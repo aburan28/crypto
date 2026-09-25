@@ -1,0 +1,1 @@
+runner validation failure after successful producer exit: KeyError: subgroup_order, because the compact observation stores subgroup order only in the optional base header. Raw manifest, stdout, stderr and resource receipt are preserved; this run is excluded from the final six-arm panel. Fixed by adding optional exact-base output in commit e979224, then rerun as ...-64-v2.

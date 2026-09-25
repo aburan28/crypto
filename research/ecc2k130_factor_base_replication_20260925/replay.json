@@ -1,0 +1,119 @@
+{
+  "base_replays": 4,
+  "cells": {
+    "2026092511": {
+      "A": {
+        "descendant_native": {
+          "first_rank": 97,
+          "hits": 148,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "original": {
+          "first_rank": 159,
+          "hits": 153,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "pullback": {
+          "first_rank": 97,
+          "hits": 148,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "transported": {
+          "first_rank": 159,
+          "hits": 153,
+          "rank": 17,
+          "witnesses_replayed": 512
+        }
+      },
+      "B": {
+        "descendant_native": {
+          "first_rank": 121,
+          "hits": 104,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "original": {
+          "first_rank": 148,
+          "hits": 124,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "pullback": {
+          "first_rank": 121,
+          "hits": 104,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "transported": {
+          "first_rank": 148,
+          "hits": 124,
+          "rank": 17,
+          "witnesses_replayed": 512
+        }
+      }
+    },
+    "2026092512": {
+      "A": {
+        "descendant_native": {
+          "first_rank": 126,
+          "hits": 132,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "original": {
+          "first_rank": 115,
+          "hits": 118,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "pullback": {
+          "first_rank": 126,
+          "hits": 132,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "transported": {
+          "first_rank": 115,
+          "hits": 118,
+          "rank": 17,
+          "witnesses_replayed": 512
+        }
+      },
+      "B": {
+        "descendant_native": {
+          "first_rank": 289,
+          "hits": 146,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "original": {
+          "first_rank": 138,
+          "hits": 198,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "pullback": {
+          "first_rank": 289,
+          "hits": 146,
+          "rank": 17,
+          "witnesses_replayed": 512
+        },
+        "transported": {
+          "first_rank": 138,
+          "hits": 198,
+          "rank": 17,
+          "witnesses_replayed": 512
+        }
+      }
+    }
+  },
+  "input_sha256": "51a4c817cb817303c5c29ba2923a22f1d68410e234571c465c88da9685e24ff0",
+  "schema": "degree7-disjoint-orbit-independent-replay-v1",
+  "status": "PASS",
+  "target_candidate_replays": 2137,
+  "total_cases": 8192,
+  "verifier_sha256": "525c98060af879668e0d88406cd088dac52334ad06daae0464493f75b8cf01f1"
+}
