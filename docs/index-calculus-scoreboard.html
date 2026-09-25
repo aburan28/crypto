@@ -6486,10 +6486,31 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </table></div>
   <div class="panel-head">
     <p>Native work: training made 23,689,479 exact S3 calls and built 5,081,560 index entries; the three L32/L128 query processes made 4,570,099/14,931,236 more S3 calls, while rho used 9,995,226/20,151,058 walk steps. These are different units and cannot define an attack-speed S without a pinned conversion. The maximum sequential IC RSS was 427.6 MiB; rho reached at most 76.4 MiB. The pre-existing factor-base construction is excluded from IC cost and could only increase it. The preregistered L128 gate passed and no final-run query failed.</p>
-    <p>With training paid only once across three disjoint blocks, L32 IC child-only lower/verified upper were 154.978/270.825 s versus three fresh rho tables at 138.899 s; L128 was 211.925/365.250 s versus 279.952 s. The L128 portfolio bounds straddle rho (0.757&times; lower, 1.305&times; upper), so it is inconclusive about a many-target break-even. A preregistered combined L = 384 same-Q run with one IC query process and one rho table, plus separate mandatory solve/recovery and audit timings, is the next measurement. This fixed n = 53 result does not transfer to n = 131 or ECC2K-130.</p>
+    <p>With training paid only once across three disjoint blocks, L32 IC child-only lower/verified upper were 154.978/270.825 s versus three fresh rho tables at 138.899 s; L128 was 211.925/365.250 s versus 279.952 s. The L128 portfolio bounds straddle rho (0.757&times; lower, 1.305&times; upper), so it is inconclusive about a many-target break-even. PR #760 tests that combined L = 384 same-Q question with one IC query process, one rho table, and separately timed mandatory rank/recovery; its fixed-stream decision appears below. This fixed n = 53 result does not transfer to n = 131 or ECC2K-130.</p>
   </div>
 </section>
 <!-- END ecc2k130-n53-shared-log-batch-20260925 -->
+<!-- BEGIN ecc2k130-n53-combined-l384-20260925 -->
+<section class="panel" id="ecc2k130-n53-combined-l384-20260925">
+  <div class="panel-head">
+    <h2>Compact n = 53 combined L = 384: one index versus one rho table <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/760">PR #760</a> preregistered the byte-exact union of the three disjoint L128 public-Q blocks from PR #754. One fresh 512-target/220-column training solve reached rank 220 at relation 461; an operational rank stage solved 220 base logs, then one compact point-index process produced 384 relations and operational recovery returned all Q logs. One fresh signed-Frobenius rho table solved the identical 384 Q values. Independent full group-law replay checked 512 training relations, 23,320 orbit labels, and every IC/rho scalar. Raw receipts, source and input hashes, and the retained archive-checker-only failure are in <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_combined_l384_n53_20260925/RESULT.md">the result</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One GitHub-hosted Ubuntu fixed stream; wall seconds include fresh processes. Complete operational IC = training producer + mandatory rank/linear solve + one-index point producer + mandatory scalar recovery. Audit is separate from both operational costs; the child-only lower omits necessary recovery. The certified factor-base construction is excluded. Ratios use the same-Q one-table rho wall.</caption>
+    <thead><tr><th>Arm / accounting bound</th><th class="n">Cold wall s</th><th class="n">IC / rho</th><th>Correctness / scope</th></tr></thead>
+    <tbody>
+      <tr><td>Compact IC, two-child lower</td><td class="n">276.592</td><td class="n">1.787</td><td>Incomplete: rank and scalar recovery omitted</td></tr>
+      <tr><td><strong>Compact IC, complete operational</strong></td><td class="n"><strong>353.649</strong></td><td class="n"><strong>2.285</strong></td><td>384/384 logs; pre-certified base</td></tr>
+      <tr><td>Compact IC, audit-inclusive diagnostic</td><td class="n">504.545</td><td class="n">3.259</td><td>Independent replay added</td></tr>
+      <tr><td><strong>Signed-Frobenius rho, one table</strong></td><td class="n"><strong>154.799</strong></td><td class="n"><strong>1.000</strong></td><td>384/384 same-Q logs</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Exact native work: IC training/query made 23,689,479/14,931,236 S3 calls and built 5,081,560 index entries in each fresh process. Rho took 11,485,626 walk steps, 12,255,749 group additions and 765,929 table entries. Operational CPU was 358.745 s IC versus 154.773 s rho; sequential peak RSS was 396.6 MiB versus 76.8 MiB. The panel finished at 659.421 s below the frozen 2,700 s global ceiling. The fixed-stream no-crossover is favorable to IC because prior base construction is uncharged. S3 and rho additions lack a pinned common-unit conversion, so attack-speed S and a general n = 131/ECC2K-130 crossover remain unset.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n53-combined-l384-20260925 -->
 <!-- BEGIN ecc2k130-compact-sparse-base-sweep-20260925 -->
 <section class="panel" id="ecc2k130-compact-sparse-base-sweep-20260925">
   <div class="panel-head">
