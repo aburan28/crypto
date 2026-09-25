@@ -39,7 +39,7 @@ Answer: **keep the σ walk, and raise `maxIters`.**
   guard first, and they are the longest.  `maxIters = 2^32` brings that loss
   to 0.01%.  No distinguished point has been collected
   (`docs/ecc2k130-status/history.json` is empty), so the change costs
-  nothing now.
+  nothing now.  (Applied 2026-09-25; see §9.)
 
 Everything below follows `AGENTS.md`: §1 gives the boundary and unit, §2 the
 method, §3 why the walks differ, §4 the single table, §5 the fruitless
@@ -467,6 +467,21 @@ None is an advance: no row moves the ratio to the floor below one.
   `max_steps_per_walker` can lower that.  Unless both are raised, the
   distinguished points the longer guard recovers (trails of `2^30` to `2^32`
   steps, about 5% at `dpWeight = 32`) would be refused there.
+
+  **Applied 2026-09-25, at the campaign owner's request.** `aws/campaign.json`
+  carries `maxIters = 2^32` and `src/witness.cpp` defaults to `2^32`. The
+  companion change,
+  [aburan28/cryptanalysis#109](https://github.com/aburan28/cryptanalysis/pull/109),
+  raises the runner template (`ecc2k130/runner/aws/campaign.json`) and the
+  `ec2k-gpu` client default.
+  Workers read the bucket copy, so a running campaign changes only when that
+  copy is edited. In `campaignContract` terms this is a new contract id, but
+  the points are unchanged: the limit decides which trails are abandoned, not
+  where a trail ends, so records written under either limit are points of one
+  walk and collide with each other. That matters because the corpus is no
+  longer empty: the cryptanalysis runner's fleet has reported `dpWeight = 32`
+  records to the shared pool since 2026-09-21, and the status page does not
+  yet read that fleet's namespaced checkpoints.
 - [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) said that choosing the
   table walk later "is a configuration change and not a code change".  That
   no longer holds: the walk needs a cycle check first.  Its §6.2 ratio

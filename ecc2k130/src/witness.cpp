@@ -108,7 +108,7 @@ struct Options {
     int instance = -1;
     bool polyBasis = false;
     int dpWeight = -1;
-    unsigned long long maxIters = 1ull << 30;
+    unsigned long long maxIters = 1ull << 32;   // aws/campaign.json "maxIters"
     std::string corpus;
     std::string job;
     std::string nbGenerator;
@@ -125,7 +125,8 @@ static void usage() {
             "  --curve C          23, 41, 83 or 131 (default 131)\n"
             "  --instance I       planted test instance on a small curve\n"
             "  --dp-weight W      distinguishing weight (default: the curve's)\n"
-            "  --max-iters N      refuse a trail longer than N steps (default 2^30)\n"
+            "  --max-iters N      refuse a trail longer than N steps (default 2^32,\n"
+            "                     the campaign's restart limit)\n"
             "  --job J            cairn job document; pins the normal basis and\n"
             "                     is checked against this binary's constants\n"
             "  --nb-generator H   the job's normal element as polynomial-basis\n"
