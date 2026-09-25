@@ -2635,6 +2635,9 @@ pub struct ScanScratch {
     gather: Vec<FastPoint>,
     /// `target − P_k` for each scanned summand.
     rests: Vec<FastPoint>,
+    /// On a folded table, each rest's slope, so the few rests the filter
+    /// admits can be completed; empty otherwise.
+    lambdas: Vec<u64>,
     /// Workspace for the shared-inversion batch addition.
     batch: BatchScratch,
     /// Canonical keys of one block of remainders.
@@ -3789,14 +3792,16 @@ impl PairSumTable {
             return;
         }
         if let Some(canon) = self.canon.as_ref() {
-            // A rotation has no dependency chain worth interleaving.
-            // (An eight-lane AVX-512 key was tried and measured slower:
-            // its run loop is as long as the worst of eight lanes.)
-            out.extend(
-                points
-                    .iter()
-                    .map(|p| if p.infinity { 0 } else { canon.canon(p.x) + 1 }),
-            );
+            // In bulk: `canon_in_place` is branch-free on AVX-512.  On its
+            // own it is slower than the scalar key, but inside the scan it
+            // is faster, and the pipeline with it is 26 % faster at n = 53
+            // (`FrobeniusCanon::canon_many` has the figures and what they
+            // do not explain).
+            out.extend(points.iter().map(|p| p.x));
+            canon.canon_in_place(out);
+            for (key, p) in out.iter_mut().zip(points) {
+                *key = if p.infinity { 0 } else { *key + 1 };
+            }
             return;
         }
         const LANES: usize = 8;
@@ -4275,21 +4280,32 @@ impl PairSumTable {
         let ScanScratch {
             gather,
             rests,
+            lambdas,
             batch,
             keys,
             pairs,
         } = scratch;
         rests.clear();
+        lambdas.clear();
+        // On a folded table the key reads only the abscissa, so the rests
+        // are formed without their ordinates and only the ones the filter
+        // admits are completed, as the full scan does.
+        let mut add = |summands: &[FastPoint], rests: &mut Vec<FastPoint>| {
+            if self.fold {
+                self.curve
+                    .add_many_lazy(target, summands, rests, lambdas, batch);
+            } else {
+                self.curve.add_many(target, summands, rests, batch);
+            }
+        };
         let mut tail = len;
         match scan {
             Scan::Cyclic { start, len } => {
                 let start = start % base;
                 tail = len.min(base - start);
-                self.curve
-                    .add_many(target, &self.negated[start..start + tail], rests, batch);
+                add(&self.negated[start..start + tail], rests);
                 if tail < len {
-                    self.curve
-                        .add_many(target, &self.negated[..len - tail], rests, batch);
+                    add(&self.negated[..len - tail], rests);
                 }
             }
             Scan::Indices(idxs) => {
@@ -4298,7 +4314,7 @@ impl PairSumTable {
                 for &i in idxs {
                     gather.push(self.negated[i as usize]);
                 }
-                self.curve.add_many(target, gather, rests, batch);
+                add(gather, rests);
             }
         }
         // Keys a block at a time: enough to keep `LANES`
@@ -4334,7 +4350,11 @@ impl PairSumTable {
                     }
                     Scan::Indices(idxs) => idxs[offset] as usize,
                 };
-                self.pairs_for_key(*rest, keys[within], pairs);
+                let rest = match lambdas.get(offset) {
+                    Some(&lambda) => self.curve.finish_lazy(target, *rest, lambda),
+                    None => *rest,
+                };
+                self.pairs_for_key(rest, keys[within], pairs);
                 for &(i, j) in pairs.iter() {
                     if !sink(&[i as usize, j as usize, k]) {
                         return;
@@ -8838,8 +8858,8 @@ impl<'a> IndividualLogSolver<'a> {
             state = fc.add(state, stride_point);
             a = (a + stride) % self.r_u64;
         }
-        let step = vec![*g; WALKS];
         let mut advanced = Vec::with_capacity(WALKS);
+        let mut lambdas: Vec<u64> = Vec::with_capacity(WALKS);
         let mut scratch = BatchScratch::default();
         let mut keys: Vec<u64> = Vec::with_capacity(WALKS);
         while report.trials < self.opts.max_trials {
@@ -8895,10 +8915,18 @@ impl<'a> IndividualLogSolver<'a> {
                     return Some(Some(d));
                 }
             }
-            // Advance every walk by G, sharing one inversion.
+            // Advance every walk by G, sharing one inversion.  Every walk
+            // adds the same point, so this is `G + stateᵢ` over a slice:
+            // the batched kernel `add_many_lazy` (eight lanes on AVX-512)
+            // and one multiplication per walk for the ordinate.  The sums
+            // are the ones `add_pairwise` computed, so the walks, their
+            // trials and the first decomposition found do not change.
             advanced.clear();
-            fc.add_pairwise(&states, &step, &mut advanced, &mut scratch);
-            states.copy_from_slice(&advanced);
+            lambdas.clear();
+            fc.add_many_lazy(*g, &states, &mut advanced, &mut lambdas, &mut scratch);
+            for ((state, sum), &lambda) in states.iter_mut().zip(&advanced).zip(&lambdas) {
+                *state = fc.finish_lazy(*g, *sum, lambda);
+            }
             for (a, _) in coefficients.iter_mut() {
                 *a = (*a + 1) % self.r_u64;
             }
@@ -11779,6 +11807,66 @@ mod tests {
             }
         }
         assert!(compared >= 1500, "the sweep shrank: {compared} comparisons");
+    }
+
+    /// On a folded table a scan forms its rests without ordinates and
+    /// completes only the ones the filter admits.  It must find exactly
+    /// what the same scan finds on the full table, which forms them whole:
+    /// for a wrapping window and for a scattered index list alike.
+    #[test]
+    fn a_folded_table_s_scan_finds_what_the_full_table_s_scan_finds() {
+        for (degree, points) in [(19u32, 300usize), (31, 400)] {
+            let kc = KoblitzCurve::new(0, degree).unwrap();
+            let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
+            let full = PairSumTable::build_full(&kc, &fb).unwrap();
+            let folded = PairSumTable::build_within(
+                &kc,
+                &fb,
+                PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
+            )
+            .unwrap();
+            assert!(
+                folded.is_folded(),
+                "degree {degree}: expected the fold tier"
+            );
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let g = fc.lift(kc.generator());
+            let base = fb.points.len();
+            let len = base / 4;
+            let idxs: Vec<u32> = (0..base as u32).filter(|i| i % 5 == 2).collect();
+            let (mut scratch_full, mut scratch_folded) =
+                (ScanScratch::default(), ScanScratch::default());
+            let mut found = 0usize;
+            for t in 1u64..300 {
+                let target = fc.mul_u64(g, t);
+                for scan in [
+                    Scan::Cyclic {
+                        start: base - len / 2,
+                        len,
+                    },
+                    Scan::Indices(&idxs),
+                ] {
+                    let mut a = Vec::new();
+                    full.witnesses_fast_scan(target, 3, scan, &mut scratch_full, &mut |w| {
+                        a.push(w.to_vec());
+                        true
+                    });
+                    let mut b = Vec::new();
+                    folded.witnesses_fast_scan(target, 3, scan, &mut scratch_folded, &mut |w| {
+                        b.push(w.to_vec());
+                        true
+                    });
+                    a.sort();
+                    b.sort();
+                    assert_eq!(a, b, "degree {degree}, t = {t}: the scans disagree");
+                    found += a.len();
+                }
+            }
+            assert!(
+                found > 0,
+                "degree {degree}: the scans found nothing to compare"
+            );
+        }
     }
 
     /// The whole point of an index scan: every witness it returns has

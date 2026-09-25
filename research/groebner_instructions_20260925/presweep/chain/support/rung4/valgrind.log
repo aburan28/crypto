@@ -1,0 +1,11 @@
+==29182== Callgrind, a call-graph generating cache profiler
+==29182== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==29182== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==29182== Command: /home/user/crypto/target/release/examples/groebner_stage_bench --label support --ladder chain --rung 4 --out /tmp/claude-0/-home-user-crypto/f80fbe96-cd66-50e9-ae29-d862a143e5f3/scratchpad/coverage/out/chain/support/rung4/stage
+==29182== 
+==29182== For interactive control, run 'callgrind_control -h'.
+==29182== 
+==29182== Events    : Ir
+==29182== Collected : 170640865
+==29182== 
+==29182== I   refs:      170,640,865

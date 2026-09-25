@@ -21,6 +21,8 @@ and before any run of the supplementary holdout it registers.  Results are
 appended below §5 and do not edit it; corrections to §0–§4 are struck in place
 and point to §5.
 
+*Re-priced in instructions on 2026-09-25 ([`RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md`](RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md) §5): the stage gains hold (`5.23×` on T1′, `6.24×` on the holdout), but the whole `K_0/2^13` logarithm moves `1.01×`.*
+
 ## The question
 
 For `m ≥ 3` the decomposition oracle solves the chain

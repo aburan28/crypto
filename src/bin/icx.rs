@@ -57,6 +57,28 @@ enum Action {
     Estimate(EstimateArgs),
     /// Run the index-calculus pipeline on the curve (or a same-family analogue).
     Run(RunArgs),
+    /// Solve a quadratic Boolean system with the FES kernel (CPU or GPU worker).
+    Fes(FesArgs),
+}
+
+#[derive(Args)]
+struct FesArgs {
+    /// Variables in the generated quadratic system.
+    #[arg(long, default_value_t = 18)]
+    n: usize,
+    /// Equations in the generated quadratic system.
+    #[arg(long, default_value_t = 20)]
+    m: usize,
+    #[arg(long, default_value_t = 1)]
+    seed: u64,
+    /// Backend: `cpu` (in-process), `gpu` (an external CUDA/Metal/host worker),
+    /// or `auto` (a discovered worker if present, else cpu).
+    #[arg(long, default_value = "auto")]
+    backend: String,
+    /// Explicit worker executable (overrides discovery); it must speak the
+    /// gpu/fes file contract.
+    #[arg(long)]
+    worker: Option<String>,
 }
 
 #[derive(Args)]
@@ -386,6 +408,27 @@ fn display(report: &Value) {
                 println!("\nScope: {note}");
             }
         }
+        Some("fes") => {
+            let sy = &report["system"];
+            println!(
+                "FES: {}-var, {}-eq quadratic system (seed {})",
+                sy["n"], sy["m"], sy["seed"]
+            );
+            println!("Backend: {}", report["backend"].as_str().unwrap_or("?"));
+            println!(
+                "Solutions: {} verified of {} proposed",
+                report["verified"], report["proposed"]
+            );
+            println!(
+                "Planted solution {}: {}",
+                report["planted"],
+                if report["planted_found"] == true {
+                    "found"
+                } else {
+                    "NOT found"
+                }
+            );
+        }
         Some("error") => {
             eprintln!("icx: {}", report["message"].as_str().unwrap_or("failed"));
         }
@@ -437,12 +480,49 @@ fn run_cmd(args: &RunArgs, json: bool) -> Result<Value, String> {
     }))
 }
 
+fn fes_cmd(args: &FesArgs) -> Result<Value, String> {
+    use crypto_lib::cryptanalysis::fes_gpu::{self, FesBackend};
+
+    let (sys, planted) = fes_gpu::random_system(args.n, args.m, args.seed);
+    let backend = match (args.worker.as_deref(), args.backend.as_str()) {
+        (Some(path), _) => FesBackend::Worker(std::path::PathBuf::from(path)),
+        (None, "cpu") => FesBackend::Cpu,
+        (None, "auto") => FesBackend::Auto,
+        (None, "gpu") => match fes_gpu::discover_worker() {
+            Some(w) => FesBackend::Worker(w),
+            None => {
+                return Err(
+                    "no FES worker found; build one with `make -C gpu/fes host-worker` \
+                            (or cuda / metal-worker) or set ICX_FES_WORKER, or use --backend cpu"
+                        .into(),
+                )
+            }
+        },
+        (None, other) => return Err(format!("unknown backend '{other}'; use cpu|gpu|auto")),
+    };
+    let res = fes_gpu::solve(&sys, &backend)?;
+    let planted_found = res.solutions.contains(&planted);
+    Ok(json!({
+        "schema_version": 1,
+        "operation": "fes",
+        "status": "complete",
+        "system": {"n": args.n, "m": args.m, "seed": args.seed},
+        "backend": res.backend,
+        "proposed": res.proposed,
+        "verified": res.verified,
+        "solutions": res.solutions.len(),
+        "planted": planted,
+        "planted_found": planted_found,
+    }))
+}
+
 fn execute(cli: &Cli) -> Result<Value, String> {
     match &cli.command {
         Some(Action::List(a)) => list(a),
         Some(Action::Inspect(a)) => inspect(&a.curve),
         Some(Action::Estimate(a)) => estimate(a),
         Some(Action::Run(a)) => run_cmd(a, cli.json),
+        Some(Action::Fes(a)) => fes_cmd(a),
         None => {
             let name = cli
                 .curve

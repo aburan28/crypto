@@ -6,6 +6,13 @@ evaluators and claims. The portable `autolab.py` is a development entry point.
 `tournament.py` still owns calibrated instruction scoring, independent checking,
 selection, held-out confirmation and replay.
 
+New research admission is governed by [MEASUREMENT.md](MEASUREMENT.md).
+Canonical identity and cost validators now exist, and CI checks the real base
+census and explicit unknown phase ledger. The optimized producer instrumentation
+and driver migration are still pending; the legacy commands below must not be
+used to claim compliance with the new measurement contract. Follow the active
+[goal checkpoint](goal_20260924/STATUS.md) before starting a new comparison.
+
 ## What was reviewed and corrected
 
 The September 24 review found real gaps between the historical optimized source

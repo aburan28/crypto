@@ -203,6 +203,13 @@ fn main() {
         _ => (LADDER, "frozen"),
     };
 
+    // `--rung i` runs only the ladder's `i`-th entry (0-based, counting
+    // inadmissible entries too), so a profiler can price one rung.
+    let only: Option<usize> = args
+        .windows(2)
+        .find(|w| w[0] == "--rung")
+        .and_then(|w| w[1].parse().ok());
+
     let mut rows = Vec::new();
     println!();
     println!("=== Gröbner stage: frozen decomposition ladder ({label}) ===");
@@ -216,7 +223,10 @@ fn main() {
          ---------:|----------:|--------:|-------:|"
     );
 
-    for inst in ladder {
+    for (position, inst) in ladder.iter().enumerate() {
+        if only.is_some_and(|i| i != position) {
+            continue;
+        }
         let Some(kc) = KoblitzCurve::new(inst.a, inst.n) else {
             continue;
         };

@@ -5,9 +5,11 @@
 // algorithm lives in fes.cuh and is checked by `make test` without a GPU.
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include <vector>
 
 #include "fes.cuh"
+#include "fes_io.hpp"
 #include "system.h"
 
 // Upper bound on variables, so per-thread scratch is a fixed-size local array.
@@ -37,57 +39,91 @@ __global__ void fes_kernel(uint64_t cst, const uint64_t *lin,
   }
 }
 
-#define CUDA_OK(call)                                                           \
-  do {                                                                          \
-    cudaError_t e = (call);                                                     \
-    if (e != cudaSuccess) {                                                     \
-      fprintf(stderr, "CUDA error %s at %s:%d\n", cudaGetErrorString(e),        \
-              __FILE__, __LINE__);                                              \
-      return 2;                                                                 \
-    }                                                                           \
-  } while (0)
-
-int main(int argc, char **argv) {
-  int low_bits = FES_N > 10 ? FES_N - 10 : FES_N; // ~1024 threads by default
-  if (argc > 1) low_bits = atoi(argv[1]);
-  if (low_bits < 1 || low_bits > FES_N) low_bits = FES_N;
-
-  const int quad_len = FES_N * (FES_N + 1) / 2;
-  const int max_out = 1 << 16;
-
+// Launch the kernel over the whole cube of a system and copy back the
+// solutions. Returns the device count (>= sols.size() if it exceeded max_out),
+// or a negative CUDA error code.
+static long long run_on_device(const FesSystem &sys, int low_bits,
+                               std::vector<uint64_t> &sols) {
+  const int quad_len = sys.n * (sys.n + 1) / 2;
+  const int max_out = 1 << 20;
   uint64_t *d_lin = nullptr, *d_quad = nullptr, *d_out = nullptr;
   unsigned int *d_count = nullptr;
-  CUDA_OK(cudaMalloc(&d_lin, FES_N * sizeof(uint64_t)));
-  CUDA_OK(cudaMalloc(&d_quad, quad_len * sizeof(uint64_t)));
-  CUDA_OK(cudaMalloc(&d_out, max_out * sizeof(uint64_t)));
-  CUDA_OK(cudaMalloc(&d_count, sizeof(unsigned int)));
-  CUDA_OK(cudaMemcpy(d_lin, FES_LIN, FES_N * sizeof(uint64_t), cudaMemcpyHostToDevice));
-  CUDA_OK(cudaMemcpy(d_quad, FES_QUAD_TRI, quad_len * sizeof(uint64_t), cudaMemcpyHostToDevice));
-  CUDA_OK(cudaMemset(d_count, 0, sizeof(unsigned int)));
+#define TRY(call)                                                              \
+  do {                                                                        \
+    if ((call) != cudaSuccess) {                                             \
+      fprintf(stderr, "CUDA error at %s:%d\n", __FILE__, __LINE__);          \
+      return -1;                                                             \
+    }                                                                        \
+  } while (0)
+  TRY(cudaMalloc(&d_lin, (sys.n ? sys.n : 1) * sizeof(uint64_t)));
+  TRY(cudaMalloc(&d_quad, (quad_len ? quad_len : 1) * sizeof(uint64_t)));
+  TRY(cudaMalloc(&d_out, max_out * sizeof(uint64_t)));
+  TRY(cudaMalloc(&d_count, sizeof(unsigned int)));
+  if (sys.n)
+    TRY(cudaMemcpy(d_lin, sys.lin.data(), sys.n * sizeof(uint64_t), cudaMemcpyHostToDevice));
+  if (quad_len)
+    TRY(cudaMemcpy(d_quad, sys.quad_tri.data(), quad_len * sizeof(uint64_t), cudaMemcpyHostToDevice));
+  TRY(cudaMemset(d_count, 0, sizeof(unsigned int)));
 
-  const uint64_t nprefix = 1ULL << (FES_N - low_bits);
+  const uint64_t nprefix = 1ULL << (sys.n - low_bits);
   const int threads = 256;
   const int blocks = (int)((nprefix + threads - 1) / threads);
-  fes_kernel<<<blocks, threads>>>(FES_CONST, d_lin, d_quad, FES_N, low_bits,
-                                  d_out, d_count, max_out);
-  CUDA_OK(cudaGetLastError());
-  CUDA_OK(cudaDeviceSynchronize());
-
+  fes_kernel<<<blocks, threads>>>(sys.cst, d_lin, d_quad, sys.n, low_bits, d_out,
+                                  d_count, max_out);
+  TRY(cudaGetLastError());
+  TRY(cudaDeviceSynchronize());
   unsigned int count = 0;
-  CUDA_OK(cudaMemcpy(&count, d_count, sizeof(unsigned int), cudaMemcpyDeviceToHost));
-  std::vector<uint64_t> out(count < (unsigned)max_out ? count : max_out);
-  if (!out.empty())
-    CUDA_OK(cudaMemcpy(out.data(), d_out, out.size() * sizeof(uint64_t), cudaMemcpyDeviceToHost));
-
-  printf("threads=%llu low_bits=%d solutions=%u\n", (unsigned long long)nprefix,
-         low_bits, count);
-  // Cross-check against the generator's known set.
-  int ok = ((int)count == FES_NUM_SOLUTIONS);
-  printf(ok ? "MATCH: %d expected\n" : "MISMATCH: expected %d\n", FES_NUM_SOLUTIONS);
-
+  TRY(cudaMemcpy(&count, d_count, sizeof(unsigned int), cudaMemcpyDeviceToHost));
+  unsigned int listed = count < (unsigned)max_out ? count : (unsigned)max_out;
+  sols.resize(listed);
+  if (listed)
+    TRY(cudaMemcpy(sols.data(), d_out, listed * sizeof(uint64_t), cudaMemcpyDeviceToHost));
   cudaFree(d_lin);
   cudaFree(d_quad);
   cudaFree(d_out);
   cudaFree(d_count);
+#undef TRY
+  return (long long)count;
+}
+
+int main(int argc, char **argv) {
+  // Worker mode: `fes_cuda --in <system-file>` reads a system in the shared
+  // contract, runs the kernel, and prints SOLUTIONS — this is what the Rust
+  // binary drives. With no --in, it runs the compiled-in self-test.
+  const char *in_path = nullptr;
+  int low_bits = -1;
+  for (int i = 1; i < argc; ++i) {
+    if (!strcmp(argv[i], "--in") && i + 1 < argc) in_path = argv[++i];
+    else if (!strcmp(argv[i], "--low-bits") && i + 1 < argc) low_bits = atoi(argv[++i]);
+  }
+
+  if (in_path) {
+    FesSystem sys;
+    if (!fes_read_system(in_path, sys)) {
+      fprintf(stderr, "fes_cuda: could not parse %s\n", in_path);
+      return 2;
+    }
+    int lb = (low_bits >= 1 && low_bits <= sys.n) ? low_bits : sys.n;
+    std::vector<uint64_t> sols;
+    long long count = run_on_device(sys, lb, sols);
+    if (count < 0) return 2;
+    fes_write_solutions(sols);
+    return 0;
+  }
+
+  // Self-test on the compiled-in system.h.
+  FesSystem sys;
+  sys.n = FES_N;
+  sys.m = FES_M;
+  sys.cst = FES_CONST;
+  sys.lin.assign(FES_LIN, FES_LIN + FES_N);
+  sys.quad_tri.assign(FES_QUAD_TRI, FES_QUAD_TRI + FES_N * (FES_N + 1) / 2);
+  int lb = FES_N > 10 ? FES_N - 10 : FES_N;
+  std::vector<uint64_t> sols;
+  long long count = run_on_device(sys, lb, sols);
+  if (count < 0) return 2;
+  printf("solutions=%lld low_bits=%d\n", count, lb);
+  int ok = ((int)count == FES_NUM_SOLUTIONS);
+  printf(ok ? "MATCH: %d expected\n" : "MISMATCH: expected %d\n", FES_NUM_SOLUTIONS);
   return ok ? 0 : 1;
 }

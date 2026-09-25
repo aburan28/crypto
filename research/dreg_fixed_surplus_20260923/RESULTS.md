@@ -137,3 +137,22 @@ python3 research/dreg_fixed_surplus_20260923/run_queue.py <dreg_ladder binary> <
 
 When `(13, 5)` has three or more finished draws, `score.py` scores the
 primary pair by the registered rule with no other change.
+
+## Addendum, 2026-09-25: the cost of finishing, re-estimated
+
+Additive; nothing above is changed. "More than 4.5 uninterrupted hours" a
+`(13, 5)` draw is true as a lower bound and badly understates the cost.
+
+- **The model.** Time is fitted as `(rows × cols)^α` against this study's
+  own measured draw times: `(11, 4)`, `(13, 4)` and the degree-5 probe.
+- **The estimate.** One `(13, 5)` draw takes about **11–24 h** on the
+  four-core container, and one `(15, 5)` draw about **1.7–5.6 days**.
+- **It is an extrapolation.** It is used for scheduling only. The script
+  and its output are `research/dreg_ell_grid_20260925/cost_model.py` and
+  `cost-model-output.txt`.
+
+The primary pair still needs a large machine that stays up for days.
+Meanwhile, `research/dreg_ell_grid_20260925/` pre-registers a cheaper design
+that separates the two readings in "The confound" above. It compares
+`ℓ = 2` with `ℓ = 3` at matched unknown counts, and adds an `ℓ = 5` cell,
+`(10, 5)`, at `(13, 4)`'s 25 unknowns.

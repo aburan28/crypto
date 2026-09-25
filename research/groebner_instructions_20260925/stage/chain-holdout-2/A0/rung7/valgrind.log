@@ -1,0 +1,14 @@
+==31730== Callgrind, a call-graph generating cache profiler
+==31730== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==31730== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==31730== Command: /home/user/crypto/target/release/examples/groebner_stage_bench --label A0 --ladder chain-holdout-2 --rung 7 --out /home/user/crypto/research/groebner_instructions_20260925/stage/chain-holdout-2/A0/rung7/stage
+==31730== 
+==31730== For interactive control, run 'callgrind_control -h'.
+==31730== brk segment overflow in thread #1: can't grow to 0x4858000
+==31730== (see section Limitations in user manual)
+==31730== NOTE: further instances of this message will not be shown
+==31730== 
+==31730== Events    : Ir
+==31730== Collected : 7731981497
+==31730== 
+==31730== I   refs:      7,731,981,497
