@@ -1,0 +1,18 @@
+{
+  "schema": "symbolic-oaware-width-gate-v1",
+  "toy": {"n": 13, "modulus": 8219, "curve_a": 0, "curve_b": 1},
+  "arms": [
+    {"id": "unequal-m9", "n": 131, "slots": [15, 15, 15, 15, 15, 14, 14, 14, 14]},
+    {"id": "unequal-m10", "n": 131, "slots": [14, 13, 13, 13, 13, 13, 13, 13, 13, 13]},
+    {"id": "balanced-m10-control", "n": 131, "slots": [13, 13, 13, 13, 13, 13, 13, 13, 13, 13]}
+  ],
+  "required_for_n131_admission": [
+    "multiword_symbolic_field_and_unbounded_boolean_dag",
+    "complete_oaware_full_point_circuit_and_model_decoder",
+    "fixed_n13_m5_all_32_qt_semantic_equivalence_and_model_replay",
+    "external_negative_certificates_for_all_fixed_negative_branches",
+    "bounded_n131_export_size_wall_rss_receipt"
+  ],
+  "toy_controls": ["image_x1_flip_at_0_1", "fake_x2_zero_chart", "o_affine_inverse_guard", "order4_chain"],
+  "caps": {"wall_seconds": 60, "rss_bytes": 268435456, "receipt_bytes": 1000000}
+}

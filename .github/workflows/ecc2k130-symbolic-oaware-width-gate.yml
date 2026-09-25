@@ -1,0 +1,24 @@
+name: ECC2K-130 symbolic O-aware width gate
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/symbolic_oaware_width_gate_20260925/**'
+      - '.github/workflows/ecc2k130-symbolic-oaware-width-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-and-archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and verify frozen source hashes
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/symbolic_oaware_width_gate_20260925/{audit,ci_replay}.py
+          python3 research/notes/ecc2k130/symbolic_oaware_width_gate_20260925/audit.py --preflight
+      - name: Archive-structure replay when committed
+        run: python3 research/notes/ecc2k130/symbolic_oaware_width_gate_20260925/ci_replay.py
