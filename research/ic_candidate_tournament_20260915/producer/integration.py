@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 import sys
 
@@ -62,6 +63,16 @@ def main():
                       HERE.parent/'identity.py', HERE.parent/'measurement.py', HERE.parent/'tournament.py']},
         protocol_sha256=digest(HERE/'PROTOCOL.md')), exclusive=True)
     (out/'cpuinfo.txt').write_text(Path('/proc/cpuinfo').read_text())
+    # Retain the actual executable and the evaluator with the reports. A source
+    # digest alone cannot reproduce the bytes that were measured after the CI
+    # runner and its build directory disappear.
+    shutil.copy2(worker, out/'worker')
+    for relative in ('identity.py', 'measurement.py', 'oracle.py', 'tournament.py',
+                     'portfolio.py', 'producer/evidence.py', 'producer/integration.py',
+                     'producer/PROTOCOL.md'):
+        target = out/'evaluator'/relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(HERE.parent/relative, target)
     outcomes = []
     for job in jobs:
         cell = f"n{job['degree']}a{job['curve_a']}"
