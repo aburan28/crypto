@@ -25,8 +25,11 @@ class ReplayControls(unittest.TestCase):
             builder_path.parent.mkdir(parents=True)
             current_builder = (replay.ROOT / replay.HISTORICAL_BUILDER).read_text()
             frontend_path = root / "src/cryptanalysis/koblitz_index_calculus.rs"
+            reuse_path = root / "src/cryptanalysis/polynomial_reuse.rs"
             current_frontend = (replay.ROOT / frontend_path.relative_to(root)).read_text()
+            current_reuse = (replay.ROOT / reuse_path.relative_to(root)).read_text()
             frontend_path.write_text(current_frontend)
+            reuse_path.write_text(current_reuse)
             builder_path.write_text(current_builder.replace(
                 "if n_vars > MAX_VARS {", "if n_vars >= MAX_VARS {", 1
             ))
@@ -35,6 +38,14 @@ class ReplayControls(unittest.TestCase):
                     replay.current_contract()
 
             builder_path.write_text(current_builder)
+            reuse_path.write_text(current_reuse.replace(
+                "if n_vars > MAX_VARS {", "if n_vars >= MAX_VARS {", 1
+            ))
+            with patch.object(replay, "ROOT", root):
+                with self.assertRaises(AssertionError):
+                    replay.current_contract()
+
+            reuse_path.write_text(current_reuse)
             frontend_path.write_text(current_frontend.replace(
                 "let unsupported = || SolveStats {\n        exhausted: true,\n        unsupported: true,",
                 "let unsupported = || SolveStats {\n        exhausted: true,\n        unsupported: false,", 1

@@ -12498,6 +12498,64 @@ mod tests {
         );
     }
 
+    /// Width-only sentinel for the frozen n19/m6/d2 layout. The placeholder
+    /// factor base is deliberately never consulted: rejection must happen
+    /// before any witness or factor-base semantics are considered.
+    #[test]
+    fn pdp_admission_n19_m6_d2_layout_is_unsupported_not_refuted() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let basis = vec![
+            F2mElement::from_bit_positions(&[0], kc.n),
+            F2mElement::from_bit_positions(&[1], kc.n),
+        ];
+        let m = 6;
+        assert_eq!(m * basis.len() + (m - 2) * kc.n as usize, 88);
+        let BinaryPoint::Affine { x, .. } = kc.generator() else {
+            panic!("generator must be affine");
+        };
+        assert!(build_decomposition_system(&basis, x, &kc.curve.b, m, &st).is_none());
+        assert!(
+            crate::cryptanalysis::polynomial_reuse::DecompositionTemplate::build(
+                &basis, &kc.curve.b, m, &st
+            )
+            .is_none()
+        );
+        assert!(
+            crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+                &basis, x, &kc.curve.b, m, &st
+            )
+            .is_none()
+        );
+        let fb = FrobeniusFactorBase {
+            domain: FactorBaseDomain::LinearSubspace,
+            ell: 2,
+            f_j: 0,
+            linearised_exponents: Vec::new(),
+            subspace: Vec::new(),
+            subspace_basis: basis,
+            points: Vec::new(),
+            orbits: Vec::new(),
+            orbit_of: Vec::new(),
+            signed_orbits: Vec::new(),
+            signed_orbit_of: Vec::new(),
+        };
+        let (found, stats) = groebner_decompose(
+            &kc,
+            &fb,
+            &HashMap::new(),
+            &st,
+            kc.generator(),
+            m,
+            SolverEngine::MatrixF4 { max_degree: 3 },
+            20_000,
+        );
+        assert!(found.is_none());
+        assert!(stats.unsupported && stats.exhausted);
+        assert_eq!(stats.reductions, 0);
+        assert_eq!(stats.infeasible_branches, 0);
+    }
+
     #[test]
     fn pdp_admission_budget_exhaustion_is_not_unsupported() {
         let kc = KoblitzCurve::new(0, 9).unwrap();

@@ -37,16 +37,24 @@ assertion is a failure. No new result can substitute for the old receipt.
 ## Separate current-tree interface contract
 
 The current source is checked *as current source*, with its digest reported,
-not forced to equal the old digest. This bounded contract concerns only the
-generic `build_decomposition_system`/`groebner_decompose` path:
+not forced to equal the old digest. This bounded contract concerns the
+generic `build_decomposition_system`, the actual
+`polynomial_reuse::build_decomposition_system_reusing`/`DecompositionTemplate::build`
+path used by `groebner_decompose`, and that frontend's unsupported status:
 
-1. `MAX_VARS` is 64; the builder still uses one `basis` for every summand.
-2. It rejects `m < 2`, uses checked multiplication and addition for the layout,
-   and returns `None` when `n_vars > MAX_VARS`. For the frozen toy arities,
-   `n13,m5,d2` has 49 raw bits and fits; `n19,m6,d2` has 88 and does not.
-3. Its Gröbner frontend maps an unsupported layout or infinity target to
+1. `MAX_VARS` is 64; both the direct builder and cached template still use
+   one `basis` for every summand. The reuse wrapper must instantiate that
+   template or fall back to the checked direct builder.
+2. Both builders reject `m < 2`, use checked multiplication and addition for
+   the layout, and return `None` when `n_vars > MAX_VARS`. The template also
+   rejects unsupported field widths. For the frozen toy arities, `n13,m5,d2`
+   has 49 raw bits and fits; `n19,m6,d2` has 88 and does not.
+3. The Gröbner frontend maps an unsupported layout or infinity target to
    `exhausted=true, unsupported=true`, rather than a refutation. The existing
-   Rust test `pdp_admission_unsupported_is_not_a_refutation` must pass.
+   Rust test `pdp_admission_unsupported_is_not_a_refutation` and a new
+   n19/m6/d2 width-only regression must pass. That regression uses a
+   deliberately inert factor-base sentinel because rejection precedes every
+   point-domain or witness operation; it does not test a rotated PDP.
 
 Passing this narrow contract does **not** conclude that no new complete
 rotated exporter exists elsewhere, nor does it certify O-aware PDP semantics
@@ -60,7 +68,12 @@ frozen input hashes.
 After preregistration passes, run the historical replay and current contract
 once. Both are deterministic read-only checks. No solver process, benchmark,
 or binary inventory runs. Archive stdout/exit status, current source digests,
-and the final decision in this PR. CI repeats the two checks and the targeted
-Rust test. Success means only `HISTORICAL_REPLAY_PASS` and
+and the final decision in this PR. The path-filtered existing admission
+workflow now runs the new freeze, historical and current checks, fail-closed
+Python controls, and both targeted Rust regressions. Its bytes are part of
+this new freeze. A shallow checkout is sufficient because the 52-KiB
+historical source fixture is committed in this PR, decompressed under a size
+cap, and checked against the old SHA-256. CI repeats the two checks and the
+targeted Rust tests. Success means only `HISTORICAL_REPLAY_PASS` and
 `CURRENT_GENERIC_CONTRACT_PASS`; a failure remains visible and is not relabeled
 as a PDP result. There is no performance ratio or ECC2K-130 transfer claim.
