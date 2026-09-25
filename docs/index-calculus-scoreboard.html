@@ -6424,6 +6424,10 @@ factor base, and this prices a decomposition oracle.</p>
   <h2>PDP admission: unsupported inputs are not refutations</h2>
   <p><span class="chip">accounting</span> Toy correctness controls now distinguish an unsupported encoding from budget exhaustion and a completed algebraic refutation. Twenty-two local release tests passed, including a 39-target F5 comparison with exhaustive enumeration and independent witness checks. These controls do not qualify a new performance winner: online time, cold cost, S and speedup remain unknown. Generic solver timing and per-query statistics still need scientific admission. See the <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/pdp-admission/PROTOCOL.md">protocol</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/pdp-admission/RESULTS.md">retained results</a>. One of three improvement rounds is complete; the incumbent is retained.</p>
 </section>
+<section class="panel" id="ic-la-accounting-controls-20260925">
+  <h2>Relation-LA admission: retain failed solve work</h2>
+  <p><span class="chip">accounting</span> The generic factor-base solver now retains failed linear-algebra attempts, their measured LA time and sparse diagnostics, and keeps successful reports consistent. Dense and sparse correctness controls and the collected-relation equivalence test pass locally. This is a bookkeeping correction with no speedup claim; full online/cold cost remains unknown. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/la-accounting/RESULTS.md">control record</a> preserves its protocol, source hashes and raw test output. The optimized round-one result is unchanged.</p>
+</section>
 
 <!-- BEGIN ic-autolab-20260924 -->
 <section id="ic-autolab-20260924">
