@@ -336,6 +336,8 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);
         printf("packed alu square: %d\n", ECC_PACKED_ALU_SQUARE);
         printf("packed alu onb square: %d\n", ECC_PACKED_ALU_SQR);
+        printf("packed square table: %d\n", ECC_PACKED_SQUARE_TABLE);
+        printf("packed polynomial inversion: %d\n", ECC_PACKED_INV_POLY);
         printf("packed profile ranges: %d\n", ECC_PROFILE_RANGE);
 #if ECC_WALK_TABLE
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);

@@ -8,8 +8,10 @@ selection, held-out confirmation and replay.
 
 New research admission is governed by [MEASUREMENT.md](MEASUREMENT.md).
 Canonical identity and cost validators now exist, and CI checks the real base
-census and explicit unknown phase ledger. The optimized producer instrumentation
-and driver migration are still pending; the legacy commands below must not be
+census and explicit unknown phase ledger. The archived optimized producers now
+pass [scientific admission controls](goal_20260924/producer-admission/README.md).
+Driver migration and comparative reference qualification are still pending;
+the legacy commands below must not be
 used to claim compliance with the new measurement contract. Follow the active
 [goal checkpoint](goal_20260924/STATUS.md) before starting a new comparison.
 

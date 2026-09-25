@@ -99,7 +99,8 @@ floor are unchanged; a self-imposed loss is removed.
   mirrored in `include/packedkernels.cuh`). No GPU was used.
 - Collectors that walk with no guard at all are unaffected by the cap: the
   Modal launcher passes no `--max-iters`, and the FPGA engine has no per-walk
-  guard. Their trails can exceed any resolver's cap; see WALK-CONSTANT.md §9.
+  guard. Their trails can exceed any resolver's cap; see WALK-CONSTANT.md
+  §11.3.
 - A cairn claim is still capped by its job's `max_steps_per_walker`, which
   the production job in the cairn repository sets to `2^30`.
 

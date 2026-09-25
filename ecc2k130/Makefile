@@ -24,6 +24,10 @@
 #   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
 #   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
+#   PACKED_SQUARE_TABLE  lambda^2 with its reduced half from a shared table
+#                        (default 0; table walk only; ROOFLINE.md)
+#   PACKED_INV_POLY  inversion accumulator kept in the polynomial basis
+#                    (default 0; 2 = link product out of line; ROOFLINE.md)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
 #   TABLE_ADDEND_GLOBAL  table-walk addends from global, selection in shared
 #   TABLE_TAG_DENOM  reverse pass rebuilds d from the tag in hist; no
@@ -119,6 +123,13 @@ PACKED_CHAIN_FIRST ?= 0
 PACKED_CHAINS ?= 1
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
+# The polynomial square with coefficients 66..130 looked up in an 8 KB shared
+# table instead of spread and reduced (ROOFLINE.md; table walk only).
+PACKED_SQUARE_TABLE ?= 0
+# The walk's inversion with the Itoh-Tsujii accumulator kept in the
+# polynomial basis: one conversion per link instead of three (ROOFLINE.md).
+# 1 inlines the eight links; 2 shares one out-of-line copy of their product.
+PACKED_INV_POLY ?= 0
 # Carry the eight per-branch step counts that make a distinguished point
 # payable on cairn (CAIRN-WITNESS.md).  WITNESS=0 compiles the counting out
 # and is the control for the paired comparison that prices it; it also keeps
@@ -227,6 +238,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
+       -DECC_PACKED_SQUARE_TABLE=$(PACKED_SQUARE_TABLE) \
+       -DECC_PACKED_INV_POLY=$(PACKED_INV_POLY) \
        -DECC_WITNESS=$(WITNESS)
 
 all: cpu
@@ -481,6 +494,14 @@ test-shared-sigma-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testsharedsigmacuda.cu -o build/test-shared-sigma-cuda
 	./build/test-shared-sigma-cuda
 
+# The table walk's cycle rule on its own: every tau-relation 4-cycle and every
+# pairwise cycle up to 8 steps refused, the rule a class function
+# (WALK-CONSTANT.md section 11).  No curve, a second.
+test-cycle-rule:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wno-unused-function src/testcyclerule.cpp -o build/test-cycle-rule
+	./build/test-cycle-rule
+
 # Device primitives of the table walk against the host reference; needs a GPU.
 # The same probe on the host, for both selection layouts, so a layout change
 # is held to the reference before any GPU sees it.
@@ -525,7 +546,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -856,6 +877,6 @@ clean:
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
-	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16
+	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host walk-constant test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean

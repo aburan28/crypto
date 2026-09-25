@@ -1,0 +1,33 @@
+{
+  "scope": "fresh-directory archive restoration and complete producer replay",
+  "restoration": {
+    "archive": "ic-producer-admission-20260925.tar.zst",
+    "status": "RESTORED",
+    "files": 32400,
+    "bytes": 121341621
+  },
+  "archive_sha256": "7e3581b0f068f24635dd6fcd95441c27d58b5d0061827fe0c6549957227e0047",
+  "replays": [
+    {
+      "reference": "both",
+      "status": "VERIFIED",
+      "pairs": 9,
+      "matches_saved_reconstruction": true,
+      "audit_receipt_sha256": "5b07bde72bb5c1b3a4a84695f95d386195613f43de36dd0b1bb5b18dcd6a2807"
+    },
+    {
+      "reference": "scaled",
+      "status": "VERIFIED",
+      "pairs": 15,
+      "matches_saved_reconstruction": true,
+      "audit_receipt_sha256": "cbad8c25473df1d41ebf2159395b7165b164b819ccd22de7fc8cd84124a974d8"
+    },
+    {
+      "reference": "pairinv",
+      "status": "VERIFIED",
+      "pairs": 15,
+      "matches_saved_reconstruction": true,
+      "audit_receipt_sha256": "61b2a2321f0d078eb6c123633b05d47a9bec4016bdcacdebe8565717ae19426e"
+    }
+  ]
+}

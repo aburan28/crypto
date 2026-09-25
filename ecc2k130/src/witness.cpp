@@ -126,7 +126,7 @@ static void usage() {
             "  --instance I       planted test instance on a small curve\n"
             "  --dp-weight W      distinguishing weight (default: the curve's)\n"
             "  --max-iters N      refuse a trail longer than N steps (default %llu:\n"
-            "                     the campaign's maxIters plus the guard's overshoot)\n"
+            "                     the campaign guard plus its overshoot; never lower)\n"
             "  --job J            cairn job document; pins the normal basis and\n"
             "                     is checked against this binary's constants\n"
             "  --nb-generator H   the job's normal element as polynomial-basis\n"

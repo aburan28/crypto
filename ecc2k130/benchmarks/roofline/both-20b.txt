@@ -1,0 +1,93 @@
+build: gpu-rtx-pro6000-20b  arch sm_120  batch 16  threads 512  regs 127  spills (0, 0)
+
+branches no rule covers: 10 reached less than once per 10^4 updates (inert), 0 reached more often
+
+self-check: dynamic CLMAD 33.125 per update, the arithmetic implies 33.125 -- OK
+
+dynamic lane-instructions per scalar update, by pipe:
+  issue     1663.36
+  alu       1232.51
+  fma        178.08
+  clmad       33.13
+  xu           7.25
+  lsu        145.01
+  const        3.44
+  uniform      4.50
+  control     15.44
+  nop         74.81
+
+by opcode:
+  LOP3         723.07
+  SHF          353.13
+  IMAD         159.07
+  LDS          117.00
+  NOP           74.81
+  PRMT          34.00
+  CLMAD         33.13
+  IADD          28.70
+  MOV           28.56
+  LDG           21.01
+  VIMNMX        16.00
+  ISETP         10.82
+  BRA           10.82
+  LEA           10.44
+  IADD3         10.00
+  STG            7.00
+  POPC           6.00
+  SEL            5.00
+  LDCU           3.25
+  BSSY           2.00
+  BSYNC          2.00
+  BREV           1.25
+  UMOV           1.13
+  S2UR           1.06
+  ULEA           1.06
+  HFMA2          1.00
+  S2R            0.94
+  CALL           0.31
+  RET            0.31
+  LDC            0.19
+
+by source function (innermost inlined frame):
+  packeddirectreduce131.h:reducePolynomial131        402.13
+  packed131.h:product131                             367.88
+  packed131.h:squarePolynomialTable131               125.00
+  packed131.h:clmul64                                 98.38
+  packed131.h:fromPolynomialReduced131                76.38
+  packed131.h:spread32alu                             52.00
+  packed131.h:clmul128                                51.50
+  packedsigma131.h:sigmaInvNetwork131                 49.44
+  packedtransform131.h:toPolynomial131                46.25
+  packedtablewalk.cuh:twPhase                         42.81
+  packedtablewalk.cuh:twPivot                         37.94
+  packedtablewalk.cuh:twAddend                        32.56
+  packedtablewalk.cuh:twByte                          32.00
+  packedsigma131.h:sigmaWalkNetwork131                30.00
+  packedkernels.cuh:fusedSelect                       28.44
+  packed131.h:add131                                  28.00
+  packedkernels.cuh:tableSelectSlot                   21.56
+  packedtablewalk.cuh:twDenominator                   20.19
+  packedcompactstate.cuh:compactLoad131               19.38
+  math_functions.hpp:?                                17.00
+  packedtablewalk.cuh:twCoordinate                    14.00
+  packedcompactstate.cuh:compactStore131              11.81
+  tablewalk.h:eccTag                                  10.88
+  packedkernels.cuh:weight                             8.00
+  sm_32_intrinsics.hpp:?                               7.13
+  tablewalk.h:eccTagFruitless                          7.00
+  packedtablewalk.cuh:twSelectHist                     5.00
+  packed131.h:sqr131                                   4.81
+  packed131.h:spread32p                                2.69
+  device_atomic_functions.hpp:?                        2.00
+
+roofline on RTX PRO 6000 Blackwell Server Edition (sm_120), 188 SMs at 2.415 GHz (benchmarks/two-chains/summary.json ref smClockMHz 2400-2422 (median 2415)):
+  pipe     work/upd  lanes/clk   SM-clk/upd  ceiling B/s
+  issue      1663.4     128.00        13.00        34.94
+  alu        1232.5      64.00        19.26        23.58
+  fma         178.1      64.00         2.78       163.17
+  xu            7.3      16.00         0.45      1001.94
+  lsu         145.0      16.00         9.06        50.09
+  clmad        33.1       1.62        20.45        22.20   1.62 (ONE-BLOCK-GEOMETRY.md section 1, 'kernel mix')
+  clmad        33.1       1.69        19.60        23.16   1.69 (fast-clmad probe, CLMAD.lo-only stream)
+  clmad        33.1       1.99        16.65        27.28   1.99 (fast-clmad probe, lo+hi product stream)
+  clmad        33.1       2.00        16.56        27.41   2.00 (FP64 pipe at 1/64 of FP32: 2 lanes/SM-clk)

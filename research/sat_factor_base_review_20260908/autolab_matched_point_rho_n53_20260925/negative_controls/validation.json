@@ -1,0 +1,32 @@
+[
+  {
+    "case": "off_curve",
+    "exit_code": 101,
+    "expected_error": "rho point target must be on the curve",
+    "point": [
+      0,
+      0
+    ],
+    "stderr_sha256": "2feb9f02a0a2575d72cf5e89fd4cf2f38ff098b5ced90ed45b365457ec53b3c5"
+  },
+  {
+    "case": "wrong_subgroup",
+    "exit_code": 101,
+    "expected_error": "rho point target must belong to the prime-order subgroup",
+    "point": [
+      0,
+      1
+    ],
+    "stderr_sha256": "74504451c21d57aa4d5d6ee1af9b3b8445ceb9a125be0716c50c37ce052ade6d"
+  },
+  {
+    "case": "out_of_range",
+    "exit_code": 101,
+    "expected_error": "rho point coordinates must be field elements",
+    "point": [
+      9007199254740992,
+      1
+    ],
+    "stderr_sha256": "6fcaa839e3cb658cab51ce475d298ae3f788fc96ac1163dce647a7135bfa1b47"
+  }
+]

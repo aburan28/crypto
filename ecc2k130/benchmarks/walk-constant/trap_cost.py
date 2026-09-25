@@ -21,7 +21,7 @@ measure, and every number it prints is marked as such in the note.
 from math import comb, exp, log2
 
 N_DEG = 131
-M_DEFAULT = 2 ** 30          # aws/campaign.json "maxIters"
+M_DEFAULT = 2 ** 30          # aws/campaign.json "maxIters" when section 6 was written; 2^32 since section 11
 DP_WEIGHTS = (32, 34)        # aws/campaign.json "dpWeight" (the live bucket); the benchmarks' 34
 
 
