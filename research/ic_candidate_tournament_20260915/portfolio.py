@@ -17,7 +17,8 @@ def family(arm):
     cfg = arm['config']
     base = cfg.get('factor_base', {})
     return (base.get('kind', 'subgroup_orbits'), cfg.get('solver', 'pair_table'),
-            cfg.get('linear_algebra', 'sparse'))
+            cfg.get('linear_algebra', 'sparse'), cfg.get('row_kernel', 'full'),
+            cfg.get('orbit_batch', 8))
 
 
 def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
@@ -40,12 +41,21 @@ def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
     eligible.sort(key=lambda r: (r['candidate_over_baseline'], r['candidate']))
     if not eligible:
         return []
+    online = any(row.get('online') is not None for row in eligible)
     keys = sorted(eligible[0]['per_cell'])
     require(all(sorted(r['per_cell']) == keys and sorted(r['native_wall_per_cell']) == keys
                 for r in eligible), 'unmatched portfolio cells')
+    if online:
+        require(all(r.get('online') is not None and sorted(r['online']['per_cell']) == keys
+                    and all(math.isfinite(v) and v > 0 for v in
+                        [r['online']['candidate_over_baseline'], *r['online']['per_cell'].values()])
+                    for r in eligible), 'missing or invalid online portfolio cost')
     def vector(r):
-        return [r['candidate_over_baseline'], r['native_wall_candidate_over_baseline']] + [
+        values = [r['candidate_over_baseline'], r['native_wall_candidate_over_baseline']] + [
             r[k][cell] for k in ('per_cell', 'native_wall_per_cell') for cell in keys]
+        if online:
+            values += [r['online']['candidate_over_baseline']] + [r['online']['per_cell'][cell] for cell in keys]
+        return values
     def dominates(a, b):
         av, bv = vector(a), vector(b)
         return all(x <= y for x, y in zip(av, bv)) and any(x < y for x, y in zip(av, bv))
@@ -55,6 +65,9 @@ def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
     def add(row, reason):
         if len(selected) < limit and row['candidate'] not in {s['candidate'] for s in selected}:
             selected.append({'candidate': row['candidate'], 'reason': reason})
+    if online:
+        add(min(eligible, key=lambda r:(r['online']['candidate_over_baseline'], r['candidate'])),
+            'single-target online-time leader')
     add(eligible[0], 'complete instruction-cost leader')
     add(min(eligible, key=lambda r: (r['native_wall_candidate_over_baseline'], r['candidate'])),
         'complete native-time leader')

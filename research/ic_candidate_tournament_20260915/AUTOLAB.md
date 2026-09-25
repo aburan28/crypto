@@ -253,3 +253,21 @@ accounting schema. Before a new comparative research campaign, implement the
 user's canonical curve/candidate/workload/run manifests and exclusive phase
 export; missing phase costs keep the end-to-end total and speedup unknown.
 Historical evidence and its original identifiers remain unchanged.
+
+## Bounded improvement round
+
+The accepted qualification is merged in [PR 765](https://github.com/aburan28/crypto/pull/765).
+Use Python 3.12 and the [frozen improvement protocol](goal_20260924/improvement/PROTOCOL.md)
+for the goal campaign. [round1.json](goal_20260924/improvement/round1.json) records
+16 complete pipelines and their hypotheses. The Linux workflow `ic-improvement.yml`
+runs candidate controls on PRs; its explicit `run_round_one=true` dispatch invokes
+`run_improvement.py --out NEW_DIRECTORY` through the existing tournament. Inspect
+workflow history first: a duplicate dispatch or job retry is not a new round.
+
+The primary display is one-target online native time; cold instructions and cold
+native time remain additional promotion gates. Confirmation uses 72 fresh targets
+and three process repetitions, with exact historical point exclusion and a nominal
+familywise bootstrap rule across three attempts. A confirmation or replay result
+cannot tune the same challenger. Preserve both cold and online rho references and
+retain all failed or incomplete runs. Zero improvement rounds have executed at
+this implementation checkpoint.
