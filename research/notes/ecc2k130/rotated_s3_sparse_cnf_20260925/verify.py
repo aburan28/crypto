@@ -258,6 +258,31 @@ def parse_sparse(path: Path, schema, by_name, iv, curve, by_h):
     return tables, blocks
 
 
+def empty_pair_control(sparse_dir, schema, sparse_clauses, by_name, iv, curve, by_h):
+    """Corrupt one n13 binary ban and require parsed point-law rejection."""
+    left, right, end = (by_name[name] for name in ("S3", "F3", "S4"))
+    vu = left["vars"][left["values"].index(None)]
+    va = right["vars"][right["values"].index(0)]
+    binary = (-vu, -va)
+    assert sparse_clauses.count(binary) == 1
+    assert not set(end["values"]) & iv.local_geometry(curve, by_h, None, 0)
+    mutated = sparse_clauses[:]
+    mutated[mutated.index(binary)] = (-vu, -va, end["vars"][0])
+    path = sparse_dir.parent / "negative_empty_pair.cnf"
+    with path.open("w") as stream:
+        stream.write("c corrupted n13 empty-admitted-output pair control\n")
+        stream.write(f"p cnf {schema['variables']} {len(mutated)}\n")
+        for row in mutated:
+            stream.write(" ".join(map(str, row)) + " 0\n")
+    try:
+        parse_sparse(path, schema, by_name, iv, curve, by_h)
+    except ClauseError as error:
+        if not str(error).startswith("point-law output mismatch"):
+            raise
+        return {"rejection": str(error), "mutated_cnf_sha256": sha(path)}
+    raise AssertionError("corrupted empty-output pair accepted")
+
+
 def path_truth(schema, path):
     xs, states = path
     m = len(xs)
@@ -328,6 +353,9 @@ def verify_panel(panel, sparse_dir: Path, produced, frozen, iv, parent):
     for path in sparse_paths:
         truth = path_truth(schema, path)
         assert all(satisfies(row, truth) for row in sparse_clauses)
+    empty_control = (empty_pair_control(sparse_dir, schema, sparse_clauses,
+                                       by_name, iv, curve, by_h)
+                     if n == 13 else None)
     assert produced["model_paths"] == len(sparse_paths)
     assert produced["target_labels"] == len(targets)
     assert produced["factor_x_tuples"] == math.prod(map(len, domains))
@@ -341,7 +369,8 @@ def verify_panel(panel, sparse_dir: Path, produced, frozen, iv, parent):
             "clauses": schema["clauses"], "bytes": produced["bytes"],
             "dense_variables": base["variables"], "dense_clauses": base["clauses"],
             "dense_bytes": produced["dense_bytes"], "target_rows": target_rows,
-            "point_cases": oracle_counts["point_addition_cases"]}, schema, sparse_clauses, blocks
+            "point_cases": oracle_counts["point_addition_cases"],
+            "negative_empty_pair_control": empty_control}, schema, sparse_clauses, blocks
 
 
 def assert_exact_clauses(actual, expected):
@@ -458,8 +487,10 @@ def run(sparse_dir: Path, out: Path):
                 control_data = (schema, clauses, blocks)
         assert len(panels) == len(PANELS) and control_data is not None
         controls = negative_controls(iv, parent, *control_data)
+        controls["n13_empty_pair_clause"] = panels[-1]["negative_empty_pair_control"]
         assert set(controls) == {"forbid_zero_zero_O", "replace_O_output",
-                                 "drop_sequential_clause", "wrong_O_target"}
+                                 "drop_sequential_clause", "wrong_O_target",
+                                 "n13_empty_pair_clause"}
         result = {"decision": "PASS", "domain": frozen["domain"],
                   "producer_sha256": sha(sparse_dir / "result.json"),
                   "panels": panels, "negative_controls": controls,

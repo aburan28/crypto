@@ -95,7 +95,7 @@ def check_evidence(receipt_path, frozen):
         assert measured["peak_rss_bytes"] <= 512 * 1024 * 1024
     assert set(sparse_verify["negative_controls"]) == {
         "forbid_zero_zero_O", "replace_O_output",
-        "drop_sequential_clause", "wrong_O_target"}
+        "drop_sequential_clause", "wrong_O_target", "n13_empty_pair_clause"}
     assert [row["panel"] for row in sparse_export["panels"]] == [row[0] for row in PANELS]
     assert [row["panel"] for row in sparse_verify["panels"]] == [row[0] for row in PANELS]
     for row in dense_export["panels"]:
@@ -112,6 +112,9 @@ def check_evidence(receipt_path, frozen):
             assert sha(root / "sparse/producer" / name / file) == row[key]
             if file == "paths.jsonl.gz":
                 assert row[key] == frozen["panels"][name][file]["sha256"]
+    control = sparse_verify["negative_controls"]["n13_empty_pair_clause"]
+    assert control["rejection"].startswith("point-law output mismatch")
+    assert sha(root / "sparse/negative_empty_pair.cnf") == control["mutated_cnf_sha256"]
     summary = json.loads((root / "summary.json").read_text())
     assert summary["decision"] == "PASS" and len(summary["panels"]) == 4
     assert sum(row["candidate_paths"] for row in summary["panels"]) == 24955
