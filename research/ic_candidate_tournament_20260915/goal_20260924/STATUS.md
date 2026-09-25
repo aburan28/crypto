@@ -165,3 +165,15 @@ report preserves those counts. The existing exact evaluator remains unchanged,
 and Linux archive replay checks both raw receipts and derived selection. The first-round runner validates those bindings and exclusions before preparing
 fresh targets. Execute the registered diversified pipeline budget after its
 implementation PR passes; do not infer an improvement from these controls.
+
+
+## Generic query admission checkpoint
+
+The [generic query accounting protocol](generic-query-accounting/PROTOCOL.md)
+preserves every attempted collection/descent query, typed frontend outcomes and
+solver counters, plus terminal failed descents. The worker exports these records
+and retains actual attempted matrix solves. Independent group and bounded
+negative-answer replay checks accounting only; complete generic scientific
+admission still needs query-law replay, exact source/base/matrix binding and
+exclusive public-target timing. This is not an improvement round. The incumbent
+remains selected and two rounds remain under the frozen goal protocol.

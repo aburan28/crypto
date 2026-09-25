@@ -3299,7 +3299,7 @@ fn forced_assignment(p: &F2BoolPoly) -> Option<(u32, bool)> {
 }
 
 /// Which algebraic engine reduces the system at each node.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum SolverEngine {
     /// Boolean matrix-F4 ([`matrix_f4_f2`]) through `max_degree`. Systems with
     /// at least 24 variables go directly to that degree because its row space
@@ -3594,7 +3594,7 @@ impl SolveOptions {
 
 /// Statistics from a solve, so callers can report what the algebra
 /// actually cost.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SolveStats {
     /// Algebraic reductions performed (F4 passes or Gröbner bases).
     pub reductions: usize,

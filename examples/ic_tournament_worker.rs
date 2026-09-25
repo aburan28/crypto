@@ -285,11 +285,11 @@ fn run(job: &Job) -> Result<Value, String> {
     dump(b"factor_base_and_tables\0");
     let mut relations = Vec::new();
     let mut trials = 0;
-    let mut solve_attempts = 0;
+    let mut collection_reports = Vec::new();
     let mut outcome = None;
     while trials < cfg.max_trials && outcome.is_none() {
         let count = cfg.batch_trials.min(cfg.max_trials - trials);
-        let (rows, _) = collector.collect(RelationWorkUnit {
+        let (rows, collection_report) = collector.collect_observed(RelationWorkUnit {
             seed: job.algorithm_seed,
             start: trials,
             count,
@@ -297,22 +297,32 @@ fn run(job: &Job) -> Result<Value, String> {
         trials += count;
         dump(b"collection_and_decomposition\0");
         system.push(&rows);
-        solve_attempts += 1;
+        collection_reports.push(collection_report);
         outcome = system.try_solve();
         relations.extend(rows);
         dump(b"verify_filter_and_linear_algebra\0");
     }
     let base = fb.points.iter().map(point).collect::<Vec<_>>();
-    let report = system.report();
-    let Some((table, solved)) = outcome else {
+    let mut report = system.report();
+    report.trials = trials as usize;
+    let Some((table, mut solved)) = outcome else {
         return Ok(
             json!({"schema_version":1,"mode":"ic","status":"incomplete","fixture":metadata,
             "trials":trials,"columns":expected_columns,"relations":relations,
-            "factor_base":base,"rejected_relations":report.rejected_relations}),
+            "factor_base":base,"rejected_relations":report.rejected_relations,
+            "query_schema_version":1,"collection_reports":collection_reports,
+            "log_table_report":report,"solve_attempts":report.solve_attempts,
+            "effective_factor_base":effective_base,"summands":cfg.summands}),
         );
     };
+    solved.trials = trials as usize;
     if solved.rejected_relations != 0 || !table.verify(&c) {
-        return Err("invalid relation or factor-base log certificate".into());
+        return Ok(
+            json!({"schema_version":1,"mode":"ic","status":"invalid_certificate",
+            "fixture":metadata,"factor_base":base,"relations":relations,"trials":trials,
+            "query_schema_version":1,"collection_reports":collection_reports,
+            "log_table_report":solved,"reason":"invalid relation or factor-base log certificate"}),
+        );
     }
     let columns = table
         .columns
@@ -324,11 +334,10 @@ fn run(job: &Job) -> Result<Value, String> {
         .ok_or("descent setup failed")?;
     let mut solutions = Vec::new();
     for (i, q) in targets.iter().enumerate() {
-        let answer = solver.solve(q);
+        let answer = solver.solve_observed(q);
         solutions.push(
-            json!({"index":i,"recovered":answer.as_ref().map(|(d,_)|d.to_string()),
-            "trials":answer.as_ref().map(|(_,r)|r.trials),
-            "relation":answer.as_ref().and_then(|(_,r)|r.relation.as_ref())}),
+            json!({"index":i,"recovered":answer.log.as_ref().map(ToString::to_string),
+            "trials":answer.trials,"relation":answer.relation,"attempts":answer.attempts}),
         );
     }
     dump(b"individual_log\0");
@@ -342,7 +351,8 @@ fn run(job: &Job) -> Result<Value, String> {
     Ok(
         json!({"schema_version":1,"mode":"ic","status":if verified{"complete"}else{"incomplete"},
         "fixture":metadata,"solutions":solutions,"factor_base":base,"relations":relations,
-        "column_logs":columns,"columns":expected_columns,"trials":trials,"solve_attempts":solve_attempts,
+        "column_logs":columns,"columns":expected_columns,"trials":trials,"solve_attempts":solved.solve_attempts,
+        "query_schema_version":1,"collection_reports":collection_reports,"log_table_report":solved,
         "accepted_relations":solved.relations,"duplicate_relations":solved.duplicate_relations,
         "rejected_relations":solved.rejected_relations,"summands":cfg.summands,
         "effective_factor_base":effective_base,

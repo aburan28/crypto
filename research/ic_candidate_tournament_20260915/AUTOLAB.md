@@ -144,9 +144,13 @@ admit them. Historical screens remain replayable with their own frozen evaluator
 The [PDP outcome controls](goal_20260924/pdp-admission/PROTOCOL.md) address one
 admission defect: an encoding rejection must be retained as unsupported, never
 reported as a proved absence of decompositions. These controls are separate
-from solver performance qualification. Generic `RelationCollector` still drops
-per-attempt solver statistics; its scientific adapter must retain them before
-ordinary-query status mixes can enter a comparative table.
+from solver performance qualification. The [generic query controls](goal_20260924/generic-query-accounting/PROTOCOL.md)
+add observed collection/descent APIs retaining every query and native frontend
+counter, including unsuccessful terminal descents. The worker exports versioned
+query records and actual attempted matrix solves. Independent group replay and
+bounded exhaustive negative controls are separate from full scientific admission:
+query-law replay, source binding, public-target intervals and exclusive phase
+accounting remain required before a comparative result.
 The [relation-LA accounting controls](goal_20260924/la-accounting/RESULTS.md)
 also preserve failed solve attempts and their diagnostics in the generic
 factor-base-log report. This repairs bookkeeping; complete scientific phase
