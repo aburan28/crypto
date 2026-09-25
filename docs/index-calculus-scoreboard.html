@@ -6665,6 +6665,15 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-subspace-support-20260925 -->
+<!-- BEGIN ecc2k130-direct-challenge-import-20260925 -->
+<section class="panel" id="ecc2k130-direct-challenge-import-20260925">
+  <div class="panel-head">
+    <h2>Public ECC2K-130 P and Q import directly into the rotated n = 131 model <span class="chip">representation</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/771">PR #771</a> checks that the #762 polynomial <code>z<sup>131</sup>+z<sup>13</sup>+z²+z+1</code> and bit-i coefficient encoding exactly match the repository's public challenge-point source. The literal P and Q each pass on-curve, subgroup-order and Frobenius-scalar identities in both the producer and an independent bit-serial/Fermat implementation; beta 3 has normal rank 131. The committed fixture gives their polynomial and normal coordinates plus every exact Q+T torsion translate. Each translate maps to the same [4]Q, while their <code>Tr(x)</code> values in torsion order O,(0,1),(1,0),(1,1) are 0,0,1,1.</p>
+    <p>This closes a point-representation prerequisite for a future actual-target S6/S7 exporter, not a decomposition, challenge log, rank, natural-target support estimate or speed claim. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/challenge_point_import_20260925/RESULT.md">Scope and replay</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/challenge_point_import_20260925/challenge_points.json">literal target fixture</a> (SHA-256 <code>939fac55c31b7145be425ce09f543feba29aa47846a8355d1f0841f6e594113a</code>).</p>
+  </div>
+</section>
+<!-- END ecc2k130-direct-challenge-import-20260925 -->
 <!-- BEGIN ecc2k130-rotated-pdp-corpus-20260925 -->
 <section class="panel" id="ecc2k130-rotated-pdp-corpus-20260925">
   <div class="panel-head">

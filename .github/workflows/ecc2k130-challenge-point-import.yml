@@ -1,0 +1,22 @@
+name: ECC2K-130 direct public challenge point import
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/challenge_point_import_20260925/**'
+      - '.github/workflows/ecc2k130-challenge-point-import.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reproduce public point fixture with independent arithmetic
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/challenge_point_import_20260925/{make_fixture,verify_fixture,ci_replay}.py
+          python3 research/notes/ecc2k130/challenge_point_import_20260925/ci_replay.py
