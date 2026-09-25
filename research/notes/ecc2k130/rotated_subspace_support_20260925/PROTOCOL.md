@@ -190,7 +190,7 @@ n=13 polynomial `0x201b`, n=131 polynomial
 `0x800000000000000000000000000002007`, beta_A=3 and first alternate
 n=13 beta_B=7; it examined no support or density outcomes. The complete
 machine-readable hash map is `FROZEN.json` (SHA-256
-`f573dd5a43dd7e5014d28ca163bed1d69c8fd793201379d694942c4df9d85069`).
+`77c313cc3db97430e77a797492c32037eecb6189225fc478789d8db6f659edc3`).
 The input manifest SHA-256 is
 `b1bfffd8ac22d47cd10f73e3745e0b295d6466b0c300df6674e7dd8d46381da4`.
 The source SHA-256 values are:
@@ -200,7 +200,7 @@ The source SHA-256 values are:
 | `gate.py` | `d3f0f6e1515282a25efb4eb6a5f68ad754f1d9be68e4a741f17a748d9a58d782` |
 | `verify.py` | `8b665a8d5a1d92cf17f64106dab4bf7134ecaffd06e669404a7508246282c1c8` |
 | `run.py` | `052553f2dedacdaf23da6230bdfd1625c02bb3375718b6c67c087d086fa62618` |
-| `ci_replay.py` | `0a370ac9b0e0792c38249bcd5871e7c40c167203e517fd6f1f8544b273507b21` |
+| `ci_replay.py` | `f50bc43fc70b9976e04283c15d6fa2b93a84358bd1985374c2044fb47d455683` |
 
 Use Python >=3.12 and run from the repository root:
 

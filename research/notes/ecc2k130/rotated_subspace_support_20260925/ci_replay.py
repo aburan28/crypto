@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import tarfile
@@ -37,6 +38,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--evidence", type=Path)
     args = parser.parse_args()
+    protocol = (HERE / "PROTOCOL.md").read_text()
+    anchor = re.search(r'machine-readable hash map is `FROZEN\.json` \(SHA-256\n`([0-9a-f]{64})`\)', protocol)
+    assert anchor is not None, "protocol freeze anchor missing"
+    assert sha(HERE / "FROZEN.json") == anchor.group(1), "protocol freeze anchor drift"
     frozen = json.loads((HERE / "FROZEN.json").read_text())
     sources = {name: sha(HERE / name) for name in SOURCES}
     inputs = tree_hashes(HERE / "inputs")
