@@ -1,0 +1,36 @@
+{
+  "base_gzip_sha256": "23397af2ef668aed0775bcb409e1ae19555357ded635452818c9a3812f679d08",
+  "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "command": [
+    "/private/tmp/kic-compact-pr-base/target/release/examples/koblitz_s5_sat_instance",
+    "53",
+    "0",
+    "1",
+    "10",
+    "natural",
+    "1",
+    "2000",
+    "1",
+    "internal"
+  ],
+  "domain": "ECC2K53-COMPACT-POINT-BATCH-20260924-v1/",
+  "exe_sha256": "af196056953bb22d04a0390be21f0d0467bc8cc53bb76fc7ea38dba616db6f79",
+  "point_file_sha256": "41d23eda5bcceba8270bdf0fcc742a570006ff647ddaf8b4735140dcf43fffe8",
+  "schema_version": "1.0",
+  "scope": "Public synthetic Q points; validator scalar labels withheld from producer",
+  "source_sha256": "bbd64410be7ad8cc035b5fc35fc521fb7ecfc4618bff83180a43c79c44b779b3",
+  "stopping_rule": "One cold process on the first N precommitted points; count all failures",
+  "task": "point_input_log_recovery_probe",
+  "training_manifest_sha256": "057952c19e5f4f87bc66bea59a85b1057aca29aea4aa431b8f19209b5f7f3ea0",
+  "training_validation_sha256": "d5c87025740036476e0d8d492c93a23ede8ed144ce665125d3cebc4c0d0ec285",
+  "validation_scalars": [
+    11581252941738,
+    2215619539842,
+    10887195971549,
+    10471086462577,
+    16974525669279,
+    5992595980692,
+    12415941691194,
+    15916188630759
+  ]
+}
