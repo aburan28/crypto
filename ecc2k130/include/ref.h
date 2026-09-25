@@ -519,10 +519,8 @@ struct TableWalk {
         return eccTag(branch(hw), k, negationBit(xn, yn, k));
     }
     // ...and after it: advance the branch while the step would be fruitless.
-    static unsigned resolveTag(unsigned t, u64 hist) {
-        for (int i = 0; i < H && eccTagFruitless(t, hist); ++i)
-            t = eccTag((eccTagH(t) + 1) & (H - 1), eccTagK(t), eccTagEps(t));
-        return t;
+    unsigned resolveTag(unsigned t, u64 hist) const {
+        return eccResolveTag(t, hist, consts.rpow, M, consts.rm);
     }
     Point addend(unsigned t) const {
         const Point q = table[eccTagH(t)][eccTagK(t)];

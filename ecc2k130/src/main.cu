@@ -918,10 +918,10 @@ static void testOrbit(Rng &rng, const Solver<Cfg> &sol) {
         if (!R::eq(sol.walk.step(pn, R::weight(pn.x), &h2, 0, 0, ell, sol.spow), R::neg(f))) okNeg = false;
         // Trails meeting as R and sigma^c(-R) carry conjugate histories; the
         // cycle rule must fire for both or neither.
-        const unsigned tag = unsigned(h0 & 0xFFFF);
+        const unsigned tag = unsigned(h0 & ECC_TAG_MASK);
         const u64 undo = eccHistPush(ECC_HIST_EMPTY, tag ^ ECC_TAG_EPS);
-        const u64 undoC = eccHistPush(ECC_HIST_EMPTY, unsigned(h1 & 0xFFFF) ^ ECC_TAG_EPS);
-        const u64 undoN = eccHistPush(ECC_HIST_EMPTY, unsigned(h2 & 0xFFFF) ^ ECC_TAG_EPS);
+        const u64 undoC = eccHistPush(ECC_HIST_EMPTY, unsigned(h1 & ECC_TAG_MASK) ^ ECC_TAG_EPS);
+        const u64 undoN = eccHistPush(ECC_HIST_EMPTY, unsigned(h2 & ECC_TAG_MASK) ^ ECC_TAG_EPS);
         u64 g0 = undo, g1 = undoC, g2 = undoN;
         const typename R::Point fa = sol.walk.step(p, hw, &g0, 0, 0, ell, sol.spow);
         if (R::eq(fa, f)) okFrob = false;   // the rule did not fire

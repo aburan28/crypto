@@ -88,6 +88,7 @@
 namespace eccPacked131 {
 
 static const int TW_H = ECC_TABLE_BRANCHES;
+static constexpr uint32_t TW_RM = eccCyclePow(131);
 #if ECC_TABLE_PIVOT_BYTES
 static const int TW_ENTRY = 8;                            // x words 0-3, y words 0-3
 static const int TW_KWORDS = TW_H * TW_ENTRY + TW_H / 4;  // + tops, 8 bits per entry
@@ -114,7 +115,9 @@ static const int TW_LINV_OFF = TW_MAX_OFF + 33 * 4;      // 131 bytes, padded
 // in shared memory, or only the selection part of it -- carries it into
 // shared memory.  8,320 bytes: the 512 x 1 geometry's one block still fits the
 // 64 KB carveout, so its L1 keeps the 64 KB ONE-BLOCK-GEOMETRY.md measured.
-static const int TW_SQR_OFF = TW_LINV_OFF + 33;
+// The cycle rule's r^k (tablewalk.h), 16 bits each, rpow[131] = 0.
+static const int TW_RPOW_OFF = TW_LINV_OFF + 33;
+static const int TW_SQR_OFF = TW_RPOW_OFF + 66;
 static const int TW_WORDS = TW_SQR_OFF + (ECC_PACKED_SQUARE_TABLE ? SQ_TAB_WORDS : 0);
 // Hybrid occupancy path: keep phase/pivot/sign tables in shared memory and
 // read the bulky addend table from global.  Selection is 14 148 bytes, which
@@ -221,7 +224,9 @@ TW_FN unsigned twSelectHist(const P131 &x, const P131 &yp, int hw,
     int h = (hw >> 1) & (TW_H - 1);
     unsigned tag = eccTag(h, k, eps);
     const unsigned long long old = *hist;
-    while (eccTagFruitless(tag, old)) {
+    const uint16_t *rpow = reinterpret_cast<const uint16_t *>(shared + (TW_RPOW_OFF - TW_SEL0));
+    const EccCycleWindow win = eccCycleWindow(k, old, rpow, 131, TW_RM);
+    for (int i = 0; i < TW_H && eccTagFruitless(tag, win, rpow, 131, TW_RM); ++i) {
         h = (h + 1) & (TW_H - 1);
         tag = eccTag(h, k, eps);
     }
@@ -358,6 +363,8 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
         }
 #endif
     for (int bit = 0; bit < 131; ++bit) linv[L(bit)] = uint8_t(bit);
+    uint16_t *rpow = reinterpret_cast<uint16_t *>(out + TW_RPOW_OFF);
+    for (int k = 0; k <= 131; ++k) rpow[k] = walk.consts.rpow[k];
 #if ECC_PACKED_SQUARE_TABLE
     fillSquareTable131(out + TW_SQR_OFF);
 #endif

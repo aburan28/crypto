@@ -439,10 +439,11 @@ REGION_RULES = [
     ("packedkernels.cuh", "if (i + 1 < ECC_BATCH) {", "(B-1)/B", "fused: not the last slot"),
     ("packedkernels.cuh", "if (!last)", "(S-1.0)/S", "fused: not the launch's last step"),
     ("packedkernels.cuh", "if (!slot) {", "1.0*U/B", "slot 0 pipeline refresh"),
-    ("packedtablewalk.cuh", "while (eccTagFruitless(tag, old))", "P_RETRY", "fruitless-cycle retry"),
+    ("packedtablewalk.cuh", "for (int i = 0; i < TW_H && eccTagFruitless(tag, win, rpow, 131, TW_RM); ++i)", "P_RETRY", "fruitless-cycle retry"),
 ]
 # A step is refused when it undoes the last one (1 in 2*H*m) or closes a
-# 4-cycle (rarer); WALK-CONSTANT.md measures the whole rule.  The retry loop
+# longer fruitless run (rarer; spurious refusals, 3 in 2^16, rarer still);
+# WALK-CONSTANT.md measures the whole rule.  The retry loop
 # is priced at 1/(2*8*131); any lane retrying costs the warp one more pass.
 P_RETRY = 1.0 / (2 * 8 * 131)
 
@@ -459,7 +460,7 @@ LOOP_RULES = [
     ("packedkernels.cuh", "for (int i = L - 1; i >= 0; --i)", "B/2"),
     ("packedkernels.cuh", "for (int slot = ECC_BATCH / 2 - 1; slot >= 0; --slot)", "B/2"),
     ("packedkernels.cuh", "for (int k = 1; k < ECC_BATCH / 2; ++k)", "B/2-1"),
-    ("packedtablewalk.cuh", "while (eccTagFruitless(tag, old))", "RETRY"),
+    ("packedtablewalk.cuh", "for (int i = 0; i < TW_H && eccTagFruitless(tag, win, rpow, 131, TW_RM); ++i)", "RETRY"),
     ("packedtablewalk.cuh", "for (int i = threadIdx.x; i < words; i += blockDim.x)", "SMEM_FILL"),
 ]
 

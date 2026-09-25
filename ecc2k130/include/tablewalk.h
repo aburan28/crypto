@@ -12,12 +12,23 @@
 // f(R) and f(-R) = -f(R): the walk is a function on the 2m-element classes
 // without any canonical representative, exactly as the sigma^j + 1 walk is.
 //
-// Unlike that walk this one is additive, so it has fruitless cycles: a step
-// that cancels the previous one (probability 1/(2 H m) per step) or closes a
-// 4-cycle with the three before it.  Both are detected from the last four step
-// tags (h, k, eps) and avoided by advancing h.  The decision depends only on
-// the last four steps, so two trails that merge inside a cycle re-synchronise
-// after one lap: merging, and with it the rho collision structure, survives.
+// Unlike that walk this one is additive, so it has fruitless cycles: runs of
+// steps whose addends sum to zero.  Pairs that cancel are the obvious ones,
+// but Frobenius satisfies s^2 + s + 2 = 0 on these curves, so four steps in
+// one branch adding sigma^(k+2) T, sigma^(k+1) T, sigma^k T, sigma^k T also
+// return a walk to where it started, as do ten more families of up to six
+// steps (WALK-CONSTANT.md section 5; benchmarks/walk-constant/fruitless_patterns.py).
+// Every one of them is an identity in Z[tau], tau^2 + tau + 2 = 0, per branch.
+// The rule maps a step to phi = +-c_h r^k in Z/2^16, r the odd root of
+// x^2 + x + 2 there: a ring homomorphism from Z[tau], so any run of steps that
+// returns formally maps to zero, and a run that does not maps to zero with
+// probability 2^-16.  A step is refused when it would close such a run of 2, 4
+// or 6 steps (5 tags of history at H = 8, 4 at H = 16, where 6-step runs
+// remain); a run of odd length cannot close, since every phi is odd.  A
+// refused step advances h.  The decision depends only on the last few steps,
+// so two trails that merge re-synchronise within a few steps: merging, and
+// with it the rho collision structure, survives.  A spurious refusal is just
+// another deterministic step, so the 2^-16 costs nothing but that.
 //
 // This header carries what host and device share: the tag encoding, the cycle
 // rule and the coordinate tables for one field size.  The reference step and
@@ -36,30 +47,94 @@
 #endif
 #include "bitslice.h"
 
-// Step tag: h in bits 0-3, k in bits 4-11, eps in bit 12.  A lane that has not
-// stepped yet holds 0xFFFF in every history slot, which no tag can conjugate to.
-#define ECC_TAG_EPS 0x1000u
-#define ECC_TAG_NONE 0xFFFFu
+// Step tag: h in the low ECC_TAG_HBITS bits, k in the next 8, eps above.
+// The history word holds the last ECC_HIST_DEPTH tags, newest in the low slot.
+// A lane that has not stepped yet holds all ones in every slot, whose k (255)
+// is no phase; phi reads it as zero.
+#if ECC_TABLE_BRANCHES == 8
+#define ECC_TAG_HBITS 3
+#define ECC_HIST_SLOT 12
+#else
+#define ECC_TAG_HBITS 4
+#define ECC_HIST_SLOT 16
+#endif
+#define ECC_HIST_DEPTH (64 / ECC_HIST_SLOT)
+#define ECC_CYCLE_WINDOWS ((ECC_HIST_DEPTH + 1) / 2)   // closing lengths 2, 4 (, 6)
+#define ECC_TAG_EPS (1u << (ECC_TAG_HBITS + 8))
+#define ECC_TAG_MASK ((1u << ECC_HIST_SLOT) - 1u)
+#define ECC_TAG_NONE ECC_TAG_MASK
 #define ECC_HIST_EMPTY 0xFFFFFFFFFFFFFFFFull
 
 ECC_HD unsigned eccTag(int h, int k, int eps) {
-    return unsigned(h) | (unsigned(k) << 4) | (unsigned(eps) << 12);
+    return unsigned(h) | (unsigned(k) << ECC_TAG_HBITS) | (unsigned(eps) << (ECC_TAG_HBITS + 8));
 }
-ECC_HD int eccTagH(unsigned t) { return int(t & 15u); }
-ECC_HD int eccTagK(unsigned t) { return int((t >> 4) & 255u); }
-ECC_HD int eccTagEps(unsigned t) { return int((t >> 12) & 1u); }
-
-// A step with tag t is fruitless after history (t1 most recent, t2, t3) when
-// it undoes t1, or when it and t1 undo t2 and t3 respectively (a 4-cycle).
-// Two consecutive tags differing only in the sign bit is the whole test.
-ECC_HD bool eccTagFruitless(unsigned t, unsigned long long hist) {
-    const unsigned t1 = unsigned(hist & 0xFFFFu);
-    const unsigned t2 = unsigned((hist >> 16) & 0xFFFFu);
-    const unsigned t3 = unsigned((hist >> 32) & 0xFFFFu);
-    return ((t ^ t1) == ECC_TAG_EPS) || (((t ^ t2) == ECC_TAG_EPS) && ((t1 ^ t3) == ECC_TAG_EPS));
-}
+ECC_HD int eccTagH(unsigned t) { return int(t & ((1u << ECC_TAG_HBITS) - 1u)); }
+ECC_HD int eccTagK(unsigned t) { return int((t >> ECC_TAG_HBITS) & 255u); }
+ECC_HD int eccTagEps(unsigned t) { return int((t >> (ECC_TAG_HBITS + 8)) & 1u); }
 ECC_HD unsigned long long eccHistPush(unsigned long long hist, unsigned t) {
-    return (hist << 16) | (unsigned long long)(t & 0xFFFFu);
+    return (hist << ECC_HIST_SLOT) | (unsigned long long)(t & ECC_TAG_MASK);
+}
+
+// The odd root of x^2 + x + 2 modulo 2^16, lifted bit by bit (the derivative
+// 2x + 1 is odd), and its powers.
+constexpr uint32_t eccCycleRoot() {
+    uint32_t r = 1;
+    for (int j = 1; j < 16; ++j)
+        if ((r * r + r + 2u) & (1u << j)) r += 1u << j;
+    return r & 0xFFFFu;
+}
+constexpr uint32_t eccCyclePow(int e) {
+    uint32_t v = 1;
+    for (int i = 0; i < e; ++i) v = (v * eccCycleRoot()) & 0xFFFFu;
+    return v;
+}
+static_assert(((eccCycleRoot() * eccCycleRoot() + eccCycleRoot() + 2u) & 0xFFFFu) == 0, "cycle root");
+
+// phi of one step in the frame cut at phase b: exponents run (k - b) mod m, so
+// r^k picks up r^m below the cut, and the common factor r^-b is dropped.  The
+// frame puts the new step's own phase opposite the cut, so every run that
+// could close through it is uncut.  rpow[k] = r^k for k < m and rpow[m] = 0.
+ECC_HD uint32_t eccCyclePhi(unsigned t, int b, const uint16_t *rpow, int m, uint32_t rm) {
+    int k = eccTagK(t);
+    k = k < m ? k : m;
+    uint32_t v = uint32_t(rpow[k]) * (uint32_t(2 * eccTagH(t) + 1) * 0x9E3779B9u);
+    if (k < b) v *= rm;
+    return eccTagEps(t) ? 0u - v : v;
+}
+// What the rule needs from the history for a step of phase k: the cut, and phi
+// summed over the last 1, 3 (and 5) steps.  Retries change only h, so this is
+// computed once per step.
+struct EccCycleWindow {
+    int b;
+    uint32_t s[ECC_CYCLE_WINDOWS];
+};
+ECC_HD EccCycleWindow eccCycleWindow(int k, unsigned long long hist, const uint16_t *rpow, int m, uint32_t rm) {
+    EccCycleWindow w;
+    w.b = k + (m + 1) / 2;
+    if (w.b >= m) w.b -= m;
+    uint32_t acc = 0;
+#pragma unroll
+    for (int i = 0; i < 2 * ECC_CYCLE_WINDOWS - 1; ++i) {
+        acc += eccCyclePhi(unsigned(hist >> (ECC_HIST_SLOT * i)) & ECC_TAG_MASK, w.b, rpow, m, rm);
+        if ((i & 1) == 0) w.s[i >> 1] = acc;
+    }
+    return w;
+}
+// A step with tag t is fruitless when it closes a run of 2, 4 (or 6) steps.
+ECC_HD bool eccTagFruitless(unsigned t, const EccCycleWindow &w, const uint16_t *rpow, int m, uint32_t rm) {
+    const uint32_t v = eccCyclePhi(t, w.b, rpow, m, rm);
+    bool closes = false;
+#pragma unroll
+    for (int i = 0; i < ECC_CYCLE_WINDOWS; ++i) closes |= ((v + w.s[i]) & 0xFFFFu) == 0;
+    return closes;
+}
+// The tag after the rule: advance the branch while the step would be
+// fruitless, at most H times.
+ECC_HD unsigned eccResolveTag(unsigned t, unsigned long long hist, const uint16_t *rpow, int m, uint32_t rm) {
+    const EccCycleWindow w = eccCycleWindow(eccTagK(t), hist, rpow, m, rm);
+    for (int i = 0; i < ECC_TABLE_BRANCHES && eccTagFruitless(t, w, rpow, m, rm); ++i)
+        t = eccTag((eccTagH(t) + 1) & (ECC_TABLE_BRANCHES - 1), eccTagK(t), eccTagEps(t));
+    return t;
 }
 
 // Coordinate tables for GF(2^M) in the permuted type-II ONB, coordinate i in
@@ -72,6 +147,8 @@ struct TableWalkConsts {
     int inv[M + 1];                // inverse of w mod M, inv[0] = 0
     unsigned long long maskLt[M][NL];        // {i : L(i) < k}
     unsigned long long plane[8][NL];         // {i : bit b of L(i) set}
+    uint16_t rpow[M + 1];                    // cycle rule: r^k, and rpow[M] = 0
+    uint32_t rm;                             // r^M
 
     static int fold(long long e) {
         e %= N;
@@ -96,6 +173,9 @@ struct TableWalkConsts {
             for (int l = 0; l < NL; ++l) maskLt[k][l] = 0;
         for (int b = 0; b < 8; ++b)
             for (int l = 0; l < NL; ++l) plane[b][l] = 0;
+        for (int k = 0; k < M; ++k) rpow[k] = uint16_t(eccCyclePow(k));
+        rpow[M] = 0;
+        rm = eccCyclePow(M);
         for (int i = 1; i <= M; ++i) {
             for (int k = L[i] + 1; k < M; ++k) setBit(maskLt[k], i);
             for (int b = 0; b < 8; ++b)

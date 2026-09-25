@@ -255,7 +255,7 @@ static int run(bool table, Dist dist, int walks, unsigned long long trials,
                         if (dist != NATIVE)
                             raw = eccTag(hashedBranch(key[w], salt), eccTagK(raw), eccTagEps(raw));
                         t.branchCounts[eccTagH(raw)]++;
-                        tag = TableWalk<Cfg>::resolveTag(raw, hist[w]);
+                        tag = tw->resolveTag(raw, hist[w]);
                         t.ruleFired += tag != raw;
                         if (dist == NATIVE) {
                             q = tw->step(p[w], hw, &hist[w], nullptr, nullptr, sol->ell, sol->spow);

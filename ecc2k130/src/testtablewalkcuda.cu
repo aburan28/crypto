@@ -53,6 +53,23 @@ __global__ void probe(const In *in, Out *out, int n, const uint32_t *consts) {
     out[i] = o;
 }
 
+// Histories the raw tag would close into a fruitless run, oldest tag first:
+// a step back, a 4-cycle of pairs, the tau-relation s^2 + s + 2 = 0 (tags k,
+// k + 1, k + 2 before a second k in one branch), and a 6-step run of pairs
+// no shorter window sees.  Every other point sees an empty history.
+static unsigned long long probeHistory(int i, unsigned raw) {
+    const unsigned A = 0x0123u, C = 0x0245u, E = ECC_TAG_EPS;
+    const int h = eccTagH(raw), k = eccTagK(raw), eps = eccTagEps(raw);
+    std::vector<unsigned> tags;
+    if (i % 4 == 1) tags = {raw ^ E};
+    if (i % 8 == 2) tags = {A ^ E, raw ^ E, A};
+    if (i % 8 == 3) tags = {eccTag(h, k, eps), eccTag(h, (k + 1) % 131, eps), eccTag(h, (k + 2) % 131, eps)};
+    if (i % 8 == 4) tags = {A, raw ^ E, C, A ^ E, C ^ E};
+    unsigned long long hist = ECC_HIST_EMPTY;
+    for (unsigned t : tags) hist = eccHistPush(hist, t);
+    return hist;
+}
+
 int main() {
     typedef Ref<CfgF131> R;
     Solver<CfgF131> sol;
@@ -83,11 +100,7 @@ int main() {
         in[i].yp = toPolynomial131(pack(pts[i].y.v));
         in[i].hw = R::weight(pts[i].x);
         rawTags[i] = tw.rawTag(pts[i], in[i].hw);
-        // Every fourth point sees a history the raw tag would undo, every
-        // eighth one a 4-cycle it would close; the rest an empty history.
-        in[i].hist = ECC_HIST_EMPTY;
-        if (i % 4 == 1) in[i].hist = eccHistPush(ECC_HIST_EMPTY, rawTags[i] ^ ECC_TAG_EPS);
-        if (i % 8 == 2) in[i].hist = eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, 0x0123u ^ ECC_TAG_EPS), rawTags[i] ^ ECC_TAG_EPS), 0x0123u);
+        in[i].hist = probeHistory(i, rawTags[i]);
     }
     In *dIn; Out *dOut;
     checked(cudaMalloc(&dIn, N * sizeof(In)));
@@ -110,7 +123,7 @@ int main() {
         int p = -1;
         for (int b = 0; b < 131; ++b) if ((piv[b >> 6] >> (b & 63)) & 1) p = b;
         const int eps = tw.negationBit(xn, yn, k);
-        const unsigned tag = TableWalk<CfgF131>::resolveTag(rawTags[i], in[i].hist);
+        const unsigned tag = tw.resolveTag(rawTags[i], in[i].hist);
         if (tag != rawTags[i]) ++ruleFired;
         const R::Point q = tw.addend(tag);
         const P131 d = toPolynomial131(pack(R::add(pts[i].x, q.x).v));
@@ -125,7 +138,7 @@ int main() {
     std::printf("  phase mismatches %d, pivot %d, sign %d, tag %d, addend words %d\n", badK, badPivot, badEps, badTag, badAdd);
     std::printf("  branches %d, shared bytes %zu, addend global %d\n",
                 TW_H, TW_SHARED_BYTES, ECC_TABLE_ADDEND_GLOBAL);
-    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= N / 4;
+    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= 5 * N / 8;
     std::printf("%s\n", ok ? "PASS" : "FAIL");
     return ok ? 0 : 1;
 }

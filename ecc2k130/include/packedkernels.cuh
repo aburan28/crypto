@@ -449,7 +449,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             const P131 w = load(p.pchain, slot, tid, p.threads);
 #endif
             P131 dp;
-            twDenominator(unsigned(hist & 0xFFFFu), x, twTab, &dp);
+            twDenominator(unsigned(hist & ECC_TAG_MASK), x, twTab, &dp);
             P131 lambdaPoly;
             if (i + 1 < ECC_BATCH) {
                 PolynomialPair pair = mulPolynomialPair131(inv, w, dp);
@@ -548,8 +548,8 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             const P131 xA = load(p.x, sA, tid, p.threads), yA = load(p.y, sA, tid, p.threads);
             const P131 xB = load(p.x, sB, tid, p.threads), yB = load(p.y, sB, tid, p.threads);
             P131 dA, dB;
-            twDenominator(unsigned(p.hist[size_t(sA) * p.threads + tid] & 0xFFFFu), xA, twTab, &dA);
-            twDenominator(unsigned(p.hist[size_t(sB) * p.threads + tid] & 0xFFFFu), xB, twTab, &dB);
+            twDenominator(unsigned(p.hist[size_t(sA) * p.threads + tid] & ECC_TAG_MASK), xA, twTab, &dA);
+            twDenominator(unsigned(p.hist[size_t(sB) * p.threads + tid] & ECC_TAG_MASK), xB, twTab, &dB);
             const P131 wA = load(p.pchain, sA, tid, p.threads), wB = load(p.pchain, sB, tid, p.threads);
             P131 lamA, lamB;
             if (i) {
@@ -869,7 +869,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             // table for the cost of a 5-word shared read instead of a 17-byte
             // global store and load.
             P131 dp;
-            twDenominator(unsigned(p.hist[size_t(slot) * p.threads + tid] & 0xFFFFu), x, twTab, &dp);
+            twDenominator(unsigned(p.hist[size_t(slot) * p.threads + tid] & ECC_TAG_MASK), x, twTab, &dp);
 #else
             P131 dp = load(denominators, slot, tid, p.threads);
             dp.v[4] &= 7;
