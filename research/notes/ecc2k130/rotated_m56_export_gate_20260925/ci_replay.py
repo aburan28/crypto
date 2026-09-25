@@ -57,6 +57,17 @@ def preflight() -> dict:
                     source_rows = json.loads(raw)
                     assert rows == [{k: row[k] for k in ("class", "Q", "R", "coset_multiplicities")}
                                     for row in source_rows]
+    failed = HERE / "evidence/failure_0"
+    if failed.exists():
+        receipt = json.loads((failed / "receipt.json").read_text())
+        assert set(receipt["arms"]) == {"n13-m5"}
+        row = receipt["arms"]["n13-m5"]
+        assert row["exit_code"] == 1
+        assert row["result_sha256"] == sha(failed / "n13-m5.json")
+        assert row["stdout_sha256"] == sha(failed / "n13-m5.stdout.txt")
+        assert row["stderr_sha256"] == sha(failed / "n13-m5.stderr.txt")
+        assert json.loads((failed / "n13-m5.json").read_text())["decision"] == "FAIL"
+        assert "assert all({p[0] for p in slot}" in (failed / "n13-m5.stderr.txt").read_text()
     proc = subprocess.run([sys.executable, str(HERE / "gate.py"), "--self-test"],
                           capture_output=True, text=True, check=False)
     assert proc.returncode == 0 and proc.stdout.strip() == "self-test PASS", proc.stderr

@@ -21,8 +21,11 @@ fixed subgroup point `Q` asks whether some labelled tuple has full sum
 `Q+T` for any of `T∈E[4]={O,(0,1),(1,0),(1,1)}`. Keep the four torsion
 branches distinct. The direct semantic reference is the set of every
 `m`-tuple of two-bit subspace masks for which at least one rational choice of
-factor-point signs has that exact full sum. It is built by enumerating all
-3,125 or 117,649 labelled rational point tuples, not by trusting an S6/S7
+factor-point signs has that exact full sum. An x mask whose coordinate
+has no rational lift remains outside the factor domain; the two-bit slice
+has four formal x values, not necessarily four rationally liftable choices.
+It is built by enumerating all 3,125 or 117,649 labelled rational point
+tuples, not by trusting an S6/S7
 zero or a solver result. It is a **verification oracle**, never an input to a
 solver benchmark, because giving a solver its answer table would leak labels.
 Compare all 64 exact `Q+T` multiplicities (16 points × four torsion branches)

@@ -250,7 +250,7 @@ def enumerate_policy(curve, factors, coordinate_maps, target_points, trace_mask,
                                   projected_by_full, ordered_full, excluded_r, q)
                 if chain else {})
     assert sum(full.values()) == total == math.prod(map(len, factors))
-    assert len(seen_masks) == 4 ** len(factors)
+    assert len(seen_masks) == math.prod(len({p[0] for p in slot}) for slot in factors)
     for index, models in enumerate(mask_witnesses):
         assert set(models) == x_masks[index] == set(matching[index])
         for masks, choice in models.items():
@@ -312,7 +312,7 @@ def run_arm(arm: str):
             assert {k:row[k] for k in frozen} == frozen
         factors = [[point(p) for p in slot] for slot in factors_raw]
         assert factors == corpus.factor_points(curve, cfg["beta"], cfg["m"], cfg["d"])
-        assert all({p[0] for p in slot} == set(coordinate_maps[i])
+        assert all({p[0] for p in slot} <= set(coordinate_maps[i])
                    for i, slot in enumerate(factors))
         assert all(curve.on(p) for slot in factors for p in slot)
         assert all(len(slot) == (5 if arm == "n13-m5" else 7) for slot in factors)
