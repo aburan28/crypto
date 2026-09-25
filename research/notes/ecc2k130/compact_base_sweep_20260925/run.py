@@ -14,7 +14,7 @@ import subprocess
 import time
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[4]
+REPO = HERE.parents[3]
 SPEC = HERE / "input_spec.json"
 COMPACT = REPO / "target/release/examples/koblitz_s5_sat_instance"
 RHO = REPO / "target/release/examples/koblitz_rho_fixture"
