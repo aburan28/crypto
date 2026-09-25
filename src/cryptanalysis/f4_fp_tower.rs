@@ -37,11 +37,20 @@
 //! - **Critical pairs** go through Gebauer–Möller (Becker–Weispfenning
 //!   `UPDATE`). Tower pairs are never pruned and never used to prune, as the
 //!   boolean engine treats its field pairs.
-//! - **The matrices are sparse.** Symbolic preprocessing gives reducer rows
-//!   with distinct leading columns. Every S-row is reduced by those alone,
-//!   in parallel, with a dense accumulator. The residues then live only on
-//!   the columns no reducer leads, and are echelonized one row at a time. A
-//!   pivot is new when no active leading monomial divides its lead.
+//! - **The elimination follows Faugère–Lachartre.** Symbolic preprocessing
+//!   gives reducer rows with distinct leading columns, and the shortest
+//!   S-row at each lcm column joins them. The columns no reducer leads are
+//!   then exactly the monomials without a divisor. The reducer block is
+//!   reduced to dense rows over those columns (`B' = A⁻¹B`, the rightmost
+//!   lead first), every S-row is reduced by it in one pass (`D − C·B'`), and
+//!   the residues are echelonized in chunks, each reduced in parallel by the
+//!   pivots found before it. Every pivot is a new leading monomial.
+//! - **Rows are formed on demand.** A row is kept as the product that makes
+//!   it and formed again, a block at a time, when it is eliminated, so a
+//!   step's memory is `B'` rather than the matrix.
+//! - **Arithmetic** below `2³¹` is lazy: an accumulator is reduced only when
+//!   it crosses `2⁶³`, and the loop is dispatched at run time to AVX2 or
+//!   AVX-512. Above `2³¹` every step is reduced (Barrett).
 //!
 //! What it measures:
 //! - `solving_degree_max`: the highest degree of a step at which the basis
@@ -657,8 +666,9 @@ pub struct StepTrace {
     pub basis_active: usize,
     pub pairs_left: usize,
     pub ms: f64,
-    /// Where `ms` went: forming the rows (S-rows and symbolic
-    /// preprocessing), phase A, phase B, and the basis update.
+    /// Where `ms` went: symbolic preprocessing, the reduced reducer block
+    /// `B'`, the S-rows and their echelon (rows formed on demand count
+    /// where they are used), and the basis update.
     pub ms_rows: f64,
     pub ms_reduce: f64,
     pub ms_echelon: f64,

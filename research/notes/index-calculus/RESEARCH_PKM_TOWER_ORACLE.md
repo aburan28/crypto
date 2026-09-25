@@ -1320,6 +1320,174 @@ counts points naively, in `O(p)`.
   - dropping a target;
   - re-running a system in the hope of a different answer.
 
+### 11.7 Results
+
+**Build.**
+- After the pre-registration commit (`a2a851ed`), `origin/main` was merged into
+  the branch (`d8b1df8f`).
+- The merge touched no file the example builds from except the module list in
+  `src/cryptanalysis/mod.rs`, so the engine and the example are the sources of
+  §11.1. Their hashes are in the round's README.
+- The merged build reproduces XV2 and XV5 exactly: 60 systems, every
+  deterministic field.
+- Every round-2 run used that build.
+
+**K1: Kummer, `m = 2`, `p₁`.** Every system refuted.
+
+| `N` | `D`, targets 0 and 1 | width | steps | F4 time, each | nonzeros, widest step |
+|--:|:--|--:|--:|--:|--:|
+| 12 | 5, 5 | 1,231 | 13 | 0.05 s | 0.3 M |
+| 14 | 5, 5 | 2,304 | 15 | 0.2 s | 1.2 M |
+| 16 | 5, 5 | 4,789 | 17 | 1.1 s | 4.6 M |
+| 18 | 5, 5 | 8,644 | 20 | 6 s | 18 M |
+| 20 | **6, 6** | 33,446 | 24 | 57 s | 121 M |
+| 22 | **6, 6** | 51,909 | 28 | 10 min | 473 M |
+
+- **The shape of the system decides everything measured here.**
+  - At each `N` the two targets give the same `D`, width and step count.
+  - So do the systems at `p₀` and at `3221225473`, wherever they overlap.
+  - Their counts of nonzeros and multiply-adds agree exactly at the two large
+    primes. At `p₀` they differ by a few parts per million, from cancellations
+    modulo a 20-bit prime.
+- **Memory.** The largest system, at `N = 22`, peaked at 2.3 GB. Its matrices
+  hold 473 million nonzeros, which are never in memory together.
+
+**K1n: the null at `p₁`.** It has the same `D`, width and step count as K1 at
+every `N` from 12 to 20, including `D = 6` at `N = 20`.
+
+**K0 and I0: `m = 2` at `p₀`, `N = 20`.** Every system refuted, so the
+staircase stop never fired.
+- **K0** gives `D = 6` on both targets, at 33,446 columns in 24 steps. Target 0
+  reproduces §11.3 field for field.
+- **I0, the isogeny tower, gives `D = 6` on both targets**, at 35,158 columns in
+  28 steps. The isogeny `D` had been 5 at every `N` from 4 to 18. It rises at
+  the same level as Kummer's, `t = 10`.
+
+**M4: Kummer, `m = 4`, `p₁`.**
+- `N = 8` and 12 give `D = 6` and 7 on both targets, as in the pilot at `p₀`:
+  1,049 and 9,452 columns, in 21 and 29 steps.
+- **`N = 16` ran out of memory.** Its first system hit the 14 GB cap after 29
+  minutes ("memory allocation of 131072 bytes failed"). The process ended
+  there, so the second target never ran, and there is no row and no `D`.
+- A trace of the `N = 12` system (D1 in the README) shows where the memory goes.
+  One early step reaches degree 7 (step 16). The refutation then comes through a
+  tail of degree-6 steps, in which the basis grows to 1,886 elements and the
+  pending pairs to 25,873.
+
+**M3: Kummer, `m = 3`, `p₁`.**
+- `N = 9` and 12 give `D = 6` on both targets, as in the pilot.
+- **`N = 15` gives `D = 7` on both targets**, at 31,397 columns in 24 steps,
+  taking about 6 minutes each.
+- M3_N18_PLACEHOLDER
+
+CONFIRM_VERIFY_PLACEHOLDER
+
+**The exit codes in `progress.txt` are all 0 and carry no information.** The
+committed scripts wrote them with `$(date …)` in the same line, which resets
+`$?` before it is read. The logs record how each run ended, and
+`confirm_round2.sh` reads the status first.
+
+### 11.8 The rule of §11.6, applied
+
+**The predictions of §11.5.**
+
+| | prediction | outcome |
+|:--|:--|:--|
+| 1 | K1, `N = 12–18`: `D = 5` | held on all 8 systems |
+| 2 | K1, `N = 20, 22`: `D = 6` | held on all 4 |
+| 3 | K0: `D = 6`; target 0 reproduces §11.3 | held |
+| 4 | K1n: the null's `D` is the tower's | held at every `N` |
+| 5 | I0: `D ≥ 5` | held: `D = 6` |
+| 6 | M4: 6 and 7 at `N = 8, 12`; M3: 6 at `N = 9, 12`; `D` not falling at new sizes | held where measured. M3 gives 7 at `N = 15`, and M3_PRED_PLACEHOLDER. M4 gave no `D` at `N = 16` |
+
+**`N`, not `|V|²/p`.** Both K1 systems at `N = 20` have `D = 6`, so "`N`"
+holds. At `p₁` the grid is `2^20/p₁ ≈ 5·10⁻⁴` of the field, three orders of
+magnitude below §11.3's system, and the run has the same shape step for step.
+
+CONJ3_PLACEHOLDER
+
+**A1, per cell.** The same `D(N)` reads differently depending on where a cell's
+range starts, so each reading comes with its range.
+
+| cell: kind, `m`, prime (runs) | `N` | `D` | final plateau `L` | upper-half slope | reading |
+|:--|:--|:--|--:|:--|:--|
+| Kummer, 2, `p₁` (K1) | 12–22 | 5 5 5 5 6 6 | 2 | 0.25 (`N = 18–22`) | H0, at the threshold |
+| null, Kummer, 2, `p₁` (K1n) | 12–20 | 5 5 5 5 6 | 0 | 0.25 (16–20) | H0, at the threshold |
+| Kummer, 2, `p₀` (XV1, K0) | 2–20 | 3 4 4 4 4 5 5 5 5 6 | 0 | 0.10 (12–20) | inconclusive |
+| isogeny, 2, `p₀` (XV1, I0) | 2–20 | 3 5 5 5 5 5 5 5 5 6 | 0 | 0.10 (12–20) | inconclusive |
+M3_A1_ROW_PLACEHOLDER
+| Kummer, 4, `p₁` (M4) | 8–12 | 6 7 | 0 | — | inconclusive (two sizes) |
+
+- **Both H0 readings are at the threshold, and both come from where the range
+  begins.**
+  - At `p₁` the cells start at `N = 12`, so each upper half is three points with
+    one rise, and its slope is exactly the threshold, 1/4.
+  - The same `D(N)`, sampled from `N = 2` at `p₀`, has an upper-half slope of
+    0.10 and reads inconclusive.
+  - The rule's reading is recorded as it stands, and it closes nothing. §3.7
+    already rules `m = 2` out: no oracle beats rho there.
+- **H1a holds in no round-2 cell.** No final plateau is longer than
+  M3_L_PLACEHOLDER. The isogeny plateau of `N = 4–18`, which §10.8 noted would
+  pass A1, ends at `N = 20`.
+- **One line still reads H1a: the isogeny null at `p₀`.** The cross-check ran it
+  only to `N = 18`, so it keeps that plateau. The null gates nothing, and at
+  `N = 20` round 2 ran the isogeny tower, not its null.
+- **`m = 4`, the regime that decides the oracle (§3.7), has two sizes**, and
+  the rule cannot read it.
+
+### 11.9 What round 2 shows, and what it does not
+
+It shows five things.
+1. **A sparse engine that matches the dense one.** `f4_fp_tower` gives
+   `f4_fp`'s verdict on every pilot system, and its solving degree from `N = 4`
+   up. It reaches `N = 22` at `m = 2` in 2.3 GB, where the dense `f4_fp`
+   stopped at `N = 18` in 13 GB.
+2. **At `m = 2` the solving degree is not bounded by 5.** It rises to 6 at
+   `N = 20`, in both families, at both primes and in the null. CONJ3_SHORT_PLACEHOLDER
+3. **The rise depends on `N` alone** among the things varied here. It does not
+   depend on `|V|²/p`, the target, the curve or the summation polynomial: within
+   a family, the whole run has the same shape.
+4. **At `m = 3` the degree rises too**, to 7 at `N = 15`. M3_SHOWS_PLACEHOLDER
+5. **The rises fall at regular levels.** This pattern was noticed after the
+   data, and is stated as a pattern, not a law.
+   - At `m = 2`, the Kummer degree rises at `t = 6` and at `t = 10`, which is
+     every four levels. The isogeny degree, 5 from `t = 2`, also rises at
+     `t = 10`.
+   - At `m = 3` the rises fall at `t = 3` and `t = 5`.
+   - At `m = 4`, at `t = 3`.
+
+It does not show three things.
+1. **Whether `D` grows linearly in `N`.**
+   - Two rises at `m = 2` fit one rise every 8 in `N`, `β = 1/8`. By §3.6 that
+     is a width of `p^{H(1/8)} ≈ p^{0.54}` per target, a negative for the oracle
+     if it holds at every `m`.
+   - They fit slower growth equally well. Rises at geometrically spaced `N`
+     (12, 20, then about 33) would make `D` logarithmic in `N`, which §3.6
+     counts as viable.
+   - Telling the two apart needs `N ≈ 28–33` at `m = 2`.
+2. **Anything at `m = 4` beyond `N = 12`**, the regime that decides the oracle.
+3. **Any speed, `S` or scoreboard row.** Nothing is priced end to end, so there
+   is no row to draw (`AGENTS.md` §7), as in §10.6.
+
+### 11.10 Next steps, ranked
+
+1. **Reach `m = 4` at `N ≥ 16`.** §11.7's trace shows the memory going into the
+   tail of degree-6 steps. There the basis, whose every element is kept
+   (retired ones included), and the pending pairs swell past 14 GB. Two levers:
+   - **Memory only, the same algorithm:** retire basis elements that no pending
+     pair references, and store elements over a shared monomial table rather
+     than as `u128` keys.
+   - **A different algorithm:** signature-based criteria (F5 or GVW) to skip
+     most of the pairs that reduce to zero. Its solving degree must be checked
+     against this engine's first.
+2. **Separate linear from logarithmic growth at `m = 2`.** Test the next rise
+   the "every four levels" pattern predicts, at `t = 14` (`N = 28`). This needs
+   the second lever.
+3. **Prove or refute the pattern.** It is a `t`-dependent version of
+   Conjecture 3: one more degree for every four more levels.
+4. **Replicate `D = 6` at `N = 20`** with an independent Gröbner engine, as
+   §10.9's fourth step proposed.
+
 ---
 
 ## References

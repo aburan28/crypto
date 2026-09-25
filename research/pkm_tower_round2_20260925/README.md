@@ -59,18 +59,38 @@ every row in memory; the second forms rows on demand, as the committed engine
 does. Their traces agree line for line. Cell K0 re-measures the same system with
 the committed build, and `analyze.py` compares the copies.
 
-**Round 2 (note §11.4).** `run_round2.sh` runs the cells in the note's order,
-one system at a time, with the example built from the commit that
-pre-registered them.
+**Round 2 (note §11.4).** `run_round2.sh` ran the cells in the note's order,
+one system at a time, from 01:54 to M3_END_PLACEHOLDER UTC on 2026-09-25, with
+the example built from the commit that pre-registered them.
 
-| file | cell |
-|:--|:--|
-| `K1-kummer-m2-p1` | Kummer, `m = 2`, `p₁`, `N = 12–22` |
-| `K1n-kummer-m2-p1-null` | its null control, `N = 12–20` |
-| `K0-kummer-m2-p0-N20` | Kummer, `m = 2`, `p₀`, `N = 20`, staircase stop at 8 |
-| `I0-isogeny-m2-p0-N20` | isogeny, `m = 2`, `p₀`, `N = 20`, staircase stop at 8 |
-| `M4-kummer-m4-p1` | Kummer, `m = 4`, `p₁`, `N = 8, 12, 16` |
-| `M3-kummer-m3-p1` | Kummer, `m = 3`, `p₁`, `N = 9–18` |
+| file | cell | what happened |
+|:--|:--|:--|
+| `K1-kummer-m2-p1` | Kummer, `m = 2`, `p₁`, `N = 12–22` | Complete: 12 systems, all refuted. `D = 5` up to `N = 18`, 6 at 20 and 22 |
+| `K1n-kummer-m2-p1-null` | its null control, `N = 12–20` | Complete: 10 systems, all refuted, with the tower's `D` at every `N` |
+| `K0-kummer-m2-p0-N20` | Kummer, `m = 2`, `p₀`, `N = 20`, staircase stop at 8 | Complete: both systems refuted at `D = 6`, so the stop never fired. Target 0 repeats `P0` exactly |
+| `I0-isogeny-m2-p0-N20` | isogeny, `m = 2`, `p₀`, `N = 20`, staircase stop at 8 | Complete: both refuted at `D = 6` |
+| `M4-kummer-m4-p1` | Kummer, `m = 4`, `p₁`, `N = 8, 12, 16` | `N = 8, 12` complete (`D = 6, 7`). The first `N = 16` system ran out of memory after 29 minutes ("memory allocation of 131072 bytes failed" in the log). The process ended there: no row, and the second `N = 16` target never ran |
+| `M3-kummer-m3-p1` | Kummer, `m = 3`, `p₁`, `N = 9–18` | `N = 9, 12, 15` complete (`D = 6, 6, 7`). M3_N18_README_PLACEHOLDER |
+
+The exit codes in `progress.txt` are all 0 and carry no information:
+`run_round2.sh` wrote them with `$(date …)` in the same line, which resets `$?`
+first. The logs show how each run ended, and `confirm_round2.sh` reads the
+status before anything else runs.
+
+**Confirmations (note §11.4).** `confirm_round2.sh` re-runs, once and whole,
+every `m = 2` cell with a finished system at `D ≥ 6`, with the degree bound at 5
+(`--cap 5`). It lists them in `confirm_cells.txt`. `analyze.py` keeps these
+rows out of the tables (their degree bound is below the default) and reports
+them in their own section.
+
+CONFIRM_README_PLACEHOLDER
+
+**Diagnostics (after the cells, labelled as such).**
+
+| file | flags (all with `--engine tower --p 2013265921 --kinds kummer --controls tower --planted 0 --random 1 --ladder-t none --trace`) | what it is |
+|:--|:--|:--|
+| `D1-kummer-m4-p1-N12-trace` | `--m 4 --t-min 3 --max-t-m4 3 --budget 600` | The step trace of M4's `N = 12` target 0, which it repeats exactly. It shows where `m = 4` spends its memory (note §11.7) |
+D2_README_PLACEHOLDER
 
 ## Builds
 
@@ -85,5 +105,14 @@ committed with the pre-registration:
 | `src/cryptanalysis/mod.rs` | `c059b21b4bc4ecfc8a4cf650894641daa4969789bc98b34d9259987b3cb2b5fa` |
 | the binary | `02656958303f6d9e7e383619ff2d0a325380d57f1e0c0738379be76da99973b1` |
 
-The round-2 cells use the same build. `xv-progress.txt` and `progress.txt`
-record when each run started and ended.
+Before the round-2 cells, `origin/main` was merged into the branch (merge
+commit `d8b1df8f`). It touched none of these sources except the module list in
+`mod.rs` (sha256 `30e44b6f9facd323b75e8cb4943274f4bc63ec4983e40e5b4727fd0b5d36d1b1`
+after the merge). The round-2 cells, the confirmations and the diagnostics ran
+on that build, binary sha256
+`0ef59debbfc54d89373bd6ddb8296d3263042d5b32aae67e762a03980b289751`. It
+reproduces `XV2` and `XV5` exactly (60 systems, every deterministic field). The
+commit with the results changes only comments in `f4_fp_tower.rs` and
+`pkm_tower_pilot.rs`.
+
+`xv-progress.txt` and `progress.txt` record when each run started and ended.

@@ -25,8 +25,17 @@
 //! no pipeline, reports no `S`, and decides nothing on its own. Stage A of
 //! the note decides, on its full ladder.
 //!
+//! `--engine tower` runs the same systems on the sparse tower engine
+//! `f4_fp_tower` instead (note §11): the tower equations become its
+//! rewriting rules, the other equations its input in normal form (the
+//! `reduced` presentation), and the naive control, which has no tower, is
+//! skipped. `--max-nnz` stops a system whose matrices grow past a size, and
+//! `--trace` prints its step trace.
+//!
 //! The committed runs, their exact flags and the scripts that tabulate and
-//! cross-check them are in `research/pkm_tower_pilot_20260924/`.
+//! cross-check them are in `research/pkm_tower_pilot_20260924/` (the pilot,
+//! `f4_fp`) and `research/pkm_tower_round2_20260925/` (round 2,
+//! `f4_fp_tower`).
 //!
 //! ```bash
 //! cargo run --release --example pkm_tower_pilot -- --out pilot.jsonl
@@ -35,6 +44,9 @@
 //! # degree at most 3 (`--cap` bounds the degree, `--dump` prints the basis).
 //! cargo run --release --example pkm_tower_pilot -- --kinds kummer --m 2 --controls tower \
 //!     --t-min 8 --max-t 8 --planted 0 --random 1 --cap 4 --dump 3 --ladder-t none
+//! # The same system on the tower engine, with its step trace.
+//! cargo run --release --example pkm_tower_pilot -- --engine tower --kinds kummer --m 2 \
+//!     --controls tower --t-min 8 --max-t 8 --planted 0 --random 1 --ladder-t none --trace
 //! ```
 
 use std::collections::BTreeMap;
