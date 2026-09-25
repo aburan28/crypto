@@ -4,6 +4,9 @@ The [registered controls](PROTOCOL.md) passed locally: 22 release Rust tests,
 121 Python harness tests with two Linux-specific skips, and compiler checks for
 `koblitz_unknown_scalar_panel` and `ic_tournament_worker`. These are toy
 correctness/accounting controls, not a new improvement round or a speed claim.
+The 39 site-build tests also pass. The first CI head exposed two relative
+scoreboard evidence links that did not survive publication; both now use the
+repository's absolute GitHub evidence-link convention.
 Linux integration remains the PR acceptance gate; its receipt is linked in the PR.
 
 The defect was in reporting an unattempted solve. The narrow Gröbner and Crossbred
