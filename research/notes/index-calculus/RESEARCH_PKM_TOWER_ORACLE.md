@@ -12,10 +12,19 @@ pilot (§10, 2026-09-24).
   the same way, and the plateau is too short to tell a bounded degree from a
   slowly growing one.
 - §10 says what the pilot does and does not show.
-- **Round 2 (§11, 2026-09-25)** builds the sparse, tower-aware engine
-  `f4_fp_tower` and cross-checks it against `f4_fp` on the pilot's systems.
-  It pre-registers larger sizes before running them, and discloses one system
-  measured at a new size first (`N = 20`, `D = 6`, §11.3).
+- **Round 2 (§11, 2026-09-25)** does four things:
+  - builds the sparse, tower-aware engine `f4_fp_tower`;
+  - cross-checks it against `f4_fp` on the pilot's systems;
+  - pre-registers larger sizes before running them, disclosing one system
+    measured at a new size first (§11.3);
+  - runs them.
+- **The solving degree is not bounded.**
+  - At `m = 2` it rises to 6 at `N = 20` and stays 6 at `N = 22`, in the
+    Kummer and the isogeny family, at every prime and in the null. This refutes
+    the pilot's Conjecture 3.
+  - At `m = 3` it reaches 7 at `N = 15`.
+  - Whether it grows linearly in `N` is not decided, and `m = 4` ran out of
+    memory at `N = 16`.
 
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
@@ -1440,8 +1449,8 @@ M3_A1_ROW_PLACEHOLDER
 It shows five things.
 1. **A sparse engine that matches the dense one.** `f4_fp_tower` gives
    `f4_fp`'s verdict on every pilot system, and its solving degree from `N = 4`
-   up. It reaches `N = 22` at `m = 2` in 2.3 GB, where the dense `f4_fp`
-   stopped at `N = 18` in 13 GB.
+   up. It reaches `N = 22` at `m = 2` in 2.3 GB, where the dense `f4_fp` ran
+   out of 13 GB at `N = 20`.
 2. **At `m = 2` the solving degree is not bounded by 5.** It rises to 6 at
    `N = 20`, in both families, at both primes and in the null. CONJ3_SHORT_PLACEHOLDER
 3. **The rise depends on `N` alone** among the things varied here. It does not
