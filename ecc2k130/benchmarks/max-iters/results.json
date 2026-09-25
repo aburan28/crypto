@@ -1,0 +1,568 @@
+{
+ "S": 110592,
+ "caps": {
+  "c30": 20800,
+  "c31": 41600,
+  "c32": 83200,
+  "ref": 0
+ },
+ "cross": {
+  "30001": {
+   "c30": {
+    "identical": true,
+    "longReported": 0,
+    "refLongFinished": 9750,
+    "refShortFinished": 233607,
+    "sharedSeeds": 233607,
+    "shortCut": 0
+   },
+   "c31": {
+    "identical": true,
+    "longReported": 0,
+    "refLongFinished": 366,
+    "refShortFinished": 242991,
+    "sharedSeeds": 242991,
+    "shortCut": 0
+   },
+   "c32": {
+    "identical": true,
+    "longReported": 0,
+    "refLongFinished": 0,
+    "refShortFinished": 243357,
+    "sharedSeeds": 243357,
+    "shortCut": 0
+   }
+  },
+  "30002": {
+   "c30": {
+    "identical": true,
+    "longReported": 0,
+    "refLongFinished": 9692,
+    "refShortFinished": 234320,
+    "sharedSeeds": 234320,
+    "shortCut": 0
+   },
+   "c31": {
+    "identical": true,
+    "longReported": 0,
+    "refLongFinished": 360,
+    "refShortFinished": 243652,
+    "sharedSeeds": 243652,
+    "shortCut": 0
+   },
+   "c32": {
+    "identical": true,
+    "longReported": 0,
+    "refLongFinished": 0,
+    "refShortFinished": 244012,
+    "sharedSeeds": 244012,
+    "shortCut": 0
+   }
+  },
+  "30003": {
+   "c30": {
+    "identical": true,
+    "longReported": 0,
+    "refLongFinished": 9856,
+    "refShortFinished": 233654,
+    "sharedSeeds": 233654,
+    "shortCut": 0
+   },
+   "c31": {
+    "identical": true,
+    "longReported": 0,
+    "refLongFinished": 369,
+    "refShortFinished": 243141,
+    "sharedSeeds": 243141,
+    "shortCut": 0
+   },
+   "c32": {
+    "identical": true,
+    "longReported": 0,
+    "refLongFinished": 1,
+    "refShortFinished": 243509,
+    "sharedSeeds": 243509,
+    "shortCut": 0
+   }
+  }
+ },
+ "failures": [],
+ "holdouts": [
+  30002,
+  30003
+ ],
+ "mc": {
+  "replicas": 400,
+  "seed": 20260925
+ },
+ "model": {
+  "c30": {
+   "Dmean": 0.14208070759952943,
+   "Dsd": 0.0012159089546143213,
+   "Dsteady": 0.15587791028064332,
+   "cutMean": 10847.6075,
+   "qmean": 0.042772133800857114,
+   "qsd": 0.00039645093775146097,
+   "qsteady": 0.04920941529334419
+  },
+  "c31": {
+   "Dmean": 0.010757703247583978,
+   "Dsd": 0.000526092884886459,
+   "Dsteady": 0.014623809673971614,
+   "cutMean": 408.6875,
+   "qmean": 0.0016734950893685712,
+   "qsd": 8.24452073368533e-05,
+   "qsteady": 0.0024219171851201423
+  },
+  "c32": {
+   "Dmean": 2.265710063309817e-05,
+   "Dsd": 3.357794916068335e-05,
+   "Dsteady": 7.067437627660493e-05,
+   "cutMean": 0.43,
+   "qmean": 1.7636483641585547e-06,
+   "qsd": 2.6135537465805487e-06,
+   "qsteady": 5.866532175256027e-06
+  }
+ },
+ "passed": true,
+ "production": {
+  "c30": {
+   "D": 0.15600502027349233,
+   "cap": 1073741824,
+   "loss": 1.1848411708847428,
+   "q": 0.04926735922735258,
+   "trailLengths": 3.0104934948221342,
+   "workLog2": [
+    61.151304474033,
+    61.1673941765713
+   ]
+  },
+  "c31": {
+   "D": 0.014650137218185949,
+   "cap": 2147483648,
+   "loss": 1.0148679547961026,
+   "q": 0.002427272692042446,
+   "trailLengths": 6.0209869896442685,
+   "workLog2": [
+    60.927902826151744,
+    60.943992528690046
+   ]
+  },
+  "c32": {
+   "D": 7.094754716387512e-05,
+   "cap": 4294967296,
+   "loss": 1.0000709525810754,
+   "q": 5.891652738053649e-06,
+   "trailLengths": 12.041973979288537,
+   "workLog2": [
+    60.90671315593199,
+    60.9228028584703
+   ]
+  }
+ },
+ "protocol": "PROTOCOL.md",
+ "runIds": [
+  30001,
+  30002,
+  30003
+ ],
+ "runs": [
+  {
+   "D": 0.0,
+   "arm": "ref",
+   "cap": 0,
+   "censoredChecks": 1684533389,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "782e877a7da6dabf69ca75ef69ef5e60dc7ffc71a07dbce6e2b7b476c02dcedc"
+   },
+   "corpus": {
+    "bytes": 17521720,
+    "sha256": "880fdc380129104928cacf48b5784ffc9fccf0180af4f4ec06363bb0f38472d7"
+   },
+   "cut": 0,
+   "droppedSteps": 0,
+   "ended": 243357,
+   "exit": 0,
+   "idleSteps": 127649296,
+   "inflightSteps": 105506816,
+   "keptSteps": 1578783216,
+   "lanes": 512,
+   "loss": 1.0,
+   "q": 0.0,
+   "rate": 12.118,
+   "reported": 243357,
+   "runId": 30001,
+   "seconds": 150.0,
+   "verified": 4,
+   "walks": 16384
+  },
+  {
+   "D": 0.14231192629792339,
+   "arm": "c30",
+   "cap": 20800,
+   "censoredChecks": 1451260082,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "690ac8a7566aa166af2089882a21d8d3d8f4ef272a4bb189c5cc5181ce4fba71"
+   },
+   "corpus": {
+    "bytes": 17451448,
+    "sha256": "b3e97ac6eb416f2649daae6271ee046d7f7be1fdc661543d91b20d460bbfa12c"
+   },
+   "cut": 10865,
+   "droppedSteps": 225992000,
+   "ended": 253246,
+   "exit": 0,
+   "idleSteps": 134929627,
+   "inflightSteps": 89005056,
+   "keptSteps": 1362012645,
+   "lanes": 512,
+   "loss": 1.1659250380894959,
+   "q": 0.042902948121589284,
+   "rate": 12.109,
+   "reported": 242381,
+   "runId": 30001,
+   "seconds": 150.1,
+   "verified": 4,
+   "walks": 16384,
+   "zD": 0.19016119382663824,
+   "zq": 0.3299634539247293
+  },
+  {
+   "D": 0.010712441876317374,
+   "arm": "c31",
+   "cap": 41600,
+   "censoredChecks": 1667425526,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "9ba2e7ae2e808a88017df96b42cb4bcd2412c721d1174768c2b1a23accb8ce16"
+   },
+   "corpus": {
+    "bytes": 17522440,
+    "sha256": "781023526f2a570c88c7e5123c1351956355fca6523c59e4b3c630fe811a2a74"
+   },
+   "cut": 407,
+   "droppedSteps": 16931200,
+   "ended": 243774,
+   "exit": 0,
+   "idleSteps": 127825969,
+   "inflightSteps": 103596032,
+   "keptSteps": 1563586127,
+   "lanes": 512,
+   "loss": 1.010828440920287,
+   "q": 0.0016695792004069343,
+   "rate": 12.059,
+   "reported": 243367,
+   "runId": 30001,
+   "seconds": 150.7,
+   "verified": 4,
+   "walks": 16384,
+   "zD": -0.08603304201000953,
+   "zq": -0.04749686595653058
+  },
+  {
+   "D": 0.0,
+   "arm": "c32",
+   "cap": 83200,
+   "censoredChecks": 1684533389,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "782e877a7da6dabf69ca75ef69ef5e60dc7ffc71a07dbce6e2b7b476c02dcedc"
+   },
+   "corpus": {
+    "bytes": 17521720,
+    "sha256": "880fdc380129104928cacf48b5784ffc9fccf0180af4f4ec06363bb0f38472d7"
+   },
+   "cut": 0,
+   "droppedSteps": 0,
+   "ended": 243357,
+   "exit": 0,
+   "idleSteps": 127649296,
+   "inflightSteps": 105506816,
+   "keptSteps": 1578783216,
+   "lanes": 512,
+   "loss": 1.0,
+   "q": 0.0,
+   "rate": 12.112,
+   "reported": 243357,
+   "runId": 30001,
+   "seconds": 150.0,
+   "tail": 1.0,
+   "verified": 4,
+   "walks": 16384,
+   "zD": -0.6747613001817134,
+   "zq": -0.6748085309001315
+  },
+  {
+   "D": 0.0,
+   "arm": "ref",
+   "cap": 0,
+   "censoredChecks": 1684036321,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "b3e35ca57e69ef6b16548f76affb5450a076b03a04df356a739344a67dd1dada"
+   },
+   "corpus": {
+    "bytes": 17568880,
+    "sha256": "5526eb232d4eebfdcbb1dded73a2c007ede55ccf19016b2fd7b0731367e0cb04"
+   },
+   "cut": 0,
+   "droppedSteps": 0,
+   "ended": 244012,
+   "exit": 0,
+   "idleSteps": 128147019,
+   "inflightSteps": 106767360,
+   "keptSteps": 1577024949,
+   "lanes": 512,
+   "loss": 1.0,
+   "q": 0.0,
+   "rate": 11.881,
+   "reported": 244012,
+   "runId": 30002,
+   "seconds": 152.9,
+   "verified": 4,
+   "walks": 16384
+  },
+  {
+   "D": 0.1421776678797082,
+   "arm": "c30",
+   "cap": 20800,
+   "censoredChecks": 1450959526,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "b6f155153aed895c0ff457d72672fa60ad669b591bc7419d6255687cff8d402a"
+   },
+   "corpus": {
+    "bytes": 17497600,
+    "sha256": "a055d3c48fc77233182c38a62014db85ecd0d116b9f0b4647966f4d6fbb1b5c2"
+   },
+   "cut": 10855,
+   "droppedSteps": 225784000,
+   "ended": 253877,
+   "exit": 0,
+   "idleSteps": 135438824,
+   "inflightSteps": 88459264,
+   "keptSteps": 1362257240,
+   "lanes": 512,
+   "loss": 1.1657425582851004,
+   "q": 0.04275692559782887,
+   "rate": 11.875,
+   "reported": 243022,
+   "runId": 30002,
+   "seconds": 153.0,
+   "verified": 4,
+   "walks": 16384,
+   "zD": 0.07974304310435094,
+   "zq": -0.03836087036266992
+  },
+  {
+   "D": 0.0103586925192762,
+   "arm": "c31",
+   "cap": 41600,
+   "censoredChecks": 1667539625,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "affc4b8ee734bdc9e3268943c175befebd4360b41ad5e81b8488739a6a63a55b"
+   },
+   "corpus": {
+    "bytes": 17567872,
+    "sha256": "986672ad2c8f84ab594d9ff06c274ca56b6882b0e581b8bf9eb4cdd0daf1e991"
+   },
+   "cut": 393,
+   "droppedSteps": 16348800,
+   "ended": 244391,
+   "exit": 0,
+   "idleSteps": 128294901,
+   "inflightSteps": 105375744,
+   "keptSteps": 1561919883,
+   "lanes": 512,
+   "loss": 1.0104671181780456,
+   "q": 0.0016080788572410605,
+   "rate": 11.888,
+   "reported": 243998,
+   "runId": 30002,
+   "seconds": 152.9,
+   "verified": 4,
+   "walks": 16384,
+   "zD": -0.7584415979963175,
+   "zq": -0.7934509990402985
+  },
+  {
+   "D": 0.0,
+   "arm": "c32",
+   "cap": 83200,
+   "censoredChecks": 1684036321,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "b3e35ca57e69ef6b16548f76affb5450a076b03a04df356a739344a67dd1dada"
+   },
+   "corpus": {
+    "bytes": 17568880,
+    "sha256": "5526eb232d4eebfdcbb1dded73a2c007ede55ccf19016b2fd7b0731367e0cb04"
+   },
+   "cut": 0,
+   "droppedSteps": 0,
+   "ended": 244012,
+   "exit": 0,
+   "idleSteps": 128147019,
+   "inflightSteps": 106767360,
+   "keptSteps": 1577024949,
+   "lanes": 512,
+   "loss": 1.0,
+   "q": 0.0,
+   "rate": 11.792,
+   "reported": 244012,
+   "runId": 30002,
+   "seconds": 154.1,
+   "tail": 1.0,
+   "verified": 4,
+   "walks": 16384,
+   "zD": -0.6747613001817134,
+   "zq": -0.6748085309001315
+  },
+  {
+   "D": 0.0,
+   "arm": "ref",
+   "cap": 0,
+   "censoredChecks": 1684191616,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "ddf9a0ddf07912aa8b6dcd8159a142c008b65052e2d7b9d04f502a9be4b03fc5"
+   },
+   "corpus": {
+    "bytes": 17532736,
+    "sha256": "c220bd0cec8a4ccae427989208008c486891b43da5fae95b38a3b190193c789b"
+   },
+   "cut": 0,
+   "droppedSteps": 0,
+   "ended": 243510,
+   "exit": 0,
+   "idleSteps": 127991222,
+   "inflightSteps": 104029184,
+   "keptSteps": 1579918922,
+   "lanes": 512,
+   "loss": 1.0,
+   "q": 0.0,
+   "rate": 11.946,
+   "reported": 243510,
+   "runId": 30003,
+   "seconds": 152.1,
+   "verified": 4,
+   "walks": 16384
+  },
+  {
+   "D": 0.14287349391631343,
+   "arm": "c30",
+   "cap": 20800,
+   "censoredChecks": 1449935222,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "57b1d77eb18c9d2ee0f3fd9bc60ea14a5597e8a8f591aca5d82e38f278263dc3"
+   },
+   "corpus": {
+    "bytes": 17458072,
+    "sha256": "6fd99cad3e654bf7b0dfa3432cdaca39df5118ef6f6cd1b36ba5bb131fe20255"
+   },
+   "cut": 10911,
+   "droppedSteps": 226948800,
+   "ended": 253384,
+   "exit": 0,
+   "idleSteps": 135297779,
+   "inflightSteps": 88181760,
+   "keptSteps": 1361510989,
+   "lanes": 512,
+   "loss": 1.1666889226995434,
+   "q": 0.043061124617181826,
+   "rate": 11.858,
+   "reported": 242473,
+   "runId": 30003,
+   "seconds": 153.4,
+   "verified": 4,
+   "walks": 16384,
+   "zD": 0.6520112495063187,
+   "zq": 0.7289447162460322
+  },
+  {
+   "D": 0.010394299410954825,
+   "arm": "c31",
+   "cap": 41600,
+   "censoredChecks": 1667641187,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "c52d8e117dd73d4a636612d61abb6bfbc212da920f3a3f7cd225364322de9ed4"
+   },
+   "corpus": {
+    "bytes": 17529208,
+    "sha256": "60c2773cd08f7d40bb70cbecf58a1fc2adb476d431b11ff305ea2d69fe7965d8"
+   },
+   "cut": 395,
+   "droppedSteps": 16432000,
+   "ended": 243856,
+   "exit": 0,
+   "idleSteps": 128109602,
+   "inflightSteps": 102963200,
+   "keptSteps": 1564434526,
+   "lanes": 512,
+   "loss": 1.0105034756820497,
+   "q": 0.0016198084115215537,
+   "rate": 11.993,
+   "reported": 243461,
+   "runId": 30003,
+   "seconds": 151.5,
+   "verified": 4,
+   "walks": 16384,
+   "zD": -0.6907598393154142,
+   "zq": -0.651180093800545
+  },
+  {
+   "D": 5.266104971378102e-05,
+   "arm": "c32",
+   "cap": 83200,
+   "censoredChecks": 1684107903,
+   "checkpoint": {
+    "bytes": 1325096,
+    "sha256": "f3c418d432cce5684621a998bace253076fa432f4dc9ed3f74cd31c89db24d4c"
+   },
+   "corpus": {
+    "bytes": 17532880,
+    "sha256": "66d7855ef5c46020a07f095b89c059705564d5791bc16be8958f10f84f5c386c"
+   },
+   "cut": 1,
+   "droppedSteps": 83200,
+   "ended": 243513,
+   "exit": 0,
+   "idleSteps": 127991737,
+   "inflightSteps": 104032256,
+   "keptSteps": 1579832135,
+   "lanes": 512,
+   "loss": 1.000052663823046,
+   "q": 4.106556939465244e-06,
+   "rate": 11.985,
+   "reported": 243512,
+   "runId": 30003,
+   "seconds": 151.6,
+   "tail": 0.3494909052766835,
+   "verified": 4,
+   "walks": 16384,
+   "zD": 0.8935610968109594,
+   "zq": 0.8964455306771638
+  }
+ ],
+ "steps": 1024,
+ "theta": 0.0001447744,
+ "thetaHat": 0.00014464942094911848,
+ "thetaSe": 1.6925833138245309e-07,
+ "verdict": {
+  "30001 c30": true,
+  "30001 c31": true,
+  "30001 c32": true,
+  "30002 c30": true,
+  "30002 c31": true,
+  "30002 c32": true,
+  "30003 c30": true,
+  "30003 c31": true,
+  "30003 c32": true
+ },
+ "weight": 44
+}
