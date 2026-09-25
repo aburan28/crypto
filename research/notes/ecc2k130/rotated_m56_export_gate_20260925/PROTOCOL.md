@@ -93,7 +93,19 @@ of [Trimoska–Ionica–Dequen, §4](https://eprint.iacr.org/2019/313.pdf)
 assumes interchangeable same-base slots and cannot be multiplied into a
 rotated-support estimate. Preserve an explicit swapped-nonzero counterexample
 and reject that ordering for rotated solver arms unless a whole-instance,
-target- and witness-preserving automorphism is proved. A future matched
+target- and witness-preserving automorphism is proved. The concrete negative
+control is selected **only for structural audit**, outside the 16 frozen solver
+targets. For each of two naive order rules (polynomial-basis integer x0≤x1
+and slot-local two-bit mask0≤mask1), enumerate all rotated tuples and select
+the numerically smallest nonzero projected R outside the frozen 16 R labels
+that (a) has no tuple satisfying that order in its entire four-torsion
+coset, and (b) has a witness with both first x-coordinates nonzero. If no
+such R exists, report that control as censored and make no concrete witness
+claim for that order. Otherwise record its full m-point tuple, full sum S,
+projected R, subgroup Q, torsion T, and the tuple with its first two points
+swapped. Check the swap retains S but puts both nonzero points outside their
+new Fi slots; check the sorted projected multiplicity is exactly zero. This
+structural Q is never added to the solver corpus. A future matched
 rotated/repeated solver comparison must charge work per useful verified
 relation and independent rank row, not only compare support fractions.
 
@@ -114,7 +126,10 @@ not claim a third independent group law.
 rotated and equal-count repeated tuples are enumerated within caps, every
 rational prefix obeys its ordinary S3 or explicit infinity branch, every
 point tuple obeys the trace morphism, all 64 exact coset counts match #767,
-and the direct mask sets contain no negative-target witness. A single mismatch,
+and the direct mask sets contain no negative-target witness. Each concrete
+symmetry control passes only if its preregistered structural witness exists;
+otherwise record it as censored without blocking the 16-target semantic
+reference. A single mismatch,
 source drift, timeout or RSS overrun is a preserved failed/censored gate,
 never a solver UNSAT result. A pass admits a later direct/chain *exporter*
 comparison, not SAT/F4/F5/WDSat performance claims. The next exporter PR

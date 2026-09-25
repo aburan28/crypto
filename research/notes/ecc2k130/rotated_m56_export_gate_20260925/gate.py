@@ -26,8 +26,8 @@ CORPUS = NOTES / "rotated_pdp_corpus_20260925"
 PARENT = NOTES / "rotated_subspace_support_20260925"
 ARCHIVE = CORPUS / "evidence/raw.tar.gz"
 ARMS = {
-    "n13-m5": {"n": 13, "poly": 0x201b, "m": 5, "d": 2, "beta": 3},
-    "n19-m6": {"n": 19, "poly": 0x80027, "m": 6, "d": 2, "beta": 3},
+    "n13-m5": {"n": 13, "poly": 0x201b, "m": 5, "d": 2, "beta": 3, "q": 2003},
+    "n19-m6": {"n": 19, "poly": 0x80027, "m": 6, "d": 2, "beta": 3, "q": 130873},
 }
 TORSION = [None, (0, 1), (1, 0), (1, 1)]
 WALL_CAP = 600
@@ -127,8 +127,69 @@ def trace_point(f, p, trace_mask: int) -> int:
     return 0 if p is None else (p[0] & trace_mask).bit_count() & 1
 
 
+def symmetry_controls(curve, factors, coordinate_maps, projected_by_full,
+                      ordered_full, excluded_r, q):
+    """First exact projected labels lost under two naive slot-order rules."""
+    projected = set(projected_by_full.values())
+    candidates = {}
+    for mode in ("field_integer", "local_mask"):
+        ordered_r = {projected_by_full[s] for s in ordered_full[mode]}
+        candidates[mode] = {r for r in projected - ordered_r
+                            if r is not None and r not in excluded_r}
+    first_witness = {mode: {} for mode in candidates}
+    for choice in itertools.product(*factors):
+        x0, x1 = choice[0][0], choice[1][0]
+        if x0 == 0 or x1 == 0:
+            continue
+        masks = tuple(coordinate_maps[i][p[0]] for i, p in enumerate(choice))
+        needed_integer = x0 > x1
+        needed_mask = masks[0] > masks[1]
+        if not needed_integer and not needed_mask:
+            continue
+        full_sum = None
+        for p in choice:
+            full_sum = curve.add(full_sum, p)
+        r = projected_by_full[full_sum]
+        if needed_integer and r in candidates["field_integer"]:
+            first_witness["field_integer"].setdefault(r, (choice, masks, full_sum))
+        if needed_mask and r in candidates["local_mask"]:
+            first_witness["local_mask"].setdefault(r, (choice, masks, full_sum))
+    controls = {}
+    for mode in candidates:
+        selected = None
+        if first_witness[mode]:
+            r = min(first_witness[mode])
+            choice, masks, full_sum = first_witness[mode][r]
+            swapped = (choice[1], choice[0], *choice[2:])
+            swapped_sum = None
+            for p in swapped:
+                swapped_sum = curve.add(swapped_sum, p)
+            assert swapped_sum == full_sum
+            assert choice[1][0] not in coordinate_maps[0]
+            assert choice[0][0] not in coordinate_maps[1]
+            subgroup_q = curve.scalar(r, pow(4, -1, q))
+            assert curve.scalar(subgroup_q, 4) == r
+            torsion = curve.add(full_sum, (subgroup_q[0], subgroup_q[0] ^ subgroup_q[1]))
+            assert torsion in TORSION and curve.add(subgroup_q, torsion) == full_sum
+            selected = {
+                "R": pjson(r), "Q": pjson(subgroup_q), "T": pjson(torsion),
+                "full_sum": pjson(full_sum),
+                "point_tuple": [pjson(p) for p in choice],
+                "x_masks": list(masks),
+                "swapped_point_tuple": [pjson(p) for p in swapped],
+                "swapped_sum": pjson(swapped_sum),
+                "swapped_slot_membership": [False, False],
+                "ordered_projected_multiplicity": 0,
+            }
+        controls[mode] = {
+            "projected_labels_lost_by_order": len(candidates[mode]),
+            "first_nonzero_two_slot_counterexample": selected,
+        }
+    return controls
+
+
 def enumerate_policy(curve, factors, coordinate_maps, target_points, trace_mask,
-                     chain: bool):
+                     chain: bool, q: int | None = None, excluded_r: set | None = None):
     f = curve.f
     full = Counter()
     matching = [Counter() for _ in target_points]
@@ -139,11 +200,13 @@ def enumerate_policy(curve, factors, coordinate_maps, target_points, trace_mask,
     branches = Counter()
     terminal = Counter()
     parity = Counter()
-    symmetry_counterexample = None
+    ordered_full = {"field_integer": set(), "local_mask": set()}
     total = 0
+    seen_masks = set()
     for choice in itertools.product(*factors):
         total += 1
         mask_tuple = tuple(coordinate_maps[i][p[0]] for i, p in enumerate(choice))
+        seen_masks.add(mask_tuple)
         bit_parity = sum(v.bit_count() for v in mask_tuple) & 1
         acc = choice[0]
         for p in choice[1:]:
@@ -161,6 +224,11 @@ def enumerate_policy(curve, factors, coordinate_maps, target_points, trace_mask,
         assert bit_parity == trace_point(f, acc, trace_mask)
         parity[bit_parity] += 1
         full[acc] += 1
+        if chain:
+            if choice[0][0] <= choice[1][0]:
+                ordered_full["field_integer"].add(acc)
+            if mask_tuple[0] <= mask_tuple[1]:
+                ordered_full["local_mask"].add(acc)
         for index in point_targets.get(acc, ()):
             matching[index][mask_tuple] += 1
             x_masks[index].add(mask_tuple)
@@ -174,19 +242,27 @@ def enumerate_policy(curve, factors, coordinate_maps, target_points, trace_mask,
                 else:
                     assert s3(f, prior[0], choice[-1][0], acc[0]) == 0
                     terminal["s3_zero"] += 1
-        if symmetry_counterexample is None and choice[0][0] and choice[1][0]:
-            if choice[0][0] not in coordinate_maps[1] and choice[1][0] not in coordinate_maps[0]:
-                symmetry_counterexample = [pjson(choice[0]), pjson(choice[1])]
-    projected = {curve.scalar(p, 4) for p in full}
+    projected_by_full = {p: curve.scalar(p, 4) for p in full}
+    projected = set(projected_by_full.values())
+    controls = (symmetry_controls(curve, factors, coordinate_maps,
+                                  projected_by_full, ordered_full, excluded_r, q)
+                if chain else {})
     assert sum(full.values()) == total == math.prod(map(len, factors))
+    assert len(seen_masks) == 4 ** len(factors)
+    if chain:
+        assert sum(branches.values()) == (len(factors) - 1) * total
+        assert sum(terminal.values()) == sum(sum(c.values()) for c in matching)
+    else:
+        assert not branches and not terminal
     return {
         "labelled_tuples": total,
+        "distinct_x_mask_tuples": len(seen_masks),
         "distinct_full_sums": len(full),
         "distinct_projected_sums": len(projected),
         "parity_counts": dict(sorted(parity.items())),
         "addition_branches": dict(sorted(branches.items())),
         "hit_terminal_branches": dict(sorted(terminal.items())),
-        "symmetry_counterexample": symmetry_counterexample,
+        "symmetry_negative_controls": controls,
         "target_full_counts": [sum(c.values()) for c in matching],
         "target_x_mask_sets": [sorted([list(t) for t in masks]) for masks in x_masks],
     }
@@ -235,12 +311,16 @@ def run_arm(arm: str):
                 target_points.append(target)
                 expected_parities.append(trace_point(f, t, trace_mask))
                 assert trace_point(f, target, trace_mask) == expected_parities[-1]
-        rotated = enumerate_policy(curve, factors, coordinate_maps, target_points, trace_mask, True)
+        excluded_r = {point(row["R"]) for row in targets_raw}
+        rotated = enumerate_policy(curve, factors, coordinate_maps, target_points,
+                                   trace_mask, True, cfg["q"], excluded_r)
         assert rotated["distinct_full_sums"] == summary["distinct_full_sums"]
         assert rotated["distinct_projected_sums"] == summary["distinct_projected_sums"]
         expected_counts = [c for row in targets_raw for c in row["coset_multiplicities"]]
         assert rotated["target_full_counts"] == expected_counts
-        assert rotated["symmetry_counterexample"] is not None
+        for j, row in enumerate(targets_raw):
+            if row["class"] == "negative":
+                assert all(not masks for masks in rotated["target_x_mask_sets"][4*j:4*j+4])
         for index, x_masks in enumerate(rotated["target_x_mask_sets"]):
             for mask_tuple in x_masks:
                 assert sum(v.bit_count() for v in mask_tuple) & 1 == expected_parities[index]
@@ -248,6 +328,8 @@ def run_arm(arm: str):
         repeated_maps = [coordinate_maps[0]] * cfg["m"]
         repeated = enumerate_policy(curve, repeated_factors, repeated_maps,
                                     target_points, trace_mask, False)
+        if arm == "n13-m5":
+            assert repeated["distinct_projected_sums"] == 61  # merged #762 control
         result = {
             "protocol": manifest["domain"], "arm": arm,
             "corpus_commit": "c77767c4a653734f428e110cca29985d721476b2",
