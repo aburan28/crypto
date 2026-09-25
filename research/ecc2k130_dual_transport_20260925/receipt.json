@@ -1,0 +1,1032 @@
+{
+  "schema": "ecc2k130_263_dual_composition_v1",
+  "status": "PASS",
+  "source_sha256": {
+    "certificate.py": "cb6a1b91ac253c69422eb4bc72e232908f1dc474795dcecf55a50e27f8056bd9",
+    "dual_transport.py": "c913bef64a115e4b42d6675ddbafac10379b166e58ddb94402ebbd44f1e7df9d"
+  },
+  "input_sha256": {
+    "twist_torsion_results.json": "6f1e7b22f3471214d38ec0d3196c88fe9edaf45791e9c05ea67764831fd75368",
+    "redteam_velu_replay.py": "c08fbb8de9d54906d783be967a36a6073b2a1d1a3583292badd3adcdd7126790",
+    "oriented_velu.py": "a1a656cc32efd612250b1ecf50dff18af79a8f62f970ee79841bfd390603423b",
+    "fastfield.py": "b5990fda51700bbfba363251c41f02febfd0fc92edfea4f5ddd647bab472789e",
+    "relations.py": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f"
+  },
+  "host": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "research/ecc2k130_dual_transport_20260925/certificate.py",
+    "--out",
+    "research/ecc2k130_dual_transport_20260925/receipt.json"
+  ],
+  "PDP_cost": null,
+  "full_ECDLP_cost": null,
+  "end_to_end_speedup": null,
+  "cost_scope": "saved torsion generators supplied; no cold basis discovery or relation/PDP work",
+  "production_field_initialization_seconds": 0.2677544170001056,
+  "rows": [
+    {
+      "seed": 20260924,
+      "line": [
+        1,
+        0
+      ],
+      "direction": "descending",
+      "forward_b": "0x3aad5ebb6187af0a2c53cbc9010d36552",
+      "reverse_b": "0x1",
+      "reverse_kernel_generator": [
+        "0x327966ed6efc5f1b0d37a9df1dac9ee90",
+        "0x5a1609cf12977257d9cfcdcec01a9830a"
+      ],
+      "raw_reverse_scalar_sign": -1,
+      "formal_dual_correction": "negate raw reverse output",
+      "independent_full_coordinate_rows": {
+        "P": {
+          "forward": [
+            "0x48514383b5b38c33f631acdfa4167fe3c",
+            "0x35844139cebd1c1de6b013d5d1ded758a"
+          ],
+          "raw_reverse": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x4cdefd62acfa8dde9ada52ebcd2f6b3b4"
+          ],
+          "positive_dual": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x7921cfd1b7a4a502e09e74ce9772eb84d"
+          ]
+        },
+        "Q": {
+          "forward": [
+            "0x6c6fb6ee18ae4c58dbb4964d944cd788d",
+            "0x6e7fed5d7c25ab3f78375ae828bba25dd"
+          ],
+          "raw_reverse": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x23da3cc981673b754065a8ad276c9233d"
+          ],
+          "positive_dual": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x811df9d723f627ed08573c9486ab911a"
+          ]
+        },
+        "P+Q": {
+          "forward": [
+            "0x37c91248a5ac4cf12173e595bd6c11831",
+            "0x6e59c479329b67fc25284588a20212748"
+          ],
+          "raw_reverse": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x25aca48bf3155c39b111b6d3286391499"
+          ],
+          "positive_dual": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x7eb0983ff22b4db5c9161d3e9ac0920bb"
+          ]
+        },
+        "2P": {
+          "forward": [
+            "0x7dfc6187b4d41a25c5890f04de5270eab",
+            "0x1fd1010f41e23c9302861c49cf4c473b3"
+          ],
+          "raw_reverse": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x185d4b30442dacaead2ea2e0a5097debd"
+          ],
+          "positive_dual": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x7c68cbab7c1e9612fbeb37d4c6b9a629"
+          ]
+        }
+      },
+      "scalar_controls": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "exception_counts": {
+        "forward_twist_kernel_points": 262,
+        "reverse_twist_kernel_points": 262,
+        "offcurve_kernel_abscissa_rejections": 2,
+        "invalid_complement_rejections": 1,
+        "invalid_witness_rejections": 1
+      },
+      "setup_from_saved_generators_seconds": 0.437730166973779,
+      "setup_from_saved_generators_field_counts": {
+        "mul": 82638,
+        "sqr": 80750,
+        "inv": 605,
+        "mul_inside_inv": 78650,
+        "sqr_inside_inv": 79255
+      },
+      "production_composition_field_counts": {
+        "mul": 2106,
+        "sqr": 800,
+        "inv": 2,
+        "mul_inside_inv": 260,
+        "sqr_inside_inv": 262
+      },
+      "production_composition_seconds_11": [
+        0.009042375022545457,
+        0.008975917007774115,
+        0.009155792009551078,
+        0.009106041979975998,
+        0.0089831669756677,
+        0.009433833009097725,
+        0.009394166991114616,
+        0.009295166004449129,
+        0.009085375000722706,
+        0.009354625013656914,
+        0.008784959005424753
+      ],
+      "production_composition_seconds_median": 0.009106041979975998,
+      "validation_replay_seconds": 3.8870900409820024,
+      "independent_reference_field_counts": {
+        "mul": 221018,
+        "sqr": 105505,
+        "inv": 760
+      }
+    },
+    {
+      "seed": 20260924,
+      "line": [
+        1,
+        4
+      ],
+      "direction": "descending",
+      "forward_b": "0x3248ef31f25d6830126239dd3fd7c593a",
+      "reverse_b": "0x1",
+      "reverse_kernel_generator": [
+        "0x2ff42166521f8495ebe54202c68f5394a",
+        "0x5fbae8931df18539c43c6babaf5b4ddaf"
+      ],
+      "raw_reverse_scalar_sign": -1,
+      "formal_dual_correction": "negate raw reverse output",
+      "independent_full_coordinate_rows": {
+        "P": {
+          "forward": [
+            "0x6a78733b864d938937f30f7ca57185755",
+            "0x7e0d3da523a0959f279bdf02f7393b1cd"
+          ],
+          "raw_reverse": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x4cdefd62acfa8dde9ada52ebcd2f6b3b4"
+          ],
+          "positive_dual": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x7921cfd1b7a4a502e09e74ce9772eb84d"
+          ]
+        },
+        "Q": {
+          "forward": [
+            "0x1ff9ed45c93ebc5eacdb6c6418e7bd1de",
+            "0x3c92557ef0c3a2987307323f9ea1ab8ba"
+          ],
+          "raw_reverse": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x23da3cc981673b754065a8ad276c9233d"
+          ],
+          "positive_dual": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x811df9d723f627ed08573c9486ab911a"
+          ]
+        },
+        "P+Q": {
+          "forward": [
+            "0x3164a612a93c37771a3e8b5963853f8b7",
+            "0x47506d2fd2a91224c77338ab7ac0ff1d0"
+          ],
+          "raw_reverse": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x25aca48bf3155c39b111b6d3286391499"
+          ],
+          "positive_dual": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x7eb0983ff22b4db5c9161d3e9ac0920bb"
+          ]
+        },
+        "2P": {
+          "forward": [
+            "0x5f7de3e1cf48c40ff5be7ba4052a6b46c",
+            "0x1f3806b4bc6e9fccce2db88f20554c56e"
+          ],
+          "raw_reverse": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x185d4b30442dacaead2ea2e0a5097debd"
+          ],
+          "positive_dual": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x7c68cbab7c1e9612fbeb37d4c6b9a629"
+          ]
+        }
+      },
+      "scalar_controls": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "exception_counts": {
+        "forward_twist_kernel_points": 262,
+        "reverse_twist_kernel_points": 262,
+        "offcurve_kernel_abscissa_rejections": 2,
+        "invalid_complement_rejections": 1,
+        "invalid_witness_rejections": 1
+      },
+      "setup_from_saved_generators_seconds": 0.42311241701827385,
+      "setup_from_saved_generators_field_counts": {
+        "mul": 82638,
+        "sqr": 80750,
+        "inv": 605,
+        "mul_inside_inv": 78650,
+        "sqr_inside_inv": 79255
+      },
+      "production_composition_field_counts": {
+        "mul": 2106,
+        "sqr": 800,
+        "inv": 2,
+        "mul_inside_inv": 260,
+        "sqr_inside_inv": 262
+      },
+      "production_composition_seconds_11": [
+        0.009462957998039201,
+        0.009142958995653316,
+        0.008820499991998076,
+        0.009131208003964275,
+        0.009102374984649941,
+        0.009036417002789676,
+        0.008737625001231208,
+        0.009327291016234085,
+        0.008888750016922131,
+        0.00903812499018386,
+        0.009490666998317465
+      ],
+      "production_composition_seconds_median": 0.009102374984649941,
+      "validation_replay_seconds": 3.873324957996374,
+      "independent_reference_field_counts": {
+        "mul": 221018,
+        "sqr": 105505,
+        "inv": 760
+      }
+    },
+    {
+      "seed": 20260924,
+      "line": [
+        1,
+        39
+      ],
+      "direction": "horizontal",
+      "forward_b": "0x1",
+      "reverse_b": "0x1",
+      "reverse_kernel_generator": [
+        "0x6597d870d1bb1dda73b8e17b512b80b96",
+        "0x51bc9fd5f0e62309ff89ce498ea958076"
+      ],
+      "raw_reverse_scalar_sign": -1,
+      "formal_dual_correction": "negate raw reverse output",
+      "independent_full_coordinate_rows": {
+        "P": {
+          "forward": [
+            "0x491f95c8b4769c6a8e9dc9d69863f1ae6",
+            "0x4f7d11079a9c49ff464c74f012327d17"
+          ],
+          "raw_reverse": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x4cdefd62acfa8dde9ada52ebcd2f6b3b4"
+          ],
+          "positive_dual": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x7921cfd1b7a4a502e09e74ce9772eb84d"
+          ]
+        },
+        "Q": {
+          "forward": [
+            "0x76d3ed147372bcc637fe8e42041980445",
+            "0x4962586e8f8f957e6b35301338490a5aa"
+          ],
+          "raw_reverse": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x23da3cc981673b754065a8ad276c9233d"
+          ],
+          "positive_dual": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x811df9d723f627ed08573c9486ab911a"
+          ]
+        },
+        "P+Q": {
+          "forward": [
+            "0x52080f4b7c3141cfaa9fd573c5be0eed2",
+            "0x5af28278f50d24052e22827bf52b48d84"
+          ],
+          "raw_reverse": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x25aca48bf3155c39b111b6d3286391499"
+          ],
+          "positive_dual": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x7eb0983ff22b4db5c9161d3e9ac0920bb"
+          ]
+        },
+        "2P": {
+          "forward": [
+            "0x53296b4625a48871d4dc9e73469051356",
+            "0x3d6389d0204d776117d696fe5a5793063"
+          ],
+          "raw_reverse": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x185d4b30442dacaead2ea2e0a5097debd"
+          ],
+          "positive_dual": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x7c68cbab7c1e9612fbeb37d4c6b9a629"
+          ]
+        }
+      },
+      "scalar_controls": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "exception_counts": {
+        "forward_twist_kernel_points": 262,
+        "reverse_twist_kernel_points": 262,
+        "offcurve_kernel_abscissa_rejections": 2,
+        "invalid_complement_rejections": 1,
+        "invalid_witness_rejections": 1
+      },
+      "setup_from_saved_generators_seconds": 0.42525737499818206,
+      "setup_from_saved_generators_field_counts": {
+        "mul": 82638,
+        "sqr": 80750,
+        "inv": 605,
+        "mul_inside_inv": 78650,
+        "sqr_inside_inv": 79255
+      },
+      "production_composition_field_counts": {
+        "mul": 2106,
+        "sqr": 800,
+        "inv": 2,
+        "mul_inside_inv": 260,
+        "sqr_inside_inv": 262
+      },
+      "production_composition_seconds_11": [
+        0.009057082992512733,
+        0.008707166998647153,
+        0.009025500010466203,
+        0.009312749985838309,
+        0.008941917010815814,
+        0.009578625002177432,
+        0.008899415988707915,
+        0.009191290999297053,
+        0.00910445800400339,
+        0.009082165983272716,
+        0.009434124978724867
+      ],
+      "production_composition_seconds_median": 0.009082165983272716,
+      "validation_replay_seconds": 3.923239249998005,
+      "independent_reference_field_counts": {
+        "mul": 221018,
+        "sqr": 105505,
+        "inv": 760
+      }
+    },
+    {
+      "seed": 20260924,
+      "line": [
+        1,
+        64
+      ],
+      "direction": "horizontal",
+      "forward_b": "0x1",
+      "reverse_b": "0x1",
+      "reverse_kernel_generator": [
+        "0x206128cab29e984813321eb127da8dd72",
+        "0xe1ab2e0035aa2ddd75fb572b02ca9501"
+      ],
+      "raw_reverse_scalar_sign": -1,
+      "formal_dual_correction": "negate raw reverse output",
+      "independent_full_coordinate_rows": {
+        "P": {
+          "forward": [
+            "0x24960265dcbe3428c86cfc13bce1bb49d",
+            "0x51292dd841789bcc51aed7a767413f1f0"
+          ],
+          "raw_reverse": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x4cdefd62acfa8dde9ada52ebcd2f6b3b4"
+          ],
+          "positive_dual": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x7921cfd1b7a4a502e09e74ce9772eb84d"
+          ]
+        },
+        "Q": {
+          "forward": [
+            "0x7f88ba6c2d4b2bc5ef92732bd8fefbdef",
+            "0x34f39b1cb84d87253a9ef85c9fec0802c"
+          ],
+          "raw_reverse": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x23da3cc981673b754065a8ad276c9233d"
+          ],
+          "positive_dual": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x811df9d723f627ed08573c9486ab911a"
+          ]
+        },
+        "P+Q": {
+          "forward": [
+            "0x67b5ba1eb07e45ae38e0e89f75f4cc86b",
+            "0x6d04d2cb8068bf9260cb804917122c324"
+          ],
+          "raw_reverse": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x25aca48bf3155c39b111b6d3286391499"
+          ],
+          "positive_dual": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x7eb0983ff22b4db5c9161d3e9ac0920bb"
+          ]
+        },
+        "2P": {
+          "forward": [
+            "0x4b2af822b8d66519f235991c6403bd8b4",
+            "0x5c2cb6ba849cfce0830292761134c68d6"
+          ],
+          "raw_reverse": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x185d4b30442dacaead2ea2e0a5097debd"
+          ],
+          "positive_dual": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x7c68cbab7c1e9612fbeb37d4c6b9a629"
+          ]
+        }
+      },
+      "scalar_controls": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "exception_counts": {
+        "forward_twist_kernel_points": 262,
+        "reverse_twist_kernel_points": 262,
+        "offcurve_kernel_abscissa_rejections": 2,
+        "invalid_complement_rejections": 1,
+        "invalid_witness_rejections": 1
+      },
+      "setup_from_saved_generators_seconds": 0.4265108340186998,
+      "setup_from_saved_generators_field_counts": {
+        "mul": 82638,
+        "sqr": 80750,
+        "inv": 605,
+        "mul_inside_inv": 78650,
+        "sqr_inside_inv": 79255
+      },
+      "production_composition_field_counts": {
+        "mul": 2106,
+        "sqr": 800,
+        "inv": 2,
+        "mul_inside_inv": 260,
+        "sqr_inside_inv": 262
+      },
+      "production_composition_seconds_11": [
+        0.009151832986390218,
+        0.00921995798125863,
+        0.009050666994880885,
+        0.009039124997798353,
+        0.008819582988508046,
+        0.009145874995738268,
+        0.009317541989730671,
+        0.009050416992977262,
+        0.009024250000948086,
+        0.009628125000745058,
+        0.009022375015774742
+      ],
+      "production_composition_seconds_median": 0.009050666994880885,
+      "validation_replay_seconds": 3.8737446249870118,
+      "independent_reference_field_counts": {
+        "mul": 221018,
+        "sqr": 105505,
+        "inv": 760
+      }
+    },
+    {
+      "seed": 20260925,
+      "line": [
+        1,
+        0
+      ],
+      "direction": "descending",
+      "forward_b": "0x33804ac2d6f98bb4947ddda6f5532523e",
+      "reverse_b": "0x1",
+      "reverse_kernel_generator": [
+        "0x36897980247a58b2e2370d19206f76f18",
+        "0x3e8eb250c7ca2e67b93b4f0417b911292"
+      ],
+      "raw_reverse_scalar_sign": -1,
+      "formal_dual_correction": "negate raw reverse output",
+      "independent_full_coordinate_rows": {
+        "P": {
+          "forward": [
+            "0x7fbdad924c83630909d1f5eb25bfb39bd",
+            "0x59ffbbdfa74dd962749e6660bfda50501"
+          ],
+          "raw_reverse": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x4cdefd62acfa8dde9ada52ebcd2f6b3b4"
+          ],
+          "positive_dual": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x7921cfd1b7a4a502e09e74ce9772eb84d"
+          ]
+        },
+        "Q": {
+          "forward": [
+            "0x676b45d8f84b3ad6e02b88f8d0a8402",
+            "0x5b831ce3643cea715e7956693a3bba658"
+          ],
+          "raw_reverse": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x23da3cc981673b754065a8ad276c9233d"
+          ],
+          "positive_dual": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x811df9d723f627ed08573c9486ab911a"
+          ]
+        },
+        "P+Q": {
+          "forward": [
+            "0x355fb94920a4491ce4030e403f7a104e3",
+            "0x67269e388b66a376cbf667bc8c8ff777f"
+          ],
+          "raw_reverse": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x25aca48bf3155c39b111b6d3286391499"
+          ],
+          "positive_dual": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x7eb0983ff22b4db5c9161d3e9ac0920bb"
+          ]
+        },
+        "2P": {
+          "forward": [
+            "0x7408ef106dd07744c7ebce27368f745a3",
+            "0x54456232b5b82f11c2f457164f25b16d5"
+          ],
+          "raw_reverse": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x185d4b30442dacaead2ea2e0a5097debd"
+          ],
+          "positive_dual": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x7c68cbab7c1e9612fbeb37d4c6b9a629"
+          ]
+        }
+      },
+      "scalar_controls": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "exception_counts": {
+        "forward_twist_kernel_points": 262,
+        "reverse_twist_kernel_points": 262,
+        "offcurve_kernel_abscissa_rejections": 2,
+        "invalid_complement_rejections": 1,
+        "invalid_witness_rejections": 1
+      },
+      "setup_from_saved_generators_seconds": 0.42616937501588836,
+      "setup_from_saved_generators_field_counts": {
+        "mul": 82638,
+        "sqr": 80750,
+        "inv": 605,
+        "mul_inside_inv": 78650,
+        "sqr_inside_inv": 79255
+      },
+      "production_composition_field_counts": {
+        "mul": 2106,
+        "sqr": 800,
+        "inv": 2,
+        "mul_inside_inv": 260,
+        "sqr_inside_inv": 262
+      },
+      "production_composition_seconds_11": [
+        0.008866249991115183,
+        0.008740500023122877,
+        0.008899375010514632,
+        0.00921324998489581,
+        0.00907816700055264,
+        0.008716334006749094,
+        0.00942695900448598,
+        0.00936620801803656,
+        0.008979042002465576,
+        0.009281625010771677,
+        0.008809749997453764
+      ],
+      "production_composition_seconds_median": 0.008979042002465576,
+      "validation_replay_seconds": 3.8775836669956334,
+      "independent_reference_field_counts": {
+        "mul": 221018,
+        "sqr": 105505,
+        "inv": 760
+      }
+    },
+    {
+      "seed": 20260925,
+      "line": [
+        1,
+        2
+      ],
+      "direction": "descending",
+      "forward_b": "0x1cec9f43ce245075b0ea308b7973cd86d",
+      "reverse_b": "0x1",
+      "reverse_kernel_generator": [
+        "0x736f8e224b088c784667a8dd4fdf8c2a6",
+        "0x3b92580f46c4791d50dc13d4901c476a7"
+      ],
+      "raw_reverse_scalar_sign": -1,
+      "formal_dual_correction": "negate raw reverse output",
+      "independent_full_coordinate_rows": {
+        "P": {
+          "forward": [
+            "0x6d3ff2514417f598ee033c693b19880bb",
+            "0x1fe6408ef4cb61cb154fe843ed04d31f6"
+          ],
+          "raw_reverse": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x4cdefd62acfa8dde9ada52ebcd2f6b3b4"
+          ],
+          "positive_dual": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x7921cfd1b7a4a502e09e74ce9772eb84d"
+          ]
+        },
+        "Q": {
+          "forward": [
+            "0x17d05b813e855d68803b3412977c644f2",
+            "0x5a3afac0ef640f455c593989bb548bb8c"
+          ],
+          "raw_reverse": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x23da3cc981673b754065a8ad276c9233d"
+          ],
+          "positive_dual": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x811df9d723f627ed08573c9486ab911a"
+          ]
+        },
+        "P+Q": {
+          "forward": [
+            "0x51305a1b1d33cc304b146e7b60a30a8a0",
+            "0x78176c58c8d736faadbe9f47c7fc6596e"
+          ],
+          "raw_reverse": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x25aca48bf3155c39b111b6d3286391499"
+          ],
+          "positive_dual": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x7eb0983ff22b4db5c9161d3e9ac0920bb"
+          ]
+        },
+        "2P": {
+          "forward": [
+            "0x441e20e18a86fdfe446982175750ede2e",
+            "0x8ce2227f04f3a35342eed03ef51ed3b8"
+          ],
+          "raw_reverse": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x185d4b30442dacaead2ea2e0a5097debd"
+          ],
+          "positive_dual": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x7c68cbab7c1e9612fbeb37d4c6b9a629"
+          ]
+        }
+      },
+      "scalar_controls": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "exception_counts": {
+        "forward_twist_kernel_points": 262,
+        "reverse_twist_kernel_points": 262,
+        "offcurve_kernel_abscissa_rejections": 2,
+        "invalid_complement_rejections": 1,
+        "invalid_witness_rejections": 1
+      },
+      "setup_from_saved_generators_seconds": 0.42909804100054316,
+      "setup_from_saved_generators_field_counts": {
+        "mul": 82638,
+        "sqr": 80750,
+        "inv": 605,
+        "mul_inside_inv": 78650,
+        "sqr_inside_inv": 79255
+      },
+      "production_composition_field_counts": {
+        "mul": 2106,
+        "sqr": 800,
+        "inv": 2,
+        "mul_inside_inv": 260,
+        "sqr_inside_inv": 262
+      },
+      "production_composition_seconds_11": [
+        0.009093457978451625,
+        0.008860334026394412,
+        0.009124750009505078,
+        0.00916579199838452,
+        0.008756208000704646,
+        0.00913233298342675,
+        0.00863679198664613,
+        0.009023582999361679,
+        0.00915045800502412,
+        0.008822042000247166,
+        0.009151042002486065
+      ],
+      "production_composition_seconds_median": 0.009093457978451625,
+      "validation_replay_seconds": 4.026299542019842,
+      "independent_reference_field_counts": {
+        "mul": 221018,
+        "sqr": 105505,
+        "inv": 760
+      }
+    },
+    {
+      "seed": 20260925,
+      "line": [
+        1,
+        30
+      ],
+      "direction": "horizontal",
+      "forward_b": "0x1",
+      "reverse_b": "0x1",
+      "reverse_kernel_generator": [
+        "0x200f6b1c0256123e0e3703c8df0856796",
+        "0x309660a69542ca90d0a581230fc11ac19"
+      ],
+      "raw_reverse_scalar_sign": -1,
+      "formal_dual_correction": "negate raw reverse output",
+      "independent_full_coordinate_rows": {
+        "P": {
+          "forward": [
+            "0x24960265dcbe3428c86cfc13bce1bb49d",
+            "0x51292dd841789bcc51aed7a767413f1f0"
+          ],
+          "raw_reverse": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x4cdefd62acfa8dde9ada52ebcd2f6b3b4"
+          ],
+          "positive_dual": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x7921cfd1b7a4a502e09e74ce9772eb84d"
+          ]
+        },
+        "Q": {
+          "forward": [
+            "0x7f88ba6c2d4b2bc5ef92732bd8fefbdef",
+            "0x34f39b1cb84d87253a9ef85c9fec0802c"
+          ],
+          "raw_reverse": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x23da3cc981673b754065a8ad276c9233d"
+          ],
+          "positive_dual": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x811df9d723f627ed08573c9486ab911a"
+          ]
+        },
+        "P+Q": {
+          "forward": [
+            "0x67b5ba1eb07e45ae38e0e89f75f4cc86b",
+            "0x6d04d2cb8068bf9260cb804917122c324"
+          ],
+          "raw_reverse": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x25aca48bf3155c39b111b6d3286391499"
+          ],
+          "positive_dual": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x7eb0983ff22b4db5c9161d3e9ac0920bb"
+          ]
+        },
+        "2P": {
+          "forward": [
+            "0x4b2af822b8d66519f235991c6403bd8b4",
+            "0x5c2cb6ba849cfce0830292761134c68d6"
+          ],
+          "raw_reverse": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x185d4b30442dacaead2ea2e0a5097debd"
+          ],
+          "positive_dual": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x7c68cbab7c1e9612fbeb37d4c6b9a629"
+          ]
+        }
+      },
+      "scalar_controls": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "exception_counts": {
+        "forward_twist_kernel_points": 262,
+        "reverse_twist_kernel_points": 262,
+        "offcurve_kernel_abscissa_rejections": 2,
+        "invalid_complement_rejections": 1,
+        "invalid_witness_rejections": 1
+      },
+      "setup_from_saved_generators_seconds": 0.43313645900343545,
+      "setup_from_saved_generators_field_counts": {
+        "mul": 82638,
+        "sqr": 80750,
+        "inv": 605,
+        "mul_inside_inv": 78650,
+        "sqr_inside_inv": 79255
+      },
+      "production_composition_field_counts": {
+        "mul": 2106,
+        "sqr": 800,
+        "inv": 2,
+        "mul_inside_inv": 260,
+        "sqr_inside_inv": 262
+      },
+      "production_composition_seconds_11": [
+        0.009521375002805144,
+        0.008690749993547797,
+        0.008772083005169407,
+        0.009507208014838398,
+        0.00875591699150391,
+        0.009241166000720114,
+        0.00883641600375995,
+        0.009856457996647805,
+        0.00884766600211151,
+        0.008624167006928474,
+        0.008872499980498105
+      ],
+      "production_composition_seconds_median": 0.00884766600211151,
+      "validation_replay_seconds": 4.029265249992022,
+      "independent_reference_field_counts": {
+        "mul": 221018,
+        "sqr": 105505,
+        "inv": 760
+      }
+    },
+    {
+      "seed": 20260925,
+      "line": [
+        1,
+        142
+      ],
+      "direction": "horizontal",
+      "forward_b": "0x1",
+      "reverse_b": "0x1",
+      "reverse_kernel_generator": [
+        "0x2bbe249cfa55561f4a5d8c700951db708",
+        "0x227623247c6940cf3dec42d46b3ae87e7"
+      ],
+      "raw_reverse_scalar_sign": -1,
+      "formal_dual_correction": "negate raw reverse output",
+      "independent_full_coordinate_rows": {
+        "P": {
+          "forward": [
+            "0x491f95c8b4769c6a8e9dc9d69863f1ae6",
+            "0x4f7d11079a9c49ff464c74f012327d17"
+          ],
+          "raw_reverse": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x4cdefd62acfa8dde9ada52ebcd2f6b3b4"
+          ],
+          "positive_dual": [
+            "0x35ff32b31b5e28dc7a4426255a5d80bf9",
+            "0x7921cfd1b7a4a502e09e74ce9772eb84d"
+          ]
+        },
+        "Q": {
+          "forward": [
+            "0x76d3ed147372bcc637fe8e42041980445",
+            "0x4962586e8f8f957e6b35301338490a5aa"
+          ],
+          "raw_reverse": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x23da3cc981673b754065a8ad276c9233d"
+          ],
+          "positive_dual": [
+            "0x2bcbe354f358590b90e0db646f062b227",
+            "0x811df9d723f627ed08573c9486ab911a"
+          ]
+        },
+        "P+Q": {
+          "forward": [
+            "0x52080f4b7c3141cfaa9fd573c5be0eed2",
+            "0x5af28278f50d24052e22827bf52b48d84"
+          ],
+          "raw_reverse": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x25aca48bf3155c39b111b6d3286391499"
+          ],
+          "positive_dual": [
+            "0x5b1c3cb4013e118c7807abedb2a303422",
+            "0x7eb0983ff22b4db5c9161d3e9ac0920bb"
+          ]
+        },
+        "2P": {
+          "forward": [
+            "0x53296b4625a48871d4dc9e73469051356",
+            "0x3d6389d0204d776117d696fe5a5793063"
+          ],
+          "raw_reverse": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x185d4b30442dacaead2ea2e0a5097debd"
+          ],
+          "positive_dual": [
+            "0x1f9bc78af3ec45cf8290119de962e7894",
+            "0x7c68cbab7c1e9612fbeb37d4c6b9a629"
+          ]
+        }
+      },
+      "scalar_controls": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "exception_counts": {
+        "forward_twist_kernel_points": 262,
+        "reverse_twist_kernel_points": 262,
+        "offcurve_kernel_abscissa_rejections": 2,
+        "invalid_complement_rejections": 1,
+        "invalid_witness_rejections": 1
+      },
+      "setup_from_saved_generators_seconds": 0.4704608339816332,
+      "setup_from_saved_generators_field_counts": {
+        "mul": 82638,
+        "sqr": 80750,
+        "inv": 605,
+        "mul_inside_inv": 78650,
+        "sqr_inside_inv": 79255
+      },
+      "production_composition_field_counts": {
+        "mul": 2106,
+        "sqr": 800,
+        "inv": 2,
+        "mul_inside_inv": 260,
+        "sqr_inside_inv": 262
+      },
+      "production_composition_seconds_11": [
+        0.01058658299734816,
+        0.009635333000915125,
+        0.010580250003840774,
+        0.008822125004371628,
+        0.010578292014542967,
+        0.010688041016692296,
+        0.0099407919915393,
+        0.009293791983509436,
+        0.009079292009118944,
+        0.009061083983397111,
+        0.00955962500302121
+      ],
+      "production_composition_seconds_median": 0.009635333000915125,
+      "validation_replay_seconds": 3.8979307079862338,
+      "independent_reference_field_counts": {
+        "mul": 221018,
+        "sqr": 105505,
+        "inv": 760
+      }
+    }
+  ],
+  "deterministic_sha256": "72d6d096b5a0c990b576cfd45ab89973b3396c589ce7165c4e6ff84b891b871f",
+  "elapsed_seconds": 37.93351887501194
+}
