@@ -53,11 +53,26 @@ while pair matches may count partitions more than once.
 
 Use the repository's single-word `FastBinaryCurve::batch_add` for pair
 construction and complement probes; independent replay uses the separate
-Python `Curve` formulas from #737, both on every positive witness and on a
-fixed sample of 16 oracle misses per arm (indices selected by SHA-256 order),
-recomputing the complete pair scan for those misses. CI checks source/input
+Python `Curve` group formulas from #737 with a cross-checked polynomial-Euclid
+inverse (instead of its much slower exponentiation inverse). Test Euclid
+against the original inverse on 128 deterministic field elements per curve,
+and compare group-add outputs on random pairs plus infinity, opposite,
+doubling and x=0 exceptions. Replay every positive witness and a fixed sample
+of 16 oracle misses per arm (indices selected by SHA-256 order), recomputing
+the complete pair scan for those misses. CI checks source/input
 hashes, point/group membership, all witnesses and sample misses. If batch
 arithmetic mismatches independent replay, classify the arm invalid.
+
+For each positive witness, independently test all three pair partitions.
+Record the count with two finite intermediate sums; verify the S3 polynomial
+on each finite pair and the final finite pair-sum x coordinates. Mark repeated
+indices and opposite-point pairs. A pair-root collision **proxy** is true
+when a finite intermediate x is produced by more than one distinct unordered
+endpoint-x pair across the full base; this does not establish which canonical
+root the producer chose. A positive target with no finite balanced partition
+can be explained by the producer's regular finite-pair restriction; a finite
+balanced witness missed by extraction points to a subsequent indexing/search
+or lifting gap, without identifying a single cause from this proxy alone.
 
 Run the exact #747 compact extractor unchanged on the **same** target JSONL,
 same R/eta and frozen base source. Record its per-target verified group-lift
