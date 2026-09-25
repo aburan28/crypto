@@ -20,3 +20,7 @@ Instrument the #717 map on one fixed public source point for each saved represen
 ## Success, failure and stop conditions
 
 Pass only if all exact arithmetic checks agree for both seeds, all eight generators, both matrices and all 264 lines per seed, and operation counters are reproducible. Stop at 180 seconds and preserve a FAIL receipt if any assertion disagrees. Freeze source/input SHA-256, counts, host, Python version, raw medians, and decision in this PR. No factor-base yield, PDP advantage, full ECDLP cost, or n131 speedup may be inferred. The next experiment is a matched native-versus-transported basis/PDP run with cold setup and full rank on the same held-out targets.
+
+## Registered extension before final audit
+
+The certificate also computes the exact minimum norm of a non-scalar element of the index-263 order, with a completing-the-square proof, and verifies the saved generators equal their stated torsion-basis line combinations. On the leaf, verify `phi(tau(P)) = [lambda]phi(P)` at full coordinates and time 11 calls to the existing affine generic scalar routine for `[lambda]`, keeping the scalar routine's field counts separate from map and source Frobenius counts. A deterministic SHA-256 over all exact classification fields and operation counts, excluding wall time and host details, is the CI replay gate. Earlier local runs were developmental; the subsequent frozen receipt is the reported result.
