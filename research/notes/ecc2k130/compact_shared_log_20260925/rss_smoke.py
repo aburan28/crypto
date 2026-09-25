@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import psutil
 import subprocess
 import sys
 import time
@@ -40,7 +41,8 @@ def main() -> None:
     assert capped["termination"] == "RSS_CAP" and capped["exit_code"] != 0
     assert capped["sampled_peak_rss_bytes"] >= capped["cap_bytes"]
     report = {"classification": "RSS_CAP_SMOKE_PASS", "platform": platform.platform(),
-              "python": sys.version, "normal": normal, "capped": capped}
+              "python": sys.version, "psutil": psutil.__version__,
+              "normal": normal, "capped": capped}
     write_json(args.out, report)
     print(json.dumps(report, sort_keys=True))
 

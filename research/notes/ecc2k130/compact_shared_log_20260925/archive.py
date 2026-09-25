@@ -45,6 +45,7 @@ def main() -> None:
     (evidence / "runs").mkdir(parents=True)
     (evidence / "source").mkdir()
     copy_one(HERE / "rss_smoke.json", evidence / "rss_smoke.json")
+    copy_one(HERE / "rss_smoke_initial.json", evidence / "rss_smoke_initial.json")
     index = {"schema_version": "1.0", "panel_names": [], "run_names": [],
              "source_sha256": {}, "uncompressed_stdout_sha256": {}}
     for source in (HERE / "make_inputs.py", HERE / "build.py", HERE / "run.py", HERE / "run_panel.py",

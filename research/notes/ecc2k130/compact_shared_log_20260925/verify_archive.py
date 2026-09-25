@@ -30,6 +30,8 @@ def main() -> None:
     actual = {str(file.relative_to(EVIDENCE)) for file in EVIDENCE.rglob("*")
               if file.is_file() and file.name != "SHA256SUMS"}
     assert listed == actual
+    initial_smoke = json.loads((EVIDENCE / "rss_smoke_initial.json").read_bytes())
+    assert initial_smoke["classification"] == "RSS_CAP_SMOKE_PASS"
     smoke = json.loads((EVIDENCE / "rss_smoke.json").read_bytes())
     assert smoke["classification"] == "RSS_CAP_SMOKE_PASS"
     assert smoke["normal"]["termination"] is None
