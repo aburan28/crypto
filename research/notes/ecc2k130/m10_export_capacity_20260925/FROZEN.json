@@ -1,0 +1,90 @@
+{
+  "basis_expected": {
+    "balanced": {
+      "basis_sha256": "c99ce17de8936f69056554d1790953cd9cd5408dd72b88d3250cd9332bdd7929",
+      "combined_coordinate_rank": 130,
+      "fixed_mask_count": 60,
+      "fixed_mask_x_sha256": "046f1a8741f72246666440b11cd20859e0f9e7413248c75e92f9fc823806fc7c",
+      "slot_dimensions": [
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13
+      ]
+    },
+    "unequal": {
+      "basis_sha256": "8ec3895b87677af57bd5e99495319c0885d9c7636b4f924771104dcb5be30dbf",
+      "combined_coordinate_rank": 131,
+      "fixed_mask_count": 60,
+      "fixed_mask_x_sha256": "73d0a4b2511a7c1e5e6602c150a51bcf26976c7e29e1ef27de992676f0b4d7cb",
+      "slot_dimensions": [
+        14,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13
+      ]
+    }
+  },
+  "caps": {
+    "dag_nodes": 2000000,
+    "dimacs_bytes": 268435456,
+    "per_arm_address_space_and_rss_bytes": 2147483648,
+    "per_arm_external_wall_seconds": 600
+  },
+  "freeze_utc": "2026-09-25T19:22:52.391152+00:00",
+  "input_sha256": {
+    "research/notes/ecc2k130/rotated_arity_screen_20260925/evidence/raw/m10/producer/result.json": "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
+    "research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py": "d3f0f6e1515282a25efb4eb6a5f68ad754f1d9be68e4a741f17a748d9a58d782",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/bounded.py": "4aec662e171996654383f9364ace3240bf3164927ff97cab96234a9da1c050ba",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/export.py": "77159083a897f65b91d0f762ef425eda2df73460a91b997e754351c7c331e8fe",
+    "research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/dag.py": "a277fb1b2f9b58ca8cc7cb33713950015f8c0446651b1d4e8657650819bcd419"
+  },
+  "prerequisite_pr_heads": {
+    "784": "c8ece3bc7ac4959945632704c7ecaa9c1f1a69cf",
+    "802": "a7d392229800683636adab7a1a88a670fab74508",
+    "804": "708e3c884c1707affbd186288639b67972047d2c"
+  },
+  "release_main_head": null,
+  "schema": "ecc2k130-m10-capacity-frozen-v1",
+  "scope": "representation_size_only_no_solver_or_PDP",
+  "source_base_head": "708e3c884c1707affbd186288639b67972047d2c",
+  "source_sha256": {
+    "INPUT.json": "2f27dd1b5af73811bcaddb1c125ddca209f26bf6656c93d83e9cadc4e386f70a",
+    "PROTOCOL.md": "00ed855ee968c536755170dfe311628e85b2310610e22b9ae65ea94c354bc9a9",
+    "basis_verify.py": "d8f8c09f778261483325f76aeb11524db46113f52c706066173847c032986703",
+    "capacity.py": "ef6b27752992ce44c663b2f0a825efac9a4bec009cf20868ee8a85948c64cd23",
+    "ci_replay.py": "8feeb96ec641916014aa4d12c07befc66a498a59c8d378754bdeb8714efd8848",
+    "inputs/balanced_m10_result.json": "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
+    "inputs/unequal_m10_result.json": "65bc8e10ea1c058a0dddb3a6b8cc2c4de016b3b454b3850baf72552bf557820e",
+    "produce.py": "9319235d43550857164ff25ce2acb62e0878a24a0388574228ff27e4b6eb7cb8",
+    "run.py": "226e61d62ac638c83881f5f5e296c9e6a9f36d0d02f59e941782205a166faa5d",
+    "selftest.py": "d646da156b1dc5631e0b0aaf03e390dc4f3d351021fc14c987ce80529193ebcf",
+    "verify.py": "ec506a72633b485a55f5f6a734cb5413cf233522d38772ce538d600c0be93200"
+  },
+  "toy_expected": {
+    "checked_branches": [
+      "double",
+      "generic",
+      "inverse",
+      "copy"
+    ],
+    "dag_nodes": 638,
+    "generic_cnf_bytes": 28906,
+    "primary_bits": 32,
+    "target_O_cnf_bytes": 28947,
+    "toy_factor_slots": 3,
+    "toy_field_degree": 3
+  }
+}

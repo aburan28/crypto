@@ -1,0 +1,32 @@
+name: ECC2K-130 m10 export capacity preflight
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-m10-export-capacity.yml'
+      - 'research/notes/ecc2k130/m10_export_capacity_20260925/**'
+      - 'research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/dag.py'
+      - 'research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/export.py'
+      - 'research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/bounded.py'
+      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check exact frozen protocol hash
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          path = Path('research/notes/ecc2k130/m10_export_capacity_20260925/FROZEN.json')
+          assert hashlib.sha256(path.read_bytes()).hexdigest() == '0f60b9ae8d4c003ac37d3093ebfa673ecb731f819870a0331d4d64c70d003a33'
+          PY
+      - name: Replay hashes, normal-basis maps, and n3 full-point toy
+        run: python3 research/notes/ecc2k130/m10_export_capacity_20260925/ci_replay.py
