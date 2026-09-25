@@ -24,6 +24,10 @@
 #   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
 #   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
+#   PACKED_SQUARE_TABLE  lambda^2 with its reduced half from a shared table
+#                        (default 0; table walk only; ROOFLINE.md)
+#   PACKED_INV_POLY  inversion accumulator kept in the polynomial basis
+#                    (default 0; 2 = link product out of line; ROOFLINE.md)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
 #   TABLE_ADDEND_GLOBAL  table-walk addends from global, selection in shared
 #   TABLE_TAG_DENOM  reverse pass rebuilds d from the tag in hist; no
@@ -119,6 +123,13 @@ PACKED_CHAIN_FIRST ?= 0
 PACKED_CHAINS ?= 1
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
+# The polynomial square with coefficients 66..130 looked up in an 8 KB shared
+# table instead of spread and reduced (ROOFLINE.md; table walk only).
+PACKED_SQUARE_TABLE ?= 0
+# The walk's inversion with the Itoh-Tsujii accumulator kept in the
+# polynomial basis: one conversion per link instead of three (ROOFLINE.md).
+# 1 inlines the eight links; 2 shares one out-of-line copy of their product.
+PACKED_INV_POLY ?= 0
 # Carry the eight per-branch step counts that make a distinguished point
 # payable on cairn (CAIRN-WITNESS.md).  WITNESS=0 compiles the counting out
 # and is the control for the paired comparison that prices it; it also keeps
@@ -227,6 +238,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
+       -DECC_PACKED_SQUARE_TABLE=$(PACKED_SQUARE_TABLE) \
+       -DECC_PACKED_INV_POLY=$(PACKED_INV_POLY) \
        -DECC_WITNESS=$(WITNESS)
 
 all: cpu
