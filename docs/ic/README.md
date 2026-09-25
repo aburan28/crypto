@@ -695,8 +695,10 @@ collection, decomposition oracle, linear algebra, verification — and is
 priced in **group-addition equivalents per `√r`** against two
 boundaries: the generic floor `√(π/2A)` for the automorphisms `A` the
 curve offers, and a counted Pollard rho on the same instance in the same
-process (an r-adding walk with distinguished points, or the signed
-Frobenius walk on Koblitz curves).  Native counters — trials, pair-table
+process, matched to those automorphisms: the negation-map walk on the
+prime and random binary curves, where the plain walk runs beside it on
+the same seeds as the before mark (ledger §18), and the signed
+Frobenius walk on Koblitz curves.  Native counters — trials, pair-table
 probes, square roots, Artin–Schreier solves, pairs of the
 pairs-and-solve loop, multiply-subtracts of the elimination — are exact;
 the conversion to additions uses the ratios **pinned in
@@ -836,7 +838,19 @@ Table 2 (§14 of the ledger note); it is a stage diagnostic, never a
 speed, and `ic bench` is where the same solver's cost reaches `S`.
 `ic bench` also runs counted Pollard rho on the same instance and
 planted targets (`--rho-runs`, default 16) and fills the table's
-`vs rho` column from it.
+`vs rho` column from it. The column divides by the **matched** walk: the
+negation map (`A = 2`) on prime and random binary curves, and on a
+Koblitz curve the cheaper of the signed-Frobenius and negation walks.
+The plain walk every report used through ledger §17 rides along as the
+before mark. `ic rho` runs the walks paired over a ladder, and
+`ic rho --reprice FILE` re-prices a frozen report against the matched
+walk (ledger §18). `ic rho --batch-koblitz a/n` runs batch rho, `k`
+targets in one group solved together, which is the reference for any
+figure that amortises one build over `k` targets (ledger §19).
+
+    ./target/release/ic rho --prime-bits 16,20,24 --char2-degrees 17,21,25 --runs 64
+    ./target/release/ic rho --reprice docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json
+    ./target/release/ic rho --batch-koblitz 0/41 --batch-sizes 1,32 --batches 16
 
 With `--solver` (repeated once per engine), `ic descent` prices
 several registered engines on the same seeded systems instead of the

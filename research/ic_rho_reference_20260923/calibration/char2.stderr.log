@@ -1,0 +1,84 @@
+  char2 13: random-binary-n13-ba3f r = 4057
+  char2 15: random-binary-n15-b2493 r = 8191
+  char2 17: random-binary-n17-bbe86 r = 65629
+  char2 19: random-binary-n19-b5f57e r = 262321
+  char2 21: random-binary-n21-b10cc7b r = 523577
+  char2 23: random-binary-n23-b3a296b r = 4195283
+  char2 25: random-binary-n25-b1448ace r = 16774829
+  char2 27: random-binary-n27-b3bfa9c2 r = 22366153
+
+| regime | instance | log₂ r | walk | A | jumps | runs | S | S median | S walk | walk / own floor | vs floor (A=2) | vs matched | ok |
+|:--|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
+| char2 | random-binary-n13-ba3f | 12.0 | frozen-plain | 1 | 16 | 128 | 14.8 | 14.3 | 1.699 | 1.356 | 16.7× | — | ✓ |
+| char2 | random-binary-n13-ba3f | 12.0 | tuned-plain-j4 | 1 | 4 | 128 | 2.843 | 2.842 | 1.607 | 1.282 | 3.208× | — | ✓ |
+| char2 | random-binary-n13-ba3f | 12.0 | negation-j4 | 2 | 4 | 128 | 2.563 | 2.465 | 1.381 | 1.559 | 2.892× | — | ✓ |
+| char2 | random-binary-n13-ba3f | 12.0 | tuned-plain-j8 | 1 | 8 | 128 | 3.794 | 3.705 | 1.406 | 1.122 | 4.281× | — | ✓ |
+| char2 | random-binary-n13-ba3f | 12.0 | negation-j8 | 2 | 8 | 128 | 3.520 | 3.375 | 1.168 | 1.318 | 3.972× | — | ✓ |
+| char2 | random-binary-n13-ba3f | 12.0 | tuned-plain-j16 | 1 | 16 | 128 | 6.861 | 6.672 | 1.487 | 1.186 | 7.742× | — | ✓ |
+| char2 | random-binary-n13-ba3f | 12.0 | negation-j16 | 2 | 16 | 128 | 6.310 | 6.280 | 0.982 | 1.108 | 7.120× | — | ✓ |
+| char2 | random-binary-n15-b2493 | 13.0 | frozen-plain | 1 | 16 | 128 | 12.2 | 11.7 | 1.365 | 1.089 | 13.8× | — | ✓ |
+| char2 | random-binary-n15-b2493 | 13.0 | tuned-plain-j4 | 1 | 4 | 128 | 2.452 | 2.376 | 1.501 | 1.197 | 2.767× | — | ✓ |
+| char2 | random-binary-n15-b2493 | 13.0 | negation-j4 | 2 | 4 | 128 | 2.171 | 2.011 | 1.274 | 1.438 | 2.450× | — | ✓ |
+| char2 | random-binary-n15-b2493 | 13.0 | tuned-plain-j8 | 1 | 8 | 128 | 3.045 | 3.050 | 1.298 | 1.036 | 3.436× | — | ✓ |
+| char2 | random-binary-n15-b2493 | 13.0 | negation-j8 | 2 | 8 | 128 | 2.835 | 2.784 | 1.122 | 1.266 | 3.199× | — | ✓ |
+| char2 | random-binary-n15-b2493 | 13.0 | tuned-plain-j16 | 1 | 16 | 128 | 5.335 | 5.215 | 1.467 | 1.170 | 6.020× | — | ✓ |
+| char2 | random-binary-n15-b2493 | 13.0 | negation-j16 | 2 | 16 | 128 | 4.925 | 4.829 | 1.121 | 1.264 | 5.558× | — | ✓ |
+| char2 | random-binary-n17-bbe86 | 16.0 | frozen-plain | 1 | 16 | 128 | 5.681 | 5.496 | 1.657 | 1.322 | 6.410× | — | ✓ |
+| char2 | random-binary-n17-bbe86 | 16.0 | tuned-plain-j4 | 1 | 4 | 128 | 2.056 | 1.940 | 1.640 | 1.309 | 2.320× | — | ✓ |
+| char2 | random-binary-n17-bbe86 | 16.0 | negation-j4 | 2 | 4 | 128 | 1.870 | 1.745 | 1.488 | 1.679 | 2.110× | — | ✓ |
+| char2 | random-binary-n17-bbe86 | 16.0 | tuned-plain-j8 | 1 | 8 | 128 | 2.130 | 2.014 | 1.438 | 1.147 | 2.403× | — | ✓ |
+| char2 | random-binary-n17-bbe86 | 16.0 | negation-j8 | 2 | 8 | 128 | 1.847 | 1.737 | 1.179 | 1.330 | 2.084× | — | ✓ |
+| char2 | random-binary-n17-bbe86 | 16.0 | tuned-plain-j16 | 1 | 16 | 128 | 2.827 | 2.654 | 1.398 | 1.116 | 3.190× | — | ✓ |
+| char2 | random-binary-n17-bbe86 | 16.0 | negation-j16 | 2 | 16 | 128 | 2.412 | 2.323 | 1.007 | 1.136 | 2.722× | — | ✓ |
+| char2 | random-binary-n19-b5f57e | 18.0 | frozen-plain | 1 | 16 | 128 | 4.045 | 3.571 | 1.869 | 1.491 | 4.565× | — | ✓ |
+| char2 | random-binary-n19-b5f57e | 18.0 | tuned-plain-j4 | 1 | 4 | 128 | 1.910 | 1.740 | 1.642 | 1.310 | 2.155× | — | ✓ |
+| char2 | random-binary-n19-b5f57e | 18.0 | negation-j4 | 2 | 4 | 128 | 1.616 | 1.466 | 1.382 | 1.560 | 1.824× | — | ✓ |
+| char2 | random-binary-n19-b5f57e | 18.0 | tuned-plain-j8 | 1 | 8 | 128 | 1.784 | 1.720 | 1.386 | 1.106 | 2.013× | — | ✓ |
+| char2 | random-binary-n19-b5f57e | 18.0 | negation-j8 | 2 | 8 | 128 | 1.465 | 1.341 | 1.089 | 1.229 | 1.653× | — | ✓ |
+| char2 | random-binary-n19-b5f57e | 18.0 | tuned-plain-j16 | 1 | 16 | 128 | 2.038 | 1.945 | 1.273 | 1.016 | 2.300× | — | ✓ |
+| char2 | random-binary-n19-b5f57e | 18.0 | negation-j16 | 2 | 16 | 128 | 1.719 | 1.650 | 0.973 | 1.098 | 1.939× | — | ✓ |
+| char2 | random-binary-n21-b10cc7b | 19.0 | frozen-plain | 1 | 16 | 128 | 3.585 | 3.470 | 1.705 | 1.361 | 4.045× | — | ✓ |
+| char2 | random-binary-n21-b10cc7b | 19.0 | tuned-plain-j4 | 1 | 4 | 128 | 1.789 | 1.758 | 1.568 | 1.251 | 2.019× | — | ✓ |
+| char2 | random-binary-n21-b10cc7b | 19.0 | negation-j4 | 2 | 4 | 128 | 1.615 | 1.440 | 1.424 | 1.607 | 1.822× | — | ✓ |
+| char2 | random-binary-n21-b10cc7b | 19.0 | tuned-plain-j8 | 1 | 8 | 128 | 1.617 | 1.571 | 1.309 | 1.044 | 1.825× | — | ✓ |
+| char2 | random-binary-n21-b10cc7b | 19.0 | negation-j8 | 2 | 8 | 128 | 1.294 | 1.255 | 1.009 | 1.139 | 1.461× | — | ✓ |
+| char2 | random-binary-n21-b10cc7b | 19.0 | tuned-plain-j16 | 1 | 16 | 128 | 1.886 | 1.859 | 1.315 | 1.049 | 2.128× | — | ✓ |
+| char2 | random-binary-n21-b10cc7b | 19.0 | negation-j16 | 2 | 16 | 128 | 1.441 | 1.320 | 0.894 | 1.009 | 1.625× | — | ✓ |
+| char2 | random-binary-n23-b3a296b | 22.0 | frozen-plain | 1 | 16 | 128 | 2.376 | 2.213 | 1.770 | 1.412 | 2.681× | — | ✓ |
+| char2 | random-binary-n23-b3a296b | 22.0 | tuned-plain-j4 | 1 | 4 | 128 | 1.808 | 1.737 | 1.707 | 1.362 | 2.040× | — | ✓ |
+| char2 | random-binary-n23-b3a296b | 22.0 | negation-j4 | 2 | 4 | 128 | 1.924 | 1.661 | 1.840 | 2.076 | 2.171× | — | ✓ |
+| char2 | random-binary-n23-b3a296b | 22.0 | tuned-plain-j8 | 1 | 8 | 128 | 1.447 | 1.412 | 1.321 | 1.054 | 1.633× | — | ✓ |
+| char2 | random-binary-n23-b3a296b | 22.0 | negation-j8 | 2 | 8 | 128 | 1.142 | 1.132 | 1.028 | 1.160 | 1.288× | — | ✓ |
+| char2 | random-binary-n23-b3a296b | 22.0 | tuned-plain-j16 | 1 | 16 | 128 | 1.543 | 1.426 | 1.323 | 1.056 | 1.741× | — | ✓ |
+| char2 | random-binary-n23-b3a296b | 22.0 | negation-j16 | 2 | 16 | 128 | 1.131 | 1.072 | 0.925 | 1.043 | 1.276× | — | ✓ |
+| char2 | random-binary-n25-b1448ace | 24.0 | frozen-plain | 1 | 16 | 128 | 2.365 | 1.988 | 2.007 | 1.602 | 2.669× | — | ✓ |
+| char2 | random-binary-n25-b1448ace | 24.0 | tuned-plain-j4 | 1 | 4 | 128 | 1.787 | 1.774 | 1.734 | 1.384 | 2.017× | — | ✓ |
+| char2 | random-binary-n25-b1448ace | 24.0 | negation-j4 | 2 | 4 | 128 | 3.265 | 3.040 | 3.219 | 3.632 | 3.684× | — | ✓ |
+| char2 | random-binary-n25-b1448ace | 24.0 | tuned-plain-j8 | 1 | 8 | 128 | 1.418 | 1.331 | 1.353 | 1.079 | 1.600× | — | ✓ |
+| char2 | random-binary-n25-b1448ace | 24.0 | negation-j8 | 2 | 8 | 128 | 1.128 | 1.047 | 1.069 | 1.206 | 1.273× | — | ✓ |
+| char2 | random-binary-n25-b1448ace | 24.0 | tuned-plain-j16 | 1 | 16 | 128 | 1.409 | 1.438 | 1.298 | 1.036 | 1.590× | — | ✓ |
+| char2 | random-binary-n25-b1448ace | 24.0 | negation-j16 | 2 | 16 | 128 | 1.038 | 0.987 | 0.933 | 1.053 | 1.171× | — | ✓ |
+| char2 | random-binary-n27-b3bfa9c2 | 24.4 | frozen-plain | 1 | 16 | 128 | 1.989 | 1.752 | 1.685 | 1.345 | 2.244× | — | ✓ |
+| char2 | random-binary-n27-b3bfa9c2 | 24.4 | tuned-plain-j4 | 1 | 4 | 128 | 1.921 | 1.769 | 1.869 | 1.491 | 2.167× | — | ✓ |
+| char2 | random-binary-n27-b3bfa9c2 | 24.4 | negation-j4 | 2 | 4 | 128 | 2.956 | 2.670 | 2.914 | 3.288 | 3.336× | — | ✓ |
+| char2 | random-binary-n27-b3bfa9c2 | 24.4 | tuned-plain-j8 | 1 | 8 | 128 | 1.438 | 1.335 | 1.378 | 1.099 | 1.622× | — | ✓ |
+| char2 | random-binary-n27-b3bfa9c2 | 24.4 | negation-j8 | 2 | 8 | 128 | 1.147 | 1.079 | 1.093 | 1.234 | 1.294× | — | ✓ |
+| char2 | random-binary-n27-b3bfa9c2 | 24.4 | tuned-plain-j16 | 1 | 16 | 128 | 1.513 | 1.532 | 1.412 | 1.127 | 1.707× | — | ✓ |
+| char2 | random-binary-n27-b3bfa9c2 | 24.4 | negation-j16 | 2 | 16 | 128 | 1.060 | 0.954 | 0.967 | 1.091 | 1.196× | — | ✓ |
+
+| regime | walk | α (total ops ∝ r^α) | R² | sizes |
+|:--|:--|--:|--:|--:|
+| char2 | frozen-plain | 0.275 | 0.967 | 8 |
+| char2 | tuned-plain-j4 | 0.456 | 0.996 | 8 |
+| char2 | negation-j4 | 0.527 | 0.979 | 8 |
+| char2 | tuned-plain-j8 | 0.393 | 0.991 | 8 |
+| char2 | negation-j8 | 0.373 | 0.986 | 8 |
+| char2 | tuned-plain-j16 | 0.326 | 0.968 | 8 |
+| char2 | negation-j16 | 0.294 | 0.960 | 8 |
+
+Rho references: "complete"; 8 instances, all verified: true
+Report saved: research/ic_rho_reference_20260923/calibration/char2.json
+
+real	0m21.564s
+user	0m21.378s
+sys	0m0.034s

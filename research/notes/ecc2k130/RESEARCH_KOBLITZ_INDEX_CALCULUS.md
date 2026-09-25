@@ -3371,7 +3371,9 @@ floor, from `5.6×`.
 
 **Class: engineering.** `S` fell, and the ratio to the generic floor fell
 with it, but nothing the method *does* changed — no count the floor
-bounds moved. `S` is still `1.17×` rho.
+bounds moved. `S` is still `1.17×` rho. *(Single-target rho: against
+batch rho on the same 32 targets it is `6.51×`, see the 2026-09-23
+section below.)*
 
 ### An honest note on the unit, and on a discarded measurement
 
@@ -3406,3 +3408,45 @@ prediction did not account for.
 
 Against the rung this branch started from, the `n = 41` pipeline is now
 `33,589,843 → 4,625,665` adds, **7.26×** fewer operations.
+
+## The reference re-read: 32 targets against 32 targets — 2026-09-23
+
+Every `vs rho` in this thread divided the cost of 32 targets solved
+together, per target, by rho solving one target.  The repository's own
+multi-target rule (`src/ecc_safety.rs::check_multi_target_margin`;
+Kuhn–Struik) says `k` logarithms in one group cost about `√(kr)`
+together, so the reference for a 32-target figure is batch rho at
+`k = 32`.  The thread also counted each rho step and each stored pair of
+the folded table as one addition, and both do more.
+
+`RESEARCH_IC_BOUNDARY_LEDGER.md` §19 declared the protocol and the
+targets first, then measured all three corrections (evidence in
+`research/ic_rho_koblitz_20260923/`):
+
+- **Batch rho, on this thread's curves.**  The tuned walk on the signed
+  Frobenius classes costs `0.0300`, `0.0252` and `0.0219` a target at
+  `k = 32` on `K_0/GF(2^41)`, `2^53` and `2^61`.  That is `0.19–0.24` of
+  one target alone, as Kuhn–Struik predicts, with every one of 1,960
+  targets verified.
+- **The step.**  A rho step with a table-driven canonicalisation costs
+  `2.74–2.92` batched additions.  Bailey et al.'s step, which never
+  canonicalises, costs `1.38–1.41`.
+- **The stored pair.**  The folded build costs `6.14` batched additions a
+  stored pair on the `|F| = 15,744` base, not one.  It makes two passes
+  over every row, each an addition and a canonical key per pair.
+
+| figure | quoted | vs batch rho, as counted | rho's step and the build priced | one target alone |
+|:--|--:|--:|--:|--:|
+| aimed, packed base build | 1.17× | **6.51×** | 6.38× | 43.7× |
+| aimed at least-mentioned | 1.33× | 7.42× | 6.71× | 49.8× |
+| `n = 53`, window 477 | 7.12× | 61.4× | 22.2× | 448× |
+| `n = 53`, full scan, every phase priced | 19.36× | 167× | 59.7× | 1,257× |
+
+Class: accounting.  The index-calculus counts did not change, so the
+steps of this thread stand as measured between its own variants: `1.139×`
+for the packed selection, `1.311×` for the least-mention aim, `7.26×`
+from the first rung.  What changes is the distance to rho, and one line of
+the "What is left" table above: priced per stored pair, **the table build
+is 75% of the pipeline**, collection 20% and selection 5%.  That makes
+the build, not collection, the next lever here: a one-pass build would
+roughly halve it.

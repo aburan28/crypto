@@ -1,0 +1,84 @@
+  prime 12: bench-12bit r = 3889
+  prime 14: bench-14bit r = 16231
+  prime 16: bench-16bit r = 65003
+  prime 18: bench-18bit r = 261673
+  prime 20: bench-20bit r = 1046999
+  prime 22: generated-22bit-3914087 r = 3911069
+  prime 24: generated-24bit-11921101 r = 11919637
+  prime 26: generated-26bit-38313677 r = 38322941
+
+| regime | instance | log₂ r | walk | A | jumps | runs | S | S median | S walk | walk / own floor | vs floor (A=2) | vs matched | ok |
+|:--|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
+| prime | bench-12bit | 11.9 | frozen-plain | 1 | 16 | 128 | 15.3 | 14.8 | 1.826 | 1.457 | 17.3× | — | ✓ |
+| prime | bench-12bit | 11.9 | tuned-plain-j4 | 1 | 4 | 128 | 2.999 | 2.918 | 1.715 | 1.368 | 3.384× | — | ✓ |
+| prime | bench-12bit | 11.9 | negation-j4 | 2 | 4 | 128 | 2.592 | 2.534 | 1.366 | 1.541 | 2.925× | — | ✓ |
+| prime | bench-12bit | 11.9 | tuned-plain-j8 | 1 | 8 | 128 | 3.839 | 3.800 | 1.409 | 1.124 | 4.332× | — | ✓ |
+| prime | bench-12bit | 11.9 | negation-j8 | 2 | 8 | 128 | 3.624 | 3.512 | 1.219 | 1.375 | 4.090× | — | ✓ |
+| prime | bench-12bit | 11.9 | tuned-plain-j16 | 1 | 16 | 128 | 6.873 | 6.735 | 1.417 | 1.130 | 7.756× | — | ✓ |
+| prime | bench-12bit | 11.9 | negation-j16 | 2 | 16 | 128 | 6.708 | 6.430 | 1.275 | 1.439 | 7.569× | — | ✓ |
+| prime | bench-14bit | 14.0 | frozen-plain | 1 | 16 | 128 | 8.899 | 8.595 | 1.747 | 1.394 | 10.0× | — | ✓ |
+| prime | bench-14bit | 14.0 | tuned-plain-j4 | 1 | 4 | 128 | 2.387 | 2.402 | 1.622 | 1.294 | 2.693× | — | ✓ |
+| prime | bench-14bit | 14.0 | negation-j4 | 2 | 4 | 128 | 1.991 | 1.868 | 1.293 | 1.459 | 2.246× | — | ✓ |
+| prime | bench-14bit | 14.0 | tuned-plain-j8 | 1 | 8 | 128 | 2.578 | 2.520 | 1.270 | 1.013 | 2.909× | — | ✓ |
+| prime | bench-14bit | 14.0 | negation-j8 | 2 | 8 | 128 | 2.324 | 2.261 | 1.051 | 1.186 | 2.623× | — | ✓ |
+| prime | bench-14bit | 14.0 | tuned-plain-j16 | 1 | 16 | 128 | 3.994 | 3.956 | 1.188 | 0.948 | 4.506× | — | ✓ |
+| prime | bench-14bit | 14.0 | negation-j16 | 2 | 16 | 128 | 3.832 | 3.736 | 1.049 | 1.183 | 4.324× | — | ✓ |
+| prime | bench-16bit | 16.0 | frozen-plain | 1 | 16 | 128 | 5.656 | 5.083 | 1.747 | 1.394 | 6.382× | — | ✓ |
+| prime | bench-16bit | 16.0 | tuned-plain-j4 | 1 | 4 | 128 | 2.197 | 2.020 | 1.781 | 1.421 | 2.479× | — | ✓ |
+| prime | bench-16bit | 16.0 | negation-j4 | 2 | 4 | 128 | 1.901 | 1.710 | 1.521 | 1.716 | 2.145× | — | ✓ |
+| prime | bench-16bit | 16.0 | tuned-plain-j8 | 1 | 8 | 128 | 2.165 | 2.083 | 1.475 | 1.177 | 2.443× | — | ✓ |
+| prime | bench-16bit | 16.0 | negation-j8 | 2 | 8 | 128 | 1.847 | 1.726 | 1.182 | 1.333 | 2.084× | — | ✓ |
+| prime | bench-16bit | 16.0 | tuned-plain-j16 | 1 | 16 | 128 | 2.702 | 2.585 | 1.271 | 1.014 | 3.049× | — | ✓ |
+| prime | bench-16bit | 16.0 | negation-j16 | 2 | 16 | 128 | 2.413 | 2.267 | 1.003 | 1.132 | 2.723× | — | ✓ |
+| prime | bench-18bit | 18.0 | frozen-plain | 1 | 16 | 128 | 4.339 | 3.963 | 2.078 | 1.658 | 4.896× | — | ✓ |
+| prime | bench-18bit | 18.0 | tuned-plain-j4 | 1 | 4 | 128 | 1.981 | 1.845 | 1.706 | 1.361 | 2.235× | — | ✓ |
+| prime | bench-18bit | 18.0 | negation-j4 | 2 | 4 | 128 | 1.683 | 1.451 | 1.439 | 1.624 | 1.899× | — | ✓ |
+| prime | bench-18bit | 18.0 | tuned-plain-j8 | 1 | 8 | 128 | 1.806 | 1.707 | 1.403 | 1.119 | 2.038× | — | ✓ |
+| prime | bench-18bit | 18.0 | negation-j8 | 2 | 8 | 128 | 1.413 | 1.357 | 1.039 | 1.172 | 1.595× | — | ✓ |
+| prime | bench-18bit | 18.0 | tuned-plain-j16 | 1 | 16 | 128 | 2.131 | 2.008 | 1.357 | 1.082 | 2.405× | — | ✓ |
+| prime | bench-18bit | 18.0 | negation-j16 | 2 | 16 | 128 | 1.711 | 1.705 | 0.965 | 1.089 | 1.931× | — | ✓ |
+| prime | bench-20bit | 20.0 | frozen-plain | 1 | 16 | 128 | 3.047 | 2.647 | 1.871 | 1.493 | 3.439× | — | ✓ |
+| prime | bench-20bit | 20.0 | tuned-plain-j4 | 1 | 4 | 128 | 1.887 | 1.841 | 1.743 | 1.391 | 2.130× | — | ✓ |
+| prime | bench-20bit | 20.0 | negation-j4 | 2 | 4 | 128 | 2.087 | 1.922 | 1.959 | 2.211 | 2.355× | — | ✓ |
+| prime | bench-20bit | 20.0 | tuned-plain-j8 | 1 | 8 | 128 | 1.583 | 1.554 | 1.378 | 1.100 | 1.786× | — | ✓ |
+| prime | bench-20bit | 20.0 | negation-j8 | 2 | 8 | 128 | 1.218 | 1.118 | 1.026 | 1.157 | 1.374× | — | ✓ |
+| prime | bench-20bit | 20.0 | tuned-plain-j16 | 1 | 16 | 128 | 1.713 | 1.629 | 1.323 | 1.056 | 1.933× | — | ✓ |
+| prime | bench-20bit | 20.0 | negation-j16 | 2 | 16 | 128 | 1.375 | 1.361 | 0.996 | 1.124 | 1.552× | — | ✓ |
+| prime | generated-22bit-3914087 | 21.9 | frozen-plain | 1 | 16 | 128 | 2.558 | 2.204 | 1.911 | 1.524 | 2.886× | — | ✓ |
+| prime | generated-22bit-3914087 | 21.9 | tuned-plain-j4 | 1 | 4 | 128 | 1.900 | 1.839 | 1.795 | 1.432 | 2.144× | — | ✓ |
+| prime | generated-22bit-3914087 | 21.9 | negation-j4 | 2 | 4 | 128 | 2.010 | 1.876 | 1.922 | 2.169 | 2.268× | — | ✓ |
+| prime | generated-22bit-3914087 | 21.9 | tuned-plain-j8 | 1 | 8 | 128 | 1.555 | 1.468 | 1.423 | 1.136 | 1.755× | — | ✓ |
+| prime | generated-22bit-3914087 | 21.9 | negation-j8 | 2 | 8 | 128 | 1.091 | 1.033 | 0.975 | 1.101 | 1.231× | — | ✓ |
+| prime | generated-22bit-3914087 | 21.9 | tuned-plain-j16 | 1 | 16 | 128 | 1.484 | 1.493 | 1.261 | 1.006 | 1.675× | — | ✓ |
+| prime | generated-22bit-3914087 | 21.9 | negation-j16 | 2 | 16 | 128 | 1.136 | 1.099 | 0.925 | 1.044 | 1.282× | — | ✓ |
+| prime | generated-24bit-11921101 | 23.5 | frozen-plain | 1 | 16 | 128 | 2.279 | 2.034 | 1.926 | 1.537 | 2.571× | — | ✓ |
+| prime | generated-24bit-11921101 | 23.5 | tuned-plain-j4 | 1 | 4 | 128 | 1.779 | 1.670 | 1.722 | 1.374 | 2.008× | — | ✓ |
+| prime | generated-24bit-11921101 | 23.5 | negation-j4 | 2 | 4 | 128 | 3.021 | 2.906 | 2.972 | 3.353 | 3.409× | — | ✓ |
+| prime | generated-24bit-11921101 | 23.5 | tuned-plain-j8 | 1 | 8 | 128 | 1.377 | 1.272 | 1.306 | 1.042 | 1.554× | — | ✓ |
+| prime | generated-24bit-11921101 | 23.5 | negation-j8 | 2 | 8 | 128 | 1.100 | 1.040 | 1.033 | 1.166 | 1.241× | — | ✓ |
+| prime | generated-24bit-11921101 | 23.5 | tuned-plain-j16 | 1 | 16 | 128 | 1.415 | 1.287 | 1.288 | 1.028 | 1.597× | — | ✓ |
+| prime | generated-24bit-11921101 | 23.5 | negation-j16 | 2 | 16 | 128 | 1.053 | 1.015 | 0.932 | 1.052 | 1.188× | — | ✓ |
+| prime | generated-26bit-38313677 | 25.2 | frozen-plain | 1 | 16 | 128 | 2.712 | 1.892 | 2.508 | 2.001 | 3.060× | — | ✓ |
+| prime | generated-26bit-38313677 | 25.2 | tuned-plain-j4 | 1 | 4 | 128 | 1.959 | 1.785 | 1.911 | 1.525 | 2.210× | — | ✓ |
+| prime | generated-26bit-38313677 | 25.2 | negation-j4 | 2 | 4 | 128 | 3.142 | 2.947 | 3.104 | 3.502 | 3.546× | — | ✓ |
+| prime | generated-26bit-38313677 | 25.2 | tuned-plain-j8 | 1 | 8 | 128 | 1.340 | 1.272 | 1.291 | 1.030 | 1.512× | — | ✓ |
+| prime | generated-26bit-38313677 | 25.2 | negation-j8 | 2 | 8 | 128 | 1.065 | 1.072 | 1.021 | 1.152 | 1.201× | — | ✓ |
+| prime | generated-26bit-38313677 | 25.2 | tuned-plain-j16 | 1 | 16 | 128 | 1.331 | 1.276 | 1.251 | 0.998 | 1.501× | — | ✓ |
+| prime | generated-26bit-38313677 | 25.2 | negation-j16 | 2 | 16 | 128 | 0.990 | 0.940 | 0.916 | 1.034 | 1.117× | — | ✓ |
+
+| regime | walk | α (total ops ∝ r^α) | R² | sizes |
+|:--|:--|--:|--:|--:|
+| prime | frozen-plain | 0.302 | 0.952 | 8 |
+| prime | tuned-plain-j4 | 0.455 | 0.997 | 8 |
+| prime | negation-j4 | 0.532 | 0.986 | 8 |
+| prime | tuned-plain-j8 | 0.394 | 0.993 | 8 |
+| prime | negation-j8 | 0.372 | 0.985 | 8 |
+| prime | tuned-plain-j16 | 0.330 | 0.974 | 8 |
+| prime | negation-j16 | 0.297 | 0.962 | 8 |
+
+Rho references: "complete"; 8 instances, all verified: true
+Report saved: research/ic_rho_reference_20260923/calibration/prime.json
+
+real	2m57.037s
+user	2m55.926s
+sys	0m0.004s
