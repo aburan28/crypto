@@ -24,7 +24,12 @@ when `R=P+Q`. The five derived, disjoint cases are P=O (copy Q), P≠O and
 Q=O (copy P), finite same-x inverses (result O), finite same-x equal points
 with nonzero x (doubling), and finite different-x points (ordinary addition).
 The relation has an explicit branch-cover constraint and validates P, Q, and
-R, including canonical O. It imposes the following denominator-free equations
+R, including canonical O. For valid finite points with the same x, subtracting
+their curve equations gives `s(s+x)=0` for `s=yP+yQ`. Thus `s=x` is the
+inverse case; otherwise `s=0`, the points are equal, and `x≠0` permits the
+doubling slope. At `x=0`, these possibilities collapse and the point is
+self-inverse, so the inverse branch handles it. This proves the five cases
+cover every valid pair. The relation imposes the following denominator-free equations
 inside the slope branches:
 
 | Branch | Slope equation | Output equations |

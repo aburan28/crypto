@@ -36,7 +36,6 @@ def check_freeze() -> dict:
 
 
 def check_evidence(path: Path, frozen: dict) -> dict:
-    path = path.resolve()
     receipt = json.loads(path.read_text())
     assert receipt["domain"] == DOMAIN
     assert receipt["freeze_sha256"] == sha(HERE / "FROZEN.json")

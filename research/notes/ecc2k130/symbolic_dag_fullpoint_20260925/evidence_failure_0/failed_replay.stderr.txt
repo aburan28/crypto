@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/private/tmp/ecc2k130-symbolic-dag-fullpoint-20260925/research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/ci_replay.py", line 93, in <module>
+    main()
+    ~~~~^^
+  File "/private/tmp/ecc2k130-symbolic-dag-fullpoint-20260925/research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/ci_replay.py", line 87, in main
+    evidence = check_evidence(args.evidence, frozen) if args.evidence else None
+               ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/ecc2k130-symbolic-dag-fullpoint-20260925/research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/ci_replay.py", line 71, in check_evidence
+    subprocess.run([sys.executable, str(HERE / "verify.py"), "--producer",
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    str(producer), "--out", str(replay_file)],
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                   cwd=HERE, check=True, capture_output=True, text=True,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                   timeout=frozen["external_child_cap_seconds"])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['/Library/Frameworks/Python.framework/Versions/3.13/bin/python3', '/private/tmp/ecc2k130-symbolic-dag-fullpoint-20260925/research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/verify.py', '--producer', 'research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/evidence/producer', '--out', '/Volumes/SSD990/llm/tmp/tmpsybhgoly/verify.json']' returned non-zero exit status 1.

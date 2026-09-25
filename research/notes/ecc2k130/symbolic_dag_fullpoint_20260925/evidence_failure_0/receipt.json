@@ -1,0 +1,49 @@
+{
+  "attempts": [
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "/private/tmp/ecc2k130-symbolic-dag-fullpoint-20260925/research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/produce.py",
+        "--out",
+        "/private/tmp/ecc2k130-symbolic-dag-fullpoint-20260925/research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/evidence/producer"
+      ],
+      "child_cpu_seconds": 0.27991900000000003,
+      "child_peak_rss_bytes": 25001984,
+      "child_wall_seconds": 1.264572833024431,
+      "exit_code": 0,
+      "external_timeout": false,
+      "phase": "producer",
+      "result_sha256": "b89c4083bcbd7423af3ede19c27debd0c6c2d713f0848d23419426fe4649689a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "de11eb77a76ddc1cfa44d5af5e4f105a21441b57d1b4dd9731350786376ffe2a",
+      "utc_start": "2026-09-25T16:59:41.339427+00:00",
+      "wall_seconds": 1.3696256669936702
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "/private/tmp/ecc2k130-symbolic-dag-fullpoint-20260925/research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/verify.py",
+        "--producer",
+        "/private/tmp/ecc2k130-symbolic-dag-fullpoint-20260925/research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/evidence/producer",
+        "--out",
+        "/private/tmp/ecc2k130-symbolic-dag-fullpoint-20260925/research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/evidence/verify.json"
+      ],
+      "child_cpu_seconds": 0.275766,
+      "child_peak_rss_bytes": 24969216,
+      "child_wall_seconds": 1.659350000001723,
+      "exit_code": 0,
+      "external_timeout": false,
+      "phase": "verifier",
+      "result_sha256": "288097ace97122be033c4eb51df83dd2928f1de5c816488e8a62ea146bd6e7b0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fd80a6ad997fb293ddf75aee34501c2fdd42e18df98c9ed8476a096e36f214b2",
+      "utc_start": "2026-09-25T16:59:42.709825+00:00",
+      "wall_seconds": 1.738254458992742
+    }
+  ],
+  "decision": "PASS",
+  "domain": "k0-symbolic-dag-fullpoint-n2n3-v1",
+  "freeze_sha256": "db93bd6185255a65ffd5b0d838a09db9a89f0b25a742c1f6705745851a60e383",
+  "producer_sha256": "b89c4083bcbd7423af3ede19c27debd0c6c2d713f0848d23419426fe4649689a",
+  "verifier_sha256": "288097ace97122be033c4eb51df83dd2928f1de5c816488e8a62ea146bd6e7b0"
+}
