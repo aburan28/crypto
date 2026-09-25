@@ -66,7 +66,7 @@ exception controls outside the saved positive roster: (1) every slot
 contains `(0,1)`, giving an all-zero projected row; (2) slots 0 and 1
 contain `P∈F0` and `τ(−P)∈F1` for the lexicographically first
 non-torsion F0 point, remaining slots `(0,1)`, giving one repeated
-canonical column with coefficients `1` and `−λ`. Construct Q and T
+canonical column with coefficients `(1,−λ)` up to a common canonical sign. Construct Q and T
 from the raw sum by the exact cofactor-four decomposition, then replay
 both controls independently. These controls do not enter the 17,917
 archive-roster count.
@@ -149,3 +149,9 @@ running a row producer. Once `RESULT.md` exists, it requires the raw archive
 and receipt instead of accepting a hash-only pass.
 
 Frozen row manifest SHA-256: `e08fd485952cc8a3674964ed9b9d95f0f8fa1ba6978b9c0c8cc2713974eb5ae4`
+
+Post-outcome documentation clarification (source and input hashes unchanged):
+with the fixed lexicographic sign convention, beta=3 selects `P` and has
+coefficients `(1,−λ)`, while beta=7 selects `−P` and has `(−1,+λ)`. The
+predeclared test was full group-law reconstruction and a repeated column;
+this wording correction does not alter the test or any measured input.
