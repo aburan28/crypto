@@ -34,8 +34,12 @@
 use crypto_lib::cryptanalysis::ic_boundary::{
     koblitz_instance, BinaryGroup, CountedGroup, GroupOps, RhoClasses, SignedFrobeniusClasses,
 };
-use crypto_lib::cryptanalysis::koblitz_fast::{BatchScratch, FastPoint, FrobeniusCanon, FrobeniusPowers};
-use crypto_lib::cryptanalysis::koblitz_index_calculus::{build_subgroup_orbit_factor_base, PairSumTable};
+use crypto_lib::cryptanalysis::koblitz_fast::{
+    BatchScratch, FastPoint, FrobeniusCanon, FrobeniusPowers,
+};
+use crypto_lib::cryptanalysis::koblitz_index_calculus::{
+    build_subgroup_orbit_factor_base, PairSumTable,
+};
 use serde_json::json;
 use std::hint::black_box;
 use std::time::Instant;
@@ -65,15 +69,25 @@ fn main() {
     let mut ops = GroupOps::default();
     // Points of the subgroup, as a walk meets them.
     let pts: Vec<FastPoint> = (0..4096u64)
-        .map(|i| bg.mul(&mut ops, inst.generator, 1 + i.wrapping_mul(0x9E37_79B9_7F4A_7C15) % (inst.r - 1)))
+        .map(|i| {
+            bg.mul(
+                &mut ops,
+                inst.generator,
+                1 + i.wrapping_mul(0x9E37_79B9_7F4A_7C15) % (inst.r - 1),
+            )
+        })
         .collect();
     let g = pts[4095];
     let batch: Vec<FastPoint> = pts[..1024].to_vec();
     // Sixteen jumps, gathered per walk the way an r-adding walk would.
     let jumps: Vec<FastPoint> = pts[2048..2064].to_vec();
     let gathered: Vec<FastPoint> = batch.iter().map(|p| jumps[(p.x % 16) as usize]).collect();
-    let fb = (base_points > 0).then(|| build_subgroup_orbit_factor_base(kc, 1, base_points).expect("a factor base"));
-    let one_thread = rayon::ThreadPoolBuilder::new().num_threads(1).build().expect("a pool");
+    let fb = (base_points > 0)
+        .then(|| build_subgroup_orbit_factor_base(kc, 1, base_points).expect("a factor base"));
+    let one_thread = rayon::ThreadPoolBuilder::new()
+        .num_threads(1)
+        .build()
+        .expect("a pool");
 
     let mut scratch = BatchScratch::default();
     let mut out: Vec<FastPoint> = Vec::with_capacity(1024);
@@ -133,7 +147,9 @@ fn main() {
         if let Some(fb) = &fb {
             let t = Instant::now();
             let table = one_thread
-                .install(|| PairSumTable::build_folded_within(kc, fb, PairSumTable::DEFAULT_BYTE_BUDGET))
+                .install(|| {
+                    PairSumTable::build_folded_within(kc, fb, PairSumTable::DEFAULT_BYTE_BUDGET)
+                })
                 .expect("a folded table within the default budget");
             let ns = t.elapsed().as_secs_f64() * 1e9;
             stored = table.len();
@@ -142,8 +158,12 @@ fn main() {
         }
     }
     black_box(sink);
-    let canon_m = median_range(&canon_units)["median"].as_f64().unwrap_or(f64::NAN);
-    let bailey_m = median_range(&bailey_units)["median"].as_f64().unwrap_or(f64::NAN);
+    let canon_m = median_range(&canon_units)["median"]
+        .as_f64()
+        .unwrap_or(f64::NAN);
+    let bailey_m = median_range(&bailey_units)["median"]
+        .as_f64()
+        .unwrap_or(f64::NAN);
     let report = json!({
         "what_this_is": "Ledger section 19.1 (b) and (c): the price of a rho step and of a folded-table stored pair, in the Koblitz collection thread's unit (one batched affine addition, add_many over 1,024 points), measured in one process on one thread in interleaved rounds; each quantity is divided by the unit of its own round.",
         "curve": inst.name, "a": a, "n": degree, "r": inst.r, "log2_r": (inst.r as f64).log2(),

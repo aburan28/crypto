@@ -1,0 +1,11 @@
+==1682== Callgrind, a call-graph generating cache profiler
+==1682== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==1682== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==1682== Command: /home/user/crypto/target/release/ic run --degree 13 --curve-a 0 --summands 3 --solver groebner --random-target --seed 304 --batch 1 --json
+==1682== 
+==1682== For interactive control, run 'callgrind_control -h'.
+==1682== 
+==1682== Events    : Ir
+==1682== Collected : 762663559
+==1682== 
+==1682== I   refs:      762,663,559

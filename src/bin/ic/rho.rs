@@ -38,11 +38,10 @@ use rand::{Rng, SeedableRng};
 use serde_json::{json, Value};
 
 use crypto_lib::cryptanalysis::ic_boundary::{
-    find_prime_order_curve, generic_floor_ops, generic_floor_s, koblitz_instance, koblitz_instance_best,
-    prime_instance_for, random_binary_instance,
-    rho_cap, rho_reference, rho_reference_walk, roster_prime_instance, signed_frobenius_rho,
-    signed_frobenius_rho_batch, BinaryGroup, BinaryInstance, CountedGroup, GroupOps, PrimeInstance, RhoResult,
-    RhoWalk,
+    find_prime_order_curve, generic_floor_ops, generic_floor_s, koblitz_instance,
+    koblitz_instance_best, prime_instance_for, random_binary_instance, rho_cap, rho_reference,
+    rho_reference_walk, roster_prime_instance, signed_frobenius_rho, signed_frobenius_rho_batch,
+    BinaryGroup, BinaryInstance, CountedGroup, GroupOps, PrimeInstance, RhoResult, RhoWalk,
 };
 
 #[derive(Args, Clone, Debug)]
@@ -108,7 +107,11 @@ impl Walk {
         match self {
             Walk::FrozenPlain => "frozen-plain".into(),
             Walk::Tuned(w) => {
-                let base = if w.negation { "negation" } else { "tuned-plain" };
+                let base = if w.negation {
+                    "negation"
+                } else {
+                    "tuned-plain"
+                };
                 if w.jumps == 0 {
                     base.into()
                 } else {
@@ -118,7 +121,15 @@ impl Walk {
         }
     }
 
-    fn run<G: CountedGroup>(&self, g: &G, gen: G::Elt, q: G::Elt, r: u64, seed: u64, cap: u64) -> RhoResult {
+    fn run<G: CountedGroup>(
+        &self,
+        g: &G,
+        gen: G::Elt,
+        q: G::Elt,
+        r: u64,
+        seed: u64,
+        cap: u64,
+    ) -> RhoResult {
         match self {
             Walk::FrozenPlain => rho_reference(g, gen, q, r, seed, cap),
             Walk::Tuned(w) => rho_reference_walk(g, gen, q, r, seed, cap, *w),
@@ -132,7 +143,11 @@ fn summarise(walk: &str, r: u64, runs: &[(u64, u64, RhoResult)]) -> Value {
     let mean = |f: &dyn Fn(&RhoResult) -> f64| runs.iter().map(|(_, _, x)| f(x)).sum::<f64>() / n;
     let mut s: Vec<f64> = runs.iter().map(|(_, _, x)| x.s).collect();
     s.sort_by(f64::total_cmp);
-    let median = if s.is_empty() { f64::NAN } else { s[s.len() / 2] };
+    let median = if s.is_empty() {
+        f64::NAN
+    } else {
+        s[s.len() / 2]
+    };
     let a = runs.first().map_or(1, |(_, _, x)| x.automorphisms);
     let mut counters = serde_json::Map::new();
     for (_, _, x) in runs {
@@ -141,7 +156,9 @@ fn summarise(walk: &str, r: u64, runs: &[(u64, u64, RhoResult)]) -> Value {
             *e = json!(e.as_u64().unwrap_or(0) + v);
         }
     }
-    let verified = runs.iter().all(|(planted, _, x)| x.verified && x.recovered == Some(*planted));
+    let verified = runs
+        .iter()
+        .all(|(planted, _, x)| x.verified && x.recovered == Some(*planted));
     json!({
         "walk": walk,
         "method": runs.first().map(|(_, _, x)| x.method.clone()),
@@ -254,7 +271,9 @@ fn prime_exclusions(inst: &PrimeInstance) -> Value {
 fn binary_exclusions(inst: &BinaryInstance) -> Value {
     let n = inst.n;
     let f = &inst.fast.field;
-    let subfields: Vec<u32> = (1..n).filter(|k| n % k == 0 && f.sqr_k(inst.b, *k) == inst.b).collect();
+    let subfields: Vec<u32> = (1..n)
+        .filter(|k| n.is_multiple_of(*k) && f.sqr_k(inst.b, *k) == inst.b)
+        .collect();
     json!({
         "koblitz": inst.koblitz.is_some(),
         "defined_over_proper_subfields_of_degree": subfields,
@@ -275,8 +294,14 @@ fn walks_for(args: &RhoArgs) -> Vec<Walk> {
         walks.push(Walk::Tuned(RhoWalk::negation()));
     } else {
         for &j in &args.jumps {
-            walks.push(Walk::Tuned(RhoWalk { jumps: j, ..RhoWalk::plain() }));
-            walks.push(Walk::Tuned(RhoWalk { jumps: j, ..RhoWalk::negation() }));
+            walks.push(Walk::Tuned(RhoWalk {
+                jumps: j,
+                ..RhoWalk::plain()
+            }));
+            walks.push(Walk::Tuned(RhoWalk {
+                jumps: j,
+                ..RhoWalk::negation()
+            }));
         }
     }
     walks
@@ -296,7 +321,11 @@ fn fit(xs: &[f64], ys: &[f64]) -> Option<(f64, f64)> {
         return None;
     }
     let alpha = sxy / sxx;
-    let r2 = if syy == 0.0 { 1.0 } else { (sxy * sxy) / (sxx * syy) };
+    let r2 = if syy == 0.0 {
+        1.0
+    } else {
+        (sxy * sxy) / (sxx * syy)
+    };
     Some((alpha, r2))
 }
 
@@ -327,7 +356,14 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
         if !json_only {
             eprintln!("  prime {bits}: {} r = {}", inst.name, inst.r);
         }
-        let rows = ladder_instance(&inst.curve, inst.generator_point(), inst.r, args.seed, args.runs, &walks);
+        let rows = ladder_instance(
+            &inst.curve,
+            inst.generator_point(),
+            inst.r,
+            args.seed,
+            args.runs,
+            &walks,
+        );
         instances.push(json!({
             "regime": "prime", "instance": inst.name, "r": inst.r, "log2_r": (inst.r as f64).log2(),
             "cofactor": inst.cofactor, "exclusions": prime_exclusions(&inst), "walks": rows,
@@ -342,7 +378,14 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
         if !json_only {
             eprintln!("  char2 {n}: {} r = {}", inst.name, inst.r);
         }
-        let rows = ladder_instance(&BinaryGroup(&inst.fast), inst.generator, inst.r, args.seed, args.runs, &walks);
+        let rows = ladder_instance(
+            &BinaryGroup(&inst.fast),
+            inst.generator,
+            inst.r,
+            args.seed,
+            args.runs,
+            &walks,
+        );
         instances.push(json!({
             "regime": "char2", "instance": inst.name, "r": inst.r, "log2_r": (inst.r as f64).log2(),
             "cofactor": inst.cofactor, "exclusions": binary_exclusions(&inst), "walks": rows,
@@ -352,7 +395,8 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
         if !(5..=62).contains(&n) {
             return Err(format!("field degrees must lie in 5..=62, got {n}"));
         }
-        let inst = koblitz_instance_best(n).ok_or_else(|| format!("no usable Koblitz curve at n = {n}"))?;
+        let inst = koblitz_instance_best(n)
+            .ok_or_else(|| format!("no usable Koblitz curve at n = {n}"))?;
         if !json_only {
             eprintln!("  koblitz {n}: {} r = {}", inst.name, inst.r);
         }
@@ -380,7 +424,9 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
             .fold(f64::NAN, f64::min);
         for w in &rows {
             let s = w["mean_s"].as_f64().unwrap_or(f64::NAN);
-            let jumps = w["counters_summed"]["jumps"].as_u64().map(|j| j / w["runs"].as_u64().unwrap_or(1).max(1));
+            let jumps = w["counters_summed"]["jumps"]
+                .as_u64()
+                .map(|j| j / w["runs"].as_u64().unwrap_or(1).max(1));
             md.push_str(&format!(
                 "| {} | {} | {:.1} | {} | {} | {} | {} | {} | {} | {} | {} | {}× | {} | {} |\n",
                 inst["regime"].as_str().unwrap_or("?"),
@@ -395,8 +441,16 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
                 fmt(w["mean_s_walk"].as_f64().unwrap_or(f64::NAN)),
                 fmt(w["walk_over_own_floor"].as_f64().unwrap_or(f64::NAN)),
                 fmt(s / generic_floor_s(2.0)),
-                if matched.is_finite() { format!("{}×", fmt(s / matched)) } else { "—".into() },
-                if w["all_verified"] == true { "✓" } else { "✗" },
+                if matched.is_finite() {
+                    format!("{}×", fmt(s / matched))
+                } else {
+                    "—".into()
+                },
+                if w["all_verified"] == true {
+                    "✓"
+                } else {
+                    "✗"
+                },
             ));
         }
     }
@@ -419,7 +473,10 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
                 .iter()
                 .filter(|i| i["regime"] == regime)
                 .filter_map(|i| {
-                    let row = i["walks"].as_array()?.iter().find(|x| x["walk"] == name.as_str())?;
+                    let row = i["walks"]
+                        .as_array()?
+                        .iter()
+                        .find(|x| x["walk"] == name.as_str())?;
                     Some((i["log2_r"].as_f64()?, row["mean_gae"].as_f64()?.log2()))
                 })
                 .collect();
@@ -429,14 +486,19 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
             let xs: Vec<f64> = pts.iter().map(|p| p.0).collect();
             let ys: Vec<f64> = pts.iter().map(|p| p.1).collect();
             if let Some((alpha, r2)) = fit(&xs, &ys) {
-                md.push_str(&format!("| {regime} | {name} | {alpha:.3} | {r2:.3} | {} |\n", pts.len()));
+                md.push_str(&format!(
+                    "| {regime} | {name} | {alpha:.3} | {r2:.3} | {} |\n",
+                    pts.len()
+                ));
                 fits.push(json!({"regime": regime, "walk": name, "alpha": alpha, "r_squared": r2, "sizes": pts.len()}));
             }
         }
     }
-    let all_verified = instances
-        .iter()
-        .all(|i| i["walks"].as_array().is_some_and(|w| w.iter().all(|x| x["all_verified"] == true)));
+    let all_verified = instances.iter().all(|i| {
+        i["walks"]
+            .as_array()
+            .is_some_and(|w| w.iter().all(|x| x["all_verified"] == true))
+    });
     if !json_only {
         eprintln!("\n{md}");
     }
@@ -470,10 +532,22 @@ fn same_run(recorded: &Value, rerun: &RhoResult) -> Result<(), String> {
     let checks = [
         ("steps", u("steps"), Some(rerun.steps)),
         ("walks", u("walks"), Some(rerun.walks)),
-        ("distinguished_points", u("distinguished_points"), Some(rerun.distinguished_points)),
+        (
+            "distinguished_points",
+            u("distinguished_points"),
+            Some(rerun.distinguished_points),
+        ),
         ("adds", ops["adds"].as_u64(), Some(rerun.group_ops.adds)),
-        ("doubles", ops["doubles"].as_u64(), Some(rerun.group_ops.doubles)),
-        ("scalar_mults", ops["scalar_mults"].as_u64(), Some(rerun.group_ops.scalar_mults)),
+        (
+            "doubles",
+            ops["doubles"].as_u64(),
+            Some(rerun.group_ops.doubles),
+        ),
+        (
+            "scalar_mults",
+            ops["scalar_mults"].as_u64(),
+            Some(rerun.group_ops.scalar_mults),
+        ),
         ("recovered", recorded["recovered"].as_u64(), rerun.recovered),
     ];
     for (what, a, b) in checks {
@@ -495,7 +569,9 @@ fn rebuild_prime(name: &str, bits_list: &[u32], seed: u64) -> Option<PrimeInstan
             return Some(inst);
         }
     }
-    (8..=20).filter_map(roster_prime_instance).find(|i| i.name == name)
+    (8..=20)
+        .filter_map(roster_prime_instance)
+        .find(|i| i.name == name)
 }
 
 /// One ledger instance of a frozen `ic boundary` report, re-priced.
@@ -511,8 +587,18 @@ fn reprice_boundary_instance(
     let seed = cfg["seed"].as_u64().ok_or("config without seed")?;
     let rho_repeats = cfg["rho_repeats"].as_u64().unwrap_or(1).max(1) as usize;
     let multiple = cfg["rho_cap_multiple"].as_f64().unwrap_or(64.0);
-    let seeds: Vec<u64> = inst["seeds"].as_array().ok_or("no seeds")?.iter().filter_map(Value::as_u64).collect();
-    let targets: Vec<u64> = inst["targets"].as_array().ok_or("no targets")?.iter().filter_map(Value::as_u64).collect();
+    let seeds: Vec<u64> = inst["seeds"]
+        .as_array()
+        .ok_or("no seeds")?
+        .iter()
+        .filter_map(Value::as_u64)
+        .collect();
+    let targets: Vec<u64> = inst["targets"]
+        .as_array()
+        .ok_or("no targets")?
+        .iter()
+        .filter_map(Value::as_u64)
+        .collect();
     let frozen_rho = inst["rho"].as_array().cloned().unwrap_or_default();
     if regime == "koblitz" {
         // Already priced against the signed-Frobenius walk (A = 2n).
@@ -528,37 +614,46 @@ fn reprice_boundary_instance(
     let mut per_rep_matched: Vec<f64> = Vec::new();
     let mut per_rep_frozen: Vec<f64> = Vec::new();
     let cap = rho_cap(r, multiple);
-    let mut run_one = |g_run: &mut dyn FnMut(u64, u64, RhoWalkOrPlain) -> RhoResult| -> Result<(), String> {
-        for (rep, (&seed_rep, &d)) in seeds.iter().zip(&targets).enumerate() {
-            let (mut sum_m, mut sum_f) = (0.0, 0.0);
-            for k in 0..rho_repeats {
-                let rho_seed = seed_rep ^ (k as u64 * 0x5EED);
-                let plain = g_run(d, rho_seed, RhoWalkOrPlain::Plain);
-                let recorded = frozen_rho
-                    .get(rep * rho_repeats + k)
-                    .ok_or_else(|| format!("{name}: no recorded rho run {rep}/{k}"))?;
-                if let Err(why) = same_run(recorded, &plain) {
-                    identity.push(format!("{name} rep {rep} run {k}: {why}"));
+    let mut run_one =
+        |g_run: &mut dyn FnMut(u64, u64, RhoWalkOrPlain) -> RhoResult| -> Result<(), String> {
+            for (rep, (&seed_rep, &d)) in seeds.iter().zip(&targets).enumerate() {
+                let (mut sum_m, mut sum_f) = (0.0, 0.0);
+                for k in 0..rho_repeats {
+                    let rho_seed = seed_rep ^ (k as u64 * 0x5EED);
+                    let plain = g_run(d, rho_seed, RhoWalkOrPlain::Plain);
+                    let recorded = frozen_rho
+                        .get(rep * rho_repeats + k)
+                        .ok_or_else(|| format!("{name}: no recorded rho run {rep}/{k}"))?;
+                    if let Err(why) = same_run(recorded, &plain) {
+                        identity.push(format!("{name} rep {rep} run {k}: {why}"));
+                    }
+                    sum_f += plain.s;
+                    let matched = g_run(d, rho_seed, RhoWalkOrPlain::Negation);
+                    sum_m += matched.s;
+                    matched_runs.push(matched);
                 }
-                sum_f += plain.s;
-                let matched = g_run(d, rho_seed, RhoWalkOrPlain::Negation);
-                sum_m += matched.s;
-                matched_runs.push(matched);
+                per_rep_matched.push(sum_m / rho_repeats as f64);
+                per_rep_frozen.push(sum_f / rho_repeats as f64);
             }
-            per_rep_matched.push(sum_m / rho_repeats as f64);
-            per_rep_frozen.push(sum_f / rho_repeats as f64);
-        }
-        Ok(())
-    };
+            Ok(())
+        };
     let exclusions = match regime.as_str() {
         "prime" => {
             let bits_list: Vec<u32> = cfg["prime_bits"]
                 .as_array()
-                .map(|a| a.iter().filter_map(|b| b.as_u64().map(|b| b as u32)).collect())
+                .map(|a| {
+                    a.iter()
+                        .filter_map(|b| b.as_u64().map(|b| b as u32))
+                        .collect()
+                })
                 .unwrap_or_default();
-            let p = rebuild_prime(&name, &bits_list, seed).ok_or_else(|| format!("cannot rebuild {name}"))?;
+            let p = rebuild_prime(&name, &bits_list, seed)
+                .ok_or_else(|| format!("cannot rebuild {name}"))?;
             if p.r != r {
-                return Err(format!("{name}: rebuilt r = {} but the report has {r}", p.r));
+                return Err(format!(
+                    "{name}: rebuilt r = {} but the report has {r}",
+                    p.r
+                ));
             }
             let g = p.generator_point();
             run_one(&mut |d, s, which| {
@@ -566,14 +661,19 @@ fn reprice_boundary_instance(
                 let q = p.curve.mul(&mut ops, g, d);
                 match which {
                     RhoWalkOrPlain::Plain => rho_reference(&p.curve, g, q, r, s, cap),
-                    RhoWalkOrPlain::Negation => rho_reference_walk(&p.curve, g, q, r, s, cap, RhoWalk::negation()),
+                    RhoWalkOrPlain::Negation => {
+                        rho_reference_walk(&p.curve, g, q, r, s, cap, RhoWalk::negation())
+                    }
                 }
             })?;
             prime_exclusions(&p)
         }
         "char2" => {
-            let n = inst["curve"]["field"]["degree"].as_u64().ok_or("binary instance without a degree")? as u32;
-            let b = random_binary_instance(n, seed, 8).ok_or_else(|| format!("cannot rebuild {name}"))?;
+            let n = inst["curve"]["field"]["degree"]
+                .as_u64()
+                .ok_or("binary instance without a degree")? as u32;
+            let b = random_binary_instance(n, seed, 8)
+                .ok_or_else(|| format!("cannot rebuild {name}"))?;
             if b.name != name || b.r != r {
                 return Err(format!("{name}: rebuilt {} with r = {}", b.name, b.r));
             }
@@ -583,14 +683,17 @@ fn reprice_boundary_instance(
                 let q = bg.mul(&mut ops, b.generator, d);
                 match which {
                     RhoWalkOrPlain::Plain => rho_reference(&bg, b.generator, q, r, s, cap),
-                    RhoWalkOrPlain::Negation => rho_reference_walk(&bg, b.generator, q, r, s, cap, RhoWalk::negation()),
+                    RhoWalkOrPlain::Negation => {
+                        rho_reference_walk(&bg, b.generator, q, r, s, cap, RhoWalk::negation())
+                    }
                 }
             })?;
             binary_exclusions(&b)
         }
         other => return Err(format!("unknown regime {other}")),
     };
-    let matched_mean = matched_runs.iter().map(|x| x.s).sum::<f64>() / matched_runs.len().max(1) as f64;
+    let matched_mean =
+        matched_runs.iter().map(|x| x.s).sum::<f64>() / matched_runs.len().max(1) as f64;
     let matched_verified = matched_runs.iter().all(|x| x.verified);
     let frozen_mean = inst["rho_s_mean"].as_f64().unwrap_or(f64::NAN);
     // Variant rows: which repeat each belongs to, by the logarithm it
@@ -605,7 +708,9 @@ fn reprice_boundary_instance(
         if !names.contains(&vname) {
             names.push(vname.clone());
         }
-        let rep = v["recovered"].as_u64().and_then(|d| targets.iter().position(|&t| t == d));
+        let rep = v["recovered"]
+            .as_u64()
+            .and_then(|d| targets.iter().position(|&t| t == d));
         let s = v["s"].as_f64().unwrap_or(f64::NAN);
         rows.push(json!({
             "variant": vname, "rep": rep, "s": s,
@@ -657,14 +762,24 @@ enum RhoWalkOrPlain {
 /// A frozen `ic bench` report, re-priced.  The instance is rebuilt from
 /// the recorded name and the seed the rho runs carry (`seed ^
 /// (0x5248_4F00 + k)`), then checked against the recorded order.
-fn reprice_bench(doc: &Value, max_cofactor: u64, identity: &mut Vec<String>) -> Result<Value, String> {
-    let name = doc["instance"].as_str().ok_or("bench report without an instance")?.to_string();
+fn reprice_bench(
+    doc: &Value,
+    max_cofactor: u64,
+    identity: &mut Vec<String>,
+) -> Result<Value, String> {
+    let name = doc["instance"]
+        .as_str()
+        .ok_or("bench report without an instance")?
+        .to_string();
     let regime = doc["regime"].as_str().unwrap_or("?").to_string();
     let per_run = doc["rho_reference"]["per_run"]
         .as_array()
         .cloned()
         .ok_or("bench report without rho_reference.per_run")?;
-    let first_seed = per_run.first().and_then(|x| x["seed"].as_u64()).ok_or("no rho runs")?;
+    let first_seed = per_run
+        .first()
+        .and_then(|x| x["seed"].as_u64())
+        .ok_or("no rho runs")?;
     let seed = first_seed ^ 0x5248_4F00;
     let r = doc["rows"][0]["r"].as_u64().ok_or("no row carries r")?;
     let max_steps = (generic_floor_ops(r as f64, 1.0) * 64.0) as u64 + 4096;
@@ -681,25 +796,31 @@ fn reprice_bench(doc: &Value, max_cofactor: u64, identity: &mut Vec<String>) -> 
         let steps = recorded["steps"].as_u64();
         let s = recorded["s"].as_f64().unwrap_or(f64::NAN);
         if steps != Some(rerun.steps) || (s - rerun.s).abs() > 1e-9 * s.abs().max(1.0) {
-            return Err(format!("recorded steps {steps:?} S {s}, re-run steps {} S {}", rerun.steps, rerun.s));
+            return Err(format!(
+                "recorded steps {steps:?} S {s}, re-run steps {} S {}",
+                rerun.steps, rerun.s
+            ));
         }
         Ok(())
     };
     let mut matched: Vec<RhoResult> = Vec::new();
     let mut signed: Vec<RhoResult> = Vec::new();
-    let exclusions;
-    match regime.as_str() {
+    let exclusions = match regime.as_str() {
         "char2" | "koblitz" => {
             let inst = if regime == "char2" {
                 let n = degree(&name).ok_or_else(|| format!("no degree in {name}"))?;
-                random_binary_instance(n, seed, max_cofactor).ok_or_else(|| format!("cannot rebuild {name}"))?
+                random_binary_instance(n, seed, max_cofactor)
+                    .ok_or_else(|| format!("cannot rebuild {name}"))?
             } else {
                 let n: u32 = name
                     .split("2^")
                     .nth(1)
                     .and_then(|t| t.trim_end_matches(')').parse().ok())
                     .ok_or_else(|| format!("no degree in {name}"))?;
-                koblitz_instance(1, n).filter(|i| i.name == name).or_else(|| koblitz_instance(0, n)).ok_or("no Koblitz curve")?
+                koblitz_instance(1, n)
+                    .filter(|i| i.name == name)
+                    .or_else(|| koblitz_instance(0, n))
+                    .ok_or("no Koblitz curve")?
             };
             if inst.name != name || inst.r != r {
                 return Err(format!("{name}: rebuilt {} with r = {}", inst.name, inst.r));
@@ -712,14 +833,22 @@ fn reprice_bench(doc: &Value, max_cofactor: u64, identity: &mut Vec<String>) -> 
                 if let Err(why) = check(recorded, &plain) {
                     identity.push(format!("{name} run {k}: {why}"));
                 }
-                matched.push(rho_reference_walk(&bg, inst.generator, q, r, *s, max_steps, RhoWalk::negation()));
+                matched.push(rho_reference_walk(
+                    &bg,
+                    inst.generator,
+                    q,
+                    r,
+                    *s,
+                    max_steps,
+                    RhoWalk::negation(),
+                ));
                 if inst.koblitz.is_some() {
                     if let Some(x) = signed_frobenius_rho(&inst, q, *planted, *s) {
                         signed.push(x);
                     }
                 }
             }
-            exclusions = binary_exclusions(&inst);
+            binary_exclusions(&inst)
         }
         "prime" => {
             let inst = (8..=20)
@@ -734,14 +863,23 @@ fn reprice_bench(doc: &Value, max_cofactor: u64, identity: &mut Vec<String>) -> 
                 if let Err(why) = check(recorded, &plain) {
                     identity.push(format!("{name} run {k}: {why}"));
                 }
-                matched.push(rho_reference_walk(&inst.curve, g, q, r, *s, max_steps, RhoWalk::negation()));
+                matched.push(rho_reference_walk(
+                    &inst.curve,
+                    g,
+                    q,
+                    r,
+                    *s,
+                    max_steps,
+                    RhoWalk::negation(),
+                ));
             }
-            exclusions = prime_exclusions(&inst);
+            prime_exclusions(&inst)
         }
         other => return Err(format!("unknown regime {other}")),
-    }
+    };
     let mean = |v: &[RhoResult]| v.iter().map(|x| x.s).sum::<f64>() / v.len().max(1) as f64;
-    let (mut matched_mean, mut method) = (mean(&matched), matched.first().map(|x| x.method.clone()));
+    let (mut matched_mean, mut method) =
+        (mean(&matched), matched.first().map(|x| x.method.clone()));
     let signed_mean = (!signed.is_empty()).then(|| mean(&signed));
     if let Some(sm) = signed_mean {
         if sm < matched_mean && signed.iter().all(|x| x.verified) {
@@ -750,7 +888,11 @@ fn reprice_bench(doc: &Value, max_cofactor: u64, identity: &mut Vec<String>) -> 
         }
     }
     let frozen_mean = doc["rho_reference"]["mean_s"].as_f64().unwrap_or(f64::NAN);
-    let verified = matched.iter().all(|x| x.verified) && draws.iter().zip(&matched).all(|((p, _, _), x)| x.recovered == Some(*p));
+    let verified = matched.iter().all(|x| x.verified)
+        && draws
+            .iter()
+            .zip(&matched)
+            .all(|((p, _, _), x)| x.recovered == Some(*p));
     let rows: Vec<Value> = doc["rows"]
         .as_array()
         .cloned()
@@ -782,7 +924,8 @@ fn reprice_bench(doc: &Value, max_cofactor: u64, identity: &mut Vec<String>) -> 
 fn reprice(path: &PathBuf, args: &RhoArgs, json_only: bool) -> Result<Value, String> {
     let bytes = std::fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let hash = blake3::hash(&bytes).to_hex().to_string();
-    let doc: Value = serde_json::from_slice(&bytes).map_err(|e| format!("{}: {e}", path.display()))?;
+    let doc: Value =
+        serde_json::from_slice(&bytes).map_err(|e| format!("{}: {e}", path.display()))?;
     let mut identity: Vec<String> = Vec::new();
     let mut progress = |line: &str| {
         if !json_only {
@@ -793,18 +936,31 @@ fn reprice(path: &PathBuf, args: &RhoArgs, json_only: bool) -> Result<Value, Str
         Some("boundary") => {
             let cfg = &doc["config"];
             let mut out = Vec::new();
-            for inst in doc["ledger"]["instances"].as_array().cloned().unwrap_or_default() {
-                out.push(reprice_boundary_instance(&inst, cfg, &mut identity, &mut progress)?);
+            for inst in doc["ledger"]["instances"]
+                .as_array()
+                .cloned()
+                .unwrap_or_default()
+            {
+                out.push(reprice_boundary_instance(
+                    &inst,
+                    cfg,
+                    &mut identity,
+                    &mut progress,
+                )?);
             }
             ("boundary", out)
         }
-        Some("bench") => ("bench", vec![reprice_bench(&doc, args.max_cofactor, &mut identity)?]),
+        Some("bench") => (
+            "bench",
+            vec![reprice_bench(&doc, args.max_cofactor, &mut identity)?],
+        ),
         other => return Err(format!("cannot re-price a report of operation {other:?}")),
     };
     let identity_ok = identity.is_empty();
-    let matched_ok = instances
-        .iter()
-        .all(|i| i.get("matched_reference").map_or(true, |m| m["all_verified"] == true));
+    let matched_ok = instances.iter().all(|i| {
+        i.get("matched_reference")
+            .is_none_or(|m| m["all_verified"] == true)
+    });
     // The re-priced table.
     let mut md = String::from(
         "| instance | log₂ r | row | S | vs rho (frozen, A = 1) | vs rho (matched) | vs floor (A = 2) |\n|:--|--:|:--|--:|--:|--:|--:|\n",
@@ -814,7 +970,10 @@ fn reprice(path: &PathBuf, args: &RhoArgs, json_only: bool) -> Result<Value, Str
             "boundary" => inst["variants"].as_array().cloned().unwrap_or_default(),
             _ => inst["rows"].as_array().cloned().unwrap_or_default(),
         };
-        if let (Some(f), Some(m)) = (inst["frozen_reference"]["mean_s"].as_f64(), inst["matched_reference"]["mean_s"].as_f64()) {
+        if let (Some(f), Some(m)) = (
+            inst["frozen_reference"]["mean_s"].as_f64(),
+            inst["matched_reference"]["mean_s"].as_f64(),
+        ) {
             md.push_str(&format!(
                 "| {} | {:.1} | **rho** (frozen {} → matched {}) | | | | |\n",
                 inst["instance"].as_str().unwrap_or("?"),
@@ -824,12 +983,18 @@ fn reprice(path: &PathBuf, args: &RhoArgs, json_only: bool) -> Result<Value, Str
             ));
         }
         for row in label_rows {
-            let s = row["mean_s"].as_f64().or(row["s"].as_f64()).unwrap_or(f64::NAN);
+            let s = row["mean_s"]
+                .as_f64()
+                .or(row["s"].as_f64())
+                .unwrap_or(f64::NAN);
             md.push_str(&format!(
                 "| {} | {:.1} | {} | {} | {}× | {}× | {}× |\n",
                 inst["instance"].as_str().unwrap_or("?"),
                 inst["log2_r"].as_f64().unwrap_or(0.0),
-                row["variant"].as_str().or(row["label"].as_str()).unwrap_or("?"),
+                row["variant"]
+                    .as_str()
+                    .or(row["label"].as_str())
+                    .unwrap_or("?"),
                 fmt(s),
                 fmt(row["vs_rho_frozen"].as_f64().unwrap_or(f64::NAN)),
                 fmt(row["vs_rho_matched"].as_f64().unwrap_or(f64::NAN)),
@@ -840,7 +1005,10 @@ fn reprice(path: &PathBuf, args: &RhoArgs, json_only: bool) -> Result<Value, Str
     if !json_only {
         eprintln!("\n{md}");
         if !identity_ok {
-            eprintln!("  IDENTITY FAILED: {} frozen runs did not reproduce", identity.len());
+            eprintln!(
+                "  IDENTITY FAILED: {} frozen runs did not reproduce",
+                identity.len()
+            );
         }
     }
     Ok(json!({
@@ -893,7 +1061,11 @@ fn mean_sd(v: &[f64]) -> (f64, f64) {
         return (f64::NAN, f64::NAN);
     }
     let m = v.iter().sum::<f64>() / n;
-    let var = if v.len() > 1 { v.iter().map(|x| (x - m).powi(2)).sum::<f64>() / (n - 1.0) } else { 0.0 };
+    let var = if v.len() > 1 {
+        v.iter().map(|x| (x - m).powi(2)).sum::<f64>() / (n - 1.0)
+    } else {
+        0.0
+    };
     (m, var.sqrt())
 }
 
@@ -907,7 +1079,8 @@ fn batch(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
         if a > 1 || !(5..=62).contains(&n) {
             return Err(format!("no Koblitz curve K_{a} / GF(2^{n}) here"));
         }
-        let inst = koblitz_instance(a, n).ok_or_else(|| format!("K_{a} / GF(2^{n}) is not usable"))?;
+        let inst =
+            koblitz_instance(a, n).ok_or_else(|| format!("K_{a} / GF(2^{n}) is not usable"))?;
         curves.push((a, inst));
     }
     if args.batch_sizes.is_empty() || args.batch_sizes.contains(&0) {
@@ -922,7 +1095,12 @@ fn batch(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
         let bg = BinaryGroup(&inst.fast);
         let floor = generic_floor_s(2.0 * n as f64);
         if !json_only {
-            eprintln!("  {}: r = {r} (2^{:.2}), A = {}", inst.name, (r as f64).log2(), 2 * n);
+            eprintln!(
+                "  {}: r = {r} (2^{:.2}), A = {}",
+                inst.name,
+                (r as f64).log2(),
+                2 * n
+            );
         }
         let mut sizes = Vec::new();
         let mut single_mean = None;
@@ -938,9 +1116,17 @@ fn batch(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
                 let mut rng = StdRng::seed_from_u64(tseed);
                 let planted: Vec<u64> = (0..k).map(|_| rng.gen_range(1..r)).collect();
                 let mut ops = GroupOps::default();
-                let targets: Vec<_> = planted.iter().map(|&d| bg.mul(&mut ops, inst.generator, d)).collect();
-                let res = signed_frobenius_rho_batch(inst, &targets, wseed).ok_or("not a Koblitz instance")?;
-                let ok = res.per_target.iter().zip(&planted).all(|(t, &d)| t.verified && t.recovered == Some(d));
+                let targets: Vec<_> = planted
+                    .iter()
+                    .map(|&d| bg.mul(&mut ops, inst.generator, d))
+                    .collect();
+                let res = signed_frobenius_rho_batch(inst, &targets, wseed)
+                    .ok_or("not a Koblitz instance")?;
+                let ok = res
+                    .per_target
+                    .iter()
+                    .zip(&planted)
+                    .all(|(t, &d)| t.verified && t.recovered == Some(d));
                 all_ok &= ok;
                 own += res.counters["solved_on_own_trail"];
                 earlier += res.counters["solved_on_an_earlier_trail"];
@@ -1000,9 +1186,11 @@ fn batch(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
             "curve": inst.describe(), "exclusions": binary_exclusions(inst), "sizes": sizes,
         }));
     }
-    let all_verified = out
-        .iter()
-        .all(|c| c["sizes"].as_array().is_some_and(|s| s.iter().all(|x| x["all_verified"] == true)));
+    let all_verified = out.iter().all(|c| {
+        c["sizes"]
+            .as_array()
+            .is_some_and(|s| s.iter().all(|x| x["all_verified"] == true))
+    });
     if !json_only {
         eprintln!("\n{md}");
     }
@@ -1031,7 +1219,10 @@ pub fn run(args: RhoArgs, json_only: bool) -> Result<Value, String> {
     if !args.batch_koblitz.is_empty() {
         return batch(&args, json_only);
     }
-    if args.prime_bits.is_empty() && args.char2_degrees.is_empty() && args.koblitz_degrees.is_empty() {
+    if args.prime_bits.is_empty()
+        && args.char2_degrees.is_empty()
+        && args.koblitz_degrees.is_empty()
+    {
         return Err("give --prime-bits, --char2-degrees and/or --koblitz-degrees, --batch-koblitz a/n, or --reprice FILE".into());
     }
     ladder(&args, json_only)

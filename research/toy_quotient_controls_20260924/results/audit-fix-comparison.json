@@ -1,0 +1,17 @@
+{
+  "status": "EXACT_DECOMPOSITION_MATCH",
+  "cases": 1920,
+  "matched_fields": [
+    "generators",
+    "roots",
+    "completion_degree",
+    "phase_opcodes",
+    "total_opcodes",
+    "verified_solution_sha256",
+    "oracle_solution_sha256",
+    "traces"
+  ],
+  "changed_scope": "independent F5B budget instrumentation and receipt; run-001 superseded",
+  "before": "run-001/raw.json.gz",
+  "after": "run-002/raw.json.gz"
+}

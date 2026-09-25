@@ -115,8 +115,7 @@ use crate::cryptanalysis::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, available_subspace_dimensions,
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
     find_irreducible_sparse, koblitz_signed_frobenius_rho_reference,
-    saturate_factor_base_two_torsion, FrobeniusFactorBase, KoblitzCurve,
-    KoblitzSignedRhoOptions,
+    saturate_factor_base_two_torsion, FrobeniusFactorBase, KoblitzCurve, KoblitzSignedRhoOptions,
 };
 use crate::cryptanalysis::research_bench::{bench_curves, linear_fit};
 use crate::cryptanalysis::residual_walk::is_prime_u64;
@@ -219,7 +218,10 @@ pub struct PinOutcome {
 
 /// The pinned ratios for `regime/instance`, or `None` when the table has
 /// no entry for it — a new size or a freshly generated curve.
-fn pinned_ratios(regime: &str, instance: &str) -> Option<serde_json::Map<String, serde_json::Value>> {
+fn pinned_ratios(
+    regime: &str,
+    instance: &str,
+) -> Option<serde_json::Map<String, serde_json::Value>> {
     let doc: serde_json::Value = serde_json::from_str(PINNED_CALIBRATION).ok()?;
     let row = doc.get("instances")?.get(format!("{regime}/{instance}"))?;
     Some(row.as_object()?.clone())
@@ -246,16 +248,18 @@ impl Calibration {
         let mut out = PinOutcome::default();
         let table = pinned_ratios(regime, instance);
         let add = self.ns_per_add;
-        let mut apply = |name: &str, slot: &mut Option<f64>, out: &mut PinOutcome| {
-            match table.as_ref().and_then(|t| t.get(name)).and_then(serde_json::Value::as_f64) {
-                Some(ratio) => {
-                    *slot = Some(ratio * add);
-                    out.pinned.push(name.to_string());
-                }
-                None => {
-                    if slot.is_some() {
-                        out.measured.push(name.to_string());
-                    }
+        let apply = |name: &str, slot: &mut Option<f64>, out: &mut PinOutcome| match table
+            .as_ref()
+            .and_then(|t| t.get(name))
+            .and_then(serde_json::Value::as_f64)
+        {
+            Some(ratio) => {
+                *slot = Some(ratio * add);
+                out.pinned.push(name.to_string());
+            }
+            None => {
+                if slot.is_some() {
+                    out.measured.push(name.to_string());
                 }
             }
         };
@@ -919,7 +923,11 @@ pub fn rho_reference<G: CountedGroup>(
     // Walks of about √r / 8 steps, so the per-walk start (two scalar
     // multiplications) stays a small fraction of the walk.
     let dp_bits = (bits / 2).saturating_sub(3).min(24);
-    let dp_mask = if dp_bits == 0 { 0 } else { (1u64 << dp_bits) - 1 };
+    let dp_mask = if dp_bits == 0 {
+        0
+    } else {
+        (1u64 << dp_bits) - 1
+    };
     // Sixteen jumps (Teske's r-adding walk needs about that many to be
     // close to a random walk) with 12-bit coefficients: the jumps only
     // need to be group elements with known coefficients, and short
@@ -1353,9 +1361,27 @@ pub fn rho_reference_walk<G: CountedGroup>(
     walk: RhoWalk,
 ) -> RhoResult {
     if walk.negation {
-        rho_walk_with(g, &NegationClasses { r }, generator, target, r, seed, max_steps, walk)
+        rho_walk_with(
+            g,
+            &NegationClasses { r },
+            generator,
+            target,
+            r,
+            seed,
+            max_steps,
+            walk,
+        )
     } else {
-        rho_walk_with(g, &PointClasses, generator, target, r, seed, max_steps, walk)
+        rho_walk_with(
+            g,
+            &PointClasses,
+            generator,
+            target,
+            r,
+            seed,
+            max_steps,
+            walk,
+        )
     }
 }
 
@@ -1371,12 +1397,21 @@ struct WalkShape {
 impl WalkShape {
     fn of(r: u64, walk: RhoWalk) -> Self {
         let bits = 64 - r.leading_zeros();
-        let jumps = if walk.jumps == 0 { rho_jumps_for(r) } else { walk.jumps }.max(1);
+        let jumps = if walk.jumps == 0 {
+            rho_jumps_for(r)
+        } else {
+            walk.jumps
+        }
+        .max(1);
         let dp_bits = walk.dp_bits.unwrap_or(bits / 4).min(40);
         Self {
             jumps,
             dp_bits,
-            dp_mask: if dp_bits == 0 { 0 } else { (1u64 << dp_bits) - 1 },
+            dp_mask: if dp_bits == 0 {
+                0
+            } else {
+                (1u64 << dp_bits) - 1
+            },
             coefficient_bits: jump_coefficient_bits(jumps),
             walk_cap: (1u64 << dp_bits) * 20 + 64,
         }
@@ -1445,7 +1480,14 @@ struct TunedWalker<'a, G: CountedGroup, C: RhoClasses<G>> {
 }
 
 impl<'a, G: CountedGroup, C: RhoClasses<G>> TunedWalker<'a, G, C> {
-    fn new(g: &'a G, classes: &'a C, r: u64, jumps: Vec<(G::Elt, u64, u64)>, shape: &WalkShape, walk: RhoWalk) -> Self {
+    fn new(
+        g: &'a G,
+        classes: &'a C,
+        r: u64,
+        jumps: Vec<(G::Elt, u64, u64)>,
+        shape: &WalkShape,
+        walk: RhoWalk,
+    ) -> Self {
         Self {
             g,
             classes,
@@ -1476,7 +1518,15 @@ impl<'a, G: CountedGroup, C: RhoClasses<G>> TunedWalker<'a, G, C> {
     ) -> WalkEnd<G::Elt> {
         let (g, r) = (self.g, self.r);
         let jump_count = self.jumps.len();
-        let (mut x, mut a, mut b, _) = rho_canon(g, self.classes, start, a, b, r, &mut tally.canonicalisations);
+        let (mut x, mut a, mut b, _) = rho_canon(
+            g,
+            self.classes,
+            start,
+            a,
+            b,
+            r,
+            &mut tally.canonicalisations,
+        );
         self.recent.clear();
         let mut last_escape: Option<u64> = None;
         let mut len = 0u64;
@@ -1498,7 +1548,12 @@ impl<'a, G: CountedGroup, C: RhoClasses<G>> TunedWalker<'a, G, C> {
                     &mut tally.canonicalisations,
                 );
                 tried += 1;
-                if self.look_ahead && flipped && tried < jump_count && !g.is_identity(&y) && self.index(&y) == j {
+                if self.look_ahead
+                    && flipped
+                    && tried < jump_count
+                    && !g.is_identity(&y)
+                    && self.index(&y) == j
+                {
                     tally.look_ahead_adds += 1;
                     continue;
                 }
@@ -1634,7 +1689,11 @@ pub fn rho_walk_with<G: CountedGroup, C: RhoClasses<G>>(
         .map(|_| {
             let a = rng.gen_range(1..short);
             let b = rng.gen_range(1..short);
-            (joint_mul(g, &mut ops, generator, target, gq, a, b), a % r, b % r)
+            (
+                joint_mul(g, &mut ops, generator, target, gq, a, b),
+                a % r,
+                b % r,
+            )
         })
         .collect();
     let (ta, tb) = (rng.gen_range(1..r.max(2)), rng.gen_range(1..r.max(2)));
@@ -1663,7 +1722,9 @@ pub fn rho_walk_with<G: CountedGroup, C: RhoClasses<G>>(
         if g.is_identity(&sx) {
             continue;
         }
-        let WalkEnd::Distinguished(x, a, b) = walker.walk(&mut ops, &mut tally, sx, sa, sb, max_steps) else {
+        let WalkEnd::Distinguished(x, a, b) =
+            walker.walk(&mut ops, &mut tally, sx, sa, sb, max_steps)
+        else {
             continue;
         };
         dps += 1;
@@ -1838,7 +1899,9 @@ pub fn rho_batch_with<G: CountedGroup, C: RhoClasses<G>>(
             if g.is_identity(&sx) {
                 continue;
             }
-            let WalkEnd::Distinguished(x, a, b) = walker.walk(&mut ops, &mut tally, sx, sa, sb, max_steps) else {
+            let WalkEnd::Distinguished(x, a, b) =
+                walker.walk(&mut ops, &mut tally, sx, sa, sb, max_steps)
+            else {
                 continue;
             };
             dps += 1;
@@ -1896,20 +1959,42 @@ pub fn rho_batch_with<G: CountedGroup, C: RhoClasses<G>>(
     let k = targets.len().max(1) as f64;
     let sqrt_r = (r as f64).sqrt();
     let gae = total.gae();
-    let mut counters = tuned_counters(&shape, setup, start_adds_all, &tally_all, verification_all, useless_all);
+    let mut counters = tuned_counters(
+        &shape,
+        setup,
+        start_adds_all,
+        &tally_all,
+        verification_all,
+        useless_all,
+    );
     for (name, v) in [
         ("targets", targets.len() as u64),
         ("target_setup_additions", target_setup.adds),
         ("target_setup_doublings", target_setup.doubles),
-        ("solved_on_own_trail", per_target.iter().filter(|t| t.solved_by == "own").count() as u64),
-        ("solved_on_an_earlier_trail", per_target.iter().filter(|t| t.solved_by == "earlier").count() as u64),
-        ("unsolved", per_target.iter().filter(|t| t.recovered.is_none()).count() as u64),
+        (
+            "solved_on_own_trail",
+            per_target.iter().filter(|t| t.solved_by == "own").count() as u64,
+        ),
+        (
+            "solved_on_an_earlier_trail",
+            per_target
+                .iter()
+                .filter(|t| t.solved_by == "earlier")
+                .count() as u64,
+        ),
+        (
+            "unsolved",
+            per_target.iter().filter(|t| t.recovered.is_none()).count() as u64,
+        ),
         ("distinguished_points_stored", table.len() as u64),
     ] {
         counters.insert(name.to_string(), v);
     }
     RhoBatchResult {
-        method: format!("batch (targets in sequence, one distinguished-point table, jumps in G) {}", classes.method()),
+        method: format!(
+            "batch (targets in sequence, one distinguished-point table, jumps in G) {}",
+            classes.method()
+        ),
         automorphisms: classes.automorphisms(),
         targets: targets.len(),
         setup_ops: setup,
@@ -1935,19 +2020,35 @@ pub fn rho_reference_negation<G: CountedGroup>(
     seed: u64,
     max_steps: u64,
 ) -> RhoResult {
-    rho_reference_walk(g, generator, target, r, seed, max_steps, RhoWalk::negation())
+    rho_reference_walk(
+        g,
+        generator,
+        target,
+        r,
+        seed,
+        max_steps,
+        RhoWalk::negation(),
+    )
 }
 
 /// The native work of a signed-Frobenius run that the unit prices at
 /// zero, carried so a reader can price it: Frobenius maps and the
 /// canonicalisations built from them.
-fn signed_rho_counters(report: &crate::cryptanalysis::koblitz_index_calculus::KoblitzSignedRhoReport) -> BTreeMap<String, u64> {
+fn signed_rho_counters(
+    report: &crate::cryptanalysis::koblitz_index_calculus::KoblitzSignedRhoReport,
+) -> BTreeMap<String, u64> {
     let c = &report.charges;
     let mut out = BTreeMap::new();
     for (k, v) in [
         ("setup_group_additions", c.setup_group_additions),
-        ("setup_scalar_multiplications", c.setup_scalar_multiplications),
-        ("verification_scalar_multiplications", c.candidate_verification_scalar_multiplications),
+        (
+            "setup_scalar_multiplications",
+            c.setup_scalar_multiplications,
+        ),
+        (
+            "verification_scalar_multiplications",
+            c.candidate_verification_scalar_multiplications,
+        ),
         ("walk_group_additions", c.walk_group_additions),
         ("canonicalisations_uncharged", c.canonicalizations),
         ("frobenius_maps_uncharged", c.frobenius_maps),
@@ -1969,7 +2070,12 @@ fn signed_rho_counters(report: &crate::cryptanalysis::koblitz_index_calculus::Ko
 /// The Frobenius maps and canonicalisations are counted and not charged
 /// (see the counters).  `planted` is the logarithm the run must
 /// recover; `None` when the instance is not a Koblitz curve.
-pub fn signed_frobenius_rho(inst: &BinaryInstance, target: FastPoint, planted: u64, seed: u64) -> Option<RhoResult> {
+pub fn signed_frobenius_rho(
+    inst: &BinaryInstance,
+    target: FastPoint,
+    planted: u64,
+    seed: u64,
+) -> Option<RhoResult> {
     let kc = inst.koblitz.as_ref()?;
     let (r, n) = (inst.r, inst.n);
     let bits = (r as f64).log2();
@@ -1982,12 +2088,15 @@ pub fn signed_frobenius_rho(inst: &BinaryInstance, target: FastPoint, planted: u
     let report = koblitz_signed_frobenius_rho_reference(kc, &target_big, &opts, &mut |_| {});
     let wall = start.elapsed().as_nanos() as u64;
     let c = &report.charges;
-    let scalar_adds =
-        (c.setup_scalar_multiplications + c.candidate_verification_scalar_multiplications) as f64 * 1.5 * bits;
+    let scalar_adds = (c.setup_scalar_multiplications
+        + c.candidate_verification_scalar_multiplications) as f64
+        * 1.5
+        * bits;
     let gops = GroupOps {
         adds: c.walk_group_additions + c.setup_group_additions,
         doubles: 0,
-        scalar_mults: c.setup_scalar_multiplications + c.candidate_verification_scalar_multiplications,
+        scalar_mults: c.setup_scalar_multiplications
+            + c.candidate_verification_scalar_multiplications,
     };
     let gae = gops.gae() + scalar_adds;
     let expected = generic_floor_ops(r as f64, 2.0 * n as f64);
@@ -2014,20 +2123,47 @@ pub fn signed_frobenius_rho(inst: &BinaryInstance, target: FastPoint, planted: u
 /// The tuned walk of ledger §18.2 on a Koblitz instance's
 /// signed-Frobenius classes (`A = 2n`), one target: [`rho_walk_with`] with
 /// [`SignedFrobeniusClasses`].  `None` for any other curve.
-pub fn signed_frobenius_rho_tuned(inst: &BinaryInstance, target: FastPoint, seed: u64, max_steps: u64) -> Option<RhoResult> {
+pub fn signed_frobenius_rho_tuned(
+    inst: &BinaryInstance,
+    target: FastPoint,
+    seed: u64,
+    max_steps: u64,
+) -> Option<RhoResult> {
     let classes = SignedFrobeniusClasses::new(inst)?;
     let g = BinaryGroup(&inst.fast);
-    Some(rho_walk_with(&g, &classes, inst.generator, target, inst.r, seed, max_steps, RhoWalk::negation()))
+    Some(rho_walk_with(
+        &g,
+        &classes,
+        inst.generator,
+        target,
+        inst.r,
+        seed,
+        max_steps,
+        RhoWalk::negation(),
+    ))
 }
 
 /// Batch rho on a Koblitz instance's signed-Frobenius classes
 /// (`A = 2n`): [`rho_batch_with`] with [`SignedFrobeniusClasses`] and the
 /// tuned walk's shape, each target's budget [`rho_cap`]`(r, 64)`.  `None`
 /// for any other curve.
-pub fn signed_frobenius_rho_batch(inst: &BinaryInstance, targets: &[FastPoint], seed: u64) -> Option<RhoBatchResult> {
+pub fn signed_frobenius_rho_batch(
+    inst: &BinaryInstance,
+    targets: &[FastPoint],
+    seed: u64,
+) -> Option<RhoBatchResult> {
     let classes = SignedFrobeniusClasses::new(inst)?;
     let g = BinaryGroup(&inst.fast);
-    Some(rho_batch_with(&g, &classes, inst.generator, targets, inst.r, seed, rho_cap(inst.r, 64.0), RhoWalk::negation()))
+    Some(rho_batch_with(
+        &g,
+        &classes,
+        inst.generator,
+        targets,
+        inst.r,
+        seed,
+        rho_cap(inst.r, 64.0),
+        RhoWalk::negation(),
+    ))
 }
 
 // ── Prime-field curves on one word ─────────────────────────────────
@@ -2071,7 +2207,11 @@ impl PrimeCurve {
         let p = self.p;
         let lhs = mulmod(pt.y, pt.y, p);
         let rhs = addmod(
-            addmod(mulmod(mulmod(pt.x, pt.x, p), pt.x, p), mulmod(self.a, pt.x, p), p),
+            addmod(
+                mulmod(mulmod(pt.x, pt.x, p), pt.x, p),
+                mulmod(self.a, pt.x, p),
+                p,
+            ),
             self.b,
             p,
         );
@@ -2111,7 +2251,7 @@ impl PrimeCurve {
         }
         let mut q = p - 1;
         let mut s = 0u32;
-        while q % 2 == 0 {
+        while q.is_multiple_of(2) {
             q /= 2;
             s += 1;
         }
@@ -2122,7 +2262,7 @@ impl PrimeCurve {
         let mut m = s;
         let mut c = powmod(z, q, p);
         let mut t = powmod(n, q, p);
-        let mut r = powmod(n, (q + 1) / 2, p);
+        let mut r = powmod(n, q.div_ceil(2), p);
         loop {
             if t == 1 {
                 return Some(r);
@@ -2192,7 +2332,7 @@ fn jacobi(mut a: u64, mut n: u64) -> i32 {
     let mut result = 1i32;
     a %= n;
     while a != 0 {
-        while a % 2 == 0 {
+        while a.is_multiple_of(2) {
             a /= 2;
             if n % 8 == 3 || n % 8 == 5 {
                 result = -result;
@@ -2344,7 +2484,11 @@ pub fn semaev_s3_quadratic(curve: &PrimeCurve, x1: u64, x2: u64) -> (u64, u64, u
     let s = addmod(x1, x2, p);
     let pr = mulmod(x1, x2, p);
     // qb = −2((x1 + x2)(x1x2 + a) + 2b)
-    let inner = addmod(mulmod(s, addmod(pr, curve.a, p), p), mulmod(2, curve.b, p), p);
+    let inner = addmod(
+        mulmod(s, addmod(pr, curve.a, p), p),
+        mulmod(2, curve.b, p),
+        p,
+    );
     let qb = submod(0, mulmod(2, inner, p), p);
     // qc = (x1x2 − a)² − 4b(x1 + x2)
     let t = submod(pr, curve.a, p);
@@ -2514,7 +2658,7 @@ fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
     let mut d = 2u64;
     while d * d <= v {
         let mut e = 0;
-        while v % d == 0 {
+        while v.is_multiple_of(d) {
             v /= d;
             e += 1;
         }
@@ -2868,7 +3012,11 @@ pub fn koblitz_factor_base(
     out.neg_index = out
         .points
         .iter()
-        .map(|p| *key_to_index.get(&inst.fast.neg(*p).pack()).expect("base closed under negation"))
+        .map(|p| {
+            *key_to_index
+                .get(&inst.fast.neg(*p).pack())
+                .expect("base closed under negation")
+        })
         .collect();
     out.point_index = key_to_index;
     out.abscissae = out.x_index.len();
@@ -2888,7 +3036,8 @@ pub fn koblitz_factor_base(
         );
     }
     out.cost.wall_ns = start.elapsed().as_nanos() as u64;
-    out.cost.count("abscissae_scanned", fb.subspace.len() as u64);
+    out.cost
+        .count("abscissae_scanned", fb.subspace.len() as u64);
     out.cost.count("as_solves", fb.subspace.len() as u64);
     out.cost.count("frobenius_maps", fb.points.len() as u64);
     out.cost.count("derived_counts", 1);
@@ -3298,7 +3447,10 @@ pub enum Oracle<'a> {
     /// or once per `R − P_i` (`m = 3`).
     Mitm { table: &'a PairTable, m: u32 },
     /// Meet in the middle on the Frobenius-folded table (Koblitz).
-    MitmFrobenius { table: &'a FrobeniusPairTable, m: u32 },
+    MitmFrobenius {
+        table: &'a FrobeniusPairTable,
+        m: u32,
+    },
     /// Semaev `S₄` pairs-and-solve over a subspace (`m = 3`, binary).
     SemaevS4 { oracle: &'a SubspaceOracle },
 }
@@ -3375,7 +3527,13 @@ pub(crate) fn lift_abscissae<G: CountedGroup>(
             acc = g.add(ops, acc, fb.points[choices[k][c]]);
         }
         if acc == target {
-            return Some(current.iter().enumerate().map(|(k, &c)| choices[k][c]).collect());
+            return Some(
+                current
+                    .iter()
+                    .enumerate()
+                    .map(|(k, &c)| choices[k][c])
+                    .collect(),
+            );
         }
         // Next combination.
         let mut k = 0;
@@ -3419,11 +3577,7 @@ fn decompose_prime(
                     };
                     candidates[0] = mulmod(submod(0, qc, p), inv, p);
                 } else {
-                    let disc = submod(
-                        mulmod(qb, qb, p),
-                        mulmod(4, mulmod(qa, qc, p), p),
-                        p,
-                    );
+                    let disc = submod(mulmod(qb, qb, p), mulmod(4, mulmod(qa, qc, p), p), p);
                     ctr.sqrt_solves += 1;
                     let Some(s) = curve.sqrt(disc) else {
                         continue;
@@ -3509,7 +3663,9 @@ pub fn decompose_mitm_frobenius(
     target: FastPoint,
 ) -> Option<Vec<usize>> {
     match m {
-        2 => table.probe(g, fb, ops, ctr, target).map(|(i, j)| vec![i, j]),
+        2 => table
+            .probe(g, fb, ops, ctr, target)
+            .map(|(i, j)| vec![i, j]),
         3 => {
             for i in 0..fb.points.len() {
                 let s = g.add(ops, target, g.neg(fb.points[i]));
@@ -3873,12 +4029,27 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
     let (mut walk_steps, mut walk_restarts, mut repeats_skipped, mut guard_probes, mut walk_jumps) =
         (0u64, 0u64, 0u64, 0u64, 0u64);
     if targets.is_walk() {
-        jumps = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, jump_count);
+        jumps = draw_jumps(
+            g,
+            generator,
+            target,
+            r,
+            &mut rng,
+            &mut rel.group_ops,
+            jump_count,
+        );
         walk_jumps += jump_count as u64;
         if !shared_jumps && pool_mode == RestartPool::Eager {
             for _ in 0..pool_count {
-                let off =
-                    draw_pool_offset(g, generator, target, r, &mut pool_rng, &mut rel.group_ops, &mut pool_ops);
+                let off = draw_pool_offset(
+                    g,
+                    generator,
+                    target,
+                    r,
+                    &mut pool_rng,
+                    &mut rel.group_ops,
+                    &mut pool_ops,
+                );
                 pool.push(off);
             }
         }
@@ -3988,7 +4159,9 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
             2 => two_column_rows += 1,
             _ => {}
         }
-        let repeated = column_parts.insert(column_part_key(&row[..d_col]), ()).is_some();
+        let repeated = column_parts
+            .insert(column_part_key(&row[..d_col]), ())
+            .is_some();
         if repeated {
             repeated_column_rows += 1;
         }
@@ -4476,7 +4649,8 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
                 acc ^= invmod(v, curve.p).unwrap_or(0);
             }
         }
-        calib.ns_per_inversion = Some(start.elapsed().as_nanos() as f64 / (8 * values.len()) as f64);
+        calib.ns_per_inversion =
+            Some(start.elapsed().as_nanos() as f64 / (8 * values.len()) as f64);
         std::hint::black_box(acc);
     }
     calib.ns_per_word_xor = Some(calibrate_word_xor());
@@ -4493,12 +4667,16 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
     // signed points, against the `2^{⌈bits/3⌉}` abscissae of the rule
     // above.  Its own rows, its own table; `None` when the two agree to
     // within a tenth so the ladder does not carry a duplicate.
-    let balanced_abscissae = (family_optimum_base(inst.group_order as f64, 1.0, 1.0) / 2.0).round().max(4.0) as usize;
+    let balanced_abscissae = (family_optimum_base(inst.group_order as f64, 1.0, 1.0) / 2.0)
+        .round()
+        .max(4.0) as usize;
     let balanced = (balanced_abscissae as f64 / fb.abscissae.max(1) as f64)
         .max(fb.abscissae.max(1) as f64 / balanced_abscissae as f64)
         > 1.1;
     let fb_bal = balanced.then(|| prime_factor_base(inst, balanced_abscissae));
-    let table_bal = fb_bal.as_ref().map(|f| PairTable::build_negation_folded(curve, f));
+    let table_bal = fb_bal
+        .as_ref()
+        .map(|f| PairTable::build_negation_folded(curve, f));
     let exact_bal_m2 = fb_bal
         .as_ref()
         .and_then(|f| exact_decomposition_ceiling(curve, &f.points, r, 2));
@@ -4578,11 +4756,25 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
             // walk every row was priced against through §17, kept as the
             // before mark.
             let rho_seed = seed ^ (k as u64 * 0x5EED);
-            let matched = rho_reference_negation(curve, g, target, r, rho_seed, rho_cap(r, cfg.rho_cap_multiple));
+            let matched = rho_reference_negation(
+                curve,
+                g,
+                target,
+                r,
+                rho_seed,
+                rho_cap(r, cfg.rho_cap_multiple),
+            );
             out.rho_verified_all &= matched.verified && matched.recovered == Some(d);
             rho_s += matched.s / cfg.rho_repeats.max(1) as f64;
             out.rho.push(matched);
-            let plain = rho_reference(curve, g, target, r, rho_seed, rho_cap(r, cfg.rho_cap_multiple));
+            let plain = rho_reference(
+                curve,
+                g,
+                target,
+                r,
+                rho_seed,
+                rho_cap(r, cfg.rho_cap_multiple),
+            );
             out.rho_verified_all &= plain.verified && plain.recovered == Some(d);
             out.rho.push(plain);
         }
@@ -4592,24 +4784,74 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         let variants: Vec<(&str, Oracle, TargetSource)> = vec![
             ("semaev_s3_roots_m2", Oracle::SemaevS3Roots, random),
             ("direct_subtraction_m2", Oracle::Subtract, random),
-            ("mitm_m2", Oracle::Mitm { table: &table, m: 2 }, random),
-            ("mitm_m3", Oracle::Mitm { table: &table, m: 3 }, random),
+            (
+                "mitm_m2",
+                Oracle::Mitm {
+                    table: &table,
+                    m: 2,
+                },
+                random,
+            ),
+            (
+                "mitm_m3",
+                Oracle::Mitm {
+                    table: &table,
+                    m: 3,
+                },
+                random,
+            ),
             // Round 2: the negation-folded table, then walk targets on it.
-            ("mitm_m2_negfold", Oracle::Mitm { table: &table_neg, m: 2 }, random),
-            ("mitm_m2_negfold_walk", Oracle::Mitm { table: &table_neg, m: 2 }, walk),
-            ("mitm_m3_negfold", Oracle::Mitm { table: &table_neg, m: 3 }, random),
-            ("mitm_m3_negfold_walk", Oracle::Mitm { table: &table_neg, m: 3 }, walk),
+            (
+                "mitm_m2_negfold",
+                Oracle::Mitm {
+                    table: &table_neg,
+                    m: 2,
+                },
+                random,
+            ),
+            (
+                "mitm_m2_negfold_walk",
+                Oracle::Mitm {
+                    table: &table_neg,
+                    m: 2,
+                },
+                walk,
+            ),
+            (
+                "mitm_m3_negfold",
+                Oracle::Mitm {
+                    table: &table_neg,
+                    m: 3,
+                },
+                random,
+            ),
+            (
+                "mitm_m3_negfold_walk",
+                Oracle::Mitm {
+                    table: &table_neg,
+                    m: 3,
+                },
+                walk,
+            ),
         ];
         let mut variants = variants;
         if let Some(t) = &table_bal {
-            variants.push(("mitm_m2_negfold_walk_balanced", Oracle::Mitm { table: t, m: 2 }, walk));
+            variants.push((
+                "mitm_m2_negfold_walk_balanced",
+                Oracle::Mitm { table: t, m: 2 },
+                walk,
+            ));
         }
         for (name, oracle, targets) in variants {
             let fb = match name.ends_with("_balanced") {
                 true => fb_bal.as_ref().unwrap_or(&fb),
                 false => &fb,
             };
-            let exact_m2 = if name.ends_with("_balanced") { exact_bal_m2 } else { exact_m2 };
+            let exact_m2 = if name.ends_with("_balanced") {
+                exact_bal_m2
+            } else {
+                exact_m2
+            };
             let budget = trial_budget(cfg, fb, oracle.summands(), space);
             let outcome = collect_and_solve(
                 curve,
@@ -4624,7 +4866,11 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
                 cfg.restart_pool(),
                 |ops, ctr, point| decompose_prime(curve, fb, &oracle, ops, ctr, point),
             );
-            let exact = if oracle.summands() == 2 { exact_m2 } else { exact_m3 };
+            let exact = if oracle.summands() == 2 {
+                exact_m2
+            } else {
+                exact_m3
+            };
             let mut v = assemble_variant(
                 name,
                 oracle.name(),
@@ -4640,7 +4886,7 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
                 outcome,
                 r,
                 space,
-                &calib,
+                calib,
                 rho_s,
                 floor_s,
                 1.0,
@@ -4731,11 +4977,18 @@ fn run_binary_variant(
 /// count is admissible by the cofactor classes and its exact trials
 /// floor is within `max_trials / m2_floor_divisor`, so a run that finds
 /// its relations at the ceiling's rate finishes well inside the budget.
-fn two_summand_row_fits(cfg: &BoundaryConfig, fb: &FactorBase<FastPoint>, space: f64, exact_m2: ExactCeiling) -> bool {
+fn two_summand_row_fits(
+    cfg: &BoundaryConfig,
+    fb: &FactorBase<FastPoint>,
+    space: f64,
+    exact_m2: ExactCeiling,
+) -> bool {
     let p = exact_m2
         .map(|e| e.1)
         .unwrap_or_else(|| decomposition_probability_ceiling(fb.points.len() as u64, 2, space));
-    p > 0.0 && (fb.columns as f64 + 1.0) / p <= cfg.max_trials as f64 / cfg.m2_floor_divisor.max(1) as f64
+    p > 0.0
+        && (fb.columns as f64 + 1.0) / p
+            <= cfg.max_trials as f64 / cfg.m2_floor_divisor.max(1) as f64
 }
 
 // ── The binary regimes ─────────────────────────────────────────────
@@ -4764,7 +5017,10 @@ fn calibrate_binary(inst: &BinaryInstance, calib: &mut Calibration) {
     let start = Instant::now();
     let mut acc = 0u64;
     for i in 0..samples {
-        acc ^= inst.artin_schreier.solve(cs[(i % 1024) as usize]).unwrap_or(1);
+        acc ^= inst
+            .artin_schreier
+            .solve(cs[(i % 1024) as usize])
+            .unwrap_or(1);
     }
     calib.ns_per_as_solve = Some(start.elapsed().as_nanos() as f64 / samples as f64);
     std::hint::black_box(acc);
@@ -4836,10 +5092,11 @@ pub fn choose_koblitz_base(
                 // A subspace that is a subfield F_{2^d} carries the whole
                 // point group E(F_{2^d}), a subgroup that meets the target
                 // subgroup only at O: no relation exists at any cost.
-                let is_subfield = n % dim == 0
-                    && fb.subspace_basis.iter().all(|v| {
-                        v.square_k_times(dim, &kc.curve.irreducible) == *v
-                    });
+                let is_subfield = n.is_multiple_of(dim)
+                    && fb
+                        .subspace_basis
+                        .iter()
+                        .all(|v| v.square_k_times(dim, &kc.curve.irreducible) == *v);
                 let healthy = !is_subfield
                     && fb.points.len() >= (1usize << dim) / 4
                     && fb.points.len() <= max_points;
@@ -4880,7 +5137,10 @@ pub fn choose_koblitz_base(
             .collect();
         if let Some(fb) = build_frobenius_union_factor_base(kc, &basis) {
             if fb.points.len() <= max_points && fb.points.len() >= 8 {
-                return Some((fb, format!("Frobenius orbit union of a seed space of dimension {s}")));
+                return Some((
+                    fb,
+                    format!("Frobenius orbit union of a seed space of dimension {s}"),
+                ));
             }
         }
     }
@@ -4979,9 +5239,15 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
     // pessimistic, and the gap grows as the base shrinks — so the ladder
     // brackets it, running `l*` and `l* − 1` wherever they differ from
     // the `⌈n/3⌉` rule.
-    let l_star = (family_optimum_base(inst.group_order as f64, 1.0, 1.0).log2().round() as i64)
+    let l_star = (family_optimum_base(inst.group_order as f64, 1.0, 1.0)
+        .log2()
+        .round() as i64)
         .clamp(2, (inst.n as i64 - 1).min(20)) as u32;
-    let l_bal = if l_star == l { l_star.saturating_sub(1).max(2) } else { l_star };
+    let l_bal = if l_star == l {
+        l_star.saturating_sub(1).max(2)
+    } else {
+        l_star
+    };
     let fb_bal = (l_bal != l).then(|| {
         binary_subspace_factor_base(inst, &(0..l_bal).map(|i| 1u64 << i).collect::<Vec<u64>>())
     });
@@ -4991,17 +5257,25 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
         .filter(|&m| summands_admissible(&g, &mut class_ops, &fb.points, r, m))
         .collect();
     fb.cost.group_ops.merge(class_ops);
-    fb.cost.count("admissibility_scalar_mults", class_ops.scalar_mults);
+    fb.cost
+        .count("admissibility_scalar_mults", class_ops.scalar_mults);
     let table = PairTable::build(&g, &fb);
     let table_neg = PairTable::build_negation_folded(&g, &fb);
-    let table_bal = fb_bal.as_ref().map(|f| PairTable::build_negation_folded(&g, f));
+    let table_bal = fb_bal
+        .as_ref()
+        .map(|f| PairTable::build_negation_folded(&g, f));
     let exact_bal_m2 = fb_bal
         .as_ref()
         .and_then(|f| exact_decomposition_ceiling(&g, &f.points, r, 2));
     calib.ns_per_lookup = table.calibrate_lookup(1_000_000);
     let census: Vec<(u32, usize)> = admissible
         .iter()
-        .map(|&m| (m, census_hits(inst, &fb, &Oracle::Mitm { table: &table, m }, 64, cfg.seed)))
+        .map(|&m| {
+            (
+                m,
+                census_hits(inst, &fb, &Oracle::Mitm { table: &table, m }, 64, cfg.seed),
+            )
+        })
         .collect();
     let m_used = census.iter().find(|(_, hits)| *hits > 0).map(|(m, _)| *m)?;
     let s4 = (m_used == 3).then(|| SubspaceOracle::new(&basis, inst.b, &inst.gf));
@@ -5011,10 +5285,11 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
     let space = inst.group_order as f64;
     let exact_m2 = exact_decomposition_ceiling(&g, &fb.points, r, 2);
     let exact_m3 = exact_decomposition_ceiling(&g, &fb.points, r, 3);
-    let exact_of = |m: u32| if m == 2 { exact_m2 } else { exact_m3 };
+    let _exact_of = |m: u32| if m == 2 { exact_m2 } else { exact_m3 };
     // The two-summand row, where the census of 64 was too small to see
     // it but the exact floor says it is within reach.
-    let m2_row = m_used == 3 && admissible.contains(&2) && two_summand_row_fits(cfg, &fb, space, exact_m2);
+    let m2_row =
+        m_used == 3 && admissible.contains(&2) && two_summand_row_fits(cfg, &fb, space, exact_m2);
 
     let mut out = binary_regime_shell(inst, "char2", 2);
     // Price with the repository's ratios, keep the host's as the note.
@@ -5080,35 +5355,70 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
         let walk = cfg.walk_source();
         let mut variants: Vec<(String, Oracle, TargetSource)> = vec![(
             format!("mitm_m{m_used}"),
-            Oracle::Mitm { table: &table, m: m_used },
+            Oracle::Mitm {
+                table: &table,
+                m: m_used,
+            },
             random,
         )];
         if let Some(o) = &s4 {
             if inst.n <= cfg.s4_max_degree {
-                variants.push(("semaev_s4_pairs_and_solve_m3".into(), Oracle::SemaevS4 { oracle: o }, random));
+                variants.push((
+                    "semaev_s4_pairs_and_solve_m3".into(),
+                    Oracle::SemaevS4 { oracle: o },
+                    random,
+                ));
             }
         }
         // Round 2: the negation-folded table, walk targets, and the
         // two-summand row where it fits.
         variants.push((
             format!("mitm_m{m_used}_negfold"),
-            Oracle::Mitm { table: &table_neg, m: m_used },
+            Oracle::Mitm {
+                table: &table_neg,
+                m: m_used,
+            },
             random,
         ));
         variants.push((
             format!("mitm_m{m_used}_negfold_walk"),
-            Oracle::Mitm { table: &table_neg, m: m_used },
+            Oracle::Mitm {
+                table: &table_neg,
+                m: m_used,
+            },
             walk,
         ));
         if m2_row {
-            variants.push(("mitm_m2_negfold".into(), Oracle::Mitm { table: &table_neg, m: 2 }, random));
-            variants.push(("mitm_m2_negfold_walk".into(), Oracle::Mitm { table: &table_neg, m: 2 }, walk));
+            variants.push((
+                "mitm_m2_negfold".into(),
+                Oracle::Mitm {
+                    table: &table_neg,
+                    m: 2,
+                },
+                random,
+            ));
+            variants.push((
+                "mitm_m2_negfold_walk".into(),
+                Oracle::Mitm {
+                    table: &table_neg,
+                    m: 2,
+                },
+                walk,
+            ));
         }
         if let Some(t) = &table_bal {
-            variants.push(("mitm_m2_negfold_walk_balanced".into(), Oracle::Mitm { table: t, m: 2 }, walk));
+            variants.push((
+                "mitm_m2_negfold_walk_balanced".into(),
+                Oracle::Mitm { table: t, m: 2 },
+                walk,
+            ));
         }
         for (name, oracle, targets) in variants {
-            let base = if name.ends_with("_balanced") { fb_bal.as_ref().unwrap_or(&fb) } else { &fb };
+            let base = if name.ends_with("_balanced") {
+                fb_bal.as_ref().unwrap_or(&fb)
+            } else {
+                &fb
+            };
             let exact_of = |m: u32| match (name.ends_with("_balanced"), m) {
                 (true, 2) => exact_bal_m2,
                 (_, 2) => exact_m2,
@@ -5163,13 +5473,24 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
             .collect()
     };
     let mut admissible = admissible_of(&frob);
-    let mut folded = koblitz_factor_base(inst, &frob, ColumnFold::SignedFrobeniusOrbit, description.clone())?;
+    let mut folded = koblitz_factor_base(
+        inst,
+        &frob,
+        ColumnFold::SignedFrobeniusOrbit,
+        description.clone(),
+    )?;
     let mut table = PairTable::build(&g, &folded);
-    let census_of = |fb: &FactorBase<FastPoint>, table: &PairTable, adm: &[u32]| -> Vec<(u32, usize)> {
-        adm.iter()
-            .map(|&m| (m, census_hits(inst, fb, &Oracle::Mitm { table, m }, 64, cfg.seed)))
-            .collect()
-    };
+    let census_of =
+        |fb: &FactorBase<FastPoint>, table: &PairTable, adm: &[u32]| -> Vec<(u32, usize)> {
+            adm.iter()
+                .map(|&m| {
+                    (
+                        m,
+                        census_hits(inst, fb, &Oracle::Mitm { table, m }, 64, cfg.seed),
+                    )
+                })
+                .collect()
+        };
     let mut census = census_of(&folded, &table, &admissible);
     if !census.iter().any(|(_, hits)| *hits > 0) {
         let saturated = saturate_factor_base_two_torsion(kc, &frob)?;
@@ -5179,7 +5500,12 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
         admissible = admissible_of(&saturated);
         frob = saturated;
         description.push_str(" + two-torsion saturation");
-        folded = koblitz_factor_base(inst, &frob, ColumnFold::SignedFrobeniusOrbit, description.clone())?;
+        folded = koblitz_factor_base(
+            inst,
+            &frob,
+            ColumnFold::SignedFrobeniusOrbit,
+            description.clone(),
+        )?;
         table = PairTable::build(&g, &folded);
         census = census_of(&folded, &table, &admissible);
     }
@@ -5211,25 +5537,37 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
 
     // Round 2 on a base sized to the folded table (n ≥ 37 on the default
     // ladder): its own rows, its own floor.
-    let balanced = choose_koblitz_balanced_base(inst, cfg, folded.points.len()).and_then(|(fbb, desc)| {
-        let fb = koblitz_factor_base(inst, &fbb, ColumnFold::SignedFrobeniusOrbit, desc)?;
-        let table = FrobeniusPairTable::build(inst, &fb)?;
-        let adm: Vec<u32> = [3u32, 2]
-            .into_iter()
-            .filter(|&m| fbb.m_can_decompose(kc, m as usize))
-            .collect();
-        let census_m3 = adm.contains(&3).then(|| {
-            census_hits(inst, &fb, &Oracle::MitmFrobenius { table: &table, m: 3 }, 64, cfg.seed)
+    let balanced =
+        choose_koblitz_balanced_base(inst, cfg, folded.points.len()).and_then(|(fbb, desc)| {
+            let fb = koblitz_factor_base(inst, &fbb, ColumnFold::SignedFrobeniusOrbit, desc)?;
+            let table = FrobeniusPairTable::build(inst, &fb)?;
+            let adm: Vec<u32> = [3u32, 2]
+                .into_iter()
+                .filter(|&m| fbb.m_can_decompose(kc, m as usize))
+                .collect();
+            let census_m3 = adm.contains(&3).then(|| {
+                census_hits(
+                    inst,
+                    &fb,
+                    &Oracle::MitmFrobenius {
+                        table: &table,
+                        m: 3,
+                    },
+                    64,
+                    cfg.seed,
+                )
+            });
+            let exact_m2 = exact_decomposition_ceiling(&g, &fb.points, r, 2);
+            let exact_m3 = exact_decomposition_ceiling(&g, &fb.points, r, 3);
+            let m3_row = census_m3.is_some_and(|hits| hits > 0);
+            let m2_row = adm.contains(&2) && two_summand_row_fits(cfg, &fb, space, exact_m2);
+            if !m3_row && !m2_row {
+                return None;
+            }
+            Some((
+                fbb, fb, table, adm, census_m3, exact_m2, exact_m3, m3_row, m2_row,
+            ))
         });
-        let exact_m2 = exact_decomposition_ceiling(&g, &fb.points, r, 2);
-        let exact_m3 = exact_decomposition_ceiling(&g, &fb.points, r, 3);
-        let m3_row = census_m3.is_some_and(|hits| hits > 0);
-        let m2_row = adm.contains(&2) && two_summand_row_fits(cfg, &fb, space, exact_m2);
-        if !m3_row && !m2_row {
-            return None;
-        }
-        Some((fbb, fb, table, adm, census_m3, exact_m2, exact_m3, m3_row, m2_row))
-    });
 
     let mut out = binary_regime_shell(inst, "koblitz", 2 * n);
     // Price with the repository's ratios, keep the host's as the note.
@@ -5297,16 +5635,32 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
             rho_s += signed.s / cfg.rho_repeats.max(1) as f64;
             out.rho.push(signed);
             // The plain walk, for the cross-regime comparison.
-            let plain = rho_reference(&g, inst.generator, target, r, seed ^ (k as u64 * 0x5EED), rho_cap(r, cfg.rho_cap_multiple));
+            let plain = rho_reference(
+                &g,
+                inst.generator,
+                target,
+                r,
+                seed ^ (k as u64 * 0x5EED),
+                rho_cap(r, cfg.rho_cap_multiple),
+            );
             out.rho.push(plain);
         }
 
         let random = cfg.random_source();
         let walk = cfg.walk_source();
-        let mut variants: Vec<(String, &FactorBase<FastPoint>, Oracle, TargetSource, ExactCeiling)> = vec![(
+        let mut variants: Vec<(
+            String,
+            &FactorBase<FastPoint>,
+            Oracle,
+            TargetSource,
+            ExactCeiling,
+        )> = vec![(
             format!("mitm_m{m_used}_signed_orbit_columns"),
             &folded,
-            Oracle::Mitm { table: &table, m: m_used },
+            Oracle::Mitm {
+                table: &table,
+                m: m_used,
+            },
             random,
             exact_of(m_used),
         )];
@@ -5314,7 +5668,10 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
             variants.push((
                 format!("mitm_m{m_used}_abscissa_columns_control"),
                 &unfolded,
-                Oracle::Mitm { table: &table, m: m_used },
+                Oracle::Mitm {
+                    table: &table,
+                    m: m_used,
+                },
                 random,
                 exact_of(m_used),
             ));
@@ -5334,7 +5691,10 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
         variants.push((
             format!("mitm_m{m_used}_signed_orbit_columns_negfold"),
             &folded,
-            Oracle::Mitm { table: &table_neg, m: m_used },
+            Oracle::Mitm {
+                table: &table_neg,
+                m: m_used,
+            },
             random,
             exact_of(m_used),
         ));
@@ -5342,14 +5702,20 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
             variants.push((
                 format!("mitm_m{m_used}_signed_orbit_columns_frobfold"),
                 &folded,
-                Oracle::MitmFrobenius { table: tf, m: m_used },
+                Oracle::MitmFrobenius {
+                    table: tf,
+                    m: m_used,
+                },
                 random,
                 exact_of(m_used),
             ));
             variants.push((
                 format!("mitm_m{m_used}_signed_orbit_columns_frobfold_walk"),
                 &folded,
-                Oracle::MitmFrobenius { table: tf, m: m_used },
+                Oracle::MitmFrobenius {
+                    table: tf,
+                    m: m_used,
+                },
                 walk,
                 exact_of(m_used),
             ));
@@ -5387,7 +5753,11 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
             // The table fold the family optimum is measured against: the
             // Frobenius-folded table holds one entry per `⟨σ, −1⟩`-orbit
             // of pairs, so its build is `|F|²/4n` rather than `|F|²/4`.
-            let table_fold = if matches!(oracle, Oracle::MitmFrobenius { .. }) { n as f64 } else { 1.0 };
+            let table_fold = if matches!(oracle, Oracle::MitmFrobenius { .. }) {
+                n as f64
+            } else {
+                1.0
+            };
             let v = run_binary_variant(
                 inst,
                 &name,
@@ -5426,7 +5796,10 @@ pub fn prime_instance_for(bits: u32, seed: u64) -> PrimeInstance {
     roster_prime_instance(bits).unwrap_or_else(|| find_prime_order_curve(bits, seed))
 }
 
-pub fn run_prime_ladder(cfg: &BoundaryConfig, mut progress: impl FnMut(&str)) -> Vec<RegimeInstance> {
+pub fn run_prime_ladder(
+    cfg: &BoundaryConfig,
+    mut progress: impl FnMut(&str),
+) -> Vec<RegimeInstance> {
     let mut out = Vec::new();
     for &bits in &cfg.prime_bits {
         progress(&format!("prime: {bits}-bit instance"));
@@ -5437,14 +5810,20 @@ pub fn run_prime_ladder(cfg: &BoundaryConfig, mut progress: impl FnMut(&str)) ->
             inst.name,
             res.log2_r,
             res.rho_s_mean,
-            res.variants.iter().map(|v| v.s).fold(f64::INFINITY, f64::min)
+            res.variants
+                .iter()
+                .map(|v| v.s)
+                .fold(f64::INFINITY, f64::min)
         ));
         out.push(res);
     }
     out
 }
 
-pub fn run_char2_ladder(cfg: &BoundaryConfig, mut progress: impl FnMut(&str)) -> Vec<RegimeInstance> {
+pub fn run_char2_ladder(
+    cfg: &BoundaryConfig,
+    mut progress: impl FnMut(&str),
+) -> Vec<RegimeInstance> {
     let mut out = Vec::new();
     for &n in &cfg.char2_degrees {
         progress(&format!("char2: searching a curve over GF(2^{n})"));
@@ -5461,7 +5840,10 @@ pub fn run_char2_ladder(cfg: &BoundaryConfig, mut progress: impl FnMut(&str)) ->
             inst.name,
             res.log2_r,
             res.rho_s_mean,
-            res.variants.iter().map(|v| v.s).fold(f64::INFINITY, f64::min)
+            res.variants
+                .iter()
+                .map(|v| v.s)
+                .fold(f64::INFINITY, f64::min)
         ));
         out.push(res);
     }
@@ -5481,7 +5863,10 @@ pub fn koblitz_instance_best(n: u32) -> Option<BinaryInstance> {
     }
 }
 
-pub fn run_koblitz_ladder(cfg: &BoundaryConfig, mut progress: impl FnMut(&str)) -> Vec<RegimeInstance> {
+pub fn run_koblitz_ladder(
+    cfg: &BoundaryConfig,
+    mut progress: impl FnMut(&str),
+) -> Vec<RegimeInstance> {
     let mut out = Vec::new();
     for &n in &cfg.koblitz_degrees {
         let inst = match koblitz_instance_best(n) {
@@ -5491,14 +5876,21 @@ pub fn run_koblitz_ladder(cfg: &BoundaryConfig, mut progress: impl FnMut(&str)) 
                 continue;
             }
         };
-        progress(&format!("koblitz: {} r=2^{:.1}", inst.name, (inst.r as f64).log2()));
+        progress(&format!(
+            "koblitz: {} r=2^{:.1}",
+            inst.name,
+            (inst.r as f64).log2()
+        ));
         match run_koblitz_instance(&inst, cfg) {
             Some(res) => {
                 progress(&format!(
                     "koblitz: {} rho(2n) S={:.3} best IC S={:.1}",
                     inst.name,
                     res.rho_s_mean,
-                    res.variants.iter().map(|v| v.s).fold(f64::INFINITY, f64::min)
+                    res.variants
+                        .iter()
+                        .map(|v| v.s)
+                        .fold(f64::INFINITY, f64::min)
                 ));
                 out.push(res);
             }
@@ -5570,9 +5962,7 @@ pub fn fit_exponents(instances: &[RegimeInstance]) -> Vec<ExponentFit> {
             })
         })
         .collect();
-    fits.sort_by(|a, b| {
-        (&a.regime, &a.variant, &a.phase).cmp(&(&b.regime, &b.variant, &b.phase))
-    });
+    fits.sort_by(|a, b| (&a.regime, &a.variant, &a.phase).cmp(&(&b.regime, &b.variant, &b.phase)));
     fits
 }
 
@@ -5611,7 +6001,9 @@ fn fmt_s(v: f64) -> String {
 pub fn format_markdown(ledger: &BoundaryLedger) -> String {
     let mut out = String::new();
     out.push_str("| regime | instance | log₂ r | variant | m | \\|F\\| | K | table | targets | trials | yield/ceiling | y/c exact | S | S rho | rho walk | vs rho | vs floor | FB | rel | LA | ok |\n");
-    out.push_str("|:--|:--|--:|:--|--:|--:|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|\n");
+    out.push_str(
+        "|:--|:--|--:|:--|--:|--:|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|\n",
+    );
     for inst in &ledger.instances {
         let name = inst.curve["name"].as_str().unwrap_or("?").to_string();
         let mut seen: Vec<String> = Vec::new();
@@ -5620,16 +6012,19 @@ pub fn format_markdown(ledger: &BoundaryLedger) -> String {
                 continue;
             }
             seen.push(v.name.clone());
-            let runs: Vec<&VariantResult> = inst.variants.iter().filter(|w| w.name == v.name).collect();
+            let runs: Vec<&VariantResult> =
+                inst.variants.iter().filter(|w| w.name == v.name).collect();
             let k = runs.len() as f64;
-            let mean = |f: &dyn Fn(&VariantResult) -> f64| runs.iter().map(|w| f(w)).sum::<f64>() / k;
+            let mean =
+                |f: &dyn Fn(&VariantResult) -> f64| runs.iter().map(|w| f(w)).sum::<f64>() / k;
             let ok = runs.iter().all(|w| w.verified);
             let reference: Vec<&RhoResult> = inst
                 .rho
                 .iter()
                 .filter(|x| x.automorphisms == inst.automorphisms_generic)
                 .collect();
-            let rho_walk = reference.iter().map(|x| x.s_walk).sum::<f64>() / reference.len().max(1) as f64;
+            let rho_walk =
+                reference.iter().map(|x| x.s_walk).sum::<f64>() / reference.len().max(1) as f64;
             out.push_str(&format!(
                 "| {} | {} | {:.1} | {} | {} | {} | {} | {} | {} | {:.0} | {:.2} | {:.2} | {} | {} | {} | {}× | {}× | {} | {} | {} | {} |\n",
                 inst.regime,
@@ -5716,7 +6111,11 @@ mod tests {
         let (qa, qb, qc) = semaev_s3_quadratic(curve, p.x, q.x);
         for x3 in [sum.x, diff.x] {
             let v = addmod(
-                addmod(mulmod(qa, mulmod(x3, x3, curve.p), curve.p), mulmod(qb, x3, curve.p), curve.p),
+                addmod(
+                    mulmod(qa, mulmod(x3, x3, curve.p), curve.p),
+                    mulmod(qb, x3, curve.p),
+                    curve.p,
+                ),
                 qc,
                 curve.p,
             );
@@ -5813,8 +6212,14 @@ mod tests {
         let plain_over_floor = plain / runs as f64 / generic_floor_ops(r as f64, 1.0);
         let neg_over_floor = neg / runs as f64 / generic_floor_ops(r as f64, 2.0);
         assert!((1.2..1.65).contains(&ratio), "plain/negation = {ratio}");
-        assert!((0.8..1.3).contains(&plain_over_floor), "plain/floor = {plain_over_floor}");
-        assert!((0.8..1.3).contains(&neg_over_floor), "negation/floor = {neg_over_floor}");
+        assert!(
+            (0.8..1.3).contains(&plain_over_floor),
+            "plain/floor = {plain_over_floor}"
+        );
+        assert!(
+            (0.8..1.3).contains(&neg_over_floor),
+            "negation/floor = {neg_over_floor}"
+        );
     }
 
     /// Two jumps and no look-ahead make fruitless 2-cycles a quarter of
@@ -5839,7 +6244,10 @@ mod tests {
         assert!(res.counters["cycles_length_2"] > 0, "{res:?}");
         assert!(res.counters["cycle_escape_doublings"] > 0, "{res:?}");
         assert_tuned_rho_closes(&res);
-        let blind = RhoWalk { cycle_window: 0, ..forced };
+        let blind = RhoWalk {
+            cycle_window: 0,
+            ..forced
+        };
         let stalled = rho_reference_walk(&grp, gen, q, r, 11, 1 << 20, blind);
         assert!(stalled.counters["walks_capped"] > 0, "{stalled:?}");
     }
@@ -5858,7 +6266,11 @@ mod tests {
             let d = rng.gen_range(1..inst.r);
             let p = bg.mul(&mut ops, inst.generator, d);
             let (rep, mu) = classes.canon(&bg, p);
-            assert_eq!(rep, bg.mul(&mut ops, inst.generator, mulmod(d, mu, inst.r)), "d = {d}");
+            assert_eq!(
+                rep,
+                bg.mul(&mut ops, inst.generator, mulmod(d, mu, inst.r)),
+                "d = {d}"
+            );
             for s in [1u32, 5, inst.n - 1] {
                 let conj = inst.fast.frobenius_k(p, s);
                 for q in [conj, bg.neg(conj)] {
@@ -5890,8 +6302,13 @@ mod tests {
         let inst = koblitz_instance_best(31).expect("a Koblitz curve at n = 31");
         let bg = BinaryGroup(&inst.fast);
         let mut ops = GroupOps::default();
-        let planted: Vec<u64> = (0..32u64).map(|i| 1 + (i * 0x9E37_79B9 + 12_345) % (inst.r - 1)).collect();
-        let targets: Vec<FastPoint> = planted.iter().map(|&d| bg.mul(&mut ops, inst.generator, d)).collect();
+        let planted: Vec<u64> = (0..32u64)
+            .map(|i| 1 + (i * 0x9E37_79B9 + 12_345) % (inst.r - 1))
+            .collect();
+        let targets: Vec<FastPoint> = planted
+            .iter()
+            .map(|&d| bg.mul(&mut ops, inst.generator, d))
+            .collect();
         let res = signed_frobenius_rho_batch(&inst, &targets, 7).expect("a Koblitz instance");
         assert_eq!(res.automorphisms, 2 * inst.n);
         for (t, &d) in res.per_target.iter().zip(&planted) {
@@ -5899,7 +6316,11 @@ mod tests {
         }
         assert!(res.all_verified);
         assert_batch_closes(&res);
-        assert!(res.counters["solved_on_an_earlier_trail"] > 16, "{:?}", res.counters);
+        assert!(
+            res.counters["solved_on_an_earlier_trail"] > 16,
+            "{:?}",
+            res.counters
+        );
         // One target is the tuned walk with its jumps in G.
         let one = signed_frobenius_rho_batch(&inst, &targets[..1], 8).expect("a Koblitz instance");
         assert_eq!(one.per_target[0].recovered, Some(planted[0]));
@@ -5916,19 +6337,40 @@ mod tests {
         let grp = Cyclic(r);
         let gen = 5u64;
         let classes = NegationClasses { r };
-        let walk_ops = |res: &RhoBatchResult| res.counters["walk_operations"] as f64 / res.targets as f64;
+        let walk_ops =
+            |res: &RhoBatchResult| res.counters["walk_operations"] as f64 / res.targets as f64;
         let (mut single, mut batched) = (0.0f64, 0.0f64);
         let (singles, batches) = (48u64, 6u64);
         for seed in 0..singles {
             let d = 1 + mix(seed) % (r - 1);
-            let res = rho_batch_with(&grp, &classes, gen, &[mulmod(gen, d, r)], r, seed, 1 << 32, RhoWalk::negation());
+            let res = rho_batch_with(
+                &grp,
+                &classes,
+                gen,
+                &[mulmod(gen, d, r)],
+                r,
+                seed,
+                1 << 32,
+                RhoWalk::negation(),
+            );
             assert_eq!(res.per_target[0].recovered, Some(d));
             single += walk_ops(&res) / singles as f64;
         }
         for seed in 0..batches {
-            let planted: Vec<u64> = (0..16u64).map(|i| 1 + mix(seed * 64 + i + 1000) % (r - 1)).collect();
+            let planted: Vec<u64> = (0..16u64)
+                .map(|i| 1 + mix(seed * 64 + i + 1000) % (r - 1))
+                .collect();
             let targets: Vec<u64> = planted.iter().map(|&d| mulmod(gen, d, r)).collect();
-            let res = rho_batch_with(&grp, &classes, gen, &targets, r, 100 + seed, 1 << 32, RhoWalk::negation());
+            let res = rho_batch_with(
+                &grp,
+                &classes,
+                gen,
+                &targets,
+                r,
+                100 + seed,
+                1 << 32,
+                RhoWalk::negation(),
+            );
             for (t, &d) in res.per_target.iter().zip(&planted) {
                 assert_eq!(t.recovered, Some(d), "{t:?}");
             }
@@ -5936,9 +6378,15 @@ mod tests {
             batched += walk_ops(&res) / batches as f64;
         }
         let ratio = batched / single;
-        assert!((0.18..0.42).contains(&ratio), "per-target k = 16 over k = 1: {ratio}");
+        assert!(
+            (0.18..0.42).contains(&ratio),
+            "per-target k = 16 over k = 1: {ratio}"
+        );
         let over_floor = single / generic_floor_ops(r as f64, 2.0);
-        assert!((0.75..1.35).contains(&over_floor), "k = 1 over its floor: {over_floor}");
+        assert!(
+            (0.75..1.35).contains(&over_floor),
+            "k = 1 over its floor: {over_floor}"
+        );
     }
 
     #[test]
@@ -5972,11 +6420,24 @@ mod tests {
         let mut canons = 0u64;
         for k in 1..200u64 {
             let p = inst.curve.mul(&mut ops, g, k);
-            let (c1, a1, _, _) = rho_canon(&inst.curve, &NegationClasses { r }, p, k, 0, r, &mut canons);
-            let (c2, a2, _, _) = rho_canon(&inst.curve, &NegationClasses { r }, inst.curve.neg(p), r - k, 0, r, &mut canons);
+            let (c1, a1, _, _) =
+                rho_canon(&inst.curve, &NegationClasses { r }, p, k, 0, r, &mut canons);
+            let (c2, a2, _, _) = rho_canon(
+                &inst.curve,
+                &NegationClasses { r },
+                inst.curve.neg(p),
+                r - k,
+                0,
+                r,
+                &mut canons,
+            );
             assert_eq!(c1, c2);
             assert_eq!(a1, a2);
-            assert_eq!(inst.curve.mul(&mut ops, g, a1), c1, "the coefficients follow the flip");
+            assert_eq!(
+                inst.curve.mul(&mut ops, g, a1),
+                c1,
+                "the coefficients follow the flip"
+            );
         }
         assert_eq!(canons, 2 * 199);
     }
@@ -6012,9 +6473,10 @@ mod tests {
             order: BigUint::from(1u32),
             cofactor: BigUint::from(1u32),
         };
-        let brute = 1 + (0..(1u64 << n))
-            .map(|x| points_with_x(&curve, &gf.to_element(x)).len() as u64)
-            .sum::<u64>();
+        let brute = 1
+            + (0..(1u64 << n))
+                .map(|x| points_with_x(&curve, &gf.to_element(x)).len() as u64)
+                .sum::<u64>();
         assert_eq!(binary_point_count(&gf, &ash, a, b), brute);
     }
 
@@ -6048,10 +6510,17 @@ mod tests {
         // reader would have concluded the host measured exactly what the
         // repository pinned.  Moving that rebinding is the fix; this is
         // the assertion that keeps it moved.
-        assert!(!res.calibration_pinned.pinned.is_empty(), "{:?}", res.calibration_pinned);
+        assert!(
+            !res.calibration_pinned.pinned.is_empty(),
+            "{:?}",
+            res.calibration_pinned
+        );
         let priced = &res.calibration;
         let host = &res.calibration_measured;
-        assert_eq!(priced.ns_per_add, host.ns_per_add, "pinning must not touch ns_per_add");
+        assert_eq!(
+            priced.ns_per_add, host.ns_per_add,
+            "pinning must not touch ns_per_add"
+        );
         let moved = [
             (priced.ns_per_sqrt, host.ns_per_sqrt),
             (priced.ns_per_legendre, host.ns_per_legendre),
@@ -6071,7 +6540,11 @@ mod tests {
         );
         // Eight rungs, plus the balanced row wherever `#E^{1/3}` differs
         // from the `2^{⌈bits/3⌉}` rule by more than a tenth.
-        assert!((8..=9).contains(&res.variants.len()), "{}", res.variants.len());
+        assert!(
+            (8..=9).contains(&res.variants.len()),
+            "{}",
+            res.variants.len()
+        );
         let balanced = res.variants.iter().find(|v| v.name.ends_with("_balanced"));
         if let Some(b) = balanced {
             assert!(res.curve["factor_base_balanced"].is_object());
@@ -6089,9 +6562,17 @@ mod tests {
             assert!(v.rank >= 1 && v.relations_found >= v.rank);
             // Prime order: the exact ceiling is the uniform one.
             assert_eq!(v.cofactor_classes, 1);
-            assert!((v.decomposition_probability_ceiling_exact - v.decomposition_probability_ceiling).abs() < 1e-12);
+            assert!(
+                (v.decomposition_probability_ceiling_exact - v.decomposition_probability_ceiling)
+                    .abs()
+                    < 1e-12
+            );
         }
-        let s3 = res.variants.iter().find(|v| v.name == "semaev_s3_roots_m2").unwrap();
+        let s3 = res
+            .variants
+            .iter()
+            .find(|v| v.name == "semaev_s3_roots_m2")
+            .unwrap();
         assert!(s3.relations.get("sqrt_solves") > 0);
         let mitm = res.variants.iter().find(|v| v.name == "mitm_m3").unwrap();
         assert!(mitm.factor_base.get("pair_table_entries") > 0);
@@ -6099,14 +6580,28 @@ mod tests {
         assert_eq!(mitm.targets, "random");
         // The negation fold halves the table's additions and keeps every
         // key the full table had, since the key was already the abscissa.
-        let neg = res.variants.iter().find(|v| v.name == "mitm_m3_negfold").unwrap();
+        let neg = res
+            .variants
+            .iter()
+            .find(|v| v.name == "mitm_m3_negfold")
+            .unwrap();
         assert_eq!(neg.table, "negation_folded");
-        assert_eq!(neg.factor_base.get("pair_table_entries"), mitm.factor_base.get("pair_table_entries"));
+        assert_eq!(
+            neg.factor_base.get("pair_table_entries"),
+            mitm.factor_base.get("pair_table_entries")
+        );
         let full_adds = mitm.factor_base.group_ops.adds;
         let neg_adds = neg.factor_base.group_ops.adds;
-        assert!(neg_adds * 2 <= full_adds + 2 * mitm.abscissae, "{neg_adds} vs {full_adds}");
+        assert!(
+            neg_adds * 2 <= full_adds + 2 * mitm.abscissae,
+            "{neg_adds} vs {full_adds}"
+        );
         // The walk draws one addition per target and restarts rarely.
-        let walk = res.variants.iter().find(|v| v.name == "mitm_m2_negfold_walk").unwrap();
+        let walk = res
+            .variants
+            .iter()
+            .find(|v| v.name == "mitm_m2_negfold_walk")
+            .unwrap();
         assert_eq!(walk.targets, "walk");
         assert!(walk.relations.get("walk_steps") > 0);
         // Sixteen jumps drawn once, and one restart offset per restart
@@ -6116,18 +6611,46 @@ mod tests {
         let offsets = walk.relations.get("walk_pool_offsets");
         assert_eq!(walk.relations.get("walk_jumps"), 16 + offsets);
         assert_eq!(offsets, walk.relations.get("walk_pool_restarts").min(16));
-        assert!(offsets < 16, "the quick ladder's walk should not need the whole pool");
-        let random = res.variants.iter().find(|v| v.name == "mitm_m2_negfold").unwrap();
+        assert!(
+            offsets < 16,
+            "the quick ladder's walk should not need the whole pool"
+        );
+        let random = res
+            .variants
+            .iter()
+            .find(|v| v.name == "mitm_m2_negfold")
+            .unwrap();
         assert!(walk.relations.group_ops.scalar_mults < random.relations.group_ops.scalar_mults);
         // No target is ever presented twice, on either source, so no row
         // can repeat an earlier row's factor-base part with different
         // coefficients: every row is a relation search, not a collision
         // search.  Every row is guarded and the guard is priced.
         for v in &res.variants {
-            assert_eq!(v.targets, if v.name.contains("_walk") { "walk" } else { "random" });
-            assert_eq!(v.linear_algebra.get("repeated_column_rows"), 0, "{}", v.name);
-            assert_eq!(v.linear_algebra.get("pinned_by_repeated_row"), 0, "{}", v.name);
-            assert!(v.relations.get("target_guard_probes") >= v.trials, "{}", v.name);
+            assert_eq!(
+                v.targets,
+                if v.name.contains("_walk") {
+                    "walk"
+                } else {
+                    "random"
+                }
+            );
+            assert_eq!(
+                v.linear_algebra.get("repeated_column_rows"),
+                0,
+                "{}",
+                v.name
+            );
+            assert_eq!(
+                v.linear_algebra.get("pinned_by_repeated_row"),
+                0,
+                "{}",
+                v.name
+            );
+            assert!(
+                v.relations.get("target_guard_probes") >= v.trials,
+                "{}",
+                v.name
+            );
         }
     }
 
@@ -6138,8 +6661,14 @@ mod tests {
         // by a median of 1.08, so identical native counts came out up to
         // eight per cent apart.  After pinning, the conversion is the
         // repository's ratio and the host's speed cancels exactly.
-        let mut fast = Calibration { ns_per_add: 146.0, ..Calibration::default() };
-        let mut slow = Calibration { ns_per_add: 213.0, ..Calibration::default() };
+        let mut fast = Calibration {
+            ns_per_add: 146.0,
+            ..Calibration::default()
+        };
+        let mut slow = Calibration {
+            ns_per_add: 213.0,
+            ..Calibration::default()
+        };
         // Give the two hosts deliberately different measured ratios.
         fast.ns_per_sqrt = Some(146.0 * 4.0);
         slow.ns_per_sqrt = Some(213.0 * 7.0);
@@ -6149,23 +6678,41 @@ mod tests {
         let a = fast.pin("prime", name);
         let b = slow.pin("prime", name);
         assert_eq!(a.pinned, b.pinned, "the same units pin on either host");
-        assert!(a.pinned.contains(&"ns_per_sqrt".to_string()), "{:?}", a.pinned);
+        assert!(
+            a.pinned.contains(&"ns_per_sqrt".to_string()),
+            "{:?}",
+            a.pinned
+        );
         for count in [1u64, 97, 1_000_000] {
             let f = fast.gae(count, fast.ns_per_sqrt.unwrap());
             let s = slow.gae(count, slow.ns_per_sqrt.unwrap());
             assert!((f - s).abs() / f.max(1e-9) < 1e-12, "{count}: {f} vs {s}");
             let fl = fast.gae(count, fast.ns_per_lookup);
             let sl = slow.gae(count, slow.ns_per_lookup);
-            assert!((fl - sl).abs() / fl.max(1e-9) < 1e-12, "{count}: {fl} vs {sl}");
+            assert!(
+                (fl - sl).abs() / fl.max(1e-9) < 1e-12,
+                "{count}: {fl} vs {sl}"
+            );
         }
         // An instance the table does not carry keeps the host's numbers
         // and says so, rather than silently pricing at someone else's.
-        let mut fresh = Calibration { ns_per_add: 100.0, ..Calibration::default() };
+        let mut fresh = Calibration {
+            ns_per_add: 100.0,
+            ..Calibration::default()
+        };
         fresh.ns_per_sqrt = Some(250.0);
         let out = fresh.pin("prime", "a-curve-generated-tomorrow");
         assert!(out.pinned.is_empty(), "{:?}", out.pinned);
-        assert!(out.measured.contains(&"ns_per_sqrt".to_string()), "{:?}", out.measured);
-        assert_eq!(fresh.ns_per_sqrt, Some(250.0), "an unpinned unit must not be rewritten");
+        assert!(
+            out.measured.contains(&"ns_per_sqrt".to_string()),
+            "{:?}",
+            out.measured
+        );
+        assert_eq!(
+            fresh.ns_per_sqrt,
+            Some(250.0),
+            "an unpinned unit must not be rewritten"
+        );
     }
 
     #[test]
@@ -6181,26 +6728,41 @@ mod tests {
                 assert!((best - 0.75 * e.powf(2.0 / 3.0) / a).abs() / best < 1e-9);
                 for k in 1..=40 {
                     let f = f_star * (0.2 + 0.1 * k as f64);
-                    assert!(ops(f) >= best * (1.0 - 1e-12), "F* is not the minimum at {f}");
+                    assert!(
+                        ops(f) >= best * (1.0 - 1e-12),
+                        "F* is not the minimum at {f}"
+                    );
                 }
                 // In the unit, with r = #E (prime order).
-                assert!((family_optimum_s(e, e, a, a) - best / e.sqrt()).abs() / (best / e.sqrt()) < 1e-9);
+                assert!(
+                    (family_optimum_s(e, e, a, a) - best / e.sqrt()).abs() / (best / e.sqrt())
+                        < 1e-9
+                );
             }
         }
         // The Frobenius fold divides the family's cost by n.
         let (e, r) = (2.2e12, 5.5e11);
-        assert!((family_optimum_s(e, r, 1.0, 1.0) / family_optimum_s(e, r, 41.0, 41.0) - 41.0).abs() < 1e-9);
+        assert!(
+            (family_optimum_s(e, r, 1.0, 1.0) / family_optimum_s(e, r, 41.0, 41.0) - 41.0).abs()
+                < 1e-9
+        );
         // The two folds are independent: folding the columns alone
         // shrinks the relation term, folding the table alone the table.
         let unfolded_table_orbit_columns = family_optimum_s(e, r, 1.0, 41.0);
         let both = family_optimum_s(e, r, 41.0, 41.0);
-        assert!(unfolded_table_orbit_columns > both, "folding the table too must help");
+        assert!(
+            unfolded_table_orbit_columns > both,
+            "folding the table too must help"
+        );
         let sweep = |t: f64, k: f64| {
             let f = family_optimum_base(e, t, k);
             (f * f / (4.0 * t) + e / (2.0 * k * f)) / r.sqrt()
         };
         for (t, k) in [(1.0, 1.0), (1.0, 41.0), (41.0, 41.0)] {
-            assert!((sweep(t, k) - family_optimum_s(e, r, t, k)).abs() / sweep(t, k) < 1e-9, "t={t} k={k}");
+            assert!(
+                (sweep(t, k) - family_optimum_s(e, r, t, k)).abs() / sweep(t, k) < 1e-9,
+                "t={t} k={k}"
+            );
         }
     }
 
@@ -6219,14 +6781,26 @@ mod tests {
         let mut ops = GroupOps::default();
         let d = 30_011 % inst.r;
         let q = curve.mul(&mut ops, g, d);
-        let oracle = Oracle::Mitm { table: &table, m: 2 };
+        let oracle = Oracle::Mitm {
+            table: &table,
+            m: 2,
+        };
         let mut restarts = 0u64;
         for seed in 1..=8u64 {
             for pool in [RestartPool::Eager, RestartPool::Lazy] {
-                let out =
-                    collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, TargetSource::Walk, pool, |o, c, p| {
-                        decompose_prime(curve, &fb, &oracle, o, c, p)
-                    });
+                let out = collect_and_solve(
+                    curve,
+                    g,
+                    q,
+                    inst.r,
+                    1,
+                    &fb,
+                    seed,
+                    4_000_000,
+                    TargetSource::Walk,
+                    pool,
+                    |o, c, p| decompose_prime(curve, &fb, &oracle, o, c, p),
+                );
                 assert_eq!(out.recovered, Some(d), "seed {seed}");
                 assert_eq!(out.linear_algebra.get("repeated_column_rows"), 0);
                 let r = out.relations.get("walk_restarts");
@@ -6237,19 +6811,30 @@ mod tests {
                 // scalar multiplications each; the restarts themselves
                 // add none.
                 let offsets = out.relations.get("walk_pool_offsets");
-                assert_eq!(out.relations.group_ops.scalar_mults, 2 * (16 + offsets) + 2, "seed {seed}: restarts {r}");
+                assert_eq!(
+                    out.relations.group_ops.scalar_mults,
+                    2 * (16 + offsets) + 2,
+                    "seed {seed}: restarts {r}"
+                );
                 assert_eq!(out.relations.get("walk_jumps"), 16 + offsets);
                 match pool {
                     RestartPool::Eager => assert_eq!(offsets, 16, "seed {seed}"),
                     // A run takes offset `k mod 16` on its k-th restart,
                     // so it holds one per restart until it has sixteen.
                     RestartPool::Lazy => {
-                        assert_eq!(offsets, out.relations.get("walk_pool_restarts").min(16), "seed {seed}")
+                        assert_eq!(
+                            offsets,
+                            out.relations.get("walk_pool_restarts").min(16),
+                            "seed {seed}"
+                        )
                     }
                 }
             }
         }
-        assert!(restarts > 0, "the guard should have forced a restart somewhere in eight runs");
+        assert!(
+            restarts > 0,
+            "the guard should have forced a restart somewhere in eight runs"
+        );
     }
 
     #[test]
@@ -6274,30 +6859,57 @@ mod tests {
             let mut ops = GroupOps::default();
             let d = 30_011 % inst.r;
             let q = curve.mul(&mut ops, g, d);
-            let oracle = Oracle::Mitm { table: &table, m: 2 };
+            let oracle = Oracle::Mitm {
+                table: &table,
+                m: 2,
+            };
             for seed in 1..=8u64 {
                 let run = |pool| {
-                    collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, TargetSource::Walk, pool, |o, c, p| {
-                        decompose_prime(curve, &fb, &oracle, o, c, p)
-                    })
+                    collect_and_solve(
+                        curve,
+                        g,
+                        q,
+                        inst.r,
+                        1,
+                        &fb,
+                        seed,
+                        4_000_000,
+                        TargetSource::Walk,
+                        pool,
+                        |o, c, p| decompose_prime(curve, &fb, &oracle, o, c, p),
+                    )
                 };
                 let eager = run(RestartPool::Eager);
                 let lazy = run(RestartPool::Lazy);
                 let at = format!("{bits} bits, seed {seed}");
                 assert_eq!(eager.recovered, lazy.recovered, "{at}");
                 assert_eq!(eager.recovered, Some(d), "{at}");
-                for k in ["trials", "relations", "walk_steps", "walk_restarts", "walk_pool_restarts", "repeated_targets_skipped"] {
+                for k in [
+                    "trials",
+                    "relations",
+                    "walk_steps",
+                    "walk_restarts",
+                    "walk_pool_restarts",
+                    "repeated_targets_skipped",
+                ] {
                     assert_eq!(eager.relations.get(k), lazy.relations.get(k), "{at}: {k}");
                 }
-                assert_eq!(eager.linear_algebra.native, lazy.linear_algebra.native, "{at}");
+                assert_eq!(
+                    eager.linear_algebra.native, lazy.linear_algebra.native,
+                    "{at}"
+                );
                 // The one difference, and it accounts for itself exactly.
-                let pool_saving = eager.relations.get("walk_pool_ops") - lazy.relations.get("walk_pool_ops");
+                let pool_saving =
+                    eager.relations.get("walk_pool_ops") - lazy.relations.get("walk_pool_ops");
                 let gae_saving = eager.relations.group_ops.gae() - lazy.relations.group_ops.gae();
                 assert_eq!(gae_saving, pool_saving as f64, "{at}");
                 saved_somewhere |= pool_saving > 0;
             }
         }
-        assert!(saved_somewhere, "no run took fewer than sixteen offsets; the fixture proves nothing");
+        assert!(
+            saved_somewhere,
+            "no run took fewer than sixteen offsets; the fixture proves nothing"
+        );
     }
 
     #[test]
@@ -6318,22 +6930,41 @@ mod tests {
         let mut ops = GroupOps::default();
         let d = 30_011 % inst.r;
         let q = curve.mul(&mut ops, g, d);
-        let oracle = Oracle::Mitm { table: &table, m: 2 };
+        let oracle = Oracle::Mitm {
+            table: &table,
+            m: 2,
+        };
         let (mut unguarded_repeats, mut guarded_repeats) = (0u64, 0u64);
         for seed in 1..=24u64 {
             for (source, repeats) in [
                 (TargetSource::RandomUnguarded, &mut unguarded_repeats),
                 (TargetSource::Random, &mut guarded_repeats),
             ] {
-                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, RestartPool::Lazy, |o, c, p| {
-                    decompose_prime(curve, &fb, &oracle, o, c, p)
-                });
+                let out = collect_and_solve(
+                    curve,
+                    g,
+                    q,
+                    inst.r,
+                    1,
+                    &fb,
+                    seed,
+                    4_000_000,
+                    source,
+                    RestartPool::Lazy,
+                    |o, c, p| decompose_prime(curve, &fb, &oracle, o, c, p),
+                );
                 assert_eq!(out.recovered, Some(d), "{source:?} seed {seed}");
                 *repeats += out.linear_algebra.get("repeated_column_rows");
             }
         }
-        assert!(unguarded_repeats > 0, "an unguarded draw repeats a target in about one run in four");
-        assert_eq!(guarded_repeats, 0, "a guarded draw never decomposes one element twice");
+        assert!(
+            unguarded_repeats > 0,
+            "an unguarded draw repeats a target in about one run in four"
+        );
+        assert_eq!(
+            guarded_repeats, 0,
+            "a guarded draw never decomposes one element twice"
+        );
     }
 
     #[test]
@@ -6355,7 +6986,10 @@ mod tests {
         let mut ops = GroupOps::default();
         let d = 20_021 % inst.r;
         let q = curve.mul(&mut ops, g, d);
-        let oracle = Oracle::Mitm { table: &table, m: 2 };
+        let oracle = Oracle::Mitm {
+            table: &table,
+            m: 2,
+        };
         let mut merged_repeats = 0;
         let mut fresh_repeats = 0;
         for seed in 1..=6u64 {
@@ -6363,15 +6997,31 @@ mod tests {
                 (TargetSource::WalkSharedJumps, &mut merged_repeats),
                 (TargetSource::Walk, &mut fresh_repeats),
             ] {
-                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, RestartPool::Lazy, |o, c, p| {
-                    decompose_prime(curve, &fb, &oracle, o, c, p)
-                });
+                let out = collect_and_solve(
+                    curve,
+                    g,
+                    q,
+                    inst.r,
+                    1,
+                    &fb,
+                    seed,
+                    4_000_000,
+                    source,
+                    RestartPool::Lazy,
+                    |o, c, p| decompose_prime(curve, &fb, &oracle, o, c, p),
+                );
                 assert_eq!(out.recovered, Some(d), "{source:?} seed {seed}");
                 *repeats += out.linear_algebra.get("repeated_column_rows");
             }
         }
-        assert!(merged_repeats > 0, "the shared-jump walk should have merged at least once in six runs");
-        assert_eq!(fresh_repeats, 0, "the fresh-jump walk never repeats a column part");
+        assert!(
+            merged_repeats > 0,
+            "the shared-jump walk should have merged at least once in six runs"
+        );
+        assert_eq!(
+            fresh_repeats, 0,
+            "the fresh-jump walk never repeats a column part"
+        );
     }
 
     /// A cyclic group `Z/N` as a counted group, for the class-counting
@@ -6438,7 +7088,10 @@ mod tests {
         // Spread evenly over the classes, exact and uniform agree to
         // within the multiset boundary terms.
         let uniform = decomposition_probability_ceiling(11, 2, 2.0 * rf);
-        assert!(p2 / uniform > 0.9 && p2 / uniform < 1.2, "{p2} vs {uniform}");
+        assert!(
+            p2 / uniform > 0.9 && p2 / uniform < 1.2,
+            "{p2} vs {uniform}"
+        );
         // The ceiling is a probability: capped at one.
         let (_, capped) = exact_decomposition_ceiling(&Cyclic(202), &mixed, 101, 3).unwrap();
         assert_eq!(capped, 1.0, "146 multisets over r = 101");
@@ -6464,7 +7117,9 @@ mod tests {
                 }
                 for table in [&full, &neg] {
                     let mut lookups = 0;
-                    let (a, b) = table.probe(curve, &fb, &mut ops, &mut lookups, s).expect("a stored sum");
+                    let (a, b) = table
+                        .probe(curve, &fb, &mut ops, &mut lookups, s)
+                        .expect("a stored sum");
                     assert_eq!(curve.add(&mut ops, fb.points[a], fb.points[b]), s);
                 }
             }
@@ -6489,17 +7144,29 @@ mod tests {
     fn frobenius_folded_table_agrees_with_the_full_table_on_every_probe() {
         let inst = koblitz_instance_best(17).expect("K_a / 2^17");
         let (frob, desc) = choose_koblitz_base(&inst, 1, 6000).expect("base");
-        let folded = koblitz_factor_base(&inst, &frob, ColumnFold::SignedFrobeniusOrbit, desc).unwrap();
+        let folded =
+            koblitz_factor_base(&inst, &frob, ColumnFold::SignedFrobeniusOrbit, desc).unwrap();
         let g = BinaryGroup(&inst.fast);
         let full = PairTable::build(&g, &folded);
-        let table = FrobeniusPairTable::build(&inst, &folded).expect("a normal basis and a closed base");
+        let table =
+            FrobeniusPairTable::build(&inst, &folded).expect("a normal basis and a closed base");
         let f = folded.points.len() as u64;
         let n = inst.n as u64;
-        assert!(table.entries * 2 * n <= full.entries * 3, "{} entries against {} full: the fold is 2n", table.entries, full.entries);
+        assert!(
+            table.entries * 2 * n <= full.entries * 3,
+            "{} entries against {} full: the fold is 2n",
+            table.entries,
+            full.entries
+        );
         // One representative per column against every point of a later
         // or equal column: at most K·|F| additions, against |F|²/2.
         assert!(table.build_ops.adds <= folded.columns as u64 * f);
-        assert!(table.build_ops.adds * 4 <= full.build_ops.adds, "{} adds against {} full", table.build_ops.adds, full.build_ops.adds);
+        assert!(
+            table.build_ops.adds * 4 <= full.build_ops.adds,
+            "{} adds against {} full",
+            table.build_ops.adds,
+            full.build_ops.adds
+        );
         let mut ops = GroupOps::default();
         let mut ctr = OracleCounters::default();
         // Every pair sum is found, and the pair returned sums to it.
@@ -6509,7 +7176,9 @@ mod tests {
                 if s.infinity {
                     continue;
                 }
-                let (a, b) = table.probe(&g, &folded, &mut ops, &mut ctr, s).expect("every pair sum has an image in the table");
+                let (a, b) = table
+                    .probe(&g, &folded, &mut ops, &mut ctr, s)
+                    .expect("every pair sum has an image in the table");
                 assert_eq!(g.add(&mut ops, folded.points[a], folded.points[b]), s);
             }
         }
@@ -6568,13 +7237,30 @@ mod tests {
     fn koblitz_stage_timing_probe() {
         let t = Instant::now();
         let inst = koblitz_instance_best(15).expect("K_a / 2^15");
-        eprintln!("instance {} r={} h={} in {:?}", inst.name, inst.r, inst.cofactor, t.elapsed());
+        eprintln!(
+            "instance {} r={} h={} in {:?}",
+            inst.name,
+            inst.r,
+            inst.cofactor,
+            t.elapsed()
+        );
         let t = Instant::now();
         let (frob, desc) = choose_koblitz_base(&inst, 1, 6000).expect("base");
-        eprintln!("base {desc}: {} points in {:?}", frob.points.len(), t.elapsed());
+        eprintln!(
+            "base {desc}: {} points in {:?}",
+            frob.points.len(),
+            t.elapsed()
+        );
         let t = Instant::now();
-        let folded = koblitz_factor_base(&inst, &frob, ColumnFold::SignedFrobeniusOrbit, desc.clone()).unwrap();
-        eprintln!("folded: {} points, {} columns in {:?}", folded.points.len(), folded.columns, t.elapsed());
+        let folded =
+            koblitz_factor_base(&inst, &frob, ColumnFold::SignedFrobeniusOrbit, desc.clone())
+                .unwrap();
+        eprintln!(
+            "folded: {} points, {} columns in {:?}",
+            folded.points.len(),
+            folded.columns,
+            t.elapsed()
+        );
         let g = BinaryGroup(&inst.fast);
         let t = Instant::now();
         let table = PairTable::build(&g, &folded);
@@ -6617,11 +7303,35 @@ mod tests {
                 eprintln!("DISAGREE on target {q:?}: truth {truth} oracle {found:?}");
             }
         }
-        eprintln!("ground truth: {truth_hits}/{checked} targets decompose; oracle found {oracle_hits}");
+        eprintln!(
+            "ground truth: {truth_hits}/{checked} targets decompose; oracle found {oracle_hits}"
+        );
         let t = Instant::now();
-        let outcome = collect_and_solve(&g, inst.generator, target, inst.r, inst.cofactor, &folded, 5, 1_000_000, TargetSource::Random, RestartPool::Lazy, |ops, ctr, point| {
-            decompose_binary(&inst, &folded, &Oracle::Mitm { table: &table, m: 3 }, ops, ctr, point)
-        });
+        let outcome = collect_and_solve(
+            &g,
+            inst.generator,
+            target,
+            inst.r,
+            inst.cofactor,
+            &folded,
+            5,
+            1_000_000,
+            TargetSource::Random,
+            RestartPool::Lazy,
+            |ops, ctr, point| {
+                decompose_binary(
+                    &inst,
+                    &folded,
+                    &Oracle::Mitm {
+                        table: &table,
+                        m: 3,
+                    },
+                    ops,
+                    ctr,
+                    point,
+                )
+            },
+        );
         eprintln!(
             "mitm m3 folded: recovered {:?} verified {} trials {} relations {} independent {} dependent {} inconsistent {} in {:?}",
             outcome.recovered, outcome.verified, outcome.trials, outcome.relations_found, outcome.independent, outcome.dependent,
@@ -6629,8 +7339,22 @@ mod tests {
         );
         let kc = inst.koblitz.as_ref().unwrap();
         let t = Instant::now();
-        let report = koblitz_signed_frobenius_rho_reference(kc, &inst.fast.lower(target), &KoblitzSignedRhoOptions { seed: 5, ..Default::default() }, &mut |_| {});
-        eprintln!("signed rho: {:?} verified {} iterations {} in {:?}", report.recovered_log, report.verified, report.iterations, t.elapsed());
+        let report = koblitz_signed_frobenius_rho_reference(
+            kc,
+            &inst.fast.lower(target),
+            &KoblitzSignedRhoOptions {
+                seed: 5,
+                ..Default::default()
+            },
+            &mut |_| {},
+        );
+        eprintln!(
+            "signed rho: {:?} verified {} iterations {} in {:?}",
+            report.recovered_log,
+            report.verified,
+            report.iterations,
+            t.elapsed()
+        );
     }
 
     #[test]
@@ -6653,7 +7377,10 @@ mod tests {
             .find(|v| v.name.starts_with("mitm_m") && v.name.ends_with("abscissa_columns_control"))
             .unwrap();
         assert!(folded.verified && control.verified, "{res:?}");
-        assert!(folded.columns < control.columns, "the fold must cut the columns");
+        assert!(
+            folded.columns < control.columns,
+            "the fold must cut the columns"
+        );
         assert_eq!(folded.signed_points, control.signed_points);
         assert!(res.automorphisms_generic == 30);
         assert!(res.floor_s < generic_floor_s(2.0));
@@ -6669,7 +7396,10 @@ mod tests {
             .find(|v| v.name.ends_with("signed_orbit_columns_frobfold"))
             .expect("a Frobenius-folded row");
         assert_eq!(frob.table, "frobenius_folded");
-        assert!(frob.factor_base.get("pair_table_entries") * 4 <= folded.factor_base.get("pair_table_entries"));
+        assert!(
+            frob.factor_base.get("pair_table_entries") * 4
+                <= folded.factor_base.get("pair_table_entries")
+        );
         assert!(frob.relations.get("canonicalisations") > 0);
         assert!(res.calibration.ns_per_canon.unwrap() > 0.0);
         let walk = res
@@ -6678,7 +7408,9 @@ mod tests {
             .find(|v| v.name.ends_with("signed_orbit_columns_frobfold_walk"))
             .expect("a walk row");
         assert_eq!(walk.targets, "walk");
-        assert!(walk.relations.get("walk_steps") + walk.relations.get("walk_restarts") >= walk.trials);
+        assert!(
+            walk.relations.get("walk_steps") + walk.relations.get("walk_restarts") >= walk.trials
+        );
     }
 
     #[test]
@@ -6748,7 +7480,10 @@ mod tests {
             .map(|&b| mk(b, 3.0 * 2f64.powf(0.75 * b)))
             .collect();
         let fits = fit_exponents(&insts);
-        let total = fits.iter().find(|f| f.variant == "v" && f.phase == "total").unwrap();
+        let total = fits
+            .iter()
+            .find(|f| f.variant == "v" && f.phase == "total")
+            .unwrap();
         assert!((total.alpha - 0.75).abs() < 1e-9, "{total:?}");
         assert!(total.r_squared > 0.999);
     }

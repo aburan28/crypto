@@ -89,6 +89,37 @@ class MeasurementSchemaTests(unittest.TestCase):
 
 
 class HelperTests(unittest.TestCase):
+    def test_matched_targets_are_required_even_when_both_producers_succeed(self):
+        row = {'fixture_index':0,'n':13,'a':0,'generator_point_key':['1','2'],
+               'subgroup_order':2003,'field_modulus_low_terms':[0,1,3,4],
+               'published_q_point_key':['3','4'],'recovered_fixture_scalar':5,'published_fixture_scalar':5}
+        direct = [dict(row,kind='point_defined_factor_base'), dict(row,kind='relation_rank_summary',linear_solution_verified=True)]
+        rho = [dict(row,kind='rho_public_fixture',verified=True)]
+        matched = lab.comparison_integrity(direct,rho,1)
+        self.assertEqual(matched['status'],'MATCHED')
+        self.assertEqual(len(matched['fixture_hash']),64)
+        rho[0]['published_q_point_key'] = [3,6]
+        self.assertEqual(lab.comparison_integrity(direct,rho,1)['status'],'INVALID_COMPARISON')
+        self.assertIsNone(lab.comparison_integrity(direct,rho,1)['fixture_hash'])
+
+    def test_partial_or_duplicate_workload_fails_closed(self):
+        row = {'fixture_index':0,'n':13,'a':0,'generator_point_key':[1,2],
+               'subgroup_order':2003,'field_modulus_low_terms':[0,1,3,4],
+               'published_q_point_key':[3,4],'recovered_fixture_scalar':5,'published_fixture_scalar':5}
+        direct = [dict(row,kind='point_defined_factor_base'), dict(row,kind='relation_rank_summary',linear_solution_verified=True)]
+        rho = [dict(row,kind='rho_public_fixture',verified=True)]
+        for a,b,count in [(direct,rho,2),(direct+direct,rho,1),([],rho,1)]:
+            self.assertEqual(lab.comparison_integrity(a,b,count)['status'],'INVALID_COMPARISON')
+
+    def test_only_complete_ic_cost_and_total_rho_batch_are_comparable(self):
+        self.assertIsNone(lab.extract_ic_cost([{'online_charged_ms':1}], 'algorithmic_charged'))
+        self.assertIsNone(lab.extract_ic_cost([{'charged_total_ms':1}], 'algorithmic_charged'))
+        self.assertEqual(lab.extract_ic_cost([{'full_algorithm_charged_total_ms':9}], 'algorithmic_charged'),9)
+        self.assertEqual(lab.extract_rho_cost([{'total_ms':2},{'total_ms':3}]),5)
+        self.assertIsNone(lab.extract_rho_cost([{'total_ms':2},{}]))
+        self.assertIsNone(lab.extract_rho_cost([{'total_ms':float('nan')}]))
+        self.assertIsNone(lab.extract_ic_cost([{'full_algorithm_charged_total_ms':-1}], 'algorithmic_charged'))
+
     def test_seed_is_deterministic(self) -> None:
         self.assertEqual(
             lab.seed_for("koblitz.vs_rho.n37_wall", "direct", 0),

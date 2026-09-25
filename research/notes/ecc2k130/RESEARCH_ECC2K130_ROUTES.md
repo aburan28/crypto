@@ -1,5 +1,10 @@
 # Routes: where to take ECC2K-130 index calculus next
 
+> **Closed out, 2026-09-23.**  Route 3 closed at its gate (X4′), which meets
+> the thread's finishing condition; the ledger of all five routes, and what is
+> left open and why, is the close-out at the end of
+> [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md).
+
 Ranked. Each route says why it is open, what to run, the one number that
 decides it, and what would close it. Companion to
 [`research/notes/ecc2k130/RESEARCH_ECC2K130_IC_LITERATURE.md`](RESEARCH_ECC2K130_IC_LITERATURE.md)
@@ -25,8 +30,12 @@ or citations rather than expectations:
 3. **Our measurements are the state of the art, not a reproduction of
    it.** No rigorous bound on `D_reg` for these systems exists in either
    direction; the only rigorous Weil-restriction bound is numerically
-   vacuous at `n = 131` (solving degree ≤ 263). So the FFD ladder is
-   contributing evidence, not re-deriving known results.
+   vacuous at `n = 131` (solving degree ≤ 263). ~~So the FFD ladder is
+   contributing evidence, not re-deriving known results.~~
+   *(Struck 2026-09-24.  The chained rows' first fall re-derives
+   Kosters–Yeo Cor. 4.11, the trace equation; see §X6′ of
+   [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md).
+   The `D_reg` half of this point stands.)*
 
 ---
 
@@ -103,6 +112,12 @@ throughout) — which is itself worth recording, since it would say the
 symmetrised systems are *too* small for the technique.
 
 ## Route 3 — Wire the symmetrised oracle into end-to-end collection
+
+> **Closed at its gate; do not wire.**  On ECC2K-130's structure the only
+> Frobenius-stable `V ∋ 1` are `F₂` and the field, so the symmetrised base
+> loses its orbit collapse.  Per relation, the oracle then costs `3.1–14.7×`
+> the enumeration it would replace (`n = 13–23`, priced from below).  See
+> §X4′ of [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md).
 
 **Why it is open.** The symmetrised oracle is measured at ~350× the
 chained `x`-system at `m = 3` (10 291 ms → 29 ms, `K₀/F₂¹⁵`) and **none

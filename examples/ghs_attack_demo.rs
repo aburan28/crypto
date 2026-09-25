@@ -10,7 +10,7 @@ use crypto_lib::cryptanalysis::binary_isogeny::{
     j_invariant, l_isogenous_neighbours, phi_l_mod2_in_x,
 };
 use crypto_lib::cryptanalysis::ec_trapdoor::{audit_curve, magic_number_full, FieldTower};
-use crypto_lib::cryptanalysis::ec_trapdoor::{construct_trapdoor_curve, DescentRow, TrapdoorCurve};
+use crypto_lib::cryptanalysis::ec_trapdoor::{DescentRow, TrapdoorCurve};
 use crypto_lib::cryptanalysis::ghs_descent::{descend_m2_abstract, ECurve, Pt};
 use crypto_lib::cryptanalysis::ghs_full_attack::{format_report, run_full_attack, AttackOptions};
 use num_bigint::BigUint;

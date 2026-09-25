@@ -120,8 +120,7 @@ fn null_space(columns: &[Vec<u64>], words: usize) -> Vec<Vec<u32>> {
     for (j, col) in columns.iter().enumerate() {
         let mut vec = col.clone();
         let mut combo = vec![j as u32];
-        loop {
-            let Some(l) = lead_bit(&vec) else { break };
+        while let Some(l) = lead_bit(&vec) {
             // reduce against a pivot with the same leading bit
             if let Some(p) = pivots.iter().find(|p| p.lead == l) {
                 for w in 0..words {
@@ -173,7 +172,7 @@ fn null_space(columns: &[Vec<u64>], words: usize) -> Vec<Vec<u32>> {
 fn syzygies(eqs: &[F2BoolPoly], num_vars: u32) -> (usize, Vec<Vec<(u32, Vec<Option<u32>>)>>) {
     let n = eqs.len() as u32;
     let cols3 = num_monomials_upto_degree(num_vars, 3) as usize;
-    let words = (cols3 + 63) / 64;
+    let words = cols3.div_ceil(64);
     // monomials per equation (precomputed)
     let monos: Vec<Vec<Vec<u32>>> = eqs.iter().map(|f| poly_monomials(f, num_vars)).collect();
     // column index = i*(N+1) + k, k=0 → multiplier 1, k=1..N → x_{k-1}
@@ -203,6 +202,7 @@ fn syzygies(eqs: &[F2BoolPoly], num_vars: u32) -> (usize, Vec<Vec<(u32, Vec<Opti
     (deps.len(), decoded)
 }
 
+#[allow(dead_code)]
 fn describe(syz: &[(u32, Vec<Option<u32>>)], n_sub: u32) -> String {
     // n_eqs participating, # with a constant term, X1-half vs X2-half linear
     // var usage (vars 0..n_sub are X₁ coords, n_sub..2n_sub are X₂ coords).
@@ -272,7 +272,7 @@ fn verify_identity(eqs: &[F2BoolPoly], common: &[Option<u32>], s: &[u32], num_va
     }
     let fs_monos = poly_monomials(&fs, num_vars);
     let cols3 = num_monomials_upto_degree(num_vars, 3) as usize;
-    let words = (cols3 + 63) / 64;
+    let words = cols3.div_ceil(64);
     // ℓ · F_S = Σ_{term ∈ ℓ} term · F_S, XOR-accumulated.
     let mut acc = vec![0u64; words];
     for term in common {

@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "campaign": "isogeny-volcano-ic-20260924",
+  "candidate_schema": "ICCAN1",
+  "curve_schema": "ICV1",
+  "boundary_schema": "docs/ic/boundary_targets.json#schema_version=2",
+  "status": "planned",
+  "worker_lanes": [
+    "topology",
+    "transport",
+    "algebra_meter",
+    "factor_bases",
+    "function_first",
+    "symmetry",
+    "koblitz",
+    "accounting"
+  ],
+  "common": {
+    "fields": {
+      "prime": [
+        101,
+        127,
+        163,
+        211,
+        257,
+        509,
+        1021
+      ],
+      "binary_degrees": [
+        9,
+        11,
+        13
+      ]
+    },
+    "isogeny_primes": [
+      2,
+      3,
+      5,
+      7
+    ],
+    "factor_base_sizes": [
+      4,
+      8,
+      16
+    ],
+    "summands": [
+      4,
+      5
+    ],
+    "discovery_classes_per_field": 4,
+    "holdout_classes_per_field": 2,
+    "seeds": [
+      240925,
+      240926,
+      240927,
+      240928,
+      240929
+    ],
+    "timing_repetitions": 3,
+    "success_gate": "paired common operations per fresh verified relation <= 0.8 * matched baseline, correctness preserved",
+    "full_attack_gate": "all phases charged; matched automorphism-aware rho; recovered scalar verified"
+  },
+  "families": [
+    {
+      "id": "TOPO",
+      "count": 8,
+      "worker": "topology",
+      "dimensions": [
+        "field",
+        "ell",
+        "edge_direction",
+        "level",
+        "coordinate_model"
+      ]
+    },
+    {
+      "id": "FB",
+      "count": 12,
+      "worker": "factor_bases",
+      "dimensions": [
+        "transported",
+        "vector_subspace",
+        "orbit_union",
+        "uniform_points",
+        "torsion_stable",
+        "membership_sparse",
+        "size",
+        "density"
+      ]
+    },
+    {
+      "id": "REL",
+      "count": 10,
+      "worker": "transport",
+      "dimensions": [
+        "direct_Sm",
+        "chained_S3",
+        "symmetrized",
+        "graph_pullback",
+        "resultant_tree",
+        "elimination_order"
+      ]
+    },
+    {
+      "id": "FFD",
+      "count": 10,
+      "worker": "algebra_meter",
+      "dimensions": [
+        "F4",
+        "F5",
+        "rank_profile",
+        "first_fall",
+        "last_fall",
+        "processed_degree",
+        "sparsity",
+        "pivoting"
+      ]
+    },
+    {
+      "id": "FUNC",
+      "count": 8,
+      "worker": "function_first",
+      "dimensions": [
+        "nagao",
+        "support_divisibility",
+        "quotient_span",
+        "lazy_transform",
+        "transported_support"
+      ]
+    },
+    {
+      "id": "SYM",
+      "count": 10,
+      "worker": "symmetry",
+      "dimensions": [
+        "permutation",
+        "torsion",
+        "frobenius",
+        "stabilizer",
+        "orbit_blocks",
+        "circulant",
+        "lifting"
+      ]
+    },
+    {
+      "id": "KOB",
+      "count": 10,
+      "worker": "koblitz",
+      "dimensions": [
+        "n",
+        "frobenius_retained",
+        "frobenius_lost",
+        "orbit_length",
+        "subfield_k",
+        "rho_discount"
+      ]
+    },
+    {
+      "id": "ACC",
+      "count": 12,
+      "worker": "accounting",
+      "dimensions": [
+        "holdout",
+        "failed_attempts",
+        "search_cost",
+        "memory",
+        "frozen_suite",
+        "boundary_v2",
+        "rho",
+        "toy_dlp",
+        "replay"
+      ]
+    }
+  ],
+  "required_measurements": [
+    "fixture_hash",
+    "candidate_id",
+    "curve_id",
+    "factor_base_size_F",
+    "orbit_count_K",
+    "m_summands",
+    "system_degree",
+    "ffd_or_degree_of_regularity",
+    "max_processed_degree",
+    "median_ms_per_target",
+    "verified_relations",
+    "fresh_rows",
+    "matrix_rank",
+    "stage_timers",
+    "peak_rss_bytes",
+    "claim_boundary_non_claims"
+  ]
+}

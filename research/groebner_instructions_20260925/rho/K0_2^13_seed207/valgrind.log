@@ -1,0 +1,11 @@
+==1825== Callgrind, a call-graph generating cache profiler
+==1825== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==1825== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==1825== Command: /home/user/crypto/target/release/examples/ir_calibration rho 0 13 207
+==1825== 
+==1825== For interactive control, run 'callgrind_control -h'.
+==1825== 
+==1825== Events    : Ir
+==1825== Collected : 844061
+==1825== 
+==1825== I   refs:      844,061

@@ -64,6 +64,7 @@ impl Gf128 {
     const REDUCTION_LOW: u128 = (1u128 << 7) | (1u128 << 2) | (1u128 << 1) | 1u128;
 
     /// GF(2^128) multiplication with carryless propagation.  O(128).
+    #[allow(clippy::should_implement_trait)]
     pub fn mul(self, rhs: Self) -> Self {
         // Schoolbook with reduction folded in.  Standard
         // "two-limb shift-XOR" routine.
@@ -84,10 +85,12 @@ impl Gf128 {
         Gf128(p)
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn add(self, rhs: Self) -> Self {
         Gf128(self.0 ^ rhs.0)
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn sub(self, rhs: Self) -> Self {
         self.add(rhs)
     }
@@ -241,7 +244,7 @@ impl Poly {
         let mut r = self.clone();
         let mut q_coeffs = vec![Gf128::zero(); (self.deg() - div.deg() + 1).max(0) as usize];
         let div_lead_inv = div.leading().inv();
-        while r.deg() >= div.deg() && !(r.deg() == -1) {
+        while r.deg() >= div.deg() && (r.deg() != -1) {
             let shift = (r.deg() - div.deg()) as usize;
             let factor = r.leading().mul(div_lead_inv);
             q_coeffs[shift] = factor;
@@ -428,7 +431,7 @@ fn random_poly(deg: usize, rng: &mut StdRng) -> Poly {
 /// is zero, so the linear term drops out.
 pub fn build_nonce_reuse_poly(ct1: &[u8], tag1: &[u8; 16], ct2: &[u8], tag2: &[u8; 16]) -> Poly {
     assert_eq!(ct1.len(), ct2.len(), "messages must be same length");
-    let n_blocks = (ct1.len() + 15) / 16;
+    let n_blocks = ct1.len().div_ceil(16);
     let mut coeffs = vec![Gf128::zero(); n_blocks + 2];
     // y^0 = t1 ⊕ t2
     let mut t_delta = [0u8; 16];

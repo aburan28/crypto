@@ -47,19 +47,18 @@ use crate::cryptanalysis::ic_boundary::lift_abscissae;
 
 use crate::cryptanalysis::ic_boundary::{
     calibrate_binary_instance, calibrate_s4, census_hits, choose_koblitz_base, decompose_mitm,
-    generic_floor_ops, generic_floor_s, koblitz_factor_base, koblitz_instance_best,
-    BinaryGroup, BinaryInstance, Calibration, ColumnFold, CountedGroup, FactorBase, GroupOps,
-    Oracle,
+    generic_floor_ops, generic_floor_s, koblitz_factor_base, koblitz_instance_best, BinaryGroup,
+    BinaryInstance, Calibration, ColumnFold, CountedGroup, FactorBase, GroupOps, Oracle,
     OracleCounters, PairTable,
 };
 use crate::cryptanalysis::koblitz_fast::FastPoint;
 use crate::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, f4_profile, f4_word_ops_total, first_fall_degree,
-    FieldStructure, SolverEngine,
+    build_decomposition_system, f4_profile, f4_word_ops_total, first_fall_degree, FieldStructure,
+    SolverEngine,
 };
 use crate::cryptanalysis::koblitz_index_calculus::{
-    build_frobenius_factor_base, groebner_decompose, sat_decompose_with,
-    FrobeniusFactorBase, SatDecompositionOptions,
+    build_frobenius_factor_base, groebner_decompose, sat_decompose_with, FrobeniusFactorBase,
+    SatDecompositionOptions,
 };
 use crate::cryptanalysis::semaev_decomp::SubspaceOracle;
 
@@ -89,7 +88,7 @@ fn median(mut xs: Vec<f64>) -> f64 {
     }
     xs.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let mid = xs.len() / 2;
-    if xs.len() % 2 == 0 {
+    if xs.len().is_multiple_of(2) {
         (xs[mid - 1] + xs[mid]) / 2.0
     } else {
         xs[mid]
@@ -138,7 +137,11 @@ impl OraclePrice {
             native_total: per_target.iter().map(|t| t.native).sum(),
             native_median_found: median(class(Verdict::Found).map(|t| t.native as f64).collect()),
             native_median_refuted: median(refuted.iter().map(|t| t.native as f64).collect()),
-            ms_median_found: median(class(Verdict::Found).map(|t| t.wall_ns as f64 / 1e6).collect()),
+            ms_median_found: median(
+                class(Verdict::Found)
+                    .map(|t| t.wall_ns as f64 / 1e6)
+                    .collect(),
+            ),
             ms_median_refuted: median(refuted.iter().map(|t| t.wall_ns as f64 / 1e6).collect()),
             ms_total: per_target.iter().map(|t| t.wall_ns as f64 / 1e6).sum(),
             gae_per_target_mean: per_target.iter().map(|t| t.gae).sum::<f64>()
@@ -323,7 +326,12 @@ fn cell_base(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<CellBase> {
         if !frob.m_can_decompose(kc, m as usize) {
             continue;
         }
-        let fb = koblitz_factor_base(&inst, &frob, ColumnFold::SignedFrobeniusOrbit, description.clone())?;
+        let fb = koblitz_factor_base(
+            &inst,
+            &frob,
+            ColumnFold::SignedFrobeniusOrbit,
+            description.clone(),
+        )?;
         let table = PairTable::build(&g, &fb);
         if census_hits(&inst, &fb, &Oracle::Mitm { table: &table, m }, 64, cfg.seed) == 0 {
             continue;
@@ -366,10 +374,8 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
     let mut macaulay: Vec<serde_json::Value> = Vec::new();
     for (t, target) in targets.iter().enumerate() {
         let x_r = inst.gf.to_element(target.x);
-        let Some(sys) = build_decomposition_system(&frob.subspace_basis, &x_r, &kc.curve.b, m as usize, &st)
-        else {
-            return None;
-        };
+        let sys =
+            build_decomposition_system(&frob.subspace_basis, &x_r, &kc.curve.b, m as usize, &st)?;
         unknowns = sys.n_vars;
         equations = sys.equations.len();
         degree = sys
@@ -395,7 +401,8 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
     let algebra = unknowns <= cfg.max_unknowns;
 
     let ns_add = calib.ns_per_add;
-    let price = |native: u64, ns: f64, adds: u64| -> f64 { native as f64 * ns / ns_add + adds as f64 };
+    let price =
+        |native: u64, ns: f64, adds: u64| -> f64 { native as f64 * ns / ns_add + adds as f64 };
     let mut disagreements = 0usize;
     let mut enumerate_rows = Vec::new();
     let mut mitm_rows = Vec::new();
@@ -415,7 +422,11 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             hits += 1;
         }
         enumerate_rows.push(TargetPrice {
-            verdict: if truth { Verdict::Found } else { Verdict::Refuted },
+            verdict: if truth {
+                Verdict::Found
+            } else {
+                Verdict::Refuted
+            },
             native: o.adds,
             group_adds: o.adds,
             wall_ns: wall,
@@ -433,7 +444,11 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
             disagreements += 1;
         }
         mitm_rows.push(TargetPrice {
-            verdict: if by_mitm.is_some() { Verdict::Found } else { Verdict::Refuted },
+            verdict: if by_mitm.is_some() {
+                Verdict::Found
+            } else {
+                Verdict::Refuted
+            },
             native: ctr.lookups,
             group_adds: o.adds,
             wall_ns: wall,
@@ -467,7 +482,10 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
                 disagreements += 1;
             }
             let mut extra = BTreeMap::new();
-            extra.insert("lift_failures".into(), u64::from(witness.is_some() && !lifted));
+            extra.insert(
+                "lift_failures".into(),
+                u64::from(witness.is_some() && !lifted),
+            );
             s4_rows.push(TargetPrice {
                 verdict,
                 native: pairs,
@@ -511,7 +529,10 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
         let mut extra = BTreeMap::new();
         extra.insert("reductions".into(), stats.reductions as u64);
         extra.insert("splits".into(), stats.splits as u64);
-        extra.insert("infeasible_branches".into(), stats.infeasible_branches as u64);
+        extra.insert(
+            "infeasible_branches".into(),
+            stats.infeasible_branches as u64,
+        );
         extra.insert("max_degree_built".into(), stats.max_degree_built as u64);
         // Where the engine's word operations went, for the stage profile:
         // the inherited engine's specialisation share is zero under the
@@ -581,17 +602,37 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
     }
 
     let mut oracles = vec![
-        OraclePrice::from_targets(&format!("enumerate_m{m}"), "group_additions", enumerate_rows),
-        OraclePrice::from_targets(&format!("meet_in_the_middle_m{m}"), "pair_table_probes", mitm_rows),
+        OraclePrice::from_targets(
+            &format!("enumerate_m{m}"),
+            "group_additions",
+            enumerate_rows,
+        ),
+        OraclePrice::from_targets(
+            &format!("meet_in_the_middle_m{m}"),
+            "pair_table_probes",
+            mitm_rows,
+        ),
     ];
     if !s4_rows.is_empty() {
-        oracles.push(OraclePrice::from_targets("semaev_s4_pairs_and_solve", "pairs", s4_rows));
+        oracles.push(OraclePrice::from_targets(
+            "semaev_s4_pairs_and_solve",
+            "pairs",
+            s4_rows,
+        ));
     }
     if !f4_rows.is_empty() {
-        oracles.push(OraclePrice::from_targets("matrix_f4_splitting", "word_xors", f4_rows));
+        oracles.push(OraclePrice::from_targets(
+            "matrix_f4_splitting",
+            "word_xors",
+            f4_rows,
+        ));
     }
     if !sat_rows.is_empty() {
-        oracles.push(OraclePrice::from_targets("cdcl_sat_native_xor", "conflicts", sat_rows));
+        oracles.push(OraclePrice::from_targets(
+            "cdcl_sat_native_xor",
+            "conflicts",
+            sat_rows,
+        ));
     }
 
     // Extrapolated relation phase: (K + 1) relations at the measured
@@ -769,7 +810,9 @@ pub fn price_swap_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<Swap
         }
         let p = picks[0];
         let pool: Vec<usize> = (0..fb.points.len())
-            .filter(|&q| class[q] == class[p] && !picks.contains(&q) && !picks.contains(&fb.neg_index[q]))
+            .filter(|&q| {
+                class[q] == class[p] && !picks.contains(&q) && !picks.contains(&fb.neg_index[q])
+            })
             .collect();
         if pool.is_empty() {
             continue;
@@ -777,7 +820,10 @@ pub fn price_swap_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<Swap
         let q = pool[rng.gen_range(0..pool.len())];
         let minus_p = g.add(&mut ops, target, g.neg(fb.points[p]));
         let swapped = g.add(&mut ops, minus_p, fb.points[q]);
-        assert!(g.mul(&mut ops, swapped, r).infinity, "class match keeps the swap in <G>");
+        assert!(
+            g.mul(&mut ops, swapped, r).infinity,
+            "class match keeps the swap in <G>"
+        );
         targets.push((target, swapped));
     }
     if targets.len() < cfg.targets {
@@ -793,7 +839,11 @@ pub fn price_swap_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<Swap
             "enumerate",
             "group_additions",
             SwapCall {
-                verdict: if found { Verdict::Found } else { Verdict::Refuted },
+                verdict: if found {
+                    Verdict::Found
+                } else {
+                    Verdict::Refuted
+                },
                 native: o.adds,
                 wall_ns: t0.elapsed().as_nanos() as u64,
             },
@@ -807,7 +857,11 @@ pub fn price_swap_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<Swap
             "meet_in_the_middle",
             "pair_table_probes",
             SwapCall {
-                verdict: if found { Verdict::Found } else { Verdict::Refuted },
+                verdict: if found {
+                    Verdict::Found
+                } else {
+                    Verdict::Refuted
+                },
                 native: ctr.lookups,
                 wall_ns: t0.elapsed().as_nanos() as u64,
             },
@@ -824,7 +878,11 @@ pub fn price_swap_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<Swap
                 "semaev_s4_pairs_and_solve",
                 "pairs",
                 SwapCall {
-                    verdict: if lifted { Verdict::Found } else { Verdict::Refuted },
+                    verdict: if lifted {
+                        Verdict::Found
+                    } else {
+                        Verdict::Refuted
+                    },
                     native: pairs,
                     wall_ns: t0.elapsed().as_nanos() as u64,
                 },
@@ -896,7 +954,9 @@ pub fn price_swap_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<Swap
 
     let mut rows: Vec<(&str, &str, Vec<SwapPair>)> = Vec::new();
     for &(target, swapped) in &targets {
-        for ((name, unit, on_target), (_, _, on_swap)) in price(target).into_iter().zip(price(swapped)) {
+        for ((name, unit, on_target), (_, _, on_swap)) in
+            price(target).into_iter().zip(price(swapped))
+        {
             let ratio = on_swap.native as f64 / on_target.native.max(1) as f64;
             let pair = SwapPair {
                 on_target,
@@ -916,12 +976,19 @@ pub fn price_swap_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<Swap
             SwapPrice {
                 oracle: name.into(),
                 native_unit: unit.into(),
-                found_on_target: pairs.iter().filter(|p| p.on_target.verdict == Verdict::Found).count(),
-                found_on_swap: pairs.iter().filter(|p| p.on_swap.verdict == Verdict::Found).count(),
+                found_on_target: pairs
+                    .iter()
+                    .filter(|p| p.on_target.verdict == Verdict::Found)
+                    .count(),
+                found_on_swap: pairs
+                    .iter()
+                    .filter(|p| p.on_swap.verdict == Verdict::Found)
+                    .count(),
                 inconclusive: pairs
                     .iter()
                     .filter(|p| {
-                        p.on_target.verdict == Verdict::Inconclusive || p.on_swap.verdict == Verdict::Inconclusive
+                        p.on_target.verdict == Verdict::Inconclusive
+                            || p.on_swap.verdict == Verdict::Inconclusive
                     })
                     .count(),
                 ratio_min: ratios.iter().copied().fold(f64::INFINITY, f64::min),
@@ -1039,9 +1106,18 @@ mod tests {
         assert!(names.contains(&"matrix_f4_splitting"));
         assert!(names.contains(&"cdcl_sat_native_xor"));
         for o in &cell.oracles {
-            assert_eq!(o.found + o.refuted + o.inconclusive, cell.targets, "{}", o.oracle);
+            assert_eq!(
+                o.found + o.refuted + o.inconclusive,
+                cell.targets,
+                "{}",
+                o.oracle
+            );
         }
-        let f4 = cell.oracles.iter().find(|o| o.oracle == "matrix_f4_splitting").unwrap();
+        let f4 = cell
+            .oracles
+            .iter()
+            .find(|o| o.oracle == "matrix_f4_splitting")
+            .unwrap();
         assert!(f4.native_total > 0, "F4 word ops must be counted");
         assert_eq!(cell.projected.len(), cell.oracles.len());
     }
@@ -1086,7 +1162,11 @@ mod tests {
                 assert_eq!(o.found_on_swap, cell.pairs, "{}", o.oracle);
                 assert_eq!(o.found_on_target, cell.pairs, "{}", o.oracle);
             }
-            assert!(o.ratio_min <= o.ratio_median && o.ratio_median <= o.ratio_max, "{}", o.oracle);
+            assert!(
+                o.ratio_min <= o.ratio_median && o.ratio_median <= o.ratio_max,
+                "{}",
+                o.oracle
+            );
         }
         let names: Vec<&str> = cell.oracles.iter().map(|o| o.oracle.as_str()).collect();
         assert!(names.contains(&"matrix_f4_splitting"));
@@ -1097,10 +1177,22 @@ mod tests {
     fn s4_agreement_is_checked_in_both_directions() {
         // (found, lifted, truth) -> agrees
         assert!(s4_agrees(true, true, true));
-        assert!(!s4_agrees(true, true, false), "a witness on a refuted target");
-        assert!(!s4_agrees(true, false, true), "a witness that does not lift");
-        assert!(!s4_agrees(true, false, false), "a spurious witness on a refuted target");
+        assert!(
+            !s4_agrees(true, true, false),
+            "a witness on a refuted target"
+        );
+        assert!(
+            !s4_agrees(true, false, true),
+            "a witness that does not lift"
+        );
+        assert!(
+            !s4_agrees(true, false, false),
+            "a spurious witness on a refuted target"
+        );
         assert!(s4_agrees(false, false, false));
-        assert!(!s4_agrees(false, false, true), "a refutation on a decomposable target");
+        assert!(
+            !s4_agrees(false, false, true),
+            "a refutation on a decomposable target"
+        );
     }
 }

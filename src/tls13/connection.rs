@@ -32,7 +32,7 @@
 //! - HelloRetryRequest (we assume the client offered a compatible group).
 //! - Multiple cipher suites.
 
-use crate::cryptanalysis::tls13_kdf::{derive_secret, hkdf_expand_label, tls13_key_schedule};
+use crate::cryptanalysis::tls13_kdf::{derive_secret, hkdf_expand_label};
 use crate::ecc::x25519::{x25519, x25519_base};
 use crate::hash::sha256::sha256;
 use crate::kdf::hkdf::hmac_sha256;
@@ -624,7 +624,7 @@ mod tests {
     #[test]
     fn ecdhe_shared_secret_matches() {
         let mut client = TlsClient::new();
-        let mut server = TlsServer::new();
+        let _server = TlsServer::new();
         let _ = client.build_client_hello();
         // After handshake, both sides should have ended up with
         // identical handshake_secret values (= they derived the same

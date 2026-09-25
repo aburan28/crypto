@@ -1,0 +1,11 @@
+==562== Callgrind, a call-graph generating cache profiler
+==562== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==562== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==562== Command: /home/user/crypto/target/release/examples/groebner_stage_bench --label A1 --ladder r2-holdout --rung 10 --out /home/user/crypto/research/groebner_instructions_20260925/stage/r2-holdout/A1/rung10/stage
+==562== 
+==562== For interactive control, run 'callgrind_control -h'.
+==562== 
+==562== Events    : Ir
+==562== Collected : 577778651
+==562== 
+==562== I   refs:      577,778,651

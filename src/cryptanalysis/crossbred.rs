@@ -823,11 +823,9 @@ pub fn format_sweep(cells: &[SweepCell]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::binary_ecc::F2mElement;
+
     use crate::cryptanalysis::koblitz_groebner::{build_decomposition_system, FieldStructure};
-    use crate::cryptanalysis::koblitz_index_calculus::{
-        build_frobenius_factor_base, find_irreducible, KoblitzCurve,
-    };
+    use crate::cryptanalysis::koblitz_index_calculus::{build_frobenius_factor_base, KoblitzCurve};
 
     /// Brute force over all `2^n` points: the ground truth every other
     /// path is compared with.

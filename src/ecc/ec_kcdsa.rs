@@ -99,7 +99,7 @@ fn z_input(cert_data: &[u8], msg: &[u8]) -> Vec<u8> {
 }
 
 fn n_byte_len(curve: &CurveParams) -> usize {
-    (curve.n.bits() as usize + 7) / 8
+    (curve.n.bits() as usize).div_ceil(8)
 }
 
 /// **Sign** `msg` with private key `x` under signer identity

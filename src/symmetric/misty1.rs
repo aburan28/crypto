@@ -149,7 +149,7 @@ fn fo(input: u32, k: usize, ek: &[u16; 16]) -> u32 {
 fn fl(input: u32, k: usize, ek: &[u16; 16]) -> u32 {
     let mut d0: u16 = (input >> 16) as u16;
     let mut d1: u16 = input as u16;
-    if k % 2 == 0 {
+    if k.is_multiple_of(2) {
         d1 ^= d0 & ek[k / 2];
         d0 ^= d1 | ek[(k / 2 + 6) % 8 + 8];
     } else {
@@ -163,7 +163,7 @@ fn fl(input: u32, k: usize, ek: &[u16; 16]) -> u32 {
 fn fl_inv(input: u32, k: usize, ek: &[u16; 16]) -> u32 {
     let mut d0: u16 = (input >> 16) as u16;
     let mut d1: u16 = input as u16;
-    if k % 2 == 0 {
+    if k.is_multiple_of(2) {
         d0 ^= d1 | ek[(k / 2 + 6) % 8 + 8];
         d1 ^= d0 & ek[k / 2];
     } else {

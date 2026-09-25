@@ -5,6 +5,12 @@ description: Prepare, run, resume and inspect bounded end-to-end index-calculus 
 
 # Run an IC tournament
 
+For the repo-local development loop, platform checks and backend panels, use
+[ic-autolab](../../../../.agents/skills/ic-autolab/SKILL.md) and
+[AUTOLAB.md](../../AUTOLAB.md). New instruction rounds retain a frozen diverse
+portfolio (`--selection-width 6 --exploration-slots 1`) before selection locks
+one challenger. Native development screens cannot promote a winner.
+
 Locate the repository, read `AGENTS.md`, then
 `research/ic_candidate_tournament_20260915/OPERATIONS.md`. Use existing session
 authorization and resource limits. A bounded local run does not imply starting

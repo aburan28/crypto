@@ -18,10 +18,10 @@ use clap::Args;
 use serde_json::{json, Value};
 
 use crypto_lib::cryptanalysis::ic_boundary::{
-    calibrate_binary_instance, calibrate_group, calibrate_row_ops, calibrate_word_xor, generic_floor_ops,
-    koblitz_instance, random_binary_instance, rho_reference, rho_reference_negation, roster_prime_instance,
-    signed_frobenius_rho, BinaryGroup, BinaryInstance, Calibration, CountedGroup, GroupOps, PinOutcome,
-    PrimeInstance, RhoResult,
+    calibrate_binary_instance, calibrate_group, calibrate_row_ops, calibrate_word_xor,
+    generic_floor_ops, koblitz_instance, random_binary_instance, rho_reference,
+    rho_reference_negation, roster_prime_instance, signed_frobenius_rho, BinaryGroup,
+    BinaryInstance, Calibration, CountedGroup, GroupOps, PinOutcome, PrimeInstance, RhoResult,
 };
 use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
@@ -32,7 +32,9 @@ use crypto_lib::cryptanalysis::ic_framework::solvers::{solver_by_name, solver_re
 use crypto_lib::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
 };
-use crypto_lib::cryptanalysis::ic_framework::{format_markdown, run_pipeline, PipelineSpec, RunReport};
+use crypto_lib::cryptanalysis::ic_framework::{
+    format_markdown, run_pipeline, PipelineSpec, RunReport,
+};
 
 #[derive(Args, Clone)]
 pub struct BenchArgs {
@@ -218,7 +220,9 @@ fn calibration_for_binary(inst: &BinaryInstance, regime: &str) -> (Calibration, 
     (calib, pins)
 }
 
-fn sample_prime_points(inst: &PrimeInstance) -> Vec<crypto_lib::cryptanalysis::ic_boundary::PrimePoint> {
+fn sample_prime_points(
+    inst: &PrimeInstance,
+) -> Vec<crypto_lib::cryptanalysis::ic_boundary::PrimePoint> {
     let g = inst.generator_point();
     let mut ops = GroupOps::default();
     (1..=8u64).map(|k| inst.curve.mul(&mut ops, g, k)).collect()
@@ -366,7 +370,8 @@ fn matched_rho(instance: &Instance, seed: u64, repeats: usize, runs: usize) -> R
                 };
             }
             let signed = rho_reference_for(&bg, gen, r, seed, repeats, runs, |t, planted, s, _| {
-                signed_frobenius_rho(i, t, planted, s).expect("a Koblitz instance carries its curve")
+                signed_frobenius_rho(i, t, planted, s)
+                    .expect("a Koblitz instance carries its curve")
             });
             let mut candidates: Vec<RhoReference> = signed.into_iter().chain(negation).collect();
             // The cheaper of the eligible walks, among those that verified.
@@ -433,7 +438,9 @@ fn run_prime(
                 ))
             }
         };
-        out.push(run_pipeline(&ctx, &spec, &base, oracle, planted, calib, rho_s)?);
+        out.push(run_pipeline(
+            &ctx, &spec, &base, oracle, planted, calib, rho_s,
+        )?);
     }
     Ok(out)
 }
@@ -489,7 +496,13 @@ fn run_binary(
                 let (sname, sparams) = parse_plugin(raw)?;
                 let budget = (spec.solver_budget_seconds > 0)
                     .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
-                Some(DescentAlgebraicOracle::new(m, inst, solver_by_name(&sname)?, sparams, budget))
+                Some(DescentAlgebraicOracle::new(
+                    m,
+                    inst,
+                    solver_by_name(&sname)?,
+                    sparams,
+                    budget,
+                ))
             }
             _ => None,
         };
@@ -500,12 +513,15 @@ fn run_binary(
             "descent-algebraic" => algebraic.as_mut().expect("built above"),
             other => return Err(format!("oracle `{other}` is not available here")),
         };
-        out.push(run_pipeline(&ctx, &spec, base, oracle, planted, calib, rho_s)?);
+        out.push(run_pipeline(
+            &ctx, &spec, base, oracle, planted, calib, rho_s,
+        )?);
     }
     Ok(out)
 }
 
 /// The instance a sweep runs every configuration on, built once.
+#[allow(clippy::large_enum_variant)]
 enum Instance {
     Prime(PrimeInstance),
     Binary(BinaryInstance),
@@ -596,10 +612,16 @@ fn spec_from(
         factor_base_params: fb_params,
         oracle: or_name,
         oracle_params: or_params,
-        solver: cfg.get("solver").cloned().or_else(|| defaults.solver.clone()),
+        solver: cfg
+            .get("solver")
+            .cloned()
+            .or_else(|| defaults.solver.clone()),
         solver_params: Params::default(),
         targets: Targets::parse(&tg)?,
-        linalg: cfg.get("linalg").cloned().unwrap_or_else(|| defaults.linalg.clone()),
+        linalg: cfg
+            .get("linalg")
+            .cloned()
+            .unwrap_or_else(|| defaults.linalg.clone()),
         max_trials: defaults.max_trials,
         seed: defaults.seed,
         solver_budget_seconds: defaults.solver_budget_seconds,
@@ -652,19 +674,21 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
             if configs.is_empty() {
                 return Err("the sweep file lists no configurations and no matrix".into());
             }
-            ((file.instance.regime.clone(), file.instance.degree), configs, a)
+            (
+                (file.instance.regime.clone(), file.instance.degree),
+                configs,
+                a,
+            )
         }
         None => {
             let (regime, degree) = match (args.bits, args.char2_degree, args.koblitz_degree) {
                 (Some(b), None, None) => ("prime".to_string(), b),
                 (None, Some(n), None) => ("char2".to_string(), n),
                 (None, None, Some(n)) => ("koblitz".to_string(), n),
-                _ => {
-                    return Err(
-                        "choose exactly one of --bits, --char2-degree, --koblitz-degree, or --sweep"
-                            .into(),
-                    )
-                }
+                _ => return Err(
+                    "choose exactly one of --bits, --char2-degree, --koblitz-degree, or --sweep"
+                        .into(),
+                ),
             };
             let mut one = std::collections::BTreeMap::new();
             if let Some(v) = &args.factor_base {
@@ -697,7 +721,11 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
                 .or_else(|| koblitz_instance(0, degree))
                 .ok_or_else(|| format!("no Koblitz instance at degree {degree}"))?,
         ),
-        other => return Err(format!("unknown regime `{other}`; try prime, char2 or koblitz")),
+        other => {
+            return Err(format!(
+                "unknown regime `{other}`; try prime, char2 or koblitz"
+            ))
+        }
     };
 
     let (calib, pins) = match &instance {
@@ -722,7 +750,11 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
                 r.runs,
                 r.min_s,
                 r.max_s,
-                if r.all_verified { "" } else { " — a run failed to verify; the column is left empty" }
+                if r.all_verified {
+                    ""
+                } else {
+                    " — a run failed to verify; the column is left empty"
+                }
             );
         }
         if let Some(p) = &references.plain {

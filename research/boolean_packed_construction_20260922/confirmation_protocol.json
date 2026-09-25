@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "scope": "Standalone generic Boolean matrix construction, at most 12 variables. No production solver integration, external inputs, curves, targets, scalar recovery, relation collection or rho runs.",
+  "mathematical_boundary": "Same finite Boolean multiplication contract as the parameterized envelope study. A packed coordinate map is shared by both new constructors. The actual output support may shrink with coefficients and cancellations; an occupancy bitmap determines the only columns returned. Precomputed degree-eligible views preserve numeric multiplier order. Compare envelope-specific reuse against packed direct multiplication, not only the older sort-based construction.",
+  "variables": [
+    6,
+    8,
+    10,
+    12
+  ],
+  "matrix_degree": 3,
+  "discovery_seeds": [
+    211,
+    1009
+  ],
+  "holdout_seeds": [
+    20260926,
+    104729
+  ],
+  "families": [
+    "repeat",
+    "coefficients",
+    "degree_cycle",
+    "escape"
+  ],
+  "batches": [
+    1,
+    4,
+    16,
+    64
+  ],
+  "repetitions": 14,
+  "variants": [
+    "direct",
+    "layout",
+    "schedule",
+    "matrix_cache",
+    "envelope",
+    "packed_envelope",
+    "packed_direct"
+  ],
+  "limits": {
+    "variables": 12,
+    "generators": 12,
+    "terms_per_generator": 32,
+    "rows": 512,
+    "columns": 512,
+    "plan_rows": 8192,
+    "plan_groups": 131072,
+    "plan_retained_bytes": 2097152,
+    "batch": 64,
+    "worker_seconds": 15,
+    "campaign_seconds": 180
+  },
+  "envelope": "Each ordered base generator support union constant and all n linear monomials. Declared using only the base fixture, before generating assignments. Exact n, degree, active mask and generator-count guard; each actual support must be a subset of its ordered envelope.",
+  "candidate": "Packed envelope: compile coefficient parity groups into fixed ambient column slots; retain degree-eligible plan-index views in numeric multiplier order. Construct bit rows and an occupancy bitmap directly. Compact actual columns and bits once, with an identity-support fast path. All coefficient guards, degree-drop rules, current caps and direct fallback remain as in the predecessor.",
+  "families_contract": {
+    "repeat": "Repeat the base instance. Matrix-copy control remains relevant.",
+    "coefficients": "First instance is base. Subsequent distinct deterministic coefficient assignments sample all generator envelopes; force a quadratic term in each generator.",
+    "degree_cycle": "As coefficients, but first generator cycles quadratic/linear/constant/zero; the others remain quadratic. Newly required multipliers are counted before cancellation.",
+    "escape": "As coefficients, but every fourth assignment adds the cubic monomial 7 outside the envelope and must fall back."
+  },
+  "controls": {
+    "direct": "Build products, parity, compact columns, and packed rows anew.",
+    "layout": "Rebuild products and reuse columns only on exact actual output-support equality.",
+    "schedule": "Replay precomputed column indices only if the canonical input equals the base.",
+    "matrix_cache": "Clone the completed matrix only if the canonical input equals the base.",
+    "envelope": "Original eager support-envelope constructor, unchanged in the same binary.",
+    "packed_direct": "Strong new control: reuse only fixed (n,D,active) ambient coordinates and multiplier lists; multiply current terms into packed rows by XOR, then use the identical occupancy compactor. No coefficient routing, generator envelopes or cached products. Cubic support escapes remain valid inputs to this generic constructor."
+  },
+  "accounting": "One cache/schedule compilation per cold batch, every application and fallback, output allocation and validation, output and cache destruction. Input/envelope generation and independent references are common setup outside total_ns; fresh-process receipts include them. Rotate seven arms over fourteen repetitions; retain all samples. No adaptive cache insertion.",
+  "memory": "Retained structure bytes use actual Rust Vec capacities, excluding allocator metadata, separately from output payload and whole-worker peak RSS. Compilation may use temporary allocations; peak RSS includes all arms and reference matrices, so it is not candidate-specific peak memory. Compilation group/row limits bound temporary growth; retained byte limit checked on the completed plan.",
+  "correctness": "Every matrix equals an independent set-parity oracle. Exhaustively vary all 256 coefficient assignments over n=3, four matrix degrees, and eight active-variable masks (8192 cases). Test bit slot 31, degree drops, parity collisions, caps, invalid inputs and support escape. Both packed variants must pass the full exhaustive grid; include cross-word bit compaction, canonical row order, identity compaction and ambient width larger than the current output cap.",
+  "performance_gate": "Packed envelope must exceed 1.05 at the 95 percent paired-bootstrap lower bound against direct, layout, and exact matrix cache on each n, each family coefficients/degree_cycle and batches 16/64 (48 comparisons). Additionally compare packed_direct / packed_envelope on all 16 cells; symbolic reuse is not credited for a gain available without it.",
+  "cross_instance_gate": "Both envelopes must hit every changed in-envelope input and fall back on all support escapes, always matching the oracle. Packed direct reuses the unchanged ambient context for every fixture, including escapes. Exact-support controls have zero changed hits.",
+  "classification": "Mathematical construction diagnostic and bounded engineering experiment. No relation-yield, end-to-end IC, asymptotic, exponent or rho claim. Full pipeline and normalized costs remain null.",
+  "dramatic_gate": "For each of packed_envelope and packed_direct separately, at batch 64 on coefficients and degree_cycle and each of four n values, require the 95 percent paired-bootstrap lower bound of min(direct,layout,schedule,matrix_cache,envelope) total_ns / candidate total_ns to exceed 2.0 in every one of eight comparisons. The minimum is taken per paired repetition. Repeat and escape are reported guardrail workloads, not members of this gate. No end-to-end or cryptanalytic conclusion follows.",
+  "predecessor": "../boolean_support_envelope_20260922/run_01/; immutable negative result retained. This new implementation and gates are frozen before its new holdouts are executed.",
+  "confirmation": "Fresh independent seed set, same worker and unchanged gates. This is a same-host confirmation, not unaffiliated reproduction. No source tuning occurred after run_01.",
+  "primary_worker_sha256": "db04d1ae9d9b7fdb8939cd822d48a9a82d637a963d6e3e9d7e1a32631f26061f"
+}

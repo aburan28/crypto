@@ -18,7 +18,7 @@ fn widest(kc: &KoblitzCurve, budget: u128, compact: bool) -> usize {
     let mut lo = 64usize;
     let mut hi = 1 << 20;
     while lo < hi {
-        let mid = (lo + hi + 1) / 2;
+        let mid = (lo + hi).div_ceil(2);
         let fits = if compact {
             PairSumTable::compact_byte_size(mid, kc.n) <= budget
         } else {

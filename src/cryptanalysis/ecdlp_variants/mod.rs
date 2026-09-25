@@ -73,7 +73,6 @@
 use std::cell::Cell;
 
 use num_bigint::BigUint;
-use num_integer::Roots;
 use num_traits::{One, Zero};
 
 use crate::ecc::curve::CurveParams;

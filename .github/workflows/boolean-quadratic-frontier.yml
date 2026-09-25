@@ -1,0 +1,22 @@
+name: Standalone Boolean quadratic frontier
+on:
+  pull_request:
+    paths:
+      - 'research/boolean_quadratic_frontier_20260923/**'
+      - '.github/workflows/boolean-quadratic-frontier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exhaustive bounded algebra and search checks
+        run: |
+          rustc --edition 2021 -O --test research/boolean_quadratic_frontier_20260923/worker.rs -o /tmp/boolean-frontier-tests
+          /tmp/boolean-frontier-tests
+      - name: Frozen evidence and corruption checks
+        run: python3 -m unittest discover -s research/boolean_quadratic_frontier_20260923 -p 'test_*.py' -v

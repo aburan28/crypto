@@ -1,0 +1,35 @@
+name: Toy quotient and representation controls
+on:
+  pull_request:
+    paths:
+      - "research/toy_quotient_controls_20260924/**"
+      - "research/toy_f5_neighbors_20260924/curves.py"
+      - "research/toy_f5_neighbors_20260924/matrix.py"
+      - ".github/workflows/toy-quotient-controls.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned independent algebra reference
+        run: python3 -m pip install -r research/toy_quotient_controls_20260924/requirements.txt
+      - name: Algebra, controls, profiling and negative tests
+        run: python3 -m unittest discover -s research/toy_quotient_controls_20260924 -p 'test_*.py' -v
+      - name: Verify committed evidence
+        run: python3 research/toy_quotient_controls_20260924/verify_replay.py
+      - name: Replay the complete bounded experiment
+        run: python3 research/toy_quotient_controls_20260924/run.py --output "$RUNNER_TEMP/toy-quotient-controls"
+      - name: Compare deterministic evidence
+        run: python3 research/toy_quotient_controls_20260924/verify_replay.py "$RUNNER_TEMP/toy-quotient-controls"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: toy-quotient-controls-results
+          path: ${{ runner.temp }}/toy-quotient-controls

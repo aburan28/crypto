@@ -1,0 +1,14 @@
+{
+  "files": {
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "profile.rs": "01802d714b0a8e990a947c745698e7a3f98c4b9f7661410aa38aaa1e469dda16",
+    "profiled_quadratic.rs": "73e1f6180bd0fead16ed9f8245e86785c675c710640123290f12538106728180",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "raw.jsonl": "1127130c6759c8ce67747230c1ff4d163674907b5d7dec9b967d117c38d5884e",
+    "receipt.json": "89ecf113a4c0d9dd60fcfe21f5bfa97684a2925a161d0ef2d135299c4059a486",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "summary.json": "721761e71a812d459e61cef1a6acc7ea6fbd45200d15ba29d00b2e558209ffc4",
+    "worker.rs": "21574fbbee13ee174840e4941a2ef670e0d0c5042d04a20dcbd5abc350d2caef"
+  },
+  "scope": "Instrumented discovery-only phase attribution. Timer overhead perturbs execution; these are not promotion timings. Models, counters and traces must match the uninstrumented quadratic reference."
+}

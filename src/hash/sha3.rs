@@ -95,7 +95,7 @@ fn keccak_sponge(msg: &[u8], rate: usize, output_len: usize, suffix: u8) -> Vec<
     // Absorb: pad and XOR message into state in `rate`-byte chunks.
     let mut padded = msg.to_vec();
     padded.push(suffix);
-    while padded.len() % rate != 0 {
+    while !padded.len().is_multiple_of(rate) {
         padded.push(0x00);
     }
     // Set the last padding byte's high bit (multi-rate padding)

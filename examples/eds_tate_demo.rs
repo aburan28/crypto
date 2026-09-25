@@ -13,7 +13,7 @@ use crypto_lib::cryptanalysis::eds_tate::{enumerate_embedding1, study};
 
 fn v2(mut n: u64) -> u32 {
     let mut k = 0;
-    while n % 2 == 0 {
+    while n.is_multiple_of(2) {
         n /= 2;
         k += 1;
     }

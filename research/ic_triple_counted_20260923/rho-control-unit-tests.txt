@@ -1,0 +1,59 @@
+test cryptanalysis::koblitz_tiny_ic::policy_tests::policy_is_one_batch_across_the_whole_panel_and_grows_beyond_it ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::collectors_name_their_summand_counts ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::arithmetic_matches_fast_curve ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::euclid_inverse_matches_fermat ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::normal_basis_inverts_and_rotates_as_squaring ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::seeded_chacha_matches_std_rng ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::normal_basis_rotation_locates_frobenius_images ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::the_orbit_name_from_zero_runs_equals_the_rotation_loop ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::unsupported_recipes_are_declined ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::triple_collector_solves_and_verifies_in_general_arithmetic ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::complete_solve_verifies_in_general_arithmetic ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::base_matches_general_construction ... ok
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 2522 filtered out; finished in 0.69s
+test cryptanalysis::aut_folded_rho::tests::empirical_speedup_versus_unfolded_rho ... ignored, experimental: ~30 s of repeated rho runs; --ignored to opt in
+test cryptanalysis::aut_folded_rho::tests::apply_aut_canonicalises ... ok
+test cryptanalysis::aut_folded_rho::tests::aut_group_axioms ... ok
+test cryptanalysis::aut_folded_rho::tests::canonicalisation_invariant_on_orbit ... ok
+test cryptanalysis::aut_folded_rho::tests::folded_rho_recovers_planted_dlp ... ok
+test cryptanalysis::aut_folded_rho::tests::integer_action_matches_point_action ... ok
+test cryptanalysis::ec_index_calculus::tests::pollard_rho_recovers_small_dlp ... ok
+test cryptanalysis::isogeny_degree_search::cost::tests::exhaustive_search_is_above_the_rho_reference ... ok
+test cryptanalysis::isogeny_degree_search::cost::tests::plain_rho_is_flat_in_s ... ok
+test cryptanalysis::koblitz_index_calculus::tests::exhausted_rho_does_not_charge_an_unused_final_advance ... ok
+test cryptanalysis::isogeny_class_search::tests::class_is_larger_than_the_rho_reference ... ok
+test cryptanalysis::koblitz_index_calculus::tests::rho_charge_ledgers_close ... ok
+test cryptanalysis::koblitz_index_calculus::tests::rho_recovers_logs_at_degree_41 ... ignored, a few seconds per target in release; the degree-41 rung of the ledger
+test cryptanalysis::koblitz_index_calculus::tests::rho_escapes_fruitless_cycles_instead_of_restarting ... ok
+test cryptanalysis::koblitz_index_calculus::tests::rho_step_count_tracks_the_birthday_bound ... ok
+test cryptanalysis::ec_index_calculus::tests::ic_and_rho_agree_on_random_dlp ... ok
+test cryptanalysis::koblitz_index_calculus::tests::single_word_rho_walk_matches_the_reference_step_for_step ... FAILED
+test cryptanalysis::md5_chosen_prefix::tests::rho_walk_deterministic ... ok
+test cryptanalysis::ml_rho_walks::tests::ml_rho_experimental_design ... ok
+test cryptanalysis::ml_rho_walks::tests::standard_walk_in_range ... ok
+test cryptanalysis::ml_rho_walks::tests::walk_partition_benchmark_p32213 ... ignored
+test cryptanalysis::ml_rho_walks::tests::walk_trace_json_serializes ... ok
+test cryptanalysis::koblitz_index_calculus::tests::rho_walk_timing_stops_before_collision_verification_progress ... ok
+test cryptanalysis::pollard_rho::tests::dp_rho_solves_16_bit_dlp ... ok
+test cryptanalysis::pollard_rho::tests::dp_rho_solves_multi_target ... ok
+test cryptanalysis::pollard_rho::tests::dp_rho_solves_tiny_dlp ... ok
+test cryptanalysis::pollard_rho::tests::rejects_trivial_group ... ok
+test cryptanalysis::pollard_rho::tests::rho_multi_target_chains_correctly ... ok
+test cryptanalysis::pollard_rho::tests::rho_solves_16_bit_dlp ... ok
+test cryptanalysis::pollard_rho::tests::rho_solves_20_bit_dlp ... ignored, slow: ~1 s of rho iterations; run with --ignored
+test cryptanalysis::pollard_rho::tests::rho_solves_tiny_dlp ... ok
+test cryptanalysis::pollard_rho::tests::sub_mod_correctness ... ok
+test cryptanalysis::preprocessing_rho::tests::cost_calculator_gives_right_order ... ok
+test cryptanalysis::preprocessing_rho::tests::empty_table_rejected_by_online_solve ... ok
+test cryptanalysis::p256_attacks::tests::negation_rho_recovers_planted_d ... ok
+test cryptanalysis::preprocessing_rho::tests::preprocessing_rho_amortises_across_targets ... ok
+test cryptanalysis::preprocessing_rho::tests::preprocessing_rho_recovers_planted_dlp_small ... ok
+test cryptanalysis::research_bench::tests::pollard_rho_hypothesis_runs_at_smallest_scale ... ok
+test cryptanalysis::visual_demos::tests::pollard_rho_demo_has_data ... ok
+test cryptanalysis::research_bench::tests::rho_scaling_runs_end_to_end ... ok
+test isogeny::attack::tests::multi_target_dp_rho_solves_m_small_with_lucky_seed ... ok
+test cryptanalysis::md5_chosen_prefix::tests::rho_chosen_prefix_birthday_toy ... ok
+test isogeny::attack::tests::pohlig_multi_target_rho_solves_m4_robustly ... ok
+test cryptanalysis::gaudry_cubic::tests::gaudry_and_rho_recover_the_planted_logarithm ... ok
+thread 'cryptanalysis::koblitz_index_calculus::tests::single_word_rho_walk_matches_the_reference_step_for_step' (3820) panicked at src/cryptanalysis/koblitz_index_calculus.rs:8427:13:
+test result: FAILED. 39 passed; 1 failed; 4 ignored; 0 measured; 2490 filtered out; finished in 1.33s

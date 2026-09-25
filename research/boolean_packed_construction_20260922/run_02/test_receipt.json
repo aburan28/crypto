@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-schedule-tg3104ae/tests"
+  ],
+  "exit_code": 0,
+  "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+  "peak_rss_bytes": 3391488,
+  "process_wall_ns": 410877583,
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "\nrunning 9 tests\ntest tests::compaction_crosses_word_boundaries_and_preserves_row_order ... ok\ntest tests::compilation_limits_are_explicit_refusals ... ok\ntest tests::cancellations_degree_drops_and_zero_rows ... ok\ntest tests::actual_support_cap_not_ambient_coordinate_count ... ok\ntest tests::coefficient_slot_31_and_empty_or_high_degree_envelopes ... ok\ntest tests::support_escape_and_context_changes_use_direct_fallback ... ok\ntest tests::current_output_caps_apply_after_parity_and_compaction ... ok\ntest tests::changed_assignment_is_recomputed_and_all_control_arms_agree ... ok\ntest tests::exhaustive_coefficients_degrees_and_active_masks ... ok\n\ntest result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n",
+  "stdout_sha256": "a577ee9bfe83a678976e8223f81f6eedd42a3668ee9437e1b967ff698c76b4ef",
+  "system_seconds": 0.004809,
+  "timed_out": false,
+  "user_seconds": 0.024766
+}

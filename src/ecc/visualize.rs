@@ -3,8 +3,6 @@
 //! scalar-multiplication double-and-add trace, and an ECDSA
 //! sign/verify flow diagram.
 
-use num_bigint::BigUint;
-
 // ── Toy curve scatter ────────────────────────────────────────────────
 
 /// Enumerate all affine points on `y² = x³ + ax + b mod p` and
@@ -29,7 +27,7 @@ pub fn demo_toy_curve_scatter(p: u64, a: u64, b: u64) -> String {
     // Render as ASCII grid (p × p, downscaled to fit ~60-wide).
     let max_dim = 60usize;
     let scale = (p as usize).max(1).div_ceil(max_dim);
-    let w = ((p as usize) + scale - 1) / scale;
+    let w = (p as usize).div_ceil(scale);
     let h = w;
     let mut grid: Vec<Vec<char>> = vec![vec![' '; w]; h];
     for &(x, y) in &pts {
@@ -217,6 +215,7 @@ pub fn run_all_ecc_demos() -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use num_bigint::BigUint;
 
     #[test]
     fn curve_scatter_renders_points() {

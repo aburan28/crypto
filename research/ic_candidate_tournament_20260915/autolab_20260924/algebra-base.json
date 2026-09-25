@@ -1,0 +1,11 @@
+{
+  "solver": "pair_table",
+  "linear_algebra": "sparse",
+  "batch_trials": 8,
+  "max_trials": 256,
+  "summands": 2,
+  "factor_base": {
+    "kind": "factor",
+    "index": 0
+  }
+}

@@ -329,7 +329,7 @@ pub fn pollard_rho_dp_dlp_zp(
     n: &BigUint,
     opts: &DpRhoOptions,
 ) -> Result<RhoSolution, &'static str> {
-    pollard_rho_dp_dlp_zp_multi(g, &[h.clone()], p, n, opts)
+    pollard_rho_dp_dlp_zp_multi(g, std::slice::from_ref(h), p, n, opts)
         .map(|mut v| v.pop().expect("non-empty result on Ok"))
 }
 

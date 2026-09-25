@@ -9,6 +9,65 @@ most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
 
+## Default workflow: finish and merge
+
+The repository owner's standing preference is autonomous delivery. For work
+the user requests in this repository, completing the task includes implementing
+the change, validating it, opening or updating its PR, monitoring CI, and
+merging when ready. **Do not ask for another approval just to merge a completed,
+passing PR.**
+
+- Apply this authorization to PRs created or maintained for the current user
+  task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
+  as a draft, wait for review, or avoid merging overrides this default.
+- Review the final diff and confirm that the requested scope, relevant tests,
+  evidence, and documentation are complete before merging. Passing CI does not
+  substitute for checking that the work is finished.
+- Check the current PR head: all required and applicable CI checks must have
+  completed successfully. Pending, cancelled, timed-out, or failed checks are
+  not a pass. A skipped job counts as inapplicable only when its conditions or
+  path filters justify that status; required checks must still be satisfied.
+- Fix failures caused by the change and resolve routine merge conflicts
+  autonomously, then rerun the affected validation. Any new commit requires
+  checking CI again for the new head. Do not bypass branch protections, required
+  reviews, unresolved blocking review feedback, or required checks.
+- If a documentation-only change legitimately triggers no CI, verify the
+  workflow filters, inspect the diff, and run any relevant local validation.
+  State that no CI applied; do not claim that nonexistent checks passed.
+- Merge using the repository's permitted merge method and an expected-head-SHA
+  guard where supported. Confirm that GitHub reports the PR as merged, then
+  report the PR link, merge commit, and validation outcome.
+- Do not stop at "PR opened" when the remaining merge work is authorized and
+  feasible. If access, required external review, a persistent CI failure, or
+  another concrete gate prevents merging, report that blocker precisely rather
+  than asking the user to repeat the authorization already given.
+
+## Research work belongs in pull requests
+
+Treat an experiment as repository work, including a negative or inconclusive
+result. Before running it, state the hypothesis, frozen inputs, reference,
+success and stop conditions, and cost accounting in a versioned protocol.
+Make each bounded experiment or compatible group of experiments a focused
+branch and PR. Commit the code, configuration, seeds, source and input hashes,
+commands, compact raw results, verification receipts, analysis, and decision
+in that PR. Link follow-on PRs to their dependencies; do not let a local note,
+untracked worktree, chat summary, or published page be the only record of a
+finding or a decision.
+
+Preserve failures, timeouts, and regressions. Do not overwrite an earlier
+run. If raw output is too large for Git, commit a manifest with its content
+hash, byte count, durable accessible location, extraction command, and the
+small derived data needed to audit the claim. A local absolute path alone is
+not a durable location. Label unmerged work and unreviewed replays as such;
+a downstream claim cannot silently treat them as accepted evidence.
+
+For performance changes, the existing frozen-suite, full-cost, matched-rho,
+and scoreboard requirements in sections 1–8 still apply. A PR that reports
+only a stage measurement must label it a stage diagnostic and leave
+end-to-end cost and speedup unset. Open or update the PR as part of the
+iteration, then follow the default finish-and-merge workflow above once
+its evidence, review, and CI gates are satisfied.
+
 ## The rule: boundary, table, ratio
 
 Any thread that claims to improve an attack must express its progress as

@@ -152,7 +152,7 @@ pub struct BitMatrix {
 
 impl BitMatrix {
     pub fn zero(rows: usize, cols: usize) -> Self {
-        let words = (cols + 63) / 64;
+        let words = cols.div_ceil(64);
         BitMatrix {
             rows,
             cols,

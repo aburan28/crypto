@@ -180,6 +180,150 @@ different field degrees, so reading them against each other separates
 readings a naive ladder confounds, and which imply different things at
 `n = 131`.
 
+## Result 3: the second cell, and the control that could not be afforded
+
+`n = 7` was run, as the correction above says it should have been.  Four
+draws a cell, `--no-control`, `d_max = 7`, the caps above, built against
+`89ebde0` on a four-core container.  Wall times are practicality notes,
+never the metric (`AGENTS.md` §6).
+
+| n | ℓ | m | vars | eqs | deg | FFD | `D_refute` | gap | refuted | unres | `D_built` | s |
+|--:|--:|--:|-----:|----:|----:|----:|---------:|----:|--------:|------:|--------:|--:|
+| 5 | 4 | 3 | 17 | 10 | 3 | 2.75 | 6.00 | 3.25 | 2/4 | **2/4** | 7 | 526 |
+| **7** | 3 | 3 | 16 | 14 | 3 | **3.00** | **6.00** | **3.00** | **4/4** | 0/4 | **6** | 522 |
+
+**`n = 7` is the cleaner cell of the two.**  Four draws of four refute at
+degree 6, with `D_built = D_refute = 6` — they resolved and stopped, and
+never approached the caps.  A single-draw pass of the same pair beforehand
+gave the same degrees (`n = 5` 88.7 s, `n = 7` 129.4 s), so the cell is
+stable across draw counts.
+
+**`n = 5` is weaker at four draws than its single draw suggested**, and
+this is the honest half of the result.  Two draws of four resolved; the
+other two neither resolved by `d_max = 7` nor fit the caps, and hit
+`D_built = 7`.  Those two are **unknown, not a higher degree** — the
+resource rule in "What is measured" applies to them exactly as it applies
+to a timeout.  So that row's `D_refute = 6.00` is a mean over two draws.
+
+One consequence to read off before the numbers are quoted: that row's
+`gap = 3.25` subtracts a **four-draw** FFD mean from a **two-draw**
+`D_refute` mean.  The denominators differ, so it is not a like-for-like
+difference and should not be compared with the `n = 7` row's `3.00`, which
+is 4/4 on both sides.  Only the `n = 7` gap is a clean number.
+
+**What this does and does not support.**  The gap does not grow between
+`n = 5` and `n = 7`.  Two rungs at one value are *consistent* with the
+constant-3 reading and do not establish it, the lever arm is two, and the
+cells differ in `ℓ` as well as `n`.  By
+[`RESEARCH_DESCENT_CROSSOVER.md`](RESEARCH_DESCENT_CROSSOVER.md) they also
+differ in surplus — `S = −7` and `S = −2` — so yield is a third
+uncontrolled variable across the pair, the same confound recorded under
+"Next".  This is a second cell, not a scaling claim.
+
+### The control at `d_max = 6`: `n = 7` is controlled after all
+
+The note's standard is that a cell being *interpreted* is re-run with the
+controls on. At `d_max = 7` that does not fit on a four-core box — the
+budget table below — but it does not have to be run there. **The real
+system refutes at degree 6**, so capping `d_max = 6` still asks the
+question the control exists to answer, and the top degree is where the
+control's cost lives:
+
+| n | ℓ | m | vars | eqs | FFD | `D_refute` | gap | ctrl(shape) | **ctrl(unsat)** | `Dc` | s |
+|--:|--:|--:|-----:|----:|----:|---------:|----:|:--|:--|--:|--:|
+| 5 | 4 | 3 | 17 | 10 | 3.00 | 6.00 | 3.00 | n/a(sat) | **unres** | 6 | 517.5 |
+| **7** | 3 | 3 | 16 | 14 | 3.00 | 6.00 | 3.00 | n/a(sat) | **unres** | 6 | **92.5** |
+
+One draw a cell, controls on, same caps, `89ebde0`. **The `n = 7` cell is
+controlled**: the infeasible control — which carries *more* equations than
+the real system — does not resolve by degree 6, where the Semaev system
+refutes. That is the same structure-not-shape reading as the `n = 5` cell
+below, now at the second rung, and it cost 92.5 s rather than hours.
+
+What this version does *not* establish is the control's non-resolution at
+degree **7**, which the `n = 5` read below does establish. The comparison
+is one degree shallower, bounded exactly where the real system stops.
+
+### The budget, and the 27× that turned out to be the machine
+
+Every row below is a four-core container at `89ebde0` unless it says
+otherwise.
+
+| run | `d_max` | draws | controls | outcome |
+|---|--:|--:|:--|---|
+| recorded above, `n = 5` | 7 | 1 | on | 494 s (this note, "Raising the caps settles it") |
+| `n = 5` | 7 | 1 | **off** | 88.7 s |
+| `n = 5` | 6 | 1 | on | 517.5 s |
+| `n = 7` | 6 | 1 | on | 92.5 s |
+| `n = 5` | 7 | 1 | **on** | **13 349 s** |
+| `n = 5` + `n = 7` | 7 | 4 | on | killed at 14 400 s, no cell emitted |
+| `n = 5` + `n = 7` | 7 | 1 | on | killed at 14 400 s; `n = 5` done at 13 349 s, `n = 7` never started |
+
+Both kills are resource limits and are not evidence about any degree.
+
+**The identical command costs 27× here what this note records** — 13 349 s
+against 494 s. The internal structure is roughly preserved: this note
+attributes degree 7 about fourteen times degree 6, and the ratio measured
+here is 13 349 / 517.5 ≈ 26, the same order — so whatever it is scales the
+whole dense path rather than one stage of it. That pointed at the
+environment over a regression, and the baseline build below settles it.
+
+**It is the machine, and the baseline build says so.** `2795774`, the
+commit that introduced the 494 s row, was built in a detached worktree and
+run on this same box with the same command, caps and seed:
+
+| cell, `d_max = 6`, controls on | `2795774` (baseline) | `89ebde0` (current) | current / baseline |
+|---|--:|--:|--:|
+| `n = 5` | **592.6 s** | 517.5 s | **0.87** |
+| `n = 7` | **108.1 s** | 92.5 s | **0.86** |
+
+**Current `main` is 13–14% faster than the commit that recorded 494 s, so
+there is no regression in this path** — if anything the F4 work since has
+improved it slightly. The 27× is the environment.
+
+The sharpest statement of it needs no comparison across versions at all:
+**the baseline code, on this box, costs 592.6 s at `d_max = 6` — more than
+the 494 s it recorded at `d_max = 7`**, for roughly a fourteenth of the
+work. The recorded row is not withdrawn; it may well be correct on the
+machine that produced it. What it is not is a budget anyone else can plan
+against, and it carries no hardware description to scope it. **A timing
+row should name its machine**; this one does not, and that is why 27×
+took three failed runs and a baseline build to resolve rather than a
+glance.
+
+**One thing came free and is worth more than the timings.** The two builds
+agree *exactly* on every measured degree — `D_refute` 6.00, `FFD` 3.00,
+gap 3.00, `ctrl(unsat)` unresolved at degree 6, on both cells — across the
+several hundred commits between them, including the F4 packing and
+elimination rewrites. The solving-degree measurement is stable under that
+much churn, which is a cross-version check on the harness that no single
+run could give.
+
+**Correction.** An earlier revision of this section claimed the
+non-control path "reproduces this note's own timing", 88.7 s against "the
+~89 s implied by 494 s minus its degree-7 control share", and concluded
+the cost was specific to the control path. That was circular: the control
+share it subtracted had itself been derived by assuming the real system
+cost the same here as there. This note's own attribution is that degree-7
+work is ~466 s of the 494 s, so the real system there cost *at most* ~28 s
+against 88.7 s here — slower too, not reproduced. The `d_max = 6` row
+added above makes the point without the arithmetic. Per `AGENTS.md` §3
+this is **accounting**: nothing measured changed, and the conclusion it
+supported is withdrawn rather than restated.
+
+Two budget facts for whoever plans the next rung:
+
+- `n = 7` with controls is affordable at `d_max = 6` (92.5 s) and not at
+  `d_max = 7` on a machine of this class, where `n = 5` alone consumes the
+  budget and there is no `--n-min` to skip it.
+- The `n = 9`/`n = 15` estimate under "What it unblocks" (2.3 and 3.7 days
+  per draw) is a real-system figure and **carries no control**. Whatever
+  the 27× turns out to be, that estimate should be re-derived on the
+  machine that will run it before days are committed.
+
+No scoreboard row: this prices no variant and computes no `S` or ratio, as
+with Results 1 and 2. It is a stage diagnostic on solving degree.
+
 ## The controls, and why the first one could not answer the question
 
 `random_control_system` draws systems with the same variable count,
@@ -302,6 +446,85 @@ anything in the table above.
 The single-cell caveat on Result 2 is unchanged.  What has changed is
 that the experiment which would lift it is now schedulable.
 
+## Result 4: the ladder at fixed surplus, inconclusive as far as it ran
+
+`research/dreg_fixed_surplus_20260923/` holds everything: a pre-registered
+`m = 3` ladder in four pairs, each pair at one surplus `S = n − 3ℓ`.
+
+- **Random subspaces**, so that `ℓ` is free and `S` can be held fixed.
+- **Each draw's solutions counted exactly** before it is measured, so only
+  unsatisfiable draws are measured, and a non-resolving degree would be a
+  real lower bound.
+
+| pair | `S` | small cell | large cell | registered verdict |
+|---|--:|---|---|---|
+| primary | `−2` | `(7, 3)`: 6 6 6 6 | `(13, 5)`: no finished draw | not testable |
+| | `−1` | `(5, 2)`: 5 5 5 5 | `(11, 4)`: 6 6 6 6 | grows |
+| | `0` | `(9, 3)`: 6 6 6 6 | `(15, 5)`: not started | not testable |
+| | `+1` | `(7, 2)`: 5 5 5 5 | `(13, 4)`: 6 6 6 6 | grows |
+
+**Inconclusive, by the rule registered before the run.** The primary pair's
+large cell needs more than 4.5 uninterrupted hours a draw, and the container
+restarted four times on 2026-09-24. That is a resource limit, not evidence.
+
+**Read the two "grows" with their confound.** Both start from `ℓ = 2`, the
+only cells at 5. Every `ℓ ≥ 3` cell resolves at 6: `(7, 3)`, `(9, 3)`,
+`(11, 4)` and `(13, 4)`, from 16 to 25 unknowns. So the growth may be an
+`ℓ = 2` floor rather than field size. The primary pair, `ℓ ≥ 3` at both
+ends, is the one that separates the two readings.
+
+FFD is 3 on 22 of 24 draws. Random subspaces reproduce Result 3's 6 at
+`(7, 3)`. Wherever a control finished, it resolved at least one degree above
+the Semaev draws.
+
+## Result 5: the `(n, ℓ)` grid — size does not move `ℓ = 2`, and `ℓ = 5` refutes above 6
+
+`research/dreg_ell_grid_20260925/` holds everything. It was pre-registered
+before any cell ran, with the same system, sampling and frozen binary as
+Result 4. It separates `ℓ` from the unknown count `N`, the confound Result 4
+could not.
+
+| `ℓ` \ `N` | 11 | 13 | 14 | 16 | 18 | 23 | 25 |
+|---|---|---|---|---|---|---|---|
+| 2 | 5555 | 5555 | **5555** | **5555** | **5555** | | |
+| 3 | | **5555** | **6666** | 6666 | 6666 | | |
+| 4 | | | | | | 6666 | 6666 |
+| 5 | | | | | | | **≥7 ≥7 ≥7 ≥7** |
+
+Bold cells are new. The others are Result 4's.
+
+- **Q1: mixed, by the registered rule.** At matched `N`, `ℓ = 3` resolves
+  above `ℓ = 2` at 14, 16 and 18 unknowns, but not at 13.
+  - Size alone does not move `ℓ = 2`. It reads 5 from 11 to 18 unknowns,
+    across surpluses −1 to +6.
+  - So Result 4's two "grows" pairs coincide with crossing from `ℓ = 2` to
+    `ℓ ≥ 3`, not with field size.
+  - The exception is `(4, 3)` at 5. It is the smallest field in the grid, and
+    it sits at surplus −5.
+- **Q2: rises at `ℓ = 5`.** At 25 unknowns `(13, 4)` is refuted at 6 on all
+  four draws.
+  - `(10, 5)` is refuted by none of its four at degree 6. That is a
+    mathematical lower bound, ≥7.
+  - The FFD is still 3, so the gap is at least 4.
+- **The confound Q2 carries.** At fixed `N`, one more `ℓ` means six fewer
+  equations, since the surplus `S = N − 6ℓ`.
+  - Lowering the surplus at fixed `ℓ` never raised the degree anywhere in the
+    grid. That argues against the equation count as the cause, without ruling
+    it out at `ℓ = 5`.
+  - `(7, 4)`, which is `ℓ = 4` at `S = −5`, separates the two readings in
+    seconds. It is not yet run.
+
+**What it means, if the rise belongs to `ℓ`:**
+
+- The refutation degree runs 5, 6, 6, ≥7 over `ℓ = 2`–`5`.
+- Result 4's flat stretch at `ℓ = 3, 4` does not continue.
+- At fixed surplus `ℓ` grows with `n`, so the degree grows with the field.
+
+That is scoped to `m = 3` and `n ≤ 13`, and it says nothing about `n = 131`.
+
+My predictions were "tracks ℓ" for Q1 and 6 for Q2. Both failed, and
+`RESULTS.md` records both.
+
 ## Reproducing
 
 ```sh
@@ -312,13 +535,62 @@ cargo run  --release --example dreg_sweep -- --d-max 8 --trials 4 --n-max 9 --m 
 # the measured gap (about eight minutes)
 F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
   cargo run --release --example dreg_sweep -- --d-max 7 --trials 1 --n-max 5 --m 3
+
+# Result 3, the n = 7 cell (about nine minutes, no controls; four-core container)
+F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
+  cargo run --release --example dreg_sweep -- --d-max 7 --trials 4 --n-max 7 --m 3 --no-control
+
+# the same pair WITH controls at d_max = 6, where the real system refutes:
+# 517.5 s and 92.5 s.  This is the controlled read of both cells.
+F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
+  cargo run --release --example dreg_sweep -- --d-max 6 --trials 1 --n-max 7 --m 3
+
+# the same pair WITH controls at d_max = 7: does not finish. n = 5 alone
+# took 13 349 s and n = 7 never started inside 14 400 s.  See the budget
+# table above.
+F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
+  cargo run --release --example dreg_sweep -- --d-max 7 --trials 1 --n-max 7 --m 3
 ```
 
 ## Next
 
 - Extend the `m = 3` ladder past `n = 5` to turn a single gap into a
   scaling claim.  This is the one that matters and the one that is
-  blocked on elimination cost, not on degree.
+  blocked on elimination cost, not on degree.  **Result 3 takes the first
+  step and does not finish the job**: `n = 7` is measured at four draws,
+  the gap is 3 there as at `n = 5`, and two rungs differing in `ℓ` and in
+  surplus are still not a scaling claim.
+- **Put the machine on every timing row.**  The 27× above took three
+  failed runs and a baseline build to resolve, and would have taken one
+  glance if the 494 s row had named its hardware.  Timings in this note
+  now carry "four-core container" and a commit; older rows cannot be
+  back-filled, so treat any row without a machine as unscoped.
+- `n = 7` at `d_max = 7` with controls still needs different hardware.
+  That is a budget item, not a degree question, and the `d_max = 6` read
+  above already answers the control question one degree shallower.
+- Give `dreg_sweep` an `--n-min`.  Every attempt at `n = 7` with controls
+  re-paid `n = 5` first and died there; one flag would have made the cell
+  reachable at this scale.  **Done differently:** `examples/dreg_ladder.rs`
+  takes explicit cells, each from its own seed, and `--unsat-index` measures
+  a single draw (Result 4).
+- **Run the primary pair `(7, 3) → (13, 5)` to completion** on a machine
+  that stays up: `research/dreg_fixed_surplus_20260923/run_queue.py` resumes
+  after interruptions.  It is the pair that separates field-size growth from
+  the `ℓ = 2` floor (Result 4).  **It is far more expensive than recorded:**
+  about 11–24 h a `(13, 5)` draw and 1.7–5.6 days a `(15, 5)` draw on the
+  four-core container.  That is an extrapolation
+  (`research/dreg_ell_grid_20260925/cost_model.py`), so it needs a large
+  machine for days.
+- **Separate `ℓ` from the unknown count directly** (pre-registered 2026-09-25,
+  `research/dreg_ell_grid_20260925/`).  The design compares `ℓ = 2` with
+  `ℓ = 3` at matched `N = 13, 14, 16, 18`, which takes minutes, and measures
+  `(10, 5)` against `(13, 4)` at `N = 25`, about 1.2 h a draw.  It answers
+  the Result 4 confound without the primary pair's cost.  **Done:**
+  Result 5.  A `(10, 5)` draw took 26–29 min, and the cost model overstated
+  it by 2.5–2.9×.
+- **Run the `(7, 4)` surplus control** for Result 5's Q2: `ℓ = 4` at
+  `S = −5`, which takes seconds.  It decides whether `(10, 5)`'s ≥7 belongs
+  to `ℓ` or to the six equations it lacks.  Pre-register it first.
 - **Match the surplus, not the unknown count, when pairing cells.**  The
   `n = 9` versus `n = 15` comparison proposed above is confounded a third
   way: those cells carry surplus `n − mℓ` of `−9` and `+3`, opposite signs
@@ -330,3 +602,6 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
 - Sparse elimination (Wiedemann/Lanczos) in place of dense `rref_f2` is
   what would move the frontier; the dense pass is the binding cost, and
   `research/notes/index-calculus/RESEARCH_GROEBNER_F4.md` already lists it as missing.
+  **Superseded:** structured sparse elimination landed ("Sparse
+  elimination" above). The frontier is now wall time. A degree-6 matrix at
+  28 unknowns takes more than 4.5 hours on a four-core container (Result 4).

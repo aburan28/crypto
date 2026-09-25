@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "status": "PRODUCER_FAILURE",
+  "directory": "run_03",
+  "completed_cells": 0,
+  "measured_samples": 0,
+  "reason": "Launcher appended with-census twice. The worker rejected argument count before fixture generation or timing.",
+  "files": {
+    "run_03/analyze.py": "34489fd9fc03223bd30fe7349a04e3989a277d12b35af40bdc891858fc2c2d81",
+    "run_03/failed.stderr": "87fd98c07c3fa3e52d0c490dd8140f7277031396fcddf73b8b19a8d386495fc3",
+    "run_03/failed.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run_03/metadata.json": "b7ea2c86c25e97b5b3fe315c605bb992bc89df8e604ee907554b55ae5f6d1c33",
+    "run_03/protocol.json": "609c37fd2c636f11677fd2da26a069be44974be3463aa50c074b10a1b0976113",
+    "run_03/raw-n12.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run_03/receipts.json": "d0a2e6b78d6619294418d0a77049625028ad69e214dea73d5d693d966d6f6048",
+    "run_03/run.py": "fa055563f3132351de2bac8d3a60947eecba74235d10037ef1ae0c92ee1fbb0e",
+    "run_03/test_receipt.json": "0343c178ba77452dd28203c1deee5fa40c79f34bab7bbcdb882dc3961380e66e",
+    "run_03/tests-compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run_03/worker-compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "run_03/worker.rs": "293bb703916301951ad925e506a048f1570575fceeedd64dd11f6b6bf98e38a5"
+  },
+  "recovery": "run_04 uses the identical worker, protocol and analyzer, with a corrected single-mode command builder. No failed-run files were changed."
+}

@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "runs": [
+    {
+      "run": "run_01",
+      "status": "COMPLETE",
+      "protocol_sha256": "844bfb3bc29bb36b1053e472d70001de0c3f1c598c3d814a6c2c1d91094f61e5",
+      "worker_sha256": "791ac80a3d613d5aba45cb9e1f7eb4846a6934b6b1e39c750e95f85ca9ecf73e",
+      "manifest_sha256": "6ac25d4277d759e05a59c3e0f3254a230a345c8f9c1d8d08715f7340250ae812",
+      "measured_outputs": 39936,
+      "cold_observations": 9216,
+      "cells": 192,
+      "universal_gate": {
+        "stream_exchange": "REJECTED",
+        "stream_plain": "REJECTED"
+      },
+      "portfolio_gate": null,
+      "negative_control_gate": null,
+      "runtime_seconds": 6.1755682500006515
+    },
+    {
+      "run": "run_02",
+      "status": "COMPLETE",
+      "protocol_sha256": "8f491f37ad8f9e02549ec79bd7be1fe4037b3d34f6f095d5c448daa130c1619b",
+      "worker_sha256": "c52ea76f336ab461b351be97d240083f7b100a7bd21447d87c121d67a32780be",
+      "manifest_sha256": "4f341885a5e1f4df4b0ece6390db8ed76efef49a00a985a03befda59251aeb36",
+      "measured_outputs": 39936,
+      "cold_observations": 9216,
+      "cells": 192,
+      "universal_gate": {
+        "stream_exchange": "REJECTED",
+        "stream_plain": "REJECTED"
+      },
+      "portfolio_gate": null,
+      "negative_control_gate": null,
+      "runtime_seconds": 6.2096808749993215
+    },
+    {
+      "run": "run_03",
+      "status": "PRODUCER_FAILURE",
+      "measured_outputs": 0,
+      "cells": 0,
+      "evidence": "LAUNCH_FAILURE.json"
+    },
+    {
+      "run": "run_04",
+      "status": "COMPLETE",
+      "protocol_sha256": "609c37fd2c636f11677fd2da26a069be44974be3463aa50c074b10a1b0976113",
+      "worker_sha256": "293bb703916301951ad925e506a048f1570575fceeedd64dd11f6b6bf98e38a5",
+      "manifest_sha256": "6fdff4966f3a567ae253f7f60dbdd92b5b69452ae06023544e11f954ef14311f",
+      "measured_outputs": 59904,
+      "cold_observations": 13824,
+      "cells": 192,
+      "universal_gate": {
+        "hybrid_census": "REJECTED",
+        "stream_census": "REJECTED",
+        "stream_exchange": "REJECTED",
+        "stream_plain": "REJECTED"
+      },
+      "portfolio_gate": "REJECTED",
+      "negative_control_gate": null,
+      "runtime_seconds": 6.703107208995789
+    },
+    {
+      "run": "run_05",
+      "status": "COMPLETE",
+      "protocol_sha256": "d9f3d6485eaca6fc22af6c82cac9504a4c305ccd5aed54ef41cbadb2a7ff76ab",
+      "worker_sha256": "7bd57b026affaa75b5dfc78a4dc854f974b61fa8e513a06ac14b28944fd9d545",
+      "manifest_sha256": "4570724f063171d737e5c5cfe855918a5b436c90b8fb44fec5b25a4ae73e484e",
+      "measured_outputs": 59904,
+      "cold_observations": 13824,
+      "cells": 192,
+      "universal_gate": {
+        "hybrid_census": "REJECTED",
+        "stream_census": "REJECTED",
+        "stream_exchange": "REJECTED",
+        "stream_plain": "REJECTED"
+      },
+      "portfolio_gate": "REJECTED",
+      "negative_control_gate": null,
+      "runtime_seconds": 6.84670404100325
+    },
+    {
+      "run": "run_06",
+      "status": "COMPLETE",
+      "protocol_sha256": "759d848571f7117ec7b7376a74d2f97a80ec671af621b4127e88771dcf081f41",
+      "worker_sha256": "765f5211c0baa7c2e909814233168b27303811e5cea1f11d032df6876c1c9fea",
+      "manifest_sha256": "c85e8086dbebc7eef11184d286a72c0b2e33063d1bf2e1d6fde526147b5654aa",
+      "measured_outputs": 244608,
+      "cold_observations": 56448,
+      "cells": 192,
+      "universal_gate": {
+        "hybrid_census": "REJECTED",
+        "stream_census": "REJECTED",
+        "stream_exchange": "REJECTED",
+        "stream_plain": "REJECTED"
+      },
+      "portfolio_gate": "REJECTED",
+      "negative_control_gate": "REJECTED",
+      "runtime_seconds": 21.00462662499922
+    },
+    {
+      "run": "run_07",
+      "status": "COMPLETE",
+      "protocol_sha256": "3edbce9fbdad1a943552583416f5cfecf0a9985f9e888ddcab4e2c97f3ca3d8e",
+      "worker_sha256": "99fc364c8c5f1cdfd00024ecd4539e339e99f56343a3b239e902f0b94623104b",
+      "manifest_sha256": "2bf584dd26c5597d2cbad10a246eae46f19b29a0911718181ca559988ceb7012",
+      "measured_outputs": 244608,
+      "cold_observations": 56448,
+      "cells": 192,
+      "universal_gate": {
+        "hybrid_census": "REJECTED",
+        "stream_census": "REJECTED",
+        "stream_exchange": "REJECTED",
+        "stream_plain": "REJECTED"
+      },
+      "portfolio_gate": "REJECTED",
+      "negative_control_gate": "REJECTED",
+      "runtime_seconds": 20.501617874993826
+    },
+    {
+      "run": "run_08",
+      "status": "COMPLETE",
+      "protocol_sha256": "c75fb994720f41b764b148996e8571dda6b379103cd5eb1f310a638336206eef",
+      "worker_sha256": "aada9fc94835dd9e338397333a0c1d390b511a4f1f58a8dfb33cb8b8bab24ff0",
+      "manifest_sha256": "bae9a132ed6b276ffd990d45b0fc0194b7945859e75711ea67e855021ca353e2",
+      "measured_outputs": 3913728,
+      "cold_observations": 56448,
+      "cells": 192,
+      "universal_gate": {
+        "hybrid_census": "REJECTED",
+        "stream_census": "REJECTED",
+        "stream_exchange": "REJECTED",
+        "stream_plain": "REJECTED"
+      },
+      "portfolio_gate": "REJECTED",
+      "negative_control_gate": "PASS",
+      "runtime_seconds": 264.70832925000286
+    },
+    {
+      "run": "run_09",
+      "status": "COMPLETE",
+      "protocol_sha256": "e6ebac8e863d4443e4cba630209022bccdef5f7f3bc7d06f46bed56ef39e8036",
+      "worker_sha256": "7535e7672ed8a6eef98d29b44b5fdd7ea9d82c202944d53dddb2f8340ea1bb26",
+      "manifest_sha256": "6b4a20d8c8fca0c492363f33e8d7de0348b684bcc1200ce731e8b7d88bb8f83f",
+      "measured_outputs": 3913728,
+      "cold_observations": 56448,
+      "cells": 192,
+      "universal_gate": {
+        "hybrid_census": "REJECTED",
+        "stream_census": "REJECTED",
+        "stream_exchange": "REJECTED",
+        "stream_plain": "REJECTED"
+      },
+      "portfolio_gate": "REJECTED",
+      "negative_control_gate": "PASS",
+      "runtime_seconds": 256.7122640000016
+    }
+  ],
+  "classification": "Conditional specialized-kernel measurements; no accepted universal or guarded portfolio promotion and no full-solver or cryptanalytic claim."
+}

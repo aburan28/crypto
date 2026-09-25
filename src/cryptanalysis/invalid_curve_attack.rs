@@ -55,7 +55,6 @@ use crate::cryptanalysis::pohlig_hellman::{
     crt_combine, pohlig_hellman_curve, PohligHellmanReport,
 };
 use crate::ecc::curve::CurveParams;
-use crate::ecc::point::Point;
 use crate::visualize::color::{paint, FG_BRIGHT_GREEN, FG_BRIGHT_RED, FG_BRIGHT_YELLOW};
 use num_bigint::BigUint;
 use num_traits::{One, Zero};

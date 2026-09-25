@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "kind": "read_only_contract_audit",
+  "commit": "8f42e0813a5607d308369f66d2ac607a3c9d9df3",
+  "path": "src/cryptanalysis/koblitz_groebner.rs",
+  "sha256": "74ff0cb5016236dd7bec2474b7fe7433eea0028d3d36b02112afc8f54234c8eb",
+  "full_span_api": {
+    "symbol": "matrix_f4_f2_counted",
+    "line": 849,
+    "behavior": "Calls the implementation with decisive_only=false and returns full reduced rows."
+  },
+  "solver_consumer": {
+    "symbol": "matrix_f4_f2_solver_consequences",
+    "line": 885,
+    "behavior": "Specialized consumer requests contradiction/forced-variable consequences. The implementation selects linear-tail reduction by default when decisive_only is true and n_vars>=24, with explicit environment overrides."
+  },
+  "linear_tail": {
+    "symbol": "f4_solver_linear_tail",
+    "line": 1098,
+    "behavior": "Echelonizes high-degree columns and fully reduces only the linear/constant row-space intersection."
+  },
+  "caller": {
+    "line": 3425,
+    "behavior": "MatrixF4/MatrixF5 choose full readback only for the legacy override; otherwise call the specialized consumer."
+  },
+  "implication": "The present full-RREF standalone workload is not a substitute for the specialized solver path. Future claims about that consumer need its existing linear-tail and flat-storage controls. No solver or curve workflow was executed or modified."
+}

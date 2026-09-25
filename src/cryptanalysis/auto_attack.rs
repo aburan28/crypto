@@ -32,8 +32,7 @@
 //!   but not auto-wired here.
 
 use crate::cryptanalysis::boomerang::{
-    boomerang_distinguisher, differential_trail_search, rectangle_attack, BlockCipher,
-    SpnTrailModel, ToySpn,
+    boomerang_distinguisher, differential_trail_search, rectangle_attack, SpnTrailModel, ToySpn,
 };
 use crate::cryptanalysis::cipher_registry::RegisteredCipher;
 use std::time::Instant;

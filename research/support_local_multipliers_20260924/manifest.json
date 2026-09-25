@@ -1,0 +1,73 @@
+{
+  "round": "support-local-multipliers-20260924",
+  "note": "research/notes/ecc2k130/RESEARCH_SUPPORT_LOCAL_MULTIPLIERS.md",
+  "scope": "decomposition-oracle Groebner stage (stage diagnostic) plus whole-logarithm runs; see the note",
+  "git_head": "d69936e1cde6bb925ee3e7bd8325ba67748a0436",
+  "built_from": {
+    "run.sh, oracle_ladder.sh, e2e.sh (the registered runs)": "1f0d9751",
+    "run_postfix.sh 'registered-*' arms (the same commit, rebuilt in a worktree)": "1f0d9751",
+    "run_postfix.sh 'fixed-*' arms (the monomial-mask hash fix)": "d69936e1"
+  },
+  "src_identical_between_builds": false,
+  "src_files_differing_between_builds": [
+    "src/cryptanalysis/fx_hash.rs",
+    "src/cryptanalysis/inherited_f4.rs",
+    "src/cryptanalysis/koblitz_groebner.rs"
+  ],
+  "registered_binary_rebuild_note": "the worktree rebuild of 1f0d9751 embeds a different path and so hashes differently from the binary the registered runs recorded (software.binary_blake3 in e2e/); check_identity.py and e2e_table.py show it reproduces every registered counter",
+  "amendment_counters_identical_to_registered": {
+    "stage_ladders (check_identity.py, every field but *_ns, 5 suites x 4 arms x 3 reps)": true,
+    "whole_logarithms (e2e_table.py: trials, relations, oracle word ops, every seed, both binaries)": true
+  },
+  "measured_sources_unchanged_since_fixed_build": true,
+  "sources_sha256_at_head": {
+    "src/cryptanalysis/koblitz_groebner.rs": "1b88d56dcce0fd91ab9ee666f53ea34aed3e30a4118ffe97bf011492382f6873",
+    "src/cryptanalysis/inherited_f4.rs": "d8badc9a68886215dbc5712abfecb979e84e18471b640f182ec02b15d1c4f3c5",
+    "src/cryptanalysis/fx_hash.rs": "6debc4afd82512c79181268c5580fd879d6c0c1948c582e3a76bbe7e976c2652",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "43817045e62acbe6cf505bd743823f1597ab5ba38f645d74ceaacf3b7ff03456",
+    "src/cryptanalysis/pq_groebner_f2.rs": "8fdd260742e30a9dff1561870555f6e5d0ed42a7f5b64b504c278adc67db9a35",
+    "examples/groebner_stage_bench.rs": "cdcbf1adad938d084a56e445c5cbecb74618ab513fbc9c2c049a01f18b94e793",
+    "examples/chain_ladder_screen.rs": "d4c4a81e64d7ab41a9c11c9bbca30c3dfa2a8aab500f309bf2f3788bf36cd974"
+  },
+  "binaries_sha256": {
+    "fixed (target/release)": {
+      "examples/groebner_stage_bench": "a915b32cb43efaf86bd37ef9f80da82cfd2601f0af1530f341df13e296b6a22f",
+      "ic": "401caa87c3d132833d796d9c30f7d453f32e87dd014fa1d3bbeac1ac8fbb919c"
+    },
+    "registered rebuild (OLD)": {
+      "examples/groebner_stage_bench": "0827ae9edac013a4d89692feeea05fd18bda86ae2e87306921455eced23ec021",
+      "ic": "b1a5c29d682f608d0115adadf930548ecf44eb546016f8f2db8368372e6e732c"
+    }
+  },
+  "host": {
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "logical_cores": 4,
+    "os": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+    "note": "shared cloud host, no CPU pinning; wall time is a practicality note, not the metric"
+  },
+  "arms": {
+    "reference": {
+      "KIC_F4_MULTIPLIERS": "occurring",
+      "KIC_CHAIN_ORDER": "interleaved",
+      "KIC_LINEAR_ELIM": "1",
+      "KIC_F4_DROP": "complete"
+    },
+    "candidate": {
+      "KIC_F4_MULTIPLIERS": "support",
+      "KIC_CHAIN_ORDER": "interleaved",
+      "KIC_LINEAR_ELIM": "1",
+      "KIC_F4_DROP": "complete"
+    }
+  },
+  "commands": [
+    "cargo build --release --example groebner_stage_bench --example chain_ladder_screen --bin ic",
+    "./target/release/examples/chain_ladder_screen --wide > research/support_local_multipliers_20260924/screen_wide.json",
+    "research/support_local_multipliers_20260924/run.sh",
+    "research/support_local_multipliers_20260924/oracle_ladder.sh",
+    "research/support_local_multipliers_20260924/e2e.sh",
+    "python3 research/support_local_multipliers_20260924/table.py > research/support_local_multipliers_20260924/tables.md",
+    "OLD=<1f0d9751 build>/release research/support_local_multipliers_20260924/run_postfix.sh",
+    "python3 research/support_local_multipliers_20260924/check_identity.py > research/support_local_multipliers_20260924/postfix_identity.md",
+    "python3 research/support_local_multipliers_20260924/e2e_table.py > research/support_local_multipliers_20260924/e2e_tables.md"
+  ]
+}

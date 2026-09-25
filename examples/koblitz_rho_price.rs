@@ -27,9 +27,18 @@ const ADDS: usize = 2_000_000;
 const CANONS: usize = 2_000_000;
 
 fn main() {
-    let degree: u32 = std::env::args().nth(1).and_then(|s| s.parse().ok()).unwrap_or(41);
-    let targets: u64 = std::env::args().nth(2).and_then(|s| s.parse().ok()).unwrap_or(16);
-    let a: u8 = std::env::args().nth(3).and_then(|s| s.parse().ok()).unwrap_or(0);
+    let degree: u32 = std::env::args()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(41);
+    let targets: u64 = std::env::args()
+        .nth(2)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(16);
+    let a: u8 = std::env::args()
+        .nth(3)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(0);
     let kc = KoblitzCurve::new(a, degree).expect("curve");
     let fc = FastCurve::new(&kc.curve).expect("fast curve");
     let r = kc.subgroup_order.to_u64_digits()[0];
@@ -38,7 +47,9 @@ fn main() {
     // The unit.
     let g = fc.lift(kc.generator());
     let seedfb = build_subgroup_orbit_factor_base(&kc, 1, 64).expect("seed base");
-    let batch: Vec<FastPoint> = (0..1024).map(|i| fc.lift(&seedfb.points[i % seedfb.points.len()])).collect();
+    let batch: Vec<FastPoint> = (0..1024)
+        .map(|i| fc.lift(&seedfb.points[i % seedfb.points.len()]))
+        .collect();
     let mut scratch = BatchScratch::default();
     let mut out: Vec<FastPoint> = Vec::with_capacity(batch.len());
     let rounds = ADDS / batch.len();
@@ -90,8 +101,14 @@ fn main() {
     }
     let nb_ns = t.elapsed().as_secs_f64() * 1e9 / CANONS as f64;
     std::hint::black_box(sink);
-    println!("canonicalisation, implemented squaring chain: {chain_ns:.1} ns = {:.2} units", chain_ns / add_ns);
-    println!("canonicalisation, normal-basis rotation (+ y by squarings): {nb_ns:.1} ns = {:.2} units", nb_ns / add_ns);
+    println!(
+        "canonicalisation, implemented squaring chain: {chain_ns:.1} ns = {:.2} units",
+        chain_ns / add_ns
+    );
+    println!(
+        "canonicalisation, normal-basis rotation (+ y by squarings): {nb_ns:.1} ns = {:.2} units",
+        nb_ns / add_ns
+    );
 
     // The implemented walk end to end.
     let mut steps = 0u64;
@@ -103,7 +120,10 @@ fn main() {
     for k in 0..targets {
         let d = 1 + (k * 0x9E37_79B9 + 12_345) % (r - 1);
         let q = kc.mul(kc.generator(), &BigUint::from(d));
-        let opts = KoblitzSignedRhoOptions { seed: 0x5EED ^ k, ..Default::default() };
+        let opts = KoblitzSignedRhoOptions {
+            seed: 0x5EED ^ k,
+            ..Default::default()
+        };
         let rep = koblitz_signed_frobenius_rho_with_progress(&kc, &q, &opts, &mut |_| {});
         steps += rep.iterations;
         walk_ns += rep.walk_ns;
@@ -114,10 +134,23 @@ fn main() {
     }
     let per_step = walk_ns as f64 / steps as f64;
     println!("\nwalk, {targets} targets, {ok} verified");
-    println!("  steps a target                {:>12.0}", steps as f64 / targets as f64);
-    println!("  S as the thread counts it     {:>12.4}   (walk additions / √r)", adds as f64 / targets as f64 / sqrt_r);
-    println!("  ns a step, everything         {per_step:>12.1}   = {:.2} units", per_step / add_ns);
-    println!("  setup ns a target             {:>12.0}   = {:.0} units", setup_ns as f64 / targets as f64, setup_ns as f64 / targets as f64 / add_ns);
+    println!(
+        "  steps a target                {:>12.0}",
+        steps as f64 / targets as f64
+    );
+    println!(
+        "  S as the thread counts it     {:>12.4}   (walk additions / √r)",
+        adds as f64 / targets as f64 / sqrt_r
+    );
+    println!(
+        "  ns a step, everything         {per_step:>12.1}   = {:.2} units",
+        per_step / add_ns
+    );
+    println!(
+        "  setup ns a target             {:>12.0}   = {:.0} units",
+        setup_ns as f64 / targets as f64,
+        setup_ns as f64 / targets as f64 / add_ns
+    );
     println!(
         "  S priced by time              {:>12.4}   (walk + setup + verification, in units, / √r)",
         (walk_ns + setup_ns + verify_ns) as f64 / add_ns / targets as f64 / sqrt_r

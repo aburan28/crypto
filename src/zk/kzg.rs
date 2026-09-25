@@ -51,7 +51,7 @@
 //! - **Single-point opening only** — batch openings and multi-point
 //!   openings (used in PLONK) are not implemented.
 
-use super::polynomial::{fr_mul, fr_neg, fr_sub, Poly};
+use super::polynomial::{fr_neg, fr_sub, Poly};
 use crate::bls12_381::fq::scalar_modulus;
 use crate::bls12_381::fq12::Fq12;
 use crate::bls12_381::fq2::Fq2;

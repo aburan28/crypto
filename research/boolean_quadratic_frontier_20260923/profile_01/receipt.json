@@ -1,0 +1,30 @@
+{
+  "scope": "Instrumented discovery-only phase attribution. Timer overhead perturbs execution; these are not promotion timings. Models, counters and traces must match the uninstrumented quadratic reference.",
+  "started_utc": "2026-09-23T11:40:14.800170+00:00",
+  "source_hashes": {
+    "profile.rs": "01802d714b0a8e990a947c745698e7a3f98c4b9f7661410aa38aaa1e469dda16",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "worker.rs": "21574fbbee13ee174840e4941a2ef670e0d0c5042d04a20dcbd5abc350d2caef",
+    "profiled_quadratic.rs": "73e1f6180bd0fead16ed9f8245e86785c675c710640123290f12538106728180"
+  },
+  "executable_sha256": "0a29c2d02c252c384dd7032dd1f2c27821f1b0fd2e16aade1092da4bd645d3ec",
+  "command": [
+    "/tmp/boolean-quadratic-phase-probe"
+  ],
+  "exit_code": 0,
+  "ended_utc": "2026-09-23T11:40:16.427942+00:00",
+  "compiler_command": [
+    "rustc",
+    "--edition",
+    "2021",
+    "-O",
+    "--cfg",
+    "profile_probe",
+    "research/boolean_quadratic_frontier_20260923/worker.rs",
+    "-o",
+    "/tmp/boolean-quadratic-phase-probe"
+  ],
+  "compiler_version": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "compiler_command_provenance": "Command executed immediately before the probe in this session; frozen source bytes were copied before subsequent edits."
+}

@@ -150,7 +150,7 @@ pub fn recover_in_prime_power_subgroup(
         // Brute-force d_j in [0, prime) such that d_j · G' = Q_j.
         let mut found = None;
         let mut current = Point::Infinity;
-        let q_u64 = prime.to_u64_digits().get(0).copied().unwrap_or(0);
+        let q_u64 = prime.to_u64_digits().first().copied().unwrap_or(0);
         for k in 0..q_u64 {
             total_steps += 1;
             if current == q_j {

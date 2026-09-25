@@ -104,7 +104,7 @@ pub fn cold_boot_recover_p(
                 // Thus q_bit = (needed >> level) & 1.
                 let derived_q_bit = ((&needed >> level) & BigUint::one())
                     .to_u32_digits()
-                    .get(0)
+                    .first()
                     .copied()
                     .unwrap_or(0) as u8;
                 if let Some(known) = q_bit_known {
@@ -130,6 +130,7 @@ pub fn cold_boot_recover_p(
 }
 
 /// Invert `a` modulo `2^bits`.  Newton iteration: starts from `a` (odd) and doubles precision.
+#[allow(dead_code)]
 fn invert_mod_pow2(a: &BigUint, bits: usize) -> BigUint {
     let mut x = BigUint::one();
     let mask_init = BigUint::from(3u32); // mod 4: a is odd, a · 1 ≡ a (mod 2), a · a ≡ 1 (mod 8) for odd a actually

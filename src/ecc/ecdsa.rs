@@ -6,7 +6,7 @@
 //!   2. Compute (x₁, _) = k·G.
 //!   3. r = x₁ mod n  (restart if r = 0).
 //!   4. s = k⁻¹(z + r·d) mod n  (restart if s = 0).
-//!   Output: (r, s).
+//!      Output: (r, s).
 //!
 //! # Verify
 //! Given public key Q, signature (r, s), and message hash z:
@@ -134,7 +134,7 @@ struct Rfc6979Drbg {
 impl Rfc6979Drbg {
     fn new(private_scalar: &BigUint, hash: &[u8], q: &BigUint) -> Self {
         let qlen_bits = q.bits() as usize;
-        let rolen = (qlen_bits + 7) / 8;
+        let rolen = qlen_bits.div_ceil(8);
         let d_bytes = int2octets(private_scalar, rolen);
         let h_bytes = bits2octets(hash, q, qlen_bits, rolen);
 

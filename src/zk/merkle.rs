@@ -145,7 +145,7 @@ impl MerkleTree {
         let mut idx = leaf_index;
         for level in 0..(self.nodes.len() - 1) {
             let level_nodes = &self.nodes[level];
-            let sibling_idx = if idx % 2 == 0 {
+            let sibling_idx = if idx.is_multiple_of(2) {
                 // We're the LEFT child; sibling is right (idx+1 or
                 // duplicate of self if at boundary).
                 if idx + 1 < level_nodes.len() {

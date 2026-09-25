@@ -1,0 +1,20 @@
+{
+  "criterion": "none",
+  "engine": "InheritedF4 { max_degree: 3 }",
+  "harness": "examples/groebner_stage_bench.rs",
+  "inherit_root": "ref",
+  "label": "support",
+  "ladder": "chain",
+  "policy": {
+    "KIC_CHAIN_ORDER": "interleaved",
+    "KIC_F4_DROP": "complete",
+    "KIC_F4_MULTIPLIERS": "support",
+    "KIC_LINEAR_ELIM": "1"
+  },
+  "reducer": "m4ri",
+  "rows": [],
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "split_rule": "HighestFree",
+  "threads": 1,
+  "unit": "64-bit word XORs in the Macaulay elimination"
+}

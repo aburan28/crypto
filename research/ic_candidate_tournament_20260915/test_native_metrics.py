@@ -50,6 +50,7 @@ class NativeMetricsTests(unittest.TestCase):
         self.assertFalse(rho_gate(comparison(data, 'candidate', draws=200)))
         self.assertFalse(rho_gate({'eligible': False}))
 
+    @unittest.skipUnless(hasattr(os, 'sched_getaffinity'), 'Linux instruction-runner capability')
     def test_watchdog_still_retains_timeout(self):
         with tempfile.TemporaryDirectory() as tmp:
             result = execute([sys.executable, '-c', 'import time; time.sleep(10)'], {},
@@ -58,6 +59,7 @@ class NativeMetricsTests(unittest.TestCase):
             self.assertNotEqual(result['exit_code'], 0)
             self.assertLess(result['process_wall_seconds'], 3)
 
+    @unittest.skipUnless(hasattr(os, 'sched_getaffinity'), 'Linux instruction-runner capability')
     def test_execute_caps_and_pins_the_child_without_a_preexec_fork(self):
         from tournament import SPAWN
         probe = ('import json,os,resource,sys; sys.stdin.read(); '

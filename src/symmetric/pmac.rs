@@ -110,7 +110,7 @@ pub fn pmac<C: BlockCipher128>(cipher: &C, message: &[u8]) -> PmacTag {
 
     // Precompute L_i = 2^i · L (Black-Rogaway 2002): L_0 = L, L_1 = 2L, L_2 = 4L, …
     let m_full = message.len() / BLOCK;
-    let last_is_partial = message.is_empty() || message.len() % BLOCK != 0;
+    let last_is_partial = message.is_empty() || !message.len().is_multiple_of(BLOCK);
     let needed_ntz = if m_full == 0 {
         0
     } else {
