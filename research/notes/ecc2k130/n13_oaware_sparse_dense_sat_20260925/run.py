@@ -183,7 +183,7 @@ def export_abba(outdir, frozen, deadline):
     for index, rep in enumerate(EXPORT_ORDER):
         stem = f"export{index}-{rep}"
         output = work / stem
-        command = [sys.executable,
+        command = [str(Path(sys.executable).resolve()),
                    str((verify.DENSE if rep == "dense" else verify.SPARSE) / "export.py"),
                    "--out", str(output)]
         stdout, stderr = outdir / f"{stem}.stdout", outdir / f"{stem}.stderr"
