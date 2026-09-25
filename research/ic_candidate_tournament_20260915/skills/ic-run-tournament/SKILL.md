@@ -16,6 +16,8 @@ Locate the repository, read `AGENTS.md`, then
 authorization and resource limits. A bounded local run does not imply starting
 an indefinite service or provisioning remote hardware.
 
+For the bounded September 24 goal, use the frozen [improvement protocol](../../goal_20260924/improvement/PROTOCOL.md) and registered first-round wrapper. Generic pilot defaults are not the goal panel. The goal uses 72 fresh targets, two qualified rho references and the predeclared familywise rule. Check prior dispatch history and retain partial attempts before starting any round.
+
 ## Prepare a new round
 
 Check the runner's `--help`, the source state, free disk space, amd64 architecture,
@@ -23,7 +25,7 @@ Rust dependencies and Valgrind version. The current instruction protocol is pinn
 to Valgrind 3.22.0. A new profiler/ISA needs a new calibrated protocol.
 
 ```bash
-python3 research/ic_candidate_tournament_20260915/tournament.py prepare \
+python3.12 research/ic_candidate_tournament_20260915/tournament.py prepare \
   --out /absolute/path/to/new-round --profile pilot
 ```
 
@@ -40,7 +42,7 @@ repetitions per arm. It is a bounded configuration result, not a family-wide cla
 Run the evaluator path printed by `prepare`:
 
 ```bash
-python3 /absolute/path/to/new-round/evaluator/tournament.py run --round /absolute/path/to/new-round
+python3.12 /absolute/path/to/new-round/evaluator/tournament.py run --round /absolute/path/to/new-round
 ```
 
 Stages are `aa`, `smoke`, `development`, `selection`, `confirmation`, `replay`.

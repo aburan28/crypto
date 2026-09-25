@@ -16,6 +16,22 @@ def check_build_identity(report, expected, kernel=None):
         require(source.get('field_kernel') == kernel, 'native/profile/admission field dispatch differs')
 
 
+def executed_policy(config, panel=None):
+    names = {'orbit_batch', 'orbit_target', 'row_kernel', 'full_pair_table'}
+    if panel is None:
+        require(not (names & config.keys()), 'candidate policy requested from an archived worker')
+        return None
+    require(panel == 'round1-v1', 'unknown candidate policy adapter')
+    policy = dict(orbit_batch=config.get('orbit_batch', 8), orbit_target=config.get('orbit_target'),
+                  row_kernel=config.get('row_kernel', 'full'), full_pair_table=config.get('full_pair_table', False))
+    require(type(policy['orbit_batch']) is int and policy['orbit_batch'] in (1, 2, 4, 8), 'invalid orbit batch')
+    require(policy['orbit_target'] is None or (type(policy['orbit_target']) is int and
+            1 <= policy['orbit_target'] <= 64), 'invalid orbit target')
+    require(policy['row_kernel'] in ('full', 'suffix', 'bounded', 'word') and
+            type(policy['full_pair_table']) is bool, 'invalid row/table policy')
+    return policy
+
+
 def walk_parameters(seed, r):
     """Independent replay of the declared nonzero SplitMix64 scalar sampler."""
     mask = (1 << 64)-1
@@ -42,8 +58,12 @@ def audit_stages(report, fixture, algorithm_seed):
     need not run another cryptographic hash in the measured solver hot path.
     """
     require(report.get('phase_schema') in (2, 3), 'missing scientific producer schema')
+    policy = report.get('diagnostics', {}).get('implementation_policy')
+    if policy is not None:
+        require(policy == executed_policy(policy, 'round1-v1'), 'invalid executed candidate policy')
+    full = policy is not None and policy['full_pair_table']
     require(report.get('executed_method') == {
-        'pdp': 'partial_folded_pair_table', 'collection': 'additive_walk',
+        'pdp': 'full_folded_pair_table' if full else 'partial_folded_pair_table', 'collection': 'additive_walk',
         'relation_la': 'incremental_gauss', 'descent': 'walked_pdp', 'direct_collision': False},
         'unexpected executed backend')
     proof = verify(report, fixture, summands=3)
@@ -52,6 +72,9 @@ def audit_stages(report, fixture, algorithm_seed):
     base = base_points(report, c)
     mapping = {}
     columns = report['columns']
+    if full:
+        require(report['pair_table']['rows'] == report['pair_table']['rows_possible'] == columns,
+                'full-table policy omitted a row')
     for column, entry in enumerate(report['column_logs']):
         p, coefficient = c.decode(entry['point']), 1
         for _ in range(c.n):
@@ -135,7 +158,7 @@ def scientific_ledger(report, costs):
         process_operations=sum(costs.values()), zero_reasons={'isogeny': 'isogeny:none; no transport executed'})
 
 
-def method_record(job, fixture, source_manifest, source_manifest_sha256, reference, build):
+def method_record(job, fixture, source_manifest, source_manifest_sha256, reference, build, panel=None):
     """Resolve only this audited backend; raw flags cannot name another LA solver."""
     cfg = job['config']
     require(cfg['solver'] == 'pair_table' and cfg['linear_algebra'] == 'tiny_gauss'
@@ -144,6 +167,7 @@ def method_record(job, fixture, source_manifest, source_manifest_sha256, referen
     require(job['factor_base']['kind'] == 'subgroup_orbits', 'unsupported optimized base')
     require(reference in ('both', 'scaled', 'pairinv'), 'unknown source policy')
     source = source_manifest_sha256
+    variant = executed_policy(cfg, panel)
     policy = {'rule': 'retain requested point bound'} if reference == 'both' else {
         'rule': '8*max(1,round(max(1,(r/4196903)^0.157))); retain point bound when rule<=8',
         'arithmetic': 'binary64-powf-round; exact implementation and build pinned'}
@@ -182,4 +206,15 @@ def method_record(job, fixture, source_manifest, source_manifest_sha256, referen
             'flags': {'build': build, 'reference_policy': reference,
                       'observer_cost': 'fully-charged-markers-native-clocks-and-diagnostics'}},
     }
+    if variant is not None:
+        construction = method['factor_base']['construction']
+        construction['orbit_policy'] = dict(policy, sampler_batch=variant['orbit_batch'],
+            explicit_orbit_target=variant['orbit_target'],
+            stop='after each declared batch once signed closure reaches the point target')
+        if variant['orbit_target'] is not None:
+            method['factor_base']['nominal_bound'] = 2 * fixture['degree'] * variant['orbit_target']
+        method['implementation']['flags']['candidate_policy'] = variant
+        if variant['full_pair_table']:
+            method['point_decomposition']['encoding'] = 'normal-basis-signed-Frobenius-keyed-full-pair-table'
+            method['target_descent']['recursive_solvers'] = 'same-full-pair-table; no recursion'
     return method

@@ -77,8 +77,10 @@ def verify_source(root, expected):
     return manifest
 
 
-def prepare(name, output, restored=None, *, instrument=True):
+def prepare(name, output, restored=None, *, instrument=True, candidate_panel=None):
     require(name in ('scaled', 'pairinv', 'both'), 'unknown archived source')
+    require(candidate_panel is None or (candidate_panel == 'round1-v1' and name == 'pairinv' and instrument),
+            'candidate panel requires the instrumented qualified pairinv parent')
     base_name = 'scaled' if name == 'pairinv' else name
     round_name, relative, expected = SOURCES[base_name]
     output = output.resolve()
@@ -111,6 +113,14 @@ def prepare(name, output, restored=None, *, instrument=True):
         module = source/'src/cryptanalysis/mod.rs'
         with module.open('a') as stream:
             stream.write('\npub mod ic_phase;\n')
+    if candidate_panel:
+        parent = {str(p.relative_to(source)): filehash(p) for p in sorted(source.rglob('*')) if p.is_file()}
+        require(sha256(parent) == '240b8daa0478aacb1f6fc248de9fd5ed9b0773c59d3ae869ced0bab8be438378',
+                'candidate derivative is not based on the qualified exact parent')
+        patch = HERE/'round1-candidates.patch'
+        subprocess.run(['git', 'apply', '--check', str(patch)], cwd=source, check=True)
+        subprocess.run(['git', 'apply', str(patch)], cwd=source, check=True)
+        patches.append(patch)
     derived = {str(p.relative_to(source)): filehash(p) for p in sorted(source.rglob('*')) if p.is_file()}
     write_immutable(output/'source-manifest.json', derived)
     receipt = {'status': 'SOURCE_MATERIALIZED_NOT_QUALIFIED', 'reference': name,
@@ -119,6 +129,9 @@ def prepare(name, output, restored=None, *, instrument=True):
                'patches': [{'name': p.name, 'sha256': filehash(p)} for p in patches],
                'phase_module_sha256': filehash(HERE/'ic_phase.rs') if instrument else None,
                'candidate_id': None, 'total_operations': None}
+    if candidate_panel:
+        receipt['candidate_panel'] = candidate_panel
+        receipt['qualified_parent_source_sha256'] = '240b8daa0478aacb1f6fc248de9fd5ed9b0773c59d3ae869ced0bab8be438378'
     write_immutable(output/'preparation.json', receipt)
     return receipt
 
@@ -129,8 +142,10 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--restored-root', type=Path)
     parser.add_argument('--original', action='store_true')
+    parser.add_argument('--candidate-panel', choices=('round1-v1',))
     args = parser.parse_args()
-    print(json.dumps(prepare(args.reference, args.out, args.restored_root, instrument=not args.original)))
+    print(json.dumps(prepare(args.reference, args.out, args.restored_root,
+                             instrument=not args.original, candidate_panel=args.candidate_panel)))
 
 
 if __name__ == '__main__':
