@@ -1,0 +1,15 @@
+name: ECC2K-130 charged phase successor design
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/rotated_phase_charged_successor_20260925/**'
+      - '.github/workflows/ecc2k130-phase-charged-successor-design.yml'
+  workflow_dispatch:
+jobs:
+  pinned-design:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hash-only design check
+        run: python3 research/notes/ecc2k130/rotated_phase_charged_successor_20260925/check_protocol.py
