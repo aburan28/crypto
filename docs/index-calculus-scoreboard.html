@@ -6684,6 +6684,25 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-pdp-corpus-20260925 -->
+<!-- BEGIN ecc2k130-rotated-m56-export-gate-20260925 -->
+<section class="panel" id="ecc2k130-rotated-m56-export-gate-20260925">
+  <div class="panel-head">
+    <h2>Rotated m = 5/6 exporter semantics: rational reference passes; polynomial export still gated <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/770">PR #770</a> pins the 16 point targets from <a href="https://github.com/aburan28/crypto/pull/767">#767</a>, then re-enumerates every rational rotated tuple and an equal-count repeated-F0 control. All 64 fixed Q+T counts match the complete parent corpus, every rational tuple passes the trace parity law, and all affine S3-chain prefixes vanish while infinity branches are kept explicit. This is an exact model-checking reference and capacity gate; no S6/S7 ANF, solver timing, relation rank, or ECDLP cost was produced.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Direct x-mask reference and raw recursive-chain layout before exception/sign/SAT auxiliaries. Support counts include O. The repeated-F0 control has no witness on any of the 16 frozen Q targets, so it cannot be a same-Q positive solver-time comparator here. Full S and rho ratios remain unset.</caption>
+    <thead><tr><th>Toy arm</th><th>Rational point tuples</th><th>Rational x masks / formal masks</th><th>Rotated / repeated projected support</th><th>Exact Q+T replay</th><th>Raw chain bits / rows</th><th>Infinity/inverse prefix steps</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, m = 5</td><td>3,125</td><td>243 / 1,024</td><td>1,591 / 61</td><td>32/32</td><td>49 / 52</td><td>130 / 130</td><td>unset / unset</td></tr>
+      <tr><td>n = 19, m = 6</td><td>117,649</td><td>4,096 / 4,096</td><td>62,389 / 377</td><td>32/32</td><td>88 / 95; exceeds u64 mask</td><td>2,450 / 2,451</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>For each fixed torsion translate, x-mask parity must match Tr(x(Q+T)); both parity classes remain necessary when all four T are allowed. Naive cross-slot sorting discards verified projected labels because nonzero rotated factor spaces are distinct: the first structural n = 13 and n = 19 counterexamples retain full Q+T witnesses, and swapping their first two points breaks both slot memberships. The initial lift-domain preflight failure is preserved; a corrected source freeze and fresh replay passed. The next gate must export and validate direct/chain equations against these exact mask sets before SAT, Gröbner, FES or WDSat arms can be ranked. Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_m56_export_gate_20260925/RESULT.md">decision and limits</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_m56_export_gate_20260925/PROTOCOL.md">frozen protocol</a>, and <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_m56_export_gate_20260925/evidence/README.md">raw receipts and replay</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-m56-export-gate-20260925 -->
 <!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
 <section class="panel" id="ecc2k130-compact-shared-log-20260925">
   <div class="panel-head">
