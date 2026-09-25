@@ -7106,7 +7106,7 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
 <section class="panel" id="ecc2k130-n13-oaware-sat-benchmark-20260925">
   <div class="panel-head">
     <h2>O-aware n = 13 SAT stage: all 96 cold toy queries complete; n = 131 remains unpriced <span class="chip">solver stage</span></h2>
-    <p><a href="https://github.com/aburan28/crypto/pull/785">PR #785</a> ran the exact #781 17.6 MB dense CNF with each of the 32 frozen #767 Q+T unit assumptions in three cold engines: CryptoMiniSat, Kissat and CaDiCaL. Each returned five SAT and 27 UNSAT branch statuses. All 15 SAT models were independently converted from chosen x values to complete rational point fibres and a signed tuple summing to the exact full point. The 81 UNSAT outputs agree with #767's complete point oracle, but no separate UNSAT proof certificate was checked. All six tiny interface smokes and 96 target children finished within the frozen 15 s/2 GiB caps with zero invalid models or timeouts.</p>
+    <p><a href="https://github.com/aburan28/crypto/pull/785">PR #785</a> ran the exact #781 17.6 MB dense CNF with each of the 32 frozen #767 Q+T unit assumptions in three cold engines: CryptoMiniSat, Kissat and CaDiCaL. Each returned five SAT and 27 UNSAT branch statuses. All 15 SAT models were independently converted from chosen x values to complete rational point fibres and a signed tuple summing to the exact full point. The 81 UNSAT outputs agree with #767's complete point oracle; at the time, no separate UNSAT proof certificate was checked. All six tiny interface smokes and 96 target children finished within the frozen 15 s/2 GiB caps with zero invalid models or timeouts.</p>
   </div>
   <div class="table-scroll"><table>
     <caption>One fixed macOS panel. Charged portfolio wall includes source/schema/oracle preflight, one base read, 32 derived query files, cold child wall and point verification for each engine. The per-child maximum is not a portfolio cost. These are solver-stage diagnostics, not full IC operations S or matched rho.</caption>
@@ -7122,6 +7122,22 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n13-oaware-sat-benchmark-20260925 -->
+<!-- BEGIN ecc2k130-n13-oaware-unsat-proof-20260925 -->
+<section class="panel" id="ecc2k130-n13-oaware-unsat-proof-20260925">
+  <div class="panel-head">
+    <h2>Five fixed n = 13 O-aware negative branches gain external DRAT certificates <span class="chip">toy proof pipeline</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/790">PR #790</a> froze the exact #785 base/query hashes, Q0T0 and all four Q4 torsion assumptions, CaDiCaL 3.0.1 binary, vendored upstream DRAT-trim source, checker controls and resource caps before producing any selected proof. Each of the five 8,490-byte text DRAT streams checks as UNSAT against its exact one-assumption CNF with a separate checker. A non-unit XOR proof is accepted while its mutated proof with essential steps removed is rejected; Q0T0's actual proof is also rejected on the fixed SAT Q0T3 query. Freshly compiled archive-only replay passed all five certificates and both controls.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Stage walls are summed over five cold proof-generation and five external-check children, then the wrong-input control separately. They do not price CNF export, relation rank, a full ECDLP or rho.</caption>
+    <thead><tr><th>Fixed branches</th><th>External proofs verified</th><th>Raw / gzip proof bytes</th><th>CaDiCaL wall sum</th><th>DRAT-trim wall sum</th><th>Wrong-input check</th><th>Full S / rho</th></tr></thead>
+    <tbody><tr><td>Q0T0; Q4T0..T3</td><td>5 / 5</td><td>42,450 / 11,672</td><td>1.976 s</td><td>3.353 s</td><td>0.950 s, rejected</td><td>unset / unset</td></tr></tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Q0T0 is only a negative full-point branch of a projected-positive Q0. All four Q4 branches have certificates, so Q4 is projected-negative within this exact toy CNF, consistent with #781's complete point semantics and #767's point oracle. The first pre-outcome checker-control failure was retained and corrected before freeze; the first selected run passed every 60/180 s, 1 GiB RSS, 128 MiB proof, 320 MiB temporary and 512 MiB archive cap. Peak cumulative child RSS upper bound was 161,300,480 bytes. No other #785 negative, n19/n131 PDP, challenge log or IC/rho speed is certified. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_unsat_proof_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_unsat_proof_20260925/EVIDENCE.md">raw hashes and replay</a>. Freeze SHA-256 <code>8941c739264bd0dc94eceb1d6d2efe3e108e13f6ee9f5ecec898f42456bd3cc4</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n13-oaware-unsat-proof-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
