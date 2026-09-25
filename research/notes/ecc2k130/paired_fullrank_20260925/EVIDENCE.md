@@ -22,7 +22,15 @@ Classification: negative control for this point-defined baseline, provisional pe
 
 The clean-source GitHub Actions run [36109718979](https://github.com/aburan28/crypto/actions/runs/36109718979) built the PR merge checkout `a045a0a80d3a8af00fedc85c0342f4e7d026aacd`, proved its pinned-main ancestry and clean tracked source, then finished all six pairs with independent replay. Every IC/rho pair has the same Q and recovered d. The verifier replayed 820 relations and 38,334 point orbit labels in total; all six terminal ranks were full (13 at n37, 146 at n41). Source and executable SHA-256 values, full raw JSONL, stderr, receipts, input commands, process wall/CPU/RSS, and failure status are in the committed [clean evidence archive](../paired_fullrank_clean_evidence_20260925/clean_archive_manifest.json). The archive SHA-256 is `5e01c894c05919a573f2716bbdeace53952cdd009a85969af56aaad591c2c9ed` (1,168,806 bytes).
 
-| n / seed index | IC wall ms | rho wall ms | rho/IC wall | IC CPU s | rho CPU s | IC peak RSS MiB | relations |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n| 37 / 0 | 36.0 | 20.5 | 0.569 | 0.032 | 0.013 | 18.0 | 15 |\n| 37 / 1 | 30.5 | 30.8 | 1.012 | 0.026 | 0.022 | 19.3 | 13 |\n| 37 / 2 | 30.7 | 20.6 | 0.670 | 0.027 | 0.018 | 18.2 | 13 |\n| 41 / 0 | 6736.7 | 575.0 | 0.085 | 6.729 | 0.568 | 1632.2 | 271 |\n| 41 / 1 | 6851.3 | 434.1 | 0.063 | 6.847 | 0.431 | 1630.9 | 219 |\n| 41 / 2 | 6857.9 | 383.8 | 0.056 | 6.851 | 0.383 | 1632.6 | 289 |\n
+| n / seed index | IC wall ms | rho wall ms | rho/IC wall | IC CPU s | rho CPU s | IC peak RSS MiB | relations |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 37 / 0 | 36.0 | 20.5 | 0.569 | 0.032 | 0.013 | 18.0 | 15 |
+| 37 / 1 | 30.5 | 30.8 | 1.012 | 0.026 | 0.022 | 19.3 | 13 |
+| 37 / 2 | 30.7 | 20.6 | 0.670 | 0.027 | 0.018 | 18.2 | 13 |
+| 41 / 0 | 6736.7 | 575.0 | 0.085 | 6.729 | 0.568 | 1632.2 | 271 |
+| 41 / 1 | 6851.3 | 434.1 | 0.063 | 6.847 | 0.431 | 1630.9 | 219 |
+| 41 / 2 | 6857.9 | 383.8 | 0.056 | 6.851 | 0.383 | 1632.6 | 289 |
+
 The median rho/IC wall ratio was **0.670 at n37** and **0.0634 at n41**. One n37 seed had near parity in the opposite direction (1.012), so three seeds do not justify a precise small-rung performance estimate. At n41 the direct arm used about 1.71 GB peak RSS and 6.7–6.9 s process wall; each matched rho run used 0.38–0.58 s. The measured point-defined full-rank method does not beat the frozen rho arm on this panel. This says nothing about an amortized shared-log method, which this fixture does not implement.
 
 The earlier clean workflow [36109167304](https://github.com/aburan28/crypto/actions/runs/36109167304) completed all six producer/replay pairs but failed evidence sealing because the default shallow checkout could not prove the pinned ref was an ancestor. Its raw [failure artifact](https://github.com/aburan28/crypto/actions/runs/36109167304/artifacts/10852239614) has digest `sha256:6a8c808d1dcc8e9416c48fb599d9566d4bea16cd2d234691ebb87d3c8faade25`. The workflow now fetches complete ancestry and checks clean status before running pairs; the strict archive gate remained intact. The local source-overlay table above remains provisional and is not substituted for this clean panel.
