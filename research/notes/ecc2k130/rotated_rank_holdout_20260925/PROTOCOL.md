@@ -44,9 +44,10 @@ If rank is deficient, retain the failure and do **not** invent unique base
 logs or call a target recovered. Full rank permits a unique base-log vector;
 check every training equation independently before any holdout query.
 
-The point-only recovery child receives `point_only.json`, solved base logs,
+The point-only recovery child is passed `point_only.json`, solved base logs,
 and a separately built **archive-oracle** response keyed by Q coordinates.
-It receives no k, training witness index or sealed label. The oracle builder
+Its input files contain no k, training witness index or sealed label. This is
+audited source/argument isolation, not OS filesystem confinement. The oracle builder
 scans all #766 row records, and for each Q picks the first available
 T-index row, strips k, source indices and all labels, and records its signed
 column coefficients, Q coordinates and torsion index. Charge the full scan,
@@ -76,8 +77,8 @@ separately. Preserve partial files and a quantitative failure receipt on a
 cap or assertion failure.
 
 Pass only if source/input hashes, full holdout exclusion, modular row
-consistency, full-rank solution (if one exists), point-only recovery process
-isolation, every `[k̂]H=Q` and sealed-label match all replay independently.
+consistency, full-rank solution (if one exists), audited point-only recovery inputs,
+every `[k̂]H=Q` and sealed-label match all replay independently.
 A rank-deficient arm is reported as a censored or failed recovery, not
 selectively discarded. This is a tiny-field semantic/end-to-end toy gate;
 it cannot establish n=131 base cardinality, PDP search cost, relation yield,
@@ -86,3 +87,23 @@ The next n=131 admission needs a separate exact compressed-base cardinality
 bound, including projected duplicates and x=1 torsion, and a fully charged
 solver/memory experiment. Update the canonical scoreboard and decision
 ledger only after an accepted archive-only replay.
+
+## Input construction and frozen-source anchor
+
+The pre-outcome `select_inputs.py` run scanned 20/16/18/16 SHA-ordered
+candidate k values for the four arms, including 4/0/2/0 negatives before the
+sixteenth positive. It retained those misses in `inputs/manifest.json`. The
+literal point-only file SHA-256 is
+`8ed34cc0d9c8b5ee18b8824766901bbc0d95e4a72e8dbc47f7fba73ac212c3b3`;
+the sealed-label file SHA-256 is
+`a5787f4aefe41d78cdeaf1ef643b2c4f951b0a2f45473d7e1356782442c017bc`.
+This was input selection only; no rank or recovery output was computed.
+The source/input freeze includes the constructor receipt and the unchanged
+#766 archive. `python3 run.py --evidence evidence` executes the producer,
+archive oracle, point-only recovery and independent verifier as separate
+children; `python3 ci_replay.py` checks the frozen split first and reruns the
+independent verifier from an outcome archive when present. Once `RESULT.md`
+exists, CI requires the archive and receipt, rather than accepting hash-only
+preregistration.
+
+Frozen rank manifest SHA-256: `bcf0ff3fe38c50fcfcece354a1eb3ec09e8ac5fa021c98e55446e4872f97de4a`
