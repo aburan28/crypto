@@ -60,11 +60,17 @@ jobs:
           RAYON_NUM_THREADS=1 cargo test --locked --release --lib exclusive_descent_ -- --test-threads=1
           cargo test --locked --release --example ic_tournament_worker public_input_ -- --test-threads=1
           RAYON_NUM_THREADS=1 cargo test --locked --release --example ic_tournament_worker exclusive_worker_ -- --include-ignored --test-threads=1
-          cargo build --locked --release --example ic_tournament_worker
+      - name: Build source-bound generic worker and audit scientific controls
+        run: |
+          python research/ic_candidate_tournament_20260915/generic_build.py \
+            --out "$RUNNER_TEMP/ic-generic-build"
+          python research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/run_controls.py \
+            --build "$RUNNER_TEMP/ic-generic-build" --out "$RUNNER_TEMP/ic-generic-admission"
       - name: Complete-solve and profiler integration
         run: |
           python research/ic_candidate_tournament_20260915/ci_smoke.py \
-            --worker target/release/examples/ic_tournament_worker \
+            --worker "$RUNNER_TEMP/ic-generic-build/worker" \
+            --build-dir "$RUNNER_TEMP/ic-generic-build" \
             --out "$RUNNER_TEMP/ic-autolab-integration"
       - name: Preserve evidence including failures
         if: always()
@@ -74,6 +80,8 @@ jobs:
           path: |
             ${{ runner.temp }}/ic-autolab-integration
             ${{ runner.temp }}/ic-query-law-rust-vectors.json
+            ${{ runner.temp }}/ic-generic-build
+            ${{ runner.temp }}/ic-generic-admission
             Cargo.lock
           retention-days: 30
           if-no-files-found: warn

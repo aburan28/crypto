@@ -10,6 +10,8 @@ from pathlib import Path
 from generic_queries import verify_queries
 from generic_query_law import verify_query_law
 from generic_phases import verify_native as verify_native_phases, parse_profiles as parse_generic_profiles
+from generic_admission import admit, admit_rho, scientific_ledger
+from generic_build import verify_build_record
 from identity import curve_record, factor_base_inventory, write_immutable
 from measurement import legacy_ledger
 from oracle import require, verify
@@ -21,9 +23,13 @@ SOLVERS = ('pair_table', 'enumerate', 'f4', 'f5', 'inherited_f4', 'sat_xor', 'sa
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--worker', type=Path, required=True)
+    parser.add_argument('--build-dir', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     args = parser.parse_args()
     worker = args.worker.resolve()
+    build = read(args.build_dir / 'build-record.json')
+    source = read(args.build_dir / 'source-manifest.json')
+    verify_build_record(build, source)
     out = args.out.resolve()
     require(platform.system() == 'Linux' and platform.machine() == 'x86_64',
             'CI integration requires Linux amd64')
@@ -186,6 +192,17 @@ def main():
             require(traced_process['exit_code'] == (2 if expected_failure else 0)
                     and traced_process['process_status'] == 'EXITED', 'exclusive native exit changed')
             traced_report = read(traced_dir / 'stdout.json')
+            native_ns = round(traced_process['process_wall_seconds'] * 1e9)
+            if job['mode'] == 'ic':
+                admitted = admit(traced_report, fixture, traced_job, build, source,
+                    executable=worker, process_wall_ns=native_ns,
+                    resources=dict(cpu=cpu, rayon_threads=1, memory_bytes=8*1024**3, timeout_seconds=60))
+                receipt['scientific_admission'] = admitted
+                for artifact in ('candidate', 'workload', 'run'):
+                    write_immutable(directory / f'generic-{artifact}.json', admitted[artifact])
+            else:
+                receipt['scientific_admission'] = admit_rho(traced_report, fixture, traced_job,
+                    build, source, executable=worker, process_wall_ns=native_ns)
             receipt['exclusive_native_phases'] = verify_native_phases(
                 traced_report, traced_job,
                 process_wall_ns=round(traced_process['process_wall_seconds'] * 1e9))
@@ -212,6 +229,19 @@ def main():
                         and profile_process['process_status'] == 'EXITED', 'exclusive profiler exit changed')
                 profiled = read(traced_profile / 'stdout.json')
                 receipt['exclusive_instructions'] = parse_generic_profiles(traced_profile, profiled, traced_job)
+                if job['mode'] == 'ic':
+                    profiled_admission = admit(profiled, fixture, traced_job, build, source,
+                        executable=worker, process_wall_ns=round(profile_process['process_wall_seconds'] * 1e9),
+                        resources=dict(cpu=cpu, rayon_threads=1, memory_bytes=8*1024**3, timeout_seconds=60))
+                    require(profiled_admission['candidate'] == receipt['scientific_admission']['candidate'],
+                            'native/profile scientific method mismatch')
+                    instructions = receipt['exclusive_instructions']
+                    receipt['scientific_instruction_ledger'] = scientific_ledger(
+                        instructions['phases'], unit=instructions['unit'],
+                        process_total=instructions['process_instructions'])
+                else:
+                    admit_rho(profiled, fixture, traced_job, build, source, executable=worker,
+                              process_wall_ns=round(profile_process['process_wall_seconds'] * 1e9))
                 profile_proof = None if expected_failure else verify(
                     profiled, fixture, expected_mode=job['mode'], summands=job['config']['summands'])
                 require(profile_proof == traced_proof, 'exclusive native/profile certificate mismatch')

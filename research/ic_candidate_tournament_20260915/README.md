@@ -1,5 +1,16 @@
 # Index-calculus candidate tournament
 
+**Current autolab goal, 2026-09-25:** one of three bounded improvement rounds has
+completed without a qualifying challenger; the strongest qualified incumbent is
+retained. The [generic scientific-admission adapter](goal_20260924/generic-scientific-admission/README.md)
+now binds source/build identity, independently reconstructed factor-base recipes,
+actual PDP/LA dispatch, stored matrices, failed attempts and exclusive phases.
+Its 69 toy controls are correctness/accounting evidence, not a performance
+comparison. Generic reference and observer qualification remains required before
+those backends enter the next round. Single-target online time is the primary
+metric; the campaign's cold-cost gates are supplementary. The results below are
+the retained historical campaign and keep their original accounting boundaries.
+
 Status: implementation complete; fourteen further tournaments finished and audited
 on 2026-09-16. [The continued-operation results](campaign_20260916/RESULTS.md)
 confirm a candidate below matched rho in both metrics on complete cold batches of
