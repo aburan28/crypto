@@ -1,0 +1,61 @@
+{
+  "cpu_seconds": 0.210283,
+  "decision": "PASS",
+  "domain": "k0-symbolic-dag-fullpoint-n2n3-v1",
+  "fields": [
+    {
+      "case_counts": {
+        "copy_p": 7,
+        "copy_q": 8,
+        "double": 6,
+        "generic": 36,
+        "inverse": 7
+      },
+      "curve_points": 8,
+      "dag": {
+        "and": 107,
+        "model_limbs": 1,
+        "total_nodes": 310,
+        "variables": 17,
+        "xor": 184
+      },
+      "invalid_model_evaluations": 288,
+      "invalid_points": 24,
+      "mismatches": 0,
+      "model_controls": 10,
+      "modulus": 7,
+      "n": 2,
+      "rows": 512,
+      "valid_model_evaluations": 2048
+    },
+    {
+      "case_counts": {
+        "copy_p": 3,
+        "copy_q": 4,
+        "double": 2,
+        "generic": 4,
+        "inverse": 3
+      },
+      "curve_points": 4,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 479,
+        "variables": 24,
+        "xor": 280
+      },
+      "invalid_model_evaluations": 2976,
+      "invalid_points": 124,
+      "mismatches": 0,
+      "model_controls": 10,
+      "modulus": 11,
+      "n": 3,
+      "rows": 64,
+      "valid_model_evaluations": 512
+    }
+  ],
+  "first_mismatch": null,
+  "peak_rss_bytes": 26443776,
+  "rows_sha256": "a2b760b72e477cb9ab4d8409e71102cd6a2a09db0b8a5e8f5ad170d1a1102da9",
+  "wall_seconds": 0.2227130829996895
+}
