@@ -5013,12 +5013,16 @@ the nine sizes. Yet its source did not change.
 
 - `FastCurve::add_many` is the same code in both binaries: 437
   instructions, the same size, and 64-byte aligned in both. Only two
-  panic-constant addresses differ.
+  instructions differ, and only in the address of a read-only constant
+  they load.
 - So is its one out-of-line callee, `Gf2::sqr`. It has the same code,
   the same alignment and the same distance from `add_many`.
+  (`unit_shift/`, from `disasm.sh`.)
 - The shift is already there in each process's first measurement,
-  before any pipeline work. Within a process the unit is flat: after
-  over before is 0.997–1.007.
+  before any pipeline work: 0.97–1.11 by size.
+- Within a process the unit holds still. Over a repetition it moves by
+  a median factor of 0.999–1.005 per size, though single processes
+  range 0.93–1.14.
 
 The shift is therefore a fixed property of binary and curve. This round
 did not isolate its cause; data placement is the remaining suspect.

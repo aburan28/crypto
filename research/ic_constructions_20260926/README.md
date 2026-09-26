@@ -27,6 +27,7 @@ projects one point per Frobenius orbit instead of one per point.
 | `runs/threads/` | four Rayon threads, `n = 53` and `n = 61`, `M1`, three ABAB rounds |
 | `runs/constructions/` | per-constructor prices on both binaries (`examples/koblitz_construction_prices.rs`) |
 | `runs/run.log` | the run's own log |
+| `unit_shift/` | the unit's code in both binaries, normalised (`disasm.sh` → `*.s`, `disasm.txt`): ledger §21.4 |
 
 ## Reproducing
 

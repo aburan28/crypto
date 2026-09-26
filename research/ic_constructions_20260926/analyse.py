@@ -111,7 +111,7 @@ def s20_row(a: int, n: int) -> dict:
 def size_row(a: int, n: int) -> dict:
     d0 = RUNS / "main" / f"k{a}n{n}"
     sets, speed, cons, all_pairs = [], [], [], 0
-    wall, unit, still = [], [], []
+    wall, unit, still, first_unit, drift = [], [], [], [], []
     pins_ok = True
     s_arm = {"baseline": [], "candidate": []}
     share = {"baseline": [], "candidate": []}
@@ -132,6 +132,12 @@ def size_row(a: int, n: int) -> dict:
         wall += [med(x, "total_ns") / med(y, "total_ns") for x, y in figure]
         unit += [med(x, "unit_ns") / med(y, "unit_ns") for x, y in figure]
         still += [phase_ns(x, UNCHANGED) / phase_ns(y, UNCHANGED) for x, y in figure]
+        # The unit before any pipeline work in the process, and how far it
+        # moves within a process (after each repetition over before it).
+        first_unit += [x["repetitions"][0]["unit_ns_before"] / y["repetitions"][0]["unit_ns_before"]
+                       for x, y in figure]
+        drift += [statistics.median(r["unit_ns_after"] / r["unit_ns_before"] for r in rep["repetitions"])
+                  for pair in figure for rep in pair]
         for arm, k in (("baseline", 0), ("candidate", 1)):
             s = statistics.median(p[k]["median"]["s_per_target"] for p in figure)
             s_arm[arm].append(s)
@@ -167,6 +173,9 @@ def size_row(a: int, n: int) -> dict:
             "wall_speedup": geo_ci(wall),
             "unit_ns_baseline_over_candidate": geo_ci(unit),
             "unchanged_phases_ns_baseline_over_candidate": geo_ci(still),
+            "unit_first_measurement_baseline_over_candidate": statistics.median(first_unit),
+            "unit_after_over_before_within_a_process": {"min": min(drift), "median": statistics.median(drift),
+                                                         "max": max(drift)},
         },
         "s_before": s_before, "s_after": s_after, "s20_s_ic": prior["s_ic"], "s_rho_s20": s_rho,
         "ratio_before": s_before / s_rho, "ratio_after": s_after / s_rho, "s20_ratio": prior["ratio"],
