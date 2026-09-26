@@ -34,6 +34,19 @@ template<int N> NF_HD void n_mac_row(uint32_t*t,const uint32_t*a,uint32_t b){
  c+=t[N];t[N]=(uint32_t)c;t[N+1]+=(uint32_t)(c>>32);
 }
 
+template<class M> NF_HD uint32_t n_reduce_row(uint32_t*t,uint32_t m){
+ uint64_t c=0;
+#pragma unroll
+ for(int j=0;j<M::N;j++){
+  int d=M::digit(j);uint64_t u;
+  if(d==-1){u=(uint64_t)t[j]+c+(1ull<<32)-m;t[j]=(uint32_t)u;c=(uint64_t)m+(u>>32)-1;}
+  else if(d==-2){u=(uint64_t)t[j]+c+(2ull<<32)-2ull*m;t[j]=(uint32_t)u;c=(uint64_t)m+(u>>32)-2;}
+  else if(d==0){u=(uint64_t)t[j]+c;t[j]=(uint32_t)u;c=u>>32;}
+  else{u=(uint64_t)t[j]+c+m;t[j]=(uint32_t)u;c=u>>32;}
+ }
+ return (uint32_t)c;
+}
+
 struct P256Mod {
  static const int N=8;
  NF_HD static uint32_t p(int i){const uint32_t x[8]={0xffffffffu,0xffffffffu,0xffffffffu,0,0,0,1,0xffffffffu};return x[i];}
@@ -71,16 +84,8 @@ template<class M> struct NistField {
 #pragma unroll
   for(int i=0;i<N;i++){
    n_mac_row<N>(t,a.v,b.v[i]);
-   uint32_t m=t[0];uint64_t c=0;
-#pragma unroll
-   for(int j=0;j<N;j++){
-    int d=M::digit(j);uint64_t u;
-    if(d==-1){u=(uint64_t)t[j]+c+(1ull<<32)-m;t[j]=(uint32_t)u;c=(uint64_t)m+(u>>32)-1;}
-    else if(d==-2){u=(uint64_t)t[j]+c+(2ull<<32)-2ull*m;t[j]=(uint32_t)u;c=(uint64_t)m+(u>>32)-2;}
-    else if(d==0){u=(uint64_t)t[j]+c;t[j]=(uint32_t)u;c=u>>32;}
-    else{u=(uint64_t)t[j]+c+m;t[j]=(uint32_t)u;c=u>>32;}
-   }
-   uint64_t z=(uint64_t)t[N]+c;t[N]=(uint32_t)z;t[N+1]+=(uint32_t)(z>>32);
+   uint32_t m=t[0];uint32_t rc=n_reduce_row<M>(t,m);
+   uint64_t z=(uint64_t)t[N]+rc;t[N]=(uint32_t)z;t[N+1]+=(uint32_t)(z>>32);
 #pragma unroll
    for(int j=0;j<N+1;j++)t[j]=t[j+1];
    t[N+1]=0;
