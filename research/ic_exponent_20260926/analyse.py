@@ -149,6 +149,28 @@ def size_row(prow: dict) -> dict:
             "bailey_step_units": statistics.fmean(s["bailey_step_units"] for s in good),
             "unit_ns": statistics.fmean(s["unit_ns"] for s in good),
         })
+        # Per target, what the descent alone costs against what batch rho
+        # costs: the part of S that k does not divide.
+        k = good[0].get("targets", 32) if isinstance(good[0].get("targets"), int) else 32
+        per_phase = {ph: statistics.fmean(s["phases_units"][ph] for s in good) for ph in good[0]["phases_units"]}
+        rho_per_target = s_rho * math.sqrt(r)
+        stored = statistics.fmean(s["stored_pairs"] for s in good)
+        scanned = statistics.fmean(s["summands_scanned"] for s in good)
+        points = statistics.fmean(s["points"] for s in good)
+        row["per_target"] = {
+            "descent_units": per_phase["descent"] / 32,
+            "verify_final_units": per_phase["verify_final"] / 32,
+            "batch_rho_units": rho_per_target,
+            "descent_over_batch_rho": per_phase["descent"] / 32 / rho_per_target,
+        }
+        row["implied_prices"] = {
+            "select_units_per_point": per_phase["select"] / points,
+            "build_units_per_stored_pair": per_phase["build"] / stored,
+            "collect_units_per_summand": per_phase["collect"] / scanned,
+            "constructions_units_per_point": (per_phase["select_projection"] + per_phase["collect_setup"]
+                                              + per_phase["logs_setup"] + per_phase["descent_setup"]) / points,
+            "setup_units": per_phase["setup"],
+        }
         cold = [s for s in good if s.get("rho_cold_s_priced")]
         if cold:
             row["cold_ratio_M1"] = cold[0]["s_cold"] / cold[0]["rho_cold_s_priced"]
