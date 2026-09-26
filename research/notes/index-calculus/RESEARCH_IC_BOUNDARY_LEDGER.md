@@ -4566,6 +4566,264 @@ showed two things:
 
 No target, size, seed or prediction changed.
 
+### 20.2 What ran
+
+- **The code.** `ic price` and the harness
+  `research/ic_exponent_20260926/run.py all`, from commit `d31a7ab4` with
+  the tracked tree clean.
+  - `host.json` reads `tree_clean: false` only because the run's own
+    output directory was untracked when the manifest was written.
+  - The harness is resumable and never overwrites. Every report and every
+    stderr is kept.
+- **The host.** One x86-64 cloud container: Intel Xeon at 2.10 GHz, four
+  logical cores, AVX-512 with `vpclmulqdq` and `gfni`, 16 GB, rustc
+  1.94.1.
+  - Every timed process ran on one Rayon thread under `taskset -c 2`, with
+    nothing else running.
+  - That is the only hardware class these figures cover.
+- **The volume.**
+  - 152 pricer reports, holding 1,353 whole-pipeline repetitions and
+    43,296 descents. Every one was verified.
+  - 1,792 batch-rho targets and 352 single-target walks. Every one was
+    verified and agreed with the planted scalar.
+- **The spread rule** fired on 11 measurement sets, all at the five
+  smallest sizes, where one repetition takes 2–70 ms. Each was rerun with
+  twice the repetitions. Both files are kept, and the rerun is the figure.
+- **Control 1** held on all 45 runs it covers (36 measurement runs and 9
+  control runs). Each was compared field by field with `ic workflow` on
+  the same parameter file, on one thread, and was identical.
+
+### 20.3 The table
+
+`S` is per target at `k = 32`.
+
+- **The reference** is batch rho on the same 32 targets. Its counted
+  operations are priced at the canonical step measured in the same
+  process.
+- **The ratio** is the mean index-calculus `S` over the mean reference,
+  across the four measurement sets, with a 95% interval from the four
+  per-set ratios.
+- **The recipe** columns give the column count, the descent's summands
+  and the base's points.
+- **law** and **model** are the declared predictions.
+- **work** prices the phases the model prices (selection, build,
+  collection, linear algebra, descent) over the same reference. It is a
+  stage diagnostic, not a speed.
+- **W / C / V** is the index-calculus total split into work,
+  constructions (with the curve's setup) and verification.
+- **cold**: `M1`'s shared phases plus its mean descent, against
+  single-target rho walked on the same 32 targets one at a time.
+
+| curve | `log₂ r` | recipe | `S`, IC | `S`, batch rho | ratio [95%] | law | model | work | W / C / V | cold |
+|:--|--:|:--|--:|--:|--:|--:|--:|--:|:--|--:|
+| `K_1/GF(2^19)` | 18.0 | 8, 2, 304 | 8.118 | 0.3271 | **24.82×** [23.47, 26.21] | 0.83× | 4.89× | 13.76× | 55% / 32% / 11% | 113× |
+| `K_1/GF(2^23)` | 22.0 | 8, 2, 368 | 2.595 | 0.2050 | **12.66×** [7.85, 18.84] | 1.20× | 3.42× | 6.68× | 53% / 38% / 8% | 62.3× |
+| `K_1/GF(2^45)` | 24.8 | 8, 2, 720 | 2.819 | 0.1191 | **23.67×** [21.02, 26.50] | 1.18× | 3.35× | 6.20× | 26% / 70% / 3% | 123× |
+| `K_0/GF(2^37)` | 27.8 | 8, 2, 592 | 0.861 | 0.0922 | **9.33×** [8.30, 10.42] | 1.84× | 2.85× | 4.58× | 49% / 47% / 3% | 41.6× |
+| `K_1/GF(2^43)` | 32.1 | 16, 2, 1,376 | 0.544 | 0.0666 | **8.16×** [7.10, 9.32] | 2.81× | 2.89× | 4.53× | 55% / 42% / 2% | 39.9× |
+| `K_1/GF(2^47)` | 36.6 | 56, 3, 5,264 | 0.397 | 0.0602 | **6.60×** [6.00, 7.25] | 4.53× | 3.56× | 3.73× | 56% / 42% / 2% | 38.7× |
+| `K_0/GF(2^41)` | 39.0 | 80, 2, 6,560 | 0.324 | 0.0666 | **4.86×** [4.21, 5.55] | 6.38× | 4.51× | 3.73× | 77% / 21% / 1% | 22.6× |
+| `K_0/GF(2^53)` | 44.3 | 264, 2, 27,984 | 0.469 | 0.0509 | **9.21×** [6.92, 11.85] | 10.30× | 6.76× | 7.81× | 85% / 15% / 0% | 43.0× |
+| `K_0/GF(2^61)` | 47.2 | 320, 2, 39,040 | 0.721 | 0.0531 | **13.59×** [11.95, 15.34] | 13.51× | 8.68× | 12.64× | 93% / 7% / 0% | 85.0× |
+
+**Against the floor**, `L(32)·√(π/4n)`:
+
+- Counted batch rho sits 4.50× its floor at `2^18`, 1.52× at `2^27.8`,
+  and 0.98–1.09× from `2^36.6` to `2^47.2`.
+- The index calculus sits 201× its floor at `2^18` and 11.8× at its best
+  (`2^39`).
+
+### 20.4 The targets, graded
+
+1. **Correct: met.**
+   - Every descent of every repetition and every rho target was
+     recovered and verified.
+   - No relation was rejected.
+   - The counts were identical across repetitions in every report.
+2. **Controls: met.**
+   - Control 1 held on all 45 runs.
+   - **Control 2** reproduced every frozen count of the headline
+     (`k0n41-least-on-u150`) on current `main`: 197 relations, 3,450
+     trials, 883,200 summands, 1,519,296 stored pairs, 52 descent trials.
+     Priced like every other row, it reads **12.53×** batch rho on its own
+     32 targets, against §19.5's 6.38× (§20.6).
+   - **Control 3**, the thread's own recipes on `M1`–`M4`:
+     - `n = 41` reads **10.93×** [10.68, 11.16], against the swept
+       recipe's 4.86×. Its base has 15,744 points against the sweep's
+       6,560, and on current prices the build is 62% of that base's
+       whole run.
+     - `n = 53` reads **7.58×** [5.92, 9.51], against the swept
+       recipe's 9.21× [6.92, 11.85]. The two are indistinguishable. The
+       sweep's choice (264 columns, window 874, units of 1,014 probes) and
+       the thread's (144 columns, window 477, units of 2,048) differ by
+       less than one seed set's noise.
+3. **Exponent: not decided.**
+   - Fitted on `ln(ratio·√n)` against `ln r` over the four largest sizes,
+     `β = 0.137`, with a 95% interval of `[−0.097, 0.371]`.
+   - Both the law's `1/6` and the model's `0.141` lie inside, so the
+     declared fit cannot tell them apart.
+   - Fitting the sixteen per-set points instead gives `0.138`
+     `[0.090, 0.185]`, which still contains both.
+   - Measured, the top end rises at about the rate both predicted, but
+     from a different floor (§20.5).
+4. **The small end.**
+   - **The law is falsified.** At the three smallest sizes the
+     interval's lower end is 23.5, 7.85 and 21.0, against twice the law's
+     1.66, 2.40 and 2.36. The crossing it extrapolated near `2^23` is not
+     there: at `2^22` and `2^24.8` the thread measures 12.7× and 23.7×
+     batch rho.
+   - **The model's minimum is not confirmed.** The least measured ratio
+     is 4.86× at `2^39` (`K_0/GF(2^41)`), eleven bits above the model's
+     `2^27.8`. At `2^27.8` itself the thread measures 9.33×, 3.3× the
+     model's 2.85×.
+5. **Crossing: none.** The lowest interval anywhere is `[4.21, 5.55]`,
+   at `2^39`.
+
+### 20.5 Where the cost goes
+
+**The descent does not amortise.** A target's descent, set against batch
+rho's cost for one target of 32:
+
+| curve | descent per target | batch rho per target | descent ÷ rho |
+|:--|--:|--:|--:|
+| `K_1/GF(2^19)` | 1,491 | 168 | 8.89× |
+| `K_1/GF(2^23)` | 1,780 | 420 | 4.24× |
+| `K_1/GF(2^45)` | 2,389 | 644 | 3.71× |
+| `K_0/GF(2^37)` | 3,981 | 1,401 | 2.84× |
+| `K_1/GF(2^43)` | 10,730 | 4,541 | 2.36× |
+| `K_1/GF(2^47)` | 25,653 | 19,677 | 1.30× |
+| `K_0/GF(2^41)` | 42,087 | 49,379 | 0.85× |
+| `K_0/GF(2^53)` | 104,548 | 233,711 | 0.45× |
+| `K_0/GF(2^61)` | 621,397 | 677,466 | 0.92× |
+
+Below about `2^37` the descent alone costs more per target than batch rho
+does. No amortisation of the shared phases, over any number of targets,
+brings the thread under batch rho there at this recipe. More targets make
+it worse, not better: rho's cost per target keeps falling as `1/√k`,
+while the descent's does not fall at all.
+
+The declared model priced the descent per probe too. It put the
+descent–rho crossover near `2^28`, because its conversions were frozen
+ones and it had no per-target setup. Measured, each target also pays for:
+
+- 64 walks started with three scalar multiplications;
+- a relation assembled in big-integer arithmetic;
+- a recovery check that is a big-integer scalar multiplication.
+
+At the frozen headline, the `m = 3` descent is 52 trials of whole-base
+scans. It costs 748,180 units, 14,388 a trial, where the frozen ledger
+charged 54 to 62.
+
+**The workflow's constructions.**
+
+- They are 7–70% of `S`: the curve's setup (2.3–8.4% by itself), the
+  column count, the collectors and coverage, the log solver and the
+  descent solver.
+- Each after the setup rebuilds the base's projected orbit map in
+  big-integer arithmetic. Together those cost 107–433 units per base
+  point.
+- They are 70% of `S` at `K_1/GF(2^45)`, whose field is wide for its
+  `r`, and 7% at `2^47.2`.
+- No frozen figure priced them.
+
+**The recipe's floor.** At the four smallest sizes the sweep's best base
+is the builder's minimum of eight orbits (Amendment 1). Every larger base
+cost more at each of them, so a smaller one might have helped. But not
+by the factor needed: none of the four has an interval within a factor
+of seven of one.
+
+**Rho's own fixed costs.** Counted batch rho sits 4.50× its floor at
+`2^18`, falling to about 1.0× from `2^36.6` up. That is walk starts and
+verification per target, which the floor does not carry. It favours the
+index calculus at the small end, and the index calculus still loses
+there.
+
+**The top end.**
+
+- From its minimum at `2^39` the ratio rises: 9.21× at `2^44.3` and
+  13.59× at `2^47.2`.
+- Beyond the local exponent, the prices themselves rise with the table as
+  it leaves cache. A stored pair costs 4.98 units at `2^39`, 7.77 at
+  `2^44.3` and 9.20 at `2^47.2`. A scanned summand costs 1.42, 1.67 and
+  2.62.
+- By `2^47.2` the work is 93% of `S`, and it alone is 12.64× batch rho.
+
+### 20.6 Prices on current main, and the headline re-priced
+
+The unit is itself faster on `main`: 28.2 ns at `n = 41`, against the
+43.8 ns §19.4 measured. So a phase whose own time fell by less than the
+addition's costs more units than it did. The folded build is the case in
+point: 409 ms → 324 ms at the headline, but 6.14 → 7.56 units a stored
+pair.
+
+| price, in batched additions | frozen | §19.4 (`3e8dd352`) | §20, current `main` |
+|:--|--:|--:|--:|
+| scanned summand, collection | 2.85 | — | 1.42 – 2.62 at the four largest sizes |
+| stored pair, folded build | 1 (counted) | 4.5 – 6.1 | 4.8 – 9.2 |
+| selection, per point | 37.3 | — | 29 – 39 |
+| descent, per `m = 3` trial | 1.19 | — | 14,388 at the headline |
+| canonical rho step | 1 (counted) | 2.74 – 2.92 | 1.80 – 2.30 |
+| Bailey et al.'s step (model) | — | 1.38 – 1.41 | 1.39 – 1.67 |
+
+**The frozen headline**, §19.5's `6.38×`, re-priced (Control 2):
+
+| | §19.5 | §20 |
+|:--|--:|--:|
+| build | 9,328,477 | 11,484,831 |
+| collection | 2,517,120 | 1,840,234 |
+| selection | 587,043 | 561,129 |
+| descent | 54 | 748,180 |
+| linear algebra | 2,153 | 73,213 |
+| constructions and setup | — | 3,338,745 |
+| verification | — | 242,602 |
+| `S` per target | 0.524 | 0.773 |
+| batch rho, priced | 0.0822 | 0.0617 |
+| ratio | 6.38× | **12.53×** |
+
+The index-calculus side rose 47%. The descent and the constructions,
+never priced before, are 22% of the new total. The reference fell 25%: a
+canonical step now costs 2.27 units against 2.74, and the batch on these
+32 targets counted 0.0271 against §19's mean of 0.0300.
+
+### 20.7 Classification
+
+**Accounting.** No index-calculus algorithm changed. The thread's figures
+move for three reasons:
+
+- its descent is priced at the probes it scans;
+- its constructions are priced at all;
+- both sides are priced on current `main`.
+
+Its best figure against batch rho at `k = 32` goes from 6.38× (§19.5) to
+4.86× at `2^39`. But that is reached by a smaller base than the thread
+ran, as the sweep chose. The thread's own recipe re-priced reads 10.9–12.5×.
+
+Two ratios to the floor stand:
+
+- the index calculus at its best is 11.8× the floor;
+- batch rho is about 1.0× the floor from `2^36.6` up.
+
+### 20.8 What does not count
+
+- **The work column** is a stage diagnostic. Its 3.73× at `2^39` is
+  neither a speed nor the method's cost.
+- **The Bailey column** in `analysis.json` is a model. Bailey's walk has
+  still not been counted here.
+- **Anything beyond `2^47.2` or below `2^18`** is extrapolation. So is
+  any reading of these rows at a different `k`, where rho per target
+  moves as `1/√k` and the descent per target does not move.
+- **The `r^{1/6}` on the page** is consistent with the top end, but it is
+  not confirmed as the thread's law there. The declared four-point fit
+  cannot separate `1/6` from the model's `0.141` or from zero.
+
+### 20.9 Reproducing
+
+    cargo build --release --bin ic
+    cd research/ic_exponent_20260926
+    python3 run.py all                 # resumable; one Rayon thread, taskset -c 2
+    python3 analyse.py > analysis.json
+    python3 render_rows.py md          # the table in §20.3
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

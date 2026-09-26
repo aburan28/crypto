@@ -3,8 +3,9 @@
 
 The scoreboard cites and never computes, so its §20 table is printed
 from the frozen analysis rather than typed: one HTML row per size, and
-the same rows as Markdown for the ledger note.  Rounding is the only
-arithmetic here.
+the same rows as Markdown for the ledger note (which alone carries the
+cold column; the page gives the cold range in its legend).  Rounding
+is the only arithmetic here.
 
     python3 render_rows.py html > rows.html
     python3 render_rows.py md   > rows.md
@@ -41,14 +42,14 @@ def main() -> None:
         pts = r["sets"][0]["points"]
         sh = r["shares"]
         cells = {
-            "recipe": f"{ch['columns']} &middot; m = {ch['descent_summands']} &middot; {pts:,}",
+            "recipe": f"{ch['columns']} &middot; {ch['descent_summands']} &middot; {pts:,}",
             "s_ic": f"{r['s_ic']:.3f}",
             "s_rho": f"{r['s_rho']:.4f}",
-            "ratio": f"<b>{x(r['ratio'])}</b> [{ci['lo']:.2f}, {ci['hi']:.2f}]",
+            "ratio": f"<b>{x(r['ratio'])}</b><br><small>[{ci['lo']:.2f}, {ci['hi']:.2f}]</small>",
             "law": x(r["law"]),
             "model": x(r["model"]),
             "work": x(r["work_ratio_stage_diagnostic"]),
-            "shares": f"{sh['work']:.0%} / {sh['constructions']:.0%} / {sh['verification']:.0%}".replace("%", "%"),
+            "shares": f"{sh['work'] * 100:.0f} / {sh['constructions'] * 100:.0f} / {sh['verification'] * 100:.0f}",
             "cold": x(r["cold_ratio_M1"], 1) if "cold_ratio_M1" in r else "&mdash;",
         }
         if mode == "html":
@@ -57,7 +58,7 @@ def main() -> None:
                 f"<td class=\"n\">{cells['s_ic']}</td><td class=\"n\">{cells['s_rho']}</td>"
                 f"<td class=\"n\">{cells['ratio']}</td><td class=\"n\">{cells['law']}</td>"
                 f"<td class=\"n\">{cells['model']}</td><td class=\"n\">{cells['work']}</td>"
-                f"<td class=\"n\">{cells['shares']}</td><td class=\"n\">{cells['cold']}</td></tr>"
+                f"<td class=\"n\">{cells['shares']}</td></tr>"
             )
         else:
             print(
