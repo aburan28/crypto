@@ -12,7 +12,7 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
 use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
 use crypto_lib::cryptanalysis::semaev_sat::XorEncoding;
 use num_bigint::BigUint;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::io::Read;
 use std::time::Instant;
@@ -56,7 +56,7 @@ struct Job {
     exclusive_phases: bool,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 struct Config {
     solver: String,
@@ -176,6 +176,18 @@ fn run(job: &Job) -> Result<Value, String> {
     if job.mode == "fixture" {
         return Err("exclusive measured phases require a supplied-point job".into());
     }
+    for (name, value) in std::env::vars_os() {
+        let name = name.to_string_lossy();
+        let declared_default = (name == "IC_ARTIFACT_CACHE" && value == "off")
+            || (name == "IC_F2_BACKEND" && value == "cpu");
+        if name.starts_with("KIC_")
+            || name.starts_with("F4_")
+            || name.starts_with("SOLVER_")
+            || (name.starts_with("IC_") && !declared_default)
+        {
+            return Err(format!("undeclared algorithm environment override: {name}"));
+        }
+    }
     if rayon::current_num_threads() != 1 {
         return Err("exclusive phases require one Rayon thread".into());
     }
@@ -189,7 +201,16 @@ fn run(job: &Job) -> Result<Value, String> {
     report["online_timing_schema"] = json!(2);
     report["generic_phase_timing"] = json!(snapshot);
     report["generic_phase_policy"] = json!("exclusive-owner-thread-v1");
+    report["generic_build"] = build_identity();
+    report["generic_runtime_policy"] = json!("default-environment-one-rayon-v1");
     Ok(report)
+}
+
+fn build_identity() -> Value {
+    json!({"schema_version":1,
+        "source_manifest_sha256":option_env!("IC_GENERIC_SOURCE_MANIFEST_SHA256"),
+        "build_sha256":option_env!("IC_GENERIC_BUILD_SHA256"),
+        "target_arch":std::env::consts::ARCH,"target_os":std::env::consts::OS})
 }
 
 fn run_inner(job: &Job) -> Result<Value, String> {
@@ -302,12 +323,20 @@ fn run_inner(job: &Job) -> Result<Value, String> {
         return Ok(
             json!({"schema_version":1,"mode":"rho","status":if verified {"complete"} else {"incomplete"},
             "fixture":metadata,"solutions":solutions,"automorphism_order":2*c.n,
+            "generic_admission_schema":if job.exclusive_phases {Some(1)} else {None},
+            "effective_config":cfg,
+            "rho_dispatch":{"algorithm":"signed-frobenius-batched-affine",
+                "jump_count":options.jump_count,"max_restarts":options.max_restarts,
+                "max_iterations_per_restart":options.max_iterations_per_restart,
+                "progress_interval":options.progress_interval,
+                "requested_walks":options.parallel_walks,"seed":options.seed,
+                "field_kernel":field_kernel},
             "elapsed_seconds":start.elapsed().as_secs_f64(),"online_timing_schema":1,
             "online_wall_ns":online_ns,"target_input":"supplied_public_point",
             "reusable_setup_excluded":true,"scalar_replay_included":replay.is_some(),"field_kernel":field_kernel}),
         );
     }
-    if job.mode != "ic" {
+    if job.mode != "ic" && job.mode != "inventory" {
         return Err("unknown mode".into());
     }
     let strategy = match cfg.solver.as_str() {
@@ -385,6 +414,20 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     measurement::mark(Phase::FactorBase);
     let fb = effective_base.materialize(&c)?;
     measurement::mark(Phase::Precompute);
+    if job.mode == "inventory" {
+        if !job.exclusive_phases {
+            return Err("generic inventory requires exclusive phase mode".into());
+        }
+        let system = FactorBaseLogSolver::new(&c, &fb, &opts).ok_or("no projected columns")?;
+        return Ok(json!({"schema_version":1,"mode":"ic","status":"inventory",
+            "fixture":metadata,"columns":system.columns(),
+            "factor_base":fb.points.iter().map(point).collect::<Vec<_>>(),
+            "effective_factor_base":effective_base,"effective_config":cfg,
+            "generic_admission_schema":1,"relation_matrix":system.matrix_snapshot(),
+            "online_wall_ns":null,"online_timing_schema":1,
+            "target_input":"supplied_public_point","reusable_setup_excluded":true,
+            "scalar_replay_included":false}));
+    }
     let pair = if strategy == DecompositionStrategy::PairTable {
         Some(PairSumTable::build(&c, &fb).ok_or("pair table unavailable")?)
     } else {
@@ -400,6 +443,8 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     let mut trials = 0;
     let mut collection_reports = Vec::new();
     let mut outcome = None;
+    let collector_dispatch = job.exclusive_phases.then(|| collector.admission_dispatch());
+    let mut matrix_batches = Vec::new();
     while trials < cfg.max_trials && outcome.is_none() {
         let count = cfg.batch_trials.min(cfg.max_trials - trials);
         let (rows, collection_report) = collector.collect_observed(RelationWorkUnit {
@@ -413,11 +458,20 @@ fn run_inner(job: &Job) -> Result<Value, String> {
         collection_reports.push(collection_report);
         outcome = system.try_solve();
         relations.extend(rows);
+        if job.exclusive_phases {
+            let observed = system.report();
+            matrix_batches.push(json!({"queries":trials,"accepted_rows":observed.relations,
+                "duplicate_relations":observed.duplicate_relations,
+                "rejected_relations":observed.rejected_relations,
+                "solve_attempts":observed.solve_attempts,"verified":observed.verified,
+                "sparse_report":observed.sparse_report}));
+        }
         dump(b"verify_filter_and_linear_algebra\0");
     }
     let base = fb.points.iter().map(point).collect::<Vec<_>>();
     let mut report = system.report();
     report.trials = trials as usize;
+    let matrix = job.exclusive_phases.then(|| system.matrix_snapshot());
     let Some((table, mut solved)) = outcome else {
         return Ok(
             json!({"schema_version":1,"mode":"ic","status":"incomplete","fixture":metadata,
@@ -426,6 +480,9 @@ fn run_inner(job: &Job) -> Result<Value, String> {
             "query_schema_version":1,"collection_reports":collection_reports,
             "log_table_report":report,"solve_attempts":report.solve_attempts,
             "effective_factor_base":effective_base,"summands":cfg.summands,
+            "generic_admission_schema":if job.exclusive_phases {Some(1)} else {None},
+            "effective_config":cfg,"collector_dispatch":collector_dispatch,
+            "descent_dispatch":null,"matrix_batches":matrix_batches,"relation_matrix":matrix,
             "online_timing_schema":1,"online_wall_ns":null,"target_input":"supplied_public_point",
             "reusable_setup_excluded":true,"scalar_replay_included":false}),
         );
@@ -450,6 +507,7 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     measurement::mark(Phase::Precompute);
     let solver = IndividualLogSolver::new(&c, &fb, &table, &opts, pair.as_ref())
         .ok_or("descent setup failed")?;
+    let descent_dispatch = job.exclusive_phases.then(|| solver.admission_dispatch());
     measurement::begin_online(Phase::TargetQuery);
     let online_start = Instant::now();
     let q = &targets[0];
@@ -468,6 +526,9 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     Ok(
         json!({"schema_version":1,"mode":"ic","status":if verified{"complete"}else{"incomplete"},
         "fixture":metadata,"solutions":solutions,"factor_base":base,"relations":relations,
+        "generic_admission_schema":if job.exclusive_phases {Some(1)} else {None},
+        "effective_config":cfg,"collector_dispatch":collector_dispatch,
+        "descent_dispatch":descent_dispatch,"matrix_batches":matrix_batches,"relation_matrix":matrix,
         "column_logs":columns,"columns":expected_columns,"trials":trials,"solve_attempts":solved.solve_attempts,
         "query_schema_version":1,"collection_reports":collection_reports,"log_table_report":solved,
         "online_timing_schema":1,"online_wall_ns":online_ns,"target_input":"supplied_public_point",
@@ -480,6 +541,15 @@ fn run_inner(job: &Job) -> Result<Value, String> {
 }
 
 fn main() {
+    let arguments: Vec<_> = std::env::args().skip(1).collect();
+    if arguments == ["--build-identity"] {
+        println!("{}", build_identity());
+        return;
+    }
+    if !arguments.is_empty() {
+        eprintln!("expected no arguments, or --build-identity");
+        std::process::exit(2);
+    }
     let mut input = String::new();
     std::io::stdin()
         .take(1_048_577)
@@ -499,7 +569,10 @@ fn main() {
     };
     let report = result
         .unwrap_or_else(|reason| json!({"schema_version":1,"status":"error","reason":reason}));
-    let success = matches!(report["status"].as_str(), Some("complete" | "fixture"));
+    let success = matches!(
+        report["status"].as_str(),
+        Some("complete" | "fixture" | "inventory")
+    );
     println!("{}", report);
     if !success {
         std::process::exit(2);

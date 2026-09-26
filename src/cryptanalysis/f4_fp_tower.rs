@@ -83,13 +83,13 @@ use rayon::prelude::*;
 // ── Arithmetic in F_p, p < 2^32 ──────────────────────────────────────
 
 #[derive(Clone, Copy, Debug)]
-struct Fp {
-    p: u64,
+pub(crate) struct Fp {
+    pub(crate) p: u64,
     m: u64,
 }
 
 impl Fp {
-    fn new(p: u64) -> Self {
+    pub(crate) fn new(p: u64) -> Self {
         assert!(
             (3..1 << 32).contains(&p),
             "f4_fp_tower: the prime must be odd and below 2^32"
@@ -102,7 +102,7 @@ impl Fp {
     /// `x mod p` for any `x < 2⁶⁴` (Barrett; the quotient estimate is low
     /// by at most one).
     #[inline(always)]
-    fn reduce(self, x: u64) -> u64 {
+    pub(crate) fn reduce(self, x: u64) -> u64 {
         let q = ((u128::from(x) * u128::from(self.m)) >> 64) as u64;
         let r = x - q * self.p;
         if r >= self.p {
@@ -112,11 +112,11 @@ impl Fp {
         }
     }
     #[inline(always)]
-    fn mul(self, a: u64, b: u64) -> u64 {
+    pub(crate) fn mul(self, a: u64, b: u64) -> u64 {
         self.reduce(a * b)
     }
     #[inline(always)]
-    fn add(self, a: u64, b: u64) -> u64 {
+    pub(crate) fn add(self, a: u64, b: u64) -> u64 {
         let s = a + b;
         if s >= self.p {
             s - self.p
@@ -125,7 +125,7 @@ impl Fp {
         }
     }
     #[inline(always)]
-    fn neg(self, a: u64) -> u64 {
+    pub(crate) fn neg(self, a: u64) -> u64 {
         if a == 0 {
             0
         } else {
@@ -144,7 +144,7 @@ impl Fp {
         }
         r
     }
-    fn inv(self, a: u64) -> u64 {
+    pub(crate) fn inv(self, a: u64) -> u64 {
         assert!(!a.is_multiple_of(self.p), "f4_fp_tower: inverse of zero");
         self.pow(a, self.p - 2)
     }
@@ -214,7 +214,7 @@ pub const ONE: Mono = (0xffff_ffffu128 << FREE_SHIFT) | (u64::MAX as u128);
 
 /// `a | b` in the polynomial ring.
 #[inline]
-fn divides(a: Mono, b: Mono) -> bool {
+pub(crate) fn divides(a: Mono, b: Mono) -> bool {
     if mask_of(a) & !mask_of(b) != 0 || degree_of(a) > degree_of(b) {
         return false;
     }
@@ -223,7 +223,7 @@ fn divides(a: Mono, b: Mono) -> bool {
 }
 
 #[inline]
-fn lcm(a: Mono, b: Mono) -> Mono {
+pub(crate) fn lcm(a: Mono, b: Mono) -> Mono {
     let (fa, fb) = (free_of(a), free_of(b));
     let mut f = [0u8; MAX_FREE];
     for k in 0..MAX_FREE {
@@ -234,7 +234,7 @@ fn lcm(a: Mono, b: Mono) -> Mono {
 
 /// `a / b`, for `b | a`.
 #[inline]
-fn quotient(a: Mono, b: Mono) -> Mono {
+pub(crate) fn quotient(a: Mono, b: Mono) -> Mono {
     let (fa, fb) = (free_of(a), free_of(b));
     let mut f = [0u8; MAX_FREE];
     for k in 0..MAX_FREE {
@@ -244,7 +244,7 @@ fn quotient(a: Mono, b: Mono) -> Mono {
 }
 
 #[inline]
-fn coprime(a: Mono, b: Mono) -> bool {
+pub(crate) fn coprime(a: Mono, b: Mono) -> bool {
     if mask_of(a) & mask_of(b) != 0 {
         return false;
     }
@@ -268,7 +268,7 @@ fn add_free(a: [u8; MAX_FREE], b: [u8; MAX_FREE]) -> [u8; MAX_FREE] {
 /// one system, so a multiplicative hash would crowd them into few buckets
 /// (see `fx_hash::MaskHasher`).
 #[derive(Default, Clone, Copy)]
-struct MonoHasher(u64);
+pub(crate) struct MonoHasher(u64);
 
 impl Hasher for MonoHasher {
     #[inline]
@@ -300,7 +300,7 @@ impl Hasher for MonoHasher {
     }
 }
 
-type MonoMap<V> = HashMap<Mono, V, BuildHasherDefault<MonoHasher>>;
+pub(crate) type MonoMap<V> = HashMap<Mono, V, BuildHasherDefault<MonoHasher>>;
 
 // ── The ring ─────────────────────────────────────────────────────────
 
@@ -459,7 +459,7 @@ impl TowerRing {
 
     /// `u · g` in normal form, for `g` given by its terms, descending and
     /// with non-zero coefficients (`len` of them).
-    fn mul_terms_fp(
+    pub(crate) fn mul_terms_fp(
         &self,
         fp: Fp,
         g: impl Iterator<Item = (Mono, u32)>,
@@ -569,7 +569,7 @@ pub struct RPoly {
 
 impl RPoly {
     /// Sort, merge repeats and drop zeros.
-    fn from_terms(fp: Fp, mut terms: Vec<(Mono, u64)>) -> RPoly {
+    pub(crate) fn from_terms(fp: Fp, mut terms: Vec<(Mono, u64)>) -> RPoly {
         terms.sort_unstable_by_key(|t| std::cmp::Reverse(t.0));
         let mut monos = Vec::with_capacity(terms.len());
         let mut coefs: Vec<u32> = Vec::with_capacity(terms.len());
@@ -696,6 +696,8 @@ pub struct TowerF4Options {
     /// Called with each step's number (from 1) and trace as soon as the step
     /// ends, so that a run that dies still leaves its trace.
     pub on_step: Option<fn(usize, &StepTrace)>,
+    /// The same for the signature engine's steps.
+    pub on_sig_step: Option<fn(usize, &super::sig_fp_tower::SigStep)>,
 }
 
 impl TowerF4Options {
@@ -706,6 +708,7 @@ impl TowerF4Options {
             stop_staircase: None,
             max_nnz: None,
             on_step: None,
+            on_sig_step: None,
         }
     }
     pub fn on_step(mut self, f: fn(usize, &StepTrace)) -> Self {
@@ -808,25 +811,25 @@ pub struct TowerF4Report {
 /// A sparse row: ascending column indices (column 0 is the largest
 /// monomial) and non-zero coefficients.
 #[derive(Clone, Debug, Default)]
-struct Row {
-    cols: Vec<u32>,
-    vals: Vec<u32>,
+pub(crate) struct Row {
+    pub(crate) cols: Vec<u32>,
+    pub(crate) vals: Vec<u32>,
 }
 
-const NONE: u32 = u32::MAX;
+pub(crate) const NONE: u32 = u32::MAX;
 
 /// A dense accumulator with a bitset of the columns it may be non-zero
 /// in, scanned in ascending order while rows are subtracted. `hi` is the
 /// last bitset word anything was written to, so a scan stops there instead
 /// of at the end of the matrix.
-struct Acc {
-    vals: Vec<u64>,
-    bits: Vec<u64>,
-    hi: usize,
+pub(crate) struct Acc {
+    pub(crate) vals: Vec<u64>,
+    pub(crate) bits: Vec<u64>,
+    pub(crate) hi: usize,
 }
 
 impl Acc {
-    fn new(n_cols: usize) -> Self {
+    pub(crate) fn new(n_cols: usize) -> Self {
         Acc {
             vals: vec![0; n_cols],
             bits: vec![0; n_cols.div_ceil(64).max(1)],
@@ -835,7 +838,7 @@ impl Acc {
     }
 
     #[inline]
-    fn load(&mut self, row: &Row) {
+    pub(crate) fn load(&mut self, row: &Row) {
         for (&c, &v) in row.cols.iter().zip(&row.vals) {
             self.vals[c as usize] = u64::from(v);
             self.bits[c as usize / 64] |= 1u64 << (c % 64);
@@ -847,7 +850,14 @@ impl Acc {
     /// columns are always to the right of the lead, so a scan standing on
     /// the lead's word sees those in its own word through `word`.
     #[inline]
-    fn sub_tail(&mut self, fp: Fp, f: u64, row: &Row, cur_word: usize, word: &mut u64) -> u64 {
+    pub(crate) fn sub_tail(
+        &mut self,
+        fp: Fp,
+        f: u64,
+        row: &Row,
+        cur_word: usize,
+        word: &mut u64,
+    ) -> u64 {
         let nf = fp.neg(f);
         for (&c, &v) in row.cols[1..].iter().zip(&row.vals[1..]) {
             let ci = c as usize;
@@ -868,7 +878,7 @@ impl Acc {
 
     /// Move every non-zero entry from word `w` on into `out`, scaled by
     /// `scale`, leaving the accumulator clean.
-    fn drain_from(&mut self, fp: Fp, w: usize, scale: u64, out: &mut Row) {
+    pub(crate) fn drain_from(&mut self, fp: Fp, w: usize, scale: u64, out: &mut Row) {
         let mut w = w;
         while w <= self.hi {
             let mut word = self.bits[w];
@@ -1588,7 +1598,12 @@ impl State {
 /// The number of standard monomials of `R / (lms)`, or `None` if it
 /// exceeds `bound` or is infinite (a free variable without a pure power
 /// among the leading monomials).
-fn staircase_at_most(lms: &[Mono], n_tower: usize, n_free: usize, bound: usize) -> Option<usize> {
+pub(crate) fn staircase_at_most(
+    lms: &[Mono],
+    n_tower: usize,
+    n_free: usize,
+    bound: usize,
+) -> Option<usize> {
     let mut cap = [0u8; MAX_FREE];
     for (k, c) in cap.iter_mut().enumerate().take(n_free) {
         *c = lms

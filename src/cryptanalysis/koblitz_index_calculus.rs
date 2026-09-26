@@ -8429,6 +8429,17 @@ pub struct RelationCollector<'a> {
     r_u64: u64,
 }
 
+/// Observe the collector that was constructed, including effective dispatch.
+/// This is separate from a caller's requested configuration.
+#[derive(Clone, Debug, Serialize)]
+pub struct CollectorDispatch {
+    pub strategy: String,
+    pub field_kernel: Option<&'static str>,
+    pub pair_table: bool,
+    pub query_rule: &'static str,
+    pub collection_window: Option<usize>,
+}
+
 /// Trials collected per batch by [`solve_factor_base_logs`] between
 /// solve attempts; every batch runs in parallel.
 pub const PRECOMPUTE_BATCH_TRIALS: usize = 64;
@@ -8510,6 +8521,21 @@ impl<'a> RelationCollector<'a> {
     /// The largest probe scalar drawn, `r − 1` (or 1 for a degenerate order).
     pub fn scalar_bound(&self) -> u64 {
         self.r_u64
+    }
+
+    pub fn admission_dispatch(&self) -> CollectorDispatch {
+        let window = self.window();
+        CollectorDispatch {
+            strategy: format!("{:?}", self.opts.strategy),
+            field_kernel: self.fast.as_ref().map(|(fc, _)| fc.field.kernel_name()),
+            pair_table: self.pair_table().is_some(),
+            query_rule: if window.is_some() {
+                "windowed-walk-64"
+            } else {
+                "trial-keyed-sample"
+            },
+            collection_window: window,
+        }
     }
 
     /// The window of factor-base summands a probe scans, and whether
@@ -9080,6 +9106,23 @@ pub struct FactorBaseLogSolver<'a> {
     report: LogTableReport,
 }
 
+/// Canonical decimal coefficients read from the actual stored relation system.
+/// Snapshot construction is optional diagnostic work, never another solve.
+#[derive(Clone, Debug, Serialize)]
+pub struct RelationMatrixRow {
+    pub entries: Vec<(usize, String)>,
+    pub rhs: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct RelationMatrixSnapshot {
+    pub modulus: String,
+    pub column_points: Vec<(String, String)>,
+    pub rows: Vec<RelationMatrixRow>,
+    pub solver: &'static str,
+    pub sparse_options: Option<SparseSolveOptions>,
+}
+
 impl<'a> FactorBaseLogSolver<'a> {
     /// `None` when the base has no projected columns.
     pub fn new(
@@ -9138,6 +9181,62 @@ impl<'a> FactorBaseLogSolver<'a> {
     /// Columns the relations must determine.
     pub fn columns(&self) -> usize {
         self.system.n_cols
+    }
+
+    /// Export the matrix actually offered to LA, preserving row/column order.
+    pub fn matrix_snapshot(&self) -> RelationMatrixSnapshot {
+        let system = &self.system;
+        let column_points = system
+            .projected
+            .representatives
+            .iter()
+            .map(|p| match p {
+                BinaryPoint::Affine { x, y } => {
+                    (x.to_biguint().to_string(), y.to_biguint().to_string())
+                }
+                BinaryPoint::Infinity => unreachable!("projected columns exclude identity"),
+            })
+            .collect();
+        let rows = if system.sparse_opts.is_some() {
+            system
+                .sparse_rows
+                .iter()
+                .map(|row| RelationMatrixRow {
+                    entries: row
+                        .entries
+                        .iter()
+                        .map(|&(j, v)| (j as usize, v.to_string()))
+                        .collect(),
+                    rhs: row.rhs.to_string(),
+                })
+                .collect()
+        } else {
+            system
+                .dense_matrix
+                .iter()
+                .zip(&system.dense_rhs)
+                .map(|(row, rhs)| RelationMatrixRow {
+                    entries: row
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, v)| !v.is_zero())
+                        .map(|(j, v)| (j, v.to_string()))
+                        .collect(),
+                    rhs: rhs.to_string(),
+                })
+                .collect()
+        };
+        RelationMatrixSnapshot {
+            modulus: self.kc.subgroup_order.to_string(),
+            column_points,
+            rows,
+            solver: if system.sparse_opts.is_some() {
+                "sparse-filter-block-wiedemann"
+            } else {
+                "dense-gauss"
+            },
+            sparse_options: system.sparse_opts,
+        }
     }
 
     /// Try to solve with what has been pushed.  `None` means more
@@ -9279,7 +9378,35 @@ pub struct IndividualLogSolver<'a> {
     r_u64: u64,
 }
 
+#[derive(Clone, Debug, Serialize)]
+pub struct DescentDispatch {
+    pub strategy: String,
+    pub field_kernel: Option<&'static str>,
+    pub pair_table: bool,
+    pub query_rule: &'static str,
+    pub summands: usize,
+    pub direct_collision: bool,
+}
+
 impl<'a> IndividualLogSolver<'a> {
+    pub fn admission_dispatch(&self) -> DescentDispatch {
+        DescentDispatch {
+            strategy: format!("{:?}", self.opts.strategy),
+            field_kernel: self.fast.as_ref().map(|(fc, _)| fc.field.kernel_name()),
+            pair_table: self.pair.is_some(),
+            query_rule: if self.opts.strategy == DecompositionStrategy::PairTable
+                && self.fast.is_some()
+                && self.pair.is_some()
+            {
+                "parallel-walk-64"
+            } else {
+                "seeded-sample"
+            },
+            summands: self.descent_m(),
+            direct_collision: self.opts.allow_direct_relation,
+        }
+    }
+
     /// `None` when the table's columns do not match the base's signed
     /// orbits, a column has no logarithm, or the strategy needs a pair
     /// table and none was supplied.
