@@ -1,0 +1,37 @@
+name: P256 rho round1
+on:
+  push:
+    branches: [research/p256-rho-experiments-round1]
+    paths:
+      - 'research/p256_rho_round1_20260926/**'
+      - '.github/workflows/p256-rho-round1.yml'
+  workflow_dispatch:
+jobs:
+  bounded-experiment:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run bounded panel
+        run: |
+          mkdir -p research/p256_rho_round1_20260926/run_ci
+          python research/p256_rho_round1_20260926/run.py \
+            --toy-bits 17 --seeds 16 \
+            --out research/p256_rho_round1_20260926/run_ci/results.jsonl
+          python - <<'PY'
+          import json, pathlib, statistics
+          p=pathlib.Path('research/p256_rho_round1_20260926/run_ci/results.jsonl')
+          rows=[json.loads(x) for x in p.read_text().splitlines()]
+          s=[r for r in rows if r.get('experiment')=='E15_summary']
+          print('SUMMARY_ROWS')
+          for r in s: print(json.dumps(r,sort_keys=True))
+          assert all(r['verified']==r['runs'] for r in s), 'not every toy DLP solve verified'
+          print('ALL_TOY_SOLVES_VERIFIED')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p256-rho-round1-results
+          path: research/p256_rho_round1_20260926/run_ci/results.jsonl
