@@ -168,6 +168,7 @@ if [ -n "$HOST_BIN" ]; then
 fi
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors || exit 1
 aws s3 cp "s3://$BUCKET/aws/protocol.py" protocol.py --only-show-errors || exit 1
+aws s3 cp "s3://$BUCKET/aws/seed_registry.py" seed_registry.py --only-show-errors || exit 1
 aws s3 cp "s3://$BUCKET/aws/rollout.py" rollout.py --only-show-errors || true
 chmod +x ecc2k130 $FIXTURES 2>/dev/null
 export LD_LIBRARY_PATH=$ROOT/lib

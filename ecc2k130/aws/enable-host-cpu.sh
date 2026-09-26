@@ -34,6 +34,7 @@ PREFIX=$(dirname "$HOST_BIN")
 aws s3 cp "s3://$BUCKET/$PREFIX/libgomp.so.1" lib/libgomp.so.1 --only-show-errors || true
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors
 aws s3 cp "s3://$BUCKET/aws/protocol.py" protocol.py --only-show-errors
+aws s3 cp "s3://$BUCKET/aws/seed_registry.py" seed_registry.py --only-show-errors
 
 export LD_LIBRARY_PATH=$ROOT/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 ./ecc2k130-cpu --test 2>&1 | tee /tmp/ecc-host-test.log | tail -n 8

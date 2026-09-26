@@ -247,66 +247,77 @@ BAKED = {"batch": 32, "threads": 256 if PACKED_STATE_TILE == "256" else 128, "le
 # generator comment in buildFor warns about, one level up.
 bakedIntact = [True]
 
-image = (
-    modal.Image.from_registry(
-        f"nvidia/cuda:{CUDA_VERSION}-devel-ubuntu24.04", add_python="3.12"
+# A guard-only rollout can retain the exact already-validated client image.
+# Keep this override in the image environment so remote module imports agree.
+SEED_BASE_IMAGE = os.environ.get("ECC_SEED_BASE_IMAGE", "")
+if SEED_BASE_IMAGE:
+    image = (modal.Image.from_id(SEED_BASE_IMAGE)
+        .pip_install("awscli")
+        .env({"ECC_SEED_BASE_IMAGE": SEED_BASE_IMAGE})
+        .add_local_file(LOCAL / "aws" / "seed_registry.py",
+                        REMOTE + "/aws/seed_registry.py", copy=True))
+else:
+    image = (
+        modal.Image.from_registry(
+            f"nvidia/cuda:{CUDA_VERSION}-devel-ubuntu24.04", add_python="3.12"
+        )
+        .entrypoint([])
+        # Containers re-import this module; preserve the settings that selected
+        # their image and baked architecture rather than reverting to defaults.
+        .env({"ECC_CUDA_VERSION": CUDA_VERSION, "ECC_GPU": DEFAULT_GPU,
+              "ECC_CPU_THREADS": str(CPU_THREADS),
+              "ECC_PACKED_SINGLE_PRODUCT": PACKED_SINGLE_PRODUCT,
+              "ECC_PACKED_CACHE_DENOM": PACKED_CACHE_DENOM,
+              "ECC_PACKED_BY_VALUE": PACKED_BY_VALUE,
+              "ECC_PACKED_PERM_SIGMA": PACKED_PERM_SIGMA,
+              "ECC_PACKED_POLY_CHAIN": PACKED_POLY_CHAIN,
+              "ECC_PACKED_UNROLL_INV": PACKED_UNROLL_INV,
+              "ECC_PACKED_PAIR_PRODUCTS": PACKED_PAIR_PRODUCTS,
+              "ECC_PACKED_POLY_STATE": PACKED_POLY_STATE,
+              "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE,
+              "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT,
+              "ECC_PACKED_CLMAD": PACKED_CLMAD,
+              "ECC_PACKED_CLMAD_SQUARE": PACKED_CLMAD_SQUARE,
+              "ECC_PACKED_KARAT3": PACKED_KARAT3,
+              "ECC_PACKED_COMPACT_STATE": PACKED_COMPACT_STATE,
+              "ECC_PACKED_SHARED_SIGMA": PACKED_SHARED_SIGMA,
+              "ECC_PACKED_TOP_CLMAD": PACKED_TOP_CLMAD,
+              "ECC_WALK_TABLE": WALK_TABLE,
+              "ECC_TABLE_PIVOT_BYTES": TABLE_PIVOT_BYTES,
+              "ECC_PACKED_WEIGHTED_PREFIX": PACKED_WEIGHTED_PREFIX,
+              "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE})
+        .apt_install("build-essential")
+        .pip_install("awscli")
+        .add_local_dir(
+            LOCAL,
+            remote_path=REMOTE,
+            copy=True,
+            ignore=["ecc2k130-cpu", "ecc2k130-cpu-v3", "ecc2k130-cpu-v4", "ecc2k130",
+                    "build/*", "__pycache__", "*.pyc"],
+        )
+        .run_commands(
+            # Regenerate before building so the baked binary's leaf is known to be
+            # BAKED["leaf"] rather than whatever headers the local checkout held.
+            f"cd {REMOTE}/codegen && python3 gen.py --out ../generated "
+            f"--leaf {BAKED['leaf']}",
+            # x86-64-v3 keeps the host binary runnable on any Modal machine; the
+            # GPU client picks its own word width on the device. The v4 (AVX-512)
+            # build is for the CPU walker, chosen at runtime by chooseCpuBinary
+            # when the host has every flag it needs; ./ecc2k130-cpu stays the v3
+            # build that validate's --test and solveCorpus run.
+            f"cd {REMOTE} && make cpu MARCH=x86-64-v3 && cp ecc2k130-cpu {CPU_BINARIES['v3']} "
+            f"&& make -B cpu MARCH=x86-64-v4 && cp ecc2k130-cpu {CPU_BINARIES['v4']} "
+            f"&& cp {CPU_BINARIES['v3']} ecc2k130-cpu",
+            f'cd {REMOTE} && make gpu ARCH="{GENCODE}" BATCH={BAKED["batch"]} '
+            f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]} '
+            f'PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT} PACKED_CACHE_DENOM={PACKED_CACHE_DENOM} '
+            f'PACKED_BY_VALUE={PACKED_BY_VALUE} PACKED_PERM_SIGMA={PACKED_PERM_SIGMA} '
+            f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
+            f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
+            f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
+            f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES}',
+        )
     )
-    .entrypoint([])
-    # Containers re-import this module; preserve the settings that selected
-    # their image and baked architecture rather than reverting to defaults.
-    .env({"ECC_CUDA_VERSION": CUDA_VERSION, "ECC_GPU": DEFAULT_GPU,
-          "ECC_CPU_THREADS": str(CPU_THREADS),
-          "ECC_PACKED_SINGLE_PRODUCT": PACKED_SINGLE_PRODUCT,
-          "ECC_PACKED_CACHE_DENOM": PACKED_CACHE_DENOM,
-          "ECC_PACKED_BY_VALUE": PACKED_BY_VALUE,
-          "ECC_PACKED_PERM_SIGMA": PACKED_PERM_SIGMA,
-          "ECC_PACKED_POLY_CHAIN": PACKED_POLY_CHAIN,
-          "ECC_PACKED_UNROLL_INV": PACKED_UNROLL_INV,
-          "ECC_PACKED_PAIR_PRODUCTS": PACKED_PAIR_PRODUCTS,
-          "ECC_PACKED_POLY_STATE": PACKED_POLY_STATE,
-          "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE,
-          "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT,
-          "ECC_PACKED_CLMAD": PACKED_CLMAD,
-          "ECC_PACKED_CLMAD_SQUARE": PACKED_CLMAD_SQUARE,
-          "ECC_PACKED_KARAT3": PACKED_KARAT3,
-          "ECC_PACKED_COMPACT_STATE": PACKED_COMPACT_STATE,
-          "ECC_PACKED_SHARED_SIGMA": PACKED_SHARED_SIGMA,
-          "ECC_PACKED_TOP_CLMAD": PACKED_TOP_CLMAD,
-          "ECC_WALK_TABLE": WALK_TABLE,
-          "ECC_TABLE_PIVOT_BYTES": TABLE_PIVOT_BYTES,
-          "ECC_PACKED_WEIGHTED_PREFIX": PACKED_WEIGHTED_PREFIX,
-          "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE})
-    .apt_install("build-essential")
-    .add_local_dir(
-        LOCAL,
-        remote_path=REMOTE,
-        copy=True,
-        ignore=["ecc2k130-cpu", "ecc2k130-cpu-v3", "ecc2k130-cpu-v4", "ecc2k130",
-                "build/*", "__pycache__", "*.pyc"],
-    )
-    .run_commands(
-        # Regenerate before building so the baked binary's leaf is known to be
-        # BAKED["leaf"] rather than whatever headers the local checkout held.
-        f"cd {REMOTE}/codegen && python3 gen.py --out ../generated "
-        f"--leaf {BAKED['leaf']}",
-        # x86-64-v3 keeps the host binary runnable on any Modal machine; the
-        # GPU client picks its own word width on the device. The v4 (AVX-512)
-        # build is for the CPU walker, chosen at runtime by chooseCpuBinary
-        # when the host has every flag it needs; ./ecc2k130-cpu stays the v3
-        # build that validate's --test and solveCorpus run.
-        f"cd {REMOTE} && make cpu MARCH=x86-64-v3 && cp ecc2k130-cpu {CPU_BINARIES['v3']} "
-        f"&& make -B cpu MARCH=x86-64-v4 && cp ecc2k130-cpu {CPU_BINARIES['v4']} "
-        f"&& cp {CPU_BINARIES['v3']} ecc2k130-cpu",
-        f'cd {REMOTE} && make gpu ARCH="{GENCODE}" BATCH={BAKED["batch"]} '
-        f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]} '
-        f'PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT} PACKED_CACHE_DENOM={PACKED_CACHE_DENOM} '
-        f'PACKED_BY_VALUE={PACKED_BY_VALUE} PACKED_PERM_SIGMA={PACKED_PERM_SIGMA} '
-        f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
-        f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
-        f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
-        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES}',
-    )
-)
 
 # Nsight Compute lives in its own image.  It is about two gigabytes and only the
 # profiler wants it, so putting it in the main image would slow every bench and
@@ -1004,7 +1015,7 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
 #    were launched with the run-sized default and collected at 34 and 35.
 #
 # So a campaign run refuses both: its weight comes from aws/campaign.json and
-# its run id from a range no AWS slot can reach. AWS slots are 16-bit and the
+# its run id from the Modal convention, protected by the shared registry. AWS slots are 16-bit and the
 # fleet has used 0-195; 90000 + run id must stay a five-digit slot.
 CAMPAIGN_CURVE = 131
 MODAL_RUN_ID_MIN = 8000
@@ -1084,11 +1095,10 @@ def checkCampaignRunId(runId, withCpu=False):
             "above it modal_sync.py has no slot number. Pass --run-id from the range "
             "(::next_run_id suggests the next free one) or --off-campaign to collect "
             "outside the campaign corpus." % (runId, MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX))
-    if withCpu and runId > MODAL_GPU_RUN_ID_MAX:
+    if runId > MODAL_GPU_RUN_ID_MAX:
         raise ValueError(
-            "run id %d cannot carry a CPU walker: its sidecar id %d is past %d. GPU runs "
-            "with a CPU sidecar take %d-%d." % (runId, cpuRunId(runId), MODAL_RUN_ID_MAX,
-                                                MODAL_RUN_ID_MIN, MODAL_GPU_RUN_ID_MAX))
+            "run id %d is reserved for a CPU sidecar; GPU runs take %d-%d"
+            % (runId, MODAL_RUN_ID_MIN, MODAL_GPU_RUN_ID_MAX))
     return runId
 
 
@@ -1348,12 +1358,18 @@ def humanBytes(n):
     return "%d B" % n
 
 
-@app.function(image=image, timeout=10 * 60, volumes={"/data": volume})
+@app.function(image=image, timeout=10 * 60, volumes={"/data": volume},
+              secrets=[modal.Secret.from_name(os.environ.get("ECC_MODAL_SEED_SECRET", "ecc2k130-cloud"))])
 def runNextRunId(curve=CAMPAIGN_CURVE):
-    """Suggest the next unused run id on the volume (no GPU rented)."""
-    return {"curve": int(curve), "runId": nextFreeRunId(curve),
+    """Check the permanent registry before suggesting a pair; no GPU rented."""
+    if int(curve) == CAMPAIGN_CURVE:
+        from aws.seed_registry import SeedRegistry, S3Json
+        next_id = SeedRegistry(S3Json(os.environ.get("ECC_BUCKET"))).next_modal_run(usedRunIds(curve))
+    else:
+        next_id = nextFreeRunId(curve)
+    return {"curve": int(curve), "runId": next_id,
             "used": sorted(usedRunIds(curve)),
-            "range": ([MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX]
+            "range": ([MODAL_RUN_ID_MIN, MODAL_GPU_RUN_ID_MAX]
                       if int(curve) == CAMPAIGN_CURVE else None)}
 
 
@@ -1483,11 +1499,42 @@ class CpuWalker:
 
 
 @app.function(image=image, gpu=DEFAULT_GPU, cpu=CPU_CORES_REQUEST, timeout=24 * HOUR,
-              volumes={"/data": volume})
+              volumes={"/data": volume},
+              secrets=[modal.Secret.from_name(os.environ.get("ECC_MODAL_SEED_SECRET", "ecc2k130-cloud"))])
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
               checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0,
               offCampaign=False, cpuThreads=None):
+    """Own every campaign seed space before building or starting a client."""
+    if not isCampaignRun(curve, offCampaign):
+        return _runSearch(hours, curve, batch, threads, leaf, dpWeight, runId, steps,
+                          workers, rebuild, walksTarget, checkpointEvery, resume,
+                          loadMax, packed, verify, offCampaign, cpuThreads)
+    if not resume:
+        raise ValueError("campaign collection requires resumable checkpoints")
+    from contextlib import ExitStack
+    from aws.seed_registry import modal_guard
+    cpuThreads = CPU_THREADS if cpuThreads is None else int(cpuThreads)
+    checkCampaignRunId(runId, withCpu=cpuThreads > 0)
+    completed = False
+    started = False
+    with ExitStack() as guards:
+        ids = [runId] + ([cpuRunId(runId)] if cpuThreads > 0 else [])
+        for rid in ids:
+            guards.enter_context(modal_guard(rid, f"/data/ckpt/curve{curve}-run{rid}.ck",
+                                             lambda: completed or not started))
+        started = True
+        result = _runSearch(hours, curve, batch, threads, leaf, dpWeight, runId, steps,
+                            workers, rebuild, walksTarget, checkpointEvery, resume,
+                            loadMax, packed, verify, offCampaign, cpuThreads)
+        completed = True
+        return result
+
+
+def _runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
+               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
+               checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0,
+               offCampaign=False, cpuThreads=None):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
@@ -1734,6 +1781,7 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     # snapshot rather than the one before it.
     tryCommitVolume(volume, ckFile)
     return {"gpu": name, "distinguishedPoints": corpusCount(dpFile), "file": dpFile,
+            "returncode": proc.returncode,
             "runId": int(runId), "dpWeight": int(dpWeight), "campaign": campaign,
             "checkpoint": ckFile if os.path.exists(ckFile) else None,
             "checkpointBytes": os.path.getsize(ckFile) if os.path.exists(ckFile) else 0,
@@ -2073,4 +2121,3 @@ def merge(curve: int = 131, solve: bool = True, load_max: int = 0):
     if solve and r.get("collisionCount"):
         print("\n%d collision(s); recovering the logarithm" % r["collisionCount"])
         print(json.dumps(solveCorpus.remote(curve=curve, loadMax=load_max), indent=2))
-

@@ -4,7 +4,9 @@ import os
 import re
 import tempfile
 import time
+import types
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 import modal_sync
@@ -366,6 +368,152 @@ class ModalSyncTests(unittest.TestCase):
             self.assertEqual(modal_sync.discover_run_ids("ecc2k130", 131), [1, 2])
         finally:
             modal_sync.subprocess.run = original
+
+
+class UploadRecoveryTests(unittest.TestCase):
+    class Store:
+        def __init__(self):
+            self.objects = {}
+            self.uploads = []
+            self.page_size = 1000
+
+        def list_objects_v2(self, Bucket, Prefix, MaxKeys=1000, ContinuationToken=None):
+            rows = [dict(Key=k, Size=len(v)) for (b, k), v in sorted(self.objects.items())
+                    if b == Bucket and k.startswith(Prefix)]
+            start = int(ContinuationToken or 0)
+            end = start + min(MaxKeys, self.page_size)
+            page = dict(Contents=rows[start:end], IsTruncated=end < len(rows))
+            if page['IsTruncated']:
+                page['NextContinuationToken'] = str(end)
+            return page
+
+        def upload_file(self, local, bucket, key):
+            data = Path(local).read_bytes()
+            self.objects[bucket, key] = data
+            self.uploads.append((key, data))
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.corpus = self.root / 'corpus.bin'
+        self.data = b''.join(bytes([n]) * 32 for n in range(8))
+        self.corpus.write_bytes(self.data)
+        self.store = self.Store()
+        modal_sync._aws_evidence.clear()
+
+    def add_object(self, start, end, data=None, bucket='bucket'):
+        data = self.data[start:end] if data is None else data
+        key = 'dp/slot-98000/%s-%016d-%s.bin' % (
+            modal_sync.stream_id(8000), start, hashlib.sha256(data).hexdigest())
+        self.store.objects[bucket, key] = data
+        return key
+
+    def recover(self):
+        return modal_sync.committed_offset(self.store, 'bucket', 8000, self.corpus)
+
+    def sync(self, state_dir='state', dry_run=False):
+        def get(volume, remote, local):
+            if remote.endswith('.bin'):
+                Path(local).write_bytes(self.corpus.read_bytes())
+                return True
+            return False
+        with patch.object(modal_sync, 'modal_volume_get', side_effect=get):
+            return modal_sync.sync_once(self.store, 'bucket', 'volume', 131, 8000,
+                                        str(self.root / state_dir), dry_run=dry_run)
+
+    def test_lost_state_uploads_only_new_suffix_after_overlapping_old_objects(self):
+        self.add_object(0, 64)
+        self.add_object(0, 128)  # historical replay under a different hash
+        self.add_object(96, 192)
+        result = self.sync()
+        self.assertEqual(result['uploaded_records'], 2)
+        self.assertEqual(self.store.uploads[0][1], self.data[192:])
+        self.assertEqual(int(ORBIT_KEY_RE.match(self.store.uploads[0][0])[3]), 192)
+        # A second host has no local state but also uploads nothing.
+        self.assertEqual(self.sync('other-host')['uploaded_records'], 0)
+        self.assertEqual(len(self.store.uploads), 1)
+
+    def test_complete_remote_corpus_needs_no_upload_with_empty_local_state(self):
+        self.add_object(0, len(self.data))
+        self.assertEqual(self.sync()['uploaded_records'], 0)
+        self.assertEqual(self.store.uploads, [])
+
+    def test_recovery_reads_all_pages_and_ignores_other_buckets_and_streams(self):
+        self.store.page_size = 1
+        self.add_object(0, 64)
+        self.add_object(64, 128)
+        self.add_object(128, 192)
+        self.add_object(0, 256, bucket='other')
+        self.store.objects['bucket', 'dp/slot-98000/' + 'f' * 32 + '-0-' + 'f' * 64 + '.bin'] = self.data
+        self.assertEqual(self.recover(), 192)
+
+    def test_a_gap_does_not_skip_unuploaded_points(self):
+        self.add_object(0, 64)
+        self.add_object(96, 128)
+        with self.assertRaisesRegex(ValueError, 'gap'):
+            self.sync()
+        self.assertEqual(self.store.uploads, [])
+
+    def test_reused_run_id_with_changed_corpus_is_refused(self):
+        self.add_object(0, 128)
+        self.corpus.write_bytes(b'x' * 32 + self.data[32:])
+        with self.assertRaisesRegex(ValueError, 'differs'):
+            self.sync()
+        self.assertEqual(self.store.uploads, [])
+
+    def test_stale_volume_snapshot_cannot_rewind_the_remote_cursor(self):
+        self.add_object(0, 192)
+        self.corpus.write_bytes(self.data[:128])
+        with self.assertRaisesRegex(ValueError, 'behind S3'):
+            self.sync()
+        self.assertEqual(self.store.uploads, [])
+
+    def test_unaligned_remote_object_is_refused(self):
+        self.add_object(0, 63)
+        with self.assertRaisesRegex(ValueError, 'unaligned'):
+            self.recover()
+
+    def test_an_ahead_or_foreign_local_cursor_cannot_skip_points(self):
+        self.add_object(0, 64)
+        state = modal_sync.state_path(131, 8000, str(self.root / 'state'))
+        modal_sync.save_state(state, dict(offset=999999, bucket='old-bucket'))
+        self.assertEqual(self.sync()['uploaded_records'], 6)
+        self.assertEqual(self.store.uploads[0][1], self.data[64:])
+
+    def test_checkpoint_failure_does_not_replay_successfully_uploaded_points(self):
+        with patch.object(modal_sync, 'upload_checkpoint', side_effect=RuntimeError('checkpoint unavailable')):
+            with self.assertRaisesRegex(RuntimeError, 'checkpoint unavailable'):
+                self.sync()
+        state = modal_sync.load_state(str(self.root / 'state/curve131-run8000.json'))
+        self.assertEqual(state['offset'], len(self.data))
+        self.assertEqual(self.sync('restart-without-state')['uploaded_records'], 0)
+        self.assertEqual(len(self.store.uploads), 1)
+
+    def test_dry_run_recovers_but_never_uploads_or_writes_state(self):
+        self.add_object(0, 128)
+        self.assertEqual(self.sync(dry_run=True)['uploaded_records'], 4)
+        self.assertEqual(self.store.uploads, [])
+        self.assertFalse((self.root / 'state/curve131-run8000.json').exists())
+
+    def test_listing_failure_does_not_fall_back_to_sending_from_zero(self):
+        with patch.object(self.store, 'list_objects_v2', side_effect=RuntimeError('S3 unavailable')):
+            with self.assertRaisesRegex(RuntimeError, 'S3 unavailable'):
+                self.sync()
+        self.assertEqual(self.store.uploads, [])
+
+    def test_one_shot_sync_exits_nonzero_on_reconciliation_error(self):
+        boto = types.SimpleNamespace(client=lambda name: self.store)
+        with patch.dict('sys.modules', {'boto3': boto}), \
+                patch.object(modal_sync, 'sync_pass', return_value={8000: {'error': 'gap'}}):
+            rc = modal_sync.main(['--bucket', 'bucket', '--run-id', '8000', '--dry-run'])
+        self.assertEqual(rc, 1)
+
+    def test_truncated_listing_without_a_cursor_cannot_be_used(self):
+        with patch.object(self.store, 'list_objects_v2',
+                          return_value={'Contents': [], 'IsTruncated': True}):
+            with self.assertRaisesRegex(ValueError, 'incomplete S3 listing'):
+                self.recover()
 
 
 if __name__ == "__main__":

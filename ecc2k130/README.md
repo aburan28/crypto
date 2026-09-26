@@ -838,15 +838,38 @@ launch (`modal_app.py`), at upload (`modal_sync.py`) and on the page
    seed: dropped by `ON CONFLICT`, correctly not a collision, and invisible.
    Runs 1-4 did this against slots 0-3 on 2026-09-19/20; 813k of run 3's 912k
    records were byte-identical to slot 2's, and 100% of its seeds had already
-   been walked. Campaign run ids therefore come from **8000-9999**, which no
-   AWS slot can reach (`90000 + r` must stay a five-digit slot), and
-   `modal_sync.py` refuses an id for which the bucket holds a checkpoint or a
+   been walked. Modal GPU IDs use **8000-8999** and CPU sidecars use
+   **9000-9999** (`90000 + r` stays a five-digit slot). The
+   shared [seed registry](SEED-IDENTITY.md) enforces permanent ownership across
+   providers and storage prefixes. `modal_sync.py` also refuses an id for
+   which the bucket holds a checkpoint or a
    dp object of slot `r - 1`.
 2. **The cutoff is the campaign's.** See above. `modal_sync.py` reads the
    ratio of a run's checkpointed iterations to its records and refuses a run
    that is not near `2^28.41` per point once it has 50k records; the ingest
    host flags the same ratio per slot on the dashboard (`off_weight_slots`),
    and counts the records it dropped as re-reports (`duplicate_records`).
+
+`modal_sync.py` recovers each run's uploaded byte offset from its immutable
+S3 objects on every pass. The local JSON state is only a cache: losing `/tmp`,
+moving the uploader to another host, or failing to publish a checkpoint after
+a successful point upload must not send an already-uploaded prefix again.
+Recovery lists every page, requires contiguous whole-record coverage, and
+checks the object-name hashes against the downloaded volume corpus. A gap,
+changed prefix, or volume snapshot older than S3 stops that run's sync before
+any points or checkpoint are published. Wait for a fresh volume snapshot or
+investigate the mismatch; do not reset the offset to bypass it. Reconciliation
+reads and hashes the covered corpus (including historical overlaps), so its
+cost grows with that corpus. Run one uploader per run: this recovery is not
+a distributed writer lease, and concurrent uploaders can still race between
+listing and uploading.
+
+The dashboard's `Re-reported points, 24 h` is a rolling count of duplicate
+ingest records, not a count of wasted GPU iterations. It includes repeat
+uploads as well as retraced walks, and can remain high after the source of
+duplicates has stopped. Check its change between fresh snapshots alongside
+new distinct points. Preserve the old objects and checkpoints when stopping
+a faulty producer; resetting the counter does not repair that producer.
 
 The procedure, once:
 
@@ -858,9 +881,9 @@ RUNID=8000 COUNT=4 PASSES=0 ./run.sh fleet       # run ids 8000-8003, until stop
 
 `run.sh` refuses `CURVE=131` without a `RUNID` in range; `fleet` takes it as
 the base of `COUNT` consecutive ids, and every pass launches the same ids so
-the checkpoints resume. Two operators must not both start from the same
-`next-run-id` answer at the same moment; the volume is the only arbiter, and
-it is read, not locked.
+the checkpoints resume. The suggestion checks the volume and permanent registry. If two operators
+choose the same answer, conditional seed acquisition admits one; the other
+launch is refused. GPU-only launches cannot use the CPU sidecar range.
 
 `fleet` deploys the app and drives it with `modal_campaign.py`, and that is
 the shape a campaign needs. `search` and `fanout` run inside an *ephemeral*

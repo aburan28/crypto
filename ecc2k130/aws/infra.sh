@@ -48,6 +48,9 @@ cmd=${1:-create}
 sync() {
     aws s3 cp worker.py "s3://$BUCKET/aws/worker.py" --only-show-errors
     aws s3 cp protocol.py "s3://$BUCKET/aws/protocol.py" --only-show-errors
+    aws s3 cp seed_registry.py "s3://$BUCKET/aws/seed_registry.py" --only-show-errors
+    seedGuardSha=$(python3 -c 'import hashlib; print(hashlib.sha256(open("seed_registry.py", "rb").read()).hexdigest())')
+    aws s3 cp seed_registry.py "s3://$BUCKET/aws/seed-guard/$seedGuardSha/seed_registry.py" --only-show-errors
     aws s3 cp merge.py "s3://$BUCKET/aws/merge.py" --only-show-errors
     aws s3 cp build.sh "s3://$BUCKET/aws/build.sh" --only-show-errors
     aws s3 cp bootstrap.sh "s3://$BUCKET/aws/bootstrap.sh" --only-show-errors
