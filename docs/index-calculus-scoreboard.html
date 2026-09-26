@@ -361,16 +361,23 @@
       the optimum is <code>r<sup>2/(3+a)&minus;1/2</sup></code>, positive for every
       <code>a &lt; 1</code>. So this family has no crossover to find at any size, and at
       sect163k1's size it sits about 10<sup>7</sup>&times; the automorphism-aware walk it competes
-      with. That <code>r<sup>1/6</sup></code> rise now has a <strong>measured</strong> crossing
-      behind it rather than only a derivation: the tournament collector that sits strictly below
-      rho on an eight-cell Koblitz panel reads 0.831 [0.772, 0.894] at
+      with. That <code>r<sup>1/6</sup></code> rise was also read as a <strong>measured</strong>
+      crossing. The tournament collector that sat strictly below rho on an eight-cell Koblitz
+      panel reads 0.831 [0.772, 0.894] at
       <code>r</code>&thinsp;=&thinsp;4.2&times;10<sup>6</sup> and 1.533 [1.238, 1.899] at
       <code>r</code>&thinsp;=&thinsp;2.3&times;10<sup>8</sup>, both bands clear of one in opposite
       directions, and beyond the crossing the ratio grows at
       <code>r<sup>[0.13, 0.19]</sup></code> across three certified cells and 1100&times; in
-      <code>r</code> (<a href="#ic-crossover-20260922">below</a>). The derived exponent lies
-      inside that range &mdash; but at a factor base measurably not where the same derivation puts
-      it, so the agreement is not yet confirmation of the model. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
+      <code>r</code> (<a href="#ic-crossover-20260922">below</a>). <strong>But that crossing was
+      measured against the tournament worker&rsquo;s rho, which is not a matched reference.</strong>
+      Its step spends about 9,100 of 9,930 instructions naming Frobenius classes by squaring, a cost
+      the IC arm had engineered away. Given the IC arm&rsquo;s own orbit naming, that rho beats the
+      lane&rsquo;s IC pipeline at every cell measured: by 1.19&ndash;2.88&times;, from
+      <code>r</code>&thinsp;=&thinsp;4.2&times;10<sup>6</sup> to 1.2&times;10<sup>10</sup>
+      (<a href="#ic-triple-counted-20260923">below</a>). So no crossing with a matched rho has been
+      measured, and the <code>r<sup>[0.13, 0.19]</sup></code> is a growth against the unmatched
+      walk. The derived exponent lies inside that range &mdash; but at a factor base measurably not
+      where the same derivation puts it, so the agreement is not yet confirmation of the model. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
       no such table and its asymptotics are the question this ladder cannot reach. It is also not
       blanket across problems: on hyperelliptic Jacobians at genus 3 and 4 index calculus measures
       <strong>below</strong> a real distinguished-point rho &mdash; 0.21 at
@@ -420,7 +427,8 @@
           earlier &mdash; so a row may sit under it. On a prime-order curve it is
           &Theta;(r<sup>1/6</sup>) where the reference is flat, which is the round&rsquo;s result &mdash;
           measured at <code>r<sup>[0.13, 0.19]</sup></code> across three certified cells spanning
-          1100&times; in <code>r</code>, each at its own swept base.</p>
+          1100&times; in <code>r</code>, each at its own swept base &mdash; against the tournament
+          worker&rsquo;s rho, which the triple-counted control found unmatched.</p>
       </div>
     </dl>
   </header>
@@ -1591,7 +1599,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         pair-table, triple-table and memory-capped rows were priced without it &mdash; and
         <code>cost_cell</code>&rsquo;s collapse path never folded the subset-sum table. It surfaced as a
         disagreement: the IC tournament&rsquo;s <em>measured</em> crossover for this family on Koblitz
-        orbit bases (0.831, 1.396, 2.207 &times; rho at n23a1, n37a0, n43a1) carried to r&thinsp;=&thinsp;2<sup>129</sup>
+        orbit bases (0.831, 1.396, 2.207 &times; rho at n23a1, n37a0, n43a1; against the tournament
+        worker&rsquo;s rho, which the triple-counted control found unmatched) carried to r&thinsp;=&thinsp;2<sup>129</sup>
         sat about 2<sup>11</sup> below the pair-table row. With both folds the m&thinsp;=&thinsp;2 row
         moves from 2<sup>+28.55</sup> to <strong>2<sup>+20.76</sup>&times; rho</strong> (m&thinsp;=&thinsp;3:
         2<sup>+29.77</sup> to 2<sup>+21.82</sup>), within 1.7 bits of the tournament&rsquo;s family model
@@ -4601,6 +4610,7 @@ factor base, and this prices a decomposition oracle.</p>
   <strong>No tournament ran and nothing was promoted</strong> &mdash; this is a measurement against
   the round-0020 winner source, with no stage summaries and no evidence pack.</p>
 <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND22-budget-and-curvature.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round22_ladder.py">the ladder</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round22_base_sweep.py">factor-base sweep</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round22_budget_effect.py">what the trial cap is worth</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND21-crossover.md">the superseded round</a>.</p></div>
+<p><strong>Accounting note, added 2026-09-26.</strong> Every ratio in this panel is against the tournament worker&rsquo;s rho. The triple-counted control (<a href="#ic-triple-counted-20260923">below</a>) found that its step spends about 9,100 of 9,930 instructions naming Frobenius classes by squaring, which the IC arm had engineered away in round 0007. Given the IC arm&rsquo;s own orbit naming, that rho beats the lane&rsquo;s IC pipeline at every cell measured, by 1.19&ndash;2.88&times;. So the crossing and the rates below are measured against an unmatched reference, and no cell of this lane has yet been shown below a matched rho. <span class="chip">accounting</span></p>
 <div class="table-scroll"><table>
 <caption>Instruction unit Ir, complete DLP, 64 fixtures a configuration, seeds 20260922 and 4242.
   Each cell at its best measured base, fixed from an independent sweep before the draw.</caption>
