@@ -710,7 +710,10 @@ independent, which overstates the uncertainty of the correlated ones.
     - no v1 replicate exists, so "under v2" is the scope of the observation.
       It does not show a change from v1.
 
-    §11.6 declares the replicate that tests it.
+    §11.6 declares the replicate that tests it.  The replicate finds no
+    scatter under either rule: χ² = 8.79 (v2) and 23.30 (v1) on 15 degrees
+    of freedom, p = 0.89 and 0.078.  The device's pooled v2 constant matches
+    the emulation's to 0.05 standard errors.
   - **It does not reach the cost.** The constant pooled from the emulation's
     rows alone is 1.0032 ± 0.0010, against the pool's 1.0034 ± 0.0009.  The cost ratio
     of item 6 moves in its third digit: 0.811–0.863 against 0.811–0.864.
@@ -1113,3 +1116,44 @@ and [scatter.py](benchmarks/walk-constant/scatter.py) the analysis.
 **Cost and classification.** About 46 minutes on four cores, with no GPU.
 The result is **accounting** whichever way it falls: it checks a
 measurement and moves no cost.
+
+### 11.6.1 Results
+
+Sources:
+- `scatter.txt`, printed by `scatter.py` from the frozen
+  `scatter-v2.jsonl` and `scatter-v1.jsonl`;
+- `scatter-build.txt`, the binaries' hashes and the source commit.
+
+The runs took 03:31–04:17 UTC on 2026-09-26, on four cores, from the
+declaration's own commit `0828682c`.  That commit was pushed while the runs
+were in progress, before any analysis.
+
+| rule | seeds | trials | pooled `c` | ± | χ² (15 dof) | p | test 1 | emulation | test 3 z |
+|---|---|---:|---:|---:|---:|---:|---|---|---:|
+| v2 | 240–255 | 319,902 | 1.00368 | 0.00093 | 8.79 | 0.89 | absent | 1.00375 ± 0.00117 | −0.05 |
+| v1 | 260–275 | 319,917 | 1.00462 | 0.00093 | 23.30 | 0.078 | absent | 1.00369 ± 0.00117 | +0.62 |
+
+- **Test 2: neither rule scatters, so the question closes.** The 2.7
+  standard-error gap between seeds 230 and 231 was chance.  So was the
+  χ² = 13.3, together with the `n = 41` reference outlier.
+- **Neither rule comes near the line.** v1's χ² is the larger, but it stays
+  under the declared "suggestive" line (p < 0.05).  Its largest single
+  deviation is −2.08 standard errors (seed 275); v2's is −1.31 (seed 244).
+  A scatter new with v2 would have looked the other way round.
+- **Test 3: the harnesses agree under both rules.**  Item 3's pooled
+  constant, `c = 1.0034 ± 0.0009`, stands, and item 6's cost ratio with it.
+- **The binaries are the rules they claim to be.** Over 84M steps each:
+  - v1's rows show 40 four-step τ-relation returns and 8 six-step pairwise
+    ones.  The harness's own leading-order count predicts 43.3 and 7.0.
+  - v2's rows show none of either.
+  - 98 and 83 trials (0.03%) reached the point at infinity and were
+    discarded, as the harness always does.
+- **Not declared, so descriptive only:**
+  - With disjoint seeds the two pools are independent.  `c(v2) − c(v1) =
+    −0.0009 ± 0.0013`, consistent with item 3's `−0.0003 ± 0.0007`.
+  - At 95% confidence, the seed-to-seed spread is at most 1.10 times the
+    stated error under v2 (a variance ratio of 1.21).  Under v1 it is at
+    most 1.79 times (3.21).
+
+**Classification: accounting.** The result checks a measurement.  It moves
+no constant and no cost, and it adds no row to item 3's pool.
