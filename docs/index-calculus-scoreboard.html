@@ -6615,6 +6615,27 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n53-coldbase-first-attempt-20260925 -->
+<!-- BEGIN ecc2k130-n53-target-cyclic-rank-20260925 -->
+<section class="panel" id="ecc2k130-n53-target-cyclic-rank-20260925">
+  <div class="panel-head">
+    <h2>n = 53 first-relation selection: cyclic scan restores full rank <span class="chip">structural lead</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/823">PR #823</a> fixed a new, disjoint 512-target known-scalar stream and compared lexicographic versus public-target-derived cyclic starts on each of two unchanged 220-column factor bases. All four arms produced 512/512 group-law-replayed relations with zero failed targets and identical point/label/representative arrays within their base. The <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/RESULT.md">first-attempt result and sealed archive</a> record source, input and process-cost receipts and an independent modular rank replay.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One fixed-order GitHub-hosted n = 53 rank/selection stage. Full child wall includes base construction or loading, setup, all 512 queries, failures and serialization. Compare policies only within the same base; certified and native point sets differ. No charged operational rank/solve, point-log recovery or rho process was run in this panel.</caption>
+    <thead><tr><th>Base and first-relation scan</th><th class="n">Rank / 220</th><th class="n">First full-rank target</th><th class="n">Full child wall s</th><th>First-pair column diversity / absent columns</th></tr></thead>
+    <tbody>
+      <tr><td>Native ascending-x, lex</td><td class="n">219</td><td class="n">&mdash;</td><td class="n">133.227</td><td>1 / column 89 absent</td></tr>
+      <tr><td><strong>Native ascending-x, cyclic</strong></td><td class="n"><strong>220</strong></td><td class="n"><strong>273</strong></td><td class="n">126.981</td><td>200 / none absent</td></tr>
+      <tr><td>Certified LCG, lex</td><td class="n">217</td><td class="n">&mdash;</td><td class="n">129.057</td><td>1 / columns 91, 165, 202 absent</td></tr>
+      <tr><td>Certified LCG, cyclic</td><td class="n">220</td><td class="n">367</td><td class="n">132.301</td><td>199 / none absent</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The preregistered native structural gate passes: cyclic reached rank 220 by target 512 with no extra failures and all relation/label checks, whereas native lex stopped at rank 219. Both lex arms selected first-pair column 0 for all 512 targets; each cyclic arm selected it twice. The single-process wall differences are descriptive, not a speed claim. The next test is a separately frozen, fully charged native-cyclic L = 384 same-Q log-recovery comparison. PR #819's exact-certified-base setup plus mandatory rank already cost 199.233 s against 149.927 s matched rho, so the successor must measure whether the complete native pipeline changes that cost barrier. This stage supplies no IC/rho ratio or n = 131 transfer.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n53-target-cyclic-rank-20260925 -->
 <!-- BEGIN ecc2k130-compact-sparse-base-sweep-20260925 -->
 <section class="panel" id="ecc2k130-compact-sparse-base-sweep-20260925">
   <div class="panel-head">
