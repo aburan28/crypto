@@ -274,6 +274,10 @@ def frozen_inputs(round_dir):
             'changed accepted reference binding')
         require(history.validate_fresh(fixtures, read(round_dir/'target-history.json')) == c['fresh_target_count'],
                 'changed fresh target census')
+        if 'target_exposure_schema' in c:
+            require(type(c['target_exposure_schema']) is int and c['target_exposure_schema'] == 1,
+                    'unknown supplemental target exposure schema')
+            history.verify_exposures(round_dir/'target-exposures', read(round_dir/'target-history.json'))
     return c, fixtures, arms
 
 
@@ -325,6 +329,8 @@ def snapshot_build(source,destination, *, scientific=False):
 
 def prepare(args):
     out = args.out.resolve()
+    require(not getattr(args, 'exposed_fixtures', []) or getattr(args, 'attempt_number', 0),
+            'supplemental exposures require the bounded campaign protocol')
     require(args.targets == 1, 'scientific admission requires a single public target')
     require(args.candidates is not None, 'supply an explicit registry of admitted optimized candidates')
     if getattr(args, 'attempt_number', 0):
@@ -368,6 +374,8 @@ def prepare(args):
             prior_rounds.append(dict(attempt_number=number, contract_sha256=digest(previous/'contract.json'),
                                      decision_sha256=digest(previous/'decision.json')))
         excluded = history.extend(parent_history, [p.resolve() for p in args.prior_round])
+        excluded = history.freeze_exposures(excluded, args.exposed_fixtures, out/'target-exposures')
+        history.verify_exposures(out/'target-exposures', excluded)
         write(out/'target-history.json', excluded, exclusive=True)
         write(out/'qualified-references.json', read(args.qualified_report), exclusive=True)
     require(not qualification or not (args.rho_source_root or args.rho_config),
@@ -598,10 +606,13 @@ def prepare(args):
         protocol = HERE/'goal_20260924/improvement/PROTOCOL.md'
         shutil.copy2(protocol, out/'improvement-protocol.md')
         c.update(attempt_number=attempt, familywise_rule=bounded.RULE, prior_rounds=prior_rounds,
+                 target_exposure_schema=1,
                  fresh_target_count=history.validate_fresh(fixtures, excluded),
                  target_uniqueness='Exact canonical curve ID plus public point; all retained prior campaign points excluded. Replay repeats confirmation.')
         for name in ('target-history.json', 'qualified-references.json', 'improvement-protocol.md'):
             c['pinned_files'][name] = digest(out/name)
+        c['pinned_files'].update({str(p.relative_to(out)):digest(p)
+            for p in (out/'target-exposures').rglob('*') if p.is_file()})
         bounded.validate_contract(c)
     write(out/'contract.json',c,exclusive=True)
     write(out/'seal.json',{'contract_sha256':objhash(c)},exclusive=True)
@@ -1218,6 +1229,8 @@ def main():
     p.add_argument('--qualified-report', type=Path, help='Accepted qualification.json from the retained reference archive')
     p.add_argument('--target-history', type=Path, help='Pinned initial cross-campaign point exclusions')
     p.add_argument('--prior-round', type=Path, action='append', default=[], help='Every preceding completed bounded round, in order')
+    p.add_argument('--exposed-fixtures', type=Path, action='append', default=[],
+        help='Additional JSON fixture evidence already exposed during development; repeat for every source.')
     p.add_argument('--qualification-widths',type=int,nargs='+',default=[1,8,32],
         help='Requested rho widths in qualification mode; the full protocol uses 1 2 4 8 16 32.')
     p.add_argument('--confirmation-cases',default='',
