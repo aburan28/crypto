@@ -709,6 +709,11 @@ independent, which overstates the uncertainty of the correlated ones.
       itself item 3's −2.6 outlier, so it is not cleanly the device's;
     - no v1 replicate exists, so "under v2" is the scope of the observation.
       It does not show a change from v1.
+
+    §11.6 declares the replicate that tests it.  The replicate finds no
+    scatter under either rule: χ² = 8.79 (v2) and 23.30 (v1) on 15 degrees
+    of freedom, p = 0.89 and 0.078.  The device's pooled v2 constant matches
+    the emulation's to 0.05 standard errors.
   - **It does not reach the cost.** The constant pooled from the emulation's
     rows alone is 1.0032 ± 0.0010, against the pool's 1.0034 ± 0.0009.  The cost ratio
     of item 6 moves in its third digit: 0.811–0.863 against 0.811–0.864.
@@ -1019,3 +1024,144 @@ switch abandons the σ corpus.
 **Classification when it lands:** engineering, whichever way it falls.
 Both walks sit at the floor (§11.2), so the rate moves `S` and not the
 ratio to the floor.
+
+### 11.6 The device harness's scatter: declared before it runs
+
+§11.1 item 3 left one thing unexplained: the device harness's constants
+under v2 vary more than their standard errors allow.  It moves the cost in
+its third digit at most, so this is a check on the measurement, not on the
+walk.  Declared before any run (`AGENTS.md` §4).
+
+**What was seen.** The χ² = 13.3 on 4 degrees of freedom mixes two
+questions.
+
+- It sums four device-against-emulation z-scores.  About 5.7 of it is the
+  `n = 41` row, measured against the emulation row that is item 3's own
+  −2.6 outlier.
+- The observation inside the device harness is narrower.  Seeds 230 and 231
+  of one row (`n = 23`, ECC2K-130's distribution, H = 8, W = 8) are 2.7
+  standard errors apart: one degree of freedom, p ≈ 0.007.
+
+**Hypothesis.** The null: the device harness's `c` on that row varies
+between seeds only as its per-run standard errors say.
+
+- The null is the expected result.  Every trial draws a fresh table, salt and
+  start points from a per-thread stream seeded with `seed × 1000003 +
+  thread`, so trials are independent by construction.
+- A failure would point at the harness, through correlated streams or an
+  understated error, not at the walk.
+
+**The runs.** Sixteen seeds per rule, 20,000 trials each, `--threads 4`.
+[scatter.sh](benchmarks/walk-constant/scatter.sh) holds the command lines
+and [scatter.py](benchmarks/walk-constant/scatter.py) the analysis.
+
+- **v2:** this tree's harness, seeds 240–255.
+- **v1:** the same source built from `825f3a84`, the last tree with rule v1,
+  seeds 260–275.  The two trees differ in the rule and in the `--merge`
+  mode, which these runs do not use.
+- **Disjoint seeds.** Under one seed the two rules draw the same tables,
+  salts and start points, trial for trial.  A stream advances only on those
+  draws and on fruitless restarts, which are rare.  Two χ² values from
+  shared instances would be nearly one number, so the v1 replicate gets its
+  own seeds.
+- **`--threads 4` is part of the design.** The map from a seed to its
+  streams depends on the thread count.
+- **A run is not bit-reproducible.** Trials go to threads through an atomic
+  counter.  The frozen `.jsonl` is the record, and a rerun drifts within
+  its standard error.
+- **Seeds 230 and 231 are excluded,** since they prompted the question.
+- Both binaries are compiled as the Makefile's `walk-constant` target
+  compiles `walk-constant-host-h8`.  `scatter-build.txt` records their
+  hashes.
+
+**Tests.**
+
+1. **Heterogeneity, per rule.** The χ² of the 16 constants about their
+   inverse-variance mean, on 15 degrees of freedom.
+   - Scatter is established at p < 0.01 (χ² > 30.58), suggestive at
+     p < 0.05 (χ² > 25.00), and absent otherwise.
+   - If the true spread is 1.8 times the stated error (a variance ratio of
+     3.3, what 13.3 / 4 suggests), the test's power at p < 0.01 is 0.86.
+     At a variance ratio of 2.5 it is 0.66, and at 2.0 it is 0.43.
+2. **Reading the two verdicts.** Only "established" counts here.
+   - v2 established and v1 not: the scatter is new with rule v2.
+   - Both established: the harness's standard error understates its
+     scatter under either rule, and the rule is not the cause.
+   - Neither: the 230/231 gap and the 13.3 were chance, plus the `n = 41`
+     reference outlier.  The question closes.
+   - v1 established and v2 not: reported as found.
+3. **Device against emulation, per rule.** The pooled constant against the
+   emulation's matching row, with both errors: 1.0038 ± 0.0012
+   (`matrix-v3`) under v2, 1.0037 ± 0.0012 (`matrix-v2`) under v1.
+   - Where test 1 established scatter, the pooled error is first scaled by
+     `√(χ²/15)`.
+   - The harnesses disagree under that rule if |z| > 2.58.
+
+**What follows.**
+
+- These rows test the harness.  They are not pooled into item 3's
+  constant, whatever they show.
+- If test 3 finds the harnesses disagree, item 3's pooled constant is
+  withdrawn until that is explained.  Item 3 already commits to this for
+  the `n = 23` row.
+
+**Inadmissible:**
+
+- changing the seeds, the trial count, the thread count or a threshold after
+  seeing a result;
+- dropping a run;
+- rerunning a seed and keeping the better result.  A crashed run is rerun
+  on the same seed, and the crash is recorded.
+
+**Cost and classification.** About 46 minutes on four cores, with no GPU.
+The result is **accounting** whichever way it falls: it checks a
+measurement and moves no cost.
+
+### 11.6.1 Results
+
+Sources:
+- `scatter.txt`, printed by `scatter.py` from the frozen
+  `scatter-v2.jsonl` and `scatter-v1.jsonl`;
+- `scatter-build.txt`, the binaries' hashes and the source commit.
+
+The runs took 03:31:43–04:17:05 UTC on 2026-09-26, on four cores.  The
+declaration's commit `0828682c` is timestamped 03:31:09, before the first
+run, and `scatter-build.txt` records that commit as the source.
+
+| rule | seeds | trials | pooled `c` | ± | χ² (15 dof) | p | test 1 | emulation | test 3 z |
+|---|---|---:|---:|---:|---:|---:|---|---|---:|
+| v2 | 240–255 | 319,902 | 1.00368 | 0.00093 | 8.79 | 0.89 | absent | 1.00375 ± 0.00117 | −0.05 |
+| v1 | 260–275 | 319,917 | 1.00462 | 0.00093 | 23.30 | 0.078 | absent | 1.00369 ± 0.00117 | +0.62 |
+
+- **Test 2: neither rule scatters, so the question closes.** The 2.7
+  standard-error gap between seeds 230 and 231 was chance.  So was the
+  `n = 23` part of the χ² = 13.3.
+- **The `n = 41` row was not rerun.** Its 5.7 of the 13.3 stays what item 3
+  said it was, a comparison against an emulation outlier, and this test
+  does not bear on it.
+- **Where each rule sits against the lines.**
+  - v2 sits well under the "suggestive" line: χ² = 8.79 against 25.00.
+    Its largest single deviation is −1.31 standard errors (seed 244).
+  - v1 sits just under it: χ² = 23.30 against 25.00.  Its largest
+    deviation is −2.08 (seed 275).
+  - v1, not v2, came closer.  A scatter new with v2 would have looked the
+    other way round.
+- **Test 3: the harnesses agree under both rules.**  Item 3's pooled
+  constant, `c = 1.0034 ± 0.0009`, stands, and item 6's cost ratio with it.
+- **The binaries are the rules they claim to be.** Over 84M steps each:
+  - v1's rows show 40 four-step τ-relation returns and 8 six-step pairwise
+    ones.  The harness's own leading-order count predicts 43.3 and 7.0.
+    They also show one six-step τ-relation return, of the residual class
+    item 2 describes.
+  - v2's rows show no return of any kind.
+  - 98 and 83 trials (0.03%) reached the point at infinity and were
+    discarded, as the harness always does.
+- **Not declared, so descriptive only:**
+  - With disjoint seeds the two pools are independent.  `c(v2) − c(v1) =
+    −0.0009 ± 0.0013`, consistent with item 3's `−0.0003 ± 0.0007`.
+  - At 95% confidence, the seed-to-seed spread is at most 1.10 times the
+    stated error under v2 (a variance ratio of 1.21).  Under v1 it is at
+    most 1.79 times (3.21).
+
+**Classification: accounting.** The result checks a measurement.  It moves
+no constant and no cost, and it adds no row to item 3's pool.
