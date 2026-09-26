@@ -3,6 +3,7 @@
 Legacy profiler labels are rejected. Unentered intervals stay null. A complete
 clock partition still needs source/dispatch, group, query, base and matrix checks.
 """
+import gzip
 import re
 from pathlib import Path
 
@@ -85,16 +86,16 @@ def verify_native(report, job, *, process_wall_ns=None):
                 scope='exclusive clock closure only', promotion_eligible=False)
 
 
-def parse_profiles(directory, report, job):
+def parse_profiles(directory, report, job, *, compressed=False):
     """Check exclusive Callgrind intervals against both trace coverage and Ir checksum."""
     coverage = verify_native(report, job)
     directory = Path(directory)
     paths = sorted(directory.glob('callgrind.out*'))
-    require(paths and all(p.is_file() and p.suffix != '.gz' for p in paths),
+    require(paths and all(p.is_file() and (p.suffix == '.gz') == compressed for p in paths),
             'missing/unexpected generic instruction profiles')
     phases, parts, terminated = {}, set(), 0
     for path in paths:
-        lines = path.read_text().splitlines()
+        lines = (gzip.decompress(path.read_bytes()).decode() if compressed else path.read_text()).splitlines()
 
         def one(prefix):
             fields = [line[len(prefix):].strip() for line in lines if line.startswith(prefix)]
