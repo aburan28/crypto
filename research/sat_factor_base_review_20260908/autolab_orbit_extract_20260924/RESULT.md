@@ -109,22 +109,24 @@ difference as finite-size, not as a growth-rate claim.
 
 ## 4. n=61 vs batched rho at L ≥ 1,024
 
-Scripts: `growing_n_n61_L1024.sh`, `growing_n_n61_L4096.sh`. a=0 n=61
-(r = 162888033982417, 48 bits, cofactor 14,156). K chosen on a disjoint same-L
-tune. Three paired evaluation blocks, alternating arm order. All fixtures
+Scripts: `growing_n_n61_L1024.sh`, `growing_n_n61_L4096.sh`, `growing_n_n61_L16384.sh`.
+a=0 n=61 (r = 162888033982417, 48 bits, cofactor 14,156). K chosen on a disjoint
+same-L tune. Three paired evaluation blocks, alternating arm order. All fixtures
 matched. No 32-target panels.
 
 | n | L | K | Compact wall | Rho wall | Wall ratio (range) | User-CPU ratio | Peak RSS compact / rho | All 3 blocks |
 |---:|---:|---:|---:|---:|---:|---:|---:|---|
 | 61 | 1,024 | 600 | 194 s | 611 s | 0.306 (0.291–0.363) | 0.284 | 3.1 / 0.37 GB | compact |
 | 61 | 4,096 | 800 | 426 s | 672 s | 0.421 (0.222–0.633) | 0.332 | 5.3 / 0.83 GB | compact |
+| 61 | 16,384 | 1,400 | 274 s | 1,334 s | 0.205 (0.138–0.291) | 0.191 | 11.5 / 1.6 GB | compact |
 
-L=1,024 tune `400/600/800/1000` → K=600 (158 s). L=4,096 tune `600/800/1000/1200`
-→ K=800 (123 s). 15,360/15,360 recovered and independently replayed. Host load
-at L=4,096 swung ~15–96, so wall is noisier than user-CPU (0.20–0.35). Same
-√(L·r/n) caveat: finite constant-factor, not asymptotic.
+L=1,024 tune → K=600. L=4,096 → K=800. L=16,384 tune `800/1000/1200/1400` →
+**K=1,400** (235 s; the top of the sweep). 64,512/64,512 recovered and
+independently replayed. Same √(L·r/n) caveat: finite constant-factor, not
+asymptotic.
 
-**Next:** n=61 at **L=16,384** (`growing_n_n61_L16384.sh`). No 32-target panels.
+**Next:** n=61 at **L=65,536** (`growing_n_n61_L65536.sh`), with K allowed above
+1,400. No 32-target panels.
 
 ## Independent replay
 
@@ -147,6 +149,7 @@ with no code shared with the producer. For each record it checks:
 | Growing n vs batched rho | 9,216 | 9,216 | 0 |
 | n=61 L=1,024 vs batched rho | 3,072 | 3,072 | 0 |
 | n=61 L=4,096 vs batched rho | 12,288 | 12,288 | 0 |
+| n=61 L=16,384 vs batched rho | 49,152 | 49,152 | 0 |
 
 ## Limits
 
