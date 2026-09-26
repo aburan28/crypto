@@ -37,7 +37,7 @@ REG=re.compile(r"Used (\d+) registers")
 @app.function(image=image,gpu=GPU,timeout=4*3600)
 def tune():
  rows=[]
- rc,info=sh("nvidia-smi --query-gpu=name,compute_cap,clocks.max.sm,memory.total,memory.max,memory.used,power.limit --format=csv,noheader")
+ rc,info=sh("nvidia-smi --query-gpu=name,compute_cap,clocks.max.sm,memory.total,memory.used,power.limit --format=csv,noheader")
  print(info)
  for ptx in (0,1):
   rc,log=build(ptx);print(log)
