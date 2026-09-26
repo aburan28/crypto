@@ -667,7 +667,7 @@ pub fn sig_f4_tower_with(
         // the element that stands for it (Roune–Stillman): the syzygy
         // criterion drops the signature, and otherwise its rewriter's
         // multiple is the row, whichever pairs produced the signature.
-        sel.sort_by(|a, b| a.sig.cmp(&b.sig));
+        sel.sort_by_key(|a| a.sig);
         let mut chosen: Vec<Pair> = Vec::with_capacity(sel.len());
         let mut k = 0;
         while k < sel.len() {
