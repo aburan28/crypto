@@ -34,3 +34,10 @@ Commands are the Make targets `test-cycle-rule`, `test-cycle-escape`,
 production translation unit compiled with `-DECC_WALK_TABLE=1 -DECC_BATCH=2`;
 and unittest discovery for `test_worker_spool.py` and `test_dp_ingest.py`.
 The workflow repeats the focused gates and adds CUDA compilation without a GPU.
+
+The first CI head passed all ECC2K certification jobs, including the 24-step
+sigma certificate and CUDA compilation. CUDA warned about unused host/device
+instantiations of the shared template. The algorithm body now has explicit
+host and device entry points, and CI treats those execution-space diagnostics
+as errors. `escape-explicit-context.log` records unchanged local regressions
+after that annotation refactor; final CI is attached to the PR head.

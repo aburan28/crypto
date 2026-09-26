@@ -81,8 +81,8 @@ jobs:
           echo /usr/local/cuda-12.9/bin >> "$GITHUB_PATH"
       - name: Compile both cold-path table layouts
         run: |
-          nvcc -O2 -std=c++17 -arch=sm_90 -DECC_WALK_TABLE=1 -c ecc2k130/src/testtablewalkcuda.cu -o /tmp/table-probe.o
-          nvcc -O2 -std=c++17 -arch=sm_90 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 -c ecc2k130/src/testtablewalkcuda.cu -o /tmp/table-probe-hybrid.o
+          nvcc -O2 -std=c++17 -arch=sm_90 --diag-error=20011,20014 -DECC_WALK_TABLE=1 -c ecc2k130/src/testtablewalkcuda.cu -o /tmp/table-probe.o
+          nvcc -O2 -std=c++17 -arch=sm_90 --diag-error=20011,20014 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 -c ecc2k130/src/testtablewalkcuda.cu -o /tmp/table-probe-hybrid.o
       - name: Compile packed table client
         run: |
-          nvcc -O2 -std=c++17 -arch=sm_90 -DECC_WALK_TABLE=1 -DECC_WITNESS=0 -DECC_BATCH=2 -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_UNROLL_INV=1 -DECC_TABLE_TAG_DENOM=1 -c ecc2k130/src/main.cu -o /tmp/table-client.o
+          nvcc -O2 -std=c++17 -arch=sm_90 --diag-error=20011,20014 -DECC_WALK_TABLE=1 -DECC_WITNESS=0 -DECC_BATCH=2 -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_UNROLL_INV=1 -DECC_TABLE_TAG_DENOM=1 -c ecc2k130/src/main.cu -o /tmp/table-client.o

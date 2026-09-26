@@ -336,7 +336,11 @@ struct TwCycleOps {
 };
 TW_COLD unsigned twCycleTag(const P131 &x, const P131 &yp, unsigned raw,
                             const uint32_t *sel, const uint32_t *tab, int dpWeight) {
+#ifdef __CUDACC__
+    return eccCycleAnchorTagDevice(TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+#else
     return eccCycleAnchorTag(TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+#endif
                              TwCycleOps{sel,tab,dpWeight}, 131, TW_H);
 }
 TW_FN unsigned twSelectHist(const P131 &x, const P131 &yp, int hw,
