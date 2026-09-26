@@ -117,7 +117,14 @@ def run(out: Path):
         if not seconds:
             return panel
         env = common | {"KIC_ORBIT_REGULAR_SCAN_POLICY": policy}
-        inputs = {"targets": HERE / "target_scalars.txt", "points_validator": HERE / "target_points.jsonl"}
+        inputs = {
+            "targets": HERE / "target_scalars.txt",
+            "points_validator": HERE / "target_points.jsonl",
+            "producer_source": REPO / "examples/koblitz_s5_sat_instance.rs",
+            "producer_binary": EXE,
+            "cargo_lock": PARENT / "Cargo.lock",
+            "protocol": HERE / "PROTOCOL.md",
+        }
         if base == "certified":
             env["KIC_FACTOR_BASE_JSONL"] = str(certified)
             inputs["certified_base"] = certified
@@ -141,7 +148,15 @@ def run(out: Path):
     audit_dir = out / "audit_stage"
     audit_command = [sys.executable, str(HERE / "audit.py"), "--out", str(out)]
     audit_inputs = {name: out / name / "producer.stdout.jsonl" for name, _, _ in ARMS}
-    audit_inputs |= {"targets": HERE / "target_scalars.txt", "points": HERE / "target_points.jsonl"}
+    audit_inputs |= {
+        "targets": HERE / "target_scalars.txt",
+        "points": HERE / "target_points.jsonl",
+        "audit_source": HERE / "audit.py",
+        "independent_group_source": ORBIT / "independent_replay_20260924_codex/replay.py",
+        "independent_rank_source": ORBIT / "cold_batch_rank.py",
+        "producer_binary": EXE,
+        "protocol": HERE / "PROTOCOL.md",
+    }
     receipt = measure(audit_command, common, audit_dir, "audit", seconds, audit_inputs)
     panel["stage_receipts"]["audit"] = receipt
     panel["classification"] = "RANK_STAGE_REPLAYED" if complete(receipt) and (out / "audit.json").is_file() else "CENSORED_OR_INVALID_AUDIT"
