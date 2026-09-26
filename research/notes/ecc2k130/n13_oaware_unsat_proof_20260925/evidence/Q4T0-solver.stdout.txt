@@ -1,0 +1,101 @@
+c --- [ banner ] -------------------------------------------------------------
+c 
+c CaDiCaL SAT Solver
+c Copyright (c) 2016-2026
+c A. Biere, M. Fleury, N. Froleyks, K. Fazekas, F. Pollitt, T. Faller
+c JKU Linz, University of Freiburg, TU Wien
+c 
+c Version 3.0.1
+c Apple clang version 21.0.0 (clang-2100.0.123.102) -Wall -Wextra -O3 -DNDEBUG -DNCLOSEFROM
+c Sun Jul 19 15:40:55 UTC 2026 Darwin Tahoe-arm64.local 25.4.0 arm64
+c 
+c --- [ proof tracing ] ------------------------------------------------------
+c 
+c opening file to write '/Volumes/SSD990/llm/tmp/n13-unsat-proof-wnar5ho4/Q4T0.drat'
+c writing non-binary proof trace to '/Volumes/SSD990/llm/tmp/n13-unsat-proof-wnar5ho4/Q4T0.drat'
+c 
+c --- [ parsing input ] ------------------------------------------------------
+c 
+c reading DIMACS file from '/Volumes/SSD990/llm/tmp/n13-unsat-proof-wnar5ho4/Q4T0.cnf'
+c opening file to read '/Volumes/SSD990/llm/tmp/n13-unsat-proof-wnar5ho4/Q4T0.cnf'
+c found 'p cnf 1263 1195345' header
+c parsed 1195345 clauses in 0.20 seconds process time
+c 
+c --- [ options ] ------------------------------------------------------------
+c 
+c   --binary=false                 (different from default 'true')
+c 
+c --- [ solving ] ------------------------------------------------------------
+c 
+c time measured in process time since initialization
+c 
+c  seconds  reduction conflicts       size tier2        variables
+c         MB    restarts   redundant    glue  trail         remaining
+c          level     rate       size/glu tier1   irredundant
+c 
+c *  0.20  0  0 0   0  0    0    0 0.0 0 0 2 6  0% 1195344 335 27%
+c l  0.21  0  0 0   0  0    0    0 0.0 1 0 2 6 93% 1195344  85  7%
+c 0  0.21  0  0 0   0  0    0    0 0.0 1 0 2 6 93% 1195344  85  7%
+c 
+c --- [ closing proof ] ------------------------------------------------------
+c 
+c DRAT proof file '/Volumes/SSD990/llm/tmp/n13-unsat-proof-wnar5ho4/Q4T0.drat' closed
+c DRAT 1178 added clauses 100.00%
+c DRAT 0 deleted clauses 0.00%
+c DRAT 8490 bytes (0.01 MB)
+c 
+c --- [ result ] -------------------------------------------------------------
+c 
+s UNSATISFIABLE
+c 
+c --- [ run-time profiling ] -------------------------------------------------
+c 
+c process time taken by individual solving procedures
+c (percentage relative to process time for solving)
+c 
+c         0.20 3370.50% parse
+c         0.01   99.47% search
+c         0.01   99.43% lucky
+c         0.00    0.00% simplify
+c   =================================
+c         0.01    2.88% solve
+c 
+c last line shows process time for solving
+c (percentage relative to total process time)
+c 
+c --- [ statistics ] ---------------------------------------------------------
+c 
+c fixed:                      1178        93.27 %  of all variables
+c learned_lits:                246       100.00 %  learned literals
+c minimized:                     0         0.00 %  learned literals
+c shrunken:                      0         0.00 %  learned literals
+c minishrunken:                  0         0.00 %  learned literals
+c propagations:                928         0.16 M  per second
+c ticks:                      1975         2.13    propagation
+c 
+c seconds are measured in process time for solving
+c 
+c --- [ glue usage ] ---------------------------------------------------------
+c 
+c focused glue 2 used 0 clauses 0.000% accumulated 0.000% tier1
+c focused glue 3 used 0 clauses 0.000% accumulated 0.000%
+c focused glue 4 used 0 clauses 0.000% accumulated 0.000%
+c focused glue 5 used 0 clauses 0.000% accumulated 0.000%
+c focused glue 6 used 0 clauses 0.000% accumulated 0.000% tier2
+c 
+c stable glue 2 used 0 clauses 0.000% accumulated 0.000% tier1
+c stable glue 3 used 0 clauses 0.000% accumulated 0.000%
+c stable glue 4 used 0 clauses 0.000% accumulated 0.000%
+c stable glue 5 used 0 clauses 0.000% accumulated 0.000%
+c stable glue 6 used 0 clauses 0.000% accumulated 0.000% tier2
+c 
+c 
+c --- [ resources ] ----------------------------------------------------------
+c 
+c total process time since initialization:         0.21    seconds
+c total real time since initialization:            0.31    seconds
+c maximum resident set size of process:          127.64    MB
+c 
+c --- [ shutting down ] ------------------------------------------------------
+c 
+c exit 20
