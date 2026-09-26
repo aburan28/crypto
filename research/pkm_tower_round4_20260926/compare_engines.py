@@ -122,11 +122,20 @@ def main():
               f"{s['muladds'] / max(f['muladds'], 1):.2f} | {f4_rows_built(f)} | "
               f"{sig_rows_built(s)} | {s['sig']['zero_rows']} | {f_mem} | {s_mem} |")
 
+    # Processes that ended without writing a row (a crash, the memory cap).
+    lost = [r for r in mem.values() if r["exit"] != 0 or r["rows"] == 0]
+    if lost:
+        print("\nProcesses that ended without writing every row:\n")
+        for r in sorted(lost, key=lambda r: (r["m"], r["N"])):
+            print(f"- {r['run']}: exit {r['exit']}, {r['rows']} rows, peak {r['peak_rss_mb']} MB, "
+                  f"{r['wall_s']} s")
+
     # 3. Predictions and the rule.
     print("\n## Section 13.5 and 13.6\n")
     agree = sum(f["inconsistent"] == s["inconsistent"] for f, s in finished)
     print(f"1. verdicts agree on {agree} of {len(finished)} systems both engines finished "
-          f"({len(timed_out)} signature systems timed out); verify.py is run separately.")
+          f"({len(timed_out)} signature systems timed out, {sum(r['engine'] == 'sig' for r in lost)} "
+          f"signature processes wrote no row); verify.py is run separately.")
     ge = sum(s["solving_degree_max"] >= f["solving_degree_max"] for f, s in finished)
     gt = sum(s["solving_degree_max"] > f["solving_degree_max"] for f, s in finished)
     eq = sum(s["solving_degree_max"] == f["solving_degree_max"] for f, s in finished)

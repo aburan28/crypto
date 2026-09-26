@@ -35,6 +35,17 @@ pilot (§10, 2026-09-24).
     8 times and the multiply-adds 316 times.
   - §§12.1–12.6 were pre-registered before the runs, and §12.3 discloses a
     profiling run made before them.
+- **Round 4 (§13, 2026-09-26) checks a signature-based engine against F4.**
+  - It adds `sig_fp_tower`, a signature F4 (F5/GVW criteria) on the tower ring.
+    It agrees with F4 and with exhaustive search on all 18 systems both engines
+    finished.
+  - It removes the zero reductions (0.03% of its rows), but needs rows 1–2
+    degrees higher than F4 on every system (`D_sig > D`, 18 of 18). It also
+    needs 1.7–28 times the memory. At `m = 3`, `N = 15` it ran out of the 14 GB
+    cap, where F4 needs 1.1 GB.
+  - Adoption fails, so **F4 stays the measuring engine**. §§13.1–13.6 were
+    pre-registered, and §13.3 discloses a bug that a smoke test found before the
+    runs, and the runs made with the buggy build.
 
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
@@ -2056,6 +2067,128 @@ on `D_sig` and nothing else.
   until it is explained.
 - **Inadmissible:** changing the engine, its options, the cells or the budgets
   after the first round-4 run; dropping a target.
+
+### 13.7 Results
+
+`run_round4.py` ran from 05:22 to 06:34 UTC on 2026-09-26. It used the example
+built from the pre-registration commit `bf41cee2` (hashes in the data README).
+A later commit (`6117ec4e`) changed only a lint and the module list's order,
+without touching a row. Every process's exit status and peak memory are in
+`memory.jsonl`, and `compare_engines.py` prints the table below from the rows.
+The two targets of every size give identical rows, apart from the wall clock,
+so each line stands for both.
+
+| `m` | `N` | verdict | `D` | `D_sig` | width F4 / sig | multiply-adds F4 | sig / F4 | peak MB F4 / sig | s per target F4 / sig |
+|--:|--:|:--|--:|--:|:--|--:|--:|:--|:--|
+| 2 | 12 | refuted, both | 5 | 6 | 1,231 / 1,315 | 6.50e7 | 0.28 | 8 / 14 | 0.1 / 0.2 |
+| 2 | 14 | refuted, both | 5 | 6 | 2,304 / 3,184 | 6.51e8 | 0.30 | 15 / 47 | 0.2 / 0.9 |
+| 2 | 16 | refuted, both | 5 | 6 | 4,789 / 7,927 | 6.18e9 | 0.31 | 36 / 224 | 1.2 / 7.0 |
+| 2 | 18 | refuted, both | 5 | 7 | 8,644 / 18,518 | 4.60e10 | 0.34 | 91 / 793 | 6.8 / 51 |
+| 2 | 20 | refuted, both | 6 | 7 | 33,446 / 42,157 | 4.84e11 | 0.37 | 473 / 4,461 | 59 / 520 |
+| 3 | 9 | refuted, both | 6 | 7 | 1,186 / 1,277 | 1.59e8 | 0.20 | 11 / 37 | 0.1 / 0.3 |
+| 3 | 12 | refuted, both | 6 | 8 | 5,019 / 8,795 | 1.06e10 | 0.58 | 64 / 646 | 2.0 / 20 |
+| 3 | 15 | F4 refuted; sig did not finish | 7 | (≥ 9) | 31,397 / 66,569 so far | 3.19e12 | — | 1,085 / 12,641 | 391 / — |
+| 4 | 8 | refuted, both | 6 | 7 | 1,049 / 1,873 | 4.84e7 | 1.49 | 9 / 62 | 0.1 / 0.5 |
+| 4 | 12 | refuted, both | 7 | 9 | 9,452 / 24,800 | 8.55e10 | 1.55 | 171 / 4,870 | 11.5 / 386 |
+
+The peak is per process, which measures both targets one after the other.
+
+- **Instrument.** `verify.py` agrees with all 38 finished rows (20 F4, 18
+  signature). The 20 F4 rows repeat round 2's on every field except the wall
+  clock. On all 18 systems both engines finished, the verdicts agree.
+- **`m = 3`, `N = 15`.** The signature process ran out of the 14 GB cap after
+  1,381 s, still on target 0, and wrote no row (exit −6, `memory allocation of
+  671088640 bytes failed`). The allocation was the split of 25.4 million
+  pending pairs after step 47. That step alone took 1,080 s: 66,569 columns,
+  2.7e8 nonzeros and 3.8e11 multiply-adds, an eighth of F4's whole run on the
+  system. It gained elements from rows of degree 9, so
+  `D_sig ≥ 9` is a lower bound from the trace, against F4's 7. This is a
+  resource failure, not evidence about the degree (§13.4). As §13.4 fixed, `m = 3`
+  stopped there.
+- **Where the rows go.** The criteria remove what they were built to remove.
+  - At `m = 2`, `N = 20` the signature engine builds 13,114 S-rows against
+    F4's 60,505.
+  - It reduces 468 of the 1,489,314 rows it builds, in all, to zero. That is
+    0.03%; the worst system is at 0.13%.
+  - But it needs 268,037 reducer rows against F4's 92,482, because its rows
+    reach a degree higher. At `m = 4`, `N = 12` it saves no S-rows (13,548
+    against 12,799), and it builds 184,887 reducers against 23,033.
+
+### 13.8 The rule of §13.6, applied
+
+**The predictions of §13.5.**
+1. **Verdicts: confirmed.** 18 of 18 agree, `verify.py` agrees with every row,
+   and F4 repeats round 2.
+2. **`D_sig > D` everywhere: confirmed** on all 18 systems. The margin is 1 or
+   2 levels. At the unseen sizes: `m = 2`, `N = 18` is 7 against 5 and `N = 20`
+   is 7 against 6, both at least one higher as predicted. At `m = 3`, `N = 15`
+   the trace gives at least 9 against 7, two higher; it is a lower bound, not a
+   finished row.
+3. **Zero reductions at most 1%: confirmed.** The worst is 0.13%.
+4. **Cost: confirmed.**
+   - The multiply-add ratio grows with `N` at every `m`: 0.28, 0.30, 0.31,
+     0.34, 0.37 at `m = 2`; 0.20, 0.58 at `m = 3`; 1.49, 1.55 at `m = 4`.
+   - It exceeds one at both `m = 4` sizes.
+   - The signature process peaks higher at every size, by 1.7–28 times.
+   - `m = 3`, `N = 15` did not finish within the memory cap.
+
+**Adoption: no.** `D_sig = D` holds on none of the 18 systems. At the largest
+finished size of each `m`, the signature engine costs more memory everywhere:
+9.4 times F4's at `m = 2`, `N = 20`; 10 times at `m = 3`, `N = 12`; 28 times at
+`m = 4`, `N = 12`. At `m = 4` it also costs more multiply-adds. **F4
+(`f4_fp_tower`) stays the measuring engine**, and `sig_fp_tower` stays in the
+tree as a checked engine that is not used for `D(N)`.
+
+### 13.9 What round 4 shows, and what it does not
+
+It shows three things.
+1. **A signature-based engine on the tower ring is correct at these sizes.**
+   It agrees with F4 and with exhaustive search on 18 systems, and with F4's
+   basis in six unit tests. Getting there took one real bug (§13.3). The tests
+   in place missed it, and the round's smoke test found it.
+2. **The zero reductions go, but the degree rises.** On every system the
+   signature engine needs rows 1–2 degrees higher than F4, and at `m ≥ 3` the
+   margin grows with `N`. So its `D` is a different quantity from §§10–12's,
+   as §13.2 warned, and it cannot extend their `D(N)`.
+   - The homogeneous control of §13.3 (from a build with the bug) points the
+     same way without a tower. A signature basis in these orders can need
+     degrees a Gröbner basis does not. So the tower's degree falls are not the
+     whole cause.
+3. **It does not scale on this problem.** At `m = 2` it is 2.7–3.6 times
+   cheaper in multiply-adds, but that advantage shrinks with `N`. At `m ≥ 3` the
+   ratio climbs past one, and memory, not arithmetic, runs out first. The pending
+   pairs are the cost: 17.9 million formed at `m = 4`, `N = 12`, and 25.4 million
+   pending when `m = 3`, `N = 15` failed.
+
+It does not show three things.
+1. **That no signature engine matches F4's degree here.** Only one family of
+   variants ran in the round: position over term with the ratio order. The
+   exploratory comparisons of the orders came from the build with the bug.
+   Signature orders tied to degree (for instance Sugar-weighted or
+   "signature-then-degree" hybrids), or F4-style selection by polynomial degree
+   with signatures kept only for the criteria, were not tried.
+2. **Anything about `D(N)` for §§10–12.** Every F4 row here repeats round 2.
+3. **Any speed, `S` or scoreboard row.** Nothing is priced end to end
+   (`AGENTS.md` §2). The multiply-add ratios are a stage diagnostic of one solver
+   against another.
+
+### 13.10 Next steps, ranked
+
+§12.10's first step is closed in the form it took. The signature criteria do
+remove the zero reductions, but they cost degree and memory, and F4 remains
+the engine. The rest of §12.10 stands, re-ranked:
+1. **`m = 3` at `N = 18` with F4** (§12.10 item 2). This is the first `m ≥ 3`
+   line with a fourth size.
+2. **`m = 4` at `N = 20` with F4**, on a machine with several times this one's
+   memory. This round removes the hope that signature criteria would bring it
+   within 14 GB.
+3. **A degree-driven signature variant**, only if a cheap check first shows
+   `D_sig = D` on the round's `m = 3`, `N = 9`–12 systems. Such a variant selects
+   rows by polynomial degree, as F4 does, and uses signatures only to skip rows
+   (Faugère's F5 in matrix form over the degree, or GVW with a degree-compatible
+   module order). Without that check, the variant is not worth a round.
+4. **`m = 2` at `N = 28`** and the **independent replication** of §12.10's items
+   3–4.
 
 ---
 

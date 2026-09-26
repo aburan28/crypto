@@ -712,6 +712,13 @@ worse than none:
   Whether the growth is linear or slower is still open, at every `m`, and
   `m = 4` at `N = 20` is beyond the machine that ran these (the width grew
   8 times from `N = 12` to 16). No oracle is built.
+
+  Round 4 (§13) built a signature-based F4 for the tower ring
+  (`src/cryptanalysis/sig_fp_tower.rs`, F5/GVW criteria) and checked it
+  against `f4_fp_tower`. It agrees on all 18 systems, and its criteria
+  remove the zero reductions. But it needs rows 1–2 degrees higher on
+  every system and up to 28 times the memory, and it ran out of 14 GB at
+  `m = 3`, `N = 15`. So `f4_fp_tower` stays the engine that measures `D`.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
