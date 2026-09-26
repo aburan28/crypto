@@ -48,6 +48,10 @@ def main() -> None:
         certified = json.loads(gzip.decompress(FIXTURE.read_bytes()))
         fresh_points = set(map(tuple, fresh["factor_base_point_coordinates"]))
         certified_points = set(map(tuple, certified["factor_base_point_coordinates"]))
+        fresh_x = {point[0] for point in fresh_points}
+        certified_x = {point[0] for point in certified_points}
+        fresh_representatives = set(map(tuple, fresh["factor_base_representatives"]))
+        certified_representatives = set(map(tuple, certified["factor_base_representatives"]))
         batch = raw["compact_orbit_batch"]
         report = {
             "classification": summary["classification"],
@@ -64,9 +68,16 @@ def main() -> None:
             "certified_cofactor": certified["cofactor"],
             "fresh_scanned_x": fresh["scanned_x"],
             "certified_scanned_x": certified["field_x_values_scanned"],
+            "certified_factor_base_seed": certified["factor_base_seed"],
+            "certified_point_selection": certified["point_selection"],
             "fresh_points": len(fresh_points),
             "certified_points": len(certified_points),
             "coordinate_intersection": len(fresh_points & certified_points),
+            "fresh_distinct_point_x": len(fresh_x),
+            "certified_distinct_point_x": len(certified_x),
+            "point_x_intersection": len(fresh_x & certified_x),
+            "representative_intersection": len(
+                fresh_representatives & certified_representatives),
             "fresh_coordinates_sha256": digest(fresh["factor_base_point_coordinates"]),
             "certified_coordinates_sha256": digest(certified["factor_base_point_coordinates"]),
             "labels_equal": fresh["factor_base_point_labels"] == certified["factor_base_point_labels"],
