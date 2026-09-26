@@ -39,14 +39,14 @@
   "parent_result_head": "d6ec7e63254a033acbe85d5fbb856610d6d30864",
   "prior_760_fixed_stream_classification": "COMPLETE_FIXED_STREAM_NO_CROSSOVER",
   "process_group_rss_cap_bytes": 2147483648,
-  "protocol_sha256": "327509f4f85b052a42803138d5d39277035c6374bccdc7adb10a899aaf1cb74a",
+  "protocol_sha256": "0af9f9a3be74e1954d680e088be49dfca52542476c64cdd24d99c4fc4b8f55a7",
   "python_version": "3.12",
-  "release_main_head": "6c3dec5662a84c5bcc633ce3a30f3025efb910f8",
+  "release_main_head": null,
   "rust_toolchain_version": "1.93.1",
   "schema": "n53_l384_certified_coldbase_freeze_v1",
   "source_sha256": {
     "archive_sealer": "cc8cd03f4478dc82b240b35efc9915d6697cc095f32e58dae5ec1346f788c9d4",
-    "archive_verifier": "0a2697d43290ede63780b534ec9cd20268054a201721c140c7d09621376cb61d",
+    "archive_verifier": "050d24f42a24b69cfbb96239a69294ef00820efb04609b2b5e005a4efac00b75",
     "audit": "f03884ecd38e958c2911d4945addf262f0d21068824aece7ccc9b4f07b658ed0",
     "cargo_lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
     "cargo_toml": "1435eec1bdf7ef0357ae6c8d86083b3352e9c40f850e2ef0e4d27648b0b6b6b8",
@@ -56,14 +56,14 @@
     "materializer_gate_test": "b0d1a0fe7b08845af5679bfbcca0b8ededbe51624b139c0e82d7edbdea0e8950",
     "operational": "29b6f7e92c80784cb9ef56688625b7003b41f800b7d88febdd06427581475923",
     "point_generation_math": "253842968ae6616bf6c96b79b89808e19e982c276af9e4e2fcb3f7a027a1a8b1",
-    "preflight": "51be8066129971b3f36f387750d9a30557124d6cba8beb2d9438341faca75fff",
+    "preflight": "cf04fe214b8f77b6820a021b15bb730cc22ff01dadf5c4f18677732967209725",
     "prior_runner": "edbeb4f9d5e608edd7ab2ef90d306288ee573911ef8bdc2c67567b1273888034",
     "rank_fixture_provenance": "a30ea68b39dd3dcd93990240ea235f5439c1af60e030be40a810348e74a9a58b",
     "rho": "fedacb54e441979c8c32860e7b5639e43799234741d49677010164564536d2c8",
     "rho_audit_math": "386a864faa4b2232edb3397fead4d924e6edb4ec4eade754b64df9fbc639fc94",
-    "runner": "492af68bf914fade984f171087176bce6455fa9ae2eb6072f96611c7b2154623",
+    "runner": "f0002c86a515a3a89b9a90969252bb5090236a4f8e27f176687e759a70b78e72",
     "training_schedule_reference": "51fb3a27ca76d05c0723755f48d230c42b5ad0d898f63ec292323bdb3061ca5f",
     "workflow": "73e6bf7ff9658d0bcf6695a602b08929f5b83b9456d6483da6db93ca6a3a357d"
   },
-  "status": "released_for_one_outcome"
+  "status": "held_no_outcome"
 }

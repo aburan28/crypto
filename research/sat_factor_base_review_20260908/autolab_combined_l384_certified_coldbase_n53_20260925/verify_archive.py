@@ -204,7 +204,7 @@ def main():
     assert sha(archive) == manifest["archive_sha256"]
     assert archive.stat().st_size == manifest["archive_bytes"]
     freeze = json.loads((HERE / "FROZEN.json").read_text())
-    assert freeze["schema"] == "n53_l384_coldbase_repeat_freeze_v1"
+    assert freeze["schema"] == "n53_l384_certified_coldbase_freeze_v1"
     assert freeze["input_sha256"]["target_points"] == sha(HERE / "points_L384.jsonl")
     assert freeze["protocol_sha256"] == sha(HERE / "PROTOCOL.md")
     assert freeze["input_sha256"]["certified_base_gzip"] == sha(
@@ -226,6 +226,11 @@ def main():
         assert summary["base_gzip_sha256"] == freeze["input_sha256"]["certified_base_gzip"]
         assert summary["validator_manifest_sha256"] == freeze["input_sha256"]["validator_manifest"]
         assert GIT_SHA.fullmatch(summary["checkout_head"])
+        assert summary["release_main_head"] == freeze["release_main_head"]
+        assert GIT_SHA.fullmatch(summary["dispatch_main_head"])
+        subprocess.run(["git", "merge-base", "--is-ancestor",
+                        summary["release_main_head"], summary["dispatch_main_head"]],
+                       cwd=REPO, check=True)
         assert all(HEX.fullmatch(value) for value in summary["binary_sha256"].values())
         check_receipts(panel, summary, freeze)
         if summary["classification"].startswith("COMPLETE"):

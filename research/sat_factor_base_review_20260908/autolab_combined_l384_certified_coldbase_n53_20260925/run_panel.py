@@ -158,6 +158,13 @@ def preflight():
 
 def run(args):
     frozen = preflight()
+    # `check_protocol` has just fetched main and checked the frozen release
+    # ancestor.  Seal the observed head so provenance is replayable later.
+    dispatch_main_head = subprocess.check_output(
+        ["git", "rev-parse", "origin/main"], cwd=REPO, text=True).strip()
+    subprocess.run(["git", "merge-base", "--is-ancestor",
+                    frozen["release_main_head"], dispatch_main_head],
+                   cwd=REPO, check=True)
     args.out.mkdir(parents=True, exist_ok=False)
     started = time.monotonic()
     root = {
@@ -168,6 +175,8 @@ def run(args):
         "base_hash": BASE_HASH,
         "base_gzip_sha256": sha(BASE_GZ),
         "checkout_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip(),
+        "release_main_head": frozen["release_main_head"],
+        "dispatch_main_head": dispatch_main_head,
         "source_sha256": frozen["source_sha256"],
         "binary_sha256": {"ic": sha(IC_EXE), "rho": sha(RHO_EXE)},
         "host": platform.platform(), "machine": platform.machine(),

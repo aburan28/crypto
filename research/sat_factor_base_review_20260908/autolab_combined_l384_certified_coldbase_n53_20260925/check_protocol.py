@@ -122,8 +122,9 @@ def preflight(*, require_release: bool = False) -> dict:
                        cwd=REPO, check=True, stdout=subprocess.DEVNULL)
         current_main = subprocess.check_output(["git", "rev-parse", "origin/main"],
                                                cwd=REPO, text=True).strip()
-        if current_main != release:
-            raise AssertionError("origin/main moved after release freeze")
+        if subprocess.run(["git", "merge-base", "--is-ancestor", release, current_main],
+                          cwd=REPO).returncode != 0:
+            raise AssertionError("origin/main no longer descends from frozen release main")
     return frozen
 
 
