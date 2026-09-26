@@ -163,6 +163,7 @@ regression on any gated layer is reverted, not explained away.
 | 2026-09-25 | **Measured:** where k0n53's whole method goes (ρ off; callgrind, one thread, scalar paths — valgrind has no AVX-512). The logs stage is relation collection, not linear algebra: its extension is 71,680 of 73,728 trials (147 relations for 144 columns), linear algebra 0.7 ms. Collection scan 68 % of instructions (`add_many_lazy` 48 % incl. `batch_inv` 28 %; Frobenius canonicalisation 24 %; the admitted-key lookup < 2 %), descent 19 %, pair table 4.6 %, setup ≈ 4 %, selection and linear algebra < 1 % each. Natively SIMD takes the method from ≈ 4.0 to 2.5 CPU-s | L3 | wall, 4 threads: k0n53 1.00–1.05 s (collect 0.13–0.17, logs 0.57, solve 0.17–0.20); k0n41 0.18–0.23 s | ranks the next E2E targets: relation yield a trial, then the batch inversion and the canonical key |
 | 2026-09-26 | Engineering: the folded pair-table build keys a row with the scan's kernels (`add_many_lazy`, bulk `canon_in_place`) instead of `add_many` and a scalar key a pair, and keys each pair **once**, placing it by a two-level partition (256 coarse partitions by hash, then a counting sort within each) instead of a count pass plus a fill pass through shared atomic cursors. Past 2 GiB of transient (12 B a pair) it keeps the two-pass build. `KIC_FOLD_BUILD=scalar` is the control | L1 | build at n = 53, 4 threads: 15,000 points 0.09 → 0.04 s; **45,000 points 1.03 → 0.33 s** (at 45,000 the atomic placing was 0.5 of the old 0.93 s). Gate against v5: all three rungs pass, counters identical; ρ/IC k0n41 7.75 → 8.34, k0n53 14.84 → 15.60 | tables identical (new test: bucket offsets, filter and each bucket's words) |
 | 2026-09-26 | E (rungs, **new reference v6**): with the build cheap, a base-size sweep on the same curves (ρ off) moves the optimum from 15,000 to ≈ 20,000–30,000 points at degree 53 and from 4,759 to ≈ 6,000 at degree 41; collection unit size and window scale move it by less than run-to-run spread. New rungs `k0n41-subgroup-wide.json` (6000) and `k0n53-subgroup-wide.json` (30000), windows scaled with `|F|`; the v5 files are unchanged | L3 | same host, v5 rung → v6 rung: k0n53 IC whole process **1.775 → 1.013 s** (descent trials 7.80 M → 2.06 M, summands scanned 31.7 M → 16.1 M), ρ/IC 15.60 → 27.28; k0n41 0.316 → 0.258 s, ρ/IC 8.34 → 10.28 | `ic-e2e-reference-v6.json` (engineering, AGENTS §3) |
+| 2026-09-26 | **Measured:** algebraic PDP at n = 53 over a non-invariant `V` (`examples/pdp_n53_bench.rs`; there is no Frobenius-stable `V` of useful size at n = 53) | L1 | m = 2 decomposes to ℓ = 22 (refutation 80 s, 2^18 branches), m = 3 to ℓ = 12 (planted, up to 1,167 s); balanced cells out of reach; every cell 10³–10⁴× slower than enumeration | see §8 |
 
 ## 6. What the L1 ladder says (pdp-reference-v1)
 
@@ -242,3 +243,58 @@ small degree of regularity would mean, and what the measurements here
 (and the repository's FFD and solving-degree ladders) do not show. What
 remains for the Gröbner route at m = 5, 6 is engineering: the constant
 per node and the use of every core.
+
+## 8. Algebraic PDP at n = 53
+
+**Why the L1 ladder has no n = 53 rung.** The order of 2 modulo 53 is 52,
+so `x^53 − 1 = (x + 1)·Φ` with `Φ` irreducible of degree 52. The only
+Frobenius-stable subspaces of `F_{2^53}` then have dimension 0, 1, 52 or
+53: there is no invariant factor base of useful size, which is also why
+the k0n53 IC rungs use subgroup-orbit bases. The algebraic route at
+n = 53 is therefore the classical Faugère–Perret–Petit–Renault /
+Petit–Quisquater setting: `F_V = { P : x(P) ∈ V }` for a non-invariant
+ℓ-dimensional `V ∋ 1`, with no Frobenius symmetry to fold.
+`examples/pdp_n53_bench.rs` measures it over a frozen random `V` per ℓ
+(`random_subspace_containing_one`, `plain_subspace_factor_base`).
+
+**Measured (4 cores, s a target; planted targets are sums of m base
+points, random ones `[k]G`; every answer verified in the group):**
+
+| m | ℓ | \|F\| | unknowns | engine | planted | random (refutation) | enumeration, same cell |
+|--:|--:|--:|--:|:--|:--|:--|:--|
+| 2 | 10 | 1,017 | 20 | groebner | 2/2, ≤ 0.05 s | 2/2, 0.005 s | < 0.01 s |
+| 2 | 14 | 16,437 | 28 | groebner | 2/2, ≤ 0.12 s | 2/2, 0.04 s (2^7 branches) | 0.06 s |
+| 2 | 18 | 262,057 | 36 | groebner | 2/2, ≤ 0.9 s | 2/2, 2.1 s (2^13) | ≈ 0.01 s a lookup scan |
+| 2 | 22 | 4,195,721 | 44 | groebner | 2/2, 2.5 / 25 s | 2/2, 80 s (2^18) | ≈ 0.2 s |
+| 2 | 18 | 262,057 | 36 | wide | 2/2, 16–55 s | 2/2, 16 s | |
+| 3 | 6 | 73 | 71 | wide | 2/2, ≤ 0.6 s | 2/2, 0.5 s | |
+| 3 | 8 | 265 | 77 | wide | 2/2, ≈ 3 s | 2/2, 4 s | |
+| 3 | 10 | 1,017 | 83 | wide | 2/2, ≈ 2 s | 2/2, 75 s (130 k nodes) | ≈ 0.02 s |
+| 3 | 12 | 4,141 | 89 | wide | 2/2, 17 / 1,167 s (1.7 M nodes) | not run | ≈ 0.3 s |
+
+So the Gröbner route **does decompose at n = 53** — m = 2 up to ℓ = 22
+and m = 3 up to ℓ = 12, planted and (where run) random — but the balanced
+cells, m·ℓ ≈ 53 (m = 2, ℓ ≈ 26; m = 3, ℓ ≈ 18), are out of reach, and
+every cell is 10³–10⁴× slower than enumeration.
+
+**Why, structurally.** With `e₁ = x₁ + x₂`, `e₂ = x₁x₂` and target
+abscissa `x₃`, `S₃ = e₂² + x₃e₂ + x₃²e₁² + b`: F₂-linear in `(e₁, e₂)`,
+and bilinear in the summand coordinates, since squaring is linear. An
+m = 2 decomposition system is 53 bilinear equations in ℓ + ℓ unknowns.
+Linear algebra closes a branch only once most of one side is fixed; the
+measured refutation branching is ≈ 2^(1.4ℓ − 12.6) (2^7, 2^13, 2^18 at
+ℓ = 14, 18, 22). That is below enumeration's 2^ℓ steps up to ℓ ≈ 31, so
+the algebra does prune, but a node costs ≈ 0.3 ms against ≈ 40 ns an
+enumeration step. Bilinear Macaulay matrices at higher bidegree reach
+the needed rank only near `(ℓ/2, 1)`, whose column count is again of
+order 2^ℓ. For m = 3, branching a summand leaves the m = 2 bilinear
+problem, so the cost multiplies by ≈ |F| — the §7 argument, now at a
+degree where no symmetry helps. Nothing measured here suggests a
+first-fall or regularity degree small enough to change that; this
+matches the published difficulties of the FPPR first-fall-degree
+assumption.
+
+**What would count as an advance here**, stated so it can be checked: a
+formulation whose refutation cost per random target at a *balanced*
+n = 53 cell is below the enumeration reference on the same host — not a
+larger ℓ solved slower. None of the engines here is near that.
