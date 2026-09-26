@@ -7,10 +7,15 @@
 //! reduced basis so two revisions can be compared for identical output.
 //!
 //! ```text
-//! cargo run --release --example f4_f2_bench -- [repeats]
+//! cargo run --release --example f4_f2_bench -- [repeats] [max_n] [families]
 //! ```
+//!
+//! `families` is a comma-separated subset of `f4`, `bb` (Buchberger) and
+//! `f5` (matrix-F5 steps), all three by default: `-- 5 24 f5` profiles the
+//! F5 steps alone.  The F5 lines also split their wall time into the
+//! criterion, the row construction, the elimination and the unpacking.
 
-use crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2;
+use crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_timed;
 use crypto_lib::cryptanalysis::pq_f4_f2::groebner_basis_f4;
 use crypto_lib::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_stats, F2BoolMono, F2BoolPoly};
 use serde_json::json;
@@ -64,6 +69,13 @@ fn main() {
         .nth(2)
         .map(|s| s.parse().expect("max_n"))
         .unwrap_or(usize::MAX);
+    let families: Vec<String> = std::env::args()
+        .nth(3)
+        .unwrap_or_else(|| "f4,bb,f5".into())
+        .split(',')
+        .map(str::to_owned)
+        .collect();
+    let run = |family: &str| families.iter().any(|f| f == family);
     for &(n, m) in &[
         (12usize, 12usize),
         (14, 14),
@@ -73,7 +85,7 @@ fn main() {
         (20, 20),
         (20, 30),
     ] {
-        if n > max_n {
+        if n > max_n || !run("f4") {
             continue;
         }
         let sys = system(n, m, 0x2545_f491_4f6c_dd1d ^ ((n * 64 + m) as u64));
@@ -97,14 +109,14 @@ fn main() {
             json!({
                 "case": format!("n{n}_m{m}"), "wall_ms": median(walls),
                 "build_ms": st.build_ns as f64 / 1e6, "eliminate_ms": st.eliminate_ns as f64 / 1e6,
-                "word_xors": st.word_xors, "divisor_tests": st.divisor_tests,
+                "word_xors": st.word_xors, "word_xors_performed": st.word_xors_performed, "divisor_tests": st.divisor_tests,
                 "steps": st.steps, "basis_len": st.basis_len, "basis_fp": format!("{:016x}", h.finish()),
             })
         );
     }
     // Buchberger (the reference engine) on the smaller systems
     for &(n, m) in &[(8usize, 8usize), (10, 10), (12, 12), (12, 16), (14, 14)] {
-        if n > max_n {
+        if n > max_n || !run("bb") {
             continue;
         }
         let sys = system(n, m, 0x2545_f491_4f6c_dd1d ^ ((n * 64 + m) as u64));
@@ -144,7 +156,7 @@ fn main() {
         (24, 24, 3),
         (24, 24, 4),
     ] {
-        if n > max_n {
+        if n > max_n || !run("f5") {
             continue;
         }
         let sys = system(n, m, 0x2545_f491_4f6c_dd1d ^ ((n * 64 + m) as u64));
@@ -152,11 +164,11 @@ fn main() {
         let mut last = None;
         for _ in 0..repeats {
             let t = std::time::Instant::now();
-            let r = matrix_f5_f2(&sys, n, degree).expect("within size limits");
+            let r = matrix_f5_f2_timed(&sys, n, degree).expect("within size limits");
             walls.push(t.elapsed().as_secs_f64() * 1e3);
             last = Some(r);
         }
-        let (rows, rep) = last.unwrap();
+        let (rows, rep, phases) = last.unwrap();
         let mut h = DefaultHasher::new();
         for p in &rows {
             for t in &p.terms {
@@ -170,6 +182,8 @@ fn main() {
                 "case": format!("f5_n{n}_m{m}_d{degree}"), "wall_ms": median(walls),
                 "criterion_word_ops": rep.criterion_word_ops, "reduce_word_ops": rep.reduce_word_ops,
                 "rows_pruned": rep.rows_pruned, "rank": rep.rank, "rows_fp": format!("{:016x}", h.finish()),
+                "criterion_ms": phases.criterion_ns as f64 / 1e6, "f5_build_ms": phases.build_ns as f64 / 1e6,
+                "reduce_ms": phases.reduce_ns as f64 / 1e6, "unpack_ms": phases.unpack_ns as f64 / 1e6,
             })
         );
     }
