@@ -54,8 +54,10 @@ template<class F> void point_test(const char*name,const char*ps,const char*xs,co
  std::cout<<name<<": Jacobian double + mixed add passed\n";
 }
 int main(){
- field_test<Fp256,P256Mod>("P-256",20000);
- field_test<Fp384,P384Mod>("P-384",20000);
+ field_test<Fp256,P256Mod>("P-256 Montgomery",20000);
+ field_test<Fp384,P384Mod>("P-384 Montgomery",20000);
+ field_test<Fp256Sol,P256SolMod>("P-256 Solinas",20000);
+ field_test<Fp384Sol,P384SolMod>("P-384 Solinas",20000);
  point_test<Fp256>("P-256 point",
   "0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff",
   "0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296",
