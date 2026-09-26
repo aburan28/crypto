@@ -133,6 +133,10 @@ ENVELOPE_SUFFIX = ".bin.json"
 # which is the cadence the dashboard and the alarms want; the backlog itself
 # is unbounded and the next pass simply takes the next slice.
 PASS_OBJECTS = 256
+# Records decoded and COPYed at a time within one object. 250k decoded rows is
+# about 140 MB of Python objects; see ingestObject for the object sizes that
+# made a bound necessary.
+INGEST_CHUNK_RECORDS = int(os.environ.get("RHO_INGEST_CHUNK_RECORDS", "250000"))
 
 
 def log(msg):
@@ -736,45 +740,59 @@ def ingestObject(conn, s3, bucket, key, found_at):
     whole = len(body) - len(body) % RECORD_BYTES
     wid = workerId(key)
     added = 0
+    collisions = []
+    duplicates = 0
     with conn.cursor() as cur:
         # A temp table plus one INSERT ... ON CONFLICT is both fast and
         # idempotent; row-at-a-time INSERT was the old ingester's ceiling.
         cur.execute("CREATE TEMP TABLE IF NOT EXISTS dp_in "
                     "(point_key bytea, a bytea, b bytea, walk_seed bytea) ON COMMIT DROP")
-        cur.execute("TRUNCATE dp_in")
-        # Sorted by the key the target is indexed on. point_key is a hash, so
-        # an object's records arrive in random index order and each insert
-        # walks to a different leaf page: on the 60 M-row table that measured
-        # ~2.2 random reads per row inserted. Sorting costs nothing here and
-        # turns a batch into a smaller set of pages touched repeatedly.
-        rows = sorted((decode(body[off:off + RECORD_BYTES])
-                       for off in range(0, whole, RECORD_BYTES)),
-                      key=lambda r: r["point_key"])
-        with cur.copy("COPY dp_in (point_key, a, b, walk_seed) FROM STDIN (FORMAT BINARY)") as cp:
-            cp.set_types(["bytea", "bytea", "bytea", "bytea"])
-            for r in rows:
-                cp.write_row((r["point_key"], r["a"], r["b"], r["walk_seed"]))
-        cur.execute(
-            "INSERT INTO distinguished_points "
-            "  (campaign_id, point_key, a, b, walk_seed, worker_id, found_at) "
-            "SELECT %s, point_key, a, b, walk_seed, %s, %s FROM dp_in "
-            "ORDER BY point_key "
-            "ON CONFLICT (campaign_id, point_key) DO NOTHING",
-            (CAMPAIGN, wid, found_at))
-        added = cur.rowcount
-        # Every record inserted means nothing conflicted, so there is nothing
-        # to look for: in the steady state, where each object is new points,
-        # the check below never runs and costs nothing. It runs on the
-        # re-reports and the resumed walks -- and on the one object that ends
-        # the campaign.
-        collisions = []
-        duplicates = 0
-        if added < len(rows):
-            collisions, duplicates = findCollisions(cur, key)
-            recordCollisions(cur, collisions)
-            if duplicates:
-                log("%s: %d of %d records are re-reports of points the store already "
-                    "holds under the same seed" % (key, duplicates, len(rows)))
+        # One object, several COPY batches, one transaction. A worker's delta
+        # is a few thousand records, but a sync loop whose state was reset
+        # re-sends a whole corpus as one object -- 6.5 M records on
+        # 2026-09-21, four times over -- and decoding that into Python dicts in
+        # one go is ~3.5 GB; six threads of it is how the ingest died at 10:30
+        # that day and stalled again at 14:00. The bytes stay whole (210 MB);
+        # only the decoded rows are bounded.
+        for start in range(0, whole, INGEST_CHUNK_RECORDS * RECORD_BYTES):
+            end = min(whole, start + INGEST_CHUNK_RECORDS * RECORD_BYTES)
+            cur.execute("TRUNCATE dp_in")
+            # Sorted by the key the target is indexed on. point_key is a hash,
+            # so an object's records arrive in random index order and each
+            # insert walks to a different leaf page: on the 60 M-row table
+            # that measured ~2.2 random reads per row inserted. Sorting costs
+            # nothing here and turns a batch into a smaller set of pages
+            # touched repeatedly.
+            rows = sorted((decode(body[off:off + RECORD_BYTES])
+                           for off in range(start, end, RECORD_BYTES)),
+                          key=lambda r: r["point_key"])
+            with cur.copy("COPY dp_in (point_key, a, b, walk_seed) FROM STDIN (FORMAT BINARY)") as cp:
+                cp.set_types(["bytea", "bytea", "bytea", "bytea"])
+                for r in rows:
+                    cp.write_row((r["point_key"], r["a"], r["b"], r["walk_seed"]))
+            cur.execute(
+                "INSERT INTO distinguished_points "
+                "  (campaign_id, point_key, a, b, walk_seed, worker_id, found_at) "
+                "SELECT %s, point_key, a, b, walk_seed, %s, %s FROM dp_in "
+                "ORDER BY point_key "
+                "ON CONFLICT (campaign_id, point_key) DO NOTHING",
+                (CAMPAIGN, wid, found_at))
+            addedHere = cur.rowcount
+            added += addedHere
+            # Every record inserted means nothing conflicted, so there is
+            # nothing to look for: in the steady state, where each object is
+            # new points, the check below never runs and costs nothing. It
+            # runs on the re-reports and the resumed walks -- and on the one
+            # object that ends the campaign.
+            if addedHere < len(rows):
+                found, dupes = findCollisions(cur, key)
+                recordCollisions(cur, found)
+                collisions += found
+                duplicates += dupes
+            del rows
+        if duplicates:
+            log("%s: %d of %d records are re-reports of points the store already "
+                "holds under the same seed" % (key, duplicates, whole // RECORD_BYTES))
         # Same transaction as the points, so the record of having ingested an
         # object cannot outlive the insert that it describes.
         cur.execute(
