@@ -40,9 +40,25 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--probe-receipt', type=Path, required=True)
+    parser.add_argument('--fallback-receipt', type=Path, required=True)
     args = parser.parse_args()
     out = args.out.resolve()
-    out.mkdir(parents=True, exist_ok=False)
+    fallback = args.fallback_receipt.resolve()
+    if fallback.exists():
+        raise SystemExit('NOT_ADMITTED: fallback receipt path already exists')
+    try:
+        out.mkdir(parents=True, exist_ok=False)
+    except Exception as exc:
+        fallback.parent.mkdir(parents=True, exist_ok=True)
+        fallback.write_text(json.dumps({
+            'schema': 'k0-dag-dimacs-linux-cadical-build-v1',
+            'utc': datetime.now(timezone.utc).isoformat(),
+            'decision': 'PREPARE_FAILURE',
+            'stage': 'CREATE_OUTPUT_DIRECTORY',
+            'output_directory': str(out),
+            'error': f'{type(exc).__name__}: {exc}',
+        }, sort_keys=True, indent=2) + '\n')
+        raise SystemExit('NOT_ADMITTED: output directory could not be created')
     prepare_path = HERE / 'PREPARE.json'
     prepare = json.loads(prepare_path.read_text())
     expected = prepare['cadical']
