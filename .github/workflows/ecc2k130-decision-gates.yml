@@ -1,0 +1,18 @@
+name: ECC2K-130 decision gates
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/NEXT_EXPERIMENT_DECISIONS_20260925.md'
+      - 'research/notes/ecc2k130/frobenius_subspace_gate_20260925.py'
+      - '.github/workflows/ecc2k130-decision-gates.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-subspace-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check exact n=131 Frobenius module dimensions
+        run: python3 research/notes/ecc2k130/frobenius_subspace_gate_20260925.py

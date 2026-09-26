@@ -19,7 +19,7 @@
 //! | `inherited-f4` | the same hybrid, children specialising their parent's reduced basis | word XORs (elimination, specialisation and linear elimination only) |
 //! | `crossbred-f2` | Joux–Vitse: a Macaulay left kernel, then `2^k` linear solves | word operations (partial) |
 //! | `xl-f2` | XL: multiply out to a degree, then linearise | monomial operations (modelled) |
-//! | `sat-cdcl` | CDCL with Tseitin monomials and native parity rows | conflicts |
+//! | `sat-cdcl` | CDCL with Tseitin monomials; parity encoded as CNF by default, native XOR opt-in | conflicts |
 //! | `fes-f2` | fast exhaustive search, libfes-lite Gray code, quadratic systems only | word XORs (Gray-code steps) |
 //! | `fes-f2-wide` | the same over 8 or 16 sub-cubes per step in the lanes of an AVX2 or AVX-512 register, ≤ 32 equations | vector XORs (Gray-code steps) |
 //! | `exhaustive` | evaluate every equation at every point, stopping at the first that fails | monomial tests |
@@ -77,6 +77,7 @@ use crate::cryptanalysis::koblitz_groebner::{
 };
 use crate::cryptanalysis::pq_f4_f2::{groebner_basis_f4, solutions_from_reduced_basis};
 use crate::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_within, solve_system_f2, F2BoolPoly};
+use crate::cryptanalysis::semaev_sat::XorEncoding;
 
 /// The largest system `exhaustive` and the model-enumerating solvers
 /// will attempt, since they are `2^n` in the variable count.
@@ -794,8 +795,30 @@ impl SystemSolver for XlF2 {
 
 // ── CDCL ───────────────────────────────────────────────────────────
 
+/// Validate a solver's configuration before a timed run. The solver trait
+/// cannot return configuration errors, so its own call repeats the check as
+/// a fail-fast invariant.
+pub fn validate_solver_params(name: &str, params: &Params) -> Result<(), String> {
+    if name == "sat-cdcl" {
+        sat_xor_encoding(params)?;
+    }
+    Ok(())
+}
+
+fn sat_xor_encoding(params: &Params) -> Result<XorEncoding, String> {
+    match params.get("sat_xor_encoding") {
+        None | Some("cnf") => Ok(XorEncoding::Cnf),
+        Some("native") => Ok(XorEncoding::Native),
+        Some(other) => Err(format!(
+            "invalid sat_xor_encoding `{other}`; expected cnf or native"
+        )),
+    }
+}
+
 /// The repository's CDCL solver, with one Tseitin auxiliary per
-/// monomial of degree at least two and the equations as parity rows.
+/// monomial of degree at least two. Parity is CNF-expanded by default
+/// for historical reproducibility; `sat_xor_encoding=native` opts into
+/// the solver's native XOR rows.
 pub struct SatCdcl;
 
 impl SystemSolver for SatCdcl {
@@ -804,14 +827,21 @@ impl SystemSolver for SatCdcl {
     }
 
     fn describe(&self) -> String {
-        "CDCL with Tseitin monomial definitions and native parity rows".into()
+        "CDCL with Tseitin monomial definitions and CNF parity by default (native XOR opt-in)"
+            .into()
     }
 
     fn parameters(&self) -> &[(&str, &str)] {
-        &[(
-            "sat_conflict_budget",
-            "conflicts before the solver gives up (default 200000)",
-        )]
+        &[
+            (
+                "sat_conflict_budget",
+                "conflicts before the solver gives up (default 200000)",
+            ),
+            (
+                "sat_xor_encoding",
+                "cnf (historical default) or native; recorded in cost.extra",
+            ),
+        ]
     }
 
     fn accepts(&self, shape: &SystemShape) -> bool {
@@ -830,11 +860,14 @@ impl SystemSolver for SatCdcl {
         _budget: Option<Duration>,
     ) -> (SolverVerdict, SolverCost) {
         use crate::cryptanalysis::sat::SolveResult;
+        let encoding = sat_xor_encoding(params)
+            .expect("sat-cdcl configuration must be validated before a timed solve");
         let started = Instant::now();
-        let mut enc = crate::cryptanalysis::semaev_sat::encode_boolean_system(
+        let mut enc = crate::cryptanalysis::semaev_sat::encode_boolean_system_with(
             system.n_vars,
             &system.equations,
             &[],
+            encoding,
         );
         enc.solver.conflict_budget = params
             .u64_or("sat_conflict_budget", 200_000)
@@ -851,6 +884,15 @@ impl SystemSolver for SatCdcl {
         extra.insert("restarts".into(), st.restarts);
         extra.insert("learnt_clauses".into(), st.learnt_clauses);
         extra.insert("xor_propagations".into(), st.xor_propagations);
+        extra.insert(
+            "native_xor_encoding".into(),
+            u64::from(encoding == XorEncoding::Native),
+        );
+        extra.insert("native_xor_rows".into(), enc.solver.n_xors() as u64);
+        extra.insert(
+            "original_clauses".into(),
+            enc.solver.n_original_clauses() as u64,
+        );
         let cost = SolverCost {
             ops: st.conflicts,
             op_unit: "conflicts".into(),
@@ -968,6 +1010,53 @@ mod tests {
             ],
             n_vars: 2,
         }
+    }
+
+    /// Keep the historical CNF default distinct from an explicitly
+    /// selected native-XOR arm, and check both against the same system.
+    #[test]
+    fn sat_cdcl_parity_modes_are_equivalent_and_reported() {
+        let sys = fixture();
+        let mut cnf = Params::default();
+        cnf.set("sat_xor_encoding", "cnf");
+        let mut native = Params::default();
+        native.set("sat_xor_encoding", "native");
+        let reference: std::collections::BTreeSet<u64> = [0, 3].into_iter().collect();
+        for (params, expected_native) in [(Params::default(), false), (cnf, false), (native, true)]
+        {
+            let (verdict, cost) = SatCdcl.solve(&sys, &params, None);
+            let SolverVerdict::Solved(points) = verdict else {
+                panic!("selected SAT encoding failed to solve the fixture: {verdict:?}");
+            };
+            assert!(points.iter().all(|point| reference.contains(point)));
+            assert_eq!(
+                cost.extra["native_xor_encoding"],
+                u64::from(expected_native)
+            );
+            assert_eq!(cost.extra["native_xor_rows"] > 0, expected_native);
+            assert!(cost.extra["original_clauses"] > 0);
+        }
+
+        let m = F2BoolMono::from_mask;
+        let inconsistent = BooleanSystem {
+            equations: vec![
+                F2BoolPoly::from_monos(vec![m(1)], 1),
+                F2BoolPoly::from_monos(vec![m(1), m(0)], 1),
+            ],
+            n_vars: 1,
+        };
+        for mode in ["cnf", "native"] {
+            let mut params = Params::default();
+            params.set("sat_xor_encoding", mode);
+            assert!(matches!(
+                SatCdcl.solve(&inconsistent, &params, None).0,
+                SolverVerdict::Unsatisfiable
+            ));
+        }
+        let mut invalid = Params::default();
+        invalid.set("sat_xor_encoding", "nativ");
+        assert!(validate_solver_params("sat-cdcl", &invalid).is_err());
+        assert!(std::panic::catch_unwind(|| SatCdcl.solve(&sys, &invalid, None)).is_err());
     }
 
     /// **Every engine must agree on the answer.**  A framework whose

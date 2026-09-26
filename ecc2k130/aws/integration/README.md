@@ -37,7 +37,9 @@ run cannot reach a developer's own database. Override with `ECC_IT_PG_PORT`,
 ## Two ways to get the services
 
 **Docker** (`docker-compose.yml`) is the intended way and the one CI uses:
-`postgres:16-alpine`, `redis:7-alpine`, `minio/minio`. Nothing is mounted and
+`postgres:16-alpine`, `redis:7-alpine`, and MinIO as
+`cgr.dev/chainguard/minio` (MinIO's own images no longer allow anonymous
+pulls; `docker-compose.yml` says more). Nothing is mounted and
 `down` removes the volumes, so there is no state to corrupt.
 
 **Without a Docker daemon** the same script starts the host's own

@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/Users/adamburan/.pyenv/versions/3.9.10/bin/python3",
+    "/private/tmp/kic-sparse-shared-log-20260925/research/notes/ecc2k130/compact_shared_log_20260925/verify.py",
+    "--mode",
+    "compact",
+    "--run",
+    "/private/tmp/kic-shared-log-n41-20260925/L8-b2-compact",
+    "--out",
+    "/private/tmp/kic-shared-log-n41-20260925/L8-b2-compact/independent_validation.json",
+    "--training",
+    "/private/tmp/kic-shared-log-n41-20260925/train",
+    "--training-report",
+    "/private/tmp/kic-shared-log-n41-20260925/train/independent_validation.json"
+  ],
+  "report_sha256": "c941bb282356bec4efae7d3175af51d32a4ab7b9479b00e9d9ea8b1f3715310b",
+  "returncode": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "a38222db7e232cc22b58c1f30095b2976f4a8726d45f6b2ca0e5cdb08ab90287",
+  "wall_ms": 2002.307959
+}

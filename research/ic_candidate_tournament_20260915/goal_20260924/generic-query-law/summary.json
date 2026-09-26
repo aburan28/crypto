@@ -1,0 +1,2515 @@
+{
+  "cold_ms": null,
+  "historical_reports": 35,
+  "instruction_cost": null,
+  "online_ms": null,
+  "passed": 47,
+  "promotion_eligible": false,
+  "results": [
+    {
+      "artifacts": {
+        "job.json": "2e3f6262b9cdc1084a367a0b915a97dad2f675de94bc921994f742adf9229d42",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "6d46f1aac4e0e1d5468577c4d8287e567a964db85888f986174383afe1358030"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-pair_table-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "eb41e001c99c64329bd105c17ad79c322b7ba2ef72a57b8d3fecdad30ed040b7",
+        "promotion_eligible": false,
+        "query_sha256": "4f98bb2537e99bc2c2342c0cbf3407038e2ea536d252f6bb7f25f86190412bf2",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "7141de973ff3e8f21a2e6e99748ec0a5ef964eae5dbe291468015a96df285df2",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "d18e7ffef24bcb99ec77a72908174b0650bbd2c68a540f8687e973310ace272c"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-pair_table-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "8c86781fc9124fdd74b83c0b4b057fc730ff07395417823a665c738bb240829b",
+        "promotion_eligible": false,
+        "query_sha256": "4f98bb2537e99bc2c2342c0cbf3407038e2ea536d252f6bb7f25f86190412bf2",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "cb5ce6e3889cf1faedb0751b98df1d139655212d33f1df7df6a068e799cd06d8",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "64701d7cd79df280d83cda499bbd8fce1b327ea26ddf0592902d82e29de3bde8"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-enumerate-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "72241b04a7b170172034de3fa6d2fe82b8d211c5b2e768263256c3ba0594495b",
+        "promotion_eligible": false,
+        "query_sha256": "a6da2181237870d44d31e90fdb78c29f8cac8b1b4300b767c222b421b7e1f0a9",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "6ba0d05a9ee446e3314c754badb3da80d616349e23cf81328ccee3e9bcdf4a27",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "4f75bde6499810534be0775330e46fdb2fcac79bbf28f99b70b2b0229b73f43f"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-enumerate-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "feb946afcad3171e16ab7621ba73788933377df15b7a14bf495bba03f2b30724",
+        "promotion_eligible": false,
+        "query_sha256": "a6da2181237870d44d31e90fdb78c29f8cac8b1b4300b767c222b421b7e1f0a9",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "a67dc90dbc87cec7f1b2c6f7b4432cbb0d8b5a70294b757926d2d85419edbac7",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "ebd2fdde28572fa786b6fa5441ca00573b916c56ff1ed861be9f3647714e3f9e"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-f4-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "c30ff31297475298db20fe521d2b7f29416894939b4a337255296ca810d3e09c",
+        "promotion_eligible": false,
+        "query_sha256": "a1fb71eb0318fe70365f42380c137cf38c765ae4947421c741511ec2cbb6c630",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "acc371194d016a43b1666d8a5aa5a3259c3eed689bcc0647b29de4c0c65ff1fe",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "68effa5d63f02018b5f82fa7f0023e610c930c0b15d7e0182b15765f8f0e9c1c"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-f4-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "1b5d542d95bdfb1971e1a9091703685c570a1dd61d6eae929e61545398bca27e",
+        "promotion_eligible": false,
+        "query_sha256": "a1fb71eb0318fe70365f42380c137cf38c765ae4947421c741511ec2cbb6c630",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "69acf40331c90b9bd4e76430838f99c9ec478b06e472fb1cc8fcc667d95016ef",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "5457196402672f9200b228125b5dae2d49154f9b95d958cb4f4cdb258cb20ae9"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-f5-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "012f387671f1ac193decdb532123743a018ed89d4f0f28ed4b7a7886b6db725e",
+        "promotion_eligible": false,
+        "query_sha256": "9bff6ea793ab7a07f494e7008bf15ae1671394fbcbd193cf1da8d402c71a8e6d",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "ab7e86dd39de734fe251c39e6d9df4d4651c18d48218c70998f08af1337e39eb",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "953117fbdc3b097ad752e221bb30ea23a097f506012e5a5ba371bbfaa1feccbd"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-f5-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "f935e4d50249a4c6dfc9d526f808190499b1d108fe5afe4dc82a4ac67f5da576",
+        "promotion_eligible": false,
+        "query_sha256": "9bff6ea793ab7a07f494e7008bf15ae1671394fbcbd193cf1da8d402c71a8e6d",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "2f7e8c1fb002fb8e052963a0a4110d0a384b4a51b3ed179fc8d3cf4c88a56be3",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "98325baaf6d6a8da0551cefea0940de44bbc81fc445a5d8306f93cde572280c1"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-inherited_f4-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "48b87cf462f8de86877d3435d6646a2a35d7b950ff7e4648b1d365037c836183",
+        "promotion_eligible": false,
+        "query_sha256": "5aa7efec9ce63a5c8a05ce4da02a6e592ef444cbbb050cd351ff15d8fd029b59",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "8b71f2fa15c55c52945a12e11c88019aae463b0a918fc4062df76594eda04af7",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "b624da9e03447f351427222adf0330d568270b85254c1d3622e1273aee4559ad"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-inherited_f4-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "ae965bdb2352fae17cbc8859ac4bf7be67908fda926cca46097ef10d031c9e83",
+        "promotion_eligible": false,
+        "query_sha256": "5aa7efec9ce63a5c8a05ce4da02a6e592ef444cbbb050cd351ff15d8fd029b59",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "a177891b11a571c2344bf6a5cb2f5e005daf08c61cc72347cee5e447d0c1d1df",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "c78493aacaf0aa281d16a0645a608d829fbb34bb39ce06c1313f5e077452fbc6"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 21,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 24,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-sat_xor-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 24,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "fe388cd4f7ca6810afb3ef2c7e027bc1dfcd2f34b1ee50a53ab7b3c267bd0048",
+        "promotion_eligible": false,
+        "query_sha256": "538c6d7d8b558ec81350690ddb2e10d07403414385d27136e3c9653c652a841f",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "0b0f40c421290048adbde32a1030ba47ba89136c58616fdd52f42a4f500068e8",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "f19d39d04fedb911b46c359efb4b21c620b88102ab0ea1674f2c651ee8e76e10"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 21,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 24,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-sat_xor-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 24,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "88f973288a655aa58d34a49a797e0e857da95ec9823b293c55d06bb8a7d48fa0",
+        "promotion_eligible": false,
+        "query_sha256": "538c6d7d8b558ec81350690ddb2e10d07403414385d27136e3c9653c652a841f",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "09bd653832f71dc20b7c5f21c6f24ab4ee803bfbbd5cf2f59778fea9bac7dbff",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "d2107d232de05131dc9b4bcf622afaffc2e7001b24a056326421ba422f88c17d"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-sat_cnf-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "2b16b9f3d55bd7a93e9bce96d9f48e3816d3ac565b8e5c18fe8d2422b34a0291",
+        "promotion_eligible": false,
+        "query_sha256": "93b2b6be9e602bd327160efefb4d004d0d74cf1989efb6768bc517fd1c65b499",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "f370cd5aa5f9688e55a4cccd25e3354c533522a885f25601f064e17716ce44b0",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "f65e661f1d48bf124cd278c569e3c2c6e2db1a41ce8d58d4327f28f3602d1374"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "a0-sat_cnf-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "ca482ff9a07d487c42886102c6f4019e27c59abbaeae762e5eae217d182c4a33",
+        "promotion_eligible": false,
+        "query_sha256": "93b2b6be9e602bd327160efefb4d004d0d74cf1989efb6768bc517fd1c65b499",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "be2b80b6dfa6c0fcf3b26976e0bc0f1e6e54d76428c59edf64b5cadac17dca3f",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "801c46f5bf8705d860171afebbec61a9ae10bf5d1f1c4c9e0bf07909a370e42a"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-pair_table-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "31f95fadd024a9d989b40fcc28152b253cf6530b60fb2cafb7b5d237cd1d8af6",
+        "promotion_eligible": false,
+        "query_sha256": "b7e4df44341b95fec45a58fd7856d188ef2337e9e056815e7f9bc74b4c2802f4",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "c9d0509e43125a471bab565c24757349b8e885b4748e1a8fa16b0bb72540f6e8",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "a97c8a72dccf28a742b2383ebd79b4804c615b4cff9542800238125eeffbbe09"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-pair_table-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "975ccceb239ed727265efe10a4e56bb0bbe9e3703cdf9e568ea2165984881841",
+        "promotion_eligible": false,
+        "query_sha256": "b7e4df44341b95fec45a58fd7856d188ef2337e9e056815e7f9bc74b4c2802f4",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "762f838640f6c027742cf53f60c220a178e54cf4f160360b6f84734bc0ed329c",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "3ded0332c9cd3a516cf9e4fb6d9178fccbbacbfd09721a900c870d28ee0f949c"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-enumerate-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "a3e320cfc11e4f1ae4ab9ea1a8fe69328a248f7b949408a2c9507375a07847e3",
+        "promotion_eligible": false,
+        "query_sha256": "d33e5fae1191191ae76fce892c8d1c9f62fe65388788714e9e21d992d1be9bf8",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "e52d9213c1391c63d9e10f4b9477027c0a09e436f9edc6436e61d383d0bcbd65",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "b9b302b19b1048e5979d9942ce7fd2a84501dd9c3f4a22c52272e478f38416e7"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-enumerate-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "86a1949841708f001c8776e9ad2d7f425f632a68c409ada74791f90909a9db07",
+        "promotion_eligible": false,
+        "query_sha256": "d33e5fae1191191ae76fce892c8d1c9f62fe65388788714e9e21d992d1be9bf8",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "a75c7e20d5307d4954881fa6a66b262bd4369db11b7562e062afe58d33972bf1",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "780b4de95e45eab8193d6e3066f544aeea6c0f73565b1de1a2944e750bdaa858"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-f4-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "d3ad68faa2d8d01c28f1f5b0d346430cca1e70c858e1fb0899a90113c804869b",
+        "promotion_eligible": false,
+        "query_sha256": "8cd2fc8512848ab0409711f9bbfa2dfda545ae05ceda0dca6e99dc5ee4cf4848",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "db0d60c5c5f8db17f2428a22a65a8abce76bb5e2ae2004da0ec30b0898c52136",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "811a6787ee9dea897529dde532fe1729ce90a85fede11416997faade02218fd2"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-f4-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "1288b4f9c97ec54e505cd87d443f74180e826c2539931739c848a440ddb175d5",
+        "promotion_eligible": false,
+        "query_sha256": "8cd2fc8512848ab0409711f9bbfa2dfda545ae05ceda0dca6e99dc5ee4cf4848",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "bee15cc2852ce05f10612d26cb33d70f9af727b70d42edf8ca5e553f971e2ed7",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "dda2c3b1b3566793f94cf74f52df2827a2857449f806f73bc35dc6b0751a8cca"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-f5-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "e455b87b41fb63f0ca9179915ba0bd7c13d873c8148cc64e89c95acafc2e92b3",
+        "promotion_eligible": false,
+        "query_sha256": "4d8a4ba9ad51b7f80536b882d316647218531f27bde2bbea8bd9a6969f846693",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "d7f0438ace2ede04c66e3de988a93134662a2169004798949078e17f0ef3ebbb",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "cccfe2ed7ce83caf116e85db651c34257308d2d2b4508305002391385634def6"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-f5-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "3d441c92801e1d669ba24647d3b509b6f495c8b51e2f842260cd9d6c69e8f7e8",
+        "promotion_eligible": false,
+        "query_sha256": "4d8a4ba9ad51b7f80536b882d316647218531f27bde2bbea8bd9a6969f846693",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "9dbccbeec7f57f8eaaa2b8c8c48e5192b11baba80bc8cafbbffb8f7326a0f7e0",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "80cf2e8cde17e7c453cf296e199d9162902753ba6c1b246df1e383f847b4e4e2"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-inherited_f4-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "7ae087923144e159aab7eac2fb13a843b84669bbff449a01a844be8d2a5a7257",
+        "promotion_eligible": false,
+        "query_sha256": "6b73729fa55b2047467fdac374cac2d8db742fb35286509b74aacde7f31fd82f",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "e8b2fda016dc675deb5940e325bcf9f502900eea4db907861e18d3827bae31ff",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "bfc03c9fcefd824ef80b3c81263c091fe611f1981a42b5d4eda324b05efebeaf"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-inherited_f4-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "892d8da797c2f9fd48baaebcd2ddd51d02f2acea8276ff48a3871b5313396b2d",
+        "promotion_eligible": false,
+        "query_sha256": "6b73729fa55b2047467fdac374cac2d8db742fb35286509b74aacde7f31fd82f",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "200605645948b160c9e6eab44b0e956cfb26ad5bbf3420a782811e1086872bd0",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "5c365b930446fd5887ec0573da048fef8e02b2f3e587155da544111c5a40f701"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-sat_xor-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "53057a60ad2ff983ea018c3e38b6852c75eb699a5f9957315c7168e0fa661175",
+        "promotion_eligible": false,
+        "query_sha256": "660920d81b0fe694a3575c25d3eaf2bc900622907a9c251ac523ab1b3b311a01",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "c1c9bc906ba7f2d9b7dc6f2f9f703a0201b3be4a727c96b26436907cb84a7c04",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "2199cd9f5d9d7f6185e5dbb1428c32c21a960a8cfe30230e2bd35fc77033bb86"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-sat_xor-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "8d3acbaad2d1ac83df507f2d17fdbaf5c55bb9022b3878ba8d0db202ff9102f1",
+        "promotion_eligible": false,
+        "query_sha256": "660920d81b0fe694a3575c25d3eaf2bc900622907a9c251ac523ab1b3b311a01",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "b020280e91327bb2257ca3d284c004a64496035df038fc7c5ffa601478b75ece",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "2fd34daf81f11ace7be31825c202ec661b0e3ada691aea83eeccdae9b98da04f"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-sat_cnf-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "03c5e53c25e49cdd34a1cca346a91ec00a0409611a94dc46227cbe68cf71b7ba",
+        "promotion_eligible": false,
+        "query_sha256": "6febd7adf8230ccbedb16acc38a08dd5489bc92cb68e742478748796b5346422",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "52237cded810f297b6b5920febb64ca85efc981737b6fb001c654e7bc9d4049f",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "456e96cbd7a1b5094b7c070b27b9073f6a090bcdee4287ffb50352b1a48a41ba"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 8,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "32"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete",
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "name": "a1-sat_cnf-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 8,
+        "descent_law": "sampled",
+        "descent_queries": 1,
+        "job_sha256": "1ec8d1973c83118eb278463802fbf495e0b4ba7a1c3d99aa8a9b38b4735ddb23",
+        "promotion_eligible": false,
+        "query_sha256": "6febd7adf8230ccbedb16acc38a08dd5489bc92cb68e742478748796b5346422",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "042d253f46d9c40369a097f69d70ccdf206cdfdb78d435097991c837a3372a0c",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "c4df2336066e3f6cdf294fafd053e0a100beb79122b8ac01d1487ffc2b453862"
+      },
+      "certificate": null,
+      "exit_code": 2,
+      "expected": "incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "incomplete-pair_table",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 1,
+        "descent_law": "walked-64",
+        "descent_queries": 0,
+        "job_sha256": "b6b1c63e397025bf2d5f0b5c890f12714df403b4ed8ca05709e911030bb83d75",
+        "promotion_eligible": false,
+        "query_sha256": "b183e8c0a1c3e3ea0278f8e15484706919d3f40806402fb1b1ee5f69c5381811",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "artifacts": {
+        "job.json": "4b80ec0c01eacf566a23295b90b42a9ef6c096318e77726013f3ff6e0a8f48db",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "0a6069eb5b950daa3a8d638009ebd0820c2049a20f14a9e3ec100afeea7dbddf"
+      },
+      "certificate": null,
+      "exit_code": 2,
+      "expected": "incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "incomplete-enumerate",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 1,
+        "descent_law": "sampled",
+        "descent_queries": 0,
+        "job_sha256": "829cce646704902b0e3337622238b6c759545a618a7b64cb04a09f6ba50426eb",
+        "promotion_eligible": false,
+        "query_sha256": "b183e8c0a1c3e3ea0278f8e15484706919d3f40806402fb1b1ee5f69c5381811",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "artifacts": {
+        "job.json": "3a0fa5cb6efa75cd0400bda1c9b973e3d6e8d45af37d3643ea5c78aa9cd6dc76",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "6ab269a5fb68f87d36b4f43d0a86127b93b247b0053729867323bd72e20b8610"
+      },
+      "certificate": null,
+      "exit_code": 2,
+      "expected": "incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "incomplete-f4",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 1,
+        "descent_law": "sampled",
+        "descent_queries": 0,
+        "job_sha256": "822db322df5e8933cf994e1d0fed7c1f97cbb81e90c9e47b6bb541eed4178db1",
+        "promotion_eligible": false,
+        "query_sha256": "c9c002647122fea6b1c3c907c8d300e99488e537039837911fec039ffce21dcd",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "artifacts": {
+        "job.json": "b9f457565f48ca01aaba906d5b60ca87fc8a5e68d20f3114893c421394e14451",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "be69fcef289581dab3b53f6f1ac1b8178f00c18c4eb0c76cdefbe54e44466a7b"
+      },
+      "certificate": null,
+      "exit_code": 2,
+      "expected": "incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "incomplete-f5",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 1,
+        "descent_law": "sampled",
+        "descent_queries": 0,
+        "job_sha256": "168d5c6f9e615aa0722dcee124510292e779684fdef027ddf499dc5027425778",
+        "promotion_eligible": false,
+        "query_sha256": "3bcd3bd47140307b878efa38b7fa7a13806d80e854437d945586ef338ecf1a7e",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "artifacts": {
+        "job.json": "51577b15d390f17335581953a036526ef1753a2ca1f2e3154ae7194a4effcb28",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "655760c1adce6977e99d1627b4628afcb1af4c38852c704ad7fdfb695ece1468"
+      },
+      "certificate": null,
+      "exit_code": 2,
+      "expected": "incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "incomplete-inherited_f4",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 1,
+        "descent_law": "sampled",
+        "descent_queries": 0,
+        "job_sha256": "3c97129245f4d86ddb0eef41848a7c39525cdcc0da0813c84802df4944bf08ad",
+        "promotion_eligible": false,
+        "query_sha256": "36c29439ad4b3fb608f88374ad92ad499d9bd57eee10f00a517079d8e5b3c2fe",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "artifacts": {
+        "job.json": "f2aa130ae3d83f6f1b79ebfb8a19a2a6351f6d597fcb553269a730c0800aff10",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "c88669059f1da07226fd6014b3420d9d35ce0c779a4d7612973ec8c8f5e09a88"
+      },
+      "certificate": null,
+      "exit_code": 2,
+      "expected": "incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "incomplete-sat_xor",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 1,
+        "descent_law": "sampled",
+        "descent_queries": 0,
+        "job_sha256": "16b0746a08792d699c90c20b368a5a1f5a1905dcfda89ca8f2038b7bba2b7f47",
+        "promotion_eligible": false,
+        "query_sha256": "77b943c36db748878b6f7f6f97f3e3e8c3f1e51f7b28fbc509368ff135e9c8a0",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "artifacts": {
+        "job.json": "7d2773cd20b914dab0a6ab26e3bd6d009fa66b0bf973aae807d747793f1ecdc5",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "1556ed517f5a26c2739a7b4564f53304d758d9ba558ae2c4001675114804e695"
+      },
+      "certificate": null,
+      "exit_code": 2,
+      "expected": "incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "name": "incomplete-sat_cnf",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 1,
+        "descent_law": "sampled",
+        "descent_queries": 0,
+        "job_sha256": "173fc5e80c25e5ea7d51212dcba6b594f3f694c8753ea8f7699677dd7aa8ca1c",
+        "promotion_eligible": false,
+        "query_sha256": "7c983cf1ee5c42575a9a0b725f9dab09f2c2b51e4d73ef2da9171a788ac09533",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "artifacts": {
+        "job.json": "90175613cc6b006755c08162d0341d15a1389d553232a15a3b821ad3ab6b96cd",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "14667cc30a11d1856907444e4a52d9828daf0caf8f6c1ec50688eedcdc062570"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "fresh_rows": 79,
+        "rank": 4,
+        "signed_base_size": 72,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 128,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 4,
+        "geometric_order_sha256": "21f006772e53238fc7365e4e677f9edb713758c1ae3e0cd0512f2ee3541c7b18",
+        "geometric_point_count": 72,
+        "geometric_set_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 72,
+        "usable_set_sha256": "15d39ca5d77d95c8c114392763cfdb8256823078496941b654556cbfed3cc98c"
+      },
+      "name": "n9-window0-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "357659158d8184a9f63b39762998175c446c522be6b6828aef642c90dee3dc4d",
+        "promotion_eligible": false,
+        "query_sha256": "837852d6f0d7ea809b147209b5712ced815865975e02f7f70797d70c63878ead",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "7cfd0e4370890656fd55007a130d616ff500be3c0e2ce71aa6c33d1c0cf06495",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "cb000986633ef5336d35f51b5791c8374ebebef092b2e5461886175ff530c63d"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "fresh_rows": 79,
+        "rank": 4,
+        "signed_base_size": 72,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 128,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 4,
+        "geometric_order_sha256": "21f006772e53238fc7365e4e677f9edb713758c1ae3e0cd0512f2ee3541c7b18",
+        "geometric_point_count": 72,
+        "geometric_set_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 72,
+        "usable_set_sha256": "15d39ca5d77d95c8c114392763cfdb8256823078496941b654556cbfed3cc98c"
+      },
+      "name": "n9-window0-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "4d3d79ce2c752b638a80cd5c6dfa7a0e7e0e7ab02cb5b0af5ade604785121320",
+        "promotion_eligible": false,
+        "query_sha256": "837852d6f0d7ea809b147209b5712ced815865975e02f7f70797d70c63878ead",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "576286ccd127156d6ddd889d405652aa01c71844787fc5d9d5615b6a61104a32",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "c078c9e093c84180da727c053d1d5a22cf1e12f73c18fbf18292692f80071de5"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "fresh_rows": 127,
+        "rank": 4,
+        "signed_base_size": 72,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 127,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 4,
+        "geometric_order_sha256": "21f006772e53238fc7365e4e677f9edb713758c1ae3e0cd0512f2ee3541c7b18",
+        "geometric_point_count": 72,
+        "geometric_set_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 72,
+        "usable_set_sha256": "15d39ca5d77d95c8c114392763cfdb8256823078496941b654556cbfed3cc98c"
+      },
+      "name": "n9-window1-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "windowed-64",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "fb6943b289c5e75e97302398e40b3df4880090a467b37e3e2ae8835631b2bb8c",
+        "promotion_eligible": false,
+        "query_sha256": "44673a54d3131b01404f4f1286d3ce8809bd5bb060d8e9236f935f7da6ca1d02",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "81863cd230ad973cb7ed17b1a248e065009ec7b222fe80bdd355cbd4954485e2",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "85ae61fb871bb9b4eeb85b08d594eae7f89b53525612b106de3976e62b961cde"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "fresh_rows": 127,
+        "rank": 4,
+        "signed_base_size": 72,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 127,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 4,
+        "geometric_order_sha256": "21f006772e53238fc7365e4e677f9edb713758c1ae3e0cd0512f2ee3541c7b18",
+        "geometric_point_count": 72,
+        "geometric_set_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 72,
+        "usable_set_sha256": "15d39ca5d77d95c8c114392763cfdb8256823078496941b654556cbfed3cc98c"
+      },
+      "name": "n9-window1-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "windowed-64",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "a2a0598101052fc758d94bb39799497a81d0793cb1c80f2d0799b8b2b77f27ff",
+        "promotion_eligible": false,
+        "query_sha256": "44673a54d3131b01404f4f1286d3ce8809bd5bb060d8e9236f935f7da6ca1d02",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "10d238d48610ceab7919b4a8eac738861cd80a010e764787200019b7ef3a8c9c",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "3a9848e01b836e6f0f3c506ee51e2a2b73525bf88f29e44a16bc343ec903ad0d"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "fresh_rows": 79,
+        "rank": 4,
+        "signed_base_size": 72,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 128,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 4,
+        "geometric_order_sha256": "21f006772e53238fc7365e4e677f9edb713758c1ae3e0cd0512f2ee3541c7b18",
+        "geometric_point_count": 72,
+        "geometric_set_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 72,
+        "usable_set_sha256": "15d39ca5d77d95c8c114392763cfdb8256823078496941b654556cbfed3cc98c"
+      },
+      "name": "n9-window1000-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "0355f80760ab8ac4b9d8d3f44b502cb7b6deef2b047d907f9c744bffae66aba3",
+        "promotion_eligible": false,
+        "query_sha256": "837852d6f0d7ea809b147209b5712ced815865975e02f7f70797d70c63878ead",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "6aec28aec2abf2fa66282a29d0d6878b650bb6dde0774d81e8ef5c38dcfd70da",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "19183b25268f8539d17c746b6f443f8c45a6ec9403879705a273234a95c7a092"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "fresh_rows": 79,
+        "rank": 4,
+        "signed_base_size": 72,
+        "solutions": [
+          "70"
+        ],
+        "verified_relations": 128,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 4,
+        "geometric_order_sha256": "21f006772e53238fc7365e4e677f9edb713758c1ae3e0cd0512f2ee3541c7b18",
+        "geometric_point_count": 72,
+        "geometric_set_sha256": "6ed25aa00802674a92684c295684a8fd8fd6dd490d05edf40af1a7572a542162",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 72,
+        "usable_set_sha256": "15d39ca5d77d95c8c114392763cfdb8256823078496941b654556cbfed3cc98c"
+      },
+      "name": "n9-window1000-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "ac94ae0615b70f28c48461b36f880a8952156d68c3a09a00ac64bd0be6428061",
+        "promotion_eligible": false,
+        "query_sha256": "837852d6f0d7ea809b147209b5712ced815865975e02f7f70797d70c63878ead",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "43101bec4371b4b0e98d634f4083a8180d0adc8f49bbf29f849d32d72b7b3dce",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "58d2b847906d377d467d0e3e01577d8f9c98c3edf9e849c49a40919cf4906076"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "fresh_rows": 123,
+        "rank": 7,
+        "signed_base_size": 182,
+        "solutions": [
+          "208"
+        ],
+        "verified_relations": 128,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 7,
+        "geometric_order_sha256": "83ddc7aa8ebbb0763077a490be550545589e334dbbb12d7fb7a8f9b6491f665d",
+        "geometric_point_count": 182,
+        "geometric_set_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 182,
+        "usable_set_sha256": "5029d36fa4f34037d4ebcbf9b47a7e6abf4e932bf7d13fb97dde97a0d39fb5da"
+      },
+      "name": "n13-window0-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "7affba4ad001bdeaca93b12a0e15c33f1616caca89657a44dd39680efe1906b7",
+        "promotion_eligible": false,
+        "query_sha256": "25631118bc63750c34182eff17159aee9b40463e045aca546eb2a6d9178339db",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "449755da6c44ea25b2cdfd73b1ec9b629f3e806df0c9897bf27bf80fcc2942eb",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "55cba7f020b2c7f4102b62b46df19bed43ec743507589d2339f7e484437b8e68"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "fresh_rows": 123,
+        "rank": 7,
+        "signed_base_size": 182,
+        "solutions": [
+          "208"
+        ],
+        "verified_relations": 128,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 7,
+        "geometric_order_sha256": "83ddc7aa8ebbb0763077a490be550545589e334dbbb12d7fb7a8f9b6491f665d",
+        "geometric_point_count": 182,
+        "geometric_set_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 182,
+        "usable_set_sha256": "5029d36fa4f34037d4ebcbf9b47a7e6abf4e932bf7d13fb97dde97a0d39fb5da"
+      },
+      "name": "n13-window0-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "d297ec435443400bd05d348d5024b4b7e6c972f605c592a15aa84ec04d9cc0f6",
+        "promotion_eligible": false,
+        "query_sha256": "25631118bc63750c34182eff17159aee9b40463e045aca546eb2a6d9178339db",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "bcf9e323322525aad6d58a6452dab8d6c51615c887b049d62077b7f92d6c3a4f",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "39054e2d01322c9c01f7800d052464d23a587fbd88285330346de43dc50d2196"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "fresh_rows": 128,
+        "rank": 7,
+        "signed_base_size": 182,
+        "solutions": [
+          "208"
+        ],
+        "verified_relations": 128,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 7,
+        "geometric_order_sha256": "83ddc7aa8ebbb0763077a490be550545589e334dbbb12d7fb7a8f9b6491f665d",
+        "geometric_point_count": 182,
+        "geometric_set_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 182,
+        "usable_set_sha256": "5029d36fa4f34037d4ebcbf9b47a7e6abf4e932bf7d13fb97dde97a0d39fb5da"
+      },
+      "name": "n13-window1-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "windowed-64",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "9d3bc0e9403f65abcefbf0784de685b38c0f83510b7d0702e249d3b8b39ad811",
+        "promotion_eligible": false,
+        "query_sha256": "41b1cb1f4aae80a89e74dc9a3bdb59dbe19b4c2bb2e04c7793cd8d8d10afb580",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "af28afe63d0d0f4d87ea399405b87e42177b7a915ceda90ccaac60361c07a8d6",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "f49cb6d8acc875aabfb4805f459e0b14233283c6d431ec892266b78cfd18b28a"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "fresh_rows": 128,
+        "rank": 7,
+        "signed_base_size": 182,
+        "solutions": [
+          "208"
+        ],
+        "verified_relations": 128,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 7,
+        "geometric_order_sha256": "83ddc7aa8ebbb0763077a490be550545589e334dbbb12d7fb7a8f9b6491f665d",
+        "geometric_point_count": 182,
+        "geometric_set_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 182,
+        "usable_set_sha256": "5029d36fa4f34037d4ebcbf9b47a7e6abf4e932bf7d13fb97dde97a0d39fb5da"
+      },
+      "name": "n13-window1-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "windowed-64",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "ce9b9b46de61988bcb670ed8983fd2415abdfba1307659ad8cc36796b28d8ab8",
+        "promotion_eligible": false,
+        "query_sha256": "41b1cb1f4aae80a89e74dc9a3bdb59dbe19b4c2bb2e04c7793cd8d8d10afb580",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "64464edb5a1764dca7d1802b97f20543acf5d1d8916a27b5ecd1d2136af1b544",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "860c2ba947906760d02a41d2da5fa62e047047722beee70655bcba8896aa84fb"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "fresh_rows": 123,
+        "rank": 7,
+        "signed_base_size": 182,
+        "solutions": [
+          "208"
+        ],
+        "verified_relations": 128,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 7,
+        "geometric_order_sha256": "83ddc7aa8ebbb0763077a490be550545589e334dbbb12d7fb7a8f9b6491f665d",
+        "geometric_point_count": 182,
+        "geometric_set_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 182,
+        "usable_set_sha256": "5029d36fa4f34037d4ebcbf9b47a7e6abf4e932bf7d13fb97dde97a0d39fb5da"
+      },
+      "name": "n13-window1000-dense",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "46688614fe41023b2739fea2211399eb3c83e235e8a6e7c1724f7ad13e960e45",
+        "promotion_eligible": false,
+        "query_sha256": "25631118bc63750c34182eff17159aee9b40463e045aca546eb2a6d9178339db",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "artifacts": {
+        "job.json": "49055bc6f110874c450cd34e4453bbb8ce3853c2657c2c2a070fa8dd1b04d7e0",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.json": "3d9e18a434622f498b8665788afe2269be928b806fdde004eeefaaea1e4e1bb6"
+      },
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "fresh_rows": 123,
+        "rank": 7,
+        "signed_base_size": 182,
+        "solutions": [
+          "208"
+        ],
+        "verified_relations": 128,
+        "verified_targets": 1
+      },
+      "exit_code": 0,
+      "expected": "complete-or-incomplete",
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 7,
+        "geometric_order_sha256": "83ddc7aa8ebbb0763077a490be550545589e334dbbb12d7fb7a8f9b6491f665d",
+        "geometric_point_count": 182,
+        "geometric_set_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "identity_images": 0,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 182,
+        "usable_set_sha256": "5029d36fa4f34037d4ebcbf9b47a7e6abf4e932bf7d13fb97dde97a0d39fb5da"
+      },
+      "name": "n13-window1000-sparse",
+      "promotion_eligible": false,
+      "query_law": {
+        "checker_sha256": {
+          "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+          "generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+          "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+        },
+        "collection_law": "sampled",
+        "collection_queries": 128,
+        "descent_law": "walked-64",
+        "descent_queries": 1,
+        "job_sha256": "5c2fb527158a47fc11b26b58a9761576a6acf8a1d4b2c55a7d3f6eea7bf6a11c",
+        "promotion_eligible": false,
+        "query_sha256": "25631118bc63750c34182eff17159aee9b40463e045aca546eb2a6d9178339db",
+        "schema_version": 1,
+        "scope": "query law and group replay only",
+        "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+      },
+      "status": "PASS",
+      "worker_status": "complete"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "toy query-law controls, no performance comparison",
+  "speedup": null,
+  "tests": 47
+}

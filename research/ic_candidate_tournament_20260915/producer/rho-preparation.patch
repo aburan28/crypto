@@ -1,0 +1,138 @@
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -6,7 +6,7 @@
+ use crypto_lib::cryptanalysis::koblitz_factor_base_search::FactorBaseSpec;
+ use crypto_lib::cryptanalysis::koblitz_fast::FastCurve;
+ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
+-    lift_points_with_x, koblitz_signed_frobenius_rho_with_progress, point_key,
++    lift_points_with_x, koblitz_signed_frobenius_rho_with_preparation, point_key,
+     DecompositionStrategy, FactorBaseLogSolver, IndividualLogSolver, KoblitzCurve,
+     KoblitzIcOptions, KoblitzSignedRhoOptions, LinearAlgebra, PairSumTable,
+     RelationCollector, RelationWorkUnit,
+@@ -329,7 +329,7 @@
+         return Ok(Report::Tree(json!({"schema_version":1,"status":"fixture","fixture":metadata})));
+     }
+     if job.mode == "rho" {
+-        ic_phase::begin_online(Phase::RhoSolve);
++        let mut rho_field_kernel = None;
+         let mut answers = Vec::new();
+         for (i, q) in targets.iter().enumerate() {
+             let options = KoblitzSignedRhoOptions {
+@@ -338,7 +338,10 @@
+                 parallel_walks: cfg.rho_parallel_walks,
+                 ..KoblitzSignedRhoOptions::default()
+             };
+-            answers.push(koblitz_signed_frobenius_rho_with_progress(&c, q, &options, &mut |_| {}));
++            answers.push(koblitz_signed_frobenius_rho_with_preparation(&c, q, &options,
++                &mut |fc| { rho_field_kernel = Some(fc.field.kernel_name());
++                    ic_phase::begin_online(Phase::RhoSolve); },
++                &mut |_| {}).ok_or("rho has no prepared packed backend")?);
+         }
+         mark(Phase::RecoveryCheck);
+         let verified = answers.iter().zip(&targets).all(|(answer,q)| {
+@@ -356,6 +359,7 @@
+             "fixture":metadata,"solutions":solutions,"automorphism_order":2*c.n,
+             "elapsed_seconds":start.elapsed().as_secs_f64(),"phase_schema":3,
+             "phase_wall_ns":phase_wall_ns,"online_wall_ns":online_wall_ns,"target_input":"supplied_public_point",
++            "rho_reusable_setup_excluded":true,"field_kernel":rho_field_kernel,
+             "source_manifest_sha256":koblitz_tiny_ic::source_snapshot(),
+             "executed_method":{"reference":"signed_frobenius_rho","requested_walks":cfg.rho_parallel_walks}})));
+     }
+@@ -715,6 +719,10 @@
+                 };
+                 assert_eq!(timing["online_wall_ns"].as_u64(), Some(online));
+                 assert!(online > 0);
++                if mode == "rho" {
++                    assert_eq!(report["rho_reusable_setup_excluded"], true);
++                    assert!(matches!(report["field_kernel"].as_str(), Some("portable"|"pclmulqdq")));
++                }
+             }
+         }
+     }
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -6046,9 +6046,23 @@
+     progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
+ ) -> KoblitzSignedRhoReport {
+     match FastCurve::new(&curve.curve) {
+-        Some(fc) => signed_rho_fast(&fc, curve, target, options, progress),
++        Some(fc) => signed_rho_fast(&fc, curve, target, options, progress, &mut |_| {}),
+         None => koblitz_signed_frobenius_rho_reference(curve, target, options, progress),
+     }
++}
++
++/// Run the packed reference with a boundary after reusable arithmetic and
++/// Frobenius constants are ready, before reading the target. The hook receives
++/// the actual arithmetic backend. Unsupported widths return None explicitly.
++pub fn koblitz_signed_frobenius_rho_with_preparation(
++    curve: &KoblitzCurve,
++    target: &BinaryPoint,
++    options: &KoblitzSignedRhoOptions,
++    ready: &mut dyn FnMut(&FastCurve),
++    progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
++) -> Option<KoblitzSignedRhoReport> {
++    let fc = FastCurve::new(&curve.curve)?;
++    Some(signed_rho_fast(&fc, curve, target, options, progress, ready))
+ }
+ 
+ #[derive(Clone, Copy)]
+@@ -6319,6 +6333,7 @@
+     target: &BinaryPoint,
+     options: &KoblitzSignedRhoOptions,
+     progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
++    ready: &mut dyn FnMut(&FastCurve),
+ ) -> KoblitzSignedRhoReport {
+     assert!(options.jump_count > 0, "rho needs at least one jump");
+     assert!(options.parallel_walks > 0, "rho needs at least one walk");
+@@ -6346,6 +6361,7 @@
+         trail_mask: rho_trail_mask(rho_expected_steps(modulus, curve.n)),
+     };
+     let g = fc.lift(curve.generator());
++    ready(fc);
+     let q = fc.lift(target);
+     let mut rng = StdRng::seed_from_u64(options.seed);
+     let mut report = KoblitzSignedRhoReport {
+@@ -11251,3 +11267,29 @@
+         }
+     }
+ }
++
++#[cfg(test)]
++mod rho_preparation_tests {
++    use super::*;
++
++    #[test]
++    fn prepared_entry_preserves_walk_charges_and_recovered_log() {
++        for (n,a) in [(13,0), (17,1), (23,1)] {
++            let c = KoblitzCurve::new(a,n).unwrap();
++            let q = c.mul(c.generator(), &BigUint::from(5u32));
++            let options = KoblitzSignedRhoOptions::default();
++            let before = koblitz_signed_frobenius_rho_with_progress(&c,&q,&options,&mut |_| {});
++            let mut calls = 0;
++            let after = koblitz_signed_frobenius_rho_with_preparation(&c,&q,&options,
++                &mut |fc| { calls += 1; assert_eq!(fc.n,n);
++                    assert!(matches!(fc.field.kernel_name(), "portable"|"pclmulqdq")); },
++                &mut |_| {}).unwrap();
++            assert_eq!(calls,1);
++            assert!(before.verified && after.verified);
++            assert_eq!(before.recovered_log,after.recovered_log);
++            assert_eq!(before.charges,after.charges);
++            assert_eq!(before.iterations,after.iterations);
++            assert_eq!(before.parallel_walks,after.parallel_walks);
++        }
++    }
++}
+--- a/src/cryptanalysis/semaev_decomp.rs
++++ b/src/cryptanalysis/semaev_decomp.rs
+@@ -162,6 +162,11 @@
+ }
+ 
+ impl Gf2 {
++    /// Backend selected by this field instance, including runtime dispatch.
++    pub fn kernel_name(&self) -> &'static str {
++        if self.has_clmul { "pclmulqdq" } else { "portable" }
++    }
++
+     pub fn new(irr: &IrreduciblePoly) -> Self {
+         assert!(irr.degree <= 63, "Gf2 handles n ≤ 63");
+         let n = irr.degree;

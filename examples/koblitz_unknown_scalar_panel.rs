@@ -294,6 +294,7 @@ fn disposition_name(value: KoblitzRelationAttemptDisposition) -> &'static str {
     match value {
         KoblitzRelationAttemptDisposition::RelationFound => "relation_found",
         KoblitzRelationAttemptDisposition::Refuted => "refuted",
+        KoblitzRelationAttemptDisposition::Unsupported => "unsupported",
         KoblitzRelationAttemptDisposition::Unknown => "unknown",
         KoblitzRelationAttemptDisposition::InvalidModel => "invalid_model",
         KoblitzRelationAttemptDisposition::DirectSkipped => "direct_skipped",

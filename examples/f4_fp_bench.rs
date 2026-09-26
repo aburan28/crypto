@@ -6,8 +6,12 @@
 //! engine can be compared for speed *and* for identical output.
 //!
 //! ```text
-//! cargo run --release --example f4_fp_bench -- [repeats]
+//! cargo run --release --example f4_fp_bench -- [repeats] [large]
 //! ```
+//!
+//! With `large`, the larger cases run after the standard ones: systems
+//! whose F4 takes from about a tenth of a second to several seconds, where
+//! the matrices are big enough for the elimination to dominate.
 
 use crypto_lib::cryptanalysis::f4_fp::{f4, solve, F4Options, Ordering, Poly, Verdict};
 use serde_json::json;
@@ -62,6 +66,7 @@ fn main() {
         .nth(1)
         .map(|s| s.parse().expect("repeats"))
         .unwrap_or(3);
+    let large = std::env::args().nth(2).is_some_and(|a| a == "large");
     // (name, n, m, deg, p, max_degree, solve?)
     let cases: &[(&str, usize, usize, u32, u64, u32, bool)] = &[
         ("quad_n4_p31", 4, 4, 2, 31, 12, true),
@@ -73,7 +78,15 @@ fn main() {
         ("quart_n3_p31", 3, 3, 4, 31, 16, true),
         ("overdet_n6_m9_p101", 6, 9, 2, 101, 10, false),
     ];
-    for &(name, n, m, d, p, dmax, do_solve) in cases {
+    let large_cases: &[(&str, usize, usize, u32, u64, u32, bool)] = &[
+        ("quad_n8_p65521", 8, 8, 2, 65521, 12, false),
+        ("quad_n9_p65521", 9, 9, 2, 65521, 14, false),
+        ("cubic_n5_p31", 5, 5, 3, 31, 16, false),
+        ("overdet_n10_m15_p65521", 10, 15, 2, 65521, 10, false),
+        ("overdet_n12_m24_p65521", 12, 24, 2, 65521, 10, false),
+    ];
+    let all = cases.iter().chain(large_cases.iter().filter(|_| large));
+    for &(name, n, m, d, p, dmax, do_solve) in all {
         let sys = system(
             n,
             m,

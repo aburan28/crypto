@@ -492,7 +492,9 @@ pub fn build_decomposition_system(
     }
     let ell = basis.len();
     let n = st.n;
-    let n_vars = m * ell + m.saturating_sub(2) * n as usize;
+    let n_vars = m
+        .checked_mul(ell)?
+        .checked_add((m - 2).checked_mul(n as usize)?)?;
     if n_vars > MAX_VARS {
         return None;
     }
@@ -3297,7 +3299,7 @@ fn forced_assignment(p: &F2BoolPoly) -> Option<(u32, bool)> {
 }
 
 /// Which algebraic engine reduces the system at each node.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum SolverEngine {
     /// Boolean matrix-F4 ([`matrix_f4_f2`]) through `max_degree`. Systems with
     /// at least 24 variables go directly to that degree because its row space
@@ -3592,7 +3594,7 @@ impl SolveOptions {
 
 /// Statistics from a solve, so callers can report what the algebra
 /// actually cost.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SolveStats {
     /// Algebraic reductions performed (F4 passes or Gröbner bases).
     pub reductions: usize,
@@ -3603,8 +3605,13 @@ pub struct SolveStats {
     pub propagations: usize,
     /// Splitting decisions made.
     pub splits: usize,
-    /// True if the node budget ran out, so results may be incomplete.
+    /// True if the node budget ran out or the input was unsupported, so
+    /// results may be incomplete. Check `unsupported` to distinguish them.
     pub exhausted: bool,
+    /// The decomposition frontend could not encode this input. No solve
+    /// occurred and an empty result is not an infeasibility certificate.
+    /// Also sets `exhausted` for callers using the older completion flag.
+    pub unsupported: bool,
     /// Highest Macaulay degree whose matrix was actually built.
     pub max_degree_built: u32,
     /// Reductions at which the next Macaulay matrix exceeded the size

@@ -1,0 +1,41 @@
+{
+  "R": 2,
+  "command": [
+    "/private/tmp/kic-base-sweep-20260925/target/release/examples/koblitz_s5_sat_instance",
+    "37",
+    "0",
+    "1317",
+    "1000000",
+    "natural",
+    "1",
+    "2000",
+    "1",
+    "internal"
+  ],
+  "count": null,
+  "environment": {
+    "KIC_ALGEBRA_ENCODING": "orbit_factorized",
+    "KIC_ORBIT_BATCH_ONLY": "1",
+    "KIC_ORBIT_BRANCH_ORDER": "pair_then_pair",
+    "KIC_ORBIT_INCLUDE_BASE_HEADER": "1",
+    "KIC_ORBIT_LAZY_RELATIVE_SUPPORT": "1",
+    "KIC_ORBIT_REP_ENCODING": "one_hot",
+    "KIC_ORBIT_TARGET_POINTS_JSONL": "/private/tmp/kic-sweep-r37-2-holdout-v1/target_points.jsonl",
+    "KIC_TASK_ID": "TASK-IC-COMPACT-BASE-SWEEP-20260925",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "executable_sha256": "c668b19ff89d429d8e47f06ba9696bb0d97f4fc92f58f717098687c5cabbb305",
+  "host": "Adams-MacBook-Pro.local",
+  "input_file": "target_points.jsonl",
+  "input_sha256": "45e8f4713f55ac6d03dc8064dfb01082f715f817d681477e46489bc7bb974358",
+  "input_spec_sha256": "700ab214498bdd18cc49530e0233ed2f135628124fdb3eea48cbda9e1ef6666b",
+  "mode": "holdout",
+  "n": 37,
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "schema_version": "1.0",
+  "seed_index": null,
+  "source_commit": "eee56e30965779e833f59fe5410cab6f61491c6e",
+  "source_path": "examples/koblitz_s5_sat_instance.rs",
+  "source_sha256": "c2bc8b05087df69bef9593363e9d7c112e843ef16da122da50eb29ab22115f09",
+  "timeout_seconds": 1800
+}

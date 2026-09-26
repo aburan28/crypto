@@ -1,0 +1,11 @@
+{"arm":"n13-m5","decision":"FAIL","error":"AssertionError()"}
+Traceback (most recent call last):
+  File "/private/tmp/kic-rotated-m56-exporter-20260925/research/notes/ecc2k130/rotated_m56_export_gate_20260925/gate.py", line 417, in <module>
+    main()
+  File "/private/tmp/kic-rotated-m56-exporter-20260925/research/notes/ecc2k130/rotated_m56_export_gate_20260925/gate.py", line 406, in main
+    result = run_arm(args.arm)
+             ^^^^^^^^^^^^^^^^^
+  File "/private/tmp/kic-rotated-m56-exporter-20260925/research/notes/ecc2k130/rotated_m56_export_gate_20260925/gate.py", line 315, in run_arm
+    assert all({p[0] for p in slot} == set(coordinate_maps[i])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

@@ -28,7 +28,9 @@ use crypto_lib::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, KoblitzOrbitBase, MitmOracle,
     PrimeAbscissaBase, SubtractOracle,
 };
-use crypto_lib::cryptanalysis::ic_framework::solvers::{solver_by_name, solver_registry};
+use crypto_lib::cryptanalysis::ic_framework::solvers::{
+    solver_by_name, solver_registry, validate_solver_params,
+};
 use crypto_lib::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
 };
@@ -645,8 +647,9 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
     // Validate the solver name up front, so a typo fails before a long
     // run rather than after it.
     if let Some(name) = &args.solver {
-        let (n, _) = parse_plugin(name)?;
+        let (n, params) = parse_plugin(name)?;
         solver_by_name(&n)?;
+        validate_solver_params(&n, &params)?;
     }
 
     // Either a sweep file or the flags describe the work.
@@ -701,6 +704,16 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
             ((regime, degree), vec![one], args.clone())
         }
     };
+
+    // A sweep may override the CLI default solver per configuration.
+    // Reject malformed SAT encoding before calibrations, rho or a target.
+    for cfg in &configs {
+        if let Some(raw) = cfg.get("solver").or(args.solver.as_ref()) {
+            let (name, params) = parse_plugin(raw)?;
+            solver_by_name(&name)?;
+            validate_solver_params(&name, &params)?;
+        }
+    }
 
     let (regime, degree) = instance_spec;
     let instance = match regime.as_str() {

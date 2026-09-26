@@ -1,0 +1,93 @@
+{
+  "artifacts": {
+    ".github/workflows/ecc2k130-factor-base-orbit-holdouts.yml": {
+      "bytes": 1784,
+      "sha256": "70cc8c21b458c5cc133320f6de9053a7b5d446c29168778bc1dc91004d1004b8"
+    },
+    "research/ecc2k130_direction_review_20260924/twist_torsion_results.json": {
+      "bytes": 65202,
+      "sha256": "6f1e7b22f3471214d38ec0d3196c88fe9edaf45791e9c05ea67764831fd75368"
+    },
+    "research/ecc2k130_dual_transport_20260925/dual_transport.py": {
+      "bytes": 4444,
+      "sha256": "c913bef64a115e4b42d6675ddbafac10379b166e58ddb94402ebbd44f1e7df9d"
+    },
+    "research/ecc2k130_factor_base_pilot_20260924/results_final.json": {
+      "bytes": 887753,
+      "sha256": "50d95459b97ee6c5d4b3b3559d33a71b08ac2df35b5cc1cb2abb682eb795aa07"
+    },
+    "research/ecc2k130_factor_base_pilot_20260924/run.py": {
+      "bytes": 23049,
+      "sha256": "da55be8578d332a05828414249767d9a36d96a36c8bb6a63708a7c47e0db3b0b"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/PROTOCOL.md": {
+      "bytes": 6243,
+      "sha256": "baf6c3df1321093839397f90334e6f05cf390e26ec028af42ea2348bf05e587c"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/README.md": {
+      "bytes": 7498,
+      "sha256": "62ced3610910d2877a6404f6dbb5eeaf1aaa697ec59dcced6829cf702112ee9c"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/compare_frozen.py": {
+      "bytes": 1942,
+      "sha256": "8426c67ab8e25257112495b476b1b68e75183b53011a5dace423a666d91a017c"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/exact_replay.json": {
+      "bytes": 1061,
+      "sha256": "982750f272271a566e48724f470b6bca51d9d3ba159114c7628693b3a2fe9865"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/exact_smoke.json": {
+      "bytes": 99093,
+      "sha256": "d83873d46f810c75045131ab57b3110e313f1185ba75831c1fa3739862f48e0c"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/exact_smoke.py": {
+      "bytes": 12578,
+      "sha256": "90a54ba796eb579d21bf0da0fe73f0ad3bef6574936fe18cffab658e99927511"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/replay.json": {
+      "bytes": 2825,
+      "sha256": "e17a602bc860cbb2130a8b3a30c0f6cdb4b49a73b529e2a76f82cb9c6259ece7"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/results.json": {
+      "bytes": 380211,
+      "sha256": "51a4c817cb817303c5c29ba2923a22f1d68410e234571c465c88da9685e24ff0"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/run.py": {
+      "bytes": 15826,
+      "sha256": "17bea826bf7d2286b562f7e2a79fcd253976d405c93cf4748886f4508204dd78"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/verify.py": {
+      "bytes": 15008,
+      "sha256": "525c98060af879668e0d88406cd088dac52334ad06daae0464493f75b8cf01f1"
+    },
+    "research/ecc2k130_factor_base_replication_20260925/verify_exact.py": {
+      "bytes": 6932,
+      "sha256": "c460b0fbf218121479b7f171f518a34145307c635a4b04bd71e4a75b8b72bbfd"
+    },
+    "research/ecc2k130_oriented_transport_20260924/oriented_velu.py": {
+      "bytes": 6121,
+      "sha256": "a1a656cc32efd612250b1ecf50dff18af79a8f62f970ee79841bfd390603423b"
+    },
+    "research/ecc2k130_relations/fastfield.py": {
+      "bytes": 7088,
+      "sha256": "b5990fda51700bbfba363251c41f02febfd0fc92edfea4f5ddd647bab472789e"
+    },
+    "research/ecc2k130_relations/relations.py": {
+      "bytes": 19185,
+      "sha256": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f"
+    }
+  },
+  "commands": [
+    "python3 research/ecc2k130_factor_base_replication_20260925/run.py --out /tmp/fb-toy.json",
+    "python3 research/ecc2k130_factor_base_replication_20260925/verify.py --input /tmp/fb-toy.json --out /tmp/fb-toy-replay.json",
+    "python3 research/ecc2k130_factor_base_replication_20260925/exact_smoke.py --toy /tmp/fb-toy.json --replay /tmp/fb-toy-replay.json --out /tmp/fb-exact.json",
+    "python3 research/ecc2k130_factor_base_replication_20260925/verify_exact.py --input /tmp/fb-exact.json --out /tmp/fb-exact-replay.json"
+  ],
+  "exact_smoke_status": "PASS",
+  "integrated_main_commit": "008fc9c1e9799450084b02e9bc4aed543614e239",
+  "preregistration_commit": "d1e4e56dcd0838f7819a6d38894601cc8a8359a2",
+  "schema": "ecc2k130-factor-base-orbit-holdouts-manifest-v1",
+  "source_platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "source_python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "toy_status": "PASS"
+}

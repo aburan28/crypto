@@ -1,0 +1,3 @@
+# Preserved first n13 replay failure
+
+The first frozen producer completed n13, but independent replay stopped at a JSON representation mismatch: producer output parses parity-count keys as strings (`"0"`, `"1"`), whereas the verifier compared an in-memory dictionary keyed by integers. The retained `n13-verify-failure.json` records the exact assertion. The source change converts only the verifier comparison keys to strings; the S3 root solver, target corpus, producer, and point oracle are unchanged. This is an accounting/replay correction, not a candidate result. The first frozen manifest and complete producer JSON remain here. The corrected verifier must run under a new freeze and output path.

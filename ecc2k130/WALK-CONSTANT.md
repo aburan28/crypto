@@ -28,13 +28,13 @@ rate on the card.**
   its rate.  `aws/campaign.json` still names σ, and the switch is the campaign
   owner's.
 - **`maxIters`** is `2^32` in `aws/campaign.json`, up from `2^30`, and the
-  replay tools admit it plus the guard's overshoot.  A scale model of the σ
-  walk at the same cap-to-trail ratios measures the loss §6 prices: the
-  guard cuts exactly the trails past it, discarding 14.2% of trail steps at
-  `2^30`'s ratio against 14.2% predicted and none at `2^32`'s
-  ([benchmarks/max-iters](benchmarks/max-iters/README.md)).  The bucket
-  copy, which is what workers read, is the owner's to republish, and on the
-  live store it can be raised at any time (§11.3).
+  replay tools admit it plus the guard's overshoot.  Workers read the bucket
+  copy, and `./rollout.sh max-iters 4294967296` raises that one field there.
+  A raise keeps every collected point and checkpoint (§11.4).  A scale model
+  of the σ walk at the same cap-to-trail ratios measures the loss §6 prices:
+  the guard cuts exactly the trails past it, discarding 14.2% of trail steps
+  at `2^30`'s ratio against 14.2% predicted, and none at `2^32`'s
+  ([benchmarks/max-iters](benchmarks/max-iters/README.md)).
 
 Round 1's answer was **keep the σ walk, and raise `maxIters`**, on these
 findings (the fruitless-cycle ones are about the rule as it was then):
@@ -64,11 +64,11 @@ findings (the fruitless-cycle ones are about the rule as it was then):
   steps** today.  At `dpWeight = 32` a trail averages `2^28.41` steps, so
   `2^30` is only three trail lengths.  About 5% of honest trails reach the
   guard first, and they are the longest.  `maxIters = 2^32` brings that loss
-  to 0.01%.  *Corrected:* this bullet went on to say no distinguished point
-  had been collected, so the change cost nothing.  It read the committed
-  placeholder `docs/ecc2k130-status/history.json`; the fleet had reported
-  32.8 M points by 2026-09-17 (`benchmarks/dp-interval/`).  Raising the
-  guard costs nothing anyway, for the reason §11.3 gives.
+  to 0.01%, and it can be raised at any time without losing collected work
+  (§11.4).  *(This line first said that no distinguished point had been
+  collected, citing `docs/ecc2k130-status/history.json`.  That file is a
+  committed placeholder and says nothing about the live bucket.  This is an
+  accounting correction.)*
 
 Everything below follows `AGENTS.md`: §1 gives the boundary and unit, §2 the
 method, §3 why the walks differ, §4 the single table, §5 the fruitless
@@ -489,11 +489,11 @@ None is an advance: no row moves the ratio to the floor below one.
   `maxIters` change below in the repository, §11.)*  Round 1 left the
   `maxIters` change to the campaign owner, for two reasons: the
   bucket copy is what workers read, and `maxIters` is part of the campaign
-  contract (`campaignContract` in `aws/protocol.py`), so changing it starts a
-  new corpus *(not on the live store, which binds no contract; §11.3
-  corrects this)*.  That costs nothing now and costs the corpus later, so the
-  change has the same deadline as the walk choice.  Recommended before
-  collection: `maxIters ≥ 2^32` at `dpWeight = 32`.  The witness generator
+  contract (`campaignContract` in `aws/protocol.py`), which binds it into a
+  strict (`storageProtocol`) corpus's id.  *(For the live corpus that was
+  wrong.  The live corpus is unversioned, so `maxIters` binds nothing there,
+  and a raise keeps every point and checkpoint; §11.4.)*  Recommended:
+  `maxIters ≥ 2^32` at `dpWeight = 32`.  The witness generator
   `src/witness.cpp` has to move with it.  It refuses a trail longer than its
   own `--max-iters`, which defaulted to `2^30`, and a cairn job's
   `max_steps_per_walker` can lower that.  Unless both are raised, the
@@ -818,7 +818,7 @@ independent, which overstates the uncertainty of the correlated ones.
   less per solve than σ.
 - **Before it is chosen,** that paired measurement is required: v2 table
   kernel against the σ kernel, alternating, in one session on one card, as
-  §6's rows are.
+  §6's rows are.  §11.5 declares it and its decision rule.
 
 ### 11.2 Classification
 
@@ -829,6 +829,7 @@ independent, which overstates the uncertainty of the correlated ones.
 | §6's five-tag sketch → four 16-bit tags | **accounting** | a correction to this note's own sketch; nothing measured changes |
 | the residual six-step relations | **accounting** | §6's 0.81–0.86 assumed every cycle caught; what is built leaves `2.0 × 10⁻⁵` of trails trapped, a ×1.0002 difference, so the projection is unchanged to two digits |
 | `README.md`'s `2^60.94` → `2^60.91–60.92` | **accounting** | a figure from a draft of §6 left in the README |
+| "`maxIters` is free only before the first point" → free at any time (§11.4) | **accounting** | the claim rested on a placeholder status file and on the strict contract, which the live corpus does not use |
 
 None is an advance: no row moves the ratio to the floor below one.
 
@@ -839,30 +840,15 @@ None is an advance: no row moves the ratio to the floor below one.
     default to `ECC_REPLAY_MAX_ITERS` in `include/kernel.h`: `2^32` plus the
     `ECC_GUARD_PERIOD − 1` steps a walk can run past the guard between
     checks, which a default of exactly `2^32` refused.
-    `aws/test_campaign_guard.py` pins it to `campaign.json`.  The bucket
-    copy is still what workers read, and republishing it is the campaign
-    owner's (`aws/README.md`).
-  - *Corrected:* this said `maxIters` is in the campaign contract, so the
-    change is free only before the first distinguished point, and that
-    `docs/ecc2k130-status/history.json` was still empty.  The contract binds
-    only a campaign with `storageProtocol`, and the live bucket copy has
-    none (`aws/bootstrap.sh` runs it as the unversioned store).  Checkpoints
-    do not record `maxIters`, and a trail is a function of its seed alone,
-    so a higher guard only lets trails finish that the lower one cut:
-    corpus, checkpoints and seed schedule carry over, and each worker adopts
-    the value at its next client restart.  `history.json` is a committed
-    placeholder; the fleet had reported 32.8 M points by 2026-09-17
-    (`benchmarks/dp-interval/`).
-  - Two limits remain.  A cairn claim is capped by its job's
-    `max_steps_per_walker`, which the production job in the cairn
-    repository sets to `2^30`, so the trails the longer guard recovers are
-    corpus points but not yet claimable there.  And collectors with no guard
-    at all (the Modal launcher passes no `--max-iters`; the FPGA engine has
-    none) report trails of any length, which a strict merge
-    (`merge.py --campaign`) rewalks only up to the campaign's cap.  The
-    share of their trails past it falls from 4.9% to 0.0006%, and for the
-    length-biased trail a collision lands on from 20% to 0.008%, but it is
-    not zero.
+    `aws/test_campaign_guard.py` pins it to `campaign.json`.  The bucket copy
+    is still what workers read, and `./rollout.sh max-iters 4294967296`
+    raises it there (§11.4).
+  - The live corpus is unversioned: `bootstrap.sh` runs it with
+    `ECC_ALLOW_LEGACY_STORAGE=1`.  So `maxIters` is in no campaign id there,
+    and a raise costs no collected work (§11.4).
+  - This bullet first said the change was free only before the first
+    distinguished point, citing an empty `docs/ecc2k130-status/history.json`.
+    That file is a committed placeholder, not the live bucket (accounting).
   - Every counter the guard compares, and every record field, is 64-bit.
     The witness's per-branch step counts are 32-bit.  A trail of at most
     `2^32` steps plus one guard period overflows one only by taking nearly
@@ -873,12 +859,181 @@ None is an advance: no row moves the ratio to the floor below one.
   the table walk under v2 is a new walk identity.  No table-walk point
   exists, so nothing forks.
 - Switching needs three things, in order:
-  1. the paired rate above;
+  1. the paired rate above (§11.5);
   2. the owner's decision;
-  3. a new corpus: points from two walks never collide, so the σ corpus,
-     32.8 M points by 2026-09-17, stays with σ.  This item said "both
-     before the first distinguished point, since the walk and `maxIters`
-     are both in the contract"; the first distinguished point was long
-     past, and `maxIters` is not what forks (above).
+  3. the switch made early, since the walk is part of a corpus's collision
+     identity: points from the σ walk never collide with the table walk's.
+     `maxIters` is not part of that identity (§11.4).
 - [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) and the [README](README.md)
   now point here, not at round 1's verdict.
+
+### 11.4 Raising `maxIters` on a live corpus
+
+`maxIters` restarts a walk that has gone that many steps without a report.
+It is a guard, not part of the walk, so raising it on a corpus that is
+already collecting loses nothing.
+
+- **Points.**
+  - A distinguished point is fixed by its seed, the walk and `dpWeight`.
+    `maxIters` only decides which trails are abandoned before they reach
+    one.
+  - A trail that ends under `2^30` ends at the same point under `2^32`.
+  - A point collected under the old guard collides with one collected under
+    the new guard exactly as two old ones would.
+  - Re-walking an old point to verify it needs fewer than `2^30` steps.
+  - Ingest does not filter records by trail length.
+- **Checkpoints.**
+  - The checkpoint header holds the magic, version, degree, threads,
+    batch, lanes, run id and iteration base.  It holds no guard.
+  - `test-production` checks this.  A host-engine checkpoint written under
+    a guard of two periods restores under four, and walks exactly as the
+    original did.  Past the old bound the old guard cuts every trail and
+    the raised one cuts none.
+- **Storage.**
+  - The live corpus is unversioned (`ECC_ALLOW_LEGACY_STORAGE=1`, from
+    `bootstrap.sh`), so no campaign id holds `maxIters`.
+  - Under `storageProtocol`, the campaign id binds the guard the campaign
+    was created with.  The first raise records that value as
+    `contractMaxIters`, so the id stays the same and so do the slots, the
+    manifests and every bound work directory.  The live `maxIters` may only
+    be at least `contractMaxIters`: `campaignContract` refuses anything
+    lower.  *(This bullet first said a strict raise was a new namespace, which
+    `rollout.py` refused; the follow-up that added `contractMaxIters`
+    changed that.)*
+- **How.**
+  - `./rollout.sh max-iters 4294967296` reads `campaign.json` together with
+    its ETag and changes `maxIters` and nothing else.
+  - It refuses a lower value and a live value of 0.  On a strict campaign
+    it records `contractMaxIters` and checks that the id did not move.
+  - It writes the file back only if the file did not change in the
+    meantime.
+  - Workers do not restart for this: it is neither a client-pointer move
+    nor a frozen field.
+  - Each worker takes the new guard when its client next restarts through
+    `reloadClient`: the scheduled restart every `restartHours` (48 in the
+    repository copy), or the next `rollout.sh activate`.  It checkpoints
+    first and resumes the same slot.
+  - A fleet running both guards during the change is harmless.
+- **Not this way.**
+  - Uploading the repository's `campaign.json` over the bucket's would carry
+    `storageProtocol` with it.  A worker started on that file refuses the
+    live slots' checkpoints ("legacy slot checkpoint requires audited
+    migration").  That is the one path that would lose work.
+  - Lowering the guard cuts trails that are already under way.
+- **Tools that re-walk trails** must accept the longer ones:
+  - `merge.py`'s solve step: leave out `--client-arg --max-iters`, since the
+    client's default cap is `2^34`, or raise it with the guard.  A merge work
+    directory accepts a raised `--max-iters` and refuses any other change to
+    the arguments it was bound with, because a larger replay cap re-walks
+    every stored point too.
+  - the witness generator and `trailforest`, whose default is
+    `ECC_REPLAY_MAX_ITERS`, the guard plus its overshoot, so a raise in the
+    bucket goes to `aws/campaign.json` and `include/kernel.h` too;
+  - cairn jobs, whose `max_steps_per_walker` must be at least `2^32`.  The
+    production job in the cairn repository sets `2^30`, so the trails the
+    raise recovers are corpus points but not yet claimable there.
+- **Collectors with no guard** are outside all of this: the Modal launcher
+  passes no `--max-iters`, and the FPGA engine has none.  Their trails can
+  be any length, and a strict merge (`merge.py --campaign`) replays only up
+  to the campaign's cap.  At `2^32` that misses 0.0006% of their trails, and
+  0.008% of the length-biased trails a collision lands on, against 4.9% and
+  20% at `2^30`.
+- **What is not recovered.** The steps the `2^30` guard has already
+  discarded, 15.6% of the steps so far.  Those trails were restarted, and
+  re-walking their seeds costs what new steps cost.  The raise stops the
+  loss from here on.
+
+### 11.5 The paired rate: declared before it runs
+
+§11.1 item 6 and §11.3 leave the switch one measurement short: the rate of
+the rule-v2 table kernel against the σ kernel, paired on one card.  This
+declares that measurement and its decision rule before any run
+(`AGENTS.md` §4).  No GPU is reachable from where this was written, so the
+job is prepared here and runs wherever the owner has a card.
+
+**What runs.** [paired-rate/gpujob.sh](benchmarks/walk-constant/paired-rate/gpujob.sh),
+under any of the three launchers, all on one RTX PRO 6000:
+
+```
+modal run --detach modal_job.py --job benchmarks/walk-constant/paired-rate/gpujob.sh --out OUT
+python3 aws/bench_job.py --job benchmarks/walk-constant/paired-rate/gpujob.sh --out OUT
+python3 runpod_job.py --job benchmarks/walk-constant/paired-rate/gpujob.sh --out OUT
+python3 benchmarks/walk-constant/paired-rate/summarize.py OUT --freeze benchmarks/walk-constant/paired-rate/run-1
+```
+
+- **Builds.** σ (`WALK_TABLE=0`) and the table walk under rule v2
+  (`WALK_TABLE=1`), from one tree, with §6's knob set (the audited 256 × 2
+  preset of `benchmarks/table-walk/gpujob.sh`), so the rows compare with
+  §6's.  Each walk gets its shipping witness default: σ carries it, the
+  table walk cannot.
+- **Correctness first.**
+  - `make test-table-walk-cuda`: the CUDA probe of §11.1 item 5, with the
+    rule-v2 histories.  It has only been compiled so far; this is its first
+    run on a GPU.
+  - Each binary's first 300 device reports, re-walked by the host
+    reference: 300 verified and 0 dropped, or the run is void.
+- **Rate.** Six rounds in each of two geometries, the automatic worker count
+  and the campaign's 385,024.  A round runs σ and the table walk back to
+  back, and the order flips each round.  Each sample is `--bench --steps
+  1024 --launches 32` and records the SM clock, power and temperature.
+
+**The cost.** Per solve, table over σ is
+
+```
+cost = (σ rate / table rate) × K,
+K    = c_table (1 + δ/2) / c_σ × table trap loss / σ guard loss = 0.932–0.943,
+```
+
+with every factor of `K` read from the round-2 files by `summarize.py`
+(item 6), across the σ bracket.  Per geometry the bracket is the smallest
+paired ratio times `K`'s low end, to the largest times its high end.  With
+§6's v1 rates this gives item 6's 0.811–0.863.  So the table walk pays while
+its rate is above 0.932–0.943 of σ's, which lets the v2 kernel lose up to
+14–19% of the v1 kernel's rate.
+
+**The decision rule.**
+
+- **Pays:** the bracket's upper end is below 1 in both geometries.
+- **Does not pay:** its lower end is above 1 in either geometry.
+- **Undecided:** anything else.  That calls for a second session, not a
+  switch.
+- **Void:** a failed build, a failed CUDA probe, anything short of 300/300
+  with 0 dropped on either binary, a bench sample with no rate, a missing
+  geometry, or a nonzero job exit.  All three launchers bring the results
+  back whatever the exit code.  A void run is frozen with the rest and run
+  again, never dropped.
+- `summarize.py` also prints the median ratio against §6's v1 session in each
+  geometry.  That comparison crosses sessions, and possibly cards, so it
+  indicates the rule's rate cost without measuring it.
+
+**The switch deadline.** A rate that pays is necessary, not sufficient.
+Points from the σ walk never collide with the table walk's (§11.3), so a
+switch abandons the σ corpus.
+
+- The work `W` to the first collision is Rayleigh distributed.
+- After `w₀ = f·E[W]` with no collision, the σ walk's expected remaining
+  work is `E[W]·exp(x²)·erfc(x)`, where `f = 2x/√π`.
+- A fresh table walk costs `cost × E[W]`, so the switch pays while
+  `exp(x²)·erfc(x) > cost`.
+- At item 6's 0.811–0.863 that is `f` below 15.4–22.3%.
+  `summarize.py --check-deadline` checks the formula by Monte Carlo and
+  reproduces both ends to four digits.
+- `summarize.py` prints `f` for the measured bracket.  Set it against the
+  work behind the σ corpus's stored points, over σ's expected
+  `2^60.91–60.92` (§11.2).  That work is the sum of their trails' lengths,
+  and every record carries its own.
+- Raw iterations overstate it.  The 15.6% of steps the `2^30` guard
+  discarded (§11.4) stored no point, so they add nothing to the corpus's
+  chance of a collision.  The figure lives in the bucket, not here.
+
+**Inadmissible:**
+
+- changing the knob set, the geometries, the repetitions or `K` after
+  seeing a rate;
+- dropping a round, a sample or a void run;
+- deciding on the geometry that favours one walk;
+- quoting wall time, or one geometry's bracket, as the verdict.
+
+**Classification when it lands:** engineering, whichever way it falls.
+Both walks sit at the floor (§11.2), so the rate moves `S` and not the
+ratio to the floor.

@@ -1,0 +1,32 @@
+name: ECC2K-130 n13 O-aware SAT stage archive
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/**'
+      - '.github/workflows/ecc2k130-n13-oaware-sat-benchmark.yml'
+      - 'docs/index-calculus-scoreboard.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-and-archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and verify frozen source/input hashes
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/{run,verify,ci_replay,analyze}.py
+          python3 research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/ci_replay.py
+      - name: Replay raw solver evidence without rerunning timed children
+        run: |
+          d=research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence
+          if test -f "$d/smoke/result.json" && test -f "$d/panel/result.json"; then
+            python3 research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/ci_replay.py --smoke "$d/smoke" --panel "$d/panel"
+          elif test -f "$d/smoke/result.json" || test -f "$d/panel/result.json"; then
+            echo 'Incomplete evidence pair' >&2
+            exit 1
+          fi

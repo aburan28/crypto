@@ -136,6 +136,43 @@ int main(int argc, char **argv) {
         require(engine.saves == (mode == 3 ? 1 : 0), "no checkpoint after lost/uncommitted reports");
         require(mode != 0 || engine.reseeds == 0, "no reseed after report overflow");
     }
+    // maxIters is a guard, not walk state: a checkpoint written under one
+    // guard restores under a larger one, the walk goes on exactly as it
+    // would have, and only the old guard would have cut it (aws/rollout.py
+    // max-iters relies on this).  Scaled down: 2 and 4 guard periods.
+    {
+        Options o; o.threads = 1; o.steps = ECC_GUARD_PERIOD; o.dpWeight = 0; o.dpCap = 65536; o.runId = 3;
+        o.maxIters = 2 * ECC_GUARD_PERIOD;
+        HostEngine<CfgF41> before, after;
+        before.setup(o, eccF41::PX, eccF41::PY, eccF41::QX, eccF41::QY);
+        before.launch(0);
+        const std::string ck = std::string(root) + "/max-iters.ck";
+        require(before.save(ck.c_str(), ECC_GUARD_PERIOD, o.runId), "checkpoint under the smaller guard");
+        o.maxIters = 4 * ECC_GUARD_PERIOD;
+        after.setup(o, eccF41::PX, eccF41::PY, eccF41::QX, eccF41::QY);
+        u64 it = 0;
+        require(after.restore(ck.c_str(), &it, o.runId) && it == ECC_GUARD_PERIOD,
+                "a checkpoint restores under a larger maxIters");
+        auto same = [&]() {
+            return before.x == after.x && before.y == after.y && before.dead == after.dead &&
+                   before.counts == after.counts && before.seed == after.seed &&
+                   before.startIter == after.startIter;
+        };
+        before.launch(ECC_GUARD_PERIOD);
+        after.launch(ECC_GUARD_PERIOD);
+        require(same(), "below both guards the restored walk is the original walk");
+        before.launch(2 * ECC_GUARD_PERIOD);
+        after.launch(2 * ECC_GUARD_PERIOD);
+        std::vector<DpRecord> reports;
+        require(before.fetch(reports) == 0 && after.fetch(reports) == 0, "no distinguished point at weight 0");
+        bool allCut = true, noneCut = true;
+        for (size_t i = 0; i < before.dead.size(); ++i) {
+            allCut &= before.dead[i] == ~HostEngine<CfgF41>::W(0);
+            noneCut &= after.dead[i] == HostEngine<CfgF41>::W(0);
+        }
+        require(allCut && noneCut && before.needsReseed() && !after.needsReseed(),
+                "the old guard cuts every trail at its bound, the raised one none");
+    }
     // The baseline bitsliced cycle guard used to emit non-DPs. It must only
     // request a restart, just as the packed backend does.
     {
@@ -155,5 +192,5 @@ int main(int argc, char **argv) {
         eng.launch(ECC_GUARD_PERIOD + 1);
         require(eng.fetch(records) == ECC_SEED_EXHAUSTED, "seed counter wrap rejected");
     }
-    printf("PASS: deterministic collision fixture, overflow/write/fsync fault isolation, cycle guard\n");
+    printf("PASS: deterministic collision fixture, overflow/write/fsync fault isolation, maxIters raise, cycle guard\n");
 }

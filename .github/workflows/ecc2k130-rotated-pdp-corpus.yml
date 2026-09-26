@@ -1,0 +1,28 @@
+name: ECC2K-130 rotated PDP corpus replay
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/**'
+      - '.github/workflows/ecc2k130-rotated-pdp-corpus.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check preregistered source, inputs and merged parent archive
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/rotated_pdp_corpus_20260925/{producer,verify,run,ci_replay}.py
+          python3 research/notes/ecc2k130/rotated_pdp_corpus_20260925/ci_replay.py
+      - name: Require complete evidence archive when receipt exists
+        if: hashFiles('research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/receipt.json') != ''
+        run: test -f research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz
+      - name: Replay both exact projected PDP arms
+        if: hashFiles('research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz') != ''
+        run: python3 research/notes/ecc2k130/rotated_pdp_corpus_20260925/ci_replay.py --evidence research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence

@@ -1,0 +1,30 @@
+name: WDSat child-status regression
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/wdsat_oracle.rs'
+      - 'research/notes/ecc2k130/WDSAT_CHILD_STATUS_*.md'
+      - '.github/workflows/wdsat-child-status.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/cryptanalysis/wdsat_oracle.rs'
+      - 'research/notes/ecc2k130/WDSAT_CHILD_STATUS_*.md'
+      - '.github/workflows/wdsat-child-status.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rust-oracle-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: Swatinem/rust-cache@v2
+      - name: Freeze dependency resolution
+        run: cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+      - name: Verify pinned upstream contradiction receipt
+        run: python3 research/notes/ecc2k130/wdsat_child_status_20260925/verify_fixture.py
+      - name: Exercise WDSat child-status and ANF fixtures
+        run: cargo test --locked --release --lib cryptanalysis::wdsat_oracle::tests

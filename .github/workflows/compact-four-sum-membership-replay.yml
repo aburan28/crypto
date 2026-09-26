@@ -1,0 +1,27 @@
+name: Compact four-sum membership replay
+on:
+  pull_request:
+    paths:
+      - 'examples/koblitz_four_sum_membership.rs'
+      - 'research/notes/ecc2k130/four_sum_membership_20260925/**'
+      - '.github/workflows/compact-four-sum-membership-replay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check source and fixed target regeneration
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/four_sum_membership_20260925/{make_inputs,run,verify,archive,replay_all}.py
+          python3 research/notes/ecc2k130/four_sum_membership_20260925/make_inputs.py > /dev/null
+      - name: Independently replay all archived complete pair sums, witnesses and sampled misses
+        run: python3 research/notes/ecc2k130/four_sum_membership_20260925/replay_all.py

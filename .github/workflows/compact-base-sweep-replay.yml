@@ -1,0 +1,26 @@
+name: Compact base sweep replay
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/compact_base_sweep_20260925/**'
+      - '.github/workflows/compact-base-sweep-replay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check frozen scripts
+        run: python3 -m py_compile research/notes/ecc2k130/compact_base_sweep_20260925/{make_inputs,run,verify,verify_holdouts,archive,replay_all,unordered_four_sum_bound}.py
+      - name: Check exact unordered-count thresholds
+        run: python3 research/notes/ecc2k130/compact_base_sweep_20260925/unordered_four_sum_bound.py > /dev/null
+      - name: Independently replay every archived relation, point log and rho scalar
+        run: python3 research/notes/ecc2k130/compact_base_sweep_20260925/replay_all.py

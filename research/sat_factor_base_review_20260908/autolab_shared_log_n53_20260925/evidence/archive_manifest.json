@@ -1,0 +1,8 @@
+{
+  "archive_bytes": 972813,
+  "archive_sha256": "6100f9b47da4a5fb6fa3ee152f4ec7376368fe09749db1aa196e4df204d4dfeb",
+  "classification": "COMPLETE_ALL_SIX_PAIRS",
+  "files": 119,
+  "panel_sha256": "7095e84a4e78742177e2181d2c19ae55b9ca1f6cceeae15a513edb17d72e8aa8",
+  "reassembly": "tar -xzf evidence.tar.gz && shasum -a 256 -c SHA256SUMS"
+}

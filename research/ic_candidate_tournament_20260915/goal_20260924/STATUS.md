@@ -1,6 +1,40 @@
 # September 24 bounded IC goal
 
-Status: optimized producer admission passed; no new performance tournament launched.
+Status: the archived reference panel has completed under the frozen protocol:
+1,290/1,290 native/profile pairs, three IC sources and eighteen rho configurations.
+[PR 761](https://github.com/aburan28/crypto/pull/761) merged the implementation at
+`e9b540eef8775f8d0d65e24c319174d8fefa7460`. The
+[qualification report and durable evidence](reference-qualification/README.md)
+select `pairinv` for IC cold instructions and online time, `rho_incumbent_4` for
+rho cold instructions and `rho_pairinv_4` for rho online time. PR 765 merged the evidence at `c2ca50318d4b9a3dc4c259e59106f2717553da31`,
+including exact Linux replay of 22 retained evidence sets and every exported table.
+Independent macOS receipt replay passed all 1,290 jobs, with two one-ULP
+derived-summary differences documented in the report.
+No reference selection is a promotion. One of the three improvement rounds has
+completed: [round one](improvement/round1/README.md), from
+[workflow 36140265516](https://github.com/aburan28/crypto/actions/runs/36140265516),
+retained the incumbent. Its frozen checker verified 3,243/3,243 native/profile
+pairs across all six stages, plus 30/30 policy controls. The selected `stop6`
+challenger had confirmation ratios of 1.064757 online time, 0.956822 cold Ir and
+0.964563 cold native time; replay also failed promotion. Neither complete cold
+metric reached the required 0.8 ratio, the instruction familywise upper bound
+exceeded one, and online regression also failed its aggregate and cell gates.
+The full run export and scoreboard retain every measured variant. Exact Linux
+transport replay and byte-exact JSON/CSV/table reproduction passed on the merged
+evidence head. [PR 782](https://github.com/aburan28/crypto/pull/782) merged at
+`b338522537f316f2379ed8cc11bb317212e573ec` with all applicable CI passing.
+The [bounded protocol](improvement/PROTOCOL.md) fixes the nominal familywise rule,
+5,133-point historical exclusions and the first 16-pipeline registry. PR 772
+merged that implementation at `5915da9d56758f81ceabbf978e796cd6be9740c3`.
+Do not dispatch round one again. A second round must be registered from
+development evidence only, with a new source identity and all prior generated
+targets excluded. No qualifying winner has been found; the full goal remains active.
+Canonical admission is merged in both drivers; the earlier
+[driver controls](driver-admission/README.md) preserve their fixed-vector scope.
+Public-point input and single-target native intervals are implemented in the
+[follow-up controls](public-inputs/README.md); PR 748 merged at
+`4a898fcd3464b71439bd9451bd466a6ec217ddc9`, with 39/39 IC and 13/13 rho
+native/profile pairs passing final Linux validation and independent replay.
 Foundation: [PR 704](https://github.com/aburan28/crypto/pull/704), merged at
 `c04879dbb305423d4e7bad9b9e9dd2188f000a35`.
 Canonical record/field/accounting work: [PR 718](https://github.com/aburan28/crypto/pull/718),
@@ -33,7 +67,13 @@ target, and passing confirmation and replay. The precise allocation, estimator,
 familywise rule and panel must be sealed before the first new measured round;
 this status note does not substitute for that protocol.
 
-## Baseline inventory, not yet fresh qualification
+The current user measurement contract makes **single-target online wall time**
+the headline metric, excluding reusable preparation and fixture generation. The
+complete cold instruction/time goals above are additional acceptance gates.
+Report both boundaries explicitly; neither batch amortization nor a cheap solver
+stage substitutes for the one-target result.
+
+## Baseline inventory and archived provenance
 
 | Source | Durable identity | Why retained |
 |---|---|---|
@@ -74,16 +114,93 @@ scalars; a public-target adapter is required before that path joins this panel.
    `measurement.py`, `test_records.py` and `ci_smoke.py`; merged in PR 718.
 2. Optimized archived producers now export eleven exclusive phases, ordinary-query
    outcomes/rank and matrix diagnostics; 39/39 pairs independently replay. Combined
-   old labels remain unknown under the new schema. Integrate admission into both
-   development and promotion drivers before any new comparison. Native phase-wall
-   and single-target online intervals still need instrumentation, with public-point
-   input so fixture construction stays outside the algorithm timing boundary.
-3. Restore/qualify candidate IC sources and a strong matched rho reference;
-   freeze rho width and source before held-out data.
+   old labels remain unknown under the new schema. Admission is now wired into
+   both drivers; the [driver control protocol](driver-admission/PROTOCOL.md)
+   covers canonical records, online timing, retained failures and frozen audit. The public-point
+   and single-target native timing follow-up passes local controls, Linux
+   integration and transported evidence replay. Rho reusable arithmetic/Frobenius
+   preparation is excluded from its online interval and retained in cold cost.
+3. The bounded reference-quality checks and five-cell development qualification
+   have executed; see the report above. Bind its selected complete sources and
+   rho settings to the new protocol before any held-out data.
 4. Seal the panel and familywise protocol, then run bounded rounds. Keep all
    failures and source/fixture/profiler artifacts; archive them durably, update
    the existing scoreboard, and merge implementation/evidence PRs.
 
 The local development machine is macOS arm64. Calibrated measurements require
 the existing Linux amd64 / Valgrind 3.22.0 workflow; native local timings cannot
-substitute for that accounting model. No new performance result is claimed here.
+substitute for that accounting model. The new measurements are development reference selection, not an improvement-round claim.
+
+## Reference-quality checks before comparison
+
+Review of the prepared `scaled` source identified two concrete issues. PR 761
+completed the allocator correction and independent row-arithmetic controls; it
+did not optimize the row kernel:
+
+- In `examples/ic_tournament_worker.rs`, the arena region guarantees 4096-byte
+  alignment but allocation rounds only the offset for arbitrary requested
+  alignments. Harden requests above that guarantee with a system-allocator
+  fallback or correct absolute-address alignment, and exercise the release
+  allocator controls. Keep old measured source snapshots immutable.
+- In `src/cryptanalysis/koblitz_tiny_ic.rs`, `Echelon::push` performs modular
+  arithmetic across every column, including already-zero prefixes. Review
+  trailing-column reduction and bounded-modulus arithmetic against independent
+  scalar-field rank/solution checks before treating this kernel as the strongest
+  compatible reference. A faster kernel must be measured; source inspection
+  alone does not establish a gain. These small matrices do not by themselves
+  justify replacing Gaussian elimination with a large sparse solver.
+
+Inspect the current compatible `icx`/rho paths as well as restored sources.
+Freeze a cross-campaign target exclusion set and the familywise confirmation rule
+before enabling promotion. The bounded runner now binds both selected rho sources/settings and the IC
+incumbent to the accepted qualification digest. The next deliverable is its
+executed bounded rounds; more integration controls alone will not complete this goal.
+
+
+Reference qualification now has measured development evidence. `pairinv`'s online
+ratio to the old incumbent is 0.9781 [0.9249, 1.0302], its cold instruction ratio
+is 0.9845 and its cold native ratio is 1.0064. This is not a 20% gain. Larger
+requested rho widths clip to the same effective width on several cells; the
+report preserves those counts. The existing exact evaluator remains unchanged,
+and Linux archive replay checks both raw receipts and derived selection. The first-round runner validates those bindings and exclusions before preparing
+fresh targets. Execute the registered diversified pipeline budget after its
+implementation PR passes; do not infer an improvement from these controls.
+
+
+## Generic query admission checkpoint
+
+The [generic query accounting protocol](generic-query-accounting/PROTOCOL.md)
+preserves every attempted collection/descent query, typed frontend outcomes and
+solver counters, plus terminal failed descents. The worker exports these records
+and retains actual attempted matrix solves. Independent group and bounded
+negative-answer replay checks accounting only; complete generic scientific
+admission still needs exact source/base/matrix binding and
+exclusive public-target timing. This is not an improvement round. The incumbent
+remains selected and two rounds remain under the frozen goal protocol.
+
+The [generic supplied-point follow-on](generic-public-inputs/RESULTS.md) separates
+fixture creation from measured jobs and places the outer online interval after
+reusable IC/rho preparation through independent scalar replay. Its 37 final local
+worker controls pass, including seven intended preparation failures with null
+online intervals. Combined legacy phase dumps remain unqualified for scientific
+cost comparison; full generic admission and the remaining two rounds are open.
+
+PR 803 merged at `62ef21ec1e083f197593edbe1309c5ddf60b7789` after all applicable
+checks passed, including Linux integration and strict archived-round replay.
+The [independent query-law controls](generic-query-law/RESULTS.md) now replay
+7,436 pinned Rust RNG/probe values, all 35 archived IC reports, and 47 fresh
+controls (40 complete, seven intentionally incomplete). Wrong seeds, batch
+partitions and collection/descent rules are rejected even when group equations
+remain valid. This is accounting admission, not a new measured improvement round.
+
+PR 805 merged the query-law checks at
+`c7c2922c116b2ec3ca84a2066a8b9c63a782a39d`, with all applicable checks passing.
+The [exclusive generic phase follow-on](generic-exclusive-phases/RESULTS.md)
+now passes two retained local 147-pair panels (126 complete and 21 deliberately
+incomplete pairs per panel). It separates query/PDP/checking/matrix/LA/descent
+work and independently checks native clock closure. Strict sessions reject
+phase changes on another thread. Linux instruction closure is exercised by
+the PR integration checks. Shared-host mode ratios remain too unstable to
+qualify overhead or comparative performance. This accounting work consumes no
+round; exact generic admission and optimized-reference qualification precede
+the remaining two rounds.

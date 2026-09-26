@@ -1,0 +1,45 @@
+name: IC reference evidence replay
+on:
+  pull_request:
+    paths:
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/**'
+      - 'research/ic_candidate_tournament_20260915/evidence/ic-reference-qualification-20260925.tar.zst'
+      - 'research/ic_candidate_tournament_20260915/evidence/manifest.json'
+      - 'research/ic_candidate_tournament_20260915/evidence/restore.py'
+      - '.github/workflows/ic-reference-evidence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  strict-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install archive decoder
+        run: sudo apt-get update && sudo apt-get install -y zstd
+      - name: Fresh extraction with SHA-256, file-count and byte-count checks
+        run: |
+          python research/ic_candidate_tournament_20260915/evidence/restore.py \
+            --archive ic-reference-qualification-20260925 --out "$RUNNER_TEMP/ic-reference-evidence"
+      - name: Independently replay certificates, accounting, summaries and reference selection
+        run: |
+          python research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/audit_archive.py \
+            --bundle "$RUNNER_TEMP/ic-reference-evidence/ic-reference-qualification" \
+            --out "$RUNNER_TEMP/ic-reference-audit.json"
+      - name: Reproduce every exported table row
+        run: |
+          python research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/export_report.py \
+            --round "$RUNNER_TEMP/ic-reference-evidence/ic-reference-qualification/full/ic-reference-qualification-36127866931-1/tournament" \
+            --out research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/RESULTS.json --verify
+      - name: Retain replay receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-reference-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/ic-reference-audit.json
+          if-no-files-found: warn
+          retention-days: 30

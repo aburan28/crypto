@@ -1,0 +1,145 @@
+{
+  "classification": "accounting and integration controls",
+  "improvement_rounds_used": 0,
+  "performance_winner": null,
+  "promotion_eligible": false,
+  "implementation_pr": "https://github.com/aburan28/crypto/pull/755",
+  "implementation_reviewed_head": "04ca67fca90d2fd6f6c6dc4d4b34ff7ffac469c5",
+  "implementation_merge": "0de6d004d81fb8c2d3e86ecef24c738d86fec853",
+  "merged_at": "2026-09-25T10:13:26Z",
+  "archive": "ic-driver-linux-controls-20260925.tar.zst",
+  "archive_sha256": "972f1b6e16cc9a09960fccc80ba5f64331c3d12a5a312581521c53cea53d334c",
+  "archive_bytes": 9324450,
+  "archive_files": 83113,
+  "expanded_file_bytes": 372870950,
+  "history": [
+    {
+      "phase": "initial",
+      "head_sha": "fdc34c1b70ddb29d3842ecca837200e3742b1633",
+      "workflow_run": "36118318243",
+      "url": "https://github.com/aburan28/crypto/actions/runs/36118318243",
+      "workflow_conclusion": "success",
+      "producer_ic_verified_pairs": 39,
+      "producer_rho_verified_pairs": 13,
+      "driver_summary": {
+        "executed_stages": [
+          "aa",
+          "smoke"
+        ],
+        "native_verified": 12,
+        "prepared_but_unexecuted": [
+          "development",
+          "selection",
+          "confirmation",
+          "replay"
+        ],
+        "profile_native_pairs_verified": 15,
+        "promotion_eligible": false,
+        "scope": "driver wiring controls; not a reference qualification or improvement round"
+      },
+      "producer_requires_same_ci_dependency": true,
+      "driver_replay_python_versions": [
+        "3.12"
+      ]
+    },
+    {
+      "phase": "intermediate",
+      "head_sha": "6b225ba3abba999fed0b3405d05ee229ad43f723",
+      "workflow_run": "36119164868",
+      "url": "https://github.com/aburan28/crypto/actions/runs/36119164868",
+      "workflow_conclusion": "success",
+      "producer_ic_verified_pairs": 39,
+      "producer_rho_verified_pairs": 13,
+      "driver_summary": {
+        "executed_stages": [
+          "aa",
+          "smoke"
+        ],
+        "native_expected_failures": 1,
+        "native_verified": 17,
+        "prepared_but_unexecuted": [
+          "development",
+          "selection",
+          "confirmation",
+          "replay"
+        ],
+        "profile_native_pairs_verified": 15,
+        "promotion_eligible": false,
+        "scope": "driver wiring controls; not a reference qualification or improvement round"
+      },
+      "producer_requires_same_ci_dependency": false,
+      "driver_replay_python_versions": [
+        "3.12"
+      ]
+    },
+    {
+      "phase": "clockfix",
+      "head_sha": "b462735a707ec9672ac92dbca67bd3d823fb54d2",
+      "workflow_run": "36120078732",
+      "url": "https://github.com/aburan28/crypto/actions/runs/36120078732",
+      "workflow_conclusion": "success",
+      "producer_ic_verified_pairs": 39,
+      "producer_rho_verified_pairs": 13,
+      "driver_summary": {
+        "executed_stages": [
+          "aa",
+          "smoke"
+        ],
+        "native_expected_failures": 1,
+        "native_verified": 17,
+        "prepared_but_unexecuted": [
+          "development",
+          "selection",
+          "confirmation",
+          "replay"
+        ],
+        "profile_native_pairs_verified": 15,
+        "promotion_eligible": false,
+        "scope": "driver wiring controls; not a reference qualification or improvement round"
+      },
+      "producer_requires_same_ci_dependency": false,
+      "driver_replay_python_versions": [
+        "3.12"
+      ]
+    },
+    {
+      "phase": "final",
+      "head_sha": "04ca67fca90d2fd6f6c6dc4d4b34ff7ffac469c5",
+      "workflow_run": "36121443713",
+      "url": "https://github.com/aburan28/crypto/actions/runs/36121443713",
+      "workflow_conclusion": "success",
+      "producer_ic_verified_pairs": 39,
+      "producer_rho_verified_pairs": 13,
+      "driver_summary": {
+        "executed_stages": [
+          "aa",
+          "smoke"
+        ],
+        "native_expected_failures": 1,
+        "native_verified": 17,
+        "prepared_but_unexecuted": [
+          "development",
+          "selection",
+          "confirmation",
+          "replay"
+        ],
+        "profile_native_pairs_verified": 15,
+        "promotion_eligible": false,
+        "scope": "driver wiring controls; not a reference qualification or improvement round"
+      },
+      "producer_requires_same_ci_dependency": false,
+      "driver_replay_python_versions": [
+        "3.11",
+        "3.12"
+      ]
+    }
+  ],
+  "limits": [
+    "Fixed controls across code revisions are not fresh confirmation samples.",
+    "Only A/A and smoke tournament stages executed.",
+    "Initial producer bundle requires its same-CI sealed missing dependency; original files remain unchanged.",
+    "Initial and intermediate tournament summaries require Python 3.12 floating-point summation.",
+    "Integer process-clock aggregation was introduced at clockfix; final driver artifacts were replayed under Python 3.11 and 3.12.",
+    "Comparative IC/rho reference qualification and familywise confirmation remain pending."
+  ]
+}

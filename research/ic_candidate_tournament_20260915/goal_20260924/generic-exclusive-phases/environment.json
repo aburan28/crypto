@@ -1,0 +1,35 @@
+{
+  "cpu_affinity": null,
+  "host": {
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "processor": "arm",
+    "release": "25.6.0",
+    "system": "Darwin",
+    "version": "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041"
+  },
+  "inputs_sha256": "b37a70caa8ba619c3c9c30cf918a6ee2931af643dc87ec729c129b5b7fa2619b",
+  "memory_limit": null,
+  "python": "3.12.13 (main, Mar 25 2026, 03:16:06) [Clang 22.1.1 ]",
+  "rayon_threads": 1,
+  "repetitions": 3,
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "scope": "uncalibrated whole-mode effects; serial collection and tracing both change",
+  "source_revision": "94ecca812e6cf1317b9d33f49768561e74e70850",
+  "sources": {
+    "Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+    "examples/ic_tournament_worker.rs": "70b2cf3d90a626952ecdaa3508085884289c214782561bd219271ddb940d3dcb",
+    "research/ic_candidate_tournament_20260915/generic_phases.py": "4f37180ab4141faa98d79f733a96e2a7ad792f37c645932d559f1bb7355ed1b6",
+    "research/ic_candidate_tournament_20260915/generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+    "research/ic_candidate_tournament_20260915/generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/PROTOCOL.md": "46b9bc8f39cd3888752f9faf432b430e0a1b25a8c64272635e1c2665d17ef5c7",
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/run_controls.py": "10f566144c893788e453e7113e9c33cbab9ad439debcf4e4cfe172b37314efd3",
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/run_controls.py": "8819eee98f2849c33a1512b038d99db4442c3ae64e788124b2e1a7f0d1f649b3",
+    "research/ic_candidate_tournament_20260915/identity.py": "1fcb72308e6353c55c30c2184c1d99edef7c84ef8283db6615e5fb3075fb307f",
+    "research/ic_candidate_tournament_20260915/oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf",
+    "src/cryptanalysis/ic_measurement.rs": "4dba299a29730bedc5476ec2711d59a0d8bbc49d67af56702e85e2610f7c3e90",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "43e0fb1f12b1689b7992fabe5a7dced62b41b5693cce67718b0c4d086af45db4"
+  },
+  "timeout_seconds": 60,
+  "worker_sha256": "33c11b9bd43f670be8155e50e6779674fc0e978d82e1990ca42b65e78538c544"
+}

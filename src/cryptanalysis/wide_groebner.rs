@@ -483,6 +483,7 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
         // with a counting pass: no sort of every term of every equation
         // (sorting was most of a search).
         let mut index: FxMap<Mono, usize> = FxMap::default();
+        index.reserve(eqs.iter().map(|p| p.terms.len()).max().unwrap_or(0) * 2);
         let mut all: Vec<Mono> = Vec::new();
         for p in eqs.iter() {
             for &m in &p.terms {
@@ -495,6 +496,10 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
         if all.len() > MAX_LINEARISATION_COLS {
             return true;
         }
+        // Ascending within a degree, so that a reduced row read in column
+        // order is one ascending run a degree (see `to_poly`): one sort of
+        // the distinct monomials here instead of one of every row there.
+        all.sort_unstable();
         let max_deg = all.iter().map(|m| m.count_ones()).max().unwrap_or(0) as usize;
         let mut start = vec![0usize; max_deg + 2];
         for m in &all {
@@ -504,6 +509,9 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
         for d in 1..start.len() {
             start[d] += start[d - 1];
         }
+        // Where each degree's columns end: a row read in column order is
+        // one ascending run between consecutive ends.
+        let degree_ends: Vec<usize> = start[1..].to_vec();
         let mut cols = vec![0 as Mono; all.len()];
         for &m in &all {
             let slot = &mut start[max_deg - m.count_ones() as usize];
@@ -535,16 +543,26 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
             &mut ops,
         );
         let to_poly = |row: &Vec<u64>| {
-            let mut terms: Vec<Mono> = Vec::new();
+            let weight: u32 = row.iter().map(|w| w.count_ones()).sum();
+            let mut terms: Vec<Mono> = Vec::with_capacity(weight as usize);
+            let mut runs: Vec<usize> = Vec::with_capacity(degree_ends.len());
+            let mut d = 0;
             for (w, &word) in row.iter().enumerate() {
                 let mut bits = word;
                 while bits != 0 {
-                    let b = bits.trailing_zeros() as usize;
+                    let c = w * 64 + bits.trailing_zeros() as usize;
                     bits &= bits - 1;
-                    terms.push(cols[w * 64 + b]);
+                    while c >= degree_ends[d] {
+                        runs.push(terms.len());
+                        d += 1;
+                    }
+                    terms.push(cols[c]);
                 }
             }
-            WPoly::from_monos(terms)
+            runs.push(terms.len());
+            WPoly {
+                terms: merge_degree_runs(terms, &runs),
+            }
         };
         let reduced: Vec<WPoly> = matrix[..rank].iter().map(to_poly).collect();
         if reduced.iter().any(WPoly::is_one) {
@@ -629,6 +647,55 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
         }
         subs.extend(batch);
     }
+}
+
+/// Monomials in column order — descending degree, ascending within a
+/// degree, no repeats — as the ascending list a [`WPoly`] keeps.  `runs`
+/// are the per-degree segments' ends in `terms`; they are merged two at
+/// a time (a plain merge each), not sorted.
+fn merge_degree_runs(terms: Vec<Mono>, runs: &[usize]) -> Vec<Mono> {
+    let mut bounds: Vec<(usize, usize)> = Vec::with_capacity(runs.len());
+    let mut lo = 0;
+    for &hi in runs {
+        if hi > lo {
+            bounds.push((lo, hi));
+        }
+        lo = hi;
+    }
+    if bounds.len() <= 1 {
+        return terms;
+    }
+    let mut cur = terms;
+    let mut next: Vec<Mono> = Vec::with_capacity(cur.len());
+    while bounds.len() > 1 {
+        next.clear();
+        let mut merged = Vec::with_capacity(bounds.len().div_ceil(2));
+        for pair in bounds.chunks(2) {
+            let start = next.len();
+            if let [(a0, a1), (b0, b1)] = *pair {
+                let (a, b) = (&cur[a0..a1], &cur[b0..b1]);
+                let (mut i, mut j) = (0, 0);
+                while i < a.len() && j < b.len() {
+                    if a[i] < b[j] {
+                        next.push(a[i]);
+                        i += 1;
+                    } else {
+                        next.push(b[j]);
+                        j += 1;
+                    }
+                }
+                next.extend_from_slice(&a[i..]);
+                next.extend_from_slice(&b[j..]);
+            } else {
+                let (a0, a1) = pair[0];
+                next.extend_from_slice(&cur[a0..a1]);
+            }
+            merged.push((start, next.len()));
+        }
+        std::mem::swap(&mut cur, &mut next);
+        bounds = merged;
+    }
+    cur
 }
 
 fn prolong_degree() -> u32 {
@@ -1542,6 +1609,27 @@ mod tests {
                     p.eval((bits | ones) & !zeros)
                 );
             }
+        }
+    }
+
+    #[test]
+    fn degree_runs_merge_to_ascending_order() {
+        let mut rng = StdRng::seed_from_u64(9);
+        for _ in 0..200 {
+            let mut monos: Vec<Mono> = (0..rng.gen_range(0..40))
+                .map(|_| {
+                    (0..rng.gen_range(0..4)).fold(0u128, |m, _| m | 1u128 << rng.gen_range(0..128))
+                })
+                .collect();
+            monos.sort_unstable();
+            monos.dedup();
+            let mut column_order = monos.clone();
+            column_order.sort_by_key(|m| (std::cmp::Reverse(m.count_ones()), *m));
+            let mut runs: Vec<usize> = (1..column_order.len())
+                .filter(|&i| column_order[i].count_ones() != column_order[i - 1].count_ones())
+                .collect();
+            runs.push(column_order.len());
+            assert_eq!(merge_degree_runs(column_order, &runs), monos);
         }
     }
 

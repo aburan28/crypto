@@ -1,0 +1,32 @@
+name: ECC2K130 rotated m5/m6 exporter semantic gate
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ecc2k130-rotated-m56-export-gate.yml'
+      - 'research/notes/ecc2k130/rotated_m56_export_gate_20260925/**'
+      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/**'
+      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/verify.py'
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-rotated-m56-export-gate.yml'
+      - 'research/notes/ecc2k130/rotated_m56_export_gate_20260925/**'
+      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/**'
+      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/verify.py'
+
+jobs:
+  frozen-semantic-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check independently pinned freeze anchor
+        run: echo "be1cd1db1556a4a36cb79040e576adcbb1b6829e3d34934876d4a427d90c3d8a  research/notes/ecc2k130/rotated_m56_export_gate_20260925/FROZEN.json" | sha256sum --check
+      - name: Check frozen source, targets, and pre-outcome self-test
+        run: python3 research/notes/ecc2k130/rotated_m56_export_gate_20260925/ci_replay.py
+      - name: Re-enumerate committed exact semantic outcomes
+        if: ${{ hashFiles('research/notes/ecc2k130/rotated_m56_export_gate_20260925/evidence/receipt.json') != '' }}
+        run: python3 research/notes/ecc2k130/rotated_m56_export_gate_20260925/ci_replay.py --evidence research/notes/ecc2k130/rotated_m56_export_gate_20260925/evidence

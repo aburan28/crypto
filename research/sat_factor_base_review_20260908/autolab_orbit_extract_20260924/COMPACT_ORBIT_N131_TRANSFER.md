@@ -1,5 +1,7 @@
 # Compact-orbit transfer to ECC2K-130: a bounded feasibility gate
 
+**Exact-count update (2026-09-25):** The [unordered four-sum addendum](COMPACT_ORBIT_N131_UNORDERED_ADDENDUM_20260925.md) supersedes this note's loose `F⁴/q` coverage ceilings and their associated threshold rows. The original ordered bound remains valid; its smaller threshold and memory projections should not be used for current decisions.
+
 **Verdict for the current materialized-root, exhaustive-query design:** no-go for an n=131 port as the next performance step. This is an architecture-specific, conditional projection, **not** an n=131 measurement or a claim about index calculus in general. The next investment should be in a demonstrably subquadratic-memory pair support *and* a query path that avoids scanning all pair states on a miss, followed by a same-stream, cold matched-rho comparison on smaller rungs. The model and exact integer calculations are in [`n131_transfer_model.py`](n131_transfer_model.py).
 
 ## Pinned inputs and accounting boundary

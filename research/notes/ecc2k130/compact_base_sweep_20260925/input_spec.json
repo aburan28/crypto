@@ -1,0 +1,112 @@
+{
+  "arms": {
+    "37": [
+      {
+        "F": 74,
+        "R": 1,
+        "eta_denominator": 1000000,
+        "eta_numerator": 146,
+        "subgroup_order": 230603167
+      },
+      {
+        "F": 148,
+        "R": 2,
+        "eta_denominator": 1000000,
+        "eta_numerator": 1317,
+        "subgroup_order": 230603167
+      },
+      {
+        "F": 222,
+        "R": 3,
+        "eta_denominator": 1000000,
+        "eta_numerator": 5125,
+        "subgroup_order": 230603167
+      }
+    ],
+    "41": [
+      {
+        "F": 328,
+        "R": 4,
+        "eta_denominator": 1000000,
+        "eta_numerator": 7,
+        "subgroup_order": 549756390943
+      },
+      {
+        "F": 656,
+        "R": 8,
+        "eta_denominator": 1000000,
+        "eta_numerator": 71,
+        "subgroup_order": 549756390943
+      },
+      {
+        "F": 984,
+        "R": 12,
+        "eta_denominator": 1000000,
+        "eta_numerator": 255,
+        "subgroup_order": 549756390943
+      }
+    ]
+  },
+  "domain": "ECC2K-COMPACT-BASE-SWEEP-20260925-v1/",
+  "holdout_points_n37_sha256": "45e8f4713f55ac6d03dc8064dfb01082f715f817d681477e46489bc7bb974358",
+  "holdout_points_n41_sha256": "b233ec481159ba77aa34fdd3c13dde0158aa28b19cd81d8997779eed624cf523",
+  "holdouts": {
+    "37": [
+      {
+        "q": [
+          74693309350,
+          59717556280
+        ],
+        "scalar_validator_only": 184907275,
+        "seed": 202609250037
+      },
+      {
+        "q": [
+          95228428129,
+          3212539623
+        ],
+        "scalar_validator_only": 40240623,
+        "seed": 202609250137
+      },
+      {
+        "q": [
+          103592170938,
+          108130457922
+        ],
+        "scalar_validator_only": 119749926,
+        "seed": 202609250237
+      }
+    ],
+    "41": [
+      {
+        "q": [
+          1529210134820,
+          450135172461
+        ],
+        "scalar_validator_only": 280350825561,
+        "seed": 202609250041
+      },
+      {
+        "q": [
+          1832736264130,
+          859036500372
+        ],
+        "scalar_validator_only": 328384169470,
+        "seed": 202609250141
+      },
+      {
+        "q": [
+          920990077812,
+          485070007325
+        ],
+        "scalar_validator_only": 51715999440,
+        "seed": 202609250241
+      }
+    ]
+  },
+  "pr737_clean_summary_sha256": "71e07979fbe150618a7750dd4eee5d19de8ff1f31c00adfb88a089b04574252f",
+  "scalar_count": 4096,
+  "schema_version": "1.0",
+  "training_scalars_n37_sha256": "2092c89d6d38012e2d9a4ca1b3add6a39660b743048f3b113699fb32b9299354",
+  "training_scalars_n41_sha256": "7693f28d4fd87c931325a1fd6d6255878902823deadd839dab24357e2fb34d37"
+}

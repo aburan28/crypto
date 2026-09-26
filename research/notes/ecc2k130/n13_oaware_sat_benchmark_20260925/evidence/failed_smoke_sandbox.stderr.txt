@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/private/tmp/kic-n13-oaware-sat-benchmark-20260925/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/run.py", line 250, in <module>
+    main()
+  File "/private/tmp/kic-n13-oaware-sat-benchmark-20260925/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/run.py", line 238, in main
+    result = (smoke if args.mode == "smoke" else panel)(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/kic-n13-oaware-sat-benchmark-20260925/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/run.py", line 163, in smoke
+    record = execute(command_for(name, binaries[name], cnf), stdout, stderr)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/kic-n13-oaware-sat-benchmark-20260925/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/run.py", line 68, in execute
+    peak = max(peak, rss(proc))
+                     ^^^^^^^^^
+  File "/private/tmp/kic-n13-oaware-sat-benchmark-20260925/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/run.py", line 44, in rss
+    family = [process] + process.children(recursive=True)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/adamburan/.local/lib/python3.12/site-packages/psutil/__init__.py", line 978, in children
+    ppid_map = _ppid_map()
+               ^^^^^^^^^^^
+  File "/Users/adamburan/.local/lib/python3.12/site-packages/psutil/__init__.py", line 256, in _ppid_map
+    for pid in pids():
+               ^^^^^^
+  File "/Users/adamburan/.local/lib/python3.12/site-packages/psutil/__init__.py", line 1485, in pids
+    ret = sorted(_psplatform.pids())
+                 ^^^^^^^^^^^^^^^^^^
+  File "/Users/adamburan/.local/lib/python3.12/site-packages/psutil/_psosx.py", line 320, in pids
+    ls = cext.pids()
+         ^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted (originated from sysctl() malloc 1/3)

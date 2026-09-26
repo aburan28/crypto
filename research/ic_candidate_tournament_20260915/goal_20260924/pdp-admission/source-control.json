@@ -1,0 +1,50 @@
+{
+  "scope": "toy correctness/accounting controls; no performance ranking",
+  "base_commit": "b338522537f316f2379ed8cc11bb317212e573ec",
+  "files": {
+    "src/cryptanalysis/koblitz_groebner.rs": "429be4bcfb520e12481d1f95a7c54862cab3f691ab585adbb60be1ba7d033518",
+    "src/cryptanalysis/crossbred.rs": "752350c0c4d6866729cf61c112023f527f36e1f4cc293e39e2a9be8f1b61afa9",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "0138b72b93e4f7f9d2a96c50b7a707dd3428a3388089749536ab0352d7829e70",
+    "examples/koblitz_unknown_scalar_panel.rs": "91a91273cb466819e7594eb67842822a8bed5e044d89e65848a90faa8463bbbc",
+    "research/ic_candidate_tournament_20260915/ci/Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627"
+  },
+  "local_rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "filters": [
+    "pdp_admission_",
+    "all_three_oracles_answer_every_target_identically",
+    "undecomposable_targets",
+    "chained_s3_handles_three_summands",
+    "the_two_algebraic_engines_agree",
+    "cryptanalysis::crossbred::tests",
+    "cryptanalysis::polynomial_reuse::tests"
+  ],
+  "performance": {
+    "single_target_online_ms": null,
+    "cold_ms": null,
+    "cold_Ir": null,
+    "S": null,
+    "rho_ratio": null,
+    "speedup": null
+  },
+  "logs": {
+    "local-regressions.log": {
+      "sha256": "cb45e0eeb2cbc812c9f7d0599edb38db7056880a0300565aa096a4cbafd4465a",
+      "bytes": 20963
+    },
+    "python-tests.log": {
+      "sha256": "11a3497d4b27764f81e38eedc4597467384fca753a9223d491d3d2f141ce5ef6",
+      "bytes": 236
+    },
+    "initial-build.log": {
+      "sha256": "105f7bbc4673c98de4c000a7edef46275842cd1ca398ac2bed2dcad1eb8d9619",
+      "bytes": 3418
+    }
+  },
+  "local_results": {
+    "rust_tests_passed": 22,
+    "python_tests_passed": 121,
+    "python_tests_skipped": 2,
+    "example_interfaces_compile": true,
+    "promotion_eligible": false
+  }
+}

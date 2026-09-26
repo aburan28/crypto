@@ -4,6 +4,7 @@ on:
     paths:
       - 'src/**'
       - 'examples/ic_tournament_worker.rs'
+      - 'examples/ic_query_law_vectors.rs'
       - 'Cargo.toml'
       - 'research/ic_candidate_tournament_20260915/**'
       - 'research/sat_factor_base_review_20260908/autolab/**'
@@ -38,10 +39,27 @@ jobs:
         run: |
           python -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_*.py' -v
           python -m unittest discover -s research/sat_factor_base_review_20260908/autolab -p 'test_boundary_autolab.py' -v
+      - name: Independently replay pinned Rust random streams
+        run: |
+          cargo run --locked --release --example ic_query_law_vectors > "$RUNNER_TEMP/ic-query-law-rust-vectors.json"
+          python research/ic_candidate_tournament_20260915/generic_query_law.py \
+            --rust-vectors "$RUNNER_TEMP/ic-query-law-rust-vectors.json"
       - name: Release arithmetic and descent regressions
         run: |
+          cargo test --locked --release --lib pdp_admission_ -- --test-threads=1
+          cargo test --locked --release --lib query_accounting_ -- --test-threads=1
+          cargo test --locked --release --lib la_accounting_ -- --test-threads=1
+          cargo test --locked --release --lib all_three_oracles_answer_every_target_identically -- --test-threads=1
+          cargo test --locked --release --lib undecomposable_targets -- --test-threads=1
+          cargo test --locked --release --lib cryptanalysis::crossbred::tests -- --test-threads=1
+          cargo test --locked --release --lib cryptanalysis::polynomial_reuse::tests -- --test-threads=1
           cargo test --locked --release --lib descent_
           cargo test --locked --release --lib rho_
+          cargo test --locked --release --lib rho_preparation_ -- --test-threads=1
+          cargo test --locked --release --lib exclusive_measurement_ -- --include-ignored --test-threads=1
+          RAYON_NUM_THREADS=1 cargo test --locked --release --lib exclusive_descent_ -- --test-threads=1
+          cargo test --locked --release --example ic_tournament_worker public_input_ -- --test-threads=1
+          RAYON_NUM_THREADS=1 cargo test --locked --release --example ic_tournament_worker exclusive_worker_ -- --include-ignored --test-threads=1
           cargo build --locked --release --example ic_tournament_worker
       - name: Complete-solve and profiler integration
         run: |
@@ -55,6 +73,7 @@ jobs:
           name: ic-autolab-integration-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             ${{ runner.temp }}/ic-autolab-integration
+            ${{ runner.temp }}/ic-query-law-rust-vectors.json
             Cargo.lock
           retention-days: 30
           if-no-files-found: warn

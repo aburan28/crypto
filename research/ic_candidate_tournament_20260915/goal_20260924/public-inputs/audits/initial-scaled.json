@@ -1,0 +1,398 @@
+{
+  "reference": "scaled",
+  "rho_rows": [
+    {
+      "cell": "n13a0",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "598"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 91438,
+        "reference_solve": 559350,
+        "setup": 267155
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 577430,
+          "phase_wall_ns": {
+            "recovery_check": 10559,
+            "reference_solve": 180297,
+            "setup": 635609
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 826465,
+          "worker_snapshot_wall_ns": 249035
+        },
+        "native_report_sha256": "30a9eac230137c59e87ce264d61d7aec6c540cfaae703dfeb3a1ad2695e82565",
+        "online": {
+          "boundary": "supplied public point; target-dependent rho setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 10559,
+            "reference_solve": 180297
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 190856
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "05e22882426f"
+    },
+    {
+      "cell": "n23a1",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "2527940"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 173399,
+        "reference_solve": 2222602,
+        "setup": 397581
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 644284,
+          "phase_wall_ns": {
+            "recovery_check": 25147,
+            "reference_solve": 357607,
+            "setup": 740613
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 1123367,
+          "worker_snapshot_wall_ns": 479083
+        },
+        "native_report_sha256": "774509f8f887e238137d6d6d219d16b78087f76cd07e7315c0205cf3e92d6d02",
+        "online": {
+          "boundary": "supplied public point; target-dependent rho setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 25147,
+            "reference_solve": 357607
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 382754
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "8e322fa2720e"
+    },
+    {
+      "cell": "n37a0",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "134101706"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 315873,
+        "reference_solve": 23531380,
+        "setup": 902035
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 622303,
+          "phase_wall_ns": {
+            "recovery_check": 35185,
+            "reference_solve": 2434833,
+            "setup": 765010
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 3235028,
+          "worker_snapshot_wall_ns": 2612725
+        },
+        "native_report_sha256": "74853d63aa5aa793280a300143451a3b8ad071e16fdda65f6c224123d152f6df",
+        "online": {
+          "boundary": "supplied public point; target-dependent rho setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 35185,
+            "reference_solve": 2434833
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 2470018
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "d51786ead015"
+    },
+    {
+      "cell": "n43a1",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "2200367456"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 307061,
+        "reference_solve": 34856275,
+        "setup": 1927296
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 637492,
+          "phase_wall_ns": {
+            "recovery_check": 34274,
+            "reference_solve": 3447952,
+            "setup": 903899
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 4386125,
+          "worker_snapshot_wall_ns": 3748633
+        },
+        "native_report_sha256": "21ccc6a33fef9612e649d04125a9d73fc532ee8b48b6b0228c86f3215e280c65",
+        "online": {
+          "boundary": "supplied public point; target-dependent rho setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 34274,
+            "reference_solve": 3447952
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 3482226
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "c117844a3d0f"
+    },
+    {
+      "cell": "n61a1",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "10484033407"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 413862,
+        "reference_solve": 131642610,
+        "setup": 2919253
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 639504,
+          "phase_wall_ns": {
+            "recovery_check": 47519,
+            "reference_solve": 12542410,
+            "setup": 1066059
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 13655988,
+          "worker_snapshot_wall_ns": 13016484
+        },
+        "native_report_sha256": "9bf791353c22cf78c6157fa34fc4efe2a6913bbdc4ed5e0f1c679094591e62b6",
+        "online": {
+          "boundary": "supplied public point; target-dependent rho setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 47519,
+            "reference_solve": 12542410
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 12589929
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "68cad1ae5301"
+    }
+  ],
+  "rho_verified_pairs": 5,
+  "rows": [
+    {
+      "candidate_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h93af40debfaf",
+      "cell": "n13a0",
+      "matrix_sha256": "4c74b498fc0148e5cc1fcd831d884648965e04e34e3caf3e422d0e1f618cafbc",
+      "native_wall_ns": 614817,
+      "rank": 7,
+      "repetition": 0,
+      "run_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h93af40debfafW05e22882426fR0",
+      "total_operations": 719509
+    },
+    {
+      "candidate_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h93af40debfaf",
+      "cell": "n13a0",
+      "matrix_sha256": "4c74b498fc0148e5cc1fcd831d884648965e04e34e3caf3e422d0e1f618cafbc",
+      "native_wall_ns": 816055,
+      "rank": 7,
+      "repetition": 1,
+      "run_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h93af40debfafW05e22882426fR1",
+      "total_operations": 719465
+    },
+    {
+      "candidate_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h93af40debfaf",
+      "cell": "n13a0",
+      "matrix_sha256": "4c74b498fc0148e5cc1fcd831d884648965e04e34e3caf3e422d0e1f618cafbc",
+      "native_wall_ns": 701663,
+      "rank": 7,
+      "repetition": 2,
+      "run_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h93af40debfafW05e22882426fR2",
+      "total_operations": 719509
+    },
+    {
+      "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h8ddc7aafe548",
+      "cell": "n23a1",
+      "matrix_sha256": "c6009e649f034de6c2cbd1fea97034fa67b352df3f24815e094a2cfb5861d83f",
+      "native_wall_ns": 840512,
+      "rank": 8,
+      "repetition": 0,
+      "run_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h8ddc7aafe548W8e322fa2720eR0",
+      "total_operations": 2313913
+    },
+    {
+      "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h8ddc7aafe548",
+      "cell": "n23a1",
+      "matrix_sha256": "c6009e649f034de6c2cbd1fea97034fa67b352df3f24815e094a2cfb5861d83f",
+      "native_wall_ns": 1312830,
+      "rank": 8,
+      "repetition": 1,
+      "run_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h8ddc7aafe548W8e322fa2720eR1",
+      "total_operations": 2313909
+    },
+    {
+      "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h8ddc7aafe548",
+      "cell": "n23a1",
+      "matrix_sha256": "c6009e649f034de6c2cbd1fea97034fa67b352df3f24815e094a2cfb5861d83f",
+      "native_wall_ns": 1072723,
+      "rank": 8,
+      "repetition": 2,
+      "run_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h8ddc7aafe548W8e322fa2720eR2",
+      "total_operations": 2313913
+    },
+    {
+      "candidate_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h47d30baad810",
+      "cell": "n37a0",
+      "matrix_sha256": "7a3181adf961a029fa1e44183d236d1a999a8f6fc137902c17dfd23a39da563b",
+      "native_wall_ns": 3712274,
+      "rank": 16,
+      "repetition": 0,
+      "run_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h47d30baad810Wd51786ead015R0",
+      "total_operations": 24365883
+    },
+    {
+      "candidate_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h47d30baad810",
+      "cell": "n37a0",
+      "matrix_sha256": "7a3181adf961a029fa1e44183d236d1a999a8f6fc137902c17dfd23a39da563b",
+      "native_wall_ns": 3679744,
+      "rank": 16,
+      "repetition": 1,
+      "run_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h47d30baad810Wd51786ead015R1",
+      "total_operations": 24365883
+    },
+    {
+      "candidate_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h47d30baad810",
+      "cell": "n37a0",
+      "matrix_sha256": "7a3181adf961a029fa1e44183d236d1a999a8f6fc137902c17dfd23a39da563b",
+      "native_wall_ns": 3684653,
+      "rank": 16,
+      "repetition": 2,
+      "run_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h47d30baad810Wd51786ead015R2",
+      "total_operations": 24365839
+    },
+    {
+      "candidate_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h774ff1701b0f",
+      "cell": "n43a1",
+      "matrix_sha256": "55aedc344e3d1794c95ac61ce50c0596d73e791a4fe62ff61278404184c0fe84",
+      "native_wall_ns": 29007809,
+      "rank": 24,
+      "repetition": 0,
+      "run_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h774ff1701b0fWc117844a3d0fR0",
+      "total_operations": 241189131
+    },
+    {
+      "candidate_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h774ff1701b0f",
+      "cell": "n43a1",
+      "matrix_sha256": "55aedc344e3d1794c95ac61ce50c0596d73e791a4fe62ff61278404184c0fe84",
+      "native_wall_ns": 28867006,
+      "rank": 24,
+      "repetition": 1,
+      "run_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h774ff1701b0fWc117844a3d0fR1",
+      "total_operations": 241189127
+    },
+    {
+      "candidate_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h774ff1701b0f",
+      "cell": "n43a1",
+      "matrix_sha256": "55aedc344e3d1794c95ac61ce50c0596d73e791a4fe62ff61278404184c0fe84",
+      "native_wall_ns": 28824287,
+      "rank": 24,
+      "repetition": 2,
+      "run_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h774ff1701b0fWc117844a3d0fR2",
+      "total_operations": 241189286
+    },
+    {
+      "candidate_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h048c1aa09468",
+      "cell": "n61a1",
+      "matrix_sha256": "a10a2a1b0b297e405e7f699591b9a66cc11fdee1d3dfa8471e444e6117e0505d",
+      "native_wall_ns": 30117720,
+      "rank": 24,
+      "repetition": 0,
+      "run_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h048c1aa09468W68cad1ae5301R0",
+      "total_operations": 253046564
+    },
+    {
+      "candidate_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h048c1aa09468",
+      "cell": "n61a1",
+      "matrix_sha256": "a10a2a1b0b297e405e7f699591b9a66cc11fdee1d3dfa8471e444e6117e0505d",
+      "native_wall_ns": 30103874,
+      "rank": 24,
+      "repetition": 1,
+      "run_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h048c1aa09468W68cad1ae5301R1",
+      "total_operations": 253046568
+    },
+    {
+      "candidate_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h048c1aa09468",
+      "cell": "n61a1",
+      "matrix_sha256": "a10a2a1b0b297e405e7f699591b9a66cc11fdee1d3dfa8471e444e6117e0505d",
+      "native_wall_ns": 31203710,
+      "rank": 24,
+      "repetition": 2,
+      "run_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h048c1aa09468W68cad1ae5301R2",
+      "total_operations": 253046568
+    }
+  ],
+  "scope": "transported producer integration evidence; no comparison",
+  "source_manifest_sha256": "f7ab5a6374305d6e3627b4fa72d01272275c3e5f6172399056f374192571b5f2",
+  "status": "VERIFIED",
+  "verified_pairs": 15,
+  "worker_sha256": "fb7dd5faabee1655f15dc2099e806e68e90c7ef10f83b3ac4b00d3ce1f65cb34"
+}

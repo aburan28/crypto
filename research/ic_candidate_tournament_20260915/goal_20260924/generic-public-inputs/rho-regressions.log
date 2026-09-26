@@ -1,0 +1,104 @@
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2058:13
+     |
+2058 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:432:9
+    |
+432 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:407:5
+    |
+407 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+   --> src/cryptanalysis/f4_fp_tower.rs:916:5
+    |
+914 | enum Lanes {
+    |      ----- variants in this enum
+915 |     Scalar,
+916 |     Avx2,
+    |     ^^^^
+917 |     Avx512,
+    |     ^^^^^^
+    |
+    = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+   --> src/cryptanalysis/koblitz_fast.rs:889:5
+    |
+885 | pub struct BatchScratch {
+    |            ------------ fields in this struct
+...
+889 |     qx: Vec<u64>,
+    |     ^^
+890 |     qy: Vec<u64>,
+    |     ^^
+    |
+    = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib test) generated 5 warnings (run `cargo fix --lib -p crypto --tests` to apply 3 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.21s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-f69e5e4543fb81b0)
+
+running 43 tests
+test cryptanalysis::aut_folded_rho::tests::folded_rho_recovers_planted_dlp ... ok
+test cryptanalysis::ec_index_calculus::tests::ic_and_rho_agree_on_random_dlp ... ok
+test cryptanalysis::ec_index_calculus::tests::pollard_rho_recovers_small_dlp ... ok
+test cryptanalysis::gaudry_cubic::tests::gaudry_and_rho_recover_the_planted_logarithm ... ok
+test cryptanalysis::gaudry_quartic::tests::k4_linear_algebra_and_rho_recover_the_planted_logarithm ... ok
+test cryptanalysis::hyperelliptic_ic_bench::tests::dp_rho_terminates_on_every_seed_it_is_given ... ok
+test cryptanalysis::hyperelliptic_ic_bench::tests::rho_solves_the_same_instance ... ok
+test cryptanalysis::ic_boundary::tests::batch_rho_per_target_cost_falls_as_the_batch_law_says ... ok
+test cryptanalysis::ic_boundary::tests::batch_rho_recovers_every_target_on_a_koblitz_curve ... ok
+test cryptanalysis::ic_boundary::tests::counted_rho_recovers_and_verifies_on_a_prime_curve ... ok
+test cryptanalysis::ic_boundary::tests::tuned_rho_recovers_and_verifies_on_prime_and_binary_curves ... ok
+test cryptanalysis::isogeny_class_search::tests::class_is_larger_than_the_rho_reference ... ok
+test cryptanalysis::isogeny_degree_search::cost::tests::exhaustive_search_is_above_the_rho_reference ... ok
+test cryptanalysis::isogeny_degree_search::cost::tests::plain_rho_is_flat_in_s ... ok
+test cryptanalysis::koblitz_index_calculus::tests::exhausted_rho_does_not_charge_an_unused_final_advance ... ok
+test cryptanalysis::koblitz_index_calculus::tests::rho_charge_ledgers_close ... ok
+test cryptanalysis::koblitz_index_calculus::tests::rho_escapes_fruitless_cycles_instead_of_restarting ... ok
+test cryptanalysis::koblitz_index_calculus::tests::rho_preparation_preserves_walk_and_charges ... ok
+test cryptanalysis::koblitz_index_calculus::tests::rho_recovers_logs_at_degree_41 ... ignored, a few seconds per target in release; the degree-41 rung of the ledger
+test cryptanalysis::koblitz_index_calculus::tests::rho_step_count_tracks_the_birthday_bound ... ok
+test cryptanalysis::koblitz_index_calculus::tests::rho_walk_timing_stops_before_collision_verification_progress ... ok
+test cryptanalysis::koblitz_index_calculus::tests::single_word_rho_walk_matches_the_reference_step_for_step ... ok
+test cryptanalysis::md5_chosen_prefix::tests::rho_chosen_prefix_birthday_toy ... ok
+test cryptanalysis::md5_chosen_prefix::tests::rho_walk_deterministic ... ok
+test cryptanalysis::ml_rho_walks::tests::ml_rho_experimental_design ... ok
+test cryptanalysis::ml_rho_walks::tests::standard_walk_in_range ... ok
+test cryptanalysis::ml_rho_walks::tests::walk_partition_benchmark_p32213 ... ignored
+test cryptanalysis::ml_rho_walks::tests::walk_trace_json_serializes ... ok
+test cryptanalysis::p256_attacks::tests::negation_rho_recovers_planted_d ... ok
+test cryptanalysis::pollard_rho::tests::dp_rho_solves_16_bit_dlp ... ok
+test cryptanalysis::pollard_rho::tests::dp_rho_solves_multi_target ... ok
+test cryptanalysis::pollard_rho::tests::dp_rho_solves_tiny_dlp ... ok
+test cryptanalysis::pollard_rho::tests::rho_multi_target_chains_correctly ... ok
+test cryptanalysis::pollard_rho::tests::rho_solves_16_bit_dlp ... ok
+test cryptanalysis::pollard_rho::tests::rho_solves_20_bit_dlp ... ignored, slow: ~1 s of rho iterations; run with --ignored
+test cryptanalysis::pollard_rho::tests::rho_solves_tiny_dlp ... ok
+test cryptanalysis::preprocessing_rho::tests::preprocessing_rho_amortises_across_targets ... ok
+test cryptanalysis::preprocessing_rho::tests::preprocessing_rho_recovers_planted_dlp_small ... ok
+test cryptanalysis::research_bench::tests::pollard_rho_hypothesis_runs_at_smallest_scale ... ok
+test cryptanalysis::research_bench::tests::rho_scaling_runs_end_to_end ... ok
+test cryptanalysis::visual_demos::tests::pollard_rho_demo_has_data ... ok
+test isogeny::attack::tests::multi_target_dp_rho_solves_m_small_with_lucky_seed ... ok
+test isogeny::attack::tests::pohlig_multi_target_rho_solves_m4_robustly ... ok
+
+test result: ok. 40 passed; 0 failed; 3 ignored; 0 measured; 2985 filtered out; finished in 2.53s
+
