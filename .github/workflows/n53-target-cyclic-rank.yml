@@ -1,0 +1,119 @@
+name: n53 target-cyclic rank control
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'examples/koblitz_s5_sat_instance.rs'
+      - 'research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/**'
+      - '.github/workflows/n53-target-cyclic-rank.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  hash-only:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify held hashes and disjoint target schedule; never run n53 producer
+        run: |
+          python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/check_protocol.py
+          git diff --check
+      - name: Rehash immutable attempted outcome if later committed
+        run: |
+          bundle=research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/evidence
+          if test -f "$bundle/archive_manifest.json"; then
+            python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/verify_archive.py --bundle "$bundle"
+          fi
+
+  outcome:
+    if: github.event.action == 'labeled' && github.event.label.name == 'run-n53-rotation-once' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: hash-only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    concurrency:
+      group: n53-target-cyclic-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: dtolnay/rust-toolchain@1.93.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refuse held or moved exact source head
+        env:
+          KIC_ROTATION_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          STARTING_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git fetch origin main
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          root = Path('research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925')
+          sys.path.insert(0, str(root))
+          import check_protocol
+          check_protocol.preflight(require_release=True)
+          print('released exact-source preflight PASS')
+          PY
+          git fetch origin "$HEAD_BRANCH:refs/remotes/origin/$HEAD_BRANCH"
+          test "$(git rev-parse "origin/$HEAD_BRANCH")" = "$STARTING_HEAD"
+          test ! -e research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/evidence/archive_manifest.json
+      - name: Build one frozen producer
+        run: |
+          cp research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/Cargo.lock Cargo.lock
+          cargo build --locked --release --example koblitz_s5_sat_instance
+          sha256sum target/release/examples/koblitz_s5_sat_instance
+          rustc --version
+          cargo --version
+      - name: Run four fixed arms and independent group/rank replay
+        env:
+          KIC_ROTATION_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/run_panel.py --out /tmp/n53-target-cyclic-rank-panel
+      - name: Seal every attempted output, including failure receipts
+        if: always()
+        run: |
+          if test -d /tmp/n53-target-cyclic-rank-panel; then
+            python3 research/sat_factor_base_review_20260908/autolab_combined_l384_coldbase_n53_20260925/archive.py \
+              --panel /tmp/n53-target-cyclic-rank-panel --out /tmp/n53-target-cyclic-rank-sealed
+            python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/verify_archive.py \
+              --bundle /tmp/n53-target-cyclic-rank-sealed
+          fi
+      - name: Commit immutable attempt to the dispatch branch
+        if: always()
+        env:
+          STARTING_HEAD: ${{ github.event.pull_request.head.sha }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if ! test -f /tmp/n53-target-cyclic-rank-sealed/archive_manifest.json; then exit 0; fi
+          git fetch origin "$HEAD_BRANCH:refs/remotes/origin/$HEAD_BRANCH"
+          test "$(git rev-parse "origin/$HEAD_BRANCH")" = "$STARTING_HEAD"
+          git checkout -B "$HEAD_BRANCH" "origin/$HEAD_BRANCH"
+          bundle=research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/evidence
+          mkdir -p "$bundle"
+          test ! -e "$bundle/archive_manifest.json"
+          cp /tmp/n53-target-cyclic-rank-sealed/evidence.tar.gz /tmp/n53-target-cyclic-rank-sealed/archive_manifest.json "$bundle/"
+          if test -f /tmp/n53-target-cyclic-rank-sealed/panel.json; then cp /tmp/n53-target-cyclic-rank-sealed/panel.json "$bundle/"; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$bundle"
+          git commit -m 'research: preserve n53 target-cyclic rank panel'
+          git push origin "HEAD:$HEAD_BRANCH"
+      - name: Upload raw attempt if evidence commit fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n53-target-cyclic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/n53-target-cyclic-rank-panel/
+          if-no-files-found: warn
+          retention-days: 30
