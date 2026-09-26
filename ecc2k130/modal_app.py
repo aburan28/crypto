@@ -145,6 +145,16 @@ if TABLE_PIVOT_BYTES not in ("0", "1"):
     raise ValueError("ECC_TABLE_PIVOT_BYTES must be 0 or 1")
 if TABLE_PIVOT_BYTES == "1" and WALK_TABLE != "1":
     raise ValueError("ECC_TABLE_PIVOT_BYTES=1 requires ECC_WALK_TABLE=1")
+# Cairn witness counters. Campaign default is WITNESS=0: on an RTX PRO 6000
+# the counters cost ~35% throughput (14.0 -> 9.2 B/s, measured 2026-09-25)
+# and emit 72-byte v2 DP records that modal_sync still frames as 32-byte v1.
+# The Makefile still defaults WITNESS=1 for local cairn measurement; Modal
+# collection is the other way round. Override with ECC_WITNESS=1 when needed.
+WITNESS = os.environ.get("ECC_WITNESS", os.environ.get("WITNESS", "0"))
+if WITNESS not in ("0", "1"):
+    raise ValueError("ECC_WITNESS must be 0 or 1")
+if WITNESS == "1" and WALK_TABLE == "1":
+    raise ValueError("ECC_WITNESS=1 is incompatible with ECC_WALK_TABLE=1")
 PACKED_STATE_TILE = os.environ.get("ECC_PACKED_STATE_TILE", "0")
 if PACKED_STATE_TILE not in ("0", "256"):
     raise ValueError("ECC_PACKED_STATE_TILE must be 0 or 256")
@@ -237,7 +247,8 @@ BAKED = {"batch": 32, "threads": 256 if PACKED_STATE_TILE == "256" else 128, "le
          "walkTable": WALK_TABLE == "1",
          "tablePivotBytes": TABLE_PIVOT_BYTES == "1",
          "packedWeightedPrefix": int(PACKED_WEIGHTED_PREFIX),
-         "packedStateTile": int(PACKED_STATE_TILE)}
+         "packedStateTile": int(PACKED_STATE_TILE),
+         "witness": WITNESS == "1"}
 
 # Cleared the first time buildFor actually builds.  `make -B gpu` replaces
 # ./ecc2k130 in place, so once anything has rebuilt, the image's baked binary is
@@ -275,7 +286,8 @@ image = (
           "ECC_WALK_TABLE": WALK_TABLE,
           "ECC_TABLE_PIVOT_BYTES": TABLE_PIVOT_BYTES,
           "ECC_PACKED_WEIGHTED_PREFIX": PACKED_WEIGHTED_PREFIX,
-          "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE})
+          "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE,
+          "ECC_WITNESS": WITNESS})
     .apt_install("build-essential")
     .add_local_dir(
         LOCAL,
@@ -304,7 +316,7 @@ image = (
         f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
         f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
         f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
-        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES}',
+        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES} WITNESS={WITNESS}',
     )
 )
 
@@ -407,7 +419,8 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
             "walkTable": WALK_TABLE == "1",
             "tablePivotBytes": TABLE_PIVOT_BYTES == "1",
             "packedWeightedPrefix": int(PACKED_WEIGHTED_PREFIX),
-            "packedStateTile": int(PACKED_STATE_TILE)}
+            "packedStateTile": int(PACKED_STATE_TILE),
+            "witness": WITNESS == "1"}
     if smemSpill and int(CUDA_VERSION.split('.')[0]) < 13:
         return False, "--smem-spill requires ECC_CUDA_VERSION=13.x.y (CUDA 13 or newer)"
     experimental = streamKarat or smemSpill or globalCg
@@ -433,7 +446,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} "
         f"PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} "
         f"PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} "
-        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES}",
+        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES} WITNESS={WITNESS}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -1528,7 +1541,8 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
         runId = checkCampaignRunId(runId, withCpu=cpuThreads > 0)
         dpWeight = campaignDpWeightFor(dpWeight)
         print("campaign run: curve %d, run id %d (campaign slot %d), dp weight %d from "
-              "aws/campaign.json" % (curve, runId, 90000 + runId, dpWeight), flush=True)
+              "aws/campaign.json, WITNESS=%s" % (curve, runId, 90000 + runId, dpWeight, WITNESS),
+              flush=True)
         if cpuThreads > 0:
             print("campaign run: CPU walker run id %d (campaign slot %d) on %d threads"
                   % (cpuRunId(runId), 90000 + cpuRunId(runId), cpuThreads), flush=True)
