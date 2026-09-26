@@ -27,10 +27,14 @@ rate on the card.**
   paired rates; the switch pays unless the new rule costs the kernel 14–19% of
   its rate.  `aws/campaign.json` still names σ, and the switch is the campaign
   owner's.
-- **`maxIters`** is `2^32` in `aws/campaign.json` and in the witness
-  generator's default, up from `2^30`.  Workers read the bucket copy, and
-  `./rollout.sh max-iters 4294967296` raises that one field there.  A raise
-  keeps every collected point and checkpoint (§11.4).
+- **`maxIters`** is `2^32` in `aws/campaign.json`, up from `2^30`, and the
+  replay tools admit it plus the guard's overshoot.  Workers read the bucket
+  copy, and `./rollout.sh max-iters 4294967296` raises that one field there.
+  A raise keeps every collected point and checkpoint (§11.4).  A scale model
+  of the σ walk at the same cap-to-trail ratios measures the loss §6 prices:
+  the guard cuts exactly the trails past it, discarding 14.2% of trail steps
+  at `2^30`'s ratio against 14.2% predicted, and none at `2^32`'s
+  ([benchmarks/max-iters](benchmarks/max-iters/README.md)).
 
 Round 1's answer was **keep the σ walk, and raise `maxIters`**, on these
 findings (the fruitless-cycle ones are about the rule as it was then):
@@ -438,8 +442,8 @@ each range spans the bracket and the three paired sessions:
 
 **Expected work of the σ walk.** On completed trails it is
 `2^60.809 × [1.070, 1.082] = 2^60.91–60.92` iterations (extrapolated
-bracket, hashed branches).  With the current guard it is ×1.185 more,
-`2^61.15–61.17`.  Bailey et al.'s planning budget `2^60.9`, quoted across
+bracket, hashed branches).  With the `2^30` guard it was ×1.185 more,
+`2^61.15–61.17`; with `2^32` it is ×1.00007 (§11.2).  Bailey et al.'s planning budget `2^60.9`, quoted across
 this tree, is the first-order `2^60.809 × 1.069`, and it stands.
 
 ## 7. Falsification target
@@ -826,7 +830,7 @@ independent, which overstates the uncertainty of the correlated ones.
 | change | class | why |
 |---|---|---|
 | rule v1 → v2 | **engineering** | `c` is at the floor before and after (pooled difference `-0.0003 ± 0.0007`); the cost per solve against σ falls from 4.85–6.26 to 0.81–0.86 (projection) by removing a loss, not by crossing the floor |
-| `maxIters` `2^30` → `2^32`, witness default with it | **engineering** | σ's guard loss ×1.185 → ×1.00007; expected work on the campaign's configuration `2^61.15–61.17` → `2^60.91–60.92` (§6 bracket) |
+| `maxIters` `2^30` → `2^32`, witness default with it | **engineering** | σ's guard loss ×1.185 → ×1.00007; expected work on the campaign's configuration `2^61.15–61.17` → `2^60.91–60.92` (§6 bracket).  A model row, whose mechanism and trail law a scale model measures at the same cap ratios ([benchmarks/max-iters](benchmarks/max-iters/README.md)) |
 | §6's five-tag sketch → four 16-bit tags | **accounting** | a correction to this note's own sketch; nothing measured changes |
 | the residual six-step relations | **accounting** | §6's 0.81–0.86 assumed every cycle caught; what is built leaves `2.0 × 10⁻⁵` of trails trapped, a ×1.0002 difference, so the projection is unchanged to two digits |
 | `README.md`'s `2^60.94` → `2^60.91–60.92` | **accounting** | a figure from a draft of §6 left in the README |
@@ -837,9 +841,13 @@ None is an advance: no row moves the ratio to the floor below one.
 ### 11.3 What changes elsewhere
 
 - `aws/campaign.json`:
-  - `maxIters` is `2^32`, and `src/witness.cpp`'s default `--max-iters` is
-    `2^32` with it.  The bucket copy is still what workers read, and
-    `./rollout.sh max-iters 4294967296` raises it there (§11.4).
+  - `maxIters` is `2^32`.  `src/witness.cpp` and `src/trailforest.cpp`
+    default to `ECC_REPLAY_MAX_ITERS` in `include/kernel.h`: `2^32` plus the
+    `ECC_GUARD_PERIOD − 1` steps a walk can run past the guard between
+    checks, which a default of exactly `2^32` refused.
+    `aws/test_campaign_guard.py` pins it to `campaign.json`.  The bucket copy
+    is still what workers read, and `./rollout.sh max-iters 4294967296`
+    raises it there (§11.4).
   - The live corpus is unversioned: `bootstrap.sh` runs it with
     `ECC_ALLOW_LEGACY_STORAGE=1`.  So `maxIters` is in no campaign id there,
     and a raise costs no collected work (§11.4).
@@ -923,8 +931,18 @@ already collecting loses nothing.
     directory accepts a raised `--max-iters` and refuses any other change to
     the arguments it was bound with, because a larger replay cap re-walks
     every stored point too.
-  - the witness generator, whose default is `2^32` since round 2;
-  - cairn jobs, whose `max_steps_per_walker` must be at least `2^32`.
+  - the witness generator and `trailforest`, whose default is
+    `ECC_REPLAY_MAX_ITERS`, the guard plus its overshoot, so a raise in the
+    bucket goes to `aws/campaign.json` and `include/kernel.h` too;
+  - cairn jobs, whose `max_steps_per_walker` must be at least `2^32`.  The
+    production job in the cairn repository sets `2^30`, so the trails the
+    raise recovers are corpus points but not yet claimable there.
+- **Collectors with no guard** are outside all of this: the Modal launcher
+  passes no `--max-iters`, and the FPGA engine has none.  Their trails can
+  be any length, and a strict merge (`merge.py --campaign`) replays only up
+  to the campaign's cap.  At `2^32` that misses 0.0006% of their trails, and
+  0.008% of the length-biased trails a collision lands on, against 4.9% and
+  20% at `2^30`.
 - **What is not recovered.** The steps the `2^30` guard has already
   discarded, 15.6% of the steps so far.  Those trails were restarted, and
   re-walking their seeds costs what new steps cost.  The raise stops the

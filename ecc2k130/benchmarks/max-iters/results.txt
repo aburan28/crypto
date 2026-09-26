@@ -1,0 +1,29 @@
+scale model: curve 131, weight 44, 16384 walks, S = 110592 steps per walk, 1024-step launches
+theta frozen 1.447744e-04, measured on the reference arms 1.446494e-04 (ratio 0.9991, -0.7 standard errors)
+
+arm  run       cap   c/mu    ended     cut      q%        D%  model D%        sd     zD     zq     loss checks
+ref  dev       inf    inf   243357       0   0.000    0.0000         -         -      -      -  1.00000 reference
+ref  hold      inf    inf   244012       0   0.000    0.0000         -         -      -      -  1.00000 reference
+ref  hold      inf    inf   243510       0   0.000    0.0000         -         -      -      -  1.00000 reference
+c30  dev     20800  3.011   253246   10865   4.290   14.2312   14.2081    0.1216   0.19   0.33  1.16593 ok
+c30  hold    20800  3.011   253877   10855   4.276   14.2178   14.2081    0.1216   0.08  -0.04  1.16574 ok
+c30  hold    20800  3.011   253384   10911   4.306   14.2873   14.2081    0.1216   0.65   0.73  1.16669 ok
+c31  dev     41600  6.023   243774     407   0.167    1.0712    1.0758    0.0526  -0.09  -0.05  1.01083 ok
+c31  hold    41600  6.023   244391     393   0.161    1.0359    1.0758    0.0526  -0.76  -0.79  1.01047 ok
+c31  hold    41600  6.023   243856     395   0.162    1.0394    1.0758    0.0526  -0.69  -0.65  1.01050 ok
+c32  dev     83200 12.045   243357       0   0.000    0.0000    0.0023    0.0034  -0.67  -0.67  1.00000 ok
+c32  hold    83200 12.045   244012       0   0.000    0.0000    0.0023    0.0034  -0.67  -0.67  1.00000 ok
+c32  hold    83200 12.045   243513       1   0.000    0.0053    0.0023    0.0034   0.89   0.90  1.00005 ok
+
+steady state at the frozen theta: c30 D = 15.5878% q = 4.9209%, c31 D = 1.4624% q = 0.2422%, c32 D = 0.0071% q = 0.0006%
+
+production projection (model row: theta = 2^-28.41, guard overshoot and launch idle omitted)
+  maxIters 2^30 = 3.01 trail lengths: cuts 4.9267% of trails, discards 15.60050% of steps, loss x1.18484, sigma work 2^61.15-61.17
+  maxIters 2^31 = 6.02 trail lengths: cuts 0.2427% of trails, discards 1.46501% of steps, loss x1.01487, sigma work 2^60.93-60.94
+  maxIters 2^32 = 12.04 trail lengths: cuts 0.0006% of trails, discards 0.00709% of steps, loss x1.00007, sigma work 2^60.91-60.92
+
+per-seed agreement, run 30001: c30 233607 shared seeds identical=True, 9750 long / 233607 short reference trails finished, 0 long reported, 0 short cut; c31 242991 shared seeds identical=True, 366 long / 242991 short reference trails finished, 0 long reported, 0 short cut; c32 243357 shared seeds identical=True, 0 long / 243357 short reference trails finished, 0 long reported, 0 short cut
+per-seed agreement, run 30002: c30 234320 shared seeds identical=True, 9692 long / 234320 short reference trails finished, 0 long reported, 0 short cut; c31 243652 shared seeds identical=True, 360 long / 243652 short reference trails finished, 0 long reported, 0 short cut; c32 244012 shared seeds identical=True, 0 long / 244012 short reference trails finished, 0 long reported, 0 short cut
+per-seed agreement, run 30003: c30 233654 shared seeds identical=True, 9856 long / 233654 short reference trails finished, 0 long reported, 0 short cut; c31 243141 shared seeds identical=True, 369 long / 243141 short reference trails finished, 0 long reported, 0 short cut; c32 243509 shared seeds identical=True, 1 long / 243509 short reference trails finished, 0 long reported, 0 short cut
+
+PASSED

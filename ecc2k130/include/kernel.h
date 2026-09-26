@@ -25,6 +25,13 @@
 #define ECC_GUARD_PERIOD 4096
 #endif
 
+// aws/campaign.json "maxIters".  The guard is checked only every
+// ECC_GUARD_PERIOD steps, so a walk can report a trail up to
+// ECC_GUARD_PERIOD - 1 steps longer; a tool replaying campaign trails has to
+// admit that window or it refuses points the campaign legitimately holds.
+#define ECC_CAMPAIGN_MAX_ITERS 4294967296ull
+#define ECC_REPLAY_MAX_ITERS (ECC_CAMPAIGN_MAX_ITERS + ECC_GUARD_PERIOD - 1)
+
 template <class W>
 struct WalkParams {
     int threads;
