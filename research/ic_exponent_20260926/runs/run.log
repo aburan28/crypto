@@ -1,0 +1,57 @@
+{
+ "commit": "d31a7ab4625ec4c94a61f1f2b42cfc6c2c74a766",
+ "tree_clean": false,
+ "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+ "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+ "cpu_flags_relevant": [
+  "pclmulqdq",
+  "popcnt",
+  "avx2",
+  "bmi2",
+  "avx512f",
+  "avx512dq",
+  "avx512ifma",
+  "avx512cd",
+  "avx512bw",
+  "avx512vl",
+  "avx512_bf16",
+  "avx512vbmi",
+  "avx512_vbmi2",
+  "gfni",
+  "vpclmulqdq",
+  "avx512_vnni",
+  "avx512_bitalg",
+  "avx512_vpopcntdq",
+  "avx512_fp16"
+ ],
+ "logical_cores": 4,
+ "memory": "MemTotal:       16481980 kB",
+ "os": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+ "arch": "x86_64",
+ "ic_binary_blake3": null,
+ "ic_binary_sha256": "bb9cd781a5ec01c56e42abfae173f4628bd94d79c2f59f604d04313a926b2379",
+ "uptime": "03:55:44 up 13 min,  0 user,  load average: 1.02, 0.65, 0.28",
+ "pinning": "RAYON_NUM_THREADS=1, taskset -c 2",
+ "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts"
+}
+k1n19: sweep
+{"columns": 8, "descent_summands": 2, "s_per_target": 8.092215204811906}
+k1n19: measure
+k1n23: sweep
+{"columns": 8, "descent_summands": 2, "s_per_target": 2.58479227710341}
+k1n23: measure
+k1n45: sweep
+{"columns": 8, "descent_summands": 2, "s_per_target": 2.846044853373263}
+k1n45: measure
+k0n37: sweep
+{"columns": 8, "descent_summands": 2, "s_per_target": 0.8608296758824644}
+k0n37: measure
+k1n43: sweep
+{"columns": 16, "descent_summands": 2, "s_per_target": 0.5197106217162953}
+k1n43: measure
+k1n47: sweep
+{"columns": 56, "descent_summands": 3, "s_per_target": 0.35510375730538046}
+k1n47: measure
+k0n41: sweep
+{"columns": 80, "descent_summands": 2, "s_per_target": 0.35424241028158093}
+k0n41: measure

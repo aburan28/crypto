@@ -1,0 +1,126 @@
+{
+ "schema_version": 1,
+ "name": "k1n45-c8-m2-s202",
+ "curve": {
+  "degree": 45,
+  "curve_a": 1
+ },
+ "summands": 3,
+ "descent_summands": 2,
+ "collection_window": 22,
+ "collection_aim": true,
+ "solver": "pair_table",
+ "seed": 202,
+ "max_trials": 100000,
+ "collection": {
+  "unit_trials": 16,
+  "units": 1,
+  "max_units": 100000
+ },
+ "factor_base": {
+  "mode": "spec",
+  "spec": {
+   "kind": "subgroup_orbits",
+   "points": 720,
+   "seed": 202
+  }
+ },
+ "targets": [
+  {
+   "random_seed": 20200
+  },
+  {
+   "random_seed": 20201
+  },
+  {
+   "random_seed": 20202
+  },
+  {
+   "random_seed": 20203
+  },
+  {
+   "random_seed": 20204
+  },
+  {
+   "random_seed": 20205
+  },
+  {
+   "random_seed": 20206
+  },
+  {
+   "random_seed": 20207
+  },
+  {
+   "random_seed": 20208
+  },
+  {
+   "random_seed": 20209
+  },
+  {
+   "random_seed": 20210
+  },
+  {
+   "random_seed": 20211
+  },
+  {
+   "random_seed": 20212
+  },
+  {
+   "random_seed": 20213
+  },
+  {
+   "random_seed": 20214
+  },
+  {
+   "random_seed": 20215
+  },
+  {
+   "random_seed": 20216
+  },
+  {
+   "random_seed": 20217
+  },
+  {
+   "random_seed": 20218
+  },
+  {
+   "random_seed": 20219
+  },
+  {
+   "random_seed": 20220
+  },
+  {
+   "random_seed": 20221
+  },
+  {
+   "random_seed": 20222
+  },
+  {
+   "random_seed": 20223
+  },
+  {
+   "random_seed": 20224
+  },
+  {
+   "random_seed": 20225
+  },
+  {
+   "random_seed": 20226
+  },
+  {
+   "random_seed": 20227
+  },
+  {
+   "random_seed": 20228
+  },
+  {
+   "random_seed": 20229
+  },
+  {
+   "random_seed": 20230
+  },
+  {
+   "random_seed": 20231
+  }
+ ]
+}
