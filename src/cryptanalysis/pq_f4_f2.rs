@@ -384,6 +384,15 @@ fn echelon(
     Some(pivots)
 }
 
+/// Monomials awaiting a reducer lookup from which [`groebner_basis_f4`] looks
+/// them up in parallel, ahead of its symbolic-preprocessing loop.
+const PAR_REDUCERS: usize = 512;
+
+/// Terms, summed over a step's critical-pair (or field) products, from which
+/// [`groebner_basis_f4`] forms them in parallel; below it rayon's dispatch
+/// (and, the first time, its pool's start-up) costs more than it spreads.
+const PAR_PRODUCT_TERMS: usize = 1 << 16;
+
 /// Words per batch after the first in [`echelon`]'s shared-out pass: large
 /// enough that sharing a batch out pays for itself, small enough that few
 /// of its rows need a pivot another of its rows is about to make.
@@ -482,10 +491,12 @@ impl State {
 
     /// Active basis elements whose leading monomial divides `m`, the
     /// shortest first.
-    fn reducer_for(&self, m: u64, active: &[usize], st: &mut F4Stats) -> Option<usize> {
+    /// The active element with the fewest terms whose leading monomial
+    /// divides `m` (the first such on a tie).  Tests every active element,
+    /// which the caller counts as `active.len()` divisor tests.
+    fn reducer_among(&self, m: u64, active: &[usize]) -> Option<usize> {
         let mut best: Option<usize> = None;
         for &g in active {
-            st.divisor_tests += 1;
             if self.lm[g] & !m == 0
                 && best.is_none_or(|b| self.polys[g].terms.len() < self.polys[b].terms.len())
             {
@@ -569,8 +580,8 @@ pub fn groebner_basis_f4(
         // (their common leading monomial is the lcm, which one half will
         // pivot and the other lose), and every field product.
         let mut seen_rows: FxSet<(u64, usize)> = FxSet::default();
-        let mut half_rows: Vec<F2BoolPoly> = Vec::new();
-        let mut field_rows: Vec<F2BoolPoly> = Vec::new();
+        let mut half_keys: Vec<(u64, usize)> = Vec::new();
+        let mut field_keys: Vec<(u64, usize)> = Vec::new();
         let mut lcm_columns: FxSet<u64> = FxSet::default();
         for p in &selected {
             match p.kind {
@@ -580,7 +591,7 @@ pub fn groebner_basis_f4(
                     for g in [i, j] {
                         let mult = p.lcm & !s.lm[g];
                         if seen_rows.insert((mult, g)) {
-                            half_rows.push(s.polys[g].mul_mono(F2BoolMono::from_mask(mult)));
+                            half_keys.push((mult, g));
                         }
                     }
                 }
@@ -590,14 +601,25 @@ pub fn groebner_basis_f4(
                     // disjoint from it, so the two kinds of key never meet.
                     let mult = 1u64 << v;
                     if seen_rows.insert((mult, g)) {
-                        let prod = s.polys[g].mul_mono(F2BoolMono::from_mask(mult));
-                        if !prod.is_zero() {
-                            field_rows.push(prod);
-                        }
+                        field_keys.push((mult, g));
                     }
                 }
             }
         }
+        // The products are independent of one another; form them in
+        // parallel when there are enough, in the order they were listed.
+        let product = |&(mult, g): &(u64, usize)| s.polys[g].mul_mono(F2BoolMono::from_mask(mult));
+        let products = |keys: &[(u64, usize)]| -> Vec<F2BoolPoly> {
+            let terms: usize = keys.iter().map(|&(_, g)| s.polys[g].terms.len()).sum();
+            if keys.len() > 1 && terms >= PAR_PRODUCT_TERMS && rayon::current_num_threads() > 1 {
+                keys.par_iter().map(product).collect()
+            } else {
+                keys.iter().map(product).collect()
+            }
+        };
+        let half_rows = products(&half_keys);
+        let mut field_rows = products(&field_keys);
+        field_rows.retain(|p| !p.is_zero());
 
         // Symbolic preprocessing.  Every monomial other than an S-pair's
         // lcm is examined once; a divisible one gets a reducer led by it.
@@ -613,10 +635,50 @@ pub fn groebner_basis_f4(
             }
         }
         let mut reducers: Vec<F2BoolPoly> = Vec::new();
-        while let Some(m) = queue.pop() {
-            match s.reducer_for(m, &active, &mut st) {
-                Some(g) => {
-                    let r = s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g]));
+        // A monomial's reducer depends only on the monomial, so a large
+        // enough stack of monomials not yet looked up is looked up (and its
+        // product formed) in parallel ahead of the loop.  The loop still
+        // pops, counts and queues in its own order; it only finds the work
+        // done.  `unprepared` counts the stack entries without a result.
+        let mut prepared: FxMap<u64, Option<F2BoolPoly>> = FxMap::default();
+        let mut unprepared = queue.len();
+        let reducer_row = |m: u64| {
+            s.reducer_among(m, &active)
+                .map(|g| s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g])))
+        };
+        // the terms a reducer row carries, on average, to price a batch
+        let mean_terms = active
+            .iter()
+            .map(|&g| s.polys[g].terms.len())
+            .sum::<usize>()
+            / active.len().max(1);
+        loop {
+            // (sizes first: asking rayon its thread count starts its pool)
+            if unprepared >= PAR_REDUCERS
+                && unprepared * mean_terms >= PAR_PRODUCT_TERMS
+                && rayon::current_num_threads() > 1
+            {
+                let todo: Vec<u64> = queue
+                    .iter()
+                    .copied()
+                    .filter(|m| !prepared.contains_key(m))
+                    .collect();
+                let rows: Vec<Option<F2BoolPoly>> =
+                    todo.par_iter().map(|&m| reducer_row(m)).collect();
+                prepared.extend(todo.into_iter().zip(rows));
+                unprepared = 0;
+            }
+            let Some(m) = queue.pop() else { break };
+            st.divisor_tests += active.len() as u64;
+            let row = match prepared.remove(&m) {
+                Some(row) => row,
+                None => {
+                    unprepared -= 1;
+                    reducer_row(m)
+                }
+            };
+            match row {
+                Some(r) => {
                     debug_assert_eq!(
                         r.lt().map(|t| t.mask),
                         Some(m),
@@ -625,6 +687,7 @@ pub fn groebner_basis_f4(
                     for t in &r.terms {
                         if examined.insert(t.mask) {
                             queue.push(t.mask);
+                            unprepared += 1;
                         }
                     }
                     reducers.push(r);
