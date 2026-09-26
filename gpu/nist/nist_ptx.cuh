@@ -71,5 +71,42 @@ template<> NF_HD void n_mac_row<12>(uint32_t*t,const uint32_t*a,uint32_t b){
  c+=t[12];t[12]=(uint32_t)c;t[13]+=(uint32_t)(c>>32);
 #endif
 }
+template<> NF_HD uint32_t n_reduce_row<P256Mod>(uint32_t*t,uint32_t m){
+#if defined(__CUDA_ARCH__)
+ uint32_t c;
+ asm("mov.u32 %7,%8;\n\t"
+ "add.cc.u32 %0,%0,%7;\n\taddc.u32 %7,0,0;\n\tsub.cc.u32 %0,%0,%8;\n\tsubc.u32 %7,%7,0;\n\tadd.u32 %7,%8,%7;\n\t"
+ "add.cc.u32 %1,%1,%7;\n\taddc.u32 %7,0,0;\n\tsub.cc.u32 %1,%1,%8;\n\tsubc.u32 %7,%7,0;\n\tadd.u32 %7,%8,%7;\n\t"
+ "add.cc.u32 %2,%2,%7;\n\taddc.u32 %7,0,0;\n\tadd.cc.u32 %3,%3,%7;\n\taddc.u32 %7,0,0;\n\t"
+ "add.cc.u32 %4,%4,%7;\n\taddc.u32 %7,0,0;\n\t"
+ "add.cc.u32 %5,%5,%7;\n\taddc.u32 %7,0,0;\n\tadd.cc.u32 %5,%5,%8;\n\taddc.u32 %7,%7,0;\n\t"
+ "add.cc.u32 %6,%6,%7;\n\taddc.u32 %7,0,0;\n\tsub.cc.u32 %6,%6,%8;\n\tsubc.u32 %7,%7,0;\n\tadd.u32 %7,%8,%7;"
+ :"+r"(t[1]),"+r"(t[2]),"+r"(t[3]),"+r"(t[4]),"+r"(t[5]),"+r"(t[6]),"+r"(t[7]),"=&r"(c):"r"(m));
+ return c;
+#else
+ return n_reduce_row<P256Mod>(t,m);
+#endif
+}
+template<> NF_HD uint32_t n_reduce_row<P384Mod>(uint32_t*t,uint32_t m){
+#if defined(__CUDA_ARCH__)
+ uint32_t c;
+ asm("mov.u32 %11,%12;\n\t"
+ "add.cc.u32 %0,%0,%11;\n\taddc.u32 %11,0,0;\n\tadd.cc.u32 %1,%1,%11;\n\taddc.u32 %11,0,0;\n\t"
+ "add.cc.u32 %2,%2,%11;\n\taddc.u32 %11,0,0;\n\tsub.cc.u32 %2,%2,%12;\n\tsubc.u32 %11,%11,0;\n\tadd.u32 %11,%12,%11;\n\t"
+ "add.cc.u32 %3,%3,%11;\n\taddc.u32 %11,0,0;\n\tsub.cc.u32 %3,%3,%12;\n\tsubc.u32 %11,%11,0;\n\tsub.cc.u32 %3,%3,%12;\n\tsubc.u32 %11,%11,0;\n\tadd.u32 %11,%12,%11;\n\t"
+ "add.cc.u32 %4,%4,%11;\n\taddc.u32 %11,0,0;\n\tsub.cc.u32 %4,%4,%12;\n\tsubc.u32 %11,%11,0;\n\tadd.u32 %11,%12,%11;\n\t"
+ "add.cc.u32 %5,%5,%11;\n\taddc.u32 %11,0,0;\n\tsub.cc.u32 %5,%5,%12;\n\tsubc.u32 %11,%11,0;\n\tadd.u32 %11,%12,%11;\n\t"
+ "add.cc.u32 %6,%6,%11;\n\taddc.u32 %11,0,0;\n\tsub.cc.u32 %6,%6,%12;\n\tsubc.u32 %11,%11,0;\n\tadd.u32 %11,%12,%11;\n\t"
+ "add.cc.u32 %7,%7,%11;\n\taddc.u32 %11,0,0;\n\tsub.cc.u32 %7,%7,%12;\n\tsubc.u32 %11,%11,0;\n\tadd.u32 %11,%12,%11;\n\t"
+ "add.cc.u32 %8,%8,%11;\n\taddc.u32 %11,0,0;\n\tsub.cc.u32 %8,%8,%12;\n\tsubc.u32 %11,%11,0;\n\tadd.u32 %11,%12,%11;\n\t"
+ "add.cc.u32 %9,%9,%11;\n\taddc.u32 %11,0,0;\n\tsub.cc.u32 %9,%9,%12;\n\tsubc.u32 %11,%11,0;\n\tadd.u32 %11,%12,%11;\n\t"
+ "add.cc.u32 %10,%10,%11;\n\taddc.u32 %11,0,0;\n\tsub.cc.u32 %10,%10,%12;\n\tsubc.u32 %11,%11,0;\n\tadd.u32 %11,%12,%11;"
+ :"+r"(t[1]),"+r"(t[2]),"+r"(t[3]),"+r"(t[4]),"+r"(t[5]),"+r"(t[6]),"+r"(t[7]),"+r"(t[8]),"+r"(t[9]),"+r"(t[10]),"+r"(t[11]),"=&r"(c):"r"(m));
+ return c;
+#else
+ return n_reduce_row<P384Mod>(t,m);
+#endif
+}
+
 #endif
 #endif
