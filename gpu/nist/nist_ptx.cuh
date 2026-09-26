@@ -84,7 +84,7 @@ template<> NF_HD uint32_t n_reduce_row<P256Mod>(uint32_t*t,uint32_t m){
  :"+r"(t[1]),"+r"(t[2]),"+r"(t[3]),"+r"(t[4]),"+r"(t[5]),"+r"(t[6]),"+r"(t[7]),"=&r"(c):"r"(m));
  return c;
 #else
- return n_reduce_row<P256Mod>(t,m);
+ return n_reduce_row_portable<P256Mod>(t,m);
 #endif
 }
 template<> NF_HD uint32_t n_reduce_row<P384Mod>(uint32_t*t,uint32_t m){
@@ -104,7 +104,7 @@ template<> NF_HD uint32_t n_reduce_row<P384Mod>(uint32_t*t,uint32_t m){
  :"+r"(t[1]),"+r"(t[2]),"+r"(t[3]),"+r"(t[4]),"+r"(t[5]),"+r"(t[6]),"+r"(t[7]),"+r"(t[8]),"+r"(t[9]),"+r"(t[10]),"+r"(t[11]),"=&r"(c):"r"(m));
  return c;
 #else
- return n_reduce_row<P384Mod>(t,m);
+ return n_reduce_row_portable<P384Mod>(t,m);
 #endif
 }
 
