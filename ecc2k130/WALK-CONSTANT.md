@@ -1124,9 +1124,9 @@ Sources:
   `scatter-v2.jsonl` and `scatter-v1.jsonl`;
 - `scatter-build.txt`, the binaries' hashes and the source commit.
 
-The runs took 03:31–04:17 UTC on 2026-09-26, on four cores, from the
-declaration's own commit `0828682c`.  That commit was pushed while the runs
-were in progress, before any analysis.
+The runs took 03:31:43–04:17:05 UTC on 2026-09-26, on four cores.  The
+declaration's commit `0828682c` is timestamped 03:31:09, before the first
+run, and `scatter-build.txt` records that commit as the source.
 
 | rule | seeds | trials | pooled `c` | ± | χ² (15 dof) | p | test 1 | emulation | test 3 z |
 |---|---|---:|---:|---:|---:|---:|---|---|---:|
@@ -1135,17 +1135,25 @@ were in progress, before any analysis.
 
 - **Test 2: neither rule scatters, so the question closes.** The 2.7
   standard-error gap between seeds 230 and 231 was chance.  So was the
-  χ² = 13.3, together with the `n = 41` reference outlier.
-- **Neither rule comes near the line.** v1's χ² is the larger, but it stays
-  under the declared "suggestive" line (p < 0.05).  Its largest single
-  deviation is −2.08 standard errors (seed 275); v2's is −1.31 (seed 244).
-  A scatter new with v2 would have looked the other way round.
+  `n = 23` part of the χ² = 13.3.
+- **The `n = 41` row was not rerun.** Its 5.7 of the 13.3 stays what item 3
+  said it was, a comparison against an emulation outlier, and this test
+  does not bear on it.
+- **Where each rule sits against the lines.**
+  - v2 sits well under the "suggestive" line: χ² = 8.79 against 25.00.
+    Its largest single deviation is −1.31 standard errors (seed 244).
+  - v1 sits just under it: χ² = 23.30 against 25.00.  Its largest
+    deviation is −2.08 (seed 275).
+  - v1, not v2, came closer.  A scatter new with v2 would have looked the
+    other way round.
 - **Test 3: the harnesses agree under both rules.**  Item 3's pooled
   constant, `c = 1.0034 ± 0.0009`, stands, and item 6's cost ratio with it.
 - **The binaries are the rules they claim to be.** Over 84M steps each:
   - v1's rows show 40 four-step τ-relation returns and 8 six-step pairwise
     ones.  The harness's own leading-order count predicts 43.3 and 7.0.
-  - v2's rows show none of either.
+    They also show one six-step τ-relation return, of the residual class
+    item 2 describes.
+  - v2's rows show no return of any kind.
   - 98 and 83 trials (0.03%) reached the point at infinity and were
     discarded, as the harness always does.
 - **Not declared, so descriptive only:**
