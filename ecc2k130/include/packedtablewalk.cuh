@@ -206,34 +206,15 @@ TW_FN int twCoordinate(const P131 &yp, int p, const uint32_t *fromRow) {
     return twParity(t);
 }
 
-// The whole selection for one point: (h, k, eps) after the cycle rule, with
-// the history advanced.  x is in the normal basis, yp in the polynomial basis.
-// The history is passed by value and returned so a caller that already holds
-// it (the fused schedule reads hist for the denominator tag) does not load it
-// twice; twSelect below is the in-memory form.
-TW_FN unsigned twSelectHist(const P131 &x, const P131 &yp, int hw,
-                            unsigned long long *hist, const uint32_t *shared) {
+// Coordinate-selected tag before the cycle hint or escape policy.
+TW_FN unsigned twRawTag(const P131 &x, const P131 &yp, int hw,
+                            const uint32_t *shared) {
     const uint8_t *bytes = reinterpret_cast<const uint8_t *>(shared);
     const int k = twPhase(x, hw, bytes + 4 * (TW_PHASE_OFF - TW_SEL0), shared + (TW_INV_OFF - TW_SEL0));
     const int p = twPivot(x, k, shared + (TW_MASK_OFF - TW_SEL0), bytes + 4 * (TW_MAX_OFF - TW_SEL0),
                           bytes + 4 * (TW_LINV_OFF - TW_SEL0));
     const int eps = twCoordinate(yp, p, shared + (TW_ROW_OFF - TW_SEL0));
-    int h = (hw >> 1) & (TW_H - 1);
-    unsigned tag = eccTag(h, k, eps);
-    const unsigned long long old = *hist;
-    while (eccTagFruitless(tag, old, 131)) {
-        h = (h + 1) & (TW_H - 1);
-        tag = eccTag(h, k, eps);
-    }
-    *hist = eccHistPush(old, tag);
-    return tag;
-}
-TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
-                        unsigned long long *hist, const uint32_t *shared) {
-    unsigned long long h = *hist;
-    const unsigned tag = twSelectHist(x, yp, hw, &h, shared);
-    *hist = h;
-    return tag;
+    return eccTag((hw >> 1) & (TW_H - 1), k, eps);
 }
 
 // The polynomial square the reverse pass needs, from the shared table when
@@ -288,6 +269,91 @@ TW_FN void twDenominator(unsigned tag, const P131 &xp, const uint32_t *shared, P
     for (int i = 0; i < 4; ++i) d->v[i] = xp.v[i] ^ t[i];
     d->v[4] = xp.v[4] ^ top;
 }
+
+// Keep the full-point probe cold. It is deliberately independent of the
+// history hint and uses the same control flow as the host reference.
+struct TwCyclePoint { P131 x, y; };
+#ifdef __CUDACC__
+#define TW_METHOD __device__ inline
+#define TW_COLD __device__ __noinline__
+#else
+#define TW_METHOD inline
+#define TW_COLD static inline
+#endif
+TW_FN int twWeight(const P131 &x) {
+    int w = 0;
+    for (int i = 0; i < 5; ++i) {
+#ifdef __CUDACC__
+        w += __popc(x.v[i]);
+#else
+        w += __builtin_popcount(x.v[i]);
+#endif
+    }
+    return w;
+}
+TW_FN bool twFieldEqual(const P131 &a, const P131 &b) {
+    for (int i = 0; i < 5; ++i) if (a.v[i] != b.v[i]) return false;
+    return true;
+}
+TW_FN bool twFieldLess(const P131 &a, const P131 &b) {
+    for (int i = 4; i >= 0; --i) if (a.v[i] != b.v[i]) return a.v[i] < b.v[i];
+    return false;
+}
+TW_FN P131 twCanonical(P131 x) {
+    P131 best = x;
+    for (int i = 1; i < 131; ++i) {
+        x = sqr131(x);
+        if (twFieldLess(x, best)) best = x;
+    }
+    return best;
+}
+struct TwCycleOps {
+    const uint32_t *sel, *tab;
+    int dpWeight;
+    TW_METHOD bool distinguished(const TwCyclePoint &p) const { return twWeight(p.x) <= dpWeight; }
+    TW_METHOD unsigned tag(const TwCyclePoint &p) const {
+        return twRawTag(p.x, toPolynomial131(p.y), twWeight(p.x), sel);
+    }
+    TW_METHOD bool next(const TwCyclePoint &p, unsigned t, TwCyclePoint *out) const {
+        P131 zero = {{0,0,0,0,0}}, tx, ty;
+        twAddend(t, zero, zero, tab, &tx, &ty);
+        tx = fromPolynomial131(tx); ty = fromPolynomial131(ty);
+        const P131 d = add131(p.x, tx);
+        if (twFieldEqual(d, zero)) return false;
+        const P131 lambda = mul131(add131(p.y, ty), inv131(d));
+        out->x = add131(add131(sqr131(lambda), lambda), d);
+        out->y = add131(add131(mul131(lambda, add131(p.x, out->x)), out->x), p.y);
+        return true;
+    }
+    TW_METHOD bool equal(const TwCyclePoint &a, const TwCyclePoint &b) const {
+        return twFieldEqual(a.x,b.x) && twFieldEqual(a.y,b.y);
+    }
+    TW_METHOD bool less(const TwCyclePoint &a, const TwCyclePoint &b) const {
+        const int wa = twWeight(a.x), wb = twWeight(b.x);
+        if (wa != wb) return wa < wb;
+        return twFieldLess(twCanonical(a.x), twCanonical(b.x));
+    }
+};
+TW_COLD unsigned twCycleTag(const P131 &x, const P131 &yp, unsigned raw,
+                            const uint32_t *sel, const uint32_t *tab, int dpWeight) {
+    return eccCycleAnchorTag(TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+                             TwCycleOps{sel,tab,dpWeight}, 131, TW_H);
+}
+TW_FN unsigned twSelectHist(const P131 &x, const P131 &yp, int hw,
+                            unsigned long long *hist, const uint32_t *sel,
+                            const uint32_t *tab, int dpWeight) {
+    unsigned tag = twRawTag(x,yp,hw,sel);
+    if (eccTagFruitless(tag,*hist,131)) tag = twCycleTag(x,yp,tag,sel,tab,dpWeight);
+    *hist = eccHistPush(*hist,tag);
+    return tag;
+}
+TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
+                        unsigned long long *hist, const uint32_t *sel,
+                        const uint32_t *tab, int dpWeight) {
+    return twSelectHist(x,yp,hw,hist,sel,tab,dpWeight);
+}
+#undef TW_METHOD
+#undef TW_COLD
 
 // Host: fill the flat constant buffer from the reference walk.
 template <class TW>

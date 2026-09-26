@@ -1,16 +1,15 @@
 //! Guards for the ECC2K-130 Pollard rho campaign: a certificate that the
-//! shipping iteration has no fruitless cycle, and a stored, verifiable
+//! sigma iteration has no orbit return through a stated length bound, and a stored, verifiable
 //! campaign seed.
 //!
-//! # No fruitless cycles
+//! # Bounded exclusion of short cycles
 //!
 //! The campaign walks `R ← σʲ(R) + R` with `j = 3 + ((HW(x_R) / 2) mod 8)`,
 //! the Hamming weight taken in normal-basis coordinates.  `σ` permutes those
 //! coordinates and negation fixes `x`, so `j` is constant on each orbit
 //! `{±σᵃ(R)}` and the iteration is equivariant: it descends to the orbit set
-//! with no canonical representative inside the loop, so there is no sign for
-//! a fruitless cycle to feed back through (`ecc2k130/Makefile`,
-//! `check-cycles`).
+//! with no canonical representative inside the loop. Equivariance alone does
+//! not exclude cycles; the finite arithmetic check below does (`check-cycles`).
 //!
 //! What equivariance leaves is arithmetic.  On the order-`ℓ` subgroup `σ`
 //! acts as multiplication by `λ`, a step multiplies the walk's scalar by

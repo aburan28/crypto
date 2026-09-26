@@ -312,14 +312,9 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testirschedule.py'
 	python3 -m unittest discover -s codegen -p 'testwdsat.py'
 
-# The iteration exploits an automorphism group of order 2m, and the usual price
-# for that is fruitless cycles.  This iteration cannot have them -- it is
-# equivariant, so it needs no canonical representative and has nothing for a
-# sign to feed back through -- but the arithmetic coincidence that would still
-# produce one is checkable, so check it, for every curve, on every change to the
-# step schedule.  The check is `ecc2k-guard cycles` in the root Rust crate
-# (src/cryptanalysis/ecc2k130_guard.rs); CYCLE_LENGTH is the longest cycle it
-# rules out.
+# Exhaustively rule out sigma-walk orbit returns through CYCLE_LENGTH.
+# Equivariance alone does not rule out cycles. This check does not cover the
+# additive table walk; test-cycle-rule and test-cycle-escape cover its policy.
 CYCLE_LENGTH ?= 24
 check-cycles:
 	cargo run --release --quiet --manifest-path ../Cargo.toml --bin ecc2k-guard -- \
@@ -508,10 +503,11 @@ test-cycle-rule:
 # Device primitives of the table walk against the host reference; needs a GPU.
 # The same probe on the host, for both selection layouts, so a layout change
 # is held to the reference before any GPU sees it.
+TABLE_PROBE_POINTS ?= 4096
 test-table-walk-host:
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -Wno-unknown-pragmas -Wno-unused-function src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble
-	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -Wno-unknown-pragmas -Wno-unused-function src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes
 	./build/test-table-walk-host-nibble
 	./build/test-table-walk-host-bytes
 
@@ -549,7 +545,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule test-cycle-escape check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -883,3 +879,12 @@ clean:
 	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
 
 .PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+
+# Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
+test-cycle-escape:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas src/testcycleescape.cpp -o build/test-cycle-escape
+	./build/test-cycle-escape
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-hybrid
+	./build/test-cycle-escape-hybrid
+.PHONY: test-cycle-escape

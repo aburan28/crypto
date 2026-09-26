@@ -17,7 +17,7 @@ on:
 permissions:
   contents: read
 jobs:
-  # The walk's step schedule must never admit a fruitless cycle: a walk
+  # The sigma step schedule must exclude orbit returns through the tested bound: a walk
   # caught in one runs to maxIters and reports nothing, on the campaign's
   # budget. `check-cycles` exits non-zero on a real hit or a degenerate step.
   no-fruitless-cycles:
@@ -48,6 +48,12 @@ jobs:
       # target that RUNS it and the aws test modules. Naming the file
       # compiled the tests and never ran one.
       - run: make -C ecc2k130 cpu test-production
+      - name: Cycle hint and common-exit regressions
+        run: make -C ecc2k130 test-cycle-rule test-cycle-escape test-table-walk-host TABLE_PROBE_POINTS=16
+      - name: Table replay, format isolation and restart regressions
+        run: |
+          g++ -O2 -std=c++17 -DECC_NO_CUDA -DECC_BATCH=2 -DECC_WALK_TABLE=1 -Wno-unknown-pragmas ecc2k130/src/testproduction.cpp -o /tmp/test-production-table
+          /tmp/test-production-table
       # Generated-header checks, the CLI checks and the codegen unit tests.
       # Nothing ran them in CI, and testdirectbuild.py sat red on main for
       # days after modal_app.py's image grew CPU_THREADS and CPU_BINARIES.
@@ -60,3 +66,23 @@ jobs:
           path: |
             ecc2k130/build/certification-local.json
             ecc2k130/build/certification-local-logs/
+
+  table-cuda-compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CUDA compiler (no GPU needed)
+        run: |
+          curl -sSfLO https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+          sudo dpkg -i cuda-keyring_1.1-1_all.deb
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends cuda-nvcc-12-9 cuda-cudart-dev-12-9
+          echo /usr/local/cuda-12.9/bin >> "$GITHUB_PATH"
+      - name: Compile both cold-path table layouts
+        run: |
+          nvcc -O2 -std=c++17 -arch=sm_90 -DECC_WALK_TABLE=1 -c ecc2k130/src/testtablewalkcuda.cu -o /tmp/table-probe.o
+          nvcc -O2 -std=c++17 -arch=sm_90 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 -c ecc2k130/src/testtablewalkcuda.cu -o /tmp/table-probe-hybrid.o
+      - name: Compile packed table client
+        run: |
+          nvcc -O2 -std=c++17 -arch=sm_90 -DECC_WALK_TABLE=1 -DECC_WITNESS=0 -DECC_BATCH=2 -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_UNROLL_INV=1 -DECC_TABLE_TAG_DENOM=1 -c ecc2k130/src/main.cu -o /tmp/table-client.o

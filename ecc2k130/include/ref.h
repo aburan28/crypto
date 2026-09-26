@@ -481,6 +481,7 @@ struct TableWalk {
     Point table[H][M];        // table[h][k] = sigma^k(T_h)
     U192 ta[H], tb[H];        // T_h = ta[h] P + tb[h] Q
     bool ready = false;
+    int dpWeight = -1; // caller supplies the campaign reporting threshold
 
     // The coordinate functions are defined on the permuted type-II normal
     // basis; the polynomial-basis test curves have no such coordinate order.
@@ -518,11 +519,30 @@ struct TableWalk {
         const int k = phase(xn, hw);
         return eccTag(branch(hw), k, negationBit(xn, yn, k));
     }
-    // ...and after it: advance the branch while the step would be fruitless.
-    static unsigned resolveTag(unsigned t, u64 hist) {
-        for (int i = 0; i < H && eccTagFruitless(t, hist, M); ++i)
-            t = eccTag((eccTagH(t) + 1) & (H - 1), eccTagK(t), eccTagEps(t));
-        return t;
+    struct CycleOps {
+        const TableWalk *walk;
+        bool distinguished(const Point &p) const { return R::weight(p.x) <= walk->dpWeight; }
+        unsigned tag(const Point &p) const { return walk->rawTag(p, R::weight(p.x)); }
+        bool next(const Point &p, unsigned t, Point *out) const {
+            const Point q = walk->addend(t);
+            if (q.inf || p.x == q.x) return false;
+            *out = R::addPt(p, q);
+            return !out->inf;
+        }
+        bool equal(const Point &a, const Point &b) const { return R::eq(a, b); }
+        bool less(const Point &a, const Point &b) const {
+            const int wa = R::weight(a.x), wb = R::weight(b.x);
+            if (wa != wb) return wa < wb;
+            const Elem ca = R::canonical(a.x), cb = R::canonical(b.x);
+            for (int i = R::NL - 1; i >= 0; --i) {
+                if (ca.v[i] != cb.v[i]) return ca.v[i] < cb.v[i];
+            }
+            return false;
+        }
+    };
+    unsigned resolveTag(const Point &p, unsigned t, u64 hist) const {
+        if (!eccTagFruitless(t, hist, M)) return t;
+        return eccCycleAnchorTag(p, t, CycleOps{this}, M, H);
     }
     Point addend(unsigned t) const {
         const Point q = table[eccTagH(t)][eccTagK(t)];
@@ -532,7 +552,7 @@ struct TableWalk {
     // coincidence has probability 2^-m and is never special-cased there.
     Point step(const Point &p, int hw, u64 *hist, U192 *a, U192 *b, const U192 &ell,
                const U192 *spow) const {
-        const unsigned t = resolveTag(rawTag(p, hw), *hist);
+        const unsigned t = resolveTag(p, rawTag(p, hw), *hist);
         *hist = eccHistPush(*hist, t);
         if (a) {
             U192 ca = mod_mul(spow[eccTagK(t)], ta[eccTagH(t)], ell);

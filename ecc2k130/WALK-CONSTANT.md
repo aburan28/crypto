@@ -1,5 +1,11 @@
 # Iterations per solve: the σ walk against the table walk
 
+> Table-walk correctness update (2026-09-26): [cycle escape v3](CYCLE-ESCAPE-V3.md)
+> replaces history-dependent exits with a validated raw-cycle anchor. Older
+> table-walk measurements below describe their recorded revisions, not v3.
+> V3 requires a new table corpus; the default sigma iteration is unchanged.
+
+
 Question: the campaign has two iteration functions: the shipping walk
 `R ← R + σʲ(R)` and the table walk `R ← R + ε·σᵏ(T_h)` of
 [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md).  The table walk runs

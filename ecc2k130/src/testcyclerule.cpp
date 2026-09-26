@@ -1,4 +1,4 @@
-// The table walk's cycle rule (tablewalk.h, eccTagFruitless) on its own, with
+// The v2 tag predicate, retained as a v3 HINT (eccTagFruitless), on its own, with
 // no curve: which runs of steps it lets a walk complete.
 //
 // A run of step tags returns a walk to a point it has left exactly when, per
