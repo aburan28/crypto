@@ -1056,7 +1056,7 @@ fn derive(seed: u64, parts: &[u64]) -> u64 {
 /// The batch law's per-target share at `k` targets, relative to one
 /// target alone: `Σ_{i<k} C(2i, i)/4^i / k` (Kuhn–Struik), about
 /// `√(2/πk)` for large `k`.
-fn batch_law(k: usize) -> f64 {
+pub(crate) fn batch_law(k: usize) -> f64 {
     let mut term = 1.0f64;
     let mut sum = 0.0f64;
     for i in 0..k {

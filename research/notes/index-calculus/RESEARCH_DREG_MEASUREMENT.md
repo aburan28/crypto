@@ -446,6 +446,35 @@ anything in the table above.
 The single-cell caveat on Result 2 is unchanged.  What has changed is
 that the experiment which would lift it is now schedulable.
 
+### Dense finish: another 10× on the draws that cost (engineering)
+
+`refute_profile` breaks one degree's structured elimination down by column
+degree band. On an `(8, 4)` degree-6 draw (60k × 58k), the sparse merge is
+cheap only in the leading band. Below it, the surviving rows are thousands
+of entries long:
+
+| band | row additions | words written | time |
+|--:|--:|--:|--:|
+| degree 6 | 2.4M | 2.3G | 6.4 s |
+| degree 5 | 11.8M | 28.7G | 75.1 s |
+| degree 4 | 5.2M | 5.0G | 17.0 s |
+| degrees 3, 2 | 1.6M | 0.26G | 1.3 s |
+
+`eliminate_high_columns_dense_finish` keeps the sparse pass for the leading
+band. It then packs the survivors as bit rows and hands them to the dense
+echelon kernel. The switch is `KIC_SPARSE_DENSE_FINISH=1`, and it is off by
+default.
+
+- **Same row space, so the same refutation and pinned variables.** This is
+  tested, and it is identity-checked on 376 committed rows: 0 mismatches,
+  including degree-7 refutations and a `≥7` bound.
+- **Speed on the measured draws:** 23,586 s became 2,271 s.
+  - `(8, 4)` at degree 6: 91 s to 13 s.
+  - `(7, 4)` at degree 7: 2,068 s to 271 s.
+  - `(10, 5)` at degree 6: 1,640 s to 324 s.
+- **Class: engineering.** It changes the cost of measuring, never a degree.
+  The evidence is `research/dreg_fixed_surplus_20260923/runs/identity-check-dense/`.
+
 ## Result 4: the ladder at fixed surplus, inconclusive as far as it ran
 
 `research/dreg_fixed_surplus_20260923/` holds everything: a pre-registered
@@ -567,6 +596,37 @@ reproduces all 299 of Result 5's rows exactly. It is not faster: it took
 1.3–1.4× the frozen binary's time on the small cells. It does not bring
 `(13, 5)` within reach.
 
+## Result 7: the ladder's primary pair — grows at fixed surplus
+
+With the dense finish, a `(13, 5)` draw takes 31–34 minutes where the
+sparse-only path had not finished one in 4.5 hours. The four registered
+draws are all **≥7**: the degree-6 Macaulay matrix contains no `1`.
+
+| pair at `S = −2` | small | large | registered verdict |
+|---|---|---|---|
+| primary | `(7, 3)`, 16 unknowns: 6 6 6 6 | `(13, 5)`, 28 unknowns: ≥7 ≥7 ≥7 ≥7 | **grows** |
+
+- **Result 4's registered verdict, re-scored with no other change: "grows
+  at fixed surplus".**
+  - The primary pair grows, and so do both other testable pairs.
+  - `(15, 5)`, at `S = 0`, is still running.
+- **This pair answers Result 4's confound.**
+  - It has `ℓ ≥ 3` at both ends, so the growth is not an `ℓ = 2` floor.
+  - It holds one surplus, so Result 6's surplus effect does not enter.
+  - Result 5's `ℓ = 5` rise at `(10, 5)` was confounded with the equation
+    count. This one is not.
+- **The prediction was "grows", and it held.**
+- **Scope.**
+  - The `(13, 5)` values are lower bounds, so the size of the growth is
+    unknown.
+  - At `S = −2` the measured rungs are `ℓ = 3` (6) and `ℓ = 5` (≥7). No
+    `ℓ = 4` cell sits at that surplus. The nearest ones, at `S = −1` and
+    `+1`, read 6, which puts the step between `ℓ = 4` and `ℓ = 5` on this
+    evidence.
+  - That placement is a reading across neighbouring surpluses, not a
+    registered comparison.
+  - `m = 3`, `n ≤ 13`. Nothing about `n = 131` follows at this scale.
+
 ## Reproducing
 
 ```sh
@@ -635,7 +695,8 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
   to `ℓ` or to the six equations it lacks.  Pre-register it first.
   **Done:** Result 6, confounded.  It did not take seconds: its degree-7
   draws take 35 min to 2 h.
-- **`ℓ = 5` at `S ≥ −2` is now the whole open question.**  It is the
+- **`ℓ = 5` at `S ≥ −2` was the whole open question.** **Answered at `S = −2`** (Result 7): `(13, 5)` is ≥7 on all four draws. `(15, 5)`, at `S = 0`, is running on the dense-finish path.
+- *Superseded note:* **`ℓ = 5` at `S ≥ −2` is now the whole open question.**  It is the
   ladder's `(13, 5)` or `(15, 5)`, at 28 or 30 unknowns.  Neither the frozen
   binary nor current `main` reaches it on the four-core container, so it
   needs either a large machine or a faster refutation path than sparse
