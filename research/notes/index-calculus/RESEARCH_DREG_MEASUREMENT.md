@@ -627,6 +627,36 @@ draws are all **≥7**: the degree-6 Macaulay matrix contains no `1`.
     registered comparison.
   - `m = 3`, `n ≤ 13`. Nothing about `n = 131` follows at this scale.
 
+## Result 8: the `S = 0` pair — every pair of the ladder grows
+
+`(15, 5)` is `ℓ = 5` at `S = 0`: 30 unknowns and 30 equations, the
+index-calculus regime, with about one decomposition in six points. On the
+dense-finish path its four draws took 96–104 min each. All four are **≥7**.
+
+| `S` | small | large | registered verdict |
+|--:|---|---|---|
+| −2 | `(7, 3)`: 6 6 6 6 | `(13, 5)`: ≥7 ×4 | grows |
+| −1 | `(5, 2)`: 5 5 5 5 | `(11, 4)`: 6 6 6 6 | grows |
+| **0** | `(9, 3)`: 6 6 6 6 | **`(15, 5)`: ≥7 ×4** | **grows** |
+| +1 | `(7, 2)`: 5 5 5 5 | `(13, 4)`: 6 6 6 6 | grows |
+
+- **Result 4's registered verdict, with every pair testable: grows at fixed
+  surplus.** The prediction was "grows", and it held in all four pairs.
+- **The evidence behind it.**
+  - The `S = −2` and `S = 0` pairs both have `ℓ ≥ 3` at both ends.
+  - Each holds one surplus.
+  - Each is ≥7 on every large-cell draw.
+- **The bottom line for this system, `m = 3` with the chained `S₃`.** At
+  fixed surplus, the refutation degree does not stay constant as the field
+  grows. It is 6 at `ℓ = 3` and above 6 at `ℓ = 5`, at the two surpluses
+  where both rungs are measured.
+  - That is evidence against a constant solving degree at these sizes.
+  - A constant degree is what a sub-exponential estimate driven by the
+    first fall degree needs. The FFD stays 3 throughout.
+  - This is a measurement at `n ≤ 15`, not a statement about `n = 131`.
+    The size of the growth is unmeasured, because the values are lower
+    bounds.
+
 ## Reproducing
 
 ```sh
@@ -695,7 +725,8 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
   to `ℓ` or to the six equations it lacks.  Pre-register it first.
   **Done:** Result 6, confounded.  It did not take seconds: its degree-7
   draws take 35 min to 2 h.
-- **`ℓ = 5` at `S ≥ −2` was the whole open question.** **Answered at `S = −2`** (Result 7): `(13, 5)` is ≥7 on all four draws. `(15, 5)`, at `S = 0`, is running on the dense-finish path.
+- **`ℓ = 5` at `S ≥ −2` was the whole open question.** **Answered** (Results 7 and 8): `(13, 5)` at `S = −2` and `(15, 5)` at `S = 0` are both ≥7 on all four draws.
+- **Next: the size of the growth.** The exact `ℓ = 5` degree needs degree 7 at 25–30 unknowns. The dense finish's dense block would be several to tens of GB there. That needs either a machine with more memory or a finish that goes dense only below the top two bands.
 - *Superseded note:* **`ℓ = 5` at `S ≥ −2` is now the whole open question.**  It is the
   ladder's `(13, 5)` or `(15, 5)`, at 28 or 30 unknowns.  Neither the frozen
   binary nor current `main` reaches it on the four-core container, so it
