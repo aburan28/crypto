@@ -6,6 +6,7 @@ on:
       - 'research/pkm_tower_round2_20260925/**'
       - 'research/pkm_tower_round3_20260925/**'
       - 'research/pkm_tower_round4_20260926/**'
+      - 'research/pkm_tower_round5_20260926/**'
       - 'src/cryptanalysis/f4_fp_tower.rs'
       - 'src/cryptanalysis/sig_fp_tower.rs'
       - 'examples/pkm_tower_pilot.rs'
@@ -36,6 +37,15 @@ jobs:
           else
             echo "no round-4 rows committed yet"
           fi
+      - name: Every committed round-5 row against exhaustive search
+        run: |
+          shopt -s nullglob
+          rows=(research/pkm_tower_round5_20260926/runs/*.jsonl)
+          if [ ${#rows[@]} -gt 0 ]; then
+            python3 research/pkm_tower_pilot_20260924/verify.py "${rows[@]}"
+          else
+            echo "no round-5 rows committed yet"
+          fi
       - name: Repeats agree, no planted solution is lost, and the engines' verdicts agree
         run: |
           shopt -s nullglob
@@ -43,11 +53,14 @@ jobs:
             research/pkm_tower_pilot_20260924/runs/*.jsonl \
             research/pkm_tower_round2_20260925/runs/*.jsonl \
             research/pkm_tower_round3_20260925/runs/*.jsonl \
-            research/pkm_tower_round4_20260926/runs/*.jsonl
+            research/pkm_tower_round4_20260926/runs/*.jsonl \
+            research/pkm_tower_round5_20260926/runs/*.jsonl
       - name: The compact-basis build reproduces every round-2 row and trace (round 3, note section 12.2)
         run: python3 research/pkm_tower_round3_20260925/compare_builds.py
       - name: The signature engine beside F4, and this round's F4 rows against round 2's (round 4, note section 13.4)
         run: python3 research/pkm_tower_round4_20260926/compare_engines.py
+      - name: The gate of note section 14.2 (signature criteria with F4's steps)
+        run: python3 research/pkm_tower_round5_20260926/compare_gate.py
   engine-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 45

@@ -979,8 +979,13 @@ fn print_sig_step(k: usize, st: &sig_fp_tower::SigStep) {
         format!(", memory {rss} MB (peak {peak} MB)")
     });
     eprintln!(
-        "sig step {}: position {} signature degree {}, {} pairs ({} syzygy, {} rewritten), rows {} gen + {} critical + {} tower + {} reducers x {} cols, nnz {}, zero {}, singular {}, fresh {} (lowest degree {}, highest row degree {}), late {}, elements {}, pairs left {}, {:.1} ms (rows {:.0}, reduce {:.0}), muladds {}{}",
+        "sig step {}: {}position {} signature degree {}, {} pairs ({} syzygy, {} rewritten), rows {} gen + {} critical + {} tower + {} reducers x {} cols, nnz {}, zero {}, singular {}, fresh {} ({} new leading monomials; lowest degree {}, highest row degree {}), late {}, elements {}, pairs left {}, {:.1} ms (rows {:.0}, reduce {:.0}), muladds {}{}",
         k,
+        if st.degree > 0 {
+            format!("degree {}, ", st.degree)
+        } else {
+            String::new()
+        },
         st.position,
         st.sugar,
         st.pairs,
@@ -995,6 +1000,7 @@ fn print_sig_step(k: usize, st: &sig_fp_tower::SigStep) {
         st.zero_rows,
         st.singular_rows,
         st.fresh,
+        st.fresh_lm,
         st.fresh_min_degree,
         st.fresh_max_nominal,
         st.late_pairs,
@@ -1104,6 +1110,7 @@ fn measure_tower(
             "sig": sig_stats,
             "sig_order": sig.map(|so| format!("{:?}", so.order)),
             "sig_rewrite": sig.map(|so| format!("{:?}", so.rewrite)),
+            "sig_steps": sig.map(|so| format!("{:?}", so.steps)),
             "input_ring_degrees": ring_degrees,
             "muladds": r.muladds,
             "max_nnz": r.max_nnz,
@@ -1288,6 +1295,14 @@ fn parse_args() -> Args {
                     "ratio" => sig_fp_tower::Rewrite::Ratio,
                     "insertion" => sig_fp_tower::Rewrite::Insertion,
                     other => panic!("unknown --sig-rewrite `{other}`"),
+                }
+            }
+            "--sig-steps" => {
+                a.sig.steps = match v.as_str() {
+                    "sugar" => sig_fp_tower::Steps::SignatureDegree,
+                    "signature" => sig_fp_tower::Steps::OneSignature,
+                    "degree" => sig_fp_tower::Steps::PolynomialDegree,
+                    other => panic!("unknown --sig-steps `{other}`"),
                 }
             }
             "--dump" => a.dump = Some(v.parse().expect("--dump")),

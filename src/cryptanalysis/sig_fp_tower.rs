@@ -276,6 +276,13 @@ pub struct SigStats {
     pub elements: u64,
     /// Highest signature degree of a step that gained an element.
     pub sig_degree_max: u32,
+    /// Highest nominal degree of a row whose element enlarged the ideal of
+    /// leading monomials: a leading monomial that no leading monomial held
+    /// when its step began divides. This is what `f4_fp_tower`'s solving
+    /// degree counts. `solving_degree_max` counts every new element, and a
+    /// signature basis also keeps elements whose leading monomial is
+    /// already in that ideal.
+    pub lm_degree_max: u32,
 }
 
 /// One step, for traces.
@@ -285,6 +292,9 @@ pub struct SigStep {
     /// its signatures belong to.
     pub sugar: u32,
     pub position: u32,
+    /// The step's polynomial degree, when steps are taken by it
+    /// ([`Steps::PolynomialDegree`]); zero otherwise.
+    pub degree: u32,
     pub pairs: usize,
     pub skipped_syzygy: usize,
     pub skipped_rewrite: usize,
@@ -299,6 +309,9 @@ pub struct SigStep {
     pub zero_rows: usize,
     pub singular_rows: usize,
     pub fresh: usize,
+    /// New elements whose leading monomial enlarged the ideal of leading
+    /// monomials (see [`SigStats::lm_degree_max`]).
+    pub fresh_lm: usize,
     pub fresh_min_degree: u32,
     pub fresh_max_nominal: u32,
     pub late_pairs: usize,
@@ -329,8 +342,7 @@ struct State {
     gen_deg: Vec<u32>,
     n_tower: usize,
     rewrite: Rewrite,
-    /// Take one signature per step instead of a whole signature degree.
-    one_signature: bool,
+    steps: Steps,
 }
 
 /// Which element stands for a signature when several could (the rewrite
@@ -519,23 +531,53 @@ pub enum ModuleOrder {
     DegreeFirst,
 }
 
+/// Which pairs a step takes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Steps {
+    /// Every pair of the lowest signature degree (the sugar, and under
+    /// position over term the lowest position first): the order the
+    /// theory asks for, a degree at a time.
+    SignatureDegree,
+    /// The pairs of the single lowest signature.
+    OneSignature,
+    /// Every pair of the lowest polynomial degree, `deg t + deg LM(g)` (the
+    /// lcm degree of a critical pair), as `f4_fp_tower`'s normal strategy
+    /// takes them. A step still eliminates its rows in signature order
+    /// and reduces a row only by rows of smaller signature.
+    ///
+    /// Out of signature order the criteria stay sound because every one
+    /// of them is monotone in the basis (Gao–Volny–Wang's cover argument):
+    /// a known syzygy stays one, and once a pair is covered (an element
+    /// whose signature divides the pair's has a multiple with a smaller
+    /// leading monomial than the pair's) it stays covered. The row built
+    /// for a signature is its rewriter's multiple, and under the ratio
+    /// order that multiple's leading monomial is at most every pair's
+    /// lcm: if smaller, the rewriter covers the pairs; if equal, the
+    /// pairs' other halves reduce the row's lead, so its reduction covers
+    /// them. So every pair ends covered or with a syzygy signature, which
+    /// is what the characterization asks of the final basis, whatever the
+    /// order. That argument needs the ratio order, which this mode
+    /// requires.
+    PolynomialDegree,
+}
+
 /// The engine's choices.
 #[derive(Clone, Copy, Debug)]
 pub struct SigOptions {
     pub order: ModuleOrder,
     pub rewrite: Rewrite,
-    /// Take the pairs of one signature per step, not of one degree.
-    pub one_signature: bool,
+    pub steps: Steps,
 }
 
 impl Default for SigOptions {
-    /// Position over term with the ratio rewrite order: the best of the
-    /// four on the pilot's `m = 3` and `m = 4` systems (note §13).
+    /// Position over term with the ratio rewrite order, a signature degree
+    /// per step: the best of the variants on the pilot's `m = 3` and
+    /// `m = 4` systems (note §13).
     fn default() -> Self {
         SigOptions {
             order: ModuleOrder::PositionFirst,
             rewrite: Rewrite::Ratio,
-            one_signature: false,
+            steps: Steps::SignatureDegree,
         }
     }
 }
@@ -548,6 +590,10 @@ pub fn sig_f4_tower_with(
     so: SigOptions,
 ) -> SigReport {
     ring.check();
+    assert!(
+        so.steps != Steps::PolynomialDegree || so.rewrite == Rewrite::Ratio,
+        "steps by polynomial degree need the ratio rewrite order"
+    );
     let started = Instant::now();
     let fp = Fp::new(ring.p);
     let mut rep = TowerF4Report::default();
@@ -611,7 +657,7 @@ pub fn sig_f4_tower_with(
             .collect(),
         n_tower: ring.n_tower(),
         rewrite: so.rewrite,
-        one_signature: so.one_signature,
+        steps: so.steps,
     };
     for (i, g) in gens.iter().enumerate() {
         s.pairs.push(Pair {
@@ -639,26 +685,37 @@ pub fn sig_f4_tower_with(
             rep.timed_out = true;
             break;
         }
-        let d = s.pairs.iter().map(|p| p.sig.sugar).min().unwrap();
+        // The step's key: the polynomial degree when steps follow it,
+        // otherwise the signature degree (with the position offset).
+        let by_degree = s.steps == Steps::PolynomialDegree;
+        let d = if by_degree {
+            s.pairs.iter().map(|p| p.nominal).min().unwrap()
+        } else {
+            s.pairs.iter().map(|p| p.sig.sugar).min().unwrap()
+        };
         if d % POT_STRIDE > opts.max_degree {
             rep.pairs_above_bound = s.pairs.len();
             break;
         }
         let step_started = Instant::now();
-        let (mut sel, rest): (Vec<Pair>, Vec<Pair>) = if s.one_signature {
+        let (mut sel, rest): (Vec<Pair>, Vec<Pair>) = match s.steps {
             // Only the pairs of the smallest signature: the order of the
             // theory, one signature per step.
-            let low = s.pairs.iter().map(|p| p.sig).min().unwrap();
-            s.pairs.drain(..).partition(|p| p.sig == low)
-        } else {
-            s.pairs.drain(..).partition(|p| p.sig.sugar == d)
+            Steps::OneSignature => {
+                let low = s.pairs.iter().map(|p| p.sig).min().unwrap();
+                s.pairs.drain(..).partition(|p| p.sig == low)
+            }
+            Steps::SignatureDegree => s.pairs.drain(..).partition(|p| p.sig.sugar == d),
+            Steps::PolynomialDegree => s.pairs.drain(..).partition(|p| p.nominal == d),
         };
         s.pairs = rest;
         rep.steps += 1;
         rep.degree_reached = rep.degree_reached.max(d % POT_STRIDE);
+        let low_sugar = sel.iter().map(|p| p.sig.sugar).min().unwrap_or(0);
         let mut tr = SigStep {
-            sugar: d % POT_STRIDE,
-            position: d / POT_STRIDE,
+            sugar: low_sugar % POT_STRIDE,
+            position: low_sugar / POT_STRIDE,
+            degree: if by_degree { d } else { 0 },
             pairs: sel.len(),
             ..Default::default()
         };
@@ -897,9 +954,24 @@ pub fn sig_f4_tower_with(
             .map(|(_, r)| degree_of(cols[r.cols[0] as usize]))
             .min()
             .unwrap_or(0);
-        for (k, r) in fresh {
+        // Which new elements enlarge the ideal of leading monomials: no
+        // leading monomial held when the step began divides theirs, as for
+        // `f4_fp_tower`'s new elements. Decided before any is inserted.
+        let lm_new: Vec<bool> = fresh
+            .iter()
+            .map(|(_, r)| {
+                let lm = cols[r.cols[0] as usize];
+                !any_divisor(lm, |q| s.lm_min.contains_key(&q))
+            })
+            .collect();
+        let mut lm_nominal = 0u32;
+        for ((k, r), new_lm) in fresh.into_iter().zip(lm_new) {
             let lm = cols[r.cols[0] as usize];
             tr.fresh_max_nominal = tr.fresh_max_nominal.max(rows[k].nominal);
+            if new_lm {
+                tr.fresh_lm += 1;
+                lm_nominal = lm_nominal.max(rows[k].nominal);
+            }
             if lm == ONE {
                 unit_found = true;
             }
@@ -915,9 +987,19 @@ pub fn sig_f4_tower_with(
             );
         }
         if let Some(mx) = max_sig_done {
+            // Pairs the step's new elements made that the step would have
+            // taken had they existed: of its signature degree and a smaller
+            // signature than its last row, or, when steps follow the
+            // polynomial degree, of its degree or lower.
             tr.late_pairs = s.pairs[before..]
                 .iter()
-                .filter(|p| p.sig.sugar == d && p.sig < mx)
+                .filter(|p| {
+                    if by_degree {
+                        p.nominal <= d
+                    } else {
+                        p.sig.sugar == d && p.sig < mx
+                    }
+                })
                 .count();
             st.late_pairs += tr.late_pairs as u64;
         }
@@ -925,7 +1007,10 @@ pub fn sig_f4_tower_with(
             let nominal = tr.fresh_max_nominal;
             learned = (learned.0.max(nominal), rep.max_cols, rep.steps);
             rep.last_productive_degree = nominal;
-            st.sig_degree_max = st.sig_degree_max.max(d % POT_STRIDE);
+            st.sig_degree_max = st.sig_degree_max.max(low_sugar % POT_STRIDE);
+        }
+        if tr.fresh_lm > 0 {
+            st.lm_degree_max = st.lm_degree_max.max(lm_nominal);
         }
         tr.elements = s.elems.len();
         tr.pairs_left = s.pairs.len();
@@ -1204,6 +1289,23 @@ mod tests {
             let la: Vec<Mono> = a.basis.iter().filter_map(RPoly::lm).collect();
             let lb: Vec<Mono> = b.report.basis.iter().filter_map(RPoly::lm).collect();
             assert_eq!(minimal(&la), minimal(&lb), "trial {trial}");
+            // Steps by polynomial degree, out of signature order, under
+            // both module orders.
+            for order in [ModuleOrder::PositionFirst, ModuleOrder::DegreeFirst] {
+                let so = SigOptions {
+                    order,
+                    rewrite: Rewrite::Ratio,
+                    steps: Steps::PolynomialDegree,
+                };
+                let d = sig_f4_tower_with(&input, &ring, &opts, so);
+                assert!(!d.report.timed_out);
+                assert_eq!(
+                    a.inconsistent, d.report.inconsistent,
+                    "trial {trial} {so:?}"
+                );
+                let ld: Vec<Mono> = d.report.basis.iter().filter_map(RPoly::lm).collect();
+                assert_eq!(minimal(&la), minimal(&ld), "trial {trial} {so:?}");
+            }
             // Every element of either basis reduces to zero by the other:
             // the same ideal, checked on the leading monomials above and on
             // membership here through f4 of the union.
@@ -1282,19 +1384,50 @@ mod tests {
     }
 
     /// Every variant (both module orders, both rewrite orders, steps by
-    /// degree or by signature) computes the ideal `f4_fp_tower` computes, on
-    /// homogeneous systems without a tower and on general towers.
+    /// signature degree, by signature or by polynomial degree) computes the
+    /// ideal `f4_fp_tower` computes, on homogeneous systems without a tower
+    /// and on general towers.
     #[test]
     fn every_variant_computes_the_same_ideal() {
         use rand::{Rng, SeedableRng};
         let mut rng = rand::rngs::StdRng::seed_from_u64(41);
         let p = 1_000_003u64;
         let variants = [
-            (ModuleOrder::PositionFirst, Rewrite::Ratio, false),
-            (ModuleOrder::PositionFirst, Rewrite::Insertion, false),
-            (ModuleOrder::DegreeFirst, Rewrite::Ratio, false),
-            (ModuleOrder::DegreeFirst, Rewrite::Insertion, false),
-            (ModuleOrder::DegreeFirst, Rewrite::Ratio, true),
+            (
+                ModuleOrder::PositionFirst,
+                Rewrite::Ratio,
+                Steps::SignatureDegree,
+            ),
+            (
+                ModuleOrder::PositionFirst,
+                Rewrite::Insertion,
+                Steps::SignatureDegree,
+            ),
+            (
+                ModuleOrder::DegreeFirst,
+                Rewrite::Ratio,
+                Steps::SignatureDegree,
+            ),
+            (
+                ModuleOrder::DegreeFirst,
+                Rewrite::Insertion,
+                Steps::SignatureDegree,
+            ),
+            (
+                ModuleOrder::DegreeFirst,
+                Rewrite::Ratio,
+                Steps::OneSignature,
+            ),
+            (
+                ModuleOrder::PositionFirst,
+                Rewrite::Ratio,
+                Steps::PolynomialDegree,
+            ),
+            (
+                ModuleOrder::DegreeFirst,
+                Rewrite::Ratio,
+                Steps::PolynomialDegree,
+            ),
         ];
         for trial in 0..24 {
             let homogeneous = trial % 2 == 0;
@@ -1347,11 +1480,11 @@ mod tests {
             let opts = TowerF4Options::new(40);
             let a = f4_tower(&input, &ring, &opts);
             let la: Vec<Mono> = a.basis.iter().filter_map(RPoly::lm).collect();
-            for &(order, rewrite, one_signature) in &variants {
+            for &(order, rewrite, steps) in &variants {
                 let so = SigOptions {
                     order,
                     rewrite,
-                    one_signature,
+                    steps,
                 };
                 let b = sig_f4_tower_with(&input, &ring, &opts, so);
                 assert!(!b.report.timed_out);
@@ -1387,10 +1520,36 @@ mod tests {
         let mut rng = rand::rngs::StdRng::seed_from_u64(61);
         let p = 2_013_265_921u64;
         let variants = [
-            (ModuleOrder::PositionFirst, Rewrite::Ratio),
-            (ModuleOrder::PositionFirst, Rewrite::Insertion),
-            (ModuleOrder::DegreeFirst, Rewrite::Ratio),
-            (ModuleOrder::DegreeFirst, Rewrite::Insertion),
+            (
+                ModuleOrder::PositionFirst,
+                Rewrite::Ratio,
+                Steps::SignatureDegree,
+            ),
+            (
+                ModuleOrder::PositionFirst,
+                Rewrite::Insertion,
+                Steps::SignatureDegree,
+            ),
+            (
+                ModuleOrder::DegreeFirst,
+                Rewrite::Ratio,
+                Steps::SignatureDegree,
+            ),
+            (
+                ModuleOrder::DegreeFirst,
+                Rewrite::Insertion,
+                Steps::SignatureDegree,
+            ),
+            (
+                ModuleOrder::PositionFirst,
+                Rewrite::Ratio,
+                Steps::PolynomialDegree,
+            ),
+            (
+                ModuleOrder::DegreeFirst,
+                Rewrite::Ratio,
+                Steps::PolynomialDegree,
+            ),
         ];
         let mut refuted = 0;
         for trial in 0..6 {
@@ -1411,11 +1570,11 @@ mod tests {
             let a = f4_tower(&input, &ring, &opts);
             refuted += usize::from(a.inconsistent);
             let la: Vec<Mono> = a.basis.iter().filter_map(RPoly::lm).collect();
-            for &(order, rewrite) in &variants {
+            for &(order, rewrite, steps) in &variants {
                 let so = SigOptions {
                     order,
                     rewrite,
-                    one_signature: false,
+                    steps,
                 };
                 let b = sig_f4_tower_with(&input, &ring, &opts, so);
                 assert!(!a.timed_out && !b.report.timed_out);

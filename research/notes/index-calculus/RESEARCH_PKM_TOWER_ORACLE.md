@@ -2190,6 +2190,98 @@ the engine. The rest of §12.10 stands, re-ranked:
 4. **`m = 2` at `N = 28`** and the **independent replication** of §12.10's items
    3–4.
 
+## 14. The gate of §13.10, 2026-09-26: signature criteria with F4's steps
+
+§§14.1–14.4 were written and committed before the gate's runs. The results
+follow as §14.5 onward. The data are in `research/pkm_tower_round5_20260926/`.
+
+### 14.1 The variant
+
+Round 4's engine takes its steps by signature degree. §13.9 traced its extra
+degree to that order: a pair of low polynomial degree can wait behind pairs of
+smaller signature and higher degree. §13.10 ranked a variant that takes F4's
+steps instead. `sig_fp_tower` now has it as `Steps::PolynomialDegree`
+(`--sig-steps degree` in the example).
+- **Steps.** Each step takes the pairs of the lowest polynomial degree
+  `deg t + deg LM(g)`, as `f4_fp_tower`'s normal strategy does.
+- **Unchanged.** Within a step, rows are still eliminated in signature order,
+  a row is reduced only by rows of smaller signature, and the criteria are
+  round 4's.
+- **Why the criteria stay sound out of signature order.** They are monotone
+  in the basis, which is Gao–Volny–Wang's cover argument:
+  - a known syzygy stays a syzygy;
+  - a pair once covered stays covered. A pair is covered when an element whose
+    signature divides the pair's has a multiple with a smaller leading
+    monomial.
+- **Why every pair ends covered.** Under the ratio order, the row built for a
+  signature (its rewriter's multiple) has a leading monomial at most every
+  pair's lcm.
+  - If smaller, the rewriter covers the pairs.
+  - If equal, the pairs' other halves reduce the row's lead, and the reduced
+    row covers them.
+
+  So every pair ends covered or with a syzygy signature, which is what the
+  characterization asks of the final basis, in any processing order. The mode
+  therefore requires the ratio order.
+- **Tests.** The mode joins every variant test, under both module orders:
+  - 120 random Kummer systems against `f4_fp_tower`'s basis;
+  - homogeneous systems and general towers, the same ideal;
+  - the long one-generator towers of §13.3.
+
+  All six tests pass.
+- **A second degree, reported beside `D_sig`.** `D_lm` is the highest degree of
+  a row whose element enlarged the ideal of leading monomials: no leading
+  monomial held when its step began divides the element's. That is what F4's
+  new elements do by construction.
+  - A signature basis also keeps elements whose leading monomial is already in
+    that ideal. `D_sig` counts those too.
+  - `D_lm` is a diagnostic. It was introduced after round 4, and **the gate
+    does not use it.**
+
+### 14.2 The gate, as §13.10 fixed it
+
+§13.10: "A degree-driven signature variant, only if a cheap check first shows
+`D_sig = D` on the round's `m = 3`, `N = 9`–12 systems."
+- **Systems.** Round 4's G3 systems at `N = 9` and 12: Kummer, `m = 3`, `p₁`,
+  targets 0 and 1, four systems. `D` is F4's, from round 4's T3 rows (equal to
+  round 2's).
+- **Variant.** Steps by polynomial degree, the ratio order, under each module
+  order: position over term and signature degree first.
+- **Pass.** A module order passes if `D_sig = D` on all four systems, where
+  `D_sig` is round 4's `solving_degree_max`, unchanged. A system that does not
+  finish within 600 s and the 14 GB cap fails.
+- **If an order passes**, round 5 is pre-registered in a later section before
+  any other run of the variant. It uses the passing order; if both pass, the
+  one with fewer multiply-adds at `N = 12`, summed over the two targets.
+- **If neither passes**, the variant is not worth a round (§13.10). This
+  section records why, and F4 stays the measuring engine.
+
+### 14.3 Context, not part of the gate
+
+The same script also runs these, to read the gate's result by:
+- the variant, both orders, on round 4's other small systems: `m = 2`,
+  `N = 12`, 14, 16, and `m = 4`, `N = 8`;
+- round 4's engine (position over term, steps by signature degree) on all the
+  systems above, for its `D_lm`. Round 4 did not report `D_lm`.
+
+None of these moves the gate.
+
+### 14.4 What was run before this section (a disclosure)
+
+- **The six unit tests** above.
+- **One plumbing check** of the example's new flag, on a system outside the
+  gate: Kummer, `m = 2`, `p₁`, `N = 8`, target 0, with steps by polynomial
+  degree. It refutes the system, with `D_sig = 5`, `D_lm = 4` and 1.65e5
+  multiply-adds. F4 gives `D = 4` and 5.17e5 multiply-adds. With one input the
+  two module orders coincide, and they gave the same row. The unit appeared in
+  a step of degree 5 from a rewritten row of degree 4. F4 finds it in its
+  degree-4 step.
+
+  This one system suggests the gate may fail. The prediction, fixed now: at
+  least one of the four gate systems gives `D_sig > D` under each order, so
+  the gate fails.
+
+
 ---
 
 ## References
