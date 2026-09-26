@@ -3,6 +3,9 @@ on:
   push:
     paths:
       - 'research/nist_gpu_arithmetic_20260926/RUN_GPU'
+concurrency:
+  group: nist-rtxpro6000-tournament
+  cancel-in-progress: true
 jobs:
   modal-rtxpro6000:
     runs-on: ubuntu-24.04
