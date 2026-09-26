@@ -227,6 +227,13 @@ one-ULP macOS differences without relaxing exact comparisons.
 Reference selection uses development data. It does not substitute for the fresh
 60-target confirmation panel or the familywise rule required by the active goal.
 
+Before each later bounded round, also supply every intervening development corpus
+with repeated `prepare --exposed-fixtures PATH` arguments. The [exposure safeguard](goal_20260924/target-exclusions/README.md)
+seals those fixture bytes, reconstructs their exclusion union during replay, and
+inherits prior rounds' excluded points even when absent from their workloads.
+The registered wrapper must still inventory all exposed sources; the option does
+not discover omitted studies automatically.
+
 ## Promotion and reference quality
 
 On Linux amd64 with Valgrind 3.22.0, follow [OPERATIONS.md](OPERATIONS.md).
