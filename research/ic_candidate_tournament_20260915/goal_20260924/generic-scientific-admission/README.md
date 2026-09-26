@@ -27,7 +27,7 @@ Four supplementary cases retain paid failed LA attempts, both at terminal
 failure and before later recovery. Eleven distinct environment-override controls
 are rejected before measurement.
 
-Local validation passes 161 Python tests (two existing platform skips), eight
+Local validation passes 162 Python tests (two existing platform skips), eight
 distinct release Rust controls and 39 site tests. The two worker controls ignored
 by the first Rust test filter were executed explicitly in the subsequent command.
 Adversarial tests keep the original group certificate valid while changing the
@@ -35,6 +35,10 @@ claimed solver or stored matrix, and require the stricter adapter to reject it.
 A [fresh archive extraction](fresh-restore-receipt.json) verifies all 1,170 file
 hashes and replays all 69 controls, reproducing 53 canonical IC run records.
 Only the separately measured external audit time changes on replay.
+The subsequent [type-edge review](type-edge-before.json) found four malformed
+boolean/integer substitutions accepted by Python's ordinary equality. Canonical
+typed comparisons and strict counter checks now reject them; the strengthened
+checker replays the same retained worker outputs without rerunning the workers.
 
 The final build has source-manifest SHA-256
 `215f4c7fa338b1053481563a717c867f1b75b25d936eb3b8cafa7fd2af31e134`

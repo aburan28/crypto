@@ -137,20 +137,22 @@ def admit(report, fixture, job, build, source, *, executable, process_wall_ns,
 
 
 def admit_rho(report, fixture, job, build, source, *, executable, process_wall_ns):
-    require(job['mode'] == 'rho' and report.get('generic_admission_schema') == 1
+    require(job['mode'] == 'rho' and type(report.get('generic_admission_schema')) is int
+            and report['generic_admission_schema'] == 1
             and report.get('generic_runtime_policy') == 'default-environment-one-rayon-v1',
             'missing rho admission policy')
     binding = verify_binding(report, build, source, executable=executable)
     cfg = effective_config(job, report)
     observed = report['rho_dispatch']
     field = kernel(report['field_kernel'])
-    require(observed == dict(algorithm='signed-frobenius-batched-affine', jump_count=16,
+    require(sha256(observed) == sha256(dict(algorithm='signed-frobenius-batched-affine', jump_count=16,
         max_restarts=64, max_iterations_per_restart=cfg['max_trials'], progress_interval=256,
-        requested_walks=cfg['rho_parallel_walks'], seed=job['algorithm_seed'], field_kernel=field),
+        requested_walks=cfg['rho_parallel_walks'], seed=job['algorithm_seed'], field_kernel=field)),
         'rho dispatch mismatch')
     expected_walks = max(1, min(cfg['rho_parallel_walks'],
         int(math.sqrt(math.pi*int(fixture['subgroup_order'])/2)/math.sqrt(2*fixture['degree'])/64)))
-    require(len(report['solutions']) == 1 and report['solutions'][0]['effective_walks'] == expected_walks,
+    require(len(report['solutions']) == 1 and type(report['solutions'][0]['effective_walks']) is int
+            and report['solutions'][0]['effective_walks'] == expected_walks,
             'rho effective width mismatch')
     clocks = verify_native(report, job, process_wall_ns=process_wall_ns)
     certificate = verify(report, fixture, expected_mode='rho') if report['status'] == 'complete' else None

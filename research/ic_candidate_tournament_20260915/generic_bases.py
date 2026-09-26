@@ -272,7 +272,7 @@ def verify_base(report, fixture, job):
     require(job['degree'] == fixture['degree'] and job['curve_a'] == fixture['curve_a'], 'base curve mismatch')
     require(5 <= fixture['degree'] <= 31 and fixture['degree'] % 2 == 1, 'generic base degree unsupported')
     recipe = effective_recipe(job, fixture)
-    require(report.get('effective_factor_base') == recipe, 'reported base recipe differs from job')
+    require(sha256(report.get('effective_factor_base')) == sha256(recipe), 'reported base recipe differs from job')
     points, detail = _reconstruct(json.dumps(recipe, sort_keys=True), json.dumps(fixture, sort_keys=True))
     encoded = [[str(x), str(y)] for x, y in points]
     require(report['factor_base'] == encoded, 'factor-base construction or ordering mismatch')

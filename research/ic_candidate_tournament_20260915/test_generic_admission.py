@@ -38,6 +38,23 @@ def build_fixture():
 
 
 class GenericAdmissionTests(unittest.TestCase):
+    def test_boolean_integer_aliases_cannot_change_dispatch_counters_or_matrix(self):
+        def column(r):
+            entry = next(e for row in r['relation_matrix']['rows'] for e in row['entries'] if e[0] in (0, 1))
+            entry[0] = bool(entry[0])
+        def sparse(r):
+            r['matrix_batches'][-1]['sparse_report']['attempts'] = False
+            r['log_table_report']['sparse_report']['attempts'] = False
+        for name, mutate in [('a0-pair_table-dense', lambda r: r['collector_dispatch'].update(pair_table=1)),
+                             ('a0-pair_table-dense', lambda r: r['descent_dispatch'].update(direct_collision=0)),
+                             ('a0-pair_table-dense', column), ('a0-pair_table-sparse', sparse),
+                             ('a0-pair_table-dense', lambda r: r.update(generic_admission_schema=True))]:
+            item = row(name)
+            mutate(item['report'])
+            verify(item['report'], item['report']['fixture'], summands=2)
+            with self.assertRaises(InvalidEvidence):
+                check(item)
+
     def test_actual_block_wiedemann_controls_and_parameter_substitution(self):
         rows = [json.loads(line) for line in gzip.decompress(
             (ROOT.parent / 'sparse-core/worker-raw.jsonl.gz').read_bytes()).splitlines()]
@@ -188,6 +205,7 @@ class GenericAdmissionTests(unittest.TestCase):
         self.assertEqual(row()['report']['generic_build'], identity)
         for mutate in [lambda b, s: s['root_files'].update({'Cargo.toml': '0'*64}),
                        lambda b, s: b['build']['flags'].update(rustflags='-C opt-level=0'),
+                       lambda b, s: b['identity'].update(schema_version=True),
                        lambda b, s: b['identity'].update(source_manifest_sha256='0'*64)]:
             b, s = copy.deepcopy(build), copy.deepcopy(source)
             mutate(b, s)

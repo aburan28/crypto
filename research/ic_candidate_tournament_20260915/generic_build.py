@@ -83,17 +83,18 @@ def source_manifest(root, metadata):
 
 
 def verify_build_record(record, source):
-    require(record.get('schema_version') == 1 and source.get('schema_version') == 1,
+    require(type(record.get('schema_version')) is int and record['schema_version'] == 1
+            and type(source.get('schema_version')) is int and source['schema_version'] == 1,
             'unknown build record schema')
     require(record['source_manifest_sha256'] == sha256(source), 'source manifest digest mismatch')
     require(record['build_sha256'] == sha256(record['build']), 'build policy digest mismatch')
     require(record['build']['source_manifest_sha256'] == record['source_manifest_sha256'],
             'build policy refers to different source')
-    require(record['identity'] == dict(schema_version=1,
+    require(sha256(record['identity']) == sha256(dict(schema_version=1,
                                        source_manifest_sha256=record['source_manifest_sha256'],
                                        build_sha256=record['build_sha256'],
                                        target_arch=record['build']['target_arch'],
-                                       target_os=record['build']['target_os']), 'embedded build identity mismatch')
+                                       target_os=record['build']['target_os'])), 'embedded build identity mismatch')
     for value in (record['worker_sha256'], record['builder_sha256']):
         require(type(value) is str and len(value) == 64
                 and all(ch in '0123456789abcdef' for ch in value), 'invalid build artifact digest')
@@ -102,7 +103,7 @@ def verify_build_record(record, source):
 
 def verify_binding(report, record, source, *, executable):
     identity = verify_build_record(record, source)
-    require(report.get('generic_build') == identity, 'worker reports a different build identity')
+    require(sha256(report.get('generic_build')) == sha256(identity), 'worker reports a different build identity')
     require(digest(executable) == record['worker_sha256'], 'worker executable digest mismatch')
     return dict(schema_version=1, source_manifest_sha256=record['source_manifest_sha256'],
                 build_sha256=record['build_sha256'], worker_sha256=record['worker_sha256'],

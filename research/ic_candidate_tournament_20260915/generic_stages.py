@@ -52,16 +52,16 @@ def dispatch(report, cfg):
               and 0 < window < len(report['factor_base']))
     collector = report['collector_dispatch']
     field = kernel(collector['field_kernel'])
-    require(collector == dict(strategy=strategy, field_kernel=field, pair_table=pair,
+    require(sha256(collector) == sha256(dict(strategy=strategy, field_kernel=field, pair_table=pair,
                               query_rule='windowed-walk-64' if active else 'trial-keyed-sample',
-                              collection_window=window if active else None),
+                              collection_window=window if active else None)),
             'collector dispatch mismatch')
     solutions = report.get('solutions', [])
     descent = report['descent_dispatch']
     if solutions:
-        require(descent == dict(strategy=strategy, field_kernel=field, pair_table=pair,
+        require(sha256(descent) == sha256(dict(strategy=strategy, field_kernel=field, pair_table=pair,
                                 query_rule='parallel-walk-64' if pair else 'seeded-sample',
-                                summands=cfg['summands'], direct_collision=False),
+                                summands=cfg['summands'], direct_collision=False)),
                 'descent dispatch mismatch')
     else:
         require(descent is None, 'unstarted descent has dispatch evidence')
@@ -120,7 +120,7 @@ def matrix_audit(report, fixture, cfg, *, inventory=False):
     require(snapshot['modulus'] == str(c.r) and snapshot['column_points'] == columns,
             'matrix modulus or column order mismatch')
     require(snapshot['solver'] == ('sparse-filter-block-wiedemann' if sparse else 'dense-gauss')
-            and snapshot['sparse_options'] == (cfg['sparse'] if sparse else None),
+            and sha256(snapshot['sparse_options']) == sha256(cfg['sparse'] if sparse else None),
             'relation LA dispatch mismatch')
     expected, seen, pivots, trajectory = [], set(), {}, []
     queries = duplicates = attempts = 0
@@ -173,6 +173,9 @@ def matrix_audit(report, fixture, cfg, *, inventory=False):
         if sparse and attempts:
             diagnostic = observed['sparse_report']
             filtering = diagnostic['filter']
+            require(all(type(diagnostic[name]) is int and diagnostic[name] >= 0 for name in
+                        ('attempts', 'core_dimension', 'core_nonzeros', 'reconstructed_columns')),
+                    'invalid sparse solve counters')
             require(filtering['rows_in'] == len(expected) and filtering['columns_in'] == len(columns),
                     'sparse input dimensions mismatch')
             require(all(type(value) is int and value >= 0 for value in filtering.values()),
@@ -204,7 +207,7 @@ def matrix_audit(report, fixture, cfg, *, inventory=False):
                         'sparse reconstruction column accounting mismatch')
         if not sparse:
             require(terminal == (len(pivots) == len(columns)), 'dense full-rank solve state mismatch')
-    require(snapshot['rows'] == expected, 'stored matrix rows differ from query witnesses')
+    require(sha256(snapshot['rows']) == sha256(expected), 'stored matrix rows differ from query witnesses')
     if inventory:
         require(not expected and not batches and report['status'] == 'inventory', 'inventory ran collection')
     else:
@@ -218,7 +221,8 @@ def matrix_audit(report, fixture, cfg, *, inventory=False):
             require(type(final[name]) is type(value) and final[name] == value,
                     'final matrix accounting mismatch: ' + name)
         require(final['sparse_report'] == batches[-1]['sparse_report'], 'final sparse report changed')
-        require(report['solve_attempts'] == attempts, 'top-level solve attempts mismatch')
+        require(type(report['solve_attempts']) is int and report['solve_attempts'] == attempts,
+                'top-level solve attempts mismatch')
         if terminal:
             require([entry['point'] for entry in logs] == columns, 'column log ordering mismatch')
             require(all(c.mul(c.g, int(entry['log'])) == p
@@ -232,7 +236,8 @@ def matrix_audit(report, fixture, cfg, *, inventory=False):
 
 
 def verify_stages(report, fixture, job):
-    require(job.get('exclusive_phases') is True and report.get('generic_admission_schema') == 1,
+    require(job.get('exclusive_phases') is True and type(report.get('generic_admission_schema')) is int
+            and report['generic_admission_schema'] == 1,
             'missing scientific stage evidence')
     require(report.get('generic_runtime_policy') == 'default-environment-one-rayon-v1',
             'missing runtime override policy')
