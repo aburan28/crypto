@@ -4721,7 +4721,9 @@ charged 54 to 62.
   descent solver.
 - Each after the setup rebuilds the base's projected orbit map in
   big-integer arithmetic. Together those cost 107–433 units per base
-  point.
+  point. [§21 corrects the attribution: the map itself already had a
+  single-word path. The big-integer constructions beside it are the
+  point index and the decomposition check.]
 - They are 70% of `S` at `K_1/GF(2^45)`, whose field is wide for its
   `r`, and 7% at `2^47.2`.
 - No frozen figure priced them.
@@ -4834,7 +4836,9 @@ round's parameter files.
   §20.5 are the same map rebuilt four to six times a run in big-integer
   arithmetic, and they are 7–70% of `S`. Built once and shared, with the
   counts unchanged, they would take most of that out of the small and
-  middle sizes.
+  middle sizes. [Taken by §21. Built once, the constructions fell
+  2.1–11.7× and the whole pipeline got 1.04–2.25× faster, with every
+  count unchanged.]
 - **The per-target big-integer work.** The descent's recovery check and
   the final verification are each a big-integer scalar multiplication
   per target. They are part of why the descent's cost per target stays
@@ -4849,6 +4853,338 @@ round's parameter files.
   cannot.
 - **Bailey's walk, counted** (§19.7). This is still unmeasured, so its
   column stays a model.
+
+## 21. The workflow's constructions, built once
+
+§20.10's first open item. It is an engineering round: every count,
+relation and recovered logarithm must come out as it was, and `S` must
+fall.
+
+**First, a correction to §20's wording.** §20.5 and §20.10 describe the
+constructions as the orbit map rebuilt "in big-integer arithmetic". The
+probe below shows that is not quite what happens:
+
+- The projected signed-orbit map already has a single-word path. It is
+  expensive because it is rebuilt five times a run, and each build pays
+  one cofactor multiplication per base point.
+- The big-integer constructions are two others: the point index, keyed
+  by big integers, and the decomposition check, which computes `[r]P` in
+  big-integer arithmetic per signed orbit.
+
+§20's numbers stand. Only the attribution was loose.
+
+### 21.1 Declared before any candidate code or timed comparison
+
+The protocol is `research/ic_constructions_20260926/PROTOCOL.md` (v1).
+
+**The probe** was made first, and it is the only measurement that was.
+`examples/koblitz_construction_prices.rs`, on the unmodified binary,
+priced each constructor alone, in units per base point:
+
+| constructor | `n = 41` | `n = 61` | builds per run |
+|:--|--:|--:|--:|
+| orbit map | 23.3 | 59.1 | 5 |
+| point index | 5.7 | 5.6 | 3 |
+| decomposition check | 10.8 | 8.5 | 2 |
+
+**The change.**
+
+1. **Built once per base.** The factor base keeps each of the three
+   constructions in a `OnceLock`, keyed by the curve's identity. Every
+   consumer borrows it, and no public signature changes.
+2. **One cofactor multiplication per Frobenius orbit.** The map projects
+   one point per recorded orbit and derives the rest by Frobenius. It
+   first confirms each orbit's recorded order on the lifted points, and
+   falls back to one multiplication per point if the order does not
+   match.
+
+**The comparison.**
+
+- **Binaries:** the baseline is `ic` at `e7022b75`, sha256 `e51e9431…`,
+  kept outside the tree. The candidate is `ic` at the candidate commit.
+- **Inputs:** §20's 36 frozen parameter files (`inputs.sha256`).
+- **Runs:** five rounds per file, baseline and candidate interleaved.
+  Each process is `ic price` at three repetitions (fifteen when fast),
+  on one thread under `taskset`.
+- **Pins:** every candidate report's counts and recovered logarithms
+  equal the baseline's in all 180 pairs. Control 1 holds on the
+  candidate at every size.
+- **Many threads:** a four-thread check at the two largest sizes.
+
+**Targets:**
+
+1. Identical outputs.
+2. The constructions fall at least 3× at every size.
+3. A whole-pipeline speedup whose 95% interval excludes 1, at the seven
+   sizes where §20 put the constructions at 15% of `S` or more.
+4. No regression anywhere, at one thread or at four.
+
+**Stop:** on any mismatch in counts or recovered logarithms.
+
+**Class: engineering.** Counts do not move, `S` falls.
+
+### 21.2 What ran
+
+Everything is in `research/ic_constructions_20260926/`. It ran in the
+declared order, on one host of §20's class (`host.json`: a 4-core
+x86-64 container, rustc 1.94.1).
+
+- **Binaries.**
+  - The baseline `ic` is `e7022b75`'s, sha256 `e51e9431…`. It has been
+    kept outside the tree since the declaration.
+  - The candidate `ic` is `33936731`'s, built from a clean tree: sha256
+    `18fcf4e8…`.
+- **The main comparison.** §20's 36 measurement parameter files. Their
+  hashes matched `inputs.sha256` before anything ran.
+  - For each file, five rounds of baseline then candidate: 360
+    processes in all.
+  - Each process is `ic price` at three repetitions (fifteen when fast),
+    on one Rayon thread under `taskset -c 2`, with nothing else running.
+- **Controls.**
+  - Control 1 (`ic workflow` against `ic price`, field by field) on the
+    candidate, at every size's `M1`.
+  - Batch rho re-priced on the candidate at `n = 41`, `M1`, with §20's
+    seeds.
+- **Four threads.** `n = 53` and `n = 61`, `M1`: three ABAB rounds
+  under `taskset -c 0-3`.
+- **Per constructor.** `examples/koblitz_construction_prices.rs` on both
+  binaries, at `n = 41` and `n = 61`.
+
+No set's A/A spread (the max over min of its five baseline totals)
+exceeded 1.25; the highest were 1.245 and 1.242. So the spread rule
+never fired, and no set was rerun.
+
+### 21.3 The table
+
+**How to read it.**
+
+- `S` is per target at `k = 32`, in the unit each process measured for
+  itself.
+- The ratio is against §20's batch rho on the same 32 targets, with an
+  interval over the four sets.
+- The speedup is baseline total over candidate total, pair by pair. It
+  is AGENTS.md §8's `baseline_total_operations /
+  candidate_total_operations`, reported as the geometric mean of 20
+  pairs with its 95% interval.
+- **Constructions** is the declared group: `select_projection`,
+  `collect_setup`, `logs_setup` and `descent_setup`. The curve's setup
+  is not in it. Its fall is a stage diagnostic, and so is its share of
+  the total.
+
+| curve | log₂ r | `S`, before → after | ratio to batch rho | speedup [95%] | constructions fall [95%] | constructions share |
+|:--|--:|--:|--:|--:|--:|--:|
+| `K_1/GF(2^19)` | 18.0 | 7.223 → 6.819 | 22.08× → **20.85×** [19.23, 22.51] | **1.058×** [1.050, 1.066] | 2.1× [2.1, 2.2] | 24.6% → 12.3% |
+| `K_1/GF(2^23)` | 22.0 | 2.322 → 1.983 | 11.33× → **9.68×** [6.00, 14.41] | **1.169×** [1.153, 1.185] | 2.8× [2.8, 2.8] | 32.5% → 13.5% |
+| `K_1/GF(2^45)` | 24.8 | 2.670 → 1.182 | 22.42× → **9.93×** [9.07, 10.83] | **2.245×** [2.222, 2.268] | 9.1× [9.0, 9.2] | 63.8% → 15.7% |
+| `K_0/GF(2^37)` | 27.8 | 0.861 → 0.582 | 9.33× → **6.31×** [5.42, 7.24] | **1.490×** [1.467, 1.513] | 5.8× [5.8, 5.9] | 38.5% → 9.9% |
+| `K_1/GF(2^43)` | 32.1 | 0.518 → 0.368 | 7.78× → **5.53×** [4.72, 6.39] | **1.404×** [1.383, 1.425] | 8.2× [8.1, 8.3] | 35.6% → 6.2% |
+| `K_1/GF(2^47)` | 36.6 | 0.381 → 0.267 | 6.33× → **4.44×** [4.04, 4.87] | **1.420×** [1.388, 1.454] | 9.0× [8.8, 9.3] | 36.3% → 5.7% |
+| `K_0/GF(2^41)` | 39.0 | 0.322 → 0.285 | 4.84× → **4.28×** [3.94, 4.63] | **1.131×** [1.115, 1.148] | 5.2× [5.0, 5.3] | 14.4% → 3.1% |
+| `K_0/GF(2^53)` | 44.3 | 0.427 → 0.396 | 8.37× → **7.77×** [5.59, 10.29] | **1.072×** [1.050, 1.094] | 9.0× [8.9, 9.1] | 11.3% → 1.4% |
+| `K_0/GF(2^61)` | 47.2 | 0.665 → 0.644 | 12.53× → **12.12×** [10.75, 13.58] | **1.039×** [1.005, 1.073] | 11.7× [11.3, 12.1] | 5.1% → 0.4% |
+
+**The whole pipeline is faster at every size.**
+
+- The speedup is largest where the constructions weighed most: 2.25× at
+  `K_1/GF(2^45)`, whose field is wide for its `r`.
+- It is 1.40–1.49× in the middle of the range.
+- It is 1.04–1.13× at the top, where the work dominates.
+- It is 1.06–1.17× at the two smallest sizes, where a fixed cost the
+  round did not touch remains (§21.6).
+
+**Two cautions on the before column.**
+
+- **The before arm is re-measured.** It is this round's own baseline on
+  this host, not §20's figure. It reads 0.89–1.00× of §20's `S` with the
+  same binary on the same inputs. That is the run-to-run spread of `S`
+  across container instances, and it is why this round pairs within
+  itself.
+- **The page's older figures are §20's.** Where they are the "was", as
+  §20's 4.86× at `2^39` is, part of the move from them is that spread.
+  The rest is the change, and only the matched speedup separates the two.
+
+### 21.4 The unit moved, and not because of its code
+
+The unit is one batched affine addition, timed in each process. In the
+candidate it runs at 0.99–1.11× the baseline's speed, faster at eight of
+the nine sizes. Yet its source did not change.
+
+**What was checked:**
+
+- `FastCurve::add_many` is the same code in both binaries: 437
+  instructions, the same size, and 64-byte aligned in both. Only two
+  instructions differ, and only in the address of a read-only constant
+  they load.
+- So is its one out-of-line callee, `Gf2::sqr`. It has the same code,
+  the same alignment and the same distance from `add_many`.
+  (`unit_shift/`, from `disasm.sh`.)
+- The shift is already there in each process's first measurement,
+  before any pipeline work: 0.97–1.11 by size.
+- Within a process the unit holds still. Over a repetition it moves by
+  a median factor of 0.999–1.005 per size, though single processes
+  range 0.93–1.14.
+
+The shift is therefore a fixed property of binary and curve. This round
+did not isolate its cause; data placement is the remaining suspect.
+
+**Its effect.** A phase the change does not touch takes the same time in
+both binaries: 0.994–1.019× over the untouched phases. But it costs up
+to 11% more *units* in the candidate. So where the unit sped up, the
+declared speedups understate the change. Secondary and not declared,
+the same 180 pairs in nanoseconds:
+
+| curve | wall-clock speedup [95%] | unit, baseline ns ÷ candidate ns | untouched phases, baseline ÷ candidate |
+|:--|--:|--:|--:|
+| `K_1/GF(2^19)` | 1.172 [1.164, 1.179] | 1.103 | 1.002 |
+| `K_1/GF(2^23)` | 1.295 [1.285, 1.305] | 1.109 | 1.011 |
+| `K_1/GF(2^45)` | 2.344 [2.322, 2.366] | 1.042 | 0.997 |
+| `K_0/GF(2^37)` | 1.464 [1.440, 1.488] | 0.990 | 0.994 |
+| `K_1/GF(2^43)` | 1.477 [1.456, 1.498] | 1.052 | 1.003 |
+| `K_1/GF(2^47)` | 1.512 [1.484, 1.541] | 1.064 | 1.013 |
+| `K_0/GF(2^41)` | 1.141 [1.123, 1.159] | 1.006 | 1.006 |
+| `K_0/GF(2^53)` | 1.129 [1.110, 1.148] | 1.059 | 1.019 |
+| `K_0/GF(2^61)` | 1.052 [1.031, 1.073] | 1.011 | 1.000 |
+
+**Rho re-priced on the candidate** at `n = 41`, `M1`. Every count, step
+and recovered logarithm equals §20's, and so do the pipeline's. It
+prices at 0.0603 a target against §20's 0.0610, a fall of 1.1%.
+
+### 21.5 The targets, graded
+
+1. **Identical outputs: met.**
+   - All 180 pairs agree in counts and in recovered logarithms, and
+     every target in every report was verified.
+   - Control 1 holds on the candidate at all nine sizes.
+2. **Constructions down at least 3× at every size: not met.** They fell
+   2.1× at `2^18` and 2.8× at `2^22`. At the other seven sizes they fell
+   5.2–11.7×. §21.6 says what is left.
+3. **A speedup interval excluding 1 at the seven declared sizes: met.**
+   The lower bounds run from 1.050 at `2^18` to 2.222 at `2^24.8`.
+4. **No regression: met.**
+   - At one thread every interval lies above 1. That includes the two
+     sizes exempt from target 3: 1.072 [1.050, 1.094] at `2^44.3` and
+     1.039 [1.005, 1.073] at `2^47.2`.
+   - At four threads, on three pairs each: 1.078 [0.987, 1.176] at
+     `2^44.3` and 1.066 [0.947, 1.200] at `2^47.2`. Neither interval lies
+     below 1, and neither excludes it.
+
+### 21.6 What is left of the constructions
+
+Each constructor alone, in units per base point: its first call, then a
+later one (from `runs/constructions/`).
+
+| constructor | `n = 41` before | `n = 41` after: first, later | `n = 61` before | `n = 61` after: first, later |
+|:--|--:|--:|--:|--:|
+| projected map | 26.3 | 8.95, 1.44 | 71.3 | 8.72, 0.72 |
+| coverage | 23.3 | 1.45, 1.61 | 59.1 | 1.05, 1.03 |
+| log solver | 22.9 | 1.09, 1.10 | 57.6 | 0.80, 0.76 |
+| relation collector | 19.5 | 9.58, 1.94 | 15.6 | 8.55, 1.66 |
+| decomposition check | 10.7 | 12.4, 1.48 | 8.07 | 9.87, 0.74 |
+| point index (`index_map`, uncached) | 5.7 | 6.1 | 6.6 | 7.6 |
+| field structure | 0.46 | 0.50 | 0.15 | 0.14 |
+| the curve (out of scope) | 74.6 | 80.4 | 152 | 165 |
+
+**What changed.**
+
+- The map's one build fell 2.9× at `n = 41` and 8.2× at `n = 61`. It now
+  pays one cofactor multiplication per Frobenius orbit: 160 of them
+  instead of 6,560 at `n = 41`.
+- Every later consumer now pays only the lookup.
+
+**What is left, by size.**
+
+- **In the middle and at the top**, three things remain:
+  - the two big-integer constructions, now built once: the decomposition
+    classes (`[r]P` per signed orbit) and the point index;
+  - the map's canonicalisation (hash sets over every signed orbit):
+    7.6–13.7 units a point in `select_projection`;
+  - the lookups themselves.
+- **At the two smallest sizes**, what is left is a fixed cost the round
+  did not touch. `FieldStructure::new` computes `n²` big-integer field
+  products and is built three times a run: by both collectors and by the
+  descent solver. On a base of 304 or 368 points that fixed cost is most
+  of the group, which is why target 2 failed there.
+- **The lookup's identity check** goes beyond the declaration, which
+  keyed each construction by the curve's identity and the base's size.
+  The implementation fingerprints every point of the base, so that a
+  base edited after first use cannot be served a stale map.
+  - It costs 0.3–0.7 units a point per lookup in the pipeline. A lookup
+    is all of `logs_setup`.
+  - There are about ten lookups a run.
+  - It is in every candidate figure above.
+- **The curve's setup** (factorising the group order) is untouched:
+  25–171 units a point. From `2^27.8` up it now costs more than the
+  whole declared group. It is out of scope, as declared.
+
+### 21.7 Classification
+
+**Engineering** (AGENTS.md §3).
+
+**What did not move:**
+
+- the counts, the relations and the recovered logarithms;
+- the counting floor, and the ratio to it.
+
+**What fell:**
+
+- `S` fell 1.04–2.25×, and the ratio to batch rho fell with it.
+- The least ratio is now 4.28× [3.94, 4.63] at `2^39`. This round's
+  own baseline read 4.84× there, and §20 4.86×.
+- Below `2^25` the thread reads 9.7–20.9×, where §20 read 12.7–24.8×.
+
+There is still no crossing, and nothing the method finds has changed.
+
+**The top end's exponent**, refitted by §20's declared method (the fit
+of `ratio·√n` over the four largest sizes):
+
+- **after:** `r^0.165` [0.010, 0.320], or `r^0.168` [0.024, 0.311] at
+  the baseline binary's unit;
+- **this round's baseline:** `r^0.128` [−0.091, 0.347];
+- **§20:** `r^0.137` [−0.10, 0.37].
+
+The interval now excludes zero, so the ratio does rise with `r` at the
+top. It still cannot separate `1/6` from the model's 0.141. The
+constructions weighed more at the smaller of the four sizes, and taking
+them out steepened the fit. That is the growth becoming visible, not a
+change in it.
+
+### 21.8 What does not count
+
+- **The constructions column** is a stage diagnostic.
+- **The wall-clock speedups** are secondary. They are paired on one host
+  and hold for its class only: one x86-64 container. Nothing is claimed
+  for Arm64, GPUs or other hosts.
+- **The four-thread check** shows no regression on three pairs. It shows
+  no gain either.
+- **The refit** rests on four points and two degrees of freedom.
+
+### 21.9 Reproducing
+
+    # the three binaries: research/ic_constructions_20260926/README.md
+    cd research/ic_constructions_20260926
+    IC_BASELINE=… IC_CANDIDATE=… PRICES_BASELINE=… PRICES_CANDIDATE=… python3 run.py all
+    python3 analyse.py > analysis.json
+    python3 render_rows.py md          # the table in §21.3
+
+### 21.10 What stays open
+
+Each of these is engineering. All are measurable the same way, on the
+same 36 files.
+
+- **`FieldStructure::new`**, rebuilt three times a run. It decides the
+  small end.
+- **The two big-integer constructions** in single-word arithmetic: the
+  decomposition classes and the point index.
+- **A cheaper identity check.** Alternatively, consumers could take a
+  base's constructions explicitly, and not look them up.
+- **The curve's setup**, which from `2^27.8` up now costs more than
+  all the declared constructions together.
+- **The unit's shift between binaries.** A rebuilt binary's unit moved
+  by 0.99–1.11× with its code unchanged. Until the cause is isolated,
+  any cross-binary comparison in this unit carries that much.
+- **Carried from §20.10:** the per-target big-integer work, the
+  builder's eight-orbit minimum, the build's price as the table leaves
+  cache, and Bailey's walk.
 
 ## Appendix A. The conversion factors, as measured
 

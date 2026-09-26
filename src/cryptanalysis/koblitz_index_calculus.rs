@@ -126,6 +126,7 @@
 
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
+use std::sync::{Arc, OnceLock};
 
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
@@ -943,9 +944,180 @@ pub struct FrobeniusFactorBase {
     /// For each point: `(signed orbit, k, negated)` with
     /// `point = (-1)^negated π^k(representative)`.
     pub signed_orbit_of: Vec<(usize, u32, bool)>,
+    /// What the consumers of this base derive from it, built on first
+    /// use and shared.  Construct with `Default::default()`.
+    pub(crate) derived: DerivedConstructions,
+}
+
+/// The constructions every consumer of a base derives from it — the
+/// projected signed-orbit map, the point index and the cofactor classes
+/// of the decomposition check — built on first use and shared.
+///
+/// A Koblitz workflow used to rebuild them in each consumer: the map
+/// five times a run (selection's column count, each coverage, the log
+/// solver, the descent solver), the index three times and the classes
+/// twice.  Ledger §21 priced that at 107–433 units per base point.
+///
+/// Each cell remembers a fingerprint of what it was built from: the
+/// base's points, in order, and for the map and the classes the curve's
+/// identity (and the classes' signed-orbit representatives).  A lookup
+/// whose fingerprint differs — a base whose public fields were edited
+/// after first use, or a call with another curve — builds afresh and
+/// caches nothing, so a cell never answers for a base it was not built
+/// from.  A clone starts empty.
+///
+/// A builder runs outside its cell.  Two first callers may both build,
+/// and one keeps its result; nothing blocks, so a builder that uses
+/// Rayon cannot deadlock a pool whose other tasks look up the same cell.
+#[derive(Default)]
+pub(crate) struct DerivedConstructions {
+    projected: OnceLock<(u64, Arc<ProjectedSignedOrbitMap>)>,
+    index: OnceLock<(u64, Arc<HashMap<(BigUint, BigUint), usize>>)>,
+    classes: OnceLock<(u64, Arc<Vec<BinaryPoint>>)>,
+}
+
+impl Clone for DerivedConstructions {
+    /// Empty: a clone is a base in its own right, likely about to be
+    /// edited, and builds its own constructions when first asked.
+    fn clone(&self) -> Self {
+        Self::default()
+    }
+}
+
+impl std::fmt::Debug for DerivedConstructions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DerivedConstructions")
+            .finish_non_exhaustive()
+    }
+}
+
+/// `cell`'s value when it was built for `key`; otherwise `build()`,
+/// kept in the cell if the cell was empty.
+fn derived_or_build<T>(
+    cell: &OnceLock<(u64, Arc<T>)>,
+    key: u64,
+    build: impl FnOnce() -> T,
+) -> Arc<T> {
+    if let Some((built_for, value)) = cell.get() {
+        if *built_for == key {
+            return Arc::clone(value);
+        }
+        return Arc::new(build());
+    }
+    let value = Arc::new(build());
+    // Losing a race to another first caller is harmless: both built the
+    // same thing when the keys agree, and a different key is not cached.
+    let _ = cell.set((key, Arc::clone(&value)));
+    value
+}
+
+/// Order-sensitive 64-bit fingerprint of a sequence of words, for the
+/// identity checks of [`DerivedConstructions`].  One word changed always
+/// changes it (every step is a bijection of the running state); it is a
+/// guard against an edited base, not a cryptographic commitment.
+struct Fingerprint(u64);
+
+impl Fingerprint {
+    fn new(tag: u64) -> Self {
+        Self(tag ^ 0x9e37_79b9_7f4a_7c15)
+    }
+
+    fn word(&mut self, w: u64) {
+        self.0 = (self.0.rotate_left(5) ^ w).wrapping_mul(0x517c_c1b7_2722_0a95);
+    }
+
+    fn words(&mut self, ws: &[u64]) {
+        self.word(ws.len() as u64);
+        for &w in ws {
+            self.word(w);
+        }
+    }
+
+    fn big(&mut self, v: &BigUint) {
+        self.words(&v.to_u64_digits());
+    }
+
+    /// Everything about the curve a projection or a class depends on:
+    /// the field, the coefficients, the Frobenius power, `h` and `r`.
+    fn curve(&mut self, kc: &KoblitzCurve) {
+        self.word(u64::from(kc.n));
+        self.word(u64::from(kc.k));
+        self.word(u64::from(kc.curve.m));
+        self.word(u64::from(kc.curve.irreducible.degree));
+        self.words(
+            &kc.curve
+                .irreducible
+                .low_terms
+                .iter()
+                .map(|&t| u64::from(t))
+                .collect::<Vec<_>>(),
+        );
+        self.words(kc.curve.a.raw_bits());
+        self.words(kc.curve.b.raw_bits());
+        self.big(&kc.cofactor);
+        self.big(&kc.subgroup_order);
+    }
+
+    fn points(&mut self, points: &[BinaryPoint]) {
+        self.word(points.len() as u64);
+        for p in points {
+            match p {
+                BinaryPoint::Infinity => self.word(u64::MAX),
+                BinaryPoint::Affine { x, y } => {
+                    self.words(x.raw_bits());
+                    self.words(y.raw_bits());
+                }
+            }
+        }
+    }
 }
 
 impl FrobeniusFactorBase {
+    /// Fingerprint of the points alone: all the point index depends on.
+    fn points_fingerprint(&self) -> u64 {
+        let mut f = Fingerprint::new(1);
+        f.points(&self.points);
+        f.0
+    }
+
+    /// Fingerprint of the points on a curve: all the projected map
+    /// depends on.
+    fn projection_fingerprint(&self, kc: &KoblitzCurve) -> u64 {
+        let mut f = Fingerprint::new(2);
+        f.curve(kc);
+        f.points(&self.points);
+        f.0
+    }
+
+    /// The projection fingerprint and the signed-orbit representatives
+    /// the classes are computed from.
+    fn classes_fingerprint(&self, kc: &KoblitzCurve) -> u64 {
+        let mut f = Fingerprint::new(3);
+        f.curve(kc);
+        f.points(&self.points);
+        f.word(self.signed_orbits.len() as u64);
+        for orbit in &self.signed_orbits {
+            f.word(orbit.first().map_or(u64::MAX, |&i| i as u64));
+        }
+        f.0
+    }
+
+    /// The point index of [`Self::index_map`], built once per base and
+    /// shared by every consumer that asks.
+    pub fn shared_index_map(&self) -> Arc<HashMap<(BigUint, BigUint), usize>> {
+        derived_or_build(&self.derived.index, self.points_fingerprint(), || {
+            self.index_map()
+        })
+    }
+
+    /// The classes of [`Self::distinct_cofactor_classes`], built once per
+    /// base and curve.
+    fn shared_cofactor_classes(&self, kc: &KoblitzCurve) -> Arc<Vec<BinaryPoint>> {
+        derived_or_build(&self.derived.classes, self.classes_fingerprint(kc), || {
+            self.distinct_cofactor_classes(kc)
+        })
+    }
+
     /// Number of unknowns the linear algebra actually carries — one per
     /// signed `π`-orbit, versus `points.len()` for a non-invariant base.
     pub fn unknowns(&self) -> usize {
@@ -1035,7 +1207,7 @@ impl FrobeniusFactorBase {
         if self.points.is_empty() || m == 0 {
             return m == 0;
         }
-        let classes = self.distinct_cofactor_classes(kc);
+        let classes = self.shared_cofactor_classes(kc);
         if m == 1 {
             return classes.contains(&BinaryPoint::Infinity);
         }
@@ -1059,7 +1231,7 @@ impl FrobeniusFactorBase {
             let mut next_keys: HashSet<u64> = HashSet::new();
             let mut next: Vec<BinaryPoint> = Vec::new();
             for q in &reps {
-                for c in &classes {
+                for c in classes.iter() {
                     let seed = kc.add(q, c);
                     if next_keys.contains(&pack_point(&seed)) {
                         continue;
@@ -2205,6 +2377,7 @@ fn finish_factor_base_domain(
         orbit_of,
         signed_orbits,
         signed_orbit_of,
+        derived: Default::default(),
     })
 }
 
@@ -5427,7 +5600,20 @@ struct ProjectedSignedOrbitMap {
 /// algebraically dependent before any relation is collected. Merging them
 /// uses only point multiplication, equality, negation and Frobenius; it does
 /// not compute or attach a discrete logarithm.
+///
+/// Built once per base and curve and shared (see
+/// [`DerivedConstructions`]); every consumer of a base asks for it.
 fn projected_signed_orbit_map(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+) -> Arc<ProjectedSignedOrbitMap> {
+    derived_or_build(&fb.derived.projected, fb.projection_fingerprint(kc), || {
+        build_projected_signed_orbit_map(kc, fb)
+    })
+}
+
+/// The construction behind [`projected_signed_orbit_map`], uncached.
+fn build_projected_signed_orbit_map(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
 ) -> ProjectedSignedOrbitMap {
@@ -5518,11 +5704,7 @@ fn projected_signed_orbit_map_fast(
     fb: &FrobeniusFactorBase,
 ) -> Option<ProjectedSignedOrbitMap> {
     let fc = FastCurve::new(&kc.curve)?;
-    let projected: Vec<FastPoint> = fb
-        .points
-        .par_iter()
-        .map(|point| fc.mul(fc.lift(point), &kc.cofactor))
-        .collect();
+    let (projected, _) = project_by_frobenius_orbits(kc, &fc, fb);
     let mut representatives: Vec<FastPoint> = Vec::new();
     let mut seen: HashSet<u64> = HashSet::new();
     for &point in &projected {
@@ -5578,6 +5760,71 @@ fn projected_signed_orbit_map_fast(
         orbit_of,
         representatives: representatives.into_iter().map(|p| fc.lower(p)).collect(),
     })
+}
+
+/// `[h]P` for every base point `P`, in single-word arithmetic, with one
+/// cofactor multiplication per Frobenius orbit rather than per point.
+///
+/// `[h]` commutes with `π`, so along a recorded orbit
+/// `i₀, i₁ = π(i₀), i₂ = π²(i₀), …` the projections are
+/// `[h]P_{i₀}, π([h]P_{i₀}), π²([h]P_{i₀}), …`.  The recorded order is
+/// not trusted: each orbit is walked by Frobenius on the lifted points
+/// first, and one whose walk disagrees — or a point no orbit lists —
+/// gets its own multiplication, as every point used to.  The result is
+/// the per-point one exactly, point for point.
+///
+/// Ledger §21 priced the per-point version at `17 + 3·bits(h)` units
+/// per base point, most of a map build; a Frobenius step is a few
+/// table-driven squarings.
+///
+/// Returns the projections and the cofactor multiplications spent.
+fn project_by_frobenius_orbits(
+    kc: &KoblitzCurve,
+    fc: &FastCurve,
+    fb: &FrobeniusFactorBase,
+) -> (Vec<FastPoint>, usize) {
+    let lifted: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
+    let by_orbit: Vec<Option<Vec<FastPoint>>> = fb
+        .orbits
+        .par_iter()
+        .map(|orbit| {
+            let (&first, _) = orbit.split_first()?;
+            if orbit.iter().any(|&i| i >= lifted.len()) {
+                return None;
+            }
+            let walks = orbit
+                .windows(2)
+                .all(|w| fc.frobenius_k(lifted[w[0]], kc.k) == lifted[w[1]]);
+            if !walks {
+                return None;
+            }
+            let mut current = fc.mul(lifted[first], &kc.cofactor);
+            let mut images = Vec::with_capacity(orbit.len());
+            images.push(current);
+            for _ in 1..orbit.len() {
+                current = fc.frobenius_k(current, kc.k);
+                images.push(current);
+            }
+            Some(images)
+        })
+        .collect();
+    let mut multiplications = 0;
+    let mut projected: Vec<Option<FastPoint>> = vec![None; lifted.len()];
+    for (orbit, images) in fb.orbits.iter().zip(by_orbit) {
+        if let Some(images) = images {
+            multiplications += 1;
+            for (&i, image) in orbit.iter().zip(images) {
+                projected[i] = Some(image);
+            }
+        }
+    }
+    multiplications += projected.iter().filter(|image| image.is_none()).count();
+    let projected = projected
+        .into_par_iter()
+        .zip(lifted.par_iter())
+        .map(|(image, &point)| image.unwrap_or_else(|| fc.mul(point, &kc.cofactor)))
+        .collect();
+    (projected, multiplications)
 }
 
 /// Number of nonzero signed-Frobenius columns remaining after every
@@ -6051,7 +6298,7 @@ fn koblitz_index_calculus_dlp_observed(
     let m_cofactor_admissible = fb.m_can_decompose(kc, opts.m);
     let cofactor_admission_ns = admission_start.elapsed().as_nanos();
 
-    let index_of = fb.index_map();
+    let index_of = fb.shared_index_map();
     progress(KoblitzIcEvent::FactorBaseReady {
         points: fb.points.len(),
         orbits: relation_unknowns,
@@ -6476,7 +6723,7 @@ fn koblitz_index_calculus_dlp_observed(
                     &a,
                     &b,
                     opts.collapse_negation,
-                    projected_orbits.as_ref(),
+                    projected_orbits.as_deref(),
                 );
                 if let Some(echelon) = echelon.as_mut() {
                     let linear_start = std::time::Instant::now();
@@ -8174,7 +8421,7 @@ pub struct RelationCollector<'a> {
     kc: &'a KoblitzCurve,
     fb: &'a FrobeniusFactorBase,
     opts: &'a KoblitzIcOptions,
-    index_of: HashMap<(BigUint, BigUint), usize>,
+    index_of: Arc<HashMap<(BigUint, BigUint), usize>>,
     field: FieldStructure,
     pair: PairSource<'a>,
     /// Single-word curve and lifted generator when the field fits.
@@ -8254,7 +8501,7 @@ impl<'a> RelationCollector<'a> {
             kc,
             fb,
             opts,
-            index_of: fb.index_map(),
+            index_of: fb.shared_index_map(),
             field: FieldStructure::new(kc.n, &kc.curve.irreducible),
             pair,
             fast,
@@ -8636,7 +8883,7 @@ struct LogSystem<'a> {
     kc: &'a KoblitzCurve,
     fb: &'a FrobeniusFactorBase,
     opts: &'a KoblitzIcOptions,
-    projected: ProjectedSignedOrbitMap,
+    projected: Arc<ProjectedSignedOrbitMap>,
     n_cols: usize,
     r_u64: u64,
     h: BigUint,
@@ -8698,7 +8945,7 @@ impl<'a> LogSystem<'a> {
             &a,
             &BigUint::zero(),
             self.opts.collapse_negation,
-            Some(&self.projected),
+            Some(self.projected.as_ref()),
         );
         let rhs = (&self.h * &a) % r;
         if self.sparse_opts.is_some() {
@@ -9099,7 +9346,8 @@ pub fn individual_log(
 /// of once per target.  `pair` is required when the strategy is
 /// [`DecompositionStrategy::PairTable`] and ignored otherwise.  For a
 /// batch of targets build one [`IndividualLogSolver`] instead: this
-/// rebuilds the orbit map of the base for every call.
+/// rebuilds the solver's column logarithms and field structure for every
+/// call (the base's orbit map and point index are shared).
 pub fn individual_log_with_pair_table(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -9120,9 +9368,9 @@ pub struct IndividualLogSolver<'a> {
     fb: &'a FrobeniusFactorBase,
     opts: &'a KoblitzIcOptions,
     pair: Option<&'a PairSumTable>,
-    projected: ProjectedSignedOrbitMap,
+    projected: Arc<ProjectedSignedOrbitMap>,
     column_log: Vec<BigUint>,
-    index_of: HashMap<(BigUint, BigUint), usize>,
+    index_of: Arc<HashMap<(BigUint, BigUint), usize>>,
     field: FieldStructure,
     /// Single-word curve and lifted generator when the field fits.
     fast: Option<(FastCurve, FastPoint)>,
@@ -9194,7 +9442,7 @@ impl<'a> IndividualLogSolver<'a> {
             pair,
             projected,
             column_log,
-            index_of: fb.index_map(),
+            index_of: fb.shared_index_map(),
             field: FieldStructure::new(kc.n, &kc.curve.irreducible),
             fast,
             h: &kc.cofactor % r,
@@ -9269,7 +9517,7 @@ impl<'a> IndividualLogSolver<'a> {
             &a,
             &b,
             self.opts.collapse_negation,
-            Some(&self.projected),
+            Some(self.projected.as_ref()),
         );
         // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
         let mut sum = BigUint::zero();
@@ -9500,7 +9748,7 @@ impl<'a> IndividualLogSolver<'a> {
                 &a,
                 &b,
                 self.opts.collapse_negation,
-                Some(&self.projected),
+                Some(self.projected.as_ref()),
             );
             // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
             let mut sum = BigUint::zero();
@@ -12245,6 +12493,132 @@ mod tests {
         assert_eq!(
             checked, 5,
             "a degree this test relies on stopped being available"
+        );
+    }
+
+    /// Ledger §21: projecting one point per Frobenius orbit and deriving
+    /// the rest by Frobenius gives the per-point projections exactly, on
+    /// subgroup bases, a divisor base, a saturated union and a base whose
+    /// recorded orbits are wrong — and spends one multiplication per
+    /// orbit whenever the orbits are right.
+    #[test]
+    fn projecting_once_per_frobenius_orbit_is_the_per_point_projection() {
+        let per_point = |kc: &KoblitzCurve, fc: &FastCurve, fb: &FrobeniusFactorBase| {
+            fb.points
+                .iter()
+                .map(|p| fc.mul(fc.lift(p), &kc.cofactor))
+                .collect::<Vec<_>>()
+        };
+        let mut bases = Vec::new();
+        for (a, degree, points) in [(0u8, 19u32, 400usize), (1, 23, 500), (0, 37, 800)] {
+            let kc = KoblitzCurve::new(a, degree).expect("curve");
+            let fb = build_subgroup_orbit_factor_base(&kc, 5, points).expect("subgroup base");
+            bases.push((kc, fb));
+        }
+        let kc = KoblitzCurve::new(1, 15).expect("curve");
+        let fb = build_frobenius_factor_base_from_divisor(&kc, &[0, 2]).expect("divisor base");
+        bases.push((kc, fb));
+        let kc = KoblitzCurve::new(0, 41).expect("curve");
+        let basis: Vec<F2mElement> = (0..5)
+            .map(|i| F2mElement::from_biguint(&BigUint::from(1u64 << i), 41))
+            .collect();
+        let union = build_frobenius_union_factor_base(&kc, &basis).expect("union");
+        let fb = saturate_factor_base_two_torsion(&kc, &union).expect("saturation");
+        bases.push((kc, fb));
+
+        for (kc, fb) in &bases {
+            let fc = FastCurve::new(&kc.curve).expect("these fields fit in a word");
+            let (projected, multiplications) = project_by_frobenius_orbits(kc, &fc, fb);
+            assert_eq!(projected, per_point(kc, &fc, fb), "{}", kc.label());
+            assert_eq!(multiplications, fb.orbits.len(), "{}", kc.label());
+            assert!(fb.orbits.len() * 2 < fb.points.len(), "{}", kc.label());
+
+            // Wrong orbits: one listed backwards, one dropped.  Both
+            // fall back to a multiplication per point.
+            let mut broken = fb.clone();
+            let reversed = broken
+                .orbits
+                .iter()
+                .position(|o| o.len() > 2)
+                .expect("an orbit long enough to reverse");
+            let dropped = broken.orbits.len() - 1;
+            assert_ne!(reversed, dropped);
+            broken.orbits[reversed].reverse();
+            let lost = broken.orbits.remove(dropped).len();
+            let (projected, multiplications) = project_by_frobenius_orbits(kc, &fc, &broken);
+            assert_eq!(projected, per_point(kc, &fc, &broken), "{}", kc.label());
+            assert_eq!(
+                multiplications,
+                broken.orbits.len() - 1 + broken.orbits[reversed].len() + lost,
+                "{}",
+                kc.label()
+            );
+            // The map built over wrong orbits is still the right map.
+            let (orbit_of, representatives) = projected_signed_orbit_map_general(kc, &broken);
+            let fast = projected_signed_orbit_map_fast(kc, &broken).expect("fits");
+            assert_eq!(fast.orbit_of, orbit_of);
+            assert_eq!(fast.representatives, representatives);
+        }
+    }
+
+    /// Ledger §21: a base's projected map, point index and cofactor
+    /// classes are built once and shared, equal the fresh constructions,
+    /// and are never served for a base that has since changed.
+    #[test]
+    fn derived_constructions_are_built_once_and_equal_fresh_ones() {
+        let kc = KoblitzCurve::new(0, 31).expect("curve");
+        let fb = build_subgroup_orbit_factor_base(&kc, 11, 600).expect("base");
+
+        let map = projected_signed_orbit_map(&kc, &fb);
+        assert!(Arc::ptr_eq(&map, &projected_signed_orbit_map(&kc, &fb)));
+        let fresh = build_projected_signed_orbit_map(&kc, &fb);
+        assert_eq!(map.orbit_of, fresh.orbit_of);
+        assert_eq!(map.representatives, fresh.representatives);
+        assert_eq!(
+            projected_signed_orbit_count(&kc, &fb),
+            fresh.representatives.len()
+        );
+
+        let index = fb.shared_index_map();
+        assert!(Arc::ptr_eq(&index, &fb.shared_index_map()));
+        assert_eq!(*index, fb.index_map());
+
+        let classes = fb.shared_cofactor_classes(&kc);
+        assert!(Arc::ptr_eq(&classes, &fb.shared_cofactor_classes(&kc)));
+        let as_set = |v: &[BinaryPoint]| v.iter().map(point_key).collect::<HashSet<_>>();
+        assert_eq!(as_set(&classes), as_set(&fb.distinct_cofactor_classes(&kc)));
+        for m in 1..=4 {
+            assert_eq!(
+                fb.m_can_decompose(&kc, m),
+                fb.m_can_decompose_reference(&kc, m)
+            );
+        }
+
+        // A clone starts empty and builds its own.
+        let copy = fb.clone();
+        let copied = projected_signed_orbit_map(&kc, &copy);
+        assert!(!Arc::ptr_eq(&map, &copied));
+        assert_eq!(copied.orbit_of, map.orbit_of);
+
+        // A base edited after first use is rebuilt, not served stale.
+        let mut edited = fb;
+        edited.points.swap(0, 1);
+        let stale_index = Arc::clone(&index);
+        let rebuilt = edited.shared_index_map();
+        assert!(!Arc::ptr_eq(&stale_index, &rebuilt));
+        assert_eq!(*rebuilt, edited.index_map());
+        assert_ne!(*rebuilt, *stale_index);
+        let rebuilt = projected_signed_orbit_map(&kc, &edited);
+        assert!(!Arc::ptr_eq(&map, &rebuilt));
+        let fresh = build_projected_signed_orbit_map(&kc, &edited);
+        assert_eq!(rebuilt.orbit_of, fresh.orbit_of);
+        assert_eq!(rebuilt.representatives, fresh.representatives);
+
+        // Another curve has another fingerprint.
+        let other = KoblitzCurve::new(0, 37).expect("curve");
+        assert_ne!(
+            edited.projection_fingerprint(&kc),
+            edited.projection_fingerprint(&other)
         );
     }
 

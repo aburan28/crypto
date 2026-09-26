@@ -1,0 +1,656 @@
+{
+  "artifacts": {
+    "baseline": "baseline.json",
+    "factor_base": "factor_base.json",
+    "logs": "logs.json",
+    "relations": "relations",
+    "solutions": "solutions.json",
+    "state": "state.json"
+  },
+  "collection_aim": true,
+  "collection_window": 1220,
+  "curve_a": 0,
+  "curve_b": 1,
+  "degree": 61,
+  "descent_summands": 2,
+  "elapsed_seconds": 9.351147811,
+  "evidence_scope": "synthetic_known_answer",
+  "factor_base": {
+    "abscissae": 19520,
+    "columns": 320,
+    "dimension": 61,
+    "domain": "explicit_orbits(320)",
+    "family": "subgroup_orbits",
+    "pair_table_stored_pairs": 6265920,
+    "pair_table_tier": "folded",
+    "points": 39040,
+    "selection_cost": {
+      "abscissae_drawn": 647,
+      "cofactor_multiplications": 320,
+      "frobenius_squarings": 19520,
+      "lifts_found": 320,
+      "rebuilds": 1
+    },
+    "signed_orbits": 320,
+    "spec": {
+      "kind": "subgroup_orbits",
+      "points": 39040,
+      "seed": 201
+    }
+  },
+  "failure": null,
+  "limitations": [
+    "No imported target was used.",
+    "This run does not establish scaling or challenge readiness."
+  ],
+  "name": "k0n61-c320-m2-s201",
+  "operation": "workflow",
+  "params_digest": "c4590704091533f2c9e9a1648b031ea5be324233d988f9fdba26409903fd17a4",
+  "resources": {
+    "cpu_seconds": 9.242091,
+    "peak_rss_bytes": 66908160,
+    "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+  },
+  "resumed": false,
+  "run_directory": "/home/user/crypto/research/ic_constructions_20260926/runs/control1/k0n61-M1-wf",
+  "run_number": 1,
+  "schema_version": 1,
+  "scope": "resumable staged pipeline: select → collect → logs → solve; completed stages, work units and solved targets are reused on rerun after re-verification against the reconstructed curve",
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "053f6072cc09b1b8d45393d54472171d64e1a7d00b4a8a3146523cb933a9a74f",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "solutions": {
+    "count": 32,
+    "items": [
+      {
+        "descent_trials": 157398,
+        "elapsed_seconds": 0.016297741,
+        "expected": "82915125919774",
+        "index": 0,
+        "recovered": "82915125919774",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "647817558248071843",
+          "y": "1591406250959704373"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 155549,
+        "elapsed_seconds": 0.016139048,
+        "expected": "126779263481484",
+        "index": 1,
+        "recovered": "126779263481484",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1818850214760598929",
+          "y": "642677847001550918"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 511624,
+        "elapsed_seconds": 0.052456463,
+        "expected": "44632913686127",
+        "index": 2,
+        "recovered": "44632913686127",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1123292028911391819",
+          "y": "1933652079345055110"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 123223,
+        "elapsed_seconds": 0.012907014,
+        "expected": "149589371504416",
+        "index": 3,
+        "recovered": "149589371504416",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "519172696006287796",
+          "y": "882546506314199483"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 390508,
+        "elapsed_seconds": 0.040048852,
+        "expected": "140130587627275",
+        "index": 4,
+        "recovered": "140130587627275",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "872775239134505377",
+          "y": "2131684159723483521"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 27190,
+        "elapsed_seconds": 0.002985795,
+        "expected": "59854340907888",
+        "index": 5,
+        "recovered": "59854340907888",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "2143063346040772667",
+          "y": "883428621560513222"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 229364,
+        "elapsed_seconds": 0.024130439,
+        "expected": "59140278439187",
+        "index": 6,
+        "recovered": "59140278439187",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "2064012555434671411",
+          "y": "471307506463647011"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 327299,
+        "elapsed_seconds": 0.033383615,
+        "expected": "64952948382838",
+        "index": 7,
+        "recovered": "64952948382838",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "180235663971897318",
+          "y": "1804432349465664368"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 49344,
+        "elapsed_seconds": 0.005309838,
+        "expected": "107707291206880",
+        "index": 8,
+        "recovered": "107707291206880",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "433326906918871938",
+          "y": "1295254135783687783"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 694320,
+        "elapsed_seconds": 0.072498045,
+        "expected": "2825896021164",
+        "index": 9,
+        "recovered": "2825896021164",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "343488553625968550",
+          "y": "104835368419626551"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 278867,
+        "elapsed_seconds": 0.028572271,
+        "expected": "80129294236747",
+        "index": 10,
+        "recovered": "80129294236747",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "300830724930374286",
+          "y": "143595780450977550"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 363216,
+        "elapsed_seconds": 0.036684402,
+        "expected": "79732373118527",
+        "index": 11,
+        "recovered": "79732373118527",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1674110867587709296",
+          "y": "598193747156381625"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 6955,
+        "elapsed_seconds": 0.000820037,
+        "expected": "24333014804925",
+        "index": 12,
+        "recovered": "24333014804925",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1817782115682284941",
+          "y": "681013659427316461"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 86228,
+        "elapsed_seconds": 0.008975567,
+        "expected": "22061384964384",
+        "index": 13,
+        "recovered": "22061384964384",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1407484109093608176",
+          "y": "1834969820616926927"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 21660,
+        "elapsed_seconds": 0.002407982,
+        "expected": "73874071821911",
+        "index": 14,
+        "recovered": "73874071821911",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1304488006699592630",
+          "y": "7153082236943889"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 468042,
+        "elapsed_seconds": 0.049498827,
+        "expected": "48547227678197",
+        "index": 15,
+        "recovered": "48547227678197",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1066123085247312215",
+          "y": "1370044040376753864"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 68711,
+        "elapsed_seconds": 0.007706387,
+        "expected": "14635580779099",
+        "index": 16,
+        "recovered": "14635580779099",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "383604679543245090",
+          "y": "1851772804972439252"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 157960,
+        "elapsed_seconds": 0.017509875,
+        "expected": "36537934483787",
+        "index": 17,
+        "recovered": "36537934483787",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "680785693602612267",
+          "y": "58249527265978264"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 71870,
+        "elapsed_seconds": 0.007810396,
+        "expected": "154047723923863",
+        "index": 18,
+        "recovered": "154047723923863",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "339950275921043730",
+          "y": "1191479813024688901"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 29528,
+        "elapsed_seconds": 0.003264248,
+        "expected": "35980968846142",
+        "index": 19,
+        "recovered": "35980968846142",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "2130966728574225553",
+          "y": "708518722868407502"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 84502,
+        "elapsed_seconds": 0.009397587,
+        "expected": "112821414678797",
+        "index": 20,
+        "recovered": "112821414678797",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1886455915505139701",
+          "y": "1253741756440767672"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 386903,
+        "elapsed_seconds": 0.040207758,
+        "expected": "72647490256467",
+        "index": 21,
+        "recovered": "72647490256467",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "670228485284659665",
+          "y": "1503685856689956339"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 112678,
+        "elapsed_seconds": 0.011669951,
+        "expected": "3854523318348",
+        "index": 22,
+        "recovered": "3854523318348",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "437914588405762886",
+          "y": "2238369474659490673"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 31279,
+        "elapsed_seconds": 0.003441749,
+        "expected": "88534639654634",
+        "index": 23,
+        "recovered": "88534639654634",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1020291390975003729",
+          "y": "136676266158744564"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 279344,
+        "elapsed_seconds": 0.028580978,
+        "expected": "2855255738358",
+        "index": 24,
+        "recovered": "2855255738358",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1612227583417546704",
+          "y": "2023863489066786907"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 70520,
+        "elapsed_seconds": 0.007328478,
+        "expected": "138963151294947",
+        "index": 25,
+        "recovered": "138963151294947",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1368853745542718674",
+          "y": "1778068944716454136"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 117731,
+        "elapsed_seconds": 0.012979856,
+        "expected": "125200697190624",
+        "index": 26,
+        "recovered": "125200697190624",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1756815546552674303",
+          "y": "1298208931894254159"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 3473,
+        "elapsed_seconds": 0.000521278,
+        "expected": "121534765770390",
+        "index": 27,
+        "recovered": "121534765770390",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1944317062100936067",
+          "y": "695547744755674585"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 478038,
+        "elapsed_seconds": 0.049716717,
+        "expected": "159202087064950",
+        "index": 28,
+        "recovered": "159202087064950",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "2156862388254155675",
+          "y": "24425261463646936"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 71860,
+        "elapsed_seconds": 0.008063793,
+        "expected": "76944474769645",
+        "index": 29,
+        "recovered": "76944474769645",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "559819355675696166",
+          "y": "1223183466820636511"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 160177,
+        "elapsed_seconds": 0.016853827,
+        "expected": "47933934692491",
+        "index": 30,
+        "recovered": "47933934692491",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1922587479996738797",
+          "y": "1589798885440313515"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 200441,
+        "elapsed_seconds": 0.021284659,
+        "expected": "44309202426369",
+        "index": 31,
+        "recovered": "44309202426369",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1593321389406163142",
+          "y": "2227969747360059421"
+        },
+        "verified": true
+      }
+    ],
+    "verified": 32
+  },
+  "solver": "pair_table",
+  "stages": [
+    {
+      "ran": true,
+      "selection_cost": {
+        "abscissae_drawn": 647,
+        "cofactor_multiplications": 320,
+        "frobenius_squarings": 19520,
+        "lifts_found": 320,
+        "rebuilds": 1
+      },
+      "stage": "select",
+      "status": "complete"
+    },
+    {
+      "aimed": true,
+      "columns": 320,
+      "columns_covered": 59,
+      "elapsed_seconds": 2.344278529,
+      "ran": true,
+      "relations_now": 23,
+      "relations_total": 23,
+      "stage": "collect",
+      "status": "complete",
+      "summands_scanned_now": 4274880,
+      "summands_scanned_total": 4274880,
+      "trials_now": 3504,
+      "trials_total": 3504,
+      "units": {
+        "ignored": 0,
+        "indices": [
+          0
+        ],
+        "max": 100000,
+        "present": 1,
+        "ran_now": 1,
+        "requested": 1,
+        "trials_per_unit": 3504
+      },
+      "worker": false
+    },
+    {
+      "columns": 320,
+      "duplicates": 0,
+      "elapsed_seconds": 6.000881868,
+      "linear_algebra": {
+        "attempts": 1,
+        "mode": "sparse",
+        "seconds": 0.002193649,
+        "sparse": {
+          "attempts": 1,
+          "core_dimension": 63,
+          "core_nonzeros": 910,
+          "filter": {
+            "columns_in": 320,
+            "columns_out": 63,
+            "dependent_rows_dropped": 0,
+            "duplicates_removed": 0,
+            "excess_rows_removed": 0,
+            "merged_columns": 257,
+            "nonzeros_in": 1005,
+            "nonzeros_out": 910,
+            "rows_in": 336,
+            "rows_out": 79,
+            "singletons_removed": 0,
+            "uncovered_columns": 0
+          },
+          "reconstructed_columns": 257,
+          "wiedemann": {
+            "block_m": 4,
+            "block_n": 4,
+            "dimension": 64,
+            "extra_steps": 0,
+            "generator_degree": 15,
+            "products": 56,
+            "sequence_length": 40
+          }
+        }
+      },
+      "ran": true,
+      "rejected": 0,
+      "relations": 336,
+      "relations_loaded": 336,
+      "stage": "logs",
+      "status": "complete",
+      "summands_scanned": 74382912,
+      "trials": 66576,
+      "units_extended": 18,
+      "units_used": 19,
+      "verification_seconds": 0.014127227
+    },
+    {
+      "already_solved": 0,
+      "elapsed_seconds": 0.693133274,
+      "failed_now": 0,
+      "pair_table_seconds": 0.0,
+      "ran": true,
+      "solved_now": 32,
+      "stage": "solve",
+      "status": "complete",
+      "targets": 32
+    }
+  ],
+  "state": {
+    "collect": {
+      "artifact": "relations",
+      "elapsed_seconds": 2.343972165,
+      "status": "complete"
+    },
+    "logs": {
+      "artifact": "logs.json",
+      "elapsed_seconds": 6.000504177,
+      "status": "complete"
+    },
+    "name": "k0n61-c320-m2-s201",
+    "params_digest": "c4590704091533f2c9e9a1648b031ea5be324233d988f9fdba26409903fd17a4",
+    "relations_collected": 336,
+    "runs": 1,
+    "schema_version": 1,
+    "select": {
+      "artifact": "factor_base.json",
+      "elapsed_seconds": 0.071213746,
+      "status": "complete"
+    },
+    "solve": {
+      "artifact": "solutions.json",
+      "elapsed_seconds": 0.692877676,
+      "status": "complete"
+    },
+    "solved_targets": 32,
+    "total_targets": 32,
+    "units_collected": 19
+  },
+  "status": "complete",
+  "stop_after": null,
+  "subfield": 1,
+  "summands": 3
+}
