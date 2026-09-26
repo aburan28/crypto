@@ -1,36 +1,52 @@
-name: ECC2K130 rotated solver admission
+name: ECC2K130 rotated solver admission replay
 
 on:
   push:
     paths:
       - '.github/workflows/ecc2k130-rotated-solver-admission.yml'
+      - 'research/notes/ecc2k130/rotated_solver_admission_replay_20260925/**'
       - 'research/notes/ecc2k130/rotated_solver_admission_20260925/**'
       - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz'
       - 'research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/**'
       - 'research/notes/ecc2k130/rotated_m56_export_gate_20260925/RESULT.md'
       - 'research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/RESULT.md'
+      - 'src/cryptanalysis/koblitz_groebner.rs'
+      - 'src/cryptanalysis/polynomial_reuse.rs'
+      - 'src/cryptanalysis/koblitz_index_calculus.rs'
   pull_request:
     paths:
       - '.github/workflows/ecc2k130-rotated-solver-admission.yml'
+      - 'research/notes/ecc2k130/rotated_solver_admission_replay_20260925/**'
       - 'research/notes/ecc2k130/rotated_solver_admission_20260925/**'
       - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz'
       - 'research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/**'
       - 'research/notes/ecc2k130/rotated_m56_export_gate_20260925/RESULT.md'
       - 'research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/RESULT.md'
+      - 'src/cryptanalysis/koblitz_groebner.rs'
+      - 'src/cryptanalysis/polynomial_reuse.rs'
+      - 'src/cryptanalysis/koblitz_index_calculus.rs'
+
+permissions:
+  contents: read
 
 jobs:
-  frozen-source-and-archive:
+  historical-and-current-interface:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify frozen source and inherited corpus without a solver run
-        run: python3 research/notes/ecc2k130/rotated_solver_admission_20260925/ci_replay.py
-      - name: Replay committed static preflight if present
-        run: |
-          if test -f research/notes/ecc2k130/rotated_solver_admission_20260925/evidence/final/receipt.json; then
-            python3 research/notes/ecc2k130/rotated_solver_admission_20260925/ci_replay.py --evidence research/notes/ecc2k130/rotated_solver_admission_20260925/evidence/final
-          fi
+      - name: Verify old and new preregistration bytes
+        run: python3 research/notes/ecc2k130/rotated_solver_admission_replay_20260925/replay.py --mode freeze
+      - name: Replay original admission receipt from pinned historical bytes
+        run: python3 research/notes/ecc2k130/rotated_solver_admission_replay_20260925/replay.py --mode historical
+      - name: Check fail-closed historical/current separation
+        run: python3 -m unittest discover -s research/notes/ecc2k130/rotated_solver_admission_replay_20260925 -p 'test_replay.py' -v
+      - name: Check current generic and reused solver-interface contract
+        run: python3 research/notes/ecc2k130/rotated_solver_admission_replay_20260925/replay.py --mode current
+      - name: Regress n19-m6 width rejection and inconclusive status
+        run: cargo test --lib pdp_admission_n19_m6_d2_layout_is_unsupported_not_refuted -- --nocapture
+      - name: Regress unsupported-input status across solver frontends
+        run: cargo test --lib pdp_admission_unsupported_is_not_a_refutation -- --nocapture
