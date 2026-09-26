@@ -2380,6 +2380,7 @@ pub fn plain_subspace_factor_base(
         orbit_of,
         signed_orbits,
         signed_orbit_of,
+        derived: Default::default(),
     })
 }
 
