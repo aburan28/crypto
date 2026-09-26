@@ -121,10 +121,18 @@ fn signed_orbit(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<BinaryPoint> {
 }
 
 fn point_defined_base(curve: &KoblitzCurve, columns: usize) -> PointBase {
+    point_defined_base_with_selection(curve, columns, false)
+}
+
+fn point_defined_base_with_selection(
+    curve: &KoblitzCurve,
+    columns: usize,
+    legacy_rank_fixture_lcg: bool,
+) -> PointBase {
     // Single-word field for the hot arithmetic below (per-x lifts and the
-    // cofactor/subgroup/label scalar multiplications).  Every swap is
-    // covered by lib bit-exactness tests; the collected sets, sort orders,
-    // keys, and labels are unchanged, so the emitted base is identical.
+    // cofactor/subgroup/label scalar multiplications).  The fast arithmetic
+    // is bit-exact for either selection schedule; the opt-in legacy schedule
+    // intentionally changes which base and point-index order are emitted.
     let fast = FastBinaryCurve::new(&curve.curve.irreducible, curve.a as u64)
         .expect("Koblitz n <= 63 fits in one word");
     let b_word = fast.gf.from_element(&curve.curve.b);
@@ -146,7 +154,23 @@ fn point_defined_base(curve: &KoblitzCurve, columns: usize) -> PointBase {
     let mut seen_orbits = HashSet::new();
     let mut orbits = Vec::new();
     let mut scanned_x = 0u64;
-    for raw_x in 0..(1u64 << curve.n) {
+    // Reproduce the certified rank fixture's seeded abscissa schedule for
+    // n > 32.  Ascending x remains the default selection rule.
+    let exhaustive = !legacy_rank_fixture_lcg || curve.n <= 32;
+    let budget = if exhaustive {
+        1u64 << curve.n
+    } else {
+        1u64 << 24
+    };
+    let mask = (1u64 << curve.n) - 1;
+    let mut state = 0xD1B54A32D192ED03u64 ^ (curve.n as u64) ^ ((columns as u64) << 17);
+    for candidate in 0..budget {
+        let raw_x = if exhaustive {
+            candidate
+        } else {
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            state & mask
+        };
         scanned_x += 1;
         for point in fast.points_with_x(b_word, raw_x) {
             let projected = to_binary(fast.scalar_mul(point, &curve.cofactor));
@@ -200,8 +224,17 @@ fn point_defined_base(curve: &KoblitzCurve, columns: usize) -> PointBase {
         }
     }
     let mut points: Vec<_> = orbits.into_iter().flatten().collect();
-    points.sort_by_cached_key(point_key);
-    points.dedup_by_key(|point| point_key(point));
+    // The certified header retains members grouped by sorted orbit.  Its
+    // point indices therefore differ from the current global-point order.
+    if legacy_rank_fixture_lcg {
+        assert_eq!(
+            points.iter().map(point_key).collect::<HashSet<_>>().len(),
+            points.len()
+        );
+    } else {
+        points.sort_by_cached_key(point_key);
+        points.dedup_by_key(|point| point_key(point));
+    }
     assert_eq!(points.len(), columns * signed_size);
     let point_labels: Vec<_> = points
         .iter()
@@ -5008,13 +5041,28 @@ fn main() {
         eta_denominator,
     );
     let factor_base_input_path = std::env::var("KIC_FACTOR_BASE_JSONL").ok();
+    let factor_base_selection_mode =
+        std::env::var("KIC_FACTOR_BASE_SELECTION").unwrap_or_else(|_| "ascending_x_v1".to_owned());
+    assert!(matches!(
+        factor_base_selection_mode.as_str(),
+        "ascending_x_v1" | "legacy_rank_fixture_lcg_v1"
+    ));
+    assert!(
+        factor_base_input_path.is_none() || factor_base_selection_mode == "ascending_x_v1",
+        "factor-base selection cannot accompany a loaded base header"
+    );
     let (base, factor_base_input_hash, factor_base_input_blake3) = if let Some(path) =
         factor_base_input_path.as_deref()
     {
         let (base, base_hash, source_hash) = point_defined_base_from_jsonl(&curve, columns, path);
         (base, Some(base_hash), Some(source_hash))
     } else {
-        (point_defined_base(&curve, columns), None, None)
+        let constructed = if factor_base_selection_mode == "legacy_rank_fixture_lcg_v1" {
+            point_defined_base_with_selection(&curve, columns, true)
+        } else {
+            point_defined_base(&curve, columns)
+        };
+        (constructed, None, None)
     };
     assert_eq!(base.signed_size, signed_size);
     let base_ms = construction_started.elapsed().as_secs_f64() * 1000.0;
@@ -6688,6 +6736,7 @@ fn main() {
                     "orbit_columns":base.orbit_columns,
                     "signed_automorphism_size":base.signed_size,
                     "factor_base_points":base.points.len(),
+                    "selection_mode":factor_base_selection_mode,
                     "factor_base_point_coordinates":base.points.iter().map(affine_coordinates).collect::<Vec<_>>(),
                     "factor_base_point_labels":base.point_labels,
                     "factor_base_representatives":base.representatives.iter().map(affine_coordinates).collect::<Vec<_>>(),
@@ -6738,6 +6787,70 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn legacy_selection_keeps_small_field_orbits_and_labels() {
+        let curve = KoblitzCurve::new(1, 7).unwrap();
+        let ascending = point_defined_base(&curve, 2);
+        let legacy = point_defined_base_with_selection(&curve, 2, true);
+        assert_eq!(ascending.scanned_x, legacy.scanned_x);
+        assert_eq!(ascending.representatives, legacy.representatives);
+        let as_map = |base: &PointBase| {
+            base.points
+                .iter()
+                .zip(&base.point_labels)
+                .map(|(point, label)| (point_key(point), *label))
+                .collect::<BTreeMap<_, _>>()
+        };
+        assert_eq!(as_map(&ascending), as_map(&legacy));
+    }
+
+    #[test]
+    fn legacy_selection_reproduces_certified_n53_order_and_labels() {
+        use std::io::Read;
+        let fixture_gzip = std::fs::File::open(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay_20260924_codex/base_header.jsonl.gz"
+        )).unwrap();
+        let mut decoder = flate2::read::GzDecoder::new(fixture_gzip);
+        let mut fixture_bytes = Vec::new();
+        decoder.read_to_end(&mut fixture_bytes).unwrap();
+        let fixture: serde_json::Value = serde_json::from_slice(&fixture_bytes).unwrap();
+        let curve = KoblitzCurve::new(0, 53).unwrap();
+        let base = point_defined_base_with_selection(&curve, 220, true);
+        assert_eq!(base.scanned_x, 400);
+        assert_eq!(
+            base.scanned_x,
+            fixture["field_x_values_scanned"].as_u64().unwrap()
+        );
+        let points: Vec<_> = base.points.iter().map(affine_coordinates).collect();
+        let reps: Vec<_> = base
+            .representatives
+            .iter()
+            .map(affine_coordinates)
+            .collect();
+        assert_eq!(json!(points), fixture["factor_base_point_coordinates"]);
+        assert_eq!(
+            json!(base.point_labels),
+            fixture["factor_base_point_labels"]
+        );
+        assert_eq!(json!(reps), fixture["factor_base_representatives"]);
+        let representative_keys: Vec<_> = base
+            .representatives
+            .iter()
+            .map(|point| {
+                let (x, y) = point_key(point);
+                json!([x.to_string(), y.to_string()])
+            })
+            .collect();
+        let hash = blake3::hash(&serde_json::to_vec(&representative_keys).unwrap())
+            .to_hex()
+            .to_string();
+        assert_eq!(
+            hash,
+            "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71"
+        );
+    }
 
     fn projected_regular_x_models(
         mut encoding: S5Encoding,

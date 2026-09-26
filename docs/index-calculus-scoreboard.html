@@ -7063,6 +7063,32 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n53-coldbase-first-attempt-20260925 -->
+
+<!-- BEGIN ecc2k130-n53-certified-coldbase-20260925 -->
+<section class="panel" id="ecc2k130-n53-certified-coldbase-20260925">
+  <div class="panel-head">
+    <h2>n = 53 L = 384 certified cold-base repeat: charged IC remains slower <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/819">PR #819</a> repeated the exact #760 public 384-Q stream with a fresh compact producer using the certified seeded-LCG x schedule and orbit-major point order. There was no prior factor-base input. Mandatory materialization proved all 220 representatives and 23,320 ordered points and labels identical to the certified fixture after numeric cofactor normalization; construction scanned 400 x values. Training yielded 512/512 relations, rank 220/220 at relation 461, and 51 correct post-rank predictions. One point index and one matched signed-Frobenius rho table each returned all 384 logs. The first and only measured <a href="https://github.com/aburan28/crypto/actions/runs/36218536407">Actions run 36218536407</a> and its committed archive pass independent 512-training/384-IC/384-rho group-law replay.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One GitHub-hosted Ubuntu fixed stream, cold wall seconds. Complete operational IC charges fresh base discovery and training, materialization, rank/base-log solve, one-index Q production and scalar recovery. Independent full group-law audit is separate. Same-Q rho uses one fresh batched table. The two-child lower omits mandatory rank and recovery.</caption>
+    <thead><tr><th>Arm / stage</th><th class="n">Wall s</th><th class="n">IC / rho</th><th>Correctness / scope</th></tr></thead>
+    <tbody>
+      <tr><td>Fresh base + 512-target training</td><td class="n">149.004</td><td class="n">&mdash;</td><td>Exact certified base; 220/220 rank later solved</td></tr>
+      <tr><td>Base materialization + rank/base-log solve</td><td class="n">50.229</td><td class="n">&mdash;</td><td>0.231 + 49.999 s; required setup</td></tr>
+      <tr><td>One-index 384-Q point producer + scalar recovery</td><td class="n">127.975</td><td class="n">&mdash;</td><td>100.700 + 27.275 s; 384/384 verified logs</td></tr>
+      <tr><td><b>Complete operational IC</b></td><td class="n"><b>327.208</b></td><td class="n"><b>2.182</b></td><td>384/384 verified logs; charged cold base</td></tr>
+      <tr><td>Matched cold batched rho</td><td class="n">149.927</td><td class="n">1.000</td><td>Same 384 Q, one table; 384/384 verified logs</td></tr>
+      <tr><td>IC two-child lower diagnostic</td><td class="n">249.934</td><td class="n">1.667</td><td>Omits mandatory rank and recovery</td></tr>
+      <tr><td>IC with independent audit added</td><td class="n">478.345</td><td class="n">3.191</td><td>Audit 151.137 s, excluded from operational ratio</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The operational gap is 177.281 s. Training + materialization + mandatory rank alone cost 199.233 s, already 49.306 s (1.329&times;) above rho, so making point query and recovery free would not reverse this L384 result. The largest individual IC stage, training at 149.004 s, is also smaller than the gap; no one-stage-only elimination suffices on these measured totals. This closes the certified-base cold-construction arm for this fixed stream. The earlier #815 ascending-x attempt remains a separate censored base-identity failure, not a retry or ratio. A different rank/base policy is a separately provisional lead, not evidence of a crossover here.</p>
+    <p>Evidence: <a href="https://github.com/aburan28/crypto/pull/819">frozen protocol, result, raw archive and verifier</a>, committed first-attempt archive SHA-256 <code>12b28300fc24436b977d62c32763b307fc08c9cf8f031af21f01de926fe4ac58</code>. This is one deterministic stream/build and wall accounting, with no common-operation-unit <code>S</code>, n = 131 transfer, best-rho claim or public ECC2K-130 logarithm.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n53-certified-coldbase-20260925 -->
 <!-- BEGIN ecc2k130-compact-sparse-base-sweep-20260925 -->
 <section class="panel" id="ecc2k130-compact-sparse-base-sweep-20260925">
   <div class="panel-head">
