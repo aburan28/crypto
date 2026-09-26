@@ -1,0 +1,143 @@
+{
+ "curve": "k0n53",
+ "seed_set": "W",
+ "seed": 101,
+ "grid_requested": [
+  132,
+  186,
+  263,
+  372,
+  526,
+  744,
+  1052
+ ],
+ "grid_actual": [
+  136,
+  192,
+  264,
+  376,
+  528,
+  744,
+  1056
+ ],
+ "extensions": 0,
+ "points": [
+  {
+   "columns": 136,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 0.47143226002637983,
+   "points": 14416
+  },
+  {
+   "columns": 136,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 0.5190658306107541,
+   "points": 14416
+  },
+  {
+   "columns": 192,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 0.40751869555837916,
+   "points": 20352
+  },
+  {
+   "columns": 192,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 0.44038475782918524,
+   "points": 20352
+  },
+  {
+   "columns": 264,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 0.40442589364235326,
+   "points": 27984
+  },
+  {
+   "columns": 264,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 0.48466554680153595,
+   "points": 27984
+  },
+  {
+   "columns": 376,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 0.690481806941135,
+   "points": 39856
+  },
+  {
+   "columns": 376,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 0.7269248855674509,
+   "points": 39856
+  },
+  {
+   "columns": 528,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 1.2361694028580037,
+   "points": 55968
+  },
+  {
+   "columns": 528,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 1.2145977379556876,
+   "points": 55968
+  },
+  {
+   "columns": 744,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 2.2246235387960516,
+   "points": 78864
+  },
+  {
+   "columns": 744,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 2.4032027925676807,
+   "points": 78864
+  },
+  {
+   "columns": 1056,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 5.257455660230023,
+   "points": 111936
+  },
+  {
+   "columns": 1056,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 4.331333714836417,
+   "points": 111936
+  }
+ ],
+ "chosen": {
+  "columns": 264,
+  "descent_summands": 2,
+  "s_per_target": 0.40442589364235326
+ }
+}

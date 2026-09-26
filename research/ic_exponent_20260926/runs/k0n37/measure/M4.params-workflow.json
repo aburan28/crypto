@@ -1,0 +1,648 @@
+{
+  "artifacts": {
+    "baseline": "baseline.json",
+    "factor_base": "factor_base.json",
+    "logs": "logs.json",
+    "relations": "relations",
+    "solutions": "solutions.json",
+    "state": "state.json"
+  },
+  "collection_aim": true,
+  "collection_window": 18,
+  "curve_a": 0,
+  "curve_b": 1,
+  "degree": 37,
+  "descent_summands": 2,
+  "elapsed_seconds": 0.062476803,
+  "evidence_scope": "synthetic_known_answer",
+  "factor_base": {
+    "abscissae": 296,
+    "columns": 8,
+    "dimension": 37,
+    "domain": "explicit_orbits(8)",
+    "family": "subgroup_orbits",
+    "pair_table_stored_pairs": 2664,
+    "pair_table_tier": "folded",
+    "points": 592,
+    "selection_cost": {
+      "abscissae_drawn": 18,
+      "cofactor_multiplications": 8,
+      "frobenius_squarings": 296,
+      "lifts_found": 8,
+      "rebuilds": 1
+    },
+    "signed_orbits": 8,
+    "spec": {
+      "kind": "subgroup_orbits",
+      "points": 592,
+      "seed": 204
+    }
+  },
+  "failure": null,
+  "limitations": [
+    "No imported target was used.",
+    "This run does not establish scaling or challenge readiness."
+  ],
+  "name": "k0n37-c8-m2-s204",
+  "operation": "workflow",
+  "params_digest": "1ed633ad583bbf19db1abf20d2fe943766326683dec6d679ea007807329805ce",
+  "resources": {
+    "cpu_seconds": 0.039848,
+    "peak_rss_bytes": 14397440,
+    "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+  },
+  "resumed": false,
+  "run_directory": "/home/user/crypto/research/ic_exponent_20260926/runs/k0n37/measure/M4.params-wf",
+  "run_number": 1,
+  "schema_version": 1,
+  "scope": "resumable staged pipeline: select → collect → logs → solve; completed stages, work units and solved targets are reused on rerun after re-verification against the reconstructed curve",
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "bce525eb3ce02a4e9ae5bb515ff5ce927b4f07c01b92b5d9dbb2a36450ab0994",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "solutions": {
+    "count": 32,
+    "items": [
+      {
+        "descent_trials": 2390,
+        "elapsed_seconds": 0.000262176,
+        "expected": "227152301",
+        "index": 0,
+        "recovered": "227152301",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "15929481406",
+          "y": "18160852434"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 751,
+        "elapsed_seconds": 0.000150996,
+        "expected": "7574069",
+        "index": 1,
+        "recovered": "7574069",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "27075166763",
+          "y": "21850872289"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 154,
+        "elapsed_seconds": 0.00011057,
+        "expected": "140084101",
+        "index": 2,
+        "recovered": "140084101",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "105048183576",
+          "y": "51401470546"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 136,
+        "elapsed_seconds": 0.000099918,
+        "expected": "218653169",
+        "index": 3,
+        "recovered": "218653169",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "37180800315",
+          "y": "33740868246"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 357,
+        "elapsed_seconds": 0.00012376,
+        "expected": "53049340",
+        "index": 4,
+        "recovered": "53049340",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "113090127401",
+          "y": "41239707416"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 331,
+        "elapsed_seconds": 0.000128163,
+        "expected": "224035786",
+        "index": 5,
+        "recovered": "224035786",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "22572348696",
+          "y": "15857483653"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 1023,
+        "elapsed_seconds": 0.000154007,
+        "expected": "181510197",
+        "index": 6,
+        "recovered": "181510197",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "100722480981",
+          "y": "109612057478"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 631,
+        "elapsed_seconds": 0.000130134,
+        "expected": "69053738",
+        "index": 7,
+        "recovered": "69053738",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "68569448078",
+          "y": "100685077316"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 869,
+        "elapsed_seconds": 0.000143011,
+        "expected": "1543868",
+        "index": 8,
+        "recovered": "1543868",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "27541481791",
+          "y": "97664124075"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 1151,
+        "elapsed_seconds": 0.000164285,
+        "expected": "24108571",
+        "index": 9,
+        "recovered": "24108571",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "79831187216",
+          "y": "23180221620"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 1204,
+        "elapsed_seconds": 0.000168435,
+        "expected": "29479909",
+        "index": 10,
+        "recovered": "29479909",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "107991232052",
+          "y": "125739125608"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 754,
+        "elapsed_seconds": 0.00014402,
+        "expected": "209833481",
+        "index": 11,
+        "recovered": "209833481",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "29743220994",
+          "y": "57111885963"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 474,
+        "elapsed_seconds": 0.00013183,
+        "expected": "226369009",
+        "index": 12,
+        "recovered": "226369009",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "76677038135",
+          "y": "76121579143"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 429,
+        "elapsed_seconds": 0.000119334,
+        "expected": "29776987",
+        "index": 13,
+        "recovered": "29776987",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "82527151819",
+          "y": "513202300"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 558,
+        "elapsed_seconds": 0.000122659,
+        "expected": "184821066",
+        "index": 14,
+        "recovered": "184821066",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "124319364341",
+          "y": "52604938183"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 5033,
+        "elapsed_seconds": 0.000439436,
+        "expected": "208440799",
+        "index": 15,
+        "recovered": "208440799",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "60968583079",
+          "y": "36655375399"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 627,
+        "elapsed_seconds": 0.000126228,
+        "expected": "104926674",
+        "index": 16,
+        "recovered": "104926674",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "61540302177",
+          "y": "112941760077"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 126,
+        "elapsed_seconds": 0.000100025,
+        "expected": "98005331",
+        "index": 17,
+        "recovered": "98005331",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "10913778512",
+          "y": "56533086584"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 872,
+        "elapsed_seconds": 0.000175815,
+        "expected": "16321221",
+        "index": 18,
+        "recovered": "16321221",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "68774595302",
+          "y": "80224095934"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 215,
+        "elapsed_seconds": 0.000122678,
+        "expected": "177806382",
+        "index": 19,
+        "recovered": "177806382",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "89699381271",
+          "y": "118229177606"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 375,
+        "elapsed_seconds": 0.00010772,
+        "expected": "185980408",
+        "index": 20,
+        "recovered": "185980408",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "59326937141",
+          "y": "1820137435"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 6710,
+        "elapsed_seconds": 0.000553537,
+        "expected": "91943197",
+        "index": 21,
+        "recovered": "91943197",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "68780644432",
+          "y": "39744323625"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 39,
+        "elapsed_seconds": 0.000084925,
+        "expected": "23099068",
+        "index": 22,
+        "recovered": "23099068",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "84652377762",
+          "y": "8153487512"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 697,
+        "elapsed_seconds": 0.00014712,
+        "expected": "159292687",
+        "index": 23,
+        "recovered": "159292687",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "134986626539",
+          "y": "12892299919"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 77,
+        "elapsed_seconds": 0.000109789,
+        "expected": "98145337",
+        "index": 24,
+        "recovered": "98145337",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "131424040822",
+          "y": "105445446365"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 113,
+        "elapsed_seconds": 0.000094099,
+        "expected": "210063779",
+        "index": 25,
+        "recovered": "210063779",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "1220998924",
+          "y": "71951294833"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 112,
+        "elapsed_seconds": 0.000094405,
+        "expected": "55866609",
+        "index": 26,
+        "recovered": "55866609",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "9598218503",
+          "y": "86019373283"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 223,
+        "elapsed_seconds": 0.000102818,
+        "expected": "66790881",
+        "index": 27,
+        "recovered": "66790881",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "29923241518",
+          "y": "78753213196"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 108,
+        "elapsed_seconds": 0.000130416,
+        "expected": "127825265",
+        "index": 28,
+        "recovered": "127825265",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "60279358019",
+          "y": "45748885487"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 392,
+        "elapsed_seconds": 0.000119484,
+        "expected": "191212329",
+        "index": 29,
+        "recovered": "191212329",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "82650662259",
+          "y": "69029235879"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 5703,
+        "elapsed_seconds": 0.000509114,
+        "expected": "147135374",
+        "index": 30,
+        "recovered": "147135374",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "47609895335",
+          "y": "62333522821"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 511,
+        "elapsed_seconds": 0.000124671,
+        "expected": "1000386",
+        "index": 31,
+        "recovered": "1000386",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "111107996401",
+          "y": "114714306756"
+        },
+        "verified": true
+      }
+    ],
+    "verified": 32
+  },
+  "solver": "pair_table",
+  "stages": [
+    {
+      "ran": true,
+      "selection_cost": {
+        "abscissae_drawn": 18,
+        "cofactor_multiplications": 8,
+        "frobenius_squarings": 296,
+        "lifts_found": 8,
+        "rebuilds": 1
+      },
+      "stage": "select",
+      "status": "complete"
+    },
+    {
+      "aimed": true,
+      "columns": 8,
+      "columns_covered": 3,
+      "elapsed_seconds": 0.00333048,
+      "ran": true,
+      "relations_now": 1,
+      "relations_total": 1,
+      "stage": "collect",
+      "status": "complete",
+      "summands_scanned_now": 648,
+      "summands_scanned_total": 648,
+      "trials_now": 36,
+      "trials_total": 36,
+      "units": {
+        "ignored": 0,
+        "indices": [
+          0
+        ],
+        "max": 100000,
+        "present": 1,
+        "ran_now": 1,
+        "requested": 1,
+        "trials_per_unit": 36
+      },
+      "worker": false
+    },
+    {
+      "columns": 8,
+      "duplicates": 0,
+      "elapsed_seconds": 0.0154794,
+      "linear_algebra": {
+        "attempts": 1,
+        "mode": "sparse",
+        "seconds": 0.000033762,
+        "sparse": {
+          "attempts": 0,
+          "core_dimension": 0,
+          "core_nonzeros": 0,
+          "filter": {
+            "columns_in": 8,
+            "columns_out": 0,
+            "dependent_rows_dropped": 0,
+            "duplicates_removed": 0,
+            "excess_rows_removed": 0,
+            "merged_columns": 7,
+            "nonzeros_in": 23,
+            "nonzeros_out": 0,
+            "rows_in": 8,
+            "rows_out": 0,
+            "singletons_removed": 1,
+            "uncovered_columns": 0
+          },
+          "reconstructed_columns": 8,
+          "wiedemann": null
+        }
+      },
+      "ran": true,
+      "rejected": 0,
+      "relations": 8,
+      "relations_loaded": 8,
+      "stage": "logs",
+      "status": "complete",
+      "summands_scanned": 9072,
+      "trials": 504,
+      "units_extended": 13,
+      "units_used": 14,
+      "verification_seconds": 0.000429571
+    },
+    {
+      "already_solved": 0,
+      "elapsed_seconds": 0.038373905,
+      "failed_now": 0,
+      "pair_table_seconds": 0.0,
+      "ran": true,
+      "solved_now": 32,
+      "stage": "solve",
+      "status": "complete",
+      "targets": 32
+    }
+  ],
+  "state": {
+    "collect": {
+      "artifact": "relations",
+      "elapsed_seconds": 0.002954362,
+      "status": "complete"
+    },
+    "logs": {
+      "artifact": "logs.json",
+      "elapsed_seconds": 0.015115022,
+      "status": "complete"
+    },
+    "name": "k0n37-c8-m2-s204",
+    "params_digest": "1ed633ad583bbf19db1abf20d2fe943766326683dec6d679ea007807329805ce",
+    "relations_collected": 8,
+    "runs": 1,
+    "schema_version": 1,
+    "select": {
+      "artifact": "factor_base.json",
+      "elapsed_seconds": 0.003016743,
+      "status": "complete"
+    },
+    "solve": {
+      "artifact": "solutions.json",
+      "elapsed_seconds": 0.037977498,
+      "status": "complete"
+    },
+    "solved_targets": 32,
+    "total_targets": 32,
+    "units_collected": 14
+  },
+  "status": "complete",
+  "stop_after": null,
+  "subfield": 1,
+  "summands": 3
+}

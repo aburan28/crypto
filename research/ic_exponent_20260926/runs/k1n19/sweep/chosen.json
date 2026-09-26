@@ -1,0 +1,55 @@
+{
+ "curve": "k1n19",
+ "seed_set": "W",
+ "seed": 101,
+ "grid_requested": [
+  2,
+  3,
+  4,
+  6,
+  8
+ ],
+ "grid_actual": [
+  8
+ ],
+ "extensions": 1,
+ "points": [
+  {
+   "columns": 8,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 8.092215204811906,
+   "points": 304
+  },
+  {
+   "columns": 8,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 10.432860492220794,
+   "points": 304
+  },
+  {
+   "columns": 16,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 13.950505385497403,
+   "points": 608
+  },
+  {
+   "columns": 16,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 15.669903993760942,
+   "points": 608
+  }
+ ],
+ "chosen": {
+  "columns": 8,
+  "descent_summands": 2,
+  "s_per_target": 8.092215204811906
+ }
+}

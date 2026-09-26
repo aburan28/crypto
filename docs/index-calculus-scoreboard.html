@@ -323,14 +323,19 @@
       measured end to end is below rho: the residual-walk thread's 500&times;-or-worse verdict on
       E(F<sub>p</sub><sup>3</sup>) is unchanged, and the three-regime ledger that heads the page
       puts the best whole-pipeline variant at <b>13.5&times;</b> the matched rho on a 23-bit
-      prime-order curve, <b>38.2&times;</b> on a 24-bit random binary curve and <b>6.5&times;</b> on
-      a 39-bit Koblitz subgroup, with no fitted exponent below the reference's. The Koblitz figure
+      prime-order curve, <b>38.2&times;</b> on a 24-bit random binary curve and <b>4.9&times;</b>
+      <small>was 6.5&times;</small> on a 39-bit Koblitz subgroup, with no fitted exponent below the
+      reference's. The Koblitz figure
       read 1.17&times; after the collection and selection rounds of 2026-09-21 and 2026-09-22 until
       ledger &sect;19 (2026-09-23) matched its reference to its problem: it is 32 targets solved
       together, per target, and it had been divided by rho solving one. Against batch rho on the
       same 32 targets it is 6.5&times;; priced by time on both sides &mdash; rho&rsquo;s canonicalisation
       each step, the pair table&rsquo;s two passes each stored pair &mdash; 6.4&times;; one target alone,
-      44&times;. The first two were
+      44&times;. Ledger &sect;20 (2026-09-26) re-priced it on current main with every phase on the
+      clock, and that same recipe reads 12.5&times;. Its descent had been charged 54 units where it
+      scans 748,180, and the workflow&rsquo;s constructions around it had not been charged at all. The
+      thread&rsquo;s best recipe, swept at each of nine sizes from 2<sup>18</sup> to 2<sup>47.2</sup>,
+      reaches 4.9&times; at 2<sup>39</sup> and no lower. The first two were
       3.55&times; and 16.0&times; until the reference was matched (ledger &sect;18, 2026-09-23): the
       prime and binary rows had been priced against a walk that used no automorphism and paid
       most of its <code>S</code> in set-up, and against the negation-map walk the contract asks for
@@ -377,7 +382,14 @@
       (<a href="#ic-triple-counted-20260923">below</a>). So no crossing with a matched rho has been
       measured, and the <code>r<sup>[0.13, 0.19]</sup></code> is a growth against the unmatched
       walk. The derived exponent lies inside that range &mdash; but at a factor base measurably not
-      where the same derivation puts it, so the agreement is not yet confirmation of the model. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
+      where the same derivation puts it, so the agreement is not yet confirmation of the model. Carried
+      from &sect;19&rsquo;s 6.38&times;, the same rise predicted that the Koblitz collection thread
+      crosses batch rho near 2<sup>23</sup>. Measured at nine sizes with every phase priced
+      (<a href="#koblitz-exponent-20260926">&sect;20</a>), it does not. The thread reads
+      12.7&ndash;24.8&times; below 2<sup>25</sup>, where its descent, which no number of targets
+      amortises, costs more per target than batch rho does. Its least ratio is 4.86&times; at
+      2<sup>39</sup>. Above that the ratio rises again, at a rate the declared fit
+      (<code>r</code><sup>0.137</sup>, 95% [&minus;0.10, 0.37]) cannot separate from 1/6. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
       no such table and its asymptotics are the question this ladder cannot reach. It is also not
       blanket across problems: on hyperelliptic Jacobians at genus 3 and 4 index calculus measures
       <strong>below</strong> a real distinguished-point rho &mdash; 0.21 at
@@ -407,7 +419,7 @@
       <div class="fact">
         <dt>Boundary 2 · the reference</dt>
         <dd>rho, counted</dd>
-        <p>S &asymp; 1.3 on E(F<sub>p</sub><sup>3</sup>) with the residual-walk accounting. On the three-regime ledger, matched to the curve&rsquo;s automorphisms with the setup inside: 0.97 to 3.6 on the prime and binary ladders (the negation-map walk, walk alone 0.87 to 1.6; the plain walk they were priced against until &sect;18 read 2.3 to 23), 0.20 to 19 on the Koblitz ladder (signed Frobenius, canonicalisation unpriced). For a figure that solves 32 targets together, batch rho at <code>k</code> = 32 on the same curve: 0.022&ndash;0.030 a target (&sect;19).</p>
+        <p>S &asymp; 1.3 on E(F<sub>p</sub><sup>3</sup>) with the residual-walk accounting. On the three-regime ledger, matched to the curve&rsquo;s automorphisms with the setup inside: 0.97 to 3.6 on the prime and binary ladders (the negation-map walk, walk alone 0.87 to 1.6; the plain walk they were priced against until &sect;18 read 2.3 to 23), 0.20 to 19 on the Koblitz ladder (signed Frobenius, canonicalisation unpriced). For a figure that solves 32 targets together, batch rho at <code>k</code> = 32 on the same curve: 0.022&ndash;0.030 a target (&sect;19). On current main, over nine sizes, it is 0.98&ndash;4.5&times; its floor, counted, and a canonical step prices at 1.8&ndash;2.3 units (&sect;20).</p>
       </div>
       <div class="fact">
         <dt>Closest to rho, one target</dt>
@@ -415,8 +427,9 @@
         <p>Meet in the middle, m = 2, prime field, folded table, walked targets and a base at the
           family optimum (222 signed points against the rule&rsquo;s 512); every phase counted; against
           the matched negation-map rho. It read 3.55&times; against the plain walk (3.63&times; in Round 4).
-          Amortised over 32 targets, the Koblitz collection thread is 6.5&times; batch rho; one target
-          alone, 44&times; (&sect;19).</p>
+          Amortised over 32 targets, the Koblitz collection thread is 4.86&times; batch rho at best, every
+          phase priced on current main (&sect;20; 6.5&times; in &sect;19). One target alone, it is
+          22.6&times; there.</p>
       </div>
       <div class="fact">
         <dt>Boundary 3 &middot; the family&rsquo;s own floor</dt>
@@ -428,7 +441,9 @@
           &Theta;(r<sup>1/6</sup>) where the reference is flat, which is the round&rsquo;s result &mdash;
           measured at <code>r<sup>[0.13, 0.19]</sup></code> across three certified cells spanning
           1100&times; in <code>r</code>, each at its own swept base &mdash; against the tournament
-          worker&rsquo;s rho, which the triple-counted control found unmatched.</p>
+          worker&rsquo;s rho, which the triple-counted control found unmatched. Against batch rho, the
+          Koblitz collection thread fits <code>r</code><sup>0.137</sup> [&minus;0.10, 0.37] over its
+          four largest sizes (&sect;20).</p>
       </div>
     </dl>
   </header>
@@ -657,6 +672,71 @@
       <span><span class="chip">accounting</span> no index-calculus count changed, and the thread&rsquo;s steps stand as measured between its own variants (1.139&times;, 1.311&times;, 7.26&times; from its first rung). Every Koblitz 32-target <code>vs rho</code> on this page now divides by batch rho at k = 32, with the single-target figure as its &ldquo;was&rdquo;</span>
       <span><b>open</b>: Bailey&rsquo;s step costs half a canonical step, but its walk&rsquo;s step count is unmeasured, so its readings are models; the cold figures inherit &plusmn;28&ndash;56% from 16 (8) single rho runs; the thread&rsquo;s single-target walk is 1.56&ndash;1.78&times; its floor at n = 53 and 61</span>
       <span><b>dated</b>: both prices were measured at commit 3e8dd352. Main has since cut the least rotation to about log&#8322; n steps, keyed the build in bulk and slimmed the scan, all with bit-identical output. So on current main a canonical step, a stored pair and the scans all cost less. The re-read is consistent for its date, but re-pricing current main needs both sides re-run (&sect;19.8)</span>
+      <span><b>superseded</b>: &sect;20 re-ran both sides on current main with every phase on the clock. The closest row reproduces every count and reads <b>12.53&times;</b> <small>was 6.38&times;</small>: the descent scans 748,180 units where 54 were charged, and the workflow&rsquo;s constructions add 3.34M that nothing had charged. The thread&rsquo;s best recipe per size reaches 4.86&times; at 2<sup>39</sup> (<a href="#koblitz-exponent-20260926">the round</a>)</span>
+    </div>
+  </div>
+
+  <div class="panel" id="koblitz-exponent-20260926">
+    <div class="panel-head">
+      <h2>The Koblitz thread at nine sizes, every phase on the clock <span class="chip">accounting</span></h2>
+      <p>Ledger &sect;20. Section 19 matched the collection thread&rsquo;s reference to its problem,
+        32 targets against batch rho at k = 32. But it did so only at the thread&rsquo;s own sizes, and on
+        the commit its figures were frozen at. Section 20 measures the thread afresh on current main, from
+        r = 2<sup>18</sup> to 2<sup>47.2</sup>. At each size the base&rsquo;s column count and the
+        descent are swept on a seed set of their own; then four other sets are measured. Every phase is
+        timed on one thread (<code>ic price</code>) and converted at one batched addition measured in the
+        same process. Batch rho runs on the same 32 targets, its step priced. Declared and committed
+        before anything ran, with two competing predictions. This page&rsquo;s
+        <code>r<sup>1/6</sup></code>, carried from &sect;19&rsquo;s 6.38&times;, crosses one near
+        2<sup>23</sup>. A phase model pricing the descent per probe predicts a minimum of 2.85&times;
+        near 2<sup>28</sup> and no crossing. Frozen source: <code>research/ic_exponent_20260926/</code>
+        (<code>analysis.json</code> for every figure here).</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>S per target at k = 32. The reference is batch rho on the same 32 targets, priced at the
+        canonical step. Intervals are 95% over four measurement sets. <b>Recipe</b>: the columns, descent
+        summands and points the sweep chose. <b>Work</b>: the phases the model prices, over the same
+        reference &mdash; a stage diagnostic, not a speed. <b>W / C / V</b>: the index-calculus total
+        split into work, constructions and verification.</caption>
+      <thead><tr><th scope="col">Curve</th><th scope="col" class="n">recipe</th>
+        <th scope="col" class="n">S, index calculus</th><th scope="col" class="n">S, batch rho</th>
+        <th scope="col" class="n">ratio</th><th scope="col" class="n">law</th><th scope="col" class="n">model</th>
+        <th scope="col" class="n">work</th><th scope="col" class="n">W / C / V %</th></tr></thead>
+      <tbody>
+        <tr><td><code>K_1/GF(2<sup>19</sup>)</code> &middot; r = 2<sup>18.0</sup></td><td class="n">8 &middot; 2 &middot; 304</td><td class="n">8.118</td><td class="n">0.3271</td><td class="n"><b>24.82&times;</b><br><small>[23.47, 26.21]</small></td><td class="n">0.83&times;</td><td class="n">4.89&times;</td><td class="n">13.76&times;</td><td class="n">55 / 32 / 11</td></tr>
+        <tr><td><code>K_1/GF(2<sup>23</sup>)</code> &middot; r = 2<sup>22.0</sup></td><td class="n">8 &middot; 2 &middot; 368</td><td class="n">2.595</td><td class="n">0.2050</td><td class="n"><b>12.66&times;</b><br><small>[7.85, 18.84]</small></td><td class="n">1.20&times;</td><td class="n">3.42&times;</td><td class="n">6.68&times;</td><td class="n">53 / 38 / 8</td></tr>
+        <tr><td><code>K_1/GF(2<sup>45</sup>)</code> &middot; r = 2<sup>24.8</sup></td><td class="n">8 &middot; 2 &middot; 720</td><td class="n">2.819</td><td class="n">0.1191</td><td class="n"><b>23.67&times;</b><br><small>[21.02, 26.50]</small></td><td class="n">1.18&times;</td><td class="n">3.35&times;</td><td class="n">6.20&times;</td><td class="n">26 / 70 / 3</td></tr>
+        <tr><td><code>K_0/GF(2<sup>37</sup>)</code> &middot; r = 2<sup>27.8</sup></td><td class="n">8 &middot; 2 &middot; 592</td><td class="n">0.861</td><td class="n">0.0922</td><td class="n"><b>9.33&times;</b><br><small>[8.30, 10.42]</small></td><td class="n">1.84&times;</td><td class="n">2.85&times;</td><td class="n">4.58&times;</td><td class="n">49 / 47 / 3</td></tr>
+        <tr><td><code>K_1/GF(2<sup>43</sup>)</code> &middot; r = 2<sup>32.1</sup></td><td class="n">16 &middot; 2 &middot; 1,376</td><td class="n">0.544</td><td class="n">0.0666</td><td class="n"><b>8.16&times;</b><br><small>[7.10, 9.32]</small></td><td class="n">2.81&times;</td><td class="n">2.89&times;</td><td class="n">4.53&times;</td><td class="n">55 / 42 / 2</td></tr>
+        <tr><td><code>K_1/GF(2<sup>47</sup>)</code> &middot; r = 2<sup>36.6</sup></td><td class="n">56 &middot; 3 &middot; 5,264</td><td class="n">0.397</td><td class="n">0.0602</td><td class="n"><b>6.60&times;</b><br><small>[6.00, 7.25]</small></td><td class="n">4.53&times;</td><td class="n">3.56&times;</td><td class="n">3.73&times;</td><td class="n">56 / 42 / 2</td></tr>
+        <tr><td><code>K_0/GF(2<sup>41</sup>)</code> &middot; r = 2<sup>39.0</sup></td><td class="n">80 &middot; 2 &middot; 6,560</td><td class="n">0.324</td><td class="n">0.0666</td><td class="n"><b>4.86&times;</b><br><small>[4.21, 5.55]</small></td><td class="n">6.38&times;</td><td class="n">4.51&times;</td><td class="n">3.73&times;</td><td class="n">77 / 21 / 1</td></tr>
+        <tr><td><code>K_0/GF(2<sup>53</sup>)</code> &middot; r = 2<sup>44.3</sup></td><td class="n">264 &middot; 2 &middot; 27,984</td><td class="n">0.469</td><td class="n">0.0509</td><td class="n"><b>9.21&times;</b><br><small>[6.92, 11.85]</small></td><td class="n">10.30&times;</td><td class="n">6.76&times;</td><td class="n">7.81&times;</td><td class="n">85 / 15 / 0</td></tr>
+        <tr><td><code>K_0/GF(2<sup>61</sup>)</code> &middot; r = 2<sup>47.2</sup></td><td class="n">320 &middot; 2 &middot; 39,040</td><td class="n">0.721</td><td class="n">0.0531</td><td class="n"><b>13.59&times;</b><br><small>[11.95, 15.34]</small></td><td class="n">13.51&times;</td><td class="n">8.68&times;</td><td class="n">12.64&times;</td><td class="n">93 / 7 / 0</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>The controls. The frozen headline (&sect;19.5&rsquo;s closest row,
+        <code>k0n41-least-on-u150</code>) re-run as it stands. It reproduces every frozen count on current
+        main (197 relations, 3,450 trials, 883,200 summands, 1,519,296 stored pairs, 52 descent trials) and
+        is priced like every row above. Beside it are the thread&rsquo;s own n = 41 and n = 53 recipes on
+        the four measurement sets.</caption>
+      <thead><tr><th scope="col">Row</th><th scope="col" class="n">S, index calculus</th>
+        <th scope="col" class="n">S, batch rho</th><th scope="col" class="n">ratio</th><th scope="col">What moved</th></tr></thead>
+      <tbody>
+        <tr><td>Frozen headline, n = 41, 15,744 points</td><td class="n">0.773 <small>was 0.524</small></td><td class="n">0.0617 <small>was 0.0822</small></td><td class="n"><b>12.53&times;</b> <small>was 6.38&times;</small></td><td>Constructions, 3.34M units, never priced. The descent, 748,180 units, was priced at 54. The build, 7.56 units a pair. Rho&rsquo;s step, 2.27 units, was 2.74.</td></tr>
+        <tr><td>The thread&rsquo;s n = 41 recipe, M1&ndash;M4</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">10.93&times; [10.68, 11.16]</td><td>Against the swept recipe&rsquo;s 4.86&times;. On current prices the build is 62% of that base&rsquo;s run.</td></tr>
+        <tr><td>The thread&rsquo;s n = 53 recipe, M1&ndash;M4</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">7.58&times; [5.92, 9.51]</td><td>Indistinguishable from the swept recipe&rsquo;s 9.21&times; [6.92, 11.85].</td></tr>
+      </tbody>
+    </table></div>
+    <div class="legend" style="padding-top:0">
+      <span><b>Declared and graded.</b> Every descent of 1,353 repetitions (43,296 descents) and every one of the 1,792 batch-rho and 352 single-rho targets was verified. No relation was rejected. The counts were identical across repetitions and identical to <code>ic workflow</code>&rsquo;s on all 45 controlled runs.</span>
+      <span><b>No crossing.</b> The least ratio is 4.86&times; [4.21, 5.55] at 2<sup>39</sup>, and the ratio rises on both sides of it. One target alone, against single-target rho on the same targets, reads 22.6&times; at 2<sup>39</sup> and 38.7&ndash;123&times; at every other size (ledger &sect;20.3).</span>
+      <span><b>The law is falsified at the small end.</b> It predicted 0.83&ndash;1.20&times; below 2<sup>25</sup>, where the thread measures 12.7&ndash;24.8&times;, every interval above twice the law. The crossing near 2<sup>23</sup> is not there.</span>
+      <span><b>The model&rsquo;s minimum is not confirmed.</b> It predicted 2.85&times; at 2<sup>27.8</sup>. The thread measures 9.33&times; there, and its minimum is eleven bits higher.</span>
+      <span><b>The top end&rsquo;s exponent is not decided.</b> The declared fit of <code>ratio&middot;&radic;n</code> over the four largest sizes gives <code>r</code><sup>0.137</sup>, 95% interval [&minus;0.10, 0.37]. It contains both the page&rsquo;s 1/6 and the model&rsquo;s 0.141.</span>
+      <span><b>Where the cost goes.</b> The descent costs more per target than batch rho below about 2<sup>37</sup>: 8.9&times; at 2<sup>18</sup>, 1.3&times; at 2<sup>36.6</sup>. It does not amortise, and more targets only lower rho&rsquo;s share. The workflow rebuilds the base&rsquo;s orbit map in big-integer arithmetic for its collectors, coverage and solvers. Those constructions, with the curve&rsquo;s setup, are 7&ndash;70% of S. At the four smallest sizes the best base is the builder&rsquo;s eight-orbit minimum. At the top, a stored pair costs 4.98 units at 2<sup>39</sup> and 9.20 at 2<sup>47.2</sup>, as the table leaves cache.</span>
+      <span><b>Prices on current main.</b> One batched addition is 28.2 ns at n = 41, against 43.8 ns in &sect;19. A canonical rho step is 1.80&ndash;2.30 units, against 2.74&ndash;2.92. A scanned summand is 1.42&ndash;2.62, against the frozen 2.85. A stored pair is 4.8&ndash;9.2.</span>
+      <span><span class="chip">accounting</span> No algorithm changed. The descent is priced at the probes it scans, the constructions are priced at all, and both sides are priced on current main. Against the floor the thread is 11.8&times; at its best, and batch rho about 1.0&times; from 2<sup>36.6</sup> up.</span>
     </div>
   </div>
 
