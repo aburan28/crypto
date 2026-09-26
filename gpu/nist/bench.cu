@@ -63,7 +63,9 @@ int main(int argc,char**argv){
  int threads=argc>1?atoi(argv[1]):128,n=1<<20,iters=128;
  cudaDeviceProp p{};CU(cudaGetDeviceProperties(&p,0));
  printf("GPU %s cc %d.%d SMs=%d regs/SM=%d NIST_PTX=%d\n",p.name,p.major,p.minor,p.multiProcessorCount,p.regsPerMultiprocessor,(int)NIST_PTX);
- bench<Fp256>("P-256",threads,n,iters);
- bench<Fp384>("P-384",threads,n,iters/2);
+ bench<Fp256>("P-256 Montgomery",threads,n,iters);
+ bench<Fp256Sol>("P-256 Solinas",threads,n,iters);
+ bench<Fp384>("P-384 Montgomery",threads,n,iters/2);
+ bench<Fp384Sol>("P-384 Solinas",threads,n,iters/2);
  return 0;
 }
