@@ -150,3 +150,17 @@ stands.
 - **Class: stage diagnostic.** It computes no `S` and no rho ratio, so it
   owes the scoreboard no row, as registered.
 - It says nothing about `n = 131`.
+
+## Addendum, 2026-09-25: the surplus does move `ℓ = 4`
+
+Additive; nothing above is changed. The pre-registered surplus control
+(`research/dreg_surplus_control_20260925/`) measured `(7, 4)`, which is
+`ℓ = 4` at `S = −5`: **7 7 6 7**.
+
+- "Lowering it at fixed `ℓ` never raised the degree", in the Q2 section
+  above, held at `ℓ = 2` and `ℓ = 3`. It **fails at `ℓ = 4`**, which reads
+  6 at `S = −1, +1` and 7 at `S = −5`.
+- The Q2 verdict stands as registered, "rises at ℓ = 5". Its attribution to
+  `ℓ` does not: that study's registered joint reading is **confounded**.
+- The same study's `(11, 5)`, which is `ℓ = 5` at `S = −4`, reads ≥7 on all
+  four draws.

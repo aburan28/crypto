@@ -1,0 +1,1471 @@
+{
+  "cold_ms": null,
+  "online_ms": null,
+  "passed": 35,
+  "promotion_eligible": false,
+  "results": [
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "a6ab78189fcd78617e27ef7705b809eca03073c31aef0ada2da7c2fee3f1ccfc",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-pair_table-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "a6ab78189fcd78617e27ef7705b809eca03073c31aef0ada2da7c2fee3f1ccfc",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-pair_table-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "ae80fe6febb7c72e163603c04ab7c66703d7a3069796d5d0d16a9b386016439d",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-enumerate-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "ae80fe6febb7c72e163603c04ab7c66703d7a3069796d5d0d16a9b386016439d",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-enumerate-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "e94cecf06b8281cc764cb9443e54d98622724a6596b775da9e2e4947f1419111",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-f4-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "e94cecf06b8281cc764cb9443e54d98622724a6596b775da9e2e4947f1419111",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-f4-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "4b0222677801f93daa0080400123f8dbc2cfb288da09fd6fdf918ac8e55d1b1a",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-f5-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "4b0222677801f93daa0080400123f8dbc2cfb288da09fd6fdf918ac8e55d1b1a",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-f5-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "267ff203e480a405c431be7d35bc312660d7222f4b4da9c1929243bff50a89cb",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-inherited_f4-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "267ff203e480a405c431be7d35bc312660d7222f4b4da9c1929243bff50a89cb",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-inherited_f4-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "2ad32d6f97c7dede8678e4d24bd3aac705436cdf2423a2b558933afc66b2260d",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-sat_xor-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "2ad32d6f97c7dede8678e4d24bd3aac705436cdf2423a2b558933afc66b2260d",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-sat_xor-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "9dc18bb71749280cfa4b48e75bafa29df6115bcd81096422cbf723e795b1f9de",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-sat_cnf-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "fresh_rows": 8,
+        "rank": 3,
+        "signed_base_size": 55,
+        "solutions": [
+          "37"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "9dc18bb71749280cfa4b48e75bafa29df6115bcd81096422cbf723e795b1f9de",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a0-sat_cnf-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "identity": 1,
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 2,
+        "promotion_eligible": false,
+        "query_sha256": "b4b09e3f0168baac059716d30c3048551556f192bf5951b0f8b2a5ba28d3ce13",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-pair_table-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "identity": 1,
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 2,
+        "promotion_eligible": false,
+        "query_sha256": "b4b09e3f0168baac059716d30c3048551556f192bf5951b0f8b2a5ba28d3ce13",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-pair_table-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "ee374e35e5dc871687c31a9c73da3deea5b40a1088591c849a71ec5958bca0e3",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-enumerate-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "ee374e35e5dc871687c31a9c73da3deea5b40a1088591c849a71ec5958bca0e3",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-enumerate-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "52ee73552e6955b4014ed387b00b86dfdd0c8fbd9a9f43adc4c5bc0b95633d86",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-f4-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "52ee73552e6955b4014ed387b00b86dfdd0c8fbd9a9f43adc4c5bc0b95633d86",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-f4-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "7374f28739b4bccdef718562b5561eb228bb8882ddbc371256819b67637b0398",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-f5-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "7374f28739b4bccdef718562b5561eb228bb8882ddbc371256819b67637b0398",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-f5-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "ecce4938d715ca7ca8652b89594e869dbc35e06e34868b19d0fe03d6f7c001a3",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-inherited_f4-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "ecce4938d715ca7ca8652b89594e869dbc35e06e34868b19d0fe03d6f7c001a3",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-inherited_f4-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "7e66e9baaacebab22782e7d6e3b44a08dd6aeaf5653da09a4b9fcca795b05f57",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-sat_xor-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "7e66e9baaacebab22782e7d6e3b44a08dd6aeaf5653da09a4b9fcca795b05f57",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-sat_xor-sparse"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "0cb4c686f16404a06baee80e411e0a270ca6d7cf92b738e2ce60eb14f7de45c2",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-sat_cnf-dense"
+    },
+    {
+      "certificate": {
+        "certified_descents": 1,
+        "degenerate_descents": 0,
+        "factor_base_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "fresh_rows": 6,
+        "rank": 2,
+        "signed_base_size": 73,
+        "solutions": [
+          "30"
+        ],
+        "verified_relations": 8,
+        "verified_targets": 1
+      },
+      "expected_complete": true,
+      "inventory": {
+        "duplicate_nonidentity_images": 36,
+        "effective_columns": 2,
+        "geometric_order_sha256": "0842c64175ad76b61a114fe3f24dad2e9d24abc0e84bdf193b5f6e3a11e21c47",
+        "geometric_point_count": 73,
+        "geometric_set_sha256": "199bed85f72cdfb13b2330c106ac845abbb9f70751695624900c43dbe7fd4b10",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 36,
+        "usable_set_sha256": "f9fecd44399dee946525594240d325a14340fe81a9c262f3c7bec3c8f209525a"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 9
+        },
+        "collection_outcomes": {
+          "witness": 8
+        },
+        "collection_queries": 8,
+        "descent_queries": 1,
+        "promotion_eligible": false,
+        "query_sha256": "0cb4c686f16404a06baee80e411e0a270ca6d7cf92b738e2ce60eb14f7de45c2",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "a1-sat_cnf-sparse"
+    },
+    {
+      "certificate": null,
+      "expected_complete": false,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 1
+        },
+        "collection_outcomes": {
+          "witness": 1
+        },
+        "collection_queries": 1,
+        "descent_queries": 0,
+        "promotion_eligible": false,
+        "query_sha256": "8da1543af260b4f6924548341fe976ed7efc087c1dd721a2e3663b0d3046fb68",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "incomplete-pair_table"
+    },
+    {
+      "certificate": null,
+      "expected_complete": false,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 1
+        },
+        "collection_outcomes": {
+          "witness": 1
+        },
+        "collection_queries": 1,
+        "descent_queries": 0,
+        "promotion_eligible": false,
+        "query_sha256": "8da1543af260b4f6924548341fe976ed7efc087c1dd721a2e3663b0d3046fb68",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "incomplete-enumerate"
+    },
+    {
+      "certificate": null,
+      "expected_complete": false,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 1
+        },
+        "collection_outcomes": {
+          "witness": 1
+        },
+        "collection_queries": 1,
+        "descent_queries": 0,
+        "promotion_eligible": false,
+        "query_sha256": "787a49ac2de48bc757405725d2a647e6c442196e7a84c3f2e2c53ad87016c04b",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "incomplete-f4"
+    },
+    {
+      "certificate": null,
+      "expected_complete": false,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 1
+        },
+        "collection_outcomes": {
+          "witness": 1
+        },
+        "collection_queries": 1,
+        "descent_queries": 0,
+        "promotion_eligible": false,
+        "query_sha256": "ab94d235ed0c7dccf0a5e9b10df258cd2097a660a063b149d7d6576e0b6262e8",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "incomplete-f5"
+    },
+    {
+      "certificate": null,
+      "expected_complete": false,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 1
+        },
+        "collection_outcomes": {
+          "witness": 1
+        },
+        "collection_queries": 1,
+        "descent_queries": 0,
+        "promotion_eligible": false,
+        "query_sha256": "f102793a644c6e36b8b80d235eda19b6f79cd235634138cc63eb079d0b574174",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "incomplete-inherited_f4"
+    },
+    {
+      "certificate": null,
+      "expected_complete": false,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 1
+        },
+        "collection_outcomes": {
+          "witness": 1
+        },
+        "collection_queries": 1,
+        "descent_queries": 0,
+        "promotion_eligible": false,
+        "query_sha256": "5a26f5e2dff9135bb93d46c20f0921cad7dd3968be45ec54b408eeb24c81a5c8",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "incomplete-sat_xor"
+    },
+    {
+      "certificate": null,
+      "expected_complete": false,
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 3,
+        "geometric_order_sha256": "72d378a46d5c25d2a9ba60039efa3b6ff9d6a8f36fedd8804a57d811b9379784",
+        "geometric_point_count": 55,
+        "geometric_set_sha256": "ff8ff90d2cdb03165f134d33732629c88dbdc5ae5c965d066b809534fd4ccc0e",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 54,
+        "usable_set_sha256": "92d89a5cd2892e7da2c8a7a2021830923e0ab660a5b6cdf0002b92c745466b86"
+      },
+      "queries": {
+        "all_outcomes": {
+          "witness": 1
+        },
+        "collection_outcomes": {
+          "witness": 1
+        },
+        "collection_queries": 1,
+        "descent_queries": 0,
+        "promotion_eligible": false,
+        "query_sha256": "00bb6b828ddfd111788acb06498cc3cb407e53090d1583e24a403e29fda63ba3",
+        "schema_version": 1,
+        "scope": "query accounting and group replay only"
+      },
+      "status": "PASS",
+      "test": "incomplete-sat_cnf"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "toy query/certificate accounting; no performance comparison",
+  "speedup": null,
+  "tests": 35,
+  "worker_sha256": "6056e85ac20778e6384e8e9e5a344534c30756bd59af0010076114768be603a1"
+}

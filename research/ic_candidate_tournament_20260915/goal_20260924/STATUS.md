@@ -165,3 +165,42 @@ report preserves those counts. The existing exact evaluator remains unchanged,
 and Linux archive replay checks both raw receipts and derived selection. The first-round runner validates those bindings and exclusions before preparing
 fresh targets. Execute the registered diversified pipeline budget after its
 implementation PR passes; do not infer an improvement from these controls.
+
+
+## Generic query admission checkpoint
+
+The [generic query accounting protocol](generic-query-accounting/PROTOCOL.md)
+preserves every attempted collection/descent query, typed frontend outcomes and
+solver counters, plus terminal failed descents. The worker exports these records
+and retains actual attempted matrix solves. Independent group and bounded
+negative-answer replay checks accounting only; complete generic scientific
+admission still needs exact source/base/matrix binding and
+exclusive public-target timing. This is not an improvement round. The incumbent
+remains selected and two rounds remain under the frozen goal protocol.
+
+The [generic supplied-point follow-on](generic-public-inputs/RESULTS.md) separates
+fixture creation from measured jobs and places the outer online interval after
+reusable IC/rho preparation through independent scalar replay. Its 37 final local
+worker controls pass, including seven intended preparation failures with null
+online intervals. Combined legacy phase dumps remain unqualified for scientific
+cost comparison; full generic admission and the remaining two rounds are open.
+
+PR 803 merged at `62ef21ec1e083f197593edbe1309c5ddf60b7789` after all applicable
+checks passed, including Linux integration and strict archived-round replay.
+The [independent query-law controls](generic-query-law/RESULTS.md) now replay
+7,436 pinned Rust RNG/probe values, all 35 archived IC reports, and 47 fresh
+controls (40 complete, seven intentionally incomplete). Wrong seeds, batch
+partitions and collection/descent rules are rejected even when group equations
+remain valid. This is accounting admission, not a new measured improvement round.
+
+PR 805 merged the query-law checks at
+`c7c2922c116b2ec3ca84a2066a8b9c63a782a39d`, with all applicable checks passing.
+The [exclusive generic phase follow-on](generic-exclusive-phases/RESULTS.md)
+now passes two retained local 147-pair panels (126 complete and 21 deliberately
+incomplete pairs per panel). It separates query/PDP/checking/matrix/LA/descent
+work and independently checks native clock closure. Strict sessions reject
+phase changes on another thread. Linux instruction closure is exercised by
+the PR integration checks. Shared-host mode ratios remain too unstable to
+qualify overhead or comparative performance. This accounting work consumes no
+round; exact generic admission and optimized-reference qualification precede
+the remaining two rounds.

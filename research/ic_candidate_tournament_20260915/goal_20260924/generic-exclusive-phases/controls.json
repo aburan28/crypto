@@ -1,0 +1,291 @@
+{
+  "S": null,
+  "accepted_parent": "c7c2922c116b2ec3ca84a2066a8b9c63a782a39d",
+  "classification": "accounting",
+  "clippy": "passed with existing warnings",
+  "cold_ms": null,
+  "complete_pairs_each": 126,
+  "distinct_rust_tests": 82,
+  "files": {
+    ".github/workflows/ic-autolab.yml": {
+      "bytes": 3927,
+      "sha256": "a73e5453d1f556707bb7f3ff493e7f1e33816ea076f51ddda02b3cb8205bdd6b"
+    },
+    "examples/ic_tournament_worker.rs": {
+      "bytes": 29515,
+      "sha256": "65ebabef347074eefaa8bdbb935c84f5d4bc3fe60263fc8df60cc0c8bf521a70"
+    },
+    "research/ic_candidate_tournament_20260915/ci_smoke.py": {
+      "bytes": 15407,
+      "sha256": "03c6ab8f20f5ccc442c7e65caabe1330dbbd0858ea402afcd1bf73475fc387a9"
+    },
+    "research/ic_candidate_tournament_20260915/generic_phases.py": {
+      "bytes": 8020,
+      "sha256": "4f37180ab4141faa98d79f733a96e2a7ad792f37c645932d559f1bb7355ed1b6"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/PROTOCOL.md": {
+      "bytes": 4029,
+      "sha256": "ec8d68c54bfb7fe136729be8642723e65d5132584596c6259a166510efb052e5"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/RESULTS.md": {
+      "bytes": 6149,
+      "sha256": "3490bb3ef2ca867cd2d0ea764861353906d6032f0587edde990e2f4c203bd737"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/build.log": {
+      "bytes": 1736,
+      "sha256": "476dcf96af418ebd3b67aff89ee5bdfdd920ebe749496bc2c150227b2ce9bf97"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/environment.json": {
+      "bytes": 2463,
+      "sha256": "ab0b34fdfbc460cdcbf99afe8904da489d08f3a1546e321eee730dd470c68d7c"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/build.log": {
+      "bytes": 1737,
+      "sha256": "97100527593de8f6196128e12cac960cfdc4bb272ffa19523d30ebb1cf03ca0d"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/environment.json": {
+      "bytes": 2463,
+      "sha256": "76e775b56dd89fc6e3cebac18f23efee3676476d0b8265a376712f61d9626643"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/fixture-n13a0-job.json": {
+      "bytes": 388,
+      "sha256": "a8379ce1ac1be54b99a9357bc9d60ca1d2059c278a2a7c0402f777aec0350855"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/fixture-n13a0.json": {
+      "bytes": 317,
+      "sha256": "08431bb161954148144711c836548e7bee7696cafeee18f8cf9a5cfa97c14b44"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/fixture-n13a0.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/fixture-n9a0-job.json": {
+      "bytes": 330,
+      "sha256": "1cdad438f52e188d130be4b30c04a05950255f4a9427d05663a4cc20dac9d960"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/fixture-n9a0.json": {
+      "bytes": 304,
+      "sha256": "e7068a06e44258593465fd7c827d0ce5fe461ba540b4e7e4346245c19a5174df"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/fixture-n9a0.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/fixture-n9a1-job.json": {
+      "bytes": 330,
+      "sha256": "70f03b67b66ec163dc8872295707e876f29cc5a8dd5e80f4b613dd45b03e5f67"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/fixture-n9a1.json": {
+      "bytes": 305,
+      "sha256": "330b50f4954845cb24988e1b03ae1e5a99c9393e83e78140d5a111a4e0d05c21"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/fixture-n9a1.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/initial-regressions/exclusive.log": {
+      "bytes": 2989,
+      "sha256": "242ddf53191d7eb61bfb99305156dab1a05c6f08e202c8b91aaa1d70e6917dc7"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/initial-regressions/la_accounting.log": {
+      "bytes": 2890,
+      "sha256": "d05781dda6009aa94397e7f8d232eef83e846574ad9a114b71a4caa3b7e0a1ea"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/initial-regressions/query_accounting.log": {
+      "bytes": 2616,
+      "sha256": "72cfa314cf53ba35ccb787064535560e62b32cbc9e33f117236591eebc32ee2d"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/initial-regressions/results.json": {
+      "bytes": 699,
+      "sha256": "9603e79d4d6d21977c908953008463fead54af71153550a5a320c6ef83b51916"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/inputs.json": {
+      "bytes": 24487,
+      "sha256": "b37a70caa8ba619c3c9c30cf918a6ee2931af643dc87ec729c129b5b7fa2619b"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/measured-library-source.rs.gz": {
+      "bytes": 136985,
+      "sha256": "8efe6a35f13c466d0dcde413334a7fbc6c3e8eb46c15ef1862110027402074ef"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/python-tests.log": {
+      "bytes": 22890,
+      "sha256": "fe77c4ac09cd560bf9ed7d8d5223630c08845cc20a2b5efc290fb54f02e0f329"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/regressions/all_three_oracles_answer_every_target_identically.log": {
+      "bytes": 2228,
+      "sha256": "554dc4e8489d0f4f8d991685c22f4875ccfa4e1d980501050f26ac768a59dbdd"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/regressions/clippy.log": {
+      "bytes": 3013,
+      "sha256": "a57d7a0878f288a96e6b5fad368f181716d45c88c9200a226fbd02d2a3edee22"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/regressions/descent.log": {
+      "bytes": 7751,
+      "sha256": "7001219bbcabd6797313425576374f5c9f156959bba378fa47a51d060b9e595b"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/regressions/exclusive.log": {
+      "bytes": 2989,
+      "sha256": "f94377639568e87152413bb57d1c8c2a881134b0442ffc50456cdc281a13231d"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/regressions/la_accounting.log": {
+      "bytes": 2313,
+      "sha256": "6091354a2d815661fe79f9efdccc56d9c25d97fad89716abf4166fb9864dc696"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/regressions/query_accounting.log": {
+      "bytes": 2616,
+      "sha256": "30f6a748a027209c68ff5219f1b4324c139c6e91dbbdbb008e972b6f58e2ac77"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/regressions/results.json": {
+      "bytes": 1392,
+      "sha256": "94cb5c7e3c9f2138213c880a31b7aa55ed4ef9c9bde808ee3b1f1d2e43acf508"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/retained-python-tests.log": {
+      "bytes": 22891,
+      "sha256": "8542a450d34524a155cc0bb52ffc5024a3a100bb88bcda686addce1ee5a26068"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/site-final.log": {
+      "bytes": 5464,
+      "sha256": "053bad2667019261f3fbebe3fc48c20695469783e8b2813d28c718043e67adf3"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/site-tests.log": {
+      "bytes": 5464,
+      "sha256": "3d51f07da0871770e68ab48713c8e975f033c7cae10b425c45b7b69e68211316"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/source-replay.log": {
+      "bytes": 1283,
+      "sha256": "9536286fca7b13803999d1012e22cbe195b860aa6504b06c750ba72ae048a5eb"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/summary.json": {
+      "bytes": 393403,
+      "sha256": "76941c8cda12c8702d629cb38b40cde5b3fd1d6ba0230ee96236f5fc27bcd064"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/worker-controls.log": {
+      "bytes": 3918,
+      "sha256": "6969fbbae7c1ffba6b409a034b0437c82174172f4b1931998edff702d4c88764"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/worker-raw.jsonl": {
+      "bytes": 2748799,
+      "sha256": "533022826f866d8b0c2150d685b9f43f96df4046c3dcc8b3c0dc415932a761cb"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/final/worker-tests.log": {
+      "bytes": 2544,
+      "sha256": "924ed0253625387e748631cf59965885a1582ab2178f8d6cb60d662852c10542"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/fixture-n13a0-job.json": {
+      "bytes": 388,
+      "sha256": "a8379ce1ac1be54b99a9357bc9d60ca1d2059c278a2a7c0402f777aec0350855"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/fixture-n13a0.json": {
+      "bytes": 317,
+      "sha256": "08431bb161954148144711c836548e7bee7696cafeee18f8cf9a5cfa97c14b44"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/fixture-n13a0.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/fixture-n9a0-job.json": {
+      "bytes": 330,
+      "sha256": "1cdad438f52e188d130be4b30c04a05950255f4a9427d05663a4cc20dac9d960"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/fixture-n9a0.json": {
+      "bytes": 304,
+      "sha256": "e7068a06e44258593465fd7c827d0ce5fe461ba540b4e7e4346245c19a5174df"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/fixture-n9a0.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/fixture-n9a1-job.json": {
+      "bytes": 330,
+      "sha256": "70f03b67b66ec163dc8872295707e876f29cc5a8dd5e80f4b613dd45b03e5f67"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/fixture-n9a1.json": {
+      "bytes": 305,
+      "sha256": "330b50f4954845cb24988e1b03ae1e5a99c9393e83e78140d5a111a4e0d05c21"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/fixture-n9a1.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/initial-compile-failure.log": {
+      "bytes": 1370,
+      "sha256": "8ff4c3db2fe772e71a46a5b152bbf6ea8258a48d290a58ad97fd1c4e715be8bd"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/initial-library-source.rs.gz": {
+      "bytes": 136634,
+      "sha256": "fa48aa3d86b35fd77048b8dc3eb80434ef75353b80a5ff1a6a594f743368eced"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/initial-measurement.rs": {
+      "bytes": 15797,
+      "sha256": "4dba299a29730bedc5476ec2711d59a0d8bbc49d67af56702e85e2610f7c3e90"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/initial-protocol.md": {
+      "bytes": 3892,
+      "sha256": "46b9bc8f39cd3888752f9faf432b430e0a1b25a8c64272635e1c2665d17ef5c7"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/initial-worker.rs": {
+      "bytes": 29312,
+      "sha256": "70b2cf3d90a626952ecdaa3508085884289c214782561bd219271ddb940d3dcb"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/inputs.json": {
+      "bytes": 24487,
+      "sha256": "b37a70caa8ba619c3c9c30cf918a6ee2931af643dc87ec729c129b5b7fa2619b"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/python-tests.log": {
+      "bytes": 22540,
+      "sha256": "30c30b5686c6fc6c7b55ddbf1edfe155e85b9a2de93809c4bda7b6640a0e2b90"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/run_controls.py": {
+      "bytes": 9619,
+      "sha256": "10f566144c893788e453e7113e9c33cbab9ad439debcf4e4cfe172b37314efd3"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/summary.json": {
+      "bytes": 393617,
+      "sha256": "fe848bac8d54a5bf1938bdd1762586d365a2c9a8ddc99ef6e9c5706b29ebe922"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/worker-controls.log": {
+      "bytes": 3918,
+      "sha256": "6969fbbae7c1ffba6b409a034b0437c82174172f4b1931998edff702d4c88764"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/worker-raw.jsonl": {
+      "bytes": 2748970,
+      "sha256": "8136bc412fa4e5d17f924f624aaab80dc8a54cc6d1e2b581216bb295c858ec84"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/worker-tests.log": {
+      "bytes": 2165,
+      "sha256": "e598173f77b307c26bfc5ae8447981df5415d9a7016276805cbd468073196683"
+    },
+    "research/ic_candidate_tournament_20260915/test_generic_phases.py": {
+      "bytes": 7529,
+      "sha256": "3cec532073e12e9ad05b0b96e398cbdb4fc5347c9c005678e33ce1302c84969d"
+    },
+    "src/cryptanalysis/ic_measurement.rs": {
+      "bytes": 18105,
+      "sha256": "3c21b762ee098ffb64c1e4ef8bd7ef1a72143a880fae062d350e76688dfeeeb9"
+    },
+    "src/cryptanalysis/koblitz_index_calculus.rs": {
+      "bytes": 579510,
+      "sha256": "22188f4899db8bd4e940aabca878d58710070e4d4ed7b37a5251bffdefd648f3"
+    },
+    "src/cryptanalysis/mod.rs": {
+      "bytes": 13772,
+      "sha256": "f130969cdb4db698ad323630e6f947c2358714a3560661a4a6a8e0f66c997dd6"
+    }
+  },
+  "final_pairs": 147,
+  "initial_pairs": 147,
+  "instructions": null,
+  "intentionally_incomplete_pairs_each": 21,
+  "online_ms": null,
+  "performance_qualified": false,
+  "phase_source_replay_tests": 7,
+  "promotion_eligible": false,
+  "python_passed": 143,
+  "python_platform_skips": 2,
+  "remaining_rounds": 2,
+  "rounds_consumed": 0,
+  "rust_test_executions": 84,
+  "schema_version": 1,
+  "site_tests": 39,
+  "speedup": null
+}

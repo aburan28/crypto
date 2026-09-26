@@ -1,0 +1,46 @@
+2026-09-25T08:20:43Z start XV1-m2-tower-null: --kinds kummer,dickson,isogeny --m 2 --controls tower,null --max-t 9 --planted 2 --random 2 --planted-max-t 7 --budget 900 --ladder-t none
+2026-09-25T08:26:47Z end XV1-m2-tower-null exit 0
+2026-09-25T08:26:47Z start XV2-m3-tower: --kinds kummer,dickson,isogeny --m 3 --controls tower --max-t-m3 4 --planted 2 --random 2 --planted-max-t 3 --budget 900 --ladder-t none
+2026-09-25T08:27:05Z end XV2-m3-tower exit 0
+2026-09-25T08:27:05Z start XV3-m4-tower-random: --kinds kummer,isogeny --m 4 --controls tower --max-t-m4 3 --planted 0 --random 2 --budget 900 --ladder-t none
+2026-09-25T08:27:36Z end XV3-m4-tower-random exit 0
+2026-09-25T08:27:36Z start XV3b-m4-tower-planted-stop64: --kinds kummer,isogeny --m 4 --controls tower --max-t-m4 3 --planted 2 --random 0 --stop-below 64 --budget 900 --ladder-t none
+2026-09-25T08:28:08Z end XV3b-m4-tower-planted-stop64 exit 0
+2026-09-25T08:28:08Z start XV4-ladder: --kinds kummer,isogeny --m none --planted 2 --random 0 --budget 300 --ladder-t 4,6 --ladder-g 1,2,4,8,12
+2026-09-25T08:29:01Z end XV4-ladder exit 0
+2026-09-25T08:29:01Z start XV5-kummer-m2-p32: --p 3221225473 --kinds kummer --m 2 --controls tower --max-t 8 --planted 2 --random 2 --planted-max-t 7 --budget 900 --ladder-t none
+2026-09-25T08:29:08Z end XV5-kummer-m2-p32 exit 0
+2026-09-25T08:29:08Z start K1-kummer-m2-p1: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 2013265921 --kinds kummer --m 2 --controls tower --t-min 6 --max-t 11
+2026-09-25T08:46:49Z end K1-kummer-m2-p1 exit 0
+2026-09-25T08:46:49Z start K1n-kummer-m2-p1-null: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 2013265921 --kinds kummer --m 2 --controls null --t-min 6 --max-t 10
+2026-09-25T08:48:24Z end K1n-kummer-m2-p1-null exit 0
+2026-09-25T08:48:24Z start K0-kummer-m2-p0-N20: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 786433 --kinds kummer --m 2 --controls tower --t-min 10 --max-t 10 --stop-below 8
+2026-09-25T08:49:47Z end K0-kummer-m2-p0-N20 exit 0
+2026-09-25T08:49:47Z start I0-isogeny-m2-p0-N20: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 786433 --kinds isogeny --m 2 --controls tower --t-min 10 --max-t 10 --stop-below 8
+2026-09-25T08:52:00Z end I0-isogeny-m2-p0-N20 exit 0
+2026-09-25T08:52:00Z start M4-kummer-m4-p1: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 2013265921 --kinds kummer --m 4 --controls tower --t-min 2 --max-t-m4 3
+2026-09-25T08:52:14Z end M4-kummer-m4-p1 exit 0
+2026-09-25T08:52:14Z start M3-kummer-m3-p1: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 2013265921 --kinds kummer --m 3 --controls tower --t-min 3 --max-t-m3 5
+2026-09-25T09:02:12Z end M3-kummer-m3-p1 exit 0
+2026-09-25T09:02:12Z start C-I0-isogeny-m2-p0-N20-t10: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 786433 --kinds isogeny --m 2 --controls tower --t-min 10 --max-t 10 --cap 5 --stop-below 8
+2026-09-25T09:03:11Z end C-I0-isogeny-m2-p0-N20-t10 exit 0
+2026-09-25T09:03:11Z start C-K0-kummer-m2-p0-N20-t10: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 786433 --kinds kummer --m 2 --controls tower --t-min 10 --max-t 10 --cap 5 --stop-below 8
+2026-09-25T09:03:38Z end C-K0-kummer-m2-p0-N20-t10 exit 0
+2026-09-25T09:03:38Z start C-K1-kummer-m2-p1-t10: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 2013265921 --kinds kummer --m 2 --controls tower --t-min 10 --max-t 10 --cap 5
+2026-09-25T09:04:05Z end C-K1-kummer-m2-p1-t10 exit 0
+2026-09-25T09:04:05Z start C-K1-kummer-m2-p1-t11: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 2013265921 --kinds kummer --m 2 --controls tower --t-min 11 --max-t 11 --cap 5
+2026-09-25T14:11:53Z the machine restarted during C-K1-kummer-m2-p1-t11 (its partial log: replay/C-K1-kummer-m2-p1-t11.interrupted.log); replay_round2.sh started again, skipping the runs that ended
+2026-09-25T14:11:53Z start C-K1-kummer-m2-p1-t11: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 2013265921 --kinds kummer --m 2 --controls tower --t-min 11 --max-t 11 --cap 5
+2026-09-25T14:12:42Z end C-K1-kummer-m2-p1-t11 exit 0
+2026-09-25T14:12:42Z start C-K1n-kummer-m2-p1-null-t10: --budget 7200 --max-nnz 2000000000 --ladder-t none --planted 0 --random 2 --trace --p 2013265921 --kinds kummer --m 2 --controls null --t-min 10 --max-t 10 --cap 5
+2026-09-25T14:13:19Z end C-K1n-kummer-m2-p1-null-t10 exit 0
+2026-09-25T14:13:19Z start D1-kummer-m4-p1-N12-trace: --p 2013265921 --kinds kummer --controls tower --planted 0 --random 1 --ladder-t none --trace --m 4 --t-min 3 --max-t-m4 3 --budget 600
+2026-09-25T14:13:29Z end D1-kummer-m4-p1-N12-trace exit 0
+2026-09-25T14:13:29Z replay done
+2026-09-25T14:14:14Z start pair_memory.py (note §12.2): baseline sha256 623655a3…, candidate sha256 ae387b05…
+2026-09-25T14:48:38Z end pair_memory.py: pairs agree
+2026-09-25T14:49:00Z start M4b-kummer-m4-p1-N16: --engine tower --p 2013265921 --kinds kummer --m 4 --controls tower --t-min 4 --max-t-m4 4 --planted 0 --random 2 --ladder-t none --budget 14400 --max-nnz 2000000000 --trace
+2026-09-25T16:40:09Z end M4b-kummer-m4-p1-N16 exit 0
+2026-09-25T16:40:09Z start C-M4b-kummer-m4-p1-N16: --engine tower --p 2013265921 --kinds kummer --m 4 --controls tower --t-min 4 --max-t-m4 4 --planted 0 --random 2 --ladder-t none --budget 14400 --max-nnz 2000000000 --trace --cap 6
+2026-09-25T16:40:10Z end C-M4b-kummer-m4-p1-N16 exit 0
+2026-09-25T16:40:10Z round 3 done

@@ -1,10 +1,11 @@
 //! Complete, public-synthetic IC/rho jobs for the candidate tournament.
 //! Uses the production research library; JSON stdin contains no known scalar.
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+use crypto_lib::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::FactorBaseSpec;
 use crypto_lib::cryptanalysis::koblitz_groebner::SolverEngine;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x, DecompositionStrategy,
+    koblitz_signed_frobenius_rho_with_preparation, point_key, points_with_x, DecompositionStrategy,
     FactorBaseLogSolver, IndividualLogSolver, KoblitzCurve, KoblitzIcOptions,
     KoblitzSignedRhoOptions, LinearAlgebra, PairSumTable, RelationCollector, RelationWorkUnit,
 };
@@ -21,6 +22,9 @@ use std::time::Instant;
 /// DUMP_STATS_AT writes the interval then resets counters; collection stays on.
 #[inline(never)]
 fn dump(label: &'static [u8]) {
+    if measurement::enabled() {
+        return;
+    }
     assert_eq!(label.last(), Some(&0));
     #[cfg(target_arch = "x86_64")]
     unsafe {
@@ -40,10 +44,16 @@ struct Job {
     mode: String,
     degree: u32,
     curve_a: u8,
+    #[serde(default)]
     target_seeds: Vec<u64>,
+    #[serde(default)]
+    public_targets: Option<Vec<[String; 2]>>,
     algorithm_seed: u64,
     factor_base: FactorBaseSpec,
     config: Config,
+    /// Opt-in until independent generic scientific admission is complete.
+    #[serde(default)]
+    exclusive_phases: bool,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -94,6 +104,40 @@ fn point(p: &BinaryPoint) -> Value {
     }
 }
 
+// None means no valid-range scalar was available to replay; this is not a
+// successful check and must not claim that scalar replay was performed.
+fn scalar_replay(c: &KoblitzCurve, q: &BinaryPoint, log: Option<&BigUint>) -> Option<bool> {
+    log.filter(|d| *d < &c.subgroup_order)
+        .map(|d| c.mul(c.generator(), d) == *q)
+}
+
+// Strict public coordinates: do not silently reduce or repair supplied inputs.
+fn public_point(c: &KoblitzCurve, encoded: &[String; 2]) -> Result<BinaryPoint, String> {
+    let coordinate = |text: &str| -> Result<F2mElement, String> {
+        if text.is_empty()
+            || !text.bytes().all(|b| b.is_ascii_digit())
+            || (text.len() > 1 && text.starts_with('0'))
+        {
+            return Err("noncanonical public coordinate".into());
+        }
+        let value = text
+            .parse::<BigUint>()
+            .map_err(|_| "invalid public coordinate")?;
+        if value.bits() > u64::from(c.n) {
+            return Err("public coordinate outside field".into());
+        }
+        Ok(F2mElement::from_biguint(&value, c.n))
+    };
+    let q = BinaryPoint::Affine {
+        x: coordinate(&encoded[0])?,
+        y: coordinate(&encoded[1])?,
+    };
+    if !c.curve.is_on_curve(&q) || c.mul(&q, &c.subgroup_order) != BinaryPoint::Infinity {
+        return Err("public point is outside the declared subgroup".into());
+    }
+    Ok(q)
+}
+
 // Same public hash-to-curve domain as ic workflow. No target scalar is created.
 fn target(c: &KoblitzCurve, seed: u64) -> Result<BinaryPoint, String> {
     for counter in 0u64..1_000_000 {
@@ -126,11 +170,37 @@ fn target(c: &KoblitzCurve, seed: u64) -> Result<BinaryPoint, String> {
 }
 
 fn run(job: &Job) -> Result<Value, String> {
+    if !job.exclusive_phases {
+        return run_inner(job);
+    }
+    if job.mode == "fixture" {
+        return Err("exclusive measured phases require a supplied-point job".into());
+    }
+    if rayon::current_num_threads() != 1 {
+        return Err("exclusive phases require one Rayon thread".into());
+    }
+    let session = measurement::Session::begin_strict()?;
+    let mut report = run_inner(job)?;
+    let snapshot = session.finish()?;
+    // The independently defined phase endpoints are authoritative in this
+    // opt-in schema. Preserve the former outer interval as a cross-check.
+    report["outer_online_wall_ns"] = report["online_wall_ns"].take();
+    report["online_wall_ns"] = json!(snapshot.online_wall_ns);
+    report["online_timing_schema"] = json!(2);
+    report["generic_phase_timing"] = json!(snapshot);
+    report["generic_phase_policy"] = json!("exclusive-owner-thread-v1");
+    Ok(report)
+}
+
+fn run_inner(job: &Job) -> Result<Value, String> {
     if !(5..=31).contains(&job.degree) || job.degree.is_multiple_of(2) || job.curve_a > 1 {
         return Err("worker accepts bounded odd-degree Koblitz fixtures (5..31)".into());
     }
-    if job.target_seeds.is_empty() || job.target_seeds.len() > 100 {
-        return Err("target count must be 1..100".into());
+    if job.mode != "fixture" && job.public_targets.as_ref().map(Vec::len) != Some(1) {
+        return Err(
+            "measured jobs require exactly one supplied public point; use fixture mode first"
+                .into(),
+        );
     }
     let cfg = &job.config;
     if !(1..=256).contains(&cfg.rho_parallel_walks)
@@ -150,51 +220,91 @@ fn run(job: &Job) -> Result<Value, String> {
     }
     let start = Instant::now();
     let c = KoblitzCurve::new(job.curve_a, job.degree).ok_or("curve has no usable subgroup")?;
-    let targets = job
-        .target_seeds
-        .iter()
-        .map(|&s| target(&c, s))
-        .collect::<Result<Vec<_>, _>>()?;
+    let targets = match &job.public_targets {
+        Some(encoded) => {
+            if encoded.is_empty()
+                || encoded.len() > 100
+                || (!job.target_seeds.is_empty() && job.target_seeds.len() != encoded.len())
+            {
+                return Err("invalid public-point/seed counts".into());
+            }
+            encoded
+                .iter()
+                .map(|p| public_point(&c, p))
+                .collect::<Result<Vec<_>, _>>()?
+        }
+        None => {
+            if job.mode != "fixture" || job.target_seeds.is_empty() || job.target_seeds.len() > 100
+            {
+                return Err("fixture mode requires 1..100 target seeds".into());
+            }
+            job.target_seeds
+                .iter()
+                .map(|&s| target(&c, s))
+                .collect::<Result<Vec<_>, _>>()?
+        }
+    };
+    let target_seeds: Vec<Option<u64>> = if job.target_seeds.is_empty() {
+        vec![None; targets.len()]
+    } else {
+        job.target_seeds.iter().copied().map(Some).collect()
+    };
     let metadata = json!({
         "degree": c.n, "curve_a": c.a,
         "irreducible": {"degree": c.curve.irreducible.degree, "low_terms": c.curve.irreducible.low_terms},
         "subgroup_order": c.subgroup_order.to_string(), "group_order": c.group_order.to_string(),
         "cofactor": c.cofactor.to_string(), "lambda": c.lambda.to_string(),
         "generator": point(c.generator()), "targets": targets.iter().map(point).collect::<Vec<_>>(),
-        "target_seeds": job.target_seeds, "target_scalar_constructed": false
+        "target_seeds": target_seeds, "target_scalar_constructed": false
     });
     dump(b"curve_and_targets\0");
     if job.mode == "fixture" {
         return Ok(json!({"schema_version":1,"status":"fixture","fixture":metadata}));
     }
     if job.mode == "rho" {
-        let mut solutions = Vec::new();
-        for (i, q) in targets.iter().enumerate() {
-            let options = KoblitzSignedRhoOptions {
-                seed: job.algorithm_seed ^ (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15),
-                max_iterations_per_restart: cfg.max_trials,
-                parallel_walks: cfg.rho_parallel_walks,
-                ..KoblitzSignedRhoOptions::default()
-            };
-            let r = koblitz_signed_frobenius_rho_with_progress(&c, q, &options, &mut |_| {});
-            solutions.push(
-                json!({"index":i,"recovered":r.recovered_log.as_ref().map(ToString::to_string),
-                "verified":r.verified,"iterations":r.iterations,"restarts":r.restarts_attempted,
-                "walk_group_additions":r.charges.walk_group_additions}),
-            );
-        }
+        measurement::mark(Phase::Precompute);
+        let q = &targets[0];
+        let options = KoblitzSignedRhoOptions {
+            seed: job.algorithm_seed,
+            max_iterations_per_restart: cfg.max_trials,
+            parallel_walks: cfg.rho_parallel_walks,
+            ..Default::default()
+        };
+        let mut online_start = None;
+        let mut field_kernel = None;
+        let answer = koblitz_signed_frobenius_rho_with_preparation(
+            &c,
+            q,
+            &options,
+            &mut |fc| {
+                field_kernel = Some(fc.field.kernel_name());
+                measurement::begin_online(Phase::RhoSolve);
+                online_start = Some(Instant::now());
+            },
+            &mut |_| {},
+        )
+        .ok_or("rho has no prepared packed backend")?;
         dump(b"rho_solve\0");
-        let verified = solutions.iter().zip(&targets).all(|(s, q)| {
-            s["recovered"]
-                .as_str()
-                .and_then(|x| x.parse::<BigUint>().ok())
-                .is_some_and(|d| d < c.subgroup_order && c.mul(c.generator(), &d) == *q)
-        });
+        measurement::mark(Phase::RecoveryCheck);
+        let replay = scalar_replay(&c, q, answer.recovered_log.as_ref());
+        let verified = replay == Some(true);
+        let online_ns = online_start
+            .expect("prepared rho boundary")
+            .elapsed()
+            .as_nanos();
+        measurement::end_online();
         dump(b"final_verification\0");
+        let solutions = vec![
+            json!({"index":0,"recovered":answer.recovered_log.as_ref().map(ToString::to_string),
+            "verified":answer.verified,"iterations":answer.iterations,"restarts":answer.restarts_attempted,
+            "walk_group_additions":answer.charges.walk_group_additions,"effective_walks":answer.parallel_walks}),
+        ];
         return Ok(
-            json!({"schema_version":1,"mode":"rho","status":if verified{"complete"}else{"incomplete"},
+            json!({"schema_version":1,"mode":"rho","status":if verified {"complete"} else {"incomplete"},
             "fixture":metadata,"solutions":solutions,"automorphism_order":2*c.n,
-            "elapsed_seconds":start.elapsed().as_secs_f64()}),
+            "elapsed_seconds":start.elapsed().as_secs_f64(),"online_timing_schema":1,
+            "online_wall_ns":online_ns,"target_input":"supplied_public_point",
+            "reusable_setup_excluded":true,"scalar_replay_included":replay.is_some(),"field_kernel":field_kernel}),
         );
     }
     if job.mode != "ic" {
@@ -272,7 +382,9 @@ fn run(job: &Job) -> Result<Value, String> {
             .clone()
             .unwrap_or_else(|| job.factor_base.clone())
     };
+    measurement::mark(Phase::FactorBase);
     let fb = effective_base.materialize(&c)?;
+    measurement::mark(Phase::Precompute);
     let pair = if strategy == DecompositionStrategy::PairTable {
         Some(PairSumTable::build(&c, &fb).ok_or("pair table unavailable")?)
     } else {
@@ -283,13 +395,14 @@ fn run(job: &Job) -> Result<Value, String> {
     let mut system = FactorBaseLogSolver::new(&c, &fb, &opts).ok_or("no projected columns")?;
     let expected_columns = system.columns();
     dump(b"factor_base_and_tables\0");
+    measurement::mark(Phase::Setup);
     let mut relations = Vec::new();
     let mut trials = 0;
-    let mut solve_attempts = 0;
+    let mut collection_reports = Vec::new();
     let mut outcome = None;
     while trials < cfg.max_trials && outcome.is_none() {
         let count = cfg.batch_trials.min(cfg.max_trials - trials);
-        let (rows, _) = collector.collect(RelationWorkUnit {
+        let (rows, collection_report) = collector.collect_observed(RelationWorkUnit {
             seed: job.algorithm_seed,
             start: trials,
             count,
@@ -297,52 +410,68 @@ fn run(job: &Job) -> Result<Value, String> {
         trials += count;
         dump(b"collection_and_decomposition\0");
         system.push(&rows);
-        solve_attempts += 1;
+        collection_reports.push(collection_report);
         outcome = system.try_solve();
         relations.extend(rows);
         dump(b"verify_filter_and_linear_algebra\0");
     }
     let base = fb.points.iter().map(point).collect::<Vec<_>>();
-    let report = system.report();
-    let Some((table, solved)) = outcome else {
+    let mut report = system.report();
+    report.trials = trials as usize;
+    let Some((table, mut solved)) = outcome else {
         return Ok(
             json!({"schema_version":1,"mode":"ic","status":"incomplete","fixture":metadata,
             "trials":trials,"columns":expected_columns,"relations":relations,
-            "factor_base":base,"rejected_relations":report.rejected_relations}),
+            "factor_base":base,"rejected_relations":report.rejected_relations,
+            "query_schema_version":1,"collection_reports":collection_reports,
+            "log_table_report":report,"solve_attempts":report.solve_attempts,
+            "effective_factor_base":effective_base,"summands":cfg.summands,
+            "online_timing_schema":1,"online_wall_ns":null,"target_input":"supplied_public_point",
+            "reusable_setup_excluded":true,"scalar_replay_included":false}),
         );
     };
+    solved.trials = trials as usize;
+    measurement::mark(Phase::RelationCheck);
     if solved.rejected_relations != 0 || !table.verify(&c) {
-        return Err("invalid relation or factor-base log certificate".into());
+        return Ok(
+            json!({"schema_version":1,"mode":"ic","status":"invalid_certificate",
+            "fixture":metadata,"factor_base":base,"relations":relations,"trials":trials,
+            "query_schema_version":1,"collection_reports":collection_reports,
+            "log_table_report":solved,"reason":"invalid relation or factor-base log certificate"}),
+        );
     }
+    measurement::mark(Phase::Setup);
     let columns = table
         .columns
         .iter()
         .map(|(p, l)| json!({"point":point(p),"log":l.to_string()}))
         .collect::<Vec<_>>();
     dump(b"log_certification\0");
+    measurement::mark(Phase::Precompute);
     let solver = IndividualLogSolver::new(&c, &fb, &table, &opts, pair.as_ref())
         .ok_or("descent setup failed")?;
-    let mut solutions = Vec::new();
-    for (i, q) in targets.iter().enumerate() {
-        let answer = solver.solve(q);
-        solutions.push(
-            json!({"index":i,"recovered":answer.as_ref().map(|(d,_)|d.to_string()),
-            "trials":answer.as_ref().map(|(_,r)|r.trials),
-            "relation":answer.as_ref().and_then(|(_,r)|r.relation.as_ref())}),
-        );
-    }
+    measurement::begin_online(Phase::TargetQuery);
+    let online_start = Instant::now();
+    let q = &targets[0];
+    let answer = solver.solve_observed(q);
     dump(b"individual_log\0");
-    let verified = solutions.iter().zip(&targets).all(|(s, q)| {
-        s["recovered"]
-            .as_str()
-            .and_then(|x| x.parse::<BigUint>().ok())
-            .is_some_and(|d| d < c.subgroup_order && c.mul(c.generator(), &d) == *q)
-    });
+    measurement::mark(Phase::RecoveryCheck);
+    let replay = scalar_replay(&c, q, answer.log.as_ref());
+    let verified = replay == Some(true);
+    let online_ns = online_start.elapsed().as_nanos();
+    measurement::end_online();
     dump(b"final_verification\0");
+    let solutions = vec![
+        json!({"index":0,"recovered":answer.log.as_ref().map(ToString::to_string),
+        "trials":answer.trials,"relation":answer.relation,"attempts":answer.attempts}),
+    ];
     Ok(
         json!({"schema_version":1,"mode":"ic","status":if verified{"complete"}else{"incomplete"},
         "fixture":metadata,"solutions":solutions,"factor_base":base,"relations":relations,
-        "column_logs":columns,"columns":expected_columns,"trials":trials,"solve_attempts":solve_attempts,
+        "column_logs":columns,"columns":expected_columns,"trials":trials,"solve_attempts":solved.solve_attempts,
+        "query_schema_version":1,"collection_reports":collection_reports,"log_table_report":solved,
+        "online_timing_schema":1,"online_wall_ns":online_ns,"target_input":"supplied_public_point",
+        "reusable_setup_excluded":true,"scalar_replay_included":replay.is_some(),
         "accepted_relations":solved.relations,"duplicate_relations":solved.duplicate_relations,
         "rejected_relations":solved.rejected_relations,"summands":cfg.summands,
         "effective_factor_base":effective_base,
@@ -362,7 +491,9 @@ fn main() {
         serde_json::from_str::<Job>(&input)
             .map_err(|e| e.to_string())
             .and_then(|job| {
-                dump(b"startup_and_input\0");
+                if !job.exclusive_phases {
+                    dump(b"startup_and_input\0");
+                }
                 run(&job)
             })
     };
@@ -372,5 +503,239 @@ fn main() {
     println!("{}", report);
     if !success {
         std::process::exit(2);
+    }
+}
+
+#[cfg(test)]
+mod public_input_tests {
+    use super::*;
+
+    fn job(mode: &str) -> Job {
+        serde_json::from_value(json!({"mode":mode,"degree":9,"curve_a":0,
+            "target_seeds":[2026092555],"algorithm_seed":2026092555,
+            "factor_base":{"kind":"factor","index":0},
+            "config":{"solver":"pair_table","linear_algebra":"dense","summands":2,
+                "batch_trials":8,"max_trials":256}}))
+        .unwrap()
+    }
+
+    fn supplied(mode: &str) -> Job {
+        let fixture = run(&job("fixture")).unwrap();
+        let mut measured = job(mode);
+        measured.public_targets =
+            Some(serde_json::from_value(fixture["fixture"]["targets"].clone()).unwrap());
+        measured
+    }
+
+    #[test]
+    fn public_input_rejects_seed_only_batch_and_noncanonical_points() {
+        for mode in ["ic", "rho"] {
+            assert!(run(&job(mode))
+                .unwrap_err()
+                .contains("exactly one supplied"));
+            let original = supplied(mode);
+            let mut batch = original.clone();
+            let point = batch.public_targets.as_ref().unwrap()[0].clone();
+            batch.public_targets.as_mut().unwrap().push(point);
+            assert!(run(&batch).unwrap_err().contains("exactly one supplied"));
+            for bad in ["", "00", "01", "+1", "-1", " 1", "512"] {
+                let mut changed = original.clone();
+                changed.public_targets.as_mut().unwrap()[0][0] = bad.into();
+                assert!(run(&changed).is_err(), "accepted {bad:?}");
+            }
+            let mut changed = original.clone();
+            changed.public_targets = Some(vec![["0".into(), "0".into()]]); // off curve
+            assert!(run(&changed)
+                .unwrap_err()
+                .contains("outside the declared subgroup"));
+            changed.public_targets = Some(vec![["0".into(), "1".into()]]); // order-two point
+            assert!(run(&changed)
+                .unwrap_err()
+                .contains("outside the declared subgroup"));
+        }
+    }
+
+    #[test]
+    fn public_input_seeds_are_provenance_and_online_interval_includes_replay() {
+        for mode in ["ic", "rho"] {
+            let original = supplied(mode);
+            let first = run(&original).unwrap();
+            assert_eq!(first["status"], "complete");
+            let online = first["online_wall_ns"].as_u64().unwrap();
+            assert!(online > 0);
+            assert!(online as f64 <= first["elapsed_seconds"].as_f64().unwrap() * 1e9);
+            assert_eq!(first["target_input"], "supplied_public_point");
+            assert_eq!(first["reusable_setup_excluded"], true);
+            assert_eq!(first["scalar_replay_included"], true);
+            if mode == "rho" {
+                assert!(matches!(
+                    first["field_kernel"].as_str(),
+                    Some("portable" | "pclmulqdq" | "pmull")
+                ));
+            }
+            for seeds in [Vec::new(), vec![1]] {
+                let mut changed = original.clone();
+                changed.target_seeds = seeds;
+                let after = run(&changed).unwrap();
+                assert_eq!(after["fixture"]["targets"], first["fixture"]["targets"]);
+                assert_eq!(after["solutions"], first["solutions"]);
+            }
+        }
+    }
+
+    #[test]
+    fn public_input_absent_or_out_of_range_scalar_does_not_claim_replay() {
+        let c = KoblitzCurve::new(0, 9).unwrap();
+        let q = c.generator();
+        assert_eq!(scalar_replay(&c, q, None), None);
+        assert_eq!(scalar_replay(&c, q, Some(&c.subgroup_order)), None);
+        assert_eq!(scalar_replay(&c, q, Some(&BigUint::from(1u32))), Some(true));
+        assert_eq!(
+            scalar_replay(&c, q, Some(&BigUint::from(2u32))),
+            Some(false)
+        );
+    }
+
+    #[test]
+    fn public_input_failed_preparation_has_no_online_interval() {
+        let mut job = supplied("ic");
+        job.config.max_trials = 1;
+        job.config.batch_trials = 1;
+        let report = run(&job).unwrap();
+        assert_eq!(report["status"], "incomplete");
+        assert_eq!(report["trials"], 1);
+        assert!(report["online_wall_ns"].is_null());
+        assert_eq!(report["scalar_replay_included"], false);
+        assert_eq!(
+            report["collection_reports"][0]["attempts"]
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
+    }
+
+    fn assert_phase_closure(report: &Value) {
+        assert_eq!(report["online_timing_schema"], 2);
+        let snapshot = &report["generic_phase_timing"];
+        let sum = |map: &Value| {
+            map.as_object()
+                .unwrap()
+                .values()
+                .filter_map(Value::as_u64)
+                .sum::<u64>()
+        };
+        assert_eq!(
+            sum(&snapshot["phases_ns"]),
+            snapshot["observed_wall_ns"].as_u64().unwrap()
+        );
+        assert_eq!(report["online_wall_ns"], snapshot["online_wall_ns"]);
+        if let Some(online) = snapshot["online_wall_ns"].as_u64() {
+            assert_eq!(sum(&snapshot["online_phases_ns"]), online);
+            assert!(online > 0 && online < snapshot["observed_wall_ns"].as_u64().unwrap());
+        } else {
+            assert!(snapshot["online_phases_ns"]
+                .as_object()
+                .unwrap()
+                .values()
+                .all(Value::is_null));
+        }
+        assert!(!measurement::enabled());
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
+    fn exclusive_worker_preserves_all_backend_queries_and_certificates() {
+        for backend in [
+            "pair_table",
+            "enumerate",
+            "f4",
+            "f5",
+            "inherited_f4",
+            "sat_xor",
+            "sat_cnf",
+        ] {
+            for la in ["dense", "sparse"] {
+                let mut job = supplied("ic");
+                job.config.solver = backend.into();
+                job.config.linear_algebra = la.into();
+                let original = run(&job).unwrap();
+                job.exclusive_phases = true;
+                let traced = run(&job).unwrap();
+                assert_eq!(traced["status"], "complete", "{backend}/{la}");
+                for key in [
+                    "fixture",
+                    "factor_base",
+                    "relations",
+                    "solutions",
+                    "column_logs",
+                    "columns",
+                    "trials",
+                    "solve_attempts",
+                    "accepted_relations",
+                    "duplicate_relations",
+                ] {
+                    assert_eq!(traced[key], original[key], "{backend}/{la}/{key}");
+                }
+                for (a, b) in traced["collection_reports"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .zip(original["collection_reports"].as_array().unwrap())
+                {
+                    assert_eq!(a["attempts"], b["attempts"]);
+                }
+                for phase in [
+                    "setup",
+                    "factor_base",
+                    "precompute",
+                    "queries",
+                    "pdp",
+                    "relation_check",
+                    "matrix_build",
+                    "relation_la",
+                    "target_query",
+                    "target_pdp",
+                    "target_relation_check",
+                    "target_descent",
+                    "recovery_check",
+                ] {
+                    assert!(
+                        traced["generic_phase_timing"]["phases_ns"][phase]
+                            .as_u64()
+                            .is_some(),
+                        "missing {backend}/{la}/{phase}"
+                    );
+                }
+                assert_phase_closure(&traced);
+            }
+        }
+        let mut job = supplied("rho");
+        let original = run(&job).unwrap();
+        job.exclusive_phases = true;
+        let traced = run(&job).unwrap();
+        assert_eq!(traced["solutions"], original["solutions"]);
+        assert!(traced["generic_phase_timing"]["phases_ns"]["rho_solve"]
+            .as_u64()
+            .is_some());
+        assert!(traced["generic_phase_timing"]["phases_ns"]["relation_la"].is_null());
+        assert_phase_closure(&traced);
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
+    fn exclusive_worker_keeps_failed_preparation_unknown_and_drops_errors() {
+        let mut job = supplied("ic");
+        job.exclusive_phases = true;
+        job.config.batch_trials = 1;
+        job.config.max_trials = 1;
+        let report = run(&job).unwrap();
+        assert_eq!(report["status"], "incomplete");
+        assert!(report["online_wall_ns"].is_null());
+        assert!(report["generic_phase_timing"]["phases_ns"]["relation_la"].is_null());
+        assert_phase_closure(&report);
+        job.public_targets = Some(vec![["512".into(), "1".into()]]);
+        assert!(run(&job).is_err());
+        assert!(!measurement::enabled());
     }
 }

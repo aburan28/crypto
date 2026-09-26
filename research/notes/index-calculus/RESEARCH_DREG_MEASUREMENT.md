@@ -525,6 +525,48 @@ That is scoped to `m = 3` and `n ≤ 13`, and it says nothing about `n = 131`.
 My predictions were "tracks ℓ" for Q1 and 6 for Q2. Both failed, and
 `RESULTS.md` records both.
 
+## Result 6: the surplus control — Result 5's `ℓ = 5` rise is confounded
+
+`research/dreg_surplus_control_20260925/` holds everything. It was
+pre-registered before any cell ran, with the grid's system, sampling and
+frozen binary.
+
+| `S` | `ℓ = 3` | `ℓ = 4` | `ℓ = 5` |
+|--:|---|---|---|
+| −5 | 5 5 5 5 | **7 7 6 7** | ≥7 ≥7 ≥7 ≥7 |
+| −4 | 6 6 6 6 | **6 7 6 7** | **≥7 ≥7 ≥7 ≥7** |
+| −2 | 6 6 6 6 | | not measured |
+| −1 | | 6 6 6 6 | |
+| 0 | 6 6 6 6 | | not measured |
+| +1 | | 6 6 6 6 | |
+
+Bold cells are new. The others are Results 4 and 5.
+
+- **Q3: rises at S = −5.** `(7, 4)` reads 7 on three of four draws, where
+  `ℓ = 4` reads 6 at `S = −1, +1`.
+  - Result 5's "lowering the surplus at fixed `ℓ` never raised the degree"
+    held at `ℓ ≤ 3` and fails at `ℓ = 4`.
+  - My prediction was "no rise".
+- **Q4: replicates.** `(11, 5)` at `S = −4` is ≥7 on all four draws.
+- **Joint reading, as registered: confounded.** Result 5's `ℓ = 5` rise
+  cannot be credited to `ℓ` alone. At `ℓ = 4`, five equations short is
+  already enough for 7.
+- **Descriptively, the degree rises with `ℓ` down each column where three
+  rungs are measured:**
+  - at `S = −5`: 5, 7, ≥7;
+  - at `S = −4`: 6, 6 or 7 (6 7 6 7), ≥7.
+
+  That is growth at fixed surplus, the ladder's registered hypothesis, seen
+  at the surpluses where it is affordable.
+- **At `S ≥ −2`, where index calculus works, every measured cell reads 6.**
+  `ℓ = 5` is unmeasured there, so the scaling question stays open in the
+  regime that matters.
+
+**Engineering check.** `dreg_ladder` built from `main` at `cc08d001`
+reproduces all 299 of Result 5's rows exactly. It is not faster: it took
+1.3–1.4× the frozen binary's time on the small cells. It does not bring
+`(13, 5)` within reach.
+
 ## Reproducing
 
 ```sh
@@ -591,6 +633,13 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
 - **Run the `(7, 4)` surplus control** for Result 5's Q2: `ℓ = 4` at
   `S = −5`, which takes seconds.  It decides whether `(10, 5)`'s ≥7 belongs
   to `ℓ` or to the six equations it lacks.  Pre-register it first.
+  **Done:** Result 6, confounded.  It did not take seconds: its degree-7
+  draws take 35 min to 2 h.
+- **`ℓ = 5` at `S ≥ −2` is now the whole open question.**  It is the
+  ladder's `(13, 5)` or `(15, 5)`, at 28 or 30 unknowns.  Neither the frozen
+  binary nor current `main` reaches it on the four-core container, so it
+  needs either a large machine or a faster refutation path than sparse
+  elimination.
 - **Match the surplus, not the unknown count, when pairing cells.**  The
   `n = 9` versus `n = 15` comparison proposed above is confounded a third
   way: those cells carry surplus `n − mℓ` of `−9` and `+3`, opposite signs

@@ -512,7 +512,7 @@ impl Default for SearchOptions {
 }
 
 /// What the search cost and found.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SearchStats {
     /// Enumerated assignments swept: `2^k`.
     pub points: u64,

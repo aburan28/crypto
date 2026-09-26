@@ -14,6 +14,8 @@ import tempfile
 import time
 import unittest
 
+import merge
+import protocol
 import rollout
 from worker import (Worker, campaignPointerMoved, frozenCampaignMoved)
 
@@ -178,16 +180,51 @@ class MaxIters(unittest.TestCase):
         self.assertTrue(rollout.maxItersReasons(campaign(maxIters=0), 1 << 32))
         self.assertTrue(rollout.maxItersReasons(campaign(), 1 << 32))
 
-    def test_strict_campaign_refused(self):
-        live = campaign(maxIters=1 << 30, storageProtocol="ecc2k-seed-orbit-v1")
-        reasons = rollout.maxItersReasons(live, 1 << 32)
-        self.assertTrue(any("campaign id" in r for r in reasons))
+    def test_strict_campaign_keeps_its_id(self):
+        # The id binds the guard the campaign was made with; the first raise
+        # records it as contractMaxIters, and later raises leave it alone.
+        live = campaign(maxIters=1 << 30, storageProtocol=protocol.PROTOCOL)
+        self.assertEqual(rollout.maxItersReasons(live, 1 << 32), [])
+        once = rollout.setMaxIters(live, 1 << 32)
+        twice = rollout.setMaxIters(once, 1 << 34)
+        self.assertEqual((once["contractMaxIters"], once["maxIters"]), (1 << 30, 1 << 32))
+        self.assertEqual((twice["contractMaxIters"], twice["maxIters"]), (1 << 30, 1 << 34))
+        ids = {protocol.campaignContract(c)["id"] for c in (live, once, twice)}
+        self.assertEqual(len(ids), 1)
+        # A legacy campaign gets no contractMaxIters: it has no id to keep.
+        self.assertNotIn("contractMaxIters", rollout.setMaxIters(campaign(maxIters=1 << 30), 1 << 32))
+
+    def test_strict_contract_refuses_a_guard_below_its_own(self):
+        live = campaign(maxIters=1 << 30, storageProtocol=protocol.PROTOCOL)
+        with self.assertRaisesRegex(ValueError, "below the campaign's guard"):
+            protocol.campaignContract(dict(live, maxIters=1 << 29, contractMaxIters=1 << 30))
+        with self.assertRaisesRegex(ValueError, "no guard"):
+            protocol.campaignContract(dict(live, maxIters=1 << 32, contractMaxIters=0))
+        # Moving maxIters by hand, without contractMaxIters, is still a new id.
+        self.assertNotEqual(protocol.campaignContract(dict(live, maxIters=1 << 32))["id"],
+                            protocol.campaignContract(live)["id"])
 
     def test_out_of_range_refused(self):
         live = campaign(maxIters=1 << 30)
         for bad in (0, -1, rollout.MAX_ITERS_LIMIT + 1, "4294967296", 2.0 ** 32):
             self.assertTrue(rollout.maxItersReasons(live, bad), bad)
         self.assertEqual(rollout.maxItersReasons(live, rollout.MAX_ITERS_LIMIT), [])
+
+    def test_cli_strict(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            camp = os.path.join(tmp, "campaign.json")
+            live = campaign(maxIters=1 << 30, storageProtocol=protocol.PROTOCOL)
+            json.dump(live, open(camp, "w"))
+            r = subprocess.run(["python3", str(HERE / "rollout.py"), "max-iters",
+                                "--campaign", camp, "--value", str(1 << 32)],
+                               capture_output=True, text=True, cwd=tmp)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertEqual(json.loads(r.stdout)["campaignId"], protocol.campaignContract(live)["id"])
+            self.assertEqual(json.load(open(camp)),
+                             dict(live, maxIters=1 << 32, contractMaxIters=1 << 30))
+        finally:
+            shutil.rmtree(tmp)
 
     def test_cli(self):
         tmp = tempfile.mkdtemp()
@@ -208,6 +245,30 @@ class MaxIters(unittest.TestCase):
             self.assertEqual(open(camp).read(), before)
         finally:
             shutil.rmtree(tmp)
+
+
+class MergeBinding(unittest.TestCase):
+    """A merge directory survives a raised guard and nothing else."""
+
+    def binding(self, *extra, **fields):
+        b = {"campaignId": "c" * 64, "curve": 131, "dpWeight": 32,
+             "clientArgs": ["--dp-weight", "32"] + list(extra)}
+        b.update(fields)
+        return b
+
+    def test_raise_accepted(self):
+        old = self.binding("--max-iters", str(1 << 30))
+        self.assertTrue(merge.bindingCompatible(old, old))
+        self.assertTrue(merge.bindingCompatible(old, self.binding("--max-iters", str(1 << 32))))
+
+    def test_everything_else_refused(self):
+        old = self.binding("--max-iters", str(1 << 30))
+        for new in (self.binding("--max-iters", str(1 << 29)),     # lower
+                    self.binding(),                                 # guard dropped
+                    self.binding("--max-iters", str(1 << 32), dpWeight=34),
+                    self.binding("--max-iters", str(1 << 32), campaignId="d" * 64)):
+            self.assertFalse(merge.bindingCompatible(old, new), new)
+        self.assertFalse(merge.bindingCompatible(self.binding(), old))   # guard appears
 
 
 class Adoption(unittest.TestCase):
@@ -354,6 +415,23 @@ class WorkerReload(unittest.TestCase):
         self.w.reloadClient()
         cmd = self.w.clientCommand(0)
         self.assertEqual(cmd[cmd.index("--max-iters") + 1], str(1 << 32))
+
+    def test_strict_raise_keeps_the_bound_directory(self):
+        # A strict worker binds its work directory to the campaign contract.
+        # rollout.py max-iters keeps that binding; the same edit by hand
+        # (maxIters without contractMaxIters) is a different campaign.
+        live = campaign(maxIters=1 << 30, storageProtocol=protocol.PROTOCOL)
+        self._put("campaign.json", live)
+        self.w.loadConfig(verifyBinary=False)
+        bound = self.w.contract["id"]
+        self._put("campaign.json", rollout.setMaxIters(live, 1 << 32))
+        self.w.loadConfig(verifyBinary=False)
+        self.assertEqual(self.w.contract["id"], bound)
+        cmd = self.w.clientCommand(0)
+        self.assertEqual(cmd[cmd.index("--max-iters") + 1], str(1 << 32))
+        self._put("campaign.json", dict(live, maxIters=1 << 34))
+        with self.assertRaisesRegex(ValueError, "different campaign"):
+            self.w.loadConfig(verifyBinary=False)
 
     def test_local_key_does_not_fetch(self):
         self.w.cfg = campaign(binaryKey="local")

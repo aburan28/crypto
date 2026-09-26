@@ -705,9 +705,13 @@ worse than none:
     pilot's bounded-degree conjecture;
   - at `m = 3`, to 7 at `N = 15`.
 
-  Whether the growth is linear or slower is open. So is `m = 4` past
-  `N = 12`, the regime that decides the oracle. It ran out of memory at
-  `N = 16`, where a diagnostic gives only `D ≥ 7`. No oracle is built.
+  Round 3 (§12) changed only how the engine stores its basis. The new
+  build reproduces round 2 exactly at 0.51–0.69 of its peak memory, and it
+  finishes `m = 4`, the regime that decides the oracle, at `N = 16`:
+  `D = 7`, as at `N = 12`. One level without a rise closes nothing.
+  Whether the growth is linear or slower is still open, at every `m`, and
+  `m = 4` at `N = 20` is beyond the machine that ran these (the width grew
+  8 times from `N = 12` to 16). No oracle is built.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
