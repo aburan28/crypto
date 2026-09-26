@@ -596,6 +596,37 @@ reproduces all 299 of Result 5's rows exactly. It is not faster: it took
 1.3–1.4× the frozen binary's time on the small cells. It does not bring
 `(13, 5)` within reach.
 
+## Result 7: the ladder's primary pair — grows at fixed surplus
+
+With the dense finish, a `(13, 5)` draw takes 31–34 minutes where the
+sparse-only path had not finished one in 4.5 hours. The four registered
+draws are all **≥7**: the degree-6 Macaulay matrix contains no `1`.
+
+| pair at `S = −2` | small | large | registered verdict |
+|---|---|---|---|
+| primary | `(7, 3)`, 16 unknowns: 6 6 6 6 | `(13, 5)`, 28 unknowns: ≥7 ≥7 ≥7 ≥7 | **grows** |
+
+- **Result 4's registered verdict, re-scored with no other change: "grows
+  at fixed surplus".**
+  - The primary pair grows, and so do both other testable pairs.
+  - `(15, 5)`, at `S = 0`, is still running.
+- **This pair answers Result 4's confound.**
+  - It has `ℓ ≥ 3` at both ends, so the growth is not an `ℓ = 2` floor.
+  - It holds one surplus, so Result 6's surplus effect does not enter.
+  - Result 5's `ℓ = 5` rise at `(10, 5)` was confounded with the equation
+    count. This one is not.
+- **The prediction was "grows", and it held.**
+- **Scope.**
+  - The `(13, 5)` values are lower bounds, so the size of the growth is
+    unknown.
+  - At `S = −2` the measured rungs are `ℓ = 3` (6) and `ℓ = 5` (≥7). No
+    `ℓ = 4` cell sits at that surplus. The nearest ones, at `S = −1` and
+    `+1`, read 6, which puts the step between `ℓ = 4` and `ℓ = 5` on this
+    evidence.
+  - That placement is a reading across neighbouring surpluses, not a
+    registered comparison.
+  - `m = 3`, `n ≤ 13`. Nothing about `n = 131` follows at this scale.
+
 ## Reproducing
 
 ```sh
@@ -664,7 +695,8 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
   to `ℓ` or to the six equations it lacks.  Pre-register it first.
   **Done:** Result 6, confounded.  It did not take seconds: its degree-7
   draws take 35 min to 2 h.
-- **`ℓ = 5` at `S ≥ −2` is now the whole open question.**  It is the
+- **`ℓ = 5` at `S ≥ −2` was the whole open question.** **Answered at `S = −2`** (Result 7): `(13, 5)` is ≥7 on all four draws. `(15, 5)`, at `S = 0`, is running on the dense-finish path.
+- *Superseded note:* **`ℓ = 5` at `S ≥ −2` is now the whole open question.**  It is the
   ladder's `(13, 5)` or `(15, 5)`, at 28 or 30 unknowns.  Neither the frozen
   binary nor current `main` reaches it on the four-core container, so it
   needs either a large machine or a faster refutation path than sparse
