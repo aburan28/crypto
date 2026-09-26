@@ -39,6 +39,9 @@ def sources() -> dict[str, Path]:
         "independent_rank": ORBIT / "cold_batch_rank.py",
         "old_target_generator": SHARED / "generate_targets.py",
         "resource_measure": PARENT / "run_panel.py",
+        "archive_sealer": PARENT / "archive.py",
+        "archive_verifier": HERE / "verify_archive.py",
+        "workflow": REPO / ".github/workflows/n53-target-cyclic-rank.yml",
     }
 
 
@@ -84,7 +87,15 @@ def preflight(*, require_release: bool = False) -> dict:
     assert HEX40.fullmatch(frozen["parent_pr_815_head"])
     subprocess.run(["git", "merge-base", "--is-ancestor", frozen["parent_pr_815_head"], "HEAD"],
                    cwd=REPO, check=True)
-    assert HEX40.fullmatch(frozen["frozen_main_head"])
+    base_main = frozen["frozen_main_head"]
+    assert HEX40.fullmatch(base_main)
+    subprocess.run(["git", "merge-base", "--is-ancestor", base_main, "HEAD"],
+                   cwd=REPO, check=True)
+    release_main = frozen["release_main_head"]
+    if release_main is not None:
+        assert HEX40.fullmatch(release_main)
+        subprocess.run(["git", "merge-base", "--is-ancestor", base_main, release_main],
+                       cwd=REPO, check=True)
     if require_release:
         expected = os.environ.get("KIC_ROTATION_EXPECTED_HEAD", "")
         actual = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()

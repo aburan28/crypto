@@ -56,6 +56,12 @@ def sha(path: Path) -> str:
 def replay_arm(root: Path, name: str, base: str, policy: str, scalars: list[int],
                points: list[tuple[int, int]], verifier, rank_module) -> dict:
     raw_path = root / name / "producer.stdout.jsonl"
+    receipt = json.loads((root / name / "resource_receipt.json").read_text())
+    manifest = json.loads((root / name / "manifest.json").read_text())
+    assert receipt["rayon_num_threads"] == 1
+    assert manifest["environment"]["KIC_ORBIT_REGULAR_SCAN_POLICY"] == policy
+    assert manifest["environment"]["KIC_ORBIT_INCLUDE_BASE_HEADER"] == "1"
+    assert manifest["environment"]["KIC_ALGEBRA_ENCODING"] == "orbit_factorized"
     raw = json.loads(raw_path.read_text())
     assert raw["n"] == 53 and raw["a"] == 0
     assert raw["pair_table_entries"] == raw["pair_selector_variables"] == 0
@@ -180,6 +186,12 @@ def run(out: Path):
     assert by_name["native_lex"]["base_arrays_sha256"] == by_name["native_cyclic"]["base_arrays_sha256"]
     assert by_name["certified_lex"]["base_arrays_sha256"] == by_name["certified_cyclic"]["base_arrays_sha256"]
     assert by_name["native_lex"]["base_arrays_sha256"] != by_name["certified_lex"]["base_arrays_sha256"]
+    certified_fixture = json.loads((out / "certified_base.jsonl").read_text())
+    for name in ("certified_lex", "certified_cyclic"):
+        header = by_name[name]["base_header"]
+        for key in ("factor_base_point_coordinates", "factor_base_point_labels",
+                    "factor_base_representatives"):
+            assert header[key] == certified_fixture[key], (name, key)
     for row in rows:
         del row["base_header"]
     report = {

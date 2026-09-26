@@ -67,6 +67,11 @@ def run(out: Path):
         "github_run_id": os.getenv("GITHUB_RUN_ID"),
         "github_run_attempt": os.getenv("GITHUB_RUN_ATTEMPT"),
         "stage_receipts": {},
+        "rayon_num_threads": 1,
+        "process_group_rss_cap_bytes": MAX_RSS,
+        "arm_wall_cap_s": ARM_S,
+        "audit_wall_cap_s": AUDIT_S,
+        "global_wall_cap_s": GLOBAL_S,
         "attack_speed_crossover": None,
         "common_operation_unit": None,
     }
@@ -117,6 +122,13 @@ def run(out: Path):
             env["KIC_FACTOR_BASE_JSONL"] = str(certified)
             inputs["certified_base"] = certified
         receipt = measure(executable, env, out / name, "producer", seconds, inputs)
+        # The shared wait4 helper records KIC_* vars, so persist the one
+        # non-KIC thread control in its exact per-child resource receipt too.
+        assert env["RAYON_NUM_THREADS"] == "1"
+        receipt["rayon_num_threads"] = int(env["RAYON_NUM_THREADS"])
+        (out / name / "resource_receipt.json").write_text(
+            json.dumps(receipt, indent=2, sort_keys=True) + "\n"
+        )
         panel["stage_receipts"][name] = receipt
         save()
         if not complete(receipt):
