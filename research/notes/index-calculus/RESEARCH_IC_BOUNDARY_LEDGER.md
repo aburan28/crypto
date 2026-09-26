@@ -4416,6 +4416,140 @@ the reference's step all date from that commit.  It is not a price of
 current main.  Re-pricing there means re-running both sides, which is
 not done here.
 
+## 20. The thread's exponent against batch rho, every phase priced on current main
+
+§19 re-read the collection thread's figures against the reference they
+should have had, batch rho at the same `k = 32`, on the commit those
+figures were frozen at.  This round measures the thread afresh on
+current `main`, at nine sizes from `r = 2^18` to `2^47.2`, and asks the
+question the page's `r^{1/6}` sentence answers only by derivation: how
+does the thread's cost per target scale against batch rho, and does it
+cross it anywhere?
+
+Two things §19 left standing make this more than a re-run.
+
+- **§19's prices are older than `main`** (§19.8).  The canonical step,
+  the stored pair and the scan all cost less there, on both sides of the
+  ratio, and none has been re-priced.
+- **The descent was priced per trial.**  The frozen ledger prices it
+  as trials times the `1.19` units of one walked probe.  For 32 targets
+  at the headline that is 46 to 52 trials, or 54 to 62 units
+  (`koblitz-collection-aim-20260922.json`: the holdout arm's total sits
+  7 units below the main arm's for 6 fewer trials).  An `m = 3` descent
+  trial is not one probe.  It is a full scan of the base (`PairSumTable::decompose_fast`
+  with `m = 3`, in blocks of 1,024, stopping at the first witness).  Its
+  cost per target is the probes it scans, about `2r/|F|²`, and that
+  cost does not amortise over `k`.  At the headline it is a few percent,
+  but it grows as `r` falls, and it decides the small end.
+
+### 20.1 Declared before anything below ran
+
+The protocol is `research/ic_exponent_20260926/PROTOCOL.md` (v1).  It
+was committed before the pricer existed.  The only computation made
+first is `predict.py`, which reads frozen files that predate the protocol
+and writes `prediction.json`.  In brief:
+
+- **Boundaries.**
+  - The floor per target at `k = 32` is `L(32)·√(π/4n)`, with
+    `L(32) = 0.19869`.
+  - The reference is batch rho at `k = 32`, run on the index-calculus
+    run's own 32 targets in the same process.  Its counted operations
+    are priced at a canonical step: one batched addition plus the table
+    canonicalisation, measured against the same unit in the same process.
+  - Bailey's step is a model column.
+  - A cold figure is derived secondarily, against single-target rho.
+- **Sizes:** `K_1/GF(2^19)`, `K_1/GF(2^23)`, `K_1/GF(2^45)`,
+  `K_0/GF(2^37)`, `K_1/GF(2^43)`, `K_1/GF(2^47)`, `K_0/GF(2^41)`,
+  `K_0/GF(2^53)` and `K_0/GF(2^61)`, at `log₂ r` = 18.0, 22.0, 24.8,
+  27.8, 32.1, 36.6, 39.0, 44.3 and 47.2.
+- **Recipe.**  Fixed at every size:
+  - the thread's `m = 3` pair-table collection, aimed at the
+    least-mentioned columns, units until determined;
+  - a window of `|F|/32`, and units of about a sixteenth of the run;
+  - 32 targets.
+
+  Swept: the column count on a geometric grid around the model's
+  optimum, and the descent's summands (2 or 3).  The sweep runs on a seed
+  set of its own, and the choice is fixed before four measurement sets
+  (`M1`–`M4`) run.
+- **Accounting.**  Every index-calculus phase is timed on one thread, in
+  the workflow's order, and divided by one batched addition measured in
+  the same process around each repetition.  The phases are setup,
+  selection, build, collection, verification, linear algebra, descent
+  setup, descent and final verification.  Every native count is kept
+  beside its time.  Three repetitions per set (fifteen under 50 ms) give
+  the A/A spread, and the figure is their median.
+- **Controls.**
+  1. The pricer's counts equal `ic workflow`'s on every measurement run.
+  2. The frozen headline (`k0n41-least-on-u150`) re-runs as it stands,
+     is checked against its frozen counts and is re-priced.
+  3. The thread's own `n = 41` and `n = 53` recipes are re-priced as
+     diagnostic rows.
+
+**Two predictions,** in `prediction.json`:
+
+| curve | `log₂ r` | law | model |
+|:--|--:|--:|--:|
+| `K_1/GF(2^19)` | 18.0 | 0.83 | 4.89 |
+| `K_1/GF(2^23)` | 22.0 | 1.20 | 3.42 |
+| `K_1/GF(2^45)` | 24.8 | 1.18 | 3.35 |
+| `K_0/GF(2^37)` | 27.8 | 1.84 | **2.85** |
+| `K_1/GF(2^43)` | 32.1 | 2.81 | 2.89 |
+| `K_1/GF(2^47)` | 36.6 | 4.53 | 3.56 |
+| `K_0/GF(2^41)` | 39.0 | 6.38 | 4.51 |
+| `K_0/GF(2^53)` | 44.3 | 10.3 | 6.76 |
+| `K_0/GF(2^61)` | 47.2 | 13.5 | 8.68 |
+
+- **The law.**  The page's `r^{1/6}`, carried as
+  `r^{1/6} n^{−1/2}` from §19.5's `6.38×` at `2^39`.  It predicts a
+  crossing near `r = 2^23`.
+- **The model.**  The same shared phases at frozen prices, plus the
+  descent priced per probe.  It predicts a minimum of `2.85×` near
+  `2^28` and no crossing.  Over the four largest sizes its local exponent
+  is `0.141`, where the law's is `1/6`, both taken on `ratio·√n`.
+
+**Targets:**
+
+1. **Correct.**  Every target of every run is verified on both sides,
+   with no rejected relation and identical counts across repetitions.
+2. **Controls.**  Control 1 holds on every run.  The frozen headline's
+   counts are reproduced, or each difference is explained.
+3. **Exponent.**  Fit `β` of `ln(ratio·√n)` on `ln r` over the four
+   largest sizes, with a 95% interval.  The law's `1/6` and the model's
+   `0.141` are each read as consistent or falsified by that interval.
+4. **Small end.**
+   - The law is falsified there if the ratio's interval at each of the
+     three smallest sizes lies above twice its prediction.
+   - The model's minimum is confirmed if the least measured ratio falls
+     at `K_0/GF(2^37)` or a neighbour, within a factor of two of `2.85`.
+5. **Crossing.**  A size whose interval lies wholly below one is claimed
+   as a crossing only after two fresh seed sets repeat it.
+
+**Inadmissible:**
+
+- choosing the recipe on a measurement set, or tuning the window, unit
+  or cap rules per size;
+- changing `k`;
+- dropping a phase, a run or a repetition;
+- multi-threaded time;
+- pricing rho's step at the implemented single-inversion walk;
+- the batch formula where the batch was measured;
+- reusing a base, table or log database;
+- quoting the first repetition's time as the figure.
+
+**Abandon or stop:**
+
+- a failed verification stops that size until diagnosed;
+- a Control 1 mismatch means the pricer is wrong;
+- a repetition spread above `1.25` doubles the repetitions once.
+
+**Host and class.**  The host manifest and noise controls follow
+`AGENTS.md` §10: one thread, `taskset`, load recorded, A/A spread from
+the repetitions.  One x86-64 cloud container is the only hardware class
+covered.
+
+**Class: accounting.**  No algorithm changes.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

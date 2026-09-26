@@ -1,0 +1,348 @@
+{
+ "what_this_is": "Ledger \u00a720's declared prediction, computed from frozen constants before any \u00a720 measurement.",
+ "k": 32,
+ "batch_law_k32": 0.19869350749593379,
+ "constants": {
+  "scan_units_per_summand": {
+   "value": 2.85,
+   "source": "docs/ic/runs/koblitz-collection-aim-20260922.json conversions_measured.scan_adds_per_summand.by_base_then_window['15744']['256']"
+  },
+  "summands_per_relation_times_F2_over_r": {
+   "value": 2.0214020864868765,
+   "source": "same run, arm aimed_at_least_mentioned: 883,200 summands scanned for 197 relations at |F| = 15,744, r = 549,756,390,943"
+  },
+  "relations_over_counting_floor": {
+   "value": 1.0260416666666667,
+   "source": "same arm: 197 relations for 192 columns"
+  },
+  "build_units_per_stored_pair": {
+   "value": 6.14,
+   "source": "ledger \u00a719.4, n = 41, |F| = 15,744, at commit 3e8dd352"
+  },
+  "select_units_per_point": {
+   "value": 37.3,
+   "source": "docs/ic/runs/koblitz-select-packed-20260922.json measurements.selection_at_the_ledger_width.after_adds_per_point"
+  },
+  "descent_units_per_probe_m3": {
+   "value": 2.67,
+   "source": "docs/ic/runs/koblitz-collection-aim-20260922.json scan_adds_per_summand '15744' 'full' (the descent's m = 3 trial is a full scan)"
+  },
+  "descent_units_per_probe_m2": {
+   "value": 1.19,
+   "source": "docs/ic/runs/koblitz-collection-aim-20260922.json conversions_measured.descent_probe_adds (one walked probe)"
+  },
+  "rho_step_units": {
+   "value": 2.83,
+   "source": "ledger \u00a719.4 canonical step, 2.74 / 2.83 / 2.92 at n = 41 / 53 / 61; the middle value"
+  },
+  "m3_block": {
+   "value": 1024,
+   "source": "PairSumTable::witnesses_fast_inner, BLOCK"
+  },
+  "m2_round": {
+   "value": 64,
+   "source": "IndividualLogSolver::solve_by_walking, WALKS"
+  },
+  "anchor_ratio": {
+   "value": 6.38,
+   "source": "ledger \u00a719.5 headline, both corrections, canonical step: 6.38x batch rho at k = 32, n = 41"
+  }
+ },
+ "model": {
+  "S_ic": "[collect + build + select] / (k sqrt r) + descent_per_target / sqrt r, minimised over |F| = 2n x columns (columns >= 2) and descent summands in {2, 3}",
+  "collect": "relations_over_counting_floor x |F|/2n x mu x scan_units_per_summand, mu = summands_per_relation_times_F2_over_r x r / |F|^2",
+  "build": "(|F|^2 / 4n + |F|) x build_units_per_stored_pair",
+  "select": "|F| x select_units_per_point",
+  "descent_per_target": "g / (1 - exp(-g / mu)) probes, g = min(1024, |F|) for m = 3 and 64 for m = 2, times that descent's units per probe",
+  "S_batch_rho": "batch_law(32) x sqrt(pi / 4n) x rho_step_units",
+  "not_modelled": "linear algebra (0.06% of the frozen headline), verification, setup"
+ },
+ "law": {
+  "ratio": "anchor_ratio x (r / 2^39.0)^(1/6) x (n / 41)^(-1/2)",
+  "crossing_log2_r_at_n41": 22.96
+ },
+ "model_minimum": {
+  "log2_r": 27.78,
+  "ratio": 2.85
+ },
+ "model_local_exponent_top_four_n_corrected": 0.141,
+ "rows": [
+  {
+   "curve": "K_1/GF(2^19)",
+   "a": 1,
+   "n": 19,
+   "r": 262543,
+   "log2_r": 18.0,
+   "model_optimum": {
+    "columns": 2,
+    "points": 76,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.5589,
+   "model_S_batch_rho": 0.1143,
+   "model_ratio": 4.89,
+   "model_phase_shares": {
+    "collect": 0.059,
+    "build": 0.102,
+    "select": 0.309,
+    "descent": 0.53
+   },
+   "law_ratio": 0.83,
+   "sweep_grid_columns": [
+    2,
+    3,
+    4,
+    6,
+    8
+   ]
+  },
+  {
+   "curve": "K_1/GF(2^23)",
+   "a": 1,
+   "n": 23,
+   "r": 4196903,
+   "log2_r": 22.0,
+   "model_optimum": {
+    "columns": 5,
+    "points": 230,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.355,
+   "model_S_batch_rho": 0.1039,
+   "model_ratio": 3.42,
+   "model_phase_shares": {
+    "collect": 0.101,
+    "build": 0.212,
+    "select": 0.369,
+    "descent": 0.318
+   },
+   "law_ratio": 1.2,
+   "sweep_grid_columns": [
+    2,
+    4,
+    5,
+    7,
+    10,
+    14,
+    20
+   ]
+  },
+  {
+   "curve": "K_1/GF(2^45)",
+   "a": 1,
+   "n": 45,
+   "r": 29264761,
+   "log2_r": 24.8,
+   "model_optimum": {
+    "columns": 5,
+    "points": 450,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.2491,
+   "model_S_batch_rho": 0.0743,
+   "model_ratio": 3.35,
+   "model_phase_shares": {
+    "collect": 0.099,
+    "build": 0.224,
+    "select": 0.389,
+    "descent": 0.287
+   },
+   "law_ratio": 1.18,
+   "sweep_grid_columns": [
+    2,
+    4,
+    5,
+    7,
+    10,
+    14,
+    20
+   ]
+  },
+  {
+   "curve": "K_0/GF(2^37)",
+   "a": 0,
+   "n": 37,
+   "r": 230603167,
+   "log2_r": 27.78,
+   "model_optimum": {
+    "columns": 10,
+    "points": 740,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.2334,
+   "model_S_batch_rho": 0.0819,
+   "model_ratio": 2.85,
+   "model_phase_shares": {
+    "collect": 0.219,
+    "build": 0.24,
+    "select": 0.243,
+    "descent": 0.297
+   },
+   "law_ratio": 1.84,
+   "sweep_grid_columns": [
+    5,
+    7,
+    10,
+    14,
+    20,
+    28,
+    40
+   ]
+  },
+  {
+   "curve": "K_1/GF(2^43)",
+   "a": 1,
+   "n": 43,
+   "r": 4644189029,
+   "log2_r": 32.11,
+   "model_optimum": {
+    "columns": 23,
+    "points": 1978,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.2199,
+   "model_S_batch_rho": 0.076,
+   "model_ratio": 2.89,
+   "model_phase_shares": {
+    "collect": 0.337,
+    "build": 0.317,
+    "select": 0.154,
+    "descent": 0.193
+   },
+   "law_ratio": 2.81,
+   "sweep_grid_columns": [
+    12,
+    16,
+    23,
+    33,
+    46,
+    65,
+    92
+   ]
+  },
+  {
+   "curve": "K_1/GF(2^47)",
+   "a": 1,
+   "n": 47,
+   "r": 106781081677,
+   "log2_r": 36.64,
+   "model_optimum": {
+    "columns": 55,
+    "points": 5170,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.2587,
+   "model_S_batch_rho": 0.0727,
+   "model_ratio": 3.56,
+   "model_phase_shares": {
+    "collect": 0.48,
+    "build": 0.334,
+    "select": 0.071,
+    "descent": 0.114
+   },
+   "law_ratio": 4.53,
+   "sweep_grid_columns": [
+    28,
+    39,
+    55,
+    78,
+    110,
+    156,
+    220
+   ]
+  },
+  {
+   "curve": "K_0/GF(2^41)",
+   "a": 0,
+   "n": 41,
+   "r": 549756390943,
+   "log2_r": 39.0,
+   "model_optimum": {
+    "columns": 104,
+    "points": 8528,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.3508,
+   "model_S_batch_rho": 0.0778,
+   "model_ratio": 4.51,
+   "model_phase_shares": {
+    "collect": 0.558,
+    "build": 0.333,
+    "select": 0.038,
+    "descent": 0.07
+   },
+   "law_ratio": 6.38,
+   "sweep_grid_columns": [
+    52,
+    74,
+    104,
+    147,
+    208,
+    294,
+    416
+   ]
+  },
+  {
+   "curve": "K_0/GF(2^53)",
+   "a": 0,
+   "n": 53,
+   "r": 21044858204113,
+   "log2_r": 44.26,
+   "model_optimum": {
+    "columns": 263,
+    "points": 27878,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.4625,
+   "model_S_batch_rho": 0.0685,
+   "model_ratio": 6.76,
+   "model_phase_shares": {
+    "collect": 0.62,
+    "build": 0.334,
+    "select": 0.015,
+    "descent": 0.031
+   },
+   "law_ratio": 10.3,
+   "sweep_grid_columns": [
+    132,
+    186,
+    263,
+    372,
+    526,
+    744,
+    1052
+   ]
+  },
+  {
+   "curve": "K_0/GF(2^61)",
+   "a": 0,
+   "n": 61,
+   "r": 162888033982417,
+   "log2_r": 47.21,
+   "model_optimum": {
+    "columns": 448,
+    "points": 54656,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.5537,
+   "model_S_batch_rho": 0.0638,
+   "model_ratio": 8.68,
+   "model_phase_shares": {
+    "collect": 0.639,
+    "build": 0.334,
+    "select": 0.009,
+    "descent": 0.019
+   },
+   "law_ratio": 13.51,
+   "sweep_grid_columns": [
+    224,
+    317,
+    448,
+    634,
+    896,
+    1267,
+    1792
+   ]
+  }
+ ]
+}
