@@ -47,9 +47,9 @@ template<class F> AP jac_to_ref(const njac<F>&P,const cpp_int&p){
 template<class F> naff<F> aff_mont(const AP&A){return {F::from_canonical(raw<F>(A.x)),F::from_canonical(raw<F>(A.y))};}
 template<class F> void point_test(const char*name,const char*ps,const char*xs,const char*ys){
  cpp_int p(ps),a=p-3;AP G{cpp_int(xs),cpp_int(ys),false};auto gm=aff_mont<F>(G);
- njac<F> J{gm.x,gm.y,F::one()};auto D=n_double<F>(J);AP want2=addref(G,G,p),got2=jac_to_ref<F>(D,p);
+ njac<F> J{gm.x,gm.y,F::one()};auto D=n_double<F>(J);AP want2=addref(G,G,p,a),got2=jac_to_ref<F>(D,p);
  CHECK(got2.x==want2.x&&got2.y==want2.y,name);
- auto T=n_madd<F>(D,gm);AP want3=addref(want2,G,p),got3=jac_to_ref<F>(T,p);
+ auto T=n_madd<F>(D,gm);AP want3=addref(want2,G,p,a),got3=jac_to_ref<F>(T,p);
  CHECK(got3.x==want3.x&&got3.y==want3.y,name);
  std::cout<<name<<": Jacobian double + mixed add passed\n";
 }
