@@ -62,6 +62,19 @@ and Linux integration workflow `36215166278` subsequently passed the 69 controls
 and existing native/profile panel, validating the setup correction. The run-key
 fix requires a further CI pass on its own commit.
 
+The corrected head `a9f12793` passed Linux integration `36216884613`, candidate
+controls `36216884670` and sealed evidence replay `36216884742`. Its downloaded
+CI exports contain 53 unique control-run keys and 53 distinct integration keys
+(42 native and 11 profiler), with 106 unique keys in their union. Site validation
+`36216884626` was cancelled before creating any jobs on both attempts: PR checks
+shared the publication concurrency group. The [CI scheduling correction](site-ci-concurrency.json)
+gives PRs separate groups while retaining the existing serialized publication
+group and all jobs/triggers/permissions. GitHub's default concurrency queue can
+replace pending runs even with `cancel-in-progress: false`. YAML parsing passes;
+local actionlint reports the identical pre-existing schedule-frequency warning
+before and after the change. The changed CI configuration must pass on its own
+head; none of these validation runs is a new improvement round.
+
 The final build has source-manifest SHA-256
 `215f4c7fa338b1053481563a717c867f1b75b25d936eb3b8cafa7fd2af31e134`
 and executable SHA-256
