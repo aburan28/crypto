@@ -1,0 +1,30 @@
+name: Rust all targets compile
+# Every other Rust workflow here names the bin, test or example it cares about
+# and filters on the paths that feed it. That is the right shape for a
+# measurement, and it is why main went four days unbuildable: #348 added a
+# field to KoblitzIcOptions, two examples construct it exhaustively, and
+# nothing in the matrix compiled those two examples on that PR -- their own
+# workflow filters on their own paths, which #348 did not touch. This job
+# exists to own no measurement at all, only the claim that the workspace
+# compiles, so a field added in src is checked against every caller in the
+# tree. It runs on any Rust change and takes the cargo cache with it.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '**/*.rs'
+      - 'Cargo.toml'
+      - '.github/workflows/rust-all-targets.yml'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      # Warnings stay out of the gate: this job answers "does it compile",
+      # and the examples carry dead code on purpose.
+      - run: RUSTFLAGS=-Awarnings cargo check --workspace --all-targets
