@@ -23,7 +23,8 @@ Allowed to move: PACKED_CLMAD and the other ALU / product-pipe knobs,
 plus the pointer fields including kernelProtocol / kernelVersion.
 
 max-iters is separate from a rollout: it raises campaign.json maxIters and
-touches nothing else (maxItersReasons says when it refuses).
+touches nothing else, except that a strict campaign records the guard its id
+was made with as contractMaxIters (maxItersReasons says when it refuses).
 
 No AWS imports. rollout.sh fetches objects and calls check / apply / adoption
 / max-iters.
@@ -260,9 +261,11 @@ def campaignPointerMoved(current, nxt):
 # seed, the walk and dpWeight, and a checkpoint does not record the guard, so
 # raising it keeps every point and every checkpoint.  Workers take the new
 # value when their client next restarts (restartHours, or a rollout) and
-# re-read campaign.json.  Lowering it would cut trails already under way, and
-# under storageProtocol the value is hashed into the campaign id, so there a
-# raise is a new namespace rather than an edit (WALK-CONSTANT.md section 11.4).
+# re-read campaign.json.  Lowering it would cut trails already under way.
+# Under storageProtocol the campaign id binds the guard the campaign was
+# created with: the first raise records it as contractMaxIters, so the id,
+# the slots and the manifests stay what they were (protocol.campaignContract;
+# WALK-CONSTANT.md section 11.4).
 GUARD_PERIOD = 4096           # include/kernel.h ECC_GUARD_PERIOD
 MAX_ITERS_LIMIT = (1 << 64) - GUARD_PERIOD   # src/main.cu refuses anything above
 
@@ -281,15 +284,18 @@ def maxItersReasons(campaign, value):
     elif type(value) is int and value <= current:
         reasons.append("maxIters %d -> %d is not a raise; only a raise keeps trails already "
                        "under way" % (current, value))
-    if campaign.get("storageProtocol"):
-        reasons.append("storageProtocol=%s hashes maxIters into the campaign id; a raise there "
-                       "is a new campaign namespace, not an edit" % campaign["storageProtocol"])
     return reasons
 
 
 def setMaxIters(campaign, value):
-    """The campaign with maxIters replaced and every other field as it was."""
+    """The campaign with maxIters replaced and every other field as it was.
+
+    A strict campaign also keeps, as contractMaxIters, the guard its id was
+    made with, the first time it is raised.
+    """
     out = dict(campaign)
+    if campaign.get("storageProtocol") and "contractMaxIters" not in out:
+        out["contractMaxIters"] = campaign["maxIters"]
     out["maxIters"] = value
     return out
 
@@ -357,10 +363,18 @@ def _cmdMaxIters(args):
     report = {"ok": not reasons, "reasons": reasons, "from": live.get("maxIters"), "to": args.value}
     if not reasons:
         out = setMaxIters(live, args.value)
-        if {k: v for k, v in out.items() if k != "maxIters"} != \
-                {k: v for k, v in live.items() if k != "maxIters"}:
+        guardFields = ("maxIters", "contractMaxIters")
+        if {k: v for k, v in out.items() if k not in guardFields} != \
+                {k: v for k, v in live.items() if k not in guardFields}:
             print("setMaxIters touched another field", file=sys.stderr)
             return 1
+        if live.get("storageProtocol"):
+            from protocol import campaignContract   # no AWS imports there either
+            before, after = campaignContract(live)["id"], campaignContract(out)["id"]
+            if before != after:
+                print("raising maxIters would move the campaign id", file=sys.stderr)
+                return 1
+            report["campaignId"] = after
         with open(args.campaign, "w") as fh:
             json.dump(out, fh, indent=1, sort_keys=True)
             fh.write("\n")
