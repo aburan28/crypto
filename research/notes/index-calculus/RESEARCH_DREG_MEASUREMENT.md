@@ -446,6 +446,35 @@ anything in the table above.
 The single-cell caveat on Result 2 is unchanged.  What has changed is
 that the experiment which would lift it is now schedulable.
 
+### Dense finish: another 10× on the draws that cost (engineering)
+
+`refute_profile` breaks one degree's structured elimination down by column
+degree band. On an `(8, 4)` degree-6 draw (60k × 58k), the sparse merge is
+cheap only in the leading band. Below it, the surviving rows are thousands
+of entries long:
+
+| band | row additions | words written | time |
+|--:|--:|--:|--:|
+| degree 6 | 2.4M | 2.3G | 6.4 s |
+| degree 5 | 11.8M | 28.7G | 75.1 s |
+| degree 4 | 5.2M | 5.0G | 17.0 s |
+| degrees 3, 2 | 1.6M | 0.26G | 1.3 s |
+
+`eliminate_high_columns_dense_finish` keeps the sparse pass for the leading
+band. It then packs the survivors as bit rows and hands them to the dense
+echelon kernel. The switch is `KIC_SPARSE_DENSE_FINISH=1`, and it is off by
+default.
+
+- **Same row space, so the same refutation and pinned variables.** This is
+  tested, and it is identity-checked on 376 committed rows: 0 mismatches,
+  including degree-7 refutations and a `≥7` bound.
+- **Speed on the measured draws:** 23,586 s became 2,271 s.
+  - `(8, 4)` at degree 6: 91 s to 13 s.
+  - `(7, 4)` at degree 7: 2,068 s to 271 s.
+  - `(10, 5)` at degree 6: 1,640 s to 324 s.
+- **Class: engineering.** It changes the cost of measuring, never a degree.
+  The evidence is `research/dreg_fixed_surplus_20260923/runs/identity-check-dense/`.
+
 ## Result 4: the ladder at fixed surplus, inconclusive as far as it ran
 
 `research/dreg_fixed_surplus_20260923/` holds everything: a pre-registered
