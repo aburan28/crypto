@@ -814,7 +814,7 @@ independent, which overstates the uncertainty of the correlated ones.
   less per solve than σ.
 - **Before it is chosen,** that paired measurement is required: v2 table
   kernel against the σ kernel, alternating, in one session on one card, as
-  §6's rows are.
+  §6's rows are.  §11.5 declares it and its decision rule.
 
 ### 11.2 Classification
 
@@ -851,7 +851,7 @@ None is an advance: no row moves the ratio to the floor below one.
   the table walk under v2 is a new walk identity.  No table-walk point
   exists, so nothing forks.
 - Switching needs three things, in order:
-  1. the paired rate above;
+  1. the paired rate above (§11.5);
   2. the owner's decision;
   3. the switch made early, since the walk is part of a corpus's collision
      identity: points from the σ walk never collide with the table walk's.
@@ -924,3 +924,98 @@ already collecting loses nothing.
   discarded, 15.6% of the steps so far.  Those trails were restarted, and
   re-walking their seeds costs what new steps cost.  The raise stops the
   loss from here on.
+
+### 11.5 The paired rate: declared before it runs
+
+§11.1 item 6 and §11.3 leave the switch one measurement short: the rate of
+the rule-v2 table kernel against the σ kernel, paired on one card.  This
+declares that measurement and its decision rule before any run
+(`AGENTS.md` §4).  No GPU is reachable from where this was written, so the
+job is prepared here and runs wherever the owner has a card.
+
+**What runs.** [paired-rate/gpujob.sh](benchmarks/walk-constant/paired-rate/gpujob.sh),
+under any of the three launchers, all on one RTX PRO 6000:
+
+```
+modal run --detach modal_job.py --job benchmarks/walk-constant/paired-rate/gpujob.sh --out OUT
+python3 aws/bench_job.py --job benchmarks/walk-constant/paired-rate/gpujob.sh --out OUT
+python3 runpod_job.py --job benchmarks/walk-constant/paired-rate/gpujob.sh --out OUT
+python3 benchmarks/walk-constant/paired-rate/summarize.py OUT --freeze benchmarks/walk-constant/paired-rate/run-1
+```
+
+- **Builds.** σ (`WALK_TABLE=0`) and the table walk under rule v2
+  (`WALK_TABLE=1`), from one tree, with §6's knob set (the audited 256 × 2
+  preset of `benchmarks/table-walk/gpujob.sh`), so the rows compare with
+  §6's.  Each walk gets its shipping witness default: σ carries it, the
+  table walk cannot.
+- **Correctness first.**
+  - `make test-table-walk-cuda`: the CUDA probe of §11.1 item 5, with the
+    rule-v2 histories.  It has only been compiled so far; this is its first
+    run on a GPU.
+  - Each binary's first 300 device reports, re-walked by the host
+    reference: 300 verified and 0 dropped, or the run is void.
+- **Rate.** Six rounds in each of two geometries, the automatic worker count
+  and the campaign's 385,024.  A round runs σ and the table walk back to
+  back, and the order flips each round.  Each sample is `--bench --steps
+  1024 --launches 32` and records the SM clock, power and temperature.
+
+**The cost.** Per solve, table over σ is
+
+```
+cost = (σ rate / table rate) × K,
+K    = c_table (1 + δ/2) / c_σ × table trap loss / σ guard loss = 0.932–0.943,
+```
+
+with every factor of `K` read from the round-2 files by `summarize.py`
+(item 6), across the σ bracket.  Per geometry the bracket is the smallest
+paired ratio times `K`'s low end, to the largest times its high end.  With
+§6's v1 rates this gives item 6's 0.811–0.863.  So the table walk pays while
+its rate is above 0.932–0.943 of σ's, which lets the v2 kernel lose up to
+14–19% of the v1 kernel's rate.
+
+**The decision rule.**
+
+- **Pays:** the bracket's upper end is below 1 in both geometries.
+- **Does not pay:** its lower end is above 1 in either geometry.
+- **Undecided:** anything else.  That calls for a second session, not a
+  switch.
+- **Void:** a failed build, a failed CUDA probe, anything short of 300/300
+  with 0 dropped on either binary, a bench sample with no rate, a missing
+  geometry, or a nonzero job exit.  All three launchers bring the results
+  back whatever the exit code.  A void run is frozen with the rest and run
+  again, never dropped.
+- `summarize.py` also prints the median ratio against §6's v1 session in each
+  geometry.  That comparison crosses sessions, and possibly cards, so it
+  indicates the rule's rate cost without measuring it.
+
+**The switch deadline.** A rate that pays is necessary, not sufficient.
+Points from the σ walk never collide with the table walk's (§11.3), so a
+switch abandons the σ corpus.
+
+- The work `W` to the first collision is Rayleigh distributed.
+- After `w₀ = f·E[W]` with no collision, the σ walk's expected remaining
+  work is `E[W]·exp(x²)·erfc(x)`, where `f = 2x/√π`.
+- A fresh table walk costs `cost × E[W]`, so the switch pays while
+  `exp(x²)·erfc(x) > cost`.
+- At item 6's 0.811–0.863 that is `f` below 15.4–22.3%.
+  `summarize.py --check-deadline` checks the formula by Monte Carlo and
+  reproduces both ends to four digits.
+- `summarize.py` prints `f` for the measured bracket.  Set it against the
+  work behind the σ corpus's stored points, over σ's expected
+  `2^60.91–60.92` (§11.2).  That work is the sum of their trails' lengths,
+  and every record carries its own.
+- Raw iterations overstate it.  The 15.6% of steps the `2^30` guard
+  discarded (§11.4) stored no point, so they add nothing to the corpus's
+  chance of a collision.  The figure lives in the bucket, not here.
+
+**Inadmissible:**
+
+- changing the knob set, the geometries, the repetitions or `K` after
+  seeing a rate;
+- dropping a round, a sample or a void run;
+- deciding on the geometry that favours one walk;
+- quoting wall time, or one geometry's bracket, as the verdict.
+
+**Classification when it lands:** engineering, whichever way it falls.
+Both walks sit at the floor (§11.2), so the rate moves `S` and not the
+ratio to the floor.
