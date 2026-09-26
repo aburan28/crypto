@@ -1,0 +1,42 @@
+name: NIST RTX PRO 6000 tournament
+on:
+  push:
+    paths:
+      - 'research/nist_gpu_arithmetic_20260926/RUN_GPU'
+jobs:
+  modal-rtxpro6000:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Modal credentials
+        id: creds
+        run: |
+          if [ -n "$MODAL_TOKEN_ID" ] && [ -n "$MODAL_TOKEN_SECRET" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "MODAL_TOKEN_ID / MODAL_TOKEN_SECRET are not configured" | tee modal-unavailable.txt
+          fi
+      - name: Install Modal
+        if: steps.creds.outputs.available == 'true'
+        run: python3 -m pip install 'modal>=1.1,<2'
+      - name: Device validation
+        if: steps.creds.outputs.available == 'true'
+        working-directory: gpu/nist
+        run: modal run modal_app.py::validate 2>&1 | tee ../../research/nist_gpu_arithmetic_20260926/validate.log
+      - name: RTX PRO tournament
+        if: steps.creds.outputs.available == 'true'
+        working-directory: gpu/nist
+        run: modal run modal_app.py::tune --repeats 3 2>&1 | tee ../../research/nist_gpu_arithmetic_20260926/tune.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nist-rtxpro6000-tournament
+          path: |
+            research/nist_gpu_arithmetic_20260926/*.log
+            modal-unavailable.txt
+          if-no-files-found: warn
