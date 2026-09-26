@@ -1,0 +1,55 @@
+{
+  "attempt1_receipt_sha256": "ec34b6a01e729a7f2a1815373e9b17450c30d2472b808c88792a6f22dedecd17",
+  "binary_ldd": "linux-vdso.so.1 (0x00007f9089b20000)\n\tlibstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f9089600000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f90898aa000)\n\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f90895d2000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f9089200000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f9089b22000)",
+  "builds": [
+    {
+      "binary_bytes": 1732064,
+      "binary_sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51",
+      "label": "a",
+      "source": {
+        "commit": "c60730422e758ef1cebe7aeddf2dda31c996bf04",
+        "source_manifest_sha256": "d6b6be954a455b1ea8bd0d75d00f52b3fef5ff7d41ecb65e53a80a9fc47f51c2",
+        "tracked_files": 468,
+        "tree": "9630ba7aaccee77f6fec916e5babd6d1ccedd404",
+        "version": "3.0.1"
+      },
+      "version_output": "3.0.1"
+    },
+    {
+      "binary_bytes": 1732064,
+      "binary_sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51",
+      "label": "b",
+      "source": {
+        "commit": "c60730422e758ef1cebe7aeddf2dda31c996bf04",
+        "source_manifest_sha256": "d6b6be954a455b1ea8bd0d75d00f52b3fef5ff7d41ecb65e53a80a9fc47f51c2",
+        "tracked_files": 468,
+        "tree": "9630ba7aaccee77f6fec916e5babd6d1ccedd404",
+        "version": "3.0.1"
+      },
+      "version_output": "3.0.1"
+    }
+  ],
+  "checkout_head": "ba8aeb651edba2f7a4ff20f336f499d0c57adf44",
+  "decision": "PASS_BUILD_ONLY_NO_MEASURED_CHILD",
+  "linux_binary_bytes": 1732064,
+  "linux_binary_sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51",
+  "machine": "x86_64",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "prepare_sha256": "b4e49436c5e4cdcc01e50f1ccbc991194a2cccb4fcb6ba85bc033d96e082ada6",
+  "probe_receipt_sha256": "4f08ba27e869012a3b36cf1bffb7171261510cc22116aa3b3864c9edf50d9d1e",
+  "python_executable": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3",
+  "python_version": "3.12.14 (main, Aug 13 2026, 02:47:42) [GCC 13.3.0]",
+  "runner_image_os": "ubuntu24",
+  "runner_image_version": "20260920.314.1",
+  "schema": "k0-dag-dimacs-linux-cadical-build-v1",
+  "toolchain": {
+    "ar": "GNU ar (GNU Binutils for Ubuntu) 2.42\nCopyright (C) 2024 Free Software Foundation, Inc.\nThis program is free software; you may redistribute it under the terms of\nthe GNU General Public License version 3 or (at your option) any later version.\nThis program has absolutely no warranty.",
+    "gcc": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+    "gxx": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+    "ldd": "ldd (Ubuntu GLIBC 2.39-0ubuntu8.9) 2.39\nCopyright (C) 2024 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\nWritten by Roland McGrath and Ulrich Drepper.",
+    "make": "GNU Make 4.3\nBuilt for x86_64-pc-linux-gnu\nCopyright (C) 1988-2020 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.",
+    "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+    "uname": "Linux runnervmtr4k5 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux"
+  },
+  "utc": "2026-09-26T05:18:08.146743+00:00"
+}
