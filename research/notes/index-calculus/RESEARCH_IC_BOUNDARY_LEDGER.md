@@ -4850,6 +4850,75 @@ round's parameter files.
 - **Bailey's walk, counted** (§19.7). This is still unmeasured, so its
   column stays a model.
 
+## 21. The workflow's constructions, built once
+
+§20.10's first open item. It is an engineering round: every count,
+relation and recovered logarithm must come out as it was, and `S` must
+fall.
+
+**First, a correction to §20's wording.** §20.5 and §20.10 describe the
+constructions as the orbit map rebuilt "in big-integer arithmetic". The
+probe below shows that is not quite what happens:
+
+- The projected signed-orbit map already has a single-word path. It is
+  expensive because it is rebuilt five times a run, and each build pays
+  one cofactor multiplication per base point.
+- The big-integer constructions are two others: the point index, keyed
+  by big integers, and the decomposition check, which computes `[r]P` in
+  big-integer arithmetic per signed orbit.
+
+§20's numbers stand. Only the attribution was loose.
+
+### 21.1 Declared before any candidate code or timed comparison
+
+The protocol is `research/ic_constructions_20260926/PROTOCOL.md` (v1).
+
+**The probe** was made first, and it is the only measurement that was.
+`examples/koblitz_construction_prices.rs`, on the unmodified binary,
+priced each constructor alone, in units per base point:
+
+| constructor | `n = 41` | `n = 61` | builds per run |
+|:--|--:|--:|--:|
+| orbit map | 23.3 | 59.1 | 5 |
+| point index | 5.7 | 5.6 | 3 |
+| decomposition check | 10.8 | 8.5 | 2 |
+
+**The change.**
+
+1. **Built once per base.** The factor base keeps each of the three
+   constructions in a `OnceLock`, keyed by the curve's identity. Every
+   consumer borrows it, and no public signature changes.
+2. **One cofactor multiplication per Frobenius orbit.** The map projects
+   one point per recorded orbit and derives the rest by Frobenius. It
+   first confirms each orbit's recorded order on the lifted points, and
+   falls back to one multiplication per point if the order does not
+   match.
+
+**The comparison.**
+
+- **Binaries:** the baseline is `ic` at `e7022b75`, sha256 `e51e9431…`,
+  kept outside the tree. The candidate is `ic` at the candidate commit.
+- **Inputs:** §20's 36 frozen parameter files (`inputs.sha256`).
+- **Runs:** five rounds per file, baseline and candidate interleaved.
+  Each process is `ic price` at three repetitions (fifteen when fast),
+  on one thread under `taskset`.
+- **Pins:** every candidate report's counts and recovered logarithms
+  equal the baseline's in all 180 pairs. Control 1 holds on the
+  candidate at every size.
+- **Many threads:** a four-thread check at the two largest sizes.
+
+**Targets:**
+
+1. Identical outputs.
+2. The constructions fall at least 3× at every size.
+3. A whole-pipeline speedup whose 95% interval excludes 1, at the seven
+   sizes where §20 put the constructions at 15% of `S` or more.
+4. No regression anywhere, at one thread or at four.
+
+**Stop:** on any mismatch in counts or recovered logarithms.
+
+**Class: engineering.** Counts do not move, `S` falls.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
