@@ -1,14 +1,13 @@
 name: NIST GPU arithmetic
 on:
-  push:
-    paths:
-      - 'gpu/nist/**'
-      - '.github/workflows/nist-gpu-arithmetic.yml'
   pull_request:
     paths:
       - 'gpu/nist/**'
       - '.github/workflows/nist-gpu-arithmetic.yml'
   workflow_dispatch:
+concurrency:
+  group: nist-gpu-arithmetic-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   cpu-oracle:
     runs-on: ubuntu-24.04
