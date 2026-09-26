@@ -695,6 +695,15 @@ def readEnvelope(s3, bucket, key):
         return None
 
 
+def tableRecordBody(body):
+    """Strip the v3 table header; signatures are checked over the original bytes."""
+    if body[:8] != b"ECC2KDT3":
+        return body
+    if len(body) < 16 or struct.unpack_from("<II", body, 8) != (3, RECORD_BYTES):
+        raise ValueError("invalid table-v3 corpus header")
+    return body[16:]
+
+
 def checkEnvelope(key, body, manifest):
     """Refuse a body that does not match its own commit marker.
 
@@ -726,6 +735,7 @@ def ingestObject(conn, s3, bucket, key, found_at):
     body = s3.get_object(Bucket=bucket, Key=key)["Body"].read()
     manifest = readEnvelope(s3, bucket, key)
     checkEnvelope(key, body, manifest)
+    body = tableRecordBody(body)
     # The producer's own clock, where it recorded one. found_at from the
     # caller is the object's S3 LastModified for the orbit key shape, and that
     # is storage metadata: a copy, a replication or a lifecycle transition
@@ -808,7 +818,8 @@ def verify(conn, s3, bucket, sample=64):
         return False
     key, records = complete[len(complete) // 2]
     body = s3.get_object(Bucket=bucket, Key=key,
-                         Range="bytes=0-%d" % (sample * RECORD_BYTES - 1))["Body"].read()
+                         Range="bytes=0-%d" % (sample * RECORD_BYTES + 16 - 1))["Body"].read()
+    body = tableRecordBody(body)[:sample * RECORD_BYTES]
     keys = [decode(body[o:o + RECORD_BYTES])["point_key"]
             for o in range(0, len(body) - len(body) % RECORD_BYTES, RECORD_BYTES)]
     with conn.cursor() as cur:

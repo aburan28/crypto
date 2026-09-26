@@ -52,12 +52,12 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
 #if ECC_WALK_TABLE && !ECC_TABLE_GLOBAL
     static size_t dynamicSharedBytes() { return eccPacked131::TW_SHARED_BYTES; }
-    unsigned checkpointVersion() const override { return 3u; }
+    unsigned checkpointVersion() const override { return 35u; }
     int laneArrayCount() const override { return 3; }
     u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
 #elif ECC_WALK_TABLE
     static size_t dynamicSharedBytes() { return 0; }
-    unsigned checkpointVersion() const override { return 3u; }
+    unsigned checkpointVersion() const override { return 35u; }
     int laneArrayCount() const override { return 3; }
     u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
 #else

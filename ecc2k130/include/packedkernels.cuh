@@ -326,7 +326,7 @@ __device__ __forceinline__ void tableSelectSlot(const WalkParams<unsigned> &p, i
             atomicAdd(p.dpCount + 1, 1u);
         }
     }
-    const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel);
+    const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight);
     twAddend(tag, xp, yp, twTab, dp, ep);
 }
 #endif
@@ -362,7 +362,7 @@ __device__ __forceinline__ void fusedSelect(const WalkParams<unsigned> &p, const
             atomicAdd(p.dpCount + 1, 1u);
         }
     }
-    const unsigned tag = twSelectHist(x, yp, hw, &hist, twSel);
+    const unsigned tag = twSelectHist(x, yp, hw, &hist, twSel, twTab, p.dpWeight);
     p.hist[id] = hist;
     P131 dp, ep;
     twAddend(tag, xp, yp, twTab, &dp, &ep);
@@ -730,7 +730,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if !ECC_PACKED_SLOT_PIPELINE
             const P131 yp = load(p.y, slot, tid, p.threads);
 #endif
-            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel);
+            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight);
             P131 dp, ep;
             twAddend(tag, xp, yp, twTab, &dp, &ep);
             if (slot) {

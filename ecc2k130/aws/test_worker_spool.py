@@ -713,3 +713,15 @@ class V2Corpus(SpoolCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class TableV3Framing(unittest.TestCase):
+    def test_worker_and_merge_agree_on_table_header(self):
+        from merge import corpusFormat
+        with tempfile.TemporaryDirectory() as root:
+            path = os.path.join(root,"table.bin")
+            with open(path,"wb") as f:
+                f.write(b"ECC2KDT3" + struct.pack("<II",3,32) + record(1) + record(2))
+            self.assertEqual(worker.dpStride(path),(16,32))
+            head,stride,dtype = corpusFormat(path)
+            self.assertEqual((head,stride),(16,32))
+            self.assertEqual(dtype.itemsize,32)

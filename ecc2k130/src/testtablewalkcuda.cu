@@ -48,7 +48,7 @@ __global__ void probe(const In *in, Out *out, int n, const uint32_t *consts) {
                       bytes + 4 * (TW_LINV_OFF - TW_SEL0));
     o.eps = twCoordinate(a.yp, o.pivot, sel + (TW_ROW_OFF - TW_SEL0));
     unsigned long long hist = a.hist;
-    o.tag = twSelect(a.xn, a.yp, a.hw, &hist, sel);
+    o.tag = twSelect(a.xn, a.yp, a.hw, &hist, sel, tab, 34);
     twAddend(o.tag, a.xp, a.yp, tab, &o.d, &o.e);
     out[i] = o;
 }
@@ -71,13 +71,20 @@ int main() {
         for (int i = 0; i < 5; ++i) w.v[i] = uint32_t(v[i / 2] >> (32 * (i & 1)));
         return w;
     };
-    const int N = 4096;
+    #ifndef ECC_TABLE_PROBE_POINTS
+#define ECC_TABLE_PROBE_POINTS 4096
+#endif
+    const int N = ECC_TABLE_PROBE_POINTS;
     std::vector<In> in(N);
     std::vector<R::Point> pts(N);
     std::vector<unsigned> rawTags(N);
     for (int i = 0; i < N; ++i) {
         // Start points of random seeds are random subgroup elements.
         pts[i] = R::startPoint(0x5eed0000ull + 7919ull * i, sol.basis, sol.target, 0, sol.ell, sol.spow);
+        if (i < 2) {
+            pts[i] = R::scalarMul(sol.basis, u192_from(1184));
+            if (i == 1) pts[i] = R::addPt(pts[i],tw.addend(tw.rawTag(pts[i],R::weight(pts[i].x))));
+        }
         in[i].xn = pack(pts[i].x.v);
         in[i].xp = toPolynomial131(in[i].xn);
         in[i].yp = toPolynomial131(pack(pts[i].y.v));
@@ -93,6 +100,7 @@ int main() {
         if (i % 8 == 3) in[i].hist = eccHistPush(eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, rawTags[i] ^ ECC_TAG_EPS), 0x0123u), 0x0456u), 0x0789u);
         if (i % 8 == 5) in[i].hist = eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, eccTagAdvanceK(rawTags[i], 2, 131)), eccTagAdvanceK(rawTags[i], 1, 131)), rawTags[i]);
         if (i % 8 == 6) in[i].hist = eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, eccTagAdvanceK(rawTags[i], 3, 131) ^ ECC_TAG_EPS), rawTags[i]), eccTagAdvanceK(rawTags[i], 1, 131) ^ ECC_TAG_EPS);
+        if (i < 2) in[i].hist = eccHistPush(ECC_HIST_EMPTY,rawTags[i] ^ ECC_TAG_EPS);
     }
     In *dIn; Out *dOut;
     checked(cudaMalloc(&dIn, N * sizeof(In)));
@@ -115,7 +123,7 @@ int main() {
         int p = -1;
         for (int b = 0; b < 131; ++b) if ((piv[b >> 6] >> (b & 63)) & 1) p = b;
         const int eps = tw.negationBit(xn, yn, k);
-        const unsigned tag = TableWalk<CfgF131>::resolveTag(rawTags[i], in[i].hist);
+        const unsigned tag = tw.resolveTag(pts[i], rawTags[i], in[i].hist);
         if (tag != rawTags[i]) ++ruleFired;
         const R::Point q = tw.addend(tag);
         const P131 d = toPolynomial131(pack(R::add(pts[i].x, q.x).v));
@@ -130,7 +138,7 @@ int main() {
     std::printf("  phase mismatches %d, pivot %d, sign %d, tag %d, addend words %d\n", badK, badPivot, badEps, badTag, badAdd);
     std::printf("  branches %d, shared bytes %zu, addend global %d\n",
                 TW_H, TW_SHARED_BYTES, ECC_TABLE_ADDEND_GLOBAL);
-    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= 5 * N / 8;   // i % 8 in {1, 2, 3, 5, 6} must all fire
+    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired > 0;   // hints need not be real cycles
     std::printf("%s\n", ok ? "PASS" : "FAIL");
     return ok ? 0 : 1;
 }

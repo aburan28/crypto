@@ -1,0 +1,19 @@
+.............................................2026-09-26T21:55:22Z vacuumed distinguished_points in 0s; index-only scans are available from here
+.2026-09-26T21:55:22Z index distinguished_points_campaign_found_at exists but is invalid (a previous build failed); dropping it
+2026-09-26T21:55:22Z building index distinguished_points_campaign_found_at; the ingest keeps running while it does
+2026-09-26T21:55:22Z built index distinguished_points_campaign_found_at in 0s
+.2026-09-26T21:55:22Z building index distinguished_points_campaign_found_at; the ingest keeps running while it does
+2026-09-26T21:55:22Z built index distinguished_points_campaign_found_at in 0s
+..2026-09-26T21:55:22Z building index distinguished_points_campaign_found_at; the ingest keeps running while it does
+2026-09-26T21:55:22Z built index distinguished_points_campaign_found_at in 0s
+.2026-09-26T21:55:22Z building index distinguished_points_campaign_found_at; the ingest keeps running while it does
+2026-09-26T21:55:22Z built index distinguished_points_campaign_found_at in 0s
+2026-09-26T21:55:22Z vacuumed distinguished_points in 0s; index-only scans are available from here
+............................................2026-09-26T21:55:24Z published status.json in 0.0s (sql): dps=1 state=IDLE_OR_STALE work=2^0.000 walkers=0 outstanding=0 unreadable=0 off_weight_walking=0 duplicates_24h=0
+2026-09-26T21:55:24Z published status.json in 0.0s (sql): dps=1 state=IDLE_OR_STALE work=2^0.000 walkers=0 outstanding=0 unreadable=0 off_weight_walking=0 duplicates_24h=0
+..2026-09-26T21:55:24Z published status.json in 0.0s (sql): dps=7 state=INGEST_BEHIND work=2^0.000 walkers=0 outstanding=3 unreadable=0 off_weight_walking=0 duplicates_24h=0
+..............
+----------------------------------------------------------------------
+Ran 110 tests in 2.141s
+
+OK
