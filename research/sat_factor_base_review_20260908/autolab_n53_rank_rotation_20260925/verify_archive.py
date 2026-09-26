@@ -178,9 +178,18 @@ def verify(bundle: Path) -> dict:
         assert summary["target_scalars_sha256"] == frozen["input_sha256"]["target_scalars"]
         assert summary["target_points_sha256"] == frozen["input_sha256"]["target_points"]
         assert summary["certified_base_gzip_sha256"] == frozen["input_sha256"]["certified_base_gzip"]
-        base_bytes = gzip.decompress(check_base_path(frozen).read_bytes())
-        assert (panel / "certified_base.jsonl").read_bytes() == base_bytes
-        assert summary["certified_base_materialized_sha256"] == file_sha(panel / "certified_base.jsonl")
+        base_path = panel / "certified_base.jsonl"
+        if "certified_base_materialized_sha256" in summary:
+            base_bytes = gzip.decompress(check_base_path(frozen).read_bytes())
+            assert base_path.read_bytes() == base_bytes
+            assert summary["certified_base_materialized_sha256"] == file_sha(base_path)
+        else:
+            # A terminal wrapper/setup failure can occur before the certified
+            # fixture is materialized. No base or rank claim is admitted.
+            assert summary["classification"] == "RUNNING" or summary["classification"].startswith(
+                "CENSORED_OR_INVALID_WRAPPER_"
+            )
+            assert summary.get("active_stage") in ("setup", "base_materialization", "unknown")
         assert HEX40.fullmatch(summary["checkout_head"])
         assert HEX64.fullmatch(summary["binary_sha256"])
         assert summary["rayon_num_threads"] == 1
@@ -202,8 +211,22 @@ def verify(bundle: Path) -> dict:
                 check_stage(panel, summary, frozen, name, name, base, policy)
         if "audit" in summary["stage_receipts"]:
             check_stage(panel, summary, frozen, "audit", None, None, None)
+        classification = summary["classification"]
+        wrapper_failure = classification.startswith("CENSORED_OR_INVALID_WRAPPER_")
+        if wrapper_failure:
+            exception_path = panel / "exception_receipt.json"
+            assert summary["exception_receipt_sha256"] == file_sha(exception_path)
+            exception = json.loads(exception_path.read_text())
+            assert exception["stage"] == summary["active_stage"]
+            assert exception["kind"] and exception["traceback"]
+            assert exception["completed_stage_keys"] == sorted(summary["stage_receipts"])
+        elif classification == "RUNNING":
+            # An abrupt OS/workflow termination may leave the last RUNNING
+            # snapshot. Preserve its raw bytes as incomplete/invalid, never
+            # as a rank or process-cost result.
+            assert "exception_receipt_sha256" not in summary
         status = "RAW_PROVENANCE_PASS"
-        if summary["classification"] == "RANK_STAGE_REPLAYED":
+        if classification == "RANK_STAGE_REPLAYED":
             assert present == set(arm_names + ["audit"])
             assert all(receipt["returncode"] == 0 and not receipt["timed_out"]
                        and not receipt["rss_gate"] and
@@ -220,9 +243,13 @@ def verify(bundle: Path) -> dict:
             assert process.returncode == 0, process.stderr[-2000:]
             assert (panel / "audit.json").read_bytes() == expected_audit
             status = "RAW_PROVENANCE_AND_INDEPENDENT_RANK_REPLAY_PASS"
+        elif wrapper_failure:
+            status = "RAW_PROVENANCE_INVALID_WRAPPER_ONLY"
+        elif classification == "RUNNING":
+            status = "RAW_PROVENANCE_INCOMPLETE_RUNNER_ONLY"
         else:
-            assert summary["classification"].startswith(("CENSORED", "INVALID"))
-        return {"status": status, "classification": summary["classification"],
+            assert classification.startswith(("CENSORED", "INVALID"))
+        return {"status": status, "classification": classification,
                 "files": count, "archive_sha256": outer["archive_sha256"]}
 
 

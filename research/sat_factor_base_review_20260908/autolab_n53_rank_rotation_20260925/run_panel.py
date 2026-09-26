@@ -12,6 +12,7 @@ import platform
 import subprocess
 import sys
 import time
+import traceback
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -49,12 +50,12 @@ def run(out: Path):
     import check_protocol
     frozen = check_protocol.preflight(require_release=True)
     assert EXE.is_file()
-    out.mkdir(parents=True, exist_ok=False)
     measure, complete = load_measure()
     started = time.monotonic()
     panel = {
         "schema": "n53_target_cyclic_rank_factorial_panel_v1",
         "classification": "RUNNING",
+        "active_stage": "base_materialization",
         "checkout_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip(),
         "protocol_sha256": sha(HERE / "PROTOCOL.md"),
         "source_sha256": sha(REPO / "examples/koblitz_s5_sat_instance.rs"),
@@ -75,6 +76,7 @@ def run(out: Path):
         "attack_speed_crossover": None,
         "common_operation_unit": None,
     }
+    out.mkdir(parents=True, exist_ok=False)
     panel_file = out / "panel.json"
 
     def save():
@@ -113,6 +115,8 @@ def run(out: Path):
     })
     assert common["KIC_ALGEBRA_ENCODING"] == "orbit_factorized"
     for name, base, policy in ARMS:
+        panel["active_stage"] = name
+        save()
         seconds = cap(name, ARM_S)
         if not seconds:
             return panel
@@ -142,6 +146,8 @@ def run(out: Path):
             panel["classification"] = "CENSORED_OR_INVALID_" + name.upper()
             save()
             return panel
+    panel["active_stage"] = "audit"
+    save()
     seconds = cap("audit", AUDIT_S)
     if not seconds:
         return panel
@@ -164,6 +170,7 @@ def run(out: Path):
         panel["audit_sha256"] = sha(out / "audit.json")
     panel["measured_arm_wall_ms"] = {name: panel["stage_receipts"][name]["wall_ms"]
                                      for name, _, _ in ARMS}
+    panel["active_stage"] = None
     save()
     return panel
 
@@ -172,7 +179,55 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    result = run(args.out)
+    try:
+        result = run(args.out)
+    except Exception as error:
+        # A wrapper/setup error after the output directory exists is still a
+        # first attempted outcome. Preserve the traceback and any partial raw
+        # child files, then mark the panel as invalid rather than RUNNING.
+        if not args.out.is_dir():
+            raise
+        summary_path = args.out / "panel.json"
+        if summary_path.is_file():
+            result = json.loads(summary_path.read_text())
+        else:
+            # No child can start before the first panel save. Still preserve
+            # the attempted dispatch with the pinned input/build identity.
+            result = {
+                "schema": "n53_target_cyclic_rank_factorial_panel_v1",
+                "classification": "RUNNING",
+                "active_stage": "setup",
+                "checkout_head": subprocess.check_output(
+                    ["git", "rev-parse", "HEAD"], cwd=REPO, text=True
+                ).strip(),
+                "protocol_sha256": sha(HERE / "PROTOCOL.md"),
+                "source_sha256": sha(REPO / "examples/koblitz_s5_sat_instance.rs"),
+                "binary_sha256": sha(EXE),
+                "cargo_lock_sha256": sha(PARENT / "Cargo.lock"),
+                "target_scalars_sha256": sha(HERE / "target_scalars.txt"),
+                "target_points_sha256": sha(HERE / "target_points.jsonl"),
+                "certified_base_gzip_sha256": sha(BASE_GZ),
+                "host": platform.platform(), "machine": platform.machine(),
+                "rayon_num_threads": 1,
+                "process_group_rss_cap_bytes": MAX_RSS,
+                "arm_wall_cap_s": ARM_S, "audit_wall_cap_s": AUDIT_S,
+                "global_wall_cap_s": GLOBAL_S,
+                "stage_receipts": {},
+                "attack_speed_crossover": None, "common_operation_unit": None,
+            }
+        stage = result.get("active_stage") or "unknown"
+        exception = {
+            "kind": type(error).__name__,
+            "message": str(error),
+            "stage": stage,
+            "traceback": traceback.format_exc(),
+            "completed_stage_keys": sorted(result.get("stage_receipts", {})),
+        }
+        exception_path = args.out / "exception_receipt.json"
+        exception_path.write_text(json.dumps(exception, indent=2, sort_keys=True) + "\n")
+        result["classification"] = "CENSORED_OR_INVALID_WRAPPER_" + stage.upper()
+        result["exception_receipt_sha256"] = sha(exception_path)
+        summary_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(json.dumps({"classification": result["classification"], "output": str(args.out)}, sort_keys=True))
     if result["classification"] != "RANK_STAGE_REPLAYED":
         raise SystemExit(2)
