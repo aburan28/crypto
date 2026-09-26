@@ -1,6 +1,6 @@
 # Protocol: RTX PRO 6000 P-256/P-384 arithmetic tournament
 
-Status: pre-registered before any RTX PRO 6000 measurement from this branch.
+Status: pre-registered before any RTX PRO 6000 measurement from this branch. Amendment 1 (still pre-measurement) adds the hand-written sparse Montgomery reduction carry chain to candidate 2.
 
 ## Question
 
@@ -27,7 +27,7 @@ excuse.
 
 Arithmetic:
 1. sparse CIOS Montgomery, portable product row;
-2. sparse CIOS Montgomery, explicit PTX product row;
+2. sparse CIOS Montgomery, explicit PTX product and sparse-reduction rows;
 3. direct generalized-Mersenne/Solinas, portable product row;
 4. direct generalized-Mersenne/Solinas, explicit PTX product row.
 
