@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[4]
 HARNESS = ROOT / 'research/ic_candidate_tournament_20260915'
 sys.path.insert(0, str(HARNESS))
 from generic_admission import admit, admit_rho
+from execution_ids import allocation, audit_runs
 from generic_build import digest, verify_binding, verify_build_record
 from generic_stages import verify_stages
 from identity import write_immutable
@@ -71,11 +72,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--run-number-start', type=int, required=True)
     parser.add_argument('--failed-la-only', action='store_true')
     parser.add_argument('--sparse-core-only', action='store_true')
     args = parser.parse_args()
     build_dir, out = args.build.resolve(), args.out.resolve()
-    out.mkdir(parents=True, exist_ok=False)
     worker = build_dir / 'worker'
     build = json.loads((build_dir / 'build-record.json').read_text())
     source = json.loads((build_dir / 'source-manifest.json').read_text())
@@ -86,6 +87,9 @@ def main():
     if args.sparse_core_only:
         require(not args.failed_la_only, 'select only one supplemental panel')
         jobs = [item for item in jobs if item['name'].startswith('sparse-core-')]
+    plan = allocation(args.run_number_start, [item['name'] for item in jobs])
+    out.mkdir(parents=True, exist_ok=False)
+    write(out / 'run-number-allocation.json', plan)
     write(out / 'inputs.json', jobs)
     resources = dict(timeout_seconds=60, rayon_threads=1, memory_bytes=None, cpu=None)
     preexec = None
@@ -102,13 +106,13 @@ def main():
         build_record_sha256=digest(build_dir / 'build-record.json'), worker_sha256=digest(worker),
         sources={name: digest(HARNESS / name) for name in ('generic_admission.py', 'generic_build.py',
         'generic_bases.py', 'generic_stages.py', 'generic_queries.py', 'generic_query_law.py',
-        'generic_phases.py', 'identity.py', 'oracle.py', 'measurement.py',
+        'generic_phases.py', 'identity.py', 'oracle.py', 'measurement.py', 'execution_ids.py',
         'goal_20260924/generic-query-law/run_controls.py',
         'goal_20260924/generic-scientific-admission/run_controls.py',
         'goal_20260924/generic-scientific-admission/PROTOCOL.md')}))
-    fixtures, results = {}, []
+    fixtures, results, admitted_runs = {}, [], []
     with (out / 'worker-raw.jsonl').open('x') as raw:
-        for item in jobs:
+        for item, execution in zip(jobs, plan['executions'], strict=True):
             name, job = item['name'], copy.deepcopy(item['job'])
             directory = out / name
             directory.mkdir()
@@ -149,7 +153,9 @@ def main():
                         executable=worker, process_wall_ns=process_ns)
                 else:
                     admitted = admit(report, fixture, job, build, source, executable=worker,
-                                     process_wall_ns=process_ns, resources=resources)
+                                     process_wall_ns=process_ns, resources=resources,
+                                     number=execution['number'])
+                    admitted_runs.append(admitted['run'])
                     receipt['admission'] = admitted
                     for artifact in ('candidate', 'workload', 'run'):
                         write_immutable(directory / f'{artifact}.json', admitted[artifact])
@@ -190,7 +196,7 @@ def main():
         rejected.append(variable)
     write(out / 'summary.json', dict(schema_version=1, controls=len(results),
         passed=sum(row['status'] == 'PASS' for row in results), performance_qualified=False,
-        environment_overrides_rejected=rejected,
+        environment_overrides_rejected=rejected, run_key_audit=audit_runs(admitted_runs),
         promotion_eligible=False, online_speedup=None, results=results))
     require(all(row['status'] == 'PASS' for row in results), 'admission failures retained')
 

@@ -4689,5 +4689,16 @@
   },
   "performance_qualified": false,
   "promotion_eligible": false,
+  "run_key_correction": {
+    "before": "run-key-audit-before.json",
+    "corrected_unique_keys": 53,
+    "measurements_changed": false,
+    "original_archive_unchanged": true,
+    "original_records": 53,
+    "original_unique_keys": 49,
+    "receipt": "run-key-correction.json",
+    "records": "run-records-v2.json.gz",
+    "records_sha256": "d794c95c6e0182d3660c730a76f8b5f64be3b9a1f8ab5fcce59108f8d49139ee"
+  },
   "schema_version": 1
 }

@@ -27,7 +27,7 @@ Four supplementary cases retain paid failed LA attempts, both at terminal
 failure and before later recovery. Eleven distinct environment-override controls
 are rejected before measurement.
 
-Local validation passes 162 Python tests (two existing platform skips), eight
+Local validation runs 165 Python tests (163 pass; two existing platform skips), eight
 distinct release Rust controls and 39 site tests. The two worker controls ignored
 by the first Rust test filter were executed explicitly in the subsequent command.
 Adversarial tests keep the original group certificate valid while changing the
@@ -40,12 +40,27 @@ boolean/integer substitutions accepted by Python's ordinary equality. Canonical
 typed comparisons and strict counter checks now reject them; the strengthened
 checker replays the same retained worker outputs without rerunning the workers.
 
+A subsequent [run-key audit](run-key-audit-before.json) found only 49 unique keys
+among those 53 records: inactive window settings correctly normalized to the
+same candidate, but the caller silently assigned every execution R0. The
+[corrected exports](run-records-v2.json.gz) supersede those run keys, with
+53 unique keys. Their [replay receipt](run-key-correction.json) checks all 69
+controls and proves that only run IDs changed; all measured values, original
+audit times, candidate/workload identities and the original archive are retained.
+The admission API now requires an explicit run number. Both runners freeze
+number allocations before execution and reject duplicate canonical keys.
+CI allocates disjoint blocks by workflow run, retry attempt and runner; native
+and profiler executions have distinct numbers. Unused reserved numbers remain
+unused. Manual runs must reserve a fresh nonoverlapping block explicitly.
+
 The [first Linux CI failure](ci-initial-failure.log) occurred at offline Cargo
 metadata resolution, before the source-bound worker build. CI now fetches the
 complete pinned dependency resolution before the offline build (host-only test
 builds need not populate every platform dependency). The command wrapper also
 retains the failing command's output; the initial exception hid Cargo's message,
-so a successful rerun is required to validate that setup correction.
+and Linux integration workflow `36215166278` subsequently passed the 69 controls
+and existing native/profile panel, validating the setup correction. The run-key
+fix requires a further CI pass on its own commit.
 
 The final build has source-manifest SHA-256
 `215f4c7fa338b1053481563a717c867f1b75b25d936eb3b8cafa7fd2af31e134`
@@ -75,7 +90,7 @@ From the repository root with Python 3.12 and the pinned dependency lockfile:
 cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
 python3 research/ic_candidate_tournament_20260915/generic_build.py --out /tmp/ic-generic-build
 python3 research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/run_controls.py \
-  --build /tmp/ic-generic-build --out /tmp/ic-generic-controls
+  --build /tmp/ic-generic-build --out /tmp/ic-generic-controls --run-number-start 1000
 python3 -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_generic_admission.py' -v
 ```
 
@@ -86,11 +101,28 @@ controls use one CPU, one Rayon worker, an 8-GiB address-space limit and a
 caps as null. CI additionally runs the existing paired native/Callgrind panel,
 requiring source-bound admission and an independently closed instruction ledger
 for every profiled IC job. It does not redispatch the sealed improvement round.
+The example reserves numbers 1000 through 1068; use a different reserved block
+for a subsequent execution. The checked-in corrected historical export uses
+numbers 0 through 68, including reserved slots for inventory and rho controls.
+
+To reproduce the run-key correction without launching any worker, extract the
+original archive as described in EVIDENCE.json, then run:
+
+```sh
+python3 research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/replay_run_ids.py \
+  --bundle /tmp/ic-generic-admission-restore/ic-generic-scientific-admission \
+  --out /tmp/ic-generic-run-keys-v2
+```
+
+The compressed corrected export reproduces byte-for-byte. Only the correction
+receipt's separately measured external replay-audit time varies.
 
 The raw full bundle, exact sources, executable, build logs, independent replay
 records and test logs are described by [EVIDENCE.json](EVIDENCE.json). Each
 admitted IC execution has immutable `candidate.json`, `workload.json`, `run.json`
-and `receipt.json` records under its replay directory in that bundle. Compact
+and `receipt.json` records under its replay directory in that bundle. Use the
+version-two export above for unique run keys; the bundle retains the original
+colliding R0 keys as historical evidence. Compact
 IDs use `pair`, `enum`, `f4`, `f5`, `if4`, `satxor` or `satcnf` for the executed PDP
 variant, and `gauss` or `bw` for the final relation-LA policy. The manifest binds
 the conditional filtering/core/reconstruction path and its exact parameters.

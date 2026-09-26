@@ -101,3 +101,18 @@ execute and report a nonempty block-Wiedemann core. The default sparse controls
 can eliminate their small matrices in filtering; calling that actual Wiedemann
 execution would overstate backend coverage. These two controls test the
 conditional core dispatch, without changing a candidate promotion gate.
+
+Run-identity correction: require an explicit nonnegative integer run number;
+never distinguish executions by adding inactive flags to candidate identity.
+Freeze each bounded runner's number allocation before starting workers, and
+reject duplicate (candidate_id, workload_id, run_id) keys before accepting an
+export. CI uses injective workflow-run/attempt namespaces and disjoint 1000-slot
+blocks for controls and integration. Integration reserves separate native/profile
+numbers per job. Manual callers must reserve nonoverlapping blocks across runs.
+The 53 retained IC runs had four duplicate-key pairs because all defaulted to R0.
+Re-export the same 69 original observations in final/failed-LA/sparse-core order,
+assigning ordinals 0 through 68, preserving all measurements and original files.
+Independent admission must reproduce every field except the corrected run ID
+and its separately timed audit. Store correction-audit time in the correction
+receipt; retain the original audit times in the corrected run records. No new
+worker execution or performance sample is authorized by this metadata replay.

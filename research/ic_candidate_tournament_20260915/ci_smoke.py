@@ -11,6 +11,7 @@ from generic_queries import verify_queries
 from generic_query_law import verify_query_law
 from generic_phases import verify_native as verify_native_phases, parse_profiles as parse_generic_profiles
 from generic_admission import admit, admit_rho, scientific_ledger
+from execution_ids import allocation, audit_runs
 from generic_build import verify_build_record
 from identity import curve_record, factor_base_inventory, write_immutable
 from measurement import legacy_ledger
@@ -25,6 +26,7 @@ def main():
     parser.add_argument('--worker', type=Path, required=True)
     parser.add_argument('--build-dir', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--run-number-start', type=int, required=True)
     args = parser.parse_args()
     worker = args.worker.resolve()
     build = read(args.build_dir / 'build-record.json')
@@ -77,6 +79,9 @@ def main():
         job['config'].update(solver=solver, batch_trials=1, max_trials=1)
         jobs.append((f'incomplete-{solver}', job, False))
     # This is a frozen list of test vectors, not a search over candidate winners.
+    plan = allocation(args.run_number_start,
+        [f'{name}/{kind}' for name, _, _ in jobs for kind in ('native', 'profile')])
+    write(out / 'run-number-allocation.json', plan, exclusive=True)
     write(out / 'inputs.json', [{'test': name, 'job': job, 'profile': profile}
                                for name, job, profile in jobs], exclusive=True)
     write(out / 'environment.json', {
@@ -88,11 +93,13 @@ def main():
         'evaluator_sha256': {name: digest(Path(__file__).with_name(name))
                              for name in ('ci_smoke.py', 'tournament.py', 'oracle.py', 'portfolio.py',
                                           'identity.py', 'measurement.py', 'generic_queries.py',
-                                          'generic_query_law.py', 'generic_phases.py')},
+                                          'generic_query_law.py', 'generic_phases.py', 'execution_ids.py',
+                                          'generic_admission.py', 'generic_build.py', 'generic_bases.py',
+                                          'generic_stages.py')},
     }, exclusive=True)
-    outcomes = []
+    outcomes, admitted_runs = [], []
     fixtures = {}
-    for name, job, profile in jobs:
+    for ordinal, (name, job, profile) in enumerate(jobs):
         directory = out / name
         directory.mkdir()
         write(directory / 'job.json', job, exclusive=True)
@@ -196,7 +203,9 @@ def main():
             if job['mode'] == 'ic':
                 admitted = admit(traced_report, fixture, traced_job, build, source,
                     executable=worker, process_wall_ns=native_ns,
+                    number=plan['executions'][2*ordinal]['number'],
                     resources=dict(cpu=cpu, rayon_threads=1, memory_bytes=8*1024**3, timeout_seconds=60))
+                admitted_runs.append(admitted['run'])
                 receipt['scientific_admission'] = admitted
                 for artifact in ('candidate', 'workload', 'run'):
                     write_immutable(directory / f'generic-{artifact}.json', admitted[artifact])
@@ -232,7 +241,10 @@ def main():
                 if job['mode'] == 'ic':
                     profiled_admission = admit(profiled, fixture, traced_job, build, source,
                         executable=worker, process_wall_ns=round(profile_process['process_wall_seconds'] * 1e9),
+                        number=plan['executions'][2*ordinal+1]['number'],
                         resources=dict(cpu=cpu, rayon_threads=1, memory_bytes=8*1024**3, timeout_seconds=60))
+                    admitted_runs.append(profiled_admission['run'])
+                    receipt['scientific_profile_run_id'] = profiled_admission['run']['run_id']
                     require(profiled_admission['candidate'] == receipt['scientific_admission']['candidate'],
                             'native/profile scientific method mismatch')
                     instructions = receipt['exclusive_instructions']
@@ -260,6 +272,7 @@ def main():
         outcomes.append(dict(test=name, status=receipt['status'], reason=receipt.get('reason')))
         print(json.dumps(outcomes[-1]), flush=True)
     summary = dict(scope='integration, no performance claim', promotion_eligible=False,
+                   run_key_audit=audit_runs(admitted_runs),
                    tests=len(outcomes), verified=sum(row['status'] == 'VERIFIED' for row in outcomes),
                    outcomes=outcomes)
     write(out / 'summary.json', summary, exclusive=True)

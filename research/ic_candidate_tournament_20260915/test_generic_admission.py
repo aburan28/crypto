@@ -7,7 +7,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from generic_admission import method_record, scientific_ledger
+from generic_admission import admit, method_record, scientific_ledger
+from execution_ids import BLOCK_SIZE, allocation, audit_runs, ci_start
 from generic_bases import complete_factors, poly_product, verify_base
 from generic_build import digest, verify_binding, verify_build_record
 from generic_phases import verify_native
@@ -38,6 +39,59 @@ def build_fixture():
 
 
 class GenericAdmissionTests(unittest.TestCase):
+    def test_run_number_is_required_and_rejects_boolean_or_negative_values(self):
+        kwargs = dict(executable=None, process_wall_ns=None, resources=None)
+        with self.assertRaises(TypeError):
+            admit(None, None, None, None, None, **kwargs)
+        for value in (True, -1, 1.0, '1'):
+            with self.assertRaisesRegex(InvalidEvidence, 'run number'):
+                admit(None, None, None, None, None, number=value, **kwargs)
+
+    def test_execution_allocation_separates_lanes_attempts_and_workflow_runs(self):
+        occupied = set()
+        for workflow, attempt in ((1, 1), (1, 2), (2, 1), (36215166278, 1),
+                                  (36215166278, 2), (36215166279, 1), (1, 1000001)):
+            for lane in ('controls', 'integration'):
+                start = ci_start(workflow, attempt, lane)
+                plan = allocation(start, [f'job-{i}' for i in range(BLOCK_SIZE)])
+                numbers = {item['number'] for item in plan['executions']}
+                self.assertFalse(occupied & numbers)
+                occupied |= numbers
+        for labels in ([], ['duplicate', 'duplicate'], ['']):
+            with self.assertRaises(InvalidEvidence):
+                allocation(0, labels)
+        with self.assertRaises(InvalidEvidence):
+            allocation(0, [str(i) for i in range(BLOCK_SIZE + 1)])
+        with self.assertRaises(InvalidEvidence):
+            allocation(True, ['job'])
+
+    def test_corrected_runs_preserve_measurements_and_expose_original_collisions(self):
+        original = list(retained())
+        for panel in ('failed-la', 'sparse-core'):
+            original += [json.loads(line) for line in gzip.decompress(
+                (ROOT.parent / panel / 'worker-raw.jsonl.gz').read_bytes()).splitlines()]
+        old = {item['name']: item['receipt']['admission'] for item in original if item['job']['mode'] == 'ic'}
+        with self.assertRaisesRegex(InvalidEvidence, 'duplicate canonical run key'):
+            audit_runs([item['run'] for item in old.values()])
+        export = json.loads(gzip.decompress((ROOT.parent / 'run-records-v2.json.gz').read_bytes()))
+        records = export['records']
+        self.assertEqual(audit_runs([item['run'] for item in records])['unique_keys'], 53)
+        by_name = {item['name']: item for item in records}
+        self.assertEqual(set(by_name), set(old))
+        for name, item in by_name.items():
+            self.assertEqual(item['candidate'], old[name]['candidate'])
+            self.assertEqual(item['workload'], old[name]['workload'])
+            restored = dict(item['run'], run_id=item['original_run_id'])
+            self.assertEqual(restored, old[name]['run'])
+        for n in (9, 13):
+            for la in ('dense', 'sparse'):
+                left, right = (by_name[f'n{n}-window{w}-{la}'] for w in (0, 1000))
+                self.assertEqual(left['candidate'], right['candidate'])
+                self.assertEqual(left['workload'], right['workload'])
+                self.assertNotEqual(left['run']['run_id'], right['run']['run_id'])
+        with self.assertRaisesRegex(InvalidEvidence, 'duplicate canonical run key'):
+            audit_runs([records[0]['run'], records[0]['run']])
+
     def test_boolean_integer_aliases_cannot_change_dispatch_counters_or_matrix(self):
         def column(r):
             entry = next(e for row in r['relation_matrix']['rows'] for e in row['entries'] if e[0] in (0, 1))

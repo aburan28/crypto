@@ -9,7 +9,7 @@ import time
 from generic_build import verify_binding
 from generic_phases import PHASES as RAW_PHASES, verify_native
 from generic_stages import effective_config, kernel, verify_stages
-from identity import candidate_manifest, run_id, sha256, workload_manifest
+from identity import candidate_manifest, natural, run_id, sha256, workload_manifest
 from measurement import PHASES, exclusive_ledger, report_sha256
 from oracle import require, verify
 
@@ -105,7 +105,8 @@ def method_record(job, report, stages, build):
 
 
 def admit(report, fixture, job, build, source, *, executable, process_wall_ns,
-          resources, number=0):
+          resources, number):
+    natural(number, 'run number')
     started = time.monotonic_ns()
     require(report.get('generic_runtime_policy') == 'default-environment-one-rayon-v1',
             'missing runtime override policy')
