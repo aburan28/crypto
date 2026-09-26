@@ -50,7 +50,7 @@ def tune():
     rate=float(v)*(1000.0 if u=="G" else 1.0) # Mop/s
     rows.append({"ptx":ptx,"threads":int(t),"curve":curve,"op":op,"Mop_s":rate,"ptxas_registers":regs})
  print("\n=== ranked ===")
- for curve in ("P-256","P-384"):
+ for curve in ("P-256 Montgomery","P-256 Solinas","P-384 Montgomery","P-384 Solinas"):
   for op in ("mul chain1","mul chain2","sqr","point_double","mixed_add"):
    xs=sorted((r for r in rows if r["curve"]==curve and r["op"]==op),key=lambda r:r["Mop_s"],reverse=True)
    if xs: print(curve,op,xs[0])
