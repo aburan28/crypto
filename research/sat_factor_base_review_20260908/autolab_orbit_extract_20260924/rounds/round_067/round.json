@@ -1,0 +1,25 @@
+{
+  "aggregate_producer_artifact": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/rounds/round_005/aggregate_producer.stdout.jsonl",
+  "aggregate_producer_sha256": "2390d3b0d6500f4bb8c8d8a43b1474d5916a209a57d63a369264b964ae40d7cc",
+  "charged_cost_amortization": "One shared n53 base/scan/index charged across rounds 5-100",
+  "claim_boundary": "Public synthetic n=53 relation-yield experiment; no discrete-log recovery, no vs_rho result, no external points, no key recovery, no asymptotic sub-rho claim.",
+  "cumulative_equation_rank_including_target": 220,
+  "cumulative_factor_base_log_rank": 220,
+  "execution_group": "shared-index-3072-targets",
+  "factor_base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "independent_replay": "PASS",
+  "relations_extracted": 32,
+  "round": 67,
+  "round_chunk": 62,
+  "schema_version": "1.0",
+  "stage": "relation_yield",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "target_scalar_recovered": false,
+  "targets": 32,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "timing_ms": {
+    "amortized_charged_total": 12565.359469385417,
+    "amortized_shared_setup_per_round": 13.155053385416977,
+    "query_sum": 12552.204416
+  }
+}

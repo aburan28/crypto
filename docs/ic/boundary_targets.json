@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "title": "Index-calculus boundary ledger",
-  "updated": "2026-09-22",
+  "updated": "2026-09-26",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Never combine best component costs from different runs into a synthetic vs_rho win.",
-  "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gröbner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
+  "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gr\u00f6bner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
   "stages": [
     "factor_base",
     "decomposition",
@@ -121,61 +121,67 @@
     "Pass the row acceptance_gates.",
     "PR updates current, appends history, sets next_target, links evidence.",
     "vs_rho and end_to_end_dlp past prior size require independent recomputation.",
-    "Incomplete measurement_schema fields fail closed — no row promotion."
+    "Incomplete measurement_schema fields fail closed \u2014 no row promotion."
   ],
   "agent_priorities": [
     {
-      "beat": "Reduce the selected algebraic n=53 exact support from 738,197,504 bytes below 512 MiB without regressing the 95-relation solve, online wall crossover, or charged resources",
       "rank": 1,
+      "regime": "koblitz",
+      "stage": "vs_rho",
+      "beat": "Compact-orbit DLP beats batched rho at n=61 L=1024/4096/16384 (K=600/800/1400, wall 0.14-0.63). L=16384 median wall 0.205, 49152/49152 replayed. Next: n=61 L=65536 only (no 32-target panels). PENDING_INDEPENDENT_VALIDATION; constant-factor; do not promote the selected-panel vs_rho row"
+    },
+    {
+      "beat": "Reduce the selected algebraic n=53 exact support from 738,197,504 bytes below 512 MiB without regressing the 95-relation solve, online wall crossover, or charged resources",
+      "rank": 2,
       "regime": "koblitz",
       "stage": "factor_base"
     },
     {
       "beat": "Reduce the selected n=53 median direct/rho core ratio from 2.2616 to <=1 and the 17.6367x fresh-build ratio while preserving the 0.8392 wall median and scalar-blind completion",
-      "rank": 2,
+      "rank": 3,
       "regime": "koblitz",
       "stage": "vs_rho"
     },
     {
       "beat": "n=31 dim-16 m=2 quadratic system median <=1h, disagreements=0, FFD logged",
-      "rank": 3,
+      "rank": 4,
       "regime": "koblitz",
       "stage": "decomposition"
     },
     {
       "beat": "sub-2^(2l) oracle at l=8 on <=64 targets, median <= half pairs-and-solve, FFD logged",
-      "rank": 4,
+      "rank": 5,
       "regime": "binary",
       "stage": "decomposition"
     },
     {
       "beat": "j=0 known-answer IC at 16 bits agreeing with rho",
-      "rank": 5,
+      "rank": 6,
       "regime": "prime",
       "stage": "end_to_end_dlp"
     },
     {
       "beat": "Filled 2026-09-21 by the boundary ledger (operation-counted relation_yield and rank on the prime and binary ladders); the open item is the CI-bearing yield curve against the subgroup-tightened ceiling at n=27 / 24 bits",
-      "rank": 6,
+      "rank": 7,
       "regime": "binary_and_prime",
       "stage": "relation_yield"
     },
     {
       "beat": "backfill FFD/DoR on any algebraic decomposition claim that currently cites only wall-clock or conflict counts",
-      "rank": 7,
+      "rank": 8,
       "regime": "all",
       "stage": "decomposition"
     },
     {
       "beat": "Iterate against research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (ic boundary): in any regime, S/S_rho < 1 at r >= 2^20 with every phase counted, or a fitted total exponent below the reference's over >= 4 sizes, or yield/ceiling > 1.5 on a base outside every proper subgroup",
-      "rank": 8,
+      "rank": 9,
       "regime": "all",
       "stage": "vs_rho"
     }
   ],
   "regimes": {
     "binary": {
-      "label": "Binary fields (Weil–Semaev / non-Koblitz)",
+      "label": "Binary fields (Weil\u2013Semaev / non-Koblitz)",
       "best_stack": [
         "semaev_decomp",
         "semaev_sat",
@@ -5940,7 +5946,7 @@
                   }
                 ]
               },
-              "f4_splits": "flat across 39→46 unknowns (scaling note)",
+              "f4_splits": "flat across 39\u219246 unknowns (scaling note)",
               "oracle_classes": [
                 "enumerate",
                 "groebner",
@@ -6963,7 +6969,7 @@
                 "demo_n_max": 13,
                 "ic_degree_doc_max": 23
               },
-              "summary": "Known-answer recovery on toys n≈7–13; ic runner degrees <=23 with caps"
+              "summary": "Known-answer recovery on toys n\u22487\u201313; ic runner degrees <=23 with caps"
             },
             {
               "metrics": {
@@ -11356,7 +11362,14 @@
               "any cost component excluded from one arm excluded from the other on a stated policy"
             ],
             "n53_probe_note": "Selected EPYC 9V74 panel wins 5/5 with a 0.839190 median; scalar-blind EPYC 7763 run is 0.987489x. Median direct core remains 2.261565x rho, retained support is 738,197,504 bytes, and fresh build plus direct is 17.636692x.",
-            "summary": "Reduce selected n=53 memory, core, and build costs while refreshing forced-single-core and obtaining independent reproduction"
+            "summary": "Reduce selected n=53 memory, core, and build costs while refreshing forced-single-core and obtaining independent reproduction",
+            "compact_orbit_followup": {
+              "summary": "a=0 n=61 vs n=61-admitted frozen Kuhn-Struik batched rho at L>=1024 (tune K on a disjoint 1024-target corpus; then L=4096 if RSS allows). No L=32 / 32-target panels.",
+              "producer": "examples/koblitz_orbit_dlp_fast.rs",
+              "rho": "examples/koblitz_rho_batch_ks_v2_n61.rs",
+              "evidence": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md",
+              "status": "PENDING_INDEPENDENT_VALIDATION"
+            }
           },
           "evidence": [
             "research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json",
@@ -11398,7 +11411,8 @@
             "docs/ic/runs/ic-boundary-ledger-round5-headline-2026-09-22.json",
             "docs/ic/runs/ic-boundary-ledger-round5-eager-headline-2026-09-22.json",
             "docs/ic/runs/ic-boundary-round5-pairing-headline-2026-09-22.json",
-            "docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json"
+            "docs/ic/runs/ic-boundary-round5-reseed-2026-09-22.json",
+            "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md"
           ],
           "history": [
             {
@@ -11752,7 +11766,7 @@
         "decomposition": {
           "status": "record",
           "current": {
-            "summary": "S3 2-decomp through bench sizes; S4/Gröbner not a scaling win; FFD not published on 2-decomp frontier",
+            "summary": "S3 2-decomp through bench sizes; S4/Gr\u00f6bner not a scaling win; FFD not published on 2-decomp frontier",
             "metrics": {
               "summation": "S3",
               "summands": 2,

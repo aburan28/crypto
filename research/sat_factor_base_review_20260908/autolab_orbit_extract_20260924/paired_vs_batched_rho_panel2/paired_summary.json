@@ -1,0 +1,248 @@
+{
+ "L": {
+  "4096": {
+   "K": 660,
+   "blocks": [
+    {
+     "block": 0,
+     "K": 660,
+     "ic_solved": 4096,
+     "ic_rank": 660,
+     "ic_base_hash": "cb6ffb64012bbde4a94c1da5918c183f51792c5829f6524a5f2d59ae00e551cd",
+     "ks_all_verified": true,
+     "fixtures_matched": true,
+     "ic": {
+      "real_s": 31.66,
+      "user_s": 21.09,
+      "sys_s": 1.26,
+      "rss": 2741977088
+     },
+     "ks": {
+      "real_s": 132.37,
+      "user_s": 90.43,
+      "sys_s": 0.85,
+      "rss": 369672192
+     },
+     "wall_ratio": 0.2391780614942963,
+     "user_ratio": 0.2332190644697556,
+     "ic_timing_ms": {
+      "base_load": 671.661708,
+      "index_build": 13721.869166999999,
+      "linear_algebra": 0.964417,
+      "normal_basis_and_selftest": 3.80475,
+      "process_total": 31555.9145,
+      "rank_stage": 2329.8077080000003,
+      "setup_total": 14397.336083,
+      "target_median": 1.769,
+      "targets_total": 14826.943375
+     },
+     "ks_group_additions": 40146334
+    },
+    {
+     "block": 1,
+     "K": 660,
+     "ic_solved": 4096,
+     "ic_rank": 660,
+     "ic_base_hash": "cb6ffb64012bbde4a94c1da5918c183f51792c5829f6524a5f2d59ae00e551cd",
+     "ks_all_verified": true,
+     "fixtures_matched": true,
+     "ic": {
+      "real_s": 28.05,
+      "user_s": 20.96,
+      "sys_s": 1.11,
+      "rss": 2742927360
+     },
+     "ks": {
+      "real_s": 115.65,
+      "user_s": 89.85,
+      "sys_s": 0.84,
+      "rss": 369557504
+     },
+     "wall_ratio": 0.24254215304798962,
+     "user_ratio": 0.23327768503060659,
+     "ic_timing_ms": {
+      "base_load": 584.7903749999999,
+      "index_build": 11958.31675,
+      "linear_algebra": 2.640875,
+      "normal_basis_and_selftest": 3.5673340000000002,
+      "process_total": 27975.904292,
+      "rank_stage": 1900.180833,
+      "setup_total": 12546.67475,
+      "target_median": 1.7919159999999998,
+      "targets_total": 13525.560208
+     },
+     "ks_group_additions": 40146334
+    },
+    {
+     "block": 2,
+     "K": 660,
+     "ic_solved": 4096,
+     "ic_rank": 660,
+     "ic_base_hash": "cb6ffb64012bbde4a94c1da5918c183f51792c5829f6524a5f2d59ae00e551cd",
+     "ks_all_verified": true,
+     "fixtures_matched": true,
+     "ic": {
+      "real_s": 30.19,
+      "user_s": 21.25,
+      "sys_s": 1.24,
+      "rss": 2740961280
+     },
+     "ks": {
+      "real_s": 116.37,
+      "user_s": 90.66,
+      "sys_s": 0.82,
+      "rss": 369606656
+     },
+     "wall_ratio": 0.2594311248603592,
+     "user_ratio": 0.2343922347231414,
+     "ic_timing_ms": {
+      "base_load": 509.324542,
+      "index_build": 13310.822416,
+      "linear_algebra": 2.6465,
+      "normal_basis_and_selftest": 6.1701250000000005,
+      "process_total": 30121.556667,
+      "rank_stage": 2319.609791,
+      "setup_total": 13826.31725,
+      "target_median": 1.808458,
+      "targets_total": 13972.342791
+     },
+     "ks_group_additions": 40146334
+    }
+   ],
+   "wall_ratio_median": 0.24254215304798962,
+   "wall_ratio_range": [
+    0.2391780614942963,
+    0.2594311248603592
+   ],
+   "user_ratio_median": 0.23327768503060659,
+   "all_blocks_ic_faster_wall": true,
+   "all_blocks_ic_faster_user": true,
+   "all_solved_and_matched": true,
+   "same_constructed_base_hash_all_blocks": true,
+   "peak_rss_ic_mb": 2742.92736,
+   "peak_rss_ks_mb": 369.672192
+  },
+  "16384": {
+   "K": 880,
+   "blocks": [
+    {
+     "block": 0,
+     "K": 880,
+     "ic_solved": 16384,
+     "ic_rank": 880,
+     "ic_base_hash": "bd74d3095501c5a9beca3032e31244177527d8596194c1158b754c2834c800e3",
+     "ks_all_verified": true,
+     "fixtures_matched": true,
+     "ic": {
+      "real_s": 75.57,
+      "user_s": 44.67,
+      "sys_s": 5.09,
+      "rss": 5328011264
+     },
+     "ks": {
+      "real_s": 247.35,
+      "user_s": 185.97,
+      "sys_s": 1.84,
+      "rss": 780075008
+     },
+     "wall_ratio": 0.30551849605821707,
+     "user_ratio": 0.24020003226326828,
+     "ic_timing_ms": {
+      "base_load": 455.477708,
+      "index_build": 32415.194375,
+      "linear_algebra": 1.669958,
+      "normal_basis_and_selftest": 4.678833,
+      "process_total": 75421.788042,
+      "rank_stage": 2365.0465,
+      "setup_total": 32875.35175,
+      "target_median": 1.166459,
+      "targets_total": 40175.758
+     },
+     "ks_group_additions": 81351961
+    },
+    {
+     "block": 1,
+     "K": 880,
+     "ic_solved": 16384,
+     "ic_rank": 880,
+     "ic_base_hash": "bd74d3095501c5a9beca3032e31244177527d8596194c1158b754c2834c800e3",
+     "ks_all_verified": true,
+     "fixtures_matched": true,
+     "ic": {
+      "real_s": 62.97,
+      "user_s": 44.06,
+      "sys_s": 4.52,
+      "rss": 5331550208
+     },
+     "ks": {
+      "real_s": 237.94,
+      "user_s": 183.12,
+      "sys_s": 1.79,
+      "rss": 780697600
+     },
+     "wall_ratio": 0.2646465495503068,
+     "user_ratio": 0.240607252075142,
+     "ic_timing_ms": {
+      "base_load": 473.87433400000003,
+      "index_build": 25231.779,
+      "linear_algebra": 1.6720000000000002,
+      "normal_basis_and_selftest": 4.51575,
+      "process_total": 62824.196749999996,
+      "rank_stage": 1827.435166,
+      "setup_total": 25710.169292,
+      "target_median": 1.136792,
+      "targets_total": 35282.984915999994
+     },
+     "ks_group_additions": 81351961
+    },
+    {
+     "block": 2,
+     "K": 880,
+     "ic_solved": 16384,
+     "ic_rank": 880,
+     "ic_base_hash": "bd74d3095501c5a9beca3032e31244177527d8596194c1158b754c2834c800e3",
+     "ks_all_verified": true,
+     "fixtures_matched": true,
+     "ic": {
+      "real_s": 63.73,
+      "user_s": 44.89,
+      "sys_s": 4.39,
+      "rss": 5734055936
+     },
+     "ks": {
+      "real_s": 243.59,
+      "user_s": 183.29,
+      "sys_s": 1.83,
+      "rss": 780959744
+     },
+     "wall_ratio": 0.26162814565458353,
+     "user_ratio": 0.24491243384800046,
+     "ic_timing_ms": {
+      "base_load": 619.331709,
+      "index_build": 24242.160458000002,
+      "linear_algebra": 1.69225,
+      "normal_basis_and_selftest": 6.046708,
+      "process_total": 63543.392542,
+      "rank_stage": 1797.164792,
+      "setup_total": 24867.539375,
+      "target_median": 1.1532499999999999,
+      "targets_total": 36875.668667
+     },
+     "ks_group_additions": 81351961
+    }
+   ],
+   "wall_ratio_median": 0.2646465495503068,
+   "wall_ratio_range": [
+    0.26162814565458353,
+    0.30551849605821707
+   ],
+   "user_ratio_median": 0.240607252075142,
+   "all_blocks_ic_faster_wall": true,
+   "all_blocks_ic_faster_user": true,
+   "all_solved_and_matched": true,
+   "same_constructed_base_hash_all_blocks": true,
+   "peak_rss_ic_mb": 5734.055936,
+   "peak_rss_ks_mb": 780.959744
+  }
+ }
+}

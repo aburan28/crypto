@@ -215,23 +215,40 @@ should be quoted without its configuration.
 
 ---
 
+## Compact-orbit shared-log DLP (2026-09-24, not a selected-panel promotion)
+
+`examples/koblitz_orbit_dlp_fast.rs` is a pair-table-free compact-orbit producer:
+one Frobenius-quotiented S3 index, normal-basis one-probe lookup, rank-guided
+relations, and K grown with batch size L. Against the frozen Kuhn–Struik batched
+rho (`d=4`) it wins all 15 paired n=53 blocks (L=32..16,384, wall 0.24–0.74),
+all 3 n=41 blocks at L=1,024 (0.34), and all 3 n=61 blocks at L=1,024 / 4,096 /
+16,384 (K=600/800/1,400, wall 0.14–0.63; 64,512/64,512 replayed).
+Constant-factor: both arms ~√(L·r/n) at optimal K. Status
+`PENDING_INDEPENDENT_VALIDATION` — do **not** promote the selected-panel
+`vs_rho` row from this arm alone.
+
+**Next beat:** a=0 n=61 vs `examples/koblitz_rho_batch_ks_v2_n61.rs` at
+**L=65,536 only**. Do not run 32-target panels. Evidence:
+[`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
+
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
-2. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
+1. **Koblitz compact-orbit `vs_rho` → a=0 n=61 vs batched rho at L=65,536** (L=1,024 / 4,096 / 16,384 already 3/3). No 32-target panels. After that: independent-host rerun and Bernstein–Lange.
+2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
+3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
    On the autolab `signed_expanded` family the nearest charged gap is `n = 37`
    at 1.15x (`partition_walk`, 14.78 ms/target against ρ's 12.82); start there
    with `solution_validation_ms`, 53% of the direct arm's charged cost.
-3. **Koblitz `decomposition` → `n = 31`, dim 16, `m = 2` within budget (with FFD logged).**
-4. **Binary `decomposition` → first sub-`2^{2ℓ}` oracle at `ℓ = 8` (with FFD logged).**
-5. **Prime `end_to_end_dlp` → 16-bit j=0 IC.**
-6. ~~Fill missing `relation_yield` / `rank` publications (binary + prime)~~ —
+4. **Koblitz `decomposition` → `n = 31`, dim 16, `m = 2` within budget (with FFD logged).**
+5. **Binary `decomposition` → first sub-`2^{2ℓ}` oracle at `ℓ = 8` (with FFD logged).**
+6. **Prime `end_to_end_dlp` → 16-bit j=0 IC.**
+7. ~~Fill missing `relation_yield` / `rank` publications (binary + prime)~~ —
    filled 2026-09-21 by the boundary ledger (operation-counted, every phase);
    the open item is the CI-bearing yield curve against the subgroup-tightened
    ceiling at `n = 27` / 24 bits.
-7. **Backfill FFD / DoR** on any algebraic decomposition claim that currently
+8. **Backfill FFD / DoR** on any algebraic decomposition claim that currently
    cites only wall-clock or conflict counts.
-8. **All regimes → iterate against [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md)
+9. **All regimes → iterate against [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md)
    (`ic boundary`):** `S / S_ρ < 1` at `r ≥ 2^20` with every phase counted, or a
    fitted total exponent below the reference's over ≥ 4 sizes, or
    `yield/ceiling > 1.5` on a base outside every proper subgroup, against the
