@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
-#include "nist_ptx.cuh"
+#include "nist_solinas.cuh"
 #define CU(x) do{cudaError_t e=(x);if(e!=cudaSuccess){fprintf(stderr,"%s\n",cudaGetErrorString(e));exit(1);}}while(0)
 
 template<class F,int CHAINS> __global__ void k_mul(typename F::elt*out,const typename F::elt*in,int iters,int n){
