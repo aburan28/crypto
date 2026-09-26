@@ -1,0 +1,120 @@
+{
+  "stage": "vs_rho",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "n": [
+    37,
+    41,
+    53
+  ],
+  "a": 0,
+  "timing_class": "algorithmic_charged",
+  "ic_cost": {
+    "online_extract_ms_median": {
+      "37": 4.0186875,
+      "41": 60.072874999999996,
+      "53": 666.570396
+    },
+    "modelled_fully_charged_ms_per_32_block_median": {
+      "37": [
+        197.30799040624998,
+        211.473444625
+      ],
+      "41": [
+        9216.608830812498,
+        9557.77382934375
+      ],
+      "53": [
+        189686.97886237502,
+        207080.463262875
+      ]
+    },
+    "modelled_stage_note": "rank-stage relations charged as explicit-method relation count x measured mean per-target extraction; not separately run"
+  },
+  "rho_cost": {
+    "per_target_ms_median_same_fixtures": {
+      "37": 5.664875,
+      "41": 145.227916,
+      "53": 1081.4433960000001
+    },
+    "rho_algorithm_ms_per_32_block": {
+      "37": [
+        195.37232799999998,
+        185.030329,
+        181.865538,
+        185.288009
+      ],
+      "41": [
+        4570.166417,
+        5262.886336,
+        5381.7823769999995,
+        5122.190829
+      ],
+      "53": [
+        36930.030625,
+        30953.551035,
+        37444.620001,
+        38226.415127
+      ]
+    }
+  },
+  "automorphism_discount": "rho control is signed-Frobenius packed rho, A = 2n (74/82/106); compact extractor uses the same signed Frobenius orbit quotient on the base",
+  "all_stages_charged_same_series": false,
+  "online_ratio_median": {
+    "37": 0.6543861967289026,
+    "41": 0.47377911549896334,
+    "53": 0.6229166023047135
+  },
+  "modelled_charged_ratio_median": {
+    "37": 1.0836619224436992,
+    "41": 1.88795653077081,
+    "53": 5.286707861518453
+  },
+  "slopes": {
+    "axis": "log2 subgroup order",
+    "points": {
+      "37": 27.781,
+      "41": 39.0,
+      "53": 44.259
+    },
+    "compact_extract_median_slope": {
+      "estimate": 0.4318,
+      "ci95": [
+        0.4129,
+        0.4525
+      ]
+    },
+    "rho_median_slope_same_fixtures": {
+      "estimate": 0.4531,
+      "ci95": [
+        0.4449,
+        0.4624
+      ]
+    },
+    "difference_compact_minus_rho": {
+      "estimate": -0.0213,
+      "ci95": [
+        -0.0423,
+        0.0014
+      ]
+    },
+    "compact_modelled_fully_charged_slope": 0.5849,
+    "rho_algorithm_block_slope": 0.4587,
+    "explicit_direct_fully_charged_block_slope": 0.5705
+  },
+  "verdict": "ONLINE_PER_TARGET_BELOW_RHO_SLOPE_TIED__FULLY_CHARGED_DIRECT_GROWS_FASTER",
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.json",
+  "independent_replay": "384/384 relations pass pure-Python GF(2^n) replay (target=[s]G, x in base, sign-choice sum, intermediates, point orders)",
+  "fixture_hash": "matched 2026-09-12 growing-n panel rho fixtures; base hashes 3762e7df3306 (n37), 1f7dbb1674af (n41), d859319015ea (n53)",
+  "executable_or_source_hash": {
+    "source_sha256": "d74877ae0c7021983e4c8c989c85c970869b431a342ace2cd864229d8ea63dab",
+    "executable_sha256": "a20c993e6e295a348dac00528472c2ab7a1094f2b25b709eece8ab16f9de847f",
+    "worktree": "dirty"
+  },
+  "host_id": "Adams-MacBook-Pro.local / Apple M4 Pro / 48 GiB",
+  "resource_caps": {
+    "sat_conflicts": 2000,
+    "peak_rss_bytes_max": 605175808
+  },
+  "seeds": "published_fixture_scalar of each rho fixture (4 blocks x 32 per n)",
+  "claim_boundary": "Finite public-synthetic matched-fixture panel, three field sizes. Online per-target cost excludes the factor-log rank stage and index build. Slope difference CI crosses zero: no sub-rho growth claim. Fully charged cost is modelled for the rank stage and grows faster than rho. No asymptotic, key-recovery, external-target, or deployed-curve claim."
+}

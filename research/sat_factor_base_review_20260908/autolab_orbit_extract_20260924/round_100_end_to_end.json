@@ -1,0 +1,25 @@
+{
+  "executable_sha256": "73abcec64e988becce76360e57ae6c78a1cf549d5af5ceb28572eedef7b9b874",
+  "factor_base_log_columns": 220,
+  "held_out_curve_check": "[derived]G equals independently recomputed held-out target",
+  "held_out_relations": 1,
+  "held_out_scalar_derived_from_factor_base_logs": 20634336950089,
+  "held_out_scalar_match": true,
+  "independent_arithmetic_replay_source": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay_20260924_codex/replay.py",
+  "modulus": 21044858204113,
+  "published_held_out_scalar": 20634336950089,
+  "relations_total": 3200,
+  "rounds_completed": 100,
+  "schema_version": "1.0",
+  "scope": "Public synthetic n=53 known-answer IC fixture. Factor-base logs solved using the first 3,199 relations only; the final relation was excluded from the solve and used to derive and verify its scalar. Not production key recovery, not asymptotic sub-rho, no ledger promotion.",
+  "source_sha256": "96970319975031d1a86b0821049625d4ed8144b5bf76b6dd62826a75ead24c0b",
+  "status": "PASS",
+  "target_coordinates": [
+    5221581241576245,
+    278819687593126
+  ],
+  "training_equations_verified": 3199,
+  "training_rank_mod_subgroup_order": 220,
+  "training_relations": 3199,
+  "training_rows_used_in_solve": 3199
+}

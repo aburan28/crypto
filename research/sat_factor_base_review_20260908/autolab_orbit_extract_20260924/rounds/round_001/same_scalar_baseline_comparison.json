@@ -1,0 +1,252 @@
+{
+  "all_relation_checks_group_valid": true,
+  "all_scalars_match": true,
+  "baseline_components_ms": {
+    "base": 23797.453959,
+    "regular_state_scan": 50653.325876,
+    "target_extraction": 24323.951544
+  },
+  "baseline_rows": [
+    {
+      "algorithm_charged_ms": 2171.759292,
+      "base_ms": 476.16975,
+      "extract_ms": 343.027167,
+      "scalar": 596471236405,
+      "scan_ms": 1352.562375
+    },
+    {
+      "algorithm_charged_ms": 2577.365542,
+      "base_ms": 579.635209,
+      "extract_ms": 452.554666,
+      "scalar": 5574677866202,
+      "scan_ms": 1545.175667
+    },
+    {
+      "algorithm_charged_ms": 2893.7400829999997,
+      "base_ms": 509.30858300000006,
+      "extract_ms": 967.265917,
+      "scalar": 13796174572732,
+      "scan_ms": 1417.165583
+    },
+    {
+      "algorithm_charged_ms": 2412.3669999999997,
+      "base_ms": 457.806292,
+      "extract_ms": 479.572292,
+      "scalar": 7487197888158,
+      "scan_ms": 1474.988416
+    },
+    {
+      "algorithm_charged_ms": 2066.693959,
+      "base_ms": 498.96574999999996,
+      "extract_ms": 339.04066700000004,
+      "scalar": 11175495048122,
+      "scan_ms": 1228.6875420000001
+    },
+    {
+      "algorithm_charged_ms": 2203.34475,
+      "base_ms": 501.140958,
+      "extract_ms": 401.584959,
+      "scalar": 3652357055680,
+      "scan_ms": 1300.618833
+    },
+    {
+      "algorithm_charged_ms": 2559.374917,
+      "base_ms": 657.67825,
+      "extract_ms": 657.6835,
+      "scalar": 1782806031358,
+      "scan_ms": 1244.013167
+    },
+    {
+      "algorithm_charged_ms": 4570.223792,
+      "base_ms": 1728.606542,
+      "extract_ms": 973.5304169999999,
+      "scalar": 2050795405222,
+      "scan_ms": 1868.086833
+    },
+    {
+      "algorithm_charged_ms": 3304.177541,
+      "base_ms": 571.093375,
+      "extract_ms": 800.747208,
+      "scalar": 15065668113821,
+      "scan_ms": 1932.336958
+    },
+    {
+      "algorithm_charged_ms": 2747.938707,
+      "base_ms": 816.3706659999999,
+      "extract_ms": 531.807041,
+      "scalar": 7740067649581,
+      "scan_ms": 1399.761
+    },
+    {
+      "algorithm_charged_ms": 3915.4579160000003,
+      "base_ms": 1738.991125,
+      "extract_ms": 530.460375,
+      "scalar": 8600276420067,
+      "scan_ms": 1646.0064160000002
+    },
+    {
+      "algorithm_charged_ms": 3308.139959,
+      "base_ms": 459.47337500000003,
+      "extract_ms": 1051.9382500000002,
+      "scalar": 17505035455781,
+      "scan_ms": 1796.728334
+    },
+    {
+      "algorithm_charged_ms": 2839.5632929999997,
+      "base_ms": 968.969917,
+      "extract_ms": 306.916917,
+      "scalar": 10545706692870,
+      "scan_ms": 1563.6764589999998
+    },
+    {
+      "algorithm_charged_ms": 3239.606667,
+      "base_ms": 692.167208,
+      "extract_ms": 941.234292,
+      "scalar": 19876721550507,
+      "scan_ms": 1606.205167
+    },
+    {
+      "algorithm_charged_ms": 2797.601333,
+      "base_ms": 859.844375,
+      "extract_ms": 473.29533299999997,
+      "scalar": 4705352299456,
+      "scan_ms": 1464.461625
+    },
+    {
+      "algorithm_charged_ms": 3024.6097499999996,
+      "base_ms": 737.836375,
+      "extract_ms": 670.71525,
+      "scalar": 18603878332041,
+      "scan_ms": 1616.0581249999998
+    },
+    {
+      "algorithm_charged_ms": 3520.11975,
+      "base_ms": 1511.472,
+      "extract_ms": 450.265208,
+      "scalar": 17623807158318,
+      "scan_ms": 1558.3825419999998
+    },
+    {
+      "algorithm_charged_ms": 4196.398583,
+      "base_ms": 576.27175,
+      "extract_ms": 1804.759875,
+      "scalar": 3891741921217,
+      "scan_ms": 1815.366958
+    },
+    {
+      "algorithm_charged_ms": 3401.118625,
+      "base_ms": 808.833417,
+      "extract_ms": 872.3969999999999,
+      "scalar": 18033300258084,
+      "scan_ms": 1719.888208
+    },
+    {
+      "algorithm_charged_ms": 4229.104792,
+      "base_ms": 537.578125,
+      "extract_ms": 1334.880917,
+      "scalar": 16518910056303,
+      "scan_ms": 2356.64575
+    },
+    {
+      "algorithm_charged_ms": 3924.021708,
+      "base_ms": 668.88475,
+      "extract_ms": 1705.305458,
+      "scalar": 2091393211348,
+      "scan_ms": 1549.8315
+    },
+    {
+      "algorithm_charged_ms": 3216.9118329999997,
+      "base_ms": 738.9145,
+      "extract_ms": 765.7664159999999,
+      "scalar": 18585971372211,
+      "scan_ms": 1712.2309169999999
+    },
+    {
+      "algorithm_charged_ms": 3607.858501,
+      "base_ms": 743.162542,
+      "extract_ms": 730.675917,
+      "scalar": 15547878052438,
+      "scan_ms": 2134.020042
+    },
+    {
+      "algorithm_charged_ms": 2770.968584,
+      "base_ms": 732.1375409999999,
+      "extract_ms": 459.718209,
+      "scalar": 14756487356197,
+      "scan_ms": 1579.112834
+    },
+    {
+      "algorithm_charged_ms": 3728.695042,
+      "base_ms": 1389.7656670000001,
+      "extract_ms": 552.1476250000001,
+      "scalar": 7559860115917,
+      "scan_ms": 1786.7817499999999
+    },
+    {
+      "algorithm_charged_ms": 2413.687,
+      "base_ms": 536.906333,
+      "extract_ms": 436.723334,
+      "scalar": 4490301587746,
+      "scan_ms": 1440.057333
+    },
+    {
+      "algorithm_charged_ms": 4222.827458,
+      "base_ms": 641.8915,
+      "extract_ms": 2129.993375,
+      "scalar": 16175767793598,
+      "scan_ms": 1450.942583
+    },
+    {
+      "algorithm_charged_ms": 2995.802792,
+      "base_ms": 633.182,
+      "extract_ms": 1001.755,
+      "scalar": 14724407582904,
+      "scan_ms": 1360.865792
+    },
+    {
+      "algorithm_charged_ms": 2938.3286660000003,
+      "base_ms": 473.679458,
+      "extract_ms": 1022.0026250000001,
+      "scalar": 1950031086639,
+      "scan_ms": 1442.646583
+    },
+    {
+      "algorithm_charged_ms": 2234.802043,
+      "base_ms": 470.32504200000005,
+      "extract_ms": 268.177334,
+      "scalar": 5808289396203,
+      "scan_ms": 1496.299667
+    },
+    {
+      "algorithm_charged_ms": 2341.5691669999997,
+      "base_ms": 561.9404999999999,
+      "extract_ms": 348.447292,
+      "scalar": 4219953041820,
+      "scan_ms": 1431.181375
+    },
+    {
+      "algorithm_charged_ms": 2400.552334,
+      "base_ms": 518.4510839999999,
+      "extract_ms": 519.5617080000001,
+      "scalar": 14001480194974,
+      "scan_ms": 1362.539542
+    }
+  ],
+  "comparison": "same 32 public synthetic n53 scalars, per-target rebuilt scan/index versus one shared scan/index batch",
+  "factor_base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "per_target_rebuilt_algorithm_charge_ms": 98774.731379,
+  "per_target_rebuilt_ms_per_target": 3086.71035559375,
+  "round": 1,
+  "schema_version": "1.0",
+  "scope": "Public synthetic Koblitz n=53 relation extraction optimization only; not full rank or vs_rho speedup.",
+  "shared_components_ms": {
+    "base": 444.855958,
+    "regular_state_scan": 1048.4344999999998,
+    "root_index_build": 184.545833,
+    "target_queries": 9637.559417
+  },
+  "shared_index_algorithm_charge_ms": 11315.395708,
+  "shared_index_ms_per_target": 353.606115875,
+  "speedup_ratio": 8.729233508746507,
+  "targets": 32
+}
