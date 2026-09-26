@@ -375,11 +375,17 @@ fn echelon(
         row.end = row.end.max(to);
         ((to - from) as u64, (to - from) as u64)
     };
-    // Reduce `row` by the pivots already in the table for as long as its
-    // lead has one; stop at the first lead without.  Pivot rows never
-    // change once made, so these are exactly the reductions the
-    // one-row-at-a-time loop would apply first, in the same order.
-    let by_known = |row: &mut Row,
+    // Reduce each of `rows` by the pivots already in the table for as long
+    // as its lead has one; stop at the first lead without.  Pivot rows
+    // never change once made, so these are exactly the reductions the
+    // one-row-at-a-time loop would apply first, in the same order.  The
+    // rows go a range of columns at a time: every row is taken as far as
+    // the range allows before any goes further, so the tables and pivots
+    // of a range are read from cache by all of them, not fetched again
+    // for each.  The ranges are taken in column order and a row stops for
+    // good at a lead without a pivot, so each row's reductions and their
+    // order are unchanged.
+    let by_known = |rows: &mut [Row],
                     pivot_of: &[u32],
                     pivots: &[(usize, Row)],
                     tables: Option<&BlockTables>|
@@ -389,22 +395,40 @@ fn echelon(
             return (0, 0);
         }
         let (mut xors, mut done) = (0u64, 0u64);
-        while let Some(lead) = row.lead() {
-            let p = pivot_of[lead];
-            if p == NONE {
-                break;
-            }
-            let (x, d) = step(row, lead, p, pivots, tables);
-            xors += x;
-            done += d;
+        let mut live: Vec<usize> = (0..rows.len()).collect();
+        while !live.is_empty() {
+            let from = live
+                .iter()
+                .filter_map(|&i| rows[i].lead())
+                .min()
+                .unwrap_or(usize::MAX);
+            let to = from.saturating_add(TILE_COLUMNS);
+            live.retain(|&i| {
+                let row = &mut rows[i];
+                loop {
+                    match row.lead() {
+                        Some(lead) if lead < to => {
+                            let p = pivot_of[lead];
+                            if p == NONE {
+                                return false;
+                            }
+                            let (x, d) = step(row, lead, p, pivots, tables);
+                            xors += x;
+                            done += d;
+                        }
+                        Some(_) => return true,
+                        None => return false,
+                    }
+                }
+            });
         }
         (xors, done)
     };
     let mut rest = rest;
     // The rows after the leading block go in batches.  Each batch is first
-    // reduced in parallel by the pivots that exist before it — the
-    // leading block's, then every earlier batch's — and then finished in
-    // order: a row resumes where it stopped, against the pivots its
+    // reduced — in parallel, a share of its rows to a thread — by the
+    // pivots that exist before it — the leading block's, then every
+    // earlier batch's — and then finished in order: a row resumes where it stopped, against the pivots its
     // predecessors in the batch have just made, and becomes a pivot if
     // anything survives.  Every row sees the reductions, the order and
     // the pivot table the serial loop would give it, so the pivots and
@@ -415,10 +439,11 @@ fn echelon(
     // batches start.
     let mut done = 0usize;
     let mut first = true;
-    // On one thread, or on a remainder too small to share out, reading
-    // each batch twice only costs: finish it serially instead, as the
-    // loop always did — in batches all the same where there are tables,
-    // so that each batch's pivots can join them for the next.
+    // On one thread, or on a remainder too small to share out, without
+    // tables, reading each batch twice only costs: finish it serially
+    // instead, as the loop always did.  With tables the batches and their
+    // first phase stay, for the cache reuse of `by_known` and so that each
+    // batch's pivots can join the tables for the next.
     // (Size first: asking rayon its thread count starts its pool.)
     let batched = rest.len() * words > PAR_WORDS && rayon::current_num_threads() > 1;
     let batch_rows = (ELIMINATION_BATCH_WORDS / words).clamp(32, 1024);
@@ -433,19 +458,17 @@ fn echelon(
         };
         let made = pivots.len();
         let chunk = &mut rest[done..end];
-        if first || batched {
+        if first || batched || tables.is_some() {
             let (pivot_of, known, tables) = (&pivot_of[..], &pivots[..], tables.as_ref());
             let threshold = if first { PAR_WORDS } else { PAR_BATCH_WORDS };
             let (x, d) = if chunk.len() > 1 && chunk.len() * words > threshold {
+                let share = chunk.len().div_ceil(rayon::current_num_threads()).max(1);
                 chunk
-                    .par_iter_mut()
-                    .map(|row| by_known(row, pivot_of, known, tables))
+                    .par_chunks_mut(share)
+                    .map(|rows| by_known(rows, pivot_of, known, tables))
                     .reduce(|| (0, 0), |a, b| (a.0 + b.0, a.1 + b.1))
             } else {
-                chunk
-                    .iter_mut()
-                    .map(|row| by_known(row, pivot_of, known, tables))
-                    .fold((0, 0), |a, b| (a.0 + b.0, a.1 + b.1))
+                by_known(chunk, pivot_of, known, tables)
             };
             xors += x;
             performed += d;
@@ -490,6 +513,10 @@ fn echelon(
     st.word_xors_performed += performed;
     Some(pivots)
 }
+
+/// Columns per range in [`echelon`]'s shared-out pass: every row of a
+/// share is taken through a range before any goes past it.
+const TILE_COLUMNS: usize = 256;
 
 /// Rows after the leading block, and rows in it, from which [`echelon`]
 /// reduces by the leading block through [`BlockTables`].
@@ -740,9 +767,10 @@ const PAR_REDUCERS: usize = 512;
 const PAR_PRODUCT_TERMS: usize = 1 << 16;
 
 /// Words per batch after the first in [`echelon`]'s shared-out pass: large
-/// enough that sharing a batch out pays for itself, small enough that few
-/// of its rows need a pivot another of its rows is about to make.
-const ELIMINATION_BATCH_WORDS: usize = 1 << 14;
+/// enough that sharing a batch out pays for itself and that a range's
+/// tables serve many rows while cached, small enough that few of its rows
+/// need a pivot another of its rows is about to make.
+const ELIMINATION_BATCH_WORDS: usize = 1 << 16;
 
 /// Words of work in one batch below which its first pass runs on one
 /// thread.
