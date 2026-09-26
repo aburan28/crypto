@@ -40,7 +40,11 @@ PIN = ["taskset", "-c", "2"]
 
 
 def sh(cmd: list[str]) -> str:
-    return subprocess.run(cmd, capture_output=True, text=True, check=False).stdout.strip()
+    """A command's output, or "" when the tool is not installed."""
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, check=False).stdout.strip()
+    except FileNotFoundError:
+        return ""
 
 
 def manifest() -> None:
