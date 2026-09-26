@@ -57,6 +57,7 @@ def run(out: Path):
         "classification": "RUNNING",
         "active_stage": "base_materialization",
         "checkout_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip(),
+        "dispatch_main_head": subprocess.check_output(["git", "rev-parse", "origin/main"], cwd=REPO, text=True).strip(),
         "protocol_sha256": sha(HERE / "PROTOCOL.md"),
         "source_sha256": sha(REPO / "examples/koblitz_s5_sat_instance.rs"),
         "binary_sha256": sha(EXE),
@@ -199,6 +200,9 @@ if __name__ == "__main__":
                 "active_stage": "setup",
                 "checkout_head": subprocess.check_output(
                     ["git", "rev-parse", "HEAD"], cwd=REPO, text=True
+                ).strip(),
+                "dispatch_main_head": subprocess.check_output(
+                    ["git", "rev-parse", "origin/main"], cwd=REPO, text=True
                 ).strip(),
                 "protocol_sha256": sha(HERE / "PROTOCOL.md"),
                 "source_sha256": sha(REPO / "examples/koblitz_s5_sat_instance.rs"),

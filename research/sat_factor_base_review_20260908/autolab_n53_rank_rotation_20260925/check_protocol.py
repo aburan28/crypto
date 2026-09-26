@@ -105,7 +105,11 @@ def preflight(*, require_release: bool = False) -> dict:
                        stdout=subprocess.DEVNULL)
         current_main = subprocess.check_output(["git", "rev-parse", "origin/main"],
                                                cwd=REPO, text=True).strip()
-        assert current_main == frozen["release_main_head"], "main changed after freeze"
+        assert HEX40.fullmatch(current_main)
+        # An unrelated main fast-forward does not change the exact reviewed
+        # PR checkout or any frozen source/input bytes; reject rewrites.
+        subprocess.run(["git", "merge-base", "--is-ancestor",
+                        frozen["release_main_head"], current_main], cwd=REPO, check=True)
     return frozen
 
 

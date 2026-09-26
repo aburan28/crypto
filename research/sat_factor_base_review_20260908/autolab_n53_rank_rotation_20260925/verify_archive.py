@@ -38,6 +38,8 @@ def verify_current_freeze():
     import check_protocol
     frozen = json.loads((HERE / "FROZEN.json").read_text())
     assert frozen["schema"] == "n53_target_cyclic_rank_factorial_freeze_v1"
+    assert frozen["status"] == "released_for_one_outcome"
+    assert HEX40.fullmatch(frozen["release_main_head"])
     assert file_sha(HERE / "PROTOCOL.md") == frozen["protocol_sha256"]
     for name, path in check_protocol.sources().items():
         assert file_sha(path) == frozen["source_sha256"][name], name
@@ -191,6 +193,9 @@ def verify(bundle: Path) -> dict:
             )
             assert summary.get("active_stage") in ("setup", "base_materialization", "unknown")
         assert HEX40.fullmatch(summary["checkout_head"])
+        assert HEX40.fullmatch(summary["dispatch_main_head"])
+        subprocess.run(["git", "merge-base", "--is-ancestor", frozen["release_main_head"],
+                        summary["dispatch_main_head"]], cwd=REPO, check=True)
         assert HEX64.fullmatch(summary["binary_sha256"])
         assert summary["rayon_num_threads"] == 1
         assert summary["process_group_rss_cap_bytes"] == frozen["process_group_rss_cap_bytes"]
