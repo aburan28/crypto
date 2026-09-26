@@ -1,4 +1,4 @@
-#include "nist_fields.cuh"
+#include "nist_solinas.cuh"
 #include <boost/multiprecision/cpp_int.hpp>
 #include <iostream>
 #include <random>
