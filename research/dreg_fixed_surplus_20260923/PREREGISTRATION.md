@@ -298,3 +298,60 @@ After a restart, the same command skips every job that has a finished line.
 
 The watchdog is now per draw, still 96 hours. The cells, `d_max`, draw
 counts, seeds and decision rules are unchanged.
+
+## Addendum, 2026-09-26, before the new binary measures any registered draw: a dense finish
+
+**What changes.** The remaining work is `(13, 5)`, `(15, 5)` and the three
+controls. It is measured on the same sparse path, which now finishes
+densely: `KIC_SPARSE_DENSE_FINISH=1` in `run_queue.py`'s environment.
+
+- **The path.** `solving_profile_sparse` eliminates the leading degree
+  band's columns sparsely, as before. It then packs the surviving rows as
+  bit rows and puts them in row echelon form with the repository's dense
+  kernel. That is `eliminate_high_columns_dense_finish` in
+  `src/cryptanalysis/sparse_macaulay.rs`.
+- **Why it is the same measurement.** The row space is unchanged. So the
+  linear rows span the same space, and the refutation and the pinned
+  variables read off it are the same.
+  - `dense_finish_keeps_the_high_rank_and_the_linear_span` checks the high
+    rank and the reduced span of the linear rows on four cells, at every
+    degree, with the switch at four positions.
+- **Why now.** A profile of one `(8, 4)` degree-6 draw (`refute_profile`)
+  found 93 of its 100 seconds merging index lists below the leading band,
+  where the surviving rows are thousands of entries long.
+
+**Identity check, before it measured anything registered.** The binary was
+run whole-cell at the committed seeds. It covered:
+
+- the grid's five cheap cells;
+- this ladder's four small cells, at seed `20260928`;
+- the surplus control's `(7, 4)` and `(8, 4)`.
+
+It reproduced **376 committed rows with 0 mismatches**: draw index,
+subspace, target, solution count, outcome and FFD.
+
+- Those rows include 44 measured draws, among them degree-7 refutations
+  and a `≥7` lower bound. The check also replayed single draws, including
+  `(10, 5)`'s first.
+- The measured draws took **2,271 s against 23,586 s** on the sparse-only
+  path.
+- The evidence is in `runs/identity-check-dense/`, with `compare.py` and
+  its output.
+
+**Binary.** `dreg_ladder` built from the commit that adds this addendum,
+with sha256 `e25fd32372e1e68fe7516071d461b0edc79d640b086a70ebf2079184342c526b`.
+
+- Formatting changed after the identity-check build. The rebuilt binary
+  reproduced four of the cells again exactly: 52 rows, 0 mismatches.
+- It carries `main`'s later changes. Current `main` alone had already
+  reproduced the grid's 299 rows (the surplus control's RESULTS.md), and
+  the 376 rows above are the check on this exact code.
+
+**Stopped.** Two frozen-binary `(13, 5)` draws had been running for about
+1.5 hours when this was committed. They were started at 02:35 UTC on
+2026-09-26, and no draw had finished. They were stopped to free their cores
+and memory for the faster path. Stopping them is a scheduling decision, not
+evidence.
+
+The cells, `d_max`, draw counts, seed `20260928`, `run_queue.py`,
+`score.py` and the decision rules are unchanged.
