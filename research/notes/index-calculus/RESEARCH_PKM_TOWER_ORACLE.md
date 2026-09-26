@@ -46,6 +46,12 @@ pilot (§10, 2026-09-24).
   - Adoption fails, so **F4 stays the measuring engine**. §§13.1–13.6 were
     pre-registered, and §13.3 discloses a bug that a smoke test found before the
     runs, and the runs made with the buggy build.
+- **The gate of §13.10 (§14, 2026-09-26) fails.** The same signature engine,
+  taking F4's steps (by polynomial degree), matches F4's `D` at `m = 3`,
+  `N = 9`. It is one above at `N = 12` under both module orders, so no round is
+  run and F4 stays. That mode's zero reductions come back as singular rows. The
+  next lever for F4's zero rows is an exact early exit once a step's residue
+  block reaches full rank (§14.8).
 
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
@@ -2189,6 +2195,219 @@ the engine. The rest of §12.10 stands, re-ranked:
    module order). Without that check, the variant is not worth a round.
 4. **`m = 2` at `N = 28`** and the **independent replication** of §12.10's items
    3–4.
+
+## 14. The gate of §13.10, 2026-09-26: signature criteria with F4's steps
+
+§§14.1–14.4 were written and committed before the gate's runs. The results
+follow as §14.5 onward. The data are in `research/pkm_tower_round5_20260926/`.
+
+### 14.1 The variant
+
+Round 4's engine takes its steps by signature degree. §13.9 traced its extra
+degree to that order: a pair of low polynomial degree can wait behind pairs of
+smaller signature and higher degree. §13.10 ranked a variant that takes F4's
+steps instead. `sig_fp_tower` now has it as `Steps::PolynomialDegree`
+(`--sig-steps degree` in the example).
+- **Steps.** Each step takes the pairs of the lowest polynomial degree
+  `deg t + deg LM(g)`, as `f4_fp_tower`'s normal strategy does.
+- **Unchanged.** Within a step, rows are still eliminated in signature order,
+  a row is reduced only by rows of smaller signature, and the criteria are
+  round 4's.
+- **Why the criteria stay sound out of signature order.** They are monotone
+  in the basis, which is Gao–Volny–Wang's cover argument:
+  - a known syzygy stays a syzygy;
+  - a pair once covered stays covered. A pair is covered when an element whose
+    signature divides the pair's has a multiple with a smaller leading
+    monomial.
+- **Why every pair ends covered.** Under the ratio order, the row built for a
+  signature (its rewriter's multiple) has a leading monomial at most every
+  pair's lcm.
+  - If smaller, the rewriter covers the pairs.
+  - If equal, the pairs' other halves reduce the row's lead, and the reduced
+    row covers them.
+
+  So every pair ends covered or with a syzygy signature, which is what the
+  characterization asks of the final basis, in any processing order. The mode
+  therefore requires the ratio order.
+- **Tests.** The mode joins every variant test, under both module orders:
+  - 120 random Kummer systems against `f4_fp_tower`'s basis;
+  - homogeneous systems and general towers, the same ideal;
+  - the long one-generator towers of §13.3.
+
+  All six tests pass.
+- **A second degree, reported beside `D_sig`.** `D_lm` is the highest degree of
+  a row whose element enlarged the ideal of leading monomials: no leading
+  monomial held when its step began divides the element's. That is what F4's
+  new elements do by construction.
+  - A signature basis also keeps elements whose leading monomial is already in
+    that ideal. `D_sig` counts those too.
+  - `D_lm` is a diagnostic. It was introduced after round 4, and **the gate
+    does not use it.**
+
+### 14.2 The gate, as §13.10 fixed it
+
+§13.10: "A degree-driven signature variant, only if a cheap check first shows
+`D_sig = D` on the round's `m = 3`, `N = 9`–12 systems."
+- **Systems.** Round 4's G3 systems at `N = 9` and 12: Kummer, `m = 3`, `p₁`,
+  targets 0 and 1, four systems. `D` is F4's, from round 4's T3 rows (equal to
+  round 2's).
+- **Variant.** Steps by polynomial degree, the ratio order, under each module
+  order: position over term and signature degree first.
+- **Pass.** A module order passes if `D_sig = D` on all four systems, where
+  `D_sig` is round 4's `solving_degree_max`, unchanged. A system that does not
+  finish within 600 s and the 14 GB cap fails.
+- **If an order passes**, round 5 is pre-registered in a later section before
+  any other run of the variant. It uses the passing order; if both pass, the
+  one with fewer multiply-adds at `N = 12`, summed over the two targets.
+- **If neither passes**, the variant is not worth a round (§13.10). This
+  section records why, and F4 stays the measuring engine.
+
+### 14.3 Context, not part of the gate
+
+The same script also runs these, to read the gate's result by:
+- the variant, both orders, on round 4's other small systems: `m = 2`,
+  `N = 12`, 14, 16, and `m = 4`, `N = 8`;
+- round 4's engine (position over term, steps by signature degree) on all the
+  systems above, for its `D_lm`. Round 4 did not report `D_lm`.
+
+None of these moves the gate.
+
+### 14.4 What was run before this section (a disclosure)
+
+- **The six unit tests** above.
+- **One plumbing check** of the example's new flag, on a system outside the
+  gate: Kummer, `m = 2`, `p₁`, `N = 8`, target 0, with steps by polynomial
+  degree. It refutes the system, with `D_sig = 5`, `D_lm = 4` and 1.65e5
+  multiply-adds. F4 gives `D = 4` and 5.17e5 multiply-adds. With one input the
+  two module orders coincide, and they gave the same row. The unit appeared in
+  a step of degree 5 from a rewritten row of degree 4. F4 finds it in its
+  degree-4 step.
+
+  This one system suggests the gate may fail. The prediction, fixed now: at
+  least one of the four gate systems gives `D_sig > D` under each order, so
+  the gate fails.
+
+
+### 14.5 Results
+
+`run_gate.py` ran from 07:16 to 07:42 UTC on 2026-09-26, with the example built
+from the pre-registration commit `718d91d2` (hashes in the data README). In
+every cell the two targets of a size give identical rows, apart from the wall
+clock, so each line stands for both. The exception is GP at `m = 3`, `N = 12`,
+whose two runs timed out at different points. F4's `D` and multiply-adds are
+round 4's T rows.
+
+| cell | `m` | `N` | F4 `D` | `D_sig` | `D_lm` | multiply-adds, sig / F4 | width F4 / sig | peak MB F4 / sig | S-rows (singular) / F4's | reducers / F4's |
+|:--|--:|--:|--:|--:|--:|--:|:--|:--|:--|:--|
+| GD | 3 | 9 | 6 | **6** | 6 | 0.25 | 1,186 / 1,277 | 11 / 79 | 1,545 (820) / 2,405 | 7,228 / 2,458 |
+| GD | 3 | 12 | 6 | **7** | 7 | 0.58 | 5,019 / 8,445 | 64 / 897 | 10,421 (6,862) / 11,509 | 112,439 / 9,839 |
+| GP | 3 | 9 | 6 | **6** | 6 | 0.34 | 1,186 / 1,270 | 11 / 145 | 2,883 (2,208) / 2,405 | 13,738 / 2,458 |
+| GP | 3 | 12 | 6 | **≥ 7**, timed out | ≥ 7 | — | 5,019 / 8,537 so far | 64 / 5,177 | — | — |
+| GD = GP | 2 | 12 | 5 | 6 | 5 | 0.54 | 1,231 / 1,378 | 8 / 53 | 6,544 (6,052) / 2,154 | 22,768 / 2,721 |
+| GD = GP | 2 | 14 | 5 | 6 | 5 | 0.60 | 2,304 / 3,832 | 15 / 232 | 19,551 (18,505) / 7,033 | 74,591 / 4,945 |
+| GD = GP | 2 | 16 | 5 | 6 | 6 | 0.69 | 4,789 / 9,235 | 36 / 826 | 51,097 (48,883) / 18,666 | 198,918 / 9,714 |
+| GD | 4 | 8 | 6 | 6 | 6 | 0.46 | 1,049 / 1,771 | 9 / 47 | 1,243 (691) / 944 | 11,033 / 1,990 |
+| GP | 4 | 8 | 6 | 7 | 7 | 1.07 | 1,049 / 2,253 | 9 / 320 | 2,146 (1,545) / 944 | 67,697 / 1,990 |
+
+GD is steps by polynomial degree with the signature-degree-first order, and GP
+the same with position over term. With one input (`m = 2`) the two orders
+coincide and gave the same rows. The peaks are per process, which measures
+both targets.
+
+- **Instrument.** All 34 finished rows (both variants and S4) refute their
+  systems, as F4 does, and `verify.py` agrees with every one. It now checks
+  each signature variant separately. Before, it checked one row per system
+  and engine, and all variants share an engine name. `analyze.py` counted the
+  variants as repeats in the same way, and now tells them apart too. Neither
+  change alters the earlier rounds' output apart from a table heading.
+- **GP at `m = 3`, `N = 12`** reached the 600 s budget on both targets. Target
+  0 stopped after 582 steps, with 23,198 elements, 2.7 million pending pairs
+  and a 5.2 GB peak. It had already gained elements from rows of degree 7.
+- **S4 (round 4's engine, rebuilt)** repeats round 4's G rows exactly: all 12,
+  on every deterministic field and every signature counter. So this PR leaves
+  the default engine unchanged.
+  - Its `D_lm` equals its `D_sig` everywhere except `m = 2`, `N = 12` (5
+    against 6).
+  - So round 4's extra degree was, almost everywhere, a larger ideal of
+    leading monomials at the higher degree. It was not elements kept only for
+    their signatures.
+
+### 14.6 The rule of §14.2, applied
+
+- **Position over term (GP): fails.** `D_sig = D` on the two `N = 9` systems,
+  and the two `N = 12` systems timed out at `D_sig ≥ 7`.
+- **Signature degree first (GD): fails.** `D_sig = D` on the two `N = 9`
+  systems, and `D_sig = 7` against 6 on the two `N = 12` systems.
+
+**The gate fails under both orders**, as §14.4 predicted. As §13.10 and §14.2
+fixed, the variant is not worth a round, and F4 (`f4_fp_tower`) stays the
+measuring engine.
+
+### 14.7 What the gate shows, and what it does not
+
+It shows three things.
+1. **F4's steps remove part of the extra degree, but not all of it.**
+   - Taking steps by polynomial degree brings `D_sig` down to F4's `D` where
+     round 4's engine needed one more: `m = 3`, `N = 9`, and `m = 4`, `N = 8`
+     under GD.
+   - At `m = 3`, `N = 12` it is one above F4 (7) where round 4's engine was two
+     above (8).
+   - At `m = 2` it is one above at every size. At the largest sizes of `m = 2`
+     and `m = 3`, `D_lm` is above `D` too. So there the ideal of leading
+     monomials needs a degree F4 does not, and the extra degree is not
+     signature bookkeeping.
+2. **The zero reductions come back as singular rows.**
+   - The degree mode reduces 0–218 rows to zero per system. But it drops many
+     of its S-rows as singular: 92–96% at `m = 2` (48,883 of 51,097 at
+     `N = 16`), and 53–66% at `m = 3`. It also builds 3–20 times F4's
+     reducers.
+   - Its multiply-adds are 0.25–0.69 of F4's under GD, because a singular row
+     stops where it meets its equal. That is at sizes where F4 takes seconds.
+     Its memory is 5–23 times F4's.
+   - In `AGENTS.md` §3's terms the missing zero rows are a relabelling, not a
+     saving that carries.
+3. **Position over term is the wrong order for these steps.** Where the two
+   orders differ it needs 1.5–3.3 times GD's steps. At `m = 3`, `N = 12` it did
+   not finish in 600 s, where GD takes 62 s, and at `m = 4`, `N = 8` it needs
+   one more degree than GD.
+
+It does not show three things.
+1. **That no signature design matches F4 here.** Untested:
+   - GVW's cover criterion used to skip pairs, instead of building the
+     rewriter's row;
+   - Schreyer-type module orders;
+   - F5 on the homogenized system.
+
+   The revisit condition is this section's gate: a variant that gives
+   `D_sig = D` on the four `m = 3`, `N ≤ 12` systems in a check of a few
+   minutes. Without that, no round.
+2. **Anything about `D(N)`.** The F4 rows are round 4's.
+3. **Any speed, `S` or scoreboard row.** Nothing is priced end to end
+   (`AGENTS.md` §2).
+
+### 14.8 Next steps, ranked
+
+The signature line ends here, at this boundary: steps by signature degree and
+by polynomial degree, under both module orders, on round 4's systems up to
+`m = 4`, `N = 12` and `m = 2`, `N = 20`. The goal
+it served, §12.10's zero reductions, has a cheaper lever inside F4. Round 3's
+trace of `m = 4`, `N = 16` shows where those rows are.
+- In its last step (53), the residue block had 82,738 rows and reached full
+  rank on its 9,661 columns. Every later row reduced to zero.
+- That elimination took 776 of the step's 935 s.
+1. **Stop a step's residue elimination once its rank reaches its column
+   count**, in `f4_fp_tower`.
+   - This changes no output. As in round 3, every row and trace must come out
+     identical except the wall clock and the multiply-adds.
+   - It saves at most the rows after saturation: up to 88% of that phase in
+     step 53, and nothing in a step whose residue stays rank-deficient, such
+     as step 49. The saving depends on when saturation comes in the row
+     order, which the trace does not record. The first task is to measure it.
+2. **`m = 3` at `N = 18` with F4** (§13.10 item 1).
+3. **`m = 4` at `N = 20` with F4**, after item 1, on a machine with several
+   times this one's memory.
+4. **`m = 2` at `N = 28`**, and the **independent replication** of §12.10's
+   items 3–4.
 
 ---
 

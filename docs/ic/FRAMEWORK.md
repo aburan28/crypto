@@ -719,6 +719,10 @@ worse than none:
   remove the zero reductions. But it needs rows 1–2 degrees higher on
   every system and up to 28 times the memory, and it ran out of 14 GB at
   `m = 3`, `N = 15`. So `f4_fp_tower` stays the engine that measures `D`.
+  A variant taking F4's steps by polynomial degree (§14) matches F4's
+  degree at `m = 3`, `N = 9` but not at `N = 12`, so the signature line
+  stops there; the next lever for F4's zero rows is an exact early exit
+  once a step's residue block reaches full rank.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
