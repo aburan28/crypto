@@ -4824,6 +4824,32 @@ Two ratios to the floor stand:
     python3 analyse.py > analysis.json
     python3 render_rows.py md          # the table in §20.3
 
+### 20.10 What stays open
+
+Each of these is engineering (§3). It would lower `S` without moving the
+ratio to the floor, and each is measurable with `ic price` on this
+round's parameter files.
+
+- **One orbit map, in single-word arithmetic.** The constructions in
+  §20.5 are the same map rebuilt four to six times a run in big-integer
+  arithmetic, and they are 7–70% of `S`. Built once and shared, with the
+  counts unchanged, they would take most of that out of the small and
+  middle sizes.
+- **The per-target big-integer work.** The descent's recovery check and
+  the final verification are each a big-integer scalar multiplication
+  per target. They are part of why the descent's cost per target stays
+  above rho's up to `2^37`.
+- **The builder's eight-orbit minimum.** It binds at the four smallest
+  sizes.
+- **The build's price as the table leaves cache.** A stored pair costs
+  4.98 units at `2^39` and 9.20 at `2^47.2`. This is the §19.7
+  one-pass-build lever again, now where it weighs most.
+- **The exponent at the top.** Separating `1/6` from `0.141` needs more
+  sizes above `2^40`, or more sets per size. The declared four-point fit
+  cannot.
+- **Bailey's walk, counted** (§19.7). This is still unmeasured, so its
+  column stays a model.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
