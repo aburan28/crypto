@@ -8,7 +8,7 @@ RTX PRO 6000 Blackwell is an sm_120 device. The design uses 32-bit limbs (8 for 
 
 Both primes have low limb 0xffffffff, hence Montgomery n' = 1. More importantly, in radix B=2^32 every modulus limb is 0, 1, B-1, or B-2. The reduction row therefore uses carry arithmetic instead of integer multiplication. P-256's signed limb pattern is [-1,-1,-1,0,0,0,+1,-1]; P-384's is [-1,0,0,-1,-2,-1,-1,-1,-1,-1,-1,-1].
 
-The CUDA path adds explicit mad.lo.cc / madc.hi.cc product-row carry chains. This is why specialized Montgomery is the first Blackwell candidate rather than assuming a generalized-Mersenne fold must win.
+The CUDA path adds explicit mad.lo.cc / madc.hi.cc product-row carry chains and hand-written sparse Montgomery reduction carry chains. A direct generalized-Mersenne/Solinas field is retained as a matched competitor, so the RTX PRO measurement decides rather than assuming either representation wins.
 
 ## Correctness
 
@@ -20,7 +20,7 @@ The test checks 20,000 random field pairs on each curve against Boost.Multipreci
 
 Run: make bench ARCH=sm_120 NIST_PTX=1 && ./bench 128
 
-The benchmark reports dependent and two-chain field multiplication, squaring, a=-3 doubling and mixed addition. Sweep block sizes: sm_120 has 64K 32-bit registers per SM and at most 48 resident warps, so especially for P-384 the winner cannot be selected from instruction count alone.
+The benchmark reports dependent and two-chain field multiplication, squaring, a=-3 doubling and mixed addition for both Montgomery and Solinas fields. The tuner sweeps 64..256 threads/block and PTX register caps 96/128/160 plus unrestricted. sm_120 has 64K 32-bit registers per SM and at most 48 resident warps, so especially for P-384 the winner cannot be selected from instruction count alone.
 
 The Modal runner automates portable-vs-PTX and block-size tuning: modal run modal_app.py::validate, then modal run modal_app.py::tune. NIST_GPU defaults to RTX-PRO-6000.
 
