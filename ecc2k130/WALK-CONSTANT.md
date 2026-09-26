@@ -884,13 +884,19 @@ already collecting loses nothing.
 - **Storage.**
   - The live corpus is unversioned (`ECC_ALLOW_LEGACY_STORAGE=1`, from
     `bootstrap.sh`), so no campaign id holds `maxIters`.
-  - Under `storageProtocol`, `campaignContract` hashes it into the id
-    together with the binary hashes.  There a raise, like any rebuild, is a
-    new namespace, and `rollout.py` refuses it.
+  - Under `storageProtocol`, the campaign id binds the guard the campaign
+    was created with.  The first raise records that value as
+    `contractMaxIters`, so the id stays the same and so do the slots, the
+    manifests and every bound work directory.  The live `maxIters` may only
+    be at least `contractMaxIters`: `campaignContract` refuses anything
+    lower.  *(This bullet first said a strict raise was a new namespace, which
+    `rollout.py` refused; the follow-up that added `contractMaxIters`
+    changed that.)*
 - **How.**
   - `./rollout.sh max-iters 4294967296` reads `campaign.json` together with
     its ETag and changes `maxIters` and nothing else.
-  - It refuses a lower value, a live value of 0 and a strict campaign.
+  - It refuses a lower value and a live value of 0.  On a strict campaign
+    it records `contractMaxIters` and checks that the id did not move.
   - It writes the file back only if the file did not change in the
     meantime.
   - Workers do not restart for this: it is neither a client-pointer move
@@ -908,9 +914,10 @@ already collecting loses nothing.
   - Lowering the guard cuts trails that are already under way.
 - **Tools that re-walk trails** must accept the longer ones:
   - `merge.py`'s solve step: leave out `--client-arg --max-iters`, since the
-    client's default cap is `2^34`.  A merge work directory bound to the
-    `2^30` argument refuses a changed one.  It is a derived cache, rebuilt
-    from `dp/` without losing a point.
+    client's default cap is `2^34`, or raise it with the guard.  A merge work
+    directory accepts a raised `--max-iters` and refuses any other change to
+    the arguments it was bound with, because a larger replay cap re-walks
+    every stored point too.
   - the witness generator, whose default is `2^32` since round 2;
   - cairn jobs, whose `max_steps_per_walker` must be at least `2^32`.
 - **What is not recovered.** The steps the `2^30` guard has already

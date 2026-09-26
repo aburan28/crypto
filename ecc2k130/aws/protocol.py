@@ -66,6 +66,22 @@ def campaignContract(config):
     fields = ("curve", "dpWeight", "maxIters", "packed", "workers", "batch",
               "binarySha256", "hostBinarySha256", "sourceSha256")
     c = {k: config[k] for k in fields}
+    # maxIters is a restart guard, not part of the walk: a raise keeps every
+    # point and checkpoint (WALK-CONSTANT.md section 11.4).  So the id binds
+    # the guard the campaign was created with, contractMaxIters once a raise
+    # has recorded it (rollout.py max-iters), and the live maxIters may only
+    # be at least that.  A campaign that never raised it has no
+    # contractMaxIters and hashes exactly as it always did.
+    live = c["maxIters"]
+    c["maxIters"] = config.get("contractMaxIters", live)
+    if type(live) is not int or type(c["maxIters"]) is not int or c["maxIters"] < 0:
+        raise ValueError("invalid maxIters")
+    if c["maxIters"] == 0 and live != 0:
+        raise ValueError("the campaign was created with no guard (maxIters 0); maxIters %d would "
+                         "cut trails already under way" % live)
+    if live < c["maxIters"]:
+        raise ValueError("maxIters %d is below the campaign's guard %d; only a raise keeps "
+                         "trails already under way" % (live, c["maxIters"]))
     if type(c["curve"]) is not int or c["curve"] not in (23, 41, 83, 131):
         raise ValueError("strict storage currently supports normal-basis curves 23/41/83/131")
     for key in ("dpWeight", "maxIters", "workers", "batch"):
