@@ -107,23 +107,24 @@ and 0.316 against 0.431 over all three sizes. These fits use 2–3 points with t
 K and have no interval. The √(L·r/n) optimum is the same for both arms, so read the
 difference as finite-size, not as a growth-rate claim.
 
-## 4. n=61 vs batched rho at L = 1,024
+## 4. n=61 vs batched rho at L ≥ 1,024
 
-Script: `growing_n_n61_L1024.sh`. a=0 n=61 (r = 162888033982417, 48 bits, cofactor
-14,156). K was chosen on a disjoint 1,024-target tune (`400/600/800/1000` → **K=600**,
-tune wall 158 s). Three paired evaluation blocks, alternating arm order. All
-fixtures matched. 3,072/3,072 recovered. No 32-target panel.
+Scripts: `growing_n_n61_L1024.sh`, `growing_n_n61_L4096.sh`. a=0 n=61
+(r = 162888033982417, 48 bits, cofactor 14,156). K chosen on a disjoint same-L
+tune. Three paired evaluation blocks, alternating arm order. All fixtures
+matched. No 32-target panels.
 
 | n | L | K | Compact wall | Rho wall | Wall ratio (range) | User-CPU ratio | Peak RSS compact / rho | All 3 blocks |
 |---:|---:|---:|---:|---:|---:|---:|---:|---|
 | 61 | 1,024 | 600 | 194 s | 611 s | 0.306 (0.291–0.363) | 0.284 | 3.1 / 0.37 GB | compact |
+| 61 | 4,096 | 800 | 426 s | 672 s | 0.421 (0.222–0.633) | 0.332 | 5.3 / 0.83 GB | compact |
 
-In-process medians: compact 194 s (setup 52 s, rank 44–88 s, targets 45–93 s,
-median 29–48 ms/target) vs batched rho ~6–10 min. Same √(L·r/n) caveat: finite
-constant-factor, not asymptotic.
+L=1,024 tune `400/600/800/1000` → K=600 (158 s). L=4,096 tune `600/800/1000/1200`
+→ K=800 (123 s). 15,360/15,360 recovered and independently replayed. Host load
+at L=4,096 swung ~15–96, so wall is noisier than user-CPU (0.20–0.35). Same
+√(L·r/n) caveat: finite constant-factor, not asymptotic.
 
-**Next:** n=61 at **L=4,096** (`growing_n_n61_L4096.sh`), K retuned on a disjoint
-4,096-target corpus. Do not run 32-target panels.
+**Next:** n=61 at **L=16,384** (`growing_n_n61_L16384.sh`). No 32-target panels.
 
 ## Independent replay
 
@@ -145,6 +146,7 @@ with no code shared with the producer. For each record it checks:
 | Paired panel 2 | 61,440 | 61,440 | 0 |
 | Growing n vs batched rho | 9,216 | 9,216 | 0 |
 | n=61 L=1,024 vs batched rho | 3,072 | 3,072 | 0 |
+| n=61 L=4,096 vs batched rho | 12,288 | 12,288 | 0 |
 
 ## Limits
 

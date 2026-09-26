@@ -222,17 +222,18 @@ one Frobenius-quotiented S3 index, normal-basis one-probe lookup, rank-guided
 relations, and K grown with batch size L. Against the frozen Kuhn–Struik batched
 rho (`d=4`) it wins all 15 paired n=53 blocks (L=32..16,384, wall 0.24–0.74),
 all 3 n=41 blocks at L=1,024 (0.34), and all 3 n=61 blocks at L=1,024 (K=600,
-wall 0.29–0.36; 3,072/3,072 replayed). Constant-factor: both arms ~√(L·r/n) at
-optimal K. Status `PENDING_INDEPENDENT_VALIDATION` — do **not** promote the
-selected-panel `vs_rho` row from this arm alone.
+wall 0.29–0.36) and L=4,096 (K=800, wall 0.22–0.63; 15,360/15,360 replayed).
+Constant-factor: both arms ~√(L·r/n) at optimal K. Status
+`PENDING_INDEPENDENT_VALIDATION` — do **not** promote the selected-panel
+`vs_rho` row from this arm alone.
 
 **Next beat:** a=0 n=61 vs `examples/koblitz_rho_batch_ks_v2_n61.rs` at
-**L=4,096 only**. Do not run 32-target panels. Evidence:
+**L=16,384 only**. Do not run 32-target panels. Evidence:
 [`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz compact-orbit `vs_rho` → a=0 n=61 vs batched rho at L=4,096** (L=1,024 already 3/3 at wall 0.29–0.36). No 32-target panels. After that: independent-host rerun and Bernstein–Lange.
+1. **Koblitz compact-orbit `vs_rho` → a=0 n=61 vs batched rho at L=16,384** (L=1,024 and L=4,096 already 3/3). No 32-target panels. After that: independent-host rerun and Bernstein–Lange.
 2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
 3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
    On the autolab `signed_expanded` family the nearest charged gap is `n = 37`

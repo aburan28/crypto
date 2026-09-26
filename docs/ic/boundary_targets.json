@@ -128,7 +128,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Compact-orbit DLP beats batched rho at n=61 L=1024 (K=600, wall 0.29-0.36, 3/3 blocks, 3072/3072 replayed). Next: n=61 L=4096 only (no 32-target panels). n=53 still 15/15 vs KS. PENDING_INDEPENDENT_VALIDATION; constant-factor; do not promote the selected-panel vs_rho row"
+      "beat": "Compact-orbit DLP beats batched rho at n=61 L=1024 (K=600, wall 0.29-0.36) and L=4096 (K=800, wall 0.22-0.63, 12288/12288 replayed). Next: n=61 L=16384 only (no 32-target panels). PENDING_INDEPENDENT_VALIDATION; constant-factor; do not promote the selected-panel vs_rho row"
     },
     {
       "beat": "Reduce the selected algebraic n=53 exact support from 738,197,504 bytes below 512 MiB without regressing the 95-relation solve, online wall crossover, or charged resources",
