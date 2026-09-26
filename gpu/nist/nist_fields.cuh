@@ -34,7 +34,7 @@ template<int N> NF_HD void n_mac_row(uint32_t*t,const uint32_t*a,uint32_t b){
  c+=t[N];t[N]=(uint32_t)c;t[N+1]+=(uint32_t)(c>>32);
 }
 
-template<class M> NF_HD uint32_t n_reduce_row(uint32_t*t,uint32_t m){
+template<class M> NF_HD uint32_t n_reduce_row_portable(uint32_t*t,uint32_t m){
  uint64_t c=0;
 #pragma unroll
  for(int j=0;j<M::N;j++){
@@ -46,6 +46,8 @@ template<class M> NF_HD uint32_t n_reduce_row(uint32_t*t,uint32_t m){
  }
  return (uint32_t)c;
 }
+
+template<class M> NF_HD uint32_t n_reduce_row(uint32_t*t,uint32_t m){return n_reduce_row_portable<M>(t,m);}
 
 struct P256Mod {
  static const int N=8;
