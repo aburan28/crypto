@@ -1,21 +1,20 @@
 #!/bin/bash
-# n=61 paired panel at L=1024: compact-orbit shared-log DLP vs the
-# n=61-admitted frozen Kuhn-Struik batched-rho copy on identical published
-# targets. K is chosen on a disjoint 1024-target tune. No L=32 panels.
+# n=61 paired panel at L=4096. K tuned on a disjoint 4096-target corpus.
+# No L=32 panels.
 set -u
 LAB=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$LAB/../../.." && pwd)
-OUT=$LAB/growing_n_n61_L1024
+OUT=$LAB/growing_n_n61_L4096
 mkdir -p "$OUT"
 cd "$OUT"
 KS=${KS_OVERRIDE:-$ROOT/target/release/examples/koblitz_rho_batch_ks_v2_n61}
 IC=$ROOT/target/release/examples/koblitz_orbit_dlp_fast
-L=1024
+L=4096
 N=61
 shasum -a 256 "$KS" "$IC" > SHA256SUMS
 echo "KS=$KS IC=$IC L=$L N=$N $(date -u +%FT%TZ)" | tee panel.log
 
-candidates="400 600 800 1000"
+candidates="600 800 1000 1200"
 wall() { grep ' real' "$1" | awk '{print $1}'; }
 
 corpus() {
@@ -79,5 +78,4 @@ done
 echo "replay start $(date -u +%FT%TZ)" | tee -a panel.log
 REPLAY_BASE=$OUT/base_n61_K$K.jsonl python3 "$LAB/independent_replay.py" \
   --dlp "$OUT" "$OUT/independent_replay.json" 61 | tee -a panel.log
-# independent_replay.py also accepts ic_n{n}_b*.jsonl (producer name).
 echo "DONE $(date -u +%FT%TZ)" | tee -a panel.log

@@ -128,7 +128,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Compact-orbit shared-log DLP (examples/koblitz_orbit_dlp_fast.rs) vs a=0 n=61 frozen Kuhn-Struik batched rho at L>=1024 only (no 32-target panels). n=53 already beats KS in 15/15 paired blocks (L=32..16384, wall 0.24-0.74) and n=41 L=1024 (0.34); 86112/86112 independently replayed; PENDING_INDEPENDENT_VALIDATION; constant-factor not asymptotic; do not promote the selected-panel vs_rho row from this arm alone"
+      "beat": "Compact-orbit DLP beats batched rho at n=61 L=1024 (K=600, wall 0.29-0.36, 3/3 blocks, 3072/3072 replayed). Next: n=61 L=4096 only (no 32-target panels). n=53 still 15/15 vs KS. PENDING_INDEPENDENT_VALIDATION; constant-factor; do not promote the selected-panel vs_rho row"
     },
     {
       "beat": "Reduce the selected algebraic n=53 exact support from 738,197,504 bytes below 512 MiB without regressing the 95-relation solve, online wall crossover, or charged resources",

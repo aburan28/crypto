@@ -224,8 +224,10 @@ def main():
     summary = {"records_dir": str(records_dir), "fields": {}, "all_pass": True, "total_records": 0}
     for n in fields:
         panel_field = {"blocks": 0, "records": 0, "pass": 0, "fail": 0, "failures": []}
-        record_paths = sorted(records_dir.glob(f"dlp_n{n}_b*.jsonl")) or sorted(
-            records_dir.glob(f"n{n}_block*.jsonl")
+        record_paths = (
+            sorted(records_dir.glob(f"dlp_n{n}_b*.jsonl"))
+            or sorted(records_dir.glob(f"ic_n{n}_b*.jsonl"))
+            or sorted(records_dir.glob(f"n{n}_block*.jsonl"))
         )
         if not record_paths:
             record_paths = [

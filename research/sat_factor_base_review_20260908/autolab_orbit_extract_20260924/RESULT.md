@@ -107,14 +107,23 @@ and 0.316 against 0.431 over all three sizes. These fits use 2–3 points with t
 K and have no interval. The √(L·r/n) optimum is the same for both arms, so read the
 difference as finite-size, not as a growth-rate claim.
 
-The next usable Koblitz rung above n=53 is a=0 n=61 (r = 162888033982417, 48 bits,
-cofactor 14,156). a=0 n=59's remaining 57-bit factor is composite. The n=61-admitting
-rho binary (`examples/koblitz_rho_batch_ks_v2_n61.rs`) differs from frozen v2 by one
-admitted-n line and is bit-identical at n=53 on a matched corpus.
+## 4. n=61 vs batched rho at L = 1,024
 
-**Do not run 32-target panels.** The next measurement is n=61 vs batched rho at
-**L ≥ 1,024** (K tuned on a disjoint 1,024-target corpus; then L=4,096 if RSS
-allows). Script: `growing_n_n61_L1024.sh`.
+Script: `growing_n_n61_L1024.sh`. a=0 n=61 (r = 162888033982417, 48 bits, cofactor
+14,156). K was chosen on a disjoint 1,024-target tune (`400/600/800/1000` → **K=600**,
+tune wall 158 s). Three paired evaluation blocks, alternating arm order. All
+fixtures matched. 3,072/3,072 recovered. No 32-target panel.
+
+| n | L | K | Compact wall | Rho wall | Wall ratio (range) | User-CPU ratio | Peak RSS compact / rho | All 3 blocks |
+|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 61 | 1,024 | 600 | 194 s | 611 s | 0.306 (0.291–0.363) | 0.284 | 3.1 / 0.37 GB | compact |
+
+In-process medians: compact 194 s (setup 52 s, rank 44–88 s, targets 45–93 s,
+median 29–48 ms/target) vs batched rho ~6–10 min. Same √(L·r/n) caveat: finite
+constant-factor, not asymptotic.
+
+**Next:** n=61 at **L=4,096** (`growing_n_n61_L4096.sh`), K retuned on a disjoint
+4,096-target corpus. Do not run 32-target panels.
 
 ## Independent replay
 
@@ -135,6 +144,7 @@ with no code shared with the producer. For each record it checks:
 | Paired panel 1 | 15,456 | 15,456 | 0 |
 | Paired panel 2 | 61,440 | 61,440 | 0 |
 | Growing n vs batched rho | 9,216 | 9,216 | 0 |
+| n=61 L=1,024 vs batched rho | 3,072 | 3,072 | 0 |
 
 ## Limits
 
