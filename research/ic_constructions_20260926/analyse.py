@@ -91,6 +91,19 @@ def constructions(rep: dict) -> float:
     return sum(rep["median"]["phases_units"][ph] for ph in CONSTRUCTIONS)
 
 
+# Phases the change does not touch: the base, table, collection, logs and
+# descent work, and the curve's setup.
+UNCHANGED = ("setup", "select", "build", "collect", "verify", "la", "descent", "verify_final")
+
+
+def med(rep: dict, key: str) -> float:
+    return statistics.median(r[key] for r in rep["repetitions"])
+
+
+def phase_ns(rep: dict, phases: tuple[str, ...]) -> float:
+    return sum(statistics.median(r["phases_ns"][ph] for r in rep["repetitions"]) for ph in phases)
+
+
 def s20_row(a: int, n: int) -> dict:
     return next(r for r in S20["sizes"] if (r["a"], r["n"]) == (a, n))
 
@@ -98,6 +111,7 @@ def s20_row(a: int, n: int) -> dict:
 def size_row(a: int, n: int) -> dict:
     d0 = RUNS / "main" / f"k{a}n{n}"
     sets, speed, cons, all_pairs = [], [], [], 0
+    wall, unit, still = [], [], []
     pins_ok = True
     s_arm = {"baseline": [], "candidate": []}
     share = {"baseline": [], "candidate": []}
@@ -113,6 +127,11 @@ def size_row(a: int, n: int) -> dict:
         cs = [constructions(x) / constructions(y) for x, y in figure]
         speed += sp
         cons += cs
+        # Secondary, not declared: the same pairs in nanoseconds, the
+        # unit's own shift between the binaries, and the untouched phases.
+        wall += [med(x, "total_ns") / med(y, "total_ns") for x, y in figure]
+        unit += [med(x, "unit_ns") / med(y, "unit_ns") for x, y in figure]
+        still += [phase_ns(x, UNCHANGED) / phase_ns(y, UNCHANGED) for x, y in figure]
         for arm, k in (("baseline", 0), ("candidate", 1)):
             s = statistics.median(p[k]["median"]["s_per_target"] for p in figure)
             s_arm[arm].append(s)
@@ -144,6 +163,11 @@ def size_row(a: int, n: int) -> dict:
         "pairs": all_pairs, "pins": pins_ok,
         "control1": control.get("pass") if control else None,
         "speedup": geo_ci(speed), "constructions_speedup_stage_diagnostic": geo_ci(cons),
+        "secondary_not_declared": {
+            "wall_speedup": geo_ci(wall),
+            "unit_ns_baseline_over_candidate": geo_ci(unit),
+            "unchanged_phases_ns_baseline_over_candidate": geo_ci(still),
+        },
         "s_before": s_before, "s_after": s_after, "s20_s_ic": prior["s_ic"], "s_rho_s20": s_rho,
         "ratio_before": s_before / s_rho, "ratio_after": s_after / s_rho, "s20_ratio": prior["ratio"],
         "ratio_before_ci": mean_ci([x / y for x, y in zip(s_arm["baseline"], rho_sets)]),
@@ -213,6 +237,12 @@ def main() -> None:
             "sizes": [s["curve"] for s in top],
             "before": fit(xs, [math.log(s["ratio_before"] * math.sqrt(s["n"])) for s in top]),
             "after": fit(xs, [math.log(s["ratio_after"] * math.sqrt(s["n"])) for s in top]),
+            # Secondary, not declared: the candidate's cost in the baseline
+            # binary's unit (S before over the paired wall-clock speedup),
+            # which takes the unit's own shift between binaries out.
+            "after_at_baseline_unit_secondary": fit(xs, [
+                math.log(s["s_before"] / s["secondary_not_declared"]["wall_speedup"]["geomean"] / s["s_rho_s20"]
+                         * math.sqrt(s["n"])) for s in top]),
         }
     least = min(sizes, key=lambda s: s["ratio_after"]) if sizes else None
     doc = {
