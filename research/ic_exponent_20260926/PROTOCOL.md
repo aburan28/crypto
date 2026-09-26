@@ -290,3 +290,58 @@ path of the method changes, and the round adds a measurement tool.
 **Accounting.** No index-calculus algorithm changes. The thread is
 re-priced on current `main`, its descent is priced at the probes it
 scans, and the measurement is extended to new sizes.
+
+## Amendment 1, before any declared run
+
+Committed with the pricer, before any declared size or seed set ran. It
+comes from two smoke tests of the pricer on curves that are not among
+the declared sizes:
+
+- `K_1/GF(2^17)`, seed 999, 8 columns, `m = 2`;
+- `K_0/GF(2^39)`, seed 998, 24 columns, `m = 3`.
+
+Both passed Control 1 against `ic workflow`, run on one thread and on
+four. Four things came out of them.
+
+1. **The base grows eight orbits at a time.**
+   - `build_subgroup_orbit_factor_base_with_cost` adds eight
+     representatives a round and stops at the first base with at least
+     the requested points. So a request for `c` columns builds
+     `8⌈c/8⌉` of them, and never fewer than eight. At `n = 17`, a request
+     for 68 points (2 columns) built 272 (8).
+   - The grid is therefore read in actual columns. Requests that build
+     the same base are one grid point, run once.
+   - The edge rule, at most three steps as declared:
+     - a minimum on the lowest grid point extends the grid down by one
+       batch (eight columns) at a time, never below eight;
+     - a minimum on the highest extends it up by `×√2`, rounded up to a
+       whole batch.
+   - At the three smallest sizes the model's optima (2 to 5 columns) are
+     below what the thread's recipe can build. That is the recipe's
+     property, and it stays in the measurement.
+2. **The workflow's constructions are priced, and now on their own
+   clocks.**
+   - The workflow builds the base's projected orbit map in the general,
+     big-integer arithmetic several times a run: for the selection's
+     column count, for each collector and coverage it creates (two of
+     each when extension units run), for the log solver, and for the
+     descent solver.
+   - At `K_0/GF(2^39)` with 1,872 points these constructions came to
+     674K of 970K units, 69%. The work the model prices (selection,
+     build, collection, linear algebra, descent) came to 296K.
+   - The pricer now keeps those constructions on clocks of their own:
+     `select_projection`, `collect_setup`, `logs_setup` and
+     `descent_setup`, beside `setup`. The clocks still sum to the whole
+     run, and every phase stays in `S` as declared.
+   - The write-up reports three groups at every size, as read-outs of
+     the same total: the work, the constructions, and the verification.
+     The work alone is a stage diagnostic and is labelled as one.
+3. **`setup` is the curve's construction** (`experiment::curve`: the
+   group order, its factorisation and a generator). The rho side
+   receives this already built. It stays in `S` as declared, and it is
+   reported as its own phase so that its weight is visible.
+4. **One smoke test's spread exceeded the threshold.** Over 15
+   repetitions at `n = 17` the spread was 1.29, above 1.25. The declared
+   rule applies (rerun with double the repetitions), unchanged.
+
+No target, size, seed set, rule or prediction changes.

@@ -4550,6 +4550,22 @@ covered.
 
 **Class: accounting.**  No algorithm changes.
 
+**Amendment 1.**  Committed with the pricer (`ic price`), before any
+declared run.  Two smoke tests on undeclared curves passed Control 1 and
+showed two things:
+
+- **The thread's base builder adds orbits eight at a time.**  So the
+  column grid is read in actual columns, with at least eight, and the
+  small end's model optima (2–5 columns) are out of the recipe's reach.
+- **The workflow rebuilds the base's projected orbit map in big-integer
+  arithmetic around its work,** for the column count, collectors,
+  coverage and both solvers.  At `r = 2^26` those constructions were
+  69% of the run.  They stay in `S` as declared.  The pricer now keeps
+  them on clocks of their own, so the write-up can read the work apart
+  from them as a labelled stage diagnostic.
+
+No target, size, seed or prediction changed.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
