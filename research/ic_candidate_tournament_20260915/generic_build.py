@@ -43,7 +43,11 @@ def controlled_environment(root):
 
 
 def command(args, root, env):
-    return subprocess.check_output(args, cwd=root, env=env, text=True, stderr=subprocess.STDOUT).strip()
+    process = subprocess.run(args, cwd=root, env=env, text=True,
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
+    require(process.returncode == 0,
+            f'build command {args!r} exited {process.returncode}:\n{process.stdout}')
+    return process.stdout.strip()
 
 
 def source_manifest(root, metadata):

@@ -40,6 +40,13 @@ boolean/integer substitutions accepted by Python's ordinary equality. Canonical
 typed comparisons and strict counter checks now reject them; the strengthened
 checker replays the same retained worker outputs without rerunning the workers.
 
+The [first Linux CI failure](ci-initial-failure.log) occurred at offline Cargo
+metadata resolution, before the source-bound worker build. CI now fetches the
+complete pinned dependency resolution before the offline build (host-only test
+builds need not populate every platform dependency). The command wrapper also
+retains the failing command's output; the initial exception hid Cargo's message,
+so a successful rerun is required to validate that setup correction.
+
 The final build has source-manifest SHA-256
 `215f4c7fa338b1053481563a717c867f1b75b25d936eb3b8cafa7fd2af31e134`
 and executable SHA-256

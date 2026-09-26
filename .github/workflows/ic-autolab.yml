@@ -34,7 +34,9 @@ jobs:
           sudo apt-get install -y valgrind
           test "$(valgrind --version)" = valgrind-3.22.0
       - name: Freeze dependency resolution
-        run: cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+        run: |
+          cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+          cargo fetch --locked
       - name: Harness and accounting regression tests
         run: |
           python -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_*.py' -v
