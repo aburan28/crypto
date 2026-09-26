@@ -87,7 +87,9 @@ use std::time::{Duration, Instant};
 use rayon::prelude::*;
 
 use crate::cryptanalysis::fx_hash::{FxMap, FxSet};
-use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, mono_key, F2BoolMono, F2BoolPoly};
+use crate::cryptanalysis::pq_groebner_f2::{
+    cmp_mono, mono_key, sort_masks_descending, F2BoolMono, F2BoolPoly,
+};
 
 /// What one F4 run cost, and how far it got.
 #[derive(Clone, Copy, Debug, Default, serde::Serialize)]
@@ -161,6 +163,7 @@ struct Pair {
 }
 
 /// A bit-packed row.  Words outside `[start, end)` are zero.
+#[derive(Default)]
 struct Row {
     bits: Vec<u64>,
     start: usize,
@@ -190,7 +193,7 @@ struct Columns {
 impl Columns {
     fn from_monomials(set: impl IntoIterator<Item = u64>) -> Self {
         let mut monos: Vec<u64> = set.into_iter().collect();
-        monos.sort_unstable_by_key(|&m| std::cmp::Reverse(mono_key(F2BoolMono::from_mask(m))));
+        sort_masks_descending(&mut monos);
         monos.dedup();
         let index = monos.iter().enumerate().map(|(i, &m)| (m, i)).collect();
         Self { monos, index }
@@ -270,66 +273,125 @@ fn echelon(
             pivots.push((lead, row));
         }
     }
+    let words = n_cols.div_ceil(64).max(1);
+    let expired = std::sync::atomic::AtomicBool::new(false);
+    // Reduce `row` by the pivots already in the table for as long as its
+    // lead has one; stop at the first lead without.  Pivot rows never
+    // change once made, so these are exactly the reductions the
+    // one-row-at-a-time loop would apply first, in the same order.
+    let by_known = |row: &mut Row, pivot_of: &[u32], pivots: &[(usize, Row)]| -> u64 {
+        if deadline.is_some_and(|d| Instant::now() >= d) {
+            expired.store(true, std::sync::atomic::Ordering::Relaxed);
+            return 0;
+        }
+        let mut xors = 0u64;
+        while let Some(lead) = row.lead() {
+            let p = pivot_of[lead];
+            if p == NONE {
+                break;
+            }
+            let pivot = &pivots[p as usize].1;
+            let (from, to) = (lead / 64, pivot.end);
+            for (a, b) in row.bits[from..to].iter_mut().zip(&pivot.bits[from..to]) {
+                *a ^= *b;
+            }
+            xors += (to - from) as u64;
+            row.end = row.end.max(to);
+        }
+        xors
+    };
     let mut rest = rest;
-    {
-        let (pivot_of, fixed_pivots) = (&pivot_of, &pivots);
-        let expired = std::sync::atomic::AtomicBool::new(false);
-        let by_fixed = |row: &mut Row| -> u64 {
-            if deadline.is_some_and(|d| Instant::now() >= d) {
-                expired.store(true, std::sync::atomic::Ordering::Relaxed);
-                return 0;
-            }
-            let mut xors = 0u64;
-            while let Some(lead) = row.lead() {
-                let p = pivot_of[lead];
-                if p == NONE {
-                    break;
-                }
-                let pivot = &fixed_pivots[p as usize].1;
-                let (from, to) = (lead / 64, pivot.end);
-                for (a, b) in row.bits[from..to].iter_mut().zip(&pivot.bits[from..to]) {
-                    *a ^= *b;
-                }
-                xors += (to - from) as u64;
-                row.end = row.end.max(to);
-            }
-            xors
-        };
-        let words = n_cols.div_ceil(64).max(1);
-        *word_xors += if rest.len() > 1 && rest.len() * words > PAR_WORDS {
-            rest.par_iter_mut().map(by_fixed).sum::<u64>()
+    // The rows after the leading block go in batches.  Each batch is first
+    // reduced in parallel by the pivots that exist before it — the
+    // leading block's, then every earlier batch's — and then finished in
+    // order: a row resumes where it stopped, against the pivots its
+    // predecessors in the batch have just made, and becomes a pivot if
+    // anything survives.  Every row sees the reductions, the order and
+    // the pivot table the serial loop would give it, so the pivots and
+    // the XOR count are identical to it; only the first phase is shared
+    // out.  The first batch is the whole remainder against the leading
+    // block, whose reductions are the bulk of a symbolic-preprocessing
+    // matrix, so the whole remainder takes that pass together before the
+    // batches start.
+    let mut done = 0usize;
+    let mut first = true;
+    // On one thread, or on a remainder too small to share out, reading
+    // each batch twice only costs: finish the remainder in one serial
+    // pass instead, as the loop always did.
+    // (Size first: asking rayon its thread count starts its pool.)
+    let batched = rest.len() * words > PAR_WORDS && rayon::current_num_threads() > 1;
+    let batch_rows = (ELIMINATION_BATCH_WORDS / words).clamp(32, 1024);
+    while done < rest.len() {
+        if deadline.is_some_and(|d| Instant::now() >= d) {
+            return None;
+        }
+        let end = if first || !batched {
+            rest.len()
         } else {
-            rest.iter_mut().map(by_fixed).sum::<u64>()
+            (done + batch_rows).min(rest.len())
         };
+        let chunk = &mut rest[done..end];
+        if first || batched {
+            let (pivot_of, known) = (&pivot_of[..], &pivots[..]);
+            let threshold = if first { PAR_WORDS } else { PAR_BATCH_WORDS };
+            *word_xors += if chunk.len() > 1 && chunk.len() * words > threshold {
+                chunk
+                    .par_iter_mut()
+                    .map(|row| by_known(row, pivot_of, known))
+                    .sum::<u64>()
+            } else {
+                chunk
+                    .iter_mut()
+                    .map(|row| by_known(row, pivot_of, known))
+                    .sum::<u64>()
+            };
+        }
         if expired.load(std::sync::atomic::Ordering::Relaxed) {
             return None;
         }
-    }
-    for (k, mut row) in rest.into_iter().enumerate() {
-        if k % 128 == 0 && deadline.is_some_and(|d| Instant::now() >= d) {
-            return None;
+        if first {
+            // Only the leading block's reductions: every row has now
+            // stopped at a lead no leading row covers.
+            first = false;
+            continue;
         }
-        while let Some(lead) = row.lead() {
-            match pivot_of[lead] {
-                NONE => {
-                    pivot_of[lead] = pivots.len() as u32;
-                    pivots.push((lead, row));
-                    break;
-                }
-                p => {
-                    let pivot = &pivots[p as usize].1;
-                    let (from, to) = (lead / 64, pivot.end);
-                    for (a, b) in row.bits[from..to].iter_mut().zip(&pivot.bits[from..to]) {
-                        *a ^= *b;
+        for (k, row) in chunk.iter_mut().enumerate() {
+            if k > 0 && k % 128 == 0 && deadline.is_some_and(|d| Instant::now() >= d) {
+                return None;
+            }
+            let mut row = std::mem::take(row);
+            while let Some(lead) = row.lead() {
+                match pivot_of[lead] {
+                    NONE => {
+                        pivot_of[lead] = pivots.len() as u32;
+                        pivots.push((lead, row));
+                        break;
                     }
-                    *word_xors += (to - from) as u64;
-                    row.end = row.end.max(to);
+                    p => {
+                        let pivot = &pivots[p as usize].1;
+                        let (from, to) = (lead / 64, pivot.end);
+                        for (a, b) in row.bits[from..to].iter_mut().zip(&pivot.bits[from..to]) {
+                            *a ^= *b;
+                        }
+                        *word_xors += (to - from) as u64;
+                        row.end = row.end.max(to);
+                    }
                 }
             }
         }
+        done = end;
     }
     Some(pivots)
 }
+
+/// Words per batch after the first in [`echelon`]'s shared-out pass: large
+/// enough that sharing a batch out pays for itself, small enough that few
+/// of its rows need a pivot another of its rows is about to make.
+const ELIMINATION_BATCH_WORDS: usize = 1 << 14;
+
+/// Words of work in one batch below which its first pass runs on one
+/// thread.
+const PAR_BATCH_WORDS: usize = 1 << 10;
 
 fn is_one(p: &F2BoolPoly) -> bool {
     p.terms.len() == 1 && p.terms[0].mask == 0
@@ -592,14 +654,20 @@ pub fn groebner_basis_f4(
         let mut s_rows: Vec<&F2BoolPoly> = half_rows.iter().chain(field_rows.iter()).collect();
         // stable: rows sharing a leading monomial keep their order
         s_rows.sort_by_cached_key(|p| std::cmp::Reverse(mono_key(p.lt().unwrap())));
+        // Every row is a monomial multiple, canonical, so its degree is its
+        // leading term's.
         for p in reducers.iter().chain(s_rows.iter().copied()) {
-            st.max_poly_degree = st.max_poly_degree.max(degree(p));
+            debug_assert!(p.is_canonical());
+            let lead = p.terms.first().map_or(0, |t| t.degree());
+            st.max_poly_degree = st.max_poly_degree.max(lead);
         }
-        let rows: Vec<Row> = reducers
-            .iter()
-            .chain(s_rows)
-            .map(|p| cols.pack(p))
-            .collect();
+        let all: Vec<&F2BoolPoly> = reducers.iter().chain(s_rows).collect();
+        // Packing is one lookup per term and independent across rows.
+        let rows: Vec<Row> = if all.len() * cols.words() > PAR_WORDS {
+            all.par_iter().map(|p| cols.pack(p)).collect()
+        } else {
+            all.iter().map(|p| cols.pack(p)).collect()
+        };
         st.build_ns += t.elapsed().as_nanos() as u64;
 
         let t = Instant::now();

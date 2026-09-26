@@ -166,6 +166,11 @@ pub fn cmp_mono(a: F2BoolMono, b: F2BoolMono) -> Ordering {
     }
 }
 
+/// A monomial within the low this-many variables has a canonical key that
+/// fits one `u64`: its degree (at most 57, six bits) above the low 57 bits
+/// of its complemented mask (see [`sort_masks_descending`]).
+const PACKED_KEY_VARS: usize = 57;
+
 /// An integer key whose natural order is [`cmp_mono`]: degree first, and
 /// within a degree the monomial lacking the highest differing variable is
 /// larger, i.e. the one with the *smaller* mask.  Sorting by the key is a
@@ -173,6 +178,33 @@ pub fn cmp_mono(a: F2BoolMono, b: F2BoolMono) -> Ordering {
 #[inline]
 pub fn mono_key(m: F2BoolMono) -> u128 {
     (u128::from(m.degree()) << 64) | u128::from(!m.mask)
+}
+
+/// Sort monomial masks into canonical order, highest first (the order of
+/// `Reverse(mono_key)`), keying each mask once rather than once per
+/// comparison.  Duplicates stay adjacent.
+pub(crate) fn sort_masks_descending(masks: &mut [u64]) {
+    let span = masks.iter().fold(0u64, |acc, &m| acc | m);
+    if span >> PACKED_KEY_VARS == 0 {
+        let low = (1u64 << PACKED_KEY_VARS) - 1;
+        let mut keys: Vec<u64> = masks
+            .iter()
+            .map(|&u| (u64::from(u.count_ones()) << PACKED_KEY_VARS) | (!u & low))
+            .collect();
+        keys.sort_unstable_by(|a, b| b.cmp(a));
+        for (m, k) in masks.iter_mut().zip(keys) {
+            *m = !k & low;
+        }
+    } else {
+        let mut keys: Vec<u128> = masks
+            .iter()
+            .map(|&u| mono_key(F2BoolMono::from_mask(u)))
+            .collect();
+        keys.sort_unstable_by(|a, b| b.cmp(a));
+        for (m, k) in masks.iter_mut().zip(keys) {
+            *m = !(k as u64);
+        }
+    }
 }
 
 // ── Polynomial ─────────────────────────────────────────────────────
@@ -407,13 +439,14 @@ impl F2BoolPoly {
         if self.is_zero() {
             return Self::zero(self.n_vars);
         }
-        let mut monos: Vec<F2BoolMono> = self.terms.iter().map(|t| t.mul(m)).collect();
         // After mul, sort order may change AND duplicates may appear
-        // (because two distinct monos can collide on union with m).
-        // Use `from_monos` to renormalise.
-        monos.sort_unstable_by_key(|m| std::cmp::Reverse(mono_key(*m)));
-        let mut out: Vec<F2BoolMono> = Vec::with_capacity(monos.len());
-        for mn in monos {
+        // (because two distinct monos can collide on union with m), so
+        // the products are re-sorted and equal pairs cancelled.
+        let mut products: Vec<u64> = self.terms.iter().map(|t| t.mask | m.mask).collect();
+        sort_masks_descending(&mut products);
+        let mut out: Vec<F2BoolMono> = Vec::with_capacity(products.len());
+        for u in products {
+            let mn = F2BoolMono::from_mask(u);
             if out.last() == Some(&mn) {
                 out.pop();
             } else {
@@ -632,10 +665,27 @@ fn note_degree(p: &F2BoolPoly, st: &mut GbStats) {
 /// [`reduce`], counting the steps and the monomials they touch.
 fn reduce_counted(r: &F2BoolPoly, basis: &[F2BoolPoly], st: &mut GbStats) -> F2BoolPoly {
     let mut acc = r.clone();
+    // Sums and monomial multiples of canonical polynomials are canonical,
+    // so from a canonical start every `acc` lists its highest degree first.
+    let canonical = r.is_canonical();
+    // The basis does not change during a reduction, so a term no leading
+    // monomial divides stays irreducible; remembering those skips their
+    // re-test on every restart.  The term and the basis element each step
+    // picks, and so every count, are unchanged.
+    let mut irreducible: crate::cryptanalysis::fx_hash::FxSet<u64> = Default::default();
     'outer: loop {
-        note_degree(&acc, st);
+        if canonical {
+            if let Some(t) = acc.terms.first() {
+                st.max_poly_degree = st.max_poly_degree.max(t.degree());
+            }
+        } else {
+            note_degree(&acc, st);
+        }
         for term_idx in 0..acc.terms.len() {
             let term = acc.terms[term_idx];
+            if irreducible.contains(&term.mask) {
+                continue;
+            }
             for b in basis {
                 let Some(blt) = b.lt() else { continue };
                 if blt.divides(term) {
@@ -646,6 +696,7 @@ fn reduce_counted(r: &F2BoolPoly, basis: &[F2BoolPoly], st: &mut GbStats) -> F2B
                     continue 'outer;
                 }
             }
+            irreducible.insert(term.mask);
         }
         return acc;
     }
@@ -1013,6 +1064,30 @@ pub fn solution_set(gb: &[F2BoolPoly], n_vars: usize) -> HashSet<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn mul_mono_matches_rebuilding_through_from_monos() {
+        let mut x = 0x0123_4567_89ab_cdefu64;
+        let mut next = move || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        for trial in 0..3_000 {
+            // Mostly small supports; every fourth trial reaches past the
+            // 57 variables a packed key covers.
+            let n: usize = if trial % 4 == 3 { 64 } else { 1 + trial % 20 };
+            let span = if n == 64 { u64::MAX } else { (1u64 << n) - 1 };
+            let terms: Vec<F2BoolMono> = (0..(next() % 60))
+                .map(|_| F2BoolMono::from_mask(next() & span))
+                .collect();
+            let p = F2BoolPoly::from_monos(terms, n);
+            let m = F2BoolMono::from_mask(next() & next() & span);
+            let expected = F2BoolPoly::from_monos(p.terms.iter().map(|t| t.mul(m)).collect(), n);
+            assert_eq!(p.mul_mono(m), expected, "{p:?} * {m:?}");
+        }
+    }
 
     #[test]
     fn substitute_matches_rebuilding_through_from_monos() {
