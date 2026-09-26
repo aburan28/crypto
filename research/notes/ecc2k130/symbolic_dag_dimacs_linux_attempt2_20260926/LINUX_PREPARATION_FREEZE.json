@@ -1,0 +1,41 @@
+{
+  "archive": {
+    "github_actions_job_id": 108344308874,
+    "github_actions_run_id": 36220351050,
+    "github_artifact_id": 10899366900,
+    "github_artifact_name": "cadical-linux-prep-36220351050",
+    "github_reported_artifact_digest": "sha256:cad1826b51f58d98d2042449d3afd85d19f35e2c5da192807cd26bffe0b8f6a2",
+    "manifest_sha256": "30f3bbd79974d07535bb2ca5de84c6069a8981895828a7b1e07427c2a4f9d4f8",
+    "path": "preparation_run_1",
+    "raw_file_count": 18
+  },
+  "attempt1_freeze_sha256": "7514910d5111f76bd50c6ccf5a70a2b25043c55d7cb515218a63a7f6c16fdd57",
+  "attempt1_manifest_sha256": "ae39923e93f6c908d7b2bd32568463d606a13f375dbb8406407f9f1acc9bc755",
+  "attempt1_receipt_sha256": "ec34b6a01e729a7f2a1815373e9b17450c30d2472b808c88792a6f22dedecd17",
+  "attempt1_record_head": "d4ba43e4f7751637a4c932e3414efe79759dbd04",
+  "build_a_binary_sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51",
+  "build_b_binary_sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51",
+  "build_receipt_sha256": "84dbc7a11eebe596a31a7b6c6f3f6c2c9502532c058d32ff25be24c6d1adc3f0",
+  "cap_probe_receipt_sha256": "4f08ba27e869012a3b36cf1bffb7171261510cc22116aa3b3864c9edf50d9d1e",
+  "caps_bytes": [
+    536870912,
+    1073741824,
+    2147483648
+  ],
+  "linux_binary_bytes": 1732064,
+  "linux_binary_path": "preparation_run_1/cadical_prepare/cadical",
+  "linux_binary_sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51",
+  "machine": "x86_64",
+  "measured_archive": null,
+  "measured_attempt2_admitted": false,
+  "preparation_checkout_head": "ba8aeb651edba2f7a4ff20f336f499d0c57adf44",
+  "prepare_sha256": "b4e49436c5e4cdcc01e50f1ccbc991194a2cccb4fcb6ba85bc033d96e082ada6",
+  "runner_image_os": "ubuntu24",
+  "runner_image_version": "20260920.314.1",
+  "schema": "k0-dag-dimacs-linux-preparation-freeze-v1",
+  "source_commit": "c60730422e758ef1cebe7aeddf2dda31c996bf04",
+  "source_manifest_sha256": "d6b6be954a455b1ea8bd0d75d00f52b3fef5ff7d41ecb65e53a80a9fc47f51c2",
+  "source_tree": "9630ba7aaccee77f6fec916e5babd6d1ccedd404",
+  "status": "PASS_HARMLESS_PREPARATION_ONLY",
+  "v2_release_head": null
+}
