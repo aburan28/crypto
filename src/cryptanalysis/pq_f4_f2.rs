@@ -222,16 +222,49 @@ impl Row {
 /// first set bit of a row is its leading monomial.
 struct Columns {
     monos: Vec<u64>,
-    index: FxMap<u64, usize>,
+    index: ColumnIndex,
 }
+
+/// A monomial's column: an array indexed by the mask itself while the
+/// masks span at most [`DENSE_INDEX_VARS`] variables, a hash map beyond.
+enum ColumnIndex {
+    Dense(Vec<u32>),
+    Hashed(FxMap<u64, usize>),
+}
+
+/// Variables up to which [`Columns`] indexes by array: `4 · 2^22` bytes at
+/// most, against a hash lookup per term packed.
+const DENSE_INDEX_VARS: u32 = 22;
 
 impl Columns {
     fn from_monomials(set: impl IntoIterator<Item = u64>) -> Self {
         let mut monos: Vec<u64> = set.into_iter().collect();
         sort_masks_descending(&mut monos);
         monos.dedup();
-        let index = monos.iter().enumerate().map(|(i, &m)| (m, i)).collect();
+        let span = monos.iter().fold(0u64, |acc, &m| acc | m);
+        let bits = u64::BITS - span.leading_zeros();
+        let index = if bits <= DENSE_INDEX_VARS {
+            let mut at = vec![NONE; 1usize << bits];
+            for (i, &m) in monos.iter().enumerate() {
+                at[m as usize] = i as u32;
+            }
+            ColumnIndex::Dense(at)
+        } else {
+            ColumnIndex::Hashed(monos.iter().enumerate().map(|(i, &m)| (m, i)).collect())
+        };
         Self { monos, index }
+    }
+
+    #[inline]
+    fn column(&self, m: u64) -> usize {
+        match &self.index {
+            ColumnIndex::Dense(at) => {
+                let c = at[m as usize];
+                debug_assert_ne!(c, NONE, "a monomial outside the columns");
+                c as usize
+            }
+            ColumnIndex::Hashed(index) => index[&m],
+        }
     }
 
     fn words(&self) -> usize {
@@ -242,7 +275,7 @@ impl Columns {
         let mut bits = vec![0u64; self.words()];
         let (mut start, mut end) = (usize::MAX, 0usize);
         for t in &p.terms {
-            let c = self.index[&t.mask];
+            let c = self.column(t.mask);
             bits[c / 64] ^= 1u64 << (c % 64);
             start = start.min(c / 64);
             end = end.max(c / 64 + 1);
@@ -697,8 +730,8 @@ impl BlockTables {
     }
 }
 
-/// Monomials awaiting a reducer lookup from which [`groebner_basis_f4`] looks
-/// them up in parallel, ahead of its symbolic-preprocessing loop.
+/// Monomials on a symbolic-preprocessing level from which
+/// [`groebner_basis_f4`] looks their reducers up in parallel.
 const PAR_REDUCERS: usize = 512;
 
 /// Terms, summed over a step's critical-pair (or field) products, from which
@@ -937,78 +970,111 @@ pub fn groebner_basis_f4(
         // Symbolic preprocessing.  Every monomial other than an S-pair's
         // lcm is examined once; a divisible one gets a reducer led by it.
         let active: Vec<usize> = (0..s.polys.len()).filter(|&g| s.active[g]).collect();
-        let mut examined: FxSet<u64> = lcm_columns.clone();
         let mut no_divisor: FxSet<u64> = FxSet::default();
-        let mut queue: Vec<u64> = Vec::new();
-        for p in half_rows.iter().chain(field_rows.iter()) {
-            for t in &p.terms {
-                if examined.insert(t.mask) {
-                    queue.push(t.mask);
-                }
-            }
-        }
+        // The first level: every monomial of the S-rows but the lcms.
+        let s_terms: usize = half_rows
+            .iter()
+            .chain(&field_rows)
+            .map(|p| p.terms.len())
+            .sum();
+        let par_terms = s_terms >= PAR_PRODUCT_TERMS && rayon::current_num_threads() > 1;
+        // (The S-rows carry many times more terms than distinct monomials,
+        // so each share of them is deduplicated into a set of its own.)
+        let mut queue: Vec<u64> = if par_terms {
+            half_rows
+                .par_iter()
+                .chain(field_rows.par_iter())
+                .fold(FxSet::default, |mut seen: FxSet<u64>, p| {
+                    seen.extend(p.terms.iter().map(|t| t.mask));
+                    seen
+                })
+                .reduce(FxSet::default, |a, b| {
+                    let (mut big, small) = if a.len() >= b.len() { (a, b) } else { (b, a) };
+                    big.extend(small);
+                    big
+                })
+                .into_iter()
+                .collect()
+        } else {
+            half_rows
+                .iter()
+                .chain(&field_rows)
+                .flat_map(|p| p.terms.iter().map(|t| t.mask))
+                .collect::<FxSet<u64>>()
+                .into_iter()
+                .collect()
+        };
+        // a fixed order, so the reducers come out in one
+        queue.sort_unstable();
+        queue.retain(|m| !lcm_columns.contains(m));
+        let mut examined: FxSet<u64> = lcm_columns.clone();
+        examined.extend(queue.iter().copied());
         let mut reducers: Vec<F2BoolPoly> = Vec::new();
-        // A monomial's reducer depends only on the monomial, so a large
-        // enough stack of monomials not yet looked up is looked up (and its
-        // product formed) in parallel ahead of the loop.  The loop still
-        // pops, counts and queues in its own order; it only finds the work
-        // done.  `unprepared` counts the stack entries without a result.
-        let mut prepared: FxMap<u64, Option<F2BoolPoly>> = FxMap::default();
-        let mut unprepared = queue.len();
+        // Level by level: the reducers of every monomial on the frontier,
+        // then the monomials they carry that nobody has examined.  The
+        // monomials examined, the reducers and the count are those of any
+        // order of examination — a monomial's reducer depends only on the
+        // monomial — and a large level's lookups, products and membership
+        // tests are independent of one another, so they run in parallel.
         let reducer_row = |m: u64| {
             s.reducer_among(m, &active)
                 .map(|g| s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g])))
         };
-        // the terms a reducer row carries, on average, to price a batch
+        // the terms a reducer row carries, on average, to price a level
         let mean_terms = active
             .iter()
             .map(|&g| s.polys[g].terms.len())
             .sum::<usize>()
             / active.len().max(1);
-        loop {
+        let mut frontier = queue;
+        while !frontier.is_empty() {
+            st.divisor_tests += (active.len() * frontier.len()) as u64;
             // (sizes first: asking rayon its thread count starts its pool)
-            if unprepared >= PAR_REDUCERS
-                && unprepared * mean_terms >= PAR_PRODUCT_TERMS
-                && rayon::current_num_threads() > 1
-            {
-                let todo: Vec<u64> = queue
-                    .iter()
-                    .copied()
-                    .filter(|m| !prepared.contains_key(m))
-                    .collect();
-                let rows: Vec<Option<F2BoolPoly>> =
-                    todo.par_iter().map(|&m| reducer_row(m)).collect();
-                prepared.extend(todo.into_iter().zip(rows));
-                unprepared = 0;
-            }
-            let Some(m) = queue.pop() else { break };
-            st.divisor_tests += active.len() as u64;
-            let row = match prepared.remove(&m) {
-                Some(row) => row,
-                None => {
-                    unprepared -= 1;
-                    reducer_row(m)
-                }
+            let parallel = frontier.len() >= PAR_REDUCERS
+                && frontier.len() * mean_terms >= PAR_PRODUCT_TERMS
+                && rayon::current_num_threads() > 1;
+            let rows: Vec<Option<F2BoolPoly>> = if parallel {
+                frontier.par_iter().map(|&m| reducer_row(m)).collect()
+            } else {
+                frontier.iter().map(|&m| reducer_row(m)).collect()
             };
-            match row {
-                Some(r) => {
-                    debug_assert_eq!(
-                        r.lt().map(|t| t.mask),
-                        Some(m),
-                        "a reducer must lead with its monomial"
-                    );
-                    for t in &r.terms {
-                        if examined.insert(t.mask) {
-                            queue.push(t.mask);
-                            unprepared += 1;
-                        }
+            // a reducer leads with its monomial, already examined
+            let unseen = |r: &F2BoolPoly| -> Vec<u64> {
+                debug_assert!(r.lt().is_some_and(|t| examined.contains(&t.mask)));
+                r.terms[1..]
+                    .iter()
+                    .map(|t| t.mask)
+                    .filter(|t| !examined.contains(t))
+                    .collect()
+            };
+            let mut next: Vec<u64> = if parallel {
+                rows.par_iter().flatten().flat_map_iter(unseen).collect()
+            } else {
+                rows.iter().flatten().flat_map(unseen).collect()
+            };
+            if parallel {
+                next.par_sort_unstable();
+            } else {
+                next.sort_unstable();
+            }
+            next.dedup();
+            examined.extend(next.iter().copied());
+            for (m, row) in frontier.into_iter().zip(rows) {
+                match row {
+                    Some(r) => {
+                        debug_assert_eq!(
+                            r.lt().map(|t| t.mask),
+                            Some(m),
+                            "a reducer must lead with its monomial"
+                        );
+                        reducers.push(r);
                     }
-                    reducers.push(r);
-                }
-                None => {
-                    no_divisor.insert(m);
+                    None => {
+                        no_divisor.insert(m);
+                    }
                 }
             }
+            frontier = next;
         }
         st.reducer_rows += reducers.len() as u64;
 
