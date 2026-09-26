@@ -7042,6 +7042,27 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n53-combined-l384-20260925 -->
+<!-- BEGIN ecc2k130-n53-coldbase-first-attempt-20260925 -->
+<section class="panel" id="ecc2k130-n53-coldbase-first-attempt-20260925">
+  <div class="panel-head">
+    <h2>n = 53 L = 384 cold-base repeat: same-base admission failed <span class="chip">censored</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/815">PR #815</a> froze a native factor-base-construction-inclusive repeat on the exact 384 public Q values from PR #760. Its first archived attempt completed the producer's 512-target training process, then failed the mandatory comparison with #760's certified factor base. The producer emitted 220 columns and 23,320 points after scanning 465 x values, versus 400 for the certified base; the two coordinate sets have zero points, distinct point x values or representatives in common. The certified rank fixture sampled x with a seeded LCG at n = 53, while the compact producer enumerated x in ascending order. Their scan counts describe different schedules, not a construction-cost improvement. The first software assertion saw integer 428 versus string "428" for the cofactor, but independent comparison of the sealed arrays establishes a substantive base mismatch. <a href="https://github.com/aburan28/crypto/pull/815">Result, raw archive and replay</a> preserve that failure.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>First attempt only. Stage wall is recorded for failure accounting; no rank, rho, point-recovery or complete same-Q comparison ran. A new IC/rho ratio is undefined.</caption>
+    <thead><tr><th>Stage</th><th class="n">Wall s</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Fresh native-base training producer</td><td class="n">115.236</td><td>Exited 0; reported 512/512 targets extracted, with no prior base input</td></tr>
+      <tr><td>Mandatory base materialization and equality gate</td><td class="n">0.116</td><td>Exited 1; same-base arm rejected</td></tr>
+      <tr><td>Operational rank, rho, IC point query, recovery and full audit</td><td class="n">&mdash;</td><td>Not run; no comparative cost verdict</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>A separate, uncharged post-outcome replay of the sealed native training output verified all 23,320 orbit labels and all 512 group-law relation witnesses, but found rank <strong>219/220</strong>. Column 102 was absent from all 2,048 factor-base x slots, so this fixed stream cannot provide complete base logs. This diagnosis was not a scheduled rank stage and supplies no IC/rho cost ratio; the certified #760 base reached full rank under its different x-selection schedule. Both arms show first-hit column skew. <a href="https://github.com/aburan28/crypto/pull/815">Diagnostic script and pinned receipt</a>.</p>
+    <p>The sealed archive passes raw-integrity replay only. PR #760's 353.649/154.799 s pre-certified-base no-crossover remains the prior measured comparison; no charged cold-base crossover, common-unit S, or n = 131/ECC2K-130 transfer is inferred. A native-base successor needs a new freeze and independent point-label/rank/point-log admission on its actual base.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n53-coldbase-first-attempt-20260925 -->
 <!-- BEGIN ecc2k130-compact-sparse-base-sweep-20260925 -->
 <section class="panel" id="ecc2k130-compact-sparse-base-sweep-20260925">
   <div class="panel-head">

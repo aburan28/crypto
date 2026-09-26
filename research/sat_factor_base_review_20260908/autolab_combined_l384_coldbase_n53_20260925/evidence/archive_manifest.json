@@ -1,0 +1,8 @@
+{
+  "archive_bytes": 459598,
+  "archive_sha256": "2ff3d4587dd9a576de393abacabfc390c2f838997b5dcbcc9b1e2e4554c5c23d",
+  "classification": "CENSORED_OR_INVALID_FRESH_BASE",
+  "files": 10,
+  "panel_sha256": "82e5346a473b60b98453602f63d9cecea54fbdd443437bdcb68aaa4e5f362e5b",
+  "reassembly": "tar -xzf evidence.tar.gz && shasum -a 256 -c SHA256SUMS"
+}
