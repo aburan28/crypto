@@ -80,6 +80,12 @@
 //! those columns, all of which have pivots, so each row ends exactly as
 //! it would have, pivot for pivot, and its count and end are the loop's.
 //!
+//! A pivot never changes once made, so the same holds for the pivots the
+//! elimination makes itself: after each batch of rows, the groups of
+//! columns its new pivots land in are tabled afresh, and later batches
+//! reduce through them too.  The tables hold at most the matrix's words
+//! for the leading block and twice them in all.
+//!
 //! ## Solutions, without enumeration
 //!
 //! The ideal of a boolean system is radical and zero-dimensional, so its
@@ -305,9 +311,11 @@ fn echelon(
     let words = n_cols.div_ceil(64).max(1);
     let expired = std::sync::atomic::AtomicBool::new(false);
     // The leading block's tables, where enough rows follow it to pay and
-    // they take no more words than the matrix.
-    let tables = (rest.len() >= TABLE_ROWS && pivots.len() >= TABLE_ROWS)
-        .then(|| BlockTables::build(&pivot_of, &pivots, (pivots.len() + rest.len()) * words))
+    // they take no more words than the matrix; later pivots join them
+    // within twice that.
+    let budget = (pivots.len() + rest.len()) * words;
+    let mut tables = (rest.len() >= TABLE_ROWS && pivots.len() >= TABLE_ROWS)
+        .then(|| BlockTables::build(&pivot_of, &pivots, budget))
         .flatten();
     let mut xors = 0u64;
     let mut performed = 0u64;
@@ -317,8 +325,12 @@ fn echelon(
     // One reduction at `lead`, which has pivot `p`: by the table when the
     // lead is on a tabled block, else by the pivot.  Returns the words the
     // row-by-row loop would XOR and the words XORed.
-    let tables = tables.as_ref();
-    let step = |row: &mut Row, lead: usize, p: u32, pivots: &[(usize, Row)]| -> (u64, u64) {
+    let step = |row: &mut Row,
+                lead: usize,
+                p: u32,
+                pivots: &[(usize, Row)],
+                tables: Option<&BlockTables>|
+     -> (u64, u64) {
         if let Some((xors, done)) = tables.and_then(|t| t.reduce(row, lead)) {
             return (xors, done);
         }
@@ -334,7 +346,11 @@ fn echelon(
     // lead has one; stop at the first lead without.  Pivot rows never
     // change once made, so these are exactly the reductions the
     // one-row-at-a-time loop would apply first, in the same order.
-    let by_known = |row: &mut Row, pivot_of: &[u32], pivots: &[(usize, Row)]| -> (u64, u64) {
+    let by_known = |row: &mut Row,
+                    pivot_of: &[u32],
+                    pivots: &[(usize, Row)],
+                    tables: Option<&BlockTables>|
+     -> (u64, u64) {
         if deadline.is_some_and(|d| Instant::now() >= d) {
             expired.store(true, std::sync::atomic::Ordering::Relaxed);
             return (0, 0);
@@ -345,7 +361,7 @@ fn echelon(
             if p == NONE {
                 break;
             }
-            let (x, d) = step(row, lead, p, pivots);
+            let (x, d) = step(row, lead, p, pivots, tables);
             xors += x;
             done += d;
         }
@@ -367,8 +383,9 @@ fn echelon(
     let mut done = 0usize;
     let mut first = true;
     // On one thread, or on a remainder too small to share out, reading
-    // each batch twice only costs: finish the remainder in one serial
-    // pass instead, as the loop always did.
+    // each batch twice only costs: finish it serially instead, as the
+    // loop always did — in batches all the same where there are tables,
+    // so that each batch's pivots can join them for the next.
     // (Size first: asking rayon its thread count starts its pool.)
     let batched = rest.len() * words > PAR_WORDS && rayon::current_num_threads() > 1;
     let batch_rows = (ELIMINATION_BATCH_WORDS / words).clamp(32, 1024);
@@ -376,24 +393,25 @@ fn echelon(
         if deadline.is_some_and(|d| Instant::now() >= d) {
             return None;
         }
-        let end = if first || !batched {
+        let end = if first || !(batched || tables.is_some()) {
             rest.len()
         } else {
             (done + batch_rows).min(rest.len())
         };
+        let made = pivots.len();
         let chunk = &mut rest[done..end];
         if first || batched {
-            let (pivot_of, known) = (&pivot_of[..], &pivots[..]);
+            let (pivot_of, known, tables) = (&pivot_of[..], &pivots[..], tables.as_ref());
             let threshold = if first { PAR_WORDS } else { PAR_BATCH_WORDS };
             let (x, d) = if chunk.len() > 1 && chunk.len() * words > threshold {
                 chunk
                     .par_iter_mut()
-                    .map(|row| by_known(row, pivot_of, known))
+                    .map(|row| by_known(row, pivot_of, known, tables))
                     .reduce(|| (0, 0), |a, b| (a.0 + b.0, a.1 + b.1))
             } else {
                 chunk
                     .iter_mut()
-                    .map(|row| by_known(row, pivot_of, known))
+                    .map(|row| by_known(row, pivot_of, known, tables))
                     .fold((0, 0), |a, b| (a.0 + b.0, a.1 + b.1))
             };
             xors += x;
@@ -421,7 +439,7 @@ fn echelon(
                         break;
                     }
                     p => {
-                        let (x, d) = step(&mut row, lead, p, &pivots);
+                        let (x, d) = step(&mut row, lead, p, &pivots, tables.as_ref());
                         xors += x;
                         performed += d;
                     }
@@ -429,6 +447,11 @@ fn echelon(
             }
         }
         done = end;
+        if let Some(t) = &mut tables {
+            if rest.len() - done >= TABLE_ROWS && pivots.len() > made {
+                performed += t.extend(&pivot_of, &pivots, &pivots[made..], 2 * budget);
+            }
+        }
     }
     st.word_xors += xors;
     st.word_xors_performed += performed;
@@ -456,9 +479,10 @@ struct BlockTable {
     counts: [u64; 1 << TABLE_BLOCK],
 }
 
-/// The method of four Russians on an [`echelon`]'s leading block: a
-/// [`BlockTable`] for every run of two or more of its pivot columns within
-/// an aligned group of [`TABLE_BLOCK`].
+/// The method of four Russians on an [`echelon`]'s pivots: a
+/// [`BlockTable`] for every run of two or more pivot columns within an
+/// aligned group of [`TABLE_BLOCK`] — the leading block's first, then each
+/// group a later pivot lands in, re-tabled.
 ///
 /// `table[b]`, for the pattern `b` a row carries on the block's columns
 /// (bit `j` for column `first + j`), is the sum of the block's pivots the
@@ -469,8 +493,11 @@ struct BlockTable {
 struct BlockTables {
     of_column: Vec<u32>,
     tables: Vec<BlockTable>,
-    /// Words written building them, counted as performed XORs.
+    /// Words written building the leading block's, counted as performed
+    /// XORs.
     built_words: u64,
+    /// Words the live tables hold.
+    held_words: usize,
 }
 
 impl BlockTables {
@@ -497,19 +524,107 @@ impl BlockTables {
             }
             c = e;
         }
-        let pivot = |c: usize| &pivots[pivot_of[c] as usize].1;
-        let width = |&(first, k): &(usize, usize)| {
-            (first..first + k).map(|c| pivot(c).end).max().unwrap() - first / 64
-        };
-        let total: usize = runs.iter().map(|r| width(r) << r.1).sum();
+        let total: usize = runs
+            .iter()
+            .map(|r| Self::width(r, pivot_of, pivots) << r.1)
+            .sum();
         if total > budget {
             return None;
         }
-        let tables: Vec<BlockTable> = runs
+        let mut tables = Self {
+            of_column: vec![NONE; n_cols],
+            tables: Vec::new(),
+            built_words: 0,
+            held_words: 0,
+        };
+        tables.built_words = tables.add(&runs, pivot_of, pivots);
+        Some(tables)
+    }
+
+    fn width(&(first, k): &(usize, usize), pivot_of: &[u32], pivots: &[(usize, Row)]) -> usize {
+        (first..first + k)
+            .map(|c| pivots[pivot_of[c] as usize].1.end)
+            .max()
+            .unwrap()
+            - first / 64
+    }
+
+    /// The aligned group of up to [`TABLE_BLOCK`] columns, within one word,
+    /// that column `c` belongs to.
+    fn group(c: usize, n_cols: usize) -> (usize, usize) {
+        let in_word = c % 64;
+        let start = c - in_word % TABLE_BLOCK;
+        (
+            start,
+            (start + TABLE_BLOCK).min(c - in_word + 64).min(n_cols),
+        )
+    }
+
+    /// Bring the tables up to date with `new`, pivots just made: re-table
+    /// every group one of them lands in, within `budget` words held.
+    /// Returns the words written.
+    fn extend(
+        &mut self,
+        pivot_of: &[u32],
+        pivots: &[(usize, Row)],
+        new: &[(usize, Row)],
+        budget: usize,
+    ) -> u64 {
+        let n_cols = pivot_of.len();
+        let mut groups: Vec<(usize, usize)> = new
+            .iter()
+            .map(|&(lead, _)| Self::group(lead, n_cols))
+            .collect();
+        groups.sort_unstable();
+        groups.dedup();
+        let mut runs: Vec<(usize, usize)> = Vec::new();
+        for (start, end) in groups {
+            // retire the group's old tables
+            for c in start..end {
+                let t = std::mem::replace(&mut self.of_column[c], NONE);
+                if t != NONE {
+                    let old = &mut self.tables[t as usize];
+                    self.held_words -= old.words.len();
+                    old.words = Vec::new();
+                }
+            }
+            let mut c = start;
+            while c < end {
+                if pivot_of[c] == NONE {
+                    c += 1;
+                    continue;
+                }
+                let mut e = c + 1;
+                while e < end && pivot_of[e] != NONE {
+                    e += 1;
+                }
+                if e - c >= 2 {
+                    runs.push((c, e - c));
+                }
+                c = e;
+            }
+        }
+        let mut within = Vec::with_capacity(runs.len());
+        let mut held = self.held_words;
+        for r in runs {
+            let words = Self::width(&r, pivot_of, pivots) << r.1;
+            if held + words <= budget {
+                held += words;
+                within.push(r);
+            }
+        }
+        self.add(&within, pivot_of, pivots)
+    }
+
+    /// Table `runs` and index them.  Returns the words written.
+    fn add(&mut self, runs: &[(usize, usize)], pivot_of: &[u32], pivots: &[(usize, Row)]) -> u64 {
+        let pivot = |c: usize| &pivots[pivot_of[c] as usize].1;
+        let built: Vec<BlockTable> = runs
             .par_iter()
             .map(|r| {
                 let (first, k) = *r;
-                let (base, shift, width) = (first / 64, first % 64, width(r));
+                let (base, shift) = (first / 64, first % 64);
+                let width = Self::width(r, pivot_of, pivots);
                 let size = 1usize << k;
                 let mut words = vec![0u64; size * width];
                 let mut ends = [base; 1 << TABLE_BLOCK];
@@ -547,19 +662,17 @@ impl BlockTables {
                 }
             })
             .collect();
-        let mut of_column = vec![NONE; n_cols];
-        let mut built_words = 0u64;
-        for (t, table) in tables.iter().enumerate() {
-            of_column[table.first..table.first + table.k].fill(t as u32);
-            built_words += (1..1usize << table.k)
+        let mut written = 0u64;
+        for table in built {
+            let t = self.tables.len() as u32;
+            self.of_column[table.first..table.first + table.k].fill(t);
+            written += (1..1usize << table.k)
                 .map(|b| (table.ends[b] - table.first / 64) as u64)
                 .sum::<u64>();
+            self.held_words += table.words.len();
+            self.tables.push(table);
         }
-        Some(Self {
-            of_column,
-            tables,
-            built_words,
-        })
+        written
     }
 
     /// Reduce `row`, whose lead is `lead`, by the table covering it, if
