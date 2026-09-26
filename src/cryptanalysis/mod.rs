@@ -138,6 +138,7 @@ pub mod eds_residue;
 pub mod eds_tate;
 pub mod f4_fp;
 pub mod f4_fp_tower;
+pub mod sig_fp_tower;
 pub mod fes_gpu;
 pub mod ffd_harness;
 pub mod fght_snfs;

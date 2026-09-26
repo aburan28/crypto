@@ -57,6 +57,7 @@ use std::time::{Duration, Instant};
 use crypto_lib::cryptanalysis::f4_fp::{self, F4Options, F4Report, Ordering, Poly};
 use crypto_lib::cryptanalysis::f4_fp_tower::{self, RPoly, SquareRule, TowerF4Options, TowerRing};
 use crypto_lib::cryptanalysis::ic_boundary::{CountedGroup, GroupOps, PrimeCurve, PrimePoint};
+use crypto_lib::cryptanalysis::sig_fp_tower;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde_json::{json, Value};
@@ -971,6 +972,42 @@ fn print_tower_step(k: usize, st: &f4_fp_tower::StepTrace) {
     );
 }
 
+/// One line of a signature-engine run's step trace, with the process's
+/// memory when the step ended.
+fn print_sig_step(k: usize, st: &sig_fp_tower::SigStep) {
+    let memory = memory_mb().map_or(String::new(), |(rss, peak)| {
+        format!(", memory {rss} MB (peak {peak} MB)")
+    });
+    eprintln!(
+        "sig step {}: position {} signature degree {}, {} pairs ({} syzygy, {} rewritten), rows {} gen + {} critical + {} tower + {} reducers x {} cols, nnz {}, zero {}, singular {}, fresh {} (lowest degree {}, highest row degree {}), late {}, elements {}, pairs left {}, {:.1} ms (rows {:.0}, reduce {:.0}), muladds {}{}",
+        k,
+        st.position,
+        st.sugar,
+        st.pairs,
+        st.skipped_syzygy,
+        st.skipped_rewrite,
+        st.gen_rows,
+        st.crit_rows,
+        st.tower_rows,
+        st.reducer_rows,
+        st.cols,
+        st.nnz,
+        st.zero_rows,
+        st.singular_rows,
+        st.fresh,
+        st.fresh_min_degree,
+        st.fresh_max_nominal,
+        st.late_pairs,
+        st.elements,
+        st.pairs_left,
+        st.ms,
+        st.ms_rows,
+        st.ms_reduce,
+        st.muladds,
+        memory
+    );
+}
+
 /// Run `f4_fp_tower` on a system: the tower equations become the ring's
 /// rewriting, and the other equations its input in normal form.
 #[allow(clippy::too_many_arguments)]
@@ -984,6 +1021,7 @@ fn measure_tower(
     stop_below: Option<usize>,
     max_nnz: Option<u64>,
     trace: bool,
+    sig: Option<sig_fp_tower::SigOptions>,
 ) -> (Outcome, Vec<RPoly>) {
     let p = ring.p;
     if let Some(s) = sol {
@@ -1019,8 +1057,14 @@ fn measure_tower(
     if trace {
         // Each step as it ends, so that a run that dies leaves its trace.
         opts = opts.on_step(print_tower_step);
+        opts.on_sig_step = Some(print_sig_step);
     }
-    let r = f4_fp_tower::f4_tower(&input, ring, &opts);
+    let (r, sig_stats) = if let Some(so) = sig {
+        let s = sig_fp_tower::sig_f4_tower_with(&input, ring, &opts, so);
+        (s.report, Some(s.stats))
+    } else {
+        (f4_fp_tower::f4_tower(&input, ring, &opts), None)
+    };
     let planted_ok = sol.map(|s| !r.inconsistent && r.basis.iter().all(|f| ring.eval(f, s) == 0));
     let lms: Vec<u128> = r.basis.iter().filter_map(RPoly::lm).collect();
     let pure = |k: usize| {
@@ -1056,7 +1100,10 @@ fn measure_tower(
         staircase_at_stop: r.staircase_at_stop,
         planted_ok,
         extra: json!({
-            "engine": "f4_fp_tower",
+            "engine": if sig.is_some() { "f4_fp_tower_sig" } else { "f4_fp_tower" },
+            "sig": sig_stats,
+            "sig_order": sig.map(|so| format!("{:?}", so.order)),
+            "sig_rewrite": sig.map(|so| format!("{:?}", so.rewrite)),
             "input_ring_degrees": ring_degrees,
             "muladds": r.muladds,
             "max_nnz": r.max_nnz,
@@ -1104,18 +1151,22 @@ struct Args {
     /// tower variables named `y<summand>_<level>`.
     dump: Option<u32>,
     /// The engine: `f4_fp` on the raw system (the default, and every
-    /// committed pilot row), or `f4_fp_tower` on the tower quotient ring.
+    /// committed pilot row), `f4_fp_tower` on the tower quotient ring, or
+    /// the signature-based `sig_fp_tower` on the same ring.
     engine: Engine,
     /// `f4_fp_tower` only: stop before a matrix with more non-zeros.
     max_nnz: Option<u64>,
     /// `f4_fp_tower` only: print one line per F4 step.
     trace: bool,
+    /// `sig_fp_tower` only: the module and rewrite orders.
+    sig: sig_fp_tower::SigOptions,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Engine {
     F4,
     Tower,
+    Sig,
 }
 
 /// Rows as they are measured: every row reaches `--out` and is flushed
@@ -1160,6 +1211,7 @@ fn parse_args() -> Args {
         engine: Engine::F4,
         max_nnz: None,
         trace: false,
+        sig: sig_fp_tower::SigOptions::default(),
     };
     let args: Vec<String> = std::env::args().skip(1).collect();
     let list = |s: &str| -> Vec<usize> {
@@ -1219,10 +1271,25 @@ fn parse_args() -> Args {
                 a.engine = match v.as_str() {
                     "f4" | "f4_fp" => Engine::F4,
                     "tower" | "f4_fp_tower" => Engine::Tower,
+                    "sig" | "f4_fp_tower_sig" => Engine::Sig,
                     other => panic!("unknown engine `{other}`"),
                 }
             }
             "--max-nnz" => a.max_nnz = Some(v.parse().expect("--max-nnz")),
+            "--sig-order" => {
+                a.sig.order = match v.as_str() {
+                    "pot" => sig_fp_tower::ModuleOrder::PositionFirst,
+                    "degree" => sig_fp_tower::ModuleOrder::DegreeFirst,
+                    other => panic!("unknown --sig-order `{other}`"),
+                }
+            }
+            "--sig-rewrite" => {
+                a.sig.rewrite = match v.as_str() {
+                    "ratio" => sig_fp_tower::Rewrite::Ratio,
+                    "insertion" => sig_fp_tower::Rewrite::Insertion,
+                    other => panic!("unknown --sig-rewrite `{other}`"),
+                }
+            }
             "--dump" => a.dump = Some(v.parse().expect("--dump")),
             other => panic!("unknown flag `{other}`"),
         }
@@ -1298,7 +1365,7 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
             cell.g,
             &mut rng,
         );
-        if a.engine == Engine::Tower && cell.control == Control::Naive {
+        if a.engine != Engine::F4 && cell.control == Control::Naive {
             // The naive control has no tower to rewrite by.
             continue;
         }
@@ -1324,7 +1391,7 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
                 let out = Outcome::from_f4(&m);
                 (out, Dumpable::Raw(m.report.basis))
             }
-            Engine::Tower => {
+            Engine::Tower | Engine::Sig => {
                 let ring = tower_ring(&tower, cell.m, p);
                 let (out, basis) = measure_tower(
                     &eqs,
@@ -1336,6 +1403,7 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
                     a.stop_below,
                     a.max_nnz,
                     a.trace,
+                    (a.engine == Engine::Sig).then_some(a.sig),
                 );
                 (out, Dumpable::Ring(basis))
             }
