@@ -125,6 +125,7 @@ fn main() {
                 "word_xors": st.word_xors, "word_xors_performed": st.word_xors_performed, "divisor_tests": st.divisor_tests,
                 "steps": st.steps, "basis_len": st.basis_len, "basis_fp": format!("{:016x}", h.finish()),
                 "matrix_rows_max": st.matrix_rows_max, "matrix_cols_max": st.matrix_cols_max,
+                "peak_matrix_bytes": st.peak_matrix_bytes, "peak_table_bytes": st.peak_table_bytes,
                 "pairs_reduced": st.pairs_reduced, "field_pairs_reduced": st.field_pairs_reduced,
                 "pairs_chain_skipped": st.pairs_chain_skipped, "pairs_product_skipped": st.pairs_product_skipped,
                 "pairs_left": st.pairs_left, "new_elements": st.new_elements,
