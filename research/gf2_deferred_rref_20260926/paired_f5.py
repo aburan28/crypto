@@ -20,6 +20,11 @@ from pathlib import Path
 
 
 PRIMARY = "f5_n24_m24_d4"
+WORKLOADS = {
+    "frozen": 0,
+    "holdout_a": 0xBADC0DE1,
+    "holdout_b": 0x5EED2026,
+}
 EXPECTED_CASES = {
     "f5_n12_m12_d4",
     "f5_n16_m16_d3",
@@ -56,12 +61,14 @@ def write_receipt(path, receipt):
     tmp.replace(path)
 
 
-def run_one(binary, mode, phase, pair, position):
+def run_one(binary, workload, seed_xor, mode, phase, pair, position):
     env = os.environ.copy()
     env["RAYON_NUM_THREADS"] = "1"
     env["KIC_GF2_DEFER_ABOVE"] = str(mode)
     record = {
         "phase": phase,
+        "workload": workload,
+        "seed_xor_hex": f"{seed_xor:016x}",
         "pair": pair,
         "position": position,
         "mode": mode,
@@ -70,7 +77,7 @@ def run_one(binary, mode, phase, pair, position):
     t0 = time.monotonic()
     try:
         proc = subprocess.run(
-            [str(binary), "1", "24", "f5"],
+            [str(binary), "1", "24", "f5", f"{seed_xor:016x}"],
             capture_output=True,
             text=True,
             env=env,
@@ -115,11 +122,11 @@ def signature(record):
     }
 
 
-def pair_ratios(records, phase, field):
-    pairs = sorted({r["pair"] for r in records if r["phase"] == phase})
+def pair_ratios(records, workload, case, phase, field):
+    pairs = sorted({r["pair"] for r in records if r["workload"] == workload and r["phase"] == phase})
     ratios = []
     for pair in pairs:
-        group = [r for r in records if r["phase"] == phase and r["pair"] == pair]
+        group = [r for r in records if r["workload"] == workload and r["phase"] == phase and r["pair"] == pair]
         if len(group) != 2:
             raise ValueError(f"incomplete {phase} pair {pair}")
         if phase == "aa":
@@ -127,27 +134,45 @@ def pair_ratios(records, phase, field):
         else:
             reference = next(r for r in group if r["mode"] == 0)
             candidate = next(r for r in group if r["mode"] == 1)
-        a = reference["cases"][PRIMARY][field]
-        b = candidate["cases"][PRIMARY][field]
+        a = reference["cases"][case][field]
+        b = candidate["cases"][case][field]
         ratios.append(a / b)
     return ratios
 
 
 def summarize(records):
     summary = {}
-    for field in ("reduce_ms", "wall_ms"):
-        aa = pair_ratios(records, "aa", field)
-        ab = pair_ratios(records, "ab", field)
-        summary[field] = {
-            "aa_ratios": aa,
-            "aa_min": min(aa),
-            "aa_max": max(aa),
-            "ab_ratios": ab,
-            "ab_median": statistics.median(ab),
-            "ab_min": min(ab),
-            "ab_bootstrap_95pct": median_bootstrap_interval(ab),
-        }
+    for workload in WORKLOADS:
+        summary[workload] = {}
+        for case in sorted(EXPECTED_CASES):
+            summary[workload][case] = {}
+            for field in ("reduce_ms", "wall_ms"):
+                aa = pair_ratios(records, workload, case, "aa", field)
+                ab = pair_ratios(records, workload, case, "ab", field)
+                summary[workload][case][field] = {
+                    "aa_ratios": aa,
+                    "aa_min": min(aa),
+                    "aa_max": max(aa),
+                    "ab_ratios": ab,
+                    "ab_median": statistics.median(ab),
+                    "ab_min": min(ab),
+                    "ab_bootstrap_95pct": median_bootstrap_interval(ab),
+                }
     return summary
+
+
+def linux_host_details():
+    details = {}
+    cpuinfo = Path("/proc/cpuinfo")
+    if cpuinfo.exists():
+        fields = dict(line.split(":", 1) for line in cpuinfo.read_text().splitlines() if ":" in line)
+        details["cpu_model"] = fields.get("model name", "").strip()
+        flags = set(fields.get("flags", "").split())
+        details["cpu_features"] = sorted(flags & {"popcnt", "avx2", "avx512f", "pclmulqdq", "bmi2"})
+    meminfo = Path("/proc/meminfo")
+    if meminfo.exists():
+        details["mem_total"] = next((line for line in meminfo.read_text().splitlines() if line.startswith("MemTotal:")), "")
+    return details
 
 
 def main():
@@ -170,6 +195,7 @@ def main():
     receipt = {
         "status": "running",
         "primary_case": PRIMARY,
+        "workloads": {name: f"{seed:016x}" for name, seed in WORKLOADS.items()},
         "pairs_per_phase": args.pairs,
         "binary_sha256": sha256(binary),
         "benchmark_source_sha256": sha256(Path("examples/f4_f2_bench.rs")),
@@ -182,20 +208,23 @@ def main():
             "pinned_cpu": affinity,
             "rustc": subprocess.check_output(["rustc", "--version"], text=True).strip(),
             "load_start": os.getloadavg(),
+            **linux_host_details(),
         },
         "runs": [],
     }
     write_receipt(output, receipt)
-    expected = None
-    sequence = [("warmup", 0, 0, 0), ("warmup", 0, 1, 1)]
-    for pair in range(args.pairs):
-        sequence.extend((("aa", pair, 0, 0), ("aa", pair, 1, 0)))
-    for pair in range(args.pairs):
-        arms = (0, 1) if pair % 2 == 0 else (1, 0)
-        sequence.extend(("ab", pair, position, mode) for position, mode in enumerate(arms))
+    expected = {}
+    sequence = []
+    for workload, seed_xor in WORKLOADS.items():
+        sequence.extend(((workload, seed_xor, "warmup", 0, 0, 0), (workload, seed_xor, "warmup", 0, 1, 1)))
+        for pair in range(args.pairs):
+            sequence.extend(((workload, seed_xor, "aa", pair, 0, 0), (workload, seed_xor, "aa", pair, 1, 0)))
+        for pair in range(args.pairs):
+            arms = (0, 1) if pair % 2 == 0 else (1, 0)
+            sequence.extend((workload, seed_xor, "ab", pair, position, mode) for position, mode in enumerate(arms))
 
-    for phase, pair, position, mode in sequence:
-        record = run_one(binary, mode, phase, pair, position)
+    for workload, seed_xor, phase, pair, position, mode in sequence:
+        record = run_one(binary, workload, seed_xor, mode, phase, pair, position)
         if record["status"] == "ok":
             try:
                 actual = signature(record)
@@ -203,12 +232,12 @@ def main():
                 record["status"] = "output_error"
                 record["error"] = str(exc)
             else:
-                if expected is None:
-                    expected = actual
-                    receipt["output_signature"] = expected
-                elif actual != expected:
+                if workload not in expected:
+                    expected[workload] = actual
+                    receipt["output_signatures"] = expected
+                elif actual != expected[workload]:
                     record["status"] = "output_mismatch"
-                    record["expected_signature"] = expected
+                    record["expected_signature"] = expected[workload]
                     record["actual_signature"] = actual
         receipt["runs"].append(record)
         write_receipt(output, receipt)
@@ -221,7 +250,7 @@ def main():
     receipt["host"]["load_end"] = os.getloadavg()
     receipt["status"] = "complete"
     write_receipt(output, receipt)
-    print(json.dumps(receipt["summary"], indent=2, sort_keys=True))
+    print(json.dumps({name: cases[PRIMARY] for name, cases in receipt["summary"].items()}, indent=2, sort_keys=True))
     return 0
 
 

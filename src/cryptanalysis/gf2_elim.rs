@@ -295,41 +295,132 @@ fn eliminate_with(
         }
     }
     // A forward pass already zeroed every row below each pivot block.
-    // Visit narrow column ranges right to left, reducing each range by
-    // blocks in reverse order.  This leaves every block's selector word
-    // intact until all ranges to its right have used it.  Higher pivot
-    // rows are zero at lower pivot columns, so later blocks cannot change
-    // those selectors either.
-    // Its pivot rows must be reduced by later blocks in this range before
-    // their combinations are used to clear earlier rows.
+    // Visit narrow column ranges right to left, leaving selector words
+    // intact until the ranges to their right have used them.  Within a
+    // range, prepare several blocks in reverse order: reduce each block's
+    // pivot rows by later blocks before building its table.  Then visit
+    // every earlier row once and apply all prepared tables while its
+    // range is cache-resident.
     if defer_above {
         let tile_words = reverse_tile_words
             .unwrap_or_else(|| ((1usize << 20) / rows.saturating_mul(8).max(1)).clamp(8, 128))
             .max(1);
+        let table_bytes = tables * (1usize << bits) * tile_words * 8;
+        let batch_blocks = ((2usize << 20) / table_bytes.max(1)).clamp(1, 16);
         let mut end = words;
         while end > 0 {
             let first = end.saturating_sub(tile_words);
             let range = first..end;
-            for (start, cols) in blocks.iter().rev() {
-                clear_block(
-                    matrix,
-                    words,
-                    *start,
-                    bits,
-                    cols,
-                    true,
-                    false,
-                    range.clone(),
-                    &mut table,
-                    config,
-                    simd,
-                    word_ops,
-                );
+            for batch in blocks.rchunks(batch_blocks) {
+                let mut prepared: Vec<DeferredTable> = Vec::with_capacity(batch.len());
+                for (start, cols) in batch.iter().rev() {
+                    for row in &mut matrix[*start..*start + cols.len()] {
+                        for block in &prepared {
+                            *word_ops += block.apply(row, simd);
+                        }
+                    }
+                    if *start > 0 {
+                        if let Some(block) =
+                            DeferredTable::new(matrix, *start, cols, bits, range.clone(), word_ops)
+                        {
+                            prepared.push(block);
+                        }
+                    }
+                }
+                for row in &mut matrix[..batch[0].0] {
+                    for block in &prepared {
+                        *word_ops += block.apply(row, simd);
+                    }
+                }
             }
             end = first;
         }
     }
     pivot_row
+}
+
+struct DeferredTable {
+    data: Vec<u64>,
+    pivot_word: usize,
+    first_word: usize,
+    end_word: usize,
+    mask: u64,
+    n_tables: usize,
+    table_size: usize,
+    bmi2: bool,
+}
+
+impl DeferredTable {
+    fn new(
+        matrix: &[Vec<u64>],
+        block_start: usize,
+        pivot_cols: &[usize],
+        bits: usize,
+        word_range: std::ops::Range<usize>,
+        word_ops: &mut u64,
+    ) -> Option<Self> {
+        let pivot_word = pivot_cols[0] / 64;
+        let first_word = pivot_word.max(word_range.start);
+        let end_word = word_range.end;
+        if first_word >= end_word {
+            return None;
+        }
+        let suffix = end_word - first_word;
+        let n_tables = pivot_cols.len().div_ceil(bits);
+        let table_size = 1usize << bits;
+        let mut data = vec![0; n_tables * table_size * suffix];
+        for t in 0..n_tables {
+            let group = &pivot_cols[t * bits..((t + 1) * bits).min(pivot_cols.len())];
+            let base = t * table_size * suffix;
+            for g in 1usize..(1 << group.len()) {
+                let low_bit = g.trailing_zeros() as usize;
+                let prev = g & (g - 1);
+                let src_row = &matrix[block_start + t * bits + low_bit][first_word..end_word];
+                let (head, tail) = data[base..].split_at_mut(g * suffix);
+                let prev_entry = &head[prev * suffix..(prev + 1) * suffix];
+                let dst = &mut tail[..suffix];
+                for ((d, &p), &s) in dst.iter_mut().zip(prev_entry).zip(src_row) {
+                    *d = p ^ s;
+                }
+                *word_ops += suffix as u64;
+            }
+        }
+        let mask = pivot_cols.iter().fold(0u64, |m, &pc| m | 1u64 << (pc % 64));
+        Some(Self {
+            data,
+            pivot_word,
+            first_word,
+            end_word,
+            mask,
+            n_tables,
+            table_size,
+            bmi2: bmi2_available(),
+        })
+    }
+
+    #[inline]
+    fn apply(&self, row: &mut [u64], simd: bool) -> u64 {
+        let pattern = gather_bits(row[self.pivot_word], self.mask, self.bmi2);
+        if pattern == 0 {
+            return 0;
+        }
+        let suffix = self.end_word - self.first_word;
+        let bits = self.table_size.trailing_zeros() as usize;
+        let mut idx = [0usize; 4];
+        for (t, slot) in idx.iter_mut().enumerate().take(self.n_tables) {
+            let g = (pattern >> (t * bits)) as usize & (self.table_size - 1);
+            *slot = t * self.table_size * suffix + g * suffix;
+        }
+        let used = xor_entries(
+            &mut row[self.first_word..self.end_word],
+            &self.data,
+            &idx[..self.n_tables],
+            suffix,
+            self.table_size,
+            simd,
+        );
+        used as u64 * suffix as u64
+    }
 }
 
 /// Clear every row outside `block_start .. block_start + pivots` (and,

@@ -7,13 +7,15 @@
 //! reduced basis so two revisions can be compared for identical output.
 //!
 //! ```text
-//! cargo run --release --example f4_f2_bench -- [repeats] [max_n] [families]
+//! cargo run --release --example f4_f2_bench -- [repeats] [max_n] [families] [seed_xor_hex]
 //! ```
 //!
 //! `families` is a comma-separated subset of `f4`, `bb` (Buchberger) and
 //! `f5` (matrix-F5 steps), all three by default: `-- 5 24 f5` profiles the
 //! F5 steps alone.  The F5 lines also split their wall time into the
 //! criterion, the row construction, the elimination and the unpacking.
+//! The optional hexadecimal seed XOR selects a fresh planted system;
+//! omission preserves the original fixed suite exactly.
 
 use crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_timed;
 use crypto_lib::cryptanalysis::pq_f4_f2::groebner_basis_f4;
@@ -75,6 +77,10 @@ fn main() {
         .split(',')
         .map(str::to_owned)
         .collect();
+    let seed_xor = std::env::args()
+        .nth(4)
+        .map(|s| u64::from_str_radix(s.trim_start_matches("0x"), 16).expect("seed_xor_hex"))
+        .unwrap_or(0);
     let run = |family: &str| families.iter().any(|f| f == family);
     for &(n, m) in &[
         (12usize, 12usize),
@@ -88,7 +94,11 @@ fn main() {
         if n > max_n || !run("f4") {
             continue;
         }
-        let sys = system(n, m, 0x2545_f491_4f6c_dd1d ^ ((n * 64 + m) as u64));
+        let sys = system(
+            n,
+            m,
+            0x2545_f491_4f6c_dd1d ^ ((n * 64 + m) as u64) ^ seed_xor,
+        );
         let mut walls = Vec::new();
         let mut last = None;
         for _ in 0..repeats {
@@ -119,7 +129,11 @@ fn main() {
         if n > max_n || !run("bb") {
             continue;
         }
-        let sys = system(n, m, 0x2545_f491_4f6c_dd1d ^ ((n * 64 + m) as u64));
+        let sys = system(
+            n,
+            m,
+            0x2545_f491_4f6c_dd1d ^ ((n * 64 + m) as u64) ^ seed_xor,
+        );
         let mut walls = Vec::new();
         let mut last = None;
         for _ in 0..repeats {
@@ -159,7 +173,11 @@ fn main() {
         if n > max_n || !run("f5") {
             continue;
         }
-        let sys = system(n, m, 0x2545_f491_4f6c_dd1d ^ ((n * 64 + m) as u64));
+        let sys = system(
+            n,
+            m,
+            0x2545_f491_4f6c_dd1d ^ ((n * 64 + m) as u64) ^ seed_xor,
+        );
         let mut walls = Vec::new();
         let mut last = None;
         for _ in 0..repeats {
