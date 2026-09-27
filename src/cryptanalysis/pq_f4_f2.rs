@@ -2253,7 +2253,9 @@ impl State {
             let mut divisor = m;
             let mut index = 0usize;
             while divisor != 0 {
-                if index % 1024 == 0 && deadline.is_some_and(|limit| Instant::now() >= limit) {
+                if index.is_multiple_of(1024)
+                    && deadline.is_some_and(|limit| Instant::now() >= limit)
+                {
                     return Err(());
                 }
                 submask_lookups += 1;
@@ -2268,7 +2270,9 @@ impl State {
             }
         } else {
             for (index, &g) in active.iter().enumerate() {
-                if index % 1024 == 0 && deadline.is_some_and(|limit| Instant::now() >= limit) {
+                if index.is_multiple_of(1024)
+                    && deadline.is_some_and(|limit| Instant::now() >= limit)
+                {
                     return Err(());
                 }
                 linear_tests += 1;
@@ -2744,12 +2748,9 @@ pub fn groebner_basis_f4(
             let lead = p.terms.first().map_or(0, |t| t.degree());
             st.max_poly_degree = st.max_poly_degree.max(lead);
         }
-        let Some(rows) = pack_rows_for_echelon(
-            &cols,
-            n_rows,
-            reducers.iter().chain(s_rows.into_iter()),
-            deadline,
-        ) else {
+        let Some(rows) =
+            pack_rows_for_echelon(&cols, n_rows, reducers.iter().chain(s_rows), deadline)
+        else {
             st.timed_out = true;
             st.build_ns += t.elapsed().as_nanos() as u64;
             s.pairs.extend(selected);
