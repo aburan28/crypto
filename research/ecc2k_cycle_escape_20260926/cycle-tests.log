@@ -1,0 +1,37 @@
+make: Entering directory '/workspace/scratch/7d06a41a6de1/crypto/ecc2k130'
+mkdir -p build
+g++ -O2 -std=c++17 -Wall -Wno-unused-function src/testcyclerule.cpp -o build/test-cycle-rule
+./build/test-cycle-rule
+m = 23: tau-relation 4-cycles refused within the first lap: 19200 / 19200
+m = 23: pairwise 2-cycles refused within the first lap: 20 / 20
+m = 23: pairwise 4-cycles refused within the first lap: 60 / 60
+m = 23: pairwise 6-cycles refused within the first lap: 300 / 300
+m = 23: pairwise 8-cycles refused within the first lap: 2100 / 2100
+m = 23: the 10-step a..e,-a..-e cycle refused in 7 / 200 (expected rarely: only by an accidental match with the history)
+m = 23: tau test on 200,000 random quadruples fired 0 times
+m = 23: covariance under sigma^c and negation: 0 mismatches in 200,000 (67018 fired)
+m = 41: tau-relation 4-cycles refused within the first lap: 19200 / 19200
+m = 41: pairwise 2-cycles refused within the first lap: 20 / 20
+m = 41: pairwise 4-cycles refused within the first lap: 60 / 60
+m = 41: pairwise 6-cycles refused within the first lap: 300 / 300
+m = 41: pairwise 8-cycles refused within the first lap: 2100 / 2100
+m = 41: the 10-step a..e,-a..-e cycle refused in 3 / 200 (expected rarely: only by an accidental match with the history)
+m = 41: tau test on 200,000 random quadruples fired 0 times
+m = 41: covariance under sigma^c and negation: 0 mismatches in 200,000 (66872 fired)
+m = 131: tau-relation 4-cycles refused within the first lap: 19200 / 19200
+m = 131: pairwise 2-cycles refused within the first lap: 20 / 20
+m = 131: pairwise 4-cycles refused within the first lap: 60 / 60
+m = 131: pairwise 6-cycles refused within the first lap: 300 / 300
+m = 131: pairwise 8-cycles refused within the first lap: 2100 / 2100
+m = 131: the 10-step a..e,-a..-e cycle refused in 2 / 200 (expected rarely: only by an accidental match with the history)
+m = 131: tau test on 200,000 random quadruples fired 0 times
+m = 131: covariance under sigma^c and negation: 0 mismatches in 200,000 (66727 fired)
+PASS
+mkdir -p build
+g++ -O2 -std=c++17 -Wno-unknown-pragmas src/testcycleescape.cpp -o build/test-cycle-escape
+./build/test-cycle-escape
+PASS: graph entry phases; F131 exits 6; packed/reference comparisons 15; pivot bytes 0; hybrid 0
+g++ -O2 -std=c++17 -Wno-unknown-pragmas -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-hybrid
+./build/test-cycle-escape-hybrid
+PASS: graph entry phases; F131 exits 6; packed/reference comparisons 15; pivot bytes 1; hybrid 1
+make: Leaving directory '/workspace/scratch/7d06a41a6de1/crypto/ecc2k130'

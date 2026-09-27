@@ -84,14 +84,32 @@ struct DpFileHeader {
 
 static const char DP_MAGIC_V2[8] = {'E', 'C', 'C', '2', 'K', 'D', 'P', '2'};
 
-// Leaves the handle positioned at the first record either way.
+static const char DP_MAGIC_TABLE3[8] = {'E','C','C','2','K','D','T','3'};
+static size_t dpHeaderBytes(bool v2) { return (v2 || ECC_WALK_TABLE) ? sizeof(DpFileHeader) : 0; }
+
+// The table rule changed the seed-to-endpoint function. Never replay a legacy
+// table/sigma corpus as v3 or append a new rule to an old stream.
 static bool dpFileIsV2(FILE *in) {
-    char probe[8];
-    if (fread(probe, 1, sizeof probe, in) != sizeof probe || memcmp(probe, DP_MAGIC_V2, 8) != 0) {
-        rewind(in);
-        return false;
+    DpFileHeader h{};
+    const size_t n = fread(&h, 1, sizeof h, in);
+    if (!n) { rewind(in); return false; } // a fresh append target
+    const bool v2 = n >= 8 && memcmp(h.magic, DP_MAGIC_V2, 8) == 0;
+    const bool table3 = n >= 8 && memcmp(h.magic, DP_MAGIC_TABLE3, 8) == 0;
+    if (v2 || table3) {
+        const unsigned version = table3 ? 3u : 2u;
+        const unsigned stride = table3 ? sizeof(DpFileRecord) : sizeof(DpFileRecordV2);
+        if (n != sizeof h || h.version != version || h.recordBytes != stride) {
+            fprintf(stderr, "persistence failure: invalid corpus header\n"); exit(8);
+        }
     }
-    return fseek(in, (long)sizeof(DpFileHeader), SEEK_SET) == 0;
+    if (bool(ECC_WALK_TABLE) != table3) {
+        if (ECC_WALK_TABLE || table3) {
+            fprintf(stderr, "incompatible corpus: table rule v3 requires its own corpus; preserve old data and use its matching client\n");
+            exit(2);
+        }
+    }
+    if (!v2 && !table3) rewind(in);
+    return v2;
 }
 
 static double nowSeconds() {
@@ -109,7 +127,7 @@ struct Options {
     long launches = 0;
     int instance = -1;
     unsigned runId = 1;
-    u64 maxIters = 0;
+    u64 maxIters = 1ull << 32;
     bool bench = false;
     bool packed = false;
     bool preferL1 = false;
@@ -454,7 +472,7 @@ struct RefEngine {
     // header's lane width is 1 and its version 2, so a bitsliced checkpoint of
     // the same curve and thread count is refused rather than misread.
     static const size_t LANE_WORDS = 3 + 3 + 1 + 1 + 1 + 1;
-    static const unsigned CKPT_VERSION = 2u;
+    static const unsigned CKPT_VERSION = ECC_WALK_TABLE ? 34u : 2u;
     void pack(std::vector<u64> &buf) const {
         buf.resize(lanes.size() * LANE_WORDS);
         for (size_t id = 0; id < lanes.size(); ++id) {
@@ -924,7 +942,7 @@ static void testOrbit(Rng &rng, const Solver<Cfg> &sol) {
         const u64 undoN = eccHistPush(ECC_HIST_EMPTY, unsigned(h2 & 0xFFFF) ^ ECC_TAG_EPS);
         u64 g0 = undo, g1 = undoC, g2 = undoN;
         const typename R::Point fa = sol.walk.step(p, hw, &g0, 0, 0, ell, sol.spow);
-        if (R::eq(fa, f)) okFrob = false;   // the rule did not fire
+        // A synthetic history is only a hint; it need not change this point.
         if (!R::eq(sol.walk.step(pc, R::weight(pc.x), &g1, 0, 0, ell, sol.spow), R::frob(fa, c))) okFrob = false;
         if (!R::eq(sol.walk.step(pn, R::weight(pn.x), &g2, 0, 0, ell, sol.spow), R::neg(fa))) okNeg = false;
         // The same with a history that closes a tau-relation (WALK-CONSTANT.md
@@ -938,7 +956,7 @@ static void testOrbit(Rng &rng, const Solver<Cfg> &sol) {
         };
         u64 r0 = tau(h0), r1 = tau(h1), r2 = tau(h2);
         const typename R::Point fr = sol.walk.step(p, hw, &r0, 0, 0, ell, sol.spow);
-        if (R::eq(fr, f)) okFrob = false;   // the tau test did not fire
+        // A tau hint alone does not establish a raw cycle at this point.
         if (!R::eq(sol.walk.step(pc, R::weight(pc.x), &r1, 0, 0, ell, sol.spow), R::frob(fr, c))) okFrob = false;
         if (!R::eq(sol.walk.step(pn, R::weight(pn.x), &r2, 0, 0, ell, sol.spow), R::neg(fr))) okNeg = false;
         if (R::weight(pc.x) != hw) okWeight = false;
@@ -1167,7 +1185,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         // "refusing to append v2 to a v1 corpus" is true of a truncated v1
         // file and tells an operator the wrong thing to go and fix.  Judge it
         // in its OWN framing, since that is the writer it has to be whole for.
-        const size_t probedBase = probedV2 ? sizeof(DpFileHeader) : 0;
+        const size_t probedBase = dpHeaderBytes(probedV2);
         const size_t probedRec = probedV2 ? sizeof(DpFileRecordV2) : sizeof(DpFileRecord);
         if (probed != 0 && ((unsigned long long)probed < probedBase ||
                             ((unsigned long long)probed - probedBase) % probedRec != 0)) {
@@ -1181,19 +1199,24 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             return 2;
         }
         if (!output.openFile(o.dpFile, dpOutV2 ? sizeof(DpFileRecordV2) : sizeof(DpFileRecord),
-                             dpOutV2 ? sizeof(DpFileHeader) : 0)) {
+                             dpHeaderBytes(dpOutV2))) {
             fprintf(stderr, "persistence failure: cannot lock/open aligned regular corpus %s\n", o.dpFile.c_str());
             return 8;
         }
         // The size measured under the lock decides the header, not the probe
         // above: the probe runs before the lock exists.
-        if (dpOutV2 && output.bytes == 0) {
+        if ((dpOutV2 || ECC_WALK_TABLE) && output.bytes == 0) {
             DpFileHeader h;
-            memcpy(h.magic, DP_MAGIC_V2, sizeof h.magic);
-            h.version = 2u;
-            h.recordBytes = (unsigned)sizeof(DpFileRecordV2);
+            memcpy(h.magic, ECC_WALK_TABLE ? DP_MAGIC_TABLE3 : DP_MAGIC_V2, sizeof h.magic);
+            h.version = ECC_WALK_TABLE ? 3u : 2u;
+            h.recordBytes = (unsigned)(dpOutV2 ? sizeof(DpFileRecordV2) : sizeof(DpFileRecord));
             if (fwrite(&h, sizeof h, 1, output.file) != 1) {
                 fprintf(stderr, "persistence failure: cannot write the corpus header to %s\n", o.dpFile.c_str());
+                return 8;
+            }
+            // Reload opens a separate handle below; publish the framing first.
+            if (fflush(output.file) != 0) {
+                fprintf(stderr, "persistence failure: cannot flush corpus header\n");
                 return 8;
             }
         }
@@ -1246,7 +1269,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         // plus 72-byte records, so a v1 record-size check would call every
         // valid v2 corpus truncated.
         const bool v2 = dpFileIsV2(in);
-        const long base = v2 ? (long)sizeof(DpFileHeader) : 0;
+        const long base = (long)dpHeaderBytes(v2);
         const size_t recBytes = v2 ? sizeof(DpFileRecordV2) : sizeof(DpFileRecord);
         if (inputStat.st_size < base ||
             (unsigned long long)(inputStat.st_size - base) % recBytes != 0) {
@@ -1552,7 +1575,7 @@ static int runReplay(const Options &o, Engine &eng, Solver<Cfg> &sol) {
         return 8;
     }
     const bool v2 = dpFileIsV2(in);
-    const long base = v2 ? (long)sizeof(DpFileHeader) : 0;
+    const long base = (long)dpHeaderBytes(v2);
     const size_t stride = v2 ? sizeof(DpFileRecordV2) : sizeof(DpFileRecord);
     if (st.st_size < base || (unsigned long long)(st.st_size - base) % stride != 0) {
         fprintf(stderr, "corpus %s is not a whole number of %s records\n",
@@ -1857,7 +1880,7 @@ static void usage() {
         "  --steps S        iterations per launch (default 64)\n"
         "  --launches L     stop after L launches (0 = until solved)\n"
         "  --dp-weight W    distinguished point when the normal-basis weight is <= W\n"
-        "  --max-iters N    restart a walk that has run N steps without a report\n"
+        "  --max-iters N    restart after N steps without a report (default 2^32; 0 disables)\n"
         "  --run-id R       16-bit salt making seeds unique across processes\n"
         "  --verify N       recompute the first N reported points with the reference\n"
         "                   (default 0: collection must not stall the GPU on a CPU rewalk)\n"

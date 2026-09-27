@@ -10,6 +10,9 @@ on:
       - 'research/ic_candidate_tournament_20260915/test_producer.py'
       - 'research/ic_candidate_tournament_20260915/autolab.py'
       - 'research/ic_candidate_tournament_20260915/driver_admission.py'
+      - 'research/ic_candidate_tournament_20260915/generic*.py'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-qualification-adapter/**'
+      - 'examples/ic_tournament_worker.rs'
       - 'research/ic_candidate_tournament_20260915/driver_smoke.py'
       - 'research/ic_candidate_tournament_20260915/test_driver_admission.py'
       - 'research/ic_candidate_tournament_20260915/qualification.py'
@@ -31,7 +34,7 @@ concurrency:
 jobs:
   archived-producer:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -101,6 +104,16 @@ jobs:
         run: |
           python research/ic_candidate_tournament_20260915/driver_smoke.py \
             --prepared "$RUNNER_TEMP/ic-producer" --out "$RUNNER_TEMP/ic-driver-evidence"
+      - name: Source-bound generic build and mixed-adapter tournament control
+        if: matrix.reference == 'scaled'
+        run: |
+          cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+          cargo fetch --locked
+          python research/ic_candidate_tournament_20260915/generic_build.py \
+            --out "$RUNNER_TEMP/ic-generic-driver-build"
+          python research/ic_candidate_tournament_20260915/generic_driver_smoke.py \
+            --prepared "$RUNNER_TEMP/ic-producer" --generic-build "$RUNNER_TEMP/ic-generic-driver-build" \
+            --out "$RUNNER_TEMP/ic-generic-driver-control"
       - name: Preserve driver controls including failed preparation and raw runs
         if: always() && matrix.reference == 'scaled'
         uses: actions/upload-artifact@v4
@@ -108,6 +121,8 @@ jobs:
           name: ic-driver-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             ${{ runner.temp }}/ic-driver-evidence
+            ${{ runner.temp }}/ic-generic-driver-build
+            ${{ runner.temp }}/ic-generic-driver-control
             !${{ runner.temp }}/ic-driver-evidence/**/build/**
           retention-days: 30
           if-no-files-found: warn

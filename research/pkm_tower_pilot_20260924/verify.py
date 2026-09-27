@@ -173,6 +173,17 @@ def count(row, v):
     return None
 
 
+def engine(row):
+    """The engine, and for the signature engine its variant: two variants of
+    one system are two measurements, each checked (see analyze.py)."""
+    e = row.get("engine", "f4_fp")
+    if e == "f4_fp_tower_sig":
+        e += "/" + "/".join((row.get("sig_order") or "PositionFirst",
+                             row.get("sig_rewrite") or "Ratio",
+                             row.get("sig_steps") or "SignatureDegree"))
+    return e
+
+
 def main(paths):
     checked = agreed = skipped = bounded = 0
     bad = []
@@ -192,7 +203,7 @@ def main(paths):
                 # A system measured by two runs is checked once (see analyze.py).
                 key = (row["p"], row["kind"], row["m"], row["t"], row["target"],
                        row["target_index"], row["x_r"], row["curve"]["a"], row["curve"]["b"],
-                       json.dumps(row["tower"], sort_keys=True), row.get("engine", "f4_fp"))
+                       json.dumps(row["tower"], sort_keys=True), engine(row))
                 if key in seen:
                     continue
                 seen.add(key)
@@ -208,7 +219,7 @@ def main(paths):
                 if ok:
                     agreed += 1
                 else:
-                    bad.append((path, row.get("engine", "f4_fp"), row["kind"], row["m"], row["N"],
+                    bad.append((path, engine(row), row["kind"], row["m"], row["N"],
                                 row["target"], n, row["inconsistent"]))
     print(f"checked {checked} tower rows against exhaustive search; {agreed} agree; {skipped} skipped (no V); "
           f"{bounded} stopped at their degree bound, with no verdict to check.")
