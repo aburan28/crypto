@@ -1,0 +1,77 @@
+{
+  "scope": "One-repetition discovery-only degree-two-product probe. n24 seed17 and all three families with eighteen matched methods. No holdouts or promotion evidence.",
+  "source_hashes": {
+    "worker.rs": "6c55dbd1ff1dbef9bab51cb1f2bffdcd8619f2947804c86d63928299803877ec",
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "packed.rs": "240e363ee53a79952225f8eacc9dd9d0a4ace0ce5d09b3b59a69de0edcd5d464",
+    "basis.rs": "716b439439daf82512904bf20b4afd7d0c54379be2043f7a8dfc37dfc879eabc",
+    "basis_tests.rs": "58331a341cfe02a2bfac5622727f3e9f58e5e293ce5270bfe0c8f85b02507046",
+    "affine.rs": "69db941537ab3c8a37bab3059b73744b4b89335510772786b7495d444412a02a",
+    "affine_tests.rs": "52a6ac0b8f53bc0ac03eda319db162f6313da6c437744f12ac60116697a59af3",
+    "compact.rs": "fee5d0ba2a85835dc7eef8e1976be1fb7541f606e8fa8bc375bdee3de1bc3a96",
+    "linearization.rs": "7fa0943491d7fbf056ec8af038d1e2cce79b614904d40b16d2278c10baf81788",
+    "linearization_tests.rs": "acf86c79fc11f115cff606ad20536287f9ac7d5dc0a58187265c9e3c0ff1738a"
+  },
+  "worker_sha256": "192360b62f8481ddfa6010e0467e78ace340cedf8846e230ad3a4cc48fca855f",
+  "compiler_command": [
+    "rustc",
+    "--edition",
+    "2021",
+    "-O",
+    "research/boolean_affine_substitution_20260923/worker.rs",
+    "-o",
+    "/tmp/boolean-affine-products-probe"
+  ],
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "started_utc": "2026-09-23T17:33:11.752094+00:00",
+  "receipts": [
+    {
+      "command": [
+        "/tmp/boolean-affine-products-probe",
+        "24",
+        "17",
+        "planted",
+        "1",
+        "200000",
+        "with-products"
+      ],
+      "exit_code": 0,
+      "process_ns": 3898253542,
+      "stdout_sha256": "67cd44d986c2978cabe8ad866fa188cfd08f4bb21182be6208e6751934aa37e1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-affine-products-probe",
+        "24",
+        "17",
+        "cross_planted",
+        "1",
+        "200000",
+        "with-products"
+      ],
+      "exit_code": 0,
+      "process_ns": 1981487875,
+      "stdout_sha256": "b3c437413c884bf61c3458169894798b5155f334c96f9f6070cfb47486291321",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-affine-products-probe",
+        "24",
+        "17",
+        "unplanted",
+        "1",
+        "200000",
+        "with-products"
+      ],
+      "exit_code": 0,
+      "process_ns": 3931442542,
+      "stdout_sha256": "9d17e5de4246041f61aa3c0a43d5b8f3cef768b8d9a2d7ea9a73054e0ef8b6c1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "complete": true,
+  "ended_utc": "2026-09-23T17:33:21.565604+00:00"
+}

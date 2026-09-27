@@ -613,7 +613,7 @@ mod tests {
 
     /// `n = 19`, `l = 6` Koblitz parameters, taken verbatim from
     /// `INFOn19l6-1-S.dimacs` in the reference corpus (see
-    /// `RESEARCH_TRIMOSKA_BENCHMARKS.md`).  The irreducible is
+    /// `research/notes/ecc2k130/RESEARCH_TRIMOSKA_BENCHMARKS.md`).  The irreducible is
     /// `z¹⁹ + z⁵ + z² + z + 1`.
     fn corpus_n19l6() -> (u32, u32, IrreduciblePoly, F2mElement, [F2mElement; 3]) {
         let n = 19;

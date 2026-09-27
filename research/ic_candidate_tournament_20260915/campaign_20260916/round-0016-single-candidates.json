@@ -1,0 +1,30 @@
+[
+ {
+  "config": {
+   "batch_trials": 1,
+   "linear_algebra": "sparse",
+   "max_trials": 4096,
+   "solver": "pair_table",
+   "summands": 3
+  },
+  "hypothesis": "The round-0015 winner source, byte-identical to the tree that round sealed. This round changes no source at all, so every difference from round 0015 belongs to the widened panel or to fresh-fixture variation. Against rho it is expected to stay below the 1.10 parity margin in every cell, with a panel-wide native ratio above round-0015's 0.9246 because the two added large cells sit where the margin is thinnest.",
+  "id": "incumbent",
+  "parent": "tiny2 + certificate, one optimisation unit (round-0015 winner)",
+  "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015"
+ },
+ {
+  "config": {
+   "batch_trials": 1,
+   "linear_algebra": "sparse",
+   "max_trials": 4096,
+   "solver": "pair_table",
+   "summands": 3
+  },
+  "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+  "hypothesis": "The round-0015 challenger, byte-identical to the tree that round sealed: the zero-run orbit name and deferred-ordinate block scan, plus the report serialisation change. It reproduced 0.9059 of the incumbent's instructions and 0.9925 of its native wall, and was refused because the native upper limit was 1.0073. Pre-registered expectation: it is refused again. At eight cells the half-width scales by sqrt(5/8), giving roughly 0.0114 about a point near 0.9925 and an upper limit near 1.004, still above 1.",
+  "id": "scan_io",
+  "parent": "round-0015 challenger scan_io, unchanged",
+  "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015/source_candidates/scan_io/source"
+ }
+]

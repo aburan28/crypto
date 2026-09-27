@@ -5,7 +5,7 @@
 //! against every `CurveParams` constant defined in
 //! [`src/ecc/curve.rs`](../src/ecc/curve.rs), and asserts that each
 //! passes the structural-completeness theorem from
-//! [`PAPER_STRUCTURAL_COMPLETENESS.md`](../PAPER_STRUCTURAL_COMPLETENESS.md).
+//! [`research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md`](../research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md).
 //!
 //! ## How it works
 //!
@@ -427,7 +427,7 @@ fn fresh_cm_curve_passes_audit() {
     eprintln!("  ✓ audit framework handled the fresh CM curve correctly");
 }
 
-/// Phase 1.5 of the GLV-HNP programme (RESEARCH_GLV_HNP.md §4): a
+/// Phase 1.5 of the GLV-HNP programme (research/notes/lattice-hnp/RESEARCH_GLV_HNP.md §4): a
 /// working LLL Boneh-Venkatesan attack on biased ECDSA signatures.
 ///
 /// Demonstrates that the codebase's `hnp_recover_key` (already
@@ -493,7 +493,7 @@ fn hnp_recovers_p256_key_via_lll_phase15() {
         let mut sigs: Vec<BiasedSignature> = Vec::new();
 
         while sigs.len() < 8 {
-            let bytes_count = ((k_bits + 7) / 8) as usize;
+            let bytes_count = k_bits.div_ceil(8) as usize;
             let mut buf = vec![0u8; bytes_count];
             rng.fill_bytes(&mut buf);
             let extra = (bytes_count as u32) * 8 - k_bits;

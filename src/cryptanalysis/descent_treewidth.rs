@@ -33,8 +33,8 @@
 //!
 //! - H. Bodlaender et al., *On exact algorithms for treewidth*, ESA 2006
 //!   (the subset DP used here).
-//! - `RESEARCH_FFD_WORKFLOW.md` iteration 3 (the spectral refutation that
-//!   motivates this) and `RESEARCH_FFD_PROOF_COMPLEXITY.md` §3.
+//! - `research/notes/index-calculus/RESEARCH_FFD_WORKFLOW.md` iteration 3 (the spectral refutation that
+//!   motivates this) and `research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` §3.
 
 use crate::cryptanalysis::ffd_harness::{quad_monomial_index, F2BoolPoly};
 

@@ -1,0 +1,284 @@
+[
+  {
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 256,
+      "solver": "pair_table",
+      "summands": 2
+    },
+    "hypothesis": "Unmodified declared baseline.",
+    "id": "incumbent",
+    "parent": null
+  },
+  {
+    "changed_parameters": {
+      "linear_algebra": "dense"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "dense",
+      "max_trials": 256,
+      "solver": "pair_table",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: linear_algebra",
+    "id": "algebra_01",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "solver": "enumerate"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 256,
+      "solver": "enumerate",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver",
+    "id": "algebra_02",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "linear_algebra": "dense",
+      "solver": "enumerate"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "dense",
+      "max_trials": 256,
+      "solver": "enumerate",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver, linear_algebra",
+    "id": "algebra_03",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "solver": "f4"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 256,
+      "solver": "f4",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver",
+    "id": "algebra_04",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "linear_algebra": "dense",
+      "solver": "f4"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "dense",
+      "max_trials": 256,
+      "solver": "f4",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver, linear_algebra",
+    "id": "algebra_05",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "solver": "f5"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 256,
+      "solver": "f5",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver",
+    "id": "algebra_06",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "linear_algebra": "dense",
+      "solver": "f5"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "dense",
+      "max_trials": 256,
+      "solver": "f5",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver, linear_algebra",
+    "id": "algebra_07",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "solver": "inherited_f4"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 256,
+      "solver": "inherited_f4",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver",
+    "id": "algebra_08",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "linear_algebra": "dense",
+      "solver": "inherited_f4"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "dense",
+      "max_trials": 256,
+      "solver": "inherited_f4",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver, linear_algebra",
+    "id": "algebra_09",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "solver": "sat_xor"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 256,
+      "solver": "sat_xor",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver",
+    "id": "algebra_10",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "linear_algebra": "dense",
+      "solver": "sat_xor"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "dense",
+      "max_trials": 256,
+      "solver": "sat_xor",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver, linear_algebra",
+    "id": "algebra_11",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "solver": "sat_cnf"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 256,
+      "solver": "sat_cnf",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver",
+    "id": "algebra_12",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "linear_algebra": "dense",
+      "solver": "sat_cnf"
+    },
+    "config": {
+      "batch_trials": 8,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "dense",
+      "max_trials": 256,
+      "solver": "sat_cnf",
+      "summands": 2
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: solver, linear_algebra",
+    "id": "algebra_13",
+    "parent": "incumbent"
+  }
+]

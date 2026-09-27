@@ -18,7 +18,7 @@ ARCH     ?= sm_90
 NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo
 
 # p and the shape default to the measured gaudry_cubic case: the largest
-# size RESEARCH_RESIDUAL_WALKS.md section 11.6 runs, and the 226 x 286
+# size research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md section 11.6 runs, and the 226 x 286
 # matrix its row selection produces.
 P      ?= 2083
 ROWS   ?= 226

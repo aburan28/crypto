@@ -8,7 +8,7 @@
 //! On a prime field there is no proper additive subspace, so a
 //! "subspace factor base" has nowhere to live and the `S₃` / `S₄`
 //! oracles of `residual_walk` degrade to one square root per
-//! factor-base element (§10.4–10.5 of `RESEARCH_RESIDUAL_WALKS.md`).
+//! factor-base element (§10.4–10.5 of `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`).
 //! Over `F_{q^k}` the base `F = {P ∈ E(F_{q^k}) : x(P) ∈ F_q}` is an
 //! `F_q`-subspace of abscissae, and a summation-polynomial equation
 //! `S_{m+1}(x_1, …, x_m, x_R) = 0` with the `x_i` unknown in `F_q` Weil-
@@ -1499,7 +1499,7 @@ pub fn solve_s4_subspace(
 /// Keep retrying degrees 11-13 after the border check has already shown
 /// they must fail.  Off by default; `GAUDRY_BORDER_RETRY=1` restores the
 /// pre-check behaviour so the saving stays measurable both ways and the
-/// earlier runs in `RESEARCH_RESIDUAL_WALKS.md` can be reproduced.
+/// earlier runs in `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` can be reproduced.
 fn border_retry_enabled() -> bool {
     std::env::var_os("GAUDRY_BORDER_RETRY").is_some()
 }
@@ -2523,7 +2523,7 @@ pub enum Solver {
     /// the exponent moves the wrong way — the variant's exponential
     /// saving in the Gröbner step has nothing to bite on at `k = 3`.
     /// It is here to be measured rather than assumed; see
-    /// `RESEARCH_RESIDUAL_WALKS.md` §11.9.
+    /// `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` §11.9.
     PairOnly,
 }
 

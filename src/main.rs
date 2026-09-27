@@ -12,6 +12,12 @@
 //!   chacha  encrypt <key-hex> <nonce-hex> <msg>
 //!   hkdf    <ikm-hex> <salt-hex> <info> <length>
 //!   pqc                                — PQC demos (ML-KEM, ML-DSA, SQIsign, toy Kyber)
+//!   pqc-fast <module> --op ...         — the speed-oriented implementations
+//!   mlwe    <attack>  ...              — ML-KEM / ML-DSA cryptanalysis
+
+mod cli_mlwe;
+mod cli_pqc;
+mod cli_pqc_fast;
 
 use clap::{Parser, Subcommand};
 use crypto_lib::{
@@ -52,6 +58,7 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum Cmd {
     /// Hash a message with the given algorithm (sha256 | sha3 | blake3)
     Hash { algorithm: String, message: String },
@@ -78,8 +85,12 @@ enum Cmd {
     Chacha,
     /// HKDF key derivation demo
     Hkdf,
-    /// Post-quantum demos: ML-KEM, ML-DSA, SQIsign, toy Kyber
-    Pqc,
+    /// Post-quantum schemes: `list` them, `run` any one of them, or the guided
+    /// `demo`. Bare `crypto pqc` is the demo.
+    Pqc {
+        #[command(subcommand)]
+        op: Option<cli_pqc::PqcOp>,
+    },
     /// Run all demos
     Demo,
     /// Cryptanalysis: run cipher-attack techniques (S-box analysis,
@@ -106,6 +117,18 @@ enum Cmd {
     Cryptopals {
         /// Challenge number 49..=56, or the literal `all`.
         challenge: String,
+    },
+    /// The speed-oriented PQC implementations in `pqc::fast`:
+    /// ML-KEM, ML-DSA, Keccak and SQIsign-scale isogeny arithmetic.
+    PqcFast {
+        #[command(subcommand)]
+        op: cli_pqc_fast::PqcFastOp,
+    },
+    /// Cryptanalysis of ML-KEM and ML-DSA: lattice-attack estimates, working
+    /// sieves, and the implementation attacks that actually break deployments.
+    Mlwe {
+        #[command(subcommand)]
+        op: cli_mlwe::MlweOp,
     },
 }
 
@@ -146,6 +169,12 @@ enum IsogenyOp {
         trials: u32,
         #[arg(long, default_value = "2,3")]
         ell_list: String,
+        /// Override the Pollard-rho iteration cap.  Defaults to the
+        /// `8·2^{bits/2}` heuristic below.  Frozen artifacts under
+        /// `experiments/` were produced with explicit caps (2^14, 2^18),
+        /// so reproducing them needs this.
+        #[arg(long)]
+        rho_cap: Option<u64>,
     },
     /// secp256k1 case study: GLV constants, twist analysis, MOV
     /// embedding-degree certificate, small-degree-isogeny survey.
@@ -179,6 +208,7 @@ enum VisualOp {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum CryptanalysisOp {
     /// List all registered ciphers known to the auto-attack runner.
     ListCiphers,
@@ -484,12 +514,14 @@ fn main() {
         Cmd::Aes => cmd_aes(),
         Cmd::Chacha => cmd_chacha(),
         Cmd::Hkdf => cmd_hkdf(),
-        Cmd::Pqc => cmd_pqc(),
+        Cmd::Pqc { op } => cli_pqc::run(op),
         Cmd::Demo => cmd_demo(),
         Cmd::Cryptanalysis { op } => cmd_cryptanalysis(op),
         Cmd::Visual { op } => cmd_visual(op),
         Cmd::Isogeny { op } => cmd_isogeny(op),
         Cmd::Cryptopals { challenge } => cmd_cryptopals(&challenge),
+        Cmd::PqcFast { op } => cli_pqc_fast::run(op),
+        Cmd::Mlwe { op } => cli_mlwe::run(op),
     }
 }
 
@@ -1192,6 +1224,7 @@ fn cmd_isogeny(op: IsogenyOp) {
             bits,
             trials,
             ell_list,
+            rho_cap,
         } => {
             let mut cfg = ExperimentConfig::default_for_bits(bits);
             cfg.num_curves = trials.max(1);
@@ -1200,8 +1233,9 @@ fn cmd_isogeny(op: IsogenyOp) {
             // Cap scales with √n.  Hasse interval is centred at p, so
             // √n ≈ √p = 2^{bits/2}.  Allow 8× headroom for the
             // geometric-distribution tail.
-            let half_bits = (cfg.bits.min(60) / 2) as u32;
-            cfg.rho_max_iters = 8u64.checked_shl(half_bits).unwrap_or(u64::MAX);
+            let half_bits = cfg.bits.min(60) / 2;
+            cfg.rho_max_iters =
+                rho_cap.unwrap_or_else(|| 8u64.checked_shl(half_bits).unwrap_or(u64::MAX));
             eprintln!(
                 "# Running isogeny experiment: bits={}, trials={}, ell={:?}",
                 cfg.bits, cfg.num_curves, cfg.primes,
@@ -1758,7 +1792,7 @@ fn cmd_rsa(op: RsaOp) {
             let kp = RsaKeyPair::generate(1024);
             println!(
                 "n (256-bit prefix): {}…",
-                to_hex(&bigint_to_bytes_be(&kp.public.n, 128))[..64].to_string()
+                &to_hex(&bigint_to_bytes_be(&kp.public.n, 128))[..64]
             );
             println!("e: {}", kp.public.e);
         }
@@ -1819,7 +1853,7 @@ fn cmd_hkdf() {
     println!("OKM:  {}", to_hex(&okm));
 }
 
-fn cmd_pqc() {
+pub(crate) fn cmd_pqc() {
     println!("=== ML-KEM-768 (NIST FIPS 203) ===");
     let (ek, dk) = ml_kem_keygen(&ML_KEM_768);
     println!(

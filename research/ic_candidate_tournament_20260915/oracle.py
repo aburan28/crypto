@@ -2,6 +2,7 @@
 import math
 import hashlib
 import json
+from functools import lru_cache
 
 
 class InvalidEvidence(ValueError):
@@ -13,17 +14,57 @@ def require(condition, message):
         raise InvalidEvidence(message)
 
 
+def polynomial_remainder(a, b):
+    """GF(2)[x] division in the checker's integer coefficient encoding."""
+    require(b > 0, 'zero polynomial divisor')
+    while a.bit_length() >= b.bit_length():
+        a ^= b << (a.bit_length() - b.bit_length())
+    return a
+
+
+@lru_cache(maxsize=128)
+def irreducible_binary_polynomial(modulus):
+    """Exact bounded-degree test, HAC Algorithm 4.69 (p=2).
+
+    https://cacr.uwaterloo.ca/hac/about/chap4.pdf, section 4.5.1.
+    Eliminate every possible irreducible factor of degree <= floor(n/2)
+    using gcd(f, x^(2^i)-x). This does not trust the producer's field claim.
+    """
+    degree = modulus.bit_length()-1
+    if degree < 1:
+        return False
+    power = 2
+    for _ in range(degree//2):
+        square = sum(1 << (2*i) for i in range(power.bit_length()) if power & (1 << i))
+        power = polynomial_remainder(square, modulus)
+        a, b = modulus, power ^ 2
+        while b:
+            a, b = b, polynomial_remainder(a, b)
+        if a != 1:
+            return False
+    return True
+
+
 class Curve:
     def __init__(self, fixture):
         self.n = int(fixture['degree'])
         self.a = int(fixture['curve_a'])
         self.r = int(fixture['subgroup_order'])
-        require(5 <= self.n <= 31 and self.n % 2 == 1, 'unsupported degree')
+        # The upper bound mirrors `koblitz_tiny_ic::MAX_DEGREE`, which is what
+        # the collector can run, not what this checker can read: the arithmetic
+        # here is Python integers over the fixture's own irreducible polynomial
+        # and has no width of its own. The Rust ceiling was 31 because the pair
+        # table packed coordinates into `u32`; widening that to `u64` lifted it
+        # to 61, and this follows so the checker keeps refusing exactly what the
+        # collector refuses. Additive: it accepts strictly more than before and
+        # reads every earlier fixture identically.
+        require(5 <= self.n <= 61 and self.n % 2 == 1, 'unsupported degree')
         require(self.a in (0, 1), 'unsupported coefficient')
         terms = fixture['irreducible']['low_terms']
         require(fixture['irreducible']['degree'] == self.n, 'field degree mismatch')
         require(len(set(terms)) == len(terms) and all(0 <= x < self.n for x in terms), 'bad modulus')
         self.modulus = (1 << self.n) | sum(1 << t for t in terms)
+        require(irreducible_binary_polynomial(self.modulus), 'reducible field modulus')
         require(self.r > 2 and all(self.r % d for d in range(2, math.isqrt(self.r) + 1)), 'nonprime subgroup')
         t = -1 if self.a == 0 else 1
         s0, s1 = 2, t
@@ -148,8 +189,44 @@ def verify(report, expected_fixture, *, expected_mode='ic', summands=3):
                 'solutions':[s['recovered'] for s in sorted(solutions,key=lambda s:s['index'])]}
     require(report.get('rejected_relations') == 0, 'rejected relation in run')
     require(report.get('summands') == summands, 'changed summand count')
-    base = [c.decode(p) for p in report['factor_base']]
+    if 'factor_base_orbits' in report:
+        # Round-0016 format: the worker reports one representative point per
+        # signed Frobenius orbit and this checker regenerates the flat base in
+        # the worker's own order -- for each representative R, in the order
+        # reported: +R, -R, +Frob(R), -Frob(R), ..., +Frob^(n-1)(R), -Frob^(n-1)(R).
+        # Relation and descent indices address that flat list, exactly as they
+        # addressed the fully listed base, and the base hash below is over the
+        # same points, so a report in either format verifies to the same
+        # certificate. The expansion is this file's own frob/neg, not the
+        # worker's; equivalence to the fully listed form was checked on every
+        # cell of round 0016 before the format was admitted.
+        require('factor_base' not in report, 'both factor-base formats in one report')
+        reps = [c.decode(p) for p in report['factor_base_orbits']]
+        require(reps and all(p is not None for p in reps), 'invalid orbit representatives')
+        base = []
+        for rep in reps:
+            q = rep
+            for _ in range(c.n):
+                base.append(q)
+                base.append(c.neg(q))
+                q = c.frob(q)
+            require(q == rep, 'orbit representative does not close under Frobenius')
+    else:
+        base = [c.decode(p) for p in report['factor_base']]
     require(base and all(p is not None for p in base) and len(set(base)) == len(base), 'invalid factor base')
+    # Which convention the report's columns and rows were built under.
+    # 'cofactor' (the default, and every report written before round 0018):
+    #   a base point's column is located by `[h]P` and a relation's row reads
+    #   `sum coeff*log == h*a`.
+    # 'representative': the column IS the orbit representative, so a base
+    #   point is located by itself and the row reads `sum coeff*log == a`.
+    # The two differ by the constant `h` on both sides and recover the same
+    # logarithms; the checker still recomputes every point and every row with
+    # its own group arithmetic under either. A report must not carry both.
+    convention = report.get('column_convention', 'cofactor')
+    require(convention in ('cofactor', 'representative'), 'unknown column convention')
+    scale = c.h if convention == 'cofactor' else 1
+    locate = (lambda p: c.mul(p, c.h)) if convention == 'cofactor' else (lambda p: p)
     logs = report.get('column_logs', [])
     require(len(logs) == report.get('columns') and len(logs) > 1, 'missing/nontrivial log matrix')
     mapping = {}
@@ -164,9 +241,11 @@ def verify(report, expected_fixture, *, expected_mode='ic', summands=3):
                 mapping[q] = j, k
             p = c.frob(p)
             coeff = coeff*c.lam % c.r
-    projected = [mapping.get(c.mul(p, c.h)) for p in base]
-    # An identity projection contributes zero; every other projection needs a column.
-    require(all(x is not None or c.mul(p,c.h) is None for p,x in zip(base,projected)), 'uncovered base column')
+    projected = [mapping.get(locate(p)) for p in base]
+    # An identity projection contributes zero; every other projection needs a
+    # column.  Under 'representative' no base point projects to the identity --
+    # the base is checked non-degenerate above -- so every one needs a column.
+    require(all(x is not None or locate(p) is None for p,x in zip(base,projected)), 'uncovered base column')
     matrix = []
     seen = set()
     rows = report.get('relations', [])
@@ -183,7 +262,7 @@ def verify(report, expected_fixture, *, expected_mode='ic', summands=3):
                 j, k = projected[i]
                 row[j] = (row[j]+k) % c.r
         require(q is not None and q == c.mul(c.g,a), 'incorrect point relation')
-        require(sum(x*int(l['log']) for x,l in zip(row,logs)) % c.r == c.h*a % c.r, 'incorrect scalar-field row')
+        require(sum(x*int(l['log']) for x,l in zip(row,logs)) % c.r == scale*a % c.r, 'incorrect scalar-field row')
         key = a, tuple(sorted(ids))
         if key not in seen:
             matrix.append(row)
@@ -201,7 +280,7 @@ def verify(report, expected_fixture, *, expected_mode='ic', summands=3):
         require(isinstance(rel, dict), 'missing descent relation: logarithm not certified as index calculus')
         a, b, ids = rel.get('a'), rel.get('b'), rel.get('points')
         require(type(a) is int and type(b) is int and 0 <= a < c.r and 0 < b < c.r, 'invalid descent scalars')
-        require(isinstance(ids, list) and len(ids) in (0, summands)
+        require(isinstance(ids, list) and len(ids) == summands
                 and all(type(i) is int and 0 <= i < len(base) for i in ids), 'bad descent relation indices')
         q = targets[s['index']]
         probe = c.add(c.mul(c.g, a), c.mul(q, b))
@@ -213,7 +292,7 @@ def verify(report, expected_fixture, *, expected_mode='ic', summands=3):
                 j, k = projected[i]
                 logsum = (logsum + k*int(logs[j]['log'])) % c.r
         require(total == probe, 'descent relation does not hold in the group')
-        require(c.h*(a + b*int(s['recovered'])) % c.r == logsum, 'logarithm is not the consequence of its descent relation')
+        require(scale*(a + b*int(s['recovered'])) % c.r == logsum, 'logarithm is not the consequence of its descent relation')
         degenerate += not ids
     return {'verified_targets':len(targets), 'verified_relations':len(rows), 'fresh_rows':len(seen),
             'certified_descents':len(solutions), 'degenerate_descents':degenerate,

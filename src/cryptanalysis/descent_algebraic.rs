@@ -45,7 +45,7 @@
 //!
 //! - Bardet–Faugère–Salvy, *complexity of Gröbner bases of semi-regular
 //!   systems* (the generic Hilbert-series baseline `r_gen`).
-//! - `RESEARCH_FFD_WORKFLOW.md` iterations 3–4 (the graph-invariant
+//! - `research/notes/index-calculus/RESEARCH_FFD_WORKFLOW.md` iterations 3–4 (the graph-invariant
 //!   refutations that motivate going algebraic).
 
 use crate::cryptanalysis::ffd_harness::{

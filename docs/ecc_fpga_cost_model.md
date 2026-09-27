@@ -186,7 +186,7 @@ above. Neither is worth RTL, for different reasons.
 ### 7a. The Macaulay reduction over `F_p` — the FPGA loses outright
 
 `gaudry_cubic` reduces one `226 x 286` matrix over `F_p` per residual
-(`RESEARCH_RESIDUAL_WALKS.md` 11.6). The primitive is a **32-bit
+(`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` 11.6). The primitive is a **32-bit
 Montgomery multiply**, `p < 2^31`.
 
 | | FPGA (VU47P) | GPU (132 SM, 1.755 GHz) |
@@ -229,7 +229,7 @@ multiplier share `FPGA-CEILING.md` measures:
 
 At the 250-350 MHz that document estimates for this fabric, and the
 **190 field multiplications per pair** measured in
-`RESEARCH_SEMAEV_DECOMPOSITION.md`:
+`research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`:
 
     569 x 300e6 / 190 = 0.90 G pairs/s per VU47P                  (derived)
 
@@ -282,7 +282,7 @@ The ordering that follows is the same one section 4 reaches for rho, now
 for both new kernels: write the GPU kernel, use `clmad`, and spend the
 quarter an FPGA campaign would cost on the thing neither platform can
 buy. Under `AGENTS.md` both kernels are **engineering** rows — they move
-wall-clock, and `RESEARCH_RESIDUAL_WALKS.md` 11.7 puts the crossover with
+wall-clock, and `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` 11.7 puts the crossover with
 rho past `2^230` regardless of how fast either phase runs.
 
 ## 6. Reproducing
