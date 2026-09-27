@@ -1,4 +1,4 @@
-# Boolean F4 six-column lookup tables: first paired run
+# Boolean F4 lookup-table width study
 
 The opt-in six-column/four-matrix-budget arm matched exact bases, counted logical XORs and matrix shapes on all seven cases and both holdouts. It passed the primary one-thread timing gate but has an unresolved smaller-case holdout regression, so the four-column default remains in place pending an independent repeat and four-thread control. This is an internal Boolean F4 solver-stage result, not a one-target IC or DLP speedup.
 
@@ -66,3 +66,18 @@ CI run [36302666376](https://github.com/aburan28/crypto/actions/runs/36302666376
 | Four, holdout B | 1.177, 1.115–1.241 | 1.081, 1.024–1.098 |
 
 The disputed one-thread holdout B `n14_m14` median was 0.9923, inside its own A/A range 0.9779–1.0042; its bootstrap interval was 0.9842–1.0031. No other smaller median fell below its A/A range at either thread count. The one-thread frozen primary clears the 1.05 elimination gate; the four-thread control does not show a material regression, though its frozen intervals include one. The bounded adjudication clears the frozen promotion rule, so the next change selects five columns by default with a four-column reference and a final default-on replay. Six columns remain opt-in after its repeated smaller-case regression.
+
+## Final default-on replay with batched pairs
+
+CI run [36305490281](https://github.com/aburan28/crypto/actions/runs/36305490281) at PR head `11345661` completed 66 successful calls at each thread count. Both binaries include the merged batched-pair default from PR #882. The reference explicitly selects four-column tables; the candidate uses the new five-column default. Every case matched its exact basis, matrix shape and logical work counters. The raw [one-thread](runs/36305490281/ci-result-five.json) and [four-thread](runs/36305490281/ci-result-five-threads4.json) receipts have SHA-256 `6e07266627baea542c3f0afa6b8bc81bac2249b235072a668f0ab752a0bc5844` and `8a011a6d3dbd8bc3d354b10a55f28370e2350085a9ac656c78e44eb170847988`.
+
+| Threads | `n20_m30` workload | Elimination ratio, 95% interval | Complete F4 ratio, 95% interval |
+| ---: | --- | ---: | ---: |
+| 1 | Frozen | 1.066, 1.057–1.072 | 1.079, 1.070–1.137 |
+| 1 | Holdout A | 1.359, 1.350–1.367 | 1.237, 1.231–1.242 |
+| 1 | Holdout B | 1.354, 1.349–1.368 | 1.233, 1.229–1.247 |
+| 4 | Frozen | 1.058, 1.046–1.066 | 1.068, 1.059–1.096 |
+| 4 | Holdout A | 1.159, 1.132–1.201 | 1.136, 1.104–1.144 |
+| 4 | Holdout B | 1.207, 1.174–1.219 | 1.139, 1.099–1.149 |
+
+Both holdout primary gains lie outside their same-run A/A ranges. No smaller complete-call median fell below its own A/A lower bound at either thread count. The one-thread frozen elimination and complete-call gates, the four-thread control, and exact-output checks all pass. Five-column tables are the measured default within the stated table budget; four columns remain available with `f4-four-tables`, while six columns remain opt-in with `f4-wide-tables`. These are Boolean F4 solver-stage gains, not a measured one-target IC or DLP speedup.
