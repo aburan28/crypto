@@ -63,11 +63,11 @@ fn xor_blocks(a: &[u8; 16], b: &[u8; 16]) -> [u8; 16] {
 fn s2v(k1: &AesKey, aads: &[&[u8]], plaintext: &[u8]) -> [u8; 16] {
     // D_0 = CMAC(K1, 0^128)
     let zero = [0u8; 16];
-    let mut d: [u8; 16] = aes_cmac(k1, &zero).into();
+    let mut d: [u8; 16] = aes_cmac(k1, &zero);
     // Fold in each AAD.
     for aad in aads {
         d = dbl(&d);
-        let mac: [u8; 16] = aes_cmac(k1, aad).into();
+        let mac: [u8; 16] = aes_cmac(k1, aad);
         d = xor_blocks(&d, &mac);
     }
     // Final: combine with plaintext.
@@ -79,7 +79,7 @@ fn s2v(k1: &AesKey, aads: &[&[u8]], plaintext: &[u8]) -> [u8; 16] {
         for i in 0..16 {
             t[n - 16 + i] ^= d2[i];
         }
-        aes_cmac(k1, &t).into()
+        aes_cmac(k1, &t)
     } else {
         // Pad: P || 1 || 0…, full 16 bytes, then XOR with dbl(D).
         let mut padded = [0u8; 16];
@@ -87,7 +87,7 @@ fn s2v(k1: &AesKey, aads: &[&[u8]], plaintext: &[u8]) -> [u8; 16] {
         padded[plaintext.len()] = 0x80;
         let d2 = dbl(&d);
         let mixed = xor_blocks(&d2, &padded);
-        aes_cmac(k1, &mixed).into()
+        aes_cmac(k1, &mixed)
     }
 }
 

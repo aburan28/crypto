@@ -1,0 +1,9 @@
+no-fruitless-cycle check, steps j in [3, 4, 5, 6, 7, 8, 9, 10], cycles up to length 8
+  m=23   clean: 12869 multisets, none hit an orbit (2.82e-1 expected by chance)
+  m=41   clean: 12869 multisets, none hit an orbit (1.92e-6 expected by chance)
+  m=83   clean: 12869 multisets, none hit an orbit (8.84e-19 expected by chance)
+  m=97   clean: 12869 multisets, none hit an orbit (6.30e-23 expected by chance)
+  m=131  clean: 12869 multisets, none hit an orbit (4.95e-33 expected by chance)
+  m=131  ell and lambda equal the generated challenge constants
+
+No cycle mechanism: the iteration is equivariant, and no step multiset up to the bound closes an orbit.

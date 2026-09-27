@@ -368,10 +368,12 @@ attack, none of which moves either floor:
   `m` summands of a decomposition; quotienting by it lowers the summation
   polynomial's degree per variable from `2^{m−1}` to `2^{m−2}`.  This is
   FHJRV's subject, reconciled as prior art in `research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md`
-  §"prior art".  It moves the Gröbner constant, not the counting floor
-  `κ ≥ √(2(B+1)/γ)`: the automorphism order `γ` grows by the same factor the
-  relation yield does, which is why the scoreboard lists it under
-  engineering.  The `2-torsion-saturated` factor bases in
+  §"prior art".  It moves the Gröbner constant, not the ratio to the
+  counting floor.  The floor `κ ≥ √(2(B+1)/γ)` *falls* with the
+  automorphism order `γ`, and the generic yield bound `γP²/2n` rises with
+  it, by the same factor: a larger symmetry group is already priced into
+  the boundary, so quotienting by it cannot move the ratio.  That is why
+  the scoreboard lists it under engineering.  The `2-torsion-saturated` factor bases in
   `research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md` measured `8.9×` *worse* than the
   unsaturated base at equal size, a relabelling.
 - **Rank-two torsion.**  `E(F_q) ≅ Z/n₁ × Z/n₂` with `n₁ > 1` puts the full

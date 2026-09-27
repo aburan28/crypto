@@ -304,14 +304,14 @@ pub fn format_boomerang_quartet_diagram(
     let mut s = String::new();
     s.push_str("```\n");
     s.push_str("  Quartet structure:\n");
-    s.push_str("\n");
+    s.push('\n');
     s.push_str("       P₁ ───E───► C₁ ──⊕δ──► C₃ ───D───► P₃\n");
     s.push_str("       │                                   │\n");
     s.push_str("       ⊕α                              right?\n");
     s.push_str("       │                                   │\n");
     s.push_str("       ▼                                   ▼\n");
     s.push_str("       P₂ ───E───► C₂ ──⊕δ──► C₄ ───D───► P₄\n");
-    s.push_str("\n");
+    s.push('\n');
     s.push_str(&format!("  α  = {}\n", alpha_hex));
     s.push_str(&format!("  δ  = {}\n", delta_hex));
     s.push_str(&format!(
