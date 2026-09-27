@@ -1014,7 +1014,7 @@ pub fn groebner_basis_f4(
 ) -> (Vec<F2BoolPoly>, F4Stats) {
     static BATCH_INSERTS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let batch_inserts =
-        *BATCH_INSERTS.get_or_init(|| std::env::var("F4_F2_BATCH_INSERTS").as_deref() == Ok("1"));
+        *BATCH_INSERTS.get_or_init(|| std::env::var("F4_F2_BATCH_INSERTS").as_deref() != Ok("0"));
     let started = Instant::now();
     let deadline = budget.map(|b| started + b);
     let mut st = F4Stats::default();

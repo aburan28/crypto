@@ -11,3 +11,15 @@ CI run [36299824843](https://github.com/aburan28/crypto/actions/runs/36299824843
 | Holdout `2468ace0` | 118.0 ms | 85.3 ms | 1.382, 1.357–1.387 | 687.3 ms | 654.7 ms | 1.050, 1.047–1.053 |
 
 Milliseconds are each arm's five A/B median; paired ratio medians need not equal the ratio of marginal medians. Frozen A/A ratios ranged 0.990–1.026 for `other_ms` and 0.998–1.010 for complete F4. Build and elimination ratios were about one, as expected. No smaller complete-F4 cell had a median regression beyond its own A/A range. The batch cuts repeated scans in `State::insert`; step-degree selection still scans the pair list. Default promotion awaits a four-thread regression control and final default-on replay.
+
+## Four-thread control and default decision
+
+CI run [36300590097](https://github.com/aburan28/crypto/actions/runs/36300590097) at PR head `8dd1fa77` passed both F4 test modes and completed 66 four-thread calls. The [complete raw receipt](runs/36300590097/ci-result-threads4.json), SHA-256 `50045f8f03f7ffa064bdb76242a79ed7d8bd1bfe81c1c7897cdf5d23081efaa6`, records a Linux x86-64 AMD EPYC 9V74 runner pinned to four CPUs. Ratios are paired within that run.
+
+| `n20_m30` workload | Other-time ratio, 95% interval | Complete-F4 ratio, interval | Complete-F4 A/A range |
+| --- | ---: | ---: | ---: |
+| Frozen seed | 1.291, 1.279–1.311 | 1.079, 1.051–1.095 | 0.975–1.027 |
+| Holdout `1ac0ffee` | 1.309, 1.284–1.319 | 1.074, 1.052–1.092 | 0.987–1.009 |
+| Holdout `2468ace0` | 1.313, 1.292–1.443 | 1.062, 1.050–1.138 | 0.964–1.015 |
+
+All exact fingerprints, pair counters, operation counts and matrix dimensions matched, and no smaller-case median regressed beyond its A/A noise. This clears the parallel control. Batched pair filtering is now selected by default, with `F4_F2_BATCH_INSERTS=0` retaining the original per-insertion path. A final explicit-reference one- and four-thread replay remains before merging. The measured improvement is only a Boolean F4 stage result.
