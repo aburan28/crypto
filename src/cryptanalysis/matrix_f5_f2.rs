@@ -458,16 +458,36 @@ pub struct F5Timings {
     pub unpack_ns: u64,
 }
 
+/// Row form requested from a matrix-F5 step. Both forms span the same
+/// space; only `Reduced` has a unique list of returned polynomials.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum F5OutputForm {
+    Reduced,
+    Echelon,
+}
+
 /// [`matrix_f5_f2`] with the wall time of each phase.
 pub fn matrix_f5_f2_timed(
     polys: &[F2BoolPoly],
     n_vars: usize,
     degree: u32,
 ) -> Option<(Vec<F2BoolPoly>, F5Report, F5Timings)> {
+    matrix_f5_f2_with_form_timed(polys, n_vars, degree, F5OutputForm::Reduced)
+}
+
+/// A timed matrix-F5 step with an explicit output form. `Echelon` skips
+/// above-pivot reduction; callers that need a canonical basis can request
+/// `Reduced` or reduce the returned rows themselves.
+pub fn matrix_f5_f2_with_form_timed(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    form: F5OutputForm,
+) -> Option<(Vec<F2BoolPoly>, F5Report, F5Timings)> {
     use std::time::Instant;
     let mut timings = F5Timings::default();
     use crate::cryptanalysis::koblitz_groebner::{
-        f5_rows_monos_with_mask, macaulay_row_count, pack_rows, rref_f2_counted,
+        echelon_f2_counted, f5_rows_monos_with_mask, macaulay_row_count, pack_rows, rref_f2_counted,
     };
     let mut report = F5Report {
         degree,
@@ -495,7 +515,13 @@ pub fn matrix_f5_f2_timed(
     timings.build_ns = t.elapsed().as_nanos() as u64;
     let t = Instant::now();
     let mut word_ops = 0u64;
-    let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
+    let rank = match form {
+        F5OutputForm::Reduced => rref_f2_counted(&mut matrix, cols.len(), &mut word_ops),
+        F5OutputForm::Echelon if matrix.len() >= 128 && cols.len() >= 256 => {
+            crate::cryptanalysis::gf2_elim::echelon_counted(&mut matrix, cols.len(), &mut word_ops)
+        }
+        F5OutputForm::Echelon => echelon_f2_counted(&mut matrix, cols.len(), &mut word_ops),
+    };
     timings.reduce_ns = t.elapsed().as_nanos() as u64;
     let t = Instant::now();
     report.cols = cols.len() as u64;
@@ -534,6 +560,35 @@ pub fn matrix_f5_f2_timed(
         .collect();
     timings.unpack_ns = t.elapsed().as_nanos() as u64;
     Some((out, report, timings))
+}
+
+/// Fingerprint the unique RREF of a list of Boolean rows. This is a
+/// diagnostic for comparing reduced and echelon output on frozen systems;
+/// its work is outside the timed F5 step.
+pub fn canonical_row_space_fingerprint(rows: &[F2BoolPoly]) -> Option<u64> {
+    use crate::cryptanalysis::koblitz_groebner::{pack_rows, rref_f2_counted};
+    use std::hash::{Hash, Hasher};
+    let rows_monos: Vec<Vec<u64>> = rows
+        .iter()
+        .map(|p| p.terms.iter().map(|t| t.mask).collect())
+        .collect();
+    let cols = macaulay_columns(&rows_monos)?;
+    let mut matrix = pack_rows(&rows_monos, &cols);
+    let mut ops = 0;
+    let rank = rref_f2_counted(&mut matrix, cols.len(), &mut ops);
+    let mut hash = std::collections::hash_map::DefaultHasher::new();
+    for row in &matrix[..rank] {
+        for (w, &word) in row.iter().enumerate() {
+            let mut bits = word;
+            while bits != 0 {
+                let c = w * 64 + bits.trailing_zeros() as usize;
+                bits &= bits - 1;
+                cols[c].hash(&mut hash);
+            }
+        }
+        u64::MAX.hash(&mut hash);
+    }
+    Some(hash.finish())
 }
 
 #[cfg(test)]
@@ -630,6 +685,37 @@ mod tests {
                 );
                 assert_eq!(f4.len() as u64, report.rank, "rank must agree");
                 assert_eq!(report.rows_built + report.rows_pruned, report.rows_f4);
+            }
+        }
+    }
+
+    #[test]
+    fn echelon_option_preserves_the_f5_row_space() {
+        let mut seed = 0x8102_34ab_cdef_9876u64;
+        for trial in 0..16 {
+            let n_vars = 5 + trial % 4;
+            let polys: Vec<F2BoolPoly> = (0..(4 + trial % 3))
+                .map(|k| random_poly(n_vars, 2, 5 + k, &mut seed))
+                .filter(|p| poly_degree(p) >= 1)
+                .collect();
+            for degree in [3, 4] {
+                let (reduced, r_report, _) =
+                    matrix_f5_f2_with_form_timed(&polys, n_vars, degree, F5OutputForm::Reduced)
+                        .unwrap();
+                let (echelon, e_report, _) =
+                    matrix_f5_f2_with_form_timed(&polys, n_vars, degree, F5OutputForm::Echelon)
+                        .unwrap();
+                assert_eq!(r_report.rank, e_report.rank);
+                assert_eq!(r_report.rows_built, e_report.rows_built);
+                assert_eq!(r_report.rows_pruned, e_report.rows_pruned);
+                assert_eq!(
+                    row_space_canonical(&reduced, n_vars),
+                    row_space_canonical(&echelon, n_vars)
+                );
+                assert_eq!(
+                    canonical_row_space_fingerprint(&reduced),
+                    canonical_row_space_fingerprint(&echelon)
+                );
             }
         }
     }

@@ -17,7 +17,9 @@
 //! The optional hexadecimal seed XOR selects a fresh planted system;
 //! omission preserves the original fixed suite exactly.
 
-use crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_timed;
+use crypto_lib::cryptanalysis::matrix_f5_f2::{
+    canonical_row_space_fingerprint, matrix_f5_f2_with_form_timed, F5OutputForm,
+};
 use crypto_lib::cryptanalysis::pq_f4_f2::groebner_basis_f4;
 use crypto_lib::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_stats, F2BoolMono, F2BoolPoly};
 use serde_json::json;
@@ -183,11 +185,19 @@ fn main() {
         let mut last = None;
         for _ in 0..repeats {
             let t = std::time::Instant::now();
-            let r = matrix_f5_f2_timed(&sys, n, degree).expect("within size limits");
+            let form = if std::env::var("KIC_F5_ECHELON").as_deref() == Ok("1") {
+                F5OutputForm::Echelon
+            } else {
+                F5OutputForm::Reduced
+            };
+            let r =
+                matrix_f5_f2_with_form_timed(&sys, n, degree, form).expect("within size limits");
             walls.push(t.elapsed().as_secs_f64() * 1e3);
             last = Some(r);
         }
         let (rows, rep, phases) = last.unwrap();
+        let row_space_fp = canonical_row_space_fingerprint(&rows)
+            .expect("returned F5 rows have a valid column set");
         let mut h = DefaultHasher::new();
         for p in &rows {
             for t in &p.terms {
@@ -201,6 +211,7 @@ fn main() {
                 "case": format!("f5_n{n}_m{m}_d{degree}"), "wall_ms": median(walls),
                 "criterion_word_ops": rep.criterion_word_ops, "reduce_word_ops": rep.reduce_word_ops,
                 "rows_pruned": rep.rows_pruned, "rank": rep.rank, "rows_fp": format!("{:016x}", h.finish()),
+                "row_space_fp": format!("{row_space_fp:016x}"),
                 "criterion_ms": phases.criterion_ns as f64 / 1e6, "f5_build_ms": phases.build_ns as f64 / 1e6,
                 "reduce_ms": phases.reduce_ns as f64 / 1e6, "unpack_ms": phases.unpack_ns as f64 / 1e6,
             })

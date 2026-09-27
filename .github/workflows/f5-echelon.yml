@@ -1,0 +1,49 @@
+name: Matrix-F5 echelon output experiment
+
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/matrix_f5_f2.rs'
+      - 'examples/f4_f2_bench.rs'
+      - 'research/f5_echelon_20260927/PROTOCOL.md'
+      - 'research/f5_echelon_20260927/paired_f5.py'
+      - '.github/workflows/f5-echelon.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  row-space-and-paired-f5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RAYON_NUM_THREADS: '1'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: F5 row-space tests
+        run: cargo test --release --lib cryptanalysis::matrix_f5_f2::tests -- --test-threads=1
+      - name: Build F5 stage benchmark
+        run: cargo build --release --example f4_f2_bench
+      - name: Five A/A and five paired A/B samples per workload
+        run: |
+          python3 research/f5_echelon_20260927/paired_f5.py \
+            target/release/examples/f4_f2_bench \
+            research/f5_echelon_20260927/ci-result.json \
+            --pairs 5
+      - name: Preserve all raw runs and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f5-echelon-${{ github.sha }}
+          path: research/f5_echelon_20260927/ci-result.json
+          if-no-files-found: warn
