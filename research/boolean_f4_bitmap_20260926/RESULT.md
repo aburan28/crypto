@@ -22,3 +22,14 @@ CI run [36296268679](https://github.com/aburan28/crypto/actions/runs/36296268679
 | Four | 1.010, 0.984–1.121 | 0.979, 0.911–1.086 | 1.033 | 1.004 |
 
 The four-thread frozen full-F4 ratio of 0.979 sits inside its A/A range of 0.973–1.110; the two holdout ratios sit inside their own A/A ranges. Every smaller four-thread cell's median was within its A/A range or improved. This clears the preregistered parallel regression control, while giving no evidence of a four-thread speed gain. The bitmap is therefore enabled by default for at most 22 variables; `F4_F2_BITMAP_SEEN=0` retains the hash-set reference. A final default-on replay of both thread counts is required before merging. The measured gains remain solver-stage diagnostics and do not change the index-calculus scoreboard or one-target online accounting.
+
+## Final default-on confirmation
+
+CI run [36297004647](https://github.com/aburan28/crypto/actions/runs/36297004647) at PR head `3cfaec73` passed the explicit hash-reference and default-bitmap tests, then completed 66 calls at each thread count. The receipts are [one thread](runs/36297004647/ci-result.json), SHA-256 `f42931269479e291cc2ab946566a160bb4ecfe944fcf19b06196984971694ab9`, and [four threads](runs/36297004647/ci-result-threads4.json), SHA-256 `c6cc5123377f37fa3638f1788faf7be0a1e9312f8a1da48a6df2e90401688f95`. The runner was Linux x86-64 on AMD EPYC 9V74, Rust 1.98.1; all compared runs were pinned to the declared CPU count.
+
+| Thread count, `n20_m30` | Frozen build ratio, 95% interval | Frozen full-F4 ratio, interval | Holdout A full ratio | Holdout B full ratio |
+| --- | ---: | ---: | ---: | ---: |
+| One | 1.659, 1.644–1.664 | 1.199, 1.194–1.203 | 1.169 | 1.173 |
+| Four | 1.032, 1.000–1.117 | 1.019, 0.996–1.045 | 1.020 | 1.026 |
+
+All seven cases on both thread counts and all three workloads retained identical fingerprints, counted operations and matrix shapes. No full-F4 cell had a median regression beyond its own A/A noise. The one-thread build and complete-call gain passed again; the four-thread result is compatible with no material change. This completes the default-on promotion gate for at most 22 variables. The measured numbers remain Boolean F4 stage results, not a one-target IC or DLP speedup.
