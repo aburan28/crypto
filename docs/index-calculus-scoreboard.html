@@ -4430,7 +4430,7 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <!-- BEGIN auxiliary-inputs-20260918 -->
 <section class="panel" id="auxiliary-inputs-20260918">
 <div class="panel-head"><h2>Auxiliary inputs and torsion points against rho <span class="chip advance">advance, DLPwAI only</span></h2>
-<p>Frozen source: <code>research/torsion_auxiliary_inputs_20260918/results/*.json</code>, tables in its <code>RESULTS.md</code>; note <code>research/notes/ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md</code>. Unit S = ops / &radic;p, affine additions, every phase charged, medians over three planted secrets, every row verified. Rows marked DLPwAI were handed <code>[&alpha;^d]G</code> (or <code>[&alpha;^i]G</code>, i &le; 2d) by the problem and are scored against that problem's generic floor &radic;(p/d); no row that sees only G and [&alpha;]G moved, as the &Omega;(&radic;p) floor requires. The torsion-embedding route (an auxiliary curve's [d]-map in place of F<sub>p</sub><sup>*</sup>) is closed by measurement. No index-calculus row exists: the inputs' logarithms are polynomially related and the relation matrix is linear.</p></div>
+<p>Frozen source: <code>research/torsion_auxiliary_inputs_20260918/results/*.json</code>, tables in its <code>RESULTS.md</code>; note <code>research/notes/ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md</code>. Unit S = ops / &radic;p, affine additions, every phase charged, medians over three planted secrets, every row verified. Rows marked DLPwAI were handed <code>[&alpha;^d]G</code> (or <code>[&alpha;^i]G</code>, i &le; 2d) by the problem and are scored against that problem's generic floor &radic;(p/d); no row that sees only G and [&alpha;]G moved, as the &Omega;(&radic;p) floor requires. The torsion-embedding route (an auxiliary curve's [d]-map in place of F<sub>p</sub><sup>*</sup>) is closed by measurement. No index-calculus row exists: the inputs' logarithms are polynomially related and the relation matrix is linear. Torsion points on the target curve enter index calculus only as symmetries (negation, 2-torsion translation, automorphisms, Frobenius); the counting floor &kappa; &ge; &radic;(2(B+1)/&gamma;) falls with the automorphism order &gamma; by the same factor the generic yield bound &gamma;P&sup2;/2n rises, so a symmetry is already priced into the boundary and quotienting by it leaves the ratio to the floor unchanged: engineering, never advance.</p></div>
 <div class="table-scroll"><table>
 <caption>p &minus; 1 case, d &asymp; p<sup>1/2</sup>, inputs G, [&alpha;]G, [&alpha;<sup>d</sup>]G. Fitted exponents over seven sizes (24&ndash;48 bits): rho 0.487, comb 0.231, naive 0.297, kangaroo 0.310.</caption>
 <thead><tr><th>Variant</th><th>bits</th><th>S</th><th>vs rho</th><th>ops / &radic;(p/d)</th><th>Verified</th><th>Class</th></tr></thead><tbody>
@@ -4453,6 +4453,16 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <tr><td>torsion embedding, oracle quotient</td><td>14 / 16 / 18 / 20</td><td>8.6&ndash;27.5 / 10.6&ndash;35.0 / 8.6&ndash;20.6 / 9.8&ndash;22.0</td><td>&mdash;</td><td>33&ndash;139</td><td>collision 12/12</td><td>not a row (uses &alpha;)</td></tr>
 </tbody></table></div>
 <p>What a leak would buy on standard curves (<code>results/curve_divisors.md</code>): the largest divisor of n&minus;1 below 2<sup>32</sup> is 18,051,648 on secp256k1, 4.26&middot;10<sup>9</sup> on P-256, 2<sup>32</sup> on BLS12-381 and 4.29&middot;10<sup>9</sup> on BN254, so a protocol publishing 2<sup>32</sup> powers hands over a 2<sup>12</sup>&ndash;2<sup>16</sup> exponent-side reduction; Curve25519's &ell;&minus;1 has nothing above 132. The 2<sup>256</sup> extrapolation with d &asymp; 2<sup>128</sup> (&asymp; 21&middot;2<sup>64</sup> operations) rests on the 0.231 exponent and on a leak no protocol provides; it is marked as extrapolation.</p>
+<div class="table-scroll"><table>
+<caption>Deployed setups (census 2026-09-27, <code>research/srs_auxiliary_census_20260927/results/srs_census.json</code>; note <code>RESEARCH_SRS_CHEON_CENSUS.md</code>). q = largest public exponent of [&tau;<sup>i</sup>]G<sub>1</sub>, read from each project's own specification; d = largest divisor of r&minus;1 with d &le; q. Costs are generic floors &radic;(r/d)+&radic;d and &radic;(&pi;r/4) at constant 1, <b>not measurements at size</b>; the measured &asymp;20&times; practical constant above would add &asymp;4.3 bits. Loss = &frac12;log<sub>2</sub>d &minus; 0.17 on every row. The published analyses (ethresear.ch #6692) used the largest power of two below q; the largest admissible d makes each attack &asymp;0.5 bit cheaper (accounting). No row sees only G and [&tau;]G.</caption>
+<thead><tr><th>Setup</th><th>curve</th><th>q</th><th>d</th><th>Cheon floor</th><th>rho</th><th>bits lost</th><th>Class</th></tr></thead><tbody>
+<tr><td>EIP-4844 KZG (mainnet, n=12)</td><td>BLS12-381</td><td>4,095</td><td>3,648</td><td>2<sup>121.51</sup></td><td>2<sup>127.25</sup></td><td>5.74</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>EIP-4844 KZG (largest, n=15)</td><td>BLS12-381</td><td>32,767</td><td>30,531</td><td>2<sup>119.98</sup></td><td>2<sup>127.25</sup></td><td>7.27</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Zcash Sapling powers of tau</td><td>BLS12-381</td><td>4,194,302</td><td>4,142,391</td><td>2<sup>116.44</sup></td><td>2<sup>127.25</sup></td><td>10.82</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Filecoin powers of tau</td><td>BLS12-381</td><td>268,435,454</td><td>265,113,024</td><td>2<sup>113.44</sup></td><td>2<sup>127.25</sup></td><td>13.82</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Aztec Ignition</td><td>BN254</td><td>100,800,000</td><td>100,663,296</td><td>2<sup>113.51</sup></td><td>2<sup>126.62</sup></td><td>13.12</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Perpetual Powers of Tau</td><td>BN254</td><td>536,870,910</td><td>536,259,126</td><td>2<sup>112.30</sup></td><td>2<sup>126.62</sup></td><td>14.32</td><td><span class="chip">extrapolation</span></td></tr>
+</tbody></table></div>
 </section>
 <!-- END auxiliary-inputs-20260918 -->
 <!-- BEGIN ic-tournament-round-0016 -->
@@ -7536,5 +7546,27 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_shared_log_20260925/RESULT.md">frozen result and accounting</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_shared_log_20260925/analysis.json">all paired ratios and native counters</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_shared_log_20260925/evidence/SHA256SUMS">26-run archive ledger</a> (SHA-256 <code>84ad0e494880e51360491276e130aea93ec16ab095ca22fe6ee53f491612f207</code>). This toy-rung wall result does not relax the n = 131 unordered four-sum/root-memory bound above. A longer-sum or implicit-index method requires a separate solver and cost gate.</p>
   </div>
 </section>
-<!-- END ecc2k130-compact-shared-log-20260925 --></body>
+<!-- END ecc2k130-compact-shared-log-20260925 -->
+<!-- BEGIN isogeny-invariant-torus-20260926 -->
+<section class="panel" id="isogeny-invariant-torus-20260926">
+  <div class="panel-head">
+    <h2>Eligible torus invariant base: exact small-field incidence <span class="chip">stage diagnostic</span></h2>
+    <p>F3, extension degree 4: compare the 27-element torus fraction set with both 27-element Frobenius invariant linear hyperplanes. Units are affine base points / affine targets covered by ordered two-point sums. Full ECDLP cost, rho ratio and speedup: unset. Six short supersingular curve models were exhaustively enumerated; 325,998 summation-equation/point-lift checks passed.</p>
+  </div>
+  <div class="table-wrap"><table>
+    <caption>Exact target incidence from <a href="https://github.com/aburan28/crypto/blob/main/research/isogeny_invariant_baseline_20260926/results/summary-001.json">frozen stage summary</a>. Every field set has 27 elements; curve-point sizes differ.</caption>
+    <thead><tr><th>Curve (a,b)</th><th>Torus V1</th><th>Invariant W1</th><th>Invariant W2</th><th>End-to-end S</th></tr></thead>
+    <tbody>
+      <tr><td>1,1</td><td>5 / 7</td><td>21 / 63</td><td>30 / 63</td><td>unset</td></tr>
+      <tr><td>1,0</td><td>5 / 7</td><td>21 / 63</td><td>3 / 3</td><td>unset</td></tr>
+      <tr><td>1,2</td><td>5 / 7</td><td>21 / 63</td><td>30 / 63</td><td>unset</td></tr>
+      <tr><td>2,0</td><td>51 / 63</td><td>3 / 3</td><td>21 / 63</td><td>unset</td></tr>
+      <tr><td>2,1</td><td>30 / 90</td><td>30 / 90</td><td>30 / 90</td><td>unset</td></tr>
+      <tr><td>2,2</td><td>30 / 90</td><td>30 / 90</td><td>30 / 90</td><td>unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head"><p>The published F13 degree-7 construction independently passed its exact 2,197-element Frobenius-invariance control. No polynomial solver comparison has been run. <a href="https://github.com/aburan28/crypto/blob/main/research/isogeny_invariant_baseline_20260926/README.md">Protocol, counting rules and limits</a>.</p></div>
+</section>
+<!-- END isogeny-invariant-torus-20260926 -->
+</body>
 </html>
