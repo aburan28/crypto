@@ -236,6 +236,102 @@ enum ColumnIndex {
 /// most, against a hash lookup per term packed.
 const DENSE_INDEX_VARS: u32 = 22;
 
+/// Set membership during symbolic preprocessing.  For up to 22 variables
+/// one bit per possible mask is smaller than the column index and avoids
+/// hashing every repeated term.  Values are retained in insertion order
+/// only to enumerate the final column set; `Columns` sorts them itself.
+enum MonomialSeen {
+    Bitmap {
+        bits: Vec<u64>,
+        limit: u64,
+        overflow: FxSet<u64>,
+        values: Vec<u64>,
+    },
+    Hashed(FxSet<u64>),
+}
+
+impl MonomialSeen {
+    fn new(n_vars: usize) -> Self {
+        static BITMAP: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        let enabled =
+            *BITMAP.get_or_init(|| std::env::var("F4_F2_BITMAP_SEEN").as_deref() != Ok("0"));
+        Self::with_bitmap(n_vars, enabled)
+    }
+
+    fn with_bitmap(n_vars: usize, enabled: bool) -> Self {
+        if enabled && n_vars <= DENSE_INDEX_VARS as usize {
+            let limit = 1u64 << n_vars;
+            Self::Bitmap {
+                bits: vec![0; (limit as usize).div_ceil(64)],
+                limit,
+                overflow: FxSet::default(),
+                values: Vec::new(),
+            }
+        } else {
+            Self::Hashed(FxSet::default())
+        }
+    }
+
+    #[inline]
+    fn insert(&mut self, mask: u64) -> bool {
+        match self {
+            Self::Bitmap {
+                bits,
+                limit,
+                overflow,
+                values,
+            } => {
+                let fresh = if mask < *limit {
+                    let slot = &mut bits[mask as usize / 64];
+                    let bit = 1u64 << (mask % 64);
+                    let fresh = *slot & bit == 0;
+                    *slot |= bit;
+                    fresh
+                } else {
+                    overflow.insert(mask)
+                };
+                if fresh {
+                    values.push(mask);
+                }
+                fresh
+            }
+            Self::Hashed(set) => set.insert(mask),
+        }
+    }
+
+    #[inline]
+    fn contains(&self, mask: &u64) -> bool {
+        match self {
+            Self::Bitmap {
+                bits,
+                limit,
+                overflow,
+                ..
+            } => {
+                if *mask < *limit {
+                    bits[*mask as usize / 64] & (1u64 << (*mask % 64)) != 0
+                } else {
+                    overflow.contains(mask)
+                }
+            }
+            Self::Hashed(set) => set.contains(mask),
+        }
+    }
+
+    fn extend(&mut self, values: impl IntoIterator<Item = u64>) {
+        for mask in values {
+            self.insert(mask);
+        }
+    }
+
+    fn into_values(self) -> Vec<u64> {
+        match self {
+            Self::Bitmap { values, .. } => values,
+            Self::Hashed(set) => set.into_iter().collect(),
+        }
+    }
+}
+
 impl Columns {
     fn from_monomials(set: impl IntoIterator<Item = u64>) -> Self {
         let mut monos: Vec<u64> = set.into_iter().collect();
@@ -998,7 +1094,7 @@ pub fn groebner_basis_f4(
         // Symbolic preprocessing.  Every monomial other than an S-pair's
         // lcm is examined once; a divisible one gets a reducer led by it.
         let active: Vec<usize> = (0..s.polys.len()).filter(|&g| s.active[g]).collect();
-        let mut no_divisor: FxSet<u64> = FxSet::default();
+        let mut no_divisor = MonomialSeen::new(n_vars);
         // The first level: every monomial of the S-rows but the lcms.
         let s_terms: usize = half_rows
             .iter()
@@ -1024,18 +1120,20 @@ pub fn groebner_basis_f4(
                 .into_iter()
                 .collect()
         } else {
-            half_rows
-                .iter()
-                .chain(&field_rows)
-                .flat_map(|p| p.terms.iter().map(|t| t.mask))
-                .collect::<FxSet<u64>>()
-                .into_iter()
-                .collect()
+            let mut seen = MonomialSeen::new(n_vars);
+            seen.extend(
+                half_rows
+                    .iter()
+                    .chain(&field_rows)
+                    .flat_map(|p| p.terms.iter().map(|t| t.mask)),
+            );
+            seen.into_values()
         };
         // a fixed order, so the reducers come out in one
         queue.sort_unstable();
         queue.retain(|m| !lcm_columns.contains(m));
-        let mut examined: FxSet<u64> = lcm_columns.clone();
+        let mut examined = MonomialSeen::new(n_vars);
+        examined.extend(lcm_columns.iter().copied());
         examined.extend(queue.iter().copied());
         let mut reducers: Vec<F2BoolPoly> = Vec::new();
         // Level by level: the reducers of every monomial on the frontier,
@@ -1107,7 +1205,7 @@ pub fn groebner_basis_f4(
         st.reducer_rows += reducers.len() as u64;
 
         let n_rows = reducers.len() + half_rows.len() + field_rows.len();
-        let cols = Columns::from_monomials(examined.iter().copied());
+        let cols = Columns::from_monomials(examined.into_values());
         let words = cols.words() as u64;
         if words * n_rows as u64 > MAX_MATRIX_WORDS {
             st.oversize = true;
@@ -1196,7 +1294,8 @@ fn interreduce(mut elements: Vec<F2BoolPoly>, n_vars: usize, st: &mut F4Stats) -
         }
     }
     let lms: Vec<u64> = minimal.iter().map(|p| p.lt().unwrap().mask).collect();
-    let mut examined: FxSet<u64> = lms.iter().copied().collect();
+    let mut examined = MonomialSeen::new(n_vars);
+    examined.extend(lms.iter().copied());
     let mut queue: Vec<u64> = Vec::new();
     for p in &minimal {
         for t in &p.terms[1..] {
@@ -1224,7 +1323,7 @@ fn interreduce(mut elements: Vec<F2BoolPoly>, n_vars: usize, st: &mut F4Stats) -
             reducers.push(r);
         }
     }
-    let cols = Columns::from_monomials(examined.iter().copied());
+    let cols = Columns::from_monomials(examined.into_values());
     let mut rows: Vec<(usize, Row)> = minimal
         .iter()
         .chain(reducers.iter())
@@ -1346,6 +1445,34 @@ mod tests {
     use crate::cryptanalysis::pq_groebner_f2::{groebner_basis_f2, reduce, spoly};
     use rand::rngs::StdRng;
     use rand::{Rng, SeedableRng};
+
+    #[test]
+    fn monomial_bitmap_matches_hash_set() {
+        let mut rng = StdRng::seed_from_u64(0x5eed_2026);
+        for n_vars in [0usize, 1, 6, 12, 20, 22, 23] {
+            let mut bitmap = MonomialSeen::with_bitmap(n_vars, true);
+            let mut hashed = MonomialSeen::with_bitmap(n_vars, false);
+            let within = (1u64 << n_vars) - 1;
+            let masks = (0..2_000)
+                .map(|i| {
+                    if i % 17 == 0 {
+                        1u64 << 40 | rng.gen::<u64>() & within
+                    } else {
+                        rng.gen::<u64>() & within
+                    }
+                })
+                .collect::<Vec<_>>();
+            for &m in &masks {
+                assert_eq!(bitmap.insert(m), hashed.insert(m), "n_vars={n_vars}");
+                assert_eq!(bitmap.contains(&m), hashed.contains(&m));
+            }
+            let mut actual = bitmap.into_values();
+            let mut expected = hashed.into_values();
+            actual.sort_unstable();
+            expected.sort_unstable();
+            assert_eq!(actual, expected, "n_vars={n_vars}");
+        }
+    }
 
     /// The row-by-row forward elimination `echelon` must match: each row
     /// reduced by the pivots before it while its lead has one.
