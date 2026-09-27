@@ -443,17 +443,18 @@ fn flush_panel(
     }
     let tile_words = ((1usize << 20) / matrix.len().saturating_mul(8).max(1)).clamp(8, 128);
     let mut first = first_word;
+    let simd = config.simd && simd_available();
     while first < words {
         let end = (first + tile_words).min(words);
+        let tiles: Vec<PanelTile> = blocks
+            .iter()
+            .map(|block| block.table.tile(first..end))
+            .collect();
         let clear = |(row, row_patterns): (&mut Vec<u64>, &Vec<u32>)| -> u64 {
-            blocks
+            tiles
                 .iter()
                 .zip(row_patterns)
-                .map(|(block, &pattern)| {
-                    block
-                        .table
-                        .apply_pattern_range(row, pattern as u64, first..end)
-                })
+                .map(|(tile, &pattern)| tile.apply(row, pattern as u64, simd))
                 .sum()
         };
         if matrix.len() * (end - first) >= config.parallel_words {
@@ -470,6 +471,39 @@ fn flush_panel(
     }
 }
 
+/// A compact slice of one block's tables for a cache-sized column range.
+struct PanelTile {
+    data: Vec<u64>,
+    first_word: usize,
+    end_word: usize,
+    n_tables: usize,
+    table_size: usize,
+}
+
+impl PanelTile {
+    fn apply(&self, row: &mut [u64], pattern: u64, simd: bool) -> u64 {
+        if pattern == 0 {
+            return 0;
+        }
+        let words = self.end_word - self.first_word;
+        let bits = self.table_size.trailing_zeros() as usize;
+        let mut idx = [0usize; 4];
+        for (t, slot) in idx.iter_mut().enumerate().take(self.n_tables) {
+            let g = (pattern >> (t * bits)) as usize & (self.table_size - 1);
+            *slot = (t * self.table_size + g) * words;
+        }
+        let used = xor_entries(
+            &mut row[self.first_word..self.end_word],
+            &self.data,
+            &idx[..self.n_tables],
+            words,
+            self.table_size,
+            simd,
+        );
+        used as u64 * words as u64
+    }
+}
+
 struct DeferredTable {
     data: Vec<u64>,
     pivot_word: usize,
@@ -482,6 +516,25 @@ struct DeferredTable {
 }
 
 impl DeferredTable {
+    fn tile(&self, range: std::ops::Range<usize>) -> PanelTile {
+        debug_assert!(range.start >= self.first_word && range.end <= self.end_word);
+        let width = range.end - range.start;
+        let suffix = self.end_word - self.first_word;
+        let entries = self.n_tables * self.table_size;
+        let mut data = vec![0; entries * width];
+        for entry in 0..entries {
+            let src = entry * suffix + range.start - self.first_word;
+            data[entry * width..(entry + 1) * width].copy_from_slice(&self.data[src..src + width]);
+        }
+        PanelTile {
+            data,
+            first_word: range.start,
+            end_word: range.end,
+            n_tables: self.n_tables,
+            table_size: self.table_size,
+        }
+    }
+
     /// Apply a previously captured pivot pattern to one column range.
     /// The table's entry stride remains its full suffix length, so the
     /// same snapshot can be replayed by cache-sized matrix ranges.
