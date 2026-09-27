@@ -36,16 +36,16 @@ jobs:
         run: F4_F2_BITMAP_SEEN=1 F4_F2_BATCH_INSERTS=1 cargo test --release --lib cryptanalysis::pq_f4_f2::tests -- --test-threads=1
       - name: Build frozen Boolean F4 benchmark
         run: cargo build --release --example f4_f2_bench
-      - name: Five A/A and five paired A/B samples per workload
+      - name: Four-thread paired control
         run: |
           python3 research/boolean_f4_batched_pairs_20260926/paired_boolean_f4.py \
             target/release/examples/f4_f2_bench \
-            research/boolean_f4_batched_pairs_20260926/ci-result.json \
-            --pairs 5 --threads 1
+            research/boolean_f4_batched_pairs_20260926/ci-result-threads4.json \
+            --pairs 5 --threads 4
       - name: Preserve raw runs and failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: boolean-f4-batched-pairs-${{ github.sha }}
-          path: research/boolean_f4_batched_pairs_20260926/ci-result.json
+          path: research/boolean_f4_batched_pairs_20260926/ci-result-threads4.json
           if-no-files-found: warn

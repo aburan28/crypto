@@ -7,3 +7,7 @@ Run `examples/f4_f2_bench.rs` once per process over the seven standard F4 cases,
 Exact basis fingerprints, basis sizes, steps, all critical/field pair counts and skip counts, divisor tests, word XORs and matrix dimensions must match. Accept a stage gain only if the primary `other_ms` ratio is at least 1.05 with lower interval bound above one, the complete-F4 ratio and lower bound exceed one, both holdout primary ratios clear their A/A noise, and no smaller case materially regresses beyond A/A noise. If it passes, run a four-thread control before default promotion. Preserve negative or inconclusive results without adding a slower runtime path.
 
 These are internal Boolean F4 solver-stage costs, not an online one-target IC or DLP comparison. Candidate IDs, rho reference and scoreboard figures remain unset.
+
+## Four-thread control frozen after the first result
+
+Run `36299824843` cleared the one-thread stage gate with exact outputs. Rerun the same seven cases and three workloads at `RAYON_NUM_THREADS=4` on four pinned allowed CPUs, with one warmup per arm, five A/A and five alternating A/B pairs. Exact output and every pair counter must still match; the primary complete F4 call must not regress beyond its own four-thread A/A noise, with smaller cases as regression controls. A four-thread speed gain is not required. Compare paired ratios only within this new run, since runner hardware may differ. If the control passes, enable batching by default, retain `F4_F2_BATCH_INSERTS=0` as reference/rollback, and repeat both thread counts before merging.
