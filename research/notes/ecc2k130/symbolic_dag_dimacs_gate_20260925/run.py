@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -14,49 +15,93 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 DOMAIN = 'k0-symbolic-dag-dimacs-gate-v1'
 PARENT_REL = 'research/notes/ecc2k130/symbolic_dag_fullpoint_20260925'
+HEX40 = re.compile(r'[0-9a-f]{40}\Z')
 
 
 def _git(*args: str) -> str:
     return subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()
 
 
-def _main_blob_sha(relative: str) -> str:
-    data = subprocess.check_output(['git', 'show', f'origin/main:{relative}'], cwd=ROOT)
+def _main_blob_sha(main_head: str, relative: str) -> str:
+    data = subprocess.check_output(['git', 'show', f'{main_head}:{relative}'], cwd=ROOT)
     return hashlib.sha256(data).hexdigest()
 
 
-def release_gate(frozen: dict) -> dict:
-    """Impossible to run a stacked outcome while parent #802 is unmerged."""
+def require_reviewed_checkout(expected_head: str, checkout_head: str,
+                              pr_head: str) -> None:
+    """Require the explicit reviewed SHA, local checkout and live PR head to agree."""
+    if not HEX40.fullmatch(expected_head):
+        raise RuntimeError('NOT_ADMITTED: explicit reviewed PR head is missing or invalid')
+    if checkout_head != expected_head or pr_head != expected_head:
+        raise RuntimeError('NOT_ADMITTED: checkout or PR head differs from reviewed SHA')
+
+
+def check_main_lineage(frozen: dict, dispatch_main_head: str) -> list[str]:
+    """Allow only monotonic main movement with no relevant upstream edits."""
+    release = frozen['release_main_head']
+    if not HEX40.fullmatch(release or '') or not HEX40.fullmatch(dispatch_main_head):
+        raise RuntimeError('NOT_ADMITTED: invalid release or dispatch main SHA')
+    if subprocess.run(['git', 'merge-base', '--is-ancestor', release,
+                       dispatch_main_head], cwd=ROOT, capture_output=True).returncode != 0:
+        raise RuntimeError('NOT_ADMITTED: main no longer descends from frozen release')
+    changed = subprocess.check_output(
+        ['git', 'diff', '--name-only', f'{release}..{dispatch_main_head}', '--',
+         *frozen['upstream_guard_paths']], cwd=ROOT, text=True).splitlines()
+    if changed:
+        raise RuntimeError('NOT_ADMITTED: relevant upstream paths changed: '
+                           + ', '.join(changed))
+    return changed
+
+
+def release_gate(frozen: dict, expected_head: str) -> dict:
+    """Check exact reviewed source and parent provenance without running a child."""
     if frozen['release_main_head'] is None:
-        raise RuntimeError('NOT_ADMITTED: #802 must merge, then rebase and re-freeze')
+        raise RuntimeError('NOT_ADMITTED: release_main_head is not frozen')
     if sha(Path(frozen['cadical_path'])) != frozen['cadical_sha256']:
         raise RuntimeError('NOT_ADMITTED: pinned CaDiCaL binary drifted')
+    if _git('status', '--porcelain'):
+        raise RuntimeError('NOT_ADMITTED: checkout is dirty')
+    checkout_head = _git('rev-parse', 'HEAD')
     pr = json.loads(subprocess.check_output(
-        ['gh', 'pr', 'view', '802', '--json', 'state,mergeCommit'], cwd=ROOT, text=True))
-    if pr['state'] != 'MERGED' or not pr['mergeCommit']:
-        raise RuntimeError('NOT_ADMITTED: parent PR #802 is not merged')
+        ['gh', 'pr', 'view', '804', '--json', 'state,baseRefName,headRefOid'],
+        cwd=ROOT, text=True))
+    if pr['state'] != 'OPEN' or pr['baseRefName'] != 'main':
+        raise RuntimeError('NOT_ADMITTED: PR #804 is not open against main')
+    require_reviewed_checkout(expected_head, checkout_head, pr['headRefOid'])
+    parent = json.loads(subprocess.check_output(
+        ['gh', 'pr', 'view', '802', '--json', 'state,mergeCommit,headRefOid'],
+        cwd=ROOT, text=True))
+    inputs = json.loads((HERE / 'INPUT.json').read_text())
+    if (parent['state'] != 'MERGED' or not parent['mergeCommit'] or
+            parent['headRefOid'] != inputs['parent_exact_head']):
+        raise RuntimeError('NOT_ADMITTED: exact parent PR #802 is not merged')
     subprocess.run(['git', 'fetch', 'origin', 'main'], cwd=ROOT, check=True)
-    main_head = _git('rev-parse', 'origin/main')
-    if main_head != frozen['release_main_head']:
-        raise RuntimeError('NOT_ADMITTED: main moved after the release freeze')
-    subprocess.run(['git', 'merge-base', '--is-ancestor', main_head, 'HEAD'],
-                   cwd=ROOT, check=True)
-    if _main_blob_sha(f'{PARENT_REL}/FROZEN.json') != frozen['parent_freeze_sha256']:
+    dispatch_main_head = _git('rev-parse', 'origin/main')
+    changed = check_main_lineage(frozen, dispatch_main_head)
+    subprocess.run(['git', 'merge-base', '--is-ancestor',
+                    frozen['release_main_head'], checkout_head], cwd=ROOT, check=True)
+    if _main_blob_sha(dispatch_main_head, f'{PARENT_REL}/FROZEN.json') != frozen['parent_freeze_sha256']:
         raise RuntimeError('NOT_ADMITTED: merged parent freeze bytes drifted')
-    if _main_blob_sha(f'{PARENT_REL}/evidence/producer/rows.jsonl.gz') != frozen['parent_rows_sha256']:
+    if _main_blob_sha(dispatch_main_head, f'{PARENT_REL}/evidence/producer/rows.jsonl.gz') != frozen['parent_rows_sha256']:
         raise RuntimeError('NOT_ADMITTED: merged parent raw rows drifted')
-    return {'parent_pr_state': pr['state'], 'parent_merge_commit': pr['mergeCommit']['oid'],
-            'release_main_head': main_head}
+    return {'parent_pr_state': parent['state'],
+            'parent_merge_commit': parent['mergeCommit']['oid'],
+            'reviewed_head': expected_head, 'checkout_head': checkout_head,
+            'pr_head': pr['headRefOid'],
+            'release_main_head': frozen['release_main_head'],
+            'dispatch_main_head': dispatch_main_head,
+            'upstream_changed_paths': changed}
 
 
 def main() -> int:
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--expected-head', required=True)
     args = parser.parse_args()
     subprocess.run([sys.executable, str(HERE / 'ci_replay.py')], cwd=ROOT, check=True)
     frozen = json.loads((HERE / 'FROZEN.json').read_text())
-    gate = release_gate(frozen)
+    gate = release_gate(frozen, args.expected_head)
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     attempts = []

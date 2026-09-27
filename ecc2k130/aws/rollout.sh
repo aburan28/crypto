@@ -286,7 +286,8 @@ EOF
 }
 
 # Raise campaign.json maxIters and change nothing else (rollout.py
-# maxItersReasons says what it refuses: a lower value, a strict campaign).
+# maxItersReasons says what it refuses: a lower value, a live value of 0;
+# a strict campaign keeps its id by recording contractMaxIters).
 # The write is conditional on the ETag read, so a campaign.json that moved
 # meanwhile is never overwritten.  Workers keep walking; each takes the new
 # guard when its client next restarts (restartHours, or an activate) and
