@@ -17,6 +17,7 @@ its old name still identify it.
 |:--|:--|
 | [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](ecdlp-general/RESEARCH_ECDLP_STATE_OF_THE_ART.md) | The ECDLP: state of the art, 2025–2026 |
 | [`RESEARCH_TORSION_AUXILIARY_INPUTS.md`](ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md) | Auxiliary inputs (Cheon) and torsion points against rho and index calculus |
+| [`RESEARCH_SRS_CHEON_CENSUS.md`](ecdlp-general/RESEARCH_SRS_CHEON_CENSUS.md) | Cheon's attack on deployed powers-of-tau setups: EIP-4844, Sapling, Filecoin, Ignition, PPoT |
 | [`RESEARCH_REPRESENTATION_STRUCTURE.md`](ecdlp-general/RESEARCH_REPRESENTATION_STRUCTURE.md) | Where exploitable structure can come from: the transfer pattern, an R1–R5 admissibility test for candidate handles, and why murmurations fail it |
 | [`RESEARCH_BENCH_LOG.md`](ecdlp-general/RESEARCH_BENCH_LOG.md) | Cryptanalysis research bench: empirical log |
 | [`RESEARCH_P256_RHO_ARITHMETIC.md`](ecdlp-general/RESEARCH_P256_RHO_ARITHMETIC.md) | Pre-registered P-256 rho engineering matrix: fused Solinas reduction, weak reduction, invariant partitioning, table sweeps, batched affine inversion, DP batching, and CPU/GPU/FPGA ablations |

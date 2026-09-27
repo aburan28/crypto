@@ -493,7 +493,11 @@ but:
    the algorithm with no generic-group analogue.  The five rows of that
    table are five different `H`, and only R1 is common to all of them —
    which is the argument for looking at what protocols publish rather
-   than at what mathematics exists.
+   than at what mathematics exists.  The first such census,
+   [`RESEARCH_SRS_CHEON_CENSUS.md`](RESEARCH_SRS_CHEON_CENSUS.md), prices
+   the deployed powers-of-tau setups and finds the published leak size
+   alone sets the loss: `½·log₂ d − 0.17` bits, with `d` within 11% of
+   the largest published exponent on every row.
 2. **Can a subfield be simulated?**  Already the repo's standing
    question — hidden isogenies, generalised-Mersenne structure
    (`RESEARCH_PKM_CRITERION.md`, `RESEARCH_NIST_SOLINAS_STRUCTURE.md`),
