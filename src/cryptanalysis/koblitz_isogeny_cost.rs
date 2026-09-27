@@ -158,7 +158,7 @@ pub fn koblitz_family_order(n: u32, a2: u8) -> i128 {
     // An earlier revision took the twist unconditionally; the cost sweep
     // only ever ran odd `n`, so no measured number was affected, but the
     // even-`n` census came back empty.
-    if a2 == 0 || n % 2 == 0 {
+    if a2 == 0 || n.is_multiple_of(2) {
         base
     } else {
         (1i128 << (n + 1)) + 2 - base

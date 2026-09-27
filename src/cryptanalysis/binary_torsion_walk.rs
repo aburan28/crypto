@@ -59,7 +59,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::time::Instant;
 
 use num_bigint::{BigInt, BigUint};
-use num_traits::{One, Signed, ToPrimitive, Zero};
+use num_traits::{One, Zero};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
@@ -1068,6 +1068,7 @@ mod tests {
     use crate::cryptanalysis::binary_isogeny::find_roots_in_f2m;
     use crate::cryptanalysis::binary_velu::{division_polynomial, elt, to_u64};
     use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+    use num_traits::{Signed, ToPrimitive};
 
     fn field(n: u32) -> IrreduciblePoly {
         find_irreducible_sparse(n).expect("irreducible")
