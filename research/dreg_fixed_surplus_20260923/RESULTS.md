@@ -156,3 +156,83 @@ Meanwhile, `research/dreg_ell_grid_20260925/` pre-registers a cheaper design
 that separates the two readings in "The confound" above. It compares
 `ℓ = 2` with `ℓ = 3` at matched unknown counts, and adds an `ℓ = 5` cell,
 `(10, 5)`, at `(13, 4)`'s 25 unknowns.
+
+## Addendum, 2026-09-26: the primary pair, scored — grows at fixed surplus
+
+Additive; nothing above is changed. `(13, 5)` now has four finished draws,
+so `score.py` scores the primary pair by the registered rule, with no other
+change. The output is in `score-output-20260926.txt`. The verdict above,
+"inconclusive", stands for the state it described. **The registered verdict
+with the primary pair in is "grows at fixed surplus".**
+
+| pair | `S` | small | large | verdict |
+|---|--:|---|---|---|
+| **primary** | −2 | `(7, 3)`: 6 6 6 6 | **`(13, 5)`: ≥7 ≥7 ≥7 ≥7** | **grows** |
+| | −1 | `(5, 2)`: 5 5 5 5 | `(11, 4)`: 6 6 6 6 | grows |
+| | 0 | `(9, 3)`: 6 6 6 6 | `(15, 5)`: running | not testable |
+| | +1 | `(7, 2)`: 5 5 5 5 | `(13, 4)`: 6 6 6 6 | grows |
+
+- **How it was measured.** The four `(13, 5)` draws were measured on the
+  dense-finish path under the pre-registration's last addendum. That path
+  was identity-checked on 376 committed rows with 0 mismatches.
+  - The draws were draw indices 0, 2, 4 and 7, so 4 of 8 were
+    unsatisfiable.
+  - Each took 31–34 min on the four-core container.
+  - FFD is 3 on all four draws.
+  - Every draw is a mathematical lower bound: the degree-6 Macaulay matrix
+    does not contain `1`. So "grows" here means at least one degree.
+- **The confound "The confound" above named is answered.** The primary pair
+  has `ℓ ≥ 3` at both ends and is held at one surplus. Going from 16 to 28
+  unknowns at `S = −2`, the degree goes from 6 on every draw to above 6 on
+  every draw.
+  - So the growth is not an `ℓ = 2` floor effect.
+  - The surplus control (`research/dreg_surplus_control_20260925/`) showed
+    that the surplus can move the degree at `ℓ = 4`. It is fixed within
+    this pair, so that confound does not apply here.
+- **The prediction was "grows", and it held for the primary pair.**
+- **What this does not say.**
+  - How fast the degree grows: the `(13, 5)` values are lower bounds.
+  - Anything at `S = 0`, which is `(15, 5)`, running now.
+  - Anything about `n = 131`.
+- **Class:** stage diagnostic, as registered, so no scoreboard row.
+
+## Addendum, 2026-09-26 (later): the `S = 0` pair — every pair grows
+
+Additive; nothing above is changed. `(15, 5)` now has four finished draws,
+measured on the same dense-finish path. `score.py`, unchanged, scores every
+pair; the output is in `score-output-20260926b.txt`.
+
+| pair | `S` | small | large | verdict |
+|---|--:|---|---|---|
+| **primary** | −2 | `(7, 3)`: 6 6 6 6 | `(13, 5)`: ≥7 ≥7 ≥7 ≥7 | **grows** |
+| | −1 | `(5, 2)`: 5 5 5 5 | `(11, 4)`: 6 6 6 6 | grows |
+| | **0** | `(9, 3)`: 6 6 6 6 | **`(15, 5)`: ≥7 ≥7 ≥7 ≥7** | **grows** |
+| | +1 | `(7, 2)`: 5 5 5 5 | `(13, 4)`: 6 6 6 6 | grows |
+
+**Overall, by the registered rule: grows at fixed surplus, with every pair
+testable and every pair growing.**
+
+- **The `(15, 5)` draws.** They are draw indices 0–3, so every draw was
+  unsatisfiable. That fits `S = 0`, where the expected yield is `1/3!`.
+  - Each draw took 96–104 min on the four-core container, and FFD is 3 on
+    all four.
+  - Each value is a mathematical lower bound: the degree-6 Macaulay matrix
+    over 30 unknowns and 30 equations contains no `1`.
+- **Why `S = 0` matters.** It is the regime index calculus works in, with
+  about one decomposition in six points. From 18 unknowns to 30, the
+  refutation degree goes from 6 on every draw to above 6 on every draw.
+- **Execution, disclosed.**
+  - The first attempt at draw 0 was lost to a container restart while
+    idle. That is a resource limit, not evidence, and the draw was rerun
+    from the same seed.
+  - Draws 2 and 3 were launched by hand with `run_queue.py`'s exact command,
+    staggered so their dense phases, of about 6.7 GB each, did not overlap.
+  - `runs/queue-dense.log` records every launch. Outcomes depend only on
+    the seed.
+- **The three controls** (`(13, 5)`, `(15, 5)` and `(13, 4)`) are
+  secondary. They are running now and will be recorded if they finish.
+- **Scope.**
+  - The large-cell values are lower bounds, so the size of the growth is
+    unmeasured.
+  - It covers `m = 3` and `n ≤ 15`, and says nothing about `n = 131`.
+  - Class: stage diagnostic, so no scoreboard row.

@@ -3131,6 +3131,17 @@ pub fn solving_profile(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Opti
     })
 }
 
+/// Whether [`solving_profile_sparse`] finishes densely after the leading
+/// degree band (`KIC_SPARSE_DENSE_FINISH=1`); see
+/// [`crate::cryptanalysis::sparse_macaulay::eliminate_high_columns_dense_finish`].
+/// Off by default, so the default path and every measurement taken on it are
+/// unchanged; the switch exists so the two paths can be run side by side on
+/// the same draws.
+fn sparse_dense_finish() -> bool {
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ON.get_or_init(|| std::env::var("KIC_SPARSE_DENSE_FINISH").as_deref() == Ok("1"))
+}
+
 /// [`solving_profile`] via structured sparse elimination.
 ///
 /// Identical semantics, different representation: the high-degree
@@ -3147,7 +3158,10 @@ pub fn solving_profile_sparse(
     n_vars: usize,
     degree: u32,
 ) -> Option<SolvingProfile> {
-    use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+    use crate::cryptanalysis::sparse_macaulay::{
+        eliminate_high_columns, eliminate_high_columns_dense_finish, leading_band_end,
+        low_column_start,
+    };
 
     if degree < system_degree(polys) {
         return None;
@@ -3168,7 +3182,11 @@ pub fn solving_profile_sparse(
     }
 
     let low_start = low_column_start(&cols);
-    let elim = eliminate_high_columns(rows, n_cols, low_start);
+    let elim = if sparse_dense_finish() {
+        eliminate_high_columns_dense_finish(rows, n_cols, low_start, leading_band_end(&cols))
+    } else {
+        eliminate_high_columns(rows, n_cols, low_start)
+    };
 
     // The surviving linear consequences span `cols[low_start..]` only.
     // Echelon form is not enough to read off a pinned variable — `{v+w,

@@ -1,4 +1,10 @@
 The algorithm in one file: [`examples/rho_toy.py`](examples/rho_toy.py)
+
+> Table-walk correctness update (2026-09-26): [cycle escape v3](CYCLE-ESCAPE-V3.md)
+> replaces history-dependent exits with a validated raw-cycle anchor. Older
+> table-walk measurements below describe their recorded revisions, not v3.
+> V3 requires a new table corpus; the default sigma iteration is unchanged.
+
 recovers a planted discrete logarithm on `GF(2^23)` with the same walk the
 GPU client uses. Live campaign counts:
 [status page](https://aburan28.github.io/crypto/status/). How the walk works,
