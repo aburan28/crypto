@@ -880,90 +880,12 @@ fn degree(p: &F2BoolPoly) -> u32 {
     p.terms.iter().map(|t| t.degree()).max().unwrap_or(0)
 }
 
-/// Critical and field pairs in insertion order within each degree. The
-/// original flat queue remains available for paired timing and rollback.
-#[derive(Debug, PartialEq, Eq)]
-enum PairQueue {
-    Flat(Vec<Pair>),
-    ByDegree(Vec<Vec<Pair>>),
-}
-
-impl PairQueue {
-    fn new(by_degree: bool) -> Self {
-        if by_degree {
-            Self::ByDegree(Vec::new())
-        } else {
-            Self::Flat(Vec::new())
-        }
-    }
-
-    fn push(&mut self, pair: Pair) {
-        match self {
-            Self::Flat(pairs) => pairs.push(pair),
-            Self::ByDegree(buckets) => {
-                let degree = pair.deg as usize;
-                if buckets.len() <= degree {
-                    buckets.resize_with(degree + 1, Vec::new);
-                }
-                buckets[degree].push(pair);
-            }
-        }
-    }
-
-    fn extend(&mut self, pairs: impl IntoIterator<Item = Pair>) {
-        for pair in pairs {
-            self.push(pair);
-        }
-    }
-
-    fn retain(&mut self, mut keep: impl FnMut(&Pair) -> bool) {
-        match self {
-            Self::Flat(pairs) => pairs.retain(keep),
-            Self::ByDegree(buckets) => {
-                for bucket in buckets {
-                    bucket.retain(&mut keep);
-                }
-            }
-        }
-    }
-
-    fn is_empty(&self) -> bool {
-        match self {
-            Self::Flat(pairs) => pairs.is_empty(),
-            Self::ByDegree(buckets) => buckets.iter().all(Vec::is_empty),
-        }
-    }
-
-    fn len(&self) -> usize {
-        match self {
-            Self::Flat(pairs) => pairs.len(),
-            Self::ByDegree(buckets) => buckets.iter().map(Vec::len).sum(),
-        }
-    }
-
-    fn take_min_degree(&mut self) -> Option<(u32, Vec<Pair>)> {
-        match self {
-            Self::Flat(pairs) => {
-                let degree = pairs.iter().map(|p| p.deg).min()?;
-                let (selected, rest) = pairs.drain(..).partition(|p| p.deg == degree);
-                *pairs = rest;
-                Some((degree, selected))
-            }
-            Self::ByDegree(buckets) => buckets
-                .iter_mut()
-                .enumerate()
-                .find(|(_, bucket)| !bucket.is_empty())
-                .map(|(degree, bucket)| (degree as u32, std::mem::take(bucket))),
-        }
-    }
-}
-
 struct State {
     n_vars: usize,
     polys: Vec<F2BoolPoly>,
     lm: Vec<u64>,
     active: Vec<bool>,
-    pairs: PairQueue,
+    pairs: Vec<Pair>,
 }
 
 impl State {
@@ -1093,9 +1015,6 @@ pub fn groebner_basis_f4(
     static BATCH_INSERTS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let batch_inserts =
         *BATCH_INSERTS.get_or_init(|| std::env::var("F4_F2_BATCH_INSERTS").as_deref() != Ok("0"));
-    static DEGREE_BUCKETS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    let degree_buckets =
-        *DEGREE_BUCKETS.get_or_init(|| std::env::var("F4_F2_DEGREE_BUCKETS").as_deref() == Ok("1"));
     let started = Instant::now();
     let deadline = budget.map(|b| started + b);
     let mut st = F4Stats::default();
@@ -1137,7 +1056,7 @@ pub fn groebner_basis_f4(
         polys: Vec::new(),
         lm: Vec::new(),
         active: Vec::new(),
-        pairs: PairQueue::new(degree_buckets),
+        pairs: Vec::new(),
     };
     if batch_inserts {
         s.insert_batch(start, &mut st);
@@ -1152,7 +1071,9 @@ pub fn groebner_basis_f4(
             st.timed_out = true;
             break;
         }
-        let (d, selected) = s.pairs.take_min_degree().unwrap();
+        let d = s.pairs.iter().map(|p| p.deg).min().unwrap();
+        let (selected, rest): (Vec<Pair>, Vec<Pair>) = s.pairs.drain(..).partition(|p| p.deg == d);
+        s.pairs = rest;
         st.steps += 1;
         st.degree_reached = st.degree_reached.max(d);
 
@@ -1679,38 +1600,13 @@ mod tests {
     }
 
     #[test]
-    fn degree_buckets_take_the_same_pairs_in_the_same_order() {
-        let (mut flat, mut grouped) = (PairQueue::new(false), PairQueue::new(true));
-        let mut rng = StdRng::seed_from_u64(0xde6e_2027);
-        for round in 0..60 {
-            for k in 0..rng.gen_range(0..30) {
-                let pair = Pair {
-                    kind: PairKind::Field(round, k),
-                    lcm: rng.gen(),
-                    deg: rng.gen_range(1..=12),
-                };
-                flat.push(pair);
-                grouped.push(pair);
-            }
-            flat.retain(|p| p.lcm % 7 != 0);
-            grouped.retain(|p| p.lcm % 7 != 0);
-            assert_eq!(flat.len(), grouped.len());
-            assert_eq!(flat.take_min_degree(), grouped.take_min_degree());
-        }
-        while !flat.is_empty() {
-            assert_eq!(flat.take_min_degree(), grouped.take_min_degree());
-        }
-        assert!(grouped.is_empty());
-    }
-
-    #[test]
     fn batched_insert_keeps_pairs_and_skip_counts() {
         let empty = || State {
             n_vars: 10,
             polys: Vec::new(),
             lm: Vec::new(),
             active: Vec::new(),
-            pairs: PairQueue::new(false),
+            pairs: Vec::new(),
         };
         let (mut serial, mut batched) = (empty(), empty());
         let (mut serial_st, mut batched_st) = (F4Stats::default(), F4Stats::default());
