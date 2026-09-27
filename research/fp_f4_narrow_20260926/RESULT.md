@@ -27,3 +27,15 @@ CI run [36296331241](https://github.com/aburan28/crypto/actions/runs/36296331241
 The frozen A/A range was 0.996–1.007, and the complete-F4 1.2× gate is clear. Every basis and solve fingerprint, step count, matrix shape, basis size and verdict matched mode `0` across all 13 cases and both holdouts. The larger `overdet_n12_m24_p65521` case improved by a paired 2.101× (2.086–2.155) on the frozen workload. No smaller case had a median regression outside its A/A range. The milliseconds are each arm's five A/B median; paired ratio medians need not equal the ratio of those marginal medians.
 
 Default promotion awaits the preregistered four-thread regression control and a final default-on replay. These are point-decomposition solver-stage timings, not one-target IC online timings or verified DLP speedups.
+
+## Four-thread control and default decision
+
+CI run [36298267078](https://github.com/aburan28/crypto/actions/runs/36298267078) at PR head `9341c7da` passed F4 tests and completed 66 four-thread paired calls. The [complete raw receipt](runs/36298267078/ci-result-threads4.json), SHA-256 `0f430e17634598c654bcfc9433faef1cab619a70c4c341fb610e249a46b46e82`, records a Linux x86-64 AMD EPYC 9V74 runner with four pinned CPUs. It used a different runner from the one-thread result; all ratios below are paired within this run.
+
+| `quad_n8_p65521` workload | Four-thread A/A range | Paired mode-0/mode-2 complete-F4 ratio, 95% interval |
+| --- | ---: | ---: |
+| Frozen seed | 0.997–1.002 | 1.580, 1.577–1.594 |
+| Holdout `badc0de1` | 0.994–1.001 | 1.588, 1.573–1.591 |
+| Holdout `5eed2026` | 0.996–1.003 | 1.586, 1.575–1.591 |
+
+Every case matched the reference basis and solve fingerprints, steps and matrix shapes. The tiny `quad_n4_p31` frozen cell's median ratio of 1.002 sits 0.002 below its A/A minimum of 1.004 but still favors mode `2`; no material smaller-case regression appeared. The primary result easily clears the four-thread regression control. Mode `2` is selected by default for supported primes, with `F4_FP_NARROW=0` retaining the original wide path and `=1` the earlier intermediate. A final one- and four-thread replay against explicit mode `0` is required before merging. These remain F4 stage timings, not online IC or verified DLP speedups.

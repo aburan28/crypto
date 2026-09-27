@@ -586,7 +586,8 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
         std::env::var("F4_FP_NARROW")
             .ok()
             .and_then(|v| v.parse().ok())
-            .unwrap_or(0)
+            .filter(|&mode| mode <= 2)
+            .unwrap_or(2)
     });
     f4_with_arithmetic(input, n_vars, p, opts, mode)
 }
