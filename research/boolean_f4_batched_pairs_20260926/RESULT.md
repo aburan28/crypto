@@ -38,3 +38,18 @@ CI run [36301310838](https://github.com/aburan28/crypto/actions/runs/36301310838
 | Four, holdout B | 1.522, 1.481–1.591 | 1.091, 1.065–1.091 |
 
 The one-thread replay passes every gate. One smaller four-thread frozen cell misses the strict A/A range: `n16_m24` has a complete-call paired median of 0.9984 against A/A 1.0111–1.0410, with a bootstrap interval of 0.9936–1.0264. The earlier four-thread control measured 1.0318 for this cell, with A/A 0.9937–1.0389. This ambiguous small-case result is not counted as a pass. The default-on change remains unmerged while it is independently repeated.
+
+## Final independent adjudication and default decision
+
+CI run [36302699789](https://github.com/aburan28/crypto/actions/runs/36302699789) at PR head `961a1447` completed 66 one-thread and 66 four-thread calls, all successful with exact fingerprints, pair counters, operation counts and matrix dimensions. The raw [one-thread](runs/36302699789/ci-result.json) and [four-thread](runs/36302699789/ci-result-threads4.json) receipts have SHA-256 `47f0ac6bbb61b0f7443e010423c60163d11069676d62dd879e04535bafa4b76d` and `7f04ced4e01432ea947962ce610f5459e0474de992c4c2bbf8313a1982986ace`.
+
+| Threads, `n20_m30` workload | Other-time ratio, 95% interval | Complete F4 ratio, 95% interval |
+| --- | ---: | ---: |
+| One, frozen | 1.515, 1.513–1.521 | 1.063, 1.060–1.069 |
+| One, holdout A | 1.519, 1.512–1.560 | 1.054, 1.050–1.056 |
+| One, holdout B | 1.549, 1.515–1.560 | 1.053, 1.049–1.056 |
+| Four, frozen | 1.542, 1.512–1.552 | 1.113, 1.105–1.121 |
+| Four, holdout A | 1.517, 1.412–1.576 | 1.094, 1.058–1.119 |
+| Four, holdout B | 1.519, 1.500–1.744 | 1.087, 1.037–1.143 |
+
+The disputed four-thread frozen `n16_m24` cell improved 1.0419× with interval 1.0203–1.0521, above its A/A range 0.9899–1.0097. No smaller complete-call median at either thread count missed its own A/A range. The bounded adjudication therefore clears every frozen gate. Batched pair updates stay selected by default, with `F4_F2_BATCH_INSERTS=0` available as the exact reference. The result concerns only the Boolean F4 solver stage.
