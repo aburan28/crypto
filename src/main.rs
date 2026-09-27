@@ -58,6 +58,7 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum Cmd {
     /// Hash a message with the given algorithm (sha256 | sha3 | blake3)
     Hash { algorithm: String, message: String },
@@ -168,6 +169,12 @@ enum IsogenyOp {
         trials: u32,
         #[arg(long, default_value = "2,3")]
         ell_list: String,
+        /// Override the Pollard-rho iteration cap.  Defaults to the
+        /// `8·2^{bits/2}` heuristic below.  Frozen artifacts under
+        /// `experiments/` were produced with explicit caps (2^14, 2^18),
+        /// so reproducing them needs this.
+        #[arg(long)]
+        rho_cap: Option<u64>,
     },
     /// secp256k1 case study: GLV constants, twist analysis, MOV
     /// embedding-degree certificate, small-degree-isogeny survey.
@@ -201,6 +208,7 @@ enum VisualOp {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum CryptanalysisOp {
     /// List all registered ciphers known to the auto-attack runner.
     ListCiphers,
@@ -1216,6 +1224,7 @@ fn cmd_isogeny(op: IsogenyOp) {
             bits,
             trials,
             ell_list,
+            rho_cap,
         } => {
             let mut cfg = ExperimentConfig::default_for_bits(bits);
             cfg.num_curves = trials.max(1);
@@ -1224,8 +1233,9 @@ fn cmd_isogeny(op: IsogenyOp) {
             // Cap scales with √n.  Hasse interval is centred at p, so
             // √n ≈ √p = 2^{bits/2}.  Allow 8× headroom for the
             // geometric-distribution tail.
-            let half_bits = (cfg.bits.min(60) / 2) as u32;
-            cfg.rho_max_iters = 8u64.checked_shl(half_bits).unwrap_or(u64::MAX);
+            let half_bits = cfg.bits.min(60) / 2;
+            cfg.rho_max_iters =
+                rho_cap.unwrap_or_else(|| 8u64.checked_shl(half_bits).unwrap_or(u64::MAX));
             eprintln!(
                 "# Running isogeny experiment: bits={}, trials={}, ell={:?}",
                 cfg.bits, cfg.num_curves, cfg.primes,
@@ -1782,7 +1792,7 @@ fn cmd_rsa(op: RsaOp) {
             let kp = RsaKeyPair::generate(1024);
             println!(
                 "n (256-bit prefix): {}…",
-                to_hex(&bigint_to_bytes_be(&kp.public.n, 128))[..64].to_string()
+                &to_hex(&bigint_to_bytes_be(&kp.public.n, 128))[..64]
             );
             println!("e: {}", kp.public.e);
         }

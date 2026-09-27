@@ -1,0 +1,1696 @@
+[
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-pair_table-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-pair_table-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "enumerate",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-enumerate-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "enumerate",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-enumerate-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "f4",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-f4-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "f4",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-f4-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "f5",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-f5-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "f5",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-f5-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "inherited_f4",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-inherited_f4-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "inherited_f4",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-inherited_f4-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "sat_xor",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-sat_xor-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "sat_xor",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-sat_xor-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "sat_cnf",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-sat_cnf-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "sat_cnf",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a0-sat_cnf-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-pair_table-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-pair_table-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "enumerate",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-enumerate-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "enumerate",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-enumerate-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "f4",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-f4-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "f4",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-f4-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "f5",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-f5-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "f5",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-f5-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "inherited_f4",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-inherited_f4-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "inherited_f4",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-inherited_f4-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "sat_xor",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-sat_xor-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "sat_xor",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-sat_xor-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "sat_cnf",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-sat_cnf-dense"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "sat_cnf",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "a1-sat_cnf-sparse"
+  },
+  {
+    "expected": "incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "dense",
+        "max_trials": 1,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "incomplete-pair_table"
+  },
+  {
+    "expected": "incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "dense",
+        "max_trials": 1,
+        "solver": "enumerate",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "incomplete-enumerate"
+  },
+  {
+    "expected": "incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "dense",
+        "max_trials": 1,
+        "solver": "f4",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "incomplete-f4"
+  },
+  {
+    "expected": "incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "dense",
+        "max_trials": 1,
+        "solver": "f5",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "incomplete-f5"
+  },
+  {
+    "expected": "incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "dense",
+        "max_trials": 1,
+        "solver": "inherited_f4",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "incomplete-inherited_f4"
+  },
+  {
+    "expected": "incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "dense",
+        "max_trials": 1,
+        "solver": "sat_xor",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "incomplete-sat_xor"
+  },
+  {
+    "expected": "incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "dense",
+        "max_trials": 1,
+        "solver": "sat_cnf",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "incomplete-sat_cnf"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 0,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 36,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n9-window0-dense"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 0,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 36,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n9-window0-sparse"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 1,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 36,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n9-window1-dense"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 1,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 36,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n9-window1-sparse"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 1000,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 36,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n9-window1000-dense"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 1000,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 36,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n9-window1000-sparse"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 0,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n13-window0-dense"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 0,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n13-window0-sparse"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 1,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n13-window1-dense"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 1,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n13-window1-sparse"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 1000,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n13-window1000-dense"
+  },
+  {
+    "expected": "complete-or-incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 128,
+        "collection_window": 1000,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 43
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "n13-window1000-sparse"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "rho",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "rho-a0"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "rho",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "rho-a1"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n9-0-factor"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "indices": [
+          0,
+          2
+        ],
+        "kind": "divisor"
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n9-1-divisor"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2,
+          4,
+          8
+        ]
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n9-2-frobenius_union"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 54,
+        "seed": 43
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n9-3-subgroup_orbits"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "frobenius_union",
+          "seed_masks": [
+            1,
+            2,
+            4,
+            8
+          ]
+        }
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n9-4-two_torsion_saturated"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "kind": "frobenius_union",
+            "seed_masks": [
+              1,
+              2,
+              4,
+              8
+            ]
+          }
+        },
+        "retained_abscissa_orbits": [
+          9
+        ]
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n9-5-pruned"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "pruned",
+          "parent": {
+            "kind": "two_torsion_saturated",
+            "parent": {
+              "kind": "frobenius_union",
+              "seed_masks": [
+                1,
+                2,
+                4,
+                8
+              ]
+            }
+          },
+          "retained_abscissa_orbits": [
+            9
+          ]
+        }
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n9-6-two_torsion_saturated"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n13-0-factor"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "indices": [
+          1
+        ],
+        "kind": "divisor"
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n13-1-divisor"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2,
+          4,
+          8
+        ]
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n13-2-frobenius_union"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 43
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n13-3-subgroup_orbits"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "frobenius_union",
+          "seed_masks": [
+            1,
+            2,
+            4,
+            8
+          ]
+        }
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n13-4-two_torsion_saturated"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "kind": "frobenius_union",
+            "seed_masks": [
+              1,
+              2,
+              4,
+              8
+            ]
+          }
+        },
+        "retained_abscissa_orbits": [
+          3
+        ]
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n13-5-pruned"
+  },
+  {
+    "expected": "inventory",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "exclusive_phases": true,
+      "factor_base": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "pruned",
+          "parent": {
+            "kind": "two_torsion_saturated",
+            "parent": {
+              "kind": "frobenius_union",
+              "seed_masks": [
+                1,
+                2,
+                4,
+                8
+              ]
+            }
+          },
+          "retained_abscissa_orbits": [
+            3
+          ]
+        }
+      },
+      "mode": "inventory",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "inventory-n13-6-two_torsion_saturated"
+  }
+]

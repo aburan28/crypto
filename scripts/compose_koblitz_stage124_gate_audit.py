@@ -11,6 +11,12 @@ regimes, oracle pricing and the whole-process count on the Koblitz rows --
 without moving any Koblitz gate fact.  Stage 124 recomposes the same seven
 gates over the current documents and chains to the Stage 109 seal; Stage 109
 itself is verified as an immutable historical snapshot by its own script.
+
+The ledger moved again later on 2026-09-21 (the boundary ledger's Round 2),
+so Stage 125 re-seals the audit and this script's verify is historical:
+seal and frozen audit only.  `build` is kept for the record of how the
+Stage 124 audit was composed and will not reproduce it on the moved
+documents.
 """
 
 from __future__ import annotations
@@ -240,16 +246,21 @@ def build(output: Path) -> dict[str, Any]:
 
 
 def verify(output: Path) -> dict[str, Any]:
-    # Stage 124 is the current audit: recompose from the live documents and
-    # require the result to equal the sealed one.  When the documents it pins
-    # move again, the next stage re-seals and this verify becomes historical,
-    # exactly as compose_koblitz_stage109_gate_audit.py's did.
+    # Stage 124 is an immutable historical snapshot.  The mutable documents
+    # it pinned by hash (the boundary ledger and its Markdown twin, the gate
+    # status) moved again on 2026-09-21 with the boundary ledger's Round 2
+    # (folded pair tables, walk targets, the exact counting ceiling, the
+    # balanced Koblitz base), so recomposing here would compare two points
+    # in time.  Stage 125 recomposes the current evidence and chains to this
+    # seal (compose_koblitz_stage125_gate_audit.py); this verify checks the
+    # seal and the frozen audit only, as Stage 109's does.
     seal = load(output / "result-seal.json", "Stage-124 seal")
     require(seal.get("schema") == SEAL_SCHEMA, "seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    current = compose()
-    require(current == load(output / "audit.json", "Stage-124 audit"), "current audit changed")
-    return current
+    committed = load(output / "audit.json", "Stage-124 audit")
+    require(committed.get("schema") == SCHEMA, "committed audit schema changed")
+    require(committed.get("status") == "current_seven_gate_audit_verified", "committed audit status changed")
+    return committed
 
 
 def main() -> None:

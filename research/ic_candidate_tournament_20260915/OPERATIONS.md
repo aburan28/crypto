@@ -6,6 +6,12 @@ rho implementation. The worker is [ic_tournament_worker.rs](../../examples/ic_to
 The [design](README.md) remains the research plan; this document describes the
 implemented, bounded operation.
 
+For the repository skill, portable development screens, backend/base adapters,
+reference qualification and diverse portfolios, start with [AUTOLAB.md](AUTOLAB.md).
+New instruction rounds can freeze a separately qualified reference using
+`--rho-source-root` / `--rho-config`. They also enforce distinct public target
+points across stages before replay; changing a random seed alone is insufficient.
+
 ## Evidence in this PR
 
 Read [evidence/README.md](evidence/README.md) and run `evidence/restore.py` before
@@ -238,7 +244,7 @@ three rounds without promotion.
 | `aa` | Identical executable and config, two labels, four curve cells, three repetitions | No spurious promotion; cell ratios within 5% |
 | `smoke` | All candidates and rho, one target per cell, three repetitions | Independent complete-solve checks; failing challengers do not enter development |
 | `development` | All surviving candidates, four cells, three targets per cell in the pilot | Full paired cost and retained failures |
-| `selection` | Incumbent, top two development candidates, rho; fresh targets | Locks one provisional challenger |
+| `selection` | Incumbent, frozen development portfolio, rho; fresh targets | Locks one provisional challenger; new rounds default to six slots including one exploration slot |
 | `confirmation` | Incumbent, locked challenger, rho; 60 fresh pilot fixtures across five cells | All promotion gates; fifth curve is a holdout |
 | `replay` | New processes on the frozen confirmation cases | Independent checker and repeated cost gate |
 
@@ -331,6 +337,8 @@ or an ECC2K-130 solve.
 ## Skills
 
 Canonical skill sources are under [skills](skills/). Installed names:
+
+- `$ic-autolab`: repo-local entry point at [`.agents/skills/ic-autolab`](../../.agents/skills/ic-autolab/SKILL.md), spanning development, quality checks and tournament continuation.
 
 - `$ic-propose-candidates`: concrete hypotheses and bounded candidate changes.
 - `$ic-run-tournament`: freeze, execute, resume and finish a local round.

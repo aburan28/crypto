@@ -29,7 +29,7 @@
   </nav>
 </header>
 
-<main id="main">
+<main id="main" tabindex="-1">
   <p class="kicker">Certicom ECC2K-130 · Pollard rho · distinguished points</p>
   <h1>Campaign status</h1>
   <p class="sub">
@@ -217,8 +217,8 @@
           <button type="button" id="forest-play">Play the walks</button>
           <button type="button" id="forest-reset">Reset view</button>
         </div>
-        <img src="./walk-forest.svg" width="1000" height="900" loading="lazy"
-             alt="Walk trails on the ECC2K-130 curve drawn as separate meandering chains of hollow nodes, each ending at a filled green node, none of them touching.">
+        <img src="./walk-forest.svg" width="1000" height="1000" loading="lazy"
+             alt="Walk trails on the ECC2K-130 curve drawn as a circle: each walk a coloured arc of hollow nodes running out from its seed to a filled green node on the rim, the longer walks starting nearer the centre, none of them touching.">
         <p class="forest-readout mono" id="forest-readout"></p>
       </div>
       <figcaption>
@@ -241,13 +241,19 @@
         enough to draw. Every trail is checked against the record the client
         wrote for it, the first few against the scalar reference as well, and
         the orbits are named by hash on the page because a distinguished
-        point's orbit is its key. The figure regenerates from the committed
+        point's orbit is its key. The figure is a circle: every
+        distinguished point sits on the rim, and every walk comes in to it
+        from as far inside as it had iterations still to go, so a seed sits
+        as deep as its walk was long and the rings mark each quarter of the
+        cap; the walks are in order of length, which is why their seeds
+        spiral in. The figure regenerates from the committed
         trails with
         <a href="https://github.com/aburan28/crypto/blob/main/docs/ecc2k130-status/walk-forest/README.md">walk_forest.py</a>.
         With JavaScript the figure is a graph: drag to pan, wheel or pinch to
         zoom, hover a node for the walk it is on and how far along, click one
         to light every path through it to its distinguished point, and play
-        the walks to watch them set off for theirs. The second forest in the
+        the walks to run them all at once, at the same number of iterations a
+        second, each lighting its trail until it reaches the rim. The second forest in the
         menu is the <span class="mono">GF(2^23)</span> test curve, small
         enough that trails meet, with the same iteration function and
         distinguishing test.
@@ -260,10 +266,11 @@
     <p class="note">
       Lifetime distinguished-point contributors, not the GPUs still walking.
       The headline card above is the live checkpoint count
-      (<span class="mono">walking_slots</span>); this table is every
-      <span class="mono">worker_id</span> that has ever reported a point. A
-      row is marked active when its most recent point is inside the last hour
-      of the snapshot.
+      (<span class="mono">walking_slots</span>). The live ingest feed does
+      not publish per-worker rows &mdash; <span class="mono">worker_id</span>
+      is an upload-object name, not a machine &mdash; so this table fills
+      only when the walker-hop snapshot carries them. A row is marked active
+      when its most recent point is inside the last hour of the snapshot.
     </p>
     <div class="scroll" tabindex="0">
       <table>
@@ -299,13 +306,20 @@
         <h3>Run a cairn node</h3>
         <p>
           <a href="https://github.com/aburan28/cairn">cairn</a> pays for
-          verified outputs and never for claimed effort. Under its
-          <a href="https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md">rho
-          piecework design</a> the paid artifact is one distinguished point
-          <span class="mono">(x, y, a, b)</span> with
-          <span class="mono">a&middot;P + b&middot;Q = (x, y)</span>: it costs
-          <span class="mono">2^d</span> group operations to find and two scalar
-          multiplications to check, so the proof of work <em>is</em> the work.
+          verified outputs and never for claimed effort, and it now posts
+          <em>this</em> search:
+          <a href="https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/objective-ecc2k130-orbit-batch.json"><span class="mono">objective-ecc2k130-orbit-batch</span></a>
+          pays per novel <strong>orbit</strong>, in batches of up to 64.
+        </p>
+        <p class="note">
+          Not per point, because on a Koblitz curve
+          <span class="mono">&sigma;(x, y) = (x&sup2;, y&sup2;)</span> and
+          negation generate a group of order <span class="mono">2m = 262</span>
+          that the walk respects: two trails have merged when they reach the
+          same orbit, and a unit keyed on one representative would pay 262
+          times for it, to 262 relabellings anybody derives from one published
+          record. So the unit is the orbit's canonical name &mdash; the least
+          cyclic rotation of the abscissa's normal-basis coordinates.
         </p>
         <p class="dl-row">
           <a class="dl" href="https://github.com/aburan28/cairn/releases/latest">Download cairn</a>
@@ -322,16 +336,57 @@ cairn run</code></pre>
           the verifier sandbox is seatbelt and bubblewrap.
         </p>
         <p class="note">
-          <strong>What is and is not posted.</strong> The rho objectives that
-          ship today are prime-field &mdash; a 50-bit rung anyone can finish,
-          and Certicom's ECCp-131 &mdash; and the contributor for them is
-          <span class="mono">crypto cryptanalysis rho-collab work --cairn</span>.
-          An ECC2K-130 objective needs a
-          <span class="mono">GF(2^131)</span> checker, which
-          <a href="https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/README.md">cairn
-          does not carry yet</a>, so points on <em>this</em> campaign are not
-          payable through cairn until it does. Install the node now to have it
-          ready, and to work the rungs that are live.
+          <strong>Why this client cannot claim yet.</strong> A point here
+          cannot carry <span class="mono">(a, b)</span>: tracking the
+          combination would cost a 129-bit modular multiplication per step, and
+          the walk above keeps its whole state in bitsliced field elements at
+          <span class="mono">1.4 &times; 10^10</span> steps a second. So the
+          corpus record is <span class="mono">(seed, canonical x)</span>, which
+          nobody can check for less than the work that made it &mdash; and
+          which anybody can invent for nothing, since a low-weight bit string
+          rotated to its least rotation is a syntactically perfect orbit name.
+        </p>
+        <p class="note">
+          cairn's answer is a <strong>witness</strong>, and it falls out of the
+          walk's own algebra: a step is
+          <span class="mono">R &#8614; R + &sigma;^j(R) = [1 + s^j]R</span> and
+          the endomorphism ring is commutative, so a trail of any length is
+          <span class="mono">[&mu;]R&#8320;</span> with
+          <span class="mono">&mu; = &prod;_j (1 + s^j)^(n_j)</span> &mdash; and
+          the <span class="mono">n_j</span> are just how many steps took each
+          branch. <strong>Eight counters.</strong> One double scalar
+          multiplication checks them: about <span class="mono">227</span> group
+          operations against the <span class="mono">4 &times; 10^7</span> the
+          trail cost, an asymmetry of <span class="mono">2^17.4</span>. The
+          claim is
+          <span class="mono">{x, seed, j: [n&#8323; … n&#8321;&#8320;]}</span>.
+        </p>
+        <p class="note">
+          The kernel does not carry those counters yet, and it should. The
+          campaign runs the <em>packed</em> backend, where the branch index is
+          already a scalar <span class="mono">int</span> beside per-walk state
+          the step touches anyway, so a counter is a scalar increment &mdash;
+          eight 8-bit fields in one <span class="mono">u64</span>, two
+          instructions on a 2,324-slot update,
+          <strong>+0.09%</strong>, about <span class="mono">36</span>
+          GPU-hours across the campaign to make every orbit it produces
+          claimable. Replay keeps the job the kernel cannot do backwards: the
+          points already collected <em>without</em> counters are claimable no
+          other way, and
+          <span class="mono">ecc2k130/build/witness</span> turns those corpus
+          records into checked claims offline, the reference walk having
+          counted the <span class="mono">n_j</span> all along because collision
+          resolution always needed them. Two limits
+          cairn states plainly as well &mdash; the posted pool is one
+          <em>tranche</em>, about
+          <span class="mono">2^46.3</span> of the expected
+          <span class="mono">2^60.8</span> iterations, because the full corpus
+          is <span class="mono">2^35.5</span> orbits (~6.8 TB) and every
+          verifying node holds all of it; and a witness does not prove the
+          counters came from the job's own branch rule, which is what the
+          sampled re-walk audit and <span class="mono">attest slash</span> are
+          for. Install the node now to be ready, and to work the rungs that are
+          live.
         </p>
       </article>
 
@@ -1006,12 +1061,17 @@ cd ec2k-gpu-$V-linux-x86_64
     return isFinite(n) && n >= 0 ? n : null;
   }
 
-  function drawWorkers(workers, snapshotAt, source) {
+  function drawWorkers(workers, snapshotAt, status) {
     var body = el("workers-body");
     var note = el("workers-note");
     body.textContent = "";
     if (!workers.length) {
-      emptyRow(body, 5, source === "ingest-status-feed"
+      var text = String((status && status.source) || "");
+      var ingestOnly = text.indexOf("dp_ingest") !== -1 || text === "ingest-status-feed";
+      // Live ingest omits per_worker even when the store holds points.
+      // Do not read that as "no workers" (272M DPs, 2026-09-21).
+      if (!ingestOnly && Number(status && status.dps) > 0) ingestOnly = true;
+      emptyRow(body, 5, ingestOnly
         ? "Per-worker counts need the walker hop; this snapshot is from the ingest feed."
         : "No workers have reported points.");
       note.textContent = "";
@@ -1654,7 +1714,7 @@ cd ec2k-gpu-$V-linux-x86_64
         emptyRow(historyBody, 7, "Could not read history.json (" + historyError + ").");
       }
     }
-    drawWorkers(status.per_worker || [], generated, status.source);
+    drawWorkers(status.per_worker || [], generated, status);
     drawCampaign(status);
 
     if (historyError) {

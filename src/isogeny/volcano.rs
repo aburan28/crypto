@@ -129,10 +129,10 @@ pub fn map_volcano(
     let cm = cm_discriminant(curve);
     // ν_ℓ(f): the start curve sits at level ν.  If ν = 0 then
     // we are already on the crater.
-    let f = cm.conductor.unsigned_abs() as u64;
+    let f = cm.conductor.unsigned_abs();
     let mut nu = 0u32;
     let mut ff = f;
-    while ff % ell == 0 && ff != 0 {
+    while ff.is_multiple_of(ell) && ff != 0 {
         ff /= ell;
         nu += 1;
     }
@@ -221,8 +221,6 @@ pub fn volcano_depth(curve: &SmallCurve, ell: u64, max_depth: usize) -> usize {
             // Actually a "floor" vertex has *zero* forward neighbours
             // when ν = depth; a 1-forward vertex is mid-descent.
             // We continue but record `d` as our last position.
-            previous_j = Some(j_invariant(&current));
-            current = forward[0].codomain;
             return d + 1;
         }
         // Multiple forward neighbours: pick any descending one.  In
@@ -280,9 +278,9 @@ pub struct VolcanoPosition {
 
 pub fn position(curve: &SmallCurve, ell: u64) -> VolcanoPosition {
     let cm = cm_discriminant(curve);
-    let mut f = cm.conductor.unsigned_abs() as u64;
+    let mut f = cm.conductor.unsigned_abs();
     let mut depth = 0u32;
-    while f != 0 && f % ell == 0 {
+    while f != 0 && f.is_multiple_of(ell) {
         f /= ell;
         depth += 1;
     }

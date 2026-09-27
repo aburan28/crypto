@@ -52,7 +52,8 @@ rational (§3.2).  For Koblitz curves the frame is `u = 1/(x + 1)`, defined
 over `F₂`, so the Frobenius survives (`w(πP) = w(P)²`, verified on every
 point), and the descended Boolean system for a subspace factor base of
 dimension `l` has `m(l − 1) + 1` unknowns of bit-degree 5 in place of `m·l`
-unknowns of bit-degree 7, with one solve covering two targets (§4.3).  The
+unknowns of bit-degree 7 — both counting the known target, which §3.2 explains;
+4 and 6 without it — with one solve covering two targets (§4.3).  The
 symmetrised `S₃` on a Koblitz curve is
 
 ```text
@@ -254,6 +255,28 @@ rational 2-torsion point, `(0, 1)`, whose translation is `x ↦ 1/x`; the
 only two frames in `PGL₂(F₂)` that make it additive are `1/(x+1)` and
 `x/(x+1)`, and the brute-force scan finds no third.
 
+**What the bit-degree column counts, and what it does not.**  `Σ popcount(eᵢ)`
+maximised over the monomials of the *polynomial*, across all `m + 1`
+arguments — the target `x_R` included.  That is what
+`coordinate_search::boolean_degree` computes, and it is a property of the
+polynomial, not of a system anyone solves.  The unknowns column is the other
+convention: the target is known when a decomposition is actually attempted,
+so it contributes no unknowns.  Held to one convention at a time, and read
+off the polynomials printed above — the `u`-frame row by substituting
+`x = (1 + u)/u` into the 24-term `S₄` and clearing denominators, which
+reproduces the 100 terms and the `[4,4,4,4]` degrees the table reports:
+
+| | polynomial, all `m + 1` arguments | descended system, target known |
+|---|---:|---:|
+| `S₄` in `x` | 7 | **6** |
+| `S₄` in `u = 1/(x + 1)`, plain | 5 | **4** |
+| `S₄` symmetrised in `w, s` | 5 | **4** |
+
+The gap the quotient buys is **2** either way, so nothing in this section's
+reading changes.  §8 quotes the right-hand column, because there the target is
+fixed and the system goes to a solver; this table quotes the left.  Mixing
+them reports the gap as 3, which §8.1 and §8.3 did until these were computed.
+
 A curve defined over `F₈ ⊂ F₂⁹` gets the same rows with a Frobenius of
 degree 3 and a frame over `F₈`; a curve not defined over any subfield gets
 the same polynomials and no Frobenius column, because there is nothing for
@@ -314,8 +337,10 @@ count):
   `dim AS(V) = l − 1`.
 - Unknowns: `m(l − 1) + 1` instead of `m·l` (the `s`-constraint
   `s² + s = Σw_i` is `F₂`-linear, so `s` is one free bit after linear
-  elimination), at Boolean degree 5 instead of 7 for `S₄`.  At `n = 13`,
-  `l = 5`: 13 unknowns for 15.
+  elimination), at Boolean degree 5 instead of 7 for `S₄` — both counting all
+  `m + 1` arguments, the target included (§3.2); 4 instead of 6 once the target
+  is fixed, which is the pair §8 measures.  The gap is 2 either way.  At
+  `n = 13`, `l = 5`: 13 unknowns for 15.
 - Orbits: the factor base is stable under `⟨π, τ_T, −1⟩`, of order up to
   `4n`, so the relation matrix shrinks by a further factor 2 in both
   dimensions relative to the signed Frobenius orbits used today.
@@ -426,7 +451,13 @@ Boolean unknowns, `n` equations.  `S₃` gives a bilinear system; the
 intermediate points**: the production `m = 3` system is two `S₃` links
 joined by a free field element, `3ℓ + n` unknowns, cubic.  A control arm
 solves the plain 24-term `S₄` in `x` directly (`3ℓ` unknowns, Boolean
-degree 7) to separate "no chaining" from "symmetry".
+degree 6) to separate "no chaining" from "symmetry".  *(The degree read 7
+here until it was checked against the harness that builds the system: 7
+counts the known target as a variable, the convention of §3.2's table, and is
+not comparable with the symmetrised system's 4 on the line above.  The `deg`
+column of `symmetrised_oracle_bench` is `system_degree` on the equations the
+solver is actually handed, and at `K₁/F₂⁹`, `m = 3` it prints `x-direct 9
+vars, deg 6` against `sym 7 vars, deg 4`.  6 against 4.)*
 
 A root gives `u_i` up to `u_i ↦ u_i + 1` with parity `ε`; the lifted points
 sum to `R` or to `R + T`, both relations over `F_u` since `T ∈ F_u`.  The
@@ -544,9 +575,16 @@ direct `S₄`-in-`x` control at `K₁/F₂¹⁵` finds in 541 ms: dropping the
 chained intermediate points is worth ×12 on its own, and the symmetry is
 worth a further ×75 on top.  Both matter; the symmetry matters more.
 The production choice to chain `S₃` rather than use `S₄` was made on the
-grounds that `S₄` is degree 4 per variable and Boolean degree 7; the
+grounds that `S₄` is degree 4 per variable and Boolean degree 6; the
 symmetrised `S₄` is degree 2 per variable and Boolean degree 4, and that
-is the version that should have been chained *against*.
+is the version that should have been chained *against*.  *(Corrected: this
+read "Boolean degree 7" against the symmetrised 4, which compares two
+conventions — the 7 counts the known target as a variable, the 4 does not.
+Held to the solved system's convention the pair is 6 against 4 — which is what
+this section's own harness prints in its `deg` column — held to the
+polynomial's, 7 against 5.  The gap is 2, not 3.  Nothing else in this
+section moves: the measured times are what they were, and the conclusion
+that the symmetrised `S₄` is the version to chain against is unaffected.)*
 
 **H2 (first fall degree lower): falsified as stated.**  The symmetrised
 `m = 2` system's first fall degree is 4 where the `x`-system's is 3, and

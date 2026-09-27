@@ -102,13 +102,12 @@
 //!   calculus*, 1968 — the AND/XOR gate-CNF encoding.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
-use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
 use crate::cryptanalysis::binary_semaev_s4::weil_descend_s4;
 use crate::cryptanalysis::ffd_harness::{
-    monomial_index, quad_monomial_index, weil_descend_s3, weil_descend_s3_subspace, F2BoolPoly,
+    quad_monomial_index, weil_descend_s3_subspace, F2BoolPoly,
 };
 use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly as BoolPoly;
-use crate::cryptanalysis::sat::{Lit, SolveResult, Solver};
+use crate::cryptanalysis::sat::{Lit, Solver};
 
 // ── Encoding ────────────────────────────────────────────────────────
 
@@ -218,7 +217,7 @@ pub fn encode_equations_with(
 
     // Assign auxiliary variable indices (after the bit-variables).
     let mut next = num_bit_vars + 1; // SAT variables are 1-indexed in DIMACS
-    for (_, v) in aux_quad_var.iter_mut() {
+    for v in aux_quad_var.values_mut() {
         *v = next;
         next += 1;
     }
@@ -748,11 +747,7 @@ fn encode_xor_eq_zero(
     let mut current_aux: Option<Lit> = None;
     let mut chain_iter = chain.iter().copied();
 
-    loop {
-        let a = match iter.next() {
-            Some(x) => x,
-            None => break,
-        };
+    while let Some(a) = iter.next() {
         let b = iter.next();
         match (current_aux, b) {
             (None, None) => {
@@ -1044,8 +1039,10 @@ pub fn encode_boolean_system_with(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
     use crate::cryptanalysis::binary_semaev_s4::{elementary_symmetric_3, symmetrised_s4_eval};
     use crate::cryptanalysis::pq_groebner_f2::F2BoolMono;
+    use crate::cryptanalysis::sat::SolveResult;
 
     /// Compare complete model sets with direct evaluation, including
     /// incremental blocking after XOR propagation and backtracking.
@@ -1396,7 +1393,7 @@ mod tests {
         // Every decoded x-coordinate must lie in the factor base.
         for x in &xs {
             assert!(
-                x.degree().map_or(true, |d| d < l),
+                x.degree().is_none_or(|d| d < l),
                 "decoded x-coordinate escaped the l-dimensional subspace"
             );
         }

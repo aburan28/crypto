@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Replay the Stage 109 historical audit and the current seven-gate audit
+      - name: Replay the Stage 109 and Stage 124 historical audits (superseded by Stage 125)
         run: |
           python3 -m py_compile \
             scripts/compose_koblitz_stage109_gate_audit.py \

@@ -763,8 +763,7 @@ pub fn extract_degree_falls(eqs: &[F2BoolPoly], num_vars: u32) -> DegreeFallRepo
     for (j, col) in cubic.iter().enumerate() {
         let mut vec = col.clone();
         let mut combo = vec![j as u32];
-        loop {
-            let Some(l) = lead_bit(&vec) else { break };
+        while let Some(l) = lead_bit(&vec) {
             match pivots.iter().find(|p| p.lead == l) {
                 Some(p) => {
                     for w in 0..words {
@@ -2495,15 +2494,12 @@ mod tests {
                         v[i / 64] ^= 1u64 << (i % 64);
                     }
                 }
-                loop {
-                    let Some(l) = v
-                        .iter()
-                        .enumerate()
-                        .find(|(_, w)| **w != 0)
-                        .map(|(i, w)| i * 64 + w.trailing_zeros() as usize)
-                    else {
-                        break;
-                    };
+                while let Some(l) = v
+                    .iter()
+                    .enumerate()
+                    .find(|(_, w)| **w != 0)
+                    .map(|(i, w)| i * 64 + w.trailing_zeros() as usize)
+                {
                     match basis.iter().find(|(bl, _)| *bl == l) {
                         Some((_, bv)) => {
                             for w in 0..v.len() {
