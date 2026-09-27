@@ -254,7 +254,7 @@ impl MonomialSeen {
     fn new(n_vars: usize) -> Self {
         static BITMAP: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
         let enabled =
-            *BITMAP.get_or_init(|| std::env::var("F4_F2_BITMAP_SEEN").as_deref() == Ok("1"));
+            *BITMAP.get_or_init(|| std::env::var("F4_F2_BITMAP_SEEN").as_deref() != Ok("0"));
         Self::with_bitmap(n_vars, enabled)
     }
 

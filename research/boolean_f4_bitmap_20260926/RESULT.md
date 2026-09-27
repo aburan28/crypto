@@ -12,4 +12,13 @@ CI run [36294892907](https://github.com/aburan28/crypto/actions/runs/36294892907
 
 The milliseconds are the median of each arm's five A/B calls; ratios are medians of paired reference/candidate ratios and need not equal the ratio of the marginal medians. The frozen A/A build ratio range was 0.995–1.009. Elimination was effectively unchanged (frozen paired median ratio 1.001). Smaller frozen cases had build ratios from 1.077 to 1.396 and full-F4 ratios from 1.040 to 1.083; no smaller case showed a median regression. All output fingerprints, basis lengths, steps, divisor-test counts, word-XOR counts and largest matrix dimensions matched in every call.
 
-Promotion still requires a parallel control and a final default-on replay. Until then the bitmap remains opt-in. This measured gain is only a solver-stage diagnostic and does not change the repository's index-calculus scoreboard or one-target online accounting.
+## Four-thread control and default decision
+
+CI run [36296268679](https://github.com/aburan28/crypto/actions/runs/36296268679) at PR head `25122240` repeated the one-thread comparison and ran the preregistered four-thread control: 66 calls per thread count, exact fingerprints and counters throughout. The complete receipts are [one thread](runs/36296268679/ci-result.json), SHA-256 `980bbdd30501d82bfeb26ac84e83a3a2a8486492f9481697debd60c85a71d587`, and [four threads](runs/36296268679/ci-result-threads4.json), SHA-256 `e150b0d23921ca67f0b322f6f3cab9b5964001808925fa9c7a9870edaeee0464`. This run used a different Linux x86-64 runner, AMD EPYC 9V45, Rust 1.98.1; ratios are paired within each run and thread count.
+
+| Thread count, `n20_m30` | Frozen build ratio, 95% interval | Frozen full-F4 ratio, interval | Holdout A full ratio | Holdout B full ratio |
+| --- | ---: | ---: | ---: | ---: |
+| One | 1.694, 1.655–1.744 | 1.211, 1.168–1.265 | 1.208 | 1.206 |
+| Four | 1.010, 0.984–1.121 | 0.979, 0.911–1.086 | 1.033 | 1.004 |
+
+The four-thread frozen full-F4 ratio of 0.979 sits inside its A/A range of 0.973–1.110; the two holdout ratios sit inside their own A/A ranges. Every smaller four-thread cell's median was within its A/A range or improved. This clears the preregistered parallel regression control, while giving no evidence of a four-thread speed gain. The bitmap is therefore enabled by default for at most 22 variables; `F4_F2_BITMAP_SEEN=0` retains the hash-set reference. A final default-on replay of both thread counts is required before merging. The measured gains remain solver-stage diagnostics and do not change the index-calculus scoreboard or one-target online accounting.

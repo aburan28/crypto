@@ -31,7 +31,7 @@ jobs:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
       - name: Boolean F4 reference tests
-        run: cargo test --release --lib cryptanalysis::pq_f4_f2::tests -- --test-threads=1
+        run: F4_F2_BITMAP_SEEN=0 cargo test --release --lib cryptanalysis::pq_f4_f2::tests -- --test-threads=1
       - name: Boolean F4 bitmap tests
         run: F4_F2_BITMAP_SEEN=1 cargo test --release --lib cryptanalysis::pq_f4_f2::tests -- --test-threads=1
       - name: Build frozen Boolean F4 benchmark
