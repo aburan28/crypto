@@ -80,6 +80,9 @@ pub struct Config {
     pub parallel_words: usize,
     /// Use the AVX-512 row update when the CPU has it.
     pub simd: bool,
+    /// Number of 64-column words whose pivot blocks share one trailing
+    /// matrix pass; zero keeps the original per-block clearing order.
+    pub column_panel_words: usize,
 }
 
 impl Default for Config {
@@ -88,13 +91,15 @@ impl Default for Config {
             tables: DEFAULT_TABLES,
             parallel_words: PARALLEL_WORDS,
             simd: true,
+            column_panel_words: 0,
         }
     }
 }
 
 impl Config {
     /// The default, with `KIC_GF2_TABLES` (1–4), `KIC_GF2_PARALLEL_WORDS`
-    /// and `KIC_GF2_SIMD=0` read once per process for ablations.
+    /// `KIC_GF2_SIMD=0` and `KIC_GF2_COLUMN_PANEL_WORDS` (1–4) read once
+    /// per process for ablations.
     pub fn from_env() -> Self {
         static CONFIG: std::sync::OnceLock<Config> = std::sync::OnceLock::new();
         *CONFIG.get_or_init(|| {
@@ -113,6 +118,12 @@ impl Config {
             }
             if std::env::var("KIC_GF2_SIMD").as_deref() == Ok("0") {
                 c.simd = false;
+            }
+            if let Some(p) = std::env::var("KIC_GF2_COLUMN_PANEL_WORDS")
+                .ok()
+                .and_then(|v| v.parse::<usize>().ok())
+            {
+                c.column_panel_words = p.min(4);
             }
             c
         })
@@ -185,6 +196,15 @@ fn eliminate_with(
     let mut pivot_cols: Vec<usize> = Vec::with_capacity(block_cap);
     let mut table: Vec<u64> = Vec::new();
     let mut blocks: Vec<(usize, Vec<usize>)> = Vec::new();
+    let panel_width = config.column_panel_words.min(4);
+    let mut panel_blocks: Vec<PanelBlock> = Vec::new();
+    let mut panel_patterns: Vec<Vec<u32>> = if panel_width == 0 {
+        Vec::new()
+    } else {
+        let capacity = (panel_width * 64).div_ceil(block_cap) + 2;
+        (0..rows).map(|_| Vec::with_capacity(capacity)).collect()
+    };
+    let mut panel_end = panel_width.min(words);
 
     let mut pivot_row = 0usize;
     let mut word = 0usize;
@@ -229,6 +249,20 @@ fn eliminate_with(
             let col = word * 64 + best as usize;
             matrix.swap(pivot_row, best_row);
             strip.swap(pivot_row, best_row);
+            if panel_width != 0 {
+                panel_patterns.swap(pivot_row, best_row);
+                // Earlier blocks already changed the active panel. Their
+                // trailing columns are applied only when a row becomes a
+                // pivot or when the whole panel is flushed.
+                for (block, pattern) in panel_blocks.iter().zip(&mut panel_patterns[pivot_row]) {
+                    *word_ops += block.table.apply_pattern_range(
+                        &mut matrix[pivot_row],
+                        *pattern as u64,
+                        panel_end..words,
+                    );
+                    *pattern = 0;
+                }
+            }
             // Reduce the new pivot row in full by the block's earlier
             // pivots.  They are mutually reduced, so testing the row's
             // current bit on each pivot column in turn is the same as
@@ -272,20 +306,47 @@ fn eliminate_with(
             }
         }
         if !pivot_cols.is_empty() {
-            clear_block(
-                matrix,
-                words,
-                block_start,
-                bits,
-                &pivot_cols,
-                reduce_above && !defer_above,
-                true,
-                0..words,
-                &mut table,
-                config,
-                simd,
-                word_ops,
-            );
+            if panel_width != 0 {
+                let table =
+                    DeferredTable::new(matrix, block_start, &pivot_cols, bits, 0..words, word_ops)
+                        .expect("the pivot word is in the matrix");
+                let block = PanelBlock {
+                    start: block_start,
+                    pivots: pivot_cols.len(),
+                    table,
+                };
+                let reduce_above_now = reduce_above && !defer_above;
+                for (i, (row, patterns)) in matrix.iter_mut().zip(&mut panel_patterns).enumerate() {
+                    let eligible =
+                        i >= block.start + block.pivots || (reduce_above_now && i < block.start);
+                    let pattern = if eligible {
+                        gather_bits(row[word], block.table.mask, block.table.bmi2) as u32
+                    } else {
+                        0
+                    };
+                    patterns.push(pattern);
+                    *word_ops +=
+                        block
+                            .table
+                            .apply_pattern_range(row, pattern as u64, word..panel_end);
+                }
+                panel_blocks.push(block);
+            } else {
+                clear_block(
+                    matrix,
+                    words,
+                    block_start,
+                    bits,
+                    &pivot_cols,
+                    reduce_above && !defer_above,
+                    true,
+                    0..words,
+                    &mut table,
+                    config,
+                    simd,
+                    word_ops,
+                );
+            }
             if defer_above {
                 blocks.push((block_start, pivot_cols.clone()));
             }
@@ -293,6 +354,22 @@ fn eliminate_with(
         if !block_full || low >= last_col_in_word {
             word += 1;
             low = 0;
+        }
+        if panel_width != 0 && (word >= panel_end || pivot_row == rows) {
+            flush_panel(
+                matrix,
+                panel_end,
+                words,
+                &panel_blocks,
+                &panel_patterns,
+                config,
+                word_ops,
+            );
+            panel_blocks.clear();
+            for patterns in &mut panel_patterns {
+                patterns.clear();
+            }
+            panel_end = (panel_end + panel_width).min(words);
         }
     }
     // A forward pass already zeroed every row below each pivot block.
@@ -340,6 +417,59 @@ fn eliminate_with(
     pivot_row
 }
 
+/// A snapshot of one block's pivot combinations. Later blocks can change
+/// the live pivot rows above them, so replay must use this immutable table.
+struct PanelBlock {
+    start: usize,
+    pivots: usize,
+    table: DeferredTable,
+}
+
+/// Replay one panel's deferred trailing updates while each narrow column
+/// range of the matrix is resident. `patterns` follows row swaps, and a
+/// row selected as a later pivot has its earlier patterns zeroed after its
+/// trailing suffix was brought up to date on demand.
+fn flush_panel(
+    matrix: &mut [Vec<u64>],
+    first_word: usize,
+    words: usize,
+    blocks: &[PanelBlock],
+    patterns: &[Vec<u32>],
+    config: Config,
+    word_ops: &mut u64,
+) {
+    if blocks.is_empty() || first_word >= words {
+        return;
+    }
+    let tile_words = ((1usize << 20) / matrix.len().saturating_mul(8).max(1)).clamp(8, 128);
+    let mut first = first_word;
+    while first < words {
+        let end = (first + tile_words).min(words);
+        let clear = |(row, row_patterns): (&mut Vec<u64>, &Vec<u32>)| -> u64 {
+            blocks
+                .iter()
+                .zip(row_patterns)
+                .map(|(block, &pattern)| {
+                    block
+                        .table
+                        .apply_pattern_range(row, pattern as u64, first..end)
+                })
+                .sum()
+        };
+        if matrix.len() * (end - first) >= config.parallel_words {
+            *word_ops += matrix
+                .par_iter_mut()
+                .zip(patterns.par_iter())
+                .with_min_len(64)
+                .map(clear)
+                .sum::<u64>();
+        } else {
+            *word_ops += matrix.iter_mut().zip(patterns).map(clear).sum::<u64>();
+        }
+        first = end;
+    }
+}
+
 struct DeferredTable {
     data: Vec<u64>,
     pivot_word: usize,
@@ -352,6 +482,40 @@ struct DeferredTable {
 }
 
 impl DeferredTable {
+    /// Apply a previously captured pivot pattern to one column range.
+    /// The table's entry stride remains its full suffix length, so the
+    /// same snapshot can be replayed by cache-sized matrix ranges.
+    fn apply_pattern_range(
+        &self,
+        row: &mut [u64],
+        pattern: u64,
+        range: std::ops::Range<usize>,
+    ) -> u64 {
+        if pattern == 0 {
+            return 0;
+        }
+        let first = range.start.max(self.first_word);
+        let end = range.end.min(self.end_word);
+        if first >= end {
+            return 0;
+        }
+        let suffix = self.end_word - self.first_word;
+        let bits = self.table_size.trailing_zeros() as usize;
+        let mut used = 0u64;
+        for t in 0..self.n_tables {
+            let g = (pattern >> (t * bits)) as usize & (self.table_size - 1);
+            if g != 0 {
+                let offset = (t * self.table_size + g) * suffix + first - self.first_word;
+                xor_into(
+                    &mut row[first..end],
+                    &self.data[offset..offset + end - first],
+                );
+                used += (end - first) as u64;
+            }
+        }
+        used
+    }
+
     fn new(
         matrix: &[Vec<u64>],
         block_start: usize,
@@ -701,11 +865,14 @@ mod tests {
         for tables in 1..=4 {
             for simd in [false, true] {
                 for parallel_words in [0, usize::MAX] {
-                    out.push(Config {
-                        tables,
-                        parallel_words,
-                        simd,
-                    });
+                    for column_panel_words in [0, 2] {
+                        out.push(Config {
+                            tables,
+                            parallel_words,
+                            simd,
+                            column_panel_words,
+                        });
+                    }
                 }
             }
         }
