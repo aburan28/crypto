@@ -19,7 +19,6 @@ use std::time::Instant;
 
 const JUMPS: usize = 32;
 
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Quotient {
     Ordinary,
@@ -353,7 +352,11 @@ struct Trail {
 
 fn main() {
     let args: Vec<_> = std::env::args().collect();
-    assert_eq!(args.len(), 6, "usage: <n> <a> <mode> <fixtures> <batch_seed>");
+    assert_eq!(
+        args.len(),
+        6,
+        "usage: <n> <a> <mode> <fixtures> <batch_seed>"
+    );
     let n: u32 = args[1].parse().unwrap();
     let a: u8 = args[2].parse().unwrap();
     let mode = Quotient::parse(&args[3]);
@@ -380,9 +383,11 @@ fn main() {
     let mut charges = Charges::default();
 
     let setup_started = Instant::now();
-    let jump_digest = blake3::hash(format!("KIC-KS-BATCH-JUMPS-v1|{n}|{a}|{batch_seed}").as_bytes());
-    let mut jump_rng =
-        StdRng::seed_from_u64(u64::from_le_bytes(jump_digest.as_bytes()[..8].try_into().unwrap()));
+    let jump_digest =
+        blake3::hash(format!("KIC-KS-BATCH-JUMPS-v1|{n}|{a}|{batch_seed}").as_bytes());
+    let mut jump_rng = StdRng::seed_from_u64(u64::from_le_bytes(
+        jump_digest.as_bytes()[..8].try_into().unwrap(),
+    ));
     let jumps: Vec<RawJump> = (0..JUMPS)
         .map(|_| loop {
             let s = jump_rng.gen_range(1..modulus);
@@ -397,8 +402,11 @@ fn main() {
 
     let dp_mask = (1u64 << dp_bits) - 1;
     let walk_cap = 8u64 << dp_bits;
-    let ideal_single = (std::f64::consts::PI * modulus as f64 / (2.0 * automorphisms as f64)).sqrt();
-    let step_cap = (ideal_single.ceil() as u64).saturating_mul(2_000).max(1_000_000);
+    let ideal_single =
+        (std::f64::consts::PI * modulus as f64 / (2.0 * automorphisms as f64)).sqrt();
+    let step_cap = (ideal_single.ceil() as u64)
+        .saturating_mul(2_000)
+        .max(1_000_000);
     let mut table: HashMap<(u8, u64, u64), Trail> = HashMap::new();
     let mut solved: Vec<u64> = Vec::with_capacity(fixtures as usize);
     let mut total_steps = 0u64;
@@ -406,7 +414,9 @@ fn main() {
 
     for index in 0..fixtures {
         let material = match &shared_corpus {
-            Some(corpus) => format!("KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{corpus}|{batch_seed}|{index}"),
+            Some(corpus) => {
+                format!("KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{corpus}|{batch_seed}|{index}")
+            }
             None => format!(
                 "TASK-KIC-DIRECT-BATCH-20260910|rho|{n}|{a}|{}|{batch_seed}|{index}",
                 mode.name()
@@ -448,7 +458,11 @@ fn main() {
             }
             let mut state = raw_canonicalize(
                 &curve,
-                RawState { point: start, a: start_a, b: 1 },
+                RawState {
+                    point: start,
+                    a: start_a,
+                    b: 1,
+                },
                 mode,
                 modulus,
                 lambda,
@@ -482,7 +496,14 @@ fn main() {
             let key = raw_key(state.point);
             charges.table_queries += 1;
             let Some(&hit) = table.get(&key) else {
-                table.insert(key, Trail { a: state.a, b: state.b, target: index });
+                table.insert(
+                    key,
+                    Trail {
+                        a: state.a,
+                        b: state.b,
+                        target: index,
+                    },
+                );
                 charges.table_inserts += 1;
                 continue;
             };
@@ -492,7 +513,8 @@ fn main() {
                 inverse_mod(denominator, modulus)
                     .map(|inv| mul_mod(sub_mod(hit.a, state.a, modulus), inv, modulus))
             } else {
-                let known = (hit.a as u128 + mul_mod(hit.b, solved[hit.target as usize], modulus) as u128)
+                let known = (hit.a as u128
+                    + mul_mod(hit.b, solved[hit.target as usize], modulus) as u128)
                     % modulus as u128;
                 inverse_mod(state.b, modulus)
                     .map(|inv| mul_mod(sub_mod(known as u64, state.a, modulus), inv, modulus))
