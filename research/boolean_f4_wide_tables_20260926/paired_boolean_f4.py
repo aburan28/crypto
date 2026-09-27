@@ -190,6 +190,7 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("--pairs", type=int, default=5)
     parser.add_argument("--threads", type=int, default=1)
+    parser.add_argument("--candidate-feature", choices=("f4-wide-tables", "f4-five-tables"), default="f4-wide-tables")
     args = parser.parse_args()
     if args.pairs < 1:
         parser.error("--pairs must be positive")
@@ -216,7 +217,7 @@ def main():
         "pairs_per_phase": args.pairs,
         "rayon_threads": args.threads,
         "binary_sha256": binary_hashes,
-        "candidate_feature": "f4-wide-tables",
+        "candidate_feature": args.candidate_feature,
         "benchmark_source_sha256": sha256(Path("examples/f4_f2_bench.rs")),
         "kernel_source_sha256": sha256(Path("src/cryptanalysis/pq_f4_f2.rs")),
         "git_sha": os.environ.get("GITHUB_SHA"),

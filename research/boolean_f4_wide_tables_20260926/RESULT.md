@@ -13,3 +13,14 @@ CI run [36297452737](https://github.com/aburan28/crypto/actions/runs/36297452737
 Milliseconds are each arm's five A/B median; the paired ratio median can differ from the ratio of marginal medians. The frozen primary matrix peak was 44.4 MB in both arms, while actual table peak rose from 21.4 to 55.2 MB; holdout A tables rose from 36.9 to 94.5 MB. Performed word XORs on the frozen primary fell from 371.6 to 308.1 million, including table construction. These extra tables stayed within the candidate's declared four-matrix budget.
 
 The holdout B `n20_m20` complete-call paired median was 0.881 against its A/A range 0.891–1.067, with bootstrap interval 0.851–1.007. All other smaller-case medians were within A/A noise or improved. The runner's holdout B A/A ranges were wide across multiple cells, so this one result cannot establish a repeatable regression or be ignored. The next frozen control repeats all cases at one thread and adds four threads; the feature remains opt-in until those results settle the gate.
+
+## Independent one-thread repeat and four-thread control
+
+CI run [36298595953](https://github.com/aburan28/crypto/actions/runs/36298595953) at PR head `0d14ad99` completed 66 calls at each thread count with exact outputs and logical counters. The raw [one-thread](runs/36298595953/ci-result.json) and [four-thread](runs/36298595953/ci-result-threads4.json) receipts have SHA-256 `05d1078078c349f1c320da9fc11727cebceba0938b8377caad1f3bfa0b881a38` and `a41ac3811f2cffc2a0a1d881a167c7abaf2559b697026334be45fcd0327c761a`, respectively. This run used a Linux x86-64 AMD EPYC 9V74 runner; comparisons stay within each run and thread count.
+
+| Thread count, `n20_m30` | Frozen elimination ratio, 95% interval | Frozen full-F4 ratio, interval | Holdout A full ratio | Holdout B full ratio |
+| --- | ---: | ---: | ---: | ---: |
+| One | 1.096, 1.088–1.111 | 1.078, 1.053–1.086 | 1.206 | 1.255 |
+| Four | 1.095, 1.076–1.113 | 1.090, 1.081–1.110 | 1.130 | 1.114 |
+
+The primary gain repeats. Yet `n20_m20` at one thread now has a frozen complete-call ratio of 0.982 against A/A 0.993–1.007, and holdout A is 0.994 against A/A 0.997–1.006. Holdout B is within A/A, as are all four-thread smaller-case medians. The smaller-case slowdown recurred on a different runner and workload, so six-column tables **fail the preregistered no-regression gate** and remain opt-in. The next five-column arm is a distinct experiment, not a reinterpretation of the six-column result.

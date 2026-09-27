@@ -29,6 +29,7 @@ name = "crypto_lib"
 path = "src/lib.rs"
 
 [features]
+f4-five-tables = []
 f4-wide-tables = []
 redis-cache = ["dep:redis"]
 # Verbose tracing in the isogeny rho attack's linear-algebra step.

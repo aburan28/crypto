@@ -33,34 +33,25 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Boolean F4 reference tests
         run: F4_F2_BITMAP_SEEN=1 cargo test --release --lib cryptanalysis::pq_f4_f2::tests -- --test-threads=1
-      - name: Boolean F4 wide-table tests
-        run: F4_F2_BITMAP_SEEN=1 cargo test --release --features f4-wide-tables --lib cryptanalysis::pq_f4_f2::tests -- --test-threads=1
-      - name: Build reference and six-column benchmarks
+      - name: Boolean F4 five-column tests
+        run: F4_F2_BITMAP_SEEN=1 cargo test --release --features f4-five-tables --lib cryptanalysis::pq_f4_f2::tests -- --test-threads=1
+      - name: Build reference and five-column benchmarks
         run: |
           cargo build --release --example f4_f2_bench
           cp target/release/examples/f4_f2_bench target/release/examples/f4_f2_tables4
-          cargo build --release --features f4-wide-tables --example f4_f2_bench
-          cp target/release/examples/f4_f2_bench target/release/examples/f4_f2_tables6
+          cargo build --release --features f4-five-tables --example f4_f2_bench
+          cp target/release/examples/f4_f2_bench target/release/examples/f4_f2_tables5
       - name: Five A/A and five paired A/B samples per workload
         run: |
           python3 research/boolean_f4_wide_tables_20260926/paired_boolean_f4.py \
             target/release/examples/f4_f2_tables4 \
-            target/release/examples/f4_f2_tables6 \
-            research/boolean_f4_wide_tables_20260926/ci-result.json \
-            --pairs 5 --threads 1
-      - name: Four-thread paired control
-        run: |
-          python3 research/boolean_f4_wide_tables_20260926/paired_boolean_f4.py \
-            target/release/examples/f4_f2_tables4 \
-            target/release/examples/f4_f2_tables6 \
-            research/boolean_f4_wide_tables_20260926/ci-result-threads4.json \
-            --pairs 5 --threads 4
+            target/release/examples/f4_f2_tables5 \
+            research/boolean_f4_wide_tables_20260926/ci-result-five.json \
+            --pairs 5 --threads 1 --candidate-feature f4-five-tables
       - name: Preserve raw runs and failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: boolean-f4-wide-tables-${{ github.sha }}
-          path: |
-            research/boolean_f4_wide_tables_20260926/ci-result.json
-            research/boolean_f4_wide_tables_20260926/ci-result-threads4.json
+          path: research/boolean_f4_wide_tables_20260926/ci-result-five.json
           if-no-files-found: warn
