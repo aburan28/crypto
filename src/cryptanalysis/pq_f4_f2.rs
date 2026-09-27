@@ -632,29 +632,26 @@ const TABLE_ROWS: usize = 256;
 
 /// Pivot columns per table: an aligned group of them never straddles a
 /// word, so a row's pattern on it is one shift and mask.
-#[cfg(all(feature = "f4-five-tables", feature = "f4-wide-tables"))]
-compile_error!("select only one Boolean F4 table-width feature");
-
 const TABLE_BLOCK: usize = if cfg!(feature = "f4-wide-tables") {
     6
-} else if cfg!(feature = "f4-five-tables") {
-    5
-} else {
+} else if cfg!(feature = "f4-four-tables") {
     4
+} else {
+    5
 };
 const TABLE_INITIAL_BUDGET_MULT: usize = if cfg!(feature = "f4-wide-tables") {
     4
-} else if cfg!(feature = "f4-five-tables") {
-    2
-} else {
+} else if cfg!(feature = "f4-four-tables") {
     1
+} else {
+    2
 };
 const TABLE_EXTENDED_BUDGET_MULT: usize = if cfg!(feature = "f4-wide-tables") {
     4
-} else if cfg!(feature = "f4-five-tables") {
-    3
-} else {
+} else if cfg!(feature = "f4-four-tables") {
     2
+} else {
+    3
 };
 
 /// One table: the leading block's pivots on up to [`TABLE_BLOCK`]

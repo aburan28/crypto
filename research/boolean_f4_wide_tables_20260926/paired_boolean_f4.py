@@ -190,7 +190,7 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("--pairs", type=int, default=5)
     parser.add_argument("--threads", type=int, default=1)
-    parser.add_argument("--candidate-feature", choices=("f4-wide-tables", "f4-five-tables"), default="f4-wide-tables")
+    parser.add_argument("--candidate-feature", choices=("f4-wide-tables", "f4-five-tables", "default-five"), default="f4-wide-tables")
     args = parser.parse_args()
     if args.pairs < 1:
         parser.error("--pairs must be positive")

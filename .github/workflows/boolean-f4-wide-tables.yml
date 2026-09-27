@@ -32,14 +32,14 @@ jobs:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
       - name: Boolean F4 reference tests
+        run: F4_F2_BITMAP_SEEN=1 cargo test --release --features f4-four-tables --lib cryptanalysis::pq_f4_f2::tests -- --test-threads=1
+      - name: Boolean F4 default five-column tests
         run: F4_F2_BITMAP_SEEN=1 cargo test --release --lib cryptanalysis::pq_f4_f2::tests -- --test-threads=1
-      - name: Boolean F4 five-column tests
-        run: F4_F2_BITMAP_SEEN=1 cargo test --release --features f4-five-tables --lib cryptanalysis::pq_f4_f2::tests -- --test-threads=1
       - name: Build reference and five-column benchmarks
         run: |
-          cargo build --release --example f4_f2_bench
+          cargo build --release --features f4-four-tables --example f4_f2_bench
           cp target/release/examples/f4_f2_bench target/release/examples/f4_f2_tables4
-          cargo build --release --features f4-five-tables --example f4_f2_bench
+          cargo build --release --example f4_f2_bench
           cp target/release/examples/f4_f2_bench target/release/examples/f4_f2_tables5
       - name: Five A/A and five paired A/B samples per workload
         run: |
@@ -47,14 +47,14 @@ jobs:
             target/release/examples/f4_f2_tables4 \
             target/release/examples/f4_f2_tables5 \
             research/boolean_f4_wide_tables_20260926/ci-result-five.json \
-            --pairs 5 --threads 1 --candidate-feature f4-five-tables
+            --pairs 5 --threads 1 --candidate-feature default-five
       - name: Four-thread paired control for five-column tables
         run: |
           python3 research/boolean_f4_wide_tables_20260926/paired_boolean_f4.py \
             target/release/examples/f4_f2_tables4 \
             target/release/examples/f4_f2_tables5 \
             research/boolean_f4_wide_tables_20260926/ci-result-five-threads4.json \
-            --pairs 5 --threads 4 --candidate-feature f4-five-tables
+            --pairs 5 --threads 4 --candidate-feature default-five
       - name: Preserve raw runs and failures
         if: always()
         uses: actions/upload-artifact@v4

@@ -51,3 +51,18 @@ CI run [36301067360](https://github.com/aburan28/crypto/actions/runs/36301067360
 | Four, holdout B | 1.163, 1.141–1.205 | 1.071, 1.056–1.096 |
 
 The independent repeat confirms the primary and holdout gains, and no four-thread smaller case regressed beyond A/A noise. One one-thread smaller case misses the frozen strict gate: holdout B `n14_m14` has a complete-call paired median of 0.9964 against its A/A range 1.0007–1.0159. Its five-pair bootstrap interval is 0.9931–1.0161. This is small and uncertain, but the gate is not met. The four-column default stays in place while this specific cell is adjudicated; five and six columns remain opt-in.
+
+## Bounded five-column adjudication
+
+CI run [36302666376](https://github.com/aburan28/crypto/actions/runs/36302666376) at PR head `8fe9ac2f` completed 66 successful calls at each thread count, with exact output signatures and logical counters. The raw [one-thread](runs/36302666376/ci-result-five.json) and [four-thread](runs/36302666376/ci-result-five-threads4.json) receipts have SHA-256 `ceef082d635505b2b41c413bda3fe88ff5373a72ce95220dba05a64321491af7` and `947ef7d141d1649cfa505f7cf8c4f0b3177a233980566655895d611ca23fd2bd`.
+
+| Threads, `n20_m30` workload | Elimination ratio, 95% interval | Complete F4 ratio, 95% interval |
+| --- | ---: | ---: |
+| One, frozen | 1.073, 1.039–1.105 | 1.032, 1.008–1.051 |
+| One, holdout A | 1.314, 1.300–1.347 | 1.165, 1.157–1.174 |
+| One, holdout B | 1.363, 1.330–1.377 | 1.184, 1.169–1.196 |
+| Four, frozen | 1.061, 0.984–1.062 | 1.010, 0.995–1.026 |
+| Four, holdout A | 1.176, 1.144–1.190 | 1.071, 1.045–1.085 |
+| Four, holdout B | 1.177, 1.115–1.241 | 1.081, 1.024–1.098 |
+
+The disputed one-thread holdout B `n14_m14` median was 0.9923, inside its own A/A range 0.9779–1.0042; its bootstrap interval was 0.9842–1.0031. No other smaller median fell below its A/A range at either thread count. The one-thread frozen primary clears the 1.05 elimination gate; the four-thread control does not show a material regression, though its frozen intervals include one. The bounded adjudication clears the frozen promotion rule, so the next change selects five columns by default with a four-column reference and a final default-on replay. Six columns remain opt-in after its repeated smaller-case regression.
