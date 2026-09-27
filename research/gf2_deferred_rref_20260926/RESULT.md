@@ -1,6 +1,6 @@
-# Deferred above-row GF(2) RREF: correctness control
+# Deferred above-row GF(2) RREF: first paired run
 
-The candidate is **not promoted**. `KIC_GF2_DEFER_ABOVE=1` enables it; the unchanged block order remains the default. No F5, IC, or DLP speedup is claimed. The host was shared and heavily loaded during this attempt (one-minute load averages observed at 177, 195, and 63), so the predeclared A/A and paired A/B wall comparison was not run.
+The first candidate is **rejected on performance**. `KIC_GF2_DEFER_ABOVE=1` enables it; the unchanged block order remains the default. No F5, IC, or DLP speedup is claimed. The original local host was heavily loaded (one-minute load averages observed at 177, 195, and 63), so the paired comparison ran later on one pinned Ubuntu CI runner.
 
 ## Change
 
@@ -10,8 +10,8 @@ The forward pass still chooses the same pivots and clears all rows below each bl
 
 | Arm | Correctness | F5 n24/m24/d4 elimination time | Full F5 time | DLP online speedup |
 | --- | --- | ---: | ---: | ---: |
-| Existing default | Textbook RREF control passed | unknown | unknown | unknown |
-| Tiled reverse pass | Same exact RREF and rank across the kernel suite | unknown | unknown | unknown |
+| Existing default | Textbook RREF control passed | 161.5 ms | 272.9 ms | unknown |
+| Tiled reverse pass | Same exact RREF and rank across the kernel suite and F5 cells | 301.4 ms | 411.4 ms | unknown |
 
 - Base revision: `a71eac61ebc2b28529be2d367a76e0fcc0e56c37`.
 - Base `gf2_elim.rs` SHA-256: `5693b918fa8b003448ef340e919e8e80d1635a7c2c3447e4ca2dde98fcdfd258`.
@@ -21,4 +21,8 @@ The forward pass still chooses the same pivots and clears all rows below each bl
 
 The first implementation visited ranges left to right; the two RREF comparison tests failed because an earlier range cleared a block's selector word before later ranges read it. That failure was retained as a design control and resolved by visiting ranges right to left.
 
-The full F5 benchmark build, module tests and paired timing remain outstanding. A release build under Rust 1.93 was stopped when the host load exceeded 200. A second build under Rust 1.98 was stopped when the load rose from about 63 to 96; neither produced a benchmark binary. The offline `cargo test --lib cryptanalysis::matrix_f5_f2::tests` attempt reached compilation of the large `crypto` crate but was stopped after the load rose to about 105 without producing a test binary. Keep this path opt-in until the protocol's exact F5 output and timing gates pass on an uncontended host.
+The local release builds under Rust 1.93 and 1.98 and a module-test build were stopped under high load without producing benchmark evidence. CI run [36291052511](https://github.com/aburan28/crypto/actions/runs/36291052511) at PR head `4b2866ef` passed the shared-kernel and full matrix-F5 tests, then ran five A/A and five A/B pairs with one Rayon thread and CPU affinity 0. Its complete receipt is [runs/36291052511/ci-result.json](runs/36291052511/ci-result.json), SHA-256 `cadb5884cf23ec4c1d2d3957f62be32aa7648969edd2b1f646b47905bec84b74`. The runner was Linux x86-64 on Azure, Rust 1.98.1, four logical CPUs. Load averaged 1.90 at start and 1.83 at end; a shared virtual runner can still add timing noise.
+
+For the primary n24/m24/d4 cell, the paired median reference/candidate elimination ratio was **0.529** (bootstrap 95% interval 0.515–0.566), outside the A/A range 0.959–1.003. The full F5-call ratio was **0.659** (interval 0.644–0.700), outside the A/A range 0.975–1.009. The candidate reduced counted elimination work from 385,616,841 to 336,771,897 word operations but took longer. All seven cells kept identical fingerprints, ranks, pruning counts and criterion counts. Smaller cells also showed no compelling gain; n20/m20/d4 elimination was 42.7 ms reference versus 52.0 ms candidate.
+
+The first reverse pass still scanned earlier rows separately for every pivot block. The next bounded iteration groups prepared blocks and applies them during one row visit per group. Its timing is unmeasured; this negative result remains the reference for that design decision. No one-target online IC comparison or rho boundary changed, so no scoreboard value is updated.
