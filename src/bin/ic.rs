@@ -1,14 +1,22 @@
 //! Research CLI: read-only curve inspection and bounded known-answer experiments.
+#[path = "ic/bench.rs"]
+mod bench;
 #[path = "ic/boundary.rs"]
 mod boundary;
 #[path = "ic/corpus.rs"]
 mod corpus;
+#[path = "ic/descent.rs"]
+mod descent;
 #[path = "ic/experiment.rs"]
 mod experiment;
 #[path = "ic/fixed.rs"]
 mod fixed;
 #[path = "ic/params.rs"]
 mod params;
+#[path = "ic/price.rs"]
+mod price;
+#[path = "ic/rho.rs"]
+mod rho;
 #[path = "ic/workflow.rs"]
 mod workflow;
 
@@ -72,8 +80,16 @@ enum Action {
     Boundary(boundary::BoundaryArgs),
     /// Write a benchmark corpus of Weil-descended Semaev S4 instances (Magma, DIMACS+XOR, CNF, ANF) with certified labels and planted witnesses.
     Corpus(corpus::CorpusArgs),
+    /// Measure the degree a Weil-descent system actually reaches, against the degree a semi-regular system of the same shape would, with the operation count, wall time and peak footprint beside it.
+    Descent(descent::DescentArgs),
+    /// Run index-calculus configurations end to end and compare them: plug a factor base, a target source, a decomposition oracle, a polynomial solver and a relation matrix together, and see every stage's cost in one unit.
+    Bench(bench::BenchArgs),
     /// Price every decomposition oracle on R and on R − P + Q pairwise: does a solver charge the same for a swapped target?
     Swap(boundary::SwapArgs),
+    /// Run the counted Pollard-rho references paired (the frozen plain walk, the tuned walk, the negation-map walk that is the matched reference), or re-price a frozen boundary or bench report against the matched one.
+    Rho(rho::RhoArgs),
+    /// Price the workflow's pipeline phase by phase: the same calls in memory on one thread, each phase on its own clock, converted at one batched addition measured in the same process, beside batch rho on the same targets with its step priced.
+    Price(price::PriceArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -121,7 +137,11 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Fixed(args)) => fixed::run(args.clone()),
         Some(Action::Boundary(args)) => boundary::run(args.clone(), cli.json),
         Some(Action::Corpus(args)) => corpus::run(args.clone()),
+        Some(Action::Descent(args)) => descent::run(args.clone(), cli.json),
+        Some(Action::Bench(args)) => bench::run(args.clone(), cli.json),
         Some(Action::Swap(args)) => boundary::swap(args.clone(), cli.json),
+        Some(Action::Rho(args)) => rho::run(args.clone(), cli.json),
+        Some(Action::Price(args)) => price::run(args.clone(), cli.json),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {
@@ -428,6 +448,30 @@ fn display(report: &Value) {
                     inst["anf"]["equations"]
                 );
             }
+        }
+        Some("rho") => {
+            println!(
+                "Rho references: {}; {} instances, all verified: {}",
+                report["status"],
+                report["instances"].as_array().map_or(0, |a| a.len()),
+                report["all_verified"]
+            );
+        }
+        Some("rho-batch") => {
+            println!(
+                "Batch rho: {}; {} curves, all verified: {}",
+                report["status"],
+                report["curves"].as_array().map_or(0, |a| a.len()),
+                report["all_verified"]
+            );
+        }
+        Some("rho-reprice") => {
+            println!(
+                "Re-priced {}: {}; the frozen walk reproduced on every recorded seed: {}",
+                report["source"].as_str().unwrap_or("?"),
+                report["status"],
+                report["identity"]["all_reproduced"]
+            );
         }
         Some("error") => {
             eprintln!(

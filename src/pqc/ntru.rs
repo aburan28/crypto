@@ -239,12 +239,7 @@ fn poly_inverse_extended(f: &NtruPoly, m: i32) -> Option<NtruPoly> {
             return None;
         }
         // Brute force inverse for small m.
-        for i in 1..m {
-            if (x * i) % m == 1 {
-                return Some(i);
-            }
-        }
-        None
+        (1..m).find(|&i| (x * i) % m == 1)
     };
 
     let mut k = 0i64;
@@ -271,7 +266,7 @@ fn poly_inverse_extended(f: &NtruPoly, m: i32) -> Option<NtruPoly> {
             // a is a constant; if it's invertible mod m, done.
             let a0_inv = mod_inv(a[0], m)?;
             // result = u · a[0]^{-1} · x^{−k}  reduced mod (x^N − 1).
-            let mut result = vec![0i32; N];
+            let mut result = [0i32; N];
             for i in 0..N {
                 result[i] = ((u[i] * a0_inv) % m + m) % m;
             }
@@ -299,10 +294,7 @@ fn poly_inverse_extended(f: &NtruPoly, m: i32) -> Option<NtruPoly> {
             std::mem::swap(&mut deg_a, &mut deg_b);
         }
         // We need a[0] nonzero now; if it's zero we'd have returned above.
-        let b0_inv = match mod_inv(b[0], m) {
-            Some(x) => x,
-            None => return None,
-        };
+        let b0_inv = mod_inv(b[0], m)?;
         let coef = (a[0] * b0_inv) % m;
         for i in 0..=deg_b {
             a[i] = ((a[i] - coef * b[i]) % m + m * m) % m;
@@ -407,7 +399,7 @@ pub fn ntru_encapsulate(pk: &NtruPublicKey) -> (NtruPoly, [u8; 32]) {
 }
 
 fn ciphertext_is_well_formed(c: &NtruPoly) -> bool {
-    c.0.iter().all(|&coeff| coeff >= 0 && coeff < Q)
+    c.0.iter().all(|&coeff| (0..Q).contains(&coeff))
 }
 
 fn is_valid_encapsulated_message(m: &NtruPoly) -> bool {

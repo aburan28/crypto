@@ -1,0 +1,94 @@
+p=269 seed=1: base 149 points, 97.0 F_p muls per addition, symmetrised S5 in 1.4 s (1.226e9 muls, 495 monomials)
+residual 0 (constructed): solved | dim 4096 rows 41780 cols 40920 | C4 = 1.2270e12 (weil 8.48e4, echelon 5.825e11, nf 5.461e11, charpoly 7.060e10, roots 1.20e6, eigen 2.774e10) | rational eigenvalues 2 | solver {[41, 122, 180, 226]} oracle {[41, 122, 180, 226]} agree true planted Some(true) | 1625 s
+residual 1: solved | dim 4096 rows 41780 cols 40920 | C4 = 1.2130e12 (weil 8.48e4, echelon 5.825e11, nf 5.460e11, charpoly 7.060e10, roots 1.20e6, eigen 1.387e10) | rational eigenvalues 1 | solver {} oracle {} agree true planted None | 1460 s
+residual 2: solved | dim 4096 rows 41780 cols 40920 | C4 = 1.2131e12 (weil 8.48e4, echelon 5.825e11, nf 5.461e11, charpoly 7.060e10, roots 1.20e6, eigen 1.387e10) | rational eigenvalues 1 | solver {} oracle {} agree true planted None | 1499 s
+residual 3: solved | dim 4096 rows 41780 cols 40920 | C4 = 1.1991e12 (weil 8.48e4, echelon 5.825e11, nf 5.460e11, charpoly 7.060e10, roots 1.20e6, eigen 0.000e0) | rational eigenvalues 0 | solver {} oracle {} agree true planted None | 1450 s
+## stderr (phase progress)
+residual 0 (constructed):
+  macaulay degree 29: 41780 rows × 40920 columns (3.42 GB), leads [Some([8, 0, 0, 0]), Some([7, 1, 0, 0]), Some([6, 2, 0, 0]), Some([5, 3, 0, 0])]
+    echelon: 2000 pivots at column 1999/40920, 2.353e9 muls, 3 s
+    echelon: 4000 pivots at column 3999/40920, 1.588e10 muls, 13 s
+    echelon: 6000 pivots at column 5999/40920, 3.520e10 muls, 23 s
+    echelon: 8000 pivots at column 7999/40920, 5.242e10 muls, 34 s
+    echelon: 10000 pivots at column 10000/40920, 8.733e10 muls, 52 s
+    echelon: 12000 pivots at column 12000/40920, 1.137e11 muls, 67 s
+    echelon: 14000 pivots at column 14004/40920, 1.566e11 muls, 91 s
+    echelon: 16000 pivots at column 16004/40920, 1.894e11 muls, 113 s
+    echelon: 18000 pivots at column 18014/40920, 2.333e11 muls, 140 s
+    echelon: 20000 pivots at column 20014/40920, 2.784e11 muls, 168 s
+    echelon: 22000 pivots at column 22034/40920, 3.195e11 muls, 193 s
+    echelon: 24000 pivots at column 24069/40920, 3.649e11 muls, 216 s
+    echelon: 26000 pivots at column 26125/40920, 4.109e11 muls, 238 s
+    echelon: 28000 pivots at column 28125/40920, 4.539e11 muls, 259 s
+    echelon: 30000 pivots at column 30329/40920, 4.923e11 muls, 280 s
+    echelon: 32000 pivots at column 32490/40920, 5.260e11 muls, 298 s
+    echelon: 34000 pivots at column 34940/40920, 5.563e11 muls, 313 s
+    echelon: 36000 pivots at column 37875/40920, 5.777e11 muls, 323 s
+  echelon: 36824 pivots, 4956 zero rows, dim 4096, 5.825e11 muls, 327 s
+  normal forms: 29488 pivots reached, 5.461e11 muls, 540 s
+residual 1 (random):
+  macaulay degree 29: 41780 rows × 40920 columns (3.42 GB), leads [Some([8, 0, 0, 0]), Some([7, 1, 0, 0]), Some([6, 2, 0, 0]), Some([5, 3, 0, 0])]
+    echelon: 2000 pivots at column 1999/40920, 2.353e9 muls, 2 s
+    echelon: 4000 pivots at column 3999/40920, 1.588e10 muls, 8 s
+    echelon: 6000 pivots at column 5999/40920, 3.519e10 muls, 16 s
+    echelon: 8000 pivots at column 7999/40920, 5.241e10 muls, 25 s
+    echelon: 10000 pivots at column 10000/40920, 8.732e10 muls, 38 s
+    echelon: 12000 pivots at column 12000/40920, 1.137e11 muls, 49 s
+    echelon: 14000 pivots at column 14004/40920, 1.566e11 muls, 65 s
+    echelon: 16000 pivots at column 16004/40920, 1.894e11 muls, 78 s
+    echelon: 18000 pivots at column 18014/40920, 2.333e11 muls, 95 s
+    echelon: 20000 pivots at column 20014/40920, 2.784e11 muls, 111 s
+    echelon: 22000 pivots at column 22034/40920, 3.194e11 muls, 127 s
+    echelon: 24000 pivots at column 24069/40920, 3.648e11 muls, 142 s
+    echelon: 26000 pivots at column 26125/40920, 4.108e11 muls, 158 s
+    echelon: 28000 pivots at column 28125/40920, 4.538e11 muls, 172 s
+    echelon: 30000 pivots at column 30329/40920, 4.922e11 muls, 187 s
+    echelon: 32000 pivots at column 32490/40920, 5.259e11 muls, 200 s
+    echelon: 34000 pivots at column 34940/40920, 5.562e11 muls, 210 s
+    echelon: 36000 pivots at column 37875/40920, 5.776e11 muls, 218 s
+  echelon: 36824 pivots, 4956 zero rows, dim 4096, 5.825e11 muls, 221 s
+  normal forms: 29488 pivots reached, 5.460e11 muls, 538 s
+residual 2 (random):
+  macaulay degree 29: 41780 rows × 40920 columns (3.42 GB), leads [Some([8, 0, 0, 0]), Some([7, 1, 0, 0]), Some([6, 2, 0, 0]), Some([5, 3, 0, 0])]
+    echelon: 2000 pivots at column 1999/40920, 2.353e9 muls, 2 s
+    echelon: 4000 pivots at column 3999/40920, 1.588e10 muls, 9 s
+    echelon: 6000 pivots at column 5999/40920, 3.520e10 muls, 16 s
+    echelon: 8000 pivots at column 7999/40920, 5.242e10 muls, 25 s
+    echelon: 10000 pivots at column 10000/40920, 8.733e10 muls, 39 s
+    echelon: 12000 pivots at column 12000/40920, 1.137e11 muls, 50 s
+    echelon: 14000 pivots at column 14004/40920, 1.566e11 muls, 66 s
+    echelon: 16000 pivots at column 16004/40920, 1.894e11 muls, 79 s
+    echelon: 18000 pivots at column 18014/40920, 2.333e11 muls, 95 s
+    echelon: 20000 pivots at column 20014/40920, 2.784e11 muls, 112 s
+    echelon: 22000 pivots at column 22034/40920, 3.195e11 muls, 127 s
+    echelon: 24000 pivots at column 24069/40920, 3.649e11 muls, 143 s
+    echelon: 26000 pivots at column 26125/40920, 4.109e11 muls, 159 s
+    echelon: 28000 pivots at column 28125/40920, 4.539e11 muls, 173 s
+    echelon: 30000 pivots at column 30329/40920, 4.923e11 muls, 188 s
+    echelon: 32000 pivots at column 32490/40920, 5.260e11 muls, 200 s
+    echelon: 34000 pivots at column 34940/40920, 5.563e11 muls, 211 s
+    echelon: 36000 pivots at column 37875/40920, 5.777e11 muls, 218 s
+  echelon: 36824 pivots, 4956 zero rows, dim 4096, 5.825e11 muls, 221 s
+  normal forms: 29488 pivots reached, 5.461e11 muls, 542 s
+residual 3 (random):
+  macaulay degree 29: 41780 rows × 40920 columns (3.42 GB), leads [Some([8, 0, 0, 0]), Some([7, 1, 0, 0]), Some([6, 2, 0, 0]), Some([4, 4, 0, 0])]
+    echelon: 2000 pivots at column 1999/40920, 2.352e9 muls, 2 s
+    echelon: 4000 pivots at column 3999/40920, 1.587e10 muls, 9 s
+    echelon: 6000 pivots at column 5999/40920, 3.519e10 muls, 17 s
+    echelon: 8000 pivots at column 7999/40920, 5.241e10 muls, 25 s
+    echelon: 10000 pivots at column 10000/40920, 8.732e10 muls, 39 s
+    echelon: 12000 pivots at column 12000/40920, 1.137e11 muls, 50 s
+    echelon: 14000 pivots at column 14004/40920, 1.566e11 muls, 67 s
+    echelon: 16000 pivots at column 16004/40920, 1.894e11 muls, 80 s
+    echelon: 18000 pivots at column 18014/40920, 2.333e11 muls, 96 s
+    echelon: 20000 pivots at column 20014/40920, 2.784e11 muls, 113 s
+    echelon: 22000 pivots at column 22034/40920, 3.194e11 muls, 129 s
+    echelon: 24000 pivots at column 24069/40920, 3.648e11 muls, 145 s
+    echelon: 26000 pivots at column 26125/40920, 4.108e11 muls, 161 s
+    echelon: 28000 pivots at column 28125/40920, 4.538e11 muls, 176 s
+    echelon: 30000 pivots at column 30329/40920, 4.922e11 muls, 191 s
+    echelon: 32000 pivots at column 32490/40920, 5.259e11 muls, 204 s
+    echelon: 34000 pivots at column 34940/40920, 5.562e11 muls, 215 s
+    echelon: 36000 pivots at column 37875/40920, 5.776e11 muls, 223 s
+  echelon: 36824 pivots, 4956 zero rows, dim 4096, 5.825e11 muls, 225 s
+  normal forms: 29488 pivots reached, 5.460e11 muls, 545 s

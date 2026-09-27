@@ -1,0 +1,129 @@
+name: Bounded IC improvement
+on:
+  pull_request:
+    paths:
+      - 'research/ic_candidate_tournament_20260915/campaign_rules.py'
+      - 'research/ic_candidate_tournament_20260915/target_history.py'
+      - 'research/ic_candidate_tournament_20260915/run_improvement.py'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement/**'
+      - 'research/ic_candidate_tournament_20260915/producer/**'
+      - 'research/ic_candidate_tournament_20260915/driver_admission.py'
+      - 'research/ic_candidate_tournament_20260915/tournament.py'
+      - 'research/ic_candidate_tournament_20260915/portfolio.py'
+      - 'research/ic_candidate_tournament_20260915/test_*.py'
+      - '.github/workflows/ic-improvement.yml'
+  workflow_dispatch:
+    inputs:
+      run_round_one:
+        description: Execute the frozen first improvement round after controls pass; never retry a measured failure
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: ic-bounded-improvement
+  cancel-in-progress: false
+jobs:
+  candidate-controls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: x86_64-unknown-linux-musl
+      - name: Install calibrated profiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind musl-tools zstd
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Harness tests and historical point census
+        run: |
+          python -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_*.py'
+          python research/ic_candidate_tournament_20260915/target_history.py \
+            --history research/ic_candidate_tournament_20260915/goal_20260924/improvement/target-history.json \
+            --repository "$GITHUB_WORKSPACE"
+      - name: Materialize the registered candidate source
+        run: |
+          python research/ic_candidate_tournament_20260915/producer/prepare.py \
+            --reference pairinv --candidate-panel round1-v1 --out "$RUNNER_TEMP/ic-candidates"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          receipt = json.loads((Path(os.environ['RUNNER_TEMP'])/'ic-candidates/preparation.json').read_text())
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              stream.write('IC_SOURCE_MANIFEST_SHA256='+receipt['source_manifest_sha256']+'\n')
+          PY
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: '${{ runner.temp }}/ic-candidates/source -> ../build'
+          shared-key: ic-round1-candidates
+      - name: Release row, orbit, allocator and worker correctness controls
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/ic-candidates/build
+        run: |
+          cd "$RUNNER_TEMP/ic-candidates/source"
+          cargo test --locked --release --lib koblitz_tiny_ic --jobs 2
+          cargo test --locked --release --lib ic_phase --jobs 2
+          cargo test --locked --release --example ic_tournament_worker --jobs 2
+          cargo build --locked --release --example ic_tournament_worker --jobs 2
+      - name: Independently verify every candidate policy on archived toy vectors
+        run: |
+          python research/ic_candidate_tournament_20260915/producer/candidate_controls.py \
+            --prepared "$RUNNER_TEMP/ic-candidates" --profile \
+            --worker "$RUNNER_TEMP/ic-candidates/build/x86_64-unknown-linux-musl/release/examples/ic_tournament_worker" \
+            --out "$RUNNER_TEMP/ic-candidate-controls"
+      - name: Preserve controls, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-candidate-controls-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-candidate-controls
+            ${{ runner.temp }}/ic-candidates/preparation.json
+            ${{ runner.temp }}/ic-candidates/source-manifest.json
+            ${{ runner.temp }}/ic-candidates/source
+          retention-days: 30
+          include-hidden-files: true
+          if-no-files-found: warn
+  improvement-round-one:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_round_one
+    needs: candidate-controls
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: x86_64-unknown-linux-musl
+      - name: Install calibrated profiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind musl-tools zstd
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ic-improvement-round1
+      - name: Run the registered toy panel once
+        run: |
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          python research/ic_candidate_tournament_20260915/run_improvement.py \
+            --out "$RUNNER_TEMP/ic-improvement-round1"
+      - name: Preserve the frozen protocol and all outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-improvement-round1-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-improvement-round1
+            !${{ runner.temp }}/ic-improvement-round1/**/build/**
+            !${{ runner.temp }}/ic-improvement-round1/reference-evidence/**
+          retention-days: 30
+          include-hidden-files: true
+          if-no-files-found: warn

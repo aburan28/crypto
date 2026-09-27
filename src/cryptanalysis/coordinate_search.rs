@@ -160,7 +160,7 @@ pub struct Gf {
 impl Gf {
     /// Prime field `F_p`, `p` an odd prime `< 2²²`.
     pub fn prime(p: u64) -> Self {
-        assert!(p >= 5 && p < (1 << 22), "prime field out of toy range");
+        assert!((5..(1 << 22)).contains(&p), "prime field out of toy range");
         assert!(is_prime_u64(p), "{p} is not prime");
         let mut sqrt_tab = vec![NONE32; p as usize];
         for a in 0..p {
@@ -622,7 +622,7 @@ fn is_prime_u64(n: u64) -> bool {
     }
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             return false;
         }
         d += 1;
@@ -942,11 +942,13 @@ impl Curve {
         if self.f.n == 1 {
             return None;
         }
-        (1..=self.f.n).filter(|d| self.f.n % d == 0).find(|&d| {
-            [self.a1, self.a2, self.a3, self.a4, self.a6]
-                .iter()
-                .all(|&a| self.f.in_subfield(a, d))
-        })
+        (1..=self.f.n)
+            .filter(|d| self.f.n.is_multiple_of(*d))
+            .find(|&d| {
+                [self.a1, self.a2, self.a3, self.a4, self.a6]
+                    .iter()
+                    .all(|&a| self.f.in_subfield(a, d))
+            })
     }
 
     /// `(x, y) ↦ (x^{p^d}, y^{p^d})`.
@@ -1713,7 +1715,7 @@ impl CoordinateSystem {
             InvariantRule::Generic => {
                 let n = us.len();
                 let gus: Vec<u64> = us.iter().map(|&u| g.apply(f, u)).collect();
-                if gus.iter().any(|&v| v == INF) {
+                if gus.contains(&INF) {
                     return None;
                 }
                 let mut total = 0;
@@ -1760,11 +1762,7 @@ impl CoordinateSystem {
             1u32 << (m - 1)
         };
         let mut b = Vec::new();
-        if self.symmetric {
-            b.extend(std::iter::repeat(base).take(m));
-        } else {
-            b.extend(std::iter::repeat(base).take(m));
-        }
+        b.extend(std::iter::repeat_n(base, m));
         b.push(base);
         if self.involution.is_some() {
             b.push(if self.rule == InvariantRule::Generic {
@@ -1799,11 +1797,11 @@ impl CoordinateSystem {
     pub fn evaluate(&self, f: &Gf, tuple: &[Pt]) -> Option<Vec<u64>> {
         let m = tuple.len() - 1;
         let us: Vec<u64> = tuple.iter().map(|&p| self.frame.apply(f, p.x())).collect();
-        if us.iter().any(|&u| u == INF) {
+        if us.contains(&INF) {
             return None;
         }
         let ws: Vec<u64> = tuple.iter().map(|&p| self.point_value(f, p)).collect();
-        if ws.iter().any(|&w| w == INF) {
+        if ws.contains(&INF) {
             return None;
         }
         let mut vals = Vec::new();
@@ -2319,7 +2317,7 @@ pub fn search(curve: &Curve, opts: &SearchOptions) -> SearchReport {
     let symmetries = detect_symmetries(curve, &pts, &mut rng);
     let l = opts
         .factor_base_dim
-        .unwrap_or_else(|| ((f.n as usize + m - 1) / m).max(2) as u32);
+        .unwrap_or_else(|| (f.n as usize).div_ceil(m).max(2) as u32);
 
     let mut systems: Vec<(CoordinateSystem, Option<String>, FrameKind)> = Vec::new();
     let wx = Frame::weierstrass();
@@ -2538,7 +2536,7 @@ mod tests {
         }
         // (q+1)/2 squares including 0; Frobenius fixes exactly F_p
         let squares = (0..f.q).filter(|&a| f.sqrt(a).is_some()).count() as u64;
-        assert_eq!(squares, (f.q + 1) / 2);
+        assert_eq!(squares, f.q.div_ceil(2));
         assert_eq!(f.subfield_elements(1).len(), 13);
         assert!(
             f.subfield_elements(1).iter().all(|&a| a < 13),
@@ -2911,7 +2909,7 @@ mod tests {
                 collapse_samples: 4,
             },
         );
-        assert_eq!(r.order, 142 - 142 + k.order());
+        assert_eq!(r.order, k.order());
         assert!(
             r.candidates.iter().all(|c| c.result.is_ok()),
             "{}",

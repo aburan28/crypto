@@ -501,6 +501,52 @@ The baseline is a real opponent, not a formality, so read it first:
   which is exactly how an earlier revision of this baseline produced a
   spurious charged crossover at `n = 41`.
 
+### Pricing every phase: `ic price`
+
+    RAYON_NUM_THREADS=1 taskset -c 2 ./target/release/ic price --params wf.json \
+        --rho-seed 2097353 --cold-rho-seed 2162688 --json --out price.json
+
+`ic workflow`'s stage timers mix phases, which is right for a resumable
+run and wrong for a price:
+
+- the collect stage builds the pair table on its first unit;
+- the logs stage collects further units, verifies relations and solves;
+- files are written between units.
+
+`ic price` (ledger §20) makes the same calls in the same order, in
+memory. It refuses to run on more than one Rayon thread unless told to.
+Each phase is charged to an exclusive clock:
+
+- selection and its projection;
+- the build;
+- the collection, and the collectors and coverage built for it;
+- the log solver's setup, relation verification and the linear algebra;
+- the descent solver's setup, each target's descent, and the final
+  `[d]G = Q` check.
+
+Target construction is on no clock.
+
+Every repetition rebuilds everything from nothing and is converted at
+one batched addition (`add_many` over 1,024 subgroup points), measured
+immediately before and after it. Its native counts must equal the first
+repetition's. The report gives, per phase:
+
+- the median over repetitions, and the first repetition separately;
+- the spread, with the counts beside each phase;
+- three read-outs of the same total: the work a model of the method
+  prices, the constructions around it, and the verification.
+
+With `--rho-seed` it runs batch rho on the same targets
+(`signed_frobenius_rho_batch`) and prices its counted operations at a
+canonical step, one batched addition plus
+`SignedFrobeniusClasses::canon`. The step is measured in the same
+process, with Bailey et al.'s step as a model. `--cold-rho-seed` also
+walks each target alone.
+
+The control that the counts are the workflow's own is
+`research/ic_exponent_20260926/control.py`, which compares a price
+report with `ic workflow`'s report and relation files, field by field.
+
 ### Choosing a factor base
 
 Five families are recipes (`ic search --family`): `factor`, `divisor`
@@ -695,8 +741,10 @@ collection, decomposition oracle, linear algebra, verification — and is
 priced in **group-addition equivalents per `√r`** against two
 boundaries: the generic floor `√(π/2A)` for the automorphisms `A` the
 curve offers, and a counted Pollard rho on the same instance in the same
-process (an r-adding walk with distinguished points, or the signed
-Frobenius walk on Koblitz curves).  Native counters — trials, pair-table
+process, matched to those automorphisms: the negation-map walk on the
+prime and random binary curves, where the plain walk runs beside it on
+the same seeds as the before mark (ledger §18), and the signed
+Frobenius walk on Koblitz curves.  Native counters — trials, pair-table
 probes, square roots, Artin–Schreier solves, pairs of the
 pairs-and-solve loop, multiply-subtracts of the elimination — are exact;
 the conversion to additions uses the ratios **pinned in
@@ -810,6 +858,63 @@ the same instance and seed, which is the only pairing that can see a
 lever that makes an existing row cheaper without renaming it.  It also
 records which first-round rows reproduce the frozen counts and which the
 target guard moved.
+
+## The pluggable benchmarking framework: `ic bench`
+
+`ic bench` runs one index-calculus *configuration* — a factor base, a
+target source, a decomposition oracle, a polynomial-system solver and a
+relation matrix, each chosen by name — end to end against a planted
+logarithm, and prices every stage in the ledger's unit so that swapping
+one stage shows what it changes and nothing else.  `ic bench --list`
+prints what can be plugged in at each stage; `--sweep` runs a matrix of
+configurations from a JSON file and prints one table.
+
+    ./target/release/ic bench --list
+    ./target/release/ic bench --char2-degree 13 \
+        --factor-base binary-subspace:dimension=6 \
+        --oracle descent-algebraic:m=2 --solver buchberger-f2
+    ./target/release/ic bench --sweep docs/ic/sweeps/solver-engines.json
+
+[`FRAMEWORK.md`](FRAMEWORK.md) is the manual: the unit, the report
+columns, the stage contracts, a worked example of adding a solver (the
+plug point for F4, F5, XL, SAT), the sweep schema and the reporting
+rules a comparison has to keep.  `ic descent` measures the algebraic
+oracle's systems on their own, in the shape of Petit–Quisquater's
+Table 2 (§14 of the ledger note); it is a stage diagnostic, never a
+speed, and `ic bench` is where the same solver's cost reaches `S`.
+`ic bench` also runs counted Pollard rho on the same instance and
+planted targets (`--rho-runs`, default 16) and fills the table's
+`vs rho` column from it. The column divides by the **matched** walk: the
+negation map (`A = 2`) on prime and random binary curves, and on a
+Koblitz curve the cheaper of the signed-Frobenius and negation walks.
+The plain walk every report used through ledger §17 rides along as the
+before mark. `ic rho` runs the walks paired over a ladder, and
+`ic rho --reprice FILE` re-prices a frozen report against the matched
+walk (ledger §18). `ic rho --batch-koblitz a/n` runs batch rho, `k`
+targets in one group solved together, which is the reference for any
+figure that amortises one build over `k` targets (ledger §19).
+
+    ./target/release/ic rho --prime-bits 16,20,24 --char2-degrees 17,21,25 --runs 64
+    ./target/release/ic rho --reprice docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json
+    ./target/release/ic rho --batch-koblitz 0/41 --batch-sizes 1,32 --batches 16
+
+With `--solver` (repeated once per engine), `ic descent` prices
+several registered engines on the same seeded systems instead of the
+built-in Buchberger: every engine solves every target `--repeats`
+times, interleaved per target with the engine order rotated each
+repetition, and every answer is checked against the reference engine
+(`fes-f2` on quadratic cells, `exhaustive` otherwise).  Each system
+carries a blake3 fingerprint and each cell a digest of the reference
+answers, so a later run can prove it saw the same inputs and decided
+them the same way.
+
+    ./target/release/ic descent --cells 17:9:2,21:11:2 --targets 8 --repeats 3 \
+        --solver buchberger-f2 --solver f4-f2 --solver matrix-f5 \
+        --solver crossbred-f2 --solver fes-f2 --solver exhaustive
+
+The matched suite that freezes this comparison, with its whole-pipeline
+counterpart, is
+[`research/ic_framework_engines_20260922/`](../../research/ic_framework_engines_20260922/README.md).
 
 ## A benchmark corpus: `ic corpus`
 

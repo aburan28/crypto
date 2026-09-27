@@ -1,0 +1,33 @@
+# Rule v2 (eccTagFruitless since WALK-CONSTANT.md section 11): the fruitless patterns it passes.
+
+# python3 fruitless_patterns.py --residual 8   (structured count by group signature)
+rule v2 residual, relation spans <= 8
+at most four determined: L = 2, groups (2,), 1 determined tags: 0 patterns
+at most four determined: L = 4, groups (4,), 3 determined tags: 0 patterns
+at most four determined: L = 4, groups (2, 2), 2 determined tags: 0 patterns
+at most four determined: L = 6, groups (4, 2), 4 determined tags: 0 patterns
+at most four determined: L = 6, groups (2, 2, 2), 3 determined tags: 0 patterns
+at most four determined: L = 8, groups (2, 2, 2, 2), 4 determined tags: 0 patterns
+residual v2: L = 6, groups (6,), 5 determined tags: 1920 patterns
+residual v2: L = 8, groups (4, 4), 6 determined tags: 17856 patterns
+residual v2: L = 10, groups (2, 2, 2, 2, 2), 5 determined tags: 1 patterns
+residual v2: L = 10, groups (4, 2, 2, 2), 6 determined tags: 240 patterns
+residual v2: L = 12, groups (2, 2, 2, 2, 2, 2), 6 determined tags: 18 patterns
+
+# Brute force, fruitless_patterns.count, as independent checks of the structured count:
+# python3 fruitless_patterns.py 8 4 4 --rule v2   (stopped during L = 8; the structured count above covers L = 8)
+rule v2, offsets |d| <= 4, at most 4 determined tags
+L = 2: none
+L = 3: none
+L = 4: none
+L = 5: none
+L = 6: none
+L = 7: none
+# count(L, 6, 5, 'v2') for L = 2..6: at most five determined tags, offsets |d| <= 6 (every six-step relation above spans at most 6)
+L = 2 {}
+L = 3 {}
+L = 4 {}
+L = 5 {}
+L = 6 {(5, (6,)): 1920}
+# structured(6, (6,), 'v2', 18): spans up to 18 add no six-term relation (still 9, the widest spanning 6)
+structured(6, (6,), 'v2', 18) = 1920

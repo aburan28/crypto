@@ -1,0 +1,908 @@
+{
+  "accepted": true,
+  "all_producer_conflicts_zero": true,
+  "archive_results_sha256": "8242ff7c6fafca79461713115fcf73074739fde355d72c942d9407aa865a84fb",
+  "archived_and_replay_pair_intermediates_exact": true,
+  "archived_base_file_blake3": "b71df453f2752e550cc3d4cc5bb6869a3b92028d1ca231326229b35d8b39a25a",
+  "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "base_header_sha256": "fedbf03991ef30cb78bf2e074ee044bc71a1e80b240f567184cb0aefc77ab143",
+  "base_points_checked_on_curve": 23320,
+  "classification": "INDEPENDENT_PUBLIC_GROUP_REPLAY_OF_12_COMPACT_ORBIT_RELATIONS",
+  "edge_selectors": 0,
+  "field_modulus": 9007199254741063,
+  "generator": [
+    198217578752339,
+    7929897206038174
+  ],
+  "independent_verifier_sha256": "c3e4d255ee73ccd18e3824452e9ab3c2739a99af5d2bdf57394ea8ba9e806605",
+  "independently_checked_archived_relations": 12,
+  "limitation": "The same pinned binary regenerates public fixture scalars and planted labels. The replay JSONL file has the same certified point-set hash but a different whole-file BLAKE3 from the archived file. HashMap iteration can select a different valid relation on replay. This validates fixed relations and outcomes, not the extractor implementation or end-to-end IC cost.",
+  "natural_targets": 8,
+  "official_ledger_promotion": false,
+  "pair_table_entries": 0,
+  "producer_executable_sha256": "a20c993e6e295a348dac00528472c2ab7a1094f2b25b709eece8ab16f9de847f",
+  "producer_source_sha256": "d74877ae0c7021983e4c8c989c85c970869b431a342ace2cd864229d8ea63dab",
+  "replay_base_file_blake3": "e4ac331d8e0f5013e6ab370f23324eb8e7672a348243135d52bf1a46ed119613",
+  "replayed_targets": 12,
+  "rows": [
+    {
+      "archived_pinned_intermediates": [
+        2751173303116898,
+        5098965973321302
+      ],
+      "archived_x_codes": [
+        3079286270156850,
+        3389059866869141,
+        5437641394921610,
+        4656147322630099
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          3079286270156850,
+          555678435107747
+        ],
+        [
+          3389059866869141,
+          5465437790946199
+        ],
+        [
+          5437641394921610,
+          383294191988323
+        ],
+        [
+          4656147322630099,
+          2522421537488389
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          7410537205914273,
+          5890973697804219
+        ],
+        [
+          7152044052940277,
+          8386635322458984
+        ],
+        [
+          2378888545448905,
+          606926933840597
+        ],
+        [
+          6443942136926537,
+          3211537695727717
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 4.381960791011807,
+      "producer_stderr": "planted_01.stderr.txt",
+      "producer_stderr_sha256": "50bb73ffcb6f063a48dd4216905888e19188bcef6fd5aed03a2678333ba79e71",
+      "producer_stdout": "planted_01.stdout.jsonl",
+      "producer_stdout_sha256": "0a1bc61134facb1249d49b9b1d9190a3e5ccf15d29b6ed3cd149fe989fec7c9d",
+      "published_scalar": null,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        4790501935052472,
+        6692773432715375
+      ],
+      "replay_x_codes": [
+        7410537205914273,
+        7152044052940277,
+        2378888545448905,
+        6443942136926537
+      ],
+      "seed": 1,
+      "target": [
+        145818849489499,
+        3468387964974892
+      ],
+      "target_class": "planted"
+    },
+    {
+      "archived_pinned_intermediates": [
+        3025560039316424,
+        6683071589328707
+      ],
+      "archived_x_codes": [
+        1902702872241835,
+        6348231444422281,
+        1859119571835145,
+        6310933791256160
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          1902702872241835,
+          3594615730990357
+        ],
+        [
+          6348231444422281,
+          3032678228374705
+        ],
+        [
+          1859119571835145,
+          6078346018838698
+        ],
+        [
+          6310933791256160,
+          142879705017081
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          544558867010413,
+          6182237844009809
+        ],
+        [
+          1703343072887840,
+          5318206310596156
+        ],
+        [
+          4537080743701540,
+          774680778231922
+        ],
+        [
+          8509653187951591,
+          5109242568018388
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 3.6045347089821007,
+      "producer_stderr": "planted_02.stderr.txt",
+      "producer_stderr_sha256": "7a0a19a3054be1c7d21e765f9f7e3ce1d0884666290655dd1098634dd807060b",
+      "producer_stdout": "planted_02.stdout.jsonl",
+      "producer_stdout_sha256": "95049b4ee1bc046bf8b63338d009453a867a57e96b93855f971334d0a5829954",
+      "published_scalar": null,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        8628082246186698,
+        3899039919701898
+      ],
+      "replay_x_codes": [
+        544558867010413,
+        1703343072887840,
+        4537080743701540,
+        8509653187951591
+      ],
+      "seed": 2,
+      "target": [
+        7301319323585636,
+        5482232964941707
+      ],
+      "target_class": "planted"
+    },
+    {
+      "archived_pinned_intermediates": [
+        2839426853366505,
+        5601020534802075
+      ],
+      "archived_x_codes": [
+        8768510256875563,
+        334167372901618,
+        1682069943501975,
+        3658670576372580
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          8768510256875563,
+          8591132992134968
+        ],
+        [
+          334167372901618,
+          5303797125906247
+        ],
+        [
+          1682069943501975,
+          3540355136933419
+        ],
+        [
+          3658670576372580,
+          7586000460905294
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          3043203643894518,
+          8201551436619478
+        ],
+        [
+          8878740731243366,
+          13838648498666
+        ],
+        [
+          4160266300314592,
+          7224835350486451
+        ],
+        [
+          2950753337396647,
+          8361895649177250
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 4.342582333018072,
+      "producer_stderr": "planted_03.stderr.txt",
+      "producer_stderr_sha256": "78435aaa18795a33a92db0cf89cfedaa4a5c6baaa6da0ee9d06cac16fe0c3b8b",
+      "producer_stdout": "planted_03.stdout.jsonl",
+      "producer_stdout_sha256": "ccda05f6d8a2ba9dac725c4304c4da57eb1449a80de43107a0e3f393318abd46",
+      "published_scalar": null,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        4127703999332618,
+        6691755499937551
+      ],
+      "replay_x_codes": [
+        3043203643894518,
+        8878740731243366,
+        4160266300314592,
+        2950753337396647
+      ],
+      "seed": 3,
+      "target": [
+        5994384422294842,
+        310842717236495
+      ],
+      "target_class": "planted"
+    },
+    {
+      "archived_pinned_intermediates": [
+        5116038365750714,
+        3305576878760308
+      ],
+      "archived_x_codes": [
+        5550306337059689,
+        2781614467481880,
+        6849618286214297,
+        5163438900492716
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          5550306337059689,
+          3157619980632617
+        ],
+        [
+          2781614467481880,
+          7488872041427054
+        ],
+        [
+          6849618286214297,
+          4771755648426535
+        ],
+        [
+          5163438900492716,
+          7820452482070583
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          8495570254575677,
+          5379534799125504
+        ],
+        [
+          8694865317744594,
+          6510164872024400
+        ],
+        [
+          7476876738241508,
+          1209202982835428
+        ],
+        [
+          7749492924960118,
+          7116375924185433
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 3.6216159589821473,
+      "producer_stderr": "planted_04.stderr.txt",
+      "producer_stderr_sha256": "fc4d120de15a0975ad3e8849665dc7e792f268283968e6aa1a6bffcdec4229d9",
+      "producer_stdout": "planted_04.stdout.jsonl",
+      "producer_stdout_sha256": "b342212f6cce2c183d533c421c071001bfc3104f4135d53a3e3a835f3189e451",
+      "published_scalar": null,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        6767330980616433,
+        2691611922377302
+      ],
+      "replay_x_codes": [
+        8495570254575677,
+        8694865317744594,
+        7476876738241508,
+        7749492924960118
+      ],
+      "seed": 4,
+      "target": [
+        2834469661775971,
+        7448095145622937
+      ],
+      "target_class": "planted"
+    },
+    {
+      "archived_pinned_intermediates": [
+        8508322537440443,
+        1682514383572631
+      ],
+      "archived_x_codes": [
+        4284093513824029,
+        40683381055032,
+        8598202243796526,
+        1671419103981869
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          4284093513824029,
+          5762045091225359
+        ],
+        [
+          40683381055032,
+          575203267499876
+        ],
+        [
+          8598202243796526,
+          606250778387763
+        ],
+        [
+          1671419103981869,
+          7829202697278473
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          800362956165259,
+          2997281430401323
+        ],
+        [
+          7810714396516894,
+          1296519522652346
+        ],
+        [
+          3670994266731181,
+          6543510917812792
+        ],
+        [
+          6152697357740661,
+          2190571001269010
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 4.174443958007032,
+      "producer_stderr": "natural_01.stderr.txt",
+      "producer_stderr_sha256": "a017c0b20236c321d5fd91658e360425dfdcf99bd3639d8a43222c2decbc0db3",
+      "producer_stdout": "natural_01.stdout.jsonl",
+      "producer_stdout_sha256": "281e770682e82c14bbc64c5742088942a7a2c9ff2b1455c51a838384511706d0",
+      "published_scalar": 20502842351706,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        889353381536960,
+        8135131240772518
+      ],
+      "replay_x_codes": [
+        800362956165259,
+        7810714396516894,
+        3670994266731181,
+        6152697357740661
+      ],
+      "seed": 1,
+      "target": [
+        2517929290749382,
+        3856156731932390
+      ],
+      "target_class": "natural"
+    },
+    {
+      "archived_pinned_intermediates": [
+        1279281870719711,
+        2390114391272915
+      ],
+      "archived_x_codes": [
+        4256565498447861,
+        7579491403306736,
+        5885905907149855,
+        683838549051000
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          4256565498447861,
+          1464102814936508
+        ],
+        [
+          7579491403306736,
+          1490755651926517
+        ],
+        [
+          5885905907149855,
+          5599546613096941
+        ],
+        [
+          683838549051000,
+          8062801859537825
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          7594916772241588,
+          5711134986303928
+        ],
+        [
+          5504108867420379,
+          7906887742106382
+        ],
+        [
+          5148847512810744,
+          3653044936584947
+        ],
+        [
+          3865013269515124,
+          702978023588486
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 3.205077958991751,
+      "producer_stderr": "natural_02.stderr.txt",
+      "producer_stderr_sha256": "55b5c34055179910f6682ab205790814f12084eb09ac14d7207eb3979f94993d",
+      "producer_stdout": "natural_02.stdout.jsonl",
+      "producer_stdout_sha256": "1b4596c4eb6ba9f4b0de282cfdcd55b2abe63255efe967e4dc9fe136873b62f4",
+      "published_scalar": 6257179957148,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        329900666145022,
+        2589056539080037
+      ],
+      "replay_x_codes": [
+        7594916772241588,
+        5504108867420379,
+        5148847512810744,
+        3865013269515124
+      ],
+      "seed": 2,
+      "target": [
+        760372507244297,
+        7861518829221943
+      ],
+      "target_class": "natural"
+    },
+    {
+      "archived_pinned_intermediates": [
+        4638988620745698,
+        5887559537057059
+      ],
+      "archived_x_codes": [
+        5598386427337473,
+        4322767991577817,
+        2696160206681474,
+        1795159773457298
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          5598386427337473,
+          8795015465592686
+        ],
+        [
+          4322767991577817,
+          2976901385822532
+        ],
+        [
+          2696160206681474,
+          4509304276441581
+        ],
+        [
+          1795159773457298,
+          3756106266189579
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          8586466034856908,
+          3901256798894683
+        ],
+        [
+          5675674731357118,
+          3980526644120747
+        ],
+        [
+          2045701043341422,
+          2983028727808951
+        ],
+        [
+          6561322435822448,
+          5998340439556565
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 4.110422875004588,
+      "producer_stderr": "natural_03.stderr.txt",
+      "producer_stderr_sha256": "ccb50d28515429092d743da1a29460b8e55dda49a1661bde5daa7b3461e4b2bf",
+      "producer_stdout": "natural_03.stdout.jsonl",
+      "producer_stdout_sha256": "f7d904a6578af3c6a2b1dbecc549ec5cfc9dee428789339e4923cfd50b29aa76",
+      "published_scalar": 2003664027339,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        6779630283169853,
+        5080376986833152
+      ],
+      "replay_x_codes": [
+        8586466034856908,
+        5675674731357118,
+        2045701043341422,
+        6561322435822448
+      ],
+      "seed": 3,
+      "target": [
+        2335767985775445,
+        3148958688452018
+      ],
+      "target_class": "natural"
+    },
+    {
+      "archived_pinned_intermediates": [
+        4576821340098076,
+        1040365325537019
+      ],
+      "archived_x_codes": [
+        5012028354599273,
+        3180678413040879,
+        7160707163992241,
+        5193935514579772
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          5012028354599273,
+          6281528673509022
+        ],
+        [
+          3180678413040879,
+          4465646673905986
+        ],
+        [
+          7160707163992241,
+          7275398900215576
+        ],
+        [
+          5193935514579772,
+          8059407116909862
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          2299161182844333,
+          5418844543351779
+        ],
+        [
+          5012339423579359,
+          7575403505129106
+        ],
+        [
+          4002434274309587,
+          6269387905021688
+        ],
+        [
+          3749471340282041,
+          6174580159583272
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 3.823793208983261,
+      "producer_stderr": "natural_04.stderr.txt",
+      "producer_stderr_sha256": "f2c5b7a32cb91fecde4fdce1fd5baa7828d176bc02a13db3c98a872d4307812f",
+      "producer_stdout": "natural_04.stdout.jsonl",
+      "producer_stdout_sha256": "f77766844ed48002fc7ec79f9942570b1e674627dc31a7d80d74427a92f90c0f",
+      "published_scalar": 11216976560695,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        5772262502658763,
+        1381576382465381
+      ],
+      "replay_x_codes": [
+        2299161182844333,
+        5012339423579359,
+        4002434274309587,
+        3749471340282041
+      ],
+      "seed": 4,
+      "target": [
+        2230699481782577,
+        2331255703658745
+      ],
+      "target_class": "natural"
+    },
+    {
+      "archived_pinned_intermediates": [
+        1721501729948894,
+        3356982511966954
+      ],
+      "archived_x_codes": [
+        6712339286279867,
+        7938809736674737,
+        3440815924218511,
+        3891612580147162
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          6712339286279867,
+          7354992651529844
+        ],
+        [
+          7938809736674737,
+          3254940471601463
+        ],
+        [
+          3440815924218511,
+          5501768034469983
+        ],
+        [
+          3891612580147162,
+          2039830896416266
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          1646021576609665,
+          1883308116805643
+        ],
+        [
+          5051800570625367,
+          6212145594693554
+        ],
+        [
+          2443676312028096,
+          760009248695038
+        ],
+        [
+          7050004554566691,
+          2583404067977761
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 3.6603721670107916,
+      "producer_stderr": "natural_05.stderr.txt",
+      "producer_stderr_sha256": "573de1905cf241dbdeb50373a97e4d6cb8f6a4b27f81ddc76febbfef92c71364",
+      "producer_stdout": "natural_05.stdout.jsonl",
+      "producer_stdout_sha256": "18837b08431e21f44d4d37f8af24c11531c71a9173721029dde2f3cdbbf8c452",
+      "published_scalar": 7200003487239,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        4290749910433691,
+        5133749986786038
+      ],
+      "replay_x_codes": [
+        1646021576609665,
+        5051800570625367,
+        2443676312028096,
+        7050004554566691
+      ],
+      "seed": 5,
+      "target": [
+        7364062325756715,
+        19731695051223
+      ],
+      "target_class": "natural"
+    },
+    {
+      "archived_pinned_intermediates": [
+        7126491978462271,
+        2198396034727871
+      ],
+      "archived_x_codes": [
+        5233259002907759,
+        6795488879960423,
+        4281562491487981,
+        2832214072720081
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          5233259002907759,
+          4649825246814834
+        ],
+        [
+          6795488879960423,
+          774491896817578
+        ],
+        [
+          4281562491487981,
+          2858793825318961
+        ],
+        [
+          2832214072720081,
+          652324224117158
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          7717234245192581,
+          4884020306697816
+        ],
+        [
+          7021968032727886,
+          2705360343998908
+        ],
+        [
+          7110457698617019,
+          8525029885848126
+        ],
+        [
+          8281690286880633,
+          7708400475477982
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 3.559118083998328,
+      "producer_stderr": "natural_06.stderr.txt",
+      "producer_stderr_sha256": "e7a6891cad9cbcfd328a2392873f2d7992830e515f7c4f8678f2551471547746",
+      "producer_stdout": "natural_06.stdout.jsonl",
+      "producer_stdout_sha256": "92639c6d0f891408a6d3f809a917b10c536a855152f1b41616777d6c3324f447",
+      "published_scalar": 7043757327258,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        5280950799840441,
+        1899749442267033
+      ],
+      "replay_x_codes": [
+        7717234245192581,
+        7021968032727886,
+        7110457698617019,
+        8281690286880633
+      ],
+      "seed": 6,
+      "target": [
+        423225896770613,
+        5221394151615490
+      ],
+      "target_class": "natural"
+    },
+    {
+      "archived_pinned_intermediates": [
+        4793461752881400,
+        4788918244518612
+      ],
+      "archived_x_codes": [
+        1990831593546376,
+        3489285811649193,
+        8137578294092516,
+        2192743242007733
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          1990831593546376,
+          6400479029481408
+        ],
+        [
+          3489285811649193,
+          2359225261979654
+        ],
+        [
+          8137578294092516,
+          2771168631534274
+        ],
+        [
+          2192743242007733,
+          2047875817330410
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          8768962709317805,
+          1207612569802386
+        ],
+        [
+          3727254184719875,
+          4104364956363438
+        ],
+        [
+          4286768151957235,
+          1505918556814451
+        ],
+        [
+          6178872957764665,
+          3342856408580230
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 3.3342124999908265,
+      "producer_stderr": "natural_07.stderr.txt",
+      "producer_stderr_sha256": "b06b2c51dd4e609ea21f8f5e96b4af3aa0aff630c35e073137e82a32bf37b23a",
+      "producer_stdout": "natural_07.stdout.jsonl",
+      "producer_stdout_sha256": "18c31af9ce9c619c1f6e6150eab13c44c5fecc046a8316057965cf8cfa428762",
+      "published_scalar": 3001883961697,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        7011838626190092,
+        584694530869180
+      ],
+      "replay_x_codes": [
+        8768962709317805,
+        3727254184719875,
+        4286768151957235,
+        6178872957764665
+      ],
+      "seed": 7,
+      "target": [
+        5256017484337587,
+        2641389835907816
+      ],
+      "target_class": "natural"
+    },
+    {
+      "archived_pinned_intermediates": [
+        7923556996458181,
+        5660894691916860
+      ],
+      "archived_x_codes": [
+        731222114514035,
+        4873124514586968,
+        2082052367894478,
+        2074475428387734
+      ],
+      "edge_selectors": 0,
+      "independent_archived_lift": [
+        [
+          731222114514035,
+          4321278897712367
+        ],
+        [
+          4873124514586968,
+          2851757820806286
+        ],
+        [
+          2082052367894478,
+          3180676071648343
+        ],
+        [
+          2074475428387734,
+          5339359902934237
+        ]
+      ],
+      "independent_replay_lift": [
+        [
+          5000008450056379,
+          2573880091730399
+        ],
+        [
+          6464800172290617,
+          769324714289273
+        ],
+        [
+          7423965293487183,
+          240927943137602
+        ],
+        [
+          4215595502007858,
+          773695709892677
+        ]
+      ],
+      "pair_table_entries": 0,
+      "process_wall_seconds": 2.888183584000217,
+      "producer_stderr": "natural_08.stderr.txt",
+      "producer_stderr_sha256": "aa73f6272a0d91a34b1a5f1f4200c554f99d38295bafb95041ba24215eeeaaf6",
+      "producer_stdout": "natural_08.stdout.jsonl",
+      "producer_stdout_sha256": "6c7a78d4fd6aaa52c2186a67dd0ab6d8634697a13c80a8d952099aba471b07cc",
+      "published_scalar": 16114453762048,
+      "replay_conflicts": 0,
+      "replay_pinned_intermediates": [
+        3790347765328609,
+        3318840003777758
+      ],
+      "replay_x_codes": [
+        5000008450056379,
+        6464800172290617,
+        7423965293487183,
+        4215595502007858
+      ],
+      "seed": 8,
+      "target": [
+        2837873561531519,
+        1990599029411092
+      ],
+      "target_class": "natural"
+    }
+  ],
+  "schema_version": "1.0",
+  "scope": "Fixed public synthetic n=53 retained base; verifier recomputes curve arithmetic and S3 identities, including archived and replayed witnesses. No rho or end-to-end IC comparison.",
+  "subgroup_order": 21044858204113
+}
