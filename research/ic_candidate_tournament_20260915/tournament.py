@@ -24,6 +24,7 @@ import threading
 from oracle import Curve, InvalidEvidence, require, verify
 from portfolio import retain
 import campaign_rules as bounded
+import campaign_rules_v2 as bounded_v2
 import target_history as history
 from driver_admission import (EVALUATOR, check_admission, freeze_admission, producer_metadata, run_record, online_table, distinct_candidates)
 
@@ -38,6 +39,10 @@ PHASES = {'startup_and_input','curve_and_targets','factor_base_and_tables',
           'collection_and_decomposition','verify_filter_and_linear_algebra',
           'log_certification','individual_log','final_verification',
           'reporting_and_cleanup','rho_solve'}
+
+
+def bounded_protocol(contract):
+    return {bounded.PURPOSE: bounded, bounded_v2.PURPOSE: bounded_v2}.get(contract.get('purpose'))
 
 
 def read(path):
@@ -267,13 +272,19 @@ def frozen_inputs(round_dir):
     for name, expected in c['evaluator_sha256'].items():
         require(digest(HERE/name)==expected,'changed evaluator or checker: '+name)
     fixtures, arms = read(round_dir/'fixtures.json'), read(round_dir/'candidates.json')
-    if any(a.get('adapter') == 'generic-v1' for a in arms):
-        require(c['purpose'] == 'reference-qualification' and c['stages'] == QUALIFICATION_STAGES
-                and c.get('execution_number_stride') == 2, 'generic pipeline lacks qualification-only contract')
-    if c.get('purpose') == bounded.PURPOSE:
-        bounded.validate_contract(c)
-        require(c['reference_qualification'] == bounded.qualified_binding(
-            read(round_dir/'qualified-references.json'), arms[0], c['reference_arms']),
+    rules = bounded_protocol(c)
+    if any(a.get('adapter') == 'generic-v1' for a in arms + c.get('reference_arms', [])):
+        require(((c['purpose'] == 'reference-qualification' and c['stages'] == QUALIFICATION_STAGES)
+                 or (rules is bounded_v2 and c['stages'] == STAGES))
+                and c.get('execution_number_stride') == 2, 'generic pipeline lacks an accepted protocol')
+    if rules:
+        rules.validate_contract(c)
+        evidence = [read(round_dir/'qualified-references.json')]
+        if rules is bounded_v2:
+            require(c['candidate_count'] == len(arms), 'changed registered candidate count')
+            evidence.append(read(round_dir/'qualified-observer.json'))
+        require(c['reference_qualification'] == rules.qualified_binding(
+            *evidence, arms[0], c['reference_arms']),
             'changed accepted reference binding')
         require(history.validate_fresh(fixtures, read(round_dir/'target-history.json')) == c['fresh_target_count'],
                 'changed fresh target census')
@@ -338,24 +349,40 @@ def prepare(args):
     require(args.candidates is not None, 'supply an explicit registry of admitted optimized candidates')
     registry = read(args.candidates)
     require(isinstance(registry, list) and 2 <= len(registry) <= 16, 'candidate count must be 2..16')
-    generic = any(a.get('adapter') == 'generic-v1' for a in registry)
-    for arm in registry:
+    rules = bounded_v2 if getattr(args, 'campaign_version', 1) == 2 else bounded
+    versioned = rules is bounded_v2
+    if versioned:
+        rules.validate_preparation(args)
+        rules.scheduled_slot_bound(len(registry))
+        declared_references = read(args.reference_registry)
+        rules.validate_reference_declarations(declared_references)
+        require(objhash(read(args.qualified_report)) == rules.QUALIFICATION_SHA256
+                and objhash(read(args.qualified_observer)) == rules.OBSERVER_SHA256,
+                'unaccepted v2 qualification/observer evidence')
+    else:
+        require(not getattr(args, 'reference_registry', None) and not getattr(args, 'qualified_observer', None),
+                'separate metric references require campaign version 2')
+        declared_references = []
+    declarations = registry + declared_references
+    generic = any(a.get('adapter') == 'generic-v1' for a in declarations)
+    for arm in declarations:
         require(arm.get('adapter') in (None, 'generic-v1'), 'unknown candidate adapter')
         require(bool(arm.get('generic_build')) == (arm.get('adapter') == 'generic-v1'),
                 'generic build requires an explicit adapter')
     if generic:
-        require(args.qualification and not getattr(args, 'attempt_number', 0),
+        require(versioned or (args.qualification and not getattr(args, 'attempt_number', 0)),
                 'generic workers require development qualification before improvement rounds')
-        require(getattr(args, 'qualification_protocol', None), 'generic qualification needs its own frozen protocol')
+        require(versioned or getattr(args, 'qualification_protocol', None),
+                'generic qualification needs its own frozen protocol')
         require(registry[0].get('adapter') is None, 'generic qualification must retain a prepared incumbent')
     if getattr(args, 'attempt_number', 0):
-        bounded.validate_preparation(args)
+        rules.validate_preparation(args)
     require(platform.machine()=='x86_64','instruction protocol currently supports amd64 only')
     require(shutil.which('valgrind') is not None,'Valgrind required')
     version = subprocess.check_output(['valgrind','--version'],text=True).strip()
     require(version=='valgrind-3.22.0','version requires a new calibrated protocol')
     if getattr(args, 'attempt_number', 0):
-        bounded.validate_environment(system=platform.system(), machine=platform.machine(),
+        rules.validate_environment(system=platform.system(), machine=platform.machine(),
             compiler=subprocess.check_output(['rustc','--version'],text=True).strip(), profiler=version)
     out.mkdir(parents=True,exist_ok=False)
     evaluator = out/'evaluator'
@@ -371,10 +398,11 @@ def prepare(args):
     excluded = None
     if bounded_run:
         require(1 <= attempt <= 3 and args.seed == 2026092550 + attempt, 'invalid bounded round/seed')
-        require(args.qualified_report and args.target_history and args.rho_source_root and args.rho_config,
-                'bounded round needs qualified evidence, target history and the cold rho reference')
+        require(args.qualified_report and args.target_history and
+                (versioned or (args.rho_source_root and args.rho_config)),
+                'bounded round needs qualified evidence, target history and bound references')
         require(len(args.prior_round) == attempt - 1, 'every preceding round must be retained')
-        require(digest(args.target_history) == bounded.HISTORY_SHA256, 'changed initial target exclusions')
+        require(digest(args.target_history) == rules.HISTORY_SHA256, 'changed initial target exclusions')
         parent_history = read(args.target_history)
         for number, previous in enumerate(args.prior_round, 1):
             previous = previous.resolve()
@@ -382,7 +410,9 @@ def prepare(args):
             subprocess.run([sys.executable, str(previous/'evaluator/tournament.py'),
                             'verify', '--round', str(previous)], check=True)
             previous_contract, previous_decision = read(previous/'contract.json'), read(previous/'decision.json')
-            bounded.validate_contract(previous_contract)
+            previous_rules = bounded_protocol(previous_contract)
+            require(previous_rules is not None, 'unknown prior campaign protocol')
+            previous_rules.validate_contract(previous_contract)
             require(previous_contract['attempt_number'] == number, 'missing or reordered prior attempt')
             require(previous_contract['prior_rounds'] == prior_rounds, 'prior campaign chain differs')
             require(previous_decision['status'] != 'promoted', 'campaign already has a qualifying winner')
@@ -393,6 +423,8 @@ def prepare(args):
         history.verify_exposures(out/'target-exposures', excluded)
         write(out/'target-history.json', excluded, exclusive=True)
         write(out/'qualified-references.json', read(args.qualified_report), exclusive=True)
+        if versioned:
+            write(out/'qualified-observer.json', read(args.qualified_observer), exclusive=True)
     require(not qualification or not (args.rho_source_root or args.rho_config),
             'qualification measures rho from every IC source; separate rho overrides are not used')
     source = args.source_root.resolve()
@@ -402,10 +434,16 @@ def prepare(args):
     require(arms[0]['id']=='incumbent','first candidate must be incumbent')
     ids, hashes = set(),set()
     built_sources = {source:(out,binary,manifest)}
-    for arm in arms:
+    for arm in declarations:
         name = arm['id']
         require(re.fullmatch(r'[a-z][a-z0-9_-]{0,31}',name) is not None and name not in ids,'invalid candidate id')
-        require(name not in {'rho','aa_control'} and not name.startswith('rho_'),'reserved candidate id')
+        if arm in declared_references:
+            require(arm.get('kind') == ('ic-reference' if name == 'ic_online' else 'rho-reference'),
+                    'changed explicit reference role')
+        else:
+            require(name not in {'rho','aa_control','ic_online'} and not name.startswith('rho_'),
+                    'reserved candidate id')
+            require(not versioned or arm.get('kind') is None, 'candidate cannot declare a reference role')
         if arm.get('adapter') == 'generic-v1':
             from generic_driver import snapshot
             require(name != 'incumbent' and not arm.get('source_root'), 'ambiguous generic source declaration')
@@ -466,15 +504,20 @@ def prepare(args):
         require(isinstance(rho_reference['config'],dict) and 'summands' in rho_reference['config'],
                 'rho config must be a complete worker configuration')
     rho_reference['configuration_sha256']=objhash(rho_reference['config'])
-    references = qualification_references(arms, args.qualification_widths) if qualification else [rho_reference]
+    references = (declared_references if versioned else
+                  qualification_references(arms, args.qualification_widths) if qualification else [rho_reference])
     reference_binding = None
-    if bounded_run:
+    if versioned:
+        rho_reference = references[1]
+        reference_binding = rules.qualified_binding(read(out/'qualified-references.json'),
+            read(out/'qualified-observer.json'), arms[0], references)
+    elif bounded_run:
         online_reference = synthetic_arm('rho_online', arms[0])
         online_reference['kind'] = 'rho-reference'
         online_reference['config'] = dict(arms[0]['config'], rho_parallel_walks=4)
         online_reference['configuration_sha256'] = objhash(online_reference['config'])
         references.append(online_reference)
-        reference_binding = bounded.qualified_binding(read(out/'qualified-references.json'), arms[0], references)
+        reference_binding = rules.qualified_binding(read(out/'qualified-references.json'), arms[0], references)
     stages = QUALIFICATION_STAGES if qualification else STAGES
     cpus = sorted(os.sched_getaffinity(0))
     cpu = args.cpu if args.cpu is not None else cpus[-1]
@@ -591,7 +634,7 @@ def prepare(args):
                 admissions[relative] = objhash(admitted)
                 admitted_arms.append((arm['id'],admitted))
             distinct_candidates(admitted_arms)
-    c = {'purpose':bounded.PURPOSE if bounded_run else 'reference-qualification' if qualification else 'improvement',
+    c = {'purpose':rules.PURPOSE if bounded_run else 'reference-qualification' if qualification else 'improvement',
         'stages':list(stages), 'reference_arms':references,
         'schema_version':2, 'scientific_admission':True, 'reference_qualification':reference_binding, 'admissions':admissions, 'resources':resources,
         'run_number_base':int.from_bytes(os.urandom(16),'big') << 16,
@@ -640,19 +683,25 @@ def prepare(args):
         c['pinned_files']['qualification-protocol.md']=digest(out/'qualification-protocol.md')
     if generic:
         c['execution_number_stride'] = 2
-        c['qualification_scope'] = 'mixed prepared/generic instrumented pipelines; no observer or promotion qualification'
+        c['qualification_scope'] = ('fully charged instrumented pipelines with accepted observer binding'
+            if versioned else 'mixed prepared/generic instrumented pipelines; no observer or promotion qualification')
     if bounded_run:
-        protocol = HERE/'goal_20260924/improvement/PROTOCOL.md'
+        protocol = HERE/('goal_20260924/improvement-v2/PROTOCOL.md' if versioned
+                         else 'goal_20260924/improvement/PROTOCOL.md')
         shutil.copy2(protocol, out/'improvement-protocol.md')
-        c.update(attempt_number=attempt, familywise_rule=bounded.RULE, prior_rounds=prior_rounds,
+        c.update(attempt_number=attempt, familywise_rule=rules.RULE, prior_rounds=prior_rounds,
                  target_exposure_schema=1,
                  fresh_target_count=history.validate_fresh(fixtures, excluded),
                  target_uniqueness='Exact canonical curve ID plus public point; all retained prior campaign points excluded. Replay repeats confirmation.')
         for name in ('target-history.json', 'qualified-references.json', 'improvement-protocol.md'):
             c['pinned_files'][name] = digest(out/name)
+        if versioned:
+            c.update(metric_references=copy.deepcopy(rules.METRIC_REFERENCES),
+                     candidate_count=len(arms), scheduled_slot_bound=rules.scheduled_slot_bound(len(arms)))
+            c['pinned_files']['qualified-observer.json'] = digest(out/'qualified-observer.json')
         c['pinned_files'].update({str(p.relative_to(out)):digest(p)
             for p in (out/'target-exposures').rglob('*') if p.is_file()})
-        bounded.validate_contract(c)
+        rules.validate_contract(c)
     write(out/'contract.json',c,exclusive=True)
     write(out/'seal.json',{'contract_sha256':objhash(c)},exclusive=True)
     print(json.dumps({'status':'prepared','round':str(out),'command':f'python3 {evaluator / "tournament.py"} run --round {out}'}))
@@ -867,6 +916,10 @@ def is_rho(arm):
     return arm['id']=='rho' or arm.get('kind')=='rho-reference'
 
 
+def is_reference(arm):
+    return is_rho(arm) or arm.get('kind') == 'ic-reference'
+
+
 def qualification_references(arms, widths=(1,8,32)):
     require(bool(widths) and len(set(widths))==len(widths) and
             all(type(width) is int and 1<=width<=256 for width in widths), 'invalid qualification rho widths')
@@ -999,8 +1052,9 @@ def gate(result,c):
     """
     if c.get('purpose') == 'reference-qualification':
         return False
-    if c.get('purpose') == bounded.PURPOSE:
-        return bounded.promotion_passes(result, c)
+    rules = bounded_protocol(c)
+    if rules:
+        return rules.promotion_passes(result, c)
     if c.get('scientific_admission') and not c.get('reference_qualification'):
         return False  # Admission controls alone do not qualify a comparative reference.
     if not result.get('eligible'):
@@ -1060,15 +1114,19 @@ def process_seconds(rows):
 
 def summarize(root,c,stage,fixtures,arms,*,save=True):
     rows=load_stage(root,stage,fixtures,arms,c['repetitions'])
-    comps=[comparison(rows,a['id'],draws=c['bootstrap_draws'],
-                      match_support=c.get('comparison_kind','fixed-support')!='factor-base-policy') for a in arms if a['id']!='incumbent' and not is_rho(a)]
+    rules = bounded_protocol(c)
+    challengers = [a for a in arms if a['id'] != 'incumbent' and not is_reference(a)]
+    if rules and stage in ('confirmation', 'replay'):
+        comps = [rules.final_comparison(rows, a['id'], c) for a in challengers]
+    elif rules is bounded_v2 and stage != 'aa':
+        comps = [rules.comparison(rows, a['id'], c) for a in challengers]
+    else:
+        comps = [comparison(rows, a['id'], draws=c['bootstrap_draws'],
+                    match_support=c.get('comparison_kind','fixed-support')!='factor-base-policy') for a in challengers]
     reference_ids = [a['id'] for a in arms if is_rho(a)]
     reference_comparisons = {name:comparison(rows,name,draws=c['bootstrap_draws']) for name in reference_ids}
-    if c.get('purpose') == bounded.PURPOSE and stage in ('confirmation', 'replay'):
-        comps = [bounded.final_comparison(rows, a['id'], c) for a in arms
-                 if a['id'] != 'incumbent' and not is_rho(a)]
-        # Rho intervals remain descriptive; the familywise budget is for the
-        # preselected challenger versus the qualified IC incumbent.
+    # Rho intervals remain descriptive; the familywise budget is for the
+    # preselected challenger versus the qualified IC references.
     rho = reference_comparisons.get('rho')
     result={'stage':stage,'runs':len(rows),'verified_runs':sum(r['status']=='VERIFIED' for r in rows),
             'comparisons':comps,'rho_over_incumbent':rho,
@@ -1080,11 +1138,15 @@ def summarize(root,c,stage,fixtures,arms,*,save=True):
             reference_ids)
         result['primary_metric']='single-target native online wall time'
         result['promotion_prerequisite']='Qualified IC and rho references plus the frozen familywise confirmation protocol; admission alone cannot promote.'
-    if c.get('purpose') in ('reference-qualification', bounded.PURPOSE):
+    if c.get('purpose') == 'reference-qualification' or rules:
         result['rho_comparisons'] = reference_comparisons
         result['promotion_eligible'] = False  # Only the final decision can promote.
-        if c.get('purpose') == bounded.PURPOSE:
+        if rules:
             result['promotion_prerequisite'] = 'Both final stages must pass the frozen familywise and complete-cost gates.'
+    if rules is bounded_v2:
+        result['metric_references'] = copy.deepcopy(rules.METRIC_REFERENCES)
+        result['ic_reference_comparisons'] = ({'ic_online': comparison(rows, 'ic_online',
+            draws=c['bootstrap_draws'], match_support=False)} if stage != 'aa' else {})
     if stage=='aa':
         aa=comps[0]
         result['passed']=bool(aa.get('eligible') and all(.95<=r<=1.05 for r in aa['per_cell'].values()) and not gate(aa,c))
@@ -1093,7 +1155,7 @@ def summarize(root,c,stage,fixtures,arms,*,save=True):
             exploration=c['exploration_slots'],seed=c['seed'])
     if stage=='selection':
         eligible=sorted([r for r in comps if r.get('eligible')],key=
-            bounded.selection_key if c.get('purpose') == bounded.PURPOSE else lambda r:r['candidate_over_baseline'])
+            rules.selection_key if rules else lambda r:r['candidate_over_baseline'])
         result['provisional_challenger']=eligible[0]['candidate'] if eligible else None
     if save:
         write(root/'summaries'/f'{stage}.json',result,exclusive=True)
@@ -1109,11 +1171,16 @@ def decision(root,c,fixtures,all_arms,*,save=True):
     rep=next((r for r in replay['comparisons'] if r['candidate']==challenger),{})
     passed=gate(conf,c) and gate(rep,c)
     final_references_complete = True
-    if c.get('purpose') == bounded.PURPOSE:
+    if bounded_protocol(c):
         final_references_complete = all(
             set(summary.get('rho_comparisons', {})) == {'rho', 'rho_online'} and
             all(row.get('eligible') for row in summary['rho_comparisons'].values())
             for summary in (confirm, replay))
+        if bounded_protocol(c) is bounded_v2:
+            final_references_complete = final_references_complete and all(
+                set(summary.get('ic_reference_comparisons', {})) == {'ic_online'} and
+                summary['ic_reference_comparisons']['ic_online'].get('eligible')
+                for summary in (confirm, replay))
         passed = passed and final_references_complete
     challenger_over_rho={}
     if challenger and c.get('objective','incumbent')=='rho':
@@ -1136,7 +1203,9 @@ def decision(root,c,fixtures,all_arms,*,save=True):
     if not passed:
         reasons.append('No challenger passed every confirmation and replay threshold.')
         if not final_references_complete:
-            reasons.append('A qualified rho reference did not complete both final stages; comparison remains inconclusive.')
+            reasons.append('A qualified reference did not complete both final stages; comparison remains inconclusive.'
+                if bounded_protocol(c) is bounded_v2 else
+                'A qualified rho reference did not complete both final stages; comparison remains inconclusive.')
         if challenger_over_rho and not all(rho_gate(p) for p in challenger_over_rho.values()):
             reasons.append('The provisional challenger did not beat matched rho on both metrics with every upper 95% limit and every cell below one.')
     result={'status':'promoted' if passed else ('retained' if choice else 'inconclusive'),
@@ -1172,7 +1241,7 @@ def decision(root,c,fixtures,all_arms,*,save=True):
     if challenger_over_rho:
         result['challenger_over_rho']=challenger_over_rho
     result['objective']=c.get('objective','incumbent')
-    if c.get('purpose') == bounded.PURPOSE:
+    if bounded_protocol(c):
         result.update(attempt_number=c['attempt_number'], familywise_rule=c['familywise_rule'],
             primary_metric='single-target native online wall time',
             qualified_references=c['reference_qualification'], promotion_eligible=passed,
@@ -1291,6 +1360,11 @@ def main():
     p.add_argument('--qualification-protocol',type=Path,
         help='Registered protocol to freeze for a new development qualification panel.')
     p.add_argument('--attempt-number', type=int, default=0, help='Bounded goal round 1..3; zero keeps promotion disabled.')
+    p.add_argument('--campaign-version', type=int, choices=(1, 2), default=1,
+        help='Version 2 binds separate cold/online IC references for rounds 2 and 3.')
+    p.add_argument('--reference-registry', type=Path,
+        help='Version 2 declarations, in order: ic_online, rho, rho_online.')
+    p.add_argument('--qualified-observer', type=Path, help='Accepted whole-mode observer summary for version 2.')
     p.add_argument('--qualified-report', type=Path, help='Accepted qualification.json from the retained reference archive')
     p.add_argument('--target-history', type=Path, help='Pinned initial cross-campaign point exclusions')
     p.add_argument('--prior-round', type=Path, action='append', default=[], help='Every preceding completed bounded round, in order')

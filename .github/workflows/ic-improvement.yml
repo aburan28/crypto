@@ -3,9 +3,11 @@ on:
   pull_request:
     paths:
       - 'research/ic_candidate_tournament_20260915/campaign_rules.py'
+      - 'research/ic_candidate_tournament_20260915/campaign_rules_v2.py'
       - 'research/ic_candidate_tournament_20260915/target_history.py'
       - 'research/ic_candidate_tournament_20260915/run_improvement.py'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/**'
       - 'research/ic_candidate_tournament_20260915/producer/**'
       - 'research/ic_candidate_tournament_20260915/driver_admission.py'
       - 'research/ic_candidate_tournament_20260915/tournament.py'
