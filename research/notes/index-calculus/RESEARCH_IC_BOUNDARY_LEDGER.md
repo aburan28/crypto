@@ -3468,7 +3468,8 @@ Reading it:
   algorithm could not.**  The best row on every instance is still the
   pair table, `3.5×`, `29×` and `86×` rho on bases chosen past the
   family optimum so the descent has unknowns to work on (§16.3); every
-  algebraic row is at least `333×` rho.  F4 took the Gröbner row from
+  algebraic row is at least `333×` rho.  (Against the matched rho of
+  §18: `21.0×`, `133×` and `257×`, and at least `2,024×`.)  F4 took the Gröbner row from
   `1,244×` the pair table to `102×` at `n = 13` and from `145,974×`
   to `95×` at `n = 17`, and left it two orders of magnitude above the
   exhaustive-search row on the same base.
@@ -3553,7 +3554,9 @@ Reading it:
   every ratio to rho here is understated by up to that factor, and the
   verdict — nothing below rho — only strengthens.  On a Koblitz curve
   the gap would be about `√(2n)`, and none of this round's whole runs
-  was on one.
+  was on one.  *§18.6 re-prices this table against the matched walk,
+  and the gap was not `√2` but `3.0`–`6.1×`, mostly the plain walk's
+  set-up: the pair table reads `21.0×`, `133×` and `257×` rho.*
 
 ### 17.14 Reproducing
 
@@ -3578,6 +3581,1610 @@ Each part's provenance names the commit, the binary's hash, the host
 and the suite file's hash it ran with; `manifest.json` holds every
 system's fingerprint and every cell's verdict digest from the frozen
 run.
+
+## 18. The matched rho: the reference the contract asks for
+
+Through §17, every `vs rho` ratio on the prime and random binary
+curves, and every one `ic bench` printed, divided by `rho_reference`:
+Teske's r-adding walk on points, with no automorphism (`A = 1`).  The
+accounting contract asks for more (`comparison_contract.rho`): "the
+eligible automorphism-aware rho reference on the same subgroup and
+operation unit".  On a generic prime curve and on a binary curve not
+defined over a proper subfield the eligible automorphism is negation
+(`A = 2`); on a Koblitz curve it is negation and the Frobenius
+(`A = 2n`), which the Koblitz regime has used since Round 1 and `ic
+bench` never did.  §17.13 recorded the gap.  This section closes it.
+§18.1 and §18.2 were written and committed before anything below ran.
+
+**What was known when this was written.**  Reading the frozen Round-5
+headline's rho records
+(`docs/ic/runs/ic-boundary-ledger-round5-headline-2026-09-22.json`,
+64 runs per instance) showed the frozen walk is not at its own floor:
+its walk steps over `√(πr/2)` average `2.31` on the 24-bit prime
+curve, `1.48` on the `n = 27` binary curve and `1.70`–`1.72` on the
+Koblitz curves' plain rows (medians `1.40` on the prime curve).  Its
+walks average `846` steps against the `512` its distinguished-point
+rate predicts.  The explanation offered here is a prediction, not a
+finding: with walks of about `θ = √r/8` steps, a walk closes a cycle
+with no distinguished point with probability about `θ²/r ≈ 2 %`, and
+each such walk pays the whole `20θ` cap.  The frozen walk also pays two
+scalar multiplications per walk start and about `560` operations for
+its table, which is most of `S` at `r ≈ 2^{12}` (`S = 16.2` there,
+§17.11).  A unit test of the new walk on `Z/(10^9 + 7)` asserts that
+the plain-to-negation walk ratio lies in `[1.2, 1.65]` and each walk
+within `[0.8, 1.3]` of its own floor; it passes, and its values were
+not printed.  One smoke test of `ic bench` touched an evaluation
+instance before this was committed: eight runs on the `W13` curve of
+seed `20260922` with the provisional rule below, negation walk
+`S = 2.70` against the frozen walk's `18.4` on the same eight seeds;
+and one on `K_1 / GF(2^17)`, which no evaluation uses, where the
+negation walk (`2.15`) came in under the signed-Frobenius walk
+(`3.51`).  Neither is used below.
+
+### 18.1 The boundaries, stated before measuring
+
+- **The floor** is the generic one, `√(πr/2A)` operations, with the
+  `A` of the curve: `S_floor = 0.886` for `A = 2`, `√(π/4n)` for a
+  Koblitz curve (§3).  The walk has its own version of it: walk
+  operations over `√(πr/2A)`, reported per run as
+  `steps_over_expected`.
+- **The reference for the reference** is what is known about adding
+  walks: a random-mapping walk needs `√(πr/2A)` steps; an adding walk
+  with `J` jumps needs about `1/√(1 − 1/J)` times more (Teske;
+  Bernstein–Lange); the negation map's look-ahead adds about `1/(2J)`
+  additions a step.  So the matched walk should sit about `1.03`–`1.1`
+  above its own floor at `J = 16`, more at small `J`.
+- **Everything is inside `S`**: the table, the start stride, one
+  addition per walk start, the walk with its rejected look-ahead
+  additions and its cycle-escape doublings, and the verification
+  `[d]G = Q` of every candidate.  Not charged, as in the frozen walk:
+  the hash of each point, the comparisons with recent points, and,
+  under negation, one field negation and one key comparison per
+  canonicalisation, which the report counts
+  (`canonicalisations_uncharged`).
+
+### 18.2 The walk, the calibration and the targets, declared before any of them ran
+
+**The walk** (`ic_boundary::rho_reference_walk`), the same code for
+both automorphism counts so that a paired run isolates the `√2`:
+
+- van Oorschot–Wiener with distinguished points every `2^{⌊bits(r)/4⌋}`
+  steps, walks of about `r^{1/4}`;
+- walk `k` starts at `[k]T` for one random `T`, one addition a start;
+- `J` jumps `[a_j]G + [b_j]Q`, coefficients of `min(12, 3·log₂J)` bits,
+  by joint double-and-add;
+- under negation (`RhoWalk::negation`): the walk moves between
+  canonical representatives of `{P, −P}` (the smaller key), with the
+  Wiener–Zuccherato look-ahead against the fruitless 2-cycle (a jump
+  whose sum flips sign and would take the same jump again is replaced
+  by the next jump), every step compared with the last sixteen points,
+  and a detected cycle left by doubling its smallest-key point — a
+  choice every walk entering that cycle makes identically — with a
+  walk that falls back into the cycle it just left abandoned;
+- the tuned walk on points (`RhoWalk::plain`) is the same code without
+  the canonicalisation and the look-ahead.
+
+**The calibration.**  The jump count `J` is the walk's one free
+parameter: it trades table set-up (about `1.75·w·J` operations) against
+the adding walk's randomness and, under negation, the rate of
+fruitless cycles.  It is fixed on curves no evaluation uses: the
+roster prime curves at `12`, `14`, `16`, `18` and `20` bits, prime
+curves generated at `22`, `24` and `26` bits, and random binary curves
+at `n = 13, 15, …, 27`, both from seed `0xCA11B`, `128` runs each,
+`J ∈ {4, 8, 16}` for both tuned walks.  The rule: at each size the `J`
+whose negation walk has the lowest mean `S`, with anything within
+`3 %` of the lowest going to the larger `J`; the size thresholds between
+the chosen counts go into `rho_jumps_for` and are not changed after any
+evaluation run.  The code as committed with this declaration carries a
+provisional rule (`4` to 18 bits, `8` to 23, `16` above) that the
+calibration either confirms or replaces.
+
+**The evaluation.**  (a) A ladder on fresh curves, seed `0xE7A1`: prime
+curves generated at `12, 14, …, 26` bits (`--generated-primes`, so none
+is a roster or calibration curve) and random binary curves at `n = 13,
+15, …, 27`, `128` runs each, the three walks paired on the same planted
+logarithms and seeds.  (b) The re-pricing of every frozen report whose
+`vs rho` the scoreboard or this note quotes on a prime or random binary
+curve: the Round-5 headline (`prime` 24-bit, `char2` `n = 27`) and the
+§17.11 whole-method runs (`W13-*`, `W15-*`, `W17-*` in
+`research/ic_framework_engines_20260922/results/baseline_v1/`).  Each
+instance is rebuilt from what its report recorded, the frozen walk is
+re-run on the recorded seeds first, and the matched walk then runs on
+the same seeds and targets.  The index-calculus rows are not re-run;
+their counts did not change.
+
+*Amendment, written while the calibration ran and before any of its
+output was read.*  The scoreboard's boundary panel, its verdict
+(`3.55×`, `16.0×`) and its exponent marks for rho cite the Round-5
+ladder, `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`, not
+the headline.  So (b) covers that ladder too — eight prime rungs from
+10 to 24 bits and five binary rungs from `n = 15` to `27` — and its
+holdout, `…-round5-holdout-2026-09-22.json`, and target 2 covers every
+one of their recorded runs.  The ladder's prime rungs from 12 to 20
+bits are the roster curves the calibration also runs, on other seeds
+and targets.  The rule the calibration fixes is a function of the
+subgroup's bit length alone; the overlap is disclosed here rather than
+avoided.
+
+**Targets:**
+
+1. **Correct.**  Every run of every walk, calibration and evaluation,
+   recovers the planted logarithm and verifies `[d]G = Q`; walks
+   abandoned in a cycle stay under `1 %` of walks.
+2. **Identity.**  The frozen walk re-run on the recorded seeds
+   reproduces every recorded run exactly: steps, walks, distinguished
+   points, additions, doublings, scalar multiplications, the logarithm
+   and `S`, in the headline and in all seven `W` reports.
+3. **At its own floor.**  At every evaluation size with `r ≥ 2^{20}`,
+   the negation walk's mean walk operations over `√(πr/4)` lie in
+   `[0.9, 1.2]`.
+4. **The `√2`, paired.**  The tuned walk on points over the negation
+   walk, in walk operations, lies in `[1.25, 1.55]` pooled over the
+   evaluation sizes with `r ≥ 2^{20}`, with a `95 %` bootstrap interval
+   inside that range.
+5. **Flat.**  The negation walk's whole `S` is at most `1.5 × 0.886`
+   at every evaluation size with `r ≥ 2^{20}`, and its total operations
+   fit `r^α` with `α` within `0.5 ± 0.05` over the ladder's sizes from
+   `2^{20}` up, at least four of them.
+6. **Matched.**  Every instance priced has no eligible automorphism
+   beyond negation: prime curves with `a, b ≠ 0` or outside the
+   `j = 0`, `j = 1728` congruences; binary curves whose `b` lies in no
+   proper subfield.
+
+**Abandon** the new reference, and leave every ratio against the frozen
+walk, if target 1 or 2 fails; if target 3 or 4 fails the walk is
+mis-built and nothing is re-priced with it; target 5 failing at the
+small sizes is reported and does not stop the re-pricing, since the
+reference is then still the best counted walk the repository has.
+
+**On Koblitz curves in `ic bench`** both eligible walks run on the
+same seeds, the repository's signed-Frobenius walk (`A = 2n`, priced
+as the Koblitz regime prices it) and the negation walk, and the one
+with the lower mean `S` prices the column; both are in the report.
+That is a choice of the cheaper of two references, which can only make
+the reference stronger.
+
+**Class, fixed in advance: accounting.**  The reference moves; no
+index-calculus row's counts change.  Every `vs rho` ratio is expected
+to rise, and a ratio that rises is not a regression of any method.
+
+**Inadmissible:** re-tuning `J`, the distinguished-point rate, the
+window or the look-ahead after an evaluation run; dropping or re-seeding
+a failed run; leaving set-up, starts or verification out of `S`;
+dividing an index-calculus row by a rho mean from other seeds, targets
+or curves than the row's own; and reading the frozen walk's before mark
+as a property of rho rather than of that walk.
+
+### 18.3 The calibration, and the rule it fixed
+
+Frozen at `research/ic_rho_reference_20260923/calibration/`: sixteen
+curves, 128 runs each, every run of every walk verified, `J = 4, 8, 16`
+for both tuned walks.  Mean `S` of the negation walk, and what the
+declared rule chose:
+
+| bits(r) | curve | log₂ r | frozen walk `S` | negation `S`, J = 4 | J = 8 | J = 16 | chosen | its walk / own floor | tuned plain at that J, walk / own floor | J = 4 walks capped |
+|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 12 | char2 `random-binary-n13-ba3f` | 12.0 | 14.77 | 2.56 | 3.52 | 6.31 | **4** | 1.56 | 1.28 | 1 |
+| 12 | prime `bench-12bit` | 11.9 | 15.35 | 2.59 | 3.62 | 6.71 | **4** | 1.54 | 1.37 | 0 |
+| 13 | char2 `random-binary-n15-b2493` | 13.0 | 12.20 | 2.17 | 2.83 | 4.93 | **4** | 1.44 | 1.20 | 1 |
+| 14 | prime `bench-14bit` | 14.0 | 8.90 | 1.99 | 2.32 | 3.83 | **4** | 1.46 | 1.29 | 4 |
+| 16 | prime `bench-16bit` | 16.0 | 5.66 | 1.90 | 1.85 | 2.41 | **8** | 1.33 | 1.18 | 15 |
+| 17 | char2 `random-binary-n17-bbe86` | 16.0 | 5.68 | 1.87 | 1.85 | 2.41 | **8** | 1.33 | 1.15 | 14 |
+| 18 | prime `bench-18bit` | 18.0 | 4.34 | 1.68 | 1.41 | 1.71 | **8** | 1.17 | 1.12 | 13 |
+| 19 | char2 `random-binary-n19-b5f57e` | 18.0 | 4.05 | 1.62 | 1.47 | 1.72 | **8** | 1.23 | 1.11 | 21 |
+| 19 | char2 `random-binary-n21-b10cc7b` | 19.0 | 3.58 | 1.61 | 1.29 | 1.44 | **8** | 1.14 | 1.04 | 34 |
+| 20 | prime `bench-20bit` | 20.0 | 3.05 | 2.09 | 1.22 | 1.37 | **8** | 1.16 | 1.10 | 100 |
+| 22 | prime `generated-22bit-3914087` | 21.9 | 2.56 | 2.01 | 1.09 | 1.14 | **8** | 1.10 | 1.14 | 173 |
+| 23 | char2 `random-binary-n23-b3a296b` | 22.0 | 2.38 | 1.92 | 1.14 | 1.13 | **16** | 1.04 | 1.06 | 177 |
+| 24 | char2 `random-binary-n25-b1448ace` | 24.0 | 2.36 | 3.26 | 1.13 | 1.04 | **16** | 1.05 | 1.04 | 626 |
+| 24 | prime `generated-24bit-11921101` | 23.5 | 2.28 | 3.02 | 1.10 | 1.05 | **16** | 1.05 | 1.03 | 471 |
+| 25 | char2 `random-binary-n27-b3bfa9c2` | 24.4 | 1.99 | 2.96 | 1.15 | 1.06 | **16** | 1.09 | 1.13 | 623 |
+| 26 | prime `generated-26bit-38313677` | 25.2 | 2.71 | 3.14 | 1.06 | 0.99 | **16** | 1.03 | 1.00 | 888 |
+
+The rule, now in `rho_jumps_for`: **four jumps to 15 bits, eight from
+16 to 22, sixteen from 23.**  It replaces the provisional one at 16–18
+bits (four there became eight) and at 23 (eight became sixteen); the
+three sizes where two counts came within `3 %` (16, 17 and 23 bits) went
+to the larger, as declared; there is no curve at 15 bits, and the
+eight-over-four ratio falls from `1.17` at 14 bits to `0.97` at 16, so
+15 stays with four.
+
+What the calibration shows beyond the rule, read before any evaluation
+ran:
+
+- **Four jumps break down as walks lengthen.**  The four-jump negation
+  walk runs `3.0`–`3.5×` its own floor at 24–26 bits, with 470–890 of
+  its walks running to the cap: fruitless cycles longer than the
+  sixteen-point window go undetected there.  Where the rule uses it
+  (at most 15 bits) it caps at most four walks in 128 runs and is
+  `1.4`–`1.6×` its floor, the price of a table cheap enough to be worth
+  it when `√r` is 64.
+- **The tuned walks sit near their floors where the table is not the
+  cost**: `1.03`–`1.17×` for the negation walk from 18 bits up, and
+  `1.00`–`1.14×` for the tuned walk on points.  Their paired walk ratio
+  is the evaluation's target 4, not read here.
+- **The frozen walk's `S` is mostly not rho.**  At 12 bits it is
+  `14.8`–`15.4` where the negation walk is `2.6`; at 24–26 bits `2.0`–`2.7`
+  where the negation walk is `1.0`–`1.1`.
+
+### 18.4 The targets, graded
+
+Frozen at `research/ic_rho_reference_20260923/` (`evaluation/`,
+`reprice/`); `analyse.py` grades them and writes `analysis.json`, which
+every number below comes from.
+
+| target | declared | measured | |
+|:--|:--|:--|:--|
+| 1. correct | every run verified; abandoned walks under `1 %` | 21,096 runs (calibration, evaluation, re-pricing), none unverified; 88 of 821,867 tuned walks abandoned in a cycle, `0.011 %` | **met** |
+| 2. identity | the frozen walk reproduces every recorded run | all 616 recorded runs of the ten reports, exactly: steps, walks, distinguished points, additions, doublings, scalar multiplications, logarithm, `S` | **met** |
+| 3. at its own floor | `[0.9, 1.2]` from `2^{20}` | `1.02`–`1.20` at the six sizes from `2^{20}` (the 22-bit prime curve at `1.197`, eight jumps) | **met**, one size at the edge |
+| 4. the `√2`, paired | `[1.25, 1.55]`, interval inside | pooled `1.362`, `95 %` interval `[1.296, 1.430]`; per size `1.19` at eight jumps, `1.37`–`1.45` at sixteen | **met** |
+| 5. flat | `S ≤ 1.33` from `2^{20}`; `α` within `0.5 ± 0.05` over at least four sizes from `2^{20}` | `S` `0.98`–`1.20`; `α = 0.452` pooled over the six sizes from `2^{20}`, the only fit with four or more (each regime has three there: prime `0.429`, binary `0.473`) | **met on the pooled fit, at its lower edge** |
+| 6. matched | no automorphism beyond negation | none on the sixteen evaluation curves or the 26 re-priced instances: every prime curve has `a, b ≠ 0`, no binary `b` lies in a proper subfield | **met** |
+
+Target 5 is the one to read with care.  The exponent is below one half
+because set-up is still visible at these sizes: `S` falls from `1.20` at
+`2^{21}` to `0.98` at `2^{25}`.  The table, the stride and the
+distinguished-point tail are a few hundred operations against `√r` of a
+few thousand.  Over every size of the ladder the fit is `0.394` (prime)
+and `0.397` (binary).  So "flat" holds in the sense declared, `S` inside
+`1.5×` the floor from `2^{20}`, and the pooled exponent clears its bound
+by `0.002`.  Neither is an asymptotic statement; the asymptote the walk
+is heading for is its floor times the adding-walk penalty, about
+`0.886 × 1.03`–`1.07`.
+
+### 18.5 The evaluation ladder
+
+Seed `0xE7A1`, sixteen curves no other run used, 128 runs a walk, all
+three walks on the same planted logarithms and seeds:
+
+| regime | curve | log₂ r | J | frozen walk `S` | tuned, points `S` | **negation `S`** (median) | negation walk / own floor | points / negation, walk ops | frozen / negation, `S` |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| prime | `generated-12bit-3529` | 11.8 | 4 | 15.05 | 3.00 | **2.80** (2.57) | 1.727 | 1.104 | 5.37× |
+| prime | `generated-14bit-14389` | 13.8 | 4 | 9.46 | 2.37 | **2.09** (1.95) | 1.540 | 1.160 | 4.52× |
+| prime | `generated-16bit-53411` | 15.7 | 8 | 6.21 | 2.28 | **1.82** (1.75) | 1.235 | 1.388 | 3.41× |
+| prime | `generated-18bit-212099` | 17.7 | 8 | 4.42 | 1.77 | **1.49** (1.42) | 1.216 | 1.246 | 2.97× |
+| prime | `generated-20bit-563153` | 19.1 | 8 | 4.14 | 1.62 | **1.38** (1.29) | 1.272 | 1.205 | 3.00× |
+| prime | `generated-22bit-2434423` | 21.2 | 8 | 3.01 | 1.41 | **1.20** (1.19) | 1.197 | 1.193 | 2.50× |
+| prime | `generated-24bit-16483309` | 24.0 | 16 | 2.56 | 1.49 | **1.06** (1.04) | 1.075 | 1.445 | 2.42× |
+| prime | `generated-26bit-42652151` | 25.3 | 16 | 2.45 | 1.34 | **0.98** (0.91) | 1.024 | 1.391 | 2.50× |
+| char2 | `random-binary-n13-b168f` | 10.4 | 4 | 21.10 | 3.53 | **3.17** (3.11) | 1.408 | 1.219 | 6.66× |
+| char2 | `random-binary-n15-b157a` | 14.0 | 4 | 9.06 | 2.40 | **2.08** (1.93) | 1.550 | 1.180 | 4.35× |
+| char2 | `random-binary-n17-b10103` | 14.4 | 4 | 9.03 | 2.25 | **2.06** (1.97) | 1.590 | 1.096 | 4.38× |
+| char2 | `random-binary-n19-b770f7` | 18.0 | 8 | 4.39 | 1.73 | **1.38** (1.32) | 1.141 | 1.322 | 3.18× |
+| char2 | `random-binary-n21-b968e` | 18.0 | 8 | 4.28 | 1.78 | **1.47** (1.40) | 1.235 | 1.263 | 2.91× |
+| char2 | `random-binary-n23-b480f9a` | 22.0 | 16 | 2.87 | 1.51 | **1.13** (1.11) | 1.047 | 1.395 | 2.53× |
+| char2 | `random-binary-n25-b1a9b772` | 22.4 | 16 | 2.27 | 1.51 | **1.14** (1.10) | 1.082 | 1.374 | 1.99× |
+| char2 | `random-binary-n27-b227199e` | 26.0 | 16 | 2.28 | 1.46 | **1.06** (1.06) | 1.127 | 1.392 | 2.15× |
+
+Reading it:
+
+- **The reference moved `2.0`–`6.7×`.**  Most of that is the frozen
+  walk's tuning, not the automorphism.  Frozen over tuned-on-points is
+  `1.5`–`6.0×`, and tuned-on-points over negation is `1.10`–`1.45×` in
+  walk operations.  The `√2` is the second factor; the first is the
+  frozen walk's per-walk scalar multiplications, its `560`-operation
+  table and its trapped walks (§18 opening).
+- **The `√2` is paid for by the jump count.**  At sixteen jumps the
+  paired walk ratio is `1.37`–`1.45`, the `√2` less the look-ahead's
+  `1/32`.  At eight it is `1.19`–`1.39`, and at four `1.10`–`1.22`,
+  where the look-ahead's `1/8` and the fruitless cycles it cannot stop
+  eat most of it.  The calibration chose four jumps at these sizes
+  anyway, because a table costs more there than the `√2` saves.
+- **The fitted exponents** of the whole cost over all eight sizes:
+  frozen walk `0.311` (prime) and `0.287` (binary), tuned on points
+  `0.417` and `0.420`, negation `0.394` and `0.397`, every `R²` above
+  `0.96`.  The frozen walk's exponent was its set-up's; the tuned walks'
+  are closer to one half and still under it, for the set-up reason
+  §18.4 gives.
+
+### 18.6 The frozen reports, re-priced
+
+Every recorded run of the frozen walk replayed exactly (target 2), so
+these ratios differ from the frozen ones only in the reference.  The
+matched walk's mean `S`, on the same curves, seeds and targets:
+
+| report | curve | log₂ r | frozen rho `S` | matched rho `S` | frozen / matched |
+|:--|:--|--:|--:|--:|--:|
+| Round-5 ladder | `bench-10bit` … `bench-20bit` | 9.7–20.0 | 22.66 · 18.58 · 8.91 · 6.36 · 4.20 · 2.68 | 3.60 · 2.85 · 2.03 · 1.74 · 1.45 · 1.29 | 2.1–6.5× |
+| | `generated-22bit-3290411` · `-24bit-10935329` | 21.7 · 23.4 | 2.98 · 3.93 | 1.22 · 1.04 | 2.45× · 3.79× |
+| | `random-binary-n15` · `n18` · `n21` · `n24` · `n27` | 14.0–24.4 | 8.36 · 7.56 · 3.18 · 2.52 · 2.31 | 2.01 · 2.01 · 1.36 · 1.18 · 0.97 | 2.1–4.2× |
+| Round-5 headline | `generated-24bit-10935329` · `random-binary-n27-b845462` | 23.4 · 24.4 | 3.28 · 2.18 | 1.05 · 1.03 | 3.12× · 2.12× |
+| Round-5 holdout | two prime, two binary | 21.0–26.0 | 2.96 · 2.66 · 2.43 · 1.99 | 1.12 · 0.88 · 0.96 · 0.90 | 2.2–3.0× |
+| §17.11 `W13` | three curves | 11.0–12.0 | 16.2 · 18.7 · 14.6 | 2.65 · 3.10 · 2.44 | 6.0–6.1× |
+| §17.11 `W15` | three curves | 12.4–14.0 | 13.1 · 9.2 · 8.9 | 2.21 · 2.06 · 1.76 | 4.5–5.9× |
+| §17.11 `W17` | one curve | 16.0 | 5.21 | 1.74 | 2.99× |
+
+**The boundary panel's rows** (the Round-5 ladder's largest prime and
+binary rungs, means over three targets), `vs rho` frozen → matched:
+
+| variant | 24-bit prime | `n = 27` binary |
+|:--|--:|--:|
+| Semaev `S₃` roots / `S₄` pairs-and-solve | 1,300× → 4,922× | 49,906× → 119,465× |
+| direct subtraction, `m = 2` | 518× → 1,962× | — |
+| meet in the middle, `m = 2` / `m = 3` | 68.3× → 258× · 14.5× → 54.7× | — / 89.1× → 213× |
+| … negation-folded table | 63.2× → 239× (`m = 2`) · 9.41× → 35.6× (`m = 3`) | 711× → 1,702× (`m = 2`) · 82.7× → 198× (`m = 3`) |
+| … and walk targets | 6.32× → 23.9× (`m = 2`) · 8.06× → 30.5× (`m = 3`) | 18.0× → 43.1× (`m = 2`) · 73.2× → 175× (`m = 3`) |
+| … and a base at the family optimum | **3.55× → 13.5×** | **16.0× → 38.2×** |
+
+The best row on every other rung, frozen → matched: prime `1.01×`,
+`0.84×`, `1.47×`, `1.84×`, `2.00×`, `3.99×`, `4.28×` from 10 to 22 bits
+become `6.3×`, `5.5×`, `6.4×`, `6.7×`, `5.8×`, `8.3×`, `10.5×`; binary
+`3.15×`, `2.82×`, `7.66×`, `10.8×` at `n = 15`–`24` become `13.1×`,
+`10.6×`, `18.0×`, `23.0×`.  **The frozen ladder had a row below its
+rho**, the 12-bit prime rung's `mitm_m2_negfold_walk` at `0.84×`.  No
+earlier round quoted it: the page showed the largest rungs, and its
+legend warned that the frozen `vs rho` "flatters index calculus at
+small sizes".  It was the plain walk's set-up, `S = 18.6` on a
+subgroup of 3,889 elements, and not a crossing.  Against the matched
+walk it is `5.5×`.  The headline's best rows go from `4.19×` and
+`21.4×` to `13.1×` and `45.3×`; the holdout's from `4.80×`, `4.74×`,
+`11.8×` and `16.8×` to `12.7×`, `14.4×`, `29.8×` and `37.1×`.
+
+**§17.11 re-priced**, medians over curves and targets as there:
+
+| row | `n = 13`: / rho, frozen → matched | `n = 15` | `n = 17` |
+|:--|--:|--:|--:|
+| pair table (the oracle reference) | 3.5× → **21.0×** | 29.1× → **133×** | 86.1× → **257×** |
+| descent + `fes-f2` | 22.4× → 135× | 40.0× → 178× | 146× → 437× |
+| descent + `exhaustive` | 50.1× → 302× | 710× → 3,163× | 5,413× → 16,163× |
+| descent + `crossbred-f2` | 509× → 3,093× | 722× → 3,216× | 2,098× → 6,264× |
+| descent + `inherited-f4` | 344× → 2,089× | 1,949× → 8,676× | 5,513× → 16,460× |
+| descent + `f4-f2` | 333× → 2,024× | 2,961× → 13,185× | 8,186× → 24,443× |
+| descent + `matrix-f4` / `matrix-f5` | 362× / 387× → 2,180× / 2,335× | 3,972× / 4,075× → 17,685× / 18,146× | 14,873× / 14,963× → 44,410× / 44,680× |
+| descent + `sat-cdcl` (first solution) | 9,035× → 54,427× | 1.04×10⁵× → 5.64×10⁵× | 8.55×10⁵× → 2.55×10⁶× |
+| descent + `buchberger-f2` | 3,832× → 23,091× | 8.45×10⁵× → 3.76×10⁶× | 1.26×10⁷× → 3.75×10⁷× |
+
+**The rho exponent on the Round-5 ladder**, the mark the page's exponent
+panel draws, moves from `0.274` to `0.372` (prime, eight rungs) and
+from `0.302` to `0.392` (binary, five).  The reference still carries
+set-up at the ladder's small rungs, so it is still under one half.
+Every index-calculus exponent on that panel is fitted to the IC rows'
+own totals and does not move.
+
+### 18.7 Classified
+
+| change | class | why |
+|:--|:--|:--|
+| the matched walk prices every prime and random binary `vs rho`, `ic bench`'s included | **accounting** | the reference moved and no index-calculus count changed; every ratio rises, `2.1`–`6.5×` on the re-priced reports; nothing changes class, and the verdict — nothing below rho — now holds on every rung, the frozen `0.84×` included |
+| the tuned walk's set-up: stride starts, distinguished points every `r^{1/4}`, a table sized to `r` | engineering of the reference | frozen over tuned-on-points `1.5`–`6.0×` on the evaluation ladder; a better-built reference, not a property of rho |
+| the negation map | the automorphism the floor always credited | `1.36×` pooled and paired (§18.4, target 4); `√2` less the look-ahead |
+| `ic bench` on a Koblitz curve: the cheaper of the signed-Frobenius and negation walks | accounting | the negation walk is cheaper to `r ≈ 2^{18}`, the signed walk from `2^{20.5}` (§18.8), and the reference is whichever a generic attacker would run |
+
+### 18.8 An open item: the Koblitz reference does not price its canonicalisation
+
+The Koblitz diagnostic
+(`research/ic_rho_reference_20260923/diagnostic/koblitz.json`, seven
+curves, 64 runs each, all verified) was run to support `ic bench`'s
+rule, and found two things about the signed-Frobenius walk that the
+Koblitz regime has used as its reference since Round 1.
+
+- **Set-up at small rungs.**  The walk starts 32 parallel walks and a
+  16-jump table by scalar multiplication, about 97 of them, so below
+  about `2^{20}` it is far weaker than the negation walk:
+
+  | curve | log₂ r | signed-Frobenius `S` | negation `S` |
+  |:--|--:|--:|--:|
+  | `K_0 / GF(2^13)` | 11.0 | 13.5 | **2.78** |
+  | `K_1 / GF(2^17)` | 16.0 | 3.56 | **1.80** |
+  | `K_1 / GF(2^19)` | 18.0 | 2.10 | **1.38** |
+  | `K_0 / GF(2^31)` | 20.5 | **1.10** | 1.19 |
+  | `K_1 / GF(2^23)` | 22.0 | **0.88** | 1.17 |
+  | `K_0 / GF(2^37)` | 27.8 | **0.42** | 0.93 |
+  | `K_0 / GF(2^41)` | 39.0 | **0.16** | 1.03 |
+
+  So the Koblitz ladder's `vs rho` below about `2^{20}` flatters index
+  calculus by up to `4.8×`, as the prime and binary ladders' did.
+- **Canonicalisation is free.**  Every step canonicalises by `n`
+  Frobenius maps.  The counters read 13.0, 17.0, 19.1, 23.2, 31.2, 37.4
+  and 41.1 maps a step, and the unit charges none of them.  The
+  index-calculus rows on the same curves pay for theirs: the folded
+  tables charge a canonicalisation per probe, `0.063`–`0.074` additions
+  at the pinned ratio.  Priced as implemented, at the pinned Frobenius
+  ratio, the maps would add `1.7 %` (`n = 13`) to `101 %` (`n = 41`) to
+  the walk's cost.  Priced with the primitive the index-calculus rows
+  are charged for, one canonicalisation a step, they would add about
+  `7 %`.  A walk that needs no per-step canonicalisation would pay less
+  than that: Bailey et al.'s `P + φ^j(P)`, with `j` read from an
+  orbit invariant, commutes with the Frobenius and canonicalises only
+  at distinguished points.  It is not built here.
+
+So every Koblitz `vs rho` on the ledger and the page is off in both
+directions: generous below `2^{20}`, harsh above.  At the boundary
+panel's `n = 41` row the second effect is about `1.07×` on the affine
+unit.  The collection thread's `1.17×` (`K_0 / GF(2^41)`, a
+batched-addition unit, reference `S` = rho iterations over `√r`)
+carries the same asymmetry.  A batched addition shares its inversion,
+so a canonicalisation is a larger fraction of it than of an affine
+addition, and that correction is larger than `7 %`, possibly enough to
+take `1.17×` below one.  That is not measured here and is not a result.
+Until a declared round prices the Koblitz reference, `1.17×` is an
+upper bound, not a margin.  The instruction-count panel
+(`ic-crossover-20260922`) is not affected: an instruction count
+charges rho's canonicalisation like everything else.
+
+*Settled in §19.*  Priced in the batched unit, a canonical step costs
+`2.74` units, so the correction guessed at above is real and large.  But
+a larger error ran the other way: `1.17×` compared 32 targets solved
+together with rho solving one.  Against batch rho at `k = 32` it reads
+`6.51×`, and `6.38×` with rho's step and the index-calculus build both
+priced (§19.5).  Nothing went below one.
+
+### 18.9 What does not count
+
+- The matched walk's `S` at toy sizes is still partly set-up: `3.6` at
+  `2^{9.7}`.  It is the cheapest counted walk the repository has, not
+  the asymptotic `0.886`.
+- Target 5 is met on the pooled fit only, by `0.002`; §18.4 says why.
+- The calibration's roster curves are also rungs of the re-priced
+  Round-5 ladder (§18.2's amendment).  The rule depends on bit length
+  alone.
+- The matched walk leaves the same native work uncharged as the frozen
+  walk — the hash per point — plus, under negation, one field negation
+  and one key comparison per canonicalisation and up to sixteen key
+  comparisons a step against recent points.  All are counted, none is
+  a group operation, and each is a small fraction of an addition.
+- The re-pricing re-uses the frozen index-calculus rows.  Their counts
+  are the frozen ones, which is why this is accounting.
+- `ic bench` on a Koblitz curve takes the cheaper of two walks by mean
+  `S`.  That is a choice between references, and it can only make the
+  reference stronger.
+- The Koblitz reference in `ic boundary` is unchanged, with both of
+  §18.8's defects.
+
+### 18.10 Reproducing
+
+```
+cargo build --release --bin ic
+sh research/ic_rho_reference_20260923/run.sh      # calibration, evaluation, re-pricing
+python3 research/ic_rho_reference_20260923/analyse.py
+```
+
+`ic rho --koblitz-degrees 13,17,19,23,31,37,41 --runs 64 --seed 59297`
+is §18.8's diagnostic.  Every report names the binary's hash and the
+commit it ran from; each re-pricing report names its source file's
+blake3.
+
+## 19. The Koblitz references: what the collection thread's `vs rho` compares
+
+§18.8 left one item open: the Koblitz reference prices its per-step
+canonicalisation at zero.  Reading how the collection thread builds its
+`vs rho` turned up a larger mismatch as well, and this section tests
+both.  The sources are `scripts/ic_e2e_benchmark.py::rho_s_of` and the
+frozen `docs/ic/runs/koblitz-*` runs.  §19.1 was written and committed
+before anything below it ran; the probe it discloses is the only
+measurement made first.
+
+**Three facts, read from the code and the frozen runs.**
+
+1. **Thirty-two targets against one.**  Every collection-thread figure
+   is `total operations / (32·√r)`: `1.17×`, `1.33×`, `8.65×`, `19.3×`
+   and the `n = 61` panel.  The 32 targets share one factor-base
+   selection, one table build and one collection.  The descent adds
+   about two operations a target (`koblitz-select-packed-20260922.json`:
+   54 over 32).  The reference beside each figure is single-target rho,
+   run separately for each target and averaged.  The repository's own
+   rule is `src/ecc_safety.rs::check_multi_target_margin` and §5 of
+   `RESEARCH_ECC2K130_RR_SOLVER_PANEL.md` (Kuhn–Struik;
+   Galbraith–Lin–Scott).  It says `k` logarithms in one group cost about
+   `√(k·r)` in total, so per-target rho falls as `1/√k`, and "a batch
+   win over `k` independent rho runs measures the baseline, not the
+   algorithm."
+2. **The reference's step is counted as its addition.**
+   `rho_S = rho_group_additions / (targets·√r)`, while each step also
+   canonicalises over the `2n` conjugates.
+3. **The index-calculus build is counted as its additions.**  One
+   addition per stored pair, while each stored pair is also
+   canonicalised: its key is the normal-basis canonical form of the
+   sum's abscissa.
+
+**The probe**, run before this was written: `examples/koblitz_rho_price.rs`,
+16 targets.  The thread's unit is one batched affine addition, `42.8 ns`
+at `n = 41` and `54.1 ns` at `n = 53` on this host.  In that unit:
+
+- The implemented walk's step costs `20.9` and `23.3` units.  Of that,
+  `18.3` and `21.1` are its canonicalisation, a chain of about `1.5n`
+  dependent squarings.
+- A normal-basis rotation with `y` lifted by squarings costs `7.0` and
+  `8.1`.
+- Priced by time, the implemented walk is `S = 3.95` at `n = 41`,
+  twenty-one times the `0.185` the thread counts for it.
+
+That is a slow canonicalisation, not rho.  A walk that canonicalises by
+table pays a fraction of an addition a step, and so does one that never
+canonicalises at all (Bailey et al.'s `P ↦ P + φ^j(P)`, with `j` an
+orbit invariant).  Pricing rho as implemented would manufacture a
+crossing.
+
+### 19.1 Declared before anything below ran
+
+**Boundaries.**  For one target the floor is `√(π/4n)` in `S`.  For `k`
+targets the generic bound falls as `1/√k` per target (Yun's `Ω(√(kr))`
+in total).  The reference for a `k`-target figure is batch rho at the
+same `k`, measured.
+
+**Measurements.**
+
+- **(a) Batch rho.**  A batch mode of the tuned walk (§18.2) on the
+  signed-Frobenius classes (`A = 2n`), with counted operations per
+  target and every logarithm verified:
+  - jumps in `G` only;
+  - one table of distinguished points shared by every target;
+  - targets solved in sequence, so a later walk can finish on an
+    earlier target's trail.
+
+  It runs on the thread's two rung curves, `K_0 / GF(2^41)` and
+  `K_0 / GF(2^53)`, at `k = 1, 4, 16, 32`, with 16 batches each on
+  fresh targets.  On the `n = 61` panel's curve it runs at `k = 1` and
+  `32`, with 8 batches.
+- **(b) Step price,** in the thread's unit, measured in the same
+  process.  Two well-built walks, each timed by its per-step primitives:
+  - a canonical walk: one batched addition plus a table-driven
+    canonicalisation (normal-basis coordinates, least rotation, and two
+    Frobenius powers applied by table);
+  - Bailey et al.'s walk: one batched addition plus the coordinates, a
+    popcount and two table-applied Frobenius powers.
+- **(c) Build price,** in the thread's unit, measured in the same
+  process: the folded table's build time per stored pair, on the
+  thread's `n = 41` base (`|F| = 15,744`).
+
+**Targets:**
+
+1. **Correct.**  Every target of every batch is recovered and verified.
+2. **The batch law holds for this walk.**  Per-target cost at `k = 32`
+   over `k = 1` lies in `[0.09, 0.35]`, a factor of two either side of
+   `1/√32`.
+3. **Re-read.**  Every 32-target Koblitz figure on the page is re-read
+   against batch rho at `k = 32` on its own curve.  That is measured at
+   `n = 41` and `53`, and at `n = 61` too if (a) completes there.
+   Beside each re-read go (b) and (c) as measured corrections, and
+   beside those the one-target (cold) figure.
+
+**Class: accounting.**  No index-calculus count changes; the reference
+is matched to the problem the figures solve.
+
+**Inadmissible:**
+
+- pricing the reference at its implemented canonicalisation, the
+  probe's `20.9` units a step;
+- using the `1/√k` formula where the batch measurement exists;
+- comparing a 32-target figure with batch rho at a different `k`;
+- dropping a failed batch;
+- using the batch reference for a cold figure.
+
+**Abandon** the re-pricing if target 1 fails.  If target 2 fails, the
+batch mode is mis-built, and the page gets the formula's reading,
+marked as a model, instead of a measurement.
+
+### 19.2 What ran
+
+The walk of §18 is now generic over the classes it moves between
+(`RhoClasses`: points, `{P, −P}`, and on a Koblitz curve `{±φ^t(P)}`).
+Its step, look-ahead, cycle escape and cap are one piece of code, shared
+by the single-target walk and the batch.  The single-target walk replays
+all 3,072 runs of eight instances of the frozen §18 evaluation ladder
+exactly — steps, operations and every counter — so §18's numbers stand as
+measured.
+
+- **(a)** `rho_batch_with`, run by `ic rho --batch-koblitz`: the tuned
+  walk on `SignedFrobeniusClasses`.  A point's representative is the
+  conjugate whose abscissa has the least normal-basis rotation, carried
+  there by table-applied Frobenius powers (`FrobeniusPowers`), then the
+  sign with the smaller ordinate.  It is `[±λ^t]P`, which a test checks on
+  every member of the class.  Sixteen jumps `[c_j]G` with full-size `c_j`,
+  distinguished points every `2^{⌊bits(r)/4⌋}` steps, one table for the
+  batch.
+- **(b) and (c)**: `examples/koblitz_reference_prices.rs`, one thread,
+  seven interleaved rounds, every quantity divided by the unit measured in
+  its own round; medians with the range over rounds.
+
+Everything is in `research/ic_rho_koblitz_20260923/`, run from commit
+`3e8dd352` with a clean tree (`provenance.txt`) and seed `0xBA7C4`.  Three
+things ran that §19.1 did not declare, and each is labelled in its file:
+
+- the build price on the base of every other quoted figure, so that no
+  base carries another's price.  One of these, `n = 41, |F| = 16,400`, was
+  added after the first pass and before any analysis;
+- a lone affine addition, to price the canonicalisation in the
+  three-regime ledger's unit;
+- `add_pairwise`, the batched addition a parallel walk actually runs.
+
+### 19.3 (a) Batch rho: the batch law holds — targets 1 and 2 met
+
+| curve | k | batches | S per target (95 % CI) | over k = 1 (95 % CI) | batch law | over floor | own / earlier trail | ok |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|
+| K_0 / GF(2^41) | 1 | 16 | 0.1429 [0.1030, 0.1828] | 1.000 [1.000, 1.000] | 1.000 | 1.032 | 16 / 0 | 16/16 |
+| K_0 / GF(2^41) | 4 | 16 | 0.0742 [0.0664, 0.0819] | 0.519 [0.409, 0.705] | 0.547 | 0.536 | 28 / 36 | 64/64 |
+| K_0 / GF(2^41) | 16 | 16 | 0.0396 [0.0367, 0.0425] | 0.277 [0.220, 0.372] | 0.280 | 0.286 | 40 / 216 | 256/256 |
+| K_0 / GF(2^41) | 32 | 16 | 0.0300 [0.0287, 0.0312] | 0.210 [0.168, 0.280] | 0.199 | 0.216 | 43 / 469 | 512/512 |
+| K_0 / GF(2^53) | 1 | 16 | 0.1052 [0.0682, 0.1422] | 1.000 [1.000, 1.000] | 1.000 | 0.864 | 16 / 0 | 16/16 |
+| K_0 / GF(2^53) | 4 | 16 | 0.0626 [0.0552, 0.0700] | 0.595 [0.435, 0.830] | 0.547 | 0.515 | 27 / 37 | 64/64 |
+| K_0 / GF(2^53) | 16 | 16 | 0.0340 [0.0313, 0.0367] | 0.323 [0.239, 0.447] | 0.280 | 0.279 | 42 / 214 | 256/256 |
+| K_0 / GF(2^53) | 32 | 16 | 0.0252 [0.0240, 0.0263] | 0.239 [0.177, 0.329] | 0.199 | 0.207 | 41 / 471 | 512/512 |
+| K_0 / GF(2^61) | 1 | 8 | 0.1151 [0.0503, 0.1798] | 1.000 [1.000, 1.000] | 1.000 | 1.014 | 8 / 0 | 8/8 |
+| K_0 / GF(2^61) | 32 | 8 | 0.0219 [0.0205, 0.0233] | 0.190 [0.131, 0.320] | 0.199 | 0.193 | 21 / 235 | 256/256 |
+
+- **Target 1 met.**  All 1,960 targets were recovered and verified, and
+  no batch was dropped.
+- **Target 2 met on all three curves.**  Per-target cost at `k = 32` over
+  `k = 1` is `0.210` `[0.168, 0.280]`, `0.239`
+  `[0.177, 0.329]` and `0.190` `[0.131, 0.320]` (batches
+  resampled), against Kuhn–Struik's `0.199` and the declared
+  `[0.09, 0.35]`.  The sizes in between follow the law as well: `0.519`
+  and `0.277` at `n = 41`, where the law gives `0.547` and `0.280`.
+- **Later targets finish on earlier trails.**  At `k = 32`, 469 of 512
+  targets at `n = 41` did.
+- **Fruitless cycles are rare on these classes.**  A Frobenius shift
+  `t ≠ 0` never undoes the jump just taken; only the `t = 0` negation
+  does, and the look-ahead catches it.  Between 0 and 22 short cycles
+  were detected per size, and 4 walks in the whole run reached the cap,
+  all charged.
+- **One target alone** costs `1.03`, `0.86` and `1.01` times its floor,
+  with the wide intervals that sixteen (at `n = 61`, eight) single rho
+  runs carry.  The thread's single-target references were the
+  repository's implemented walk, counted the same way.  They sat at
+  `1.20–1.23`, `1.78` and `1.56` times the same floors.
+
+### 19.4 (b) and (c): the step and the stored pair, priced
+
+A step, in units of one batched addition (`add_many` over 1,024 points):
+
+| curve | unit (ns) | canonical step | Bailey step | add_pairwise | affine add | canonicalisation in affine units |
+|:--|--:|--:|--:|--:|--:|--:|
+| n = 41 | 43.8 | 2.74 [2.59, 2.89] | 1.39 [1.38, 1.54] | 1.06 | 14.8 | 0.117 |
+| n = 53 | 50.6 | 2.83 [2.75, 2.87] | 1.38 [1.36, 1.42] | 0.98 | 18.7 | 0.098 |
+| n = 61 | 54.0 | 2.92 [2.72, 3.04] | 1.41 [1.37, 1.44] | 1.04 | 21.0 | 0.091 |
+
+A stored pair of the folded table, in the same unit:
+
+| base | orbits | stored pairs | units per stored pair | range | declared |
+|:--|--:|--:|--:|--:|:--|
+| n = 41, F = 5,248 | 64 | 170,560 | 4.47 | [3.80, 4.96] | no |
+| n = 41, F = 15,744 | 192 | 1,519,296 | 6.14 | [5.48, 6.76] | yes |
+| n = 41, F = 16,400 | 200 | 1,648,200 | 5.69 | [4.69, 6.95] | no |
+| n = 53, F = 15,264 | 144 | 1,106,640 | 5.87 | [5.23, 6.71] | no |
+| n = 61, F = 6,832 | 56 | 194,712 | 4.96 | [3.80, 6.77] | no |
+| n = 61, F = 9,760 | 80 | 395,280 | 5.18 | [4.70, 5.64] | no |
+| n = 61, F = 12,688 | 104 | 666,120 | 5.56 | [5.34, 5.92] | no |
+| n = 61, F = 18,544 | 152 | 1,418,616 | 5.86 | [5.12, 7.81] | no |
+
+- **A canonical step costs `2.74–2.92` units, not one.**  The table-driven
+  canonicalisation costs more than the addition it follows (`1.74–1.92`
+  units), because the least rotation was, at `3e8dd352`, a serial scan
+  over `n` rotations (see §19.8 for what main has changed since).
+- **Bailey et al.'s step costs `1.38–1.41` units**, because that walk
+  never canonicalises.  Its step *count* was not measured here, so any
+  figure priced at its step is a model, and is marked as one.
+- **The unit is fair to rho.**  The batched addition of 1,024 independent
+  walks (`add_pairwise`) costs `0.98–1.06` units.
+- **A stored pair costs `4.5–6.1` units, not one**, and
+  `6.14` `[5.48, 6.76]` on the declared base.  The folded
+  build makes two passes over every row, one to count and one to fill.
+  Each pass computes a batched addition and a canonical key per pair,
+  then scatters the pair into its bucket.  A one-pass build would roughly
+  halve that; it was not measured.
+- **In the three-regime ledger's unit**, a lone affine addition with its
+  own inversion (`14.8–21.0` units here), the canonicalisation costs
+  `0.09–0.12` of an addition.  §18.8 had estimated about 7%.  Those rows
+  are single-target, so they are not re-read here (§19.7).
+
+### 19.5 The re-read — target 3 met
+
+Every 32-target Koblitz figure on the page, from its frozen file
+(`analyse.py` lists the file and field of each).  The columns are:
+
+- **quoted**: as the page had it, against single-target rho;
+- **re-read**: against batch rho at `k = 32` on the same curve, both sides
+  counted as the thread counts, one unit per rho step and per stored pair;
+- **+ (b) canonical**: rho's step priced at the canonical walk it ran;
+- **+ (b) Bailey, model**: priced at Bailey's step, holding the step count
+  (a model, see §19.4);
+- **+ (c)**: the index-calculus build priced per stored pair, where the
+  table is folded and its base was measured;
+- **+ (b) and (c)**: both, with the canonical step;
+- **cold**: one target alone — the whole pipeline less the other 31
+  targets' descents, against the `k = 1` measurement.
+
+`≥` marks rows whose `S` leaves selection and the linear algebra unpriced.
+
+| panel | row | n | quoted | re-read (k = 32) | + (b) canonical | + (b) Bailey, model | + (c) | + (b) and (c) | cold | cold + (b), (c) |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| select-packed-20260922 | aimed, BigUint base build | 41 | 1.33× | **7.41×** | 2.70× | 5.32× | 18.4× | 6.71× | 49.7× | 45.0× |
+| select-packed-20260922 | aimed, packed base build | 41 | 1.17× | **6.51×** | 2.37× | 4.67× | 17.5× | 6.38× | 43.7× | 42.8× |
+| collection-aim-20260922 | original rung, full scan | 41 | 8.50× | **47.3×** | 17.2× | 33.9× | 48.1× | 17.5× | 317× | 118× |
+| collection-aim-20260922 | + collection window 164 | 41 | 3.48× | **19.4×** | 7.06× | 13.9× | 20.2× | 7.36× | 130× | 49.4× |
+| collection-aim-20260922 | + wider base 16,400 | 41 | 2.78× | **15.4×** | 5.63× | 11.1× | 26.3× | 9.60× | 104× | 64.4× |
+| collection-aim-20260922 | + lean relation target | 41 | 2.04× | **11.3×** | 4.13× | 8.13× | 22.2× | 8.10× | 76.0× | 54.3× |
+| collection-aim-20260922 | + stop when determined | 41 | 1.75× | **9.73×** | 3.55× | 6.98× | 20.7× | 7.55× | 65.2× | 50.7× |
+| collection-aim-20260922 | + aim at uncovered columns (relabelling, not kept) | 41 | 1.71× | **9.53×** | 3.47× | 6.84× | 20.5× | 7.48× | 63.9× | 50.2× |
+| collection-aim-20260922 | + aim at least-mentioned | 41 | 1.33× | **7.42×** | 2.70× | 5.32× | 18.4× | 6.71× | 49.8× | 45.0× |
+| collection-aim-20260922 | + aim at least-mentioned (holdout, seeds 900-931) | 41 | 1.33× | **7.42×** | 2.70× | 5.32× | 18.4× | 6.71× | 49.8× | 45.0× |
+| phase-prices-20260921 | k0n41-subgroup-rung | 41 | 8.75× | **49.8×** | 18.2× | 35.7× | 50.6× | 18.5× | 334× | 124× |
+| phase-prices-20260921 | k0n53-subgroup-rung | 53 | 19.4× | **167×** | 59.1× | 121× | 169× | 59.7× | 1,257× | 449× |
+| collection-window-20260921 | baseline_full_scan | 53 | 19.1× | **165×** | 58.4× | 119× | 167× | 59.0× | 1,242× | 443× |
+| collection-window-20260921 | window_1908 | 53 | 7.67× | **66.2×** | 23.4× | 47.9× | 67.7× | 23.9× | 485× | 175× |
+| collection-window-20260921 | window_954 | 53 | 7.43× | **64.2×** | 22.7× | 46.4× | 65.7× | 23.2× | 469× | 170× |
+| collection-window-20260921 | window_477 | 53 | 7.12× | **61.4×** | 21.7× | 44.4× | 62.9× | 22.2× | 448× | 162× |
+| collection-window-20260921 | window_477_holdout | 53 | 6.99× | **60.4×** | 21.4× | 43.7× | 61.8× | 21.9× | 448× | 162× |
+| collection-window-20260921 | baseline_full_scan | 41 | 8.50× | **47.3×** | 17.2× | 33.9× | 48.1× | 17.5× | 317× | 118× |
+| collection-window-20260921 | window_164 | 41 | 3.48× | **19.4×** | 7.06× | 13.9× | 20.2× | 7.36× | 130× | 49.4× |
+| probe-volume-20260921 | k0n41-subgroup-rung compact | 41 | ≥ 11.9× | **≥ 67.5×** | ≥ 24.6× | ≥ 48.4× | — | — | ≥ 453× | — |
+| probe-volume-20260921 | k0n41-subgroup-rung folded | 41 | ≥ 8.65× | **≥ 49.2×** | ≥ 17.9× | ≥ 35.3× | ≥ 50.1× | ≥ 18.3× | ≥ 330× | ≥ 122× |
+| probe-volume-20260921 | k0n53-subgroup-rung compact | 53 | ≥ 23.7× | **≥ 205×** | ≥ 72.5× | ≥ 148× | — | — | ≥ 1,548× | — |
+| probe-volume-20260921 | k0n53-subgroup-rung folded | 53 | ≥ 19.3× | **≥ 167×** | ≥ 59.0× | ≥ 121× | ≥ 168× | ≥ 59.5× | ≥ 1,254× | ≥ 447× |
+| tier-crossover-20260921 | 6832 points full | 61 | ≥ 12.1× | **≥ 98.0×** | ≥ 33.6× | ≥ 69.4× | — | — | ≥ 505× | — |
+| tier-crossover-20260921 | 6832 points compact | 61 | ≥ 12.8× | **≥ 104×** | ≥ 35.5× | ≥ 73.4× | — | — | ≥ 529× | — |
+| tier-crossover-20260921 | 6832 points folded | 61 | ≥ 15.2× | **≥ 124×** | ≥ 42.3× | ≥ 87.4× | ≥ 124× | ≥ 42.4× | ≥ 601× | ≥ 206× |
+| tier-crossover-20260921 | 9760 points full | 61 | ≥ 12.5× | **≥ 101×** | ≥ 34.6× | ≥ 71.5× | — | — | ≥ 552× | — |
+| tier-crossover-20260921 | 9760 points compact | 61 | ≥ 12.2× | **≥ 98.4×** | ≥ 33.7× | ≥ 69.6× | — | — | ≥ 535× | — |
+| tier-crossover-20260921 | 9760 points folded | 61 | ≥ 13.9× | **≥ 113×** | ≥ 38.7× | ≥ 79.9× | ≥ 113× | ≥ 38.8× | ≥ 600× | ≥ 206× |
+| tier-crossover-20260921 | 12688 points full | 61 | ≥ 13.0× | **≥ 105×** | ≥ 36.1× | ≥ 74.5× | — | — | ≥ 605× | — |
+| tier-crossover-20260921 | 12688 points compact | 61 | ≥ 12.2× | **≥ 99.3×** | ≥ 34.0× | ≥ 70.2× | — | — | ≥ 573× | — |
+| tier-crossover-20260921 | 12688 points folded | 61 | ≥ 13.3× | **≥ 108×** | ≥ 37.1× | ≥ 76.5× | ≥ 108× | ≥ 37.2× | ≥ 608× | ≥ 209× |
+| tier-crossover-20260921 | 18544 points full | 61 | ≥ 15.4× | **≥ 125×** | ≥ 42.8× | ≥ 88.4× | — | — | ≥ 745× | — |
+| tier-crossover-20260921 | 18544 points compact | 61 | ≥ 14.4× | **≥ 117×** | ≥ 40.0× | ≥ 82.5× | — | — | ≥ 695× | — |
+| tier-crossover-20260921 | 18544 points folded | 61 | ≥ 13.6× | **≥ 110×** | ≥ 37.7× | ≥ 77.8× | ≥ 111× | ≥ 37.9× | ≥ 651× | ≥ 225× |
+
+**The headline.**
+
+| | `vs rho` |
+|:--|--:|
+| quoted, against single-target rho | 1.17× |
+| re-read, against batch rho at `k = 32` | **6.51×** |
+| rho's step priced at the canonical walk | 2.37× |
+| rho's step priced at Bailey's step (a model) | 4.67× |
+| the build priced per stored pair | 17.5× |
+| both, canonical step | **6.38×** |
+| both, Bailey's step (a model) | 12.6× |
+| cold, one target | 43.7× |
+| cold, with both | 42.8× |
+
+With both corrections, the build becomes 75% of that pipeline rather
+than 33%, and collection falls from 54% to 20%.
+
+**Where the factor comes from.**  The thread's reference over batch rho at
+`k = 32` is `5.56×` at `n = 41`, `8.63×` at `n = 53` and `8.10×` at
+`n = 61`.  The batch accounts for `4.6–5.2×` of it: the single-target floor
+over the `k = 32` measurement.  The rest comes from the thread's
+single-target walk sitting `1.20–1.78×` above that floor.
+
+**The two corrections pull in opposite directions, and on the headline row
+they nearly cancel.**  Pricing rho's step lowers every ratio, by
+`2.74–2.92×` at the canonical walk and `1.38–1.41×` at Bailey's step.
+Pricing the build raises each row by as much as its build weighs.  The
+n = 41 rows on the 15,744- and 16,400-point bases rise `1.7–2.7×`, the
+5,248-point rows `2–4%`, and the n = 53 and n = 61 rows `0.1–2.4%`.  The
+lowest reading anywhere in the table is `2.37×`, and it is the lopsided
+one: the headline row with rho's step priced and the build still at one
+unit a pair.  Priced on both sides, the closest figure is **`6.38×`**.
+
+**Cold, one target costs from `43.7×` rho** (the headline row; `42.8×`
+with both corrections) **to `≥ 1,548×`**.  The `k = 1` measurement it
+divides by carries a 95% interval of `±28%` at `n = 41`, `±35%` at
+`n = 53` and `±56%` at `n = 61`.
+
+### 19.6 Classification
+
+**Accounting.**  No index-calculus count changed.  The reference was
+matched to the problem the figures solve, and the thread's own two
+uncharged costs were priced.  The thread's engineering steps stand as
+measured, because they are ratios of index-calculus totals on the same
+instances and do not depend on the reference: `1.139×` for the packed
+selection, `1.311×` for the least-mention aim, `7.26×` from the rung it
+started from.  What falls is the distance to rho, which those steps were
+read against.  The closest figure moves from `1.17×` to `6.5×` batch rho
+as counted.  It moves to `6.4×` with every rho step and stored pair priced
+by time, or to `12.6×` if Bailey's step is taken with the canonical walk's
+count.  On the curves, bases and target counts these figures cover,
+nothing measured end to end on an elliptic curve is below rho.
+
+### 19.7 What stays open
+
+- **Bailey's walk, counted.**  Its step costs half a canonical step.
+  Until its step count is measured, the `4.67×` and `12.6×` readings are
+  models.
+- **The one-target references are thin.**  Sixteen (eight) runs put
+  `±28–56%` on every cold figure.
+- **The thread's single-target walk is `1.56–1.78×` its floor at
+  `n = 53` and `61`.**  Any single-target figure priced against it there
+  is flattered by as much.
+- **The three-regime ledger's Koblitz rows** are single-target and in the
+  affine unit.  Priced at the table-driven canonicalisation, their
+  reference's step rises by `9–12%` (§19.4), so those rows would read
+  `8–11%` lower.  They are not re-read here.
+- **The build's two passes** are the thread's largest phase once priced,
+  and the obvious next lever for it.
+
+### 19.8 After the merge with main (2026-09-25)
+
+Both prices in §19.4 were measured at `3e8dd352`.  Since then main has
+made the Koblitz primitives faster (#689 and the AVX-512 kernels that
+followed it), with bit-identical outputs:
+
+- the least rotation searches the longest zero runs, about `log₂ n`
+  steps instead of `n`;
+- the folded build keys its pairs in bulk;
+- the scan forms its rests without their ordinates.
+
+Every frozen count therefore stands.  On the merged code, the walk
+replays the frozen runs it was checked against exactly: the eight
+instances of §18's ladder and the first batches of §19's `n = 41` run.
+But on current main a canonical rho step, a stored pair and the
+index-calculus scan all cost less than §19.4 measured.  The re-read is
+internally consistent, because the frozen figures, their build price and
+the reference's step all date from that commit.  It is not a price of
+current main.  Re-pricing there means re-running both sides, which is
+not done here.
+
+## 20. The thread's exponent against batch rho, every phase priced on current main
+
+§19 re-read the collection thread's figures against the reference they
+should have had, batch rho at the same `k = 32`, on the commit those
+figures were frozen at.  This round measures the thread afresh on
+current `main`, at nine sizes from `r = 2^18` to `2^47.2`, and asks the
+question the page's `r^{1/6}` sentence answers only by derivation: how
+does the thread's cost per target scale against batch rho, and does it
+cross it anywhere?
+
+Two things §19 left standing make this more than a re-run.
+
+- **§19's prices are older than `main`** (§19.8).  The canonical step,
+  the stored pair and the scan all cost less there, on both sides of the
+  ratio, and none has been re-priced.
+- **The descent was priced per trial.**  The frozen ledger prices it
+  as trials times the `1.19` units of one walked probe.  For 32 targets
+  at the headline that is 46 to 52 trials, or 54 to 62 units
+  (`koblitz-collection-aim-20260922.json`: the holdout arm's total sits
+  7 units below the main arm's for 6 fewer trials).  An `m = 3` descent
+  trial is not one probe.  It is a full scan of the base (`PairSumTable::decompose_fast`
+  with `m = 3`, in blocks of 1,024, stopping at the first witness).  Its
+  cost per target is the probes it scans, about `2r/|F|²`, and that
+  cost does not amortise over `k`.  At the headline it is a few percent,
+  but it grows as `r` falls, and it decides the small end.
+
+### 20.1 Declared before anything below ran
+
+The protocol is `research/ic_exponent_20260926/PROTOCOL.md` (v1).  It
+was committed before the pricer existed.  The only computation made
+first is `predict.py`, which reads frozen files that predate the protocol
+and writes `prediction.json`.  In brief:
+
+- **Boundaries.**
+  - The floor per target at `k = 32` is `L(32)·√(π/4n)`, with
+    `L(32) = 0.19869`.
+  - The reference is batch rho at `k = 32`, run on the index-calculus
+    run's own 32 targets in the same process.  Its counted operations
+    are priced at a canonical step: one batched addition plus the table
+    canonicalisation, measured against the same unit in the same process.
+  - Bailey's step is a model column.
+  - A cold figure is derived secondarily, against single-target rho.
+- **Sizes:** `K_1/GF(2^19)`, `K_1/GF(2^23)`, `K_1/GF(2^45)`,
+  `K_0/GF(2^37)`, `K_1/GF(2^43)`, `K_1/GF(2^47)`, `K_0/GF(2^41)`,
+  `K_0/GF(2^53)` and `K_0/GF(2^61)`, at `log₂ r` = 18.0, 22.0, 24.8,
+  27.8, 32.1, 36.6, 39.0, 44.3 and 47.2.
+- **Recipe.**  Fixed at every size:
+  - the thread's `m = 3` pair-table collection, aimed at the
+    least-mentioned columns, units until determined;
+  - a window of `|F|/32`, and units of about a sixteenth of the run;
+  - 32 targets.
+
+  Swept: the column count on a geometric grid around the model's
+  optimum, and the descent's summands (2 or 3).  The sweep runs on a seed
+  set of its own, and the choice is fixed before four measurement sets
+  (`M1`–`M4`) run.
+- **Accounting.**  Every index-calculus phase is timed on one thread, in
+  the workflow's order, and divided by one batched addition measured in
+  the same process around each repetition.  The phases are setup,
+  selection, build, collection, verification, linear algebra, descent
+  setup, descent and final verification.  Every native count is kept
+  beside its time.  Three repetitions per set (fifteen under 50 ms) give
+  the A/A spread, and the figure is their median.
+- **Controls.**
+  1. The pricer's counts equal `ic workflow`'s on every measurement run.
+  2. The frozen headline (`k0n41-least-on-u150`) re-runs as it stands,
+     is checked against its frozen counts and is re-priced.
+  3. The thread's own `n = 41` and `n = 53` recipes are re-priced as
+     diagnostic rows.
+
+**Two predictions,** in `prediction.json`:
+
+| curve | `log₂ r` | law | model |
+|:--|--:|--:|--:|
+| `K_1/GF(2^19)` | 18.0 | 0.83 | 4.89 |
+| `K_1/GF(2^23)` | 22.0 | 1.20 | 3.42 |
+| `K_1/GF(2^45)` | 24.8 | 1.18 | 3.35 |
+| `K_0/GF(2^37)` | 27.8 | 1.84 | **2.85** |
+| `K_1/GF(2^43)` | 32.1 | 2.81 | 2.89 |
+| `K_1/GF(2^47)` | 36.6 | 4.53 | 3.56 |
+| `K_0/GF(2^41)` | 39.0 | 6.38 | 4.51 |
+| `K_0/GF(2^53)` | 44.3 | 10.3 | 6.76 |
+| `K_0/GF(2^61)` | 47.2 | 13.5 | 8.68 |
+
+- **The law.**  The page's `r^{1/6}`, carried as
+  `r^{1/6} n^{−1/2}` from §19.5's `6.38×` at `2^39`.  It predicts a
+  crossing near `r = 2^23`.
+- **The model.**  The same shared phases at frozen prices, plus the
+  descent priced per probe.  It predicts a minimum of `2.85×` near
+  `2^28` and no crossing.  Over the four largest sizes its local exponent
+  is `0.141`, where the law's is `1/6`, both taken on `ratio·√n`.
+
+**Targets:**
+
+1. **Correct.**  Every target of every run is verified on both sides,
+   with no rejected relation and identical counts across repetitions.
+2. **Controls.**  Control 1 holds on every run.  The frozen headline's
+   counts are reproduced, or each difference is explained.
+3. **Exponent.**  Fit `β` of `ln(ratio·√n)` on `ln r` over the four
+   largest sizes, with a 95% interval.  The law's `1/6` and the model's
+   `0.141` are each read as consistent or falsified by that interval.
+4. **Small end.**
+   - The law is falsified there if the ratio's interval at each of the
+     three smallest sizes lies above twice its prediction.
+   - The model's minimum is confirmed if the least measured ratio falls
+     at `K_0/GF(2^37)` or a neighbour, within a factor of two of `2.85`.
+5. **Crossing.**  A size whose interval lies wholly below one is claimed
+   as a crossing only after two fresh seed sets repeat it.
+
+**Inadmissible:**
+
+- choosing the recipe on a measurement set, or tuning the window, unit
+  or cap rules per size;
+- changing `k`;
+- dropping a phase, a run or a repetition;
+- multi-threaded time;
+- pricing rho's step at the implemented single-inversion walk;
+- the batch formula where the batch was measured;
+- reusing a base, table or log database;
+- quoting the first repetition's time as the figure.
+
+**Abandon or stop:**
+
+- a failed verification stops that size until diagnosed;
+- a Control 1 mismatch means the pricer is wrong;
+- a repetition spread above `1.25` doubles the repetitions once.
+
+**Host and class.**  The host manifest and noise controls follow
+`AGENTS.md` §10: one thread, `taskset`, load recorded, A/A spread from
+the repetitions.  One x86-64 cloud container is the only hardware class
+covered.
+
+**Class: accounting.**  No algorithm changes.
+
+**Amendment 1.**  Committed with the pricer (`ic price`), before any
+declared run.  Two smoke tests on undeclared curves passed Control 1 and
+showed two things:
+
+- **The thread's base builder adds orbits eight at a time.**  So the
+  column grid is read in actual columns, with at least eight, and the
+  small end's model optima (2–5 columns) are out of the recipe's reach.
+- **The workflow rebuilds the base's projected orbit map in big-integer
+  arithmetic around its work,** for the column count, collectors,
+  coverage and both solvers.  At `r = 2^26` those constructions were
+  69% of the run.  They stay in `S` as declared.  The pricer now keeps
+  them on clocks of their own, so the write-up can read the work apart
+  from them as a labelled stage diagnostic.
+
+No target, size, seed or prediction changed.
+
+### 20.2 What ran
+
+- **The code.** `ic price` and the harness
+  `research/ic_exponent_20260926/run.py all`, from commit `d31a7ab4` with
+  the tracked tree clean.
+  - `host.json` reads `tree_clean: false` only because the run's own
+    output directory was untracked when the manifest was written.
+  - The harness is resumable and never overwrites. Every report and every
+    stderr is kept.
+- **The host.** One x86-64 cloud container: Intel Xeon at 2.10 GHz, four
+  logical cores, AVX-512 with `vpclmulqdq` and `gfni`, 16 GB, rustc
+  1.94.1.
+  - Every timed process ran on one Rayon thread under `taskset -c 2`, with
+    nothing else running.
+  - That is the only hardware class these figures cover.
+- **The volume.**
+  - 152 pricer reports, holding 1,353 whole-pipeline repetitions and
+    43,296 descents. Every one was verified.
+  - 1,792 batch-rho targets and 352 single-target walks. Every one was
+    verified and agreed with the planted scalar.
+- **The spread rule** fired on 11 measurement sets, all at the five
+  smallest sizes, where one repetition takes 2–70 ms. Each was rerun with
+  twice the repetitions. Both files are kept, and the rerun is the figure.
+- **Control 1** held on all 45 runs it covers (36 measurement runs and 9
+  control runs). Each was compared field by field with `ic workflow` on
+  the same parameter file, on one thread, and was identical.
+
+### 20.3 The table
+
+`S` is per target at `k = 32`.
+
+- **The reference** is batch rho on the same 32 targets. Its counted
+  operations are priced at the canonical step measured in the same
+  process.
+- **The ratio** is the mean index-calculus `S` over the mean reference,
+  across the four measurement sets, with a 95% interval from the four
+  per-set ratios.
+- **The recipe** columns give the column count, the descent's summands
+  and the base's points.
+- **law** and **model** are the declared predictions.
+- **work** prices the phases the model prices (selection, build,
+  collection, linear algebra, descent) over the same reference. It is a
+  stage diagnostic, not a speed.
+- **W / C / V** is the index-calculus total split into work,
+  constructions (with the curve's setup) and verification.
+- **cold**: `M1`'s shared phases plus its mean descent, against
+  single-target rho walked on the same 32 targets one at a time.
+
+| curve | `log₂ r` | recipe | `S`, IC | `S`, batch rho | ratio [95%] | law | model | work | W / C / V | cold |
+|:--|--:|:--|--:|--:|--:|--:|--:|--:|:--|--:|
+| `K_1/GF(2^19)` | 18.0 | 8, 2, 304 | 8.118 | 0.3271 | **24.82×** [23.47, 26.21] | 0.83× | 4.89× | 13.76× | 55% / 32% / 11% | 113× |
+| `K_1/GF(2^23)` | 22.0 | 8, 2, 368 | 2.595 | 0.2050 | **12.66×** [7.85, 18.84] | 1.20× | 3.42× | 6.68× | 53% / 38% / 8% | 62.3× |
+| `K_1/GF(2^45)` | 24.8 | 8, 2, 720 | 2.819 | 0.1191 | **23.67×** [21.02, 26.50] | 1.18× | 3.35× | 6.20× | 26% / 70% / 3% | 123× |
+| `K_0/GF(2^37)` | 27.8 | 8, 2, 592 | 0.861 | 0.0922 | **9.33×** [8.30, 10.42] | 1.84× | 2.85× | 4.58× | 49% / 47% / 3% | 41.6× |
+| `K_1/GF(2^43)` | 32.1 | 16, 2, 1,376 | 0.544 | 0.0666 | **8.16×** [7.10, 9.32] | 2.81× | 2.89× | 4.53× | 55% / 42% / 2% | 39.9× |
+| `K_1/GF(2^47)` | 36.6 | 56, 3, 5,264 | 0.397 | 0.0602 | **6.60×** [6.00, 7.25] | 4.53× | 3.56× | 3.73× | 56% / 42% / 2% | 38.7× |
+| `K_0/GF(2^41)` | 39.0 | 80, 2, 6,560 | 0.324 | 0.0666 | **4.86×** [4.21, 5.55] | 6.38× | 4.51× | 3.73× | 77% / 21% / 1% | 22.6× |
+| `K_0/GF(2^53)` | 44.3 | 264, 2, 27,984 | 0.469 | 0.0509 | **9.21×** [6.92, 11.85] | 10.30× | 6.76× | 7.81× | 85% / 15% / 0% | 43.0× |
+| `K_0/GF(2^61)` | 47.2 | 320, 2, 39,040 | 0.721 | 0.0531 | **13.59×** [11.95, 15.34] | 13.51× | 8.68× | 12.64× | 93% / 7% / 0% | 85.0× |
+
+**Against the floor**, `L(32)·√(π/4n)`:
+
+- Counted batch rho sits 4.50× its floor at `2^18`, 1.52× at `2^27.8`,
+  and 0.98–1.09× from `2^36.6` to `2^47.2`.
+- The index calculus sits 201× its floor at `2^18` and 11.8× at its best
+  (`2^39`).
+
+### 20.4 The targets, graded
+
+1. **Correct: met.**
+   - Every descent of every repetition and every rho target was
+     recovered and verified.
+   - No relation was rejected.
+   - The counts were identical across repetitions in every report.
+2. **Controls: met.**
+   - Control 1 held on all 45 runs.
+   - **Control 2** reproduced every frozen count of the headline
+     (`k0n41-least-on-u150`) on current `main`: 197 relations, 3,450
+     trials, 883,200 summands, 1,519,296 stored pairs, 52 descent trials.
+     Priced like every other row, it reads **12.53×** batch rho on its own
+     32 targets, against §19.5's 6.38× (§20.6).
+   - **Control 3**, the thread's own recipes on `M1`–`M4`:
+     - `n = 41` reads **10.93×** [10.68, 11.16], against the swept
+       recipe's 4.86×. Its base has 15,744 points against the sweep's
+       6,560, and on current prices the build is 62% of that base's
+       whole run.
+     - `n = 53` reads **7.58×** [5.92, 9.51], against the swept
+       recipe's 9.21× [6.92, 11.85]. The two are indistinguishable. The
+       sweep's choice (264 columns, window 874, units of 1,014 probes) and
+       the thread's (144 columns, window 477, units of 2,048) differ by
+       less than one seed set's noise.
+3. **Exponent: not decided.**
+   - Fitted on `ln(ratio·√n)` against `ln r` over the four largest sizes,
+     `β = 0.137`, with a 95% interval of `[−0.097, 0.371]`.
+   - Both the law's `1/6` and the model's `0.141` lie inside, so the
+     declared fit cannot tell them apart.
+   - Fitting the sixteen per-set points instead gives `0.138`
+     `[0.090, 0.185]`, which still contains both.
+   - Measured, the top end rises at about the rate both predicted, but
+     from a different floor (§20.5).
+4. **The small end.**
+   - **The law is falsified.** At the three smallest sizes the
+     interval's lower end is 23.5, 7.85 and 21.0, against twice the law's
+     1.66, 2.40 and 2.36. The crossing it extrapolated near `2^23` is not
+     there: at `2^22` and `2^24.8` the thread measures 12.7× and 23.7×
+     batch rho.
+   - **The model's minimum is not confirmed.** The least measured ratio
+     is 4.86× at `2^39` (`K_0/GF(2^41)`), eleven bits above the model's
+     `2^27.8`. At `2^27.8` itself the thread measures 9.33×, 3.3× the
+     model's 2.85×.
+5. **Crossing: none.** The lowest interval anywhere is `[4.21, 5.55]`,
+   at `2^39`.
+
+### 20.5 Where the cost goes
+
+**The descent does not amortise.** A target's descent, set against batch
+rho's cost for one target of 32:
+
+| curve | descent per target | batch rho per target | descent ÷ rho |
+|:--|--:|--:|--:|
+| `K_1/GF(2^19)` | 1,491 | 168 | 8.89× |
+| `K_1/GF(2^23)` | 1,780 | 420 | 4.24× |
+| `K_1/GF(2^45)` | 2,389 | 644 | 3.71× |
+| `K_0/GF(2^37)` | 3,981 | 1,401 | 2.84× |
+| `K_1/GF(2^43)` | 10,730 | 4,541 | 2.36× |
+| `K_1/GF(2^47)` | 25,653 | 19,677 | 1.30× |
+| `K_0/GF(2^41)` | 42,087 | 49,379 | 0.85× |
+| `K_0/GF(2^53)` | 104,548 | 233,711 | 0.45× |
+| `K_0/GF(2^61)` | 621,397 | 677,466 | 0.92× |
+
+Below about `2^37` the descent alone costs more per target than batch rho
+does. No amortisation of the shared phases, over any number of targets,
+brings the thread under batch rho there at this recipe. More targets make
+it worse, not better: rho's cost per target keeps falling as `1/√k`,
+while the descent's does not fall at all.
+
+The declared model priced the descent per probe too. It put the
+descent–rho crossover near `2^28`, because its conversions were frozen
+ones and it had no per-target setup. Measured, each target also pays for:
+
+- 64 walks started with three scalar multiplications;
+- a relation assembled in big-integer arithmetic;
+- a recovery check that is a big-integer scalar multiplication.
+
+At the frozen headline, the `m = 3` descent is 52 trials of whole-base
+scans. It costs 748,180 units, 14,388 a trial, where the frozen ledger
+charged 54 to 62.
+
+**The workflow's constructions.**
+
+- They are 7–70% of `S`: the curve's setup (2.3–8.4% by itself), the
+  column count, the collectors and coverage, the log solver and the
+  descent solver.
+- Each after the setup rebuilds the base's projected orbit map in
+  big-integer arithmetic. Together those cost 107–433 units per base
+  point. [§21 corrects the attribution: the map itself already had a
+  single-word path. The big-integer constructions beside it are the
+  point index and the decomposition check.]
+- They are 70% of `S` at `K_1/GF(2^45)`, whose field is wide for its
+  `r`, and 7% at `2^47.2`.
+- No frozen figure priced them.
+
+**The recipe's floor.** At the four smallest sizes the sweep's best base
+is the builder's minimum of eight orbits (Amendment 1). Every larger base
+cost more at each of them, so a smaller one might have helped. But not
+by the factor needed: none of the four has an interval within a factor
+of seven of one.
+
+**Rho's own fixed costs.** Counted batch rho sits 4.50× its floor at
+`2^18`, falling to about 1.0× from `2^36.6` up. That is walk starts and
+verification per target, which the floor does not carry. It favours the
+index calculus at the small end, and the index calculus still loses
+there.
+
+**The top end.**
+
+- From its minimum at `2^39` the ratio rises: 9.21× at `2^44.3` and
+  13.59× at `2^47.2`.
+- Beyond the local exponent, the prices themselves rise with the table as
+  it leaves cache. A stored pair costs 4.98 units at `2^39`, 7.77 at
+  `2^44.3` and 9.20 at `2^47.2`. A scanned summand costs 1.42, 1.67 and
+  2.62.
+- By `2^47.2` the work is 93% of `S`, and it alone is 12.64× batch rho.
+
+### 20.6 Prices on current main, and the headline re-priced
+
+The unit is itself faster on `main`: 28.2 ns at `n = 41`, against the
+43.8 ns §19.4 measured. So a phase whose own time fell by less than the
+addition's costs more units than it did. The folded build is the case in
+point: 409 ms → 324 ms at the headline, but 6.14 → 7.56 units a stored
+pair.
+
+| price, in batched additions | frozen | §19.4 (`3e8dd352`) | §20, current `main` |
+|:--|--:|--:|--:|
+| scanned summand, collection | 2.85 | — | 1.42 – 2.62 at the four largest sizes |
+| stored pair, folded build | 1 (counted) | 4.5 – 6.1 | 4.8 – 9.2 |
+| selection, per point | 37.3 | — | 29 – 39 |
+| descent, per `m = 3` trial | 1.19 | — | 14,388 at the headline |
+| canonical rho step | 1 (counted) | 2.74 – 2.92 | 1.80 – 2.30 |
+| Bailey et al.'s step (model) | — | 1.38 – 1.41 | 1.39 – 1.67 |
+
+**The frozen headline**, §19.5's `6.38×`, re-priced (Control 2):
+
+| | §19.5 | §20 |
+|:--|--:|--:|
+| build | 9,328,477 | 11,484,831 |
+| collection | 2,517,120 | 1,840,234 |
+| selection | 587,043 | 561,129 |
+| descent | 54 | 748,180 |
+| linear algebra | 2,153 | 73,213 |
+| constructions and setup | — | 3,338,745 |
+| verification | — | 242,602 |
+| `S` per target | 0.524 | 0.773 |
+| batch rho, priced | 0.0822 | 0.0617 |
+| ratio | 6.38× | **12.53×** |
+
+The index-calculus side rose 47%. The descent and the constructions,
+never priced before, are 22% of the new total. The reference fell 25%: a
+canonical step now costs 2.27 units against 2.74, and the batch on these
+32 targets counted 0.0271 against §19's mean of 0.0300.
+
+### 20.7 Classification
+
+**Accounting.** No index-calculus algorithm changed. The thread's figures
+move for three reasons:
+
+- its descent is priced at the probes it scans;
+- its constructions are priced at all;
+- both sides are priced on current `main`.
+
+Its best figure against batch rho at `k = 32` goes from 6.38× (§19.5) to
+4.86× at `2^39`. But that is reached by a smaller base than the thread
+ran, as the sweep chose. The thread's own recipe re-priced reads 10.9–12.5×.
+
+Two ratios to the floor stand:
+
+- the index calculus at its best is 11.8× the floor;
+- batch rho is about 1.0× the floor from `2^36.6` up.
+
+### 20.8 What does not count
+
+- **The work column** is a stage diagnostic. Its 3.73× at `2^39` is
+  neither a speed nor the method's cost.
+- **The Bailey column** in `analysis.json` is a model. Bailey's walk has
+  still not been counted here.
+- **Anything beyond `2^47.2` or below `2^18`** is extrapolation. So is
+  any reading of these rows at a different `k`, where rho per target
+  moves as `1/√k` and the descent per target does not move.
+- **The `r^{1/6}` on the page** is consistent with the top end, but it is
+  not confirmed as the thread's law there. The declared four-point fit
+  cannot separate `1/6` from the model's `0.141` or from zero.
+
+### 20.9 Reproducing
+
+    cargo build --release --bin ic
+    cd research/ic_exponent_20260926
+    python3 run.py all                 # resumable; one Rayon thread, taskset -c 2
+    python3 analyse.py > analysis.json
+    python3 render_rows.py md          # the table in §20.3
+
+### 20.10 What stays open
+
+Each of these is engineering (§3). It would lower `S` without moving the
+ratio to the floor, and each is measurable with `ic price` on this
+round's parameter files.
+
+- **One orbit map, in single-word arithmetic.** The constructions in
+  §20.5 are the same map rebuilt four to six times a run in big-integer
+  arithmetic, and they are 7–70% of `S`. Built once and shared, with the
+  counts unchanged, they would take most of that out of the small and
+  middle sizes. [Taken by §21. Built once, the constructions fell
+  2.1–11.7× and the whole pipeline got 1.04–2.25× faster, with every
+  count unchanged.]
+- **The per-target big-integer work.** The descent's recovery check and
+  the final verification are each a big-integer scalar multiplication
+  per target. They are part of why the descent's cost per target stays
+  above rho's up to `2^37`.
+- **The builder's eight-orbit minimum.** It binds at the four smallest
+  sizes.
+- **The build's price as the table leaves cache.** A stored pair costs
+  4.98 units at `2^39` and 9.20 at `2^47.2`. This is the §19.7
+  one-pass-build lever again, now where it weighs most.
+- **The exponent at the top.** Separating `1/6` from `0.141` needs more
+  sizes above `2^40`, or more sets per size. The declared four-point fit
+  cannot.
+- **Bailey's walk, counted** (§19.7). This is still unmeasured, so its
+  column stays a model.
+
+## 21. The workflow's constructions, built once
+
+§20.10's first open item. It is an engineering round: every count,
+relation and recovered logarithm must come out as it was, and `S` must
+fall.
+
+**First, a correction to §20's wording.** §20.5 and §20.10 describe the
+constructions as the orbit map rebuilt "in big-integer arithmetic". The
+probe below shows that is not quite what happens:
+
+- The projected signed-orbit map already has a single-word path. It is
+  expensive because it is rebuilt five times a run, and each build pays
+  one cofactor multiplication per base point.
+- The big-integer constructions are two others: the point index, keyed
+  by big integers, and the decomposition check, which computes `[r]P` in
+  big-integer arithmetic per signed orbit.
+
+§20's numbers stand. Only the attribution was loose.
+
+### 21.1 Declared before any candidate code or timed comparison
+
+The protocol is `research/ic_constructions_20260926/PROTOCOL.md` (v1).
+
+**The probe** was made first, and it is the only measurement that was.
+`examples/koblitz_construction_prices.rs`, on the unmodified binary,
+priced each constructor alone, in units per base point:
+
+| constructor | `n = 41` | `n = 61` | builds per run |
+|:--|--:|--:|--:|
+| orbit map | 23.3 | 59.1 | 5 |
+| point index | 5.7 | 5.6 | 3 |
+| decomposition check | 10.8 | 8.5 | 2 |
+
+**The change.**
+
+1. **Built once per base.** The factor base keeps each of the three
+   constructions in a `OnceLock`, keyed by the curve's identity. Every
+   consumer borrows it, and no public signature changes.
+2. **One cofactor multiplication per Frobenius orbit.** The map projects
+   one point per recorded orbit and derives the rest by Frobenius. It
+   first confirms each orbit's recorded order on the lifted points, and
+   falls back to one multiplication per point if the order does not
+   match.
+
+**The comparison.**
+
+- **Binaries:** the baseline is `ic` at `e7022b75`, sha256 `e51e9431…`,
+  kept outside the tree. The candidate is `ic` at the candidate commit.
+- **Inputs:** §20's 36 frozen parameter files (`inputs.sha256`).
+- **Runs:** five rounds per file, baseline and candidate interleaved.
+  Each process is `ic price` at three repetitions (fifteen when fast),
+  on one thread under `taskset`.
+- **Pins:** every candidate report's counts and recovered logarithms
+  equal the baseline's in all 180 pairs. Control 1 holds on the
+  candidate at every size.
+- **Many threads:** a four-thread check at the two largest sizes.
+
+**Targets:**
+
+1. Identical outputs.
+2. The constructions fall at least 3× at every size.
+3. A whole-pipeline speedup whose 95% interval excludes 1, at the seven
+   sizes where §20 put the constructions at 15% of `S` or more.
+4. No regression anywhere, at one thread or at four.
+
+**Stop:** on any mismatch in counts or recovered logarithms.
+
+**Class: engineering.** Counts do not move, `S` falls.
+
+### 21.2 What ran
+
+Everything is in `research/ic_constructions_20260926/`. It ran in the
+declared order, on one host of §20's class (`host.json`: a 4-core
+x86-64 container, rustc 1.94.1).
+
+- **Binaries.**
+  - The baseline `ic` is `e7022b75`'s, sha256 `e51e9431…`. It has been
+    kept outside the tree since the declaration.
+  - The candidate `ic` is `33936731`'s, built from a clean tree: sha256
+    `18fcf4e8…`.
+- **The main comparison.** §20's 36 measurement parameter files. Their
+  hashes matched `inputs.sha256` before anything ran.
+  - For each file, five rounds of baseline then candidate: 360
+    processes in all.
+  - Each process is `ic price` at three repetitions (fifteen when fast),
+    on one Rayon thread under `taskset -c 2`, with nothing else running.
+- **Controls.**
+  - Control 1 (`ic workflow` against `ic price`, field by field) on the
+    candidate, at every size's `M1`.
+  - Batch rho re-priced on the candidate at `n = 41`, `M1`, with §20's
+    seeds.
+- **Four threads.** `n = 53` and `n = 61`, `M1`: three ABAB rounds
+  under `taskset -c 0-3`.
+- **Per constructor.** `examples/koblitz_construction_prices.rs` on both
+  binaries, at `n = 41` and `n = 61`.
+
+No set's A/A spread (the max over min of its five baseline totals)
+exceeded 1.25; the highest were 1.245 and 1.242. So the spread rule
+never fired, and no set was rerun.
+
+### 21.3 The table
+
+**How to read it.**
+
+- `S` is per target at `k = 32`, in the unit each process measured for
+  itself.
+- The ratio is against §20's batch rho on the same 32 targets, with an
+  interval over the four sets.
+- The speedup is baseline total over candidate total, pair by pair. It
+  is AGENTS.md §8's `baseline_total_operations /
+  candidate_total_operations`, reported as the geometric mean of 20
+  pairs with its 95% interval.
+- **Constructions** is the declared group: `select_projection`,
+  `collect_setup`, `logs_setup` and `descent_setup`. The curve's setup
+  is not in it. Its fall is a stage diagnostic, and so is its share of
+  the total.
+
+| curve | log₂ r | `S`, before → after | ratio to batch rho | speedup [95%] | constructions fall [95%] | constructions share |
+|:--|--:|--:|--:|--:|--:|--:|
+| `K_1/GF(2^19)` | 18.0 | 7.223 → 6.819 | 22.08× → **20.85×** [19.23, 22.51] | **1.058×** [1.050, 1.066] | 2.1× [2.1, 2.2] | 24.6% → 12.3% |
+| `K_1/GF(2^23)` | 22.0 | 2.322 → 1.983 | 11.33× → **9.68×** [6.00, 14.41] | **1.169×** [1.153, 1.185] | 2.8× [2.8, 2.8] | 32.5% → 13.5% |
+| `K_1/GF(2^45)` | 24.8 | 2.670 → 1.182 | 22.42× → **9.93×** [9.07, 10.83] | **2.245×** [2.222, 2.268] | 9.1× [9.0, 9.2] | 63.8% → 15.7% |
+| `K_0/GF(2^37)` | 27.8 | 0.861 → 0.582 | 9.33× → **6.31×** [5.42, 7.24] | **1.490×** [1.467, 1.513] | 5.8× [5.8, 5.9] | 38.5% → 9.9% |
+| `K_1/GF(2^43)` | 32.1 | 0.518 → 0.368 | 7.78× → **5.53×** [4.72, 6.39] | **1.404×** [1.383, 1.425] | 8.2× [8.1, 8.3] | 35.6% → 6.2% |
+| `K_1/GF(2^47)` | 36.6 | 0.381 → 0.267 | 6.33× → **4.44×** [4.04, 4.87] | **1.420×** [1.388, 1.454] | 9.0× [8.8, 9.3] | 36.3% → 5.7% |
+| `K_0/GF(2^41)` | 39.0 | 0.322 → 0.285 | 4.84× → **4.28×** [3.94, 4.63] | **1.131×** [1.115, 1.148] | 5.2× [5.0, 5.3] | 14.4% → 3.1% |
+| `K_0/GF(2^53)` | 44.3 | 0.427 → 0.396 | 8.37× → **7.77×** [5.59, 10.29] | **1.072×** [1.050, 1.094] | 9.0× [8.9, 9.1] | 11.3% → 1.4% |
+| `K_0/GF(2^61)` | 47.2 | 0.665 → 0.644 | 12.53× → **12.12×** [10.75, 13.58] | **1.039×** [1.005, 1.073] | 11.7× [11.3, 12.1] | 5.1% → 0.4% |
+
+**The whole pipeline is faster at every size.**
+
+- The speedup is largest where the constructions weighed most: 2.25× at
+  `K_1/GF(2^45)`, whose field is wide for its `r`.
+- It is 1.40–1.49× in the middle of the range.
+- It is 1.04–1.13× at the top, where the work dominates.
+- It is 1.06–1.17× at the two smallest sizes, where a fixed cost the
+  round did not touch remains (§21.6).
+
+**Two cautions on the before column.**
+
+- **The before arm is re-measured.** It is this round's own baseline on
+  this host, not §20's figure. It reads 0.89–1.00× of §20's `S` with the
+  same binary on the same inputs. That is the run-to-run spread of `S`
+  across container instances, and it is why this round pairs within
+  itself.
+- **The page's older figures are §20's.** Where they are the "was", as
+  §20's 4.86× at `2^39` is, part of the move from them is that spread.
+  The rest is the change, and only the matched speedup separates the two.
+
+### 21.4 The unit moved, and not because of its code
+
+The unit is one batched affine addition, timed in each process. In the
+candidate it runs at 0.99–1.11× the baseline's speed, faster at eight of
+the nine sizes. Yet its source did not change.
+
+**What was checked:**
+
+- `FastCurve::add_many` is the same code in both binaries: 437
+  instructions, the same size, and 64-byte aligned in both. Only two
+  instructions differ, and only in the address of a read-only constant
+  they load.
+- So is its one out-of-line callee, `Gf2::sqr`. It has the same code,
+  the same alignment and the same distance from `add_many`.
+  (`unit_shift/`, from `disasm.sh`.)
+- The shift is already there in each process's first measurement,
+  before any pipeline work: 0.97–1.11 by size.
+- Within a process the unit holds still. Over a repetition it moves by
+  a median factor of 0.999–1.005 per size, though single processes
+  range 0.93–1.14.
+
+The shift is therefore a fixed property of binary and curve. This round
+did not isolate its cause; data placement is the remaining suspect.
+
+**Its effect.** A phase the change does not touch takes the same time in
+both binaries: 0.994–1.019× over the untouched phases. But it costs up
+to 11% more *units* in the candidate. So where the unit sped up, the
+declared speedups understate the change. Secondary and not declared,
+the same 180 pairs in nanoseconds:
+
+| curve | wall-clock speedup [95%] | unit, baseline ns ÷ candidate ns | untouched phases, baseline ÷ candidate |
+|:--|--:|--:|--:|
+| `K_1/GF(2^19)` | 1.172 [1.164, 1.179] | 1.103 | 1.002 |
+| `K_1/GF(2^23)` | 1.295 [1.285, 1.305] | 1.109 | 1.011 |
+| `K_1/GF(2^45)` | 2.344 [2.322, 2.366] | 1.042 | 0.997 |
+| `K_0/GF(2^37)` | 1.464 [1.440, 1.488] | 0.990 | 0.994 |
+| `K_1/GF(2^43)` | 1.477 [1.456, 1.498] | 1.052 | 1.003 |
+| `K_1/GF(2^47)` | 1.512 [1.484, 1.541] | 1.064 | 1.013 |
+| `K_0/GF(2^41)` | 1.141 [1.123, 1.159] | 1.006 | 1.006 |
+| `K_0/GF(2^53)` | 1.129 [1.110, 1.148] | 1.059 | 1.019 |
+| `K_0/GF(2^61)` | 1.052 [1.031, 1.073] | 1.011 | 1.000 |
+
+**Rho re-priced on the candidate** at `n = 41`, `M1`. Every count, step
+and recovered logarithm equals §20's, and so do the pipeline's. It
+prices at 0.0603 a target against §20's 0.0610, a fall of 1.1%.
+
+### 21.5 The targets, graded
+
+1. **Identical outputs: met.**
+   - All 180 pairs agree in counts and in recovered logarithms, and
+     every target in every report was verified.
+   - Control 1 holds on the candidate at all nine sizes.
+2. **Constructions down at least 3× at every size: not met.** They fell
+   2.1× at `2^18` and 2.8× at `2^22`. At the other seven sizes they fell
+   5.2–11.7×. §21.6 says what is left.
+3. **A speedup interval excluding 1 at the seven declared sizes: met.**
+   The lower bounds run from 1.050 at `2^18` to 2.222 at `2^24.8`.
+4. **No regression: met.**
+   - At one thread every interval lies above 1. That includes the two
+     sizes exempt from target 3: 1.072 [1.050, 1.094] at `2^44.3` and
+     1.039 [1.005, 1.073] at `2^47.2`.
+   - At four threads, on three pairs each: 1.078 [0.987, 1.176] at
+     `2^44.3` and 1.066 [0.947, 1.200] at `2^47.2`. Neither interval lies
+     below 1, and neither excludes it.
+
+### 21.6 What is left of the constructions
+
+Each constructor alone, in units per base point: its first call, then a
+later one (from `runs/constructions/`).
+
+| constructor | `n = 41` before | `n = 41` after: first, later | `n = 61` before | `n = 61` after: first, later |
+|:--|--:|--:|--:|--:|
+| projected map | 26.3 | 8.95, 1.44 | 71.3 | 8.72, 0.72 |
+| coverage | 23.3 | 1.45, 1.61 | 59.1 | 1.05, 1.03 |
+| log solver | 22.9 | 1.09, 1.10 | 57.6 | 0.80, 0.76 |
+| relation collector | 19.5 | 9.58, 1.94 | 15.6 | 8.55, 1.66 |
+| decomposition check | 10.7 | 12.4, 1.48 | 8.07 | 9.87, 0.74 |
+| point index (`index_map`, uncached) | 5.7 | 6.1 | 6.6 | 7.6 |
+| field structure | 0.46 | 0.50 | 0.15 | 0.14 |
+| the curve (out of scope) | 74.6 | 80.4 | 152 | 165 |
+
+**What changed.**
+
+- The map's one build fell 2.9× at `n = 41` and 8.2× at `n = 61`. It now
+  pays one cofactor multiplication per Frobenius orbit: 160 of them
+  instead of 6,560 at `n = 41`.
+- Every later consumer now pays only the lookup.
+
+**What is left, by size.**
+
+- **In the middle and at the top**, three things remain:
+  - the two big-integer constructions, now built once: the decomposition
+    classes (`[r]P` per signed orbit) and the point index;
+  - the map's canonicalisation (hash sets over every signed orbit):
+    7.6–13.7 units a point in `select_projection`;
+  - the lookups themselves.
+- **At the two smallest sizes**, what is left is a fixed cost the round
+  did not touch. `FieldStructure::new` computes `n²` big-integer field
+  products and is built three times a run: by both collectors and by the
+  descent solver. On a base of 304 or 368 points that fixed cost is most
+  of the group, which is why target 2 failed there.
+- **The lookup's identity check** goes beyond the declaration, which
+  keyed each construction by the curve's identity and the base's size.
+  The implementation fingerprints every point of the base, so that a
+  base edited after first use cannot be served a stale map.
+  - It costs 0.3–0.7 units a point per lookup in the pipeline. A lookup
+    is all of `logs_setup`.
+  - There are about ten lookups a run.
+  - It is in every candidate figure above.
+- **The curve's setup** (factorising the group order) is untouched:
+  25–171 units a point. From `2^27.8` up it now costs more than the
+  whole declared group. It is out of scope, as declared.
+
+### 21.7 Classification
+
+**Engineering** (AGENTS.md §3).
+
+**What did not move:**
+
+- the counts, the relations and the recovered logarithms;
+- the counting floor, and the ratio to it.
+
+**What fell:**
+
+- `S` fell 1.04–2.25×, and the ratio to batch rho fell with it.
+- The least ratio is now 4.28× [3.94, 4.63] at `2^39`. This round's
+  own baseline read 4.84× there, and §20 4.86×.
+- Below `2^25` the thread reads 9.7–20.9×, where §20 read 12.7–24.8×.
+
+There is still no crossing, and nothing the method finds has changed.
+
+**The top end's exponent**, refitted by §20's declared method (the fit
+of `ratio·√n` over the four largest sizes):
+
+- **after:** `r^0.165` [0.010, 0.320], or `r^0.168` [0.024, 0.311] at
+  the baseline binary's unit;
+- **this round's baseline:** `r^0.128` [−0.091, 0.347];
+- **§20:** `r^0.137` [−0.10, 0.37].
+
+The interval now excludes zero, so the ratio does rise with `r` at the
+top. It still cannot separate `1/6` from the model's 0.141. The
+constructions weighed more at the smaller of the four sizes, and taking
+them out steepened the fit. That is the growth becoming visible, not a
+change in it.
+
+### 21.8 What does not count
+
+- **The constructions column** is a stage diagnostic.
+- **The wall-clock speedups** are secondary. They are paired on one host
+  and hold for its class only: one x86-64 container. Nothing is claimed
+  for Arm64, GPUs or other hosts.
+- **The four-thread check** shows no regression on three pairs. It shows
+  no gain either.
+- **The refit** rests on four points and two degrees of freedom.
+
+### 21.9 Reproducing
+
+    # the three binaries: research/ic_constructions_20260926/README.md
+    cd research/ic_constructions_20260926
+    IC_BASELINE=… IC_CANDIDATE=… PRICES_BASELINE=… PRICES_CANDIDATE=… python3 run.py all
+    python3 analyse.py > analysis.json
+    python3 render_rows.py md          # the table in §21.3
+
+### 21.10 What stays open
+
+Each of these is engineering. All are measurable the same way, on the
+same 36 files.
+
+- **`FieldStructure::new`**, rebuilt three times a run. It decides the
+  small end.
+- **The two big-integer constructions** in single-word arithmetic: the
+  decomposition classes and the point index.
+- **A cheaper identity check.** Alternatively, consumers could take a
+  base's constructions explicitly, and not look them up.
+- **The curve's setup**, which from `2^27.8` up now costs more than
+  all the declared constructions together.
+- **The unit's shift between binaries.** A rebuilt binary's unit moved
+  by 0.99–1.11× with its code unchanged. Until the cause is isolated,
+  any cross-binary comparison in this unit carries that much.
+- **Carried from §20.10:** the per-target big-integer work, the
+  builder's eight-orbit minimum, the build's price as the table leaves
+  cache, and Bailey's walk.
 
 ## Appendix A. The conversion factors, as measured
 

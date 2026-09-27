@@ -224,7 +224,7 @@ pub fn format_joux_tree(depth: usize) -> String {
     for i in 0..depth {
         s.push_str("  │  (choose B_a^{");
         s.push_str(&format!("{}", i + 1));
-        s.push_str("}");
+        s.push('}');
         let _ = i;
         s.push_str("        ");
     }

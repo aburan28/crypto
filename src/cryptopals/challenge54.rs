@@ -196,7 +196,7 @@ pub fn find_glue(
 pub fn forge(diamond: &Diamond, prediction: &[u8], iv: &[u8], b_bytes: usize) -> Vec<u8> {
     // Hash the prediction up to its final state.  The prediction
     // should already be 16-byte aligned (caller's responsibility).
-    assert!(prediction.len() % 16 == 0);
+    assert!(prediction.len().is_multiple_of(16));
     let state_after_pred = weak_hash(prediction, iv, b_bytes);
     let (glue, leaf_idx) = find_glue(&state_after_pred, diamond, b_bytes);
     let mut out = prediction.to_vec();
@@ -230,7 +230,7 @@ pub fn run() -> Report {
         b"The Wu-Tang Clan will rule the AFC East in week 17\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
     // Align to 16 bytes — trim/pad as needed.
     let mut padded = prediction.to_vec();
-    while padded.len() % 16 != 0 {
+    while !padded.len().is_multiple_of(16) {
         padded.push(0);
     }
     let forged = forge(&diamond, &padded, &iv, b_bytes);

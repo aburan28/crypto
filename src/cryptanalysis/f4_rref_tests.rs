@@ -51,7 +51,7 @@ fn synthetic(rows: usize, cols: usize, kind: &str, mut seed: u64) -> Vec<Vec<u64
                 *word &= next(&mut seed) & next(&mut seed) & next(&mut seed);
             }
         }
-        if cols % 64 != 0 {
+        if !cols.is_multiple_of(64) {
             *row.last_mut().unwrap() &= (1u64 << (cols % 64)) - 1;
         }
     }

@@ -33,9 +33,12 @@ use crypto_lib::cryptanalysis::koblitz_fast::FastPoint;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
 
 /// Degrees where `ℓ = 3` divides the conductor, so a 3-isogeny moves.
-/// `ℓ = 3` is the one degree whose kernels need no factorisation: the
-/// kernel polynomial is linear, so the kernels are simply the roots of the
-/// degree-4 `ψ₃`.
+/// `ℓ = 3` is the degree this example walks: its kernel polynomial is
+/// linear, so no torsion needs building.  Every other degree is walked by
+/// `koblitz_isogeny_class_walk`, which builds `E[ℓ]` in its splitting field.
+/// It is kept for that independent route: at `ℓ = 3` the kernels are simply
+/// the roots of the degree-4 `ψ₃`, which the walk's torsion construction is
+/// tested against.
 const CASES: &[(u32, u8)] = &[(12, 0), (16, 0), (16, 1), (20, 0)];
 
 fn factorise(mut v: u64) -> Vec<(u64, u32)> {
@@ -43,7 +46,7 @@ fn factorise(mut v: u64) -> Vec<(u64, u32)> {
     let mut d = 2u64;
     while d.saturating_mul(d) <= v {
         let mut e = 0;
-        while v % d == 0 {
+        while v.is_multiple_of(d) {
             v /= d;
             e += 1;
         }
@@ -94,7 +97,10 @@ fn main() {
         let f = factorise(base.order);
         let (r, e) = *f.last().expect("a factor");
         if e != 1 || r < 50 {
-            println!("\n── n={n} a₂={a2}: #E = {} has no clean prime subgroup; skipped.", base.order);
+            println!(
+                "\n── n={n} a₂={a2}: #E = {} has no clean prime subgroup; skipped.",
+                base.order
+            );
             continue;
         }
         let cofactor = base.order / r;
@@ -168,7 +174,14 @@ fn main() {
                     "FAIL"
                 }
             );
-            one_hop_rows.push((n, a2, *a6p, rep.order_preserved, rep.transported, rep.image_order_ok));
+            one_hop_rows.push((
+                n,
+                a2,
+                *a6p,
+                rep.order_preserved,
+                rep.transported,
+                rep.image_order_ok,
+            ));
         }
 
         // ── part 2: a walk, composing hops ──────────────────────────
@@ -211,11 +224,10 @@ fn main() {
                 };
                 let g2 = next.group();
                 let mut o2 = GroupOps::default();
-                let ok = g2.mul(&mut o2, pp, r).infinity
-                    && {
-                        let dp = g2.mul(&mut o2, pp, d % r);
-                        !dp.infinity && dp.x == qq.x
-                    };
+                let ok = g2.mul(&mut o2, pp, r).infinity && {
+                    let dp = g2.mul(&mut o2, pp, d % r);
+                    !dp.infinity && dp.x == qq.x
+                };
                 if ok {
                     verified += 1;
                 } else {
@@ -227,10 +239,12 @@ fn main() {
             }
         }
 
-        let by_depth = depth.values().fold(BTreeMap::new(), |mut m: BTreeMap<u32, usize>, d| {
-            *m.entry(*d).or_insert(0) += 1;
-            m
-        });
+        let by_depth = depth
+            .values()
+            .fold(BTreeMap::new(), |mut m: BTreeMap<u32, usize>, d| {
+                *m.entry(*d).or_insert(0) += 1;
+                m
+            });
         println!(
             "      reached {} vertices by composed 3-isogenies; depth histogram {:?}",
             reached.len(),
@@ -259,13 +273,24 @@ fn main() {
             degs,
             reached.len()
         );
-        walk_rows.push((n, a2, reached.len(), verified, failed, cls.class_size.to_string(), degs.join(",")));
+        walk_rows.push((
+            n,
+            a2,
+            reached.len(),
+            verified,
+            failed,
+            cls.class_size.to_string(),
+            degs.join(","),
+        ));
     }
 
     // ── part 3: the reach, in the same units as the cost sweep ──────
     println!("\n════════════════════════════════════════════════════════════════");
     println!("── Part 3: what this route can and cannot name ──");
-    println!("\n   {:>4} {:>14} {:>22} {:>14} {:>16}", "n", "class size", "isogeny degrees ℓ|c", "deg ψ_ℓ", "kernel route");
+    println!(
+        "\n   {:>4} {:>14} {:>22} {:>14} {:>16}",
+        "n", "class size", "isogeny degrees ℓ|c", "deg ψ_ℓ", "kernel route"
+    );
     for n in [8u32, 12, 16, 17, 19, 20] {
         let cls = koblitz_isogeny_class(n, 5_000_000);
         let degs: Vec<u64> = cls
@@ -279,23 +304,26 @@ fn main() {
             "   {:>4} {:>14} {:>22} {:>14} {:>16}",
             n,
             cls.class_size.to_string(),
-            degs.iter().map(|d| d.to_string()).collect::<Vec<_>>().join(","),
+            degs.iter()
+                .map(|d| d.to_string())
+                .collect::<Vec<_>>()
+                .join(","),
             psideg,
             if maxd == 3 {
                 "roots of ψ₃"
-            } else if maxd <= 31 {
-                "factor ψ_ℓ"
             } else {
-                "factor ψ_ℓ (large)"
+                "E[ℓ] in F_(q^m)"
             }
         );
     }
     println!("\n   ℓ = 3 needs no factorisation at all: the kernel polynomial is");
     println!("   linear, so the kernels are the four roots of a degree-4 ψ₃.");
-    println!("   Every larger ℓ needs the degree-(ℓ−1)/2 factors of ψ_ℓ, which is");
-    println!("   where n = 17 (ℓ=271, deg ψ = 36720) and n = 19 (ℓ=457, deg ψ =");
-    println!("   104424) sit.  That is a factorisation problem, not a Vélu one:");
-    println!("   the formulas above already work at any ℓ, given the kernel.");
+    println!("   Larger ℓ do not need ψ_ℓ factored either, though this example");
+    println!("   once said they did.  At the crater Frobenius is a scalar λ on");
+    println!("   E[ℓ], so E[ℓ] lives in F_(q^m) with m = ord_ℓ(λ) — m = 135 at");
+    println!("   n = 17 and 8 at n = 19 — and the kernels are read off its points.");
+    println!("   That walk is `koblitz_isogeny_class_walk`; it reaches every");
+    println!("   member of both classes the cost sweep measured.");
 
     println!("\n── summary ──");
     let hops_ok = one_hop_rows.iter().filter(|r| r.3 && r.4 && r.5).count();

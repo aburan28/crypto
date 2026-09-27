@@ -6,10 +6,9 @@
 
 use crypto_lib::cryptanalysis::koblitz_groebner::{FieldStructure, SolverEngine};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    all_factors_of_x_n_minus_1, available_subspace_dimensions,
-    build_frobenius_factor_base_from_divisor, cyclotomic_cosets, enumerate_decompose,
-    groebner_decompose, koblitz_index_calculus_dlp_with_factor_base, sat_decompose,
-    DecompositionStrategy, KoblitzCurve, KoblitzIcOptions,
+    available_subspace_dimensions, build_frobenius_factor_base_from_divisor, cyclotomic_cosets,
+    enumerate_decompose, groebner_decompose, koblitz_index_calculus_dlp_with_factor_base,
+    sat_decompose, DecompositionStrategy, KoblitzCurve, KoblitzIcOptions,
 };
 use num_bigint::BigUint;
 use std::time::Instant;
@@ -19,8 +18,8 @@ fn main() {
     println!("=== Every invariant subspace dimension, by cyclotomic coset ===");
     println!();
     println!(
-        "{:>5} {:>7} {:>28}  {}",
-        "n", "cosets", "coset sizes", "available dimensions"
+        "{:>5} {:>7} {:>28}  available dimensions",
+        "n", "cosets", "coset sizes"
     );
     for n in [7u32, 9, 15, 21, 31, 63, 127, 131, 163] {
         let mut sizes: Vec<usize> = cyclotomic_cosets(n).iter().map(|c| c.len()).collect();

@@ -45,7 +45,7 @@ fn left_kernel(
             .max()
             .unwrap_or(0);
         let mut mults = vec![0u64];
-        if de + 1 <= d {
+        if de < d {
             for v in 0..n_vars {
                 mults.push(1u64 << v);
             }

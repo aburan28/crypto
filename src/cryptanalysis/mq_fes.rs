@@ -402,7 +402,10 @@ pub fn wide_lanes() -> Option<usize> {
 /// unrolled chunk and `n − k ≤ 32`.  Returns `None` when the host has
 /// neither AVX-512 nor AVX2 or the system does not fit, and otherwise the
 /// solutions (bit `i` = `x_i`, in no particular order) and the lane count.
-pub fn gray_find_all_wide(forms: &[QuadraticForm], max_solutions: usize) -> Option<(Vec<u64>, usize)> {
+pub fn gray_find_all_wide(
+    forms: &[QuadraticForm],
+    max_solutions: usize,
+) -> Option<(Vec<u64>, usize)> {
     let lanes = wide_lanes()?;
     let n = forms.first()?.n;
     let k = lanes.trailing_zeros() as usize;
@@ -456,7 +459,10 @@ mod wide {
     }
     macro_rules! zero_lanes_256 {
         ($v:expr) => {
-            _mm256_movemask_ps(_mm256_castsi256_ps(_mm256_cmpeq_epi32($v, _mm256_setzero_si256()))) as u32
+            _mm256_movemask_ps(_mm256_castsi256_ps(_mm256_cmpeq_epi32(
+                $v,
+                _mm256_setzero_si256(),
+            ))) as u32
         };
     }
 
@@ -584,7 +590,15 @@ fn gray_ffs_minimal(
 }
 
 #[inline(always)]
-fn step2(fq: &[u64; 561], fl: &mut [u64; 34], a: usize, b: usize, index: u64, out: &mut Vec<u64>, max_solutions: usize) -> bool {
+fn step2(
+    fq: &[u64; 561],
+    fl: &mut [u64; 34],
+    a: usize,
+    b: usize,
+    index: u64,
+    out: &mut Vec<u64>,
+    max_solutions: usize,
+) -> bool {
     if fl[0] == 0 {
         out.push(index ^ (index >> 1));
         if out.len() >= max_solutions {
@@ -607,7 +621,7 @@ fn gray_ffs_unrolled_l4(
     const L: usize = 4;
     let mut ffs = Ffs::reset(n - L);
     let mut k1 = ffs.k1 + L as i32;
-    let mut k2 = ffs.k2 + L as i32;
+    let mut k2;
     let iterations = 1u64 << (n - L);
     for j in 0..iterations {
         let alpha = idxq(0, k1 as usize);
@@ -645,10 +659,7 @@ pub fn gray_incremental_find_one(forms: &[QuadraticForm]) -> Option<u64> {
 }
 
 /// Previous O(n)-per-step Gray update — kept for regression / speed comparison.
-pub fn gray_on_step_find_all(
-    forms: &[QuadraticForm],
-    max_solutions: usize,
-) -> Option<Vec<u64>> {
+pub fn gray_on_step_find_all(forms: &[QuadraticForm], max_solutions: usize) -> Option<Vec<u64>> {
     if forms.is_empty() {
         return Some(vec![0]);
     }
@@ -771,11 +782,7 @@ pub fn mq_fes_decompose(
             return (None, stats);
         }
     };
-    let forms: Option<Vec<_>> = sys
-        .equations
-        .iter()
-        .map(QuadraticForm::from_poly)
-        .collect();
+    let forms: Option<Vec<_>> = sys.equations.iter().map(QuadraticForm::from_poly).collect();
     let forms = match forms {
         Some(forms) => forms,
         None => {
@@ -964,7 +971,9 @@ mod tests {
                     n,
                     constant: rng.gen(),
                     linear: (0..n).map(|_| rng.gen()).collect(),
-                    quad: (0..n).map(|i| (0..i).map(|_| rng.gen_bool(0.4)).collect()).collect(),
+                    quad: (0..n)
+                        .map(|i| (0..i).map(|_| rng.gen_bool(0.4)).collect())
+                        .collect(),
                 })
                 .collect();
             // Plant a root: shift each form's constant so it vanishes there.
@@ -976,16 +985,25 @@ mod tests {
                 }
             }
             let mut scalar = gray_incremental_find_all(&forms, usize::MAX).unwrap();
-            let (mut wide, used) = gray_find_all_wide(&forms, usize::MAX).expect("fits the wide search");
+            let (mut wide, used) =
+                gray_find_all_wide(&forms, usize::MAX).expect("fits the wide search");
             assert_eq!(used, lanes);
             scalar.sort_unstable();
             wide.sort_unstable();
-            assert!(scalar.contains(&planted), "trial {trial}: the scalar search lost the planted root");
+            assert!(
+                scalar.contains(&planted),
+                "trial {trial}: the scalar search lost the planted root"
+            );
             assert_eq!(wide, scalar, "trial {trial} (n = {n}, m = {m})");
         }
         // Too many equations for a 32-bit lane, or too few variables for
         // the unrolled chunk: declined, not answered wrongly.
-        let wide_form = |n: usize| QuadraticForm { n, constant: false, linear: vec![false; n], quad: (0..n).map(|i| vec![false; i]).collect() };
+        let wide_form = |n: usize| QuadraticForm {
+            n,
+            constant: false,
+            linear: vec![false; n],
+            quad: (0..n).map(|i| vec![false; i]).collect(),
+        };
         assert!(gray_find_all_wide(&vec![wide_form(12); 33], 1).is_none());
         assert!(gray_find_all_wide(&[wide_form(k + 3)], 1).is_none());
     }

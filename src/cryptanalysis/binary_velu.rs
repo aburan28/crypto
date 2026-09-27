@@ -81,7 +81,9 @@
 use std::collections::{BTreeSet, HashMap};
 
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, F2mPoly, IrreduciblePoly};
-use crate::cryptanalysis::ic_boundary::{binary_point_count, ArtinSchreier, BinaryGroup, CountedGroup, GroupOps};
+use crate::cryptanalysis::ic_boundary::{
+    binary_point_count, ArtinSchreier, BinaryGroup, CountedGroup, GroupOps,
+};
 use crate::cryptanalysis::koblitz_fast::{FastCurve, FastPoint};
 use crate::cryptanalysis::semaev_decomp::Gf2;
 
@@ -122,12 +124,7 @@ pub fn to_u64(e: &F2mElement) -> u64 {
 /// For odd `ℓ`, `deg ψ_ℓ = (ℓ² − 1)/2`, and its roots are the abscissae of
 /// the `ℓ`-torsion — `(ℓ+1)` subgroups of order `ℓ`, each contributing
 /// `(ℓ−1)/2` of them.
-pub fn division_polynomial(
-    a6: &F2mElement,
-    m: u32,
-    n: u32,
-    irr: &IrreduciblePoly,
-) -> F2mPoly {
+pub fn division_polynomial(a6: &F2mElement, m: u32, n: u32, irr: &IrreduciblePoly) -> F2mPoly {
     let zero = F2mElement::zero(n);
     let one = F2mElement::one(n);
     let p0 = F2mPoly::zero(n);
@@ -135,7 +132,13 @@ pub fn division_polynomial(
     let psi2 = F2mPoly::from_coeffs(vec![zero.clone(), one.clone()], n);
     // ψ₃ = x⁴ + x³ + a₆
     let psi3 = F2mPoly::from_coeffs(
-        vec![a6.clone(), zero.clone(), zero.clone(), one.clone(), one.clone()],
+        vec![
+            a6.clone(),
+            zero.clone(),
+            zero.clone(),
+            one.clone(),
+            one.clone(),
+        ],
         n,
     );
     // ψ₄ = ψ₂·(x⁵ + a₆x) = x⁶ + a₆x²
@@ -170,6 +173,7 @@ pub fn division_polynomial(
     psi_rec(m, a6, n, irr, &mut cache)
 }
 
+#[allow(clippy::only_used_in_recursion)]
 fn psi_rec(
     m: u32,
     a6: &F2mElement,
@@ -184,7 +188,7 @@ fn psi_rec(
         let k = (m - 1) / 2; // m = 2k+1
         let a = psi_rec(k + 2, a6, n, irr, cache);
         let b = psi_rec(k, a6, n, irr, cache);
-        let c = psi_rec(k.wrapping_sub(1).max(0), a6, n, irr, cache);
+        let c = psi_rec(k.wrapping_sub(1), a6, n, irr, cache);
         let d = psi_rec(k + 1, a6, n, irr, cache);
         let b3 = b.mul(&b, irr).mul(&b, irr);
         let d3 = d.mul(&d, irr).mul(&d, irr);
@@ -364,12 +368,8 @@ impl Curve {
 /// by returning an empty vector rather than by failing.
 ///
 /// Returns each subgroup as its kernel polynomial.
-pub fn kernels_via_rational_torsion(
-    curve: &Curve,
-    ell: u64,
-    scan_limit: u64,
-) -> Vec<F2mPoly> {
-    if curve.order % ell != 0 {
+pub fn kernels_via_rational_torsion(curve: &Curve, ell: u64, scan_limit: u64) -> Vec<F2mPoly> {
+    if !curve.order.is_multiple_of(ell) {
         return Vec::new();
     }
     let group = curve.group();
@@ -380,7 +380,7 @@ pub fn kernels_via_rational_torsion(
     // `[#E/3]P = O` for every `P` at `n = 8`, where the 3-Sylow is
     // `Z/3 × Z/3`.  Removing the full `ℓ`-power lands in the Sylow instead.
     let mut cofactor = curve.order;
-    while cofactor % ell == 0 {
+    while cofactor.is_multiple_of(ell) {
         cofactor /= ell;
     }
 
@@ -420,7 +420,9 @@ pub fn kernels_via_rational_torsion(
             continue;
         }
         // Recover a point with this packed identity.
-        let Some(p) = unpack(curve, key) else { continue };
+        let Some(p) = unpack(curve, key) else {
+            continue;
+        };
         // Walk ⟨p⟩, collecting abscissae one per ± pair.
         let mut xs: BTreeSet<u64> = BTreeSet::new();
         let mut cur = p;
@@ -451,11 +453,7 @@ fn unpack(curve: &Curve, packed: u64) -> Option<FastPoint> {
 }
 
 /// `h(x) = Π (x + x_i)` from a set of abscissae.
-pub fn kernel_polynomial(
-    xs: &BTreeSet<u64>,
-    n: u32,
-    irr: &IrreduciblePoly,
-) -> F2mPoly {
+pub fn kernel_polynomial(xs: &BTreeSet<u64>, n: u32, irr: &IrreduciblePoly) -> F2mPoly {
     let mut h = F2mPoly::from_coeffs(vec![F2mElement::one(n)], n);
     for &x in xs {
         let lin = F2mPoly::from_coeffs(vec![elt(x, n), F2mElement::one(n)], n);
@@ -465,11 +463,7 @@ pub fn kernel_polynomial(
 }
 
 /// Build the isogeny a kernel polynomial defines.
-pub fn isogeny_from_kernel(
-    curve: &Curve,
-    kernel: F2mPoly,
-    ell: u64,
-) -> BinaryIsogeny {
+pub fn isogeny_from_kernel(curve: &Curve, kernel: F2mPoly, ell: u64) -> BinaryIsogeny {
     let a6e = elt(curve.a6, curve.n);
     let a6p = velu_codomain(&a6e, &kernel, curve.n, &curve.irr);
     let d = kernel.degree().unwrap_or(0);
@@ -529,8 +523,10 @@ pub fn transport_instance(
     let codomain = Curve::new(domain.n, &domain.irr, domain.a2, iso.a6_codomain)?;
     let order_preserved = codomain.order == domain.order;
 
-    let xp = velu_x_map(&elt(p.x, domain.n), &iso.kernel, domain.n, &domain.irr).map(|e| to_u64(&e));
-    let xq = velu_x_map(&elt(q.x, domain.n), &iso.kernel, domain.n, &domain.irr).map(|e| to_u64(&e));
+    let xp =
+        velu_x_map(&elt(p.x, domain.n), &iso.kernel, domain.n, &domain.irr).map(|e| to_u64(&e));
+    let xq =
+        velu_x_map(&elt(q.x, domain.n), &iso.kernel, domain.n, &domain.irr).map(|e| to_u64(&e));
 
     let mut transported = false;
     let mut image_order_ok = false;
@@ -627,8 +623,7 @@ mod tests {
         for root in find_roots_in_f2m(&psi3, n, &irr) {
             let h = F2mPoly::from_coeffs(vec![root, F2mElement::one(n)], n);
             let iso = isogeny_from_kernel(&domain, h, 3);
-            let codomain =
-                Curve::new(n, &irr, 0, iso.a6_codomain).expect("codomain is a curve");
+            let codomain = Curve::new(n, &irr, 0, iso.a6_codomain).expect("codomain is a curve");
             assert_eq!(
                 codomain.order, domain.order,
                 "an isogeny preserves the number of points"
@@ -648,10 +643,7 @@ mod tests {
         let psi3 = division_polynomial(&elt(a6v, n), 3, n, &irr);
         let from_psi = find_roots_in_f2m(&psi3, n, &irr);
 
-        let a: BTreeSet<u64> = from_points
-            .iter()
-            .map(|h| to_u64(&h.coeff(0)))
-            .collect();
+        let a: BTreeSet<u64> = from_points.iter().map(|h| to_u64(&h.coeff(0))).collect();
         let b: BTreeSet<u64> = from_psi.iter().map(to_u64).collect();
         assert_eq!(a, b, "both routes must name the same four subgroups");
     }

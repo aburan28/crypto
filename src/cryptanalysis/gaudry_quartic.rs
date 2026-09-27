@@ -61,7 +61,10 @@ pub struct Fp4 {
 
 impl Fp4 {
     pub fn new(p: u64) -> Fp4 {
-        assert!(p % 4 == 1, "t⁴ − c is irreducible over F_p only when p ≡ 1 (mod 4)");
+        assert!(
+            p % 4 == 1,
+            "t⁴ − c is irreducible over F_p only when p ≡ 1 (mod 4)"
+        );
         let c = (2..p)
             .find(|&c| pow_mod(c, (p - 1) / 2, p) == p - 1)
             .expect("a non-square");
@@ -128,7 +131,10 @@ impl Fp4 {
         let (a0, a1, a2, a3) = (a.0[0], a.0[1], a.0[2], a.0[3]);
         let sqr = |x0: u64, x1: u64| -> (u64, u64) {
             let x01 = mm(x0, x1, p);
-            (am(mm(x0, x0, p), mm(c, mm(x1, x1, p), p), p), am(x01, x01, p))
+            (
+                am(mm(x0, x0, p), mm(c, mm(x1, x1, p), p), p),
+                am(x01, x01, p),
+            )
         };
         let m2 = |x0: u64, x1: u64, y0: u64, y1: u64| -> (u64, u64) {
             (
@@ -190,7 +196,7 @@ impl Fp4 {
         let mut m = s;
         let mut cc = self.pow(&z, odd);
         let mut t = self.pow(a, odd);
-        let mut r = self.pow(a, (odd + 1) / 2);
+        let mut r = self.pow(a, odd.div_ceil(2));
         while t != E4::ONE {
             let mut i = 0;
             let mut tt = t;
@@ -363,12 +369,7 @@ fn poly_mul(f: &Fp4, a: &[E4], b: &[E4]) -> Vec<E4> {
 fn poly_sub(f: &Fp4, a: &[E4], b: &[E4]) -> Vec<E4> {
     let n = a.len().max(b.len());
     (0..n)
-        .map(|i| {
-            f.sub(
-                a.get(i).unwrap_or(&E4::ZERO),
-                b.get(i).unwrap_or(&E4::ZERO),
-            )
-        })
+        .map(|i| f.sub(a.get(i).unwrap_or(&E4::ZERO), b.get(i).unwrap_or(&E4::ZERO)))
         .collect()
 }
 fn poly_scale(f: &Fp4, a: &[E4], k: &E4) -> Vec<E4> {
@@ -886,7 +887,7 @@ fn echelon_by_lead(mut rows: Vec<Vec<u16>>, p: u32, muls: &mut u64, debug: bool)
         rows[pr] = piv;
         pivot_row[c] = pr as u32;
         npiv += 1;
-        if debug && npiv % 2000 == 0 {
+        if debug && npiv.is_multiple_of(2000) {
             eprintln!(
                 "    echelon: {npiv} pivots at column {c}/{ncols}, {:.3e} muls, {:.0} s",
                 *muls as f64,
@@ -1106,22 +1107,23 @@ pub fn solve_system4(
         reached: 0,
     };
     // Multiplication matrix of a variable: column b ↦ NF(var · b).
-    let mult_matrix = |nfs: &mut NormalForms4, var: usize, muls: &mut u64| -> Option<Vec<Vec<u64>>> {
-        let mut targets = Vec::with_capacity(dim);
-        for &bc in &standard {
-            let mut m = cols[bc];
-            m[var] += 1;
-            targets.push(*col_index.get(&m)?);
-        }
-        nfs.ensure(&targets, muls).ok()?;
-        let mut out = vec![vec![0u64; dim]; dim];
-        for (bi, &tc) in targets.iter().enumerate() {
-            for (ri, v) in nfs.vector(tc).into_iter().enumerate() {
-                out[ri][bi] = v;
+    let mult_matrix =
+        |nfs: &mut NormalForms4, var: usize, muls: &mut u64| -> Option<Vec<Vec<u64>>> {
+            let mut targets = Vec::with_capacity(dim);
+            for &bc in &standard {
+                let mut m = cols[bc];
+                m[var] += 1;
+                targets.push(*col_index.get(&m)?);
             }
-        }
-        Some(out)
-    };
+            nfs.ensure(&targets, muls).ok()?;
+            let mut out = vec![vec![0u64; dim]; dim];
+            for (bi, &tc) in targets.iter().enumerate() {
+                for (ri, v) in nfs.vector(tc).into_iter().enumerate() {
+                    out[ri][bi] = v;
+                }
+            }
+            Some(out)
+        };
     let mut nf_muls = 0u64;
     let m_e1 = mult_matrix(&mut nfs, 0, &mut nf_muls);
     st.nf_muls += nf_muls;
@@ -1295,8 +1297,16 @@ pub fn mitm_decompositions(curve: &Curve4, base: &[Pt4], r: &Pt4) -> BTreeSet<[u
     for k in 0..n {
         for l in (k + 1)..n {
             for (sk, sl) in [(1, 1), (1, -1), (-1, 1), (-1, -1)] {
-                let pk = if sk == 1 { base[k] } else { curve.neg(&base[k]) };
-                let pl = if sl == 1 { base[l] } else { curve.neg(&base[l]) };
+                let pk = if sk == 1 {
+                    base[k]
+                } else {
+                    curve.neg(&base[k])
+                };
+                let pl = if sl == 1 {
+                    base[l]
+                } else {
+                    curve.neg(&base[l])
+                };
                 let v = curve.sub(&curve.sub(r, &pk), &pl);
                 if v.inf {
                     continue;
@@ -1306,7 +1316,12 @@ pub fn mitm_decompositions(curve: &Curve4, base: &[Pt4], r: &Pt4) -> BTreeSet<[u
                         if i == k || i == l || j == k || j == l {
                             continue;
                         }
-                        let mut xs = [base[i].x.0[0], base[j].x.0[0], base[k].x.0[0], base[l].x.0[0]];
+                        let mut xs = [
+                            base[i].x.0[0],
+                            base[j].x.0[0],
+                            base[k].x.0[0],
+                            base[l].x.0[0],
+                        ];
                         xs.sort_unstable();
                         out.insert(xs);
                     }
@@ -1440,9 +1455,14 @@ pub fn pair_table(curve: &Curve4, base: &[Pt4]) -> PairTable {
     let mut map: HashMap<E4, Vec<(u32, u32, i8, E4)>> = HashMap::new();
     for i in 0..base.len() {
         for j in (i + 1)..base.len() {
-            for (s, v) in [(1i8, curve.add(&base[i], &base[j])), (-1, curve.sub(&base[i], &base[j]))] {
+            for (s, v) in [
+                (1i8, curve.add(&base[i], &base[j])),
+                (-1, curve.sub(&base[i], &base[j])),
+            ] {
                 if !v.inf {
-                    map.entry(v.x).or_default().push((i as u32, j as u32, s, v.y));
+                    map.entry(v.x)
+                        .or_default()
+                        .push((i as u32, j as u32, s, v.y));
                 }
             }
         }
@@ -1452,16 +1472,29 @@ pub fn pair_table(curve: &Curve4, base: &[Pt4]) -> PairTable {
 
 /// Every decomposition `R = Σ s_t P_{i_t}` over four distinct base points,
 /// with its signs, by meet in the middle against the pair table.
-pub fn mitm_signed(curve: &Curve4, base: &[Pt4], table: &PairTable, r: &Pt4) -> Vec<Vec<(usize, i64)>> {
+pub fn mitm_signed(
+    curve: &Curve4,
+    base: &[Pt4],
+    table: &PairTable,
+    r: &Pt4,
+) -> Vec<Vec<(usize, i64)>> {
     let n = base.len();
     let mut out: BTreeSet<Vec<(usize, i64)>> = BTreeSet::new();
     for k in 0..n {
         for sk in [1i64, -1] {
-            let pk = if sk == 1 { base[k] } else { curve.neg(&base[k]) };
+            let pk = if sk == 1 {
+                base[k]
+            } else {
+                curve.neg(&base[k])
+            };
             let tk = curve.sub(r, &pk);
             for l in (k + 1)..n {
                 for sl in [1i64, -1] {
-                    let pl = if sl == 1 { base[l] } else { curve.neg(&base[l]) };
+                    let pl = if sl == 1 {
+                        base[l]
+                    } else {
+                        curve.neg(&base[l])
+                    };
                     let v = curve.sub(&tk, &pl);
                     if v.inf {
                         continue;
@@ -1506,7 +1539,11 @@ pub fn rho4(inst: &Spec4, seed: u64) -> RhoRun4 {
         .map(|_| {
             let al = rng.gen_range(0..n);
             let be = rng.gen_range(1..n);
-            (al, be, curve.add(&curve.mul(&inst.g, al), &curve.mul(&inst.q, be)))
+            (
+                al,
+                be,
+                curve.add(&curve.mul(&inst.g, al), &curve.mul(&inst.q, be)),
+            )
         })
         .collect();
     let mut table: HashMap<Pt4, (u64, u64)> = HashMap::new();
@@ -1673,7 +1710,11 @@ pub fn run_k4_la(p: u64, seed: u64, rho_runs: usize) -> K4LaReport {
                         .rows
                         .iter()
                         .map(|&i| SparseRel {
-                            cols: full_rels[i].cols.iter().map(|&(c, v)| (map[c], v)).collect(),
+                            cols: full_rels[i]
+                                .cols
+                                .iter()
+                                .map(|&(c, v)| (map[c], v))
+                                .collect(),
                             rhs: full_rels[i].rhs,
                         })
                         .collect();
@@ -1760,10 +1801,7 @@ mod tests {
         let x = [pts[0].x, pts[1].x, pts[2].x, pts[3].x, sum.x];
         assert!(curve.s5(&x).is_zero(), "S5 must vanish on a four-point sum");
         // Signs do not matter: x(P1 − P2 + P3 + P4) is a root too.
-        let mixed = curve.add(
-            &curve.add(&curve.sub(&pts[0], &pts[1]), &pts[2]),
-            &pts[3],
-        );
+        let mixed = curve.add(&curve.add(&curve.sub(&pts[0], &pts[1]), &pts[2]), &pts[3]);
         let xm = [pts[0].x, pts[1].x, pts[2].x, pts[3].x, mixed.x];
         assert!(curve.s5(&xm).is_zero());
         // Symmetric in the first four arguments at a random point.
@@ -1830,7 +1868,11 @@ mod tests {
         assert!(super::super::residual_walk::is_prime_u64(rep.n));
         assert!(rep.rho.iter().all(|r| r.correct), "{:?}", rep.rho);
         assert!(rep.la_ops > 0 && rep.r > 0.0);
-        assert!((rep.row_weight - 5.0).abs() < 1e-9, "four points and d: {}", rep.row_weight);
+        assert!(
+            (rep.row_weight - 5.0).abs() < 1e-9,
+            "four points and d: {}",
+            rep.row_weight
+        );
         assert_eq!(rep.fp_muls_per_add, 97.0);
     }
 }

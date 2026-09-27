@@ -1,0 +1,96 @@
+build: gpu-rtx-pro6000-20b  arch sm_120  batch 16  threads 512  regs 116  spills (0, 0)
+
+branches no rule covers: 10 reached less than once per 10^4 updates (inert), 0 reached more often
+
+self-check: dynamic CLMAD 33.125 per update, the arithmetic implies 33.125 -- OK
+
+dynamic lane-instructions per scalar update, by pipe:
+  issue     1698.86
+  alu       1319.57
+  fma        188.64
+  clmad       33.13
+  xu           9.75
+  lsu         80.01
+  const        3.31
+  uniform      4.38
+  control     16.44
+  nop         74.44
+
+by opcode:
+  LOP3         770.25
+  SHF          394.25
+  IMAD         169.70
+  NOP           74.44
+  LDS           52.00
+  PRMT          34.00
+  CLMAD         33.13
+  MOV           28.19
+  IADD          27.76
+  LDG           21.01
+  VIMNMX        16.00
+  ISETP         10.82
+  BRA           10.82
+  LEA           10.50
+  IADD3         10.00
+  STG            7.00
+  POPC           6.00
+  SEL            5.00
+  BREV           3.75
+  LDCU           3.13
+  BSSY           2.00
+  BSYNC          2.00
+  UMOV           1.06
+  S2UR           1.00
+  S2R            1.00
+  ULEA           1.00
+  HFMA2          0.94
+  CALL           0.81
+  RET            0.81
+  LDC            0.19
+
+by source function (innermost inlined frame):
+  packeddirectreduce131.h:reducePolynomial131        440.63
+  packed131.h:product131                             372.13
+  packed131.h:spread32alu                            109.00
+  packed131.h:clmul64                                 94.75
+  packedtransform131.h:toPolynomial131                85.63
+  packed131.h:fromPolynomialReduced131                52.06
+  packedtransform131.h:fromPolynomialProduct131       51.50
+  packedsigma131.h:sigmaInvNetwork131                 49.38
+  packed131.h:clmul128                                46.25
+  packedtablewalk.cuh:twPhase                         42.81
+  packedtablewalk.cuh:twPivot                         37.94
+  packedtablewalk.cuh:twAddend                        32.63
+  packedtablewalk.cuh:twByte                          32.00
+  packedsigma131.h:sigmaWalkNetwork131                30.13
+  packedkernels.cuh:fusedSelect                       29.32
+  packed131.h:add131                                  29.00
+  packedkernels.cuh:tableSelectSlot                   21.56
+  packedcompactstate.cuh:compactLoad131               19.38
+  packedtablewalk.cuh:twDenominator                   19.19
+  math_functions.hpp:?                                17.00
+  packedtablewalk.cuh:twCoordinate                    14.00
+  tablewalk.h:eccTag                                  10.88
+  packedcompactstate.cuh:compactStore131               8.75
+  packedkernels.cuh:weight                             8.00
+  tablewalk.h:eccTagFruitless                          7.00
+  sm_32_intrinsics.hpp:?                               7.00
+  packedtablewalk.cuh:twSelectHist                     5.00
+  packed131.h:sqr131                                   4.81
+  packed131.h:inv131                                   4.13
+  packed131.h:reverse32                                3.75
+
+roofline on RTX PRO 6000 Blackwell Server Edition (sm_120), 188 SMs at 2.415 GHz (benchmarks/two-chains/summary.json ref smClockMHz 2400-2422 (median 2415)):
+  pipe     work/upd  lanes/clk   SM-clk/upd  ceiling B/s        busy
+  issue      1698.9     128.00        13.27        34.21       58.7%
+  alu        1319.6      64.00        20.62        22.02       91.2%
+  fma         188.6      64.00         2.95       154.03       13.0%
+  xu            9.8      16.00         0.61       745.04        2.7%
+  lsu          80.0      16.00         5.00        90.79       22.1%
+  clmad        33.1       1.62        20.45        22.20       90.4%   1.62 (ONE-BLOCK-GEOMETRY.md section 1, 'kernel mix')
+  clmad        33.1       1.69        19.60        23.16       86.7%   1.69 (fast-clmad probe, CLMAD.lo-only stream)
+  clmad        33.1       1.99        16.65        27.28       73.6%   1.99 (fast-clmad probe, lo+hi product stream)
+  clmad        33.1       2.00        16.56        27.41       73.2%   2.00 (FP64 pipe at 1/64 of FP32: 2 lanes/SM-clk)
+
+measured 20.078 B/s = 22.61 SM-clocks per update.
+busiest pipe: alu at 91.2% of 64.00 lanes/SM-clk.

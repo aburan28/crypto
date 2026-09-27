@@ -253,7 +253,7 @@ fn is_probable_prime(n: u64) -> bool {
         if n == p {
             return true;
         }
-        if n % p == 0 {
+        if n.is_multiple_of(p) {
             return false;
         }
     }

@@ -126,3 +126,13 @@ own suite file.  The ledger reads them in §17.6–§17.14:
 - the inherited-F4 hybrid is `1.20×` the vector reference at 34
   unknowns, with a crossing extrapolated near 35;
 - nothing measured end to end is below rho.
+
+The bench parts' `vs rho` divided by the plain walk (`A = 1`).  Ledger
+§18 re-prices them against the matched negation-map walk on the same
+curves, seeds and targets, after replaying every recorded rho run
+exactly (`research/ic_rho_reference_20260923/reprice/W*.json`).  The
+reference is `3.0`–`6.1×` cheaper there, mostly the plain walk's set-up.
+The pair table reads `21.0×`, `133×` and `257×` rho at `n = 13`, `15`
+and `17`, and every algebraic row at least `2,024×`.  A bench part run
+from now on carries the matched reference in `rho_reference` and the
+plain walk in `rho_reference_plain`.
