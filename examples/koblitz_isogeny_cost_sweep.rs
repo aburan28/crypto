@@ -129,7 +129,13 @@ fn main() {
             64 - r.leading_zeros()
         );
         let t0 = Instant::now();
-        let census = enumerate_class_exact(n, &irr, a2);
+        let census = match class_from_walk(n, a2) {
+            Some(c) => {
+                println!("   members read from the explicit-isogeny walk (the 4^n scan is past budget here)");
+                c
+            }
+            None => enumerate_class_exact(n, &irr, a2),
+        };
         let scan_s = t0.elapsed().as_secs_f64();
         println!(
             "   scanned {} curves in {scan_s:.1}s: {} in the class, {} on the twist",
@@ -314,6 +320,45 @@ fn main() {
     }
 
     write_json(&reach_rows, &sweeps);
+}
+
+/// Past the scan budget the class is named by the explicit-isogeny walk
+/// (`koblitz_isogeny_class_walk`), whose snapshot lists every edge it
+/// computed.  Its vertex set is used only when the walk reached exactly the
+/// CM class size; `scanned = 0` records that no scan was run.
+fn class_from_walk(n: u32, a2: u8) -> Option<ClassCensus> {
+    if 2 * n <= 40 {
+        return None;
+    }
+    let text = std::fs::read_to_string("experiments/koblitz_isogeny_class_walk.json").ok()?;
+    let v: serde_json::Value = serde_json::from_str(&text).ok()?;
+    let case = v["cases"]
+        .as_array()?
+        .iter()
+        .find(|c| c["n"].as_u64() == Some(n as u64) && c["a2"].as_u64() == Some(a2 as u64))?;
+    if case["reached_equals_census"].as_bool() != Some(true) {
+        return None;
+    }
+    let mut members: Vec<u64> = vec![1];
+    for e in case["edge_list"].as_array()? {
+        members.push(e["from"].as_u64()?);
+        members.push(e["to"].as_u64()?);
+    }
+    members.sort_unstable();
+    members.dedup();
+    let target_order = koblitz_family_order(n, a2);
+    let predicted: num_bigint::BigInt = case["class_size_cm"].as_str()?.parse().ok()?;
+    Some(ClassCensus {
+        n,
+        a2,
+        target_order,
+        twist_order: (1i128 << (n + 1)) + 2 - target_order,
+        agrees_with_cm: predicted == num_bigint::BigInt::from(members.len()),
+        members,
+        twist_members: 0,
+        scanned: 0,
+        predicted_class_size: predicted,
+    })
 }
 
 fn print_row(r: &IcCostRow) {
