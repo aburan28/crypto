@@ -24,3 +24,20 @@ CI run [36305037801](https://github.com/aburan28/crypto/actions/runs/36305037801
 | Holdout C | 2.318, 2.292–2.341 | 1.527, 1.518–1.535 |
 
 The selective rule keeps the large gain and removes the material `n12_m12_d4` regression. Three unchanged reduced-path cells narrowly missed the strict A/A gate: holdout A `n16_m16_d4` 0.9907 versus A/A minimum 0.9937; holdout A `n24_m24_d3` 0.9913 versus 0.9917; and holdout C `n24_m24_d3` 0.9863 versus 0.9915. Because both arms execute the same reduced code for these cells, this is an unresolved timing control, not evidence of a changed row space. The frozen rule still treats it as a miss. One bounded independent repeat and four-thread control are specified before the next run; the default remains RREF.
+
+## Bounded independent repeat and four-thread control
+
+CI run [36305721430](https://github.com/aburan28/crypto/actions/runs/36305721430) at PR head `2d8f71e5` completed all 88 calls in each thread setting. All calls succeeded, with matching canonical row-space fingerprints, ranks, pruning and criterion counts. The [one-thread raw receipt](runs/36305721430/ci-result.json) has SHA-256 `bb8713dbfd851e008204374c50a39c97d47b8e00af029c994683f94e6d9df351`; the [four-thread raw receipt](runs/36305721430/ci-result-threads4.json) has SHA-256 `bef298bab3ea4ff613677c4a8ec523b454fed2df13861048b82bfc27912cfcf3`.
+
+| Threads | `f5_n24_m24_d4` workload | Elimination ratio, 95% interval | Complete F5 ratio, 95% interval |
+| ---: | --- | ---: | ---: |
+| 1 | Frozen | 2.278, 2.254–2.311 | 1.485, 1.393–1.501 |
+| 1 | Holdout A | 2.226, 2.197–2.252 | 1.484, 1.480–1.497 |
+| 1 | Holdout B | 2.341, 2.278–2.366 | 1.524, 1.508–1.534 |
+| 1 | Holdout C | 2.367, 2.308–2.407 | 1.545, 1.524–1.550 |
+| 4 | Frozen | 1.559, 1.544–1.582 | 1.302, 1.290–1.316 |
+| 4 | Holdout A | 1.579, 1.531–1.586 | 1.310, 1.239–1.327 |
+| 4 | Holdout B | 1.590, 1.562–1.611 | 1.312, 1.298–1.324 |
+| 4 | Holdout C | 1.551, 1.540–1.577 | 1.303, 1.282–1.311 |
+
+The one-thread frozen `n16_m16_d4` complete-call median was 0.9940, below its A/A minimum 0.9978. The four-thread holdout B `n24_m24_d3` median was 0.9951, below its A/A minimum 0.9997. Both cases use the unchanged reduced path in both arms. The predeclared smaller-case gate therefore still fails. No further repeats are planned. `F5OutputForm::Echelon` and `SelectiveEchelon` remain explicit options; the original public entry points retain RREF output. The primary stage gain is measured for the opt-in mode only, and no one-target IC or DLP speedup is claimed.
