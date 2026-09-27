@@ -62,9 +62,9 @@ def write_receipt(path, receipt):
     tmp.replace(path)
 
 
-def run_one(binary, workload, seed_xor, mode, phase, pair, position):
+def run_one(binary, workload, seed_xor, threads, mode, phase, pair, position):
     env = os.environ.copy()
-    env["RAYON_NUM_THREADS"] = "1"
+    env["RAYON_NUM_THREADS"] = str(threads)
     env["KIC_GF2_DEFER_ABOVE"] = "0"
     env["KIC_GF2_WORD_BATCH"] = "0"
     env["KIC_F5_ECHELON"] = "2" if mode == 1 else "0"
@@ -75,6 +75,7 @@ def run_one(binary, workload, seed_xor, mode, phase, pair, position):
         "pair": pair,
         "position": position,
         "mode": mode,
+        "rayon_threads": threads,
         "load_before": os.getloadavg(),
     }
     t0 = time.monotonic()
@@ -186,23 +187,29 @@ def main():
     parser.add_argument("binary", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--pairs", type=int, default=5)
+    parser.add_argument("--threads", type=int, default=1)
     args = parser.parse_args()
     if args.pairs < 1:
         parser.error("--pairs must be positive")
+    if args.threads < 1:
+        parser.error("--threads must be positive")
     binary = args.binary.resolve()
     output = args.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
 
     affinity = None
     if hasattr(os, "sched_getaffinity"):
-        allowed = os.sched_getaffinity(0)
-        affinity = min(allowed)
-        os.sched_setaffinity(0, {affinity})
+        allowed = sorted(os.sched_getaffinity(0))
+        if len(allowed) < args.threads:
+            parser.error(f"{args.threads} threads requested but only {len(allowed)} CPUs allowed")
+        affinity = allowed[:args.threads]
+        os.sched_setaffinity(0, set(affinity))
     receipt = {
         "status": "running",
         "primary_case": PRIMARY,
         "workloads": {name: f"{seed:016x}" for name, seed in WORKLOADS.items()},
         "pairs_per_phase": args.pairs,
+        "rayon_threads": args.threads,
         "binary_sha256": sha256(binary),
         "benchmark_source_sha256": sha256(Path("examples/f4_f2_bench.rs")),
         "kernel_source_sha256": sha256(Path("src/cryptanalysis/gf2_elim.rs")),
@@ -211,7 +218,7 @@ def main():
             "platform": platform.platform(),
             "machine": platform.machine(),
             "cpu_count": os.cpu_count(),
-            "pinned_cpu": affinity,
+            "pinned_cpus": affinity,
             "rustc": subprocess.check_output(["rustc", "--version"], text=True).strip(),
             "load_start": os.getloadavg(),
             **linux_host_details(),
@@ -230,7 +237,7 @@ def main():
             sequence.extend((workload, seed_xor, "ab", pair, position, mode) for position, mode in enumerate(arms))
 
     for workload, seed_xor, phase, pair, position, mode in sequence:
-        record = run_one(binary, workload, seed_xor, mode, phase, pair, position)
+        record = run_one(binary, workload, seed_xor, args.threads, mode, phase, pair, position)
         if record["status"] == "ok":
             try:
                 actual = signature(record)
