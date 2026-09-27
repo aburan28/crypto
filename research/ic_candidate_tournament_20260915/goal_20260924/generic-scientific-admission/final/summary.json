@@ -1,0 +1,401 @@
+{
+  "controls": 63,
+  "environment_overrides_rejected": [
+    "KIC_F4_INHERIT",
+    "KIC_F4_KERNEL",
+    "KIC_GF2_SIMD",
+    "KIC_SCAN_SIMD",
+    "F4_F2_MAX_ROWS",
+    "SOLVER_SPLIT_RULE",
+    "IC_TEMPLATE_MEMO",
+    "IC_CACHE_LOCAL_BYTES",
+    "IC_REDIS_URL",
+    "IC_F2_BACKEND",
+    "IC_ARTIFACT_CACHE"
+  ],
+  "online_speedup": null,
+  "passed": 63,
+  "performance_qualified": false,
+  "promotion_eligible": false,
+  "results": [
+    {
+      "name": "a0-pair_table-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-pair_table-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-enumerate-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-enumerate-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-f4-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-f4-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-f5-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-f5-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-inherited_f4-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-inherited_f4-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-sat_xor-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-sat_xor-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-sat_cnf-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a0-sat_cnf-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-pair_table-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-pair_table-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-enumerate-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-enumerate-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-f4-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-f4-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-f5-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-f5-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-inherited_f4-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-inherited_f4-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-sat_xor-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-sat_xor-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-sat_cnf-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "a1-sat_cnf-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "incomplete-pair_table",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "name": "incomplete-enumerate",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "name": "incomplete-f4",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "name": "incomplete-f5",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "name": "incomplete-inherited_f4",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "name": "incomplete-sat_xor",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "name": "incomplete-sat_cnf",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "incomplete"
+    },
+    {
+      "name": "n9-window0-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n9-window0-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n9-window1-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n9-window1-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n9-window1000-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n9-window1000-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n13-window0-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n13-window0-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n13-window1-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n13-window1-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n13-window1000-dense",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "n13-window1000-sparse",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "rho-a0",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "rho-a1",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "inventory-n9-0-factor",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n9-1-divisor",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n9-2-frobenius_union",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n9-3-subgroup_orbits",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n9-4-two_torsion_saturated",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n9-5-pruned",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n9-6-two_torsion_saturated",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n13-0-factor",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n13-1-divisor",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n13-2-frobenius_union",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n13-3-subgroup_orbits",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n13-4-two_torsion_saturated",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n13-5-pruned",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    },
+    {
+      "name": "inventory-n13-6-two_torsion_saturated",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "inventory"
+    }
+  ],
+  "schema_version": 1
+}

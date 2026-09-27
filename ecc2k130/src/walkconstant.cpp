@@ -65,6 +65,13 @@
 #error "build with -DECC_WALK_TABLE=1"
 #endif
 
+// Hashed-branch experiments retain rule v2 and are NOT measurements of v3.
+static unsigned legacyHashedResolve(unsigned t, unsigned long long hist, int m, int h) {
+    for (int i = 0; i < h && eccTagFruitless(t,hist,m); ++i)
+        t = eccTag((eccTagH(t)+1)&(h-1),eccTagK(t),eccTagEps(t));
+    return t;
+}
+
 // How many of a walk's own recent points a table step is compared with.
 static const int RECENT = 16;
 
@@ -241,7 +248,7 @@ static int run(bool table, Dist dist, int walks, unsigned long long trials,
                 }
                 raw = eccTag(hashedBranch(R::canonical(pt.x).v[0], salt), eccTagK(raw), eccTagEps(raw));
                 *branch = eccTagH(raw);
-                const unsigned tag = TableWalk<Cfg>::resolveTag(raw, h);
+                const unsigned tag = legacyHashedResolve(raw, h, Cfg::M, H);
                 h = eccHistPush(h, tag);
                 return R::addPtRaw(pt, tw->addend(tag));
             };
@@ -301,10 +308,10 @@ static int run(bool table, Dist dist, int walks, unsigned long long trials,
                      "n = %d, device table walk, H = %d, %s branches: %llu merges, %llu parted (%.3e +- %.1e; "
                      "predicted 20q = %.3e from q = sum p^2 / 2m = %.3e); by step [%s]\n",
                      Cfg::M, H, distName[dist], done, partedAll, rate, se, predicted, q, byStep.c_str());
-        std::printf("{\"n\":%d,\"walk\":\"device-table\",\"branches\":%d,\"dist\":\"%s\",\"rule\":\"v2\","
+        std::printf("{\"n\":%d,\"walk\":\"device-table\",\"branches\":%d,\"dist\":\"%s\",\"rule\":\"%s\","
                     "\"seed\":%llu,\"merges\":%llu,\"parted\":%llu,\"parted_rate\":%.6e,\"parted_se\":%.6e,"
                     "\"parted_by_step\":[%s],\"sum_p2\":%.6f,\"predicted\":%.6e}\n",
-                    Cfg::M, H, distName[dist], seed, done, partedAll, rate, se, byStep.c_str(), s2, predicted);
+                    Cfg::M, H, distName[dist], dist == NATIVE ? "v3" : "v2-hashed-control", seed, done, partedAll, rate, se, byStep.c_str(), s2, predicted);
         std::fflush(stdout);
         delete sol;
         return 0;
@@ -351,7 +358,7 @@ static int run(bool table, Dist dist, int walks, unsigned long long trials,
                         if (dist != NATIVE)
                             raw = eccTag(hashedBranch(key[w], salt), eccTagK(raw), eccTagEps(raw));
                         t.branchCounts[eccTagH(raw)]++;
-                        tag = TableWalk<Cfg>::resolveTag(raw, hist[w]);
+                        tag = (dist == NATIVE ? tw->resolveTag(p[w], raw, hist[w]) : legacyHashedResolve(raw, hist[w], Cfg::M, H));
                         t.ruleFired += tag != raw;
                         if (dist == NATIVE) {
                             q = tw->step(p[w], hw, &hist[w], nullptr, nullptr, sol->ell, sol->spow);
@@ -469,14 +476,14 @@ static int run(bool table, Dist dist, int walks, unsigned long long trials,
                  model, c / model, total.ruleFired, total.steps, fruitlessRate, pairwisePredicted,
                  fruitlessJson.c_str(), relationRate, relationPredicted, relationJson.c_str(),
                  total.shortReturns, total.restarts);
-    std::printf("{\"n\":%d,\"walk\":\"device-%s\",\"branches\":%d,\"dist\":\"%s\",\"walks\":%d,"
+    std::printf("{\"n\":%d,\"walk\":\"device-%s\",\"branches\":%d,\"dist\":\"%s\",\"rule\":\"%s\",\"walks\":%d,"
                 "\"trials\":%llu,\"seed\":%llu,\"classes\":%.1f,\"random_mapping_rho\":%.4f,"
                 "\"mean_visited\":%.4f,\"se_visited\":%.4f,\"c\":%.5f,\"c_se\":%.5f,\"sum_p2\":%.5f,"
                 "\"injective_model\":%.5f,\"class_frame_model\":%.5f,\"cycle_rule\":%llu,"
                 "\"restarts\":%llu,\"steps\":%llu,\"sum_p4\":%.6f,\"fruitless\":{%s},"
                 "\"fruitless_per_step\":%.6e,\"fruitless_predicted\":%.6e,\"relation\":{%s},"
                 "\"relation_per_step\":%.6e,\"relation_predicted\":%.6e,\"short_returns\":%llu}\n",
-                Cfg::M, walk, H, distName[dist], walks, total.trials, seed, classes, expected, mean,
+                Cfg::M, walk, H, distName[dist], table ? (dist == NATIVE ? "v3" : "v2-hashed-control") : "sigma", walks, total.trials, seed, classes, expected, mean,
                 se, c, cse, s2, injective, classFrame, total.ruleFired, total.restarts, total.steps,
                 s4, fruitlessJson.c_str(), fruitlessRate, pairwisePredicted, relationJson.c_str(),
                 relationRate, relationPredicted, total.shortReturns);

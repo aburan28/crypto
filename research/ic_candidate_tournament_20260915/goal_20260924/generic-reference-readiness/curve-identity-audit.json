@@ -1,0 +1,36 @@
+{
+  "cells": [
+    {
+      "cell": "n17a1",
+      "curve_id": "EC1N17Ckb1hbbe2b5b6b1e6",
+      "qualified_reference_match": true
+    },
+    {
+      "cell": "n19a0",
+      "curve_id": "EC1N19Ckb0h7f23e389f421",
+      "qualified_reference_match": true
+    },
+    {
+      "cell": "n23a0",
+      "curve_id": "EC1N23Ckb0h15a530fe9c69",
+      "qualified_reference_match": true
+    },
+    {
+      "cell": "n23a1",
+      "curve_id": "EC1N23Ckb1h7eb0debb9f5d",
+      "qualified_reference_match": true
+    },
+    {
+      "cell": "n31a0",
+      "curve_id": "EC1N31Ckb0he647499140c8",
+      "qualified_reference_match": true
+    }
+  ],
+  "comparison": "canonical curve identity, including generator and subgroup; no performance comparison",
+  "readiness_fixture_sha256": "6bf86fce58c981d19e3888319949e1242844c2bb5f633c262be6adb04dd472b8",
+  "reference_archive": "ic-reference-qualification-20260925.tar.zst",
+  "reference_archive_sha256": "a61e6b7c8154dfc594365a044dc74346880018a9c57e14d699ab4c55444950ac",
+  "reference_fixture_member": "ic-reference-qualification/full/ic-reference-qualification-36127866931-1/tournament/fixtures.json",
+  "reference_fixture_sha256": "a31c787c4d54981658c557ac3fb6d5bd4e39ae0a30715b5bbfcf702bf6567b93",
+  "status": "PASS"
+}

@@ -204,3 +204,18 @@ the PR integration checks. Shared-host mode ratios remain too unstable to
 qualify overhead or comparative performance. This accounting work consumes no
 round; exact generic admission and optimized-reference qualification precede
 the remaining two rounds.
+
+
+## Generic five-cell readiness
+
+The [registered readiness check](generic-reference-readiness/README.md) passes
+15/15 jobs: ten pair-table IC solves with dense/sparse relation-LA policies and
+five rho solves on the five development cells. All raw reports and canonical
+records independently replay after fresh archive extraction. The two n23a1 IC
+runs retain unresolved queries; no larger proved-negative PDP claim is admitted.
+This is admission readiness only, pending the implementation/evidence PR and
+parent PR 822. Calibrated generic reference and instrumentation qualification
+still precedes comparative ranking. Preserve all five exposed points in
+`generic-reference-readiness/fixtures.json` as exclusions for the next registered
+confirmation panel; keep the sealed round-one history unchanged. One round is
+closed, no challenger qualified, and two remain.

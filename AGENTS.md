@@ -50,6 +50,20 @@ merge.**
 
 ## Research work belongs in pull requests
 
+**Always create or update a PR for repository-related action items, research
+plans, benchmark protocols, and workstream closeout checklists, including
+Markdown-only planning work. Do this in the same task without waiting for the
+user to ask again.** Commit the plan in the relevant repository and return its
+PR link; a chat response, scratch file, or Library copy alone is not delivery.
+Update an existing relevant PR when appropriate rather than creating duplicates.
+An explicit user request not to create a PR overrides this default.
+
+A planning PR may merge when the plan itself is complete and its applicable
+checks pass. Keep unperformed experiments and measurements marked pending;
+merging the plan does not close the underlying workstream. Track execution,
+evidence, and closeout in linked follow-on PRs and update the checklist as work
+lands. Apply the finish-and-merge rules above to each completed deliverable.
+
 Treat an experiment as repository work, including a negative or inconclusive
 result. A research decision, preregistered protocol, reproducibility fix, or
 rejected hypothesis also belongs in a PR, even before an outcome exists.

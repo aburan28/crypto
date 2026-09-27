@@ -78,7 +78,7 @@ def reference_report(root, contract, fixtures, ic_arms):
                     result['native_wall_candidate_over_baseline'], row['alias'])
         return min(candidates, key=key)['alias']
 
-    return dict(schema_version=1, status='DEVELOPMENT_REFERENCES_SELECTED' if eligible_ic and eligible_rho else 'INCOMPLETE',
+    result = dict(schema_version=1, status='DEVELOPMENT_REFERENCES_SELECTED' if eligible_ic and eligible_rho else 'INCOMPLETE',
         classification='reference qualification on a frozen development panel; no improvement claim',
         promotion_eligible=False, improvement_rounds_used=0,
         selected_ic_cold=select(eligible_ic,False), selected_ic_online=select(eligible_ic,True),
@@ -89,3 +89,8 @@ def reference_report(root, contract, fixtures, ic_arms):
         measured_stages=contract['stages'], heldout_data_used=False,
         table=table,
         next_gate='Freeze qualified sources, reference settings, cross-campaign target exclusions and familywise confirmation before an improvement round.')
+    if any(arm.get('adapter') == 'generic-v1' for arm in ic_arms):
+        result.update(qualification_scope=contract['qualification_scope'],
+            observer_qualification=None, eligible_for_improvement=False,
+            next_gate='Qualify fully charged generic/reference comparisons and instrumentation before a registered improvement round; this mixed-adapter result cannot change the accepted reference binding.')
+    return result

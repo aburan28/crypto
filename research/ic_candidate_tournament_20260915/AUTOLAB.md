@@ -204,6 +204,13 @@ across history, and preserve failed configurations as evidence.
 
 ## Development reference qualification
 
+The [generic qualification adapter](goal_20260924/generic-qualification-adapter/README.md)
+admits source-bound generic builds beside a prepared incumbent through the same
+tournament. It requires qualification mode and an explicit registered protocol;
+generic pipelines remain ineligible for improvement rounds pending comparative
+reference and instrumentation qualification. Its one-cell integration control is
+not a replacement for the five-cell research panel below.
+
 `tournament.py prepare --qualification` freezes only A/A, smoke and development.
 It interleaves declared rho widths from each distinct candidate source with
 all IC arms, reports actual effective widths, and keeps separate online and cold
@@ -226,6 +233,13 @@ one-ULP macOS differences without relaxing exact comparisons.
 
 Reference selection uses development data. It does not substitute for the fresh
 60-target confirmation panel or the familywise rule required by the active goal.
+
+Before each later bounded round, also supply every intervening development corpus
+with repeated `prepare --exposed-fixtures PATH` arguments. The [exposure safeguard](goal_20260924/target-exclusions/README.md)
+seals those fixture bytes, reconstructs their exclusion union during replay, and
+inherits prior rounds' excluded points even when absent from their workloads.
+The registered wrapper must still inventory all exposed sources; the option does
+not discover omitted studies automatically.
 
 ## Promotion and reference quality
 

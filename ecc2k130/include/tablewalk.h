@@ -9,31 +9,19 @@
 // L(e) is the discrete logarithm base 2 of the folded coordinate index e in
 // (Z/n)*/±1, so squaring shifts every L by one and k(sigma R) = k(R) + 1;
 // eps is sigma-invariant and flips under negation.  Hence f(sigma R) = sigma
-// f(R) and f(-R) = -f(R): the walk is a function on the 2m-element classes
-// without any canonical representative, exactly as the sigma^j + 1 walk is.
+// f(R) and f(-R) = -f(R): the raw map descends to the 2m-element classes.
+// The cold escape path below additionally compares canonical orbit keys.
 //
-// Unlike that walk this one is additive, so it has fruitless cycles: runs of
-// steps whose addends sum to O return a walk to a point it has left, with no
-// collision, and a walk in one never becomes distinguished.  The rule refuses
-// a step -- advancing h -- when it would close one, judged from the step's tag
-// and the last four (WALK-CONSTANT.md sections 5 and 11):
-//
-//   - a step that undoes any of the last four (t = -t_i, i = 1..4).  Every
-//     pairwise cycle of at most 8 steps has a pair at most 4 steps apart, so
-//     none can close; the shortest that can has 10 steps, at order (2Hm)^-5.
-//   - a step that, with the last three, sums to O through Frobenius itself:
-//     sigma^2 + sigma + 2 = 0 on these curves, hence sigma^3 + sigma - 2 = 0,
-//     so four steps on one branch whose (k, eps) are a repeated pair and two
-//     partners at k+1, k+2 with the same sign, or at k+1, k+3 with the
-//     opposite sign, return the walk.  No two of those tags cancel, which is
-//     why a pairwise rule cannot see them; before this check they trapped
-//     about half of all trails at the campaign's dpWeight.
-//
-// Both tests read only differences of k and parities of eps, so the rule is a
-// class function like the step.  The decision depends only on the last four
-// steps, so two trails that merge re-synchronise after four steps unless the
-// rule fires differently for their different pasts, which the harness in
-// src/walkconstant.cpp measures (a parted merge is a lost collision).
+// Rule v3 uses the v2 tag predicate only as a cheap hint. A hint is never
+// sufficient to change a step: probe up to eight RAW steps, require an exact
+// return, and choose the least (weight, canonical x) eligible vertex of that
+// cycle. Advance h once only at that vertex. Eligibility is recomputed using
+// the cycle's own four preceding tags, not the arriving walk's history.
+// False hints leave the raw step unchanged. Walks entering a detected cycle
+// may take an extra lap to fill their histories, but leave through the same
+// orbit edge. This is eventual coalescence, not immediate history independence.
+// Longer cycles, and cycles without a tag hint, require the finite trail guard.
+// Historical v2 throughput/merge-loss measurements do not certify this rule.
 //
 // This header carries what host and device share: the tag encoding, the cycle
 // rule and the coordinate tables for one field size.  The reference step and
@@ -100,9 +88,9 @@ ECC_HD bool eccTauRelation(unsigned t, unsigned t1, unsigned t2, unsigned t3, in
     return false;
 }
 
-// A step with tag t is fruitless after history (t1 most recent, t2, t3, t4)
-// when it undoes any of them, or closes a tau-relation with t1, t2, t3.  m is
-// the field degree.
+// Cheap hint from history (t1 most recent, t2, t3, t4): t negates one of
+// these tags, or completes a tau-relation with t1, t2, t3. This is NOT proof
+// that the raw walk cycles at the current point. m is the field degree.
 ECC_HD bool eccTagFruitless(unsigned t, unsigned long long hist, int m) {
     const unsigned t1 = unsigned(hist & 0xFFFFu);
     const unsigned t2 = unsigned((hist >> 16) & 0xFFFFu);
@@ -115,6 +103,23 @@ ECC_HD bool eccTagFruitless(unsigned t, unsigned long long hist, int m) {
 ECC_HD unsigned long long eccHistPush(unsigned long long hist, unsigned t) {
     return (hist << 16) | (unsigned long long)(t & 0xFFFFu);
 }
+
+// Shared host/device cold-path control flow. Ops supplies a complete raw
+// addition, exact point equality, and an orbit-invariant strict ordering.
+// A table may contain exceptional points; next() then returns false and this
+// bounded probe declines to infer a cycle. It does not invent a point.
+template <class Point, class Ops>
+inline unsigned eccCycleAnchorTag(const Point &start, unsigned raw, const Ops &ops,
+                                  int m, int branches) {
+#include "cycleanchor_body.h"
+}
+#ifdef __CUDACC__
+template <class Point, class Ops>
+__device__ __forceinline__ unsigned eccCycleAnchorTagDevice(const Point &start, unsigned raw, const Ops &ops,
+                                  int m, int branches) {
+#include "cycleanchor_body.h"
+}
+#endif
 
 // Coordinate tables for GF(2^M) in the permuted type-II ONB, coordinate i in
 // 1..M stored at bit i-1.  Host-side construction; the device gets copies.

@@ -1,0 +1,75 @@
+{
+ "curve": "k1n45",
+ "seed_set": "W",
+ "seed": 101,
+ "grid_requested": [
+  2,
+  4,
+  5,
+  7,
+  10,
+  14,
+  20
+ ],
+ "grid_actual": [
+  8,
+  16,
+  24
+ ],
+ "extensions": 0,
+ "points": [
+  {
+   "columns": 8,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 2.846044853373263,
+   "points": 720
+  },
+  {
+   "columns": 8,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 2.95755478490813,
+   "points": 720
+  },
+  {
+   "columns": 16,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 5.043139727461428,
+   "points": 1440
+  },
+  {
+   "columns": 16,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 4.65780976690444,
+   "points": 1440
+  },
+  {
+   "columns": 24,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 7.36861820560708,
+   "points": 2160
+  },
+  {
+   "columns": 24,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 7.607585222213807,
+   "points": 2160
+  }
+ ],
+ "chosen": {
+  "columns": 8,
+  "descent_summands": 2,
+  "s_per_target": 2.846044853373263
+ }
+}
