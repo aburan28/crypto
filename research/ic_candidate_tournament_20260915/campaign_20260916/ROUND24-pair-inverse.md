@@ -147,3 +147,134 @@ this collector and this checker. §4 reads round 0023's fixtures, so its numbers
 are in-sample for nothing in this round. Nothing here bears on sect163k1 or on
 any curve outside the census, and no exponent claim follows from a constant
 factor.
+
+## 7. Amendment: a matched rho, and the triple table (before any stage ran)
+
+Written and committed before any round-0024 stage ran. §1–6 are kept as they
+were registered. This section replaces §3's arms, evaluator and trial count,
+and §5's predictions. Seed, cells, holdouts, allocation, profile, objective,
+comparison kind and timeout are unchanged.
+
+### 7.1 Why
+
+Two findings from another lane arrived after §1–6 were merged.
+
+* **The tournament's rho was not matched to its IC arm.**
+  `research/ic_triple_counted_20260923/RESULTS.md` §3 profiled the worker's
+  `koblitz_signed_frobenius_rho`. It names each Frobenius class by walking the
+  orbit with field squarings, about 9,100 of its 9,930 instructions a step at
+  `n43a1`. The IC arm has named the same classes with a normal-basis rotation
+  since round 0007. `rho-normal-basis.patch` gives rho that one function, and
+  the IC pipeline then loses at every cell that lane measured, by 1.19× to
+  2.88×. This bears on every IC/rho ratio this campaign has published,
+  including the strict wins of rounds 0017, 0019 and 0020.
+* **A triple-sum table moves the collector's cost law** from `r^{2/3}` to
+  `r^{3/5}`: `research/ic_triple_table_20260923` and its counted sizing.
+
+The user chose to redesign this round around both. `pairinv` is dropped: a
+0.91–0.997 constant bears on neither question. It would also compete with
+the triple arm in selection, and only one challenger reaches confirmation.
+
+### 7.2 The round, as amended
+
+| | |
+|:--|:--|
+| rho | the incumbent build's rho mode, with `rho-normal-basis.patch` in every arm's source |
+| arms | `incumbent` = round 0023's `scaled` + the rho patch (`--source-root round24-sources/matched`); `counted` = the same + `triple-table.patch` + `counted-sizing.patch`, run as `solver: triple_counted`, `summands: 4` |
+| registry | `round-0024-amended-candidates.json`, trees from `round24_amended_candidates.py` |
+| evaluator | round 0023's frozen `evaluator/tournament.py` and `oracle.py` (sha256 `1e5b2774…`, `528c14b3…`, identical to this campaign's harness at `c3347a01`) |
+| trials | 4,656: aa 48, smoke 72, development 216, selection 216, confirmation 2,052, replay 2,052; `--max-processes 6000` |
+
+**Why the incumbent is `scaled`.** It passed every incumbent gate in round
+0023 and was not promoted only because objective `rho` requires beating rho
+everywhere. It is the strongest pair arm measured. Round 0023's incumbent, one
+batch of eight orbits, is 2.5× worse at `n43a1` and would make the triple arm
+look better than it is.
+
+**Why not main's harness.** Since `c3347a01`, `tournament.py` on main
+admits only sources prepared by `producer/prepare.py` from a fixed allow-list
+(`driver_admission.py:35`). Its method record requires `solver == pair_table`
+and `summands == 3` (`producer/evidence.py:164-166`), so it cannot score a
+four-summand arm at all. It also cannot promote outside the bounded campaign
+of `goal_20260924` (`tournament.py:943-944`). This campaign's own evaluator is
+frozen into every round it runs, and `oracle.py` checks each arm's reports at
+that arm's own `summands` (`oracle.py:191, 254`).
+
+**Summands differ across arms, and this is a protocol change.**
+`OPERATIONS.md` asks for matched summands in an *implementation* comparison.
+This is a method comparison: both arms solve the same public DLP on the same
+fixture, each relation is re-added in the group at its own length, and cost is
+the whole cold job per recovered logarithm. `--comparison-kind
+factor-base-policy` already lets support differ across arms.
+
+### 7.3 Before the round
+
+* **Tests** ([round24-amended-tests.txt](round24-amended-tests.txt)).
+  * `koblitz_tiny_ic` passes 10/10 on `matched` and 13/13 on `counted`,
+    including the triple collector's end-to-end test.
+  * The library's rho tests pass 39 of 40 on `matched`. The failure is
+    `single_word_rho_walk_matches_the_reference_step_for_step`, as the other
+    lane recorded and by construction: it pins the old walk's class
+    representative, and the matched rho names a different member of the same
+    class.
+* **Probe** ([round24_amended_probe.py](round24_amended_probe.py), raw
+  [round24-amended-probe.txt](round24-amended-probe.txt)). Four of round
+  0023's fixtures a cell, a closed round. Every arm finished and all four
+  recovered the same logarithm on every fixture: pair, triple, matched rho and
+  round 0023's rho. Geometric means, instructions, 95% bands on four fixtures:
+
+| cell | counted/pair | pair/matched rho | counted/matched rho | matched rho/old rho |
+|:--|--:|--:|--:|--:|
+| `n13a0` | 1.995 | 0.704 | 1.406 | 1.016 |
+| `n17a1` | 2.292 | 0.629 | 1.442 | 0.872 |
+| `n19a0` | 2.251 | 0.628 | 1.412 | 0.917 |
+| `n19a1` | 2.073 | 0.640 | 1.327 | 0.965 |
+| `n23a0` | 1.850 | 0.766 | 1.418 | 0.737 |
+| `n23a1` | 1.321 | 1.202 [0.993, 1.455] | 1.588 | 0.628 |
+| `n29a1` | 3.878 | 0.821 | 3.183 | 0.971 |
+| `n31a0` | 3.011 | 0.775 | 2.333 | 0.692 |
+| `n37a0` | 0.506 | 2.913 | 1.475 | 0.662 |
+| `n43a1` | 0.284 | 10.386 | 2.953 | 0.210 |
+| `n59a0` | 0.764 | 1.700 | 1.298 | 0.597 |
+| `n61a1` | 0.362 | 8.741 | 3.160 | 0.247 |
+
+The matched rho's saving grows with the degree, because the orbit walk it
+removes costs about `1.5n` squarings a step. It is small on the panel and
+four- to five-fold at `n43a1` and `n61a1`.
+
+### 7.4 Predictions (these replace §5)
+
+1. **Correctness.** Every report from every arm verifies. All three arms
+   recover the same logarithm on every fixture of every stage. No trial is
+   unfinished, and the A/A stage passes.
+2. **The small-cell win survives a matched rho, but not all eight cells.**
+   `incumbent`/rho is below one in instructions at `n13a0`, `n17a1`, `n19a0`,
+   `n19a1`, `n23a0`, `n29a1` and `n31a0`, each in [0.55, 0.95].
+   `n23a1` reads in [0.90, 1.40], with no direction registered.
+3. **Past the crossing, a matched rho wins by far more than round 0023
+   measured.** `incumbent`/rho is in [1.8, 5] at `n37a0`, [5, 20] at `n43a1`,
+   [1.3, 2.6] at `n59a0` and [4, 20] at `n61a1`.
+4. **The triple table sits between the two.** `counted`/`incumbent` is above
+   one at all eight panel cells, in [1.2, 4.5], and below one at the four
+   crossover cells, in [0.15, 0.95].
+5. **The triple table does not beat a matched rho anywhere.**
+   `counted`/rho is above one at every cell measured. The ratio is scored in
+   development and selection; confirmation scores it only if `counted` is the
+   provisional challenger, which prediction 6 says it is.
+6. **The decision.** `counted` is the provisional challenger, being the only
+   one. It fails the incumbent gate: cells above `max_cell_ratio` 1.10 on the
+   panel. Status `retained`, `beats_rho_strict` false, `rho_parity` false.
+
+**How this round re-reads earlier rounds, fixed now.** The eight-cell strict
+win of rounds 0017, 0019 and 0020 **survives a matched rho** only if this
+round's `incumbent`/rho has every per-cell ratio and upper 95% limit below one
+at all eight panel cells, in instructions and native time, on confirmation and
+replay. Otherwise the correction reads: that win was measured against an
+unmatched rho and does not hold against a matched one, at the cells that fail.
+Either way it is recorded as an additive correction, and no earlier record is
+rewritten.
+
+Native time is reported, not predicted. Every conclusion stays scoped to these
+twelve cells, one seed, this collector pair, this rho and this checker. The
+matched rho is not offered as the best possible rho. Other asymmetries may
+remain, in either direction.
