@@ -3,6 +3,7 @@
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::FactorBaseSpec;
+use crypto_lib::cryptanalysis::koblitz_fast::FastCurve;
 use crypto_lib::cryptanalysis::koblitz_groebner::SolverEngine;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     koblitz_signed_frobenius_rho_with_preparation, point_key, points_with_x, DecompositionStrategy,
@@ -282,6 +283,20 @@ fn run_inner(job: &Job) -> Result<Value, String> {
     if job.mode == "fixture" {
         return Ok(json!({"schema_version":1,"status":"fixture","fixture":metadata}));
     }
+    if job.mode == "reference_inventory" {
+        if !job.exclusive_phases {
+            return Err("reference inventory requires exclusive phase mode".into());
+        }
+        let fast =
+            FastCurve::new(&c.curve).ok_or("no packed arithmetic for reference inventory")?;
+        return Ok(json!({"schema_version":1,"mode":"rho","status":"inventory",
+            "fixture":metadata,"effective_config":cfg,"generic_admission_schema":1,
+            "field_kernel":fast.field.kernel_name(),
+            "inventory_policy":"configuration-only-no-query-or-target-solve-v1",
+            "online_wall_ns":null,"online_timing_schema":1,
+            "target_input":"supplied_public_point","reusable_setup_excluded":true,
+            "scalar_replay_included":false}));
+    }
     if job.mode == "rho" {
         measurement::mark(Phase::Precompute);
         let q = &targets[0];
@@ -419,11 +434,14 @@ fn run_inner(job: &Job) -> Result<Value, String> {
             return Err("generic inventory requires exclusive phase mode".into());
         }
         let system = FactorBaseLogSolver::new(&c, &fb, &opts).ok_or("no projected columns")?;
+        let fast = FastCurve::new(&c.curve).ok_or("no packed arithmetic for IC inventory")?;
         return Ok(json!({"schema_version":1,"mode":"ic","status":"inventory",
             "fixture":metadata,"columns":system.columns(),
             "factor_base":fb.points.iter().map(point).collect::<Vec<_>>(),
             "effective_factor_base":effective_base,"effective_config":cfg,
             "generic_admission_schema":1,"relation_matrix":system.matrix_snapshot(),
+            "field_kernel":fast.field.kernel_name(),
+            "inventory_policy":"configuration-only-no-query-or-target-solve-v1",
             "online_wall_ns":null,"online_timing_schema":1,
             "target_input":"supplied_public_point","reusable_setup_excluded":true,
             "scalar_replay_included":false}));
@@ -714,6 +732,30 @@ mod public_input_tests {
                 .all(Value::is_null));
         }
         assert!(!measurement::enabled());
+    }
+
+    #[test]
+    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
+    fn exclusive_worker_inventory_freezes_kernel_without_target_work() {
+        for mode in ["inventory", "reference_inventory"] {
+            let mut job = supplied(mode);
+            job.exclusive_phases = true;
+            let report = run(&job).unwrap();
+            assert_eq!(report["status"], "inventory");
+            assert_eq!(
+                report["inventory_policy"],
+                "configuration-only-no-query-or-target-solve-v1"
+            );
+            assert!(matches!(
+                report["field_kernel"].as_str(),
+                Some("portable" | "pclmulqdq" | "pmull")
+            ));
+            assert!(report.get("solutions").is_none());
+            assert!(report.get("collection_reports").is_none());
+            assert_phase_closure(&report);
+            assert!(report["online_wall_ns"].is_null());
+            assert_eq!(report["scalar_replay_included"], false);
+        }
     }
 
     #[test]

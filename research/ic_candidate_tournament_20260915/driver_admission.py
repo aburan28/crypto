@@ -1,7 +1,7 @@
 """Shared admission and run records for the existing native and instruction drivers.
 
-Only the audited optimized schema-3 producers are admitted here. Adding another
-backend requires a method adapter and independent stage audit, not a solver tag.
+Prepared schema-3 producers and explicitly source-bound generic workers use
+separate scientific adapters. A solver tag alone cannot admit another backend.
 """
 import copy
 import json
@@ -18,6 +18,9 @@ from producer.timing import native_intervals
 EVALUATOR = ('autolab.py', 'tournament.py', 'portfolio.py', 'oracle.py', 'identity.py',
              'campaign_rules.py', 'target_history.py',
              'measurement.py', 'driver_admission.py', 'qualification.py', 'producer/evidence.py', 'producer/timing.py')
+EVALUATOR += ('generic_driver.py', 'generic_admission.py', 'generic_build.py',
+              'generic_bases.py', 'generic_stages.py', 'generic_queries.py',
+              'generic_query_law.py', 'generic_phases.py')
 INPUT_LAW = ('public-hash-to-curve-cofactor-v1; independently generated fixture, '
              'one supplied public point, no planted scalar')
 
@@ -42,7 +45,12 @@ def producer_metadata(source, manifest, compiler):
             'cargo_config_sha256': manifest['.cargo/config.toml']}}
 
 
-def make_admission(*, job, fixture, report, manifest, metadata, resources, worker_sha256):
+def make_admission(*, job, fixture, report, manifest, metadata, resources, worker_sha256,
+                   executable=None):
+    if metadata.get('adapter') is not None:
+        from generic_driver import make_admission as generic_admission
+        return generic_admission(job=job, fixture=fixture, report=report, manifest=manifest,
+            metadata=metadata, resources=resources, worker_sha256=worker_sha256, executable=executable)
     require(len(fixture['targets']) == 1 and job.get('public_targets') == fixture['targets'],
             'admission requires one frozen supplied public point')
     require(report.get('status') == 'inventory' and report['fixture'] == fixture,
@@ -79,7 +87,8 @@ def make_admission(*, job, fixture, report, manifest, metadata, resources, worke
 
 def freeze_admission(directory, *, binary, job, fixture, manifest, metadata, resources,
                      worker_sha256, execute):
-    inventory_job = dict(job, mode='inventory')
+    inventory_job = dict(job, mode='reference_inventory' if metadata.get('adapter') and job['mode']=='rho'
+                         else 'inventory')
     process = execute(binary, inventory_job, directory)
     if (directory/'job.json').exists():
         require(load(directory/'job.json') == inventory_job, 'changed inventory job')
@@ -94,7 +103,7 @@ def freeze_admission(directory, *, binary, job, fixture, manifest, metadata, res
             process.get('process_status', process.get('status')) == 'EXITED',
             'inventory admission failed; raw failure retained')
     admitted = make_admission(job=job, fixture=fixture, report=load(directory/'stdout.json'),
-        manifest=manifest, metadata=metadata, resources=resources, worker_sha256=worker_sha256)
+        manifest=manifest, metadata=metadata, resources=resources, worker_sha256=worker_sha256, executable=binary)
     for name in ('workload', 'candidate', 'method', 'reference'):
         if name in admitted:
             write_immutable(directory/(name+'.json'), admitted[name])
@@ -102,10 +111,10 @@ def freeze_admission(directory, *, binary, job, fixture, manifest, metadata, res
     return admitted
 
 
-def check_admission(admitted, *, job, fixture, manifest, metadata, resources, worker_sha256):
+def check_admission(admitted, *, job, fixture, manifest, metadata, resources, worker_sha256, executable=None):
     expected = make_admission(job=job, fixture=fixture, report=admitted['report'], manifest=manifest,
-        metadata=metadata, resources=resources, worker_sha256=worker_sha256)
-    require(admitted == expected, 'changed canonical admission')
+        metadata=metadata, resources=resources, worker_sha256=worker_sha256, executable=executable)
+    require(report_sha256(admitted) == report_sha256(expected), 'changed canonical admission')
 
 
 def distinct_candidates(named_admissions):
@@ -120,8 +129,15 @@ def distinct_candidates(named_admissions):
 
 
 def run_record(admitted, *, number, host_id, status, native=None, process_wall_ns=None,
-               profile=None, costs=None):
+               profile=None, costs=None, manifest=None, executable=None, profile_wall_ns=None,
+               native_status=None, profile_status=None):
     """Reconstructible success/failure record; never rank a failed or partial solve."""
+    if admitted.get('adapter') is not None:
+        from generic_driver import run_record as generic_run
+        return generic_run(admitted, manifest=manifest, executable=executable, number=number,
+            host_id=host_id, status=status, native=native, process_wall_ns=process_wall_ns,
+            profile=profile, costs=costs, profile_wall_ns=profile_wall_ns,
+            native_status=native_status, profile_status=profile_status)
     fixture, job = admitted['fixture'], admitted['job']
     proof = timing = stage_audit = None
     ledger = exclusive_ledger(dict.fromkeys(PHASES), unit='valgrind-3.22-amd64-Ir',
