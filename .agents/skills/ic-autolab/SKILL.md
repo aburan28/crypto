@@ -28,7 +28,38 @@ not required by this repository-local runner.
 
 ## Quality and accounting first
 
-Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use its registered runner for this goal, not generic pilot defaults. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass.
+Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use a versioned runner for the intended unexecuted round; the round-one wrapper is historical, and generic pilot defaults do not implement the goal protocol. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass and an accepted, versioned reference binding is committed.
+
+
+The [registered generic/reference study](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/README.md)
+uses the existing tournament for fully charged development comparisons and a
+separate whole-mode observer study. It has already been dispatched in workflow
+`36290704597`; inspect that run and its retained evidence rather than dispatching
+`qualify_generic=true` again. Its development leaders do not change the accepted
+reference binding or consume an improvement round.
+
+Observer comparisons include tracing, reporting and execution-path differences.
+Legacy `OBS1` records lack full scientific admission: keep their missing phases
+and matrix/dispatch evidence unknown. Do not fabricate these fields, subtract
+a guessed instrumentation cost, or call a whole-mode ratio pure timer overhead.
+Use the fully charged enabled interval for IC claims, with direct paired
+IC/rho uncertainty on the same public points.
+
+Before round two, require the accepted reference binding, a new registered
+candidate panel and runner, and the next frozen seed. Exclude every previously
+exposed point, including all 25 fixtures from this development study even when
+an execution failed or was not reached. Preserve separate cold/online leaders
+when they differ; do not weaken the archived reference to admit a challenger.
+
+The [version-two protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/PROTOCOL.md)
+binds that accepted evidence for attempts two and three. Use
+`reference_registry_v2.py` to verify and declare all three extra references,
+then `tournament.py prepare --campaign-version 2` with the registry, accepted
+qualification and observer reports, and complete target exclusions. Its maximum
+panel is ten challengers plus the incumbent: 3,480 native/profile pairs including
+all references, within the unchanged 3,500-pair cap. Keep the original
+three-attempt familywise budget. This driver support does not register or
+execute a round; freeze its candidate panel and dispatch wrapper first.
 
 Before a rho comparison, inspect the actual reference path and run its release
 tests for reference/packed agreement, fruitless-cycle escape, charge closure,

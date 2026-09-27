@@ -112,6 +112,36 @@ impl Barrett {
     }
 }
 
+/// Narrow reduction for `p <= 2^16`.  Every elimination update is at most
+/// `(p - 1) + (p - 1)^2 = p(p - 1) < 2^32`, so both the matrix and the
+/// multiply-add accumulator can stay in 32-bit lanes.
+#[derive(Clone, Copy)]
+struct Barrett32 {
+    p: u32,
+    m: u32,
+}
+
+impl Barrett32 {
+    fn new(p: u64) -> Self {
+        assert!((2..=1 << 16).contains(&p));
+        Self {
+            p: p as u32,
+            m: ((1u64 << 32) / p) as u32,
+        }
+    }
+
+    /// `x mod p` for the bounded product-plus-accumulator above.  The
+    /// quotient estimate undershoots by at most one; the mask avoids a
+    /// data-dependent branch in the row's inner loop.
+    #[inline(always)]
+    fn reduce(self, x: u32) -> u32 {
+        let q = ((x as u64 * self.m as u64) >> 32) as u32;
+        let r = x - q * self.p;
+        let less = 0u32.wrapping_sub((r < self.p) as u32);
+        r.wrapping_sub(self.p).wrapping_add(less & self.p)
+    }
+}
+
 // ── Polynomial helpers ─────────────────────────────────────────────
 
 fn total_degree(m: &[u32]) -> u32 {
@@ -342,6 +372,157 @@ fn eliminate(row: &mut [u64], pivot: &[u64], col: usize, fp: Barrett) {
     }
 }
 
+#[inline]
+fn eliminate32(row: &mut [u32], pivot: &[u32], col: usize, fp: Barrett32) {
+    let f = row[col];
+    if f == 0 {
+        return;
+    }
+    let neg = fp.p - f;
+    for (x, &y) in row[col..].iter_mut().zip(&pivot[col..]) {
+        *x = fp.reduce(*x + neg * y);
+    }
+}
+
+fn rref32(
+    rows: &mut Vec<Vec<u32>>,
+    fp: Barrett32,
+    deadline: Option<Instant>,
+) -> Option<Vec<usize>> {
+    let n_cols = rows.first().map_or(0, |r| r.len());
+    let mut pivots = Vec::new();
+    let mut pr = 0usize;
+    for c in 0..n_cols {
+        if pr >= rows.len() {
+            break;
+        }
+        if c % 32 == 0 && deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let Some(r) = (pr..rows.len()).find(|&r| rows[r][c] != 0) else {
+            continue;
+        };
+        rows.swap(pr, r);
+        let inv = invmod(rows[pr][c] as u64, fp.p as u64) as u32;
+        for x in &mut rows[pr][c..] {
+            *x = fp.reduce(*x * inv);
+        }
+        let (head, tail) = rows.split_at_mut(pr + 1);
+        let prow = &head[pr];
+        if tail.len() * (n_cols - c) > PAR_WORK {
+            tail.par_iter_mut()
+                .for_each(|row| eliminate32(row, prow, c, fp));
+        } else {
+            tail.iter_mut()
+                .for_each(|row| eliminate32(row, prow, c, fp));
+        }
+        pivots.push(c);
+        pr += 1;
+    }
+    rows.truncate(pr);
+    for i in (1..pr).rev() {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let c = pivots[i];
+        let (head, tail) = rows.split_at_mut(i);
+        let prow = &tail[0];
+        if head.len() * (n_cols - c) > PAR_WORK {
+            head.par_iter_mut()
+                .for_each(|row| eliminate32(row, prow, c, fp));
+        } else {
+            head.iter_mut()
+                .for_each(|row| eliminate32(row, prow, c, fp));
+        }
+    }
+    Some(pivots)
+}
+
+#[inline]
+fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+    for (x, &y) in acc[from..].iter_mut().zip(&pivot[from..]) {
+        *x += factor * u64::from(y);
+    }
+}
+
+#[inline]
+fn normalize_lazy(acc: &mut [u64], fp: Barrett) {
+    for x in acc {
+        *x = fp.reduce(*x);
+    }
+}
+
+/// Row-oriented RREF.  Each row keeps a 64-bit scratch accumulator while
+/// it meets the existing 32-bit pivots, reducing only the next pivot
+/// coefficient and the row when it is stored.  A bounded normalization
+/// keeps even the largest supported prime far below `u64` overflow.
+fn rref32_deferred(
+    rows: &mut Vec<Vec<u32>>,
+    fp32: Barrett32,
+    fp: Barrett,
+    deadline: Option<Instant>,
+) -> Option<Vec<usize>> {
+    const NORMALIZE_AFTER: usize = 256;
+    let mut known: Vec<(usize, Vec<u32>)> = Vec::new();
+    for source in std::mem::take(rows) {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let mut acc: Vec<u64> = source.into_iter().map(u64::from).collect();
+        let mut pending = 0usize;
+        for (j, (c, pivot)) in known.iter().enumerate() {
+            if j % 32 == 0 && deadline.is_some_and(|d| Instant::now() > d) {
+                return None;
+            }
+            let f = fp.reduce(acc[*c]);
+            if f != 0 {
+                add_lazy(&mut acc, pivot, *c, fp.p - f);
+                pending += 1;
+                if pending == NORMALIZE_AFTER {
+                    normalize_lazy(&mut acc, fp);
+                    pending = 0;
+                }
+            }
+        }
+        let mut row: Vec<u32> = acc.into_iter().map(|v| fp.reduce(v) as u32).collect();
+        let Some(c) = row.iter().position(|&v| v != 0) else {
+            continue;
+        };
+        let inv = invmod(u64::from(row[c]), fp.p) as u32;
+        for x in &mut row[c..] {
+            *x = fp32.reduce(*x * inv);
+        }
+        let at = known.partition_point(|(pc, _)| *pc < c);
+        known.insert(at, (c, row));
+    }
+    for i in (0..known.len()).rev() {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let (earlier, later) = known.split_at_mut(i + 1);
+        let row = &mut earlier[i].1;
+        let mut acc: Vec<u64> = row.iter().copied().map(u64::from).collect();
+        let mut pending = 0usize;
+        for (c, pivot) in later.iter().rev() {
+            let f = fp.reduce(acc[*c]);
+            if f != 0 {
+                add_lazy(&mut acc, pivot, *c, fp.p - f);
+                pending += 1;
+                if pending == NORMALIZE_AFTER {
+                    normalize_lazy(&mut acc, fp);
+                    pending = 0;
+                }
+            }
+        }
+        for (x, v) in row.iter_mut().zip(acc) {
+            *x = fp.reduce(v) as u32;
+        }
+    }
+    let pivots = known.iter().map(|(c, _)| *c).collect();
+    *rows = known.into_iter().map(|(_, row)| row).collect();
+    Some(pivots)
+}
+
 /// Row-reduce `rows` (dense, entries in `[0, p)`) to reduced echelon form
 /// in place: zero rows are dropped, the rest sorted by pivot column, whose
 /// list is returned.  `None` when the deadline passed first.
@@ -400,6 +581,24 @@ fn rref(rows: &mut Vec<Vec<u64>>, fp: Barrett, deadline: Option<Instant>) -> Opt
 
 /// Degree-bounded F4.
 pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
+    static MODE: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
+    let mode = *MODE.get_or_init(|| {
+        std::env::var("F4_FP_NARROW")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .filter(|&mode| mode <= 2)
+            .unwrap_or(2)
+    });
+    f4_with_arithmetic(input, n_vars, p, opts, mode)
+}
+
+fn f4_with_arithmetic(
+    input: &[Poly],
+    n_vars: usize,
+    p: u64,
+    opts: &F4Options,
+    mode: u8,
+) -> F4Report {
     let t0 = Instant::now();
     let debug = std::env::var("F4_DEBUG").is_ok();
     if debug {
@@ -413,6 +612,9 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
         );
     }
     let fp = Barrett::new(p);
+    let narrow = mode != 0 && p <= 1 << 16;
+    let deferred = mode == 2 && narrow;
+    let fp32 = narrow.then(|| Barrett32::new(p));
     let ord = opts.order;
     let mut basis: Vec<Poly> = Vec::new();
     let mut alive: Vec<bool> = Vec::new();
@@ -665,38 +867,129 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
         }
         let free_cols: Vec<usize> = (0..n_cols).filter(|&c| reducer_at[c] == NONE).collect();
         let deadline = opts.deadline;
-        let reduce_pair_row = |r: &Vec<(u32, u64)>| -> Option<Vec<u64>> {
-            if deadline.is_some_and(|d| Instant::now() > d) {
-                return None;
-            }
-            let mut acc = vec![0u64; n_cols];
-            for &(c, v) in r {
-                acc[c as usize] = v;
-            }
-            for c in r[0].0 as usize..n_cols {
-                let f = acc[c];
-                if f == 0 || reducer_at[c] == NONE {
-                    continue;
+        let pivots: Option<(Vec<Vec<u64>>, Vec<usize>)> = if deferred {
+            let fp32 = fp32.expect("deferred mode has narrow arithmetic");
+            let reduce_pair_row = |r: &Vec<(u32, u64)>| -> Option<Vec<u32>> {
+                if deadline.is_some_and(|d| Instant::now() > d) {
+                    return None;
                 }
-                acc[c] = 0;
-                let neg = p - f;
-                for &(cc, v) in &reducers[reducer_at[c] as usize][1..] {
-                    let x = &mut acc[cc as usize];
-                    *x = fp.reduce(*x + neg * v);
+                let mut acc = vec![0u64; n_cols];
+                for &(c, v) in r {
+                    acc[c as usize] = v;
                 }
-            }
-            let row: Vec<u64> = free_cols.iter().map(|&c| acc[c]).collect();
-            Some(row)
-        };
-        let reduced: Option<Vec<Vec<u64>>> = if parallel {
-            pair_rows.par_iter().map(reduce_pair_row).collect()
+                let mut pending = 0usize;
+                for c in r[0].0 as usize..n_cols {
+                    if reducer_at[c] == NONE {
+                        continue;
+                    }
+                    let f = fp.reduce(acc[c]);
+                    if f == 0 {
+                        continue;
+                    }
+                    acc[c] = 0;
+                    let neg = p - f;
+                    for &(cc, v) in &reducers[reducer_at[c] as usize][1..] {
+                        acc[cc as usize] += neg * v;
+                    }
+                    pending += 1;
+                    if pending == 256 {
+                        normalize_lazy(&mut acc, fp);
+                        pending = 0;
+                    }
+                }
+                Some(
+                    free_cols
+                        .iter()
+                        .map(|&c| fp.reduce(acc[c]) as u32)
+                        .collect(),
+                )
+            };
+            let reduced: Option<Vec<Vec<u32>>> = if parallel {
+                pair_rows.par_iter().map(reduce_pair_row).collect()
+            } else {
+                pair_rows.iter().map(reduce_pair_row).collect()
+            };
+            reduced.and_then(|mut rows| {
+                rows.retain(|r| r.iter().any(|&v| v != 0));
+                rref32_deferred(&mut rows, fp32, fp, deadline).map(|piv| {
+                    let wide = rows
+                        .into_iter()
+                        .map(|row| row.into_iter().map(u64::from).collect())
+                        .collect();
+                    (wide, piv)
+                })
+            })
+        } else if let Some(fp32) = fp32 {
+            let reduce_pair_row = |r: &Vec<(u32, u64)>| -> Option<Vec<u32>> {
+                if deadline.is_some_and(|d| Instant::now() > d) {
+                    return None;
+                }
+                let mut acc = vec![0u32; n_cols];
+                for &(c, v) in r {
+                    acc[c as usize] = v as u32;
+                }
+                for c in r[0].0 as usize..n_cols {
+                    let f = acc[c];
+                    if f == 0 || reducer_at[c] == NONE {
+                        continue;
+                    }
+                    acc[c] = 0;
+                    let neg = fp32.p - f;
+                    for &(cc, v) in &reducers[reducer_at[c] as usize][1..] {
+                        let x = &mut acc[cc as usize];
+                        *x = fp32.reduce(*x + neg * v as u32);
+                    }
+                }
+                Some(free_cols.iter().map(|&c| acc[c]).collect())
+            };
+            let reduced: Option<Vec<Vec<u32>>> = if parallel {
+                pair_rows.par_iter().map(reduce_pair_row).collect()
+            } else {
+                pair_rows.iter().map(reduce_pair_row).collect()
+            };
+            reduced.and_then(|mut rows| {
+                rows.retain(|r| r.iter().any(|&v| v != 0));
+                rref32(&mut rows, fp32, deadline).map(|piv| {
+                    let wide = rows
+                        .into_iter()
+                        .map(|row| row.into_iter().map(u64::from).collect())
+                        .collect();
+                    (wide, piv)
+                })
+            })
         } else {
-            pair_rows.iter().map(reduce_pair_row).collect()
+            let reduce_pair_row = |r: &Vec<(u32, u64)>| -> Option<Vec<u64>> {
+                if deadline.is_some_and(|d| Instant::now() > d) {
+                    return None;
+                }
+                let mut acc = vec![0u64; n_cols];
+                for &(c, v) in r {
+                    acc[c as usize] = v;
+                }
+                for c in r[0].0 as usize..n_cols {
+                    let f = acc[c];
+                    if f == 0 || reducer_at[c] == NONE {
+                        continue;
+                    }
+                    acc[c] = 0;
+                    let neg = p - f;
+                    for &(cc, v) in &reducers[reducer_at[c] as usize][1..] {
+                        let x = &mut acc[cc as usize];
+                        *x = fp.reduce(*x + neg * v);
+                    }
+                }
+                Some(free_cols.iter().map(|&c| acc[c]).collect())
+            };
+            let reduced: Option<Vec<Vec<u64>>> = if parallel {
+                pair_rows.par_iter().map(reduce_pair_row).collect()
+            } else {
+                pair_rows.iter().map(reduce_pair_row).collect()
+            };
+            reduced.and_then(|mut rows| {
+                rows.retain(|r| r.iter().any(|&v| v != 0));
+                rref(&mut rows, fp, deadline).map(|piv| (rows, piv))
+            })
         };
-        let pivots = reduced.and_then(|mut rows| {
-            rows.retain(|r| r.iter().any(|&v| v != 0));
-            rref(&mut rows, fp, deadline).map(|piv| (rows, piv))
-        });
         if debug {
             eprintln!(
                 "f4 step {steps}: degree {d}, {} pairs, {} rows × {n_cols} cols, {} pivots, basis {}",
@@ -1416,6 +1709,104 @@ mod tests {
                 x ^= x << 17;
                 assert_eq!(fp.reduce(x), x % p, "{x} mod {p}");
             }
+        }
+    }
+
+    #[test]
+    fn narrow_arithmetic_matches_wide_rref() {
+        let mut x = 0x0123_4567_89ab_cdefu64;
+        let mut next = || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        for p in [2u64, 3, 29, 31, 101, 65_521] {
+            let fp = Barrett::new(p);
+            let narrow = Barrett32::new(p);
+            let max_update = (p * (p - 1)) as u32;
+            for probe in [0, 1, (p - 1) as u32, p as u32, max_update - 1] {
+                assert_eq!(narrow.reduce(probe) as u64, fp.reduce(probe as u64));
+            }
+            for _ in 0..10_000 {
+                let probe = (next() % p.saturating_mul(p - 1)) as u32;
+                assert_eq!(narrow.reduce(probe) as u64, probe as u64 % p);
+            }
+            for (rows, cols) in [(1, 1), (7, 9), (20, 15), (25, 40)] {
+                let mut wide: Vec<Vec<u64>> = (0..rows)
+                    .map(|_| (0..cols).map(|_| next() % p).collect())
+                    .collect();
+                let mut narrow_rows: Vec<Vec<u32>> = wide
+                    .iter()
+                    .map(|row| row.iter().map(|&v| v as u32).collect())
+                    .collect();
+                let mut deferred_rows = narrow_rows.clone();
+                let want = rref(&mut wide, fp, None).unwrap();
+                let got = rref32(&mut narrow_rows, narrow, None).unwrap();
+                let got_deferred = rref32_deferred(&mut deferred_rows, narrow, fp, None).unwrap();
+                assert_eq!(got, want, "p={p}, shape={rows}x{cols}");
+                assert_eq!(got_deferred, want, "deferred p={p}, shape={rows}x{cols}");
+                let widened: Vec<Vec<u64>> = narrow_rows
+                    .into_iter()
+                    .map(|row| row.into_iter().map(u64::from).collect())
+                    .collect();
+                assert_eq!(widened, wide, "p={p}, shape={rows}x{cols}");
+                let widened_deferred: Vec<Vec<u64>> = deferred_rows
+                    .into_iter()
+                    .map(|row| row.into_iter().map(u64::from).collect())
+                    .collect();
+                assert_eq!(
+                    widened_deferred, wide,
+                    "deferred p={p}, shape={rows}x{cols}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn narrow_f4_matches_wide_basis() {
+        let monomials = [
+            vec![0, 0, 0],
+            vec![1, 0, 0],
+            vec![0, 1, 0],
+            vec![0, 0, 1],
+            vec![2, 0, 0],
+            vec![0, 2, 0],
+            vec![0, 0, 2],
+            vec![1, 1, 0],
+            vec![1, 0, 1],
+            vec![0, 1, 1],
+        ];
+        let mut seed = 0x5eed_2026_u64;
+        let mut next = || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        for p in [29u64, 31, 65_521] {
+            let sys: Vec<Poly> = (0..3)
+                .map(|_| monomials.iter().map(|m| (m.clone(), next() % p)).collect())
+                .collect();
+            let opts = F4Options::new(Ordering::Grevlex, 6);
+            let wide = f4_with_arithmetic(&sys, 3, p, &opts, 0);
+            let narrow = f4_with_arithmetic(&sys, 3, p, &opts, 1);
+            let deferred = f4_with_arithmetic(&sys, 3, p, &opts, 2);
+            assert_eq!(narrow.basis, wide.basis, "p={p}");
+            assert_eq!(narrow.steps, wide.steps, "p={p}");
+            assert_eq!(
+                (narrow.max_rows, narrow.max_cols),
+                (wide.max_rows, wide.max_cols)
+            );
+            assert_eq!(narrow.inconsistent, wide.inconsistent, "p={p}");
+            assert_eq!(deferred.basis, wide.basis, "deferred p={p}");
+            assert_eq!(deferred.steps, wide.steps, "deferred p={p}");
+            assert_eq!(
+                (deferred.max_rows, deferred.max_cols),
+                (wide.max_rows, wide.max_cols),
+                "deferred p={p}"
+            );
+            assert_eq!(deferred.inconsistent, wide.inconsistent, "deferred p={p}");
         }
     }
 

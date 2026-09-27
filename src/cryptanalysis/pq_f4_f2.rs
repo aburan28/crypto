@@ -181,7 +181,7 @@ pub const MAX_MATRIX_WORDS: u64 = 1 << 27;
 
 const NONE: u32 = u32::MAX;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PairKind {
     /// The S-polynomial of basis elements `i` and `j`.
     Critical(usize, usize),
@@ -190,7 +190,7 @@ enum PairKind {
     Field(usize, u32),
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct Pair {
     kind: PairKind,
     /// The lcm of the two leading monomials (critical pairs only).
@@ -924,6 +924,41 @@ impl State {
     /// Becker–Weispfenning `UPDATE` for the critical pairs, plus the
     /// field pairs of the new element.
     fn insert(&mut self, h_poly: F2BoolPoly, st: &mut F4Stats) {
+        self.insert_core(h_poly, st, true);
+    }
+
+    /// Insert one F4 step's new elements in order, then scan queued pairs
+    /// once for every new leading monomial that came after each pair.
+    fn insert_batch(&mut self, polys: Vec<F2BoolPoly>, st: &mut F4Stats) {
+        let first = self.polys.len();
+        for poly in polys {
+            self.insert_core(poly, st, false);
+        }
+        if self.polys.len() > first {
+            self.filter_pairs_since(first, st);
+        }
+    }
+
+    fn filter_pairs_since(&mut self, first: usize, st: &mut F4Stats) {
+        let lm = &self.lm;
+        let mut dropped = 0u64;
+        self.pairs.retain(|p| match p.kind {
+            PairKind::Field(..) => true,
+            PairKind::Critical(i, j) => {
+                let keep = (first.max(i.max(j) + 1)..lm.len()).all(|h| {
+                    let lh = lm[h];
+                    lh & !p.lcm != 0 || (lm[i] | lh) == p.lcm || (lm[j] | lh) == p.lcm
+                });
+                if !keep {
+                    dropped += 1;
+                }
+                keep
+            }
+        });
+        st.pairs_chain_skipped += dropped;
+    }
+
+    fn insert_core(&mut self, h_poly: F2BoolPoly, st: &mut F4Stats, immediate_filter: bool) {
         let h = self.polys.len();
         let lh = h_poly.lt().expect("a new element is non-zero").mask;
         self.polys.push(h_poly);
@@ -958,19 +993,9 @@ impl State {
             }
         }
         // Old pairs whose lcm `h` divides strictly on both sides.
-        let lm = &self.lm;
-        let mut dropped = 0u64;
-        self.pairs.retain(|p| match p.kind {
-            PairKind::Field(..) => true,
-            PairKind::Critical(i, j) => {
-                let keep = lh & !p.lcm != 0 || (lm[i] | lh) == p.lcm || (lm[j] | lh) == p.lcm;
-                if !keep {
-                    dropped += 1;
-                }
-                keep
-            }
-        });
-        st.pairs_chain_skipped += dropped;
+        if immediate_filter {
+            self.filter_pairs_since(h, st);
+        }
         // Product criterion on what survived.
         for (g, l) in d {
             if lh & self.lm[g] == 0 {
@@ -1019,6 +1044,9 @@ pub fn groebner_basis_f4(
     n_vars: usize,
     budget: Option<Duration>,
 ) -> (Vec<F2BoolPoly>, F4Stats) {
+    static BATCH_INSERTS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let batch_inserts =
+        *BATCH_INSERTS.get_or_init(|| std::env::var("F4_F2_BATCH_INSERTS").as_deref() != Ok("0"));
     let started = Instant::now();
     let deadline = budget.map(|b| started + b);
     let mut st = F4Stats::default();
@@ -1062,8 +1090,12 @@ pub fn groebner_basis_f4(
         active: Vec::new(),
         pairs: Vec::new(),
     };
-    for p in start {
-        s.insert(p, &mut st);
+    if batch_inserts {
+        s.insert_batch(start, &mut st);
+    } else {
+        for p in start {
+            s.insert(p, &mut st);
+        }
     }
 
     while !s.pairs.is_empty() {
@@ -1290,9 +1322,13 @@ pub fn groebner_basis_f4(
             st.solving_degree = st.solving_degree.max(d);
         }
         fresh.sort_by(|a, b| cmp_mono(a.lt().unwrap(), b.lt().unwrap()));
-        for p in fresh {
-            st.new_elements += 1;
-            s.insert(p, &mut st);
+        st.new_elements += fresh.len() as u64;
+        if batch_inserts {
+            s.insert_batch(fresh, &mut st);
+        } else {
+            for p in fresh {
+                s.insert(p, &mut st);
+            }
         }
     }
     st.pairs_left = s.pairs.len() as u64;
@@ -1593,6 +1629,51 @@ mod tests {
 
     fn poly(masks: &[u64], n: usize) -> F2BoolPoly {
         F2BoolPoly::from_monos(masks.iter().map(|&m| F2BoolMono::from_mask(m)).collect(), n)
+    }
+
+    #[test]
+    fn batched_insert_keeps_pairs_and_skip_counts() {
+        let empty = || State {
+            n_vars: 10,
+            polys: Vec::new(),
+            lm: Vec::new(),
+            active: Vec::new(),
+            pairs: Vec::new(),
+        };
+        let (mut serial, mut batched) = (empty(), empty());
+        let (mut serial_st, mut batched_st) = (F4Stats::default(), F4Stats::default());
+        let mut rng = StdRng::seed_from_u64(0xba7c_2026);
+        for _ in 0..30 {
+            let mut group = Vec::new();
+            for _ in 0..rng.gen_range(1..6) {
+                let p = loop {
+                    let masks: Vec<u64> = (0..rng.gen_range(1..20))
+                        .map(|_| rng.gen_range(0..(1u64 << 10)))
+                        .collect();
+                    let p = poly(&masks, 10);
+                    if !p.is_zero() {
+                        break p;
+                    }
+                };
+                group.push(p);
+            }
+            for p in &group {
+                serial.insert(p.clone(), &mut serial_st);
+            }
+            batched.insert_batch(group, &mut batched_st);
+            assert_eq!(batched.polys, serial.polys);
+            assert_eq!(batched.lm, serial.lm);
+            assert_eq!(batched.active, serial.active);
+            assert_eq!(batched.pairs, serial.pairs);
+            assert_eq!(
+                batched_st.pairs_chain_skipped,
+                serial_st.pairs_chain_skipped
+            );
+            assert_eq!(
+                batched_st.pairs_product_skipped,
+                serial_st.pairs_product_skipped
+            );
+        }
     }
 
     fn brute_force(eqs: &[F2BoolPoly], n: usize) -> Vec<u64> {

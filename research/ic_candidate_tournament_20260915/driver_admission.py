@@ -16,7 +16,7 @@ from producer.evidence import audit_stages, check_build_identity, method_record,
 from producer.timing import native_intervals
 
 EVALUATOR = ('autolab.py', 'tournament.py', 'portfolio.py', 'oracle.py', 'identity.py',
-             'campaign_rules.py', 'target_history.py',
+             'campaign_rules.py', 'campaign_rules_v2.py', 'target_history.py',
              'measurement.py', 'driver_admission.py', 'qualification.py', 'producer/evidence.py', 'producer/timing.py')
 EVALUATOR += ('generic_driver.py', 'generic_admission.py', 'generic_build.py',
               'generic_bases.py', 'generic_stages.py', 'generic_queries.py',
