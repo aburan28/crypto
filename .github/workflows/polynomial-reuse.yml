@@ -14,6 +14,9 @@ on:
       - 'research/weil_factor_composition_20260914/**'
       - 'research/f4_linear_algebra_20260914/contract.json'
       - 'src/cryptanalysis/pq_groebner_f2.rs'
+      # Feeds the cache fingerprint and supplies the cached symbolic
+      # summation polynomials, so a change here changes every key.
+      - 'src/cryptanalysis/semaev_leading_form.rs'
       - '.github/workflows/polynomial-reuse.yml'
 jobs:
   correctness:
@@ -39,6 +42,7 @@ jobs:
       - run: cargo test --release --features redis-cache --lib algebra_cache
       - run: 'cargo test --release --features redis-cache --lib koblitz_groebner::'
       - run: 'cargo test --release --features redis-cache --lib weil_charts::'
+      - run: 'cargo test --release --features redis-cache --lib semaev_leading_form::'
       - run: cargo check --release --features redis-cache --example weil_factor_composition
       # The cost harnesses assert nothing and so cannot flake; they are run,
       # not just compiled, because a harness that builds but no longer

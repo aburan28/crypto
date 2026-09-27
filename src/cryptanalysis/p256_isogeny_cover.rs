@@ -47,10 +47,7 @@
 //!   directly bounds the expected outcome of running the same probe
 //!   at `2^32`, `2^64`, …, `P-256`.
 
-use crate::prime_hyperelliptic::{
-    count_points, fast_frob_ab, frob_ab_and_jac, jac_order_via_lpoly, Fp2Ctx, FpPoly,
-    HyperellipticCurveP,
-};
+use crate::prime_hyperelliptic::{fast_frob_ab, Fp2Ctx, FpPoly, HyperellipticCurveP};
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
 
@@ -130,7 +127,7 @@ fn is_prime_u64(n: u64) -> bool {
     }
     let mut d = 3u64;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             return false;
         }
         d += 2;
@@ -481,10 +478,10 @@ pub fn quintic_discriminant(f: &FpPoly) -> BigUint {
         FpPoly::from_coeffs(coeffs, p.clone())
     };
     // Resultant Res(f, f') via Euclidean GCD trace.
-    let res = sylvester_resultant(f, &fp);
+
     // Δ = (-1)^{n(n-1)/2} · Res(f, f') / lc(f).
     // For n=5: (-1)^10 = 1, lc(f) = 1 (monic).
-    res
+    sylvester_resultant(f, &fp)
 }
 
 /// Sylvester resultant `Res(a, b)` via the **subresultant Euclidean
@@ -747,10 +744,7 @@ fn build_target_maps(
         for &t2 in &traces {
             let a = t1 + t2;
             let b = t1 * t2 + 2 * (p as i128);
-            frob_broad_map
-                .entry((a, b))
-                .or_insert_with(Vec::new)
-                .push((t1, t2));
+            frob_broad_map.entry((a, b)).or_default().push((t1, t2));
         }
     }
     (jac_map, frob_strict_map, frob_broad_map)
@@ -1141,7 +1135,7 @@ pub fn run_probe_with_stats(p: u64, max_curves: Option<usize>) -> (ProbeStats, V
     let ecs = sweep_prime_order_curves(p);
     let n_eqs = ecs.len();
     let hits = run_probe(p, max_curves);
-    let total = (p as u64).pow(5);
+    let total = p.pow(5);
     let stats = tally_stats(&hits, p, total, n_eqs);
     (stats, hits)
 }
@@ -1162,6 +1156,7 @@ pub fn run_probe_random_with_stats(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::prime_hyperelliptic::frob_ab_and_jac;
 
     #[test]
     fn tiny_sweep_p_5() {
@@ -1568,7 +1563,7 @@ mod tests {
         unique_targets.sort_by_key(|((a, b), _)| (*a, *b));
         let mut seen: HashMap<(i128, i128), Vec<i128>> = HashMap::new();
         for (key, t) in unique_targets {
-            seen.entry(key).or_insert_with(Vec::new).push(t);
+            seen.entry(key).or_default().push(t);
         }
         let mut tier_empties = 0usize;
         for (key, traces) in &seen {
@@ -1719,10 +1714,10 @@ mod tests {
 
         // Bonus: distribution of |a_ℓ / (2√ℓ)| — Sato–Tate density.
         // Bin into 10 equal-width bins on [-1, 1].
-        let mut bins = vec![0u64; 10];
+        let mut bins = [0u64; 10];
         for (ell, a) in &samples {
             let x = *a as f64 / (2.0 * (*ell as f64).sqrt());
-            if x < -1.0 || x > 1.0 {
+            if !(-1.0..=1.0).contains(&x) {
                 continue;
             }
             let idx = (((x + 1.0) / 2.0) * 10.0).floor() as usize;
@@ -1879,7 +1874,7 @@ mod tests {
             }
             let mut d = 3u64;
             while d * d <= n {
-                if n % d == 0 {
+                if n.is_multiple_of(d) {
                     return false;
                 }
                 d += 2;
@@ -1899,15 +1894,12 @@ mod tests {
                     }
                     let n = e.order();
                     // EXACTLY divisible by 4, not by 8 (i.e., cofactor "exactly 4").
-                    if n % 4 == 0 && n % 8 != 0 {
+                    if n.is_multiple_of(4) && !n.is_multiple_of(8) {
                         let q = n / 4;
                         if q >= 3 && q % 2 == 1 && is_prime_small(q) {
                             let t: i128 = (p_u as i128) + 1 - (n as i128);
                             let target_b: i128 = 2 * (p_u as i128) - t * t;
-                            targets
-                                .entry(target_b)
-                                .or_insert_with(Vec::new)
-                                .push((a, b, n, t));
+                            targets.entry(target_b).or_default().push((a, b, n, t));
                         }
                     }
                 }
@@ -2001,7 +1993,7 @@ mod tests {
             }
             let mut d = 3u64;
             while d * d <= n {
-                if n % d == 0 {
+                if n.is_multiple_of(d) {
                     return false;
                 }
                 d += 2;
@@ -2020,16 +2012,13 @@ mod tests {
                         continue;
                     }
                     let n = e.order();
-                    if n % 8 == 0 {
+                    if n.is_multiple_of(8) {
                         let q = n / 8;
                         if q >= 2 && is_prime_small(q) {
                             let t: i128 = (p_u as i128) + 1 - (n as i128);
                             let target_b: i128 = 2 * (p_u as i128) - t * t;
                             target_b_set.insert(target_b);
-                            target_to_e
-                                .entry(target_b)
-                                .or_insert_with(Vec::new)
-                                .push((a, b, n, t));
+                            target_to_e.entry(target_b).or_default().push((a, b, n, t));
                         }
                     }
                 }
@@ -2168,7 +2157,7 @@ mod tests {
             }
             let mut d = 3u64;
             while d * d <= n {
-                if n % d == 0 {
+                if n.is_multiple_of(d) {
                     return false;
                 }
                 d += 2;
@@ -2192,7 +2181,7 @@ mod tests {
                     }
                     let n = e.order();
                     // Cofactor 8 with prime subgroup.
-                    if n % 8 == 0 {
+                    if n.is_multiple_of(8) {
                         let q = n / 8;
                         if q >= 2 && is_prime_small(q) {
                             let t: i128 = (p_u as i128) + 1 - (n as i128);
@@ -2205,9 +2194,7 @@ mod tests {
             let target_set: HashMap<(i128, i128), Vec<(u64, u64, u64, i128)>> = {
                 let mut m: HashMap<(i128, i128), Vec<(u64, u64, u64, i128)>> = HashMap::new();
                 for (a, b, n, t, target_b) in &even_n_curves {
-                    m.entry((0, *target_b))
-                        .or_insert_with(Vec::new)
-                        .push((*a, *b, *n, *t));
+                    m.entry((0, *target_b)).or_default().push((*a, *b, *n, *t));
                 }
                 m
             };
@@ -2534,7 +2521,7 @@ mod tests {
     /// claim — that `(T² + T + 1)²` divides `(T² + T + 1) · (T² + T
     /// + 1) · Q(T)` for any palindromic `Q`, by polynomial division
     /// in `F_2[T]`.  Quick sanity check; the deep obstruction
-    /// claim about Jacobian moduli is left as a documented conjecture.
+    ///      claim about Jacobian moduli is left as a documented conjecture.
     #[test]
     fn phase15_higher_genus_product_obstruction() {
         // Verify: (T² + T + 1)² | (T² + T + 1) · P_A(T) in F_2[T]
@@ -2720,7 +2707,7 @@ mod tests {
         }
         // Full parity breakdown across ALL realized classes.
         let mut parity_counts: HashMap<(i128, i128), u64> = HashMap::new(); // (a mod 2, b mod 2) -> count
-        for ((a, b), _) in &counts {
+        for (a, b) in counts.keys() {
             *parity_counts
                 .entry((a.rem_euclid(2), b.rem_euclid(2)))
                 .or_insert(0) += 1;
@@ -2971,7 +2958,7 @@ mod tests {
         let coeffs: Vec<BigUint> = coeffs_z
             .iter()
             .map(|c| {
-                let cm = ((c % 13 + 13) % 13) as u64;
+                let cm = c.rem_euclid(13) as u64;
                 BigUint::from(cm)
             })
             .collect();

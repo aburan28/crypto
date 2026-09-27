@@ -1,0 +1,231 @@
+{
+  "arguments": {
+    "batch": 1,
+    "control": false,
+    "curve_a": 0,
+    "curve_b": 1,
+    "degree": 13,
+    "factor_base": null,
+    "factor_index": 0,
+    "known_log": null,
+    "max_trials": 20000,
+    "random_target": true,
+    "seed": 205,
+    "solver": "groebner",
+    "subfield": 1,
+    "summands": 3,
+    "wdsat_binary": null,
+    "wdsat_timeout_ms": 5000
+  },
+  "counts": {
+    "algebra_cache_current_thread": [
+      {
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "errors": 0,
+        "invalid": 0,
+        "local_hits": 0,
+        "lookups": 0,
+        "misses": 0,
+        "overhead_ns": 0,
+        "oversized": 0,
+        "redis_hits": 0
+      },
+      {
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "errors": 0,
+        "invalid": 0,
+        "local_hits": 0,
+        "lookups": 0,
+        "misses": 0,
+        "overhead_ns": 0,
+        "oversized": 0,
+        "redis_hits": 0
+      },
+      {
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "errors": 0,
+        "invalid": 0,
+        "local_hits": 0,
+        "lookups": 0,
+        "misses": 0,
+        "overhead_ns": 0,
+        "oversized": 0,
+        "redis_hits": 0
+      }
+    ],
+    "batches": 9,
+    "cofactor_admissible": true,
+    "columns": 77,
+    "dependent_relations": 0,
+    "f4_reductions": 225,
+    "f4_word_ops": 3085035,
+    "factor_base_points": 4005,
+    "inconsistent_relations": 0,
+    "independent_relations": 9,
+    "linear_solve_attempts": 1,
+    "pair_table_entries": 0,
+    "relations": 9,
+    "sat_calls": 0,
+    "sat_conflicts": 0,
+    "sat_invalid_models": 0,
+    "sat_unknowns": 0,
+    "trials": 9,
+    "verification_failures": 0
+  },
+  "elapsed_seconds": 0.083840656,
+  "evidence_scope": "synthetic_known_answer",
+  "factor_base": {
+    "abscissae": 4096,
+    "columns": 77,
+    "dimension": 12,
+    "domain": "linear_subspace",
+    "family": "factor",
+    "points": 4005,
+    "signed_orbits": 155,
+    "spec": {
+      "index": 0,
+      "kind": "factor"
+    }
+  },
+  "limitations": [
+    "No imported target was used.",
+    "This run does not establish scaling or challenge readiness."
+  ],
+  "mode": {
+    "batch": 1,
+    "collapse_negation": true,
+    "collapse_projected_orbits": true,
+    "control": false,
+    "early_solve": true
+  },
+  "operation": "run",
+  "parameters": {
+    "a": "0",
+    "b": "1",
+    "cofactor": "4",
+    "field": {
+      "degree": 13,
+      "kind": "binary",
+      "polynomial_terms": [
+        0,
+        1,
+        3,
+        4,
+        13
+      ]
+    },
+    "fixture": {
+      "known_log": "351",
+      "seed": 205
+    },
+    "generator": {
+      "x": "0x12b9",
+      "y": "0x1bc4"
+    },
+    "name": "synthetic-k0-n13",
+    "point": {
+      "x": "0x1988",
+      "y": "0x130b"
+    },
+    "schema_version": 1,
+    "subgroup_order": "2003"
+  },
+  "resources": {
+    "cpu_seconds": 0.088266,
+    "peak_rss_bytes": 12972032,
+    "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+  },
+  "result": {
+    "expected": "351",
+    "recovered": "351",
+    "verified": true
+  },
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "bc75d2655054bccd381defb92b55412ec6b5646ecec63272c179d24aa3b1e7e0",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "stages": [
+    {
+      "details": {},
+      "elapsed_seconds": 5.6e-8,
+      "stage": "factor_base",
+      "status": "started"
+    },
+    {
+      "details": {
+        "columns": 77,
+        "points": 4005
+      },
+      "elapsed_seconds": 0.009711704,
+      "stage": "factor_base",
+      "status": "complete"
+    },
+    {
+      "details": {
+        "wanted": 81
+      },
+      "elapsed_seconds": 4.1e-8,
+      "stage": "relation_collection",
+      "status": "started"
+    },
+    {
+      "details": {
+        "collected": 9,
+        "trials": 9
+      },
+      "elapsed_seconds": 0.073625969,
+      "stage": "relation_collection",
+      "status": "stopped"
+    },
+    {
+      "details": {
+        "columns": 78,
+        "rows": 9
+      },
+      "elapsed_seconds": 4e-8,
+      "stage": "linear_algebra",
+      "status": "started"
+    },
+    {
+      "details": {
+        "candidate_produced": true,
+        "columns": 78,
+        "rank": 9,
+        "rows": 9
+      },
+      "elapsed_seconds": 4.698e-6,
+      "stage": "linear_algebra",
+      "status": "rank"
+    },
+    {
+      "details": {},
+      "elapsed_seconds": 6.091e-6,
+      "stage": "linear_algebra",
+      "status": "complete"
+    },
+    {
+      "details": {},
+      "elapsed_seconds": 3.1e-8,
+      "stage": "verification",
+      "status": "started"
+    },
+    {
+      "details": {},
+      "elapsed_seconds": 6.082e-6,
+      "stage": "verification",
+      "status": "pass"
+    }
+  ],
+  "status": "complete",
+  "timing_seconds": {
+    "linear_algebra": 0.000046003,
+    "pair_table": 0.0,
+    "relation_collection": 0.073603823
+  }
+}
