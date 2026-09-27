@@ -1039,3 +1039,10 @@ makes every orbit claimable. For points already collected without counters,
   with rational coefficients*, Math. Ann. 261 (1982).
 - **Fried, Gaudry, Heninger, Thomé**, *A kilobit hidden SNFS discrete
   logarithm computation*, EUROCRYPT 2017.
+
+## Verified Boolean solver comparisons
+
+See [the Gröbner comparison protocol](groebner_compare/README.md) for the bounded
+Boolean worker runner, independent basis certificates, learn/apply fallback
+accounting, and immutable diagnostic receipts. These are solver-stage controls;
+no full-DLP speedup or research-state transition is implied.
