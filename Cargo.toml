@@ -13,6 +13,17 @@ path = "src/main.rs"
 name = "ic"
 path = "src/bin/ic.rs"
 
+# `icx` — index calculus across every standardized curve (catalog + engine).
+[[bin]]
+name = "icx"
+path = "src/bin/icx.rs"
+
+# `ecc2k-guard` — the ECC2K-130 rho campaign's no-fruitless-cycle
+# certificate and verifiable seed provenance.
+[[bin]]
+name = "ecc2k-guard"
+path = "src/bin/ecc2k_guard.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"

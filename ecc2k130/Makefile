@@ -24,6 +24,10 @@
 #   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
 #   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
+#   PACKED_SQUARE_TABLE  lambda^2 with its reduced half from a shared table
+#                        (default 0; table walk only; ROOFLINE.md)
+#   PACKED_INV_POLY  inversion accumulator kept in the polynomial basis
+#                    (default 0; 2 = link product out of line; ROOFLINE.md)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
 #   TABLE_ADDEND_GLOBAL  table-walk addends from global, selection in shared
 #   TABLE_TAG_DENOM  reverse pass rebuilds d from the tag in hist; no
@@ -124,6 +128,13 @@ PACKED_CHAIN_FIRST ?= 0
 PACKED_CHAINS ?= 1
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
+# The polynomial square with coefficients 66..130 looked up in an 8 KB shared
+# table instead of spread and reduced (ROOFLINE.md; table walk only).
+PACKED_SQUARE_TABLE ?= 0
+# The walk's inversion with the Itoh-Tsujii accumulator kept in the
+# polynomial basis: one conversion per link instead of three (ROOFLINE.md).
+# 1 inlines the eight links; 2 shares one out-of-line copy of their product.
+PACKED_INV_POLY ?= 0
 # Carry the eight per-branch step counts that make a distinguished point
 # payable on cairn (CAIRN-WITNESS.md).  WITNESS=0 compiles the counting out
 # and is the control for the paired comparison that prices it; it also keeps
@@ -233,6 +244,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
+       -DECC_PACKED_SQUARE_TABLE=$(PACKED_SQUARE_TABLE) \
+       -DECC_PACKED_INV_POLY=$(PACKED_INV_POLY) \
        -DECC_WITNESS=$(WITNESS)
 
 all: cpu
@@ -305,14 +318,13 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testirschedule.py'
 	python3 -m unittest discover -s codegen -p 'testwdsat.py'
 
-# The iteration exploits an automorphism group of order 2m, and the usual price
-# for that is fruitless cycles.  This iteration cannot have them -- it is
-# equivariant, so it needs no canonical representative and has nothing for a
-# sign to feed back through -- but the arithmetic coincidence that would still
-# produce one is checkable, so check it, for every curve, on every change to the
-# step schedule.
+# Exhaustively rule out sigma-walk orbit returns through CYCLE_LENGTH.
+# Equivariance alone does not rule out cycles. This check does not cover the
+# additive table walk; test-cycle-rule and test-cycle-escape cover its policy.
+CYCLE_LENGTH ?= 24
 check-cycles:
-	cd codegen && python3 cycles.py --max-length 8
+	cargo run --release --quiet --manifest-path ../Cargo.toml --bin ecc2k-guard -- \
+	    cycles --max-length $(CYCLE_LENGTH)
 
 # SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
 # `test` because it needs solvers the rest of the repo does not:
@@ -486,16 +498,25 @@ test-shared-sigma-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testsharedsigmacuda.cu -o build/test-shared-sigma-cuda
 	./build/test-shared-sigma-cuda
 
+# The table walk's cycle rule on its own: every tau-relation 4-cycle and every
+# pairwise cycle up to 8 steps refused, the rule a class function
+# (WALK-CONSTANT.md section 11).  No curve, a second.
+test-cycle-rule:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wno-unused-function src/testcyclerule.cpp -o build/test-cycle-rule
+	./build/test-cycle-rule
+
 # Device primitives of the table walk against the host reference; needs a GPU.
 # The same probe on the host, for both selection layouts, so a layout change
 # is held to the reference before any GPU sees it.  PHASE_POPC is checked on
 # top of each pivot layout (CHEAPER-SELECTION.md).
+TABLE_PROBE_POINTS ?= 4096
 test-table-walk-host:
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -DECC_TABLE_PHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble
-	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes
-	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -DECC_TABLE_PHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble-popc
-	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes-popc
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -DECC_TABLE_PHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -DECC_TABLE_PHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble-popc
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes-popc
 	./build/test-table-walk-host-nibble
 	./build/test-table-walk-host-bytes
 	./build/test-table-walk-host-nibble-popc
@@ -514,6 +535,17 @@ test-phase-cost:
 bench-cheaper-selection:
 	@test -n "$(OUT)" || (echo "usage: make bench-cheaper-selection OUT=DIR"; exit 1)
 	modal run --detach modal_job.py --job benchmarks/cheaper-selection/gpujob.sh --out "$(OUT)" --gpu "RTX PRO 6000"
+
+# The walks' iteration constants on the device walks' own host reference
+# (WALK-CONSTANT.md): the n = 23 rows of benchmarks/walk-constant, at the
+# campaign's H = 8.  About ten minutes on four cores; not part of `test`.
+WALK_CONSTANT_FLAGS = -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -Wno-unknown-pragmas -Wno-unused-function -pthread
+walk-constant:
+	mkdir -p build
+	$(CXX) $(WALK_CONSTANT_FLAGS) -DECC_TABLE_BRANCHES=8 src/walkconstant.cpp -o build/walk-constant-host-h8
+	$(CXX) $(WALK_CONSTANT_FLAGS) -DECC_TABLE_BRANCHES=16 src/walkconstant.cpp -o build/walk-constant-host-h16
+	for d in ecc2k130 native; do ./build/walk-constant-host-h8 --n 23 --walk table --dist $$d --walks 8 --trials 20000 --seed 230; done
+	for d in ecc2k130 native; do ./build/walk-constant-host-h8 --n 23 --walk sigma --dist $$d --walks 8 --trials 20000 --seed 230; done
 
 test-table-walk-cuda:
 	mkdir -p build
@@ -538,7 +570,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule test-cycle-escape check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -869,5 +901,15 @@ clean:
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
+	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+
+# Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
+test-cycle-escape:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas src/testcycleescape.cpp -o build/test-cycle-escape
+	./build/test-cycle-escape
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-hybrid
+	./build/test-cycle-escape-hybrid
+.PHONY: test-cycle-escape
