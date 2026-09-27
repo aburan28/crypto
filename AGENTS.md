@@ -308,6 +308,33 @@ complete an iteration. The equivalent-suite exception below still applies.
   Update the research note and canonical scoreboard in the same PR, retaining
   the prior baseline and classifying the change by §3.
 
+### 8a. Require m=83 for high-fidelity ECC2K-130 IC evidence
+
+For every index-calculus improvement intended to transfer to ECC2K-130,
+**always use m=83 as the highest-fidelity smaller-curve confidence gate**
+before claiming that the improvement survives scaling toward m=131. Use the
+same Koblitz family as the challenge:
+`E_0: y² + xy = x³ + 1` over `GF(2^83)`. Its group order is
+`4 * 2417851639230796216685689`, with the second factor prime. A verified
+polynomial-basis modulus is `z^83 + z^45 + z² + z + 1`; a different basis
+is acceptable only when the field representation and conversions are recorded.
+Freeze the exact curve, basis, prime-order subgroup, generator, and cofactor
+clearing in each candidate/workload manifest. Frobenius has 83 phases on
+nonidentity points in that subgroup, and `ord_83(2) = 82), so the nontrivial
+cyclotomic block is irreducible over `GF(2)`, as for m=131.
+
+- Use smaller degrees, including m=53, for smoke tests, solver tuning, and
+  inexpensive falsification. They do not discharge the m=83 gate.
+- On m=83, run the unmodified baseline and candidate with matching curve,
+  subgroup, factor-base policy, targets, seeds, resource limits, and independent
+  holdouts. Preserve failed searches, timeouts, and out-of-memory outcomes.
+  Apply the full-cost, verified-DLP, matched-rho, and scoreboard rules above;
+  a solver-only or relation-only gain remains a stage diagnostic.
+- If the m=83 comparison is missing or incomplete, report that explicitly and
+  leave high-fidelity ECC2K-130 improvement unestablished. A successful m=83
+  result is evidence at m=83; any transfer to m=131 remains an extrapolation
+  until separately checked there.
+
 ### 9. AWS GPU hosts use the `meow34` key pair
 
 For AWS EC2 benchmark and validation hosts, including G7/G7e instances, use the
