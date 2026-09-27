@@ -267,6 +267,9 @@ def frozen_inputs(round_dir):
     for name, expected in c['evaluator_sha256'].items():
         require(digest(HERE/name)==expected,'changed evaluator or checker: '+name)
     fixtures, arms = read(round_dir/'fixtures.json'), read(round_dir/'candidates.json')
+    if any(a.get('adapter') == 'generic-v1' for a in arms):
+        require(c['purpose'] == 'reference-qualification' and c['stages'] == QUALIFICATION_STAGES
+                and c.get('execution_number_stride') == 2, 'generic pipeline lacks qualification-only contract')
     if c.get('purpose') == bounded.PURPOSE:
         bounded.validate_contract(c)
         require(c['reference_qualification'] == bounded.qualified_binding(
@@ -274,6 +277,10 @@ def frozen_inputs(round_dir):
             'changed accepted reference binding')
         require(history.validate_fresh(fixtures, read(round_dir/'target-history.json')) == c['fresh_target_count'],
                 'changed fresh target census')
+        if 'target_exposure_schema' in c:
+            require(type(c['target_exposure_schema']) is int and c['target_exposure_schema'] == 1,
+                    'unknown supplemental target exposure schema')
+            history.verify_exposures(round_dir/'target-exposures', read(round_dir/'target-history.json'))
     return c, fixtures, arms
 
 
@@ -325,8 +332,22 @@ def snapshot_build(source,destination, *, scientific=False):
 
 def prepare(args):
     out = args.out.resolve()
+    require(not getattr(args, 'exposed_fixtures', []) or getattr(args, 'attempt_number', 0),
+            'supplemental exposures require the bounded campaign protocol')
     require(args.targets == 1, 'scientific admission requires a single public target')
     require(args.candidates is not None, 'supply an explicit registry of admitted optimized candidates')
+    registry = read(args.candidates)
+    require(isinstance(registry, list) and 2 <= len(registry) <= 16, 'candidate count must be 2..16')
+    generic = any(a.get('adapter') == 'generic-v1' for a in registry)
+    for arm in registry:
+        require(arm.get('adapter') in (None, 'generic-v1'), 'unknown candidate adapter')
+        require(bool(arm.get('generic_build')) == (arm.get('adapter') == 'generic-v1'),
+                'generic build requires an explicit adapter')
+    if generic:
+        require(args.qualification and not getattr(args, 'attempt_number', 0),
+                'generic workers require development qualification before improvement rounds')
+        require(getattr(args, 'qualification_protocol', None), 'generic qualification needs its own frozen protocol')
+        require(registry[0].get('adapter') is None, 'generic qualification must retain a prepared incumbent')
     if getattr(args, 'attempt_number', 0):
         bounded.validate_preparation(args)
     require(platform.machine()=='x86_64','instruction protocol currently supports amd64 only')
@@ -368,13 +389,15 @@ def prepare(args):
             prior_rounds.append(dict(attempt_number=number, contract_sha256=digest(previous/'contract.json'),
                                      decision_sha256=digest(previous/'decision.json')))
         excluded = history.extend(parent_history, [p.resolve() for p in args.prior_round])
+        excluded = history.freeze_exposures(excluded, args.exposed_fixtures, out/'target-exposures')
+        history.verify_exposures(out/'target-exposures', excluded)
         write(out/'target-history.json', excluded, exclusive=True)
         write(out/'qualified-references.json', read(args.qualified_report), exclusive=True)
     require(not qualification or not (args.rho_source_root or args.rho_config),
             'qualification measures rho from every IC source; separate rho overrides are not used')
     source = args.source_root.resolve()
     binary, manifest = snapshot_build(source,out,scientific=True)
-    arms = read(args.candidates) if args.candidates else candidates()
+    arms = registry
     require(isinstance(arms,list) and 2 <= len(arms) <= 16,'candidate count must be 2..16')
     require(arms[0]['id']=='incumbent','first candidate must be incumbent')
     ids, hashes = set(),set()
@@ -383,7 +406,25 @@ def prepare(args):
         name = arm['id']
         require(re.fullmatch(r'[a-z][a-z0-9_-]{0,31}',name) is not None and name not in ids,'invalid candidate id')
         require(name not in {'rho','aa_control'} and not name.startswith('rho_'),'reserved candidate id')
-        if arm.get('source_root'):
+        if arm.get('adapter') == 'generic-v1':
+            from generic_driver import snapshot
+            require(name != 'incumbent' and not arm.get('source_root'), 'ambiguous generic source declaration')
+            candidate_source = ('generic-v1', Path(arm['generic_build']).resolve())
+            if candidate_source in built_sources:
+                destination, arm_binary, arm_manifest = built_sources[candidate_source]
+            else:
+                destination = out/'source_candidates'/name
+                destination.mkdir(parents=True)
+                arm_binary, arm_manifest = snapshot(candidate_source[1], destination,
+                    subprocess.check_output(['rustc', '--version'], text=True).strip())
+                built_sources[candidate_source] = (destination, arm_binary, arm_manifest)
+            arm['binary_relative'] = str(arm_binary.relative_to(out))
+            arm['source_directory'] = str((destination/'source').relative_to(out))
+            arm['source_manifest_relative'] = str((destination/'source-manifest.json').relative_to(out))
+            arm['build_record_relative'] = str((destination/'build-record.json').relative_to(out))
+            arm['build_sha256'] = read(destination/'build-record.json')['build_sha256']
+            arm.pop('generic_build')
+        elif arm.get('source_root'):
             require(name!='incumbent','use --source-root for the incumbent')
             candidate_source=Path(arm['source_root']).resolve()
             if candidate_source in built_sources:
@@ -403,7 +444,7 @@ def prepare(args):
             arm['source_directory']='source'
             arm['source_manifest_relative']='source-manifest.json'
         h = objhash(arm['config'])
-        identity=objhash([objhash(arm_manifest),h])
+        identity=objhash([objhash(arm_manifest),h,arm.get('adapter'),arm.get('build_sha256')])
         require(identity not in hashes,'duplicate candidate source/configuration')
         ids.add(name); hashes.add(identity)
         arm['configuration_sha256'] = h
@@ -540,7 +581,7 @@ def prepare(args):
                 if stage!='aa' and arm['id']=='aa_control':
                     continue
                 relative = str(Path('admissions')/stage/case['id']/arm['id'])
-                job = dict(copy.deepcopy(case['job']), mode='rho' if is_rho(arm) else 'ic', config=arm['config'])
+                job = executed_job(case, arm)
                 destination = (out/arm['source_manifest_relative']).parent
                 admitted = freeze_admission(out/relative, binary=out/arm['binary_relative'], job=job,
                     fixture=case['fixture'], manifest=read(out/arm['source_manifest_relative']),
@@ -587,21 +628,30 @@ def prepare(args):
         for p in (out/name).rglob('*') if p.is_file()})
     for arm in all_admission_arms:
         directory=(out/arm['source_manifest_relative']).parent
-        for name in ('producer.json','preparation.json','build.log'):
+        names = ['producer.json','preparation.json','build.log']
+        if arm.get('adapter') == 'generic-v1':
+            names += ['build-record.json', 'root-source.tar.gz']
+        for name in names:
             path=directory/name
             c['pinned_files'][str(path.relative_to(out))]=digest(path)
     if qualification:
-        protocol=HERE/'goal_20260924/reference-qualification/PROTOCOL.md'
+        protocol=getattr(args, 'qualification_protocol', None) or HERE/'goal_20260924/reference-qualification/PROTOCOL.md'
         shutil.copy2(protocol,out/'qualification-protocol.md')
         c['pinned_files']['qualification-protocol.md']=digest(out/'qualification-protocol.md')
+    if generic:
+        c['execution_number_stride'] = 2
+        c['qualification_scope'] = 'mixed prepared/generic instrumented pipelines; no observer or promotion qualification'
     if bounded_run:
         protocol = HERE/'goal_20260924/improvement/PROTOCOL.md'
         shutil.copy2(protocol, out/'improvement-protocol.md')
         c.update(attempt_number=attempt, familywise_rule=bounded.RULE, prior_rounds=prior_rounds,
+                 target_exposure_schema=1,
                  fresh_target_count=history.validate_fresh(fixtures, excluded),
                  target_uniqueness='Exact canonical curve ID plus public point; all retained prior campaign points excluded. Replay repeats confirmation.')
         for name in ('target-history.json', 'qualified-references.json', 'improvement-protocol.md'):
             c['pinned_files'][name] = digest(out/name)
+        c['pinned_files'].update({str(p.relative_to(out)):digest(p)
+            for p in (out/'target-exposures').rglob('*') if p.is_file()})
         bounded.validate_contract(c)
     write(out/'contract.json',c,exclusive=True)
     write(out/'seal.json',{'contract_sha256':objhash(c)},exclusive=True)
@@ -660,6 +710,25 @@ def trial_path(root, stage, case, arm, repetition):
     return root/'runs'/stage/case['id']/arm/f'rep-{repetition}'
 
 
+def executed_job(case, arm):
+    job = dict(copy.deepcopy(case['job']), mode='rho' if is_rho(arm) else 'ic', config=copy.deepcopy(arm['config']))
+    if arm.get('adapter') == 'generic-v1':
+        job['exclusive_phases'] = True
+    return job
+
+
+def trial_profiles(directory, c, case, arm, *, compressed=False):
+    if arm.get('adapter') == 'generic-v1':
+        from generic_phases import parse_profiles as generic_profiles
+        return generic_profiles(directory, read(directory/'stdout.json'), executed_job(case, arm),
+                                compressed=compressed)['phases']
+    return parse_profiles(directory, compressed=compressed, phase_schema=3 if c.get('scientific_admission') else 1)
+
+
+def phase_total(costs):
+    return sum(v for v in costs.values() if v is not None)
+
+
 def verify_receipt(directory, c, case, arm):
     r = read(directory/'receipt.json')
     require(r['case']==case['id'] and r['cell']==case['cell'],'changed case identity')
@@ -673,8 +742,8 @@ def verify_receipt(directory, c, case, arm):
         report = read(directory/'profile/stdout.json')
         proof = verify(report,case['fixture'],expected_mode=r['mode'],summands=arm['config']['summands'])
         require(proof==r['certificate'],'certificate summary changed')
-        costs = parse_profiles(directory/'profile',compressed=True,phase_schema=3 if c.get('scientific_admission') else 1)
-        require(costs==r['phase_costs'] and sum(costs.values())==r['total_operations'],'changed cost summary')
+        costs = trial_profiles(directory/'profile',c,case,arm,compressed=True)
+        require(costs==r['phase_costs'] and phase_total(costs)==r['total_operations'],'changed cost summary')
         native = read(directory/'native/stdout.json')
         native_proof = verify(native,case['fixture'],expected_mode=r['mode'],summands=arm['config']['summands'])
         require(native_proof['solutions']==proof['solutions'],'native/profile mismatch')
@@ -705,21 +774,25 @@ def scientific_trial(root, c, row, case, arm, directory):
     relative = str(Path('admissions')/stage/case['id']/arm['id'])
     admitted = read(root/relative/'admission.json')
     require(objhash(admitted) == c['admissions'][relative], 'changed admission receipt')
-    job = dict(copy.deepcopy(case['job']), mode='rho' if is_rho(arm) else 'ic', config=arm['config'])
+    job = executed_job(case, arm)
     require(read(directory/'job.json') == job, 'changed executed job')
     manifest_path=root/arm['source_manifest_relative']
     check_admission(admitted, job=job, fixture=case['fixture'], manifest=read(manifest_path),
         metadata=read(manifest_path.parent/'producer.json'), resources=c['resources'],
-        worker_sha256=digest(root/arm['binary_relative']))
+        worker_sha256=digest(root/arm['binary_relative']), executable=root/arm['binary_relative'])
     complete=row['status']=='VERIFIED'
-    return run_record(admitted, number=c['run_number_base']+(STAGES.index(stage)*len(c['run_aliases'])+
-        c['run_aliases'].index(arm['id']))*c['repetitions']+row['repetition'],
+    ordinal=(STAGES.index(stage)*len(c['run_aliases'])+c['run_aliases'].index(arm['id']))*c['repetitions']+row['repetition']
+    return run_record(admitted, number=c['run_number_base']+c.get('execution_number_stride',1)*ordinal,
         host_id=objhash(c['host']), status='complete' if complete else
             {'TIMEOUT':'timeout','OOM':'oom'}.get(row['status'],'error'),
         native=read(directory/'native/stdout.json') if complete else None,
         profile=read(directory/'profile/stdout.json') if complete else None,
         costs=row['phase_costs'] if complete else None,
-        process_wall_ns=row.get('native_process',{}).get('process_wall_ns'))
+        process_wall_ns=row.get('native_process',{}).get('process_wall_ns'),
+        manifest=read(manifest_path), executable=root/arm['binary_relative'],
+        profile_wall_ns=row.get('profile_process',{}).get('process_wall_ns'),
+        native_status=row.get('native_process',{}).get('process_status','NOT_RUN'),
+        profile_status=row.get('profile_process',{}).get('process_status','NOT_RUN'))
 
 
 def run_trial(root, c, stage, case, arm, repetition):
@@ -728,8 +801,7 @@ def run_trial(root, c, stage, case, arm, repetition):
         return verify_receipt(directory,c,case,arm)
     require(not directory.exists(),'interrupted trial retained; start a new campaign rather than overwrite it')
     directory.mkdir(parents=True)
-    job = copy.deepcopy(case['job'])
-    job.update(mode='rho' if is_rho(arm) else 'ic',config=arm['config'])
+    job = executed_job(case, arm)
     write(directory/'job.json',job,exclusive=True)
     binary=root/arm.get('binary_relative','worker')
     command = ['valgrind','--tool=callgrind','--cache-sim=no','--branch-sim=no',
@@ -748,7 +820,7 @@ def run_trial(root, c, stage, case, arm, repetition):
         require(run['exit_code']==0,'worker failed or incomplete')
         report = read(directory/'profile/stdout.json')
         proof = verify(report,case['fixture'],expected_mode=job['mode'],summands=job['config']['summands'])
-        costs = parse_profiles(directory/'profile',phase_schema=3 if c.get('scientific_admission') else 1)
+        costs = trial_profiles(directory/'profile',c,case,arm)
         expected = {'startup_and_input','curve_and_targets','final_verification','reporting_and_cleanup'}
         expected |= {'rho_solve'} if job['mode']=='rho' else PHASES-{'rho_solve'}
         if not c.get('scientific_admission'):
@@ -760,7 +832,7 @@ def run_trial(root, c, stage, case, arm, repetition):
         require(native['exit_code']==0 and native['process_status']=='EXITED','native worker failed')
         nproof = verify(read(directory/'native/stdout.json'),case['fixture'],expected_mode=job['mode'],summands=job['config']['summands'])
         require(nproof['solutions']==proof['solutions'],'native/profile answers differ')
-        total = sum(costs.values())
+        total = phase_total(costs)
         r.update(status='VERIFIED',total_operations=total,phase_costs=costs,certificate=proof,
                  normalized_S=total/math.sqrt(int(case['fixture']['subgroup_order'])),
                  floor_operations=proof['rank'],
@@ -802,7 +874,7 @@ def qualification_references(arms, widths=(1,8,32)):
     seen=set()
     for arm in arms:
         for width in widths:
-            source_width=(arm['source_manifest_sha256'],width)
+            source_width=(arm['source_manifest_sha256'],arm.get('build_sha256'),arm.get('adapter'),width)
             if source_width in seen:
                 continue
             seen.add(source_width)
@@ -1176,6 +1248,8 @@ def audit(args):
     source_files=0
     for manifest_path,source_path in source_pairs:
         source_manifest=read(root/manifest_path)
+        if source_manifest.get('schema_version') == 1 and 'root_files' in source_manifest:
+            source_manifest = source_manifest['root_files']
         source_files+=len(source_manifest)
         for name,h in source_manifest.items():
             require(digest(root/source_path/name)==h,'changed source snapshot '+name)
@@ -1214,10 +1288,14 @@ def main():
     p.add_argument('--profile',choices=['pilot','standard'],default='pilot')
     p.add_argument('--qualification',action='store_true',
         help='Run only A/A, smoke and development with matched rho references; never promote.')
+    p.add_argument('--qualification-protocol',type=Path,
+        help='Registered protocol to freeze for a new development qualification panel.')
     p.add_argument('--attempt-number', type=int, default=0, help='Bounded goal round 1..3; zero keeps promotion disabled.')
     p.add_argument('--qualified-report', type=Path, help='Accepted qualification.json from the retained reference archive')
     p.add_argument('--target-history', type=Path, help='Pinned initial cross-campaign point exclusions')
     p.add_argument('--prior-round', type=Path, action='append', default=[], help='Every preceding completed bounded round, in order')
+    p.add_argument('--exposed-fixtures', type=Path, action='append', default=[],
+        help='Additional JSON fixture evidence already exposed during development; repeat for every source.')
     p.add_argument('--qualification-widths',type=int,nargs='+',default=[1,8,32],
         help='Requested rho widths in qualification mode; the full protocol uses 1 2 4 8 16 32.')
     p.add_argument('--confirmation-cases',default='',

@@ -492,7 +492,9 @@ pub fn build_decomposition_system(
     }
     let ell = basis.len();
     let n = st.n;
-    let n_vars = m * ell + m.saturating_sub(2) * n as usize;
+    let n_vars = m
+        .checked_mul(ell)?
+        .checked_add((m - 2).checked_mul(n as usize)?)?;
     if n_vars > MAX_VARS {
         return None;
     }
@@ -3129,6 +3131,17 @@ pub fn solving_profile(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Opti
     })
 }
 
+/// Whether [`solving_profile_sparse`] finishes densely after the leading
+/// degree band (`KIC_SPARSE_DENSE_FINISH=1`); see
+/// [`crate::cryptanalysis::sparse_macaulay::eliminate_high_columns_dense_finish`].
+/// Off by default, so the default path and every measurement taken on it are
+/// unchanged; the switch exists so the two paths can be run side by side on
+/// the same draws.
+fn sparse_dense_finish() -> bool {
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ON.get_or_init(|| std::env::var("KIC_SPARSE_DENSE_FINISH").as_deref() == Ok("1"))
+}
+
 /// [`solving_profile`] via structured sparse elimination.
 ///
 /// Identical semantics, different representation: the high-degree
@@ -3145,7 +3158,10 @@ pub fn solving_profile_sparse(
     n_vars: usize,
     degree: u32,
 ) -> Option<SolvingProfile> {
-    use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+    use crate::cryptanalysis::sparse_macaulay::{
+        eliminate_high_columns, eliminate_high_columns_dense_finish, leading_band_end,
+        low_column_start,
+    };
 
     if degree < system_degree(polys) {
         return None;
@@ -3166,7 +3182,11 @@ pub fn solving_profile_sparse(
     }
 
     let low_start = low_column_start(&cols);
-    let elim = eliminate_high_columns(rows, n_cols, low_start);
+    let elim = if sparse_dense_finish() {
+        eliminate_high_columns_dense_finish(rows, n_cols, low_start, leading_band_end(&cols))
+    } else {
+        eliminate_high_columns(rows, n_cols, low_start)
+    };
 
     // The surviving linear consequences span `cols[low_start..]` only.
     // Echelon form is not enough to read off a pinned variable — `{v+w,
@@ -3297,7 +3317,7 @@ fn forced_assignment(p: &F2BoolPoly) -> Option<(u32, bool)> {
 }
 
 /// Which algebraic engine reduces the system at each node.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum SolverEngine {
     /// Boolean matrix-F4 ([`matrix_f4_f2`]) through `max_degree`. Systems with
     /// at least 24 variables go directly to that degree because its row space
@@ -3592,7 +3612,7 @@ impl SolveOptions {
 
 /// Statistics from a solve, so callers can report what the algebra
 /// actually cost.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SolveStats {
     /// Algebraic reductions performed (F4 passes or Gröbner bases).
     pub reductions: usize,
@@ -3603,8 +3623,13 @@ pub struct SolveStats {
     pub propagations: usize,
     /// Splitting decisions made.
     pub splits: usize,
-    /// True if the node budget ran out, so results may be incomplete.
+    /// True if the node budget ran out or the input was unsupported, so
+    /// results may be incomplete. Check `unsupported` to distinguish them.
     pub exhausted: bool,
+    /// The decomposition frontend could not encode this input. No solve
+    /// occurred and an empty result is not an infeasibility certificate.
+    /// Also sets `exhausted` for callers using the older completion flag.
+    pub unsupported: bool,
     /// Highest Macaulay degree whose matrix was actually built.
     pub max_degree_built: u32,
     /// Reductions at which the next Macaulay matrix exceeded the size

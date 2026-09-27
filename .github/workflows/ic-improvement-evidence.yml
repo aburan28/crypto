@@ -1,0 +1,61 @@
+name: IC improvement evidence replay
+on:
+  pull_request:
+    paths:
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement/audit_archive.py'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement/export_report.py'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement/render_report.py'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/**'
+      - 'research/ic_candidate_tournament_20260915/evidence/ic-improvement-round1-20260925.tar.zst'
+      - 'research/ic_candidate_tournament_20260915/evidence/manifest.json'
+      - 'research/ic_candidate_tournament_20260915/evidence/restore.py'
+      - '.github/workflows/ic-improvement-evidence.yml'
+      - 'docs/index-calculus-scoreboard.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  strict-round-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install archive decoder
+        run: sudo apt-get update && sudo apt-get install -y zstd
+      - name: Fresh extraction with archive hash, file-count and byte-count checks
+        run: |
+          python research/ic_candidate_tournament_20260915/evidence/restore.py \
+            --archive ic-improvement-round1-20260925 --out "$RUNNER_TEMP/ic-improvement-evidence"
+      - name: Independently replay controls, all measured receipts, statistics and decision
+        run: |
+          python research/ic_candidate_tournament_20260915/goal_20260924/improvement/audit_archive.py \
+            --bundle "$RUNNER_TEMP/ic-improvement-evidence/ic-improvement-round1" \
+            --out "$RUNNER_TEMP/ic-improvement-audit.json"
+      - name: Reproduce every exported table and run row
+        run: |
+          python research/ic_candidate_tournament_20260915/goal_20260924/improvement/export_report.py \
+            --round "$RUNNER_TEMP/ic-improvement-evidence/ic-improvement-round1/round/tournament" \
+            --out "$RUNNER_TEMP/ic-improvement-export"
+          cmp "$RUNNER_TEMP/ic-improvement-export/RESULTS.json" \
+            research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json
+          cmp "$RUNNER_TEMP/ic-improvement-export/RUNS.csv" \
+            research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RUNS.csv
+      - name: Check report and scoreboard against the frozen export
+        run: |
+          python research/ic_candidate_tournament_20260915/goal_20260924/improvement/render_report.py \
+            --results research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json \
+            --markdown research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/README.md \
+            --scoreboard docs/index-calculus-scoreboard.html --verify
+      - name: Retain independent replay receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-improvement-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-improvement-audit.json
+            ${{ runner.temp }}/ic-improvement-export
+          if-no-files-found: warn
+          retention-days: 30

@@ -10,10 +10,25 @@ rho cold instructions and `rho_pairinv_4` for rho online time. PR 765 merged the
 including exact Linux replay of 22 retained evidence sets and every exported table.
 Independent macOS receipt replay passed all 1,290 jobs, with two one-ULP
 derived-summary differences documented in the report.
-No reference selection is a promotion. Zero of the three improvement rounds have
-run. The [bounded protocol](improvement/PROTOCOL.md) now fixes the nominal
-familywise rule, 5,133-point historical exclusions and the first 16-pipeline
-registry. The implementation PR must pass candidate controls before dispatch.
+No reference selection is a promotion. One of the three improvement rounds has
+completed: [round one](improvement/round1/README.md), from
+[workflow 36140265516](https://github.com/aburan28/crypto/actions/runs/36140265516),
+retained the incumbent. Its frozen checker verified 3,243/3,243 native/profile
+pairs across all six stages, plus 30/30 policy controls. The selected `stop6`
+challenger had confirmation ratios of 1.064757 online time, 0.956822 cold Ir and
+0.964563 cold native time; replay also failed promotion. Neither complete cold
+metric reached the required 0.8 ratio, the instruction familywise upper bound
+exceeded one, and online regression also failed its aggregate and cell gates.
+The full run export and scoreboard retain every measured variant. Exact Linux
+transport replay and byte-exact JSON/CSV/table reproduction passed on the merged
+evidence head. [PR 782](https://github.com/aburan28/crypto/pull/782) merged at
+`b338522537f316f2379ed8cc11bb317212e573ec` with all applicable CI passing.
+The [bounded protocol](improvement/PROTOCOL.md) fixes the nominal familywise rule,
+5,133-point historical exclusions and the first 16-pipeline registry. PR 772
+merged that implementation at `5915da9d56758f81ceabbf978e796cd6be9740c3`.
+Do not dispatch round one again. A second round must be registered from
+development evidence only, with a new source identity and all prior generated
+targets excluded. No qualifying winner has been found; the full goal remains active.
 Canonical admission is merged in both drivers; the earlier
 [driver controls](driver-admission/README.md) preserve their fixed-vector scope.
 Public-point input and single-target native intervals are implemented in the
@@ -150,3 +165,57 @@ report preserves those counts. The existing exact evaluator remains unchanged,
 and Linux archive replay checks both raw receipts and derived selection. The first-round runner validates those bindings and exclusions before preparing
 fresh targets. Execute the registered diversified pipeline budget after its
 implementation PR passes; do not infer an improvement from these controls.
+
+
+## Generic query admission checkpoint
+
+The [generic query accounting protocol](generic-query-accounting/PROTOCOL.md)
+preserves every attempted collection/descent query, typed frontend outcomes and
+solver counters, plus terminal failed descents. The worker exports these records
+and retains actual attempted matrix solves. Independent group and bounded
+negative-answer replay checks accounting only; complete generic scientific
+admission still needs exact source/base/matrix binding and
+exclusive public-target timing. This is not an improvement round. The incumbent
+remains selected and two rounds remain under the frozen goal protocol.
+
+The [generic supplied-point follow-on](generic-public-inputs/RESULTS.md) separates
+fixture creation from measured jobs and places the outer online interval after
+reusable IC/rho preparation through independent scalar replay. Its 37 final local
+worker controls pass, including seven intended preparation failures with null
+online intervals. Combined legacy phase dumps remain unqualified for scientific
+cost comparison; full generic admission and the remaining two rounds are open.
+
+PR 803 merged at `62ef21ec1e083f197593edbe1309c5ddf60b7789` after all applicable
+checks passed, including Linux integration and strict archived-round replay.
+The [independent query-law controls](generic-query-law/RESULTS.md) now replay
+7,436 pinned Rust RNG/probe values, all 35 archived IC reports, and 47 fresh
+controls (40 complete, seven intentionally incomplete). Wrong seeds, batch
+partitions and collection/descent rules are rejected even when group equations
+remain valid. This is accounting admission, not a new measured improvement round.
+
+PR 805 merged the query-law checks at
+`c7c2922c116b2ec3ca84a2066a8b9c63a782a39d`, with all applicable checks passing.
+The [exclusive generic phase follow-on](generic-exclusive-phases/RESULTS.md)
+now passes two retained local 147-pair panels (126 complete and 21 deliberately
+incomplete pairs per panel). It separates query/PDP/checking/matrix/LA/descent
+work and independently checks native clock closure. Strict sessions reject
+phase changes on another thread. Linux instruction closure is exercised by
+the PR integration checks. Shared-host mode ratios remain too unstable to
+qualify overhead or comparative performance. This accounting work consumes no
+round; exact generic admission and optimized-reference qualification precede
+the remaining two rounds.
+
+
+## Generic five-cell readiness
+
+The [registered readiness check](generic-reference-readiness/README.md) passes
+15/15 jobs: ten pair-table IC solves with dense/sparse relation-LA policies and
+five rho solves on the five development cells. All raw reports and canonical
+records independently replay after fresh archive extraction. The two n23a1 IC
+runs retain unresolved queries; no larger proved-negative PDP claim is admitted.
+This is admission readiness only, pending the implementation/evidence PR and
+parent PR 822. Calibrated generic reference and instrumentation qualification
+still precedes comparative ranking. Preserve all five exposed points in
+`generic-reference-readiness/fixtures.json` as exclusions for the next registered
+confirmation panel; keep the sealed round-one history unchanged. One round is
+closed, no challenger qualified, and two remain.
