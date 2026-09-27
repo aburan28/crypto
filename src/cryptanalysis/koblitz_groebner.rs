@@ -5719,9 +5719,8 @@ mod tests {
     fn degree_reporting_duplicate_rows_can_trigger_rank_proxy() {
         // xy + x has roots (0,0), (0,1), (1,1), and is already a
         // principal Boolean relation. Duplicating it adds no information.
-        let p = F2BoolPoly::from_monos(
-            vec![F2BoolMono::from_mask(3), F2BoolMono::var(0)], 2);
-        let (single, _) = first_fall_degree(&[p.clone()], 2, 2);
+        let p = F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(3), F2BoolMono::var(0)], 2);
+        let (single, _) = first_fall_degree(std::slice::from_ref(&p), 2, 2);
         let (duplicate, _) = first_fall_degree(&[p.clone(), p], 2, 2);
         assert_eq!(single, None);
         assert_eq!(duplicate, Some(2));
@@ -5734,8 +5733,8 @@ mod tests {
         // variable is pinned. An unresolved diagnostic is expected.
         let (degree, profiles) = solving_degree(&[p], 2, 3);
         assert_eq!(degree, None);
-        assert!(profiles.iter().all(|p| !p.refuted && p.vars_determined == 0));
+        assert!(profiles
+            .iter()
+            .all(|p| !p.refuted && p.vars_determined == 0));
     }
-
 }
-

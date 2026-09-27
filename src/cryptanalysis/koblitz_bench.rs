@@ -1965,7 +1965,13 @@ mod tests {
         );
 
         let table = format_dreg_table(std::slice::from_ref(&r));
-        for col in ["D_rank_proxy", "D_pin(shape)", "D_pin(extra)", "Dc(shape)", "Dc(extra)"] {
+        for col in [
+            "D_rank_proxy",
+            "D_pin(shape)",
+            "D_pin(extra)",
+            "Dc(shape)",
+            "Dc(extra)",
+        ] {
             assert!(
                 table.contains(col),
                 "a field that is stored but never printed cannot do its job; \
@@ -2008,6 +2014,4 @@ mod tests {
         assert!(!table.contains("FFD"));
         assert!(!table.contains("ctrl(unsat)"));
     }
-
 }
-
