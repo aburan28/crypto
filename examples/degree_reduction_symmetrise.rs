@@ -60,8 +60,8 @@ fn main() {
     println!("\n── Macaulay width of each presentation at its generator degree ──");
     println!("   Exact, no solver needed: cols(vars, D) = sum_{{k<=D}} C(vars, k).");
     println!(
-        "\n   {:>3} {:>9} {:>10} {:>13} {:>14}  {}",
-        "l", "sym vars", "elim vars", "cols(sym,3)", "cols(elim,6)", "narrower"
+        "\n   {:>3} {:>9} {:>10} {:>13} {:>14}  narrower",
+        "l", "sym vars", "elim vars", "cols(sym,3)", "cols(elim,6)"
     );
     let mut crossover: Option<u32> = None;
     let mut width_rows = Vec::new();

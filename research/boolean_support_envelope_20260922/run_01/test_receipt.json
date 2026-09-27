@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-schedule-va2y3hec/tests"
+  ],
+  "exit_code": 0,
+  "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+  "peak_rss_bytes": 3211264,
+  "process_wall_ns": 421800167,
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "\nrunning 7 tests\ntest tests::cancellations_degree_drops_and_zero_rows ... ok\ntest tests::compilation_limits_are_explicit_refusals ... ok\ntest tests::coefficient_slot_31_and_empty_or_high_degree_envelopes ... ok\ntest tests::current_output_caps_apply_after_parity_and_compaction ... ok\ntest tests::support_escape_and_context_changes_use_direct_fallback ... ok\ntest tests::changed_assignment_is_recomputed_and_all_control_arms_agree ... ok\ntest tests::exhaustive_coefficients_degrees_and_active_masks ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n",
+  "stdout_sha256": "222446f60ecc688827af9376ec2a6739827c631a90fb63760d8fb3c88ce3b243",
+  "system_seconds": 0.005056,
+  "timed_out": false,
+  "user_seconds": 0.023384
+}

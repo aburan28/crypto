@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fit the genus exponent law, and correct for a drifting rho reference.
 
-`RESEARCH_HYPERELLIPTIC_IC_RHO.md` round five pre-registers
+`research/notes/index-calculus/RESEARCH_HYPERELLIPTIC_IC_RHO.md` round five pre-registers
 
     S_ic / S_rho  ∝  g! · p^(1 − g/2)
 

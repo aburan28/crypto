@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Derived boundaries for the follow-on experiments to the ECC2K-130 decomposition note.
 
-`RESEARCH_ECC2K130_DECOMPOSITION.md` prices one family of decomposition methods
+`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` prices one family of decomposition methods
 and closes it.  This script derives the boundaries the *next* experiments have
 to be scored against, so each one is pre-registered with a number rather than a
 hope:
@@ -357,7 +357,7 @@ def main() -> None:
     report = {
         "schema": "ecc2k130_decomposition_targets/v1",
         "purpose": "pre-registered boundaries for the follow-on experiments to "
-                   "RESEARCH_ECC2K130_DECOMPOSITION.md",
+                   "research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md",
         "unit": "log2 group operations",
         "log2_rho_reference": round(log2_rho, 4),
         "E1_scale_model_ladder": e1,

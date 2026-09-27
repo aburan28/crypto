@@ -52,6 +52,7 @@ import math
 import os
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -108,9 +109,29 @@ def feed_url(stack=DEFAULT_STACK, region=DEFAULT_REGION, account=None):
     return "https://%s-status-%s.s3.%s.amazonaws.com/status.json" % (stack, account, region)
 
 
-def fetch(url, timeout=FETCH_TIMEOUT_S):
-    with urllib.request.urlopen(url, timeout=timeout) as response:  # nosec B310 - https only
-        return json.loads(response.read().decode("utf-8"))
+# One S3 GET that fails on a runner is almost always a blip, and when this
+# document is the only source the page has, one blip must not cost a publish.
+# The environment overrides exist for the offline tests, which exercise the
+# unreachable case and should not wait nine seconds to do it.
+FETCH_ATTEMPTS = int(os.environ.get("RHO_WORK_FEED_ATTEMPTS", "3"))
+FETCH_BACKOFF_S = float(os.environ.get("RHO_WORK_FEED_BACKOFF_S", "3"))
+
+
+def fetch(url, timeout=FETCH_TIMEOUT_S, attempts=None, backoff_s=None):
+    """The feed document, retried a few times before the caller hears of it."""
+    attempts = FETCH_ATTEMPTS if attempts is None else max(1, int(attempts))
+    backoff_s = FETCH_BACKOFF_S if backoff_s is None else backoff_s
+    last = None
+    for attempt in range(1, attempts + 1):
+        try:
+            with urllib.request.urlopen(url, timeout=timeout) as response:  # nosec B310 - https only
+                return json.loads(response.read().decode("utf-8"))
+        except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
+            last = err
+            if attempt < attempts:
+                print("work feed fetch %d/%d failed (%s); retrying" % (attempt, attempts, err))
+                time.sleep(backoff_s * attempt)
+    raise last
 
 
 def work_block(feed, campaign, now=None, max_age_s=MAX_FEED_AGE_S):
@@ -145,25 +166,51 @@ def work_block(feed, campaign, now=None, max_age_s=MAX_FEED_AGE_S):
     if max_age_s is not None and age > max_age_s:
         return None
     slots = work.get("per_slot") or []
-    walking = [
-        slot
-        for slot in slots
-        if isinstance(slot, dict)
-        and not slot.get("retired")
-        and isinstance(slot.get("checkpoint_age_s"), (int, float))
-        and slot["checkpoint_age_s"] <= FRESH_CHECKPOINT_S
-    ]
+    if slots:
+        walking = [
+            slot
+            for slot in slots
+            if isinstance(slot, dict)
+            and not slot.get("retired")
+            and isinstance(slot.get("checkpoint_age_s"), (int, float))
+            and slot["checkpoint_age_s"] <= FRESH_CHECKPOINT_S
+        ]
+        n_slots = len(slots)
+        walking_slots = len(walking)
+        # A slot whose iterations-per-point says it is not at the campaign's
+        # cutoff (dp_ingest.dpWeightVerdict). Its points mostly cannot meet
+        # anyone else's, so it is counted apart from the walkers it sits among.
+        off_weight = [s for s in slots if isinstance(s, dict) and s.get("dp_weight_ok") is False]
+        off_weight_slots = len(off_weight)
+        off_weight_walking = sum(1 for s in off_weight if s in walking)
+    else:
+        n_slots = _count(work.get("slots"))
+        walking_slots = _count(work.get("walking_slots"))
+        off_weight_slots = _count(work.get("off_weight_slots"))
+        off_weight_walking = _count(work.get("off_weight_walking_slots"))
     block = {
         "iterations": iterations,
         "iterations_log2": round(math.log2(iterations), 6),
-        "slots": len(slots),
-        "walking_slots": len(walking),
+        "slots": n_slots,
+        "walking_slots": walking_slots,
+        "off_weight_slots": off_weight_slots,
+        "off_weight_walking_slots": off_weight_walking,
         "feed_generated_at": feed.get("generated_at"),
         "feed_age_seconds": int(max(0.0, age)),
         "method": work.get("method") or "sum of the slots' checkpointed iteration bases",
         "source": feed.get("source") or "campaign work feed",
     }
+    for key in ("campaign_dp_weight", "iterations_per_dp_log2_expected"):
+        if isinstance(work.get(key), (int, float)):
+            block[key] = work[key]
     return block
+
+
+def _count(value):
+    try:
+        return max(0, int(value or 0))
+    except (TypeError, ValueError):
+        return 0
 
 
 def ingest_block(feed):
@@ -190,12 +237,19 @@ def ingest_block(feed):
         lag = int(lag) if lag is not None else None
     except (TypeError, ValueError):
         lag = None
-    return {
+    block = {
         "outstanding_objects": outstanding,
         "unrecognised_objects": unrecognised,
         "newest_object_at": ingest.get("newest_object_at"),
         "lag_seconds": lag,
     }
+    # Records the store dropped as the same walk's point again. A few come
+    # from resumed workers; a run walking another run's seeds produces nothing
+    # else, and until these were published that read as a worker adding points.
+    for key in ("duplicate_records", "duplicate_records_last_day", "duplicate_slots_last_day"):
+        if key in ingest:
+            block[key] = _count(ingest.get(key))
+    return block
 
 
 def snapshot_from_feed(feed, campaign, now=None):

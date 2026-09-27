@@ -47,7 +47,7 @@
 //! Demirci-Selçuk meet-in-the-middle, a mixture-differential
 //! distinguisher, or the biclique attack. Those rely on automated
 //! tooling and large-state structures that would dwarf the rest of the
-//! cryptanalysis module. They are tracked in `DEFERRED.md`.
+//! cryptanalysis module. They are tracked in `docs/DEFERRED.md`.
 
 pub mod algebraic;
 pub mod biclique;

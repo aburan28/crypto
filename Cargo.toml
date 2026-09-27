@@ -13,12 +13,48 @@ path = "src/main.rs"
 name = "ic"
 path = "src/bin/ic.rs"
 
+# `icx` — index calculus across every standardized curve (catalog + engine).
+[[bin]]
+name = "icx"
+path = "src/bin/icx.rs"
+
+# `ecc2k-guard` — the ECC2K-130 rho campaign's no-fruitless-cycle
+# certificate and verifiable seed provenance.
+[[bin]]
+name = "ecc2k-guard"
+path = "src/bin/ecc2k_guard.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"
 
 [features]
 redis-cache = ["dep:redis"]
+# Verbose tracing in the isogeny rho attack's linear-algebra step.
+rho_debug = []
+
+[lints.rust]
+# `hashclash_linked` is set by a downstream build script that links the
+# HashClash C library (see src/cryptanalysis/md5_hashclash_ffi.rs).
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(hashclash_linked)"] }
+
+[lints.clippy]
+# The whole allow list; CI runs clippy with -D warnings for everything else.
+# Index loops mirror the specs and papers the algorithms come from (state
+# matrices, round tables, polynomial coefficients); iterator rewrites of
+# them obscure the correspondence without making them safer.
+needless_range_loop = "allow"
+manual_memcpy = "allow"
+# Attack and protocol entry points take their parameters explicitly.
+too_many_arguments = "allow"
+type_complexity = "allow"
+# Constants are grouped as they appear in their standards, not by nibble.
+unusual_byte_groupings = "allow"
+# Authenticated decryption fails without detail on purpose: no error oracle.
+result_unit_err = "allow"
+# `chunks_exact(N)` is equivalent to `as_chunks::<N>().0`; rewriting 51 call
+# sites would change slice types throughout for no behavior gain.
+chunks_exact_to_as_chunks = "allow"
 
 [dependencies]
 redis = { version = "0.32", optional = true, default-features = false, features = ["tls-rustls"] }
@@ -52,3 +88,13 @@ blake3 = "1.5"
 flate2 = "1.0"
 # Base64 codec for cryptopals fixtures (challenge 56 cookie).
 base64 = "0.21"
+
+[[bench]]
+name = "pqc_speed"
+path = "benches/pqc_speed.rs"
+harness = false
+
+[[bench]]
+name = "pqc_split"
+path = "benches/pqc_split.rs"
+harness = false

@@ -207,6 +207,14 @@ campaign. The exact per-variant observations are:
 | RR incidence | 86 / 110 | 24 | 0 | Unmeasured / unmeasured | Engineering candidate; incomplete panel |
 | RR norm | 110 / 110 | 0 | 0 | Unmeasured / unmeasured | Engineering candidate; correctness passed |
 
+**Followed up 2026-09-20.** The incidence watchdogs above are the open item
+`research/notes/ecc2k130/RESEARCH_ECC2K130_WDSAT.md` went after, by putting both
+encodings in front of WDSat instead. RR-norm runs there and XORGAUSS is worth
+1,277x in conflicts; RR-incidence never reaches the solver, because the instance
+exceeds WDSat's static allocation and the process dies before printing. That is a
+tool boundary, not a statement about the encoding, and the incidence panel here
+stays incomplete.
+
 Both complete backends recovered the same 947 **projected x-tuples**, summed
 over the 110 target cases. The Semaev frontend also produced five non-liftable
 models in the n=5, weight=2 panel; they were rejected, blocked and retained in

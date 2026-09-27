@@ -1,11 +1,39 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 109, 2026-09-13. The historical optimization chain is
+Current through Stage 128, 2026-09-22. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
-public unknown-scalar run. Stage 109 composes the current seven-gate audit
-without changing any prior frozen artifact.
+public unknown-scalar run. Stage 109 composed the current seven-gate audit on
+2026-09-13 without changing any prior frozen artifact. Stage 124 re-sealed that
+audit over the boundary ledger as updated on 2026-09-21 by the index-calculus
+boundary ledger (operation-counted rows for the prime and binary regimes,
+oracle pricing and the whole-process count on the Koblitz rows;
+`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`), chaining to
+the Stage 109 seal. Stage 125 re-seals it again over that ledger's Round 2
+of the same day (folded pair tables, walk targets, the exact counting
+ceiling and a balanced Koblitz base; the note's §10, with the first-round
+records kept in the ledger's history), chaining to the Stage 124 and Stage
+109 seals. Stage 126 re-seals it once more over that ledger's Round 3, also of
+the same day (a walk restart that costs one group operation instead of
+thirty-two scalar multiplications, bases sized at the derived family optimum
+on the prime and binary ladders, and the family shape law reported per row;
+the note's §11), chaining to the Stage 125, Stage 124 and Stage 109 seals.
+Stage 127 re-seals it a fourth time over that ledger's Round 4, also of the
+same day: the unit's conversion from native counters to group additions now
+uses ratios pinned in `docs/ic/calibration.json` rather than factors measured
+on the host at the start of each run (the note's §12). That round reprices
+every row by up to 9.5 per cent without moving a single native counter on any
+of the 537 rows compared, and chains to the Stage 126, 125, 124 and 109 seals.
+Stage 128 re-seals it a fifth time over that ledger's Round 5, on 2026-09-22:
+the walk's sixteen restart offsets are drawn on first use instead of at setup,
+so a row is charged for the offsets it took rather than for a pool it may never
+reach (the note's §13). Because the offsets come off their own random stream and
+are taken in a fixed cycle, the before and after walk bit-identical
+trajectories, and all 537 rows are identical in every counter but the pool's
+with zero trajectories moved; the saving is confined to the small rungs. It
+chains to the Stage 127, 126, 125, 124 and 109 seals. No Koblitz gate fact moved
+at any of these re-seals and no prior frozen artifact changed.
 
 The campaign has target-independent algebraic factor bases; matched native-XOR,
 WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a

@@ -52,7 +52,7 @@
 //! verified discrete logarithms: the base this module's `T` selects costs
 //! `22.41×` the one [`SearchOptions::solve_cost_targets`] selects, and the
 //! rank correlation between `T` and measured cost across the six bases is
-//! `ρ = −0.83`.  See `RESEARCH_FACTOR_BASE_SOLVE_COST.md` §6, and
+//! `ρ = −0.83`.  See `research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md` §6, and
 //! `examples/groebner_base_sweep.rs` for the sweep that scores the second
 //! factor directly.
 //!
@@ -61,7 +61,7 @@
 //! *subset* of its span is carried by the SAT domain trie instead and is
 //! left unmeasured rather than priced on the span.  Free and unmeasured:
 //! `ker g(σ) ⊆ ker Tr` exactly when `(x+1) ∤ g`, which doubles the yield
-//! (`RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1) for the price of a
+//! (`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1) for the price of a
 //! divisibility test.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -73,12 +73,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 
-use super::koblitz_groebner::{f4_profile, FieldStructure, SolverEngine};
+use super::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
-    build_frobenius_factor_base, build_frobenius_factor_base_from_divisor, groebner_decompose,
-    build_frobenius_union_factor_base, build_subgroup_orbit_factor_base, invariant_factors,
-    projected_signed_orbit_count, restrict_factor_base_to_orbits, saturate_factor_base_two_torsion,
-    span_f2, top_factor_indices, FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
+    build_frobenius_factor_base, build_frobenius_factor_base_from_divisor,
+    build_frobenius_union_factor_base, build_subgroup_orbit_factor_base, groebner_decompose,
+    invariant_factors, projected_signed_orbit_count, restrict_factor_base_to_orbits,
+    saturate_factor_base_two_torsion, span_f2, top_factor_indices, FactorBaseDomain,
+    FrobeniusFactorBase, KoblitzCurve, PairSumTable,
 };
 
 // ── Specifications ─────────────────────────────────────────────────
@@ -483,7 +484,7 @@ pub fn greedy_prune(
                 continue;
             }
             let s = expected_trials(unknowns - 1, extra_relations, c, targets);
-            if s < score * (1.0 - 1e-12) && best.map_or(true, |(_, _, bs)| s < bs) {
+            if s < score * (1.0 - 1e-12) && best.is_none_or(|(_, _, bs)| s < bs) {
                 best = Some((o, c, s));
             }
         }
@@ -571,7 +572,7 @@ pub struct SearchOptions {
     /// measurement means what it did.  A trial is paid whether or not it
     /// succeeds and the Gröbner system carries `m·ℓ` unknowns, so the
     /// two orders can differ by an order of magnitude — see
-    /// `RESEARCH_FACTOR_BASE_SOLVE_COST.md`.
+    /// `research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`.
     ///
     /// Only linear-subspace candidates can be priced: the summation
     /// polynomial is Weil-restricted over the subspace basis, so a base
@@ -634,7 +635,7 @@ pub struct Candidate {
     /// `m·dim + (m − 2)·n` — Boolean unknowns of the algebraic system.
     pub sat_variables: usize,
     /// Whether the abscissa subspace lies inside `ker Tr`, which doubles
-    /// the yield (`RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1).  Decided
+    /// the yield (`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1).  Decided
     /// by a divisibility, not by solving: `ker g(σ) ⊆ ker Tr` exactly
     /// when `(x+1) ∤ g`, and equivalently every abscissa has trace zero.
     pub trace_zero: bool,
@@ -668,7 +669,8 @@ impl Candidate {
     /// The quantity to minimise: measured stage cost where it was
     /// measured, expected trials otherwise.
     pub fn score(&self) -> f64 {
-        self.expected_stage_ops.unwrap_or_else(|| self.expected_trials())
+        self.expected_stage_ops
+            .unwrap_or_else(|| self.expected_trials())
     }
 }
 
@@ -710,7 +712,7 @@ impl SearchReport {
 /// a word-XOR count of `10^6`.
 ///
 /// A trace-zero base breaks a tie because it yields twice for nothing
-/// (`RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1); the remaining ties go to
+/// (`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1); the remaining ties go to
 /// the smaller base, which is the cheaper one to materialise and to
 /// solve over.
 pub fn rank_candidates(candidates: &mut [Candidate]) {
@@ -943,9 +945,8 @@ fn measure_solve_cost(
     // A memo hit returns a reduction without computing it, so the counter
     // diff below would report replayed work as free.
     if super::algebra_cache::enabled(super::algebra_cache::Layer::ExactReduction) {
-        candidate.solve_cost_skipped = Some(
-            "IC_REDUCTION_CACHE replays reductions, so nothing here can be timed".into(),
-        );
+        candidate.solve_cost_skipped =
+            Some("IC_REDUCTION_CACHE replays reductions, so nothing here can be timed".into());
         return;
     }
     let trials = sample.min(targets.points.len());
@@ -959,7 +960,9 @@ fn measure_solve_cost(
     }
     let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
     let index_of = fb.index_map();
-    let before = f4_profile().word_ops;
+    // The calling thread's own count: the process-wide profile would
+    // charge this candidate for whatever another thread solves meanwhile.
+    let before = f4_word_ops_thread();
     for target in targets.points.iter().take(trials) {
         let _ = groebner_decompose(
             kc,
@@ -972,7 +975,7 @@ fn measure_solve_cost(
             20_000,
         );
     }
-    let ops = f4_profile().word_ops.saturating_sub(before) as f64 / trials as f64;
+    let ops = f4_word_ops_thread().saturating_sub(before) as f64 / trials as f64;
     candidate.measured_ops_per_target = Some(ops);
     // Cost per target is only half of it: without a trial count there is
     // nothing to multiply, and a base that decomposes nothing is not made
@@ -1074,7 +1077,6 @@ pub fn candidate_specs(kc: &KoblitzCurve, opts: &SearchOptions) -> Vec<FactorBas
             }
         }
     }
-    drop(push);
     if opts.saturate && (&kc.cofactor % BigUint::from(2u32)).is_zero() {
         let base: Vec<FactorBaseSpec> = specs.clone();
         for spec in base {
@@ -1185,7 +1187,7 @@ mod tests {
 
     /// Coverage alone ranks the bases of `K_1/2^15` backwards.
     ///
-    /// The point of `RESEARCH_FACTOR_BASE_SOLVE_COST.md`: expected trials
+    /// The point of `research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`: expected trials
     /// sees the relation columns and the coverage and not the `m·ℓ`
     /// unknowns of the Weil-restricted summation system, so it climbs the
     /// dimension ladder collecting yield while paying an order of
@@ -1216,6 +1218,9 @@ mod tests {
         assert!(cost_pick.expected_trials() > trials_pick.expected_trials());
 
         // And the pick is really cheaper, measured the same way on both.
+        // The margin depends on the engine doing the measuring: 5.1× with
+        // the from-scratch matrix-F4 and 3.6× with the inherited engine
+        // splitting on the smallest free variable, both deterministic.
         let measured = |spec: &FactorBaseSpec| {
             by_cost
                 .candidates
@@ -1225,7 +1230,7 @@ mod tests {
                 .expect("every linear-subspace candidate is priced")
         };
         assert!(
-            measured(&cost_pick.spec) * 4.0 < measured(&trials_pick.spec),
+            measured(&cost_pick.spec) * 2.0 < measured(&trials_pick.spec),
             "cost pick {:?} at {:e} word XORs must beat trials pick {:?} at {:e}",
             cost_pick.spec,
             measured(&cost_pick.spec),
@@ -1443,7 +1448,7 @@ mod tests {
         // the subspace grows while the Weil-restricted system carries
         // m·ℓ unknowns and does not, so the trials-optimal base is one
         // the oracle is an order of magnitude slower on
-        // (RESEARCH_FACTOR_BASE_SOLVE_COST.md).  Ranking by measured
+        // (research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md).  Ranking by measured
         // stage cost must put a six-dimensional base first; ranking by
         // trials alone must not.
         let kc = KoblitzCurve::new(1, 15).unwrap();

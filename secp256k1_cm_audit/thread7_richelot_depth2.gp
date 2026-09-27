@@ -238,7 +238,7 @@ print("Any Jac(C) reachable by (2,2)-isogeny walks from the product nodes");
 print("decomposes over F̄_p into elliptic curves. Its HCDLP reduces to ECDLP");
 print("on those factors (Weil restriction argument), giving DLP cost ~√p.");
 print("");
-print("This strengthens Theorem 4.1 of PAPER_STRUCTURAL_COMPLETENESS.md:");
+print("This strengthens Theorem 4.1 of research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md:");
 print("not only is each individual cover useless (B5), but the ENTIRE (2,2)-");
 print("isogeny graph neighborhood of secp256k1's isogeny class consists of");
 print("split Jacobians -- there is no 'escape' to a non-split abelian surface");

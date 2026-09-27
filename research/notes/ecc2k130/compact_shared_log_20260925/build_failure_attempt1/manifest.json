@@ -1,0 +1,24 @@
+{
+  "build_script_sha256": "37e302a660b351ca56cbd4310793dc08c0fc6d39dc9563fa945f04d38f6af7c3",
+  "cargo_returncode": null,
+  "checkout_head": "d01ebfd83fe0c58fc0b07b623c0a7403854ae715",
+  "classification": "BUILD_PLUMBING_FAILURE_BEFORE_ANY_PRODUCER",
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_s5_sat_instance",
+    "--example",
+    "koblitz_rho_batch_ks"
+  ],
+  "failure": "sandbox DNS failure resolving index.crates.io; wrapper then tried to read absent Cargo.lock",
+  "first_output_mtime_utc": "2026-09-25 10:46:58 UTC",
+  "last_output_mtime_utc": "2026-09-25 10:47:09 UTC",
+  "root_cargo_lock_present": false,
+  "schema_version": "1.0",
+  "stderr_sha256": "a71ba0d195cf644d9f5b6de88799869d575df45510d0f7260275cc5e768a6994",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "wrapper_returncode": 1
+}

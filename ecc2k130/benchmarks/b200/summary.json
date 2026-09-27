@@ -1,0 +1,68 @@
+{
+  "unit": "B scalar updates / s",
+  "class": "engineering",
+  "driver": "580.95.05",
+  "cudaImageVersion": "13.3.1",
+  "preset": "make bench-b200-modal; B200_CLMAD=1, automatic workers",
+  "geometry": {
+    "batch": 16,
+    "threads": 256,
+    "minBlocks": 2,
+    "steps": 1024,
+    "launches": 32,
+    "repeats": 3,
+    "workers": "automatic"
+  },
+  "reference": {
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "medianB": 15.115792,
+    "sms": 188,
+    "perSmM": 80.40314893617023,
+    "receipt": "ecc2k130/benchmarks/top-clmad/summary.json"
+  },
+  "prior": {
+    "kind": "sm-count-scale",
+    "sms": 148,
+    "B": 11.899623829787234
+  },
+  "validate": {
+    "gpu": "NVIDIA B200",
+    "cc": "100",
+    "host": "all checks passed (0 failures)",
+    "gpuEndToEnd": "GPU END TO END: all instances solved",
+    "modalApp": "ap-BzWfDhplfJSrxuHbuxjGKp",
+    "log": "validate.log",
+    "logSha256": "66f0107b7afac6800f85be4516cbbc9403ff253132672f5cc52f4ba01b679761"
+  },
+  "arms": {
+    "b200_clmad": {
+      "gpu": "NVIDIA B200",
+      "packedClmad": true,
+      "sms": 148,
+      "ratesB": [
+        8.821857,
+        8.823243,
+        8.810542
+      ],
+      "medianB": 8.821857,
+      "gpuUuid": "GPU-eff75013-aab9-ce18-ca91-ca9185ab96a5",
+      "registers": 102,
+      "localBytes": 0,
+      "automaticThreads": 75776,
+      "ratioToPrior": 0.7413533260894087,
+      "ratioTo6000": 0.5836185758576196,
+      "perSmM": 59.60714189189189,
+      "modalApp": "ap-siOazkY39t3EJCxHKwT6tF"
+    }
+  },
+  "everySampleValid": true,
+  "fieldProductsPerUpdate": 5.3125,
+  "receipts": {
+    "b200-clmad": {
+      "json": "clmad.json",
+      "log": "clmad.log",
+      "logSha256": "d52f9f3ced993ee68091f98b146c75c0db4ca1ef96e4bb648ba3f618aa0eb983",
+      "binarySha256": "faa4c636ec1327e556fe36541e2b7aab3bce6f4d16061c6ad6c24826eb751445"
+    }
+  }
+}

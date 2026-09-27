@@ -27,7 +27,7 @@
 //! without an argument: `2^k` independent points, no shared state, and
 //! the per-point work is a bitwise AND against a precomputed table.
 //!
-//! `RESEARCH_RESIDUAL_WALKS.md` §11.7 names the Joux–Vitse family as
+//! `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` §11.7 names the Joux–Vitse family as
 //! one of the two things that cut the index-calculus constant by orders
 //! of magnitude.  This is the Boolean half of that family, measured in
 //! the same units as everything else: `word_ops` on both phases, so a
@@ -512,7 +512,7 @@ impl Default for SearchOptions {
 }
 
 /// What the search cost and found.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SearchStats {
     /// Enumerated assignments swept: `2^k`.
     pub points: u64,
@@ -530,9 +530,12 @@ pub struct SearchStats {
     pub filter_word_ops: u64,
     /// Row operations in the per-point linear solves.
     pub solve_row_ops: u64,
-    /// Set if a rank-deficient system exceeded `max_kernel_dim`, so the
-    /// solution list may be incomplete.
+    /// Set if a search limit or unsupported input left the solution list
+    /// incomplete. Check `unsupported` to distinguish encoding rejection.
     pub exhausted: bool,
+    /// A decomposition frontend could not encode its input. No search
+    /// occurred; also sets `exhausted` for older completion checks.
+    pub unsupported: bool,
 }
 
 /// **Solve** the original system by crossbred search.
@@ -823,11 +826,9 @@ pub fn format_sweep(cells: &[SweepCell]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::binary_ecc::F2mElement;
+
     use crate::cryptanalysis::koblitz_groebner::{build_decomposition_system, FieldStructure};
-    use crate::cryptanalysis::koblitz_index_calculus::{
-        build_frobenius_factor_base, find_irreducible, KoblitzCurve,
-    };
+    use crate::cryptanalysis::koblitz_index_calculus::{build_frobenius_factor_base, KoblitzCurve};
 
     /// Brute force over all `2^n` points: the ground truth every other
     /// path is compared with.

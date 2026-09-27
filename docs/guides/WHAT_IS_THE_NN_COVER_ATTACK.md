@@ -262,7 +262,7 @@ mechanisms precise and verify them computationally.
 - `binary_ecc::*` — Binary-field EC infrastructure
 - `prime_hyperelliptic::*` — Prime-field genus-2 Jacobian
   arithmetic (built during this investigation)
-- `RESEARCH_P256_ISOGENY_COVER.md` — Full 21-phase research log
-- `P256_RESEARCH_REPORT.pdf` — Comprehensive analytical PDF
+- `research/notes/cm-isogeny/RESEARCH_P256_ISOGENY_COVER.md` — Full 21-phase research log
+- `research/notes/cm-isogeny/P256_RESEARCH_REPORT.pdf` — Comprehensive analytical PDF
 - `MAINSTREAM_CURVE_AUDIT.pdf` — All 29 standardised curves
-- `P256_VISUAL_REPORT.pdf` — 8-figure visual summary
+- `research/notes/cm-isogeny/P256_VISUAL_REPORT.pdf` — 8-figure visual summary

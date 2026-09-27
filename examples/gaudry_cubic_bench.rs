@@ -1,7 +1,7 @@
 //! **Gaudry-style index calculus on `E(F_{p³})` versus rho — measurement.**
 //!
 //! Companion to `crypto_lib::cryptanalysis::gaudry_cubic` and §11 of
-//! `RESEARCH_RESIDUAL_WALKS.md`.  For each prime `p ≡ 1 (mod 3)` it
+//! `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`.  For each prime `p ≡ 1 (mod 3)` it
 //! generates a prime-order curve over `F_{p³}`, the subspace factor
 //! base `{P : x(P) ∈ F_p}`, collects triple decompositions with the
 //! Weil-restricted `S₃` meet-in-the-middle oracle until `d` is
@@ -25,8 +25,8 @@ use std::env;
 use std::fs;
 
 use crypto_lib::cryptanalysis::gaudry_cubic::{
-    generate_instance3, run_gaudry_opts, run_gaudry_with, run_rho3, GaudryOptions, GaudryReport,
-    RhoReport3, Solver, SubspaceBase,
+    generate_instance3, run_gaudry_opts, run_rho3, GaudryOptions, GaudryReport, RhoReport3, Solver,
+    SubspaceBase,
 };
 use rand::rngs::StdRng;
 use rand::SeedableRng;
@@ -56,6 +56,7 @@ fn one(
     sparse_la: bool,
     small_base: SmallBase,
     max_lp: u8,
+    merge_cap: u8,
 ) -> Row {
     let inst = generate_instance3(p, seed);
     let mut rng = StdRng::seed_from_u64(seed);
@@ -72,6 +73,7 @@ fn one(
         sparse_la,
         small_base: small,
         max_large_primes: max_lp,
+        max_merge_level: merge_cap,
     };
     let g = run_gaudry_opts(&inst, &base, seed, &opts);
     let r = run_rho3(&inst, seed);
@@ -107,6 +109,9 @@ fn main() {
     let mut small_base = SmallBase::None;
     let mut max_lp = 2u8;
     let mut protocol_la = false;
+    // Merge-level cap for the large-prime eliminator; 0 is the uncapped
+    // behaviour these runs had before section 11.10 registered the question.
+    let mut merge_cap: u8 = 0;
     let mut sizes: Vec<u64> = vec![271, 523, 1039, 2083];
     let mut seeds = 2u64;
     let mut i = 0;
@@ -138,6 +143,10 @@ fn main() {
                 small_base = SmallBase::Fraction(args[i].parse().expect("--lp-frac"));
             }
             "--lp-rule" => small_base = SmallBase::Rule,
+            "--merge-cap" => {
+                i += 1;
+                merge_cap = args[i].parse().expect("--merge-cap");
+            }
             "--max-lp" => {
                 i += 1;
                 max_lp = args[i].parse().expect("--max-lp");
@@ -177,7 +186,15 @@ fn main() {
                         (true, SmallBase::None),
                         (true, SmallBase::Rule),
                     ] {
-                        out.push(one(pp, s, max_residuals, solver, false, sp, sb, 2));
+                        // Only the large-prime arm has an eliminator, so only
+                        // it can carry a merge-level cap; the two control arms
+                        // run uncapped whatever --merge-cap says.
+                        let cap = if matches!(sb, SmallBase::Rule) {
+                            merge_cap
+                        } else {
+                            0
+                        };
+                        out.push(one(pp, s, max_residuals, solver, false, sp, sb, 2, cap));
                     }
                 } else {
                     out.push(one(
@@ -189,6 +206,7 @@ fn main() {
                         sparse_la,
                         small_base,
                         max_lp,
+                        merge_cap,
                     ));
                 }
             }
@@ -204,6 +222,7 @@ fn main() {
             sparse_la,
             small_base,
             max_lp,
+            merge_cap,
         )]
     };
     if let Some(path) = json {

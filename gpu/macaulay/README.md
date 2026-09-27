@@ -13,7 +13,7 @@ see [How this is tested](#how-this-is-tested).
 
 `src/cryptanalysis/gaudry_cubic.rs` solves one symmetrised-`S₄` system
 per residual of an index-calculus run on `E(F_{p³})`.
-`RESEARCH_RESIDUAL_WALKS.md` §11.6 measures that solve at `0.88 · 10⁶`
+`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` §11.6 measures that solve at `0.88 · 10⁶`
 `F_p` multiplications, of which the Macaulay step is **57 %** (17 %
 forward elimination, 40 % normal forms). Every residual produces the
 same shape over the same `p`; there are thousands per run; no residual
