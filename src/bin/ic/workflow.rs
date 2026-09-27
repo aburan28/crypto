@@ -771,7 +771,7 @@ fn public_hash_target(c: &KoblitzCurve, seed: u64) -> Result<(BinaryPoint, Targe
     Err("public hash-to-curve target attempt cap exhausted".into())
 }
 
-fn resolve_target(
+pub(crate) fn resolve_target(
     c: &KoblitzCurve,
     target: &TargetSpec,
 ) -> Result<(BinaryPoint, Option<BigUint>, TargetRecord), String> {
@@ -992,7 +992,7 @@ fn probe_budget(c: &KoblitzCurve, fb: &FrobeniusFactorBase, p: &WorkflowParams) 
     }
 }
 
-fn build_pair_table(
+pub(crate) fn build_pair_table(
     c: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     p: &WorkflowParams,

@@ -28,10 +28,12 @@ degree is a lower bound, never a value.
 Files may overlap. Every cell draws its tower, curve and targets from a seed
 fixed by (seed, kind, m, t, g), so a cell that two runs share is the same
 system measured twice. Such a system is counted once, as the copy read
-first. The copies must agree on every deterministic field, and any
-disagreement is printed. A copy halted by the staircase stop is compared only
-on the solving degree and the width. Rows written before `solving_degree_max`
-existed are skipped and counted.
+first, unless that copy timed out and a later one finished: the finished copy
+then stands for the system, and its degree must not fall below the lower
+bound of the copy that stopped. Finished copies must agree on every
+deterministic field, and any disagreement is printed. A copy halted by the
+staircase stop is compared only on the solving degree and the width. Rows
+written before `solving_degree_max` existed are skipped and counted.
 
     python3 analyze.py runs/*.jsonl
 """
@@ -59,8 +61,17 @@ STOP_COMPARABLE = ("solving_degree_max", "max_cols_to_solution")
 
 
 def engine(r):
-    """Rows written before the tower engine existed are all `f4_fp`'s."""
-    return r.get("engine", "f4_fp")
+    """Rows written before the tower engine existed are all `f4_fp`'s. A
+    signature-engine row also names its variant (module order, rewrite order,
+    steps), so that two variants of one system are two measurements, not two
+    copies of one. Round 4's rows predate the steps field and ran the default
+    steps, by signature degree."""
+    e = r.get("engine", "f4_fp")
+    if e == "f4_fp_tower_sig":
+        e += "/" + "/".join((r.get("sig_order") or "PositionFirst",
+                             r.get("sig_rewrite") or "Ratio",
+                             r.get("sig_steps") or "SignatureDegree"))
+    return e
 
 
 def instance_key(r):
@@ -124,6 +135,20 @@ def load(paths, report=True):
                         diff = [f for f in fields if r.get(f) != first.get(f)]
                         if diff:
                             mismatches.append((path, r["kind"], r["m"], r["control"], r["N"], diff))
+                    elif r["timed_out"] != first["timed_out"]:
+                        # One copy finished and one stopped early, whose degree
+                        # is only a lower bound: the finished copy stands for the
+                        # system (round 3 finished what round 2's D2 could not),
+                        # and its degree must not fall below that bound.
+                        done, cut = (first, r) if r["timed_out"] else (r, first)
+                        if done["solving_degree_max"] < cut["solving_degree_max"]:
+                            mismatches.append(
+                                (path, r["kind"], r["m"], r["control"], r["N"],
+                                 ["solving_degree_max below a stopped copy's lower bound"])
+                            )
+                        if done is r:
+                            rows[rows.index(first)] = r
+                            seen[k] = r
                     continue
                 seen[k] = r
                 rows.append(r)

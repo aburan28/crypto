@@ -446,6 +446,35 @@ anything in the table above.
 The single-cell caveat on Result 2 is unchanged.  What has changed is
 that the experiment which would lift it is now schedulable.
 
+### Dense finish: another 10× on the draws that cost (engineering)
+
+`refute_profile` breaks one degree's structured elimination down by column
+degree band. On an `(8, 4)` degree-6 draw (60k × 58k), the sparse merge is
+cheap only in the leading band. Below it, the surviving rows are thousands
+of entries long:
+
+| band | row additions | words written | time |
+|--:|--:|--:|--:|
+| degree 6 | 2.4M | 2.3G | 6.4 s |
+| degree 5 | 11.8M | 28.7G | 75.1 s |
+| degree 4 | 5.2M | 5.0G | 17.0 s |
+| degrees 3, 2 | 1.6M | 0.26G | 1.3 s |
+
+`eliminate_high_columns_dense_finish` keeps the sparse pass for the leading
+band. It then packs the survivors as bit rows and hands them to the dense
+echelon kernel. The switch is `KIC_SPARSE_DENSE_FINISH=1`, and it is off by
+default.
+
+- **Same row space, so the same refutation and pinned variables.** This is
+  tested, and it is identity-checked on 376 committed rows: 0 mismatches,
+  including degree-7 refutations and a `≥7` bound.
+- **Speed on the measured draws:** 23,586 s became 2,271 s.
+  - `(8, 4)` at degree 6: 91 s to 13 s.
+  - `(7, 4)` at degree 7: 2,068 s to 271 s.
+  - `(10, 5)` at degree 6: 1,640 s to 324 s.
+- **Class: engineering.** It changes the cost of measuring, never a degree.
+  The evidence is `research/dreg_fixed_surplus_20260923/runs/identity-check-dense/`.
+
 ## Result 4: the ladder at fixed surplus, inconclusive as far as it ran
 
 `research/dreg_fixed_surplus_20260923/` holds everything: a pre-registered
@@ -525,6 +554,109 @@ That is scoped to `m = 3` and `n ≤ 13`, and it says nothing about `n = 131`.
 My predictions were "tracks ℓ" for Q1 and 6 for Q2. Both failed, and
 `RESULTS.md` records both.
 
+## Result 6: the surplus control — Result 5's `ℓ = 5` rise is confounded
+
+`research/dreg_surplus_control_20260925/` holds everything. It was
+pre-registered before any cell ran, with the grid's system, sampling and
+frozen binary.
+
+| `S` | `ℓ = 3` | `ℓ = 4` | `ℓ = 5` |
+|--:|---|---|---|
+| −5 | 5 5 5 5 | **7 7 6 7** | ≥7 ≥7 ≥7 ≥7 |
+| −4 | 6 6 6 6 | **6 7 6 7** | **≥7 ≥7 ≥7 ≥7** |
+| −2 | 6 6 6 6 | | not measured |
+| −1 | | 6 6 6 6 | |
+| 0 | 6 6 6 6 | | not measured |
+| +1 | | 6 6 6 6 | |
+
+Bold cells are new. The others are Results 4 and 5.
+
+- **Q3: rises at S = −5.** `(7, 4)` reads 7 on three of four draws, where
+  `ℓ = 4` reads 6 at `S = −1, +1`.
+  - Result 5's "lowering the surplus at fixed `ℓ` never raised the degree"
+    held at `ℓ ≤ 3` and fails at `ℓ = 4`.
+  - My prediction was "no rise".
+- **Q4: replicates.** `(11, 5)` at `S = −4` is ≥7 on all four draws.
+- **Joint reading, as registered: confounded.** Result 5's `ℓ = 5` rise
+  cannot be credited to `ℓ` alone. At `ℓ = 4`, five equations short is
+  already enough for 7.
+- **Descriptively, the degree rises with `ℓ` down each column where three
+  rungs are measured:**
+  - at `S = −5`: 5, 7, ≥7;
+  - at `S = −4`: 6, 6 or 7 (6 7 6 7), ≥7.
+
+  That is growth at fixed surplus, the ladder's registered hypothesis, seen
+  at the surpluses where it is affordable.
+- **At `S ≥ −2`, where index calculus works, every measured cell reads 6.**
+  `ℓ = 5` is unmeasured there, so the scaling question stays open in the
+  regime that matters.
+
+**Engineering check.** `dreg_ladder` built from `main` at `cc08d001`
+reproduces all 299 of Result 5's rows exactly. It is not faster: it took
+1.3–1.4× the frozen binary's time on the small cells. It does not bring
+`(13, 5)` within reach.
+
+## Result 7: the ladder's primary pair — grows at fixed surplus
+
+With the dense finish, a `(13, 5)` draw takes 31–34 minutes where the
+sparse-only path had not finished one in 4.5 hours. The four registered
+draws are all **≥7**: the degree-6 Macaulay matrix contains no `1`.
+
+| pair at `S = −2` | small | large | registered verdict |
+|---|---|---|---|
+| primary | `(7, 3)`, 16 unknowns: 6 6 6 6 | `(13, 5)`, 28 unknowns: ≥7 ≥7 ≥7 ≥7 | **grows** |
+
+- **Result 4's registered verdict, re-scored with no other change: "grows
+  at fixed surplus".**
+  - The primary pair grows, and so do both other testable pairs.
+  - `(15, 5)`, at `S = 0`, is still running.
+- **This pair answers Result 4's confound.**
+  - It has `ℓ ≥ 3` at both ends, so the growth is not an `ℓ = 2` floor.
+  - It holds one surplus, so Result 6's surplus effect does not enter.
+  - Result 5's `ℓ = 5` rise at `(10, 5)` was confounded with the equation
+    count. This one is not.
+- **The prediction was "grows", and it held.**
+- **Scope.**
+  - The `(13, 5)` values are lower bounds, so the size of the growth is
+    unknown.
+  - At `S = −2` the measured rungs are `ℓ = 3` (6) and `ℓ = 5` (≥7). No
+    `ℓ = 4` cell sits at that surplus. The nearest ones, at `S = −1` and
+    `+1`, read 6, which puts the step between `ℓ = 4` and `ℓ = 5` on this
+    evidence.
+  - That placement is a reading across neighbouring surpluses, not a
+    registered comparison.
+  - `m = 3`, `n ≤ 13`. Nothing about `n = 131` follows at this scale.
+
+## Result 8: the `S = 0` pair — every pair of the ladder grows
+
+`(15, 5)` is `ℓ = 5` at `S = 0`: 30 unknowns and 30 equations, the
+index-calculus regime, with about one decomposition in six points. On the
+dense-finish path its four draws took 96–104 min each. All four are **≥7**.
+
+| `S` | small | large | registered verdict |
+|--:|---|---|---|
+| −2 | `(7, 3)`: 6 6 6 6 | `(13, 5)`: ≥7 ×4 | grows |
+| −1 | `(5, 2)`: 5 5 5 5 | `(11, 4)`: 6 6 6 6 | grows |
+| **0** | `(9, 3)`: 6 6 6 6 | **`(15, 5)`: ≥7 ×4** | **grows** |
+| +1 | `(7, 2)`: 5 5 5 5 | `(13, 4)`: 6 6 6 6 | grows |
+
+- **Result 4's registered verdict, with every pair testable: grows at fixed
+  surplus.** The prediction was "grows", and it held in all four pairs.
+- **The evidence behind it.**
+  - The `S = −2` and `S = 0` pairs both have `ℓ ≥ 3` at both ends.
+  - Each holds one surplus.
+  - Each is ≥7 on every large-cell draw.
+- **The bottom line for this system, `m = 3` with the chained `S₃`.** At
+  fixed surplus, the refutation degree does not stay constant as the field
+  grows. It is 6 at `ℓ = 3` and above 6 at `ℓ = 5`, at the two surpluses
+  where both rungs are measured.
+  - That is evidence against a constant solving degree at these sizes.
+  - A constant degree is what a sub-exponential estimate driven by the
+    first fall degree needs. The FFD stays 3 throughout.
+  - This is a measurement at `n ≤ 15`, not a statement about `n = 131`.
+    The size of the growth is unmeasured, because the values are lower
+    bounds.
+
 ## Reproducing
 
 ```sh
@@ -591,6 +723,15 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
 - **Run the `(7, 4)` surplus control** for Result 5's Q2: `ℓ = 4` at
   `S = −5`, which takes seconds.  It decides whether `(10, 5)`'s ≥7 belongs
   to `ℓ` or to the six equations it lacks.  Pre-register it first.
+  **Done:** Result 6, confounded.  It did not take seconds: its degree-7
+  draws take 35 min to 2 h.
+- **`ℓ = 5` at `S ≥ −2` was the whole open question.** **Answered** (Results 7 and 8): `(13, 5)` at `S = −2` and `(15, 5)` at `S = 0` are both ≥7 on all four draws.
+- **Next: the size of the growth.** The exact `ℓ = 5` degree needs degree 7 at 25–30 unknowns. The dense finish's dense block would be several to tens of GB there. That needs either a machine with more memory or a finish that goes dense only below the top two bands.
+- *Superseded note:* **`ℓ = 5` at `S ≥ −2` is now the whole open question.**  It is the
+  ladder's `(13, 5)` or `(15, 5)`, at 28 or 30 unknowns.  Neither the frozen
+  binary nor current `main` reaches it on the four-core container, so it
+  needs either a large machine or a faster refutation path than sparse
+  elimination.
 - **Match the surplus, not the unknown count, when pairing cells.**  The
   `n = 9` versus `n = 15` comparison proposed above is confounded a third
   way: those cells carry surplus `n − mℓ` of `−9` and `+3`, opposite signs

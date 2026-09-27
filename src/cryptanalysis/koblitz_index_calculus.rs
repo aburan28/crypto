@@ -126,6 +126,7 @@
 
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
+use std::sync::{Arc, OnceLock};
 
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
@@ -142,6 +143,7 @@ use crate::cryptanalysis::crossbred::{
     SearchStats as CrossbredSearchStats,
 };
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
+use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
     chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
@@ -942,9 +944,180 @@ pub struct FrobeniusFactorBase {
     /// For each point: `(signed orbit, k, negated)` with
     /// `point = (-1)^negated π^k(representative)`.
     pub signed_orbit_of: Vec<(usize, u32, bool)>,
+    /// What the consumers of this base derive from it, built on first
+    /// use and shared.  Construct with `Default::default()`.
+    pub(crate) derived: DerivedConstructions,
+}
+
+/// The constructions every consumer of a base derives from it — the
+/// projected signed-orbit map, the point index and the cofactor classes
+/// of the decomposition check — built on first use and shared.
+///
+/// A Koblitz workflow used to rebuild them in each consumer: the map
+/// five times a run (selection's column count, each coverage, the log
+/// solver, the descent solver), the index three times and the classes
+/// twice.  Ledger §21 priced that at 107–433 units per base point.
+///
+/// Each cell remembers a fingerprint of what it was built from: the
+/// base's points, in order, and for the map and the classes the curve's
+/// identity (and the classes' signed-orbit representatives).  A lookup
+/// whose fingerprint differs — a base whose public fields were edited
+/// after first use, or a call with another curve — builds afresh and
+/// caches nothing, so a cell never answers for a base it was not built
+/// from.  A clone starts empty.
+///
+/// A builder runs outside its cell.  Two first callers may both build,
+/// and one keeps its result; nothing blocks, so a builder that uses
+/// Rayon cannot deadlock a pool whose other tasks look up the same cell.
+#[derive(Default)]
+pub(crate) struct DerivedConstructions {
+    projected: OnceLock<(u64, Arc<ProjectedSignedOrbitMap>)>,
+    index: OnceLock<(u64, Arc<HashMap<(BigUint, BigUint), usize>>)>,
+    classes: OnceLock<(u64, Arc<Vec<BinaryPoint>>)>,
+}
+
+impl Clone for DerivedConstructions {
+    /// Empty: a clone is a base in its own right, likely about to be
+    /// edited, and builds its own constructions when first asked.
+    fn clone(&self) -> Self {
+        Self::default()
+    }
+}
+
+impl std::fmt::Debug for DerivedConstructions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DerivedConstructions")
+            .finish_non_exhaustive()
+    }
+}
+
+/// `cell`'s value when it was built for `key`; otherwise `build()`,
+/// kept in the cell if the cell was empty.
+fn derived_or_build<T>(
+    cell: &OnceLock<(u64, Arc<T>)>,
+    key: u64,
+    build: impl FnOnce() -> T,
+) -> Arc<T> {
+    if let Some((built_for, value)) = cell.get() {
+        if *built_for == key {
+            return Arc::clone(value);
+        }
+        return Arc::new(build());
+    }
+    let value = Arc::new(build());
+    // Losing a race to another first caller is harmless: both built the
+    // same thing when the keys agree, and a different key is not cached.
+    let _ = cell.set((key, Arc::clone(&value)));
+    value
+}
+
+/// Order-sensitive 64-bit fingerprint of a sequence of words, for the
+/// identity checks of [`DerivedConstructions`].  One word changed always
+/// changes it (every step is a bijection of the running state); it is a
+/// guard against an edited base, not a cryptographic commitment.
+struct Fingerprint(u64);
+
+impl Fingerprint {
+    fn new(tag: u64) -> Self {
+        Self(tag ^ 0x9e37_79b9_7f4a_7c15)
+    }
+
+    fn word(&mut self, w: u64) {
+        self.0 = (self.0.rotate_left(5) ^ w).wrapping_mul(0x517c_c1b7_2722_0a95);
+    }
+
+    fn words(&mut self, ws: &[u64]) {
+        self.word(ws.len() as u64);
+        for &w in ws {
+            self.word(w);
+        }
+    }
+
+    fn big(&mut self, v: &BigUint) {
+        self.words(&v.to_u64_digits());
+    }
+
+    /// Everything about the curve a projection or a class depends on:
+    /// the field, the coefficients, the Frobenius power, `h` and `r`.
+    fn curve(&mut self, kc: &KoblitzCurve) {
+        self.word(u64::from(kc.n));
+        self.word(u64::from(kc.k));
+        self.word(u64::from(kc.curve.m));
+        self.word(u64::from(kc.curve.irreducible.degree));
+        self.words(
+            &kc.curve
+                .irreducible
+                .low_terms
+                .iter()
+                .map(|&t| u64::from(t))
+                .collect::<Vec<_>>(),
+        );
+        self.words(kc.curve.a.raw_bits());
+        self.words(kc.curve.b.raw_bits());
+        self.big(&kc.cofactor);
+        self.big(&kc.subgroup_order);
+    }
+
+    fn points(&mut self, points: &[BinaryPoint]) {
+        self.word(points.len() as u64);
+        for p in points {
+            match p {
+                BinaryPoint::Infinity => self.word(u64::MAX),
+                BinaryPoint::Affine { x, y } => {
+                    self.words(x.raw_bits());
+                    self.words(y.raw_bits());
+                }
+            }
+        }
+    }
 }
 
 impl FrobeniusFactorBase {
+    /// Fingerprint of the points alone: all the point index depends on.
+    fn points_fingerprint(&self) -> u64 {
+        let mut f = Fingerprint::new(1);
+        f.points(&self.points);
+        f.0
+    }
+
+    /// Fingerprint of the points on a curve: all the projected map
+    /// depends on.
+    fn projection_fingerprint(&self, kc: &KoblitzCurve) -> u64 {
+        let mut f = Fingerprint::new(2);
+        f.curve(kc);
+        f.points(&self.points);
+        f.0
+    }
+
+    /// The projection fingerprint and the signed-orbit representatives
+    /// the classes are computed from.
+    fn classes_fingerprint(&self, kc: &KoblitzCurve) -> u64 {
+        let mut f = Fingerprint::new(3);
+        f.curve(kc);
+        f.points(&self.points);
+        f.word(self.signed_orbits.len() as u64);
+        for orbit in &self.signed_orbits {
+            f.word(orbit.first().map_or(u64::MAX, |&i| i as u64));
+        }
+        f.0
+    }
+
+    /// The point index of [`Self::index_map`], built once per base and
+    /// shared by every consumer that asks.
+    pub fn shared_index_map(&self) -> Arc<HashMap<(BigUint, BigUint), usize>> {
+        derived_or_build(&self.derived.index, self.points_fingerprint(), || {
+            self.index_map()
+        })
+    }
+
+    /// The classes of [`Self::distinct_cofactor_classes`], built once per
+    /// base and curve.
+    fn shared_cofactor_classes(&self, kc: &KoblitzCurve) -> Arc<Vec<BinaryPoint>> {
+        derived_or_build(&self.derived.classes, self.classes_fingerprint(kc), || {
+            self.distinct_cofactor_classes(kc)
+        })
+    }
+
     /// Number of unknowns the linear algebra actually carries — one per
     /// signed `π`-orbit, versus `points.len()` for a non-invariant base.
     pub fn unknowns(&self) -> usize {
@@ -1034,7 +1207,7 @@ impl FrobeniusFactorBase {
         if self.points.is_empty() || m == 0 {
             return m == 0;
         }
-        let classes = self.distinct_cofactor_classes(kc);
+        let classes = self.shared_cofactor_classes(kc);
         if m == 1 {
             return classes.contains(&BinaryPoint::Infinity);
         }
@@ -1058,7 +1231,7 @@ impl FrobeniusFactorBase {
             let mut next_keys: HashSet<u64> = HashSet::new();
             let mut next: Vec<BinaryPoint> = Vec::new();
             for q in &reps {
-                for c in &classes {
+                for c in classes.iter() {
                     let seed = kc.add(q, c);
                     if next_keys.contains(&pack_point(&seed)) {
                         continue;
@@ -2204,6 +2377,7 @@ fn finish_factor_base_domain(
         orbit_of,
         signed_orbits,
         signed_orbit_of,
+        derived: Default::default(),
     })
 }
 
@@ -2273,6 +2447,7 @@ fn decompose(
     start: usize,
 ) -> Option<Vec<usize>> {
     if m == 0 {
+        let _check = measurement::relation_check_scope();
         return if *target == BinaryPoint::Infinity {
             Some(Vec::new())
         } else {
@@ -2280,6 +2455,7 @@ fn decompose(
         };
     }
     if m == 1 {
+        let _check = measurement::relation_check_scope();
         let idx = *index_of.get(&point_key(target))?;
         return if idx >= start { Some(vec![idx]) } else { None };
     }
@@ -4141,6 +4317,7 @@ impl PairSumTable {
         m: usize,
     ) -> Option<Vec<usize>> {
         let idxs = self.decompose_fast(self.curve.lift(target), m)?;
+        let _check = measurement::relation_check_scope();
         let sum = idxs
             .iter()
             .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
@@ -4161,6 +4338,7 @@ impl PairSumTable {
         });
         let mut idxs = found?;
         idxs.sort_unstable();
+        let _check = measurement::relation_check_scope();
         let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
             self.curve.add(s, self.points[i])
         });
@@ -4215,6 +4393,7 @@ impl PairSumTable {
             false
         });
         let idxs = found?;
+        let _check = measurement::relation_check_scope();
         let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
             self.curve.add(s, self.points[i])
         });
@@ -4611,6 +4790,7 @@ pub(crate) fn lift_candidate(
         target: &BinaryPoint,
     ) -> bool {
         if depth == xs.len() {
+            let _check = measurement::relation_check_scope();
             return acc == target;
         }
         for p in points_with_x(&kc.curve, &xs[depth]) {
@@ -4822,7 +5002,7 @@ fn crossbred_params_for(system: &[F2BoolPoly], n_vars: usize) -> CrossbredParams
 }
 
 /// What a SAT decomposition attempt cost and concluded.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SatDecompositionStats {
     /// CDCL solve calls (one per model examined, plus the final one).
     pub solver_calls: usize,
@@ -5420,7 +5600,20 @@ struct ProjectedSignedOrbitMap {
 /// algebraically dependent before any relation is collected. Merging them
 /// uses only point multiplication, equality, negation and Frobenius; it does
 /// not compute or attach a discrete logarithm.
+///
+/// Built once per base and curve and shared (see
+/// [`DerivedConstructions`]); every consumer of a base asks for it.
 fn projected_signed_orbit_map(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+) -> Arc<ProjectedSignedOrbitMap> {
+    derived_or_build(&fb.derived.projected, fb.projection_fingerprint(kc), || {
+        build_projected_signed_orbit_map(kc, fb)
+    })
+}
+
+/// The construction behind [`projected_signed_orbit_map`], uncached.
+fn build_projected_signed_orbit_map(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
 ) -> ProjectedSignedOrbitMap {
@@ -5511,11 +5704,7 @@ fn projected_signed_orbit_map_fast(
     fb: &FrobeniusFactorBase,
 ) -> Option<ProjectedSignedOrbitMap> {
     let fc = FastCurve::new(&kc.curve)?;
-    let projected: Vec<FastPoint> = fb
-        .points
-        .par_iter()
-        .map(|point| fc.mul(fc.lift(point), &kc.cofactor))
-        .collect();
+    let (projected, _) = project_by_frobenius_orbits(kc, &fc, fb);
     let mut representatives: Vec<FastPoint> = Vec::new();
     let mut seen: HashSet<u64> = HashSet::new();
     for &point in &projected {
@@ -5571,6 +5760,71 @@ fn projected_signed_orbit_map_fast(
         orbit_of,
         representatives: representatives.into_iter().map(|p| fc.lower(p)).collect(),
     })
+}
+
+/// `[h]P` for every base point `P`, in single-word arithmetic, with one
+/// cofactor multiplication per Frobenius orbit rather than per point.
+///
+/// `[h]` commutes with `π`, so along a recorded orbit
+/// `i₀, i₁ = π(i₀), i₂ = π²(i₀), …` the projections are
+/// `[h]P_{i₀}, π([h]P_{i₀}), π²([h]P_{i₀}), …`.  The recorded order is
+/// not trusted: each orbit is walked by Frobenius on the lifted points
+/// first, and one whose walk disagrees — or a point no orbit lists —
+/// gets its own multiplication, as every point used to.  The result is
+/// the per-point one exactly, point for point.
+///
+/// Ledger §21 priced the per-point version at `17 + 3·bits(h)` units
+/// per base point, most of a map build; a Frobenius step is a few
+/// table-driven squarings.
+///
+/// Returns the projections and the cofactor multiplications spent.
+fn project_by_frobenius_orbits(
+    kc: &KoblitzCurve,
+    fc: &FastCurve,
+    fb: &FrobeniusFactorBase,
+) -> (Vec<FastPoint>, usize) {
+    let lifted: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
+    let by_orbit: Vec<Option<Vec<FastPoint>>> = fb
+        .orbits
+        .par_iter()
+        .map(|orbit| {
+            let (&first, _) = orbit.split_first()?;
+            if orbit.iter().any(|&i| i >= lifted.len()) {
+                return None;
+            }
+            let walks = orbit
+                .windows(2)
+                .all(|w| fc.frobenius_k(lifted[w[0]], kc.k) == lifted[w[1]]);
+            if !walks {
+                return None;
+            }
+            let mut current = fc.mul(lifted[first], &kc.cofactor);
+            let mut images = Vec::with_capacity(orbit.len());
+            images.push(current);
+            for _ in 1..orbit.len() {
+                current = fc.frobenius_k(current, kc.k);
+                images.push(current);
+            }
+            Some(images)
+        })
+        .collect();
+    let mut multiplications = 0;
+    let mut projected: Vec<Option<FastPoint>> = vec![None; lifted.len()];
+    for (orbit, images) in fb.orbits.iter().zip(by_orbit) {
+        if let Some(images) = images {
+            multiplications += 1;
+            for (&i, image) in orbit.iter().zip(images) {
+                projected[i] = Some(image);
+            }
+        }
+    }
+    multiplications += projected.iter().filter(|image| image.is_none()).count();
+    let projected = projected
+        .into_par_iter()
+        .zip(lifted.par_iter())
+        .map(|(image, &point)| image.unwrap_or_else(|| fc.mul(point, &kc.cofactor)))
+        .collect();
+    (projected, multiplications)
 }
 
 /// Number of nonzero signed-Frobenius columns remaining after every
@@ -6044,7 +6298,7 @@ fn koblitz_index_calculus_dlp_observed(
     let m_cofactor_admissible = fb.m_can_decompose(kc, opts.m);
     let cofactor_admission_ns = admission_start.elapsed().as_nanos();
 
-    let index_of = fb.index_map();
+    let index_of = fb.shared_index_map();
     progress(KoblitzIcEvent::FactorBaseReady {
         points: fb.points.len(),
         orbits: relation_unknowns,
@@ -6469,7 +6723,7 @@ fn koblitz_index_calculus_dlp_observed(
                     &a,
                     &b,
                     opts.collapse_negation,
-                    projected_orbits.as_ref(),
+                    projected_orbits.as_deref(),
                 );
                 if let Some(echelon) = echelon.as_mut() {
                     let linear_start = std::time::Instant::now();
@@ -6948,9 +7202,25 @@ pub fn koblitz_signed_frobenius_rho_with_progress(
     progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
 ) -> KoblitzSignedRhoReport {
     match FastCurve::new(&curve.curve) {
-        Some(fc) => signed_rho_fast(&fc, curve, target, options, progress),
+        Some(fc) => signed_rho_fast(&fc, curve, target, options, progress, &mut |_| {}),
         None => koblitz_signed_frobenius_rho_reference(curve, target, options, progress),
     }
+}
+
+/// Run the packed rho path with an explicit boundary after reusable arithmetic
+/// and Frobenius preparation, before any target-dependent work. Unsupported
+/// widths return `None`; the callback receives the actual field kernel.
+pub fn koblitz_signed_frobenius_rho_with_preparation(
+    curve: &KoblitzCurve,
+    target: &BinaryPoint,
+    options: &KoblitzSignedRhoOptions,
+    ready: &mut dyn FnMut(&FastCurve),
+    progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
+) -> Option<KoblitzSignedRhoReport> {
+    let fc = FastCurve::new(&curve.curve)?;
+    Some(signed_rho_fast(
+        &fc, curve, target, options, progress, ready,
+    ))
 }
 
 #[derive(Clone, Copy)]
@@ -7221,6 +7491,7 @@ fn signed_rho_fast(
     target: &BinaryPoint,
     options: &KoblitzSignedRhoOptions,
     progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
+    ready: &mut dyn FnMut(&FastCurve),
 ) -> KoblitzSignedRhoReport {
     assert!(options.jump_count > 0, "rho needs at least one jump");
     assert!(options.parallel_walks > 0, "rho needs at least one walk");
@@ -7248,6 +7519,7 @@ fn signed_rho_fast(
         trail_mask: rho_trail_mask(rho_expected_steps(modulus, curve.n)),
     };
     let g = fc.lift(curve.generator());
+    ready(fc);
     let q = fc.lift(target);
     let mut rng = StdRng::seed_from_u64(options.seed);
     let mut report = KoblitzSignedRhoReport {
@@ -7747,7 +8019,7 @@ impl FactorBaseLogTable {
 }
 
 /// What a factor-base logarithm precomputation did.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
 pub struct LogTableReport {
     /// Relation columns solved (equals the table length on success).
     pub columns: usize,
@@ -7775,9 +8047,127 @@ pub struct LogTableReport {
     pub duplicate_relations: usize,
 }
 
-/// Dispatch one decomposition question `target = Σ_{i} P_{i}` (`m`
-/// summands) to the requested oracle, mirroring the driver's own
-/// dispatch.  A prebuilt pair table is used when supplied.
+/// A decomposition frontend's verdict, before independent consumer verification.
+/// Incomplete or unsupported searches must never become proved negatives.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PdpOutcome {
+    Witness,
+    ProvedUnsat,
+    Incomplete,
+    Unsupported,
+    InvalidModel,
+    /// The frontend supplies no completeness certificate (including window misses).
+    Unresolved,
+    /// The query was the identity and no PDP solver was invoked.
+    Identity,
+}
+
+/// SAT-like frontend that actually produced the retained counters.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PdpSatBackend {
+    NativeXor,
+    Cnf,
+    Wdsat,
+    MqFes,
+}
+
+/// Native counters from the dispatched frontend; no conversion into a common
+/// operation unit is implied. The engine label records the actual dispatch.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "family", rename_all = "snake_case")]
+pub enum PdpSolverStats {
+    None,
+    Groebner {
+        engine: SolverEngine,
+        stats: SolveStats,
+    },
+    Crossbred {
+        stats: CrossbredSearchStats,
+    },
+    Sat {
+        backend: PdpSatBackend,
+        stats: SatDecompositionStats,
+    },
+    WeilChart {
+        engine: SolverEngine,
+        stats: crate::cryptanalysis::weil_charts::WeilSolveStats,
+    },
+}
+
+/// Exactly one attempted decomposition, including its unsuccessful work.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PdpAttempt {
+    pub outcome: PdpOutcome,
+    pub points: Option<Vec<usize>>,
+    pub stats: PdpSolverStats,
+}
+
+impl PdpAttempt {
+    fn bare(points: Option<Vec<usize>>, missing: PdpOutcome) -> Self {
+        Self {
+            outcome: if points.is_some() {
+                PdpOutcome::Witness
+            } else {
+                missing
+            },
+            points,
+            stats: PdpSolverStats::None,
+        }
+    }
+
+    fn algebra(points: Option<Vec<usize>>, unsupported: bool, incomplete: bool) -> Self {
+        Self::bare(
+            points,
+            if unsupported {
+                PdpOutcome::Unsupported
+            } else if incomplete {
+                PdpOutcome::Incomplete
+            } else {
+                PdpOutcome::ProvedUnsat
+            },
+        )
+    }
+
+    fn sat(
+        points: Option<Vec<usize>>,
+        backend: PdpSatBackend,
+        stats: SatDecompositionStats,
+    ) -> Self {
+        // An invalid model blocks admission even if a later model lifted.
+        let outcome = if stats.spurious != 0 {
+            PdpOutcome::InvalidModel
+        } else if points.is_some() {
+            PdpOutcome::Witness
+        } else if stats.unsupported {
+            PdpOutcome::Unsupported
+        } else if stats.refuted {
+            PdpOutcome::ProvedUnsat
+        } else if stats.exhausted {
+            PdpOutcome::Incomplete
+        } else {
+            PdpOutcome::Unresolved
+        };
+        Self {
+            outcome,
+            points,
+            stats: PdpSolverStats::Sat { backend, stats },
+        }
+    }
+}
+
+/// Query chronology for collection (`b=0`) or descent (`[a]G+[b]Q`).
+/// Trial indices are zero based; witnesses remain independently checkable.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct QueryAttempt {
+    pub trial: u64,
+    pub a: u64,
+    pub b: u64,
+    pub pdp: PdpAttempt,
+}
+
+/// Dispatch once and retain the frontend's actual verdict and counters.
 #[allow(clippy::too_many_arguments)]
 fn decompose_once(
     kc: &KoblitzCurve,
@@ -7787,20 +8177,34 @@ fn decompose_once(
     pair: Option<&PairSumTable>,
     opts: &KoblitzIcOptions,
     target: &BinaryPoint,
-) -> Option<Vec<usize>> {
+) -> PdpAttempt {
     if let Some(plan) = &opts.weil_charts {
         if opts.strategy != DecompositionStrategy::Groebner || opts.m != 2 || !plan.matches(kc, fb)
         {
-            return None;
+            return PdpAttempt::bare(None, PdpOutcome::Unsupported);
         }
     }
     match opts.strategy {
-        DecompositionStrategy::Enumerate => decompose(kc, fb, index_of, target, opts.m, 0),
-        DecompositionStrategy::PairTable => pair
-            .expect("pair table required")
-            .decompose(kc, fb, target, opts.m),
+        DecompositionStrategy::Enumerate => PdpAttempt::bare(
+            decompose(kc, fb, index_of, target, opts.m, 0),
+            PdpOutcome::ProvedUnsat,
+        ),
+        // Keep lookup misses conservative: a caller may have supplied a partial table.
+        DecompositionStrategy::PairTable => PdpAttempt::bare(
+            pair.expect("pair table required")
+                .decompose(kc, fb, target, opts.m),
+            if (2..=4).contains(&opts.m) {
+                PdpOutcome::Unresolved
+            } else {
+                PdpOutcome::Unsupported
+            },
+        ),
         DecompositionStrategy::Crossbred => {
-            crossbred_decompose(kc, fb, index_of, field, target, opts.m, opts.crossbred).0
+            let (points, stats) =
+                crossbred_decompose(kc, fb, index_of, field, target, opts.m, opts.crossbred);
+            let mut attempt = PdpAttempt::algebra(points, stats.unsupported, stats.exhausted);
+            attempt.stats = PdpSolverStats::Crossbred { stats };
+            attempt
         }
         DecompositionStrategy::Groebner => {
             if let Some(plan) = &opts.weil_charts {
@@ -7810,11 +8214,19 @@ fn decompose_once(
                     split_rule: split_rule_default(),
                     ..Default::default()
                 };
-                return plan
-                    .decompose(kc, fb, index_of, target, &options)
-                    .and_then(|(ids, _)| ids);
+                let Some((points, stats)) = plan.decompose(kc, fb, index_of, target, &options)
+                else {
+                    return PdpAttempt::bare(None, PdpOutcome::Unsupported);
+                };
+                let mut attempt =
+                    PdpAttempt::algebra(points, stats.solver.unsupported, stats.solver.exhausted);
+                attempt.stats = PdpSolverStats::WeilChart {
+                    engine: options.resolve().engine,
+                    stats,
+                };
+                return attempt;
             }
-            groebner_decompose(
+            let (points, stats) = groebner_decompose(
                 kc,
                 fb,
                 index_of,
@@ -7823,11 +8235,16 @@ fn decompose_once(
                 opts.m,
                 opts.engine,
                 opts.node_budget,
-            )
-            .0
+            );
+            let mut attempt = PdpAttempt::algebra(points, stats.unsupported, stats.exhausted);
+            attempt.stats = PdpSolverStats::Groebner {
+                engine: opts.engine.effective(),
+                stats,
+            };
+            attempt
         }
         DecompositionStrategy::Sat => {
-            sat_decompose_with(
+            let (points, stats) = sat_decompose_with(
                 kc,
                 fb,
                 index_of,
@@ -7837,25 +8254,36 @@ fn decompose_once(
                 opts.max_models,
                 opts.sat_macaulay_degree,
                 opts.sat_options,
+            );
+            PdpAttempt::sat(
+                points,
+                match opts.sat_options.encoding {
+                    XorEncoding::Native => PdpSatBackend::NativeXor,
+                    XorEncoding::Cnf => PdpSatBackend::Cnf,
+                },
+                stats,
             )
-            .0
         }
         DecompositionStrategy::Wdsat => {
-            let binary = opts.wdsat_binary.as_ref()?;
+            let Some(binary) = opts.wdsat_binary.as_ref() else {
+                return PdpAttempt::bare(None, PdpOutcome::Unsupported);
+            };
             let wopts = crate::cryptanalysis::wdsat_oracle::WdsatSolveOptions {
                 binary: binary.clone(),
                 work_dir: None,
                 timeout: std::time::Duration::from_millis(opts.wdsat_timeout_ms),
                 keep_anf: None,
             };
-            crate::cryptanalysis::wdsat_oracle::wdsat_decompose(
+            let (points, stats) = crate::cryptanalysis::wdsat_oracle::wdsat_decompose(
                 kc, fb, index_of, field, target, opts.m, &wopts,
-            )
-            .0
+            );
+            PdpAttempt::sat(points, PdpSatBackend::Wdsat, stats)
         }
         DecompositionStrategy::MqFes => {
-            crate::cryptanalysis::mq_fes::mq_fes_decompose(kc, fb, index_of, field, target, opts.m)
-                .0
+            let (points, stats) = crate::cryptanalysis::mq_fes::mq_fes_decompose(
+                kc, fb, index_of, field, target, opts.m,
+            );
+            PdpAttempt::sat(points, PdpSatBackend::MqFes, stats)
         }
     }
 }
@@ -7902,6 +8330,43 @@ pub struct CollectionReport {
     #[serde(default)]
     pub summands_scanned: u64,
     pub elapsed_seconds: f64,
+    /// Present only for the observed APIs. One record per actual query,
+    /// sorted by trial; no query is rerun to create this evidence.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attempts: Option<Vec<QueryAttempt>>,
+}
+
+#[derive(Default)]
+struct CollectionChunk {
+    relations: Vec<CollectedRelation>,
+    attempts: Vec<QueryAttempt>,
+}
+
+impl CollectionChunk {
+    fn push(&mut self, trial: u64, a: u64, mut pdp: PdpAttempt, observe: bool) {
+        let points = if observe {
+            pdp.points.clone()
+        } else {
+            pdp.points.take()
+        };
+        if let Some(points) = points {
+            self.relations.push(CollectedRelation { trial, a, points });
+        }
+        if observe {
+            self.attempts.push(QueryAttempt {
+                trial,
+                a,
+                b: 0,
+                pdp,
+            });
+        }
+    }
+
+    fn merge(mut self, mut other: Self) -> Self {
+        self.relations.append(&mut other.relations);
+        self.attempts.append(&mut other.attempts);
+        self
+    }
 }
 
 /// The probe scalar of trial `t` under `seed`: uniform in `1..r`, drawn
@@ -7956,12 +8421,23 @@ pub struct RelationCollector<'a> {
     kc: &'a KoblitzCurve,
     fb: &'a FrobeniusFactorBase,
     opts: &'a KoblitzIcOptions,
-    index_of: HashMap<(BigUint, BigUint), usize>,
+    index_of: Arc<HashMap<(BigUint, BigUint), usize>>,
     field: FieldStructure,
     pair: PairSource<'a>,
     /// Single-word curve and lifted generator when the field fits.
     fast: Option<(FastCurve, FastPoint)>,
     r_u64: u64,
+}
+
+/// Observe the collector that was constructed, including effective dispatch.
+/// This is separate from a caller's requested configuration.
+#[derive(Clone, Debug, Serialize)]
+pub struct CollectorDispatch {
+    pub strategy: String,
+    pub field_kernel: Option<&'static str>,
+    pub pair_table: bool,
+    pub query_rule: &'static str,
+    pub collection_window: Option<usize>,
 }
 
 /// Trials collected per batch by [`solve_factor_base_logs`] between
@@ -8025,7 +8501,7 @@ impl<'a> RelationCollector<'a> {
             kc,
             fb,
             opts,
-            index_of: fb.index_map(),
+            index_of: fb.shared_index_map(),
             field: FieldStructure::new(kc.n, &kc.curve.irreducible),
             pair,
             fast,
@@ -8045,6 +8521,21 @@ impl<'a> RelationCollector<'a> {
     /// The largest probe scalar drawn, `r − 1` (or 1 for a degenerate order).
     pub fn scalar_bound(&self) -> u64 {
         self.r_u64
+    }
+
+    pub fn admission_dispatch(&self) -> CollectorDispatch {
+        let window = self.window();
+        CollectorDispatch {
+            strategy: format!("{:?}", self.opts.strategy),
+            field_kernel: self.fast.as_ref().map(|(fc, _)| fc.field.kernel_name()),
+            pair_table: self.pair_table().is_some(),
+            query_rule: if window.is_some() {
+                "windowed-walk-64"
+            } else {
+                "trial-keyed-sample"
+            },
+            collection_window: window,
+        }
     }
 
     /// The window of factor-base summands a probe scans, and whether
@@ -8131,67 +8622,124 @@ impl<'a> RelationCollector<'a> {
         unit: RelationWorkUnit,
         points: Option<&[u32]>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
+        self.collect_impl(unit, points, false)
+    }
+
+    /// Collect once while retaining every query and frontend outcome.
+    pub fn collect_observed(
+        &self,
+        unit: RelationWorkUnit,
+    ) -> (Vec<CollectedRelation>, CollectionReport) {
+        self.collect_impl(unit, None, true)
+    }
+
+    /// Observed counterpart of [`Self::collect_aimed`].
+    pub fn collect_aimed_observed(
+        &self,
+        unit: RelationWorkUnit,
+        points: Option<&[u32]>,
+    ) -> (Vec<CollectedRelation>, CollectionReport) {
+        self.collect_impl(unit, points, true)
+    }
+
+    fn collect_impl(
+        &self,
+        unit: RelationWorkUnit,
+        points: Option<&[u32]>,
+        observe: bool,
+    ) -> (Vec<CollectedRelation>, CollectionReport) {
+        let _collection = measurement::scope(Phase::Queries);
         // Aiming takes precedence over sweeping: a run that names the
         // summands it still needs has said the sweep is what it wants to
         // stop doing.
         if let Some(targets) = points.and_then(|c| self.aimed(c)) {
-            return self.collect_walked(unit, targets);
+            return self.collect_walked(unit, targets, observe);
         }
         if let Some(window) = self.window() {
-            return self.collect_walked(unit, Targets::Window(window));
+            return self.collect_walked(unit, Targets::Window(window), observe);
         }
-        self.collect_swept(unit)
+        self.collect_swept(unit, observe)
     }
 
     /// [`Self::collect`] without the walked, windowed path: one scalar
     /// multiplication per probe and a full scan.
-    fn collect_swept(&self, unit: RelationWorkUnit) -> (Vec<CollectedRelation>, CollectionReport) {
+    fn collect_swept(
+        &self,
+        unit: RelationWorkUnit,
+        observe: bool,
+    ) -> (Vec<CollectedRelation>, CollectionReport) {
         let begin = std::time::Instant::now();
         let g = self.kc.generator();
         let end = unit.start.saturating_add(unit.count);
-        let probe = |t: u64| -> Option<CollectedRelation> {
+        let probe = |t: u64| {
+            measurement::mark(Phase::Queries);
             let a = probe_scalar(unit.seed, t, self.r_u64);
-            let points = match (&self.fast, self.pair_table()) {
-                // [a]G and the decomposition in single-word arithmetic.
+            let pdp = match (&self.fast, self.pair_table()) {
                 (Some((fc, g_fast)), Some(pair))
                     if self.opts.strategy == DecompositionStrategy::PairTable =>
                 {
                     let target = fc.mul_u64(*g_fast, a);
+                    measurement::mark(Phase::Pdp);
                     if target.infinity {
-                        return None;
+                        PdpAttempt::bare(None, PdpOutcome::Identity)
+                    } else {
+                        PdpAttempt::bare(
+                            pair.decompose_fast(target, self.opts.m),
+                            if (2..=4).contains(&self.opts.m) {
+                                PdpOutcome::Unresolved
+                            } else {
+                                PdpOutcome::Unsupported
+                            },
+                        )
                     }
-                    pair.decompose_fast(target, self.opts.m)?
                 }
                 _ => {
                     let target = match &self.fast {
                         Some((fc, g_fast)) => fc.lower(fc.mul_u64(*g_fast, a)),
                         None => self.kc.mul(g, &BigUint::from(a)),
                     };
+                    measurement::mark(Phase::Pdp);
                     if target == BinaryPoint::Infinity {
-                        return None;
+                        PdpAttempt::bare(None, PdpOutcome::Identity)
+                    } else {
+                        decompose_once(
+                            self.kc,
+                            self.fb,
+                            &self.index_of,
+                            &self.field,
+                            self.pair_table(),
+                            self.opts,
+                            &target,
+                        )
                     }
-                    decompose_once(
-                        self.kc,
-                        self.fb,
-                        &self.index_of,
-                        &self.field,
-                        self.pair_table(),
-                        self.opts,
-                        &target,
-                    )?
                 }
             };
-            Some(CollectedRelation {
-                trial: t,
-                a,
-                points,
-            })
+            (t, a, pdp)
         };
-        let mut relations: Vec<CollectedRelation> = (unit.start..end)
-            .into_par_iter()
-            .filter_map(probe)
-            .collect();
-        relations.sort_by_key(|r| r.trial);
+        // Phase boundaries remain on the session's controlling thread. The
+        // query law and output order are identical to the parallel API.
+        let mut collected = if measurement::enabled() {
+            (unit.start..end).map(probe).fold(
+                CollectionChunk::default(),
+                |mut chunk, (t, a, pdp)| {
+                    chunk.push(t, a, pdp, observe);
+                    chunk
+                },
+            )
+        } else {
+            (unit.start..end)
+                .into_par_iter()
+                .map(probe)
+                .fold(CollectionChunk::default, |mut chunk, (t, a, pdp)| {
+                    chunk.push(t, a, pdp, observe);
+                    chunk
+                })
+                .reduce(CollectionChunk::default, CollectionChunk::merge)
+        };
+        measurement::mark(Phase::Queries);
+        collected.relations.sort_by_key(|r| r.trial);
+        collected.attempts.sort_by_key(|r| r.trial);
+        let relations = collected.relations;
         let trials = (end - unit.start) as usize;
         let report = CollectionReport {
             trials,
@@ -8204,6 +8752,7 @@ impl<'a> RelationCollector<'a> {
                 0
             },
             elapsed_seconds: begin.elapsed().as_secs_f64(),
+            attempts: observe.then_some(collected.attempts),
         };
         (relations, report)
     }
@@ -8218,6 +8767,7 @@ impl<'a> RelationCollector<'a> {
         &self,
         unit: RelationWorkUnit,
         targets: Targets,
+        observe: bool,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
         let window = targets.len();
         let begin = std::time::Instant::now();
@@ -8230,6 +8780,7 @@ impl<'a> RelationCollector<'a> {
                     relations: 0,
                     summands_scanned: 0,
                     elapsed_seconds: begin.elapsed().as_secs_f64(),
+                    attempts: observe.then(Vec::new),
                 },
             );
         }
@@ -8241,48 +8792,59 @@ impl<'a> RelationCollector<'a> {
         // Runs of the probe sequence this unit covers, clipped to it.
         let first_run = unit.start / PROBE_RUN;
         let last_run = end.saturating_sub(1) / PROBE_RUN;
-        let mut relations: Vec<CollectedRelation> = (first_run..=last_run)
-            .into_par_iter()
-            .flat_map_iter(|run| {
-                let run_start = (run * PROBE_RUN).max(unit.start);
-                let run_end = ((run + 1) * PROBE_RUN).min(end);
-                let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
-                let mut point = fc.mul_u64(*g_fast, a);
-                let mut found = Vec::new();
-                // Reused across the run's trials, so the scan's four
-                // buffers are allocated once per run rather than once
-                // per probe.
-                let mut scratch = ScanScratch::default();
-                for t in run_start..run_end {
-                    if !point.infinity && a != 0 {
-                        // A rotating offset, so no column is favoured by
-                        // sitting where the window always starts.
-                        let scan = targets.scan(unit.seed, t, base);
-                        if let Some(points) = pair.decompose_fast_scan(point, 3, scan, &mut scratch)
-                        {
-                            found.push(CollectedRelation {
-                                trial: t,
-                                a,
-                                points,
-                            });
-                        }
-                    }
-                    // The next trial of the run is one stride further
-                    // along, matching [`walked_probe_scalar`] without
-                    // re-deriving the run's anchor.
-                    a = ((a as u128 + stride as u128) % self.r_u64.max(2) as u128) as u64;
-                    point = fc.add(point, stride_point);
-                }
-                found
-            })
-            .collect();
-        relations.sort_by_key(|r| r.trial);
+        let run_probes = |run: u64| {
+            measurement::mark(Phase::Queries);
+            let run_start = (run * PROBE_RUN).max(unit.start);
+            let run_end = ((run + 1) * PROBE_RUN).min(end);
+            let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
+            let mut point = fc.mul_u64(*g_fast, a);
+            let mut found = CollectionChunk::default();
+            // Reused across the run's trials, so the scan's four
+            // buffers are allocated once per run rather than once
+            // per probe.
+            let mut scratch = ScanScratch::default();
+            for t in run_start..run_end {
+                measurement::mark(Phase::Pdp);
+                let pdp = if !point.infinity && a != 0 {
+                    let scan = targets.scan(unit.seed, t, base);
+                    PdpAttempt::bare(
+                        pair.decompose_fast_scan(point, 3, scan, &mut scratch),
+                        PdpOutcome::Unresolved,
+                    )
+                } else {
+                    PdpAttempt::bare(None, PdpOutcome::Identity)
+                };
+                found.push(t, a, pdp, observe);
+                measurement::mark(Phase::Queries);
+                // The next trial of the run is one stride further
+                // along, matching [`walked_probe_scalar`] without
+                // re-deriving the run's anchor.
+                a = ((a as u128 + stride as u128) % self.r_u64.max(2) as u128) as u64;
+                point = fc.add(point, stride_point);
+            }
+            found
+        };
+        let mut collected = if measurement::enabled() {
+            (first_run..=last_run)
+                .map(run_probes)
+                .fold(CollectionChunk::default(), CollectionChunk::merge)
+        } else {
+            (first_run..=last_run)
+                .into_par_iter()
+                .map(run_probes)
+                .reduce(CollectionChunk::default, CollectionChunk::merge)
+        };
+        measurement::mark(Phase::Queries);
+        collected.relations.sort_by_key(|r| r.trial);
+        collected.attempts.sort_by_key(|r| r.trial);
+        let relations = collected.relations;
         let trials = (end - unit.start) as usize;
         let report = CollectionReport {
             trials,
             relations: relations.len(),
             summands_scanned: trials as u64 * window as u64,
             elapsed_seconds: begin.elapsed().as_secs_f64(),
+            attempts: observe.then_some(collected.attempts),
         };
         (relations, report)
     }
@@ -8321,7 +8883,7 @@ struct LogSystem<'a> {
     kc: &'a KoblitzCurve,
     fb: &'a FrobeniusFactorBase,
     opts: &'a KoblitzIcOptions,
-    projected: ProjectedSignedOrbitMap,
+    projected: Arc<ProjectedSignedOrbitMap>,
     n_cols: usize,
     r_u64: u64,
     h: BigUint,
@@ -8373,6 +8935,7 @@ impl<'a> LogSystem<'a> {
 
     /// Rewrite `[a]G = Σ P_i` as a row over the projected columns.
     fn push(&mut self, rel: &CollectedRelation) {
+        let _matrix = measurement::scope(Phase::MatrixBuild);
         let r = &self.kc.subgroup_order;
         let a = BigUint::from(rel.a);
         let relation = relation_from_decomposition_with_mode(
@@ -8382,7 +8945,7 @@ impl<'a> LogSystem<'a> {
             &a,
             &BigUint::zero(),
             self.opts.collapse_negation,
-            Some(&self.projected),
+            Some(self.projected.as_ref()),
         );
         let rhs = (&self.h * &a) % r;
         if self.sparse_opts.is_some() {
@@ -8397,6 +8960,7 @@ impl<'a> LogSystem<'a> {
     /// Solve with the rows so far; `Some` only for a table certified in
     /// the group.  Attempts, timing and sparse statistics go to `report`.
     fn attempt(&self, report: &mut LogTableReport) -> Option<FactorBaseLogTable> {
+        let _la = measurement::scope(Phase::RelationLa);
         report.solve_attempts += 1;
         let begin = std::time::Instant::now();
         let solution = match self.sparse_opts {
@@ -8423,6 +8987,7 @@ impl<'a> LogSystem<'a> {
         };
         report.linear_algebra_seconds += begin.elapsed().as_secs_f64();
         let table = self.table_from(solution?);
+        let _check = measurement::scope(Phase::RelationCheck);
         table.verify(self.kc).then_some(table)
     }
 
@@ -8541,6 +9106,23 @@ pub struct FactorBaseLogSolver<'a> {
     report: LogTableReport,
 }
 
+/// Canonical decimal coefficients read from the actual stored relation system.
+/// Snapshot construction is optional diagnostic work, never another solve.
+#[derive(Clone, Debug, Serialize)]
+pub struct RelationMatrixRow {
+    pub entries: Vec<(usize, String)>,
+    pub rhs: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct RelationMatrixSnapshot {
+    pub modulus: String,
+    pub column_points: Vec<(String, String)>,
+    pub rows: Vec<RelationMatrixRow>,
+    pub solver: &'static str,
+    pub sparse_options: Option<SparseSolveOptions>,
+}
+
 impl<'a> FactorBaseLogSolver<'a> {
     /// `None` when the base has no projected columns.
     pub fn new(
@@ -8568,6 +9150,7 @@ impl<'a> FactorBaseLogSolver<'a> {
     /// new.  A forged or duplicate relation is counted and dropped, so a
     /// remote worker cannot enter anything into the linear algebra.
     pub fn push(&mut self, relations: &[CollectedRelation]) {
+        let _check = measurement::scope(Phase::RelationCheck);
         let begin = std::time::Instant::now();
         let verdicts: Vec<bool> = relations
             .par_iter()
@@ -8598,6 +9181,62 @@ impl<'a> FactorBaseLogSolver<'a> {
     /// Columns the relations must determine.
     pub fn columns(&self) -> usize {
         self.system.n_cols
+    }
+
+    /// Export the matrix actually offered to LA, preserving row/column order.
+    pub fn matrix_snapshot(&self) -> RelationMatrixSnapshot {
+        let system = &self.system;
+        let column_points = system
+            .projected
+            .representatives
+            .iter()
+            .map(|p| match p {
+                BinaryPoint::Affine { x, y } => {
+                    (x.to_biguint().to_string(), y.to_biguint().to_string())
+                }
+                BinaryPoint::Infinity => unreachable!("projected columns exclude identity"),
+            })
+            .collect();
+        let rows = if system.sparse_opts.is_some() {
+            system
+                .sparse_rows
+                .iter()
+                .map(|row| RelationMatrixRow {
+                    entries: row
+                        .entries
+                        .iter()
+                        .map(|&(j, v)| (j as usize, v.to_string()))
+                        .collect(),
+                    rhs: row.rhs.to_string(),
+                })
+                .collect()
+        } else {
+            system
+                .dense_matrix
+                .iter()
+                .zip(&system.dense_rhs)
+                .map(|(row, rhs)| RelationMatrixRow {
+                    entries: row
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, v)| !v.is_zero())
+                        .map(|(j, v)| (j, v.to_string()))
+                        .collect(),
+                    rhs: rhs.to_string(),
+                })
+                .collect()
+        };
+        RelationMatrixSnapshot {
+            modulus: self.kc.subgroup_order.to_string(),
+            column_points,
+            rows,
+            solver: if system.sparse_opts.is_some() {
+                "sparse-filter-block-wiedemann"
+            } else {
+                "dense-gauss"
+            },
+            sparse_options: system.sparse_opts,
+        }
     }
 
     /// Try to solve with what has been pushed.  `None` means more
@@ -8657,6 +9296,21 @@ pub struct IndividualLogReport {
     /// The recovered logarithm, if the descent succeeded and verified.
     pub log: Option<BigUint>,
     pub relation: Option<DescentRelation>,
+    /// All queries on an observed execution, including a terminal failure.
+    pub attempts: Option<Vec<QueryAttempt>>,
+}
+
+impl IndividualLogReport {
+    fn record(&mut self, a: u64, b: u64, pdp: &PdpAttempt) {
+        if let Some(attempts) = &mut self.attempts {
+            attempts.push(QueryAttempt {
+                trial: (self.trials - 1) as u64,
+                a,
+                b,
+                pdp: pdp.clone(),
+            });
+        }
+    }
 }
 
 /// **Recover `log_G Q` with one relation, reusing a solved table.**
@@ -8692,7 +9346,8 @@ pub fn individual_log(
 /// of once per target.  `pair` is required when the strategy is
 /// [`DecompositionStrategy::PairTable`] and ignored otherwise.  For a
 /// batch of targets build one [`IndividualLogSolver`] instead: this
-/// rebuilds the orbit map of the base for every call.
+/// rebuilds the solver's column logarithms and field structure for every
+/// call (the base's orbit map and point index are shared).
 pub fn individual_log_with_pair_table(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -8713,9 +9368,9 @@ pub struct IndividualLogSolver<'a> {
     fb: &'a FrobeniusFactorBase,
     opts: &'a KoblitzIcOptions,
     pair: Option<&'a PairSumTable>,
-    projected: ProjectedSignedOrbitMap,
+    projected: Arc<ProjectedSignedOrbitMap>,
     column_log: Vec<BigUint>,
-    index_of: HashMap<(BigUint, BigUint), usize>,
+    index_of: Arc<HashMap<(BigUint, BigUint), usize>>,
     field: FieldStructure,
     /// Single-word curve and lifted generator when the field fits.
     fast: Option<(FastCurve, FastPoint)>,
@@ -8723,7 +9378,35 @@ pub struct IndividualLogSolver<'a> {
     r_u64: u64,
 }
 
+#[derive(Clone, Debug, Serialize)]
+pub struct DescentDispatch {
+    pub strategy: String,
+    pub field_kernel: Option<&'static str>,
+    pub pair_table: bool,
+    pub query_rule: &'static str,
+    pub summands: usize,
+    pub direct_collision: bool,
+}
+
 impl<'a> IndividualLogSolver<'a> {
+    pub fn admission_dispatch(&self) -> DescentDispatch {
+        DescentDispatch {
+            strategy: format!("{:?}", self.opts.strategy),
+            field_kernel: self.fast.as_ref().map(|(fc, _)| fc.field.kernel_name()),
+            pair_table: self.pair.is_some(),
+            query_rule: if self.opts.strategy == DecompositionStrategy::PairTable
+                && self.fast.is_some()
+                && self.pair.is_some()
+            {
+                "parallel-walk-64"
+            } else {
+                "seeded-sample"
+            },
+            summands: self.descent_m(),
+            direct_collision: self.opts.allow_direct_relation,
+        }
+    }
+
     /// `None` when the table's columns do not match the base's signed
     /// orbits, a column has no logarithm, or the strategy needs a pair
     /// table and none was supplied.
@@ -8759,7 +9442,7 @@ impl<'a> IndividualLogSolver<'a> {
             pair,
             projected,
             column_log,
-            index_of: fb.index_map(),
+            index_of: fb.shared_index_map(),
             field: FieldStructure::new(kc.n, &kc.curve.irreducible),
             fast,
             h: &kc.cofactor % r,
@@ -8767,18 +9450,24 @@ impl<'a> IndividualLogSolver<'a> {
         })
     }
 
-    /// Decompose `[a]G + [b]Q` for the probe `(a, b)`, or `None` when the
-    /// probe is `O` (reported separately) or does not decompose.
-    fn probe(&self, q: &BinaryPoint, q_fast: Option<FastPoint>, a: u64, b: u64) -> Probe {
+    /// Draw one query and preserve the frontend's verdict, including identity queries.
+    fn probe(&self, q: &BinaryPoint, q_fast: Option<FastPoint>, a: u64, b: u64) -> PdpAttempt {
+        let _query = measurement::scope(Phase::TargetQuery);
         if let (Some((fc, g)), Some(qf)) = (&self.fast, q_fast) {
             let target = fc.add(fc.mul_u64(*g, a), fc.mul_u64(qf, b));
             if target.infinity {
-                return Probe::Degenerate;
+                return PdpAttempt::bare(None, PdpOutcome::Identity);
             }
-            let idxs = match (self.opts.strategy, self.pair) {
-                (DecompositionStrategy::PairTable, Some(pair)) => {
-                    pair.decompose_fast(target, self.opts.m)
-                }
+            measurement::mark(Phase::TargetPdp);
+            return match (self.opts.strategy, self.pair) {
+                (DecompositionStrategy::PairTable, Some(pair)) => PdpAttempt::bare(
+                    pair.decompose_fast(target, self.opts.m),
+                    if (2..=4).contains(&self.opts.m) {
+                        PdpOutcome::Unresolved
+                    } else {
+                        PdpOutcome::Unsupported
+                    },
+                ),
                 _ => decompose_once(
                     self.kc,
                     self.fb,
@@ -8789,16 +9478,15 @@ impl<'a> IndividualLogSolver<'a> {
                     &fc.lower(target),
                 ),
             };
-            return idxs.map_or(Probe::Miss, Probe::Decomposed);
         }
-        let g = self.kc.generator();
         let target = self.kc.add(
-            &self.kc.mul(g, &BigUint::from(a)),
+            &self.kc.mul(self.kc.generator(), &BigUint::from(a)),
             &self.kc.mul(q, &BigUint::from(b)),
         );
         if target == BinaryPoint::Infinity {
-            return Probe::Degenerate;
+            return PdpAttempt::bare(None, PdpOutcome::Identity);
         }
+        measurement::mark(Phase::TargetPdp);
         decompose_once(
             self.kc,
             self.fb,
@@ -8808,7 +9496,6 @@ impl<'a> IndividualLogSolver<'a> {
             self.opts,
             &target,
         )
-        .map_or(Probe::Miss, Probe::Decomposed)
     }
 
     /// Summands the descent asks for.
@@ -8819,6 +9506,7 @@ impl<'a> IndividualLogSolver<'a> {
     /// Turn a decomposition of `[a]G + [b]Q` into the logarithm, or
     /// `None` when this relation cannot give one.
     fn logarithm_from(&self, q: &BinaryPoint, idxs: &[usize], a: u64, b: u64) -> Option<BigUint> {
+        let _descent = measurement::scope(Phase::TargetDescent);
         let kc = self.kc;
         let r = &kc.subgroup_order;
         let (a, b) = (BigUint::from(a), BigUint::from(b));
@@ -8829,7 +9517,7 @@ impl<'a> IndividualLogSolver<'a> {
             &a,
             &b,
             self.opts.collapse_negation,
-            Some(&self.projected),
+            Some(self.projected.as_ref()),
         );
         // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
         let mut sum = BigUint::zero();
@@ -8842,6 +9530,7 @@ impl<'a> IndividualLogSolver<'a> {
         let numerator = (sum + r - ha) % r;
         let hb = (&self.h * &b) % r;
         let d = (numerator * mod_inverse(&hb, r)?) % r;
+        let _replay = measurement::scope(Phase::RecoveryCheck);
         (kc.mul(kc.generator(), &d) == *q).then_some(d)
     }
 
@@ -8861,6 +9550,7 @@ impl<'a> IndividualLogSolver<'a> {
         q: &BinaryPoint,
         report: &mut IndividualLogReport,
     ) -> Option<Option<BigUint>> {
+        let _query = measurement::scope(Phase::TargetQuery);
         let (fc, g) = self.fast.as_ref()?;
         let pair = self.pair?;
         let m = self.descent_m();
@@ -8899,6 +9589,7 @@ impl<'a> IndividualLogSolver<'a> {
             // not hold yields no witness, so the reject changes nothing
             // but the time — the trials, their order and the first
             // decomposition found are the same.
+            measurement::mark(Phase::TargetPdp);
             pair.keys_of(&states, &mut keys);
             for &key in &keys {
                 pair.prefetch_key(key);
@@ -8909,6 +9600,7 @@ impl<'a> IndividualLogSolver<'a> {
                 }
                 report.trials += 1;
                 if state.infinity {
+                    report.record(*a, *b, &PdpAttempt::bare(None, PdpOutcome::Identity));
                     if !self.opts.allow_direct_relation {
                         continue;
                     }
@@ -8918,6 +9610,7 @@ impl<'a> IndividualLogSolver<'a> {
                         &BigUint::from(*b),
                         &self.kc.subgroup_order,
                     ) {
+                        let _replay = measurement::scope(Phase::RecoveryCheck);
                         if self.kc.mul(self.kc.generator(), &d) == *q {
                             report.relation = Some(DescentRelation {
                                 a: *a,
@@ -8930,9 +9623,19 @@ impl<'a> IndividualLogSolver<'a> {
                     continue;
                 }
                 if m == 2 && !pair.contains_key(key) {
+                    report.record(*a, *b, &PdpAttempt::bare(None, PdpOutcome::Unresolved));
                     continue;
                 }
-                let Some(idxs) = pair.decompose_fast(*state, m) else {
+                let pdp = PdpAttempt::bare(
+                    pair.decompose_fast(*state, m),
+                    if (2..=4).contains(&m) {
+                        PdpOutcome::Unresolved
+                    } else {
+                        PdpOutcome::Unsupported
+                    },
+                );
+                report.record(*a, *b, &pdp);
+                let Some(idxs) = pdp.points else {
                     continue;
                 };
                 if let Some(d) = self.logarithm_from(q, &idxs, *a, *b) {
@@ -8951,6 +9654,7 @@ impl<'a> IndividualLogSolver<'a> {
             // are the ones `add_pairwise` computed, so the walks, their
             // trials and the first decomposition found do not change.
             advanced.clear();
+            measurement::mark(Phase::TargetQuery);
             lambdas.clear();
             fc.add_many_lazy(*g, &states, &mut advanced, &mut lambdas, &mut scratch);
             for ((state, sum), &lambda) in states.iter_mut().zip(&advanced).zip(&lambdas) {
@@ -8966,40 +9670,60 @@ impl<'a> IndividualLogSolver<'a> {
     /// The logarithm of `q` to the base's generator, verified as
     /// `[d]G = Q` in the general arithmetic before it is returned.
     pub fn solve(&self, q: &BinaryPoint) -> Option<(BigUint, IndividualLogReport)> {
+        let report = self.solve_report(q);
+        report.log.clone().map(|d| (d, report))
+    }
+
+    /// Return the terminal report even when the trial budget is exhausted.
+    pub fn solve_report(&self, q: &BinaryPoint) -> IndividualLogReport {
+        self.solve_impl(q, false)
+    }
+
+    /// Like [`Self::solve_report`], retaining every attempted query in order.
+    pub fn solve_observed(&self, q: &BinaryPoint) -> IndividualLogReport {
+        self.solve_impl(q, true)
+    }
+
+    fn solve_impl(&self, q: &BinaryPoint, observe: bool) -> IndividualLogReport {
+        let _query = measurement::scope(Phase::TargetQuery);
         let kc = self.kc;
         let r = &kc.subgroup_order;
         let g = kc.generator();
-        let mut report = IndividualLogReport::default();
+        let mut report = IndividualLogReport {
+            attempts: observe.then(Vec::new),
+            ..Default::default()
+        };
         if *q == BinaryPoint::Infinity {
             // Q = O has logarithm 0.
             report.log = Some(BigUint::zero());
-            return Some((BigUint::zero(), report));
+            return report;
         }
         // The walk needs the single-word arithmetic and a pair table;
         // without either, fall through to drawing probes.
         if self.opts.strategy == DecompositionStrategy::PairTable {
             if let Some(found) = self.solve_by_walking(q, &mut report) {
-                return found.map(|d| {
-                    report.log = Some(d.clone());
-                    (d, report)
-                });
+                report.log = found;
+                return report;
             }
         }
         let q_fast = self.fast.as_ref().map(|(fc, _)| fc.lift(q));
         let mut rng = StdRng::seed_from_u64(self.opts.seed ^ 0x44_45_53_43_45_4e_54_00);
         while report.trials < self.opts.max_trials {
+            measurement::mark(Phase::TargetQuery);
             report.trials += 1;
             let a = rng.gen_range(1..self.r_u64);
             let b = rng.gen_range(1..self.r_u64);
-            let idxs = match self.probe(q, q_fast, a, b) {
-                Probe::Decomposed(idxs) => idxs,
-                Probe::Miss => continue,
-                Probe::Degenerate => {
+            let pdp = self.probe(q, q_fast, a, b);
+            report.record(a, b, &pdp);
+            let idxs = match pdp.points {
+                Some(idxs) => idxs,
+                None if pdp.outcome == PdpOutcome::Identity => {
                     if !self.opts.allow_direct_relation {
                         continue;
                     }
                     // Degenerate relation [a]G + [b]Q = O already yields d.
                     if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
+                        let _replay = measurement::scope(Phase::RecoveryCheck);
                         if kc.mul(g, &d) == *q {
                             report.log = Some(d.clone());
                             report.relation = Some(DescentRelation {
@@ -9007,12 +9731,14 @@ impl<'a> IndividualLogSolver<'a> {
                                 b,
                                 points: Vec::new(),
                             });
-                            return Some((d, report));
+                            return report;
                         }
                     }
                     continue;
                 }
+                None => continue,
             };
+            measurement::mark(Phase::TargetDescent);
             let a = BigUint::from(a);
             let b = BigUint::from(b);
             let relation = relation_from_decomposition_with_mode(
@@ -9022,7 +9748,7 @@ impl<'a> IndividualLogSolver<'a> {
                 &a,
                 &b,
                 self.opts.collapse_negation,
-                Some(&self.projected),
+                Some(self.projected.as_ref()),
             );
             // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
             let mut sum = BigUint::zero();
@@ -9038,6 +9764,7 @@ impl<'a> IndividualLogSolver<'a> {
                 continue;
             };
             let d = (numerator * hb_inv) % r;
+            measurement::mark(Phase::RecoveryCheck);
             if kc.mul(g, &d) == *q {
                 report.log = Some(d.clone());
                 report.relation = Some(DescentRelation {
@@ -9045,30 +9772,58 @@ impl<'a> IndividualLogSolver<'a> {
                     b: b.to_u64_digits()[0],
                     points: idxs,
                 });
-                return Some((d, report));
+                return report;
             }
             // A non-matching d means this factor base cannot place Q in the
             // span its columns log (e.g. Q outside the reachable subgroup);
             // keep trying other relations before giving up.
         }
-        None
+        report
     }
-}
-
-/// Outcome of one descent probe.
-enum Probe {
-    /// `[a]G + [b]Q = O`.
-    Degenerate,
-    /// The probe did not decompose.
-    Miss,
-    /// The probe decomposed into these base indices.
-    Decomposed(Vec<usize>),
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::cryptanalysis::koblitz_groebner::build_decomposition_system;
+
+    #[test]
+    fn rho_preparation_preserves_walk_and_charges() {
+        for a in [0, 1] {
+            let curve = KoblitzCurve::new(a, 9).unwrap();
+            let q = curve.mul(curve.generator(), &BigUint::from(17u32));
+            let options = KoblitzSignedRhoOptions {
+                seed: 2026092555,
+                ..Default::default()
+            };
+            let plain =
+                koblitz_signed_frobenius_rho_with_progress(&curve, &q, &options, &mut |_| {});
+            let mut calls = 0;
+            let prepared = koblitz_signed_frobenius_rho_with_preparation(
+                &curve,
+                &q,
+                &options,
+                &mut |fc| {
+                    calls += 1;
+                    assert_eq!(fc.n, 9);
+                    assert!(matches!(
+                        fc.field.kernel_name(),
+                        "portable" | "pclmulqdq" | "pmull"
+                    ));
+                },
+                &mut |_| {},
+            )
+            .unwrap();
+            assert_eq!(calls, 1);
+            assert!(plain.verified && prepared.verified);
+            assert_eq!(plain.recovered_log, prepared.recovered_log);
+            assert_eq!(plain.charges, prepared.charges);
+            assert_eq!(plain.iterations, prepared.iterations);
+            assert_eq!(plain.restarts_attempted, prepared.restarts_attempted);
+            assert_eq!(plain.jump_table_rebuilds, prepared.jump_table_rebuilds);
+            assert_eq!(plain.parallel_walks, prepared.parallel_walks);
+        }
+    }
 
     #[test]
     fn koblitz_mul_dispatch_matches_general_arithmetic() {
@@ -11741,6 +12496,132 @@ mod tests {
         );
     }
 
+    /// Ledger §21: projecting one point per Frobenius orbit and deriving
+    /// the rest by Frobenius gives the per-point projections exactly, on
+    /// subgroup bases, a divisor base, a saturated union and a base whose
+    /// recorded orbits are wrong — and spends one multiplication per
+    /// orbit whenever the orbits are right.
+    #[test]
+    fn projecting_once_per_frobenius_orbit_is_the_per_point_projection() {
+        let per_point = |kc: &KoblitzCurve, fc: &FastCurve, fb: &FrobeniusFactorBase| {
+            fb.points
+                .iter()
+                .map(|p| fc.mul(fc.lift(p), &kc.cofactor))
+                .collect::<Vec<_>>()
+        };
+        let mut bases = Vec::new();
+        for (a, degree, points) in [(0u8, 19u32, 400usize), (1, 23, 500), (0, 37, 800)] {
+            let kc = KoblitzCurve::new(a, degree).expect("curve");
+            let fb = build_subgroup_orbit_factor_base(&kc, 5, points).expect("subgroup base");
+            bases.push((kc, fb));
+        }
+        let kc = KoblitzCurve::new(1, 15).expect("curve");
+        let fb = build_frobenius_factor_base_from_divisor(&kc, &[0, 2]).expect("divisor base");
+        bases.push((kc, fb));
+        let kc = KoblitzCurve::new(0, 41).expect("curve");
+        let basis: Vec<F2mElement> = (0..5)
+            .map(|i| F2mElement::from_biguint(&BigUint::from(1u64 << i), 41))
+            .collect();
+        let union = build_frobenius_union_factor_base(&kc, &basis).expect("union");
+        let fb = saturate_factor_base_two_torsion(&kc, &union).expect("saturation");
+        bases.push((kc, fb));
+
+        for (kc, fb) in &bases {
+            let fc = FastCurve::new(&kc.curve).expect("these fields fit in a word");
+            let (projected, multiplications) = project_by_frobenius_orbits(kc, &fc, fb);
+            assert_eq!(projected, per_point(kc, &fc, fb), "{}", kc.label());
+            assert_eq!(multiplications, fb.orbits.len(), "{}", kc.label());
+            assert!(fb.orbits.len() * 2 < fb.points.len(), "{}", kc.label());
+
+            // Wrong orbits: one listed backwards, one dropped.  Both
+            // fall back to a multiplication per point.
+            let mut broken = fb.clone();
+            let reversed = broken
+                .orbits
+                .iter()
+                .position(|o| o.len() > 2)
+                .expect("an orbit long enough to reverse");
+            let dropped = broken.orbits.len() - 1;
+            assert_ne!(reversed, dropped);
+            broken.orbits[reversed].reverse();
+            let lost = broken.orbits.remove(dropped).len();
+            let (projected, multiplications) = project_by_frobenius_orbits(kc, &fc, &broken);
+            assert_eq!(projected, per_point(kc, &fc, &broken), "{}", kc.label());
+            assert_eq!(
+                multiplications,
+                broken.orbits.len() - 1 + broken.orbits[reversed].len() + lost,
+                "{}",
+                kc.label()
+            );
+            // The map built over wrong orbits is still the right map.
+            let (orbit_of, representatives) = projected_signed_orbit_map_general(kc, &broken);
+            let fast = projected_signed_orbit_map_fast(kc, &broken).expect("fits");
+            assert_eq!(fast.orbit_of, orbit_of);
+            assert_eq!(fast.representatives, representatives);
+        }
+    }
+
+    /// Ledger §21: a base's projected map, point index and cofactor
+    /// classes are built once and shared, equal the fresh constructions,
+    /// and are never served for a base that has since changed.
+    #[test]
+    fn derived_constructions_are_built_once_and_equal_fresh_ones() {
+        let kc = KoblitzCurve::new(0, 31).expect("curve");
+        let fb = build_subgroup_orbit_factor_base(&kc, 11, 600).expect("base");
+
+        let map = projected_signed_orbit_map(&kc, &fb);
+        assert!(Arc::ptr_eq(&map, &projected_signed_orbit_map(&kc, &fb)));
+        let fresh = build_projected_signed_orbit_map(&kc, &fb);
+        assert_eq!(map.orbit_of, fresh.orbit_of);
+        assert_eq!(map.representatives, fresh.representatives);
+        assert_eq!(
+            projected_signed_orbit_count(&kc, &fb),
+            fresh.representatives.len()
+        );
+
+        let index = fb.shared_index_map();
+        assert!(Arc::ptr_eq(&index, &fb.shared_index_map()));
+        assert_eq!(*index, fb.index_map());
+
+        let classes = fb.shared_cofactor_classes(&kc);
+        assert!(Arc::ptr_eq(&classes, &fb.shared_cofactor_classes(&kc)));
+        let as_set = |v: &[BinaryPoint]| v.iter().map(point_key).collect::<HashSet<_>>();
+        assert_eq!(as_set(&classes), as_set(&fb.distinct_cofactor_classes(&kc)));
+        for m in 1..=4 {
+            assert_eq!(
+                fb.m_can_decompose(&kc, m),
+                fb.m_can_decompose_reference(&kc, m)
+            );
+        }
+
+        // A clone starts empty and builds its own.
+        let copy = fb.clone();
+        let copied = projected_signed_orbit_map(&kc, &copy);
+        assert!(!Arc::ptr_eq(&map, &copied));
+        assert_eq!(copied.orbit_of, map.orbit_of);
+
+        // A base edited after first use is rebuilt, not served stale.
+        let mut edited = fb;
+        edited.points.swap(0, 1);
+        let stale_index = Arc::clone(&index);
+        let rebuilt = edited.shared_index_map();
+        assert!(!Arc::ptr_eq(&stale_index, &rebuilt));
+        assert_eq!(*rebuilt, edited.index_map());
+        assert_ne!(*rebuilt, *stale_index);
+        let rebuilt = projected_signed_orbit_map(&kc, &edited);
+        assert!(!Arc::ptr_eq(&map, &rebuilt));
+        let fresh = build_projected_signed_orbit_map(&kc, &edited);
+        assert_eq!(rebuilt.orbit_of, fresh.orbit_of);
+        assert_eq!(rebuilt.representatives, fresh.representatives);
+
+        // Another curve has another fingerprint.
+        let other = KoblitzCurve::new(0, 37).expect("curve");
+        assert_ne!(
+            edited.projection_fingerprint(&kc),
+            edited.projection_fingerprint(&other)
+        );
+    }
+
     /// A cyclic window and the same indices named outright are the same
     /// scan, so they must return the same witnesses.  This is the
     /// cross-check §6 asks for when a new oracle replaces one that
@@ -12268,6 +13149,7 @@ mod tests {
             }
             // A nonzero prior value catches replacement as well as omission.
             solver.report.linear_algebra_seconds = 7.0;
+            let session = measurement::Session::begin().unwrap();
             for expected in 1..=2 {
                 assert!(solver.try_solve().is_none());
                 let report = solver.report();
@@ -12279,6 +13161,16 @@ mod tests {
                     solver.system.sparse_opts.is_some()
                 );
             }
+            let phases = session.finish().unwrap();
+            assert!(phases.phases_ns["relation_la"].is_some());
+            // Dense elimination returns a provisional zero vector, rejected
+            // by the group certificate. Sparse LA rejects uncovered columns
+            // before producing a vector. Both failed paths keep their work.
+            assert_eq!(
+                phases.phases_ns["relation_check"].is_some(),
+                solver.system.sparse_opts.is_none()
+            );
+            assert_eq!(phases.online_wall_ns, None);
         }
     }
 
@@ -12413,6 +13305,399 @@ mod tests {
                 );
             }
         }
+    }
+
+    fn check_query_attempt(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        q: &BinaryPoint,
+        attempt: &QueryAttempt,
+        m: usize,
+    ) {
+        let target = kc.add(
+            &kc.mul(kc.generator(), &BigUint::from(attempt.a)),
+            &kc.mul(q, &BigUint::from(attempt.b)),
+        );
+        if attempt.pdp.outcome == PdpOutcome::Identity {
+            assert_eq!(target, BinaryPoint::Infinity);
+            assert!(attempt.pdp.points.is_none());
+            assert_eq!(attempt.pdp.stats, PdpSolverStats::None);
+        } else if let Some(points) = &attempt.pdp.points {
+            assert_eq!(attempt.pdp.outcome, PdpOutcome::Witness);
+            assert_eq!(points.len(), m);
+            let sum = points
+                .iter()
+                .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+            assert_eq!(sum, target);
+        } else if attempt.pdp.outcome == PdpOutcome::ProvedUnsat {
+            assert!(enumerate_decompose(kc, fb, &fb.index_map(), &target, m).is_none());
+        }
+        let encoded = serde_json::to_string(attempt).unwrap();
+        assert_eq!(
+            *attempt,
+            serde_json::from_str::<QueryAttempt>(&encoded).unwrap()
+        );
+    }
+
+    fn query_control_options() -> Vec<KoblitzIcOptions> {
+        [
+            (
+                DecompositionStrategy::PairTable,
+                SolverEngine::MatrixF4 { max_degree: 3 },
+                XorEncoding::Native,
+            ),
+            (
+                DecompositionStrategy::Enumerate,
+                SolverEngine::MatrixF4 { max_degree: 3 },
+                XorEncoding::Native,
+            ),
+            (
+                DecompositionStrategy::Groebner,
+                SolverEngine::MatrixF4 { max_degree: 3 },
+                XorEncoding::Native,
+            ),
+            (
+                DecompositionStrategy::Groebner,
+                SolverEngine::MatrixF5 { max_degree: 3 },
+                XorEncoding::Native,
+            ),
+            (
+                DecompositionStrategy::Groebner,
+                SolverEngine::InheritedF4 { max_degree: 3 },
+                XorEncoding::Native,
+            ),
+            (
+                DecompositionStrategy::Sat,
+                SolverEngine::MatrixF4 { max_degree: 3 },
+                XorEncoding::Native,
+            ),
+            (
+                DecompositionStrategy::Sat,
+                SolverEngine::MatrixF4 { max_degree: 3 },
+                XorEncoding::Cnf,
+            ),
+        ]
+        .into_iter()
+        .map(|(strategy, engine, encoding)| {
+            let mut opts = KoblitzIcOptions {
+                m: 2,
+                seed: 2026092554,
+                strategy,
+                engine,
+                max_trials: 256,
+                allow_direct_relation: false,
+                node_budget: 20_000,
+                ..Default::default()
+            };
+            opts.sat_options.encoding = encoding;
+            opts
+        })
+        .collect()
+    }
+
+    #[test]
+    fn query_accounting_collection_preserves_queries_witnesses_and_counters() {
+        for a in [0, 1] {
+            let kc = KoblitzCurve::new(a, 9).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            for opts in query_control_options() {
+                let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
+                let unit = RelationWorkUnit {
+                    seed: opts.seed,
+                    start: 7,
+                    count: 32,
+                };
+                let (plain, unobserved) = collector.collect(unit);
+                let (observed, report) = collector.collect_observed(unit);
+                assert_eq!(plain, observed);
+                assert!(unobserved.attempts.is_none());
+                assert_eq!(report.trials, 32);
+                let attempts = report.attempts.unwrap();
+                assert_eq!(attempts.len(), report.trials);
+                assert_eq!(
+                    report.relations,
+                    attempts.iter().filter(|a| a.pdp.points.is_some()).count()
+                );
+                for (i, attempt) in attempts.iter().enumerate() {
+                    assert_eq!(attempt.trial, 7 + i as u64);
+                    assert_eq!(
+                        attempt.a,
+                        probe_scalar(opts.seed, attempt.trial, collector.r_u64)
+                    );
+                    assert_eq!(attempt.b, 0);
+                    check_query_attempt(&kc, &fb, &BinaryPoint::Infinity, attempt, opts.m);
+                    match (&attempt.pdp.stats, opts.strategy) {
+                        (
+                            PdpSolverStats::Groebner { engine, stats },
+                            DecompositionStrategy::Groebner,
+                        ) => {
+                            assert_eq!(*engine, opts.engine.effective());
+                            assert!(stats.reductions > 0);
+                        }
+                        (PdpSolverStats::Sat { backend, stats }, DecompositionStrategy::Sat) => {
+                            assert_eq!(
+                                *backend,
+                                if opts.sat_options.encoding == XorEncoding::Native {
+                                    PdpSatBackend::NativeXor
+                                } else {
+                                    PdpSatBackend::Cnf
+                                }
+                            );
+                            assert!(stats.solver_calls > 0);
+                        }
+                        (
+                            PdpSolverStats::None,
+                            DecompositionStrategy::Enumerate | DecompositionStrategy::PairTable,
+                        ) => (),
+                        other => panic!("lost dispatch/counters: {other:?}"),
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn query_accounting_windowed_walk_retains_partitioned_and_identity_queries() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 43, 36).unwrap();
+        let opts = KoblitzIcOptions {
+            m: 3,
+            seed: 2026092554,
+            strategy: DecompositionStrategy::PairTable,
+            collection_window: Some(1),
+            ..Default::default()
+        };
+        let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
+        let unit = RelationWorkUnit {
+            seed: opts.seed,
+            start: 13,
+            count: 512,
+        };
+        let (plain, _) = collector.collect(unit);
+        let (observed, report) = collector.collect_observed(unit);
+        assert_eq!(plain, observed);
+        let all = report.attempts.unwrap();
+        let session = measurement::Session::begin().unwrap();
+        let traced = collector.collect_observed(unit);
+        let phases = session.finish().unwrap();
+        assert_eq!(traced.0, plain);
+        assert_eq!(traced.1.attempts.as_ref().unwrap(), &all);
+        for phase in ["queries", "pdp", "relation_check"] {
+            assert!(phases.phases_ns[phase].is_some());
+        }
+        let left = collector
+            .collect_observed(RelationWorkUnit { count: 53, ..unit })
+            .1
+            .attempts
+            .unwrap();
+        let right = collector
+            .collect_observed(RelationWorkUnit {
+                start: 66,
+                count: 459,
+                ..unit
+            })
+            .1
+            .attempts
+            .unwrap();
+        assert_eq!(all, [left, right].concat());
+        assert_eq!(all.len(), 512);
+        assert!(all.iter().any(|a| a.pdp.outcome == PdpOutcome::Identity));
+        for attempt in &all {
+            assert_eq!(
+                attempt.a,
+                walked_probe_scalar(opts.seed, attempt.trial, collector.r_u64)
+            );
+            assert!(matches!(
+                attempt.pdp.outcome,
+                PdpOutcome::Witness | PdpOutcome::Unresolved | PdpOutcome::Identity
+            ));
+            check_query_attempt(&kc, &fb, &BinaryPoint::Infinity, attempt, opts.m);
+        }
+        let empty = collector
+            .collect_observed(RelationWorkUnit { count: 0, ..unit })
+            .1;
+        assert_eq!(empty.attempts, Some(Vec::new()));
+        let selected = [0u32, 1, 2];
+        let plain = collector.collect_aimed(unit, Some(&selected)).0;
+        let (observed, report) = collector.collect_aimed_observed(unit, Some(&selected));
+        assert_eq!(plain, observed);
+        assert_eq!(report.attempts.unwrap().len(), 512);
+    }
+
+    #[test]
+    fn query_accounting_unsupported_and_incomplete_are_retained() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        for strategy in [
+            DecompositionStrategy::Groebner,
+            DecompositionStrategy::Crossbred,
+            DecompositionStrategy::Sat,
+        ] {
+            let opts = KoblitzIcOptions {
+                m: 16,
+                strategy,
+                ..Default::default()
+            };
+            let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
+            let (rows, report) = collector.collect_observed(RelationWorkUnit {
+                seed: 2026092554,
+                start: 0,
+                count: 8,
+            });
+            assert!(rows.is_empty());
+            let attempts = report.attempts.unwrap();
+            assert_eq!(attempts.len(), 8);
+            assert!(attempts
+                .iter()
+                .all(|a| a.pdp.outcome == PdpOutcome::Unsupported));
+        }
+        let opts = KoblitzIcOptions {
+            m: 2,
+            strategy: DecompositionStrategy::Groebner,
+            node_budget: 0,
+            ..Default::default()
+        };
+        let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
+        let (_, report) = collector.collect_observed(RelationWorkUnit {
+            seed: 2026092554,
+            start: 0,
+            count: 8,
+        });
+        for attempt in report.attempts.unwrap() {
+            assert_eq!(attempt.pdp.outcome, PdpOutcome::Incomplete);
+            let PdpSolverStats::Groebner { stats, .. } = attempt.pdp.stats else {
+                panic!("missing stats")
+            };
+            assert!(stats.exhausted && !stats.unsupported);
+            assert_eq!(stats.reductions, 0);
+        }
+    }
+
+    #[test]
+    fn query_accounting_descent_preserves_success_and_terminal_failures() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let options = query_control_options();
+        let (table, _) = solve_factor_base_logs(&kc, &fb, &options[0]).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        for opts in options {
+            let solver = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+            for d in [1u64, 17] {
+                let q = kc.mul(kc.generator(), &BigUint::from(d));
+                let (plain, report) = solver.solve(&q).unwrap();
+                let observed = solver.solve_observed(&q);
+                assert_eq!(observed.log, Some(plain));
+                assert_eq!(observed.trials, report.trials);
+                assert!(report.attempts.is_none());
+                assert_eq!(
+                    serde_json::to_value(&observed.relation).unwrap(),
+                    serde_json::to_value(&report.relation).unwrap()
+                );
+                let attempts = observed.attempts.unwrap();
+                assert_eq!(attempts.len(), observed.trials);
+                for (t, attempt) in attempts.iter().enumerate() {
+                    assert_eq!(attempt.trial, t as u64);
+                    check_query_attempt(&kc, &fb, &q, attempt, opts.m);
+                }
+            }
+        }
+        let q = kc.mul(kc.generator(), &BigUint::from(17u32));
+        for (strategy, m, cap) in [
+            (DecompositionStrategy::Groebner, 2, 8),
+            (DecompositionStrategy::Groebner, 16, 8),
+            (DecompositionStrategy::PairTable, 2, 0),
+        ] {
+            let opts = KoblitzIcOptions {
+                m,
+                seed: 2026092554,
+                strategy,
+                node_budget: 0,
+                max_trials: cap,
+                allow_direct_relation: false,
+                ..Default::default()
+            };
+            let solver = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+            assert!(solver.solve(&q).is_none());
+            let terminal = solver.solve_report(&q);
+            let observed = solver.solve_observed(&q);
+            assert!(terminal.log.is_none() && observed.log.is_none());
+            assert_eq!(terminal.trials, cap);
+            assert_eq!(observed.trials, cap);
+            assert!(terminal.attempts.is_none());
+            let attempts = observed.attempts.unwrap();
+            assert_eq!(attempts.len(), cap);
+            for attempt in &attempts {
+                check_query_attempt(&kc, &fb, &q, attempt, m);
+                assert!(matches!(
+                    attempt.pdp.outcome,
+                    PdpOutcome::Incomplete | PdpOutcome::Unsupported | PdpOutcome::Identity
+                ));
+            }
+            if cap != 0 {
+                assert!(attempts.iter().any(|a| a.pdp.outcome
+                    == if m == 16 {
+                        PdpOutcome::Unsupported
+                    } else {
+                        PdpOutcome::Incomplete
+                    }));
+            }
+        }
+        // A nonzero walked budget must also retain the final miss.
+        let opts = KoblitzIcOptions {
+            m: 2,
+            seed: 2026092554,
+            strategy: DecompositionStrategy::PairTable,
+            max_trials: 1,
+            allow_direct_relation: false,
+            ..Default::default()
+        };
+        let solver = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let mut failures = 0;
+        for d in 1..r {
+            let q = kc.mul(kc.generator(), &BigUint::from(d));
+            let report = solver.solve_observed(&q);
+            assert_eq!(report.trials, 1);
+            assert_eq!(report.attempts.as_ref().unwrap().len(), 1);
+            check_query_attempt(&kc, &fb, &q, &report.attempts.as_ref().unwrap()[0], 2);
+            failures += usize::from(report.log.is_none());
+        }
+        assert!(failures > 0);
+    }
+
+    #[test]
+    fn exclusive_descent_failure_preserves_paid_queries() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let setup = query_control_options();
+        let (table, _) = solve_factor_base_logs(&kc, &fb, &setup[0]).unwrap();
+        let opts = KoblitzIcOptions {
+            m: 2,
+            seed: 2026092554,
+            strategy: DecompositionStrategy::Groebner,
+            node_budget: 0,
+            max_trials: 8,
+            allow_direct_relation: false,
+            ..Default::default()
+        };
+        let solver = IndividualLogSolver::new(&kc, &fb, &table, &opts, None).unwrap();
+        let q = kc.mul(kc.generator(), &BigUint::from(17u32));
+        let ordinary = solver.solve_observed(&q);
+        let session = measurement::Session::begin().unwrap();
+        measurement::begin_online(Phase::TargetQuery);
+        let traced = solver.solve_observed(&q);
+        measurement::end_online();
+        let phases = session.finish().unwrap();
+        assert_eq!(ordinary.attempts, traced.attempts);
+        assert_eq!(traced.trials, 8);
+        assert!(traced.log.is_none());
+        assert!(phases.online_phases_ns["target_pdp"].is_some());
+        assert_eq!(phases.online_phases_ns["recovery_check"], None);
+        assert_eq!(
+            Some(phases.online_phases_ns.values().flatten().sum()),
+            phases.online_wall_ns
+        );
+        assert!(phases.online_wall_ns.unwrap() > 0);
     }
 
     #[test]

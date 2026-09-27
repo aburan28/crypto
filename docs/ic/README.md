@@ -501,6 +501,52 @@ The baseline is a real opponent, not a formality, so read it first:
   which is exactly how an earlier revision of this baseline produced a
   spurious charged crossover at `n = 41`.
 
+### Pricing every phase: `ic price`
+
+    RAYON_NUM_THREADS=1 taskset -c 2 ./target/release/ic price --params wf.json \
+        --rho-seed 2097353 --cold-rho-seed 2162688 --json --out price.json
+
+`ic workflow`'s stage timers mix phases, which is right for a resumable
+run and wrong for a price:
+
+- the collect stage builds the pair table on its first unit;
+- the logs stage collects further units, verifies relations and solves;
+- files are written between units.
+
+`ic price` (ledger §20) makes the same calls in the same order, in
+memory. It refuses to run on more than one Rayon thread unless told to.
+Each phase is charged to an exclusive clock:
+
+- selection and its projection;
+- the build;
+- the collection, and the collectors and coverage built for it;
+- the log solver's setup, relation verification and the linear algebra;
+- the descent solver's setup, each target's descent, and the final
+  `[d]G = Q` check.
+
+Target construction is on no clock.
+
+Every repetition rebuilds everything from nothing and is converted at
+one batched addition (`add_many` over 1,024 subgroup points), measured
+immediately before and after it. Its native counts must equal the first
+repetition's. The report gives, per phase:
+
+- the median over repetitions, and the first repetition separately;
+- the spread, with the counts beside each phase;
+- three read-outs of the same total: the work a model of the method
+  prices, the constructions around it, and the verification.
+
+With `--rho-seed` it runs batch rho on the same targets
+(`signed_frobenius_rho_batch`) and prices its counted operations at a
+canonical step, one batched addition plus
+`SignedFrobeniusClasses::canon`. The step is measured in the same
+process, with Bailey et al.'s step as a model. `--cold-rho-seed` also
+walks each target alone.
+
+The control that the counts are the workflow's own is
+`research/ic_exponent_20260926/control.py`, which compares a price
+report with `ic workflow`'s report and relation files, field by field.
+
 ### Choosing a factor base
 
 Five families are recipes (`ic search --family`): `factor`, `divisor`
