@@ -142,7 +142,7 @@ def pair_ratios(records, workload, case, phase, field):
             reference, candidate = sorted(group, key=lambda r: r["position"])
         else:
             reference = next(r for r in group if r["mode"] == 0)
-            candidate = next(r for r in group if r["mode"] == 1)
+            candidate = next(r for r in group if r["mode"] != 0)
         a = reference["cases"][case][field]
         b = candidate["cases"][case][field]
         ratios.append(a / b)
@@ -192,6 +192,7 @@ def main():
     parser.add_argument("binary", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--pairs", type=int, default=5)
+    parser.add_argument("--candidate-mode", type=int, choices=(1, 2), default=1)
     args = parser.parse_args()
     if args.pairs < 1:
         parser.error("--pairs must be positive")
@@ -209,6 +210,7 @@ def main():
         "primary_case": PRIMARY,
         "workloads": {name: f"{seed:016x}" for name, seed in WORKLOADS.items()},
         "pairs_per_phase": args.pairs,
+        "candidate_mode": args.candidate_mode,
         "binary_sha256": sha256(binary),
         "benchmark_source_sha256": sha256(Path("examples/f4_fp_bench.rs")),
         "kernel_source_sha256": sha256(Path("src/cryptanalysis/f4_fp.rs")),
@@ -228,11 +230,11 @@ def main():
     expected = {}
     sequence = []
     for workload, seed_xor in WORKLOADS.items():
-        sequence.extend(((workload, seed_xor, "warmup", 0, 0, 0), (workload, seed_xor, "warmup", 0, 1, 1)))
+        sequence.extend(((workload, seed_xor, "warmup", 0, 0, 0), (workload, seed_xor, "warmup", 0, 1, args.candidate_mode)))
         for pair in range(args.pairs):
             sequence.extend(((workload, seed_xor, "aa", pair, 0, 0), (workload, seed_xor, "aa", pair, 1, 0)))
         for pair in range(args.pairs):
-            arms = (0, 1) if pair % 2 == 0 else (1, 0)
+            arms = (0, args.candidate_mode) if pair % 2 == 0 else (args.candidate_mode, 0)
             sequence.extend((workload, seed_xor, "ab", pair, position, mode) for position, mode in enumerate(arms))
 
     for workload, seed_xor, phase, pair, position, mode in sequence:

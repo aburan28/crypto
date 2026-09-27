@@ -34,12 +34,12 @@ jobs:
         run: cargo test --release --lib cryptanalysis::f4_fp::tests -- --test-threads=1
       - name: Build frozen F4 stage benchmark
         run: cargo build --release --example f4_fp_bench
-      - name: Five A/A and five paired A/B samples per workload
+      - name: Five A/A and five paired A/B samples for deferred mode
         run: |
           python3 research/fp_f4_narrow_20260926/paired_fp_f4.py \
             target/release/examples/f4_fp_bench \
             research/fp_f4_narrow_20260926/ci-result.json \
-            --pairs 5
+            --pairs 5 --candidate-mode 2
       - name: Preserve raw runs and failures
         if: always()
         uses: actions/upload-artifact@v4
