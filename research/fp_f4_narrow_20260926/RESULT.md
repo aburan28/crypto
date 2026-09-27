@@ -39,3 +39,14 @@ CI run [36298267078](https://github.com/aburan28/crypto/actions/runs/36298267078
 | Holdout `5eed2026` | 0.996–1.003 | 1.586, 1.575–1.591 |
 
 Every case matched the reference basis and solve fingerprints, steps and matrix shapes. The tiny `quad_n4_p31` frozen cell's median ratio of 1.002 sits 0.002 below its A/A minimum of 1.004 but still favors mode `2`; no material smaller-case regression appeared. The primary result easily clears the four-thread regression control. Mode `2` is selected by default for supported primes, with `F4_FP_NARROW=0` retaining the original wide path and `=1` the earlier intermediate. A final one- and four-thread replay against explicit mode `0` is required before merging. These remain F4 stage timings, not online IC or verified DLP speedups.
+
+## Final default-on confirmation
+
+CI run [36299733742](https://github.com/aburan28/crypto/actions/runs/36299733742) at PR head `c88c02ad` passed explicit reference and deferred F4 tests, then completed 66 calls at each thread count. Its [one-thread receipt](runs/36299733742/ci-result.json), SHA-256 `12c88b0f1f93bfdcaf3617f87adc8a97ef79d44eda25b8fcac4a799d8c5d36d3`, and [four-thread receipt](runs/36299733742/ci-result-threads4.json), SHA-256 `8ebd1cfd5fce5358b8e61902d153b56dc60ac2b6bb0ca71db491268874f3637b`, record Linux x86-64 AMD EPYC 7763 runners with one or four pinned CPUs and Rust 1.98.1. Ratios are paired only within each thread count and run.
+
+| Thread count, `quad_n8_p65521` | Frozen complete-F4 ratio, 95% interval | Holdout A ratio | Holdout B ratio |
+| --- | ---: | ---: | ---: |
+| One | 1.640, 1.633–1.646 | 1.637 | 1.631 |
+| Four | 1.480, 1.466–1.504 | 1.483 | 1.473 |
+
+Every one of the 13 cases matched basis and solve fingerprints, steps, matrix shape, basis size and verdict. All primary ratios cleared A/A noise, and no smaller case's median fell below its A/A range at either thread count. This completes the default-on promotion gate for mode `2` when `p <= 65536`; mode `0` remains the explicit reference. These measurements cover the complete F4 solver call only. One-target online IC/DLP time and rho speedup remain unknown.
