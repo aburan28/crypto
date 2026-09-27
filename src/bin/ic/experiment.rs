@@ -982,11 +982,11 @@ pub(crate) fn resource_delta(start: ResourceSnapshot) -> Value {
 pub fn resources() -> Value {
     let value = resource_snapshot();
     json!({"cpu_seconds":value.cpu_seconds,"peak_rss_bytes":value.peak_rss_bytes,
-        "scope":if value.cpu_seconds.is_some() {
-            "process counters sampled before report emission; peak resident memory, not allocated bytes"
-        } else {
-            "measurement unavailable on this platform"
-        }})
+    "scope":if value.cpu_seconds.is_some() {
+        "process counters sampled before report emission; peak resident memory, not allocated bytes"
+    } else {
+        "measurement unavailable on this platform"
+    }})
 }
 fn batch_size(requested: u32) -> usize {
     if requested == 0 {

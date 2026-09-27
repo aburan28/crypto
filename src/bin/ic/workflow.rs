@@ -1303,9 +1303,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
             let pair_begin = Instant::now();
             let pair_resource_start = experiment::resource_snapshot();
-            pair = Some(
-                build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?,
-            );
+            pair = Some(build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?);
             pair_table_build_seconds = pair_begin.elapsed().as_secs_f64();
             pair_table_build_resources = Some(experiment::resource_delta(pair_resource_start));
         }
