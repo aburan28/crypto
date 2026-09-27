@@ -325,7 +325,13 @@ bucket, same slots, same `dp/`; step 5 does not change.
 
 `campaign.json` lives in the bucket and is read by every worker at start
 and again on the 60 s heartbeat. Change `restartHours`, `uploadEvery` or
-`verify` freely. Never change `workers`, `batch`, `blockThreads`,
+`verify` freely. Raise `maxIters` with `./rollout.sh max-iters N`, which
+rewrites that one field of the bucket copy: it is a restart guard, not part
+of the walk, so a raise keeps every point and checkpoint, and each worker
+takes it at its next client restart (`restartHours`, or an `activate`).
+Never lower it (that cuts trails under way) and never upload the
+repository's copy over the bucket's (it carries `storageProtocol`, and the
+live slots' checkpoints would be refused; `WALK-CONSTANT.md` §11.4). Never change `workers`, `batch`, `blockThreads`,
 `minBlocks`, `curve` or `dpWeight` once any slot exists: the first four
 make every existing checkpoint unloadable (each slot would be retired and
 its in-flight work lost), the last two break the collision guarantee.

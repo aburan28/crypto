@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/private/tmp/kic-compact-pr-base/target/release/examples/koblitz_rho_batch_ks",
+    "53",
+    "0",
+    "signed_frobenius",
+    "8",
+    "531311"
+  ],
+  "environment": {
+    "KIC_RHO_BATCH_CORPUS": "compact-point-batch-20260924-v1",
+    "KIC_RHO_DP_BITS": "4",
+    "KIC_RHO_PRECOMPUTE_WALKS": "0",
+    "KIC_RHO_TARGET_POINTS_JSONL": "/private/tmp/kic-rho-matched-20260925/research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/target_points_8.jsonl"
+  },
+  "executable_sha256": "f459fad1dab5e6c100aae3c8d7803fbea73ec7ffc8568f991e88dfe933105dfe",
+  "host": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "point_file_sha256": "41d23eda5bcceba8270bdf0fcc742a570006ff647ddaf8b4735140dcf43fffe8",
+  "protocol_sha256": "6cbf5bd63eb7a16aa281d0234364a7861a8f6e87591f479d2fdfc29b481a8646",
+  "schema_version": "1.0",
+  "seed": 531311,
+  "source_sha256": "fedacb54e441979c8c32860e7b5639e43799234741d49677010164564536d2c8",
+  "targets": 8,
+  "timeout_s": 180
+}

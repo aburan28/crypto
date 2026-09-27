@@ -1,0 +1,30 @@
+  prime generated-24bit-10935329: rebuilding
+  char2 random-binary-n27-b845462: rebuilding
+
+| instance | log₂ r | row | S | vs rho (frozen, A = 1) | vs rho (matched) | vs floor (A = 2) |
+|:--|--:|:--|--:|--:|--:|--:|
+| generated-24bit-10935329 | 23.4 | **rho** (frozen 3.276 → matched 1.049) | | | | |
+| generated-24bit-10935329 | 23.4 | semaev_s3_roots_m2 | 4728 | 1443× | 4505× | 5335× |
+| generated-24bit-10935329 | 23.4 | direct_subtraction_m2 | 1885 | 575× | 1796× | 2127× |
+| generated-24bit-10935329 | 23.4 | mitm_m2 | 251 | 76.7× | 239× | 284× |
+| generated-24bit-10935329 | 23.4 | mitm_m3 | 56.9 | 17.4× | 54.2× | 64.2× |
+| generated-24bit-10935329 | 23.4 | mitm_m2_negfold | 232 | 70.7× | 221× | 261× |
+| generated-24bit-10935329 | 23.4 | mitm_m2_negfold_walk | 24.7 | 7.538× | 23.5× | 27.9× |
+| generated-24bit-10935329 | 23.4 | mitm_m3_negfold | 37.0 | 11.3× | 35.3× | 41.8× |
+| generated-24bit-10935329 | 23.4 | mitm_m3_negfold_walk | 32.1 | 9.790× | 30.6× | 36.2× |
+| generated-24bit-10935329 | 23.4 | mitm_m2_negfold_walk_balanced | 13.7 | 4.192× | 13.1× | 15.5× |
+| random-binary-n27-b845462 | 24.4 | **rho** (frozen 2.176 → matched 1.027) | | | | |
+| random-binary-n27-b845462 | 24.4 | mitm_m3 | 208 | 95.8× | 203× | 235× |
+| random-binary-n27-b845462 | 24.4 | semaev_s4_pairs_and_solve_m3 | 117128 | 53837× | 114046× | 132165× |
+| random-binary-n27-b845462 | 24.4 | mitm_m3_negfold | 194 | 89.0× | 189× | 219× |
+| random-binary-n27-b845462 | 24.4 | mitm_m3_negfold_walk | 170 | 78.1× | 165× | 192× |
+| random-binary-n27-b845462 | 24.4 | mitm_m2_negfold | 1465 | 673× | 1427× | 1653× |
+| random-binary-n27-b845462 | 24.4 | mitm_m2_negfold_walk | 46.5 | 21.4× | 45.3× | 52.5× |
+| random-binary-n27-b845462 | 24.4 | mitm_m2_negfold_walk_balanced | 46.8 | 21.5× | 45.6× | 52.8× |
+
+Re-priced docs/ic/runs/ic-boundary-ledger-round5-headline-2026-09-22.json: "complete"; the frozen walk reproduced on every recorded seed: true
+Report saved: research/ic_rho_reference_20260923/reprice/ic-boundary-ledger-round5-headline-2026-09-22.json
+
+real	1m58.492s
+user	1m57.680s
+sys	0m0.008s

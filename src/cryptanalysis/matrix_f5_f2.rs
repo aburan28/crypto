@@ -440,6 +440,32 @@ pub fn matrix_f5_f2(
     n_vars: usize,
     degree: u32,
 ) -> Option<(Vec<F2BoolPoly>, F5Report)> {
+    matrix_f5_f2_timed(polys, n_vars, degree).map(|(rows, report, _)| (rows, report))
+}
+
+/// Wall time of each phase of one [`matrix_f5_f2`] step, in nanoseconds.
+/// Kept out of [`F5Report`], which is compared and stored as a record of
+/// what a step did.
+#[derive(Clone, Copy, Debug, Default, serde::Serialize)]
+pub struct F5Timings {
+    /// Evaluating the criterion: the lower-degree echelons.
+    pub criterion_ns: u64,
+    /// Listing the surviving rows, the column map and the packing.
+    pub build_ns: u64,
+    /// The elimination.
+    pub reduce_ns: u64,
+    /// Turning the pivot rows back into polynomials.
+    pub unpack_ns: u64,
+}
+
+/// [`matrix_f5_f2`] with the wall time of each phase.
+pub fn matrix_f5_f2_timed(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(Vec<F2BoolPoly>, F5Report, F5Timings)> {
+    use std::time::Instant;
+    let mut timings = F5Timings::default();
     use crate::cryptanalysis::koblitz_groebner::{
         f5_rows_monos_with_mask, macaulay_row_count, pack_rows, rref_f2_counted,
     };
@@ -448,10 +474,13 @@ pub fn matrix_f5_f2(
         ..Default::default()
     };
     if polys.is_empty() {
-        return Some((Vec::new(), report));
+        return Some((Vec::new(), report, timings));
     }
+    let t = Instant::now();
     let mask = all_variable_mask(n_vars);
     let criterion = F5Criterion::new(polys, n_vars, degree, mask);
+    timings.criterion_ns = t.elapsed().as_nanos() as u64;
+    let t = Instant::now();
     report.criterion_word_ops = criterion.word_ops();
     report.criterion_rows = criterion.lower_level_rows().0;
     report.rows_f4 = macaulay_row_count(polys, n_vars, degree)? as u64;
@@ -459,12 +488,16 @@ pub fn matrix_f5_f2(
     report.rows_built = rows_monos.len() as u64;
     report.rows_pruned = report.rows_f4 - report.rows_built;
     if rows_monos.is_empty() {
-        return Some((Vec::new(), report));
+        return Some((Vec::new(), report, timings));
     }
     let cols = macaulay_columns(&rows_monos)?;
     let mut matrix = pack_rows(&rows_monos, &cols);
+    timings.build_ns = t.elapsed().as_nanos() as u64;
+    let t = Instant::now();
     let mut word_ops = 0u64;
     let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
+    timings.reduce_ns = t.elapsed().as_nanos() as u64;
+    let t = Instant::now();
     report.cols = cols.len() as u64;
     report.rank = rank as u64;
     report.zero_reductions = report.rows_built - rank as u64;
@@ -477,7 +510,8 @@ pub fn matrix_f5_f2(
         .par_iter()
         .map(|row| {
             // walk the set bits, not every column
-            let mut monos: Vec<F2BoolMono> = Vec::new();
+            let terms = row.iter().map(|w| w.count_ones() as usize).sum();
+            let mut monos: Vec<F2BoolMono> = Vec::with_capacity(terms);
             for (w, &word) in row.iter().enumerate() {
                 let mut bits = word;
                 while bits != 0 {
@@ -486,11 +520,20 @@ pub fn matrix_f5_f2(
                     monos.push(F2BoolMono::from_mask(cols[c]));
                 }
             }
-            F2BoolPoly::from_monos(monos, n_vars_out)
+            // The columns are distinct and in descending order, so the
+            // walk yields the canonical term list; `from_monos` would
+            // re-sort it for nothing.
+            let p = F2BoolPoly {
+                terms: monos,
+                n_vars: n_vars_out,
+            };
+            debug_assert!(p.is_canonical());
+            p
         })
         .filter(|p| !p.is_zero())
         .collect();
-    Some((out, report))
+    timings.unpack_ns = t.elapsed().as_nanos() as u64;
+    Some((out, report, timings))
 }
 
 #[cfg(test)]
