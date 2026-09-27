@@ -443,7 +443,10 @@ impl<'a> ExtCurve<'a> {
         let dbl = |xx: &El, zz: &El| -> (El, El) {
             let x2 = k.sqr(xx);
             let z2 = k.sqr(zz);
-            (k.add(&k.sqr(&x2), &k.mul(&self.a6, &k.sqr(&z2))), k.mul(&x2, &z2))
+            (
+                k.add(&k.sqr(&x2), &k.mul(&self.a6, &k.sqr(&z2))),
+                k.mul(&x2, &z2),
+            )
         };
         let madd = |x0: &El, z0: &El, x1: &El, z1: &El| -> (El, El) {
             let a = k.mul(x0, z1);
@@ -538,14 +541,8 @@ impl<'a> ExtCurve<'a> {
             }
             return Pt::O;
         }
-        let lam = k.mul(
-            &k.add(y1, y2),
-            &k.inv(&k.add(x1, x2)).expect("x1 ≠ x2"),
-        );
-        let x3 = k.add(
-            &k.add(&k.add(&k.sqr(&lam), &lam), &k.add(x1, x2)),
-            &self.a2,
-        );
+        let lam = k.mul(&k.add(y1, y2), &k.inv(&k.add(x1, x2)).expect("x1 ≠ x2"));
+        let x3 = k.add(&k.add(&k.add(&k.sqr(&lam), &lam), &k.add(x1, x2)), &self.a2);
         let y3 = k.add(&k.add(&k.mul(&lam, &k.add(x1, &x3)), &x3), y1);
         Pt::A(x3, y3)
     }
@@ -744,7 +741,9 @@ pub fn torsion_basis(
                 break;
             }
             let t = curve.mul_pt(&s2, &pow(k - 1));
-            let Pt::A(tx, _) = &t else { unreachable!("order ℓ^k, k ≥ 1") };
+            let Pt::A(tx, _) = &t else {
+                unreachable!("order ℓ^k, k ≥ 1")
+            };
             if !line.contains(tx) {
                 return Torsion::Rank2(t1, t);
             }
@@ -810,9 +809,7 @@ pub fn all_kernels(curve: &ExtCurve<'_>, p1: &Pt, p2: &Pt, ell: u64) -> Vec<Kern
                 unreachable!("generators have order ℓ")
             };
             let abscissae = subgroup_abscissae(curve, &xg, d);
-            let t = abscissae
-                .iter()
-                .fold(k.zero(), |acc, x| k.add(&acc, x));
+            let t = abscissae.iter().fold(k.zero(), |acc, x| k.add(&acc, x));
             let t_is_rational = k.is_base(&t);
             Kernel {
                 abscissae,
@@ -1026,7 +1023,12 @@ pub fn walk_class(
 
 /// The Koblitz curve's DLP instance with the class-wide secret the cost
 /// sweep used, so the walk carries *that* instance: `(x(P), x(Q), d, r)`.
-pub fn koblitz_instance(n: u32, irr: &IrreduciblePoly, a2: u8, seed: u64) -> Option<(u64, u64, u64, u64)> {
+pub fn koblitz_instance(
+    n: u32,
+    irr: &IrreduciblePoly,
+    a2: u8,
+    seed: u64,
+) -> Option<(u64, u64, u64, u64)> {
     let curve = Curve::new(n, irr, a2, 1)?;
     let mut r = curve.order;
     let mut f = 2u64;
@@ -1063,8 +1065,8 @@ pub fn koblitz_instance(n: u32, irr: &IrreduciblePoly, a2: u8, seed: u64) -> Opt
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cryptanalysis::binary_velu::{division_polynomial, elt, to_u64};
     use crate::cryptanalysis::binary_isogeny::find_roots_in_f2m;
+    use crate::cryptanalysis::binary_velu::{division_polynomial, elt, to_u64};
     use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
 
     fn field(n: u32) -> IrreduciblePoly {
@@ -1085,7 +1087,9 @@ mod tests {
             let mut ops = GroupOps::default();
             let mut checked = 0;
             for x in 1..(1u64 << n) {
-                let Some(&p) = base.points_with_x(x).first() else { continue };
+                let Some(&p) = base.points_with_x(x).first() else {
+                    continue;
+                };
                 for s in [2u64, 3, 5, 7, 12, 97] {
                     let want = g.mul(&mut ops, p, s);
                     let got = ec.ladder_x(&ext.base(x), &BigUint::from(s));
@@ -1128,7 +1132,10 @@ mod tests {
             let ai = ext.inv(&a).expect("nonzero is a unit in a field");
             assert_eq!(ext.mul(&a, &ai), ext.one());
             let b = ext.random(&mut rng);
-            assert_eq!(ext.sqr(&ext.add(&a, &b)), ext.add(&ext.sqr(&a), &ext.sqr(&b)));
+            assert_eq!(
+                ext.sqr(&ext.add(&a, &b)),
+                ext.add(&ext.sqr(&a), &ext.sqr(&b))
+            );
         }
     }
 
@@ -1205,8 +1212,10 @@ mod tests {
                 })
                 .collect();
             let psi3 = division_polynomial(&elt(1, n), 3, n, &irr);
-            let from_psi: BTreeSet<u64> =
-                find_roots_in_f2m(&psi3, n, &irr).iter().map(to_u64).collect();
+            let from_psi: BTreeSet<u64> = find_roots_in_f2m(&psi3, n, &irr)
+                .iter()
+                .map(to_u64)
+                .collect();
             assert_eq!(from_points, from_psi, "a₂ = {a2}");
         }
     }

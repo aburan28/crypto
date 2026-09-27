@@ -17,7 +17,9 @@ use std::collections::BTreeSet;
 use std::time::Instant;
 
 use crypto_lib::cryptanalysis::binary_torsion_walk::*;
-use crypto_lib::cryptanalysis::isogeny_class_search::{class_number_of_conductor, koblitz_isogeny_class};
+use crypto_lib::cryptanalysis::isogeny_class_search::{
+    class_number_of_conductor, koblitz_isogeny_class,
+};
 use num_bigint::BigInt;
 
 /// The volcano's prediction: `π` is scalar on `E[ℓ]` exactly at vertices whose
@@ -35,8 +37,16 @@ fn predicted_rank2(factors: &[(BigInt, u32)], ell: u64) -> BigInt {
             .map(|((p, _), &e)| (p.clone(), e))
             .collect();
         let ell_b = BigInt::from(ell);
-        let v_c = factors.iter().find(|(p, _)| *p == ell_b).map(|(_, e)| *e).unwrap_or(0);
-        let v_f = f_factors.iter().find(|(p, _)| *p == ell_b).map(|(_, e)| *e).unwrap_or(0);
+        let v_c = factors
+            .iter()
+            .find(|(p, _)| *p == ell_b)
+            .map(|(_, e)| *e)
+            .unwrap_or(0);
+        let v_f = f_factors
+            .iter()
+            .find(|(p, _)| *p == ell_b)
+            .map(|(_, e)| *e)
+            .unwrap_or(0);
         if v_c > v_f {
             total += class_number_of_conductor(&f_factors);
         }
@@ -55,7 +65,9 @@ fn predicted_rank2(factors: &[(BigInt, u32)], ell: u64) -> BigInt {
         }
     }
 }
-use crypto_lib::cryptanalysis::koblitz_isogeny_cost::{enumerate_class_exact, field_for, DEFAULT_SEED};
+use crypto_lib::cryptanalysis::koblitz_isogeny_cost::{
+    enumerate_class_exact, field_for, DEFAULT_SEED,
+};
 
 /// `(n, a₂)`: the prime-degree classes first, then the two-prime class that
 /// exercises multi-level walking, then the two the cost sweep measured.
@@ -86,7 +98,11 @@ fn census(n: u32, a2: u8) -> (Option<BTreeSet<u64>>, usize, &'static str) {
                         .collect();
                     if !set.is_empty() {
                         let len = set.len();
-                        return (Some(set), len, "cost-sweep snapshot (exhaustive trace scan)");
+                        return (
+                            Some(set),
+                            len,
+                            "cost-sweep snapshot (exhaustive trace scan)",
+                        );
                     }
                 }
             }
@@ -104,7 +120,11 @@ fn census(n: u32, a2: u8) -> (Option<BTreeSet<u64>>, usize, &'static str) {
         .to_string()
         .parse()
         .expect("class size fits");
-    (None, size, "CM class number only — the 4^n scan is past budget")
+    (
+        None,
+        size,
+        "CM class number only — the 4^n scan is past budget",
+    )
 }
 
 fn main() {
@@ -216,7 +236,9 @@ fn main() {
             Some(set) => {
                 let ok = &reached == set;
                 if ok {
-                    println!("   census ({src}): {cen_size} members → walk REACHED EXACTLY THE CLASS");
+                    println!(
+                        "   census ({src}): {cen_size} members → walk REACHED EXACTLY THE CLASS"
+                    );
                 } else {
                     println!(
                         "   census ({src}): {cen_size} members → walk DIFFERS: {} missing (e.g. {:?}), {} extra (e.g. {:?})",
@@ -233,7 +255,11 @@ fn main() {
                 println!(
                     "   census ({src}): {cen_size} members → walk reached {} {}",
                     reached.len(),
-                    if ok { "= the class size; the walk is the only census there is at this n" } else { "≠ the class size" }
+                    if ok {
+                        "= the class size; the walk is the only census there is at this n"
+                    } else {
+                        "≠ the class size"
+                    }
                 );
                 ok
             }
