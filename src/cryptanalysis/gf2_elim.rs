@@ -27,7 +27,10 @@
 //! therefore read and written once per block rather than once per pivot,
 //! which is the point of the method; several tables divide the passes by
 //! their number again, at the price of `256 · suffix` words each, which
-//! must stay cache resident.
+//! must stay cache resident.  The opt-in `KIC_GF2_DEFER_ABOVE=1` first
+//! clears only below each block, then clears above in reverse block order
+//! across bounded column ranges.  This path is still awaiting a valid
+//! performance comparison on an uncontended host.
 //!
 //! The reduced row echelon form of a matrix is unique, so
 //! [`rref_counted`] can be — and in the tests is — checked bit for bit
@@ -141,6 +144,31 @@ pub fn eliminate(
     config: Config,
     word_ops: &mut u64,
 ) -> usize {
+    // Preserve the measured ordering until the tiled path has a valid
+    // performance comparison.  Echelon callers never need the reverse pass.
+    static DEFER_ABOVE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let defer_above = reduce_above
+        && *DEFER_ABOVE.get_or_init(|| std::env::var("KIC_GF2_DEFER_ABOVE").as_deref() == Ok("1"));
+    eliminate_with(
+        matrix,
+        n_cols,
+        reduce_above,
+        defer_above,
+        config,
+        word_ops,
+        None,
+    )
+}
+
+fn eliminate_with(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    reduce_above: bool,
+    defer_above: bool,
+    config: Config,
+    word_ops: &mut u64,
+    reverse_tile_words: Option<usize>,
+) -> usize {
     let rows = matrix.len();
     let words = n_cols.div_ceil(64);
     if rows == 0 || words == 0 {
@@ -155,6 +183,7 @@ pub fn eliminate(
     let mut strip: Vec<u64> = vec![0; rows];
     let mut pivot_cols: Vec<usize> = Vec::with_capacity(block_cap);
     let mut table: Vec<u64> = Vec::new();
+    let mut blocks: Vec<(usize, Vec<usize>)> = Vec::new();
 
     let mut pivot_row = 0usize;
     let mut word = 0usize;
@@ -248,16 +277,56 @@ pub fn eliminate(
                 block_start,
                 bits,
                 &pivot_cols,
-                reduce_above,
+                reduce_above && !defer_above,
+                true,
+                0..words,
                 &mut table,
                 config,
                 simd,
                 word_ops,
             );
+            if defer_above {
+                blocks.push((block_start, pivot_cols.clone()));
+            }
         }
         if !block_full || low >= last_col_in_word {
             word += 1;
             low = 0;
+        }
+    }
+    // A forward pass already zeroed every row below each pivot block.
+    // Visit narrow column ranges right to left, reducing each range by
+    // blocks in reverse order.  This leaves every block's selector word
+    // intact until all ranges to its right have used it.  Higher pivot
+    // rows are zero at lower pivot columns, so later blocks cannot change
+    // those selectors either.
+    // Its pivot rows must be reduced by later blocks in this range before
+    // their combinations are used to clear earlier rows.
+    if defer_above {
+        let tile_words = reverse_tile_words
+            .unwrap_or_else(|| ((1usize << 20) / rows.saturating_mul(8).max(1)).clamp(8, 128))
+            .max(1);
+        let mut end = words;
+        while end > 0 {
+            let first = end.saturating_sub(tile_words);
+            let range = first..end;
+            for (start, cols) in blocks.iter().rev() {
+                clear_block(
+                    matrix,
+                    words,
+                    *start,
+                    bits,
+                    cols,
+                    true,
+                    false,
+                    range.clone(),
+                    &mut table,
+                    config,
+                    simd,
+                    word_ops,
+                );
+            }
+            end = first;
         }
     }
     pivot_row
@@ -273,14 +342,24 @@ fn clear_block(
     bits: usize,
     pivot_cols: &[usize],
     reduce_above: bool,
+    reduce_below: bool,
+    word_range: std::ops::Range<usize>,
     table: &mut Vec<u64>,
     config: Config,
     simd: bool,
     word_ops: &mut u64,
 ) {
     let b = pivot_cols.len();
-    let first_word = pivot_cols[0] / 64;
-    let suffix = words - first_word;
+    if reduce_above && !reduce_below && block_start == 0 {
+        return;
+    }
+    let pivot_word = pivot_cols[0] / 64;
+    let first_word = pivot_word.max(word_range.start);
+    let end_word = word_range.end.min(words);
+    if first_word >= end_word {
+        return;
+    }
+    let suffix = end_word - first_word;
     let n_tables = b.div_ceil(bits);
     let table_size = 1usize << bits;
     table.clear();
@@ -293,7 +372,7 @@ fn clear_block(
         for g in 1usize..(1 << group.len()) {
             let low_bit = g.trailing_zeros() as usize;
             let prev = g & (g - 1);
-            let src_row = &matrix[block_start + t * bits + low_bit][first_word..words];
+            let src_row = &matrix[block_start + t * bits + low_bit][first_word..end_word];
             let (head, tail) = table[base..].split_at_mut(g * suffix);
             let prev_entry = &head[prev * suffix..(prev + 1) * suffix];
             let dst = &mut tail[..suffix];
@@ -307,7 +386,6 @@ fn clear_block(
     // A block never crosses a word, so a row's whole pattern is its
     // pivot word gathered through the block's column mask: bit i of the
     // result is pivot i, since the pivots are in increasing column order.
-    let pivot_word = first_word;
     debug_assert!(pivot_cols.iter().all(|&pc| pc / 64 == pivot_word));
     let mask = pivot_cols.iter().fold(0u64, |m, &pc| m | 1u64 << (pc % 64));
     let bmi2 = bmi2_available();
@@ -321,13 +399,17 @@ fn clear_block(
             let g = (pattern >> (t * bits)) as usize & (table_size - 1);
             *slot = t * table_size * suffix + g * suffix;
         }
-        let dst = &mut row[first_word..words];
+        let dst = &mut row[first_word..end_word];
         let used = xor_entries(dst, table, &idx[..n_tables], suffix, table_size, simd);
         used as u64 * suffix as u64
     };
     let (head, tail) = matrix.split_at_mut(block_start);
     let above: &mut [Vec<u64>] = if reduce_above { head } else { &mut [] };
-    let below = &mut tail[b..];
+    let below: &mut [Vec<u64>] = if reduce_below {
+        &mut tail[b..]
+    } else {
+        &mut []
+    };
     if (above.len() + below.len()) * suffix >= config.parallel_words {
         *word_ops += above
             .par_iter_mut()
@@ -557,11 +639,27 @@ mod tests {
                 let mut want = m.clone();
                 let rank = naive_rref(&mut want, cols);
                 for config in configs() {
-                    let mut got = m.clone();
-                    let mut ops = 0;
-                    let r = eliminate(&mut got, cols, true, config, &mut ops);
-                    assert_eq!(r, rank, "{rows}x{cols} d={density} {config:?}");
-                    assert_eq!(got, want, "{rows}x{cols} d={density} {config:?}");
+                    for defer_above in [false, true] {
+                        let mut got = m.clone();
+                        let mut ops = 0;
+                        let r = eliminate_with(
+                            &mut got,
+                            cols,
+                            true,
+                            defer_above,
+                            config,
+                            &mut ops,
+                            Some(2),
+                        );
+                        assert_eq!(
+                            r, rank,
+                            "{rows}x{cols} d={density} {config:?} defer={defer_above}"
+                        );
+                        assert_eq!(
+                            got, want,
+                            "{rows}x{cols} d={density} {config:?} defer={defer_above}"
+                        );
+                    }
                 }
             }
         }
@@ -595,10 +693,23 @@ mod tests {
             let mut want = m.clone();
             let rank = naive_rref(&mut want, cols);
             for config in configs() {
-                let mut got = m.clone();
-                let mut ops = 0;
-                assert_eq!(eliminate(&mut got, cols, true, config, &mut ops), rank);
-                assert_eq!(got, want, "{config:?}");
+                for defer_above in [false, true] {
+                    let mut got = m.clone();
+                    let mut ops = 0;
+                    assert_eq!(
+                        eliminate_with(
+                            &mut got,
+                            cols,
+                            true,
+                            defer_above,
+                            config,
+                            &mut ops,
+                            Some(3)
+                        ),
+                        rank
+                    );
+                    assert_eq!(got, want, "{config:?} defer={defer_above}");
+                }
             }
         }
     }
@@ -631,5 +742,33 @@ mod tests {
                 assert_eq!(again, want);
             }
         }
+    }
+
+    #[test]
+    fn reverse_tile_width_preserves_the_counted_work() {
+        let mut rng = StdRng::seed_from_u64(41);
+        let input = random_matrix(&mut rng, 160, 385, 0.15);
+        let mut want = input.clone();
+        let rank = naive_rref(&mut want, 385);
+        let mut counts = Vec::new();
+        for width in [Some(1), Some(2), Some(3), None] {
+            let mut got = input.clone();
+            let mut ops = 0;
+            assert_eq!(
+                eliminate_with(
+                    &mut got,
+                    385,
+                    true,
+                    true,
+                    Config::default(),
+                    &mut ops,
+                    width
+                ),
+                rank
+            );
+            assert_eq!(got, want, "reverse tile width {width:?}");
+            counts.push(ops);
+        }
+        assert!(counts.iter().all(|&ops| ops == counts[0]));
     }
 }
