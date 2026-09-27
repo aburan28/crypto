@@ -1,0 +1,6 @@
+baseline add_many address 0x00000000003aa480 size 0x0000000000000710 mod64 0
+baseline sqr address 0x00000000003ab2d0 size 0x00000000000002c4 mod64 16
+candidate add_many address 0x00000000003dee00 size 0x0000000000000710 mod64 0
+candidate sqr address 0x00000000003dfc50 size 0x00000000000002c4 mod64 16
+add_many: 437 instructions; 4 lines differ
+sqr: 170 instructions; 0 lines differ

@@ -1,0 +1,3710 @@
+[
+  {
+    "n": 9,
+    "ell": 4,
+    "draw": 0,
+    "x_r": "36",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 31,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 297,
+            "kernel": 18,
+            "trivial": 0,
+            "residual": 18
+          },
+          {
+            "d": 4,
+            "rows": 4743,
+            "kernel": 658,
+            "trivial": 45,
+            "residual": 613
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            4
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5049,
+        "cols_4": 16112,
+        "kernel_3": 0,
+        "kernel_4": 89,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 45,
+        "plus_k3_multiples_4": 45,
+        "residual_4": 44,
+        "residual_4_with_k3": 44,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            89,
+            18
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 89,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 1201.264358
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 34,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 324,
+            "kernel": 39,
+            "trivial": 0,
+            "residual": 39
+          },
+          {
+            "d": 4,
+            "rows": 5661,
+            "kernel": 885,
+            "trivial": 44,
+            "residual": 841
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5994,
+        "cols_4": 27820,
+        "kernel_3": 1,
+        "kernel_4": 84,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 78,
+        "plus_k3_multiples_4": 78,
+        "residual_4": 6,
+        "residual_4_with_k3": 6,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            84,
+            39
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 84,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 2702.772687
+      }
+    ]
+  },
+  {
+    "n": 9,
+    "ell": 4,
+    "draw": 1,
+    "x_r": "153",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 31,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 297,
+            "kernel": 18,
+            "trivial": 0,
+            "residual": 18
+          },
+          {
+            "d": 4,
+            "rows": 4743,
+            "kernel": 658,
+            "trivial": 45,
+            "residual": 613
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            4
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5049,
+        "cols_4": 16112,
+        "kernel_3": 0,
+        "kernel_4": 89,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 45,
+        "plus_k3_multiples_4": 45,
+        "residual_4": 44,
+        "residual_4_with_k3": 44,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            89,
+            18
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 89,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 1114.867733
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 34,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 324,
+            "kernel": 39,
+            "trivial": 0,
+            "residual": 39
+          },
+          {
+            "d": 4,
+            "rows": 5661,
+            "kernel": 885,
+            "trivial": 44,
+            "residual": 841
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5994,
+        "cols_4": 27820,
+        "kernel_3": 1,
+        "kernel_4": 84,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 78,
+        "plus_k3_multiples_4": 78,
+        "residual_4": 6,
+        "residual_4_with_k3": 6,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            84,
+            39
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 84,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 2461.1984260000004
+      }
+    ]
+  },
+  {
+    "n": 9,
+    "ell": 4,
+    "draw": 2,
+    "x_r": "189",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 31,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 297,
+            "kernel": 18,
+            "trivial": 0,
+            "residual": 18
+          },
+          {
+            "d": 4,
+            "rows": 4743,
+            "kernel": 658,
+            "trivial": 45,
+            "residual": 613
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            6
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5049,
+        "cols_4": 16112,
+        "kernel_3": 0,
+        "kernel_4": 87,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 45,
+        "plus_k3_multiples_4": 45,
+        "residual_4": 42,
+        "residual_4_with_k3": 42,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            87,
+            18
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 87,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 1320.969152
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 34,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 324,
+            "kernel": 39,
+            "trivial": 0,
+            "residual": 39
+          },
+          {
+            "d": 4,
+            "rows": 5661,
+            "kernel": 885,
+            "trivial": 44,
+            "residual": 841
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5994,
+        "cols_4": 27820,
+        "kernel_3": 1,
+        "kernel_4": 84,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 78,
+        "plus_k3_multiples_4": 78,
+        "residual_4": 6,
+        "residual_4_with_k3": 6,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            84,
+            39
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 84,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 2552.712509
+      }
+    ]
+  },
+  {
+    "n": 9,
+    "ell": 4,
+    "draw": 3,
+    "x_r": "26",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 31,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 297,
+            "kernel": 18,
+            "trivial": 0,
+            "residual": 18
+          },
+          {
+            "d": 4,
+            "rows": 4742,
+            "kernel": 657,
+            "trivial": 45,
+            "residual": 612
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            6
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5049,
+        "cols_4": 16112,
+        "kernel_3": 0,
+        "kernel_4": 87,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 45,
+        "plus_k3_multiples_4": 45,
+        "residual_4": 42,
+        "residual_4_with_k3": 42,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            87,
+            18
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 87,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 1450.779437
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 34,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 324,
+            "kernel": 39,
+            "trivial": 0,
+            "residual": 39
+          },
+          {
+            "d": 4,
+            "rows": 5661,
+            "kernel": 885,
+            "trivial": 44,
+            "residual": 841
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5994,
+        "cols_4": 27820,
+        "kernel_3": 1,
+        "kernel_4": 84,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 78,
+        "plus_k3_multiples_4": 78,
+        "residual_4": 6,
+        "residual_4_with_k3": 6,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            84,
+            39
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 84,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 2542.8175610000003
+      }
+    ]
+  },
+  {
+    "n": 9,
+    "ell": 4,
+    "draw": 4,
+    "x_r": "212",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 31,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 297,
+            "kernel": 18,
+            "trivial": 0,
+            "residual": 18
+          },
+          {
+            "d": 4,
+            "rows": 4743,
+            "kernel": 658,
+            "trivial": 45,
+            "residual": 613
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            4
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5049,
+        "cols_4": 16112,
+        "kernel_3": 0,
+        "kernel_4": 89,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 45,
+        "plus_k3_multiples_4": 45,
+        "residual_4": 44,
+        "residual_4_with_k3": 44,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            89,
+            18
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 89,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 1258.908374
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 34,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 324,
+            "kernel": 39,
+            "trivial": 0,
+            "residual": 39
+          },
+          {
+            "d": 4,
+            "rows": 5661,
+            "kernel": 885,
+            "trivial": 44,
+            "residual": 841
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5994,
+        "cols_4": 27646,
+        "kernel_3": 1,
+        "kernel_4": 84,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 78,
+        "plus_k3_multiples_4": 78,
+        "residual_4": 6,
+        "residual_4_with_k3": 6,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            84,
+            39
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 84,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 2629.6245059999997
+      }
+    ]
+  },
+  {
+    "n": 9,
+    "ell": 4,
+    "draw": 5,
+    "x_r": "107",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 31,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 297,
+            "kernel": 18,
+            "trivial": 0,
+            "residual": 18
+          },
+          {
+            "d": 4,
+            "rows": 4743,
+            "kernel": 658,
+            "trivial": 45,
+            "residual": 613
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            6
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5049,
+        "cols_4": 16112,
+        "kernel_3": 0,
+        "kernel_4": 87,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 45,
+        "plus_k3_multiples_4": 45,
+        "residual_4": 42,
+        "residual_4_with_k3": 42,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            87,
+            18
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 87,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 1187.079625
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 34,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 324,
+            "kernel": 39,
+            "trivial": 0,
+            "residual": 39
+          },
+          {
+            "d": 4,
+            "rows": 5661,
+            "kernel": 885,
+            "trivial": 44,
+            "residual": 841
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5994,
+        "cols_4": 27820,
+        "kernel_3": 1,
+        "kernel_4": 84,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 78,
+        "plus_k3_multiples_4": 78,
+        "residual_4": 6,
+        "residual_4_with_k3": 6,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            84,
+            39
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 84,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 2421.892089
+      }
+    ]
+  },
+  {
+    "n": 9,
+    "ell": 4,
+    "draw": 6,
+    "x_r": "56",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 31,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 297,
+            "kernel": 18,
+            "trivial": 0,
+            "residual": 18
+          },
+          {
+            "d": 4,
+            "rows": 4743,
+            "kernel": 658,
+            "trivial": 45,
+            "residual": 613
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            4
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5049,
+        "cols_4": 16112,
+        "kernel_3": 0,
+        "kernel_4": 89,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 45,
+        "plus_k3_multiples_4": 45,
+        "residual_4": 44,
+        "residual_4_with_k3": 44,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            89,
+            18
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 89,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 1095.764225
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 34,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 324,
+            "kernel": 39,
+            "trivial": 0,
+            "residual": 39
+          },
+          {
+            "d": 4,
+            "rows": 5661,
+            "kernel": 885,
+            "trivial": 44,
+            "residual": 841
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5994,
+        "cols_4": 27820,
+        "kernel_3": 1,
+        "kernel_4": 84,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 78,
+        "plus_k3_multiples_4": 78,
+        "residual_4": 6,
+        "residual_4_with_k3": 6,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            84,
+            39
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 84,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 2600.972154
+      }
+    ]
+  },
+  {
+    "n": 9,
+    "ell": 4,
+    "draw": 7,
+    "x_r": "57",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 31,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 297,
+            "kernel": 18,
+            "trivial": 0,
+            "residual": 18
+          },
+          {
+            "d": 4,
+            "rows": 4743,
+            "kernel": 658,
+            "trivial": 45,
+            "residual": 613
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            6
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5049,
+        "cols_4": 16112,
+        "kernel_3": 0,
+        "kernel_4": 87,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 45,
+        "plus_k3_multiples_4": 45,
+        "residual_4": 42,
+        "residual_4_with_k3": 42,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            87,
+            18
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 87,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 1088.2489520000001
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 34,
+        "eq_degrees": [
+          [
+            2,
+            9
+          ],
+          [
+            3,
+            18
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 9,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 324,
+            "kernel": 39,
+            "trivial": 0,
+            "residual": 39
+          },
+          {
+            "d": 4,
+            "rows": 5661,
+            "kernel": 885,
+            "trivial": 44,
+            "residual": 841
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 5994,
+        "cols_4": 27820,
+        "kernel_3": 1,
+        "kernel_4": 84,
+        "trivial_4": 45,
+        "trivial_plus_identities_4": 78,
+        "plus_k3_multiples_4": 78,
+        "residual_4": 6,
+        "residual_4_with_k3": 6,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            84,
+            39
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 84,
+        "last_link_trivial": 45,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 45,
+        "ms": 2733.30796
+      }
+    ]
+  },
+  {
+    "n": 11,
+    "ell": 4,
+    "draw": 0,
+    "x_r": "1865",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 35,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 407,
+            "kernel": 22,
+            "trivial": 0,
+            "residual": 22
+          },
+          {
+            "d": 4,
+            "rows": 7315,
+            "kernel": 914,
+            "trivial": 66,
+            "residual": 848
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            10
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 7733,
+        "cols_4": 25186,
+        "kernel_3": 0,
+        "kernel_4": 116,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 66,
+        "plus_k3_multiples_4": 66,
+        "residual_4": 50,
+        "residual_4_with_k3": 50,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            116,
+            22
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 116,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 3716.1179989999996
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 38,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 440,
+            "kernel": 45,
+            "trivial": 0,
+            "residual": 45
+          },
+          {
+            "d": 4,
+            "rows": 8569,
+            "kernel": 1177,
+            "trivial": 65,
+            "residual": 1112
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 9020,
+        "cols_4": 41839,
+        "kernel_3": 1,
+        "kernel_4": 111,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 103,
+        "plus_k3_multiples_4": 103,
+        "residual_4": 8,
+        "residual_4_with_k3": 8,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            111,
+            45
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 111,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 6912.885271
+      }
+    ]
+  },
+  {
+    "n": 11,
+    "ell": 4,
+    "draw": 1,
+    "x_r": "1697",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 35,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 407,
+            "kernel": 22,
+            "trivial": 0,
+            "residual": 22
+          },
+          {
+            "d": 4,
+            "rows": 7315,
+            "kernel": 914,
+            "trivial": 66,
+            "residual": 848
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            10
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 7733,
+        "cols_4": 25186,
+        "kernel_3": 0,
+        "kernel_4": 116,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 66,
+        "plus_k3_multiples_4": 66,
+        "residual_4": 50,
+        "residual_4_with_k3": 50,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            116,
+            22
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 116,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 3443.306854
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 38,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 440,
+            "kernel": 45,
+            "trivial": 0,
+            "residual": 45
+          },
+          {
+            "d": 4,
+            "rows": 8569,
+            "kernel": 1177,
+            "trivial": 65,
+            "residual": 1112
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 9020,
+        "cols_4": 41839,
+        "kernel_3": 1,
+        "kernel_4": 111,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 103,
+        "plus_k3_multiples_4": 103,
+        "residual_4": 8,
+        "residual_4_with_k3": 8,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            111,
+            45
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 111,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 7099.326262
+      }
+    ]
+  },
+  {
+    "n": 11,
+    "ell": 4,
+    "draw": 2,
+    "x_r": "402",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 35,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 407,
+            "kernel": 22,
+            "trivial": 0,
+            "residual": 22
+          },
+          {
+            "d": 4,
+            "rows": 7315,
+            "kernel": 914,
+            "trivial": 66,
+            "residual": 848
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            4
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 7733,
+        "cols_4": 25186,
+        "kernel_3": 0,
+        "kernel_4": 122,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 66,
+        "plus_k3_multiples_4": 66,
+        "residual_4": 56,
+        "residual_4_with_k3": 56,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            122,
+            22
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 122,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 3649.098537
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 38,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 440,
+            "kernel": 45,
+            "trivial": 0,
+            "residual": 45
+          },
+          {
+            "d": 4,
+            "rows": 8569,
+            "kernel": 1177,
+            "trivial": 65,
+            "residual": 1112
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 9020,
+        "cols_4": 41839,
+        "kernel_3": 1,
+        "kernel_4": 111,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 103,
+        "plus_k3_multiples_4": 103,
+        "residual_4": 8,
+        "residual_4_with_k3": 8,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            111,
+            45
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 111,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 7045.163597
+      }
+    ]
+  },
+  {
+    "n": 11,
+    "ell": 4,
+    "draw": 3,
+    "x_r": "2002",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 35,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 407,
+            "kernel": 22,
+            "trivial": 0,
+            "residual": 22
+          },
+          {
+            "d": 4,
+            "rows": 7315,
+            "kernel": 914,
+            "trivial": 66,
+            "residual": 848
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            10
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 7733,
+        "cols_4": 25186,
+        "kernel_3": 0,
+        "kernel_4": 116,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 66,
+        "plus_k3_multiples_4": 66,
+        "residual_4": 50,
+        "residual_4_with_k3": 50,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            116,
+            22
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 116,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 3792.217526
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 38,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 440,
+            "kernel": 45,
+            "trivial": 0,
+            "residual": 45
+          },
+          {
+            "d": 4,
+            "rows": 8569,
+            "kernel": 1177,
+            "trivial": 65,
+            "residual": 1112
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 9020,
+        "cols_4": 41839,
+        "kernel_3": 1,
+        "kernel_4": 111,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 103,
+        "plus_k3_multiples_4": 103,
+        "residual_4": 8,
+        "residual_4_with_k3": 8,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            111,
+            45
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 111,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 6901.6748290000005
+      }
+    ]
+  },
+  {
+    "n": 11,
+    "ell": 4,
+    "draw": 4,
+    "x_r": "1318",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 35,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 407,
+            "kernel": 22,
+            "trivial": 0,
+            "residual": 22
+          },
+          {
+            "d": 4,
+            "rows": 7315,
+            "kernel": 914,
+            "trivial": 66,
+            "residual": 848
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            4
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 7733,
+        "cols_4": 25186,
+        "kernel_3": 0,
+        "kernel_4": 122,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 66,
+        "plus_k3_multiples_4": 66,
+        "residual_4": 56,
+        "residual_4_with_k3": 56,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            122,
+            22
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 122,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 3411.483951
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 38,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 440,
+            "kernel": 45,
+            "trivial": 0,
+            "residual": 45
+          },
+          {
+            "d": 4,
+            "rows": 8569,
+            "kernel": 1177,
+            "trivial": 65,
+            "residual": 1112
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 9020,
+        "cols_4": 41839,
+        "kernel_3": 1,
+        "kernel_4": 111,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 103,
+        "plus_k3_multiples_4": 103,
+        "residual_4": 8,
+        "residual_4_with_k3": 8,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            111,
+            45
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 111,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 6921.834022
+      }
+    ]
+  },
+  {
+    "n": 11,
+    "ell": 4,
+    "draw": 5,
+    "x_r": "857",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 35,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 407,
+            "kernel": 22,
+            "trivial": 0,
+            "residual": 22
+          },
+          {
+            "d": 4,
+            "rows": 7315,
+            "kernel": 914,
+            "trivial": 66,
+            "residual": 848
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            10
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 7733,
+        "cols_4": 25186,
+        "kernel_3": 0,
+        "kernel_4": 116,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 66,
+        "plus_k3_multiples_4": 66,
+        "residual_4": 50,
+        "residual_4_with_k3": 50,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            116,
+            22
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 116,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 3445.200132
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 38,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 440,
+            "kernel": 45,
+            "trivial": 0,
+            "residual": 45
+          },
+          {
+            "d": 4,
+            "rows": 8569,
+            "kernel": 1177,
+            "trivial": 65,
+            "residual": 1112
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 9020,
+        "cols_4": 41839,
+        "kernel_3": 1,
+        "kernel_4": 111,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 103,
+        "plus_k3_multiples_4": 103,
+        "residual_4": 8,
+        "residual_4_with_k3": 8,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            111,
+            45
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 111,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 7047.8713419999995
+      }
+    ]
+  },
+  {
+    "n": 11,
+    "ell": 4,
+    "draw": 6,
+    "x_r": "554",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 35,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 407,
+            "kernel": 22,
+            "trivial": 0,
+            "residual": 22
+          },
+          {
+            "d": 4,
+            "rows": 7314,
+            "kernel": 913,
+            "trivial": 66,
+            "residual": 847
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            10
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 7733,
+        "cols_4": 25186,
+        "kernel_3": 0,
+        "kernel_4": 116,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 66,
+        "plus_k3_multiples_4": 66,
+        "residual_4": 50,
+        "residual_4_with_k3": 50,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            116,
+            22
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 116,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 3671.109503
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 38,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 440,
+            "kernel": 45,
+            "trivial": 0,
+            "residual": 45
+          },
+          {
+            "d": 4,
+            "rows": 8569,
+            "kernel": 1177,
+            "trivial": 65,
+            "residual": 1112
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 9020,
+        "cols_4": 41839,
+        "kernel_3": 1,
+        "kernel_4": 111,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 103,
+        "plus_k3_multiples_4": 103,
+        "residual_4": 8,
+        "residual_4_with_k3": 8,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            111,
+            45
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 111,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 7104.747356
+      }
+    ]
+  },
+  {
+    "n": 11,
+    "ell": 4,
+    "draw": 7,
+    "x_r": "1244",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 35,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 407,
+            "kernel": 22,
+            "trivial": 0,
+            "residual": 22
+          },
+          {
+            "d": 4,
+            "rows": 7315,
+            "kernel": 914,
+            "trivial": 66,
+            "residual": 848
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            10
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 7733,
+        "cols_4": 25186,
+        "kernel_3": 0,
+        "kernel_4": 116,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 66,
+        "plus_k3_multiples_4": 66,
+        "residual_4": 50,
+        "residual_4_with_k3": 50,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            116,
+            22
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 116,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 3117.600375
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 38,
+        "eq_degrees": [
+          [
+            2,
+            11
+          ],
+          [
+            3,
+            22
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 11,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 440,
+            "kernel": 45,
+            "trivial": 0,
+            "residual": 45
+          },
+          {
+            "d": 4,
+            "rows": 8569,
+            "kernel": 1177,
+            "trivial": 65,
+            "residual": 1112
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 9020,
+        "cols_4": 41839,
+        "kernel_3": 1,
+        "kernel_4": 111,
+        "trivial_4": 66,
+        "trivial_plus_identities_4": 103,
+        "plus_k3_multiples_4": 103,
+        "residual_4": 8,
+        "residual_4_with_k3": 8,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            111,
+            45
+          ]
+        ],
+        "small_block": 4,
+        "last_link_kernel": 111,
+        "last_link_trivial": 66,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 66,
+        "ms": 7230.030226
+      }
+    ]
+  },
+  {
+    "n": 13,
+    "ell": 5,
+    "draw": 0,
+    "x_r": "6936",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 43,
+        "eq_degrees": [
+          [
+            2,
+            13
+          ],
+          [
+            3,
+            26
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 13,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 585,
+            "kernel": 26,
+            "trivial": 0,
+            "residual": 26
+          },
+          {
+            "d": 4,
+            "rows": 12857,
+            "kernel": 1248,
+            "trivial": 91,
+            "residual": 1157
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            0
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 13455,
+        "cols_4": 58008,
+        "kernel_3": 0,
+        "kernel_4": 117,
+        "trivial_4": 91,
+        "trivial_plus_identities_4": 91,
+        "plus_k3_multiples_4": 91,
+        "residual_4": 26,
+        "residual_4_with_k3": 26,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            117,
+            26
+          ]
+        ],
+        "small_block": 5,
+        "last_link_kernel": 117,
+        "last_link_trivial": 91,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 91,
+        "ms": 14945.436071
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 46,
+        "eq_degrees": [
+          [
+            2,
+            13
+          ],
+          [
+            3,
+            26
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 13,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 624,
+            "kernel": 54,
+            "trivial": 0,
+            "residual": 54
+          },
+          {
+            "d": 4,
+            "rows": 14651,
+            "kernel": 1691,
+            "trivial": 90,
+            "residual": 1601
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 15288,
+        "cols_4": 88221,
+        "kernel_3": 1,
+        "kernel_4": 145,
+        "trivial_4": 91,
+        "trivial_plus_identities_4": 136,
+        "plus_k3_multiples_4": 136,
+        "residual_4": 9,
+        "residual_4_with_k3": 9,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            145,
+            54
+          ]
+        ],
+        "small_block": 5,
+        "last_link_kernel": 145,
+        "last_link_trivial": 91,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 91,
+        "ms": 26477.58653
+      }
+    ]
+  },
+  {
+    "n": 13,
+    "ell": 5,
+    "draw": 1,
+    "x_r": "1163",
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 43,
+        "eq_degrees": [
+          [
+            2,
+            13
+          ],
+          [
+            3,
+            26
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 13,
+            "kernel": 0,
+            "trivial": 0,
+            "residual": 0
+          },
+          {
+            "d": 3,
+            "rows": 585,
+            "kernel": 26,
+            "trivial": 0,
+            "residual": 26
+          },
+          {
+            "d": 4,
+            "rows": 12857,
+            "kernel": 1248,
+            "trivial": 91,
+            "residual": 1157
+          }
+        ],
+        "first_fall_degree": 3,
+        "linear": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            0
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 13455,
+        "cols_4": 58008,
+        "kernel_3": 0,
+        "kernel_4": 117,
+        "trivial_4": 91,
+        "trivial_plus_identities_4": 91,
+        "plus_k3_multiples_4": 91,
+        "residual_4": 26,
+        "residual_4_with_k3": 26,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            117,
+            26
+          ]
+        ],
+        "small_block": 5,
+        "last_link_kernel": 117,
+        "last_link_trivial": 91,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 91,
+        "ms": 14213.191044000001
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 46,
+        "eq_degrees": [
+          [
+            2,
+            13
+          ],
+          [
+            3,
+            26
+          ]
+        ],
+        "graded": [
+          {
+            "d": 2,
+            "rows": 13,
+            "kernel": 1,
+            "trivial": 0,
+            "residual": 1
+          },
+          {
+            "d": 3,
+            "rows": 624,
+            "kernel": 54,
+            "trivial": 0,
+            "residual": 54
+          },
+          {
+            "d": 4,
+            "rows": 14651,
+            "kernel": 1691,
+            "trivial": 90,
+            "residual": 1601
+          }
+        ],
+        "first_fall_degree": 2,
+        "linear": [
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ]
+        ],
+        "constant_derived": [
+          [
+            2,
+            false
+          ],
+          [
+            3,
+            false
+          ],
+          [
+            4,
+            false
+          ]
+        ],
+        "rows_4": 15288,
+        "cols_4": 88221,
+        "kernel_3": 1,
+        "kernel_4": 145,
+        "trivial_4": 91,
+        "trivial_plus_identities_4": 136,
+        "plus_k3_multiples_4": 136,
+        "residual_4": 9,
+        "residual_4_with_k3": 9,
+        "generator_failures": 0,
+        "link_kernels_4": [
+          [
+            "L0(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L1(deg 3)",
+            0,
+            0
+          ],
+          [
+            "L2(deg 2)",
+            145,
+            54
+          ]
+        ],
+        "small_block": 5,
+        "last_link_kernel": 145,
+        "last_link_trivial": 91,
+        "small_mult_kernel": 0,
+        "trivial_plus_small": 91,
+        "ms": 26703.438939000003
+      }
+    ]
+  }
+]

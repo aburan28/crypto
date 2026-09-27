@@ -1,0 +1,57 @@
+{
+  "artifacts": [
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "ed848d8bac683ea481ecff15eab221c1fea9a62d02a8f47a82e181527bd35f4b",
+      "path": "resource_probe_01"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "01eadaec490c40ac226d4a05d80eb9c70fc14209c81f1dfecfa89e9ce02445d0",
+      "path": "resource_probe_02"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "6957690eea7aabfc44d40a31f966e95335c241b303dff995b2b22cea03643c95",
+      "path": "resource_probe_03"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "50693c77ae6cebe9955b715cb1cb805ebea00235899550d94968bb135001596e",
+      "path": "resource_probe_04"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "6ff84b605beaf8350d6ab63c2bb3b8b2ac24af9b9a9e44f55c67f5fa32a58e4d",
+      "path": "resource_probe_05"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "76415a2eefcc33acaf62c46a47d3c1a28088cdb4817ae496ac685cd2a3b7a158",
+      "path": "resource_probe_06"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "4b1db46822db1dfd5e019c47f88404532fcf53d617c6ba6f12111424b2b9a9ae",
+      "path": "resource_probe_07"
+    },
+    {
+      "kind": "complete fixed-arm comparison",
+      "manifest_sha256": "75a46a5912824ec6a475153bb4a552922770d2a13cefd03c74503d4fad38027c",
+      "path": "run_01"
+    }
+  ],
+  "classification": "engineering",
+  "confirmation_eligible": false,
+  "confirmation_executed": false,
+  "full_ic_cost": null,
+  "primary_results_sha256": "fe4d4366804283ce24f03f47b3256253fc366ef00ae3d4ac70a68fcae745823a",
+  "production_solver_cost": null,
+  "reporter_sha256": "46cad83c2a20dff1b1504bbe6a72918c4fb89490fc9fa2ef0f0aa98126c6dfba",
+  "rho_ratio": null,
+  "schema_version": 1,
+  "scope": "Complete standalone generated public Boolean polynomial systems only. No curve inputs, imported targets, scalar recovery, production IC integration or rho campaign.",
+  "source_lineage_sha256": "daff1b45e2eed92875005c2b47c9ae538995626a2f43c710ecf4425445494123",
+  "summary_sha256": "a9bd321325ae0c28c0ce48f20f8cb409488a98679ddc451d79249e046fefb763",
+  "validation_attempts_sha256": "b50deda9697012f363146d39774f0f18357c4a297bf0d1e8ab1024dbbaa2fefc"
+}

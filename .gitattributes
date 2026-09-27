@@ -7,6 +7,7 @@ research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-wds
 # Preserve frozen patch context and verbatim benchmark source/log bytes.
 research/summation_polynomials_20260914/*.patch -whitespace
 research/gaudry_allocation_20260914/*.patch -whitespace
+research/ic_candidate_tournament_20260915/producer/*.patch -whitespace
 research/summation_polynomials_20260914/gaudry-tests.log whitespace=-blank-at-eof
 research/gaudry_allocation_20260914/gaudry-tests.log whitespace=-blank-at-eof
 gpu/macaulay/benchmarks/pipeline-20260914/sources/kernels.cuh whitespace=-blank-at-eof
@@ -17,3 +18,18 @@ research/sat_factor_base_review_20260908/autolab_groebner_m4ri_20260921/runs/** 
 research/sat_factor_base_review_20260908/autolab_groebner_linear_tail_20260921/runs/** -whitespace
 research/sat_factor_base_review_20260908/autolab_groebner_active_layout_20260921/runs/** -whitespace
 research/sat_factor_base_review_20260908/autolab_groebner_flat_matrix_20260921/runs/** -whitespace
+research/sat_factor_base_review_20260908/autolab_groebner_fused_hash_20260922/runs/** -whitespace
+
+# Preserve hash-bound compiler diagnostics in the projected-syndrome experiment.
+research/boolean_byte_sieve_20260923/**/worker-compile.txt whitespace=-blank-at-eof
+
+# Preserve the exact executed runner and its matching replay source.
+research/boolean_implicit_minors_20260923/run.py whitespace=-blank-at-eof
+research/boolean_implicit_minors_20260923/run_01/run.py whitespace=-blank-at-eof
+
+# Keep the raw million-clause toy DIMACS downloadable without rendering its full diff.
+research/notes/ecc2k130/rotated_s3_o_branch_20260925/evidence/producer/n13-m5/base.cnf -diff
+
+# Keep pinned SAT solver stdout/stderr bytes verbatim, including padded comment lines.
+research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/**/*.stdout -whitespace
+research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/**/*.stderr -whitespace

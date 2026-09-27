@@ -152,7 +152,13 @@ pub fn koblitz_family_order(n: u32, a2: u8) -> i128 {
         .to_string()
         .parse::<i128>()
         .expect("a Koblitz order below 2^63 fits i128");
-    if a2 == 0 {
+    // `a₂ = 1` is the quadratic twist of `a₂ = 0` only when `Tr(1) = n mod 2`
+    // is 1.  For even `n` the trace of 1 is 0, `y ↦ y + sx` with
+    // `s² + s = 1` identifies the two families, and they share one order.
+    // An earlier revision took the twist unconditionally; the cost sweep
+    // only ever ran odd `n`, so no measured number was affected, but the
+    // even-`n` census came back empty.
+    if a2 == 0 || n.is_multiple_of(2) {
         base
     } else {
         (1i128 << (n + 1)) + 2 - base
@@ -281,12 +287,11 @@ pub fn class_reach_report(n: u32) -> ClassReachReport {
     });
     let log2_exhaustive_scan = 2.0 * n as f64;
 
-    let blocked_because = if log2_exhaustive_scan <= EXHAUSTIVE_SCAN_LOG2_BUDGET {
-        None
-    } else if modular_polynomial_available {
-        None
-    } else {
-        Some(format!(
+    let blocked_because =
+        if log2_exhaustive_scan <= EXHAUSTIVE_SCAN_LOG2_BUDGET || modular_polynomial_available {
+            None
+        } else {
+            Some(format!(
             "exhaustive trace scan costs 2^{log2_exhaustive_scan:.0} field operations, and the \
              only isogeny degrees that move are {}, for none of which Φ_ℓ is tabulated (have \
              ℓ ∈ {TABULATED_MODULAR_LEVELS:?}) nor a kernel polynomial implemented",
@@ -296,7 +301,7 @@ pub fn class_reach_report(n: u32) -> ClassReachReport {
                 .collect::<Vec<_>>()
                 .join(", ")
         ))
-    };
+        };
 
     ClassReachReport {
         n,
@@ -550,6 +555,7 @@ pub fn diagnose_member(
 struct Member {
     n: u32,
     irr: IrreduciblePoly,
+    #[allow(dead_code)]
     gf: Gf2,
     ash: ArtinSchreier,
     a2: u8,
@@ -681,7 +687,7 @@ fn factorise(mut v: u64) -> Vec<(u64, u32)> {
     let mut d = 2u64;
     while d.saturating_mul(d) <= v {
         let mut e = 0;
-        while v % d == 0 {
+        while v.is_multiple_of(d) {
             v /= d;
             e += 1;
         }
@@ -887,8 +893,20 @@ pub fn measure_member(
     for probe in 0..opts.yield_probes {
         row.trials += 1;
         if probe_once(
-            &me, &group, &mut ops, &mut rng, &basis, &st, &solve_opts, &entry_of, q_point,
-            secret_col, unknowns, &mut gauss, &mut row, opts,
+            &me,
+            &group,
+            &mut ops,
+            &mut rng,
+            &basis,
+            &st,
+            &solve_opts,
+            &entry_of,
+            q_point,
+            secret_col,
+            unknowns,
+            &mut gauss,
+            &mut row,
+            opts,
         ) && row.log.is_none()
         {
             if let Some(d) = gauss.pinned(secret_col) {
@@ -906,8 +924,20 @@ pub fn measure_member(
         row.closure_trials += 1;
         let before = row.relations;
         let solved = probe_once(
-            &me, &group, &mut ops, &mut rng, &basis, &st, &solve_opts, &entry_of, q_point,
-            secret_col, unknowns, &mut gauss, &mut row, opts,
+            &me,
+            &group,
+            &mut ops,
+            &mut rng,
+            &basis,
+            &st,
+            &solve_opts,
+            &entry_of,
+            q_point,
+            secret_col,
+            unknowns,
+            &mut gauss,
+            &mut row,
+            opts,
         );
         // Move the phase-2 relation out of the measured counters.
         if row.relations > before {
@@ -997,18 +1027,19 @@ fn probe_once(
 
     let mut lifted: Option<Vec<(usize, i8)>> = None;
     let started = Instant::now();
-    let (_, stats) = solve_boolean_system_filtered(&sys.equations, sys.n_vars, solve_opts, |root| {
-        let xs: Vec<u64> = (0..opts.m)
-            .map(|i| from_element(&sys.summand_x(basis, root, i, n)))
-            .collect();
-        match lift(me, group, entry_of, &xs, target) {
-            Some(terms) => {
-                lifted = Some(terms);
-                true
+    let (_, stats) =
+        solve_boolean_system_filtered(&sys.equations, sys.n_vars, solve_opts, |root| {
+            let xs: Vec<u64> = (0..opts.m)
+                .map(|i| from_element(&sys.summand_x(basis, root, i, n)))
+                .collect();
+            match lift(me, group, entry_of, &xs, target) {
+                Some(terms) => {
+                    lifted = Some(terms);
+                    true
+                }
+                None => false,
             }
-            None => false,
-        }
-    });
+        });
     row.groebner_ns += started.elapsed().as_nanos();
     row.groebner_calls += 1;
     row.reductions += stats.reductions;
@@ -1563,6 +1594,35 @@ mod tests {
         assert!(report.blocked_because.is_some());
         assert!(!report.modular_polynomial_available);
         assert!(report.log2_exhaustive_scan > EXHAUSTIVE_SCAN_LOG2_BUDGET);
+    }
+
+    #[test]
+    fn the_two_families_coincide_for_even_n_and_twist_for_odd_n() {
+        // Tr(1) = n mod 2 decides whether a₂ = 1 is the twist.
+        for n in [8u32, 12, 16] {
+            let irr = field_for(n).expect("field");
+            let gf = Gf2::new(&irr);
+            let ash = ArtinSchreier::new(&gf);
+            for a2 in [0u8, 1] {
+                assert_eq!(
+                    curve_order(&gf, &ash, a2, 1) as i128,
+                    koblitz_family_order(n, a2),
+                    "n = {n}, a₂ = {a2}"
+                );
+            }
+        }
+        for n in [11u32, 13] {
+            let irr = field_for(n).expect("field");
+            let gf = Gf2::new(&irr);
+            let ash = ArtinSchreier::new(&gf);
+            for a2 in [0u8, 1] {
+                assert_eq!(
+                    curve_order(&gf, &ash, a2, 1) as i128,
+                    koblitz_family_order(n, a2),
+                    "n = {n}, a₂ = {a2}"
+                );
+            }
+        }
     }
 
     #[test]
