@@ -320,7 +320,7 @@ polynomial-basis modulus is `z^83 + z^45 + z² + z + 1`; a different basis
 is acceptable only when the field representation and conversions are recorded.
 Freeze the exact curve, basis, prime-order subgroup, generator, and cofactor
 clearing in each candidate/workload manifest. Frobenius has 83 phases on
-nonidentity points in that subgroup, and `ord_83(2) = 82), so the nontrivial
+nonidentity points in that subgroup, and `ord_83(2) = 82`, so the nontrivial
 cyclotomic block is irreducible over `GF(2)`, as for m=131.
 
 - Use smaller degrees, including m=53, for smoke tests, solver tuning, and
