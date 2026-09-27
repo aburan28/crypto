@@ -185,10 +185,10 @@ fn main() {
         let mut last = None;
         for _ in 0..repeats {
             let t = std::time::Instant::now();
-            let form = if std::env::var("KIC_F5_ECHELON").as_deref() == Ok("1") {
-                F5OutputForm::Echelon
-            } else {
-                F5OutputForm::Reduced
+            let form = match std::env::var("KIC_F5_ECHELON").as_deref() {
+                Ok("1") => F5OutputForm::Echelon,
+                Ok("2") => F5OutputForm::SelectiveEchelon,
+                _ => F5OutputForm::Reduced,
             };
             let r =
                 matrix_f5_f2_with_form_timed(&sys, n, degree, form).expect("within size limits");

@@ -464,6 +464,9 @@ pub struct F5Timings {
 pub enum F5OutputForm {
     Reduced,
     Echelon,
+    /// Echelon only for degree-4 systems with at least 20 variables,
+    /// where the saved reduction outweighed unpacking in the first study.
+    SelectiveEchelon,
 }
 
 /// [`matrix_f5_f2`] with the wall time of each phase.
@@ -515,12 +518,14 @@ pub fn matrix_f5_f2_with_form_timed(
     timings.build_ns = t.elapsed().as_nanos() as u64;
     let t = Instant::now();
     let mut word_ops = 0u64;
-    let rank = match form {
-        F5OutputForm::Reduced => rref_f2_counted(&mut matrix, cols.len(), &mut word_ops),
-        F5OutputForm::Echelon if matrix.len() >= 128 && cols.len() >= 256 => {
-            crate::cryptanalysis::gf2_elim::echelon_counted(&mut matrix, cols.len(), &mut word_ops)
-        }
-        F5OutputForm::Echelon => echelon_f2_counted(&mut matrix, cols.len(), &mut word_ops),
+    let echelon = matches!(form, F5OutputForm::Echelon)
+        || (matches!(form, F5OutputForm::SelectiveEchelon) && degree == 4 && n_vars >= 20);
+    let rank = if !echelon {
+        rref_f2_counted(&mut matrix, cols.len(), &mut word_ops)
+    } else if matrix.len() >= 128 && cols.len() >= 256 {
+        crate::cryptanalysis::gf2_elim::echelon_counted(&mut matrix, cols.len(), &mut word_ops)
+    } else {
+        echelon_f2_counted(&mut matrix, cols.len(), &mut word_ops)
     };
     timings.reduce_ns = t.elapsed().as_nanos() as u64;
     let t = Instant::now();

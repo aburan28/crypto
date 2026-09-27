@@ -24,6 +24,7 @@ WORKLOADS = {
     "frozen": 0,
     "holdout_a": 0xBADC0DE1,
     "holdout_b": 0x5EED2026,
+    "holdout_c": 0xDECAFBAD,
 }
 EXPECTED_CASES = {
     "f5_n12_m12_d4",
@@ -66,7 +67,7 @@ def run_one(binary, workload, seed_xor, mode, phase, pair, position):
     env["RAYON_NUM_THREADS"] = "1"
     env["KIC_GF2_DEFER_ABOVE"] = "0"
     env["KIC_GF2_WORD_BATCH"] = "0"
-    env["KIC_F5_ECHELON"] = str(mode)
+    env["KIC_F5_ECHELON"] = "2" if mode == 1 else "0"
     record = {
         "phase": phase,
         "workload": workload,
