@@ -44,7 +44,9 @@ permissions:
   id-token: write
 
 concurrency:
-  group: ecc2k130-status-pages
+  # Scheduled publications must not replace pending PR validation runs.
+  # Keep all publishing events in the original serialized deployment group.
+  group: ${{ github.event_name == 'pull_request' && format('ecc2k130-status-pages-pr-{0}', github.event.pull_request.number) || 'ecc2k130-status-pages' }}
   cancel-in-progress: false
 
 jobs:

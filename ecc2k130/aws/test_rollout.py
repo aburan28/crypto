@@ -14,6 +14,8 @@ import tempfile
 import time
 import unittest
 
+import merge
+import protocol
 import rollout
 from worker import (Worker, campaignPointerMoved, frozenCampaignMoved)
 
@@ -157,6 +159,118 @@ class GeometryGate(unittest.TestCase):
             shutil.rmtree(tmp)
 
 
+class MaxIters(unittest.TestCase):
+    """campaign.json maxIters may only be raised, and only on the unversioned store."""
+
+    def test_raise_changes_only_max_iters(self):
+        live = campaign(maxIters=1 << 30)
+        self.assertEqual(rollout.maxItersReasons(live, 1 << 32), [])
+        out = rollout.setMaxIters(live, 1 << 32)
+        self.assertEqual(out["maxIters"], 1 << 32)
+        self.assertEqual({k: v for k, v in out.items() if k != "maxIters"},
+                         {k: v for k, v in live.items() if k != "maxIters"})
+        self.assertEqual(live["maxIters"], 1 << 30)
+
+    def test_lower_or_equal_refused(self):
+        live = campaign(maxIters=1 << 32)
+        self.assertTrue(rollout.maxItersReasons(live, 1 << 30))
+        self.assertTrue(rollout.maxItersReasons(live, 1 << 32))
+
+    def test_unguarded_live_refused(self):
+        self.assertTrue(rollout.maxItersReasons(campaign(maxIters=0), 1 << 32))
+        self.assertTrue(rollout.maxItersReasons(campaign(), 1 << 32))
+
+    def test_strict_campaign_keeps_its_id(self):
+        # The id binds the guard the campaign was made with; the first raise
+        # records it as contractMaxIters, and later raises leave it alone.
+        live = campaign(maxIters=1 << 30, storageProtocol=protocol.PROTOCOL)
+        self.assertEqual(rollout.maxItersReasons(live, 1 << 32), [])
+        once = rollout.setMaxIters(live, 1 << 32)
+        twice = rollout.setMaxIters(once, 1 << 34)
+        self.assertEqual((once["contractMaxIters"], once["maxIters"]), (1 << 30, 1 << 32))
+        self.assertEqual((twice["contractMaxIters"], twice["maxIters"]), (1 << 30, 1 << 34))
+        ids = {protocol.campaignContract(c)["id"] for c in (live, once, twice)}
+        self.assertEqual(len(ids), 1)
+        # A legacy campaign gets no contractMaxIters: it has no id to keep.
+        self.assertNotIn("contractMaxIters", rollout.setMaxIters(campaign(maxIters=1 << 30), 1 << 32))
+
+    def test_strict_contract_refuses_a_guard_below_its_own(self):
+        live = campaign(maxIters=1 << 30, storageProtocol=protocol.PROTOCOL)
+        with self.assertRaisesRegex(ValueError, "below the campaign's guard"):
+            protocol.campaignContract(dict(live, maxIters=1 << 29, contractMaxIters=1 << 30))
+        with self.assertRaisesRegex(ValueError, "no guard"):
+            protocol.campaignContract(dict(live, maxIters=1 << 32, contractMaxIters=0))
+        # Moving maxIters by hand, without contractMaxIters, is still a new id.
+        self.assertNotEqual(protocol.campaignContract(dict(live, maxIters=1 << 32))["id"],
+                            protocol.campaignContract(live)["id"])
+
+    def test_out_of_range_refused(self):
+        live = campaign(maxIters=1 << 30)
+        for bad in (0, -1, rollout.MAX_ITERS_LIMIT + 1, "4294967296", 2.0 ** 32):
+            self.assertTrue(rollout.maxItersReasons(live, bad), bad)
+        self.assertEqual(rollout.maxItersReasons(live, rollout.MAX_ITERS_LIMIT), [])
+
+    def test_cli_strict(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            camp = os.path.join(tmp, "campaign.json")
+            live = campaign(maxIters=1 << 30, storageProtocol=protocol.PROTOCOL)
+            json.dump(live, open(camp, "w"))
+            r = subprocess.run(["python3", str(HERE / "rollout.py"), "max-iters",
+                                "--campaign", camp, "--value", str(1 << 32)],
+                               capture_output=True, text=True, cwd=tmp)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertEqual(json.loads(r.stdout)["campaignId"], protocol.campaignContract(live)["id"])
+            self.assertEqual(json.load(open(camp)),
+                             dict(live, maxIters=1 << 32, contractMaxIters=1 << 30))
+        finally:
+            shutil.rmtree(tmp)
+
+    def test_cli(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            camp = os.path.join(tmp, "campaign.json")
+            json.dump(campaign(maxIters=1 << 30, restartHours=48), open(camp, "w"))
+            r = subprocess.run(["python3", str(HERE / "rollout.py"), "max-iters",
+                                "--campaign", camp, "--value", str(1 << 32)],
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertEqual(json.load(open(camp)), campaign(maxIters=1 << 32, restartHours=48))
+            self.assertEqual(json.loads(r.stdout)["from"], 1 << 30)
+            before = open(camp).read()
+            r = subprocess.run(["python3", str(HERE / "rollout.py"), "max-iters",
+                                "--campaign", camp, "--value", str(1 << 30)],
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, 2)
+            self.assertEqual(open(camp).read(), before)
+        finally:
+            shutil.rmtree(tmp)
+
+
+class MergeBinding(unittest.TestCase):
+    """A merge directory survives a raised guard and nothing else."""
+
+    def binding(self, *extra, **fields):
+        b = {"campaignId": "c" * 64, "curve": 131, "dpWeight": 32,
+             "clientArgs": ["--dp-weight", "32"] + list(extra)}
+        b.update(fields)
+        return b
+
+    def test_raise_accepted(self):
+        old = self.binding("--max-iters", str(1 << 30))
+        self.assertTrue(merge.bindingCompatible(old, old))
+        self.assertTrue(merge.bindingCompatible(old, self.binding("--max-iters", str(1 << 32))))
+
+    def test_everything_else_refused(self):
+        old = self.binding("--max-iters", str(1 << 30))
+        for new in (self.binding("--max-iters", str(1 << 29)),     # lower
+                    self.binding(),                                 # guard dropped
+                    self.binding("--max-iters", str(1 << 32), dpWeight=34),
+                    self.binding("--max-iters", str(1 << 32), campaignId="d" * 64)):
+            self.assertFalse(merge.bindingCompatible(old, new), new)
+        self.assertFalse(merge.bindingCompatible(self.binding(), old))   # guard appears
+
+
 class Adoption(unittest.TestCase):
     def test_walking_slots(self):
         now = int(time.time())
@@ -285,10 +399,112 @@ class WorkerReload(unittest.TestCase):
         self.assertFalse(self.w.campaignPointerChanged())
         self.assertEqual(open(self.client, "rb").read(), b"old-client")
 
+    def test_max_iters_raise_waits_for_a_restart(self):
+        # A raise is neither a pointer move nor a frozen field: the running
+        # client keeps its guard, and the next scheduled restart (which goes
+        # through reloadClient) starts it with the new one on the same slot.
+        digest = hashlib.sha256(b"old-client").hexdigest()
+        self._put("bin/oldoldoldoldol/ecc2k130", b"old-client")
+        self._put("campaign.json", campaign(maxIters=1 << 30, binarySha256=digest))
+        self.w.loadConfig()
+        cmd = self.w.clientCommand(0)
+        self.assertEqual(cmd[cmd.index("--max-iters") + 1], str(1 << 30))
+        self._put("campaign.json", campaign(maxIters=1 << 32, binarySha256=digest))
+        self.assertIsNone(frozenCampaignMoved(self.w.cfg, campaign(maxIters=1 << 32)))
+        self.assertFalse(self.w.campaignPointerChanged())
+        self.w.reloadClient()
+        cmd = self.w.clientCommand(0)
+        self.assertEqual(cmd[cmd.index("--max-iters") + 1], str(1 << 32))
+
+    def test_strict_raise_keeps_the_bound_directory(self):
+        # A strict worker binds its work directory to the campaign contract.
+        # rollout.py max-iters keeps that binding; the same edit by hand
+        # (maxIters without contractMaxIters) is a different campaign.
+        live = campaign(maxIters=1 << 30, storageProtocol=protocol.PROTOCOL)
+        self._put("campaign.json", live)
+        self.w.loadConfig(verifyBinary=False)
+        bound = self.w.contract["id"]
+        self._put("campaign.json", rollout.setMaxIters(live, 1 << 32))
+        self.w.loadConfig(verifyBinary=False)
+        self.assertEqual(self.w.contract["id"], bound)
+        cmd = self.w.clientCommand(0)
+        self.assertEqual(cmd[cmd.index("--max-iters") + 1], str(1 << 32))
+        self._put("campaign.json", dict(live, maxIters=1 << 34))
+        with self.assertRaisesRegex(ValueError, "different campaign"):
+            self.w.loadConfig(verifyBinary=False)
+
     def test_local_key_does_not_fetch(self):
         self.w.cfg = campaign(binaryKey="local")
         self.assertEqual(self.w.clientStoreKey(), "")
         self.assertFalse(self.w.fetchClient())
+
+
+FAKE_AWS = r"""#!/usr/bin/env python3
+# Stand-in for the two s3api calls rollout.sh max-iters makes, over a directory.
+import hashlib, os, shutil, sys
+store = os.environ["FAKE_S3"]
+args = sys.argv[1:]
+def opt(name):
+    return args[args.index(name) + 1]
+def etag(path):
+    return '"%s"' % hashlib.md5(open(path, "rb").read()).hexdigest()
+obj = os.path.join(store, opt("--key"))
+if args[:2] == ["s3api", "get-object"]:
+    shutil.copy(obj, args[6])
+    print(etag(obj))
+elif args[:2] == ["s3api", "put-object"]:
+    if os.environ.get("FAKE_S3_MOVED") or opt("--if-match") != etag(obj):
+        sys.stderr.write("An error occurred (PreconditionFailed)\n")
+        sys.exit(254)
+    shutil.copy(opt("--body"), obj)
+    print("{}")
+else:
+    sys.exit("unexpected aws call: %r" % args)
+"""
+
+
+class MaxItersScript(unittest.TestCase):
+    """rollout.sh max-iters against a stand-in store: only a guarded raise lands."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.store = os.path.join(self.tmp, "store")
+        os.makedirs(self.store)
+        bindir = os.path.join(self.tmp, "bin")
+        os.makedirs(bindir)
+        aws = os.path.join(bindir, "aws")
+        open(aws, "w").write(FAKE_AWS)
+        os.chmod(aws, 0o755)
+        self.env = dict(os.environ, PATH=bindir + os.pathsep + os.environ["PATH"],
+                        FAKE_S3=self.store, BUCKET="test-bucket")
+        self.camp = os.path.join(self.store, "campaign.json")
+        json.dump(campaign(maxIters=1 << 30, restartHours=48), open(self.camp, "w"))
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def run_sh(self, *args, **env):
+        return subprocess.run(["bash", str(HERE / "rollout.sh"), "max-iters", *args],
+                              capture_output=True, text=True, env=dict(self.env, **env))
+
+    def test_raise_lands(self):
+        r = self.run_sh(str(1 << 32))
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(json.load(open(self.camp)), campaign(maxIters=1 << 32, restartHours=48))
+        self.assertIn("next client restart", r.stdout)
+
+    def test_lower_refused_and_nothing_written(self):
+        before = open(self.camp).read()
+        r = self.run_sh(str(1 << 29))
+        self.assertEqual(r.returncode, 2)
+        self.assertEqual(open(self.camp).read(), before)
+
+    def test_moved_meanwhile_not_overwritten(self):
+        before = open(self.camp).read()
+        r = self.run_sh(str(1 << 32), FAKE_S3_MOVED="1")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("nothing written", r.stderr)
+        self.assertEqual(open(self.camp).read(), before)
 
 
 class Scripts(unittest.TestCase):
@@ -311,6 +527,8 @@ class Scripts(unittest.TestCase):
         sh = (HERE / "rollout.sh").read_text()
         self.assertIn("kernels/$kver.json", sh)
         self.assertIn("--from-version", sh)
+        self.assertIn("max-iters) cmd_max_iters", sh)
+        self.assertIn("--if-match", sh)
         camp = json.loads((HERE / "campaign.json").read_text())
         self.assertEqual(camp["kernelProtocol"], "ecc2k-kernel-v1")
         self.assertEqual(camp["kernelVersion"], 0)

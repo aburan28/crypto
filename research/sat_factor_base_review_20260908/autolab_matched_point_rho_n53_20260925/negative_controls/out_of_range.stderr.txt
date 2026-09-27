@@ -1,0 +1,4 @@
+
+thread 'main' (16825507) panicked at examples/koblitz_rho_batch_ks.rs:252:13:
+rho point coordinates must be field elements
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -1,4 +1,10 @@
 The algorithm in one file: [`examples/rho_toy.py`](examples/rho_toy.py)
+
+> Table-walk correctness update (2026-09-26): [cycle escape v3](CYCLE-ESCAPE-V3.md)
+> replaces history-dependent exits with a validated raw-cycle anchor. Older
+> table-walk measurements below describe their recorded revisions, not v3.
+> V3 requires a new table corpus; the default sigma iteration is unchanged.
+
 recovers a planted discrete logarithm on `GF(2^23)` with the same walk the
 GPU client uses. Live campaign counts:
 [status page](https://aburan28.github.io/crypto/status/). How the walk works,
@@ -15,12 +21,24 @@ the step tag instead of stored, products inlined and the forward pass
 software-pipelined. 300/300 device reports re-walked, the same distinguished
 points as the two-pass kernel, 19.04 B/s in DP-34 collection. Measured against
 the tree's previous best configuration rebuilt in the same session on the same
-card, 17.41 B/s: +15.3%. The kernel sits at 0.90 of the carry-less unit's
-22.3 B/s ceiling for its 33 CLMADs per update; the remaining tenth is the
-serial inversion (§7 there). The campaign default below is unchanged.
-[TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× that
+card, 17.41 B/s: +15.3%. [ROOFLINE.md](ROOFLINE.md) prices it per pipe from
+dynamic SASS counts: the ALU pipe is 91% busy (1,320 logic lane-instructions
+per update at 64 per SM-clock), the carry-less unit 73%, and the speed of
+light for its 33.1 CLMADs per update is 27.4 B/s. The same note corrects the
+22.3 B/s "carry-less ceiling" quoted here before: it assumed 1.62 CLMADs per
+SM-clock, and a measured sweep build ran the unit at least 1.654 (accounting;
+no rate changes). The campaign default below is unchanged.  The table walk's
+first cycle rule let fruitless cycles through (four steps that sum to `O`
+through Frobenius's own `σ² + σ + 2 = 0`, and six-step pairwise ones), which
+at the campaign's distinguished-point weight trapped about half its walks.
+The rule now refuses them, and the table walk is projected at 0.81–0.86× the
+σ walk's cost per solve on these rates; the new kernel's own paired rate is
+the measurement the switch waits on ([WALK-CONSTANT.md](WALK-CONSTANT.md)
+§11).
+[TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× the 22.3
 ceiling (five products alone fill the carry-less unit for 18.5 of the 15.2
-SM-clocks 30 B/s allows) and builds the kernel for the remaining tenth:
+SM-clocks 30 B/s allows; at the unit's 2.0 they fill 15.0, so the verdict
+stands, ROOFLINE.md §5) and builds the kernel for the remaining tenth:
 `PACKED_CHAINS=2` (`make gpu-rtx-pro6000-chains2`), two interleaved
 Montgomery chains per thread so the inversion and the forward pass overlap
 inside the warp — same walk, same distinguished points, and **0.696× the
@@ -31,8 +49,12 @@ reference** measured paired on one RTX PRO 6000: each warp issues `CLMAD`s
 bound by the logic pipe with the unit idle; the ALU→`CLMAD` trades that lost
 on the 6000 win there at par with the slots they remove (`TOP_CLMAD` + the
 `CLMAD` squaring + the ONB inversion: +37.9%, 15.37 B/s, verified), and
-30 B/s is a 1.95× ALU cut away rather than below a floor; per dollar the
-6000 stays 2.7× ahead.
+30 B/s is an ALU cut away rather than below a floor. [AUTOSWEEP.md](AUTOSWEEP.md)
+then lets the card choose: an automatic star-and-greedy sweep of every knob
+and geometry on the B200 finds **19.40 B/s** (`make gpu-b200-19b`: one fused
+pass per step, batch 32, three-limb Karatsuba — three knobs the 6000 had
+rejected), +26.3% paired, verified, 0.97× the 6000 at 2.06× the price; per
+dollar the 6000 stays 2.1× ahead.
 
 The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
 complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
@@ -121,8 +143,10 @@ GPUs.
 
 Two targets are configured:
 
-* **ECC2K-130**, still open, `GF(2^131)`, about `2^60.9` iterations. Uses the
-  permuted type-II optimal normal basis of Bailey et al.
+* **ECC2K-130**, still open, `GF(2^131)`, about `2^60.9` iterations (Bailey et
+  al.'s budget; measured for this walk, `2^60.91–60.92` on completed trails,
+  [WALK-CONSTANT.md](WALK-CONSTANT.md)). Uses the permuted type-II optimal
+  normal basis of Bailey et al.
 * **ECC2K-95**, solved by Harley's group in 1998, `GF(2^97)`, about `2^44`
   iterations. `2*97+1 = 195` is composite so that field has no type-II optimal
   normal basis; this one runs on a polynomial-basis backend with the

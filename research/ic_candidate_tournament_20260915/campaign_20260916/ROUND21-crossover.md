@@ -1,14 +1,25 @@
 # Round 0021 — the crossover, measured
 
 > **CORRECTION, round 0022.** §4's `n37a0` reading of **1.533 [1.238, 1.899]
-> is upper-biased and superseded**; see `ROUND22-budget-and-curvature.md`.
+> is biased and superseded by 1.763 [1.547, 2.009]**; see
+> `ROUND22-budget-and-curvature.md`.
 > `round21_crossover.py` verified that the IC arm completed and never checked
 > rho's status before charging it — `instructions()` reads callgrind's
 > `Collected:` line, not the worker's JSON — so **4 of the 64 rho runs at
 > `n37a0` were cut off at `max_trials = 4096`** and their truncated counts went
-> into the denominator. An under-charged denominator inflates IC/rho, so the
-> correction runs **downward**. `n23a1`'s 0.831 is unaffected: 64 of 64
-> completed there. The claim in §4 that "both arms complete at both cells" is
+> into the denominator. `n23a1`'s 0.831 is unaffected: 64 of 64 completed
+> there.
+>
+> **Second correction, same round: the direction stated above was wrong too.**
+> The first banner said an under-charged denominator inflates IC/rho and the
+> correction runs downward. That was reasoning rather than measurement, and it
+> assumed a truncated rho is charged less than a finished one. The opposite
+> holds — a rho that returns `incomplete` has exhausted its restarts, so it did
+> a great deal of work and produced nothing, and its instruction count is
+> *larger* than a run that found its collision early. Charging it over-charged
+> the denominator and pushed the ratio **down**. Measured with every rho run
+> required to complete, `n37a0` reads **1.763 [1.547, 2.009]**: 1.533 was a
+> **lower** bound. The claim in §4 that "both arms complete at both cells" is
 > withdrawn — it was asserted, not checked. Everything below is left as
 > published; §§1–3 (the widening, its cost, the red test) are unaffected.
 

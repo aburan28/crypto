@@ -108,7 +108,11 @@ use std::collections::{HashMap, HashSet};
 
 /// Degree of a Boolean polynomial (`0` for a constant or zero).
 fn poly_degree(p: &F2BoolPoly) -> u32 {
-    p.terms.iter().map(|t| t.mask.count_ones()).max().unwrap_or(0)
+    p.terms
+        .iter()
+        .map(|t| t.mask.count_ones())
+        .max()
+        .unwrap_or(0)
 }
 
 /// Product `p · s` as a set of monomial masks with even multiplicities
@@ -291,7 +295,7 @@ impl F5Criterion {
         let degrees: Vec<u32> = polys.iter().map(poly_degree).collect();
         // A constant generator (`1`, or zero) is outside the criterion's
         // hypotheses; the solver never passes one, so prune nothing.
-        if degrees.iter().any(|&d| d == 0) {
+        if degrees.contains(&0) {
             return out;
         }
         let column_mask = occurring_vars(polys) | (multiplier_mask & all_variable_mask(n_vars));
@@ -436,49 +440,100 @@ pub fn matrix_f5_f2(
     n_vars: usize,
     degree: u32,
 ) -> Option<(Vec<F2BoolPoly>, F5Report)> {
+    matrix_f5_f2_timed(polys, n_vars, degree).map(|(rows, report, _)| (rows, report))
+}
+
+/// Wall time of each phase of one [`matrix_f5_f2`] step, in nanoseconds.
+/// Kept out of [`F5Report`], which is compared and stored as a record of
+/// what a step did.
+#[derive(Clone, Copy, Debug, Default, serde::Serialize)]
+pub struct F5Timings {
+    /// Evaluating the criterion: the lower-degree echelons.
+    pub criterion_ns: u64,
+    /// Listing the surviving rows, the column map and the packing.
+    pub build_ns: u64,
+    /// The elimination.
+    pub reduce_ns: u64,
+    /// Turning the pivot rows back into polynomials.
+    pub unpack_ns: u64,
+}
+
+/// [`matrix_f5_f2`] with the wall time of each phase.
+pub fn matrix_f5_f2_timed(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(Vec<F2BoolPoly>, F5Report, F5Timings)> {
+    use std::time::Instant;
+    let mut timings = F5Timings::default();
     use crate::cryptanalysis::koblitz_groebner::{
-        f5_rows_monos_with_mask, macaulay_rows_monos, pack_rows, rref_f2_counted,
+        f5_rows_monos_with_mask, macaulay_row_count, pack_rows, rref_f2_counted,
     };
     let mut report = F5Report {
         degree,
         ..Default::default()
     };
     if polys.is_empty() {
-        return Some((Vec::new(), report));
+        return Some((Vec::new(), report, timings));
     }
+    let t = Instant::now();
     let mask = all_variable_mask(n_vars);
     let criterion = F5Criterion::new(polys, n_vars, degree, mask);
+    timings.criterion_ns = t.elapsed().as_nanos() as u64;
+    let t = Instant::now();
     report.criterion_word_ops = criterion.word_ops();
     report.criterion_rows = criterion.lower_level_rows().0;
-    report.rows_f4 = macaulay_rows_monos(polys, n_vars, degree)?.len() as u64;
+    report.rows_f4 = macaulay_row_count(polys, n_vars, degree)? as u64;
     let rows_monos = f5_rows_monos_with_mask(polys, n_vars, degree, mask, &criterion)?;
     report.rows_built = rows_monos.len() as u64;
     report.rows_pruned = report.rows_f4 - report.rows_built;
     if rows_monos.is_empty() {
-        return Some((Vec::new(), report));
+        return Some((Vec::new(), report, timings));
     }
     let cols = macaulay_columns(&rows_monos)?;
     let mut matrix = pack_rows(&rows_monos, &cols);
+    timings.build_ns = t.elapsed().as_nanos() as u64;
+    let t = Instant::now();
     let mut word_ops = 0u64;
     let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
+    timings.reduce_ns = t.elapsed().as_nanos() as u64;
+    let t = Instant::now();
     report.cols = cols.len() as u64;
     report.rank = rank as u64;
     report.zero_reductions = report.rows_built - rank as u64;
     report.reduce_word_ops = word_ops;
     let n_vars_out = polys[0].n_vars;
-    let out = matrix
-        .iter()
-        .take(rank)
+    // one polynomial per pivot row, independently: dense rows after the
+    // back-substitution make this as long as the elimination on one thread
+    use rayon::prelude::*;
+    let out = matrix[..rank]
+        .par_iter()
         .map(|row| {
-            let monos: Vec<F2BoolMono> = (0..cols.len())
-                .filter(|c| row[c / 64] & (1u64 << (c % 64)) != 0)
-                .map(|c| F2BoolMono::from_mask(cols[c]))
-                .collect();
-            F2BoolPoly::from_monos(monos, n_vars_out)
+            // walk the set bits, not every column
+            let terms = row.iter().map(|w| w.count_ones() as usize).sum();
+            let mut monos: Vec<F2BoolMono> = Vec::with_capacity(terms);
+            for (w, &word) in row.iter().enumerate() {
+                let mut bits = word;
+                while bits != 0 {
+                    let c = w * 64 + bits.trailing_zeros() as usize;
+                    bits &= bits - 1;
+                    monos.push(F2BoolMono::from_mask(cols[c]));
+                }
+            }
+            // The columns are distinct and in descending order, so the
+            // walk yields the canonical term list; `from_monos` would
+            // re-sort it for nothing.
+            let p = F2BoolPoly {
+                terms: monos,
+                n_vars: n_vars_out,
+            };
+            debug_assert!(p.is_canonical());
+            p
         })
         .filter(|p| !p.is_zero())
         .collect();
-    Some((out, report))
+    timings.unpack_ns = t.elapsed().as_nanos() as u64;
+    Some((out, report, timings))
 }
 
 #[cfg(test)]
@@ -586,9 +641,14 @@ mod tests {
         // pruned row is still in the span.
         let n_vars = 4;
         let f = poly(n_vars, &[&[0, 1], &[2], &[]]);
-        let (_, report) = matrix_f5_f2(&[f.clone()], n_vars, 4).unwrap();
+        let (_, report) = matrix_f5_f2(std::slice::from_ref(&f), n_vars, 4).unwrap();
         assert_eq!(report.rows_pruned, 1);
-        let c = F5Criterion::new(&[f.clone()], n_vars, 4, all_variable_mask(n_vars));
+        let c = F5Criterion::new(
+            std::slice::from_ref(&f),
+            n_vars,
+            4,
+            all_variable_mask(n_vars),
+        );
         assert!(c.prunes(0, f.lt().unwrap().mask));
         assert_eq!(c.pruned_by_part(), (0, 1));
     }
@@ -600,14 +660,22 @@ mod tests {
         let n_vars = 4;
         let f1 = poly(n_vars, &[&[0], &[1]]);
         let f2 = poly(n_vars, &[&[2], &[3], &[]]);
-        let c = F5Criterion::new(&[f1.clone(), f2.clone()], n_vars, 2, all_variable_mask(n_vars));
+        let c = F5Criterion::new(
+            &[f1.clone(), f2.clone()],
+            n_vars,
+            2,
+            all_variable_mask(n_vars),
+        );
         assert!(c.prunes(1, f1.lt().unwrap().mask));
         assert!(c.prunes(1, f2.lt().unwrap().mask));
         assert!(c.prunes(0, f1.lt().unwrap().mask));
         assert!(!c.prunes(0, f2.lt().unwrap().mask));
         let f4 = matrix_f4_f2(&[f1.clone(), f2.clone()], n_vars, 2).unwrap();
         let (f5, report) = matrix_f5_f2(&[f1, f2], n_vars, 2).unwrap();
-        assert_eq!(row_space_canonical(&f4, n_vars), row_space_canonical(&f5, n_vars));
+        assert_eq!(
+            row_space_canonical(&f4, n_vars),
+            row_space_canonical(&f5, n_vars)
+        );
         assert_eq!(report.rows_pruned, 3);
     }
 
@@ -630,14 +698,17 @@ mod tests {
             .iter()
             .filter_map(|p| p.lt().map(|m| m.mask))
             .collect();
-        assert!(naive.contains(&0b01) && naive.contains(&0b10), "x₀ and x₁ are naive LMs");
+        assert!(
+            naive.contains(&0b01) && naive.contains(&0b10),
+            "x₀ and x₁ are naive LMs"
+        );
         // Rows kept by the naive rule, and their span:
         let kept: Vec<F2BoolPoly> = monomials_up_to_mask(all_variable_mask(n_vars), degree - 2)
             .into_iter()
             .filter(|t| !naive.contains(t))
             .map(|t| f.mul_mono(F2BoolMono::from_mask(t)))
             .collect();
-        let full = matrix_f4_f2(&[f.clone()], n_vars, degree).unwrap();
+        let full = matrix_f4_f2(std::slice::from_ref(&f), n_vars, degree).unwrap();
         let naive_space = row_space_canonical(&kept, n_vars);
         assert!(
             naive_space.len() < full.len(),
@@ -646,7 +717,10 @@ mod tests {
         // The sound criterion keeps the full row space.
         let (f5, report) = matrix_f5_f2(&[f], n_vars, degree).unwrap();
         assert_eq!(f5.len(), full.len());
-        assert_eq!(row_space_canonical(&full, n_vars), row_space_canonical(&f5, n_vars));
+        assert_eq!(
+            row_space_canonical(&full, n_vars),
+            row_space_canonical(&f5, n_vars)
+        );
         assert!(report.rows_pruned > 0);
     }
 

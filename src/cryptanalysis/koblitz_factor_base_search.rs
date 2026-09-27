@@ -75,10 +75,11 @@ use crate::binary_ecc::{BinaryPoint, F2mElement};
 
 use super::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
-    build_frobenius_factor_base, build_frobenius_factor_base_from_divisor, groebner_decompose,
-    build_frobenius_union_factor_base, build_subgroup_orbit_factor_base, invariant_factors,
-    projected_signed_orbit_count, restrict_factor_base_to_orbits, saturate_factor_base_two_torsion,
-    span_f2, top_factor_indices, FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
+    build_frobenius_factor_base, build_frobenius_factor_base_from_divisor,
+    build_frobenius_union_factor_base, build_subgroup_orbit_factor_base, groebner_decompose,
+    invariant_factors, projected_signed_orbit_count, restrict_factor_base_to_orbits,
+    saturate_factor_base_two_torsion, span_f2, top_factor_indices, FactorBaseDomain,
+    FrobeniusFactorBase, KoblitzCurve, PairSumTable,
 };
 
 // ── Specifications ─────────────────────────────────────────────────
@@ -483,7 +484,7 @@ pub fn greedy_prune(
                 continue;
             }
             let s = expected_trials(unknowns - 1, extra_relations, c, targets);
-            if s < score * (1.0 - 1e-12) && best.map_or(true, |(_, _, bs)| s < bs) {
+            if s < score * (1.0 - 1e-12) && best.is_none_or(|(_, _, bs)| s < bs) {
                 best = Some((o, c, s));
             }
         }
@@ -668,7 +669,8 @@ impl Candidate {
     /// The quantity to minimise: measured stage cost where it was
     /// measured, expected trials otherwise.
     pub fn score(&self) -> f64 {
-        self.expected_stage_ops.unwrap_or_else(|| self.expected_trials())
+        self.expected_stage_ops
+            .unwrap_or_else(|| self.expected_trials())
     }
 }
 
@@ -943,9 +945,8 @@ fn measure_solve_cost(
     // A memo hit returns a reduction without computing it, so the counter
     // diff below would report replayed work as free.
     if super::algebra_cache::enabled(super::algebra_cache::Layer::ExactReduction) {
-        candidate.solve_cost_skipped = Some(
-            "IC_REDUCTION_CACHE replays reductions, so nothing here can be timed".into(),
-        );
+        candidate.solve_cost_skipped =
+            Some("IC_REDUCTION_CACHE replays reductions, so nothing here can be timed".into());
         return;
     }
     let trials = sample.min(targets.points.len());
@@ -1076,7 +1077,6 @@ pub fn candidate_specs(kc: &KoblitzCurve, opts: &SearchOptions) -> Vec<FactorBas
             }
         }
     }
-    drop(push);
     if opts.saturate && (&kc.cofactor % BigUint::from(2u32)).is_zero() {
         let base: Vec<FactorBaseSpec> = specs.clone();
         for spec in base {
@@ -1218,6 +1218,9 @@ mod tests {
         assert!(cost_pick.expected_trials() > trials_pick.expected_trials());
 
         // And the pick is really cheaper, measured the same way on both.
+        // The margin depends on the engine doing the measuring: 5.1× with
+        // the from-scratch matrix-F4 and 3.6× with the inherited engine
+        // splitting on the smallest free variable, both deterministic.
         let measured = |spec: &FactorBaseSpec| {
             by_cost
                 .candidates
@@ -1227,7 +1230,7 @@ mod tests {
                 .expect("every linear-subspace candidate is priced")
         };
         assert!(
-            measured(&cost_pick.spec) * 4.0 < measured(&trials_pick.spec),
+            measured(&cost_pick.spec) * 2.0 < measured(&trials_pick.spec),
             "cost pick {:?} at {:e} word XORs must beat trials pick {:?} at {:e}",
             cost_pick.spec,
             measured(&cost_pick.spec),

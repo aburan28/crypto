@@ -61,14 +61,14 @@ fn validate_degree(curve: &SmallCurve, ell: u64) {
     );
     let mut divisor = 2;
     while divisor <= ell / divisor {
-        assert!(ell % divisor != 0, "ell must be prime");
+        assert!(!ell.is_multiple_of(divisor), "ell must be prime");
         divisor += 1;
     }
 }
 
 fn valuation(mut conductor: i64, ell: u64) -> u32 {
     let mut depth = 0;
-    while conductor > 0 && conductor as u64 % ell == 0 {
+    while conductor > 0 && (conductor as u64).is_multiple_of(ell) {
         conductor /= ell as i64;
         depth += 1;
     }
@@ -80,7 +80,7 @@ fn certified_depth(cm: &CmData, ell: u64) -> Option<u32> {
         None
     } else if let Some(f) = cm.endomorphism_conductor {
         Some(valuation(f, ell))
-    } else if cm.frobenius_order_conductor as u64 % ell != 0 {
+    } else if !(cm.frobenius_order_conductor as u64).is_multiple_of(ell) {
         // f_E divides f_pi, so this local statement is known even when f_E is not.
         Some(0)
     } else {

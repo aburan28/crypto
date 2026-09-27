@@ -326,6 +326,115 @@ Ordered by cost, all inside what this repository already has:
 3. **Then the `m = 4` cells**, which is Route 4's own falsifier, read with
    the surplus named.
 
+## 8. Pre-registration: the surplus sweep
+
+Written and committed **before any result of this run existed**, per
+`AGENTS.md` §4.  The run is §7 item 1, the note's own falsification target.
+
+**Why it is needed.**  `ic descent`'s default ladder hard-codes
+`n' = ⌈n/m⌉` — its own comment calls it "the square-system choice" — so
+every cell it has published sits at surplus `S ∈ {0, −1, −2}`.  The axis
+this note says governs the descent has never been varied.
+
+**The run.**  `n = 11` fixed, `n'` swept, both families (`K` Koblitz, `R`
+random binary), 8 targets a cell, the tool's default 120 s a target, four-
+core Xeon container at 2.80 GHz, `0bb6f78`:
+
+| `m` | `n'` | `vars = m·n'` | `S = n − m·n'` |
+|--:|--:|--:|--:|
+| 2 | 2, 3, 4, 5, 6 | 4, 6, 8, 10, 12 | `+7, +5, +3, +1, −1` |
+| 3 | 2, 3, 4 | 6, 9, 12 | `+5, +2, −1` |
+
+**Statistic.**  `D_av/D_sr` on family `K`: the degree the Semaev descent
+reaches over the degree a structureless system *of the same shape*
+reaches.  Dividing by the shape is what stops "overdetermined systems are
+easier" from counting as a finding.  `R` is reported beside it as a second
+null object.
+
+**Decision rule, fixed now.**  For each `m`, compare `D_av/D_sr` at the
+lowest surplus against the highest:
+
+- **flat** — the difference is at most `0.05` for both `m`: §4's scoping
+  rule is **withdrawn**, as §7 already commits to.
+- **moves** — the difference exceeds `0.10` for both `m`, in either
+  direction: the rule survives, and the direction and size are the first
+  measured rate at which the structural effect changes toward the attack's
+  regime.
+- anything else: **inconclusive**, and reported as that.
+
+No direction is predicted.  The note argues that surplus *matters*, not
+which way the ratio goes, and inventing a direction now would only be a
+second thing to be wrong about.
+
+**A known confound, named in advance so it cannot be used afterwards.**
+At large surplus both degrees can sit at the system's own total degree,
+because nothing resolves below it.  That pins `D_av/D_sr` at `1` for a
+reason that has nothing to do with structure.  Any cell where `D_sr`
+equals the system degree is **uninformative about structure**: it is
+reported, and it counts toward neither verdict.  If that removes a
+comparison for some `m`, that `m` is inconclusive rather than flat.
+
+A single `n` is the test the note committed to, not a replication.  A
+second `n` follows only if this one is not inconclusive.
+
+### 8.1 Outcome: inconclusive, under every reading
+
+Appended after the run; §8 above is unchanged.  **Artefact:**
+`docs/ic/runs/ic-descent-surplus-n11-2026-09-23.json` (status `complete`,
+2 333 s, built at `0bb6f78`, binary blake3 `e1425639…`, four-core Xeon
+container at 2.80 GHz).
+
+| `m` | `n'` | vars | `S` | `D_sr` | `D_av` (K) | **`D_av/D_sr` (K)** | (R) | floored? | budget |
+|--:|--:|--:|--:|:--|--:|--:|--:|:--|:--|
+| 2 | 2 | 4 | `+7` | 2 | 1.88 | 0.938 | 0.688 | **yes** (input degree 2) | |
+| 2 | 3 | 6 | `+5` | 2–3 | 2.00 | 1.000 | 1.000 | on some targets | |
+| 2 | 4 | 8 | `+3` | 3 | 2.00 | 0.667 | 0.667 | | |
+| 2 | 5 | 10 | `+1` | 3–4 | 2.62 | 0.875 | 0.917 | | |
+| 2 | 6 | 12 | `−1` | 4 | 3.00 | 0.750 | 0.750 | | |
+| 3 | 2 | 6 | `+5` | 5–6 | 5.38 | 1.075 | 1.406 | **yes** (input degree ≤ 6) | |
+| 3 | 3 | 9 | `+2` | 7 | 7.00 | 1.000 | 1.000 | | |
+| 3 | 4 | 12 | `−1` | 8 | ≥ 9.00 | **≥ 1.125** | ≥ 1.125 | | **8/8 hit the 120 s budget** |
+
+Input degrees are the code's, not inferred: `S₃` descends to quadratics and
+`S₄` to degree at most six (`pq_descent_symbolic.rs`).  The table's
+`d_poly` column is not used for the confound; it tracks the degree *reached*
+and rises with `n'`.
+
+The rule applied three ways, so the verdict does not rest on a reading chosen
+after the fact:
+
+| reading of the confound clause | `m = 2` | `m = 3` | verdict |
+|---|---|---|---|
+| ignored | `−0.19`: moves | `+0.05`, a lower bound: flat on its face | **inconclusive** |
+| a floored endpoint voids that `m` | void | void | **inconclusive** |
+| drop floored cells, compare the rest | `+0.08` | `≥ +0.125`: moves | **inconclusive** |
+
+**§4's scoping rule is neither withdrawn nor supported.**  It stands as an
+untested derivation, and by §8 no second `n` follows.
+
+**What the run shows, which is not the verdict.**
+
+- **The test was underpowered, and that is the design's fault.**  At `m = 2`
+  adjacent cells read `0.938, 1.000, 0.667, 0.875, 0.750`: cell-to-cell
+  scatter of `0.33` at eight targets, against a decision threshold of `0.10`
+  on two endpoints.  A rule that compares endpoints cannot resolve an effect
+  smaller than the scatter it sits in.  A re-run should register a slope in
+  `S` with an interval, over enough targets that the interval is narrower
+  than the effect it is looking for.
+- **Koblitz and random curves agree** at six of eight cells, exactly
+  (`1.000`, `0.667`, `0.750`, `1.000`, `≥ 1.125`) or nearly (`0.875` vs
+  `0.917`).  They differ only at the two floored cells.  So whatever this
+  ratio measures, it is not Koblitz structure.
+- **At `m = 3` no measured cell has a degree advantage over a structureless
+  system of the same shape**: `1.000` at `S = +2` and at least `1.125` at the
+  square cell.
+- **The part of the axis that matters most is out of reach here.**  The
+  `m = 3` square cell — twelve unknowns, eleven equations — ran out of the
+  120 s budget on all eight targets.  That is a resource limit and says
+  nothing about its degree beyond the lower bound printed.  The regime §3
+  argues the attack is driven towards, `S → 0` at `m ≥ 3`, is where this
+  engine stops, at `n = 11`.
+
 ## References
 
 - **I. Semaev**, *Summation polynomials and the discrete logarithm problem on

@@ -1,0 +1,35 @@
+{
+  "controls": 2,
+  "environment_overrides_rejected": [
+    "KIC_F4_INHERIT",
+    "KIC_F4_KERNEL",
+    "KIC_GF2_SIMD",
+    "KIC_SCAN_SIMD",
+    "F4_F2_MAX_ROWS",
+    "SOLVER_SPLIT_RULE",
+    "IC_TEMPLATE_MEMO",
+    "IC_CACHE_LOCAL_BYTES",
+    "IC_REDIS_URL",
+    "IC_F2_BACKEND",
+    "IC_ARTIFACT_CACHE"
+  ],
+  "online_speedup": null,
+  "passed": 2,
+  "performance_qualified": false,
+  "promotion_eligible": false,
+  "results": [
+    {
+      "name": "sparse-core-a0",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    },
+    {
+      "name": "sparse-core-a1",
+      "reason": null,
+      "status": "PASS",
+      "worker_status": "complete"
+    }
+  ],
+  "schema_version": 1
+}

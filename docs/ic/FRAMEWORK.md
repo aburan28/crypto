@@ -44,7 +44,14 @@ ic bench --bits 18 \
 ic bench --char2-degree 13 \
     --factor-base binary-subspace:dimension=6 \
     --oracle descent-algebraic:m=2 \
-    --solver buchberger-f2
+    --solver f4-f2
+
+# The engines on their own, paired: every engine solves the same
+# seeded descent systems, interleaved, checked against the exhaustive
+# reference.  A stage diagnostic, not a speed (§7).
+ic descent --cells 17:9:2 --targets 8 --repeats 3 \
+    --solver buchberger-f2 --solver f4-f2 --solver matrix-f5 \
+    --solver crossbred-f2 --solver fes-f2
 
 # The relation matrix is a stage too.
 ic bench --bits 20 \
@@ -217,7 +224,55 @@ stopwatch, and the table should say which is which.
 | `work`, `work_unit` | the method's own count (`row_ops` for an elimination) |
 | `recovered`, `verified` | the logarithm found, and whether it is the planted one |
 | `total_gae`, `s` | the whole pipeline, and it over `√r` |
-| `s_over_rho` | against a counted Pollard rho on the same instance, when supplied |
+| `s_over_rho` | against the matched counted Pollard rho on the same instance, when supplied |
+
+### The rho reference
+
+`ic bench` runs the reference before any configuration, on the same
+subgroup and the same planted logarithms (`--rho-runs`, default 16),
+and every row's `s_over_rho` divides by its mean `S`.  It is the
+**matched** walk the accounting contract asks for: it uses the
+automorphisms the curve actually has, because a generic algorithm may
+use them too.
+
+| curve | `rho_reference` (prices the column) | also in the report |
+|:--|:--|:--|
+| generic prime, random binary | the negation-map walk, `A = 2` (`ic_boundary::rho_reference_negation`) | `rho_reference_plain`: the plain walk on points, `A = 1`, on the same seeds |
+| Koblitz | the cheaper, by mean `S`, of the signed-Frobenius walk (`A = 2n`) and the negation walk | the other in `rho_reference_candidates`; the plain walk |
+
+The negation walk is tuned so that its `S` is rho's and not its set-up's.
+Walk starts cost one addition each, and distinguished points come about
+every `r^{1/4}` steps. The jump table is sized to the subgroup
+(`rho_jumps_for`, calibrated in ledger §18.3). Fruitless cycles are
+handled by the Wiener–Zuccherato look-ahead and a deterministic doubling
+escape. Every operation it performs is charged, and its `counters` say
+where each one went.
+
+Through ledger §17 the column divided by the plain walk. That walk's
+`S` is mostly set-up at toy sizes: `14.8` at `r ≈ 2^{12}`, where the
+negation walk measures `2.6`. So a frozen report's `vs rho` from before
+§18 is generous to index calculus. `ic rho --reprice FILE` re-prices
+one against the matched walk. It first replays the frozen walk on the
+recorded seeds and refuses to re-price if any run differs.
+
+**A figure that solves `k` targets at once needs rho at the same `k`.**
+`ic bench` and `ic boundary` solve one target, so the single-target walk
+is their reference.  A pipeline that amortises one build over `k`
+targets and quotes its total over `k·√r` must divide by batch rho
+(Kuhn–Struik): `k` targets in sequence, jumps in `G` only, and one table
+of distinguished points, so a later target can finish on an earlier
+one's trail (`ic_boundary::rho_batch_with`).  At `k = 32` that costs
+about a fifth of one target alone (ledger §19).
+
+    ./target/release/ic rho --batch-koblitz 0/41,0/53 --batch-sizes 1,4,16,32 --batches 16
+
+The walk is generic over the classes it moves between
+(`ic_boundary::RhoClasses`): points, `{P, −P}`, and on a Koblitz curve
+the signed Frobenius classes (`SignedFrobeniusClasses`).  Those are
+canonicalised by the least normal-basis rotation, and `x` and `y` are
+carried there by table.  The count charges group operations only.  What
+a step's canonicalisation costs on top, in a batched unit, is measured
+by `examples/koblitz_reference_prices.rs`.
 
 ---
 
@@ -314,10 +369,33 @@ pub trait SystemSolver: Send + Sync {
     fn describe(&self) -> String;
     fn parameters(&self) -> &[(&str, &str)] { &[] }
     fn accepts(&self, shape: &SystemShape) -> bool { true }
+    fn finds_every_solution(&self) -> bool { true }
     fn solve(&self, system: &BooleanSystem, params: &Params, budget: Option<Duration>)
         -> (SolverVerdict, SolverCost);
 }
 ```
+
+What ships behind it (`ic bench --list` prints each one's parameters):
+
+| name | engine | native unit | limits |
+|:--|:--|:--|:--|
+| `f4-f2` | Faugère's F4 over `F_2[v]/(v² − v)`: normal strategy, Gebauer–Möller criteria, the field products `v·g` as pairs, symbolic preprocessing, bit-packed elimination; a full reduced basis, solutions read off its linear elements ([`pq_f4_f2.rs`](../../src/cryptanalysis/pq_f4_f2.rs)) | word XORs (elimination only) | matrix size; the budget |
+| `matrix-f4` | the Koblitz oracle's hybrid: Macaulay matrices to a fixed degree (`max_degree`, default 3), propagation, splitting (`split`) | word XORs (elimination only) | `node_budget` |
+| `matrix-f5` | the same, leaving out the rows the Boolean F5 criterion predicts to reduce to zero | word XORs (elimination only) | `node_budget` |
+| `inherited-f4` | the same, children specialising their parent's reduced basis | word XORs (elimination, specialisation and linear elimination only) | `node_budget` |
+| `crossbred-f2` | Joux–Vitse: a Macaulay left kernel at degree `D`, then `2^k` bit-sliced linear solves | word operations (partial) | parameters that do not fit the system are a budget verdict |
+| `buchberger-f2` | Buchberger over the boolean ring, one pair at a time, coprime and chain criteria, closed under the field equations since 34154ed9 — the frozen rows of ledger §14–§17 were measured on the earlier pair-only engine, whose degree is an upper bound (§17.1, §17.7) | monomial operations | the budget; enumerates for solutions up to 26 unknowns |
+| `xl-f2` | XL: multiply out to degree `n_vars`, linearise | monomial operations (modelled) | declines above 10 unknowns |
+| `sat-cdcl` | CDCL with Tseitin monomials and native parity rows; **one model per call** | conflicts | `sat_conflict_budget` |
+| `fes-f2` | fast exhaustive search, libfes-lite's Gray code: two word XORs per point | word XORs (Gray-code steps) | quadratic systems, ≤ 32 unknowns, ≤ 64 equations |
+| `fes-f2-wide` | the same over 16 (AVX-512) or 8 (AVX2) sub-cubes per Gray-code step, the last four or three unknowns fixed per 32-bit lane; the first 32 equations in the lanes, the rest filtering the candidates; the scalar walk where the lanes do not fit ([`mq_fes.rs`](../../src/cryptanalysis/mq_fes.rs)) | vector XORs (Gray-code steps, *k* lanes) | quadratic systems, ≤ 36 unknowns; 3–4× `fes-f2` here |
+| `exhaustive` | every equation at every point, stopping at the first that fails | monomial tests (performed) | 26 unknowns |
+
+The exhaustive searches are the **reference**, not a strawman:
+`fes-f2-wide` (or `fes-f2` on a host without the vector instructions)
+wherever the system is quadratic (every two-summand descent),
+`exhaustive` where it is not. An engine that does not beat the
+strongest of them on a cell has not earned that cell.
 
 The contract is short and all of it matters:
 
@@ -343,6 +421,20 @@ The contract is short and all of it matters:
   degree `n_vars` with no budget hook — about 150 seconds a call on a
   12-unknown descent against Buchberger's 7 milliseconds on the same
   systems — so it declines above ten unknowns.
+- **Say whether you find every solution.** `finds_every_solution`
+  defaults to `true`. An engine that returns one model per call (a SAT
+  solver) overrides it to `false`: the accounting contract keeps
+  first-solution and complete-enumeration engines on separate
+  leaderboards, and a paired comparison checks a first-solution engine
+  for membership in the reference's solution set rather than equality.
+- **Qualify a partial count.** The runner prices a count by the
+  calibrated word-XOR ratio only when `op_unit` is exactly
+  `word XORs`, which asserts that the count covers the whole run. An
+  engine that counts its elimination but not its matrix build (every
+  F4-family engine here) says so in the unit — `word XORs (elimination
+  only)` — and is priced by measured wall time instead. Leaving the
+  qualifier off would price an incomplete count as a complete one,
+  flattering the engine by whatever it left out.
 
 ### `RelationSolver` — the matrix
 
@@ -439,9 +531,9 @@ impl SystemSolver for F5 {
 ```rust
 pub fn solver_registry() -> Vec<Box<dyn SystemSolver>> {
     vec![
+        Box::new(F4F2),
         Box::new(BuchbergerF2),
-        Box::new(XlF2),
-        Box::new(SatCdcl),
+        // … the other shipped engines …
         Box::new(Exhaustive),
         Box::new(F5),            // ← yours
     ]
@@ -450,22 +542,38 @@ pub fn solver_registry() -> Vec<Box<dyn SystemSolver>> {
 
 **Step 3 — check it agrees with the others.** The module's tests
 already require every registered solver to find the same solution set
-on a fixture and to refute an unsatisfiable system. Your engine is now
-in that loop; if it disagrees, the test names it.
+on random quadratic systems and on descent systems of both summand
+counts, and to refute an unsatisfiable system. Your engine is now in
+that loop; if it disagrees, the test names it.
 
 ```bash
 cargo test --release --lib cryptanalysis::ic_framework
 ```
 
-**Step 4 — measure it against the reference.** `exhaustive` is not a
-strawman: it is the best algorithm that already solves the same
-problem, in the same unit, on the same instance, and its cost is
-exactly `2^n · Σ_i |terms_i|`. If your engine cannot beat it on a cell,
-it has not earned that cell whatever its asymptotics are said to be.
+**Step 4 — measure it against the reference, on its own.** `ic descent
+--solver f5 --solver fes-f2 --solver buchberger-f2 --repeats 3` runs
+your engine on the frozen descent table's seeded targets beside the
+reference and the baseline, interleaved per target, and checks every
+answer against the reference's. `fes-f2` (quadratic systems) and
+`exhaustive` (the rest) are not strawmen: they are the best algorithms
+that already solve the same problem on the same instance. If your
+engine cannot beat them on a cell, it has not earned that cell whatever
+its asymptotics are said to be.
+
+**Step 5 — measure the whole method.** The per-call ratio is a stage
+diagnostic. What your engine does to `S` is the answer:
 
 ```bash
 ic bench --sweep my-solver-sweep.json
 ```
+
+**Step 6 — run the matched suite before claiming anything.**
+[`research/ic_framework_engines_20260922/`](../../research/ic_framework_engines_20260922/README.md)
+freezes the paired baseline/candidate comparison `AGENTS.md` §8 asks
+every performance change to carry: `run.py --add-engine f5` reruns the
+frozen engines with yours beside them, and `compare.py --manifest`
+refuses the comparison if your run saw different inputs or decided them
+differently.
 
 The same four steps apply to a factor base (`FactorBaseBuilder`), an
 oracle (`DecompositionOracle`) or a matrix (`RelationSolver`) — a
@@ -554,23 +662,67 @@ worse than none:
 - **The sizes are toy.** The largest instances here are tens of bits.
   Nothing measured is a statement about a deployed curve.
 - **The engines, not the descent, are the ceiling on the algebraic
-  rows.** The descent is symbolic and reaches 64 boolean variables;
-  the shipped engines do not. `exhaustive` and Buchberger's solution
-  extraction enumerate `2^{n_vars}` points and stop at 26 variables,
-  `xl-f2` stops at 10, and Buchberger's basis computation is the wall
-  long before its cap: at `n' = 9` (18 unknowns, ledger §16) it took
-  47 and 90 minutes for runs of 69 and 134 relations, `10⁵` times the
-  pair table on the same base, with six more unknowns costing it
-  2,300× against the exhaustive engine's 77×. An engine that scales
-  is the plug point's purpose (§5); the rows past `n' ≈ 9` are
-  waiting for one.
-- **No F4 or F5 ships.** The `SystemSolver` plug point exists for them
-  and is exercised by four engines (Buchberger, XL, CDCL, exhaustive),
-  but a signature-based or matrix-F4 engine is yours to plug in; §5
-  shows how.
+  rows, and F4 moved it.** The descent is symbolic and reaches 64
+  boolean variables. Buchberger's basis computation stops deciding
+  targets at twenty unknowns; `f4-f2` decides every two-summand target
+  through twenty-eight (a degree-five matrix outgrows its 1 GiB cap at
+  thirty), the matrix hybrids through thirty-four. `exhaustive`
+  enumerates to 26 unknowns, `fes-f2` to 32, `fes-f2-wide` to 36, and
+  `xl-f2` stops at 10. Ledger §17 has the measurements.
+- **No engine here beats exhaustive search, and nothing beats rho.**
+  In ledger §17 the F4-family engines cut the Gröbner row's whole-method
+  `S` by `12×` to `1,535×`. Crossbred at its defaults crossed the scalar
+  fast exhaustive search at 26–28 unknowns but not its vector form
+  (`2.45`–`3.0×`). The inherited-F4 hybrid is `1.20×` the vector form at
+  34 unknowns, with a crossing extrapolated near 35. The best whole
+  row on every instance measured is still the pair table.
+- **F5 ships as matrix-F5 inside a hybrid, not as a signature-based
+  engine.** `matrix-f5` builds the Macaulay matrix to a fixed degree
+  with the rows the F5 criterion predicts to reduce to zero left out,
+  then propagates and splits. At its default degree 3 on the quadratic
+  two-summand descents the criterion prunes only what linear equations
+  allow — the trivial syzygies first appear at degree 4 — so there it
+  tracks `matrix-f4`. An incremental signature-based F5 (or GVW, or a
+  signature-based F4) is not in the registry; it is the obvious next
+  engine to plug in, and §5 shows how.
 - **No iterative matrix.** Two eliminations ship; Wiedemann and Lanczos
   are open, and the trait is written so that a matrix-vector product is
   a legitimate `work_unit`.
+- **No algebraic oracle on prime-field curves.** The prime regime has
+  only the table oracles (`subtract`, `mitm`), whose family law is
+  `Θ(r^{1/6})` above rho. The one published algebraic mechanism is
+  Petit–Kosters–Messeng's tower factor base; its design, and the test
+  on the solver axis that decides whether to build it end to end, are in
+  [`RESEARCH_PKM_TOWER_ORACLE.md`](../../research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md).
+  A pilot of that test (§10 there) found F4's solving degree nearly flat,
+  where linear growth in `N` had been pre-registered: 4–5 for `m = 2`
+  through `N = 18`, and 5–6 for `m = 3` through `N = 12`. Round 2 (§11)
+  built the sparse tower-aware F4 that extending `N` needed
+  (`src/cryptanalysis/f4_fp_tower.rs`, cross-checked against `f4_fp`). It
+  finds the degree rising again, slowly:
+  - at `m = 2`, to 6 at `N = 20` and still 6 at `N = 22`, in the Kummer and
+    isogeny families alike and at every prime tried, which refutes the
+    pilot's bounded-degree conjecture;
+  - at `m = 3`, to 7 at `N = 15`.
+
+  Round 3 (§12) changed only how the engine stores its basis. The new
+  build reproduces round 2 exactly at 0.51–0.69 of its peak memory, and it
+  finishes `m = 4`, the regime that decides the oracle, at `N = 16`:
+  `D = 7`, as at `N = 12`. One level without a rise closes nothing.
+  Whether the growth is linear or slower is still open, at every `m`, and
+  `m = 4` at `N = 20` is beyond the machine that ran these (the width grew
+  8 times from `N = 12` to 16). No oracle is built.
+
+  Round 4 (§13) built a signature-based F4 for the tower ring
+  (`src/cryptanalysis/sig_fp_tower.rs`, F5/GVW criteria) and checked it
+  against `f4_fp_tower`. It agrees on all 18 systems, and its criteria
+  remove the zero reductions. But it needs rows 1–2 degrees higher on
+  every system and up to 28 times the memory, and it ran out of 14 GB at
+  `m = 3`, `N = 15`. So `f4_fp_tower` stays the engine that measures `D`.
+  A variant taking F4's steps by polynomial degree (§14) matches F4's
+  degree at `m = 3`, `N = 9` but not at `N = 12`, so the signature line
+  stops there; the next lever for F4's zero rows is an exact early exit
+  once a step's residue block reaches full rank.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
@@ -587,7 +739,7 @@ worse than none:
 | factor base | `FactorBaseBuilder` | `prime-abscissa`, `binary-subspace`, `koblitz-orbit` |
 | targets | `Targets` | `random`, `walk` |
 | point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic` |
-| polynomial solver | `SystemSolver` | `buchberger-f2`, `xl-f2`, `sat-cdcl`, `exhaustive` |
+| polynomial solver | `SystemSolver` | `f4-f2`, `buchberger-f2`, `matrix-f4`, `matrix-f5`, `inherited-f4`, `crossbred-f2`, `xl-f2`, `sat-cdcl`, `fes-f2`, `fes-f2-wide`, `exhaustive` |
 | relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss` |
 
 `ic bench --list` prints this with every parameter each plug-in reads.
@@ -597,7 +749,10 @@ worse than none:
 | file | what is in it |
 |:--|:--|
 | [`stages.rs`](../../src/cryptanalysis/ic_framework/stages.rs) | the traits and their types — the normative contracts |
-| [`solvers.rs`](../../src/cryptanalysis/ic_framework/solvers.rs) | the `SystemSolver` implementations and their registry |
+| [`solvers.rs`](../../src/cryptanalysis/ic_framework/solvers.rs) | the `SystemSolver` adapters and their registry |
+| [`pq_f4_f2.rs`](../../src/cryptanalysis/pq_f4_f2.rs) | the boolean F4 engine: pair selection and criteria, symbolic preprocessing, the packed elimination, solution extraction |
+| [`koblitz_groebner.rs`](../../src/cryptanalysis/koblitz_groebner.rs), [`crossbred.rs`](../../src/cryptanalysis/crossbred.rs), [`mq_fes.rs`](../../src/cryptanalysis/mq_fes.rs) | the hybrid F4/F5 engines, crossbred, and fast exhaustive search the adapters call |
+| [`ic_descent_degrees.rs`](../../src/cryptanalysis/ic_descent_degrees.rs), [`descent.rs`](../../src/bin/ic/descent.rs) | `ic descent`: the degree table, and the paired engine comparison (`--solver`) |
 | [`plugins.rs`](../../src/cryptanalysis/ic_framework/plugins.rs) | the factor bases and decomposition oracles, the algebraic one included |
 | [`pq_descent_symbolic.rs`](../../src/cryptanalysis/pq_descent_symbolic.rs) | the symbolic Weil descent the algebraic oracle builds its systems with |
 | [`linalg.rs`](../../src/cryptanalysis/ic_framework/linalg.rs) | the structured elimination and the matrix registry |

@@ -62,7 +62,7 @@ def parse_identity(path):
     out = {}
     if not path.exists(): return out
     for line in path.read_text().splitlines():
-        m = re.match(r"(\S+)\s+(\d+) records\s+sha256 (\w+)\s+(IDENTICAL to ref|DIFFERS from ref)", line)
+        m = re.match(r"(\S+)\s+(\d+) records\s+sha256 (\w+)\s+(IDENTICAL to \w+|DIFFERS from \w+)", line)
         if m: out[m.group(1)] = {"records": int(m.group(2)), "sha256_16": m.group(3), "identicalToRef": m.group(4).startswith("IDENTICAL")}
         m = re.match(r"(\S+)\s+missing", line)
         if m: out[m.group(1)] = {"missing": True}

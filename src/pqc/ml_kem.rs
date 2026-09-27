@@ -814,7 +814,7 @@ mod tests {
     fn compress_decompress_error_bound() {
         // |Decompress_d(Compress_d(x)) − x| ≤ ⌈q / 2^{d+1}⌋ (FIPS 203 §4.2.1).
         for d in [1usize, 4, 5, 10, 11] {
-            let bound = (Q + (1 << (d + 1)) - 1) / (1 << (d + 1));
+            let bound = Q.div_ceil(1 << (d + 1));
             for x in 0..Q {
                 let y = decompress(compress(x, d), d);
                 let diff = {

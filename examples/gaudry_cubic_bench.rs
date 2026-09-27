@@ -25,8 +25,8 @@ use std::env;
 use std::fs;
 
 use crypto_lib::cryptanalysis::gaudry_cubic::{
-    generate_instance3, run_gaudry_opts, run_gaudry_with, run_rho3, GaudryOptions, GaudryReport,
-    RhoReport3, Solver, SubspaceBase,
+    generate_instance3, run_gaudry_opts, run_rho3, GaudryOptions, GaudryReport, RhoReport3, Solver,
+    SubspaceBase,
 };
 use rand::rngs::StdRng;
 use rand::SeedableRng;
@@ -189,7 +189,11 @@ fn main() {
                         // Only the large-prime arm has an eliminator, so only
                         // it can carry a merge-level cap; the two control arms
                         // run uncapped whatever --merge-cap says.
-                        let cap = if matches!(sb, SmallBase::Rule) { merge_cap } else { 0 };
+                        let cap = if matches!(sb, SmallBase::Rule) {
+                            merge_cap
+                        } else {
+                            0
+                        };
                         out.push(one(pp, s, max_residuals, solver, false, sp, sb, 2, cap));
                     }
                 } else {

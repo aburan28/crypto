@@ -32,7 +32,6 @@
 
 use super::SmallCurve;
 use num_bigint::BigUint;
-use num_integer::Integer;
 use num_traits::Zero;
 use std::collections::HashMap;
 
@@ -116,7 +115,7 @@ pub fn frobenius_trace_bsgs(curve: &SmallCurve) -> Option<i64> {
 
     // Try up to 4 random points; combine orders via lcm.
     let mut combined: u64 = 1;
-    let mut rng_state: u64 = (p as u64)
+    let mut rng_state: u64 = p
         .wrapping_mul(0xA0761D6478BD642F)
         .wrapping_add(curve.a)
         .wrapping_add(curve.b);
@@ -175,7 +174,7 @@ pub fn sample_random_point(curve: &SmallCurve, rng: &mut u64) -> Option<crate::e
         *rng = rng
             .wrapping_mul(6364136223846793005)
             .wrapping_add(1442695040888963407);
-        let x = ((*rng >> 7) % p) as u64;
+        let x = (*rng >> 7) % p;
         let rhs = curve.rhs(x);
         if rhs == 0 {
             return Some(Point::Affine {
@@ -224,7 +223,7 @@ pub fn tonelli_shanks_u64(n: u64, p: u64) -> Option<u64> {
     let mut m = s;
     let mut c = mod_pow_u64(z, q, p);
     let mut t = mod_pow_u64(n, q, p);
-    let mut r = mod_pow_u64(n, (q + 1) / 2, p);
+    let mut r = mod_pow_u64(n, q.div_ceil(2), p);
     loop {
         if t == 1 {
             return Some(r);
@@ -247,7 +246,7 @@ pub fn tonelli_shanks_u64(n: u64, p: u64) -> Option<u64> {
     }
 }
 
-fn mod_pow_u64(mut base: u64, mut exp: u64, m: u64) -> u64 {
+fn mod_pow_u64(base: u64, mut exp: u64, m: u64) -> u64 {
     let mut acc: u128 = 1;
     let mb = base as u128;
     let _ = mb;
@@ -340,9 +339,9 @@ fn refine_point_order(curve: &SmallCurve, point: &crate::ecc::point::Point, mut 
     let mut factors = Vec::new();
     let mut q = 2;
     while q <= remainder / q {
-        if remainder % q == 0 {
+        if remainder.is_multiple_of(q) {
             factors.push(q);
-            while remainder % q == 0 {
+            while remainder.is_multiple_of(q) {
                 remainder /= q;
             }
         }
@@ -352,7 +351,7 @@ fn refine_point_order(curve: &SmallCurve, point: &crate::ecc::point::Point, mut 
         factors.push(remainder);
     }
     for q in factors {
-        while k % q == 0 {
+        while k.is_multiple_of(q) {
             let candidate = k / q;
             if matches!(
                 point.scalar_mul(&BigUint::from(candidate), &a_fe),

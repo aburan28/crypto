@@ -8,9 +8,11 @@
     worker's JSON status, so a rho run cut off at `max_trials` contributes a
     TRUNCATED instruction count as the denominator.  On this script's own
     draw, 4 of the 64 rho runs at `n37a0` did not complete (64 of 64 did at
-    `n23a1`).  An under-charged denominator inflates IC/rho, so the 1.533
-    [1.238, 1.899] below is an upper-biased reading and the correction runs
-    downward.  `n23a1`'s 0.831 stands.
+    `n23a1`).  `n23a1`'s 0.831 stands; `n37a0`'s 1.533 does not, and it is a
+    LOWER bound rather than an upper one -- a rho that returns `incomplete`
+    exhausted its restarts, so it did MORE work than one that found its
+    collision early, and charging it over-charged the denominator.  Measured
+    with every rho run required to complete: 1.763 [1.547, 2.009].
 
     The code below is LEFT EXACTLY AS IT RAN.  Fixing it here would make the
     published numbers unreproducible, which is the one thing a correction
