@@ -527,13 +527,9 @@ pub fn format_report(r: &EdsReport) -> String {
         ca = sgn(r.chi_a),
         cb = sgn(r.chi_b),
         pw = r.period_w,
-        jw = if r.order > 0 { r.period_w / r.order } else { 0 },
+        jw = r.period_w.checked_div(r.order).unwrap_or(0),
         pc = r.period_chi,
-        jc = if r.order > 0 {
-            r.period_chi / r.order
-        } else {
-            0
-        },
+        jc = r.period_chi.checked_div(r.order).unwrap_or(0),
         qr = qr,
         nqr = nqr,
         zero = zero,
@@ -750,7 +746,7 @@ fn sqrt_u64(n: u64, p: u64) -> Option<u64> {
     // p ≡ 1 (mod 4): full Tonelli–Shanks.
     let mut q = p - 1;
     let mut s = 0u32;
-    while q % 2 == 0 {
+    while q.is_multiple_of(2) {
         q /= 2;
         s += 1;
     }
@@ -762,7 +758,7 @@ fn sqrt_u64(n: u64, p: u64) -> Option<u64> {
     let mut m = s;
     let mut c = powm(z, q, p);
     let mut t = powm(n, q, p);
-    let mut r = powm(n, (q + 1) / 2, p);
+    let mut r = powm(n, q.div_ceil(2), p);
     loop {
         if t == 1 {
             return Some(r);
@@ -1693,7 +1689,7 @@ mod tests {
             let br = reduce_and_analyze(&w, p).expect("reduction ok");
             let pp = BigUint::from(p);
             let a = BigUint::from(p - 1); // −1 mod p
-            let b = BigUint::from(invm(4, p)); // 1/4 mod p
+            let _b = BigUint::from(invm(4, p)); // 1/4 mod p
             let px = BigUint::from(0u32);
             let py = BigUint::from(invm(2, p)); // 1/2 mod p
             let ord = point_order(&px, &py, &a, &pp, 2 * p + 4).expect("finite order");

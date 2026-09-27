@@ -259,6 +259,15 @@ pub fn elgamal_rerandomise(pk: &ElGamalPublicKey, c: &ElGamalCiphertext) -> ElGa
     }
 }
 
+// `Integer::gcd` is available via the `num_integer` import in the
+// dependency graph; we don't currently use it here but keep the
+// import path live by silencing dead-code lints if the compiler ever
+// folds it out.
+#[allow(dead_code)]
+fn _gcd_link(a: &BigUint, b: &BigUint) -> BigUint {
+    a.gcd(b)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -386,13 +395,4 @@ mod tests {
         let m_wrong = elgamal_decrypt(&sk_b, &c).unwrap();
         assert_ne!(m_wrong, m, "wrong key must not decrypt");
     }
-}
-
-// `Integer::gcd` is available via the `num_integer` import in the
-// dependency graph; we don't currently use it here but keep the
-// import path live by silencing dead-code lints if the compiler ever
-// folds it out.
-#[allow(dead_code)]
-fn _gcd_link(a: &BigUint, b: &BigUint) -> BigUint {
-    a.gcd(b)
 }

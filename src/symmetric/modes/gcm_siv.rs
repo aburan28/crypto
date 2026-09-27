@@ -186,7 +186,7 @@ fn derive_key_bytes<C: BlockCipher128>(
 
 fn pad16(data: &[u8]) -> Vec<u8> {
     let mut v = data.to_vec();
-    while v.len() % 16 != 0 {
+    while !v.len().is_multiple_of(16) {
         v.push(0);
     }
     v

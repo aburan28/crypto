@@ -19,6 +19,7 @@ its old name still identify it.
 | [`RESEARCH_TORSION_AUXILIARY_INPUTS.md`](ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md) | Auxiliary inputs (Cheon) and torsion points against rho and index calculus |
 | [`RESEARCH_REPRESENTATION_STRUCTURE.md`](ecdlp-general/RESEARCH_REPRESENTATION_STRUCTURE.md) | Where exploitable structure can come from: the transfer pattern, an R1–R5 admissibility test for candidate handles, and why murmurations fail it |
 | [`RESEARCH_BENCH_LOG.md`](ecdlp-general/RESEARCH_BENCH_LOG.md) | Cryptanalysis research bench: empirical log |
+| [`RESEARCH_P256_RHO_ARITHMETIC.md`](ecdlp-general/RESEARCH_P256_RHO_ARITHMETIC.md) | Pre-registered P-256 rho engineering matrix: fused Solinas reduction, weak reduction, invariant partitioning, table sweeps, batched affine inversion, DP batching, and CPU/GPU/FPGA ablations |
 
 ## index-calculus — Semaev decomposition, factor bases, Gröbner, first-fall degree
 
@@ -34,6 +35,7 @@ its old name still identify it.
 | [`RESEARCH_FACTOR_BASE_SOLVE_COST.md`](index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md) | Choosing the factor base for the solver, not for the yield |
 | [`RESEARCH_GROEBNER_F4.md`](index-calculus/RESEARCH_GROEBNER_F4.md) | Minimal Buchberger / matrix-F4 solver |
 | [`RESEARCH_DREG_MEASUREMENT.md`](index-calculus/RESEARCH_DREG_MEASUREMENT.md) | Solving degree vs first-fall degree on binary Semaev systems |
+| [`RESEARCH_DESCENT_CROSSOVER.md`](index-calculus/RESEARCH_DESCENT_CROSSOVER.md) | The descent crossover: why a descended Semaev system's overdetermination and its decomposition yield are one parameter, and the scoping rule that follows for every refutation measurement |
 | [`RESEARCH_FFD_MEASUREMENT.md`](index-calculus/RESEARCH_FFD_MEASUREMENT.md) | First-fall-degree measurement |
 | [`RESEARCH_FFD_PROOF_COMPLEXITY.md`](index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md) | A proof-complexity bridge for the first-fall-degree assumption |
 | [`RESEARCH_FFD_WORKFLOW.md`](index-calculus/RESEARCH_FFD_WORKFLOW.md) | FFD falsification-driven experiment loop |
@@ -43,6 +45,7 @@ its old name still identify it.
 | [`RESEARCH_HYPERELLIPTIC_IC_RHO.md`](index-calculus/RESEARCH_HYPERELLIPTIC_IC_RHO.md) | Index calculus vs rho on genus-2 and genus-3 Jacobians |
 | [`RESEARCH_EXOTIC_COORDINATES.md`](index-calculus/RESEARCH_EXOTIC_COORDINATES.md) | Exotic coordinates for point decomposition |
 | [`RESEARCH_AUTOLAB_LOG.md`](index-calculus/RESEARCH_AUTOLAB_LOG.md) | Research AutoLab log |
+| [`RESEARCH_PKM_TOWER_ORACLE.md`](index-calculus/RESEARCH_PKM_TOWER_ORACLE.md) | Design and pre-registration of the prime-field algebraic oracle (Petit–Kosters–Messeng towers): construction, framework integration, the one-generator bound, and the solver-axis falsification test. A pilot (§10) contradicts the pre-registered expectation: F4's solving degree stays nearly flat (4–5 for `m = 2` through `N = 18`). Round 2 (§11) builds a sparse tower-aware F4 (`f4_fp_tower`), cross-checks it, and finds the degree rising again: 6 at `N = 20–22` for `m = 2` (Kummer, isogeny and the null alike) and 7 at `N = 15` for `m = 3`. That refutes the pilot's bounded-degree conjecture. Round 3 (§12) stores the basis compactly, reproduces round 2 exactly, and finishes `m = 4` at `N = 16`: `D = 7`, as at `N = 12`. Linear or slower growth remains open. Round 4 (§13) builds a signature-based F4 (F5/GVW criteria, `sig_fp_tower`) and checks it against F4: it agrees on all 18 systems and removes the zero reductions, but needs rows 1–2 degrees higher everywhere and up to 28 times the memory, so F4 stays the measuring engine. The gate of §14 fails too: taking F4's steps brings the signature engine to F4's degree at `m = 3`, `N = 9` but one above at `N = 12`, so no round follows |
 
 ## ecc2k130 — the ECC2K-130 campaign, Koblitz curves, binary Weil descent
 

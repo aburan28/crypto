@@ -55,12 +55,13 @@ all meet, and the two readings of it are what any cross-cap statement has to
 rest on.  Note also what the change cannot do -- a longer restart interval can
 only help rho -- so it cannot flatter the candidate.
 
-**Neither treatment of round 0021's four truncated fixtures is unbiased, and
-both err the same way.**  Charging a truncated rho under-charges the
-denominator, which raises the ratio; dropping those fixtures removes exactly
-the draws where rho is expensive, which are the draws with the LOWEST ratios,
-so the mean rises too.  1.533 is therefore an upper bound on `n37a0` under the
-frozen protocol, and the correction runs downward whichever way it is handled.
+**Round 0021's four truncated fixtures bias the ratio DOWNWARD, which is the
+opposite of what this script's first version asserted.**  The assertion was
+that a truncated rho is charged too little, raising the ratio.  It is charged
+too MUCH: an `incomplete` rho has exhausted its restarts, so it did a great
+deal of work and returned nothing, where a completed run often finds its
+collision early.  1.533 is therefore a lower bound on `n37a0`, and this script
+measures 1.763 [1.547, 2.009] with every rho run required to finish.
 
 ## What this measures
 

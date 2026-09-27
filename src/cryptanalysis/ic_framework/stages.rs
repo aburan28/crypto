@@ -213,12 +213,71 @@ pub trait DecompositionOracle<G: CountedGroup> {
         None
     }
 
-    /// The cost the last [`decompose`] charged to a [`SystemSolver`],
-    /// when it used one.
-    ///
-    /// [`decompose`]: DecompositionOracle::decompose
-    fn last_solver_cost(&self) -> Option<SolverCost> {
+    /// Everything the oracle's [`SystemSolver`] cost over the run so
+    /// far, when it uses one.  The runner prices this into `S` and
+    /// fills the report's degree columns from it.  Table oracles return
+    /// `None`.
+    fn solver_totals(&self) -> Option<SolverTotals> {
         None
+    }
+}
+
+/// Totals an algebraic oracle accumulates over its solver calls.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct SolverTotals {
+    pub solver: String,
+    pub calls: u64,
+    pub ops: u64,
+    pub op_unit: String,
+    pub wall_ns: u64,
+    pub peak_bytes: u64,
+    /// Calls that ran out of budget, counted apart from refutations.
+    pub budget_exceeded: u64,
+    pub solving_degree_sum: u64,
+    pub solving_degree_max: u32,
+    pub calls_with_a_degree: u64,
+    /// The shape of the last system, which is the shape of every system
+    /// on one base: the descent's variable and equation counts do not
+    /// depend on the target.
+    pub shape: Option<SystemShape>,
+    pub extra: BTreeMap<String, u64>,
+}
+
+impl SolverTotals {
+    pub fn absorb(&mut self, shape: &SystemShape, cost: Option<&SolverCost>, budget_exceeded: bool) {
+        self.calls += 1;
+        self.shape = Some(shape.clone());
+        self.budget_exceeded += u64::from(budget_exceeded);
+        let Some(c) = cost else { return };
+        self.ops += c.ops;
+        if self.op_unit.is_empty() {
+            self.op_unit = c.op_unit.clone();
+        }
+        self.wall_ns += c.wall_ns;
+        self.peak_bytes = self.peak_bytes.max(c.peak_bytes);
+        if let Some(d) = c.solving_degree {
+            self.solving_degree_sum += d as u64;
+            self.solving_degree_max = self.solving_degree_max.max(d);
+            self.calls_with_a_degree += 1;
+        }
+        for (k, v) in &c.extra {
+            *self.extra.entry(k.clone()).or_insert(0) += v;
+        }
+    }
+
+    pub fn solving_degree_mean(&self) -> Option<f64> {
+        (self.calls_with_a_degree > 0)
+            .then(|| self.solving_degree_sum as f64 / self.calls_with_a_degree as f64)
+    }
+
+    pub fn semi_regular_degree(&self) -> Option<u32> {
+        self.shape.as_ref()?.semi_regular_degree
+    }
+
+    /// Mean solving degree over the semi-regular degree: below one is
+    /// the structure the solver exploited.
+    pub fn degree_over_bound(&self) -> Option<f64> {
+        Some(self.solving_degree_mean()? / self.semi_regular_degree()? as f64)
     }
 }
 
@@ -317,6 +376,16 @@ pub trait SystemSolver: Send + Sync {
     /// on every target of a sweep.
     fn accepts(&self, shape: &SystemShape) -> bool {
         let _ = shape;
+        true
+    }
+
+    /// Whether `Solved` carries **every** solution (a complete
+    /// enumeration) or only one (a first-solution search, as a CDCL
+    /// solver returns).  The two are different workloads and are never
+    /// ranked against each other: the accounting contract keeps them
+    /// on separate leaderboards, and a comparison checks a first-solution
+    /// engine only for membership in the reference's solution set.
+    fn finds_every_solution(&self) -> bool {
         true
     }
 

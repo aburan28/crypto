@@ -1649,3 +1649,13 @@ class _StopParsing(Exception):
 
 if __name__ == "__main__":
     unittest.main()
+
+class TableV3Framing(unittest.TestCase):
+    def test_header_is_not_a_distinguished_point(self):
+        from dp_ingest import tableRecordBody
+        import struct
+        payload = bytes(range(32)) * 2
+        self.assertEqual(tableRecordBody(b"ECC2KDT3" + struct.pack("<II",3,32) + payload), payload)
+        self.assertEqual(tableRecordBody(payload), payload)
+        with self.assertRaises(ValueError):
+            tableRecordBody(b"ECC2KDT3" + struct.pack("<II",3,72))
