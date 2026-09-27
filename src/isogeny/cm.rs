@@ -479,7 +479,7 @@ pub fn cm_discriminant(curve: &SmallCurve) -> CmData {
     let a = curve.a as u128 % modulus;
     let b = curve.b as u128 % modulus;
     assert!(
-        (4 * ((a * a % modulus) * a % modulus) + 27 * (b * b % modulus)) % modulus != 0,
+        !(4 * ((a * a % modulus) * a % modulus) + 27 * (b * b % modulus)).is_multiple_of(modulus),
         "CM metadata requires a nonsingular curve"
     );
     let p = curve.p as i64;

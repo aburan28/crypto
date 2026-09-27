@@ -12,7 +12,7 @@ fn curve(p: u64, a: u64, b: u64) -> SmallCurve {
     }
 }
 fn nonsingular(c: &SmallCurve) -> bool {
-    (4 * c.a.pow(3) + 27 * c.b.pow(2)) % c.p != 0
+    !(4 * c.a.pow(3) + 27 * c.b.pow(2)).is_multiple_of(c.p)
 }
 // Counts square roots by enumerating y, without Legendre symbols or EC arithmetic.
 fn count(c: &SmallCurve) -> i64 {
