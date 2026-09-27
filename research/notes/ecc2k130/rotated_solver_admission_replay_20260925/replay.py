@@ -16,26 +16,49 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 OLD = ROOT / "research/notes/ecc2k130/rotated_solver_admission_20260925"
 ORIGINAL_FILES = ("INPUT.json", "PROTOCOL.md", "audit.py", "run.py", "ci_replay.py")
-NEW_FILES = (
-    "PROTOCOL.md",
-    "replay.py",
-    "test_replay.py",
-    "historical_koblitz_groebner.rs.gz",
-    ".github/workflows/ecc2k130-rotated-solver-admission.yml",
-)
 BASE_COMMIT = "8b640f31195238242be8940c928454ad2c9f2ce6"
 HISTORICAL_BUILDER = "src/cryptanalysis/koblitz_groebner.rs"
 
+# Reference-file keys (INPUT.json's `reference_files`) whose bytes are pinned
+# by a committed gzip snapshot of the file at BASE_COMMIT, rather than
+# verified against the live tree. These are ordinary src/ and examples/
+# sources that unrelated work elsewhere in the repository keeps editing --
+# two of the five drifted within 48 hours of the original freeze -- so all
+# five get a snapshot rather than waiting for each to break the replay in
+# turn. The other five reference files are evidence artifacts inside
+# dedicated `research/notes/ecc2k130/rotated_*_20260925/` directories that
+# only that research thread touches, so they stay verified live: adding a
+# ~2 MB snapshot of `corpus_archive` for a file nothing else edits would
+# only grow the repository.
+SNAPSHOT_KEYS = (
+    "binary_semaev",
+    "koblitz_builder",
+    "sat_example",
+    "solver_adapter",
+    "wdsat_adapter",
+)
+SNAPSHOT_DIR = HERE / "historical_snapshots"
+# Largest snapshot (sat_example) decompresses to 285,865 bytes; the cap is
+# headroom against a corrupted or truncated gzip stream, not a size this
+# reference set is expected to approach.
+SNAPSHOT_MAX_BYTES = 4 * 1024 * 1024
+
+def snapshot_path(key: str) -> Path:
+    return SNAPSHOT_DIR / f"{key}.rs.gz"
+
+NEW_FILES = (
+    ("PROTOCOL.md", "replay.py", "test_replay.py")
+    + tuple(f"historical_snapshots/{key}.rs.gz" for key in SNAPSHOT_KEYS)
+    + (".github/workflows/ecc2k130-rotated-solver-admission.yml",)
+)
 
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
-
 
 def safe_reference(path: str) -> Path:
     rel = PurePosixPath(path)
     assert not rel.is_absolute() and ".." not in rel.parts and rel.parts
     return Path(*rel.parts)
-
 
 def frozen_input() -> dict:
     own = json.loads((HERE / "FROZEN.json").read_text())
@@ -53,7 +76,6 @@ def frozen_input() -> dict:
     assert data["reference_files"]["koblitz_builder"]["path"] == HISTORICAL_BUILDER
     return data
 
-
 def historical_replay(data: dict) -> None:
     with tempfile.TemporaryDirectory(prefix="rotated-admission-historical-") as temporary:
         root = Path(temporary)
@@ -66,10 +88,10 @@ def historical_replay(data: dict) -> None:
             rel = safe_reference(item["path"])
             assert rel not in seen, rel
             seen.add(rel)
-            if label == "koblitz_builder":
-                with gzip.open(HERE / "historical_koblitz_groebner.rs.gz", "rb") as stream:
-                    raw = stream.read(1024 * 1024 + 1)
-                assert len(raw) <= 1024 * 1024
+            if label in SNAPSHOT_KEYS:
+                with gzip.open(snapshot_path(label), "rb") as stream:
+                    raw = stream.read(SNAPSHOT_MAX_BYTES + 1)
+                assert len(raw) <= SNAPSHOT_MAX_BYTES, label
             else:
                 raw = (ROOT / rel).read_bytes()
             assert sha(raw) == item["sha256"], label
@@ -89,14 +111,12 @@ def historical_replay(data: dict) -> None:
             print(result.stdout.strip())
     print("HISTORICAL_REPLAY_PASS")
 
-
 def function_body(source: str, name: str) -> str:
     match = re.search(rf"(?m)^pub fn {re.escape(name)}\s*\(", source)
     assert match, name
     end = source.find("\n}\n", match.end())
     assert end >= 0, name
     return source[match.start():end + 2]
-
 
 def current_contract() -> dict:
     builder_path = ROOT / HISTORICAL_BUILDER
@@ -155,7 +175,6 @@ def current_contract() -> dict:
         "generic_builder_admits_layout": {"n13-m5-d2": True, "n19-m6-d2": False},
     }
 
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=("freeze", "historical", "current"), required=True)
@@ -167,7 +186,6 @@ def main() -> None:
         historical_replay(data)
     else:
         print(json.dumps(current_contract(), sort_keys=True, separators=(",", ":")))
-
 
 if __name__ == "__main__":
     main()

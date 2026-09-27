@@ -13,9 +13,24 @@ import replay
 
 class ReplayControls(unittest.TestCase):
     def test_historical_reference_mismatch_is_rejected(self) -> None:
+        # Every snapshotted key, not just the one that happened to drift
+        # first: each is read from its own gzip file and must be checked
+        # against its own frozen hash, not skipped or cross-checked against
+        # a different key's snapshot.
+        for key in replay.SNAPSHOT_KEYS:
+            with self.subTest(key=key):
+                data = copy.deepcopy(replay.frozen_input())
+                data["reference_files"][key]["sha256"] = "0" * 64
+                with self.assertRaisesRegex(AssertionError, key):
+                    replay.historical_replay(data)
+
+    def test_historical_live_reference_mismatch_is_rejected(self) -> None:
+        # A reference file verified against the live tree, not a snapshot,
+        # must still fail closed if it no longer matches.
         data = copy.deepcopy(replay.frozen_input())
-        data["reference_files"]["koblitz_builder"]["sha256"] = "0" * 64
-        with self.assertRaisesRegex(AssertionError, "koblitz_builder"):
+        live_key = next(k for k in data["reference_files"] if k not in replay.SNAPSHOT_KEYS)
+        data["reference_files"][live_key]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(AssertionError, live_key):
             replay.historical_replay(data)
 
     def test_current_width_guard_and_unsupported_status_are_required(self) -> None:

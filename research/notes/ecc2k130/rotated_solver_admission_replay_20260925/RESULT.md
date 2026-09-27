@@ -48,3 +48,63 @@ two `cargo test --lib pdp_admission_... -- --nocapture` commands in the
 path-filtered workflow. Compact stdout and the exact current source digests
 are in [`evidence/`](evidence/). No solver process, ECDLP timing, full-DLP
 cost, matched-rho ratio or ECC2K-130 transfer result is claimed.
+
+
+## Round 2: a second reference file drifted, generalized to a snapshotted set
+
+Two days after round 1, the original, untouched
+`ci_replay.py` failed again on `main` at `6c0324c9`: **two** reference
+files no longer matched `INPUT.json`, not the one round 1 fixed. Reproduced
+directly (no CI needed):
+
+```
+python3 research/notes/ecc2k130/rotated_solver_admission_20260925/ci_replay.py
+```
+
+| reference key | path | frozen sha256 | `6c0324c9` sha256 |
+|:--|:--|:--|:--|
+| `koblitz_builder` | `src/cryptanalysis/koblitz_groebner.rs` | `bd95ee98…79c015` | `1590fd29…881a63c0` |
+| `sat_example` | `examples/koblitz_s5_sat_instance.rs` | `c2bc8b05…2115f09` | `4ce1a95c…d550c8eaf` |
+
+`koblitz_builder` had already moved once, past round 1's snapshotted
+`429be4bc…` value, to a third hash; `sat_example` drifted for the first
+time. Both files sit under `src/cryptanalysis/` and `examples/`, ordinary
+locations unrelated cryptanalysis work keeps editing, so patching this one
+file again would only defer the next break. Round 2 (`PROTOCOL.md`) instead
+snapshots all five reference-file keys whose paths live under `src/` or
+`examples/` (`binary_semaev`, `koblitz_builder`, `sat_example`,
+`solver_adapter`, `wdsat_adapter`), each independently verified against
+`INPUT.json`'s original hash and stored as its own
+`historical_snapshots/<key>.rs.gz`; the round-1 single-file
+`historical_koblitz_groebner.rs.gz` is superseded by
+`historical_snapshots/koblitz_builder.rs.gz` (identical bytes). The five
+evidence-file keys inside this thread's own `rotated_*_20260925/`
+directories remain verified live, unchanged from round 1.
+
+Merging round 1 onto current `main` also exposed a second, independent
+problem: `main` had added a required `derived` field to
+`FrobeniusFactorBase` since round 1's regression test was written, so the
+sentinel factor-base literal in
+`pdp_admission_n19_m6_d2_layout_is_unsupported_not_refuted` no longer
+compiled (`E0063`). Fixed with `derived: Default::default()`, matching the
+pattern used elsewhere in the same file; this is a struct-literal update
+for an added field, not a change to the test's assertions or to
+`groebner_decompose`'s admission logic.
+
+| Check | Recorded outcome |
+|:--|:--|
+| `replay.py --mode freeze` | `NEW_AND_ORIGINAL_FREEZE_PASS` |
+| `replay.py --mode historical` | `HISTORICAL_REPLAY_PASS` (all five snapshotted keys, all five live keys) |
+| `replay.py --mode current` | `CURRENT_GENERIC_CONTRACT_PASS` |
+| `python3 -m unittest discover -s . -p test_replay.py -v` | 4 passed (mismatch rejected for every snapshotted key and for a live-verified key; width-guard and path-traversal controls unchanged) |
+| `cargo test --lib pdp_admission_n19_m6_d2_layout_is_unsupported_not_refuted -- --nocapture` | 1 passed, 0 failed |
+| `cargo test --lib pdp_admission_unsupported_is_not_a_refutation -- --nocapture` | 1 passed, 0 failed |
+| `rustfmt --check --edition 2021 src/cryptanalysis/koblitz_index_calculus.rs` | clean |
+| `cargo clippy --lib --tests -- -D warnings` | clean (one pre-existing unrelated `unknown_lints` warning on an unrecognized clippy lint name, not from this change) |
+
+All commands ran locally to completion; this round's local sandbox could
+reach `crates.io` (round 1's could not), so no result here depends on
+hosted CI to have actually executed. No solver process, ECDLP timing,
+full-DLP cost, matched-rho ratio, or ECC2K-130 transfer result is claimed,
+and the 2026-09-25 admission verdict is unchanged: zero solver arms
+admitted for its hash-pinned interfaces.

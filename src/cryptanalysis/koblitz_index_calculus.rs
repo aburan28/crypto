@@ -13831,6 +13831,7 @@ mod tests {
             orbit_of: Vec::new(),
             signed_orbits: Vec::new(),
             signed_orbit_of: Vec::new(),
+            derived: Default::default(),
         };
         let (found, stats) = groebner_decompose(
             &kc,
