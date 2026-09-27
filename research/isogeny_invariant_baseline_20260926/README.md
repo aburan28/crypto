@@ -52,3 +52,7 @@ f889db266f0e9de1fb8f93cc8d1d7f2f23d405e82d0fcc17d7b1bc292df2241c  results/summar
 ## Next experimental gate
 
 A future candidate needs *matched* m=3 Semaev polynomial systems at eligible parameters, with equivalent vector space bases, fixed random and planted targets, explicit grouping by Frobenius orbit, separately priced parameterization, failed solves, point lifting and verification, and an independent enumerative control. Freeze target seeds and solver configurations **before** running it. A meaningful claimed speedup additionally needs the repo's equivalent full DLP suite, matched rho, precomputation, matrix work and scalar verification; this m=2 enumeration is outside the frozen binary WDSat corpus and cannot be spliced into its `S` axis. Do not infer performance at the binary 131 degree challenge from this odd characteristic degree four control.
+
+## Evidence and independent reproduction
+
+[Evidence requirements and receipt format](EVIDENCE.md) distinguish public execution evidence, independent finite recomputation, mathematical proof, and performance claims. CI retains fresh raw outputs, command logs, hashes, a machine-readable receipt and corruption controls. Its independent verifier reconstructs all 246 tiny-field factor-base rows using separate arithmetic and line-intersection calculations. This does not extend the mathematical or performance scope of the baseline above.
