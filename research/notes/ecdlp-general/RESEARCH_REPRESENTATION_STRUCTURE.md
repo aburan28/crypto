@@ -8,9 +8,11 @@ narrow, and two attacks already catalogued in this repository violate it.
 §2.4 states the corrected pattern, §3 the corrected test (R2 restated,
 R5 added), §9 the audit that found it — completed across the repository's
 measured threads in §9.3, which found no further counterexample and split
-R5 into two failure modes; §9.4 adds Cheon as the measured positive
+R5 into two failure modes; §9.4 adds Cheon as a measured positive
 control, and §9.5 closes §7.3 — the higher-dimensional analogue for plain
-curves exists, and computes the trace.  **The verdict on murmurations is
+curves exists, and computes the trace.  §9.6 corrects §9.4: the sweep had
+skipped `research/notes/lattice-hnp/`, which already held measured HNP key
+recoveries, so Cheon was not the repository's first positive control.  **The verdict on murmurations is
 unchanged** and does not depend on the repaired clause; see §4.4.
 **Companions:** [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](./RESEARCH_ECDLP_STATE_OF_THE_ART.md) §8,
 [`RESEARCH_DIEM_DESCENT.md`](../index-calculus/RESEARCH_DIEM_DESCENT.md),
@@ -493,7 +495,11 @@ but:
    the algorithm with no generic-group analogue.  The five rows of that
    table are five different `H`, and only R1 is common to all of them —
    which is the argument for looking at what protocols publish rather
-   than at what mathematics exists.
+   than at what mathematics exists.  The first such census,
+   [`RESEARCH_SRS_CHEON_CENSUS.md`](RESEARCH_SRS_CHEON_CENSUS.md), prices
+   the deployed powers-of-tau setups and finds the published leak size
+   alone sets the loss: `½·log₂ d − 0.17` bits, with `d` within 11% of
+   the largest published exponent on every row.
 2. **Can a subfield be simulated?**  Already the repo's standing
    question — hidden isogenies, generalised-Mersenne structure
    (`RESEARCH_PKM_CRITERION.md`, `RESEARCH_NIST_SOLINAS_STRUCTURE.md`),
@@ -704,6 +710,14 @@ holds.
 
 ### 9.4 Cheon: the positive control the sweep lacked (2026-09-21)
 
+> **Correction (2026-09-27, §9.6).**  The heading and the next two
+> paragraphs overstate.  The §9.3 ledger lacked a positive instance only
+> because the sweep never read `research/notes/lattice-hnp/`, which
+> already held measured key recoveries on eight standard curves.  The
+> repository had a measured positive control before Cheon arrived.
+> Cheon is the second, and the first with a fitted exponent in the
+> repository's own unit.  The text below is kept as written.
+
 Merging `main` brought in
 [`RESEARCH_TORSION_AUXILIARY_INPUTS.md`](./RESEARCH_TORSION_AUXILIARY_INPUTS.md),
 written independently and landing squarely on this note's subject.  It
@@ -806,3 +820,46 @@ Three honesties about this entry:
 What this does *not* close: F4′ and F5 stand, and §7.1 — which deployed
 protocols publish more than the group element — remains the productive
 question, now with one fewer distraction beside it.
+
+### 9.6 Correction: the sweep skipped the lattice-HNP threads (2026-09-27)
+
+**What was wrong.**  §9.3 swept the ECC2K-130, index-calculus, CM/isogeny
+and EDS threads and did not open `research/notes/lattice-hnp/`.  §9.4 then
+argued that every transfer in the ledger fails, that this was a weak
+evidential position, and that Cheon supplied the missing positive.  The
+repository already had one.
+
+**What the skipped folder holds**, classified against R1–R5:
+
+| thread | R1 (licensing datum) | class | outcome |
+|:--|:--|:--|:--|
+| `LLL_GS_ANALYSIS` (with the Phase 1.5 runs in `GLV_HNP`) | published `(r, s)` per signature, plus 64 bits of nonce bias on each of 8 signatures (`k_bits = 192` on 256-bit curves) | **measured positive** | planted keys recovered on secp192k1, secp224k1, secp256k1, P-256, brainpoolP256r1, P-384, brainpoolP384r1 and P-521 — 3/3 seeds at 256, 384 and 521 bits after the fixes below; under a second per probe where timed at 192–256 bits, about 80 s per probe on P-521 |
+| `CGA_HNC` | needs smooth factors of `#E` | R1 absent | standard curves have cofactor 1; isogeny transport keeps the group order, so the category never changes |
+| `GLV_HNP`, `GLV_HNP_PHASE2` (GLV-specific variant) | — | open | design documents; the `k₁`-only-leak lattice is not implemented |
+| `HNP_LANDSCAPE` | — | survey | real-world breaks cited from the literature, not measured here |
+
+The HNP row satisfies the test outright: R1 is the published signature
+plus the biased nonce, R2 embeds the problem into a lattice in
+`Z^{m+2}`, R3 is LLL, R4 is the private key itself, and R5 holds at every
+standard size measured.  Two failures recorded along the way —
+secp256k1 at 256 bits and the 384/521-bit curves — were traced to
+overflow and catastrophic cancellation in Gram–Schmidt and closed with
+high-precision reduction (`LLL_GS_ANALYSIS` §10.4).  They were numerical
+defects, not properties of the curves.
+
+**What changes.**  The factual claim in §9.4 — that the ledger had no
+positive instance until Cheon — is withdrawn.  The conclusion survives
+and is strengthened: the pattern had a measured positive all along, of a
+different kind from Cheon.  HNP is **polynomial time given the leak**,
+like SSSA; Cheon is an **exponent** reduction.  With both in hand the
+ledger now holds measured positives of both kinds, and every positive in
+it — measured or catalogued — consumes something a protocol published.
+
+**How it happened**, recorded so it is not repeated: the sweep chose
+threads by reading headlines, and the lattice-HNP headlines read as
+proposals and surveys.  The measured recoveries sit in tables below the
+fold.  A later ledger should list every folder under `research/notes/`
+and say which were read.
+
+**Class** (`AGENTS.md` §3): **accounting**.  A claim corrected, the
+conclusion unchanged.

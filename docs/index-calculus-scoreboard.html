@@ -4453,6 +4453,16 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <tr><td>torsion embedding, oracle quotient</td><td>14 / 16 / 18 / 20</td><td>8.6&ndash;27.5 / 10.6&ndash;35.0 / 8.6&ndash;20.6 / 9.8&ndash;22.0</td><td>&mdash;</td><td>33&ndash;139</td><td>collision 12/12</td><td>not a row (uses &alpha;)</td></tr>
 </tbody></table></div>
 <p>What a leak would buy on standard curves (<code>results/curve_divisors.md</code>): the largest divisor of n&minus;1 below 2<sup>32</sup> is 18,051,648 on secp256k1, 4.26&middot;10<sup>9</sup> on P-256, 2<sup>32</sup> on BLS12-381 and 4.29&middot;10<sup>9</sup> on BN254, so a protocol publishing 2<sup>32</sup> powers hands over a 2<sup>12</sup>&ndash;2<sup>16</sup> exponent-side reduction; Curve25519's &ell;&minus;1 has nothing above 132. The 2<sup>256</sup> extrapolation with d &asymp; 2<sup>128</sup> (&asymp; 21&middot;2<sup>64</sup> operations) rests on the 0.231 exponent and on a leak no protocol provides; it is marked as extrapolation.</p>
+<div class="table-scroll"><table>
+<caption>Deployed setups (census 2026-09-27, <code>research/srs_auxiliary_census_20260927/results/srs_census.json</code>; note <code>RESEARCH_SRS_CHEON_CENSUS.md</code>). q = largest public exponent of [&tau;<sup>i</sup>]G<sub>1</sub>, read from each project's own specification; d = largest divisor of r&minus;1 with d &le; q. Costs are generic floors &radic;(r/d)+&radic;d and &radic;(&pi;r/4) at constant 1, <b>not measurements at size</b>; the measured &asymp;20&times; practical constant above would add &asymp;4.3 bits. Loss = &frac12;log<sub>2</sub>d &minus; 0.17 on every row. The published analyses (ethresear.ch #6692) used the largest power of two below q; the largest admissible d makes each attack &asymp;0.5 bit cheaper (accounting). No row sees only G and [&tau;]G.</caption>
+<thead><tr><th>Setup</th><th>curve</th><th>q</th><th>d</th><th>Cheon floor</th><th>rho</th><th>bits lost</th><th>Class</th></tr></thead><tbody>
+<tr><td>EIP-4844 KZG (mainnet, n=12)</td><td>BLS12-381</td><td>4,095</td><td>3,648</td><td>2<sup>121.51</sup></td><td>2<sup>127.25</sup></td><td>5.74</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>EIP-4844 KZG (largest, n=15)</td><td>BLS12-381</td><td>32,767</td><td>30,531</td><td>2<sup>119.98</sup></td><td>2<sup>127.25</sup></td><td>7.27</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Zcash Sapling powers of tau</td><td>BLS12-381</td><td>4,194,302</td><td>4,142,391</td><td>2<sup>116.44</sup></td><td>2<sup>127.25</sup></td><td>10.82</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Filecoin powers of tau</td><td>BLS12-381</td><td>268,435,454</td><td>265,113,024</td><td>2<sup>113.44</sup></td><td>2<sup>127.25</sup></td><td>13.82</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Aztec Ignition</td><td>BN254</td><td>100,800,000</td><td>100,663,296</td><td>2<sup>113.51</sup></td><td>2<sup>126.62</sup></td><td>13.12</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Perpetual Powers of Tau</td><td>BN254</td><td>536,870,910</td><td>536,259,126</td><td>2<sup>112.30</sup></td><td>2<sup>126.62</sup></td><td>14.32</td><td><span class="chip">extrapolation</span></td></tr>
+</tbody></table></div>
 </section>
 <!-- END auxiliary-inputs-20260918 -->
 <!-- BEGIN ic-tournament-round-0016 -->
