@@ -29,8 +29,9 @@
 //! their number again, at the price of `256 · suffix` words each, which
 //! must stay cache resident.  The opt-in `KIC_GF2_DEFER_ABOVE=1` first
 //! clears only below each block, then clears above in reverse block order
-//! across bounded column ranges.  This path is still awaiting a valid
-//! performance comparison on an uncontended host.
+//! across bounded column ranges.  Paired CI measurements in
+//! `research/gf2_deferred_rref_20260926/RESULT.md` found this opt-in
+//! path slower on its measured x86-64 runner, so it is not the default.
 //!
 //! The reduced row echelon form of a matrix is unique, so
 //! [`rref_counted`] can be — and in the tests is — checked bit for bit

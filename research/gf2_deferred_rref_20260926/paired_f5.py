@@ -165,7 +165,10 @@ def linux_host_details():
     details = {}
     cpuinfo = Path("/proc/cpuinfo")
     if cpuinfo.exists():
-        fields = dict(line.split(":", 1) for line in cpuinfo.read_text().splitlines() if ":" in line)
+        fields = {
+            key.strip(): value.strip()
+            for key, value in (line.split(":", 1) for line in cpuinfo.read_text().splitlines() if ":" in line)
+        }
         details["cpu_model"] = fields.get("model name", "").strip()
         flags = set(fields.get("flags", "").split())
         details["cpu_features"] = sorted(flags & {"popcnt", "avx2", "avx512f", "pclmulqdq", "bmi2"})

@@ -25,4 +25,16 @@ The local release builds under Rust 1.93 and 1.98 and a module-test build were s
 
 For the primary n24/m24/d4 cell, the paired median reference/candidate elimination ratio was **0.529** (bootstrap 95% interval 0.515–0.566), outside the A/A range 0.959–1.003. The full F5-call ratio was **0.659** (interval 0.644–0.700), outside the A/A range 0.975–1.009. The candidate reduced counted elimination work from 385,616,841 to 336,771,897 word operations but took longer. All seven cells kept identical fingerprints, ranks, pruning counts and criterion counts. Smaller cells also showed no compelling gain; n20/m20/d4 elimination was 42.7 ms reference versus 52.0 ms candidate.
 
-The first reverse pass still scanned earlier rows separately for every pivot block. The next bounded iteration groups prepared blocks and applies them during one row visit per group. Its timing is unmeasured; this negative result remains the reference for that design decision. No one-target online IC comparison or rho boundary changed, so no scoreboard value is updated.
+The first reverse pass still scanned earlier rows separately for every pivot block. The next bounded iteration groups prepared blocks and applies them during one row visit per group; its timing is reported below. This negative result remains the reference for that design decision. No one-target online IC comparison or rho boundary changed, so no scoreboard value is updated.
+
+## Second iteration: grouped blocks and two holdouts
+
+CI run [36291855267](https://github.com/aburan28/crypto/actions/runs/36291855267) at PR head `0d26ee59` passed the exact-kernel and full matrix-F5 tests, then completed all 66 frozen/holdout calls on one pinned Linux x86-64 runner. The full receipt is [runs/36291855267/ci-result.json](runs/36291855267/ci-result.json), SHA-256 `024ada543a5258452b9ba0532670d60fc1acccf300ba5b264f1545f5a381031d`. All seven F5 cases on each workload matched the reference fingerprint, rank, pruning and criterion counts. The run recorded 16.4 GB host memory, four logical CPUs, Rust 1.98.1, and load 1.96 at start and 1.97 at end. Its CPU model/features fields are empty because the receipt parser failed to strip spaces from `/proc/cpuinfo` keys; this is a metadata limitation, not an output mismatch.
+
+| Workload | Reference elimination | Grouped elimination | Paired ratio, 95% bootstrap interval | Reference full F5 | Grouped full F5 | Paired full ratio, interval |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Frozen seed | 107.1 ms | 161.4 ms | 0.664, 0.652–0.672 | 202.0 ms | 254.1 ms | 0.795, 0.782–0.803 |
+| Holdout `badc0de1` | 106.8 ms | 161.6 ms | 0.660, 0.660–0.664 | 200.7 ms | 255.0 ms | 0.789, 0.774–0.793 |
+| Holdout `5eed2026` | 110.0 ms | 163.8 ms | 0.670, 0.630–0.678 | 205.7 ms | 258.3 ms | 0.791, 0.760–0.807 |
+
+Values are medians of the five A/B samples for `f5_n24_m24_d4`; ratios are medians of paired reference/candidate ratios, so they need not equal ratios of the marginal medians. The frozen A/A elimination ratio range was 1.001–1.011. Every smaller frozen case also had a median elimination ratio below 1. Both reverse-pass designs are rejected as performance changes. The forward pass still updates all rows below each pivot block, so grouping only the reverse pass did not remove its repeated matrix reads. The unchanged path should remain the default; there is no measured F5 or IC gain to promote.
