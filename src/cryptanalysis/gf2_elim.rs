@@ -80,6 +80,9 @@ pub struct Config {
     pub parallel_words: usize,
     /// Use the AVX-512 row update when the CPU has it.
     pub simd: bool,
+    /// Clear up to two pivot blocks from one column word in a single
+    /// matrix pass. The ordinary per-block path remains the reference.
+    pub batch_word: bool,
 }
 
 impl Default for Config {
@@ -88,13 +91,15 @@ impl Default for Config {
             tables: DEFAULT_TABLES,
             parallel_words: PARALLEL_WORDS,
             simd: true,
+            batch_word: false,
         }
     }
 }
 
 impl Config {
     /// The default, with `KIC_GF2_TABLES` (1–4), `KIC_GF2_PARALLEL_WORDS`
-    /// and `KIC_GF2_SIMD=0` read once per process for ablations.
+    /// `KIC_GF2_SIMD=0`, and `KIC_GF2_WORD_BATCH=1` read once per process
+    /// for ablations.
     pub fn from_env() -> Self {
         static CONFIG: std::sync::OnceLock<Config> = std::sync::OnceLock::new();
         *CONFIG.get_or_init(|| {
@@ -113,6 +118,9 @@ impl Config {
             }
             if std::env::var("KIC_GF2_SIMD").as_deref() == Ok("0") {
                 c.simd = false;
+            }
+            if std::env::var("KIC_GF2_WORD_BATCH").as_deref() == Ok("1") {
+                c.batch_word = true;
             }
             c
         })
@@ -185,6 +193,7 @@ fn eliminate_with(
     let mut pivot_cols: Vec<usize> = Vec::with_capacity(block_cap);
     let mut table: Vec<u64> = Vec::new();
     let mut blocks: Vec<(usize, Vec<usize>)> = Vec::new();
+    let mut pending: Vec<PendingBlock> = Vec::with_capacity(2);
 
     let mut pivot_row = 0usize;
     let mut word = 0usize;
@@ -195,8 +204,10 @@ fn eliminate_with(
         pivot_cols.clear();
         // The strip: each unpivoted row's current word, in reduced form
         // with respect to the (so far empty) block.
-        for (s, row) in strip[block_start..].iter_mut().zip(&matrix[block_start..]) {
-            *s = row[word];
+        if pending.is_empty() {
+            for (s, row) in strip[block_start..].iter_mut().zip(&matrix[block_start..]) {
+                *s = row[word];
+            }
         }
         let last_col_in_word = if word + 1 == words && !n_cols.is_multiple_of(64) {
             (n_cols % 64) as u32
@@ -229,6 +240,12 @@ fn eliminate_with(
             let col = word * 64 + best as usize;
             matrix.swap(pivot_row, best_row);
             strip.swap(pivot_row, best_row);
+            // The strip has applied any preceding block in this word.
+            // Bring only the selected row's suffix up to date before it
+            // becomes a pivot; other rows wait for the combined clear.
+            for block in &pending {
+                *word_ops += block.table.apply(&mut matrix[pivot_row], simd);
+            }
             // Reduce the new pivot row in full by the block's earlier
             // pivots.  They are mutually reduced, so testing the row's
             // current bit on each pivot column in turn is the same as
@@ -272,23 +289,47 @@ fn eliminate_with(
             }
         }
         if !pivot_cols.is_empty() {
-            clear_block(
+            if config.batch_word {
+                let table =
+                    DeferredTable::new(matrix, block_start, &pivot_cols, bits, 0..words, word_ops)
+                        .expect("the pivot word is inside the matrix");
+                pending.push(PendingBlock {
+                    start: block_start,
+                    pivots: pivot_cols.len(),
+                    table,
+                });
+            } else {
+                clear_block(
+                    matrix,
+                    words,
+                    block_start,
+                    bits,
+                    &pivot_cols,
+                    reduce_above && !defer_above,
+                    true,
+                    0..words,
+                    &mut table,
+                    config,
+                    simd,
+                    word_ops,
+                );
+            }
+            if defer_above {
+                blocks.push((block_start, pivot_cols.clone()));
+            }
+        }
+        if !pending.is_empty()
+            && (pending.len() == 2 || !block_full || low >= last_col_in_word || pivot_row == rows)
+        {
+            clear_pending(
                 matrix,
-                words,
-                block_start,
-                bits,
-                &pivot_cols,
+                &pending,
                 reduce_above && !defer_above,
-                true,
-                0..words,
-                &mut table,
                 config,
                 simd,
                 word_ops,
             );
-            if defer_above {
-                blocks.push((block_start, pivot_cols.clone()));
-            }
+            pending.clear();
         }
         if !block_full || low >= last_col_in_word {
             word += 1;
@@ -338,6 +379,46 @@ fn eliminate_with(
         }
     }
     pivot_row
+}
+
+struct PendingBlock {
+    start: usize,
+    pivots: usize,
+    table: DeferredTable,
+}
+
+fn clear_pending(
+    matrix: &mut [Vec<u64>],
+    pending: &[PendingBlock],
+    reduce_above: bool,
+    config: Config,
+    simd: bool,
+    word_ops: &mut u64,
+) {
+    let end = pending.last().unwrap().start + pending.last().unwrap().pivots;
+    let clear = |(i, row): (usize, &mut Vec<u64>)| -> u64 {
+        if i < end && !reduce_above {
+            return 0;
+        }
+        pending
+            .iter()
+            // A later pivot row was already updated on selection. A
+            // block's own pivot rows are mutually reduced within it.
+            .filter(|block| i < block.start || i >= end)
+            .map(|block| block.table.apply(row, simd))
+            .sum()
+    };
+    let suffix = matrix[0].len() - pending[0].table.pivot_word;
+    if matrix.len() * suffix >= config.parallel_words {
+        *word_ops += matrix
+            .par_iter_mut()
+            .enumerate()
+            .with_min_len(64)
+            .map(clear)
+            .sum::<u64>();
+    } else {
+        *word_ops += matrix.iter_mut().enumerate().map(clear).sum::<u64>();
+    }
 }
 
 struct DeferredTable {
@@ -701,11 +782,14 @@ mod tests {
         for tables in 1..=4 {
             for simd in [false, true] {
                 for parallel_words in [0, usize::MAX] {
-                    out.push(Config {
-                        tables,
-                        parallel_words,
-                        simd,
-                    });
+                    for batch_word in [false, true] {
+                        out.push(Config {
+                            tables,
+                            parallel_words,
+                            simd,
+                            batch_word,
+                        });
+                    }
                 }
             }
         }
