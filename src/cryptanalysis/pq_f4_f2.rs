@@ -225,6 +225,59 @@ struct Columns {
     index: ColumnIndex,
 }
 
+/// A matrix-only monomial product.  Its first term is the leading term;
+/// the remaining terms need no order because column packing uses XOR.
+/// Collisions are cancelled before symbolic preprocessing sees the row.
+enum MatrixProduct {
+    Canonical(F2BoolPoly),
+    Unordered(Vec<F2BoolMono>),
+}
+
+impl MatrixProduct {
+    fn multiply(poly: &F2BoolPoly, mask: u64, expected_lead: Option<u64>, unordered: bool) -> Self {
+        if !unordered {
+            return Self::Canonical(poly.mul_mono(F2BoolMono::from_mask(mask)));
+        }
+        let mut parity: FxSet<u64> = FxSet::default();
+        parity.reserve(poly.terms.len());
+        for term in &poly.terms {
+            let product = term.mask | mask;
+            if !parity.insert(product) {
+                parity.remove(&product);
+            }
+        }
+        let lead = expected_lead.filter(|m| parity.contains(m)).or_else(|| {
+            parity
+                .iter()
+                .copied()
+                .max_by_key(|&m| mono_key(F2BoolMono::from_mask(m)))
+        });
+        let Some(lead) = lead else {
+            return Self::Unordered(Vec::new());
+        };
+        parity.remove(&lead);
+        let mut terms = Vec::with_capacity(parity.len() + 1);
+        terms.push(F2BoolMono::from_mask(lead));
+        terms.extend(parity.into_iter().map(F2BoolMono::from_mask));
+        Self::Unordered(terms)
+    }
+
+    fn terms(&self) -> &[F2BoolMono] {
+        match self {
+            Self::Canonical(poly) => &poly.terms,
+            Self::Unordered(terms) => terms,
+        }
+    }
+
+    fn lt(&self) -> Option<F2BoolMono> {
+        self.terms().first().copied()
+    }
+
+    fn is_zero(&self) -> bool {
+        self.terms().is_empty()
+    }
+}
+
 /// A monomial's column: an array indexed by the mask itself while the
 /// masks span at most [`DENSE_INDEX_VARS`] variables, a hash map beyond.
 enum ColumnIndex {
@@ -272,9 +325,13 @@ impl Columns {
     }
 
     fn pack(&self, p: &F2BoolPoly) -> Row {
+        self.pack_terms(&p.terms)
+    }
+
+    fn pack_terms(&self, terms: &[F2BoolMono]) -> Row {
         let mut bits = vec![0u64; self.words()];
         let (mut start, mut end) = (usize::MAX, 0usize);
-        for t in &p.terms {
+        for t in terms {
             let c = self.column(t.mask);
             bits[c / 64] ^= 1u64 << (c % 64);
             start = start.min(c / 64);
@@ -891,6 +948,9 @@ pub fn groebner_basis_f4(
     n_vars: usize,
     budget: Option<Duration>,
 ) -> (Vec<F2BoolPoly>, F4Stats) {
+    static UNSORTED_PRODUCTS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let unordered = *UNSORTED_PRODUCTS
+        .get_or_init(|| std::env::var("F4_F2_UNSORTED_PRODUCTS").as_deref() == Ok("1"));
     let started = Instant::now();
     let deadline = budget.map(|b| started + b);
     let mut st = F4Stats::default();
@@ -982,17 +1042,23 @@ pub fn groebner_basis_f4(
         }
         // The products are independent of one another; form them in
         // parallel when there are enough, in the order they were listed.
-        let product = |&(mult, g): &(u64, usize)| s.polys[g].mul_mono(F2BoolMono::from_mask(mult));
-        let products = |keys: &[(u64, usize)]| -> Vec<F2BoolPoly> {
+        let product = |&(mult, g): &(u64, usize), lead: Option<u64>| {
+            MatrixProduct::multiply(&s.polys[g], mult, lead, unordered)
+        };
+        let products = |keys: &[(u64, usize)], known_lead: bool| -> Vec<MatrixProduct> {
             let terms: usize = keys.iter().map(|&(_, g)| s.polys[g].terms.len()).sum();
             if keys.len() > 1 && terms >= PAR_PRODUCT_TERMS && rayon::current_num_threads() > 1 {
-                keys.par_iter().map(product).collect()
+                keys.par_iter()
+                    .map(|key| product(key, known_lead.then_some(key.0 | s.lm[key.1])))
+                    .collect()
             } else {
-                keys.iter().map(product).collect()
+                keys.iter()
+                    .map(|key| product(key, known_lead.then_some(key.0 | s.lm[key.1])))
+                    .collect()
             }
         };
-        let half_rows = products(&half_keys);
-        let mut field_rows = products(&field_keys);
+        let half_rows = products(&half_keys, true);
+        let mut field_rows = products(&field_keys, false);
         field_rows.retain(|p| !p.is_zero());
 
         // Symbolic preprocessing.  Every monomial other than an S-pair's
@@ -1003,7 +1069,7 @@ pub fn groebner_basis_f4(
         let s_terms: usize = half_rows
             .iter()
             .chain(&field_rows)
-            .map(|p| p.terms.len())
+            .map(|p| p.terms().len())
             .sum();
         let par_terms = s_terms >= PAR_PRODUCT_TERMS && rayon::current_num_threads() > 1;
         // (The S-rows carry many times more terms than distinct monomials,
@@ -1013,7 +1079,7 @@ pub fn groebner_basis_f4(
                 .par_iter()
                 .chain(field_rows.par_iter())
                 .fold(FxSet::default, |mut seen: FxSet<u64>, p| {
-                    seen.extend(p.terms.iter().map(|t| t.mask));
+                    seen.extend(p.terms().iter().map(|t| t.mask));
                     seen
                 })
                 .reduce(FxSet::default, |a, b| {
@@ -1027,7 +1093,7 @@ pub fn groebner_basis_f4(
             half_rows
                 .iter()
                 .chain(&field_rows)
-                .flat_map(|p| p.terms.iter().map(|t| t.mask))
+                .flat_map(|p| p.terms().iter().map(|t| t.mask))
                 .collect::<FxSet<u64>>()
                 .into_iter()
                 .collect()
@@ -1037,7 +1103,7 @@ pub fn groebner_basis_f4(
         queue.retain(|m| !lcm_columns.contains(m));
         let mut examined: FxSet<u64> = lcm_columns.clone();
         examined.extend(queue.iter().copied());
-        let mut reducers: Vec<F2BoolPoly> = Vec::new();
+        let mut reducers: Vec<MatrixProduct> = Vec::new();
         // Level by level: the reducers of every monomial on the frontier,
         // then the monomials they carry that nobody has examined.  The
         // monomials examined, the reducers and the count are those of any
@@ -1046,7 +1112,7 @@ pub fn groebner_basis_f4(
         // tests are independent of one another, so they run in parallel.
         let reducer_row = |m: u64| {
             s.reducer_among(m, &active)
-                .map(|g| s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g])))
+                .map(|g| MatrixProduct::multiply(&s.polys[g], m & !s.lm[g], Some(m), unordered))
         };
         // the terms a reducer row carries, on average, to price a level
         let mean_terms = active
@@ -1061,15 +1127,15 @@ pub fn groebner_basis_f4(
             let parallel = frontier.len() >= PAR_REDUCERS
                 && frontier.len() * mean_terms >= PAR_PRODUCT_TERMS
                 && rayon::current_num_threads() > 1;
-            let rows: Vec<Option<F2BoolPoly>> = if parallel {
+            let rows: Vec<Option<MatrixProduct>> = if parallel {
                 frontier.par_iter().map(|&m| reducer_row(m)).collect()
             } else {
                 frontier.iter().map(|&m| reducer_row(m)).collect()
             };
             // a reducer leads with its monomial, already examined
-            let unseen = |r: &F2BoolPoly| -> Vec<u64> {
+            let unseen = |r: &MatrixProduct| -> Vec<u64> {
                 debug_assert!(r.lt().is_some_and(|t| examined.contains(&t.mask)));
-                r.terms[1..]
+                r.terms()[1..]
                     .iter()
                     .map(|t| t.mask)
                     .filter(|t| !examined.contains(t))
@@ -1121,22 +1187,20 @@ pub fn groebner_basis_f4(
         st.peak_matrix_bytes = st.peak_matrix_bytes.max(words * n_rows as u64 * 8);
         // Reducers first, each on a column of its own; then the S-rows by
         // leading monomial, so the second half of a pair meets the first.
-        let mut s_rows: Vec<&F2BoolPoly> = half_rows.iter().chain(field_rows.iter()).collect();
+        let mut s_rows: Vec<&MatrixProduct> = half_rows.iter().chain(field_rows.iter()).collect();
         // stable: rows sharing a leading monomial keep their order
         s_rows.sort_by_cached_key(|p| std::cmp::Reverse(mono_key(p.lt().unwrap())));
-        // Every row is a monomial multiple, canonical, so its degree is its
-        // leading term's.
+        // The first term is the lead even when the remaining terms are unordered.
         for p in reducers.iter().chain(s_rows.iter().copied()) {
-            debug_assert!(p.is_canonical());
-            let lead = p.terms.first().map_or(0, |t| t.degree());
+            let lead = p.lt().map_or(0, |t| t.degree());
             st.max_poly_degree = st.max_poly_degree.max(lead);
         }
-        let all: Vec<&F2BoolPoly> = reducers.iter().chain(s_rows).collect();
+        let all: Vec<&MatrixProduct> = reducers.iter().chain(s_rows).collect();
         // Packing is one lookup per term and independent across rows.
         let rows: Vec<Row> = if all.len() * cols.words() > PAR_WORDS {
-            all.par_iter().map(|p| cols.pack(p)).collect()
+            all.par_iter().map(|p| cols.pack_terms(p.terms())).collect()
         } else {
-            all.iter().map(|p| cols.pack(p)).collect()
+            all.iter().map(|p| cols.pack_terms(p.terms())).collect()
         };
         st.build_ns += t.elapsed().as_nanos() as u64;
 
@@ -1434,6 +1498,28 @@ mod tests {
 
     fn poly(masks: &[u64], n: usize) -> F2BoolPoly {
         F2BoolPoly::from_monos(masks.iter().map(|&m| F2BoolMono::from_mask(m)).collect(), n)
+    }
+
+    #[test]
+    fn unordered_matrix_products_cancel_collisions_before_counting_columns() {
+        let mut rng = StdRng::seed_from_u64(0x51a7_2026);
+        for _ in 0..1000 {
+            let masks: Vec<u64> = (0..rng.gen_range(1..80))
+                .map(|_| rng.gen_range(0..(1u64 << 10)))
+                .collect();
+            let source = poly(&masks, 10);
+            let mult = rng.gen_range(0..(1u64 << 10));
+            let expected = source.mul_mono(F2BoolMono::from_mask(mult));
+            let got = MatrixProduct::multiply(&source, mult, None, true);
+            assert_eq!(got.lt(), expected.lt());
+            let mut actual_masks: Vec<u64> = got.terms().iter().map(|t| t.mask).collect();
+            let mut expected_masks: Vec<u64> = expected.terms.iter().map(|t| t.mask).collect();
+            actual_masks.sort_unstable();
+            expected_masks.sort_unstable();
+            assert_eq!(actual_masks, expected_masks);
+            let cols = Columns::from_monomials(expected_masks);
+            assert_eq!(cols.pack_terms(got.terms()).bits, cols.pack(&expected).bits);
+        }
     }
 
     fn brute_force(eqs: &[F2BoolPoly], n: usize) -> Vec<u64> {
