@@ -24,3 +24,15 @@ CI run [36298595953](https://github.com/aburan28/crypto/actions/runs/36298595953
 | Four | 1.095, 1.076–1.113 | 1.090, 1.081–1.110 | 1.130 | 1.114 |
 
 The primary gain repeats. Yet `n20_m20` at one thread now has a frozen complete-call ratio of 0.982 against A/A 0.993–1.007, and holdout A is 0.994 against A/A 0.997–1.006. Holdout B is within A/A, as are all four-thread smaller-case medians. The smaller-case slowdown recurred on a different runner and workload, so six-column tables **fail the preregistered no-regression gate** and remain opt-in. The next five-column arm is a distinct experiment, not a reinterpretation of the six-column result.
+
+## Five-column first paired run
+
+CI run [36300043072](https://github.com/aburan28/crypto/actions/runs/36300043072) at PR head `2a0c4518` passed five-column correctness tests and completed 66 one-thread calls with exact bases, counted logical XORs and matrix shapes. The [full raw receipt](runs/36300043072/ci-result-five.json), SHA-256 `5654da89e41063189ec096ce200f7b8fdf69be9946c2f110787c0d1582d4689a`, records a Linux x86-64 AMD EPYC 7763 runner pinned to one CPU.
+
+| `n20_m30` workload | Four-column elimination | Five-column elimination | Paired elimination ratio, 95% interval | Four-column full F4 | Five-column full F4 | Paired full ratio, interval |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Frozen seed | 302.6 ms | 277.0 ms | 1.095, 1.075–1.101 | 567.2 ms | 544.3 ms | 1.043, 1.035–1.046 |
+| Holdout `1ac0ffee` | 397.3 ms | 299.7 ms | 1.326, 1.307–1.332 | 661.2 ms | 565.0 ms | 1.170, 1.163–1.177 |
+| Holdout `2468ace0` | 406.0 ms | 297.3 ms | 1.367, 1.349–1.376 | 669.9 ms | 562.0 ms | 1.192, 1.182–1.196 |
+
+Frozen primary peak table storage rose from 21.4 to 33.6 MB while the matrix peak stayed 44.4 MB; performed XORs fell from 371.6 to 324.9 million. No smaller complete-call median regressed beyond its own A/A range. The frozen A/A full-F4 range was unusually wide, 0.991–1.240, despite a paired A/B interval above one. An independent one-thread repeat and four-thread control are required before any default change.

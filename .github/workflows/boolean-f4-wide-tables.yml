@@ -48,10 +48,19 @@ jobs:
             target/release/examples/f4_f2_tables5 \
             research/boolean_f4_wide_tables_20260926/ci-result-five.json \
             --pairs 5 --threads 1 --candidate-feature f4-five-tables
+      - name: Four-thread paired control for five-column tables
+        run: |
+          python3 research/boolean_f4_wide_tables_20260926/paired_boolean_f4.py \
+            target/release/examples/f4_f2_tables4 \
+            target/release/examples/f4_f2_tables5 \
+            research/boolean_f4_wide_tables_20260926/ci-result-five-threads4.json \
+            --pairs 5 --threads 4 --candidate-feature f4-five-tables
       - name: Preserve raw runs and failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: boolean-f4-wide-tables-${{ github.sha }}
-          path: research/boolean_f4_wide_tables_20260926/ci-result-five.json
+          path: |
+            research/boolean_f4_wide_tables_20260926/ci-result-five.json
+            research/boolean_f4_wide_tables_20260926/ci-result-five-threads4.json
           if-no-files-found: warn
