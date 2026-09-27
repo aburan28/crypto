@@ -41,11 +41,19 @@ jobs:
           python3 research/boolean_f4_bitmap_20260926/paired_boolean_f4.py \
             target/release/examples/f4_f2_bench \
             research/boolean_f4_bitmap_20260926/ci-result.json \
-            --pairs 5
+            --pairs 5 --threads 1
+      - name: Four-thread paired control
+        run: |
+          python3 research/boolean_f4_bitmap_20260926/paired_boolean_f4.py \
+            target/release/examples/f4_f2_bench \
+            research/boolean_f4_bitmap_20260926/ci-result-threads4.json \
+            --pairs 5 --threads 4
       - name: Preserve raw runs and failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: boolean-f4-bitmap-${{ github.sha }}
-          path: research/boolean_f4_bitmap_20260926/ci-result.json
+          path: |
+            research/boolean_f4_bitmap_20260926/ci-result.json
+            research/boolean_f4_bitmap_20260926/ci-result-threads4.json
           if-no-files-found: warn
