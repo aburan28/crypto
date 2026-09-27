@@ -512,7 +512,7 @@ impl Default for SearchOptions {
 }
 
 /// What the search cost and found.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct SearchStats {
     /// Enumerated assignments swept: `2^k`.
     pub points: u64,
@@ -530,9 +530,12 @@ pub struct SearchStats {
     pub filter_word_ops: u64,
     /// Row operations in the per-point linear solves.
     pub solve_row_ops: u64,
-    /// Set if a rank-deficient system exceeded `max_kernel_dim`, so the
-    /// solution list may be incomplete.
+    /// Set if a search limit or unsupported input left the solution list
+    /// incomplete. Check `unsupported` to distinguish encoding rejection.
     pub exhausted: bool,
+    /// A decomposition frontend could not encode its input. No search
+    /// occurred; also sets `exhausted` for older completion checks.
+    pub unsupported: bool,
 }
 
 /// **Solve** the original system by crossbred search.

@@ -33,9 +33,12 @@ use crypto_lib::cryptanalysis::koblitz_fast::FastPoint;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
 
 /// Degrees where `ℓ = 3` divides the conductor, so a 3-isogeny moves.
-/// `ℓ = 3` is the one degree whose kernels need no factorisation: the
-/// kernel polynomial is linear, so the kernels are simply the roots of the
-/// degree-4 `ψ₃`.
+/// `ℓ = 3` is the degree this example walks: its kernel polynomial is
+/// linear, so no torsion needs building.  Every other degree is walked by
+/// `koblitz_isogeny_class_walk`, which builds `E[ℓ]` in its splitting field.
+/// It is kept for that independent route: at `ℓ = 3` the kernels are simply
+/// the roots of the degree-4 `ψ₃`, which the walk's torsion construction is
+/// tested against.
 const CASES: &[(u32, u8)] = &[(12, 0), (16, 0), (16, 1), (20, 0)];
 
 fn factorise(mut v: u64) -> Vec<(u64, u32)> {
@@ -308,19 +311,19 @@ fn main() {
             psideg,
             if maxd == 3 {
                 "roots of ψ₃"
-            } else if maxd <= 31 {
-                "factor ψ_ℓ"
             } else {
-                "factor ψ_ℓ (large)"
+                "E[ℓ] in F_(q^m)"
             }
         );
     }
     println!("\n   ℓ = 3 needs no factorisation at all: the kernel polynomial is");
     println!("   linear, so the kernels are the four roots of a degree-4 ψ₃.");
-    println!("   Every larger ℓ needs the degree-(ℓ−1)/2 factors of ψ_ℓ, which is");
-    println!("   where n = 17 (ℓ=271, deg ψ = 36720) and n = 19 (ℓ=457, deg ψ =");
-    println!("   104424) sit.  That is a factorisation problem, not a Vélu one:");
-    println!("   the formulas above already work at any ℓ, given the kernel.");
+    println!("   Larger ℓ do not need ψ_ℓ factored either, though this example");
+    println!("   once said they did.  At the crater Frobenius is a scalar λ on");
+    println!("   E[ℓ], so E[ℓ] lives in F_(q^m) with m = ord_ℓ(λ) — m = 135 at");
+    println!("   n = 17 and 8 at n = 19 — and the kernels are read off its points.");
+    println!("   That walk is `koblitz_isogeny_class_walk`; it reaches every");
+    println!("   member of both classes the cost sweep measured.");
 
     println!("\n── summary ──");
     let hops_ok = one_hop_rows.iter().filter(|r| r.3 && r.4 && r.5).count();

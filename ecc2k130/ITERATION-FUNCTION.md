@@ -1,5 +1,11 @@
 # Iteration function and the 28 B/s question
 
+> Table-walk correctness update (2026-09-26): [cycle escape v3](CYCLE-ESCAPE-V3.md)
+> replaces history-dependent exits with a validated raw-cycle anchor. Older
+> table-walk measurements below describe their recorded revisions, not v3.
+> V3 requires a new table corpus; the default sigma iteration is unchanged.
+
+
 Question: can a different iteration function take one RTX PRO 6000 from the
 audited 14.64 B updates/s to 28 B/s?
 

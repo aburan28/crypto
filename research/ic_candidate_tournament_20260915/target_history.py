@@ -7,7 +7,7 @@ import subprocess
 import tarfile
 
 from identity import curve_record
-from oracle import require
+from oracle import Curve, require
 
 
 def file_hash(path):
@@ -85,6 +85,19 @@ def extend(history, rounds):
                        set(root.glob('fixture_generation/**/stdout.json')))
         require(paths, 'prior round has no retained fixture evidence')
         hashes = {}
+        # A prior round may have excluded development fixtures that it never
+        # measured itself. Preserve those exposures through later rounds too.
+        inherited = root / 'target-history.json'
+        if inherited.exists():
+            previous = json.loads(inherited.read_text())
+            previous_points = history_sets(previous)
+            hashes['target-history.json'] = file_hash(inherited)
+            for entry in previous['curves']:
+                key = entry['curve_id']
+                if key not in entries:
+                    entries[key] = json.loads(json.dumps(entry))
+                    used[key] = set()
+                used[key].update(previous_points[key])
         for path in paths:
             hashes[str(path.relative_to(root))] = file_hash(path)
             for fixture in fixture_values(json.loads(path.read_text())):
@@ -102,6 +115,70 @@ def extend(history, rounds):
     result['parent_history_sha256'] = object_hash(history)
     result['round_additions'] = additions
     return result
+
+
+def validate_exposure_source(data):
+    extracted = list(fixture_values(json.loads(data)))
+    require(extracted and any(fixture['targets'] for fixture in extracted),
+            'supplemental source has no exposed public targets')
+    for fixture in extracted:
+        curve = Curve(fixture)
+        require(type(fixture['targets']) is list, 'invalid exposed target list')
+        for point in fixture['targets']:
+            require(type(point) is list and len(point) == 2 and all(
+                (type(v) is int and v >= 0) or
+                (type(v) is str and v.isascii() and v.isdecimal()) for v in point),
+                'invalid exposed point encoding')
+            decoded = curve.decode(point)
+            require(decoded is not None and curve.mul(decoded, curve.r) is None,
+                    'exposed target is not a nonidentity subgroup point')
+
+
+def freeze_exposures(history, fixtures, destination):
+    """Retain supplemental fixture bytes and a reconstructible exclusion union."""
+    from identity import write_immutable
+    history_sets(history)
+    destination = Path(destination)
+    destination.mkdir(parents=True, exist_ok=False)
+    write_immutable(destination / 'base-history.json', history)
+    sources, roots = [], []
+    for ordinal, source in enumerate(fixtures):
+        data = Path(source).read_bytes()
+        validate_exposure_source(data)
+        root = destination / f'{ordinal:04d}'
+        root.mkdir()
+        path = root / 'fixtures.json'
+        with path.open('xb') as stream:
+            stream.write(data)
+        sources.append(dict(path=str(path.relative_to(destination)), sha256=file_hash(path)))
+        roots.append(root)
+    result = extend(history, roots)
+    write_immutable(destination / 'sources.json', dict(schema_version=1,
+        base_history_sha256=file_hash(destination / 'base-history.json'), fixtures=sources))
+    return result
+
+
+def verify_exposures(destination, expected):
+    """Reconstruct exclusions from the retained inputs, without the originals."""
+    destination = Path(destination)
+    manifest = json.loads((destination / 'sources.json').read_text())
+    require(type(manifest.get('schema_version')) is int and manifest['schema_version'] == 1,
+            'unknown supplemental exposure schema')
+    base = destination / 'base-history.json'
+    require(file_hash(base) == manifest['base_history_sha256'], 'changed base target history')
+    roots = []
+    for ordinal, source in enumerate(manifest['fixtures']):
+        require(source['path'] == f'{ordinal:04d}/fixtures.json', 'changed exposure source order/path')
+        path = destination / source['path']
+        require(file_hash(path) == source['sha256'], 'changed supplemental fixture source')
+        validate_exposure_source(path.read_bytes())
+        roots.append(path.parent)
+    require({p.relative_to(destination).as_posix() for p in destination.glob('*/fixtures.json')}
+            == {source['path'] for source in manifest['fixtures']}, 'unlisted supplemental fixture source')
+    actual = extend(json.loads(base.read_text()), roots)
+    require(object_hash(actual) == object_hash(expected), 'supplemental target exclusions differ')
+    return dict(status='VERIFIED', fixture_sources=len(roots),
+                excluded_points=sum(map(len, history_sets(actual).values())))
 
 
 def verify_sources(history, repository):

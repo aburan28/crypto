@@ -1,0 +1,819 @@
+{
+  "accepted": true,
+  "all_relation_lifts_verified": true,
+  "base_points_checked_on_curve": 23320,
+  "classification": "INDEPENDENT_PUBLIC_ARITHMETIC_REPLAY_OF_32_SHARED_INDEX_RELATIONS",
+  "cumulative_factor_base_log_rank": 96,
+  "factor_base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "factor_base_log_columns": 220,
+  "independent_verifier": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay_20260924_codex/replay.py",
+  "independent_verifier_sha256": "c3e4d255ee73ccd18e3824452e9ab3c2739a99af5d2bdf57394ea8ba9e806605",
+  "round": 3,
+  "rows": [
+    {
+      "fixture_index": 0,
+      "group_lift": [
+        [
+          54253425340514,
+          3968581218366403
+        ],
+        [
+          1730526701006158,
+          6937918546162239
+        ],
+        [
+          8594041755289540,
+          4135312823985152
+        ],
+        [
+          4914672098938062,
+          8663665082263756
+        ]
+      ],
+      "producer_query_ms": 104.333416,
+      "s3_identities": true,
+      "scalar": 2034678288176,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 1,
+      "group_lift": [
+        [
+          5028165797313983,
+          4462603940089646
+        ],
+        [
+          1974156366035508,
+          6535922698137791
+        ],
+        [
+          6455316321798809,
+          1689058426814242
+        ],
+        [
+          2578169836107675,
+          6838393654238552
+        ]
+      ],
+      "producer_query_ms": 553.512625,
+      "s3_identities": true,
+      "scalar": 1549331746220,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 2,
+      "group_lift": [
+        [
+          1804151424470866,
+          2254029739336361
+        ],
+        [
+          8019439181752675,
+          2303860818814662
+        ],
+        [
+          7770221626726540,
+          4353061717104202
+        ],
+        [
+          8736423598292331,
+          3762517661176680
+        ]
+      ],
+      "producer_query_ms": 246.620917,
+      "s3_identities": true,
+      "scalar": 7241430956410,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 3,
+      "group_lift": [
+        [
+          8254610769380131,
+          2027861373001117
+        ],
+        [
+          1172679063432364,
+          8088895597398183
+        ],
+        [
+          592588730857818,
+          6515669903400923
+        ],
+        [
+          4400804938996522,
+          7000540699245149
+        ]
+      ],
+      "producer_query_ms": 200.264042,
+      "s3_identities": true,
+      "scalar": 5335373113383,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 4,
+      "group_lift": [
+        [
+          1796727659967618,
+          5879017763619543
+        ],
+        [
+          5359136548971078,
+          7796889913756679
+        ],
+        [
+          2444729695603982,
+          2978737952005240
+        ],
+        [
+          3192368804418921,
+          448055350539243
+        ]
+      ],
+      "producer_query_ms": 446.723875,
+      "s3_identities": true,
+      "scalar": 8767161308760,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 5,
+      "group_lift": [
+        [
+          5006736684043669,
+          7884291079053906
+        ],
+        [
+          8098927981145556,
+          544217564114951
+        ],
+        [
+          5888619041376427,
+          7144762850609872
+        ],
+        [
+          4918101775003986,
+          6386129295607787
+        ]
+      ],
+      "producer_query_ms": 139.585875,
+      "s3_identities": true,
+      "scalar": 12017682572745,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 6,
+      "group_lift": [
+        [
+          942847018903948,
+          6940096586892608
+        ],
+        [
+          4492626797908706,
+          4099624256110808
+        ],
+        [
+          32479849798458,
+          6772513865563942
+        ],
+        [
+          1385068242213021,
+          3055411264416967
+        ]
+      ],
+      "producer_query_ms": 611.0845,
+      "s3_identities": true,
+      "scalar": 9936011909804,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 7,
+      "group_lift": [
+        [
+          923290271174970,
+          6663265870452807
+        ],
+        [
+          5025915318687677,
+          8298332554454878
+        ],
+        [
+          3798311347559465,
+          5812284099308813
+        ],
+        [
+          6553380172378228,
+          1999412616588146
+        ]
+      ],
+      "producer_query_ms": 149.212792,
+      "s3_identities": true,
+      "scalar": 18854968778807,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 8,
+      "group_lift": [
+        [
+          2497403785306546,
+          2238611788331439
+        ],
+        [
+          2317936310462897,
+          7966755005353438
+        ],
+        [
+          1804312063817018,
+          1300390508177916
+        ],
+        [
+          8234483145544943,
+          523428977048693
+        ]
+      ],
+      "producer_query_ms": 67.043375,
+      "s3_identities": true,
+      "scalar": 1820043926362,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 9,
+      "group_lift": [
+        [
+          8735057627904025,
+          8962877677020639
+        ],
+        [
+          3497969187270305,
+          5630618378037370
+        ],
+        [
+          7923239237915345,
+          4403493811781787
+        ],
+        [
+          3776759969340941,
+          4143842788895511
+        ]
+      ],
+      "producer_query_ms": 356.928083,
+      "s3_identities": true,
+      "scalar": 6574075904665,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 10,
+      "group_lift": [
+        [
+          1390061477218441,
+          7548955220944294
+        ],
+        [
+          8476675390527731,
+          8236611585957607
+        ],
+        [
+          2076673082050120,
+          6189009718768591
+        ],
+        [
+          2393089347104352,
+          8871752947657438
+        ]
+      ],
+      "producer_query_ms": 67.03170899999999,
+      "s3_identities": true,
+      "scalar": 19578498885907,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 11,
+      "group_lift": [
+        [
+          594846816569210,
+          3534054816357977
+        ],
+        [
+          3117728928239669,
+          212718456711398
+        ],
+        [
+          1110741478054845,
+          4047980178269262
+        ],
+        [
+          8957943551094056,
+          3873803159301222
+        ]
+      ],
+      "producer_query_ms": 330.614042,
+      "s3_identities": true,
+      "scalar": 19830515918708,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 12,
+      "group_lift": [
+        [
+          6635094790840619,
+          8917524376642386
+        ],
+        [
+          2364607849213277,
+          165173886256411
+        ],
+        [
+          7337624090732409,
+          2306963768627202
+        ],
+        [
+          8255189294538885,
+          2256841841427280
+        ]
+      ],
+      "producer_query_ms": 61.9505,
+      "s3_identities": true,
+      "scalar": 18787111787029,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 13,
+      "group_lift": [
+        [
+          954485191721372,
+          627158253826413
+        ],
+        [
+          4357811742325169,
+          7248645333573010
+        ],
+        [
+          5666341952723870,
+          8749757495913016
+        ],
+        [
+          3220465226977565,
+          2478702441722414
+        ]
+      ],
+      "producer_query_ms": 705.984583,
+      "s3_identities": true,
+      "scalar": 5390242702552,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 14,
+      "group_lift": [
+        [
+          8874533907922590,
+          2018830881752458
+        ],
+        [
+          925106605946276,
+          5263376629625375
+        ],
+        [
+          1533174097935712,
+          1314275252255055
+        ],
+        [
+          2476018131702490,
+          985631466193133
+        ]
+      ],
+      "producer_query_ms": 166.608708,
+      "s3_identities": true,
+      "scalar": 19688325625275,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 15,
+      "group_lift": [
+        [
+          2155004288093821,
+          117239076690482
+        ],
+        [
+          3477657546984245,
+          7001183754846829
+        ],
+        [
+          8235097413492473,
+          2692655946805085
+        ],
+        [
+          7063139270044251,
+          2509453909830858
+        ]
+      ],
+      "producer_query_ms": 37.865334,
+      "s3_identities": true,
+      "scalar": 11062104947964,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 16,
+      "group_lift": [
+        [
+          525406307447123,
+          4538180893956598
+        ],
+        [
+          3690485333422777,
+          3221339790775767
+        ],
+        [
+          196189332803347,
+          4884585733655612
+        ],
+        [
+          4636184716640340,
+          5532473083099670
+        ]
+      ],
+      "producer_query_ms": 33.533459,
+      "s3_identities": true,
+      "scalar": 2094479562031,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 17,
+      "group_lift": [
+        [
+          6123576246359117,
+          2139440393266662
+        ],
+        [
+          8434418973172070,
+          234825326575387
+        ],
+        [
+          5298749996307725,
+          3979221790340813
+        ],
+        [
+          4122115030369396,
+          1832184245057486
+        ]
+      ],
+      "producer_query_ms": 97.162166,
+      "s3_identities": true,
+      "scalar": 10589589979047,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 18,
+      "group_lift": [
+        [
+          7217696196602978,
+          4728167088410294
+        ],
+        [
+          5236568924834953,
+          3754145825681703
+        ],
+        [
+          6051659736333990,
+          6864897502634761
+        ],
+        [
+          2849096210045891,
+          2868871015113907
+        ]
+      ],
+      "producer_query_ms": 98.83958299999999,
+      "s3_identities": true,
+      "scalar": 627655172982,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 19,
+      "group_lift": [
+        [
+          8407298219619430,
+          6311725059809370
+        ],
+        [
+          1415920866835142,
+          8081199855418379
+        ],
+        [
+          6457061382291947,
+          2231056548825290
+        ],
+        [
+          2948301905222655,
+          5067495785786619
+        ]
+      ],
+      "producer_query_ms": 19.038459,
+      "s3_identities": true,
+      "scalar": 19863734135413,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 20,
+      "group_lift": [
+        [
+          6518376598426878,
+          2071940309523873
+        ],
+        [
+          6371502631118935,
+          3024746201921625
+        ],
+        [
+          1492739002535388,
+          7858781519757509
+        ],
+        [
+          2096909577242344,
+          3894971915239210
+        ]
+      ],
+      "producer_query_ms": 15.427208,
+      "s3_identities": true,
+      "scalar": 10444298533958,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 21,
+      "group_lift": [
+        [
+          6407251752388467,
+          3193277911129190
+        ],
+        [
+          7384158017768511,
+          3924733202555800
+        ],
+        [
+          6736917985718359,
+          8799002336520516
+        ],
+        [
+          7733833776276619,
+          1261376159272950
+        ]
+      ],
+      "producer_query_ms": 365.825541,
+      "s3_identities": true,
+      "scalar": 2680213079423,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 22,
+      "group_lift": [
+        [
+          954485191721372,
+          627158253826413
+        ],
+        [
+          1004286303949133,
+          1151397228334075
+        ],
+        [
+          4842044068028162,
+          3353099881367265
+        ],
+        [
+          8813160281040757,
+          5373373762735049
+        ]
+      ],
+      "producer_query_ms": 91.646625,
+      "s3_identities": true,
+      "scalar": 4639074131581,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 23,
+      "group_lift": [
+        [
+          3183289250299527,
+          5339531774193038
+        ],
+        [
+          1546981372028486,
+          7846403453544502
+        ],
+        [
+          336106751525772,
+          8217818211542877
+        ],
+        [
+          6678715906178855,
+          8889204761548236
+        ]
+      ],
+      "producer_query_ms": 484.35825,
+      "s3_identities": true,
+      "scalar": 6849426381958,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 24,
+      "group_lift": [
+        [
+          7185336724093744,
+          5670190555593857
+        ],
+        [
+          2571894712962475,
+          2433714115622283
+        ],
+        [
+          4913797240682086,
+          5936299262308635
+        ],
+        [
+          7714456961498491,
+          2076005741281903
+        ]
+      ],
+      "producer_query_ms": 93.50987500000001,
+      "s3_identities": true,
+      "scalar": 1163201925110,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 25,
+      "group_lift": [
+        [
+          1144908590590474,
+          5895992979893939
+        ],
+        [
+          2914881567283555,
+          7961524587564657
+        ],
+        [
+          5103337386179486,
+          1724645094587492
+        ],
+        [
+          6976686889437288,
+          2323653623761858
+        ]
+      ],
+      "producer_query_ms": 15.691334000000001,
+      "s3_identities": true,
+      "scalar": 12199919530995,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 26,
+      "group_lift": [
+        [
+          3667499092388597,
+          4626759814277558
+        ],
+        [
+          7421316287745611,
+          4351371393679046
+        ],
+        [
+          8029306284585216,
+          6340821406558119
+        ],
+        [
+          1387784116215911,
+          6731925525305932
+        ]
+      ],
+      "producer_query_ms": 107.408708,
+      "s3_identities": true,
+      "scalar": 16255749327743,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 27,
+      "group_lift": [
+        [
+          1675007556075451,
+          3386900237696130
+        ],
+        [
+          3873172674590150,
+          705665791303379
+        ],
+        [
+          7908216262137907,
+          5747912456624110
+        ],
+        [
+          5673507444145216,
+          1602043460675911
+        ]
+      ],
+      "producer_query_ms": 80.58025,
+      "s3_identities": true,
+      "scalar": 15900371449727,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 28,
+      "group_lift": [
+        [
+          6970804942964182,
+          5861159717643140
+        ],
+        [
+          6802243179124787,
+          79704366407320
+        ],
+        [
+          5623907496033957,
+          6807419063919025
+        ],
+        [
+          3476928017083409,
+          714451161925974
+        ]
+      ],
+      "producer_query_ms": 358.164,
+      "s3_identities": true,
+      "scalar": 20313700367889,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 29,
+      "group_lift": [
+        [
+          1088501794996267,
+          3720533131083660
+        ],
+        [
+          1701790714413764,
+          4111448607849313
+        ],
+        [
+          1447494319687090,
+          6302785741411671
+        ],
+        [
+          2343465837205825,
+          5558848733801874
+        ]
+      ],
+      "producer_query_ms": 492.522416,
+      "s3_identities": true,
+      "scalar": 7110593499010,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 30,
+      "group_lift": [
+        [
+          8593180613827510,
+          7872285516128508
+        ],
+        [
+          3686372472492767,
+          3307289240110389
+        ],
+        [
+          1119167277452713,
+          5176683662907508
+        ],
+        [
+          7283819825889886,
+          6730118396939095
+        ]
+      ],
+      "producer_query_ms": 106.30637499999999,
+      "s3_identities": true,
+      "scalar": 15185640780928,
+      "target_matches_published_q": true
+    },
+    {
+      "fixture_index": 31,
+      "group_lift": [
+        [
+          6698349458019535,
+          1199254077453648
+        ],
+        [
+          1905989621770211,
+          361549884592825
+        ],
+        [
+          7249847049195438,
+          3653461693803200
+        ],
+        [
+          2252666211462507,
+          5338757478753079
+        ]
+      ],
+      "producer_query_ms": 81.306292,
+      "s3_identities": true,
+      "scalar": 10319027682716,
+      "target_matches_published_q": true
+    }
+  ],
+  "s3_identities_checked_per_target": 3,
+  "schema_version": "1.0",
+  "scope": "Fixed public synthetic n=53 matched block scalars and retained factor-base point set; no full rank, discrete-log recovery, vs_rho result, or ledger promotion.",
+  "target_scalars_match_published_fixtures": true,
+  "targets_checked": 32
+}
