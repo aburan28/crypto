@@ -162,6 +162,8 @@ pub struct F4Stats {
     pub basis_len: u64,
     /// Largest matrix held, in bytes of packed words.
     pub peak_matrix_bytes: u64,
+    /// Largest live lookup-table allocation, in bytes of packed words.
+    pub peak_table_bytes: u64,
     /// Wall time spent building matrices (products, columns, packing)
     /// and eliminating them.
     pub build_ns: u64,
@@ -442,10 +444,14 @@ fn echelon(
     // The leading block's tables, where enough rows follow it to pay and
     // they take no more words than the matrix; later pivots join them
     // within twice that.
-    let budget = (pivots.len() + rest.len()) * words;
+    let matrix_words = (pivots.len() + rest.len()) * words;
+    let budget = matrix_words * TABLE_INITIAL_BUDGET_MULT;
     let mut tables = (rest.len() >= TABLE_ROWS && pivots.len() >= TABLE_ROWS)
         .then(|| BlockTables::build(&pivot_of, &pivots, budget))
         .flatten();
+    if let Some(t) = &tables {
+        st.peak_table_bytes = st.peak_table_bytes.max((t.held_words * 8) as u64);
+    }
     let mut xors = 0u64;
     let mut performed = 0u64;
     if let Some(t) = &tables {
@@ -601,7 +607,13 @@ fn echelon(
         done = end;
         if let Some(t) = &mut tables {
             if rest.len() - done >= TABLE_ROWS && pivots.len() > made {
-                performed += t.extend(&pivot_of, &pivots, &pivots[made..], 2 * budget);
+                performed += t.extend(
+                    &pivot_of,
+                    &pivots,
+                    &pivots[made..],
+                    matrix_words * TABLE_EXTENDED_BUDGET_MULT,
+                );
+                st.peak_table_bytes = st.peak_table_bytes.max((t.held_words * 8) as u64);
             }
         }
     }
@@ -620,7 +632,19 @@ const TABLE_ROWS: usize = 256;
 
 /// Pivot columns per table: an aligned group of them never straddles a
 /// word, so a row's pattern on it is one shift and mask.
+#[cfg(not(feature = "f4-wide-tables"))]
 const TABLE_BLOCK: usize = 4;
+#[cfg(feature = "f4-wide-tables")]
+const TABLE_BLOCK: usize = 6;
+
+#[cfg(not(feature = "f4-wide-tables"))]
+const TABLE_INITIAL_BUDGET_MULT: usize = 1;
+#[cfg(feature = "f4-wide-tables")]
+const TABLE_INITIAL_BUDGET_MULT: usize = 4;
+#[cfg(not(feature = "f4-wide-tables"))]
+const TABLE_EXTENDED_BUDGET_MULT: usize = 2;
+#[cfg(feature = "f4-wide-tables")]
+const TABLE_EXTENDED_BUDGET_MULT: usize = 4;
 
 /// One table: the leading block's pivots on up to [`TABLE_BLOCK`]
 /// consecutive columns from `first`, all of which have one.

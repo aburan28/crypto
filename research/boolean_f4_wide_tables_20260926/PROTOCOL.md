@@ -1,0 +1,9 @@
+# Boolean F4 six-column lookup tables
+
+Frozen before the paired run. This is a stacked experiment on the measured bitmap default from PR #877. Build two binaries from the same source: ordinary four-column tables with a one-matrix initial and two-matrix extended budget; `--features f4-wide-tables` uses six-column tables with a four-matrix budget throughout. The feature is opt-in. Record and reject identical binary hashes. In both arms the bitmap is explicitly enabled. The wider arm can allocate more table memory; report `peak_table_bytes` beside `peak_matrix_bytes` and the actually performed word XORs.
+
+Use `examples/f4_f2_bench.rs`, one repetition and all seven standard Boolean F4 cases, primary `n20_m30`. The frozen seed XOR is zero; holdout XORs are `1ac0ffee` and `2468ace0`. Pin one Linux CPU with `RAYON_NUM_THREADS=1`. Warm each binary once per workload, then collect five A/A reference pairs and five alternating-order A/B pairs. Preserve every call, failure, process status, host/load, source and binary hashes, phase times, full output and counters in the raw receipt. Report A/A noise ranges, paired ratio median/minimum, and exact five-pair bootstrap 95% interval.
+
+Exact basis fingerprints, basis lengths, steps, divisor tests, logical word XOR counts, and matrix shapes must match. The performed XOR and table-memory counts may differ. A stage gain requires the primary elimination ratio to be at least 1.05 with lower interval bound above one, complete F4-call ratio and lower bound above one, holdout primary ratios outside their own A/A noise, and no material smaller-case regression beyond A/A noise. If these pass, run the same paired design with four threads before changing the default. A negative, inconclusive or oversized result stays opt-in with its receipt.
+
+This compares an internal solver stage. It does not measure one-target online IC or DLP speed, and it makes no rho or scoreboard claim.
