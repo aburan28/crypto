@@ -41,7 +41,7 @@ def doctor(source):
             'native_build_ready': all(checks.values()) and bool(shutil.which('cargo')),
             'instruction_protocol_ready': platform.system() == 'Linux' and platform.machine() == 'x86_64'
                 and version == 'valgrind-3.22.0', 'valgrind': version,
-            'scientific_admission': 'Prepared optimized schema-3 sources only: pair_table/tiny_gauss/subgroup_orbits; other implemented adapters remain proposals pending stage admission.',
+            'scientific_admission': 'Prepared optimized schema-3 sources; source-bound generic-v1 workers may enter explicit development qualification, with independent stage checks. Generic improvement eligibility and observer qualification remain pending.',
             'baseline_quality': 'Requires fresh rho sensitivity screen and arithmetic equivalence tests; no global-best certification.',
             'native_scope': 'Development diagnostic; no operation-count or hardware-independent speedup claim.',
             'stages': {

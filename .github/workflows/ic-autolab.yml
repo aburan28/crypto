@@ -34,7 +34,9 @@ jobs:
           sudo apt-get install -y valgrind
           test "$(valgrind --version)" = valgrind-3.22.0
       - name: Freeze dependency resolution
-        run: cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+        run: |
+          cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+          cargo fetch --locked
       - name: Harness and accounting regression tests
         run: |
           python -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_*.py' -v
@@ -60,12 +62,23 @@ jobs:
           RAYON_NUM_THREADS=1 cargo test --locked --release --lib exclusive_descent_ -- --test-threads=1
           cargo test --locked --release --example ic_tournament_worker public_input_ -- --test-threads=1
           RAYON_NUM_THREADS=1 cargo test --locked --release --example ic_tournament_worker exclusive_worker_ -- --include-ignored --test-threads=1
-          cargo build --locked --release --example ic_tournament_worker
+      - name: Build source-bound generic worker and audit scientific controls
+        run: |
+          run_start=$(python research/ic_candidate_tournament_20260915/execution_ids.py \
+            --workflow-run "$GITHUB_RUN_ID" --attempt "$GITHUB_RUN_ATTEMPT" --lane controls)
+          python research/ic_candidate_tournament_20260915/generic_build.py \
+            --out "$RUNNER_TEMP/ic-generic-build"
+          python research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/run_controls.py \
+            --build "$RUNNER_TEMP/ic-generic-build" --out "$RUNNER_TEMP/ic-generic-admission" \
+            --run-number-start "$run_start"
       - name: Complete-solve and profiler integration
         run: |
+          run_start=$(python research/ic_candidate_tournament_20260915/execution_ids.py \
+            --workflow-run "$GITHUB_RUN_ID" --attempt "$GITHUB_RUN_ATTEMPT" --lane integration)
           python research/ic_candidate_tournament_20260915/ci_smoke.py \
-            --worker target/release/examples/ic_tournament_worker \
-            --out "$RUNNER_TEMP/ic-autolab-integration"
+            --worker "$RUNNER_TEMP/ic-generic-build/worker" \
+            --build-dir "$RUNNER_TEMP/ic-generic-build" \
+            --out "$RUNNER_TEMP/ic-autolab-integration" --run-number-start "$run_start"
       - name: Preserve evidence including failures
         if: always()
         uses: actions/upload-artifact@v4
@@ -74,6 +87,8 @@ jobs:
           path: |
             ${{ runner.temp }}/ic-autolab-integration
             ${{ runner.temp }}/ic-query-law-rust-vectors.json
+            ${{ runner.temp }}/ic-generic-build
+            ${{ runner.temp }}/ic-generic-admission
             Cargo.lock
           retention-days: 30
           if-no-files-found: warn
