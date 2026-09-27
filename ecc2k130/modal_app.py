@@ -672,7 +672,8 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 walkTable=WALK_TABLE == '1',
                 tablePivotBytes=TABLE_PIVOT_BYTES == '1',
                 packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX),
-                packedStateTile=int(PACKED_STATE_TILE))
+                packedStateTile=int(PACKED_STATE_TILE),
+                witness=WITNESS == '1')
     if not rebuild and (streamKarat or smemSpill or globalCg or not bakedIntact[0]
                         or want != BAKED or info['cc'] not in BAKED_ARCHES):
         raise ValueError('rebuild=False requires the untouched matching baked binary')
