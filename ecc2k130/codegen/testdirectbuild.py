@@ -42,6 +42,8 @@ def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', comp
                subprocess=subprocess, time=time, json=json, benchResult=benchResult,
                summarizeSamples=summarizeSamples, bestResult=bestResult,
                CUDA_VERSION='13.0.0', DEFAULT_GPU='RTX-PRO-6000', BAKED_ARCHES=('120',), REMOTE='/unused',
+               # modal_app.py's default with ECC_CPU_THREADS unset; the image assignment reads it.
+               CPU_THREADS=0,
                print=lambda *a, **k: None,
                bakedIntact=[True], computeCapability=lambda: '120', gpuName=lambda: 'fixture GPU')
     for key in ('SINGLE_PRODUCT', 'CACHE_DENOM', 'BY_VALUE', 'POLY_CHAIN',
@@ -49,6 +51,7 @@ def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', comp
         env['PACKED_' + key] = '1'
     env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad, PACKED_CLMAD_SQUARE=square, PACKED_KARAT3=karat, PACKED_WEIGHTED_PREFIX=weighted, PACKED_COMPACT_STATE=compact, PACKED_SHARED_SIGMA=shared, PACKED_TOP_CLMAD='0', WALK_TABLE='0', TABLE_PIVOT_BYTES='0')
     assignment('BAKED', env)
+    assignment('CPU_BINARIES', env)
     return env
 
 

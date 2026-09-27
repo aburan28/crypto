@@ -361,16 +361,23 @@
       the optimum is <code>r<sup>2/(3+a)&minus;1/2</sup></code>, positive for every
       <code>a &lt; 1</code>. So this family has no crossover to find at any size, and at
       sect163k1's size it sits about 10<sup>7</sup>&times; the automorphism-aware walk it competes
-      with. That <code>r<sup>1/6</sup></code> rise now has a <strong>measured</strong> crossing
-      behind it rather than only a derivation: the tournament collector that sits strictly below
-      rho on an eight-cell Koblitz panel reads 0.831 [0.772, 0.894] at
+      with. That <code>r<sup>1/6</sup></code> rise was also read as a <strong>measured</strong>
+      crossing. The tournament collector that sat strictly below rho on an eight-cell Koblitz
+      panel reads 0.831 [0.772, 0.894] at
       <code>r</code>&thinsp;=&thinsp;4.2&times;10<sup>6</sup> and 1.533 [1.238, 1.899] at
       <code>r</code>&thinsp;=&thinsp;2.3&times;10<sup>8</sup>, both bands clear of one in opposite
       directions, and beyond the crossing the ratio grows at
       <code>r<sup>[0.13, 0.19]</sup></code> across three certified cells and 1100&times; in
-      <code>r</code> (<a href="#ic-crossover-20260922">below</a>). The derived exponent lies
-      inside that range &mdash; but at a factor base measurably not where the same derivation puts
-      it, so the agreement is not yet confirmation of the model. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
+      <code>r</code> (<a href="#ic-crossover-20260922">below</a>). <strong>But that crossing was
+      measured against the tournament worker&rsquo;s rho, which is not a matched reference.</strong>
+      Its step spends about 9,100 of 9,930 instructions naming Frobenius classes by squaring, a cost
+      the IC arm had engineered away. Given the IC arm&rsquo;s own orbit naming, that rho beats the
+      lane&rsquo;s IC pipeline at every cell measured: by 1.19&ndash;2.88&times;, from
+      <code>r</code>&thinsp;=&thinsp;4.2&times;10<sup>6</sup> to 1.2&times;10<sup>10</sup>
+      (<a href="#ic-triple-counted-20260923">below</a>). So no crossing with a matched rho has been
+      measured, and the <code>r<sup>[0.13, 0.19]</sup></code> is a growth against the unmatched
+      walk. The derived exponent lies inside that range &mdash; but at a factor base measurably not
+      where the same derivation puts it, so the agreement is not yet confirmation of the model. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
       no such table and its asymptotics are the question this ladder cannot reach. It is also not
       blanket across problems: on hyperelliptic Jacobians at genus 3 and 4 index calculus measures
       <strong>below</strong> a real distinguished-point rho &mdash; 0.21 at
@@ -420,7 +427,8 @@
           earlier &mdash; so a row may sit under it. On a prime-order curve it is
           &Theta;(r<sup>1/6</sup>) where the reference is flat, which is the round&rsquo;s result &mdash;
           measured at <code>r<sup>[0.13, 0.19]</sup></code> across three certified cells spanning
-          1100&times; in <code>r</code>, each at its own swept base.</p>
+          1100&times; in <code>r</code>, each at its own swept base &mdash; against the tournament
+          worker&rsquo;s rho, which the triple-counted control found unmatched.</p>
       </div>
     </dl>
   </header>
@@ -1591,7 +1599,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         pair-table, triple-table and memory-capped rows were priced without it &mdash; and
         <code>cost_cell</code>&rsquo;s collapse path never folded the subset-sum table. It surfaced as a
         disagreement: the IC tournament&rsquo;s <em>measured</em> crossover for this family on Koblitz
-        orbit bases (0.831, 1.396, 2.207 &times; rho at n23a1, n37a0, n43a1) carried to r&thinsp;=&thinsp;2<sup>129</sup>
+        orbit bases (0.831, 1.396, 2.207 &times; rho at n23a1, n37a0, n43a1; against the tournament
+        worker&rsquo;s rho, which the triple-counted control found unmatched) carried to r&thinsp;=&thinsp;2<sup>129</sup>
         sat about 2<sup>11</sup> below the pair-table row. With both folds the m&thinsp;=&thinsp;2 row
         moves from 2<sup>+28.55</sup> to <strong>2<sup>+20.76</sup>&times; rho</strong> (m&thinsp;=&thinsp;3:
         2<sup>+29.77</sup> to 2<sup>+21.82</sup>), within 1.7 bits of the tournament&rsquo;s family model
@@ -4601,6 +4610,7 @@ factor base, and this prices a decomposition oracle.</p>
   <strong>No tournament ran and nothing was promoted</strong> &mdash; this is a measurement against
   the round-0020 winner source, with no stage summaries and no evidence pack.</p>
 <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND22-budget-and-curvature.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round22_ladder.py">the ladder</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round22_base_sweep.py">factor-base sweep</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round22_budget_effect.py">what the trial cap is worth</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND21-crossover.md">the superseded round</a>.</p></div>
+<p><strong>Accounting note, added 2026-09-26.</strong> Every ratio in this panel is against the tournament worker&rsquo;s rho. The triple-counted control (<a href="#ic-triple-counted-20260923">below</a>) found that its step spends about 9,100 of 9,930 instructions naming Frobenius classes by squaring, which the IC arm had engineered away in round 0007. Given the IC arm&rsquo;s own orbit naming, that rho beats the lane&rsquo;s IC pipeline at every cell measured, by 1.19&ndash;2.88&times;. So the crossing and the rates below are measured against an unmatched reference, and no cell of this lane has yet been shown below a matched rho. <span class="chip">accounting</span></p>
 <div class="table-scroll"><table>
 <caption>Instruction unit Ir, complete DLP, 64 fixtures a configuration, seeds 20260922 and 4242.
   Each cell at its best measured base, fixed from an independent sweep before the draw.</caption>
@@ -6429,10 +6439,30 @@ factor base, and this prices a decomposition oracle.</p>
   <p><span class="chip">accounting</span> The generic factor-base solver now retains failed linear-algebra attempts, their measured LA time and sparse diagnostics, and keeps successful reports consistent. Dense and sparse correctness controls and the collected-relation equivalence test pass locally. This is a bookkeeping correction with no speedup claim; full online/cold cost remains unknown. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/la-accounting/RESULTS.md">control record</a> preserves its protocol, source hashes and raw test output. The optimized round-one result is unchanged.</p>
 </section>
 
+<section class="panel" id="ic-generic-query-controls-20260925">
+  <h2>Generic query admission: keep unsuccessful work visible</h2>
+  <p><span class="chip">accounting</span> Observed collection and descent now retain each attempted query, its native solver counters and terminal failures. Independent group replay and bounded exhaustive negative controls pass for 28 complete toy worker solves and seven intentional incomplete runs across seven built-in backends. Seventy-two distinct release Rust tests and 126 Python tests passed locally; two Python platform controls were skipped. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/RESULTS.md">control record</a> preserves every raw worker report and the protocol. Complete generic timing and scientific admission remain pending: online/cold cost, S and speedup are unknown. This bookkeeping change consumes no improvement round; one round is complete, no challenger qualified, and two remain.</p>
+</section>
+
+<section class="panel" id="ic-generic-public-inputs-20260925">
+  <h2>Generic online boundary: one supplied public target</h2>
+  <p><span class="chip">accounting</span> Measured generic jobs now require one validated public point. Their outer online interval excludes fixture generation and reusable IC/rho preparation, and ends after independent scalar replay. Final local controls passed 28 complete IC solves, two rho solves and seven intended preparation failures; an unstarted online interval stays null. Forty-four distinct Rust tests and 126 Python tests passed, with three existing Rust ignores and two Python platform skips. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/RESULTS.md">protocol and raw evidence</a> preserve both control passes. Raw online intervals are available; exclusive scientific phases and calibrated comparative costs remain pending. This does not promote a challenger or consume an improvement round.</p>
+</section>
+
+<section class="panel" id="ic-generic-query-law-20260925">
+  <h2>Generic query law: independently replay the declared sampler</h2>
+  <p><span class="chip">accounting</span> The independent checker now binds every retained query to the frozen seed, collection rule and descent rule. It agrees with 7,436 values from the pinned Rust RNG and probe implementation, replays 35 archived IC reports, and passes 47 fresh toy controls: 40 complete solves and seven intentional preparation failures. Adversarial tests reject valid group equations substituted at the wrong query position. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/RESULTS.md">protocol, raw records and replay receipts</a> retain these controls. Source/base/matrix binding and exclusive generic phases remain admission requirements; comparative online/cold costs, S and speedup are unknown. No improvement round is consumed and the incumbent remains selected.</p>
+</section>
+
+<section class="panel" id="ic-generic-exclusive-phases-20260925">
+  <h2>Generic phase accounting: preserve exclusive costs and unknowns</h2>
+  <p><span class="chip">accounting</span> The opt-in worker separates ordinary-query generation, PDP, relation checking, matrix construction, final LA and single-target stages. Each of two retained local panels passes 147 enabled/disabled pairs: 126 complete and 21 intentional preparation failures. Query histories, base census and independent certificates agree; every observed native phase partition closes. Unentered work remains unknown. Strict sessions reject phase changes on another thread. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-exclusive-phases/RESULTS.md">protocol and both raw evidence sets</a> preserve the unstable timing ratios: neither pass qualifies overhead or performance. Comparative online/cold costs, S and speedup remain unset pending scientific admission and calibrated qualification. No improvement round is consumed; the incumbent remains selected.</p>
+</section>
+
 <!-- BEGIN ic-autolab-20260924 -->
 <section id="ic-autolab-20260924">
 <h2>IC autolab — native development checkpoint, 2026-09-24</h2>
-<p><strong>2026-09-25 accounting update:</strong> the restored optimized producers passed 39/39 IC and 13/13 matched rho native/profile admission pairs, with independent artifact replay. Measured jobs accept one supplied public point; native online intervals exclude reusable preparation and include scalar replay. Complete cold instruction and native costs remain separately recorded. These are fixed correctness/accounting controls, with no new tournament winner or speedup claim; canonical admission is now wired into both existing drivers, and the separate five-cell reference qualification above is now measured; the familywise improvement protocol remains pending. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/driver-admission/README.md">driver controls</a> retain canonical failure rows and per-target online tables: final Linux driver controls verified 17 native jobs and 15 native/profile pairs, retaining one intentional native failure. The durable history passed 28 audits after fresh extraction; no improvement round has run. <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/README.md">Protocol, superseded controls and durable evidence</a>.</p>
+<p><strong>2026-09-25 accounting update:</strong> the restored optimized producers passed 39/39 IC and 13/13 matched rho native/profile admission pairs, with independent artifact replay. Measured jobs accept one supplied public point; native online intervals exclude reusable preparation and include scalar replay. Complete cold instruction and native costs remain separately recorded. These are fixed correctness/accounting controls, with no new tournament winner or speedup claim; canonical admission is now wired into both existing drivers, and the separate five-cell reference qualification above is now measured; the familywise protocol is frozen and round one retained the incumbent. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/driver-admission/README.md">driver controls</a> retain canonical failure rows and per-target online tables: final Linux driver controls verified 17 native jobs and 15 native/profile pairs, retaining one intentional native failure. The earlier driver-admission history passed 28 audits after fresh extraction. The later <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/README.md">round-one evidence</a> records the completed round; two remain. <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/README.md">Protocol, superseded controls and durable evidence</a>.</p>
 <p>888/960 verified jobs across six audited development screens; 72 retained rejections and an earlier reporting failure are preserved. No promoted winner, operation-count result, ECC2K-130 gain or global-optimum claim. Native wall times have uncontrolled affinity, OS caches and host activity; A/A variation is recorded.</p>
 <p>Source: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.json">frozen measurements</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.md">report and limits</a>. S and ratios to an operation floor are unmeasured. Classification: accounting and integration engineering.</p>
 <h3>implementation_v2</h3>
@@ -6988,10 +7018,31 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     </tbody>
   </table></div>
   <div class="panel-head">
-    <p>The exact m6,d21 F from <a href="https://github.com/aburan28/crypto/pull/773">#773</a> gives a one-base counting ceiling of 12.4685%; even four equal-size bases cannot exceed 49.8738% by the union bound. Balanced m10 reduces C but has 1,178 raw affine-chain variables before branches/auxiliaries. A separate full-dimensional unequal-slot census, starting with five 15-bit and four 14-bit m9 slots, is the next parameter experiment; no larger-rung solver has been admitted. Producer/independent replay wall was at most 10.506/124.310 s per arm, below frozen 600/1,200 s and 256 MiB caps. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/RESULT.md">Exact result and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/EVIDENCE.md">raw receipt and replay</a>. Freeze SHA-256 <code>3e930522ef1102770b7a748477959a108f8656fa2aaaa0b22a17598b2856eedb</code>.</p>
+    <p>The exact m6,d21 F from <a href="https://github.com/aburan28/crypto/pull/773">#773</a> gives a one-base counting ceiling of 12.4685%; even four equal-size bases cannot exceed 49.8738% by the union bound. Balanced m10 reduces C but has 1,178 raw affine-chain variables before branches/auxiliaries. The subsequent full-dimensional unequal-slot census is reported immediately below; no larger-rung solver has been admitted. Producer/independent replay wall was at most 10.506/124.310 s per arm, below frozen 600/1,200 s and 256 MiB caps. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/RESULT.md">Exact result and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/EVIDENCE.md">raw receipt and replay</a>. Freeze SHA-256 <code>3e930522ef1102770b7a748477959a108f8656fa2aaaa0b22a17598b2856eedb</code>.</p>
   </div>
 </section>
 <!-- END ecc2k130-rotated-arity-screen-20260925 -->
+<!-- BEGIN ecc2k130-rotated-unequal-arity-20260925 -->
+<section class="panel" id="ecc2k130-rotated-unequal-arity-20260925">
+  <div class="panel-head">
+    <h2>Full-dimensional unequal n = 131 slots: m9 narrowly misses the frozen column cap; m10 passes <span class="chip">necessary count</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/784">PR #784</a> froze four beta-3 allocations, parent hashes and an independent verifier before outcomes. Each arm partitions all 131 normal-basis conjugate indices across high slots i=0..r−1 and low slots i=r..m−1, giving combined GF(2) rank 131. After inverse Frobenius the normalized low space is nested in the high space, so its nonzero signed ±[4] columns are a subset of the high set. The complete natural-mask replay checked all 1,056,768 low/high masks, all row/chunk digests, exact column sets and 512 fixed sample ordinals; 269 rational-lift samples passed full group-law checks. Every space had zero x=1 masks.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>F is exact physical F0 size in each normalized space, C is the number of distinct nonzero signed columns. N=F<sub>high</sub><sup>r</sup>F<sub>low</sub><sup>m−r</sup>. The frozen gate requires N≥q and C<sub>high</sub>≤16,384; N/q is a necessary tuple-count ceiling, not a measured PDP hit rate. Full S and matched rho remain unset.</caption>
+    <thead><tr><th>Slots high / low</th><th>F low / high</th><th>C low / high</th><th>Exact N/q</th><th>Raw chain variables</th><th>Gate</th></tr></thead>
+    <tbody>
+      <tr><td>m7: 19×5 / 18×2</td><td>261,709 / 523,721</td><td>130,854 / 261,860</td><td>3.9652248352</td><td>786</td><td>fail C</td></tr>
+      <tr><td>m8: 17×3 / 16×5</td><td>65,747 / 131,331</td><td>32,873 / 65,665</td><td>4.0889520501</td><td>917</td><td>fail C</td></tr>
+      <tr><td>m9: 15×5 / 14×4</td><td>16,743 / 33,247</td><td>8,371 / 16,623</td><td>4.6905739288</td><td>1,048</td><td>fail C by 239</td></tr>
+      <tr><td>m10: 14×1 / 13×9</td><td>7,977 / 16,125</td><td>3,988 / 8,062</td><td>3.0987505090</td><td>1,179</td><td>pass necessary screen</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>All four N≥q. The m9 miss is only 239 columns above the preregistered cap, not a proof that m9 is impossible. Unequal m10 has 2.02144× the ordered tuple count and 2.02156× the signed columns of #778's balanced m10, with one more raw chain variable. The threshold admits unequal m10 as a next implicit-PDP feasibility arm but establishes no support, relation rank, solver or attack-cost dominance. The first run and all eight children passed frozen time/RSS caps; largest child RSS upper bound was 79,659,008 bytes. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_unequal_arity_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_unequal_arity_20260925/EVIDENCE.md">receipt and replay</a>. Freeze SHA-256 <code>ba93ce394df2c57f498f62bd59b74ed1faac8b748119d3e15594659d197f09cf</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-unequal-arity-20260925 -->
 <!-- BEGIN ecc2k130-rotated-pdp-corpus-20260925 -->
 <section class="panel" id="ecc2k130-rotated-pdp-corpus-20260925">
   <div class="panel-head">

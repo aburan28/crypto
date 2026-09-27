@@ -319,6 +319,31 @@ def main():
         return runMerge(args, campaign)
 
 
+def splitMaxIters(clientArgs):
+    """(the solver arguments without --max-iters, its value or None)."""
+    args = list(clientArgs or [])
+    if "--max-iters" not in args:
+        return args, None
+    i = args.index("--max-iters")
+    return args[:i] + args[i + 2:], int(args[i + 1])
+
+
+def bindingCompatible(old, new):
+    """Whether a merge directory bound to `old` may continue under `new`.
+
+    Everything must match except that the solver's --max-iters may rise: the
+    replay of a stored point only needs a cap at least its trail's length, so
+    a raised guard re-walks every old point too (WALK-CONSTANT.md section
+    11.4).  A lower one, or one appearing or disappearing, is refused.
+    """
+    if old == new:
+        return True
+    oldArgs, before = splitMaxIters(old.get("clientArgs"))
+    newArgs, after = splitMaxIters(new.get("clientArgs"))
+    same = dict(old, clientArgs=oldArgs) == dict(new, clientArgs=newArgs)
+    return same and before is not None and after is not None and after > before
+
+
 def runMerge(args, campaign):
     if campaign:
         bindDirectory(args.work, campaign)
@@ -329,7 +354,7 @@ def runMerge(args, campaign):
     verifyBuckets(state, args.work)
     binding = {"campaignId": campaign["id"] if campaign else None,
                "curve": args.curve, "dpWeight": args.dp_weight, "clientArgs": args.client_arg}
-    if "binding" in state and state["binding"] != binding:
+    if "binding" in state and not bindingCompatible(state["binding"], binding):
         raise ValueError("merge state belongs to different campaign/solve parameters")
     state["binding"] = binding
     if not os.path.exists(statePath):

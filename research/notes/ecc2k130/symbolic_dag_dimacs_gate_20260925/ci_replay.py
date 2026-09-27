@@ -6,6 +6,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -16,6 +17,14 @@ ROOT = HERE.parents[3]
 PARENT = HERE.parent / 'symbolic_dag_fullpoint_20260925'
 ARCHIVED_CADICAL = ROOT / 'research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/panel/Q0T3-cadical.stdout'
 DOMAIN = 'k0-symbolic-dag-dimacs-gate-v1'
+PARENT_REL = 'research/notes/ecc2k130/symbolic_dag_fullpoint_20260925'
+HEX40 = re.compile(r'[0-9a-f]{40}\Z')
+GUARD_PATHS = [
+    '.github/workflows/ecc2k130-symbolic-dag-dimacs-gate.yml',
+    'research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/panel/Q0T3-cadical.stdout',
+    'research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/',
+    'research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/',
+]
 SOURCES = ('PROTOCOL.md', 'INPUT.json', 'export.py', 'verify.py', 'bounded.py',
            'produce.py', 'run.py', 'ci_replay.py', 'third_party/drat-trim.c',
            'third_party/LICENSE')
@@ -51,8 +60,21 @@ def check_freeze() -> dict:
     assert frozen['n131_external_wall_cap_seconds'] == 90
     assert frozen['n131_rss_cap_bytes'] == 512 << 20
     assert frozen['proof_byte_cap'] == 128 << 20
-    if frozen['release_main_head'] is not None:
-        assert len(frozen['release_main_head']) == 40
+    assert HEX40.fullmatch(frozen['release_main_head'])
+    assert frozen['upstream_guard_paths'] == GUARD_PATHS
+    held = HERE / 'preoutcome_release_1'
+    assert frozen['previous_freeze_sha256'] == sha(held / 'FROZEN.json')
+    assert set(frozen['preoutcome_release_hold_sha256']) == {'FROZEN.json',
+                                                               'PROTOCOL.md',
+                                                               'HOLD.json', 'README.md'}
+    for name, digest in frozen['preoutcome_release_hold_sha256'].items():
+        assert sha(held / name) == digest, name
+    hold = json.loads((held / 'HOLD.json').read_text())
+    assert hold['classification'] == 'SUPERSEDED_EXACT_MAIN_RELEASE_BEFORE_OUTCOME'
+    assert hold['frozen_sha256'] == frozen['previous_freeze_sha256']
+    assert hold['protocol_sha256'] == sha(held / 'PROTOCOL.md')
+    assert hold['release_main_head'] == frozen['release_main_head']
+    assert hold['measured_children_started'] == 0 and hold['outcome_receipt'] is None
     # Import the actual producer in hash-only CI; this catches parent/local
     # module shadowing before the protected outcome run.
     sys.path.insert(0, str(HERE))
@@ -99,6 +121,31 @@ def check_evidence(receipt_path: Path, frozen: dict) -> dict:
     assert receipt['domain'] == DOMAIN
     assert receipt['freeze_sha256'] == sha(HERE / 'FROZEN.json')
     assert receipt['decision'] in ('PASS', 'FAIL_OR_CENSORED')
+    gate = receipt['release_gate']
+    assert gate['parent_pr_state'] == 'MERGED'
+    assert gate['release_main_head'] == frozen['release_main_head']
+    assert gate['upstream_changed_paths'] == []
+    for key in ('parent_merge_commit', 'reviewed_head', 'checkout_head',
+                'pr_head', 'dispatch_main_head'):
+        assert HEX40.fullmatch(gate[key]), key
+    assert gate['reviewed_head'] == gate['checkout_head'] == gate['pr_head']
+    for ancestor, descendant in ((gate['release_main_head'], gate['dispatch_main_head']),
+                                 (gate['parent_merge_commit'], gate['dispatch_main_head']),
+                                 (gate['release_main_head'], gate['checkout_head']),
+                                 (gate['checkout_head'], 'HEAD')):
+        subprocess.run(['git', 'merge-base', '--is-ancestor', ancestor, descendant],
+                       cwd=ROOT, check=True)
+    changed = subprocess.check_output(
+        ['git', 'diff', '--name-only',
+         f"{gate['release_main_head']}..{gate['dispatch_main_head']}", '--',
+         *frozen['upstream_guard_paths']], cwd=ROOT, text=True).splitlines()
+    assert not changed, changed
+    for relative, key in ((f'{PARENT_REL}/FROZEN.json', 'parent_freeze_sha256'),
+                          (f'{PARENT_REL}/evidence/producer/rows.jsonl.gz',
+                           'parent_rows_sha256')):
+        raw = subprocess.check_output(
+            ['git', 'show', f"{gate['dispatch_main_head']}:{relative}"], cwd=ROOT)
+        assert hashlib.sha256(raw).hexdigest() == frozen[key]
     manifest_path = archive / 'MANIFEST.json'
     assert sha(manifest_path) == receipt['manifest_sha256']
     manifest = json.loads(manifest_path.read_text())

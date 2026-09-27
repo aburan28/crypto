@@ -144,13 +144,34 @@ admit them. Historical screens remain replayable with their own frozen evaluator
 The [PDP outcome controls](goal_20260924/pdp-admission/PROTOCOL.md) address one
 admission defect: an encoding rejection must be retained as unsupported, never
 reported as a proved absence of decompositions. These controls are separate
-from solver performance qualification. Generic `RelationCollector` still drops
-per-attempt solver statistics; its scientific adapter must retain them before
-ordinary-query status mixes can enter a comparative table.
+from solver performance qualification. The [generic query controls](goal_20260924/generic-query-accounting/PROTOCOL.md)
+add observed collection/descent APIs retaining every query and native frontend
+counter, including unsuccessful terminal descents. The worker exports versioned
+query records and actual attempted matrix solves. Independent group replay and
+bounded exhaustive negative controls are separate from full scientific admission.
+The [independent query-law adapter](goal_20260924/generic-query-law/RESULTS.md)
+now replays the pinned RNG, swept/windowed collection and sampled/walked descent
+from the frozen worker job. CI requires native/profile agreement and rejects
+sampler substitutions even when the replacement group equation is true. Exact
+source/base/matrix binding and exclusive phase accounting remain required before
+a comparative result. The
+[generic public-input controls](goal_20260924/generic-public-inputs/RESULTS.md)
+require one supplied point for measured jobs and place the outer online boundary
+after reusable IC/rho preparation through scalar replay. These intervals retain
+legacy combined instruction phases; they do not qualify generic performance.
 The [relation-LA accounting controls](goal_20260924/la-accounting/RESULTS.md)
 also preserve failed solve attempts and their diagnostics in the generic
 factor-base-log report. This repairs bookkeeping; complete scientific phase
 instrumentation is still required before comparing its cost.
+
+The [exclusive generic phase controls](goal_20260924/generic-exclusive-phases/RESULTS.md)
+add opt-in native and instruction partitions for the generic worker. Both local
+147-pair passes preserve query histories, base census and certificates; missing
+phases stay null and failed work remains charged. The checker requires exact
+online closure and whole-process instruction closure. This is clock-accounting
+admission only: tracing changes collection scheduling, and the uncalibrated
+enabled/disabled timings do not establish low overhead. Exact source/dispatch,
+base/matrix admission and optimized-reference qualification are still required.
 
 Native screens always report `promotion_eligible=false`; operation counts, S,
 floor ratios, memory caps and affinity remain null when unavailable. A/A results,
