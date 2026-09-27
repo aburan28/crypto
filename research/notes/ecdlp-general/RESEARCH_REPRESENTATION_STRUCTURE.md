@@ -835,8 +835,16 @@ repository already had one.
 |:--|:--|:--|:--|
 | `LLL_GS_ANALYSIS` (with the Phase 1.5 runs in `GLV_HNP`) | published `(r, s)` per signature, plus 64 bits of nonce bias on each of 8 signatures (`k_bits = 192` on 256-bit curves) | **measured positive** | planted keys recovered on secp192k1, secp224k1, secp256k1, P-256, brainpoolP256r1, P-384, brainpoolP384r1 and P-521 — 3/3 seeds at 256, 384 and 521 bits after the fixes below; under a second per probe where timed at 192–256 bits, about 80 s per probe on P-521 |
 | `CGA_HNC` | needs smooth factors of `#E` | R1 absent | standard curves have cofactor 1; isogeny transport keeps the group order, so the category never changes |
-| `GLV_HNP`, `GLV_HNP_PHASE2` (GLV-specific variant) | — | open | design documents; the `k₁`-only-leak lattice is not implemented |
+| `GLV_HNP`, `GLV_HNP_PHASE2` (GLV-specific variant) | bias on the GLV half-scalar `k₁` only, `k₂` free | **measured at toy size; R5 open** | the GLV-aware lattice is implemented and its Kannan-LLL recovery measured over 3,000 instances at 12, 17 and 20 bits (`GLV_HNP_PHASE2` §8b); recovery follows `Π = NU·ν̂ < 1`, a law its own script labels post hoc.  Not run at cryptographic size |
 | `HNP_LANDSCAPE` | — | survey | real-world breaks cited from the literature, not measured here |
+
+> **Correction (2026-09-27).**  The GLV row above originally read
+> *"open — design documents; the `k₁`-only-leak lattice is not
+> implemented."*  That is the same headline-reading error this section
+> was written to record: `GLV_HNP_PHASE2`'s status block said "design
+> document", but its §8b measures the lattice.  The two GLV notes' own
+> status blocks were stale as well and are updated alongside this
+> correction.
 
 The HNP row satisfies the test outright: R1 is the published signature
 plus the biased nonce, R2 embeds the problem into a lattice in
@@ -859,7 +867,10 @@ it — measured or catalogued — consumes something a protocol published.
 threads by reading headlines, and the lattice-HNP headlines read as
 proposals and surveys.  The measured recoveries sit in tables below the
 fold.  A later ledger should list every folder under `research/notes/`
-and say which were read.
+and say which were read.  The same error recurred once more inside this
+section (the GLV row, corrected above), which argues for a stronger rule:
+read to the last measured section of a note, not just its status block,
+before classifying it.
 
 **Class** (`AGENTS.md` §3): **accounting**.  A claim corrected, the
 conclusion unchanged.
