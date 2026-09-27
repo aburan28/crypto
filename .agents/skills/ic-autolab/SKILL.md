@@ -51,6 +51,16 @@ exposed point, including all 25 fixtures from this development study even when
 an execution failed or was not reached. Preserve separate cold/online leaders
 when they differ; do not weaken the archived reference to admit a challenger.
 
+The [version-two protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/PROTOCOL.md)
+binds that accepted evidence for attempts two and three. Use
+`reference_registry_v2.py` to verify and declare all three extra references,
+then `tournament.py prepare --campaign-version 2` with the registry, accepted
+qualification and observer reports, and complete target exclusions. Its maximum
+panel is ten challengers plus the incumbent: 3,480 native/profile pairs including
+all references, within the unchanged 3,500-pair cap. Keep the original
+three-attempt familywise budget. This driver support does not register or
+execute a round; freeze its candidate panel and dispatch wrapper first.
+
 Before a rho comparison, inspect the actual reference path and run its release
 tests for reference/packed agreement, fruitless-cycle escape, charge closure,
 and birthday-scale walk counts. Screen rho walk widths on the same development
