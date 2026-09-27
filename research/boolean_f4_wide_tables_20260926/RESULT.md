@@ -36,3 +36,18 @@ CI run [36300043072](https://github.com/aburan28/crypto/actions/runs/36300043072
 | Holdout `2468ace0` | 406.0 ms | 297.3 ms | 1.367, 1.349–1.376 | 669.9 ms | 562.0 ms | 1.192, 1.182–1.196 |
 
 Frozen primary peak table storage rose from 21.4 to 33.6 MB while the matrix peak stayed 44.4 MB; performed XORs fell from 371.6 to 324.9 million. No smaller complete-call median regressed beyond its own A/A range. The frozen A/A full-F4 range was unusually wide, 0.991–1.240, despite a paired A/B interval above one. An independent one-thread repeat and four-thread control are required before any default change.
+
+## Five-column independent repeat and four-thread control
+
+CI run [36301067360](https://github.com/aburan28/crypto/actions/runs/36301067360) at PR head `659a9cfc` completed 66 calls at each thread count. Every call succeeded with the same exact output signatures and logical counts. The complete raw [one-thread](runs/36301067360/ci-result-five.json) and [four-thread](runs/36301067360/ci-result-five-threads4.json) receipts have SHA-256 `cc68e3ed1601618176a857203e2f534aeeacb6c997882045e6290f238ada2404` and `3f69baa15538342b49ea239304f80825895dcb0b9d5883822172198ef9062833`.
+
+| Threads, `n20_m30` workload | Elimination ratio, 95% interval | Complete F4 ratio, 95% interval |
+| --- | ---: | ---: |
+| One, frozen | 1.074, 1.068–1.095 | 1.037, 1.033–1.049 |
+| One, holdout A | 1.298, 1.291–1.318 | 1.155, 1.148–1.168 |
+| One, holdout B | 1.324, 1.299–1.331 | 1.166, 1.156–1.174 |
+| Four, frozen | 1.060, 1.008–1.071 | 1.020, 1.007–1.053 |
+| Four, holdout A | 1.180, 1.151–1.224 | 1.060, 1.050–1.103 |
+| Four, holdout B | 1.163, 1.141–1.205 | 1.071, 1.056–1.096 |
+
+The independent repeat confirms the primary and holdout gains, and no four-thread smaller case regressed beyond A/A noise. One one-thread smaller case misses the frozen strict gate: holdout B `n14_m14` has a complete-call paired median of 0.9964 against its A/A range 1.0007–1.0159. Its five-pair bootstrap interval is 0.9931–1.0161. This is small and uncertain, but the gate is not met. The four-column default stays in place while this specific cell is adjudicated; five and six columns remain opt-in.
