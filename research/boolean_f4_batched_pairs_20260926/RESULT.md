@@ -23,3 +23,18 @@ CI run [36300590097](https://github.com/aburan28/crypto/actions/runs/36300590097
 | Holdout `2468ace0` | 1.313, 1.292–1.443 | 1.062, 1.050–1.138 | 0.964–1.015 |
 
 All exact fingerprints, pair counters, operation counts and matrix dimensions matched, and no smaller-case median regressed beyond its A/A noise. This clears the parallel control. Batched pair filtering is now selected by default, with `F4_F2_BATCH_INSERTS=0` retaining the original per-insertion path. A final explicit-reference one- and four-thread replay remains before merging. The measured improvement is only a Boolean F4 stage result.
+
+## Default-on replay and outstanding four-thread control
+
+CI run [36301310838](https://github.com/aburan28/crypto/actions/runs/36301310838) at PR head `317f150e` completed 66 calls at each thread count. Every call succeeded and exact fingerprints, pair counters, operation counts and matrix dimensions matched. The raw [one-thread](runs/36301310838/ci-result.json) and [four-thread](runs/36301310838/ci-result-threads4.json) receipts have SHA-256 `e46f0a4d1d884de2dfc91fcaa413321a5086bf5a8e6f576889358de7cf8cc4e1` and `5c74db97f20ceec402d9d51d1a27f22233a62c65c8278b6a231d60ae180a92b0`.
+
+| Threads, `n20_m30` workload | Other-time ratio, 95% interval | Complete F4 ratio, 95% interval |
+| --- | ---: | ---: |
+| One, frozen | 1.525, 1.509–1.545 | 1.063, 1.055–1.066 |
+| One, holdout A | 1.532, 1.512–1.547 | 1.055, 1.050–1.071 |
+| One, holdout B | 1.550, 1.518–1.558 | 1.054, 1.048–1.059 |
+| Four, frozen | 1.521, 1.467–1.548 | 1.095, 1.076–1.129 |
+| Four, holdout A | 1.546, 1.522–1.962 | 1.119, 1.086–1.158 |
+| Four, holdout B | 1.522, 1.481–1.591 | 1.091, 1.065–1.091 |
+
+The one-thread replay passes every gate. One smaller four-thread frozen cell misses the strict A/A range: `n16_m24` has a complete-call paired median of 0.9984 against A/A 1.0111–1.0410, with a bootstrap interval of 0.9936–1.0264. The earlier four-thread control measured 1.0318 for this cell, with A/A 0.9937–1.0389. This ambiguous small-case result is not counted as a pass. The default-on change remains unmerged while it is independently repeated.
