@@ -174,7 +174,7 @@ pub fn sqrt_mod(n: u64, p: u64) -> Option<u64> {
     }
     let mut q = p - 1;
     let mut s = 0u32;
-    while q % 2 == 0 {
+    while q.is_multiple_of(2) {
         q /= 2;
         s += 1;
     }
@@ -185,7 +185,7 @@ pub fn sqrt_mod(n: u64, p: u64) -> Option<u64> {
     let mut m = s;
     let mut c = pow_mod(z, q, p);
     let mut t = pow_mod(n, q, p);
-    let mut r = pow_mod(n, (q + 1) / 2, p);
+    let mut r = pow_mod(n, q.div_ceil(2), p);
     loop {
         if t == 1 {
             return Some(r);
@@ -217,13 +217,13 @@ pub fn is_prime_u64(n: u64) -> bool {
         return false;
     }
     for &sp in &[2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        if n % sp == 0 {
+        if n.is_multiple_of(sp) {
             return n == sp;
         }
     }
     let mut d = n - 1;
     let mut s = 0;
-    while d % 2 == 0 {
+    while d.is_multiple_of(2) {
         d /= 2;
         s += 1;
     }
@@ -2073,7 +2073,6 @@ fn run_fresh_hash_dp(inst: &Instance, fb: &FactorBase, opts: &WalkOptions) -> St
             advance(&mut s1, &mut l1);
             advance(&mut s2, &mut l2);
             i1 += 1;
-            i2 += 1;
         }
     };
 

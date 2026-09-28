@@ -18,6 +18,12 @@ use std::{
 pub enum Layer {
     Preprocessing,
     ExactReduction,
+    /// Has no producer.  It held `polynomial_reuse::parameter_basis_cached`,
+    /// removed once measured never to pay for itself (the note at that
+    /// function's former place gives the figures).  The slot is kept, not
+    /// deleted, because `ic` reports cache statistics as the fixed array
+    /// `[preprocessing, exact-reduction, parameterized]` and the 2026-09-14
+    /// polynomial-reuse record reads that shape; its counters now stay zero.
     Parameterized,
 }
 impl Layer {
@@ -97,6 +103,10 @@ fn fingerprint() -> &'static str {
             include_str!("polynomial_reuse.rs"),
             include_str!("koblitz_groebner.rs"),
             include_str!("pq_groebner_f2.rs"),
+            // Produces the cached symbolic summation polynomials. Without it a
+            // change to the generator would leave every key untouched and the
+            // old bytes would be served as current.
+            include_str!("semaev_leading_form.rs"),
         ] {
             h.update(source.as_bytes());
         }

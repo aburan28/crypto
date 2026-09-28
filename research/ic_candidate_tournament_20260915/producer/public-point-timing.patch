@@ -1,0 +1,359 @@
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -19,5 +19,5 @@
+ use std::io::Read;
+ use std::time::Instant;
+-use crypto_lib::cryptanalysis::ic_phase::{mark, Phase};
++use crypto_lib::cryptanalysis::ic_phase::{self, mark, Phase};
+ 
+ /// The whole process allocates well under a megabyte (the largest job of the
+@@ -32,5 +32,5 @@
+     use std::alloc::{GlobalAlloc, Layout, System};
+     use std::cell::UnsafeCell;
+-    use std::sync::atomic::{AtomicUsize, Ordering::Relaxed};
++    use std::sync::atomic::{AtomicUsize, Ordering::{Acquire, AcqRel, Relaxed, Release}};
+ 
+     const SIZE: usize = 64 << 20;
+@@ -40,5 +40,6 @@
+     unsafe impl Sync for Region {}
+     static REGION: Region = Region(UnsafeCell::new([0; SIZE]));
+-    /// Offset of the first free byte.
++    /// Offset of the first free byte. Acquire/release transfers ownership of
++    /// reused bytes between threads; relaxed atomics do not publish their data.
+     static TOP: AtomicUsize = AtomicUsize::new(0);
+ 
+@@ -51,10 +52,10 @@
+         #[inline]
+         unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+-            let mut top = TOP.load(Relaxed);
++            let mut top = TOP.load(Acquire);
+             loop {
+                 let start = (top + layout.align() - 1) & !(layout.align() - 1);
+                 let end = start + layout.size();
+                 if end > SIZE { return System.alloc(layout); }
+-                match TOP.compare_exchange_weak(top, end, Relaxed, Relaxed) {
++                match TOP.compare_exchange_weak(top, end, AcqRel, Acquire) {
+                     Ok(_) => return (base() + start) as *mut u8,
+                     Err(seen) => top = seen,
+@@ -69,5 +70,5 @@
+             // Only the most recent block can be given back.
+             let end = offset + layout.size();
+-            let _ = TOP.compare_exchange(end, offset, Relaxed, Relaxed);
++            let _ = TOP.compare_exchange(end, offset, Release, Relaxed);
+         }
+ 
+@@ -78,5 +79,5 @@
+             let end = offset + layout.size();
+             if offset + new_size <= SIZE
+-                && TOP.compare_exchange(end, offset + new_size, Relaxed, Relaxed).is_ok()
++                && TOP.compare_exchange(end, offset + new_size, AcqRel, Acquire).is_ok()
+             {
+                 return ptr;
+@@ -158,5 +159,5 @@
+             a.dealloc(r, Layout::from_size_align(1000, 8).unwrap());
+             a.dealloc(q, big);
+-            a.dealloc(p, l);
++            // `realloc` already released p; freeing it again is invalid.
+         }
+     }
+@@ -184,4 +185,6 @@
+     curve_a: u8,
+     target_seeds: Vec<u64>,
++    #[serde(default)]
++    public_targets: Option<Vec<[String; 2]>>,
+     algorithm_seed: u64,
+     factor_base: FactorBaseSpec,
+@@ -250,4 +253,23 @@
+ }
+ 
++/// Decode the supplied public point without constructing a target scalar or
++/// silently reducing out-of-range coordinates. Seeds are provenance only.
++fn public_point(c: &KoblitzCurve, encoded: &[String; 2]) -> Result<BinaryPoint, String> {
++    let coordinate = |text: &str| -> Result<F2mElement, String> {
++        if text.is_empty() || !text.bytes().all(|b| b.is_ascii_digit()) ||
++            (text.len() > 1 && text.starts_with('0')) {
++            return Err("noncanonical public coordinate".into());
++        }
++        let value = text.parse::<BigUint>().map_err(|_| "invalid coordinate")?;
++        if value.bits() > u64::from(c.n) { return Err("coordinate outside field encoding".into()); }
++        Ok(F2mElement::from_biguint(&value, c.n))
++    };
++    let q = BinaryPoint::Affine { x: coordinate(&encoded[0])?, y: coordinate(&encoded[1])? };
++    if !c.curve.is_on_curve(&q) || c.mul(&q, &c.subgroup_order) != BinaryPoint::Infinity {
++        return Err("public point is outside the declared subgroup".into());
++    }
++    Ok(q)
++}
++
+ /// A finished report: a value tree, or text already serialised by the
+ /// fast pipeline (the same JSON document, written directly).
+@@ -266,5 +288,5 @@
+     }
+-    if job.target_seeds.is_empty() || job.target_seeds.len() > 100 {
+-        return Err("target count must be 1..100".into());
++    if job.mode != "fixture" && job.public_targets.as_ref().map(Vec::len) != Some(1) {
++        return Err("measured jobs require exactly one supplied public point; use fixture mode first".into());
+     }
+     let cfg = &job.config;
+@@ -274,7 +296,25 @@
+         return Err("invalid collection limits".into());
+     }
++    ic_phase::begin();
+     let start = Instant::now();
+     let c = KoblitzCurve::new(job.curve_a, job.degree).ok_or("curve has no usable subgroup")?;
+-    let targets = job.target_seeds.iter().map(|&s| target(&c, s)).collect::<Result<Vec<_>, _>>()?;
++    let targets = match &job.public_targets {
++        Some(encoded) => {
++            if encoded.is_empty() || encoded.len() > 100 ||
++                (!job.target_seeds.is_empty() && job.target_seeds.len() != encoded.len()) {
++                return Err("invalid public-point/seed counts".into());
++            }
++            encoded.iter().map(|p| public_point(&c, p)).collect::<Result<Vec<_>, _>>()?
++        }
++        None => {
++            if job.mode != "fixture" || job.target_seeds.is_empty() || job.target_seeds.len() > 100 {
++                return Err("fixture mode requires 1..100 target seeds".into());
++            }
++            job.target_seeds.iter().map(|&s| target(&c, s)).collect::<Result<Vec<_>, _>>()?
++        }
++    };
++    let target_seeds: Vec<Option<u64>> = if job.target_seeds.is_empty() {
++        vec![None; targets.len()]
++    } else { job.target_seeds.iter().copied().map(Some).collect() };
+     let metadata = json!({
+         "degree": c.n, "curve_a": c.a,
+@@ -283,5 +323,5 @@
+         "cofactor": c.cofactor.to_string(), "lambda": c.lambda.to_string(),
+         "generator": point(c.generator()), "targets": targets.iter().map(point).collect::<Vec<_>>(),
+-        "target_seeds": job.target_seeds, "target_scalar_constructed": false
++        "target_seeds": target_seeds, "target_scalar_constructed": false
+     });
+ 
+@@ -290,6 +330,6 @@
+     }
+     if job.mode == "rho" {
+-        mark(Phase::RhoSolve);
+-        let mut solutions = Vec::new();
++        ic_phase::begin_online(Phase::RhoSolve);
++        let mut answers = Vec::new();
+         for (i, q) in targets.iter().enumerate() {
+             let options = KoblitzSignedRhoOptions {
+@@ -299,18 +339,22 @@
+                 ..KoblitzSignedRhoOptions::default()
+             };
+-            let r = koblitz_signed_frobenius_rho_with_progress(&c, q, &options, &mut |_| {});
+-            solutions.push(json!({"index":i,"recovered":r.recovered_log.as_ref().map(ToString::to_string),
+-                "verified":r.verified,"iterations":r.iterations,"restarts":r.restarts_attempted,
+-                "walk_group_additions":r.charges.walk_group_additions}));
++            answers.push(koblitz_signed_frobenius_rho_with_progress(&c, q, &options, &mut |_| {}));
+         }
+         mark(Phase::RecoveryCheck);
+-        let verified = solutions.iter().zip(&targets).all(|(s,q)| {
+-            s["recovered"].as_str().and_then(|x| x.parse::<BigUint>().ok())
+-                .is_some_and(|d| d < c.subgroup_order && c.mul(c.generator(), &d) == *q)
++        let verified = answers.iter().zip(&targets).all(|(answer,q)| {
++            answer.recovered_log.as_ref().is_some_and(|d| d < &c.subgroup_order && c.mul(c.generator(), d) == *q)
+         });
+-        mark(Phase::Setup);
++        ic_phase::end_online();
++        let solutions = answers.iter().enumerate().map(|(i,r)| json!({
++            "index":i,"recovered":r.recovered_log.as_ref().map(ToString::to_string),
++            "verified":r.verified,"iterations":r.iterations,"restarts":r.restarts_attempted,
++            "walk_group_additions":r.charges.walk_group_additions,
++            "effective_walks":r.parallel_walks
++        })).collect::<Vec<_>>();
++        let (phase_wall_ns, online_wall_ns) = ic_phase::wall_snapshot();
+         return Ok(Report::Tree(json!({"schema_version":1,"mode":"rho","status":if verified{"complete"}else{"incomplete"},
+             "fixture":metadata,"solutions":solutions,"automorphism_order":2*c.n,
+-            "elapsed_seconds":start.elapsed().as_secs_f64(),"phase_schema":2,
++            "elapsed_seconds":start.elapsed().as_secs_f64(),"phase_schema":3,
++            "phase_wall_ns":phase_wall_ns,"online_wall_ns":online_wall_ns,"target_input":"supplied_public_point",
+             "source_manifest_sha256":koblitz_tiny_ic::source_snapshot(),
+             "executed_method":{"reference":"signed_frobenius_rho","requested_walks":cfg.rho_parallel_walks}})));
+@@ -398,5 +442,5 @@
+             "factor_base_orbits":ic.orbit_representatives().iter()
+                 .map(|&(x,y)|json!([x.to_string(),y.to_string()])).collect::<Vec<_>>(),
+-            "summands":3,"phase_schema":2,"source_manifest_sha256":koblitz_tiny_ic::source_snapshot(),
++            "summands":3,"phase_schema":3,"target_input":"supplied_public_point","source_manifest_sha256":koblitz_tiny_ic::source_snapshot(),
+             "field_kernel":ic.field_kernel()})));
+     }
+@@ -477,5 +521,5 @@
+     columns.push(']');
+ 
+-    mark(Phase::TargetDescent);
++    ic_phase::begin_online(Phase::TargetDescent);
+     let mut answers = Vec::with_capacity(targets.len());
+     for q in targets {
+@@ -486,5 +530,5 @@
+         s.as_ref().is_some_and(|(d, _, _)| d < &c.subgroup_order && c.mul(c.generator(), d) == *q)
+     });
+-    mark(Phase::Setup);
++    ic_phase::end_online();
+     out.push_str("{\"schema_version\":1,\"mode\":\"ic\",\"status\":\"");
+     out.push_str(if verified { "complete" } else { "incomplete" });
+@@ -557,4 +601,5 @@
+ fn append_diagnostics(out: &mut String, ic: &TinyIc) {
+     let (stats, rank) = ic.stage_diagnostics();
++    let (phase_wall_ns, online_wall_ns) = ic_phase::wall_snapshot();
+     let diagnostics = json!({
+         "source_manifest_sha256":koblitz_tiny_ic::source_snapshot(),"field_kernel":ic.field_kernel(),
+@@ -566,8 +611,9 @@
+         "matrix_nonzeros":stats.matrix_nonzeros,
+         "matrix_encoding":"u64-le-row-major-including-rhs",
+-        "phase_wall_ns":null
++        "phase_wall_ns":phase_wall_ns,"online_wall_ns":online_wall_ns,
++        "target_input":"supplied_public_point"
+     });
+     assert_eq!(out.pop(), Some('}'));
+-    out.push_str(",\"phase_schema\":2,\"executed_method\":{\"pdp\":\"partial_folded_pair_table\",\"collection\":\"additive_walk\",\"relation_la\":\"incremental_gauss\",\"descent\":\"walked_pdp\",\"direct_collision\":false},\"diagnostics\":");
++    out.push_str(",\"phase_schema\":3,\"executed_method\":{\"pdp\":\"partial_folded_pair_table\",\"collection\":\"additive_walk\",\"relation_la\":\"incremental_gauss\",\"descent\":\"walked_pdp\",\"direct_collision\":false},\"diagnostics\":");
+     out.push_str(&serde_json::to_string(&diagnostics).expect("diagnostics"));
+     out.push('}');
+@@ -612,2 +658,83 @@
+     if success { 0 } else { 2 }
+ }
++
++#[cfg(test)]
++mod public_input_tests {
++    use super::*;
++
++    fn job(mode: &str, target: Option<Value>, seeds: Vec<u64>) -> Job {
++        serde_json::from_value(json!({"mode":mode,"degree":13,"curve_a":0,
++            "target_seeds":seeds,"public_targets":target,"algorithm_seed":2026092527u64,
++            "factor_base":{"kind":"subgroup_orbits","seed":43,"points":78},
++            "config":{"batch_trials":1,"max_trials":4096}})).unwrap()
++    }
++
++    fn value(report: Report) -> Value {
++        match report { Report::Tree(v) => v, Report::Text(s, _) => serde_json::from_str(&s).unwrap() }
++    }
++
++    #[test]
++    fn public_coordinates_are_canonical_and_subgroup_checked() {
++        let c = KoblitzCurve::new(0, 13).unwrap();
++        for encoded in [["00", "1"], ["+1", "1"], ["8192", "1"], ["0", "1"]] {
++            assert!(public_point(&c, &encoded.map(String::from)).is_err());
++        }
++        let encoded: [String; 2] = serde_json::from_value(point(c.generator())).unwrap();
++        assert_eq!(public_point(&c, &encoded).unwrap(), *c.generator());
++    }
++
++    #[test]
++    fn measured_jobs_reject_generation_and_multiple_targets() {
++        let c = KoblitzCurve::new(0, 13).unwrap();
++        for mode in ["ic", "rho", "inventory"] {
++            assert!(run(&job(mode, None, vec![43])).is_err());
++            assert!(run(&job(mode, Some(json!([point(c.generator()), point(c.generator())])), vec![43,44])).is_err());
++        }
++        assert!(run(&job("fixture", None, vec![43])).is_ok());
++    }
++
++    #[test]
++    fn both_algorithms_use_the_point_and_ignore_provenance_seeds() {
++        let c = KoblitzCurve::new(0, 13).unwrap();
++        // Planted only as a correctness control, never a yield/timing sample.
++        let target = point(&c.mul(c.generator(), &BigUint::from(5u32)));
++        for mode in ["ic", "rho"] {
++            for seeds in [vec![], vec![111], vec![222]] {
++                let report = value(run(&job(mode, Some(json!([target])), seeds)).ok().unwrap());
++                assert_eq!(report["fixture"]["targets"][0], target);
++                assert_eq!(report["solutions"][0]["recovered"], "5");
++                assert_eq!(report["phase_schema"], 3);
++                let timing = if mode == "ic" { &report["diagnostics"] } else { &report };
++                assert_eq!(timing["target_input"], "supplied_public_point");
++                let online: u64 = if mode == "ic" {
++                    ["target_query", "target_pdp", "target_relation_check", "target_descent", "recovery_check"].iter()
++                        .map(|name| timing["phase_wall_ns"][name].as_u64().unwrap()).sum()
++                } else {
++                    timing["phase_wall_ns"]["reference_solve"].as_u64().unwrap() +
++                        timing["phase_wall_ns"]["recovery_check"].as_u64().unwrap()
++                };
++                assert_eq!(timing["online_wall_ns"].as_u64(), Some(online));
++                assert!(online > 0);
++            }
++        }
++    }
++}
++
++#[test]
++fn simultaneous_live_buffers_remain_intact() {
++    std::thread::scope(|scope| {
++        for thread in 0..4u8 {
++            scope.spawn(move || {
++                for iteration in 0..5000usize {
++                    let byte=thread.wrapping_add(iteration as u8);
++                    let mut data=vec![byte; 16+iteration%512];
++                    let mut other=vec![byte ^ 0xff; 19+iteration%117];
++                    data.reserve(70);
++                    other.resize(200,byte ^ 0xff);
++                    assert!(data.iter().all(|&v|v==byte));
++                    assert!(other.iter().all(|&v|v==byte ^ 0xff));
++                }
++            });
++        }
++    });
++}
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -1429,4 +1429,5 @@
+     /// re-added in the group before it is returned.
+     fn decompose(&mut self, target: FastPoint, start: usize, collection: bool) -> Option<[usize; 3]> {
++        if !collection { mark(Phase::TargetPdp); }
+         if target.infinity {
+             return None;
+@@ -1493,5 +1494,5 @@
+                 let mut witness = [i, first, second];
+                 witness.sort_unstable();
+-                if collection { mark(Phase::RelationCheck); }
++                mark(if collection { Phase::RelationCheck } else { Phase::TargetRelationCheck });
+                 let sum = witness.iter().fold(FastPoint::INFINITY, |s, &w| {
+                     self.arith.add(s, self.points[w])
+@@ -1500,5 +1501,5 @@
+                     return Some(witness);
+                 }
+-                if collection { mark(Phase::Pdp); }
++                mark(if collection { Phase::Pdp } else { Phase::TargetPdp });
+             }
+             scanned += len;
+@@ -1654,9 +1655,11 @@
+     /// The logarithm of `q`, verified as `[d]G = Q` in the group, with
+     /// the number of descent probes it took and the relation
+-    /// `[a]G + [b]Q = Σ P_i` it was derived from (an empty `points` list
+-    /// records a probe that landed on `O`).  That relation is the
++    /// `[a]G + [b]Q = Σ P_i` it was derived from. Every admitted witness
++    /// has exactly three indices; direct collisions are skipped. The relation is the
+     /// index-calculus certificate the checker re-verifies.
+     pub fn solve_target(&mut self, q: &BinaryPoint) -> Option<(BigUint, u64, DescentWitness)> {
++        mark(Phase::TargetDescent);
+         let logs = self.logs.clone()?;
++        mark(Phase::TargetQuery);
+         let q_fast = self.arith.lift(q);
+         if q_fast.infinity {
+@@ -1673,4 +1676,5 @@
+             self.arith.mul_point(q_fast, b),
+         );
++        mark(Phase::TargetDescent);
+         let hb_inv = invmod(b, r)?;
+         let size = self.points.len();
+@@ -1684,4 +1688,5 @@
+                 let start = (trials as usize * (2 * self.n as usize + 1)) % size;
+                 if let Some(w) = self.decompose(probe, start, false) {
++                    mark(Phase::TargetDescent);
+                     let mut sum = 0u64;
+                     for &i in &w {
+@@ -1693,11 +1698,15 @@
+                 }
+             }
++            mark(Phase::TargetDescent);
+             if let Some((d, points)) = candidate {
++                mark(Phase::RecoveryCheck);
+                 if d < r && self.arith.fixed_base_mul(&self.g_table, d) == q_fast {
+                     return Some((BigUint::from(d), trials, DescentWitness { a, b, points }));
+                 }
+             }
++            mark(Phase::TargetQuery);
+             a = (a + stride_scalar) % r;
+             probe = self.arith.add(probe, stride);
++            mark(Phase::TargetDescent);
+         }
+         None

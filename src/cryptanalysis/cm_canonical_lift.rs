@@ -46,13 +46,12 @@
 //! This module empirically measures `v_p(log_F(T))` for many
 //! `(d, P, p, E)` triples on CM curves and tabulates the distribution.
 
-use crate::cryptanalysis::canonical_lift::{ZpCurve, ZpInt, ZpPoint};
+use crate::cryptanalysis::canonical_lift::{ZpCurve, ZpInt};
 use crate::cryptanalysis::nonanom_formal_log::{
-    formal_z_projective, proj_hensel_lift, proj_scalar_mul, ZpProjPoint,
+    formal_z_projective, proj_hensel_lift, proj_scalar_mul,
 };
 use num_bigint::{BigInt, BigUint};
-use num_integer::Integer;
-use num_traits::{One, Zero};
+use num_traits::Zero;
 
 /// CM elliptic curves over Z with class-number-1 discriminants.
 /// Each entry: `(D, a, b, label)` for `E: y² = x³ + ax + b` with
@@ -271,6 +270,7 @@ fn mod_inv_i128(a: i128, p: i128) -> Option<i128> {
 }
 
 /// Brute-force: count points on `E: y² = x³ + ax + b` over `F_p`.
+#[allow(dead_code)]
 fn count_points_signed(a: i64, b: i64, p: u64) -> u64 {
     let p_i = p as i128;
     let a_norm = ((a as i128 % p_i) + p_i) % p_i;
@@ -283,7 +283,7 @@ fn count_points_signed(a: i64, b: i64, p: u64) -> u64 {
             count += 1;
         } else {
             // QR test via Euler.
-            let pow = mod_pow_i128(rhs, ((p - 1) / 2) as u64, p_i);
+            let pow = mod_pow_i128(rhs, (p - 1) / 2, p_i);
             if pow == 1 {
                 count += 2;
             }
@@ -292,6 +292,7 @@ fn count_points_signed(a: i64, b: i64, p: u64) -> u64 {
     count
 }
 
+#[allow(dead_code)]
 fn mod_pow_i128(base: i128, mut exp: u64, modulus: i128) -> i128 {
     let mut result: i128 = 1;
     let mut base = base % modulus;
@@ -306,6 +307,7 @@ fn mod_pow_i128(base: i128, mut exp: u64, modulus: i128) -> i128 {
 }
 
 /// Find a non-2-torsion point on `E: y² = x³ + ax + b` over `F_p`.
+#[allow(dead_code)]
 fn find_generator(a: i64, b: i64, p: u64) -> Option<(u64, u64)> {
     let p_i = p as i128;
     let a_norm = ((a as i128 % p_i) + p_i) % p_i;
@@ -324,16 +326,17 @@ fn find_generator(a: i64, b: i64, p: u64) -> Option<(u64, u64)> {
 }
 
 /// Compute order of (px, py) in E(F_p) by trying divisors of #E.
+#[allow(dead_code)]
 fn point_order(px: u64, py: u64, a: i64, b: i64, p: u64) -> u64 {
     let n = count_points_signed(a, b, p);
     for d in 2..=n {
-        if n % d != 0 {
+        if !n.is_multiple_of(d) {
             continue;
         }
         // Test [d]·P = O.  If [d-1]·P = -P (negative), then [d]·P = O.
         match scalar_mul_fp_signed(px, py, d - 1, a, b, p) {
             Some((rx, ry)) => {
-                if rx == px && (ry + py) % p == 0 {
+                if rx == px && (ry + py).is_multiple_of(p) {
                     return d;
                 }
             }

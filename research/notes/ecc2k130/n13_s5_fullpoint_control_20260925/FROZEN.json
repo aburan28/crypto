@@ -1,0 +1,62 @@
+{
+  "branch_labels": 32,
+  "charged_n19_status": "UNRUN",
+  "cnf_byte_max": 67108864,
+  "dag_node_max": 2000000,
+  "domain": "ECC2K130-N13-S5-FULLPOINT-CONTROL-20260925-v1",
+  "exact_head_peer_review_required": true,
+  "factor_points_per_slot": 5,
+  "field_polynomial": 8219,
+  "freeze_utc": "2026-09-25T19:14:11.718213+00:00",
+  "input_source_sha256": {
+    "research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz": "39f16990213e2c7525c6dae92c131127b12f914bbfd6182264249da72bc9546c",
+    "research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/n13-m5/producer/result.json": "26da668ed7ce8c0316faec0e114f3e7ad68dc249a3070d5f54d95d2cb490d383",
+    "research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py": "d3f0f6e1515282a25efb4eb6a5f68ad754f1d9be68e4a741f17a748d9a58d782",
+    "research/notes/ecc2k130/rotated_subspace_support_20260925/verify.py": "8b665a8d5a1d92cf17f64106dab4bf7134ecaffd06e669404a7508246282c1c8"
+  },
+  "m": 5,
+  "merged_parent_sha256": {
+    "research/notes/ecc2k130/n19_s6_fullpoint_exporter_20260925/FROZEN.json": "fff109842c29204661c4e5220937d1b25a688eb312d6c96d51233282cccd26e8",
+    "research/notes/ecc2k130/n19_s6_fullpoint_exporter_20260925/admission.py": "f95b89ff94272747abc17e965474df2f89b97f72ef6e7c36aa41f675499d0f77",
+    "research/notes/ecc2k130/n19_s6_fullpoint_exporter_20260925/s6.py": "7671ab0f3de2729053e96028155faa3a782a815b95e644da6d921ed592d73485",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/bounded.py": "4aec662e171996654383f9364ace3240bf3164927ff97cab96234a9da1c050ba",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/export.py": "77159083a897f65b91d0f762ef425eda2df73460a91b997e754351c7c331e8fe",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/third_party/drat-trim.c": "d834b649f437e091597f5347f259b9f681087f89ca0844d0cee250a1a1a0c2ee",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/verify.py": "b87fa827308c964679c8c5d7e6d457406a9edfd3cfef15952017f0056aae5d7c",
+    "research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/dag.py": "a277fb1b2f9b58ca8cc7cb33713950015f8c0446651b1d4e8657650819bcd419"
+  },
+  "n": 13,
+  "n13_semantic_status": "UNRUN",
+  "n13_solver_status": "UNRUN",
+  "nonzero_exact_branches": 5,
+  "primary_bits": 320,
+  "proof_checker_upstream_commit": "2e3b2dc",
+  "release_main_head": null,
+  "required_merged_prs": [
+    802,
+    804,
+    807,
+    811
+  ],
+  "schema": "ecc2k130_n13_s5_fullpoint_control_v1",
+  "semantic_rss_bytes": 4294967296,
+  "semantic_wall_seconds": 3600,
+  "solver_sha256_for_later_gate": "601c9fa8ba5d09fd81bb00c89b3e54832f138bccc3422bd8652e8cda4d74d1fa",
+  "source_base_head": "2b812f3795f5bc33890fe6bd9d1d71beaa2e4866",
+  "source_sha256": {
+    "INPUT.json": "fb99cd5f79d96455cea04ad417abc6ae18264410cedc7951acb1cdfa71534227",
+    "PROTOCOL.md": "1007a573c0a8901181fcacd65d89c955a11708a5f9ec5e93df3aa10e105bc9d3",
+    "admission5.py": "5f4cb9d2e75e48c085c888ad33ea468d0fa0decb45953d5a5b2e7f60ee3d6fd3",
+    "ci_replay.py": "848aa38367b0ce582be95d47de80276cc1bff5f00a7da2d97653bef494c5647a",
+    "evidence/toy_selftest.json": "d2c96f93f5e9c931219a58d415559cb4632ec9e85c6a964248a2f87256b1bf25",
+    "query.py": "db9fcb2f452a2d29b41e53c441260646996f6332e6514850d62e0fa77da801e6",
+    "run.py": "1678257703029575db688d20ca61f6c19884f9648f41909c756ef558fa3d76ac",
+    "s5.py": "194734c23c110414fa1574eb2a210779e2027555cf384684b40466d69786b591",
+    "selftest.py": "5714ee60fe59782c872fc3b070c1fde302621180067bca2eb212d462983b1b4c",
+    "semantic13.py": "393ba8a1b1b5dd40bfdb9656b0ec603d803a4741854ec93f7ad9c9fc702d0653"
+  },
+  "status": "stacked_draft_preoutcome",
+  "workflow_sha256": {
+    ".github/workflows/ecc2k130-n13-s5-fullpoint-control.yml": "c9285da1887843cac5b6c260d2dd37cc2db4d69757fd1e18b4d2573563a25588"
+  }
+}

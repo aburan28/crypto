@@ -1,0 +1,26 @@
+{
+ "kind": "rho",
+ "ir": 706284,
+ "r": 2003,
+ "seed": 202,
+ "result": {
+  "automorphisms": 1,
+  "distinguished_points": 9,
+  "expected_steps": 56.091933845876426,
+  "gae": 754.0,
+  "group_ops": {
+   "adds": 293,
+   "doubles": 461,
+   "scalar_mults": 51
+  },
+  "method": "r-adding walk, distinguished points, 16 jumps",
+  "recovered": 1438,
+  "s": 16.847321793761946,
+  "s_walk": 0.603286058927815,
+  "steps": 27,
+  "steps_over_expected": 0.48135263216611124,
+  "verified": true,
+  "walks": 9,
+  "wall_ns": 12031356
+ }
+}

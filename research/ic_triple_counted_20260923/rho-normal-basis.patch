@@ -1,0 +1,240 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -624,10 +624,13 @@
+ /// Frobenius as a rotation: in a normal basis `{γ, γ², γ⁴, …}` squaring
+ /// rotates the coordinate word by one bit, so the least rotation names
+ /// the orbit of an abscissa and the rotation count locates a point in it.
+-struct NormalBasis {
++pub(crate) struct NormalBasis {
+     n: u32,
+     mask: u64,
+     tables: Vec<[u64; 16]>,
++    /// Nibble tables of the basis itself, `γ^{2^i}`: normal coordinates
++    /// back to the polynomial basis.
++    columns: Vec<[u64; 16]>,
+ }
+ 
+ fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
+@@ -651,9 +654,16 @@
+ 
+ impl NormalBasis {
+     fn new(arith: &Arith) -> Option<Self> {
+-        let n = arith.n;
++        Self::from_squaring(arith.n, |c| arith.sqr(c))
++    }
++
++    /// The basis for any polynomial-basis field of degree `n` whose squaring
++    /// is `sqr` -- so a caller with its own arithmetic (the rho walk) names
++    /// orbits with exactly this code.
++    pub(crate) fn from_squaring(n: u32, sqr: impl Fn(u64) -> u64) -> Option<Self> {
+         let mask = (1u64 << n) - 1;
+         let mut inverse = None;
++        let mut basis = Vec::new();
+         let mut candidate = 2u64;
+         for _ in 0..4096 {
+             candidate = candidate.wrapping_mul(0x9e37_79b9_7f4a_7c15) ^ (candidate >> 29);
+@@ -665,12 +675,13 @@
+             let columns: Vec<u64> = (0..n)
+                 .map(|_| {
+                     let c = column;
+-                    column = arith.sqr(column);
++                    column = sqr(column);
+                     c
+                 })
+                 .collect();
+             if let Some(inv) = invert_f2(&columns, n) {
+                 inverse = Some(inv);
++                basis = columns;
+                 break;
+             }
+         }
+@@ -680,27 +691,55 @@
+             .collect();
+         // Nibble tables: `n/4` lookups per key and a kilobyte to touch.
+         let nibbles = ((n + 3) / 4) as usize;
+-        let tables = (0..nibbles)
+-            .map(|ni| {
+-                let mut table = [0u64; 16];
+-                for (b, slot) in table.iter_mut().enumerate() {
+-                    let mut acc = 0u64;
+-                    for t in 0..4 {
+-                        let j = ni * 4 + t;
+-                        if (b >> t) & 1 == 1 && j < n as usize {
+-                            acc ^= by_bit[j];
++        let nibble_tables = |by: &[u64]| -> Vec<[u64; 16]> {
++            (0..nibbles)
++                .map(|ni| {
++                    let mut table = [0u64; 16];
++                    for (b, slot) in table.iter_mut().enumerate() {
++                        let mut acc = 0u64;
++                        for t in 0..4 {
++                            let j = ni * 4 + t;
++                            if (b >> t) & 1 == 1 && j < n as usize {
++                                acc ^= by[j];
++                            }
+                         }
++                        *slot = acc;
+                     }
+-                    *slot = acc;
+-                }
+-                table
+-            })
+-            .collect();
+-        Some(Self { n, mask, tables })
++                    table
++                })
++                .collect()
++        };
++        let tables = nibble_tables(&by_bit);
++        let columns = nibble_tables(&basis);
++        Some(Self { n, mask, tables, columns })
++    }
++
++    /// `x` from its normal coordinates: the inverse of [`Self::coords`].
++    #[inline]
++    pub(crate) fn from_coords(&self, c: u64) -> u64 {
++        let mut acc = 0u64;
++        for (i, table) in self.columns.iter().enumerate() {
++            acc ^= table[((c >> (4 * i)) & 0xf) as usize];
++        }
++        acc
++    }
++
++    /// Normal coordinates of `x^{2^k}` from those of `x`: squaring moves the
++    /// coefficient of `γ^{2^i}` to `γ^{2^{i+1}}`, a left rotation.
++    #[inline]
++    pub(crate) fn frobenius_coords(&self, c: u64, k: u32) -> u64 {
++        let (n, k) = (self.n, k % self.n);
++        if k == 0 { c } else { ((c << k) | (c >> (n - k))) & self.mask }
++    }
++
++    /// The all-ones word: with zero, one of the two words every rotation fixes.
++    #[inline]
++    pub(crate) fn mask(&self) -> u64 {
++        self.mask
+     }
+ 
+     #[inline]
+-    fn coords(&self, x: u64) -> u64 {
++    pub(crate) fn coords(&self, x: u64) -> u64 {
+         let mut acc = 0u64;
+         for (i, table) in self.tables.iter().enumerate() {
+             acc ^= table[((x >> (4 * i)) & 0xf) as usize];
+@@ -720,7 +759,7 @@
+     /// tried all `n − 1`.  Ties (periodic words) resolve to the least
+     /// `k`, as the loop did; the loop is kept as the test reference.
+     #[inline]
+-    fn canon(&self, x: u64) -> (u64, u32) {
++    pub(crate) fn canon(&self, x: u64) -> (u64, u32) {
+         let c = self.coords(x);
+         let n = self.n;
+         let mask = self.mask;
+@@ -1976,7 +2015,7 @@
+                     *slot = ((b as u64) << (4 * i)) & ((1u64 << n) - 1);
+                 }
+                 t
+-            }).collect() };
++            }).collect(), columns: Vec::new() };
+             let mask = (1u64 << n) - 1;
+             let mut state = 0x243f_6a88_85a3_08d3u64 ^ u64::from(n);
+             let mut words: Vec<u64> = vec![0, mask, 1, 1 << (n - 1), mask ^ 1, mask >> 1];
+@@ -2094,6 +2133,27 @@
+         }
+     }
+ 
++    #[test]
++    fn normal_basis_inverts_and_rotates_as_squaring() {
++        for (n, a) in CELLS {
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let arith = Arith::new(&kc).unwrap();
++            let nb = NormalBasis::new(&arith).unwrap();
++            let mask = (1u64 << n) - 1;
++            let mut state = 0x5eed_u64 ^ u64::from(n);
++            for _ in 0..300 {
++                state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
++                let x = (state >> 5) & mask;
++                assert_eq!(nb.from_coords(nb.coords(x)), x, "n={n}");
++                for k in [0u32, 1, 2, n - 1] {
++                    assert_eq!(nb.frobenius_coords(nb.coords(x), k), nb.coords(arith.field.sqr_k(x, k)), "n={n} k={k}");
++                }
++                let (key, k) = nb.canon(x);
++                assert_eq!(nb.from_coords(key), arith.field.sqr_k(x, k), "n={n}");
++            }
++        }
++    }
++
+     #[test]
+     fn normal_basis_rotation_locates_frobenius_images() {
+         for (n, a) in CELLS {
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -6070,6 +6070,10 @@
+     /// this many zeros, so the table holds about `2^16` of them however
+     /// long the walk is.
+     trail_mask: u64,
++    /// The IC arm's normal basis (`koblitz_tiny_ic::NormalBasis`), when the
++    /// Frobenius is one squaring and the orbit is the whole rotation group:
++    /// the orbit is then named by a least rotation instead of `n` squarings.
++    normal: Option<crate::cryptanalysis::koblitz_tiny_ic::NormalBasis>,
+ }
+ 
+ #[inline]
+@@ -6141,19 +6145,38 @@
+         // pick the sign there.  Same representative as comparing every
+         // `(x, y)` pair, at a little over half the squarings.
+         let field = &self.fc.field;
+-        let mut x = state.point.x;
+-        let mut best_x = x;
+-        let mut best_k = 0u32;
+-        for k in 1..self.orbit_length {
+-            x = field.sqr_k(x, self.frobenius_degree);
+-            if x < best_x {
+-                best_x = x;
+-                best_k = k;
++        // The representative is the orbit member whose abscissa has the
++        // least NORMAL coordinates -- the IC arm's orbit name -- reached by
++        // two basis changes instead of a squaring chain.  A different
++        // representative from the loop below, but still a function of the
++        // class, so the walk is still a map on classes.  An abscissa every
++        // rotation fixes (normal coordinates all zeros or all ones) has no
++        // least rotation to name it by, and takes the loop.
++        let named = self.normal.as_ref().and_then(|nb| {
++            let (key, k) = nb.canon(state.point.x);
++            (key != 0 && key != nb.mask()).then(|| {
++                let y = nb.from_coords(nb.frobenius_coords(nb.coords(state.point.y), k));
++                (nb.from_coords(key), k, y)
++            })
++        });
++        let (best_x, best_k, y) = match named {
++            Some(found) => found,
++            None => {
++                let mut x = state.point.x;
++                let mut best_x = x;
++                let mut best_k = 0u32;
++                for k in 1..self.orbit_length {
++                    x = field.sqr_k(x, self.frobenius_degree);
++                    if x < best_x {
++                        best_x = x;
++                        best_k = k;
++                    }
++                }
++                (best_x, best_k, field.sqr_k(state.point.y, best_k * self.frobenius_degree))
+             }
+-        }
++        };
+         charges.frobenius_maps += u64::from(self.orbit_length);
+         charges.negations_examined += u64::from(self.orbit_length);
+-        let y = field.sqr_k(state.point.y, best_k * self.frobenius_degree);
+         let negated_y = best_x ^ y;
+         let lambda_k = self.lambda_pow[best_k as usize];
+         let (point, factor) = if negated_y < y {
+@@ -6344,6 +6367,9 @@
+         modulus,
+         lambda_pow,
+         trail_mask: rho_trail_mask(rho_expected_steps(modulus, curve.n)),
++        normal: (curve.k == 1 && fc.field.n == curve.n)
++            .then(|| crate::cryptanalysis::koblitz_tiny_ic::NormalBasis::from_squaring(fc.field.n, |c| fc.field.sqr(c)))
++            .flatten(),
+     };
+     let g = fc.lift(curve.generator());
+     let q = fc.lift(target);

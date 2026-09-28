@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 130, 2026-09-21. The historical optimization chain is
+Current through Stage 133, 2026-09-21. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
@@ -18,11 +18,32 @@ records kept in the ledger's history), chaining to the Stage 124 and Stage
 the same day (a walk restart that costs one group operation instead of
 thirty-two scalar multiplications, bases sized at the derived family optimum
 on the prime and binary ladders, and the family shape law reported per row;
-the note's §11), chaining to the Stage 125, Stage 124 and Stage 109 seals. No
-Koblitz gate fact moved at any of these re-seals and no prior frozen artifact
-changed.
+the note's §11), chaining to the Stage 125, Stage 124 and Stage 109 seals.
+Stage 127 re-seals it a fourth time over that ledger's Round 4, also of the
+same day: the unit's conversion from native counters to group additions now
+uses ratios pinned in `docs/ic/calibration.json` rather than factors measured
+on the host at the start of each run (the note's §12). That round reprices
+every row by up to 9.5 per cent without moving a single native counter on any
+of the 537 rows compared, and chains to the Stage 126, 125, 124 and 109 seals.
+Stage 128 re-seals it a fifth time over that ledger's Round 5, on 2026-09-22:
+the walk's sixteen restart offsets are drawn on first use instead of at setup,
+so a row is charged for the offsets it took rather than for a pool it may never
+reach (the note's §13). Because the offsets come off their own random stream and
+are taken in a fixed cycle, the before and after walk bit-identical
+trajectories, and all 537 rows are identical in every counter but the pool's
+with zero trajectories moved; the saving is confined to the small rungs. It
+chains to the Stage 127, 126, 125, 124 and 109 seals. No Koblitz gate fact moved
+at any of these re-seals and no prior frozen artifact changed.
 
-Stage 127 supersedes the current audit without mutating those snapshots. It
+Stage 129 re-seals it a sixth time, also on 2026-09-22, and moves a gate fact
+for the first time since Stage 109. The gate-6 online wall crossing holds only
+against the fixture rho control, not against a batched signed-Frobenius rho
+(see "The n=53 crossover against a batched rho" below), so gate 6 is now false
+outright. The Stage 108 measurements themselves are unchanged. Stage 129 chains
+to the Stage 128, 127, 126, 125, 124 and 109 seals, and no prior frozen
+artifact changed.
+
+Stage 130 supersedes the current audit without mutating those snapshots. It
 hash-pins the frozen 160-input Phase-B matrix and the current scalar-blind
 `n=53` workflow evidence, and keeps them explicitly separate: Phase B is the
 common `n, ell, m` Semaev solver matrix, while the optimized `n=53` run uses a
@@ -31,21 +52,26 @@ It also incorporates the current one-core refresh, native projected-predicate
 operation counts, every accepted and rejected optimization process, and the
 unchanged Magma and unaffiliated-review gaps.
 
-Stage 128 adds a current unified `n=41, ell=6, m=3` single-target series over
+Stages 130 onward were composed on a parallel branch as Stages 127 onward and
+were renumbered by three on merge, because Stages 127 to 129 above were already
+sealed. Their measurements are unchanged; only their stage ids, predecessor
+links and seals moved, and Stage 130 chains to the Stage 129 seal.
+
+Stage 131 adds a current unified `n=41, ell=6, m=3` single-target series over
 the fixed public two-torsion-saturated Frobenius-union base.  It charges the
 same process from algebraic materialisation through projected predicate,
 relations, verification, sparse linear algebra, descent and automorphism rho,
 under five default-thread and five one-worker repetitions.  It replaces the
 older online-only reading with a current full-cost loss in both thread classes.
 
-Stage 129 materialises the exact non-Frobenius-closed standard
+Stage 132 materialises the exact non-Frobenius-closed standard
 `n=59, ell=9, m=3` Phase-B factor base in the end-to-end workflow.  A bounded
 1.2-million-probe attempt reaches zero natural relations, as the public counting
 ceiling predicts, while same-target signed-Frobenius rho completes in five
 metered repetitions.  The result is censored at its cap: it is larger-regime
 execution evidence, not a completed IC run or an UNSAT certificate.
 
-Stage 130 counts the public cofactor classes of every standard `n=59` width
+Stage 133 counts the public cofactor classes of every standard `n=59` width
 from `ell=9` through `16`, charges those counters and the width constructions,
 and binds the result to the exact compact-table memory formula.  It establishes
 a finite no-go frontier for materialized standard bases under the current 4 GiB
@@ -63,9 +89,9 @@ does not establish a new state of the art.
 | 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds / 245,972,992 B maximum RSS, including rejected variants. Selection emits native projected-predicate counts and every workflow stage emits wall, CPU and cumulative RSS. | Licensed Magma process resources are absent. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
 | 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract, seal the return before truth scoring, and report F4 resources. |
 | 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | Every executed Phase-B arm retains wall, core-seconds, peak RSS, conflicts or operations, tree memory, and workflow wall. The current scalar-blind `n=53` workflow has a five-pair one-worker panel: median IC 5.195076 wall, rho 1.580426 wall, whole-process 6.757385 core-seconds and 104,644,608 B RSS. The default-thread panel reports IC 0.891978 versus rho 1.580089. | Supply the same fields for licensed Magma F4. SAT conflicts remain inapplicable to exact pair-table arms and are reported as null. |
-| 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage; larger IC is censored** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and `n=59`. Stage 128 refreshes unified current `n=41`. Stage 129 runs the exact standard `n=59, ell=9, m=3` base through the relation cap and rho. Stage 130 covers every standard width `ell=9..16` with exact class-aware yield and memory bounds. | The evidence is finite and toy-sized; it is not an asymptotic scaling law. The `n=59` IC arm remains censored and no non-standard larger base has completed. |
+| 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage; larger IC is censored** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and `n=59`. Stage 131 refreshes unified current `n=41`. Stage 132 runs the exact standard `n=59, ell=9, m=3` base through the relation cap and rho. Stage 133 covers every standard width `ell=9..16` with exact class-aware yield and memory bounds. | The evidence is finite and toy-sized; it is not an asymptotic scaling law. The `n=59` IC arm remains censored and no non-standard larger base has completed. |
 | 5. Unknown scalar with no constructed factor-base logs | **Satisfied for finite degrees 23, 31, 41, and 53** | Stage 108 archives public hash-seed-53001 without constructing or supplying its scalar, derives all 94 factor-base logs from 95 verified relations, and has direct IC and rho independently recover `d=7892094459170` with `[d]G=Q`. Selected direct is 4.307977 seconds versus 4.362556 rho, ratio 0.987489. | Repeat on independent n=53 public seeds and obtain unaffiliated replay; these strengthen rather than replace the finite gate-5 execution. |
-| 6. Full cost against automorphism-optimized Pollard rho | **Standard materialized `n=59` frontier fails; `n=41` loss; `n=53` default-thread wall pass only** | Stage 129 spends 18.155840 wall / 78.395618 core-seconds at the zero-relation `n=59` cap. Stage 130 proves every measured standard base fitting the 4 GiB table budget needs at least 1.582B probes; `ell=16` needs 9.976 GB and still at least 399M. Stage 128 `n=41` loses 4.258x default and 23.817x one-worker. Current `n=53` default-thread rho/IC is 1.778 but one-worker IC remains about 3.29x rho. | Search a different algebraic/implicit larger-regime base, reduce current one-core and total-core ratios while retaining the `n=53` wall result, and obtain independent replay. |
+| 6. Full cost against automorphism-optimized Pollard rho | **False. The online wall gate passed only against the fixture rho control; full-cost/core gate false** | Stage 108 selects the four-shard direct route after five direct/mixed wins with 0.904540 median wall and 0.912199 median core ratios. Its identified EPYC 9V74 panel has five direct/rho wins and 0.839190 median wall ratio. Median direct core remains 2.261565 times rho, retained support is 738,197,504 B, and fresh build plus direct is 17.636692 times rho. The rho control in that panel (`koblitz_rho_fixture`) inverts once per step, canonicalises by squaring chains, stores every point and runs on one thread, about 9.5 µs a step. Against a batched signed-Frobenius rho on the same target (cryptanalysis `suite/examples/koblitz_batched_rho.rs`, M4 Pro, portable arithmetic for all arms), the selected direct takes a median 17.3 s against 0.49 s for 1-thread and 0.20 s for 4-thread rho. That is 46.3M support queries against about 0.56M rho steps. | Beat an automorphism-optimized rho (shared inversion, orbit key, distinguished points), not the fixture control, first on the EPYC gate host. The query count `r/(n·|F|)` grows as `r^{2/3}` against rho's `r^{1/2}`, so constant-factor improvements (including an orbit-folded support table) cannot close this gate toward larger degrees. |
 | 7. Independent external reproduction and novelty review | **Missing** | Issue [#97](https://github.com/aburan28/crypto/issues/97) and [mtrimoska/EC-Index-Calculus-Benchmarks#1](https://github.com/mtrimoska/EC-Index-Calculus-Benchmarks/issues/1) now include the five-run selected panel, current-head source pin, unknown-scalar result, exact verifier boundary, and the `CONCUR` / `QUALIFIED` / `BREAKS` format. Stage 11 archives GitHub Actions run [34428320022](https://github.com/aburan28/crypto/actions/runs/34428320022) as a project-authored Linux degree-23 reproduction (`STAGE11_RESULTS.md`); it is not independent review. Reviewers bind each gate to per-instance records with [the evidence guide](EXTERNAL_REVIEW_EVIDENCE.md) and [review template](EXTERNAL_NOVELTY_REVIEW_TEMPLATE.json); empty fields remain requests, not completed review. | An unaffiliated reviewer must return a sealed reproduction and source-pinned novelty/correctness assessment. Project-authored CI and replays do not satisfy independence. |
 
 The local measurements above are limited to their stated fields. The meter's
@@ -187,7 +213,7 @@ constructed base logs. The exact support still occupies 738,197,504 bytes;
 selected median direct core is 2.261565 times rho and fresh build plus direct
 is 17.636692 times rho.
 
-Stage 127 adds the distinct current `ic workflow` route on public hash seed
+Stage 130 adds the distinct current `ic workflow` route on public hash seed
 53001.  Its factor base is the target-independent subgroup-orbit recipe with
 36,464 points and 344 projected columns; no factor-base logs or target scalar
 are constructed.  The selected one-unit stream has 588 relations with canonical
@@ -200,7 +226,7 @@ times loss; five default-thread runs have median IC 0.891978 versus 1.580089
 rho, a 1.777988 rho/IC wall advantage.  Whole-process CPU remains dearer, so
 this does not close the full-cost gate.
 
-Stage 128 refreshes one target from the fixed-algebraic `n=41` holdout under
+Stage 131 refreshes one target from the fixed-algebraic `n=41` holdout under
 the current workflow.  The public recipe saturates the Frobenius union generated
 by masks `[1,2,4,8,16,32]` with two-torsion; it materialises 4,759 points and
 29 projected columns from zero target samples or scalar labels.  Fourteen
@@ -217,7 +243,7 @@ series charges 21.784403 sequential wall-seconds, 37.073066 core-seconds and
 though the older five-target experiment had a fast online descent after shared
 precomputation.
 
-Stage 129 adds the exact standard Phase-B `K_1/F_(2^59)` base to the workflow:
+Stage 132 adds the exact standard Phase-B `K_1/F_(2^59)` base to the workflow:
 the polynomial span `x = sum(c_i z^i), 0 <= i < 9` has 512 abscissae, 483
 rational points, 242 negation columns and 231 public projected columns.  It is
 not Frobenius-closed, so the implementation refuses the folded table and uses
@@ -234,7 +260,7 @@ median rho is 3.728387 wall / 3.719220 core-seconds and maximum RSS is
 88,522,752 B.  The spent IC cap is already 4.87 times median rho wall and 21.08
 times median rho core without reaching one relation.
 
-Stage 130 makes the cofactor obstruction exact across standard widths.  In the
+Stage 133 makes the cofactor obstruction exact across standard widths.  In the
 small cyclic quotient of order 22,894, only `4.354e-5` to `4.593e-5` of
 unordered triples cancel for every measured `ell=9..16`, close to the exact
 `1/22894` penalty.  The best class-aware probe lower bounds among bases fitting
@@ -249,12 +275,48 @@ its at-most 0.125 expected yield.  The full frontier charges 16 processes,
 maximum RSS.  This is a finite no-go result for materialized standard bases
 under this budget, not for implicit bases or index calculus in general.
 
+## The n=53 crossover against a batched rho
+
+The Stage 108 online-wall crossing was measured against `koblitz_rho_fixture`.
+That control is correct but slow. It inverts once per step, canonicalises both
+coordinates by 52 squarings each, stores every point, and runs on one thread:
+about 9.5 µs a step. On 2026-09-22, `suite/examples/koblitz_batched_rho.rs` in
+`aburan28/cryptanalysis` (PR #54) ran the same signed-Frobenius walk with one
+inversion shared across 64 walks, the normal-basis orbit key, and only
+distinguished points stored. It was run on the same target (`d=476811900269`)
+and the same host as the selected direct route, and every run recovered the
+scalar and checked `[d]G=Q`:
+
+| Arm | Runs | Median wall |
+|:--|--:|--:|
+| Selected direct (Stage 106/108 flags), 4 threads | 3 | 17.3 s (about 16 s CPU) |
+| `koblitz_rho_fixture`, 1 thread | 5 | 3.03 s |
+| batched rho, 1 thread | 7 | 0.49 s |
+| batched rho, 4 threads | 7 | 0.20 s |
+
+The host is an Apple M4 Pro, which has none of the x86 PCLMUL paths both
+fixtures specialise, so these are not EPYC gate-host ratios and the gate host
+needs its own rerun. The operation counts do not depend on the host: the direct
+route spends 46.3M support queries against about 0.56M rho steps. The batched
+walk still favours index calculus in one respect, because it moves `y` onto the
+orbit representative by up to `n-1` squarings.
+
+The gap widens with degree. A run spends about `r/(n·|F|)` queries (40M
+predicted at `n=53`, 46.3M measured), and the base rule `|F|^3 ≈ 6r·η` makes
+that grow as `r^{2/3}` against rho's `r^{1/2}`. At ECC2K-130 that is about 2^80.6
+queries against 2^60.9 rho steps. Folding the support table by the signed
+Frobenius orbit (738 MB to about 15 MB) would pass the memory requirement and
+change neither verdict. Per-run records are in
+`suite/docs/ic/runs/koblitz-n53-rho-control-20260922.json` in that repository.
+
 The narrow supported conclusion is unchanged: this is strong internal
 engineering and finite public toy-research evidence. The known SAT-based
 point-decomposition and Frobenius-invariant-factor-base literature remain the
 prior-art baseline. The finite `n=41` online descent is faster after
-precomputation, and the selected `n=53` panel passes the predeclared online wall
-threshold on the recorded host. Its memory, core, and fresh-build costs remain
-above rho. Licensed Magma and unaffiliated
+precomputation. The selected `n=53` panel passes the predeclared online wall
+threshold on the recorded host only against the fixture rho control. Against a
+batched signed-Frobenius rho it loses by one to two orders of magnitude, and its
+query count grows faster than rho's with degree. Its memory, core, and
+fresh-build costs remain above rho. Licensed Magma and unaffiliated
 reproduction/novelty review remain open. This is not a new Koblitz
 index-calculus SOTA result.
