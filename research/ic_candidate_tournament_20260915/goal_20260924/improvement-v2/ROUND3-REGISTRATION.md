@@ -32,9 +32,12 @@ No candidate inherits another candidate's cheapest measured phase.
 The tournament's family key now recognizes exact factor-base recipes, orbit
 target, pair-table coverage, collection batch and adapter. That prevents a
 different mechanism being silently counted as the same family when the
-development portfolio reserves
-its diversity slots. The frozen evaluator retains this selector; prior rounds
-are reverified with their original frozen evaluators and decisions.
+development portfolio reserves its diversity slots. One standout cell
+specialist is now reserved before those slots fill; its advantage is measured
+against already selected candidates within the *same metric and cell*, so the
+online and cold IC reference denominators are never mixed. The exploration
+slot remains protected. The frozen evaluator retains this selector; prior
+rounds are reverified with their original frozen evaluators and decisions.
 
 The [runner](../../run_improvement_v3.py) restores both sealed prior rounds,
 extends their exact public-point exclusions (including failed preparation),
