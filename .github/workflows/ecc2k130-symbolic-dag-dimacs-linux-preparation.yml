@@ -1,0 +1,62 @@
+name: ECC2K-130 symbolic DAG DIMACS Linux preparation
+on:
+  pull_request:
+    types: [labeled]
+    branches:
+      - codex/ecc2k130-symbolic-dag-dimacs-gate-20260925
+    paths:
+      - 'research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/**'
+      - '.github/workflows/ecc2k130-symbolic-dag-dimacs-linux-preparation.yml'
+permissions:
+  contents: read
+jobs:
+  harmless-cap-and-cadical-build:
+    if: github.event.pull_request.number == 831 && github.event.label.name == 'ecc2k130-dag-linux-prep-v1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact checkout, first failure, and preparation source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          python3 -m py_compile research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/{check_parent,source_manifest,harmless_cap_probe,prepare_cadical}.py
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/check_parent.py 2>&1 | tee "$RUNNER_TEMP/check_parent.log"
+      - name: Prove hard address-space caps with harmless children
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/harmless_cap_probe.py \
+            --out "$RUNNER_TEMP/rlimit_probe.json" 2>&1 | tee "$RUNNER_TEMP/rlimit_probe.log"
+      - name: Build CaDiCaL twice from pinned official source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/prepare_cadical.py \
+            --probe-receipt "$RUNNER_TEMP/rlimit_probe.json" \
+            --fallback-receipt "$RUNNER_TEMP/cadical_prepare_launch_failure.json" \
+            --out "$RUNNER_TEMP/cadical_prepare" 2>&1 | tee "$RUNNER_TEMP/cadical_prepare.log"
+      - name: Preserve preparation success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cadical-linux-prep-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            ${{ runner.temp }}/check_parent.log
+            ${{ runner.temp }}/rlimit_probe.log
+            ${{ runner.temp }}/rlimit_probe.json
+            ${{ runner.temp }}/cadical_prepare.log
+            ${{ runner.temp }}/cadical_prepare_launch_failure.json
+            ${{ runner.temp }}/cadical_prepare/PREPARE_RECEIPT.json
+            ${{ runner.temp }}/cadical_prepare/cadical
+            ${{ runner.temp }}/cadical_prepare/*.stdout.txt
+            ${{ runner.temp }}/cadical_prepare/*.stderr.txt

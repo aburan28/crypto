@@ -124,8 +124,8 @@ pub fn pmac<C: BlockCipher128>(cipher: &C, message: &[u8]) -> [u8; 16] {
     let mut sigma = [0u8; 16];
     let mut offset = [0u8; 16];
 
-    let last_complete = !message.is_empty() && message.len() % BLOCK == 0;
-    let full_blocks_to_xor_inline = if last_complete { m - 1 } else { m - 1 };
+    let last_complete = !message.is_empty() && message.len().is_multiple_of(BLOCK);
+    let full_blocks_to_xor_inline = m - 1;
 
     for i in 1..=full_blocks_to_xor_inline {
         xor16(&mut offset, &l_table[ntz(i as u64) as usize]);

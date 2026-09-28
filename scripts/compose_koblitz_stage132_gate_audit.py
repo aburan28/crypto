@@ -1,243 +1,31 @@
 #!/usr/bin/env python3
-"""Compose the current Koblitz gates with the selected n59 ell=15
-cofactor-projected width optimization."""
+"""Compose the current seven-gate audit with the bounded n=59 standard-
+subspace end-to-end attempt and same-target rho panel."""
 from __future__ import annotations
-
-import argparse
-import hashlib
-import json
-import subprocess
-import sys
+import argparse,hashlib,json,subprocess,sys
 from pathlib import Path
 from typing import Any
-
-REPO = Path(__file__).resolve().parents[1]
-EVIDENCE = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota-gates"
-STAGE131 = EVIDENCE / "stage-131-current-gate-audit-20260921"
-OPT = REPO / "docs/ic/runs/koblitz-n59-cofactor-projected-l15-optimization-20260921.json"
-PARAMS = REPO / "docs/ic/params/k1n59-cofactor-projected-l15-full-public-59001.json"
-GATE_STATUS = EVIDENCE / "GATE_STATUS.md"
-SCHEMA = "koblitz_stage132_current_gate_audit.v1"
-SEAL_SCHEMA = "koblitz_stage132_current_gate_audit_seal.v1"
-MARKER = "Current through Stage 132"
-
-
-class Stage132Error(RuntimeError):
-    pass
-
-
-def require(value: bool, message: str) -> None:
-    if not value:
-        raise Stage132Error(message)
-
-
-def load(path: Path, context: str) -> dict[str, Any]:
-    value = json.loads(path.read_text())
-    require(isinstance(value, dict), f"{context} must be an object")
-    return value
-
-
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def replay_stage131() -> dict[str, Any]:
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(REPO / "scripts/compose_koblitz_stage131_gate_audit.py"),
-            "verify",
-            "--output",
-            str(STAGE131),
-        ],
-        cwd=REPO,
-        text=True,
-        capture_output=True,
-        check=True,
-    )
-    value = json.loads(result.stdout)
-    require(
-        value.get("schema") == "koblitz_stage131_current_gate_audit.v1",
-        "Stage-131 replay changed",
-    )
-    return value
-
-
-def compose() -> dict[str, Any]:
-    predecessor = replay_stage131()
-    opt = load(OPT, "n59 ell15 optimization")
-    params = load(PARAMS, "n59 ell15 params")
-    require(
-        opt.get("operation") == "koblitz_n59_cofactor_projected_width_optimization",
-        "optimization identity changed",
-    )
-    require(
-        params.get("name") == "k1n59-cofactor-projected-standard-l15-full-public-59001-stage132",
-        "parameter identity changed",
-    )
-    require(params.get("targets") == [{"public_hash_seed": 59001}], "target changed")
-    require(opt["params"]["sha256"] == sha256(PARAMS), "parameter pin changed")
-    require(
-        opt["predecessor"]["sha256"]
-        == predecessor["evidence_pins"]["n59_evidence_sha256"],
-        "ell14 predecessor pin changed",
-    )
-    factor_base = opt["factor_base"]
-    require(
-        factor_base["parent"] == {"kind": "standard_subspace", "ell": 15}
-        and factor_base["points"] == 32934
-        and factor_base["projected_columns"] == 16344,
-        "ell15 factor-base shape changed",
-    )
-    require(
-        factor_base["factor_base_logs_known_by_construction"] is False
-        and factor_base["target_subgroup_enumerated"] is False
-        and factor_base["scalar_preimages_retained"] is False,
-        "factor-base knowledge boundary changed",
-    )
-    relations = opt["relation_stream"]
-    require(
-        relations["relations"] == 54749
-        and relations["trials"] == 2600000
-        and relations["canonical_relations_sha256"]
-        == "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
-        "ell15 relation stream changed",
-    )
-    for name in ("default_thread", "one_worker"):
-        run = opt[name]
-        require(run["verified"] is True, f"{name} solution is unverified")
-        require(run["recovered_scalar"] == 17861472351607, f"{name} scalar changed")
-        require(
-            run["canonical_relations_sha256"] == relations["canonical_relations_sha256"],
-            f"{name} relation hash changed",
-        )
-        require(run["ic_over_rho_wall_ratio"] > 1, f"{name} rho boundary changed")
-    comparison = opt["comparison_to_ell14"]
-    require(
-        comparison["default_thread"]["ic_wall_reduction_fraction"] > 0.04
-        and comparison["default_thread"]["whole_cpu_reduction_fraction"] > 0.13,
-        "default-thread improvement boundary changed",
-    )
-    require(
-        comparison["one_worker"]["ic_wall_reduction_fraction"] > 0.17
-        and comparison["one_worker"]["whole_cpu_reduction_fraction"] > 0.16,
-        "one-worker improvement boundary changed",
-    )
-    require(
-        comparison["default_thread"]["rss_multiple"] > 4.8
-        and comparison["one_worker"]["rss_multiple"] > 4.7,
-        "memory tradeoff boundary changed",
-    )
-    accounting = opt["process_accounting"]
-    require(
-        accounting["processes"] == 4
-        and accounting["total_core_seconds"] > 2681
-        and accounting["peak_rss_bytes"] == 4375724032,
-        "optimization process accounting changed",
-    )
-    require(MARKER in GATE_STATUS.read_text(), "gate-status marker changed")
-
-    gates = dict(predecessor["gates"])
-    gates["3_single_core_core_memory_conflicts_wall"] = (
-        "partial_current_n59_ell15_complete_magma_missing"
-    )
-    gates["6_full_cost_vs_automorphism_rho"] = (
-        "failed_current_n59_ell15_improved_time_at_4_8x_memory"
-    )
-    return {
-        "schema": SCHEMA,
-        "status": "current_seven_gate_audit_verified",
-        "all_seven_gates_passed": False,
-        "koblitz_index_calculus_sota": False,
-        "claim_boundary": (
-            "finite same-target n59 ell14-to-ell15 improvement with fully charged time "
-            "and memory; full cost remains far behind rho, so this is not a SOTA"
-        ),
-        "predecessor": {
-            "stage131_audit_sha256": sha256(STAGE131 / "audit.json"),
-            "stage131_seal_sha256": sha256(STAGE131 / "result-seal.json"),
-            "stage131_status": predecessor["status"],
-        },
-        "evidence_pins": {
-            "optimization_sha256": sha256(OPT),
-            "params_sha256": sha256(PARAMS),
-            "gate_status_sha256": sha256(GATE_STATUS),
-        },
-        "inherited_phase_b_same_instance_matrix": predecessor[
-            "inherited_phase_b_same_instance_matrix"
-        ],
-        "inherited_current_n53": predecessor["inherited_current_n53"],
-        "inherited_current_n41": predecessor["inherited_current_n41"],
-        "inherited_current_n59_standard_cap": predecessor[
-            "inherited_current_n59_standard_cap"
-        ],
-        "inherited_current_n59_standard_frontier": predecessor[
-            "inherited_current_n59_standard_frontier"
-        ],
-        "inherited_current_n59_cofactor_projected_ell14": predecessor[
-            "current_n59_cofactor_projected"
-        ],
-        "current_n59_cofactor_projected_ell15": opt,
-        "gates": gates,
-        "next_targets": [
-            "execute the frozen 160-input packet under licensed Magma F4 with complete resource and terminal receipts",
-            "optimize the same n59 public target below the selected ell15 full cost without hiding its 4.8x memory tradeoff",
-            "obtain unaffiliated reproduction and a source-pinned novelty/correctness review",
-        ],
-        "licensed_magma_complete": False,
-        "independent_external_reproduction_satisfied": False,
-        "full_cost_gate_passed": False,
-    }
-
-
-def write_new(path: Path, value: dict[str, Any]) -> None:
-    require(not path.exists(), f"refusing to overwrite {path}")
-    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
-
-
-def build(output: Path) -> dict[str, Any]:
-    require(not output.exists(), f"refusing to overwrite {output}")
-    output.mkdir(parents=True)
-    audit = compose()
-    write_new(output / "audit.json", audit)
-    write_new(
-        output / "result-seal.json",
-        {
-            "schema": SEAL_SCHEMA,
-            "status": "audit_frozen",
-            "audit_sha256": sha256(output / "audit.json"),
-        },
-    )
-    return audit
-
-
-def verify(output: Path) -> dict[str, Any]:
-    seal = load(output / "result-seal.json", "seal")
-    require(seal.get("schema") == SEAL_SCHEMA, "seal schema changed")
-    require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    audit = compose()
-    require(audit == load(output / "audit.json", "audit"), "current audit changed")
-    return audit
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    subparsers = parser.add_subparsers(dest="command", required=True)
-    build_parser = subparsers.add_parser("build")
-    build_parser.add_argument("--output", type=Path, required=True)
-    verify_parser = subparsers.add_parser("verify")
-    verify_parser.add_argument("--output", type=Path, required=True)
-    args = parser.parse_args()
-    try:
-        result = (
-            build(args.output.resolve())
-            if args.command == "build"
-            else verify(args.output.resolve(strict=True))
-        )
-        print(json.dumps(result, indent=2, sort_keys=True))
-    except (OSError, ValueError, KeyError, subprocess.CalledProcessError, Stage132Error) as error:
-        raise SystemExit(f"stage132-gate-audit: {error}")
-
-
-if __name__ == "__main__":
-    main()
+REPO=Path(__file__).resolve().parents[1];E=REPO/'research/sat_factor_base_review_20260908/continuation-05-sota-gates';S128=E/'stage-131-current-gate-audit-20260921';N59=REPO/'docs/ic/runs/koblitz-n59-standard-cap-20260921.json';P59=REPO/'docs/ic/params/k1n59-standard-l9-m3-cap-public-59001.json';G=E/'GATE_STATUS.md';SCHEMA='koblitz_stage132_current_gate_audit.v1';SEAL='koblitz_stage132_current_gate_audit_seal.v1';MARK='Current through Stage 132'
+class Error(RuntimeError):pass
+def req(v:bool,m:str)->None:
+ if not v:raise Error(m)
+def load(p:Path,c:str)->dict[str,Any]:
+ v=json.loads(p.read_text());req(isinstance(v,dict),f'{c} must be object');return v
+def sha(p:Path)->str:return hashlib.sha256(p.read_bytes()).hexdigest()
+def replay()->dict[str,Any]:
+ r=subprocess.run([sys.executable,str(REPO/'scripts/compose_koblitz_stage131_gate_audit.py'),'verify','--output',str(S128)],cwd=REPO,text=True,capture_output=True,check=True);v=json.loads(r.stdout);req(v.get('schema')=='koblitz_stage131_current_gate_audit.v1','Stage-131 replay changed');return v
+def compose()->dict[str,Any]:
+ pred=replay();n=load(N59,'n59 evidence');p=load(P59,'n59 params');req(n.get('schema_version')==1,'n59 schema changed');req(p.get('name')=='k1n59-standard-l9-m3-eight-unit-cap-public-59001-stage129','n59 params changed');req(p.get('targets')==[{'public_hash_seed':59001}],'n59 target changed')
+ fb=n['factor_base'];req(fb['kind']=='standard_subspace' and fb['ell']==9 and fb['points']==483 and fb['projected_columns']==231,'n59 factor base changed');req(fb['target_subgroup_enumerated'] is False and fb['discrete_log_labels_used'] is False,'n59 factor-base boundary changed');req(fb['folded_table_forbidden'] is True and fb['pair_table_tier']=='compact','n59 table boundary changed')
+ bc=n['bounded_collection'];req(bc['trial_cap']==1200000 and bc['relations']==0,'n59 cap outcome changed');req(bc['linear_algebra']['attempts']==0,'n59 LA boundary changed');req(bc['status']=='cap_reached_zero_relations_censored','n59 censorship changed')
+ rho=n['rho'];req(rho['summary']['runs']==5 and rho['summary']['all_verified'] is True,'n59 rho panel incomplete');req(rho['summary']['recovered_scalars']==[17861472351607],'n59 rho scalar changed');req(n['public_target']['target_scalar_constructed_or_supplied'] is False,'n59 target gained scalar');req(MARK in G.read_text(),'gate marker changed')
+ gates=dict(pred['gates']);gates['4_n31_n41_larger_pdp_scaling']='satisfied_finite_coverage_n59_end_to_end_attempt_censored';gates['6_full_cost_vs_automorphism_rho']='partial_n59_ic_incomplete_after_cap_n41_n53_losses_default_n53_wall_pass'
+ return {'schema':SCHEMA,'status':'current_seven_gate_audit_verified','all_seven_gates_passed':False,'koblitz_index_calculus_sota':False,'claim_boundary':'strong internal engineering and finite public toy-research improvement; not a Koblitz index-calculus SOTA','predecessor':{'stage131_audit_sha256':sha(S128/'audit.json'),'stage131_seal_sha256':sha(S128/'result-seal.json'),'stage131_status':pred['status']},'evidence_pins':{'n59_evidence_sha256':sha(N59),'n59_params_sha256':sha(P59),'gate_status_sha256':sha(G)},'inherited_phase_b_same_instance_matrix':pred['inherited_phase_b_same_instance_matrix'],'inherited_current_n53':pred['inherited_current_n53'],'inherited_current_n41':pred['current_n41'],'current_n59':n,'gates':gates,'next_targets':['execute the frozen 160-input packet under licensed Magma F4 with complete resource and terminal receipts','find an algebraic larger-PDP base with non-negligible natural relation yield or prove the materialized-base route infeasible under a stated bound','reduce current n41 and n53 one-core IC/rho ratios below one without losing the n53 default-thread wall crossover','obtain unaffiliated reproduction and a source-pinned novelty/correctness review'],'licensed_magma_complete':False,'independent_external_reproduction_satisfied':False,'full_cost_gate_passed':False}
+def new(p:Path,v:dict[str,Any])->None:req(not p.exists(),f'refusing overwrite {p}');p.write_text(json.dumps(v,indent=2,sort_keys=True)+'\n')
+def build(o:Path)->dict[str,Any]:req(not o.exists(),f'refusing overwrite {o}');o.mkdir(parents=True);a=compose();new(o/'audit.json',a);new(o/'result-seal.json',{'schema':SEAL,'status':'audit_frozen','audit_sha256':sha(o/'audit.json')});return a
+def verify(o:Path)->dict[str,Any]:s=load(o/'result-seal.json','seal');req(s.get('schema')==SEAL,'seal schema');req(sha(o/'audit.json')==s.get('audit_sha256'),'audit seal');a=load(o/'audit.json','audit');req(a.get('schema')==SCHEMA,'audit schema');req(a.get('status')=='current_seven_gate_audit_verified','audit status');return a
+def main()->None:
+ p=argparse.ArgumentParser();sp=p.add_subparsers(dest='cmd',required=True);b=sp.add_parser('build');b.add_argument('--output',type=Path,required=True);v=sp.add_parser('verify');v.add_argument('--output',type=Path,required=True);a=p.parse_args()
+ try:r=build(a.output.resolve()) if a.cmd=='build' else verify(a.output.resolve(strict=True));print(json.dumps(r,indent=2,sort_keys=True))
+ except (OSError,ValueError,KeyError,subprocess.CalledProcessError,Error) as e:raise SystemExit(f'stage132-gate-audit: {e}')
+if __name__=='__main__':main()

@@ -1,0 +1,9 @@
+=== Paired oracle benchmark: x-system vs symmetrised system ===
+targets = 2, node budget = 50000, SAT conflict budget = 2000000, targets in <G> = true
+
+== K_0/F_2^31  m = 2  dim V = 16  |F_x| = 68327  |F_u| = 69441  targets = 2
+   arm            vars  eqs deg found refuted inconc via T     found ms   refuted ms    effort built  ffd  gate
+   x-chained F4     32   31   2     2       0      0     0        27696            -      7056     3    3    ok
+   sym F4           31   31   2     0       2      0     0            -        15534      4095     3    4    ok
+   divisor indices [0, 1, 2, 3]  (150.7 s)
+

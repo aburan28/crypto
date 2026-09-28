@@ -1,0 +1,438 @@
+{
+  "ic": {
+    "job": {
+      "algorithm_seed": 2026092527,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 43
+      },
+      "mode": "ic",
+      "public_targets": [
+        [
+          "4737",
+          "3053"
+        ]
+      ],
+      "target_seeds": [
+        2026092526
+      ]
+    },
+    "process": {
+      "exit_code": 0,
+      "process_wall_ns": 4804584
+    },
+    "report": {
+      "accepted_relations": 7,
+      "column_convention": "representative",
+      "column_logs": [
+        {
+          "log": "1569",
+          "point": [
+            "44",
+            "564"
+          ]
+        },
+        {
+          "log": "1941",
+          "point": [
+            "50",
+            "6388"
+          ]
+        },
+        {
+          "log": "1846",
+          "point": [
+            "74",
+            "5509"
+          ]
+        },
+        {
+          "log": "1182",
+          "point": [
+            "154",
+            "4606"
+          ]
+        },
+        {
+          "log": "1885",
+          "point": [
+            "156",
+            "7223"
+          ]
+        },
+        {
+          "log": "1072",
+          "point": [
+            "1013",
+            "4077"
+          ]
+        },
+        {
+          "log": "881",
+          "point": [
+            "1412",
+            "6415"
+          ]
+        }
+      ],
+      "columns": 7,
+      "diagnostics": {
+        "field_kernel": "portable",
+        "final_rank": 7,
+        "identity_queries": 0,
+        "matrix_encoding": "u64-le-row-major-including-rhs",
+        "matrix_nonzeros": 17,
+        "online_wall_ns": 28375,
+        "ordinary_queries": 7,
+        "pdp_attempts": 7,
+        "pdp_outcomes": {
+          "budget": 0,
+          "error": 0,
+          "lift_rejected": 0,
+          "proved_unsat": 0,
+          "timeout": 0,
+          "unresolved": 0,
+          "verified": 7
+        },
+        "phase_wall_ns": {
+          "factor_base": 43083,
+          "matrix_build": 957,
+          "pdp": 12626,
+          "precompute": 39875,
+          "queries": 2583,
+          "recovery_check": 21500,
+          "reference_solve": 0,
+          "relation_check": 13625,
+          "relation_la": 2709,
+          "setup": 142000,
+          "target_descent": 542,
+          "target_pdp": 1334,
+          "target_query": 4708,
+          "target_relation_check": 291
+        },
+        "rank_events": [
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            1,
+            1,
+            2
+          ],
+          [
+            2,
+            2,
+            3
+          ],
+          [
+            3,
+            3,
+            4
+          ],
+          [
+            4,
+            4,
+            5
+          ],
+          [
+            5,
+            5,
+            6
+          ],
+          [
+            6,
+            6,
+            7
+          ]
+        ],
+        "source_manifest_sha256": "e91457938cc3e6742ab7d1b3cc06203be0d2849c82851412cb2dc21bcd595844",
+        "target_input": "supplied_public_point"
+      },
+      "duplicate_relations": 0,
+      "elapsed_seconds": 0.000281042,
+      "executed_method": {
+        "collection": "additive_walk",
+        "descent": "walked_pdp",
+        "direct_collision": false,
+        "pdp": "partial_folded_pair_table",
+        "relation_la": "incremental_gauss"
+      },
+      "factor_base_orbits": [
+        [
+          "44",
+          "564"
+        ],
+        [
+          "50",
+          "6388"
+        ],
+        [
+          "74",
+          "5509"
+        ],
+        [
+          "154",
+          "4606"
+        ],
+        [
+          "156",
+          "7223"
+        ],
+        [
+          "1013",
+          "4077"
+        ],
+        [
+          "1412",
+          "6415"
+        ]
+      ],
+      "fixture": {
+        "cofactor": "4",
+        "curve_a": 0,
+        "degree": 13,
+        "generator": [
+          "4793",
+          "7108"
+        ],
+        "group_order": "8012",
+        "irreducible": {
+          "degree": 13,
+          "low_terms": [
+            0,
+            1,
+            3,
+            4
+          ]
+        },
+        "lambda": "89",
+        "subgroup_order": "2003",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          2026092526
+        ],
+        "targets": [
+          [
+            "4737",
+            "3053"
+          ]
+        ]
+      },
+      "mode": "ic",
+      "pair_table": {
+        "rows": 1,
+        "rows_possible": 7,
+        "scan_block": 8,
+        "sum_orbits": 69
+      },
+      "phase_schema": 3,
+      "rejected_relations": 0,
+      "relations": [
+        {
+          "a": 389,
+          "points": [
+            0,
+            23,
+            46
+          ],
+          "trial": 0
+        },
+        {
+          "a": 1956,
+          "points": [
+            22,
+            27,
+            38
+          ],
+          "trial": 1
+        },
+        {
+          "a": 1520,
+          "points": [
+            11,
+            48,
+            54
+          ],
+          "trial": 2
+        },
+        {
+          "a": 1084,
+          "points": [
+            1,
+            14,
+            81
+          ],
+          "trial": 3
+        },
+        {
+          "a": 648,
+          "points": [
+            4,
+            28,
+            108
+          ],
+          "trial": 4
+        },
+        {
+          "a": 212,
+          "points": [
+            11,
+            12,
+            135
+          ],
+          "trial": 5
+        },
+        {
+          "a": 1779,
+          "points": [
+            25,
+            121,
+            162
+          ],
+          "trial": 6
+        }
+      ],
+      "schema_version": 1,
+      "solutions": [
+        {
+          "index": 0,
+          "recovered": "598",
+          "relation": {
+            "a": 336,
+            "b": 1221,
+            "points": [
+              10,
+              27,
+              61
+            ]
+          },
+          "trials": 1
+        }
+      ],
+      "solve_attempts": 7,
+      "sparse_report": null,
+      "status": "complete",
+      "summands": 3,
+      "trials": 7
+    }
+  },
+  "rho": {
+    "job": {
+      "algorithm_seed": 2026092527,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "curve_a": 0,
+      "degree": 13,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 43
+      },
+      "mode": "rho",
+      "public_targets": [
+        [
+          "4737",
+          "3053"
+        ]
+      ],
+      "target_seeds": [
+        2026092526
+      ]
+    },
+    "process": {
+      "exit_code": 0,
+      "process_wall_ns": 6718458
+    },
+    "report": {
+      "automorphism_order": 26,
+      "elapsed_seconds": 0.000424041,
+      "executed_method": {
+        "reference": "signed_frobenius_rho",
+        "requested_walks": 32
+      },
+      "fixture": {
+        "cofactor": "4",
+        "curve_a": 0,
+        "degree": 13,
+        "generator": [
+          "4793",
+          "7108"
+        ],
+        "group_order": "8012",
+        "irreducible": {
+          "degree": 13,
+          "low_terms": [
+            0,
+            1,
+            3,
+            4
+          ]
+        },
+        "lambda": "89",
+        "subgroup_order": "2003",
+        "target_scalar_constructed": false,
+        "target_seeds": [
+          2026092526
+        ],
+        "targets": [
+          [
+            "4737",
+            "3053"
+          ]
+        ]
+      },
+      "mode": "rho",
+      "online_wall_ns": 326167,
+      "phase_schema": 3,
+      "phase_wall_ns": {
+        "factor_base": 0,
+        "matrix_build": 0,
+        "pdp": 0,
+        "precompute": 0,
+        "queries": 0,
+        "recovery_check": 19500,
+        "reference_solve": 306667,
+        "relation_check": 0,
+        "relation_la": 0,
+        "setup": 80083,
+        "target_descent": 0,
+        "target_pdp": 0,
+        "target_query": 0,
+        "target_relation_check": 0
+      },
+      "schema_version": 1,
+      "solutions": [
+        {
+          "effective_walks": 1,
+          "index": 0,
+          "iterations": 4,
+          "recovered": "598",
+          "restarts": 1,
+          "verified": true,
+          "walk_group_additions": 3
+        }
+      ],
+      "source_manifest_sha256": "e91457938cc3e6742ab7d1b3cc06203be0d2849c82851412cb2dc21bcd595844",
+      "status": "complete",
+      "target_input": "supplied_public_point"
+    }
+  },
+  "scope": "local correctness and interval-closure vector; no comparison; source e91457938cc3e6742ab7d1b3cc06203be0d2849c82851412cb2dc21bcd595844"
+}

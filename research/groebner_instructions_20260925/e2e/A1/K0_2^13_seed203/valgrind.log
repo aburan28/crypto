@@ -1,0 +1,11 @@
+==749== Callgrind, a call-graph generating cache profiler
+==749== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==749== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==749== Command: /home/user/crypto/target/release/ic run --degree 13 --curve-a 0 --summands 3 --solver groebner --random-target --seed 203 --batch 1 --json
+==749== 
+==749== For interactive control, run 'callgrind_control -h'.
+==749== 
+==749== Events    : Ir
+==749== Collected : 1406796479
+==749== 
+==749== I   refs:      1,406,796,479
