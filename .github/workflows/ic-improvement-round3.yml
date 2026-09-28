@@ -90,6 +90,7 @@ jobs:
             ${{ runner.temp }}/ic-round3-candidate-controls
             ${{ runner.temp }}/ic-round3-candidates/preparation.json
             ${{ runner.temp }}/ic-round3-candidates/source-manifest.json
+            ${{ runner.temp }}/ic-round3-candidates/source
           retention-days: 30
           include-hidden-files: true
           if-no-files-found: warn
