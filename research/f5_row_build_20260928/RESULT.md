@@ -19,4 +19,15 @@ For the primary `f5_n24_m24_d4` case on the frozen seed, median reference and ca
 
 The primary build and full-call gates passed. Every holdout primary build ratio was above its A/A maximum. Across all four seeds and the six smaller cases, no complete-call median fell below its own A/A minimum. The frozen smaller-case complete-call ratios ranged from 1.076× to 1.276×. This is a solver-stage measurement; it is not a 2× complete-call result or an end-to-end IC speedup.
 
-The four-thread control specified in the protocol is pending in the next CI run. The workflow change for that control does not alter the candidate source or benchmark harness.
+## Four-thread control and decision
+
+[CI run 36453351055](https://github.com/aburan28/crypto/actions/runs/36453351055) completed all 88 four-thread calls at PR head `1f82e707`, again with exact raw and canonical row fingerprints, rank, pruning and counted operations on every case. Its AMD EPYC 9V74 runner reported AVX2, AVX-512F and BMI2, with four pinned CPUs. The run used a different runner from the one-thread experiment; only ratios paired inside each run are comparable. The raw receipt is [36453351055-t4.json.gz](runs/36453351055-t4.json.gz), SHA-256 `738896a0c2a88c1919b76068fe9e1b7ee205ab887017a0bb7a991ee6bc69e716`; the uncompressed receipt SHA-256 is `3f1af837e552ed1bb81d936d38d54cc6d367f74d21103883e6d6ff46fd9bd14d`. Both binaries remain in the CI artifact.
+
+| Primary `f5_n24_m24_d4` seed | Build ratio, 95% interval | Complete-call ratio, 95% interval | Complete-call A/A range |
+| --- | ---: | ---: | ---: |
+| Frozen | 1.382×, 1.225–1.433× | **0.865×, 0.745–1.095×** | 0.897–1.093× |
+| Holdout A | 1.364×, 1.340–1.427× | 1.180×, 0.933–1.313× | 0.994–1.271× |
+| Holdout B | 1.415×, 1.362–1.462× | 1.222×, 0.955–1.385× | 0.678–1.257× |
+| Fresh holdout C | 1.356×, 1.336–1.395× | 1.081×, 0.793–1.477× | 0.626–1.418× |
+
+The frozen primary complete-call median is below its own A/A minimum and its interval crosses one, so the predeclared four-thread gate **fails**. On that case, median A/B build times fell from 34.88 to 25.73 ms, but elimination rose from 119.85 to 158.67 ms; the complete call rose from 183.21 to 209.84 ms. Identical counted work and output indicate a timing or memory-layout interaction in elimination, but these receipts do not identify its cause. The protocol rules out a timing-driven rerun to seek a pass. The original row builder stays the default; `KIC_F5_FUSED_BUILD=1` remains an explicit one-thread research option, supported by the passing one-thread receipt, with the four-thread regression recorded here. No 2× complete-call or end-to-end IC result is claimed.
