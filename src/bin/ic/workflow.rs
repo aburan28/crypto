@@ -53,9 +53,9 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x, CollectedRelation,
-    ColumnCoverage, DecompositionStrategy, FactorBaseLogSolver, FactorBaseLogTable,
-    FactorBaseSelectionCost, FrobeniusFactorBase, IndividualLogSolver, KoblitzCurve,
-    KoblitzSignedRhoOptions, PairSumTable, ProbeBudget, RelationCollector, RelationWorkUnit,
+    ColumnCoverage, DecompositionStrategy, FactorBaseLogTable, FactorBaseSelectionCost,
+    FrobeniusFactorBase, KoblitzCurve, KoblitzSignedRhoOptions, PairSumTable, ProbeBudget,
+    ProjectedFactorBase, RelationCollector, RelationWorkUnit,
 };
 use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
 use num_bigint::BigUint;
@@ -1183,8 +1183,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     if let (Some(cost), Some(report)) = (selection_cost, stage_reports.last_mut()) {
         report["selection_cost"] = json!(cost);
     }
-    let columns =
-        crypto_lib::cryptanalysis::koblitz_index_calculus::projected_signed_orbit_count(&c, &fb);
+    let projected = ProjectedFactorBase::new(&c, &fb);
+    let columns = projected.columns();
     if let Some(window) = p.collection_window {
         if window as usize >= fb.points.len() {
             return Err(format!(
@@ -1457,8 +1457,9 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         // One solver for the whole stage: the orbit map of the base and
         // the verification of a relation are each paid once, however many
         // rounds of collection it takes to determine the columns.
-        let mut solver =
-            FactorBaseLogSolver::new(&c, &fb, &ic).ok_or("factor base has no projected columns")?;
+        let mut solver = projected
+            .log_solver(&ic)
+            .ok_or("factor base has no projected columns")?;
         solver.push(&merged);
         let mut loaded = merged.len();
         let mut outcome = solver.try_solve();
@@ -1703,7 +1704,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let solver = if pending.is_empty() {
         None
     } else {
-        IndividualLogSolver::new(&c, &fb, &table, &ic, pair.as_ref())
+        projected.individual_log_solver(&table, &ic, pair.as_ref())
     };
     // Targets are independent, so they are solved in parallel.  Each
     // one's `elapsed_seconds` is still its own descent wall, and
