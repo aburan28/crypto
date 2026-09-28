@@ -1,0 +1,93 @@
+{
+  "classification": "accounting / correctness",
+  "parent_commit": "360ebed21e1dc3b637abf2c7c51f36a0cef710c4",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "sources_sha256": {
+    "src/isogeny/cm.rs": "58d1a3731cb56e991b1a6a9d474172d22289a55a759d20b674b3bb1f77b0cf3d",
+    "src/isogeny/volcano.rs": "8cb750cd51b8787ff192750c08415edd4d5f8108f7d6216b0b63bf882f5d9803",
+    "tests/volcano_metadata_exhaustive.rs": "d56a0d88d4557a5f2acfb775df98465ff509a4131e21d5a78ce012164e8f8e78",
+    "docs/index-calculus-scoreboard.html": "cb2236a0f61326fdc1ef7786a7ac4dd76734df2532e45178fa99a82e7bf3bd2d"
+  },
+  "runs": {
+    "exhaustive.log": {
+      "command": "cargo test --test volcano_metadata_exhaustive -- --nocapture",
+      "exit_code": 0,
+      "sha256": "127aba5624e35f71ad1d0a44e0fa63c822879948a0a4781c3339b276f769e6b8"
+    },
+    "cm-tests.log": {
+      "command": "cargo test --lib isogeny::cm::tests",
+      "exit_code": 0,
+      "sha256": "4f7f293b742aa7bbd1b3bff9615f9b8a1035bd979c6cf46c64be3760e30f4bde"
+    },
+    "volcano-tests.log": {
+      "command": "cargo test --lib isogeny::volcano::tests",
+      "exit_code": 0,
+      "sha256": "b4d0aabf2b16c0c6e0a0e923c11b0a8fab1cf766a0e26964a4b0091e8041ff30"
+    },
+    "velu-tests.log": {
+      "command": "cargo test --lib isogeny::velu::tests",
+      "exit_code": 0,
+      "sha256": "34bad021216f28246a5b22f4b26a91a5fbf33f96b48b02371086bebccac027e9"
+    },
+    "build.log": {
+      "command": "cargo check --bin crypto",
+      "exit_code": 0,
+      "sha256": "48a2e0b449e24ce4e6702d4227988b49a23fa47e2537f60e121c9f511fe93184"
+    },
+    "site-build-fixed.log": {
+      "command": "python3 scripts/site/test_build.py",
+      "exit_code": 0,
+      "sha256": "fb41441e3a2d65f1a4ad6b1f278418acd59005b29bd68898890218ce9c36e730"
+    },
+    "status-tests.log": {
+      "command": "python3 scripts/rho_status/test_rho_status.py",
+      "exit_code": 0,
+      "sha256": "8442727dfe11239453609528bb645af5a262b0adb7facc4497d6a910281b3f0e"
+    },
+    "initial.log": {
+      "command": "cargo test --test volcano_metadata_exhaustive -- --nocapture (initial four tests, before cap fix)",
+      "exit_code": 101,
+      "sha256": "07e08151b4906177b3b055fed2eb7dfaf64e13481364bd5909e920882f1a508e"
+    },
+    "point-count-failure.log": {
+      "command": "cargo test --test volcano_metadata_exhaustive -- --nocapture (before exact point-order fix)",
+      "exit_code": 101,
+      "sha256": "24a142d2efb94d3a5b82a14477f3d5791b175730df650d120494f9362702b31f"
+    },
+    "site-build.log": {
+      "command": "python3 scripts/site/test_build.py (before link fix)",
+      "exit_code": 1,
+      "sha256": "b88dfe9e8ae6e48076cae5fb715ce03c09afbcdc034dca4e46bb727a69e1ddd4"
+    }
+  },
+  "counts": {
+    "nonsingular_curve_models": 7968,
+    "supersingular_models": 630,
+    "unknown_ordinary_models": 3820,
+    "position_comparisons": 31810,
+    "small_field_bsgs_certificates": 5399,
+    "discriminants": 50000,
+    "two_kernel_models": 942,
+    "two_kernels": 876,
+    "nonkernel_images": 12936,
+    "capped_maps": 9984,
+    "branch_boundary_counts": 18,
+    "branch_boundary_bsgs_certificates": 17,
+    "integration_tests": 5,
+    "cm_unit_tests": 15,
+    "volcano_unit_tests": 9,
+    "velu_unit_tests": 5,
+    "site_tests": 39,
+    "status_tests": 64
+  },
+  "ecdLP_total_operations": null,
+  "ratio_to_rho": null,
+  "speedup": null,
+  "limitations": [
+    "bounded prime-field validation only",
+    "no general independent endomorphism-ring oracle",
+    "no GF256 solver replay",
+    "no ECC2K130 ECDLP measurement",
+    "new remote CI not yet verified"
+  ]
+}

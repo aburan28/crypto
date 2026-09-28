@@ -17,6 +17,7 @@ import hashlib
 import io
 import json
 import os
+import pathlib
 import struct
 import sys
 import time
@@ -257,6 +258,96 @@ class ProgressBackfill(unittest.TestCase):
         conn = CountingConn(progress={LEGACY: 100})
         todo, _, _ = dp_ingest.pending(conn, self.s3, "bucket")
         self.assertEqual([k for k, _, _, _ in todo], [ORBIT])
+
+
+class TotalsCursor:
+    """Answers the rollup query, or refuses it the way a missing grant does."""
+
+    def __init__(self, conn):
+        self.conn = conn
+        self.rows = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, args=None):
+        self.conn.queries.append(sql)
+        if "rho_dp_meta" in sql:
+            if self.conn.refuse:
+                raise RuntimeError("permission denied for table rho_dp_hour")
+            self.rows = [self.conn.rollupRow] if self.conn.rollupRow else []
+        elif "FROM rho_dp_hour" in sql:
+            self.rows = [("2026-09-18T17:00:00Z", 500)]
+        elif "LEFT JOIN distinguished_points" in sql:
+            self.rows = [("ecc2k-130", "curve", 32, "created", 188, 4, 120, "first", "last")]
+        else:
+            self.rows = [("2026-09-18T17:00:00Z", 7)]
+
+    def fetchone(self):
+        return self.rows[0] if self.rows else None
+
+    def fetchall(self):
+        return self.rows
+
+
+class TotalsConn:
+    def __init__(self, rollupRow=None, refuse=False):
+        self.queries = []
+        self.rollupRow = rollupRow
+        self.refuse = refuse
+        self.rollbacks = 0
+
+    def cursor(self):
+        return TotalsCursor(self)
+
+    def rollback(self):
+        self.rollbacks += 1
+
+
+class CampaignTotals(unittest.TestCase):
+    """Where the headline figures come from, and what happens when they cannot.
+
+    The scan was 143 s at 137 M rows on 2026-09-17 and 2,916 s at 188 M on
+    2026-09-18, and the ingest stops ingesting for as long as it runs.
+    """
+
+    def scans(self, conn):
+        return sum("LEFT JOIN distinguished_points" in q for q in conn.queries)
+
+    def test_a_ready_rollup_is_read_and_the_corpus_is_not_touched(self):
+        conn = TotalsConn(rollupRow=("ecc2k-130", "curve", 32, "created",
+                                     189235432, 494759, 120695354, "first", "last"))
+        row, hourly, source = dp_ingest.campaignTotals(conn)
+        self.assertEqual(source, "rollup")
+        self.assertEqual(row[4], 189235432)
+        self.assertEqual(self.scans(conn), 0, "the rollup path must not scan the corpus")
+        self.assertEqual(hourly, [("2026-09-18T17:00:00Z", 500)])
+
+    def test_a_store_without_a_backfilled_rollup_still_gets_its_figures(self):
+        conn = TotalsConn(rollupRow=None)
+        row, _, source = dp_ingest.campaignTotals(conn)
+        self.assertEqual(source, "scan")
+        self.assertEqual(row[4], 188)
+        self.assertEqual(self.scans(conn), 1)
+
+    def test_a_refused_rollup_falls_back_rather_than_failing_the_status(self):
+        # The ingest connects as the rho/dp-rds role; the rollup tables are
+        # owned by the walker role, which is why #448's trigger is SECURITY
+        # DEFINER. A missing SELECT grant must cost a slow status, not a
+        # status.
+        conn = TotalsConn(rollupRow=("x",), refuse=True)
+        row, _, source = dp_ingest.campaignTotals(conn)
+        self.assertEqual(source, "scan")
+        self.assertEqual(self.scans(conn), 1)
+        self.assertGreaterEqual(conn.rollbacks, 1, "a failed query must not poison the session")
+
+    def test_the_published_document_names_which_one_it_used(self):
+        source = pathlib.Path(dp_ingest.__file__).read_text(encoding="utf-8")
+        self.assertIn('TOTALS_SOURCE_LABELS[totals_source]', source)
+        self.assertIn('TOTALS_SOURCE_LABELS.get(payload.get("totals_source")', source)
 
 
 class IndexCursor:
@@ -625,6 +716,27 @@ class Collisions(unittest.TestCase):
             record(7), inserted=0, candidates=[self.candidate(b"pk", 7, 9)])
         self.assertEqual(hits, 1)
         self.assertEqual(self.progressRow(conn)[3], 0)
+
+    def test_a_large_object_is_copied_in_bounded_batches_with_the_same_totals(self):
+        # A sync loop whose state was reset re-sends a whole corpus as one
+        # object (6.5 M records on 2026-09-21); decoding it in one go is
+        # gigabytes of Python dicts. Three records at a chunk of two must
+        # produce two COPY batches, one progress row, and summed counts.
+        self.addCleanup(setattr, dp_ingest, "INGEST_CHUNK_RECORDS", dp_ingest.INGEST_CHUNK_RECORDS)
+        dp_ingest.INGEST_CHUNK_RECORDS = 2
+        conn, (added, seen, hits) = self.ingest(
+            record(7) + record(8) + record(9), inserted=1,
+            candidates=[self.candidate(b"pk", 7, 7)])
+        self.assertEqual(seen, 3)
+        # The fake reports `inserted` rows per INSERT, so two batches insert two.
+        self.assertEqual(added, 2)
+        truncates = [q for q, _ in conn.queries if q.startswith("TRUNCATE dp_in")]
+        inserts = [q for q, _ in conn.queries if "INSERT INTO distinguished_points" in q]
+        self.assertEqual((len(truncates), len(inserts)), (2, 2))
+        # Both batches conflicted (1 < 2 and 1 < 1 is false -> only the first
+        # batch runs the check), and the one re-report is counted once.
+        self.assertEqual(self.progressRow(conn)[2:], (3, 1))
+        self.assertEqual(conn.commits, 1)
 
     def test_the_progress_table_grows_the_column_it_needs(self):
         self.assertIn("ADD COLUMN IF NOT EXISTS duplicates", dp_ingest.PROGRESS_DUPLICATES_DDL)
@@ -1047,6 +1159,44 @@ class Snapshot(unittest.TestCase):
                                       stream(2, 2049457, covered=2049457)])
         snapshot = dp_ingest.campaignSnapshot(conn)
         self.assertEqual(snapshot["per_slot_records"][2]["records"], 12000000 + 2049457)
+
+
+class UnseededCountersConn(SnapshotConn):
+    """A store whose dp_ingest_totals has no row for the campaign yet."""
+
+    def cursor(self):
+        cur = SnapshotCursor(self)
+        execute = cur.execute
+
+        def unseeded(sql, args=None):
+            execute(sql, args)
+            if "dp_ingest_totals" in sql:
+                cur.one = cur.one[:4] + (None, None, None)
+        cur.execute = unseeded
+        return cur
+
+
+class SnapshotFallback(unittest.TestCase):
+    """Unseeded counters are answered by campaignTotals, and say so."""
+
+    def test_unseeded_counters_fall_back_to_the_rollup_or_scan(self):
+        totals = ((dp_ingest.CAMPAIGN, "sect131r1", 32, when("2026-09-01T00:00:00"), 188,
+                   4, 120, when("2026-09-01T00:00:00"), when("2026-09-18T17:00:00")),
+                  [], "rollup")
+        conn = UnseededCountersConn()
+        with mock.patch.object(dp_ingest, "campaignTotals", return_value=totals) as fallback:
+            snapshot = dp_ingest.campaignSnapshot(conn)
+        fallback.assert_called_once_with(conn)
+        self.assertEqual(snapshot["totals_source"], "rollup")
+        self.assertEqual(snapshot["dps"], 188)
+        self.assertTrue(snapshot["last_dp_at"].startswith("2026-09-18"))
+        self.assertFalse([q for q in conn.queries if "FROM dp_ingest_hourly" in q])
+
+    def test_seeded_counters_do_not_consult_the_fallback(self):
+        with mock.patch.object(dp_ingest, "campaignTotals") as fallback:
+            snapshot = dp_ingest.campaignSnapshot(SnapshotConn())
+        fallback.assert_not_called()
+        self.assertEqual(snapshot["totals_source"], "counters")
 
 
 class CutoffVerdict(unittest.TestCase):
@@ -1649,3 +1799,13 @@ class _StopParsing(Exception):
 
 if __name__ == "__main__":
     unittest.main()
+
+class TableV3Framing(unittest.TestCase):
+    def test_header_is_not_a_distinguished_point(self):
+        from dp_ingest import tableRecordBody
+        import struct
+        payload = bytes(range(32)) * 2
+        self.assertEqual(tableRecordBody(b"ECC2KDT3" + struct.pack("<II",3,32) + payload), payload)
+        self.assertEqual(tableRecordBody(payload), payload)
+        with self.assertRaises(ValueError):
+            tableRecordBody(b"ECC2KDT3" + struct.pack("<II",3,72))

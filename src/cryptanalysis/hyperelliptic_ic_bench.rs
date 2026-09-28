@@ -44,18 +44,24 @@
 //!   operation.  So
 //!
 //!   ```text
-//!     T = (m + 1)·g!                        (trials)
-//!     floor_ops = T  +  (T·g + m²)/c
+//!     floor_ops = (m + 1)·(1 + g/c)  +  m²/c
 //!   ```
 //!
-//!   one group operation per trial, plus the field work no
+//!   one group operation per relation, plus the field work no
 //!   implementation can skip: the smoothness oracle must read each
 //!   candidate's `u`, whose `g` coefficients cost `g` multiplications,
 //!   and any dense solve must read its own `m × m` matrix once.  Those
-//!   `T·g + m²` mul-mods are divided by the measured
-//!   mul-mods-per-group-op factor `c` so every term is in the same unit
-//!   as the measurement.  It moves only with `m` and `g`, so it cannot
-//!   be tuned away; it is a floor on *this* algorithm, not on the DLP.
+//!   mul-mods are divided by the measured mul-mods-per-group-op factor
+//!   `c` so every term is in the same unit as the measurement.  It
+//!   moves only with `m` and `g`, so it cannot be tuned away; it is a
+//!   floor on *this* algorithm, not on the DLP.
+//!
+//!   The floor does **not** divide the relation count by a smoothness
+//!   rate.  An earlier version took `(m+1)·g!` trials from heuristic H1
+//!   (yield `≈ 1/g!` for uniformly drawn divisors) and the factor-base
+//!   walk measured below it — which a real floor cannot do. The walk
+//!   does not draw uniformly, so H1 is a **prediction** reported beside
+//!   the floor (`ic_h1_predicted_s`), not a bound inside it.
 //! - **Reference.**  Pollard rho, measured, on the same instances.
 //!
 //! The ratio `S_ic / S_rho` and the ratio `S_ic` to the floor are the
@@ -592,9 +598,16 @@ pub struct HeadToHeadRow {
     pub rho_wall_ms: f64,
     pub rho_correct: bool,
 
-    /// `(m+1)·g! + m²/c`, derived — see the module docs.
+    /// Unconditional floor, `(m+1)·(1 + g/c) + m²/c` — see the module
+    /// docs.
     pub ic_floor_ops: f64,
     pub ic_floor_s: f64,
+    /// What heuristic H1 (yield `= 1/g!`) predicts the cost will be.
+    /// This is a **prediction, not a bound**: a search whose divisors
+    /// are not uniformly distributed can beat it, and the factor-base
+    /// walk does.
+    pub ic_h1_predicted_ops: f64,
+    pub ic_h1_predicted_s: f64,
     pub modmuls_per_group_op: f64,
 }
 
@@ -750,9 +763,24 @@ pub fn head_to_head(
     // smoothness, and the cheapest test that reads `u` at all touches
     // its `g` coefficients.  Charging zero for it would put the floor
     // below what any implementation can reach.
-    let trials_floor = (m + 1.0) * factorial(curve.genus);
-    let floor_ops =
-        trials_floor + (trials_floor * curve.genus as f64 + m * m) / conv.max(f64::MIN_POSITIVE);
+    // Unconditional floor: `m + 1` independent relations are needed,
+    // each costs at least one group operation to produce a candidate and
+    // at least one oracle call reading `u`'s `g` coefficients, and any
+    // dense solve reads its `m × m` matrix once.
+    //
+    // It deliberately does **not** divide by a smoothness rate.  An
+    // earlier version took the trial count to be `(m+1)·g!` from
+    // heuristic H1, and the factor-base walk then measured *below* it —
+    // which cannot happen to a real floor, and meant the boundary had an
+    // assumption inside it rather than that the run was impossible.  H1
+    // says the yield is `≈ 1/g!` for divisors drawn uniformly; a walk
+    // stepping through the factor base does not draw uniformly, and the
+    // measured genus-3 yield (0.17 – 0.27) sits above `1/3! = 0.167`.
+    let relations_floor = m + 1.0;
+    let floor_ops = relations_floor
+        + (relations_floor * curve.genus as f64 + m * m) / conv.max(f64::MIN_POSITIVE);
+    let h1_trials = (m + 1.0) * factorial(curve.genus);
+    let h1_ops = h1_trials + (h1_trials * curve.genus as f64 + m * m) / conv.max(f64::MIN_POSITIVE);
 
     HeadToHeadRow {
         p: p_u,
@@ -783,6 +811,8 @@ pub fn head_to_head(
 
         ic_floor_ops: floor_ops,
         ic_floor_s: floor_ops / root_n,
+        ic_h1_predicted_ops: h1_ops,
+        ic_h1_predicted_s: h1_ops / root_n,
         modmuls_per_group_op: conv,
     }
 }

@@ -162,9 +162,10 @@ impl MPoly {
                     .entry(k)
                     .or_insert_with(|| FieldElement::zero(self.p.clone()));
                 *entry = entry.add(&coef);
-                if entry.is_zero() {
-                    out.terms.remove_entry(&vec![0; self.n_vars]); // no-op placeholder
-                }
+                // A cancelled term is removed by the `retain` below; the buggy
+                // predecessor here removed the *constant* term (the all-zero
+                // exponent vector) whenever ANY term cancelled, so e.g.
+                // (1+x)(1-x) lost its constant and came out as -x².
             }
         }
         // Clean zero coefficients (paranoia after addition).
@@ -339,7 +340,7 @@ fn expand_s3_in_xs(a: &FieldElement, b: &FieldElement) -> MPoly {
 ///    X_{i_2}^{a_2} … X_{i_n}^{a_n}` in `f` (with `a_1 ≥ a_2 ≥ … ≥
 ///    a_n`, by symmetry).
 /// 2. Form the corresponding e-monomial
-///       `e_1^{a_1 - a_2} e_2^{a_2 - a_3} … e_{n-1}^{a_{n-1} - a_n}
+///    `e_1^{a_1 - a_2} e_2^{a_2 - a_3} … e_{n-1}^{a_{n-1} - a_n}
 ///        e_n^{a_n}`,
 ///    multiplied by the leading coefficient.
 /// 3. Subtract this from `f` (after expanding the e-monomial back as
@@ -448,6 +449,27 @@ mod tests {
     }
 
     #[test]
+    fn mul_keeps_constant_when_a_term_cancels() {
+        // Regression: (1+x)(1-x) = 1 - x^2. A prior bug removed the constant
+        // term whenever any term cancelled, yielding -x^2.
+        let p = p_271();
+        let one = MPoly::constant(fe(1), 1);
+        let x = MPoly::variable(0, 1, p.clone());
+        let one_minus_x = one.add(&x.scale(&fe(270))); // 270 = -1 mod 271
+        let prod = one.add(&x).mul(&one_minus_x);
+        assert_eq!(prod.num_terms(), 2, "expected 1 - x^2 (two terms)");
+        assert!(
+            prod.terms.contains_key(&vec![0u32]),
+            "constant term was dropped"
+        );
+        assert!(prod.terms.contains_key(&vec![2u32]), "x^2 term missing");
+        assert!(
+            !prod.terms.contains_key(&vec![1u32]),
+            "the x term should have cancelled"
+        );
+    }
+
+    #[test]
     fn elementary_symmetric_sanity() {
         let p = p_271();
         let e1 = elementary_symmetric(1, 3, p.clone());
@@ -480,7 +502,7 @@ mod tests {
 
     /// **Symmetric decomposition round-trip**: build `p = X_1² + X_2²
     /// + X_3²`, which is the power sum `p_2 = e_1² - 2 e_2`, decompose,
-    /// and verify the result.
+    ///   and verify the result.
     #[test]
     fn decompose_power_sum_2() {
         let p = p_271();

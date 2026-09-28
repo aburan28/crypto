@@ -51,12 +51,11 @@
 //!   `F_r` (the BLS12-381 scalar field has a 2^32-th root of unity,
 //!   so any domain up to size `2^32` is supported).
 
-use super::polynomial::{fr_add, fr_inv, fr_mul, fr_neg, fr_pow, fr_reduce, fr_sub, Poly};
+use super::polynomial::{fr_add, fr_inv, fr_mul, fr_neg, fr_pow, fr_sub, Poly};
 use crate::bls12_381::fq::scalar_modulus;
 use crate::hash::sha256::sha256;
-use num_bigint::{BigUint, RandBigInt};
+use num_bigint::BigUint;
 use num_traits::{One, Zero};
-use rand::rngs::OsRng;
 
 const FS_TAG: &str = "ZK-PLONK/v1";
 
