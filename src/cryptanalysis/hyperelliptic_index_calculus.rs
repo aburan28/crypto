@@ -1149,14 +1149,11 @@ pub fn hec_index_calculus_dlp(
         if collected.len() < m + 1 {
             return (None, report);
         }
-        match solve_for_logarithm(curve, &collected, m, n, params, &mut report) {
-            Some(candidate) => {
-                if &d1.scalar_mul(&candidate, curve) == d2 {
-                    k = Some(candidate);
-                    break;
-                }
+        if let Some(candidate) = solve_for_logarithm(curve, &collected, m, n, params, &mut report) {
+            if &d1.scalar_mul(&candidate, curve) == d2 {
+                k = Some(candidate);
+                break;
             }
-            None => {}
         }
         // Grow the margin geometrically; `round` bounds the total.
         extra += m / 4 + 8;
