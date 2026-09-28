@@ -90,5 +90,5 @@ printf '%s\n' "${jobs[@]}" | xargs -P "$JOBS" -I{} bash -c 'eval "$INST_SER"; ev
   echo "cpu: $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed 's/^ //') x$(nproc)"
   echo "rustc: $(rustc --version)"
   echo "commit: $(cd "$ROOT" && git rev-parse HEAD)"
-  echo "ic blake3: $(b3sum "$IC" 2>/dev/null | cut -d' ' -f1 || python3 -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest()+' (sha256; b3sum absent)')" "$IC")"
+  echo "ic sha256: $(sha256sum "$IC" | cut -d' ' -f1)"
 } >"$OUT/host.txt"

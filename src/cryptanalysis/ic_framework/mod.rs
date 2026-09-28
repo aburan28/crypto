@@ -1123,6 +1123,9 @@ mod tests {
         let mut ops = GroupOps::default();
         for p in &fb.points {
             let q = group.add(&mut ops, *p, t);
+            if group.is_identity(&q) {
+                continue; // T + T = O
+            }
             assert!(
                 fb.index_of_key(group.key(&q)).is_some(),
                 "P + T left the base for P = ({:#x}, {:#x})",

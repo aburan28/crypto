@@ -1934,7 +1934,7 @@ ranges, columns and phase shares in `RESULTS.md`.
 | `K₁/2¹⁷` | 2 | 2083 | 1742 | **0.84** | 0.54 | 4.9 | 1.76 | 990× |
 | `K₀/2²³` | 2 | 11020 | 8460 | **0.77** | 0.29 | 4.4 | 1.10 | 7700× |
 | `K₁/2²³` | 2 | 6825 | 5156 | **0.76** | 0.60 | 4.5 | 0.89 | 5800× |
-| `K₀/2³¹` | 2 | 16713 | 67025 | **4.0** | 1.64 | (not finished) | 1.06 | 63500× |
+| `K₀/2³¹` | 2 | 16713 | 67025 | **4.0** | 1.64 | 48.5 | 1.06 | 63500× |
 | `K₁/2¹⁷` | 3 | (x-m3: see RESULTS.md) | 116502 | — | — | — | 1.76 | 66000× |
 
 Reading it:
@@ -1952,10 +1952,12 @@ Reading it:
    the three repeats), which is the yield halving plus the extra
    relations through `T`, on three repeats whose ranges overlap.  It is
    not a solver effect and it does not favour the rewriting.
-3. **Cap 4 is `4.4–4.9×` worse than cap 3** at `m = 2`, on both curves
-   and all three degrees: §17's finding that the cap is absolute and
-   that the deeper matrices cost more than they prune holds in the
-   pipeline as it did in the oracle.
+3. **Cap 4 is `4.4–4.9×` worse than cap 3** at `m = 2` and `n = 17, 23`,
+   and `48×` worse at `n = 31` (`S = 811298`, 17 minutes of wall for
+   three logarithms rho finds in milliseconds): §17's finding that the
+   cap is absolute and that the deeper matrices cost more than they
+   prune holds in the pipeline as it did in the oracle, and gets worse
+   with the variable count.
 4. **Against rho every arm is three to five orders of magnitude off**,
    and the ratio grows with `n` (`990×` → `5800–7700×` → `63500×`),
    as Galbraith–Gebregiyorgis said it would (§19).  The combinatorial
