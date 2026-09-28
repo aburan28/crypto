@@ -137,7 +137,7 @@ fn cycles(max_length: usize, curves: Vec<u32>, json: Option<PathBuf>) -> Result<
         std::fs::write(&path, body).map_err(|e| format!("{}: {e}", path.display()))?;
     }
     if cert.passed {
-        println!("\nNo cycle mechanism: the iteration is equivariant, and no step multiset up to the bound closes an orbit.");
+        println!("\nNo sigma-walk step multiset up to the stated bound closes an orbit. Longer cycles and the additive table walk are outside this certificate.");
     } else {
         println!("\nA real hit or a degenerate step means a walk can loop without reaching a distinguished point: the step schedule has to change.");
     }

@@ -52,13 +52,17 @@ RECORD_V2 = np.dtype([("seed", "<u8"), ("iters", "<u8"),
                       ("counts", "<u4", 8)])
 RECORD_V2_BYTES = RECORD_V2.itemsize  # 72
 DP_MAGIC_V2 = b"ECC2KDP2"
+DP_MAGIC_TABLE3 = b"ECC2KDT3"
 DP_HEADER_BYTES = 16
 
 
 def corpusFormat(path):
     """(header bytes, record bytes, dtype) for a corpus file."""
     with open(path, "rb") as fh:
-        if fh.read(len(DP_MAGIC_V2)) == DP_MAGIC_V2:
+        magic = fh.read(len(DP_MAGIC_V2))
+        if magic == DP_MAGIC_TABLE3:
+            return DP_HEADER_BYTES, RECORD_BYTES, RECORD
+        if magic == DP_MAGIC_V2:
             return DP_HEADER_BYTES, RECORD_V2_BYTES, RECORD_V2
     return 0, RECORD_BYTES, RECORD
 
@@ -236,14 +240,18 @@ def hashBuckets(state, work):
                              for name in os.listdir(directory) if name.endswith(".bin")}
 
 
-def solve(pair, client, curve, work, extra, timeout=3600):
+def solve(pair, client, curve, work, extra, timeout=3600, walk="sigma"):
     """Hand the two colliding records to the host client and parse its answer."""
     seedA, seedB = int(pair["seedA"], 16), int(pair["seedB"], 16)
     key = int(pair["key"], 16)
     words = [(key >> (64 * i)) & ((1 << 64) - 1) for i in range(3)]
     recs = np.array([(seedA,) + tuple(words), (seedB,) + tuple(words)], dtype=RECORD)
     pairFile = os.path.join(work, "pair-%s-%s.bin" % (pair["seedA"], pair["seedB"]))
-    recs.tofile(pairFile)
+    with open(pairFile, "wb") as out:
+        if walk == "table":
+            import struct
+            out.write(DP_MAGIC_TABLE3 + struct.pack("<II", 3, RECORD_BYTES))
+        recs.tofile(out)
     cmd = [client, "--curve", str(curve), "--threads", "1", "--steps", "1", "--launches", "1",
            "--verify", "0", "--run-id", "65535", "--load", pairFile] + extra
     log("solving: " + " ".join(cmd))
@@ -282,6 +290,7 @@ def main():
                                                      "..", "ecc2k130-cpu"),
                     help="host client used to rewalk and solve (default ../ecc2k130-cpu)")
     ap.add_argument("--curve", type=int, default=131)
+    ap.add_argument("--walk", choices=("sigma", "table"), default="sigma")
     ap.add_argument("--buckets", type=int, default=4096, help="bucket count for a new work dir")
     ap.add_argument("--detect-only", action="store_true")
     ap.add_argument("--campaign", help="strict campaign.json; require committed checksummed chunks")
@@ -308,6 +317,7 @@ def main():
         if sha256File(args.client) != config["hostBinarySha256"]:
             ap.error("solver binary hash differs from pinned campaign hostBinarySha256")
         args.curve, args.dp_weight = config["curve"], config["dpWeight"]
+        args.walk = config.get("walk", "sigma")
         if config["maxIters"]:
             args.client_arg = ["--max-iters", str(config["maxIters"])]
     if args.dp_weight is not None:
@@ -354,6 +364,8 @@ def runMerge(args, campaign):
     verifyBuckets(state, args.work)
     binding = {"campaignId": campaign["id"] if campaign else None,
                "curve": args.curve, "dpWeight": args.dp_weight, "clientArgs": args.client_arg}
+    if getattr(args, "walk", "sigma") == "table":
+        binding["walk"] = "table-v3"
     if "binding" in state and not bindingCompatible(state["binding"], binding):
         raise ValueError("merge state belongs to different campaign/solve parameters")
     state["binding"] = binding
@@ -394,7 +406,7 @@ def runMerge(args, campaign):
 
     for pair in pending:
         try:
-            res = solve(pair, args.client, args.curve, args.work, args.client_arg, args.solve_timeout)
+            res = solve(pair, args.client, args.curve, args.work, args.client_arg, args.solve_timeout, getattr(args, "walk", "sigma"))
         except (OSError, subprocess.TimeoutExpired) as exc:
             pair["result"] = {"verified": False, "error": type(exc).__name__}
             saveState(statePath, state)

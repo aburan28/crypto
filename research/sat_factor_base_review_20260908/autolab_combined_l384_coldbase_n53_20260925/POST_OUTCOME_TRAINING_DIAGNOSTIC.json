@@ -1,0 +1,30 @@
+{
+  "archive_sha256": "2ff3d4587dd9a576de393abacabfc390c2f838997b5dcbcc9b1e2e4554c5c23d",
+  "checkout_head": "b3d7cf1c90473989170f8b27cb027229b99a54fd",
+  "classification": "POST_OUTCOME_DIAGNOSTIC_UNCHARGED",
+  "columns": 220,
+  "columns_visited": 219,
+  "diagnostic_source_sha256": "21f9131c7f195a7dfe37a24cc8d012b7abcd8bbd668c77ae2199a36bd269c269",
+  "first_full_rank_relation": null,
+  "full_rank_solution": null,
+  "github_run_attempt": "1",
+  "github_run_id": "36182222980",
+  "group_witnesses_replayed": 512,
+  "independent_group_source_sha256": "54767452cfbb3a4ec931c1c5e19b1500c12bc61605a43cebfdade2732770499d",
+  "independent_rank_source_sha256": "51fb3a27ca76d05c0723755f48d230c42b5ad0d898f63ec292323bdb3061ca5f",
+  "last_rank_gain_relation": 501,
+  "least_positive_column_occurrences": 1,
+  "missing_pivots": [
+    102
+  ],
+  "most_column_occurrences": 539,
+  "orbit_labels_replayed": 23320,
+  "rank": 219,
+  "relation_x_slots": 2048,
+  "representatives_replayed": 220,
+  "scope": "Read-only analysis of already sealed training bytes; no rho, point IC or cost comparison",
+  "training_raw_sha256": "5cfcc6b51d378cd7934f1ad979958832dbb0a9ba898956d1fd7faf5a30aaa1dc",
+  "zero_occurrence_columns": [
+    102
+  ]
+}

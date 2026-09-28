@@ -68,6 +68,21 @@ def panel():
     return jobs
 
 
+def reference_readiness_panel():
+    """Admission-only vectors on the five registered development cells."""
+    jobs = []
+    for n, a in ((17, 1), (19, 0), (23, 0), (23, 1), (31, 0)):
+        for mode, la in (('ic', 'dense'), ('ic', 'sparse'), ('rho', 'dense')):
+            job = dict(mode=mode, degree=n, curve_a=a, target_seeds=[2026092561],
+                algorithm_seed=2026092561, exclusive_phases=True,
+                factor_base=dict(kind='subgroup_orbits', seed=43, points=16*n),
+                config=dict(solver='pair_table', linear_algebra=la, summands=3,
+                    batch_trials=1, max_trials=65536, collection_window=0, rho_parallel_walks=4))
+            jobs.append(dict(name=f'readiness-n{n}a{a}-{mode}-{la}', job=job,
+                             expected='complete-or-incomplete'))
+    return jobs
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, required=True)
@@ -75,6 +90,7 @@ def main():
     parser.add_argument('--run-number-start', type=int, required=True)
     parser.add_argument('--failed-la-only', action='store_true')
     parser.add_argument('--sparse-core-only', action='store_true')
+    parser.add_argument('--reference-readiness', action='store_true')
     args = parser.parse_args()
     build_dir, out = args.build.resolve(), args.out.resolve()
     worker = build_dir / 'worker'
@@ -87,6 +103,9 @@ def main():
     if args.sparse_core_only:
         require(not args.failed_la_only, 'select only one supplemental panel')
         jobs = [item for item in jobs if item['name'].startswith('sparse-core-')]
+    if args.reference_readiness:
+        require(not args.failed_la_only and not args.sparse_core_only, 'select only one panel')
+        jobs = reference_readiness_panel()
     plan = allocation(args.run_number_start, [item['name'] for item in jobs])
     out.mkdir(parents=True, exist_ok=False)
     write(out / 'run-number-allocation.json', plan)
@@ -103,13 +122,15 @@ def main():
         preexec = restrict
     env = dict(PATH=os.environ['PATH'], RAYON_NUM_THREADS='1', LC_ALL='C')
     write(out / 'environment.json', dict(host=platform.uname()._asdict(), resources=resources,
+        panel='reference-readiness' if args.reference_readiness else 'scientific-controls',
         build_record_sha256=digest(build_dir / 'build-record.json'), worker_sha256=digest(worker),
         sources={name: digest(HARNESS / name) for name in ('generic_admission.py', 'generic_build.py',
         'generic_bases.py', 'generic_stages.py', 'generic_queries.py', 'generic_query_law.py',
         'generic_phases.py', 'identity.py', 'oracle.py', 'measurement.py', 'execution_ids.py',
         'goal_20260924/generic-query-law/run_controls.py',
         'goal_20260924/generic-scientific-admission/run_controls.py',
-        'goal_20260924/generic-scientific-admission/PROTOCOL.md')}))
+        'goal_20260924/generic-scientific-admission/PROTOCOL.md',
+        'goal_20260924/generic-reference-readiness/PROTOCOL.md')}))
     fixtures, results, admitted_runs = {}, [], []
     with (out / 'worker-raw.jsonl').open('x') as raw:
         for item, execution in zip(jobs, plan['executions'], strict=True):
@@ -183,7 +204,8 @@ def main():
                  'F4_F2_MAX_ROWS', 'SOLVER_SPLIT_RULE', 'IC_TEMPLATE_MEMO',
                  'IC_CACHE_LOCAL_BYTES', 'IC_REDIS_URL', 'IC_F2_BACKEND', 'IC_ARTIFACT_CACHE')
     rejected = []
-    control_job = dict(jobs[0]['job'], public_targets=fixtures[(9, 0)]['targets'])
+    first_job = jobs[0]['job']
+    control_job = dict(first_job, public_targets=fixtures[(first_job['degree'], first_job['curve_a'])]['targets'])
     for variable in overrides:
         cp = subprocess.run([str(worker)], input=json.dumps(control_job), text=True,
             capture_output=True, timeout=60, env={**env, variable: 'undeclared-control'}, preexec_fn=preexec)
@@ -195,10 +217,16 @@ def main():
                 'undeclared environment override accepted')
         rejected.append(variable)
     write(out / 'summary.json', dict(schema_version=1, controls=len(results),
+        panel='reference-readiness' if args.reference_readiness else 'scientific-controls',
+        readiness_passed=(all(row['status'] == 'PASS' and row['worker_status'] == 'complete'
+                              for row in results) if args.reference_readiness else None),
         passed=sum(row['status'] == 'PASS' for row in results), performance_qualified=False,
         environment_overrides_rejected=rejected, run_key_audit=audit_runs(admitted_runs),
         promotion_eligible=False, online_speedup=None, results=results))
     require(all(row['status'] == 'PASS' for row in results), 'admission failures retained')
+    if args.reference_readiness:
+        require(all(row['worker_status'] == 'complete' for row in results),
+                'reference-panel incomplete solves retained')
 
 
 if __name__ == '__main__':

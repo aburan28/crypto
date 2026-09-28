@@ -30,7 +30,7 @@ def scientific_ledger(values, *, unit, process_total):
     return exclusive_ledger(costs, unit=unit, process_operations=process_total, zero_reasons=reasons)
 
 
-def method_record(job, report, stages, build):
+def method_record(job, report, stages, build, *, collector_plan=None):
     cfg = effective_config(job, report)
     source = build['source_manifest_sha256']
     solver, m = cfg['solver'], cfg['summands']
@@ -40,7 +40,9 @@ def method_record(job, report, stages, build):
     recipe = stages['base']['recipe']
     base_dimension = stages['base']['construction']['nominal_dimension']
     ambient_sat = sat and m == 3 and base_dimension == job['degree']
-    collector = report['collector_dispatch']
+    # Inventory freezes declared wiring without claiming that a query ran.
+    # Measured reports always use the independently checked observed dispatch.
+    collector = report['collector_dispatch'] if collector_plan is None else collector_plan
     code = dict(pair_table='pair', enumerate='enum', f4='f4', f5='f5',
                 inherited_f4='if4', sat_xor='satxor', sat_cnf='satcnf')[solver]
     encoding = ('ambient-S4-circuit-with-finite-base-membership' if ambient_sat else

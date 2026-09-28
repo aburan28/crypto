@@ -64,6 +64,10 @@ def validate_contract(contract):
     require(contract.get('familywise_rule') == RULE, 'changed familywise confirmation rule')
     require(type(contract.get('attempt_number')) is int and 1 <= contract['attempt_number'] <= 3,
             'attempt is outside the three-round budget')
+    if contract['attempt_number'] > 1:
+        require(type(contract.get('target_exposure_schema')) is int
+                and contract['target_exposure_schema'] == 1,
+                'later rounds require sealed supplemental target exclusions')
     require(contract['seed'] == 2026092550 + contract['attempt_number'], 'changed predeclared round seed')
     validate_environment(system=contract['host']['system'], machine=contract['host']['machine'],
                          compiler=contract['compiler'], profiler=contract['profiler_version'])

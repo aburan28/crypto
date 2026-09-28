@@ -61,8 +61,17 @@ STOP_COMPARABLE = ("solving_degree_max", "max_cols_to_solution")
 
 
 def engine(r):
-    """Rows written before the tower engine existed are all `f4_fp`'s."""
-    return r.get("engine", "f4_fp")
+    """Rows written before the tower engine existed are all `f4_fp`'s. A
+    signature-engine row also names its variant (module order, rewrite order,
+    steps), so that two variants of one system are two measurements, not two
+    copies of one. Round 4's rows predate the steps field and ran the default
+    steps, by signature degree."""
+    e = r.get("engine", "f4_fp")
+    if e == "f4_fp_tower_sig":
+        e += "/" + "/".join((r.get("sig_order") or "PositionFirst",
+                             r.get("sig_rewrite") or "Ratio",
+                             r.get("sig_steps") or "SignatureDegree"))
+    return e
 
 
 def instance_key(r):
