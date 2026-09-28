@@ -261,75 +261,77 @@ bakedIntact = [True]
 # A guard-only rollout can retain the exact already-validated client image.
 # Keep this override in the image environment so remote module imports agree.
 SEED_BASE_IMAGE = os.environ.get("ECC_SEED_BASE_IMAGE", "")
+image = (
+    modal.Image.from_registry(
+        f"nvidia/cuda:{CUDA_VERSION}-devel-ubuntu24.04", add_python="3.12"
+    )
+    .entrypoint([])
+    # Containers re-import this module; preserve the settings that selected
+    # their image and baked architecture rather than reverting to defaults.
+    .env({"ECC_CUDA_VERSION": CUDA_VERSION, "ECC_GPU": DEFAULT_GPU,
+          "ECC_CPU_THREADS": str(CPU_THREADS),
+          "ECC_PACKED_SINGLE_PRODUCT": PACKED_SINGLE_PRODUCT,
+          "ECC_PACKED_CACHE_DENOM": PACKED_CACHE_DENOM,
+          "ECC_PACKED_BY_VALUE": PACKED_BY_VALUE,
+          "ECC_PACKED_PERM_SIGMA": PACKED_PERM_SIGMA,
+          "ECC_PACKED_POLY_CHAIN": PACKED_POLY_CHAIN,
+          "ECC_PACKED_UNROLL_INV": PACKED_UNROLL_INV,
+          "ECC_PACKED_PAIR_PRODUCTS": PACKED_PAIR_PRODUCTS,
+          "ECC_PACKED_POLY_STATE": PACKED_POLY_STATE,
+          "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE,
+          "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT,
+          "ECC_PACKED_CLMAD": PACKED_CLMAD,
+          "ECC_PACKED_CLMAD_SQUARE": PACKED_CLMAD_SQUARE,
+          "ECC_PACKED_KARAT3": PACKED_KARAT3,
+          "ECC_PACKED_COMPACT_STATE": PACKED_COMPACT_STATE,
+          "ECC_PACKED_SHARED_SIGMA": PACKED_SHARED_SIGMA,
+          "ECC_PACKED_TOP_CLMAD": PACKED_TOP_CLMAD,
+          "ECC_WALK_TABLE": WALK_TABLE,
+          "ECC_TABLE_PIVOT_BYTES": TABLE_PIVOT_BYTES,
+          "ECC_PACKED_WEIGHTED_PREFIX": PACKED_WEIGHTED_PREFIX,
+          "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE,
+          "ECC_WITNESS": WITNESS})
+    .apt_install("build-essential")
+    .pip_install("awscli")
+    .add_local_dir(
+        LOCAL,
+        remote_path=REMOTE,
+        copy=True,
+        ignore=["ecc2k130-cpu", "ecc2k130-cpu-v3", "ecc2k130-cpu-v4", "ecc2k130",
+                "build/*", "__pycache__", "*.pyc"],
+    )
+    .run_commands(
+        # Regenerate before building so the baked binary's leaf is known to be
+        # BAKED["leaf"] rather than whatever headers the local checkout held.
+        f"cd {REMOTE}/codegen && python3 gen.py --out ../generated "
+        f"--leaf {BAKED['leaf']}",
+        # x86-64-v3 keeps the host binary runnable on any Modal machine; the
+        # GPU client picks its own word width on the device. The v4 (AVX-512)
+        # build is for the CPU walker, chosen at runtime by chooseCpuBinary
+        # when the host has every flag it needs; ./ecc2k130-cpu stays the v3
+        # build that validate's --test and solveCorpus run.
+        f"cd {REMOTE} && make cpu MARCH=x86-64-v3 && cp ecc2k130-cpu {CPU_BINARIES['v3']} "
+        f"&& make -B cpu MARCH=x86-64-v4 && cp ecc2k130-cpu {CPU_BINARIES['v4']} "
+        f"&& cp {CPU_BINARIES['v3']} ecc2k130-cpu",
+        f'cd {REMOTE} && make gpu ARCH="{GENCODE}" BATCH={BAKED["batch"]} '
+        f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]} '
+        f'PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT} PACKED_CACHE_DENOM={PACKED_CACHE_DENOM} '
+        f'PACKED_BY_VALUE={PACKED_BY_VALUE} PACKED_PERM_SIGMA={PACKED_PERM_SIGMA} '
+        f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
+        f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
+        f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
+        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES} WITNESS={WITNESS}',
+    )
+)
+# The full image stays the module-level `image` assignment (codegen tests read
+# it); a guard-only rollout replaces it with the exact already-validated one.
 if SEED_BASE_IMAGE:
     image = (modal.Image.from_id(SEED_BASE_IMAGE)
         .pip_install("awscli")
         .env({"ECC_SEED_BASE_IMAGE": SEED_BASE_IMAGE})
         .add_local_file(LOCAL / "aws" / "seed_registry.py",
                         REMOTE + "/aws/seed_registry.py", copy=True))
-else:
-    image = (
-        modal.Image.from_registry(
-            f"nvidia/cuda:{CUDA_VERSION}-devel-ubuntu24.04", add_python="3.12"
-        )
-        .entrypoint([])
-        # Containers re-import this module; preserve the settings that selected
-        # their image and baked architecture rather than reverting to defaults.
-        .env({"ECC_CUDA_VERSION": CUDA_VERSION, "ECC_GPU": DEFAULT_GPU,
-              "ECC_CPU_THREADS": str(CPU_THREADS),
-              "ECC_PACKED_SINGLE_PRODUCT": PACKED_SINGLE_PRODUCT,
-              "ECC_PACKED_CACHE_DENOM": PACKED_CACHE_DENOM,
-              "ECC_PACKED_BY_VALUE": PACKED_BY_VALUE,
-              "ECC_PACKED_PERM_SIGMA": PACKED_PERM_SIGMA,
-              "ECC_PACKED_POLY_CHAIN": PACKED_POLY_CHAIN,
-              "ECC_PACKED_UNROLL_INV": PACKED_UNROLL_INV,
-              "ECC_PACKED_PAIR_PRODUCTS": PACKED_PAIR_PRODUCTS,
-              "ECC_PACKED_POLY_STATE": PACKED_POLY_STATE,
-              "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE,
-              "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT,
-              "ECC_PACKED_CLMAD": PACKED_CLMAD,
-              "ECC_PACKED_CLMAD_SQUARE": PACKED_CLMAD_SQUARE,
-              "ECC_PACKED_KARAT3": PACKED_KARAT3,
-              "ECC_PACKED_COMPACT_STATE": PACKED_COMPACT_STATE,
-              "ECC_PACKED_SHARED_SIGMA": PACKED_SHARED_SIGMA,
-              "ECC_PACKED_TOP_CLMAD": PACKED_TOP_CLMAD,
-              "ECC_WALK_TABLE": WALK_TABLE,
-              "ECC_TABLE_PIVOT_BYTES": TABLE_PIVOT_BYTES,
-              "ECC_PACKED_WEIGHTED_PREFIX": PACKED_WEIGHTED_PREFIX,
-              "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE,
-              "ECC_WITNESS": WITNESS})
-        .apt_install("build-essential")
-        .pip_install("awscli")
-        .add_local_dir(
-            LOCAL,
-            remote_path=REMOTE,
-            copy=True,
-            ignore=["ecc2k130-cpu", "ecc2k130-cpu-v3", "ecc2k130-cpu-v4", "ecc2k130",
-                    "build/*", "__pycache__", "*.pyc"],
-        )
-        .run_commands(
-            # Regenerate before building so the baked binary's leaf is known to be
-            # BAKED["leaf"] rather than whatever headers the local checkout held.
-            f"cd {REMOTE}/codegen && python3 gen.py --out ../generated "
-            f"--leaf {BAKED['leaf']}",
-            # x86-64-v3 keeps the host binary runnable on any Modal machine; the
-            # GPU client picks its own word width on the device. The v4 (AVX-512)
-            # build is for the CPU walker, chosen at runtime by chooseCpuBinary
-            # when the host has every flag it needs; ./ecc2k130-cpu stays the v3
-            # build that validate's --test and solveCorpus run.
-            f"cd {REMOTE} && make cpu MARCH=x86-64-v3 && cp ecc2k130-cpu {CPU_BINARIES['v3']} "
-            f"&& make -B cpu MARCH=x86-64-v4 && cp ecc2k130-cpu {CPU_BINARIES['v4']} "
-            f"&& cp {CPU_BINARIES['v3']} ecc2k130-cpu",
-            f'cd {REMOTE} && make gpu ARCH="{GENCODE}" BATCH={BAKED["batch"]} '
-            f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]} '
-            f'PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT} PACKED_CACHE_DENOM={PACKED_CACHE_DENOM} '
-            f'PACKED_BY_VALUE={PACKED_BY_VALUE} PACKED_PERM_SIGMA={PACKED_PERM_SIGMA} '
-            f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
-            f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
-            f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
-            f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES} WITNESS={WITNESS}',
-        )
-    )
+
 
 # Nsight Compute lives in its own image.  It is about two gigabytes and only the
 # profiler wants it, so putting it in the main image would slow every bench and
