@@ -78,7 +78,7 @@ pub struct Config {
     pub tables: usize,
     /// Row words per block from which rows are cleared in parallel.
     pub parallel_words: usize,
-    /// Use the widest supported vector row update (AVX2 or AVX-512).
+    /// Use AVX-512 when available, or an explicitly requested AVX2 update.
     pub simd: bool,
 }
 
@@ -682,8 +682,6 @@ fn simd_kind(enabled: bool) -> SimdKind {
             }
             if std::arch::is_x86_feature_detected!("avx512f") {
                 SimdKind::Avx512
-            } else if std::arch::is_x86_feature_detected!("avx2") {
-                SimdKind::Avx2
             } else {
                 SimdKind::Scalar
             }
@@ -693,7 +691,7 @@ fn simd_kind(enabled: bool) -> SimdKind {
     SimdKind::Scalar
 }
 
-/// Whether a vector row update can run on this CPU.
+/// Whether a vector row update is selected in this process.
 pub fn simd_available() -> bool {
     !matches!(simd_kind(true), SimdKind::Scalar)
 }
