@@ -5683,10 +5683,7 @@ impl<'a> ProjectedFactorBase<'a> {
     }
 
     /// Start a relation-fed factor-base logarithm solve using this map.
-    pub fn log_solver<'b>(
-        &'b self,
-        opts: &'b KoblitzIcOptions,
-    ) -> Option<FactorBaseLogSolver<'b>> {
+    pub fn log_solver<'b>(&'b self, opts: &'b KoblitzIcOptions) -> Option<FactorBaseLogSolver<'b>> {
         FactorBaseLogSolver::with_projected(self.kc, self.fb, opts, &self.map)
     }
 
@@ -5697,14 +5694,7 @@ impl<'a> ProjectedFactorBase<'a> {
         opts: &'b KoblitzIcOptions,
         pair: Option<&'b PairSumTable>,
     ) -> Option<IndividualLogSolver<'b>> {
-        IndividualLogSolver::with_projected(
-            self.kc,
-            self.fb,
-            table,
-            opts,
-            pair,
-            &self.map,
-        )
+        IndividualLogSolver::with_projected(self.kc, self.fb, table, opts, pair, &self.map)
     }
 }
 
