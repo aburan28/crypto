@@ -248,7 +248,7 @@ pub fn build_orbit_factor_base(
                 &curve.p - &y
             };
             let cx = canonical_orbit_x(&x, zeta, &curve.p);
-            if !seen.contains_key(&cx) {
+            if let std::collections::hash_map::Entry::Vacant(slot) = seen.entry(cx.clone()) {
                 let zeta_x = (&x * zeta) % &curve.p;
                 let zeta_sq_x = (&zeta_x * zeta) % &curve.p;
                 let entry = OrbitEntry {
@@ -260,7 +260,7 @@ pub fn build_orbit_factor_base(
                     canonical_x: cx.clone(),
                     orbit_x: [x.clone(), zeta_x, zeta_sq_x],
                 };
-                seen.insert(cx, out.len());
+                slot.insert(out.len());
                 out.push(entry);
             }
         }

@@ -15,9 +15,12 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
+import shutil
 import subprocess
 import sys
-from datetime import datetime, timezone
+import time
+from datetime import datetime, timedelta, timezone
 
 DEFAULT_CAMPAIGN = "ecc2k-130"
 SCHEMA_VERSION = 1
@@ -28,35 +31,266 @@ CLAIM_BOUNDARY = (
     "solver has checked [k]P = Q."
 )
 
-SNAPSHOT_SQL = r"""
--- One pass over distinguished_points, not three.
---
--- The previous form ran three independent LATERAL subqueries against this
--- table -- totals, per-worker, hourly -- so the planner scanned it three
--- times per snapshot. That was affordable at a few million rows and is not
--- at 30.6M: the step took 41-72s through 2026-09-14T15:49Z, 129s at 16:18Z,
--- broke the SSH hop at 262s, and ran 510s once keepalives let it finish --
--- 30s under the remote timeout. The table only grows.
---
--- `grouped` aggregates once by (worker_id, hour); every figure below is
--- derived from it. The rolling windows stay exact because they are counted
--- as FILTER aggregates during that same pass rather than recovered from
--- hour buckets, which would round `last hour` to a bucket boundary and pull
--- rows older than the 7-day cutoff into the first hourly bucket.
-WITH grouped AS (
-  SELECT
-    worker_id,
-    date_trunc('hour', found_at) AS hour,
-    count(*)::bigint AS dps,
-    min(found_at) AS first_dp_at,
-    max(found_at) AS last_dp_at,
-    count(*) FILTER (WHERE found_at > now() - interval '1 hour')::bigint AS dps_last_hour,
-    count(*) FILTER (WHERE found_at > now() - interval '24 hours')::bigint AS dps_last_day,
-    count(*) FILTER (WHERE found_at > now() - interval '7 days')::bigint AS dps_last_week
+# Lifetime aggregates used to come from one GROUP BY over distinguished_points.
+# That was affordable at a few million rows and is not at ~187 M: the walker
+# hop took 524 s on 2026-09-18T11:25Z and the next run died at the 540 s remote
+# timeout, so Pages froze on that snapshot and the dashboard's stale banner is
+# what a visitor sees. An index on (campaign_id, found_at) helps the ingest's
+# *count* query (#432) and does not help this one, because grouping by
+# worker_id still heap-fetches every row.
+#
+# The durable answer is the one #432 named and deferred: a rollup maintained
+# from INSERTs. Another btree on distinguished_points does not get Pages
+# under 540s: the ingest already builds (campaign_id, found_at), and this
+# query still has to read worker_id for every row. A covering index would
+# still be O(corpus) every 15 minutes. snapshot.py creates the rollup,
+# backfills it once, and installs a statement-level trigger so the ingest's
+# INSERT ... SELECT keeps the buckets current without a code deploy on that
+# host. Later snapshots read the rollup.
+#
+# #448 landed that design and the live page still did not move. The merged
+# backfill set statement_timeout to 800s, took SHARE on distinguished_points,
+# and grouped by (worker_id, found_at) — one row per object. PostgreSQL
+# cancelled it at 800s, rolled back, and left rho_dp_meta.ready false, so
+# every later publish retried the same scan. The hop copies this file each
+# run, so the fix is here: (1) write an index-only fallback *before* the
+# backfill so a later SIGTERM still leaves status.json to scp, (2) backfill
+# one hour at a time through (campaign_id, found_at), resume from
+# rho_dp_meta.backfill_through, never lock the heap.
+
+ENSURE_SQL = r"""
+CREATE TABLE IF NOT EXISTS rho_dp_hour (
+  campaign_id text NOT NULL,
+  hour        timestamptz NOT NULL,
+  worker_id   text NOT NULL,
+  dps         bigint NOT NULL,
+  first_at    timestamptz NOT NULL,
+  last_at     timestamptz NOT NULL,
+  PRIMARY KEY (campaign_id, hour, worker_id)
+);
+CREATE TABLE IF NOT EXISTS rho_dp_recent (
+  campaign_id text NOT NULL,
+  worker_id   text NOT NULL,
+  found_at    timestamptz NOT NULL,
+  dps         bigint NOT NULL,
+  PRIMARY KEY (campaign_id, worker_id, found_at)
+);
+CREATE TABLE IF NOT EXISTS rho_dp_meta (
+  campaign_id   text PRIMARY KEY,
+  ready         boolean NOT NULL DEFAULT false,
+  backfilled_at timestamptz
+);
+ALTER TABLE rho_dp_meta ADD COLUMN IF NOT EXISTS backfill_through timestamptz;
+CREATE INDEX IF NOT EXISTS rho_dp_hour_hour
+  ON rho_dp_hour (campaign_id, hour);
+CREATE INDEX IF NOT EXISTS rho_dp_recent_found_at
+  ON rho_dp_recent (campaign_id, found_at);
+
+CREATE OR REPLACE FUNCTION rho_dp_rollup_insert() RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $fn$
+BEGIN
+  INSERT INTO rho_dp_hour (campaign_id, hour, worker_id, dps, first_at, last_at)
+  SELECT campaign_id,
+         date_trunc('hour', found_at),
+         worker_id,
+         count(*)::bigint,
+         min(found_at),
+         max(found_at)
+  FROM new_rows
+  GROUP BY 1, 2, 3
+  ON CONFLICT (campaign_id, hour, worker_id) DO UPDATE SET
+    dps = rho_dp_hour.dps + EXCLUDED.dps,
+    first_at = LEAST(rho_dp_hour.first_at, EXCLUDED.first_at),
+    last_at = GREATEST(rho_dp_hour.last_at, EXCLUDED.last_at);
+
+  INSERT INTO rho_dp_recent (campaign_id, worker_id, found_at, dps)
+  SELECT campaign_id, worker_id, found_at, count(*)::bigint
+  FROM new_rows
+  GROUP BY 1, 2, 3
+  ON CONFLICT (campaign_id, worker_id, found_at) DO UPDATE SET
+    dps = rho_dp_recent.dps + EXCLUDED.dps;
+  RETURN NULL;
+END;
+$fn$;
+
+DO $tg$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger t
+    JOIN pg_class c ON c.oid = t.tgrelid
+    WHERE t.tgname = 'rho_dp_rollup_insert'
+      AND c.relname = 'distinguished_points'
+      AND NOT t.tgisinternal
+  ) THEN
+    EXECUTE $create$
+      CREATE TRIGGER rho_dp_rollup_insert
+      AFTER INSERT ON distinguished_points
+      REFERENCING NEW TABLE AS new_rows
+      FOR EACH STATEMENT
+      EXECUTE PROCEDURE rho_dp_rollup_insert()
+    $create$;
+  END IF;
+END
+$tg$;
+"""
+
+READY_SQL = r"""
+SELECT COALESCE(
+  (SELECT ready FROM rho_dp_meta WHERE campaign_id = '{{campaign}}'),
+  false
+);
+"""
+
+INIT_META_SQL = r"""
+INSERT INTO rho_dp_meta (campaign_id, ready)
+VALUES ('{{campaign}}', false)
+ON CONFLICT (campaign_id) DO NOTHING;
+"""
+
+BOUNDS_SQL = r"""
+SET statement_timeout = '30s';
+SELECT
+  (SELECT to_char(
+     date_trunc('hour', min(found_at)) AT TIME ZONE 'UTC',
+     'YYYY-MM-DD"T"HH24:MI:SS"Z"'
+   )
+   FROM distinguished_points
+   WHERE campaign_id = '{{campaign}}'),
+  to_char(
+    date_trunc('hour', now()) AT TIME ZONE 'UTC',
+    'YYYY-MM-DD"T"HH24:MI:SS"Z"'
+  ),
+  (SELECT to_char(
+     backfill_through AT TIME ZONE 'UTC',
+     'YYYY-MM-DD"T"HH24:MI:SS"Z"'
+   )
+   FROM rho_dp_meta
+   WHERE campaign_id = '{{campaign}}');
+"""
+
+# One hour of distinguished_points, using the #432 (campaign_id, found_at)
+# index. Peak hours on this campaign are ~10 M rows, not 187 M. No SHARE
+# lock: the trigger is already live, so ON CONFLICT adds buckets ingest
+# wrote after this transaction's snapshot. DELETE + scan of one closed
+# hour is how a mid-hour trigger start gets the pre-trigger rows without
+# wiping hours already finished.
+#
+# REPEATABLE READ: the scan must not see rows the trigger already counted
+# after DELETE. READ COMMITTED + ON CONFLICT ADD double-counts ingest that
+# commits in that window, and backfill_through would freeze the inflation.
+# rho_dp_recent keeps the object's found_at, not the hour bucket: READ_SQL
+# slides a 1h/24h window over that column, and an hour timestamp would make
+# dps_last_hour drop to the current clock hour (IDLE_OR_STALE after :00).
+BACKFILL_SQL = r"""
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+SET LOCAL statement_timeout = '300s';
+SET LOCAL lock_timeout = '15s';
+DELETE FROM rho_dp_hour
+ WHERE campaign_id = '{{campaign}}'
+   AND hour = '{{hour}}'::timestamptz;
+DELETE FROM rho_dp_recent
+ WHERE campaign_id = '{{campaign}}'
+   AND found_at >= '{{hour}}'::timestamptz
+   AND found_at < '{{hour}}'::timestamptz + interval '1 hour';
+WITH src AS MATERIALIZED (
+  SELECT campaign_id, worker_id, found_at
   FROM distinguished_points
-  WHERE campaign_id = %(campaign)s
-  GROUP BY 1, 2
+  WHERE campaign_id = '{{campaign}}'
+    AND found_at >= '{{hour}}'::timestamptz
+    AND found_at < '{{hour}}'::timestamptz + interval '1 hour'
+), ins_hour AS (
+  INSERT INTO rho_dp_hour (campaign_id, hour, worker_id, dps, first_at, last_at)
+  SELECT
+    campaign_id,
+    date_trunc('hour', found_at),
+    worker_id,
+    count(*)::bigint,
+    min(found_at),
+    max(found_at)
+  FROM src
+  GROUP BY 1, 2, 3
+  ON CONFLICT (campaign_id, hour, worker_id) DO UPDATE SET
+    dps = rho_dp_hour.dps + EXCLUDED.dps,
+    first_at = LEAST(rho_dp_hour.first_at, EXCLUDED.first_at),
+    last_at = GREATEST(rho_dp_hour.last_at, EXCLUDED.last_at)
+), ins_recent AS (
+  INSERT INTO rho_dp_recent (campaign_id, worker_id, found_at, dps)
+  SELECT campaign_id, worker_id, found_at, count(*)::bigint
+  FROM src
+  WHERE found_at > now() - interval '7 days'
+  GROUP BY 1, 2, 3
+  ON CONFLICT (campaign_id, worker_id, found_at) DO UPDATE SET
+    dps = rho_dp_recent.dps + EXCLUDED.dps
 )
+UPDATE rho_dp_meta
+SET backfill_through = '{{hour}}'::timestamptz
+WHERE campaign_id = '{{campaign}}';
+COMMIT;
+"""
+
+MARK_READY_SQL = r"""
+UPDATE rho_dp_meta
+SET ready = true, backfilled_at = now()
+WHERE campaign_id = '{{campaign}}'
+  AND backfill_through >= date_trunc('hour', now());
+"""
+
+# Campaign row plus collisions. Cheap. The DP totals are summed from
+# HOUR_COUNT_SQL so a 187 M-row GROUP BY never sits on the walker.
+CAMPAIGN_SQL = r"""
+SET statement_timeout = '15s';
+SELECT json_build_object(
+  'campaign_id', c.campaign_id,
+  'curve_id', c.curve_id,
+  'dp_mask_bits', c.dp_mask_bits,
+  'campaign_created_at', c.created_at,
+  'collisions', COALESCE(k.collisions, 0),
+  'latest_collision_at', k.latest_collision_at
+)
+FROM rho_campaigns c
+LEFT JOIN LATERAL (
+  SELECT
+    count(*)::bigint AS collisions,
+    max(detected_at) AS latest_collision_at
+  FROM rho_collisions x
+  WHERE x.campaign_id = c.campaign_id
+) k ON true
+WHERE c.campaign_id = '{{campaign}}';
+"""
+
+# One hour through (campaign_id, found_at). Index-only: no worker_id, no
+# GROUP BY. The 2026-09-18T18:56Z publish died ~200s into a full-table
+# GROUP BY hour — walker SSH reset, scp of this run's file never happened.
+# Peak hours are ~10 M rows; a count of one hour is seconds and logs a line
+# so the hop is not silent.
+HOUR_COUNT_SQL = r"""
+SET statement_timeout = '60s';
+SELECT
+  count(*)::bigint,
+  min(found_at),
+  max(found_at),
+  count(*) FILTER (WHERE found_at > now() - interval '1 hour')::bigint,
+  count(*) FILTER (WHERE found_at > now() - interval '24 hours')::bigint
+FROM distinguished_points
+WHERE campaign_id = '{{campaign}}'
+  AND found_at >= '{{hour}}'::timestamptz
+  AND found_at < '{{hour}}'::timestamptz + interval '1 hour';
+"""
+
+# Name kept so tests and greps still find the fallback path. The published
+# fallback is CAMPAIGN_SQL plus one HOUR_COUNT_SQL per hour.
+FALLBACK_SQL = HOUR_COUNT_SQL
+
+PRUNE_SQL = r"""
+DELETE FROM rho_dp_recent
+WHERE found_at < now() - interval '8 days';
+"""
+
+READ_SQL = r"""
 SELECT json_build_object(
   'campaign_id', c.campaign_id,
   'curve_id', c.curve_id,
@@ -67,59 +301,75 @@ SELECT json_build_object(
   'workers', COALESCE(s.workers, 0),
   'first_dp_at', s.first_dp,
   'last_dp_at', s.last_dp,
-  'dps_last_hour', COALESCE(s.dps_last_hour, 0),
-  'dps_last_day', COALESCE(s.dps_last_day, 0),
+  'dps_last_hour', COALESCE(r.dps_last_hour, 0),
+  'dps_last_day', COALESCE(r.dps_last_day, 0),
   'collisions', COALESCE(k.collisions, 0),
   'latest_collision_at', k.latest_collision_at,
   'per_worker', COALESCE(w.per_worker, '[]'::json),
-  'hourly', COALESCE(h.hourly, '[]'::json)
+  'hourly', COALESCE(h.hourly, '[]'::json),
+  'rollup_ready', true
 )
 FROM rho_campaigns c
+JOIN rho_dp_meta m ON m.campaign_id = c.campaign_id AND m.ready
 LEFT JOIN LATERAL (
   SELECT
     sum(dps)::bigint AS dps,
     count(DISTINCT worker_id)::bigint AS workers,
-    min(first_dp_at) AS first_dp,
-    max(last_dp_at) AS last_dp,
-    sum(dps_last_hour)::bigint AS dps_last_hour,
-    sum(dps_last_day)::bigint AS dps_last_day
-  FROM grouped
+    min(first_at) AS first_dp,
+    max(last_at) AS last_dp
+  FROM rho_dp_hour
+  WHERE campaign_id = c.campaign_id
 ) s ON true
+LEFT JOIN LATERAL (
+  SELECT
+    COALESCE(sum(dps) FILTER (WHERE found_at > now() - interval '1 hour'), 0)::bigint AS dps_last_hour,
+    COALESCE(sum(dps) FILTER (WHERE found_at > now() - interval '24 hours'), 0)::bigint AS dps_last_day
+  FROM rho_dp_recent
+  WHERE campaign_id = c.campaign_id
+) r ON true
 LEFT JOIN LATERAL (
   SELECT
     count(*)::bigint AS collisions,
     max(detected_at) AS latest_collision_at
-  FROM rho_collisions r
-  WHERE r.campaign_id = c.campaign_id
+  FROM rho_collisions x
+  WHERE x.campaign_id = c.campaign_id
 ) k ON true
 LEFT JOIN LATERAL (
-  SELECT json_agg(row_to_json(x) ORDER BY x.dps DESC) AS per_worker
+  SELECT json_agg(row_to_json(p) ORDER BY p.dps DESC) AS per_worker
   FROM (
     SELECT
       worker_id,
       sum(dps)::bigint AS dps,
-      min(first_dp_at) AS first_dp_at,
-      max(last_dp_at) AS last_dp_at
-    FROM grouped
+      min(first_at) AS first_dp_at,
+      max(last_at) AS last_dp_at
+    FROM rho_dp_hour
+    WHERE campaign_id = c.campaign_id
     GROUP BY worker_id
     ORDER BY sum(dps) DESC
     LIMIT 32
-  ) x
+  ) p
 ) w ON true
 LEFT JOIN LATERAL (
   SELECT json_agg(row_to_json(y) ORDER BY y.hour) AS hourly
   FROM (
-    SELECT
-      hour,
-      sum(dps_last_week)::bigint AS dps
-    FROM grouped
+    SELECT hour, sum(dps)::bigint AS dps
+    FROM rho_dp_hour
+    WHERE campaign_id = c.campaign_id
+      AND hour > now() - interval '7 days'
     GROUP BY hour
-    HAVING sum(dps_last_week) > 0
+    HAVING sum(dps) > 0
     ORDER BY hour
   ) y
 ) h ON true
-WHERE c.campaign_id = %(campaign)s;
+WHERE c.campaign_id = '{{campaign}}';
 """
+
+# Kept so a grep for the old one-pass scan still finds the backfill, which
+# is the remaining distinguished_points read that groups by worker_id.
+SNAPSHOT_SQL = BACKFILL_SQL
+
+HOUR_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:00:00Z$")
+SESSION_PREAMBLE = "SET statement_timeout = 0;\n"
 
 
 FORBIDDEN_PUBLIC_KEYS = (
@@ -168,6 +418,10 @@ def campaign_state(row):
         return "COLLISION_RECORDED"
     if int(row.get("dps_last_hour") or 0) > 0:
         return "COLLECTING"
+    outstanding = int(row.get("ingest_outstanding") or 0)
+    unrecognised = int(row.get("ingest_unrecognised") or 0)
+    if outstanding > 0 or unrecognised > 0:
+        return "INGEST_BEHIND"
     if int(row.get("dps") or 0) > 0:
         return "IDLE_OR_STALE"
     return "EMPTY"
@@ -219,54 +473,329 @@ def normalize(row, campaign, source):
     return snapshot
 
 
-def psql_json(database_url, campaign):
-    sql = SNAPSHOT_SQL.replace("%(campaign)s", "'%s'" % campaign.replace("'", "''"))
+def sql_campaign(campaign):
+    if not campaign or any(ch in campaign for ch in "\n\r;"):
+        raise SystemExit("refusing campaign id %r" % campaign)
+    return campaign.replace("'", "''")
+
+
+def sql_hour(hour):
+    if isinstance(hour, datetime):
+        text = hour.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:00:00Z")
+    else:
+        text = str(hour)
+    if not HOUR_RE.match(text):
+        raise SystemExit("refusing hour %r" % text)
+    return text
+
+
+def parse_hour(text):
+    text = (text or "").strip()
+    if not text:
+        return None
+    return datetime.strptime(sql_hour(text), "%Y-%m-%dT%H:00:00Z").replace(tzinfo=timezone.utc)
+
+
+def parse_bounds(text):
+    lines = [line for line in (text or "").strip().splitlines() if line]
+    if not lines:
+        return None, None, None
+    parts = lines[-1].split("|")
+    while len(parts) < 3:
+        parts.append("")
+    return parse_hour(parts[0]), parse_hour(parts[1]), parse_hour(parts[2])
+
+
+def parse_hour_counts(text):
+    lines = [line for line in (text or "").strip().splitlines() if line]
+    if not lines:
+        return 0, None, None, 0, 0
+    parts = lines[-1].split("|")
+    while len(parts) < 5:
+        parts.append("")
+
+    def count(value):
+        return int(value) if value else 0
+
+    return count(parts[0]), parts[1] or None, parts[2] or None, count(parts[3]), count(parts[4])
+
+
+def hours_to_backfill(start_hour, now_hour, through):
+    if start_hour is None or now_hour is None:
+        return []
+    hour = start_hour
+    if through is not None:
+        hour = through + timedelta(hours=1)
+    out = []
+    while hour <= now_hour:
+        out.append(hour)
+        hour += timedelta(hours=1)
+    return out
+
+
+def render_sql(template, campaign, hour=None):
+    sql = template.replace("{{campaign}}", sql_campaign(campaign))
+    if hour is not None:
+        sql = sql.replace("{{hour}}", sql_hour(hour))
+    return sql
+
+
+def psql_script(database_url, sql, tuples_only=True):
+    cmd = ["psql", database_url, "-v", "ON_ERROR_STOP=1", "-q"]
+    if tuples_only:
+        cmd += ["-At"]
     proc = subprocess.run(
-        ["psql", database_url, "-v", "ON_ERROR_STOP=1", "-At", "-c", sql],
+        cmd + ["-f", "-"],
+        input=SESSION_PREAMBLE + sql,
         capture_output=True,
         text=True,
         check=False,
     )
+    if proc.stderr:
+        sys.stderr.write(proc.stderr)
+        if not proc.stderr.endswith("\n"):
+            sys.stderr.write("\n")
+        sys.stderr.flush()
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or "psql failed")
-    line = proc.stdout.strip().splitlines()
-    if not line:
-        raise RuntimeError("campaign %s not found" % campaign)
-    return json.loads(line[0])
+    return proc.stdout
 
 
-def psycopg_json(database_url, campaign):
-    import psycopg
-
-    # Named parameter, bound once per occurrence: the query references the
-    # campaign in both the aggregate scan and the campaign row lookup, so
-    # positional binding would need the value passed twice.
-    with psycopg.connect(database_url) as conn:
-        with conn.cursor() as cur:
-            cur.execute("SET default_transaction_read_only = on")
-            cur.execute(SNAPSHOT_SQL, {"campaign": campaign})
-            row = cur.fetchone()
-    if not row or row[0] is None:
-        raise RuntimeError("campaign %s not found" % campaign)
-    return row[0]
+def rollup_ready_from_text(text):
+    token = (text or "").strip().splitlines()
+    if not token:
+        return False
+    return token[-1].lower() in ("t", "true", "1")
 
 
-def take_snapshot(database_url, campaign, source="direct"):
+def is_lock_race(err):
+    text = str(err).lower()
+    return (
+        "serialize" in text
+        or "deadlock" in text
+        or "lock timeout" in text
+        or "lock_not_available" in text
+    )
+
+
+def parse_json_row(text, what):
+    lines = [line for line in (text or "").strip().splitlines() if line.startswith("{")]
+    if not lines:
+        raise RuntimeError(what)
+    return json.loads(lines[-1])
+
+
+def snapshot_budget_s():
+    raw = os.environ.get("RHO_SNAPSHOT_BUDGET_S", "1400")
+    try:
+        return max(60.0, float(raw))
+    except ValueError:
+        return 1400.0
+
+
+def write_snapshot_file(path, snapshot):
+    text = json.dumps(snapshot, indent=2, sort_keys=True) + "\n"
+    if path == "-":
+        sys.stdout.write(text)
+        return
+    directory = os.path.dirname(os.path.abspath(path))
+    os.makedirs(directory or ".", exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write(text)
+    os.replace(tmp, path)
+
+
+def backfill_one_hour(database_url, campaign, hour):
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            psql_script(
+                database_url,
+                render_sql(BACKFILL_SQL, campaign, hour=hour),
+                tuples_only=False,
+            )
+            return
+        except RuntimeError as err:
+            last_err = err
+            if attempt < 3 and is_lock_race(err):
+                sys.stderr.write(
+                    "rho_status: backfill %s attempt %d lost a lock race; retrying\n"
+                    % (sql_hour(hour), attempt)
+                )
+                continue
+            raise
+    if last_err is not None:
+        raise last_err
+
+
+def backfill_hours(database_url, campaign, started, budget):
+    psql_script(database_url, render_sql(INIT_META_SQL, campaign), tuples_only=False)
+    bounds_text = psql_script(
+        database_url, render_sql(BOUNDS_SQL, campaign), tuples_only=True
+    )
+    start_hour, now_hour, through = parse_bounds(bounds_text)
+    hours = hours_to_backfill(start_hour, now_hour, through)
+    if not hours:
+        sys.stderr.write("rho_status: no distinguished_points hours to backfill\n")
+        psql_script(database_url, render_sql(MARK_READY_SQL, campaign), tuples_only=False)
+        return True
+    sys.stderr.write(
+        "rho_status: backfilling %d hour(s) from %s through %s\n"
+        % (len(hours), sql_hour(hours[0]), sql_hour(hours[-1]))
+    )
+    for index, hour in enumerate(hours, 1):
+        leftover = budget - (time.monotonic() - started)
+        if leftover < 90:
+            sys.stderr.write(
+                "rho_status: backfill budget reached after %d/%d hours; will resume\n"
+                % (index - 1, len(hours))
+            )
+            return False
+        sys.stderr.write(
+            "rho_status: backfill hour %s (%d/%d, %.0fs left)\n"
+            % (sql_hour(hour), index, len(hours), leftover)
+        )
+        sys.stderr.flush()
+        backfill_one_hour(database_url, campaign, hour)
+    psql_script(database_url, render_sql(MARK_READY_SQL, campaign), tuples_only=False)
+    return True
+
+
+def load_fallback(database_url, campaign, started, budget):
+    """Lifetime totals by counting one hour at a time on the found_at index."""
+    meta = parse_json_row(
+        psql_script(
+            database_url, render_sql(CAMPAIGN_SQL, campaign), tuples_only=True
+        ),
+        "campaign %s missing from rho_campaigns" % campaign,
+    )
+    bounds_text = psql_script(
+        database_url, render_sql(BOUNDS_SQL, campaign), tuples_only=True
+    )
+    start_hour, now_hour, _through = parse_bounds(bounds_text)
+    hours = hours_to_backfill(start_hour, now_hour, None)
+    total = last_hour = last_day = 0
+    first_at = last_at = None
+    hourly = []
+    week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+    sys.stderr.write(
+        "rho_status: fallback counting %d hour(s) from %s through %s\n"
+        % (
+            len(hours),
+            sql_hour(hours[0]) if hours else "-",
+            sql_hour(hours[-1]) if hours else "-",
+        )
+    )
+    sys.stderr.flush()
+    for index, hour in enumerate(hours, 1):
+        leftover = budget - (time.monotonic() - started)
+        if leftover < 90:
+            raise RuntimeError(
+                "fallback budget exhausted after %d/%d hours" % (index - 1, len(hours))
+            )
+        sys.stderr.write(
+            "rho_status: fallback hour %s (%d/%d, %.0fs left)\n"
+            % (sql_hour(hour), index, len(hours), leftover)
+        )
+        sys.stderr.flush()
+        dps, hour_min, hour_max, dps_last_hour, dps_last_day = parse_hour_counts(
+            psql_script(
+                database_url,
+                render_sql(HOUR_COUNT_SQL, campaign, hour=hour),
+                tuples_only=True,
+            )
+        )
+        total += dps
+        last_hour += dps_last_hour
+        last_day += dps_last_day
+        if dps <= 0:
+            continue
+        if hour >= week_ago:
+            hourly.append({"hour": sql_hour(hour), "dps": dps})
+        if first_at is None and hour_min:
+            first_at = hour_min
+        if hour_max:
+            last_at = hour_max
+    meta.update(
+        {
+            "dps": total,
+            "workers": 0,
+            "first_dp_at": first_at,
+            "last_dp_at": last_at,
+            "dps_last_hour": last_hour,
+            "dps_last_day": last_day,
+            "per_worker": [],
+            "hourly": hourly,
+            "rollup_ready": False,
+        }
+    )
+    return meta
+
+
+def psql_json(database_url, campaign, publish=None):
+    started = time.monotonic()
+    budget = snapshot_budget_s()
+    sys.stderr.write("rho_status: ensuring rho_dp rollup tables and insert trigger\n")
+    psql_script(database_url, ENSURE_SQL, tuples_only=False)
+    ready_text = psql_script(database_url, render_sql(READY_SQL, campaign), tuples_only=True)
+    if rollup_ready_from_text(ready_text):
+        sys.stderr.write("rho_status: rollup ready, skipping distinguished_points scan\n")
+    else:
+        # Publish the index-only document first so a later timeout still
+        # leaves a file the hop can scp. Then spend the rest of the budget
+        # on hour chunks; the next run resumes.
+        sys.stderr.write(
+            "rho_status: rollup not ready; publishing index-only fallback first\n"
+        )
+        sys.stderr.flush()
+        fallback = load_fallback(database_url, campaign, started, budget)
+        if publish is not None:
+            publish(fallback)
+        try:
+            backfill_hours(database_url, campaign, started, budget)
+        except RuntimeError as err:
+            sys.stderr.write("rho_status: backfill interrupted: %s\n" % err)
+            return fallback
+        ready_text = psql_script(
+            database_url, render_sql(READY_SQL, campaign), tuples_only=True
+        )
+        if not rollup_ready_from_text(ready_text):
+            sys.stderr.write(
+                "rho_status: rollup still not ready; keeping the index-only snapshot\n"
+            )
+            return fallback
+    psql_script(database_url, PRUNE_SQL, tuples_only=False)
+    text = psql_script(database_url, render_sql(READ_SQL, campaign), tuples_only=True)
+    return parse_json_row(
+        text, "campaign %s rollup not ready (backfill did not complete)" % campaign
+    )
+
+
+def take_snapshot(database_url, campaign, source="direct", out=None):
     if not database_url:
         raise SystemExit("DATABASE_URL is required")
-    try:
-        import psycopg  # noqa: F401
+    # The walker hop has psql and often no psycopg. Prefer psql so the
+    # ensure/backfill statements run as separate sessions with COMMIT
+    # between the trigger becoming visible and each hour chunk.
+    if not shutil.which("psql"):
+        raise SystemExit("psql is required to take a snapshot")
 
-        row = psycopg_json(database_url, campaign)
-        driver = "psycopg"
-    except ImportError:
-        row = psql_json(database_url, campaign)
-        driver = "psql"
-    if isinstance(row, str):
-        row = json.loads(row)
-    snapshot = normalize(row, campaign, source)
-    snapshot["query_driver"] = driver
-    return snapshot
+    snapshot = {"query_driver": "psql"}
+
+    def publish(row):
+        if isinstance(row, str):
+            row = json.loads(row)
+        built = normalize(row, campaign, source)
+        built["query_driver"] = "psql"
+        snapshot.clear()
+        snapshot.update(built)
+        if out:
+            write_snapshot_file(out, built)
+        return built
+
+    row = psql_json(database_url, campaign, publish=publish)
+    return publish(row)
 
 
 def main(argv=None):
@@ -276,14 +805,10 @@ def main(argv=None):
     parser.add_argument("--out", default="-")
     parser.add_argument("--source", default="direct")
     args = parser.parse_args(argv)
-    snapshot = take_snapshot(args.database_url, args.campaign, args.source)
-    text = json.dumps(snapshot, indent=2, sort_keys=True) + "\n"
+    out = None if args.out == "-" else args.out
+    snapshot = take_snapshot(args.database_url, args.campaign, args.source, out=out)
     if args.out == "-":
-        sys.stdout.write(text)
-    else:
-        os.makedirs(os.path.dirname(os.path.abspath(args.out)) or ".", exist_ok=True)
-        with open(args.out, "w", encoding="utf-8") as fh:
-            fh.write(text)
+        write_snapshot_file("-", snapshot)
     return 0
 
 

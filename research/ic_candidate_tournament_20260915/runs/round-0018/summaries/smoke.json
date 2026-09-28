@@ -1,0 +1,145 @@
+{
+  "comparisons": [
+    {
+      "candidate": "block",
+      "candidate_over_baseline": 0.8276802564895671,
+      "ci95": [
+        0.8009267809395872,
+        0.8584169337492368
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9419705221701616,
+      "native_wall_ci95": [
+        0.9210215864025817,
+        0.9621356986990043
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9533308927005286,
+        "n17a1": 0.9740961768956754,
+        "n19a0": 0.92137364349831,
+        "n23a0": 0.967494017763679,
+        "n23a1": 0.9368586091657161,
+        "n31a0": 0.9007831279723577
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 6,
+      "per_cell": {
+        "n13a0": 0.8829805599616364,
+        "n17a1": 0.8453447461777278,
+        "n19a0": 0.8495438488803837,
+        "n23a0": 0.8105412655946628,
+        "n23a1": 0.8141584638531849,
+        "n31a0": 0.7682820772686255
+      },
+      "speedup": 1.2081960299999073
+    },
+    {
+      "candidate": "column",
+      "candidate_over_baseline": 0.8204559622480762,
+      "ci95": [
+        0.7889663493351676,
+        0.8463141132254559
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9224931913166828,
+      "native_wall_ci95": [
+        0.900808307622196,
+        0.944199779569836
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.8846632501234358,
+        "n17a1": 0.9360741888666029,
+        "n19a0": 0.9190046110371313,
+        "n23a0": 0.9625923613477145,
+        "n23a1": 0.9443336749591382,
+        "n31a0": 0.8908512246953402
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 6,
+      "per_cell": {
+        "n13a0": 0.8608004721679147,
+        "n17a1": 0.8393799541201984,
+        "n19a0": 0.8405757854765816,
+        "n23a0": 0.821835242873894,
+        "n23a1": 0.8176450718285009,
+        "n31a0": 0.7473845272644902
+      },
+      "speedup": 1.2188344603651453
+    },
+    {
+      "candidate": "both",
+      "candidate_over_baseline": 0.8143894251817774,
+      "ci95": [
+        0.7814074212148735,
+        0.8437052098029504
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9009281674326624,
+      "native_wall_ci95": [
+        0.8812152692696469,
+        0.9238071920729429
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9183554386542108,
+        "n17a1": 0.8929510183495636,
+        "n19a0": 0.897505193055951,
+        "n23a0": 0.8975737708467681,
+        "n23a1": 0.9456040607078715,
+        "n31a0": 0.8560243153201484
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 6,
+      "per_cell": {
+        "n13a0": 0.8607857169205799,
+        "n17a1": 0.8393715971435854,
+        "n19a0": 0.8405697676517846,
+        "n23a0": 0.8051802677710547,
+        "n23a1": 0.8106557928512081,
+        "n31a0": 0.7359360090262356
+      },
+      "speedup": 1.227913783110326
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 19.275916115002474,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 1.2163580855573362,
+    "ci95": [
+      0.988106173885964,
+      1.4670175412677708
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 6,
+    "native_wall_candidate_over_baseline": 1.0411107752904496,
+    "native_wall_ci95": [
+      0.9696080396554653,
+      1.1133874882098216
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.0345620529270125,
+      "n17a1": 1.102302077284436,
+      "n19a0": 1.1673483166882208,
+      "n23a0": 1.107158919210881,
+      "n23a1": 0.9535614369479922,
+      "n31a0": 0.9060775578939543
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 6,
+    "per_cell": {
+      "n13a0": 1.2875133719428973,
+      "n17a1": 1.3541791150797464,
+      "n19a0": 1.6368573715344852,
+      "n23a0": 1.4934253297974913,
+      "n23a1": 0.8172623527584989,
+      "n31a0": 0.9297902190269393
+    },
+    "speedup": 0.8221263227282279
+  },
+  "runs": 90,
+  "stage": "smoke",
+  "verified_runs": 90
+}

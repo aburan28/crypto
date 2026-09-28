@@ -121,6 +121,14 @@ at 8.5 B/s. The nearest thing to a direct measurement agrees — doubling
 resident blocks per SM (minBlocks 4) cost 34%
 ([../BATCH-TUNING.md](../BATCH-TUNING.md)).
 
+On a host without that systemd unit — a RunPod MIG box, a rented 8×B200 —
+one process is one GPU. `ECC_ALL_GPUS=1 python3 aws/worker.py` (or
+`aws/start_all_gpus.sh`) starts one supervisor per `nvidia-smi -L` device.
+B200 and MIG names omit the 385,024-worker 6000 preset and let `autoThreads`
+fill the slice; putting the 188-SM grid on one of eight 24 GB MIGs is how a
+pod shows ~1/8 utilization. The client default is `--verify 0`: a cutoff-32
+CPU replay is a ~2^28-step scalar walk during which the GPU used to sit idle.
+
 ## How the pieces fit
 
 ```
@@ -154,6 +162,15 @@ resident blocks per SM (minBlocks 4) cost 34%
   A slot whose checkpoint the client refuses (exit 6) is *retired*, never
   restarted from its start points: that would walk the same seeds again and
   re-report points already in the corpus.
+  A third registry lives in RDS Postgres -- the database the dashboard
+  already runs -- and is chosen with `ECC_SLOT_BACKEND=rds`: a claim is then
+  one conditional `UPDATE`, and every lease carries a fence token that
+  rejects writes from an owner the slot has moved past, which no lease length
+  can do on its own. See [`controlplane/README.md`](controlplane/README.md)
+  for the invariants it keeps across RDS, ElastiCache and S3. The live
+  campaign is unchanged: switching an existing fleet is a cutover, and a
+  cutover two backends could both serve during is the double claim the
+  registry exists to prevent.
 * **Checkpoints.** The client writes one every `checkpointEvery` seconds and
   on SIGTERM. The supervisor uploads a hard-link snapshot after every tick.
   A replacement worker resumes whichever of the local or S3 checkpoint is
@@ -308,7 +325,13 @@ bucket, same slots, same `dp/`; step 5 does not change.
 
 `campaign.json` lives in the bucket and is read by every worker at start
 and again on the 60 s heartbeat. Change `restartHours`, `uploadEvery` or
-`verify` freely. Never change `workers`, `batch`, `blockThreads`,
+`verify` freely. Raise `maxIters` with `./rollout.sh max-iters N`, which
+rewrites that one field of the bucket copy: it is a restart guard, not part
+of the walk, so a raise keeps every point and checkpoint, and each worker
+takes it at its next client restart (`restartHours`, or an `activate`).
+Never lower it (that cuts trails under way) and never upload the
+repository's copy over the bucket's (it carries `storageProtocol`, and the
+live slots' checkpoints would be refused; `WALK-CONSTANT.md` §11.4). Never change `workers`, `batch`, `blockThreads`,
 `minBlocks`, `curve` or `dpWeight` once any slot exists: the first four
 make every existing checkpoint unloadable (each slot would be retired and
 its in-flight work lost), the last two break the collision guarantee.
@@ -425,7 +448,10 @@ every boot after it.
   via [`.github/workflows/ecc2k130-status.yml`](../../.github/workflows/ecc2k130-status.yml).
   That job uses IAM user `ecc2k130-status-gha` access keys stored as
   GitHub secrets (`scripts/rho_status/gha_iam_user.sh`) and hops through
-  the tagged `rho-ecc2k-walker` host. It does not open RDS to the internet.
+  the tagged `rho-ecc2k-walker` host. If that instance is not running, it
+  republishes the ingest host's `status.json` from the status bucket
+  instead of leaving Pages on the last successful hop. It does not open
+  RDS to the internet.
 * `status.py` sums live workers' rates, each slot's checkpointed iterations ×
   **that slot's own** walk count (survives restarts), uploaded points, and the
   fraction of 2^60.9. The walk count is not a campaign constant: a checkpoint
@@ -473,10 +499,75 @@ every boot after it.
 ### The store's ingest path (`dp_ingest.py`)
 
 The public dashboard reads Postgres (`rho-dp`), not S3, so something has to
-copy `s3://$BUCKET/dp/` into it. `dp_ingest.py` does, on its own instance
-(`Name=rho-dp-ingest`), as a systemd unit with `Restart=always`, publishing
-`status.json` to the status bucket and its journal to
+copy `s3://$BUCKET/dp/` into it. `dp_ingest.py` does that work; how it is
+deployed is a separate question.
+
+**General path (any host).** From a machine with AWS credentials and a route
+to Postgres, run:
+
+```bash
+cd ecc2k130/aws
+./ingest.sh ensure-access    # once per new egress IP: opens rho-dp to this /32
+./ingest.sh                  # poll forever
+./ingest.sh once             # one pass, then exit
+./ingest.sh pending          # backlog report, writes nothing
+```
+
+Or from the Modal tree: `./run.sh ingest` (same script; sets
+`INGEST_ENSURE_ACCESS=1` to add this host's egress /32 before connecting).
+Set `DATABASE_URL` to skip Secrets Manager, or `RHO_DB_HOST` plus the
+`rho/dp-rds` secret (connections use `sslmode=require` by default). Requires
+the same IAM scope as the ingest instance profile: read `dp/`, read the
+secret, write the status bucket. Multiple ingesters at once are safe.
+
+From outside the VPC, `rho-dp` must be publicly reachable (`ensure-access`
+enables that and opens the RDS security group). Hosts with unstable egress
+(Cloud Agents, some NAT pools) may need several /32 rules over time; the
+VPC ingest host avoids that.
+
+**VPC host (classic deployment).** `./ingest_host.sh up` launches
+`Name=rho-dp-ingest` inside the VPC as a systemd unit with `Restart=always`,
+publishing `status.json` to the status bucket and its journal to
 `s3://$BUCKET/logs/rho-ingest-<instance>/ingest.log` every two minutes.
+Use this when EC2 is available and you prefer a private RDS endpoint with no
+public IP allowlisting.
+
+**Scheduled Lambda (no host).** `./ingest_lambda.sh up` deploys the same
+program as a Lambda on a two-minute EventBridge schedule, running one
+`--once` pass per invocation. The ingest loop never needed a resident
+process: the three properties below — idempotent, no state outside the
+database, bounded passes — are exactly what makes a scheduled invocation
+equivalent to a daemon, and they were already true.
+
+```bash
+./ingest_lambda.sh preflight   # FIRST: can the VPC reach S3/Secrets/CloudWatch?
+./ingest_lambda.sh package     # vendor psycopg, build a 5 MB zip
+./ingest_lambda.sh up          # function + role + schedule, idempotent
+./ingest_lambda.sh status      # schedule, errors, feed age, backlog
+./ingest_lambda.sh down        # disable the schedule
+```
+
+`preflight` is not optional and is the one step that can reject the whole
+approach: a function in a private subnet reaches S3, Secrets Manager and
+CloudWatch only through a NAT gateway or VPC endpoints, where the EC2 host
+got there by living in the VPC with an instance profile. It reports what is
+missing and what to add; setting `DATABASE_URL` removes the Secrets Manager
+leg entirely.
+
+Cut over with both running — concurrent ingesters are safe, so overlapping
+proves the new path before the old one goes away — then
+`./ingest_host.sh retire <id>`. Rollback is `./ingest_lambda.sh down &&
+./ingest_host.sh up`, with no code revert, because neither `ingest.sh` nor
+`ingest_host.sh` changed.
+
+Reserved concurrency is 1 and the schedule retries 0 times. A trigger that
+arrives mid-pass is therefore dropped rather than queued, which is harmless —
+the next tick resumes from `dp_ingest_progress` — so **`Throttles` is expected
+while a backlog drains and must not be alarmed on.** Alarm on `Errors`, and
+above all on the age of the published `status.json`
+(`scripts/rho_status/check_feed_age.py`): removing the host removes "the box
+died", but a scheduled function failing on every invocation is exactly as
+quiet unless something is watching the number itself.
 
 **The store is a derived view.** `dp/` is the corpus, `merge.py` is what
 searches it for collisions, and `distinguished_points` can be dropped and
@@ -564,15 +655,24 @@ mechanism here and a vacuum per deploy is not a cost this table can carry.
 With both in place, measured at 137 M rows on the host deployed at 21:05Z: the
 vacuum took 42 s, the per-object aggregate fell from ~3 min to 46 s, and the
 snapshot from over six minutes to **142.8 s** (`published status.json in
-142.8s`, which is why that line carries a duration). It is still O(corpus):
-the durable answer when it next hurts is a maintained total and hourly table
-updated inside the ingest transaction, since `found_at` is constant per
-object, and that would make the snapshot O(1). Not done — the 30-minute
-spacing buys the room.
+142.8s`, which is why that line carries a duration). It is still O(corpus)
+for this program's own `publishStatus`. The Pages snapshot no longer is:
+`scripts/rho_status/snapshot.py` backfills `rho_dp_hour` / `rho_dp_recent`
+once and installs a statement-level insert trigger on
+`distinguished_points`, so the ingest's existing `INSERT ... SELECT` keeps
+the buckets current without a code deploy on this host. Later Pages runs
+read the rollup. This program's `--status-every` (default 180 s) still buys
+room for the count query until an ingest-host deploy starts reading the
+same tables.
 
-While a snapshot runs, this program is not ingesting — the loop is
-pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh
-is the 15-minute Actions job, with this copy as the second one. The corpus-wide per-object
+While a snapshot runs, this program used to stop ingesting — the loop was
+pass, publish, pass — so a slow `pending()` aggregate or a long drain froze
+`status.json` for as long as the pass took. Status now publishes on its own
+`StatusPublisher` thread every `--status-every` (default 180 s), re-reading
+checkpoints from S3 and the rollup from Postgres while the main loop keeps
+ingesting. `--status-every` still matches the 3-minute Actions refresh
+cadence, with this copy in the status bucket as what the job reads
+when the walker hop is down. The corpus-wide per-object
 aggregate in `pending()` is the other scan, and it is cached for half an hour
 (`COUNTS_TTL`) because it answers a question about the pre-`dp_ingest_progress`
 era, which stopped growing when that table appeared.

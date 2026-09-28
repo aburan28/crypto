@@ -813,7 +813,7 @@ validation.
 - NIST FIPS 186-4 (current), 186-5 (in preparation)
 - RFC 7748 (Curve25519/Curve448), RFC 8032 (Ed25519/Ed448)
 - IETF Crypto Forum Research Group recommendations
-- This investigation: `RESEARCH_P256_ISOGENY_COVER.md`,
+- This investigation: `research/notes/cm-isogeny/RESEARCH_P256_ISOGENY_COVER.md`,
   `MAINSTREAM_CURVE_AUDIT.pdf`, `P256_PROPERTIES.md`
 
 ---

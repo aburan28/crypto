@@ -4,6 +4,7 @@
 #   make test L=4       a different subspace dimension
 #   make ladder         l = 3,4,5 in sequence
 #   make bench2         CUDA binary (needs nvcc)
+#   make bench-host     host timing of the field and one full sweep
 #   make clean
 #
 # The CPU tests compile the *same* .cuh headers with g++, so a green
@@ -19,7 +20,7 @@ ARCH     ?= sm_90
 NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo
 
 # n = 3l keeps the decomposition probability near 1/3! as the factor
-# base grows, which is the ladder RESEARCH_SEMAEV_DECOMPOSITION.md runs.
+# base grows, which is the ladder research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md runs.
 L   ?= 5
 YES ?= 4
 NO  ?= 4
@@ -28,7 +29,7 @@ GEN   := params.h vectors.h
 HDRS  := gf2n.cuh decomp.cuh
 TESTS := test_cpu_main
 
-.PHONY: all test ladder bench2 clean gen
+.PHONY: all test ladder bench2 bench-host clean gen
 all: test
 
 gen: $(GEN)
@@ -54,8 +55,14 @@ ladder:
 	done
 	@$(MAKE) --no-print-directory clean >/dev/null
 
+bench_host_main: bench_host.cpp $(HDRS) $(GEN)
+	$(CXX) $(CXXFLAGS) -O3 -I. -o $@ $<
+
+bench-host: bench_host_main
+	./bench_host_main
+
 bench2: bench2.cu $(HDRS) $(GEN)
 	$(NVCC) $(NVCCFLAGS) -I. -o $@ $<
 
 clean:
-	rm -f $(GEN) $(TESTS) bench2
+	rm -f $(GEN) $(TESTS) bench2 bench_host_main

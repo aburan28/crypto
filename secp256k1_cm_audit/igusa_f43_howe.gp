@@ -7,7 +7,7 @@
 
 \\ Pre-set parisize to 256MB so igusa_clebsch_complete.gp's resize is a no-op
 \\ (PARI 2.15.4: default(parisize,...) during read() aborts the read if it
-\\  actually resizes the heap — documented in RESEARCH_AUTOLAB_LOG.md 2026-06-12)
+\\  actually resizes the heap — documented in research/notes/index-calculus/RESEARCH_AUTOLAB_LOG.md 2026-06-12)
 default(parisize, 256000000);
 read("igusa_clebsch_complete.gp");
 

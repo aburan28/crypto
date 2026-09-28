@@ -65,6 +65,8 @@ class BuildTests(unittest.TestCase):
             "status/walk-forest.json",
             "status/walk-forest-gf2-23.json",
             "status/walk-forest.js",
+            "status/how.html",
+            "status/rho-toy.js",
             "status/status.json",
             "status/history.json",
             "status.json",
@@ -185,6 +187,30 @@ class BuildTests(unittest.TestCase):
             self.assertIn('CAMPAIGN = "ecc2k-130";', page, name)
         self.assertIn("EXPECTED_ITERATIONS_LOG2 = 60.9;", dashboard)
 
+    def test_pages_merge_the_live_feed_with_the_pages_snapshot(self):
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        landing = read(os.path.join(self.out, "index.html"))
+        for name, page in (("dashboard", dashboard), ("landing", landing)):
+            self.assertIn("LIVE_FEED_URL", page, name)
+            self.assertIn("function mergeSnapshots", page, name)
+            self.assertIn("function publishedMs", page, name)
+            self.assertIn("function attachRateFromHistory", page, name)
+            # A frozen ingest feed must not overwrite a fresher Pages stamp:
+            # that is what made a healthy publisher look dead on 2026-09-20.
+            self.assertIn("pagesPub > livePub", page, name)
+        self.assertIn("loadStatus", dashboard)
+        how = read(os.path.join(self.out, "status", "how.html"))
+        self.assertIn("rho-toy.js", how)
+        self.assertIn("ecc2k130/examples/rho_toy.py", how)
+        toy = read(os.path.join(self.out, "status", "rho-toy.js"))
+        self.assertIn("global.RhoToy", toy)
+
+    def test_dashboard_drops_live_figures_when_the_snapshot_is_stale(self):
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn("walking_slots: 0", dashboard)
+        self.assertIn("delete status.walk_rate", dashboard)
+        self.assertIn("Past STALE_AFTER they are not current", dashboard)
+
     def test_both_pages_read_the_measured_rate_through_one_shared_block(self):
         # Two pages render the same snapshot's rate, so a fix applied to one
         # copy and not the other publishes two different walk rates for one
@@ -207,6 +233,7 @@ class BuildTests(unittest.TestCase):
             "function measuredRate",
             "function walkingSlots",
             "function formatRate",
+            "function campaignDisplayState",
         ):
             self.assertIn(name, dashboard, name)
         # B it/s is the unit the campaign quotes a GPU in (ecc2k130/aws/README.md).
@@ -229,10 +256,46 @@ class BuildTests(unittest.TestCase):
         self.assertIn('id="live-gpus"', landing)
         self.assertIn(">GPUs running<", landing)
         self.assertIn("walkingSlots(status)", landing)
+        self.assertIn("campaignDisplayState(status)", landing)
         self.assertNotIn("live-workers", landing)
         # Lifetime contributors stay in the workers table, not the GPU card.
         self.assertIn('id="workers-note"', dashboard)
         self.assertIn("Lifetime distinguished-point contributors", dashboard)
+
+    def test_skip_link_is_clipped_until_keyboard_focus(self):
+        # left:-9999px parked "Skip to status" in a horizontal scrollport
+        # iOS could pan to, and :focus (not :focus-visible) un-hid it when a
+        # WebView focused the first link. The hash also has to land: without
+        # tabindex on #main the jump is a no-op on iOS.
+        for rel, label in (
+            ("status/index.html", "Skip to status"),
+            ("status/how.html", "Skip to explanation"),
+            ("index.html", "Skip to content"),
+        ):
+            page = read(os.path.join(self.out, rel))
+            self.assertIn(label, page, rel)
+            self.assertIn('href="#main"', page, rel)
+            self.assertIn('<main id="main" tabindex="-1">', page, rel)
+        for rel in ("status/style.css", "assets/site.css"):
+            css = read(os.path.join(self.out, rel))
+            self.assertNotIn("left: -9999px", css, rel)
+            self.assertIn(".skip:focus-visible", css, rel)
+            self.assertIn("clip-path: inset(50%)", css, rel)
+            self.assertNotIn(".skip:focus {", css, rel)
+
+    def test_dashboard_does_not_claim_zero_workers_on_the_ingest_feed(self):
+        # The live document is dp_ingest.py; it has no per_worker. Treating
+        # only source === "ingest-status-feed" as ingest-only made the table
+        # say "No workers have reported points" on 272M DPs.
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn('indexOf("dp_ingest")', dashboard)
+        self.assertIn("ingest-status-feed", dashboard)
+        self.assertIn("Number(status && status.dps) > 0", dashboard)
+        self.assertIn("Per-worker counts need the walker hop", dashboard)
+        css = read(os.path.join(self.out, "status", "style.css"))
+        empty = css[css.index("td.empty"):]
+        empty = empty[:empty.index("}")]
+        self.assertIn("white-space: normal", empty)
 
     def test_pages_prefer_the_counted_iteration_total_over_the_derived_one(self):
         # The derived total is the point count times the interval for
@@ -259,6 +322,46 @@ class BuildTests(unittest.TestCase):
                 body.index("ITERATIONS_PER_DP_LOG2"),
                 "%s applies the fallback interval before checking for a counted total" % rel,
             )
+
+    def test_dashboard_coordinate_table_cites_the_priced_note(self):
+        # The coordinate-system table prices one update per point
+        # representation. Every figure on it comes from
+        # ecc2k130/LAMBDA-PROJECTIVE.md and nowhere else (AGENTS.md section 7:
+        # the page cites, never computes), so pin each carry-less figure on
+        # the page to that note, the page's link to the note, and the landing
+        # page's entry pointing at both.
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        landing = read(os.path.join(self.out, "index.html"))
+        # the note bolds its reference row, so drop the markers before matching
+        note = read(os.path.join(ROOT, "ecc2k130", "LAMBDA-PROJECTIVE.md")).replace("*", "")
+        self.assertIn('id="h-coords"', dashboard)
+        section = dashboard[dashboard.index('id="h-coords"'):dashboard.index('id="h-workers"')]
+        figures = re.findall(r'<td class="num clmad">([^<]+)</td>', section)
+        self.assertGreaterEqual(len(figures), 8, figures)
+        for figure in figures:
+            self.assertIn("| %s |" % figure, note, "dashboard prices %s clmad, which the note does not carry" % figure)
+        self.assertIn("ecc2k130/LAMBDA-PROJECTIVE.md", section)
+        self.assertIn("ecc2k130/LAMBDA-PROJECTIVE.md", landing)
+        self.assertIn('href="./status/#h-coords"', landing)
+
+    def test_status_workflow_reruns_the_pins_when_a_cited_document_changes(self):
+        # These tests pin the published pages to documents outside the site
+        # tree. The workflow that runs them is path-filtered, so a document
+        # it does not list can change without the pins running, and the page
+        # drifts from what it cites until the next site edit. Keep every
+        # document a pin reads in both the pull_request and push filters.
+        workflow = read(os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml"))
+        cited = ("ecc2k130/LAMBDA-PROJECTIVE.md", "ecc2k130/aws/README.md")
+        for trigger in ("pull_request", "push"):
+            # The trigger's block is everything indented deeper than its key,
+            # up to the next key at the same depth (the triggers are adjacent,
+            # with no blank line between them) or the next top-level key.
+            match = re.search(r"^  %s:\n((?:    .*\n|\n)*)" % trigger, workflow, re.M)
+            self.assertIsNotNone(match, "no %s trigger in the status workflow" % trigger)
+            paths = re.findall(r'-\s+"([^"]+)"', match.group(1))
+            self.assertIn("docs/ecc2k130-status/**", paths, trigger)
+            for doc in cited:
+                self.assertIn(doc, paths, "%s does not list %s" % (trigger, doc))
 
     def test_dashboard_publishes_the_rate_and_the_span_it_measured(self):
         # A rate without its window is not checkable: 15 minutes of
@@ -343,7 +446,10 @@ class BuildTests(unittest.TestCase):
         self.assertIn('label(gx, H - 22, xLabel(work, mark), "middle", "tick")', page)
         self.assertIn('label(gx + 4, y(p) - 6, mark, "start", "tick")', page)
         css = read(os.path.join(self.out, "status", "style.css"))
-        self.assertIn(".odds-chart svg", css)
+        # The override has to outrank `.chart svg { min-width: 560px }`; a bare
+        # `.odds-chart svg` ties on specificity and loses on source order,
+        # which pushed the curve out past the card edge on a phone.
+        self.assertIn(".chart.odds-chart svg", css)
         self.assertIn("min-width: 0", css)
         # Walk forest fits the column on a phone. A 640px min-width made the
         # caption lay out at that width, so every line clipped; the SVG
@@ -589,7 +695,7 @@ class BuildTests(unittest.TestCase):
 
     def test_sitemap_and_robots_point_at_the_published_urls(self):
         sitemap = read(os.path.join(self.out, "sitemap.xml"))
-        for path in ("/", "/scoreboard/", "/status/"):
+        for path in ("/", "/scoreboard/", "/status/", "/status/how.html"):
             self.assertIn("<loc>%s%s</loc>" % (BASE_URL, path), sitemap)
         self.assertIn("<lastmod>2026-01-01</lastmod>", sitemap)
         self.assertIn("Sitemap: %s/sitemap.xml" % BASE_URL, read(os.path.join(self.out, "robots.txt")))

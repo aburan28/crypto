@@ -1,7 +1,7 @@
 //! **Partial-decomposition residual walks — measurement panel.**
 //!
 //! Companion to `crypto_lib::cryptanalysis::residual_walk` and
-//! `RESEARCH_RESIDUAL_WALKS.md`.  Compares five ways of turning residual
+//! `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`.  Compares five ways of turning residual
 //! collisions into index-calculus relations on toy prime-order curves,
 //! all sharing one factor base, one operation counter, one verifier and
 //! one rank tracker:

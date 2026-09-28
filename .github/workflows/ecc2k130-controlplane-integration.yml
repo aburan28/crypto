@@ -1,0 +1,45 @@
+# The control plane against real Postgres, Redis and S3.
+#
+# `ecc2k130-certification.yml` runs test_controlplane.py, which drives the
+# same code against SQLite, a fake cache and a directory so that it passes
+# anywhere.  This one runs test_integration.py, whose job is the things that
+# only show up against the real servers: the advisory lock two hosts contend
+# for, a bigint column, a TTL the server owns, a client library's own retry
+# defaults, and a listing longer than one S3 page.
+name: ECC2K control-plane integration
+on:
+  pull_request:
+    paths:
+      - 'ecc2k130/aws/**'
+      - '.github/workflows/ecc2k130-controlplane-integration.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ecc2k130/aws/**'
+      - '.github/workflows/ecc2k130-controlplane-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install the clients production imports lazily
+        run: make -C ecc2k130 test-integration-deps
+      # The same script a developer runs, so the docker path is the one CI
+      # exercises and the compose file cannot rot unnoticed.
+      - name: Postgres, Redis and MinIO, and the suite against them
+        run: make -C ecc2k130 test-integration
+      - name: Service logs
+        if: failure()
+        run: |
+          cd ecc2k130/aws/integration
+          docker compose -f docker-compose.yml logs --no-color --tail 200 || true
+      - name: Stop the services
+        if: always()
+        run: ecc2k130/aws/integration/services.sh down || true

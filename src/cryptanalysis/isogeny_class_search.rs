@@ -1,7 +1,7 @@
 //! # EXP-R6 / lever **L5** — the curve-side lever: can an isogeny make the
 //! Gröbner basis easier?
 //!
-//! `RESEARCH_DEGREE_REDUCTION.md` measures four levers (L1–L4), all of
+//! `research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md` measures four levers (L1–L4), all of
 //! which change the *presentation* of one fixed curve's decomposition
 //! ideal.  This module measures the one lever that changes the **curve**:
 //! the ECDLP transports along an isogeny `φ: E → E'` of degree coprime to
@@ -99,14 +99,19 @@
 //! ```text
 //!   S₄ = [A₁(X₃x_R)² + A₂(X₁X₂)²]²                 a₆-free, Boolean degree 3
 //!      + (A₁B₂ + A₂B₁)(B₁(X₃x_R)² + B₂(X₁X₂)²)     a₆-free, Boolean degree 6
-//!      + a₆  · (A₁B₂ + A₂B₁)(B₁ + B₂)              Boolean degree ≤ 5
+//!      + a₆  · (A₁B₂ + A₂B₁)(B₁ + B₂)              Boolean degree 4
 //!      + a₆² · (A₁ + A₂)²                          Boolean degree 1
 //! ```
 //!
 //! with `A₁ = (X₁+X₂)², B₁ = X₁X₂, A₂ = (X₃+x_R)², B₂ = X₃x_R`, and Boolean
 //! degrees counted with squaring free (`F_2`-linear), so `A₁, A₂, B₂` are
 //! degree 1 and `B₁` is degree 2.  The top Boolean degree is 6 and it is
-//! `a₆`-free; every `a₆`-carrying term sits in degree `≤ 5`.  The identity is verified, not asserted — see
+//! `a₆`-free; every `a₆`-carrying term sits at degree `4` or below, exactly
+//! two degrees under the top — the same two-degree gap EXP-R6b then computed
+//! at every `m ≤ 5` (`research/notes/ecc2k130/RESEARCH_ISOGENY_CLASS_SEARCH.md` §2C).
+//! An earlier revision of this block wrote `≤ 5` here, a product-of-factor-degrees
+//! bound: Boolean degree is `Σ wt(eᵢ)`, so `A₂B₁ · B₁` collapses rather than
+//! adding.  The identity is verified, not asserted — see
 //! `s4_a6_expansion_is_quadratic_with_subleading_coefficients`.
 //!
 //! **What this does and does not cover.**  The leading-form ideal is
@@ -169,7 +174,7 @@
 //! subfields but too strong as a claim about the mechanism: subfield-*like*
 //! bases do not need one — quasi-subfield polynomials
 //! (Huang–Kosters–Petit–Yeo–Yun) supply them at prime `n`, and
-//! `RESEARCH_QUASI_SUBFIELD.md` exhibits genuine non-subfield examples over
+//! `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md` exhibits genuine non-subfield examples over
 //! `F_{2^7}`.  The field-invariance form above does not depend on that question
 //! either way.  For `n = 131` the census in that note happens to find no
 //! quasi-subfield cell either, so the mechanism is doubly out of reach here.

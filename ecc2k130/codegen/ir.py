@@ -32,6 +32,8 @@ class Prog:
         self.inputRef = []     # index -> (arrayName, position) or None
         self.hash = {}
         self.nInput = 0
+        self.schedule = None       # emission order chosen by scheduleLive
+        self.scheduleKey = None    # the roots that schedule was chosen for
 
     def addInput(self, arrayName, pos):
         idx = len(self.ops)
@@ -126,13 +128,21 @@ class Prog:
                 out.append(i)
         return out
 
+    def emitOrder(self, roots):
+        """The order emit() will walk: the schedule if one has been chosen for
+        these roots, otherwise the order the DAG was built in."""
+        if self.schedule is not None and self.scheduleKey == tuple(roots):
+            return self.schedule
+        rc = self.refCounts(roots)
+        return [i for i in range(len(self.ops)) if self.ops[i] is not None and rc[i] > 0]
+
     def peakLive(self, roots):
         """High-water mark of simultaneously live values, in the order emit()
         will use.  This is what decides whether a routine fits the register
         file: past it the compiler starts spilling, and a spilled value costs
         two memory instructions every time it is touched."""
         rc = self.refCounts(roots)
-        order = [i for i in range(len(self.ops)) if self.ops[i] is not None and rc[i] > 0]
+        order = self.emitOrder(roots)
         inOrder = set(order)
         rootSet = set(r for r in roots if r is not None)
         uses = {}
@@ -208,7 +218,139 @@ class Prog:
                     break
         self.ops = newOps
         self.hash = {}
+        self.schedule = None
+        self.scheduleKey = None
         return self
+
+    # ---- scheduling ---------------------------------------------------
+    def slotCount(self, roots, order):
+        """C locals emit() would allocate for this order -- the same
+        first-fit-with-free-list the emitter runs, and the number the compiler
+        must find registers for."""
+        lastUse = {}
+        for i in order:
+            for a in self.ops[i][1]:
+                lastUse[a] = i
+        rootsOf = set(r for r in roots if r is not None)
+        held, free, nextSlot = set(), 0, 0
+        for i in order:
+            for a in self.ops[i][1]:
+                if self.inputRef[a] is None and lastUse.get(a) == i and a in held:
+                    held.discard(a)
+                    free += 1
+            if free:
+                free -= 1
+            else:
+                nextSlot += 1
+            held.add(i)
+            if i in rootsOf and lastUse.get(i) is None:
+                held.discard(i)
+                free += 1
+        return nextSlot
+
+    def scheduleLive(self, roots):
+        """Emit in whichever order holds fewest values at once.
+
+        Two orders are scored and the cheaper kept, because neither wins
+        everywhere.  Construction order carries the builder's own blocking --
+        for a Karatsuba leaf that is subproduct by subproduct, which is
+        already a good schedule and hard to beat.  Sethi-Ullman depth-first
+        order is much better where the routine is a forest of independent
+        output accumulations, which is what the basis conversions are.
+
+        A greedy "free the most registers" list schedule was tried first and
+        is worse than both: in a schoolbook leaf every ready operation is an
+        AND over array inputs, so nothing frees anything and the tie-break
+        chooses blind.  It is not kept."""
+        best = None
+        for order in (self.emitOrder(roots), self.suOrder(roots)):
+            got = self.slotCount(roots, order)
+            if best is None or got < best[0]:
+                best = (got, order)
+        self.schedule = best[1]
+        self.scheduleKey = tuple(roots)
+        return self
+
+    def suOrder(self, roots):
+        """A Sethi-Ullman depth-first order.
+
+        By this point the DAG is fixed, so a schedule cannot change the
+        operation count: everything it buys is spill traffic.  That matters on
+        a host, where the wide word is one of 32 `zmm` registers rather than
+        one of a GPU thread's 255, and the order the builder happens to
+        produce leaves 254 values live in the m=131 leaf.
+
+        The order is Sethi-Ullman: take the roots one at a time and emit each
+        one's subtree depth first, visiting the operand that needs the most
+        registers first so the other operand's result waits in one register
+        rather than many.  On a tree that is optimal, and these routines are
+        mostly trees -- 131 independent output accumulations whose subtrees
+        hash-consing has partly merged.  A shared value is emitted with
+        whichever output reaches it first and stays live until its last
+        consumer, which is the one place the DAG costs more than a tree.
+
+        Liveness here is emit()'s: a root is stored to the output array as
+        soon as it is computed, so being a root does not extend a value's live
+        range.  peakLive() keeps its own, more conservative model, which is
+        what chooseLeaf() sizes the leaf against."""
+        rc = self.refCounts(roots)
+        n = len(self.ops)
+        live = []
+        for i in range(n):
+            live.append(self.ops[i] is not None and rc[i] > 0)
+
+        # need[i]: registers to evaluate i's subtree, ignoring sharing.
+        # Operands always have a smaller index, so one forward sweep settles
+        # it.  Inputs are array references and cost nothing to keep.
+        need = [0] * n
+        kids = [()] * n
+        for i in range(n):
+            if not live[i]:
+                continue
+            ks = []
+            for a in self.ops[i][1]:
+                if self.inputRef[a] is None and live[a] and a not in ks:
+                    ks.append(a)
+            ks.sort(key=lambda a: need[a], reverse=True)
+            kids[i] = tuple(ks)
+            want = 1
+            for k in range(len(ks)):
+                if need[ks[k]] + k > want:
+                    want = need[ks[k]] + k
+            need[i] = want
+
+        done = [False] * n
+        order = []
+        for r in roots:
+            if r is None or self.inputRef[r] is not None or not live[r]:
+                continue
+            if done[r]:
+                continue
+            stack = [(r, 0)]
+            while stack:
+                i, k = stack.pop()
+                if k == 0 and done[i]:
+                    continue
+                if k < len(kids[i]):
+                    stack.append((i, k + 1))
+                    nxt = kids[i][k]
+                    if not done[nxt]:
+                        stack.append((nxt, 0))
+                    continue
+                if done[i]:
+                    continue
+                done[i] = True
+                order.append(i)
+
+        nLive = 0
+        for i in range(n):
+            if live[i]:
+                nLive += 1
+        if len(order) != nLive:
+            # every live operation is reachable from some root by construction
+            raise RuntimeError('schedule covered %d of %d operations' %
+                               (len(order), nLive))
+        return order
 
     # ---- emission -----------------------------------------------------
     def emitCnf(self, roots, inputLits, cnf):
@@ -255,11 +397,7 @@ class Prog:
 
     def emit(self, roots, outName, indent='    ', wordType='W'):
         """Return a list of C source lines computing roots into outName[k]."""
-        rc = self.refCounts(roots)
-        order = []
-        for i in range(len(self.ops)):
-            if self.ops[i] is not None and rc[i] > 0:
-                order.append(i)
+        order = self.emitOrder(roots)
 
         rootsOf = {}
         for k in range(len(roots)):

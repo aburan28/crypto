@@ -1,5 +1,5 @@
 //! # Coordinate quotients: invariants of any finite group of point maps, by
-//! orbit sums — the second search space of `RESEARCH_EXOTIC_COORDINATES.md`.
+//! orbit sums — the second search space of `research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md`.
 //!
 //! The first search ([`crate::cryptanalysis::coordinate_search`]) handled
 //! coordinates of a single point and proved that, up to a Möbius frame, the
@@ -48,7 +48,7 @@ use std::collections::{HashMap, HashSet};
 
 use super::coordinate_search::{
     detect_symmetries, kernel, linearising_frame, relation_tuple, Auto, Curve, FrameKind, Gf,
-    Mobius, MobiusKind, Pt, Rng64, Scope, SymmetryKind, INF,
+    Mobius, Pt, Rng64, Scope, SymmetryKind, INF,
 };
 
 /// Exponent vectors over `nv` variables with total degree exactly `d`.
@@ -1238,6 +1238,7 @@ pub fn format_quotient(f: &Gf, r: &QuotientReport) -> String {
 
 #[cfg(test)]
 mod tests {
+    use super::super::coordinate_search::MobiusKind;
     use super::*;
 
     fn seeds_points(m: usize) -> Vec<Seed> {

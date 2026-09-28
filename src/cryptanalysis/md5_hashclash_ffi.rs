@@ -29,7 +29,7 @@
 //! ## Usage (when fully wired)
 //!
 //! ```ignore
-//! use crypto::cryptanalysis::md5_hashclash_ffi::ChosenPrefixCollision;
+//! use crypto_lib::cryptanalysis::md5_hashclash_ffi::ChosenPrefixCollision;
 //!
 //! let prefix_p = b"Alice's CSR:\n";
 //! let prefix_q = b"Bob's CSR:\n";
@@ -247,7 +247,10 @@ mod tests {
         let r = cpc.find();
         match r {
             Err(FfiError::NotLinked) => {
-                assert!(!HASHCLASH_LINKED);
+                #[allow(clippy::assertions_on_constants)]
+                {
+                    assert!(!HASHCLASH_LINKED);
+                }
                 println!("\n=== hashclash FFI: not linked (expected) ===");
             }
             other => panic!("expected NotLinked, got {:?}", other),
