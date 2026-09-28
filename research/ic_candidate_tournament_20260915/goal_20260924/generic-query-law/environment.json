@@ -1,0 +1,28 @@
+{
+  "host": {
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "processor": "arm",
+    "release": "25.6.0",
+    "system": "Darwin",
+    "version": "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041"
+  },
+  "inputs_sha256": "2615cdcc8f000bcf374d862a15dd3c75e56ed88f911cbcf353193e4d35a39530",
+  "python": "3.12.13 (main, Mar 25 2026, 03:16:06) [Clang 22.1.1 ]",
+  "rayon_threads": 1,
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "source_revision": "ed427f31c4b9d74cb483b414b0c418541b2e3689",
+  "sources": {
+    "Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+    "examples/ic_query_law_vectors.rs": "2ef603e1bac0d470a33d527f313bc82a5393ec56be1aa26a8431602d3d6fa946",
+    "examples/ic_tournament_worker.rs": "3e5566ed10429e987c16a4087a68603b2dd3ac0b3c43a16cdc5adfafa5108102",
+    "research/ic_candidate_tournament_20260915/generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+    "research/ic_candidate_tournament_20260915/generic_query_law.py": "69f3e1793658f9a555d5479df696df6e02c97ea10eb5129e04bf06c5fb54bc2f",
+    "research/ic_candidate_tournament_20260915/identity.py": "1fcb72308e6353c55c30c2184c1d99edef7c84ef8283db6615e5fb3075fb307f",
+    "research/ic_candidate_tournament_20260915/oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "e91b7283df427172a0cb9b9799ba370a9d7ab0d251ed2fea42447e7c25fe2121"
+  },
+  "timeout_seconds": 60,
+  "vectors_sha256": "dc98542d910783a052dca5bd4f5bf2662d7247a86b8d985c47a2f4ffb7c9ea88",
+  "worker_sha256": "fe1cf635acf5c98b4ef6c9df90d11136a10b270bce5ef73f80c13826dbdde05b"
+}

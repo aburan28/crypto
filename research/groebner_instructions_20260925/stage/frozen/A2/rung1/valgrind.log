@@ -1,0 +1,11 @@
+==1018== Callgrind, a call-graph generating cache profiler
+==1018== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==1018== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==1018== Command: /home/user/crypto/target/release/examples/groebner_stage_bench --label A2 --rung 1 --out /home/user/crypto/research/groebner_instructions_20260925/stage/frozen/A2/rung1/stage
+==1018== 
+==1018== For interactive control, run 'callgrind_control -h'.
+==1018== 
+==1018== Events    : Ir
+==1018== Collected : 176659980
+==1018== 
+==1018== I   refs:      176,659,980

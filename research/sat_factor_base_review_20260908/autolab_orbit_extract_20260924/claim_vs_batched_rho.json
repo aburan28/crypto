@@ -1,0 +1,211 @@
+{
+  "stage": "vs_rho",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "n": [
+    37,
+    41,
+    53
+  ],
+  "a": 0,
+  "timing_class": "whole_process_wall",
+  "comparator": "frozen Kuhn-Struik batched signed-Frobenius rho (autolab_batched_rho_n53_20260922/frozen/v2, d=4), same host, paired blocks",
+  "ic_cost": {
+    "n53_panel1_K220_wall_s_median": {
+      "32": 8.64,
+      "1024": 35.72,
+      "4096": 112.55
+    },
+    "n53_panel2_wall_s_median": {
+      "4096": {
+        "K": 660,
+        "wall_s": 30.19
+      },
+      "16384": {
+        "K": 880,
+        "wall_s": 63.73
+      }
+    },
+    "growing_n_L1024_inprocess_ms": {
+      "37": 360.13824999999997,
+      "41": 2716.81,
+      "53": 14926.141625
+    }
+  },
+  "rho_cost": {
+    "n53_panel1_wall_s_median": {
+      "32": 12.76,
+      "1024": 63.92,
+      "4096": 122.25
+    },
+    "n53_panel2_wall_s_median": {
+      "4096": 116.37,
+      "16384": 243.59
+    },
+    "growing_n_L1024_inprocess_ms": {
+      "37": 400.620833,
+      "41": 8605.643291,
+      "53": 59513.242792
+    }
+  },
+  "wall_ratio_compact_over_rho": {
+    "n53_panel1_K220": {
+      "32": {
+        "median": 0.7422680412371134,
+        "range": [
+          0.7288401253918496,
+          0.7455529775715392
+        ],
+        "all_3_blocks_compact": true
+      },
+      "1024": {
+        "median": 0.5588235294117647,
+        "range": [
+          0.5417439703153988,
+          0.5857165428977722
+        ],
+        "all_3_blocks_compact": true
+      },
+      "4096": {
+        "median": 0.9122879262065557,
+        "range": [
+          0.9075149169488792,
+          0.9339877300613497
+        ],
+        "all_3_blocks_compact": true
+      }
+    },
+    "n53_panel2_declared_K": {
+      "4096": {
+        "K": 660,
+        "median": 0.24254215304798962,
+        "range": [
+          0.2391780614942963,
+          0.2594311248603592
+        ],
+        "all_3_blocks_compact": true
+      },
+      "16384": {
+        "K": 880,
+        "median": 0.2646465495503068,
+        "range": [
+          0.26162814565458353,
+          0.30551849605821707
+        ],
+        "all_3_blocks_compact": true
+      }
+    },
+    "growing_n_L1024": {
+      "37": {
+        "K": 42,
+        "median": 0.95,
+        "range": [
+          0.8478260869565217,
+          1.0789473684210527
+        ],
+        "all_3_blocks_compact": false
+      },
+      "41": {
+        "K": 255,
+        "median": 0.3394833948339483,
+        "range": [
+          0.27570621468926554,
+          0.3577235772357724
+        ],
+        "all_3_blocks_compact": true
+      },
+      "53": {
+        "K": 440,
+        "median": 0.246262388711574,
+        "range": [
+          0.24204233317175636,
+          0.2639550714771954
+        ],
+        "all_3_blocks_compact": true
+      }
+    }
+  },
+  "peak_rss_mb": {
+    "n53_L16384_compact": 5734.055936,
+    "n53_L16384_rho": 780.959744
+  },
+  "slopes_log2_r_L1024_inprocess": {
+    "n37_41_53": {
+      "compact_inproc": 0.31566169465526,
+      "batched_rho_inproc": 0.4310143696150642
+    },
+    "n41_53": {
+      "compact_inproc": 0.46736179896739927,
+      "batched_rho_inproc": 0.5304916874442941
+    }
+  },
+  "automorphism_discount": "both arms quotient by the signed Frobenius group, A = 2n (74/82/106)",
+  "all_stages_charged_same_series": true,
+  "stages_charged": "curve setup, base load or in-process x-scan construction, normal basis and self-test, index build, rank-guided relation stage, linear algebra, per-target relation and log recovery with [d]G verification",
+  "verdict": "N53_COMPACT_ORBIT_SHARED_LOG_BEATS_BATCHED_RHO_ALL_15_BLOCKS_L32_TO_16384__N41_3_OF_3__N37_UNRESOLVED",
+  "independent_replay_pointer": [
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/paired_vs_batched_rho/replay_L32/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/paired_vs_batched_rho/replay_L1024/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/paired_vs_batched_rho/replay_L4096/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/paired_vs_batched_rho_panel2/replay_L4096_b0/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/paired_vs_batched_rho_panel2/replay_L4096_b1/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/paired_vs_batched_rho_panel2/replay_L4096_b2/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/paired_vs_batched_rho_panel2/replay_L16384_b0/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/paired_vs_batched_rho_panel2/replay_L16384_b1/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/paired_vs_batched_rho_panel2/replay_L16384_b2/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_vs_batched_rho/replay_n37/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_vs_batched_rho/replay_n41/independent_replay.json",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_vs_batched_rho/replay_n53/independent_replay.json"
+  ],
+  "independent_replay": "86,112/86,112 targets pass pure-Python GF(2^n) replay: relation sums to target, intermediates, point orders, [d]G = target, d = published scalar",
+  "fixture_hash": {
+    "corpora": "n53-ks-scaling-{32,1024,4096,16384}-v1, n{37,41,53}-ks-growing-1024-v1 generated by the frozen batched rho producer",
+    "retained_base_n53": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71"
+  },
+  "executable_or_source_hash": {
+    "compact_source_sha256": "6c825c3d5f2937cd5c19370baa265da20fcb49eca13a348dbde67a3100f96bbe",
+    "compact_executable_sha256": "d79ad3527119380fb9e814bc7b79c7f40cd96d77e0224082901c23a0ce4e1694",
+    "rho_executable_sha256": "2377b35031aa9c33b67ed21d93c21e431991bb50a311acf3c884c69db9719587",
+    "worktree": "dirty"
+  },
+  "host_id": "Adams-MacBook-Pro.local / Apple M4 Pro / 48 GiB, shared (load average 27-50)",
+  "resource_caps": {
+    "threads_per_arm": 1,
+    "peak_rss_cap": "16 GiB",
+    "compact_peak_rss_mb_max": 5734.055936
+  },
+  "seeds": {
+    "rho_batch_seed": 531310,
+    "rank_seed": 7,
+    "K_rule": "panel 2 declared in paired_vs_batched_rho_protocol.json; growing-n K tuned on disjoint corpus"
+  },
+  "claim_boundary": "Finite public-synthetic batches at n=37/41/53 on one shared host, one implementation per arm. Both arms cost ~sqrt(L*r/n) at their optimal parameters: constant-factor result, not an asymptotic sub-rho claim. Compact uses 2-7x more memory than batched rho at large L. Bernstein-Lange precomputed rho and better-tuned batched rho not compared. Producer rerun on an independent host pending. No key recovery, external points, or deployed-curve claim.",
+  "recovered_d_verified": {
+    "targets": 86112,
+    "verified_in_producer": 86112,
+    "verified_in_independent_replay": 86112
+  },
+  "stage_timers": {
+    "n53_L16384_K880_block0_ms": {
+      "base_load": 455.477708,
+      "index_build": 32415.194375,
+      "linear_algebra": 1.669958,
+      "normal_basis_and_selftest": 4.678833,
+      "process_total": 75421.788042,
+      "rank_stage": 2365.0465,
+      "setup_total": 32875.35175,
+      "target_median": 1.166459,
+      "targets_total": 40175.758
+    },
+    "n53_L4096_K660_block0_ms": {
+      "base_load": 671.661708,
+      "index_build": 13721.869166999999,
+      "linear_algebra": 0.964417,
+      "normal_basis_and_selftest": 3.80475,
+      "process_total": 31555.9145,
+      "rank_stage": 2329.8077080000003,
+      "setup_total": 14397.336083,
+      "target_median": 1.769,
+      "targets_total": 14826.943375
+    }
+  }
+}

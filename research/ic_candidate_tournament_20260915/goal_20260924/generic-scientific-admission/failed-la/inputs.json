@@ -1,0 +1,102 @@
+[
+  {
+    "expected": "incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "dense",
+        "max_trials": 4,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "failed-la-dense-limit4"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "dense",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "failed-la-dense-limit256"
+  },
+  {
+    "expected": "incomplete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "sparse",
+        "max_trials": 4,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "failed-la-sparse-limit4"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "failed-la-sparse-limit256"
+  }
+]

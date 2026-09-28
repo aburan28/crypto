@@ -247,7 +247,10 @@ mod tests {
         let r = cpc.find();
         match r {
             Err(FfiError::NotLinked) => {
-                assert!(!HASHCLASH_LINKED);
+                #[allow(clippy::assertions_on_constants)]
+                {
+                    assert!(!HASHCLASH_LINKED);
+                }
                 println!("\n=== hashclash FFI: not linked (expected) ===");
             }
             other => panic!("expected NotLinked, got {:?}", other),

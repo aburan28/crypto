@@ -1,0 +1,3479 @@
+{
+  "S": null,
+  "classification": "accounting and integration engineering",
+  "global_optimum_claim": false,
+  "limits": [
+    "No pinned affinity or measured memory cap on native path.",
+    "Public development targets only; no final confirmation used.",
+    "These use the general worker, not the archived optimized tiny-IC winner.",
+    "A/A noise prevents interpreting small native differences as improvements.",
+    "One-column IC matrices remain outside this checker protocol, not mathematically disproved.",
+    "Implementation_v2 overlapped a 1.11-second local rho test run; its timing is diagnostic only.",
+    "Other host activity is uncontrolled; no runtime promotion or cross-host claim."
+  ],
+  "operation_counts": null,
+  "panels": [
+    {
+      "aa_paired_ratio": 0.8546352560937969,
+      "audit": {
+        "promotion_eligible": false,
+        "status": "VERIFIED",
+        "trial_receipts": 192
+      },
+      "binary_sha256": "c1aec290d54a46c9a955cc565633a30f71c60766f15e75397d02af641a197382",
+      "cases": 4,
+      "cells": [
+        "13a0",
+        "9a0"
+      ],
+      "contract_sha256": "fffd410faafd90521e3d6449accf70936d7dbe379c5c3399bc5b8ba390d86868",
+      "failures": {},
+      "panel": "implementation_v2",
+      "repetitions": 3,
+      "seed": 2026092402,
+      "table": [
+        {
+          "S": null,
+          "arm": "incumbent",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.0,
+          "failures": [],
+          "median_cold_wall_seconds": 0.021871895500225946,
+          "mode": "ic",
+          "paired_over_incumbent": 1.0,
+          "paired_over_rho": {
+            "rho_w1": 3.0033760933760907,
+            "rho_w32": 2.9751664832156592,
+            "rho_w8": 2.8148849335988873
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_01",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.6440294806657848,
+          "failures": [],
+          "median_cold_wall_seconds": 0.01408614550018683,
+          "mode": "ic",
+          "paired_over_incumbent": 0.5870860040455673,
+          "paired_over_rho": {
+            "rho_w1": 1.7632400693061556,
+            "rho_w32": 1.7466786020013845,
+            "rho_w8": 1.652579547514643
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_02",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.5196689967171768,
+          "failures": [],
+          "median_cold_wall_seconds": 0.011366145990905352,
+          "mode": "ic",
+          "paired_over_incumbent": 0.4663345120547516,
+          "paired_over_rho": {
+            "rho_w1": 1.4005779250214452,
+            "rho_w32": 1.3874228102320256,
+            "rho_w8": 1.3126779920001088
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_03",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.7840503120129294,
+          "failures": [],
+          "median_cold_wall_seconds": 0.01714866649126634,
+          "mode": "ic",
+          "paired_over_incumbent": 0.5512483584267976,
+          "paired_over_rho": {
+            "rho_w1": 1.6556061412118583,
+            "rho_w32": 1.6400556399190602,
+            "rho_w8": 1.5517006988067117
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_04",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.6446400359588379,
+          "failures": [],
+          "median_cold_wall_seconds": 0.014099499501753598,
+          "mode": "ic",
+          "paired_over_incumbent": 0.6558687367030858,
+          "paired_over_rho": {
+            "rho_w1": 1.9698204842068252,
+            "rho_w32": 1.9513186828280162,
+            "rho_w8": 1.8461950253640513
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_05",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.882928162241728,
+          "failures": [],
+          "median_cold_wall_seconds": 0.019311312498757616,
+          "mode": "ic",
+          "paired_over_incumbent": 0.7642488141379169,
+          "paired_over_rho": {
+            "rho_w1": 2.2953266177728464,
+            "rho_w32": 2.2737674566604436,
+            "rho_w8": 2.151272472437638
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_06",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.6735756164101183,
+          "failures": [],
+          "median_cold_wall_seconds": 0.014732375493622385,
+          "mode": "ic",
+          "paired_over_incumbent": 0.6011064189654756,
+          "paired_over_rho": {
+            "rho_w1": 1.8053486482958214,
+            "rho_w32": 1.7883916705518723,
+            "rho_w8": 1.6920454022354974
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_07",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.1822468242372413,
+          "failures": [],
+          "median_cold_wall_seconds": 0.025857978995190933,
+          "mode": "ic",
+          "paired_over_incumbent": 1.0254480650340436,
+          "paired_over_rho": {
+            "rho_w1": 3.0798062035220166,
+            "rho_w32": 3.0508787133676374,
+            "rho_w8": 2.8865183084524615
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_08",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.5669823640097631,
+          "failures": [],
+          "median_cold_wall_seconds": 0.012400979016092606,
+          "mode": "ic",
+          "paired_over_incumbent": 0.5899247525266875,
+          "paired_over_rho": {
+            "rho_w1": 1.7717658986294595,
+            "rho_w32": 1.7551243513366923,
+            "rho_w8": 1.6605702978444246
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_09",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.7181019126935285,
+          "failures": [],
+          "median_cold_wall_seconds": 0.01570624999294523,
+          "mode": "ic",
+          "paired_over_incumbent": 0.6500967118375317,
+          "paired_over_rho": {
+            "rho_w1": 1.9524849227152479,
+            "rho_w32": 1.9341459479077328,
+            "rho_w8": 1.829947439533645
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_10",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.6090721768823235,
+          "failures": [],
+          "median_cold_wall_seconds": 0.03519345850509126,
+          "mode": "ic",
+          "paired_over_incumbent": 1.1015122505133743,
+          "paired_over_rho": {
+            "rho_w1": 3.308255559752764,
+            "rho_w32": 3.277182328578842,
+            "rho_w8": 3.1006302381447006
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_11",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.8470316386854705,
+          "failures": [],
+          "median_cold_wall_seconds": 0.018526187486713752,
+          "mode": "ic",
+          "paired_over_incumbent": 0.8512687923773272,
+          "paired_over_rho": {
+            "rho_w1": 2.556680340063199,
+            "rho_w32": 2.5326663792884934,
+            "rho_w8": 2.396223698105857
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "aa_control",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.9041721371947656,
+          "failures": [],
+          "median_cold_wall_seconds": 0.019775958498939872,
+          "mode": "ic",
+          "paired_over_incumbent": 0.8546352560937969,
+          "paired_over_rho": {
+            "rho_w1": 2.566791096708462,
+            "rho_w32": 2.5426821693046953,
+            "rho_w8": 2.405699906100855
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w1",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.36616627510548205,
+          "failures": [],
+          "median_cold_wall_seconds": 0.008008750504814088,
+          "mode": "rho",
+          "paired_over_incumbent": 0.33295863352095256,
+          "paired_over_rho": {
+            "rho_w1": 1.0,
+            "rho_w32": 0.9906073667488239,
+            "rho_w8": 0.9372402410098029
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w8",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.38563948468797943,
+          "failures": [],
+          "median_cold_wall_seconds": 0.00843466650985647,
+          "mode": "rho",
+          "paired_over_incumbent": 0.35525430828942617,
+          "paired_over_rho": {
+            "rho_w1": 1.066962296585322,
+            "rho_w32": 1.0569407110406637,
+            "rho_w8": 1.0
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w32",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.3617494197272994,
+          "failures": [],
+          "median_cold_wall_seconds": 0.007912145505542867,
+          "mode": "rho",
+          "paired_over_incumbent": 0.33611564449972114,
+          "paired_over_rho": {
+            "rho_w1": 1.0094816913001594,
+            "rho_w32": 1.0,
+            "rho_w8": 0.9461268636491448
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        }
+      ],
+      "trials": 192,
+      "verified": 192
+    },
+    {
+      "aa_paired_ratio": 0.8363415544128647,
+      "audit": {
+        "promotion_eligible": false,
+        "status": "VERIFIED",
+        "trial_receipts": 216
+      },
+      "binary_sha256": "c1aec290d54a46c9a955cc565633a30f71c60766f15e75397d02af641a197382",
+      "cases": 4,
+      "cells": [
+        "9a0",
+        "9a1"
+      ],
+      "contract_sha256": "421034fb477ca477e0cd36d84e1ba01d53fb26836241a81a9efdf95e29f8b11b",
+      "failures": {},
+      "panel": "algebra",
+      "repetitions": 3,
+      "seed": 2026092403,
+      "table": [
+        {
+          "S": null,
+          "arm": "incumbent",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.0,
+          "failures": [],
+          "median_cold_wall_seconds": 0.017503312512417324,
+          "mode": "ic",
+          "paired_over_incumbent": 1.0,
+          "paired_over_rho": {
+            "rho_w1": 2.4006390918563274,
+            "rho_w32": 2.074185823071328,
+            "rho_w8": 2.8467505342617088
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_01",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.8534456259437724,
+          "failures": [],
+          "median_cold_wall_seconds": 0.014938125503249466,
+          "mode": "ic",
+          "paired_over_incumbent": 0.874874251268475,
+          "paired_over_rho": {
+            "rho_w1": 2.100257328053636,
+            "rho_w32": 1.8146517689512132,
+            "rho_w8": 2.4905487422103434
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_02",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.8378723458868182,
+          "failures": [],
+          "median_cold_wall_seconds": 0.014665541515569203,
+          "mode": "ic",
+          "paired_over_incumbent": 0.8676133819792036,
+          "paired_over_rho": {
+            "rho_w1": 2.082826601396952,
+            "rho_w32": 1.7995913768082326,
+            "rho_w8": 2.4698788586819056
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_03",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.8227169002825353,
+          "failures": [],
+          "median_cold_wall_seconds": 0.014400271014892496,
+          "mode": "ic",
+          "paired_over_incumbent": 0.9063370491882733,
+          "paired_over_rho": {
+            "rho_w1": 2.1757881506790806,
+            "rho_w32": 1.8799114583506173,
+            "rho_w8": 2.5801154789978975
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_04",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.5121709383252182,
+          "failures": [],
+          "median_cold_wall_seconds": 0.02646800050570164,
+          "mode": "ic",
+          "paired_over_incumbent": 1.5454221718263526,
+          "paired_over_rho": {
+            "rho_w1": 3.710000879107848,
+            "rho_w32": 3.2054927594623224,
+            "rho_w8": 4.399431393306559
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_05",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.4801888780762387,
+          "failures": [],
+          "median_cold_wall_seconds": 0.025908208510372788,
+          "mode": "ic",
+          "paired_over_incumbent": 1.8774900197679127,
+          "paired_over_rho": {
+            "rho_w1": 4.507175936024959,
+            "rho_w32": 3.8942631819605102,
+            "rho_w8": 5.344745716845331
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_06",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.4440362059719174,
+          "failures": [],
+          "median_cold_wall_seconds": 0.025275416992371902,
+          "mode": "ic",
+          "paired_over_incumbent": 1.1423466593225262,
+          "paired_over_rho": {
+            "rho_w1": 2.7423620468211385,
+            "rho_w32": 2.369439245799675,
+            "rho_w8": 3.251975962738479
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_07",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.5024739447862672,
+          "failures": [],
+          "median_cold_wall_seconds": 0.026298270997358486,
+          "mode": "ic",
+          "paired_over_incumbent": 1.5179347295865813,
+          "paired_over_rho": {
+            "rho_w1": 3.644013450731911,
+            "rho_w32": 3.1484786964560976,
+            "rho_w8": 4.321181502425003
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_08",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.1911804968057538,
+          "failures": [],
+          "median_cold_wall_seconds": 0.020849604494287632,
+          "mode": "ic",
+          "paired_over_incumbent": 1.133220096306583,
+          "paired_over_rho": {
+            "rho_w1": 2.7204524628707754,
+            "rho_w32": 2.3505090581786394,
+            "rho_w8": 3.22599491459687
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_09",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.2364921494301255,
+          "failures": [],
+          "median_cold_wall_seconds": 0.021642708510626107,
+          "mode": "ic",
+          "paired_over_incumbent": 1.2294800859453996,
+          "paired_over_rho": {
+            "rho_w1": 2.9515379569794042,
+            "rho_w32": 2.550170164016466,
+            "rho_w8": 3.5000230915291985
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_10",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.0306025503464227,
+          "failures": [],
+          "median_cold_wall_seconds": 0.018038958514807746,
+          "mode": "ic",
+          "paired_over_incumbent": 1.1083523708269012,
+          "paired_over_rho": {
+            "rho_w1": 2.6607540289586993,
+            "rho_w32": 2.2989287745366536,
+            "rho_w8": 3.155202703801713
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_11",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.9396590496505983,
+          "failures": [],
+          "median_cold_wall_seconds": 0.016447146001155488,
+          "mode": "ic",
+          "paired_over_incumbent": 0.9716469008318942,
+          "paired_over_rho": {
+            "rho_w1": 2.3325735336180937,
+            "rho_w32": 2.0153762267367075,
+            "rho_w8": 2.766036334056928
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_12",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.9222528014092022,
+          "failures": [],
+          "median_cold_wall_seconds": 0.03364579151093494,
+          "mode": "ic",
+          "paired_over_incumbent": 2.0596108747777384,
+          "paired_over_rho": {
+            "rho_w1": 4.944382380003847,
+            "rho_w32": 4.272015677507521,
+            "rho_w8": 5.863198358144751
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "algebra_13",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.5921605118475413,
+          "failures": [],
+          "median_cold_wall_seconds": 0.02786808300879784,
+          "mode": "ic",
+          "paired_over_incumbent": 1.5899856479191516,
+          "paired_over_rho": {
+            "rho_w1": 3.816981701885227,
+            "rho_w32": 3.2979256898007843,
+            "rho_w8": 4.526292492682295
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "aa_control",
+          "base_sizes": [
+            55,
+            73
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.740021837892003,
+          "failures": [],
+          "median_cold_wall_seconds": 0.012952833494637161,
+          "mode": "ic",
+          "paired_over_incumbent": 0.8363415544128647,
+          "paired_over_rho": {
+            "rho_w1": 2.0077542296674094,
+            "rho_w32": 1.7347277954086016,
+            "rho_w8": 2.380855766850091
+          },
+          "rank_range": [
+            2,
+            3
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ],
+            "n9a1-000": [
+              2
+            ],
+            "n9a1-001": [
+              2
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w1",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.4266347290240371,
+          "failures": [],
+          "median_cold_wall_seconds": 0.007467520990758203,
+          "mode": "rho",
+          "paired_over_incumbent": 0.4165557427571239,
+          "paired_over_rho": {
+            "rho_w1": 1.0,
+            "rho_w32": 0.8640140161457734,
+            "rho_w8": 1.1858302832436254
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [],
+            "n9a0-001": [],
+            "n9a1-000": [],
+            "n9a1-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w8",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.34896134622647634,
+          "failures": [],
+          "median_cold_wall_seconds": 0.006107979497755878,
+          "mode": "rho",
+          "paired_over_incumbent": 0.35127770697313504,
+          "paired_over_rho": {
+            "rho_w1": 0.84329099545736,
+            "rho_w32": 0.7286152397646808,
+            "rho_w8": 1.0
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [],
+            "n9a0-001": [],
+            "n9a1-000": [],
+            "n9a1-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w32",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.41748643257664225,
+          "failures": [],
+          "median_cold_wall_seconds": 0.0073073954990832135,
+          "mode": "rho",
+          "paired_over_incumbent": 0.4821168811766638,
+          "paired_over_rho": {
+            "rho_w1": 1.1573886317965512,
+            "rho_w32": 1.0,
+            "rho_w8": 1.3724664890662563
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n9a0-000": [],
+            "n9a0-001": [],
+            "n9a1-000": [],
+            "n9a1-001": []
+          }
+        }
+      ],
+      "trials": 216,
+      "verified": 216
+    },
+    {
+      "aa_paired_ratio": 0.9174506105487783,
+      "audit": {
+        "promotion_eligible": false,
+        "status": "VERIFIED",
+        "trial_receipts": 204
+      },
+      "binary_sha256": "c1aec290d54a46c9a955cc565633a30f71c60766f15e75397d02af641a197382",
+      "cases": 4,
+      "cells": [
+        "13a0",
+        "9a0"
+      ],
+      "contract_sha256": "7687fadf6be3effa0b75d2ed0043b936deb23ee8fd7ffc19c42f456972ccaa22",
+      "failures": {
+        "missing/nontrivial log matrix": 24,
+        "worker failed or incomplete": 24
+      },
+      "panel": "factor_base",
+      "repetitions": 3,
+      "seed": 2026092404,
+      "table": [
+        {
+          "S": null,
+          "arm": "incumbent",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.0,
+          "failures": [],
+          "median_cold_wall_seconds": 0.02331620799668599,
+          "mode": "ic",
+          "paired_over_incumbent": 1.0,
+          "paired_over_rho": {
+            "rho_w1": 3.0395545021921446,
+            "rho_w32": 2.9965420397812235,
+            "rho_w8": 2.756790746757564
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_01",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.2491695045607556,
+          "failures": [],
+          "median_cold_wall_seconds": 0.029125895991455764,
+          "mode": "ic",
+          "paired_over_incumbent": 1.2986616196239447,
+          "paired_over_rho": {
+            "rho_w1": 3.947352772752103,
+            "rho_w32": 3.891494138653523,
+            "rho_w8": 3.580138336148481
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_02",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.2127052348699325,
+          "failures": [],
+          "median_cold_wall_seconds": 0.028275687494897284,
+          "mode": "ic",
+          "paired_over_incumbent": 1.221950693360024,
+          "paired_over_rho": {
+            "rho_w1": 3.714185731459275,
+            "rho_w32": 3.6616266231931265,
+            "rho_w8": 3.368662364448903
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_03",
+          "base_sizes": [
+            90,
+            208
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.1409963624075175,
+          "failures": [],
+          "median_cold_wall_seconds": 0.026603708509355783,
+          "mode": "ic",
+          "paired_over_incumbent": 1.0804461503726772,
+          "paired_over_rho": {
+            "rho_w1": 3.2840749607414423,
+            "rho_w32": 3.237602311311513,
+            "rho_w8": 2.978563949717228
+          },
+          "rank_range": [
+            5,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              8
+            ],
+            "n13a0-001": [
+              8
+            ],
+            "n9a0-000": [
+              5
+            ],
+            "n9a0-001": [
+              5
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_04",
+          "base_sizes": [
+            90,
+            208
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.1590372891267502,
+          "failures": [],
+          "median_cold_wall_seconds": 0.02702435450919438,
+          "mode": "ic",
+          "paired_over_incumbent": 1.1541016785831075,
+          "paired_over_rho": {
+            "rho_w1": 3.5079549531247967,
+            "rho_w32": 3.45831419805636,
+            "rho_w8": 3.181616828335283
+          },
+          "rank_range": [
+            5,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              8
+            ],
+            "n13a0-001": [
+              8
+            ],
+            "n9a0-000": [
+              5
+            ],
+            "n9a0-001": [
+              5
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_05",
+          "base_sizes": [
+            108,
+            208
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.2509574244422774,
+          "failures": [],
+          "median_cold_wall_seconds": 0.029167583503294736,
+          "mode": "ic",
+          "paired_over_incumbent": 1.107086641811793,
+          "paired_over_rho": {
+            "rho_w1": 3.3650501864358184,
+            "rho_w32": 3.3174316638692547,
+            "rho_w8": 3.0520062100056564
+          },
+          "rank_range": [
+            6,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              8
+            ],
+            "n13a0-001": [
+              8
+            ],
+            "n9a0-000": [
+              6
+            ],
+            "n9a0-001": [
+              6
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_06",
+          "base_sizes": [
+            108,
+            208
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.2087040693116144,
+          "failures": [],
+          "median_cold_wall_seconds": 0.02818239548651036,
+          "mode": "ic",
+          "paired_over_incumbent": 1.2344383357049429,
+          "paired_over_rho": {
+            "rho_w1": 3.7521426009705374,
+            "rho_w32": 3.6990463684574273,
+            "rho_w8": 3.4030881813141933
+          },
+          "rank_range": [
+            6,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              8
+            ],
+            "n13a0-001": [
+              8
+            ],
+            "n9a0-000": [
+              6
+            ],
+            "n9a0-001": [
+              6
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_07",
+          "base_sizes": [
+            55,
+            4005
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 27.55850941044135,
+          "failures": [],
+          "median_cold_wall_seconds": 0.6425599374924786,
+          "mode": "ic",
+          "paired_over_incumbent": 8.954886016727196,
+          "paired_over_rho": {
+            "rho_w1": 27.21886410876065,
+            "rho_w32": 26.833692410572063,
+            "rho_w8": 24.686746909182233
+          },
+          "rank_range": [
+            3,
+            77
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              77
+            ],
+            "n13a0-001": [
+              77
+            ],
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_08",
+          "base_sizes": [
+            55,
+            4005
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 25.721311912257242,
+          "failures": [],
+          "median_cold_wall_seconds": 0.5997234584938269,
+          "mode": "ic",
+          "paired_over_incumbent": 6.761011070622706,
+          "paired_over_rho": {
+            "rho_w1": 20.55046163908217,
+            "rho_w32": 20.2596539045472,
+            "rho_w8": 18.63869275821813
+          },
+          "rank_range": [
+            3,
+            77
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              77
+            ],
+            "n13a0-001": [
+              77
+            ],
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_09",
+          "base_sizes": [],
+          "complete": false,
+          "diagnostic_time_over_incumbent": null,
+          "failures": [
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 2
+            }
+          ],
+          "median_cold_wall_seconds": null,
+          "mode": "ic",
+          "paired_over_incumbent": null,
+          "paired_over_rho": {
+            "rho_w1": null,
+            "rho_w32": null,
+            "rho_w8": null
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 0,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_10",
+          "base_sizes": [],
+          "complete": false,
+          "diagnostic_time_over_incumbent": null,
+          "failures": [
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 2
+            }
+          ],
+          "median_cold_wall_seconds": null,
+          "mode": "ic",
+          "paired_over_incumbent": null,
+          "paired_over_rho": {
+            "rho_w1": null,
+            "rho_w32": null,
+            "rho_w8": null
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 0,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_11",
+          "base_sizes": [],
+          "complete": false,
+          "diagnostic_time_over_incumbent": null,
+          "failures": [
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 2
+            }
+          ],
+          "median_cold_wall_seconds": null,
+          "mode": "ic",
+          "paired_over_incumbent": null,
+          "paired_over_rho": {
+            "rho_w1": null,
+            "rho_w32": null,
+            "rho_w8": null
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 0,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "factor_base_12",
+          "base_sizes": [],
+          "complete": false,
+          "diagnostic_time_over_incumbent": null,
+          "failures": [
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 2
+            }
+          ],
+          "median_cold_wall_seconds": null,
+          "mode": "ic",
+          "paired_over_incumbent": null,
+          "paired_over_rho": {
+            "rho_w1": null,
+            "rho_w32": null,
+            "rho_w8": null
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 0,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "aa_control",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.038270074113555,
+          "failures": [],
+          "median_cold_wall_seconds": 0.024208521004766226,
+          "mode": "ic",
+          "paired_over_incumbent": 0.9174506105487783,
+          "paired_over_rho": {
+            "rho_w1": 2.7886411338324715,
+            "rho_w32": 2.749179323932365,
+            "rho_w8": 2.52921935376795
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w1",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.31188870888880105,
+          "failures": [],
+          "median_cold_wall_seconds": 0.007272062008269131,
+          "mode": "rho",
+          "paired_over_incumbent": 0.32899558118757005,
+          "paired_over_rho": {
+            "rho_w1": 1.0,
+            "rho_w32": 0.9858490899308103,
+            "rho_w8": 0.90697197394202
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w8",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.3482323758835417,
+          "failures": [],
+          "median_cold_wall_seconds": 0.008119458507280797,
+          "mode": "rho",
+          "paired_over_incumbent": 0.3627406255538848,
+          "paired_over_rho": {
+            "rho_w1": 1.1025699015303057,
+            "rho_w32": 1.086967534008755,
+            "rho_w8": 1.0
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w32",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.37596968971693423,
+          "failures": [],
+          "median_cold_wall_seconds": 0.008766187485889532,
+          "mode": "rho",
+          "paired_over_incumbent": 0.3337179945164426,
+          "paired_over_rho": {
+            "rho_w1": 1.0143540326949865,
+            "rho_w32": 1.0,
+            "rho_w8": 0.9199906793094204
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        }
+      ],
+      "trials": 204,
+      "verified": 156
+    },
+    {
+      "aa_paired_ratio": 0.9468048870938677,
+      "audit": {
+        "promotion_eligible": false,
+        "status": "VERIFIED",
+        "trial_receipts": 108
+      },
+      "binary_sha256": "c1aec290d54a46c9a955cc565633a30f71c60766f15e75397d02af641a197382",
+      "cases": 4,
+      "cells": [
+        "13a0",
+        "9a0"
+      ],
+      "contract_sha256": "1d3d713d6cf5c439d34528d41d2d1038d145b6910b33109f8085964fefb132fd",
+      "failures": {
+        "missing/nontrivial log matrix": 18,
+        "worker failed or incomplete": 6
+      },
+      "panel": "union_followup",
+      "repetitions": 3,
+      "seed": 2026092405,
+      "table": [
+        {
+          "S": null,
+          "arm": "incumbent",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.0,
+          "failures": [],
+          "median_cold_wall_seconds": 0.02289112500147894,
+          "mode": "ic",
+          "paired_over_incumbent": 1.0,
+          "paired_over_rho": {
+            "rho_w1": 2.660722658947142,
+            "rho_w32": 2.5425362187158322,
+            "rho_w8": 2.843914719113789
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "union_1",
+          "base_sizes": [],
+          "complete": false,
+          "diagnostic_time_over_incumbent": null,
+          "failures": [
+            {
+              "case": "n9a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            }
+          ],
+          "median_cold_wall_seconds": null,
+          "mode": "ic",
+          "paired_over_incumbent": null,
+          "paired_over_rho": {
+            "rho_w1": null,
+            "rho_w32": null,
+            "rho_w8": null
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 6,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              3
+            ],
+            "n13a0-001": [
+              3
+            ],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "union_2",
+          "base_sizes": [],
+          "complete": false,
+          "diagnostic_time_over_incumbent": null,
+          "failures": [
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n13a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n13a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "missing/nontrivial log matrix",
+              "repetition": 2
+            }
+          ],
+          "median_cold_wall_seconds": null,
+          "mode": "ic",
+          "paired_over_incumbent": null,
+          "paired_over_rho": {
+            "rho_w1": null,
+            "rho_w32": null,
+            "rho_w8": null
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 0,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "union_3",
+          "base_sizes": [],
+          "complete": false,
+          "diagnostic_time_over_incumbent": null,
+          "failures": [
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-000",
+              "reason": "worker failed or incomplete",
+              "repetition": 2
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 0
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 1
+            },
+            {
+              "case": "n9a0-001",
+              "reason": "worker failed or incomplete",
+              "repetition": 2
+            }
+          ],
+          "median_cold_wall_seconds": null,
+          "mode": "ic",
+          "paired_over_incumbent": null,
+          "paired_over_rho": {
+            "rho_w1": null,
+            "rho_w32": null,
+            "rho_w8": null
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 6,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              2
+            ],
+            "n13a0-001": [
+              2
+            ],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "union_4",
+          "base_sizes": [
+            57,
+            185
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.7291754336746473,
+          "failures": [],
+          "median_cold_wall_seconds": 0.016691646000253968,
+          "mode": "ic",
+          "paired_over_incumbent": 0.8994853118296221,
+          "paired_over_rho": {
+            "rho_w1": 2.393280950575211,
+            "rho_w32": 2.2869739835297187,
+            "rho_w8": 2.558059517938918
+          },
+          "rank_range": [
+            3,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              3
+            ],
+            "n9a0-001": [
+              3
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "aa_control",
+          "base_sizes": [
+            72,
+            182
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.8471632787018772,
+          "failures": [],
+          "median_cold_wall_seconds": 0.019392520509427413,
+          "mode": "ic",
+          "paired_over_incumbent": 0.9468048870938677,
+          "paired_over_rho": {
+            "rho_w1": 2.5191852166925437,
+            "rho_w32": 2.407285717493313,
+            "rho_w8": 2.692632354535119
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n9a0-000": [
+              4
+            ],
+            "n9a0-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w1",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.3503441176368801,
+          "failures": [],
+          "median_cold_wall_seconds": 0.008019770990358666,
+          "mode": "rho",
+          "paired_over_incumbent": 0.3758377434180622,
+          "paired_over_rho": {
+            "rho_w1": 1.0,
+            "rho_w32": 0.955581075000851,
+            "rho_w8": 1.0688504905051386
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w8",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.3054786294261149,
+          "failures": [],
+          "median_cold_wall_seconds": 0.00699274949147366,
+          "mode": "rho",
+          "paired_over_incumbent": 0.3516279842285906,
+          "paired_over_rho": {
+            "rho_w1": 0.9355845451569191,
+            "rho_w32": 0.894026885415231,
+            "rho_w8": 1.0
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w32",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.3996863845772506,
+          "failures": [],
+          "median_cold_wall_seconds": 0.009149270990747027,
+          "mode": "rho",
+          "paired_over_incumbent": 0.39330806485229675,
+          "paired_over_rho": {
+            "rho_w1": 1.046483680099158,
+            "rho_w32": 1.0,
+            "rho_w8": 1.1185345947796075
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n9a0-000": [],
+            "n9a0-001": []
+          }
+        }
+      ],
+      "trials": 108,
+      "verified": 84
+    },
+    {
+      "aa_paired_ratio": 0.9141721796069637,
+      "audit": {
+        "promotion_eligible": false,
+        "status": "VERIFIED",
+        "trial_receipts": 120
+      },
+      "binary_sha256": "c1aec290d54a46c9a955cc565633a30f71c60766f15e75397d02af641a197382",
+      "cases": 4,
+      "cells": [
+        "13a0",
+        "17a1"
+      ],
+      "contract_sha256": "f0ef24d8549da04caa8fa15e530c8d98941f7cadbf30c2cda99264ff3493de6b",
+      "failures": {},
+      "panel": "interactions",
+      "repetitions": 3,
+      "seed": 2026092406,
+      "table": [
+        {
+          "S": null,
+          "arm": "incumbent",
+          "base_sizes": [
+            182,
+            272
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.0,
+          "failures": [],
+          "median_cold_wall_seconds": 0.036232688013114966,
+          "mode": "ic",
+          "paired_over_incumbent": 1.0,
+          "paired_over_rho": {
+            "rho_w1": 3.8099493413139336,
+            "rho_w32": 3.875655813960151,
+            "rho_w8": 4.01597761030434
+          },
+          "rank_range": [
+            7,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              8
+            ],
+            "n17a1-001": [
+              8
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "combination_01",
+          "base_sizes": [
+            137,
+            185
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.6551686421149039,
+          "failures": [],
+          "median_cold_wall_seconds": 0.023738521005725488,
+          "mode": "ic",
+          "paired_over_incumbent": 0.6503233581440186,
+          "paired_over_rho": {
+            "rho_w1": 2.4776990500018687,
+            "rho_w32": 2.520429503944955,
+            "rho_w8": 2.611684045764309
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              4
+            ],
+            "n17a1-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "combination_02",
+          "base_sizes": [
+            137,
+            185
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.7377644184693406,
+          "failures": [],
+          "median_cold_wall_seconds": 0.02673118800157681,
+          "mode": "ic",
+          "paired_over_incumbent": 0.7665351289425745,
+          "paired_over_rho": {
+            "rho_w1": 2.9204600096087527,
+            "rho_w32": 2.9708263290909835,
+            "rho_w8": 3.0783879153451297
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              4
+            ],
+            "n17a1-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "union_4",
+          "base_sizes": [
+            137,
+            185
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.067746698366893,
+          "failures": [],
+          "median_cold_wall_seconds": 0.03868733299896121,
+          "mode": "ic",
+          "paired_over_incumbent": 0.8036285480566814,
+          "paired_over_rho": {
+            "rho_w1": 3.061784057329626,
+            "rho_w32": 3.114587654540231,
+            "rho_w8": 3.2273542559970174
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              4
+            ],
+            "n17a1-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_01",
+          "base_sizes": [
+            182,
+            272
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.778799518875876,
+          "failures": [],
+          "median_cold_wall_seconds": 0.028217999992193654,
+          "mode": "ic",
+          "paired_over_incumbent": 0.780234582653231,
+          "paired_over_rho": {
+            "rho_w1": 2.9726542342500295,
+            "rho_w32": 3.023920696512767,
+            "rho_w8": 3.133404614720527
+          },
+          "rank_range": [
+            7,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              8
+            ],
+            "n17a1-001": [
+              8
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_10",
+          "base_sizes": [
+            182,
+            272
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.9864786044373925,
+          "failures": [],
+          "median_cold_wall_seconds": 0.035742771506193094,
+          "mode": "ic",
+          "paired_over_incumbent": 0.981269389349753,
+          "paired_over_rho": {
+            "rho_w1": 3.7385866636046186,
+            "rho_w32": 3.8030624138944984,
+            "rho_w8": 3.9407558973056203
+          },
+          "rank_range": [
+            7,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              8
+            ],
+            "n17a1-001": [
+              8
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "aa_control",
+          "base_sizes": [
+            182,
+            272
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.7563428085648111,
+          "failures": [],
+          "median_cold_wall_seconds": 0.02740433301369194,
+          "mode": "ic",
+          "paired_over_incumbent": 0.9141721796069637,
+          "paired_over_rho": {
+            "rho_w1": 3.4829496935410744,
+            "rho_w32": 3.543016722854353,
+            "rho_w8": 3.6712950052646853
+          },
+          "rank_range": [
+            7,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              8
+            ],
+            "n17a1-001": [
+              8
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w1",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.2809801608046946,
+          "failures": [],
+          "median_cold_wall_seconds": 0.010180666504311375,
+          "mode": "rho",
+          "paired_over_incumbent": 0.2624706814750274,
+          "paired_over_rho": {
+            "rho_w1": 1.0,
+            "rho_w32": 1.0172460226527729,
+            "rho_w8": 1.0540763801650321
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n17a1-000": [],
+            "n17a1-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w8",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.26052441892062134,
+          "failures": [],
+          "median_cold_wall_seconds": 0.009439499990548939,
+          "mode": "rho",
+          "paired_over_incumbent": 0.24900537229942815,
+          "paired_over_rho": {
+            "rho_w1": 0.9486978541758371,
+            "rho_w32": 0.9650591188595906,
+            "rho_w8": 1.0
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n17a1-000": [],
+            "n17a1-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w32",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.22429388878063583,
+          "failures": [],
+          "median_cold_wall_seconds": 0.008126770495437086,
+          "mode": "rho",
+          "paired_over_incumbent": 0.25802084808408166,
+          "paired_over_rho": {
+            "rho_w1": 0.9830463602032096,
+            "rho_w32": 1.0,
+            "rho_w8": 1.0362059488974096
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n17a1-000": [],
+            "n17a1-001": []
+          }
+        }
+      ],
+      "trials": 120,
+      "verified": 120
+    },
+    {
+      "aa_paired_ratio": 0.8617484864426005,
+      "audit": {
+        "promotion_eligible": false,
+        "status": "VERIFIED",
+        "trial_receipts": 120
+      },
+      "binary_sha256": "c1aec290d54a46c9a955cc565633a30f71c60766f15e75397d02af641a197382",
+      "cases": 4,
+      "cells": [
+        "13a0",
+        "17a1"
+      ],
+      "contract_sha256": "e85a628c2b0ad1a5796219fc9016b33c0903ee3fced05cf3cb14b1874b7f70ea",
+      "failures": {},
+      "panel": "interaction_replication",
+      "repetitions": 3,
+      "seed": 2026092407,
+      "table": [
+        {
+          "S": null,
+          "arm": "incumbent",
+          "base_sizes": [
+            182,
+            272
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.0,
+          "failures": [],
+          "median_cold_wall_seconds": 0.03842349999467842,
+          "mode": "ic",
+          "paired_over_incumbent": 1.0,
+          "paired_over_rho": {
+            "rho_w1": 4.42694874602869,
+            "rho_w32": 4.795129547964884,
+            "rho_w8": 3.8557060781629713
+          },
+          "rank_range": [
+            7,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              8
+            ],
+            "n17a1-001": [
+              8
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "combination_01",
+          "base_sizes": [
+            137,
+            185
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.8077078286998476,
+          "failures": [],
+          "median_cold_wall_seconds": 0.027151166999829,
+          "mode": "ic",
+          "paired_over_incumbent": 0.8077078286998476,
+          "paired_over_rho": {
+            "rho_w1": 3.5756811594203457,
+            "rho_w32": 3.8730636755211987,
+            "rho_w8": 3.1142839844978187
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              4
+            ],
+            "n17a1-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "combination_02",
+          "base_sizes": [
+            137,
+            185
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.8790647838029694,
+          "failures": [],
+          "median_cold_wall_seconds": 0.03320333349984139,
+          "mode": "ic",
+          "paired_over_incumbent": 0.8790647838029694,
+          "paired_over_rho": {
+            "rho_w1": 3.891574742334537,
+            "rho_w32": 4.215229519388982,
+            "rho_w8": 3.389415430008128
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              4
+            ],
+            "n17a1-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "union_4",
+          "base_sizes": [
+            137,
+            185
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.9237621509271976,
+          "failures": [],
+          "median_cold_wall_seconds": 0.038631667019217275,
+          "mode": "ic",
+          "paired_over_incumbent": 0.9237621509271976,
+          "paired_over_rho": {
+            "rho_w1": 4.089447695675922,
+            "rho_w32": 4.429559185202601,
+            "rho_w8": 3.5617553401068958
+          },
+          "rank_range": [
+            4,
+            7
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              4
+            ],
+            "n17a1-001": [
+              4
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_01",
+          "base_sizes": [
+            182,
+            272
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.7138010692858309,
+          "failures": [],
+          "median_cold_wall_seconds": 0.028091207990655676,
+          "mode": "ic",
+          "paired_over_incumbent": 0.7138010692858309,
+          "paired_over_rho": {
+            "rho_w1": 3.159960748588847,
+            "rho_w32": 3.422768598701418,
+            "rho_w8": 2.752207121444607
+          },
+          "rank_range": [
+            7,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              8
+            ],
+            "n17a1-001": [
+              8
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "implementation_10",
+          "base_sizes": [
+            182,
+            272
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 1.1014117100677825,
+          "failures": [],
+          "median_cold_wall_seconds": 0.04484937500092201,
+          "mode": "ic",
+          "paired_over_incumbent": 1.1014117100677825,
+          "paired_over_rho": {
+            "rho_w1": 4.875893188745884,
+            "rho_w32": 5.281411835420557,
+            "rho_w8": 4.246719825068223
+          },
+          "rank_range": [
+            7,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              8
+            ],
+            "n17a1-001": [
+              8
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "aa_control",
+          "base_sizes": [
+            182,
+            272
+          ],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.8617484864426005,
+          "failures": [],
+          "median_cold_wall_seconds": 0.03734339599031955,
+          "mode": "ic",
+          "paired_over_incumbent": 0.8617484864426005,
+          "paired_over_rho": {
+            "rho_w1": 3.814916381449192,
+            "rho_w32": 4.13219563025493,
+            "rho_w8": 3.322648877024476
+          },
+          "rank_range": [
+            7,
+            8
+          ],
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [
+              7
+            ],
+            "n13a0-001": [
+              7
+            ],
+            "n17a1-000": [
+              8
+            ],
+            "n17a1-001": [
+              8
+            ]
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w1",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.22588922017610352,
+          "failures": [],
+          "median_cold_wall_seconds": 0.010358562489273027,
+          "mode": "rho",
+          "paired_over_incumbent": 0.22588922017610352,
+          "paired_over_rho": {
+            "rho_w1": 1.0,
+            "rho_w32": 1.0831680742331795,
+            "rho_w8": 0.8709624392244961
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n17a1-000": [],
+            "n17a1-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w8",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.2593558688675886,
+          "failures": [],
+          "median_cold_wall_seconds": 0.010609021002892405,
+          "mode": "rho",
+          "paired_over_incumbent": 0.2593558688675886,
+          "paired_over_rho": {
+            "rho_w1": 1.1481551384585524,
+            "rho_w32": 1.24364499024508,
+            "rho_w8": 1.0
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n17a1-000": [],
+            "n17a1-001": []
+          }
+        },
+        {
+          "S": null,
+          "arm": "rho_w32",
+          "base_sizes": [],
+          "complete": true,
+          "diagnostic_time_over_incumbent": 0.20854493919239633,
+          "failures": [],
+          "median_cold_wall_seconds": 0.00854422950942535,
+          "mode": "rho",
+          "paired_over_incumbent": 0.20854493919239633,
+          "paired_over_rho": {
+            "rho_w1": 0.9232177570484085,
+            "rho_w32": 1.0,
+            "rho_w8": 0.8040879896142501
+          },
+          "rank_range": null,
+          "ratio_to_floor": null,
+          "scheduled": 12,
+          "total_operations": null,
+          "verified": 12,
+          "verified_rank_by_case": {
+            "n13a0-000": [],
+            "n13a0-001": [],
+            "n17a1-000": [],
+            "n17a1-001": []
+          }
+        }
+      ],
+      "trials": 120,
+      "verified": 120
+    }
+  ],
+  "promotion": false,
+  "ratio_definition": "Equal-cell geometric mean of per-case median ratios; repetitions are not independent targets.",
+  "ratio_implementation_sha256": "2a8bcace7da6ba004193f3cd316426e2d6430df7834f5c2f8323886236a52a21",
+  "reporter_sha256": "6c9f94342bceea9fec3dbe6ca76a6b2f52ffa2bb19351349c4b1c405e870a21a",
+  "retained_first_run": {
+    "raw_receipts_verified": 192,
+    "status": "REPORTING_FAILURE_RETAINED",
+    "verified_jobs": 192
+  },
+  "status": "DEVELOPMENT_ONLY",
+  "trials": 960,
+  "unit": "complete cold child wall seconds",
+  "verified": 888
+}

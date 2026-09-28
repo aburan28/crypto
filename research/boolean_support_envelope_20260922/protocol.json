@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "scope": "Standalone generic Boolean matrix construction, at most 12 variables. No production solver integration, external inputs, curves, targets, scalar recovery, relation collection or rho runs.",
+  "mathematical_boundary": "A fixed support envelope E_j represents p_j(c)=sum_{m in E_j} c_{j,m} x^m over F2. Coefficients may change. Compile a parity mask per product monomial and multiplier. At application recompute actual generator degrees, select all degree-eligible multipliers, evaluate parity, remove zero rows and compact actual output columns. Exact-support caching cannot reuse changed inputs; this different contract can.",
+  "variables": [
+    6,
+    8,
+    10,
+    12
+  ],
+  "matrix_degree": 3,
+  "discovery_seeds": [
+    17,
+    937
+  ],
+  "holdout_seeds": [
+    20260924,
+    87139
+  ],
+  "families": [
+    "repeat",
+    "coefficients",
+    "degree_cycle",
+    "escape"
+  ],
+  "batches": [
+    1,
+    4,
+    16,
+    64
+  ],
+  "repetitions": 10,
+  "variants": [
+    "direct",
+    "layout",
+    "schedule",
+    "matrix_cache",
+    "envelope"
+  ],
+  "limits": {
+    "variables": 12,
+    "generators": 12,
+    "terms_per_generator": 32,
+    "rows": 512,
+    "columns": 512,
+    "plan_rows": 8192,
+    "plan_groups": 131072,
+    "plan_retained_bytes": 2097152,
+    "batch": 64,
+    "worker_seconds": 15,
+    "campaign_seconds": 180
+  },
+  "envelope": "Each ordered base generator support union constant and all n linear monomials. Declared using only the base fixture, before generating assignments. Exact n, degree, active mask and generator-count guard; each actual support must be a subset of its ordered envelope.",
+  "candidate": "For each possible multiplier t compile groups (m OR t, XOR coefficient-slot mask), retaining only source monomials with degree <= D-degree(t). Compile multipliers through D-min_degree(E_j). On every apply derive actual coefficient bits and generator degree d, visit all multipliers of degree <= D-d, evaluate parity, remove empty rows and recompact output support. On context mismatch or support escape use direct construction and retain the original envelope. Exceeding a compilation limit is an explicit refusal, not a zero/UNSAT matrix.",
+  "families_contract": {
+    "repeat": "Repeat the base instance. Matrix-copy control remains relevant.",
+    "coefficients": "First instance is base. Subsequent distinct deterministic coefficient assignments sample all generator envelopes; force a quadratic term in each generator.",
+    "degree_cycle": "As coefficients, but first generator cycles quadratic/linear/constant/zero; the others remain quadratic. Newly required multipliers are counted before cancellation.",
+    "escape": "As coefficients, but every fourth assignment adds the cubic monomial 7 outside the envelope and must fall back."
+  },
+  "controls": {
+    "direct": "Build products, parity, compact columns, and packed rows anew.",
+    "layout": "Rebuild products and reuse columns only on exact actual output-support equality.",
+    "schedule": "Replay precomputed column indices only if the canonical input equals the base.",
+    "matrix_cache": "Clone the completed matrix only if the canonical input equals the base."
+  },
+  "accounting": "One cache/schedule compilation per cold batch, every application and fallback, output allocation and validation, output and cache destruction. Input/envelope generation and independent references are common setup outside total_ns; fresh-process receipts include them. Rotate the five arms over ten repetitions; retain all samples. No adaptive cache insertion.",
+  "memory": "Retained structure bytes use actual Rust Vec capacities, excluding allocator metadata, separately from output payload and whole-worker peak RSS. Compilation may use temporary allocations; peak RSS includes all arms and reference matrices, so it is not candidate-specific peak memory. Compilation group/row limits bound temporary growth; retained byte limit checked on the completed plan.",
+  "correctness": "Every matrix equals an independent set-parity oracle. Exhaustively vary all 256 coefficient assignments over n=3, four matrix degrees, and eight active-variable masks (8192 cases). Test bit slot 31, degree drops, parity collisions, caps, invalid inputs and support escape.",
+  "performance_gate": "For each of four n values and batches 16 and 64, on each of coefficients and degree_cycle holdouts, the 95 percent paired bootstrap lower bound for control total_ns / envelope total_ns must exceed 1.05 against direct, layout and matrix_cache separately (48 gates). Repeat/escape and exact schedule remain reported controls. Reject promotion if any gate fails; do not tune from these holdouts.",
+  "cross_instance_gate": "Every changed in-envelope input must hit and equal the oracle; outside-envelope inputs must fall back and equal the oracle. Exact-support controls must have zero changed hits. Degree-cycle fixtures must contain newly required multipliers.",
+  "classification": "Mathematical construction diagnostic and bounded engineering experiment. No relation-yield, end-to-end IC, asymptotic, exponent or rho claim. Full pipeline and normalized costs remain null."
+}

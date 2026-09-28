@@ -1,0 +1,124 @@
+{
+  "note": "TWO-CHAINS.md section 6 / FAST-CLMAD",
+  "probe": "benchmarks/clmad-price/probe.cu, 20000 rounds x 3 passes x 3 runs, best per stream",
+  "lanesPerSMClockBasis": "best lane-ops/s over runs divided by SMs x median sampled SM clock after each pass",
+  "gpus": {
+    "6000": {
+      "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "sms": 188,
+      "smClockMHzSampled": [
+        2347,
+        2347,
+        2347
+      ],
+      "laneOpsPerSecond": {
+        "LOP3": 28201720000000.0,
+        "CLMAD.lo": 746410900000.0,
+        "CLMAD product (lo+hi)": 877824400000.0,
+        "CLMAD.lo + LOP3 mix": 1479149000000.0,
+        "IMAD.WIDE": 13825760000000.0,
+        "POPC": 7096876000000.0,
+        "FLO": 7030963000000.0,
+        "SHF": 27958030000000.0,
+        "ISETP + SEL": 41843160000000.0,
+        "PRMT": 28271710000000.0,
+        "IMNMX": 15640960000000.0,
+        "LDS.U8 random": 4058057000000.0
+      },
+      "lanesPerSMClock": {
+        "LOP3": 63.915274365645594,
+        "CLMAD.lo": 1.6916364485218796,
+        "CLMAD product (lo+hi)": 1.9894668612715192,
+        "CLMAD.lo + LOP3 mix": 3.3522853982902574,
+        "IMAD.WIDE": 31.3341613105005,
+        "POPC": 16.084081987870437,
+        "FLO": 15.93469934456844,
+        "SHF": 63.36298488790579,
+        "ISETP + SEL": 94.83170004260758,
+        "PRMT": 64.07389696216991,
+        "IMNMX": 35.448059541832485,
+        "LDS.U8 random": 9.197021548559048
+      },
+      "lop3SlotsPerClmadLo": 37.78310311384788,
+      "lop3SlotsPer64x64Product": 64.25367077971403
+    },
+    "b200": {
+      "gpu": "NVIDIA B200",
+      "sms": 148,
+      "smClockMHzSampled": [
+        1965,
+        1965,
+        1965
+      ],
+      "laneOpsPerSecond": {
+        "LOP3": 18523060000000.0,
+        "CLMAD.lo": 4906342000000.0,
+        "CLMAD product (lo+hi)": 8465587000000.0,
+        "CLMAD.lo + LOP3 mix": 9221647000000.0,
+        "IMAD.WIDE": 6649963000000.0,
+        "POPC": 4638717000000.0,
+        "FLO": 4641104000000.0,
+        "SHF": 18488040000000.0,
+        "ISETP + SEL": 18411340000000.0,
+        "PRMT": 18555380000000.0,
+        "IMNMX": 9245937000000.0,
+        "LDS.U8 random": 2671023000000.0
+      },
+      "lanesPerSMClock": {
+        "LOP3": 63.692524585654354,
+        "CLMAD.lo": 16.870717282167664,
+        "CLMAD product (lo+hi)": 29.109370057079982,
+        "CLMAD.lo + LOP3 mix": 31.709122481259886,
+        "IMAD.WIDE": 22.866250601746785,
+        "POPC": 15.95047452032185,
+        "FLO": 15.958682346468606,
+        "SHF": 63.572106457602644,
+        "ISETP + SEL": 63.30836943814043,
+        "PRMT": 63.80365862045252,
+        "IMNMX": 31.792644935011346,
+        "LDS.U8 random": 9.184454301629874
+      },
+      "lop3SlotsPerClmadLo": 3.7753299708825843,
+      "lop3SlotsPer64x64Product": 4.376084021108046
+    },
+    "h100": {
+      "gpu": "NVIDIA H100 80GB HBM3",
+      "sms": 132,
+      "smClockMHzSampled": [
+        1980,
+        1980,
+        1980
+      ],
+      "laneOpsPerSecond": {
+        "LOP3": 15642090000000.0,
+        "CLMAD.lo": 7806726000000.0,
+        "CLMAD product (lo+hi)": 7870009000000.0,
+        "CLMAD.lo + LOP3 mix": 9395067000000.0,
+        "IMAD.WIDE": 5903293000000.0,
+        "POPC": 4179909000000.0,
+        "FLO": 4179902000000.0,
+        "SHF": 15639290000000.0,
+        "ISETP + SEL": 15880120000000.0,
+        "PRMT": 15723240000000.0,
+        "IMNMX": 8075107000000.0,
+        "LDS.U8 random": 2405741000000.0
+      },
+      "lanesPerSMClock": {
+        "LOP3": 59.84882920110193,
+        "CLMAD.lo": 29.869628099173553,
+        "CLMAD product (lo+hi)": 30.111757728803184,
+        "CLMAD.lo + LOP3 mix": 35.946843434343435,
+        "IMAD.WIDE": 22.5868265993266,
+        "POPC": 15.992917814508724,
+        "FLO": 15.992891031527396,
+        "SHF": 59.83811600857055,
+        "ISETP + SEL": 60.75956535047444,
+        "PRMT": 60.1593204775023,
+        "IMNMX": 30.896491429445973,
+        "LDS.U8 random": 9.204702326293235
+      },
+      "lop3SlotsPerClmadLo": 2.003668375193391,
+      "lop3SlotsPer64x64Product": 3.975113624393568
+    }
+  }
+}
