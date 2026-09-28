@@ -307,9 +307,11 @@
     <div class="eyebrow">Cryptanalysis cost ledger · aburan28/crypto</div>
     <h1>Index Calculus Scoreboard</h1>
     <p class="verdict">The calibrated index-calculus families below are scored against
-      their generic-group floor and matched Pollard rho reference; their existing
-      500×-or-worse rho verdict is unchanged. The newer binary-field solver and
-      parameter-sweep pilots are explicitly uncalibrated: their component counts
+      their generic-group floor and matched Pollard rho reference; the best cell is now
+      the <code>j = 0</code> orbit quotient of the subspace base at 271× plain rho
+      (469× a rho folded by the same automorphism), an engineering step from 898 to 330
+      that leaves the hundreds-of-times-behind-rho verdict in place. The newer binary-field
+      solver and parameter-sweep pilots are explicitly uncalibrated: their component counts
       do not establish an end-to-end speedup or belong in that normalized claim.</p>
 
     <dl class="facts">
@@ -604,8 +606,60 @@
           <tr><td>O(1) S&#8324; solve, tuned</td><td class="n">898</td><td class="n">528&times;</td><td class="n">&mdash;</td><td><span class="chip">engineering</span></td></tr>
           <tr><td>Double large primes</td><td class="n">3,378</td><td class="n">1,987&times;</td><td class="n">&mdash;</td><td><span class="chip advance">advance, exponent</span></td></tr>
           <tr><td>Pair-only (k&minus;1) decompositions</td><td class="n">1,659</td><td class="n">1,037&times;</td><td class="n">&mdash;</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr class="group"><td colspan="5">Subspace base on a <code>j = 0</code> curve over E(F_p&sup3;), 2<sup>33.1</sup>, two seeds (<code>experiments/22_glv_quotient.json</code>)</td></tr>
+          <tr><td>O(1) S&#8324; solve, <code>&lang;&minus;1&rang;</code> base <em>(control on the same stream)</em></td><td class="n">991.5</td><td class="n">813&times;</td><td class="n">1.00</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td><code>&lang;&psi;&rang;</code> orbit quotient of the base, orientation as <code>&lambda;<sup>k</sup></code></td><td class="n">329.6 <em>(before 991.5)</em></td><td class="n">271&times; plain, 469&times; folded rho</td><td class="n">1.00</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>Canonical residuals and decompositions, uniform stream</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">0 saved of &le; 0.011 expected</td><td><span class="chip">accounting</span></td></tr>
         </tbody>
       </table>
+    </div>
+    <div class="panel-head">
+      <p>The <code>j = 0</code> rows use the rho reference measured on their own instances
+        (mean <code>S = 1.22</code> at two seeds, spread 1.05&ndash;1.39); the folded figure divides
+        that by &radic;3, the gain a rho that folds by <code>&lang;&minus;1, &psi;&rang;</code> takes from
+        the same group, and is an extrapolation. Columns, relations, residuals, solver calls and
+        non-zeros all fall by 3.0&times; with the count staying on its fold-aware floor
+        (<code>RESEARCH_GLV_INDEX_CALCULUS.md</code> &sect;3).</p>
+    </div>
+  </div>
+
+  <!-- ============ GLV / C3 SOLVER LEVERS ============ -->
+  <div class="panel" id="glv-c3-levers">
+    <div class="panel-head">
+      <h2>GLV / C&#8323; levers on the <code>j = 0</code> subspace harness <span class="chip relabel">relabelling</span></h2>
+      <p>Frozen source: <code>experiments/22_glv_{canonical,graded,invariant}.json</code>, tables by
+        <code>scripts/glv_gaudry_tables.py</code>. Unit: <code>F_p</code> multiplications of one
+        point-decomposition solve on the same residuals, so the boundary is the ordinary
+        symmetrised-S&#8324; solve at 1.0&times;. A C&#8323;-invariant formulation solves the
+        whole orbit <code>{R, &psi;R, &psi;&sup2;R}</code>, whose three relations are
+        <code>&lambda;</code>-multiples of one another, so nothing in this panel can beat 1.0&times;;
+        the column says how far below parity each lever lands.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Twelve decomposable residuals, four at each of p = 271, 541, 1051; every F4 solution
+          set checked against the harness (orbit = 3 &times; ordinary on 12/12; invariant identical
+          on 12/12; every harness triple satisfies the function-first system).</caption>
+        <thead><tr><th scope="col">Formulation / lever</th><th scope="col" class="n">Solve size</th>
+          <th scope="col" class="n">Mults vs ordinary</th><th scope="col">Correct</th><th scope="col">Class</th></tr></thead>
+        <tbody>
+          <tr><td>Ordinary symmetrised S&#8324; <em>(reference)</em>: Macaulay 252&times;286 at D = 10, dim 64</td><td class="n">6.1&middot;10<sup>5</sup> (harness 0.9&ndash;1.0&middot;10<sup>6</sup>)</td><td class="n">1.0&times;</td><td>yes</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td>C&#8323;-invariant coordinates <code>(e&#8321;/X, e&#8322;/X&sup2;, e&#8323;; c_R = X&sup3;)</code></td><td class="n">identical, term for term</td><td class="n">1.0&times;</td><td>yes</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>Z/3-graded orbit system <code>(e, z), z&sup3; = 1</code>, F4 plain</td><td class="n">1,668&times;1,632; single-degree Macaulay open at D = 19</td><td class="n">34&ndash;70&times;</td><td>yes, 3&times; solutions</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>&hellip; F4 block-aware by weight (14 blocked steps)</td><td class="n">3.0&times; fewer dense cells; 0.5&ndash;1.1&times; wall</td><td class="n">34&ndash;69&times; (0.986 of plain)</td><td>yes</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>Function-first Nagao <code>L(4O)</code> coefficient system, 9 unknowns</td><td class="n">10,641&times;8,789 at D = 8, unsolved at 120 s</td><td class="n">&gt; 3,000&times;, unsolved</td><td>witnessed, not solved</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>Canonical generation on a pair sieve <code>P_i + P_j</code></td><td class="n">95 % of rows fold to 0 = 0, 3 % unit-dependent</td><td class="n">&mdash;</td><td>337 duplicates verified, 0 mismatches</td><td><span class="chip">engineering</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p>The grading is real &mdash; S&#8324; on a <code>j = 0</code> curve is &psi;-invariant term by term
+        &mdash; but with <code>x_R</code> fixed every Macaulay row couples all three weight classes
+        (100 % on every residual); the only object it grades is the orbit system, which has
+        three times the solutions and 456 of its 648 B&eacute;zout solutions at infinity. Block-aware
+        elimination never multiplies across blocks that a sparse-aware elimination would have
+        multiplied anyway, so it is a footprint lever (3&times;) and not a field-operation lever
+        (1.4 %). <code>S</code> is unchanged by everything in this panel.</p>
     </div>
   </div>
 

@@ -38,6 +38,7 @@
 //! the descent systems of the coordinate thread can be timed at `m = 3`.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::sync::atomic::{AtomicU64, Ordering as AtomicOrdering};
 use std::time::{Duration, Instant};
 
 use rayon::prelude::*;
@@ -50,6 +51,15 @@ pub use super::groebner_f4::Ordering;
 pub type Poly = Vec<(Vec<u32>, u64)>;
 
 // ── Field arithmetic ───────────────────────────────────────────────
+
+/// Process-wide count of `F_p` multiplications spent in [`row_reduce`]
+/// (pivot normalisation and elimination).  Reports carry the difference
+/// over their own run, so nested and parallel runs stay additive.
+static FIELD_OPS: AtomicU64 = AtomicU64::new(0);
+
+fn field_ops_now() -> u64 {
+    FIELD_OPS.load(AtomicOrdering::Relaxed)
+}
 
 #[inline]
 fn mulmod(a: u64, b: u64, p: u64) -> u64 {
@@ -156,6 +166,14 @@ pub struct F4Options {
     pub max_degree: u32,
     /// Cooperative stop: the run returns `timed_out` once past it.
     pub deadline: Option<Instant>,
+    /// A `Z/3`-weight per variable.  When set, every step whose rows
+    /// are all weight-homogeneous (each row's monomials in one class
+    /// `Σ wᵢeᵢ (mod 3)`) partitions its matrix into the three weight
+    /// blocks and reduces them separately: the row spaces are direct
+    /// summands, so the pivots and the reduced rows are those of the
+    /// whole matrix.  A step with a mixed row falls back to the plain
+    /// reduction.
+    pub weights: Option<Vec<u8>>,
 }
 
 impl F4Options {
@@ -164,12 +182,22 @@ impl F4Options {
             order,
             max_degree,
             deadline: None,
+            weights: None,
         }
     }
     pub fn with_budget(mut self, budget: Duration) -> Self {
         self.deadline = Some(Instant::now() + budget);
         self
     }
+    /// Block-aware reduction by the given `Z/3`-weights.
+    pub fn with_weights(mut self, weights: Vec<u8>) -> Self {
+        self.weights = Some(weights);
+        self
+    }
+}
+
+fn z3_weight(e: &[u32], w: &[u8]) -> u8 {
+    (e.iter().zip(w).map(|(&a, &b)| a * b as u32).sum::<u32>() % 3) as u8
 }
 
 #[derive(Clone, Debug)]
@@ -190,6 +218,10 @@ pub struct F4Report {
     /// Pairs dropped because their lcm degree exceeded the bound: `> 0`
     /// means the basis may be a strict truncation.
     pub pairs_above_bound: usize,
+    /// `F_p` multiplications spent in row reduction over this run.
+    pub field_ops: u64,
+    /// Steps reduced block by block under `F4Options::weights`.
+    pub blocked_steps: usize,
 }
 
 struct Pair {
@@ -223,11 +255,14 @@ fn row_reduce(rows: &mut Vec<Vec<u64>>, p: u64, deadline: Option<Instant>) -> (V
         let inv = invmod(rows[pivot_row][c], p);
         {
             let row = &mut rows[pivot_row];
+            let mut ops = 0u64;
             for x in row.iter_mut().skip(c) {
                 if *x != 0 {
                     *x = mulmod(*x, inv, p);
+                    ops += 1;
                 }
             }
+            FIELD_OPS.fetch_add(ops, AtomicOrdering::Relaxed);
         }
         let (head, tail) = rows.split_at_mut(pivot_row);
         let (prow, rest) = tail.split_first_mut().unwrap();
@@ -238,11 +273,14 @@ fn row_reduce(rows: &mut Vec<Vec<u64>>, p: u64, deadline: Option<Instant>) -> (V
                 return;
             }
             let neg = p - f;
+            let mut ops = 0u64;
             for (x, &y) in row.iter_mut().zip(prow.iter()).skip(c) {
                 if y != 0 {
                     *x = (*x + mulmod(neg, y, p)) % p;
+                    ops += 1;
                 }
             }
+            FIELD_OPS.fetch_add(ops, AtomicOrdering::Relaxed);
         };
         head.par_iter_mut().for_each(eliminate);
         rest.par_iter_mut().for_each(eliminate);
@@ -265,6 +303,7 @@ fn dense_row(f: &Poly, m: &[u32], col_of: &HashMap<Vec<u32>, usize>, n_cols: usi
 /// Degree-bounded F4.
 pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
     let t0 = Instant::now();
+    let ops0 = field_ops_now();
     let debug = std::env::var("F4_DEBUG").is_ok();
     if debug {
         eprintln!(
@@ -280,31 +319,35 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
     let mut basis: Vec<Poly> = Vec::new();
     let mut alive: Vec<bool> = Vec::new();
     let mut pairs: Vec<Pair> = Vec::new();
+    let mut blocked_steps = 0usize;
     let mut pairs_above_bound = 0usize;
-    let report = |basis: &[Poly], alive: &[bool], inconsistent, dr, sd, steps, mr, mc, to, pab| {
-        let b: Vec<Poly> = if inconsistent {
-            vec![vec![(vec![0; n_vars], 1)]]
-        } else {
-            basis
-                .iter()
-                .zip(alive)
-                .filter(|(_, &a)| a)
-                .map(|(f, _)| f.clone())
-                .collect()
+    let report =
+        |basis: &[Poly], alive: &[bool], inconsistent, dr, sd, steps, mr, mc, to, pab, bs| {
+            let b: Vec<Poly> = if inconsistent {
+                vec![vec![(vec![0; n_vars], 1)]]
+            } else {
+                basis
+                    .iter()
+                    .zip(alive)
+                    .filter(|(_, &a)| a)
+                    .map(|(f, _)| f.clone())
+                    .collect()
+            };
+            F4Report {
+                basis: b,
+                inconsistent,
+                degree_reached: dr,
+                solving_degree: sd,
+                steps,
+                max_rows: mr,
+                max_cols: mc,
+                ms: t0.elapsed().as_secs_f64() * 1e3,
+                timed_out: to,
+                pairs_above_bound: pab,
+                field_ops: field_ops_now() - ops0,
+                blocked_steps: bs,
+            }
         };
-        F4Report {
-            basis: b,
-            inconsistent,
-            degree_reached: dr,
-            solving_degree: sd,
-            steps,
-            max_rows: mr,
-            max_cols: mc,
-            ms: t0.elapsed().as_secs_f64() * 1e3,
-            timed_out: to,
-            pairs_above_bound: pab,
-        }
-    };
 
     // add a polynomial to the basis: pairs with the product criterion
     // and the degree bound; drop basis elements it makes redundant
@@ -357,7 +400,7 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
             continue;
         }
         if total_degree(&f[0].0) == 0 {
-            return report(&basis, &alive, true, 0, 0, 0, 0, 0, false, 0);
+            return report(&basis, &alive, true, 0, 0, 0, 0, 0, false, 0, 0);
         }
         add(
             f,
@@ -392,6 +435,7 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                     max_cols,
                     true,
                     pairs_above_bound,
+                    blocked_steps,
                 );
             }
         }
@@ -472,14 +516,92 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                 col_of[&lm]
             })
             .collect();
-        let mut rows: Vec<Vec<u64>> = rows_poly
-            .par_iter()
-            .map(|(idx, m)| dense_row(&basis[*idx], m, &col_of, n_cols))
-            .collect();
-        max_rows = max_rows.max(rows.len());
+        max_rows = max_rows.max(rows_poly.len());
         max_cols = max_cols.max(n_cols);
         steps += 1;
-        let (pivots, timed_out) = row_reduce(&mut rows, p, opts.deadline);
+        // Block-aware reduction when the weights make every row
+        // homogeneous: each weight class is reduced on its own.
+        let blocks: Option<Vec<u8>> = opts.weights.as_ref().and_then(|w| {
+            let col_w: Vec<u8> = cols.iter().map(|m| z3_weight(m, w)).collect();
+            let mut row_w = Vec::with_capacity(rows_poly.len());
+            for (idx, m) in &rows_poly {
+                let mut cls: Option<u8> = None;
+                for (e, _) in &basis[*idx] {
+                    let em: Vec<u32> = e.iter().zip(m).map(|(x, y)| x + y).collect();
+                    let cw = col_w[col_of[&em]];
+                    match cls {
+                        None => cls = Some(cw),
+                        Some(c) if c == cw => {}
+                        Some(_) => return None,
+                    }
+                }
+                row_w.push(cls.unwrap_or(0));
+            }
+            Some(row_w)
+        });
+        let (rows, pivots, timed_out) = match blocks {
+            Some(row_w) => {
+                blocked_steps += 1;
+                let w = opts.weights.as_ref().unwrap();
+                let col_w: Vec<u8> = cols.iter().map(|m| z3_weight(m, w)).collect();
+                let mut out: Vec<(usize, Vec<u64>)> = Vec::new();
+                let mut timed_out = false;
+                for class in 0..3u8 {
+                    let bcols: Vec<usize> = (0..n_cols).filter(|&c| col_w[c] == class).collect();
+                    if bcols.is_empty() {
+                        continue;
+                    }
+                    let local: HashMap<usize, usize> =
+                        bcols.iter().enumerate().map(|(i, &c)| (c, i)).collect();
+                    let brows: Vec<&(usize, Vec<u32>)> = rows_poly
+                        .iter()
+                        .zip(&row_w)
+                        .filter(|(_, &rw)| rw == class)
+                        .map(|(r, _)| r)
+                        .collect();
+                    if brows.is_empty() {
+                        continue;
+                    }
+                    let mut m: Vec<Vec<u64>> = brows
+                        .par_iter()
+                        .map(|(idx, mono)| {
+                            let mut row = vec![0u64; bcols.len()];
+                            for (e, c) in &basis[*idx] {
+                                let em: Vec<u32> = e.iter().zip(mono).map(|(x, y)| x + y).collect();
+                                row[local[&col_of[&em]]] = *c;
+                            }
+                            row
+                        })
+                        .collect();
+                    let (piv, to) = row_reduce(&mut m, p, opts.deadline);
+                    timed_out |= to;
+                    for (r, &lc) in piv.iter().enumerate() {
+                        let mut full = vec![0u64; n_cols];
+                        for (j, &v) in m[r].iter().enumerate() {
+                            if v != 0 {
+                                full[bcols[j]] = v;
+                            }
+                        }
+                        out.push((bcols[lc], full));
+                    }
+                    if timed_out {
+                        break;
+                    }
+                }
+                out.sort_by_key(|(c, _)| *c);
+                let pivots: Vec<usize> = out.iter().map(|(c, _)| *c).collect();
+                let rows: Vec<Vec<u64>> = out.into_iter().map(|(_, r)| r).collect();
+                (rows, pivots, timed_out)
+            }
+            None => {
+                let mut rows: Vec<Vec<u64>> = rows_poly
+                    .par_iter()
+                    .map(|(idx, m)| dense_row(&basis[*idx], m, &col_of, n_cols))
+                    .collect();
+                let (pivots, timed_out) = row_reduce(&mut rows, p, opts.deadline);
+                (rows, pivots, timed_out)
+            }
+        };
         if debug {
             eprintln!(
                 "f4 step {steps}: degree {d}, {} pairs, {} rows × {n_cols} cols, {} pivots, basis {}",
@@ -501,6 +623,7 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                 max_cols,
                 true,
                 pairs_above_bound,
+                blocked_steps,
             );
         }
         // new polynomials: rows whose pivot column is not an input leading monomial
@@ -527,6 +650,7 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                     max_cols,
                     false,
                     pairs_above_bound,
+                    blocked_steps,
                 );
             }
             new_polys.push(poly);
@@ -564,6 +688,8 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
         ms: t0.elapsed().as_secs_f64() * 1e3,
         timed_out: false,
         pairs_above_bound,
+        field_ops: field_ops_now() - ops0,
+        blocked_steps,
     }
 }
 
@@ -691,6 +817,11 @@ pub struct SolveReport {
     pub f4_runs: usize,
     pub ms: f64,
     pub timed_out: bool,
+    /// `F_p` multiplications spent in row reduction, summed over the
+    /// F4 runs of the substitution tree.
+    pub field_ops: u64,
+    /// Block-reduced steps of the top-level run.
+    pub blocked_steps: usize,
 }
 
 /// Roots in `F_p` of a univariate polynomial given as `(degree, coeff)`.
@@ -734,11 +865,13 @@ fn specialise(f: &Poly, i: usize, a: u64, p: u64) -> Vec<(Vec<u32>, u64)> {
 /// substitution.  Solutions are full assignments `(x_0, …, x_{n−1})`.
 pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveReport {
     let t0 = Instant::now();
+    let ops0 = field_ops_now();
     let mut runs = 0usize;
     let mut max_rows = 0;
     let mut max_cols = 0;
     let mut top: Option<(u32, u32)> = None;
     let mut timed_out = false;
+    let mut blocked = 0usize;
     let verdict = solve_rec(
         input,
         n_vars,
@@ -749,6 +882,7 @@ pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveRe
         &mut max_cols,
         &mut top,
         &mut timed_out,
+        &mut blocked,
     );
     let (solving_degree, degree_reached) = top.unwrap_or((0, 0));
     SolveReport {
@@ -760,6 +894,8 @@ pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveRe
         f4_runs: runs,
         ms: t0.elapsed().as_secs_f64() * 1e3,
         timed_out,
+        field_ops: field_ops_now() - ops0,
+        blocked_steps: blocked,
     }
 }
 
@@ -774,6 +910,7 @@ fn solve_rec(
     max_cols: &mut usize,
     top: &mut Option<(u32, u32)>,
     timed_out: &mut bool,
+    blocked: &mut usize,
 ) -> Verdict {
     if n_vars == 0 {
         // constants only: consistent iff all zero
@@ -790,6 +927,7 @@ fn solve_rec(
     *max_cols = (*max_cols).max(r.max_cols);
     if top.is_none() {
         *top = Some((r.solving_degree, r.degree_reached));
+        *blocked = r.blocked_steps;
     }
     if r.timed_out {
         *timed_out = true;
@@ -848,6 +986,7 @@ fn solve_rec(
             max_cols,
             top,
             timed_out,
+            blocked,
         ) {
             Verdict::Inconsistent => {}
             Verdict::Undetermined => return Verdict::Undetermined,

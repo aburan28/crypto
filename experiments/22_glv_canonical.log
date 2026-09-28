@@ -1,0 +1,17 @@
+p=  271 n=2^ 24.2 seed=1 uniform aG + bQ        residuals=   270 orbits=   270 dups=    0 expected_uniform=  0.0110 saved=    0 verified=   0/0 mismatches=0 rows=   56 zero=   0 duplicate=   0 merged=  1 |     1124 ms
+p=  271 n=2^ 24.2 seed=1 base pairs P_i + P_j   residuals=  3000 orbits=  2163 dups=  837 expected_uniform=  1.3567 saved=  837 verified= 100/837 mismatches=0 rows= 6812 zero=6468 duplicate= 245 merged=4571 |     9550 ms
+p=  271 n=2^ 24.2 seed=2 uniform aG + bQ        residuals=   270 orbits=   270 dups=    0 expected_uniform=  0.0110 saved=    0 verified=   0/0 mismatches=0 rows=   52 zero=   0 duplicate=   0 merged=  1 |     1147 ms
+p=  271 n=2^ 24.2 seed=2 base pairs P_i + P_j   residuals=  3000 orbits=  2242 dups=  758 expected_uniform=  1.3567 saved=  758 verified= 100/758 mismatches=0 rows= 7177 zero=6706 duplicate= 349 merged=4746 |    10062 ms
+p=  541 n=2^ 27.2 seed=1 uniform aG + bQ        residuals=   540 orbits=   540 dups=    0 expected_uniform=  0.0055 saved=    0 verified=   0/0 mismatches=0 rows=   85 zero=   0 duplicate=   0 merged=  3 |     2284 ms
+p=  541 n=2^ 27.2 seed=1 base pairs P_i + P_j   residuals=  3000 orbits=  2870 dups=  130 expected_uniform=  0.1704 saved=  130 verified= 100/130 mismatches=0 rows= 9021 zero=8598 duplicate= 252 merged=5966 |    23346 ms
+p=  541 n=2^ 27.2 seed=2 uniform aG + bQ        residuals=   540 orbits=   540 dups=    0 expected_uniform=  0.0055 saved=    0 verified=   0/0 mismatches=0 rows=   83 zero=   0 duplicate=   0 merged=  1 |     2247 ms
+p=  541 n=2^ 27.2 seed=2 base pairs P_i + P_j   residuals=  3000 orbits=  2867 dups=  133 expected_uniform=  0.1704 saved=  133 verified= 100/133 mismatches=0 rows= 9069 zero=8589 duplicate= 289 merged=5961 |    23006 ms
+p= 1051 n=2^ 30.1 seed=1 uniform aG + bQ        residuals=  1050 orbits=  1050 dups=    0 expected_uniform=  0.0028 saved=    0 verified=   0/0 mismatches=0 rows=  219 zero=   0 duplicate=   0 merged=  1 |     4466 ms
+p= 1051 n=2^ 30.1 seed=1 base pairs P_i + P_j   residuals=  3000 orbits=  2972 dups=   28 expected_uniform=  0.0232 saved=   28 verified=  28/28 mismatches=0 rows= 9459 zero=8911 duplicate= 285 merged=6013 |    47229 ms
+p= 1051 n=2^ 30.1 seed=2 uniform aG + bQ        residuals=  1050 orbits=  1050 dups=    0 expected_uniform=  0.0028 saved=    0 verified=   0/0 mismatches=0 rows=  204 zero=   0 duplicate=   0 merged=  0 |     4476 ms
+p= 1051 n=2^ 30.1 seed=2 base pairs P_i + P_j   residuals=  3000 orbits=  2970 dups=   30 expected_uniform=  0.0232 saved=   30 verified=  30/30 mismatches=0 rows= 9473 zero=8904 duplicate= 298 merged=6011 |    45723 ms
+p= 2113 n=2^ 33.1 seed=1 uniform aG + bQ        residuals=  2112 orbits=  2112 dups=    0 expected_uniform=  0.0014 saved=    0 verified=   0/0 mismatches=0 rows=  302 zero=   0 duplicate=   0 merged=  0 |     8963 ms
+p= 2113 n=2^ 33.1 seed=1 base pairs P_i + P_j   residuals=  3000 orbits=  2991 dups=    9 expected_uniform=  0.0029 saved=    9 verified=   9/9 mismatches=0 rows= 9395 zero=8970 duplicate= 234 merged=6006 |    81929 ms
+p= 2113 n=2^ 33.1 seed=2 uniform aG + bQ        residuals=  2112 orbits=  2112 dups=    0 expected_uniform=  0.0014 saved=    0 verified=   0/0 mismatches=0 rows=  366 zero=   0 duplicate=   0 merged=  1 |     9236 ms
+p= 2113 n=2^ 33.1 seed=2 base pairs P_i + P_j   residuals=  3000 orbits=  2992 dups=    8 expected_uniform=  0.0029 saved=    8 verified=   8/8 mismatches=0 rows= 9475 zero=8973 duplicate= 256 merged=6006 |    88037 ms
+wrote experiments/22_glv_canonical.json
