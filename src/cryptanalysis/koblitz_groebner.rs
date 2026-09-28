@@ -1536,6 +1536,29 @@ pub(crate) fn macaulay_row_count(
     )
 }
 
+/// Build the F5-surviving rows while counting all nonempty F4 rows in the
+/// same product traversal. F5's report needs the latter count even for rows
+/// pruned by its criterion.
+pub(crate) fn f5_rows_monos_with_f4_count(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    criterion: &F5Criterion,
+) -> Option<(usize, Vec<Vec<u64>>)> {
+    let mut rows_monos = Vec::new();
+    let (_, full_count) = visit_macaulay_rows_counted::<true>(
+        polys,
+        n_vars,
+        degree,
+        multiplier_mask,
+        Some(criterion),
+        max_f4_rows(),
+        |row| rows_monos.push(row.to_vec()),
+    )?;
+    Some((full_count, rows_monos))
+}
+
 /// Hand every non-empty Macaulay row (ascending monomial masks, odd
 /// multiplicities kept) to `visit`, in generator-then-multiplier order;
 /// returns the row count, or `None` once it exceeds the size limits.
@@ -1545,12 +1568,34 @@ fn visit_macaulay_rows(
     degree: u32,
     multiplier_mask: u64,
     criterion: Option<&F5Criterion>,
-    mut visit: impl FnMut(&[u64]),
+    visit: impl FnMut(&[u64]),
 ) -> Option<usize> {
-    // Read once per build, not once per row: the cap is an environment
-    // lookup, and the loop below runs once per Macaulay row.
-    let row_cap = max_f4_rows();
-    let mut count = 0usize;
+    visit_macaulay_rows_counted::<false>(
+        polys,
+        n_vars,
+        degree,
+        multiplier_mask,
+        criterion,
+        max_f4_rows(),
+        visit,
+    )
+    .map(|(selected, _)| selected)
+}
+
+/// When `COUNT_PRUNED` is true, visit only criterion survivors but count
+/// nonempty pruned rows toward the full F4 size limit as well.
+fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    criterion: Option<&F5Criterion>,
+    row_cap: usize,
+    mut visit: impl FnMut(&[u64]),
+) -> Option<(usize, usize)> {
+    // The caller reads the configured cap once per build, not once per row.
+    let mut selected_count = 0usize;
+    let mut full_count = 0usize;
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
     let mut all: Vec<u64> = Vec::new();
     let mut row: Vec<u64> = Vec::new();
@@ -1573,7 +1618,8 @@ fn visit_macaulay_rows(
             }
         });
         for &mult in multipliers.iter() {
-            if criterion.is_some_and(|c| c.prunes(i, mult)) {
+            let pruned = criterion.is_some_and(|c| c.prunes(i, mult));
+            if pruned && !COUNT_PRUNED {
                 continue;
             }
             // Multiplying by a monomial is a union of masks, so two
@@ -1595,15 +1641,18 @@ fn visit_macaulay_rows(
                 i = j;
             }
             if !row.is_empty() {
-                visit(&row);
-                count += 1;
+                full_count += 1;
+                if !pruned {
+                    visit(&row);
+                    selected_count += 1;
+                }
             }
-            if count > row_cap {
+            if full_count > row_cap {
                 return None;
             }
         }
     }
-    Some(count)
+    Some((selected_count, full_count))
 }
 
 /// Column masks of the Macaulay matrix at `degree`, in descending
@@ -4450,6 +4499,58 @@ mod tests {
     use crate::binary_ecc::BinaryCurve;
     use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
     use crate::cryptanalysis::koblitz_index_calculus::{find_irreducible, KoblitzCurve};
+
+    #[test]
+    fn fused_f5_count_applies_the_full_f4_row_cap() {
+        let n_vars = 4;
+        let f = F2BoolPoly::from_monos(
+            vec![
+                F2BoolMono::from_mask(0b0011),
+                F2BoolMono::from_mask(0b0100),
+                F2BoolMono::from_mask(0),
+            ],
+            n_vars,
+        );
+        let polys = [f];
+        let mask = all_variable_mask(n_vars);
+        let criterion = F5Criterion::new(&polys, n_vars, 4, mask);
+        let (selected, full) = visit_macaulay_rows_counted::<true>(
+            &polys,
+            n_vars,
+            4,
+            mask,
+            Some(&criterion),
+            usize::MAX,
+            |_| {},
+        )
+        .unwrap();
+        assert!(full > selected);
+        let cap = full - 1;
+        assert!(visit_macaulay_rows_counted::<true>(
+            &polys,
+            n_vars,
+            4,
+            mask,
+            Some(&criterion),
+            cap,
+            |_| {},
+        )
+        .is_none());
+        assert_eq!(
+            visit_macaulay_rows_counted::<false>(
+                &polys,
+                n_vars,
+                4,
+                mask,
+                Some(&criterion),
+                cap,
+                |_| {},
+            )
+            .unwrap()
+            .0,
+            selected
+        );
+    }
 
     fn fe(v: u64, n: u32) -> F2mElement {
         F2mElement::from_biguint(&num_bigint::BigUint::from(v), n)
