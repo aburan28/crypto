@@ -598,6 +598,7 @@ fn lazy_simd_kind() -> u8 {
         *KIND.get_or_init(|| {
             if std::env::var("F4_FP_LAZY_AVX512").as_deref() == Ok("1")
                 && std::arch::is_x86_feature_detected!("avx512f")
+                && std::arch::is_x86_feature_detected!("avx2")
             {
                 2
             } else if std::env::var("F4_FP_LAZY_AVX2").as_deref() == Ok("1")
@@ -622,7 +623,7 @@ fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64, simd: u8) 
     if simd == 0 {
         add_lazy_scalar(acc, pivot, from, factor);
     } else if simd == 2 {
-        // SAFETY: `lazy_simd_kind` verified AVX-512F before this call.
+        // SAFETY: `lazy_simd_kind` verified AVX-512F and AVX2.
         unsafe { add_lazy_avx512(acc, pivot, from, factor) };
     } else {
         // SAFETY: `lazy_simd_kind` verified AVX2 before this call.
@@ -1734,7 +1735,9 @@ mod tests {
     #[cfg(target_arch = "x86_64")]
     #[test]
     fn avx512_lazy_accumulation_matches_scalar_at_boundaries() {
-        if !std::arch::is_x86_feature_detected!("avx512f") {
+        if !std::arch::is_x86_feature_detected!("avx512f")
+            || !std::arch::is_x86_feature_detected!("avx2")
+        {
             return;
         }
         let fp = Barrett::new(65521);
@@ -1751,7 +1754,7 @@ mod tests {
                 for update in 0..256 {
                     let factor = ((update * 4093 + 1) % 65521) as u64;
                     add_lazy_scalar(&mut scalar, &pivot, from, factor);
-                    // SAFETY: the runtime AVX-512F feature was checked above.
+                    // SAFETY: the runtime AVX-512F and AVX2 features were checked above.
                     unsafe { add_lazy_avx512(&mut vector, &pivot, from, factor) };
                     assert_eq!(vector, scalar, "width={width} from={from} update={update}");
                 }
