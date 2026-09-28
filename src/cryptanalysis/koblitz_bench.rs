@@ -1829,16 +1829,18 @@ mod tests {
             let zero = random_control_system(n_vars, 3, 0, 1, 7);
             let one = random_control_system(n_vars, 3, 1, 1, 7);
             let masks = |polys: &[F2BoolPoly]| {
-                polys.iter().map(|p| p.terms.iter().map(|t| t.mask).collect::<Vec<_>>())
+                polys
+                    .iter()
+                    .map(|p| p.terms.iter().map(|t| t.mask).collect::<Vec<_>>())
                     .collect::<Vec<_>>()
             };
             assert_eq!(masks(&zero), masks(&one));
-            assert!(one.iter().all(|p| p.terms.len() == 1
-                && p.terms[0].mask.count_ones() == 1));
+            assert!(one
+                .iter()
+                .all(|p| p.terms.len() == 1 && p.terms[0].mask.count_ones() == 1));
         }
         assert!(random_control_system(2, 0, 2, 1, 7).is_empty());
     }
-
 
     #[test]
     fn cost_model_matches_the_built_system() {
