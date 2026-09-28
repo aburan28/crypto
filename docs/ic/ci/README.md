@@ -154,6 +154,43 @@ targets and carry exactly the caveats of
 The charged ρ/IC column is advisory and is not gated: on its own it is the
 stage number this gate was built not to be fooled by.
 
+## Run history: the paired interval a runtime claim needs
+
+`AGENTS.md` §8 lets a *runtime* claim stand only on paired baseline/candidate
+reruns on matched hardware with a 95 % interval that excludes no improvement.
+Each passing CI run is one such paired rerun (rho and IC in the same process,
+same runner image), and `scripts/ic_e2e_history.py` keeps them:
+
+```bash
+gh run download <run-id> --dir /tmp/art            # the workflow's artifact
+python3 scripts/ic_e2e_history.py add --run-dir /tmp/art/ic-e2e-benchmark-<run-id> \
+    --run-id <run-id> --url https://github.com/aburan28/crypto/actions/runs/<run-id>
+python3 scripts/ic_e2e_history.py report --runs docs/ic/ci/runs/*.json \
+    --reference docs/ic/ci/ic-e2e-reference-n61-v4.json
+```
+
+`add` writes a compact record (host, `ic` hash, commit, per-rung counters and
+whole-process seconds) to `docs/ic/ci/runs/<run-id>.json` and never overwrites;
+`report` pools only runs whose counters are identical to each other and to the
+frozen reference — different counters are a different algorithm — and gives,
+per rung, the per-run rho/IC ratios, a t-based 95 % interval, and the same for
+rho − IC in seconds. The rung's claim "faster than rho end to end" is set only
+with at least three runs and both intervals excluding no improvement. It is a
+statement about wall time on that runner; `S` stays null.
+
+Current history (5 runs on the `ubuntu-latest` image, see `runs/`), all on the
+four-rung `n = 61` ladder archived below, not on the v5 aimed rungs:
+
+| rung | log₂ r | runs | rho/IC per run | 95 % CI | runtime claim |
+|:--|--:|--:|:--|:--|:--|
+| `k0n31` | 20.5 | 5 | 0.036, 0.036, 0.037, 0.037, 0.038 | [0.036, 0.037] | no (IC slower) |
+| `k0n41-subgroup` | 39.0 | 5 | 2.228, 2.234, 2.256, 2.206, 2.251 | **[2.210, 2.260]** | faster than rho, end to end |
+| `k0n53-subgroup` | 44.3 | 5 | 1.996, 2.064, 2.034, 2.004, 1.957 | **[1.961, 2.062]** | faster than rho, end to end |
+| `k0n61-subgroup-wide` | 47.2 | 3 | 1.774, 1.696, 1.784 | **[1.632, 1.871]** | faster than rho, end to end |
+
+Add each new passing run's artifact; the table above is regenerated from the
+`report` output, not edited by hand.
+
 ## Running it locally
 
 ```bash
@@ -176,7 +213,7 @@ recording the before and after. In the same pull request:
 
 ```bash
 python3 scripts/ic_e2e_benchmark.py freeze --output /tmp/ic-e2e \
-    --reference-out docs/ic/ci/ic-e2e-reference-v3.json --note "why v3 supersedes v2"
+    --reference-out docs/ic/ci/ic-e2e-reference-v5.json --note "why v5 supersedes v4"
 ```
 
 then point `IC_E2E_REFERENCE` in the workflow at the new file. `freeze`
@@ -185,7 +222,7 @@ refuses to overwrite, so the superseded reference stays in the tree as the
 vanish). Classify the change in the PR by the §3 test — a lower counter with
 a lower total is engineering; a lower counter with a higher total is
 relabelling — and update the scoreboard if the figures it cites moved.
-Freeze from CI hardware, as v2 was: let the workflow run once against the old
+Freeze from CI hardware, as v2 and n61-v4 were: let the workflow run once against the old
 reference (it will fail on the drift, which is the point), download the run
 artifact, `freeze` from it, and land the new reference in the same PR. The
 manifest inside the artifact records the host and binary hash.
@@ -193,3 +230,35 @@ manifest inside the artifact records the host and binary hash.
 Adding a rung is the same operation: add its parameter file (with
 `baseline.rho` on) to the `run` step and to a new reference. The gate refuses a
 rung that was run but not frozen and a frozen rung that was not run.
+
+## Archived `n = 61` references (from #506)
+
+#506 froze a four-rung ladder that adds `docs/ic/params/k0n61-subgroup-wide.json`
+to the three v4-era rungs. Its two references were named `v3` and `v4` on that
+branch, which collided with main's `v3` and `v4`; they are kept under
+**`ic-e2e-reference-n61-v3.json`** (dev host) and
+**`ic-e2e-reference-n61-v4.json`** (GitHub `ubuntu-latest` runner). They are
+archived inputs, not the gated reference: the workflow gates against
+`ic-e2e-reference-v5.json` above. The run records in `runs/` that this ladder
+produced keep the `reference` path they were recorded with, so their `v3`/`v4`
+mean these `n61` files. The records and a report over them come from
+`scripts/ic_e2e_history.py`.
+
+| rung | base | `n` | log₂ r | targets | ρ/IC whole-process, dev host → CI runner | crosses ρ e2e |
+|:--|:--|--:|--:|--:|:--|:--|
+| `docs/ic/params/k0n31.json` | pruned divisor, 35 columns | 31 | 20.5 | 32 | 0.03 → 0.04 | no |
+| `docs/ic/params/k0n41-subgroup.json` | subgroup, 5248 points | 41 | 39.0 | 32 | 2.70 → 2.26 | yes |
+| `docs/ic/params/k0n53-subgroup.json` | subgroup, 15264 points | 53 | 44.3 | 32 | 2.50 → 2.03 | yes |
+| `docs/ic/params/k0n61-subgroup-wide.json` | subgroup, 36112 points, compact table, 2-summand descent | 61 | 47.2 | 32 | 1.87 → 1.77 | yes |
+
+Every pinned counter is identical across the two `n61` references, including
+the 652,056,328-entry compact pair table at `n = 61`. The four rungs take about
+3.5 min on the runner's four cores; the `n = 61` rung peaks at 4.5 GB of
+resident memory.
+
+Read the ladder down the rows: at a fixed batch of 32 targets the whole-process
+margin over ρ **shrinks** as the subgroup grows, 2.26 → 2.03 → 1.77 from 39 to
+47 bits, while the charged (descent-only) ratio rises 10.8 → 26 → 76. That is
+the §5 lesson in one table: the stage number improves as the method's
+end-to-end standing worsens, because precomputation grows faster than the
+descent saves.

@@ -107,6 +107,27 @@ def stage_diagnostics(rows):
     return result
 
 
+def reference_ratios(tables, *, versioned):
+    """Use observed costs when online IC denominators differ between roles."""
+    by_name = {row['alias']: row for row in tables}
+    for row in tables:
+        online_ref = by_name.get('rho_online', {}).get('online_over_ic')
+        cold_ref = by_name.get('rho', {}).get('cold_Ir_over_ic')
+        row['rho_online_over_IC_online'] = online_ref/row['online_over_ic'] if online_ref and row['online_over_ic'] else None
+        row['cold_Ir_over_cold_rho'] = row['cold_Ir_over_ic']/cold_ref if cold_ref and row['cold_Ir_over_ic'] else None
+        if versioned:
+            comp = row.get('comparison') or {}
+            row['online_ic_reference'] = comp.get('metric_references', {}).get('online_ns', 'incumbent')
+            # Every complete arm has the same points and process repetitions,
+            # so the equal-cell geometric cost aggregates have a common law.
+            # Dividing ratios to incumbent and ic_online would not cancel.
+            rho = by_name.get('rho_online', {})
+            numerator, denominator = rho.get('online_ms'), row.get('online_ms')
+            row['rho_online_over_IC_online'] = (numerator/denominator
+                if rho.get('complete') and row['complete']
+                and numerator is not None and denominator is not None else None)
+
+
 def export(root):
     c = read(root/'contract.json')
     decision = read(root/'decision.json')
@@ -115,6 +136,7 @@ def export(root):
             'bounded-improvement-20260924-v2'):
         raise ValueError('not a bounded improvement round')
     fixtures = read(root/'fixtures.json')
+    versioned = c['purpose'] == 'bounded-improvement-20260924-v2'
     stages, runs = {}, []
     for stage in c['stages']:
         summary = read(root/'summaries'/f'{stage}.json')
@@ -123,6 +145,7 @@ def export(root):
             raise ValueError('receipt count differs from audited summary')
         comparisons = {v['candidate']:v for v in summary['comparisons']}
         comparisons.update(summary.get('rho_comparisons', {}))
+        comparisons.update(summary.get('ic_reference_comparisons', {}))
         aliases = sorted({r['arm'] for r in rows}, key=lambda a:(a!='incumbent',a))
         tables = []
         for alias in aliases:
@@ -173,13 +196,7 @@ def export(root):
                 actual_B_columns_rank={k:[list(v) for v in sorted(values,key=repr)] for k,values in sorted(shapes.items())},
                 stage_diagnostics=stage_diagnostics(selected) if mode == 'ic' else None,
                 comparison=comp))
-        by_name={v['alias']:v for v in tables}
-        # Ratios of equal-cell geometric means preserve the matched point law.
-        for row in tables:
-            online_ref=by_name.get('rho_online',{}).get('online_over_ic')
-            cold_ref=by_name.get('rho',{}).get('cold_Ir_over_ic')
-            row['rho_online_over_IC_online'] = online_ref/row['online_over_ic'] if online_ref and row['online_over_ic'] else None
-            row['cold_Ir_over_cold_rho'] = row['cold_Ir_over_ic']/cold_ref if cold_ref and row['cold_Ir_over_ic'] else None
+        reference_ratios(tables, versioned=versioned)
         stages[stage]=dict(table=tables,failures=summary['failures'],paired_online=summary.get('single_target_online'),
             retained_portfolio=summary.get('retained_portfolio'),provisional_challenger=summary.get('provisional_challenger'),
             runs=summary['runs'],verified_runs=summary['verified_runs'])

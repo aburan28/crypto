@@ -215,6 +215,19 @@ exceeds WDSat's static allocation and the process dies before printing. That is 
 tool boundary, not a statement about the encoding, and the incidence panel here
 stays incomplete.
 
+**Followed up again 2026-09-20, on the real curve.** [`solver_16`](solver_16/RESULTS.md)
+compiles the norm encoding and Trimoska's S′4 by Weil descent in a polynomial
+basis with `V = {deg x < d}` at `n = 131`, so both fit every solver, and gives
+them to CryptoMiniSat (native XOR, conflicts recovered by bisection on
+`confl_limit`) and WDSat with pair enumeration as the null object. The SAT
+exhaustion is one conflict for `d ≤ 6` (the linear certificate of §9 of the
+panel note), 839 at `d = 7`, 312,231 at `d = 8` (37× the abscissa pairs) and
+censored from `d = 9`; the norm encoding costs 10³–10⁴× S′4 on matched
+instances and is censored where S′4 takes 0.03 s, because its coefficient
+equations are F₂-linear and hide the certificate from the solver. WDSat's `-x`
+mode is shown incomplete at `n = 131`. The SAT route on this descended system
+is closed as an exponent lead; see the note's §11.
+
 Both complete backends recovered the same 947 **projected x-tuples**, summed
 over the 110 target cases. The Semaev frontend also produced five non-liftable
 models in the n=5, weight=2 panel; they were rejected, blocked and retained in
