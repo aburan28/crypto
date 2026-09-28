@@ -94,7 +94,10 @@ def dpStride(path):
     """(first record offset, record size) for a corpus file, by its magic."""
     try:
         with open(path, "rb") as fh:
-            if fh.read(len(DP_MAGIC_V2)) == DP_MAGIC_V2:
+            magic = fh.read(len(DP_MAGIC_V2))
+            if magic == DP_MAGIC_TABLE3:
+                return DP_HEADER_BYTES, RECORD_BYTES
+            if magic == DP_MAGIC_V2:
                 return DP_HEADER_BYTES, RECORD_BYTES_V2
     except OSError:
         pass
@@ -119,6 +122,7 @@ SPOOL_MAX_BYTES = 2 * 1024 * 1024 * 1024   # unsent points a worker may hold
 # after it.
 RECORD_BYTES_V2 = 72
 DP_MAGIC_V2 = b"ECC2KDP2"
+DP_MAGIC_TABLE3 = b"ECC2KDT3"
 DP_HEADER_BYTES = 16
 CKPT_MAGIC = b"ECC2K130"
 CKPT_ITER_OFFSET = 32      # magic[8] + version, m, threads, batch, lanes, runId (u32 each)

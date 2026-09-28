@@ -1,0 +1,8 @@
+{
+  "archive_bytes": 962898,
+  "archive_sha256": "12b28300fc24436b977d62c32763b307fc08c9cf8f031af21f01de926fe4ac58",
+  "classification": "COMPLETE_FIXED_STREAM_NO_CROSSOVER",
+  "files": 35,
+  "panel_sha256": "19b29020d9153535917a834637936a042e0f50e36d1c758e3befde7b10acd59a",
+  "reassembly": "tar -xzf evidence.tar.gz && shasum -a 256 -c SHA256SUMS"
+}

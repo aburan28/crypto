@@ -24,6 +24,10 @@
 #   PACKED_CLMUL_FLAT  issue 128-bit Karatsuba as 3x lo then 3x hi clmad
 #   PACKED_PAIR_CLMUL  twelve-clmad interleaved pair product (default 0)
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
+#   PACKED_SQUARE_TABLE  lambda^2 with its reduced half from a shared table
+#                        (default 0; table walk only; ROOFLINE.md)
+#   PACKED_INV_POLY  inversion accumulator kept in the polynomial basis
+#                    (default 0; 2 = link product out of line; ROOFLINE.md)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
 #   TABLE_ADDEND_GLOBAL  table-walk addends from global, selection in shared
 #   TABLE_TAG_DENOM  reverse pass rebuilds d from the tag in hist; no
@@ -31,11 +35,16 @@
 #   TABLE_FUSED  one fused pass per step, alternating slot order (default 0)
 #   TABLE_PIPE_SELECT  forward pass issues slot k's products before slot k+1's
 #                      selection (default 0)
+#   TABLE_PHASE_POPC  phase via eight L-bit popc planes (default 0;
+#                     CHEAPER-SELECTION.md)
 #   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
+#   PACKED_CHAINS  independent Montgomery chains per thread, 1 or 2 (default 1;
+#                  TWO-CHAINS.md; 2 needs TAG_DENOM and an even BATCH)
 #   PHASE_PROFILE  clock64() timing of the walk's three phases, at exit
 #   ARCH     CUDA architectures
 #
-# `make gpu-rtx-pro6000-20b` is the 20 B/s build of ONE-BLOCK-GEOMETRY.md.
+# `make gpu-rtx-pro6000-20b` is the 20 B/s build of ONE-BLOCK-GEOMETRY.md;
+# `make gpu-rtx-pro6000-chains2` its two-chain form (TWO-CHAINS.md).
 
 MODAL   ?= modal
 NVCC    ?= nvcc
@@ -90,6 +99,9 @@ PACKED_ALU_SQR ?= 0
 WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
 TABLE_PIVOT_BYTES ?= 0
+# Phase via eight L-bit popc planes instead of 17 byte-table lookups
+# (CHEAPER-SELECTION.md). Off by default.
+TABLE_PHASE_POPC ?= 0
 # Read the table from global memory instead of a per-block shared copy.
 # Drops the 48 KB smem tax so 80-register builds can resident 3 blocks on
 # this SKU's 100 KB/SM; random table lookups then miss the LDS pipe.
@@ -110,8 +122,19 @@ PHASE_PROFILE ?= 0
 TABLE_PIPE_SELECT ?= 0
 # Reverse pass issues the chain product before lambda's.
 PACKED_CHAIN_FIRST ?= 0
+# Two independent Montgomery chains of BATCH/2 slots per thread, interleaved
+# slot by slot with a paired inversion (TWO-CHAINS.md).  Needs TAG_DENOM and
+# an even BATCH; BATCH=32 keeps the one-chain BATCH=16 inversion share.
+PACKED_CHAINS ?= 1
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
+# The polynomial square with coefficients 66..130 looked up in an 8 KB shared
+# table instead of spread and reduced (ROOFLINE.md; table walk only).
+PACKED_SQUARE_TABLE ?= 0
+# The walk's inversion with the Itoh-Tsujii accumulator kept in the
+# polynomial basis: one conversion per link instead of three (ROOFLINE.md).
+# 1 inlines the eight links; 2 shares one out-of-line copy of their product.
+PACKED_INV_POLY ?= 0
 # Carry the eight per-branch step counts that make a distinguished point
 # payable on cairn (CAIRN-WITNESS.md).  WITNESS=0 compiles the counting out
 # and is the control for the paired comparison that prices it; it also keeps
@@ -215,10 +238,14 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_ALU_SQR=$(PACKED_ALU_SQR) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
+       -DECC_TABLE_PHASE_POPC=$(TABLE_PHASE_POPC) \
        -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
+       -DECC_PACKED_CHAINS=$(PACKED_CHAINS) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
+       -DECC_PACKED_SQUARE_TABLE=$(PACKED_SQUARE_TABLE) \
+       -DECC_PACKED_INV_POLY=$(PACKED_INV_POLY) \
        -DECC_WITNESS=$(WITNESS)
 
 all: cpu
@@ -290,15 +317,15 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testnativebench.py'
 	python3 -m unittest discover -s codegen -p 'testirschedule.py'
 	python3 -m unittest discover -s codegen -p 'testwdsat.py'
+	python3 -m unittest discover -s codegen -p 'testlambdaprojective.py'
 
-# The iteration exploits an automorphism group of order 2m, and the usual price
-# for that is fruitless cycles.  This iteration cannot have them -- it is
-# equivariant, so it needs no canonical representative and has nothing for a
-# sign to feed back through -- but the arithmetic coincidence that would still
-# produce one is checkable, so check it, for every curve, on every change to the
-# step schedule.
+# Exhaustively rule out sigma-walk orbit returns through CYCLE_LENGTH.
+# Equivariance alone does not rule out cycles. This check does not cover the
+# additive table walk; test-cycle-rule and test-cycle-escape cover its policy.
+CYCLE_LENGTH ?= 24
 check-cycles:
-	cd codegen && python3 cycles.py --max-length 8
+	cargo run --release --quiet --manifest-path ../Cargo.toml --bin ecc2k-guard -- \
+	    cycles --max-length $(CYCLE_LENGTH)
 
 # SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
 # `test` because it needs solvers the rest of the repo does not:
@@ -346,6 +373,7 @@ test-production: ecc2k130-cpu build/test-production
 	./build/test-production
 	python3 -m unittest discover -s aws -p test_certification.py -v
 	python3 -m unittest discover -s aws -p test_bootstrap_contract.py -v
+	python3 -m unittest discover -s aws -p test_campaign_guard.py -v
 	python3 -m unittest discover -s aws -p test_worker_family.py -v
 	python3 -m unittest discover -s aws -p test_status_walks.py -v
 	python3 -m unittest discover -s aws -p test_fleet_roll.py -v
@@ -472,15 +500,54 @@ test-shared-sigma-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testsharedsigmacuda.cu -o build/test-shared-sigma-cuda
 	./build/test-shared-sigma-cuda
 
+# The table walk's cycle rule on its own: every tau-relation 4-cycle and every
+# pairwise cycle up to 8 steps refused, the rule a class function
+# (WALK-CONSTANT.md section 11).  No curve, a second.
+test-cycle-rule:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wno-unused-function src/testcyclerule.cpp -o build/test-cycle-rule
+	./build/test-cycle-rule
+
 # Device primitives of the table walk against the host reference; needs a GPU.
 # The same probe on the host, for both selection layouts, so a layout change
-# is held to the reference before any GPU sees it.
+# is held to the reference before any GPU sees it.  PHASE_POPC is checked on
+# top of each pivot layout (CHEAPER-SELECTION.md).
+TABLE_PROBE_POINTS ?= 4096
 test-table-walk-host:
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -Wno-unknown-pragmas -Wno-unused-function src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble
-	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -Wno-unknown-pragmas -Wno-unused-function src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -DECC_TABLE_PHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -DECC_TABLE_PHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble-popc
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes-popc
 	./build/test-table-walk-host-nibble
 	./build/test-table-walk-host-bytes
+	./build/test-table-walk-host-nibble-popc
+	./build/test-table-walk-host-bytes-popc
+
+# Host static price of twPhase byte-table vs popc planes (CHEAPER-SELECTION.md).
+test-phase-cost:
+	mkdir -p build
+	$(CXX) -O3 -std=c++17 -DPHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function src/testphasecost.cpp -o build/test-phase-cost-table
+	$(CXX) -O3 -std=c++17 -DPHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function src/testphasecost.cpp -o build/test-phase-cost-popc
+	./build/test-phase-cost-table
+	./build/test-phase-cost-popc
+
+# GPU paired measurement of TABLE_PHASE_POPC (needs Modal/RunPod/AWS + a 6000).
+#   make bench-cheaper-selection OUT=/tmp/cheaper-selection
+bench-cheaper-selection:
+	@test -n "$(OUT)" || (echo "usage: make bench-cheaper-selection OUT=DIR"; exit 1)
+	modal run --detach modal_job.py --job benchmarks/cheaper-selection/gpujob.sh --out "$(OUT)" --gpu "RTX PRO 6000"
+
+# The walks' iteration constants on the device walks' own host reference
+# (WALK-CONSTANT.md): the n = 23 rows of benchmarks/walk-constant, at the
+# campaign's H = 8.  About ten minutes on four cores; not part of `test`.
+WALK_CONSTANT_FLAGS = -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -Wno-unknown-pragmas -Wno-unused-function -pthread
+walk-constant:
+	mkdir -p build
+	$(CXX) $(WALK_CONSTANT_FLAGS) -DECC_TABLE_BRANCHES=8 src/walkconstant.cpp -o build/walk-constant-host-h8
+	$(CXX) $(WALK_CONSTANT_FLAGS) -DECC_TABLE_BRANCHES=16 src/walkconstant.cpp -o build/walk-constant-host-h16
+	for d in ecc2k130 native; do ./build/walk-constant-host-h8 --n 23 --walk table --dist $$d --walks 8 --trials 20000 --seed 230; done
+	for d in ecc2k130 native; do ./build/walk-constant-host-h8 --n 23 --walk sigma --dist $$d --walks 8 --trials 20000 --seed 230; done
 
 test-table-walk-cuda:
 	mkdir -p build
@@ -505,7 +572,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule test-cycle-escape check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -595,19 +662,72 @@ bench-rtx-pro6000:
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
+# Architecture of the two RTX PRO 6000 builds below.  Override to run the same
+# knob set on another part, e.g. PRO6000_ARCH="-gencode arch=compute_100,code=sm_100"
+# for a B200 (benchmarks/fast-clmad/gpujob.sh derives it from the compute capability).
+PRO6000_ARCH ?= -gencode arch=compute_120,code=sm_120
 # The 20 B/s configuration of ONE-BLOCK-GEOMETRY.md: the table walk in one
 # 512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt
 # from the step tag, the products inlined, the forward pass software-pipelined.
 # Local nvcc build (CUDA 13.3+); measured 20.08 B/s median on an RTX PRO 6000.
-gpu-rtx-pro6000-20b:
-	$(MAKE) -B ecc2k130 ARCH="-gencode arch=compute_120,code=sm_120" \
-	    BATCH=16 THREADS=512 MINBLOCKS=1 \
+# ALU squaring is on in this preset.  The value is expanded into the child
+# make, so a command-line PACKED_ALU_SQUARE reaches the build.
+# The knob set itself, so the recipe below and gpu-preset cannot drift apart.
+PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
 	    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
 	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
 	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
-	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=1 \
+	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
 	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 PACKED_CHAIN_FIRST=1 \
+	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
+gpu-rtx-pro6000-20b: PACKED_ALU_SQUARE = 1
+gpu-rtx-pro6000-20b:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS)
+
+# The same knob set with overrides appended: on a make command line the last
+# assignment of a variable wins, so every knob and the geometry are reachable
+# from KNOBS, which the recipes above cannot offer for the values they name.
+#   make gpu-preset KNOBS="THREADS=256 MINBLOCKS=2 PACKED_TOP_CLMAD=1"
+# benchmarks/autosweep/gpujob.sh builds its arms this way.
+gpu-preset: PACKED_ALU_SQUARE = 1
+gpu-preset:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
+
+# The RTX PRO 4500 build of POWER-BOUND.md: the 20 B/s knob set with one fused
+# pass per step, which does the same work per clock as the 20 B/s build and
+# 7% more per joule; on a 165 W part that sits on its power limit, per joule is
+# the rate.  Predicted 7.2 - 7.4 B/s on a 4500 (receipts: 5.107 / 5.552);
+# measured only on an RTX PRO 6000 so far.  RTX4500_EXTRA adds knobs, e.g.
+# PACKED_ALU_SQUARE=0 for the second arm POWER-BOUND.md section 4 names.
+RTX4500_EXTRA ?=
+gpu-rtx-pro4500:
+	$(MAKE) gpu-preset KNOBS="TABLE_FUSED=1 TABLE_PIPE_SELECT=0 $(RTX4500_EXTRA)"
+
+# The B200 build the automatic sweep of AUTOSWEEP.md found (sm_100): the 20 B/s
+# knob set with the products' 3-bit correction on the carry-less unit as a
+# three-limb Karatsuba, the squaring on the unit, the ONB inversion, one fused
+# pass per step, and batch 32.  19.40 B/s median on one B200, verified.
+gpu-b200-19b:
+	$(MAKE) gpu-preset PRO6000_ARCH="-gencode arch=compute_100,code=sm_100" \
+	    KNOBS="PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_KARAT3=1 TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=512 MINBLOCKS=1"
+
+# The two-chain form of the 20 B/s build (TWO-CHAINS.md): the same arithmetic
+# and the same state footprint per SM, as 256 threads x 32 slots in two
+# interleaved chains of 16 instead of 512 threads x one chain of 16.
+# CHAINS2_THREADS and CHAINS2_BATCH are the geometry knobs of that note.
+CHAINS2_THREADS ?= 256
+CHAINS2_BATCH ?= 32
+gpu-rtx-pro6000-chains2: PACKED_ALU_SQUARE = 1
+gpu-rtx-pro6000-chains2:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" \
+	    BATCH=$(CHAINS2_BATCH) THREADS=$(CHAINS2_THREADS) MINBLOCKS=1 \
+	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+	    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
+	    TABLE_TAG_DENOM=1 PACKED_CHAINS=2 \
 	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
 
 # Ada preset for the EC2 g6 (L4) and g6e (L40S) instance types, both sm_89.
@@ -783,5 +903,15 @@ clean:
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
+	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+
+# Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
+test-cycle-escape:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas src/testcycleescape.cpp -o build/test-cycle-escape
+	./build/test-cycle-escape
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-hybrid
+	./build/test-cycle-escape-hybrid
+.PHONY: test-cycle-escape

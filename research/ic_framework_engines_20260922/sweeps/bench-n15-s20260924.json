@@ -1,0 +1,39 @@
+{
+ "_what": "Matched whole-pipeline suite (ledger 17.2): E(F_2^15), binary-subspace dimension 8 (16 boolean unknowns at m=2), two planted targets, the pair table as the oracle reference row, then the descent oracle once per engine. Seed 20260924 picks the curve and the targets.",
+ "instance": {
+  "regime": "char2",
+  "degree": 15,
+  "max_cofactor": 8
+ },
+ "repeats": 2,
+ "seed": 20260924,
+ "configurations": [
+  {
+   "factor_base": "binary-subspace:dimension=8",
+   "oracle": "mitm:m=2",
+   "targets": "walk"
+  }
+ ],
+ "matrix": {
+  "factor_base": [
+   "binary-subspace:dimension=8"
+  ],
+  "oracle": [
+   "descent-algebraic:m=2"
+  ],
+  "solver": [
+   "buchberger-f2",
+   "f4-f2",
+   "matrix-f4",
+   "matrix-f5",
+   "inherited-f4",
+   "crossbred-f2",
+   "fes-f2",
+   "exhaustive",
+   "sat-cdcl"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

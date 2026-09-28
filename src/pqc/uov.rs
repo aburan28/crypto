@@ -112,7 +112,7 @@ fn transpose(a: &Matrix) -> Matrix {
 /// Returns `None` if `A` is singular.
 fn solve(a: &Matrix, b: &[u8]) -> Option<Vec<u8>> {
     let n = a.len();
-    let mut m: Matrix = a.iter().cloned().collect();
+    let mut m: Matrix = a.to_vec();
     let mut rhs = b.to_vec();
     for col in 0..n {
         let pivot = (col..n).find(|&r| m[r][col] != 0)?;
@@ -153,7 +153,7 @@ fn random_invertible(n: usize) -> (Matrix, Matrix) {
 
 fn invert(a: &Matrix) -> Option<Matrix> {
     let n = a.len();
-    let mut m: Matrix = a.iter().cloned().collect();
+    let mut m: Matrix = a.to_vec();
     let mut inv = zero_matrix(n, n);
     for (i, row) in inv.iter_mut().enumerate() {
         row[i] = 1;
