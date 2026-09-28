@@ -156,15 +156,16 @@ def sections(data):
         'reconstruct every export and pass all eleven frozen audits without worker execution. '
         'The verifier has not been weakened to accommodate the local difference.')
     prose('Next bounded research step',
-        'Do not redispatch this qualification or sealed round one. Bind the reviewed observer '
-        'evidence and separate cold/online IC and rho leaders in a new versioned reference contract. '
-        'Then freeze round two with seed 2026092552 and fresh candidate combinations, retaining '
-        'diverse alternatives and an exploration slot rather than discarding every local loser. '
-        'Exclude all 25 exposed points in fixtures.json, including A/A and smoke, in addition to '
-        'all earlier exposed panels. The n29a1 holdout was not generated or inspected here. '
-        'Promotion still requires fresh confirmation and replay under the predeclared familywise '
-        'rule, at least 20% lower complete cold Ir and cold native time, no online regression, '
-        'no cell regression above 10%, and independently verified answers. Two rounds remain.')
+        'Do not redispatch this qualification, sealed round one, or sealed round two. The reviewed '
+        'observer evidence and separate cold/online IC and rho leaders remain bound in the '
+        'version-two reference contract. Round two completed under seed 2026092552 and retained '
+        'the incumbent; selected stop5_word failed the frozen familywise and complete-cost gates. '
+        'Exclude all exposed points from that round and earlier panels, including the readiness, '
+        'qualification and adapter-control corpora. A third attempt needs a new registered panel '
+        'and seed; never retune on confirmation or replay. Promotion still requires fresh '
+        'confirmation and replay under the predeclared familywise rule, at least 20% lower '
+        'complete cold Ir and cold native time, no online regression, no cell regression above '
+        '10%, and independently verified answers. One round remains.')
     return result
 
 
