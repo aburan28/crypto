@@ -556,7 +556,11 @@ mod tests {
                 "verification tracks the challenge endpoint and nothing else: \
                  message {i} was {} with endpoint {}",
                 if accepted { "accepted" } else { "rejected" },
-                if end == signed_end { "unchanged" } else { "moved" }
+                if end == signed_end {
+                    "unchanged"
+                } else {
+                    "moved"
+                }
             );
             rejected += usize::from(!accepted);
         }
@@ -577,7 +581,10 @@ mod tests {
     #[test]
     fn the_toy_graph_sets_the_false_accept_rate() {
         let vertices = graph().adj.len();
-        assert_eq!(vertices, 37, "p = 431 puts 37 supersingular j-invariants here");
+        assert_eq!(
+            vertices, 37,
+            "p = 431 puts 37 supersingular j-invariants here"
+        );
         let (pk, sk) = sqisign_keygen();
         let sig = sqisign_sign(&pk, &sk, b"original message");
         let trials = 4000;
