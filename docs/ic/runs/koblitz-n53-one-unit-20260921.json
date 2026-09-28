@@ -740,9 +740,9 @@
   "core_cost_reading": "IC-only total core-seconds are measured directly. The one-target rho is single-threaded, but its process CPU was not sampled as a separate report field; the whole-process wall crossover is not a core-second crossover."
  },
  "gates": {
-  "algebraic_factor_base_and_charged_resources": "partial_pass_native_selection_counts_added_licensed_magma_missing",
+  "algebraic_factor_base_and_charged_resources": "partial_pass_native_selection_and_phase_cpu_counts_added_licensed_magma_missing",
   "same_instance_solver_matrix": "not_run_here",
-  "wall_core_memory_reporting": "partial_pass_current_single_core_refresh_added_magma_missing",
+  "wall_core_memory_reporting": "partial_pass_current_single_core_and_phase_cpu_added_magma_missing",
   "n31_n41_larger_pdp_scaling": "not_run_here",
   "unknown_scalar_without_constructed_factor_base_logs": "finite_pass",
   "full_cost_vs_automorphism_rho": "parallel_wall_pass_4_of_5_single_target_single_core_and_total_core_fail_32_target_batch_pass",
@@ -1157,9 +1157,9 @@
   }
  },
  "science_process_accounting": {
-  "processes": 101,
-  "sequential_wall_seconds": 311.139654002,
-  "total_core_seconds": 1159.24267,
+  "processes": 103,
+  "sequential_wall_seconds": 318.046582585,
+  "total_core_seconds": 1184.8914760000002,
   "peak_rss_bytes": 139853824,
   "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count diagnostic, factor-base-width diagnostic, collection-window diagnostic, and rejected reusable-scratch A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
   "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
@@ -1222,5 +1222,82 @@
    }
   },
   "reading": "The workflow now emits native subgroup-orbit construction counts on fresh and resumed materialization. Timing already charged selection wall and process resources; these counters expose what that phase did without changing the base or solver."
+ },
+ "current_head_phase_resource_replay": {
+  "source_commit": "00080dfd",
+  "binary_blake3": "f9931bdeb1d4e8ed4c0fa8a965b6575ca39e3c13a4c58ddba57f1e3a330b0af9",
+  "stages": [
+   {
+    "stage": "select",
+    "status": "complete",
+    "ran": true,
+    "wall_seconds": 0.271455625,
+    "cpu_seconds": 1.057332,
+    "peak_rss_bytes_at_end": 23003136
+   },
+   {
+    "stage": "collect",
+    "status": "complete",
+    "ran": true,
+    "wall_seconds": 0.862095333,
+    "cpu_seconds": 7.776439,
+    "peak_rss_bytes_at_end": 93913088,
+    "subphases": {
+     "pair_table_build": {
+      "wall_seconds": 0.317252375,
+      "cpu_seconds": 3.2593150000000004,
+      "peak_rss_bytes_at_end": 92700672
+     },
+     "relation_unit": {
+      "wall_seconds": 0.487008459,
+      "cpu_seconds": 4.472336,
+      "peak_rss_bytes_at_end": 93913088
+     }
+    }
+   },
+   {
+    "stage": "logs",
+    "status": "complete",
+    "ran": true,
+    "wall_seconds": 0.160044334,
+    "cpu_seconds": 1.051146000000001,
+    "peak_rss_bytes_at_end": 95436800
+   },
+   {
+    "stage": "solve",
+    "status": "complete",
+    "ran": true,
+    "wall_seconds": 0.106963584,
+    "cpu_seconds": 0.9036300000000015,
+    "peak_rss_bytes_at_end": 95518720
+   },
+   {
+    "stage": "baseline",
+    "status": "complete",
+    "ran": true,
+    "wall_seconds": 1.585445958,
+    "cpu_seconds": 1.580718000000001,
+    "peak_rss_bytes_at_end": 95551488
+   }
+  ],
+  "stage_cpu_sum": 12.369265000000004,
+  "whole_process_cpu_seconds": 12.380427000000001,
+  "unattributed_cpu_seconds": 0.011161999999997008,
+  "whole_process_wall_seconds": 2.992156708,
+  "whole_process_peak_rss_bytes": 95567872,
+  "selection_cost": {
+   "abscissae_drawn": 695,
+   "cofactor_multiplications": 344,
+   "frobenius_squarings": 18232,
+   "lifts_found": 344,
+   "rebuilds": 1
+  },
+  "trials": 17000,
+  "summands_scanned": 19363000,
+  "relations": 588,
+  "recovered_scalar": 7892094459170,
+  "verified": true,
+  "rho_over_ic_wall_ratio": 1.2354096675370514,
+  "reading": "Stage CPU deltas reconcile to the top-level process total. Collection now separates pair-table construction from the relation unit; RSS fields remain cumulative process high-water marks, not phase-local allocation peaks or deltas."
  }
 }
