@@ -18,8 +18,8 @@ use std::fs;
 
 use crypto_lib::cryptanalysis::glv_gaudry::{
     generate_j0_instance3, run_canonical_experiment, run_graded_experiment,
-    run_invariant_experiment, run_quotient_experiment, CanonicalReport, GradedReport,
-    InvariantReport, QuotientReport,
+    run_invariant_experiment, run_quotient_experiment_with_rho, run_veronese_experiment,
+    CanonicalReport, GradedReport, InvariantReport, QuotientReport, VeroneseReport,
 };
 use serde::Serialize;
 
@@ -31,6 +31,7 @@ enum Row {
     Canonical { seed: u64, report: CanonicalReport },
     Graded { seed: u64, report: GradedReport },
     Invariant { seed: u64, report: InvariantReport },
+    Veronese { seed: u64, report: VeroneseReport },
 }
 
 fn main() {
@@ -50,6 +51,7 @@ fn main() {
     let mut f4_max_degree = 14u32;
     let mut f4_budget = 120.0f64;
     let mut cell_cap = 1u64 << 27;
+    let mut rho_runs = 1u32;
     let mut i = 0;
     while i < args.len() {
         let next = |i: &mut usize| -> String {
@@ -79,6 +81,7 @@ fn main() {
             "--f4-max-degree" => f4_max_degree = next(&mut i).parse().expect("--f4-max-degree"),
             "--f4-budget" => f4_budget = next(&mut i).parse().expect("--f4-budget"),
             "--cell-cap" => cell_cap = next(&mut i).parse().expect("--cell-cap"),
+            "--rho-runs" => rho_runs = next(&mut i).parse().expect("--rho-runs"),
             other => {
                 eprintln!("unknown argument {other}");
                 std::process::exit(2);
@@ -93,7 +96,7 @@ fn main() {
             let n = glv.inst.curve.n;
             match exp.as_str() {
                 "quotient" => {
-                    let r = run_quotient_experiment(&glv, seed, max_residuals);
+                    let r = run_quotient_experiment_with_rho(&glv, seed, max_residuals, rho_runs);
                     for st in [&r.control, &r.quotient] {
                         println!(
                             "p={p:>5} n=2^{:5.1} seed={seed} {:<18} cols={:>5} rels={:>5} (zero {:>4} dup {:>4} merged {:>4}) residuals={:>6} nnz={:>7} avg_w={:>5.2} bytes={:>9} core={:>5}x nnz {:>7} LA attempts={} ops={:>10} wiedemann={:>8.1}ms | group_ops={:>9} oracle_muls={:>13} total_ops={:>12.0} S={:>9.1} floor_res={:>8.1} ratio={:>5.2} ok={:?}",
@@ -106,6 +109,10 @@ fn main() {
                         "         base={} orbits={} rate={:.3} solves={} unsolved={} Fp/add={:.1} peak_rss={} MB wall={:.0} ms | rho S={:.2} ok={:?}",
                         r.base, r.orbits, r.decomposition_rate, r.solve_stats.solves, r.solve_stats.unsolved,
                         r.fp_muls_per_add, r.peak_rss_bytes >> 20, r.wall_ms, r.rho.s, r.rho.correct
+                    );
+                    println!(
+                        "         rho over {} walks: S mean={:.2} min={:.2} max={:.2}; quotient S / rho mean = {:.0}x",
+                        r.rho_runs.len(), r.rho_s_mean, r.rho_s_min, r.rho_s_max, r.quotient.s / r.rho_s_mean
                     );
                     rows.push(Row::Quotient { seed, report: r });
                 }
@@ -228,6 +235,37 @@ fn main() {
                         );
                     }
                     rows.push(Row::Invariant { seed, report: r });
+                }
+                "veronese" => {
+                    let r =
+                        run_veronese_experiment(&glv, seed, residuals, f4_max_degree, f4_budget);
+                    println!(
+                        "p={p:>5} n=2^{:5.1} seed={seed} generators: {:?}; skipped {}",
+                        r.bits, r.generators, r.residuals_skipped
+                    );
+                    for row in &r.rows {
+                        println!(
+                            "  residual {} harness triples={:?} muls={} | equations={} (toric {}) witnessed={:?} ({})",
+                            row.residual_index, row.harness_triples.as_ref().map(|t| t.len()), row.harness_fp_muls,
+                            row.equations, row.toric_relations, row.witnessed, row.witnesses
+                        );
+                        for s in [
+                            &row.ordinary_f4_basis,
+                            &row.orbit_f4_basis,
+                            &row.veronese_f4_basis,
+                        ] {
+                            println!(
+                                "    basis-only F4 {}: D_max={} D_reach={} max={}x{} basis={:?} staircase={:?} ops={} ms={:.0}{}",
+                                s.system, s.solving_degree_max, s.degree_reached, s.max_rows, s.max_cols, s.basis_size, s.staircase,
+                                s.field_ops, s.ms, if s.timed_out { " TIMED OUT" } else { "" }
+                            );
+                        }
+                        println!(
+                            "    mults vs ordinary {:?}, vs orbit {:?}",
+                            row.mults_vs_ordinary, row.mults_vs_orbit
+                        );
+                    }
+                    rows.push(Row::Veronese { seed, report: r });
                 }
                 other => {
                     eprintln!("unknown experiment {other}");

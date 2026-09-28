@@ -1161,6 +1161,12 @@ fn s4_symbolic(curve: &Curve3) -> KPoly {
     t1.mul(f, &t1).sub(f, &t2.mul(f, &t3))
 }
 
+/// The unsymmetrised `S₄(x₁, x₂, x₃, x₄)` of the curve as
+/// `[e₁, e₂, e₃, e₄] ↦ coefficient` terms (degree ≤ 4 in each slot).
+pub fn s4_terms(curve: &Curve3) -> HashMap<[u8; 4], E3> {
+    s4_symbolic(curve).terms
+}
+
 /// `S₄` symmetrised in `(x₁, x₂, x₃)`: a polynomial in
 /// `(e₁, e₂, e₃, x₄)` with `e₁ = x₁+x₂+x₃`, `e₂ = x₁x₂+x₁x₃+x₂x₃`,
 /// `e₃ = x₁x₂x₃`, total degree ≤ 4 in the `e`s, degree ≤ 4 in `x₄`.
