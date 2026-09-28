@@ -62,6 +62,13 @@
 //!   What survives — and what this module is for — is the exact
 //!   *protocol structure* and the verifier's job, which are the same as
 //!   in the real scheme.
+//! - The 37 vertices also bound what the verifier can bind.  A response
+//!   pins one endpoint `j(E₂)`, so a *tampered* message verifies whenever
+//!   its challenge walk ends where the signed one did: measured 0.02888
+//!   over 40,000 tampered messages against `1/37 = 0.02703`.  Real
+//!   parameters make that `2^-128` by making the vertex set exponentially
+//!   large.  `the_toy_graph_sets_the_false_accept_rate` holds it to the
+//!   vertex count rather than to zero.
 //!
 //! The same educational compromise as `pqc::csidh` (toy prime,
 //! brute-force point/root finding); see SECURITY.md.
@@ -520,11 +527,70 @@ mod tests {
         assert!(sqisign_verify(&pk, msg, &sig));
     }
 
+    /// Tampering is caught exactly when it moves the challenge endpoint.
+    ///
+    /// The response is checked against one vertex, `j(E₂)`, so a tampered
+    /// message verifies iff its challenge walk happens to end where the signed
+    /// one did.  At `p = 431` there are 37 vertices to end on and the endpoint
+    /// is near-uniform, so that is a ~1/37 coincidence rather than a forgery —
+    /// which is why this asserts the *relationship* instead of `!verify`.  As a
+    /// flat `assert!(!sqisign_verify(&pk, b"tampered message", &sig))` it failed
+    /// 7 runs in 200 (see `the_toy_graph_sets_the_false_accept_rate`).
     #[test]
     fn wrong_message_rejected() {
         let (pk, sk) = sqisign_keygen();
         let sig = sqisign_sign(&pk, &sk, b"original message");
-        assert!(!sqisign_verify(&pk, b"tampered message", &sig));
+        let signed_end = *challenge_walk(&pk.j, &sig.commitment, b"original message")
+            .last()
+            .unwrap();
+        let mut rejected = 0usize;
+        for i in 0..500 {
+            let msg = format!("tampered message {i}");
+            let end = *challenge_walk(&pk.j, &sig.commitment, msg.as_bytes())
+                .last()
+                .unwrap();
+            let accepted = sqisign_verify(&pk, msg.as_bytes(), &sig);
+            assert_eq!(
+                accepted,
+                end == signed_end,
+                "verification tracks the challenge endpoint and nothing else: \
+                 message {i} was {} with endpoint {}",
+                if accepted { "accepted" } else { "rejected" },
+                if end == signed_end { "unchanged" } else { "moved" }
+            );
+            rejected += usize::from(!accepted);
+        }
+        assert!(rejected > 0, "tampering must be caught for some message");
+    }
+
+    /// The toy parameters, not the protocol, set how often tampering slips
+    /// through: the graph has ⌊p/12⌋ + 1 = 37 vertices at `p = 431`, so a
+    /// tampered message lands back on the signed endpoint about 1/37 of the
+    /// time.  Measured 0.02888 over 40,000 tampered messages against
+    /// `1/37 = 0.02703`.  Real parameters make the same quantity `2^-128` by
+    /// making the vertex set exponentially large; here it is a property of the
+    /// prime and is asserted as one, generously enough that the assertion is
+    /// about the scheme and not about the sample: the band below is eight
+    /// standard deviations wide at these trial counts, and it would still fail
+    /// loudly for a verifier that stopped reading the message at all (rate 1)
+    /// or one that bound more than the endpoint (rate 0).
+    #[test]
+    fn the_toy_graph_sets_the_false_accept_rate() {
+        let vertices = graph().adj.len();
+        assert_eq!(vertices, 37, "p = 431 puts 37 supersingular j-invariants here");
+        let (pk, sk) = sqisign_keygen();
+        let sig = sqisign_sign(&pk, &sk, b"original message");
+        let trials = 4000;
+        let accepted = (0..trials)
+            .filter(|i| sqisign_verify(&pk, format!("tampered {i}").as_bytes(), &sig))
+            .count();
+        let rate = accepted as f64 / trials as f64;
+        let uniform = 1.0 / vertices as f64;
+        assert!(
+            rate > uniform / 4.0 && rate < uniform * 4.0,
+            "false-accept rate {rate:.5} is not the ~1/{vertices} = {uniform:.5} the \
+             vertex count implies; verification binds something other than the endpoint"
+        );
     }
 
     #[test]
