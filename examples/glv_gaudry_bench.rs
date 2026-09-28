@@ -209,6 +209,18 @@ fn main() {
                         println!("    F4 {}", f4(&row.invariant_f4));
                         println!("    F4 {}", f4(&row.orbit_f4));
                         println!("    F4 {}", f4(&row.function_first_f4));
+                        for s in [
+                            &row.ordinary_f4_basis,
+                            &row.invariant_f4_basis,
+                            &row.orbit_f4_basis,
+                            &row.function_first_f4_basis,
+                        ] {
+                            println!(
+                                "    basis-only F4 {}: D_max={} D_reach={} max={}x{} basis={:?} staircase={:?} ops={} ms={:.0}{}",
+                                s.system, s.solving_degree_max, s.degree_reached, s.max_rows, s.max_cols, s.basis_size, s.staircase,
+                                s.field_ops, s.ms, if s.timed_out { " TIMED OUT" } else { "" }
+                            );
+                        }
                         println!(
                             "    checks: ordinary F4 = harness {:?}; orbit = 3 × ordinary {:?}; function-first witnessed by harness triples {:?} ({} witnesses) [skipped residuals so far: {}]",
                             row.ordinary_f4_matches_harness, row.orbit_f4_triples_ordinary, row.function_first_witnessed, row.function_first_witnesses, r.residuals_skipped

@@ -1279,8 +1279,9 @@
   <div class="panel" id="glv-c3-levers">
     <div class="panel-head">
       <h2>GLV / C&#8323; levers on the <code>j = 0</code> subspace harness <span class="chip relabel">relabelling</span></h2>
-      <p>Frozen source: <code>experiments/22_glv_{canonical,graded,invariant}.json</code>, tables by
-        <code>scripts/glv_gaudry_tables.py</code>. Unit: <code>F_p</code> multiplications of one
+      <p>Frozen source: <code>experiments/22_glv_{canonical,graded,invariant}.json</code> (branch F4
+        engine) and <code>experiments/22_glv_{graded,invariant}_v2.json</code> (replay on the merged
+        engine), tables by <code>scripts/glv_gaudry_tables.py</code>. Unit: <code>F_p</code> multiplications of one
         point-decomposition solve on the same residuals, so the boundary is the ordinary
         symmetrised-S&#8324; solve at 1.0&times;. A C&#8323;-invariant formulation solves the
         whole orbit <code>{R, &psi;R, &psi;&sup2;R}</code>, whose three relations are
@@ -1297,9 +1298,9 @@
         <tbody>
           <tr><td>Ordinary symmetrised S&#8324; <em>(reference)</em>: Macaulay 252&times;286 at D = 10, dim 64</td><td class="n">6.1&middot;10<sup>5</sup> (harness 0.9&ndash;1.0&middot;10<sup>6</sup>)</td><td class="n">1.0&times;</td><td>yes</td><td><span class="chip">baseline</span></td></tr>
           <tr><td>C&#8323;-invariant coordinates <code>(e&#8321;/X, e&#8322;/X&sup2;, e&#8323;; c_R = X&sup3;)</code></td><td class="n">identical, term for term</td><td class="n">1.0&times;</td><td>yes</td><td><span class="chip">accounting</span></td></tr>
-          <tr><td>Z/3-graded orbit system <code>(e, z), z&sup3; = 1</code>, F4 plain</td><td class="n">1,668&times;1,632; single-degree Macaulay open at D = 19</td><td class="n">34&ndash;70&times;</td><td>yes, 3&times; solutions</td><td><span class="chip relabel">relabelling</span></td></tr>
-          <tr><td>&hellip; F4 block-aware by weight (14 blocked steps)</td><td class="n">3.0&times; fewer dense cells; 0.5&ndash;1.1&times; wall</td><td class="n">34&ndash;69&times; (0.986 of plain)</td><td>yes</td><td><span class="chip">engineering</span></td></tr>
-          <tr><td>Function-first Nagao <code>L(4O)</code> coefficient system, 9 unknowns</td><td class="n">10,641&times;8,789 at D = 8, unsolved at 120 s</td><td class="n">&gt; 3,000&times;, unsolved</td><td>witnessed, not solved</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>Z/3-graded orbit system <code>(e, z), z&sup3; = 1</code>, F4 plain</td><td class="n">1,668&times;1,632; single-degree Macaulay open at D = 19</td><td class="n">12&ndash;30&times; merged engine (34&ndash;70&times; branch)</td><td>yes, 3&times; solutions</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>&hellip; F4 block-aware by weight (14 blocked steps)</td><td class="n">3.0&times; fewer dense cells; 0.85&ndash;1.2&times; wall (0.5&ndash;1.1&times; on the branch engine)</td><td class="n">12&ndash;29&times; (0.95 of plain; 0.986 on the branch engine)</td><td>yes</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>Function-first Nagao <code>L(4O)</code> coefficient system, 9 unknowns</td><td class="n">132-element basis, staircase 64 (the same variety), 10,641&times;8,789 at D = 9</td><td class="n">3,110&times; (complete basis vs complete basis)</td><td>witnessed by every harness triple</td><td><span class="chip relabel">relabelling</span></td></tr>
           <tr><td>Canonical generation on a pair sieve <code>P_i + P_j</code></td><td class="n">95 % of rows fold to 0 = 0, 3 % unit-dependent</td><td class="n">&mdash;</td><td>337 duplicates verified, 0 mismatches</td><td><span class="chip">engineering</span></td></tr>
         </tbody>
       </table>
@@ -1311,7 +1312,7 @@
         three times the solutions and 456 of its 648 B&eacute;zout solutions at infinity. Block-aware
         elimination never multiplies across blocks that a sparse-aware elimination would have
         multiplied anyway, so it is a footprint lever (3&times;) and not a field-operation lever
-        (1.4 %). <code>S</code> is unchanged by everything in this panel.</p>
+        (1.4&ndash;5 %). <code>S</code> is unchanged by everything in this panel.</p>
     </div>
   </div>
 

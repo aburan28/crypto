@@ -133,6 +133,17 @@ def invariant(rows):
         for row in q["rows"]:
             for s in (row["ordinary_f4"], row["invariant_f4"], row["orbit_f4"], row["function_first_f4"]):
                 print(f"| {q['p']} | {row['residual_index']} | {s['system']} | {s['n_vars']} | {s['equations']} | {s['solving_degree']} | {s['degree_reached']} | {s['max_rows']:,} × {s['max_cols']:,} | {s['field_ops']:,} | {s['solutions'] if s['solutions'] is not None else 'not solved'} | {s['basis_size'] if s['basis_size'] is not None else '—'} | {s['ms']:.0f}{' (timed out at budget ' + str(q['f4_budget_secs']) + ' s)' if s['timed_out'] else ''} |")
+    if "ordinary_f4_basis" in rows[0]["report"]["rows"][0]:
+        print("\n#### Experiment 4 — complete grevlex Gröbner bases (basis-only F4, no substitution runs)\n")
+        print("| p | residual | system | unknowns | basis elements | staircase | highest productive degree | degree reached | max rows × cols | field mults | mults vs ordinary | ms |")
+        print("|---:|---:|:--|---:|---:|---:|---:|---:|:--|---:|---:|---:|")
+        for r in rows:
+            q = r["report"]
+            for row in q["rows"]:
+                o = row["ordinary_f4_basis"]
+                for s in (row["ordinary_f4_basis"], row["invariant_f4_basis"], row["orbit_f4_basis"], row["function_first_f4_basis"]):
+                    vs = f"{s['field_ops'] / o['field_ops']:.1f}×" if o["field_ops"] else "—"
+                    print(f"| {q['p']} | {row['residual_index']} | {s['system']} | {s['n_vars']} | {s['basis_size']} | {s['staircase']} | {s['solving_degree_max']} | {s['degree_reached']} | {s['max_rows']:,} × {s['max_cols']:,} | {s['field_ops']:,} | {vs} | {s['ms']:.0f}{' (timed out)' if s['timed_out'] else ''} |")
     checks = [(row["ordinary_f4_matches_harness"], row["orbit_f4_triples_ordinary"], row["function_first_witnessed"]) for r in rows for row in r["report"]["rows"]]
     print(f"\nChecks on every residual — ordinary F4 solutions = harness e-solutions: {all(c[0] for c in checks)}; orbit = 3 × ordinary: {all(c[1] for c in checks)}; function-first witnessed by every harness triple: {all(c[2] for c in checks)}.")
 

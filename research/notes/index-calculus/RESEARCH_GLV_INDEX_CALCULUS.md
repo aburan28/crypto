@@ -2,7 +2,7 @@
 
 **Module:** `src/cryptanalysis/glv_gaudry.rs` (engine changes in `f4_fp.rs`: field-op counter, weight-block reduction; `gaudry_cubic.rs`: `Curve3::new`, `SymmetrisedS4::terms`)
 **Bench:**  `cargo run --release --example glv_gaudry_bench -- --exp {quotient,canonical,graded,invariant} --sizes 271,541,1051[,2113] --seeds 2 --json experiments/22_glv_<exp>.json`
-**Data:**   `experiments/22_glv_{quotient,canonical,graded,invariant}.{json,log}`
+**Data:**   `experiments/22_glv_{quotient,canonical,graded,invariant}.{json,log}` (branch engine, 2026-09-18); `experiments/22_glv_{graded,invariant}_v2.{json,log}` (replay of the two F4-dependent experiments on the merged engine, 2026-09-28; experiments 1 and 2 replayed bit for bit and are not duplicated)
 **Tables:** `python3 scripts/glv_gaudry_tables.py experiments/22_glv_*.json` (every number below is printed by it from the frozen files)
 **Setting:** §11 of `RESEARCH_RESIDUAL_WALKS.md` (this directory) — Gaudry's subspace base `{P : x(P) ∈ F_p}` on `E(F_{p³})` with the `O(1)` symmetrised-`S₄` solve — on `j = 0` curves, where the order-3 automorphism `ψ(x, y) = (ωx, y)`, `ω ∈ F_p`, preserves the base.
 
@@ -19,13 +19,16 @@
 > its decompositions are `ψ`-conjugates of the pair itself and fold to
 > `0 = 0`.  The `Z/3` grading exists — `S₄` is `ψ`-invariant term by term
 > — but only on the *orbit* system, which has three times the solutions,
-> `50–70×` the F4 multiplications, and does not close under a single-degree
-> Macaulay truncation by degree `19`; block-aware elimination cuts its
-> dense footprint by `3×` and its multiplications by `1.4 %`.  The
+> `12–30×` the F4 multiplications (`34–70×` on the branch engine), and does
+> not close under a single-degree Macaulay truncation by degree `19`;
+> block-aware elimination cuts its dense footprint by `3×` and its
+> multiplications by `5 %` (`1.4 %` on the branch engine), with no wall-time
+> gain on the merged engine.  The
 > `C₃`-invariant formulation of the per-residual PDP is the ordinary
 > Semaev system term for term, and the function-first (Nagao `L(4O)`)
-> formulation is `> 30×` larger in every matrix dimension and unsolved at
-> a budget where the ordinary system solves in seconds.
+> formulation describes the same `64`-point variety with a `132`-element
+> Gröbner basis that costs `3,100×` the ordinary one to compute
+> (`10,641 × 8,789` against `221 × 277`).
 
 ## 1. Setting and what `ψ` does to the harness
 
@@ -232,24 +235,36 @@ solutions at infinity, and the single-degree affine truncation keeps
 finding new standard monomials (`348` at `D = 10`, `576` at `D = 19`)
 instead of settling at `192`.  Its degree-by-degree F4 does solve it:
 
-| system | F4 `D_solve` | max matrix | field mults (top run + p substitution runs) | solutions | blocked steps | mults vs ordinary | mults block / plain | ms block / plain |
-|:--|---:|:--|---:|---:|---:|---:|---:|---:|
-| ordinary | 10 | 221 × 277 | 6.2–13.3·10⁶ | 1–3 | 0 | 1.0× | — | — |
-| orbit, plain | 10 | 1,668 × 1,632 | 4.3–4.6·10⁸ | 3× ordinary | 0 | 34–70× | — | — |
-| orbit, block-aware | 10 | 1,668 × 1,632 | 4.3–4.5·10⁸ | 3× ordinary | 14 | 34–69× | 0.984–0.988 | 0.50–1.10 |
+| engine | system | F4 `D_solve` | max matrix | field mults (top run + p substitution runs) | solutions | blocked steps | mults vs ordinary | mults block / plain | ms block / plain |
+|:--|:--|---:|:--|---:|---:|---:|---:|---:|---:|
+| merged (`_v2`) | ordinary | 10 | 221 × 277 | 1.9–5.7·10⁶ | 1–3 | 0 | 1.0× | — | — |
+| merged (`_v2`) | orbit, plain | 10 | 1,668 × 1,632 | 5.9–7.2·10⁷ | 3× ordinary | 0 | 12–30× | — | — |
+| merged (`_v2`) | orbit, block-aware | 10 | 1,668 × 1,632 | 5.6–6.8·10⁷ | 3× ordinary | 14 | 12–29× | 0.945–0.954 | 0.85–1.21 |
+| branch | ordinary | 10 | 221 × 277 | 6.2–13.3·10⁶ | 1–3 | 0 | 1.0× | — | — |
+| branch | orbit, plain | 10 | 1,668 × 1,632 | 4.3–4.6·10⁸ | 3× ordinary | 0 | 34–70× | — | — |
+| branch | orbit, block-aware | 10 | 1,668 × 1,632 | 4.3–4.5·10⁸ | 3× ordinary | 14 | 34–69× | 0.984–0.988 | 0.50–1.10 |
 
 Ranges over the twelve residuals; the "vs ordinary" ratio falls with
 `p` only because the substitution solver's `p` sub-runs are counted on
-both sides.  `orbit = 3 × ordinary` solutions held on every residual.
+both sides.  `orbit = 3 × ordinary` solutions held on every residual on
+both engines.  The merged engine (`main` after 2026-09-18) reduces each
+step's pair rows by the symbolic reducers first and takes the reduced
+echelon form of the remainder over the free columns only, so it spends
+`3–7×` fewer multiplications than the branch engine's dense reduction of
+the whole matrix; the block split then acts on that remainder.
 
 - **Block-aware elimination is a footprint lever, not a field-operation
   lever.**  Sparse-aware elimination never multiplies across blocks, so
-  the counts agree to `1.4 %`; what the split buys is `3.0×` fewer dense
-  cells (Macaulay) and `0.5–0.8×` the wall time in F4 (one residual at
-  `p = 1051` ran `1.10×`).  **Class: engineering** on the orbit system.
+  the counts agree to `5 %` on the merged engine (`1.4 %` on the branch
+  engine); what the split buys is `3.0×` fewer dense cells (Macaulay) and,
+  on the branch engine's dense reduction, `0.5–0.8×` the wall time; on
+  the merged engine, whose reduction is already reducer-sparse, the wall
+  time is `0.85–1.21×` (no gain).  **Class: engineering** on the orbit
+  system.
 - **Against the boundary it is far below parity.**  The orbit system
-  costs `34–70×` the ordinary solve in F4 multiplications for three
-  dependent relations, i.e. `> 100×` per useful relation, and its
+  costs `12–30×` (merged) or `34–70×` (branch) the ordinary solve in F4
+  multiplications for three dependent relations, i.e. `> 35×` per useful
+  relation, and its
   `d_reg` under a single-degree truncation is beyond `19` against `10`.
   The `Z/3` grading is real, but it is a symmetry of the *orbit*, and
   quotienting the per-residual problem by it is experiment 1, not a
@@ -295,24 +310,37 @@ is eliminated by `f(R) = 0`, which makes the division exact (checked
 symbolically), and `e = (−t₁, t₂, −t₃)`.  Every harness triple with
 distinct abscissae yields a point of this system
 (`function_first_witnessed = true`, `1–2` witnesses per residual), so
-it is the right system; solving it is another matter:
+it is the right system; computing its Gröbner basis is another matter.
+The complete grevlex bases (basis-only F4, no degree truncation —
+`pairs_above_bound = 0` — and no substitution runs), on the merged
+engine (`22_glv_invariant_v2.json`):
 
-| formulation | unknowns | equations | Macaulay | F4 (bound 14, budget 120 s) |
-|:--|---:|---:|:--|:--|
-| ordinary symmetrised Semaev `S₄` | 3 | 3 | `D = 10`, `252 × 286`, dim `64`, `6.1·10⁵` mults | `D_solve 10`, `221 × 277`, solved, `0.4–3.3 s` |
-| `C₃`-invariant `(ẽ₁, ẽ₂, ẽ₃)` | 3 | 3 | identical to ordinary | identical to ordinary |
-| orbit `(e, z)`, `z³ = 1` | 4 | 4 | no closure `≤ 19`, `11,985 × 8,855` | `D_solve 10`, `1,668 × 1,632`, `3×` solutions, `7–17 s` |
-| function-first (Nagao `L(4O)`) | 9 | 9 | no closure `≤ 6`, `1,980 × 5,005`, standard `1,099` and rising, `3.2·10⁶` mults | reaches `D = 7–8` at `10,641 × 8,789`, `2.5–4.6·10¹⁰` mults, basis `132`, **unsolved at 120 s** |
+| formulation | unknowns | basis elements | staircase | highest productive degree | degree reached | max matrix | field mults | vs ordinary | ms |
+|:--|---:|---:|---:|---:|---:|:--|---:|---:|---:|
+| ordinary symmetrised Semaev `S₄` | 3 | 17 | 64 | 10 | 14 | `221 × 277` | `6.3·10⁵` | 1.0× | 9–16 |
+| `C₃`-invariant `(ẽ₁, ẽ₂, ẽ₃)` | 3 | 17 | 64 | 10 | 14 | `221 × 277` | `6.3·10⁵` (identical) | 1.0× | 8–14 |
+| orbit `(e, z)`, `z³ = 1` | 4 | 73 | 192 | 10 | 14 | `1,668 × 1,632` | `2.3·10⁷` | 36–38× | 71–148 |
+| function-first (Nagao `L(4O)`) | 9 | 132 | 64 | 5 | 9 | `10,641 × 8,789` | `1.96·10⁹` | 3,110–3,118× | 2,400–2,700 |
+
+Identical up to the last digit on all twelve residuals except the
+orbit's `p = 1051` fourth residual (`38.0×`).  The single-degree
+Macaulay instrument tells the same story from the other side: the
+function-first matrix has `1,980 × 5,005` at `D = 6` with `1,099`
+standard monomials and rising (no closure), against the ordinary
+`252 × 286` closing at `D = 10` with `64`.  On the branch engine
+(`22_glv_invariant.json`) the function-first F4 reached only degree
+`7–8` inside a `120 s` budget at `2.5–4.6·10¹⁰` multiplications; the
+merged engine's reducer-sparse step completes the basis in `2.6 s`.
 
 - The invariant system is the ordinary system: **accounting**.
-- The function-first system needs `> 17×` the columns of the ordinary
-  Macaulay matrix by degree `6` without closing (`> 30×` by the degree
-  `8` its F4 reaches), and its F4 spends `> 3,000×` the ordinary
-  solve's multiplications without producing a univariate element; the
-  ordinary solve finishes in seconds.
-  On `E(F_{p³})` with the subspace base the symmetrised Semaev system
-  is the function-first system with the six function coefficients
-  eliminated, and eliminating them is what makes it solvable.
+- The function-first system is the *same variety* — staircase `64`, the
+  ordinary system's quotient — presented with six more unknowns, and the
+  presentation costs `3,100×` the multiplications, `38×` the columns and
+  `7.8×` the basis elements.  Its F4 learns everything by degree `5`
+  (the low-degree coefficient identities) and then spends to degree `9`
+  certifying it.  On `E(F_{p³})` with the subspace base the symmetrised
+  Semaev system is the function-first system with the six function
+  coefficients eliminated, and that elimination is the whole saving.
   **Class: relabelling** for function-first as a prime-field PDP
   formulation (its binary-field completion counts in
   `research/nagao_relations` are not contradicted; they were never
@@ -324,9 +352,9 @@ it is the right system; solving it is another matter:
 |:--|:--|:--|:--|
 | `⟨ψ⟩` factor-base quotient | `S ÷ 3.0` at every size; columns, relations, residuals, solver calls, NNZ, LA all `÷ 3`; `residuals / floor` `1.00 → 0.98–1.09` | engineering | count moved with its floor; `271–714×` rho (plain), `469–1,237×` (folded, extrapolated) |
 | canonical residuals and decompositions | `0` solver calls saved on the uniform stream (`0` found, `≤ 0.011` expected); `97 %` of a pair generator's rows removed as `0 = 0` or unit-dependent | accounting (uniform) / engineering (pair sieve) | at the collision floor; no `S` changes |
-| `Z/3`-graded block-aware F4 | exists only on the orbit system: `3.0×` fewer dense cells, `1.4 %` fewer multiplications, `0.5–1.1×` wall; the orbit system costs `34–70×` the ordinary solve | engineering (footprint) / relabelling (as a solver) | boundary is `1.0×` the ordinary solve; measured `34–70×` |
+| `Z/3`-graded block-aware F4 | exists only on the orbit system: `3.0×` fewer dense cells, `1.4–5 %` fewer multiplications, `0.5–1.2×` wall; the orbit system costs `12–30×` (merged engine) to `34–70×` (branch engine) the ordinary solve | engineering (footprint) / relabelling (as a solver) | boundary is `1.0×` the ordinary solve; measured `12–70×` |
 | `C₃`-invariant PDP | identical to the ordinary system on `12/12` residuals | accounting | — |
-| function-first `L(4O)` formulation | `> 30×` columns, unsolved at `> 3,000×` the multiplications | relabelling | — |
+| function-first `L(4O)` formulation | same `64`-point variety, `132`-element basis at `3,100×` the multiplications and `38×` the columns | relabelling | — |
 
 The one `3` on this page is the order of the automorphism group acting
 on the base, and it sits where §10.3 found it on prime fields: in the

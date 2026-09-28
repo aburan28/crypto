@@ -1879,6 +1879,49 @@ pub struct F4Summary {
     /// (top-level run) that were reduced block by block.
     pub block_aware: bool,
     pub blocked_steps: usize,
+    /// Basis-only runs: the highest step degree at which the run learned a
+    /// new element, and the number of standard monomials of the basis
+    /// (`None` when some variable has no pure power in the leading
+    /// ideal, i.e. the basis is not zero-dimensional or is truncated).
+    pub solving_degree_max: u32,
+    pub staircase: Option<usize>,
+}
+
+/// Standard monomials of a Gröbner basis: monomials divisible by no
+/// leading monomial, counted under the pure-power caps of the leading
+/// ideal (`None` when a variable has no pure power).
+pub fn staircase_size(basis: &[f4_fp::Poly], n_vars: usize) -> Option<usize> {
+    let mut cap = vec![0u32; n_vars];
+    for (k, c) in cap.iter_mut().enumerate() {
+        *c = basis
+            .iter()
+            .map(|g| &g[0].0)
+            .filter(|m| m.iter().enumerate().all(|(i, &e)| (i == k) == (e > 0)))
+            .map(|m| m[k])
+            .min()?;
+    }
+    fn walk(k: usize, mono: &mut Vec<u32>, cap: &[u32], lms: &[&Vec<u32>], count: &mut usize) {
+        if lms
+            .iter()
+            .any(|l| l.iter().zip(mono.iter()).all(|(a, b)| a <= b))
+        {
+            return;
+        }
+        if k == cap.len() {
+            *count += 1;
+            return;
+        }
+        for e in 0..cap[k] {
+            mono[k] = e;
+            walk(k + 1, mono, cap, lms, count);
+        }
+        mono[k] = 0;
+    }
+    let lms: Vec<&Vec<u32>> = basis.iter().map(|g| &g[0].0).collect();
+    let mut count = 0usize;
+    let mut mono = vec![0u32; n_vars];
+    walk(0, &mut mono, &cap, &lms, &mut count);
+    Some(count)
 }
 
 /// Run the F4 engine on a system.  With `solve`, the substitution
@@ -1943,6 +1986,12 @@ fn f4_summary(
         summary.basis_size = Some(rep.basis.len());
         summary.pairs_above_bound = rep.pairs_above_bound;
         summary.blocked_steps = rep.blocked_steps;
+        summary.solving_degree_max = rep.solving_degree_max;
+        summary.staircase = if rep.timed_out || rep.inconsistent {
+            None
+        } else {
+            staircase_size(&rep.basis, sys.n_vars)
+        };
         (summary, None)
     }
 }
@@ -2050,6 +2099,13 @@ pub struct InvariantRow {
     pub invariant_f4: F4Summary,
     pub orbit_f4: F4Summary,
     pub function_first_f4: F4Summary,
+    /// Basis-only F4 (the complete grevlex basis, no substitution runs)
+    /// on the same four formulations, with the staircase size: the cost
+    /// of one Gröbner basis against another on the same variety.
+    pub ordinary_f4_basis: F4Summary,
+    pub invariant_f4_basis: F4Summary,
+    pub orbit_f4_basis: F4Summary,
+    pub function_first_f4_basis: F4Summary,
     /// F4 on the ordinary system found the harness's `e`-solutions.
     pub ordinary_f4_matches_harness: Option<bool>,
     /// The orbit system has three times the ordinary solutions.
@@ -2146,6 +2202,9 @@ pub fn run_invariant_experiment(
         let (inv_f4, _) = f4_summary(&invariant, p, f4_max_degree, f4_budget_secs, true, false);
         let (orb_f4, _) = f4_summary(&orbit, p, f4_max_degree, f4_budget_secs, true, false);
         let (ff_f4, _) = f4_summary(&ff, p, f4_max_degree, f4_budget_secs, false, false);
+        let (ord_b, _) = f4_summary(&ordinary, p, f4_max_degree, f4_budget_secs, false, false);
+        let (inv_b, _) = f4_summary(&invariant, p, f4_max_degree, f4_budget_secs, false, false);
+        let (orb_b, _) = f4_summary(&orbit, p, f4_max_degree, f4_budget_secs, false, false);
         let ordinary_matches = ord_sols.as_ref().map(|s| {
             s.iter().all(|x| ordinary.vanishes_at(x, p)) && s.len() as u64 == stats.e_solutions
         });
@@ -2188,7 +2247,11 @@ pub fn run_invariant_experiment(
             ordinary_f4: ord_f4,
             invariant_f4: inv_f4,
             orbit_f4: orb_f4,
+            function_first_f4_basis: ff_f4.clone(),
             function_first_f4: ff_f4,
+            ordinary_f4_basis: ord_b,
+            invariant_f4_basis: inv_b,
+            orbit_f4_basis: orb_b,
             ordinary_f4_matches_harness: ordinary_matches,
             orbit_f4_triples_ordinary: orbit_triples,
             function_first_witnessed: ff_witnessed,
