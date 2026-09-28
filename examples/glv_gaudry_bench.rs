@@ -25,6 +25,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 #[serde(untagged)]
+#[allow(clippy::large_enum_variant)]
 enum Row {
     Quotient { seed: u64, report: QuotientReport },
     Canonical { seed: u64, report: CanonicalReport },
@@ -51,7 +52,7 @@ fn main() {
     let mut cell_cap = 1u64 << 27;
     let mut i = 0;
     while i < args.len() {
-        let mut next = |i: &mut usize| -> String {
+        let next = |i: &mut usize| -> String {
             *i += 1;
             args[*i].clone()
         };
@@ -111,7 +112,7 @@ fn main() {
                 "canonical" => {
                     let t = if random_residuals == 0 {
                         // About what the quotient pipeline needs: |F|/(3ρ) with ρ ≈ 1/6.
-                        (p as u64 / 2 / 3 * 6).max(50)
+                        (p / 2 / 3 * 6).max(50)
                     } else {
                         random_residuals
                     };

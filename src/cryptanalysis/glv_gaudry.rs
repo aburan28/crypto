@@ -1437,7 +1437,7 @@ pub fn invariant_system(pre: &SymmetrisedS4, f: &Fp3, x_r: &E3) -> (WeightedSyst
     let mut h: HashMap<Vec<u8>, E3> = HashMap::new();
     for (e, c) in pre.terms() {
         let w = e[0] as u32 + 2 * e[1] as u32 + e[3] as u32;
-        if w % 3 != 0 {
+        if !w.is_multiple_of(3) {
             only_orbit_invariant = false;
         }
         let v = f.mul(c, &f.pow(&c_r, (w / 3) as u128));
@@ -1762,7 +1762,7 @@ pub fn run_graded_experiment(
         let r = curve.add(&curve.mul(&curve.g, a), &curve.mul(&inst.q, b));
         let mut stats = SolveStats::default();
         let triples = solve_s4_subspace(inst, &pre, &r.x, &mut rng, &mut stats);
-        if triples.as_ref().map_or(true, |t| t.is_empty()) {
+        if triples.as_ref().is_none_or(|t| t.is_empty()) {
             skipped += 1;
             continue;
         }
@@ -2139,21 +2139,6 @@ pub struct InvariantReport {
     pub rows: Vec<InvariantRow>,
 }
 
-/// Roots in `F_p` of `x³ + t₁x² + t₂x + t₃` (brute force, `p` small).
-fn cubic_roots(t: [u64; 3], p: u64) -> Vec<u64> {
-    (0..p)
-        .filter(|&x| {
-            let x2 = mm(x, x, p);
-            let v = am(
-                am(am(mm(x2, x, p), mm(t[0], x2, p), p), mm(t[1], x, p), p),
-                t[2],
-                p,
-            );
-            v == 0
-        })
-        .collect()
-}
-
 pub fn run_invariant_experiment(
     glv: &GlvInstance3,
     seed: u64,
@@ -2184,7 +2169,7 @@ pub fn run_invariant_experiment(
         let r = curve.add(&curve.mul(&curve.g, a), &curve.mul(&inst.q, b));
         let mut stats = SolveStats::default();
         let triples = solve_s4_subspace(inst, &pre, &r.x, &mut rng, &mut stats);
-        if triples.as_ref().map_or(true, |t| t.is_empty()) {
+        if triples.as_ref().is_none_or(|t| t.is_empty()) {
             skipped += 1;
             continue;
         }
