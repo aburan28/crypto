@@ -12,6 +12,8 @@ on:
       - 'research/ic_candidate_tournament_20260915/driver_admission.py'
       - 'research/ic_candidate_tournament_20260915/generic*.py'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-qualification-adapter/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/**'
+      - 'research/ic_candidate_tournament_20260915/test_generic_qualification.py'
       - 'examples/ic_tournament_worker.rs'
       - 'research/ic_candidate_tournament_20260915/driver_smoke.py'
       - 'research/ic_candidate_tournament_20260915/test_driver_admission.py'
@@ -24,6 +26,10 @@ on:
     inputs:
       qualify_references:
         description: Run the frozen five-cell development qualification after all producer controls pass
+        type: boolean
+        default: false
+      qualify_generic:
+        description: Run the registered five-cell generic/reference comparison and native whole-mode observer study
         type: boolean
         default: false
 permissions:
@@ -114,6 +120,19 @@ jobs:
           python research/ic_candidate_tournament_20260915/generic_driver_smoke.py \
             --prepared "$RUNNER_TEMP/ic-producer" --generic-build "$RUNNER_TEMP/ic-generic-driver-build" \
             --out "$RUNNER_TEMP/ic-generic-driver-control"
+          python research/ic_candidate_tournament_20260915/generic_observer.py prepare --control \
+            --round "$RUNNER_TEMP/ic-generic-driver-control/tournament" --out "$RUNNER_TEMP/ic-generic-driver-observer"
+          python "$RUNNER_TEMP/ic-generic-driver-observer/evaluator/generic_observer.py" run \
+            --out "$RUNNER_TEMP/ic-generic-driver-observer"
+          python "$RUNNER_TEMP/ic-generic-driver-observer/evaluator/generic_observer.py" verify \
+            --out "$RUNNER_TEMP/ic-generic-driver-observer"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads((Path(os.environ['RUNNER_TEMP'])/'ic-generic-driver-observer/summary.json').read_text())
+          assert (report['pairs'], report['complete_pairs'], report['incomplete_pairs'], report['failed_pairs']) == (45,36,9,0)
+          assert report['promotion_eligible'] is False and report['legacy_scientific_admission'] is None
+          PY
       - name: Preserve driver controls including failed preparation and raw runs
         if: always() && matrix.reference == 'scaled'
         uses: actions/upload-artifact@v4
@@ -123,7 +142,59 @@ jobs:
             ${{ runner.temp }}/ic-driver-evidence
             ${{ runner.temp }}/ic-generic-driver-build
             ${{ runner.temp }}/ic-generic-driver-control
+            ${{ runner.temp }}/ic-generic-driver-observer
             !${{ runner.temp }}/ic-driver-evidence/**/build/**
+          retention-days: 30
+          if-no-files-found: warn
+          include-hidden-files: true
+
+  generic-reference-qualification:
+    if: github.event_name == 'workflow_dispatch' && inputs.qualify_generic
+    needs: archived-producer
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: x86_64-unknown-linux-musl
+      - name: Install calibrated profiler and static toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind musl-tools zstd
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ic-producer-*-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/qualified-producer-inputs
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ic-generic-reference-qualification
+      - name: Build the source-bound generic worker
+        run: |
+          cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+          cargo fetch --locked
+          python research/ic_candidate_tournament_20260915/generic_build.py \
+            --out "$RUNNER_TEMP/ic-generic-qualification-build"
+      - name: Execute the registered comparison and whole-mode observer study
+        run: |
+          python research/ic_candidate_tournament_20260915/generic_reference_qualification.py \
+            --artifacts "$RUNNER_TEMP/qualified-producer-inputs" \
+            --generic-build "$RUNNER_TEMP/ic-generic-qualification-build" \
+            --out "$RUNNER_TEMP/ic-generic-reference-qualification"
+      - name: Retain every result and failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-generic-reference-qualification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-generic-reference-qualification
+            ${{ runner.temp }}/ic-generic-qualification-build
+            !${{ runner.temp }}/ic-generic-reference-qualification/**/build/**
+            !${{ runner.temp }}/ic-generic-qualification-build/target/**
           retention-days: 30
           if-no-files-found: warn
           include-hidden-files: true

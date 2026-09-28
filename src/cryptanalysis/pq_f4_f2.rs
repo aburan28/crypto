@@ -162,6 +162,8 @@ pub struct F4Stats {
     pub basis_len: u64,
     /// Largest matrix held, in bytes of packed words.
     pub peak_matrix_bytes: u64,
+    /// Largest live lookup-table allocation, in bytes of packed words.
+    pub peak_table_bytes: u64,
     /// Wall time spent building matrices (products, columns, packing)
     /// and eliminating them.
     pub build_ns: u64,
@@ -179,7 +181,7 @@ pub const MAX_MATRIX_WORDS: u64 = 1 << 27;
 
 const NONE: u32 = u32::MAX;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PairKind {
     /// The S-polynomial of basis elements `i` and `j`.
     Critical(usize, usize),
@@ -188,7 +190,7 @@ enum PairKind {
     Field(usize, u32),
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct Pair {
     kind: PairKind,
     /// The lcm of the two leading monomials (critical pairs only).
@@ -235,6 +237,102 @@ enum ColumnIndex {
 /// Variables up to which [`Columns`] indexes by array: `4 · 2^22` bytes at
 /// most, against a hash lookup per term packed.
 const DENSE_INDEX_VARS: u32 = 22;
+
+/// Set membership during symbolic preprocessing.  For up to 22 variables
+/// one bit per possible mask is smaller than the column index and avoids
+/// hashing every repeated term.  Values are retained in insertion order
+/// only to enumerate the final column set; `Columns` sorts them itself.
+enum MonomialSeen {
+    Bitmap {
+        bits: Vec<u64>,
+        limit: u64,
+        overflow: FxSet<u64>,
+        values: Vec<u64>,
+    },
+    Hashed(FxSet<u64>),
+}
+
+impl MonomialSeen {
+    fn new(n_vars: usize) -> Self {
+        static BITMAP: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        let enabled =
+            *BITMAP.get_or_init(|| std::env::var("F4_F2_BITMAP_SEEN").as_deref() != Ok("0"));
+        Self::with_bitmap(n_vars, enabled)
+    }
+
+    fn with_bitmap(n_vars: usize, enabled: bool) -> Self {
+        if enabled && n_vars <= DENSE_INDEX_VARS as usize {
+            let limit = 1u64 << n_vars;
+            Self::Bitmap {
+                bits: vec![0; (limit as usize).div_ceil(64)],
+                limit,
+                overflow: FxSet::default(),
+                values: Vec::new(),
+            }
+        } else {
+            Self::Hashed(FxSet::default())
+        }
+    }
+
+    #[inline]
+    fn insert(&mut self, mask: u64) -> bool {
+        match self {
+            Self::Bitmap {
+                bits,
+                limit,
+                overflow,
+                values,
+            } => {
+                let fresh = if mask < *limit {
+                    let slot = &mut bits[mask as usize / 64];
+                    let bit = 1u64 << (mask % 64);
+                    let fresh = *slot & bit == 0;
+                    *slot |= bit;
+                    fresh
+                } else {
+                    overflow.insert(mask)
+                };
+                if fresh {
+                    values.push(mask);
+                }
+                fresh
+            }
+            Self::Hashed(set) => set.insert(mask),
+        }
+    }
+
+    #[inline]
+    fn contains(&self, mask: &u64) -> bool {
+        match self {
+            Self::Bitmap {
+                bits,
+                limit,
+                overflow,
+                ..
+            } => {
+                if *mask < *limit {
+                    bits[*mask as usize / 64] & (1u64 << (*mask % 64)) != 0
+                } else {
+                    overflow.contains(mask)
+                }
+            }
+            Self::Hashed(set) => set.contains(mask),
+        }
+    }
+
+    fn extend(&mut self, values: impl IntoIterator<Item = u64>) {
+        for mask in values {
+            self.insert(mask);
+        }
+    }
+
+    fn into_values(self) -> Vec<u64> {
+        match self {
+            Self::Bitmap { values, .. } => values,
+            Self::Hashed(set) => set.into_iter().collect(),
+        }
+    }
+}
 
 impl Columns {
     fn from_monomials(set: impl IntoIterator<Item = u64>) -> Self {
@@ -346,10 +444,14 @@ fn echelon(
     // The leading block's tables, where enough rows follow it to pay and
     // they take no more words than the matrix; later pivots join them
     // within twice that.
-    let budget = (pivots.len() + rest.len()) * words;
+    let matrix_words = (pivots.len() + rest.len()) * words;
+    let budget = matrix_words * TABLE_INITIAL_BUDGET_MULT;
     let mut tables = (rest.len() >= TABLE_ROWS && pivots.len() >= TABLE_ROWS)
         .then(|| BlockTables::build(&pivot_of, &pivots, budget))
         .flatten();
+    if let Some(t) = &tables {
+        st.peak_table_bytes = st.peak_table_bytes.max((t.held_words * 8) as u64);
+    }
     let mut xors = 0u64;
     let mut performed = 0u64;
     if let Some(t) = &tables {
@@ -505,7 +607,13 @@ fn echelon(
         done = end;
         if let Some(t) = &mut tables {
             if rest.len() - done >= TABLE_ROWS && pivots.len() > made {
-                performed += t.extend(&pivot_of, &pivots, &pivots[made..], 2 * budget);
+                performed += t.extend(
+                    &pivot_of,
+                    &pivots,
+                    &pivots[made..],
+                    matrix_words * TABLE_EXTENDED_BUDGET_MULT,
+                );
+                st.peak_table_bytes = st.peak_table_bytes.max((t.held_words * 8) as u64);
             }
         }
     }
@@ -524,7 +632,27 @@ const TABLE_ROWS: usize = 256;
 
 /// Pivot columns per table: an aligned group of them never straddles a
 /// word, so a row's pattern on it is one shift and mask.
-const TABLE_BLOCK: usize = 4;
+const TABLE_BLOCK: usize = if cfg!(feature = "f4-wide-tables") {
+    6
+} else if cfg!(feature = "f4-four-tables") {
+    4
+} else {
+    5
+};
+const TABLE_INITIAL_BUDGET_MULT: usize = if cfg!(feature = "f4-wide-tables") {
+    4
+} else if cfg!(feature = "f4-four-tables") {
+    1
+} else {
+    2
+};
+const TABLE_EXTENDED_BUDGET_MULT: usize = if cfg!(feature = "f4-wide-tables") {
+    4
+} else if cfg!(feature = "f4-four-tables") {
+    2
+} else {
+    3
+};
 
 /// One table: the leading block's pivots on up to [`TABLE_BLOCK`]
 /// consecutive columns from `first`, all of which have one.
@@ -796,6 +924,41 @@ impl State {
     /// Becker–Weispfenning `UPDATE` for the critical pairs, plus the
     /// field pairs of the new element.
     fn insert(&mut self, h_poly: F2BoolPoly, st: &mut F4Stats) {
+        self.insert_core(h_poly, st, true);
+    }
+
+    /// Insert one F4 step's new elements in order, then scan queued pairs
+    /// once for every new leading monomial that came after each pair.
+    fn insert_batch(&mut self, polys: Vec<F2BoolPoly>, st: &mut F4Stats) {
+        let first = self.polys.len();
+        for poly in polys {
+            self.insert_core(poly, st, false);
+        }
+        if self.polys.len() > first {
+            self.filter_pairs_since(first, st);
+        }
+    }
+
+    fn filter_pairs_since(&mut self, first: usize, st: &mut F4Stats) {
+        let lm = &self.lm;
+        let mut dropped = 0u64;
+        self.pairs.retain(|p| match p.kind {
+            PairKind::Field(..) => true,
+            PairKind::Critical(i, j) => {
+                let keep = (first.max(i.max(j) + 1)..lm.len()).all(|h| {
+                    let lh = lm[h];
+                    lh & !p.lcm != 0 || (lm[i] | lh) == p.lcm || (lm[j] | lh) == p.lcm
+                });
+                if !keep {
+                    dropped += 1;
+                }
+                keep
+            }
+        });
+        st.pairs_chain_skipped += dropped;
+    }
+
+    fn insert_core(&mut self, h_poly: F2BoolPoly, st: &mut F4Stats, immediate_filter: bool) {
         let h = self.polys.len();
         let lh = h_poly.lt().expect("a new element is non-zero").mask;
         self.polys.push(h_poly);
@@ -830,19 +993,9 @@ impl State {
             }
         }
         // Old pairs whose lcm `h` divides strictly on both sides.
-        let lm = &self.lm;
-        let mut dropped = 0u64;
-        self.pairs.retain(|p| match p.kind {
-            PairKind::Field(..) => true,
-            PairKind::Critical(i, j) => {
-                let keep = lh & !p.lcm != 0 || (lm[i] | lh) == p.lcm || (lm[j] | lh) == p.lcm;
-                if !keep {
-                    dropped += 1;
-                }
-                keep
-            }
-        });
-        st.pairs_chain_skipped += dropped;
+        if immediate_filter {
+            self.filter_pairs_since(h, st);
+        }
         // Product criterion on what survived.
         for (g, l) in d {
             if lh & self.lm[g] == 0 {
@@ -891,6 +1044,9 @@ pub fn groebner_basis_f4(
     n_vars: usize,
     budget: Option<Duration>,
 ) -> (Vec<F2BoolPoly>, F4Stats) {
+    static BATCH_INSERTS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let batch_inserts =
+        *BATCH_INSERTS.get_or_init(|| std::env::var("F4_F2_BATCH_INSERTS").as_deref() != Ok("0"));
     let started = Instant::now();
     let deadline = budget.map(|b| started + b);
     let mut st = F4Stats::default();
@@ -934,8 +1090,12 @@ pub fn groebner_basis_f4(
         active: Vec::new(),
         pairs: Vec::new(),
     };
-    for p in start {
-        s.insert(p, &mut st);
+    if batch_inserts {
+        s.insert_batch(start, &mut st);
+    } else {
+        for p in start {
+            s.insert(p, &mut st);
+        }
     }
 
     while !s.pairs.is_empty() {
@@ -998,7 +1158,7 @@ pub fn groebner_basis_f4(
         // Symbolic preprocessing.  Every monomial other than an S-pair's
         // lcm is examined once; a divisible one gets a reducer led by it.
         let active: Vec<usize> = (0..s.polys.len()).filter(|&g| s.active[g]).collect();
-        let mut no_divisor: FxSet<u64> = FxSet::default();
+        let mut no_divisor = MonomialSeen::new(n_vars);
         // The first level: every monomial of the S-rows but the lcms.
         let s_terms: usize = half_rows
             .iter()
@@ -1024,18 +1184,20 @@ pub fn groebner_basis_f4(
                 .into_iter()
                 .collect()
         } else {
-            half_rows
-                .iter()
-                .chain(&field_rows)
-                .flat_map(|p| p.terms.iter().map(|t| t.mask))
-                .collect::<FxSet<u64>>()
-                .into_iter()
-                .collect()
+            let mut seen = MonomialSeen::new(n_vars);
+            seen.extend(
+                half_rows
+                    .iter()
+                    .chain(&field_rows)
+                    .flat_map(|p| p.terms.iter().map(|t| t.mask)),
+            );
+            seen.into_values()
         };
         // a fixed order, so the reducers come out in one
         queue.sort_unstable();
         queue.retain(|m| !lcm_columns.contains(m));
-        let mut examined: FxSet<u64> = lcm_columns.clone();
+        let mut examined = MonomialSeen::new(n_vars);
+        examined.extend(lcm_columns.iter().copied());
         examined.extend(queue.iter().copied());
         let mut reducers: Vec<F2BoolPoly> = Vec::new();
         // Level by level: the reducers of every monomial on the frontier,
@@ -1107,7 +1269,7 @@ pub fn groebner_basis_f4(
         st.reducer_rows += reducers.len() as u64;
 
         let n_rows = reducers.len() + half_rows.len() + field_rows.len();
-        let cols = Columns::from_monomials(examined.iter().copied());
+        let cols = Columns::from_monomials(examined.into_values());
         let words = cols.words() as u64;
         if words * n_rows as u64 > MAX_MATRIX_WORDS {
             st.oversize = true;
@@ -1160,9 +1322,13 @@ pub fn groebner_basis_f4(
             st.solving_degree = st.solving_degree.max(d);
         }
         fresh.sort_by(|a, b| cmp_mono(a.lt().unwrap(), b.lt().unwrap()));
-        for p in fresh {
-            st.new_elements += 1;
-            s.insert(p, &mut st);
+        st.new_elements += fresh.len() as u64;
+        if batch_inserts {
+            s.insert_batch(fresh, &mut st);
+        } else {
+            for p in fresh {
+                s.insert(p, &mut st);
+            }
         }
     }
     st.pairs_left = s.pairs.len() as u64;
@@ -1196,7 +1362,8 @@ fn interreduce(mut elements: Vec<F2BoolPoly>, n_vars: usize, st: &mut F4Stats) -
         }
     }
     let lms: Vec<u64> = minimal.iter().map(|p| p.lt().unwrap().mask).collect();
-    let mut examined: FxSet<u64> = lms.iter().copied().collect();
+    let mut examined = MonomialSeen::new(n_vars);
+    examined.extend(lms.iter().copied());
     let mut queue: Vec<u64> = Vec::new();
     for p in &minimal {
         for t in &p.terms[1..] {
@@ -1224,7 +1391,7 @@ fn interreduce(mut elements: Vec<F2BoolPoly>, n_vars: usize, st: &mut F4Stats) -
             reducers.push(r);
         }
     }
-    let cols = Columns::from_monomials(examined.iter().copied());
+    let cols = Columns::from_monomials(examined.into_values());
     let mut rows: Vec<(usize, Row)> = minimal
         .iter()
         .chain(reducers.iter())
@@ -1347,6 +1514,34 @@ mod tests {
     use rand::rngs::StdRng;
     use rand::{Rng, SeedableRng};
 
+    #[test]
+    fn monomial_bitmap_matches_hash_set() {
+        let mut rng = StdRng::seed_from_u64(0x5eed_2026);
+        for n_vars in [0usize, 1, 6, 12, 20, 22, 23] {
+            let mut bitmap = MonomialSeen::with_bitmap(n_vars, true);
+            let mut hashed = MonomialSeen::with_bitmap(n_vars, false);
+            let within = (1u64 << n_vars) - 1;
+            let masks = (0..2_000)
+                .map(|i| {
+                    if i % 17 == 0 {
+                        1u64 << 40 | rng.gen::<u64>() & within
+                    } else {
+                        rng.gen::<u64>() & within
+                    }
+                })
+                .collect::<Vec<_>>();
+            for &m in &masks {
+                assert_eq!(bitmap.insert(m), hashed.insert(m), "n_vars={n_vars}");
+                assert_eq!(bitmap.contains(&m), hashed.contains(&m));
+            }
+            let mut actual = bitmap.into_values();
+            let mut expected = hashed.into_values();
+            actual.sort_unstable();
+            expected.sort_unstable();
+            assert_eq!(actual, expected, "n_vars={n_vars}");
+        }
+    }
+
     /// The row-by-row forward elimination `echelon` must match: each row
     /// reduced by the pivots before it while its lead has one.
     fn echelon_reference(rows: &[Row], n_cols: usize) -> (Vec<(usize, Vec<u64>, usize)>, u64) {
@@ -1434,6 +1629,51 @@ mod tests {
 
     fn poly(masks: &[u64], n: usize) -> F2BoolPoly {
         F2BoolPoly::from_monos(masks.iter().map(|&m| F2BoolMono::from_mask(m)).collect(), n)
+    }
+
+    #[test]
+    fn batched_insert_keeps_pairs_and_skip_counts() {
+        let empty = || State {
+            n_vars: 10,
+            polys: Vec::new(),
+            lm: Vec::new(),
+            active: Vec::new(),
+            pairs: Vec::new(),
+        };
+        let (mut serial, mut batched) = (empty(), empty());
+        let (mut serial_st, mut batched_st) = (F4Stats::default(), F4Stats::default());
+        let mut rng = StdRng::seed_from_u64(0xba7c_2026);
+        for _ in 0..30 {
+            let mut group = Vec::new();
+            for _ in 0..rng.gen_range(1..6) {
+                let p = loop {
+                    let masks: Vec<u64> = (0..rng.gen_range(1..20))
+                        .map(|_| rng.gen_range(0..(1u64 << 10)))
+                        .collect();
+                    let p = poly(&masks, 10);
+                    if !p.is_zero() {
+                        break p;
+                    }
+                };
+                group.push(p);
+            }
+            for p in &group {
+                serial.insert(p.clone(), &mut serial_st);
+            }
+            batched.insert_batch(group, &mut batched_st);
+            assert_eq!(batched.polys, serial.polys);
+            assert_eq!(batched.lm, serial.lm);
+            assert_eq!(batched.active, serial.active);
+            assert_eq!(batched.pairs, serial.pairs);
+            assert_eq!(
+                batched_st.pairs_chain_skipped,
+                serial_st.pairs_chain_skipped
+            );
+            assert_eq!(
+                batched_st.pairs_product_skipped,
+                serial_st.pairs_product_skipped
+            );
+        }
     }
 
     fn brute_force(eqs: &[F2BoolPoly], n: usize) -> Vec<u64> {

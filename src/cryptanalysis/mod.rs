@@ -149,6 +149,7 @@ pub mod gf2_elim;
 pub mod gf3m;
 pub mod ghs_descent;
 pub mod ghs_full_attack;
+pub mod glv_gaudry;
 pub mod groebner_f4;
 pub mod hash_attacks;
 pub mod hilbert_class_poly;
