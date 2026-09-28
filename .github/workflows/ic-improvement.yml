@@ -125,7 +125,8 @@ jobs:
           assert receipt['source_manifest_sha256'] == panel['candidate_source_sha256']
           assert receipt['candidate_panel'] == 'round2-v1'
           with open(os.environ['GITHUB_ENV'], 'a') as stream:
-              stream.write('IC_ROUND2_SOURCE_MANIFEST_SHA256='+receipt['source_manifest_sha256']+'\n')
+              # Compile-time tag read by option_env!("IC_SOURCE_MANIFEST_SHA256").
+              stream.write('IC_SOURCE_MANIFEST_SHA256='+receipt['source_manifest_sha256']+'\n')
           PY
       - uses: Swatinem/rust-cache@v2
         with:
@@ -135,6 +136,7 @@ jobs:
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/ic-round2-candidates/build
         run: |
+          test -n "$IC_SOURCE_MANIFEST_SHA256"
           cd "$RUNNER_TEMP/ic-round2-candidates/source"
           cargo test --locked --release --lib koblitz_tiny_ic --jobs 2
           cargo test --locked --release --lib ic_phase --jobs 2
