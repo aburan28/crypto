@@ -49,11 +49,12 @@ a guessed instrumentation cost, or call a whole-mode ratio pure timer overhead.
 Use the fully charged enabled interval for IC claims, with direct paired
 IC/rho uncertainty on the same public points.
 
-Before round two, require the accepted reference binding, a new registered
-candidate panel and runner, and the next frozen seed. Exclude every previously
-exposed point, including all 25 fixtures from this development study even when
-an execution failed or was not reached. Preserve separate cold/online leaders
-when they differ; do not weaken the archived reference to admit a challenger.
+For any later bounded round, require the accepted reference binding, a new
+registered candidate panel and runner, and the next frozen seed. Exclude every
+previously exposed point, including all 25 fixtures from this development study
+even when an execution failed or was not reached. Preserve separate cold/online
+leaders when they differ; do not weaken the archived reference to admit a
+challenger.
 
 The [version-two protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/PROTOCOL.md)
 binds that accepted evidence for attempts two and three. Use
@@ -63,9 +64,13 @@ qualification and observer reports, and complete target exclusions. Round two
 has completed and retained the incumbent:
 [report](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/README.md),
 archive `ic-improvement-round2-20260928`. Do not redispatch `run_round_two=true`
-or `run_round_one=true`. A third attempt needs a new registered panel, the next
-frozen seed, and exclusions for every prior generated point, including all
-round-two fixtures; never retune on confirmation or replay.
+or `run_round_one=true`. The [third-round registration](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/ROUND3-REGISTRATION.md)
+pins a new configuration panel and seed `2026092553` while reusing the checked
+round-two executable source. Its workflow measures once when the panel first
+lands on `main`; inspect the live or completed workflow before attempting any
+manual run. The runner restores both prior rounds and excludes all their
+generated points, including failed preparation; never retune on confirmation
+or replay.
 
 Before a rho comparison, inspect the actual reference path and run its release
 tests for reference/packed agreement, fruitless-cycle escape, charge closure,
@@ -127,12 +132,12 @@ workflow `36140265516` (3,243/3,243 pairs) and round two under the version-two
 registry (3,480/3,480 pairs; selected `stop5_word` failed promotion). Read
 [round one](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/README.md)
 and [round two](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/README.md),
-including development-stage evidence, before proposing a third attempt. Do not
-dispatch `run_round_one=true` or `run_round_two=true` again. A follow-on needs a
-new registered source/configuration panel, the next predeclared round seed, and
-exclusions for every prior generated point; never retune on confirmation or
-replay. A duplicate dispatch or a retry of a measured failure is not a new
-round; retain partial evidence and investigate it.
+including development-stage evidence, before interpreting the registered third
+attempt. Do not dispatch `run_round_one=true` or `run_round_two=true` again.
+The third panel, seed and prior-point exclusions are fixed in
+`improvement-v2/round3.json` and `run_improvement_v3.py`; verify its workflow
+status before any further execution. A duplicate dispatch or a retry of a
+measured failure is not a new round; retain partial evidence and investigate it.
 
 Selection locks one challenger; confirmation and replay cannot be used to
 retune it. Preserve final failures. Subsequent tuning requires new held-out

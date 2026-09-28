@@ -490,7 +490,8 @@ pub fn matrix_f5_f2_with_form_timed(
     use std::time::Instant;
     let mut timings = F5Timings::default();
     use crate::cryptanalysis::koblitz_groebner::{
-        echelon_f2_counted, f5_rows_monos_with_mask, macaulay_row_count, pack_rows, rref_f2_counted,
+        echelon_f2_counted, f5_rows_monos_with_f4_count, f5_rows_monos_with_mask,
+        macaulay_row_count, pack_rows, rref_f2_counted,
     };
     let mut report = F5Report {
         degree,
@@ -506,8 +507,17 @@ pub fn matrix_f5_f2_with_form_timed(
     let t = Instant::now();
     report.criterion_word_ops = criterion.word_ops();
     report.criterion_rows = criterion.lower_level_rows().0;
-    report.rows_f4 = macaulay_row_count(polys, n_vars, degree)? as u64;
-    let rows_monos = f5_rows_monos_with_mask(polys, n_vars, degree, mask, &criterion)?;
+    static FUSED_BUILD: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let fused_build =
+        *FUSED_BUILD.get_or_init(|| std::env::var("KIC_F5_FUSED_BUILD").as_deref() == Ok("1"));
+    let rows_monos = if fused_build {
+        let (rows_f4, rows) = f5_rows_monos_with_f4_count(polys, n_vars, degree, mask, &criterion)?;
+        report.rows_f4 = rows_f4 as u64;
+        rows
+    } else {
+        report.rows_f4 = macaulay_row_count(polys, n_vars, degree)? as u64;
+        f5_rows_monos_with_mask(polys, n_vars, degree, mask, &criterion)?
+    };
     report.rows_built = rows_monos.len() as u64;
     report.rows_pruned = report.rows_f4 - report.rows_built;
     if rows_monos.is_empty() {
@@ -690,6 +700,36 @@ mod tests {
                 );
                 assert_eq!(f4.len() as u64, report.rank, "rank must agree");
                 assert_eq!(report.rows_built + report.rows_pruned, report.rows_f4);
+            }
+        }
+    }
+
+    #[test]
+    fn fused_row_build_matches_two_pass_rows_and_full_count() {
+        use crate::cryptanalysis::koblitz_groebner::{
+            f5_rows_monos_with_f4_count, f5_rows_monos_with_mask, macaulay_row_count,
+        };
+        let mut seed = 0x7a11_f5c0_1d5e_2028u64;
+        for trial in 0..32 {
+            let n_vars = 5 + trial % 4;
+            let mut polys: Vec<F2BoolPoly> = (0..(3 + trial % 5))
+                .map(|k| random_poly(n_vars, 2, 4 + k, &mut seed))
+                .filter(|p| poly_degree(p) >= 1)
+                .collect();
+            // Distinct terms can map to the same mask after multiplication
+            // by x_1, so the F4 count must exclude a cancelled zero row.
+            polys.push(poly(n_vars, &[&[0], &[0, 1]]));
+            polys.push(poly(n_vars, &[&[0], &[0, 1], &[2]]));
+            let mask = all_variable_mask(n_vars);
+            for degree in 2..=4 {
+                let criterion = F5Criterion::new(&polys, n_vars, degree, mask);
+                let old_count = macaulay_row_count(&polys, n_vars, degree).unwrap();
+                let old_rows =
+                    f5_rows_monos_with_mask(&polys, n_vars, degree, mask, &criterion).unwrap();
+                let (new_count, new_rows) =
+                    f5_rows_monos_with_f4_count(&polys, n_vars, degree, mask, &criterion).unwrap();
+                assert_eq!(new_count, old_count, "trial {trial} degree {degree}");
+                assert_eq!(new_rows, old_rows, "trial {trial} degree {degree}");
             }
         }
     }

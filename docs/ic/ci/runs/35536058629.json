@@ -1,0 +1,112 @@
+{
+ "git": {
+  "commit": "27595c0716294f60cd70fae052c966833024c0ee",
+  "dirty": false
+ },
+ "host": {
+  "cpu_count": 4,
+  "machine": "x86_64",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "python": "3.12.14"
+ },
+ "ic_binary_sha256": "e998d9ec4996f91b6d9bf10e0a7989c50ae9f3d87bdc43eb2546d18449732ca0",
+ "reference": "docs/ic/ci/ic-e2e-reference-v4.json",
+ "run_id": "35536058629",
+ "rungs": {
+  "docs/ic/params/k0n31.json": {
+   "charged_ratio": 2.1844124950112143,
+   "counters": {
+    "collection_relations": 78,
+    "collection_summands_scanned": 277760,
+    "collection_trials": 128,
+    "descent_trials": 52,
+    "factor_base_columns": 35,
+    "factor_base_points": 2170,
+    "pair_table_stored_pairs": 2355535,
+    "rho_group_additions": 5456,
+    "rho_iterations": 5477
+   },
+   "degree": 31,
+   "ic_verified": 32,
+   "ic_whole_process_seconds": 0.456114201,
+   "rho_seconds_total": 0.017169763999999997,
+   "rho_verified": 32,
+   "subgroup_bits": 20.457029116748018,
+   "targets": 32,
+   "whole_process_crossover": false,
+   "whole_process_ratio": 0.03764356374424746
+  },
+  "docs/ic/params/k0n41-subgroup.json": {
+   "charged_ratio": 10.121410335672127,
+   "counters": {
+    "collection_relations": 124,
+    "collection_summands_scanned": 15072256,
+    "collection_trials": 2872,
+    "descent_trials": 726,
+    "factor_base_columns": 64,
+    "factor_base_points": 5248,
+    "pair_table_stored_pairs": 13773376,
+    "rho_group_additions": 4054253,
+    "rho_iterations": 4045603
+   },
+   "degree": 41,
+   "ic_verified": 32,
+   "ic_whole_process_seconds": 1.3086622170000002,
+   "rho_seconds_total": 2.945287918,
+   "rho_verified": 32,
+   "subgroup_bits": 39.00000151433405,
+   "targets": 32,
+   "whole_process_crossover": true,
+   "whole_process_ratio": 2.250609729340111
+  },
+  "docs/ic/params/k0n53-subgroup.json": {
+   "charged_ratio": 22.053069909901645,
+   "counters": {
+    "collection_relations": 458,
+    "collection_summands_scanned": 242514432,
+    "collection_trials": 15888,
+    "descent_trials": 7803621,
+    "factor_base_columns": 144,
+    "factor_base_points": 15264,
+    "pair_table_stored_pairs": 116502480,
+    "rho_group_additions": 31947860,
+    "rho_iterations": 31891777
+   },
+   "degree": 53,
+   "ic_verified": 32,
+   "ic_whole_process_seconds": 15.911690958,
+   "rho_seconds_total": 31.132121902000005,
+   "rho_verified": 32,
+   "subgroup_bits": 44.258533022667656,
+   "targets": 32,
+   "whole_process_crossover": true,
+   "whole_process_ratio": 1.9565564705960778
+  },
+  "docs/ic/params/k0n61-subgroup-wide.json": {
+   "charged_ratio": 63.16140952168118,
+   "counters": {
+    "collection_relations": 336,
+    "collection_summands_scanned": 90000000,
+    "collection_trials": 80000,
+    "descent_trials": 6819485,
+    "factor_base_columns": 296,
+    "factor_base_points": 36112,
+    "pair_table_stored_pairs": 652056328,
+    "rho_group_additions": 72555474,
+    "rho_iterations": 72445898
+   },
+   "degree": 61,
+   "ic_verified": 32,
+   "ic_whole_process_seconds": 47.253721011,
+   "rho_seconds_total": 84.31234930100003,
+   "rho_verified": 32,
+   "subgroup_bits": 47.21087395347554,
+   "targets": 32,
+   "whole_process_crossover": true,
+   "whole_process_ratio": 1.7842478327023874
+  }
+ },
+ "schema_version": 1,
+ "started_at": "2026-09-20T20:37:31.560542+00:00",
+ "url": "https://github.com/aburan28/crypto/actions/runs/35536058629"
+}
