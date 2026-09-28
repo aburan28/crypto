@@ -5709,12 +5709,7 @@ impl<'a> ProjectedFactorBase<'a> {
                 * u64::from(kc.n)
                 * u64::from(kc.k),
         };
-        Self {
-            kc,
-            fb,
-            map,
-            cost,
-        }
+        Self { kc, fb, map, cost }
     }
 
     /// Nonzero signed-Frobenius columns after cofactor projection.

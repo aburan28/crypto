@@ -1216,7 +1216,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         write_atomic(&state_path, &state)?;
     }
     if let Some(report) = stage_reports.last_mut() {
-        report["projected_predicate_cost"] = factor_base_summary["projected_predicate_cost"].clone();
+        report["projected_predicate_cost"] =
+            factor_base_summary["projected_predicate_cost"].clone();
         report["elapsed_seconds"] = json!(t0.elapsed().as_secs_f64());
         report["resources"] = experiment::resource_delta(select_resource_start);
     }
