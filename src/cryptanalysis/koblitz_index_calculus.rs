@@ -5795,21 +5795,61 @@ pub struct ProjectedFactorBase<'a> {
     kc: &'a KoblitzCurve,
     fb: &'a FrobeniusFactorBase,
     map: Arc<ProjectedSignedOrbitMap>,
+    cost: ProjectedFactorBaseCost,
+}
+
+/// Native public operations used to construct a projected factor-base
+/// predicate.  These are counts, independent of host timing.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ProjectedFactorBaseCost {
+    pub input_points: u64,
+    pub input_signed_orbits: u64,
+    pub output_columns: u64,
+    pub cofactor_multiplications: u64,
+    pub derived_frobenius_coordinate_squarings: u64,
+    pub derived_negations: u64,
+    pub canonical_frobenius_coordinate_squarings: u64,
 }
 
 impl<'a> ProjectedFactorBase<'a> {
     /// Build and bind the projected signed-orbit predicate.
     pub fn new(kc: &'a KoblitzCurve, fb: &'a FrobeniusFactorBase) -> Self {
-        Self {
-            kc,
-            fb,
-            map: projected_signed_orbit_map(kc, fb),
-        }
+        let map = projected_signed_orbit_map(kc, fb);
+        let derived_frobenius_coordinate_squarings = fb
+            .signed_orbit_of
+            .iter()
+            .map(|&(_, shift, _)| 2 * u64::from(shift) * u64::from(kc.k))
+            .sum();
+        let cost = ProjectedFactorBaseCost {
+            input_points: fb.points.len() as u64,
+            input_signed_orbits: fb.signed_orbits.len() as u64,
+            output_columns: map.representatives.len() as u64,
+            cofactor_multiplications: fb.signed_orbits.len() as u64,
+            derived_frobenius_coordinate_squarings,
+            derived_negations: fb
+                .signed_orbit_of
+                .iter()
+                .filter(|&&(_, _, negated)| negated)
+                .count() as u64,
+            // Canonical representative discovery and the final location
+            // map each walk every output orbit once.  Every point
+            // Frobenius squares two coordinates `k` times.
+            canonical_frobenius_coordinate_squarings: 4
+                * map.representatives.len() as u64
+                * u64::from(kc.n)
+                * u64::from(kc.k),
+        };
+        Self { kc, fb, map, cost }
     }
 
     /// Nonzero signed-Frobenius columns after cofactor projection.
     pub fn columns(&self) -> usize {
         self.map.representatives.len()
+    }
+
+    /// Native construction counts for full-cost reporting.
+    pub fn cost(&self) -> ProjectedFactorBaseCost {
+        self.cost
     }
 
     /// Start a relation-fed factor-base logarithm solve using this map.
@@ -11976,6 +12016,13 @@ mod tests {
             ..KoblitzIcOptions::default()
         };
         let projected = ProjectedFactorBase::new(&kc, &fb);
+        let projection_cost = projected.cost();
+        assert_eq!(projection_cost.input_points, fb.points.len() as u64);
+        assert_eq!(
+            projection_cost.cofactor_multiplications,
+            fb.signed_orbits.len() as u64
+        );
+        assert_eq!(projection_cost.output_columns, projected.columns() as u64);
         assert_eq!(projected.columns(), projected_signed_orbit_count(&kc, &fb));
         assert_eq!(
             projected.log_solver(&opts).unwrap().columns(),
