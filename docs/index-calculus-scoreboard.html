@@ -1282,6 +1282,46 @@
     </div>
   </div>
 
+  <!-- ============ ENDOMORPHISM-INVARIANT FACTOR BASES (PLAN + PILOT) ============ -->
+  <div class="panel" id="glv-invariant-bases">
+    <div class="panel-head">
+      <h2>Endomorphism-invariant factor bases across curve families <span class="chip">engineering</span> <span class="chip">plan</span></h2>
+      <p>Frozen source: <code>experiments/23_glv_invariant_pilot.json</code> and
+        <code>experiments/23_glv_invariant_gls_pilot.json</code> (2026-09-28), tables by
+        <code>scripts/glv_invariant_tables.py</code>; note
+        <code>research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md</code>.
+        One fold (<code>fold_by_endomorphisms</code>) over the framework&rsquo;s counted groups,
+        the control the same call with negation alone on the same points. A pilot, not the
+        plan&rsquo;s experiments: two seeds per size, <code>r</code> from 2<sup>12.8</sup> to
+        2<sup>23.9</sup>, every row&rsquo;s answer checked against the planted logarithm. Each
+        <em>vs rho</em> figure is against the counted negation walk (<code>A = 2</code>); the
+        matched folded walk would be &radic;(w/2) cheaper still (an extrapolation, E6 pending).</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>family</th><th>fold</th><th class="n">points a column</th><th class="n">columns, control / fold</th><th class="n">S control / S fold (subtract oracle)</th><th class="n">S control / S fold (pair table)</th><th class="n">S fold vs rho (A = 2)</th><th>class</th></tr></thead>
+        <tbody>
+          <tr><td><code>j = 0</code> over F<sub>p</sub></td><td><code>&lang;&minus;1, &zeta;&rang;</code>, order 6</td><td class="n">6.0</td><td class="n">3.00</td><td class="n">1.00&ndash;2.65</td><td class="n">1.00&ndash;1.02</td><td class="n">18&times;&ndash;1,328&times;</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td><code>j = 1728</code> over F<sub>p</sub></td><td><code>&lang;&iota;&rang;</code>, order 4</td><td class="n">4.0</td><td class="n">2.00</td><td class="n">1.00&ndash;3.82</td><td class="n">1.00&ndash;1.13</td><td class="n">16&times;&ndash;2,834&times;</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>GLS twist over F<sub>p&sup2;</sub>, the <code>&psi;</code>-stable line</td><td><code>&lang;&minus;1, &psi;&rang;</code>, order 4</td><td class="n">4.0</td><td class="n">2.00</td><td class="n">1.31&ndash;1.98</td><td class="n">&mdash;</td><td class="n">40&times;&ndash;796&times;</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>generic, <code>D = &minus;7</code>, <code>D = &minus;8</code> (controls)</td><td>negation</td><td class="n">2.0</td><td class="n">1.00</td><td class="n">1.00</td><td class="n">1.00</td><td class="n">5&times;&ndash;4,250&times;</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td>degree-2 CM maps on <code>D = &minus;7, &minus;8</code> (type C)</td><td>none: <code>ord<sub>r</sub>(&lambda;)</code> 3.5&middot;10&sup3;&ndash;3.4&middot;10<sup>6</sup></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">0 of 38&ndash;362 base points kept in the base</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td><span class="chip">accounting</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p>The fold divides the columns by the group&rsquo;s order over two and the relation count
+        moves with them, so the count stays on its floor: the same reading as the
+        <code>&lang;&psi;&rang;</code> quotient row above. Where the relation phase is the cost
+        (<code>subtract</code>, <code>|F|</code> additions a target) <code>S</code> falls with the
+        trials; where the pair table is (<code>mitm</code>) both arms build the same table and
+        <code>S</code> does not move. Pending, per the note&rsquo;s &sect;4: full-rank stopping rule and
+        six seeds at four or more sizes (E1), an <code>O(1)</code> resultant oracle for the line
+        (E2b), the composite <code>&lang;&iota;, &psi;&rang;</code> fold (E3), degree-3 and Q-curve maps
+        (E4b), subfield curves on E(F<sub>p&sup3;</sub>) (E5), the matched folded rho (E6).</p>
+    </div>
+  </div>
+
   <!-- ============ GLV / C3 SOLVER LEVERS ============ -->
   <div class="panel" id="glv-c3-levers">
     <div class="panel-head">

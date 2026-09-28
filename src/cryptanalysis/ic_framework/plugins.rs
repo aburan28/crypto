@@ -12,6 +12,8 @@
 //! | `prime-abscissa` | prime | the smallest abscissae carrying a point, one column each |
 //! | `binary-subspace` | binary, Koblitz | points whose abscissa lies in an `F_2`-subspace |
 //! | `koblitz-orbit` | Koblitz | the same, each signed Frobenius orbit folded onto one column |
+//! | `glv-orbit` | prime | the closure of the smallest abscissae under the curve's automorphism group, each orbit folded onto one column (`j = 0`: 6 points a column, `j = 1728`: 4, generic: 2) |
+//! | `gls-line` | GLS over `F_{p²}` | the `ψ`-stable line `x ∈ u·s·F_p`, each `⟨−1, ψ⟩`-orbit folded onto one column (4 points a column) |
 //!
 //! The column map is the interesting part.  `koblitz-orbit` gives a
 //! whole orbit of `2n` points one unknown, which cuts the relations
@@ -38,6 +40,8 @@ use super::stages::{
     BooleanSystem, DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost,
     SolverTotals, SolverVerdict, SystemShape, SystemSolver,
 };
+use crate::cryptanalysis::gls_fp2::{gls_line_base, Fp2Curve, Fp2Point, GlsInstance};
+use crate::cryptanalysis::glv_invariant_base::{glv_orbit_base, AutomorphismGroup};
 use crate::cryptanalysis::ic_boundary::{
     binary_subspace_factor_base, decompose_mitm, decompose_mitm_frobenius, koblitz_factor_base,
     prime_factor_base, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
@@ -215,6 +219,108 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
             ),
         )
         .ok_or_else(|| "the invariant subspace produced no usable factor base".into())
+    }
+}
+
+/// The prime-field analogue of `koblitz-orbit`: the `size` smallest
+/// abscissae, closed under the curve's automorphism group and folded
+/// one orbit to a column.  `group` picks the group (`auto` takes what
+/// the curve has); `no_fold` keeps the closed point set and folds by
+/// negation only, which is the control that shows what the fold buys
+/// on the same points.  See `glv_invariant_base`.
+pub struct GlvOrbitBase<'i> {
+    pub instance: &'i PrimeInstance,
+}
+
+impl FactorBaseBuilder<PrimeCurve> for GlvOrbitBase<'_> {
+    fn name(&self) -> &str {
+        "glv-orbit"
+    }
+
+    fn describe(&self, params: &Params) -> String {
+        format!(
+            "the closure of the {} smallest abscissae under the {} automorphism group, {}",
+            params.get("size").unwrap_or("?"),
+            params.get("group").unwrap_or("auto"),
+            if params.flag("no_fold") {
+                "folded by negation only (the control)"
+            } else {
+                "each orbit folded onto one column"
+            }
+        )
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[
+            (
+                "size",
+                "seed abscissae; the base is their closure under the group (3× as many on j = 0, 2× on j = 1728)",
+            ),
+            (
+                "group",
+                "auto (what the curve has), negation, j0 or j1728",
+            ),
+            (
+                "no_fold",
+                "1 to fold the same points by negation only: the control that shows what the fold buys",
+            ),
+        ]
+    }
+
+    fn build(
+        &self,
+        _ctx: &InstanceCtx<PrimeCurve>,
+        params: &Params,
+        _ops: &mut GroupOps,
+    ) -> Result<FactorBase<PrimePoint>, String> {
+        let size = params.u64("size")? as usize;
+        if size == 0 {
+            return Err("factor base size must be positive".into());
+        }
+        let group = AutomorphismGroup::parse(params.get("group").unwrap_or("auto"))?;
+        let (fb, _) = glv_orbit_base(self.instance, size, group, !params.flag("no_fold"))?;
+        Ok(fb)
+    }
+}
+
+/// The `ψ`-stable line of a GLS twist over `F_{p²}`, folded by
+/// `⟨−1, ψ⟩`; `no_fold` folds the same points by negation only.  See
+/// `gls_fp2`.
+pub struct GlsLineBase<'i> {
+    pub instance: &'i GlsInstance,
+}
+
+impl FactorBaseBuilder<Fp2Curve> for GlsLineBase<'_> {
+    fn name(&self) -> &str {
+        "gls-line"
+    }
+
+    fn describe(&self, params: &Params) -> String {
+        format!(
+            "the ψ-stable line x ∈ u·s·F_p, {}",
+            if params.flag("no_fold") {
+                "folded by negation only (the control)"
+            } else {
+                "each ⟨−1, ψ⟩-orbit folded onto one column"
+            }
+        )
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[(
+            "no_fold",
+            "1 to fold the same points by negation only: the control that shows what the fold buys",
+        )]
+    }
+
+    fn build(
+        &self,
+        _ctx: &InstanceCtx<Fp2Curve>,
+        params: &Params,
+        _ops: &mut GroupOps,
+    ) -> Result<FactorBase<Fp2Point>, String> {
+        let (fb, _) = gls_line_base(self.instance, !params.flag("no_fold"))?;
+        Ok(fb)
     }
 }
 
