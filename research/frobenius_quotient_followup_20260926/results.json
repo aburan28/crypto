@@ -1,0 +1,119 @@
+{
+  "orders": {
+    "13": {
+      "curve_order": 8012,
+      "N_mod_8": 4,
+      "odd_subgroup_order": 2003,
+      "odd_subgroup_is_odd": true,
+      "odd_subgroup_probable_prime": true,
+      "log2_odd_subgroup": 10.967946705812707
+    },
+    "19": {
+      "curve_order": 523492,
+      "N_mod_8": 4,
+      "odd_subgroup_order": 130873,
+      "odd_subgroup_is_odd": true,
+      "odd_subgroup_probable_prime": true,
+      "log2_odd_subgroup": 16.997807964508816
+    },
+    "29": {
+      "curve_order": 536830604,
+      "N_mod_8": 4,
+      "odd_subgroup_order": 134207651,
+      "odd_subgroup_is_odd": true,
+      "odd_subgroup_probable_prime": false,
+      "log2_odd_subgroup": 26.999891679110313
+    },
+    "131": {
+      "curve_order": 2722258935367507707729280517973639940516,
+      "N_mod_8": 4,
+      "odd_subgroup_order": 680564733841876926932320129493409985129,
+      "odd_subgroup_is_odd": true,
+      "odd_subgroup_probable_prime": true,
+      "log2_odd_subgroup": 129.0
+    }
+  },
+  "log2_full_size_mean": -96.8663079938502,
+  "line": {
+    "13": {
+      "trials": 100,
+      "passed": 100,
+      "tangent_cases": 20
+    },
+    "19": {
+      "trials": 100,
+      "passed": 100,
+      "tangent_cases": 20
+    }
+  },
+  "certificate": {
+    "13": {
+      "checked": 8191,
+      "accepted": 1001,
+      "agree": 8191
+    },
+    "19": {
+      "checked": 4000,
+      "accepted": 519,
+      "agree": 4000
+    }
+  },
+  "density": [
+    {
+      "n": 13,
+      "s": 4,
+      "basis": [
+        "0x1c55",
+        "0x14b9",
+        "0x124d",
+        "0x115b"
+      ],
+      "valid_orbits": 4,
+      "tuples": 1,
+      "targets": 8,
+      "positive_cases": 8,
+      "cases": 8,
+      "observed_mean": 231.375,
+      "uniform_target_mean": 228.14578132800798
+    },
+    {
+      "n": 19,
+      "s": 6,
+      "basis": [
+        "0x4390d",
+        "0x5287",
+        "0x53b6d",
+        "0x40558",
+        "0x7321c",
+        "0x2103f"
+      ],
+      "valid_orbits": 10,
+      "tuples": 32,
+      "targets": 8,
+      "positive_cases": 256,
+      "cases": 256,
+      "observed_mean": 15.51953125,
+      "uniform_target_mean": 15.932514728018766
+    },
+    {
+      "n": 29,
+      "s": 7,
+      "basis": [
+        "0x1e799e9b",
+        "0xf3505e",
+        "0xeba29c4",
+        "0x60e6aec",
+        "0x10c86a10",
+        "0x1b82172f",
+        "0x1f6fb026"
+      ],
+      "valid_orbits": 16,
+      "tuples": 16,
+      "targets": 8,
+      "positive_cases": 10,
+      "cases": 128,
+      "observed_mean": 0.078125,
+      "uniform_target_mean": 0.0843207962860478
+    }
+  ]
+}
