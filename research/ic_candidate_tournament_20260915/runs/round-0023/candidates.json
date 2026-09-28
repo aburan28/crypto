@@ -1,0 +1,39 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "2a66ec4ce19a2b39a458bad77b14976dd75011dca8c3665dbdd137832aaf4896",
+    "hypothesis": "The round-0020 winner, widened so it can run above degree 31, with max_trials raised 4096 -> 65536 so rho completes at every cell. Round 0021 measured the widening at 1.0007x the promoted worker with identical logarithms and factor bases on all eight panel cells; round 0022 bounded the cap change at 14 ppm on either arm. Its factor base is the case's: points = 6*degree, one batch of eight orbits at every cell.",
+    "id": "incumbent",
+    "parent": "round-0020 promoted `both` plus round21-wide-pair-table.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0020",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "2d30bde93226ba65a7ff94f6d25169ec7ab0acc14eb638bd509e15d8bddf1e41"
+  },
+  {
+    "binary_relative": "source_candidates/scaled/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "2a66ec4ce19a2b39a458bad77b14976dd75011dca8c3665dbdd137832aaf4896",
+    "falsification": "Any bad, missing or unmatched certificate; any recovered logarithm different from the incumbent's on the same fixture; a panel cell whose scaled/incumbent instruction ratio leaves [0.995, 1.005], which would mean the policy is not inert where it builds the same base; scaled/incumbent above one at any of the four crossover cells.",
+    "hypothesis": "The orbit count follows the subgroup order: 8*round((r/4196903)^0.157), never fewer than one batch. That is exactly one batch on all eight panel cells, so the arm should be the incumbent there to within the literal it parses, and 16 at n37a0 and 24 at n43a1, n59a0 and n61a1. The rule is fitted to round 0022's measured optima at n23a1, n37a0 and n43a1; n59a0 and n61a1 are outside the range it was fitted on and enter as holdouts.",
+    "id": "scaled",
+    "parent": "incumbent plus round23-scaled-base.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0020",
+    "source_directory": "source_candidates/scaled/source",
+    "source_manifest_relative": "source_candidates/scaled/source-manifest.json",
+    "source_manifest_sha256": "55154f73c35b1f55240b35fd1a5e8e2488c6df41444b5114949e41741c0c3db1"
+  }
+]

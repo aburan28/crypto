@@ -55,7 +55,7 @@ use crate::cryptanalysis::binary_isogeny::{
 };
 use crate::cryptanalysis::ec_trapdoor::{magic_number_full, FieldTower, TrapdoorCurve};
 use crate::cryptanalysis::ghs_descent::{
-    brute_force_ecdlp, descend_m1, descend_m2_abstract, sigma_point, ECurve, Pt,
+    brute_force_ecdlp, descend_m1, descend_m2_abstract, ECurve, Pt,
 };
 use num_bigint::BigUint;
 
@@ -463,7 +463,7 @@ mod tests {
             row: DescentRow::default(),
             full_audit: None,
         };
-        let curve = ECurve::new(big_n, irr.clone(), a, b);
+        let _curve = ECurve::new(big_n, irr.clone(), a, b);
         // Trivial DLP: q = 1·p.
         let p = Pt::Inf;
         let q = Pt::Inf;
