@@ -219,3 +219,18 @@ still precedes comparative ranking. Preserve all five exposed points in
 `generic-reference-readiness/fixtures.json` as exclusions for the next registered
 confirmation panel; keep the sealed round-one history unchanged. One round is
 closed, no challenger qualified, and two remain.
+
+## Round-two registration
+
+The version-two reference binding from [PR 881](https://github.com/aburan28/crypto/pull/881)
+is in tree. Round two is now registered under
+[improvement-v2/round2.json](improvement-v2/round2.json) with runner
+`run_improvement_v2.py`, seed `2026092552`, and candidate source
+`8582e4ab4b63e98696a0ff00ee296e2902923a2c39c325ab0f3e3950ffbb2b28`. The panel
+recombines round-one development portfolio parents and adds `half`/`cover`
+pair-table modes; it does not retune on round-one confirmation or replay.
+Supplemental exclusions cover the readiness, generic-reference-qualification and
+adapter-control fixture corpora in addition to the restored round-one prior.
+Dispatch with workflow input `run_round_two=true` only after candidate controls
+pass on the registered head. No second-round measurement has executed yet; the
+campaign still has two attempts remaining and no qualifying winner.

@@ -70,7 +70,17 @@ against separate metric baselines. A replay of the committed development run
 records checks the new online comparison against the observed online leader.
 These are software controls, not additional research measurements.
 
-A dedicated candidate panel and dispatch wrapper for round two still need to be
-registered before its execution. This protocol/driver update generates no new
-research target, consumes no improvement round and promotes no candidate.
-The campaign remains active with two rounds left.
+Round two is now registered. [round2.json](round2.json) freezes eleven arms
+(incumbent plus ten challengers) on source digest
+`8582e4ab4b63e98696a0ff00ee296e2902923a2c39c325ab0f3e3950ffbb2b28`, built from
+the qualified parent plus [round2-candidates.patch](../../producer/round2-candidates.patch).
+The panel is drawn only from round-one **development** portfolio parents and new
+pair-table modes (`half`, `cover`) that sit between the heuristic and full
+extremes; confirmation and replay outcomes are not used for retuning. Zero-factor
+skips in Full/Suffix row reduction are always on in this source. Seed
+`2026092552`. The dispatch wrapper is
+[`run_improvement_v2.py`](../../run_improvement_v2.py); the Linux workflow accepts
+`run_round_two=true` after both round-one and round-two candidate controls pass.
+Do not dispatch until those controls are green on the registered head. Execution
+still consumes one of the two remaining improvement attempts; this registration
+itself promotes no candidate.
