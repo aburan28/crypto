@@ -7,6 +7,38 @@ rungs, and gates the result against the reference in this directory. It is the
 CI form of the rule in `AGENTS.md` §2 that end-to-end speed is the measure of
 speed: nothing on this page is a stage number.
 
+| rung (v6) | base | `n` | log₂ r | targets | relations | summands scanned | descent trials | IC whole process, same host: v5 rung → v6 rung | ρ/IC whole-process, v5 → v6 (same host) | crosses ρ e2e |
+|:--|:--|--:|--:|--:|--:|--:|--:|:--|:--|:--|
+| `docs/ic/params/k0n31.json` | pruned divisor, 35 columns | 31 | 20.5 | 32 | 78 → 78 | 277,760 → 277,760 | unchanged | unchanged | 0.08 → 0.06 | no |
+| `docs/ic/params/k0n41-subgroup-wide.json` | subgroup, 6560 points, 80 columns | 41 | 39.0 | 32 | 67 → 83 | 2,770,944 → 2,287,616 | 726 → 346 | 0.316 s → 0.258 s | 8.34 → 10.28 | yes |
+| `docs/ic/params/k0n53-subgroup-wide.json` | subgroup, 30528 points, 288 columns | 53 | 44.3 | 32 | 147 → 334 | 31,694,848 → 16,064,512 | 7,803,621 → 2,057,777 | 1.775 s → 1.013 s | 15.60 → 27.28 | yes |
+
+**`ic-e2e-reference-v6.json`** is what the workflow gates against. It
+supersedes v5 because the degree-41 and degree-53 rungs now use **wider
+factor bases** — 6000 and 30000 requested points (6560 and 30528
+materialised) against 4759 and 15000 — with the collection window scaled
+with the base (207 and 954 summands), on the same curves, targets, seeds,
+solver, descent summand count and aimed, windowed collection as the v5
+rungs. The v5 rung files are unchanged.
+
+The width was chosen by a sweep of the base size on each curve (ρ off,
+same host; `docs/ic/perf/OPTIMIZATION_PLAN.md` log), which only paid off
+once the folded pair-table build stopped dominating: keyed once with the
+scan's own kernels and placed by partitioning, the build at degree 53 fell
+from 0.09 s to 0.04 s at 15,000 points and from 1.03 s to 0.33 s at
+45,000. A wider base needs more relations (columns grow like `|F|`) but
+finds them in fewer summands (pair sums grow like `|F|²`), and it cuts the
+descent's trials by 3.8× at degree 53 and 2.1× at degree 41. The sweep's
+minimum was flat between about 20,000 and 30,000 points at degree 53 and
+around 6,000 at degree 41; unit size and window scale moved it by less
+than run-to-run spread. By `AGENTS.md` §3 this is **engineering**: a
+parameter of the same method, re-chosen because a stage got cheaper; the
+generic-group floor does not move.
+
+The IC figures in the table are from one host and one `ic` binary, v5 rung
+beside v6 rung; v6 itself is frozen on a dev host, as v3–v5 were, and its
+`frozen_from` records the commit, the binary hash and the host.
+
 | rung (v5) | base | `n` | log₂ r | targets | relations | summands scanned | IC whole process, same host: v4 rung → v5 rung | ρ/IC whole-process, v4 → v5 (dev) | crosses ρ e2e |
 |:--|:--|--:|--:|--:|--:|--:|:--|:--|:--|
 | `docs/ic/params/k0n31.json` | pruned divisor, 35 columns | 31 | 20.5 | 32 | 78 → 78 | 277,760 → 277,760 | 0.074 s → 0.073 s | 0.04 → 0.08 | no |
@@ -19,8 +51,9 @@ ledger records that cite them still mean what they meant. Earlier columns
 of the ρ/IC ratio, for the v4 rungs: v1 (dev) 2.70 / 2.50, v2 (runner)
 2.23 / 2.00, v3 (dev) 1.79 / 1.51, v4 (dev) 3.39 / 3.00.
 
-**`ic-e2e-reference-v5.json`** is what the workflow gates against. It
-supersedes v4 for two reasons, one of them a gate fix.
+The v5 rungs, above as the "before" column, are the table below. v5
+(`ic-e2e-reference-v5.json`) superseded v4 for two reasons, one of them a
+gate fix.
 
 *The rungs collect the way the measurements say to.* The degree-41 and
 degree-53 rungs keep their curve, base, targets, pair-table tier and

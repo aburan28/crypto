@@ -5,6 +5,7 @@ algorithm. Complete implementations, not sums of the best stage times, compete.
 """
 import copy
 import itertools
+import json
 import math
 
 from oracle import require
@@ -16,9 +17,12 @@ AXES = ('factor_base', 'solver', 'linear_algebra', 'batch_trials', 'collection_w
 def family(arm):
     cfg = arm['config']
     base = cfg.get('factor_base', {})
-    return (base.get('kind', 'subgroup_orbits'), cfg.get('solver', 'pair_table'),
-            cfg.get('linear_algebra', 'sparse'), cfg.get('row_kernel', 'full'),
-            cfg.get('orbit_batch', 8))
+    return (arm.get('adapter'), json.dumps(base, sort_keys=True, separators=(',', ':')),
+            cfg.get('solver', 'pair_table'), cfg.get('linear_algebra', 'sparse'),
+            cfg.get('row_kernel', 'full'), cfg.get('orbit_batch', 8),
+            cfg.get('orbit_target'), cfg.get('pair_table',
+                'full' if cfg.get('full_pair_table') else 'heuristic'),
+            cfg.get('batch_trials', 1), cfg.get('collection_window'))
 
 
 def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
@@ -71,14 +75,33 @@ def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
     add(eligible[0], 'complete instruction-cost leader')
     add(min(eligible, key=lambda r: (r['native_wall_candidate_over_baseline'], r['candidate'])),
         'complete native-time leader')
-    # Reserve diversity before filling with close variants of the leader.
+    # At least one standout cell specialist gets a chance before the remaining
+    # slots fill with distinct families. Compare only within one metric/cell;
+    # the qualified baselines differ for online and cold costs in v2.
+    metrics = [('cold instructions', lambda r, cell: r['per_cell'][cell]),
+               ('cold native', lambda r, cell: r['native_wall_per_cell'][cell])]
+    if online:
+        metrics.insert(0, ('single-target online', lambda r, cell: r['online']['per_cell'][cell]))
+    specialists = []
+    for metric, cost in metrics:
+        for cell in keys:
+            winner = min(eligible, key=lambda r: (cost(r, cell), r['candidate']))
+            if winner['candidate'] in {s['candidate'] for s in selected}:
+                continue
+            retained_ids = {s['candidate'] for s in selected}
+            best_retained = min(cost(row, cell) for row in eligible
+                                if row['candidate'] in retained_ids)
+            advantage = best_retained / cost(winner, cell)
+            if advantage > 1:
+                specialists.append((-advantage, metric, cell, winner['candidate'], winner))
+    if specialists:
+        _, metric, cell, _, winner = min(specialists)
+        add(winner, f'cell specialist: {metric} {cell}')
+    # Use the remaining competitive slots for non-dominated distinct families.
     for row in frontier:
         known = {family(by_id[s['candidate']]) for s in selected}
         if family(by_id[row['candidate']]) not in known:
             add(row, 'non-dominated implementation family')
-    for cell in keys:
-        add(min(eligible, key=lambda r: (r['per_cell'][cell], r['candidate'])),
-            'cell specialist: ' + cell)
     for row in frontier + eligible:
         add(row, 'Pareto frontier' if row in frontier else 'development reserve')
     remaining = [r for r in eligible if r['candidate'] not in {s['candidate'] for s in selected}]

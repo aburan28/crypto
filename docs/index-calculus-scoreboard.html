@@ -325,13 +325,12 @@
       <a href="https://github.com/aburan28/crypto/blob/main/research/volcano_metadata_20260923/README.md">Bounded exhaustive validation</a>: 7,968 curve models and 9,984 capped neighborhoods; three correctness defects corrected, no ECDLP speedup measured.
       No ECDLP performance gain or ratio to rho is claimed.</p>
     <p class="verdict">The calibrated index-calculus families below are scored against
-      their generic-group floor and matched Pollard rho reference. On elliptic curves nothing
-      measured end to end is below rho: the residual-walk thread's hundreds-of-times-behind-rho
-      verdict on E(F<sub>p</sub><sup>3</sup>) is unchanged (its best cell is now the
-      <code>j = 0</code> orbit quotient of the subspace base at 224&times; plain rho, 388&times; a rho
-      folded by the same automorphism, an engineering step from 898 to 312), and the three-regime
-      ledger that heads the page
-      puts the best whole-pipeline variant at <b>13.5&times;</b> the matched rho on a 23-bit
+      their generic-group floor and matched Pollard rho reference. The residual-walk thread's
+      hundreds-of-times-behind-rho verdict on E(F<sub>p</sub><sup>3</sup>) is unchanged (its best
+      cell is now the <code>j = 0</code> orbit quotient of the subspace base at 224&times; plain rho,
+      388&times; a rho folded by the same automorphism, an engineering step from 898 to 312). In the
+      three-regime whole-pipeline ledger that heads the page, none of its elliptic-curve rows is
+      below rho: its best rows are <b>13.5&times;</b> the matched rho on a 23-bit
       prime-order curve, <b>38.2&times;</b> on a 24-bit random binary curve and <b>4.3&times;</b>
       <small>was 4.9&times;</small> on a 39-bit Koblitz subgroup, with no fitted exponent below the
       reference's. The Koblitz figure
@@ -5074,6 +5073,19 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<!-- BEGIN degree-reporting-correction-20260922 -->
+<section class="panel" id="degree-reporting-correction-20260922">
+  <div class="panel-head"><h2>Degree sweep interpretation <span class="chip">accounting</span></h2></div>
+  <p>The legacy <code>dreg_sweep</code> measures rank deficiency and bounded
+  refutation/pinning, not certified first fall degree, F4/F5 solving degree,
+  or homogeneous regularity. Both random-control arms have an all-zero root;
+  the former <code>ctrl(unsat)</code> label was incorrect. New output calls it
+  <code>D_pin(extra)</code>. Unresolved multi-solution systems do not establish
+  a solving-degree lower bound. Numerical results and earlier cost rows are retained.</p>
+  <p><a href="https://github.com/aburan28/crypto/blob/main/research/degree_reporting_20260922/README.md">Definitions and regression checks</a>.
+  No performance or boundary-ratio improvement is claimed.</p>
+</section>
+<!-- END degree-reporting-correction-20260922 -->
 <section id="factor-base-accounting-audit-20260922" class="panel">
   <h2>Factor-base selector: accounting correction <span class="chip">accounting</span></h2>
   <p>The archived selector comparison measures F4 word XORs during complete toy
@@ -7608,7 +7620,7 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     <p>The table includes field setup, kernel/map and base construction, cofactor projection, the target prefix to rank, pair-table work, matrix recovery, and scalar verification. Inversion's internal multiplications are counted once; separate audit replay is not a candidate cost. Original/transported and native/pullback have identical hit and rank trajectories as required by subgroup transport. Native selection fails the predeclared lower-total-cost gate on this one toy stream. The 421-point pullback inverse table is an audit control, not a scalable candidate.</p>
 <p><a href="https://github.com/aburan28/crypto/pull/753">PR #753</a> replayed all 8,192 toy policy-target outcomes, 2,137 target draws, four base constructions and all recovered scalars. Native-to-original cold field-multiplication components are 2.087–3.700 in the four held-out cells; native is cheaper than transported in two and dearer in two. Dual pullback and tagged source-orbit classification are charged. The conditional exact degree-263 smoke tested 32 public Certicom P,Q targets on each nonconjugate descending line [1,0] and [1,4] with 16 useful source/leaf points and one charged native leaf-orbit neighbor per selected point. All four 136-pair policies had 0/32 hits and rank 0 on both lines; 64 exact targets and 256 policy-target cases were independently replayed. Under uniform subgroup targets, the m=2 32-target union-bound expectation is at most 6.40e-36 hits per arm. Prior torsion discovery has a separate 3.267-second receipt without compatible field-operation metering, so no complete exact-target cost ratio is asserted. <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/README.md">Scope and decision</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/results.json">toy cases</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/replay.json">toy replay</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/exact_smoke.json">exact smoke</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/exact_replay.json">exact replay</a> preserve the evidence.</p>
     <p>Exact-target transport: <a href="https://github.com/aburan28/crypto/pull/717">PR #717</a> passed eight saved degree-263 representatives, 40 independent full-coordinate checks, 2,096 actual-degree kernel inputs, and 122 invalid-input controls. Its original validation did not include a reverse map. PR #750 now verifies a normalized dual for all eight saved degree-263 maps; a general arbitrary-kernel dual interface and exact-target PDP yield remain open. Compact producer: <a href="https://github.com/aburan28/crypto/pull/720">PR #720</a> promoted the n = 53 source and frozen 23,320-point base to main; its 12 archived witnesses were replayed in PR validation. The archived claim JSON still has its historical pending-validation label and does not by itself certify a main-based full-rank recovery. These are not cost rows in the toy table.</p>
-    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/results_final.json">frozen degree-7 raw stream</a> (SHA-256 <code>50d95459b97ee6c5d4b3b3559d33a71b08ac2df35b5cc1cb2abb682eb795aa07</code>), <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/RESULT.md">scope and accounting</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_oriented_transport_20260924/validation.json">oriented-map validation</a>, and <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/COMPACT_ORBIT_PRODUCER.md">producer provenance and replay</a>. Next gates: preregister an implicit m ≥ 3 exact-target producer with supported target mass for useful rank, charged native leaf action, and a counting/memory admission bound; separately, use a fresh-stream exact group-law oracle to classify compact four-sum support versus extractor misses. The verified n = 53 full-rank and rho controls, and the completed n = 37/41 sparse-base sweep, appear below.</p>
+    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/results_final.json">frozen degree-7 raw stream</a> (SHA-256 <code>50d95459b97ee6c5d4b3b3559d33a71b08ac2df35b5cc1cb2abb682eb795aa07</code>), <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/RESULT.md">scope and accounting</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_oriented_transport_20260924/validation.json">oriented-map validation</a>, and <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/COMPACT_ORBIT_PRODUCER.md">producer provenance and replay</a>. The next exact-target gate is an implicit m ≥ 3 producer with supported target mass for useful rank, charged native leaf action, and a counting/memory admission bound. The separate fresh-stream group-law four-sum oracle is complete in <a href="https://github.com/aburan28/crypto/pull/757">PR #757</a>; its support-versus-extractor result appears below with the verified n = 53 full-rank and rho controls and the completed n = 37/41 sparse-base sweep.</p>
   </div>
 </section>
 <!-- END ecc2k130-directed-gates-20260925 -->
@@ -7678,11 +7690,11 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     <p><a href="https://github.com/aburan28/crypto/pull/760">PR #760</a> preregistered the byte-exact union of the three disjoint L128 public-Q blocks from PR #754. One fresh 512-target/220-column training solve reached rank 220 at relation 461; an operational rank stage solved 220 base logs, then one compact point-index process produced 384 relations and operational recovery returned all Q logs. One fresh signed-Frobenius rho table solved the identical 384 Q values. Independent full group-law replay checked 512 training relations, 23,320 orbit labels, and every IC/rho scalar. Raw receipts, source and input hashes, and the retained archive-checker-only failure are in <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_combined_l384_n53_20260925/RESULT.md">the result</a>.</p>
   </div>
   <div class="table-scroll"><table>
-    <caption>One GitHub-hosted Ubuntu fixed stream; wall seconds include fresh processes. Complete operational IC = training producer + mandatory rank/linear solve + one-index point producer + mandatory scalar recovery. Audit is separate from both operational costs; the child-only lower omits necessary recovery. The certified factor-base construction is excluded. Ratios use the same-Q one-table rho wall.</caption>
+    <caption>One GitHub-hosted Ubuntu fixed stream; wall seconds include fresh processes. Post-certified-base operational IC = training producer + mandatory rank/linear solve + one-index point producer + mandatory scalar recovery. Audit is separate from both operational costs; the child-only lower omits necessary recovery. The certified factor-base construction is excluded. Ratios use the same-Q one-table rho wall.</caption>
     <thead><tr><th>Arm / accounting bound</th><th class="n">Cold wall s</th><th class="n">IC / rho</th><th>Correctness / scope</th></tr></thead>
     <tbody>
       <tr><td>Compact IC, two-child lower</td><td class="n">276.592</td><td class="n">1.787</td><td>Incomplete: rank and scalar recovery omitted</td></tr>
-      <tr><td><strong>Compact IC, complete operational</strong></td><td class="n"><strong>353.649</strong></td><td class="n"><strong>2.285</strong></td><td>384/384 logs; pre-certified base</td></tr>
+      <tr><td><strong>Compact IC, post-certified-base operational</strong></td><td class="n"><strong>353.649</strong></td><td class="n"><strong>2.285</strong></td><td>384/384 logs; pre-certified base</td></tr>
       <tr><td>Compact IC, audit-inclusive diagnostic</td><td class="n">504.545</td><td class="n">3.259</td><td>Independent replay added</td></tr>
       <tr><td><strong>Signed-Frobenius rho, one table</strong></td><td class="n"><strong>154.799</strong></td><td class="n"><strong>1.000</strong></td><td>384/384 same-Q logs</td></tr>
     </tbody>
@@ -8039,6 +8051,27 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n13-oaware-sat-benchmark-20260925 -->
+<!-- BEGIN ecc2k130-s3-sparse-cnf-20260925 -->
+<section class="panel" id="ecc2k130-s3-sparse-cnf-20260925">
+  <div class="panel-head">
+    <h2>Sparse O-aware S3 CNF: exact toy paths pass at 0.40% of dense n = 13 bytes <span class="chip">engineering</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/786">PR #786</a> pins every #781 dense base/schema/path byte and checks a Sinz sequential one-hot plus allowed-output implication encoding on the identical four panels and 32 n = 13 Q+T labels plus O. The independent verifier parsed both CNFs, compared every local relation with full signed-point addition, then matched all 24,955 primary-state paths, 56,394 signed point tuples and 61 exact target assumptions. All five mutation controls rejected, including one that falsely opens an n = 13 empty-output pair. No SAT solver ran in this gate.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One fixed dense-then-sparse cold panel; fractions are exact sparse/dense representation ratios. The three n = 13 empty-admitted-output input pairs each become a binary ban. Full ECDLP S and matched-rho ratios remain unset.</caption>
+    <thead><tr><th>Panel</th><th>Path / target counts</th><th>Variables dense → sparse</th><th>Clauses dense → sparse (ratio)</th><th>Raw CNF bytes dense → sparse (ratio)</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 2, m = 4</td><td>949 / 8</td><td>31 → 55</td><td>258 → 128 (128/258)</td><td>3,310 → 1,530 (1530/3310)</td><td>unset / unset</td></tr>
+      <tr><td>n = 3, m = 5</td><td>70 / 4</td><td>22 → 35</td><td>66 → 61 (61/66)</td><td>824 → 687 (687/824)</td><td>unset / unset</td></tr>
+      <tr><td>n = 4, m = 4</td><td>22,373 / 16</td><td>59 → 111</td><td>1,744 → 364 (364/1744)</td><td>23,102 → 4,743 (4743/23102)</td><td>unset / unset</td></tr>
+      <tr><td>n = 13, m = 5</td><td>1,563 / 33</td><td>1,263 → 2,517</td><td>1,195,344 → 4,731 (4731/1195344)</td><td>17,630,779 → 70,166 (70166/17630779)</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The n = 13 sparse clause and byte ratios are 0.3958% and 0.3980%; 1,254 auxiliaries nearly double variables. External cold child walls were dense export/replay 1.536/2.850 s and sparse export/replay 0.818/10.394 s; peak child RSS was 236,011,520/478,478,336 versus 56,311,808/72,744,960 bytes. The stronger sparse independent replay is slower, so these are representation/verifier diagnostics, not a solver speedup. The first exporter assertion failure and second archive-path audit failure remain archived; a fresh third run passed untouched archive replay under freeze SHA-256 <code>d748bc12bc67d94b8a578cd8707e8154c1b7bbe4d7dc02d943b59073bdcfabe9</code>. This admits a toy sparse semantic reference for a separate same-target SAT comparison. Explicit prefix-state enumeration has no established n = 131 scale path. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/RESULT.md">Exact decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/evidence/README.md">raw attempts, receipts and replay</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-sparse-cnf-20260925 -->
 <!-- BEGIN ecc2k130-n13-oaware-unsat-proof-20260925 -->
 <section class="panel" id="ecc2k130-n13-oaware-unsat-proof-20260925">
   <div class="panel-head">
@@ -8265,3 +8298,4 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
 <!-- END ic-tournament-round-0024 -->
 </body>
 </html>
+
