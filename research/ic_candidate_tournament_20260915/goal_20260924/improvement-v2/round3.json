@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "round": 3,
+  "candidate_panel": "round3-v1",
+  "candidate_source_sha256": "8582e4ab4b63e98696a0ff00ee296e2902923a2c39c325ab0f3e3950ffbb2b28",
+  "scope": "synthetic toy mathematical benchmarks only",
+  "development_basis": "Only round-one and round-two development-stage costs and rank/yield diagnostics informed these predeclared combinations. Round two half-table improved online time but cost more cold instructions; smaller bases and word rows reduced cold costs with online regressions. Confirmation/replay were not used for configuration selection. The exact round-two compiled algorithm is reused under a new registry label, with no unmeasured Rust optimization claimed.",
+  "candidates": [
+    {
+      "id": "incumbent",
+      "source": "qualified-pairinv",
+      "hypothesis": "Unmodified qualified cold IC reference.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3
+      }
+    },
+    {
+      "id": "stop3_word_half",
+      "source": "round3-v1",
+      "hypothesis": "Three-orbit exploration combines the previously cold-favorable small base with half pair coverage; it may lose on natural-query yield.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 3,
+        "row_kernel": "word",
+        "pair_table": "half"
+      }
+    },
+    {
+      "id": "stop4_word_half",
+      "source": "round3-v1",
+      "hypothesis": "Recombine the round-one four-orbit native-time parent and word row kernel with the round-two half-table online parent.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 4,
+        "row_kernel": "word",
+        "pair_table": "half"
+      }
+    },
+    {
+      "id": "stop4_word_cover",
+      "source": "round3-v1",
+      "hypothesis": "A four-orbit base with three precomputed table rows tests whether broad pair coverage recovers online time despite setup cost.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 4,
+        "row_kernel": "word",
+        "pair_table": "cover"
+      }
+    },
+    {
+      "id": "stop5_half",
+      "source": "round3-v1",
+      "hypothesis": "Isolate the five-orbit size and half-table interaction without the word row kernel.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 5,
+        "row_kernel": "full",
+        "pair_table": "half"
+      }
+    },
+    {
+      "id": "stop5_word_half",
+      "source": "round3-v1",
+      "hypothesis": "Recombine the round-two native-time five-orbit parent with half-table online coverage.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 5,
+        "row_kernel": "word",
+        "pair_table": "half"
+      }
+    },
+    {
+      "id": "stop6_word_cover",
+      "source": "round3-v1",
+      "hypothesis": "Test whether extra table coverage improves the six-orbit word-row parent enough to offset its precomputation.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 6,
+        "row_kernel": "word",
+        "pair_table": "cover"
+      }
+    },
+    {
+      "id": "stop6_bounded_half",
+      "source": "round3-v1",
+      "hypothesis": "Use the independently checked bounded scalar-row kernel with the six-orbit half table; this slower parent can reverse under changed base size.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 6,
+        "row_kernel": "bounded",
+        "pair_table": "half"
+      }
+    },
+    {
+      "id": "stop7_word",
+      "source": "round3-v1",
+      "hypothesis": "Probe the wider seven-orbit base with word rows and inexpensive heuristic table construction.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 7,
+        "row_kernel": "word",
+        "pair_table": "heuristic"
+      }
+    },
+    {
+      "id": "word_cover",
+      "source": "round3-v1",
+      "hypothesis": "Keep eight orbits and combine word rows with near-complete table coverage, a distinct online/cold tradeoff.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 8,
+        "orbit_target": null,
+        "row_kernel": "word",
+        "pair_table": "cover"
+      }
+    },
+    {
+      "id": "batch2_stop4_word_half",
+      "source": "round3-v1",
+      "hypothesis": "Batch two collection rows before a rank solve to test final-LA versus overshoot cost on the four-orbit combination.",
+      "config": {
+        "batch_trials": 2,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 4,
+        "row_kernel": "word",
+        "pair_table": "half"
+      }
+    }
+  ]
+}

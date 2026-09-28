@@ -67,6 +67,21 @@ class PortfolioTests(unittest.TestCase):
         self.assertNotIn('timeout', [r['candidate'] for r in chosen])
         self.assertEqual(chosen, retain(rows, arms, width=3, exploration=1, seed=12))
 
+    def test_pair_table_family_survives_before_a_later_cell_specialist(self):
+        from portfolio import family
+        arms = [
+            {'id':'leader', 'config':dict(BASE_CONFIG, pair_table='heuristic', orbit_target=4)},
+            {'id':'half', 'config':dict(BASE_CONFIG, pair_table='half', orbit_target=4)},
+            {'id':'specialist', 'config':dict(BASE_CONFIG, pair_table='heuristic', orbit_target=4)},
+        ]
+        self.assertNotEqual(family(arms[0]), family(arms[1]))
+        rows = [self.row('leader', .8, {'small':.8, 'large':.8}),
+                self.row('half', .9, {'small':.7, 'large':1.1}),
+                self.row('specialist', 1.0, {'small':.6, 'large':1.4})]
+        self.assertEqual(retain(rows, arms, width=2, exploration=0), [
+            {'candidate':'leader', 'reason':'complete instruction-cost leader'},
+            {'candidate':'half', 'reason':'non-dominated implementation family'}])
+
     def test_combinations_include_individually_losing_parents(self):
         arms = [dict(id='incumbent',config=BASE_CONFIG),
                 dict(id='batch',config=dict(BASE_CONFIG,batch_trials=1)),

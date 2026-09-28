@@ -79,7 +79,7 @@ def verify_source(root, expected):
 
 def prepare(name, output, restored=None, *, instrument=True, candidate_panel=None):
     require(name in ('scaled', 'pairinv', 'both'), 'unknown archived source')
-    require(candidate_panel is None or (candidate_panel in ('round1-v1', 'round2-v1')
+    require(candidate_panel is None or (candidate_panel in ('round1-v1', 'round2-v1', 'round3-v1')
             and name == 'pairinv' and instrument),
             'candidate panel requires the instrumented qualified pairinv parent')
     base_name = 'scaled' if name == 'pairinv' else name
@@ -118,7 +118,7 @@ def prepare(name, output, restored=None, *, instrument=True, candidate_panel=Non
         parent = {str(p.relative_to(source)): filehash(p) for p in sorted(source.rglob('*')) if p.is_file()}
         require(sha256(parent) == '240b8daa0478aacb1f6fc248de9fd5ed9b0773c59d3ae869ced0bab8be438378',
                 'candidate derivative is not based on the qualified exact parent')
-        patch = HERE/('round2-candidates.patch' if candidate_panel == 'round2-v1'
+        patch = HERE/('round2-candidates.patch' if candidate_panel in ('round2-v1', 'round3-v1')
                       else 'round1-candidates.patch')
         subprocess.run(['git', 'apply', '--check', str(patch)], cwd=source, check=True)
         subprocess.run(['git', 'apply', str(patch)], cwd=source, check=True)
@@ -144,7 +144,7 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--restored-root', type=Path)
     parser.add_argument('--original', action='store_true')
-    parser.add_argument('--candidate-panel', choices=('round1-v1', 'round2-v1'))
+    parser.add_argument('--candidate-panel', choices=('round1-v1', 'round2-v1', 'round3-v1'))
     args = parser.parse_args()
     print(json.dumps(prepare(args.reference, args.out, args.restored_root,
                              instrument=not args.original, candidate_panel=args.candidate_panel)))
