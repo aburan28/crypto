@@ -1,0 +1,22 @@
+name: ECC2K-130 rotated compressed-row certificate
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/rotated_row_certificate_20260925/**'
+      - '.github/workflows/ecc2k130-rotated-row-certificate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and verify preregistered source and input hashes
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/rotated_row_certificate_20260925/{make_inputs,row,replay,run,ci_replay}.py
+          python3 research/notes/ecc2k130/rotated_row_certificate_20260925/ci_replay.py

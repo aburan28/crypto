@@ -1,0 +1,22 @@
+{
+  "algorithm_seed": 2026092556,
+  "config": {
+    "batch_trials": 128,
+    "collection_window": 0,
+    "linear_algebra": "dense",
+    "max_trials": 256,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "curve_a": 0,
+  "degree": 13,
+  "factor_base": {
+    "kind": "subgroup_orbits",
+    "points": 78,
+    "seed": 43
+  },
+  "mode": "fixture",
+  "target_seeds": [
+    2026092556
+  ]
+}

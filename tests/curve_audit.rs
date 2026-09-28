@@ -493,7 +493,7 @@ fn hnp_recovers_p256_key_via_lll_phase15() {
         let mut sigs: Vec<BiasedSignature> = Vec::new();
 
         while sigs.len() < 8 {
-            let bytes_count = ((k_bits + 7) / 8) as usize;
+            let bytes_count = k_bits.div_ceil(8) as usize;
             let mut buf = vec![0u8; bytes_count];
             rng.fill_bytes(&mut buf);
             let extra = (bytes_count as u32) * 8 - k_bits;

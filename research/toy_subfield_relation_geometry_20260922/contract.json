@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "scope": "bounded_toy_relation_geometry_no_discrete_log_solver",
+  "field_pairs_n_k": [[6, 2], [9, 3], [10, 2], [12, 4]],
+  "max_field_degree": 12,
+  "dimension_multipliers": [1, 2],
+  "curve_a": 0,
+  "curve_cases": ["subfield_control", "full_degree_main", "full_degree_holdout"],
+  "families": ["generic_linear", "subfield_linear", "scaled_subfield_linear"],
+  "seed": 22092026,
+  "targets": "all points of each toy curve, including infinity in the denominator",
+  "summands": 2,
+  "pairs": "unordered distinct affine factor-base points; infinity sums excluded",
+  "field_basis": "polynomial basis, certified irreducible fixed toy moduli",
+  "factor_base": "all rational points with x in the specified F2 vector space",
+  "derived_bounds": [
+    "distinct_nonidentity_targets <= min(number_of_pairs, curve_order - 1)",
+    "product_span_dimension <= min(n, l*(l+1)/2)",
+    "on a curve defined over the proper subfield, points with both coordinates there remain there under addition"
+  ],
+  "screening_success": "For dimension k on at least three of the four full_degree_holdout curves, at least one structured family has lower product-span dimension and at least as many distinct nonidentity pair-sum targets as generic_linear. This is a structural screen, not a solver speedup.",
+  "rejection_rule": "Do not promote a narrower product span alone. Retain empty bases, zero coverage and regressions. Do not extrapolate these toy counts to Oakley or to a subgroup DLP.",
+  "unmeasured": ["groebner_cost", "S", "ratio_to_rho", "ratio_to_dlp_floor", "full_dlp_total_operations"],
+  "benchmark_exception": "The frozen WDSat corpus measures a solver. This experiment exhaustively measures small-curve relation geometry and invokes no solver; its own matched synthetic inputs are frozen here. It is not an equivalent solver-performance benchmark."
+}

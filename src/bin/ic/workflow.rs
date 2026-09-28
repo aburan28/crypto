@@ -46,19 +46,18 @@ use super::experiment::{
     self, log_table_from_doc, log_table_to_doc, FactorBaseDocument, LinearAlgebraMode,
     LogTableDocument, Solver,
 };
-use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
-use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
 use clap::{Args, ValueEnum};
+use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search, Candidate, FactorBaseSpec, Family, SearchOptions,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x, FactorBaseLogTable,
-    solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
-    FactorBaseSelectionCost, FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions,
-    KoblitzSignedRhoOptions, PairSumTable, ProbeBudget, ProjectedFactorBase,
-    RelationCollector, RelationWorkUnit,
+    koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x, CollectedRelation,
+    ColumnCoverage, DecompositionStrategy, FactorBaseLogTable, FactorBaseSelectionCost,
+    FrobeniusFactorBase, KoblitzCurve, KoblitzSignedRhoOptions, PairSumTable, ProbeBudget,
+    ProjectedFactorBase, RelationCollector, RelationWorkUnit,
 };
+use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
 use num_bigint::BigUint;
 use num_traits::Zero;
 use rand::{rngs::StdRng, Rng, SeedableRng};
@@ -93,6 +92,13 @@ fn one_u32() -> u32 {
 fn one_u64() -> u64 {
     1
 }
+/// `skip_serializing_if` for a flag that is off by default, so adding
+/// one does not change the digest of every parameter file that predates
+/// it.
+fn is_false(b: &bool) -> bool {
+    !*b
+}
+
 fn is_one_u32(v: &u32) -> bool {
     *v == 1
 }
@@ -299,6 +305,30 @@ pub struct WorkflowParams {
     /// probe. A separate selection run must tune this value.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub collection_window: Option<u32>,
+    /// Aim the collection window at the columns the run still needs
+    /// covered, instead of sweeping the whole base.
+    ///
+    /// A relation cannot be used until every column it mentions has a
+    /// log, and the matrix cannot be solved until every column is
+    /// mentioned, so a run's relation count is set by *coverage*, not
+    /// by rank.  Measured at `n = 41` on a 192-column base: coverage and
+    /// full rank both complete at relation 330, where rank alone needs
+    /// 192, and 62% of the scanning goes on the last 10% of columns —
+    /// the coupon-collector tail of relations arriving at uniformly
+    /// random columns.
+    ///
+    /// The `m = 3` scan's hit always involves the column of the summand
+    /// it scanned, so a window restricted to the columns still missing
+    /// returns only relations that cover one.  The window keeps its
+    /// width, so scans per trial and the reported counter are unchanged;
+    /// what falls is the number of relations the run needs.
+    ///
+    /// Off by default, and deliberately: with it on, every unit after
+    /// the first scans a different set, so a run's counters are not the
+    /// swept run's.  The frozen ledger rungs are the regression
+    /// baseline and sweep.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub collection_aim: bool,
     /// Bytes the pair table may occupy, when it should differ from
     /// [`PairSumTable::DEFAULT_BYTE_BUDGET`].
     ///
@@ -412,11 +442,21 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
         return Err("collection.unit_trials must be 1..=100000000".into());
     }
     if col.units == 0 || col.max_units < col.units || col.max_units > 100_000 {
-        return Err("collection.units must be at least 1 and at most collection.max_units (≤ 100000)".into());
+        return Err(
+            "collection.units must be at least 1 and at most collection.max_units (≤ 100000)"
+                .into(),
+        );
     }
     for (i, t) in p.targets.iter().enumerate() {
-        if [t.known_log.is_some(), t.random_seed.is_some(), t.public_hash_seed.is_some()]
-            .into_iter().filter(|set| *set).count() != 1
+        if [
+            t.known_log.is_some(),
+            t.random_seed.is_some(),
+            t.public_hash_seed.is_some(),
+        ]
+        .into_iter()
+        .filter(|set| *set)
+        .count()
+            != 1
         {
             return Err(format!(
                 "target {i}: set exactly one of known_log, random_seed, or public_hash_seed"
@@ -584,7 +624,10 @@ pub fn parse_units(text: &str) -> Result<UnitList, String> {
             Some((a, b)) => (a.trim().parse::<usize>(), b.trim().parse::<usize>()),
             None => (part.parse::<usize>(), part.parse::<usize>()),
         };
-        let (lo, hi) = (lo.map_err(|e| format!("{part:?}: {e}"))?, hi.map_err(|e| format!("{part:?}: {e}"))?);
+        let (lo, hi) = (
+            lo.map_err(|e| format!("{part:?}: {e}"))?,
+            hi.map_err(|e| format!("{part:?}: {e}"))?,
+        );
         if lo > hi {
             return Err(format!("{part:?}: empty range"));
         }
@@ -651,7 +694,9 @@ fn known_scalar(c: &KoblitzCurve, t: &TargetSpec) -> Result<BigUint, String> {
     let k = if let Some(s) = &t.known_log {
         super::params::number(s)?
     } else {
-        let seed = t.random_seed.expect("validated known-scalar target has known_log or random_seed");
+        let seed = t
+            .random_seed
+            .expect("validated known-scalar target has known_log or random_seed");
         let mut rng = StdRng::seed_from_u64(seed ^ 0x534f_4c56_4552_5447);
         BigUint::from(rng.gen_range(1..c.subgroup_order.to_u64_digits()[0]))
     };
@@ -726,7 +771,7 @@ fn public_hash_target(c: &KoblitzCurve, seed: u64) -> Result<(BinaryPoint, Targe
     Err("public hash-to-curve target attempt cap exhausted".into())
 }
 
-fn resolve_target(
+pub(crate) fn resolve_target(
     c: &KoblitzCurve,
     target: &TargetSpec,
 ) -> Result<(BinaryPoint, Option<BigUint>, TargetRecord), String> {
@@ -941,10 +986,13 @@ fn probe_budget(c: &KoblitzCurve, fb: &FrobeniusFactorBase, p: &WorkflowParams) 
     };
     let descent_probes = per_target.saturating_mul(p.targets.len() as u64);
 
-    ProbeBudget { summands_scanned, descent_probes }
+    ProbeBudget {
+        summands_scanned,
+        descent_probes,
+    }
 }
 
-fn build_pair_table(
+pub(crate) fn build_pair_table(
     c: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     p: &WorkflowParams,
@@ -1031,8 +1079,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         "ic — workflow {:?} in {} ({}); {}; {} summands; engine {}",
         p.name,
         args.dir.display(),
-        if resumed { format!("resuming, run {}", state.runs) } else { "fresh".into() },
-        experiment::curve_label(p.curve.degree, p.curve.curve_a, p.curve.subfield, p.curve.curve_b),
+        if resumed {
+            format!("resuming, run {}", state.runs)
+        } else {
+            "fresh".into()
+        },
+        experiment::curve_label(
+            p.curve.degree,
+            p.curve.curve_a,
+            p.curve.subfield,
+            p.curve.curve_b
+        ),
         p.summands,
         p.solver.name()
     ));
@@ -1041,7 +1098,12 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     // stage made the phase CPU totals smaller than the whole-process charge.
     let t0 = Instant::now();
     let select_resource_start = experiment::resource_snapshot();
-    let c = experiment::curve(p.curve.degree, p.curve.curve_a, p.curve.subfield, p.curve.curve_b)?;
+    let c = experiment::curve(
+        p.curve.degree,
+        p.curve.curve_a,
+        p.curve.subfield,
+        p.curve.curve_b,
+    )?;
     let mut stage_reports: Vec<Value> = Vec::new();
     let mut overall_failed: Option<String> = None;
 
@@ -1051,63 +1113,71 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         FactorBaseSpec,
         FrobeniusFactorBase,
         Option<FactorBaseSelectionCost>,
-    ) =
-        if state.select.status == StageStatus::Complete && fb_path.exists() {
-            let doc: FactorBaseDocument = read_json(&fb_path)?;
-            if !doc.matches(&c) {
-                return Err("factor_base.json does not belong to this curve".into());
-            }
-            let (fb, cost) = experiment::materialize_with_selection_cost(&c, &doc.spec)?;
-            say(&format!("[1/4] select: reused {}", FACTOR_BASE_FILE));
-            (doc.spec, fb, cost)
-        } else {
-            select_ran = true;
-            let (spec, search_report) = match &p.factor_base {
-                FactorBaseSource::Spec { spec } => (spec.clone(), None),
-                src @ FactorBaseSource::Search { .. } => {
-                    let opts = search_options(src, &p)?;
-                    say("[1/4] select: running factor-base search …");
-                    let report = search(&c, &opts);
-                    let best = report.best().ok_or(
-                        "factor-base search found no candidate that decomposes any target",
-                    )?;
-                    let top: Vec<Value> = report.candidates.iter().take(5).map(candidate_json).collect();
-                    (best.spec.clone(), Some(json!({"candidates_scored":report.candidates.len(),
+    ) = if state.select.status == StageStatus::Complete && fb_path.exists() {
+        let doc: FactorBaseDocument = read_json(&fb_path)?;
+        if !doc.matches(&c) {
+            return Err("factor_base.json does not belong to this curve".into());
+        }
+        let (fb, cost) = experiment::materialize_with_selection_cost(&c, &doc.spec)?;
+        say(&format!("[1/4] select: reused {}", FACTOR_BASE_FILE));
+        (doc.spec, fb, cost)
+    } else {
+        select_ran = true;
+        let (spec, search_report) = match &p.factor_base {
+            FactorBaseSource::Spec { spec } => (spec.clone(), None),
+            src @ FactorBaseSource::Search { .. } => {
+                let opts = search_options(src, &p)?;
+                say("[1/4] select: running factor-base search …");
+                let report = search(&c, &opts);
+                let best = report
+                    .best()
+                    .ok_or("factor-base search found no candidate that decomposes any target")?;
+                let top: Vec<Value> = report
+                    .candidates
+                    .iter()
+                    .take(5)
+                    .map(candidate_json)
+                    .collect();
+                (
+                    best.spec.clone(),
+                    Some(json!({"candidates_scored":report.candidates.len(),
                         "targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
-                        "elapsed_ms":report.elapsed_ms,"top":top})))
-                }
-            };
-            let (fb, cost) = experiment::materialize_with_selection_cost(&c, &spec)?;
-            let doc = FactorBaseDocument {
-                schema_version: 1,
-                degree: c.n,
-                curve_a: c.a,
-                subfield: c.k,
-                curve_b: c.b_index,
-                spec: spec.clone(),
-            };
-            write_atomic(&fb_path, &doc)?;
-            state.select = StageState {
-                status: StageStatus::Complete,
-                artifact: Some(FACTOR_BASE_FILE.into()),
-                elapsed_seconds: t0.elapsed().as_secs_f64(),
-                reason: None,
-            };
-            write_atomic(&state_path, &state)?;
-            if let Some(sr) = search_report {
-                stage_reports.push(json!({"stage":"select","status":"complete","ran":true,"search":sr}));
+                        "elapsed_ms":report.elapsed_ms,"top":top})),
+                )
             }
-            say(&format!(
-                "[1/4] select: complete — {} ({} points, {} signed orbits)",
-                serde_json::to_string(&spec).unwrap_or_default(),
-                fb.points.len(),
-                fb.unknowns()
-            ));
-            (spec, fb, cost)
         };
+        let (fb, cost) = experiment::materialize_with_selection_cost(&c, &spec)?;
+        let doc = FactorBaseDocument {
+            schema_version: 1,
+            degree: c.n,
+            curve_a: c.a,
+            subfield: c.k,
+            curve_b: c.b_index,
+            spec: spec.clone(),
+        };
+        write_atomic(&fb_path, &doc)?;
+        state.select = StageState {
+            status: StageStatus::Complete,
+            artifact: Some(FACTOR_BASE_FILE.into()),
+            elapsed_seconds: t0.elapsed().as_secs_f64(),
+            reason: None,
+        };
+        write_atomic(&state_path, &state)?;
+        if let Some(sr) = search_report {
+            stage_reports
+                .push(json!({"stage":"select","status":"complete","ran":true,"search":sr}));
+        }
+        say(&format!(
+            "[1/4] select: complete — {} ({} points, {} signed orbits)",
+            serde_json::to_string(&spec).unwrap_or_default(),
+            fb.points.len(),
+            fb.unknowns()
+        ));
+        (spec, fb, cost)
+    };
     if !select_ran {
         stage_reports.push(json!({"stage":"select","status":"complete","ran":false}));
-    } else if stage_reports.last().map_or(true, |v| v["stage"] != "select") {
+    } else if stage_reports.last().is_none_or(|v| v["stage"] != "select") {
         stage_reports.push(json!({"stage":"select","status":"complete","ran":true}));
     }
     if let (Some(cost), Some(report)) = (selection_cost, stage_reports.last_mut()) {
@@ -1146,12 +1216,23 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         write_atomic(&state_path, &state)?;
     }
     if let Some(report) = stage_reports.last_mut() {
-        report["projected_predicate_cost"] = factor_base_summary["projected_predicate_cost"].clone();
+        report["projected_predicate_cost"] =
+            factor_base_summary["projected_predicate_cost"].clone();
         report["elapsed_seconds"] = json!(t0.elapsed().as_secs_f64());
         report["resources"] = experiment::resource_delta(select_resource_start);
     }
     if args.stop_after == Some(Stage::Select) {
-        return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
+        return Ok(finish(
+            &p,
+            &state,
+            &args,
+            stage_reports,
+            factor_base_summary,
+            None,
+            None,
+            begin,
+            "stopped",
+        ));
     }
 
     // ── Stage 2: collect (work units) ──────────────────────────────
@@ -1185,10 +1266,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     p.collection.max_units
                 ));
             }
-            list.iter().copied().filter(|u| !units.contains_key(u)).collect()
+            list.iter()
+                .copied()
+                .filter(|u| !units.contains_key(u))
+                .collect()
         }
         None if logs_done => Vec::new(),
-        None => (0..p.collection.units).filter(|u| !units.contains_key(u)).collect(),
+        None => (0..p.collection.units)
+            .filter(|u| !units.contains_key(u))
+            .collect(),
     };
     if ignored > 0 {
         say(&format!(
@@ -1203,6 +1289,20 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let mut pair_table_build_resources: Option<Value> = None;
     let mut relation_unit_seconds = 0.0f64;
     let mut relation_unit_resources: Option<Value> = None;
+    // Columns already covered by the units on disk, so a resumed run
+    // aims at the same set a straight-through run would, and the report
+    // can state coverage even when every unit was reused.
+    let mut coverage = match p.collection_aim {
+        true => {
+            let mut cov =
+                ColumnCoverage::new(&c, &fb).ok_or("factor base has no projected columns")?;
+            for doc in units.values() {
+                cov.add(&doc.relations);
+            }
+            Some(cov)
+        }
+        false => None,
+    };
     if !wanted.is_empty() {
         say(&format!(
             "[2/4] collect: running {} work unit(s) of {} probes ({} already present) …",
@@ -1215,9 +1315,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
             let pair_begin = Instant::now();
             let pair_resource_start = experiment::resource_snapshot();
-            pair = Some(
-                build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?,
-            );
+            pair = Some(build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?);
             pair_table_build_seconds = pair_begin.elapsed().as_secs_f64();
             pair_table_build_resources = Some(experiment::resource_delta(pair_resource_start));
         }
@@ -1225,12 +1323,39 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             .ok_or("factor base cannot decompose with this summand count")?;
         let relation_resource_start = experiment::resource_snapshot();
         for &u in &wanted {
-            let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, u)?;
+            // `None` sweeps.  The first unit of a fresh run has every
+            // column at zero mentions, and a window over every column
+            // *is* the sweep, so aiming costs nothing until the counts
+            // start to differ.  It stays on after coverage completes,
+            // aiming then at the once-mentioned columns, because that is
+            // the phase where the run is short of rank rather than of
+            // coverage and where the tail actually is.
+            let aim = coverage
+                .as_ref()
+                .map(|cov| cov.missing_points())
+                .filter(|pts| !pts.is_empty());
+            let doc = collect_unit(
+                &c,
+                &collector,
+                &p,
+                &digest,
+                &spec,
+                &rel_dir,
+                u,
+                aim.as_deref(),
+            )?;
+            if let Some(cov) = coverage.as_mut() {
+                cov.add(&doc.relations);
+            }
             say(&format!(
-                "      unit {u:05}: {} relations from {} probes ({:.2}s)",
+                "      unit {u:05}: {} relations from {} probes ({:.2}s){}",
                 doc.relations.len(),
                 doc.count,
-                doc.elapsed_seconds
+                doc.elapsed_seconds,
+                match coverage.as_ref() {
+                    Some(cov) => format!(", {}/{} columns covered", cov.covered(), cov.columns()),
+                    None => String::new(),
+                }
             ));
             units_ran += 1;
             relations_now += doc.relations.len();
@@ -1248,7 +1373,11 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     state.relations_collected = units.values().map(|d| d.relations.len()).sum();
     let requested_present = (0..p.collection.units).all(|u| units.contains_key(&u));
     state.collect = StageState {
-        status: if requested_present || logs_done { StageStatus::Complete } else { StageStatus::Pending },
+        status: if requested_present || logs_done {
+            StageStatus::Complete
+        } else {
+            StageStatus::Pending
+        },
         artifact: Some(RELATIONS_DIR.into()),
         elapsed_seconds: state.collect.elapsed_seconds + t1.elapsed().as_secs_f64(),
         reason: None,
@@ -1272,6 +1401,13 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         "pair_table_build_resources":pair_table_build_resources,
         "relation_unit_seconds":relation_unit_seconds,
         "relation_unit_resources":relation_unit_resources,
+        // What the run aimed at, and how far coverage got: the number
+        // aiming exists to move is `relations_total`, and without the
+        // coverage beside it a reader cannot tell a run that finished
+        // from one that ran out of units.
+        "aimed":p.collection_aim,
+        "columns_covered":coverage.as_ref().map(|cov| cov.covered()),
+        "columns":coverage.as_ref().map(|cov| cov.columns()),
         "elapsed_seconds":collect_elapsed,"resources":collect_resources}));
     if units_ran == 0 {
         say(&format!(
@@ -1290,7 +1426,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         ));
     }
     if worker_mode || args.stop_after == Some(Stage::Collect) {
-        return Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), None, None, begin, "stopped"));
+        return Ok(finish(
+            &p,
+            &state,
+            &args,
+            stage_reports,
+            with_tier(factor_base_summary, pair.as_ref()),
+            None,
+            None,
+            begin,
+            "stopped",
+        ));
     }
 
     // ── Stage 3: logs (merge, verify, solve) ───────────────────────
@@ -1302,8 +1448,13 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         if doc.spec != spec {
             return Err("logs.json was built over a different factor base".into());
         }
-        say(&format!("[3/4] logs: reused {} ({} columns, re-verified)", LOGS_FILE, table.len()));
-        stage_reports.push(json!({"stage":"logs","status":"complete","ran":false,"columns":table.len()}));
+        say(&format!(
+            "[3/4] logs: reused {} ({} columns, re-verified)",
+            LOGS_FILE,
+            table.len()
+        ));
+        stage_reports
+            .push(json!({"stage":"logs","status":"complete","ran":false,"columns":table.len()}));
         Some(table)
     } else {
         say(&format!(
@@ -1311,8 +1462,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             state.relations_collected,
             units.len()
         ));
-        let merged: Vec<CollectedRelation> =
-            units.values().flat_map(|d| d.relations.iter().cloned()).collect();
+        let merged: Vec<CollectedRelation> = units
+            .values()
+            .flat_map(|d| d.relations.iter().cloned())
+            .collect();
         // One solver for the whole stage: the orbit map of the base and
         // the verification of a relation are each paid once, however many
         // rounds of collection it takes to determine the columns.
@@ -1331,12 +1484,22 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             let collector = {
                 if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
                     pair = Some(
-                        build_pair_table(&c, &fb, &p)
-                            .ok_or("field too wide for the pair table")?,
+                        build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?,
                     );
                 }
                 RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
                     .ok_or("factor base cannot decompose with this summand count")?
+            };
+            // Coverage of every relation the solver already holds, so
+            // the first extension unit aims at what those left out.
+            let mut extend_coverage = match p.collection_aim {
+                true => {
+                    let mut cov = ColumnCoverage::new(&c, &fb)
+                        .ok_or("factor base has no projected columns")?;
+                    cov.add(&merged);
+                    Some(cov)
+                }
+                false => None,
             };
             while outcome.is_none() {
                 let report = solver.report();
@@ -1348,12 +1511,40 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     "      {} accepted relations ({} rejected, {} duplicates) do not determine all {} columns; collecting unit {next:05} …",
                     report.relations, report.rejected_relations, report.duplicate_relations, report.columns
                 ));
-                let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, next)?;
+                // The extension loop runs precisely when the system is
+                // undetermined, so it is where aiming is worth most —
+                // and measurement says what it should aim at there is
+                // the least-mentioned columns, not the uncovered ones:
+                // at n = 41 a run that has covered every column still
+                // lacks a pivot on two of them, and both are columns
+                // mentioned exactly once.
+                let aim = extend_coverage
+                    .as_ref()
+                    .map(|cov| cov.missing_points())
+                    .filter(|pts| !pts.is_empty());
+                let doc = collect_unit(
+                    &c,
+                    &collector,
+                    &p,
+                    &digest,
+                    &spec,
+                    &rel_dir,
+                    next,
+                    aim.as_deref(),
+                )?;
+                if let Some(cov) = extend_coverage.as_mut() {
+                    cov.add(&doc.relations);
+                }
                 say(&format!(
-                    "      unit {next:05}: {} relations from {} probes ({:.2}s)",
+                    "      unit {next:05}: {} relations from {} probes ({:.2}s){}",
                     doc.relations.len(),
                     doc.count,
-                    doc.elapsed_seconds
+                    doc.elapsed_seconds,
+                    match extend_coverage.as_ref() {
+                        Some(cov) =>
+                            format!(", {}/{} columns covered", cov.covered(), cov.columns()),
+                        None => String::new(),
+                    }
                 ));
                 solver.push(&doc.relations);
                 loaded += doc.relations.len();
@@ -1369,7 +1560,9 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         let summands_scanned_total: u64 = units.values().map(|d| d.summands_scanned).sum();
         let outcome = outcome.or_else(|| {
             Some((
-                FactorBaseLogTable { columns: Vec::new() },
+                FactorBaseLogTable {
+                    columns: Vec::new(),
+                },
                 solver.report(),
             ))
         });
@@ -1423,7 +1616,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 None
             }
             None => {
-                let reason = "factor base has no usable projected columns for this summand count".to_string();
+                let reason = "factor base has no usable projected columns for this summand count"
+                    .to_string();
                 state.logs = StageState {
                     status: StageStatus::Failed,
                     artifact: None,
@@ -1431,7 +1625,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     reason: Some(reason.clone()),
                 };
                 write_atomic(&state_path, &state)?;
-                stage_reports.push(json!({"stage":"logs","status":"failed","ran":true,"reason":reason}));
+                stage_reports
+                    .push(json!({"stage":"logs","status":"failed","ran":true,"reason":reason}));
                 overall_failed = Some(reason);
                 None
             }
@@ -1442,10 +1637,30 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         report["resources"] = experiment::resource_delta(logs_resource_start);
     }
     let Some(table) = table else {
-        return Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), None, overall_failed, begin, "failed"));
+        return Ok(finish(
+            &p,
+            &state,
+            &args,
+            stage_reports,
+            with_tier(factor_base_summary, pair.as_ref()),
+            None,
+            overall_failed,
+            begin,
+            "failed",
+        ));
     };
     if args.stop_after == Some(Stage::Logs) {
-        return Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), None, None, begin, "stopped"));
+        return Ok(finish(
+            &p,
+            &state,
+            &args,
+            stage_reports,
+            with_tier(factor_base_summary, pair.as_ref()),
+            None,
+            None,
+            begin,
+            "stopped",
+        ));
     }
 
     // ── Stage 3: solve (per-target resumable) ──────────────────────
@@ -1453,7 +1668,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let solve_resource_start = experiment::resource_snapshot();
     let mut solutions: SolutionsDocument = if sol_path.exists() {
         let d: SolutionsDocument = read_json(&sol_path)?;
-        if d.params_digest != digest || !same_curve(d.degree, d.curve_a, d.subfield, d.curve_b, &c) {
+        if d.params_digest != digest || !same_curve(d.degree, d.curve_a, d.subfield, d.curve_b, &c)
+        {
             return Err("solutions.json belongs to a different run".into());
         }
         d
@@ -1468,9 +1684,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             solutions: Vec::new(),
         }
     };
-    let already: std::collections::HashSet<usize> =
-        solutions.solutions.iter().filter(|s| s.verified).map(|s| s.index).collect();
-    let pending: Vec<usize> = (0..p.targets.len()).filter(|i| !already.contains(i)).collect();
+    let already: std::collections::HashSet<usize> = solutions
+        .solutions
+        .iter()
+        .filter(|s| s.verified)
+        .map(|s| s.index)
+        .collect();
+    let pending: Vec<usize> = (0..p.targets.len())
+        .filter(|i| !already.contains(i))
+        .collect();
     say(&format!(
         "[4/4] solve: {} targets, {} already solved, {} pending",
         p.targets.len(),
@@ -1479,7 +1701,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     ));
     // The pair table is shared with collection; built once per process.
     let mut pair_table_seconds = 0.0f64;
-    if ic.strategy == DecompositionStrategy::PairTable && (!pending.is_empty() || p.baseline.rho) && pair.is_none() {
+    if ic.strategy == DecompositionStrategy::PairTable
+        && (!pending.is_empty() || p.baseline.rho)
+        && pair.is_none()
+    {
         let tp = Instant::now();
         pair = Some(build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?);
         pair_table_seconds = tp.elapsed().as_secs_f64();
@@ -1493,52 +1718,98 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     } else {
         projected.individual_log_solver(&table, &ic, pair.as_ref())
     };
-    for i in pending {
-        let (q, expected, target_record) = resolve_target(&c, &p.targets[i])?;
-        // Timed like the ρ baseline: the descent on the public point
-        // only, not the construction of the target.
-        let t = Instant::now();
-        let outcome = solver.as_ref().and_then(|s| s.solve(&q));
-        let (recovered, trials) = match outcome {
-            Some((d, r)) => (Some(d), r.trials),
-            None => (None, 0),
-        };
-        let verified = recovered.as_ref().is_some_and(|d| c.mul(c.generator(), d) == q)
-            && expected.as_ref().map_or(true, |known| recovered.as_ref() == Some(known));
-        // Replace any earlier unverified attempt for this index.
-        solutions.solutions.retain(|s| s.index != i);
-        solutions.solutions.push(Solution {
-            index: i,
-            expected: expected.as_ref().map(ToString::to_string)
-                .unwrap_or_else(|| "not_constructed".into()),
-            target: Some(target_record),
-            recovered: recovered.map(|d| d.to_string()),
-            verified,
-            descent_trials: trials,
-            elapsed_seconds: t.elapsed().as_secs_f64(),
-        });
-        solutions.solutions.sort_by_key(|s| s.index);
-        if verified {
-            solved_now += 1;
-        } else {
-            failed_now += 1;
+    // Targets are independent, so they are solved in parallel.  Each
+    // one's `elapsed_seconds` is still its own descent wall, and
+    // `descent_seconds_total` sums them, so the gated end-to-end figures
+    // price the same work as a serial run; only the stage's own wall
+    // falls.  Every finished target is recorded and the state written at
+    // once, under a lock, so an interrupted batch keeps what it solved.
+    {
+        use rayon::prelude::*;
+        use std::sync::Mutex;
+        let shared = Mutex::new((&mut solutions, &mut state, &mut solved_now, &mut failed_now));
+        let failures: Vec<String> = pending
+            .par_iter()
+            .with_max_len(1)
+            .filter_map(|&i| {
+                let (q, expected, target_record) = match resolve_target(&c, &p.targets[i]) {
+                    Ok(t) => t,
+                    Err(e) => return Some(e),
+                };
+                // Timed like the ρ baseline: the descent on the public point
+                // only, not the construction of the target.
+                let t = Instant::now();
+                let outcome = solver.as_ref().and_then(|s| s.solve(&q));
+                let elapsed = t.elapsed().as_secs_f64();
+                let (recovered, trials) = match outcome {
+                    Some((d, r)) => (Some(d), r.trials),
+                    None => (None, 0),
+                };
+                let verified = recovered
+                    .as_ref()
+                    .is_some_and(|d| c.mul(c.generator(), d) == q)
+                    && expected
+                        .as_ref()
+                        .is_none_or(|known| recovered.as_ref() == Some(known));
+                let solution = Solution {
+                    index: i,
+                    expected: expected
+                        .as_ref()
+                        .map(ToString::to_string)
+                        .unwrap_or_else(|| "not_constructed".into()),
+                    target: Some(target_record),
+                    recovered: recovered.map(|d| d.to_string()),
+                    verified,
+                    descent_trials: trials,
+                    elapsed_seconds: elapsed,
+                };
+                let mut guard = shared.lock().unwrap_or_else(|e| e.into_inner());
+                let (solutions, state, solved_now, failed_now) = &mut *guard;
+                // Replace any earlier unverified attempt for this index.
+                solutions.solutions.retain(|s| s.index != i);
+                solutions.solutions.push(solution);
+                solutions.solutions.sort_by_key(|s| s.index);
+                if verified {
+                    **solved_now += 1;
+                } else {
+                    **failed_now += 1;
+                }
+                state.solved_targets = solutions.solutions.iter().filter(|s| s.verified).count();
+                if let Err(e) = write_atomic(&sol_path, &**solutions) {
+                    return Some(e);
+                }
+                if let Err(e) = write_atomic(&state_path, &**state) {
+                    return Some(e);
+                }
+                say(&format!(
+                    "      target {i}: {} ({} descent trials, {:.2}s)",
+                    if verified { "verified" } else { "FAILED" },
+                    trials,
+                    elapsed
+                ));
+                None
+            })
+            .collect();
+        if let Some(e) = failures.into_iter().next() {
+            return Err(e);
         }
-        state.solved_targets = solutions.solutions.iter().filter(|s| s.verified).count();
-        write_atomic(&sol_path, &solutions)?;
-        write_atomic(&state_path, &state)?;
-        say(&format!(
-            "      target {i}: {} ({} descent trials, {:.2}s)",
-            if verified { "verified" } else { "FAILED" },
-            trials,
-            t.elapsed().as_secs_f64()
-        ));
     }
     let all_verified = state.solved_targets == p.targets.len();
     state.solve = StageState {
-        status: if all_verified { StageStatus::Complete } else { StageStatus::Failed },
+        status: if all_verified {
+            StageStatus::Complete
+        } else {
+            StageStatus::Failed
+        },
         artifact: Some(SOLUTIONS_FILE.into()),
         elapsed_seconds: t2.elapsed().as_secs_f64(),
-        reason: (!all_verified).then(|| format!("{} of {} targets unsolved", p.targets.len() - state.solved_targets, p.targets.len())),
+        reason: (!all_verified).then(|| {
+            format!(
+                "{} of {} targets unsolved",
+                p.targets.len() - state.solved_targets,
+                p.targets.len()
+            )
+        }),
     };
     write_atomic(&state_path, &state)?;
     let solve_elapsed = t2.elapsed().as_secs_f64();
@@ -1552,7 +1823,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     if p.baseline.rho {
         let t3 = Instant::now();
         let baseline_resource_start = experiment::resource_snapshot();
-        say(&format!("[ρ]   baseline: signed-Frobenius rho on {} targets …", p.targets.len()));
+        say(&format!(
+            "[ρ]   baseline: signed-Frobenius rho on {} targets …",
+            p.targets.len()
+        ));
         let mut rows = Vec::with_capacity(p.targets.len());
         let (mut rho_seconds, mut rho_iterations, mut rho_verified) = (0.0f64, 0u64, 0usize);
         for i in 0..p.targets.len() {
@@ -1567,16 +1841,23 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             let report = koblitz_signed_frobenius_rho_with_progress(&c, &q, &options, &mut |_| {});
             let secs = t.elapsed().as_secs_f64();
             let verified = report.verified
-                && report.recovered_log.as_ref().is_some_and(|d| c.mul(c.generator(), d) == q)
-                && expected.as_ref().map_or(true, |known| report.recovered_log.as_ref() == Some(known));
+                && report
+                    .recovered_log
+                    .as_ref()
+                    .is_some_and(|d| c.mul(c.generator(), d) == q)
+                && expected
+                    .as_ref()
+                    .is_none_or(|known| report.recovered_log.as_ref() == Some(known));
             rho_seconds += secs;
             rho_iterations += report.iterations;
             rho_verified += usize::from(verified);
-            rows.push(json!({"index":i,"verified":verified,"iterations":report.iterations,
+            rows.push(
+                json!({"index":i,"verified":verified,"iterations":report.iterations,
                 "restarts":report.restarts_attempted,"seconds":secs,
                 "walk_group_additions":report.charges.walk_group_additions,
                 "recovered":report.recovered_log.as_ref().map(ToString::to_string),
-                "target":target_record}));
+                "target":target_record}),
+            );
             say(&format!(
                 "      target {i}: rho {} after {} iterations ({:.3}s)",
                 if verified { "verified" } else { "FAILED" },
@@ -1585,13 +1866,31 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             ));
         }
         let targets = p.targets.len().max(1) as f64;
-        let descent_total: f64 = solutions.solutions.iter().filter(|x| x.verified).map(|x| x.elapsed_seconds).sum();
-        let descent_trials: usize = solutions.solutions.iter().filter(|x| x.verified).map(|x| x.descent_trials).sum();
-        let precompute = state.select.elapsed_seconds + state.collect.elapsed_seconds + state.logs.elapsed_seconds;
+        let descent_total: f64 = solutions
+            .solutions
+            .iter()
+            .filter(|x| x.verified)
+            .map(|x| x.elapsed_seconds)
+            .sum();
+        let descent_trials: usize = solutions
+            .solutions
+            .iter()
+            .filter(|x| x.verified)
+            .map(|x| x.descent_trials)
+            .sum();
+        let precompute = state.select.elapsed_seconds
+            + state.collect.elapsed_seconds
+            + state.logs.elapsed_seconds;
         let ic_charged = descent_total / targets;
         let ic_amortised = (precompute + pair_table_seconds + descent_total) / targets;
         let rho_per_target = rho_seconds / targets;
-        let ratio = |ic: f64| if ic > 0.0 { rho_per_target / ic } else { f64::INFINITY };
+        let ratio = |ic: f64| {
+            if ic > 0.0 {
+                rho_per_target / ic
+            } else {
+                f64::INFINITY
+            }
+        };
         let baseline_elapsed = t3.elapsed().as_secs_f64();
         let vs_rho = json!({
             "n":c.n,"subgroup_order":c.subgroup_order.to_string(),"targets":p.targets.len(),
@@ -1627,7 +1926,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         ));
     }
     let status = if all_verified { "complete" } else { "failed" };
-    Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), Some(&solutions), overall_failed, begin, status))
+    Ok(finish(
+        &p,
+        &state,
+        &args,
+        stage_reports,
+        with_tier(factor_base_summary, pair.as_ref()),
+        Some(&solutions),
+        overall_failed,
+        begin,
+        status,
+    ))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1646,7 +1955,7 @@ fn finish(
         "evidence_scope":evidence_scope(p),
         "name":p.name,"degree":p.curve.degree,"curve_a":p.curve.curve_a,"subfield":p.curve.subfield,"curve_b":p.curve.curve_b,
         "summands":p.summands,"descent_summands":p.descent_summands.unwrap_or(p.summands),
-        "collection_window":p.collection_window,"solver":p.solver,
+        "collection_window":p.collection_window,"collection_aim":p.collection_aim,"solver":p.solver,
         "params_digest":state.params_digest,"run_directory":args.dir.display().to_string(),"run_number":state.runs,
         "resumed":state.runs>1,"stop_after":args.stop_after,
         "factor_base":factor_base,
@@ -1718,6 +2027,7 @@ fn collect_unit(
     spec: &FactorBaseSpec,
     rel_dir: &Path,
     unit: usize,
+    aim: Option<&[u32]>,
 ) -> Result<RelationUnitDocument, String> {
     let work = RelationWorkUnit {
         seed: p.seed,
@@ -1726,7 +2036,7 @@ fn collect_unit(
             .ok_or("work unit range overflows")?,
         count: p.collection.unit_trials,
     };
-    let (relations, report) = collector.collect(work);
+    let (relations, report) = collector.collect_aimed(work, aim);
     let doc = RelationUnitDocument {
         schema_version: 1,
         params_digest: digest.to_string(),
@@ -1753,7 +2063,12 @@ mod tests {
     use super::*;
     use crypto_lib::cryptanalysis::koblitz_index_calculus::build_subgroup_orbit_factor_base;
 
-    fn params(unit_trials: u64, units: usize, window: Option<u32>, targets: usize) -> WorkflowParams {
+    fn params(
+        unit_trials: u64,
+        units: usize,
+        window: Option<u32>,
+        targets: usize,
+    ) -> WorkflowParams {
         let mut p: WorkflowParams =
             serde_json::from_value(json!({
                 "schema_version": 1,
@@ -1773,7 +2088,9 @@ mod tests {
         p.summands = 3;
         p.solver = Solver::PairTable;
         p.descent_summands = Some(2);
-        p.targets = (0..targets).map(|i| serde_json::from_value(json!({"random_seed": i})).unwrap()).collect();
+        p.targets = (0..targets)
+            .map(|i| serde_json::from_value(json!({"random_seed": i})).unwrap())
+            .collect();
         p
     }
 
@@ -1793,7 +2110,10 @@ mod tests {
         // case and the fold would never be chosen.
         let mut wide = params(1_000, 3, Some(64), 8);
         wide.collection.max_units = 100_000;
-        assert_eq!(probe_budget(&kc, &fb, &wide).summands_scanned, b.summands_scanned);
+        assert_eq!(
+            probe_budget(&kc, &fb, &wide).summands_scanned,
+            b.summands_scanned
+        );
 
         // No window is a full scan: the whole base, once per probe.
         let full = probe_budget(&kc, &fb, &params(1_000, 3, None, 8));
@@ -1816,7 +2136,10 @@ mod tests {
 
         let mut three = params(1_000, 3, Some(64), 8);
         three.summands = 3;
-        assert_eq!(probe_budget(&kc, &fb, &three).summands_scanned, 1_000 * 3 * 64);
+        assert_eq!(
+            probe_budget(&kc, &fb, &three).summands_scanned,
+            1_000 * 3 * 64
+        );
 
         for m in [2u8, 4] {
             let mut other = params(1_000, 3, Some(64), 8);
@@ -1854,7 +2177,11 @@ mod tests {
 
         for targets in [1usize, 8, 32] {
             let b = probe_budget(&kc, &fb, &params(1_000, 3, Some(64), targets));
-            assert_eq!(b.descent_probes, expected * targets as u64, "{targets} targets");
+            assert_eq!(
+                b.descent_probes,
+                expected * targets as u64,
+                "{targets} targets"
+            );
         }
     }
 
@@ -1868,8 +2195,14 @@ mod tests {
         let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
         let (points, orbits) = (fb.points.len(), fb.signed_orbits.len());
 
-        let light = ProbeBudget { summands_scanned: 0, descent_probes: 0 };
-        let heavy = ProbeBudget { summands_scanned: u32::MAX as u64, descent_probes: 0 };
+        let light = ProbeBudget {
+            summands_scanned: 0,
+            descent_probes: 0,
+        };
+        let heavy = ProbeBudget {
+            summands_scanned: u32::MAX as u64,
+            descent_probes: 0,
+        };
         assert!(PairSumTable::fold_is_cheaper(points, kc.n, orbits, light));
         assert!(!PairSumTable::fold_is_cheaper(points, kc.n, orbits, heavy));
     }

@@ -89,9 +89,7 @@ pub fn exchange_bytes(
     let mut b = *s2;
     for (i, &pos) in support.iter().enumerate() {
         if (swap_mask >> i) & 1 == 1 {
-            let t = a[pos];
-            a[pos] = b[pos];
-            b[pos] = t;
+            std::mem::swap(&mut a[pos], &mut b[pos]);
         }
     }
     (a, b)

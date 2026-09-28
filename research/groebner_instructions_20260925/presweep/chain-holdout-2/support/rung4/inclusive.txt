@@ -1,0 +1,235 @@
+--------------------------------------------------------------------------------
+Profile data file '/tmp/claude-0/-home-user-crypto/f80fbe96-cd66-50e9-ae29-d862a143e5f3/scratchpad/coverage/out/chain-holdout-2/support/rung4/callgrind.out' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 1434137827
+Trigger: Program termination
+Profiled target:  /home/user/crypto/target/release/examples/groebner_stage_bench --label support --ladder chain-holdout-2 --rung 4 --out /tmp/claude-0/-home-user-crypto/f80fbe96-cd66-50e9-ae29-d862a143e5f3/scratchpad/coverage/out/chain-holdout-2/support/rung4/stage (PID 29307, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       100
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                     
+--------------------------------------------------------------------------------
+8,275,938,268 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                       file:function
+--------------------------------------------------------------------------------
+57,073,457,545 (689.6%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::solve_rec'2 [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 8,275,938,268 (100.0%)  ./csu/../csu/libc-start.c:__libc_start_main@@GLIBC_2.34 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 8,275,938,268 (100.0%)  ./csu/../sysdeps/nptl/libc_start_call_main.h:(below main) [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 8,275,938,268 (100.0%)  ???:(below main) [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 8,275,938,268 (100.0%)  ???:0x000000000001f540 [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+ 8,275,938,268 (100.0%)  ???:crypto_lib::cryptanalysis::koblitz_index_calculus::groebner_decompose [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 8,275,938,268 (100.0%)  ???:groebner_stage_bench::main [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 8,275,938,268 (100.0%)  ???:main [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 8,275,938,268 (100.0%)  ???:std::rt::lang_start::{{closure}} [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 8,275,938,268 (100.0%)  ???:std::rt::lang_start_internal [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 8,275,938,268 (100.0%)  ???:std::sys::backtrace::__rust_begin_short_backtrace [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 8,121,692,148 (98.14%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::solve_boolean_system_filtered [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 8,118,901,574 (98.10%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::solve_rec [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 5,753,818,305 (69.52%)  ???:<alloc::vec::Vec<T> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<T,I>>::from_iter [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 3,941,734,968 (47.63%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::InheritedBases::specialise_owned [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 3,890,702,994 (47.01%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::specialise_shared [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 2,247,755,969 (27.16%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::insert [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 2,067,992,911 (24.99%)  ???:core::slice::sort::unstable::quicksort::quicksort'2 [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 1,657,797,456 (20.03%)  ???:core::slice::sort::unstable::ipnsort [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 1,633,818,144 (19.74%)  ???:core::slice::sort::unstable::quicksort::quicksort [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 1,629,242,898 (19.69%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::eliminate_linear_generators [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 1,598,061,178 (19.31%)  ???:core::ops::function::impls::<impl core::ops::function::FnMut<A> for &mut F>::call_mut [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 1,495,972,416 (18.08%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::reduce_inherited [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 1,399,871,819 (16.91%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::from_system_closed_with [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 1,399,143,973 (16.91%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::from_system_with [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 1,311,045,139 (15.84%)  ???:std::thread::local::LocalKey<T>::with [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 1,149,189,294 (13.89%)  ???:crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly::from_monos [/home/user/crypto/target/release/examples/groebner_stage_bench]
+ 1,103,024,716 (13.33%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::ensure_current [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   884,440,700 (10.69%)  ???:core::slice::sort::shared::smallsort::small_sort_network [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   811,468,433 ( 9.81%)  ???:<alloc::vec::Vec<T> as alloc::vec::spec_from_iter::SpecFromIter<T,I>>::from_iter [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   797,929,269 ( 9.64%)  ???:crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly::substitute_dispatch [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   789,561,141 ( 9.54%)  ???:crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly::substitute_popcnt [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   425,904,495 ( 5.15%)  ???:__rustc::__rust_alloc [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   423,269,050 ( 5.11%)  ???:__rustc::__rdl_alloc [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   399,550,045 ( 4.83%)  ./malloc/./malloc/malloc.c:malloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+   386,688,366 ( 4.67%)  ./malloc/./malloc/malloc.c:_int_malloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+   334,518,927 ( 4.04%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   329,836,748 ( 3.99%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::extend_columns [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   328,676,765 ( 3.97%)  ???:__rustc::__rust_dealloc [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   325,775,220 ( 3.94%)  ???:__rustc::__rdl_dealloc [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   322,873,675 ( 3.90%)  ./malloc/./malloc/malloc.c:free [/usr/lib/x86_64-linux-gnu/libc.so.6]
+   321,553,189 ( 3.89%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::build_inherited_macaulay [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   308,620,188 ( 3.73%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::macaulay_rows_monos_with_mask [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   254,268,985 ( 3.07%)  ./malloc/./malloc/malloc.c:_int_free [/usr/lib/x86_64-linux-gnu/libc.so.6]
+   252,438,428 ( 3.05%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::echelon_f2_suffix_counted [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   246,489,633 ( 2.98%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::build_macaulay_with_multiplier_mask [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   192,653,419 ( 2.33%)  ???:alloc::rc::Rc<T,A>::drop_slow [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   184,871,724 ( 2.23%)  ???:alloc::raw_vec::RawVecInner<A>::finish_grow [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   165,964,331 ( 2.01%)  ???:core::ptr::drop_in_place<crypto_lib::cryptanalysis::inherited_f4::ReducedBasis> [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   161,359,118 ( 1.95%)  ???:__rustc::__rust_realloc [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   161,112,792 ( 1.95%)  ???:__rustc::__rdl_realloc [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   157,418,636 ( 1.90%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::composite_to [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   155,693,620 ( 1.88%)  ./malloc/./malloc/malloc.c:realloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+   135,987,546 ( 1.64%)  ./malloc/./malloc/malloc.c:_int_realloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+   132,959,030 ( 1.61%)  ???:crypto_lib::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   132,943,838 ( 1.61%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::build_decomposition_system [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   132,782,022 ( 1.60%)  ???:<alloc::vec::Vec<T> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<T,I>>::from_iter'2 [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   132,485,671 ( 1.60%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::pack_rows [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   132,265,692 ( 1.60%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::sym_semaev_s3 [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   124,654,130 ( 1.51%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::SymElement::mul [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   122,990,521 ( 1.49%)  ???:<core::iter::adapters::map::Map<I,F> as core::iter::traits::iterator::Iterator>::fold [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   118,834,407 ( 1.44%)  ???:core::ptr::drop_in_place<alloc::vec::Vec<crypto_lib::cryptanalysis::inherited_f4::LazyRow>> [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   118,055,392 ( 1.43%)  ???:alloc::raw_vec::RawVec<T,A>::grow_one [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   115,928,581 ( 1.40%)  ???:crypto_lib::cryptanalysis::inherited_f4::fold_layout_popcnt [/home/user/crypto/target/release/examples/groebner_stage_bench]
+   105,828,797 ( 1.28%)  ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:__memcpy_avx_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    93,871,444 ( 1.13%)  ???:__rustc::__rust_alloc_zeroed [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    93,605,251 ( 1.13%)  ???:__rustc::__rdl_alloc_zeroed [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    88,548,611 ( 1.07%)  ./malloc/./malloc/malloc.c:calloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    82,542,768 ( 1.00%)  ???:crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly::add [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    76,532,535 ( 0.92%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::decisive_rows [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    76,319,790 ( 0.92%)  ???:alloc::raw_vec::RawVecInner<A>::reserve::do_reserve_and_handle [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    73,365,575 ( 0.89%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::linear_tail [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    68,112,471 ( 0.82%)  ???:hashbrown::map::HashMap<K,V,S,A>::contains_key [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    66,141,158 ( 0.80%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::F4ColumnIndex::get [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    65,781,508 ( 0.79%)  ./malloc/./malloc/malloc.c:malloc_consolidate [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    63,944,501 ( 0.77%)  ./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:__memset_avx2_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    63,834,719 ( 0.77%)  ???:std::env::_var [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    63,825,328 ( 0.77%)  ./malloc/./malloc/malloc.c:_int_free_merge_chunk [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    62,335,508 ( 0.75%)  ???:std::env::_var_os [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    62,230,204 ( 0.75%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::echelon_f2_m4ri_counted [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    62,204,368 ( 0.75%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::echelon_f2_m4ri_arena_counted [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    61,355,721 ( 0.74%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::adopt_layout [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    58,074,703 ( 0.70%)  ???:core::ops::function::Fn::call [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    56,289,021 ( 0.68%)  ???:hashbrown::map::HashMap<K,V,S,A>::insert [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    56,264,438 ( 0.68%)  ???:core::ptr::drop_in_place<crypto_lib::cryptanalysis::koblitz_groebner::InheritedBases> [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    54,919,296 ( 0.66%)  ???:std::sys::env::unix::getenv::{{closure}} [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    52,991,946 ( 0.64%)  ./stdlib/./stdlib/getenv.c:getenv [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    46,437,045 ( 0.56%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::max_f4_rows [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    45,650,959 ( 0.55%)  ???:core::slice::sort::shared::pivot::median3_rec [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    37,561,130 ( 0.45%)  ./malloc/../string/bits/string_fortified.h:calloc
+    37,359,620 ( 0.45%)  ???:0x0000000004989740 [???]
+    35,821,044 ( 0.43%)  ./malloc/./malloc/malloc.c:unlink_chunk.isra.0 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    35,649,462 ( 0.43%)  ???:core::slice::sort::shared::pivot::median3_rec'2 [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    31,230,428 ( 0.38%)  ???:alloc::rc::rc_inner_layout_for_value_layout [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    26,006,950 ( 0.31%)  ???:crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly::mul_mono [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    23,297,639 ( 0.28%)  ???:core::slice::sort::shared::smallsort::small_sort_general [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    22,093,884 ( 0.27%)  ???:core::slice::sort::stable::driftsort_main [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    21,989,166 ( 0.27%)  ???:core::slice::sort::stable::drift::sort [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    21,725,590 ( 0.26%)  ./malloc/../string/bits/string_fortified.h:_int_realloc
+    21,265,472 ( 0.26%)  ???:0x00000000049896b0 [???]
+    17,758,229 ( 0.21%)  ./malloc/./malloc/malloc.c:_int_free_maybe_consolidate [/usr/lib/x86_64-linux-gnu/libc.so.6]
+    16,557,473 ( 0.20%)  ???:core::slice::sort::shared::smallsort::insertion_sort_shift_left [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    15,121,080 ( 0.18%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::monomials_up_to_mask [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    14,861,368 ( 0.18%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::collapse_to_one [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    13,613,233 ( 0.16%)  ???:core::ptr::drop_in_place<alloc::vec::Vec<alloc::rc::Rc<crypto_lib::cryptanalysis::inherited_f4::LayoutStep>>> [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    13,475,878 ( 0.16%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::choose_split [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    11,899,475 ( 0.14%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::F4ColumnLayout::new [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    10,701,457 ( 0.13%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::dump_node_system [/home/user/crypto/target/release/examples/groebner_stage_bench]
+    10,065,343 ( 0.12%)  ???:<core::iter::adapters::chain::Chain<A,B> as core::iter::traits::iterator::Iterator>::fold [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     9,188,901 ( 0.11%)  ???:alloc::rc::Rc<T,A>::drop_slow'2 [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     8,704,632 ( 0.11%)  ./malloc/./malloc/arena.c:free
+     8,620,723 ( 0.10%)  ???:core::ops::function::FnOnce::call_once [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     5,159,819 ( 0.06%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::composite_to'2 [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     4,590,892 ( 0.06%)  ???:<T as alloc::vec::spec_from_elem::SpecFromElem>::from_elem [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     4,335,637 ( 0.05%)  ???:core::ffi::c_str::CStr::from_bytes_with_nul [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     3,994,623 ( 0.05%)  ???:core::hash::BuildHasher::hash_one [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     3,666,457 ( 0.04%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::max_f4_cols [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     3,621,925 ( 0.04%)  ???:hashbrown::raw::RawTableInner::fallible_with_capacity [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     3,509,346 ( 0.04%)  ???:hashbrown::raw::RawTable<T,A>::reserve_rehash [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     3,292,562 ( 0.04%)  ???:core::slice::sort::stable::quicksort::quicksort [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     3,049,228 ( 0.04%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::drop_zeros [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     2,901,638 ( 0.04%)  ???:__rustc::__rust_no_alloc_shim_is_unstable_v2 [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     2,836,219 ( 0.03%)  ???:<alloc::vec::Vec<T,A> as core::clone::Clone>::clone [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     2,806,725 ( 0.03%)  ???:core::iter::traits::iterator::Iterator::partition [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     2,764,780 ( 0.03%)  ???:0x0000000004989600 [???]
+     2,589,208 ( 0.03%)  ./string/../sysdeps/x86_64/multiarch/strcmp-avx2.S:__strncmp_avx2 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+     2,449,772 ( 0.03%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::from_system_with::{{closure}} [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     2,266,560 ( 0.03%)  ???:core::slice::sort::shared::smallsort::small_sort_general_with_scratch [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     2,166,660 ( 0.03%)  ???:std::time::Instant::elapsed [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     2,072,460 ( 0.03%)  ???:<alloc::vec::Vec<T,A1> as alloc::vec::spec_extend::SpecExtend<T,alloc::vec::into_iter::IntoIter<T,A2>>>::spec_extend [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     1,860,992 ( 0.02%)  ???:<core::hash::sip::Hasher<S> as core::hash::Hasher>::write [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     1,750,752 ( 0.02%)  ./malloc/./malloc/arena.c:malloc
+     1,724,278 ( 0.02%)  ./malloc/./malloc/arena.c:realloc
+     1,506,880 ( 0.02%)  ???:core::slice::sort::stable::quicksort::quicksort'2 [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     1,299,996 ( 0.02%)  ???:std::sys::pal::unix::time::Timespec::now [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     1,247,360 ( 0.02%)  ???:core::slice::sort::shared::smallsort::sort8_stable [/home/user/crypto/target/release/examples/groebner_stage_bench]
+     1,131,246 ( 0.01%)  ???:alloc::vec::Vec<T,A>::extend_with [/home/user/crypto/target/release/examples/groebner_stage_bench]
+       917,476 ( 0.01%)  ./malloc/./malloc/malloc.c:alloc_perturb [/usr/lib/x86_64-linux-gnu/libc.so.6]
+       890,738 ( 0.01%)  ???:std::sys::pal::unix::time::Timespec::sub_timespec [/home/user/crypto/target/release/examples/groebner_stage_bench]
+       857,522 ( 0.01%)  ???:0x0000000004989500 [???]
+       750,664 ( 0.01%)  ./string/../sysdeps/x86_64/multiarch/strlen-avx2.S:__strlen_avx2 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+       703,525 ( 0.01%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::SymElement::square [/home/user/crypto/target/release/examples/groebner_stage_bench]
+       698,146 ( 0.01%)  ???:std::time::Instant::now [/home/user/crypto/target/release/examples/groebner_stage_bench]
+       668,480 ( 0.01%)  ???:core::slice::sort::shared::smallsort::sort4_stable [/home/user/crypto/target/release/examples/groebner_stage_bench]
+       532,394 ( 0.01%)  ./malloc/./malloc/arena.c:calloc
+       529,628 ( 0.01%)  ./time/../sysdeps/unix/sysv/linux/clock_gettime.c:clock_gettime@@GLIBC_2.17 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+       300,376 ( 0.00%)  ???:core::ptr::drop_in_place<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>> [/home/user/crypto/target/release/examples/groebner_stage_bench]
+       236,026 ( 0.00%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::SymElement::from_subspace_vars [/home/user/crypto/target/release/examples/groebner_stage_bench]
+       174,018 ( 0.00%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::close [/home/user/crypto/target/release/examples/groebner_stage_bench]
+        70,742 ( 0.00%)  ???:<alloc::vec::Vec<T,A> as core::ops::drop::Drop>::drop [/home/user/crypto/target/release/examples/groebner_stage_bench]
+        40,239 ( 0.00%)  ???:hashbrown::raw::RawTable<T,A>::clear [/home/user/crypto/target/release/examples/groebner_stage_bench]
+        19,470 ( 0.00%)  ???:<core::iter::adapters::copied::Copied<I> as core::iter::traits::iterator::Iterator>::try_fold [/home/user/crypto/target/release/examples/groebner_stage_bench]
+        16,390 ( 0.00%)  ???:std::sync::once_lock::OnceLock<T>::initialize [/home/user/crypto/target/release/examples/groebner_stage_bench]
+        16,181 ( 0.00%)  ???:std::sys::sync::once::futex::Once::call [/home/user/crypto/target/release/examples/groebner_stage_bench]
+        15,678 ( 0.00%)  ???:std::sys::thread_local::native::lazy::Storage<T,D>::get_or_init_slow [/home/user/crypto/target/release/examples/groebner_stage_bench]
+        15,653 ( 0.00%)  ???:std::sync::once::Once::call_once_force::{{closure}} [/home/user/crypto/target/release/examples/groebner_stage_bench]
+        14,118 ( 0.00%)  ???:crypto_lib::cryptanalysis::algebra_cache::AlgebraCache::from_env [/home/user/crypto/target/release/examples/groebner_stage_bench]
+        10,640 ( 0.00%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::split_rule_default [/home/user/crypto/target/release/examples/groebner_stage_bench]
+         8,632 ( 0.00%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::DecompositionSystem::interleaved_order [/home/user/crypto/target/release/examples/groebner_stage_bench]
+         6,944 ( 0.00%)  ???:core::array::<impl [T; N]>::try_map [/home/user/crypto/target/release/examples/groebner_stage_bench]
+         4,392 ( 0.00%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::invert_permutation [/home/user/crypto/target/release/examples/groebner_stage_bench]
+         2,542 ( 0.00%)  ???:hashbrown::raw::RawTable<T,A>::remove_entry [/home/user/crypto/target/release/examples/groebner_stage_bench]
+         1,755 ( 0.00%)  ???:std::sys::thread_local::destructors::linux_like::register [/home/user/crypto/target/release/examples/groebner_stage_bench]
+         1,671 ( 0.00%)  ./stdlib/./stdlib/cxa_thread_atexit_impl.c:__cxa_thread_atexit_impl [/usr/lib/x86_64-linux-gnu/libc.so.6]
+         1,035 ( 0.00%)  ???:0x0000000004989450 [???]
+           988 ( 0.00%)  ./malloc/./malloc/morecore.c:__glibc_morecore [/usr/lib/x86_64-linux-gnu/libc.so.6]
+           949 ( 0.00%)  ???:core::str::converts::from_utf8 [/home/user/crypto/target/release/examples/groebner_stage_bench]
+           768 ( 0.00%)  ./misc/./misc/sbrk.c:sbrk [/usr/lib/x86_64-linux-gnu/libc.so.6]
+           510 ( 0.00%)  ./malloc/./malloc/malloc.c:systrim.constprop.0 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+           176 ( 0.00%)  ./nptl/./nptl/pthread_mutex_lock.c:pthread_mutex_lock@@GLIBC_2.2.5 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+           148 ( 0.00%)  ./malloc/./malloc/malloc.c:sysmalloc_mmap.isra.0 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+           144 ( 0.00%)  ./misc/../sysdeps/unix/sysv/linux/brk.c:brk [/usr/lib/x86_64-linux-gnu/libc.so.6]
+           136 ( 0.00%)  ./nptl/./nptl/pthread_mutex_unlock.c:pthread_mutex_unlock@@GLIBC_2.2.5 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+           132 ( 0.00%)  ???:0x00000000049894e0 [???]
+           124 ( 0.00%)  ./elf/./elf/dl-open.c:_dl_find_dso_for_object [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+            59 ( 0.00%)  ./misc/../sysdeps/unix/sysv/linux/setvmaname.c:__set_vma_name [/usr/lib/x86_64-linux-gnu/libc.so.6]
+            36 ( 0.00%)  ./malloc/./malloc/malloc.c:munmap_chunk [/usr/lib/x86_64-linux-gnu/libc.so.6]
+            32 ( 0.00%)  ./misc/../sysdeps/unix/sysv/linux/brk_call.h:brk
+            26 ( 0.00%)  ./misc/../sysdeps/unix/sysv/linux/mmap64.c:mmap [/usr/lib/x86_64-linux-gnu/libc.so.6]
+            26 ( 0.00%)  ???:0x0000000004989720 [???]
+            24 ( 0.00%)  ./elf/./elf/dl-tunables.c:__tunable_get_val [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+             6 ( 0.00%)  ./misc/../sysdeps/unix/syscall-template.S:munmap [/usr/lib/x86_64-linux-gnu/libc.so.6]
+
+--------------------------------------------------------------------------------
+The following files chosen for auto-annotation could not be found:
+--------------------------------------------------------------------------------
+  ./csu/../csu/libc-start.c
+  ./csu/../sysdeps/nptl/libc_start_call_main.h
+  ./elf/./elf/dl-open.c
+  ./elf/./elf/dl-tunables.c
+  ./malloc/../string/bits/string_fortified.h
+  ./malloc/./malloc/arena.c
+  ./malloc/./malloc/malloc.c
+  ./malloc/./malloc/morecore.c
+  ./misc/../sysdeps/unix/syscall-template.S
+  ./misc/../sysdeps/unix/sysv/linux/brk.c
+  ./misc/../sysdeps/unix/sysv/linux/brk_call.h
+  ./misc/../sysdeps/unix/sysv/linux/mmap64.c
+  ./misc/../sysdeps/unix/sysv/linux/setvmaname.c
+  ./misc/./misc/sbrk.c
+  ./nptl/./nptl/pthread_mutex_lock.c
+  ./nptl/./nptl/pthread_mutex_unlock.c
+  ./stdlib/./stdlib/cxa_thread_atexit_impl.c
+  ./stdlib/./stdlib/getenv.c
+  ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S
+  ./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S
+  ./string/../sysdeps/x86_64/multiarch/strcmp-avx2.S
+  ./string/../sysdeps/x86_64/multiarch/strlen-avx2.S
+  ./time/../sysdeps/unix/sysv/linux/clock_gettime.c
+

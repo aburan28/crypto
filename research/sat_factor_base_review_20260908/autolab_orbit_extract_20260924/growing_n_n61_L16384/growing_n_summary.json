@@ -1,0 +1,47 @@
+{
+  "L": 16384,
+  "n": 61,
+  "K": 1400,
+  "tune_walls_s": {"800": 459.60, "1000": 381.12, "1200": 386.70, "1400": 234.56},
+  "chosen_K": 1400,
+  "note": "K=1400 won at the top of the sweep",
+  "blocks": [
+    {
+      "solved": 16384,
+      "matched": true,
+      "ic": {"real_s": 187.35, "user_s": 153.36, "rss": 11064115200},
+      "ks": {"real_s": 1360.74, "user_s": 1038.88, "rss": 1602879488},
+      "ic_inproc_ms": 186854.4,
+      "wall_ratio": 0.1376816981936314,
+      "user_ratio": 0.14762051632238565
+    },
+    {
+      "solved": 16384,
+      "matched": true,
+      "ic": {"real_s": 273.59, "user_s": 200.26, "rss": 9832333312},
+      "ks": {"real_s": 1334.26, "user_s": 1050.82, "rss": 1242890240},
+      "ic_inproc_ms": 272971.2,
+      "wall_ratio": 0.20504999025677154,
+      "user_ratio": 0.1905749795407415
+    },
+    {
+      "solved": 16384,
+      "matched": true,
+      "ic": {"real_s": 294.52, "user_s": 201.06, "rss": 11486248960},
+      "ks": {"real_s": 1011.63, "user_s": 931.16, "rss": 1551433728},
+      "ic_inproc_ms": 294006.6,
+      "wall_ratio": 0.29113411029625456,
+      "user_ratio": 0.2159233644059023
+    }
+  ],
+  "ok": true,
+  "wall_ratio_median": 0.20504999025677154,
+  "wall_ratio_range": [0.1376816981936314, 0.29113411029625456],
+  "user_ratio_median": 0.1905749795407415,
+  "all_blocks_compact_faster_wall": true,
+  "ic_rss_mb": 11486.24896,
+  "ks_rss_mb": 1602.879488,
+  "targets_solved": 49152,
+  "replayed": 49152,
+  "replay_fail": 0
+}

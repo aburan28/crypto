@@ -1,37 +1,47 @@
-//! How expensive is the `Parameterized` (Gröbner) cache layer?
+//! What would a full parametric Gröbner basis cost to build?
 //!
 //! `algebra_cache` has three layers. `Preprocessing` is the one on the
 //! relation-search path and it is cheap -- see `preprocessing_cost.rs`, which
-//! measures it. `Parameterized` is the other extreme: `parameter_basis_cached`
-//! runs Buchberger over F2 on `n_vars + n` Boolean variables, is capped at 16,
-//! and is marked offline-experiment-only. This probe puts a number on it,
-//! because "is any cached artifact expensive enough to deserve a durable tier"
-//! cannot be answered without one.
+//! measures it. `Parameterized` was the other extreme: a cached Gröbner basis
+//! of the template with the target bits as `n` extra Boolean variables, capped
+//! at 16. That cache was removed after it was measured never to pay for itself
+//! (see `polynomial_reuse.rs`); this probe still prices the basis it would have
+//! stored, because the cost is the reason it went.
 //!
-//! **Run every point under an external `timeout`.** The Buchberger engine has
-//! no interrupt hook, so a point past the feasible edge does not come back:
+//! **Run every point under an external `timeout`.** A point past the feasible
+//! edge does not come back:
 //!
 //!     for pt in "3 2 2" "5 2 2" "5 3 2"; do
 //!       timeout 45 cargo run --release --example gb_probe -- $pt
 //!     done
 //!
-//! Measured 2026-09-21, 4-core x86_64 container, rustc 1.94.1, release:
+//! `b = 1` throughout: the Koblitz coefficient, and the case the engine left
+//! unclosed before it paired basis elements with the field equations. Three
+//! engines, one row each; a superseded figure moves, it does not vanish.
+//! 4-core x86_64 container, rustc 1.94.1, release, one run per point:
 //!
-//!     n=3 ell=2 m=2   7 vars      49 ms
-//!     n=5 ell=2 m=2   9 vars    5340 ms
-//!     n=5 ell=3 m=2  11 vars   did not finish in 45 s
+//!                     vars   2026-09-21   340a8379    this engine
+//!     n=3 ell=2 m=2     7       49 ms      10.5 ms       12.8 ms
+//!     n=5 ell=2 m=2     9     5340 ms      1174 ms       1347 ms
+//!     n=5 ell=3 m=2    11     did not finish in 45 s, on every engine
 //!     n=7 ell=2 m=2, n=5 ell=2 m=3, n=7 ell=3 m=2, n=9 ell=2 m=2
-//!                                did not finish in 45 s
+//!                             did not finish in 45 s (2026-09-21)
 //!
-//! Two more variables cost about 100x, which is what Buchberger over F2 should
-//! do and why the 16-variable cap is where it is. Scoped to these points on
-//! this machine; nothing here is a claim about any attack's cost.
+//! Read the columns as three different computations, not one getting faster.
+//! 2026-09-21 is the engine before the chain criterion (b8eca515), which
+//! accounts for the 4.6x to 340a8379. Neither of those returned a Gröbner
+//! basis here: at n=5 the 340a8379 output has 28 elements and is not closed.
+//! This engine adds the field-equation pairs, finds two new generators at each
+//! point, and returns the 16- and 23-element reduced bases. It costs +22% and
+//! +15% over 340a8379 at those points, the price of a correct answer on a
+//! system that needs the pairs. Scoped to these points on this machine;
+//! nothing here is a claim about any attack's cost.
 
 use crypto_lib::binary_ecc::F2mElement;
-use crypto_lib::cryptanalysis::algebra_cache::AlgebraCache;
 use crypto_lib::cryptanalysis::koblitz_groebner::FieldStructure;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible;
-use crypto_lib::cryptanalysis::polynomial_reuse::{parameter_basis_cached, DecompositionTemplate};
+use crypto_lib::cryptanalysis::polynomial_reuse::DecompositionTemplate;
+use crypto_lib::cryptanalysis::pq_groebner_f2::groebner_basis_f2_stats;
 use num_bigint::BigUint;
 use std::time::Instant;
 
@@ -77,17 +87,22 @@ fn main() {
         return;
     }
 
-    let mut cache = AlgebraCache::local(64 * 1024 * 1024);
+    let Some(generators) = t.parameterized_generators() else {
+        println!(
+            "{n:>4} {ell:>4} {m:>3} {:>7} {total:>7}   refused",
+            t.n_vars
+        );
+        return;
+    };
     let start = Instant::now();
-    let got = parameter_basis_cached(&t, &mut cache);
+    let (g, stats) = groebner_basis_f2_stats(generators, total);
     let ns = start.elapsed().as_nanos();
-    match got {
-        Some(g) => println!(
-            "{n:>4} {ell:>4} {m:>3} {:>7} {total:>7}  {:>11.1} ms   ({} generators)",
-            t.n_vars,
-            ns as f64 / 1e6,
-            g.len(),
-        ),
-        None => println!("{n:>4} {ell:>4} {m:>3} {:>7} {total:>7}   refused", t.n_vars),
-    }
+    println!(
+        "{n:>4} {ell:>4} {m:>3} {:>7} {total:>7}  {:>11.1} ms   ({} generators, {} from field pairs, {:.3e} mono ops)",
+        t.n_vars,
+        ns as f64 / 1e6,
+        g.len(),
+        stats.field_generators,
+        stats.mono_ops as f64,
+    );
 }

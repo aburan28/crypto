@@ -70,7 +70,7 @@ fn sqrt_mod(n: u64, p: u64) -> Option<u64> {
     // Tonelli–Shanks
     let mut q = p - 1;
     let mut s = 0u32;
-    while q % 2 == 0 {
+    while q.is_multiple_of(2) {
         q /= 2;
         s += 1;
     }
@@ -78,7 +78,7 @@ fn sqrt_mod(n: u64, p: u64) -> Option<u64> {
     while powm(z, (p - 1) / 2, p) != p - 1 {
         z += 1;
     }
-    let (mut m, mut c, mut t, mut r) = (s, powm(z, q, p), powm(n, q, p), powm(n, (q + 1) / 2, p));
+    let (mut m, mut c, mut t, mut r) = (s, powm(z, q, p), powm(n, q, p), powm(n, q.div_ceil(2), p));
     loop {
         if t == 1 {
             return Some(r);
@@ -291,7 +291,10 @@ pub fn self_tate_raw(
     p: u64,
     xs_start: u64,
 ) -> Option<(u64, u64)> {
-    assert!((p - 1) % r == 0, "embedding degree must be 1 (r | p−1)");
+    assert!(
+        (p - 1).is_multiple_of(r),
+        "embedding degree must be 1 (r | p−1)"
+    );
     let raw = miller_self_raw(pp, c, r, a, b, p, xs_start)?;
     let t = powm(raw, (p - 1) / r, p);
     Some((t, raw))
@@ -300,7 +303,10 @@ pub fn self_tate_raw(
 /// Reduced Tate pairing `⟨P,Q⟩_r ∈ μ_r ⊂ F_p^*` for an **arbitrary** second
 /// argument `Q` (not necessarily in `⟨P⟩`), embedding degree 1 (`r | p−1`).
 pub fn tate_pairing(pp: (u64, u64), qq: (u64, u64), r: u64, a: u64, b: u64, p: u64) -> Option<u64> {
-    assert!((p - 1) % r == 0, "embedding degree must be 1 (r | p−1)");
+    assert!(
+        (p - 1).is_multiple_of(r),
+        "embedding degree must be 1 (r | p−1)"
+    );
     let exp = (p - 1) / r;
     for xs in 1..p {
         let rhs = (addm(addm(mulm(mulm(xs, xs, p), xs, p), mulm(a, xs, p), p), b, p)) % p;
@@ -447,7 +453,11 @@ pub fn find_embedding1_instance(p: u64, min_r: u64) -> Option<(u64, u64, (u64, u
             while d * d <= gg {
                 if gg % d == 0 {
                     for cand in [d, gg / d] {
-                        if cand % 2 == 0 && cand >= min_r && cand > r && (p - 1) % cand == 0 {
+                        if cand % 2 == 0
+                            && cand >= min_r
+                            && cand > r
+                            && (p - 1).is_multiple_of(cand)
+                        {
                             r = cand;
                         }
                     }
@@ -510,7 +520,11 @@ pub fn enumerate_embedding1(
             while d * d <= gg {
                 if gg % d == 0 {
                     for cand in [d, gg / d] {
-                        if cand % 2 == 0 && cand >= min_r && cand > r && (p - 1) % cand == 0 {
+                        if cand % 2 == 0
+                            && cand >= min_r
+                            && cand > r
+                            && (p - 1).is_multiple_of(cand)
+                        {
                             r = cand;
                         }
                     }
@@ -595,7 +609,7 @@ mod tests {
 
     fn v2(mut n: u64) -> u32 {
         let mut k = 0;
-        while n % 2 == 0 {
+        while n.is_multiple_of(2) {
             n /= 2;
             k += 1;
         }
