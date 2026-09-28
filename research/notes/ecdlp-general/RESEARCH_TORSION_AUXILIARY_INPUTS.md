@@ -375,7 +375,15 @@ attack, none of which moves either floor:
   the boundary, so quotienting by it cannot move the ratio.  That is why
   the scoreboard lists it under engineering.  The `2-torsion-saturated` factor bases in
   `research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md` measured `8.9×` *worse* than the
-  unsaturated base at equal size, a relabelling.
+  unsaturated base at equal size, a relabelling.  The end-to-end run of
+  the symmetrised system on Koblitz curves
+  (`research/koblitz_symmetrised_e2e_20260927/`, exotic-coordinates note
+  §20) measured both halves of that argument at once: the `+T`-closed
+  base's yield is `0.6×` the plain base's (representations come in
+  pairs), the `w, s` solve is `1.5–2.4×` cheaper per trial, and the net
+  is `0.76–0.84×` the plain decomposition at `n = 17, 23` and `4.0×`
+  worse at `n = 31`, three to five orders of magnitude above the matched
+  rho throughout.  Engineering, as the floor requires.
 - **Rank-two torsion.**  `E(F_q) ≅ Z/n₁ × Z/n₂` with `n₁ > 1` puts the full
   `n₁`-torsion over `F_q`; the Weil pairing on `E[n₁]` maps its logarithm to
   `F_q^*`, but that is the MOV reduction for the small part `n₁ | q − 1`, and
