@@ -15,6 +15,25 @@ decision. [RUNS.csv](RUNS.csv) retains all 3,480 canonical run keys and their
 exclusive ledgers. No scheduled pair failed or timed out in this round; the
 exporter still preserves those statuses when present.
 
+## Reporting correction
+
+The original aggregate exporter divided rho/incumbent by challenger/ic_online.
+Those denominators differ, so that quotient was not the matched rho/challenger
+speedup. The corrected report divides the measured online costs directly and
+names each row's IC denominator. It also includes the auxiliary IC reference
+comparisons already retained by the frozen evaluator. Historical values remain
+in [the complete before/after record](REPORTING-CORRECTION.json).
+
+| Selected challenger stage | Previously exported online rho / challenger | Corrected matched ratio |
+| --- | ---: | ---: |
+| Confirmation | 5.058918983932264 | 5.0219292766882875 |
+| Replay | 5.1760622769942755 | 5.130908564435435 |
+
+This is an accounting correction. The raw archive, per-target paired rows,
+measured costs, RUNS.csv, frozen evaluator, confirmation/replay gates and
+negative promotion decision are unchanged. No worker was rerun. Linux evidence
+CI must independently reproduce the correction from the retained archive.
+
 ## Frozen execution
 
 [PR 892](https://github.com/aburan28/crypto/pull/892) merged the
