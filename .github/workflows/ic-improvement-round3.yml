@@ -40,7 +40,7 @@ jobs:
           test "$(valgrind --version)" = valgrind-3.22.0
       - name: Verify registered panel and historical target census
         run: |
-          test "$(sha256sum research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/round3.json | cut -d ' ' -f1)" = 30b04a370e77e2a2bb7c01b7e96fd1ad8b1785104240113ac71f85eac28beca8
+          test "$(sha256sum research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/round3.json | cut -d ' ' -f1)" = 6c87dafb98945bb49038f9389dc37881536700a9b9709d3862f9dbf79782763c
           python -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_*.py'
           python research/ic_candidate_tournament_20260915/target_history.py \
             --history research/ic_candidate_tournament_20260915/goal_20260924/improvement/target-history.json \

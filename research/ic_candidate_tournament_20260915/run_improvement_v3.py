@@ -19,14 +19,10 @@ from tournament import digest, read, write
 
 HERE = Path(__file__).resolve().parent
 PANEL = HERE / 'goal_20260924/improvement-v2/round3.json'
-PANEL_SHA256 = '30b04a370e77e2a2bb7c01b7e96fd1ad8b1785104240113ac71f85eac28beca8'
+PANEL_SHA256 = '6c87dafb98945bb49038f9389dc37881536700a9b9709d3862f9dbf79782763c'
 HISTORY = HERE / 'goal_20260924/improvement/target-history.json'
-GOAL = HERE / 'goal_20260924'
-EXPOSED = (
-    GOAL / 'generic-reference-readiness/fixtures.json',
-    GOAL / 'generic-reference-qualification/fixtures.json',
-    GOAL / 'generic-adapter-control/fixtures.json',
-)
+EXPOSED = tuple(HERE.parents[1] / relative
+                for relative in read(PANEL)['exposed_fixture_sha256'])
 
 
 def registry(panel, source):
@@ -76,6 +72,8 @@ def main():
     require(digest(HISTORY) == rules.HISTORY_SHA256, 'changed target history')
     for path in EXPOSED:
         require(path.is_file(), f'missing exposed fixture corpus: {path.name}')
+        require(digest(path) == panel['exposed_fixture_sha256'][
+            str(path.relative_to(HERE.parents[1]))], 'changed exposed fixture corpus')
 
     run([sys.executable, HERE / 'target_history.py', '--history', HISTORY,
          '--repository', HERE.parents[1]])

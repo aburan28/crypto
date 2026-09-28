@@ -1,7 +1,7 @@
 # Third and final bounded IC attempt: premeasurement registration
 
 The exact [eleven-arm panel](round3.json) is frozen by its byte SHA-256,
-`30b04a370e77e2a2bb7c01b7e96fd1ad8b1785104240113ac71f85eac28beca8`.
+`6c87dafb98945bb49038f9389dc37881536700a9b9709d3862f9dbf79782763c`.
 The [version-two protocol](PROTOCOL.md) remains the decision rule. This file is
 a registration, not an improvement result. Seed `2026092553`, 72 fresh
 confirmation points (12 in each of six cells), three process repetitions per
@@ -41,9 +41,17 @@ rounds are reverified with their original frozen evaluators and decisions.
 
 The [runner](../../run_improvement_v3.py) restores both sealed prior rounds,
 extends their exact public-point exclusions (including failed preparation),
-and pins the three supplemental readiness/qualification/control fixture
-corpora. It independently replays both prior decisions before generating a
-new point. The accepted reference archive supplies the exact frozen workers.
+and pins seven additional fixture corpora by file hash. Three are the prior
+readiness/qualification/control panels. Four are older autolab and round-0024
+corpora that expose otherwise unreserved points on the six study curves;
+their subgroup points were independently validated before registration. An
+inventory of all 2,105 research JSON files containing `targets` found no other
+unreserved points on those six curves after these exclusions. The runner
+independently replays both prior decisions before generating a new point. The
+accepted reference archive supplies the exact frozen workers.
+The supplemental exclusion preflight reconstructed and verified 5,697 distinct
+points across the initial history and these seven sources; the two restored
+prior rounds add their own exposures during measured preparation.
 The [workflow](../../../../.github/workflows/ic-improvement-round3.yml) runs
 archived fixed-vector candidate controls during review and starts the measured
 round once when this new panel first lands on `main`. The workflow retains

@@ -264,8 +264,11 @@ class VersionedCampaignTests(unittest.TestCase):
         self.assertEqual(policies['stop6_bounded_half']['row_kernel'], 'bounded')
         self.assertEqual(policies['word_cover']['pair_table'], 'cover')
         self.assertEqual(rows[-1]['config']['batch_trials'], 2)
+        self.assertEqual(len(EXPOSED), 7)
         for path in EXPOSED:
             self.assertTrue(path.is_file(), path.name)
+            self.assertEqual(digest(path), panel['exposed_fixture_sha256'][
+                str(path.relative_to(HERE.parents[1]))])
 
 
 if __name__ == '__main__':
