@@ -49,8 +49,8 @@ use std::time::{Duration, Instant};
 use rayon::prelude::*;
 
 use super::fx_hash::{FxMap, FxSet};
-pub use super::groebner_f4::Ordering;
 use super::groebner_f4::cmp_monomial;
+pub use super::groebner_f4::Ordering;
 
 /// A polynomial over `F_p`: `(exponent vector, coefficient)` terms with
 /// non-zero coefficients, sorted with the leading term first.
@@ -121,7 +121,11 @@ impl Barrett {
     fn reduce(self, x: u64) -> u64 {
         let q = ((u128::from(x) * u128::from(self.m)) >> 64) as u64;
         let r = x - q * self.p;
-        if r >= self.p { r - self.p } else { r }
+        if r >= self.p {
+            r - self.p
+        } else {
+            r
+        }
     }
 }
 
@@ -534,8 +538,8 @@ fn add_lazy_scalar(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
 #[target_feature(enable = "avx2")]
 unsafe fn add_lazy_avx2(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
     use std::arch::x86_64::{
-        __m128i, __m256i, _mm_loadu_si128, _mm256_add_epi64, _mm256_cvtepu32_epi64,
-        _mm256_loadu_si256, _mm256_mul_epu32, _mm256_set1_epi64x, _mm256_storeu_si256,
+        __m128i, __m256i, _mm256_add_epi64, _mm256_cvtepu32_epi64, _mm256_loadu_si256,
+        _mm256_mul_epu32, _mm256_set1_epi64x, _mm256_storeu_si256, _mm_loadu_si128,
     };
     let (acc, pivot) = (&mut acc[from..], &pivot[from..]);
     let multiplier = _mm256_set1_epi64x(factor as i64);
