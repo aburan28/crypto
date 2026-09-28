@@ -102,3 +102,39 @@ uses the finite-field subfield theorem. For prime m, the degree of each
 irreducible factor of Phi_m over GF(2) is ord_m(2); this explains why the
 degree-31 cyclotomic structure differs despite having no intermediate subfield.
 The benchmark roles and transfer qualifications are in AGENTS.md section 8b.
+
+## Additional structural questions raised in the follow-up
+
+These are diagnostic hypotheses for general polynomial algebra. No corresponding
+measurements on the blocked system have been obtained in this review.
+
+| Priority | Structure | Question and limitation |
+| --- | --- | --- |
+| 1 | Variable-interaction graph | Do equations couple small variable groups through narrow separators, or do shared variables create a large coupled core? Few monomials do not imply small elimination width. |
+| 2 | Elimination fill-in | Does low input support survive exact reductions? Record intermediate support, not only initial/final storage; a memory improvement on input rows need not survive elimination. |
+| 3 | Algebraic redundancy | Are many generated rows dependent, and are low-degree dependencies already handled by the current solver? F5-style criteria are existing prior art, not a newly discovered mechanism. |
+| 4 | Structural fidelity across field degrees | Keep the degree-31 split cyclotomic block distinct from the irreducible blocks at 53, 83 and 131. An observed gain must name which structure it needs. |
+
+The strongest additional literature lead is **chordal elimination / chordal
+networks**, which exploit variable interactions rather than merely counting
+monomials. Cifuentes and Parrilo's papers establish benefits for suitable
+structured systems; their favourable complexity statements have hypotheses and
+are not universal consequences of a sparse input.
+
+- *Exploiting chordal structure in polynomial ideals: a Groebner bases
+  approach* (SIAM J. Discrete Math., 2016):
+  <https://arxiv.org/abs/1411.1745>.
+- *Chordal networks of polynomial ideals* (SIAM J. Applied Algebra and
+  Geometry, 2017): <https://arxiv.org/abs/1604.02618>.
+
+Provenance: both primary abstracts retrieved and reviewed on 2026-09-28.
+Their application and completeness conditions still need a full-paper review
+before adopting a solver. A first general-algebra study should establish the
+interaction graph and observed elimination width on frozen synthetic examples.
+A width from one heuristic ordering is an upper bound, not a proof of optimal
+treewidth. High width or rapid fill-in is a reason to lower this lead's priority,
+not proof that all sparse-algebra approaches fail.
+
+Matrix row rank is a linear diagnostic; it does not alone certify ideal
+equality or a complete polynomial solve. Keep those correctness obligations
+separate when interpreting redundancy.
