@@ -10,6 +10,17 @@ the primary target.
 > lattice construction with predicted dimension and (ii) a falsifier
 > implementation before any claim of attack viability.
 >
+> **Update (2026-09-27).**  The GLV-aware variant is still unvalidated
+> at cryptographic size, but two things recorded below have moved.
+> The secp256k1 failure in the Phase 1.5 baseline was a floating-point
+> defect in the LLL implementation, since fixed: secp256k1 now recovers
+> like the other curves
+> ([`RESEARCH_LLL_GS_ANALYSIS.md`](RESEARCH_LLL_GS_ANALYSIS.md) §10).
+> And the GLV-aware lattice has been implemented and measured at 12, 17
+> and 20 bits ([`RESEARCH_GLV_HNP_PHASE2.md`](RESEARCH_GLV_HNP_PHASE2.md)
+> §8b).  The superseded text is kept as written, with notes where it
+> stands.
+>
 > Companion to [`research/notes/lattice-hnp/RESEARCH_HNP_LANDSCAPE.md`](RESEARCH_HNP_LANDSCAPE.md)
 > which surveys the broader HNP landscape.
 
@@ -218,6 +229,27 @@ BKZ reduction.  An integration test in
 planted P-256 key from 8 biased signatures with `k_bits = 192`
 (64 bits of nonce bias) in seconds.
 
+> **Superseded (resolved 2026-05-21/22; recorded here 2026-09-27).**
+> The failure below is not a property of secp256k1.  It was an `f64`
+> overflow in the Gram–Schmidt norms: `n ≈ 2^256` gives
+> `n^4 ≈ 2^1024 > f64::MAX`, the norms became `Inf → NaN`, and LLL ran to
+> its iteration cap.  Global scaling by `2^(max_bits − 500)` in
+> `src/cryptanalysis/lattice.rs` fixed it, and secp256k1 and the 384-bit
+> curves now recover 3/3 seeds; P-521 additionally needed the 2048-bit
+> fixed-point Gram–Schmidt `lll_reduce_hp`
+> ([`RESEARCH_LLL_GS_ANALYSIS.md`](RESEARCH_LLL_GS_ANALYSIS.md) §10.1–10.4).
+> Of the three hypotheses listed below, the third — *a numerical-stability
+> quirk of the LLL implementation* — was the right one.  The tables and
+> hypotheses are kept as they were recorded.
+>
+> Re-run on 2026-09-27 (`cargo test --release --test lll_degeneracy_probe
+> probe_koblitz_lll_degeneracy_hypothesis -- --ignored`): **8/8 recovered**,
+> secp256k1 2/2 at 77–78 ms per probe.  Note that the test's closing line
+> still prints "Hypothesis confirmed: near-power-of-2 n ⇒ LLL fails
+> uniformly" although it classifies all four curves as generic and its
+> near-2^k bucket is empty (0/0), so that line is vacuous, not a
+> confirmation.
+
 **Empirical finding (LLL-degeneracy phenomenon)**: the same
 parameters do *not* converge on secp256k1 lattices.  A controlled
 head-to-head probe in
@@ -254,7 +286,8 @@ power-of-2 group orders — succeed at LLL **fine**.  The
 degeneracy is therefore **specific to secp256k1**, NOT a general
 near-power-of-2 phenomenon.
 
-Refined hypotheses (all currently open):
+Refined hypotheses (all currently open — since resolved; see the
+superseded note above):
 
 - The phenomenon may relate to a specific arithmetic feature of
   secp256k1's `n` beyond bit-length and near-power-of-2 form.
@@ -274,7 +307,21 @@ likely inherits the same degeneracy, requiring stronger reduction
 [`research/notes/lattice-hnp/RESEARCH_GLV_HNP_PHASE2.md`](RESEARCH_GLV_HNP_PHASE2.md) §4 for
 the Phase 2 risk mitigation strategy.
 
+*Superseded: the mechanism was the numerical defect described above,
+now fixed, so there is no secp256k1-specific degeneracy for Phase 2 to
+inherit.  Phase 2 has been measured only at 12–20 bits
+([`RESEARCH_GLV_HNP_PHASE2.md`](RESEARCH_GLV_HNP_PHASE2.md) §8b); how
+it behaves at cryptographic size is not yet measured.*
+
 ### Phase 1: lattice prototype + planted-key recovery (toy)
+
+*Status (2026-09-27): partly done, at other sizes than planned.  The
+GLV-aware lattice is built and its planted-`d` recovery measured over
+3,000 instances at 12, 17 and 20 bits
+([`RESEARCH_GLV_HNP_PHASE2.md`](RESEARCH_GLV_HNP_PHASE2.md) §8b;
+scripts in `secp256k1_cm_audit/glv_hnp_phase2_*`).  The 40-bit run and
+the comparison against standard HNP on the same signatures, which the
+prediction below is about, have not been run.*
 
 - Build the GLV-aware lattice in PARI/GP using small (40-bit)
   secp256k1-like curve.

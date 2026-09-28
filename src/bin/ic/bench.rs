@@ -25,8 +25,8 @@ use crypto_lib::cryptanalysis::ic_boundary::{
 };
 use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
-    BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, KoblitzOrbitBase, MitmOracle,
-    PrimeAbscissaBase, SubtractOracle,
+    BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, KoblitzOrbitBase,
+    KoblitzSymmetrisedBase, MitmOracle, PrimeAbscissaBase, SubtractOracle, SymmetrisedOracle,
 };
 use crypto_lib::cryptanalysis::ic_framework::solvers::{
     solver_by_name, solver_registry, validate_solver_params,
@@ -53,6 +53,11 @@ pub struct BenchArgs {
     /// Koblitz instance of this field degree.
     #[arg(long)]
     pub koblitz_degree: Option<u32>,
+    /// Which Koblitz curve at that degree: `0` for `K_0` (`a = 0`) or `1`
+    /// for `K_1`.  Without it the bench takes `K_1` and falls back to
+    /// `K_0`, so a ladder over both curves at one degree needs this.
+    #[arg(long)]
+    pub koblitz_a: Option<u8>,
     /// Largest cofactor a random binary curve may have.  The boundary
     /// ladders use 8, so `S = ops / sqrt(r)` is taken over a subgroup
     /// close to the whole group, as on every ledger row; a larger bound
@@ -93,6 +98,76 @@ pub struct BenchArgs {
     /// documentation for the schema.
     #[arg(long)]
     pub sweep: Option<std::path::PathBuf>,
+    /// Write every factor base the run builds, point by point, to this
+    /// JSON file (a new file; an existing one is never overwritten), so
+    /// the base a report's rows were taken over can be frozen next to
+    /// the report.  Binary and Koblitz instances only.
+    #[arg(long)]
+    pub factor_base_out: Option<std::path::PathBuf>,
+}
+
+/// The factor base a configuration builds, frozen point by point: the
+/// curve it was built on, the builder and its parameters, the column
+/// each point folds onto, and a hash of the point list so two reports
+/// can be checked against the same base.
+fn frozen_factor_base<'c>(
+    inst: &BinaryInstance,
+    spec: &PipelineSpec,
+    base: &dyn FactorBaseBuilder<BinaryGroup<'c>>,
+    ctx: &InstanceCtx<'_, BinaryGroup<'c>>,
+) -> Result<Value, String> {
+    let mut ops = GroupOps::default();
+    let fb = base.build(ctx, &spec.factor_base_params, &mut ops)?;
+    let f = &inst.fast.field;
+    let mut hasher = blake3::Hasher::new();
+    let points: Vec<Value> = fb
+        .points
+        .iter()
+        .enumerate()
+        .map(|(i, p)| {
+            hasher.update(&p.x.to_le_bytes());
+            hasher.update(&p.y.to_le_bytes());
+            // The frame the symmetrised system works in: u = 1/(x + 1),
+            // in which the rational 2-torsion acts as u ↦ u + 1.
+            let u = (inst.koblitz.is_some() && p.x != 1).then(|| f.inv(p.x ^ 1));
+            json!({
+                "i": i,
+                "x": format!("{:#x}", p.x),
+                "y": format!("{:#x}", p.y),
+                "u": u.map(|u| format!("{u:#x}")),
+                "col": fb.col_of.get(i),
+                "coef": fb.coef_of.get(i),
+                "neg": fb.neg_index.get(i),
+            })
+        })
+        .collect();
+    Ok(json!({
+        "schema_version": 1,
+        "what_this_is": "The factor base one `ic bench` configuration was run over, frozen point by point on the curve it was built on.",
+        "instance": inst.name,
+        "curve": {
+            "degree": inst.n,
+            "irreducible_low_terms": inst.irreducible.low_terms,
+            "a": format!("{:#x}", inst.a),
+            "b": format!("{:#x}", inst.b),
+            "koblitz_a": inst.koblitz.as_ref().map(|k| k.a),
+            "group_order": inst.group_order,
+            "r": inst.r,
+            "cofactor": inst.cofactor,
+            "generator": {"x": format!("{:#x}", inst.generator.x), "y": format!("{:#x}", inst.generator.y)},
+        },
+        "factor_base": spec.factor_base,
+        "factor_base_params": spec.factor_base_params,
+        "description": fb.description,
+        "dimension": fb.dimension,
+        "columns": fb.columns,
+        "abscissae": fb.abscissae,
+        "points": fb.points.len(),
+        "subspace_basis": fb.subspace_basis.as_ref().map(|b| b.iter().map(|w| format!("{w:#x}")).collect::<Vec<_>>()),
+        "build_cost": fb.cost,
+        "point_list_blake3": hasher.finalize().to_hex().to_string(),
+        "point_list": points,
+    }))
 }
 
 /// `name:k=v,k=v` → `(name, params)`.
@@ -139,6 +214,10 @@ fn listing() -> Value {
                      "parameters": [
                         {"name": "divisor", "means": "comma-separated factor indices selecting the Frobenius-invariant subspace"},
                         {"name": "no_fold", "means": "1 for one column per abscissa: the control that shows what the fold buys"}]},
+                    {"name": "koblitz-symmetrised", "regimes": ["koblitz"],
+                     "parameters": [
+                        {"name": "divisor", "means": "`;`-separated factor indices; must include 0 (x + 1) so that 1 ∈ V; the base is F_u = {P : 1/(x+1) ∈ V}, T = (0,1) included"},
+                        {"name": "no_fold", "means": "1 for one column per abscissa"}]},
                 ],
             },
             {
@@ -165,6 +244,13 @@ fn listing() -> Value {
                     {"name": "descent-algebraic", "summands": "2 or 3", "regimes": ["char2", "koblitz"],
                      "parameters": [{"name": "m", "means": "summands, 2 (descends S3) or 3 (descends S4)"}],
                      "needs": "a subspace factor base (binary-subspace or koblitz-orbit) and --solver"},
+                    {"name": "symmetrised", "summands": "2 or 3", "regimes": ["koblitz"],
+                     "parameters": [{"name": "m", "means": "summands, 2 (symmetrised S3) or 3 (symmetrised S4)"},
+                                    {"name": "divisor", "means": "the base's divisor; copied from koblitz-symmetrised when omitted"},
+                                    {"name": "engine", "means": "inherited-f4 (default), matrix-f4 or matrix-f5"},
+                                    {"name": "max_degree", "means": "Macaulay cap before splitting (default 3)"},
+                                    {"name": "node_budget", "means": "splits before a call gives up (default 4096)"}],
+                     "needs": "the koblitz-symmetrised factor base; solves in w = u² + u, s = Σu with koblitz_groebner"},
                 ],
             },
             {
@@ -454,18 +540,21 @@ fn run_binary(
     args: &BenchArgs,
     calib: &Calibration,
     rho_s: Option<f64>,
+    frozen: &mut Vec<Value>,
 ) -> Result<Vec<RunReport>, String> {
     let fb_name = spec.factor_base.as_str();
     let or_name = spec.oracle.as_str();
     let g = BinaryGroup(&inst.fast);
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
+    let symmetrised_base = KoblitzSymmetrisedBase { instance: inst };
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
+        "koblitz-symmetrised" => &symmetrised_base,
         other => {
             return Err(format!(
-                "factor base `{other}` is not available on a binary curve; try binary-subspace or koblitz-orbit"
+                "factor base `{other}` is not available on a binary curve; try binary-subspace, koblitz-orbit or koblitz-symmetrised"
             ))
         }
     };
@@ -486,10 +575,29 @@ fn run_binary(
         };
         let mut spec = spec.clone();
         spec.seed = spec.seed.wrapping_add(rep as u64 * 0x9E37);
+        // The base does not depend on the target, so the first repeat's
+        // is the one every repeat ran over.
+        if rep == 0 && args.factor_base_out.is_some() {
+            let mut doc = frozen_factor_base(inst, &spec, base, &ctx)?;
+            doc["configuration"] = json!(spec.label());
+            frozen.push(doc);
+        }
         let m = spec.oracle_params.u64_or("m", 2)? as u32;
+        // The symmetrised oracle rebuilds F_u from the base's divisor and
+        // checks it point for point; spare the user typing it twice.
+        if or_name == "symmetrised" && spec.oracle_params.get("divisor").is_none() {
+            if let Some(d) = spec.factor_base_params.get("divisor") {
+                let d = d.to_string();
+                spec.oracle_params.set("divisor", d);
+            }
+        }
         let mut subtract = SubtractOracle;
         let mut mitm = MitmOracle::new(m);
         let mut frob = FrobeniusMitmOracle::new(m, inst);
+        let mut symmetrised = match or_name {
+            "symmetrised" => Some(SymmetrisedOracle::new(m, inst)),
+            _ => None,
+        };
         let mut algebraic = match or_name {
             "descent-algebraic" => {
                 let raw = spec.solver.as_deref().ok_or(
@@ -513,6 +621,7 @@ fn run_binary(
             "mitm" => &mut mitm,
             "mitm-frobenius" => &mut frob,
             "descent-algebraic" => algebraic.as_mut().expect("built above"),
+            "symmetrised" => symmetrised.as_mut().expect("built above"),
             other => return Err(format!("oracle `{other}` is not available here")),
         };
         out.push(run_pipeline(
@@ -729,11 +838,13 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
                 )
             })?,
         ),
-        "koblitz" => Instance::Binary(
-            koblitz_instance(1, degree)
+        "koblitz" => Instance::Binary(match args.koblitz_a {
+            Some(a) => koblitz_instance(a, degree)
+                .ok_or_else(|| format!("no Koblitz instance K_{a} at degree {degree}"))?,
+            None => koblitz_instance(1, degree)
                 .or_else(|| koblitz_instance(0, degree))
                 .ok_or_else(|| format!("no Koblitz instance at degree {degree}"))?,
-        ),
+        }),
         other => {
             return Err(format!(
                 "unknown regime `{other}`; try prime, char2 or koblitz"
@@ -777,8 +888,12 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
             eprintln!("  also run (A = {}): S = {:.3}", c.automorphisms, c.mean_s);
         }
     }
+    if args.factor_base_out.is_some() && matches!(instance, Instance::Prime(_)) {
+        return Err("--factor-base-out freezes binary and Koblitz bases only".into());
+    }
     let mut rows: Vec<RunReport> = Vec::new();
     let mut failures: Vec<Value> = Vec::new();
+    let mut frozen: Vec<Value> = Vec::new();
     for cfg in &configs {
         let spec = spec_from(cfg, &args)?;
         if !json_only {
@@ -790,7 +905,7 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
         // ones that do plus a note on the ones that do not.
         let outcome = match &instance {
             Instance::Prime(i) => run_prime(i, &spec, &args, &calib, rho_s),
-            Instance::Binary(i) => run_binary(i, &spec, &args, &calib, rho_s),
+            Instance::Binary(i) => run_binary(i, &spec, &args, &calib, rho_s, &mut frozen),
         };
         match outcome {
             Ok(mut got) => rows.append(&mut got),
@@ -798,6 +913,21 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
         }
     }
 
+    if let Some(path) = &args.factor_base_out {
+        let doc = json!({
+            "schema_version": 1,
+            "operation": "bench-factor-bases",
+            "instance": instance.name(),
+            "seed": args.seed,
+            "factor_bases": frozen,
+        });
+        let file = std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(path)
+            .map_err(|e| format!("cannot create {}: {e}", path.display()))?;
+        serde_json::to_writer_pretty(file, &doc).map_err(|e| e.to_string())?;
+    }
     let all_verified = !rows.is_empty() && rows.iter().all(|r| r.verified);
     let markdown = format_markdown(&rows);
     if !json_only {
