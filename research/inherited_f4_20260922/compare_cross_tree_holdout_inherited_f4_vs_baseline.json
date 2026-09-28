@@ -1,0 +1,72 @@
+{
+  "kind": "cross-tree comparison: same instances, same verified answers, splitting tree may differ",
+  "unit": "64-bit word operations",
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "identity_checked": [
+    "curve",
+    "m",
+    "ell",
+    "factor_base_points",
+    "targets",
+    "decomposed",
+    "oversize",
+    "exhausted"
+  ],
+  "repetitions": {
+    "reference": 3,
+    "candidate": 3
+  },
+  "rows": [
+    {
+      "curve": "K_0/2^19",
+      "m": 2,
+      "ell": 18,
+      "targets": 12,
+      "decomposed": 12,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 116912104,
+        "reductions": 228,
+        "splits": 204,
+        "infeasible_branches": 0,
+        "wall_ns": 324474724
+      },
+      "candidate": {
+        "word_ops": 22640333,
+        "reductions": 228,
+        "splits": 204,
+        "infeasible_branches": 0,
+        "wall_ns": 107876097
+      },
+      "word_op_ratio": 5.163886237892349,
+      "wall_ratio": 3.0078463443111034
+    },
+    {
+      "curve": "K_1/2^17",
+      "m": 2,
+      "ell": 8,
+      "targets": 24,
+      "decomposed": 10,
+      "same_tree": false,
+      "reference": {
+        "word_ops": 33578834,
+        "reductions": 1062,
+        "splits": 531,
+        "infeasible_branches": 510,
+        "wall_ns": 444277008
+      },
+      "candidate": {
+        "word_ops": 3011390,
+        "reductions": 1198,
+        "splits": 598,
+        "infeasible_branches": 580,
+        "wall_ns": 74837890
+      },
+      "word_op_ratio": 11.150609519192134,
+      "wall_ratio": 5.936525040991936
+    }
+  ],
+  "total_word_op_ratio": 5.866699012771969,
+  "total_wall_ratio": 4.2074049426768845,
+  "min_word_op_ratio": 5.163886237892349
+}

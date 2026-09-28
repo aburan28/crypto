@@ -1,0 +1,29 @@
+name: Matched point-only rho replay
+on:
+  pull_request:
+    paths:
+      - 'examples/koblitz_rho_batch_ks.rs'
+      - 'research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/**'
+      - 'research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/point_recovery_20260924_codex/**'
+      - '.github/workflows/matched-rho-point-replay.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'examples/koblitz_rho_batch_ks.rs'
+      - 'research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/**'
+      - 'research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/point_recovery_20260924_codex/**'
+      - '.github/workflows/matched-rho-point-replay.yml'
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the point-input rho producer
+        run: cargo build --release --example koblitz_rho_batch_ks
+      - name: Check point-input behavior and frozen receipts
+        run: |
+          python3 research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/test_rho_point_input.py
+          python3 -m py_compile research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/analyze.py research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/replay_ic_single.py
+          python3 research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/replay_ic_single.py
+          python3 research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/analyze.py
+          git diff --exit-code -- research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/analysis.json

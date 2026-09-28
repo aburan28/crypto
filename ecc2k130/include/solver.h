@@ -67,7 +67,7 @@ struct Solver {
 
 #if ECC_WALK_TABLE
     TableWalk<Cfg> walk;
-    void setupWalk() { walk.setup(basis, target, ell); }
+    void setupWalk() { walk.setup(basis, target, ell); walk.dpWeight = dpWeight; }
 #else
     void setupWalk() {}
 #endif

@@ -1,0 +1,24 @@
+name: Standalone Boolean projected fibers
+on:
+  pull_request:
+    paths:
+      - 'research/boolean_projected_fibers_20260923/**'
+      - '.github/workflows/boolean-projected-fibers.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Complete affine recovery and retained algebra
+        run: |
+          rustc --edition 2021 -O --test research/boolean_projected_fibers_20260923/measure.rs -o /tmp/boolean-projected-tests
+          /tmp/boolean-projected-tests
+      - name: Immutable evidence and accounting checks
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 -m unittest discover -s research/boolean_projected_fibers_20260923 -p 'test_*.py' -v

@@ -1,0 +1,134 @@
+name: Final bounded IC improvement round
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ic-improvement-round3.yml'
+      - 'research/ic_candidate_tournament_20260915/run_improvement_v3.py'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/round3.json'
+      - 'research/ic_candidate_tournament_20260915/producer/**'
+      - 'research/ic_candidate_tournament_20260915/portfolio.py'
+      - 'research/ic_candidate_tournament_20260915/test_*.py'
+  push:
+    branches: [main]
+    paths:
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/round3.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ic-bounded-improvement-round3
+  cancel-in-progress: false
+
+jobs:
+  candidate-controls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: x86_64-unknown-linux-musl
+      - name: Install calibrated profiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind musl-tools zstd
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Verify registered panel and historical target census
+        run: |
+          test "$(sha256sum research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/round3.json | cut -d ' ' -f1)" = 6c87dafb98945bb49038f9389dc37881536700a9b9709d3862f9dbf79782763c
+          python -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_*.py'
+          python research/ic_candidate_tournament_20260915/target_history.py \
+            --history research/ic_candidate_tournament_20260915/goal_20260924/improvement/target-history.json \
+            --repository "$GITHUB_WORKSPACE"
+      - name: Materialize exact source
+        run: |
+          python research/ic_candidate_tournament_20260915/producer/prepare.py \
+            --reference pairinv --candidate-panel round3-v1 --out "$RUNNER_TEMP/ic-round3-candidates"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          receipt = json.loads((root/'ic-round3-candidates/preparation.json').read_text())
+          panel = json.loads(Path('research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/round3.json').read_text())
+          assert panel['round'] == 3 and panel['candidate_panel'] == receipt['candidate_panel'] == 'round3-v1'
+          assert receipt['source_manifest_sha256'] == panel['candidate_source_sha256']
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              stream.write('IC_SOURCE_MANIFEST_SHA256='+receipt['source_manifest_sha256']+'\n')
+          PY
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: '${{ runner.temp }}/ic-round3-candidates/source -> ../build'
+          shared-key: ic-round3-candidates
+      - name: Release row, orbit, table and worker correctness controls
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/ic-round3-candidates/build
+        run: |
+          test -n "$IC_SOURCE_MANIFEST_SHA256"
+          cd "$RUNNER_TEMP/ic-round3-candidates/source"
+          cargo test --locked --release --lib koblitz_tiny_ic --jobs 2
+          cargo test --locked --release --lib ic_phase --jobs 2
+          cargo test --locked --release --example ic_tournament_worker --jobs 2
+          cargo build --locked --release --example ic_tournament_worker --jobs 2
+      - name: Independently verify every registered policy on archived toy vectors
+        run: |
+          python research/ic_candidate_tournament_20260915/producer/candidate_controls.py \
+            --prepared "$RUNNER_TEMP/ic-round3-candidates" --profile \
+            --panel research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/round3.json \
+            --worker "$RUNNER_TEMP/ic-round3-candidates/build/x86_64-unknown-linux-musl/release/examples/ic_tournament_worker" \
+            --out "$RUNNER_TEMP/ic-round3-candidate-controls"
+      - name: Preserve all controls and any failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-round3-candidate-controls-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-round3-candidate-controls
+            ${{ runner.temp }}/ic-round3-candidates/preparation.json
+            ${{ runner.temp }}/ic-round3-candidates/source-manifest.json
+            ${{ runner.temp }}/ic-round3-candidates/source
+          retention-days: 30
+          include-hidden-files: true
+          if-no-files-found: warn
+
+  improvement-round-three:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: candidate-controls
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: x86_64-unknown-linux-musl
+      - name: Install calibrated profiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind musl-tools zstd
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Run the registered final toy panel once
+        run: |
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          python research/ic_candidate_tournament_20260915/run_improvement_v3.py \
+            --out "$RUNNER_TEMP/ic-improvement-round3"
+      - name: Preserve the frozen protocol and every outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-improvement-round3-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-improvement-round3
+            !${{ runner.temp }}/ic-improvement-round3/**/build/**
+            !${{ runner.temp }}/ic-improvement-round3/reference-evidence/**
+            !${{ runner.temp }}/ic-improvement-round3/prior-round1/**
+            !${{ runner.temp }}/ic-improvement-round3/prior-round2/**
+          retention-days: 30
+          include-hidden-files: true
+          if-no-files-found: warn

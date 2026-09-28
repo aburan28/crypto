@@ -44,6 +44,7 @@ where evaluating over the factor base would be `2^l`.
 | `gf2n.cuh` | One-word `GF(2^n)` for `n ≤ 63`, branch-free |
 | `decomp.cuh` | `L_V`, the quartic, `rem`/`sqr_mod`/`gcd`, and `decompose_row` |
 | `test_cpu.cpp` | Verification harness — compiles the `.cuh` headers with g++ |
+| `bench_host.cpp` | Host timing of `gf_mul` / `gf_sqr` / `gf_inv` and one full sweep (`make bench-host`) |
 | `bench2.cu` | Device driver: selftest, throughput, occupancy |
 
 ## Build and test
@@ -53,6 +54,7 @@ make test            # needs only Python 3 and a C++17 compiler
 make test L=4        # a different subspace dimension
 make ladder          # l = 3, 4, 5 in sequence
 make bench2          # CUDA binary (needs nvcc)
+make bench-host      # host timing of the field and one full sweep
 ```
 
 ## How this is tested
@@ -120,6 +122,51 @@ multiply" claim was the main reason an FPGA looked attractive for this
 kernel, and removing it removes the argument.
 [`docs/ecc_fpga_cost_model.md`](../../docs/ecc_fpga_cost_model.md) §7
 reworks that comparison.
+
+## Word-level reduction, squaring and inversion
+
+Once the product was native, the rest of the field was the bottleneck:
+`gf_reduce128` walked the `n − 1` bits above `z^n` one at a time with a
+branch on each, `gf_sqr` spread its input bit by bit with a branch on
+each, and `gf_inv` spent `n − 2` multiplies. All three now follow the CPU
+field (`src/binary_ecc/f2m.rs`, `src/cryptanalysis/semaev_decomp.rs`):
+
+- **Reduction by folding.** Write the product as `L + z^n·H`. Because
+  `z^n ≡ r(z) = f(z) − z^n`, it equals `L + H·r`, so one multiply by the
+  sparse tail folds every high bit at once. Each fold lowers what is left
+  above `z^n` by `n − deg r`, so the low-tail polynomials `sref.py` picks
+  need one or two rounds. On a `clmad` target `H·r` is one native
+  product; elsewhere it is shift-xor over `r`'s two to four terms.
+- **Squaring** is `clmad(a, a)` on the device and a five-step branch-free
+  bit spread elsewhere.
+- **Inversion** is the Itoh–Tsujii chain: `n − 1` squarings and
+  `⌊log₂(n−1)⌋ + popcount(n−1) − 1` multiplies (5 at `n = 21`, against 19).
+- **The software product** loops over the field's `n` bits rather than 64,
+  since both operands are reduced. That is the pre-Ampere and host path.
+
+None of these branches on operand values or loops a data-dependent
+number of times, so a warp stays converged through the field arithmetic. The bit-at-a-time reduction is kept as
+`gf_reduce128_ref`, and `make test` checks both fold variants, the spread
+square and the bounded product against it on 20 001 products per field,
+including the widest one, `(z^n − 1)²`. The fold is also checked on
+random dense tails with `deg r` up to `n − 1` for every `n` from 2 to 63,
+since the low-tail fields barely exercise its multi-round path. The fold's
+round count depends only on `n` and `deg r`, never on the operands.
+
+Host timings from `make bench-host L=7` (`n = 21`, software product,
+one x86 core). Checksums are identical before and after:
+
+| op | before | after |
+|---|---|---|
+| `gf_mul` | 149 ns | 16 ns |
+| `gf_sqr` | 35 ns | 7.4 ns |
+| `gf_inv` | 5.5 µs | 0.21 µs |
+| one full `2^l`-row sweep | 5.07 ms | 0.44 ms |
+
+These are host numbers and say nothing absolute about a GPU. On a `clmad`
+target the product was already native, so the device gain is whatever the
+reduction, squaring and inversion were costing on top of it. That still
+has to be measured with `./bench2` on hardware.
 
 ## One deliberate difference from the CPU path
 
