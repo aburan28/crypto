@@ -60,6 +60,12 @@ Preparation, execution and replay all bind these references. Generic native and
 profiled executions retain separate run numbers. A failed or missing reference
 blocks a complete comparison; it cannot become a successful-subset estimate.
 
+Newly frozen evaluators also retain [single-target rho context](RHO-REPORTING.md)
+beside paired online rows: source/configuration/seed, worker and walk counts,
+collision policy, correctness and timing, and whole-process peak RSS. Separate
+collision-table memory is unmeasured and remains explicitly unknown. Historical
+records retain their own evaluators.
+
 ## Validation and remaining work
 
 Controls exercise the accepted report/build/source binding, changed reference
