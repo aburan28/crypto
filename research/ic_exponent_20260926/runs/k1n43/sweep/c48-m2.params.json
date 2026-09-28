@@ -1,0 +1,126 @@
+{
+ "schema_version": 1,
+ "name": "k1n43-c48-m2-s101",
+ "curve": {
+  "degree": 43,
+  "curve_a": 1
+ },
+ "summands": 3,
+ "descent_summands": 2,
+ "collection_window": 129,
+ "collection_aim": true,
+ "solver": "pair_table",
+ "seed": 101,
+ "max_trials": 100000,
+ "collection": {
+  "unit_trials": 16,
+  "units": 1,
+  "max_units": 100000
+ },
+ "factor_base": {
+  "mode": "spec",
+  "spec": {
+   "kind": "subgroup_orbits",
+   "points": 4128,
+   "seed": 101
+  }
+ },
+ "targets": [
+  {
+   "random_seed": 10100
+  },
+  {
+   "random_seed": 10101
+  },
+  {
+   "random_seed": 10102
+  },
+  {
+   "random_seed": 10103
+  },
+  {
+   "random_seed": 10104
+  },
+  {
+   "random_seed": 10105
+  },
+  {
+   "random_seed": 10106
+  },
+  {
+   "random_seed": 10107
+  },
+  {
+   "random_seed": 10108
+  },
+  {
+   "random_seed": 10109
+  },
+  {
+   "random_seed": 10110
+  },
+  {
+   "random_seed": 10111
+  },
+  {
+   "random_seed": 10112
+  },
+  {
+   "random_seed": 10113
+  },
+  {
+   "random_seed": 10114
+  },
+  {
+   "random_seed": 10115
+  },
+  {
+   "random_seed": 10116
+  },
+  {
+   "random_seed": 10117
+  },
+  {
+   "random_seed": 10118
+  },
+  {
+   "random_seed": 10119
+  },
+  {
+   "random_seed": 10120
+  },
+  {
+   "random_seed": 10121
+  },
+  {
+   "random_seed": 10122
+  },
+  {
+   "random_seed": 10123
+  },
+  {
+   "random_seed": 10124
+  },
+  {
+   "random_seed": 10125
+  },
+  {
+   "random_seed": 10126
+  },
+  {
+   "random_seed": 10127
+  },
+  {
+   "random_seed": 10128
+  },
+  {
+   "random_seed": 10129
+  },
+  {
+   "random_seed": 10130
+  },
+  {
+   "random_seed": 10131
+  }
+ ]
+}

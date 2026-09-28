@@ -392,7 +392,7 @@ fn small_primes_up_to(bound: u64) -> Vec<u64> {
 fn audit_embedding(p: &BigUint, n: &BigUint, cap: u64) -> EmbeddingReport {
     let mut gcds = Vec::new();
     let mut embedding_degree: Option<u64> = None;
-    let mut p_pow_minus_one = if n.is_zero() {
+    let p_pow_minus_one = if n.is_zero() {
         BigUint::zero()
     } else {
         (p % n + n - 1u32) % n
@@ -408,7 +408,7 @@ fn audit_embedding(p: &BigUint, n: &BigUint, cap: u64) -> EmbeddingReport {
         };
         let g = n.gcd(&raw);
         gcds.push(g.bits());
-        if &raw == &BigUint::zero() && embedding_degree.is_none() {
+        if raw == BigUint::zero() && embedding_degree.is_none() {
             embedding_degree = Some(j);
         }
         if g == *n && embedding_degree.is_none() {
@@ -439,8 +439,8 @@ fn audit_divisor_sets(curve: &CurveParams, max_step: u64) -> DivisorSetReport {
     }
     // For each x ∈ F_p compute whether x³ + a·x + b is a QR mod p.
     // Precompute QR table.
-    let a_u64 = curve.a.to_u64_digits().get(0).copied().unwrap_or(0) % p_u64;
-    let b_u64 = curve.b.to_u64_digits().get(0).copied().unwrap_or(0) % p_u64;
+    let a_u64 = curve.a.to_u64_digits().first().copied().unwrap_or(0) % p_u64;
+    let b_u64 = curve.b.to_u64_digits().first().copied().unwrap_or(0) % p_u64;
     let mut is_curve_x = vec![false; p_u64 as usize];
     for x in 0..p_u64 {
         let v = ((x.wrapping_mul(x) % p_u64).wrapping_mul(x) % p_u64
@@ -488,7 +488,7 @@ fn audit_divisor_sets(curve: &CurveParams, max_step: u64) -> DivisorSetReport {
     }
 }
 
-fn empty_divisor_report(max_step: u64) -> DivisorSetReport {
+fn empty_divisor_report(_max_step: u64) -> DivisorSetReport {
     DivisorSetReport {
         steps: vec![],
         hits: vec![],
@@ -501,7 +501,7 @@ fn empty_divisor_report(max_step: u64) -> DivisorSetReport {
 
 /// `n` is a quadratic residue mod prime `p` iff `n^{(p-1)/2} ≡ 1`.
 fn is_qr_mod_p(n: u64, p: u64) -> bool {
-    if n % p == 0 {
+    if n.is_multiple_of(p) {
         return true;
     }
     let exp = (p - 1) / 2;

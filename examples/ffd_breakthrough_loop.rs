@@ -519,7 +519,7 @@ fn judge_p6(rows: &[AvgRow]) -> Verdict {
     }
     let all_collapsed = overdet
         .iter()
-        .all(|r| r.refutation.mean.map_or(false, |m| m <= G_P6_COLLAPSE_MEAN));
+        .all(|r| r.refutation.mean.is_some_and(|m| m <= G_P6_COLLAPSE_MEAN));
     if all_collapsed {
         Verdict {
             status: "supported",

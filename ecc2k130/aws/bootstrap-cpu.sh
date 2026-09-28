@@ -73,6 +73,7 @@ if aws s3 cp "s3://$BUCKET/$PREFIX/libgomp.so.1" lib/libgomp.so.1 --only-show-er
 fi
 aws s3 cp "s3://$BUCKET/aws/worker.py" worker.py --only-show-errors || exit 1
 aws s3 cp "s3://$BUCKET/aws/protocol.py" protocol.py --only-show-errors || exit 1
+aws s3 cp "s3://$BUCKET/aws/seed_registry.py" seed_registry.py --only-show-errors || exit 1
 
 # Host arithmetic against the reference before walking the live campaign.
 if ! ./ecc2k130-cpu --test 2>&1 | tee host-test.log | tail -n 20; then

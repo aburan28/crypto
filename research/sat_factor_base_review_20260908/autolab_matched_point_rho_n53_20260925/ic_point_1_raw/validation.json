@@ -1,0 +1,45 @@
+{
+  "classification": "PUBLIC_SYNTHETIC_POINT_INPUT_LOG_RECOVERY",
+  "frobenius_eigenvalue": 10244141222326,
+  "independent_orbit_labels_verified": 23320,
+  "point_batch_query_ms_sum": 143.153542,
+  "point_batch_reported_stage_ms": 1407.774835,
+  "point_batch_stdout_sha256": "e11f44e934017462e529c4605413a61ad5601fa57309f7bd5021e17b4f2fb1f7",
+  "point_input_sha256": "e3f422b5b4b5141e89ef35facd50b52db7595678303b3cfceba7ea23a6200304",
+  "rows": [
+    {
+      "independent_group_lift": [
+        [
+          5672040666322692,
+          2649831977239847
+        ],
+        [
+          4118265303046830,
+          5734329428500296
+        ],
+        [
+          3191271603854749,
+          792929775662702
+        ],
+        [
+          8175615106988343,
+          1598375052617595
+        ]
+      ],
+      "query_ms": 143.153166,
+      "recovered_scalar": 11581252941738,
+      "target_point": [
+        1982694855789544,
+        1466753660120656
+      ],
+      "validator_scalar": 11581252941738
+    }
+  ],
+  "schema_version": "1.0",
+  "scope": "Eight held-out point-only inputs recovered using previously solved n53 factor-base logs; cold IC setup is charged, but no matched rho or n131 transfer claim",
+  "targets_recovered": 1,
+  "targets_requested": 1,
+  "training_full_rank_at_extracted": 461,
+  "training_process_wall_ms": 158126.68312501046,
+  "training_validation_sha256": "d5c87025740036476e0d8d492c93a23ede8ed144ce665125d3cebc4c0d0ec285"
+}

@@ -569,7 +569,7 @@ fn verify_challenge(curve: &CurveParams, g: &Point, q: &Point) {
     assert!(is_probable_prime(&curve.p, 30), "p is not prime");
     assert!(is_probable_prime(&curve.n, 30), "n is not prime");
     let pb = curve.p.bits();
-    assert!(pb >= 79 && pb <= 80, "p should be ~79 bits, got {}", pb);
+    assert!((79..=80).contains(&pb), "p should be ~79 bits, got {}", pb);
 
     // 2. Discriminant 4a^3 + 27b^2 != 0 (mod p)
     let four = BigUint::from(4u32);
