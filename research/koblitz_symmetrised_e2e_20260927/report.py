@@ -18,7 +18,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 RES = os.path.join(HERE, "results")
 
-ARMS = ["sym", "sym4", "x", "mitm-x", "mitm-u", "sym-m3", "x-m3"]
+ARMS = ["sym", "sym4", "x", "mitm-x", "mitm-u", "sym-m3", "x-m3", "x-m3-probe"]
 INSTANCES = ["k1_17", "k0_23", "k1_23", "k0_31"]
 NAMES = {
     "k1_17": "K_1 / GF(2^17)",
@@ -124,6 +124,8 @@ def main():
         "`results/<instance>__<arm>.fb.json`.  `dec` is the decomposition phase's share of",
         "the total.  `vs rho` is `S / S_rho` on the matched reference (same seeds, same targets).",
         "",
+        "`x-m3-probe` is the bounded diagnostic run after `x-m3` hit the 3-hour wall cap:",
+        "one planted logarithm, at most 12 trials, so its S is a partial cost, not a solve.",
         "`S_xor` reprices the solver phase by its counted word XORs alone at the pinned",
         "`ns_per_word_xor` (a floor on the solve; the runner prices the algebraic arms by",
         "measured wall because the count covers only the eliminations, and the `unit` column",
