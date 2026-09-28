@@ -19,6 +19,10 @@ Inspect the latest local round's contract, source identity, summary and failures
 Archived winners must be restored and identified by their candidate's
 `source_directory` and configuration, not assumed to be `round/source`.
 Use an isolated checkout when the working tree contains other work.
+Before choosing a next round, reconcile the latest upstream registration,
+merged evidence, and live/completed workflow runs with the local checkpoint.
+A stale local draft never authorizes repeating an already executed attempt.
+Preserve superseded drafts separately and disable their dispatch path.
 
 The development screen works on macOS and Linux. The promotion tournament
 requires Linux amd64 and Valgrind 3.22.0. Never put native seconds into an
@@ -70,6 +74,10 @@ targets as IC; lock a strong measured reference before held-out confirmation.
 If a faster compatible implementation is found, update and remeasure the
 reference. Do not certify a reference as globally optimal. Preserve its curve,
 subgroup, automorphisms, hardware, thread count, memory, setup and target count.
+For newly frozen runs, retain the [single-target rho context](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/RHO-REPORTING.md)
+beside each paired online row. Interleaved walk width is not a worker count.
+Collision-table memory remains unknown unless separately measured; whole-process
+peak RSS does not supply that missing allocation measurement.
 
 Require the checker to verify every group relation, scalar-field rank, factor
 log and actual per-target descent relation. A valid final scalar alone does not

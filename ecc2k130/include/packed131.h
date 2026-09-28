@@ -97,6 +97,9 @@
 #if ECC_PACKED_CLMAD_SQUARE && !ECC_PACKED_CLMAD
 #error "ECC_PACKED_CLMAD_SQUARE requires ECC_PACKED_CLMAD"
 #endif
+/* ECC_PACKED_CLMAD_SQUARE remains a baked-image / audit identity bit
+   (NATIVE-SQUARE.md). The instruction itself is selected by ECC_USE_CLMAD_INSN
+   above; PACKED_ALU_SQUARE / PACKED_ALU_SQR are the measured opt-outs. */
 #ifndef ECC_PACKED_KARAT3
 #define ECC_PACKED_KARAT3 0
 #endif

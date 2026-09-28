@@ -36,13 +36,17 @@ class ClmadGuardTests(unittest.TestCase):
 
     def test_unsupported_compiler_or_device_is_rejected(self):
         # These are preprocessing controls, not claims of CUDA compilation.
+        # Old toolkits still hard-error. sm_75 in a fat ARCHES="75 …" CLMAD=1
+        # build must soft-fall back to the software product so g4dn stays
+        # buildable (packed131.h ECC_USE_CLMAD_INSN).
         common = ['-DECC_PACKED_CLMAD=1', '-D__CUDACC__', '-D__CUDACC_VER_MAJOR__=13']
         old_compiler = self.preprocess(*common, '-D__CUDACC_VER_MINOR__=2', '-D__CUDA_ARCH__=800')
         old_device = self.preprocess(*common, '-D__CUDACC_VER_MINOR__=3', '-D__CUDA_ARCH__=750')
         self.assertNotEqual(old_compiler.returncode, 0)
         self.assertIn('requires CUDA 13.3', old_compiler.stderr)
-        self.assertNotEqual(old_device.returncode, 0)
-        self.assertIn('requires sm_80', old_device.stderr)
+        self.assertEqual(old_device.returncode, 0, old_device.stderr)
+        self.assertNotIn('clmad.lo.u64', old_device.stdout)
+        self.assertNotIn('clmad.hi.u64', old_device.stdout)
 
     def test_supported_preprocessor_configuration_selects_both_halves(self):
         result = self.preprocess('-DECC_PACKED_CLMAD=1', '-D__CUDACC__',
@@ -53,10 +57,13 @@ class ClmadGuardTests(unittest.TestCase):
         self.assertIn('clmad.hi.u64', result.stdout)
 
     def test_square_selection_and_host_fallback(self):
-        host = self.preprocess('-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_SQUARE=1')
+        # Native squaring follows ECC_USE_CLMAD_INSN (CLMAD + sm_80+), not the
+        # historical ECC_PACKED_CLMAD_SQUARE selector. Host and Turing keep the
+        # shift/mask path; the square flag still validates 0/1 and CLMAD dependency.
+        host = self.preprocess('-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_SQUARE=0')
         self.assertEqual(host.returncode, 0, host.stderr)
         self.assertNotIn('clmad.lo.u64', host.stdout)
-        device = self.preprocess('-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_SQUARE=1',
+        device = self.preprocess('-DECC_PACKED_CLMAD=1', '-DECC_PACKED_CLMAD_SQUARE=0',
                                  '-D__CUDACC__', '-D__CUDACC_VER_MAJOR__=13',
                                  '-D__CUDACC_VER_MINOR__=3', '-D__CUDA_ARCH__=1200')
         self.assertEqual(device.returncode, 0, device.stderr)
@@ -83,7 +90,7 @@ class NativeSquareProofTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, 'inequivalent output bits'):
             prove(bad_mask)
         for before, after in [('clmad.lo.u64 %0, %1, %1, 0;', 'clmad.hi.u64 %0, %1, %1, 0;'),
-                              ('const uint64_t a = uint64_t(x);', 'const uint64_t a = uint64_t(x >> 1);')]:
+                              ('"l"((uint64_t)x)', '"l"((uint64_t)(x >> 1))')]:
             with self.assertRaisesRegex(ValueError, 'native branch'):
                 prove(source.replace(before, after))
 

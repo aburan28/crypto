@@ -278,3 +278,22 @@ Native time is reported, not predicted. Every conclusion stays scoped to these
 twelve cells, one seed, this collector pair, this rho and this checker. The
 matched rho is not offered as the best possible rho. Other asymmetries may
 remain, in either direction.
+
+## 8. Outcome (appended after the round; §1–7 unchanged)
+
+`retained`, `beats_rho_strict` and `rho_parity` false: §7.4 prediction 6.
+Audit VERIFIED over 4,656 receipts. All three arms recover the same logarithm
+in every one of the 1,560 (stage, case, repetition) groups. Predictions 1 and
+3–6 are confirmed.
+
+Prediction 2 is missed at `n23a0`, which reads 0.971 against [0.55, 0.95].
+`n23a1` reads 1.126, inside its band. **Under the rule fixed in §7.4, the
+eight-cell strict win of rounds 0017, 0019 and 0020 does not survive a
+matched rho.** It fails at `n23a1` in both metrics on both stages. Six of the
+eight cells stay below a matched rho in both metrics, at 0.61–0.82 of its
+instructions.
+
+The triple table is above the matched rho at every cell in instructions, at
+1.22–3.14×. Full account:
+[RESULTS.md](RESULTS.md#round-0024-a-matched-rho-and-the-triple-table),
+[report](../runs/round-0024/REPORT.md).
