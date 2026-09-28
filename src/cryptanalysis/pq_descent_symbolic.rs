@@ -161,7 +161,7 @@ impl FieldBoolPoly {
             .iter()
             .map(|(&m, &c)| (mono_key(F2BoolMono::from_mask(m)), c))
             .collect();
-        keyed.sort_unstable_by(|a, b| b.0.cmp(&a.0));
+        keyed.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
         let mut monos: Vec<Vec<F2BoolMono>> = (0..n).map(|_| Vec::new()).collect();
         for &(key, c) in &keyed {
             let m = F2BoolMono::from_mask(!(key as u64));

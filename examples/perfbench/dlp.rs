@@ -134,7 +134,7 @@ fn bsgs_fast_toy40_w1_x4() -> Box<dyn Workload> {
         let st = solver.stats();
         let mut fp = Fp::new();
         for x in &xs {
-            fp = fp.u64(x.map_or(u64::MAX, |v| v));
+            fp = fp.u64(x.unwrap_or(u64::MAX));
         }
         fp.u64(st.baby_steps)
             .u64(st.giant_steps)
@@ -160,7 +160,7 @@ fn bsgs_fast_toy40_w4_interval38_x8() -> Box<dyn Workload> {
         let st = solver.stats();
         let mut fp = Fp::new();
         for x in &xs {
-            fp = fp.u64(x.map_or(u64::MAX, |v| v));
+            fp = fp.u64(x.unwrap_or(u64::MAX));
         }
         fp.u64(st.baby_steps).u64(st.table_entries).finish()
     }))
