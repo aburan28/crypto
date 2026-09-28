@@ -1,0 +1,61 @@
+name: GF2 AVX2 table-XOR experiment
+
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/gf2_elim.rs'
+      - 'research/gf2_avx2_table_20260928/PROTOCOL.md'
+      - 'research/gf2_avx2_table_20260928/paired_f5.py'
+      - '.github/workflows/gf2-avx2-table.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-output-and-paired-elimination:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RAYON_NUM_THREADS: '1'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Exact RREF, echelon, and word-count tests
+        run: cargo test --release --lib gf2_elim::tests -- --test-threads=1
+      - name: Build and retain unmodified reference
+        run: |
+          git worktree add --detach --no-checkout "$RUNNER_TEMP/gf2-avx2-reference" aa2c05c9ddbf15133878aa64e2cace8ee5cef1d8
+          git -C "$RUNNER_TEMP/gf2-avx2-reference" sparse-checkout set src examples docs/ic research/f4_linear_algebra_20260914
+          git -C "$RUNNER_TEMP/gf2-avx2-reference" reset --hard HEAD
+          CARGO_TARGET_DIR="$RUNNER_TEMP/gf2-avx2-reference-target" cargo build --release --manifest-path "$RUNNER_TEMP/gf2-avx2-reference/Cargo.toml" --example f4_f2_bench
+          cp "$RUNNER_TEMP/gf2-avx2-reference-target/release/examples/f4_f2_bench" "$RUNNER_TEMP/gf2-avx2-reference-binary"
+      - name: Build candidate
+        run: cargo build --release --example f4_f2_bench
+      - name: Five A/A and five paired A/B samples per workload
+        run: |
+          python3 research/gf2_avx2_table_20260928/paired_f5.py \
+            "$RUNNER_TEMP/gf2-avx2-reference-binary" \
+            target/release/examples/f4_f2_bench \
+            research/gf2_avx2_table_20260928/ci-result.json \
+            --pairs 5 --threads 1
+      - name: Preserve raw calls and both binaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gf2-avx2-table-${{ github.sha }}
+          path: |
+            research/gf2_avx2_table_20260928/ci-result.json
+            ${{ runner.temp }}/gf2-avx2-reference-binary
+            target/release/examples/f4_f2_bench
+          if-no-files-found: warn
