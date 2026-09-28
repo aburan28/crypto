@@ -55,12 +55,13 @@ The [version-two protocol](../../../research/ic_candidate_tournament_20260915/go
 binds that accepted evidence for attempts two and three. Use
 `reference_registry_v2.py` to verify and declare all three extra references,
 then `tournament.py prepare --campaign-version 2` with the registry, accepted
-qualification and observer reports, and complete target exclusions. Round two is
-registered: [round2.json](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/round2.json)
-and [`run_improvement_v2.py`](../../../research/ic_candidate_tournament_20260915/run_improvement_v2.py)
-freeze the panel, seed `2026092552`, prior round-one archive and exposed
-fixtures. Dispatch only via `run_round_two=true` after controls; do not retune
-on round-one confirmation or replay, and do not redispatch round one.
+qualification and observer reports, and complete target exclusions. Round two
+has completed and retained the incumbent:
+[report](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/README.md),
+archive `ic-improvement-round2-20260928`. Do not redispatch `run_round_two=true`
+or `run_round_one=true`. A third attempt needs a new registered panel, the next
+frozen seed, and exclusions for every prior generated point, including all
+round-two fixtures; never retune on confirmation or replay.
 
 Before a rho comparison, inspect the actual reference path and run its release
 tests for reference/packed agreement, fruitless-cycle escape, charge closure,
@@ -113,7 +114,17 @@ configuration and count a new family/size/resource regime as a separate panel.
 
 Use `tournament.py prepare` for the calibrated instruction tournament and
 `--selection-width` / `--exploration-slots` to freeze its portfolio budget.
-The first bounded round has completed in workflow `36140265516`: 3,243/3,243 verified pairs, incumbent retained, no promotion. Read [its full report](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/README.md) and the development-stage evidence before proposing round two. Do not dispatch `run_round_one=true` again. A follow-on needs a new registered source/configuration panel, the next predeclared round seed, and exclusions for every prior generated point; never retune on confirmation or replay. The registered wrapper uses Python 3.12 and the existing prepare/run/verify sequence. A duplicate dispatch or a retry of a measured failure is not a new round; retain partial evidence and investigate it.
+Two bounded rounds have completed and retained the incumbent: round one in
+workflow `36140265516` (3,243/3,243 pairs) and round two under the version-two
+registry (3,480/3,480 pairs; selected `stop5_word` failed promotion). Read
+[round one](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/README.md)
+and [round two](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/README.md),
+including development-stage evidence, before proposing a third attempt. Do not
+dispatch `run_round_one=true` or `run_round_two=true` again. A follow-on needs a
+new registered source/configuration panel, the next predeclared round seed, and
+exclusions for every prior generated point; never retune on confirmation or
+replay. A duplicate dispatch or a retry of a measured failure is not a new
+round; retain partial evidence and investigate it.
 
 Selection locks one challenger; confirmation and replay cannot be used to
 retune it. Preserve final failures. Subsequent tuning requires new held-out

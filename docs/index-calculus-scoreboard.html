@@ -462,7 +462,7 @@
     <p><b>10.7% fewer field products</b> per specialization (1,342 → 1,199; p = 67, seed = 11).</p>
     <p>Timing diagnostics: <b>55.4% less specialization time</b> and <b>1.2% less setup time</b>. Full-DLP confirmation remains inconclusive.</p>
     <p><span class="chip">accounting</span> <a href="#ic-bounded-round-1-20260925">Bounded IC autolab, round one</a>: incumbent retained after 3,243 verified toy-panel pairs. The selected challenger&rsquo;s single-target online time was 6.5% higher on confirmation; neither complete cold metric met the 20% improvement gate.</p>
-    <p><span class="chip">accounting</span> <a href="#ic-reference-binding-v2-20260926">Round two registered</a>: seed 2026092552, eleven arms on a new candidate source with half/cover pair-table modes; no second-round measurement yet.</p></div>
+    <p><span class="chip">accounting</span> <a href="#ic-bounded-round-2-20260925">Bounded IC autolab, round two</a>: incumbent retained after 3,480 verified toy-panel pairs. Selected <code>stop5_word</code> confirmation ratios were 1.093655 online, 0.922725 cold Ir and 0.987022 cold native; neither cold gate reached 0.8. One round remains.</p></div>
     <nav aria-label="Performance evidence"><a href="algorithm-lab.html">Factor bases, linear algebra &amp; SAT demos →</a><a href="performance-gains.html">Explore performance charts →</a><a href="#summation-polynomials-20260914">Summation-polynomial evidence</a><a href="#gaudry-allocation-20260914">Earlier Gaudry gains</a><a href="#macaulay-cpu-gpu-pipeline">CPU/GPU pipeline</a></nav>
   </aside>
 
@@ -6627,6 +6627,257 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Complete cold Ir is user-space guest instructions, not curve additions. The K-instruction collector floor is implementation-specific and inapplicable to rho. Engineering rows test implementation changes; accounting rows are references or compatibility controls. Per-target identities, exact admitted bases, phase ledgers, uncertainty, retained failures and the final gate are available in the linked frozen report.</p>
 </section>
 <!-- END ic-bounded-round-1-20260925 -->
+<!-- BEGIN ic-bounded-round-2-20260925 -->
+<section class="panel" id="ic-bounded-round-2-20260925">
+<h2>Bounded IC round 2: retained</h2>
+<p>Round 2: retained. Selected challenger: stop5_word; retained/promoted winner: incumbent. 3480/3480 native/profile pairs independently verified by the measured round&#x27;s frozen checker. Fresh Linux transport replay is the evidence-PR merge gate. All results are limited to the registered synthetic toy panel.</p>
+<p>Primary metric: single-target online native time, reusable preparation excluded and scalar replay included. Cold cost remains an additional acceptance gate. Engineering/accounting only; no global-optimum or asymptotic claim. <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/README.md">Full report</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/EVIDENCE.md">Provenance and reproduction</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json">Frozen tables and stage diagnostics</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RUNS.csv">Every run, including failures</a>.</p>
+<h3>Confirmation</h3>
+<div class="table-scroll"><table><caption>Confirmation: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0300712</td><td>1</td><td>reference</td><td>5.53271</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>0.0302927</td><td>unknown</td><td>unknown</td><td>unknown</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>0.225603</td><td>7.50231</td><td>[6.79684, 8.33391]</td><td>0.737468</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.166375</td><td>5.53271</td><td>[5.11118, 6.01516]</td><td>1</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0331297</td><td>1.09365</td><td>[1.02861, 1.15887]</td><td>5.05892</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Confirmation: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.78088e+06</td><td>2788.01</td><td>1</td><td>reference</td><td>0.706919</td><td>222610</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>1.80886e+06</td><td>2831.81</td><td>unknown</td><td>unknown</td><td>unknown</td><td>226108</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>2.51922e+06</td><td>3943.89</td><td>1.41459</td><td>[1.28029, 1.56319]</td><td>1</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>4.58321e+06</td><td>7175.12</td><td>2.57356</td><td>[2.07447, 3.108]</td><td>1.8193</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>1.64326e+06</td><td>2572.57</td><td>0.922725</td><td>[0.891417, 0.954667]</td><td>0.652292</td><td>328653</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Confirmation: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.776046</td><td>1</td><td>reference</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>0.785151</td><td>unknown</td><td>unknown</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>0.823813</td><td>1.06155</td><td>[1.02343, 1.10013]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>1.60659</td><td>2.07023</td><td>[1.98018, 2.17453]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.765974</td><td>0.987022</td><td>[0.959326, 1.01544]</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<h3>Replay</h3>
+<div class="table-scroll"><table><caption>Replay: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0301787</td><td>1</td><td>reference</td><td>5.60364</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>0.0304443</td><td>unknown</td><td>unknown</td><td>unknown</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>0.227286</td><td>7.53133</td><td>[6.83563, 8.34729]</td><td>0.744044</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.169111</td><td>5.60364</td><td>[5.18522, 6.08137]</td><td>1</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0329592</td><td>1.08261</td><td>[1.01826, 1.14675]</td><td>5.17606</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Replay: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.78088e+06</td><td>2788.01</td><td>1</td><td>reference</td><td>0.70692</td><td>222610</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>1.80886e+06</td><td>2831.81</td><td>unknown</td><td>unknown</td><td>unknown</td><td>226107</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>2.51921e+06</td><td>3943.88</td><td>1.41459</td><td>[1.28029, 1.5632]</td><td>1</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>4.58322e+06</td><td>7175.13</td><td>2.57357</td><td>[2.07451, 3.10801]</td><td>1.81931</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>1.64326e+06</td><td>2572.57</td><td>0.922726</td><td>[0.891419, 0.954669]</td><td>0.652294</td><td>328653</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Replay: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.782402</td><td>1</td><td>reference</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>0.807039</td><td>unknown</td><td>unknown</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>0.838329</td><td>1.07148</td><td>[1.03267, 1.11189]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>1.6424</td><td>2.09918</td><td>[1.99526, 2.18742]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.785639</td><td>1.00414</td><td>[0.979479, 1.0295]</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<h3>Development</h3>
+<div class="table-scroll"><table><caption>Development: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0324391</td><td>1</td><td>reference</td><td>5.4419</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>0.031925</td><td>0.988777</td><td>[0.958135, 1.01936]</td><td>5.50367</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>0.0322854</td><td>0.999939</td><td>[0.952806, 1.07447]</td><td>5.44223</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>0.0308678</td><td>0.956032</td><td>[0.894381, 1.01261]</td><td>5.69217</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>0.0307428</td><td>0.95216</td><td>[0.910193, 0.979171]</td><td>5.71532</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.0322874</td><td>unknown</td><td>unknown</td><td>unknown</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>0.240285</td><td>7.40729</td><td>[6.20784, 8.86932]</td><td>0.734668</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.17653</td><td>5.4419</td><td>[4.60466, 6.34739]</td><td>1</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0368943</td><td>1.14268</td><td>[1.04381, 1.25609]</td><td>4.76238</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>0.0343731</td><td>1.0646</td><td>[0.969192, 1.24539]</td><td>5.11169</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>0.0348506</td><td>1.07939</td><td>[0.984671, 1.24676]</td><td>5.04165</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>0.0349149</td><td>1.08138</td><td>[0.979282, 1.25134]</td><td>5.03237</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>0.0326492</td><td>1.01121</td><td>[0.951769, 1.08414]</td><td>5.38159</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>0.0310254</td><td>0.960914</td><td>[0.910474, 1.00331]</td><td>5.66326</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Development: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.84007e+06</td><td>2297.31</td><td>1</td><td>reference</td><td>0.695632</td><td>230009</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>1.84334e+06</td><td>2301.39</td><td>1.00178</td><td>[1.00092, 1.00258]</td><td>0.696868</td><td>230417</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>1.84043e+06</td><td>2297.76</td><td>1.00019</td><td>[0.999721, 1.0007]</td><td>0.695767</td><td>230053</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>2.92164e+06</td><td>3647.65</td><td>1.58779</td><td>[1.26462, 1.9492]</td><td>1.10452</td><td>365205</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>2.32126e+06</td><td>2898.08</td><td>1.26151</td><td>[1.07197, 1.45119]</td><td>0.877544</td><td>290157</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>1.87399e+06</td><td>2339.66</td><td>unknown</td><td>unknown</td><td>unknown</td><td>234248</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>2.64518e+06</td><td>3302.48</td><td>1.43754</td><td>[1.17677, 1.72102]</td><td>1</td><td>not applicable</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>4.3996e+06</td><td>5492.87</td><td>2.391</td><td>[1.77221, 3.0715]</td><td>1.66326</td><td>not applicable</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>1.7647e+06</td><td>2203.21</td><td>0.959039</td><td>[0.889063, 1.07556]</td><td>0.667138</td><td>352940</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>1.99384e+06</td><td>2489.3</td><td>1.08357</td><td>[0.991588, 1.14722]</td><td>0.753764</td><td>332307</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>1.76314e+06</td><td>2201.27</td><td>0.958194</td><td>[0.896201, 1.03968]</td><td>0.66655</td><td>293857</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>1.99171e+06</td><td>2486.64</td><td>1.08241</td><td>[0.99081, 1.14589]</td><td>0.75296</td><td>331952</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>2.20854e+06</td><td>2757.35</td><td>1.20025</td><td>[1.04028, 1.35899]</td><td>0.834931</td><td>315506</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>2.31756e+06</td><td>2893.46</td><td>1.2595</td><td>[1.07083, 1.44848]</td><td>0.876147</td><td>289695</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Development: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.78059</td><td>1</td><td>reference</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>0.786094</td><td>1.00705</td><td>[0.9669, 1.05491]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>0.788452</td><td>1.01007</td><td>[0.954645, 1.05953]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>0.884694</td><td>1.13336</td><td>[1.05871, 1.23197]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>0.801723</td><td>1.02707</td><td>[0.943319, 1.11723]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.801967</td><td>unknown</td><td>unknown</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>0.844018</td><td>1.08126</td><td>[1.02359, 1.14318]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>1.56977</td><td>2.011</td><td>[1.86215, 2.16501]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.764284</td><td>0.97911</td><td>[0.900617, 1.06604]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>0.796603</td><td>1.02051</td><td>[0.951836, 1.0937]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>0.771569</td><td>0.988442</td><td>[0.926275, 1.06167]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>0.806693</td><td>1.03344</td><td>[0.97319, 1.10112]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>0.771435</td><td>0.988271</td><td>[0.917037, 1.07152]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>0.82124</td><td>1.05207</td><td>[0.982673, 1.13446]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<h3>Smoke</h3>
+<div class="table-scroll"><table><caption>Smoke: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0343879</td><td>1</td><td>reference</td><td>5.77961</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>0.0340717</td><td>0.969299</td><td>[0.932079, 0.998657]</td><td>5.96267</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>0.0341205</td><td>0.970689</td><td>[0.921854, 1.00575]</td><td>5.95413</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>0.0336985</td><td>0.958684</td><td>[0.939401, 0.972397]</td><td>6.0287</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>0.0334549</td><td>0.951754</td><td>[0.904468, 0.981786]</td><td>6.07259</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.0351508</td><td>unknown</td><td>unknown</td><td>unknown</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>0.264357</td><td>7.68749</td><td>[6.55676, 9.20841]</td><td>0.75182</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.198749</td><td>5.77961</td><td>[5.148, 6.79648]</td><td>1</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0365239</td><td>1.03906</td><td>[0.950518, 1.20629]</td><td>5.56233</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>0.0331454</td><td>0.942949</td><td>[0.903755, 0.983814]</td><td>6.12929</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>0.0345409</td><td>0.982649</td><td>[0.909099, 1.06425]</td><td>5.88167</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>0.033814</td><td>0.961968</td><td>[0.911507, 1.02496]</td><td>6.00811</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>0.0328168</td><td>0.9336</td><td>[0.902179, 0.966443]</td><td>6.19067</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>0.0345434</td><td>0.98272</td><td>[0.907491, 1.08555]</td><td>5.88124</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Smoke: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.95591e+06</td><td>2441.95</td><td>1</td><td>reference</td><td>0.668756</td><td>244489</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>1.95893e+06</td><td>2445.72</td><td>1.00154</td><td>[1.00033, 1.00278]</td><td>0.669789</td><td>244867</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>1.95601e+06</td><td>2442.06</td><td>1.00005</td><td>[0.999089, 1.00101]</td><td>0.668789</td><td>244501</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>2.8749e+06</td><td>3589.29</td><td>1.46985</td><td>[1.12193, 1.85791]</td><td>0.982971</td><td>359362</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>2.22654e+06</td><td>2779.83</td><td>1.13837</td><td>[0.900282, 1.38731]</td><td>0.761289</td><td>278318</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>1.99761e+06</td><td>2494.01</td><td>unknown</td><td>unknown</td><td>unknown</td><td>249702</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>2.9247e+06</td><td>3651.47</td><td>1.49531</td><td>[1.41065, 1.57653]</td><td>1</td><td>not applicable</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>4.65417e+06</td><td>5810.7</td><td>2.37954</td><td>[1.93471, 2.79046]</td><td>1.59133</td><td>not applicable</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>1.64788e+06</td><td>2057.37</td><td>0.842514</td><td>[0.739185, 0.937249]</td><td>0.563436</td><td>329577</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>1.78125e+06</td><td>2223.88</td><td>0.910698</td><td>[0.717783, 1.07938]</td><td>0.609035</td><td>296875</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>1.60664e+06</td><td>2005.88</td><td>0.821426</td><td>[0.695266, 0.925538]</td><td>0.549334</td><td>267773</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>1.77942e+06</td><td>2221.59</td><td>0.909764</td><td>[0.717054, 1.07808]</td><td>0.60841</td><td>296570</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>2.0637e+06</td><td>2576.51</td><td>1.05511</td><td>[0.808529, 1.30343]</td><td>0.705609</td><td>294814</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>2.22329e+06</td><td>2775.76</td><td>1.1367</td><td>[0.899087, 1.38493]</td><td>0.760175</td><td>277911</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Smoke: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.883762</td><td>1</td><td>reference</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>0.806024</td><td>0.912038</td><td>[0.824216, 0.989386]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>0.769606</td><td>0.87083</td><td>[0.822997, 0.926405]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>0.87437</td><td>0.989373</td><td>[0.914658, 1.10576]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>0.836014</td><td>0.945973</td><td>[0.841427, 1.0603]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.834291</td><td>unknown</td><td>unknown</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>rho</td><td>0.834498</td><td>0.944257</td><td>[0.907044, 0.982996]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>1.64785</td><td>1.86459</td><td>[1.79109, 1.9345]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.751737</td><td>0.850611</td><td>[0.784426, 0.914588]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>0.779652</td><td>0.882198</td><td>[0.817026, 0.961222]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>0.795277</td><td>0.899877</td><td>[0.864115, 0.936088]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>0.785345</td><td>0.888639</td><td>[0.819207, 0.978242]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>0.783953</td><td>0.887064</td><td>[0.814203, 0.956984]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>0.893904</td><td>1.01148</td><td>[0.909177, 1.12712]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<p>Complete cold Ir is user-space guest instructions, not curve additions. The K-instruction collector floor is implementation-specific and inapplicable to rho. Engineering rows test implementation changes; accounting rows are references or compatibility controls. Per-target identities, exact admitted bases, phase ledgers, uncertainty, retained failures and the final gate are available in the linked frozen report.</p>
+</section>
+<!-- END ic-bounded-round-2-20260925 -->
+
 <section class="panel" id="ic-pdp-outcome-controls-20260925">
   <h2>PDP admission: unsupported inputs are not refutations</h2>
   <p><span class="chip">accounting</span> Toy correctness controls now distinguish an unsupported encoding from budget exhaustion and a completed algebraic refutation. Twenty-two local release tests passed, including a 39-target F5 comparison with exhaustive enumeration and independent witness checks. These controls do not qualify a new performance winner: online time, cold cost, S and speedup remain unknown. Generic solver timing and per-query statistics still need scientific admission. See the <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/pdp-admission/PROTOCOL.md">protocol</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/pdp-admission/RESULTS.md">retained results</a>. One of three improvement rounds is complete; the incumbent is retained.</p>
@@ -6664,7 +6915,7 @@ factor base, and this prices a decomposition oracle.</p>
 <section class="panel" id="ic-reference-binding-v2-20260926">
   <h2>Remaining rounds: separate qualified cold and online references</h2>
   <p><span class="chip">accounting</span> The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/PROTOCOL.md">version-two protocol</a> binds the accepted reference and observer evidence below. Cold instruction and native costs use the prepared pair-inversion incumbent; primary single-target online time uses the prepared combined implementation. Both qualified rho references remain mandatory. Reference failures block a complete result, and reference arms cannot enter challenger selection. Instrumentation costs remain charged.</p>
-  <p>The original three-attempt familywise budget, 72 fresh confirmation targets and three repetitions remain fixed. Ten challengers plus the incumbent and three additional references fit a maximum schedule of 3,480 native/profile pairs under the existing 3,500-pair cap. Six diverse challengers, including an exploration slot, remain eligible for selection. Round two is registered in <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/round2.json">round2.json</a> with runner <code>run_improvement_v2.py</code>, seed 2026092552 and candidate source <code>8582e4ab4b63e98696a0ff00ee296e2902923a2c39c325ab0f3e3950ffbb2b28</code>. The panel recombines round-one development parents and adds half/cover pair-table modes; it does not retune on confirmation. No second-round measurement has executed; round one is sealed, no challenger has qualified, and two rounds remain.</p>
+  <p>The original three-attempt familywise budget, 72 fresh confirmation targets and three repetitions remain fixed. Ten challengers plus the incumbent and three additional references fit a maximum schedule of 3,480 native/profile pairs under the existing 3,500-pair cap. Six diverse challengers, including an exploration slot, remain eligible for selection. Round two executed under that registry and retained the incumbent: see <a href="#ic-bounded-round-2-20260925">the round-two evidence</a>. Selected <code>stop5_word</code> failed the frozen familywise and complete-cost gates on confirmation and replay. No challenger has qualified; one registered attempt remains. Do not redispatch round two or round one.</p>
 </section>
 
 <!-- BEGIN ic-generic-reference-qualification-20260926 -->
@@ -6852,7 +7103,7 @@ factor base, and this prices a decomposition oracle.</p>
 <h3>Retained failures, portability and delivery gate</h3>
 <p>Research failures are zero, but the prerequisite controls retain intentional incomplete runs, including 12 incomplete mixed-adapter profiles and nine incomplete observer-control pairs. Nine prerequisite audits and the 360-pair observer replay passed locally without workers. Strict macOS replay of the main comparison failed on a one-ULP statistic: development/rho_comparisons/rho_prepared_both_8/per_cell/n23a0 was stored as 1.1843664724946852 and recomputed as 1.1843664724946854. Original Linux bytes and this failure are preserved. The dedicated Linux evidence CI must freshly restore the archive, reconstruct every export and pass all eleven frozen audits without worker execution. The verifier has not been weakened to accommodate the local difference.</p>
 <h3>Next bounded research step</h3>
-<p>Do not redispatch this qualification or sealed round one. The reviewed observer evidence and separate cold/online IC and rho leaders are bound in the version-two reference contract. Round two is frozen with seed 2026092552 and the registered candidate panel above, retaining diverse alternatives and an exploration slot. Exclude all 25 exposed points in fixtures.json, including A/A and smoke, in addition to all earlier exposed panels and the restored round-one prior. Promotion still requires fresh confirmation and replay under the predeclared familywise rule, at least 20% lower complete cold Ir and cold native time, no online regression, no cell regression above 10%, and independently verified answers. Two rounds remain; dispatch only after candidate controls pass.</p>
+<p>Do not redispatch this qualification, sealed round one, or sealed round two. The reviewed observer evidence and separate cold/online IC and rho leaders remain bound in the version-two reference contract. Round two completed under seed 2026092552 and retained the incumbent; selected stop5_word failed the frozen familywise and complete-cost gates. Exclude all exposed points from that round and earlier panels, including the readiness, qualification and adapter-control corpora. A third attempt needs a new registered panel and seed; never retune on confirmation or replay. Promotion still requires fresh confirmation and replay under the predeclared familywise rule, at least 20% lower complete cold Ir and cold native time, no online regression, no cell regression above 10%, and independently verified answers. One round remains.</p>
 </section>
 <!-- END ic-generic-reference-qualification-20260926 -->
 
