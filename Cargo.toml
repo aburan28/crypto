@@ -18,11 +18,20 @@ path = "src/bin/ic.rs"
 name = "icx"
 path = "src/bin/icx.rs"
 
+# `ecc2k-guard` — the ECC2K-130 rho campaign's no-fruitless-cycle
+# certificate and verifiable seed provenance.
+[[bin]]
+name = "ecc2k-guard"
+path = "src/bin/ecc2k_guard.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"
 
 [features]
+f4-four-tables = []
+f4-five-tables = []
+f4-wide-tables = []
 redis-cache = ["dep:redis"]
 # Verbose tracing in the isogeny rho attack's linear-algebra step.
 rho_debug = []

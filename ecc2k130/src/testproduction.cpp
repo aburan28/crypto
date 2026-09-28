@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cerrno>
 #include <unistd.h>
+#include <sys/wait.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -92,11 +93,12 @@ static int findFixture() {
 int main(int argc, char **argv) {
     using R = Ref<CfgF41>;
     if (argc == 2 && std::string(argv[1]) == "--find-fixture") return findFixture();
+    require(Options().maxIters == (1ull << 32), "standalone guard enabled by default");
     auto sol = fixtureSolver();
     // A known cross-run collision on the fixture instance.  The seeds depend
     // on the iteration function, the discrete log they resolve to does not.
 #if ECC_WALK_TABLE
-    const u64 a = 0x0002000000860000ull, b = 0x0001000001ba0000ull;   // walks 134 and 442
+    const u64 a = 0x0002000001c30000ull, b = 0x0001000002740000ull;   // v3: walks 451 and 628
 #else
     const u64 a = 0x0002000048880000ull, b = 0x000100004cf60000ull;
 #endif
@@ -136,6 +138,42 @@ int main(int argc, char **argv) {
         require(engine.saves == (mode == 3 ? 1 : 0), "no checkpoint after lost/uncommitted reports");
         require(mode != 0 || engine.reseeds == 0, "no reseed after report overflow");
     }
+    // New table data must not be confused with older table or sigma data.
+    // Exercise the real reader in a child because malformed headers fail closed.
+    auto headerCase = [&](const char *magic, unsigned version, unsigned stride, int want) {
+        FILE *f = tmpfile(); require(f != nullptr, "temporary corpus");
+        DpFileHeader h{}; memcpy(h.magic, magic, 8); h.version=version; h.recordBytes=stride;
+        require(fwrite(&h,sizeof h,1,f)==1,"write test header"); fflush(f); rewind(f);
+        fflush(stdout); const pid_t pid=fork(); require(pid>=0,"fork header reader");
+        if(pid==0){ dpFileIsV2(f); _exit(0); }
+        int status=0; require(waitpid(pid,&status,0)==pid,"wait header reader");
+        require(WIFEXITED(status) && WEXITSTATUS(status)==want,"corpus format isolation");
+        fclose(f);
+    };
+    headerCase(DP_MAGIC_TABLE3,3,sizeof(DpFileRecord),ECC_WALK_TABLE?0:2);
+    headerCase(DP_MAGIC_V2,2,sizeof(DpFileRecordV2),ECC_WALK_TABLE?2:0);
+    headerCase(DP_MAGIC_TABLE3,3,1,8);
+    headerCase("legacy!!",0,0,ECC_WALK_TABLE?2:0);
+#if ECC_WALK_TABLE
+    require(RefEngine<CfgF41>::CKPT_VERSION == 34u, "new table checkpoint version");
+    {
+        Options o; o.threads=1; o.steps=1; o.dpWeight=sol.dpWeight; o.dpCap=16;
+        RefEngine<CfgF41> before, after; before.sol=&sol; after.sol=&sol;
+        before.setup(o,nullptr,nullptr,nullptr,nullptr);
+        after.setup(o,nullptr,nullptr,nullptr,nullptr);
+        before.launch(0);
+        const std::string ck=std::string(root)+"/table-v3.ck";
+        require(before.save(ck.c_str(),1,o.runId),"save table-v3 checkpoint");
+        u64 it=0; require(after.restore(ck.c_str(),&it,o.runId) && it==1,"restore table-v3 checkpoint");
+        std::vector<u64> a,b;before.pack(a);after.pack(b);
+        require(a==b,"table history survives resume");
+        FILE *f=fopen(ck.c_str(),"r+b");require(f!=nullptr,"open checkpoint header");
+        const unsigned oldVersion=2;
+        require(fseek(f,8,SEEK_SET)==0 && fwrite(&oldVersion,sizeof oldVersion,1,f)==1,"write old checkpoint version");
+        fclose(f); require(!after.restore(ck.c_str(),&it,o.runId),"reject pre-v3 table checkpoint");
+    }
+
+#endif
     // maxIters is a guard, not walk state: a checkpoint written under one
     // guard restores under a larger one, the walk goes on exactly as it
     // would have, and only the old guard would have cut it (aws/rollout.py

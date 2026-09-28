@@ -705,9 +705,24 @@ worse than none:
     pilot's bounded-degree conjecture;
   - at `m = 3`, to 7 at `N = 15`.
 
-  Whether the growth is linear or slower is open. So is `m = 4` past
-  `N = 12`, the regime that decides the oracle. It ran out of memory at
-  `N = 16`, where a diagnostic gives only `D ≥ 7`. No oracle is built.
+  Round 3 (§12) changed only how the engine stores its basis. The new
+  build reproduces round 2 exactly at 0.51–0.69 of its peak memory, and it
+  finishes `m = 4`, the regime that decides the oracle, at `N = 16`:
+  `D = 7`, as at `N = 12`. One level without a rise closes nothing.
+  Whether the growth is linear or slower is still open, at every `m`, and
+  `m = 4` at `N = 20` is beyond the machine that ran these (the width grew
+  8 times from `N = 12` to 16). No oracle is built.
+
+  Round 4 (§13) built a signature-based F4 for the tower ring
+  (`src/cryptanalysis/sig_fp_tower.rs`, F5/GVW criteria) and checked it
+  against `f4_fp_tower`. It agrees on all 18 systems, and its criteria
+  remove the zero reductions. But it needs rows 1–2 degrees higher on
+  every system and up to 28 times the memory, and it ran out of 14 GB at
+  `m = 3`, `N = 15`. So `f4_fp_tower` stays the engine that measures `D`.
+  A variant taking F4's steps by polynomial degree (§14) matches F4's
+  degree at `m = 3`, `N = 9` but not at `N = 12`, so the signature line
+  stops there; the next lever for F4's zero rows is an exact early exit
+  once a step's residue block reaches full rank.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.

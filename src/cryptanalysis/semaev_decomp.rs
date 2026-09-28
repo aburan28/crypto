@@ -176,6 +176,19 @@ unsafe fn clmul_u64_neon(a: u64, b: u64) -> u128 {
 }
 
 impl Gf2 {
+    /// Carry-less multiplication selected by this instance's runtime dispatch.
+    pub fn kernel_name(&self) -> &'static str {
+        #[cfg(target_arch = "x86_64")]
+        if self.has_clmul {
+            return "pclmulqdq";
+        }
+        #[cfg(target_arch = "aarch64")]
+        if self.has_clmul {
+            return "pmull";
+        }
+        "portable"
+    }
+
     pub fn new(irr: &IrreduciblePoly) -> Self {
         assert!(irr.degree <= 63, "Gf2 handles n ≤ 63");
         let n = irr.degree;

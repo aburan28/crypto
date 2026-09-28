@@ -783,6 +783,12 @@ impl DregSummary {
 /// This is the null object for the sweep.  If the Semaev systems
 /// resolve at the same degree as these, then their algebraic structure
 /// is buying nothing and the measurement is of the shape alone.
+/// # Panics
+///
+/// Panics before sampling if `n_vars` is outside `1..=64`, or
+/// `degree.max(1) > n_vars`. Squarefree monomials cannot have more
+/// variables than the system; attempting to sample one would never finish.
+/// Degree zero retains its historical interpretation as degree one.
 pub fn random_control_system(
     n_vars: usize,
     n_eqs: usize,
@@ -790,6 +796,14 @@ pub fn random_control_system(
     terms_per_eq: usize,
     seed: u64,
 ) -> Vec<F2BoolPoly> {
+    assert!(
+        (1..=64).contains(&n_vars),
+        "random controls require 1..=64 Boolean variables"
+    );
+    assert!(
+        degree.max(1) <= n_vars as u32,
+        "random control degree cannot exceed the variable count"
+    );
     let mut rng = StdRng::seed_from_u64(seed);
     (0..n_eqs)
         .map(|_| {
@@ -1385,6 +1399,154 @@ pub fn sparse_elimination_cost(
     })
 }
 
+/// Where one degree's structured elimination spends its work, by column
+/// degree band, for one ladder draw given by its recorded `(V, x_R)`.
+///
+/// Runs the same algorithm as
+/// [`crate::cryptanalysis::sparse_macaulay::eliminate_high_columns`]
+/// (lowest-weight pivot per leading column, columns in descending monomial
+/// order) with counters added, so a profile describes the measured path
+/// rather than a model of it.  `ladder_refutation_profile_matches_the_eliminator`
+/// holds the two to the same rank, vanished rows and linear rows.
+#[derive(Clone, Debug)]
+pub struct RefutationBand {
+    /// Monomial degree of the columns in this band.
+    pub degree: u32,
+    pub columns: usize,
+    pub pivots: usize,
+    /// Row additions performed while eliminating this band.
+    pub xors: u64,
+    /// Total length of the rows those additions produced: the work, in
+    /// column indices written.
+    pub xor_output: u64,
+    /// Nonzeros left in the non-pivot rows when the band is done.
+    pub active_nnz_after: u64,
+    pub ms: f64,
+}
+
+/// See [`RefutationBand`].
+#[derive(Clone, Debug)]
+pub struct RefutationProfile {
+    pub n_vars: usize,
+    pub rows: usize,
+    pub cols: usize,
+    pub start_nnz: u64,
+    pub build_ms: f64,
+    pub bands: Vec<RefutationBand>,
+    pub high_rank: usize,
+    pub vanished: usize,
+    pub linear_rows: usize,
+    pub max_weight: usize,
+}
+
+/// Profile one degree of one ladder draw.  `basis` and `x_r` are the
+/// recorded low words of the draw's `V` basis and `x_R`, as the ladder's
+/// JSON lines print them.
+pub fn ladder_refutation_profile(
+    n: u32,
+    basis: &[u64],
+    x_r: u64,
+    degree: u32,
+) -> Option<RefutationProfile> {
+    use crate::cryptanalysis::koblitz_groebner::build_macaulay_sparse;
+    use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+    use crate::cryptanalysis::sparse_macaulay::{low_column_start, xor_sorted};
+    use std::mem::take;
+
+    let irr = find_irreducible_sparse(n)?;
+    let st = FieldStructure::new(n, &irr);
+    let elem = |w: u64| F2mElement::from_biguint(&BigUint::from(w), n);
+    let basis: Vec<F2mElement> = basis.iter().map(|&w| elem(w)).collect();
+    let sys = build_decomposition_system(&basis, &elem(x_r), &F2mElement::one(n), 3, &st)?;
+
+    let t0 = Instant::now();
+    let (cols, mut rows) = build_macaulay_sparse(&sys.equations, sys.n_vars, degree)?;
+    let build_ms = t0.elapsed().as_secs_f64() * 1e3;
+    let n_cols = cols.len();
+    let low_start = low_column_start(&cols);
+    let start_nnz = rows.iter().map(|r| r.len() as u64).sum();
+    let mut max_weight = rows.iter().map(|r| r.len()).max().unwrap_or(0);
+    let n_rows = rows.len();
+
+    let mut buckets: Vec<Vec<usize>> = vec![Vec::new(); n_cols.max(1)];
+    let mut vanished = 0usize;
+    for (i, r) in rows.iter().enumerate() {
+        match r.first() {
+            Some(&lead) => buckets[lead as usize].push(i),
+            None => vanished += 1,
+        }
+    }
+    let mut is_pivot = vec![false; n_rows];
+    let mut bands: Vec<RefutationBand> = Vec::new();
+    let mut c = 0usize;
+    while c < low_start.min(n_cols) {
+        let deg = cols[c].count_ones();
+        let mut band = RefutationBand {
+            degree: deg,
+            columns: 0,
+            pivots: 0,
+            xors: 0,
+            xor_output: 0,
+            active_nnz_after: 0,
+            ms: 0.0,
+        };
+        let tb = Instant::now();
+        while c < low_start.min(n_cols) && cols[c].count_ones() == deg {
+            band.columns += 1;
+            let bucket = take(&mut buckets[c]);
+            if !bucket.is_empty() {
+                let piv = *bucket
+                    .iter()
+                    .min_by_key(|&&i| rows[i].len())
+                    .expect("non-empty");
+                is_pivot[piv] = true;
+                band.pivots += 1;
+                let pivot_row = rows[piv].clone();
+                for i in bucket {
+                    if i == piv {
+                        continue;
+                    }
+                    let reduced = xor_sorted(&rows[i], &pivot_row);
+                    band.xors += 1;
+                    band.xor_output += reduced.len() as u64;
+                    max_weight = max_weight.max(reduced.len());
+                    match reduced.first() {
+                        Some(&lead) => buckets[lead as usize].push(i),
+                        None => vanished += 1,
+                    }
+                    rows[i] = reduced;
+                }
+            }
+            c += 1;
+        }
+        band.ms = tb.elapsed().as_secs_f64() * 1e3;
+        band.active_nnz_after = rows
+            .iter()
+            .zip(&is_pivot)
+            .filter(|(_, &p)| !p)
+            .map(|(r, _)| r.len() as u64)
+            .sum();
+        bands.push(band);
+    }
+    let linear_rows = rows
+        .iter()
+        .zip(&is_pivot)
+        .filter(|(r, &p)| !p && !r.is_empty() && r[0] as usize >= low_start)
+        .count();
+    Some(RefutationProfile {
+        n_vars: sys.n_vars,
+        rows: n_rows,
+        cols: n_cols,
+        start_nnz,
+        build_ms,
+        high_rank: bands.iter().map(|b| b.pivots).sum(),
+        bands,
+        vanished,
+        linear_rows,
+        max_weight,
+    })
+}
+
 /// The dense Macaulay matrix of one frozen decomposition system, for
 /// benchmarking an elimination kernel on the matrices the oracle really
 /// reduces: the system `build_decomposition_system` makes for `m`
@@ -1518,6 +1680,120 @@ mod tests {
         }
     }
 
+    /// The profiler runs the eliminator's own algorithm: same rank, same
+    /// vanished rows, same number of linear rows, same fill-in.
+    #[test]
+    fn ladder_refutation_profile_matches_the_eliminator() {
+        use crate::cryptanalysis::koblitz_groebner::build_macaulay_sparse;
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+
+        let mut rng = StdRng::seed_from_u64(0x9F0F_11E);
+        for (n, ell, degree) in [(5u32, 2usize, 5u32), (7, 2, 5), (7, 3, 5)] {
+            let (basis, x_r) = ladder_sample(n, ell, &mut rng);
+            let word = |e: &F2mElement| e.raw_bits().first().copied().unwrap_or(0);
+            let words: Vec<u64> = basis.iter().map(word).collect();
+            let p = ladder_refutation_profile(n, &words, word(&x_r), degree).unwrap();
+
+            let irr = find_irreducible_sparse(n).unwrap();
+            let st = FieldStructure::new(n, &irr);
+            let sys =
+                build_decomposition_system(&basis, &x_r, &F2mElement::one(n), 3, &st).unwrap();
+            let (cols, rows) = build_macaulay_sparse(&sys.equations, sys.n_vars, degree).unwrap();
+            let e = eliminate_high_columns(rows, cols.len(), low_column_start(&cols));
+            assert_eq!(
+                (p.high_rank, p.vanished, p.linear_rows, p.max_weight),
+                (e.high_rank, e.vanished, e.linear_rows.len(), e.max_weight),
+                "(n, ell, degree) = ({n}, {ell}, {degree})"
+            );
+        }
+    }
+
+    /// The dense finish keeps the row space: on ladder draws of four cells,
+    /// at every degree from the system's own up, and with the switch point
+    /// anywhere from the first column to the linear boundary, it finds the
+    /// same high rank and linear rows spanning the same space as the
+    /// sparse-only eliminator.
+    #[test]
+    fn dense_finish_keeps_the_high_rank_and_the_linear_span() {
+        use crate::cryptanalysis::koblitz_groebner::{
+            build_macaulay_sparse, rref_f2, system_degree,
+        };
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        use crate::cryptanalysis::sparse_macaulay::{
+            eliminate_high_columns, eliminate_high_columns_dense_finish, leading_band_end,
+            low_column_start,
+        };
+
+        // The reduced echelon form of a set of rows over `cols[low..]`: a
+        // canonical name for the space they span.
+        let span = |rows: &[Vec<u32>], low: usize, n_cols: usize| -> Vec<Vec<u64>> {
+            let width = n_cols - low;
+            let mut m: Vec<Vec<u64>> = rows
+                .iter()
+                .map(|r| {
+                    let mut bits = vec![0u64; width.div_ceil(64).max(1)];
+                    for &c in r {
+                        let k = c as usize - low;
+                        bits[k / 64] |= 1 << (k % 64);
+                    }
+                    bits
+                })
+                .collect();
+            let rank = if m.is_empty() {
+                0
+            } else {
+                rref_f2(&mut m, width)
+            };
+            m.truncate(rank);
+            m
+        };
+
+        let mut rng = StdRng::seed_from_u64(0xDE_45E);
+        let mut compared = 0;
+        for (n, ell, d_top) in [(5u32, 2usize, 6u32), (7, 2, 5), (7, 3, 5), (4, 3, 6)] {
+            for _ in 0..3 {
+                let (basis, x_r) = ladder_sample(n, ell, &mut rng);
+                let irr = find_irreducible_sparse(n).unwrap();
+                let st = FieldStructure::new(n, &irr);
+                let sys =
+                    build_decomposition_system(&basis, &x_r, &F2mElement::one(n), 3, &st).unwrap();
+                for degree in system_degree(&sys.equations)..=d_top {
+                    let Some((cols, rows)) =
+                        build_macaulay_sparse(&sys.equations, sys.n_vars, degree)
+                    else {
+                        continue;
+                    };
+                    let low = low_column_start(&cols);
+                    let want = eliminate_high_columns(rows.clone(), cols.len(), low);
+                    for until in [0, leading_band_end(&cols), low / 2, low] {
+                        let got = eliminate_high_columns_dense_finish(
+                            rows.clone(),
+                            cols.len(),
+                            low,
+                            until,
+                        );
+                        assert_eq!(
+                            got.high_rank, want.high_rank,
+                            "({n}, {ell}) degree {degree}"
+                        );
+                        assert_eq!(
+                            span(&got.linear_rows, low, cols.len()),
+                            span(&want.linear_rows, low, cols.len()),
+                            "({n}, {ell}) degree {degree} switch at {until}"
+                        );
+                        assert_eq!(
+                            got.high_rank + got.vanished + got.linear_rows.len(),
+                            rows.len()
+                        );
+                        compared += 1;
+                    }
+                }
+            }
+        }
+        assert!(compared >= 100, "only {compared} comparisons ran");
+    }
+
     /// A draw with solutions is never sent to the Macaulay path, and a
     /// small unsatisfiable draw resolves by refutation within a generous
     /// `d_max` -- the three outcomes the sweep distinguishes are reachable.
@@ -1544,6 +1820,47 @@ mod tests {
             "{sat} satisfiable, {refuted} refuted"
         );
     }
+
+    #[test]
+    #[should_panic(expected = "random controls require 1..=64 Boolean variables")]
+    fn control_input_rejects_zero_variables() {
+        random_control_system(0, 1, 1, 1, 7);
+    }
+
+    #[test]
+    #[should_panic(expected = "random controls require 1..=64 Boolean variables")]
+    fn control_input_rejects_mask_overflow() {
+        random_control_system(65, 1, 1, 1, 7);
+    }
+
+    #[test]
+    #[should_panic(expected = "random control degree cannot exceed the variable count")]
+    fn control_input_rejects_unreachable_degree() {
+        random_control_system(1, 1, 2, 1, 7);
+    }
+
+    #[test]
+    #[should_panic(expected = "random control degree cannot exceed the variable count")]
+    fn control_input_rejects_extreme_degree_before_sampling() {
+        random_control_system(2, 1, u32::MAX, 1, 7);
+    }
+
+    #[test]
+    fn control_input_preserves_supported_boundaries() {
+        for n_vars in [1, 64] {
+            let zero = random_control_system(n_vars, 3, 0, 1, 7);
+            let one = random_control_system(n_vars, 3, 1, 1, 7);
+            let masks = |polys: &[F2BoolPoly]| {
+                polys.iter().map(|p| p.terms.iter().map(|t| t.mask).collect::<Vec<_>>())
+                    .collect::<Vec<_>>()
+            };
+            assert_eq!(masks(&zero), masks(&one));
+            assert!(one.iter().all(|p| p.terms.len() == 1
+                && p.terms[0].mask.count_ones() == 1));
+        }
+        assert!(random_control_system(2, 0, 2, 1, 7).is_empty());
+    }
+
 
     #[test]
     fn cost_model_matches_the_built_system() {
