@@ -3,11 +3,10 @@
   "rho": true
  },
  "collection": {
-  "max_units": 256,
-  "unit_trials": 4000,
-  "units": 4
+  "max_units": 2048,
+  "unit_trials": 2048,
+  "units": 1
  },
- "collection_window": 1139,
  "curve": {
   "curve_a": 0,
   "degree": 53
@@ -17,7 +16,7 @@
   "mode": "spec",
   "spec": {
    "kind": "subgroup_orbits",
-   "points": 36000,
+   "points": 30000,
    "seed": 1
   }
  },
@@ -124,5 +123,7 @@
   {
    "random_seed": 231
   }
- ]
+ ],
+ "collection_window": 954,
+ "collection_aim": true
 }

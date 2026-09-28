@@ -1,0 +1,24 @@
+name: ECC2K-130 n13 S5 full-point control preflight
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/n13_s5_fullpoint_control_20260925/**'
+      - '.github/workflows/ecc2k130-n13-s5-fullpoint-control.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-input-and-toy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify frozen source, input archive and syntax
+        run: python3 research/notes/ecc2k130/n13_s5_fullpoint_control_20260925/ci_replay.py
+      - name: Replay only the n2 toy complete-model control
+        run: |
+          python3 research/notes/ecc2k130/n13_s5_fullpoint_control_20260925/selftest.py > /tmp/s5-toy-selftest.json
+          cmp /tmp/s5-toy-selftest.json research/notes/ecc2k130/n13_s5_fullpoint_control_20260925/evidence/toy_selftest.json

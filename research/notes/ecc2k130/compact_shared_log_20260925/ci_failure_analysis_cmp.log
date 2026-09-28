@@ -1,0 +1,22 @@
+replay	Replay committed archive and decision without rerunning producers	﻿2026-09-25T11:00:51.9417875Z ##[group]Run if test -f research/notes/ecc2k130/compact_shared_log_20260925/evidence/SHA256SUMS; then
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9418609Z ^[[36;1mif test -f research/notes/ecc2k130/compact_shared_log_20260925/evidence/SHA256SUMS; then^[[0m
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9419431Z ^[[36;1m  python3 -B research/notes/ecc2k130/compact_shared_log_20260925/verify_archive.py^[[0m
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9420155Z ^[[36;1m  python3 -B research/notes/ecc2k130/compact_shared_log_20260925/summarize.py --out /tmp/compact-shared-log-analysis.json^[[0m
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9420982Z ^[[36;1m  cmp /tmp/compact-shared-log-analysis.json research/notes/ecc2k130/compact_shared_log_20260925/analysis.json^[[0m
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9421783Z ^[[36;1melse^[[0m
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9422154Z ^[[36;1m  test ! -e research/notes/ecc2k130/compact_shared_log_20260925/analysis.json^[[0m
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9422715Z ^[[36;1m  echo 'Pre-outcome draft: frozen input replay passed; no producer archive exists yet.'^[[0m
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9423148Z ^[[36;1mfi^[[0m
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9494285Z shell: /usr/bin/bash -e {0}
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9494558Z env:
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9494838Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9495301Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9495749Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9496145Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9496526Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9496900Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:00:51.9497230Z ##[endgroup]
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:02:05.8626239Z {"censored_children": 0, "classification": "ARCHIVE_REPLAY_PASS", "complete_children": 26, "panels": [37, 41], "runs": 26, "sha256sums_sha256": "84ad0e494880e51360491276e130aea93ec16ab095ca22fe6ee53f491612f207"}
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:02:05.9963847Z {"37": "NEGATIVE_FULLY_CHARGED_SAME_HOST_WALL_OBSERVATION", "41": "NEGATIVE_FULLY_CHARGED_SAME_HOST_WALL_OBSERVATION"}
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:02:06.0046655Z /tmp/compact-shared-log-analysis.json research/notes/ecc2k130/compact_shared_log_20260925/analysis.json differ: byte 58172, line 1623
+replay	Replay committed archive and decision without rerunning producers	2026-09-25T11:02:06.0061417Z ##[error]Process completed with exit code 1.
