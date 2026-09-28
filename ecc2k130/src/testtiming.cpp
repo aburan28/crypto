@@ -89,8 +89,46 @@ static bool timingCase(bool restart, bool checkpoint, bool stopped) {
                     output.find(expected) != std::string::npos;
     if (!ok) {
         fprintf(stderr, "timing mismatch: restart=%d checkpoint=%d stopped=%d "
-                "pending=%d syncs=%d clock=%ld\n%s", restart, checkpoint, stopped,
-                engine.pending, engine.syncs, timingSeconds, output.c_str());
+                "pending=%d syncs=%d clock=%ld launches=%d\n%s", restart, checkpoint, stopped,
+                engine.pending, engine.syncs, timingSeconds, engine.launches, output.c_str());
+    }
+    return ok;
+}
+
+static bool overlapCase() {
+    // Two launches: the second kernel is queued before host DP handling, so
+    // the GPU is not idle for it. Fake engine work is still launch+fetch per
+    // launch, and the finished rate stays 4 M it/s.
+    timingSeconds = 0;
+    gStop = 0;
+    Options options;
+    options.steps = 2;
+    options.launches = 2;
+    options.verify = 0;
+    PendingEngine engine{false};
+    Solver<CfgF23> unusedSolver;
+
+    FILE *capture = tmpfile();
+    if (!capture) return false;
+    fflush(stdout);
+    const int savedStdout = dup(fileno(stdout));
+    if (savedStdout < 0 || dup2(fileno(capture), fileno(stdout)) < 0) return false;
+    const int result = runSearch<CfgF23>(options, engine, unusedSolver, nullptr);
+    fflush(stdout);
+    if (dup2(savedStdout, fileno(stdout)) < 0) return false;
+    close(savedStdout);
+    rewind(capture);
+    std::string output;
+    char chunk[1024];
+    for (size_t n; (n = fread(chunk, 1, sizeof chunk, capture));) output.append(chunk, n);
+    fclose(capture);
+
+    const bool ok = result == 0 && engine.launches == 2 && engine.reseeds == 0 &&
+                    engine.saves == 0 && engine.syncs == 1 && timingSeconds == 4 &&
+                    output.find("finished: 4.000 M it/s") != std::string::npos;
+    if (!ok) {
+        fprintf(stderr, "overlap mismatch: launches=%d reseeds=%d syncs=%d clock=%ld\n%s",
+                engine.launches, engine.reseeds, engine.syncs, timingSeconds, output.c_str());
     }
     return ok;
 }
@@ -99,7 +137,8 @@ int main() {
     HostEngine<CfgF23> host;
     host.synchronize();
     if (!timingCase(false, false, false) || !timingCase(true, false, false) ||
-        !timingCase(true, true, false) || !timingCase(true, false, true)) return 1;
+        !timingCase(true, true, false) || !timingCase(true, false, true) ||
+        !overlapCase()) return 1;
     puts("PASS: final timing waits for pending reseeds; no-reseed, checkpoint/resume, "
-         "and interrupted-run controls retain their counts");
+         "interrupted-run, and overlapped-launch controls retain their counts");
 }

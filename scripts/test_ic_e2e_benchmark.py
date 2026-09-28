@@ -36,13 +36,15 @@ def synthetic_report(*, targets: int = 4, rho_seconds: float = 2.0, ic_precomput
     return {
         "schema_version": 1, "operation": "workflow", "status": "complete", "failure": None,
         "name": "test-rung", "degree": N, "params_digest": "ab" * 32,
-        "factor_base": {"points": 200, "columns": 35, "pair_table_stored_pairs": 20100},
+        "factor_base": {"points": 200, "columns": 35, "pair_table_stored_pairs": 20100,
+                        "pair_table_tier": "compact"},
         "solutions": {"count": targets, "verified": targets, "items": items},
         "stages": [
             {"stage": "select", "status": "complete", "ran": True},
             {"stage": "collect", "status": "complete", "ran": True, "trials_total": 128,
              "summands_scanned_total": 25600, "relations_total": 78},
-            {"stage": "logs", "status": "complete", "ran": True},
+            {"stage": "logs", "status": "complete", "ran": True, "trials": 128,
+             "summands_scanned": 25600, "relations_loaded": 78, "units_extended": 0},
             {"stage": "solve", "status": "complete", "ran": True},
             {"stage": "baseline", "status": "complete", "ran": True, "vs_rho": {
                 "n": N, "subgroup_order": str(R), "targets": targets, "claim_boundary": "synthetic_known_answer",
@@ -84,6 +86,37 @@ class MeasureTests(unittest.TestCase):
         self.assertTrue(m["wall"]["whole_process_crossover"])
         self.assertIsNone(m["ic_S"])
         self.assertAlmostEqual(m["rho_S"]["measured_over_expected"], 1.0, delta=0.01)
+
+    def test_extension_units_are_counted(self) -> None:
+        # Units collected inside the logs stage, because the planned ones
+        # left a column undetermined, are work the collect stage never
+        # reports; the pinned counters must include them.
+        rep = synthetic_report()
+        rep["stages"][2].update(trials=384, summands_scanned=76800, relations_loaded=81, units_extended=2)
+        m = bench.measure(rep)
+        self.assertEqual(m["counters"]["collection_trials"], 384)
+        self.assertEqual(m["counters"]["collection_summands_scanned"], 76800)
+        self.assertEqual(m["counters"]["collection_relations"], 81)
+
+    def test_extension_drift_fails(self) -> None:
+        ref = bench.measure(synthetic_report())
+        rep = synthetic_report()
+        rep["stages"][2].update(trials=384, units_extended=2)
+        r = bench.check_rung(PARAMS, ref, bench.measure(rep), 0.5, 3.0)
+        self.assertFalse(r["ok"])
+        self.assertIn("collection_trials", r["counter_drift"])
+
+    def test_logs_total_below_collect_is_refused(self) -> None:
+        rep = synthetic_report()
+        rep["stages"][2]["trials"] = 64
+        with self.assertRaisesRegex(bench.CheckFailure, "below the collect stage"):
+            bench.measure(rep)
+
+    def test_reused_logs_stage_is_refused(self) -> None:
+        rep = synthetic_report()
+        rep["stages"][2] = {"stage": "logs", "status": "complete", "ran": False, "columns": 35}
+        with self.assertRaisesRegex(bench.CheckFailure, "fresh logs stage"):
+            bench.measure(rep)
 
     def test_unverified_descent_is_refused(self) -> None:
         rep = synthetic_report()
@@ -130,6 +163,7 @@ class CheckRungTests(unittest.TestCase):
     def test_counter_drift_fails_even_when_faster(self) -> None:
         rep = synthetic_report(ic_precompute=0.1)  # faster end to end …
         rep["stages"][1]["trials_total"] = 64  # … but the algorithm changed
+        rep["stages"][2]["trials"] = 64
         r = bench.check_rung(PARAMS, self.ref, bench.measure(rep), 0.5, 3.0)
         self.assertFalse(r["ok"])
         self.assertIn("collection_trials", r["counter_drift"])
@@ -187,6 +221,43 @@ class CheckRungTests(unittest.TestCase):
         self.assertIn("**PASS**", text)
         self.assertEqual(text.count(f"| `{PARAMS}` |"), 1)
         self.assertIn("IC `S` is null", text)
+
+
+class TierPinTests(unittest.TestCase):
+    """The tier is pinned because no counter can see it.
+
+    ``pair_table_stored_pairs`` is ``|F|(|F|+1)/2`` for the full tier and
+    the compact one alike, so a run that switched between them used to
+    read as "counters identical" while the algorithm had changed.  This
+    pins the fix, not the bug.
+    """
+
+    def test_a_tier_change_is_caught_even_when_every_counter_matches(self):
+        report = synthetic_report()
+        m_before = bench.measure(report)
+        switched = synthetic_report()
+        switched["factor_base"]["pair_table_tier"] = "folded"
+        m_after = bench.measure(switched)
+        # The thing that made this slip through: nothing else moved.
+        self.assertEqual(m_before["counters"], m_after["counters"])
+        ref = dict(m_before)
+        row = bench.check_rung("p.json", ref, m_after, 0.5, 3.0)
+        self.assertFalse(row["ok"])
+        self.assertTrue(
+            any("tier changed" in p for p in row["problems"]),
+            row["problems"],
+        )
+
+    def test_an_unchanged_tier_passes(self):
+        m = bench.measure(synthetic_report())
+        row = bench.check_rung("p.json", dict(m), m, 0.5, 3.0)
+        self.assertTrue(row["ok"], row["problems"])
+
+    def test_a_report_without_a_tier_is_refused(self):
+        report = synthetic_report()
+        del report["factor_base"]["pair_table_tier"]
+        with self.assertRaises(bench.CheckFailure):
+            bench.measure(report)
 
 
 class CliTests(unittest.TestCase):

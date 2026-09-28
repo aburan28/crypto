@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Replay current seven-gate audit
+      - name: Replay the Stage 109 historical audit (superseded by Stage 124)
         run: |
           python3 -m py_compile scripts/compose_koblitz_stage109_gate_audit.py
           python3 -m json.tool docs/ic/boundary_targets.json >/dev/null

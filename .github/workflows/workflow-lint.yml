@@ -1,0 +1,39 @@
+name: Workflow syntax
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Every workflow parses and declares triggers
+        run: |
+          python3 - <<'PY'
+          import glob, sys, yaml
+
+          bad = []
+          files = sorted(glob.glob('.github/workflows/*.yml')
+                         + glob.glob('.github/workflows/*.yaml'))
+          for path in files:
+              try:
+                  doc = yaml.safe_load(open(path))
+              except yaml.YAMLError as err:
+                  bad.append('%s: %s' % (path, str(err).replace('\n', ' ')))
+                  continue
+              # YAML 1.1 reads a bare `on` as the boolean True.
+              triggers = doc.get('on', doc.get(True))
+              if not triggers:
+                  bad.append('%s: no `on:` triggers' % path)
+              if not doc.get('jobs'):
+                  bad.append('%s: no `jobs:`' % path)
+          for line in bad:
+              print(line)
+          print('checked %d workflows, %d problems' % (len(files), len(bad)))
+          sys.exit(1 if bad else 0)
+          PY

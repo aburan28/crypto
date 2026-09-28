@@ -52,7 +52,8 @@ rational (§3.2).  For Koblitz curves the frame is `u = 1/(x + 1)`, defined
 over `F₂`, so the Frobenius survives (`w(πP) = w(P)²`, verified on every
 point), and the descended Boolean system for a subspace factor base of
 dimension `l` has `m(l − 1) + 1` unknowns of bit-degree 5 in place of `m·l`
-unknowns of bit-degree 7, with one solve covering two targets (§4.3).  The
+unknowns of bit-degree 7 — both counting the known target, which §3.2 explains;
+4 and 6 without it — with one solve covering two targets (§4.3).  The
 symmetrised `S₃` on a Koblitz curve is
 
 ```text
@@ -254,6 +255,28 @@ rational 2-torsion point, `(0, 1)`, whose translation is `x ↦ 1/x`; the
 only two frames in `PGL₂(F₂)` that make it additive are `1/(x+1)` and
 `x/(x+1)`, and the brute-force scan finds no third.
 
+**What the bit-degree column counts, and what it does not.**  `Σ popcount(eᵢ)`
+maximised over the monomials of the *polynomial*, across all `m + 1`
+arguments — the target `x_R` included.  That is what
+`coordinate_search::boolean_degree` computes, and it is a property of the
+polynomial, not of a system anyone solves.  The unknowns column is the other
+convention: the target is known when a decomposition is actually attempted,
+so it contributes no unknowns.  Held to one convention at a time, and read
+off the polynomials printed above — the `u`-frame row by substituting
+`x = (1 + u)/u` into the 24-term `S₄` and clearing denominators, which
+reproduces the 100 terms and the `[4,4,4,4]` degrees the table reports:
+
+| | polynomial, all `m + 1` arguments | descended system, target known |
+|---|---:|---:|
+| `S₄` in `x` | 7 | **6** |
+| `S₄` in `u = 1/(x + 1)`, plain | 5 | **4** |
+| `S₄` symmetrised in `w, s` | 5 | **4** |
+
+The gap the quotient buys is **2** either way, so nothing in this section's
+reading changes.  §8 quotes the right-hand column, because there the target is
+fixed and the system goes to a solver; this table quotes the left.  Mixing
+them reports the gap as 3, which §8.1 and §8.3 did until these were computed.
+
 A curve defined over `F₈ ⊂ F₂⁹` gets the same rows with a Frobenius of
 degree 3 and a frame over `F₈`; a curve not defined over any subfield gets
 the same polynomials and no Frobenius column, because there is nothing for
@@ -314,8 +337,10 @@ count):
   `dim AS(V) = l − 1`.
 - Unknowns: `m(l − 1) + 1` instead of `m·l` (the `s`-constraint
   `s² + s = Σw_i` is `F₂`-linear, so `s` is one free bit after linear
-  elimination), at Boolean degree 5 instead of 7 for `S₄`.  At `n = 13`,
-  `l = 5`: 13 unknowns for 15.
+  elimination), at Boolean degree 5 instead of 7 for `S₄` — both counting all
+  `m + 1` arguments, the target included (§3.2); 4 instead of 6 once the target
+  is fixed, which is the pair §8 measures.  The gap is 2 either way.  At
+  `n = 13`, `l = 5`: 13 unknowns for 15.
 - Orbits: the factor base is stable under `⟨π, τ_T, −1⟩`, of order up to
   `4n`, so the relation matrix shrinks by a further factor 2 in both
   dimensions relative to the signed Frobenius orbits used today.
@@ -426,7 +451,13 @@ Boolean unknowns, `n` equations.  `S₃` gives a bilinear system; the
 intermediate points**: the production `m = 3` system is two `S₃` links
 joined by a free field element, `3ℓ + n` unknowns, cubic.  A control arm
 solves the plain 24-term `S₄` in `x` directly (`3ℓ` unknowns, Boolean
-degree 7) to separate "no chaining" from "symmetry".
+degree 6) to separate "no chaining" from "symmetry".  *(The degree read 7
+here until it was checked against the harness that builds the system: 7
+counts the known target as a variable, the convention of §3.2's table, and is
+not comparable with the symmetrised system's 4 on the line above.  The `deg`
+column of `symmetrised_oracle_bench` is `system_degree` on the equations the
+solver is actually handed, and at `K₁/F₂⁹`, `m = 3` it prints `x-direct 9
+vars, deg 6` against `sym 7 vars, deg 4`.  6 against 4.)*
 
 A root gives `u_i` up to `u_i ↦ u_i + 1` with parity `ε`; the lifted points
 sum to `R` or to `R + T`, both relations over `F_u` since `T ∈ F_u`.  The
@@ -544,9 +575,16 @@ direct `S₄`-in-`x` control at `K₁/F₂¹⁵` finds in 541 ms: dropping the
 chained intermediate points is worth ×12 on its own, and the symmetry is
 worth a further ×75 on top.  Both matter; the symmetry matters more.
 The production choice to chain `S₃` rather than use `S₄` was made on the
-grounds that `S₄` is degree 4 per variable and Boolean degree 7; the
+grounds that `S₄` is degree 4 per variable and Boolean degree 6; the
 symmetrised `S₄` is degree 2 per variable and Boolean degree 4, and that
-is the version that should have been chained *against*.
+is the version that should have been chained *against*.  *(Corrected: this
+read "Boolean degree 7" against the symmetrised 4, which compares two
+conventions — the 7 counts the known target as a variable, the 4 does not.
+Held to the solved system's convention the pair is 6 against 4 — which is what
+this section's own harness prints in its `deg` column — held to the
+polynomial's, 7 against 5.  The gap is 2, not 3.  Nothing else in this
+section moves: the measured times are what they were, and the conclusion
+that the symmetrised `S₄` is the version to chain against is unaffected.)*
 
 **H2 (first fall degree lower): falsified as stated.**  The symmetrised
 `m = 2` system's first fall degree is 4 where the `x`-system's is 3, and
@@ -1819,3 +1857,143 @@ solver and is not in the literature; and §18's split-rule measurement
 is new as a measurement.  What is retracted is the claim of having
 found new point representations.  The search rediscovered a known
 classification and confirmed it computationally.
+
+## 20. End to end: the symmetrised system as an index calculus, priced against `x` and against rho
+
+**Code:** `KoblitzSymmetrisedBase`, `SymmetrisedOracle`
+(`src/cryptanalysis/ic_framework/plugins.rs`); `ic bench --koblitz-a`,
+`--factor-base-out` (`src/bin/ic/bench.rs`).
+**Evidence:** `research/koblitz_symmetrised_e2e_20260927/` — the
+preregistered contract (`README.md`), the commands (`run.sh`), every
+`ic bench` report and every factor base frozen point by point
+(`results/`), the tabulation (`RESULTS.md`).
+
+§8, §17 and §18 priced the symmetrised system one decomposition at a
+time, and §19 said what that leaves out: none of it was a comparison
+against rho, and none of it ran the system as the relation collector of
+a complete index calculus, where a base closed under `+T` also changes
+how many targets decompose and how many relations a matrix needs.  This
+round does that, with both arms under one runner (`ic bench`), one
+relation loop, one pricing rule and one matched rho reference per
+instance.
+
+### Setup
+
+- **Instances.**  `K₁/F_{2^17}` (`r = 65587`), `K₀/F_{2^23}`
+  (`r = 2095853`), `K₁/F_{2^23}` (`r = 4196903`), `K₀/F_{2^31}`
+  (`r = 1439393`), with `V ∋ 1` of dimension 9, 12, 12 and 11
+  (divisor `0;1`, `0;1`, `0;1`, `0;1;2` of `xⁿ − 1`).  `K₀/2¹⁷` and
+  `K₁/2³¹` have no prime-order subgroup in the roster; `n = 13, 19, 29,
+  37` have no proper Frobenius-stable `V ∋ 1`.
+- **Arms** at `m = 2`: `sym` (base `F_u = {P : 1/(x+1) ∈ V}`, the
+  `w, s` system, inherited-F4 at Macaulay cap 3), `sym4` (cap 4), `x`
+  (base `{P : x ∈ V}`, plain Weil descent, inherited-F4), and the
+  combinatorial control `mitm-frobenius` on each base (`mitm-u`,
+  `mitm-x`).  At `n = 17` also `m = 3` for `sym` and `x`.  Three planted
+  logarithms per arm, eight counted rho runs, every run verified.
+- **Pricing.**  Both algebraic arms report word XORs, but the count
+  covers the eliminations only, so the runner prices them by *measured*
+  wall at the host's `ns_per_add` (its rule: only a unit that is exactly
+  "word XORs" is priced by count).  Runs are serial for that reason.
+  `RESULTS.md` also carries `S_xor`, the solve repriced by its counted
+  XORs at the pinned `ns_per_word_xor`, as a floor on the solve.
+
+### What the +T closure does to the collection, before any solving
+
+The two bases have the same `dim V` and nearly the same size, and the
+combinatorial control sees them with no algebra at all:
+
+| instance | base | points | columns | hit rate at `m = 2` | trials per relation |
+|:--|:--|--:|--:|--:|--:|
+| `K₁/2¹⁷` | `x` | 443 | 14 | 0.60 | 1.7 |
+| | `u` (`+T`-closed) | 409 | 13 | 0.31 | 3.3 |
+| `K₀/2²³` | `x` | 4235 | 94 | 0.62 | 1.6 |
+| | `u` | 4049 | 89 | 0.38 | 2.7 |
+| `K₁/2²³` | `x` | 3957 | 87 | 0.59 | 1.7 |
+| | `u` | 4141 | 91 | 0.42 | 2.5 |
+| `K₀/2³¹` | `x` | 2049 | 35 | 0.002 | 504 |
+| | `u` | 2357 | 39 | 0.002 | 604 |
+
+The `u`-base's hit rate is the `x`-base's times about `0.6`: if
+`Q = P₁ + P₂` with both in `F_u` then `Q = (P₁ + T) + (P₂ + T)` as well,
+so representations come in pairs and the set of representable targets
+is about half as large (`1 − e^{−1/2} = 0.39` against `1 − e^{−1} = 0.63`
+at `|F|²/2 ≈ #E`).  That is the counting floor of the torsion note (§4
+there) seen directly: the symmetry that lowers the degrees also halves
+the yield, and at `n = 31` the `u`-base needed 3–5 relations where the
+`x`-base's matrix closed on 2, for the same reason (a relation through
+`T` needs a partner to cancel it).
+
+### The end-to-end comparison
+
+`S = GAE/√r` over the whole pipeline, mean of three repeats; full
+ranges, columns and phase shares in `RESULTS.md`.
+
+| instance | `m` | `S_x` | `S_sym` | `S_sym / S_x` | `S_xor` sym / x | `S_sym4 / S_x` | rho `S` | `S_sym / S_rho` |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| `K₁/2¹⁷` | 2 | 2083 | 1742 | **0.84** | 0.54 | 4.9 | 1.76 | 990× |
+| `K₀/2²³` | 2 | 11020 | 8460 | **0.77** | 0.29 | 4.4 | 1.10 | 7700× |
+| `K₁/2²³` | 2 | 6825 | 5156 | **0.76** | 0.60 | 4.5 | 0.89 | 5800× |
+| `K₀/2³¹` | 2 | 16713 | 67025 | **4.0** | 1.64 | 48.5 | 1.06 | 63500× |
+| `K₁/2¹⁷` | 3 | no solve (3 h cap, 0 relations) | 116502 | — | — | — | 1.76 | 66000× |
+
+Reading it:
+
+1. **At `n = 17` and `n = 23` the symmetrised arm is cheaper end to end,
+   by `0.76–0.84`.**  Per trial the `w, s` solve is `1.5–2.4×` cheaper
+   in measured wall (`2–3.5×` in counted XORs), and the base's halved
+   yield takes back most of that: `1.6–2.0×` more trials per relation.
+   The net is under the contract's `0.8` line at `n = 23` and just over
+   it at `n = 17`.
+2. **At `n = 31` the symmetrised arm loses, `4.0×`.**  Per solver call
+   the two are close (10.6 ms against 8.4 ms; 0.44 M against 0.71 M
+   counted XORs), so the reversal is the collection: the `u`-base needed
+   `2.6×` as many trials to a solvable matrix (7926 against 3021 over
+   the three repeats), which is the yield halving plus the extra
+   relations through `T`, on three repeats whose ranges overlap.  It is
+   not a solver effect and it does not favour the rewriting.
+3. **Cap 4 is `4.4–4.9×` worse than cap 3** at `m = 2` and `n = 17, 23`,
+   and `48×` worse at `n = 31` (`S = 811298`, 17 minutes of wall for
+   three logarithms rho finds in milliseconds): §17's finding that the
+   cap is absolute and that the deeper matrices cost more than they
+   prune holds in the pipeline as it did in the oracle, and gets worse
+   with the variable count.
+4. **At `m = 3` the rewriting is the difference between solving and
+   not solving, on this engine.**  The symmetrised `S₄` (degrees
+   `[2,2,2,2,1]` in `w, s`, 25 boolean variables after descent) found
+   all three logarithms in 20 s of wall, at `S = 116502`.  The plain
+   `S₄` descent (27 variables, degree 6, semi-regular degree 14) found
+   no relation in three hours: the bounded diagnostic
+   (`results/k1_17__x-m3-probe.json`, 12 trials) shows every call
+   giving up *oversize* (the Macaulay matrix exceeds the engine's row
+   and column bounds) after 6.7 s, so the full run was 2 M trials'
+   worth of the same.  That is §17's "the symmetrised system is the
+   smaller Macaulay problem" as a feasibility line rather than a
+   constant, and it is the one place the symmetry changes what can be
+   run at all.  It is still `66000×` rho, and the `m = 2` arms at the
+   same `n` are `50×` cheaper than either.
+5. **Against rho every arm is three to five orders of magnitude off**,
+   and the ratio grows with `n` (`990×` → `5800–7700×` → `63500×`),
+   as Galbraith–Gebregiyorgis said it would (§19).  The combinatorial
+   controls sit at `9–130×` rho on the same bases, so the algebraic
+   solve is the whole gap.
+
+### Classification
+
+Against the boundaries the contract names: **engineering** at
+`n = 17, 23` (a constant factor under one on the solve, paid for in
+part by the base's yield; the ratio to rho is unmoved in kind and grows
+with `n`), **engineering** at `m = 3` (a solver-feasibility gain: the
+plain arm has no `S` to compare, and the symmetrised one is `66000×`
+rho), and **refuted** at `n = 31, m = 2` (`S_sym / S_x ≥ 1`).  No row
+approaches `S / S_rho < 1`, and the gain does not grow with `n`, so
+nothing here is an advance, which is what the counting floor said in
+advance: the symmetry is priced into the floor, and quotienting by it
+moves the Gröbner constant and the yield in opposite directions.
+
+What this settles that §8–§18 could not: the oracle-only wins of
+`×300–6000` on refutations at `n = 15` do not survive the pipeline,
+because a base that refutes faster also decomposes fewer targets, and
+the trial count is where the pipeline spends.  The frozen bases in
+`results/*.fb.json` (with each point's `u`, column and `+T` partner)
+are the record of what was compared.

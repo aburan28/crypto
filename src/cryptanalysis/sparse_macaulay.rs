@@ -149,7 +149,10 @@ pub fn eliminate_high_columns(
             out.max_weight = out.max_weight.max(reduced.len());
             match reduced.first() {
                 Some(&lead) => {
-                    debug_assert!(lead as usize > c, "reduction must advance the leading column");
+                    debug_assert!(
+                        lead as usize > c,
+                        "reduction must advance the leading column"
+                    );
                     buckets[lead as usize].push(i);
                 }
                 None => out.vanished += 1,
@@ -170,6 +173,143 @@ pub fn eliminate_high_columns(
         }
     }
     out
+}
+
+/// [`eliminate_high_columns`] with a dense finish: the columns before
+/// `sparse_until` are eliminated sparsely, exactly as there, and the rows
+/// that survive them are packed as bit rows over the remaining columns and
+/// put in row echelon form by
+/// [`crate::cryptanalysis::koblitz_groebner::echelon_f2_counted`].
+///
+/// Why: in a degree-`D` Macaulay matrix the leading band (the degree-`D`
+/// columns) is where rows are short, and the sparse merge wins there.
+/// Once that band is gone the survivors are thousands of entries long —
+/// a ladder draw at 20 unknowns spends 93 of its 100 seconds merging index
+/// lists over the degree-5 and degree-4 columns — and a bit row does the
+/// same row addition at a fraction of the cost.
+///
+/// The row space is the same, so the linear rows span the same space; the
+/// refutation and the pinned variables read off it, and `high_rank`, are
+/// unchanged.  The dense finish also reduces the linear rows among
+/// themselves, so they come back independent; `vanished` keeps the identity
+/// `rows = high_rank + vanished + linear rows` and therefore counts the
+/// dependent linear rows that the sparse path lists.  `max_weight` covers
+/// the sparse phase only.  The linear rows themselves
+/// are a different basis of that space, which is all
+/// [`crate::cryptanalysis::koblitz_groebner::solving_profile_sparse`] reads.
+pub fn eliminate_high_columns_dense_finish(
+    mut rows: Vec<Vec<u32>>,
+    n_cols: usize,
+    low_start: usize,
+    sparse_until: usize,
+) -> SparseElimination {
+    use crate::cryptanalysis::koblitz_groebner::echelon_f2_counted;
+
+    let n_rows = rows.len();
+    let sparse_until = sparse_until.min(low_start).min(n_cols);
+    let mut out = SparseElimination {
+        max_weight: rows.iter().map(|r| r.len()).max().unwrap_or(0),
+        ..Default::default()
+    };
+
+    let mut buckets: Vec<Vec<usize>> = vec![Vec::new(); n_cols.max(1)];
+    for (i, r) in rows.iter().enumerate() {
+        if let Some(&lead) = r.first() {
+            buckets[lead as usize].push(i);
+        }
+    }
+    let mut is_pivot = vec![false; n_rows];
+    for c in 0..sparse_until {
+        let bucket = take(&mut buckets[c]);
+        if bucket.is_empty() {
+            continue;
+        }
+        let piv = *bucket
+            .iter()
+            .min_by_key(|&&i| rows[i].len())
+            .expect("bucket is non-empty");
+        is_pivot[piv] = true;
+        out.high_rank += 1;
+        let pivot_row = rows[piv].clone();
+        for i in bucket {
+            if i == piv {
+                continue;
+            }
+            let reduced = xor_sorted(&rows[i], &pivot_row);
+            out.max_weight = out.max_weight.max(reduced.len());
+            if let Some(&lead) = reduced.first() {
+                buckets[lead as usize].push(i);
+            }
+            rows[i] = reduced;
+        }
+    }
+    drop(buckets);
+
+    // Survivors span columns `sparse_until ..` only.  Pack them, freeing
+    // each sparse row as it goes.
+    let width = n_cols - sparse_until;
+    let words = width.div_ceil(64).max(1);
+    let mut dense: Vec<Vec<u64>> = Vec::new();
+    for (i, r) in rows.iter_mut().enumerate() {
+        if is_pivot[i] || r.is_empty() {
+            continue;
+        }
+        let mut bits = vec![0u64; words];
+        for &c in r.iter() {
+            let k = c as usize - sparse_until;
+            bits[k / 64] |= 1 << (k % 64);
+        }
+        *r = Vec::new();
+        dense.push(bits);
+    }
+    drop(rows);
+
+    let mut word_ops = 0u64;
+    let rank = if dense.is_empty() {
+        0
+    } else {
+        echelon_f2_counted(&mut dense, width, &mut word_ops)
+    };
+    let low_offset = low_start - sparse_until;
+    for row in dense.iter().take(rank) {
+        let lead = row
+            .iter()
+            .enumerate()
+            .find(|(_, &w)| w != 0)
+            .map(|(k, &w)| k * 64 + w.trailing_zeros() as usize)
+            .expect("an echelon row within the rank is nonzero");
+        if lead < low_offset {
+            out.high_rank += 1;
+            continue;
+        }
+        let mut support = Vec::new();
+        for (k, &w) in row.iter().enumerate() {
+            let mut w = w;
+            while w != 0 {
+                let b = w.trailing_zeros() as usize;
+                support.push((sparse_until + k * 64 + b) as u32);
+                w &= w - 1;
+            }
+        }
+        out.linear_rows.push(support);
+    }
+    out.vanished = n_rows - out.high_rank - out.linear_rows.len();
+    out
+}
+
+/// Where [`eliminate_high_columns_dense_finish`] should stop eliminating
+/// sparsely: the end of the leading degree band.  Columns are in
+/// descending, degree-first monomial order, so that band is a prefix.
+pub fn leading_band_end(cols: &[u64]) -> usize {
+    match cols.first() {
+        Some(first) => {
+            let top = first.count_ones();
+            cols.iter()
+                .position(|m| m.count_ones() < top)
+                .unwrap_or(cols.len())
+        }
+        None => 0,
+    }
 }
 
 /// Index of the first column whose monomial has degree at most 1.

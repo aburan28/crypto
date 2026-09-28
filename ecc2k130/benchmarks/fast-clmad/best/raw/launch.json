@@ -1,0 +1,20 @@
+{
+  "job": "benchmarks/fast-clmad/gpujob-best.sh",
+  "gpu": "B200",
+  "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+  "gitRev": "aed9d688888e0519f363a482d034253e5e86a879",
+  "gitDirty": true,
+  "env": {
+    "SOURCE_REV": "aed9d688888e0519f363a482d034253e5e86a879 (uncommitted changes)",
+    "REPS": "5"
+  },
+  "provider": "modal",
+  "token": "1e38a4dd568d4af886935361b14612ec",
+  "volume": "ecc2k130-jobs",
+  "startedAt": "2026-09-22T18:01:50Z",
+  "functionCallId": "fc-01M354FZE9XWCHKYNAC2XT7MZA",
+  "exitCode": 0,
+  "seconds": 588.1499667167664,
+  "deviceLine": "NVIDIA B200, 580.95.05",
+  "finishedAt": "2026-09-22T18:12:25Z"
+}

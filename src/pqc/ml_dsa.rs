@@ -919,11 +919,13 @@ pub(crate) fn ml_dsa_65_secret_vectors(sk: &MlDsaSecretKey) -> (Vec<Vec<i32>>, V
 
 /// The number of polynomials in `s1` / `z`, and in `s2` / `t`.
 pub(crate) const ML_DSA_65_L: usize = L;
+#[allow(dead_code)]
 pub(crate) const ML_DSA_65_K: usize = K;
 /// `q`, `γ₁`, `η`, `τ` for the attack modules.
 pub(crate) const ML_DSA_65_Q: i32 = Q;
 pub(crate) const ML_DSA_65_GAMMA1: i32 = GAMMA1;
 pub(crate) const ML_DSA_65_ETA: i32 = ETA;
+#[allow(dead_code)]
 pub(crate) const ML_DSA_65_TAU: usize = TAU;
 
 fn sign_impl(
