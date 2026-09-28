@@ -15122,3 +15122,301 @@ mod subfield_tests {
         }
     }
 }
+
+/// Differential check of the single-word cofactor-class walk against
+/// the general walk exactly as it stood before it (bbb28fac), on random
+/// point sets closed under Frobenius and negation — far more varied
+/// than any factor base's classes — and on the factor bases themselves.
+#[cfg(test)]
+mod admissibility_walk_differential {
+    use super::*;
+
+    /// `m_can_decompose`'s walk for `m ≥ 2`, verbatim from bbb28fac.
+    fn old_walk(kc: &KoblitzCurve, classes: &[BinaryPoint], m: usize) -> bool {
+        let identity = pack_point(&BinaryPoint::Infinity);
+        let class_keys: HashSet<u64> = classes.iter().map(pack_point).collect();
+        let mut layer: Vec<BinaryPoint> = vec![BinaryPoint::Infinity];
+        let mut layer_keys: HashSet<u64> = HashSet::from([identity]);
+        for _ in 1..m {
+            let reps = signed_frobenius_orbit_representatives(kc, &layer);
+            let mut next_keys: HashSet<u64> = HashSet::new();
+            let mut next: Vec<BinaryPoint> = Vec::new();
+            for q in &reps {
+                for c in classes.iter() {
+                    let seed = kc.add(q, c);
+                    if next_keys.contains(&pack_point(&seed)) {
+                        continue;
+                    }
+                    let mut current = seed;
+                    for _ in 0..kc.n {
+                        for candidate in [current.clone(), point_neg(&current)] {
+                            if next_keys.insert(pack_point(&candidate)) {
+                                next.push(candidate);
+                            }
+                        }
+                        current = kc.frobenius(&current);
+                    }
+                }
+            }
+            layer = next;
+            layer_keys = next_keys;
+        }
+        layer_keys.iter().any(|k| class_keys.contains(k))
+    }
+
+    /// `m_can_decompose` verbatim from bbb28fac (unshared classes).
+    fn old_m_can_decompose(fb: &FrobeniusFactorBase, kc: &KoblitzCurve, m: usize) -> bool {
+        if fb.points.is_empty() || m == 0 {
+            return m == 0;
+        }
+        let classes = fb.distinct_cofactor_classes(kc);
+        if m == 1 {
+            return classes.contains(&BinaryPoint::Infinity);
+        }
+        old_walk(kc, &classes, m)
+    }
+
+    fn xorshift(s: &mut u64) -> u64 {
+        *s ^= *s << 13;
+        *s ^= *s >> 7;
+        *s ^= *s << 17;
+        *s
+    }
+
+    fn random_point(kc: &KoblitzCurve, s: &mut u64) -> BinaryPoint {
+        loop {
+            let v = xorshift(s) & ((1u64 << kc.n) - 1);
+            let x = F2mElement::from_biguint(&BigUint::from(v), kc.n);
+            let pts = points_with_x(&kc.curve, &x);
+            if !pts.is_empty() {
+                return pts[(xorshift(s) as usize) % pts.len()].clone();
+            }
+        }
+    }
+
+    /// The signed-Frobenius closure of `seeds`, deduplicated, in a
+    /// seeded random order.
+    fn closure(kc: &KoblitzCurve, seeds: &[BinaryPoint], s: &mut u64) -> Vec<BinaryPoint> {
+        let mut seen = HashSet::new();
+        let mut out = Vec::new();
+        for p in seeds {
+            let mut current = p.clone();
+            for _ in 0..kc.n {
+                for c in [current.clone(), point_neg(&current)] {
+                    if seen.insert(pack_point(&c)) {
+                        out.push(c);
+                    }
+                }
+                current = kc.frobenius(&current);
+            }
+        }
+        for i in (1..out.len()).rev() {
+            let j = (xorshift(s) as usize) % (i + 1);
+            out.swap(i, j);
+        }
+        out
+    }
+
+    #[test]
+    fn fast_walk_matches_the_old_walk_on_random_closed_sets() {
+        // (curve, trials, largest m, most random orbits)
+        let mut curves: Vec<(KoblitzCurve, usize, usize, usize)> = Vec::new();
+        for n in [3u32, 5, 7, 9, 11] {
+            for a in [0u8, 1] {
+                curves.extend(KoblitzCurve::new(a, n).map(|kc| (kc, 24, 6, 3)));
+            }
+        }
+        for (k, n, ai, bi) in [
+            (2u32, 6u32, 0u64, 2u64),
+            (2, 10, 1, 3),
+            (3, 9, 5, 1),
+            (2, 14, 0, 2),
+        ] {
+            if let Some(kc) = KoblitzCurve::subfield(k, n, ai, bi) {
+                curves.push((kc, 16, 5, 2));
+            }
+        }
+        // The widest field the single-word walk takes: n = 62 = 2 · 31.
+        for (k, n, ai, bi) in [(2u32, 62u32, 0u64, 2u64), (2, 62, 1, 1)] {
+            if let Some(kc) = KoblitzCurve::subfield(k, n, ai, bi) {
+                curves.push((kc, 6, 4, 1));
+            }
+        }
+        assert!(curves.iter().any(|(kc, ..)| kc.n == 62), "no n = 62 curve");
+        assert!(curves.len() >= 10, "{} curves", curves.len());
+        let mut s = 0x9E37_79B9_7F4A_7C15u64;
+        let mut answers = [0usize; 2];
+        let mut cases = 0usize;
+        for (kc, trials, max_m, max_orbits) in &curves {
+            let fc = FastCurve::new(&kc.curve).expect("n ≤ 62");
+            let two_torsion = points_with_x(&kc.curve, &F2mElement::zero(kc.n)).remove(0);
+            for trial in 0..*trials {
+                let mut seeds: Vec<BinaryPoint> = Vec::new();
+                let orbits = (xorshift(&mut s) as usize) % (max_orbits + 1);
+                for _ in 0..orbits {
+                    seeds.push(random_point(kc, &mut s));
+                }
+                // Plant a cancellation on some trials: −(a sum of the
+                // seeds, with repeats), so both answers occur.
+                if !seeds.is_empty() && xorshift(&mut s).is_multiple_of(2) {
+                    let terms = 1 + (xorshift(&mut s) as usize) % 3;
+                    let mut acc = BinaryPoint::Infinity;
+                    for _ in 0..terms {
+                        let p = &seeds[(xorshift(&mut s) as usize) % seeds.len()];
+                        acc = kc.add(&acc, p);
+                    }
+                    seeds.push(point_neg(&acc));
+                }
+                if xorshift(&mut s).is_multiple_of(3) {
+                    seeds.push(BinaryPoint::Infinity);
+                }
+                if xorshift(&mut s).is_multiple_of(3) || seeds.is_empty() {
+                    seeds.push(two_torsion.clone());
+                }
+                let classes = closure(kc, &seeds, &mut s);
+                for m in 2..=*max_m {
+                    let old = old_walk(kc, &classes, m);
+                    assert_eq!(
+                        fast_classes_can_cancel(kc, &fc, &classes, m),
+                        old,
+                        "n = {} k = {} trial {trial} m = {m} |classes| = {}",
+                        kc.n,
+                        kc.k,
+                        classes.len()
+                    );
+                    assert_eq!(classes_can_cancel(kc, &classes, m), old);
+                    answers[usize::from(old)] += 1;
+                    cases += 1;
+                }
+            }
+        }
+        // An empty class set, and one that is only `O`.
+        for (kc, ..) in curves.iter().take(4) {
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            for classes in [vec![], vec![BinaryPoint::Infinity]] {
+                for m in 2..=5 {
+                    assert_eq!(
+                        fast_classes_can_cancel(kc, &fc, &classes, m),
+                        old_walk(kc, &classes, m)
+                    );
+                }
+            }
+        }
+        assert!(
+            answers[0] > cases / 20 && answers[1] > cases / 20,
+            "{answers:?}"
+        );
+    }
+
+    /// Classes in the coset `T + ⟨G⟩` of the 2-torsion point: `m` of them
+    /// sum into `[m]T + ⟨G⟩`, so an odd `m` never cancels however large the
+    /// layers grow, and an even `m` soon does.  The odd case makes the fast
+    /// walk exhaust every layer (and the last one's seeds) with hundreds of
+    /// representatives, which random sets on small groups rarely do: they
+    /// cancel early and exercise only the first hit.
+    #[test]
+    fn fast_walk_matches_the_old_walk_on_large_coset_layers() {
+        let mut curves: Vec<KoblitzCurve> = Vec::new();
+        for n in [5u32, 7, 9, 11] {
+            for a in [0u8, 1] {
+                curves.extend(KoblitzCurve::new(a, n));
+            }
+        }
+        for (k, n, ai, bi) in [(2u32, 10u32, 1u64, 3u64), (3, 9, 5, 1)] {
+            curves.extend(KoblitzCurve::subfield(k, n, ai, bi));
+        }
+        assert!(curves.len() >= 8, "{} curves", curves.len());
+        let mut s = 0x0DD5_0F7E_C05E_7501u64;
+        let mut answers = [0usize; 2];
+        let mut widest = 0usize;
+        for kc in &curves {
+            let fc = FastCurve::new(&kc.curve).expect("n ≤ 62");
+            let two_torsion = points_with_x(&kc.curve, &F2mElement::zero(kc.n)).remove(0);
+            let r = kc.subgroup_order.to_u64_digits()[0];
+            for trial in 0..4 {
+                let orbits = 1 + (xorshift(&mut s) as usize) % 4;
+                let seeds: Vec<BinaryPoint> = (0..orbits)
+                    .map(|_| {
+                        let k = BigUint::from(1 + xorshift(&mut s) % (r - 1));
+                        kc.add(&two_torsion, &kc.mul(kc.generator(), &k))
+                    })
+                    .collect();
+                let classes = closure(kc, &seeds, &mut s);
+                widest = widest.max(classes.len());
+                for m in 2..=7 {
+                    let old = old_walk(kc, &classes, m);
+                    if m % 2 == 1 {
+                        assert!(!old, "odd m cancelled in T + ⟨G⟩");
+                    }
+                    assert_eq!(
+                        fast_classes_can_cancel(kc, &fc, &classes, m),
+                        old,
+                        "n = {} k = {} trial {trial} m = {m} |classes| = {}",
+                        kc.n,
+                        kc.k,
+                        classes.len()
+                    );
+                    answers[usize::from(old)] += 1;
+                }
+            }
+        }
+        assert!(widest >= 40, "{widest}");
+        assert!(answers[0] > 0 && answers[1] > 0, "{answers:?}");
+    }
+
+    #[test]
+    fn m_can_decompose_matches_the_old_one_on_factor_bases() {
+        let mut s = 0x2026_0928_0000_0001u64;
+        let mut answers = [0usize; 2];
+        let mut curves: Vec<KoblitzCurve> = Vec::new();
+        for n in [5u32, 7, 9, 11, 13, 15, 17, 19] {
+            for a in [0u8, 1] {
+                curves.extend(KoblitzCurve::new(a, n));
+            }
+        }
+        for (k, n, ai, bi) in [(2u32, 10u32, 1u64, 3u64), (2, 14, 0, 2), (3, 9, 5, 1)] {
+            if let Some(kc) = KoblitzCurve::subfield(k, n, ai, bi) {
+                curves.push(kc);
+            }
+        }
+        assert!(curves.len() >= 12, "{} curves", curves.len());
+        for kc in &curves {
+            let factors = invariant_factors(kc).len();
+            let mut bases: Vec<FrobeniusFactorBase> = Vec::new();
+            for i in 0..factors {
+                bases.extend(build_frobenius_factor_base_from_divisor(kc, &[i]));
+                for j in i + 1..factors {
+                    bases.extend(build_frobenius_factor_base_from_divisor(kc, &[i, j]));
+                }
+            }
+            for _ in 0..2 {
+                let e1 = xorshift(&mut s) & ((1u64 << kc.n) - 1);
+                let e2 = xorshift(&mut s) & ((1u64 << kc.n) - 1);
+                bases.extend(build_frobenius_union_factor_base(
+                    kc,
+                    &[
+                        F2mElement::from_biguint(&BigUint::from(e1), kc.n),
+                        F2mElement::from_biguint(&BigUint::from(e2), kc.n),
+                    ],
+                ));
+            }
+            for fb in &bases {
+                if fb.distinct_cofactor_classes(kc).len() > 400 {
+                    continue;
+                }
+                for m in 0..=7 {
+                    let old = old_m_can_decompose(fb, kc, m);
+                    assert_eq!(
+                        fb.m_can_decompose(kc, m),
+                        old,
+                        "n = {} k = {} m = {m}",
+                        kc.n,
+                        kc.k
+                    );
+                    answers[usize::from(old)] += 1;
+                }
+            }
+        }
+        assert!(answers[0] > 0 && answers[1] > 0, "{answers:?}");
+    }
+}
