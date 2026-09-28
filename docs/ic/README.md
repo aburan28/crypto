@@ -648,6 +648,40 @@ Frobenius squarings and one rebuild.  Fresh and resumed materialisation
 report the same deterministic counts; process CPU, RSS and select wall
 remain charged separately.
 
+Every workflow stage now carries a process-CPU delta and the cumulative
+process RSS high-water mark at its end.  On the current scalar-blind
+replay, select/setup used 1.057 core-seconds, relation collection 7.776,
+logs/verification/LA 1.051, target solve 0.904 and rho 1.581.  Their
+12.369-core-second sum is within 0.012 seconds of the 12.380 whole-process
+meter.  Collection is the measured single-target bottleneck: its folded
+pair-table build used 0.317 s wall and 3.259 core-seconds, while the exact
+17,000-probe relation unit used 0.487 s wall and 4.472 core-seconds.
+
+The single-target successor removes the folded builder's duplicate
+arithmetic pass.  Its count pass retains a six-byte scatter token per
+stored pair; table shapes needing more than 48 token bits use the previous
+recomputation path.  Five matched current-head pairs kept the exact same
+588-relation hash and verified scalar in every run.  Median pair-build
+wall fell from 0.313 s to 0.205 s (0.656x), pair-build CPU from 3.227 to
+2.120 core-seconds (0.659x), full IC wall from 1.225 to 1.105 s (0.901x),
+and whole-process CPU from 12.269 to 11.213 core-seconds (0.914x).  The
+charged trade is memory: median peak RSS rose from 93.9 MB to 125.9 MB
+(1.331x).  A full hash cache was rejected at 2.519x RSS, and a five-byte
+filter variant was rejected after slowing the relation unit by 3.1%.
+The same exact binaries over five matched one-worker pairs cut the
+single-core pair build from 2.585 to 1.256 s (0.486x), full IC wall from
+8.449 to 7.095 s (0.841x), and whole-process CPU from 10.791 to 9.424
+core-seconds (0.875x).  Median RSS rose from 69.6 to 108.0 MB (1.538x).
+Same-process rho remained faster: rho/IC improved from 0.187 to 0.223,
+leaving IC about 4.49 times slower on one core.
+On this AArch64 host, enabling the scan's existing 32-key lookahead
+with native `PRFM PLDL1KEEP` reduced the one-core relation unit from
+3.929 to 3.877 s (0.989x) over five more matched pairs, full IC from
+7.120 to 7.060 s (0.993x), and whole-process CPU from 9.453 to 9.393
+core-seconds (0.995x), with 5/5 identical relation hashes and essentially
+flat RSS.  Other architectures retain their existing prefetch or no-op
+paths.
+
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
 verified the published point in all five fresh runs.  The selected
@@ -671,11 +705,13 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 101 processes, 311.140 sequential wall-seconds,
-1,159.243 core-seconds and a 139.9 MB maximum RSS.
+campaign contains 179 processes, 683.360 sequential wall-seconds,
+2,045.455 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+a rejected uncompressed-cache run).
 
-With `RAYON_NUM_THREADS=1`, five fresh scalar-blind repeats used a
-median 8.570 s for full IC against 1.599 s for rho: IC was 5.362 times
+Before the cached builder, five fresh scalar-blind repeats with
+`RAYON_NUM_THREADS=1` used a median 8.570 s for full IC against 1.599 s
+for rho: IC was 5.362 times
 slower, with 10.984 total process core-seconds, 68.5 MB peak RSS and a
 1.008 wall/core ratio.  A one-pass 2/4/6/8/10/12/14-thread diagnostic
 first crossed wall at eight threads; no thread count produced a
