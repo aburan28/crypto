@@ -47,7 +47,7 @@ use rand::rngs::OsRng;
 // per-bit op count uniform; new code should target one of the
 // supported sizes.
 fn rsa_mod_pow_ct(base: &BigUint, exp: &BigUint, n: &BigUint, bits: usize) -> BigUint {
-    let limbs = (bits + 63) / 64;
+    let limbs = bits.div_ceil(64);
     match limbs {
         16 => rsa_mod_pow_ct_sized::<16>(base, exp, n),
         24 => rsa_mod_pow_ct_sized::<24>(base, exp, n),
@@ -529,7 +529,7 @@ fn emsa_pkcs1_v1_5_encode_sha256(
     let mut em = Vec::with_capacity(key_bytes);
     em.push(0x00);
     em.push(0x01);
-    em.extend(std::iter::repeat(0xff).take(ps_len));
+    em.extend(std::iter::repeat_n(0xff, ps_len));
     em.push(0x00);
     em.extend_from_slice(&SHA256_DIGEST_INFO_PREFIX);
     em.extend_from_slice(&hash);
@@ -539,7 +539,7 @@ fn emsa_pkcs1_v1_5_encode_sha256(
 /// Sign a message with RSASSA-PKCS1-v1_5/SHA-256.
 /// Routed through [`rsa_mod_pow_ct_crt`] because the exponent `d` is private.
 pub fn rsa_sign(message: &[u8], key: &RsaPrivateKey) -> BigUint {
-    let key_bytes = ((key.bits + 7) / 8) as usize;
+    let key_bytes = key.bits.div_ceil(8) as usize;
     let encoded = emsa_pkcs1_v1_5_encode_sha256(message, key_bytes)
         .expect("RSA key too small for SHA-256 PKCS#1 v1.5 signature");
     let m = BigUint::from_bytes_be(&encoded);
@@ -548,7 +548,7 @@ pub fn rsa_sign(message: &[u8], key: &RsaPrivateKey) -> BigUint {
 
 /// Verify an RSASSA-PKCS1-v1_5/SHA-256 signature.
 pub fn rsa_verify(message: &[u8], signature: &BigUint, key: &RsaPublicKey) -> bool {
-    let key_bytes = ((key.bits + 7) / 8) as usize;
+    let key_bytes = key.bits.div_ceil(8) as usize;
     let expected = match emsa_pkcs1_v1_5_encode_sha256(message, key_bytes) {
         Ok(v) => v,
         Err(_) => return false,
@@ -661,7 +661,7 @@ pub(crate) fn pkcs1_unpad_encrypt(padded: &[u8]) -> Result<Vec<u8>, &'static str
 
 /// High-level RSA encrypt with PKCS#1 v1.5 padding.
 pub fn rsa_encrypt(msg: &[u8], key: &RsaPublicKey) -> Result<BigUint, &'static str> {
-    let key_bytes = ((key.bits + 7) / 8) as usize;
+    let key_bytes = key.bits.div_ceil(8) as usize;
     let padded = pkcs1_pad_encrypt(msg, key_bytes)?;
     let m = BigUint::from_bytes_be(&padded);
     Ok(rsa_encrypt_raw(&m, key))
@@ -670,7 +670,7 @@ pub fn rsa_encrypt(msg: &[u8], key: &RsaPublicKey) -> Result<BigUint, &'static s
 /// High-level RSA decrypt with PKCS#1 v1.5 unpadding.
 pub fn rsa_decrypt(ciphertext: &BigUint, key: &RsaPrivateKey) -> Result<Vec<u8>, &'static str> {
     let m = rsa_decrypt_raw(ciphertext, key);
-    let key_bytes = ((key.bits + 7) / 8) as usize;
+    let key_bytes = key.bits.div_ceil(8) as usize;
     let padded = crate::utils::encoding::bigint_to_bytes_be(&m, key_bytes);
     pkcs1_unpad_encrypt(&padded)
 }
@@ -748,7 +748,7 @@ mod tests {
         // n must be exactly 1023 or 1024 bits. We force the bit-1 of each
         // prime, so n is at least 2^1022 and at most 2^1024 - 1.
         let bits = kp.public.n.bits();
-        assert!(bits >= 1023 && bits <= 1024, "got {bits} bits");
+        assert!((1023..=1024).contains(&bits), "got {bits} bits");
         // d·e ≡ 1 (mod λ(n))
         let lambda = (&kp.private.p - BigUint::one()).lcm(&(&kp.private.q - BigUint::one()));
         assert_eq!((&kp.private.d * &kp.private.e) % &lambda, BigUint::one());
@@ -776,8 +776,8 @@ mod tests {
     #[test]
     fn pkcs1_pad_rejects_oversized_message() {
         // 128-byte modulus has 128 - 11 = 117 bytes max payload.
-        assert!(pkcs1_pad_encrypt(&vec![0u8; 117], 128).is_ok());
-        assert!(pkcs1_pad_encrypt(&vec![0u8; 118], 128).is_err());
+        assert!(pkcs1_pad_encrypt(&[0u8; 117], 128).is_ok());
+        assert!(pkcs1_pad_encrypt(&[0u8; 118], 128).is_err());
     }
 
     #[test]

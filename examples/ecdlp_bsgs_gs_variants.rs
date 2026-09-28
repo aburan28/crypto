@@ -80,8 +80,8 @@ fn gs_opts(seed: u64) -> GaudrySchostOptions {
 fn print_block(title: &str, rows: &[Row], sqrt_n: f64) {
     println!("\n{title}");
     println!(
-        "  {:<34} {:>9} {:>8} {:>10} {:>8}  {}",
-        "algorithm", "ops", "ops/√n", "inv", "table", "ok"
+        "  {:<34} {:>9} {:>8} {:>10} {:>8}  ok",
+        "algorithm", "ops", "ops/√n", "inv", "table"
     );
     for r in rows {
         println!(

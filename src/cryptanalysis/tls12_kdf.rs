@@ -254,10 +254,10 @@ pub fn run_anomaly_audit(n_handshakes: usize, key_block_length: usize, seed: u64
         rng.fill_bytes(&mut cr);
         rng.fill_bytes(&mut sr);
         let (_, kb) = tls12_key_schedule(&pms, &cr, &sr, 8, None);
-        if seen.contains_key(&kb) {
-            short_collisions += 1;
+        if let std::collections::hash_map::Entry::Vacant(e) = seen.entry(kb) {
+            e.insert(());
         } else {
-            seen.insert(kb, ());
+            short_collisions += 1;
         }
     }
     let pairs_f = (short_key_n as f64) * ((short_key_n - 1) as f64) / 2.0;
