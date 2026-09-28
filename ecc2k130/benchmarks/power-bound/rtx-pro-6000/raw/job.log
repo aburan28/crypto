@@ -1,0 +1,112 @@
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05, 2430 MHz, 600.00 W, 300.00 W, 600.00 W, 12.0
+Cuda compilation tools, release 13.3, V13.3.73
+Build cuda_13.3.r13.3/compiler.38244171_0
+source: 340a837937faedee3daf600ee2fbf5e6d76515b7 (uncommitted changes)
+=== build ship-256x2: -B ecc2k130 ARCH=-gencode arch=compute_120,code=sm_120 BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 WALK_TABLE=0 WITNESS=0
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 104 registers, used 1 barriers, 1792 bytes smem
+=== build table-256x2: -B ecc2k130 ARCH=-gencode arch=compute_120,code=sm_120 BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 WALK_TABLE=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 102 registers, used 1 barriers
+=== build ref20b: gpu-rtx-pro6000-20b PRO6000_ARCH=-gencode arch=compute_120,code=sm_120
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 116 registers, used 1 barriers
+=== build ref20b-384x1: gpu-preset PRO6000_ARCH=-gencode arch=compute_120,code=sm_120 KNOBS=THREADS=384 MINBLOCKS=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 116 registers, used 1 barriers
+=== build ref20b-640x1: gpu-preset PRO6000_ARCH=-gencode arch=compute_120,code=sm_120 KNOBS=THREADS=640 MINBLOCKS=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 96 registers, used 1 barriers
+=== build ref20b-fused: gpu-preset PRO6000_ARCH=-gencode arch=compute_120,code=sm_120 KNOBS=TABLE_FUSED=1 TABLE_PIPE_SELECT=0
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 116 registers, used 1 barriers
+=== build ref20b-alusqr: gpu-preset PRO6000_ARCH=-gencode arch=compute_120,code=sm_120 KNOBS=PACKED_ALU_SQR=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 116 registers, used 1 barriers
+=== build c2-256x32: gpu-rtx-pro6000-chains2 PRO6000_ARCH=-gencode arch=compute_120,code=sm_120
+    40 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 182 registers, used 1 barriers, 40 bytes cumulative stack size
+=== verify ship-256x2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM
+packed kernel: 104 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier
+packed chains: 1
+packed alu onb square: 0
+packed table walk: 0 (0 branches, 0 shared bytes)
+  finished: 6.794 M it/s, 1478764 distinguished points (300 verified against the reference, 0 dropped)
+=== verify table-256x2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM
+packed kernel: 102 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 1
+packed alu onb square: 0
+packed table walk: 1 (8 branches, 48508 shared bytes)
+  finished: 7.309 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify ref20b
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM
+packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 1
+packed alu onb square: 0
+packed table walk: 1 (8 branches, 48732 shared bytes)
+  finished: 7.061 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify ref20b-384x1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 384 packed threads resident per SM
+packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 1
+packed alu onb square: 0
+packed table walk: 1 (8 branches, 48732 shared bytes)
+  finished: 7.022 M it/s, 1110451 distinguished points (300 verified against the reference, 0 dropped)
+=== verify ref20b-640x1
+VERIFY FAILED ref20b-640x1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM
+packed kernel: 96 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 1
+packed alu onb square: 0
+packed table walk: 1 (8 branches, 48732 shared bytes)
+NOT 300/300: ref20b-640x1
+=== verify ref20b-fused
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM
+packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 1
+packed alu onb square: 0
+packed table walk: 1 (8 branches, 48732 shared bytes)
+  finished: 6.979 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify ref20b-alusqr
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM
+packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 1
+packed alu onb square: 1
+packed table walk: 1 (8 branches, 48732 shared bytes)
+  finished: 7.216 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify c2-256x32
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM
+packed kernel: 182 registers/thread, 40 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 2
+packed alu onb square: 0
+packed table walk: 1 (8 branches, 48732 shared bytes)
+  finished: 7.037 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+uncapped ship-256x2 rep 1:   finished: 14459.240 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118382.754030622 1790118390.356009454
+uncapped table-256x2 rep 1:   finished: 16688.086 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118390.482469445 1790118398.727315688
+uncapped ref20b rep 1:   finished: 20050.304 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118398.824194187 1790118406.084935284
+uncapped ref20b-384x1 rep 1:   finished: 18522.128 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118406.145477744 1790118412.497124156
+uncapped ref20b-640x1 rep 1:   finished: 20230.002 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118412.579915292 1790118420.962294293
+uncapped ref20b-fused rep 1:   finished: 20092.998 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118421.081186707 1790118428.335541883
+uncapped ref20b-alusqr rep 1:   finished: 19995.793 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118428.419833883 1790118435.737101050
+uncapped c2-256x32 rep 1:   finished: 13885.229 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118435.848385376 1790118445.466854398
+uncapped ship-256x2 rep 2:   finished: 14467.149 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118445.488986684 1790118453.140453410
+uncapped table-256x2 rep 2:   finished: 16497.889 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118453.220131520 1790118461.569153790
+uncapped ref20b rep 2:   finished: 20094.799 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118461.657005240 1790118468.781515589
+uncapped ref20b-384x1 rep 2:   finished: 18533.055 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118468.871743048 1790118475.078030750
+uncapped ref20b-640x1 rep 2:   finished: 20126.652 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118475.181112251 1790118483.643839959
+uncapped ref20b-fused rep 2:   finished: 20150.718 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118483.745204183 1790118490.934712610
+uncapped ref20b-alusqr rep 2:   finished: 20031.197 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118490.960130165 1790118498.261720809
+uncapped c2-256x32 rep 2:   finished: 13905.533 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118498.381916347 1790118507.758794720
+uncapped ship-256x2 rep 3:   finished: 14479.323 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118507.844147048 1790118515.529991913
+uncapped table-256x2 rep 3:   finished: 16449.889 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118515.566403654 1790118523.791195599
+uncapped ref20b rep 3:   finished: 20097.168 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118523.903107548 1790118531.156639461
+uncapped ref20b-384x1 rep 3:   finished: 18543.295 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118531.235781802 1790118537.511030285
+uncapped ref20b-640x1 rep 3:   finished: 20099.494 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118537.556786981 1790118545.983084076
+uncapped ref20b-fused rep 3:   finished: 20152.771 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118546.105326723 1790118553.344277618
+uncapped ref20b-alusqr rep 3:   finished: 20034.369 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118553.430236555 1790118560.745457013
+uncapped c2-256x32 rep 3:   finished: 13895.194 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) window 1790118560.852316990 1790118570.222319879
+=== power limit: try 378 W
+power limit not settable in this container; capped pass skipped
+=== done

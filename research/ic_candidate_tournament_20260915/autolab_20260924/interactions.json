@@ -1,0 +1,117 @@
+[
+  {
+    "config": {
+      "batch_trials": 64,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Unmodified declared baseline.",
+    "id": "incumbent",
+    "parent": null
+  },
+  {
+    "config": {
+      "batch_trials": 1,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2,
+          4,
+          8
+        ]
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "No gain on fresh development fixtures; confirmation remains unused.",
+    "hypothesis": "Test interaction of retained mechanisms in a complete run.",
+    "id": "combination_01",
+    "parents": [
+      "implementation_01",
+      "union_4"
+    ]
+  },
+  {
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2,
+          4,
+          8
+        ]
+      },
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "No gain on fresh development fixtures; confirmation remains unused.",
+    "hypothesis": "Test interaction of retained mechanisms in a complete run.",
+    "id": "combination_02",
+    "parents": [
+      "implementation_10",
+      "union_4"
+    ]
+  },
+  {
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2,
+          4,
+          8
+        ]
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Larger orbit union may provide enough independent log columns; charge construction and solve.",
+    "id": "union_4",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "batch_trials": 1
+    },
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: batch_trials",
+    "id": "implementation_01",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "linear_algebra": "dense"
+    },
+    "config": {
+      "batch_trials": 64,
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: linear_algebra",
+    "id": "implementation_10",
+    "parent": "incumbent"
+  }
+]

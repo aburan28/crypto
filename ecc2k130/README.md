@@ -1,4 +1,10 @@
 The algorithm in one file: [`examples/rho_toy.py`](examples/rho_toy.py)
+
+> Table-walk correctness update (2026-09-26): [cycle escape v3](CYCLE-ESCAPE-V3.md)
+> replaces history-dependent exits with a validated raw-cycle anchor. Older
+> table-walk measurements below describe their recorded revisions, not v3.
+> V3 requires a new table corpus; the default sigma iteration is unchanged.
+
 recovers a planted discrete logarithm on `GF(2^23)` with the same walk the
 GPU client uses. Live campaign counts:
 [status page](https://aburan28.github.io/crypto/status/). How the walk works,
@@ -15,9 +21,43 @@ the step tag instead of stored, products inlined and the forward pass
 software-pipelined. 300/300 device reports re-walked, the same distinguished
 points as the two-pass kernel, 19.04 B/s in DP-34 collection. Measured against
 the tree's previous best configuration rebuilt in the same session on the same
-card, 17.41 B/s: +15.3%. The kernel sits at 0.90 of the carry-less unit's
-22.3 B/s ceiling for its 33 CLMADs per update; the remaining tenth is the
-serial inversion (§7 there). The campaign default below is unchanged.
+card, 17.41 B/s: +15.3%. [ROOFLINE.md](ROOFLINE.md) prices it per pipe from
+dynamic SASS counts: the ALU pipe is 91% busy (1,320 logic lane-instructions
+per update at 64 per SM-clock), the carry-less unit 73%, and the speed of
+light for its 33.1 CLMADs per update is 27.4 B/s. The same note corrects the
+22.3 B/s "carry-less ceiling" quoted here before: it assumed 1.62 CLMADs per
+SM-clock, and a measured sweep build ran the unit at least 1.654 (accounting;
+no rate changes). The campaign default below is unchanged.  The table walk's
+first cycle rule let fruitless cycles through (four steps that sum to `O`
+through Frobenius's own `σ² + σ + 2 = 0`, and six-step pairwise ones), which
+at the campaign's distinguished-point weight trapped about half its walks.
+The rule now refuses them, and the table walk is projected at 0.81–0.86× the
+σ walk's cost per solve on these rates; the new kernel's own paired rate is
+the measurement the switch waits on ([WALK-CONSTANT.md](WALK-CONSTANT.md)
+§11).
+[CHEAPER-SELECTION.md](CHEAPER-SELECTION.md) prices the remaining forward-pass
+lever (phase via popc planes, `TABLE_PHASE_POPC`) against the earlier 0.90
+floor of that 22.3 B/s ceiling.
+[TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× the 22.3
+ceiling (five products alone fill the carry-less unit for 18.5 of the 15.2
+SM-clocks 30 B/s allows; at the unit's 2.0 they fill 15.0, so the verdict
+stands, ROOFLINE.md §5) and builds the kernel for the remaining tenth:
+`PACKED_CHAINS=2` (`make gpu-rtx-pro6000-chains2`), two interleaved
+Montgomery chains per thread so the inversion and the forward pass overlap
+inside the warp — same walk, same distinguished points, and **0.696× the
+reference** measured paired on one RTX PRO 6000: each warp issues `CLMAD`s
+1.42× more often but 182 registers halve the warps. Its §6 then measures the
+`CLMAD` rate across dies: 37.8 logic slots per `CLMAD` on the RTX PRO 6000,
+3.8 on a B200, 2.0 on an H100. On a B200 the same kernel does 11.1 B/s
+bound by the logic pipe with the unit idle; the ALU→`CLMAD` trades that lost
+on the 6000 win there at par with the slots they remove (`TOP_CLMAD` + the
+`CLMAD` squaring + the ONB inversion: +37.9%, 15.37 B/s, verified), and
+30 B/s is an ALU cut away rather than below a floor. [AUTOSWEEP.md](AUTOSWEEP.md)
+then lets the card choose: an automatic star-and-greedy sweep of every knob
+and geometry on the B200 finds **19.40 B/s** (`make gpu-b200-19b`: one fused
+pass per step, batch 32, three-limb Karatsuba — three knobs the 6000 had
+rejected), +26.3% paired, verified, 0.97× the 6000 at 2.06× the price; per
+dollar the 6000 stays 2.1× ahead.
 
 The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
 complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
@@ -106,8 +146,10 @@ GPUs.
 
 Two targets are configured:
 
-* **ECC2K-130**, still open, `GF(2^131)`, about `2^60.9` iterations. Uses the
-  permuted type-II optimal normal basis of Bailey et al.
+* **ECC2K-130**, still open, `GF(2^131)`, about `2^60.9` iterations (Bailey et
+  al.'s budget; measured for this walk, `2^60.91–60.92` on completed trails,
+  [WALK-CONSTANT.md](WALK-CONSTANT.md)). Uses the permuted type-II optimal
+  normal basis of Bailey et al.
 * **ECC2K-95**, solved by Harley's group in 1998, `GF(2^97)`, about `2^44`
   iterations. `2*97+1 = 195` is composite so that field has no type-II optimal
   normal basis; this one runs on a polynomial-basis backend with the
@@ -451,6 +493,12 @@ with `c` a 128-bit string from a PRF of the walk seed, computed with the same
 bitsliced arithmetic and merged into the finished lanes under a mask. No linear
 combination of `P` and `Q` is tracked in the loop: a coefficient update is a
 129-bit modular multiplication per step, which this walk cannot afford.
+
+A walk that goes `--max-iters` steps without a report is restarted the same
+way and its trail discarded. The σ walk has no fruitless cycles, so that only
+ever cuts an honest trail: the campaign's `2^32` is twelve trail lengths at
+`dpWeight` 32 and discards 0.007% of the walk's steps, where the earlier
+`2^30` discarded 15.6% ([benchmarks/max-iters](benchmarks/max-iters/README.md)).
 
 Reports are `(seed, endpoint)`. Collision resolution recomputes each walk
 counting how often each `sigma^j + 1` was applied, giving
@@ -805,15 +853,38 @@ launch (`modal_app.py`), at upload (`modal_sync.py`) and on the page
    seed: dropped by `ON CONFLICT`, correctly not a collision, and invisible.
    Runs 1-4 did this against slots 0-3 on 2026-09-19/20; 813k of run 3's 912k
    records were byte-identical to slot 2's, and 100% of its seeds had already
-   been walked. Campaign run ids therefore come from **8000-9999**, which no
-   AWS slot can reach (`90000 + r` must stay a five-digit slot), and
-   `modal_sync.py` refuses an id for which the bucket holds a checkpoint or a
+   been walked. Modal GPU IDs use **8000-8999** and CPU sidecars use
+   **9000-9999** (`90000 + r` stays a five-digit slot). The
+   shared [seed registry](SEED-IDENTITY.md) enforces permanent ownership across
+   providers and storage prefixes. `modal_sync.py` also refuses an id for
+   which the bucket holds a checkpoint or a
    dp object of slot `r - 1`.
 2. **The cutoff is the campaign's.** See above. `modal_sync.py` reads the
    ratio of a run's checkpointed iterations to its records and refuses a run
    that is not near `2^28.41` per point once it has 50k records; the ingest
    host flags the same ratio per slot on the dashboard (`off_weight_slots`),
    and counts the records it dropped as re-reports (`duplicate_records`).
+
+`modal_sync.py` recovers each run's uploaded byte offset from its immutable
+S3 objects on every pass. The local JSON state is only a cache: losing `/tmp`,
+moving the uploader to another host, or failing to publish a checkpoint after
+a successful point upload must not send an already-uploaded prefix again.
+Recovery lists every page, requires contiguous whole-record coverage, and
+checks the object-name hashes against the downloaded volume corpus. A gap,
+changed prefix, or volume snapshot older than S3 stops that run's sync before
+any points or checkpoint are published. Wait for a fresh volume snapshot or
+investigate the mismatch; do not reset the offset to bypass it. Reconciliation
+reads and hashes the covered corpus (including historical overlaps), so its
+cost grows with that corpus. Run one uploader per run: this recovery is not
+a distributed writer lease, and concurrent uploaders can still race between
+listing and uploading.
+
+The dashboard's `Re-reported points, 24 h` is a rolling count of duplicate
+ingest records, not a count of wasted GPU iterations. It includes repeat
+uploads as well as retraced walks, and can remain high after the source of
+duplicates has stopped. Check its change between fresh snapshots alongside
+new distinct points. Preserve the old objects and checkpoints when stopping
+a faulty producer; resetting the counter does not repair that producer.
 
 The procedure, once:
 
@@ -825,9 +896,9 @@ RUNID=8000 COUNT=4 PASSES=0 ./run.sh fleet       # run ids 8000-8003, until stop
 
 `run.sh` refuses `CURVE=131` without a `RUNID` in range; `fleet` takes it as
 the base of `COUNT` consecutive ids, and every pass launches the same ids so
-the checkpoints resume. Two operators must not both start from the same
-`next-run-id` answer at the same moment; the volume is the only arbiter, and
-it is read, not locked.
+the checkpoints resume. The suggestion checks the volume and permanent registry. If two operators
+choose the same answer, conditional seed acquisition admits one; the other
+launch is refused. GPU-only launches cannot use the CPU sidecar range.
 
 `fleet` deploys the app and drives it with `modal_campaign.py`, and that is
 the shape a campaign needs. `search` and `fanout` run inside an *ephemeral*
@@ -1200,22 +1271,19 @@ what the instrument is for: finding where the curve bends, if it does.
 
 ## What is not done
 
-* Throughput on real hardware is unmeasured. The client has now run on an
-  RTX PRO 6000 Blackwell (sm_120): the whole validation suite passes there and
-  every planted discrete logarithm is recovered on the device itself, through
-  both backends. What has not been measured is how fast it walks. `bench` is
-  the number that settles that, and `autotune` decides the build knobs —
-  including whether the register-budget leaf, which is chosen from static ptxas
-  analysis and measures *worse* on the host, is right on a GPU. The §6 layout
-  question — one thread per bitsliced multiply versus 32 threads cooperating —
-  is likewise only partly answered: the register data says the leaf fits, but
-  the 16 KB per-thread stack frame means occupancy needs measurement.
+* Throughput on real hardware is measured. Peak on one RTX PRO 6000 is the
+  table-walk 20.08 B/s build (`make gpu-rtx-pro6000-20b`); the live campaign
+  still ships the audited sigma / packed preset at about 14.1–14.6 B/s
+  (`aws/campaign.json`). Remaining single-GPU work is closing the last tenth
+  against the CLMAD floor, not proving that the client walks — see
+  [ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md) and [TWO-CHAINS.md](TWO-CHAINS.md).
 * The multiplier is optimal only within the Karatsuba family. Toom-3 over
   GF(2), which is where Bernstein's 11961-bit-operation chain comes from, is not
   implemented; a search over balanced and unbalanced Karatsuba splits and the
   guide's 128+3 decomposition found nothing better than 8859 instructions.
-* No server. Corpora are files that can be reloaded and merged, but there is no
-  UDP protocol, no hash-routed sharding, and no live multi-machine merging.
+* No live UDP/hash-sharded server. Corpora are files that can be reloaded and
+  merged (AWS ingest, Modal volume, local merge); there is no UDP protocol and
+  no live multi-machine merging beyond those batch paths.
 * The start-point PRF is a mixing function rather than AES. Any client that
   wants to interoperate with a different implementation must agree on it.
 * Multi-GPU is not implemented: one process drives one device.

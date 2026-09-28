@@ -1,0 +1,3960 @@
+{
+  "affine_rank_per_cell": {
+    "0": 96,
+    "1": 48
+  },
+  "all_complete_verified": true,
+  "calibrated_operation_ratio": null,
+  "campaign_seconds": 971.8025553330081,
+  "case_ratios": [
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-discovery-17-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.5848800362154821,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-discovery-17-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6515912897822446,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-discovery-17-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.36243624362436244,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.5891173950299914,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.2079093875983874,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.33753375337533753,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.6775067750677507,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.7647058823529411,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.43506493506493504,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-discovery-937-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6832,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-discovery-937-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.7058823529411765,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-discovery-937-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.40664556962025317,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.6601056168987038,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.2755102040816326,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.38449367088607594,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.7261669953977646,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.8285821455363841,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.4857142857142857,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261013-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6842105263157895,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261013-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.8146666666666667,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261013-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.43333333333333335,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.6832,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.28394488310884036,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.40988720902327813,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.7421602787456446,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.8226867982965544,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.5144454799627214,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-1703939-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.5952016334864727,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-1703939-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6813074565883555,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-1703939-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.37662337662337664,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.5186666666666667,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.2061090909090909,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.3407172995780591,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.7939047619047619,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.8525052928722654,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.5052121212121212,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261014-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.5745658835546475,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261014-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.7109333333333333,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261014-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.38548293811451706,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.6781936533767291,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.2907234042553192,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.42106592573882295,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.7669296515450361,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.8100951592883741,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.47925,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-1835009-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6793478260869565,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-1835009-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6547359231776517,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-1835009-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.38375757575757574,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.6785255036433776,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.28888888888888886,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.42213333333333336,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.712,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.7144955925563173,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.43615934627170583,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261015-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6822857142857143,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261015-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.796,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261015-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.4435136970794657,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.6297777777777778,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.2518896447467876,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.3722236405412305,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.6872890888638921,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.7935238095238095,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.48484848484848486,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-1966087-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.7089877835951134,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-1966087-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.7546523016650343,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-1966087-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.423949908687712,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.6965280754393485,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.2571575518601063,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.41379310344827586,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.6283853273911553,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.6470588235294118,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.4000564652738566,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261016-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6272941176470588,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261016-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.7272231314784506,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261016-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.37037037037037035,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.5966315789473684,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.1871219512195122,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.28414814814814815,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.6923929098966026,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.8036862408915559,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.4838709677419355,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-2097153-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6794625719769674,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-2097153-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6865882352941176,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-2097153-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.37651612903225806,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.6665263157894736,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.2749362531873406,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.4129924341247065,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.6943333333333334,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.8136696501220505,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.4742701632855022,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-holdout-20261018-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.7502308402585411,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-holdout-20261018-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.7668,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-holdout-20261018-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.47058823529411764,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.7096399535423926,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.2749362531873406,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.42459239130434784,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.6565186246418339,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.7119609438567941,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.4421424962102072,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-holdout-2359297-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.6665263157894736,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-holdout-2359297-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.7595969289827256,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-holdout-2359297-planted",
+      "family": "planted",
+      "n": 12,
+      "paired_median_ratio": 0.43812348341871127,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.7290480065093572,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.2856369541681703,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 12,
+      "paired_median_ratio": 0.4411764705882353,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n12-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.7421602787456446,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n12-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.7417218543046358,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n12-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 12,
+      "paired_median_ratio": 0.4601536245799328,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-discovery-17-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.9585345072422607,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-discovery-17-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 1.06,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-discovery-17-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.7373333333333333,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.8986938031591738,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.6017662337662337,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.6950678027121084,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.9816345942781883,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0955365331702842,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.9373528642427413,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-discovery-937-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.8176243868255081,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-discovery-937-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.9236571428571428,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-discovery-937-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.5913947021805942,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.8115286248278576,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.43740625360563057,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.5833846153846154,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0030462887287317,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0144695652173914,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.8907563025210085,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261013-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 1.0460689655172415,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261013-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 1.1257358490566038,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261013-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.8372404554588078,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 1.0118593816179584,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.7283635676492819,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.8144206754262134,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.999925700274909,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0189279224712295,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.888,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-1703939-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.8206927779035544,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-1703939-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.9453969928778686,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-1703939-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.5911718339464004,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.7920627376425855,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.3999759990399616,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.5462127659574468,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0185185185185186,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0410357359176257,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.896700143472023,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261014-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.9777777777777777,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261014-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 1.062429696287964,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261014-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.7053176708349123,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.9782608695652174,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.5575023892959541,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.7336637537498369,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.9843996099902498,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0294117647058822,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.8923108301040179,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-1835009-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 1.067623449282413,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-1835009-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 1.0782857142857143,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-1835009-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.9634155264505744,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.9787234042553191,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.9312164948453608,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.8415443094581501,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0375413782726453,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0711456310679612,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.9266288397573861,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261015-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.6900980060831362,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261015-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.7901664730933023,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261015-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.4168,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.6911401341334275,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.2512833675564682,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.40476190476190477,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.9936153846153846,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0321808921129805,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.8842975206611571,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-1966087-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 1.0,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-1966087-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.9469167196439924,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-1966087-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.7626666666666667,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.9073426573426573,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.5957424606073255,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.7130225080385852,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.9454664301055187,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0080645161290323,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.877643504531722,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261016-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.8298536117110631,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261016-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 1.0,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261016-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.5971334829908479,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.8101296207393183,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.3768692715870719,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.5448526977821914,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.1165301204819278,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.188916357643181,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.9389847054995119,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-2097153-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.8108465608465608,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-2097153-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.9464209172738963,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-2097153-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.6750229287679609,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.9160951996772893,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.524117239787676,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.6567736438511786,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0314716981132075,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0684856539754515,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.9085892833399813,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-holdout-20261018-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.7844446111152779,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-holdout-20261018-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.815694626474443,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-holdout-20261018-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.7188054002454657,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.9787001240061274,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.9768712871287129,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.8496913366164944,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.009404152873909,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.0712233009708738,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 0.9430427350427351,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-holdout-2359297-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.9295250971776238,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-holdout-2359297-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 1.076979878161344,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-holdout-2359297-planted",
+      "family": "planted",
+      "n": 16,
+      "paired_median_ratio": 0.7374631268436578,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.9445,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.6009470512268618,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 16,
+      "paired_median_ratio": 0.7128813992084769,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n16-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.1385816525699415,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n16-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.2,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n16-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 16,
+      "paired_median_ratio": 1.03563913729616,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-discovery-17-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.2589523118892227,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-discovery-17-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.2826086956521738,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-discovery-17-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.20263705759888967,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.1340116908421736,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.2340425531914894,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.18605677682938723,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.2305013927576602,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.235374065953734,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.9605014828794823,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-discovery-937-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.2943448446794448,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-discovery-937-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.2767556995293685,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-discovery-937-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.7502567164179105,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.2464561403508772,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.1841333333333333,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.9065934065934066,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.2657632653061224,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.2590573746161444,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.9775887287950369,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261013-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.8814831665150137,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261013-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.0568662211918725,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261013-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.20064724919093851,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.979775828460039,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.609,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.05060829511439134,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.08411246574261,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.0611389092660921,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.8336043360433605,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-1703939-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.106225748667756,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-1703939-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.115046634189808,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-1703939-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.8472516703786191,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.4878058675568847,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 4.898165793234874,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.48222763063707946,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.5489863512283895,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.5504890510948905,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.0254956351472628,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261014-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.06802286363475,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261014-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.0648849557522124,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261014-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.1473154822533887,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.2109735372663268,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.4196891191709844,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.1630952380952381,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.082240079175406,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.0955662748368629,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.8434577006507592,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-1835009-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.103713717693837,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-1835009-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.1066442348325984,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-1835009-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.8534684333593141,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.077124131082423,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.816583465905974,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.8496080409567435,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.0952894863392868,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.0592243304830449,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.8524013020470687,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261015-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.0700824424368303,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261015-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.0738886612721499,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261015-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.9638909612625538,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.0468241860465117,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.87139303151649,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.8219272197962154,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.3076568628552805,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.3037974683544304,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.9976779754687962,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-1966087-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.8580740740740741,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-1966087-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.9656476002629849,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-1966087-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.07370652883023034,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.9176667173021419,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.5274725274725275,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.0761564945226917,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.1036602182735116,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.1086873239436619,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.8530027188689505,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261016-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.0527595039878908,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261016-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.0610339983990091,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261016-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.5189811659192826,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.1797945205479452,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 2.2877933899605725,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.749170285633584,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.0569844801784583,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.0638563246677704,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.8266973222706588,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-2097153-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.7909062148864914,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-2097153-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.7905526235442928,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-2097153-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.1812061078538754,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.6727377361908923,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.2085697762677559,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.0605508982035927,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.250892982399344,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.2354217821782179,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.9749402839456331,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-holdout-20261018-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.7661127547211547,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-holdout-20261018-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.77842864048682,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-holdout-20261018-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.005128205128205,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.7387801418439717,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.6107764705882353,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.0775851367567344,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.0889978976874561,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.0792507511667058,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.8468664850136239,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-holdout-2359297-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.0933659798577104,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-holdout-2359297-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 1.094953488372093,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-holdout-2359297-planted",
+      "family": "planted",
+      "n": 20,
+      "paired_median_ratio": 0.2475106020289373,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 1.0614054985935941,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 3.768605025773196,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 20,
+      "paired_median_ratio": 0.22307985697258642,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n20-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.9979715430900811,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n20-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 0.9926304118956891,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n20-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 20,
+      "paired_median_ratio": 1.0148760822349825,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-discovery-17-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0883479308475392,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-discovery-17-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0990117140808033,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-discovery-17-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.9001403126508909,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.1036369101292456,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 2.1727491175980487,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-discovery-17-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.9158585454256659,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1033808538506806,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1176392041661103,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-discovery-17-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.866071120615321,
+      "seed": 17,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-discovery-937-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.9891901342231015,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-discovery-937-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.9843791699325929,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-discovery-937-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0066474646978718,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.1809981972235815,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 2.3692780506588127,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-discovery-937-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.017220885169278,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.292949062610541,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.3028560331470995,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-discovery-937-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.979000364154004,
+      "seed": 937,
+      "split": "discovery"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261013-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.068921761182349,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261013-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0767076315369335,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261013-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0214032919498905,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.072117989889979,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 3.098279021591905,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261013-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.0332663903563382,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1803164141234581,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1905314439159242,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261013-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.8795260172464671,
+      "seed": 20261013,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-1703939-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.1076996330114761,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-1703939-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0987981572224719,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-1703939-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.698108185275797,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.4005974630773778,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.7909853246184354,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-1703939-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.0302494887525562,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1017551744225158,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.0737086960423585,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-1703939-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.8333578723782016,
+      "seed": 1703939,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261014-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0705594624969161,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261014-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0904433629885633,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261014-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.6263784443571468,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.0710682852807283,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.0097855054768305,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261014-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.6645232477785958,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1109539997144768,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1094375308705666,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261014-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.8394543056837663,
+      "seed": 20261014,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-1835009-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.1432901018631534,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-1835009-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.1843907270557419,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-1835009-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.8126477042045587,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.3094468982793857,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 2.552756715075183,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-1835009-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.9216741682520533,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.0922306438748421,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.0869846599993718,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-1835009-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.8288599729769306,
+      "seed": 1835009,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261015-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0617472095516365,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261015-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.069524861878453,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261015-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.08402539200260431,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.5968800674968137,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 2.6533188598078237,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261015-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.0455779129620963,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1019229967429471,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.096900417674214,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261015-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.8486537057481637,
+      "seed": 20261015,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-1966087-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.9569813634562789,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-1966087-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.9797447999542483,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-1966087-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0563990024937655,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.7507638516847597,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.472464537536292,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-1966087-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.0233932250550068,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.15323296796463393,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.15125143042138672,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-1966087-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.038299548625359,
+      "seed": 1966087,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261016-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.2903530270772037,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261016-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.297915747109259,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261016-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.47133896298634675,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.1018450835805569,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 2.1653137518079864,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261016-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.4137433898652299,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.0773014519980972,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.0867044802087864,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-20261016-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.8392400147804764,
+      "seed": 20261016,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-2097153-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.6613644549660903,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-2097153-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.6575932581334095,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-2097153-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.038377035182147,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.08076972343522562,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.16043186633041004,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-2097153-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.1646749272019685,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1134758031977177,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1092499890105059,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-regression-2097153-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.8433369427177327,
+      "seed": 2097153,
+      "split": "regression"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-holdout-20261018-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.1035661386624918,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-holdout-20261018-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.1120998591477131,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-holdout-20261018-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.4820931443976617,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.0968384279475982,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 2.15225252157885,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-holdout-20261018-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.5402425904943646,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.0768492448997615,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.0743690046234886,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-holdout-20261018-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.8229618960565033,
+      "seed": 20261018,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-holdout-2359297-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.43509178560716993,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-holdout-2359297-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 0.441055834767642,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-holdout-2359297-planted",
+      "family": "planted",
+      "n": 24,
+      "paired_median_ratio": 1.0251994306500078,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 0.9286155535726542,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.8295446411334841,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-holdout-2359297-cross_planted",
+      "family": "cross_planted",
+      "n": 24,
+      "paired_median_ratio": 1.0181575330766588,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "gray_delta_simd",
+      "cell": "n24-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1239407400629373,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "initial_simd",
+      "cell": "n24-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 1.1217588655287671,
+      "seed": 2359297,
+      "split": "holdout"
+    },
+    {
+      "candidate": "packed_gray16_delta_simd",
+      "cell": "n24-holdout-2359297-unplanted",
+      "family": "unplanted",
+      "n": 24,
+      "paired_median_ratio": 0.8503418855423723,
+      "seed": 2359297,
+      "split": "holdout"
+    }
+  ],
+  "cells": 144,
+  "certified_empty_affine_tail_cells": 96,
+  "classification": "engineering",
+  "confirmation_eligible": false,
+  "confirmation_executed": false,
+  "distinct_systems": 144,
+  "full_ic_cost": null,
+  "gate_counts": {
+    "gray_delta_simd": {
+      "dramatic_passes": 0,
+      "gates": {
+        "incremental": "REJECTED",
+        "retained_frontier": "REJECTED",
+        "same_policy": "REJECTED"
+      },
+      "incremental_passes": 5,
+      "paired_median_range": [
+        0.7816943603114942,
+        1.107621238380999
+      ],
+      "required": 18
+    },
+    "initial_simd": {
+      "dramatic_passes": 0,
+      "gates": {
+        "incremental": "REJECTED",
+        "retained_frontier": "REJECTED",
+        "same_policy": "PASS"
+      },
+      "incremental_passes": 10,
+      "paired_median_range": [
+        0.5318291700241741,
+        1.9915815758584783
+      ],
+      "required": 18
+    },
+    "packed_gray16_delta_simd": {
+      "dramatic_passes": 0,
+      "gates": {
+        "incremental": "REJECTED",
+        "retained_frontier": "REJECTED",
+        "same_policy": "REJECTED"
+      },
+      "incremental_passes": 0,
+      "paired_median_range": [
+        0.5642469090737581,
+        1.0095769945356854
+      ],
+      "required": 18
+    }
+  },
+  "observations": 28224,
+  "outcomes_per_cell": {
+    "SAT": 107,
+    "UNSAT": 37
+  },
+  "peak_worker_rss_bytes": 29769728,
+  "production_solver_cost": null,
+  "rho_ratio": null,
+  "schema_version": 1,
+  "scope": "Complete standalone generated public Boolean systems only. No curve inputs, imported targets, scalar recovery, production solver integration, IC or rho campaign."
+}
