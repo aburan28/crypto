@@ -1,7 +1,7 @@
 # Sparsity-aware algebra: follow-up and applicability review
 
-Status: literature/applicability review and pending general-algebra study.
-Date: 2026-09-28. No new solver benchmark or ECDLP speedup is reported here.
+Status: applicability review and completed small synthetic Boolean-closure audit.
+Date: 2026-09-28. No ECDLP speedup or blocked-workload result is reported here.
 
 ## What has been established
 
@@ -60,7 +60,7 @@ This study concerns standalone synthetic polynomial and linear-algebra data.
 - [x] Review the existing storage report and distinguish storage from elimination.
 - [x] Check the primary sparse-algebra literature's stated domain.
 - [x] Record the torus/Boolean solution-set mismatch.
-- [ ] Recover and pin the standalone component source and its original receipt
+- [x] Recover and pin the standalone component source and its original receipt
       before reporting a reproduced result.
 - [ ] Define frozen synthetic inputs with sparse, block-structured and
       fill-in-heavy cases; include zero-coordinate solutions, dependent rows,
@@ -81,8 +81,9 @@ Before any performance experiment, freeze its inputs, seeds, source hashes,
 reference, metrics, success/stop conditions and repetition policy in a
 versioned protocol as required by AGENTS.md. The checklist above is a research
 plan, not an executed experiment or an admission-ready benchmark protocol.
-All new performance, memory-comparison and cryptographic-improvement results
-remain unknown.
+The earlier plan above is superseded in part by the bounded synthetic audit
+below. Process RSS, blocked-workload performance and cryptographic-improvement
+results remain unmeasured.
 
 ## Field-archetype arithmetic checked in this follow-up
 
@@ -138,3 +139,49 @@ not proof that all sparse-algebra approaches fail.
 Matrix row rank is a linear diagnostic; it does not alone certify ideal
 equality or a complete polynomial solve. Keep those correctness obligations
 separate when interpreting redundancy.
+
+## Executed candidate: exact Boolean closure audit
+
+The recovered source archive and its original four-entry SHA-256 manifest were
+verified. A standalone wrapper (1 <= n <= 10) replaces lossy degree truncation
+with degree-prioritized exact work and records each accepted row's origin. It
+uses the full Boolean quotient, retains all degrees, and allows zero coordinates.
+An independent dense-bitset verifier checks provenance, input containment and
+closure under every variable. These checks certify ideal equality; budget
+exhaustion is explicitly incomplete. This is a correctness oracle for small
+synthetic algebra, not a scalable solver or an application integration.
+
+The declared control suite passed nine unittest methods, including 60 seeded
+random systems and deliberately broken certificates. Eight measured systems
+at n=6 and n=8 produced the same independently verified ideals as an exhaustive
+monomial-multiple reference using the same sparse reducer. The candidate was
+slower and used more peak Python allocation memory in all eight cases: measured
+median time ratios were 1.45-2.66 and allocation-peak ratios 1.18-2.42. Three
+untraced timing repeats and one separate traced allocation run were used.
+The reference is elementary; these tiny timings are descriptive, not robust
+hardware conclusions or a comparison against a state-of-the-art solver.
+
+The monomial cases submitted fewer rows, but queue overhead outweighed that
+saving. Every case reached full degree n. Full ideal closure can require 2^n
+independent rows, so the implementation does not resolve the scaling problem.
+Keep the verifier and negative control; do not promote degree scheduling alone
+as an established optimization. No mathematical novelty has been demonstrated.
+
+Primary prior art reviewed: PolyBoRi's Boolean quotient arithmetic and shared
+ZDD representation (<https://polybori.sourceforge.net/features.html>), and
+Borderbasix's established prolongation/reduction/completion framework
+(<https://www-sop.inria.fr/teams/galaad/software/bbx/borderbasis.en.html>).
+This wrapper does not implement those complete systems or transfer the cited
+characteristic-zero semigroup bounds.
+
+Evidence: `boolean_sparse_adaptation.zip`, saved as a durable artifact for the
+requesting user, SHA-256
+`f177e883dfa8d4fd2604ebf1e0b759a48c57701a9b4c54dc6d003fa855bab52f`.
+It contains source, unchanged baseline, frozen protocol, all generated inputs,
+raw timings/counters, tests, an example certificate, and a file hash manifest.
+The evidence archive is not checked into this repository. Recorded protocol
+deviation: planted measurement inputs use seed 131+n instead of literal 131;
+no seed was changed after inspecting results. Source hashes were recorded after
+the run, not independently timestamped before it. Process RSS was not measured.
+Accordingly this is not an admission-ready repository benchmark and supports no
+cryptanalytic claim.
