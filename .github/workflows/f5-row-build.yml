@@ -39,7 +39,7 @@ jobs:
       - name: Build and retain unmodified reference
         run: |
           git worktree add --detach --no-checkout "$RUNNER_TEMP/f5-row-reference" 7b77244d1ddc60b32b34e3cd010722b7ae45197c
-          git -C "$RUNNER_TEMP/f5-row-reference" sparse-checkout set src examples research/f4_linear_algebra_20260914
+          git -C "$RUNNER_TEMP/f5-row-reference" sparse-checkout set src examples docs/ic research/f4_linear_algebra_20260914
           git -C "$RUNNER_TEMP/f5-row-reference" reset --hard HEAD
           CARGO_TARGET_DIR="$RUNNER_TEMP/f5-row-reference-target" cargo build --release --manifest-path "$RUNNER_TEMP/f5-row-reference/Cargo.toml" --example f4_f2_bench
           cp "$RUNNER_TEMP/f5-row-reference-target/release/examples/f4_f2_bench" "$RUNNER_TEMP/f5-row-reference-binary"

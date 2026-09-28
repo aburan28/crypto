@@ -1,0 +1,3 @@
+# F5 fused row-build experiment
+
+CI run [36450865831](https://github.com/aburan28/crypto/actions/runs/36450865831) at PR head `44d5d288` passed the exact F5 row and cap tests but stopped before any benchmark call. The sparse checkout used to build the unmodified reference omitted `docs/ic/calibration.json`, which `src/cryptanalysis/ic_boundary.rs` includes at compile time. No reference or candidate timing was produced; this is a setup failure, not a performance result. The workflow now includes `docs/ic` in that checkout. The original run log and failed job remain available at the linked CI run.
