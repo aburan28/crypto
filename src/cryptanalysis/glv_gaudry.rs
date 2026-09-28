@@ -41,7 +41,7 @@ use serde::Serialize;
 
 use super::f4_fp::{self, F4Options, Ordering as F4Ordering, Verdict};
 use super::gaudry_cubic::{
-    run_rho3, solve_s4_subspace, square_core, subspace_triple_oracle_groebner,
+    run_rho3, s4_terms, solve_s4_subspace, square_core, subspace_triple_oracle_groebner,
     unique_hasse_multiple3, wiedemann_u64, Curve3, Fp3, Instance3, Pt3, RhoReport3, SolveStats,
     SparseRel, SubspaceBase, SymmetrisedS4, E3,
 };
@@ -520,6 +520,13 @@ pub struct QuotientReport {
     pub wall_ms: f64,
     pub peak_rss_bytes: u64,
     pub rho: RhoReport3,
+    /// Plain rho on the same instance with `rho_runs` walk seeds: every
+    /// run's `S`, their mean, minimum and maximum, so the reference
+    /// carries its own spread instead of one draw.
+    pub rho_runs: Vec<RhoReport3>,
+    pub rho_s_mean: f64,
+    pub rho_s_min: f64,
+    pub rho_s_max: f64,
 }
 
 /// One residual stream, two relation stores: the ordinary `⟨−1⟩`-folded
@@ -532,6 +539,17 @@ pub fn run_quotient_experiment(
     glv: &GlvInstance3,
     seed: u64,
     max_residuals: u64,
+) -> QuotientReport {
+    run_quotient_experiment_with_rho(glv, seed, max_residuals, 1)
+}
+
+/// As [`run_quotient_experiment`], with `rho_runs` independent rho
+/// walks on the instance for the reference column.
+pub fn run_quotient_experiment_with_rho(
+    glv: &GlvInstance3,
+    seed: u64,
+    max_residuals: u64,
+    rho_runs: u32,
 ) -> QuotientReport {
     let inst = &glv.inst;
     let curve = &inst.curve;
@@ -614,6 +632,17 @@ pub fn run_quotient_experiment(
     quotient.finish(fp_per_add, precompute, n, rate);
     let wall_ms = start.elapsed().as_secs_f64() * 1e3;
     let rho = run_rho3(inst, seed);
+    let runs: Vec<RhoReport3> = (0..rho_runs.max(1))
+        .map(|k| {
+            run_rho3(
+                inst,
+                seed.wrapping_mul(1_000_003).wrapping_add(k as u64 + 1),
+            )
+        })
+        .collect();
+    let rho_s_mean = runs.iter().map(|r| r.s).sum::<f64>() / runs.len() as f64;
+    let rho_s_min = runs.iter().map(|r| r.s).fold(f64::INFINITY, f64::min);
+    let rho_s_max = runs.iter().map(|r| r.s).fold(0.0, f64::max);
     QuotientReport {
         p: curve.field.p,
         n,
@@ -635,6 +664,10 @@ pub fn run_quotient_experiment(
         wall_ms,
         peak_rss_bytes: peak_rss_bytes(),
         rho,
+        rho_runs: runs,
+        rho_s_mean,
+        rho_s_min,
+        rho_s_max,
     }
 }
 
@@ -2258,6 +2291,263 @@ pub fn run_invariant_experiment(
     }
 }
 
+// ── The Veronese (unsymmetrised diagonal-invariant) formulation ─────────
+
+/// The cubic monomials in `(x₁, x₂, x₃, z)`: the twenty generators of
+/// the invariant ring of the diagonal `C₃` action with weights
+/// `(1, 1, 1, 1)`, in grevlex order (largest first).
+pub fn veronese_generators() -> Vec<[u8; 4]> {
+    let mut out: Vec<[u8; 4]> = Vec::new();
+    for a in 0..=3u8 {
+        for b in 0..=3 - a {
+            for c in 0..=3 - a - b {
+                out.push([a, b, c, 3 - a - b - c]);
+            }
+        }
+    }
+    out.sort_by(|x, y| grevlex_cmp(y, x));
+    out
+}
+
+/// Write a monomial of degree `3k` in `(x₁, x₂, x₃, z)` as a product of
+/// `k` cubic generators: peel the grevlex-largest generator dividing what
+/// is left, `k` times.  Returns the exponent vector over the twenty
+/// generators.
+fn veronese_factor(mono: [u8; 4], gens: &[[u8; 4]]) -> Vec<u8> {
+    let mut rest = mono;
+    let mut e = vec![0u8; gens.len()];
+    while rest.iter().map(|&v| v as u32).sum::<u32>() > 0 {
+        let (i, g) = gens
+            .iter()
+            .enumerate()
+            .find(|(_, g)| g.iter().zip(&rest).all(|(a, b)| a <= b))
+            .expect("a monomial of degree 3k is divisible by a cubic");
+        e[i] += 1;
+        for (r, &gv) in rest.iter_mut().zip(g) {
+            *r -= gv;
+        }
+    }
+    e
+}
+
+/// The orbit PDP in the invariants of the diagonal `C₃` action on
+/// `(x₁, x₂, x₃, z)`: unknowns `m_α = x^α`, one per cubic monomial
+/// (twenty, all `F_p`-valued since `z ∈ F_p` with `z³ = 1`); equations
+/// the three Weil components of `S₄(x₁, x₂, x₃, z·x_R)`, each of weight
+/// `0` and hence a polynomial in the `m_α` of degree `≤ 4`, together with
+/// `m_{z³} = 1` and the toric relations `m_α m_β = m_γ m_δ` of the cubic
+/// Veronese (`α + β = γ + δ`).  Its points are the `(x, z)` of the orbit
+/// system with `x` ordered and the three points of each `ψ`-orbit
+/// identified (every cubic monomial is `ζ`-invariant), so its staircase
+/// is `6 × 64 = 384` against the orbit system's `192`.
+pub fn veronese_system(curve: &Curve3, x_r: &E3) -> WeightedSystem {
+    let f = &curve.field;
+    let p = f.p;
+    let gens = veronese_generators();
+    let n_vars = gens.len();
+    // S₄(x₁, x₂, x₃, z·x_R) with z^d reduced modulo z³ − 1.
+    let mut pow = [Fp3::ONE; 5];
+    for i in 1..5 {
+        pow[i] = f.mul(&pow[i - 1], x_r);
+    }
+    let mut h: HashMap<[u8; 4], E3> = HashMap::new();
+    for (e, c) in s4_terms(curve) {
+        let v = f.mul(&c, &pow[e[3] as usize]);
+        let key = [e[0], e[1], e[2], e[3] % 3];
+        let entry = h.entry(key).or_insert(Fp3::ZERO);
+        *entry = f.add(entry, &v);
+    }
+    h.retain(|_, v| *v != Fp3::ZERO);
+    let mut in_m: HashMap<Vec<u8>, E3> = HashMap::new();
+    for (mono, c) in h {
+        assert!(
+            mono.iter().map(|&v| v as u32).sum::<u32>() % 3 == 0,
+            "S₄ on a j = 0 curve is ψ-invariant"
+        );
+        let key = veronese_factor(mono, &gens);
+        let entry = in_m.entry(key).or_insert(Fp3::ZERO);
+        *entry = f.add(entry, &c);
+    }
+    let mut polys = weil_split(&in_m, p);
+    // m_{z³} = 1.
+    let z3 = gens
+        .iter()
+        .position(|g| *g == [0, 0, 0, 3])
+        .expect("z³ is a generator");
+    let mut eq = HashMap::new();
+    let mut e = vec![0u8; n_vars];
+    e[z3] = 1;
+    eq.insert(e, 1u64);
+    eq.insert(vec![0u8; n_vars], p - 1);
+    polys.push(eq);
+    // Toric relations: for every pair of generators, the product's
+    // canonical factorisation must agree with the pair.
+    let mut seen: HashSet<Vec<u8>> = HashSet::new();
+    for i in 0..n_vars {
+        for j in i..n_vars {
+            let prod = [
+                gens[i][0] + gens[j][0],
+                gens[i][1] + gens[j][1],
+                gens[i][2] + gens[j][2],
+                gens[i][3] + gens[j][3],
+            ];
+            let canon = veronese_factor(prod, &gens);
+            let mut pair = vec![0u8; n_vars];
+            pair[i] += 1;
+            pair[j] += 1;
+            if pair == canon {
+                continue;
+            }
+            let mut rel: Vec<u8> = pair.clone();
+            rel.extend(&canon);
+            if !seen.insert(rel) {
+                continue;
+            }
+            let mut eq = HashMap::new();
+            eq.insert(pair, 1u64);
+            eq.insert(canon, p - 1);
+            polys.push(eq);
+        }
+    }
+    WeightedSystem::new("veronese (20 cubic invariants)", vec![0; n_vars], polys)
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct VeroneseRow {
+    pub residual_index: u64,
+    pub x_r: [u64; 3],
+    pub harness_triples: Option<Vec<[u64; 3]>>,
+    pub harness_fp_muls: u64,
+    pub equations: usize,
+    pub toric_relations: usize,
+    /// Every harness triple, with the signs the harness confirms, gives a
+    /// point of the Veronese system (`m_α = x^α` at `z = 1`).
+    pub witnessed: Option<bool>,
+    pub witnesses: usize,
+    pub ordinary_f4_basis: F4Summary,
+    pub orbit_f4_basis: F4Summary,
+    pub veronese_f4_basis: F4Summary,
+    pub mults_vs_ordinary: Option<f64>,
+    pub mults_vs_orbit: Option<f64>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct VeroneseReport {
+    pub p: u64,
+    pub n: u64,
+    pub bits: f64,
+    pub generators: Vec<String>,
+    pub residuals_skipped: u64,
+    pub f4_max_degree: u32,
+    pub f4_budget_secs: f64,
+    pub rows: Vec<VeroneseRow>,
+}
+
+/// The Veronese formulation against the ordinary and orbit bases on the
+/// same decomposable residuals (basis-only F4 with staircase sizes).
+pub fn run_veronese_experiment(
+    glv: &GlvInstance3,
+    seed: u64,
+    residuals: u64,
+    f4_max_degree: u32,
+    f4_budget_secs: f64,
+) -> VeroneseReport {
+    let inst = &glv.inst;
+    let curve = &inst.curve;
+    let f = &curve.field;
+    let n = curve.n;
+    let p = f.p;
+    let mut rng = StdRng::seed_from_u64(seed ^ 0x9A0D);
+    let pre = SymmetrisedS4::precompute(curve);
+    let gens = veronese_generators();
+    let names = ["x1", "x2", "x3", "z"];
+    let mut stream = StdRng::seed_from_u64(seed ^ 0x57_AEA1);
+    let mut rows = Vec::new();
+    let mut skipped = 0u64;
+    let mut idx = 0u64;
+    while (rows.len() as u64) < residuals {
+        let a = stream.gen_range(0..n);
+        let b = stream.gen_range(1..n);
+        let r = curve.add(&curve.mul(&curve.g, a), &curve.mul(&inst.q, b));
+        let mut stats = SolveStats::default();
+        let triples = solve_s4_subspace(inst, &pre, &r.x, &mut rng, &mut stats);
+        if triples.as_ref().is_none_or(|t| t.is_empty()) {
+            skipped += 1;
+            continue;
+        }
+        idx += 1;
+        let ordinary = ordinary_system(&pre, f, &r.x);
+        let orbit = orbit_system(&pre, f, &r.x);
+        let veronese = veronese_system(curve, &r.x);
+        let toric = veronese.polys.len() - 4;
+        // Witnesses: every harness triple, in each of its six orders, at
+        // z = 1, evaluated in the generators.
+        let (witnessed, witnesses) = match &triples {
+            Some(tr) => {
+                let mut ok = true;
+                let mut count = 0usize;
+                for t in tr {
+                    let pt: Vec<u64> = gens
+                        .iter()
+                        .map(|g| {
+                            let mut v = 1u64;
+                            for (k, &e) in g.iter().enumerate() {
+                                let base = if k < 3 { t[k] } else { 1 };
+                                for _ in 0..e {
+                                    v = mm(v, base, p);
+                                }
+                            }
+                            v
+                        })
+                        .collect();
+                    if veronese.vanishes_at(&pt, p) {
+                        count += 1;
+                    } else {
+                        ok = false;
+                    }
+                }
+                (Some(ok), count)
+            }
+            None => (None, 0),
+        };
+        let (ord_b, _) = f4_summary(&ordinary, p, f4_max_degree, f4_budget_secs, false, false);
+        let (orb_b, _) = f4_summary(&orbit, p, f4_max_degree, f4_budget_secs, false, false);
+        let (ver_b, _) = f4_summary(&veronese, p, f4_max_degree, f4_budget_secs, false, false);
+        let ratio = |a: &F4Summary, b: &F4Summary| -> Option<f64> {
+            if !a.timed_out && !b.timed_out && b.field_ops > 0 {
+                Some(a.field_ops as f64 / b.field_ops as f64)
+            } else {
+                None
+            }
+        };
+        rows.push(VeroneseRow {
+            residual_index: idx - 1,
+            x_r: r.x.0,
+            harness_triples: triples,
+            harness_fp_muls: stats.fp_muls,
+            equations: veronese.polys.len(),
+            toric_relations: toric,
+            witnessed,
+            witnesses,
+            mults_vs_ordinary: ratio(&ver_b, &ord_b),
+            mults_vs_orbit: ratio(&ver_b, &orb_b),
+            ordinary_f4_basis: ord_b,
+            orbit_f4_basis: orb_b,
+            veronese_f4_basis: ver_b,
+        });
+    }
+    VeroneseReport {
+        p,
+        n,
+        bits: (n as f64).log2(),
+        generators: gens.iter().map(|g| render_monomial(g, &names)).collect(),
+        residuals_skipped: skipped,
+        f4_max_degree,
+        f4_budget_secs,
+        rows,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2384,6 +2674,50 @@ mod tests {
         assert_eq!(v.solutions, o.solutions.map(|k| 3 * k));
         assert!(b.blocked_steps > 0);
         assert_eq!(v.solving_degree, b.solving_degree);
+    }
+
+    #[test]
+    fn veronese_system_is_witnessed_by_harness_triples() {
+        let glv = tiny();
+        let c = &glv.inst.curve;
+        let f = &c.field;
+        let pre = SymmetrisedS4::precompute(c);
+        let mut rng = StdRng::seed_from_u64(11);
+        let mut stats = SolveStats::default();
+        for k in 2..600u64 {
+            let r = c.mul(&c.g, k);
+            let Some(triples) = solve_s4_subspace(&glv.inst, &pre, &r.x, &mut rng, &mut stats)
+            else {
+                continue;
+            };
+            if triples.is_empty() {
+                continue;
+            }
+            let ver = veronese_system(c, &r.x);
+            assert_eq!(ver.n_vars, 20);
+            let gens = veronese_generators();
+            for t in &triples {
+                let pt: Vec<u64> = gens
+                    .iter()
+                    .map(|g| {
+                        let mut v = 1u64;
+                        for (i, &e) in g.iter().enumerate() {
+                            let base = if i < 3 { t[i] } else { 1 };
+                            for _ in 0..e {
+                                v = mm(v, base, f.p);
+                            }
+                        }
+                        v
+                    })
+                    .collect();
+                assert!(ver.vanishes_at(&pt, f.p));
+            }
+            // 20 generators, 3 Weil components, z³ = 1, and the 126
+            // toric quadrics of the cubic Veronese.
+            assert_eq!(ver.polys.len(), 130);
+            return;
+        }
+        panic!("no decomposable multiple of g found");
     }
 
     #[test]

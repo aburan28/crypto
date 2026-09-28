@@ -2,7 +2,7 @@
 
 **Module:** `src/cryptanalysis/glv_gaudry.rs` (engine changes in `f4_fp.rs`: field-op counter, weight-block reduction; `gaudry_cubic.rs`: `Curve3::new`, `SymmetrisedS4::terms`)
 **Bench:**  `cargo run --release --example glv_gaudry_bench -- --exp {quotient,canonical,graded,invariant} --sizes 271,541,1051[,2113] --seeds 2 --json experiments/22_glv_<exp>.json`
-**Data:**   `experiments/22_glv_{quotient,canonical,graded,invariant}.{json,log}` (branch engine, 2026-09-18); `experiments/22_glv_{graded,invariant}_v2.{json,log}` (replay of the two F4-dependent experiments on the merged engine, 2026-09-28; experiments 1 and 2 replayed bit for bit and are not duplicated)
+**Data:**   `experiments/22_glv_{quotient,canonical,graded,invariant}.{json,log}` (branch engine, 2026-09-18); `experiments/22_glv_{graded,invariant}_v2.{json,log}` (replay of the two F4-dependent experiments on the merged engine, 2026-09-28; experiments 1 and 2 replayed bit for bit and are not duplicated); `experiments/22_glv_quotient_seeds6.{json,log}` (experiment 1 at six instance seeds with eight rho walks per instance, 2026-09-28); `experiments/22_glv_veronese.{json,log}` (the Veronese invariant formulation, 2026-09-28)
 **Tables:** `python3 scripts/glv_gaudry_tables.py experiments/22_glv_*.json` (every number below is printed by it from the frozen files)
 **Setting:** §11 of `RESEARCH_RESIDUAL_WALKS.md` (this directory) — Gaudry's subspace base `{P : x(P) ∈ F_p}` on `E(F_{p³})` with the `O(1)` symmetrised-`S₄` solve — on `j = 0` curves, where the order-3 automorphism `ψ(x, y) = (ωx, y)`, `ω ∈ F_p`, preserves the base.
 
@@ -12,7 +12,8 @@
 > `3.0` at every size from `2^24` to `2^33` — with the count sitting on
 > its (fold-aware) floor before and after, so this is the automorphism
 > group's `3`, *engineering*, not an advance, and the method stays
-> `270–700×` behind rho.  Canonical generation saves no solver call on
+> `220–540×` behind rho (six instances and `48` rho walks per size).
+> Canonical generation saves no solver call on
 > the harness's own residual stream (the collision floor `3T²/n` is below
 > `0.02` at every size, and `0` were found) but is what makes a
 > sieve-style pair generator usable on a `j = 0` curve at all: `95 %` of
@@ -25,10 +26,12 @@
 > multiplications by `5 %` (`1.4 %` on the branch engine), with no wall-time
 > gain on the merged engine.  The
 > `C₃`-invariant formulation of the per-residual PDP is the ordinary
-> Semaev system term for term, and the function-first (Nagao `L(4O)`)
-> formulation describes the same `64`-point variety with a `132`-element
-> Gröbner basis that costs `3,100×` the ordinary one to compute
-> (`10,641 × 8,789` against `221 × 277`).
+> Semaev system term for term; the Veronese formulation in the twenty
+> cubic invariants of the diagonal action costs `19,400×` the ordinary
+> basis for a `384`-point staircase; and the function-first (Nagao
+> `L(4O)`) formulation describes the same `64`-point variety with a
+> `132`-element Gröbner basis that costs `3,100×` the ordinary one to
+> compute (`10,641 × 8,789` against `221 × 277`).
 
 ## 1. Setting and what `ψ` does to the harness
 
@@ -60,10 +63,12 @@ is the weight-`1` version of the same statement.
   `columns` by `3`, so the floor divides by `3` with it.  By §3 of
   `AGENTS.md`, an *advance* would be `residuals / floor < 0.9` on the
   quotient; `≈ 1.0` on both is the count moving with its bound.
-- **Reference.**  Plain rho on the same group (`run_rho3`, measured per
-  instance, two seeds).  A rho that folds by `⟨−1, ψ⟩` gains the same
-  `√3` (`RESEARCH_RESIDUAL_WALKS.md` §10.3 measured it on prime-field
-  `j = 0`); that column is an extrapolation and is marked so.
+- **Reference.**  Plain rho on the same group (`run_rho3`): first two
+  instance seeds with one walk each, then six instance seeds with eight
+  independent walks each (`48` walks per size, `_seeds6`).  A rho that
+  folds by `⟨−1, ψ⟩` gains the same `√3` (`RESEARCH_RESIDUAL_WALKS.md`
+  §10.3 measured it on prime-field `j = 0`); that column is an
+  extrapolation and is marked so.
 - **Orbit duplicates (experiment 2).**  `T` uniform residuals collide in
   a `⟨−1, ψ⟩`-orbit `C(T, 2)·6/n` times in expectation; the canonical
   generator cannot save more solver calls than that on a uniform stream.
@@ -110,8 +115,23 @@ algebra.
 Means over two seeds; every run recovered the planted logarithm.  The
 per-seed table (columns, relations, residuals, non-zeros, bytes, the
 square core's rows and non-zeros, Wiedemann time, mod-`n`
-multiplications) is the first table of `scripts/glv_gaudry_tables.py`;
-at `2^33.1`, seed 1:
+multiplications) is the first table of `scripts/glv_gaudry_tables.py`.
+The rho column above is one walk on each of two instances and spans
+`0.16–2.62`; the same experiment at six instance seeds with eight rho
+walks each (`22_glv_quotient_seeds6.json`, every run correct) gives the
+reference its own spread:
+
+| p | n | instance seeds | rho walks | rho S mean | rho S min | rho S max | control S | quotient S | ratio | quotient res/floor | quotient S / rho S mean | folded rho S (÷√3, extrapolation) | quotient S / folded rho |
+|---:|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 271 | 2^24.2 | 6 | 48 | 1.57 | 0.68 | 3.89 | 2,495.8 | 852.5 | 2.93 | 1.01 | 542× | 0.91 | 939× |
+| 541 | 2^27.2 | 6 | 48 | 1.51 | 0.44 | 3.56 | 1,797.6 | 617.3 | 2.91 | 1.03 | 409× | 0.87 | 708× |
+| 1051 | 2^30.1 | 6 | 48 | 1.45 | 0.23 | 3.90 | 1,347.9 | 445.2 | 3.03 | 0.99 | 307× | 0.84 | 532× |
+| 2113 | 2^33.1 | 6 | 48 | 1.39 | 0.16 | 3.35 | 963.8 | 312.1 | 3.09 | 0.98 | 224× | 0.81 | 388× |
+
+The `48`-walk means sit at the repository's `S ≈ 1.3` reference within
+`20 %`; the quotient's `3.0×` over the control and its `≈ 1.0`
+residuals-to-floor ratio are unchanged at six seeds.  At `2^33.1`,
+seed 1 of the two-seed run:
 
 | store | columns | relations | residuals | NNZ | bytes | core rows × NNZ | Wiedemann ms | mod-n mults | total ops | S |
 |:--|---:|---:|---:|---:|---:|:--|---:|---:|---:|---:|
@@ -132,11 +152,13 @@ What moved and what did not:
 - `residuals / floor` is `1.00` on the control and `0.98–1.09` on the
   quotient at every size: the count moved *with* its floor.  **Class:
   engineering**, exactly as the prime-field sixfold fold of §10.3 was.
-- Against rho the quotient is `271–714×` behind on the measured plain
-  rho and `469–1,237×` behind a folded rho (extrapolated `÷√3`), where
-  the tuned `O(1)` solve of §11.6 was `528×` behind at `2^33`.  The two
-  seeds' rho `S` range from `0.16` to `2.62`, so the rho column is noisy
-  at two seeds; the control-to-quotient ratio is not.
+- Against rho the quotient is `224–542×` behind on the `48`-walk plain
+  rho mean and `388–939×` behind a folded rho (extrapolated `÷√3`),
+  where the tuned `O(1)` solve of §11.6 was `528×` behind at `2^33`.
+  Single walks range from `0.16` to `3.90` in `S`, which is why the
+  reference is a mean over `48` walks and not one draw; the
+  control-to-quotient ratio is measured on one stream and does not
+  depend on it.
 
 The `3` is the size of the automorphism group acting on the base.  It
 cannot be tuned upward, it applies to the relation phase only through
@@ -332,7 +354,36 @@ standard monomials and rising (no closure), against the ordinary
 `7–8` inside a `120 s` budget at `2.5–4.6·10¹⁰` multiplications; the
 merged engine's reducer-sparse step completes the basis in `2.6 s`.
 
+**The Veronese formulation, run.**  The unsymmetrised diagonal action
+has the twenty cubic monomials of `(x₁, x₂, x₃, z)` as invariant
+generators, and the orbit PDP written in them (`veronese_system`) is:
+unknowns `m_α = x^α`, all `F_p`-valued because `z ∈ F_p`; the three
+Weil components of `S₄(x, z·x_R)`, each of weight `0` and hence a
+polynomial of degree `≤ 4` in the `m_α`; `m_{z³} = 1`; and the `126`
+toric quadrics `m_α m_β = m_γ m_δ` of the cubic Veronese — `130`
+equations in `20` unknowns.  Every harness triple, at `z = 1`, is a
+point of it (`witnessed` on `6/6` residuals).  Its complete grevlex
+basis (`22_glv_veronese.json`, two decomposable residuals at each of
+`p = 271, 541, 1051`, budget `600 s`):
+
+| formulation | unknowns | equations | basis elements | staircase | highest productive degree | degree reached | max matrix | field mults | vs ordinary | vs orbit | s |
+|:--|---:|---:|---:|---:|---:|---:|:--|---:|---:|---:|---:|
+| ordinary symmetrised `S₄` | 3 | 3 | 17 | 64 | 10 | 14 | `221 × 277` | `6.3·10⁵` | 1.0× | 0.03× | 0.01 |
+| orbit `(e, z)` | 4 | 4 | 73 | 192 | 10 | 14 | `1,668 × 1,632` | `2.3·10⁷` | 36× | 1.0× | 0.1 |
+| Veronese, `20` cubic invariants | 20 | 130 | 299 | 384 | 5 | 9 | `67,363 × 63,555` | `1.23·10¹⁰` | 19,300–19,460× | 533–536× | 31–52 |
+
+The staircase is `384 = 6 × 64`: the six orderings of `(x₁, x₂, x₃)`
+that symmetrisation removes, times the `64` solutions, with the three
+points of every `ψ`-orbit identified — which is exactly what an
+invariant ring does, and exactly why it cannot help: the quotient by
+`C₃` is taken *after* the orbit has been paid for.  Identical to the
+last digit of the staircase on all six residuals.
+
 - The invariant system is the ordinary system: **accounting**.
+- The Veronese system is the orbit system with the symmetrisation undone
+  (`6×` the points) and the `C₃` quotient taken in `20` coordinates: it
+  costs `536×` the orbit basis and `19,400×` the ordinary one.
+  **Class: relabelling.**
 - The function-first system is the *same variety* — staircase `64`, the
   ordinary system's quotient — presented with six more unknowns, and the
   presentation costs `3,100×` the multiplications, `38×` the columns and
@@ -350,10 +401,11 @@ merged engine's reducer-sparse step completes the basis in `2.6 s`.
 
 | lever | what moved | class | test against the boundary |
 |:--|:--|:--|:--|
-| `⟨ψ⟩` factor-base quotient | `S ÷ 3.0` at every size; columns, relations, residuals, solver calls, NNZ, LA all `÷ 3`; `residuals / floor` `1.00 → 0.98–1.09` | engineering | count moved with its floor; `271–714×` rho (plain), `469–1,237×` (folded, extrapolated) |
+| `⟨ψ⟩` factor-base quotient | `S ÷ 3.0` at every size; columns, relations, residuals, solver calls, NNZ, LA all `÷ 3`; `residuals / floor` `0.98–1.09` | engineering | count moved with its floor; `224–542×` rho (plain, `48` walks per size), `388–939×` (folded, extrapolated) |
 | canonical residuals and decompositions | `0` solver calls saved on the uniform stream (`0` found, `≤ 0.011` expected); `97 %` of a pair generator's rows removed as `0 = 0` or unit-dependent | accounting (uniform) / engineering (pair sieve) | at the collision floor; no `S` changes |
 | `Z/3`-graded block-aware F4 | exists only on the orbit system: `3.0×` fewer dense cells, `1.4–5 %` fewer multiplications, `0.5–1.2×` wall; the orbit system costs `12–30×` (merged engine) to `34–70×` (branch engine) the ordinary solve | engineering (footprint) / relabelling (as a solver) | boundary is `1.0×` the ordinary solve; measured `12–70×` |
 | `C₃`-invariant PDP | identical to the ordinary system on `12/12` residuals | accounting | — |
+| Veronese PDP in the `20` cubic invariants | `299`-element basis, `384`-point staircase (`6 × 64`), `19,400×` the ordinary basis, `536×` the orbit basis | relabelling | boundary is `1.0×` the ordinary solve |
 | function-first `L(4O)` formulation | same `64`-point variety, `132`-element basis at `3,100×` the multiplications and `38×` the columns | relabelling | — |
 
 The one `3` on this page is the order of the automorphism group acting
@@ -361,19 +413,14 @@ on the base, and it sits where §10.3 found it on prime fields: in the
 number of unknowns.  The scoreboard's verdict — every index-calculus
 variant on `E(F_{p³})` is hundreds of times behind rho at the sizes
 that fit — is unchanged; the best cell moves from `898` (§11.6 tuned)
-to `309–351` at `2^33`, against a rho that folds by the same group.
+to `312` at `2^33` (six seeds), against a rho that folds by the same
+group.
 
 ## 8. What was not done
 
 - The block-aware F4 was tested on the orbit system only; on any system
   with `x_R` fixed there is no block to split (`100 %` coupled rows), so
   there is nothing to run.
-- The `20`-generator Veronese (unsymmetrised diagonal) formulation was
-  derived (generators and Hilbert counts) but not solved: it embeds the
-  orbit system into `20` unknowns with quadratic Veronese relations and
-  is bounded below by the orbit system's cost.
-- Two seeds per size; the rho reference at two seeds spans `0.16–2.62`
-  in `S`.  The control-to-quotient ratio, measured on one stream, does
-  not depend on it.
 - `F_p` multiplications of the F4 substitution solver include its `p`
-  sub-runs; the top-level run's counts are in the JSON per formulation.
+  sub-runs; the top-level run's counts are in the JSON per formulation,
+  and the basis-only tables of §6 have none.

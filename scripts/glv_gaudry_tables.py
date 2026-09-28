@@ -51,6 +51,15 @@ def quotient(rows):
         )
     print("\nMemory: peak RSS of the whole process (both stores, MB): "
           + ", ".join(f"p={q['p']}: {q['peak_rss_bytes'] >> 20}" for q in rows_reports(rows)))
+    if "rho_runs" in rows[0]["report"]:
+        print("\n### Experiment 1 — rho reference with repeated walks (per size, over all instance seeds)\n")
+        print("| p | n | instance seeds | rho walks per instance | rho S mean | rho S min | rho S max | quotient S mean | quotient S / rho S mean | folded rho S (÷√3, extrapolation) | quotient S / folded rho |")
+        print("|---:|:--|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
+        for p, qs in sorted(per_size.items()):
+            walks = [r["s"] for q in qs for r in q["rho_runs"]]
+            rho = statistics.mean(walks)
+            ts = statistics.mean(q["quotient"]["s"] for q in qs)
+            print(f"| {p} | 2^{qs[0]['bits']:.1f} | {len(qs)} | {len(qs[0]['rho_runs'])} | {rho:.2f} | {min(walks):.2f} | {max(walks):.2f} | {ts:,.1f} | {ts / rho:,.0f}× | {rho / 3 ** 0.5:.2f} | {ts / (rho / 3 ** 0.5):,.0f}× |")
 
 
 def rows_reports(rows):
@@ -148,6 +157,23 @@ def invariant(rows):
     print(f"\nChecks on every residual — ordinary F4 solutions = harness e-solutions: {all(c[0] for c in checks)}; orbit = 3 × ordinary: {all(c[1] for c in checks)}; function-first witnessed by every harness triple: {all(c[2] for c in checks)}.")
 
 
+def veronese(rows):
+    print("\n### Experiment 4b — the Veronese formulation (20 cubic invariants of the diagonal C₃ action)\n")
+    q0 = rows[0]["report"]
+    print(f"Generators: {', '.join(q0['generators'])}.\n")
+    print("| p | residual | harness triples | equations (toric) | witnessed | system | basis elements | staircase | highest productive degree | degree reached | max rows × cols | field mults | mults vs ordinary | mults vs orbit | ms |")
+    print("|---:|---:|---:|:--|:--|:--|---:|---:|---:|---:|:--|---:|---:|---:|---:|")
+    for r in rows:
+        q = r["report"]
+        for row in q["rows"]:
+            o = row["ordinary_f4_basis"]
+            ob = row["orbit_f4_basis"]
+            for s in (row["ordinary_f4_basis"], row["orbit_f4_basis"], row["veronese_f4_basis"]):
+                vo = f"{s['field_ops'] / o['field_ops']:.1f}×" if o["field_ops"] else "—"
+                vb = f"{s['field_ops'] / ob['field_ops']:.2f}×" if ob["field_ops"] else "—"
+                print(f"| {q['p']} | {row['residual_index']} | {len(row['harness_triples']) if row['harness_triples'] is not None else '—'} | {row['equations']} ({row['toric_relations']}) | {row['witnessed']} ({row['witnesses']}) | {s['system']} | {s['basis_size']} | {s['staircase']} | {s['solving_degree_max']} | {s['degree_reached']} | {s['max_rows']:,} × {s['max_cols']:,} | {s['field_ops']:,} | {vo} | {vb} | {s['ms']:.0f}{' (timed out)' if s['timed_out'] else ''} |")
+
+
 def main():
     files = sys.argv[1:]
     for path in files:
@@ -161,6 +187,8 @@ def main():
             graded(rows)
         elif "generators_symmetrised" in rep:
             invariant(rows)
+        elif "toric_relations" in (rep["rows"][0] if rep.get("rows") else {}):
+            veronese(rows)
         else:
             print(f"unrecognised report in {path}")
 
