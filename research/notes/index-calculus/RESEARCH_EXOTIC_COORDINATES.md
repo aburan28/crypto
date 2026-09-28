@@ -1935,7 +1935,7 @@ ranges, columns and phase shares in `RESULTS.md`.
 | `K₀/2²³` | 2 | 11020 | 8460 | **0.77** | 0.29 | 4.4 | 1.10 | 7700× |
 | `K₁/2²³` | 2 | 6825 | 5156 | **0.76** | 0.60 | 4.5 | 0.89 | 5800× |
 | `K₀/2³¹` | 2 | 16713 | 67025 | **4.0** | 1.64 | 48.5 | 1.06 | 63500× |
-| `K₁/2¹⁷` | 3 | (x-m3: see RESULTS.md) | 116502 | — | — | — | 1.76 | 66000× |
+| `K₁/2¹⁷` | 3 | no solve (3 h cap, 0 relations) | 116502 | — | — | — | 1.76 | 66000× |
 
 Reading it:
 
@@ -1958,7 +1958,21 @@ Reading it:
    cap is absolute and that the deeper matrices cost more than they
    prune holds in the pipeline as it did in the oracle, and gets worse
    with the variable count.
-4. **Against rho every arm is three to five orders of magnitude off**,
+4. **At `m = 3` the rewriting is the difference between solving and
+   not solving, on this engine.**  The symmetrised `S₄` (degrees
+   `[2,2,2,2,1]` in `w, s`, 25 boolean variables after descent) found
+   all three logarithms in 20 s of wall, at `S = 116502`.  The plain
+   `S₄` descent (27 variables, degree 6, semi-regular degree 14) found
+   no relation in three hours: the bounded diagnostic
+   (`results/k1_17__x-m3-probe.json`, 12 trials) shows every call
+   giving up *oversize* (the Macaulay matrix exceeds the engine's row
+   and column bounds) after 6.7 s, so the full run was 2 M trials'
+   worth of the same.  That is §17's "the symmetrised system is the
+   smaller Macaulay problem" as a feasibility line rather than a
+   constant, and it is the one place the symmetry changes what can be
+   run at all.  It is still `66000×` rho, and the `m = 2` arms at the
+   same `n` are `50×` cheaper than either.
+5. **Against rho every arm is three to five orders of magnitude off**,
    and the ratio grows with `n` (`990×` → `5800–7700×` → `63500×`),
    as Galbraith–Gebregiyorgis said it would (§19).  The combinatorial
    controls sit at `9–130×` rho on the same bases, so the algebraic
@@ -1969,7 +1983,9 @@ Reading it:
 Against the boundaries the contract names: **engineering** at
 `n = 17, 23` (a constant factor under one on the solve, paid for in
 part by the base's yield; the ratio to rho is unmoved in kind and grows
-with `n`), and **refuted** at `n = 31` (`S_sym / S_x ≥ 1`).  No row
+with `n`), **engineering** at `m = 3` (a solver-feasibility gain: the
+plain arm has no `S` to compare, and the symmetrised one is `66000×`
+rho), and **refuted** at `n = 31, m = 2` (`S_sym / S_x ≥ 1`).  No row
 approaches `S / S_rho < 1`, and the gain does not grow with `n`, so
 nothing here is an advance, which is what the counting floor said in
 advance: the symmetry is priced into the floor, and quotienting by it

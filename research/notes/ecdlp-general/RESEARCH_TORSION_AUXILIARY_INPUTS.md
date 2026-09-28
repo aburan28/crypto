@@ -382,8 +382,10 @@ attack, none of which moves either floor:
   base's yield is `0.6×` the plain base's (representations come in
   pairs), the `w, s` solve is `1.5–2.4×` cheaper per trial, and the net
   is `0.76–0.84×` the plain decomposition at `n = 17, 23` and `4.0×`
-  worse at `n = 31`, three to five orders of magnitude above the matched
-  rho throughout.  Engineering, as the floor requires.
+  worse at `n = 31`; at `m = 3` the lowered degrees are the difference
+  between the engine solving and giving up, still `66000×` rho.  Three
+  to five orders of magnitude above the matched rho throughout:
+  engineering, as the floor requires.
 - **Rank-two torsion.**  `E(F_q) ≅ Z/n₁ × Z/n₂` with `n₁ > 1` puts the full
   `n₁`-torsion over `F_q`; the Weil pairing on `E[n₁]` maps its logarithm to
   `F_q^*`, but that is the MOV reduction for the small part `n₁ | q − 1`, and

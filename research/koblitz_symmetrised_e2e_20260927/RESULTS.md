@@ -23,7 +23,7 @@ says so).  Runs are serial, one per core, so the measured price is not shared.
 | K_1 / GF(2^17) | mitm-u | 409 | 13 | `8efcbdf6495e` | 0.312 (0.226–0.357) | 3.35 (2.80–4.43) | 19% | lookups | 15.2 (15.1–15.3) | 15.2 (15.1–15.3) | 1.764 | 9× | yes (3) | 0.0 |
 | K_1 / GF(2^17) | sym-m3 | 409 | 13 | `8efcbdf6495e` | 0.633 (0.500–0.733) | 1.62 (1.36–2.00) | 100% | word XORs (measured) | 116501.8 (94055.0–138482.1) | 947.8 (781.8–1116.3) | 1.764 | 66027× | yes (3) | 19.9 |
 | K_1 / GF(2^17) | x-m3 | — | — | — | — | — | — | — | not finished | — | — | — | — | # exit 124 at 2026-09-28T03:31:16Z |
-| K_1 / GF(2^17) | x-m3-probe | — | — | — | — | — | — | — | not finished | — | — | — | — | # 2026-09-28T13:36:42Z diagnostic after the 3 h cap: ic bench --koblitz-degree 17 --koblitz-a 1 --factor-base koblitz-orbit:divisor=0;1 --oracle descent-algebraic:m=3 --solver inherited-f4 --repeats 1 --max-trials 12 --rho-runs 8 --seed 123212651130 |
+| K_1 / GF(2^17) | x-m3-probe | 443 | 14 | `—` | 0.000 | 12.00 | 100% | word XORs (measured) | 1596883.5 | 112863.3 | 1.599 | 998684× | NO (1) | 81.1 |
 | K_0 / GF(2^23) | sym | 4049 | 89 | `5fb5064f00a5` | 0.350 (0.313–0.387) | 2.88 (2.59–3.19) | 100% | word XORs (measured) | 8460.0 (6878.8–9524.7) | 122.3 (103.1–140.2) | 1.095 | 7727× | yes (3) | 10.0 |
 | K_0 / GF(2^23) | sym4 | 4049 | 89 | `5fb5064f00a5` | 0.350 (0.313–0.387) | 2.88 (2.59–3.19) | 100% | word XORs (measured) | 48239.1 (39463.9–55322.4) | 10566.7 (8513.0–12119.8) | 1.095 | 44057× | yes (3) | 56.0 |
 | K_0 / GF(2^23) | x | 4235 | 94 | `f6a13cce8ce2` | 0.622 (0.588–0.651) | 1.61 (1.54–1.70) | 100% | word XORs (measured) | 11020.3 (10063.2–11689.8) | 424.1 (389.3–444.8) | 1.095 | 10065× | yes (3) | 13.0 |
