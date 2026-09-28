@@ -21,7 +21,7 @@ What is measured and what is not:
 | packed backend (the RTX preset, and the campaign) | **implemented, not compiled**: there is no CUDA toolchain on the machine this was written on, so `make gpu` has not been run. The edits mirror the bitsliced ones site for site and are listed in §5 |
 | end to end against cairn | **done**: 128 real weight-34 ECC2K-130 orbits, emitted by `build/witness` from the carried counters with **0 steps replayed**, accepted by `examples/certicom-ecdlp/checkers/ecc2k130_orbit_batch.py` in the merged objective and by `orbit_dp.py verify` against the pinned job |
 | what the witness costs the bitsliced walk | **measured: +6.0%** median on the CPU backend (spread +5.4% to +7.1%), against +33.8% predicted (§5) |
-| what the witness costs the packed walk | **not measured** — it needs the GPU, and §5 says what to run |
+| what the witness costs the packed walk | **measured: +34.7%** on one RTX PRO 6000 (14.003 → 9.150 B/s, automatic workers, campaign knobs; `benchmarks/witness-cost/`); matches §5's 36% hot-state prediction |
 
 Under `AGENTS.md` §3 this change is still none of the four classes. It does not
 lower `S` and it does not move the ratio to any floor: it *raises* the cost of

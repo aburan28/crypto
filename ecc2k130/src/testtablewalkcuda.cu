@@ -43,7 +43,11 @@ __global__ void probe(const In *in, Out *out, int n, const uint32_t *consts) {
     In a = in[i];
     Out o;
     const uint8_t *bytes = reinterpret_cast<const uint8_t *>(sel);
+#if ECC_TABLE_PHASE_POPC
+    o.k = twPhase(a.xn, a.hw, sel + (TW_PLANE_OFF - TW_SEL0), sel + (TW_INV_OFF - TW_SEL0));
+#else
     o.k = twPhase(a.xn, a.hw, bytes + 4 * (TW_PHASE_OFF - TW_SEL0), sel + (TW_INV_OFF - TW_SEL0));
+#endif
     o.pivot = twPivot(a.xn, o.k, sel + (TW_MASK_OFF - TW_SEL0), bytes + 4 * (TW_MAX_OFF - TW_SEL0),
                       bytes + 4 * (TW_LINV_OFF - TW_SEL0));
     o.eps = twCoordinate(a.yp, o.pivot, sel + (TW_ROW_OFF - TW_SEL0));
