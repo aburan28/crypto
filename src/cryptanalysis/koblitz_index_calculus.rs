@@ -143,6 +143,7 @@ use crate::cryptanalysis::crossbred::{
     SearchStats as CrossbredSearchStats,
 };
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
+use crate::cryptanalysis::fx_hash::FxMap;
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
@@ -2435,7 +2436,68 @@ pub fn enumerate_decompose(
     target: &BinaryPoint,
     m: usize,
 ) -> Option<Vec<usize>> {
+    if m >= 2 {
+        if let Some(fc) = FastCurve::new(&kc.curve) {
+            return FastEnumeration::new(&fc, fb, index_of).decompose(fc.lift(target), m, 0);
+        }
+    }
     decompose(kc, fb, index_of, target, m, 0)
+}
+
+/// [`enumerate_decompose`]'s search on single-word coordinates: the same
+/// tuples in the same order, each step one [`FastCurve::add`] of a
+/// pre-negated base point instead of a heap-backed general addition (with
+/// a Fermat inversion), and the final lookup by packed point.  The packed
+/// index is built from the caller's `index_of`, so a restricted or foreign
+/// map keeps its meaning; on the curve a packed point names one point.
+struct FastEnumeration<'a> {
+    fc: &'a FastCurve,
+    neg: Vec<FastPoint>,
+    index: FxMap<u64, usize>,
+}
+
+impl<'a> FastEnumeration<'a> {
+    fn new(
+        fc: &'a FastCurve,
+        fb: &FrobeniusFactorBase,
+        index_of: &HashMap<(BigUint, BigUint), usize>,
+    ) -> Self {
+        let word = |v: &BigUint| v.iter_u64_digits().next().unwrap_or(0);
+        let index = index_of
+            .iter()
+            .map(|((kx, ky), &i)| {
+                let packed = if kx.is_zero() {
+                    FastPoint::INFINITY.pack()
+                } else {
+                    FastPoint::affine(word(&(kx - 1u32)), word(ky)).pack()
+                };
+                (packed, i)
+            })
+            .collect();
+        let neg = fb.points.iter().map(|p| fc.neg(fc.lift(p))).collect();
+        FastEnumeration { fc, neg, index }
+    }
+
+    fn decompose(&self, target: FastPoint, m: usize, start: usize) -> Option<Vec<usize>> {
+        if m == 0 {
+            let _check = measurement::relation_check_scope();
+            return target.infinity.then(Vec::new);
+        }
+        if m == 1 {
+            let _check = measurement::relation_check_scope();
+            let idx = *self.index.get(&target.pack())?;
+            return if idx >= start { Some(vec![idx]) } else { None };
+        }
+        for i in start..self.neg.len() {
+            let rest = self.fc.add(target, self.neg[i]);
+            if let Some(mut tail) = self.decompose(rest, m - 1, i) {
+                let mut out = vec![i];
+                out.append(&mut tail);
+                return Some(out);
+            }
+        }
+        None
+    }
 }
 
 fn decompose(
@@ -11224,6 +11286,51 @@ mod tests {
                 }
             }
         }
+    }
+
+    /// The single-word enumeration returns exactly the generic search's
+    /// answer (same summands, same order) for m = 2, 3, on both Koblitz
+    /// curves, with the full index and with a restricted one, for targets
+    /// that decompose, that do not, and the identity.
+    #[test]
+    fn fast_enumeration_matches_the_generic_search() {
+        let mut curves = 0;
+        for a in [0u8, 1] {
+            for n in [7u32, 11, 13] {
+                // not every (a, n) gives a curve the constructor accepts
+                let Some(kc) = KoblitzCurve::new(a, n) else {
+                    continue;
+                };
+                curves += 1;
+                let basis: Vec<F2mElement> = (0..3.min(n as usize))
+                    .map(|i| F2mElement::from_bit_positions(&[i as u32], n))
+                    .collect();
+                let fb = build_frobenius_union_factor_base(&kc, &basis).unwrap();
+                let full = fb.index_map();
+                let restricted: HashMap<(BigUint, BigUint), usize> = full
+                    .iter()
+                    .filter(|(_, &i)| i % 3 != 1)
+                    .map(|(k, &i)| (k.clone(), i))
+                    .collect();
+                let mut targets = vec![BinaryPoint::Infinity];
+                for k in 1u32..=40 {
+                    targets.push(kc.mul(kc.generator(), &BigUint::from(k * 7919 + 3)));
+                }
+                for (i, p) in fb.points.iter().enumerate().take(6) {
+                    targets.push(kc.add(p, &fb.points[(i * 5 + 1) % fb.points.len()]));
+                }
+                for index in [&full, &restricted] {
+                    for m in [2usize, 3] {
+                        for t in &targets {
+                            let fast = enumerate_decompose(&kc, &fb, index, t, m);
+                            let slow = decompose(&kc, &fb, index, t, m, 0);
+                            assert_eq!(fast, slow, "a={a} n={n} m={m} target={t:?}");
+                        }
+                    }
+                }
+            }
+        }
+        assert!(curves >= 2, "only {curves} curves built");
     }
 
     #[test]
