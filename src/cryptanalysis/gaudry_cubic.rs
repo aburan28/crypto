@@ -341,6 +341,18 @@ pub struct Curve3 {
 }
 
 impl Curve3 {
+    /// A curve `y² = x³ + ax + b` over `field` with generator `g` of
+    /// order `n` (`n = 0` and `g = O` while the order is still unknown).
+    pub fn new(field: Fp3, a: E3, b: E3, n: u64, g: Pt3) -> Curve3 {
+        Curve3 {
+            field,
+            a,
+            b,
+            n,
+            g,
+            ops: Cell::new(0),
+        }
+    }
     pub fn ops(&self) -> u64 {
         self.ops.get()
     }
@@ -459,7 +471,7 @@ fn isqrt(n: u128) -> u128 {
 
 /// Order of `pt` if it is the unique multiple in the Hasse interval
 /// `[p³ + 1 − 2p^{3/2}, p³ + 1 + 2p^{3/2}]` (BSGS, `O(p^{3/4})`).
-fn unique_hasse_multiple3(curve: &Curve3, pt: &Pt3) -> Option<u64> {
+pub fn unique_hasse_multiple3(curve: &Curve3, pt: &Pt3) -> Option<u64> {
     let p = curve.field.p as u128;
     let n0 = p * p * p + 1;
     let two_sqrt = 2 * isqrt(p * p * p) + 2;
@@ -1163,6 +1175,10 @@ pub struct SymmetrisedS4 {
 }
 
 impl SymmetrisedS4 {
+    /// The terms `e₁^a e₂^b e₃^c x₄^d ↦ coefficient`.
+    pub fn terms(&self) -> &HashMap<[u8; 4], E3> {
+        &self.terms
+    }
     /// Once per curve.  Reduces the lex-leading term of the symmetric
     /// polynomial by the matching product of elementary symmetric
     /// polynomials until nothing is left.
