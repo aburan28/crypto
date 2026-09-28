@@ -409,7 +409,7 @@
       exponent matching the derived law. That is a toy-size result
       (<code>p &le; 251</code>) whose reference needed correcting, not a statement about
       any deployed curve. The newer binary-field solver, the
-      Crossbred decomposition oracle, the WDSat Riemann-Roch panel and the
+      Crossbred decomposition oracle, the WDSat Riemann-Roch panel, the Weil-descent SAT round on the challenge curve and the
       parameter-sweep pilots are explicitly uncalibrated: their component counts
       do not establish an end-to-end speedup or belong in that normalized claim.</p>
 
@@ -4841,6 +4841,43 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0020 -->
+<section class="panel" id="solver16-weil-descent-sat-20260920">
+<h2>Weil-descent SAT on the ECC2K-130 curve: the cheap regime ends at d = 7</h2>
+<p>The successor to the two Riemann&ndash;Roch lines above, on the real curve. The Nagao norm encoding and
+Trimoska's S&prime;4 are compiled to F<sub>2</sub> in a polynomial basis with the factor base
+<code>V = {deg x &lt; d}</code> &mdash; the layout that keeps S&prime;4 to <code>9d &minus; 3</code> variables &mdash;
+and given to CryptoMiniSat with native XOR clauses (conflicts recovered by bisection on
+<code>confl_limit</code>, so the reference arm finally has the declared unit) and to WDSat, against
+brute-force pair enumeration as the null object. Contract frozen with its prediction before the run.
+Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/solver_16/RESULTS.md">RESULTS.md</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/solver_16/contract.json">contract</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/solver_16/raw.jsonl">raw (CryptoMiniSat)</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/solver_16/raw_wdsat.jsonl">raw (WDSat)</a>.
+Write-up: <code>research/notes/ecc2k130/RESEARCH_ECC2K130_RR_SOLVER_PANEL.md</code> &sect;11.</p>
+<div class="table-scroll"><table>
+<caption>K<sub>0</sub> over GF(2<sup>131</sup>), four uniform and four planted targets per d, 300 s per solve.
+Unit: CryptoMiniSat conflicts to decide (mean of the four uniform exhaustions); WDSat decisions. Boundary:
+pair enumeration, C(A, 2) unordered abscissa pairs. Decompositions of uniform targets begin to exist at
+d = 45; every row measures exhaustion, never yield. S against the group order is uncalibrated: this prices
+an oracle, not an attack.</caption>
+<thead><tr><th>Variant</th><th>Full-DLP S</th><th>Cost / rho</th><th>d = 4&ndash;6</th><th>d = 7</th><th>d = 8</th><th>d = 9, 10</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>Pair enumeration (null object), pairs</td><td>Uncalibrated</td><td>Uncalibrated</td><td>45 / 136 / 561</td><td>2,701</td><td>8,515</td><td>31,626 / 134,421</td><td>Reference (solver_12: identical solution sets)</td><td><span class="chip">boundary</span></td></tr>
+<tr><td>S&prime;4 &mdash; CryptoMiniSat, uniform exhaustion</td><td>Uncalibrated</td><td>Uncalibrated</td><td><strong>1</strong> (linear certificate)</td><td><strong>839</strong> (0.31&times; pairs)</td><td><strong>312,231</strong> (36.7&times; pairs)</td><td>censored at 300 s</td><td>24/24 planted enumerations complete, all six permutations, every witness re-derived in the group</td><td><span class="chip">closure &mdash; measured negative</span></td></tr>
+<tr><td>RR norm (b eliminated) &mdash; CryptoMiniSat, matched instances</td><td>Uncalibrated</td><td>Uncalibrated</td><td>d = 5: 35,163 (3.5&times;10<sup>4</sup>&times; S&prime;4); d = 6: 38&ndash;43 s vs 0.01 s</td><td>censored (S&prime;4: 0.03 s)</td><td>censored</td><td>&mdash;</td><td>16/16 planted enumerations complete at d &le; 6; every witness verified</td><td><span class="chip">closure &mdash; linearly equivalent to S&prime;4, strictly dearer</span></td></tr>
+<tr><td>S&prime;4 &mdash; WDSat plain (<code>-b</code>)</td><td>Uncalibrated</td><td>Uncalibrated</td><td>10/12 refuted at XORGAUSS init; else 0.999 of 2<sup>3d</sup>/3!</td><td>1.000&ndash;1.002 of 2<sup>3d</sup>/3!</td><td>1.000&ndash;1.001 of 2<sup>3d</sup>/3!</td><td>&mdash;</td><td>16/16 planted first solutions verified</td><td><span class="chip">brute-force tree, control</span></td></tr>
+<tr><td>S&prime;4 &mdash; WDSat <code>-x</code> (Gaussian during search)</td><td>&mdash;</td><td>&mdash;</td><td colspan="4">completeness audit only: <strong>1 of 16</strong> <code>-x -b</code> cells declares a decomposable target UNSAT (49 decisions); 16/16 without <code>-b</code>; propagation sound, backtracking not</td><td>Defect reproduced on two seeds</td><td><span class="chip">tool defect &mdash; no cost read</span></td></tr>
+<tr><td>Reading the d &le; 6 one-conflict refutations as a fast oracle</td><td>&mdash;</td><td>&mdash;</td><td colspan="4">&mdash;</td><td>&mdash;</td><td><span class="chip relabel">relabelling &mdash; the certificate expires 39 dimensions before decompositions exist</span></td></tr>
+</tbody></table></div>
+<p>The contract's falsifier asked for a slope of log<sub>2</sub>(conflicts) below 1.8 per dimension over at least
+four complete sizes. Five exist (d = 4&ndash;8) and their least-squares slope is <strong>4.62</strong> with a residual
+standard error of 4.38 &mdash; two regimes joined at d = 7, not a power law: one dimension costs 370&times; in
+conflicts where it costs 3.2&times; in pairs, and the next is out of budget. The obstruction is the one &sect;9 of the
+panel note measured &mdash; the S<sub>4</sub> value-set span saturates F<sub>2</sub><sup>131</sup> at d = 7 &mdash; seen from
+the solver's side, and it closes the SAT route on this descended system and the coefficient encoding under
+SAT. It does not speak to an encoding whose value set stays proper at d = 45, or to a factor base that is not an
+F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 2<sup>131</sup>.</p>
+</section>
+<!-- END solver16-weil-descent-sat-20260920 -->
 <!-- BEGIN ic-crossover-20260922 -->
 <section class="panel" id="ic-crossover-20260922">
 <div class="panel-head"><h2>Where the tournament collector crosses rho <span class="chip">engineering</span></h2>
@@ -5036,6 +5073,32 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section id="factor-base-accounting-audit-20260922" class="panel">
+  <h2>Factor-base selector: accounting correction <span class="chip">accounting</span></h2>
+  <p>The archived selector comparison measures F4 word XORs during complete toy
+    runs. It does not measure total calibrated operations. The enumeration model
+    in the decomposition note is not a lower bound on arbitrary algebraic
+    solvers. Ratios to rho and a problem-wide floor remain unmeasured; no new
+    solver run or end-to-end speedup is claimed.</p>
+  <p>Source: <a href="https://github.com/aburan28/crypto/blob/main/research/factor_base_selector_20260915/end_to_end/summary.json">frozen summary</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md">corrected research note</a>.
+    Each row aggregates twelve archived runs on the same toy curve. Counts are
+    preserved; this panel corrects their interpretation.</p>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Divisor</th><th>F4 word XORs</th><th>Verified runs</th><th>Total S</th><th>vs rho / floor</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0·3</td><td>2,405,397</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>1·3</td><td>9,543,849</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>1·4</td><td>10,144,324</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>3·4</td><td>53,895,954</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>2·4</td><td>88,192,793</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>2·3</td><td>109,566,018</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+    </tbody>
+  </table></div>
+  <p>At extension degree 131 the Frobenius-stable linear-subspace dimensions
+    are exactly {0, 1, 130, 131}. This rules out a small intermediate-dimensional
+    stable linear subspace; it does not rule out all nonlinear invariant sets
+    or all index-calculus algorithms.</p>
 
 <section class="panel" id="toy-ic-e2e-candidates-20260922">
 <h2>Fixed toy IC pipeline: 360 verified runs; rho still leads</h2>
@@ -6700,17 +6763,18 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <div class="table-scroll"><table><caption>Confirmation: Single-target online time</caption><thead><tr>
 <th>Variant</th>
 <th>Online ms</th>
+<th>IC denominator</th>
 <th>/ IC reference</th>
 <th>Descriptive 95% interval</th>
 <th>Online rho / variant</th>
 <th>Verified / scheduled</th>
 <th>Class</th>
 </tr></thead><tbody>
-<tr><td>incumbent</td><td>0.0300712</td><td>1</td><td>reference</td><td>5.53271</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>ic_online</td><td>0.0302927</td><td>unknown</td><td>unknown</td><td>unknown</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>rho</td><td>0.225603</td><td>7.50231</td><td>[6.79684, 8.33391]</td><td>0.737468</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>rho_online</td><td>0.166375</td><td>5.53271</td><td>[5.11118, 6.01516]</td><td>1</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>stop5_word</td><td>0.0331297</td><td>1.09365</td><td>[1.02861, 1.15887]</td><td>5.05892</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>incumbent</td><td>0.0300712</td><td>incumbent</td><td>1</td><td>reference</td><td>5.53271</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>0.0302927</td><td>incumbent</td><td>1.00737</td><td>[0.995238, 1.01899]</td><td>5.49226</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.225603</td><td>incumbent</td><td>7.50231</td><td>[6.79684, 8.33391]</td><td>0.737468</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.166375</td><td>incumbent</td><td>5.53271</td><td>[5.11118, 6.01516]</td><td>1</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0331297</td><td>ic_online</td><td>1.09365</td><td>[1.02861, 1.15887]</td><td>5.02193</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
 </tbody></table></div>
 <div class="table-scroll"><table><caption>Confirmation: Complete cold instructions</caption><thead><tr>
 <th>Variant</th>
@@ -6724,7 +6788,7 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <th>Class</th>
 </tr></thead><tbody>
 <tr><td>incumbent</td><td>1.78088e+06</td><td>2788.01</td><td>1</td><td>reference</td><td>0.706919</td><td>222610</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>ic_online</td><td>1.80886e+06</td><td>2831.81</td><td>unknown</td><td>unknown</td><td>unknown</td><td>226108</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>1.80886e+06</td><td>2831.81</td><td>1.01571</td><td>[1.00708, 1.0248]</td><td>0.718025</td><td>226108</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho</td><td>2.51922e+06</td><td>3943.89</td><td>1.41459</td><td>[1.28029, 1.56319]</td><td>1</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho_online</td><td>4.58321e+06</td><td>7175.12</td><td>2.57356</td><td>[2.07447, 3.108]</td><td>1.8193</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>stop5_word</td><td>1.64326e+06</td><td>2572.57</td><td>0.922725</td><td>[0.891417, 0.954667]</td><td>0.652292</td><td>328653</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
@@ -6738,7 +6802,7 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <th>Class</th>
 </tr></thead><tbody>
 <tr><td>incumbent</td><td>0.776046</td><td>1</td><td>reference</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>ic_online</td><td>0.785151</td><td>unknown</td><td>unknown</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.785151</td><td>1.01173</td><td>[0.978519, 1.04686]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho</td><td>0.823813</td><td>1.06155</td><td>[1.02343, 1.10013]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho_online</td><td>1.60659</td><td>2.07023</td><td>[1.98018, 2.17453]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>stop5_word</td><td>0.765974</td><td>0.987022</td><td>[0.959326, 1.01544]</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
@@ -6747,17 +6811,18 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <div class="table-scroll"><table><caption>Replay: Single-target online time</caption><thead><tr>
 <th>Variant</th>
 <th>Online ms</th>
+<th>IC denominator</th>
 <th>/ IC reference</th>
 <th>Descriptive 95% interval</th>
 <th>Online rho / variant</th>
 <th>Verified / scheduled</th>
 <th>Class</th>
 </tr></thead><tbody>
-<tr><td>incumbent</td><td>0.0301787</td><td>1</td><td>reference</td><td>5.60364</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>ic_online</td><td>0.0304443</td><td>unknown</td><td>unknown</td><td>unknown</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>rho</td><td>0.227286</td><td>7.53133</td><td>[6.83563, 8.34729]</td><td>0.744044</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>rho_online</td><td>0.169111</td><td>5.60364</td><td>[5.18522, 6.08137]</td><td>1</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>stop5_word</td><td>0.0329592</td><td>1.08261</td><td>[1.01826, 1.14675]</td><td>5.17606</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>incumbent</td><td>0.0301787</td><td>incumbent</td><td>1</td><td>reference</td><td>5.60364</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>0.0304443</td><td>incumbent</td><td>1.0088</td><td>[0.994649, 1.0208]</td><td>5.55476</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.227286</td><td>incumbent</td><td>7.53133</td><td>[6.83563, 8.34729]</td><td>0.744044</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.169111</td><td>incumbent</td><td>5.60364</td><td>[5.18522, 6.08137]</td><td>1</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0329592</td><td>ic_online</td><td>1.08261</td><td>[1.01826, 1.14675]</td><td>5.13091</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
 </tbody></table></div>
 <div class="table-scroll"><table><caption>Replay: Complete cold instructions</caption><thead><tr>
 <th>Variant</th>
@@ -6771,7 +6836,7 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <th>Class</th>
 </tr></thead><tbody>
 <tr><td>incumbent</td><td>1.78088e+06</td><td>2788.01</td><td>1</td><td>reference</td><td>0.70692</td><td>222610</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>ic_online</td><td>1.80886e+06</td><td>2831.81</td><td>unknown</td><td>unknown</td><td>unknown</td><td>226107</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>1.80886e+06</td><td>2831.81</td><td>1.01571</td><td>[1.00708, 1.0248]</td><td>0.718027</td><td>226107</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho</td><td>2.51921e+06</td><td>3943.88</td><td>1.41459</td><td>[1.28029, 1.5632]</td><td>1</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho_online</td><td>4.58322e+06</td><td>7175.13</td><td>2.57357</td><td>[2.07451, 3.10801]</td><td>1.81931</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>stop5_word</td><td>1.64326e+06</td><td>2572.57</td><td>0.922726</td><td>[0.891419, 0.954669]</td><td>0.652294</td><td>328653</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
@@ -6785,7 +6850,7 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <th>Class</th>
 </tr></thead><tbody>
 <tr><td>incumbent</td><td>0.782402</td><td>1</td><td>reference</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>ic_online</td><td>0.807039</td><td>unknown</td><td>unknown</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.807039</td><td>1.03149</td><td>[0.994054, 1.06489]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho</td><td>0.838329</td><td>1.07148</td><td>[1.03267, 1.11189]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho_online</td><td>1.6424</td><td>2.09918</td><td>[1.99526, 2.18742]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>stop5_word</td><td>0.785639</td><td>1.00414</td><td>[0.979479, 1.0295]</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
@@ -6794,26 +6859,27 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <div class="table-scroll"><table><caption>Development: Single-target online time</caption><thead><tr>
 <th>Variant</th>
 <th>Online ms</th>
+<th>IC denominator</th>
 <th>/ IC reference</th>
 <th>Descriptive 95% interval</th>
 <th>Online rho / variant</th>
 <th>Verified / scheduled</th>
 <th>Class</th>
 </tr></thead><tbody>
-<tr><td>incumbent</td><td>0.0324391</td><td>1</td><td>reference</td><td>5.4419</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>batch4_stop6_word</td><td>0.031925</td><td>0.988777</td><td>[0.958135, 1.01936]</td><td>5.50367</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>compatibility</td><td>0.0322854</td><td>0.999939</td><td>[0.952806, 1.07447]</td><td>5.44223</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>cover_table</td><td>0.0308678</td><td>0.956032</td><td>[0.894381, 1.01261]</td><td>5.69217</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>half_table</td><td>0.0307428</td><td>0.95216</td><td>[0.910193, 0.979171]</td><td>5.71532</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>ic_online</td><td>0.0322874</td><td>unknown</td><td>unknown</td><td>unknown</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>rho</td><td>0.240285</td><td>7.40729</td><td>[6.20784, 8.86932]</td><td>0.734668</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>rho_online</td><td>0.17653</td><td>5.4419</td><td>[4.60466, 6.34739]</td><td>1</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>stop5_word</td><td>0.0368943</td><td>1.14268</td><td>[1.04381, 1.25609]</td><td>4.76238</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>stop6_half</td><td>0.0343731</td><td>1.0646</td><td>[0.969192, 1.24539]</td><td>5.11169</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>stop6_word</td><td>0.0348506</td><td>1.07939</td><td>[0.984671, 1.24676]</td><td>5.04165</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>stop6_word_half</td><td>0.0349149</td><td>1.08138</td><td>[0.979282, 1.25134]</td><td>5.03237</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>stop7_half</td><td>0.0326492</td><td>1.01121</td><td>[0.951769, 1.08414]</td><td>5.38159</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>word_half</td><td>0.0310254</td><td>0.960914</td><td>[0.910474, 1.00331]</td><td>5.66326</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>incumbent</td><td>0.0324391</td><td>incumbent</td><td>1</td><td>reference</td><td>5.4419</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>0.031925</td><td>ic_online</td><td>0.988777</td><td>[0.958135, 1.01936]</td><td>5.52952</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>0.0322854</td><td>ic_online</td><td>0.999939</td><td>[0.952806, 1.07447]</td><td>5.4678</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>0.0308678</td><td>ic_online</td><td>0.956032</td><td>[0.894381, 1.01261]</td><td>5.71891</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>0.0307428</td><td>ic_online</td><td>0.95216</td><td>[0.910193, 0.979171]</td><td>5.74217</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.0322874</td><td>incumbent</td><td>0.995324</td><td>[0.9508, 1.03375]</td><td>5.46746</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.240285</td><td>incumbent</td><td>7.40729</td><td>[6.20784, 8.86932]</td><td>0.734668</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.17653</td><td>incumbent</td><td>5.4419</td><td>[4.60466, 6.34739]</td><td>1</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0368943</td><td>ic_online</td><td>1.14268</td><td>[1.04381, 1.25609]</td><td>4.78475</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>0.0343731</td><td>ic_online</td><td>1.0646</td><td>[0.969192, 1.24539]</td><td>5.1357</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>0.0348506</td><td>ic_online</td><td>1.07939</td><td>[0.984671, 1.24676]</td><td>5.06534</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>0.0349149</td><td>ic_online</td><td>1.08138</td><td>[0.979282, 1.25134]</td><td>5.05602</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>0.0326492</td><td>ic_online</td><td>1.01121</td><td>[0.951769, 1.08414]</td><td>5.40687</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>0.0310254</td><td>ic_online</td><td>0.960914</td><td>[0.910474, 1.00331]</td><td>5.68986</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
 </tbody></table></div>
 <div class="table-scroll"><table><caption>Development: Complete cold instructions</caption><thead><tr>
 <th>Variant</th>
@@ -6831,7 +6897,7 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <tr><td>compatibility</td><td>1.84043e+06</td><td>2297.76</td><td>1.00019</td><td>[0.999721, 1.0007]</td><td>0.695767</td><td>230053</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>cover_table</td><td>2.92164e+06</td><td>3647.65</td><td>1.58779</td><td>[1.26462, 1.9492]</td><td>1.10452</td><td>365205</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
 <tr><td>half_table</td><td>2.32126e+06</td><td>2898.08</td><td>1.26151</td><td>[1.07197, 1.45119]</td><td>0.877544</td><td>290157</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>ic_online</td><td>1.87399e+06</td><td>2339.66</td><td>unknown</td><td>unknown</td><td>unknown</td><td>234248</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>1.87399e+06</td><td>2339.66</td><td>1.01843</td><td>[1.00803, 1.02973]</td><td>0.708454</td><td>234248</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho</td><td>2.64518e+06</td><td>3302.48</td><td>1.43754</td><td>[1.17677, 1.72102]</td><td>1</td><td>not applicable</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho_online</td><td>4.3996e+06</td><td>5492.87</td><td>2.391</td><td>[1.77221, 3.0715]</td><td>1.66326</td><td>not applicable</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>stop5_word</td><td>1.7647e+06</td><td>2203.21</td><td>0.959039</td><td>[0.889063, 1.07556]</td><td>0.667138</td><td>352940</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
@@ -6854,7 +6920,7 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <tr><td>compatibility</td><td>0.788452</td><td>1.01007</td><td>[0.954645, 1.05953]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>cover_table</td><td>0.884694</td><td>1.13336</td><td>[1.05871, 1.23197]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
 <tr><td>half_table</td><td>0.801723</td><td>1.02707</td><td>[0.943319, 1.11723]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>ic_online</td><td>0.801967</td><td>unknown</td><td>unknown</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.801967</td><td>1.02739</td><td>[0.957903, 1.09589]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho</td><td>0.844018</td><td>1.08126</td><td>[1.02359, 1.14318]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho_online</td><td>1.56977</td><td>2.011</td><td>[1.86215, 2.16501]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>stop5_word</td><td>0.764284</td><td>0.97911</td><td>[0.900617, 1.06604]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
@@ -6868,26 +6934,27 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <div class="table-scroll"><table><caption>Smoke: Single-target online time</caption><thead><tr>
 <th>Variant</th>
 <th>Online ms</th>
+<th>IC denominator</th>
 <th>/ IC reference</th>
 <th>Descriptive 95% interval</th>
 <th>Online rho / variant</th>
 <th>Verified / scheduled</th>
 <th>Class</th>
 </tr></thead><tbody>
-<tr><td>incumbent</td><td>0.0343879</td><td>1</td><td>reference</td><td>5.77961</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>batch4_stop6_word</td><td>0.0340717</td><td>0.969299</td><td>[0.932079, 0.998657]</td><td>5.96267</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>compatibility</td><td>0.0341205</td><td>0.970689</td><td>[0.921854, 1.00575]</td><td>5.95413</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>cover_table</td><td>0.0336985</td><td>0.958684</td><td>[0.939401, 0.972397]</td><td>6.0287</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>half_table</td><td>0.0334549</td><td>0.951754</td><td>[0.904468, 0.981786]</td><td>6.07259</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>ic_online</td><td>0.0351508</td><td>unknown</td><td>unknown</td><td>unknown</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>rho</td><td>0.264357</td><td>7.68749</td><td>[6.55676, 9.20841]</td><td>0.75182</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>rho_online</td><td>0.198749</td><td>5.77961</td><td>[5.148, 6.79648]</td><td>1</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
-<tr><td>stop5_word</td><td>0.0365239</td><td>1.03906</td><td>[0.950518, 1.20629]</td><td>5.56233</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>stop6_half</td><td>0.0331454</td><td>0.942949</td><td>[0.903755, 0.983814]</td><td>6.12929</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>stop6_word</td><td>0.0345409</td><td>0.982649</td><td>[0.909099, 1.06425]</td><td>5.88167</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>stop6_word_half</td><td>0.033814</td><td>0.961968</td><td>[0.911507, 1.02496]</td><td>6.00811</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>stop7_half</td><td>0.0328168</td><td>0.9336</td><td>[0.902179, 0.966443]</td><td>6.19067</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>word_half</td><td>0.0345434</td><td>0.98272</td><td>[0.907491, 1.08555]</td><td>5.88124</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>incumbent</td><td>0.0343879</td><td>incumbent</td><td>1</td><td>reference</td><td>5.77961</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>0.0340717</td><td>ic_online</td><td>0.969299</td><td>[0.932079, 0.998657]</td><td>5.83326</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>0.0341205</td><td>ic_online</td><td>0.970689</td><td>[0.921854, 1.00575]</td><td>5.8249</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>0.0336985</td><td>ic_online</td><td>0.958684</td><td>[0.939401, 0.972397]</td><td>5.89785</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>0.0334549</td><td>ic_online</td><td>0.951754</td><td>[0.904468, 0.981786]</td><td>5.94079</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.0351508</td><td>incumbent</td><td>1.02219</td><td>[0.978404, 1.08059]</td><td>5.65417</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.264357</td><td>incumbent</td><td>7.68749</td><td>[6.55676, 9.20841]</td><td>0.75182</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.198749</td><td>incumbent</td><td>5.77961</td><td>[5.148, 6.79648]</td><td>1</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0365239</td><td>ic_online</td><td>1.03906</td><td>[0.950518, 1.20629]</td><td>5.4416</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>0.0331454</td><td>ic_online</td><td>0.942949</td><td>[0.903755, 0.983814]</td><td>5.99626</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>0.0345409</td><td>ic_online</td><td>0.982649</td><td>[0.909099, 1.06425]</td><td>5.75401</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>0.033814</td><td>ic_online</td><td>0.961968</td><td>[0.911507, 1.02496]</td><td>5.87771</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>0.0328168</td><td>ic_online</td><td>0.9336</td><td>[0.902179, 0.966443]</td><td>6.05631</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>0.0345434</td><td>ic_online</td><td>0.98272</td><td>[0.907491, 1.08555]</td><td>5.75359</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
 </tbody></table></div>
 <div class="table-scroll"><table><caption>Smoke: Complete cold instructions</caption><thead><tr>
 <th>Variant</th>
@@ -6905,7 +6972,7 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <tr><td>compatibility</td><td>1.95601e+06</td><td>2442.06</td><td>1.00005</td><td>[0.999089, 1.00101]</td><td>0.668789</td><td>244501</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>cover_table</td><td>2.8749e+06</td><td>3589.29</td><td>1.46985</td><td>[1.12193, 1.85791]</td><td>0.982971</td><td>359362</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
 <tr><td>half_table</td><td>2.22654e+06</td><td>2779.83</td><td>1.13837</td><td>[0.900282, 1.38731]</td><td>0.761289</td><td>278318</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>ic_online</td><td>1.99761e+06</td><td>2494.01</td><td>unknown</td><td>unknown</td><td>unknown</td><td>249702</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>1.99761e+06</td><td>2494.01</td><td>1.02132</td><td>[1.00994, 1.03359]</td><td>0.683015</td><td>249702</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho</td><td>2.9247e+06</td><td>3651.47</td><td>1.49531</td><td>[1.41065, 1.57653]</td><td>1</td><td>not applicable</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho_online</td><td>4.65417e+06</td><td>5810.7</td><td>2.37954</td><td>[1.93471, 2.79046]</td><td>1.59133</td><td>not applicable</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>stop5_word</td><td>1.64788e+06</td><td>2057.37</td><td>0.842514</td><td>[0.739185, 0.937249]</td><td>0.563436</td><td>329577</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
@@ -6928,7 +6995,7 @@ No solver speedup or n=53/n=83 neighbor result is measured.
 <tr><td>compatibility</td><td>0.769606</td><td>0.87083</td><td>[0.822997, 0.926405]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>cover_table</td><td>0.87437</td><td>0.989373</td><td>[0.914658, 1.10576]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
 <tr><td>half_table</td><td>0.836014</td><td>0.945973</td><td>[0.841427, 1.0603]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
-<tr><td>ic_online</td><td>0.834291</td><td>unknown</td><td>unknown</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.834291</td><td>0.944023</td><td>[0.867752, 1.027]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho</td><td>0.834498</td><td>0.944257</td><td>[0.907044, 0.982996]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>rho_online</td><td>1.64785</td><td>1.86459</td><td>[1.79109, 1.9345]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
 <tr><td>stop5_word</td><td>0.751737</td><td>0.850611</td><td>[0.784426, 0.914588]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
@@ -7934,7 +8001,7 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
 <section class="panel" id="ecc2k130-n13-oaware-sat-benchmark-20260925">
   <div class="panel-head">
     <h2>O-aware n = 13 SAT stage: all 96 cold toy queries complete; n = 131 remains unpriced <span class="chip">solver stage</span></h2>
-    <p><a href="https://github.com/aburan28/crypto/pull/785">PR #785</a> ran the exact #781 17.6 MB dense CNF with each of the 32 frozen #767 Q+T unit assumptions in three cold engines: CryptoMiniSat, Kissat and CaDiCaL. Each returned five SAT and 27 UNSAT branch statuses. All 15 SAT models were independently converted from chosen x values to complete rational point fibres and a signed tuple summing to the exact full point. The 81 UNSAT outputs agree with #767's complete point oracle, but no separate UNSAT proof certificate was checked. All six tiny interface smokes and 96 target children finished within the frozen 15 s/2 GiB caps with zero invalid models or timeouts.</p>
+    <p><a href="https://github.com/aburan28/crypto/pull/785">PR #785</a> ran the exact #781 17.6 MB dense CNF with each of the 32 frozen #767 Q+T unit assumptions in three cold engines: CryptoMiniSat, Kissat and CaDiCaL. Each returned five SAT and 27 UNSAT branch statuses. All 15 SAT models were independently converted from chosen x values to complete rational point fibres and a signed tuple summing to the exact full point. The 81 UNSAT outputs agree with #767's complete point oracle; at the time, no separate UNSAT proof certificate was checked. All six tiny interface smokes and 96 target children finished within the frozen 15 s/2 GiB caps with zero invalid models or timeouts.</p>
   </div>
   <div class="table-scroll"><table>
     <caption>One fixed macOS panel. Charged portfolio wall includes source/schema/oracle preflight, one base read, 32 derived query files, cold child wall and point verification for each engine. The per-child maximum is not a portfolio cost. These are solver-stage diagnostics, not full IC operations S or matched rho.</caption>
@@ -7950,6 +8017,22 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n13-oaware-sat-benchmark-20260925 -->
+<!-- BEGIN ecc2k130-n13-oaware-unsat-proof-20260925 -->
+<section class="panel" id="ecc2k130-n13-oaware-unsat-proof-20260925">
+  <div class="panel-head">
+    <h2>Five fixed n = 13 O-aware negative branches gain external DRAT certificates <span class="chip">toy proof pipeline</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/790">PR #790</a> froze the exact #785 base/query hashes, Q0T0 and all four Q4 torsion assumptions, CaDiCaL 3.0.1 binary, vendored upstream DRAT-trim source, checker controls and resource caps before producing any selected proof. Each of the five 8,490-byte text DRAT streams checks as UNSAT against its exact one-assumption CNF with a separate checker. A non-unit XOR proof is accepted while its mutated proof with essential steps removed is rejected; Q0T0's actual proof is also rejected on the fixed SAT Q0T3 query. Freshly compiled archive-only replay passed all five certificates and both controls.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Stage walls are summed over five cold proof-generation and five external-check children, then the wrong-input control separately. They do not price CNF export, relation rank, a full ECDLP or rho.</caption>
+    <thead><tr><th>Fixed branches</th><th>External proofs verified</th><th>Raw / gzip proof bytes</th><th>CaDiCaL wall sum</th><th>DRAT-trim wall sum</th><th>Wrong-input check</th><th>Full S / rho</th></tr></thead>
+    <tbody><tr><td>Q0T0; Q4T0..T3</td><td>5 / 5</td><td>42,450 / 11,672</td><td>1.976 s</td><td>3.353 s</td><td>0.950 s, rejected</td><td>unset / unset</td></tr></tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Q0T0 is only a negative full-point branch of a projected-positive Q0. All four Q4 branches have certificates, so Q4 is projected-negative within this exact toy CNF, consistent with #781's complete point semantics and #767's point oracle. The first pre-outcome checker-control failure was retained and corrected before freeze; the first selected run passed every 60/180 s, 1 GiB RSS, 128 MiB proof, 320 MiB temporary and 512 MiB archive cap. Peak cumulative child RSS upper bound was 161,300,480 bytes. No other #785 negative, n19/n131 PDP, challenge log or IC/rho speed is certified. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_unsat_proof_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_unsat_proof_20260925/EVIDENCE.md">raw hashes and replay</a>. Freeze SHA-256 <code>8941c739264bd0dc94eceb1d6d2efe3e108e13f6ee9f5ecec898f42456bd3cc4</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n13-oaware-unsat-proof-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">

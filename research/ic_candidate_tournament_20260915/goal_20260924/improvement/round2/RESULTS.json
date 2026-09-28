@@ -743,6 +743,7 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h37ee4fda15d7"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.030448171287971493,
           "online_over_ic": 1,
           "rho_online_over_IC_online": null,
@@ -1143,6 +1144,7 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h37ee4fda15d7"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.030083779525266093,
           "online_over_ic": 0.9880323925118827,
           "rho_online_over_IC_online": null,
@@ -15340,6 +15342,7 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h37ee4fda15d7"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.03007119917874017,
           "online_over_ic": 1,
           "rho_online_over_IC_online": 5.532710029792343,
@@ -16921,11 +16924,60 @@
           },
           "alias": "ic_online",
           "cold_Ir": 1808860.553334147,
-          "cold_Ir_over_cold_rho": null,
-          "cold_Ir_over_ic": null,
+          "cold_Ir_over_cold_rho": 0.7180249979943876,
+          "cold_Ir_over_ic": 1.0157103529285647,
           "cold_ms": 0.7851508263656836,
-          "cold_time_over_ic": null,
-          "comparison": null,
+          "cold_time_over_ic": 1.0117326662414394,
+          "comparison": {
+            "candidate": "ic_online",
+            "candidate_over_baseline": 1.0157103529285647,
+            "ci95": [
+              1.0070835993423146,
+              1.0247952980907908
+            ],
+            "eligible": true,
+            "independent_curve_blocks": 6,
+            "native_wall_candidate_over_baseline": 1.0117326662414394,
+            "native_wall_ci95": [
+              0.9785189282336912,
+              1.0468596209860985
+            ],
+            "native_wall_per_cell": {
+              "n17a1": 0.9859325119514335,
+              "n19a0": 1.0027893770619607,
+              "n23a0": 1.0427824448133671,
+              "n23a1": 1.0014319687542124,
+              "n29a1": 1.0546941891872854,
+              "n31a0": 0.9849087738521574
+            },
+            "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+            "online": {
+              "boundary": "one supplied public point after reusable preparation through scalar replay",
+              "candidate_over_baseline": 1.0073656368311839,
+              "ci95": [
+                0.9952376058854902,
+                1.0189931382338986
+              ],
+              "per_cell": {
+                "n17a1": 1.0044870969119903,
+                "n19a0": 0.9845874078796925,
+                "n23a0": 1.0147168000054747,
+                "n23a1": 1.0059497519569136,
+                "n29a1": 1.0197908605704527,
+                "n31a0": 1.0150604327873656
+              }
+            },
+            "paired_cases": 72,
+            "per_cell": {
+              "n17a1": 1.0047590604279906,
+              "n19a0": 1.0071094147195934,
+              "n23a0": 1.0258658530484894,
+              "n23a1": 1.0329096621488965,
+              "n29a1": 1.0028405301254568,
+              "n31a0": 1.0211649408696415
+            },
+            "speedup": 0.9845326446823471
+          },
           "complete": true,
           "identities": [
             "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0hf59be3efe7b9",
@@ -16936,9 +16988,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h8de850f439e4"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.030292692710968974,
-          "online_over_ic": null,
-          "rho_online_over_IC_online": null,
+          "online_over_ic": 1.0073656368311839,
+          "rho_online_over_IC_online": 5.492256066224663,
           "scheduled": 216,
           "stage_diagnostics": {
             "n17a1": {
@@ -18581,9 +18634,10 @@
             "RHO1hf8c7094678fa"
           ],
           "mode": "rho",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.2256033473058492,
           "online_over_ic": 7.502306308600653,
-          "rho_online_over_IC_online": 0.7374678934995812,
+          "rho_online_over_IC_online": 0.7374678934995811,
           "scheduled": 216,
           "stage_diagnostics": null,
           "verified": 216
@@ -18701,6 +18755,7 @@
             "RHO1h81768fdd8de4"
           ],
           "mode": "rho",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.16637522530409898,
           "online_over_ic": 5.532710029792343,
           "rho_online_over_IC_online": 1.0,
@@ -18916,9 +18971,10 @@
             "IC1N31Ckb0fb310PDP3pairRCwalkLAgaussTDpdpISO0h2ade10001cae"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.033129742801518536,
           "online_over_ic": 1.0936546023695766,
-          "rho_online_over_IC_online": 5.058918983932264,
+          "rho_online_over_IC_online": 5.0219292766882875,
           "scheduled": 216,
           "stage_diagnostics": {
             "n17a1": {
@@ -32060,9 +32116,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h37ee4fda15d7"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.032439060771684944,
           "online_over_ic": 1,
-          "rho_online_over_IC_online": 5.441898744350395,
+          "rho_online_over_IC_online": 5.441898744350396,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -32680,9 +32737,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0hf1846988d90d"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03192500668046759,
           "online_over_ic": 0.9887768108772744,
-          "rho_online_over_IC_online": 5.503667444953698,
+          "rho_online_over_IC_online": 5.529523794566452,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -33300,9 +33358,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h1fdc2ff80994"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03228541447116664,
           "online_over_ic": 0.9999393102142209,
-          "rho_online_over_IC_online": 5.442229032064511,
+          "rho_online_over_IC_online": 5.467796742674418,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -33920,9 +33979,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h703b4c768778"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03086776380485238,
           "online_over_ic": 0.9560320334262764,
-          "rho_online_over_IC_online": 5.692171971317154,
+          "rho_online_over_IC_online": 5.718913919303352,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -34540,9 +34600,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h2030350e6759"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03074275729719725,
           "online_over_ic": 0.9521603494759713,
-          "rho_online_over_IC_online": 5.715317538002276,
+          "rho_online_over_IC_online": 5.742168224365234,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -35095,11 +35156,57 @@
           },
           "alias": "ic_online",
           "cold_Ir": 1873985.0004450576,
-          "cold_Ir_over_cold_rho": null,
-          "cold_Ir_over_ic": null,
+          "cold_Ir_over_cold_rho": 0.7084539941210951,
+          "cold_Ir_over_ic": 1.018432259758905,
           "cold_ms": 0.8019670302851202,
-          "cold_time_over_ic": null,
-          "comparison": null,
+          "cold_time_over_ic": 1.0273851343186278,
+          "comparison": {
+            "candidate": "ic_online",
+            "candidate_over_baseline": 1.018432259758905,
+            "ci95": [
+              1.0080314598372697,
+              1.0297300388825172
+            ],
+            "eligible": true,
+            "independent_curve_blocks": 5,
+            "native_wall_candidate_over_baseline": 1.0273851343186278,
+            "native_wall_ci95": [
+              0.9579027926673169,
+              1.0958911060132996
+            ],
+            "native_wall_per_cell": {
+              "n17a1": 1.0646520518106595,
+              "n19a0": 0.9282157300915741,
+              "n23a0": 1.0738130519087792,
+              "n23a1": 1.0252404529110857,
+              "n31a0": 1.052095966527045
+            },
+            "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+            "online": {
+              "boundary": "one supplied public point after reusable preparation through scalar replay",
+              "candidate_over_baseline": 0.9953239464059888,
+              "ci95": [
+                0.9507998892338083,
+                1.0337531730892622
+              ],
+              "per_cell": {
+                "n17a1": 0.9171371192247767,
+                "n19a0": 0.9939193902718155,
+                "n23a0": 1.0447621569496381,
+                "n23a1": 1.008052091861332,
+                "n31a0": 1.0175046940753418
+              }
+            },
+            "paired_cases": 15,
+            "per_cell": {
+              "n17a1": 1.0058769061044885,
+              "n19a0": 1.0070087530483263,
+              "n23a0": 1.027482437896698,
+              "n23a1": 1.037555163141307,
+              "n31a0": 1.014605124389551
+            },
+            "speedup": 0.9819013394535749
+          },
           "complete": true,
           "identities": [
             "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0hf59be3efe7b9",
@@ -35109,9 +35216,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h8de850f439e4"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.032287373984977163,
-          "online_over_ic": null,
-          "rho_online_over_IC_online": null,
+          "online_over_ic": 0.9953239464059888,
+          "rho_online_over_IC_online": 5.46746490326142,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -35724,9 +35832,10 @@
             "RHO1hf8c7094678fa"
           ],
           "mode": "rho",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.24028547942679854,
           "online_over_ic": 7.4072884266900925,
-          "rho_online_over_IC_online": 0.7346681310183676,
+          "rho_online_over_IC_online": 0.7346681310183675,
           "scheduled": 45,
           "stage_diagnostics": null,
           "verified": 45
@@ -35833,6 +35942,7 @@
             "RHO1h81768fdd8de4"
           ],
           "mode": "rho",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.17653008408133847,
           "online_over_ic": 5.441898744350395,
           "rho_online_over_IC_online": 1.0,
@@ -35947,9 +36057,10 @@
             "IC1N31Ckb0fb310PDP3pairRCwalkLAgaussTDpdpISO0h2ade10001cae"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.036894288566138585,
           "online_over_ic": 1.1426847096114088,
-          "rho_online_over_IC_online": 4.762379944858992,
+          "rho_online_over_IC_online": 4.78475370963941,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -36567,9 +36678,10 @@
             "IC1N31Ckb0fb372PDP3pairRCwalkLAgaussTDpdpISO0hd89a1504b952"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03437311781051432,
           "online_over_ic": 1.0645993640271771,
-          "rho_online_over_IC_online": 5.111687014131519,
+          "rho_online_over_IC_online": 5.135701831136775,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -37187,9 +37299,10 @@
             "IC1N31Ckb0fb372PDP3pairRCwalkLAgaussTDpdpISO0h0b196a025713"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03485059665191587,
           "online_over_ic": 1.0793877714592504,
-          "rho_online_over_IC_online": 5.041653137308903,
+          "rho_online_over_IC_online": 5.0653389336344095,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -37807,9 +37920,10 @@
             "IC1N31Ckb0fb372PDP3pairRCwalkLAgaussTDpdpISO0hf14d3e7993c7"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.034914864887621765,
           "online_over_ic": 1.081378278204574,
-          "rho_online_over_IC_online": 5.032372902279532,
+          "rho_online_over_IC_online": 5.0560150998586,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -38427,9 +38541,10 @@
             "IC1N31Ckb0fb434PDP3pairRCwalkLAgaussTDpdpISO0h7cf382c9def3"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.032649217262681315,
           "online_over_ic": 1.0112069590383075,
-          "rho_online_over_IC_online": 5.38158751352525,
+          "rho_online_over_IC_online": 5.406870328959333,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -39047,9 +39162,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0hea01213bde4d"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.031025375739229852,
           "online_over_ic": 0.9609135680611713,
-          "rho_online_over_IC_online": 5.663255182597199,
+          "rho_online_over_IC_online": 5.689861278879729,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -53459,9 +53575,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h37ee4fda15d7"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.030178729904720574,
           "online_over_ic": 1,
-          "rho_online_over_IC_online": 5.603639674768153,
+          "rho_online_over_IC_online": 5.603639674768151,
           "scheduled": 216,
           "stage_diagnostics": {
             "n17a1": {
@@ -55040,11 +55157,60 @@
           },
           "alias": "ic_online",
           "cold_Ir": 1808859.0797112088,
-          "cold_Ir_over_cold_rho": null,
-          "cold_Ir_over_ic": null,
+          "cold_Ir_over_cold_rho": 0.7180266824710175,
+          "cold_Ir_over_ic": 1.0157107450809526,
           "cold_ms": 0.8070392203591055,
-          "cold_time_over_ic": null,
-          "comparison": null,
+          "cold_time_over_ic": 1.0314896655544792,
+          "comparison": {
+            "candidate": "ic_online",
+            "candidate_over_baseline": 1.0157107450809526,
+            "ci95": [
+              1.0070819301241347,
+              1.0247954319641603
+            ],
+            "eligible": true,
+            "independent_curve_blocks": 6,
+            "native_wall_candidate_over_baseline": 1.0314896655544792,
+            "native_wall_ci95": [
+              0.9940544033797325,
+              1.0648904912968944
+            ],
+            "native_wall_per_cell": {
+              "n17a1": 0.9678334336792914,
+              "n19a0": 1.0398153824283507,
+              "n23a0": 1.0750851508071466,
+              "n23a1": 1.0302184837696031,
+              "n29a1": 1.049196000284219,
+              "n31a0": 1.0299202593810264
+            },
+            "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+            "online": {
+              "boundary": "one supplied public point after reusable preparation through scalar replay",
+              "candidate_over_baseline": 1.0088003346759713,
+              "ci95": [
+                0.9946494685680963,
+                1.020802343628757
+              ],
+              "per_cell": {
+                "n17a1": 1.0097132328226468,
+                "n19a0": 0.9778357105028127,
+                "n23a0": 1.0207096505258753,
+                "n23a1": 1.0136172143563449,
+                "n29a1": 1.0199356577410605,
+                "n31a0": 1.0116222910629338
+              }
+            },
+            "paired_cases": 72,
+            "per_cell": {
+              "n17a1": 1.004756715313895,
+              "n19a0": 1.0071179954155505,
+              "n23a0": 1.0258660750134885,
+              "n23a1": 1.0329094431623862,
+              "n29a1": 1.0028382574841275,
+              "n31a0": 1.021163299134607
+            },
+            "speedup": 0.9845322645674085
+          },
           "complete": true,
           "identities": [
             "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0hf59be3efe7b9",
@@ -55055,9 +55221,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h8de850f439e4"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.03044431282797786,
-          "online_over_ic": null,
-          "rho_online_over_IC_online": null,
+          "online_over_ic": 1.0088003346759713,
+          "rho_online_over_IC_online": 5.554755963248219,
           "scheduled": 216,
           "stage_diagnostics": {
             "n17a1": {
@@ -56700,6 +56867,7 @@
             "RHO1hf8c7094678fa"
           ],
           "mode": "rho",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.22728588303368857,
           "online_over_ic": 7.53132698928249,
           "rho_online_over_IC_online": 0.7440441349502489,
@@ -56820,6 +56988,7 @@
             "RHO1h81768fdd8de4"
           ],
           "mode": "rho",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.16911072822820428,
           "online_over_ic": 5.603639674768153,
           "rho_online_over_IC_online": 1.0,
@@ -57035,9 +57204,10 @@
             "IC1N31Ckb0fb310PDP3pairRCwalkLAgaussTDpdpISO0h2ade10001cae"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03295921689199151,
           "online_over_ic": 1.0826066949917323,
-          "rho_online_over_IC_online": 5.1760622769942755,
+          "rho_online_over_IC_online": 5.130908564435435,
           "scheduled": 216,
           "stage_diagnostics": {
             "n17a1": {
@@ -66314,9 +66484,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h37ee4fda15d7"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.03254100125283903,
           "online_over_ic": 1,
-          "rho_online_over_IC_online": 5.552855252051069,
+          "rho_online_over_IC_online": 5.55285525205107,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -66934,9 +67105,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0hf1846988d90d"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03210556280476637,
           "online_over_ic": 0.9815659100808399,
-          "rho_online_over_IC_online": 5.657139469721138,
+          "rho_online_over_IC_online": 5.628167019299275,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -67554,9 +67726,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h2030350e6759"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03148275217642548,
           "online_over_ic": 0.9625246714975781,
-          "rho_online_over_IC_online": 5.769052385339341,
+          "rho_online_over_IC_online": 5.739506784579454,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -68109,11 +68282,57 @@
           },
           "alias": "ic_online",
           "cold_Ir": 1780233.5271158305,
-          "cold_Ir_over_cold_rho": null,
-          "cold_Ir_over_ic": null,
+          "cold_Ir_over_cold_rho": 0.6612478458200496,
+          "cold_Ir_over_ic": 1.015567934258134,
           "cold_ms": 0.8422921186987573,
-          "cold_time_over_ic": null,
-          "comparison": null,
+          "cold_time_over_ic": 1.0426948740714812,
+          "comparison": {
+            "candidate": "ic_online",
+            "candidate_over_baseline": 1.015567934258134,
+            "ci95": [
+              1.0074815991004045,
+              1.024729365096295
+            ],
+            "eligible": true,
+            "independent_curve_blocks": 5,
+            "native_wall_candidate_over_baseline": 1.0426948740714812,
+            "native_wall_ci95": [
+              0.9942761533418988,
+              1.0939834199177907
+            ],
+            "native_wall_per_cell": {
+              "n17a1": 1.0336804713264864,
+              "n19a0": 0.9955691284456093,
+              "n23a0": 1.0608493114146837,
+              "n23a1": 0.9966054376586632,
+              "n31a0": 1.1327954835185905
+            },
+            "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+            "online": {
+              "boundary": "one supplied public point after reusable preparation through scalar replay",
+              "candidate_over_baseline": 1.0051477595321026,
+              "ci95": [
+                0.9935085214262788,
+                1.0177592735703036
+              ],
+              "per_cell": {
+                "n17a1": 0.9957387438399942,
+                "n19a0": 0.9998476511516626,
+                "n23a0": 1.0072080216559494,
+                "n23a1": 1.0197557495189808,
+                "n31a0": 1.0033558099828541
+              }
+            },
+            "paired_cases": 15,
+            "per_cell": {
+              "n17a1": 1.0043817322415127,
+              "n19a0": 1.0074452570240673,
+              "n23a0": 1.0190535851129736,
+              "n23a1": 1.0307550822799758,
+              "n31a0": 1.0164174953299263
+            },
+            "speedup": 0.9846707111036286
+          },
           "complete": true,
           "identities": [
             "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0hf59be3efe7b9",
@@ -68123,9 +68342,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h8de850f439e4"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.032708514502222494,
-          "online_over_ic": null,
-          "rho_online_over_IC_online": null,
+          "online_over_ic": 1.0051477595321026,
+          "rho_online_over_IC_online": 5.524416882385461,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -68738,9 +68958,10 @@
             "RHO1hf8c7094678fa"
           ],
           "mode": "rho",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.24516070298475853,
           "online_over_ic": 7.533901648566195,
-          "rho_online_over_IC_online": 0.7370490764380836,
+          "rho_online_over_IC_online": 0.7370490764380837,
           "scheduled": 45,
           "stage_diagnostics": null,
           "verified": 45
@@ -68847,6 +69068,7 @@
             "RHO1h81768fdd8de4"
           ],
           "mode": "rho",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.18069546971382763,
           "online_over_ic": 5.552855252051069,
           "rho_online_over_IC_online": 1.0,
@@ -68961,9 +69183,10 @@
             "IC1N31Ckb0fb310PDP3pairRCwalkLAgaussTDpdpISO0h2ade10001cae"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03344253264320425,
           "online_over_ic": 1.0224411946599374,
-          "rho_online_over_IC_online": 5.430977625953286,
+          "rho_online_over_IC_online": 5.40316343985228,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -69581,9 +69804,10 @@
             "IC1N31Ckb0fb372PDP3pairRCwalkLAgaussTDpdpISO0hd89a1504b952"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03301980774155918,
           "online_over_ic": 1.009517192818877,
-          "rho_online_over_IC_online": 5.500505877018121,
+          "rho_online_over_IC_online": 5.47233560922288,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -70201,9 +70425,10 @@
             "IC1N31Ckb0fb372PDP3pairRCwalkLAgaussTDpdpISO0h0b196a025713"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.0330346502786542,
           "online_over_ic": 1.0099709748790195,
-          "rho_online_over_IC_online": 5.498034488284402,
+          "rho_online_over_IC_online": 5.469876877449086,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -70821,9 +71046,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0hea01213bde4d"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.031665432720898196,
           "online_over_ic": 0.9681097782275188,
-          "rho_online_over_IC_online": 5.735770236943185,
+          "rho_online_over_IC_online": 5.706395087238908,
           "scheduled": 45,
           "stage_diagnostics": {
             "n17a1": {
@@ -75241,9 +75467,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h37ee4fda15d7"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.034387886131982175,
           "online_over_ic": 1,
-          "rho_online_over_IC_online": 5.779612856108024,
+          "rho_online_over_IC_online": 5.779612856108023,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -75646,9 +75873,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0hf1846988d90d"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03407165217928783,
           "online_over_ic": 0.9692987595085356,
-          "rho_online_over_IC_online": 5.962674355467519,
+          "rho_online_over_IC_online": 5.833255978810513,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -76051,9 +76279,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h1fdc2ff80994"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.034120521456139585,
           "online_over_ic": 0.9706890334283687,
-          "rho_online_over_IC_online": 5.954134287162034,
+          "rho_online_over_IC_online": 5.824901270581856,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -76456,9 +76685,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h703b4c768778"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.0336985205552431,
           "online_over_ic": 0.9586836000669918,
-          "rho_online_over_IC_online": 6.028696908661158,
+          "rho_online_over_IC_online": 5.897845528766395,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -76861,9 +77091,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h2030350e6759"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.0334549368662569,
           "online_over_ic": 0.9517539282586384,
-          "rho_online_over_IC_online": 6.072591543365208,
+          "rho_online_over_IC_online": 5.94078744124738,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -77201,11 +77432,57 @@
           },
           "alias": "ic_online",
           "cold_Ir": 1997614.8498290332,
-          "cold_Ir_over_cold_rho": null,
-          "cold_Ir_over_ic": null,
+          "cold_Ir_over_cold_rho": 0.6830145906634825,
+          "cold_Ir_over_ic": 1.0213205906332639,
           "cold_ms": 0.8342914647292247,
-          "cold_time_over_ic": null,
-          "comparison": null,
+          "cold_time_over_ic": 0.9440230771039504,
+          "comparison": {
+            "candidate": "ic_online",
+            "candidate_over_baseline": 1.0213205906332639,
+            "ci95": [
+              1.0099414237489173,
+              1.033587114824026
+            ],
+            "eligible": true,
+            "independent_curve_blocks": 5,
+            "native_wall_candidate_over_baseline": 0.9440230771039504,
+            "native_wall_ci95": [
+              0.8677517672148573,
+              1.0269982773589132
+            ],
+            "native_wall_per_cell": {
+              "n17a1": 0.8141817201401995,
+              "n19a0": 0.9778942281744412,
+              "n23a0": 1.0248770034044714,
+              "n23a1": 1.0546457285831534,
+              "n31a0": 0.8712072445645055
+            },
+            "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+            "online": {
+              "boundary": "one supplied public point after reusable preparation through scalar replay",
+              "candidate_over_baseline": 1.022186301634477,
+              "ci95": [
+                0.9784038710396035,
+                1.0805944515481474
+              ],
+              "per_cell": {
+                "n17a1": 0.9539359774511778,
+                "n19a0": 0.9838064466497423,
+                "n23a0": 1.0179654229066193,
+                "n23a1": 1.0270652583930593,
+                "n31a0": 1.137340030794861
+              }
+            },
+            "paired_cases": 5,
+            "per_cell": {
+              "n17a1": 1.0040259681902508,
+              "n19a0": 1.010207391950576,
+              "n23a0": 1.0338195898107425,
+              "n23a1": 1.0376245557563415,
+              "n31a0": 1.0213390867189214
+            },
+            "speedup": 0.9791244876204404
+          },
           "complete": true,
           "identities": [
             "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0hf59be3efe7b9",
@@ -77215,9 +77492,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0h8de850f439e4"
           ],
           "mode": "ic",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.03515082614627837,
-          "online_over_ic": null,
-          "rho_online_over_IC_online": null,
+          "online_over_ic": 1.022186301634477,
+          "rho_online_over_IC_online": 5.65416778415678,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -77615,6 +77893,7 @@
             "RHO1hf8c7094678fa"
           ],
           "mode": "rho",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.2643565864216187,
           "online_over_ic": 7.687491618618454,
           "rho_online_over_IC_online": 0.7518203781985648,
@@ -77724,6 +78003,7 @@
             "RHO1h81768fdd8de4"
           ],
           "mode": "rho",
+          "online_ic_reference": "incumbent",
           "online_ms": 0.19874866878278297,
           "online_over_ic": 5.779612856108024,
           "rho_online_over_IC_online": 1.0,
@@ -77838,9 +78118,10 @@
             "IC1N31Ckb0fb310PDP3pairRCwalkLAgaussTDpdpISO0h2ade10001cae"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.036523930156817555,
           "online_over_ic": 1.0390632073574906,
-          "rho_online_over_IC_online": 5.562330390666545,
+          "rho_online_over_IC_online": 5.441601381051939,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -78243,9 +78524,10 @@
             "IC1N31Ckb0fb372PDP3pairRCwalkLAgaussTDpdpISO0hd89a1504b952"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.033145438442531386,
           "online_over_ic": 0.9429490591372827,
-          "rho_online_over_IC_online": 6.129294896795244,
+          "rho_online_over_IC_online": 5.996260062372677,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -78648,9 +78930,10 @@
             "IC1N31Ckb0fb372PDP3pairRCwalkLAgaussTDpdpISO0h0b196a025713"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.034540921272001236,
           "online_over_ic": 0.9826489177881896,
-          "rho_online_over_IC_online": 5.881666128648627,
+          "rho_online_over_IC_online": 5.754006015580367,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -79053,9 +79336,10 @@
             "IC1N31Ckb0fb372PDP3pairRCwalkLAgaussTDpdpISO0hf14d3e7993c7"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03381397569378766,
           "online_over_ic": 0.9619681640787767,
-          "rho_online_over_IC_online": 6.008112401144623,
+          "rho_online_over_IC_online": 5.877707802909945,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -79458,9 +79742,10 @@
             "IC1N31Ckb0fb434PDP3pairRCwalkLAgaussTDpdpISO0h7cf382c9def3"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.03281681480326692,
           "online_over_ic": 0.9336000999436375,
-          "rho_online_over_IC_online": 6.190672919226278,
+          "rho_online_over_IC_online": 6.056305889960945,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
@@ -79863,9 +80148,10 @@
             "IC1N31Ckb0fb496PDP3pairRCwalkLAgaussTDpdpISO0hea01213bde4d"
           ],
           "mode": "ic",
+          "online_ic_reference": "ic_online",
           "online_ms": 0.034543404205878474,
           "online_over_ic": 0.9827195543606246,
-          "rho_online_over_IC_online": 5.881243362322576,
+          "rho_online_over_IC_online": 5.7535924252931805,
           "scheduled": 15,
           "stage_diagnostics": {
             "n17a1": {
