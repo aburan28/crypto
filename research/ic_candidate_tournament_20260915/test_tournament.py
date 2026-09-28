@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from oracle import Curve, InvalidEvidence, rank, verify
-from tournament import comparison, gate, parse_profiles
+from tournament import comparison, gate, parse_confirmation_allocation, parse_profiles
 
 
 class ArithmeticTests(unittest.TestCase):
@@ -102,6 +102,43 @@ class DecisionTests(unittest.TestCase):
         data=rows(.5)
         data[1]['certificate']['factor_base_sha256']='different-base'
         with self.assertRaises(InvalidEvidence):comparison(data,'candidate',draws=200)
+
+    def test_confirmation_allocation_raises_only(self):
+        panel=['n13a0','n23a0','n23a1']
+        self.assertEqual(parse_confirmation_allocation('',12,panel),{})
+        self.assertEqual(parse_confirmation_allocation(' n23a1=48 ,n23a0=16',12,panel),
+                         {'n23a1':48,'n23a0':16})
+        self.assertEqual(parse_confirmation_allocation('n23a1=12',12,panel),{'n23a1':12})
+        for bad in ('n23a1=11','n23a1=0','n19a1=48','n23a1','n23a1=12,n23a1=48'):
+            with self.assertRaises(InvalidEvidence,msg=bad):
+                parse_confirmation_allocation(bad,12,panel)
+
+    def test_unequal_per_cell_case_counts_do_not_tilt_the_estimate(self):
+        """Round 0019's allocation raises one cell's case count far above the
+        others.  The cross-cell mean is unweighted, so a cell measured 32 times
+        must carry exactly the weight of a cell measured 4 times -- otherwise
+        the allocation would move the headline, which is not what it is for."""
+        data=[r for r in rows(.5) if not (r['cell']=='0' and r['case'] not in ('0-0','0-1'))]
+        data+= [dict(r,case=f'0-{i}',case_sha256=f'0-{i}')
+                for i in range(4,32) for r in rows(.5) if r['case']=='0-0' and r['cell']=='0']
+        result=comparison(data,'candidate',draws=200)
+        self.assertEqual(sorted(result['per_cell']),['0','1','2','3'])
+        self.assertEqual(result['paired_cases'],4-2+28+12)
+        for value in result['per_cell'].values():
+            self.assertAlmostEqual(value,.5,places=9)
+        self.assertAlmostEqual(result['candidate_over_baseline'],.5,places=9)
+
+    def test_one_dense_cell_cannot_outvote_a_regressed_sparse_cell(self):
+        """The per-cell gate is a maximum, not an average: 32 good cases at one
+        cell must not rescue a cell that regressed on 4."""
+        data=[r for r in rows(.5) if not (r['cell']=='0' and r['case'] not in ('0-0','0-1'))]
+        data+= [dict(r,case=f'0-{i}',case_sha256=f'0-{i}')
+                for i in range(4,32) for r in rows(.5) if r['case']=='0-0' and r['cell']=='0']
+        for row in data:
+            if row['arm']=='candidate' and row['cell']=='3':row['total_operations']=2000
+        result=comparison(data,'candidate',draws=200)
+        self.assertGreater(result['per_cell']['3'],1.1)
+        self.assertFalse(gate(result,self.contract))
 
     def test_per_cell_regression_blocks_aggregate_win(self):
         data=rows(.1)

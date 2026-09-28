@@ -1,21 +1,21 @@
 {
- "frozen_at": "2026-09-20T20:14:44.563316+00:00",
+ "frozen_at": "2026-09-21T17:57:36.483969+00:00",
  "frozen_from": {
   "git": {
-   "commit": "c6d2a107cd6750dfd10b9766d7368278ee24c810",
-   "dirty": false
+   "commit": "8345b58e8dbf7737d465a77a4c1a1de8f3aa060a",
+   "dirty": true
   },
   "host": {
    "cpu_count": 4,
    "machine": "x86_64",
-   "platform": "Linux-6.12.94+-x86_64-with-glibc2.39",
-   "python": "3.12.3"
+   "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+   "python": "3.11.15"
   },
   "ic_binary": {
    "path": "target/release/ic",
-   "sha256": "8077b709c2444fe548d92c8620716679f47724617c03f809c1240e2df0ad0236"
+   "sha256": "bd8ed51f3a8fb2c778e09310f19b89435d19650400cbc4fa1dccd37e63f081f9"
   },
-  "note": "four rungs: adds k0n61-subgroup-wide (47.2-bit subgroup, 36112-point compact base, descent_summands 2) to the three of v2. Frozen on the 4-vCPU dev host as the interim reference so the workflow can run the new rung once on CI; v4 is then frozen from that run's artifact and v3 stays as the dev-host before mark."
+  "note": "Supersedes v2. The pair-table tier is chosen by a measured cost model rather than a fixed ladder (docs/ic/runs/koblitz-tier-crossover-20260921.json), and all three rungs now build the compact tier where v2 built the full one. Every pinned counter is unchanged -- pair_table_stored_pairs is |F|(|F|+1)/2 for both tiers -- which is why the tier itself is now pinned beside them. Frozen on a dev host, so the wall ratios carry the host effect the README describes; the counters and the tier do not."
  },
  "rungs": {
   "docs/ic/params/k0n31.json": {
@@ -36,6 +36,7 @@
    "ic_S_null_reason": "pinned IC counters are in mixed units (group additions, table lookups, scalar multiplications) with no measured conversion recorded; AGENTS.md \u00a78 says leave it null",
    "ic_verified": 32,
    "name": "k0n31-ledger-rung",
+   "pair_table_tier": "compact",
    "params_digest": "07fa61787cde4e34d9ce2ba3a7f4ffb07bdefacf565cd8e8a7ec28fcfa7174da",
    "rho_S": {
     "expected": 0.15917105461020273,
@@ -47,15 +48,15 @@
    "subgroup_order": "1439393",
    "targets": 32,
    "wall": {
-    "amortised_ratio": 0.03366363508252904,
-    "charged_ratio": 2.3343378078616506,
-    "ic_descent_seconds_total": 0.007148015999999999,
-    "ic_precompute_seconds": 0.48851693399999996,
-    "ic_whole_process_seconds": 0.49566494999999994,
+    "amortised_ratio": 0.03127978051255959,
+    "charged_ratio": 1.573864870984119,
+    "ic_descent_seconds_total": 0.014036334,
+    "ic_precompute_seconds": 0.692212004,
+    "ic_whole_process_seconds": 0.7062483380000001,
     "reported_whole_process_crossover": false,
-    "rho_seconds_total": 0.016685884,
+    "rho_seconds_total": 0.022091293,
     "whole_process_crossover": false,
-    "whole_process_ratio": 0.03366363508252904
+    "whole_process_ratio": 0.03127978051255959
    }
   },
   "docs/ic/params/k0n41-subgroup.json": {
@@ -76,6 +77,7 @@
    "ic_S_null_reason": "pinned IC counters are in mixed units (group additions, table lookups, scalar multiplications) with no measured conversion recorded; AGENTS.md \u00a78 says leave it null",
    "ic_verified": 32,
    "name": "k0n41-subgroup-rung",
+   "pair_table_tier": "compact",
    "params_digest": "6c98955f051f35648e69477854a89587c53d60b2867c0f20509536ccf6d25b4b",
    "rho_S": {
     "expected": 0.13840539283493047,
@@ -87,15 +89,15 @@
    "subgroup_order": "549756390943",
    "targets": 32,
    "wall": {
-    "amortised_ratio": 2.4086755698848346,
-    "charged_ratio": 10.23489652162715,
-    "ic_descent_seconds_total": 0.28110042900000004,
-    "ic_precompute_seconds": 0.9133459460000001,
-    "ic_whole_process_seconds": 1.194446375,
+    "amortised_ratio": 1.7912095208741936,
+    "charged_ratio": 9.269845894799984,
+    "ic_descent_seconds_total": 0.396993677,
+    "ic_precompute_seconds": 1.6575232089999998,
+    "ic_whole_process_seconds": 2.054516886,
     "reported_whole_process_crossover": true,
-    "rho_seconds_total": 2.877033803,
+    "rho_seconds_total": 3.6800702070000004,
     "whole_process_crossover": true,
-    "whole_process_ratio": 2.4086755698848346
+    "whole_process_ratio": 1.7912095208741936
    }
   },
   "docs/ic/params/k0n53-subgroup.json": {
@@ -116,6 +118,7 @@
    "ic_S_null_reason": "pinned IC counters are in mixed units (group additions, table lookups, scalar multiplications) with no measured conversion recorded; AGENTS.md \u00a78 says leave it null",
    "ic_verified": 32,
    "name": "k0n53-subgroup-rung",
+   "pair_table_tier": "compact",
    "params_digest": "fe74a196597c95cb34694eff0646b5ab382965a81ba331423dc6f1f5ef8c95be",
    "rho_S": {
     "expected": 0.12173263026670363,
@@ -127,55 +130,15 @@
    "subgroup_order": "21044858204113",
    "targets": 32,
    "wall": {
-    "amortised_ratio": 2.331324503254658,
-    "charged_ratio": 27.450339513181987,
-    "ic_descent_seconds_total": 1.111150082,
-    "ic_precompute_seconds": 11.972162412,
-    "ic_whole_process_seconds": 13.083312494,
+    "amortised_ratio": 1.505541647477566,
+    "charged_ratio": 19.98272891788902,
+    "ic_descent_seconds_total": 2.004982188,
+    "ic_precompute_seconds": 24.606713088,
+    "ic_whole_process_seconds": 26.611695276,
     "reported_whole_process_crossover": true,
-    "rho_seconds_total": 30.501447001000006,
+    "rho_seconds_total": 40.065015548,
     "whole_process_crossover": true,
-    "whole_process_ratio": 2.331324503254658
-   }
-  },
-  "docs/ic/params/k0n61-subgroup-wide.json": {
-   "claim_boundary": "synthetic_known_answer",
-   "counters": {
-    "collection_relations": 336,
-    "collection_summands_scanned": 90000000,
-    "collection_trials": 80000,
-    "descent_trials": 6819485,
-    "factor_base_columns": 296,
-    "factor_base_points": 36112,
-    "pair_table_stored_pairs": 652056328,
-    "rho_group_additions": 72555474,
-    "rho_iterations": 72445898
-   },
-   "degree": 61,
-   "ic_S": null,
-   "ic_S_null_reason": "pinned IC counters are in mixed units (group additions, table lookups, scalar multiplications) with no measured conversion recorded; AGENTS.md \u00a78 says leave it null",
-   "ic_verified": 32,
-   "name": "k0n61-subgroup-wide",
-   "params_digest": "a5185d27548a825c18993f81a2a4b239a1a7e9f4bcf3431481ffc87e6fb81448",
-   "rho_S": {
-    "expected": 0.11346973044749432,
-    "measured": 0.1776542553485069,
-    "measured_over_expected": 1.565653277291538
-   },
-   "rho_verified": 32,
-   "subgroup_bits": 47.21087395347554,
-   "subgroup_order": "162888033982417",
-   "targets": 32,
-   "wall": {
-    "amortised_ratio": 1.8740964213388351,
-    "charged_ratio": 71.9493251590862,
-    "ic_descent_seconds_total": 1.1345928859999999,
-    "ic_precompute_seconds": 42.424101078999996,
-    "ic_whole_process_seconds": 43.558693964999996,
-    "reported_whole_process_crossover": true,
-    "rho_seconds_total": 81.63319247800001,
-    "whole_process_crossover": true,
-    "whole_process_ratio": 1.8740964213388351
+    "whole_process_ratio": 1.505541647477566
    }
   }
  },

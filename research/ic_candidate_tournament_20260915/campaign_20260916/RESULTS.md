@@ -1,7 +1,7 @@
 # Continued IC tournament results
 
 Batch (16-target) parity verdict: **True**; selected implementation **combined_descent**.
-Single-target verdict: **strictly below rho in both metrics on every cell**; selected implementation **tiny2** (round-0007), re-measured with the per-target descent certificate under the merged checker in round-0008 (retained, `beats_rho_strict`), in round-0010 on a lean static executable under an evaluator that no longer forks itself (0.5347 of rho's instructions and 0.8445 of its native time, `beats_rho_strict` on every cell), in round-0011 with the general binary-field arithmetic in words for both arms (0.4796 of rho's instructions and 0.8653 of its native time, `beats_rho_strict` on every cell), in round-0012 as a musl static executable without relocations whose worker serves the heap from an arena, for both arms (0.4369 of rho's instructions and 0.7988 of its native time, `beats_rho_strict` on every cell), in round-0013 with one field inversion per scalar product for both arms, which halved rho's job because its setup is scalar products (0.7697 of rho's instructions and 0.9098 of its native time, `beats_rho_strict` on every cell: the strict-win record under the corrected baseline), in round-0014 with the worker built as one optimisation unit, which made both arms faster again and rho slightly more so (0.7818 and 0.9424), and in round-0015 on that same executable against fresh fixtures: 0.7372 and 0.9246, `beats_rho_strict` still on every cell, after **tiny_batch1** reached parity in round-0006. The last two figures are the same executable measured twice, which is the size of the fixture variation these ratios carry.
+Single-target verdict: **strictly below rho in both metrics on every cell**; selected implementation **tiny2** (round-0007), re-measured with the per-target descent certificate under the merged checker in round-0008 (retained, `beats_rho_strict`), in round-0010 on a lean static executable under an evaluator that no longer forks itself (0.5347 of rho's instructions and 0.8445 of its native time, `beats_rho_strict` on every cell), in round-0011 with the general binary-field arithmetic in words for both arms (0.4796 of rho's instructions and 0.8653 of its native time, `beats_rho_strict` on every cell), in round-0012 as a musl static executable without relocations whose worker serves the heap from an arena, for both arms (0.4369 of rho's instructions and 0.7988 of its native time, `beats_rho_strict` on every cell), in round-0013 with one field inversion per scalar product for both arms, which halved rho's job because its setup is scalar products (0.7697 of rho's instructions and 0.9098 of its native time, `beats_rho_strict` on every cell: the strict-win record under the corrected baseline), in round-0014 with the worker built as one optimisation unit, which made both arms faster again and rho slightly more so (0.7818 and 0.9424), and in round-0015 on that same executable against fresh fixtures: 0.7372 and 0.9246, `beats_rho_strict` still on every cell, after **tiny_batch1** reached parity in round-0006. The last two figures are the same executable measured twice, which is the size of the fixture variation these ratios carry. Rounds 0016–0017 widened the panel to eight cells and round 0017 held `beats_rho_strict` there; round 0018b, the same executable under a fresh seed, did not, failing at `n23a1` alone. **Round 0019 settles it: `both` — round 0018's scan-block ceiling and representative column convention together — is PROMOTED with `beats_rho_strict` on all eight cells in both metrics on both final stages, at 0.6751 of rho's instructions and 0.8848 of its native time, under seed 2026092119 with forty confirmation fixtures at `n23a1` instead of twelve.** Round 0020 then **replicated that win on a second independent seed** (2026092120): `beats_rho_strict` on all eight cells again, at 0.6629 of rho's instructions and 0.8832 of its native time, with `n23a1` at 0.7948. Every eight-cell strict claim is scoped to its seeds as well as its panel, and the tournament classifies both rounds `engineering` rather than an advance: `S` fell, the ratio to the boundary at the largest cell did not.
 
 Completed three new tournaments with **4,704 profiled trials**, each paired with a fresh native run, followed by round 0006-batch16 (1,680 further profiled trials, incumbent retained, index-calculus admission enforced by a per-target descent certificate) and by the single-target rounds 0006–0011 (1,584, 1,488, 1,356, 1,356, 1,440 and 1,440 profiled trials: parity, a strict win over rho, that win re-measured with the descent certificate, the same pipeline on a leaner shared job, the strict win on every cell on a lean static executable under an evaluator that no longer forks itself, and the same again with the general binary-field arithmetic in words). Every listed round passed its independent artifact/correctness audit. The 36-trial batch screen is separate development evidence.
 
@@ -273,13 +273,783 @@ Against its six pre-registered predictions, in order: **(1) confirmed** — on a
 
 Prediction 4's failure is the round's honest caveat. Development measured `orbits` at 1.005 of `scan_io`'s wall at n23a1 on four fixtures, and the cell flipped on twelve fresh ones under a new seed; the margin there (0.950 confirmation, upper limit for the panel 0.9266) is real on these fixtures and larger than the ±4% per-cell spread the A/A control shows, but cross-round fixture variation at a single cell is of the same order, and no reader should take 0.950 at n23a1 as a stable per-cell number. What is stable is the panel: eight cells, both metrics, both stages, upper limits 0.7443 and 0.9266.
 
+## Round 0018: two levers that work, and a strict win that does not replicate
+
+Round 0018 ([pre-registration](ROUND18-single-target.md), [report](../runs/round-0018b/REPORT.md),
+`--objective rho`, seed 2026091818, the round-0016/0017 eight-cell panel) took
+the n23a1 collection that round 0017 handed forward. It killed the hypothesis
+it was given, measured two levers it found instead, ran twice because the
+first run used the wrong baseline, and ended by refuting a claim of its own
+campaign. **Retained: the incumbent.**
+
+### What was killed before anything was built
+
+Round 0017 found its `orbits_rows` arm badly wrong — two pair-table rows cost
+1.272x three at n23a1 against a predicted 0.973x — which invites the
+conclusion that the shipped row rule is wrong in the same direction. It is
+not. Sweeping every row count at every cell
+([round18_row_sweep.py](round18_row_sweep.py), with
+[a probe patch](round18-rows-probe.patch) making the count settable and the
+probe first checked byte-identical to the frozen worker) puts the shipped
+choice at the measured optimum at **seven of eight cells, n23a1 included**;
+the one miss is n23a0, where three rows beat two by 1.0%, inside the A/A
+control's per-cell spread. The sweep reproduces round 0017's number from the
+other side: two rows cost 1.307x three at n23a1 here against 1.272x there.
+Cost of finding out: one probe build and about fifteen minutes.
+
+### The two levers
+
+`decompose` scans the base in blocks, each paying one batch inversion and
+discarded on an early exit, so the rule sizes a block at about one expected
+witness, `chunk = (1/hit + 1).clamp(8, 64)`. That ceiling binds at exactly two
+cells — the rule asks 71 at n23a0 and 102 at n23a1 — and the obvious reading,
+that the cap is too low, is wrong: at n23a1 the block the rule asks for costs
+**1.040x** what 16 costs ([round18_block_sweep.py](round18_block_sweep.py)).
+A single fixed block is a wash ([round18_block_grid.py](round18_block_grid.py):
+the best constant on the development cells is 12, at 0.9910, and it makes
+n13a0 and n29a1 worse), so **`block`** ([patch](round18-block.patch)) leaves the
+rule's shape alone and lowers the ceiling to 16, chosen on the development
+cells alone ([round18_ceiling_choice.py](round18_ceiling_choice.py)) and
+recorded as marginal: 12, 16 and 24 sit within 0.1% of each other. What is not
+marginal is that anything at or below 32 beats 64, and that a ceiling can only
+lower a block, so no cell can regress.
+
+**`column`** ([patch](round18-column.patch)) drops a cofactor multiplication
+applied to a point that is already in the subgroup. `TinyIc::new` projects each
+sampled point with `[h]` and closes its abscissa under Frobenius, so every
+orbit representative is already in the order-`r` subgroup; forming the column
+as `[h]rep` scaled every column by a constant and the row (`h*a`) and the
+descent (`invmod(h*b)`, `sum - h*a`) each carried a matching constant.
+Dropping all four leaves the same logarithms and saves `K` scalar
+multiplications by the cofactor per job — nothing where `h` is 2 or 4, most of
+the base phase where `h` is 12,646 (n29a1) or 1,492 (n31a0). The report
+declares `column_convention: representative`, which the checker amendment
+([oracle patch](round18-oracle-convention.patch), additive) reads: a base point
+is then located by itself and its row reads `sum coeff*log == a`; a report
+without the key is read exactly as before; an unknown value is refused. Under
+the new convention every base point must carry a column, where the old one
+excused a point whose `[h]` image is the identity — strictly stronger. The
+amendment was admitted only after it was attacked at n29a1, where the two
+conventions differ by a factor of 12,646: stripping the label, relabelling a
+legacy report as `representative` and relabelling in the other direction are
+each refused, as are a column logarithm, a relation scalar, a recovered
+logarithm and an orbit representative's coordinates each moved by one; and 280
+frozen round-0016 and round-0017 profiles sampled at random still verify
+unchanged.
+
+**`both`** is the two together. All 2,340 trials verified, every logarithm
+certified, audit status VERIFIED over 2,340 receipts and 452 source files.
+
+| both / incumbent | confirmation | replay |
+|---|---|---|
+| instructions | 0.9652 [0.9448, 0.9828] | 0.9652 [0.9448, 0.9828] |
+| native wall | 0.9613 [0.9288, 0.9895] | 0.9739 [0.9475, 0.9973] |
+
+Every cell inside 1.10; largest gains at n31a0 (0.9203) and n29a1 (0.9236),
+smallest at n17a1 (0.9930). Against rho, `both` is below one at every cell in
+both metrics **except n23a1 on instructions, at 1.0112**, and that single cell
+is why nothing was promoted: the objective is `rho`, and a challenger must beat
+matched rho strictly everywhere.
+
+### The result that matters, which the round did not set out to find
+
+The incumbent here is **byte-identical to round 0017's promoted winner**. On
+this seed it measures 0.7115 [0.6206, 0.8188] against rho with n23a1 at
+**1.0231**. Round 0017 measured the same executable at 0.6702 [0.6050, 0.7443]
+with n23a1 at **0.950**. Instructions are deterministic, so the whole of that
+difference is the fixture draw.
+
+**Round 0017's eight-cell strict win does not replicate under a fresh seed**,
+and n23a1 is where it breaks. Round 0017's own entry above had already said
+that no reader should take 0.950 at n23a1 as a stable per-cell number; this is
+that warning cashed out. `strict_win_record_eight_cells` still names round
+0017, because those receipts are immutable and say what they say, but the
+record is **seed-dependent** and is not a property of the executable or of the
+panel. `rho_parity` does still hold here, in both metrics on both stages.
+
+### Predictions, in the order they were checked
+
+**2 confirmed.** `block` is a no-op where it provably cannot act: 1.00026,
+1.00018, 1.00013 at n13a0, n17a1, n19a0 against a prediction of 1.000 within
+0.001. **3 confirmed** — `both` over the incumbent at 0.9652, inside the
+predicted 0.95–0.975, with the largest gains near 0.92 at n31a0 and n29a1 and
+the smallest above 0.98 at n17a1. **4 confirmed on what could be tested**:
+among the six development cells the ranking by `column`'s gain is exactly the
+ranking by cofactor, all three `h=4` cells ahead of both `h=2` cells.
+**6 confirmed, and its caveat earned** — both gates passed, but the replay
+native upper limit cleared one by 0.27% (0.9973) and this round's own A/A
+control returned a native panel interval of [0.9609, 1.034] against the
+challenger's point estimate of 0.9613; the instruction side carries no such
+caveat, reproducing to 1.0000034 [0.9999975, 1.0000117]. **7 falsified** —
+`beats_rho_strict` does not hold on all eight cells.
+
+**5, and part of 4, were not testable, and that is a fault in the
+pre-registration rather than a result.** Single-lever arms run only in
+development and selection, which exclude the holdout cells, so `block` at
+n19a1 and `column` at n29a1 — the two cells those predictions name — were never
+measured. Round 0017's prediction 2 hit the same wall for the same reason. A
+prediction about a holdout cell has to be written about an arm that reaches
+confirmation.
+
+### The run that was thrown away, and kept
+
+The first attempt ([runs/round-0018](../runs/round-0018)) ran all 2,340 trials
+and verified every one, against the wrong incumbent: `prepare` was given
+`runs/round-0017/source`, which is round 0017's *incumbent*, not its promoted
+winner at `runs/round-0017/source_candidates/orbits/source` — the path this
+campaign's own `next-proposal-single-target.json` names. Its incumbent worker
+hashes to `7ca9953d…` against the winner's `e9f263b8…` and its source carries
+no `factor_base_orbits` at all, so every arm-versus-incumbent number in it
+conflates this round's levers with round 0017's certificate. Prediction 2 is
+what caught it: the three cells where `block` cannot act read 0.876, 0.847 and
+0.852 instead of 1.000.
+
+The record is kept and superseded rather than deleted. The preflight that was
+supposed to prevent exactly this ([round18_preflight.sh](round18_preflight.sh))
+checked nine contract fields and all three candidate worker hashes, and never
+checked the baseline those arms are measured against; it now verifies that the
+incumbent hashes to the round-0017 winner and that the baseline source carries
+the orbit certificate, and it refuses on either.
+
+## Round 0019: the cell resolved, and the strict win promoted
+
+Round 0018b left the campaign's central claim undecided rather than dead. Its
+`both` arm — the scan-block clamp ceiling at 16 and the representative column
+convention — beat the incumbent by 3.5% in instructions and failed the strict
+rho gate at exactly one cell, `n23a1`, by 1.1%. Pooling rounds 0017 and 0018b,
+24 independent fixtures for the same executable, put that cell's winner/rho
+ratio at **0.8913 with a 95% band of [0.7802, 1.0182]**: an estimate straddling
+the gate, on a cell whose per-case log spread is 0.329, where twelve fixtures
+fail by sampling alone about **9%** of the time.
+
+So round 0019 changed the instrument rather than the algorithm. It carries **no
+new arm**: `tournament.py prepare` gained `--confirmation-cases cell=count`,
+which is additive, raises only — a count below the profile floor is refused —
+and leaves the estimator and both gates untouched. The allocation was computed
+from frozen prior rounds alone by `round19_allocate.py` as the smallest count
+whose one-sided failure probability is at most 1% in both metrics:
+**forty fixtures at `n23a1`, twelve everywhere else, 124 cases against the flat
+panel's 96, no cell measured less than round 0018b measured it.** More fixtures
+move a cell's estimate toward its true value in whichever direction that lies,
+so the allocation can resolve a cell but cannot buy it a pass.
+
+**Result: `both` PROMOTED. `beats_rho_strict` true, both metrics, every cell,
+both final stages.** Seed 2026092119, 2,646 trials, audit VERIFIED over 2,646
+receipts and 452 source files.
+
+| winner (`both`) / rho | confirmation | replay |
+|---|---|---|
+| instructions | 0.6751 [0.6298, 0.7265] | 0.6751 [0.6297, 0.7265] |
+| native wall | 0.8848 [0.8624, 0.9098] | 0.8882 [0.8676, 0.9127] |
+
+Worst cells: `n23a1` at **0.7498** in instructions, `n29a1` at **0.9427**
+natively. Against the incumbent, `both` reads 0.9657 [0.9479, 0.9825] in
+instructions and 0.9662 / 0.9787 natively across the two stages.
+
+**The incumbent alone would not have passed.** Its `n29a1` native cell reads
+1.0007 — the cell whose cofactor is 12,646, where round 0018's `column` lever
+removes the redundant cofactor multiplication. The challenger is not merely
+cheaper on average; it is what carries the panel's worst native cell under one.
+
+### Predictions: four confirmed, two falsified, one split
+
+**1 confirmed** — `both`/incumbent 0.9657 in instructions with both upper
+limits below one on both stages. **3 confirmed** — `beats_rho_strict` holds.
+**4 confirmed** — every cell's per-case spread landed within ±40% of the
+pre-registered column, ratios 0.73 to 1.19; the variance model that sized the
+allocation was right at all eight cells. **7 confirmed** — confirmation and
+replay agree in instructions to 3.1e-5, as they must when two stages share
+fixtures and Ir is deterministic.
+
+**2 falsified.** `both`/rho at `n23a1` was predicted in [0.78, 1.00] with a
+point value of 0.881, from rounds 0017 and 0018b pooled. It measured **0.7498**
+— below the range, about three standard errors low. The miss is in the *mean*,
+not the spread, which prediction 4 confirms held.
+
+**5 falsified.** The per-case spread was predicted monotone in `r` across six
+cells; `n19a1` (0.198) exceeds `n31a0` (0.184). One adjacent pair, by 0.014,
+with the rest of the chain in order.
+
+**6 split.** The same-degree contrast holds at degree 23 — winner/rho at
+`n23a1` over `n23a0` is 1.1609, above the predicted 1.05 — and fails at degree
+19, where 0.9870 is below the predicted 1.00. The crossover mechanism is
+visible where the subgroup orders are large and is not resolvable at degree 19.
+
+### What prediction 2's miss means, and the control it needed
+
+`round19_seed_variance.py` combines the three rounds' per-cell log ratios by
+inverse variance and tests their scatter against chi-square on two degrees of
+freedom. Three of eight cells exceed p < 0.05 against 0.4 expected by chance:
+`n13a0` (0.043), `n23a1` (0.044), and `n31a0` (0.0001, reading 0.5737, 0.6932,
+0.7868 across the three seeds).
+
+That needed a control before it could mean anything, because **`rho` is not a
+fixed binary**: the tournament synthesises it from each round's baseline arm,
+and round 0017's baseline was the pre-orbits incumbent (`7ca9953d…`) where
+rounds 0018b and 0019 both use the orbits winner (`e9f263b8…`). A cross-round
+ratio could have been reading a change of executable. Measured directly on
+identical fixtures, three cases at each of eight cells, **the two binaries
+return the same rho instruction count to within 2 parts in 10,000** (geometric
+mean 0.99999, worst cell 1.0002). The orbits change never reached rho's code
+path. The columns are comparable — and round 0018b's reading of its own
+`n23a1` flip as the fixture draw now rests on a control rather than an
+assumption.
+
+**The test over-rejects here, and that matters more than the p-values.** rho's
+cost is a collision time, so it is right-skewed with a long tail: a twelve-case
+sample standard deviation underestimates the spread and a twelve-case mean is
+not normal, and both push chi-square toward rejecting. With three seeds and
+n=12 in two of them, a flagged cell is a question to put to a fourth seed, not
+an established fact. Round 0019's n=40 column is the only well-resolved mean on
+the table.
+
+### How fragile is this win?
+
+Measured on round 0019's own 124 cases, the per-cell failure probability of a
+*fresh twelve-case seed* is at most **0.1%**, at `n23a1`; every other cell is
+below 0.003% in both metrics. Round 0018b faced 9.1% at that cell. The
+difference is not the allocation — it is that `both`'s margin at `n23a1` is now
+25% rather than 1.1%, because round 0018b drew a hard fixture set there and
+round 0019 did not. The cross-seed combined value for `both` at that cell is
+about 0.78, so round 0018b's 1.0112 is the outlier of the three.
+
+That is the honest scope: **the strict win is established for this seed and
+panel with the binding cell resolved at forty fixtures, and the cross-seed
+evidence puts its margin at roughly 22% rather than at the gate.** It is not
+established that a per-cell ratio is a fixed property of the executable; three
+cells say otherwise, weakly.
+
+### What it is not
+
+By the AGENTS.md §3 test this is **engineering**, and the tournament's own
+decision record classifies it that way. `S` fell; the ratio to the boundary at
+the largest cell did not. `round19_model.py` works the solver's own published
+cost model: at its optimal factor-base size this pair-table collector is
+`Θ(r^{2/3})` where rho is `Θ(r^{1/2})`, so the ratio grows as `r^{1/6}` and
+must eventually exceed one. The same-degree contrast measures it rising 16.6%
+per doubling of `r` at degree 23, and one further doubling past `n23a1` reads
+1.040 — above rho.
+
+The factor base cannot fix that. `round19_base_sweep.py` measured the cost over
+the orbit count at every cell: it rises monotonically everywhere, and the base
+the panel builds is the cheapest one reachable. That sweep also corrected the
+model. Its first version varied the contract's `factor_base.points` from
+`2·degree` to `12·degree` and measured a flat line, because
+`build_subgroup_orbit_factor_base` samples orbits in batches of eight and stops
+at the first rebuild that reaches the target. At degree 23, `points=1`,
+`points=138` — the contract's value — and `points=368` all return eight orbits.
+**The panel's factor base is seven or eight orbits at every cell and the
+contract's `points` parameter has been inert since round 0002.**
+
+## Round 0020: the replication, and what a fourth seed said about the flagged cells
+
+Round 0019 promoted `both` with `beats_rho_strict` on all eight cells. That was
+one seed, and this campaign's own failure mode is that a single-seed strict win
+need not survive a fresh draw — round 0017 held the gate and round 0018b, the
+same executable, did not. Round 0020 is the test round 0017 never got: identical
+to round 0019 in panel, allocation, arms, objective and limits, changing only
+the seed (2026092120).
+
+The baseline stayed the **incumbent** rather than round 0019's promoted winner.
+Promoting `both` into the baseline would make `both`/incumbent identically 1 and
+destroy the quantity under test.
+
+**Result: `beats_rho_strict` again, on a second independent seed. `both`
+promoted.** 2,646 trials, audit VERIFIED over 2,646 receipts and 452 source
+files.
+
+| winner (`both`) / rho | confirmation | replay |
+|---|---|---|
+| instructions | 0.6629 [0.5916, 0.7426] | 0.6629 [0.5916, 0.7426] |
+| native wall | 0.8832 [0.8568, 0.9129] | 0.8791 [0.8512, 0.9093] |
+
+`n23a1` reads **0.7948** in instructions and 0.9322 natively, against 0.7498 and
+0.8967 in round 0019 — and 1.0112 in round 0018b on twelve fixtures. Against the
+incumbent, `both` reads 0.9638 [0.9440, 0.9822] in instructions and 0.9698
+natively.
+
+### Predictions: five confirmed, one reported rather than scored
+
+**1 confirmed** — `beats_rho_strict` holds. **2 confirmed** — 0.6629 inside the
+predicted [0.62, 0.74], 0.8832 inside [0.85, 0.92]. **3 confirmed** — `n23a1`
+below 0.95 in instructions, at 0.7948. **4 confirmed** — `both`/incumbent 0.9638
+inside [0.95, 0.98] with both upper limits below one on both stages. **6
+confirmed** — the incumbent's worst native cell is `n29a1` as predicted.
+
+**5 was pre-registered with no expected outcome**, which is what it means for
+round 0019 to have recorded its flagged cells as open questions rather than
+findings. Over four seeds:
+
+| cell | 0017 | 0018b | 0019 | 0020 | combined | p (3 seeds) | p (4 seeds) |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| `n13a0` | 0.7146 | 0.7039 | 0.6932 | 0.7160 | 0.7058 | 0.0431 | **0.0204** |
+| `n31a0` | 0.5737 | 0.6932 | 0.7868 | 0.6119 | 0.6612 | 0.0001 | **0.0001** |
+| `n23a1` | 0.7765 | 1.0231 | 0.7647 | 0.8122 | 0.8022 | 0.0443 | 0.0953 |
+
+**`n23a1` came off the list.** Adding a second forty-fixture column moved it from
+0.044 to 0.095: its apparent seed-dependence was largely round 0018b's
+twelve-fixture reading, which is the same diagnosis round 0019 made of the
+original gate failure, now confirmed from the other side. `n13a0` tightened
+rather than loosened, and `n31a0` is unchanged at 0.0001.
+
+Two corrections to how round 0019 read this. The monotone rise at `n31a0` across
+three seeds — 0.5737, 0.6932, 0.7868 — **is not a trend**; the fourth seed reads
+0.6119. It is scatter. And the two cells that remain flagged sit at combined
+0.7058 and 0.6612, **nowhere near the gate**, so whatever they are, they do not
+threaten the strict win. The cell that could have threatened it is the one that
+cleared.
+
+The caveat on the test still stands and still matters: rho's cost is
+right-skewed, twelve-case sample spreads underestimate, and chi-square
+over-rejects here. Two flags out of eight cells at p < 0.05, on four seeds with
+n=12 at six of them, is weak evidence of anything.
+
+### Scope, unchanged
+
+Two independent seeds now hold `beats_rho_strict` on the eight-cell panel with
+the binding cell resolved at forty fixtures. That makes the result robust to the
+fixture draw **on this panel, at these subgroup orders, for this executable**. It
+says nothing about larger `r`, where the boundary of round 0019 §3 puts this
+collector at `Θ(r^{2/3})` against rho's `Θ(r^{1/2})`. The classification is
+**engineering** under AGENTS.md §3, in both rounds' own decision records.
+
+## Round 0021: the crossover, measured — and the ceiling was eight bytes
+
+Rounds 0019 and 0020 hold `beats_rho_strict` on the eight-cell panel under two
+seeds, and both classify the gain **engineering** for one reason: the
+`Θ(r^{2/3})` against `Θ(r^{1/2})` boundary was *derived*, its only measured
+support a same-degree contrast between two panel cells.
+[PROBE-degree-ceiling.md](PROBE-degree-ceiling.md) then found the cell that
+would settle it — `n37a0`, `r = 230,603,167`, 55× the panel's largest — and
+found that the promoted implementation could not run there. This round removes
+that obstacle and takes the measurement.
+[ROUND21-crossover.md](ROUND21-crossover.md) is the full write-up.
+
+**No tournament ran, nothing was promoted, and `WINNER-single-target.json` is
+unchanged.** This is a measurement round against the round-0020 winner source,
+not a round of the tournament, so it has no `runs/round-0021/`, no stage
+summaries and no evidence pack.
+
+### The crossover
+
+Sixty-four independent fixtures a cell, pooled over two seed streams
+(20260922, 4242), every IC report checked by `oracle.py`
+([round21_crossover.py](round21_crossover.py)):
+
+| cell | r | IC/rho | 95% band | per-case sd(log) |
+|:--|--:|--:|:--|--:|
+| `n23a1` | 4,196,903 | **0.831** | [0.772, 0.894] | 0.300 |
+| `n37a0` | 230,603,167 | **1.533** | [1.238, 1.899] | 0.872 |
+
+**Both bands exclude one, in opposite directions: the collector crosses rho
+between these two subgroup orders.** Measured on cells where both arms complete
+and every answer is certified — not extrapolated. The ratio grows as
+**r^0.153** across the two, where [round19_model.py](round19_model.py) derives
+**r^{1/6} = r^0.167** for the balanced optimum. Two cells fix one rate and no
+curvature, and the cells differ in degree as well as in `r`, so the agreement is
+worth exactly what a two-point rate is worth — but it is the first measured
+support the boundary has had beyond the panel. The `n23a1` value doubles as a
+cross-check: 0.831 here against 0.7498 (round 0019) and 0.7948 (round 0020).
+
+### The ceiling was eight bytes
+
+`koblitz_tiny_ic` declared `MAX_DEGREE = 31`. Its field has always been one
+`u64`; the ceiling lived in the pair table, which packed each stored sum's
+coordinates into `u32`.
+[round21-wide-pair-table.patch](round21-wide-pair-table.patch) widens those two
+fields and lifts the three bounds that mirrored them — the module constant, the
+worker's `(5..=31)` dispatch guard and `oracle.py`'s `Curve.__init__` — all to
+61. Lifting one and not the others cost a build to discover, so
+[round21_build.sh](round21_build.sh) now checks all three before it hands back a
+binary.
+
+The widening costs **0.07% panel-wide**, worst cell 0.15%, and **24 of 24
+confirmation fixtures returned the same logarithms and the same factor-base
+hash**:
+
+| cell | n13a0 | n17a1 | n19a0 | n19a1 | n23a0 | n23a1 | n29a1 | n31a0 |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| widened / promoted | 1.0011 | 1.0008 | 1.0015 | 1.0006 | 1.0003 | 1.0002 | 1.0004 | 1.0004 |
+
+### A test that had been red since round 0018
+
+Building the widened tree surfaced `complete_solve_verifies_in_general_arithmetic`
+failing at `n13a0`, and it reproduces **identically on the unmodified round-0020
+winner** — it is not this round's. The assertion carried the **cofactor**
+convention (`h·(a + b·d)`) after round 0018's `column` patch moved the solver to
+the **representative** convention. `oracle.py` was amended at the time; this test
+was not, and has been red at every cell whose cofactor is not one ever since,
+through the two rounds that promoted the arm that broke it.
+
+It does not invalidate those rounds, for a specific reason: the failing assertion
+is an internal cross-check between the tiny path and the general one, while the
+assertion in the same test that the recovered logarithm equals the planted scalar
+passed throughout, and every published result was verified by `oracle.py` — 2,646
+receipts a round — against the planted secret. What it does expose is a real gap:
+**the campaign verified through `oracle.py` and the tournament harness and never
+ran `cargo test` on a candidate arm's own source.** Fixed here, in the patch.
+
+### Withdrawn
+
+Two claims of mine were wrong and are withdrawn. Before writing any code I
+computed that `n37a0` would need 32 orbits and that 8 could not solve it inside
+`max_trials`, and I let that shape the design: eight orbits solve it and are the
+*best* configuration. `max_trials` bounds relation-producing trials; the quantity
+in the cost model is the pair-table scan count. The same error produced the claim
+that `n41a0` "needs ~39,922 orbits".
+
+### What is not claimed
+
+**`n41a0` yields no comparison.** At `r = 5.5·10¹¹` IC completes with a large
+enough base (104 orbits, 3.8s) and rho does not complete at all, returning in
+0.06s against the ~72,600 steps it would need. That is the frozen trial budget
+cutting rho off, not rho being out-run, and a budget exhaustion is never evidence
+about an algorithm. Recorded so the absence is on the record.
+
+**The factor base was not tuned toward the answer.** The base is swept at
+`n37a0` and every size reported — 8 orbits 1.533, 32 orbits 1.815, 40 orbits
+1.884, 56 orbits 2.105 on the sixteen-fixture pass. Bigger is monotonically
+worse, which is what round 0019's sweep found at all eight panel cells,
+reproduced two decades of `r` higher; the headline uses the cheapest
+configuration, which is the one the sampler builds by default.
+
+**The sample size was arrived at the hard way.** Three fixtures read `n23a1` at
+0.882, then 1.097 on a second draw; sixteen read `n37a0` at 1.782 [1.394, 2.278]
+on one stream and **1.116 [0.578, 2.154]** on another — a band containing one,
+which is no answer. That is round 0019's finding, that the per-case spread grows
+with the cell because rho's collision search is a growing share of its cost,
+holding two decades of `r` further out. Sixty-four fixtures bring both standard
+errors under 0.11.
+
+**This does not overturn rounds 0019 and 0020.** Their strict win stands exactly
+as scoped: eight cells, subgroup orders 2·10³ to 4·10⁶, two seeds. This round
+adds the measured cell beyond that scope, where the same collector loses. By
+AGENTS.md §3 the campaign's gains remain **engineering**, with a measurement
+rather than a derivation now behind the reason why.
+
+## Round 0022: two checks round 0021 did not run, and both failed
+
+[ROUND22-budget-and-curvature.md](ROUND22-budget-and-curvature.md) is the full
+write-up. **Round 0021's crossing survives; both of its numbers do not.**
+
+| cell | r | best base | IC/rho | 95% band |
+|:--|--:|--:|--:|:--|
+| `n23a1` | 4,196,903 | 8 orbits | **0.831** | [0.772, 0.894] |
+| `n37a0` | 230,603,167 | 16 orbits | **1.396** | [1.244, 1.567] |
+| `n43a1` | 4,644,189,029 | 24 orbits | **2.207** | [1.933, 2.519] |
+
+64 fixtures a configuration over two seed streams, both arms required to
+complete, every IC report checked by `oracle.py`
+([round22_ladder.py](round22_ladder.py)). No tournament ran and nothing was
+promoted.
+
+### rho was charged while it was still running
+
+`round21_crossover.py` checks that the IC arm completed and then measures both
+arms, and `instructions()` reads callgrind's `Collected:` line rather than the
+worker's JSON — so it cannot tell a solved rho from one that ran out of budget.
+**Four of the 64 rho runs at `n37a0` were cut off and charged anyway**; 64 of 64
+completed at `n23a1`.
+
+My first correction said this inflated the ratio. That was reasoning rather than
+measurement and it was wrong: an `incomplete` rho has exhausted its restarts, so
+it did a great deal of work and produced nothing, where a completed run often
+finds its collision early. Charging it **over**-charged the denominator. 1.533
+was a *lower* bound; with every rho run required to finish, the same
+default-base configuration reads 1.763 [1.547, 2.009].
+
+### The factor base was optimal only on the panel
+
+Round 0021 carried round 0019's "bigger is monotonically worse" from the
+eight-cell panel to the new cells and reported the sampler's default single
+batch. That holds at `n23a1`, where 8 orbits is best and the curve rises to
+9.949 at 159 orbits. **It does not hold further out**
+([round22_base_sweep.py](round22_base_sweep.py)):
+
+| cell | 8 orbits | 16 | 24 | 32 | 40 | 48 |
+|:--|--:|--:|--:|--:|--:|--:|
+| `n23a1` | **0.831** | 1.043 | 1.337 | — | — | — |
+| `n37a0` | 1.763 | **1.396** | 1.519 | 1.709 | 1.846 | — |
+| `n43a1` | 5.794 | 3.006 | **2.207** | 2.261 | — | 2.449 |
+
+At `n43a1` the default costs the candidate **2.6×**. Note the direction: the
+default *overstated* the candidate's loss, which is the one direction a result
+already going against the candidate will not be challenged on.
+
+### The rate, at the third attempt
+
+| step | r ratio | rate |
+|:--|--:|:--|
+| `n23a1` → `n37a0` | 55× | r^[0.130, 0.188] |
+| `n37a0` → `n43a1` | 20× | r^[0.075, 0.187] |
+
+Each step is a range over every base size in that cell's flat region — the
+minimum plus every size whose band overlaps it — because the ladder must not
+depend on choosing between sizes the data cannot separate. **The ranges overlap,
+so no curvature is resolvable**, and the derived `r^{1/6} = r^0.167` lies inside
+both.
+
+The two earlier answers were artifacts. At the default base the rate appeared to
+**accelerate** (r^0.188 then r^0.396) — a handicap widening with `r`. On a base
+grid that skipped 16 orbits it appeared to **decelerate** on disjoint ranges
+(r^[0.180, 0.199] then r^[0.060, 0.120]), with `n43a1`'s minimum on the edge of
+the grid, which is how a minimum outside it announces itself. Filling the hole
+moved `n37a0`'s best base from 32 orbits to 16 and its ratio from 1.709 to
+1.396. Both spurious results were more interesting than the real one.
+
+### What the trial cap is worth, and what the optima say
+
+Raising `max_trials` from 4096 to 65,536 is a protocol change rather than an
+extension — it is rho's iterations-per-restart — but
+[round22_budget_effect.py](round22_budget_effect.py) bounds it at **14 ppm** on
+either arm, both signs, with identical logarithms and factor bases everywhere;
+`n23a1` reads 0.831 at both caps.
+
+The model's rate survives and its other prediction does not.
+`F = (c·#E·t/k)^{1/3}` predicts 30 and 83 orbits at the two new cells; measured
+best bases are 16 and 24, growing about `r^0.157` rather than `r^{1/3}`. These
+are not independent predictions — `r^{1/6}` is derived *from* that base — so the
+agreement on the rate, at a base measurably not where the derivation puts it, is
+a coincidence the model does not explain rather than a confirmation of it.
+
+**The eight-cell panel is untouched.** Rounds 0019 and 0020 were measured at
+4096 trials with a base that is optimal there, and both facts still hold. The
+classification stays **engineering** under AGENTS.md §3.
+
+## Round 0023: the crossover cells in the harness, and the base rule out of sample
+
+[ROUND23-crossover-panel.md](ROUND23-crossover-panel.md) is the
+pre-registration; [report](../runs/round-0023/REPORT.md). Seed 2026092323,
+twelve cells (`13a0,17a1,19a0,23a0,23a1,31a0,37a0,43a1` in every stage, with
+`19a1,29a1,59a0,61a1` held out to confirmation and replay), 172 confirmation cases, 3,648
+trials, audit VERIFIED over 3,648 receipts and 453 source files.
+
+**Result: `retained`, as registered.** `scaled` — the incumbent with the orbit
+count set by `8·round((r/4,196,903)^0.157)` — passes every gate against the
+incumbent on both final stages and fails `rho_gate` at the four crossover
+cells, so it is not promoted and `beats_rho_strict` is false. This is the
+first round in which the tournament itself, rather than an ad-hoc script,
+scores cells where rho wins.
+
+| `scaled` / incumbent | confirmation | replay |
+|---|---|---|
+| instructions | 0.7982 [0.6501, 0.9515] | 0.7982 [0.6501, 0.9515] |
+| native wall | 0.8244 [0.6781, 0.9690] | 0.8327 [0.6881, 0.9775] |
+
+| cell | r | `scaled` / incumbent | `scaled` / rho | incumbent / rho |
+|:--|--:|--:|--:|--:|
+| eight panel cells | ≤ 4.2·10⁶ | 1.0001 – 1.0006 | 0.570 – 0.841 | 0.570 – 0.841 |
+| `n37a0` | 2.3·10⁸ | **0.679** | 1.085 | 1.596 |
+| `n43a1` | 4.6·10⁹ | **0.402** | 2.613 | 6.492 |
+| `n59a0` (holdout) | 1.0·10¹⁰ | **0.540** | 1.235 | 2.288 |
+| `n61a1` (holdout) | 1.2·10¹⁰ | **0.452** | 1.897 | 4.194 |
+
+Confirmation, instructions; replay agrees to the fourth digit on every cell.
+Over the whole panel `scaled`/rho is 0.8998 [0.7011, 1.2122] in instructions
+and 1.097 [0.929, 1.361] natively.
+
+**All three arms recover the same logarithm on every one of the 1,032
+final-stage (case, repetition) pairs**, and the two IC arms build
+byte-identical factor bases on all 744 panel-cell pairs, as the amended patch
+makes them by construction; on the 288 crossover-cell pairs the bases differ,
+as designed.
+
+### Predictions: five confirmed, one missed
+
+**1 confirmed** — the policy is inert on the panel: every panel cell reads
+1.0001–1.0006, inside [0.995, 1.005]. The residue is 285–412 instructions a
+job, the rule's own cost, so the ratio is largest where the job is smallest.
+**2 confirmed** — `n37a0` 0.679 in [0.65, 0.95], `n43a1` 0.402 in
+[0.28, 0.50]. **3 confirmed** — the rule holds out of sample: 0.540 at `n59a0`
+and 0.452 at `n61a1`, both below 0.70. **4 confirmed** — `scaled`/rho below one
+on all eight panel cells, `n23a1` at 0.841 < 0.95. **6 confirmed** —
+`retained`, every incumbent gate passed on both stages, `rho_gate` failed.
+
+**5 is missed at `n37a0`.** `scaled`/rho reads **1.085**, below the registered
+[1.15, 1.70]; `n43a1` at 2.613 is inside [1.8, 2.8] and both holdouts are above
+one. The miss is rho's: its median iteration count on this round's twelve
+`n37a0` fixtures is 1.195× the `sqrt(πr/4n)` model, and at `n43a1` 0.768×
+(`measurements.json`, `rho_health`). rho's cost is right-skewed and twelve
+fixtures is the allocation round 0019 showed too small to pin it; the ladder's
+1.396 came from 64. The direction is not in dispute — rho wins at `n37a0` in
+this round too — but the magnitude is not measured to the band's precision.
+
+### Where the cost is past the crossing
+
+Share of `scaled`'s confirmation instructions by phase:
+
+| cell | collection and decomposition | factor base and tables | curve and targets |
+|:--|--:|--:|--:|
+| `n23a1` | 43.8% | 31.8% | 6.7% |
+| `n37a0` | 64.6% | 27.3% | 2.3% |
+| `n43a1` | 80.7% | 15.5% | 0.8% |
+| `n59a0` | 41.9% | 8.6% | 48.2% |
+| `n61a1` | 78.3% | 16.8% | 0.9% |
+
+`n59a0` is the exception because its cofactor is 5.7·10⁷: finding the subgroup
+point and targets is half the job, and rho pays it too. Everywhere else the
+crossover is a collection problem, which is what round 0024 attacks.
+
+### Scope
+
+One seed, twelve fixtures at each crossover cell, this collector and this
+checker. The eight-cell strict win of rounds 0019 and 0020 is not re-tested
+here — the objective gate is scored on all twelve cells — although every
+panel cell stays below rho. Two of the four crossover cells are in-sample for
+the base rule; `n59a0` and `n61a1` are its first out-of-sample test and it
+held. Classification **accounting**, in the round's own decision record.
+
+## Round 0024: a matched rho, and the triple table
+
+[ROUND24-pair-inverse.md](ROUND24-pair-inverse.md) §7 is the pre-registration
+as amended before any stage ran; [report](../runs/round-0024/REPORT.md). Seed
+2026092424, twelve cells, 228 confirmation cases (forty at `n23a1`, `n37a0`
+and `n43a1`), 4,656 trials, audit VERIFIED over 4,656 receipts and 453 source
+files. Run on round 0023's frozen evaluator, because main's harness admits
+only three-summand pair-table sources.
+
+**The round's rho is matched.** Every arm's source carries
+`research/ic_triple_counted_20260923/rho-normal-basis.patch`, so rho names
+Frobenius classes with the same normal-basis rotation as the IC arm. The old
+rho walked the orbit by squaring. The incumbent is round 0023's `scaled`, the
+best pair arm measured. The challenger `counted` is the triple-sum collector
+with counted sizing, at four summands.
+
+**Result: `retained`, as registered.** All three arms recover the same
+logarithm on every one of the 1,560 (stage, case, repetition) groups, and the
+A/A stage passed.
+
+| cell | pair/rho, instr | native | triple/rho, instr | native | triple/pair, instr |
+|:--|--:|--:|--:|--:|--:|
+| `n13a0` | 0.695 | 0.878 | 1.368 | 0.951 | 1.967 |
+| `n17a1` | 0.609 | 0.894 | 1.344 | 1.015 | 2.205 |
+| `n19a0` | 0.611 | 0.882 | 1.423 | 0.979 | 2.327 |
+| `n19a1` | 0.626 | 0.890 | 1.325 | 1.106 | 2.115 |
+| `n23a0` | 0.971 | 0.960 | 1.497 | 1.091 | 1.542 |
+| `n23a1` | **1.126** | **1.041** | 1.490 | 1.098 | 1.323 |
+| `n29a1` | 0.819 | 0.911 | 3.140 | 1.287 | 3.835 |
+| `n31a0` | 0.793 | 0.945 | 2.585 | 1.320 | 3.260 |
+| `n37a0` | 2.783 | 2.323 | 1.459 | 1.374 | 0.524 |
+| `n43a1` | 9.264 | 7.663 | 2.698 | 2.523 | 0.291 |
+| `n59a0` | 1.880 | 1.558 | 1.219 | 1.133 | 0.648 |
+| `n61a1` | 8.514 | 8.021 | 2.673 | 2.591 | 0.314 |
+
+The table shows confirmation. Replay agrees to the fourth digit in
+instructions and within 0.05 in native time. Over the whole panel the pair arm
+reads 1.380 [0.847, 2.387] of rho in instructions and 1.488 [0.999, 2.420]
+natively. The triple arm reads 1.746 [1.462, 2.117] and 1.292.
+
+### The correction this round was registered to make
+
+**The eight-cell strict win of rounds 0017, 0019 and 0020 does not survive a
+matched rho.** Under the rule fixed in §7.4 before the run, it needed every
+panel cell below one in both metrics on both stages. It fails at **`n23a1`**:
+1.126 in instructions on both stages, and 1.041 (confirmation) and 1.019
+(replay) natively. At `n23a0` it is below one, but only by 3% in instructions and
+0.4–4% natively.
+
+This round's incumbent is the arm those rounds promoted, plus three patches:
+
+- the round-0021 widening, measured at 1.0007×;
+- round 0023's base policy, 1.0001–1.0006× on the panel;
+- the rho patch, whose cost on the IC side this round does not isolate.
+
+What does survive: **six of the eight cells** (`n13a0`, `n17a1`, `n19a0`,
+`n19a1`, `n29a1`, `n31a0`) are below a matched rho in both metrics on both
+stages, at 0.61–0.82 of its instructions and 0.87–0.95 of its native time.
+Those rounds' records are unchanged. This section is the correction, and it is
+scoped to this seed.
+
+**Past the crossing, the old rho understated rho's lead by 1.5× to 4.5×.**
+Round 0023 measured the pair arm at 1.08, 2.61, 1.23 and 1.90× the old rho at
+the four crossover cells, on another seed. Against a matched rho it is 2.78,
+9.26, 1.88 and 8.51×. In the pre-round probe the matched rho was 4–5× cheaper than the old one at
+`n43a1` and `n61a1`, because the orbit walk it replaces costs about `1.5n` squarings a
+step.
+
+### The triple table
+
+It does what `research/ic_triple_table_20260923` said it would do to the pair
+collector: 0.29–0.65 of its cost past the crossing, 1.3–3.8× below it. **It
+does not beat a matched rho at any cell in instructions**: 1.22–3.14×, closest
+at `n59a0` (1.22). Natively it reads just under one at `n13a0` and
+`n19a0` (0.95–0.98; replay 0.96, 1.03) and at `n17a1` on replay (0.92). Those
+are three of the four smallest cells, and in instructions the same arm is
+1.34–1.42× rho there. This round does not measure what closes that gap
+natively. It
+fails the incumbent gate because it is dearer than the pair arm on the whole
+panel.
+
+### Predictions (§7.4): five confirmed, one missed by a margin
+
+**1 confirmed**: correctness, above. **3 confirmed**: 2.78, 9.26, 1.88 and
+8.51 each inside its band. **4 confirmed**: the triple arm is above the pair
+arm on all eight panel cells (1.32–3.84, inside [1.2, 4.5]) and below it at
+all four crossover cells (0.29–0.65, inside [0.15, 0.95]). **5 confirmed**:
+`counted`/rho is above one at every cell, in instructions, which is what it
+registered. Native time was reported and not predicted, and its sub-one
+readings are above. **6 confirmed**: `retained`, `beats_rho_strict` and
+`rho_parity` false.
+
+**2 is missed at one cell.** Seven small cells were registered in
+[0.55, 0.95]; `n23a0` reads 0.971. `n23a1` at 1.126 is inside its
+direction-free [0.90, 1.40]. The four-fixture probe put `n23a0` at 0.766, and
+twelve fixtures read higher.
+
+### Curve and candidate identities
+
+In the ICV1/ICCAN1 convention of
+`research/isogeny_volcano_ic_20260924/identity_schema.json`, computed by
+[round24_identities.py](round24_identities.py) into
+[round24-identities.json](round24-identities.json). That file also has every
+arm's ICCAN1 identity per cell, with its factor base read off this round's
+receipts:
+
+- the pair arm is `orbit7` at `n13a0`, `orbit8` on the rest of the panel,
+  `orbit16` at `n37a0` and `orbit24` beyond;
+- the triple arm is `orbit2` everywhere except `orbit3` at `n43a1`.
+
+The script pins the canonical JSON, `modhash8` and field-element encodings the
+schema leaves open. The cell labels in earlier records are unchanged.
+
+| cell | ICV1 identity |
+|:--|:--|
+| `n13a0` | `ICV1:f2m-13-e068f4ed:181:8012:0x1:unk:unk:r:a349c2b58170` |
+| `n17a1` | `ICV1:f2m-17-4a8d1ed1:-101:131174:0x1:unk:unk:r:b7e2f44c2089` |
+| `n19a0` | `ICV1:f2m-19-185c144b:797:523492:0x1:unk:unk:r:999b48f556de` |
+| `n19a1` | `ICV1:f2m-19-185c144b:-797:525086:0x1:unk:unk:r:03eeaf6a7913` |
+| `n23a0` | `ICV1:f2m-23-6b551aa3:5197:8383412:0x1:unk:unk:r:9d6c7fef45ff` |
+| `n23a1` | `ICV1:f2m-23-6b551aa3:-5197:8393806:0x1:unk:unk:r:0d04e4cf5538` |
+| `n29a1` | `ICV1:f2m-29-272bc8c7:-40309:536911222:0x1:unk:unk:r:0dceaf5202f9` |
+| `n31a0` | `ICV1:f2m-31-900f9445:-90707:2147574356:0x1:unk:unk:r:7bd17fd4c3c0` |
+| `n37a0` | `ICV1:f2m-37-f364a2d2:-534059:137439487532:0x1:unk:unk:r:f7add3ce6190` |
+| `n43a1` | `ICV1:f2m-43-eecf2bb3:-998717:8796094020926:0x1:unk:unk:r:062c88f5f4c1` |
+| `n59a0` | `ICV1:f2m-59-736d7ac5:943548413:576460751359875076:0x1:unk:unk:r:8d9129b59298` |
+| `n61a1` | `ICV1:f2m-61-54d52be2:-158598901:2305843009372292854:0x1:unk:unk:r:abf8907f5e39` |
+
+### What this leaves
+
+On this seed and these cells, **no index-calculus arm this campaign has built
+beats a matched rho** except the pair collector on six small cells, where it
+wins by a constant factor and loses the lead by `r` ≈ 4·10⁶. The triple
+table's better cost law does not close the gap at the cells measured. The
+pair arm's lead over the triple arm reverses between `n31a0` and `n37a0`,
+while both stay above rho. Classification **accounting**: no algorithm got
+worse; the baseline it was counted against changed.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.
 
 The parity rule was declared before measurement: both candidate/rho upper paired 95% limits and every curve-cell ratio must be at most 1.10, in instructions and native time, on confirmation and replay. The full decisions contain the replay evidence.
 
-**Every strict-win statement above is scoped to the five-cell panel that produced it.** Rounds 0006 to 0015 all ran the cells `n13a0, n17a1, n19a0, n23a0` with `n19a1` added in confirmation and replay — a panel that was inherited, never chosen. Round 0016 ran the same executables on eight cells and `beats_rho_strict` came back false, with the winner losing to rho outright at `n23a1` and `n29a1`; the same receipts restricted to the legacy five still pass. Read the strict claims as "strictly below rho on those five cells", which is what was measured, and not as a statement about the Koblitz family or about every curve the worker admits. **Round 0017 then restored the strict claim on all eight cells** — winner/rho 0.6702 [0.6050, 0.7443] instructions and 0.8999 [0.8755, 0.9266] native on confirmation, every cell below one in both metrics on both stages — with the certificate named by orbit representatives. That claim is scoped to those eight cells and to this checker's second certificate format, both stated in the round's pre-registration; it is still not a statement about the family.
+**Every strict-win statement above is scoped to the five-cell panel that produced it.** Rounds 0006 to 0015 all ran the cells `n13a0, n17a1, n19a0, n23a0` with `n19a1` added in confirmation and replay — a panel that was inherited, never chosen. Round 0016 ran the same executables on eight cells and `beats_rho_strict` came back false, with the winner losing to rho outright at `n23a1` and `n29a1`; the same receipts restricted to the legacy five still pass. Read the strict claims as "strictly below rho on those five cells", which is what was measured, and not as a statement about the Koblitz family or about every curve the worker admits. **Round 0018b then failed to replicate that restoration under a fresh seed**: the same executable, the
+same panel and the same gates, seed 2026091818 instead of 2026091717, gives winner/rho 0.7115 [0.6206,
+0.8188] on instructions with n23a1 at 1.0231 rather than 0.950, and `beats_rho_strict` false. Instructions
+are deterministic, so that is the fixture draw alone. Read every eight-cell strict claim below as scoped to
+its own seed as well as to its panel.
+
+**Round 0017 then restored the strict claim on all eight cells** — winner/rho 0.6702 [0.6050, 0.7443] instructions and 0.8999 [0.8755, 0.9266] native on confirmation, every cell below one in both metrics on both stages — with the certificate named by orbit representatives. That claim is scoped to those eight cells and to this checker's second certificate format, both stated in the round's pre-registration; it is still not a statement about the family.
 
 These are implementation improvements in fixed-compiler Valgrind amd64 guest instructions and matched native wall time. Kernel/device and external-audit work are outside the instruction count. No arithmetic-complexity, broader-family, or cryptographic-size claim follows. The K-instruction rank floor is deliberately weak.
 

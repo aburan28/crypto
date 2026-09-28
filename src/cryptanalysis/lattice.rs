@@ -132,7 +132,7 @@ fn gram_schmidt_hp(basis: &[Vec<BigInt>]) -> (Vec<BigInt>, Vec<Vec<BigInt>>) {
 /// Cost is higher than `lll_reduce` (~10-100× per GS call due to
 /// BigInt arithmetic), but for cryptanalytic dimensions (≤ 30) this
 /// is still milliseconds to seconds.
-pub fn lll_reduce_hp(basis: &mut Vec<Vec<BigInt>>, delta: f64) -> Result<(), &'static str> {
+pub fn lll_reduce_hp(basis: &mut [Vec<BigInt>], delta: f64) -> Result<(), &'static str> {
     if !(0.25 < delta && delta < 1.0) {
         return Err("delta must be in (1/4, 1)");
     }
@@ -280,7 +280,7 @@ pub fn lll_reduce_hp(basis: &mut Vec<Vec<BigInt>>, delta: f64) -> Result<(), &'s
 ///
 /// Returns `Err` if the input is malformed or the algorithm fails
 /// to terminate within a generous iteration cap.
-pub fn lll_reduce(basis: &mut Vec<Vec<BigInt>>, delta: f64) -> Result<(), &'static str> {
+pub fn lll_reduce(basis: &mut [Vec<BigInt>], delta: f64) -> Result<(), &'static str> {
     if !(0.25 < delta && delta < 1.0) {
         return Err("delta must be in (1/4, 1)");
     }
@@ -618,7 +618,7 @@ mod tests {
         let mut z_seed: u64 = 0xDEAD_BEEF;
         let mut sigs: Vec<BiasedSignature> = Vec::new();
         while sigs.len() < 8 {
-            let bytes = ((k_bits + 7) / 8) as usize;
+            let bytes = k_bits.div_ceil(8) as usize;
             let mut buf = vec![0u8; bytes];
             k_rng.fill_bytes(&mut buf);
             let extra = bytes as u32 * 8 - k_bits;

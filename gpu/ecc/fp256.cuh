@@ -467,6 +467,14 @@ struct Field {
         return (int)mp_sub(t.v, h.v, a.v);   /* borrow <=> half < a */
     }
 
+    /* a < b as 256-bit integers, again on the *internal* representation.
+     * Branch-free: the borrow out of a - b.  Used by the fold-6 walk to pick
+     * the smallest of {x, beta x, beta^2 x}. */
+    static FP_HD int lt(const elt &a, const elt &b) {
+        elt t;
+        return (int)mp_sub(t.v, a.v, b.v);
+    }
+
     /* --- Montgomery CIOS: r = a * b * 2^-256 mod p ------------------- */
     static FP_HD elt mont_mul(const elt &a, const elt &b) {
         uint32_t t[10];

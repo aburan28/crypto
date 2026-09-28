@@ -78,7 +78,8 @@ The original autolab/performance model describes bitsliced code and must not be
 used to infer packed performance. Actual GPU timing selects settings.
 
 For sustained collection after validation, `search` and `fanout` default to
-`--verify 0`. Replaying a normal-cutoff trail on the CPU is a 2^32-step
+`--verify 0`, and the client itself now defaults to `--verify 0` as well.
+Replaying a normal-cutoff trail on the CPU is a 2^32-step
 scalar walk at dp-weight 32, during which the GPU writes nothing; a budget
 of four is why recycled campaign searchers printed `resumed from` and then
 went silent. `validate` still replays reports. Choose an unused run ID and

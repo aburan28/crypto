@@ -108,7 +108,7 @@ fn main() {
                 .iter()
                 .map(|&i| 63 - factors[i].leading_zeros())
                 .sum();
-            if dim < 3 || dim > 8 || dim >= n {
+            if !(3..=8).contains(&dim) || dim >= n {
                 continue;
             }
             let start = Instant::now();

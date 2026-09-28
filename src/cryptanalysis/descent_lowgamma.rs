@@ -130,7 +130,7 @@ impl FactorSubspace {
 /// The Frobenius map is `F_2`-linear regardless, so the kernel route is
 /// always correct. Returns `None` if `d ∤ n`.
 fn subfield_basis(n: u32, d: u32, irr: &IrreduciblePoly) -> Option<Vec<F2mElement>> {
-    if d == 0 || n % d != 0 {
+    if d == 0 || !n.is_multiple_of(d) {
         return None;
     }
     if d == n {
@@ -484,7 +484,7 @@ pub fn run_lowgamma_cell(
         state ^= state >> 27;
         state.wrapping_mul(0x2545F4914F6CDD1D)
     };
-    let mut rand_nz = |m: u32, rng: &mut dyn FnMut() -> u64| loop {
+    let rand_nz = |m: u32, rng: &mut dyn FnMut() -> u64| loop {
         let bits: Vec<u32> = (0..m).filter(|_| (rng() >> 19) & 1 == 1).collect();
         let e = F2mElement::from_bit_positions(&bits, m);
         if !e.is_zero() {

@@ -1,0 +1,59 @@
+name: Prime-field F4 narrow arithmetic experiment
+
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/f4_fp.rs'
+      - 'examples/f4_fp_bench.rs'
+      - 'research/fp_f4_narrow_20260926/PROTOCOL.md'
+      - 'research/fp_f4_narrow_20260926/paired_fp_f4.py'
+      - '.github/workflows/fp-f4-narrow.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-output-and-paired-f4:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RAYON_NUM_THREADS: '1'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Prime-field F4 wide reference tests
+        run: F4_FP_NARROW=0 cargo test --release --lib cryptanalysis::f4_fp::tests -- --test-threads=1
+      - name: Prime-field F4 deferred default tests
+        run: F4_FP_NARROW=2 cargo test --release --lib cryptanalysis::f4_fp::tests -- --test-threads=1
+      - name: Build frozen F4 stage benchmark
+        run: cargo build --release --example f4_fp_bench
+      - name: Final one-thread paired confirmation
+        run: |
+          python3 research/fp_f4_narrow_20260926/paired_fp_f4.py \
+            target/release/examples/f4_fp_bench \
+            research/fp_f4_narrow_20260926/ci-result.json \
+            --pairs 5 --candidate-mode 2 --threads 1
+      - name: Final four-thread paired confirmation
+        run: |
+          python3 research/fp_f4_narrow_20260926/paired_fp_f4.py \
+            target/release/examples/f4_fp_bench \
+            research/fp_f4_narrow_20260926/ci-result-threads4.json \
+            --pairs 5 --candidate-mode 2 --threads 4
+      - name: Preserve raw runs and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fp-f4-narrow-${{ github.sha }}
+          path: |
+            research/fp_f4_narrow_20260926/ci-result.json
+            research/fp_f4_narrow_20260926/ci-result-threads4.json
+          if-no-files-found: warn

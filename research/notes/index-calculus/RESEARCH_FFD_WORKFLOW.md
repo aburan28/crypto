@@ -67,7 +67,8 @@ One result flows back already. Lever L5 there — change the *curve*, by
 walking the isogeny class — is settled by an exact argument rather than a
 sweep: the curve coefficient `a₆ = 1/j` is the whole curve-dependence of the
 descended Semaev system, and it enters strictly *below* the leading form (an
-additive constant at `m = 2`; Boolean degree `≤ 5` of `6` at `m = 3`).  So
+additive constant at `m = 2`; Boolean degree `4` of `6` at `m = 3`, and
+exactly two degrees below the leading form at every `m ≤ 5`).  So
 the degree of regularity, a Hilbert invariant of the leading forms, is
 **constant on an entire isogeny class**, and every `D*` this program measures
 that varies with the curve varies through the *inhomogeneous* part only.  The
