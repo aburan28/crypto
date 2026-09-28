@@ -1,0 +1,67 @@
+diff -ruN a/src/cryptanalysis/koblitz_tiny_ic.rs b/src/cryptanalysis/koblitz_tiny_ic.rs
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-16 10:55:16.691383280 +0000
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-16 12:23:13.825309556 +0000
+@@ -43,10 +43,9 @@
+ /// Largest degree handled: keys and packed identities must fit a word.
+ pub const MAX_DEGREE: u32 = 31;
+ 
+-/// Expected pair-sum witnesses per rest that the folded table is sized
+-/// for: rows are added until a random rest has at least this many, or
+-/// every row is built.
+-pub const TABLE_WITNESSES: f64 = 2.5;
++/// Probes beyond the column count that the table-size rule budgets for:
++/// a few dependent rows and the descent.
++pub const TABLE_PROBES: f64 = 3.0;
+ 
+ fn is_prime(n: u32) -> bool {
+     n >= 2 && (2..n).take_while(|d| d * d <= n).all(|d| n % d != 0)
+@@ -677,20 +676,27 @@
+         //
+         // Row `o` of the folded table holds `C_o + P_j` for every `j`, so a
+         // pair `(P_i, P_j)` is represented once either summand's orbit has a
+-        // row.  On a cell where pair sums are dense — the expected number of
+-        // pair sums equal to one rest, `λ = |F|(|F|+1)/(2r)`, is large — a
+-        // prefix of `t` rows already leaves a rest a decomposition with
+-        // probability `1 − exp(−λ·(1 − ((K−t)/K)²))`, and the rows not built
+-        // are the bulk of the setup.  `t` is the least row count with that
+-        // expected witness count at least `TABLE_WITNESSES`; on the sparse
+-        // cells that is every row, as before.  A deterministic function of
+-        // the public base and order, fixed before any probe is drawn.
++        // row: `t` rows cover the fraction `1 − ((K−t)/K)²` of the pairs.
++        // Building a row costs `|F|` entries; a probe then costs about one
++        // entry per rest it scans, and scans `1/(λ·cov)` rests on average,
++        // `λ = |F|(|F|+1)/(2r)` being the expected pair-sum witnesses of a
++        // rest.  The row count is the one that minimises the expected total,
++        // `t·|F| + (K + TABLE_PROBES)/(λ·cov(t))`, over `1 ≤ t ≤ K` — a fixed
++        // function of the public base size, column count and subgroup order,
++        // decided before any probe is drawn.  On every cell of this
++        // operation that is one or two rows.
+         let canon = NormalBasis::new(&arith).ok_or("no normal basis found")?;
+         let size = points_vec.len();
+         let lambda_pairs = (size as f64) * (size as f64 + 1.0) / 2.0 / r as f64;
+-        let coverage = |rows: usize| 1.0 - ((orbits - rows) as f64 / orbits as f64).powi(2);
++        let coverage = |rows: usize| {
++            let rest = (orbits - rows) as f64 / orbits as f64;
++            1.0 - rest * rest
++        };
++        let expected_work = |rows: usize| {
++            (rows * size) as f64 + (orbits as f64 + TABLE_PROBES) / (lambda_pairs * coverage(rows)).max(1e-12)
++        };
+         let table_rows = (1..=orbits)
+-            .find(|&t| lambda_pairs * coverage(t) >= TABLE_WITNESSES)
++            .min_by(|&a, &b| expected_work(a).total_cmp(&expected_work(b)))
+             .unwrap_or(orbits);
+         let mut table = PairTable::with_capacity(table_rows * size);
+         let mut sums: Vec<FastPoint> = Vec::with_capacity(size);
+@@ -718,8 +724,9 @@
+         }
+         // A scan block pays one inversion and is thrown away on an early
+         // exit; size it to about one expected witness per block.
+-        let hit = 1.0 - (-(lambda_pairs * coverage(table_rows))).exp();
+-        let chunk = ((0.5 / hit.max(1e-9)).ceil() as usize).clamp(8, 64).min(size);
++        // `1 − exp(−x) ≥ min(x, 1)/2`, enough to size a block without libm.
++        let hit = (lambda_pairs * coverage(table_rows)).min(1.0).max(1e-9);
++        let chunk = ((1.0 / hit) as usize + 1).clamp(8, 64).min(size);
+ 
+         let mut prng = SplitMix(algorithm_seed ^ 0x5449_4e59_4943_0001);
+         let probe_scalar = prng.scalar(r);

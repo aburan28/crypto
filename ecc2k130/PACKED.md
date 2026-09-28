@@ -77,12 +77,14 @@ The bitsliced shared-memory-spilling option is also rejected in packed mode.
 The original autolab/performance model describes bitsliced code and must not be
 used to infer packed performance. Actual GPU timing selects settings.
 
-For sustained collection after validation, `search` and `fanout` expose
-`--verify`: use `--verify 0` when measuring collection throughput. Replaying a
-normal-cutoff trail on the CPU can be expensive; this remains a separate
-correctness check. The default verification budget remains four for backward
-compatibility. Choose an unused run ID and use `--walks 0` for automatic GPU
-worker sizing, or explicitly choose the desired parallel-walk count.
+For sustained collection after validation, `search` and `fanout` default to
+`--verify 0`, and the client itself now defaults to `--verify 0` as well.
+Replaying a normal-cutoff trail on the CPU is a 2^32-step
+scalar walk at dp-weight 32, during which the GPU writes nothing; a budget
+of four is why recycled campaign searchers printed `resumed from` and then
+went silent. `validate` still replays reports. Choose an unused run ID and
+use `--walks 0` for automatic GPU worker sizing, or explicitly choose the
+desired parallel-walk count.
 
 ## Arithmetic
 

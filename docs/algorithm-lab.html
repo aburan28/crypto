@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Interactive ECC teaching lab: choose a factor base, inspect point decompositions, step through modular linear algebra, and explore SAT propagation and backtracking.">
+<title>Inside index calculus · Interactive algorithm lab</title>
+<link rel="stylesheet" href="algorithm-lab/style.css">
+<script src="algorithm-lab/core.js" defer></script>
+<script src="algorithm-lab/ui.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to demonstrations</a>
+<main id="main">
+<nav class="site-nav" aria-label="Site"><a href="https://aburan28.github.io/crypto/">Overview</a><a href="performance-gains.html">Performance</a><a href="#main" aria-current="page">Algorithm lab</a><a href="https://aburan28.github.io/crypto/scoreboard/">Cost ledger</a></nav>
+<header>
+<p class="eyebrow">aburan28 / crypto · Interactive teaching examples</p>
+<h1>See the work<br>inside index calculus.</h1>
+<p class="lede">Choose a factor base. Turn point sums into equations. Watch a matrix solver and a SAT solver make progress, one step at a time.</p>
+<p class="scope">Exact arithmetic on a tiny curve and four Boolean variables. These demonstrations explain the algorithms; the <a href="performance-gains.html">performance dashboard</a> holds the measured results.</p>
+</header>
+<nav class="journey" aria-label="Demonstrations">
+<a href="#factor-base"><span>01</span> Choose the points</a><a href="#linear-algebra"><span>02</span> Solve the relations</a><a href="#sat-solver"><span>03</span> Explore SAT search</a>
+</nav>
+<noscript><style>.live-controls{display:none}</style><p class="notice">Enable JavaScript to run the demonstrations. The worked examples and explanations below remain available.</p></noscript>
+<section id="factor-base" aria-labelledby="factor-title">
+<div class="section-head"><div><p class="eyebrow">01 / Factor bases</p><h2 id="factor-title">A small vocabulary of curve points</h2></div><span class="badge">Coordinates mod 17</span></div>
+<p>Here a factor base is a chosen set of <strong>elliptic-curve points</strong>. We try to write a target as a sum of two of them. It is not a prime factorization of the target’s coordinates.</p>
+<div class="formula">E: y² = x³ + 2x + 2 (mod 17) &nbsp;·&nbsp; G = (5, 1) &nbsp;·&nbsp; ord(G) = 19</div>
+<div class="controls live-controls">
+<label for="base-size">Factor-base size <select id="base-size"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select></label>
+<label for="target-k">Target R = [a]G <input id="target-k" type="range" min="1" max="18" value="11"><output id="target-value" for="target-k">a = 11</output></label>
+<button id="find-hit" type="button">Find a decomposable target</button>
+</div>
+<div class="two-col">
+<div><svg id="curve-plot" viewBox="0 0 460 450" role="img" aria-labelledby="curve-title curve-desc"><title id="curve-title">Elliptic-curve points over the field with 17 elements</title><desc id="curve-desc">Factor-base points are teal; the target has an amber ring. All coordinates are residues modulo 17.</desc></svg><div class="legend"><span><i class="dot base"></i>Factor base</span><span><i class="dot target"></i>Target R</span><span><i class="dot"></i>Other curve points</span></div></div>
+<div><div class="mini-stats" id="factor-stats"></div><h3>Selected factor base</h3><div id="base-points" class="point-list"></div><h3 id="target-heading">Target</h3><div id="decompositions" class="result" aria-live="polite"></div><p class="hint">Pairs are unordered and may repeat a point. A larger base offers more pairs but also adds unknown logarithms to the matrix below.</p></div>
+</div>
+<details><summary>How the example chooses and checks points</summary><p>We take points with y ≤ 8, ordered by x, then keep the first B. This chooses one representative from each sign pair on this curve; this toy search uses only the selected points, without adding their negatives automatically. Real repository factor bases use subspace and orbit constructions.</p><p>Each candidate sum is computed with the elliptic-curve group law. The point at infinity is part of the group, but has no affine dot. The counters above count candidate pairs and distinct nonidentity targets covered, not runtime or cryptanalytic speedup.</p><p>Worked example at B = 4: F₁ = (0, 6), F₂ = (3, 1), and F₁ + F₂ = (13, 10) = [11]G.</p></details>
+</section>
+<section id="linear-algebra" aria-labelledby="linear-title">
+<div class="section-head"><div><p class="eyebrow">02 / Linear algebra</p><h2 id="linear-title">Point relations become a matrix</h2></div><span class="badge">Logarithms mod 19</span></div>
+<p>If Fᵢ = [ℓᵢ]G, then Fᵢ + Fⱼ = [a]G gives <strong>ℓᵢ + ℓⱼ ≡ a (mod 19)</strong>. The factor base above controls the columns here. Row operations use the subgroup order 19, while point coordinates use 17.</p>
+<div class="controls live-controls"><label for="matrix-case">Relations <select id="matrix-case"><option value="full">Independent relations</option><option value="dependent">Duplicate a row: rank deficient</option><option value="inconsistent">Inject an incorrect relation</option></select></label><button type="button" id="matrix-reset">Reset</button><button type="button" id="matrix-back">Previous step</button><button type="button" id="matrix-next" class="primary">Next row operation</button><button type="button" id="matrix-finish">Solve all</button></div>
+<div id="matrix-context" class="notice"></div>
+<details><summary>Inspect the original point relations</summary><div id="relation-list" class="relation-list"></div></details>
+<div class="matrix-layout"><div class="table-scroll" role="region" aria-label="Augmented relation matrix" tabindex="0"><table id="relation-matrix"><caption>Augmented matrix [A | a], reduced over F₁₉</caption></table></div><aside class="step-card"><span id="matrix-position" class="eyebrow"></span><h3>Current operation</h3><p id="matrix-step" aria-live="polite"></p><div id="matrix-rank" class="rank"></div></aside></div>
+<div id="matrix-solution" class="result" aria-live="polite"></div>
+<p class="hint">The demo gathers known probes [a]G by explicit enumeration and selects independent relations for teaching. Gauss–Jordan elimination receives only the coefficient matrix and right-hand side. Each recovered logarithm is checked by multiplying G.</p>
+<details><summary>What the repository runs at larger sizes</summary><p>This dense walkthrough makes every row operation visible. The repository also implements relation filtering and sparse block Wiedemann: duplicate and singleton handling, a smaller matrix core, sparse matrix-times-block products, reconstruction, and verification against the original relations. The small matrix here is not a benchmark of that implementation.</p><p>For B = 4, the recovered logarithms are (7, 4, 1, 2). The first relation gives 7 + 4 ≡ 11 (mod 19), and [11]G = (13, 10).</p><a href="https://github.com/aburan28/crypto/blob/main/docs/ic/README.md#linear-algebra-relation-filtering-and-block-wiedemann">Read the repository’s linear-algebra workflow →</a></details>
+</section>
+<section id="sat-solver" aria-labelledby="sat-title">
+<div class="section-head"><div><p class="eyebrow">03 / SAT solvers</p><h2 id="sat-title">Decide, propagate, and backtrack</h2></div><span class="badge">Boolean arithmetic · F₂</span></div>
+<p>The binary-field route turns polynomial equations into Boolean constraints. Products become AND gates; sums become XOR parity rows. This four-variable example lets you follow those constraints through a small DPLL solver.</p>
+<p class="scope">SAT finds candidate point decompositions before the relation matrix is solved. This Boolean example illustrates that solving machinery separately from the mod-17 curve above. The repository uses CDCL and native parity reasoning; this demo uses chronological backtracking and single-row XOR propagation.</p>
+<div class="controls live-controls"><label for="sat-case">Example <select id="sat-case"><option value="gates">AND + XOR: satisfiable</option><option value="search" selected>Search and backtracking: satisfiable</option><option value="unsat">Contradictory parity: UNSAT</option></select></label><label for="sat-encoding">Encoding <select id="sat-encoding"><option value="native">Native XOR rows</option><option value="cnf">All clauses in CNF</option></select></label><label for="sat-first">Branch order <select id="sat-first"><option value="0">Try 0 first</option><option value="1">Try 1 first</option></select></label></div>
+<p id="sat-formula" class="formula"></p><p id="sat-size" class="hint"></p>
+<div class="controls live-controls"><button id="sat-reset" type="button">Reset</button><button id="sat-back" type="button">Previous step</button><button id="sat-next" class="primary" type="button">Next solver step</button><button id="sat-finish" type="button">Run to result</button><button id="sat-download" type="button">Download CNF</button></div>
+<div class="assignment" id="sat-assignment" aria-label="Current Boolean assignment"></div>
+<div class="sat-layout"><div><h3>Constraints at this step</h3><p class="hint">Each CNF clause is an OR of literals; all clauses and parity rows must hold. ¬x means “not x”; ⊕ means XOR.</p><div id="sat-constraints" class="constraints"></div></div><aside class="step-card"><span id="sat-position" class="eyebrow"></span><h3 id="sat-event">Solver step</h3><p id="sat-step" aria-live="polite"></p><div id="sat-counts" class="mini-stats"></div><p id="sat-verification" class="verification"></p></aside></div>
+<details><summary>Truth table: independently check all 16 assignments</summary><p>Every row is checked against the original AND and parity constraints, regardless of the selected encoding. A satisfying row verifies SAT; no satisfying rows verifies UNSAT for this bounded example.</p><div class="table-scroll" role="region" tabindex="0" aria-label="Complete truth table"><table id="truth-table"><caption>Original formula, all four-bit assignments</caption></table></div></details>
+<p class="hint">Trace counters describe only this teaching solver. They do not measure the Rust solver or establish a performance gain. The CNF download expands parity rows by forbidding their failing truth-table assignments.</p>
+</section>
+<section class="where-next"><p class="eyebrow">From the lesson to the implementation</p><h2>Follow the same stages in the repository.</h2><div class="source-grid"><div><h3>Factor-base search</h3><p>Subspaces, orbits, and verified decompositions.</p><a href="https://github.com/aburan28/crypto/blob/main/src/cryptanalysis/koblitz_factor_base_search.rs">Factor-base source →</a></div><div><h3>Binary Semaev → SAT</h3><p>AND definitions and CNF or native XOR constraints.</p><a href="https://github.com/aburan28/crypto/blob/main/src/cryptanalysis/semaev_sat.rs">Semaev encoding source →</a></div><div><h3>CDCL solving</h3><p>Propagation, learned clauses, and parity reasoning.</p><a href="https://github.com/aburan28/crypto/blob/main/src/cryptanalysis/sat.rs">SAT solver source →</a></div></div><p><a href="performance-gains.html">Explore the measured performance gains →</a></p></section>
+<footer><p>All demo arithmetic runs locally in the browser. No external scripts or network services are needed. <a href="algorithm-lab/README.md">Example definitions and validation</a>.</p><p>Further reading: <a href="https://doc.sagemath.org/html/en/reference/arithmetic_curves/sage/schemes/elliptic_curves/ell_finite_field.html">SageMath finite-field elliptic curves</a> · <a href="https://github.com/msoos/cryptominisat">CryptoMiniSat and XOR constraints</a>.</p></footer>
+</main>
+</body></html>

@@ -1,13 +1,14 @@
 //! Bounded experiments on internally generated, known-answer toy instances.
 use super::params::{self, Field, Fixture, Parameters};
 use clap::{Args, ValueEnum};
+use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
     search_with_progress, Candidate, FactorBaseSpec, Family, SearchOptions, SearchReport,
 };
-use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    factor_x_n_minus_1, individual_log, koblitz_index_calculus_dlp_with_factor_base_and_progress,
-    order_of_2_mod_n, solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable,
+    build_subgroup_orbit_factor_base_with_cost, factor_x_n_minus_1, individual_log,
+    koblitz_index_calculus_dlp_with_factor_base_and_progress, order_of_2_mod_n,
+    solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable, FactorBaseSelectionCost,
     FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, LinearAlgebra,
     LogTableReport, MAX_N, MAX_SUBFIELD_DEGREE,
 };
@@ -60,7 +61,7 @@ pub fn degree(value: &str) -> Result<u32, String> {
     let n = value
         .parse::<u32>()
         .map_err(|_| "degree must be an integer")?;
-    if n < 3 || n > MAX_N || n % 2 == 0 {
+    if !(3..=MAX_N).contains(&n) || n % 2 == 0 {
         return Err(format!(
             "synthetic degree must be odd and 3..={}",
             MAX_N - 1
@@ -75,7 +76,7 @@ pub fn field_degree(value: &str) -> Result<u32, String> {
     let n = value
         .parse::<u32>()
         .map_err(|_| "degree must be an integer")?;
-    if n < 3 || n > MAX_N {
+    if !(3..=MAX_N).contains(&n) {
         return Err(format!("synthetic degree must be 3..={MAX_N}"));
     }
     Ok(n)
@@ -108,6 +109,11 @@ pub enum Solver {
     Enumerate,
     /// Meet-in-the-middle over a precomputed pair-sum table.
     PairTable,
+    /// Trimoska WDSat on the same Semaev ANF as `sat`.
+    Wdsat,
+    /// ALMASTY-inspired quadratic Semaev FES (`m = 2`): Gray early-exit,
+    /// Möbius all-roots, Monica past `n = 24`.
+    MqFes,
 }
 impl Solver {
     pub fn name(self) -> &'static str {
@@ -116,6 +122,8 @@ impl Solver {
             Self::Sat => "sat",
             Self::Enumerate => "enumerate",
             Self::PairTable => "pair-table",
+            Self::Wdsat => "wdsat",
+            Self::MqFes => "mq-fes",
         }
     }
     fn strategy(self) -> DecompositionStrategy {
@@ -124,6 +132,8 @@ impl Solver {
             Self::Sat => DecompositionStrategy::Sat,
             Self::Enumerate => DecompositionStrategy::Enumerate,
             Self::PairTable => DecompositionStrategy::PairTable,
+            Self::Wdsat => DecompositionStrategy::Wdsat,
+            Self::MqFes => DecompositionStrategy::MqFes,
         }
     }
 }
@@ -198,7 +208,10 @@ pub struct FactorBaseDocument {
 impl FactorBaseDocument {
     /// Whether the document was written for `c`.
     pub fn matches(&self, c: &KoblitzCurve) -> bool {
-        self.degree == c.n && self.curve_a == c.a && self.subfield == c.k && self.curve_b == c.b_index
+        self.degree == c.n
+            && self.curve_a == c.a
+            && self.subfield == c.k
+            && self.curve_b == c.b_index
     }
     pub fn label(&self) -> String {
         curve_label(self.degree, self.curve_a, self.subfield, self.curve_b)
@@ -256,6 +269,12 @@ pub struct RunArgs {
     pub max_trials: u32,
     #[arg(long,value_enum,default_value_t=Solver::Groebner)]
     pub solver: Solver,
+    /// Path to a WDSat `wdsat_solver` binary; required for `--solver wdsat`.
+    #[arg(long)]
+    pub wdsat_binary: Option<PathBuf>,
+    /// Soft wall-clock budget for one WDSat child process, in milliseconds.
+    #[arg(long, default_value_t = 5_000)]
+    pub wdsat_timeout_ms: u64,
     /// Targets decomposed per batch (in parallel); 0 selects the CPU count.
     #[arg(long,default_value_t=0,value_parser=clap::value_parser!(u32).range(0..=4096))]
     pub batch: u32,
@@ -279,6 +298,8 @@ impl Default for RunArgs {
             summands: 2,
             max_trials: 20_000,
             solver: Solver::Groebner,
+            wdsat_binary: None,
+            wdsat_timeout_ms: 5_000,
             batch: 0,
             control: false,
         }
@@ -378,6 +399,15 @@ pub struct SearchArgs {
     /// Score raw signed orbits instead of cofactor-projected columns.
     #[arg(long)]
     pub raw_columns: bool,
+    /// Measure the Gröbner oracle on this many targets per candidate and
+    /// rank by expected stage word XORs instead of expected trials.
+    ///
+    /// A trial is paid whether or not it succeeds, and the Weil-restricted
+    /// system carries m·ℓ unknowns, so coverage alone can rank bases
+    /// backwards: see research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md. Off by default,
+    /// so existing searches score exactly as before.
+    #[arg(long,value_parser=clap::value_parser!(u32).range(1..=4096))]
+    pub solve_cost_targets: Option<u32>,
     #[arg(long, default_value_t = 1)]
     pub seed: u64,
     /// Candidates (best census first) validated by real end-to-end runs.
@@ -504,14 +534,19 @@ pub fn load_log_table(path: &Path) -> Result<LogTableDocument, String> {
     if data.len() > 16_777_216 {
         return Err("logarithm database exceeds 16 MiB".into());
     }
-    let doc: LogTableDocument =
-        serde_json::from_slice(&data).map_err(|e| format!("invalid logarithm database JSON: {e}"))?;
+    let doc: LogTableDocument = serde_json::from_slice(&data)
+        .map_err(|e| format!("invalid logarithm database JSON: {e}"))?;
     if doc.schema_version != 1 {
         return Err("unsupported logarithm database schema version".into());
     }
     Ok(doc)
 }
-pub(crate) fn ic_options(strategy: Solver, summands: u8, max_trials: u32, seed: u64) -> KoblitzIcOptions {
+pub(crate) fn ic_options(
+    strategy: Solver,
+    summands: u8,
+    max_trials: u32,
+    seed: u64,
+) -> KoblitzIcOptions {
     ic_options_with_descent(strategy, summands, None, None, max_trials, seed)
 }
 
@@ -532,6 +567,7 @@ pub(crate) fn ic_options_with_descent(
         strategy: strategy.strategy(),
         collapse_negation: true,
         collapse_projected_orbits: true,
+        crossbred: None,
         allow_direct_relation: false,
         max_trials: max_trials as usize,
         seed,
@@ -602,7 +638,10 @@ pub(crate) fn log_table_from_doc(
 pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
     let begin = Instant::now();
     if std::fs::symlink_metadata(&args.database).is_ok() {
-        return Err(format!("logarithm database already exists: {}", args.database.display()));
+        return Err(format!(
+            "logarithm database already exists: {}",
+            args.database.display()
+        ));
     }
     let spec = match &args.factor_base {
         Some(path) => {
@@ -646,17 +685,23 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
     let (table, report) = solve_factor_base_logs(&c, &fb, &opts)
         .ok_or("factor base has no usable projected columns for this summand count")?;
     if !report.verified {
-        return Ok(json!({"schema_version":1,"operation":"logs","status":"incomplete",
+        return Ok(
+            json!({"schema_version":1,"operation":"logs","status":"incomplete",
             "evidence_scope":"synthetic_known_answer",
             "reason":"relations did not determine every column logarithm within the trial budget",
             "degree":c.n,"curve_a":c.a,"factor_base":factor_base_json(&spec,&fb,report.columns),
             "counts":{"columns":report.columns,"trials":report.trials,"relations":report.relations},
             "linear_algebra":linear_algebra_json(&report),
-            "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}));
+            "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources()}),
+        );
     }
     let doc = log_table_to_doc(&c, &spec, args.summands, args.solver, &table);
-    write_new(&args.database, &serde_json::to_value(&doc).map_err(|e| e.to_string())?)?;
-    Ok(json!({"schema_version":1,"operation":"logs","status":"complete",
+    write_new(
+        &args.database,
+        &serde_json::to_value(&doc).map_err(|e| e.to_string())?,
+    )?;
+    Ok(
+        json!({"schema_version":1,"operation":"logs","status":"complete",
         "evidence_scope":"synthetic_known_answer","degree":c.n,"curve_a":c.a,
         "subgroup_order":c.subgroup_order.to_string(),"cofactor":c.cofactor.to_string(),
         "factor_base":factor_base_json(&spec,&fb,report.columns),
@@ -665,7 +710,8 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
         "verified":true,"out":args.database.display().to_string(),
         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":resources(),
         "scope":"once-per-curve factor-base logarithm database; every column log certified by [x]G == point",
-        "limitations":["No imported target was used.","This precomputation does not establish scaling or challenge readiness."]}))
+        "limitations":["No imported target was used.","This precomputation does not establish scaling or challenge readiness."]}),
+    )
 }
 pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
     let begin = Instant::now();
@@ -683,7 +729,9 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
     }
     let c = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
     if doc.subgroup_order != c.subgroup_order.to_string() {
-        return Err("logarithm database subgroup order does not match the reconstructed curve".into());
+        return Err(
+            "logarithm database subgroup order does not match the reconstructed curve".into(),
+        );
     }
     let fb = materialize(&c, &doc.spec)?;
     // Reconstruct the table and re-verify every column against the curve.
@@ -713,10 +761,15 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
     let outcome = individual_log(&c, &fb, &table, &target, &opts);
     let (recovered, report) = match outcome {
         Some((d, r)) => (Some(d), r),
-        None => (None, crypto_lib::cryptanalysis::koblitz_index_calculus::IndividualLogReport::default()),
+        None => (
+            None,
+            crypto_lib::cryptanalysis::koblitz_index_calculus::IndividualLogReport::default(),
+        ),
     };
     let verified = recovered.as_ref() == Some(&k)
-        && recovered.as_ref().is_some_and(|d| c.mul(c.generator(), d) == target);
+        && recovered
+            .as_ref()
+            .is_some_and(|d| c.mul(c.generator(), d) == target);
     Ok(json!({"schema_version":1,"operation":"solve",
         "status":if verified{"complete"}else{"incomplete"},
         "evidence_scope":"synthetic_known_answer","degree":c.n,"curve_a":c.a,
@@ -730,11 +783,11 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
 }
 pub(crate) fn curve(n: u32, a: u8, k: u32, b: u64) -> Result<KoblitzCurve, String> {
     // Keep this guard even for internal callers, independently of Clap.
-    if n < 3 || n > MAX_N || k == 0 || k > MAX_SUBFIELD_DEGREE || n % k != 0 {
+    if !(3..=MAX_N).contains(&n) || k == 0 || k > MAX_SUBFIELD_DEGREE || !n.is_multiple_of(k) {
         return Err("unsupported synthetic curve parameters: the degree must be a multiple of the subfield degree k, 1 ≤ k ≤ 8".into());
     }
     let e = n / k;
-    if e < 3 || e % 2 == 0 {
+    if e < 3 || e.is_multiple_of(2) {
         return Err(format!(
             "unsupported synthetic curve parameters: the extension degree n/k = {e} must be odd and at least 3"
         ));
@@ -770,7 +823,11 @@ fn known(curve: &KoblitzCurve, args: &RunArgs) -> Result<BigUint, String> {
 pub(crate) fn validate_factor_size(n: u32, k: u32) -> Result<u32, String> {
     // The legacy family is the top-degree factor of x^{n/k} − 1 over
     // GF(2^k): F_2-dimension k · ord_{n/k}(2^k).
-    let e = if k >= 1 && n % k == 0 { n / k } else { n };
+    let e = if k >= 1 && n.is_multiple_of(k) {
+        n / k
+    } else {
+        n
+    };
     let order = if k == 1 {
         order_of_2_mod_n(e)
     } else {
@@ -781,7 +838,9 @@ pub(crate) fn validate_factor_size(n: u32, k: u32) -> Result<u32, String> {
             acc == 1
         })
     };
-    let dim = order.map(|o| o * k).ok_or("no supported factor-base family for this degree")?;
+    let dim = order
+        .map(|o| o * k)
+        .ok_or("no supported factor-base family for this degree")?;
     if dim > MAX_FACTOR_DIMENSION {
         return Err(format!("factor-base dimension {dim} exceeds the materialization limit {MAX_FACTOR_DIMENSION}; use ic search and --factor-base, or inspection and fixture generation"));
     }
@@ -814,17 +873,36 @@ fn factor_base_spec(args: &RunArgs) -> Result<FactorBaseSpec, String> {
         }
     }
 }
-pub(crate) fn materialize(kc: &KoblitzCurve, spec: &FactorBaseSpec) -> Result<FrobeniusFactorBase, String> {
-    let fb = spec.materialize(kc)?;
+pub(crate) fn materialize_with_selection_cost(
+    kc: &KoblitzCurve,
+    spec: &FactorBaseSpec,
+) -> Result<(FrobeniusFactorBase, Option<FactorBaseSelectionCost>), String> {
+    let (fb, cost) = match spec {
+        FactorBaseSpec::SubgroupOrbits { seed, points } => {
+            let (fb, cost) = build_subgroup_orbit_factor_base_with_cost(kc, *seed, *points)?;
+            (fb, Some(cost))
+        }
+        _ => (spec.materialize(kc)?, None),
+    };
     if fb.subspace.len() > MAX_ABSCISSAE {
         return Err(format!(
             "factor base has {} abscissae, above the materialization limit {MAX_ABSCISSAE}",
             fb.subspace.len()
         ));
     }
-    Ok(fb)
+    Ok((fb, cost))
 }
-pub(crate) fn factor_base_json(spec: &FactorBaseSpec, fb: &FrobeniusFactorBase, columns: usize) -> Value {
+pub(crate) fn materialize(
+    kc: &KoblitzCurve,
+    spec: &FactorBaseSpec,
+) -> Result<FrobeniusFactorBase, String> {
+    materialize_with_selection_cost(kc, spec).map(|(fb, _)| fb)
+}
+pub(crate) fn factor_base_json(
+    spec: &FactorBaseSpec,
+    fb: &FrobeniusFactorBase,
+    columns: usize,
+) -> Value {
     json!({"spec":spec,"family":spec.family(),
         "domain":crypto_lib::cryptanalysis::koblitz_factor_base_search::domain_label(&fb.domain),
         "dimension":fb.ell,"abscissae":fb.subspace.len(),"points":fb.points.len(),
@@ -864,7 +942,13 @@ pub fn generate(args: GenerateArgs) -> Result<Value, String> {
     let k = known(&c, &run)?;
     serde_json::to_value(parameters(&c, &k, args.seed)).map_err(|e| e.to_string())
 }
-pub fn resources() -> Value {
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct ResourceSnapshot {
+    cpu_seconds: Option<f64>,
+    peak_rss_bytes: Option<u64>,
+}
+
+pub(crate) fn resource_snapshot() -> ResourceSnapshot {
     #[cfg(any(target_os = "macos", target_os = "linux"))]
     {
         // libc defines the platform-specific layout; no shell/process inspection is used.
@@ -872,12 +956,37 @@ pub fn resources() -> Value {
         if unsafe { libc::getrusage(libc::RUSAGE_SELF, &mut usage) } == 0 {
             let multiplier = if cfg!(target_os = "macos") { 1 } else { 1024 };
             let seconds = |t: libc::timeval| t.tv_sec as f64 + t.tv_usec as f64 / 1_000_000.0;
-            return json!({"cpu_seconds":seconds(usage.ru_utime)+seconds(usage.ru_stime),
-                "peak_rss_bytes":usage.ru_maxrss.max(0) as u64*multiplier,
-                "scope":"process counters sampled before report emission; peak resident memory, not allocated bytes"});
+            return ResourceSnapshot {
+                cpu_seconds: Some(seconds(usage.ru_utime) + seconds(usage.ru_stime)),
+                peak_rss_bytes: Some(usage.ru_maxrss.max(0) as u64 * multiplier),
+            };
         }
     }
-    json!({"cpu_seconds":null,"peak_rss_bytes":null,"scope":"measurement unavailable on this platform"})
+    ResourceSnapshot {
+        cpu_seconds: None,
+        peak_rss_bytes: None,
+    }
+}
+
+pub(crate) fn resource_delta(start: ResourceSnapshot) -> Value {
+    let end = resource_snapshot();
+    let cpu_seconds = match (start.cpu_seconds, end.cpu_seconds) {
+        (Some(start), Some(end)) => Some((end - start).max(0.0)),
+        _ => None,
+    };
+    json!({"cpu_seconds":cpu_seconds,
+        "peak_rss_bytes_at_end":end.peak_rss_bytes,
+        "scope":"process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"})
+}
+
+pub fn resources() -> Value {
+    let value = resource_snapshot();
+    json!({"cpu_seconds":value.cpu_seconds,"peak_rss_bytes":value.peak_rss_bytes,
+    "scope":if value.cpu_seconds.is_some() {
+        "process counters sampled before report emission; peak resident memory, not allocated bytes"
+    } else {
+        "measurement unavailable on this platform"
+    }})
 }
 fn batch_size(requested: u32) -> usize {
     if requested == 0 {
@@ -892,6 +1001,9 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
     let begin = Instant::now();
     if args.max_trials == 0 || args.max_trials > 1_000_000 {
         return Err("trial limit must be 1..=1000000".into());
+    }
+    if args.solver == Solver::Wdsat && args.wdsat_binary.is_none() {
+        return Err("--solver wdsat requires --wdsat-binary".into());
     }
     let spec = factor_base_spec(&args)?;
     if !quiet {
@@ -924,18 +1036,21 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
         seed: args.seed,
         collapse_negation: !args.control,
         collapse_projected_orbits: !args.control,
+        crossbred: None,
         stop_on_verified_rank: !args.control,
         allow_direct_relation: false,
         relation_batch_size: batch,
+        wdsat_binary: args.wdsat_binary.clone(),
+        wdsat_timeout_ms: args.wdsat_timeout_ms,
         ..KoblitzIcOptions::default()
     };
     let mut stages = Vec::new();
     let mut stage_start = Instant::now();
     let record = |stages: &mut Vec<Value>,
-                      stage: &str,
-                      state: &str,
-                      details: Value,
-                      stage_start: &mut Instant| {
+                  stage: &str,
+                  state: &str,
+                  details: Value,
+                  stage_start: &mut Instant| {
         if state == "started" {
             *stage_start = Instant::now();
         }
@@ -1073,7 +1188,9 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
             "independent_relations":r.independent_relations,"dependent_relations":r.dependent_relations,
             "inconsistent_relations":r.inconsistent_relations,"verification_failures":r.verification_failures,
             "trials":r.trials,"batches":r.relation_batches,"pair_table_entries":r.pair_table_entries,
-            "f4_reductions":r.reductions,"sat_calls":r.sat_calls,"sat_unknowns":r.sat_unknowns,"sat_invalid_models":r.sat_invalid_models,
+            "algebra_cache_current_thread":crypto_lib::cryptanalysis::algebra_cache::stats(),
+            "f4_reductions":r.reductions,
+            "f4_word_ops":crypto_lib::cryptanalysis::koblitz_groebner::f4_profile().word_ops,"sat_calls":r.sat_calls,"sat_unknowns":r.sat_unknowns,"sat_invalid_models":r.sat_invalid_models,
             "sat_conflicts":r.sat_conflicts,"linear_solve_attempts":r.linear_solve_attempts,"cofactor_admissible":r.m_cofactor_admissible},
         "timing_seconds":{"pair_table":r.pair_table_ns as f64/1e9,"relation_collection":r.relation_collection_ns as f64/1e9,
             "linear_algebra":r.linear_algebra_ns as f64/1e9},
@@ -1173,7 +1290,7 @@ fn child(args: &RunArgs, seconds: u32) -> Result<Value, String> {
 fn median(values: &mut [f64]) -> f64 {
     values.sort_by(f64::total_cmp);
     let n = values.len();
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         (values[n / 2 - 1] + values[n / 2]) / 2.0
     } else {
         values[n / 2]
@@ -1306,7 +1423,10 @@ impl TempSpec {
             doc.degree
         ));
         let _ = std::fs::remove_file(&path);
-        write_new(&path, &serde_json::to_value(doc).map_err(|e| e.to_string())?)?;
+        write_new(
+            &path,
+            &serde_json::to_value(doc).map_err(|e| e.to_string())?,
+        )?;
         Ok(Self(path))
     }
 }
@@ -1325,6 +1445,10 @@ fn candidate_summary(c: &Candidate) -> Value {
         "expected_trials":census.map(|x| if x.expected_trials.is_finite(){json!(x.expected_trials)}else{Value::Null}),
         "enumeration_ops_per_trial":c.enumeration_ops_per_trial,"pair_table_lookups_per_trial":c.pair_table_lookups_per_trial,
         "sat_variables":c.sat_variables,"build_ms":c.build_ms,"census_ms":census.map(|x| x.census_ms),
+        "trace_zero":c.trace_zero,
+        "measured_ops_per_target":c.measured_ops_per_target,
+        "expected_stage_ops":c.expected_stage_ops,
+        "solve_cost_skipped":c.solve_cost_skipped,
         "prune_steps":c.prune_steps,"skipped":c.skipped})
 }
 pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
@@ -1335,6 +1459,28 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
     if let Some(path) = &args.spec_out {
         if std::fs::symlink_metadata(path).is_ok() {
             return Err(format!("spec output already exists: {}", path.display()));
+        }
+    }
+    // Scoring one oracle and running another selects for the wrong thing.
+    if args.solve_cost_targets.is_some() {
+        if args.solver != Solver::Groebner {
+            return Err(format!(
+                "--solve-cost-targets measures the Gröbner oracle, but the runs would use {}; \
+                 pass --solver groebner or drop --solve-cost-targets",
+                args.solver.name()
+            ));
+        }
+        // A replayed reduction reports as free, so a warm cache would price
+        // the candidates measured later at a fraction of their cost.
+        // Only a replayed *reduction* skips the counter: word_ops is added
+        // inside matrix_f4_f2_counted, so a preprocessing hit still runs F4.
+        use crypto_lib::cryptanalysis::algebra_cache::{enabled, Layer};
+        if enabled(Layer::ExactReduction) {
+            return Err(
+                "--solve-cost-targets cannot measure while replayed reductions report as free; \
+                 unset IC_REDUCTION_CACHE"
+                    .into(),
+            );
         }
     }
     let kc = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
@@ -1365,11 +1511,15 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         saturate: !args.no_saturate,
         projected_columns: !args.raw_columns,
         seed: args.seed,
+        solve_cost_targets: args.solve_cost_targets.map(|t| t as usize),
     };
     if !quiet {
         println!(
             "ic — factor-base search on {}; r = {}; h = {}; {} summands",
-            kc.label(), kc.subgroup_order, kc.cofactor, args.summands
+            kc.label(),
+            kc.subgroup_order,
+            kc.cofactor,
+            args.summands
         );
         let _ = std::io::stdout().flush();
     }
@@ -1387,9 +1537,13 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
                 } else {
                     "∞".into()
                 }),
-                c.skipped
-                    .as_ref()
-                    .map_or(String::new(), |s| format!("  ({s})"))
+                c.expected_stage_ops
+                    .map(|ops| format!("  stage word XORs {ops:.3e}"))
+                    .or_else(|| c.solve_cost_skipped.as_ref().map(|r| format!("  (unpriced: {r})")))
+                    .unwrap_or_default()
+                    + &c.skipped
+                        .as_ref()
+                        .map_or(String::new(), |s| format!("  ({s})"))
             );
             let _ = std::io::stdout().flush();
         }
@@ -1403,7 +1557,7 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         .candidates
         .iter()
         .enumerate()
-        .filter(|(_, c)| c.expected_trials().is_finite())
+        .filter(|(_, c)| c.score().is_finite())
         .take(args.validate_top as usize)
         .collect();
     for (rank, candidate) in scored {
@@ -1451,12 +1605,14 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         let eligible = costs.len() == args.holdout as usize;
         let med = eligible.then(|| median(&mut costs));
         if let Some(cost) = med {
-            if winner.map_or(true, |(_, best)| cost < best) {
+            if winner.is_none_or(|(_, best)| cost < best) {
                 winner = Some((rank, cost));
             }
         }
-        validations.push(json!({"rank":rank+1,"spec":candidate.spec,"eligible":eligible,
-            "median_process_seconds":med,"holdout":runs}));
+        validations.push(
+            json!({"rank":rank+1,"spec":candidate.spec,"eligible":eligible,
+            "median_process_seconds":med,"holdout":runs}),
+        );
     }
     let selected = winner.map(|(rank, _)| &report.candidates[rank]);
     let selected_doc = selected.map(|c| FactorBaseDocument {
@@ -1477,21 +1633,62 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
     } else {
         "inconclusive"
     };
-    Ok(json!({"schema_version":1,"operation":"search","status":status,
+    // What ranked the report is what was measured, not what was requested.
+    let measured_any = report
+        .candidates
+        .iter()
+        .any(|c| c.expected_stage_ops.is_some());
+    let mut limitations = vec![
+        "Coverage is exact on the target set, which is the whole subgroup only when exhaustive_targets is true.".to_string(),
+        "Selected means fastest validated on these holdout fixtures, not a global optimum.".to_string(),
+        "No imported target was used.".to_string(),
+    ];
+    let scoring = if let (Some(t), true) = (args.solve_cost_targets, measured_any) {
+        limitations.push(format!(
+            "Solve cost is the mean over {t} census targets of one oracle, the Gröbner one, and only for \
+             linear-subspace candidates; pruned, saturated, union and orbit bases are left unmeasured and \
+             ranked below every measured one (see solve_cost_skipped)."
+        ));
+        limitations.push(
+            "Base construction, lifting, filtering and the relation linear algebra are not in the score; \
+             all of them grow with the base size, so pricing them would favour the smaller base further."
+                .to_string(),
+        );
+        "expected_stage_ops = expected_trials × measured Gröbner word XORs per census target, charged on \
+         decomposing and refuted targets alike; expected_trials = (columns + 1 + extra) / coverage"
+    } else {
+        if args.solve_cost_targets.is_some() {
+            limitations.push(
+                "Solve cost was requested but no candidate could be priced, so this report is ranked by \
+                 expected trials; see solve_cost_skipped on each candidate."
+                    .to_string(),
+            );
+        }
+        limitations.push(
+            "Expected trials ignore per-trial oracle cost; the validation runs measure wall time with the \
+             chosen oracle. Pass --solve-cost-targets to rank by measured solving cost instead."
+                .to_string(),
+        );
+        "expected_trials = (columns + 1 + extra) / coverage, coverage measured exactly on the shared target \
+         set by enumerating every m-summand witness through a pair-sum table"
+    };
+    Ok(
+        json!({"schema_version":1,"operation":"search","status":status,
         "evidence_scope":"exact_yield_census_with_synthetic_validation",
         "degree":kc.n,"curve_a":kc.a,"subgroup_order":kc.subgroup_order.to_string(),"cofactor":kc.cofactor.to_string(),
         "summands":args.summands,"options":report.options,"targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
         "candidate_count":report.candidates.len(),
         "candidates":report.candidates.iter().map(candidate_summary).collect::<Vec<_>>(),
+        // best_census keeps its name for frozen consumers; best_scored is the
+        // same candidate named after the objective that actually ranked it.
         "best_census":report.best().map(|c| c.spec.clone()),
+        "best_scored":report.best().map(|c| c.spec.clone()),
         "validation":{"solver":args.solver,"holdout_samples":args.holdout,"max_trials":args.max_trials,
             "timeout_seconds":args.timeout_seconds,"validated_top":args.validate_top,"runs":validations},
         "selected":selected_doc,"selected_summary":selected.map(candidate_summary),
         "spec_out":args.spec_out.as_ref().filter(|_| selected.is_some()).map(|p| p.display().to_string()),
         "census_ms":census_ms,"elapsed_seconds":started.elapsed().as_secs_f64(),"resources":resources(),
-        "scoring":"expected_trials = (columns + 1 + extra) / coverage, coverage measured exactly on the shared target set by enumerating every m-summand witness through a pair-sum table",
-        "limitations":["Coverage is exact on the target set, which is the whole subgroup only when exhaustive_targets is true.",
-            "Expected trials ignore per-trial oracle cost; the validation runs measure wall time with the chosen oracle.",
-            "Selected means fastest validated on these holdout fixtures, not a global optimum.",
-            "No imported target was used."]}))
+        "scoring":scoring,"scoring_objective":if measured_any{"expected_stage_ops"}else{"expected_trials"},
+        "limitations":limitations}),
+    )
 }

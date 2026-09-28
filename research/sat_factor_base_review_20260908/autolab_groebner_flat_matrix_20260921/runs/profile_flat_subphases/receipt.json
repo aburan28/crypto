@@ -1,0 +1,23 @@
+{
+  "child_system_ms": 24.744,
+  "child_user_ms": 8186.591,
+  "command": [
+    "target/release/examples/koblitz_f4_frontier_probe",
+    "sym",
+    "3",
+    "solve"
+  ],
+  "ended_unix_ns": 1790046931900050000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/koblitz_f4_frontier_probe",
+  "executable_sha256": "731d606643cf0a19f03cd953370a17ce6e3445bda9fe7ca51e029d71a6819c67",
+  "exit_code": 0,
+  "peak_rss_bytes": 34553856,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790046923640924000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 572,
+  "stdout_sha256": "c6ac38d309b97c5173db4e75a46276fd924b8e6a7e2e2a2cb0179654ffcb3571",
+  "task_id": "TASK-KIC-GROEBNER-FLAT-MATRIX-PROFILE-SUBPHASES-20260921",
+  "wall_ms": 8259.215083
+}

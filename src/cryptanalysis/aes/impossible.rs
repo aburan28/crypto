@@ -69,7 +69,7 @@
 //! key bytes uniquely.
 //!
 //! That full attack is `≈ 2⁹¹` operations as stated in the literature
-//! and we do not run it here — see `DEFERRED.md`. The
+//! and we do not run it here — see `docs/DEFERRED.md`. The
 //! [`key_byte_eliminations_5_round`] routine below runs the *one-byte*
 //! version of the elimination over a small parameter range, sufficient
 //! to demonstrate the elimination mechanism on a runnable scale.
@@ -150,7 +150,7 @@ pub fn verify_4_round_impossibility(
         if active == 1 {
             one += 1;
         }
-        if active >= 2 && active <= 4 {
+        if (2..=4).contains(&active) {
             low += 1;
         }
         if active == 16 {

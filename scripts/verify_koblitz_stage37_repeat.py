@@ -34,6 +34,10 @@ ARCHIVE_ROOT = "koblitz-stage35-algebraic-walk-34694400320"
 SCHEMA = "koblitz_stage37_repeat_result.v1"
 SEAL_SCHEMA = "koblitz_stage37_repeat_result_seal.v1"
 
+# The delta between the two sealed run commits, as `git diff --name-only`
+# reports it.  These are the paths at those commits: the two notes lived
+# in the repository root then and were moved under research/notes/ later,
+# and history does not move with them.
 EXPECTED_SOURCE_DELTA = [
     "RESEARCH_AUTOLAB_LOG.md",
     "RESEARCH_QUASI_SUBFIELD.md",

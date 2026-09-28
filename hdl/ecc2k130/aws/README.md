@@ -1,0 +1,512 @@
+# hdl/ecc2k130 on AWS: synthesis, the F2 image, and an FPGA fleet
+
+Two things live here. `synth.tcl` is the out-of-context synthesis probe
+that brings back LUT, FF and Fmax for the engine's modules, spending nothing
+on an FPGA. Everything else turns the engine into an F2 image and runs it
+as part of the campaign in [`ecc2k130/aws/`](../../../ecc2k130/aws/):
+the same bucket, the same slot registry, the same `dp/` corpus, the same
+`merge.py`, with F2 instances and GPU instances side by side.
+
+**Nothing here has been run.** There was no Vivado, no AWS account and no
+F2 instance in the environment this was written in. The VHDL and the host
+program are tested (GHDL, and the host against its own model of the
+register block); the CL wrapper parses; the shell scripts pass `bash -n`.
+Expect the first build to need a fix or two in the HDK glue, and read the
+build log.
+
+| File | What it is |
+|---|---|
+| `synth.tcl` | Out-of-context synthesis of `gf131_mul`, `ec2k_batch_pipe`, `ec2k_step_pipe`, `ec2k_walker`, `ec2k_axil` for the VU47P; run through `ecc/aws/run_aws_synthesis.sh` |
+| `cl_ecc2k130/` | The F2 custom logic: `design/cl_ecc2k130.sv` ties off every shell interface except OCL and instantiates `ec2k_axil` there; `build/scripts/encrypt.tcl` and `synth_cl_ecc2k130.tcl` are the HDK's hooks, taught to read VHDL |
+| `build_afi.sh` | From your laptop: push sources, launch a build instance, follow it, promote the resulting AFI |
+| `build_afi_instance.sh` | What the build instance runs: HDK setup, `aws_build_dcp_from_cl.py`, upload, `create-fpga-image` |
+| `bootstrap_f2.sh` | User data of an F2 worker: SDK, host program, load the AFI into every slot, one `worker.py` per slot |
+| `f2.sh` | Launch template and EC2 Fleet for F2 instances, measured in FPGAs |
+
+## The flow
+
+Prerequisites: `ecc2k130/aws/infra.sh` has run (bucket, worker role,
+security group, `campaign.json`), and the account is subscribed to the free
+**FPGA Developer AMI** in the Marketplace (Ubuntu, Vivado preinstalled and
+licensed for F2 builds).
+
+```bash
+cd hdl/ecc2k130/aws
+
+./build_afi.sh push                     # engine + host sources -> s3://BUCKET/fpga/source.tar.gz
+NENG=32 ./build_afi.sh launch           # r6i.4xlarge with the FPGA Developer AMI; hours
+./build_afi.sh status                   # instance state, log tail, AFI state
+./build_afi.sh wait                     # blocks until the AFI is available (submits it
+                                        #   from here if the instance's own call was refused)
+./build_afi.sh promote                  # -> s3://BUCKET/fpga/afi.json, the image workers load
+
+./f2.sh infra                           # launch template from bootstrap_f2.sh
+./f2.sh up 8 --on-demand 8              # 8 FPGAs; f2.6xlarge/12xlarge/48xlarge, cheapest per AZ
+./f2.sh status
+../../../ecc2k130/aws/merge.py          # the same merge as for the GPUs; the points are indistinguishable
+./f2.sh down
+```
+
+`launch` starts the instance with `--instance-initiated-shutdown-behavior
+terminate` and the build script ends with `shutdown`, so a finished or
+failed build costs nothing after it stops; `KEEP=1` keeps it for a
+post-mortem over SSM. The build log is copied to
+`fpga/builds/TAG/build.log` every five minutes, the utilisation and timing
+reports to `fpga/builds/TAG/reports/`, `build.json` records the geometry
+and whether timing was met once the tarball is up, and `afi.json` adds
+the AFI and AGFI ids once the image is submitted. `launch` makes an
+instance role for the build when the caller has the IAM rights, and
+otherwise gives the instance a 36 h session token of the caller; with
+the token the instance's `create-fpga-image` is refused
+(`InaccessibleStorageLocation`: the image service will not read the
+tarball through a `GetSessionToken` credential, though S3 itself
+accepts it), and `wait` — or `./build_afi.sh submit TAG` — makes the
+image from the uploaded tarball with the caller's own keys.
+
+## Geometry
+
+The image is parameterised at build time through `-verilog_define`s that
+`build_afi.sh` passes as `NENG`, `ID_W`, `DP_WEIGHT`, `LOG_W`, `LOG_NB`
+(`cl_ecc2k130_defines.vh` has the defaults), plus `DSP_LEAVES`, which
+edits the package constant. The host reads them back from
+`GEOM` and refuses to run against an image with the wrong distinguished-point
+weight, and `bootstrap_f2.sh` refuses to start if `campaign.json`'s
+`dpWeight` differs from the image's, so a stale image cannot poison the
+corpus.
+
+`NENG` is the number to sweep. Each engine is one batched step unit plus
+its walk memory, about 6.9k LUTs, 12 RAMB36, 4 URAM288 and 66 DSPs as
+synthesised (`../README.md`, "Capacity"); the VU47P has 1.30M LUTs,
+2 016 RAMB36, 960 URAM288 and 9 024 DSPs, of which the CL's pblock
+holds 7 992 DSPs and 3 576 RAMB18 sites (1 788 RAMB36). 128 engines is
+68% of the LUTs, 76% of the block RAM and 53% of the UltraRAM, and takes
+ten DSP leaves (7 680 DSPs); 136 with nine leaves is 73% / 81% / 57% and
+144 77% / 86% / 60% — 144 is the most the CL's block RAM holds (3 456 of
+3 576 sites; 152 would want 3 648), and it took the step count out of
+the walk words to get there: at 12 RAMB36 + 2 RAMB18 per engine, 144
+wanted 3 744 and `place_design` refused before placing anything. (With the
+all-LUT multiplier, 8.1k LUTs per engine, 96 engines was 63% of the
+LUTs, 112 73% and 128 83% — the 128-engine image that runs at 8.25 G
+steps/s; with the product tree in block RAM,
+17 tiles per engine, 48 was a third of the device, 64 42% of the LUTs
+and 54% of the RAM, 80 53% and 67%, 96 63% and 81%, and the RAM ran out
+first.) Read `synth_utilization` and the post-route timing from the
+reports, then go to what fits.
+
+`ID_W` sets walks per engine, `2^ID_W`. Each walk is 285 bits of block
+RAM in the FIFO (`x`, `y`, id, the low 13 bits of its step count, the
+DP flag; the high 19 bits are a per-walk table in distributed RAM) and
+288 in the step unit's leaf table, and the step unit holds `W · 2^LOG_NB`
+walks at once — 512 at the
+default 64 × 8, which 512 walks (the default) feed at 5.16 clocks per
+step in simulation and 5.17 on the device; the same 512 as 32 × 16
+starve at 5.21 – 5.22, see "What came back". 512 fills the FIFO's block
+RAMs exactly, so fewer walks would save nothing; 1 024 would take four
+more RAMB36 per engine. More walks means more work lost on a restart and
+a longer time to the first report, nothing else.
+
+## Clocking
+
+The F2 shell fixes `clk_main_a0` at 250 MHz, and the engine synthesises
+with +1.98 ns of slack at 4.0 ns, so the CL makes its own clock: one
+`MMCME4_ADV` (`MMCM_ENG` in `cl_ecc2k130.sv`) multiplies `clk_main_a0` by
+`ECC_MMCM_MULT / ECC_MMCM_DIV` into `clk_eng`, and the register block and
+every engine run on that. `build_afi.sh` takes `CLK_MHZ` (250, 300, 333 —
+the default — 350, 375, 400) or the raw `MMCM_MULT` / `MMCM_DIV` pair;
+the VCO at `250 · MULT` MHz must stay within 800–1600, and both values may
+be fractional in eighths. The image reports the frequency it was built
+for in the `CLOCK` register and the host prints it.
+
+The shell's OCL port stays on `clk_main_a0` and crosses to `clk_eng` in
+`BRIDGE`, an `ec2k_axil_cdc` (`../ec2k_axil_cdc.vhd`): one transaction of
+each kind in flight, level handshakes through `ASYNC_REG` synchronisers,
+data written a clock before its flag and copied a synchroniser after it.
+Those synchroniser inputs and data copies are the only paths between the
+two clocks, and `cl_timing_user.xdc` constrains exactly them by name
+(false path into `cdc_*_meta`, `set_max_delay -datapath_only` from
+`cdc_*_src` to `cdc_*_cap`). Because both clocks come from the same
+source, Vivado times anything else that crosses against their edge
+relationship, so a path that was forgotten fails timing rather than
+sneaking through. The engine reset is the shell reset or the MMCM losing
+lock, through an `xpm_cdc_async_rst` into `clk_eng` and one more register
+per engine inside `ec2k_axil`, so no single flop drives every engine.
+
+The MMCM and bridge cost 250 LUTs. Above what the routed design closes,
+the build is flagged `timingViolated` in `afi.json`; such an image runs
+(the host verifies every report by rewalking it, so a wrong step costs
+throughput, not corpus integrity) but should be rebuilt one table entry
+lower. The 250 MHz entry (`MMCM_MULT=4 MMCM_DIV=4`) is the baseline with
+the same structure.
+
+## What each F2 instance does
+
+`bootstrap_f2.sh` clones `aws-fpga` (`f2` branch) and runs `sdk_setup.sh`
+for the management tools and the `fpga_mgmt` library, fetches
+`campaign.json`, `fpga/afi.json`, `fpga/source.tar.gz` and `aws/worker.py`
+from the bucket, builds `ecc2k130-fpga` with `make pci`, and runs its
+`--selftest`. Then per slot: `fpga-load-local-image -S slot -I agfi` (F2's
+tools rescan PCI by default and reject F1's `-R`), wait for `loaded`, and
+probe the slot with `ecc2k130-fpga --launches 1`,
+which checks `MAGIC` and `GEOM`. Only a slot that answers as this image
+gets a worker.
+
+The workers are `ecc2k130-worker@SLOT` systemd units running the
+unmodified `worker.py` with `ECC_CLIENT=ecc2k130-fpga` and `ECC_GPU=SLOT`;
+`worker.py` claims a campaign slot, hands the client `--run-id`,
+`--dp-file`, `--checkpoint` and the rest, uploads `dp.bin` and the
+checkpoint on its schedule, retires the slot on exit 6, and reports the
+device as `ECC_DEVICE_NAME` (`f2.6xlarge fpga 32x256 TAG`) in the slot
+registry. A spot interruption stops the workers with SIGTERM, the client
+flushes its points and writes its checkpoint, and the replacement instance
+resumes from S3; the walks that were in the FPGA at that moment are lost,
+which costs at most `2^dpWeight` steps each.
+
+## Cost, roughly
+
+An F2 build instance runs for hours at r6i.4xlarge prices; the AFI
+generation after it is free. `f2.6xlarge` on-demand is a few dollars an
+hour for one VU47P; if the engine reaches the estimated 11–19 G steps/s
+that is a small fraction of the GPU fleet's cost per step
+(`ecc2k130/RTX-PRO6000.md` has the GPU side). None of that is measured
+until the first build.
+
+## Out-of-context synthesis without an image
+
+`synth.tcl` synthesises the modules out-of-context and writes utilisation,
+hierarchical utilisation and timing reports plus a one-line summary per
+module. The launch script lives with the secp256k1 datapath and works here
+unchanged:
+
+```bash
+# see the plan, spend nothing
+HDLDIR=$(pwd)/.. ../../ecc/aws/run_aws_synthesis.sh \
+    --key-name mykey --key-file ~/.ssh/mykey.pem --dry-run
+
+# real run, sweeping the clock
+for p in 3.333 2.5 2.0; do
+  HDLDIR=$(pwd)/.. ../../ecc/aws/run_aws_synthesis.sh \
+      --key-name mykey --key-file ~/.ssh/mykey.pem --period $p --out reports-$p
+done
+```
+
+Read [`../../ecc/aws/README.md`](../../ecc/aws/README.md) first: it
+explains the cost, the termination trap, and why this is synthesis rather
+than an FPGA image.
+
+### What came back
+
+The estimates in [`../README.md`](../README.md) against what Vivado 2025.2
+synthesised (out of context, `xcvu47p-fsvh2892-2-e`, 4.0 ns clock):
+
+| Quantity | Estimate | Synthesised |
+|---|---|---|
+| LUT per multiplier | 5–6k | 5 547 at two Karatsuba levels, 4 855 at three, 5 019 at four, all LUT leaves; **4 004 at three with eleven leaves in DSPs** (now the default) |
+| FF per multiplier | ~3k | 2 892 / 4 647 / 7 262 at two / three / four levels |
+| DSP per multiplier | 0 | **66** (eleven 17-bit leaves as 2 × 3 grids of 25 × 16 integer products; 0 with `MUL_DSP_LEAVES = 0`) |
+| LUT per engine (step unit + walker) | ~10k | 13 106 with the memories in LUTRAM (4 576 of them); 8 260 – 8 570 with them in block RAM; 7 970 – 8 110 with the tree in UltraRAM, 32-walk batches and the enable-free stages; 7 170 – 7 320 with eleven multiplier leaves in DSPs; 7 000 – 7 150 with the single-writer level arrays; 6 840 – 6 990 with the DSP pieces widened to 9 × 6 coefficients; 6 540 – 6 690 with the output weight taken beside the final multiply; **6 790 – 6 940** with the step count's high bits in a LUTRAM table (376 LUTRAM and 310 SRL of it), which buys two RAMB18; 9 371 FF |
+| Register block (`ec2k_axil`) | — | 883 LUTs, 2 380 FF for two engines, of which a spine stage of ~300 LUTs, ~870 FF per engine; bridge ~250 LUTs, 201 FF |
+| BRAM | 0 | **12 RAMB36 and 4 URAM288 per engine** (the product tree in UltraRAM; the step count's high 19 bits in a LUTRAM table so the FIFO word and the leaf word each fit four RAMB36 — 12 + 2 RAMB18 while they carried all 32); 16 + 2 with the tree in block RAM (the 48-, 64- and 80-engine images below); 20 + 2 before the retire side stopped reading memories |
+| Clock | 300–400 MHz | +1.98 ns slack at 4.0 ns, +1.24 ns at 3.0 ns (synthesis, two engines with register block and bridge); the shell fixes `clk_main_a0` at 250 MHz, so the CL's own MMCM makes the engine clock, 333 MHz by default |
+
+The first CL synthesis (32 engines) read 1.29M LUTs, four times this: a
+two-writer counter array in the walker had become 8k flip-flops behind a
+256:1 mux, and every distinct `array(expr)` in the step unit's operand
+stage had become its own LUTRAM copy. Both are fixed
+([`../README.md`](../README.md), "Capacity"); the per-module probe that
+found them is a plain out-of-context `synth_design` of one entity with a
+LUT histogram by driven signal, which is the tool to reach for if a future
+build's numbers do not add up.
+
+The first 48-engine *implementation* (250 MHz, the flat register block of
+that revision) placed at **−2.5 ns** on the 4 ns clock while the engine
+alone synthesised at +2 ns: the placer's log shows it replicating the
+load and run registers across SLRs and re-placing the report holding
+registers behind the 48:1 mux, i.e. the interconnect between the register
+block and engines spread over three SLRs, not the arithmetic. That is what
+the spine in `ec2k_axil` is for ([`../README.md`](../README.md), "The
+host interface"): every inter-engine wire is register to neighbour, and
+the block has no path that touches more than one engine.
+
+The same log, read to the end, showed a second failure inside every
+engine, and the larger one: total negative slack was −246 µs over 18 000
+endpoints, "long congestion 32×32" in two SLRs, and the nets that could
+not be fixed were the write address and write enable of each LUTRAM array
+(`f_wr`, `leaf_addr`, `fb`, the multiplier tag's address decode — 1 400
+to 1 800 loads each), which physical optimisation reports it cannot
+replicate because the loads are memory primitives. 4 800 LUTRAM per
+engine, 48 times, spread across every SLICEM of a region is a design
+that cannot place tightly. Every wide memory is now block RAM
+([`../README.md`](../README.md), "Capacity"), with the read latency of
+two hidden by a prefetch buffer in the walker and, on the retire side, by
+not reading at all (the final multiply carries what its retire needs);
+the engine lost 4 700 LUTs and gained 17 block RAM tiles, and the free
+depth of a block RAM made 512 walks and 16 batches in flight the
+default, 5.29 clocks per step against 5.54.
+
+**The 48-engine build of that revision met timing at 333 MHz**
+(`20260912-181902-n48-c333`): placed at +0.418 ns with no failing
+endpoint and no congestion worse than 8×8, routed at **WNS +0.022 ns,
+TNS 0, WHS +0.009**; 403 891 LUTs (31%), 397 918 FFs (15%), 960 RAMB36 +
+96 RAMB18 (50% of the block RAM), no DSP or URAM. Its ten worst paths
+were all one net, a spine stage's reset register into the clock enables
+of the 1 300 data flip-flops it held during reset, 2.3 ns of route for
+one LUT across an SLR boundary — so data registers no longer see the
+reset anywhere in the design (the batch pipe, walker and multiplier had
+the same shape inside every engine). The first revision's 48-engine
+build, for the record, routed at −1.65 ns on the 4 ns clock with −221 µs
+of total negative slack.
+
+Its AFI `agfi-0977ae08fec2f9ced` cannot be loaded: `fpga-load-local-image`
+answers `cl-id-mismatch`, because the HDK's `aws_build_dcp_from_cl.py`
+copies the PCIe ids from `cl_id_defines.vh` into the manifest with
+`str.lstrip("32'h")`, which also strips a leading `2` or `3` of the id
+itself — subsystem id `2C13` went in as `C13`. The same DCP tarball with
+the manifest corrected by hand was resubmitted as
+**`agfi-08bd9e69a78e4dc79`** (build directory
+`20260912-181902-n48-c333-idfix`); `build_afi_instance.sh` now checks the
+manifest against the defines and rewrites it inside the tarball, and the
+subsystem id is `EC13`.
+
+**That image runs.** On an `f2.6xlarge` (FPGA Developer AMI, `sdk_setup.sh`,
+`make pci`, `fpga-load-local-image -S 0 -I agfi-08bd9e69a78e4dc79`), the
+host program reads `MAGIC`, `GEOM` (48 × 512 walks, dp weight 34) and
+`CLOCK` (333.3 MHz), loads the 24 576 walks in 7.3 s over AXI-Lite, and
+then holds **3 010.7 M steps/s** for as long as it runs (2 995 at 2 s,
+3 010 from 10 s on; 103 G iterations in a 40 s run) — 48 × 333.3 MHz /
+3.011 G = **5.31 clocks per step** against the 5.29 the simulation gave,
+with **0 dropped reports** and, in a run with `--verify 64`, all 64 sampled
+distinguished points equal to the client's reference walk from the same
+seed. (Verification is a software walk of up to `2^26` steps per point on
+the host, so with it on, the host stops draining the queue, the credits
+run out and the engines stall — 748 M steps/s in that run; workers run
+`--verify 0` and the campaign's merge checks the corpus.) The rate
+counter counts from reset, so the first version of the host program
+reported 8 G/s over the first seconds; it now measures from the end of
+the load.
+
+**64 engines at 333 MHz also met timing** (`20260912-193357-n64-c333`,
+the same revision as the 48-engine image): placed at +0.360 ns, routed at
+**WNS +0.040 ns, TNS 0**, 539 553 LUTs (41.4%), 532 647 FFs (20.4%),
+1 280 RAMB36 + 128 RAMB18 (67%). Its worst paths are now inside the
+engines and the spine, not the reset: a fill's batch id into a leaf
+table's write address (3.0 ns with the block RAM's setup) and a stage's
+`up_valid` into the 300-bit insert mux of the stage below. Its manifest
+had the same clipped id; the corrected resubmission,
+**`agfi-00c9bd0dc08fef595`** (`20260912-193357-n64-c333-idfix`), loads,
+answers 64 × 512 walks at 333.3 MHz, takes 9.7 s to seed, and holds
+**4 013.7 M steps/s** (0 dropped; 32 points verified in a second run) —
+5.32 clocks per step. It is the promoted image.
+
+The same 64 engines with the level in the tag and reset-free data
+registers (`20260912-201058-n64-c333`) placed at +0.427 ns (against
++0.360) and routed at **+0.026 ns**, its worst path now the fill's state
+(`fill_pend → fill_ok → p1_take → p0_adv → in_ready`) into the 300
+clock enables of the step unit's first input register — since removed
+by letting an input stage take a walk only when it is empty, so its
+enable is its own valid bit (5.31 clocks per step in simulation, from
+5.29). The 300-bit insert mux's select is likewise now a register in
+its own stage, and the leaf writes go through a register with one
+address copy per table.
+
+**80 engines at 333 MHz met timing too** (`20260912-204307-n80-c333`,
+the revision with the retire-free memories: 17 tiles per engine): placed
+at +0.089 ns, routed at **WNS +0.027 ns, TNS 0, WHS +0.010**; 686 854
+LUTs (52.7%), 1 280 RAMB36 + 160 RAMB18 (67% of the block RAM). Its
+worst paths are spread over the engines now — a burst level into a tree
+address, an input register into a `d` table's data pins, `ra_valid` into
+the multiplier operand register's enables, the FIFO's write pointer into
+its write enable — each around 2.97 ns, no single net to remove. Its
+manifest was written by the checked flow (`pci_subsystem_id=0xEC13`), so
+AFI **`agfi-03f41bca67d09198c`** loaded as submitted: 80 × 512 walks at
+333.3 MHz, 12.2 s to seed, **5 015.8 M steps/s** held (0 dropped; 32
+points verified in a second run), 5.32 clocks per step. It is the
+promoted image.
+
+The 80-engine build of the revision with the three path fixes above
+(`20260912-224741-n80-c333`) placed at +0.300 ns (against +0.089) and
+routed at +0.016 (`agfi-0e21ecc9f59b3c5c0`, not measured: same engines,
+same clock). **96 engines at 333 MHz met timing** too
+(`20260912-230411-n96-c333`): placed at +0.381, routed at **+0.002 ns**,
+809 266 LUTs (62%), 1 632 block RAM tiles (81%). Its AFI
+**`agfi-0b503e1c5b319ef8b`** loaded as submitted: 96 × 512 walks at
+333.3 MHz, **6 018.0 M steps/s** held over 30 s (0 dropped; 32 points
+verified in a second run), 5.32 clocks per step. It is the promoted
+image. Every worst path of both images was a
+control net fanning out to a stage's data registers — the spine's
+insert-mux select (`e_dp_ack`/`hold` → 310 loads, 2.8 ns of route),
+`p1_valid` into the input stage's 310 clock enables (2.9 ns), `a_valid`
+into the operand registers' 440 — so the revision after them has no
+clock enables on the operand, multiplier and retire registers or the
+leaf write stage (the data moves every clock; the valid bits say what
+counts), and a fanout limit on every remaining control net over 250
+loads (`report_high_fanout_nets` on the synthesised probe found them:
+the input stages' "empty", the walker's report load, the inversion's
+Frobenius select, the spine's insert and load enables), so the driver is
+replicated and each copy sits among its loads. The limit has to go on
+the net the loads see — on the valid register it did nothing, the loads
+saw Vivado's inverter.
+
+Past 96 the block RAM is gone, so the product tree — the largest array,
+2W words per batch, kept twice — moved to **UltraRAM**, of which the
+VU47P has 960 blocks the design had left empty: 4 URAM288 per engine
+(two 72-bit blocks hold a 131 × 512 copy; the depth is mostly unused, the
+ports are the resource) and the engine drops from 17 block RAM tiles to
+13. Every memory address, read and write, is now a register of its own
+so the placer can put it beside the block; the UltraRAM columns are
+further from an engine's logic than its block RAMs (the reads take three
+clocks instead of two, 5.31 clocks per step unchanged with sixteen
+batches in flight). 112 engines is then 73% of the LUTs, 72% of the
+block RAM and 47% of the UltraRAM; 128 is 83% / 83% / 53%.
+
+**Both met timing at 333 MHz** (`20260913-002654-n112-c333` routed at
++0.015 ns, `20260913-002701-n128-c333` at +0.006), and so did every
+build of the two revisions after them:
+
+| Build | Engines | MHz | Geometry | Routed WNS | AFI | Measured |
+|---|---|---|---|---|---|---|
+| `20260913-005436-n112-c333` | 112 | 333 | 32 × 8 | +0.024 | `agfi-0cf3dbac5fa68a289` | — |
+| `20260913-012736-n128-c333` | 128 | 333 | 32 × 8 | +0.020 | `agfi-030346823d4e82eeb` | — |
+| `20260913-023919-n128-c333` | 128 | 333 | 32 × 8 | +0.048 | **`agfi-0d9e38b932946eb0e`** | **8 249 M steps/s**, promoted |
+| `20260913-030605-n112-c375` | 112 | **375** | 32 × 8 | +0.049 | `agfi-0ac7cee15d08ba812` | 8 123 M steps/s |
+| `20260913-030804-n120-c333` | 120 | 333 | 32 × 8 | +0.063 | `agfi-04a330a8874becf82` | 7 730 M steps/s |
+
+`20260913-005436` was the first with the **32 × 8 batch geometry** (the
+same 256 walks and the same memory per step unit as 16 × 16, 5.16 clocks
+per step against 5.31 — the bound is `5 + 5/W` — and 200 fewer LUTs per
+engine); `012736` and `023919` added the enable-free stages and the
+fanout limits above, and `030605` is that source at 375 MHz. All three
+measured images run **5.17 clocks per step** on the device (128 × 333.3
+MHz / 8.249 G; 112 × 375 / 8.123 G; 120 × 333.3 / 7.730 G), 0 reports
+dropped, 32 points verified on the promoted one. The 128-engine image's
+ten worst paths were all one net, the spine stage's `dn_gid` compare
+into the kept load's 270 clock enables (0.048 ns), and the 375 MHz
+image's were the engine's reset register into the step unit's control
+flip-flops (pure route) and the input stage's valid through its
+replicated inverters into 310 enables — so the stage that forwards a
+load now decides "this one is the next stage's" a clock early
+(`dn_mine`, a register beside `dn_ldv`), each input stage keeps its
+"empty" as a register, and the walker and step unit take the reset
+through a register of their own, all three under fanout limits.
+
+With the LUTs binding, the last empty resource was the **DSP48E2
+blocks**: eleven of the multiplier's 27 leaf products are now integer
+products in DSPs that count AND terms (`gf2_dsp_leaf.vhd`; the main
+README, "Leaves in DSPs"), 66 DSPs per engine for 790 fewer LUTs
+(7 170 – 7 320 per engine, −9.7%), same slack in the probe. The device
+has 9 024 DSPs but **the CL's pblock holds 7 992** (the shell has the
+other columns), which the first two DSP builds found by failing
+`place_design`'s utilisation DRC before placing anything
+(`20260913-034430-n128-c333`, 128 × 66 = 8 448; `034437-n136`, 136 × 60
+= 8 160): 120 engines can take eleven leaves, 128 ten, 136 and 144 nine
+(`DSP_LEAVES=`).
+
+The multiplier is 13 clocks instead of 10, which 8 batches of 32 no
+longer hide (5.38 clocks per step), and the first answer, **32 × 16**,
+read 5.22 — but so does the 10-clock multiplier at 32 × 16 (5.21 against
+5.16 at 32 × 8): sixteen batches of 32 are all 512 of the engine's
+walks, so as a batch retires nothing is queued to fill the next, and it
+starves. With 1 024 walks 32 × 16 runs 5.16 with either multiplier, but
+the FIFO would take 4 more RAMB36 per engine, which 128 engines do not
+have. **64 × 8** does: the same 512 walks in flight as 32 × 16 and the
+same words in the tables and the tree, 5.16 clocks per step with either
+multiplier (64 × 4 does not hide the 13 clocks: 6.06), and 7 323 LUTs
+per engine against 32 × 16's 7 690 and 32 × 8's 7 318. It is the
+default geometry now (`LOG_W`/`LOG_NB` on `build_afi.sh` override it).
+
+The builds pushed past this (`20260913-084315-n128-c375` with ten DSP
+leaves, `084330-n128-c375` and `084337-n112-c400` without) all routed
+and all **missed**: −0.448, −0.210 and −0.231 ns. The 400 MHz image's
+ten worst paths were every one the `dn_gid` compare above (2.1 ns of
+route into the clock enables), which the `dn_mine` register removes;
+the 375 MHz images' were the walker's FIFO — the block RAM's write
+enable was a pointer compare 2.0 – 2.6 ns of route from the array, its
+data pins a step/load select as far — and the report register's 300
+clock enables hanging off a LUTRAM read of the buffer's head ("is it a
+report"), plus, at the same −0.21, the multiplier's final combine into
+its output register and two paths into the batch level bookkeeping. The
+FIFO is now written through an enable/address/word register the placer
+can put beside the array (a committed pointer a clock behind the
+allocating one keeps a read from meeting its write), and the buffer's
+oldest entry moves into a head register as that empties, so the step
+unit's input and every control term of the report register are
+flip-flops (+9 LUTs, +633 FFs per engine, rate unchanged). The DSP
+build's −0.448 was not in the DSPs: its worst paths were the same FIFO
+write enable, with 6× the total negative slack of the LUT-only build,
+so there is more behind it that the report's ten paths do not show.
+
+Those three tarballs uploaded but their `create-fpga-image` failed with
+`InaccessibleStorageLocation`: an instance launched on the caller's
+36 h session token (this account's user has no IAM rights to make the
+build role) can read and write the bucket, but the image service,
+reading the tarball on the caller's behalf, refuses a `GetSessionToken`
+credential. The same call from the workstation's own keys succeeds, so
+the instance now writes `build.json` (geometry and timing) before the
+call and **`./build_afi.sh submit TAG`** makes the image from the
+uploaded tarball; `wait` does so itself when the instance is gone with
+the tarball up and no `afi.json`.
+
+Two more paths from that −0.21 list went the same way. The batch level
+bookkeeping: the fill and the retire both wrote each batch's phase and
+level, and an array with two write ports is flip-flops behind a mux;
+now the fill only pushes "new" with the batch's queue entry and the
+retire is the arrays' only writer, so they are 20 LUTRAM (−191 LUTs
+per engine, 7 132 at 64 × 8). The multiplier's output: its 261-bit
+product register is spread over the whole Karatsuba tree and the XOR
+trees from it into the output register were 2.2 ns of route for 0.4 of
+logic, so the product is copied into a register the placer can put
+beside those trees before the back-conversion (`MUL_LATENCY` 14 with
+DSP leaves, 11 without; +17 LUTs, +261 FFs; the engine was 7 000 –
+7 150 LUTs and 10 420 FFs). Neither shows in synthesis, where the
+engine's worst path is the output weight's sum at +1.25 ns on 3.0.
+
+The DSP leaf then lost its LUT corner. The DSP48E2's 27 × 18 signed
+multiplier is 26 × 17 unsigned, room for nine coefficients three bits
+apart against six, not the eight against five the first version packed;
+with `a` split 9 + 8 and `b` 6 + 6 + 5 the same six DSPs cover all 289
+terms of a 17-bit leaf and the LUTs only XOR the parities into place: 22
+per leaf against 40 plus the corner's flip-flops, −212 LUTs and −647
+FFs per multiplier (4 004 LUTs on its own), −156 LUTs and −976 FFs per
+engine in the probe: 6 840 – 6 990 LUTs and 9 440 FFs.
+
+And the output weight moved. The step unit took the weight of `x3` after
+the retire, over four clocks, with `x3` and `y` waiting beside the
+popcount in 262 shift-register LUTs per engine; `x3` is formed three
+stages before the final multiply issues and rides beside it in a shift
+register anyway, so the weight and the DP bit are now taken from the
+head of that pipe and ride along as nine bits, ready with the product:
+−306 LUTs per engine (the SRLs, 592 → 329), **6 540 – 6 690 LUTs and
+9 455 FFs**, rate 5.16 unchanged.
+
+**144 engines did not fit the block RAM.** `20260913-170445-n144-c333`
+(nine DSP leaves) failed `place_design`'s utilisation DRC: 144 × (12
+RAMB36 + 2 RAMB18) = 3 744 RAMB18 sites against the CL pblock's 3 576
+(the device has 4 032; the shell's columns are the rest). The two
+RAMB18 were the 32-bit step count: the walker's FIFO word (`x`, `y`, id,
+count, DP flag) was 304 bits and the step unit's leaf word (`x`, `y`,
+`j`, tag, valid) 307, each 512 deep, and four RAMB36 hold 288 bits at
+that depth. Now only the count's low 13 bits travel with the walk (285
+and 288 bits — the leaf word exactly full) and the high 19 sit in a
+512-entry LUTRAM table in the walker, read by the retiring walk's id
+through an address register and bumped through a write register on
+the clocks the low count wraps (once in 8 192 steps of a walk), cleared
+by a load, and read by the report register on a clock with no
+retirement (the main README, "The walker"). **12 RAMB36 and no RAMB18
+per engine**: 144 engines is 3 456 sites, and the most the block RAM
+holds (152 would want 3 648). The table, its read mux and incrementer
+are +180 LUTRAM and +93 logic LUTs per engine, the narrower tag −19 SRLs
+and −84 FFs: **6 790 – 6 940 LUTs and 9 371 FFs**, none of the probe's
+eighty worst paths in the table (the address register was needed: with
+the retiring id muxed straight into the LUTRAM address pins, that mux's
+170-load net, the read, the 8:1 mux and the incrementer were the
+engine's worst path at 1.67 ns before routing), rate 5.17 unchanged.
+`20260913-195641-n144-c333` (nine leaves) is the first build of it.
+`175919-n144-c333`, the same geometry on the revision before, and
+`084322-n136-c333` (32 × 16, routing at −4.3 ns after ten hours) were
+stopped.
+
+Builds of the revision with the walker's registers and 64 × 8
+(`20260913-170424-n128-c375` and `170431-n112-c400` with the LUT
+multiplier, `170438-n136-c333` with nine DSP leaves) and of the revision
+with the two above as well (`175911-n128-c375`) and with the output
+weight beside the multiply (`184712-n128-c375`) were running when this
+was written.

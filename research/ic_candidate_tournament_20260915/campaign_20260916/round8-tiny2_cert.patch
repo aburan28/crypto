@@ -1,0 +1,125 @@
+diff -ruN a/src/cryptanalysis/koblitz_tiny_ic.rs b/src/cryptanalysis/koblitz_tiny_ic.rs
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-16 12:23:13.718039511 +0000
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-16 13:17:02.173265950 +0000
+@@ -918,6 +918,15 @@
+     }
+ }
+ 
++/// The relation `[a]G + [b]Q = Σ_i P_i` a target's logarithm was derived
++/// from, over base indices; empty `points` means the probe was `O`.
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct DescentWitness {
++    pub a: u64,
++    pub b: u64,
++    pub points: Vec<usize>,
++}
++
+ /// One complete cold job's state: base, table, relations, logs.
+ pub struct TinyIc {
+     arith: Arith,
+@@ -1418,8 +1427,11 @@
+     }
+ 
+     /// The logarithm of `q`, verified as `[d]G = Q` in the group, with
+-    /// the number of descent probes it took.
+-    pub fn solve_target(&mut self, q: &BinaryPoint) -> Option<(BigUint, u64)> {
++    /// the number of descent probes it took and the relation
++    /// `[a]G + [b]Q = Σ P_i` it was derived from (an empty `points` list
++    /// records a probe that landed on `O`).  That relation is the
++    /// index-calculus certificate the checker re-verifies.
++    pub fn solve_target(&mut self, q: &BinaryPoint) -> Option<(BigUint, u64, DescentWitness)> {
+         let logs = self.logs.clone()?;
+         let q_fast = self.arith.lift(q);
+         if q_fast.infinity {
+@@ -1443,7 +1455,7 @@
+             let mut candidate = None;
+             if probe.infinity {
+                 // [a]G + [b]Q = O
+-                candidate = Some(mulmod((r - a % r) % r, invmod(b, r)?, r));
++                candidate = Some((mulmod((r - a % r) % r, invmod(b, r)?, r), Vec::new()));
+             } else {
+                 let start = (trials as usize * (2 * self.n as usize + 1)) % size;
+                 if let Some(w) = self.decompose(probe, start) {
+@@ -1453,12 +1465,12 @@
+                         sum = (sum + mulmod(self.coefficient(i), logs[o as usize], r)) % r;
+                     }
+                     let numerator = (sum + r - mulmod(h, a % r, r)) % r;
+-                    candidate = Some(mulmod(numerator, hb_inv, r));
++                    candidate = Some((mulmod(numerator, hb_inv, r), w.to_vec()));
+                 }
+             }
+-            if let Some(d) = candidate {
++            if let Some((d, points)) = candidate {
+                 if d < r && self.arith.fixed_base_mul(&self.g_table, d) == q_fast {
+-                    return Some((BigUint::from(d), trials));
++                    return Some((BigUint::from(d), trials, DescentWitness { a, b, points }));
+                 }
+             }
+             a = (a + stride_scalar) % r;
+@@ -1659,11 +1671,26 @@
+                 }
+                 assert!(tiny.verify_columns());
+                 let r = kc.subgroup_order.to_u64().unwrap();
++                let h = kc.cofactor.to_u64().unwrap() % r;
++                // per base index: its column's log times its signed Frobenius coefficient
++                let orbit_logs: Vec<u64> = (0..base.len())
++                    .map(|i| {
++                        let (o, _, _) = tiny.location(i);
++                        let (_, l) = &logs[o as usize];
++                        mulmod(tiny.coefficient(i), l.to_u64().unwrap(), r)
++                    })
++                    .collect();
+                 for d in [5u64, 99, r - 2, r / 2] {
+                     let q = kc.mul(g, &BigUint::from(d));
+-                    let (found, trials) = tiny.solve_target(&q).expect("descent");
++                    let (found, trials, w) = tiny.solve_target(&q).expect("descent");
+                     assert_eq!(found, BigUint::from(d), "n={n} a={a} d={d}");
+                     assert!(trials >= 1);
++                    assert!(w.points.is_empty() || w.points.len() == 3);
++                    let probe = kc.add(&kc.mul(g, &BigUint::from(w.a)), &kc.mul(&q, &BigUint::from(w.b)));
++                    let sum = w.points.iter().fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &base[i]));
++                    assert_eq!(sum, probe, "n={n} a={a} d={d} witness");
++                    let logsum = w.points.iter().fold(0u64, |s, &i| (s + orbit_logs[i]) % r);
++                    assert_eq!(mulmod(h, (w.a + mulmod(w.b, d, r)) % r, r), logsum, "n={n} a={a} d={d} scalar");
+                 }
+                 let (accepted, duplicates, attempts) = tiny.accounting();
+                 assert_eq!(accepted + duplicates, all.len());
+diff -ruN a/examples/ic_tournament_worker.rs b/examples/ic_tournament_worker.rs
+--- a/examples/ic_tournament_worker.rs	2026-09-16 12:23:13.727754273 +0000
++++ b/examples/ic_tournament_worker.rs	2026-09-16 13:15:40.812908930 +0000
+@@ -335,7 +335,7 @@
+     }
+     dump(b"individual_log\0");
+     let verified = answers.iter().zip(targets).all(|(s, q)| {
+-        s.as_ref().is_some_and(|(d, _)| d < &c.subgroup_order && c.mul(c.generator(), d) == *q)
++        s.as_ref().is_some_and(|(d, _, _)| d < &c.subgroup_order && c.mul(c.generator(), d) == *q)
+     });
+     dump(b"final_verification\0");
+     out.push_str("{\"schema_version\":1,\"mode\":\"ic\",\"status\":\"");
+@@ -348,13 +348,24 @@
+         out.push_str("{\"index\":");
+         push_u64(&mut out, i as u64);
+         match answer {
+-            Some((d, t)) => {
++            Some((d, t, w)) => {
+                 out.push_str(",\"recovered\":\"");
+                 out.push_str(&d.to_string());
+                 out.push_str("\",\"trials\":");
+                 push_u64(&mut out, *t);
++                // The index-calculus certificate: the relation the scalar came from.
++                out.push_str(",\"relation\":{\"a\":");
++                push_u64(&mut out, w.a);
++                out.push_str(",\"b\":");
++                push_u64(&mut out, w.b);
++                out.push_str(",\"points\":[");
++                for (k, &idx) in w.points.iter().enumerate() {
++                    if k > 0 { out.push(','); }
++                    push_u64(&mut out, idx as u64);
++                }
++                out.push_str("]}");
+             }
+-            None => out.push_str(",\"recovered\":null,\"trials\":null"),
++            None => out.push_str(",\"recovered\":null,\"trials\":null,\"relation\":null"),
+         }
+         out.push('}');
+     }

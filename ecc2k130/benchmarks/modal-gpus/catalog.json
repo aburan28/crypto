@@ -1,0 +1,146 @@
+{
+  "unit": "B complete scalar updates / s",
+  "class": "engineering",
+  "geometry": {
+    "batch": 16,
+    "threads": 256,
+    "minBlocks": 2,
+    "steps": 1024,
+    "launches": 32,
+    "repeats": 3,
+    "workers": "automatic",
+    "cudaImageVersion": "13.3.1",
+    "packedClmadDefault": 1,
+    "topClmad": 0
+  },
+  "reference": {
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "modal": "RTX-PRO-6000",
+    "medianB": 15.115792,
+    "sms": 188,
+    "workers": 385024,
+    "receipt": "ecc2k130/benchmarks/top-clmad/summary.json",
+    "collectingB": 14.1,
+    "pricePerSecond": 0.000842,
+    "priceSource": "https://modal.com/pricing (2026-09-19)"
+  },
+  "skipAliases": {
+    "A100": "Modal may upgrade A100 to A100-80GB; measure A100-40GB and A100-80GB.",
+    "H100": "Modal may upgrade H100 to H200; measure H100! to pin Hopper 80 GB.",
+    "B200+": "Modal may run B200+ on B300; measure B200 and B300."
+  },
+  "gpus": [
+    {
+      "modal": "T4",
+      "run": true,
+      "clmad": 0,
+      "cc": ["75", "7.5"],
+      "publishedSms": 40,
+      "pricePerSecond": 0.000164,
+      "nameAny": ["T4"],
+      "nameForbid": ["L4"]
+    },
+    {
+      "modal": "L4",
+      "run": true,
+      "clmad": 1,
+      "cc": ["89", "8.9"],
+      "publishedSms": 58,
+      "pricePerSecond": 0.000222,
+      "nameAny": ["L4"],
+      "nameForbid": ["L40"]
+    },
+    {
+      "modal": "A10",
+      "run": true,
+      "clmad": 1,
+      "cc": ["86", "8.6"],
+      "publishedSms": 72,
+      "pricePerSecond": 0.000306,
+      "nameAny": ["A10"],
+      "nameForbid": ["A100"]
+    },
+    {
+      "modal": "L40S",
+      "run": true,
+      "clmad": 1,
+      "cc": ["89", "8.9"],
+      "publishedSms": 142,
+      "pricePerSecond": 0.000542,
+      "nameAny": ["L40S"],
+      "nameForbid": []
+    },
+    {
+      "modal": "A100-40GB",
+      "run": true,
+      "clmad": 1,
+      "cc": ["80", "8.0"],
+      "publishedSms": 108,
+      "pricePerSecond": 0.000583,
+      "nameAny": ["A100"],
+      "nameRequire": ["40"],
+      "nameForbid": ["80GB", "80 GB"]
+    },
+    {
+      "modal": "A100-80GB",
+      "run": true,
+      "clmad": 1,
+      "cc": ["80", "8.0"],
+      "publishedSms": 108,
+      "pricePerSecond": 0.000694,
+      "nameAny": ["A100"],
+      "nameRequire": ["80"],
+      "nameForbid": []
+    },
+    {
+      "modal": "RTX-PRO-6000",
+      "run": true,
+      "clmad": 1,
+      "cc": ["120", "12.0"],
+      "publishedSms": 188,
+      "pricePerSecond": 0.000842,
+      "nameAny": ["RTX PRO 6000", "RTX 6000"],
+      "nameForbid": []
+    },
+    {
+      "modal": "H100!",
+      "run": true,
+      "clmad": 1,
+      "cc": ["90", "9.0"],
+      "publishedSms": 132,
+      "pricePerSecond": 0.001097,
+      "nameAny": ["H100"],
+      "nameForbid": ["H200"]
+    },
+    {
+      "modal": "H200",
+      "run": true,
+      "clmad": 1,
+      "cc": ["90", "9.0"],
+      "publishedSms": 132,
+      "pricePerSecond": 0.001261,
+      "nameAny": ["H200"],
+      "nameForbid": []
+    },
+    {
+      "modal": "B200",
+      "run": true,
+      "clmad": 1,
+      "cc": ["100", "10.0"],
+      "publishedSms": 148,
+      "pricePerSecond": 0.001736,
+      "nameAny": ["B200"],
+      "nameForbid": ["B300"]
+    },
+    {
+      "modal": "B300",
+      "run": true,
+      "clmad": 1,
+      "cc": ["100", "10.0", "103", "10.3"],
+      "publishedSms": 160,
+      "pricePerSecond": 0.001972,
+      "nameAny": ["B300"],
+      "nameForbid": []
+    }
+  ]
+}

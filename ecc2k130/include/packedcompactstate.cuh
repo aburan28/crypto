@@ -46,6 +46,22 @@ ECC_HD P131 compactLoad131(const unsigned *storage, int slot, int tid) {
     return value;
 }
 
+// Issue L2 prefetches for the 16-byte low record and the tail byte.  The
+// walk is DRAM-bound (Nsight: ~65% DRAM vs ~35% ALU on the RTX PRO 6000
+// table walk); starting the next slot's lines during the current product
+// hides that latency.  Host is a no-op.
+ECC_HD void compactPrefetch131(const unsigned *storage, int slot, int tid) {
+#if defined(__CUDA_ARCH__)
+    const unsigned char *bytes = reinterpret_cast<const unsigned char *>(storage);
+    const unsigned char *low = bytes + compactLowByteOffset(slot, tid);
+    const unsigned char *top = bytes + compactTopByteOffset(slot, tid);
+    asm volatile("prefetch.global.L2 [%0];" :: "l"(low));
+    asm volatile("prefetch.global.L2 [%0];" :: "l"(top));
+#else
+    (void)storage; (void)slot; (void)tid;
+#endif
+}
+
 ECC_HD void compactStore131(unsigned *storage, int slot, int tid, P131 value) {
     unsigned char *bytes = reinterpret_cast<unsigned char *>(storage);
 #if defined(__CUDA_ARCH__)

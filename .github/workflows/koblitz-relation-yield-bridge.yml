@@ -3,6 +3,7 @@ name: Koblitz relation-yield bridge
 on:
   pull_request:
     paths:
+      - "research/weil_factor_composition_20260914/validation/dependencies.lock.txt"
       - "Cargo.toml"
       - "examples/koblitz_relation_yield_bridge.rs"
       - "examples/koblitz_public_factor_base_discovery.rs"
@@ -30,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Install frozen dependency lock
-        run: cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+        run: cp research/weil_factor_composition_20260914/validation/dependencies.lock.txt Cargo.lock
       - name: Validate Python custody rules
         run: python3 scripts/test_koblitz_relation_yield_bridge.py
       - name: Validate Rust producer

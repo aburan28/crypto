@@ -1,0 +1,776 @@
+diff --git a/examples/weil_factor_composition.rs b/examples/weil_factor_composition.rs
+index 78fd850..698bde1 100644
+--- a/examples/weil_factor_composition.rs
++++ b/examples/weil_factor_composition.rs
+@@ -42,6 +42,7 @@ fn stats(s: &WeilSolveStats) -> Value {
+     "algebraic_pairs":s.algebraic_pairs,"projection_refutations":s.projection_refutations,
+     "linear_constraints":s.linear_constraints,"projection_word_xors":s.projection_word_xors,
+     "coefficient_field_muls":s.coefficient_field_muls,"coefficient_field_squares":s.coefficient_field_squares,
++    "residual_assignments":s.residual_assignments,
+     "reductions":s.solver.reductions,"exhausted":s.solver.exhausted})
+ }
+ fn seed_basis(kc: &KoblitzCurve, c: &Value, seed: u64) -> Vec<F2mElement> {
+@@ -248,6 +249,7 @@ fn main() {
+                 "oracle_validation_ns":verify.elapsed().as_nanos(),"relations":r.relations,"independent_relations":r.independent_relations,
+                 "dependent_relations":r.dependent_relations,"trials":r.trials,"reductions":r.reductions,"matrix_columns":r.matrix_columns,
+                 "matrix_rank":r.terminal_matrix_rank,"relation_collection_ns":r.relation_collection_ns,"linear_algebra_ns":r.linear_algebra_ns,
++                "chart_residual_assignments":r.chart_residual_assignments,
+                 "projected_orbit_construction_ns":r.projected_orbit_construction_ns,"cofactor_admission_ns":r.cofactor_admission_ns,
+                 "pair_table_ns":r.pair_table_ns,"pair_table_entries":r.pair_table_entries,"direct_relations_skipped":r.direct_relations_skipped,
+                 "attempts":checks})
+@@ -289,6 +291,7 @@ fn main() {
+     println!(
+         "{}",
+         json!({"phase":"census","component_count":diagnostic.component_count(),"tensor_bytes":diagnostic.tensor_bytes(),
++        "rational_support_dimensions":diagnostic.rational_support_dimensions(),
+         "relative_product_ranks":diagnostic.relative_product_ranks(),"pair_weighted_product_rank":diagnostic.pair_weighted_product_rank(),
+         "projected_columns":projected_signed_orbit_count(&kc,&fb),"exact_pair_coverage":subgroup_count(&truth),
+         "same_component_coverage":subgroup_count(&same),"coverage_denominator":order-1,"validation_ns":validation.elapsed().as_nanos()})
+diff --git a/src/cryptanalysis/koblitz_fast.rs b/src/cryptanalysis/koblitz_fast.rs
+index 297def4..6f087e6 100644
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -119,6 +119,60 @@ impl FastCurve {
+         F2mElement::from_biguint(&BigUint::from(v), self.n)
+     }
+ 
++    /// All points with abscissa `x`, in the same root/sign order as the
++    /// general Artin–Schreier implementation. No discrete logarithm is used.
++    pub fn points_with_x(&self, x: u64) -> Vec<FastPoint> {
++        assert!(x >> self.n == 0, "abscissa exceeds field width");
++        let f = &self.field;
++        if x == 0 {
++            return vec![FastPoint::affine(0, f.sqr_k(self.b, self.n - 1))];
++        }
++        let rhs = x ^ self.a ^ f.mul(self.b, f.sqr(f.inv(x)));
++        let u = if self.n % 2 == 1 {
++            let mut acc = rhs;
++            let mut half_trace = rhs;
++            for _ in 0..(self.n - 1) / 2 {
++                acc = f.sqr(f.sqr(acc));
++                half_trace ^= acc;
++            }
++            if f.sqr(half_trace) ^ half_trace != rhs {
++                return Vec::new();
++            }
++            half_trace
++        } else {
++            // Same descending image-pivot convention as solve_artin_schreier.
++            let mut pivots: Vec<(u64, u64)> = Vec::new();
++            for i in 0..self.n {
++                let mut img = f.sqr(1 << i) ^ (1 << i);
++                let mut pre = 1 << i;
++                for &(pimg, ppre) in &pivots {
++                    if img & (1 << (63 - pimg.leading_zeros())) != 0 {
++                        img ^= pimg;
++                        pre ^= ppre;
++                    }
++                }
++                if img != 0 {
++                    pivots.push((img, pre));
++                    pivots.sort_by(|x, y| y.0.cmp(&x.0));
++                }
++            }
++            let mut target = rhs;
++            let mut solution = 0;
++            for (pimg, ppre) in pivots {
++                if target & (1 << (63 - pimg.leading_zeros())) != 0 {
++                    target ^= pimg;
++                    solution ^= ppre;
++                }
++            }
++            if target != 0 {
++                return Vec::new();
++            }
++            solution
++        };
++        let p = FastPoint::affine(x, f.mul(x, u));
++        vec![p, self.neg(p)]
++    }
++
+     /// Whether `p` satisfies the curve equation.
+     pub fn is_on_curve(&self, p: FastPoint) -> bool {
+         if p.infinity {
+@@ -466,6 +520,31 @@ mod tests {
+     use rand::rngs::StdRng;
+     use rand::{Rng, SeedableRng};
+ 
++    #[test]
++    fn packed_lifts_preserve_general_roots_and_sign_order() {
++        use crate::cryptanalysis::koblitz_index_calculus::{
++            find_irreducible_sparse, points_with_x_general,
++        };
++        for n in 3..=10 {
++            let irr = find_irreducible_sparse(n).unwrap();
++            for (a, b) in [(0, 1), (1, 1), (3, 5)] {
++                let curve = BinaryCurve {
++                    m: n, irreducible: irr.clone(),
++                    a: F2mElement::from_biguint(&BigUint::from(a as u64), n),
++                    b: F2mElement::from_biguint(&BigUint::from(b as u64), n),
++                    generator: BinaryPoint::Infinity,
++                    order: BigUint::from(1u64), cofactor: BigUint::from(1u64),
++                };
++                let fc = FastCurve::new(&curve).unwrap();
++                for x in 0..1u64 << n {
++                    let expected = points_with_x_general(&curve, &fc.element(x));
++                    let actual: Vec<_> = fc.points_with_x(x).into_iter().map(|p| fc.lower(p)).collect();
++                    assert_eq!(actual, expected, "n={n} a={a} b={b} x={x}");
++                }
++            }
++        }
++    }
++
+     fn random_points(kc: &KoblitzCurve, count: usize, seed: u64) -> Vec<BinaryPoint> {
+         let mut rng = StdRng::seed_from_u64(seed);
+         let r = kc.subgroup_order.to_u64_digits()[0];
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 3cc9978..d7bad16 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -760,6 +760,14 @@ impl KoblitzCurve {
+ /// iff the right-hand side has absolute trace `0`.  For `x = 0` the
+ /// equation degenerates to `y² = b`, whose unique solution is `y = √b`.
+ pub fn points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
++    if let Some(fc) = FastCurve::new(curve) {
++        return fc.points_with_x(fc.field.from_element(x)).into_iter()
++            .map(|p| fc.lower(p)).collect();
++    }
++    points_with_x_general(curve, x)
++}
++
++pub(crate) fn points_with_x_general(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
+     let irr = &curve.irreducible;
+     let m = curve.m;
+     if x.is_zero() {
+@@ -988,6 +996,11 @@ impl FrobeniusFactorBase {
+         if self.points.is_empty() || m == 0 {
+             return m == 0;
+         }
++        // Factor bases are negation closed and repeated summands are allowed:
++        // P + (-P) supplies an exact cofactor cancellation for every even m.
++        if m % 2 == 0 {
++            return true;
++        }
+         let classes = self.distinct_cofactor_classes(kc);
+         if m == 1 {
+             return classes.iter().any(|c| *c == BinaryPoint::Infinity);
+@@ -1642,10 +1655,24 @@ pub fn build_frobenius_union_factor_base(
+         return None;
+     }
+     let mut xs = std::collections::BTreeMap::new();
+-    for mut x in seed {
+-        for _ in 0..kc.extension_degree() {
+-            xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
+-            x = kc.frobenius_x(&x);
++    if let Some(fc) = FastCurve::new(&kc.curve) {
++        let mut packed = std::collections::BTreeSet::new();
++        for x in seed {
++            let mut x = fc.field.from_element(&x);
++            for _ in 0..kc.extension_degree() {
++                packed.insert(x);
++                x = fc.field.sqr_k(x, kc.k);
++            }
++        }
++        for x in packed {
++            xs.insert(BigUint::from(x), fc.field.to_element(x));
++        }
++    } else {
++        for mut x in seed {
++            for _ in 0..kc.extension_degree() {
++                xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
++                x = kc.frobenius_x(&x);
++            }
+         }
+     }
+     let ambient: Vec<_> = (0..kc.n)
+@@ -1900,12 +1927,68 @@ fn finish_factor_base_domain(
+     domain: FactorBaseDomain,
+ ) -> Option<FrobeniusFactorBase> {
+     let mut points: Vec<BinaryPoint> = Vec::new();
++    let fast = FastCurve::new(&kc.curve);
+     for x in &subspace {
+-        for p in points_with_x(&kc.curve, x) {
+-            points.push(p);
++        if let Some(fc) = &fast {
++            points.extend(fc.points_with_x(fc.field.from_element(x)).into_iter().map(|p| fc.lower(p)));
++        } else {
++            points.extend(points_with_x(&kc.curve, x));
+         }
+     }
+ 
++    // Build the exact same index/orbit arrays without general field arithmetic
++    // or allocating coordinates at every Frobenius step.
++    if let Some(fc) = &fast {
++        let packed: Vec<_> = points.iter().map(|p| fc.lift(p)).collect();
++        let index: HashMap<_, _> = packed.iter().enumerate().map(|(i, &p)| (p, i)).collect();
++        let mut orbit_of = vec![(usize::MAX, 0); points.len()];
++        let mut orbits = Vec::new();
++        for start in 0..packed.len() {
++            if orbit_of[start].0 != usize::MAX { continue; }
++            let orbit = orbits.len();
++            let mut cycle = Vec::new();
++            let mut current = packed[start];
++            let mut k = 0;
++            loop {
++                let i = *index.get(&current)?;
++                if orbit_of[i].0 != usize::MAX { break; }
++                orbit_of[i] = (orbit, k);
++                cycle.push(i);
++                current = fc.frobenius_k(current, kc.k);
++                k += 1;
++            }
++            orbits.push(cycle);
++        }
++        let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
++        let mut signed_orbits = Vec::new();
++        for start in 0..packed.len() {
++            if signed_orbit_of[start].0 != usize::MAX { continue; }
++            let orbit = signed_orbits.len();
++            let mut members = Vec::new();
++            let mut current = packed[start];
++            for k in 0..kc.n {
++                for (negated, p) in [(false, current), (true, fc.neg(current))] {
++                    let i = *index.get(&p)?;
++                    if signed_orbit_of[i].0 == usize::MAX {
++                        signed_orbit_of[i] = (orbit, k, negated);
++                        members.push(i);
++                    } else if signed_orbit_of[i].0 != orbit {
++                        return None;
++                    }
++                }
++                current = fc.frobenius_k(current, kc.k);
++                if current == packed[start] { break; }
++            }
++            if current != packed[start] { return None; }
++            signed_orbits.push(members);
++        }
++        if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() { return None; }
++        return Some(FrobeniusFactorBase {
++            domain, ell, f_j, linearised_exponents: exps, subspace, subspace_basis,
++            points, orbits, orbit_of, signed_orbits, signed_orbit_of,
++        });
++    }
++
+     // Index points for the orbit walk and for relation lookups.
+     let mut index_of: HashMap<(BigUint, BigUint), usize> = HashMap::new();
+     for (i, p) in points.iter().enumerate() {
+@@ -4290,11 +4373,12 @@ fn projected_signed_orbit_map_fast(
+     fb: &FrobeniusFactorBase,
+ ) -> Option<ProjectedSignedOrbitMap> {
+     let fc = FastCurve::new(&kc.curve)?;
+-    let projected: Vec<FastPoint> = fb
+-        .points
+-        .par_iter()
+-        .map(|point| fc.mul(fc.lift(point), &kc.cofactor))
+-        .collect();
++    let project = |point: &BinaryPoint| fc.mul(fc.lift(point), &kc.cofactor);
++    let projected: Vec<FastPoint> = if fb.points.len() < 256 {
++        fb.points.iter().map(project).collect()
++    } else {
++        fb.points.par_iter().map(project).collect()
++    };
+     let mut representatives: Vec<FastPoint> = Vec::new();
+     let mut seen: HashSet<u64> = HashSet::new();
+     for &point in &projected {
+@@ -4568,6 +4652,9 @@ pub struct KoblitzIcReport {
+     pub pair_table_entries: usize,
+     /// Time spent building that table.
+     pub pair_table_ns: u128,
++    /// Assignments checked by the projected chart solver, separate from F4
++    /// reductions. Neither counter alone measures total attack cost.
++    pub chart_residual_assignments: usize,
+     /// One exact record for every generated relation candidate, including
+     /// refutations, capped Unknown outcomes, invalid models, and skipped direct
+     /// relations. This is public synthetic replay material, not a log label.
+@@ -4661,6 +4748,7 @@ enum RelationAttemptOutcome {
+     Direct,
+     Enumerated(Option<Vec<usize>>),
+     Groebner(Option<Vec<usize>>, SolveStats),
++    Charts(Option<Vec<usize>>, super::weil_charts::WeilSolveStats),
+     Sat(Option<Vec<usize>>, SatDecompositionStats),
+ }
+ 
+@@ -4788,6 +4876,7 @@ fn koblitz_index_calculus_dlp_observed(
+     }
+     let r = &kc.subgroup_order;
+     let g = kc.generator().clone();
++    let fast = FastCurve::new(&kc.curve);
+     let projection_start = std::time::Instant::now();
+     let projected_orbits = opts
+         .collapse_projected_orbits
+@@ -4846,6 +4935,7 @@ fn koblitz_index_calculus_dlp_observed(
+         cofactor_admission_ns,
+         pair_table_entries: 0,
+         pair_table_ns: 0,
++        chart_residual_assignments: 0,
+         attempt_records: Vec::new(),
+         relation_matrix: Vec::new(),
+         matrix_rows: 0,
+@@ -4988,7 +5078,11 @@ fn koblitz_index_calculus_dlp_observed(
+             .map(|_| {
+                 let a = BigUint::from(rng.gen_range(1..r_u64));
+                 let b = BigUint::from(rng.gen_range(1..r_u64));
+-                let target = kc.add(&kc.mul(&g, &a), &kc.mul(q, &b));
++                let target = if let Some(fc) = &fast {
++                    fc.lower(fc.add(fc.mul(fc.lift(&g), &a), fc.mul(fc.lift(q), &b)))
++                } else {
++                    kc.add(&kc.mul(&g, &a), &kc.mul(q, &b))
++                };
+                 (a, b, target)
+             })
+             .collect();
+@@ -5016,9 +5110,8 @@ fn koblitz_index_calculus_dlp_observed(
+                             split_rule: split_rule_default(),
+                             ..Default::default()
+                         };
+-                        let (idxs, stats) = plan.decompose(kc, fb, &index_of, target, &options)
+-                            .expect("chart cover validated at pipeline entry");
+-                        return RelationAttemptOutcome::Groebner(idxs, stats.solver);
++                        let (idxs, stats) = plan.decompose_validated(kc, fb, &index_of, target, &options);
++                        return RelationAttemptOutcome::Charts(idxs, stats);
+                     }
+                     let (idxs, stats) = groebner_decompose(
+                         kc,
+@@ -5135,6 +5228,19 @@ fn koblitz_index_calculus_dlp_observed(
+                     };
+                     (idxs, disposition)
+                 }
++                RelationAttemptOutcome::Charts(idxs, stats) => {
++                    report.chart_residual_assignments += stats.residual_assignments;
++                    report.reductions += stats.solver.reductions;
++                    report.infeasible_branches += stats.solver.infeasible_branches;
++                    let disposition = if idxs.is_some() {
++                        KoblitzRelationAttemptDisposition::RelationFound
++                    } else if stats.solver.exhausted {
++                        KoblitzRelationAttemptDisposition::Unknown
++                    } else {
++                        KoblitzRelationAttemptDisposition::Refuted
++                    };
++                    (idxs, disposition)
++                }
+                 RelationAttemptOutcome::Sat(idxs, stats) => {
+                     solver_calls = stats.solver_calls;
+                     models = stats.models;
+diff --git a/src/cryptanalysis/weil_charts.rs b/src/cryptanalysis/weil_charts.rs
+index 2c652e0..4ff1aac 100644
+--- a/src/cryptanalysis/weil_charts.rs
++++ b/src/cryptanalysis/weil_charts.rs
+@@ -6,6 +6,7 @@
+ //! the coordinate equations before calling the existing F4 splitting solver.
+ //! Product ranks and XOR counters are diagnostics, not total attack costs.
+ use super::{
++    koblitz_fast::{FastCurve, FastPoint},
+     koblitz_groebner::{solve_boolean_system_filtered, SolveOptions, SolveStats},
+     koblitz_index_calculus::{
+         enumerate_decompose, lift_candidate, FrobeniusFactorBase, KoblitzCurve,
+@@ -79,6 +80,9 @@ pub struct WeilSolveStats {
+     pub projection_word_xors: u64,
+     pub coefficient_field_muls: u64,
+     pub coefficient_field_squares: u64,
++    /// Exact assignments checked in small projected affine spaces. Charged
++    /// alongside reductions to the query budget, but reported separately.
++    pub residual_assignments: usize,
+     pub solver: SolveStats,
+ }
+ 
+@@ -95,6 +99,10 @@ pub struct WeilChartPlan {
+     templates: Vec<PairTemplate>,
+     domain: Vec<u64>,
+     project_linear: bool,
++    points: Vec<BinaryPoint>,
++    point_lifts: Option<(FastCurve, HashMap<u64, Vec<(FastPoint, usize)>>)>,
++    point_constraints: Vec<Vec<u64>>,
++    point_chart: Option<Box<WeilChartPlan>>,
+ }
+ 
+ impl WeilChartPlan {
+@@ -161,6 +169,62 @@ impl WeilChartPlan {
+                 }
+             })
+             .collect();
++        let point_lifts = if let Some(fc) = FastCurve::new(&kc.curve) {
++            let mut lifts: HashMap<u64, Vec<(FastPoint, usize)>> = HashMap::new();
++            for (i, p) in fb.points.iter().enumerate() {
++                let p = fc.lift(p);
++                if p.infinity || !domain.contains(&p.x) || !fc.is_on_curve(p) {
++                    return Err("invalid factor-base point".into());
++                }
++                lifts.entry(p.x).or_insert_with(|| Vec::with_capacity(2)).push((p, i));
++            }
++            Some((fc, lifts))
++        } else {
++            None
++        };
++        // A valid point's local coordinates lie in the span of the rational
++        // abscissae present in that component. Keep these necessary equations
++        // separate: the unrestricted algebraic visitor must retain S3 roots
++        // that do not lift to rational factor-base points.
++        let rational_xs: HashSet<_> = fb.points.iter().filter_map(|p| match p {
++            BinaryPoint::Affine { x, .. } => Some(bits(x)),
++            BinaryPoint::Infinity => None,
++        }).collect();
++        let mut constraint_cache: HashMap<Vec<u64>, Vec<u64>> = HashMap::new();
++        let point_constraints: Vec<Vec<u64>> = charts.iter().map(|basis| {
++            let support = canonical_basis((0..1u64 << basis.len())
++                .filter(|&m| rational_xs.contains(&combination(basis, m))));
++            constraint_cache.entry(support.clone()).or_insert_with(|| {
++                canonical_basis((1..1u64 << basis.len())
++                    .filter(|&mask| support.iter().all(|s| (mask & s).count_ones() % 2 == 0)))
++            }).clone()
++        }).collect();
++        let support_basis = canonical_basis((0..1u64 << charts[0].len())
++            .filter(|&m| rational_xs.contains(&combination(&charts[0], m))));
++        let point_chart = if !support_basis.is_empty() && support_basis.len() < seed.len() {
++            let compact_seed: Vec<_> = support_basis.iter()
++                .map(|&m| field.to_element(combination(&charts[0], m))).collect();
++            let mut compact_domain = BTreeSet::new();
++            for mask in 0..1u64 << compact_seed.len() {
++                let mut x = compact_seed.iter().enumerate()
++                    .fold(0, |x, (i, b)| if mask >> i & 1 != 0 { x ^ bits(b) } else { x });
++                for _ in 0..kc.extension_degree() {
++                    compact_domain.insert(x);
++                    x = frob(&field, x, kc.k);
++                }
++            }
++            // A caller can supply a non-Frobenius-closed subset of points.
++            // Compress only when every original point remains covered.
++            if rational_xs.iter().all(|x| compact_domain.contains(x)) {
++                let mut compact_fb = fb.clone();
++                compact_fb.subspace = compact_domain.into_iter().map(|x| field.to_element(x)).collect();
++                Some(Box::new(Self::new(kc, &compact_fb, &compact_seed, project_linear)?))
++            } else {
++                None
++            }
++        } else {
++            None
++        };
+         Ok(Self {
+             field,
+             k: kc.k,
+@@ -170,6 +234,10 @@ impl WeilChartPlan {
+             templates,
+             domain: domain.into_iter().collect(),
+             project_linear,
++            points: fb.points.clone(),
++            point_lifts,
++            point_constraints,
++            point_chart,
+         })
+     }
+ 
+@@ -205,8 +273,13 @@ impl WeilChartPlan {
+             .map(|b| (0..1u64 << b.len()).map(|m| combination(b, m)).collect())
+             .collect()
+     }
++    /// Dimensions of the spans of local coordinates with factor-base lifts.
++    pub fn rational_support_dimensions(&self) -> Vec<usize> {
++        self.point_constraints.iter().map(|cs| self.seed_dimension() - cs.len()).collect()
++    }
+     pub fn matches(&self, kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> bool {
+-        self.field.n == kc.n
++        self.points == fb.points
++            && self.field.n == kc.n
+             && self.k == kc.k
+             && self.a == bits(&kc.curve.a)
+             && self.b == bits(&kc.curve.b)
+@@ -259,6 +332,16 @@ impl WeilChartPlan {
+         &self,
+         x_target: u64,
+         options: &SolveOptions,
++        accept: impl FnMut(u64, u64) -> bool,
++    ) -> WeilSolveStats {
++        self.visit_pairs_inner(x_target, options, false, accept)
++    }
++
++    fn visit_pairs_inner(
++        &self,
++        x_target: u64,
++        options: &SolveOptions,
++        point_search: bool,
+         mut accept: impl FnMut(u64, u64) -> bool,
+     ) -> WeilSolveStats {
+         let mut stats = WeilSolveStats::default();
+@@ -277,13 +360,18 @@ impl WeilChartPlan {
+             for j in i..self.charts.len() {
+                 stats.component_pairs += 1;
+                 let r = rotations[(e as usize - i) % e as usize];
+-                let rows = self.rows(j - i, r, &mut stats);
++                let mut rows = self.rows(j - i, r, &mut stats);
++                if point_search {
++                    rows.extend(self.point_constraints[i].iter().map(|row| row << (ell * ell)));
++                    rows.extend(self.point_constraints[j].iter().map(|row| row << (ell * ell + ell)));
++                }
+                 let prepared = prepare(rows, ell, self.project_linear, &mut stats);
+                 let Some(prepared) = prepared else {
+                     stats.projection_refutations += 1;
+                     continue;
+                 };
+-                let remaining = options.node_budget.saturating_sub(stats.solver.reductions);
++                let remaining = options.node_budget.saturating_sub(
++                    stats.solver.reductions.saturating_add(stats.residual_assignments));
+                 if remaining == 0 {
+                     stats.solver.exhausted = true;
+                     return stats;
+@@ -294,12 +382,7 @@ impl WeilChartPlan {
+                     ..*options
+                 };
+                 let mut stop = false;
+-                let (_, got) = solve_boolean_system_filtered(
+-                    &prepared.equations,
+-                    prepared.n_vars,
+-                    &opts,
+-                    |root| {
+-                        let assignment = prepared.lift(root);
++                let mut accept_assignment = |assignment| {
+                         let x = combination(&self.charts[i], assignment);
+                         let y = combination(&self.charts[j], assignment >> ell);
+                         let pair = if x <= y { (x, y) } else { (y, x) };
+@@ -310,16 +393,45 @@ impl WeilChartPlan {
+                         stats.algebraic_pairs += 1;
+                         stop = accept(pair.0, pair.1);
+                         stop
+-                    },
+-                );
+-                stats.solver.reductions += got.reductions;
+-                stats.solver.infeasible_branches += got.infeasible_branches;
+-                stats.solver.propagations += got.propagations;
+-                stats.solver.splits += got.splits;
+-                stats.solver.max_degree_built =
+-                    stats.solver.max_degree_built.max(got.max_degree_built);
+-                stats.solver.oversize += got.oversize;
+-                stats.solver.exhausted |= got.exhausted;
++                };
++                if let Some(rows) = &prepared.residual_rows {
++                    for root in 0..1u64 << prepared.n_vars {
++                        if root as usize >= remaining {
++                            stats.solver.exhausted = true;
++                            break;
++                        }
++                        stats.residual_assignments += 1;
++                        let assignment = prepared.lift(root);
++                        let mut monomials = (assignment << (ell * ell))
++                            | (1u64 << (ell * ell + 2 * ell));
++                        let right = assignment >> ell;
++                        for bit in 0..ell {
++                            if assignment >> bit & 1 != 0 {
++                                monomials |= right << (bit * ell);
++                            }
++                        }
++                        if rows.iter().all(|r| (r & monomials).count_ones() % 2 == 0)
++                            && accept_assignment(assignment)
++                        {
++                            break;
++                        }
++                    }
++                } else {
++                    let (_, got) = solve_boolean_system_filtered(
++                        &prepared.equations,
++                        prepared.n_vars,
++                        &opts,
++                        |root| accept_assignment(prepared.lift(root)),
++                    );
++                    stats.solver.reductions += got.reductions;
++                    stats.solver.infeasible_branches += got.infeasible_branches;
++                    stats.solver.propagations += got.propagations;
++                    stats.solver.splits += got.splits;
++                    stats.solver.max_degree_built =
++                        stats.solver.max_degree_built.max(got.max_degree_built);
++                    stats.solver.oversize += got.oversize;
++                    stats.solver.exhausted |= got.exhausted;
++                }
+                 if stop || stats.solver.exhausted {
+                     return stats;
+                 }
+@@ -341,15 +453,46 @@ impl WeilChartPlan {
+         if !self.matches(kc, fb) {
+             return None;
+         }
++        Some(self.decompose_validated(kc, fb, index, target, options))
++    }
++
++    /// The immutable curve, domain and point order must already have passed
++    /// `matches` at pipeline entry. This avoids rebuilding a set every trial.
++    pub(crate) fn decompose_validated(
++        &self,
++        kc: &KoblitzCurve,
++        fb: &FrobeniusFactorBase,
++        index: &HashMap<(BigUint, BigUint), usize>,
++        target: &BinaryPoint,
++        options: &SolveOptions,
++    ) -> (Option<Vec<usize>>, WeilSolveStats) {
++        if let Some(compact) = &self.point_chart {
++            // Point indices and coverage were checked when this immutable
++            // plan was constructed, and again by the parent pipeline entry.
++            return compact.decompose_validated(kc, fb, index, target, options);
++        }
+         let BinaryPoint::Affine { x, .. } = target else {
+             // Infinity has no S3 abscissa. Handle the group identity directly.
+-            return Some((
++            return (
+                 enumerate_decompose(kc, fb, index, target, 2),
+                 WeilSolveStats::default(),
+-            ));
++            );
+         };
+         let mut answer = None;
+-        let stats = self.visit_pairs(bits(x), options, |a, b| {
++        let stats = self.visit_pairs_inner(bits(x), options, true, |a, b| {
++            if let Some((fc, lifts)) = &self.point_lifts {
++                let Some(left) = lifts.get(&a) else { return false; };
++                let Some(right) = lifts.get(&b) else { return false; };
++                for &(p, i) in left {
++                    for &(q, j) in right {
++                        if fc.add(p, q) == fc.lift(target) {
++                            answer = Some(vec![i.min(j), i.max(j)]);
++                            return true;
++                        }
++                    }
++                }
++                return false;
++            }
+             let xs = [
+                 F2mElement::from_biguint(&BigUint::from(a), kc.n),
+                 F2mElement::from_biguint(&BigUint::from(b), kc.n),
+@@ -357,7 +500,7 @@ impl WeilChartPlan {
+             answer = lift_candidate(kc, fb, index, &xs, target);
+             answer.is_some()
+         });
+-        Some((answer, stats))
++        (answer, stats)
+     }
+ }
+ 
+@@ -365,6 +508,7 @@ struct Prepared {
+     equations: Vec<F2BoolPoly>,
+     n_vars: usize,
+     expressions: Vec<u64>,
++    residual_rows: Option<Vec<u64>>,
+ }
+ impl Prepared {
+     fn lift(&self, assignment: u64) -> u64 {
+@@ -430,6 +574,7 @@ fn prepare(
+             equations,
+             n_vars: nv,
+             expressions: (0..nv).map(|i| 1 << i).collect(),
++            residual_rows: None,
+         });
+     }
+     let rank = rref(&mut rows, quadratic, &mut stats.projection_word_xors).len();
+@@ -453,6 +598,14 @@ fn prepare(
+             }
+         }
+     }
++    if nf <= 12 {
++        return Some(Prepared {
++            equations: Vec::new(),
++            n_vars: nf,
++            expressions,
++            residual_rows: Some(rows[..rank].to_vec()),
++        });
++    }
+     let expand = |expression: u64| -> Vec<u64> {
+         (0..=nf)
+             .filter(|i| expression >> i & 1 != 0)
+@@ -494,6 +647,7 @@ fn prepare(
+         equations,
+         n_vars: nf,
+         expressions,
++        residual_rows: None,
+     })
+ }
+ 
+@@ -503,6 +657,32 @@ mod tests {
+         build_frobenius_union_factor_base, linearised_kernel_basis,
+     };
+     use super::*;
++
++    #[test]
++    fn cached_lifts_match_general_witnesses_and_reject_reordered_bases() {
++        let kc = KoblitzCurve::new(1, 7).unwrap();
++        let seed: Vec<_> = [1u64, 2].into_iter()
++            .map(|x| F2mElement::from_biguint(&BigUint::from(x), 7)).collect();
++        let fb = build_frobenius_union_factor_base(&kc, &seed).unwrap();
++        let plan = WeilChartPlan::new(&kc, &fb, &seed, true).unwrap();
++        let index = fb.index_map();
++        for k in 1..71u64 {
++            let target = kc.mul(kc.generator(), &BigUint::from(k));
++            let mut general = plan.clone();
++            general.point_lifts = None;
++            let expected = general.decompose(&kc, &fb, &index, &target, &SolveOptions::default()).unwrap();
++            let actual = plan.decompose(&kc, &fb, &index, &target, &SolveOptions::default()).unwrap();
++            assert_eq!(actual.0, expected.0, "k={k}");
++            assert_eq!(actual.1.solver.reductions, expected.1.solver.reductions);
++        }
++        let mut reordered = fb.clone();
++        reordered.points.swap(0, 1);
++        assert!(!plan.matches(&kc, &reordered));
++        assert!(plan.decompose(&kc, &reordered, &reordered.index_map(), kc.generator(), &SolveOptions::default()).is_none());
++        let mut changed = fb.clone();
++        changed.points.pop();
++        assert!(!plan.matches(&kc, &changed));
++    }
+     fn truth(plan: &WeilChartPlan, r: u64) -> BTreeSet<(u64, u64)> {
+         let f = &plan.field;
+         let mut out = BTreeSet::new();
+@@ -616,6 +796,61 @@ mod tests {
+         assert_eq!(stats.solver.reductions, 0);
+     }
+ 
++    #[test]
++    fn residual_assignment_budget_covers_all_components() {
++        let kc = KoblitzCurve::new(1, 7).unwrap();
++        let seed: Vec<_> = [1u64, 2, 4].into_iter()
++            .map(|x| F2mElement::from_biguint(&BigUint::from(x), 7)).collect();
++        let fb = build_frobenius_union_factor_base(&kc, &seed).unwrap();
++        let plan = WeilChartPlan::new(&kc, &fb, &seed, true).unwrap();
++        let mut exhausted = 0;
++        for r in 0..16 {
++            let mut roots = BTreeSet::new();
++            let stats = plan.visit_pairs(r, &SolveOptions { node_budget: 1, ..Default::default() }, |x, y| {
++                roots.insert((x, y));
++                false
++            });
++            assert!(stats.residual_assignments + stats.solver.reductions <= 1);
++            if stats.solver.exhausted {
++                exhausted += 1;
++            } else {
++                assert_eq!(roots, truth(&plan, r));
++            }
++        }
++        assert!(exhausted > 0);
++    }
++
++    #[test]
++    fn rational_support_compression_preserves_every_subgroup_decomposition() {
++        let kc = KoblitzCurve::new(1, 11).unwrap();
++        let seed: Vec<_> = [1u64, 2, 4].into_iter()
++            .map(|x| F2mElement::from_biguint(&BigUint::from(x), 11)).collect();
++        let fb = build_frobenius_union_factor_base(&kc, &seed).unwrap();
++        let plan = WeilChartPlan::new(&kc, &fb, &seed, true).unwrap();
++        assert!(plan.rational_support_dimensions().iter().all(|&d| d == 1));
++        assert_eq!(plan.point_chart.as_ref().unwrap().seed_dimension(), 1);
++        let fc = FastCurve::new(&kc.curve).unwrap();
++        let points: Vec<_> = fb.points.iter().map(|p| fc.lift(p)).collect();
++        let expected: HashSet<_> = points.iter().enumerate()
++            .flat_map(|(i, &p)| points[i..].iter().map(move |&q| (p,q)))
++            .map(|(p,q)| fc.add(p,q)).collect();
++        let index = fb.index_map();
++        for k in 1..991u64 {
++            let target = kc.mul(kc.generator(), &BigUint::from(k));
++            let (w, stats) = plan.decompose(&kc, &fb, &index, &target, &SolveOptions::default()).unwrap();
++            assert!(!stats.solver.exhausted);
++            assert_eq!(w.is_some(), expected.contains(&fc.lift(&target)), "k={k}");
++            if let Some(w) = w {
++                assert_eq!(kc.add(&fb.points[w[0]], &fb.points[w[1]]), target);
++            }
++        }
++        // The algebraic API still includes nonlifting roots of the full union.
++        let mut actual = BTreeSet::new();
++        let stats = plan.visit_pairs(13, &SolveOptions::default(), |x,y| { actual.insert((x,y)); false });
++        assert!(!stats.solver.exhausted);
++        assert_eq!(actual, truth(&plan, 13));
++    }
++
+     #[test]
+     fn pipeline_rejects_wrong_arity_and_identity_lifts() {
+         use super::super::koblitz_index_calculus::{

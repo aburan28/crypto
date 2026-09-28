@@ -237,9 +237,13 @@ class Certification(unittest.TestCase):
     def test_contract_binds_every_semantic_field(self):
         for key, value in (("dpWeight", 14), ("curve", 83), ("maxIters", 99),
                            ("binarySha256", "b" * 64), ("sourceSha256", "b" * 64),
-                           ("workers", 2), ("batch", 16)):
+                           ("workers", 2), ("batch", 16), ("walk", "table")):
             with self.subTest(field=key):
                 self.assertNotEqual(protocol.campaignContract(dict(self.config, **{key: value}))["id"], self.campaign["id"])
+        # The default is the walk every existing corpus was collected with.
+        self.assertEqual(protocol.campaignContract(dict(self.config, walk="sigma"))["id"], self.campaign["id"])
+        with self.assertRaises(ValueError):
+            protocol.campaignContract(dict(self.config, walk="random"))
 
     def test_legacy_directory_cannot_be_silently_certified(self):
         (self.work / "dp.bin").write_bytes(b"")
@@ -344,7 +348,7 @@ class Certification(unittest.TestCase):
         config = dict(self.config, curve=83, dpWeight=24, steps=8)
         protocol.atomicJson(store / "campaign.json", config)
         program = ("import worker; worker.instanceId=lambda:'local-cert'; "
-                   "worker.gpuName=lambda g:'cpu'; raise SystemExit(worker.Worker().run())")
+                   "worker.gpuName=lambda g:'test-gpu'; raise SystemExit(worker.Worker().run())")
         lastIteration = -1
         for attempt in range(2):
             root = self.root / ("replacement-%d" % attempt); root.mkdir()
@@ -401,7 +405,7 @@ class Certification(unittest.TestCase):
         env.pop("ECC_ALLOW_LEGACY_STORAGE", None)
         # Avoid EC2 metadata and nvidia-smi lookups: the test is strictly offline.
         program = ("import worker; worker.instanceId=lambda:'local-cert'; "
-                   "worker.gpuName=lambda g:'cpu'; raise SystemExit(worker.Worker().run())")
+                   "worker.gpuName=lambda g:'test-gpu'; raise SystemExit(worker.Worker().run())")
         p = subprocess.run([sys.executable, "-c", program], cwd=ROOT / "aws", env=env,
                            text=True, capture_output=True, timeout=45)
         self.assertEqual(p.returncode, 0, p.stdout + p.stderr)

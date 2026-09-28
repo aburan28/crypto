@@ -1,0 +1,87 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "factor_base_orbits": 2,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "3fc2bf1d89e97d9ac30177ded0f3b61337fa15b5b249dd1bad7f4cf4c40f32b3",
+    "hypothesis": "Promoted two-orbit policy, unchanged complete cold cost.",
+    "id": "incumbent",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "96cd5e5b5802e2247a80445073c1691e105344bccea6c9819743f1f3c2aaa17f"
+  },
+  {
+    "binary_relative": "source_candidates/orbit_projection/worker",
+    "config": {
+      "batch_trials": 1,
+      "factor_base_orbits": 2,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "3fc2bf1d89e97d9ac30177ded0f3b61337fa15b5b249dd1bad7f4cf4c40f32b3",
+    "hypothesis": "Fixed-support engineering: orbit_projection. See IMPLEMENTATION_PLAN.md.",
+    "id": "orbit_projection",
+    "source_directory": "source_candidates/orbit_projection/source",
+    "source_manifest_relative": "source_candidates/orbit_projection/source-manifest.json",
+    "source_manifest_sha256": "8d11f79dd489c0fef3a82cc1fedf6e6b209b9ee1592d5ee324ae0556bee19142"
+  },
+  {
+    "binary_relative": "source_candidates/serial_collection/worker",
+    "config": {
+      "batch_trials": 1,
+      "factor_base_orbits": 2,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "3fc2bf1d89e97d9ac30177ded0f3b61337fa15b5b249dd1bad7f4cf4c40f32b3",
+    "hypothesis": "Fixed-support engineering: serial_collection. See IMPLEMENTATION_PLAN.md.",
+    "id": "serial_collection",
+    "source_directory": "source_candidates/serial_collection/source",
+    "source_manifest_relative": "source_candidates/serial_collection/source-manifest.json",
+    "source_manifest_sha256": "0cb4755147e0b8ef211c205bfd47c200cc049874abb9bf415cffa9b742cbf1b8"
+  },
+  {
+    "binary_relative": "source_candidates/combined/worker",
+    "config": {
+      "batch_trials": 1,
+      "factor_base_orbits": 2,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "3fc2bf1d89e97d9ac30177ded0f3b61337fa15b5b249dd1bad7f4cf4c40f32b3",
+    "hypothesis": "Fixed-support engineering: combined. See IMPLEMENTATION_PLAN.md.",
+    "id": "combined",
+    "source_directory": "source_candidates/combined/source",
+    "source_manifest_relative": "source_candidates/combined/source-manifest.json",
+    "source_manifest_sha256": "088f6b1698646a7fa4fc7e14d7b983a7e5f15995fbefad60fece1fadd3784115"
+  },
+  {
+    "binary_relative": "source_candidates/combined/worker",
+    "config": {
+      "batch_trials": 1,
+      "factor_base_orbits": 2,
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "f53526754236c1e83a06f845ed28eb2c4aa2e91f768a9a280ef172c3546034a3",
+    "hypothesis": "Combined implementation with dense two-column elimination.",
+    "id": "combined_dense",
+    "source_directory": "source_candidates/combined/source",
+    "source_manifest_relative": "source_candidates/combined/source-manifest.json",
+    "source_manifest_sha256": "088f6b1698646a7fa4fc7e14d7b983a7e5f15995fbefad60fece1fadd3784115"
+  }
+]

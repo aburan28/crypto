@@ -1,0 +1,16 @@
+{
+  "base_commit": "8679850505a1ab2cb817f14704cf7fb9dac95bdf",
+  "python_tests": {
+    "count": 18,
+    "status": "passed"
+  },
+  "worker_cargo_check": "passed --locked --offline",
+  "worker_cargo_build": "passed --locked --offline",
+  "worker_smoke": "fixture metadata exact; 16 IC targets and 16 rho targets independently verified",
+  "final_round_restored_audit": {
+    "status": "VERIFIED",
+    "trial_receipts": 1488,
+    "source_files": 450
+  },
+  "performance_evidence": "frozen original workers; PR worker smoke makes no new performance claim"
+}

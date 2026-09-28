@@ -1,0 +1,30 @@
+{
+  "agents": [
+    {
+      "name": "nop"
+    }
+  ],
+  "environment": {
+    "delete": false,
+    "kwargs": {
+      "keep_containers": true
+    },
+    "type": "docker"
+  },
+  "job_name": "autolab-20260915T205319Z",
+  "jobs_dir": "/home/ubuntu/crypto/research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/jobs",
+  "n_attempts": 1,
+  "n_concurrent_trials": 1,
+  "quiet": true,
+  "retry": {
+    "max_retries": 0
+  },
+  "tasks": [
+    {
+      "path": "/home/ubuntu/crypto/research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/task"
+    }
+  ],
+  "verifier": {
+    "max_timeout_sec": 3300
+  }
+}

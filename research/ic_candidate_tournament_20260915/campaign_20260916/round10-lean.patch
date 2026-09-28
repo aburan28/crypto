@@ -1,0 +1,55 @@
+diff -ruN a/.cargo/config.toml b/.cargo/config.toml
+--- a/.cargo/config.toml	1970-01-01 00:00:00.000000000 +0000
++++ b/.cargo/config.toml	2026-09-16 19:36:28.142071206 +0000
+@@ -0,0 +1,3 @@
++[build]
++target = "x86_64-unknown-linux-gnu"
++rustflags = ["-C", "target-feature=+crt-static"]
+diff -ruN a/examples/ic_tournament_worker.rs b/examples/ic_tournament_worker.rs
+--- a/examples/ic_tournament_worker.rs	2026-09-16 14:43:59.582611037 +0000
++++ b/examples/ic_tournament_worker.rs	2026-09-16 19:38:09.153014278 +0000
+@@ -1,3 +1,4 @@
++#![no_main]
+ //! Complete, public-synthetic IC/rho jobs for the candidate tournament.
+ //! Uses the production research library; JSON stdin contains no known scalar.
+ use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+@@ -408,7 +409,12 @@
+     Ok(Report::Text(out, verified))
+ }
+ 
+-fn main() {
++/// The C entry point directly: without the std runtime's start-up the process
++/// installs no signal handlers, allocates no alternate signal stack and does not
++/// read `/proc/self/maps`, work that served no purpose for a job that reads one
++/// JSON document and writes one. Shared by every arm, rho included.
++#[no_mangle]
++pub extern "C" fn main(_argc: i32, _argv: *const *const u8) -> i32 {
+     let mut input = String::new();
+     std::io::stdin().take(1_048_577).read_to_string(&mut input).expect("stdin");
+     let result = if input.len() > 1_048_576 { Err("job too large".into()) } else {
+@@ -433,5 +439,5 @@
+         lock.write_all(&text).expect("stdout");
+         lock.flush().expect("stdout");
+     }
+-    if !success { std::process::exit(2); }
++    if success { 0 } else { 2 }
+ }
+diff -ruN a/src/cryptanalysis/koblitz_tiny_ic.rs b/src/cryptanalysis/koblitz_tiny_ic.rs
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-16 14:35:55.428194263 +0000
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-16 19:38:09.153820390 +0000
+@@ -95,9 +95,14 @@
+ }
+ 
+ fn has_pclmul() -> bool {
++    // One CPUID (leaf 1, ECX bit 1) instead of the standard library's feature
++    // cache, whose first use queries several leaves; on a virtual machine every
++    // CPUID traps to the hypervisor.
+     #[cfg(target_arch = "x86_64")]
+     {
+-        std::arch::is_x86_feature_detected!("pclmulqdq")
++        // SAFETY: CPUID is available on every x86_64 processor.
++        let leaf = unsafe { std::arch::x86_64::__cpuid(1) };
++        (leaf.ecx >> 1) & 1 == 1
+     }
+     #[cfg(not(target_arch = "x86_64"))]
+     {

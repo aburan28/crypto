@@ -120,6 +120,17 @@ python3 aws/merge.py --work /data/merge-v2 \
   --client ./ecc2k130-cpu
 ```
 
+`kernelProtocol: "ecc2k-kernel-v1"` is a different contract. It
+versions the CUDA client pointer (`kernels/<n>.json`, pinned sha256,
+append-only `kernelVersion`) so a CLMAD or pipe-balance flip can land
+without rewriting live geometry. It does **not** authenticate the DP
+corpus, does **not** belong in `campaignContract`, and must not be
+confused with turning `storageProtocol` on. The live unversioned store
+may adopt kernel v1; it may not adopt `ecc2k-seed-orbit-v1` without
+the migration review below. `rollout.sh activate` refuses a campaign
+that already has `storageProtocol`, because those binary hashes sit in
+the campaign id.
+
 **Do not turn this on in an existing campaign without a migration review.**
 Old data has no manifest proving its cutoff, walk version or producer build.
 The strict path intentionally refuses to bless it by merely writing a new

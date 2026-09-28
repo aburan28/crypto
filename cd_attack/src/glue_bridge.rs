@@ -18,7 +18,7 @@ use std::process::{Command, Stdio};
 
 use num_bigint::BigInt;
 
-use crate::field::{F2, Fp2};
+use crate::field::{Fp2, F2};
 use crate::jacobian::Div;
 use crate::poly::Poly;
 
@@ -34,14 +34,8 @@ pub struct GluingSolution {
 
 impl GluingSolution {
     pub fn to_div(&self, fp2: &Fp2) -> Div {
-        let u = Poly::new(
-            vec![self.u0.clone(), self.u1.clone(), fp2.one()],
-            fp2,
-        );
-        let v = Poly::new(
-            vec![self.v0.clone(), self.v1.clone()],
-            fp2,
-        );
+        let u = Poly::new(vec![self.u0.clone(), self.u1.clone(), fp2.one()], fp2);
+        let v = Poly::new(vec![self.v0.clone(), self.v1.clone()], fp2);
         Div { u, v }
     }
 }
@@ -96,8 +90,7 @@ pub fn gluing_divisor_map_fp(
             String::from_utf8_lossy(&output.stderr)
         ));
     }
-    let stdout = String::from_utf8(output.stdout)
-        .map_err(|e| format!("non-utf8 stdout: {e}"))?;
+    let stdout = String::from_utf8(output.stdout).map_err(|e| format!("non-utf8 stdout: {e}"))?;
     let parsed: serde_json::Value = serde_json::from_str(&stdout)
         .map_err(|e| format!("json parse error: {e} (output was: {stdout})"))?;
     if let Some(err) = parsed.get("error") {
@@ -115,9 +108,9 @@ pub fn gluing_divisor_map_fp(
         }
         // Each field is now an [a, b] pair representing a + b·i.
         let pick = |key: &str| -> Result<F2, String> {
-            let v = sol.get(key)
-                .ok_or_else(|| format!("missing key '{key}'"))?;
-            let arr = v.as_array()
+            let v = sol.get(key).ok_or_else(|| format!("missing key '{key}'"))?;
+            let arr = v
+                .as_array()
                 .ok_or_else(|| format!("'{key}' not an array: {:?}", v))?;
             if arr.len() != 2 {
                 return Err(format!("'{key}' has length {}", arr.len()));
@@ -125,16 +118,20 @@ pub fn gluing_divisor_map_fp(
             let parse_one = |val: &serde_json::Value| -> Result<BigInt, String> {
                 match val {
                     serde_json::Value::Number(n) => Ok(BigInt::from(
-                        n.as_i64().ok_or_else(|| "non-int".to_string())?
+                        n.as_i64().ok_or_else(|| "non-int".to_string())?,
                     )),
-                    serde_json::Value::String(s) => s.parse::<i64>()
+                    serde_json::Value::String(s) => s
+                        .parse::<i64>()
                         .map(BigInt::from)
                         .map_err(|e| format!("'{s}': {e}")),
                     serde_json::Value::Null => Err("null value".to_string()),
                     _ => Err(format!("unexpected: {:?}", val)),
                 }
             };
-            Ok(F2 { a: parse_one(&arr[0])?, b: parse_one(&arr[1])? })
+            Ok(F2 {
+                a: parse_one(&arr[0])?,
+                b: parse_one(&arr[1])?,
+            })
         };
         out.push(GluingSolution {
             u0: pick("u0")?,
@@ -152,32 +149,39 @@ mod tests {
     use crate::field::{Fp, Fp2};
     use crate::glue::from_prod_to_jac;
 
-    fn ctx() -> Fp2 { Fp2::new(Fp::new(BigInt::from(431u64))) }
+    fn ctx() -> Fp2 {
+        Fp2::new(Fp::new(BigInt::from(431u64)))
+    }
 
     #[test]
     fn gluing_divisor_map_returns_valid_mumford() {
         let fp2 = ctx();
-        let zero = || F2 { a: BigInt::from(0), b: BigInt::from(0) };
-        let int = |n: i64| F2 { a: BigInt::from(n), b: BigInt::from(0) };
+        let zero = || F2 {
+            a: BigInt::from(0),
+            b: BigInt::from(0),
+        };
+        let int = |n: i64| F2 {
+            a: BigInt::from(n),
+            b: BigInt::from(0),
+        };
         // E_α: Montgomery A=6 → 2-torsion (0, 52, 373); 4-tor (1, 55) → (0,0)
         // E_β: Montgomery A=10 → 2-torsion (0, 170, 251); 4-tor (1, 72) → (0,0)
         let alpha = [zero(), int(52), int(373)];
-        let beta  = [zero(), int(170), int(251)];
-        let pc    = (int(1), int(55));
-        let p_pt  = (int(1), int(72));
+        let beta = [zero(), int(170), int(251)];
+        let pc = (int(1), int(55));
+        let p_pt = (int(1), int(72));
 
         let script = format!(
             "{}/scripts/gluing_divisor_map.py",
             env!("CARGO_MANIFEST_DIR")
         );
-        let sols = gluing_divisor_map_fp(
-            &BigInt::from(431u64),
-            &alpha, &beta, &pc, &p_pt,
-            &script,
-        )
-        .expect("python script must succeed");
-        assert!(!sols.is_empty(), "expected at least one solution from Groebner");
-        println!("got {} solution(s); first = {:?}", sols.len(), &sols[0]);
+        let sols = gluing_divisor_map_fp(&BigInt::from(431u64), &alpha, &beta, &pc, &p_pt, &script)
+            .expect("python script must succeed");
+        assert!(
+            !sols.is_empty(),
+            "expected at least one solution from Groebner"
+        );
+        println!("got {} solution(s); first = {:?}", sols.len(), sols[0]);
 
         let c = from_prod_to_jac(&alpha, &beta, &fp2);
         for (i, sol) in sols.iter().enumerate() {
@@ -185,7 +189,8 @@ mod tests {
             assert!(
                 d.is_valid(&c, &fp2),
                 "solution {i} not a valid Mumford form on J(h): u={:?} v={:?}",
-                d.u, d.v
+                d.u,
+                d.v
             );
         }
     }
@@ -198,10 +203,7 @@ mod tests {
         pc: &(F2, F2),
         p_pt: &(F2, F2),
     ) -> Result<Vec<GluingSolution>, String> {
-        let script = format!(
-            "{}/scripts/msolve_bridge.py",
-            env!("CARGO_MANIFEST_DIR")
-        );
+        let script = format!("{}/scripts/msolve_bridge.py", env!("CARGO_MANIFEST_DIR"));
         gluing_divisor_map_fp(p, alpha, beta, pc, p_pt, &script)
     }
 
@@ -214,18 +216,18 @@ mod tests {
         let i = fp2.i();
         let neg_i = fp2.neg(&i);
         let zero = fp2.zero();
-        let int = |n: i64| F2 { a: BigInt::from(n), b: BigInt::from(0) };
+        let int = |n: i64| F2 {
+            a: BigInt::from(n),
+            b: BigInt::from(0),
+        };
 
         let alpha = [zero.clone(), i.clone(), neg_i.clone()];
         let beta = [zero, int(170), int(251)];
-        let pc = (int(1), int(243));   // 4-torsion on E_α (lift x=1)
-        let p_pt = (int(1), int(72));  // 4-torsion on E_β
+        let pc = (int(1), int(243)); // 4-torsion on E_α (lift x=1)
+        let p_pt = (int(1), int(72)); // 4-torsion on E_β
 
-        let sols = call_msolve_bridge(
-            &BigInt::from(431u64),
-            &alpha, &beta, &pc, &p_pt,
-        )
-        .expect("msolve bridge must succeed");
+        let sols = call_msolve_bridge(&BigInt::from(431u64), &alpha, &beta, &pc, &p_pt)
+            .expect("msolve bridge must succeed");
         assert!(!sols.is_empty(), "expected non-empty F_{{p²}} solutions");
         println!("F_{{p²}} solutions: {} found", sols.len());
 
@@ -237,12 +239,14 @@ mod tests {
             if d.is_valid(&c, &fp2) {
                 valid_count += 1;
             } else {
-                eprintln!("solution {i} not valid Mumford: u={:?} v={:?}",
-                          d.u, d.v);
+                eprintln!("solution {i} not valid Mumford: u={:?} v={:?}", d.u, d.v);
             }
         }
-        println!("{}/{} solutions are valid Mumford forms",
-                 valid_count, sols.len());
+        println!(
+            "{}/{} solutions are valid Mumford forms",
+            valid_count,
+            sols.len()
+        );
         assert!(valid_count > 0, "expected at least one valid Mumford form");
     }
 
@@ -256,7 +260,10 @@ mod tests {
         let i = fp2.i();
         let neg_i = fp2.neg(&i);
         let zero = fp2.zero();
-        let int = |n: i64| F2 { a: BigInt::from(n), b: BigInt::from(0) };
+        let int = |n: i64| F2 {
+            a: BigInt::from(n),
+            b: BigInt::from(0),
+        };
 
         // E_α: A=0 (j=1728); 2-torsion {0, i, -i}
         let alpha = [zero.clone(), i.clone(), neg_i.clone()];
@@ -271,12 +278,8 @@ mod tests {
             "{}/scripts/gluing_divisor_map.py",
             env!("CARGO_MANIFEST_DIR")
         );
-        let sols = gluing_divisor_map_fp(
-            &BigInt::from(431u64),
-            &alpha, &beta, &pc, &p_pt,
-            &script,
-        )
-        .expect("python script must succeed for F_{p²} inputs");
+        let sols = gluing_divisor_map_fp(&BigInt::from(431u64), &alpha, &beta, &pc, &p_pt, &script)
+            .expect("python script must succeed for F_{p²} inputs");
         // For non-Kani-correct inputs we may get partial / no solutions —
         // but the path should run without timing out (closed-form reduction
         // keeps Groebner fast). Print what we got for inspection.
@@ -286,8 +289,10 @@ mod tests {
         for (i, sol) in sols.iter().enumerate() {
             let d = sol.to_div(&fp2);
             if !d.is_valid(&c, &fp2) {
-                eprintln!("WARNING: solution {i} not valid Mumford: u={:?} v={:?}",
-                          d.u, d.v);
+                eprintln!(
+                    "WARNING: solution {i} not valid Mumford: u={:?} v={:?}",
+                    d.u, d.v
+                );
             }
         }
     }

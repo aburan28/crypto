@@ -1,0 +1,58 @@
+{
+  "bootstrap_draws": 2000,
+  "ci_level": 0.95,
+  "comparison_kind": "factor-base-policy",
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "confirmation_ratio": 0.8,
+  "created_unix": 1789554848.1443071,
+  "curve_diversity_limit": "One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.",
+  "equivalent_suite_reason": "Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; final suite has 60 inputs in pilot.",
+  "evaluator_sha256": {
+    "oracle.py": "1b426cce5d61f408b4e4b969dc2d0bd67e1b10681567cfeb38127596f3ca3949",
+    "tournament.py": "a30e5d982d7acefe434336dcdd7a7386e2dbfb66601bfe44d0dabdbc71d3535e"
+  },
+  "evidence_scope": "bounded public-hash ECDLP configuration tournament",
+  "family_wide_or_scaling_claim": false,
+  "host": {
+    "machine": "x86_64",
+    "node": "ip-172-31-37-103",
+    "processor": "x86_64",
+    "release": "6.17.0-1020-aws",
+    "system": "Linux",
+    "version": "#20~24.04.1-Ubuntu SMP Mon Jul 13 20:40:21 UTC 2026"
+  },
+  "limits": {
+    "cpu": 7,
+    "max_profiled_jobs": 1800,
+    "memory_bytes": 8589934592,
+    "timeout_seconds": 60,
+    "worker_threads": 1
+  },
+  "max_cell_ratio": 1.1,
+  "metric_class": "implementation_instruction_cost",
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall",
+  "native_timings": "paired native reruns retained; no runtime claim from profiled elapsed time",
+  "parity_margin": 1.1,
+  "pinned_files": {
+    "calibration.json": "d63ed8f9e1d29df6beac7328adf4c5d038cdf7f08dc3be8bd7f3a61892651c2b",
+    "candidates.json": "7384b76dcf5187bb447105d7395926822ffb143b1d2c0d25fc2cb5b3381a9248",
+    "fixtures.json": "7c446e0507088fd3e0e50e52cd1bf8a8a0b3070409e9d1cb0b144b8ff842a7a7",
+    "source-manifest.json": "569cda87df08be4f5760cb2551f4f7eb6b638f124eb178ea5ab7e7b890730709",
+    "source_candidates/cold_context/source-manifest.json": "ac6519782945c97b49657227ee9d13b3d177b2eba337b6354363fe53f5ac78d9",
+    "source_candidates/cold_context/worker": "5109cf18cfb527c1b68d37cb074cedb17925957cf31523263eaac1deecdac601",
+    "source_candidates/orbits1/source-manifest.json": "e6e0e41b263801ceee215b50a36f955a84cf4920ffc7de4241155adf1951a1bd",
+    "source_candidates/orbits1/worker": "7fa7367ec19d50975915fad939b9549d24f520ce74b153b43b33c09da9ffb5b0",
+    "worker": "2941bfcd788c3bb6ba70b22c195cb984ddc55bdda97ff30b52ea14857afc6ec1"
+  },
+  "profile": "pilot",
+  "profiler_version": "valgrind-3.22.0",
+  "repetitions": 3,
+  "require_native_progress": true,
+  "schema_version": 1,
+  "seed": 2026091607,
+  "source_manifest_sha256": "1568ce30061d48aab917aab08d864653b1b70b009a9bec9f1d307b56a0b788bf",
+  "support_contract": "Stable support within each arm/case; base policy varies across arms; same public ECDLPs and per-arm floors.",
+  "target_count": 1,
+  "unit": "valgrind-3.22-amd64-Ir",
+  "workload": "complete cold batch with all setup charged once and every target verified"
+}

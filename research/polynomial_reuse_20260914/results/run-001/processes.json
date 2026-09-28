@@ -1,0 +1,3029 @@
+[
+  {
+    "name": "stage-n3-l1-m2-r0-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003334266002639197
+  },
+  {
+    "name": "stage-n3-l1-m2-r0-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.001977017003810033
+  },
+  {
+    "name": "stage-n3-l1-m2-r0-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0023629100032849237
+  },
+  {
+    "name": "stage-n3-l1-m2-r1-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0019213019986636937
+  },
+  {
+    "name": "stage-n3-l1-m2-r1-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0019840669992845505
+  },
+  {
+    "name": "stage-n3-l1-m2-r1-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0025249539976357482
+  },
+  {
+    "name": "stage-n3-l1-m2-r2-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0019206309953005984
+  },
+  {
+    "name": "stage-n3-l1-m2-r2-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.002602551998279523
+  },
+  {
+    "name": "stage-n3-l1-m2-r2-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0020545940060401335
+  },
+  {
+    "name": "stage-n3-l2-m2-r0-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.002326002999325283
+  },
+  {
+    "name": "stage-n3-l2-m2-r0-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.002220635004050564
+  },
+  {
+    "name": "stage-n3-l2-m2-r0-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.03540222800074844
+  },
+  {
+    "name": "stage-n3-l2-m2-r1-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.002863585999875795
+  },
+  {
+    "name": "stage-n3-l2-m2-r1-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0023179019990493543
+  },
+  {
+    "name": "stage-n3-l2-m2-r1-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.03543431599973701
+  },
+  {
+    "name": "stage-n3-l2-m2-r2-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0027095339974039234
+  },
+  {
+    "name": "stage-n3-l2-m2-r2-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.002569297001173254
+  },
+  {
+    "name": "stage-n3-l2-m2-r2-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.036401427001692355
+  },
+  {
+    "name": "stage-n5-l2-m2-r0-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004480677998799365
+  },
+  {
+    "name": "stage-n5-l2-m2-r0-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004086323002411518
+  },
+  {
+    "name": "stage-n5-l2-m2-r0-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 3.786504777999653
+  },
+  {
+    "name": "stage-n5-l2-m2-r1-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.005574239999987185
+  },
+  {
+    "name": "stage-n5-l2-m2-r1-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004593149998981971
+  },
+  {
+    "name": "stage-n5-l2-m2-r1-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 3.873051023001608
+  },
+  {
+    "name": "stage-n5-l2-m2-r2-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007546350003394764
+  },
+  {
+    "name": "stage-n5-l2-m2-r2-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.005108457000460476
+  },
+  {
+    "name": "stage-n5-l2-m2-r2-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 3.8441636489951634
+  },
+  {
+    "name": "stage-n7-l3-m2-r0-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01193674599926453
+  },
+  {
+    "name": "stage-n7-l3-m2-r0-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010936507998849265
+  },
+  {
+    "name": "stage-n7-l3-m2-r0-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.036534539001877
+  },
+  {
+    "name": "stage-n7-l3-m2-r1-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011931783999898471
+  },
+  {
+    "name": "stage-n7-l3-m2-r1-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011751993995858356
+  },
+  {
+    "name": "stage-n7-l3-m2-r1-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.03693124200072
+  },
+  {
+    "name": "stage-n7-l3-m2-r2-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012911883000924718
+  },
+  {
+    "name": "stage-n7-l3-m2-r2-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011377021000953391
+  },
+  {
+    "name": "stage-n7-l3-m2-r2-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.034691228000156
+  },
+  {
+    "name": "stage-n9-l3-m2-r0-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011690681996697094
+  },
+  {
+    "name": "stage-n9-l3-m2-r0-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011325953004416078
+  },
+  {
+    "name": "stage-n9-l3-m2-r0-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.03389924899966
+  },
+  {
+    "name": "stage-n9-l3-m2-r1-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010807358994497918
+  },
+  {
+    "name": "stage-n9-l3-m2-r1-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010081745000206865
+  },
+  {
+    "name": "stage-n9-l3-m2-r1-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.03509111099993
+  },
+  {
+    "name": "stage-n9-l3-m2-r2-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012293081999814603
+  },
+  {
+    "name": "stage-n9-l3-m2-r2-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01114079800026957
+  },
+  {
+    "name": "stage-n9-l3-m2-r2-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.033796267998696
+  },
+  {
+    "name": "stage-n3-l1-m3-r0-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0034072999987984076
+  },
+  {
+    "name": "stage-n3-l1-m3-r0-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0026470250013517216
+  },
+  {
+    "name": "stage-n3-l1-m3-r0-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0035149220057064667
+  },
+  {
+    "name": "stage-n3-l1-m3-r1-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0026513620032346807
+  },
+  {
+    "name": "stage-n3-l1-m3-r1-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.002976771997055039
+  },
+  {
+    "name": "stage-n3-l1-m3-r1-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0038305780035443604
+  },
+  {
+    "name": "stage-n3-l1-m3-r2-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0027164809944224544
+  },
+  {
+    "name": "stage-n3-l1-m3-r2-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.002636689998325892
+  },
+  {
+    "name": "stage-n3-l1-m3-r2-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0034707259983406402
+  },
+  {
+    "name": "stage-n5-l2-m3-r0-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.09613628299848642
+  },
+  {
+    "name": "stage-n5-l2-m3-r0-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.09709434600517852
+  },
+  {
+    "name": "stage-n5-l2-m3-r0-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.033732392003003
+  },
+  {
+    "name": "stage-n5-l2-m3-r1-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.09937095799978124
+  },
+  {
+    "name": "stage-n5-l2-m3-r1-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.09770400300476467
+  },
+  {
+    "name": "stage-n5-l2-m3-r1-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.034094053000445
+  },
+  {
+    "name": "stage-n5-l2-m3-r2-baseline",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.11544691200106172
+  },
+  {
+    "name": "stage-n5-l2-m3-r2-template",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.10485907700058306
+  },
+  {
+    "name": "stage-n5-l2-m3-r2-parameterized",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.033810681998148
+  },
+  {
+    "name": "dlp-n7-groebner-s101-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0429370249985368
+  },
+  {
+    "name": "dlp-n7-groebner-s101-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04451632400014205
+  },
+  {
+    "name": "dlp-n7-groebner-s101-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.05201496900554048
+  },
+  {
+    "name": "dlp-n7-groebner-s101-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03912639299960574
+  },
+  {
+    "name": "dlp-n7-groebner-s101-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0404038060005405
+  },
+  {
+    "name": "dlp-n7-groebner-s101-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04375144599907799
+  },
+  {
+    "name": "dlp-n7-groebner-s202-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03981953599577537
+  },
+  {
+    "name": "dlp-n7-groebner-s202-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04118733500217786
+  },
+  {
+    "name": "dlp-n7-groebner-s202-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04794682400097372
+  },
+  {
+    "name": "dlp-n7-groebner-s202-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03707456700067269
+  },
+  {
+    "name": "dlp-n7-groebner-s202-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03900020700530149
+  },
+  {
+    "name": "dlp-n7-groebner-s202-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0388091440036078
+  },
+  {
+    "name": "dlp-n7-groebner-s307-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04203623400098877
+  },
+  {
+    "name": "dlp-n7-groebner-s307-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0429746959998738
+  },
+  {
+    "name": "dlp-n7-groebner-s307-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04804457100544823
+  },
+  {
+    "name": "dlp-n7-groebner-s307-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03794882900547236
+  },
+  {
+    "name": "dlp-n7-groebner-s307-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03863851300411625
+  },
+  {
+    "name": "dlp-n7-groebner-s307-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.036988143998314627
+  },
+  {
+    "name": "dlp-n7-groebner-s409-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04060092199506471
+  },
+  {
+    "name": "dlp-n7-groebner-s409-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.042473077002796344
+  },
+  {
+    "name": "dlp-n7-groebner-s409-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.05069581799762091
+  },
+  {
+    "name": "dlp-n7-groebner-s409-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.037714035002863966
+  },
+  {
+    "name": "dlp-n7-groebner-s409-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03736504099651938
+  },
+  {
+    "name": "dlp-n7-groebner-s409-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03679501699662069
+  },
+  {
+    "name": "dlp-n7-sat-s101-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.041337047005072236
+  },
+  {
+    "name": "dlp-n7-sat-s101-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0338536830022349
+  },
+  {
+    "name": "dlp-n7-sat-s101-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04212878399994224
+  },
+  {
+    "name": "dlp-n7-sat-s101-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04163690200221026
+  },
+  {
+    "name": "dlp-n7-sat-s101-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.044837261993961874
+  },
+  {
+    "name": "dlp-n7-sat-s101-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.043739589003962465
+  },
+  {
+    "name": "dlp-n7-sat-s202-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03289424900140148
+  },
+  {
+    "name": "dlp-n7-sat-s202-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03332013999897754
+  },
+  {
+    "name": "dlp-n7-sat-s202-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.041197771999577526
+  },
+  {
+    "name": "dlp-n7-sat-s202-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04263587099558208
+  },
+  {
+    "name": "dlp-n7-sat-s202-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0414574669994181
+  },
+  {
+    "name": "dlp-n7-sat-s202-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04458695399807766
+  },
+  {
+    "name": "dlp-n7-sat-s307-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03803346600034274
+  },
+  {
+    "name": "dlp-n7-sat-s307-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03608860900567379
+  },
+  {
+    "name": "dlp-n7-sat-s307-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.041824604995781556
+  },
+  {
+    "name": "dlp-n7-sat-s307-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.043311774999892805
+  },
+  {
+    "name": "dlp-n7-sat-s307-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04200212199793896
+  },
+  {
+    "name": "dlp-n7-sat-s307-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0509414120024303
+  },
+  {
+    "name": "dlp-n7-sat-s409-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03696136299549835
+  },
+  {
+    "name": "dlp-n7-sat-s409-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.039954638996277936
+  },
+  {
+    "name": "dlp-n7-sat-s409-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04535249800392194
+  },
+  {
+    "name": "dlp-n7-sat-s409-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04343331699783448
+  },
+  {
+    "name": "dlp-n7-sat-s409-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04618258699338185
+  },
+  {
+    "name": "dlp-n7-sat-s409-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04951876000268385
+  },
+  {
+    "name": "dlp-n9-groebner-s101-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010362703003920615
+  },
+  {
+    "name": "dlp-n9-groebner-s101-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011478182001155801
+  },
+  {
+    "name": "dlp-n9-groebner-s101-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01231675499730045
+  },
+  {
+    "name": "dlp-n9-groebner-s101-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012843639000493567
+  },
+  {
+    "name": "dlp-n9-groebner-s101-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.015490424004383385
+  },
+  {
+    "name": "dlp-n9-groebner-s101-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.014519240998197347
+  },
+  {
+    "name": "dlp-n9-groebner-s202-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011748158998670988
+  },
+  {
+    "name": "dlp-n9-groebner-s202-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.013048486995103303
+  },
+  {
+    "name": "dlp-n9-groebner-s202-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012338899003225379
+  },
+  {
+    "name": "dlp-n9-groebner-s202-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.02150835499924142
+  },
+  {
+    "name": "dlp-n9-groebner-s202-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.017436815003748052
+  },
+  {
+    "name": "dlp-n9-groebner-s202-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.02251414900092641
+  },
+  {
+    "name": "dlp-n9-groebner-s307-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010109151000506245
+  },
+  {
+    "name": "dlp-n9-groebner-s307-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011797784005466383
+  },
+  {
+    "name": "dlp-n9-groebner-s307-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010314890998415649
+  },
+  {
+    "name": "dlp-n9-groebner-s307-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01250949599489104
+  },
+  {
+    "name": "dlp-n9-groebner-s307-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.015564624998660292
+  },
+  {
+    "name": "dlp-n9-groebner-s307-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00886746099422453
+  },
+  {
+    "name": "dlp-n9-groebner-s409-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.013181728005292825
+  },
+  {
+    "name": "dlp-n9-groebner-s409-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01384106100158533
+  },
+  {
+    "name": "dlp-n9-groebner-s409-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01323021999996854
+  },
+  {
+    "name": "dlp-n9-groebner-s409-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.015948833999573253
+  },
+  {
+    "name": "dlp-n9-groebner-s409-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.02032483899529325
+  },
+  {
+    "name": "dlp-n9-groebner-s409-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012030984995362815
+  },
+  {
+    "name": "dlp-n9-sat-s101-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006367057001625653
+  },
+  {
+    "name": "dlp-n9-sat-s101-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006660828999883961
+  },
+  {
+    "name": "dlp-n9-sat-s101-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007415915999445133
+  },
+  {
+    "name": "dlp-n9-sat-s101-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00807479800278088
+  },
+  {
+    "name": "dlp-n9-sat-s101-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0078349769974011
+  },
+  {
+    "name": "dlp-n9-sat-s101-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007369745995674748
+  },
+  {
+    "name": "dlp-n9-sat-s202-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006931387004442513
+  },
+  {
+    "name": "dlp-n9-sat-s202-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009644371995818801
+  },
+  {
+    "name": "dlp-n9-sat-s202-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007331659006013069
+  },
+  {
+    "name": "dlp-n9-sat-s202-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00749519000237342
+  },
+  {
+    "name": "dlp-n9-sat-s202-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008418031000474002
+  },
+  {
+    "name": "dlp-n9-sat-s202-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009586614003637806
+  },
+  {
+    "name": "dlp-n9-sat-s307-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007002343001659028
+  },
+  {
+    "name": "dlp-n9-sat-s307-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007358809998549987
+  },
+  {
+    "name": "dlp-n9-sat-s307-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010507115999644157
+  },
+  {
+    "name": "dlp-n9-sat-s307-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008136331001878716
+  },
+  {
+    "name": "dlp-n9-sat-s307-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00950867700157687
+  },
+  {
+    "name": "dlp-n9-sat-s307-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007140851994336117
+  },
+  {
+    "name": "dlp-n9-sat-s409-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/reference-target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00780261900217738
+  },
+  {
+    "name": "dlp-n9-sat-s409-off",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008940271000028588
+  },
+  {
+    "name": "dlp-n9-sat-s409-preprocess-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009188554999127518
+  },
+  {
+    "name": "dlp-n9-sat-s409-both-local",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007992013001057785
+  },
+  {
+    "name": "dlp-n9-sat-s409-both-redis-cold",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008162420002918225
+  },
+  {
+    "name": "dlp-n9-sat-s409-both-redis-warm",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009881508995022159
+  }
+]

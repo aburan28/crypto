@@ -1,6 +1,7 @@
 # gpu/ecc -- build + test.
 #
 #   make test          generated headers + CPU verification (no GPU needed)
+#                      (rho suites, then the baby-step giant-step suites)
 #   make bench         CUDA benchmark binary (needs nvcc)
 #   make bench ARCH=sm_100   target Blackwell (default: sm_80;sm_90;sm_100)
 #   make clean
@@ -25,10 +26,11 @@ NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo
 FP_PTX     ?= 0
 MIN_BLOCKS ?= 0
 
-GEN := curve_secp256k1.h curve_toy40.h \
-       vec_secp256k1_mont.h vec_secp256k1_fast.h vec_toy40_mont.h
+GEN := curve_secp256k1.h curve_toy40.h curve_toy36j0.h \
+       vec_secp256k1_mont.h vec_secp256k1_fast.h vec_toy40_mont.h vec_toy36j0_mont.h
 
-TESTS := test_secp_fast test_secp_mont test_toy_mont
+TESTS := test_secp_fast test_secp_mont test_toy_mont test_toyj0_mont \
+         test_bsgs_toy test_bsgs_secp_fast test_bsgs_secp_mont
 
 .PHONY: all test bench clean gen ptxcheck
 all: test
@@ -44,8 +46,11 @@ vec_secp256k1_fast.h: ecref.py
 	$(PY) ecref.py vectors --curve secp256k1 --mode fast > $@
 vec_toy40_mont.h: ecref.py
 	$(PY) ecref.py vectors --curve toy40 --mode mont > $@
+vec_toy36j0_mont.h: ecref.py
+	$(PY) ecref.py vectors --curve toy36j0 --mode mont > $@
 
 HDRS := fp256.cuh point.cuh rho.cuh rho_host.hpp
+BSGS_HDRS := fp256.cuh point.cuh bsgs.cuh bsgs_host.hpp
 
 # secp256k1 with the special (fast) reduction -- the production path
 test_secp_fast: test_cpu.cpp $(HDRS) curve_secp256k1.h vec_secp256k1_fast.h
@@ -64,6 +69,26 @@ test_toy_mont: test_cpu.cpp $(HDRS) curve_toy40.h vec_toy40_mont.h
 	$(CXX) $(CXXFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_toy40.h"' \
 	  -DGPU_ECC_VECTORS_HEADER='"vec_toy40_mont.h"' -DFP_FAST=0 -o $@ $<
 
+# 36-bit j = 0 toy curve (a = 0, prime order, p = n = 1 mod 3): the smallest
+# curve carrying the full Aut(E) = Z/6, so the fold-6 walk -- secp256k1's
+# production configuration -- is solved end to end, and its step count is
+# averaged over SOLVE_RUNS solves against folds 1 and 2 on the same curve
+test_toyj0_mont: test_cpu.cpp $(HDRS) curve_toy36j0.h vec_toy36j0_mont.h
+	$(CXX) $(CXXFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_toy36j0.h"' \
+	  -DGPU_ECC_VECTORS_HEADER='"vec_toy36j0_mont.h"' -DFP_FAST=0 -DSOLVE_RUNS=8 -o $@ $<
+
+# Baby-step giant-step: the engine is curve-generic, so it is checked on
+# both secp256k1 paths (table build, steppers, a 2^22 interval log) and on
+# the toy curve, where whole-group logs fit a CPU run.
+test_bsgs_toy: test_bsgs.cpp $(BSGS_HDRS) curve_toy40.h
+	$(CXX) $(CXXFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_toy40.h"' -DFP_FAST=0 -o $@ $<
+
+test_bsgs_secp_fast: test_bsgs.cpp $(BSGS_HDRS) curve_secp256k1.h
+	$(CXX) $(CXXFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_secp256k1.h"' -DFP_FAST=1 -o $@ $<
+
+test_bsgs_secp_mont: test_bsgs.cpp $(BSGS_HDRS) curve_secp256k1.h
+	$(CXX) $(CXXFLAGS) -DGPU_ECC_CURVE_HEADER='"curve_secp256k1.h"' -DFP_FAST=0 -o $@ $<
+
 test: $(TESTS) ptxcheck
 	@rc=0; for t in $(TESTS); do \
 	  echo "=== ./$$t ==="; ./$$t || rc=1; done; exit $$rc
@@ -74,7 +99,7 @@ ptxcheck: fp256.cuh ptx_asm_check.py
 	@echo "=== ptx_asm_check ==="
 	@python3 ptx_asm_check.py
 
-bench: bench.cu $(HDRS) kernels.cuh curve_secp256k1.h
+bench: bench.cu $(HDRS) $(BSGS_HDRS) kernels.cuh kernels_bsgs.cuh curve_secp256k1.h
 	$(NVCC) $(NVCCFLAGS) -DFP_PTX=$(FP_PTX) -DRHO_MIN_BLOCKS=$(MIN_BLOCKS) \
 	  -DGPU_ECC_CURVE_HEADER='"curve_secp256k1.h"' -o $@ $<
 

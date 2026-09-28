@@ -1,0 +1,22 @@
+{
+  "command": [
+    "target/release/examples/koblitz_public_factor_base_discovery",
+    "15",
+    "1",
+    "2",
+    "8"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 120.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.4177650420000134,
+    "user_seconds": 0.41641799999999995,
+    "system_seconds": 0.000998,
+    "total_core_seconds": 0.41741599999999995,
+    "single_core_seconds": 0.41741599999999995,
+    "peak_rss_bytes": 13983744,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

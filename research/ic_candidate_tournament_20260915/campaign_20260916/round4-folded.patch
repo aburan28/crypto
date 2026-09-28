@@ -1,0 +1,29 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -2320,7 +2320,7 @@
+     /// bytes per entry.  Returns `None` when the field is too wide to
+     /// pack a point into a `u64`.
+     pub fn build(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
+-        Self::build_within(kc, fb, Self::DEFAULT_BYTE_BUDGET)
++        Self::build_folded_within(kc, fb, Self::DEFAULT_BYTE_BUDGET)
+     }
+ 
+     /// Bytes the entries of a table for this base would occupy.
+@@ -2681,7 +2681,7 @@
+                 f(Self::canon_key_with(&curve, canon.as_ref(), p), orbit);
+             }
+         };
+-        (0..reps.len()).into_par_iter().for_each(|r| {
++        (0..reps.len()).into_iter().for_each(|r| {
+             each_row(r, &mut |key, _| {
+                 let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
+                 counts[bucket + 1].fetch_add(1, Ordering::Relaxed);
+@@ -2699,7 +2699,7 @@
+         let words = (1usize << filter_bits) / 64;
+         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
+         let slots = rests.as_mut_ptr() as usize;
+-        (0..reps.len()).into_par_iter().for_each(|r| {
++        (0..reps.len()).into_iter().for_each(|r| {
+             each_row(r, &mut |key, orbit| {
+                 let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
+                 let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;

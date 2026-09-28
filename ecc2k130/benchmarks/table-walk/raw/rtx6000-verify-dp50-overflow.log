@@ -1,0 +1,39 @@
++ cd /work/ecc
++ cat
++ docker run --rm --gpus all -v /work/ecc:/src -w /src nvidia/cuda:13.3.1-devel-ubuntu24.04 bash /src/verifyjob.sh
++ grep -v '^==$\|^== CUDA\|Copyright\|license\|LICENSE\|NGC\|^$\|CUDA Version'
+==========
+==========
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+=== verify table: 300 device reports re-walked by the host reference (full output)
+packed unrolled inversion: 1
+packed paired products: 1
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed state tile: 256
+packed table walk: 1 (8 branches, 48508 shared bytes)
+backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 50, 16 steps per launch
+DP OVERFLOW: 125865 reports, capacity 65536; checkpoint NOT advanced. Increase --dp-cap or lower --dp-weight.
+exit: 7
+=== verify legacy: 300 device reports re-walked by the host reference (full output)
+packed unrolled inversion: 1
+packed paired products: 1
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed state tile: 256
+packed table walk: 0 (0 branches, 0 shared bytes)
+backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 50, 16 steps per launch
+DP OVERFLOW: 126331 reports, capacity 65536; checkpoint NOT advanced. Increase --dp-cap or lower --dp-weight.
+exit: 7
+               total        used        free      shared  buff/cache   available
+Mem:              62           2          46           0          13          59
++ echo JOB_DONE
+JOB_DONE

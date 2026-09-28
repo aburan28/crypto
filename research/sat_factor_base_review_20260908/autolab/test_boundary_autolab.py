@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
+import stat
 import tempfile
+import textwrap
 import unittest
 from pathlib import Path
 
@@ -86,6 +89,37 @@ class MeasurementSchemaTests(unittest.TestCase):
 
 
 class HelperTests(unittest.TestCase):
+    def test_matched_targets_are_required_even_when_both_producers_succeed(self):
+        row = {'fixture_index':0,'n':13,'a':0,'generator_point_key':['1','2'],
+               'subgroup_order':2003,'field_modulus_low_terms':[0,1,3,4],
+               'published_q_point_key':['3','4'],'recovered_fixture_scalar':5,'published_fixture_scalar':5}
+        direct = [dict(row,kind='point_defined_factor_base'), dict(row,kind='relation_rank_summary',linear_solution_verified=True)]
+        rho = [dict(row,kind='rho_public_fixture',verified=True)]
+        matched = lab.comparison_integrity(direct,rho,1)
+        self.assertEqual(matched['status'],'MATCHED')
+        self.assertEqual(len(matched['fixture_hash']),64)
+        rho[0]['published_q_point_key'] = [3,6]
+        self.assertEqual(lab.comparison_integrity(direct,rho,1)['status'],'INVALID_COMPARISON')
+        self.assertIsNone(lab.comparison_integrity(direct,rho,1)['fixture_hash'])
+
+    def test_partial_or_duplicate_workload_fails_closed(self):
+        row = {'fixture_index':0,'n':13,'a':0,'generator_point_key':[1,2],
+               'subgroup_order':2003,'field_modulus_low_terms':[0,1,3,4],
+               'published_q_point_key':[3,4],'recovered_fixture_scalar':5,'published_fixture_scalar':5}
+        direct = [dict(row,kind='point_defined_factor_base'), dict(row,kind='relation_rank_summary',linear_solution_verified=True)]
+        rho = [dict(row,kind='rho_public_fixture',verified=True)]
+        for a,b,count in [(direct,rho,2),(direct+direct,rho,1),([],rho,1)]:
+            self.assertEqual(lab.comparison_integrity(a,b,count)['status'],'INVALID_COMPARISON')
+
+    def test_only_complete_ic_cost_and_total_rho_batch_are_comparable(self):
+        self.assertIsNone(lab.extract_ic_cost([{'online_charged_ms':1}], 'algorithmic_charged'))
+        self.assertIsNone(lab.extract_ic_cost([{'charged_total_ms':1}], 'algorithmic_charged'))
+        self.assertEqual(lab.extract_ic_cost([{'full_algorithm_charged_total_ms':9}], 'algorithmic_charged'),9)
+        self.assertEqual(lab.extract_rho_cost([{'total_ms':2},{'total_ms':3}]),5)
+        self.assertIsNone(lab.extract_rho_cost([{'total_ms':2},{}]))
+        self.assertIsNone(lab.extract_rho_cost([{'total_ms':float('nan')}]))
+        self.assertIsNone(lab.extract_ic_cost([{'full_algorithm_charged_total_ms':-1}], 'algorithmic_charged'))
+
     def test_seed_is_deterministic(self) -> None:
         self.assertEqual(
             lab.seed_for("koblitz.vs_rho.n37_wall", "direct", 0),
@@ -125,6 +159,103 @@ class HelperTests(unittest.TestCase):
             result = lab.claim_check(args)
             self.assertEqual(result["status"], "PASS")
             self.assertEqual(json.loads(out.read_text())["status"], "PASS")
+
+
+class TimingTests(unittest.TestCase):
+    """The wall metric must not charge a producer for its first execution.
+
+    A single cold run adds a roughly constant per-process term to both arms,
+    which pulls ratios toward parity and so flatters the slower arm.
+    """
+
+    def make_producer(self, directory: str, body: str) -> Path:
+        path = Path(directory) / "fake_producer"
+        path.write_text("#!/usr/bin/env python3\n" + textwrap.dedent(body))
+        path.chmod(path.stat().st_mode | stat.S_IXUSR)
+        return path
+
+    def test_timing_free_ignores_durations(self) -> None:
+        first = json.dumps({"base_hash": "abc", "rank": 3, "setup_ms": 1.5})
+        second = json.dumps({"base_hash": "abc", "rank": 3, "setup_ms": 9.9})
+        differing = json.dumps({"base_hash": "zzz", "rank": 3, "setup_ms": 1.5})
+        self.assertEqual(lab._timing_free(first), lab._timing_free(second))
+        self.assertNotEqual(lab._timing_free(first), lab._timing_free(differing))
+
+    def test_warmup_runs_and_is_not_timed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            counter = Path(tmp) / "calls"
+            producer = self.make_producer(
+                tmp,
+                f"""
+                import json, sys
+                with open({str(counter)!r}, 'a') as handle:
+                    handle.write(' '.join(sys.argv[1:]) + '\\n')
+                if len(sys.argv) < 2:
+                    sys.exit(2)
+                print(json.dumps({{'base_hash': 'abc', 'setup_ms': 1.0}}))
+                """,
+            )
+            observed = lab.run_timed(
+                [str(producer), "real-arg"],
+                env=dict(os.environ),
+                cwd=Path(tmp),
+                repeats=3,
+            )
+            calls = counter.read_text().splitlines()
+        # One warmup with no arguments, then exactly the timed repeats.
+        self.assertEqual(calls[0], "")
+        self.assertEqual(calls[1:], ["real-arg"] * 3)
+        self.assertEqual(observed["timed_repeats"], 3)
+        self.assertEqual(len(observed["whole_process_wall_samples_ms"]), 3)
+        self.assertEqual(observed["exit_code"], 0)
+        self.assertTrue(observed["stdout_stable"])
+        self.assertEqual(
+            observed["whole_process_wall_ms"],
+            sorted(observed["whole_process_wall_samples_ms"])[1],
+        )
+        # The warmup's cost is reported, not folded into the result.
+        self.assertNotIn(
+            observed["cold_start_wall_ms"], observed["whole_process_wall_samples_ms"]
+        )
+
+    def test_repeats_stop_once_a_run_exceeds_the_budget(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            producer = self.make_producer(
+                tmp,
+                """
+                import json, sys, time
+                if len(sys.argv) < 2:
+                    sys.exit(2)
+                time.sleep(0.05)
+                print(json.dumps({'base_hash': 'abc'}))
+                """,
+            )
+            original = lab.REPEAT_BUDGET_MS
+            lab.REPEAT_BUDGET_MS = 1.0
+            try:
+                observed = lab.run_timed(
+                    [str(producer), "real-arg"],
+                    env=dict(os.environ),
+                    cwd=Path(tmp),
+                    repeats=5,
+                )
+            finally:
+                lab.REPEAT_BUDGET_MS = original
+
+        self.assertEqual(observed["timed_repeats"], 1)
+
+    def test_failing_producer_reports_its_exit_code(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            producer = self.make_producer(tmp, "import sys\nsys.exit(3)\n")
+            observed = lab.run_timed(
+                [str(producer), "real-arg"],
+                env=dict(os.environ),
+                cwd=Path(tmp),
+                repeats=3,
+            )
+
+        self.assertEqual(observed["exit_code"], 3)
+        self.assertEqual(observed["timed_repeats"], 1)
 
 
 if __name__ == "__main__":

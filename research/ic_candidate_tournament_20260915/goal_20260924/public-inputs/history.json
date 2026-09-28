@@ -1,0 +1,78 @@
+{
+  "implementation_head": "159ec5ff086702a7fd5603d32eeacb48b6ef7361",
+  "implementation_pr": 748,
+  "improvement_rounds": 0,
+  "merge_commit": "4a898fcd3464b71439bd9451bd466a6ec217ddc9",
+  "promotion_eligible": false,
+  "runs": [
+    {
+      "head": "9d8b6f6af9f803a4340e20274d8284bbb19cbb36",
+      "label": "initial",
+      "run_id": 36112457361,
+      "sources": [
+        {
+          "artifact_directory": "initial/ic-producer-both-36112457361-1",
+          "ic_pairs": 9,
+          "reference": "both",
+          "rho_pairs": 3,
+          "source_manifest_sha256": "3af46d7abe7c49f7be729a6f5f8b6aa4c2ca9fcca041132e3f07e2de3a14589c",
+          "worker_sha256": "d1e81e7e172012b122e5b4818c5897c850b9e1613b8d8d5d8bf85e96599820b8"
+        },
+        {
+          "artifact_directory": "initial/ic-producer-scaled-36112457361-1",
+          "ic_pairs": 15,
+          "reference": "scaled",
+          "rho_pairs": 5,
+          "source_manifest_sha256": "f7ab5a6374305d6e3627b4fa72d01272275c3e5f6172399056f374192571b5f2",
+          "worker_sha256": "fb7dd5faabee1655f15dc2099e806e68e90c7ef10f83b3ac4b00d3ce1f65cb34"
+        },
+        {
+          "artifact_directory": "initial/ic-producer-pairinv-36112457361-1",
+          "ic_pairs": 15,
+          "reference": "pairinv",
+          "rho_pairs": 5,
+          "source_manifest_sha256": "549c8cf6373145fc5fe8d03fe0d9783a77f90e7268e5d0df5b3d39e42e374ead",
+          "worker_sha256": "40d7902977965e6b8b36b89fe4ded2139a9b5ebcb190545a7ae34ba6b5d6b13a"
+        }
+      ],
+      "status": "SUPERSEDED_RHO_PREPARATION_BOUNDARY",
+      "url": "https://github.com/aburan28/crypto/actions/runs/36112457361"
+    },
+    {
+      "head": "159ec5ff086702a7fd5603d32eeacb48b6ef7361",
+      "label": "final",
+      "run_id": 36113511435,
+      "sources": [
+        {
+          "artifact_directory": "final/ic-producer-both-36113511435-1",
+          "ic_pairs": 9,
+          "reference": "both",
+          "rho_pairs": 3,
+          "source_manifest_sha256": "a496494d7685b1e5a2adbeba4b7ee43236ec39e7f30259bbe8550f4ada5083ea",
+          "worker_sha256": "2bf1ebf277fd39ee7622bf6e830c664e7f7d0df7236b0fff5ea562db67070608"
+        },
+        {
+          "artifact_directory": "final/ic-producer-scaled-36113511435-1",
+          "ic_pairs": 15,
+          "reference": "scaled",
+          "rho_pairs": 5,
+          "source_manifest_sha256": "9c3d4a51ec4e52bfd4f9dbb83675cadb95889aea7370d6ffc91abe380ed48ba0",
+          "worker_sha256": "823b4e0283d59a79a83faf6b659021171f217be0a20844dfcbeab29a458abfaf"
+        },
+        {
+          "artifact_directory": "final/ic-producer-pairinv-36113511435-1",
+          "ic_pairs": 15,
+          "reference": "pairinv",
+          "rho_pairs": 5,
+          "source_manifest_sha256": "d5fb1b0299fc8c555ea3dec3594f8be7ea26de918bd4f9ea038994f467289d92",
+          "worker_sha256": "9ebdb0976ae808419f48b61aa586045f9acdf8859d2ac6168d26de9b038aad1c"
+        }
+      ],
+      "status": "VERIFIED",
+      "url": "https://github.com/aburan28/crypto/actions/runs/36113511435"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "producer admission and timing controls; no performance comparison",
+  "verified_merged_files": 20
+}

@@ -24,6 +24,8 @@ HERE = REPO / "research" / "sat_factor_base_review_20260908" / "continuation-05-
 DEFAULT_PROTOCOL = HERE / "stage-21-relation-yield-protocol.json"
 DEFAULT_METER = REPO / "scripts" / "process_meter.py"
 FROZEN_LOCK = HERE / "stage-20-rust-build" / "Cargo.lock"
+# Current-manifest CI is operational smoke. Production keeps its archived lock.
+SMOKE_LOCK = REPO / "research/weil_factor_composition_20260914/validation/dependencies.lock.txt"
 WORKSPACE_LOCK = REPO / "Cargo.lock"
 DISCOVERY_SOURCE = REPO / "examples" / "koblitz_public_factor_base_discovery.rs"
 YIELD_SOURCE = REPO / "examples" / "koblitz_relation_yield_bridge.rs"
@@ -568,8 +570,9 @@ def load_protocol(path: Path, production: bool) -> tuple[dict[str, Any], bytes, 
     return validate_protocol(value, production), data, resolved
 
 
-def install_frozen_lock() -> dict[str, Any]:
-    frozen = regular_bytes(FROZEN_LOCK, "frozen dependency lock")
+def install_frozen_lock(production: bool = True) -> dict[str, Any]:
+    selected = FROZEN_LOCK if production else SMOKE_LOCK
+    frozen = regular_bytes(selected, "frozen dependency lock")
     if WORKSPACE_LOCK.exists() or WORKSPACE_LOCK.is_symlink():
         current = regular_bytes(WORKSPACE_LOCK, "workspace dependency lock")
         if current != frozen:
@@ -579,7 +582,7 @@ def install_frozen_lock() -> dict[str, Any]:
         write_new(WORKSPACE_LOCK, frozen)
         installed = True
     return {
-        "frozen": file_identity(FROZEN_LOCK, "frozen dependency lock"),
+        "frozen": file_identity(selected, "frozen dependency lock"),
         "workspace": file_identity(WORKSPACE_LOCK, "workspace dependency lock"),
         "installed_by_runner": installed,
     }
@@ -1639,7 +1642,7 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
         raise Stage21Error("execution requires a clean committed checkout unless smoke uses --allow-dirty")
     if production and args.allow_dirty:
         raise Stage21Error("--allow-dirty is available only for operational smoke")
-    lock = install_frozen_lock()
+    lock = install_frozen_lock(production)
     cargo = shutil.which("cargo")
     rustc = shutil.which("rustc")
     if cargo is None or rustc is None:
@@ -1854,7 +1857,7 @@ def validate_source_binding(
     frozen = validate_file_identity(lock["frozen"], "frozen dependency lock")
     workspace = validate_file_identity(lock["workspace"], "workspace dependency lock")
     if (
-        frozen["path"] != str(FROZEN_LOCK.resolve())
+        frozen["path"] != str((FROZEN_LOCK if production else SMOKE_LOCK).resolve())
         or workspace["path"] != str(WORKSPACE_LOCK.resolve())
         or any(frozen[field] != workspace[field] for field in ("bytes", "sha256"))
         or not isinstance(lock["installed_by_runner"], bool)

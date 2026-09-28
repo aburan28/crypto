@@ -1,0 +1,58 @@
+{
+  "unit": "64-bit word XORs in the Macaulay elimination, whole run",
+  "curve": "K_1/2^15",
+  "m": 2,
+  "targets": "12 random known-answer targets per base, seeds 11..133",
+  "bases": {
+    "1\u00b73": {
+      "runs": 12,
+      "verified": 12,
+      "trials": 53,
+      "f4_reductions": 365,
+      "word_ops": 6226452,
+      "wall_seconds": 0.09291490399999999,
+      "points": 67,
+      "columns": 2
+    },
+    "1\u00b74": {
+      "runs": 12,
+      "verified": 12,
+      "trials": 56,
+      "f4_reductions": 374,
+      "word_ops": 6649451,
+      "wall_seconds": 0.093454495,
+      "points": 77,
+      "columns": 1
+    },
+    "2\u00b73": {
+      "runs": 12,
+      "verified": 12,
+      "trials": 52,
+      "f4_reductions": 2157,
+      "word_ops": 75493337,
+      "wall_seconds": 0.4960206650000001,
+      "points": 211,
+      "columns": 4
+    },
+    "2\u00b74": {
+      "runs": 12,
+      "verified": 12,
+      "trials": 63,
+      "f4_reductions": 1742,
+      "word_ops": 61979392,
+      "wall_seconds": 0.42124142299999995,
+      "points": 281,
+      "columns": 6
+    },
+    "3\u00b74": {
+      "runs": 12,
+      "verified": 12,
+      "trials": 42,
+      "f4_reductions": 1053,
+      "word_ops": 37392007,
+      "wall_seconds": 0.289020772,
+      "points": 251,
+      "columns": 5
+    }
+  }
+}

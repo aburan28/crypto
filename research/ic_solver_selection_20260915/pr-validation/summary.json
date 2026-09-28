@@ -1,0 +1,9 @@
+{
+  "base_commit": "fbed45fc55a8e0993809565a0fbd0f5abb29a113",
+  "python_tests_passed": 22,
+  "rust_tests_passed": 23,
+  "cpu_xor_tests_passed": 3,
+  "optional_native_tests_skipped": 1,
+  "initial_shared_test_failure": "The reference SAT policy exhausted its 16-model bound on all toy queries. The test now accepts budget/external_timeout as unresolved while still requiring candidate positives and checking every resolved result against the exhaustive oracle.",
+  "runtime_source": "unchanged from candidate-v2; only the additional shared-engine test assertion changed"
+}

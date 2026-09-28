@@ -1,0 +1,4 @@
+{
+  "status": "no processes were changed",
+  "note": "The attempted affinity adjustment could not find the process IDs in the new command namespace. No isolation is claimed for the diagnostic run; its raw output is retained under diagnostics/iteration-5-shared-host. Subsequent workloads are launched with taskset."
+}

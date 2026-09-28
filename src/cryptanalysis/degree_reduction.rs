@@ -1,7 +1,7 @@
 //! # Buying down the Gröbner solving degree `D*` — lever L3 (hybrid slicing).
 //!
-//! The FFD program (`RESEARCH_FFD_PROOF_COMPLEXITY.md`,
-//! `RESEARCH_FFD_WORKFLOW.md`) measures `D*`, the degree at which the
+//! The FFD program (`research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md`,
+//! `research/notes/index-calculus/RESEARCH_FFD_WORKFLOW.md`) measures `D*`, the degree at which the
 //! Macaulay/Gröbner computation on a Weil-descended Semaev system
 //! terminates, and establishes two facts we now use *offensively*:
 //!
@@ -72,7 +72,7 @@
 //! - L. Bettale, J.-C. Faugère, L. Perret, *Hybrid approach for solving
 //!   multivariate systems over finite fields*, J. Math. Cryptol. 2009.
 //! - Bardet–Faugère–Salvy, semi-regular complexity (the `cols^ω` model).
-//! - `RESEARCH_DEGREE_REDUCTION.md` (this thread's charter, ledger R1–R5).
+//! - `research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md` (this thread's charter, ledger R1–R5).
 
 use std::collections::BTreeMap;
 
@@ -763,8 +763,7 @@ pub fn extract_degree_falls(eqs: &[F2BoolPoly], num_vars: u32) -> DegreeFallRepo
     for (j, col) in cubic.iter().enumerate() {
         let mut vec = col.clone();
         let mut combo = vec![j as u32];
-        loop {
-            let Some(l) = lead_bit(&vec) else { break };
+        while let Some(l) = lead_bit(&vec) {
             match pivots.iter().find(|p| p.lead == l) {
                 Some(p) => {
                     for w in 0..words {
@@ -2495,15 +2494,12 @@ mod tests {
                         v[i / 64] ^= 1u64 << (i % 64);
                     }
                 }
-                loop {
-                    let Some(l) = v
-                        .iter()
-                        .enumerate()
-                        .find(|(_, w)| **w != 0)
-                        .map(|(i, w)| i * 64 + w.trailing_zeros() as usize)
-                    else {
-                        break;
-                    };
+                while let Some(l) = v
+                    .iter()
+                    .enumerate()
+                    .find(|(_, w)| **w != 0)
+                    .map(|(i, w)| i * 64 + w.trailing_zeros() as usize)
+                {
                     match basis.iter().find(|(bl, _)| *bl == l) {
                         Some((_, bv)) => {
                             for w in 0..v.len() {

@@ -1,6 +1,6 @@
 /* decomp.cuh -- the pairs-and-solve decomposition oracle, per thread.
  *
- * `RESEARCH_SEMAEV_DECOMPOSITION.md` records the parallelism this
+ * `research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md` records the parallelism this
  * implements, under "What's still open":
  *
  *   > **Parallelism.**  The pair loop is embarrassingly parallel over

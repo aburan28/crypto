@@ -1,0 +1,60 @@
+{
+  "bootstrap_draws": 2000,
+  "ci_level": 0.95,
+  "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "confirmation_ratio": 0.8,
+  "created_unix": 1789562058.8936024,
+  "curve_diversity_limit": "One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.",
+  "equivalent_suite_reason": "Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; final suite has 60 inputs in pilot.",
+  "evaluator_sha256": {
+    "oracle.py": "1b426cce5d61f408b4e4b969dc2d0bd67e1b10681567cfeb38127596f3ca3949",
+    "tournament.py": "e2b3c4834c83aa8c63d98d07286b795e6b538d333318691c3b83f7117e2654b6"
+  },
+  "evidence_scope": "bounded public-hash ECDLP configuration tournament",
+  "family_wide_or_scaling_claim": false,
+  "host": {
+    "machine": "x86_64",
+    "node": "vm",
+    "processor": "x86_64",
+    "release": "6.18.44-fc-v33",
+    "system": "Linux",
+    "version": "#1 SMP PREEMPT_DYNAMIC @0"
+  },
+  "limits": {
+    "cpu": 3,
+    "max_profiled_jobs": 1800,
+    "memory_bytes": 8589934592,
+    "timeout_seconds": 60,
+    "worker_threads": 1
+  },
+  "max_cell_ratio": 1.1,
+  "metric_class": "implementation_instruction_cost",
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall",
+  "native_timings": "paired native reruns retained; no runtime claim from profiled elapsed time",
+  "no_regression_ratio": 0.98,
+  "objective": "rho",
+  "parity_margin": 1.1,
+  "pinned_files": {
+    "calibration.json": "d63ed8f9e1d29df6beac7328adf4c5d038cdf7f08dc3be8bd7f3a61892651c2b",
+    "candidates.json": "2f19648aa5e81d7be784fb5b8395964ef7e20a3a134361280279230b06b61c62",
+    "fixtures.json": "7c446e0507088fd3e0e50e52cd1bf8a8a0b3070409e9d1cb0b144b8ff842a7a7",
+    "source-manifest.json": "a48a3fa6e706fe6965824ca842c42ea145628b705d7fbed17ec38e110dc3ffc3",
+    "source_candidates/tiny2/source-manifest.json": "c6bbf27a621dcf77e1b9277b1fb08a652cf8dc87fbb27456045d271bb12f542c",
+    "source_candidates/tiny2/worker": "a7173243e5eb21b2b9e61dcb25f9d841c9debcbcc0adb73cf4c593ff3cddc62c",
+    "source_candidates/tiny2_arith/source-manifest.json": "858892294a17fe31a4937d8029ee074045abc6bb5ac7180693deb46b58259b01",
+    "source_candidates/tiny2_arith/worker": "a7bffb9c0ea01025ba846a266e36962a8bc77606088da2dfb95234da39fec8f9",
+    "source_candidates/tiny2_rows/source-manifest.json": "0c08b0ef495a88cf77fd785baa1614e16a24e71dc19b70eae94f22ea3ebbd7b5",
+    "source_candidates/tiny2_rows/worker": "6f22859cfba52c089c477c03abfdf9159bedd3421a1e7bb97727f63cc048e093",
+    "worker": "996554968bf3d37fc6fe66e3ef0d92a0e20aee1f5817d975a3031a5867217dd8"
+  },
+  "profile": "pilot",
+  "profiler_version": "valgrind-3.22.0",
+  "repetitions": 3,
+  "require_native_progress": true,
+  "schema_version": 1,
+  "seed": 2026091607,
+  "source_manifest_sha256": "049a1fa0397fde7488a50ef21440a5309009785dbd70d42c5e95eeb802ded2c6",
+  "target_count": 1,
+  "unit": "valgrind-3.22-amd64-Ir",
+  "workload": "complete cold batch with all setup charged once and every target verified"
+}

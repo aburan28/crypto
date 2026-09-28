@@ -1,0 +1,85 @@
+{
+  "audit": "passed",
+  "decision": {
+    "arithmetic_operation_speedup": null,
+    "beats_rho": false,
+    "classification": "engineering",
+    "confirmation": {
+      "candidate": "autolab",
+      "candidate_over_baseline": 0.731278079281907,
+      "ci95": [
+        0.7063051319526432,
+        0.7600346799570532
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.6928064499172422,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.6960900989365364,
+        "n17a1": 0.713228901514772,
+        "n19a0": 0.7426648360585519,
+        "n19a1": 0.7255744658905725,
+        "n23a0": 0.7817061600271971
+      },
+      "speedup": 1.3674688580600827
+    },
+    "family_wide_or_complexity_claim": false,
+    "independent_replay": "fresh processes, frozen executable, same final cases; independent Python group and rank checker",
+    "instruction_speedup": 1.3674688580600827,
+    "provisional_challenger": "autolab",
+    "reasons": [],
+    "replay": {
+      "candidate": "autolab",
+      "candidate_over_baseline": 0.7312790306807864,
+      "ci95": [
+        0.7063097521762826,
+        0.7600348125248142
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.6964676827782744,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.69609790355365,
+        "n17a1": 0.7132259035839659,
+        "n19a0": 0.7426665213260227,
+        "n19a1": 0.7255733560808519,
+        "n23a0": 0.7817051881320805
+      },
+      "speedup": 1.3674670789740095
+    },
+    "rho_comparison": {
+      "candidate": "rho",
+      "candidate_over_baseline": 0.07661830638922928,
+      "ci95": [
+        0.06996022081556,
+        0.08271777151074777
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.18543115614092864,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.07413657849180284,
+        "n17a1": 0.0651297789827307,
+        "n19a0": 0.08225238845015981,
+        "n19a1": 0.07882241112704898,
+        "n23a0": 0.0843436444526372
+      },
+      "speedup": 13.051711100476325
+    },
+    "rho_over_winner": 0.1047731479445769,
+    "rho_verdict_scope": "observed complete instruction cost; no asymptotic crossover claim",
+    "scope": "bounded public-hash ECDLP configuration tournament",
+    "status": "promoted",
+    "unit": "valgrind-3.22-amd64-Ir",
+    "winner": "autolab"
+  },
+  "promotion": true,
+  "status": "promoted",
+  "wall_seconds": 1483.3829336166382
+}

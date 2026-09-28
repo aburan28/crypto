@@ -32,7 +32,7 @@ fn rotl(x: u32, n: u32) -> u32 {
     if n == 0 {
         x
     } else {
-        (x << n) | (x >> (32 - n))
+        x.rotate_left(n)
     }
 }
 

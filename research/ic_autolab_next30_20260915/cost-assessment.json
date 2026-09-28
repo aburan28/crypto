@@ -1,0 +1,74 @@
+{
+  "algorithm_metric": "valgrind-3.22-amd64-Ir",
+  "assistant_session_price_included": false,
+  "benchmark_model_api_calls": 0,
+  "benchmark_model_api_cost_usd": 0,
+  "campaign_allocation_cap": {
+    "allocated_cpu_hours": 4,
+    "allocated_gib_hours": 16,
+    "cpu_count": 2,
+    "memory_gib": 8,
+    "wall_seconds": 7200
+  },
+  "confirmation_ratio": 0.522831359399723,
+  "container_work": [
+    {
+      "cpu_hours": 0.06308879083333334,
+      "cpu_seconds": 227.119647,
+      "memory_events": {
+        "high": 0,
+        "low": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_group_kill": 0,
+        "oom_kill": 0
+      },
+      "peak_memory_bytes": 1540079616,
+      "resource_artifact": "development-resources.json",
+      "resource_sha256": "7a8b42925faa04ed2d9dee736ceae062e2f450837edbe559836430521bd8c00c",
+      "scope": "Container build and paired development; host compilation and audit separate.",
+      "wall_seconds": null,
+      "work": "Candidate A development"
+    },
+    {
+      "cpu_hours": 0.4031477111111111,
+      "cpu_seconds": 1451.33176,
+      "memory_events": {
+        "high": 0,
+        "low": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_group_kill": 0,
+        "oom_kill": 0
+      },
+      "peak_memory_bytes": 1809862656,
+      "resource_artifact": "runs/autolab-20260915T224645Z/jobs/autolab-20260915T224645Z/task__4brp5nH/verifier/resources.json",
+      "resource_sha256": "81258dbd2e116f7673e9dfd88113f1421cb6948ce76672266516f96e006c78f2",
+      "scope": "Container build, fixtures, all benchmark stages, profiler and in-container independent audit. Wall time includes supervisor publication and cleanup.",
+      "wall_seconds": 1410.29252743721,
+      "work": "Final AutoLab campaign"
+    }
+  ],
+  "decision_sha256": "a2d3a39fea5ce1de230eaa886cc6eafdd24cc5f7647820476b0ec4fe44bc50d4",
+  "host_supervisor_child_cpu_seconds": 64.823309,
+  "local_cpu_price_usd_per_hour": null,
+  "measured_container_cpu_hours": 0.46623650194444444,
+  "new_cloud_resources": false,
+  "outcome": "promoted",
+  "phase_costs_sha256": "67e91c8b135f9200cf3250cefe76348e6bb60af8df775b6daf457abea30bc805",
+  "pricing_formula": "0.466236502 * local container CPU-hour rate, plus separately metered host CPU and any priced preparation, storage, electricity and assistant usage.",
+  "recorded_utc": "2026-09-15T23:12:44.650385+00:00",
+  "replay_ratio": 0.5228295269400968,
+  "schema_version": 1,
+  "scope": "Only the additional-30% goal; earlier campaigns excluded.",
+  "separate_development_audit_host_cpu_seconds": 2.9818260000000003,
+  "solver_cost_boundary": "Entire cold worker user-space process. Profiler, builds, external audits and kernel/device execution are research overhead outside solver Ir.",
+  "total_research_cost_usd": null,
+  "unmetered_overhead": [
+    "Host source-test compilation",
+    "Image preparation/build overhead outside benchmark containers",
+    "Reporting scripts outside supervisor",
+    "Storage and electricity",
+    "Assistant session"
+  ]
+}

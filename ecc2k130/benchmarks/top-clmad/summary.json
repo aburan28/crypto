@@ -1,0 +1,47 @@
+{
+  "unit": "B scalar updates / s",
+  "class": "engineering",
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "driver": "580.95.05",
+  "cudaImageVersion": "13.3.1",
+  "preset": "make bench-rtx-pro6000",
+  "geometry": {
+    "batch": 16,
+    "threads": 256,
+    "minBlocks": 2,
+    "steps": 1024,
+    "launches": 32,
+    "repeats": 3,
+    "workers": 385024,
+    "updatesPerSample": 201863462912
+  },
+  "control": {
+    "packedTopClmad": false,
+    "registers": 104,
+    "modalApp": "ap-4Hwm5mJlrNnbfq6Rde0Arq",
+    "gpuUuid": "GPU-9ec10bb8-da4a-33fc-ea3b-30f6bc9fddd8",
+    "ratesB": [15.205241, 15.115792, 15.026171],
+    "medianB": 15.115792
+  },
+  "candidate": {
+    "packedTopClmad": true,
+    "registers": 94,
+    "modalApp": "ap-8DBs2WJMiDpqErMbvCTWDN",
+    "gpuUuid": "GPU-d8687b80-9ed5-f228-3efd-e40e95b26f09",
+    "ratesB": [12.820670, 12.859376, 12.868661],
+    "medianB": 12.859376
+  },
+  "ratioToMatchedControl": 0.850725,
+  "ratioToHistorical14_637530": 0.878521,
+  "ratioToOneAddFloor23": 0.559103,
+  "ratioToOneAddFloor25": 0.514375,
+  "everyPairFaster": false,
+  "acceptance1pctAllPairs": false,
+  "promoteDefault": false,
+  "receipts": {
+    "controlJson": "control.json",
+    "candidateJson": "candidate.json",
+    "controlLogSha256": "f79036d97ffc9ce789d59b8a35f52293e6fcfd51f343deb0ac52686a9561e445",
+    "candidateLogSha256": "b592716ff92da2262b90ca1ebc03344108db7b9b1ae057d53170f6fb7f50b0bc"
+  }
+}

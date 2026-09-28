@@ -376,7 +376,7 @@ def make_complete_rank_deficient_run(parent: Path) -> tuple[Path, Path]:
     (run_root / "binaries").mkdir()
     (run_root / "inputs").mkdir()
     frozen = stage23.protocol("smoke")
-    source = stage23.source_binding()
+    source = stage23.source_binding("smoke")
     host = stage23.host_binding()
     shutil.copyfile(stage23.PROTOCOL, run_root / "inputs/protocol.json")
     write_json(run_root / "inputs/source.json", source)
@@ -502,7 +502,7 @@ def make_incomplete_build_run(parent: Path) -> tuple[Path, Path]:
     (run_root / "binaries").mkdir()
     (run_root / "inputs").mkdir()
     frozen = stage23.protocol("smoke")
-    source = stage23.source_binding()
+    source = stage23.source_binding("smoke")
     host = stage23.host_binding()
     shutil.copyfile(stage23.PROTOCOL, run_root / "inputs/protocol.json")
     write_json(run_root / "inputs/source.json", source)
@@ -590,6 +590,15 @@ def reseal(run_root: Path) -> None:
 
 
 class Stage23Tests(unittest.TestCase):
+    def test_smoke_lock_is_explicitly_bound_and_production_keeps_its_pin(self) -> None:
+        self.assertEqual(stage23.dependency_lock("production"), stage23.LOCK)
+        self.assertEqual(stage23.source_relative_paths("production"), stage23.SOURCE_RELATIVE_PATHS)
+        smoke_path = str(stage23.SMOKE_LOCK.relative_to(stage23.REPO))
+        self.assertIn(smoke_path, stage23.source_relative_paths("smoke"))
+        self.assertEqual(stage23.dependency_lock("smoke"), stage23.SMOKE_LOCK)
+        with self.assertRaises(stage23.Stage23Error):
+            stage23.dependency_lock("unknown")
+
     def test_protocol_and_self_test(self) -> None:
         result = stage23.self_test()
         self.assertEqual(result["self_test"], "pass")

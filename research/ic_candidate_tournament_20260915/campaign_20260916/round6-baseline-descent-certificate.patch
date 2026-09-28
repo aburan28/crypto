@@ -1,0 +1,93 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -7310,6 +7310,19 @@
+     pub trials: usize,
+     /// The recovered logarithm, if the descent succeeded and verified.
+     pub log: Option<BigUint>,
++    /// The relation the logarithm was derived from: the certificate that it
++    /// is an index-calculus consequence of the factor-base logs.
++    pub relation: Option<DescentRelation>,
++}
++
++/// The single relation `[a]G + [b]Q = Σ_i P_i` over factor-base points
++/// `P_i` (by index) that an individual-logarithm descent recovered its
++/// answer from. An empty summand list is the degenerate `[a]G + [b]Q = O`.
++#[derive(Clone, Debug, Default, PartialEq, Eq)]
++pub struct DescentRelation {
++    pub a: u64,
++    pub b: u64,
++    pub points: Vec<usize>,
+ }
+ 
+ /// **Recover `log_G Q` with one relation, reusing a solved table.**
+@@ -7545,10 +7558,16 @@
+         report.trials += 1;
+         if initial.infinity {
+             if let Some(d) = solve_for_d(&BigUint::from(a0), &BigUint::from(b), &self.kc.subgroup_order) {
+-                if self.kc.mul(self.kc.generator(), &d) == *q { return Some(Some(d)); }
++                if self.kc.mul(self.kc.generator(), &d) == *q {
++                    report.relation = Some(DescentRelation { a: a0, b, points: Vec::new() });
++                    return Some(Some(d));
++                }
+             }
+         } else if let Some(idxs) = pair.decompose_fast(initial, m) {
+-            if let Some(d) = self.logarithm_from(q, &idxs, a0, b) { return Some(Some(d)); }
++            if let Some(d) = self.logarithm_from(q, &idxs, a0, b) {
++                report.relation = Some(DescentRelation { a: a0, b, points: idxs });
++                return Some(Some(d));
++            }
+         }
+         if report.trials >= self.opts.max_trials { return Some(None); }
+         let stride_point = fc.mul_u64(*g, stride);
+@@ -7575,6 +7594,7 @@
+                     // [a]G + [b]Q = O already yields d.
+                     if let Some(d) = solve_for_d(&BigUint::from(*a), &BigUint::from(*b), &self.kc.subgroup_order) {
+                         if self.kc.mul(self.kc.generator(), &d) == *q {
++                            report.relation = Some(DescentRelation { a: *a, b: *b, points: Vec::new() });
+                             return Some(Some(d));
+                         }
+                     }
+@@ -7584,6 +7604,7 @@
+                     continue;
+                 };
+                 if let Some(d) = self.logarithm_from(q, &idxs, *a, *b) {
++                    report.relation = Some(DescentRelation { a: *a, b: *b, points: idxs });
+                     return Some(Some(d));
+                 }
+             }
+@@ -7634,12 +7655,14 @@
+                     if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
+                         if self.verify_log(q, &d) {
+                             report.log = Some(d.clone());
++                            report.relation = Some(DescentRelation { a, b, points: Vec::new() });
+                             return Some((d, report));
+                         }
+                     }
+                     continue;
+                 }
+             };
++            let (probe_a, probe_b) = (a, b);
+             let a = BigUint::from(a);
+             let b = BigUint::from(b);
+             let relation = relation_from_decomposition_with_mode(
+@@ -7667,6 +7690,7 @@
+             let d = (numerator * hb_inv) % r;
+             if self.verify_log(q, &d) {
+                 report.log = Some(d.clone());
++                report.relation = Some(DescentRelation { a: probe_a, b: probe_b, points: idxs.clone() });
+                 return Some((d, report));
+             }
+             // A non-matching d means this factor base cannot place Q in the
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -199,7 +199,9 @@
+     for (i,q) in targets.iter().enumerate() {
+         let answer = solver.solve(q);
+         solutions.push(json!({"index":i,"recovered":answer.as_ref().map(|(d,_)|d.to_string()),
+-            "trials":answer.as_ref().map(|(_,r)|r.trials)}));
++            "trials":answer.as_ref().map(|(_,r)|r.trials),
++            "relation":answer.as_ref().and_then(|(_,r)|r.relation.as_ref())
++                .map(|rel|json!({"a":rel.a,"b":rel.b,"points":rel.points}))}));
+     }
+     dump(b"individual_log\0");
+     let verified = solutions.iter().zip(&targets).all(|(s,q)| {

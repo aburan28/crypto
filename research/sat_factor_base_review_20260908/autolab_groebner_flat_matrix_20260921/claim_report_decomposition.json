@@ -1,0 +1,65 @@
+{
+  "claim_boundary": "Public-synthetic n=31 decomposition-linear-algebra evidence only. This is not relation-yield evidence, an end-to-end index-calculus crossover, an asymptotic improvement, a sub-rho result, an external-target capability, or a key-recovery claim.",
+  "claim_boundary_non_claims": [
+    "not relation-yield evidence",
+    "not end-to-end index calculus",
+    "not asymptotic or sub-rho evidence",
+    "not external or private targets",
+    "not a key-recovery claim"
+  ],
+  "dimension_l_or_dim": 16,
+  "eq_var_ratio": 0.96875,
+  "executable_or_source_hash": {
+    "frontier_probe_source": "3ef9da206011ecb9aed60a9aa567cbcc2deb1dc031c83b4d31c7df5d7d23a688",
+    "koblitz_groebner_source": "6ef9d275a0d1572f2c88483899c64b71104b1d93e787c8b552a27ffd9c44e0aa",
+    "paired_executable_receipt": "faa551ea8fb04d67aefff624a188e8192d17ef3929b781130a11e9c524881cf6",
+    "profile_executable_receipt": "731d606643cf0a19f03cd953370a17ce6e3445bda9fe7ca51e029d71a6819c67",
+    "rref_tests_source": "4da17c9d4be9e0b16bd59f610303c14918ee1472a43eedd43776081a151007f9"
+  },
+  "f4_splits": {
+    "sym": 4095,
+    "x": 7056
+  },
+  "ffd_or_degree_of_regularity": {
+    "symmetrised": 4,
+    "x_chained": 3
+  },
+  "fixture_hash": "21da9d3a33876b0166014d376f43ab2c4cda80f42d37c94d31c52deaf971ddf6",
+  "host_id": {
+    "hostname": "Adams-MacBook-Pro.local",
+    "machine": "arm64",
+    "system": "Darwin"
+  },
+  "largest_solvable": {
+    "m": 2,
+    "n": 31,
+    "node_budget": 50000,
+    "unknowns": 32
+  },
+  "m_summands": 2,
+  "macaulay_degree_max": 3,
+  "median_ms_per_target": {
+    "sym_refuted_flat": 6105.0,
+    "x_found_flat": 10109.0
+  },
+  "n_or_bits": 31,
+  "oracle_class": "Boolean matrix-F4 with contiguous solver matrix and exact linear-tail elimination",
+  "resource_caps": {
+    "node_budget": 50000,
+    "targets_per_arm": 2,
+    "threads": 1
+  },
+  "schema_version": 2,
+  "seeds": [
+    24301
+  ],
+  "stage": "decomposition",
+  "system_degree": "quadratic",
+  "task_id": "TASK-KIC-GROEBNER-FLAT-MATRIX-20260921",
+  "unknowns": 32,
+  "verdict_mix": {
+    "inconclusive": 0,
+    "sym_refuted": 2,
+    "x_found": 2
+  }
+}

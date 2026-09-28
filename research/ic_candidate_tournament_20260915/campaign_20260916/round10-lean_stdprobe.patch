@@ -1,0 +1,36 @@
+diff -ruN a/.cargo/config.toml b/.cargo/config.toml
+--- a/.cargo/config.toml	1970-01-01 00:00:00.000000000 +0000
++++ b/.cargo/config.toml	2026-09-16 19:41:26.293719346 +0000
+@@ -0,0 +1,3 @@
++[build]
++target = "x86_64-unknown-linux-gnu"
++rustflags = ["-C", "target-feature=+crt-static"]
+diff -ruN a/examples/ic_tournament_worker.rs b/examples/ic_tournament_worker.rs
+--- a/examples/ic_tournament_worker.rs	2026-09-16 14:43:59.582611037 +0000
++++ b/examples/ic_tournament_worker.rs	2026-09-16 19:41:26.309928172 +0000
+@@ -1,3 +1,4 @@
++#![no_main]
+ //! Complete, public-synthetic IC/rho jobs for the candidate tournament.
+ //! Uses the production research library; JSON stdin contains no known scalar.
+ use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
+@@ -408,7 +409,12 @@
+     Ok(Report::Text(out, verified))
+ }
+ 
+-fn main() {
++/// The C entry point directly: without the std runtime's start-up the process
++/// installs no signal handlers, allocates no alternate signal stack and does not
++/// read `/proc/self/maps`, work that served no purpose for a job that reads one
++/// JSON document and writes one. Shared by every arm, rho included.
++#[no_mangle]
++pub extern "C" fn main(_argc: i32, _argv: *const *const u8) -> i32 {
+     let mut input = String::new();
+     std::io::stdin().take(1_048_577).read_to_string(&mut input).expect("stdin");
+     let result = if input.len() > 1_048_576 { Err("job too large".into()) } else {
+@@ -433,5 +439,5 @@
+         lock.write_all(&text).expect("stdout");
+         lock.flush().expect("stdout");
+     }
+-    if !success { std::process::exit(2); }
++    if success { 0 } else { 2 }
+ }

@@ -1,0 +1,54 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -7377,6 +7377,15 @@
+ }
+ 
+ impl<'a> IndividualLogSolver<'a> {
++    fn verify_log(&self, q: &BinaryPoint, d: &BigUint) -> bool {
++        if d >= &self.kc.subgroup_order { return false; }
++        if let Some((fc, g)) = &self.fast {
++            fc.mul(*g, d) == fc.lift(q)
++        } else {
++            self.kc.mul(self.kc.generator(), d) == *q
++        }
++    }
++
+     /// `None` when the table's columns do not match the base's signed
+     /// orbits, a column has no logarithm, or the strategy needs a pair
+     /// table and none was supplied.
+@@ -7495,7 +7504,7 @@
+         let numerator = (sum + r - ha) % r;
+         let hb = (&self.h * &b) % r;
+         let d = (numerator * mod_inverse(&hb, r)?) % r;
+-        (kc.mul(kc.generator(), &d) == *q).then_some(d)
++        (self.verify_log(q, &d)).then_some(d)
+     }
+ 
+     /// **Walk the probes instead of drawing them.**
+@@ -7574,7 +7583,7 @@
+     }
+ 
+     /// The logarithm of `q` to the base's generator, verified as
+-    /// `[d]G = Q` in the general arithmetic before it is returned.
++    /// `[d]G = Q` in the curve arithmetic before it is returned.
+     pub fn solve(&self, q: &BinaryPoint) -> Option<(BigUint, IndividualLogReport)> {
+         let kc = self.kc;
+         let r = &kc.subgroup_order;
+@@ -7607,7 +7616,7 @@
+                 Probe::Degenerate => {
+                     // Degenerate relation [a]G + [b]Q = O already yields d.
+                     if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
+-                        if kc.mul(g, &d) == *q {
++                        if self.verify_log(q, &d) {
+                             report.log = Some(d.clone());
+                             return Some((d, report));
+                         }
+@@ -7640,7 +7649,7 @@
+                 continue;
+             };
+             let d = (numerator * hb_inv) % r;
+-            if kc.mul(g, &d) == *q {
++            if self.verify_log(q, &d) {
+                 report.log = Some(d.clone());
+                 return Some((d, report));
+             }

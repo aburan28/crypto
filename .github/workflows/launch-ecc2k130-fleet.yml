@@ -1,0 +1,130 @@
+name: Launch ECC2K-130 rho fleet
+
+# Spot-first g7e fleet sized for ~100 B iterations/s aggregate
+# (~14 B/s per GPU → 16 GPUs with headroom; 2 GPUs on-demand base).
+# Mirrors ecc2k130/aws/README.md runbook: infra → push_source → fleet up.
+
+on:
+  push:
+    branches:
+      - cursor/launch-rho-fleet-ccb7
+    paths:
+      - '.github/workflows/launch-ecc2k130-fleet.yml'
+  workflow_dispatch:
+    inputs:
+      gpus:
+        description: Total GPU target capacity
+        required: true
+        default: '16'
+      on_demand:
+        description: On-demand g7e GPU base (rest prefer spot)
+        required: true
+        default: '2'
+      region:
+        description: AWS region
+        required: true
+        default: 'us-west-2'
+      fallback_wait_seconds:
+        description: Seconds to wait for spot before on-demand shortfall fill
+        required: true
+        default: '180'
+
+permissions:
+  contents: read
+
+jobs:
+  launch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ github.event.inputs.region || 'us-west-2' }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Ensure campaign infra, source, and fleet
+        working-directory: ecc2k130/aws
+        env:
+          AWS_DEFAULT_REGION: ${{ github.event.inputs.region || 'us-west-2' }}
+          KEY_NAME: meow34
+          GPUS: ${{ github.event.inputs.gpus || '16' }}
+          ON_DEMAND: ${{ github.event.inputs.on_demand || '2' }}
+          FALLBACK_WAIT_SECONDS: ${{ github.event.inputs.fallback_wait_seconds || '180' }}
+          # Prefer the single-GPU sizes so "many spot instances" fills as
+          # many 2xlarge/4xlarge/8xlarge spots; larger multi-GPU types stay
+          # available as overrides for leftover capacity.
+          TYPES: g7e.2xlarge,g7e.4xlarge,g7e.8xlarge,g7e.12xlarge,g7e.24xlarge,g7e.48xlarge
+          # Temporary until admin runs: AWS_PROFILE=admin ./iam_role.sh adam
+          WORKER_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          WORKER_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          chmod +x infra.sh push_source.sh fleet.sh
+
+          echo "=== caller ==="
+          aws sts get-caller-identity
+
+          if ! aws ec2 describe-key-pairs --key-names "$KEY_NAME" >/dev/null 2>&1; then
+            echo "key pair $KEY_NAME missing in $AWS_DEFAULT_REGION" >&2
+            exit 1
+          fi
+
+          echo "=== infra.sh (idempotent, SKIP_IAM — adam cannot iam:CreateRole) ==="
+          # Role/profile must already exist from a one-time admin run of
+          # iam_role.sh. adam can refresh the launch template, SG, and S3 sync.
+          KEY_NAME="$KEY_NAME" SKIP_IAM=1 ./infra.sh
+
+          echo "=== push_source.sh ==="
+          ./push_source.sh
+
+          existing=$(aws ec2 describe-fleets --filters "Name=tag:Project,Values=ecc2k130" \
+            --query "Fleets[?FleetState=='active'].FleetId | [0]" --output text)
+          if [ -n "$existing" ] && [ "$existing" != None ]; then
+            echo "=== active fleet $existing — scaling to $GPUS GPUs ==="
+            echo "$existing" > ".fleet-id-$AWS_DEFAULT_REGION"
+            aws ec2 modify-fleet --fleet-id "$existing" --target-capacity-specification \
+              "TotalTargetCapacity=$GPUS,OnDemandTargetCapacity=$ON_DEMAND,DefaultTargetCapacityType=spot"
+            echo "=== fleet status ==="
+            ./fleet.sh status || true
+          else
+            echo "=== fleet.sh up $GPUS --on-demand $ON_DEMAND ==="
+            set +e
+            ./fleet.sh up "$GPUS" --on-demand "$ON_DEMAND"
+            fleet_rc=$?
+            set -e
+            if [ "$fleet_rc" -ne 0 ]; then
+              # fleet.sh can also fail after CreateFleet succeeded (fallback
+              # wait / modify-fleet); only launch unmanaged instances when no
+              # fleet exists, or the run would double the capacity.
+              created=$(aws ec2 describe-fleets --filters "Name=tag:Project,Values=ecc2k130" \
+                --query "Fleets[?FleetState=='active'].FleetId | [0]" --output text)
+              if [ -n "$created" ] && [ "$created" != None ]; then
+                echo "=== fleet.sh up failed (rc=$fleet_rc) but fleet $created is active; not launching direct instances ==="
+                echo "$created" > ".fleet-id-$AWS_DEFAULT_REGION"
+                ./fleet.sh status || true
+              else
+                echo "=== CreateFleet failed (rc=$fleet_rc); falling back to direct run-instances ==="
+                chmod +x launch_direct.sh
+                ./launch_direct.sh "$GPUS" --on-demand "$ON_DEMAND"
+              fi
+            else
+              echo "=== fleet status ==="
+              ./fleet.sh status || true
+            fi
+          fi
+
+          echo "=== tagged worker instances ==="
+          aws ec2 describe-instances \
+            --filters "Name=tag:Project,Values=ecc2k130" \
+                      "Name=instance-state-name,Values=pending,running" \
+            --query 'Reservations[].Instances[].[InstanceId,InstanceType,InstanceLifecycle,Placement.AvailabilityZone,State.Name]' \
+            --output table || true
+
+          account=$(aws sts get-caller-identity --query Account --output text)
+          echo "bucket: s3://ecc2k130-$account"
+          echo "target: ${GPUS} GPUs (~$((GPUS * 14)) B it/s at 14 B/s/GPU), ${ON_DEMAND} on-demand base"
+          echo "monitor: ECC_BUCKET=ecc2k130-$account python3 status.py --watch 60"

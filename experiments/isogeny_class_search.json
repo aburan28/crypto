@@ -3,7 +3,7 @@
   "experiment": "EXP-R6",
   "lever": "L5 curve-side (isogeny)",
   "seed": 7,
-  "generated_unix": 1789215278,
+  "generated_unix": 1789308382,
   "omega": 2.807,
   "verdict": "KILLED",
   "class": {
@@ -58,7 +58,9 @@
     {"n": 10, "l": 5, "targets": 16, "survivors": 73, "curves": 1023, "fraction": 0.07135875, "koblitz_mean": 2.727273},
     {"n": 10, "l": 5, "targets": 32, "survivors": 14, "curves": 1023, "fraction": 0.01368524, "koblitz_mean": 2.454545},
     {"n": 10, "l": 5, "targets": 48, "survivors": 7, "curves": 1023, "fraction": 0.00684262, "koblitz_mean": 2.588235},
-    {"n": 10, "l": 5, "targets": 64, "survivors": 1, "curves": 1023, "fraction": 0.00097752, "koblitz_mean": 2.550000}
+    {"n": 10, "l": 5, "targets": 64, "survivors": 1, "curves": 1023, "fraction": 0.00097752, "koblitz_mean": 2.550000},
+    {"n": 10, "l": 5, "targets": 128, "survivors": 0, "curves": 1023, "fraction": 0.00000000, "koblitz_mean": 2.518519},
+    {"n": 10, "l": 5, "targets": 256, "survivors": 0, "curves": 1023, "fraction": 0.00000000, "koblitz_mean": 2.451220}
   ],
   "table_floor_log2": 13.8158,
   "table": [

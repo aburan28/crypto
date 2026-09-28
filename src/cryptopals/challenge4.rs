@@ -14,7 +14,7 @@ pub fn run() -> Report {
     for line in DATA.lines() {
         let ct = hex_decode(line.trim());
         let (k, pt, s) = break_single_xor(&ct);
-        if best.as_ref().map_or(true, |(_, _, _, bs)| s > *bs) {
+        if best.as_ref().is_none_or(|(_, _, _, bs)| s > *bs) {
             best = Some((line.trim().to_string(), k, pt, s));
         }
     }

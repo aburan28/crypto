@@ -9,6 +9,87 @@ most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
 
+## Default workflow: finish and merge when authorized
+
+The repository owner's standing preference is autonomous delivery. For work
+the user requests in this repository, completing the task includes implementing
+the change, validating it, opening or updating its PR, monitoring CI, and
+merging when ready. **Do not ask for another approval just to merge a completed,
+passing PR unless a policy or reviewer requires explicit authorization for that
+merge.**
+
+- Apply this authorization to PRs created or maintained for the current user
+  task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
+  as a draft, wait for review, or avoid merging overrides this default.
+- Review the final diff and confirm that the requested scope, relevant tests,
+  evidence, and documentation are complete before merging. Passing CI does not
+  substitute for checking that the work is finished.
+- Check the current PR head: all required and applicable CI checks must have
+  completed successfully. Pending, cancelled, timed-out, or failed checks are
+  not a pass. A skipped job counts as inapplicable only when its conditions or
+  path filters justify that status; required checks must still be satisfied.
+- Fix failures caused by the change and resolve routine merge conflicts
+  autonomously, then rerun the affected validation. Any new commit requires
+  checking CI again for the new head. Do not bypass branch protections, required
+  reviews, unresolved blocking review feedback, or required checks.
+- If a documentation-only change legitimately triggers no CI, verify the
+  workflow filters, inspect the diff, and run any relevant local validation.
+  State that no CI applied; do not claim that nonexistent checks passed.
+- Merge using the repository's permitted merge method and an expected-head-SHA
+  guard where supported. Confirm that GitHub reports the PR as merged, then
+  report the PR link, merge commit, and validation outcome.
+- Do not stop at "PR opened" when the remaining merge work is authorized and
+  feasible. If access, required external review, a persistent CI failure, or
+  another concrete gate prevents merging, report that blocker precisely rather
+  than asking the user to repeat the authorization already given.
+- If automatic approval review rejects a merge for lack of authorization,
+  leave that PR open and ask for explicit approval naming the exact PR. Do not
+  retry by changing tools, branches, accounts, or merge route. Continue work
+  that does not depend on the merge; after approval, recheck the final PR head,
+  review state, and applicable CI before merging.
+
+## Research work belongs in pull requests
+
+**Always create or update a PR for repository-related action items, research
+plans, benchmark protocols, and workstream closeout checklists, including
+Markdown-only planning work. Do this in the same task without waiting for the
+user to ask again.** Commit the plan in the relevant repository and return its
+PR link; a chat response, scratch file, or Library copy alone is not delivery.
+Update an existing relevant PR when appropriate rather than creating duplicates.
+An explicit user request not to create a PR overrides this default.
+
+A planning PR may merge when the plan itself is complete and its applicable
+checks pass. Keep unperformed experiments and measurements marked pending;
+merging the plan does not close the underlying workstream. Track execution,
+evidence, and closeout in linked follow-on PRs and update the checklist as work
+lands. Apply the finish-and-merge rules above to each completed deliverable.
+
+Treat an experiment as repository work, including a negative or inconclusive
+result. A research decision, preregistered protocol, reproducibility fix, or
+rejected hypothesis also belongs in a PR, even before an outcome exists.
+Before running an experiment, state the hypothesis, frozen inputs, reference,
+success and stop conditions, and cost accounting in a versioned protocol.
+Make each bounded experiment or compatible group of experiments a focused
+branch and PR. Commit the code, configuration, seeds, source and input hashes,
+commands, compact raw results, verification receipts, analysis, and decision
+in that PR. Link follow-on PRs to their dependencies; do not let a local note,
+untracked worktree, chat summary, or published page be the only record of a
+finding or a decision.
+
+Preserve failures, timeouts, and regressions. Do not overwrite an earlier
+run. If raw output is too large for Git, commit a manifest with its content
+hash, byte count, durable accessible location, extraction command, and the
+small derived data needed to audit the claim. A local absolute path alone is
+not a durable location. Label unmerged work and unreviewed replays as such;
+a downstream claim cannot silently treat them as accepted evidence.
+
+For performance changes, the existing frozen-suite, full-cost, matched-rho,
+and scoreboard requirements in sections 1–8 still apply. A PR that reports
+only a stage measurement must label it a stage diagnostic and leave
+end-to-end cost and speedup unset. Open or update the PR as part of the
+iteration, then follow the default finish-and-merge workflow above once
+its evidence, review, and CI gates are satisfied.
+
 ## The rule: boundary, table, ratio
 
 Any thread that claims to improve an attack must express its progress as
@@ -24,7 +105,7 @@ derived rather than measured.  It comes in two kinds, and a thread
 normally has one of each:
 
 - A **floor**: a lower bound from a counting or generic-group argument.
-  Example from `RESEARCH_RESIDUAL_WALKS.md`: a generic algorithm's
+  Example from `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`: a generic algorithm's
   expected relation yield from `P` residuals is at most `γP²/2n`, so the
   count factor obeys `κ_total ≥ √(2(B+1)/γ)`.  That floor moves only
   with the factor-base size `B` and the automorphism order `γ`, so it
@@ -54,6 +135,22 @@ belongs in `S`: precomputation, table setup, relation verification,
 linear algebra, and any work an oracle does per call.  Convert foreign
 units with a measured conversion factor and record it, for instance the
 63 field multiplications per curve addition measured on `F_{p³}`.
+
+**End-to-end speed is the measure of speed.**  `S` is defined over the
+*whole* method, cold, from setup to the recovered logarithm; a number
+that prices only one phase — the relation search, the decomposition
+oracle, a single solver call, the linear algebra — is a stage
+diagnostic, never a speed.  "Faster than rho" means the method's `S`
+column, with every phase inside it, sits below rho's, robustly, at
+growing `n` — nothing less earns the phrase.  Quoting a phase crossover
+as a method crossover is the §5 mistake, and the residual-walk thread is
+the worked case: its relation phase crosses rho near `2^{96}` in
+isolation while the whole method never does, because the linear algebra
+it left out decides the exponent (§11.6–11.7).  Equivalently, the only
+admissible speed ratio is §8's
+`speedup = baseline_total_operations / candidate_total_operations`;
+a ratio taken over any smaller slice of the pipeline is labelled a stage
+diagnostic and may not be reported as a speedup.
 
 The table must carry a **ratio column** against each boundary, and a
 correctness column.  A row without a verified answer is not a result.
@@ -211,6 +308,33 @@ complete an iteration. The equivalent-suite exception below still applies.
   Update the research note and canonical scoreboard in the same PR, retaining
   the prior baseline and classifying the change by §3.
 
+### 8a. Require m=83 for high-fidelity ECC2K-130 IC evidence
+
+For every index-calculus improvement intended to transfer to ECC2K-130,
+**always use m=83 as the highest-fidelity smaller-curve confidence gate**
+before claiming that the improvement survives scaling toward m=131. Use the
+same Koblitz family as the challenge:
+`E_0: y² + xy = x³ + 1` over `GF(2^83)`. Its group order is
+`4 * 2417851639230796216685689`, with the second factor prime. A verified
+polynomial-basis modulus is `z^83 + z^45 + z² + z + 1`; a different basis
+is acceptable only when the field representation and conversions are recorded.
+Freeze the exact curve, basis, prime-order subgroup, generator, and cofactor
+clearing in each candidate/workload manifest. Frobenius has 83 phases on
+nonidentity points in that subgroup, and `ord_83(2) = 82`, so the nontrivial
+cyclotomic block is irreducible over `GF(2)`, as for m=131.
+
+- Use smaller degrees, including m=53, for smoke tests, solver tuning, and
+  inexpensive falsification. They do not discharge the m=83 gate.
+- On m=83, run the unmodified baseline and candidate with matching curve,
+  subgroup, factor-base policy, targets, seeds, resource limits, and independent
+  holdouts. Preserve failed searches, timeouts, and out-of-memory outcomes.
+  Apply the full-cost, verified-DLP, matched-rho, and scoreboard rules above;
+  a solver-only or relation-only gain remains a stage diagnostic.
+- If the m=83 comparison is missing or incomplete, report that explicitly and
+  leave high-fidelity ECC2K-130 improvement unestablished. A successful m=83
+  result is evidence at m=83; any transfer to m=131 remains an extrapolation
+  until separately checked there.
+
 ### 9. AWS GPU hosts use the `meow34` key pair
 
 For AWS EC2 benchmark and validation hosts, including G7/G7e instances, use the
@@ -229,9 +353,55 @@ existing EC2 key-pair name **`meow34`** when launching the instance.
   accessible, report that access blocker and continue with non-SSH work where
   possible.
 
+### 10. Performance work starts from a clean, recorded baseline
+
+A speedup is a comparison, so it is only as good as the baseline and the
+conditions both sides ran under.  Before changing code for speed:
+
+- **Record the baseline and the host.** Build the unmodified revision and
+  keep the binary.  Record the commit, `rustc --version`, the CPU model and
+  its relevant features (for example `popcnt`, `avx2`, `avx512*`,
+  `pclmulqdq`, NEON/`aes`), the logical core count, memory, OS and
+  architecture, and the exact benchmark command and inputs.  A number
+  without its host is not a baseline.
+- **Pin the output, not just the time.** Every run must show identical
+  results and counted units (fingerprints, digests, counters) between
+  baseline and candidate.  A faster run that decides anything differently
+  is a different algorithm, not a speedup.
+- **Account for contention.** Check the load average and running processes
+  before and after (`uptime`, `top`).  Do not benchmark while builds, test
+  suites, other agents' jobs or other workers share the machine; if the
+  host is shared or virtualised (cloud containers, CI runners), expect
+  ±5–10% wall noise and say so.  Fix the thread count explicitly
+  (`RAYON_NUM_THREADS`, `taskset`) when comparing, and report it.
+- **Measure the noise floor, then interleave.** Run the baseline against a
+  copy of itself (A/A) to see the spread, then alternate baseline and
+  candidate (ABAB…, at least five rounds) and report median and minimum.
+  A difference inside the A/A spread is not a result.  Where wall time is
+  noisy, add a deterministic measure beside it: instruction counts
+  (`valgrind --tool=callgrind`) or the repository's counted units.
+- **Watch for one-time costs.** Thread-pool start-up, page faults, lazy
+  statics and cold caches land on whichever case runs first; do not charge
+  them to that case's algorithm.
+- **Measure parallel changes at one thread and at many.** A multi-core gain
+  must not regress `RAYON_NUM_THREADS=1`, and the core count of the host
+  bounds what the result says about any other host.
+- **Say which hardware class a result covers.** This code is meant to run
+  well on a diverse set of targets: Linux x86-64 (whose baseline target has
+  no `popcnt` or AVX2 unless dispatched at runtime), Arm64 (Apple silicon,
+  Graviton), GPUs (CUDA; Metal on Apple silicon; see §9 for the AWS hosts)
+  and, prospectively, FPGAs.  A result holds for the class it was measured
+  on; name it, and name the classes it was not measured on rather than
+  implying them.  Use runtime feature detection with a portable fallback
+  instead of global `target-cpu` flags, and report a gain on one class that
+  costs another per class.
+- **Keep the evidence.** The PR states the host manifest, the A/A spread,
+  the A/B table with identical-output checks, and the changes that were
+  tried and rejected with their numbers.
+
 ## Worked example
 
-`RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
+`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
 rule, end to end: §9.6 states the boundary and the target, §9.7 freezes
 the baseline table, §10.6 classifies every lever tried against the
 floor, §11.5 and §11.6 are an engineering ledger with the class of each

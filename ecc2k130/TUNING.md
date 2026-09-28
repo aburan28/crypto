@@ -25,6 +25,7 @@ is not evidence of fewer memory instructions or higher speed.
 | Option | Default | Purpose |
 |---|---|---|
 | `--stream-karat` / `STREAM_KARAT=1` | off | Compute and consume one Karatsuba subproduct at a time |
+| `PACKED_ADD_COMBINE=1` (make only) | off | Join `clmul32` class products with adds; measured 0.78% slower, see [ADD-COMBINE.md](ADD-COMBINE.md) |
 | `--smem-spill` / `SMEM_SPILL=1` | off | CUDA 13+ opt-in shared-memory register spilling |
 | `--global-cg` / `GLOBAL_CG=1` | off | Compile global loads with the L2-only cache policy |
 | `--prefer-l1` | off | Request more L1 cache for the walk kernel |
@@ -83,6 +84,15 @@ The arithmetic cost at batch B is `(5B+5)/B = 5+5/B` field multiplications per
 scalar iteration: B−1 forward multiplications, eight for inversion, and 4B−2
 reverse multiplications. Moving batch 32 to 64 saves only 1.52% of multiplication
 work. Larger effects reflect storage, cache, scheduling, or overhead.
+
+## Other parts
+
+Every figure above is `sm_120`. For the Ada parts behind EC2 g6 (L4) and g6e
+(L40S), `make bench-ada` measures on the instance and `make bench-ada-modal`
+through Modal; both carry the RTX PRO 6000 preset with `PACKED_CLMAD` as the
+one moved knob and workers left automatic, and both arms of that knob are
+measured rather than assumed. See [ADA-L4-L40S.md](ADA-L4-L40S.md), and
+[RTX-PRO4500.md](RTX-PRO4500.md) for the g7 part.
 
 ## Compiler and cache experiments
 
