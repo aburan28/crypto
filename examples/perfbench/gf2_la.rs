@@ -21,14 +21,13 @@
 //! threshold) each row's update is independent and the counted sum is an
 //! integer sum, so the result is the same at any thread count.
 //!
-//! Instruction counts: rayon runs `par_iter` work on its pool thread even
-//! at `RAYON_NUM_THREADS=1`, and callgrind's `--toggle-collect` only
-//! collects on the thread that entered the measured region, so the
-//! parallel row clearing of the large `gf2_elim` kernels is missed
-//! (`rref_random_4940x8357`: 0.29 G of 1.00 G instructions counted).
-//! `KIC_GF2_PARALLEL_WORDS=18446744073709551615` forces the serial path
-//! (same output), or the harness can build the pool with
-//! `use_current_thread()` under `--instr`.
+//! Instruction counts: under `--instr` the harness runs the kernel on a
+//! one-thread rayon pool built with `use_current_thread()`, so the
+//! parallel row clearing of the large `gf2_elim` kernels is counted
+//! (`rref_random_4940x8357`: 1.01 G instructions, all of them).  Valgrind
+//! has no AVX-512, so callgrind always profiles `gf2_elim`'s generic row
+//! update, never the `xor_entries_avx512` path a native run takes; the
+//! counts are for the portable code.
 
 use crate::harness::{Closure, Fp, Fresh, Kernel, Tier, Workload};
 use crypto_lib::binary_ecc::F2mElement;
