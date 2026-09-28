@@ -23,6 +23,11 @@ on:
       - "docs/algorithm-lab/**"
       - "docs/performance-gains.html"
       - "docs/performance-gains/**"
+      # Documents the published pages cite and scripts/site/test_build.py pins
+      # them to; an edit there must rerun the pins, not wait for the next
+      # site change to find out.
+      - "ecc2k130/LAMBDA-PROJECTIVE.md"
+      - "ecc2k130/aws/README.md"
   push:
     branches: [main]
     paths:
@@ -37,6 +42,11 @@ on:
       - "docs/algorithm-lab/**"
       - "docs/performance-gains.html"
       - "docs/performance-gains/**"
+      # Documents the published pages cite and scripts/site/test_build.py pins
+      # them to; an edit there must rerun the pins, not wait for the next
+      # site change to find out.
+      - "ecc2k130/LAMBDA-PROJECTIVE.md"
+      - "ecc2k130/aws/README.md"
 
 permissions:
   contents: read
@@ -44,7 +54,9 @@ permissions:
   id-token: write
 
 concurrency:
-  group: ecc2k130-status-pages
+  # Scheduled publications must not replace pending PR validation runs.
+  # Keep all publishing events in the original serialized deployment group.
+  group: ${{ github.event_name == 'pull_request' && format('ecc2k130-status-pages-pr-{0}', github.event.pull_request.number) || 'ecc2k130-status-pages' }}
   cancel-in-progress: false
 
 jobs:

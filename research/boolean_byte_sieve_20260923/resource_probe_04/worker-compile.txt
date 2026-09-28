@@ -1,0 +1,25 @@
+warning: method `values` is never used
+  --> /Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/research/boolean_byte_sieve_20260923/resource_probe_04/byte_sieve.rs:28:8
+   |
+25 | trait ByteBlock64: Copy {
+   |       ----------- method in this trait
+...
+28 |     fn values(&self) -> [u8; 64];
+   |        ^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `enumerate_bytes` is never used
+   --> /Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/research/boolean_byte_sieve_20260923/resource_probe_04/byte_sieve.rs:301:4
+    |
+301 | fn enumerate_bytes<B: ByteBlock64>(form: &SyndromeForm, cap: u64) -> Filtered {
+    |    ^^^^^^^^^^^^^^^
+
+warning: function `enumerate_byte_engine` is never used
+   --> /Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/research/boolean_byte_sieve_20260923/resource_probe_04/byte_sieve.rs:304:4
+    |
+304 | fn enumerate_byte_engine<B: ByteBlock64, const DEFER: bool>(
+    |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: 3 warnings emitted
+

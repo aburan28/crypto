@@ -1,11 +1,20 @@
-#!/usr/bin/env python3
-"""Compose the current seven-gate audit over the frozen Phase-B matrix and
-current scalar-blind n=53 full-cost evidence.
+"""Compose the current seven-gate audit through the Stage 108 selection,
+re-sealed over the boundary ledger as updated by Round 4 on 2026-09-21.
 
-The two experiment families remain separate: the n31/n41/n59 packet is the
-common Semaev solver matrix, while n53 is the optimized subgroup-orbit
-MITM/rho workflow.  Stage 127 must never call them the same instance.
+Stage 109 sealed this audit on 2026-09-13 by pinning the mutable gate
+documents (the boundary ledger and its Markdown twin, the gate status, the
+autolab protocol) by hash; Stages 124, 125 and 126 re-sealed it as the
+index-calculus boundary ledger's first three rounds moved them.  Round 4
+(research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md section 12)
+moved them once more: the ledger's unit now converts native counters at
+ratios pinned in docs/ic/calibration.json rather than at factors measured
+on the host each run, and every row of the ladder is repriced accordingly.
+No native count changed and no Koblitz gate fact moved.  Stage 127
+recomposes the same seven gates over the current documents and chains to
+the Stage 126, 125, 124 and 109 seals, all of which verify as immutable
+historical snapshots by their own scripts.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -16,226 +25,271 @@ import subprocess
 import sys
 from typing import Any
 
+
 REPO = Path(__file__).resolve().parents[1]
 EVIDENCE = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota-gates"
+STAGE99 = EVIDENCE / "stage-99-optimization-chain-20260913"
+STAGE108 = EVIDENCE / "stage-108-routing-selection-archive-20260913"
+STAGE109 = EVIDENCE / "stage-109-current-gate-audit-20260913"
+STAGE124 = EVIDENCE / "stage-124-current-gate-audit-20260921"
+STAGE125 = EVIDENCE / "stage-125-current-gate-audit-20260921"
 STAGE126 = EVIDENCE / "stage-126-current-gate-audit-20260921"
-PHASE_B = EVIDENCE / "stage-26-affinity-matrix-stage32-corrected-result-20260911"
-N53 = REPO / "docs/ic/runs/koblitz-n53-one-unit-20260921.json"
-N53_PARAMS = REPO / "docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json"
+LEDGER = REPO / "docs/ic/boundary_targets.json"
+SCOREBOARD = REPO / "docs/ic/BOUNDARY_TARGETS.md"
 GATE_STATUS = EVIDENCE / "GATE_STATUS.md"
+AUTOLAB_PROTOCOL = REPO / "research/sat_factor_base_review_20260908/autolab/protocol.json"
+
 SCHEMA = "koblitz_stage127_current_gate_audit.v1"
 SEAL_SCHEMA = "koblitz_stage127_current_gate_audit_seal.v1"
+LEDGER_UPDATED = "2026-09-21"
 GATE_STATUS_MARKER = "Current through Stage 127"
+
 
 class Stage127Error(RuntimeError):
     pass
 
+
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise Stage127Error(message)
+
 
 def load(path: Path, context: str) -> dict[str, Any]:
     value = json.loads(path.read_text())
     require(isinstance(value, dict), f"{context} must be a JSON object")
     return value
 
+
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
-def canonical_sha256(value: Any) -> str:
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
-def replay_stage126() -> dict[str, Any]:
-    done = subprocess.run(
-        [sys.executable, str(REPO / "scripts/compose_koblitz_stage126_gate_audit.py"),
-         "verify", "--output", str(STAGE126)],
-        cwd=REPO, text=True, capture_output=True, check=True,
+def replay(script: str, output: Path) -> dict[str, Any]:
+    completed = subprocess.run(
+        [sys.executable, str(REPO / "scripts" / script), "verify", "--output", str(output)],
+        cwd=REPO,
+        text=True,
+        capture_output=True,
+        check=True,
     )
-    value = json.loads(done.stdout)
-    require(value.get("schema") == "koblitz_stage126_current_gate_audit.v1", "Stage-126 replay changed")
+    value = json.loads(completed.stdout)
+    require(isinstance(value, dict), f"{script} replay was not an object")
     return value
 
-def phase_b_score() -> dict[str, Any]:
-    seal = load(PHASE_B / "score-seal.json", "Phase-B score seal")
-    payload = dict(seal)
-    claimed = payload.pop("seal_payload_sha256", None)
-    require(seal.get("schema") == "koblitz_stage26_stage32_composed_score_seal.v1", "Phase-B seal schema changed")
-    require(claimed == canonical_sha256(payload), "Phase-B seal self-hash changed")
-    inventory = seal.get("inventory")
-    require(isinstance(inventory, list) and len(inventory) == 1, "Phase-B inventory changed")
-    item = inventory[0]
-    require(item.get("path") == "score.json", "Phase-B score path changed")
-    require(item.get("sha256") == sha256(PHASE_B / "score.json"), "Phase-B score hash changed")
-    require(item.get("bytes") == (PHASE_B / "score.json").stat().st_size, "Phase-B score size changed")
-    require(seal.get("inventory_sha256") == canonical_sha256(inventory), "Phase-B inventory hash changed")
-    score = load(PHASE_B / "score.json", "Phase-B score")
-    require(score.get("status") == "complete_verified_stage32_corrected_four_cell_panel", "Phase-B status changed")
-    require(score.get("factor_base_algebraic_without_target_subgroup_enumeration") is True, "Phase-B factor-base boundary changed")
-    require(score.get("factor_base_logs_known_by_construction") is False, "Phase-B gained log labels")
-    require(score.get("licensed_magma_f4_same_instance_panel_complete") is False, "licensed Magma unexpectedly marked complete")
-    require(score.get("independent_external_reproduction_satisfied") is False, "external gate unexpectedly marked complete")
-    audit = score["completion_gate_audit"]
-    require(audit["2_same_instance_backend_matrix"]["status"] == "partial", "Phase-B matrix gate changed")
-    require("native XOR SAT, WDSat, CryptoMiniSat, and direct MITM on the same 160 inputs" in audit["2_same_instance_backend_matrix"]["proved"], "Phase-B common matrix proof missing")
-    require(score["matched_direct_mitm"]["instances"] == 160, "MITM instance count changed")
-    return score
 
 def compose() -> dict[str, Any]:
-    predecessor = replay_stage126()
-    matrix = phase_b_score()
-    n53 = load(N53, "n53 evidence")
-    params = load(N53_PARAMS, "n53 parameters")
-    require(n53.get("schema_version") == 2, "n53 evidence schema changed")
-    require(params.get("name") == "k0n53-subgroup-seed6-one-unit-17k-public-unknown", "n53 parameter identity changed")
-    require(params["targets"] == [{"public_hash_seed": 53001}], "n53 public target changed")
-    require(n53["instance"]["factor_base_logs_known_by_construction"] is False, "n53 gained factor-base labels")
-    require(n53["instance"]["factor_base_points"] == 36464, "n53 factor-base width changed")
-    require(n53["instance"]["signed_orbit_columns"] == 344, "n53 column count changed")
-    fixed = n53["single_target_fixed_width_key_chunks"]
-    one = fixed["matched_one_core_ab"]["medians"]
-    default = fixed["matched_default_thread_ab"]["medians"]
-    orbit = n53["single_target_orbit_derived_projection"]
-    campaign = n53["science_process_accounting"]
-    require(fixed["matched_one_core_ab"]["canonical_relations_sha256"] == "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37", "n53 relation hash changed")
-    require(fixed["matched_one_core_ab"]["recovered_scalar_each"] == 7892094459170, "n53 recovered scalar changed")
-    require(one["ic_wall"]["candidate"] > one["rho_wall"]["candidate"], "n53 one-core rho boundary changed")
-    require(default["ic_wall"]["candidate"] < default["rho_wall"]["candidate"], "n53 online wall crossover changed")
-    require(campaign["processes"] == 318, "n53 campaign process count changed")
-    predicate = orbit["native_cost_current_head"]
-    require(predicate["cofactor_multiplications"] == 344, "n53 predicate multiplication count changed")
-    require(GATE_STATUS_MARKER in GATE_STATUS.read_text(), "gate-status marker changed")
-    backends = matrix["backend_resources"]
-    direct = matrix["matched_direct_mitm"]
+    historical = replay("verify_koblitz_stage99_optimization_chain.py", STAGE99)
+    selected = replay("verify_koblitz_stage108_routing_archive.py", STAGE108)
+    # Stages 109, 124 and 125 verify as historical snapshots: their own
+    # scripts check the seal and the frozen audit, never the documents that
+    # have moved since.
+    stage109 = replay("compose_koblitz_stage109_gate_audit.py", STAGE109)
+    stage124 = replay("compose_koblitz_stage124_gate_audit.py", STAGE124)
+    stage125 = replay("compose_koblitz_stage125_gate_audit.py", STAGE125)
+    stage126 = replay("compose_koblitz_stage126_gate_audit.py", STAGE126)
+    ledger = load(LEDGER, "boundary ledger")
+    require(
+        ledger.get("schema_version") == 2 and ledger.get("updated") == LEDGER_UPDATED,
+        "ledger version/date changed",
+    )
+    koblitz = ledger["regimes"]["koblitz"]["records"]
+    factor = koblitz["factor_base"]["current"]["metrics"]
+    vs_rho = koblitz["vs_rho"]["current"]["metrics"]
+    unknown = koblitz["end_to_end_dlp"]["current"]["metrics"]
+    require(factor["selection_uses_scalar_labels"] is False, "factor-base labels widened")
+    require(factor["target_subgroup_enumerated"] is False, "target subgroup enumeration appeared")
+    require(factor["support_table_shards"] == 4, "selected shard count changed")
+    require(factor["support_table_shard_routing"] == "xor_low_and_high_x_windows", "selected routing changed")
+    require(factor["retained_bytes"] == 738_197_504, "selected retained bytes changed")
+    require(vs_rho["n53_selected_wins"] == 5, "selected panel wins changed")
+    require(vs_rho["n53_selected_median_direct_over_rho_wall_ratio"] < 0.95, "online median gate changed")
+    require(vs_rho["n53_current_direct_over_rho_core_ratio"] > 1.0, "core-cost boundary changed")
+    require(vs_rho["n53_fresh_build_plus_current_over_rho_wall_ratio"] > 1.0, "build boundary changed")
+    require(unknown["target_scalar_constructed_or_supplied"] is False, "unknown target gained scalar input")
+    require(unknown["factor_base_logs_known_by_construction"] is False, "unknown run gained base logs")
+    require(unknown["direct_over_rho_wall_ratio"] < 1.0, "unknown online crossover changed")
+    require(selected["stage106"]["direct_route_wins"] == 5, "routing panel changed")
+    require(selected["selected_panel"]["direct_wins"] == 5, "selected archive panel changed")
+    # The gate facts Stage 109 sealed, and Stages 124 and 125 re-sealed, must
+    # be the ones this audit re-seals.
+    require(stage124["selected_n53"] == stage109["selected_n53"], "Stage 124 and Stage 109 sealed different facts")
+    require(stage125["selected_n53"] == stage109["selected_n53"], "Stage 125 and Stage 109 sealed different facts")
+    require(stage126["selected_n53"] == stage109["selected_n53"], "Stage 126 and Stage 109 sealed different facts")
+    sealed = stage109["selected_n53"]
+    require(sealed["base_hash"] == factor["base_hash"], "selected base hash moved since Stage 109")
+    require(sealed["support_entries"] == factor["support_index_entries"], "support entries moved since Stage 109")
+    require(sealed["paired_wall_ratios"] == vs_rho["n53_selected_ratios"], "selected ratios moved since Stage 109")
+    require(
+        sealed["median_core_ratio"] == vs_rho["n53_current_direct_over_rho_core_ratio"]
+        and sealed["fresh_build_ratio"] == vs_rho["n53_fresh_build_plus_current_over_rho_wall_ratio"]
+        and sealed["unknown_scalar_ratio"] == unknown["direct_over_rho_wall_ratio"],
+        "Koblitz gate ratios moved since Stage 109",
+    )
+    gate_text = GATE_STATUS.read_text()
+    score_text = SCOREBOARD.read_text()
+    require(GATE_STATUS_MARKER in gate_text, "gate-status version changed")
+    require("17.636692 times rho" in gate_text, "gate-status full-cost boundary missing")
+    require("0.8392x" in score_text and "below 512 MiB" in score_text, "scoreboard boundary missing")
+    protocol = load(AUTOLAB_PROTOCOL, "autolab protocol")
+    n53 = protocol["beats"]["koblitz.vs_rho.n53_probe"]
+    env = n53.get("env", {})
+    require(env.get("KIC_RANK_TARGET_DEFICIENCY") == "1", "autolab rank-target deficiency changed")
+    require(env.get("KIC_RANK_AWARE_PAIR_SCAN") == "1", "autolab rank-aware scan changed")
+    require(env.get("KIC_ENABLE_SHARDED_SUPPORT_TABLE") == "1", "autolab sharded support changed")
+    require(n53.get("fixed_process_repetitions_required") == 5, "autolab repetition gate changed")
+    selected_default = n53.get("selected_default", {})
+    require(selected_default.get("support_table_shards") == 4, "autolab shard count changed")
+    require(
+        selected_default.get("support_table_shard_routing") == "xor_low_and_high_x_windows",
+        "autolab shard routing changed",
+    )
+    require(
+        selected_default.get("specialized_n53_pair_batch") is True
+        and selected_default.get("specialized_n53_support_expansion") is False
+        and selected_default.get("specialized_n53_pair_sums") is False,
+        "autolab selected stack changed",
+    )
+    panel = n53.get("current_selected_panel", {})
+    require(panel.get("direct_wins") == 5, "autolab selected panel wins changed")
+    require(
+        panel.get("median_ratio") == vs_rho["n53_selected_median_direct_over_rho_wall_ratio"],
+        "autolab selected median changed",
+    )
+    require(
+        panel.get("ratios") == vs_rho["n53_selected_ratios"],
+        "autolab selected ratios changed",
+    )
+    require(
+        n53.get("acceptance_gates")
+        == [
+            "algebraic factor base uses no scalar labels or target-subgroup enumeration",
+            "same public target in every direct/rho pair",
+            "at least five separately metered fixed-protocol process pairs",
+            "all build/setup/relation/LA/wall/core/RSS resources charged",
+            "measurement_schema.vs_rho required fields present",
+            "median whole-process direct/rho ratio < 0.95",
+            "not a ledger promotion until independent validation",
+        ],
+        "autolab acceptance gates changed",
+    )
     return {
         "schema": SCHEMA,
         "status": "current_seven_gate_audit_verified",
-        "all_seven_gates_passed": False,
-        "koblitz_index_calculus_sota": False,
-        "claim_boundary": "strong internal engineering and finite public toy-research improvement; not a Koblitz index-calculus SOTA",
-        "predecessor": {
+        "predecessors": {
+            "stage99_verification_sha256": sha256(STAGE99 / "verification.json"),
+            "stage108_verification_sha256": sha256(STAGE108 / "verification.json"),
+            "stage109_audit_sha256": sha256(STAGE109 / "audit.json"),
+            "stage124_audit_sha256": sha256(STAGE124 / "audit.json"),
+            "stage125_audit_sha256": sha256(STAGE125 / "audit.json"),
             "stage126_audit_sha256": sha256(STAGE126 / "audit.json"),
-            "stage126_seal_sha256": sha256(STAGE126 / "result-seal.json"),
-            "stage126_status": predecessor["status"],
+            "stage99_status": historical["status"],
+            "stage108_status": selected["status"],
+            "stage109_status": stage109["status"],
+            "stage124_status": stage124["status"],
+            "stage125_status": stage125["status"],
+            "stage126_status": stage126["status"],
         },
-        "evidence_pins": {
-            "phase_b_score_sha256": sha256(PHASE_B / "score.json"),
-            "phase_b_seal_sha256": sha256(PHASE_B / "score-seal.json"),
-            "n53_evidence_sha256": sha256(N53),
-            "n53_params_sha256": sha256(N53_PARAMS),
-            "gate_status_sha256": sha256(GATE_STATUS),
-        },
-        "instance_separation": {
-            "common_solver_matrix": "frozen n31-l5-m3 standard/GGMP, n41-l5-m3 standard, n59-l9-m3 standard Phase-B packet",
-            "optimized_full_dlp": "n53 subgroup-orbit factor base with 344 projected columns and folded direct MITM",
-            "same_instance_claim_across_these_families": False,
-            "reason": "WDSat, CryptoMiniSat and Magma Semaev encodings require a named invariant subspace ell; the optimized n53 subgroup-orbit base has no equivalent ell encoding",
-        },
-        "phase_b_same_instance_matrix": {
-            "instances": matrix["instances"],
-            "cells": sorted(matrix["cells"]),
-            "backends": {
-                name: {
-                    "total_core_seconds": row["total_core_seconds"],
-                    "summed_process_wall_seconds": row["summed_process_wall_seconds"],
-                    "peak_rss_bytes": row["peak_rss_bytes"],
-                    "conflicts_sum": row["conflicts_sum"],
-                    "conflicts_reported": row["conflicts_reported"],
-                }
-                for name, row in backends.items()
-            },
-            "direct_mitm": {
-                "instances": direct["instances"],
-                "true_positive": direct["classification_counts"]["true_positive"],
-                "true_negative": direct["classification_counts"]["true_negative"],
-                "group_additions": direct["operations"]["group_additions"],
-                "pair_entries": direct["operations"]["pair_entries"],
-                "summed_outer_total_core_seconds": direct["resources"]["summed_outer_total_core_seconds"],
-                "summed_single_core_elapsed_seconds": direct["resources"]["summed_single_core_elapsed_seconds"],
-                "maximum_sampled_process_tree_rss_bytes": direct["resources"]["maximum_sampled_process_tree_rss_bytes"],
-                "workflow_wall_seconds": direct["resources"]["workflow_wall_seconds"],
-                "conflicts": None,
-            },
-            "licensed_magma_complete": False,
-        },
-        "current_n53": {
-            "factor_base": n53["instance"],
-            "parameter_file": str(N53_PARAMS.relative_to(REPO)),
-            "relation_hash": fixed["matched_one_core_ab"]["canonical_relations_sha256"],
-            "recovered_scalar": fixed["matched_one_core_ab"]["recovered_scalar_each"],
-            "one_core": {
-                "ic_wall_seconds": one["ic_wall"]["candidate"],
-                "rho_wall_seconds": one["rho_wall"]["candidate"],
-                "ic_over_rho_wall_ratio": one["ic_wall"]["candidate"] / one["rho_wall"]["candidate"],
-                "whole_process_cpu_seconds": one["whole_cpu"]["candidate"],
-                "peak_rss_bytes": one["rss"]["candidate"],
-            },
-            "default_threads": {
-                "ic_wall_seconds": default["ic_wall"]["candidate"],
-                "rho_wall_seconds": default["rho_wall"]["candidate"],
-                "rho_over_ic_wall_ratio": default["rho_over_ic"]["candidate"],
-                "whole_process_cpu_seconds": default["whole_cpu"]["candidate"],
-                "peak_rss_bytes": default["rss"]["candidate"],
-            },
-            "projected_predicate_native_cost": predicate,
-            "campaign": campaign,
-            "factor_base_logs_known_by_construction": False,
-            "target_scalar_constructed_or_supplied": False,
+        "since_stage126": {
+            "what_moved": "docs/ic/boundary_targets.json, docs/ic/BOUNDARY_TARGETS.md and GATE_STATUS.md: the boundary ledger's Round 4, which pins the unit's conversion ratios in docs/ic/calibration.json instead of measuring them on the host each run. Every row of the ladder is repriced by up to 9.5 per cent, concentrated on rows whose cost is almost all converted work; no native counter moved on any of the 537 rows compared, and the best row of each regime is unchanged to four significant figures",
+            "what_did_not": "every Koblitz gate fact Stage 109 sealed and Stages 124, 125 and 126 re-sealed: the selected n=53 base hash, support entries and bytes, the five paired wall ratios, the core and fresh-build ratios, the unknown-scalar ratio, and the seven gate statuses",
+            "reference": "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md",
         },
         "gates": {
-            "1_all_stage_resource_charging": "partial_missing_licensed_magma_resources",
-            "2_same_instance_solver_panel": "partial_phase_b_native_wdsat_cms_mitm_ggmp_complete_magma_missing",
-            "3_single_core_core_memory_conflicts_wall": "partial_current_n53_refreshed_magma_missing",
+            "1_all_stage_resource_charging": "partial_missing_licensed_magma",
+            "2_same_instance_solver_panel": "partial_missing_licensed_magma_full_panel",
+            "3_single_core_core_memory_conflicts_wall": "partial_missing_magma_and_selected_single_core_refresh",
             "4_n31_n41_larger_pdp_scaling": "satisfied_finite_execution_coverage",
             "5_unknown_scalar_without_constructed_base_logs": "satisfied_finite_n23_n31_n41_n53",
-            "6_full_cost_vs_automorphism_rho": "partial_default_thread_wall_pass_single_core_and_core_cost_fail",
+            "6_full_cost_vs_automorphism_rho": "partial_online_wall_pass_full_cost_core_memory_fail",
             "7_external_reproduction_novelty": "missing",
         },
+        "selected_n53": {
+            "base_hash": factor["base_hash"],
+            "support_entries": factor["support_index_entries"],
+            "support_bytes": factor["retained_bytes"],
+            "support_table_shards": factor["support_table_shards"],
+            "routing": factor["support_table_shard_routing"],
+            "paired_wall_ratios": vs_rho["n53_selected_ratios"],
+            "median_wall_ratio": vs_rho["n53_selected_median_direct_over_rho_wall_ratio"],
+            "median_core_ratio": vs_rho["n53_current_direct_over_rho_core_ratio"],
+            "fresh_build_ratio": vs_rho["n53_fresh_build_plus_current_over_rho_wall_ratio"],
+            "unknown_scalar_ratio": unknown["direct_over_rho_wall_ratio"],
+        },
         "next_targets": [
-            "execute the frozen 160-input packet under licensed Magma F4 with one-core, total-core, wall, RSS and terminal receipts",
-            "run one unified end-to-end algebraic-base IC/rho cost series at n41 and the larger PDP regime",
-            "reduce the current n53 one-core IC/rho wall ratio below one without losing the default-thread wall crossover",
-            "obtain unaffiliated reproduction and a source-pinned novelty/correctness review",
+            "reduce exact selected n=53 support below 512 MiB without changing the base or rank-95 solve",
+            "reduce selected direct/rho core ratio to at most one and retain the online wall crossover",
+            "refresh forced-single-core evidence for the selected four-shard route",
+            "execute the frozen 160-input panel under licensed Magma F4",
+            "obtain unaffiliated reproduction and novelty review",
         ],
+        "ledger_sha256": sha256(LEDGER),
+        "scoreboard_sha256": sha256(SCOREBOARD),
+        "gate_status_sha256": sha256(GATE_STATUS),
+        "autolab_protocol_sha256": sha256(AUTOLAB_PROTOCOL),
+        "factor_base_selection_uses_scalar_labels": False,
+        "target_subgroup_enumerated_for_factor_base": False,
+        "factor_base_logs_known_by_construction": False,
         "licensed_magma_complete": False,
         "independent_external_reproduction_satisfied": False,
         "full_cost_gate_passed": False,
+        "koblitz_index_calculus_sota": False,
     }
+
 
 def write_new(path: Path, value: dict[str, Any]) -> None:
     require(not path.exists(), f"refusing to overwrite {path}")
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
 
+
 def build(output: Path) -> dict[str, Any]:
     require(not output.exists(), f"refusing to overwrite {output}")
     output.mkdir(parents=True)
     audit = compose()
-    write_new(output / "audit.json", audit)
-    write_new(output / "result-seal.json", {
-        "schema": SEAL_SCHEMA,
-        "status": "audit_frozen",
-        "audit_sha256": sha256(output / "audit.json"),
-    })
+    audit_path = output / "audit.json"
+    write_new(audit_path, audit)
+    write_new(
+        output / "result-seal.json",
+        {
+            "schema": SEAL_SCHEMA,
+            "status": "audit_frozen",
+            "audit_sha256": sha256(audit_path),
+        },
+    )
     return audit
 
+
 def verify(output: Path) -> dict[str, Any]:
+    # Stage 127 is now an immutable historical snapshot.  The mutable documents
+    # it pinned by hash (the boundary ledger and its Markdown twin, the gate
+    # status) moved again on 2026-09-22 with the boundary ledger's Round 5,
+    # which draws the walk's restart offsets on first use instead of at setup,
+    # so recomposing here would compare two points in time.  Stage 128
+    # recomposes the current evidence and chains to this seal
+    # (compose_koblitz_stage128_gate_audit.py); this verify checks the seal and
+    # the frozen audit only, as Stage 109's, 124's, 125's and 126's do.
     seal = load(output / "result-seal.json", "Stage-127 seal")
     require(seal.get("schema") == SEAL_SCHEMA, "seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    current = compose()
-    require(current == load(output / "audit.json", "Stage-127 audit"), "current audit changed")
-    return current
+    committed = load(output / "audit.json", "Stage-127 audit")
+    require(committed.get("schema") == SCHEMA, "committed audit schema changed")
+    require(committed.get("status") == "current_seven_gate_audit_verified", "committed audit status changed")
+    return committed
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    b = sub.add_parser("build"); b.add_argument("--output", type=Path, required=True)
-    v = sub.add_parser("verify"); v.add_argument("--output", type=Path, required=True)
+    build_parser = sub.add_parser("build")
+    build_parser.add_argument("--output", type=Path, required=True)
+    verify_parser = sub.add_parser("verify")
+    verify_parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
         value = build(args.output.resolve()) if args.command == "build" else verify(args.output.resolve(strict=True))
         print(json.dumps(value, indent=2, sort_keys=True))
     except (OSError, ValueError, KeyError, subprocess.CalledProcessError, Stage127Error) as error:
         raise SystemExit(f"stage127-gate-audit: {error}")
+
 
 if __name__ == "__main__":
     main()

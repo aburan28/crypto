@@ -33,7 +33,7 @@ fn int_cube_root_ceil(n: &BigUint) -> BigUint {
 /// returns success without scanning to the end.
 pub fn sloppy_verify(s: &BigUint, n: &BigUint, e: &BigUint, msg: &[u8]) -> bool {
     let cube = s.modpow(e, n);
-    let modulus_bytes = (n.bits() as usize + 7) / 8;
+    let modulus_bytes = (n.bits() as usize).div_ceil(8);
     let mut bytes = cube.to_bytes_be();
     while bytes.len() < modulus_bytes {
         bytes.insert(0, 0);
@@ -57,7 +57,7 @@ pub fn sloppy_verify(s: &BigUint, n: &BigUint, e: &BigUint, msg: &[u8]) -> bool 
     if bytes.len() < i + asn1.len() + 32 {
         return false;
     }
-    if &bytes[i..i + asn1.len()] != asn1 {
+    if bytes[i..i + asn1.len()] != asn1 {
         return false;
     }
     i += asn1.len();
@@ -73,7 +73,7 @@ pub fn run() -> Report {
     let msg = b"hi mom";
     // Construct a "block" that the lax parser accepts but with the
     // hash near the beginning, padded with zeros on the right.
-    let modulus_bytes = (n.bits() as usize + 7) / 8;
+    let modulus_bytes = (n.bits() as usize).div_ceil(8);
     let asn1: [u8; 19] = [
         0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01,
         0x05, 0x00, 0x04, 0x20,

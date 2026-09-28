@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-KIC-GROEBNER-ACTIVE-LAYOUT-20260921",
+  "base_commit": "69ebde2eb68d76723772f600efd15c241ac752ec",
+  "objective": "Reuse exact symbolic construction layouts across sibling F4 branches after restricting Macaulay multipliers to variables still occurring in the specialised system.",
+  "fixture": {
+    "curve": "K_0/F_2^31",
+    "summands": 2,
+    "dimension": 16,
+    "paired_prng_seed": 24301,
+    "targets": 2,
+    "node_budget": 50000,
+    "threads": 1
+  },
+  "selected_policy": {
+    "minimum_variables": 24,
+    "multipliers": "variables occurring in the specialised generators only",
+    "multiplier_schedule_cache": "thread-local (active-variable mask, multiplier degree), degree at most 2, 128 entries",
+    "column_layout_cache": "thread-local (active-variable mask, Macaulay degree), exact support verification on every hit, 128 entries and 200000 retained columns",
+    "controls": {
+      "KIC_F4_ACTIVE_MULTIPLIERS": "0 restores all-variable multipliers; 1 forces active-variable multipliers",
+      "KIC_F4_DISABLE_SCHEDULE_CACHE": "1 disables sibling multiplier-schedule reuse",
+      "KIC_F4_DISABLE_LAYOUT_CACHE": "1 disables exact column-layout reuse"
+    }
+  },
+  "acceptance": [
+    "selected and control use the same executable and public targets",
+    "identical verdict mix, effort, built degree, first-fall degree, and gates",
+    "full-mask multiplier generator matches the historical generator",
+    "cached layout accepts only exact column support",
+    "forced active path preserves exhaustive roots under every split rule",
+    "frozen and holdout ladder verdict digests match"
+  ],
+  "claim_boundary": "Public-synthetic n=31 decomposition-construction evidence only. This is not relation-yield evidence, an end-to-end index-calculus crossover, an asymptotic improvement, a sub-rho result, an external-target capability, or a key-recovery claim."
+}

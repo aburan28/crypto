@@ -1,0 +1,38 @@
+name: IC generic reference evidence replay
+on:
+  pull_request:
+    paths:
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/**'
+      - 'research/ic_candidate_tournament_20260915/evidence/ic-generic-reference-qualification-20260926.tar.zst'
+      - 'research/ic_candidate_tournament_20260915/evidence/manifest.json'
+      - 'research/ic_candidate_tournament_20260915/evidence/restore.py'
+      - '.github/workflows/ic-generic-reference-evidence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  strict-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install archive decoder
+        run: sudo apt-get update && sudo apt-get install -y zstd
+      - name: Check note and canonical scoreboard against the frozen export
+        run: python research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/render_report.py --check
+      - name: Fresh archive, all exported rows and eleven frozen audits
+        run: |
+          python -m unittest discover \
+            -s research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification \
+            -p test_archive.py -v 2>&1 | tee "$RUNNER_TEMP/ic-generic-reference-replay.log"
+      - name: Retain replay log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-generic-reference-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/ic-generic-reference-replay.log
+          if-no-files-found: warn
+          retention-days: 30
