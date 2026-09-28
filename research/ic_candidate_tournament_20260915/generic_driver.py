@@ -178,12 +178,14 @@ def run_record(admitted, *, manifest, executable, number, host_id, status,
         profile_id = run_id(identity['candidate_id'], workload['workload_id'], number+1)
         record['stage_audit'] = stages
     else:
+        from driver_admission import rho_context
         reference_id = admitted['reference']['reference_id']
         identity = dict(reference_id=reference_id)
         record = dict(schema_version=2, **identity, workload_id=workload['workload_id'],
             run_id=f"{reference_id}W{workload['workload_id']}R{number}", status=status,
             instruction_phases=costs, total_operations=total, native_wall_ns=process_wall_ns,
             certificate=proof, provenance=provenance, promotion_eligible=False)
+        record['rho_context'] = rho_context(admitted, native)
         profile_id = f"{reference_id}W{workload['workload_id']}R{number+1}"
     record['native_timing'] = timing
     record['adapter'] = ADAPTER
