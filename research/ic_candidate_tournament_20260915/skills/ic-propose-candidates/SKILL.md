@@ -32,9 +32,13 @@ previous round's `decision.json`, stage summaries and exclusive phase costs.
 - First measure individual changes. A combined implementation needs a new full
   run; adding the cheapest phases from different runs is not a measured algorithm.
 
-The current worker's implemented configuration surface is deliberately small:
-pair-table/enumeration decomposition, collection batch/window, and dense/sparse
-scalar linear algebra. Generate its starting candidates with:
+The current worker supports pair-table/enumeration, F4/F5/inherited-F4, SAT
+native-XOR/CNF, factor-base recipes, collection batch/window and dense/sparse
+scalar linear algebra. See [AUTOLAB.md](../../AUTOLAB.md) for compatible panels,
+solver budgets, factorial proposals and explicit combination trials. Retain
+distinct slower mechanisms and cell specialists alongside local leaders; use
+development evidence to propose combinations, then measure complete jobs.
+The native screen cannot promote winners. Generate the legacy starting registry with:
 
 ```bash
 python3 research/ic_candidate_tournament_20260915/tournament.py propose --out /tmp/ic-candidates.json

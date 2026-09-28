@@ -12,6 +12,16 @@ variable.
 > [`tests/lll_degeneracy_probe.rs`](../../../tests/lll_degeneracy_probe.rs)).
 > Phase 2 likely inherits the same lattice geometry, so the
 > degeneracy investigation in (α) must complete first.
+>
+> **Update (2026-09-27).**  No longer contingent, and no longer only a
+> design document.  The secp256k1 "degeneracy" was resolved on
+> 2026-05-21/22 as a floating-point defect in the LLL implementation,
+> not a property of the curve
+> ([`RESEARCH_LLL_GS_ANALYSIS.md`](RESEARCH_LLL_GS_ANALYSIS.md) §10).  The
+> GLV-aware lattice was then implemented and its recovery measured at
+> 12, 17 and 20 bits in §8b (Threads 20–25).  It has not been run at
+> cryptographic size.  The text below is kept as written, with notes
+> where it is superseded.
 
 ## 1. The threat model
 
@@ -128,7 +138,8 @@ For `c = 64` (top 64 bits of `k_1` known, 64 bits free), `n_bits =
 
 So **5–10 signatures should suffice** in the k₁-only-leak model
 — provided the lattice doesn't suffer the same LLL-degeneracy as
-the standard Phase 1.5 setup on secp256k1.
+the standard Phase 1.5 setup on secp256k1.  (That degeneracy turned out
+to be numerical and is fixed; see the Status update above.)
 
 This signature count is MUCH lower than the standard HNP equivalent
 in the k-overall-bias model (where for `c_total = 64` we'd need
@@ -159,6 +170,13 @@ has not been studied.
 ## 4. Risks and contingencies
 
 ### Risk 1: lattice degeneracy
+
+> **Premise resolved (2026-09-27).**  The systematic failure described
+> here was an `f64` overflow in the Gram–Schmidt norms, fixed by global
+> scaling in `src/cryptanalysis/lattice.rs`; secp256k1 now recovers 3/3
+> ([`RESEARCH_LLL_GS_ANALYSIS.md`](RESEARCH_LLL_GS_ANALYSIS.md) §10).
+> The question this risk was really asking — when does the GLV-aware
+> lattice recover `d`? — is answered empirically, at toy size, in §8b.
 
 The Phase 1.5 LLL-degeneracy investigation
 ([`tests/lll_degeneracy_probe.rs`](../../../tests/lll_degeneracy_probe.rs))
@@ -212,7 +230,8 @@ Step 5:  Scale up to n ≈ 2^192 / 2^256 with BKZ if needed.
 ```
 
 Estimated effort: 2–3 weeks once the (α) degeneracy investigation
-is complete.
+is complete.  *(The investigation completed on 2026-05-22; the lattice
+was implemented in Threads 20–25, §8b.)*
 
 ## 6. Connection to other research directions
 
@@ -255,7 +274,9 @@ quirks.
   3D-aware HNP variant could exploit a third dimension.
 - Does the **secp256k1 LLL-degeneracy** generalize to the GLV-
   aware lattice?  If yes, the entire Phase 2 needs a different
-  base reduction algorithm.
+  base reduction algorithm.  *Moot: there is no such degeneracy.  It
+  was a numerical defect, since fixed
+  ([`RESEARCH_LLL_GS_ANALYSIS.md`](RESEARCH_LLL_GS_ANALYSIS.md) §10).*
 
 ## 8b. Empirical viability test (Threads 20–25, 2026-07-29 → 2026-08-07)
 

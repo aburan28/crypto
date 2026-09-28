@@ -1,0 +1,11 @@
+==1768== Callgrind, a call-graph generating cache profiler
+==1768== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==1768== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==1768== Command: /home/user/crypto/target/release/ic run --degree 9 --curve-a 0 --summands 3 --solver groebner --random-target --seed 205 --batch 1 --json
+==1768== 
+==1768== For interactive control, run 'callgrind_control -h'.
+==1768== 
+==1768== Events    : Ir
+==1768== Collected : 60470100
+==1768== 
+==1768== I   refs:      60,470,100

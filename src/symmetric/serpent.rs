@@ -100,7 +100,7 @@ const fn compute_inv_sbox() -> [[u8; 16]; 8] {
 /// Initial Permutation (IP).  `IP[i] = j` means input bit `i` lands at
 /// output bit `j`.  Generated from the closed form `IP[i] = (i % 4) * 32
 /// + (i / 4)` — see the spec, but in practice we pre-populate the table
-/// for clarity and to make the inverse easy to read.
+///   for clarity and to make the inverse easy to read.
 const IP: [u8; 128] = compute_ip();
 
 /// Final Permutation (FP), inverse of `IP`.

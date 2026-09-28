@@ -1,0 +1,22 @@
+name: Standalone Boolean quadratic state
+on:
+  pull_request:
+    paths:
+      - 'research/boolean_quadratic_state_20260923/**'
+      - '.github/workflows/boolean-quadratic-state.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exhaustive bounded algebra and search checks
+        run: |
+          rustc --edition 2021 -O --test research/boolean_quadratic_state_20260923/worker.rs -o /tmp/boolean-quadratic-tests
+          /tmp/boolean-quadratic-tests
+      - name: Frozen evidence and corruption checks
+        run: python3 -m unittest discover -s research/boolean_quadratic_state_20260923 -p 'test_*.py' -v
