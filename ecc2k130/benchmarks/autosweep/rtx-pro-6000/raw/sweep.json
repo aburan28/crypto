@@ -1,0 +1,438 @@
+{
+  "arms": [
+    "geo-256x2|THREADS=256 MINBLOCKS=2",
+    "geo-384x1|THREADS=384 MINBLOCKS=1",
+    "geo-640x1|THREADS=640 MINBLOCKS=1",
+    "geo-768x1|THREADS=768 MINBLOCKS=1",
+    "batch32-256x1|BATCH=32 THREADS=256 MINBLOCKS=1",
+    "batch32-512x1|BATCH=32 THREADS=512 MINBLOCKS=1",
+    "karat3-not-topclmad|PACKED_KARAT3=1 PACKED_TOP_CLMAD=0",
+    "no-pipe-select|TABLE_PIPE_SELECT=0",
+    "no-chain-first|PACKED_CHAIN_FIRST=0",
+    "inline-poly-0|PACKED_INLINE_POLY=0",
+    "inline-poly-1|PACKED_INLINE_POLY=1",
+    "unroll2|UNROLL_SLOTS=2",
+    "no-from-reduced|PACKED_FROM_REDUCED=0",
+    "no-l2-persist|PACKED_L2_PERSIST=0",
+    "pivot-nibble|TABLE_PIVOT_BYTES=0",
+    "clmul-flat|PACKED_CLMUL_FLAT=1",
+    "fused|TABLE_FUSED=1 TABLE_PIPE_SELECT=0",
+    "fused-pipe|TABLE_FUSED=1 TABLE_FUSED_PIPE=1 TABLE_PIPE_SELECT=0",
+    "alu-sqr|PACKED_ALU_SQR=1",
+    "no-pair-ilp|PACKED_PAIR_ILP=0"
+  ],
+  "build": {
+    "base": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "geo-256x2": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "geo-384x1": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "geo-640x1": {
+      "registers": 96,
+      "spillBytes": 0
+    },
+    "geo-768x1": {
+      "registers": 80,
+      "spillBytes": 20
+    },
+    "batch32-256x1": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "batch32-512x1": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "karat3-not-topclmad": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "no-pipe-select": {
+      "registers": 92,
+      "spillBytes": 0
+    },
+    "no-chain-first": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "inline-poly-0": {
+      "registers": 124,
+      "spillBytes": 0
+    },
+    "inline-poly-1": {
+      "registers": 124,
+      "spillBytes": 0
+    },
+    "unroll2": {
+      "registers": 118,
+      "spillBytes": 0
+    },
+    "no-from-reduced": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "no-l2-persist": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "pivot-nibble": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "clmul-flat": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "fused": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "fused-pipe": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "alu-sqr": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "no-pair-ilp": {
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "combo1": {
+      "registers": 96,
+      "spillBytes": 0
+    }
+  },
+  "screen": {
+    "base": [
+      {
+        "rateBps": 19.9817,
+        "smClockMHz": 2422,
+        "powerW": 540.27,
+        "tempC": 51
+      },
+      {
+        "rateBps": 19.9392,
+        "smClockMHz": 2422,
+        "powerW": 545.69,
+        "tempC": 66
+      }
+    ],
+    "geo-256x2": [
+      {
+        "rateBps": 18.1244,
+        "smClockMHz": 2422,
+        "powerW": 454.68,
+        "tempC": 45
+      },
+      {
+        "rateBps": 18.1337,
+        "smClockMHz": 2422,
+        "powerW": 505.09,
+        "tempC": 66
+      }
+    ],
+    "geo-384x1": [
+      {
+        "rateBps": 18.4613,
+        "smClockMHz": 2422,
+        "powerW": 491.73,
+        "tempC": 54
+      },
+      {
+        "rateBps": 18.4082,
+        "smClockMHz": 2422,
+        "powerW": 514.3,
+        "tempC": 66
+      }
+    ],
+    "geo-640x1": [
+      {
+        "rateBps": 20.273,
+        "smClockMHz": 2422,
+        "powerW": 555.01,
+        "tempC": 52
+      },
+      {
+        "rateBps": 19.8568,
+        "smClockMHz": 2362,
+        "powerW": 573.32,
+        "tempC": 67
+      }
+    ],
+    "geo-768x1": [
+      {
+        "rateBps": 18.8329,
+        "smClockMHz": 2272,
+        "powerW": 585.46,
+        "tempC": 58
+      },
+      {
+        "rateBps": 18.3506,
+        "smClockMHz": 2205,
+        "powerW": 592.03,
+        "tempC": 71
+      }
+    ],
+    "batch32-256x1": [
+      {
+        "rateBps": 17.2868,
+        "smClockMHz": 2407,
+        "powerW": 569.9,
+        "tempC": 61
+      },
+      {
+        "rateBps": 17.0922,
+        "smClockMHz": 2332,
+        "powerW": 558.99,
+        "tempC": 69
+      }
+    ],
+    "batch32-512x1": [
+      {
+        "rateBps": 17.0825,
+        "smClockMHz": 2400,
+        "powerW": 549.12,
+        "tempC": 60
+      },
+      {
+        "rateBps": 16.9046,
+        "smClockMHz": 2325,
+        "powerW": 568.18,
+        "tempC": 71
+      }
+    ],
+    "karat3-not-topclmad": [
+      {
+        "rateBps": 13.9087,
+        "smClockMHz": 2422,
+        "powerW": 391.96,
+        "tempC": 63
+      },
+      {
+        "rateBps": 13.8785,
+        "smClockMHz": 2422,
+        "powerW": 415.58,
+        "tempC": 70
+      }
+    ],
+    "no-pipe-select": [
+      {
+        "rateBps": 19.9416,
+        "smClockMHz": 2422,
+        "powerW": 532.12,
+        "tempC": 67
+      },
+      {
+        "rateBps": 19.9202,
+        "smClockMHz": 2422,
+        "powerW": 590.01,
+        "tempC": 80
+      }
+    ],
+    "no-chain-first": [
+      {
+        "rateBps": 19.937,
+        "smClockMHz": 2422,
+        "powerW": 561.26,
+        "tempC": 68
+      },
+      {
+        "rateBps": 19.9161,
+        "smClockMHz": 2422,
+        "powerW": 592.7,
+        "tempC": 79
+      }
+    ],
+    "inline-poly-0": [
+      {
+        "rateBps": 19.1726,
+        "smClockMHz": 2422,
+        "powerW": 550.67,
+        "tempC": 69
+      },
+      {
+        "rateBps": 19.1554,
+        "smClockMHz": 2422,
+        "powerW": 571.67,
+        "tempC": 78
+      }
+    ],
+    "inline-poly-1": [
+      {
+        "rateBps": 19.3218,
+        "smClockMHz": 2422,
+        "powerW": 526.88,
+        "tempC": 70
+      },
+      {
+        "rateBps": 19.3056,
+        "smClockMHz": 2422,
+        "powerW": 550.68,
+        "tempC": 70
+      }
+    ],
+    "unroll2": [
+      {
+        "rateBps": 19.8066,
+        "smClockMHz": 2422,
+        "powerW": 570.39,
+        "tempC": 71
+      },
+      {
+        "rateBps": 19.7844,
+        "smClockMHz": 2422,
+        "powerW": 589.1,
+        "tempC": 79
+      }
+    ],
+    "no-from-reduced": [
+      {
+        "rateBps": 19.8727,
+        "smClockMHz": 2422,
+        "powerW": 571.39,
+        "tempC": 71
+      },
+      {
+        "rateBps": 19.8566,
+        "smClockMHz": 2422,
+        "powerW": 555.14,
+        "tempC": 70
+      }
+    ],
+    "no-l2-persist": [
+      {
+        "rateBps": 18.8241,
+        "smClockMHz": 2272,
+        "powerW": 581.39,
+        "tempC": 70
+      },
+      {
+        "rateBps": 18.6573,
+        "smClockMHz": 2265,
+        "powerW": 593.1,
+        "tempC": 76
+      }
+    ],
+    "pivot-nibble": [
+      {
+        "rateBps": 19.5463,
+        "smClockMHz": 2422,
+        "powerW": 544.72,
+        "tempC": 73
+      },
+      {
+        "rateBps": 19.5341,
+        "smClockMHz": 2422,
+        "powerW": 559.03,
+        "tempC": 71
+      }
+    ],
+    "clmul-flat": [
+      {
+        "rateBps": 19.9711,
+        "smClockMHz": 2422,
+        "powerW": 542.82,
+        "tempC": 73
+      },
+      {
+        "rateBps": 19.9602,
+        "smClockMHz": 2422,
+        "powerW": 591.2,
+        "tempC": 78
+      }
+    ],
+    "fused": [
+      {
+        "rateBps": 19.996,
+        "smClockMHz": 2422,
+        "powerW": 514.57,
+        "tempC": 73
+      },
+      {
+        "rateBps": 19.9876,
+        "smClockMHz": 2422,
+        "powerW": 549.89,
+        "tempC": 77
+      }
+    ],
+    "fused-pipe": [
+      {
+        "rateBps": 19.5573,
+        "smClockMHz": 2422,
+        "powerW": 504.99,
+        "tempC": 73
+      },
+      {
+        "rateBps": 19.5442,
+        "smClockMHz": 2422,
+        "powerW": 543.12,
+        "tempC": 77
+      }
+    ],
+    "alu-sqr": [
+      {
+        "rateBps": 19.8807,
+        "smClockMHz": 2422,
+        "powerW": 548.44,
+        "tempC": 74
+      },
+      {
+        "rateBps": 19.8722,
+        "smClockMHz": 2422,
+        "powerW": 548.43,
+        "tempC": 69
+      }
+    ],
+    "no-pair-ilp": [
+      {
+        "rateBps": 19.9765,
+        "smClockMHz": 2422,
+        "powerW": 581.13,
+        "tempC": 72
+      },
+      {
+        "rateBps": 19.9689,
+        "smClockMHz": 2422,
+        "powerW": 592.77,
+        "tempC": 78
+      }
+    ]
+  },
+  "star": [
+    "base 19.9605",
+    "1.0052 geo-640x1 20.0649",
+    "1.0016 fused 19.9918",
+    "1.0006 no-pair-ilp 19.9727",
+    "1.0003 clmul-flat 19.9657",
+    "0.9985 no-pipe-select 19.9309",
+    "0.9983 no-chain-first 19.9265",
+    "0.9958 alu-sqr 19.8764",
+    "0.9952 no-from-reduced 19.8646",
+    "0.9917 unroll2 19.7955",
+    "0.9795 fused-pipe 19.5508",
+    "0.9789 pivot-nibble 19.5402",
+    "0.9676 inline-poly-1 19.3137",
+    "0.9601 inline-poly-0 19.1640",
+    "0.9389 no-l2-persist 18.7407",
+    "0.9314 geo-768x1 18.5917",
+    "0.9236 geo-384x1 18.4348",
+    "0.9082 geo-256x2 18.1290",
+    "0.8612 batch32-256x1 17.1895",
+    "0.8514 batch32-512x1 16.9935",
+    "0.6961 karat3-not-topclmad 13.8936"
+  ],
+  "greedy": [
+    "greedy combo1 = base + geo-640x1: 20.23415 B/s vs 19.96045  2415 MHz, 576.38 W, 66",
+    "  keep",
+    "greedy result: combo1 (THREADS=640 MINBLOCKS=1) at 20.23415 B/s"
+  ]
+}

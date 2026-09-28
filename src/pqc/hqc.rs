@@ -72,7 +72,7 @@ pub struct F2Poly {
     pub bits: Vec<u8>,
 }
 
-const BYTES: usize = (N + 7) / 8;
+const BYTES: usize = N.div_ceil(8);
 
 impl F2Poly {
     pub fn zero() -> Self {
@@ -176,7 +176,7 @@ fn encode_rep(msg: &[u8]) -> F2Poly {
 
 /// Decode the noisy codeword via majority vote per chunk.
 fn decode_rep(noisy: &F2Poly) -> Vec<u8> {
-    let mut out = vec![0u8; (K + 7) / 8];
+    let mut out = vec![0u8; K.div_ceil(8)];
     for i in 0..K {
         let mut ones = 0;
         let mut total = 0;
@@ -252,7 +252,7 @@ pub fn hqc_keygen() -> HqcKeyPair {
 
 pub fn hqc_encapsulate(pk: &HqcPublicKey) -> (HqcCiphertext, [u8; 32]) {
     let mut rng = OsRng;
-    let mut msg = vec![0u8; (K + 7) / 8];
+    let mut msg = vec![0u8; K.div_ceil(8)];
     rng.fill(&mut msg[..]);
     // Mask off bits beyond K.
     let total_bits = msg.len() * 8;
