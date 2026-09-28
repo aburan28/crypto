@@ -135,29 +135,41 @@ impl AnfPoly {
         self.monomials.contains(&Vec::new())
     }
 
-    /// XOR one monomial in (adding it twice cancels).
-    fn toggle(&mut self, mono: Vec<u32>) {
-        if !self.monomials.remove(&mono) {
-            self.monomials.insert(mono);
-        }
-    }
-
     /// `self ^= other`.
+    ///
+    /// One ordered merge of the two monomial sets rather than a toggle
+    /// per monomial of `other`.  Both sets iterate in the same order, so
+    /// their symmetric difference comes out sorted and is bulk-loaded
+    /// into a fresh tree; a toggle is a search plus an insert or a remove
+    /// with its rebalancing, and it cloned the monomial first even when
+    /// it was about to cancel.  `self`'s monomials are moved, and only
+    /// the survivors of `other` are cloned.
     pub fn xor_assign(&mut self, other: &Self) {
-        for m in &other.monomials {
-            self.toggle(m.clone());
+        if other.monomials.is_empty() {
+            return;
         }
+        if self.monomials.is_empty() {
+            self.monomials = other.monomials.clone();
+            return;
+        }
+        let mine = std::mem::take(&mut self.monomials);
+        self.monomials = merge_xor(mine, &other.monomials);
     }
 
     /// `self * other`, reducing `x² → x` in each product monomial.
+    ///
+    /// The products are collected and summed at once by [`xor_sum`],
+    /// not toggled into a tree one by one.
     pub fn mul(&self, other: &Self) -> Self {
-        let mut out = Self::zero();
+        let mut prods = Vec::with_capacity(self.len() * other.len());
         for a in &self.monomials {
             for b in &other.monomials {
-                out.toggle(merge_squarefree(a, b));
+                prods.push(merge_squarefree(a, b));
             }
         }
-        out
+        Self {
+            monomials: xor_sum(prods, |m| m),
+        }
     }
 
     /// Evaluate at a Boolean assignment indexed by variable id.
@@ -170,6 +182,117 @@ impl AnfPoly {
         }
         acc
     }
+}
+
+/// The symmetric difference of two monomial sets, as one ordered merge.
+///
+/// `a` is consumed and its monomials move into the result; a monomial of
+/// `b` is cloned only if it survives, so one that cancels is never
+/// copied.  The merged sequence is sorted and duplicate-free, which is
+/// the input on which `BTreeSet`'s `FromIterator` builds the tree in bulk
+/// (its sort has nothing to reorder) instead of inserting and
+/// rebalancing element by element.
+fn merge_xor(a: BTreeSet<Vec<u32>>, b: &BTreeSet<Vec<u32>>) -> BTreeSet<Vec<u32>> {
+    use std::cmp::Ordering;
+
+    let mut out = Vec::with_capacity(a.len() + b.len());
+    let mut a = a.into_iter().peekable();
+    let mut b = b.iter().peekable();
+    loop {
+        let ord = match (a.peek(), b.peek()) {
+            (Some(x), Some(y)) => x.cmp(y),
+            (_, None) => {
+                out.extend(a);
+                break;
+            }
+            (None, _) => {
+                out.extend(b.cloned());
+                break;
+            }
+        };
+        match ord {
+            Ordering::Less => out.extend(a.next()),
+            Ordering::Greater => out.extend(b.next().cloned()),
+            Ordering::Equal => {
+                // x ⊕ x = 0: both copies drop here, neither is cloned.
+                a.next();
+                b.next();
+            }
+        }
+    }
+    out.into_iter().collect()
+}
+
+/// Keep, once, each element of a sorted vector that occurs an odd number
+/// of times (as judged by `same`), preserving order.  Over `F₂` a
+/// monomial added `k` times contributes `k mod 2` times, and after the
+/// sort its copies are adjacent, so this one pass is the XOR-sum of the
+/// whole multiset.
+fn retain_odd<T>(v: &mut Vec<T>, same: impl Fn(&T, &T) -> bool) {
+    let len = v.len();
+    let (mut write, mut read) = (0, 0);
+    while read < len {
+        let mut end = read + 1;
+        while end < len && same(&v[end], &v[read]) {
+            end += 1;
+        }
+        if (end - read) % 2 == 1 {
+            v.swap(write, read);
+            write += 1;
+        }
+        read = end;
+    }
+    v.truncate(write);
+}
+
+/// An order-preserving `u64` key for a monomial of degree ≤ 4 whose
+/// variables all lie below `u16::MAX`: each variable plus one in a
+/// 16-bit field, from the top, zero-padded.  Integer order on the keys
+/// is then the lexicographic order of the index vectors (a proper prefix
+/// is smaller, as the zero padding makes it), and distinct monomials get
+/// distinct keys.  `None` for a monomial that does not fit.
+fn packed_key(m: &[u32]) -> Option<u64> {
+    if m.len() > 4 {
+        return None;
+    }
+    let mut key = 0u64;
+    for (k, &v) in m.iter().enumerate() {
+        if v >= u32::from(u16::MAX) {
+            return None;
+        }
+        key |= u64::from(v + 1) << (48 - 16 * k);
+    }
+    Some(key)
+}
+
+/// The XOR-sum of a multiset of monomials, each held as a `T` (owned, or
+/// borrowed from the sets being summed): sort, cancel pairs, turn the
+/// survivors into owned monomials with `own`, bulk-load them.
+///
+/// This is how a sum of many terms is formed without one tree operation
+/// per term, and a borrowed monomial that cancels is never cloned.  When
+/// every monomial has a [`packed_key`] — the Weil descent's are all at
+/// most quadratic or cubic over a few dozen variables — the sort compares
+/// integers instead of walking two index vectors behind two pointers per
+/// comparison; equal keys are equal monomials, so which of them survives
+/// cannot matter.  Otherwise it sorts the monomials themselves.
+fn xor_sum<T>(monos: Vec<T>, own: impl FnMut(T) -> Vec<u32>) -> BTreeSet<Vec<u32>>
+where
+    T: Ord + std::borrow::Borrow<Vec<u32>>,
+{
+    if monos.iter().all(|m| packed_key(m.borrow()).is_some()) {
+        let mut keyed: Vec<(u64, T)> = monos
+            .into_iter()
+            .map(|m| (packed_key(m.borrow()).unwrap_or_default(), m))
+            .collect();
+        keyed.sort_unstable_by_key(|p| p.0);
+        retain_odd(&mut keyed, |a, b| a.0 == b.0);
+        return keyed.into_iter().map(|(_, m)| m).map(own).collect();
+    }
+    let mut monos = monos;
+    monos.sort();
+    retain_odd(&mut monos, |a, b| a == b);
+    monos.into_iter().map(own).collect()
 }
 
 /// Union of two sorted variable lists, deduplicated because `x² = x`.
@@ -245,39 +368,52 @@ impl AnfF2m {
         self.coeffs.is_empty()
     }
 
+    /// Coefficient-wise `self ⊕ other`.  Each coefficient is one ordered
+    /// merge of the two monomial sets, cloning only the monomials that
+    /// survive it.
     pub fn xor(&self, other: &Self) -> Self {
         let len = self.len().max(other.len());
-        let mut out = Self::zero(len);
-        for i in 0..len {
-            if let Some(c) = self.coeffs.get(i) {
-                out.coeffs[i].xor_assign(c);
-            }
-            if let Some(c) = other.coeffs.get(i) {
-                out.coeffs[i].xor_assign(c);
-            }
-        }
-        out
+        let coeffs = (0..len)
+            .map(|i| match (self.coeffs.get(i), other.coeffs.get(i)) {
+                (Some(a), Some(b)) => AnfPoly {
+                    monomials: a
+                        .monomials
+                        .symmetric_difference(&b.monomials)
+                        .cloned()
+                        .collect(),
+                },
+                (Some(c), None) | (None, Some(c)) => c.clone(),
+                (None, None) => unreachable!("i < max(len)"),
+            })
+            .collect();
+        Self { coeffs }
     }
 
     /// Polynomial multiplication (convolution).  No reduction.
+    ///
+    /// Coefficient `k` of the product is `Σ_{i+j=k} a_i·b_j`; all the
+    /// monomial products for one `k` are collected and summed at once by
+    /// [`xor_sum`], so no intermediate `a_i·b_j` is ever built as a set.
     pub fn mul(&self, other: &Self) -> Self {
         if self.is_empty() || other.is_empty() {
             return Self::zero(0);
         }
-        let mut out = Self::zero(self.len() + other.len() - 1);
-        for (i, a) in self.coeffs.iter().enumerate() {
-            if a.is_zero() {
-                continue;
-            }
-            for (j, b) in other.coeffs.iter().enumerate() {
-                if b.is_zero() {
-                    continue;
+        let coeffs = (0..self.len() + other.len() - 1)
+            .map(|k| {
+                let mut prods = Vec::new();
+                for i in k.saturating_sub(other.len() - 1)..=k.min(self.len() - 1) {
+                    for a in &self.coeffs[i].monomials {
+                        for b in &other.coeffs[k - i].monomials {
+                            prods.push(merge_squarefree(a, b));
+                        }
+                    }
                 }
-                let prod = a.mul(b);
-                out.coeffs[i + j].xor_assign(&prod);
-            }
-        }
-        out
+                AnfPoly {
+                    monomials: xor_sum(prods, |m| m),
+                }
+            })
+            .collect();
+        Self { coeffs }
     }
 
     /// **Squaring as relocation.**  `(Σ c_d z^d)² = Σ c_d z^{2d}`: in
@@ -330,47 +466,107 @@ impl AnfF2m {
     /// Multiply by a *known* field constant.  Walks the constant's set
     /// bits and XORs a shifted copy per bit — the symbolic analogue of
     /// shift-and-add.
+    ///
+    /// The shifted copies are summed per output coefficient: coefficient
+    /// `k` is the XOR of `self`'s coefficients `k − j` over the set bits
+    /// `j`, whose monomials are gathered by reference and summed once, so
+    /// only the monomials that survive are cloned.
     pub fn mul_const(&self, c: &F2mElement, n: u32) -> Self {
         if self.is_empty() {
             return Self::zero(0);
         }
         let raw = c.raw_bits();
-        let mut out = Self::zero(self.len() + n as usize - 1);
-        for j in 0..n as usize {
-            let set = (raw.get(j / 64).copied().unwrap_or(0) >> (j % 64)) & 1 == 1;
-            if !set {
-                continue;
-            }
-            for (i, a) in self.coeffs.iter().enumerate() {
-                if !a.is_zero() {
-                    let a = a.clone();
-                    out.coeffs[i + j].xor_assign(&a);
+        let shifts: Vec<usize> = (0..n as usize)
+            .filter(|&j| (raw.get(j / 64).copied().unwrap_or(0) >> (j % 64)) & 1 == 1)
+            .collect();
+        let coeffs = (0..self.len() + n as usize - 1)
+            .map(|k| {
+                let mut parts = Vec::new();
+                for &j in &shifts {
+                    if let Some(a) = k.checked_sub(j).and_then(|i| self.coeffs.get(i)) {
+                        parts.extend(&a.monomials);
+                    }
                 }
-            }
-        }
-        out
+                AnfPoly {
+                    monomials: xor_sum(parts, Vec::clone),
+                }
+            })
+            .collect();
+        Self { coeffs }
     }
 
     /// Reduce modulo the field's irreducible, truncating to `n`
     /// coefficients.  `z^n ≡ Σ_{t ∈ low_terms} z^t`.
+    ///
+    /// Formed as the combination `1 · self` of
+    /// [`AnfF2m::reduced_combination`]: each low coefficient is summed
+    /// once from every coefficient that folds onto it, where folding the
+    /// top coefficients down one at a time would rebuild each target
+    /// once per coefficient above it.
     pub fn reduce(&mut self, n: u32, irr: &IrreduciblePoly) {
-        let n = n as usize;
-        if self.coeffs.len() <= n {
-            self.coeffs.resize(n, AnfPoly::zero());
+        if self.coeffs.len() <= n as usize {
+            self.coeffs.resize(n as usize, AnfPoly::zero());
             return;
         }
-        for d in (n..self.coeffs.len()).rev() {
-            if self.coeffs[d].is_zero() {
-                continue;
-            }
-            let top = std::mem::replace(&mut self.coeffs[d], AnfPoly::zero());
-            for &t in &irr.low_terms {
-                let target = d - n + t as usize;
-                let top = top.clone();
-                self.coeffs[target].xor_assign(&top);
+        self.coeffs = Self::reduced_combination(&[(self, &F2mElement::one(n))], n, irr);
+    }
+
+    /// `Σ_T c_T · X_T`, reduced modulo the field's irreducible to `n`
+    /// coefficients, for symbolic elements `X_T` and *known* constants
+    /// `c_T`: the element that summing the [`AnfF2m::mul_const`] products
+    /// and calling [`AnfF2m::reduce`] once gives, computed without
+    /// building any unreduced intermediate.
+    ///
+    /// Every step of that is `F₂`-linear in the coefficients: `c_T · z^i`
+    /// is the XOR of `z^{i+j}` over the set bits `j` of `c_T`, and each
+    /// `z^d` reduces to a fixed set of low powers ([`reduction_images`]).
+    /// So coefficient `t` of the result is the XOR of every `X_T[i]`
+    /// that lands on `z^t` an odd number of times, and those are
+    /// gathered by reference and summed once per `t` by [`xor_sum`]: the
+    /// only monomials cloned are the ones in the answer.
+    fn reduced_combination(
+        terms: &[(&AnfF2m, &F2mElement)],
+        n: u32,
+        irr: &IrreduciblePoly,
+    ) -> Vec<AnfPoly> {
+        let n = n as usize;
+        let longest = terms.iter().map(|(x, _)| x.len()).max().unwrap_or(0);
+        let images = reduction_images(longest + n, n, irr);
+        let mut parts: Vec<Vec<&Vec<u32>>> = vec![Vec::new(); n];
+        let mut lands = vec![0u64; n.div_ceil(64)];
+        for &(x, c) in terms {
+            let raw = c.raw_bits();
+            let shifts: Vec<usize> = (0..n)
+                .filter(|&j| (raw.get(j / 64).copied().unwrap_or(0) >> (j % 64)) & 1 == 1)
+                .collect();
+            for (i, coeff) in x.coeffs.iter().enumerate() {
+                if coeff.is_zero() {
+                    continue;
+                }
+                // Where `c · z^i` lands after reduction, with multiplicity
+                // mod 2: two shifts that reduce onto the same `z^t` cancel.
+                lands.fill(0);
+                for &j in &shifts {
+                    for (w, img) in lands.iter_mut().zip(&images[i + j]) {
+                        *w ^= img;
+                    }
+                }
+                for (word, &bits) in lands.iter().enumerate() {
+                    let mut bits = bits;
+                    while bits != 0 {
+                        let t = word * 64 + bits.trailing_zeros() as usize;
+                        parts[t].extend(&coeff.monomials);
+                        bits &= bits - 1;
+                    }
+                }
             }
         }
-        self.coeffs.truncate(n);
+        parts
+            .into_iter()
+            .map(|p| AnfPoly {
+                monomials: xor_sum(p, Vec::clone),
+            })
+            .collect()
     }
 
     /// Evaluate coefficient-wise at a Boolean assignment, giving the
@@ -378,6 +574,30 @@ impl AnfF2m {
     pub fn eval_bits(&self, assignment: &[bool]) -> Vec<bool> {
         self.coeffs.iter().map(|c| c.eval(assignment)).collect()
     }
+}
+
+/// `images[d]` is `z^d` reduced modulo `z^n + Σ_{t ∈ low_terms} z^t`, as
+/// a bit set over the powers `0..n`, for every `d < len`: the linear map
+/// that reduction applies to coefficient positions.  Built upwards, since
+/// `z^d = Σ_t z^{d−n+t}` and every `d − n + t` is below `d`.
+fn reduction_images(len: usize, n: usize, irr: &IrreduciblePoly) -> Vec<Vec<u64>> {
+    let words = n.div_ceil(64);
+    let mut images: Vec<Vec<u64>> = Vec::with_capacity(len);
+    for d in 0..len {
+        let mut image = vec![0u64; words];
+        if d < n {
+            image[d / 64] = 1 << (d % 64);
+        } else {
+            for &t in &irr.low_terms {
+                assert!((t as usize) < n, "low terms lie below z^n");
+                for (w, src) in image.iter_mut().zip(&images[d - n + t as usize]) {
+                    *w ^= src;
+                }
+            }
+        }
+        images.push(image);
+    }
+    images
 }
 
 // ── Variable layout ─────────────────────────────────────────────────
@@ -518,7 +738,11 @@ pub fn weil_descend_s4(
     //        + e₃e₁²x_R + e₃x_R³ + e₁²e₃²x_R² + e₃²x_R⁴ + e₃² + e₂²x_R²
     //
     // Note how few real multiplications this needs: every `pow` with an
-    // even exponent is a relocation, and `mul_const` is shift-and-add.
+    // even exponent is a relocation, and every x_R power is a known
+    // constant.  So f₃ is one F₂-linear combination Σ c_T · X_T of
+    // symbolic X_T with constant c_T, which is formed and reduced in a
+    // single pass (AnfF2m::reduced_combination) — the same element as
+    // summing the twelve `X_T.mul_const(c_T)` products and reducing once.
     let e1_2 = e1.square();
     let e2_2 = e2.square();
     let e3_2 = e3.square();
@@ -526,30 +750,31 @@ pub fn weil_descend_s4(
     let e2_4 = e2_2.square();
     let e3_4 = e3_2.square();
     let e3_3 = e3_2.mul(e3);
+    let e3_e2_2 = e3.mul(&e2_2);
+    let e3_e1_2 = e3.mul(&e1_2);
+    let e1_2_e3_2 = e1_2.mul(&e3_2);
+    let xr4_sym = AnfF2m::from_const(&xr4, n);
+    let one = F2mElement::one(n);
 
-    let mut f3 = AnfF2m::zero(0);
-    let terms: Vec<AnfF2m> = vec![
-        AnfF2m::from_const(&xr4, n),        // x_R⁴
-        e1_4,                               // e₁⁴
-        e3_4,                               // e₃⁴
-        e2_4.mul_const(&xr4, n),            // e₂⁴ x_R⁴
-        e3_3.mul_const(&xr1, n),            // e₃³ x_R
-        e3.mul(&e2_2).mul_const(&xr3, n),   // e₃ e₂² x_R³
-        e3.mul(&e1_2).mul_const(&xr1, n),   // e₃ e₁² x_R
-        e3.mul_const(&xr3, n),              // e₃ x_R³
-        e1_2.mul(&e3_2).mul_const(&xr2, n), // e₁² e₃² x_R²
-        e3_2.mul_const(&xr4, n),            // e₃² x_R⁴
-        e3_2.clone(),                       // e₃²
-        e2_2.mul_const(&xr2, n),            // e₂² x_R²
+    let terms: [(&AnfF2m, &F2mElement); 12] = [
+        (&xr4_sym, &one),   // x_R⁴
+        (&e1_4, &one),      // e₁⁴
+        (&e3_4, &one),      // e₃⁴
+        (&e2_4, &xr4),      // e₂⁴ x_R⁴
+        (&e3_3, &xr1),      // e₃³ x_R
+        (&e3_e2_2, &xr3),   // e₃ e₂² x_R³
+        (&e3_e1_2, &xr1),   // e₃ e₁² x_R
+        (e3, &xr3),         // e₃ x_R³
+        (&e1_2_e3_2, &xr2), // e₁² e₃² x_R²
+        (&e3_2, &xr4),      // e₃² x_R⁴
+        (&e3_2, &one),      // e₃²
+        (&e2_2, &xr2),      // e₂² x_R²
     ];
-    for t in &terms {
-        f3 = f3.xor(t);
-    }
 
     // One reduction, at the end.
-    f3.reduce(n, irr);
+    let semaev = AnfF2m::reduced_combination(&terms, n, irr);
     debug_assert!(
-        f3.coeffs.iter().all(|c| c.degree() <= 2),
+        semaev.iter().all(|c| c.degree() <= 2),
         "the symmetrised system must be quadratic in the e-variables"
     );
 
@@ -557,7 +782,7 @@ pub fn weil_descend_s4(
         n,
         l,
         correspondence,
-        semaev: f3.coeffs,
+        semaev,
     }
 }
 
@@ -785,5 +1010,318 @@ mod tests {
         let (n, l, irr, x_r, _) = corpus_n19l6();
         let b = F2mElement::from_bit_positions(&[1], n);
         let _ = weil_descend_s4(n, l, &irr, &b, &x_r);
+    }
+
+    // ── The merged and gathered sums against the old toggles ────────
+
+    /// The toggle-based arithmetic this module used before its sums
+    /// became ordered merges and gathered parity sums, kept verbatim as
+    /// the oracle those are pinned against.  Equal results are equal
+    /// monomial sets, so `monomials()` also iterates them identically.
+    mod toggle_reference {
+        use super::super::{e_len, merge_squarefree, AnfF2m, AnfPoly};
+        use crate::binary_ecc::{F2mElement, IrreduciblePoly};
+
+        fn toggle(p: &mut AnfPoly, mono: Vec<u32>) {
+            if !p.monomials.remove(&mono) {
+                p.monomials.insert(mono);
+            }
+        }
+
+        pub fn xor_assign(p: &mut AnfPoly, other: &AnfPoly) {
+            for m in &other.monomials {
+                toggle(p, m.clone());
+            }
+        }
+
+        pub fn mul(a: &AnfPoly, b: &AnfPoly) -> AnfPoly {
+            let mut out = AnfPoly::zero();
+            for x in &a.monomials {
+                for y in &b.monomials {
+                    toggle(&mut out, merge_squarefree(x, y));
+                }
+            }
+            out
+        }
+
+        pub fn xor(a: &AnfF2m, b: &AnfF2m) -> AnfF2m {
+            let len = a.len().max(b.len());
+            let mut out = AnfF2m::zero(len);
+            for i in 0..len {
+                if let Some(c) = a.coeffs.get(i) {
+                    xor_assign(&mut out.coeffs[i], c);
+                }
+                if let Some(c) = b.coeffs.get(i) {
+                    xor_assign(&mut out.coeffs[i], c);
+                }
+            }
+            out
+        }
+
+        pub fn f2m_mul(a: &AnfF2m, b: &AnfF2m) -> AnfF2m {
+            if a.is_empty() || b.is_empty() {
+                return AnfF2m::zero(0);
+            }
+            let mut out = AnfF2m::zero(a.len() + b.len() - 1);
+            for (i, x) in a.coeffs.iter().enumerate() {
+                if x.is_zero() {
+                    continue;
+                }
+                for (j, y) in b.coeffs.iter().enumerate() {
+                    if y.is_zero() {
+                        continue;
+                    }
+                    let prod = mul(x, y);
+                    xor_assign(&mut out.coeffs[i + j], &prod);
+                }
+            }
+            out
+        }
+
+        pub fn mul_const(a: &AnfF2m, c: &F2mElement, n: u32) -> AnfF2m {
+            if a.is_empty() {
+                return AnfF2m::zero(0);
+            }
+            let raw = c.raw_bits();
+            let mut out = AnfF2m::zero(a.len() + n as usize - 1);
+            for j in 0..n as usize {
+                let set = (raw.get(j / 64).copied().unwrap_or(0) >> (j % 64)) & 1 == 1;
+                if !set {
+                    continue;
+                }
+                for (i, x) in a.coeffs.iter().enumerate() {
+                    if !x.is_zero() {
+                        let x = x.clone();
+                        xor_assign(&mut out.coeffs[i + j], &x);
+                    }
+                }
+            }
+            out
+        }
+
+        pub fn reduce(a: &mut AnfF2m, n: u32, irr: &IrreduciblePoly) {
+            let n = n as usize;
+            if a.coeffs.len() <= n {
+                a.coeffs.resize(n, AnfPoly::zero());
+                return;
+            }
+            for d in (n..a.coeffs.len()).rev() {
+                if a.coeffs[d].is_zero() {
+                    continue;
+                }
+                let top = std::mem::replace(&mut a.coeffs[d], AnfPoly::zero());
+                for &t in &irr.low_terms {
+                    let target = d - n + t as usize;
+                    let top = top.clone();
+                    xor_assign(&mut a.coeffs[target], &top);
+                }
+            }
+            a.coeffs.truncate(n);
+        }
+
+        /// The old `weil_descend_s4` body, both halves, with every sum,
+        /// product and reduction taken from this module: returns
+        /// `(correspondence, semaev)`.
+        pub fn weil_descend_s4(
+            n: u32,
+            l: u32,
+            irr: &IrreduciblePoly,
+            x_r: &F2mElement,
+        ) -> (Vec<Vec<AnfPoly>>, Vec<AnfPoly>) {
+            let xs: Vec<AnfF2m> = (0..3)
+                .map(|i| AnfF2m::from_vars(i as u32 * l, l as usize))
+                .collect();
+            let sigma1 = xor(&xor(&xs[0], &xs[1]), &xs[2]);
+            let x0x1 = f2m_mul(&xs[0], &xs[1]);
+            let x0x2 = f2m_mul(&xs[0], &xs[2]);
+            let x1x2 = f2m_mul(&xs[1], &xs[2]);
+            let sigma2 = xor(&xor(&x0x1, &x0x2), &x1x2);
+            let sigma3 = f2m_mul(&x0x1, &xs[2]);
+            let mut correspondence = Vec::with_capacity(3);
+            for (i, sigma) in [sigma1, sigma2, sigma3].iter().enumerate() {
+                let mut row = sigma.coeffs.clone();
+                row.resize(e_len(i + 1, l), AnfPoly::zero());
+                correspondence.push(row);
+            }
+
+            let mut offset = 0u32;
+            let mut e_syms = Vec::with_capacity(3);
+            for i in 1..=3 {
+                let len = e_len(i, l);
+                e_syms.push(AnfF2m::from_vars(offset, len));
+                offset += len as u32;
+            }
+            let (e1, e2, e3) = (&e_syms[0], &e_syms[1], &e_syms[2]);
+            let xr1 = x_r.clone();
+            let xr2 = xr1.square(irr);
+            let xr3 = xr2.mul(&xr1, irr);
+            let xr4 = xr2.square(irr);
+            let e1_2 = e1.square();
+            let e2_2 = e2.square();
+            let e3_2 = e3.square();
+            let e1_4 = e1_2.square();
+            let e2_4 = e2_2.square();
+            let e3_4 = e3_2.square();
+            let e3_3 = f2m_mul(&e3_2, e3);
+            let terms: Vec<AnfF2m> = vec![
+                AnfF2m::from_const(&xr4, n),
+                e1_4,
+                e3_4,
+                mul_const(&e2_4, &xr4, n),
+                mul_const(&e3_3, &xr1, n),
+                mul_const(&f2m_mul(e3, &e2_2), &xr3, n),
+                mul_const(&f2m_mul(e3, &e1_2), &xr1, n),
+                mul_const(e3, &xr3, n),
+                mul_const(&f2m_mul(&e1_2, &e3_2), &xr2, n),
+                mul_const(&e3_2, &xr4, n),
+                e3_2.clone(),
+                mul_const(&e2_2, &xr2, n),
+            ];
+            let mut f3 = AnfF2m::zero(0);
+            for t in &terms {
+                f3 = xor(&f3, t);
+            }
+            reduce(&mut f3, n, irr);
+            (correspondence, f3.coeffs)
+        }
+    }
+
+    use rand::rngs::StdRng;
+    use rand::{Rng, SeedableRng};
+
+    /// A random ANF: up to `count` monomials of degree ≤ `max_deg` over
+    /// the variable ids in `palette`.  A small palette makes repeated
+    /// monomials, and so cancellation, common; a palette with ids at and
+    /// above `u16::MAX` and degrees above four reaches every monomial
+    /// shape the sums have to order.
+    fn random_anf(rng: &mut StdRng, palette: &[u32], max_deg: usize, count: usize) -> AnfPoly {
+        let mut p = AnfPoly::zero();
+        for _ in 0..rng.gen_range(0..=count) {
+            let deg = rng.gen_range(0..=max_deg);
+            let mut m: Vec<u32> = (0..deg)
+                .map(|_| palette[rng.gen_range(0..palette.len())])
+                .collect();
+            m.sort_unstable();
+            m.dedup();
+            p.monomials.insert(m);
+        }
+        p
+    }
+
+    fn random_f2m(rng: &mut StdRng, len: usize, palette: &[u32], count: usize) -> AnfF2m {
+        AnfF2m {
+            coeffs: (0..len)
+                .map(|_| random_anf(rng, palette, 3, count))
+                .collect(),
+        }
+    }
+
+    fn palettes() -> [Vec<u32>; 3] {
+        [
+            (0..6).collect(),
+            (0..40).collect(),
+            vec![0, 7, 65_533, 65_534, 65_535, 65_536, 70_000, u32::MAX - 1],
+        ]
+    }
+
+    /// The ordered-merge `xor_assign` and the gathered `mul` give the
+    /// toggles' monomial sets on random operands, including empty,
+    /// identical and heavily overlapping ones.
+    #[test]
+    fn anf_sums_agree_with_toggles() {
+        let mut rng = StdRng::seed_from_u64(0x414e_465f_786f_72);
+        let palettes = palettes();
+        for round in 0..600 {
+            let palette = &palettes[round % palettes.len()];
+            let a = random_anf(&mut rng, palette, 6, 40);
+            let b = random_anf(&mut rng, palette, 6, 40);
+            let zero = AnfPoly::zero();
+            for (x, y) in [(&a, &b), (&a, &a), (&a, &zero), (&zero, &b)] {
+                let mut got = x.clone();
+                got.xor_assign(y);
+                let mut want = x.clone();
+                toggle_reference::xor_assign(&mut want, y);
+                assert_eq!(got, want, "xor_assign, round {round}");
+                assert_eq!(x.mul(y), toggle_reference::mul(x, y), "mul, round {round}");
+            }
+        }
+    }
+
+    /// `AnfF2m::{xor, mul, mul_const, reduce}` give the toggles'
+    /// coefficients on random elements, with field widths on both sides
+    /// of a 64-bit word and reductions deep enough to fold twice.
+    #[test]
+    fn symbolic_field_ops_agree_with_toggles() {
+        let mut rng = StdRng::seed_from_u64(0x5334_5f66_326d);
+        let palettes = palettes();
+        for round in 0..80 {
+            let palette = &palettes[round % palettes.len()];
+            let n = [5u32, 17, 63, 64, 67, 130][round % 6];
+            let mut low_terms = vec![0];
+            for _ in 0..rng.gen_range(0..4) {
+                low_terms.push(rng.gen_range(1..n));
+            }
+            low_terms.sort_unstable();
+            low_terms.dedup();
+            let irr = IrreduciblePoly {
+                degree: n,
+                low_terms,
+            };
+            let bits: Vec<u32> = (0..n).filter(|_| rng.gen_bool(0.5)).collect();
+            let c = F2mElement::from_bit_positions(&bits, n);
+
+            let (len_a, len_b) = (rng.gen_range(0..12), rng.gen_range(0..12));
+            let a = random_f2m(&mut rng, len_a, palette, 6);
+            let b = random_f2m(&mut rng, len_b, palette, 6);
+            assert_eq!(a.xor(&b).coeffs, toggle_reference::xor(&a, &b).coeffs);
+            assert_eq!(a.mul(&b).coeffs, toggle_reference::f2m_mul(&a, &b).coeffs);
+            assert_eq!(
+                a.mul_const(&c, n).coeffs,
+                toggle_reference::mul_const(&a, &c, n).coeffs
+            );
+
+            let len = rng.gen_range(0..3 * n as usize);
+            let long = random_f2m(&mut rng, len, palette, 6);
+            let mut got = long.clone();
+            got.reduce(n, &irr);
+            let mut want = long;
+            toggle_reference::reduce(&mut want, n, &irr);
+            assert_eq!(got.coeffs, want.coeffs, "reduce, n = {n}, round {round}");
+        }
+    }
+
+    /// **The descended system is unchanged**: both halves of
+    /// [`weil_descend_s4`] equal the toggle-based construction's, on the
+    /// perfbench cell (`n = 17, l = 4`), the corpus cell, a cell whose
+    /// `e₃⁴` runs past `z^{2n}` (so reduction folds more than once), and
+    /// a field wider than one 64-bit word.
+    #[test]
+    fn weil_descent_agrees_with_toggle_reference() {
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        let mut rng = StdRng::seed_from_u64(0x7765_696c);
+        let cases = [
+            (17, 4, find_irreducible_sparse(17).expect("irreducible")),
+            (19, 6, corpus_n19l6().2),
+            (11, 6, find_irreducible_sparse(11).expect("irreducible")),
+            (
+                67,
+                3,
+                IrreduciblePoly {
+                    degree: 67,
+                    low_terms: vec![0, 1, 2, 5],
+                },
+            ),
+        ];
+        for (n, l, irr) in cases {
+            let b = F2mElement::one(n);
+            for _ in 0..3 {
+                let bits: Vec<u32> = (0..n).filter(|_| rng.gen_bool(0.5)).collect();
+                let x_r = F2mElement::from_bit_positions(&bits, n);
+                let sys = weil_descend_s4(n, l, &irr, &b, &x_r);
+                let (correspondence, semaev) = toggle_reference::weil_descend_s4(n, l, &irr, &x_r);
+                assert_eq!(sys.correspondence, correspondence, "n = {n}, l = {l}");
+                assert_eq!(sys.semaev, semaev, "n = {n}, l = {l}");
+            }
+        }
     }
 }
