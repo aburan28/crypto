@@ -229,10 +229,10 @@ def main():
         },
         "runs": [],
     }
-    if "avx2" not in receipt["host"].get("cpu_features", []) or "avx512f" in receipt["host"].get("cpu_features", []):
+    if "avx2" not in receipt["host"].get("cpu_features", []):
         receipt["status"] = "unsupported_host"
         write_receipt(output, receipt)
-        print("AVX2 without AVX-512F required for this experiment", file=sys.stderr)
+        print("AVX2 required for this experiment", file=sys.stderr)
         return 2
     write_receipt(output, receipt)
     expected = {}
