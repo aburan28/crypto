@@ -436,6 +436,12 @@ By AGENTS.md §3, against the boundary each row is entitled to.
    rho reduction on the exponent side; that is a parameter statement for
    pairing-based schemes, and the place to look next is which deployed
    schemes publish `[α^i]G` for `i` in the thousands or beyond.
+   **Done for powers-of-tau setups** in
+   [`RESEARCH_SRS_CHEON_CENSUS.md`](RESEARCH_SRS_CHEON_CENSUS.md): the
+   deployed setups give away 5.74 (EIP-4844 mainnet) to 14.32 bits
+   (Perpetual Powers of Tau), and the largest admissible `d` beats the
+   published power-of-two analyses by ≈ 0.5 bit.  `q`-SDH signature and
+   broadcast schemes remain.
 3. **Kangaroo memory.**  The kangaroo row costs `2–4×` the BSGS row in
    operations and `√(p/d)/Θ` less memory; that trade is where a
    large-instance run would be engineered, and the Fujitsu numbers say the
