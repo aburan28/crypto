@@ -45,20 +45,22 @@ jobs:
           cp "$RUNNER_TEMP/f5-row-reference-target/release/examples/f4_f2_bench" "$RUNNER_TEMP/f5-row-reference-binary"
       - name: Build candidate
         run: cargo build --release --example f4_f2_bench
-      - name: Five A/A and five paired A/B samples per workload
+      # The frozen one-thread gate passed in run 36451830641. This follow-up
+      # exercises the preregistered four-thread control without changing code.
+      - name: Four-thread A/A and paired A/B control
         run: |
           python3 research/f5_row_build_20260928/paired_f5.py \
             "$RUNNER_TEMP/f5-row-reference-binary" \
             target/release/examples/f4_f2_bench \
-            research/f5_row_build_20260928/ci-result.json \
-            --pairs 5 --threads 1
+            research/f5_row_build_20260928/ci-result-t4.json \
+            --pairs 5 --threads 4
       - name: Preserve raw calls and both binaries
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: f5-row-build-${{ github.sha }}
+          name: f5-row-build-t4-${{ github.sha }}
           path: |
-            research/f5_row_build_20260928/ci-result.json
+            research/f5_row_build_20260928/ci-result-t4.json
             ${{ runner.temp }}/f5-row-reference-binary
             target/release/examples/f4_f2_bench
           if-no-files-found: warn
