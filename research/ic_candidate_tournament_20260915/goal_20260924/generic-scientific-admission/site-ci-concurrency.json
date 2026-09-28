@@ -1,0 +1,33 @@
+{
+  "actionlint_original": "../../../../../private/tmp/ic-site-workflow-before.yml:11:13: scheduled job runs too frequently. it runs once per 180 seconds. the shortest interval is once every 5 minutes [events]\n   |\n11 |     - cron: \"*/3 * * * *\"\n   |             ^~~~\n",
+  "actionlint_result": "same existing schedule-frequency warning before and after; no new diagnostics",
+  "actionlint_updated": ".github/workflows/ecc2k130-status.yml:11:13: scheduled job runs too frequently. it runs once per 180 seconds. the shortest interval is once every 5 minutes [events]\n   |\n11 |     - cron: \"*/3 * * * *\"\n   |             ^~~~\n",
+  "actionlint_version": "v0.0.0-20250119115933-03d0035246f3",
+  "attempts": [
+    {
+      "conclusion": "cancelled",
+      "event": "pull_request",
+      "head_branch": "codex/ic-generic-scientific-admission",
+      "head_sha": "a9f12793489a0690a3487da82b36db5dcb726017",
+      "id": 36216884626,
+      "run_attempt": 1,
+      "status": "completed"
+    },
+    {
+      "conclusion": "cancelled",
+      "event": "pull_request",
+      "head_branch": "codex/ic-generic-scientific-admission",
+      "head_sha": "a9f12793489a0690a3487da82b36db5dcb726017",
+      "id": 36216884626,
+      "run_attempt": 2,
+      "status": "completed"
+    }
+  ],
+  "jobs_triggers_permissions_unchanged": true,
+  "local_yaml_parse": "PASS (Ruby YAML; local Python lacks PyYAML)",
+  "new_group": "${{ github.event_name == 'pull_request' && format('ecc2k130-status-pages-pr-{0}', github.event.pull_request.number) || 'ecc2k130-status-pages' }}",
+  "observed_jobs": 0,
+  "publication_group_unchanged": true,
+  "rule": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#concurrency",
+  "scope": "CI scheduling repair; no measurement or promotion change"
+}

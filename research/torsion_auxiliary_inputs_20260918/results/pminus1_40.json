@@ -1,0 +1,294 @@
+{
+ "bits": 40,
+ "case": "p-1",
+ "curve": {
+  "q": 892922107019,
+  "a": 68202370043,
+  "b": 122440454391,
+  "p": 892921861621,
+  "G": [
+   720703401834,
+   365990133875
+  ],
+  "p_minus_1": {
+   "2": 2,
+   "3": 3,
+   "5": 1,
+   "4967": 1,
+   "10739": 1,
+   "31": 1
+  },
+  "p_plus_1": {
+   "2": 1,
+   "7": 1,
+   "63780132973": 1
+  }
+ },
+ "d": 966510,
+ "log_p_d": 0.5008199963825091,
+ "sqrt_p": 944945.4278533761,
+ "floor_dlpwai": 961.1774029808622,
+ "rows": [
+  {
+   "variant": "cheon_p-1_bsgs_naive",
+   "seed": 0,
+   "alpha": 24588183613,
+   "correct": true,
+   "ops": 132757,
+   "add": 44014,
+   "dbl": 88743,
+   "smul": 2355,
+   "phases": {
+    "p-1:precompute": 0,
+    "p-1:step1:baby": 54415,
+    "p-1:step1:giant": 12669,
+    "p-1:step2:precompute": 56,
+    "p-1:step2:baby": 55395,
+    "p-1:step2:giant": 10170,
+    "p-1:verify": 52
+   },
+   "S": 0.14049171104153904,
+   "ops_over_floor": 138.11914386281435,
+   "secs": 0.2398667335510254
+  },
+  {
+   "variant": "cheon_p-1_bsgs_comb",
+   "seed": 0,
+   "alpha": 24588183613,
+   "correct": true,
+   "ops": 14706,
+   "add": 14454,
+   "dbl": 252,
+   "smul": 2355,
+   "phases": {
+    "p-1:precompute": 2620,
+    "p-1:step1:baby": 3836,
+    "p-1:step1:giant": 897,
+    "p-1:step2:precompute": 2676,
+    "p-1:step2:baby": 3908,
+    "p-1:step2:giant": 717,
+    "p-1:verify": 52
+   },
+   "S": 0.015562803487400838,
+   "ops_over_floor": 15.29998515819541,
+   "secs": 0.030869245529174805,
+   "table_points": 5100,
+   "comb_w": 8
+  },
+  {
+   "variant": "cheon_p-1_kangaroo_comb",
+   "seed": 0,
+   "alpha": 24588183613,
+   "correct": true,
+   "ops": 61027,
+   "add": 60775,
+   "dbl": 252,
+   "smul": 13997,
+   "phases": {
+    "p-1:kang1:precompute": 2620,
+    "p-1:kang1:walk": 5183,
+    "p-1:kang2:shift": 56,
+    "p-1:kang2:precompute": 2620,
+    "p-1:kang2:walk": 50496,
+    "p-1:verify": 52
+   },
+   "S": 0.06458256551241745,
+   "ops_over_floor": 63.49192127357482,
+   "secs": 0.15045380592346191
+  },
+  {
+   "variant": "rho_reference",
+   "seed": 0,
+   "alpha": 24588183613,
+   "correct": true,
+   "ops": 696267,
+   "add": 682803,
+   "dbl": 13464,
+   "smul": 75,
+   "phases": {
+    "rho:precompute": 3698,
+    "rho:walk": 692517,
+    "rho:verify": 52
+   },
+   "S": 0.7368330270476078,
+   "ops_over_floor": 724.3896889800927,
+   "secs": 1.6757893562316895,
+   "steps": 681324,
+   "walks": 5
+  },
+  {
+   "variant": "cheon_p-1_bsgs_naive",
+   "seed": 1,
+   "alpha": 501840440104,
+   "correct": true,
+   "ops": 131666,
+   "add": 43649,
+   "dbl": 88017,
+   "smul": 2336,
+   "phases": {
+    "p-1:precompute": 0,
+    "p-1:step1:baby": 54415,
+    "p-1:step1:giant": 14012,
+    "p-1:step2:precompute": 61,
+    "p-1:step2:baby": 55395,
+    "p-1:step2:giant": 7729,
+    "p-1:verify": 54
+   },
+   "S": 0.139337147012928,
+   "ops_over_floor": 136.9840776444279,
+   "secs": 0.2464139461517334
+  },
+  {
+   "variant": "cheon_p-1_bsgs_comb",
+   "seed": 1,
+   "alpha": 501840440104,
+   "correct": true,
+   "ops": 14637,
+   "add": 14382,
+   "dbl": 255,
+   "smul": 2336,
+   "phases": {
+    "p-1:precompute": 2620,
+    "p-1:step1:baby": 3836,
+    "p-1:step1:giant": 993,
+    "p-1:step2:precompute": 2681,
+    "p-1:step2:baby": 3908,
+    "p-1:step2:giant": 545,
+    "p-1:verify": 54
+   },
+   "S": 0.015489783397598673,
+   "ops_over_floor": 15.228198202128805,
+   "secs": 0.030679941177368164,
+   "table_points": 5100,
+   "comb_w": 8
+  },
+  {
+   "variant": "cheon_p-1_kangaroo_comb",
+   "seed": 1,
+   "alpha": 501840440104,
+   "correct": true,
+   "ops": 67201,
+   "add": 66946,
+   "dbl": 255,
+   "smul": 15540,
+   "phases": {
+    "p-1:kang1:precompute": 2620,
+    "p-1:kang1:walk": 26584,
+    "p-1:kang2:shift": 61,
+    "p-1:kang2:precompute": 2620,
+    "p-1:kang2:walk": 35262,
+    "p-1:verify": 54
+   },
+   "S": 0.07111627615645477,
+   "ops_over_floor": 69.91529325553445,
+   "secs": 0.17821097373962402
+  },
+  {
+   "variant": "rho_reference",
+   "seed": 1,
+   "alpha": 501840440104,
+   "correct": true,
+   "ops": 1918101,
+   "add": 1885750,
+   "dbl": 32351,
+   "smul": 89,
+   "phases": {
+    "rho:precompute": 3622,
+    "rho:walk": 1914425,
+    "rho:verify": 54
+   },
+   "S": 2.02985372854529,
+   "ops_over_floor": 1995.5743799755048,
+   "secs": 4.888430595397949,
+   "steps": 1884089,
+   "walks": 12
+  },
+  {
+   "variant": "cheon_p-1_bsgs_naive",
+   "seed": 2,
+   "alpha": 824453197792,
+   "correct": true,
+   "ops": 174332,
+   "add": 57757,
+   "dbl": 116575,
+   "smul": 3092,
+   "phases": {
+    "p-1:precompute": 0,
+    "p-1:step1:baby": 54415,
+    "p-1:step1:giant": 30578,
+    "p-1:step2:precompute": 53,
+    "p-1:step2:baby": 55395,
+    "p-1:step2:giant": 33826,
+    "p-1:verify": 65
+   },
+   "S": 0.18448896080277186,
+   "ops_over_floor": 181.37338586961255,
+   "secs": 0.3200654983520508
+  },
+  {
+   "variant": "cheon_p-1_bsgs_comb",
+   "seed": 2,
+   "alpha": 824453197792,
+   "correct": true,
+   "ops": 17652,
+   "add": 17395,
+   "dbl": 257,
+   "smul": 3092,
+   "phases": {
+    "p-1:precompute": 2620,
+    "p-1:step1:baby": 3836,
+    "p-1:step1:giant": 2164,
+    "p-1:step2:precompute": 2673,
+    "p-1:step2:baby": 3908,
+    "p-1:step2:giant": 2386,
+    "p-1:verify": 65
+   },
+   "S": 0.018680443843302027,
+   "ops_over_floor": 18.364976065039126,
+   "secs": 0.038742780685424805,
+   "table_points": 5100,
+   "comb_w": 8
+  },
+  {
+   "variant": "cheon_p-1_kangaroo_comb",
+   "seed": 2,
+   "alpha": 824453197792,
+   "correct": true,
+   "ops": 45206,
+   "add": 44949,
+   "dbl": 257,
+   "smul": 10016,
+   "phases": {
+    "p-1:kang1:precompute": 2620,
+    "p-1:kang1:walk": 6843,
+    "p-1:kang2:shift": 53,
+    "p-1:kang2:precompute": 2620,
+    "p-1:kang2:walk": 33005,
+    "p-1:verify": 65
+   },
+   "S": 0.04783979970430045,
+   "ops_over_floor": 47.031900520969785,
+   "secs": 0.11005353927612305
+  },
+  {
+   "variant": "rho_reference",
+   "seed": 2,
+   "alpha": 824453197792,
+   "correct": true,
+   "ops": 1547711,
+   "add": 1520864,
+   "dbl": 26847,
+   "smul": 85,
+   "phases": {
+    "rho:precompute": 3668,
+    "rho:walk": 1543978,
+    "rho:verify": 65
+   },
+   "S": 1.6378840030116033,
+   "ops_over_floor": 1610.224080591308,
+   "secs": 3.818465232849121,
+   "steps": 1519232,
+   "walks": 10
+  }
+ ]
+}

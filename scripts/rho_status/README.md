@@ -1,6 +1,6 @@
 # ECC2K-130 public status snapshot
 
-GitHub Action, run every 15 minutes, that reads the private Pollard-ρ distinguished-point
+GitHub Action, run every 3 minutes, that reads the private Pollard-ρ distinguished-point
 store and publishes **aggregates only** to GitHub Pages.
 
 The page never includes point keys, walk coefficients `(a, b)`, seeds, or
@@ -20,7 +20,7 @@ sources:
 1. **The ingest host's public `status.json`** — first, always. The ingest
    host (`ecc2k130/aws/dp_ingest.py`, `publishStatus`) writes the campaign
    counts, the 48-hour hourly series, the checkpointed walk total and its
-   own health to the status bucket every `--status-every` seconds (1800).
+   own health to the status bucket every `--status-every` seconds (180).
    It is one HTTPS GET, retried, and it needs no EC2 instance, no SSH key
    and no security-group change. `work_feed.py --as-snapshot` copies that
    document (with `work.per_slot` stripped, `per_worker` empty, and the
@@ -73,8 +73,8 @@ Two more things stop one dependency from freezing the page:
   Before this the page had one sentence for both, and the fix for a dead
   walker was indistinguishable from the fix for a dead cron.
 
-The dashboard's stale threshold is 90 minutes: two missed feed writes at
-the ingest host's 30-minute cadence, or six missed Action runs.
+The dashboard's stale threshold is 90 minutes: many missed feed writes at
+the ingest host's 3-minute cadence, or thirty missed Action runs.
 `test_rho_status.py` pins it to both cadences.
 
 `snapshot.py` on the walker does not scan `distinguished_points` on every
@@ -195,6 +195,34 @@ looked like a dead walk on this page until that distinction existed.
 
 A recorded collision is **not** treated as a solved discrete log on the
 page. Independent verification of `[k]P = Q` is still required.
+
+Two counts published since 2026-09-21 say whether the points being added
+can take part in a collision at all, because on 2026-09-20 most could not
+and nothing on the page said so:
+
+- `work.off_weight_slots` / `work.off_weight_walking_slots` — slots whose
+  checkpointed iterations divided by the records they uploaded is more than
+  `2^1.0` away from the campaign's `2^28.41` per point (`dp_ingest.py`,
+  `dpWeightVerdict`; `work.campaign_dp_weight` and
+  `work.iterations_per_dp_log2_expected` carry the reference). Walks stop at
+  their own distinguished point, so a slot at another cutoff meets the
+  fleet's walks and neither records the same point. Four Modal runs at
+  weight 34 and 35 were two thirds of the fleet's rate that evening. The
+  record count behind the ratio is per upload stream, furthest offset
+  reached, not a sum of object sizes: a stream re-uploaded from offset 0
+  (as every Modal corpus was, twice, that night) would otherwise read as
+  a slot three times as dense as it is.
+- `ingest.duplicate_records`, `ingest.duplicate_records_last_day`,
+  `ingest.duplicate_slots_last_day` — records the store dropped because it
+  already held the point **under the same seed**. A resumed worker
+  re-reports a handful; a run walking another run's seeds re-reports
+  everything, and Modal runs 1-4 did exactly that against AWS slots 0-3
+  (89% of run 3's records were byte-identical to slot 2's). Counted per
+  object on `dp_ingest_progress.duplicates` from the deploy onward; not a
+  collision, and no longer silent.
+
+The dashboard draws the first on the GPU card and both in the campaign
+table. Per-slot rows stay private, as before.
 
 ## Iterations per second, and why it is not derived from points
 

@@ -60,7 +60,7 @@
 //! The measured comparison against rho on the same instances, in the
 //! unit `S = total group operations / sqrt(N)`, lives in
 //! [`crate::cryptanalysis::hyperelliptic_ic_bench`] and
-//! `RESEARCH_HYPERELLIPTIC_IC_RHO.md`.  This module *measures*; it does
+//! `research/notes/index-calculus/RESEARCH_HYPERELLIPTIC_IC_RHO.md`.  This module *measures*; it does
 //! not claim.
 //!
 //! ## Scope
@@ -705,10 +705,63 @@ pub enum RelationSearch {
         /// trial count measures directly.
         step_bits: u32,
     },
+    /// An adding walk whose steps are **factor-base places**, not
+    /// combinations of `D₁` and `D₂`.
+    ///
+    /// The walk carries `R = a·D₁ + b·D₂ + Σ n_j F_j` and counts the
+    /// steps it took.  When `R` decomposes as `Σ c_i F_i`, the relation
+    /// is `Σ (c_i − n_i) y_i − b·k ≡ a` — the same shape as before,
+    /// because `log F_j` was already one of the unknowns.  Not knowing
+    /// the steps' discrete logarithms costs nothing here, and buys the
+    /// whole precomputation: the factor base is already built, so the
+    /// steps are free.
+    ///
+    /// **Pollard rho cannot do this.**  Its steps must have known
+    /// `(a_j, b_j)` or a collision says nothing, so it has to pay for
+    /// every branch divisor it uses.  This is a structural asymmetry
+    /// between the two methods, not an optimisation withheld from the
+    /// reference — which is why it is worth the extra code.
+    ///
+    /// Cost: rows gain up to one entry per distinct step used, so they
+    /// carry `≤ g + branches + 1` non-zeros instead of `≤ g + 1`.  The
+    /// sparse solve absorbs that; the measurement says by how much.
+    ///
+    /// **`D₁` and `D₂` must stay in the step set.**  A step by a place
+    /// changes neither `a` nor `b`, so a walk that only ever steps by
+    /// places produces rows that all share one `(a, b)` — every row then
+    /// reads `a + b·k = (something in the y's)`, subtracting any two
+    /// eliminates `k`, and the system pins the `y`'s while leaving `k`
+    /// free.  The rows are true identities and still say nothing about
+    /// the logarithm.  `d_step_in` of the steps are `D₁` or `D₂`, which
+    /// cost nothing to build either, and move `a` and `b`.
+    ///
+    /// Steps are drawn from the RNG rather than from a hash of the
+    /// position: relation collection has no collision to detect, so
+    /// there is nothing determinism buys here, and a random sequence
+    /// cannot cycle — which removes the restart machinery the
+    /// `(a_j, b_j)` walk needs.
+    FactorBaseWalk {
+        branches: usize,
+        /// One step in `d_step_in` is by `D₁` or `D₂` rather than a
+        /// place.  4 means a quarter of steps move `(a, b)`.
+        d_step_in: u64,
+    },
 }
 
 impl RelationSearch {
-    /// The walk this module uses unless told otherwise.
+    /// The factor-base walk this module uses unless told otherwise.
+    ///
+    /// 64 branches rather than 16: they cost nothing to build, and more
+    /// of them makes the walk closer to a random map.
+    pub fn factor_base_walk() -> Self {
+        Self::FactorBaseWalk {
+            branches: 64,
+            d_step_in: 4,
+        }
+    }
+
+    /// The `(a_j, b_j)`-step walk, kept as the reference the
+    /// factor-base walk has to beat.
     pub fn walk() -> Self {
         // 16 branches, matching the rho reference: Teske's analysis says
         // an r-adding walk is within a few percent of the random-map
@@ -766,11 +819,30 @@ impl Default for HecIndexCalculusParams {
             extra_relations: 8,
             max_trials: 200_000,
             seed: 0,
-            search: RelationSearch::walk(),
+            search: RelationSearch::factor_base_walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
         }
     }
+}
+
+/// `R = a·D₁ + b·D₂ + Σ n_j F_j` decomposed as `Σ c_i F_i` gives the row
+/// `Σ (c_i − n_i) y_i − b·k ≡ a`, so the steps the walk took are
+/// subtracted from the decomposition it found.
+fn subtract_steps(
+    decomposition: Vec<(usize, i64)>,
+    taken: &HashMap<usize, i64>,
+) -> Vec<(usize, i64)> {
+    if taken.is_empty() {
+        return decomposition;
+    }
+    let mut acc: HashMap<usize, i64> = decomposition.into_iter().collect();
+    for (&idx, &count) in taken {
+        *acc.entry(idx).or_insert(0) -= count;
+    }
+    let mut out: Vec<(usize, i64)> = acc.into_iter().filter(|&(_, c)| c != 0).collect();
+    out.sort_unstable_by_key(|&(i, _)| i);
+    out
 }
 
 /// Branch selector for the adding walk: a hash of the Mumford
@@ -832,84 +904,178 @@ pub fn collect_relations(
             restart_interval,
             step_bits,
         } => (branches.max(1), restart_interval.max(1), step_bits.max(1)),
+        RelationSearch::FactorBaseWalk { branches, .. } => {
+            (branches.min(fb.len()).max(1), usize::MAX, 0)
+        }
     };
+    let walking = !matches!(params.search, RelationSearch::Random);
+
     // Steps with `step_bits`-bit coefficients cost `2·step_bits`
-    // operations each instead of `2⌈log₂ N⌉`.
-    let step_bound = BigUint::one() << step_bits;
+    // operations each instead of `2⌈log₂ N⌉`.  Factor-base steps cost
+    // nothing at all: they are places the factor base already holds.
+    let step_bound = BigUint::one() << step_bits.max(1);
     let step_build_ops = 2 * step_bits as usize;
-    let mut steps: Vec<(BigUint, BigUint, MumfordDivisorP)> = Vec::with_capacity(branches);
-    for _ in 0..branches {
-        let a = rand_below(&mut rng, &step_bound) + BigUint::one();
-        let b = rand_below(&mut rng, &step_bound) + BigUint::one();
-        let s = d1
-            .scalar_mul(&a, curve)
-            .add(&d2.scalar_mul(&b, curve), curve);
-        report.jacobian_ops += step_build_ops;
-        report.precompute_ops += step_build_ops;
-        steps.push((a, b, s));
+    let mut steps: Vec<(BigUint, BigUint, MumfordDivisorP)> = Vec::new();
+    let mut fb_steps: Vec<usize> = Vec::new();
+    match params.search {
+        RelationSearch::FactorBaseWalk { .. } => {
+            // Distinct places, so a step is never silently doubled.
+            let mut chosen: Vec<usize> = (0..fb.len()).collect();
+            for i in (1..chosen.len()).rev() {
+                let j = (rng.next_u64() as usize) % (i + 1);
+                chosen.swap(i, j);
+            }
+            fb_steps = chosen.into_iter().take(branches).collect();
+        }
+        _ => {
+            for _ in 0..branches {
+                let a = rand_below(&mut rng, &step_bound) + BigUint::one();
+                let b = rand_below(&mut rng, &step_bound) + BigUint::one();
+                let s = d1
+                    .scalar_mul(&a, curve)
+                    .add(&d2.scalar_mul(&b, curve), curve);
+                report.jacobian_ops += step_build_ops;
+                report.precompute_ops += step_build_ops;
+                steps.push((a, b, s));
+            }
+        }
     }
 
-    // Current walk position; `None` forces a fresh start.
-    let mut current: Option<(BigUint, BigUint, MumfordDivisorP)> = None;
+    /// Walk position: coefficients of `D₁` and `D₂`, the divisor, and
+    /// how many times each factor-base step has been taken.
+    struct Position {
+        a: BigUint,
+        b: BigUint,
+        r: MumfordDivisorP,
+        taken: HashMap<usize, i64>,
+    }
+
+    let mut current: Option<Position> = None;
     let mut since_restart = 0usize;
 
     while relations.len() < wanted && report.trials < params.max_trials {
         report.trials += 1;
 
-        let (a, b, r) = match (&params.search, current.take()) {
-            // Fresh independent draw: two scalar multiplications.
-            (RelationSearch::Random, _) | (_, None) => {
+        let mut pos = match current.take() {
+            Some(pos) if walking => {
+                // One step of the walk: one group operation.
+                match params.search {
+                    RelationSearch::FactorBaseWalk { d_step_in, .. } => {
+                        // A quarter of the steps move `(a, b)`; the rest
+                        // move through the factor base.  Both cost one
+                        // group operation and nothing to prepare.
+                        let roll = rng.next_u64() % d_step_in.max(2);
+                        let mut taken = pos.taken;
+                        let (mut a, mut b) = (pos.a, pos.b);
+                        let next = if roll == 0 {
+                            a = (a + BigUint::one()) % n;
+                            report.jacobian_ops += 1;
+                            pos.r.add(d1, curve)
+                        } else if roll == 1 {
+                            b = (b + BigUint::one()) % n;
+                            report.jacobian_ops += 1;
+                            pos.r.add(d2, curve)
+                        } else {
+                            let idx = fb_steps[(rng.next_u64() as usize) % fb_steps.len()];
+                            *taken.entry(idx).or_insert(0) += 1;
+                            report.jacobian_ops += 1;
+                            pos.r.add(&fb.entries[idx].divisor, curve)
+                        };
+                        Position {
+                            a,
+                            b,
+                            r: next,
+                            taken,
+                        }
+                    }
+                    _ => {
+                        let (aj, bj, sj) = &steps[walk_branch(&pos.r, steps.len())];
+                        let next = pos.r.add(sj, curve);
+                        report.jacobian_ops += 1;
+                        Position {
+                            a: (&pos.a + aj) % n,
+                            b: (&pos.b + bj) % n,
+                            r: next,
+                            taken: pos.taken,
+                        }
+                    }
+                }
+            }
+            // Fresh start.  The factor-base walk needs no random
+            // starting point — its own steps supply the randomness — so
+            // it starts at `D₁ + D₂` for one operation instead of two
+            // scalar multiplications.
+            _ if matches!(params.search, RelationSearch::FactorBaseWalk { .. }) => {
+                report.jacobian_ops += 1;
+                report.precompute_ops += 1;
+                Position {
+                    a: BigUint::one(),
+                    b: BigUint::one(),
+                    r: d1.add(d2, curve),
+                    taken: HashMap::new(),
+                }
+            }
+            _ => {
                 let a = rand_below(&mut rng, n);
                 let b = rand_below(&mut rng, n);
                 let r = d1
                     .scalar_mul(&a, curve)
                     .add(&d2.scalar_mul(&b, curve), curve);
                 report.jacobian_ops += scalar_pair_ops;
-                if matches!(params.search, RelationSearch::Walk { .. }) {
-                    // A restart is precomputation too: it buys position,
-                    // not a candidate the cheap step could not reach.
+                if walking {
+                    // A start is precomputation: it buys position, not a
+                    // candidate the cheap step could not reach.
                     report.precompute_ops += scalar_pair_ops;
                 }
                 since_restart = 0;
-                (a, b, r)
-            }
-            // One step of the walk: one group operation.
-            (RelationSearch::Walk { .. }, Some((a, b, r))) => {
-                let (aj, bj, sj) = &steps[walk_branch(&r, steps.len())];
-                let next = r.add(sj, curve);
-                report.jacobian_ops += 1;
-                ((a + aj) % n, (b + bj) % n, next)
+                Position {
+                    a,
+                    b,
+                    r,
+                    taken: HashMap::new(),
+                }
             }
         };
 
-        if let RelationSearch::Walk { .. } = params.search {
+        if walking && !matches!(params.search, RelationSearch::FactorBaseWalk { .. }) {
             since_restart += 1;
             if since_restart >= restart_interval {
-                // Escape the orbit with one randomly chosen step.  The
-                // index comes from the RNG, not from the position, so
-                // the next point is off the deterministic trajectory —
-                // which is the whole job of a restart, at one group
-                // operation instead of a fresh pair of scalar
-                // multiplications.
-                let j = (rng.next_u64() as usize) % steps.len();
-                let (aj, bj, sj) = &steps[j];
-                let jumped = r.add(sj, curve);
+                // Escape the orbit with one randomly chosen step: the
+                // index comes from the RNG rather than the position, so
+                // the next point is off the deterministic trajectory.
+                match params.search {
+                    RelationSearch::FactorBaseWalk { .. } => {
+                        let idx = fb_steps[(rng.next_u64() as usize) % fb_steps.len()];
+                        pos.r = pos.r.add(&fb.entries[idx].divisor, curve);
+                        *pos.taken.entry(idx).or_insert(0) += 1;
+                    }
+                    _ => {
+                        let j = (rng.next_u64() as usize) % steps.len();
+                        let (aj, bj, sj) = &steps[j];
+                        pos.r = pos.r.add(sj, curve);
+                        pos.a = (&pos.a + aj) % n;
+                        pos.b = (&pos.b + bj) % n;
+                    }
+                }
                 report.jacobian_ops += 1;
                 report.precompute_ops += 1;
-                current = Some(((&a + aj) % n, (&b + bj) % n, jumped));
                 since_restart = 0;
-            } else {
-                current = Some((a.clone(), b.clone(), r.clone()));
             }
         }
 
+        let (a, b, r) = (pos.a.clone(), pos.b.clone(), pos.r.clone());
+        let taken = pos.taken.clone();
+        if walking {
+            current = Some(pos);
+        }
+
         if r.is_identity() {
-            // a·D₁ + b·D₂ = 0 is a relation with no factor-base part;
-            // it is still a valid row and pins the logarithm directly.
+            // a·D₁ + b·D₂ + Σ n_j F_j = 0 is a relation whose only
+            // factor-base part is the steps the walk took.
             relations.push(HecRelation {
                 coef_a: a,
                 coef_b: b,
-                entries: Vec::new(),
+                entries: subtract_steps(Vec::new(), &taken),
             });
             report.smooth_trials += 1;
             continue;
@@ -923,7 +1089,7 @@ pub fn collect_relations(
                 relations.push(HecRelation {
                     coef_a: a,
                     coef_b: b,
-                    entries,
+                    entries: subtract_steps(entries, &taken),
                 });
             }
             None => {
@@ -969,55 +1135,33 @@ pub fn hec_index_calculus_dlp(
     }
 
     let m = fb.len();
-    let wanted = m + 1 + params.extra_relations;
-    let relations = collect_relations(curve, d1, d2, n, &fb, wanted, params, &mut report);
-    if relations.len() < m + 1 {
-        return (None, report);
-    }
-
-    // Unknowns: (y_1, …, y_m, k), where y_i = log_{D₁} F_i.
-    // Row: Σ c_i y_i − b k ≡ a  (mod n).
-    let mut rows: Vec<Vec<(usize, BigUint)>> = Vec::with_capacity(relations.len());
-    let mut rhs: Vec<BigUint> = Vec::with_capacity(relations.len());
-    for rel in &relations {
-        let mut row: HashMap<usize, BigUint> = HashMap::new();
-        for &(j, c) in &rel.entries {
-            let e = row.entry(j).or_insert_with(BigUint::zero);
-            *e = (&*e + signed_mod(c, n)) % n;
+    // Rows from a walk are correlated — consecutive relations differ by
+    // a step or two — so a fixed margin of spare rows is sometimes not
+    // enough and the system pins the `y`'s while leaving `k` free.  That
+    // showed up as one seed in ten failing at `p = 41`.  Collect more
+    // rows and solve again rather than hope the margin was right; the
+    // extra rows are counted like any others.
+    let mut extra = params.extra_relations;
+    let mut k = None;
+    for round in 0..4 {
+        let wanted = m + 1 + extra;
+        let collected = collect_relations(curve, d1, d2, n, &fb, wanted, params, &mut report);
+        if collected.len() < m + 1 {
+            return (None, report);
         }
-        row.insert(m, (n - &(&rel.coef_b % n)) % n);
-        let mut sparse: Vec<(usize, BigUint)> =
-            row.into_iter().filter(|(_, v)| !v.is_zero()).collect();
-        sparse.sort_unstable_by_key(|&(j, _)| j);
-        rows.push(sparse);
-        rhs.push(&rel.coef_a % n);
-    }
-
-    let k = match params.linear_algebra {
-        LinearAlgebra::Sparse => {
-            let (k, ops) = match sparse_solve_for_k(rows, rhs, m, n) {
-                Some(v) => v,
-                None => return (None, report),
-            };
-            report.solve_row_ops = ops;
-            k
-        }
-        LinearAlgebra::Dense => {
-            let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(rows.len());
-            for row in &rows {
-                let mut dense = vec![BigUint::zero(); m + 1];
-                for (j, v) in row {
-                    dense[*j] = v.clone();
-                }
-                matrix.push(dense);
+        if let Some(candidate) = solve_for_logarithm(curve, &collected, m, n, params, &mut report) {
+            if &d1.scalar_mul(&candidate, curve) == d2 {
+                k = Some(candidate);
+                break;
             }
-            report.solve_row_ops = rows.len() * (m + 1) * (m + 1);
-            let solution = match gaussian_eliminate_mod_n(&mut matrix, &mut rhs, n) {
-                Some(s) => s,
-                None => return (None, report),
-            };
-            solution[m].clone()
         }
+        // Grow the margin geometrically; `round` bounds the total.
+        extra += m / 4 + 8;
+        let _ = round;
+    }
+    let k = match k {
+        Some(k) => k,
+        None => return (None, report),
     };
 
     if &d1.scalar_mul(&k, curve) == d2 {
@@ -1140,6 +1284,62 @@ fn sparse_solve_for_k(
         }
     }
     None
+}
+
+/// Build the relation system and solve it for `k = log_{D₁} D₂`.
+///
+/// Returns `None` when the rows do not determine `k` — which is a
+/// statement about the rows, not about the instance, so the caller may
+/// collect more and try again.
+fn solve_for_logarithm(
+    curve: &HyperellipticCurveP,
+    relations: &[HecRelation],
+    m: usize,
+    n: &BigUint,
+    params: &HecIndexCalculusParams,
+    report: &mut HecIndexCalculusReport,
+) -> Option<BigUint> {
+    let _ = curve;
+    // Unknowns: (y_1, …, y_m, k), where y_i = log_{D₁} F_i.
+    // Row: Σ c_i y_i − b k ≡ a  (mod n).
+    let mut rows: Vec<Vec<(usize, BigUint)>> = Vec::with_capacity(relations.len());
+    let mut rhs: Vec<BigUint> = Vec::with_capacity(relations.len());
+    for rel in relations {
+        let mut row: HashMap<usize, BigUint> = HashMap::new();
+        for &(j, c) in &rel.entries {
+            let e = row.entry(j).or_insert_with(BigUint::zero);
+            *e = (&*e + signed_mod(c, n)) % n;
+        }
+        row.insert(m, (n - &(&rel.coef_b % n)) % n);
+        let mut sparse: Vec<(usize, BigUint)> =
+            row.into_iter().filter(|(_, v)| !v.is_zero()).collect();
+        sparse.sort_unstable_by_key(|&(j, _)| j);
+        rows.push(sparse);
+        rhs.push(&rel.coef_a % n);
+    }
+
+    let k = match params.linear_algebra {
+        LinearAlgebra::Sparse => {
+            let (k, ops) = sparse_solve_for_k(rows, rhs, m, n)?;
+            report.solve_row_ops = ops;
+            k
+        }
+        LinearAlgebra::Dense => {
+            let mut matrix: Vec<Vec<BigUint>> = Vec::with_capacity(rows.len());
+            for row in &rows {
+                let mut dense = vec![BigUint::zero(); m + 1];
+                for (j, v) in row {
+                    dense[*j] = v.clone();
+                }
+                matrix.push(dense);
+            }
+            report.solve_row_ops = rows.len() * (m + 1) * (m + 1);
+            let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, n)?;
+            solution[m].clone()
+        }
+    };
+
+    Some(k)
 }
 
 fn signed_mod(v: i64, n: &BigUint) -> BigUint {
@@ -1540,6 +1740,40 @@ mod tests {
         }
     }
 
+    /// A solvable genus-3 instance on `y² = x⁷ + x³ + c x + 1`.
+    fn genus3_instance(
+        p: u64,
+    ) -> (
+        HyperellipticCurveP,
+        MumfordDivisorP,
+        MumfordDivisorP,
+        BigUint,
+        BigUint,
+    ) {
+        for c in 1..12u64 {
+            let curve = genus3_curve(p, c);
+            let fb = build_factor_base(&curve, usize::MAX);
+            for e in fb.entries.iter().take(4) {
+                let order = match divisor_order_bsgs(&curve, &e.divisor, 50_000) {
+                    Some(o) => o,
+                    None => continue,
+                };
+                let l = largest_prime_factor(&order);
+                if l < BigUint::from(500u32) {
+                    continue;
+                }
+                let d1 = e.divisor.scalar_mul(&(&order / &l), &curve);
+                if divisor_order_bsgs(&curve, &d1, 50_000).as_ref() != Some(&l) {
+                    continue;
+                }
+                let k = &l / BigUint::from(3u32) + BigUint::from(4u32);
+                let d2 = d1.scalar_mul(&k, &curve);
+                return (curve, d1, d2, l, k);
+            }
+        }
+        panic!("no usable genus-3 instance at p={p}");
+    }
+
     #[test]
     fn solves_a_genus_three_dlp() {
         // Genus 3 is where the asymptotic crossover against rho is
@@ -1669,7 +1903,7 @@ mod tests {
             extra_relations: 8,
             max_trials: 200_000,
             seed: 11,
-            search: RelationSearch::walk(),
+            search: RelationSearch::factor_base_walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Scan,
         };
@@ -1692,6 +1926,126 @@ mod tests {
             fast_rep.smoothness_field_ops,
             scan_rep.smoothness_field_ops
         );
+    }
+
+    /// Check a collected relation is a true identity in the Jacobian:
+    /// `Σ c_i F_i = a·D₁ + b·D₂`.
+    fn relation_holds(
+        curve: &HyperellipticCurveP,
+        fb: &HecFactorBase,
+        d1: &MumfordDivisorP,
+        d2: &MumfordDivisorP,
+        rel: &HecRelation,
+    ) -> bool {
+        let mut lhs = MumfordDivisorP::identity(curve.p.clone());
+        for &(i, c) in &rel.entries {
+            let base = &fb.entries[i].divisor;
+            let term = if c >= 0 {
+                base.scalar_mul(&BigUint::from(c as u64), curve)
+            } else {
+                base.neg(curve)
+                    .scalar_mul(&BigUint::from(c.unsigned_abs()), curve)
+            };
+            lhs = lhs.add(&term, curve);
+        }
+        let rhs = d1
+            .scalar_mul(&rel.coef_a, curve)
+            .add(&d2.scalar_mul(&rel.coef_b, curve), curve);
+        lhs == rhs
+    }
+
+    #[test]
+    fn every_factor_base_walk_relation_is_a_true_identity() {
+        // The factor-base walk subtracts the steps it took from the
+        // decomposition it found.  Get that bookkeeping wrong by one and
+        // the rows are not relations at all — the solve would then
+        // return a `k` that fails verification, which reads as "no
+        // solution" rather than as a bug.  So check the rows directly,
+        // at both genera.
+        for (curve, d1, d2, _l, _k) in [toy_instance(41), genus3_instance(41)] {
+            let fb = build_factor_base(&curve, usize::MAX);
+            let params = HecIndexCalculusParams {
+                fb_size: usize::MAX,
+                extra_relations: 4,
+                max_trials: 200_000,
+                seed: 99,
+                search: RelationSearch::factor_base_walk(),
+                linear_algebra: LinearAlgebra::Sparse,
+                smoothness: SmoothnessTest::Gcd,
+            };
+            let mut report = HecIndexCalculusReport::default();
+            let n = &_l;
+            let rels =
+                collect_relations(&curve, &d1, &d2, n, &fb, fb.len() + 5, &params, &mut report);
+            assert!(!rels.is_empty());
+            // A walked row carries step counts, so it must be wider than
+            // a bare decomposition at least once, or the test is not
+            // exercising the bookkeeping it claims to.
+            assert!(
+                rels.iter().any(|r| r.entries.len() > curve.genus as usize),
+                "no row carried step counts"
+            );
+            for (i, rel) in rels.iter().enumerate() {
+                assert!(
+                    relation_holds(&curve, &fb, &d1, &d2, rel),
+                    "relation {i} is not an identity: {rel:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn rank_deficient_rows_are_recovered_by_collecting_more() {
+        // Seed 20260919 at p = 41 produced 24 factor-base-walk rows that
+        // pinned every `y_i` and left `k` free: walked rows are
+        // correlated, so a fixed margin of spare rows is sometimes not
+        // enough.  The driver now collects more and solves again, so
+        // this seed must succeed.
+        let (curve, d1, d2, l, k) = toy_instance(41);
+        for seed in [20260919u64, 20260916, 20260917, 20260918, 20260920] {
+            let params = HecIndexCalculusParams {
+                fb_size: usize::MAX,
+                extra_relations: 8,
+                max_trials: 500_000,
+                seed,
+                search: RelationSearch::factor_base_walk(),
+                linear_algebra: LinearAlgebra::Sparse,
+                smoothness: SmoothnessTest::Gcd,
+            };
+            let (got, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
+            assert_eq!(got.as_ref(), Some(&k), "seed {seed}: {report:?}");
+        }
+    }
+
+    #[test]
+    fn factor_base_walk_pays_no_step_precomputation() {
+        let (curve, d1, d2, l, k) = genus3_instance(41);
+        let base = HecIndexCalculusParams {
+            fb_size: usize::MAX,
+            extra_relations: 8,
+            max_trials: 500_000,
+            seed: 5,
+            search: RelationSearch::walk(),
+            linear_algebra: LinearAlgebra::Sparse,
+            smoothness: SmoothnessTest::Gcd,
+        };
+        let fbw = HecIndexCalculusParams {
+            search: RelationSearch::factor_base_walk(),
+            ..base.clone()
+        };
+        let (k_old, old) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &base);
+        let (k_new, new) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &fbw);
+        assert_eq!(k_old.as_ref(), Some(&k));
+        assert_eq!(k_new.as_ref(), Some(&k), "factor-base walk: {new:?}");
+        // The only precomputation left is the starting point and the
+        // restart jumps, so it cannot come near 64 branch divisors.
+        assert!(
+            new.precompute_ops * 3 < old.precompute_ops,
+            "factor-base walk precompute {} vs {} for the (a,b)-step walk",
+            new.precompute_ops,
+            old.precompute_ops
+        );
+        assert!(new.ops_per_trial() < 1.5, "{new:?}");
     }
 
     #[test]
@@ -1772,7 +2126,7 @@ mod tests {
             extra_relations: 5,
             max_trials: 50_000,
             seed: 3,
-            search: RelationSearch::walk(),
+            search: RelationSearch::factor_base_walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
         };

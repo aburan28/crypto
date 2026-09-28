@@ -116,7 +116,7 @@ grows closer to `n^{0.68}`, and every built variant costs between
 `528×` and `4,000×` Pollard rho at the sizes that fit, with the
 asymptotically better large-prime variant crossing rho only past
 `2^{230}`. That result is published in this repository
-(`RESEARCH_RESIDUAL_WALKS.md`, `docs/index-calculus-scoreboard.html`).
+(`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`, `docs/index-calculus-scoreboard.html`).
 
 The open scientific question is whether any of the *next* algebraic
 levers — higher Semaev polynomials, symmetrized decompositions,

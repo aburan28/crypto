@@ -5,7 +5,7 @@
  *   ./bench2 occupancy     launch configuration report
  *
  * One thread owns one `X₁` and walks every `X₂ >= X₁`.  That is the
- * decomposition `RESEARCH_SEMAEV_DECOMPOSITION.md` describes as
+ * decomposition `research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md` describes as
  * "embarrassingly parallel over `X₁`, and nothing in it shares state":
  * no shared memory, no atomics except the single result slot, and no
  * communication between lanes at all.
@@ -267,7 +267,7 @@ static void throughput() {
     cudaFree(d_lv);
     cudaFree(d_out);
     printf("\nThe CPU reference is about 1 us per pair at l = 8 (roughly 190\n");
-    printf("field multiplications), measured in RESEARCH_SEMAEV_DECOMPOSITION.md.\n");
+    printf("field multiplications), measured in research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md.\n");
     printf("Quote the ratio, not the pairs/s: the note's own conclusion is that a\n");
     printf("faster oracle does not move the attack's exponent.\n");
 }

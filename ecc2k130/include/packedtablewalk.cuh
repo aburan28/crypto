@@ -46,6 +46,21 @@
 #if ECC_TABLE_PIVOT_BYTES != 0 && ECC_TABLE_PIVOT_BYTES != 1
 #error "ECC_TABLE_PIVOT_BYTES must be 0 or 1"
 #endif
+// ECC_TABLE_PHASE_POPC=1: compute the Frobenius phase with eight bit-plane
+// popcounts against L-bit masks (the reference's TableWalkConsts::phase),
+// instead of 17 byte-table lookups.  Drops 4,352 bytes of shared phase table
+// and 17 LDS.U8; adds 8×5 mask words and ~40 POPC/AND.  Priced in
+// CHEAPER-SELECTION.md against the MIO-bound forward pass of the 20 B/s
+// build; off by default until a paired GPU run clears the target there.
+#ifndef ECC_TABLE_PHASE_POPC
+#define ECC_TABLE_PHASE_POPC 0
+#endif
+#if ECC_TABLE_PHASE_POPC != 0 && ECC_TABLE_PHASE_POPC != 1
+#error "ECC_TABLE_PHASE_POPC must be 0 or 1"
+#endif
+#if ECC_TABLE_PHASE_POPC && !ECC_WALK_TABLE
+#error "ECC_TABLE_PHASE_POPC requires ECC_WALK_TABLE"
+#endif
 #ifndef ECC_TABLE_GLOBAL
 #define ECC_TABLE_GLOBAL 0
 #endif
@@ -67,6 +82,23 @@
 #if ECC_TABLE_ADDEND_GLOBAL && ECC_TABLE_GLOBAL
 #error "ECC_TABLE_ADDEND_GLOBAL is the hybrid smem path; do not combine with ECC_TABLE_GLOBAL"
 #endif
+// ECC_TABLE_TAG_DENOM=1: the reverse pass rebuilds d = x + x_T from the step
+// tag instead of reading the denominator the forward pass stored.  The tag is
+// already in memory -- twSelect pushes it into the low 16 bits of hist, which
+// pass 2 has to read anyway to stay a class function -- so the denominator
+// field (17 bytes stored in pass 1, 17 loaded in pass 2) disappears from the
+// per-update traffic, and the persisting blob shrinks from x/y/pchain/denom to
+// x/y/pchain, which fits this SKU's 80 MiB persisting-L2 window.  The price is
+// one hist load and one 5-word table read per update in the reverse pass.
+#ifndef ECC_TABLE_TAG_DENOM
+#define ECC_TABLE_TAG_DENOM 0
+#endif
+#if ECC_TABLE_TAG_DENOM != 0 && ECC_TABLE_TAG_DENOM != 1
+#error "ECC_TABLE_TAG_DENOM must be 0 or 1"
+#endif
+#if ECC_TABLE_TAG_DENOM && !ECC_WALK_TABLE
+#error "ECC_TABLE_TAG_DENOM requires ECC_WALK_TABLE"
+#endif
 
 namespace eccPacked131 {
 
@@ -79,20 +111,38 @@ static const int TW_MASK_OFF = TW_TABLE_WORDS;
 static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;      // 131 x 4 words
 static const int TW_ROWTOP_OFF = TW_ROW_OFF + 131 * 4;    // 17 words, 4 bits per row
 static const int TW_INV_OFF = TW_ROWTOP_OFF + 17;
+#if ECC_TABLE_PHASE_POPC
+static const int TW_PLANE_OFF = TW_INV_OFF + 132;         // 8 x 5 words
+static const int TW_MAX_OFF = TW_PLANE_OFF + 8 * 5;       // 17 * 256 bytes
+static const int TW_LINV_OFF = TW_MAX_OFF + 17 * 64;      // 131 bytes, padded
+#else
 static const int TW_PHASE_OFF = TW_INV_OFF + 132;         // 17 * 256 bytes
 static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;     // 17 * 256 bytes
 static const int TW_LINV_OFF = TW_MAX_OFF + 17 * 64;      // 131 bytes, padded
+#endif
 #else
 static const int TW_ENTRY = 9;
 static const int TW_TABLE_WORDS = 131 * TW_H * TW_ENTRY;
 static const int TW_MASK_OFF = TW_TABLE_WORDS;
 static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;
 static const int TW_INV_OFF = TW_ROW_OFF + 131 * 5;
+#if ECC_TABLE_PHASE_POPC
+static const int TW_PLANE_OFF = TW_INV_OFF + 132;
+static const int TW_MAX_OFF = TW_PLANE_OFF + 8 * 5;       // 33 * 16 bytes
+static const int TW_LINV_OFF = TW_MAX_OFF + 33 * 4;
+#else
 static const int TW_PHASE_OFF = TW_INV_OFF + 132;        // 17 * 256 bytes
 static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;    // 33 * 16 bytes
 static const int TW_LINV_OFF = TW_MAX_OFF + 33 * 4;      // 131 bytes, padded
 #endif
-static const int TW_WORDS = TW_LINV_OFF + 33;
+#endif
+// ECC_PACKED_SQUARE_TABLE=1 appends the polynomial-square table of packed131.h
+// (SQ_TAB_WORDS words) after linv, so every layout below -- the whole buffer
+// in shared memory, or only the selection part of it -- carries it into
+// shared memory.  8,320 bytes: the 512 x 1 geometry's one block still fits the
+// 64 KB carveout, so its L1 keeps the 64 KB ONE-BLOCK-GEOMETRY.md measured.
+static const int TW_SQR_OFF = TW_LINV_OFF + 33;
+static const int TW_WORDS = TW_SQR_OFF + (ECC_PACKED_SQUARE_TABLE ? SQ_TAB_WORDS : 0);
 // Hybrid occupancy path: keep phase/pivot/sign tables in shared memory and
 // read the bulky addend table from global.  Selection is 14 148 bytes, which
 // fits three (and four) blocks in this SKU's 100 KB/SM; the full buffer does
@@ -100,7 +150,9 @@ static const int TW_WORDS = TW_LINV_OFF + 33;
 static const int TW_SEL_WORDS = TW_WORDS - TW_MASK_OFF;
 static const int TW_SEL0 = ECC_TABLE_ADDEND_GLOBAL ? TW_MASK_OFF : 0;
 static const size_t TW_SHARED_BYTES = size_t(ECC_TABLE_ADDEND_GLOBAL ? TW_SEL_WORDS : TW_WORDS) * sizeof(uint32_t);
-static_assert(TW_SHARED_BYTES <= 48 * 1024, "table walk tables must leave room for two blocks per SM");
+static_assert(TW_SHARED_BYTES <= 48 * 1024 || ECC_PACKED_SQUARE_TABLE,
+              "table walk tables must leave room for two blocks per SM");
+static_assert(TW_SHARED_BYTES <= 64 * 1024, "table walk tables must leave a 64 KB L1 at one block per SM");
 static_assert(!ECC_TABLE_ADDEND_GLOBAL || TW_SHARED_BYTES <= 33 * 1024,
               "selection tables must fit three blocks in a 100 KB SM");
 
@@ -114,14 +166,30 @@ __device__ __forceinline__ void twLoadShared(uint32_t *shared, const uint32_t *g
 __device__ __forceinline__ uint32_t twByte(uint32_t w, int t) { return __byte_perm(w, 0u, 0x4440u | unsigned(t)); }
 __device__ __forceinline__ unsigned twMax(unsigned a, unsigned b) { return max(a, b); }
 __device__ __forceinline__ int twParity(uint32_t t) { return int(__popc(t) & 1u); }
+__device__ __forceinline__ int twPopc(uint32_t t) { return int(__popc(t)); }
 #else
 #define TW_FN static inline
 static inline uint32_t twByte(uint32_t w, int t) { return (w >> (8 * t)) & 0xFFu; }
 static inline unsigned twMax(unsigned a, unsigned b) { return a > b ? a : b; }
 static inline int twParity(uint32_t t) { return __builtin_popcount(t) & 1; }
+static inline int twPopc(uint32_t t) { return __builtin_popcount(t); }
 #endif
 
 // Frobenius phase k(x) = (sum_e L(e) x_e) * HW(x)^-1 mod 131 of a normal-basis x.
+#if ECC_TABLE_PHASE_POPC
+TW_FN int twPhase(const P131 &x, int hw, const uint32_t *plane, const uint32_t *inv) {
+    unsigned s = 0;
+#pragma unroll
+    for (int b = 0; b < 8; ++b) {
+        const uint32_t *m = plane + b * 5;
+        unsigned c = 0;
+#pragma unroll
+        for (int i = 0; i < 5; ++i) c += unsigned(twPopc(x.v[i] & m[i]));
+        s += c << b;
+    }
+    return int(((s % 131u) * inv[hw]) % 131u);
+}
+#else
 TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *inv) {
     unsigned s = 0;
 #pragma unroll
@@ -131,6 +199,7 @@ TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *i
     s += phase[16 * 256 + (x.v[4] & 0xFFu)];
     return int(((s % 131u) * inv[hw]) % 131u);
 }
+#endif
 
 // Index of the support element whose L is last before k in cyclic order:
 // among set bits with L < k if any, else among all set bits, the largest L.
@@ -181,24 +250,30 @@ TW_FN int twCoordinate(const P131 &yp, int p, const uint32_t *fromRow) {
     return twParity(t);
 }
 
-// The whole selection for one point: (h, k, eps) after the cycle rule, with
-// the history advanced.  x is in the normal basis, yp in the polynomial basis.
-TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
-                                             unsigned long long *hist, const uint32_t *shared) {
+// Coordinate-selected tag before the cycle hint or escape policy.
+TW_FN unsigned twRawTag(const P131 &x, const P131 &yp, int hw,
+                            const uint32_t *shared) {
     const uint8_t *bytes = reinterpret_cast<const uint8_t *>(shared);
+#if ECC_TABLE_PHASE_POPC
+    const int k = twPhase(x, hw, shared + (TW_PLANE_OFF - TW_SEL0), shared + (TW_INV_OFF - TW_SEL0));
+#else
     const int k = twPhase(x, hw, bytes + 4 * (TW_PHASE_OFF - TW_SEL0), shared + (TW_INV_OFF - TW_SEL0));
+#endif
     const int p = twPivot(x, k, shared + (TW_MASK_OFF - TW_SEL0), bytes + 4 * (TW_MAX_OFF - TW_SEL0),
                           bytes + 4 * (TW_LINV_OFF - TW_SEL0));
     const int eps = twCoordinate(yp, p, shared + (TW_ROW_OFF - TW_SEL0));
-    int h = (hw >> 1) & (TW_H - 1);
-    unsigned tag = eccTag(h, k, eps);
-    const unsigned long long old = *hist;
-    while (eccTagFruitless(tag, old)) {
-        h = (h + 1) & (TW_H - 1);
-        tag = eccTag(h, k, eps);
-    }
-    *hist = eccHistPush(old, tag);
-    return tag;
+    return eccTag((hw >> 1) & (TW_H - 1), k, eps);
+}
+
+// The polynomial square the reverse pass needs, from the shared table when
+// ECC_PACKED_SQUARE_TABLE is on.  `shared` is the kernel's twSel.
+TW_FN P131 twSquare(const P131 &a, const uint32_t *shared) {
+#if ECC_PACKED_SQUARE_TABLE
+    return squarePolynomialTable131(a, shared + (TW_SQR_OFF - TW_SEL0));
+#else
+    (void)shared;
+    return squarePolynomial131(a);
+#endif
 }
 
 // d = x + x_T and e = y + y_T (+ x_T when the table point is negated), in the
@@ -225,6 +300,112 @@ TW_FN void twAddend(unsigned tag, const P131 &xp, const P131 &yp,
     d->v[4] = xp.v[4] ^ tx;
     e->v[4] = yp.v[4] ^ (top >> 3) ^ (tx & negMask);
 }
+
+// d = x + x_T alone, for the reverse pass under ECC_TABLE_TAG_DENOM: the same
+// table entry twAddend reads, without the y half.
+TW_FN void twDenominator(unsigned tag, const P131 &xp, const uint32_t *shared, P131 *d) {
+#if ECC_TABLE_PIVOT_BYTES
+    const int h = eccTagH(tag);
+    const uint32_t *kbase = shared + eccTagK(tag) * TW_KWORDS;
+    const uint32_t *t = kbase + h * TW_ENTRY;
+    const uint32_t top = (kbase[TW_H * TW_ENTRY + (h >> 2)] >> ((h & 3) * 8)) & 7u;
+#else
+    const uint32_t *t = shared + (eccTagK(tag) * TW_H + eccTagH(tag)) * TW_ENTRY;
+    const uint32_t top = t[8] & 7u;
+#endif
+#pragma unroll
+    for (int i = 0; i < 4; ++i) d->v[i] = xp.v[i] ^ t[i];
+    d->v[4] = xp.v[4] ^ top;
+}
+
+// Keep the full-point probe cold. It is deliberately independent of the
+// history hint and uses the same control flow as the host reference.
+struct TwCyclePoint { P131 x, y; };
+#ifdef __CUDACC__
+#define TW_METHOD __device__ inline
+#define TW_COLD __device__ __noinline__
+#else
+#define TW_METHOD inline
+#define TW_COLD static inline
+#endif
+TW_FN int twWeight(const P131 &x) {
+    int w = 0;
+    for (int i = 0; i < 5; ++i) {
+#ifdef __CUDACC__
+        w += __popc(x.v[i]);
+#else
+        w += __builtin_popcount(x.v[i]);
+#endif
+    }
+    return w;
+}
+TW_FN bool twFieldEqual(const P131 &a, const P131 &b) {
+    for (int i = 0; i < 5; ++i) if (a.v[i] != b.v[i]) return false;
+    return true;
+}
+TW_FN bool twFieldLess(const P131 &a, const P131 &b) {
+    for (int i = 4; i >= 0; --i) if (a.v[i] != b.v[i]) return a.v[i] < b.v[i];
+    return false;
+}
+TW_FN P131 twCanonical(P131 x) {
+    P131 best = x;
+    for (int i = 1; i < 131; ++i) {
+        x = sqr131(x);
+        if (twFieldLess(x, best)) best = x;
+    }
+    return best;
+}
+struct TwCycleOps {
+    const uint32_t *sel, *tab;
+    int dpWeight;
+    TW_METHOD bool distinguished(const TwCyclePoint &p) const { return twWeight(p.x) <= dpWeight; }
+    TW_METHOD unsigned tag(const TwCyclePoint &p) const {
+        return twRawTag(p.x, toPolynomial131(p.y), twWeight(p.x), sel);
+    }
+    TW_METHOD bool next(const TwCyclePoint &p, unsigned t, TwCyclePoint *out) const {
+        P131 zero = {{0,0,0,0,0}}, tx, ty;
+        twAddend(t, zero, zero, tab, &tx, &ty);
+        tx = fromPolynomial131(tx); ty = fromPolynomial131(ty);
+        const P131 d = add131(p.x, tx);
+        if (twFieldEqual(d, zero)) return false;
+        const P131 lambda = mul131(add131(p.y, ty), inv131(d));
+        out->x = add131(add131(sqr131(lambda), lambda), d);
+        out->y = add131(add131(mul131(lambda, add131(p.x, out->x)), out->x), p.y);
+        return true;
+    }
+    TW_METHOD bool equal(const TwCyclePoint &a, const TwCyclePoint &b) const {
+        return twFieldEqual(a.x,b.x) && twFieldEqual(a.y,b.y);
+    }
+    TW_METHOD bool less(const TwCyclePoint &a, const TwCyclePoint &b) const {
+        const int wa = twWeight(a.x), wb = twWeight(b.x);
+        if (wa != wb) return wa < wb;
+        return twFieldLess(twCanonical(a.x), twCanonical(b.x));
+    }
+};
+TW_COLD unsigned twCycleTag(const P131 &x, const P131 &yp, unsigned raw,
+                            const uint32_t *sel, const uint32_t *tab, int dpWeight) {
+#ifdef __CUDACC__
+    return eccCycleAnchorTagDevice(TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+#else
+    return eccCycleAnchorTag(TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+#endif
+                             TwCycleOps{sel,tab,dpWeight}, 131, TW_H);
+}
+TW_FN unsigned twSelectHist(const P131 &x, const P131 &yp, int hw,
+                            unsigned long long *hist, const uint32_t *sel,
+                            const uint32_t *tab, int dpWeight) {
+    unsigned tag = twRawTag(x,yp,hw,sel);
+    if (eccTagFruitless(tag,*hist,131)) tag = twCycleTag(x,yp,tag,sel,tab,dpWeight);
+    *hist = eccHistPush(*hist,tag);
+    return tag;
+}
+TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
+                        unsigned long long *hist, const uint32_t *sel,
+                        const uint32_t *tab, int dpWeight) {
+    return twSelectHist(x,yp,hw,hist,sel,tab,dpWeight);
+}
+#undef TW_METHOD
+#undef TW_COLD
 
 // Host: fill the flat constant buffer from the reference walk.
 template <class TW>
@@ -269,7 +450,12 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
     // Coordinate i (1-based in the reference) sits at bit i - 1.
     auto L = [&](int bit) { return bit < 131 ? walk.consts.L[bit + 1] : -1; };
     uint8_t *bytes = reinterpret_cast<uint8_t *>(out);
-    uint8_t *phase = bytes + 4 * TW_PHASE_OFF, *maxL = bytes + 4 * TW_MAX_OFF, *linv = bytes + 4 * TW_LINV_OFF;
+#if ECC_TABLE_PHASE_POPC
+    for (int b = 0; b < 8; ++b)
+        for (int i = 0; i < 5; ++i)
+            out[TW_PLANE_OFF + b * 5 + i] = uint32_t(walk.consts.plane[b][i / 2] >> (32 * (i & 1)));
+#else
+    uint8_t *phase = bytes + 4 * TW_PHASE_OFF;
     for (int i = 0; i < 17; ++i)
         for (int v = 0; v < 256; ++v) {
             unsigned s = 0;
@@ -277,6 +463,8 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
                 if ((v >> t) & 1) s += unsigned(L(8 * i + t) < 0 ? 0 : L(8 * i + t));
             phase[i * 256 + v] = uint8_t(s % 131u);
         }
+#endif
+    uint8_t *maxL = bytes + 4 * TW_MAX_OFF, *linv = bytes + 4 * TW_LINV_OFF;
 #if ECC_TABLE_PIVOT_BYTES
     for (int i = 0; i < 17; ++i)
         for (int v = 0; v < 256; ++v) {
@@ -295,6 +483,9 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
         }
 #endif
     for (int bit = 0; bit < 131; ++bit) linv[L(bit)] = uint8_t(bit);
+#if ECC_PACKED_SQUARE_TABLE
+    fillSquareTable131(out + TW_SQR_OFF);
+#endif
 }
 
 } // namespace eccPacked131

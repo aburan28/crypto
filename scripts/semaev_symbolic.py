@@ -1,6 +1,6 @@
 """Symbolic Semaev polynomials over F_2[a6], and the Boolean-degree profile.
 
-Reference implementation for Boundary C of RESEARCH_ISOGENY_CLASS_SEARCH.md.
+Reference implementation for Boundary C of research/notes/ecc2k130/RESEARCH_ISOGENY_CLASS_SEARCH.md.
 The authoritative version is `cryptanalysis::semaev_leading_form` in Rust,
 which the test suite runs; this script exists so the computation can be
 re-derived independently, and it is what

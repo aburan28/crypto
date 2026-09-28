@@ -1,5 +1,5 @@
 //! Working MOV attack on a supersingular curve via the F_{p²} distortion
-//! Tate pairing — §5.10 of `RESEARCH_EDS_RESIDUE.md`.
+//! Tate pairing — §5.10 of `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md`.
 //!
 //! ```bash
 //! cargo run --release --example eds_mov_demo

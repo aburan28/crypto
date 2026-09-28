@@ -384,7 +384,7 @@ fn build_geometry(cell: &PhaseACell) -> Result<CellGeometry, String> {
         }
         factor_points.extend(points_with_x(&curve, &x));
     }
-    factor_points.sort_by_key(|point| point_key(point));
+    factor_points.sort_by_key(point_key);
     factor_points.dedup_by_key(|point| point_key(point));
     if let Some(expected) = cell.expected_factor_points {
         if factor_points.len() != expected {
@@ -417,7 +417,7 @@ pub fn decode_uniform_affine_draw(
     }
     let x = F2mElement::from_biguint(&BigUint::from(x_bits), curve.m);
     let mut lifts = points_with_x(curve, &x);
-    lifts.sort_by_key(|point| point_key(point));
+    lifts.sort_by_key(point_key);
     if x_bits == 0 {
         if sign || lifts.len() != 1 {
             return None;

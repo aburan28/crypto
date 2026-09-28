@@ -3,7 +3,7 @@
 `build.py` assembles everything published at
 <https://aburan28.github.io/crypto/>. The
 [`ecc2k130-status`](../../.github/workflows/ecc2k130-status.yml) workflow runs
-it every 15 minutes, after refreshing the campaign snapshot, and uploads the
+it every 3 minutes, after refreshing the campaign snapshot, and uploads the
 result as the Pages artifact.
 
 ```bash

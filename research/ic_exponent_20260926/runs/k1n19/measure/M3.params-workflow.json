@@ -1,0 +1,648 @@
+{
+  "artifacts": {
+    "baseline": "baseline.json",
+    "factor_base": "factor_base.json",
+    "logs": "logs.json",
+    "relations": "relations",
+    "solutions": "solutions.json",
+    "state": "state.json"
+  },
+  "collection_aim": true,
+  "collection_window": 10,
+  "curve_a": 1,
+  "curve_b": 1,
+  "degree": 19,
+  "descent_summands": 2,
+  "elapsed_seconds": 0.028033803,
+  "evidence_scope": "synthetic_known_answer",
+  "factor_base": {
+    "abscissae": 152,
+    "columns": 8,
+    "dimension": 19,
+    "domain": "explicit_orbits(8)",
+    "family": "subgroup_orbits",
+    "pair_table_stored_pairs": 1368,
+    "pair_table_tier": "folded",
+    "points": 304,
+    "selection_cost": {
+      "abscissae_drawn": 22,
+      "cofactor_multiplications": 8,
+      "frobenius_squarings": 152,
+      "lifts_found": 8,
+      "rebuilds": 1
+    },
+    "signed_orbits": 8,
+    "spec": {
+      "kind": "subgroup_orbits",
+      "points": 304,
+      "seed": 203
+    }
+  },
+  "failure": null,
+  "limitations": [
+    "No imported target was used.",
+    "This run does not establish scaling or challenge readiness."
+  ],
+  "name": "k1n19-c8-m2-s203",
+  "operation": "workflow",
+  "params_digest": "5a843d3843e3a243f9f64711a3f663e9334e02f399f8e0155da1241a78296afb",
+  "resources": {
+    "cpu_seconds": 0.018468000000000002,
+    "peak_rss_bytes": 14004224,
+    "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+  },
+  "resumed": false,
+  "run_directory": "/home/user/crypto/research/ic_exponent_20260926/runs/k1n19/measure/M3.params-wf",
+  "run_number": 1,
+  "schema_version": 1,
+  "scope": "resumable staged pipeline: select → collect → logs → solve; completed stages, work units and solved targets are reused on rerun after re-verification against the reconstructed curve",
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "bce525eb3ce02a4e9ae5bb515ff5ce927b4f07c01b92b5d9dbb2a36450ab0994",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "solutions": {
+    "count": 32,
+    "items": [
+      {
+        "descent_trials": 6,
+        "elapsed_seconds": 0.00005799,
+        "expected": "204004",
+        "index": 0,
+        "recovered": "204004",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "64919",
+          "y": "352469"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 2,
+        "elapsed_seconds": 0.000047721,
+        "expected": "85562",
+        "index": 1,
+        "recovered": "85562",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "170542",
+          "y": "268358"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 18,
+        "elapsed_seconds": 0.000045555,
+        "expected": "129480",
+        "index": 2,
+        "recovered": "129480",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "168436",
+          "y": "317294"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 21,
+        "elapsed_seconds": 0.00004844,
+        "expected": "133222",
+        "index": 3,
+        "recovered": "133222",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "25205",
+          "y": "447680"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 12,
+        "elapsed_seconds": 0.000038471,
+        "expected": "258130",
+        "index": 4,
+        "recovered": "258130",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "84957",
+          "y": "374986"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 3,
+        "elapsed_seconds": 0.000045976,
+        "expected": "225904",
+        "index": 5,
+        "recovered": "225904",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "357279",
+          "y": "327705"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 7,
+        "elapsed_seconds": 0.000046117,
+        "expected": "115989",
+        "index": 6,
+        "recovered": "115989",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "27631",
+          "y": "154656"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 8,
+        "elapsed_seconds": 0.000043049,
+        "expected": "207466",
+        "index": 7,
+        "recovered": "207466",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "79457",
+          "y": "139096"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 3,
+        "elapsed_seconds": 0.000043278,
+        "expected": "162148",
+        "index": 8,
+        "recovered": "162148",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "185930",
+          "y": "344167"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 4,
+        "elapsed_seconds": 0.000054723,
+        "expected": "84824",
+        "index": 9,
+        "recovered": "84824",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "73579",
+          "y": "318131"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 8,
+        "elapsed_seconds": 0.000042977,
+        "expected": "235115",
+        "index": 10,
+        "recovered": "235115",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "420780",
+          "y": "4874"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 3,
+        "elapsed_seconds": 0.000042546,
+        "expected": "90573",
+        "index": 11,
+        "recovered": "90573",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "165646",
+          "y": "46302"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 20,
+        "elapsed_seconds": 0.000042948,
+        "expected": "20577",
+        "index": 12,
+        "recovered": "20577",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "82419",
+          "y": "201954"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 10,
+        "elapsed_seconds": 0.00004437,
+        "expected": "156900",
+        "index": 13,
+        "recovered": "156900",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "488794",
+          "y": "519109"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 18,
+        "elapsed_seconds": 0.000046982,
+        "expected": "65149",
+        "index": 14,
+        "recovered": "65149",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "468068",
+          "y": "40151"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 2,
+        "elapsed_seconds": 0.00004444,
+        "expected": "47666",
+        "index": 15,
+        "recovered": "47666",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "509270",
+          "y": "523394"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 4,
+        "elapsed_seconds": 0.000043457,
+        "expected": "172736",
+        "index": 16,
+        "recovered": "172736",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "221208",
+          "y": "26422"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 1,
+        "elapsed_seconds": 0.000045513,
+        "expected": "64367",
+        "index": 17,
+        "recovered": "64367",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "43015",
+          "y": "135892"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 6,
+        "elapsed_seconds": 0.000042494,
+        "expected": "156003",
+        "index": 18,
+        "recovered": "156003",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "323675",
+          "y": "304793"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 5,
+        "elapsed_seconds": 0.00004194,
+        "expected": "197651",
+        "index": 19,
+        "recovered": "197651",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "373787",
+          "y": "411661"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 3,
+        "elapsed_seconds": 0.000040729,
+        "expected": "10334",
+        "index": 20,
+        "recovered": "10334",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "188782",
+          "y": "395811"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 3,
+        "elapsed_seconds": 0.000041943,
+        "expected": "243366",
+        "index": 21,
+        "recovered": "243366",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "68921",
+          "y": "435196"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 1,
+        "elapsed_seconds": 0.000041438,
+        "expected": "237209",
+        "index": 22,
+        "recovered": "237209",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "359345",
+          "y": "338917"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 5,
+        "elapsed_seconds": 0.000047839,
+        "expected": "199185",
+        "index": 23,
+        "recovered": "199185",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "385779",
+          "y": "208431"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 5,
+        "elapsed_seconds": 0.000044613,
+        "expected": "2925",
+        "index": 24,
+        "recovered": "2925",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "32659",
+          "y": "300595"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 3,
+        "elapsed_seconds": 0.000043892,
+        "expected": "188894",
+        "index": 25,
+        "recovered": "188894",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "273285",
+          "y": "163248"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 4,
+        "elapsed_seconds": 0.000042736,
+        "expected": "203253",
+        "index": 26,
+        "recovered": "203253",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "91757",
+          "y": "157098"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 14,
+        "elapsed_seconds": 0.000043726,
+        "expected": "89726",
+        "index": 27,
+        "recovered": "89726",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "223280",
+          "y": "456919"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 5,
+        "elapsed_seconds": 0.000039102,
+        "expected": "207569",
+        "index": 28,
+        "recovered": "207569",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "360199",
+          "y": "28534"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 7,
+        "elapsed_seconds": 0.000043657,
+        "expected": "44985",
+        "index": 29,
+        "recovered": "44985",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "342505",
+          "y": "198225"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 15,
+        "elapsed_seconds": 0.000041334,
+        "expected": "1808",
+        "index": 30,
+        "recovered": "1808",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "31245",
+          "y": "305012"
+        },
+        "verified": true
+      },
+      {
+        "descent_trials": 1,
+        "elapsed_seconds": 0.000047482,
+        "expected": "17246",
+        "index": 31,
+        "recovered": "17246",
+        "target": {
+          "kind": "random_known_log",
+          "target_scalar_constructed": true,
+          "x": "160132",
+          "y": "174808"
+        },
+        "verified": true
+      }
+    ],
+    "verified": 32
+  },
+  "solver": "pair_table",
+  "stages": [
+    {
+      "ran": true,
+      "selection_cost": {
+        "abscissae_drawn": 22,
+        "cofactor_multiplications": 8,
+        "frobenius_squarings": 152,
+        "lifts_found": 8,
+        "rebuilds": 1
+      },
+      "stage": "select",
+      "status": "complete"
+    },
+    {
+      "aimed": true,
+      "columns": 8,
+      "columns_covered": 8,
+      "elapsed_seconds": 0.002240813,
+      "ran": true,
+      "relations_now": 13,
+      "relations_total": 13,
+      "stage": "collect",
+      "status": "complete",
+      "summands_scanned_now": 160,
+      "summands_scanned_total": 160,
+      "trials_now": 16,
+      "trials_total": 16,
+      "units": {
+        "ignored": 0,
+        "indices": [
+          0
+        ],
+        "max": 100000,
+        "present": 1,
+        "ran_now": 1,
+        "requested": 1,
+        "trials_per_unit": 16
+      },
+      "worker": false
+    },
+    {
+      "columns": 8,
+      "duplicates": 0,
+      "elapsed_seconds": 0.001221096,
+      "linear_algebra": {
+        "attempts": 1,
+        "mode": "sparse",
+        "seconds": 0.000031735,
+        "sparse": {
+          "attempts": 0,
+          "core_dimension": 0,
+          "core_nonzeros": 0,
+          "filter": {
+            "columns_in": 8,
+            "columns_out": 0,
+            "dependent_rows_dropped": 5,
+            "duplicates_removed": 0,
+            "excess_rows_removed": 0,
+            "merged_columns": 8,
+            "nonzeros_in": 33,
+            "nonzeros_out": 0,
+            "rows_in": 13,
+            "rows_out": 0,
+            "singletons_removed": 0,
+            "uncovered_columns": 0
+          },
+          "reconstructed_columns": 8,
+          "wiedemann": null
+        }
+      },
+      "ran": true,
+      "rejected": 0,
+      "relations": 13,
+      "relations_loaded": 13,
+      "stage": "logs",
+      "status": "complete",
+      "summands_scanned": 160,
+      "trials": 16,
+      "units_extended": 0,
+      "units_used": 1,
+      "verification_seconds": 0.000320611
+    },
+    {
+      "already_solved": 0,
+      "elapsed_seconds": 0.021506649,
+      "failed_now": 0,
+      "pair_table_seconds": 0.0,
+      "ran": true,
+      "solved_now": 32,
+      "stage": "solve",
+      "status": "complete",
+      "targets": 32
+    }
+  ],
+  "state": {
+    "collect": {
+      "artifact": "relations",
+      "elapsed_seconds": 0.001935053,
+      "status": "complete"
+    },
+    "logs": {
+      "artifact": "logs.json",
+      "elapsed_seconds": 0.000861629,
+      "status": "complete"
+    },
+    "name": "k1n19-c8-m2-s203",
+    "params_digest": "5a843d3843e3a243f9f64711a3f663e9334e02f399f8e0155da1241a78296afb",
+    "relations_collected": 13,
+    "runs": 1,
+    "schema_version": 1,
+    "select": {
+      "artifact": "factor_base.json",
+      "elapsed_seconds": 0.001993621,
+      "status": "complete"
+    },
+    "solve": {
+      "artifact": "solutions.json",
+      "elapsed_seconds": 0.021231322,
+      "status": "complete"
+    },
+    "solved_targets": 32,
+    "total_targets": 32,
+    "units_collected": 1
+  },
+  "status": "complete",
+  "stop_after": null,
+  "subfield": 1,
+  "summands": 3
+}

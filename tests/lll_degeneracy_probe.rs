@@ -44,7 +44,7 @@ fn generate_biased_sigs(
     let mut sigs = Vec::with_capacity(count);
 
     while sigs.len() < count {
-        let bytes_count = ((k_bits + 7) / 8) as usize;
+        let bytes_count = k_bits.div_ceil(8) as usize;
         let mut buf = vec![0u8; bytes_count];
         rng.fill_bytes(&mut buf);
         let extra = (bytes_count as u32) * 8 - k_bits;
@@ -649,7 +649,7 @@ fn probe_p521_hp_timing() {
 /// P-521 HP LLL at m=16 — tests efficiency after incremental GS swap (2026-05-28).
 ///
 /// With 5.7× speedup: m=8 ~14s → m=16 estimated ~45-55s (O((m+2)²) scaling).
-/// 3-seed run targets <180s total.  A pass closes §10.5 of RESEARCH_LLL_GS_ANALYSIS.md.
+/// 3-seed run targets <180s total.  A pass closes §10.5 of research/notes/lattice-hnp/RESEARCH_LLL_GS_ANALYSIS.md.
 ///
 /// Run: `cargo test --test lll_degeneracy_probe p521_hp_m16 -- --ignored --nocapture`
 #[test]

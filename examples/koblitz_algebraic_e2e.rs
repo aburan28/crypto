@@ -301,6 +301,7 @@ fn main() {
         seed,
         strategy: DecompositionStrategy::Sat,
         engine: SolverEngine::default(),
+        weil_charts: None,
         node_budget: 0,
         max_models: 64,
         sat_macaulay_degree: None,
@@ -317,7 +318,11 @@ fn main() {
         relation_batch_size: 1,
         allow_direct_relation: false,
         collapse_projected_orbits: true,
+        crossbred: None,
+        wdsat_binary: None,
+        wdsat_timeout_ms: 5_000,
         linear_algebra: crypto_lib::cryptanalysis::koblitz_index_calculus::LinearAlgebra::Dense,
+        weil_charts: None,
     };
     let solve_start = Instant::now();
     let report =

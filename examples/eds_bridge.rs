@@ -1,5 +1,5 @@
 //! EDS-Residue **F_p ↔ Z bridge** — Silverman–Stephens archimedean signs vs
-//! the arithmetic F_p χ-period.  Item 4 of `RESEARCH_EDS_RESIDUE.md` §5.
+//! the arithmetic F_p χ-period.  Item 4 of `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md` §5.
 //!
 //! ```bash
 //! cargo run --release --example eds_bridge
