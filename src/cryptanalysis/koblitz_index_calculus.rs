@@ -4165,11 +4165,7 @@ impl PairSumTable {
             // is faster, and the pipeline with it is 26 % faster at n = 53
             // (`FrobeniusCanon::canon_many` has the figures and what they
             // do not explain).
-            out.extend(points.iter().map(|p| p.x));
-            canon.canon_in_place(out);
-            for (key, p) in out.iter_mut().zip(points) {
-                *key = if p.infinity { 0 } else { *key + 1 };
-            }
+            canon.point_keys(points, out);
             return;
         }
         const LANES: usize = 8;
