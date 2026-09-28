@@ -69,6 +69,13 @@ fn field_ops_now() -> u64 {
     FIELD_OPS.load(AtomicOrdering::Relaxed)
 }
 
+/// The process-wide row-reduction counter, for callers that run several
+/// F4 solves concurrently and want the batch's total as one difference
+/// (per-report differences interleave under concurrency).
+pub fn field_ops_total() -> u64 {
+    field_ops_now()
+}
+
 #[inline]
 fn count_ops(n: usize) {
     FIELD_OPS.fetch_add(n as u64, AtomicOrdering::Relaxed);
