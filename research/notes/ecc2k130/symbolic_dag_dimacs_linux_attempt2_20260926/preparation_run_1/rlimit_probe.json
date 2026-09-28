@@ -1,0 +1,53 @@
+{
+  "caps": [
+    {
+      "cap_bytes": 536870912,
+      "observation": {
+        "exception": "OSError",
+        "limit": [
+          536870912,
+          536870912
+        ],
+        "over_cap_allocation": "REJECTED"
+      },
+      "python_exit_code": 0,
+      "true_exit_code": 0
+    },
+    {
+      "cap_bytes": 1073741824,
+      "observation": {
+        "exception": "OSError",
+        "limit": [
+          1073741824,
+          1073741824
+        ],
+        "over_cap_allocation": "REJECTED"
+      },
+      "python_exit_code": 0,
+      "true_exit_code": 0
+    },
+    {
+      "cap_bytes": 2147483648,
+      "observation": {
+        "exception": "OSError",
+        "limit": [
+          2147483648,
+          2147483648
+        ],
+        "over_cap_allocation": "REJECTED"
+      },
+      "python_exit_code": 0,
+      "true_exit_code": 0
+    }
+  ],
+  "checkout_head": "ba8aeb651edba2f7a4ff20f336f499d0c57adf44",
+  "decision": "PASS_HARMLESS_CAPS_ONLY",
+  "machine": "x86_64",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "python": "3.12.14 (main, Aug 13 2026, 02:47:42) [GCC 13.3.0]",
+  "python_executable": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3",
+  "runner_image_os": "ubuntu24",
+  "runner_image_version": "20260920.314.1",
+  "schema": "k0-dag-dimacs-linux-rlimit-probe-v1",
+  "utc": "2026-09-26T05:18:07.997591+00:00"
+}

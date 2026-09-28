@@ -142,7 +142,7 @@ pub fn average_steps_to_collision<W: WalkFn>(
 
 use crate::cryptanalysis::pollard_rho::{pollard_rho_dlp, RhoOptions};
 use num_bigint::RandBigInt;
-use num_traits::{One, Zero};
+use num_traits::Zero;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -251,19 +251,11 @@ pub fn benchmark_walk_partitions(
                 continue;
             }
             let h = g.modpow(&secret, &p_big);
-            match solve_dlp_zp_with_partition(
-                &g,
-                &h,
-                &n,
-                &p_big,
-                &partition,
-                base_seed + run as u64,
-            ) {
-                Some(iters) => {
-                    successes += 1;
-                    iters_log.push(iters);
-                }
-                None => {}
+            if let Some(iters) =
+                solve_dlp_zp_with_partition(&g, &h, &n, &p_big, &partition, base_seed + run as u64)
+            {
+                successes += 1;
+                iters_log.push(iters);
             }
         }
         iters_log.sort();
@@ -403,6 +395,5 @@ mod tests {
         println!("design that any researcher with GPU access can act on.");
 
         // Sanity: the experimental-design documentation runs.
-        assert!(true);
     }
 }

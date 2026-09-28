@@ -14,7 +14,7 @@
 //! elliptic (this is the splitting test used by the Castryck-Decru attack
 //! as its verification signal).
 
-use crate::field::{F2, Fp2};
+use crate::field::{Fp2, F2};
 use crate::jacobian::{self, Curve, Div};
 use crate::poly::{ext_gcd, Poly};
 use num_bigint::BigInt;
@@ -37,7 +37,7 @@ fn coeffs3(p: &Poly, fp2: &Fp2) -> (F2, F2, F2) {
     (
         p.coeffs.get(2).cloned().unwrap_or_else(|| fp2.zero()),
         p.coeffs.get(1).cloned().unwrap_or_else(|| fp2.zero()),
-        p.coeffs.get(0).cloned().unwrap_or_else(|| fp2.zero()),
+        p.coeffs.first().cloned().unwrap_or_else(|| fp2.zero()),
     )
 }
 
@@ -69,9 +69,8 @@ pub fn co_wronskians(s: &Splitting, fp2: &Fp2) -> [Poly; 3] {
         s.g[1].derivative(fp2),
         s.g[2].derivative(fp2),
     ];
-    let w = |j: usize, k: usize| -> Poly {
-        s.g[j].mul(&gd[k], fp2).sub(&gd[j].mul(&s.g[k], fp2), fp2)
-    };
+    let w =
+        |j: usize, k: usize| -> Poly { s.g[j].mul(&gd[k], fp2).sub(&gd[j].mul(&s.g[k], fp2), fp2) };
     [
         w(1, 2), // omit index 0
         w(2, 0), // omit index 1
@@ -129,9 +128,15 @@ pub fn pushforward(s: &Splitting, d: &Div, fp2: &Fp2) -> (Curve, Div) {
 
     // Φ(x, X) = G_1(x) H_1(X) + G_2(x) H_2(X)
     //        = A2(X) x² + A1(X) x + A0(X)
-    let big_a2 = h1.scalar_mul(&g1_2, fp2).add(&h2.scalar_mul(&g2_2, fp2), fp2);
-    let big_a1 = h1.scalar_mul(&g1_1, fp2).add(&h2.scalar_mul(&g2_1, fp2), fp2);
-    let big_a0 = h1.scalar_mul(&g1_0, fp2).add(&h2.scalar_mul(&g2_0, fp2), fp2);
+    let big_a2 = h1
+        .scalar_mul(&g1_2, fp2)
+        .add(&h2.scalar_mul(&g2_2, fp2), fp2);
+    let big_a1 = h1
+        .scalar_mul(&g1_1, fp2)
+        .add(&h2.scalar_mul(&g2_1, fp2), fp2);
+    let big_a0 = h1
+        .scalar_mul(&g1_0, fp2)
+        .add(&h2.scalar_mul(&g2_0, fp2), fp2);
 
     // u(x) = x² + u₁ x + u₀  (monic)
     let u0 = d.u.coeffs[0].clone();
@@ -146,23 +151,27 @@ pub fn pushforward(s: &Splitting, d: &Div, fp2: &Fp2) -> (Curve, Div) {
     let alpha_sq = alpha.mul(&alpha, fp2);
     let alpha_beta = alpha.mul(&beta, fp2);
     let beta_sq = beta.mul(&beta, fp2);
-    let u_new = alpha_sq.scalar_mul(&u0, fp2)
+    let u_new = alpha_sq
+        .scalar_mul(&u0, fp2)
         .sub(&alpha_beta.scalar_mul(&u1, fp2), fp2)
         .add(&beta_sq, fp2);
 
     // v(x) = v₁ x + v₀
-    let v0 = d.v.coeffs.get(0).cloned().unwrap_or_else(|| fp2.zero());
+    let v0 = d.v.coeffs.first().cloned().unwrap_or_else(|| fp2.zero());
     let v1 = d.v.coeffs.get(1).cloned().unwrap_or_else(|| fp2.zero());
 
     // G_1*(X) := G_1(x) with x ← −β/α  (cleared denominator α²)
     //          = β² − g₁₁ αβ + g₁₀ α²    (since G_1 = x² + g₁₁x + g₁₀)
     // (Assuming G_1 monic; g1_2 = 1.)
-    let g1_star = beta_sq.clone()
+    let g1_star = beta_sq
+        .clone()
         .sub(&alpha_beta.scalar_mul(&g1_1, fp2), fp2)
         .add(&alpha_sq.scalar_mul(&g1_0, fp2), fp2);
 
     // v*(X) := v(x) with x ← −β/α, cleared α: v* = v₀ α − v₁ β
-    let v_star = alpha.scalar_mul(&v0, fp2).sub(&beta.scalar_mul(&v1, fp2), fp2);
+    let v_star = alpha
+        .scalar_mul(&v0, fp2)
+        .sub(&beta.scalar_mul(&v1, fp2), fp2);
 
     // β + α·X  (linear-in-X factor for the (x − X) term, after substitution)
     let alpha_times_x = alpha.mul(&Poly::x(fp2), fp2);
@@ -191,8 +200,10 @@ pub fn pushforward(s: &Splitting, d: &Div, fp2: &Fp2) -> (Curve, Div) {
         let (un, r1) = u_new.div_rem(&g, fp2);
         let (np, _r2) = n_poly.div_rem(&g, fp2);
         let (dp, r3) = d_poly.div_rem(&g, fp2);
-        assert!(r1.is_zero() && r3.is_zero(),
-                "gcd should divide D and U_new exactly");
+        assert!(
+            r1.is_zero() && r3.is_zero(),
+            "gcd should divide D and U_new exactly"
+        );
         (un, np, dp)
     };
 
@@ -223,13 +234,7 @@ pub fn pushforward(s: &Splitting, d: &Div, fp2: &Fp2) -> (Curve, Div) {
 ///
 /// In the C-D attack, a correct guess of Alice's secret bits gives `true`;
 /// wrong guesses give `false` because the chain splits prematurely.
-pub fn does_22_chain_split(
-    h: &Curve,
-    d1: &Div,
-    d2: &Div,
-    a: u32,
-    fp2: &Fp2,
-) -> bool {
+pub fn does_22_chain_split(h: &Curve, d1: &Div, d2: &Div, a: u32, fp2: &Fp2) -> bool {
     assert!(a >= 2, "chain length must be at least 2");
     let mut cur_curve = h.clone();
     let mut cur_d1 = d1.clone();
@@ -293,10 +298,12 @@ mod tests {
     use super::*;
     use crate::field::{Fp, Fp2};
     use num_bigint::BigInt;
-    use num_integer::Integer;
+
     use num_traits::Zero;
 
-    fn ctx() -> Fp2 { Fp2::new(Fp::new(BigInt::from(431u64))) }
+    fn ctx() -> Fp2 {
+        Fp2::new(Fp::new(BigInt::from(431u64)))
+    }
 
     /// Build a deg-2 polynomial from int coefficients [c, b, a] meaning a·x² + b·x + c.
     fn quad(c: i64, b: i64, a: i64, fp2: &Fp2) -> Poly {
@@ -311,9 +318,9 @@ mod tests {
     /// forces H[2] to drop from generic deg 2 to deg 1, keeping the
     /// codomain f̃ at deg 5 so it fits our current Curve invariant.
     fn split_curve(fp2: &Fp2) -> (Curve, Splitting) {
-        let g0 = quad(1, 0, 1, fp2);      // x² + 1
-        let g1 = quad(3, 0, 1, fp2);      // x² + 3
-        let g2 = linr(-2, 1, fp2);        // x − 2
+        let g0 = quad(1, 0, 1, fp2); // x² + 1
+        let g1 = quad(3, 0, 1, fp2); // x² + 3
+        let g2 = linr(-2, 1, fp2); // x − 2
         let f = g0.mul(&g1, fp2).mul(&g2, fp2);
         let c = Curve::new_monic_deg5(f, fp2);
         let s = Splitting { g: [g0, g1, g2] };
@@ -393,8 +400,11 @@ mod tests {
             let xe = fp2.from_int(x as i64);
             let rhs = c.f.eval(&xe, fp2);
             assert!(rhs.b.is_zero());
-            if rhs.a.is_zero() { n += 1; }
-            else if fp2.fp.is_square(&rhs.a) { n += 2; }
+            if rhs.a.is_zero() {
+                n += 1;
+            } else if fp2.fp.is_square(&rhs.a) {
+                n += 2;
+            }
         }
         n
     }
@@ -406,10 +416,16 @@ mod tests {
         let exp = (&fp2.fp.p * &fp2.fp.p - BigInt::from(1)) / 2;
         for a in 0..p_u {
             for b in 0..p_u {
-                let x = F2 { a: BigInt::from(a), b: BigInt::from(b) };
+                let x = F2 {
+                    a: BigInt::from(a),
+                    b: BigInt::from(b),
+                };
                 let rhs = c.f.eval(&x, fp2);
-                if fp2.is_zero(&rhs) { n += 1; }
-                else if fp2.pow(&rhs, &exp) == fp2.one() { n += 2; }
+                if fp2.is_zero(&rhs) {
+                    n += 1;
+                } else if fp2.pow(&rhs, &exp) == fp2.one() {
+                    n += 2;
+                }
             }
         }
         n
@@ -445,12 +461,22 @@ mod tests {
     fn sample_pt(c: &Curve, x_try: i64, fp2: &Fp2) -> Option<(F2, F2)> {
         let x = fp2.from_int(x_try);
         let rhs = c.f.eval(&x, fp2);
-        if !rhs.b.is_zero() { return None; }
+        if !rhs.b.is_zero() {
+            return None;
+        }
         // Skip 2-torsion points (y = 0) — they cause v* to vanish identically
         // in the pushforward, exercising a degenerate code path.
-        if rhs.a.is_zero() { return None; }
+        if rhs.a.is_zero() {
+            return None;
+        }
         let y_re = fp2.fp.sqrt(&rhs.a)?;
-        Some((x, F2 { a: y_re, b: num_bigint::BigInt::from(0) }))
+        Some((
+            x,
+            F2 {
+                a: y_re,
+                b: num_bigint::BigInt::from(0),
+            },
+        ))
     }
 
     #[test]
@@ -462,14 +488,19 @@ mod tests {
         for k in 0..200i64 {
             if let Some(p) = sample_pt(&c, k, &fp2) {
                 pts.push(p);
-                if pts.len() == 2 { break; }
+                if pts.len() == 2 {
+                    break;
+                }
             }
         }
         let d1 = pt_to_div(&pts[0].0, &pts[0].1, &fp2);
         let d2 = pt_to_div(&pts[1].0, &pts[1].1, &fp2);
         let d = jacobian::add(&c, &d1, &d2, &fp2);
         assert_eq!(d.u.degree(), Some(2), "test divisor should have deg-2 u");
-        assert!(d.is_valid(&c, &fp2), "test divisor must be valid Mumford on C");
+        assert!(
+            d.is_valid(&c, &fp2),
+            "test divisor must be valid Mumford on C"
+        );
 
         let (c_tilde, d_image) = pushforward(&s, &d, &fp2);
         // The image must satisfy Mumford invariants on the codomain.
@@ -477,7 +508,8 @@ mod tests {
             d_image.is_valid(&c_tilde, &fp2),
             "image divisor must satisfy v² ≡ f̃ (mod u) on codomain.\n\
              u_image = {:?}\n  v_image = {:?}",
-            d_image.u, d_image.v
+            d_image.u,
+            d_image.v
         );
     }
 
@@ -490,7 +522,9 @@ mod tests {
         for k in 0..200i64 {
             if let Some(p) = sample_pt(&c, k, &fp2) {
                 pts.push(p);
-                if pts.len() == 3 { break; }
+                if pts.len() == 3 {
+                    break;
+                }
             }
         }
         let d1 = pt_to_div(&pts[0].0, &pts[0].1, &fp2);
@@ -516,7 +550,7 @@ mod tests {
         // divisors whose u-polys are linearly dependent with the third
         // factor's coefficients — i.e., a split partition (δ=0).
         let fp2 = ctx();
-        let (c, _s) = split_curve(&fp2);
+        let (_c, _s) = split_curve(&fp2);
         // We need 2-torsion divisors d1, d2 on J(c) whose u-polys G_1, G_2
         // give δ=0 with G_3 = c.f/(G_1·G_2). Use a known split partition:
         //   G_1 = x²+1, G_2 = x²+3, G_3 = (linear)*(linear)
@@ -528,24 +562,42 @@ mod tests {
         //
         // Use a simpler construction: build a fresh curve where the natural
         // splitting IS δ=0 by construction (linearly dependent rows).
-        let g0 = Poly::new(vec![fp2.from_int(1), fp2.from_int(0), fp2.from_int(1)], &fp2); // x²+1
-        let g1 = Poly::new(vec![fp2.from_int(2), fp2.from_int(0), fp2.from_int(1)], &fp2); // x²+2
-        // g2 = g0+g1 = 2x²+3 (gives δ=0 in 3x3 cofactor matrix with first 2 rows
-        // having the same x-coef pattern). Need product = monic deg 6.
-        let g2_unnorm = Poly::new(vec![fp2.from_int(3), fp2.from_int(0), fp2.from_int(2)], &fp2);
+        let g0 = Poly::new(
+            vec![fp2.from_int(1), fp2.from_int(0), fp2.from_int(1)],
+            &fp2,
+        ); // x²+1
+        let g1 = Poly::new(
+            vec![fp2.from_int(2), fp2.from_int(0), fp2.from_int(1)],
+            &fp2,
+        ); // x²+2
+           // g2 = g0+g1 = 2x²+3 (gives δ=0 in 3x3 cofactor matrix with first 2 rows
+           // having the same x-coef pattern). Need product = monic deg 6.
+        let g2_unnorm = Poly::new(
+            vec![fp2.from_int(3), fp2.from_int(0), fp2.from_int(2)],
+            &fp2,
+        );
         let f_split = g0.mul(&g1, &fp2).mul(&g2_unnorm, &fp2);
         let curve_with_split = jacobian::Curve::new(f_split, &fp2);
 
         // 2-torsion divisor on curve_with_split with u = g0:
         // u = x²+1, v = 0. v² = 0, f mod u = ?  (f is divisible by g0, so f mod g0 = 0)
-        let d_a = Div { u: g0.clone(), v: Poly::zero() };
-        let d_b = Div { u: g1.clone(), v: Poly::zero() };
+        let d_a = Div {
+            u: g0.clone(),
+            v: Poly::zero(),
+        };
+        let d_b = Div {
+            u: g1.clone(),
+            v: Poly::zero(),
+        };
         assert!(d_a.is_valid(&curve_with_split, &fp2));
         assert!(d_b.is_valid(&curve_with_split, &fp2));
 
         // a=2 chain: just final splitting check on (G_1, G_2, G_3).
         let split = does_22_chain_split(&curve_with_split, &d_a, &d_b, 2, &fp2);
-        assert!(split, "constructed split partition should yield does_22_chain_split = true");
+        assert!(
+            split,
+            "constructed split partition should yield does_22_chain_split = true"
+        );
     }
 
     #[test]
@@ -554,14 +606,29 @@ mod tests {
         let (c, _s) = split_curve(&fp2);
         // Use the test split's natural G_1, G_2 — these don't give δ=0.
         // G_1 = x²+1, G_2 = x²+3 (the curve's natural factors). δ ≠ 0 here.
-        let g0 = Poly::new(vec![fp2.from_int(1), fp2.from_int(0), fp2.from_int(1)], &fp2);
-        let g1 = Poly::new(vec![fp2.from_int(3), fp2.from_int(0), fp2.from_int(1)], &fp2);
-        let d_a = Div { u: g0.clone(), v: Poly::zero() };
-        let d_b = Div { u: g1.clone(), v: Poly::zero() };
+        let g0 = Poly::new(
+            vec![fp2.from_int(1), fp2.from_int(0), fp2.from_int(1)],
+            &fp2,
+        );
+        let g1 = Poly::new(
+            vec![fp2.from_int(3), fp2.from_int(0), fp2.from_int(1)],
+            &fp2,
+        );
+        let d_a = Div {
+            u: g0.clone(),
+            v: Poly::zero(),
+        };
+        let d_b = Div {
+            u: g1.clone(),
+            v: Poly::zero(),
+        };
         assert!(d_a.is_valid(&c, &fp2));
         assert!(d_b.is_valid(&c, &fp2));
         let split = does_22_chain_split(&c, &d_a, &d_b, 2, &fp2);
-        assert!(!split, "non-split partition should yield does_22_chain_split = false");
+        assert!(
+            !split,
+            "non-split partition should yield does_22_chain_split = false"
+        );
     }
 
     #[test]
@@ -572,13 +639,17 @@ mod tests {
         let (_c, s) = split_curve(&fp2);
         // G_1 = x² + 1.  D = ⟨G_1, 0⟩ is a 2-torsion divisor in ker(φ).
         let g1 = s.g[0].clone();
-        let kernel_div = Div { u: g1, v: Poly::zero() };
+        let kernel_div = Div {
+            u: g1,
+            v: Poly::zero(),
+        };
         // u has degree 2 — meets our pushforward precondition.
         let (_, phi_d) = pushforward(&s, &kernel_div, &fp2);
         assert!(
             phi_d.is_identity(&fp2),
             "kernel element should map to identity, got u={:?} v={:?}",
-            phi_d.u, phi_d.v
+            phi_d.u,
+            phi_d.v
         );
     }
 }

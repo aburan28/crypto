@@ -1,0 +1,32 @@
+{
+  "scope": "Discrete diagnostic counts on twelve discovery fixtures. Instrumented timings are not performance evidence; no holdouts are sampled.",
+  "started_utc": "2026-09-23T15:27:48.952125+00:00",
+  "primary_manifest_sha256": "997d17c3aeb4d9985a651193b204aa4cfd13a1b4705a43b2cde1962a2691e4d7",
+  "source_hashes": {
+    "SOURCE_LINEAGE.json": "371391b1e8a33c5304d40c2c4b9194e53bb46031d80631764c5c78024c9ca67c",
+    "basis.rs": "15ae2bf75605660e3ca1451e5a458550be83e5a4586754cc7300bc72fdf729c2",
+    "basis_tests.rs": "58331a341cfe02a2bfac5622727f3e9f58e5e293ce5270bfe0c8f85b02507046",
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "packed.rs": "240e363ee53a79952225f8eacc9dd9d0a4ace0ce5d09b3b59a69de0edcd5d464",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "run.py": "8d9b83802ada87aef0c94734ee6a40f3589fbd68bbd522e6c9c3fb7978f19a3a",
+    "worker.rs": "deb78a8e5310095827c45fa975e6725f0263295a76a6c1914df0ce2841f9f694"
+  },
+  "complete": true,
+  "compiler_command": [
+    "/opt/homebrew/bin/rustc",
+    "--edition",
+    "2021",
+    "-O",
+    "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/research/boolean_basis_transport_20260923/affine_opportunity_01/worker.rs",
+    "-o",
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-affine-opportunity-47f648lt/probe"
+  ],
+  "compiler_exit_code": 0,
+  "executable_sha256": "c140ff3462b3e86c4056fca5cf69790f52290820fc26a9bf224813ccd48920d1",
+  "command": [
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-affine-opportunity-47f648lt/probe"
+  ],
+  "exit_code": 0,
+  "ended_utc": "2026-09-23T15:27:50.536246+00:00"
+}

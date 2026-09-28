@@ -1,0 +1,31 @@
+{
+  "schema": "ecc2k130_263_dual_composition_v1",
+  "status": "FAIL",
+  "source_sha256": {
+    "certificate.py": "b1b3318a2576794245aa5bff08c0fb4e4ed158e30102a0abc9e37995a2d9bc73",
+    "dual_transport.py": "c0e15b26dad5f44dbb19aa989aef092e4a7f9a21e58282f8348c881203ca0c2e"
+  },
+  "input_sha256": {
+    "twist_torsion_results.json": "6f1e7b22f3471214d38ec0d3196c88fe9edaf45791e9c05ea67764831fd75368",
+    "redteam_velu_replay.py": "c08fbb8de9d54906d783be967a36a6073b2a1d1a3583292badd3adcdd7126790",
+    "oriented_velu.py": "a1a656cc32efd612250b1ecf50dff18af79a8f62f970ee79841bfd390603423b",
+    "fastfield.py": "b5990fda51700bbfba363251c41f02febfd0fc92edfea4f5ddd647bab472789e",
+    "relations.py": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f"
+  },
+  "host": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "research/ecc2k130_dual_transport_20260925/certificate.py",
+    "--out",
+    "research/ecc2k130_dual_transport_20260925/receipt_initial.json"
+  ],
+  "PDP_cost": null,
+  "full_ECDLP_cost": null,
+  "end_to_end_speedup": null,
+  "cost_scope": "saved torsion generators supplied; no cold basis discovery or relation/PDP work",
+  "production_field_initialization_seconds": 0.25388283299980685,
+  "rows": [],
+  "failure": "Traceback (most recent call last):\n  File \"/private/tmp/dual-263-20260925/research/ecc2k130_dual_transport_20260925/certificate.py\", line 296, in main\n    rows.append(run_row(saved_run, saved, field, started + 300))\n                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/private/tmp/dual-263-20260925/research/ecc2k130_dual_transport_20260925/certificate.py\", line 185, in run_row\n    reverse_kernel = half_kernel(reference, independent_complement_image, 1)\n  File \"/private/tmp/dual-263-20260925/research/ecc2k130_dual_transport_20260925/certificate.py\", line 68, in half_kernel\n    check(point is not None and reference.on_curve(point, a), \"half-kernel point\")\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/private/tmp/dual-263-20260925/research/ecc2k130_dual_transport_20260925/certificate.py\", line 54, in check\n    raise AssertionError(message)\nAssertionError: half-kernel point\n",
+  "elapsed_seconds": 2.661549832992023
+}

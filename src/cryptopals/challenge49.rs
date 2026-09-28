@@ -52,7 +52,7 @@ use crate::symmetric::aes::{encrypt_block, AesKey};
 /// Input must be a multiple of 16 bytes.  Caller supplies padding.
 pub fn cbc_mac(key: &AesKey, iv: &[u8; 16], msg: &[u8]) -> [u8; 16] {
     assert!(
-        msg.len() % 16 == 0,
+        msg.len().is_multiple_of(16),
         "cbc_mac: message must be block-aligned"
     );
     let mut state = *iv;
@@ -71,7 +71,7 @@ pub fn cbc_mac(key: &AesKey, iv: &[u8; 16], msg: &[u8]) -> [u8; 16] {
 /// boundary in the same way the oracle does.
 fn pad_block(buf: &[u8]) -> Vec<u8> {
     let mut v = buf.to_vec();
-    while v.len() % 16 != 0 {
+    while !v.len().is_multiple_of(16) {
         v.push(0);
     }
     v
@@ -119,7 +119,7 @@ impl BankPart2 {
         Some((padded, tag))
     }
     pub fn verify(&self, msg: &[u8], tag: &[u8; 16]) -> bool {
-        if msg.len() % 16 != 0 {
+        if !msg.len().is_multiple_of(16) {
             return false;
         }
         &cbc_mac(&self.key, &[0u8; 16], msg) == tag

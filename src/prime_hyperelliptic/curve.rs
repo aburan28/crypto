@@ -35,7 +35,7 @@
 //! ```
 
 use super::fp2::{Fp2, Fp2Ctx};
-use super::fp_poly::{fp_inv, FpPoly};
+use super::fp_poly::FpPoly;
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
 
@@ -146,7 +146,7 @@ impl MumfordDivisorP {
     }
 
     /// Negation: `−(u, v) = (u, −v mod u)`.
-    pub fn neg(&self, curve: &HyperellipticCurveP) -> Self {
+    pub fn neg(&self, _curve: &HyperellipticCurveP) -> Self {
         let v_neg = self.v.neg();
         let v_new = if self.u.is_zero() {
             v_neg
@@ -370,7 +370,7 @@ pub fn fast_point_counts(curve: &HyperellipticCurveP, p_u: u64) -> (u64, u64) {
         .iter()
         .map(|c| c.to_u64_digits().first().copied().unwrap_or(0) % p_u)
         .collect();
-    let deg_f = f_coeffs.len();
+    let _deg_f = f_coeffs.len();
     // Precompute the QR table for F_p: chi[v] = 1 if v is a non-zero
     // square mod p, 0 if v == 0, p-1 (= -1) if non-square.
     // Built via Euler's criterion once.
@@ -772,7 +772,7 @@ mod tests {
         // a_2 = #Jac - 74 — must be in [-4p, 4p]
         // (consequence of Frobenius eigenvalue bound |α_i| = √p).
         let n1 = count_points(&curve);
-        let a1 = BigUint::from(curve.p.clone() + BigUint::one() - n1.clone());
+        let a1 = curve.p.clone() + BigUint::one() - n1.clone();
         // Sanity: a_1 here = 4
         assert_eq!(a1, BigUint::from(4u32));
         let _ = order;

@@ -1,0 +1,84 @@
+name: n53 true shared-log batch
+
+on:
+  pull_request:
+    paths:
+      - 'research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/**'
+      - '.github/workflows/n53-shared-log-batch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  paired-panel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 58
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check study scripts
+        run: python3 -m py_compile research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/{generate_targets,run_panel,verify_pair,archive,verify_archive,verify_failed_attempt}.py
+      - name: Replay committed evidence if present
+        run: |
+          bundle=research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/evidence
+          if test -f "$bundle/archive_manifest.json"; then
+            python3 research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/verify_archive.py --bundle "$bundle"
+            echo 'PANEL_ARCHIVED=1' >> "$GITHUB_ENV"
+          fi
+      - name: Replay retained first-run verifier failure
+        if: env.PANEL_ARCHIVED == '1'
+        run: python3 research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/verify_failed_attempt.py --bundle research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/failed_attempt_1
+      - name: Build exact checked-out producers
+        if: env.PANEL_ARCHIVED != '1'
+        run: cargo build --release --example koblitz_s5_sat_instance --example koblitz_rho_batch_ks
+      - name: Check clean source and preregistered ancestry
+        if: env.PANEL_ARCHIVED != '1'
+        run: |
+          test -z "$(git status --porcelain)"
+          git merge-base --is-ancestor fc27150df3238b6863ed5618c721e7fd8b6ce403 HEAD
+          git rev-parse HEAD
+          sha256sum examples/koblitz_s5_sat_instance.rs examples/koblitz_rho_batch_ks.rs
+      - name: Run cold training and matched point batches
+        if: env.PANEL_ARCHIVED != '1'
+        run: python3 research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/run_panel.py --out /tmp/n53-shared-log-panel
+      - name: Seal all attempted outputs including censored runs
+        if: always() && env.PANEL_ARCHIVED != '1'
+        run: |
+          if test -d /tmp/n53-shared-log-panel; then
+            python3 research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/archive.py \
+              --panel /tmp/n53-shared-log-panel --out /tmp/n53-shared-log-sealed
+          fi
+      - name: Commit durable raw evidence to PR branch
+        if: always() && github.event_name == 'pull_request' && env.PANEL_ARCHIVED != '1'
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+          STARTING_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if ! test -f /tmp/n53-shared-log-sealed/archive_manifest.json; then exit 0; fi
+          git fetch origin "$HEAD_BRANCH:refs/remotes/origin/$HEAD_BRANCH"
+          test "$(git rev-parse "origin/$HEAD_BRANCH")" = "$STARTING_HEAD"
+          git checkout -B "$HEAD_BRANCH" "origin/$HEAD_BRANCH"
+          bundle=research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/evidence
+          mkdir -p "$bundle"
+          cp /tmp/n53-shared-log-sealed/{evidence.tar.gz,archive_manifest.json} "$bundle/"
+          if test -f /tmp/n53-shared-log-sealed/panel.json; then cp /tmp/n53-shared-log-sealed/panel.json "$bundle/"; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$bundle"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'research: preserve n53 true shared-log paired panel'
+          git push origin "HEAD:$HEAD_BRANCH"
+      - name: Upload all attempted raw outputs
+        if: always() && env.PANEL_ARCHIVED != '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: n53-shared-log-${{ github.sha }}
+          path: /tmp/n53-shared-log-panel/
+          if-no-files-found: warn
+          retention-days: 30

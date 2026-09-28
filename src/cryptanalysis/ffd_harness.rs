@@ -310,7 +310,7 @@ pub fn quad_monomial_index(i: u32, j: u32, num_vars: u32) -> usize {
     // # of pairs (a, b) with a < i is C(num_vars - 0, ...) — easier:
     // # of pairs with first index < i  =  i·num_vars − i·(i+1)/2.
     let pairs_before_i = (i as u64) * (num_vars as u64) - (i as u64) * (i as u64 + 1) / 2;
-    let in_row = (j as u64 - i as u64 - 1) as u64;
+    let in_row = j as u64 - i as u64 - 1;
     1 + num_vars as usize + (pairs_before_i + in_row) as usize
 }
 
@@ -578,7 +578,7 @@ fn sq_f2m_const(c: &F2mElement, _n: u32, irr: &IrreduciblePoly) -> F2mElement {
 /// Reduce a convolution result (length `2n - 1`) modulo the irreducible
 /// polynomial `m(z)` of degree `n`.  `irr.low_terms` lists the
 /// non-leading nonzero exponents of `m`, so `z^n ≡ Σ_{e ∈ low_terms} z^e`.
-fn reduce_mod_irr(conv: &mut Vec<F2BoolPoly>, n: u32, irr: &IrreduciblePoly) {
+fn reduce_mod_irr(conv: &mut [F2BoolPoly], n: u32, irr: &IrreduciblePoly) {
     let nu = n as usize;
     let high = conv.len();
     for k in (nu..high).rev() {
@@ -658,7 +658,7 @@ pub(crate) fn build_macaulay_rows(
         return (Vec::new(), cols, 0);
     }
     let multipliers = enumerate_monomials_upto(num_vars, d.saturating_sub(2));
-    let row_words = (cols + 63) / 64;
+    let row_words = cols.div_ceil(64);
     let mut rows: Vec<Vec<u64>> = Vec::new();
     for mult in &multipliers {
         for eq in eqs {
@@ -873,7 +873,7 @@ fn pack_bits(flat: &[bool], words: usize) -> Vec<u64> {
 }
 
 /// Gauss-Jordan reduction over `F_2` (XOR rows).  Returns the rank.
-pub(crate) fn f2_rank(rows: &mut Vec<Vec<u64>>, cols: usize) -> usize {
+pub(crate) fn f2_rank(rows: &mut [Vec<u64>], cols: usize) -> usize {
     let mut rank = 0;
     let mut row = 0;
     for col in 0..cols {
@@ -1046,7 +1046,7 @@ mod tests {
         for i in 0..v {
             for j in (i + 1)..v {
                 let idx = quad_monomial_index(i, j, v);
-                assert!(idx >= 1 + v as usize);
+                assert!(idx > v as usize);
                 assert!(idx < 1 + v as usize + 15);
                 assert!(seen.insert(idx), "duplicate index for ({},{})", i, j);
             }
@@ -1101,10 +1101,10 @@ mod tests {
     ///   non-trivial system);
     /// - the rank at D = 4 saturates at the column count (the system
     ///   "fell" — every monomial of degree ≤ 4 was reduced).
-    /// **The factor-base descent must agree with field arithmetic.**
-    /// Pick `X₁, X₂` inside the `l`-dimensional subspace, evaluate the
-    /// descended equations at their bits, and compare against the bits
-    /// of `S₃(X₁, X₂, x₃)` computed directly over `F_{2ⁿ}`.
+    ///   **The factor-base descent must agree with field arithmetic.**
+    ///   Pick `X₁, X₂` inside the `l`-dimensional subspace, evaluate the
+    ///   descended equations at their bits, and compare against the bits
+    ///   of `S₃(X₁, X₂, x₃)` computed directly over `F_{2ⁿ}`.
     #[test]
     fn subspace_descent_matches_field_evaluation() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
@@ -1184,7 +1184,7 @@ mod tests {
         assert_eq!(row.num_eqs, 4);
         // First entry should describe D = 2.
         assert_eq!(row.per_degree[0].degree, 2);
-        assert!(row.per_degree[0].cols >= 8 + 1);
+        assert!(row.per_degree[0].cols > 8);
         // Some non-trivial system was constructed.
         assert!(row.per_degree[0].rank >= 1);
         // Rank at the largest degree should be substantial.

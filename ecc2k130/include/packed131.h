@@ -97,6 +97,9 @@
 #if ECC_PACKED_CLMAD_SQUARE && !ECC_PACKED_CLMAD
 #error "ECC_PACKED_CLMAD_SQUARE requires ECC_PACKED_CLMAD"
 #endif
+/* ECC_PACKED_CLMAD_SQUARE remains a baked-image / audit identity bit
+   (NATIVE-SQUARE.md). The instruction itself is selected by ECC_USE_CLMAD_INSN
+   above; PACKED_ALU_SQUARE / PACKED_ALU_SQR are the measured opt-outs. */
 #ifndef ECC_PACKED_KARAT3
 #define ECC_PACKED_KARAT3 0
 #endif
@@ -743,6 +746,67 @@ ECC_HD P131 squarePolynomial131(P131 a) {
     h[8] = uint32_t(ECC_PACKED_ALU_SQUARE ? spread32alu(a.v[4]) : spread32p(a.v[4]));
     return reducePolynomial131(h);
 }
+#ifndef ECC_PACKED_SQUARE_TABLE
+#define ECC_PACKED_SQUARE_TABLE 0
+#endif
+#if ECC_PACKED_SQUARE_TABLE != 0 && ECC_PACKED_SQUARE_TABLE != 1
+#error "ECC_PACKED_SQUARE_TABLE must be 0 or 1"
+#endif
+// The polynomial square with only the half that needs reducing looked up.
+// Coefficients 0..65 of a square to degree <= 130, so their squares are the
+// bit spread and need no reduction at all; the spread-then-reduce form above
+// spends a whole 261-bit reduction (~75 integer instructions) on the other 65
+// coefficients.  Those map linearly to x^(2i) mod f, i = 66..130, so they come
+// from a table: thirteen 5-bit windows of coefficients 66..130, each window's
+// 32 sums of x^(2i) mod f stored word-major (word k of entry e of window w at
+// SQ_TAB_INDEX(k, w, e)).  Every lane's 32-bit read of word k of window w then
+// hits bank e: a warp's lookup is conflict-free however its lanes' windows
+// fall.  8,320 bytes, beside the walk tables in shared memory.  roofline.py
+// prices the whole square at ~110 integer instructions against ~190.
+static const int SQ_WINDOWS = 13, SQ_WINDOW_BITS = 5, SQ_FIRST = 66;
+static const int SQ_TAB_WORDS = 5 * SQ_WINDOWS * 32;
+#define SQ_TAB_INDEX(k, w, e) (((k) * SQ_WINDOWS + (w)) * 32 + (e))
+// Window w of a covers coefficients SQ_FIRST + 5w .. SQ_FIRST + 5w + 4.
+ECC_HD uint32_t squareWindow131(const P131 &a, int w) {
+    const int p = SQ_FIRST + SQ_WINDOW_BITS * w, word = p >> 5, bit = p & 31;
+    const uint32_t lo = a.v[word] >> bit;
+    const uint32_t hi = (bit > 32 - SQ_WINDOW_BITS && word < 4) ? a.v[word + 1] << (32 - bit) : 0u;
+    return (lo | hi) & 31u;
+}
+// Host: the table, from squarePolynomial131 of the basis coefficients it covers.
+inline void fillSquareTable131(uint32_t *tab) {
+    for (int w = 0; w < SQ_WINDOWS; ++w)
+        for (int e = 0; e < 32; ++e) {
+            P131 sum = {{0, 0, 0, 0, 0}};
+            for (int b = 0; b < SQ_WINDOW_BITS; ++b) {
+                const int i = SQ_FIRST + SQ_WINDOW_BITS * w + b;
+                if (!((e >> b) & 1) || i > 130) continue;
+                P131 basis = {{0, 0, 0, 0, 0}};
+                basis.v[i >> 5] = 1u << (i & 31);
+                const P131 sq = squarePolynomial131(basis);
+                for (int k = 0; k < 5; ++k) sum.v[k] ^= sq.v[k];
+            }
+            for (int k = 0; k < 5; ++k) tab[SQ_TAB_INDEX(k, w, e)] = sum.v[k];
+        }
+}
+ECC_HD P131 squarePolynomialTable131(P131 a, const uint32_t *tab) {
+    // coefficients 0..65: the spread, bits 0..130, no reduction
+    uint32_t r[5];
+#pragma unroll
+    for (int i = 0; i < 2; ++i) {
+        const uint64_t w = ECC_PACKED_ALU_SQUARE ? spread32alu(a.v[i]) : spread32p(a.v[i]);
+        r[2 * i] = uint32_t(w);
+        r[2 * i + 1] = uint32_t(w >> 32);
+    }
+    r[4] = (a.v[2] & 1u) | ((a.v[2] & 2u) << 1);
+#pragma unroll
+    for (int w = 0; w < SQ_WINDOWS; ++w) {
+        const uint32_t e = squareWindow131(a, w);
+#pragma unroll
+        for (int k = 0; k < 5; ++k) r[k] ^= tab[SQ_TAB_INDEX(k, w, e)];
+    }
+    return P131{{r[0], r[1], r[2], r[3], r[4]}};
+}
 ECC_HD P131 sqr131(const P131 &a){
  P131 rev=reverse131(a),r;
 #if ECC_PACKED_ALU_SQR
@@ -783,6 +847,27 @@ ECC_HD P131 sigma131(P131 a,int k){
 #ifndef ECC_PACKED_UNROLL_INV
 #define ECC_PACKED_UNROLL_INV 0
 #endif
+// Two independent products in one out-of-line body.  The inversion is a
+// chain of eight dependent products, and a warp cannot issue a clmad more
+// often than once per ~63 cycles (ONE-BLOCK-GEOMETRY.md section 1), so a
+// single chain leaves the warp idle between links.  Two chains give ptxas
+// twelve independent clmads per link and two independent conversion
+// networks to interleave.  Same arithmetic as mul131, so the results are
+// bit-identical to two mul131 calls.
+static ECC_BIG void mul131x2(MulArg a1, MulArg b1, MulArg a2, MulArg b2, P131 *r1, P131 *r2) {
+#if ECC_PACKED_SINGLE_PRODUCT && !ECC_PACKED_ONB_INV
+    const P131 pa1 = toPolynomial131(a1), pb1 = toPolynomial131(b1);
+    const P131 pa2 = toPolynomial131(a2), pb2 = toPolynomial131(b2);
+    uint32_t h1[9], h2[9];
+    product131(pa1, pb1, h1);
+    product131(pa2, pb2, h2);
+    *r1 = fromPolynomialProduct131(h1);
+    *r2 = fromPolynomialProduct131(h2);
+#else
+    *r1 = mulOnb131(a1, b1);
+    *r2 = mulOnb131(a2, b2);
+#endif
+}
 ECC_HD P131 inv131(P131 a){
 #if ECC_PACKED_ONB_INV
 #define ECC_INV_MUL mulOnb131
@@ -810,6 +895,106 @@ ECC_HD P131 inv131(P131 a){
  return sqr131(acc);
 #endif
 #undef ECC_INV_MUL
+}
+
+#ifndef ECC_PACKED_INV_POLY
+#define ECC_PACKED_INV_POLY 0
+#endif
+#if ECC_PACKED_INV_POLY != 0 && ECC_PACKED_INV_POLY != 1 && ECC_PACKED_INV_POLY != 2
+#error "ECC_PACKED_INV_POLY must be 0, 1 or 2"
+#endif
+// The walk's inverse, polynomial basis in and out: the same Itoh-Tsujii chain
+// as inv131 with the accumulator kept in both bases.  The Frobenius powers
+// need it in the normal basis, the products want it in the polynomial one,
+// and mul131 converts both operands in (two toPolynomial131, ~80 integer
+// instructions each) and the unreduced product out (~100).  Here each link
+// converts only its Frobenius power in, reduces the product it already has
+// in the polynomial basis (~75) and converts that out (~52):
+// toPolynomial131(inv131(fromPolynomial131(ap))) bit for bit, ~50 integer
+// instructions per link cheaper, the same eight products.
+//
+// Inlined (1), the eight links add ~1,900 instructions to the walk kernel
+// (4,920 -> 6,856 for the 20 B/s build); 2 keeps one out-of-line copy of the
+// link's product and reduction, as the reference inverse keeps mul131 out of
+// line, and inlines only the conversion out.
+#if ECC_PACKED_INV_POLY == 2
+#define ECC_INV_POLY_PRODUCT static ECC_BIG
+#else
+#define ECC_INV_POLY_PRODUCT ECC_HD
+#endif
+ECC_INV_POLY_PRODUCT P131 invPoly131Product(P131 frobN, P131 otherP) {
+    uint32_t h[9];
+    product131(toPolynomial131(frobN), otherP, h);
+    return reducePolynomial131(h);
+}
+#undef ECC_INV_POLY_PRODUCT
+ECC_HD P131 invPoly131Link(P131 frobN, P131 otherP, P131 *accN) {
+    const P131 p = invPoly131Product(frobN, otherP);
+    *accN = fromPolynomial131(p);
+    return p;
+}
+ECC_HD P131 invPoly131(P131 ap) {
+    const P131 an = fromPolynomial131(ap);
+    P131 accN, accP;
+    accP = invPoly131Link(sqr131(an), ap, &accN);                         // beta_2
+    accP = invPoly131Link(sqr131(sqr131(accN)), accP, &accN);             // beta_4
+    accP = invPoly131Link(sigma131(accN, 4), accP, &accN);                // beta_8
+    accP = invPoly131Link(sigma131(accN, 8), accP, &accN);                // beta_16
+    accP = invPoly131Link(sigma131(accN, 16), accP, &accN);               // beta_32
+    accP = invPoly131Link(sigma131(accN, 32), accP, &accN);               // beta_64
+    accP = invPoly131Link(sqr131(accN), ap, &accN);                       // beta_65
+    accP = invPoly131Link(sigma131(accN, 65), accP, &accN);               // beta_130
+    (void)accP;
+    return toPolynomial131(sqr131(accN));
+}
+
+// The walk's inversion: polynomial basis in and out.
+ECC_HD P131 invPolynomial131(P131 ap) {
+#if ECC_PACKED_INV_POLY
+    return invPoly131(ap);
+#else
+    return toPolynomial131(inv131(fromPolynomial131(ap)));
+#endif
+}
+
+// sigma^k of two elements with the repeated squarings of both in one loop
+// body, so the two Frobenius chains interleave instead of running back to
+// back.  Same values as sigma131 on each.
+ECC_HD void sigma131x2(P131 *a, P131 *b, int k) {
+#if ECC_PACKED_PERM_SIGMA & 1
+ if(k>=3 && k<=10) { *a = sigmaWalkNetwork131(*a,k-3); *b = sigmaWalkNetwork131(*b,k-3); return; }
+#endif
+#if ECC_PACKED_PERM_SIGMA & 2
+ if(k==16 || k==32 || k==65) {
+  const int which = k==16?0:k==32?1:2;
+  *a = sigmaInvNetwork131(*a,which); *b = sigmaInvNetwork131(*b,which); return;
+ }
+#endif
+#pragma unroll 1
+ for(int i=0;i<k;i++){ *a=sqr131(*a); *b=sqr131(*b); }
+}
+
+// Two independent inversions, link by link: the same Itoh-Tsujii chain as
+// inv131 (powers 2,4,8,16,32,64,65,130) with every product a mul131x2 and
+// every Frobenius map a sigma131x2, so each of the eight links carries two
+// independent dependency chains.  Bit-identical to inv131 on each input.
+ECC_HD void inv131x2(P131 a, P131 b, P131 *ra, P131 *rb) {
+ P131 xa, xb, ya, yb;
+ mul131x2(sqr131(a), a, sqr131(b), b, &xa, &xb);                  // beta_2
+ ya = sqr131(sqr131(xa)); yb = sqr131(sqr131(xb));
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_4
+ ya = xa; yb = xb; sigma131x2(&ya, &yb, 4);
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_8
+ ya = xa; yb = xb; sigma131x2(&ya, &yb, 8);
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_16
+ ya = xa; yb = xb; sigma131x2(&ya, &yb, 16);
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_32
+ ya = xa; yb = xb; sigma131x2(&ya, &yb, 32);
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_64
+ mul131x2(sqr131(xa), a, sqr131(xb), b, &xa, &xb);                 // beta_65
+ ya = xa; yb = xb; sigma131x2(&ya, &yb, 65);
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_130
+ *ra = sqr131(xa); *rb = sqr131(xb);
 }
 
 } // namespace eccPacked131
