@@ -69,7 +69,11 @@ int main() {
         if (i < 2) hist = eccHistPush(ECC_HIST_EMPTY, rawTag ^ ECC_TAG_EPS);
 
         // device-side primitives, on the host, from the shared buffer
+#if ECC_TABLE_PHASE_POPC
+        const int k = twPhase(xn, hw, shared.data() + TW_PLANE_OFF, shared.data() + TW_INV_OFF);
+#else
         const int k = twPhase(xn, hw, bytes + 4 * TW_PHASE_OFF, shared.data() + TW_INV_OFF);
+#endif
         const int pivot = twPivot(xn, k, shared.data() + TW_MASK_OFF, bytes + 4 * TW_MAX_OFF, bytes + 4 * TW_LINV_OFF);
         const int eps = twCoordinate(yp, pivot, shared.data() + TW_ROW_OFF);
         unsigned long long h2 = hist;

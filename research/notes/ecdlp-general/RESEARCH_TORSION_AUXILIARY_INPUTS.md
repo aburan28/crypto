@@ -375,7 +375,17 @@ attack, none of which moves either floor:
   the boundary, so quotienting by it cannot move the ratio.  That is why
   the scoreboard lists it under engineering.  The `2-torsion-saturated` factor bases in
   `research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md` measured `8.9×` *worse* than the
-  unsaturated base at equal size, a relabelling.
+  unsaturated base at equal size, a relabelling.  The end-to-end run of
+  the symmetrised system on Koblitz curves
+  (`research/koblitz_symmetrised_e2e_20260927/`, exotic-coordinates note
+  §20) measured both halves of that argument at once: the `+T`-closed
+  base's yield is `0.6×` the plain base's (representations come in
+  pairs), the `w, s` solve is `1.5–2.4×` cheaper per trial, and the net
+  is `0.76–0.84×` the plain decomposition at `n = 17, 23` and `4.0×`
+  worse at `n = 31`; at `m = 3` the lowered degrees are the difference
+  between the engine solving and giving up, still `66000×` rho.  Three
+  to five orders of magnitude above the matched rho throughout:
+  engineering, as the floor requires.
 - **Rank-two torsion.**  `E(F_q) ≅ Z/n₁ × Z/n₂` with `n₁ > 1` puts the full
   `n₁`-torsion over `F_q`; the Weil pairing on `E[n₁]` maps its logarithm to
   `F_q^*`, but that is the MOV reduction for the small part `n₁ | q − 1`, and
@@ -436,6 +446,12 @@ By AGENTS.md §3, against the boundary each row is entitled to.
    rho reduction on the exponent side; that is a parameter statement for
    pairing-based schemes, and the place to look next is which deployed
    schemes publish `[α^i]G` for `i` in the thousands or beyond.
+   **Done for powers-of-tau setups** in
+   [`RESEARCH_SRS_CHEON_CENSUS.md`](RESEARCH_SRS_CHEON_CENSUS.md): the
+   deployed setups give away 5.74 (EIP-4844 mainnet) to 14.32 bits
+   (Perpetual Powers of Tau), and the largest admissible `d` beats the
+   published power-of-two analyses by ≈ 0.5 bit.  `q`-SDH signature and
+   broadcast schemes remain.
 3. **Kangaroo memory.**  The kangaroo row costs `2–4×` the BSGS row in
    operations and `√(p/d)/Θ` less memory; that trade is where a
    large-instance run would be engineered, and the Fujitsu numbers say the
