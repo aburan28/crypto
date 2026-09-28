@@ -1,0 +1,3029 @@
+[
+  {
+    "name": "stage-n3-l1-m2-r0-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0045184720000293055
+  },
+  {
+    "name": "stage-n3-l1-m2-r0-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0036414560000253005
+  },
+  {
+    "name": "stage-n3-l1-m2-r0-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0035333160000163844
+  },
+  {
+    "name": "stage-n3-l1-m2-r1-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003619904000004226
+  },
+  {
+    "name": "stage-n3-l1-m2-r1-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0032648029999791106
+  },
+  {
+    "name": "stage-n3-l1-m2-r1-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0030877369999871007
+  },
+  {
+    "name": "stage-n3-l1-m2-r2-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0030878560000360267
+  },
+  {
+    "name": "stage-n3-l1-m2-r2-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003339809999999943
+  },
+  {
+    "name": "stage-n3-l1-m2-r2-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0030493539999838504
+  },
+  {
+    "name": "stage-n3-l2-m2-r0-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003608042999985628
+  },
+  {
+    "name": "stage-n3-l2-m2-r0-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003466897999999219
+  },
+  {
+    "name": "stage-n3-l2-m2-r0-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01433144700001776
+  },
+  {
+    "name": "stage-n3-l2-m2-r1-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003914762000022165
+  },
+  {
+    "name": "stage-n3-l2-m2-r1-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0036684590000390926
+  },
+  {
+    "name": "stage-n3-l2-m2-r1-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.014104978000034407
+  },
+  {
+    "name": "stage-n3-l2-m2-r2-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0034724180000011984
+  },
+  {
+    "name": "stage-n3-l2-m2-r2-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003529953999986901
+  },
+  {
+    "name": "stage-n3-l2-m2-r2-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.013134182000044348
+  },
+  {
+    "name": "stage-n5-l2-m2-r0-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006488705999970534
+  },
+  {
+    "name": "stage-n5-l2-m2-r0-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0063685679999707645
+  },
+  {
+    "name": "stage-n5-l2-m2-r0-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 1.0974846350000007
+  },
+  {
+    "name": "stage-n5-l2-m2-r1-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007679111000015837
+  },
+  {
+    "name": "stage-n5-l2-m2-r1-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006671098000026632
+  },
+  {
+    "name": "stage-n5-l2-m2-r1-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 1.0739323819999527
+  },
+  {
+    "name": "stage-n5-l2-m2-r2-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0096120779999751
+  },
+  {
+    "name": "stage-n5-l2-m2-r2-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006511270999965291
+  },
+  {
+    "name": "stage-n5-l2-m2-r2-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "2",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 1.1181581760000086
+  },
+  {
+    "name": "stage-n7-l3-m2-r0-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.016482401000018854
+  },
+  {
+    "name": "stage-n7-l3-m2-r0-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01992087100001072
+  },
+  {
+    "name": "stage-n7-l3-m2-r0-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.032757801000002
+  },
+  {
+    "name": "stage-n7-l3-m2-r1-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01695573299997477
+  },
+  {
+    "name": "stage-n7-l3-m2-r1-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0168847290000258
+  },
+  {
+    "name": "stage-n7-l3-m2-r1-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.034773601999973
+  },
+  {
+    "name": "stage-n7-l3-m2-r2-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.016421363000006295
+  },
+  {
+    "name": "stage-n7-l3-m2-r2-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.015510448999975779
+  },
+  {
+    "name": "stage-n7-l3-m2-r2-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "7",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.011783947000026
+  },
+  {
+    "name": "stage-n9-l3-m2-r0-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01560713899999655
+  },
+  {
+    "name": "stage-n9-l3-m2-r0-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.014771368999959122
+  },
+  {
+    "name": "stage-n9-l3-m2-r0-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.030960649000008
+  },
+  {
+    "name": "stage-n9-l3-m2-r1-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01538177499998028
+  },
+  {
+    "name": "stage-n9-l3-m2-r1-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01434964000003447
+  },
+  {
+    "name": "stage-n9-l3-m2-r1-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.03329203100003
+  },
+  {
+    "name": "stage-n9-l3-m2-r2-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01610056100003021
+  },
+  {
+    "name": "stage-n9-l3-m2-r2-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.015413379999927201
+  },
+  {
+    "name": "stage-n9-l3-m2-r2-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "9",
+      "3",
+      "2",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.03341057900002
+  },
+  {
+    "name": "stage-n3-l1-m3-r0-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.005656247999922925
+  },
+  {
+    "name": "stage-n3-l1-m3-r0-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00518582699999115
+  },
+  {
+    "name": "stage-n3-l1-m3-r0-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007600166999964131
+  },
+  {
+    "name": "stage-n3-l1-m3-r1-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.005016903999944589
+  },
+  {
+    "name": "stage-n3-l1-m3-r1-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004671812999959002
+  },
+  {
+    "name": "stage-n3-l1-m3-r1-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00488513300001614
+  },
+  {
+    "name": "stage-n3-l1-m3-r2-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004573496000034538
+  },
+  {
+    "name": "stage-n3-l1-m3-r2-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004790060000004814
+  },
+  {
+    "name": "stage-n3-l1-m3-r2-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "3",
+      "1",
+      "3",
+      "parameterized"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00484173200004534
+  },
+  {
+    "name": "stage-n5-l2-m3-r0-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.08156358899998395
+  },
+  {
+    "name": "stage-n5-l2-m3-r0-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.10425590199997714
+  },
+  {
+    "name": "stage-n5-l2-m3-r0-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.03420912899992
+  },
+  {
+    "name": "stage-n5-l2-m3-r1-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0839155319999918
+  },
+  {
+    "name": "stage-n5-l2-m3-r1-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.07853507200002241
+  },
+  {
+    "name": "stage-n5-l2-m3-r1-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.03420095900003
+  },
+  {
+    "name": "stage-n5-l2-m3-r2-baseline",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "baseline"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.09232426800008398
+  },
+  {
+    "name": "stage-n5-l2-m3-r2-template",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "template"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.08581965500002298
+  },
+  {
+    "name": "stage-n5-l2-m3-r2-parameterized",
+    "command": [
+      "/home/user/crypto/target/release/examples/polynomial_reuse_bench",
+      "5",
+      "2",
+      "3",
+      "parameterized"
+    ],
+    "status": "timeout",
+    "returncode": null,
+    "wall_seconds": 30.029810706000035
+  },
+  {
+    "name": "dlp-n7-groebner-s101-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.06503140899997106
+  },
+  {
+    "name": "dlp-n7-groebner-s101-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04237996100005148
+  },
+  {
+    "name": "dlp-n7-groebner-s101-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.038130722000005335
+  },
+  {
+    "name": "dlp-n7-groebner-s101-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03475008299994897
+  },
+  {
+    "name": "dlp-n7-groebner-s101-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.035144970999908764
+  },
+  {
+    "name": "dlp-n7-groebner-s101-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03528371699997024
+  },
+  {
+    "name": "dlp-n7-groebner-s202-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.05795681099993999
+  },
+  {
+    "name": "dlp-n7-groebner-s202-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04143478100002085
+  },
+  {
+    "name": "dlp-n7-groebner-s202-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0341266389999646
+  },
+  {
+    "name": "dlp-n7-groebner-s202-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03736003299991353
+  },
+  {
+    "name": "dlp-n7-groebner-s202-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0374932899999294
+  },
+  {
+    "name": "dlp-n7-groebner-s202-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03625257200008036
+  },
+  {
+    "name": "dlp-n7-groebner-s307-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.06017139400000815
+  },
+  {
+    "name": "dlp-n7-groebner-s307-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04006592299992917
+  },
+  {
+    "name": "dlp-n7-groebner-s307-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03498185000000831
+  },
+  {
+    "name": "dlp-n7-groebner-s307-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.034775494999962575
+  },
+  {
+    "name": "dlp-n7-groebner-s307-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03884932599999047
+  },
+  {
+    "name": "dlp-n7-groebner-s307-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.040049805999956334
+  },
+  {
+    "name": "dlp-n7-groebner-s409-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.07805642200003149
+  },
+  {
+    "name": "dlp-n7-groebner-s409-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04232506599998942
+  },
+  {
+    "name": "dlp-n7-groebner-s409-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03548103999992236
+  },
+  {
+    "name": "dlp-n7-groebner-s409-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03608707199998662
+  },
+  {
+    "name": "dlp-n7-groebner-s409-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.037126912999951855
+  },
+  {
+    "name": "dlp-n7-groebner-s409-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04156580800008669
+  },
+  {
+    "name": "dlp-n7-sat-s101-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.05459959200004505
+  },
+  {
+    "name": "dlp-n7-sat-s101-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03931048600009035
+  },
+  {
+    "name": "dlp-n7-sat-s101-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.034305585999959476
+  },
+  {
+    "name": "dlp-n7-sat-s101-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03798700899994856
+  },
+  {
+    "name": "dlp-n7-sat-s101-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.038013508999938495
+  },
+  {
+    "name": "dlp-n7-sat-s101-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03926237100006347
+  },
+  {
+    "name": "dlp-n7-sat-s202-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04950267799995345
+  },
+  {
+    "name": "dlp-n7-sat-s202-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.040218792000018766
+  },
+  {
+    "name": "dlp-n7-sat-s202-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.037127897999994275
+  },
+  {
+    "name": "dlp-n7-sat-s202-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0335295260000521
+  },
+  {
+    "name": "dlp-n7-sat-s202-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.034646512999984225
+  },
+  {
+    "name": "dlp-n7-sat-s202-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0363854290000063
+  },
+  {
+    "name": "dlp-n7-sat-s307-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04844663799997306
+  },
+  {
+    "name": "dlp-n7-sat-s307-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04029894099994635
+  },
+  {
+    "name": "dlp-n7-sat-s307-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.035207476000095994
+  },
+  {
+    "name": "dlp-n7-sat-s307-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03757363500005795
+  },
+  {
+    "name": "dlp-n7-sat-s307-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.045294758000068214
+  },
+  {
+    "name": "dlp-n7-sat-s307-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04351217600003565
+  },
+  {
+    "name": "dlp-n7-sat-s409-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.05164296599991758
+  },
+  {
+    "name": "dlp-n7-sat-s409-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.054339028000072176
+  },
+  {
+    "name": "dlp-n7-sat-s409-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04869279699994422
+  },
+  {
+    "name": "dlp-n7-sat-s409-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03906546599989724
+  },
+  {
+    "name": "dlp-n7-sat-s409-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.039391849000026014
+  },
+  {
+    "name": "dlp-n7-sat-s409-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03767345400001432
+  },
+  {
+    "name": "dlp-n9-groebner-s101-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012971923000009156
+  },
+  {
+    "name": "dlp-n9-groebner-s101-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01143927199996142
+  },
+  {
+    "name": "dlp-n9-groebner-s101-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01187805299991851
+  },
+  {
+    "name": "dlp-n9-groebner-s101-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011183699999946839
+  },
+  {
+    "name": "dlp-n9-groebner-s101-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012194538000017019
+  },
+  {
+    "name": "dlp-n9-groebner-s101-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.013038289999940389
+  },
+  {
+    "name": "dlp-n9-groebner-s202-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.013074740999968526
+  },
+  {
+    "name": "dlp-n9-groebner-s202-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009915194999962296
+  },
+  {
+    "name": "dlp-n9-groebner-s202-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010308710000003884
+  },
+  {
+    "name": "dlp-n9-groebner-s202-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011094667999941521
+  },
+  {
+    "name": "dlp-n9-groebner-s202-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012108480000051713
+  },
+  {
+    "name": "dlp-n9-groebner-s202-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011315507000063008
+  },
+  {
+    "name": "dlp-n9-groebner-s307-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01120418100003917
+  },
+  {
+    "name": "dlp-n9-groebner-s307-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011426335000010113
+  },
+  {
+    "name": "dlp-n9-groebner-s307-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012096153000015875
+  },
+  {
+    "name": "dlp-n9-groebner-s307-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010822162000067692
+  },
+  {
+    "name": "dlp-n9-groebner-s307-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011406202999978632
+  },
+  {
+    "name": "dlp-n9-groebner-s307-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010439744999985123
+  },
+  {
+    "name": "dlp-n9-groebner-s409-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.014106421000064984
+  },
+  {
+    "name": "dlp-n9-groebner-s409-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009931679000033
+  },
+  {
+    "name": "dlp-n9-groebner-s409-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012007327999981499
+  },
+  {
+    "name": "dlp-n9-groebner-s409-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.014057474999958686
+  },
+  {
+    "name": "dlp-n9-groebner-s409-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01196647300002951
+  },
+  {
+    "name": "dlp-n9-groebner-s409-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01100780800004486
+  },
+  {
+    "name": "dlp-n9-sat-s101-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007272419999935664
+  },
+  {
+    "name": "dlp-n9-sat-s101-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009527907999995477
+  },
+  {
+    "name": "dlp-n9-sat-s101-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01166526800000156
+  },
+  {
+    "name": "dlp-n9-sat-s101-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010515387000054943
+  },
+  {
+    "name": "dlp-n9-sat-s101-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009689541000057034
+  },
+  {
+    "name": "dlp-n9-sat-s101-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010307245000035437
+  },
+  {
+    "name": "dlp-n9-sat-s202-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009276285999931133
+  },
+  {
+    "name": "dlp-n9-sat-s202-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010246485999914512
+  },
+  {
+    "name": "dlp-n9-sat-s202-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010515311000062866
+  },
+  {
+    "name": "dlp-n9-sat-s202-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009619826000061948
+  },
+  {
+    "name": "dlp-n9-sat-s202-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011078555999915807
+  },
+  {
+    "name": "dlp-n9-sat-s202-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01108076599996366
+  },
+  {
+    "name": "dlp-n9-sat-s307-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007920204000015474
+  },
+  {
+    "name": "dlp-n9-sat-s307-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01016845000003741
+  },
+  {
+    "name": "dlp-n9-sat-s307-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009645137999996223
+  },
+  {
+    "name": "dlp-n9-sat-s307-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010607634000052713
+  },
+  {
+    "name": "dlp-n9-sat-s307-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010725639000042975
+  },
+  {
+    "name": "dlp-n9-sat-s307-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010410315999934028
+  },
+  {
+    "name": "dlp-n9-sat-s409-reference",
+    "command": [
+      "/tmp/claude-0/-home-user/8533d08e-4224-5d27-b5e8-b0564930b949/scratchpad/crypto-ref-01fa842/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009419656000090981
+  },
+  {
+    "name": "dlp-n9-sat-s409-off",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011313473999962298
+  },
+  {
+    "name": "dlp-n9-sat-s409-preprocess-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01226914599999418
+  },
+  {
+    "name": "dlp-n9-sat-s409-both-local",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012816660999988017
+  },
+  {
+    "name": "dlp-n9-sat-s409-both-redis-cold",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012913980999996966
+  },
+  {
+    "name": "dlp-n9-sat-s409-both-redis-warm",
+    "command": [
+      "/home/user/crypto/target/release/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012558286999933443
+  }
+]

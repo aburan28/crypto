@@ -194,13 +194,26 @@ fn magma_text(entry_name: &str, sys: &S4System, names: &[String], lines: &[Strin
     let _ = writeln!(s, "// {entry_name}: Weil-descended symmetrised Semaev S4 over GF(2^{}), factor-base subspace of dimension {}", sys.n, sys.l);
     let _ = writeln!(s, "// {} x-variables (bits of X1, X2, X3), {} e-variables (coefficients of e1, e2, e3); field equations included", sys.n_x_vars(), sys.n_e_vars());
     let _ = writeln!(s, "F := GF(2);");
-    let _ = writeln!(s, "P<{}> := PolynomialRing(F, {}, \"grevlex\");", names.join(", "), names.len());
+    let _ = writeln!(
+        s,
+        "P<{}> := PolynomialRing(F, {}, \"grevlex\");",
+        names.join(", "),
+        names.len()
+    );
     s.push_str("system := [\n");
     for (k, line) in lines.iter().enumerate() {
-        let _ = writeln!(s, "    {line}{}", if k + 1 < lines.len() { "," } else { "" });
+        let _ = writeln!(
+            s,
+            "    {line}{}",
+            if k + 1 < lines.len() { "," } else { "" }
+        );
     }
     s.push_str("];\n");
-    let _ = writeln!(s, "fieldEquations := [ v^2 + v : v in [{}] ];", names.join(", "));
+    let _ = writeln!(
+        s,
+        "fieldEquations := [ v^2 + v : v in [{}] ];",
+        names.join(", ")
+    );
     s.push_str("I := ideal<P | system cat fieldEquations>;\n");
     s.push_str("time G := GroebnerBasis(I);\n");
     s.push_str("G;\n");
@@ -209,9 +222,16 @@ fn magma_text(entry_name: &str, sys: &S4System, names: &[String], lines: &[Strin
 
 fn anf_text(entry_name: &str, sys: &S4System, names: &[String], lines: &[String]) -> String {
     let mut s = String::new();
-    let _ = writeln!(s, "c {entry_name}: one polynomial over GF(2) per line, `=0` implied; `*` is AND, `+` is XOR");
+    let _ = writeln!(
+        s,
+        "c {entry_name}: one polynomial over GF(2) per line, `=0` implied; `*` is AND, `+` is XOR"
+    );
     let _ = writeln!(s, "c variables: {} (x1..x{} are the bits of X1, X2, X3; e1..e{} the coefficients of e1, e2, e3)", names.len(), sys.n_x_vars(), sys.n_e_vars());
-    let _ = writeln!(s, "c SAT numbering: x_k is DIMACS variable k, e_k is DIMACS variable {} + k", sys.n_x_vars());
+    let _ = writeln!(
+        s,
+        "c SAT numbering: x_k is DIMACS variable k, e_k is DIMACS variable {} + k",
+        sys.n_x_vars()
+    );
     let _ = writeln!(s, "p anf {} {}", names.len(), lines.len());
     for line in lines {
         s.push_str(line);
@@ -370,36 +390,59 @@ fn build_entry(
             xor_enc.solver.solve()
         };
         if verdict != SolveResult::Sat {
-            return Err(format!("{name}: solver verdict {verdict:?} disagrees with the planted witness"));
+            return Err(format!(
+                "{name}: solver verdict {verdict:?} disagrees with the planted witness"
+            ));
         }
         true
     } else {
-        !xor_enc.trivially_unsat || true
+        // Unsatisfiable labels are certified by the refutation above.
+        true
     };
     // A planted witness must satisfy the descended S₄.
     if let Some(xs) = planted {
-        let value = crate::cryptanalysis::semaev_decomp::eval_f3(xs[0], xs[1], xs[2], gf.from_element(x_r), gf);
+        let value = crate::cryptanalysis::semaev_decomp::eval_f3(
+            xs[0],
+            xs[1],
+            xs[2],
+            gf.from_element(x_r),
+            gf,
+        );
         if value != 0 {
             return Err(format!("{name}: planted abscissae do not satisfy S₄"));
         }
     }
 
     let planted_hex = planted.map(|xs| xs.map(|x| format!("0x{x:x}")));
-    let planted_vars = planted.map(|xs| planted_true_variables(&xs, l)).unwrap_or_default();
+    let planted_vars = planted
+        .map(|xs| planted_true_variables(&xs, l))
+        .unwrap_or_default();
     let mut info = String::new();
     let _ = writeln!(info, "name {name}");
-    let _ = writeln!(info, "curve y^2 + x*y = x^3 + {}*x^2 + 1 over GF(2^{n})", cfg.a);
+    let _ = writeln!(
+        info,
+        "curve y^2 + x*y = x^3 + {}*x^2 + 1 over GF(2^{n})",
+        cfg.a
+    );
     let _ = writeln!(
         info,
         "modulus z^{n} + {}",
         irr.low_terms
             .iter()
             .rev()
-            .map(|t| if *t == 0 { "1".to_string() } else { format!("z^{t}") })
+            .map(|t| if *t == 0 {
+                "1".to_string()
+            } else {
+                format!("z^{t}")
+            })
             .collect::<Vec<_>>()
             .join(" + ")
     );
-    let _ = writeln!(info, "factor_base subspace <1, z, ..., z^{}> (dimension {l})", l - 1);
+    let _ = writeln!(
+        info,
+        "factor_base subspace <1, z, ..., z^{}> (dimension {l})",
+        l - 1
+    );
     let _ = writeln!(info, "x_R 0x{:x}", gf.from_element(x_r));
     let _ = writeln!(info, "satisfiable {}", satisfiable);
     let _ = writeln!(
@@ -416,14 +459,35 @@ fn build_entry(
         let _ = writeln!(
             info,
             "witness_true_sat_variables {}",
-            planted_vars.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" ")
+            planted_vars
+                .iter()
+                .map(|v| v.to_string())
+                .collect::<Vec<_>>()
+                .join(" ")
         );
     }
-    let _ = writeln!(info, "variables x_(i,j) = bit j of X_(i+1) -> DIMACS {} ; e-variables from {} ; CNF auxiliaries after {}", "1 + i*l + j", 3 * l + 1, 3 * l + sys.n_e_vars());
-    let _ = writeln!(info, "dimacs_xor variables {} clauses {} xor_rows {}", stats_xor.variables, stats_xor.clauses, stats_xor.xor_rows);
-    let _ = writeln!(info, "dimacs_cnf variables {} clauses {}", stats_cnf.variables, stats_cnf.clauses);
-    let _ = writeln!(info, "anf equations {} monomials {}", lines.len(), anf_monomials);
-    let _ = writeln!(info, "generator crypto_lib::cryptanalysis::ic_corpus seed {}", cfg.seed);
+    let _ = writeln!(info, "variables x_(i,j) = bit j of X_(i+1) -> DIMACS 1 + i*l + j ; e-variables from {} ; CNF auxiliaries after {}", 3 * l + 1, 3 * l + sys.n_e_vars());
+    let _ = writeln!(
+        info,
+        "dimacs_xor variables {} clauses {} xor_rows {}",
+        stats_xor.variables, stats_xor.clauses, stats_xor.xor_rows
+    );
+    let _ = writeln!(
+        info,
+        "dimacs_cnf variables {} clauses {}",
+        stats_cnf.variables, stats_cnf.clauses
+    );
+    let _ = writeln!(
+        info,
+        "anf equations {} monomials {}",
+        lines.len(),
+        anf_monomials
+    );
+    let _ = writeln!(
+        info,
+        "generator crypto_lib::cryptanalysis::ic_corpus seed {}",
+        cfg.seed
+    );
 
     Ok(CorpusEntry {
         name: name.to_string(),

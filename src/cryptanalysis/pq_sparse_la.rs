@@ -280,7 +280,7 @@ mod tests {
         // Build a 4×4 invertible system mod 17 with prescribed solution
         // (1, 2, 3, 4).
         let n = BigUint::from(17u32);
-        let true_sol = vec![
+        let true_sol = [
             BigUint::from(1u32),
             BigUint::from(2u32),
             BigUint::from(3u32),

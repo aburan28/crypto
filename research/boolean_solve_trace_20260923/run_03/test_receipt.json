@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-solve-trace-kqa3o1_3/tests"
+  ],
+  "exit_code": 0,
+  "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+  "peak_rss_bytes": 4833280,
+  "process_wall_ns": 287372292,
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "\nrunning 8 tests\ntest tests::cap_is_unknown_not_unsat ... ok\ntest tests::specialization_and_affine_completion_preserve_solutions ... ok\ntest tests::word_degree_two_matches_flat_on_embedded_active_variables ... ok\ntest tests::ordered_specialization_matches_sorting_for_every_small_assignment ... ok\ntest tests::exhaustive_small_systems_agree_with_boolean_enumeration ... ok\ntest tests::merge_search_keeps_the_complete_search_trace ... ok\ntest tests::kernel_variants_have_identical_traces_and_verified_models ... ok\ntest tests::selective_policies_match_each_other_on_complete_search ... ok\n\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s\n\n",
+  "stdout_sha256": "1aaa94bfc0d4b4bc8b13fb04182da50085d37eb0397750c21ff550d0381923dd",
+  "system_seconds": 0.004226,
+  "timed_out": false,
+  "user_seconds": 0.118069
+}

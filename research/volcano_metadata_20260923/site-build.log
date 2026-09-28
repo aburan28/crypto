@@ -1,0 +1,35 @@
+..............F.......F................
+======================================================================
+FAIL: test_internal_links_resolve (__main__.BuildTests.test_internal_links_resolve)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/c3a925672ea5/crypto/scripts/site/test_build.py", line 628, in test_internal_links_resolve
+    self.assertEqual(missing, [], "unresolvable internal links: %s" % missing)
+AssertionError: Lists differ: ['scoreboard/index.html -> ../research/volcano_metadata_20260922/README.md'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'scoreboard/index.html -> ../research/volcano_metadata_20260922/README.md'
+
+- ['scoreboard/index.html -> ../research/volcano_metadata_20260922/README.md']
++ [] : unresolvable internal links: ['scoreboard/index.html -> ../research/volcano_metadata_20260922/README.md']
+
+======================================================================
+FAIL: test_research_evidence_is_linked_absolutely (__main__.BuildTests.test_research_evidence_is_linked_absolutely)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/c3a925672ea5/crypto/scripts/site/test_build.py", line 642, in test_research_evidence_is_linked_absolutely
+    self.assertEqual(
+AssertionError: Lists differ: ['scoreboard/index.html -> ../research/volcano_metadata_20260922/README.md'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'scoreboard/index.html -> ../research/volcano_metadata_20260922/README.md'
+
+- ['scoreboard/index.html -> ../research/volcano_metadata_20260922/README.md']
++ [] : link research evidence as https://github.com/aburan28/crypto/blob/main/research/<path>, not relatively: ['scoreboard/index.html -> ../research/volcano_metadata_20260922/README.md']
+
+----------------------------------------------------------------------
+Ran 39 tests in 0.212s
+
+FAILED (failures=2)

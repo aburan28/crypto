@@ -29,6 +29,7 @@ NOTE = "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
 ROUND_READING = {
     2: "; Round 2 keeps every first-round row as its before mark and adds the folded-table, walk-target and balanced-base rungs",
     3: "; Round 3 keeps the same rows and makes the walk's restart cost one group operation instead of thirty-two scalar multiplications, adds the base at the family optimum on the prime and binary ladders, and reports every row's ratio to the family shape law S_family = 0.75 (#E t/k)^(2/3) / (t sqrt r)",
+    5: "; Round 5 keeps the same rows again and draws the walk's sixteen restart offsets on first use instead of at setup, so a row is charged for the offsets it took rather than for a pool it may never reach; the offsets come off their own random stream and are taken in a fixed cycle, so the eager and the lazy arm walk bit-identical trajectories and the saving is a subtraction rather than an estimate. It is confined to the rungs below 2^20 and leaves every figure at and above them unmoved",
 }
 
 def mean(xs):
