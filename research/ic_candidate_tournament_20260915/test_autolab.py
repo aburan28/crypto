@@ -67,6 +67,41 @@ class PortfolioTests(unittest.TestCase):
         self.assertNotIn('timeout', [r['candidate'] for r in chosen])
         self.assertEqual(chosen, retain(rows, arms, width=3, exploration=1, seed=12))
 
+    def test_cell_specialist_and_pair_table_family_both_survive(self):
+        from portfolio import family
+        arms = [
+            {'id':'leader', 'config':dict(BASE_CONFIG, pair_table='heuristic', orbit_target=4)},
+            {'id':'half', 'config':dict(BASE_CONFIG, pair_table='half', orbit_target=4)},
+            {'id':'specialist', 'config':dict(BASE_CONFIG, pair_table='heuristic', orbit_target=4)},
+        ]
+        self.assertNotEqual(family(arms[0]), family(arms[1]))
+        self.assertNotEqual(family(arms[0]), family(dict(arms[0], config=dict(
+            arms[0]['config'], factor_base={'kind':'frobenius_union', 'seed_masks':[1, 2, 8]}))))
+        rows = [self.row('leader', .8, {'small':.8, 'large':.8}),
+                self.row('half', .9, {'small':.7, 'large':1.1}),
+                self.row('specialist', 1.0, {'small':.6, 'large':1.4})]
+        self.assertEqual(retain(rows, arms, width=3, exploration=0), [
+            {'candidate':'leader', 'reason':'complete instruction-cost leader'},
+            {'candidate':'specialist', 'reason':'cell specialist: cold instructions small'},
+            {'candidate':'half', 'reason':'non-dominated implementation family'}])
+
+    def test_online_cell_specialist_is_not_lost_to_cold_diversity(self):
+        arms = [{'id': name, 'config': dict(BASE_CONFIG, row_kernel=kernel)}
+                for name, kernel in (('online', 'full'), ('cold', 'word'),
+                                     ('large_cell', 'bounded'))]
+        rows = [
+            dict(self.row('online', .8, {'small':.8, 'large':.8}),
+                 online=dict(candidate_over_baseline=.8, per_cell={'small':.8, 'large':1.0})),
+            dict(self.row('cold', .7, {'small':.7, 'large':.7}),
+                 online=dict(candidate_over_baseline=1.0, per_cell={'small':1.0, 'large':1.0})),
+            dict(self.row('large_cell', .9, {'small':.9, 'large':.9}),
+                 online=dict(candidate_over_baseline=1.1, per_cell={'small':1.5, 'large':.6})),
+        ]
+        selected = retain(rows, arms, width=3, exploration=0)
+        self.assertEqual([item['candidate'] for item in selected],
+                         ['online', 'cold', 'large_cell'])
+        self.assertEqual(selected[-1]['reason'], 'cell specialist: single-target online large')
+
     def test_combinations_include_individually_losing_parents(self):
         arms = [dict(id='incumbent',config=BASE_CONFIG),
                 dict(id='batch',config=dict(BASE_CONFIG,batch_trials=1)),
