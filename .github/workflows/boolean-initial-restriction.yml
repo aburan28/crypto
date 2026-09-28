@@ -1,0 +1,24 @@
+name: Standalone Boolean initial restriction
+on:
+  pull_request:
+    paths:
+      - 'research/boolean_initial_restriction_20260923/**'
+      - '.github/workflows/boolean-initial-restriction.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exhaustive bounded algebra and search checks
+        run: |
+          rustc --edition 2021 -O --test research/boolean_initial_restriction_20260923/worker.rs -o /tmp/boolean-initial-tests
+          /tmp/boolean-initial-tests
+      - name: Frozen evidence and corruption checks
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 -m unittest discover -s research/boolean_initial_restriction_20260923 -p 'test_*.py' -v

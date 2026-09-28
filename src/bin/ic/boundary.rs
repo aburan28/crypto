@@ -30,7 +30,9 @@ fn parse_cells(cells: &[String]) -> Result<Vec<(u32, u32)>, String> {
             .split_once(':')
             .ok_or_else(|| format!("oracle cell `{c}` is not of the form n:m"))?;
         let n: u32 = n.parse().map_err(|_| format!("bad degree in `{c}`"))?;
-        let m: u32 = m.parse().map_err(|_| format!("bad summand count in `{c}`"))?;
+        let m: u32 = m
+            .parse()
+            .map_err(|_| format!("bad summand count in `{c}`"))?;
         if !(5..=62).contains(&n) || !(2..=4).contains(&m) {
             return Err(format!("oracle cell `{c}` out of range"));
         }
@@ -152,17 +154,22 @@ pub struct BoundaryArgs {
     /// collision and not a relation.  For that diagnostic only.
     #[arg(long)]
     pub unguarded_targets: bool,
+    /// Draw all sixteen walk-restart offsets at setup, as Rounds 3 and 4
+    /// did, instead of drawing each the first time a restart reaches for
+    /// it.  The baseline arm of the note's §13: the walk is otherwise
+    /// identical, down to the trajectory, so the two runs differ only in
+    /// the offsets each row paid for.
+    #[arg(long)]
+    pub eager_restart_pool: bool,
 }
 
 fn host() -> Value {
-    let cpu = std::fs::read_to_string("/proc/cpuinfo")
-        .ok()
-        .and_then(|s| {
-            s.lines()
-                .find(|l| l.starts_with("model name"))
-                .and_then(|l| l.split(':').nth(1))
-                .map(|v| v.trim().to_string())
-        });
+    let cpu = std::fs::read_to_string("/proc/cpuinfo").ok().and_then(|s| {
+        s.lines()
+            .find(|l| l.starts_with("model name"))
+            .and_then(|l| l.split(':').nth(1))
+            .map(|v| v.trim().to_string())
+    });
     // Captured at start-up, not here: a run of half an hour can outlive the
     // commit it started on, and a report that names the wrong one is worse
     // than a report that names none.
@@ -204,6 +211,7 @@ pub fn run(args: BoundaryArgs, json: bool) -> Result<Value, String> {
         cfg.s4_max_degree = v;
     }
     cfg.unguarded_targets = args.unguarded_targets;
+    cfg.eager_restart_pool = args.eager_restart_pool;
     for &b in &cfg.prime_bits {
         if !(8..=32).contains(&b) {
             return Err(format!("prime ladder bits must lie in 8..=32, got {b}"));
@@ -269,7 +277,7 @@ pub fn run(args: BoundaryArgs, json: bool) -> Result<Value, String> {
         .all(|i| i.rho_verified_all && i.variants.iter().all(|v| v.verified));
     let oracles_agree = oracle_pricing
         .as_ref()
-        .map_or(true, |o| o["all_agree"] == true);
+        .is_none_or(|o| o["all_agree"] == true);
     let markdown = format_markdown(&ledger);
     let ran_something = !ledger.instances.is_empty()
         || oracle_pricing

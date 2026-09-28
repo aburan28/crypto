@@ -1,0 +1,585 @@
+{
+  "all_jobs_verified": false,
+  "global_optimum_claim": false,
+  "next_action": "Retain distinct mechanisms; run actual combinations on fresh development cases. Freeze one challenger before confirmation.",
+  "promotion_eligible": false,
+  "reason": "No instruction accounting, held-out confirmation, or baseline quality certification.",
+  "retained_candidates": [
+    "incumbent",
+    "factor_base_01",
+    "factor_base_02",
+    "factor_base_03",
+    "factor_base_04",
+    "factor_base_05",
+    "factor_base_06",
+    "factor_base_07",
+    "factor_base_08",
+    "factor_base_09",
+    "factor_base_10",
+    "factor_base_11",
+    "factor_base_12"
+  ],
+  "status": "DEVELOPMENT_DIAGNOSTIC",
+  "table": [
+    {
+      "S": null,
+      "arm": "incumbent",
+      "base_sizes": [
+        72,
+        182
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.0,
+      "failures": [],
+      "median_cold_wall_seconds": 0.02331620799668599,
+      "mode": "ic",
+      "rank_range": [
+        4,
+        7
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "factor_base_01",
+      "base_sizes": [
+        72,
+        182
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.2491695045607556,
+      "failures": [],
+      "median_cold_wall_seconds": 0.029125895991455764,
+      "mode": "ic",
+      "rank_range": [
+        4,
+        7
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "factor_base_02",
+      "base_sizes": [
+        72,
+        182
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.2127052348699325,
+      "failures": [],
+      "median_cold_wall_seconds": 0.028275687494897284,
+      "mode": "ic",
+      "rank_range": [
+        4,
+        7
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "factor_base_03",
+      "base_sizes": [
+        90,
+        208
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.1409963624075175,
+      "failures": [],
+      "median_cold_wall_seconds": 0.026603708509355783,
+      "mode": "ic",
+      "rank_range": [
+        5,
+        8
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "factor_base_04",
+      "base_sizes": [
+        90,
+        208
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.1590372891267502,
+      "failures": [],
+      "median_cold_wall_seconds": 0.02702435450919438,
+      "mode": "ic",
+      "rank_range": [
+        5,
+        8
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "factor_base_05",
+      "base_sizes": [
+        108,
+        208
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.2509574244422774,
+      "failures": [],
+      "median_cold_wall_seconds": 0.029167583503294736,
+      "mode": "ic",
+      "rank_range": [
+        6,
+        8
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "factor_base_06",
+      "base_sizes": [
+        108,
+        208
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.2087040693116144,
+      "failures": [],
+      "median_cold_wall_seconds": 0.02818239548651036,
+      "mode": "ic",
+      "rank_range": [
+        6,
+        8
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "factor_base_07",
+      "base_sizes": [
+        55,
+        4005
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 27.55850941044135,
+      "failures": [],
+      "median_cold_wall_seconds": 0.6425599374924786,
+      "mode": "ic",
+      "rank_range": [
+        3,
+        77
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "factor_base_08",
+      "base_sizes": [
+        55,
+        4005
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 25.721311912257242,
+      "failures": [],
+      "median_cold_wall_seconds": 0.5997234584938269,
+      "mode": "ic",
+      "rank_range": [
+        3,
+        77
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "factor_base_09",
+      "base_sizes": [],
+      "complete": false,
+      "diagnostic_time_over_incumbent": null,
+      "failures": [
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 0
+        },
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 1
+        },
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 2
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 0
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 1
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 2
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 0
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 1
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 2
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 0
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 1
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 2
+        }
+      ],
+      "median_cold_wall_seconds": null,
+      "mode": "ic",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 0
+    },
+    {
+      "S": null,
+      "arm": "factor_base_10",
+      "base_sizes": [],
+      "complete": false,
+      "diagnostic_time_over_incumbent": null,
+      "failures": [
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 0
+        },
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 1
+        },
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 2
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 0
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 1
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 2
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 0
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 1
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 2
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 0
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 1
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 2
+        }
+      ],
+      "median_cold_wall_seconds": null,
+      "mode": "ic",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 0
+    },
+    {
+      "S": null,
+      "arm": "factor_base_11",
+      "base_sizes": [],
+      "complete": false,
+      "diagnostic_time_over_incumbent": null,
+      "failures": [
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 0
+        },
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 1
+        },
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 2
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 0
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 1
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 2
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 0
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 1
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 2
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 0
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 1
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 2
+        }
+      ],
+      "median_cold_wall_seconds": null,
+      "mode": "ic",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 0
+    },
+    {
+      "S": null,
+      "arm": "factor_base_12",
+      "base_sizes": [],
+      "complete": false,
+      "diagnostic_time_over_incumbent": null,
+      "failures": [
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 0
+        },
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 1
+        },
+        {
+          "case": "n13a0-000",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 2
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 0
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 1
+        },
+        {
+          "case": "n13a0-001",
+          "reason": "missing/nontrivial log matrix",
+          "repetition": 2
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 0
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 1
+        },
+        {
+          "case": "n9a0-000",
+          "reason": "worker failed or incomplete",
+          "repetition": 2
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 0
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 1
+        },
+        {
+          "case": "n9a0-001",
+          "reason": "worker failed or incomplete",
+          "repetition": 2
+        }
+      ],
+      "median_cold_wall_seconds": null,
+      "mode": "ic",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 0
+    },
+    {
+      "S": null,
+      "arm": "aa_control",
+      "base_sizes": [
+        72,
+        182
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.038270074113555,
+      "failures": [],
+      "median_cold_wall_seconds": 0.024208521004766226,
+      "mode": "ic",
+      "rank_range": [
+        4,
+        7
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "rho_w1",
+      "base_sizes": [],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.31188870888880105,
+      "failures": [],
+      "median_cold_wall_seconds": 0.007272062008269131,
+      "mode": "rho",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "rho_w8",
+      "base_sizes": [],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.3482323758835417,
+      "failures": [],
+      "median_cold_wall_seconds": 0.008119458507280797,
+      "mode": "rho",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "rho_w32",
+      "base_sizes": [],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.37596968971693423,
+      "failures": [],
+      "median_cold_wall_seconds": 0.008766187485889532,
+      "mode": "rho",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    }
+  ],
+  "unit": "complete cold child wall seconds"
+}

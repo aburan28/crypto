@@ -1,0 +1,66 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/ic-autolab-la-accounting)
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2058:13
+     |
+2058 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:432:9
+    |
+432 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:407:5
+    |
+407 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+   --> src/cryptanalysis/f4_fp_tower.rs:916:5
+    |
+914 | enum Lanes {
+    |      ----- variants in this enum
+915 |     Scalar,
+916 |     Avx2,
+    |     ^^^^
+917 |     Avx512,
+    |     ^^^^^^
+    |
+    = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+   --> src/cryptanalysis/koblitz_fast.rs:889:5
+    |
+885 | pub struct BatchScratch {
+    |            ------------ fields in this struct
+...
+889 |     qx: Vec<u64>,
+    |     ^^
+890 |     qy: Vec<u64>,
+    |     ^^
+    |
+    = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib test) generated 5 warnings (run `cargo fix --lib -p crypto --tests` to apply 3 suggestions)
+    Finished `release` profile [optimized] target(s) in 2m 58s
+     Running unittests src/lib.rs (/Volumes/SSD990/crypto/worktrees/ic-autolab-goal/target/release/deps/crypto_lib-f69e5e4543fb81b0)
+
+running 4 tests
+test cryptanalysis::koblitz_index_calculus::tests::query_accounting_collection_preserves_queries_witnesses_and_counters ... ok
+test cryptanalysis::koblitz_index_calculus::tests::query_accounting_descent_preserves_success_and_terminal_failures ... ok
+test cryptanalysis::koblitz_index_calculus::tests::query_accounting_unsupported_and_incomplete_are_retained ... ok
+test cryptanalysis::koblitz_index_calculus::tests::query_accounting_windowed_walk_retains_partitioned_and_identity_queries ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 3023 filtered out; finished in 0.68s
+

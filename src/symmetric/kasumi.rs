@@ -88,7 +88,7 @@ const S9: [u16; 512] = [
 
 #[inline]
 fn rol16(a: u16, b: u32) -> u16 {
-    (a << b) | (a >> (16 - b))
+    a.rotate_left(b)
 }
 
 // ── FI: 16-bit nonlinear function ────────────────────────────────────

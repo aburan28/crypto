@@ -19,7 +19,7 @@
 use crate::cryptopals::challenge67::coppersmith;
 use crate::cryptopals::set8_util::crt_combine;
 use crate::cryptopals::Report;
-use num_bigint::{BigInt, BigUint, ToBigInt};
+use num_bigint::{BigInt, BigUint};
 use num_integer::Integer;
 use num_traits::{One, Zero};
 
@@ -45,12 +45,12 @@ fn is_small_prime(n: u64) -> bool {
     if n < 4 {
         return true;
     }
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         return false;
     }
     let mut i = 3u64;
     while i * i <= n {
-        if n % i == 0 {
+        if n.is_multiple_of(i) {
             return false;
         }
         i += 2;
@@ -161,7 +161,7 @@ pub fn dlog_bsgs(g: &BigUint, target: &BigUint, m: &BigUint) -> Option<BigUint> 
 ///    `f(k) = k·M + (65537^a mod M)`.
 pub fn roca_recover(n: &BigUint, m: &BigUint, target_bits: u64) -> Option<BigUint> {
     let g = BigUint::from(65537u32);
-    let dlog_n = dlog_bsgs(&g, &(n % m), m)?;
+    let _dlog_n = dlog_bsgs(&g, &(n % m), m)?;
     let ord = order_mod(&g, m);
     // Half the group: a and a' = (dlog_n − a) both in [0, ord).
     let k_max = (BigUint::one() << target_bits as usize) / m + BigUint::one();

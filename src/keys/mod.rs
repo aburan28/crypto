@@ -40,7 +40,7 @@ impl KeyBundle {
         println!("=== RSA-{} ===", self.rsa.public.bits);
         let n_hex = to_hex(&bigint_to_bytes_be(
             &self.rsa.public.n,
-            (self.rsa.public.bits as usize + 7) / 8,
+            (self.rsa.public.bits as usize).div_ceil(8),
         ));
         println!("n (first 32 bytes): {}", &n_hex[..64]);
         println!("e: {}", self.rsa.public.e);

@@ -54,7 +54,7 @@ pub fn run() -> Report {
     assert_eq!(block_size, 16);
 
     // 2. ECB confirmation.
-    let probe = oracle(&vec![b'A'; 32]);
+    let probe = oracle(&[b'A'; 32]);
     assert_eq!(&probe[0..16], &probe[16..32]);
     r.line("ECB confirmed (duplicate cipher blocks on duplicate input).");
 

@@ -1,0 +1,14 @@
+==1222== Callgrind, a call-graph generating cache profiler
+==1222== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==1222== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==1222== Command: /home/user/crypto/target/release/examples/groebner_stage_bench --label A2 --ladder chain-holdout-2 --rung 7 --out /home/user/crypto/research/groebner_instructions_20260925/stage/chain-holdout-2/A2/rung7/stage
+==1222== 
+==1222== For interactive control, run 'callgrind_control -h'.
+==1222== brk segment overflow in thread #1: can't grow to 0x4853000
+==1222== (see section Limitations in user manual)
+==1222== NOTE: further instances of this message will not be shown
+==1222== 
+==1222== Events    : Ir
+==1222== Collected : 2137234785
+==1222== 
+==1222== I   refs:      2,137,234,785
