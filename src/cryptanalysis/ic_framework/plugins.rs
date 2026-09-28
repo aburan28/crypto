@@ -38,18 +38,18 @@ use super::stages::{
     BooleanSystem, DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost,
     SolverTotals, SolverVerdict, SystemShape, SystemSolver,
 };
-use crate::cryptanalysis::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
-use crate::cryptanalysis::koblitz_symmetrised::{
-    build_symmetrised_factor_base, build_symmetrised_system, frobenius_view_of_symmetrised,
-    symmetrised_groebner_decompose, SymmetrisedFactorBase,
-};
 use crate::cryptanalysis::ic_boundary::{
     binary_subspace_factor_base, decompose_mitm, decompose_mitm_frobenius, koblitz_factor_base,
     prime_factor_base, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
     FrobeniusPairTable, GroupOps, OracleCounters, PairTable, PrimeCurve, PrimeInstance, PrimePoint,
 };
 use crate::cryptanalysis::koblitz_fast::FastPoint;
+use crate::cryptanalysis::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base_from_divisor;
+use crate::cryptanalysis::koblitz_symmetrised::{
+    build_symmetrised_factor_base, build_symmetrised_system, frobenius_view_of_symmetrised,
+    symmetrised_groebner_decompose, SymmetrisedFactorBase,
+};
 use crate::cryptanalysis::pq_descent_symbolic::{descend, max_n_prime, SymbolicDescent};
 
 // ── Factor bases ───────────────────────────────────────────────────
@@ -860,8 +860,14 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
                 "the koblitz-symmetrised base's divisor; copied from the base when omitted",
             ),
             ("engine", "inherited-f4 (default), matrix-f4 or matrix-f5"),
-            ("max_degree", "highest Macaulay degree built before splitting (default 3)"),
-            ("node_budget", "splits before a call gives up (default 4096)"),
+            (
+                "max_degree",
+                "highest Macaulay degree built before splitting (default 3)",
+            ),
+            (
+                "node_budget",
+                "splits before a call gives up (default 4096)",
+            ),
         ]
     }
 
@@ -873,7 +879,10 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
         _ops: &mut GroupOps,
     ) -> Result<(), String> {
         if !(2..=3).contains(&self.summands) {
-            return Err(format!("symmetrised takes m = 2 or 3, got {}", self.summands));
+            return Err(format!(
+                "symmetrised takes m = 2 or 3, got {}",
+                self.summands
+            ));
         }
         let kc = self
             .instance
@@ -920,14 +929,15 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
         // generator so the report's degree columns come from a real
         // system, and so an oversize layout is refused here, once.
         let g = self.instance.fast.lower(self.instance.generator);
-        let sys = build_symmetrised_system(kc, &fb_u, &g, self.summands as usize, &st)
-            .ok_or_else(|| {
+        let sys = build_symmetrised_system(kc, &fb_u, &g, self.summands as usize, &st).ok_or_else(
+            || {
                 format!(
                     "the symmetrised system for dimension {} at m = {} exceeds the 64-variable \
                      layout or the generator has u ∈ {{0, ∞}}",
                     fb_u.ell, self.summands
                 )
-            })?;
+            },
+        )?;
         self.shape = Some(
             BooleanSystem {
                 equations: sys.equations,
