@@ -1,0 +1,78 @@
+{
+  "comparisons": [
+    {
+      "candidate": "both",
+      "candidate_over_baseline": 0.9678545173175633,
+      "ci95": [
+        0.9467838934469768,
+        0.9857265027388212
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9646453658808768,
+      "native_wall_ci95": [
+        0.9416698275175526,
+        0.9981977371401768
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 1.0364638757784037,
+        "n17a1": 0.9449158698755986,
+        "n19a0": 0.9554951789828297,
+        "n23a0": 0.9602910624528405,
+        "n23a1": 0.9495640999405601,
+        "n31a0": 0.9442850344915132
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 18,
+      "per_cell": {
+        "n13a0": 0.9759247344160562,
+        "n17a1": 0.992468274744423,
+        "n19a0": 0.9889225231606783,
+        "n23a0": 0.9544427440064877,
+        "n23a1": 0.9776097836938933,
+        "n31a0": 0.9197077415414715
+      },
+      "speedup": 1.033213134936363
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 34.09472537312831,
+  "provisional_challenger": "both",
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 1.5195472014807965,
+    "ci95": [
+      1.2938084872650952,
+      1.7721926597220472
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 6,
+    "native_wall_candidate_over_baseline": 1.116336746992679,
+    "native_wall_ci95": [
+      1.065731157379509,
+      1.1669234168440306
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.2060135084869619,
+      "n17a1": 1.1201974727945552,
+      "n19a0": 1.1227232785681003,
+      "n23a0": 1.1081840628220123,
+      "n23a1": 1.0186021449243794,
+      "n31a0": 1.1304083330611499
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 18,
+    "per_cell": {
+      "n13a0": 1.4422664667749654,
+      "n17a1": 1.5636718764871862,
+      "n19a0": 1.9268460949414812,
+      "n23a0": 1.3520229953034528,
+      "n23a1": 1.133386097425392,
+      "n31a0": 1.8487792261472713
+    },
+    "speedup": 0.6580907779801124
+  },
+  "runs": 162,
+  "stage": "selection",
+  "verified_runs": 162
+}

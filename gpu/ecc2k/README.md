@@ -466,6 +466,75 @@ the part that needed a test: on a binary curve `−P = (x, x+y)`, so `P`
 and `−P` share an abscissa and a single bit of `y` separates them only
 when `x` is odd. Comparing `y` against `x+y` separates them always.
 
+**The folded key, `pt_canon`.** The CPU side stores one entry per
+*signed Frobenius orbit* rather than one per pair, which at `n = 61` is
+`2n` times fewer entries and buys a base `√(2n)` times wider at the same
+memory. The key that names an orbit is `pt_canon`, and it is the same
+function `koblitz_fast::FrobeniusCanon::canon` is: `π` is a squaring
+only in a *polynomial* basis, and in a normal basis `{β, β², β⁴, …}` it
+is a one-bit cyclic rotation of the coordinate word, so the orbit of `x`
+is the set of rotations of that word and the least rotation names it.
+Nothing is squared and nothing is reduced.
+
+The basis change is **host data**, uploaded from
+`FrobeniusCanon::tables()`, not rediscovered on the device. The normal
+element comes from a randomised search, so a device that searched for
+its own would find a different basis and name the same orbits
+differently — valid on its own, and unable to read a table the CPU
+built. `n ≤ 62` is the ceiling, so the fold does not reach `ecc2k95`.
+
+**Stored by orbit: `pairtable_fold_kernel`.** Keying by orbit is not
+the saving; `pairtable_kernel` with the tables still emits one entry per
+pair, the same size and merely named differently. The saving is in
+*which pairs are summed*. The fold kernel takes the base sorted by
+signed orbit and one representative per orbit, and row `r` sums that
+representative with the orbit-sorted suffix starting at its own orbit —
+every orbit of pairs is reached, and each sum orbit is kept from one of
+its two summands rather than both. That is about `orbits·|F|/2` sums
+against `|F|²/2`, `2n` times fewer. Each entry carries its row's orbit
+as the tag, which is what lets the CPU recover a hit's summands by
+walking `2n` points instead of the base. `pt_fold_count` and
+`pt_fold_fill` then store it in the CPU's own layout: the bucket from the
+top of `pt_filter_hash(key)`, the word `(orbit << 16) | (hash & 0xffff)`,
+and a presence bit.
+
+The row plan (sorted base, representatives, suffix starts) is host data
+from `PairSumTable::folded_rows`, uploaded the way the basis is, so
+there is one derivation of it and not two. The bucket width comes from
+the CPU's pair *estimate*, not from the sums, because that is how the
+CPU sizes its buckets. Only tagged words are built. The CPU falls back
+to untagged words past `2^16` orbits, and that is two terabytes of table
+at `n = 61`, so this refuses such a base rather than store it
+unchecked.
+
+**The device build.** `pairtable_fold_count_kernel` and
+`pairtable_fold_fill_kernel` store the table on the device, with no
+per-entry array in between. The count pass adds each entry to its
+bucket's count with `atomicAdd`. The host then scans the counts into
+offsets, which also gives the total the presence filter is sized from,
+so the build is two launches. The fill pass takes a slot from its
+bucket's cursor with `atomicAdd`, writes the tagged word there and sets
+the presence bit with `atomicOr`. Both passes recompute every row, as
+`build_folded_within` does on the CPU. That is twice the curve
+arithmetic, with nothing on the device but the table. Keeping the first
+pass's keys would halve the arithmetic for three times the table's
+memory; which is faster is a question for a device.
+
+The work comes in **chunks** of one row, not whole rows. A fold has only
+about one row per signed orbit, some fourteen hundred at the widest base
+the note built. That is too few threads for a GPU, and a row per thread
+needs `2|F|` field elements of scratch each, about 8 GB at that base. A
+chunk is up to `--chunk` entries of one row under one batched inversion,
+with scratch proportional to the chunk, and there are `entries / chunk`
+of them to grid-stride over. The table cannot depend on the split, and
+the tests below run several. The kernels' atomics dispatch on
+`__CUDA_ARCH__`, so the host emulation runs them with the compiler's own
+atomics.
+
+The host keeps `pt_fold_count` / `pt_fold_fill` too: the same two
+passes over `pairtable_fold_kernel`'s `(key, tag)` output, which is the
+form the emulation checks entry by entry against unbatched addition.
+
 `make test` runs `test_pt_*` for every curve: batch inversion against
 one-at-a-time inversion (with a planted zero, which every real row has
 at `j = i`), every row of a 48-point triangle against unbatched
@@ -475,6 +544,188 @@ deliberately includes negated points so that `P_i + P_j = O` occurs —
 without them the infinity branch is never taken and the test would claim
 coverage it does not have. `ecc2k95` skips it: at `m = 97` a point does
 not fit in a `u64` and `FastCurve` refuses the same case.
+
+**CI runs it** — `.github/workflows/gpu-ecc2k-host-verification.yml`, on
+any pull request touching `gpu/ecc2k/**`, and also on
+`examples/dump_canon_vectors.rs`, `examples/dump_fold_vectors.rs`,
+`examples/load_fold_table.rs`, `src/cryptanalysis/koblitz_fast.rs` and
+`src/cryptanalysis/koblitz_index_calculus.rs`, because the vectors and
+the round trip are built from those and a change to any of them moves
+what the C++ side is checked against. No GPU: `G2_HD` is `inline`
+without `__CUDACC__`, so everything but the kernels builds under g++.
+A second job, `nvcc-compile`, builds the kernels themselves (below).
+
+**And the kernels themselves run on the host, concurrently.** Their
+bodies are plain C++ once `__global__` and the four thread-index
+builtins are supplied, so `test_pairtable_emu.cpp` includes the header
+behind a `__CUDACC__` shim and runs each emulated GPU thread on a CPU
+thread of its own, all at once. `threadIdx` and `blockIdx` are
+`thread_local`. For `pairtable_kernel` it checks every entry of the
+triangle against unbatched addition in both the packed and the folded
+key, and that 4 and 7 threads give the same table as one. That exercises
+the grid-stride loop and the scratch split.
+
+What the threads share, they share for real: the device build's counts,
+cursors and presence words take contended atomics. `make test` also
+builds the emulation with ThreadSanitizer (`test_tsan_k23`,
+`test_tsan_k41`), so an unsynchronised shared write is reported rather
+than left to timing. A control makes that more than a clean run:
+`test_racy_k23` turns every atomic into a plain read-modify-write and
+must be reported as a data race in `pt_atomic_*`. It is. Tried by
+mutation, a fold kernel whose threads shared one scratch buffer is
+reported too, and its rows come out wrong even without the sanitiser.
+ThreadSanitizer checks the C++ memory model, not CUDA's. Relaxed
+atomics on the counts, cursors and filter, with plain stores to slots
+handed out once, are enough under CUDA's model too, but that is argued
+here, not tested.
+
+It exists because of a bug nothing else could see. The first folded
+kernel passed its own `n` — |F|, the point count — to `pt_canon` as the
+field degree. Every building block was correct and separately tested;
+the one line that assembled them was wrong. Put back, that line makes
+this test fail with 960 of 1176 keys wrong on `k23`, and the test also
+asserts on every run that the wrong degree *would* change keys on its
+base, so it cannot quietly stop being able to tell the two apart.
+
+**The fold is checked against the table the CPU stored.**
+`examples/dump_fold_vectors.rs` builds a folded table with
+`PairSumTable::build_folded_within` at `n = 23` and `n = 41` (sixteen
+signed orbits each, 736 and 1312 points; the same trinomials as `k23`
+and `k41`) and dumps what it stored, plus the plan it was built from,
+into `vec_fold.h`. The test first checks the setup:
+
+- the bucket width against the CPU's over a grid of 576
+  (orbits, points, degree) points, through the public
+  `folded_byte_size`;
+- every dumped point lies on this curve;
+- the CPU's basis is `vec_canon.h`'s and names every base point alike.
+
+Then it runs the fold kernel and checks the result in three steps:
+
+- every entry is `pt_canon` of the unbatched sum, tagged with its row,
+  with infinity exactly once per row;
+- the assembled table has the CPU's bucket offsets and presence words
+  exactly, and the same multiset of words in every bucket (order
+  within a bucket comes from the CPU's parallel cursors);
+- 3 and 5 threads give the same output as one.
+
+On `k23` that is 6256 stored words for 736 points against 271216
+unfolded (43.4×, with `2n = 46`), and on `k41` 11152 for 1312 against
+861328 (77.2×, `2n = 82`). These are entry counts, not speed. Three
+mistakes must each fail the comparison: rows over the whole base, a base
+not sorted by orbit, and tags taken from the second summand.
+
+**The CPU loads the table and answers from it.** Stored state agreeing
+is not yet a table the descent can use, so `make test` ends with
+`make roundtrip`. Each `test_emu_*` run writes the table it assembled to
+`fold_table_k23.bin` / `fold_table_k41.bin` (the format is documented at
+`write_table` in `test_pairtable_emu.cpp`). `examples/load_fold_table.rs`
+rebuilds the same base, loads the file with
+`PairSumTable::from_folded_parts`, and asks it, beside the CPU's own
+table:
+
+- for every stored pair `P_i + P_j`, `i ≤ j` (271,216 at `k23`, 861,328
+  at `k41`), whether it is present and which pairs sum to it, and the
+  loaded table's answer must include `(i, j)`; recovery walks the orbit
+  a word's tag names, so this reads every tag;
+- 19,999 multiples of the generator, most of them absent, and
+  three-summand decompositions of every hundredth.
+
+The loaded table agrees on every question and finds every pair. The
+control shifts one bucket's words into the next. That leaves the table
+well-formed, and it has to lose stored pairs here, which it does (368 at
+`k23`, 738 at `k41`). A single word is not enough, because the fold
+stores some sum orbits twice: 430 of the 6,256 words at `k23` have an
+exact copy beside them.
+
+`from_folded_parts` itself checks what a lookup relies on and refuses
+the rest:
+
+- bucket offsets that do not partition the words;
+- a presence filter that is not a whole power of two;
+- a tag naming no orbit of the base;
+- keys named in a basis other than the one this side would use.
+
+The last one matters most: such a table is well-formed and wrong, and
+would report a decomposition absent when it is there. It does not check
+that the words came from this base, which only a rebuild could show.
+That is the builder's to prove, and the round trip proves it for this
+one.
+
+The device build is checked the same way, twice.
+
+- **Against the CPU's table.** Count and fill run concurrently at five
+  splits of threads and chunk size, from one thread with whole rows to
+  64 threads with chunks of one entry. Every split must give the CPU's
+  bucket offsets and presence words exactly, and every bucket's words,
+  with each cursor ending where the next bucket starts.
+- **Through the round trip.** The table `make roundtrip` loads is the
+  device build's, whose order within buckets the atomics chose. The
+  plan it came from is a file `dump_fold_plan.rs` wrote, and the test
+  requires that file to be `vec_fold.h`'s plan field by field.
+
+**Every kernel builds under `nvcc`.** `make nvcc-check` builds and links
+`fold2k.cu`, which holds every pair-table kernel and the launcher, for
+`k23` and `k41`. It compiles `bench2k.cu`, and with it `kernels2k.cuh`,
+for `ecc2k95`. All of it at `sm_90`, `sm_100` and `sm_120`, with
+`-Werror all-warnings`. CI runs it on CUDA 12.9 from NVIDIA's apt
+repository, compile only. Its first run found something `g++` had let
+through: the host helpers were `static inline`, which `nvcc` warns are
+declared and never referenced in any translation unit that does not call
+them. Registers per thread, from `ptxas` 12.9.86; every kernel's stack
+is 56 B:
+
+| kernel | curve | sm_90 | sm_100 | sm_120 |
+|---|---|---|---|---|
+| `pairtable_fold_count_kernel` | `k23` | 56 | 56 | 56 |
+| `pairtable_fold_count_kernel` | `k41` | 64 | 66 | 72 |
+| `pairtable_fold_fill_kernel` | `k23` | 60 | 56 | 56 |
+| `pairtable_fold_fill_kernel` | `k41` | 66 | 72 | 70 |
+| `pairtable_fold_kernel` | `k23` | 62 | 62 | 58 |
+| `pairtable_fold_kernel` | `k41` | 78 | 80 | 80 |
+| `pairtable_kernel` | `k23` | 64 | 56 | 62 |
+| `pairtable_kernel` | `k41` | 64 | 72 | 80 |
+
+These are static figures, not measurements of anything running.
+
+**On a device: `fold2k`.** `fold2k.cu` reads a plan, uploads it, runs the
+count kernel, the host scan and the fill kernel, checks that every
+cursor ended where the next bucket starts, and writes the table file.
+It times each phase with CUDA events and prints the curve additions
+performed, twice the stored words, beside the time. Everything in it
+but the CUDA calls is shared with the emulation above: the plan reader
+and table writer (`fold_io.hpp`), the chunking and scan, the geometry
+and the kernels. On a machine with a GPU:
+
+    make device-roundtrip ARCH=sm_120   # G7e's RTX PRO 6000 Blackwell; sm_90 for H100
+
+builds `fold2k_k23` and `fold2k_k41`, builds both toy tables on the
+device, and loads them with `load_fold_table`, which compares stored
+state exactly and asks every stored pair. For a base wide enough to
+time, write the plan directly and sample the probes. From the
+repository root, after `make -C gpu/ecc2k fold2k_k41 ARCH=...`:
+
+    cargo run --release --example dump_fold_plan -- 41 100000 0x5eed_f01d /tmp/wide_plan.bin
+    gpu/ecc2k/fold2k_k41 /tmp/wide_plan.bin /tmp/wide_table.bin
+    cargo run --release --example load_fold_table -- --sample 64 /tmp/wide_table.bin
+
+The stored-state comparison is exact at any size; `--sample` only thins
+the probes, which at `|F|²/2` pairs a wide base cannot afford.
+
+The curve is compiled in, so a plan's degree has to be one this
+directory has a header for: 23 or 41 today.
+
+What none of this covers is how the kernels run on a device: launch
+geometry, occupancy under load, memory placement, CUDA's own memory
+model and the time a build takes. `fold2k` has been compiled and linked
+for three architectures and run as far as its first CUDA call, which
+fails here for want of a driver, and nowhere further. The build's speed
+is unmeasured, and moving it to a device changes wall-clock, not the
+operation count `S` is priced in. The emulation also covers only the
+pair-table kernels. The ones in `kernels2k.cuh` compile under `nvcc`, and
+the device functions they call — the walk, the batched steppers, an
+end-to-end solve on a toy curve — are tested by `test_cpu2k.cpp`, but
+the `__global__` wrappers themselves are run by nothing on the host.
 
 ## Files
 
@@ -488,6 +739,10 @@ not fit in a `u64` and `FastCurve` refuses the same case.
 | `rho2k_host.hpp` | Walk replay, class relation, the solve |
 | `kernels2k.cuh` | Kernels and launch structure |
 | `bench2k.cu` | Device self-test and benchmarks |
+| `pairtable.cuh` | The `|F|²` pair table and the folded one: row sums, keys, the fold kernels and their storage |
+| `fold_io.hpp` | Host-only reader and writer for fold plans and tables |
+| `fold2k.cu` | Builds a folded table on a GPU from a plan |
+| `test_pairtable.cpp`, `test_pairtable_emu.cpp` | Pair-table building blocks, and the kernels themselves on concurrent CPU threads |
 | `test_cpu2k.cpp` | CPU verification harness |
 | `ptx_stats2k.sh` | Static instruction and occupancy analysis, no GPU needed |
 

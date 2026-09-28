@@ -73,9 +73,6 @@ COUNTER_PATHS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("factor_base_points", ("factor_base", "points")),
     ("factor_base_columns", ("factor_base", "columns")),
     ("pair_table_stored_pairs", ("factor_base", "pair_table_stored_pairs")),
-    ("collection_trials", ("stages.collect", "trials_total")),
-    ("collection_summands_scanned", ("stages.collect", "summands_scanned_total")),
-    ("collection_relations", ("stages.collect", "relations_total")),
     ("descent_trials", ("stages.baseline", "vs_rho", "ic", "descent_trials_total")),
     ("rho_iterations", ("stages.baseline", "vs_rho", "rho", "iterations_total")),
 )
@@ -109,8 +106,56 @@ def _lookup(report: dict[str, Any], path: tuple[str, ...]) -> Any:
     return node
 
 
-def counters_of(report: dict[str, Any]) -> dict[str, int]:
+def tier_of(report: dict[str, Any]) -> str:
+    """Which representation of the pair table the run actually built.
+
+    Pinned beside the counters because none of them can see it.
+    ``pair_table_stored_pairs`` is ``|F|(|F|+1)/2`` for the full tier and
+    for the compact one alike — they hold the same pairs and differ only
+    in how a pair is stored — so a run that switched between them reads
+    as "counters identical" while the algorithm has changed.  That is the
+    one thing this gate exists to refuse, and it went through it once.
+    """
+    tier = _lookup(report, ("factor_base", "pair_table_tier"))
+    if not isinstance(tier, str) or not tier:
+        raise CheckFailure("factor_base.pair_table_tier missing: the report predates tier reporting")
+    return tier
+
+
+# The collection counters, read from the logs stage.  A run whose planned
+# units leave a column undetermined collects further units inside that
+# stage, until the system is determined; the collect stage reports only
+# the planned units, so reading the counters there would pin a fraction
+# of the work and let every extension unit change unseen.  The logs
+# stage totals every unit the logs were solved from, planned and
+# extended, and equals the collect stage's totals when nothing was
+# extended — which is why references frozen before this read still hold.
+COLLECTION_PATHS: tuple[tuple[str, str, str], ...] = (
+    ("collection_trials", "trials", "trials_total"),
+    ("collection_summands_scanned", "summands_scanned", "summands_scanned_total"),
+    ("collection_relations", "relations_loaded", "relations_total"),
+)
+
+
+def collection_counters_of(report: dict[str, Any]) -> dict[str, int]:
+    logs = _stage(report, "logs")
+    collect = _stage(report, "collect")
+    if logs is None or not logs.get("ran"):
+        raise CheckFailure("logs stage missing or reused: the collection counters need a fresh logs stage")
     out: dict[str, int] = {}
+    for label, logs_key, collect_key in COLLECTION_PATHS:
+        value = logs.get(logs_key)
+        if not isinstance(value, int) or isinstance(value, bool):
+            raise CheckFailure(f"counter {label!r} missing or not an integer in the logs stage")
+        planned = (collect or {}).get(collect_key)
+        if isinstance(planned, int) and value < planned:
+            raise CheckFailure(f"counter {label!r}: logs total {value} is below the collect stage's {planned}")
+        out[label] = value
+    return out
+
+
+def counters_of(report: dict[str, Any]) -> dict[str, int]:
+    out: dict[str, int] = collection_counters_of(report)
     for label, path in COUNTER_PATHS:
         value = _lookup(report, path)
         if not isinstance(value, int) or isinstance(value, bool):
@@ -297,6 +342,7 @@ def measure(report: dict[str, Any]) -> dict[str, Any]:
         "ic_verified": ic_verified,
         "rho_verified": rho_verified,
         "counters": counters,
+        "pair_table_tier": tier_of(report),
         "wall": wall_of(report),
         "rho_S": rho_s_of(report, counters),
         "ic_S": None,
@@ -377,6 +423,12 @@ def check_rung(params: str, ref: dict[str, Any], m: dict[str, Any], tolerance: f
     problems: list[str] = []
     if m["params_digest"] != ref["params_digest"]:
         problems.append(f"parameter file changed (digest {m['params_digest'][:12]} != frozen {ref['params_digest'][:12]}); re-freeze deliberately")
+    frozen_tier = ref.get("pair_table_tier")
+    if frozen_tier is not None and m.get("pair_table_tier") != frozen_tier:
+        problems.append(
+            f"pair table tier changed ({frozen_tier} -> {m.get('pair_table_tier')}); "
+            "the algorithm changed — freeze a new reference beside the old one"
+        )
     drift = {}
     for label, frozen in ref["counters"].items():
         now = m["counters"].get(label)

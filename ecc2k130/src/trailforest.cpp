@@ -84,7 +84,7 @@ struct Options {
     unsigned long long walks = 40;
     unsigned long long max = 0;
     unsigned long long skip = 0;
-    unsigned long long maxIters = 1ull << 32;
+    unsigned long long maxIters = ECC_REPLAY_MAX_ITERS;
     unsigned long long every = 1024;
     unsigned long long cap = 1ull << 20;
     std::string corpus;
@@ -536,14 +536,16 @@ static void usage() {
             "  --walks N        lanes 0 .. N-1 of that run, first walk each (default 40)\n"
             "  --check-corpus F hold generated trails to the client's records in F\n"
             "  --corpus-out F   write the generated endpoints as a corpus file\n"
-            "  --max-iters N    give up on a walk after N steps (default 2^32)\n"
+            "  --max-iters N    give up on a walk after N steps (default %llu: the\n"
+            "                   campaign's maxIters plus the guard's overshoot)\n"
             "  --sample         walk with the client's bitsliced kernel instead of the\n"
             "                   reference, keep the walks that finish within --cap steps,\n"
             "                   sample them every --every steps and name orbits by hash;\n"
             "                   seeds from --corpus (checked) or --run-id/--walks\n"
             "  --every N        sample stride in --sample mode (default 1024)\n"
             "  --cap N          most steps a sampled walk may take (default 2^20)\n"
-            "  --hashes-out F   write each drawn walk's endpoint name in --sample mode\n");
+            "  --hashes-out F   write each drawn walk's endpoint name in --sample mode\n",
+            (unsigned long long)ECC_REPLAY_MAX_ITERS);
 }
 
 int main(int argc, char **argv) {

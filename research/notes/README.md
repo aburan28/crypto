@@ -17,13 +17,17 @@ its old name still identify it.
 |:--|:--|
 | [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](ecdlp-general/RESEARCH_ECDLP_STATE_OF_THE_ART.md) | The ECDLP: state of the art, 2025–2026 |
 | [`RESEARCH_TORSION_AUXILIARY_INPUTS.md`](ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md) | Auxiliary inputs (Cheon) and torsion points against rho and index calculus |
+| [`RESEARCH_SRS_CHEON_CENSUS.md`](ecdlp-general/RESEARCH_SRS_CHEON_CENSUS.md) | Cheon's attack on deployed powers-of-tau setups: EIP-4844, Sapling, Filecoin, Ignition, PPoT |
+| [`RESEARCH_REPRESENTATION_STRUCTURE.md`](ecdlp-general/RESEARCH_REPRESENTATION_STRUCTURE.md) | Where exploitable structure can come from: the transfer pattern, an R1–R5 admissibility test for candidate handles, and why murmurations fail it |
 | [`RESEARCH_BENCH_LOG.md`](ecdlp-general/RESEARCH_BENCH_LOG.md) | Cryptanalysis research bench: empirical log |
+| [`RESEARCH_P256_RHO_ARITHMETIC.md`](ecdlp-general/RESEARCH_P256_RHO_ARITHMETIC.md) | Pre-registered P-256 rho engineering matrix: fused Solinas reduction, weak reduction, invariant partitioning, table sweeps, batched affine inversion, DP batching, and CPU/GPU/FPGA ablations |
 
 ## index-calculus — Semaev decomposition, factor bases, Gröbner, first-fall degree
 
 | note | subject |
 |:--|:--|
 | [`RESEARCH_RESIDUAL_WALKS.md`](index-calculus/RESEARCH_RESIDUAL_WALKS.md) | Residual walks over partial decompositions; the reference thread for the boundary-table-ratio rule |
+| [`RESEARCH_IC_BOUNDARY_LEDGER.md`](index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) | The boundary ledger: prime, random-binary and Koblitz index calculus end to end in one unit against the generic floor and a counted rho (`ic boundary`, frozen runs under `docs/ic/runs/`); §10 is the Round-2 engineering ledger (folded pair tables, walk targets, exact ceiling, balanced base) with every first-round row kept as its before mark |
 | [`RESEARCH_SEMAEV_DECOMPOSITION.md`](index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md) | Fast factor-base decomposition for binary Semaev `S₄` |
 | [`RESEARCH_SYMMETRIZED_SEMAEV.md`](index-calculus/RESEARCH_SYMMETRIZED_SEMAEV.md) | Symmetrised summation polynomials (FGHR) |
 | [`RESEARCH_HIGHER_SEMAEV.md`](index-calculus/RESEARCH_HIGHER_SEMAEV.md) | Higher-order Semaev polynomials over prime fields |
@@ -32,6 +36,7 @@ its old name still identify it.
 | [`RESEARCH_FACTOR_BASE_SOLVE_COST.md`](index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md) | Choosing the factor base for the solver, not for the yield |
 | [`RESEARCH_GROEBNER_F4.md`](index-calculus/RESEARCH_GROEBNER_F4.md) | Minimal Buchberger / matrix-F4 solver |
 | [`RESEARCH_DREG_MEASUREMENT.md`](index-calculus/RESEARCH_DREG_MEASUREMENT.md) | Solving degree vs first-fall degree on binary Semaev systems |
+| [`RESEARCH_DESCENT_CROSSOVER.md`](index-calculus/RESEARCH_DESCENT_CROSSOVER.md) | The descent crossover: why a descended Semaev system's overdetermination and its decomposition yield are one parameter, and the scoping rule that follows for every refutation measurement |
 | [`RESEARCH_FFD_MEASUREMENT.md`](index-calculus/RESEARCH_FFD_MEASUREMENT.md) | First-fall-degree measurement |
 | [`RESEARCH_FFD_PROOF_COMPLEXITY.md`](index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md) | A proof-complexity bridge for the first-fall-degree assumption |
 | [`RESEARCH_FFD_WORKFLOW.md`](index-calculus/RESEARCH_FFD_WORKFLOW.md) | FFD falsification-driven experiment loop |
@@ -41,6 +46,7 @@ its old name still identify it.
 | [`RESEARCH_HYPERELLIPTIC_IC_RHO.md`](index-calculus/RESEARCH_HYPERELLIPTIC_IC_RHO.md) | Index calculus vs rho on genus-2 and genus-3 Jacobians |
 | [`RESEARCH_EXOTIC_COORDINATES.md`](index-calculus/RESEARCH_EXOTIC_COORDINATES.md) | Exotic coordinates for point decomposition |
 | [`RESEARCH_AUTOLAB_LOG.md`](index-calculus/RESEARCH_AUTOLAB_LOG.md) | Research AutoLab log |
+| [`RESEARCH_PKM_TOWER_ORACLE.md`](index-calculus/RESEARCH_PKM_TOWER_ORACLE.md) | Design and pre-registration of the prime-field algebraic oracle (Petit–Kosters–Messeng towers): construction, framework integration, the one-generator bound, and the solver-axis falsification test. A pilot (§10) contradicts the pre-registered expectation: F4's solving degree stays nearly flat (4–5 for `m = 2` through `N = 18`). Round 2 (§11) builds a sparse tower-aware F4 (`f4_fp_tower`), cross-checks it, and finds the degree rising again: 6 at `N = 20–22` for `m = 2` (Kummer, isogeny and the null alike) and 7 at `N = 15` for `m = 3`. That refutes the pilot's bounded-degree conjecture. Round 3 (§12) stores the basis compactly, reproduces round 2 exactly, and finishes `m = 4` at `N = 16`: `D = 7`, as at `N = 12`. Linear or slower growth remains open. Round 4 (§13) builds a signature-based F4 (F5/GVW criteria, `sig_fp_tower`) and checks it against F4: it agrees on all 18 systems and removes the zero reductions, but needs rows 1–2 degrees higher everywhere and up to 28 times the memory, so F4 stays the measuring engine. The gate of §14 fails too: taking F4's steps brings the signature engine to F4's degree at `m = 3`, `N = 9` but one above at `N = 12`, so no round follows |
 
 ## ecc2k130 — the ECC2K-130 campaign, Koblitz curves, binary Weil descent
 
@@ -58,6 +64,7 @@ its old name still identify it.
 | [`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md) | Frobenius-invariant factor bases on Koblitz curves |
 | [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md) | Making the Koblitz decomposition oracle reach a useful `m` |
 | [`RESEARCH_TRIMOSKA_BENCHMARKS.md`](ecc2k130/RESEARCH_TRIMOSKA_BENCHMARKS.md) | Bit-sliced Weil descent: EC-Index-Calculus-Benchmarks review |
+| [`RESEARCH_WDSAT_IC_UNIFICATION.md`](ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md) | Unifying Koblitz index calculus with the Trimoska WDSat solver |
 
 ## cm-isogeny — CM structure, isogeny graphs, covers, P-256 and secp256k1 audits
 
@@ -93,3 +100,10 @@ Put it in the theme it belongs to (or add a theme directory), add a row
 here, and cite its frozen evidence directory by path.  Guides and primers
 that are not research results go in `docs/guides/`; the library roadmap
 is `docs/DEFERRED.md`.
+
+A research note never lives at the repository root or loose in a code
+directory: that is the one placement this index exists to prevent.  When a
+note moves into its theme, update every inbound link in the same commit —
+sibling notes, `docs/` pages, and the `docs/index-calculus-scoreboard.html`
+citation — but leave the basename unchanged so the frozen experiment JSONs
+that name the note by filename keep resolving.

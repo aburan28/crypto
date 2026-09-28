@@ -15,9 +15,14 @@
 //! Gröbner basis — enough to decide consistency and, for a zero-
 //! dimensional ideal, to solve, whenever the solving degree is at most
 //! `D`.  Each step builds one matrix by symbolic preprocessing (the pair
-//! multiples plus one reducer per reducible monomial), row-reduces it
-//! over `u64` arithmetic mod `p` (rows in parallel), and keeps the rows
-//! whose leading monomial is new.  The product criterion prunes pairs;
+//! multiples plus one reducer per reducible monomial) and keeps the rows
+//! of its reduced echelon form whose leading monomial is new.  The
+//! reducers already have distinct leading monomials, so the step reduces
+//! each (sparse) pair row by them alone and takes the dense reduced
+//! echelon form of only what is left, on the columns no reducer leads —
+//! the same rows the whole matrix's echelon form would give, from a much
+//! smaller dense block.  Rows run in parallel once a step is large enough
+//! to repay the dispatch.  The product criterion prunes pairs;
 //! polynomials whose leading monomial becomes divisible by a new one are
 //! dropped.
 //!
@@ -33,15 +38,17 @@
 //! ## Honest scope
 //!
 //! Small primes (`p < 2³²`), a few unknowns, degrees in the tens: the
-//! matrices are dense.  No Gebauer–Möller chain criterion, no F5
+//! residual matrices are dense.  No Gebauer–Möller chain criterion, no F5
 //! signatures, no sugar; this is the plain algorithm, written so that
 //! the descent systems of the coordinate thread can be timed at `m = 3`.
 
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashSet};
+use std::sync::atomic::{AtomicU64, Ordering as AtomicOrdering};
 use std::time::{Duration, Instant};
 
 use rayon::prelude::*;
 
+use super::fx_hash::{FxMap, FxSet};
 use super::groebner_f4::cmp_monomial;
 pub use super::groebner_f4::Ordering;
 
@@ -50,6 +57,22 @@ pub use super::groebner_f4::Ordering;
 pub type Poly = Vec<(Vec<u32>, u64)>;
 
 // ── Field arithmetic ───────────────────────────────────────────────
+
+/// Process-wide count of `F_p` multiplications spent in row reduction
+/// (reducer applications, pivot normalisation and elimination).  Reports
+/// carry the difference over their own run, so nested and parallel runs
+/// stay additive; one atomic add per row operation keeps it off the hot
+/// loops.
+static FIELD_OPS: AtomicU64 = AtomicU64::new(0);
+
+fn field_ops_now() -> u64 {
+    FIELD_OPS.load(AtomicOrdering::Relaxed)
+}
+
+#[inline]
+fn count_ops(n: usize) {
+    FIELD_OPS.fetch_add(n as u64, AtomicOrdering::Relaxed);
+}
 
 #[inline]
 fn mulmod(a: u64, b: u64, p: u64) -> u64 {
@@ -69,6 +92,71 @@ fn invmod(a: u64, p: u64) -> u64 {
         e >>= 1;
     }
     r
+}
+
+/// Reduction modulo a fixed `p < 2³²` by Barrett's method: a precomputed
+/// `⌊2⁶⁴/p⌋` turns each remainder in the eliminations into a high
+/// multiply and at most one subtraction, instead of a hardware division
+/// by a `p` known only at run time.
+#[derive(Clone, Copy)]
+struct Barrett {
+    p: u64,
+    m: u64,
+}
+
+impl Barrett {
+    fn new(p: u64) -> Self {
+        assert!(
+            (2..1 << 32).contains(&p),
+            "f4_fp: the prime must be below 2^32"
+        );
+        Barrett {
+            p,
+            m: (u128::from(u64::MAX) + 1).div_euclid(u128::from(p)) as u64,
+        }
+    }
+    /// `x mod p` for any `x < 2⁶⁴`: `q = ⌊x·m/2⁶⁴⌋` undershoots `⌊x/p⌋`
+    /// by at most one.
+    #[inline(always)]
+    fn reduce(self, x: u64) -> u64 {
+        let q = ((u128::from(x) * u128::from(self.m)) >> 64) as u64;
+        let r = x - q * self.p;
+        if r >= self.p {
+            r - self.p
+        } else {
+            r
+        }
+    }
+}
+
+/// Narrow reduction for `p <= 2^16`.  Every elimination update is at most
+/// `(p - 1) + (p - 1)^2 = p(p - 1) < 2^32`, so both the matrix and the
+/// multiply-add accumulator can stay in 32-bit lanes.
+#[derive(Clone, Copy)]
+struct Barrett32 {
+    p: u32,
+    m: u32,
+}
+
+impl Barrett32 {
+    fn new(p: u64) -> Self {
+        assert!((2..=1 << 16).contains(&p));
+        Self {
+            p: p as u32,
+            m: ((1u64 << 32) / p) as u32,
+        }
+    }
+
+    /// `x mod p` for the bounded product-plus-accumulator above.  The
+    /// quotient estimate undershoots by at most one; the mask avoids a
+    /// data-dependent branch in the row's inner loop.
+    #[inline(always)]
+    fn reduce(self, x: u32) -> u32 {
+        let q = ((x as u64 * self.m as u64) >> 32) as u32;
+        let r = x - q * self.p;
+        let less = 0u32.wrapping_sub((r < self.p) as u32);
+        r.wrapping_sub(self.p).wrapping_add(less & self.p)
+    }
 }
 
 // ── Polynomial helpers ─────────────────────────────────────────────
@@ -102,13 +190,6 @@ pub fn normalise(terms: &[(Vec<u32>, u64)], p: u64, ord: Ordering) -> Poly {
 
 fn divides(a: &[u32], b: &[u32]) -> bool {
     a.iter().zip(b).all(|(x, y)| x <= y)
-}
-
-/// `m · f`.
-fn shift(f: &Poly, m: &[u32]) -> Poly {
-    f.iter()
-        .map(|(e, c)| (e.iter().zip(m).map(|(x, y)| x + y).collect(), *c))
-        .collect()
 }
 
 /// Render a polynomial with variable names.
@@ -156,6 +237,29 @@ pub struct F4Options {
     pub max_degree: u32,
     /// Cooperative stop: the run returns `timed_out` once past it.
     pub deadline: Option<Instant>,
+    /// Stop once the leading monomials of the basis so far leave at most
+    /// this many standard monomials.
+    ///
+    /// The basis generates a subideal of the input ideal whose quotient then
+    /// has at most that dimension. Every solution of the input is therefore
+    /// among at most that many points, which can be enumerated and checked
+    /// against the input directly. The pairs still pending would only
+    /// certify the Gröbner basis, and are left unprocessed.
+    ///
+    /// Zero-dimensionality alone is not a stopping criterion. Field-like
+    /// equations (`y² = …` for every variable) make the leading ideal
+    /// zero-dimensional from the start, with an exponentially large
+    /// staircase. `None` (the default) never stops early; a stopped run
+    /// reports the staircase it stopped at in
+    /// `F4Report::staircase_at_stop`.
+    pub stop_staircase: Option<usize>,
+    /// A `Z/3`-weight per variable.  When set, every step whose rows are
+    /// all weight-homogeneous (each row's monomials in one class
+    /// `Σ wᵢeᵢ (mod 3)`) reduces the three weight blocks of its matrix
+    /// separately: the row spaces are direct summands, so the pivots and
+    /// the reduced rows are those of the whole matrix.  A step with a
+    /// mixed row falls back to the plain reduction.
+    pub weights: Option<Vec<u8>>,
 }
 
 impl F4Options {
@@ -164,12 +268,72 @@ impl F4Options {
             order,
             max_degree,
             deadline: None,
+            stop_staircase: None,
+            weights: None,
         }
+    }
+    /// Block-aware reduction by the given `Z/3`-weights.
+    pub fn with_weights(mut self, weights: Vec<u8>) -> Self {
+        self.weights = Some(weights);
+        self
     }
     pub fn with_budget(mut self, budget: Duration) -> Self {
         self.deadline = Some(Instant::now() + budget);
         self
     }
+    /// See [`F4Options::stop_staircase`].
+    pub fn stopping_below(mut self, standard_monomials: usize) -> Self {
+        self.stop_staircase = Some(standard_monomials);
+        self
+    }
+}
+
+/// The number of monomials divisible by none of `lms` (the staircase of a
+/// zero-dimensional leading ideal), or `None` when it exceeds `bound` or is
+/// infinite.
+///
+/// The search is depth first over the variables. A monomial that is
+/// already divisible with the remaining exponents at zero stays divisible
+/// however they grow, so such branches are pruned. The search stops at
+/// `bound + 1` leaves, so a huge staircase costs as little as a small one.
+fn staircase_at_most(lms: &[&[u32]], n_vars: usize, bound: usize) -> Option<usize> {
+    // the exponent of the smallest pure power of each variable among the LMs
+    let mut cap = vec![0u32; n_vars];
+    for (k, c) in cap.iter_mut().enumerate() {
+        *c = lms
+            .iter()
+            .filter(|m| m.iter().enumerate().all(|(i, &e)| (i == k) == (e > 0)))
+            .map(|m| m[k])
+            .min()?;
+    }
+    fn walk(
+        k: usize,
+        mono: &mut Vec<u32>,
+        cap: &[u32],
+        lms: &[&[u32]],
+        count: &mut usize,
+        bound: usize,
+    ) -> bool {
+        if lms.iter().any(|l| divides(l, mono)) {
+            return true;
+        }
+        if k == cap.len() {
+            *count += 1;
+            return *count <= bound;
+        }
+        for e in 0..cap[k] {
+            mono[k] = e;
+            if !walk(k + 1, mono, cap, lms, count, bound) {
+                mono[k] = 0;
+                return false;
+            }
+        }
+        mono[k] = 0;
+        true
+    }
+    let mut count = 0usize;
+    let mut mono = vec![0u32; n_vars];
+    walk(0, &mut mono, &cap, lms, &mut count, bound).then_some(count)
 }
 
 #[derive(Clone, Debug)]
@@ -182,6 +346,19 @@ pub struct F4Report {
     /// Degree of the step at which `1` appeared, or at which the last
     /// new basis element was found.
     pub solving_degree: u32,
+    /// The highest step degree at which the run learned something new (a
+    /// new basis element, or `1`).  This is the framework's solving degree
+    /// (`docs/ic/FRAMEWORK.md` §3).  It differs from `solving_degree` when
+    /// step degrees fall: on tower and chain systems the normal strategy
+    /// climbs, learns low-degree elements and descends again, so the last
+    /// productive step need not be the highest one.
+    pub solving_degree_max: u32,
+    /// The widest matrix up to and including the last productive step.
+    /// This is what reaching the basis costs, without the trailing steps
+    /// whose pairs all reduce to zero.
+    pub max_cols_to_solution: usize,
+    /// Steps up to and including the last productive one.
+    pub steps_to_solution: usize,
     pub steps: usize,
     pub max_rows: usize,
     pub max_cols: usize,
@@ -190,6 +367,62 @@ pub struct F4Report {
     /// Pairs dropped because their lcm degree exceeded the bound: `> 0`
     /// means the basis may be a strict truncation.
     pub pairs_above_bound: usize,
+    /// When the run stopped early (`F4Options::stop_staircase`), the number
+    /// of standard monomials it stopped at, with pairs still pending: the
+    /// basis is then not certified complete.
+    pub staircase_at_stop: Option<usize>,
+    /// `F_p` multiplications spent in row reduction over this run.
+    pub field_ops: u64,
+    /// Steps reduced block by block under `F4Options::weights`.
+    pub blocked_steps: usize,
+}
+
+fn z3_weight(e: &[u32], w: &[u8]) -> u8 {
+    (e.iter().zip(w).map(|(&a, &b)| a * b as u32).sum::<u32>() % 3) as u8
+}
+
+/// Reduce `rows` (over the free columns, whose weight classes are
+/// `col_class`) block by block: every row lies in one class, so each
+/// class is reduced on its own by `reduce`, and the pivots and reduced
+/// rows are re-assembled in column order.  A `None` from `reduce` (the
+/// deadline) is passed through.
+fn rref_blocked<T: Copy + Default + PartialEq + Send>(
+    rows: &mut Vec<Vec<T>>,
+    col_class: &[u8],
+    reduce: impl Fn(&mut Vec<Vec<T>>) -> Option<Vec<usize>>,
+) -> Option<Vec<usize>> {
+    let width = col_class.len();
+    let mut out: Vec<(usize, Vec<T>)> = Vec::new();
+    for class in 0..3u8 {
+        let bcols: Vec<usize> = (0..width).filter(|&c| col_class[c] == class).collect();
+        if bcols.is_empty() {
+            continue;
+        }
+        let mut block: Vec<Vec<T>> = rows
+            .iter()
+            .filter(|r| {
+                r.iter()
+                    .position(|v| *v != T::default())
+                    .is_some_and(|c| col_class[c] == class)
+            })
+            .map(|r| bcols.iter().map(|&c| r[c]).collect())
+            .collect();
+        if block.is_empty() {
+            continue;
+        }
+        let piv = reduce(&mut block)?;
+        for (row, &lc) in block.iter().zip(&piv) {
+            let mut full = vec![T::default(); width];
+            for (j, &v) in row.iter().enumerate() {
+                full[bcols[j]] = v;
+            }
+            out.push((bcols[lc], full));
+        }
+    }
+    out.sort_by_key(|(c, _)| *c);
+    let pivots = out.iter().map(|(c, _)| *c).collect();
+    *rows = out.into_iter().map(|(_, r)| r).collect();
+    Some(pivots)
 }
 
 struct Pair {
@@ -199,72 +432,268 @@ struct Pair {
     degree: u32,
 }
 
-/// Row-reduce `rows` (dense, entries in `[0, p)`) to reduced echelon
-/// form in place; returns the pivot column of each non-zero row, rows
-/// sorted by pivot column.
-fn row_reduce(rows: &mut Vec<Vec<u64>>, p: u64, deadline: Option<Instant>) -> (Vec<usize>, bool) {
-    let n_cols = rows.first().map(|r| r.len()).unwrap_or(0);
-    let mut pivot_row = 0usize;
-    let mut pivots: Vec<usize> = Vec::new();
-    for c in 0..n_cols {
-        if pivot_row >= rows.len() {
-            break;
-        }
-        if let Some(d) = deadline {
-            if Instant::now() > d {
-                return (pivots, true);
-            }
-        }
-        // find a pivot
-        let Some(r) = (pivot_row..rows.len()).find(|&r| rows[r][c] != 0) else {
-            continue;
-        };
-        rows.swap(pivot_row, r);
-        let inv = invmod(rows[pivot_row][c], p);
-        {
-            let row = &mut rows[pivot_row];
-            for x in row.iter_mut().skip(c) {
-                if *x != 0 {
-                    *x = mulmod(*x, inv, p);
-                }
-            }
-        }
-        let (head, tail) = rows.split_at_mut(pivot_row);
-        let (prow, rest) = tail.split_first_mut().unwrap();
-        let prow: &Vec<u64> = prow;
-        let eliminate = |row: &mut Vec<u64>| {
-            let f = row[c];
-            if f == 0 {
-                return;
-            }
-            let neg = p - f;
-            for (x, &y) in row.iter_mut().zip(prow.iter()).skip(c) {
-                if y != 0 {
-                    *x = (*x + mulmod(neg, y, p)) % p;
-                }
-            }
-        };
-        head.par_iter_mut().for_each(eliminate);
-        rest.par_iter_mut().for_each(eliminate);
-        pivots.push(c);
-        pivot_row += 1;
+/// Rows × columns of remaining elimination work below which a pivot's
+/// elimination runs on one thread: under it, rayon's dispatch costs more
+/// than the arithmetic it spreads.
+const PAR_WORK: usize = 1 << 15;
+
+/// Subtract `f · pivot` from `row` over the columns `from..`, with
+/// `f = row[col]`.  `p < 2³²`, so `x + (p − f)·y < 2⁶⁴` fits a `u64`
+/// and one Barrett reduction replaces the `u128` remainder of [`mulmod`].
+#[inline]
+fn eliminate(row: &mut [u64], pivot: &[u64], col: usize, fp: Barrett) {
+    let f = row[col];
+    if f == 0 {
+        return;
     }
-    (pivots, false)
+    let neg = fp.p - f;
+    let mut ops = 0usize;
+    for (x, &y) in row[col..].iter_mut().zip(&pivot[col..]) {
+        if y != 0 {
+            *x = fp.reduce(*x + neg * y);
+            ops += 1;
+        }
+    }
+    count_ops(ops);
 }
 
-/// Multiply out `f` by monomial `m` and scatter into a dense row.
-fn dense_row(f: &Poly, m: &[u32], col_of: &HashMap<Vec<u32>, usize>, n_cols: usize) -> Vec<u64> {
-    let mut row = vec![0u64; n_cols];
-    for (e, c) in f {
-        let em: Vec<u32> = e.iter().zip(m).map(|(x, y)| x + y).collect();
-        row[col_of[&em]] = *c;
+#[inline]
+fn eliminate32(row: &mut [u32], pivot: &[u32], col: usize, fp: Barrett32) {
+    let f = row[col];
+    if f == 0 {
+        return;
     }
-    row
+    let neg = fp.p - f;
+    for (x, &y) in row[col..].iter_mut().zip(&pivot[col..]) {
+        *x = fp.reduce(*x + neg * y);
+    }
+    count_ops(row.len() - col);
+}
+
+fn rref32(
+    rows: &mut Vec<Vec<u32>>,
+    fp: Barrett32,
+    deadline: Option<Instant>,
+) -> Option<Vec<usize>> {
+    let n_cols = rows.first().map_or(0, |r| r.len());
+    let mut pivots = Vec::new();
+    let mut pr = 0usize;
+    for c in 0..n_cols {
+        if pr >= rows.len() {
+            break;
+        }
+        if c % 32 == 0 && deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let Some(r) = (pr..rows.len()).find(|&r| rows[r][c] != 0) else {
+            continue;
+        };
+        rows.swap(pr, r);
+        let inv = invmod(rows[pr][c] as u64, fp.p as u64) as u32;
+        for x in &mut rows[pr][c..] {
+            *x = fp.reduce(*x * inv);
+        }
+        count_ops(n_cols - c);
+        let (head, tail) = rows.split_at_mut(pr + 1);
+        let prow = &head[pr];
+        if tail.len() * (n_cols - c) > PAR_WORK {
+            tail.par_iter_mut()
+                .for_each(|row| eliminate32(row, prow, c, fp));
+        } else {
+            tail.iter_mut()
+                .for_each(|row| eliminate32(row, prow, c, fp));
+        }
+        pivots.push(c);
+        pr += 1;
+    }
+    rows.truncate(pr);
+    for i in (1..pr).rev() {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let c = pivots[i];
+        let (head, tail) = rows.split_at_mut(i);
+        let prow = &tail[0];
+        if head.len() * (n_cols - c) > PAR_WORK {
+            head.par_iter_mut()
+                .for_each(|row| eliminate32(row, prow, c, fp));
+        } else {
+            head.iter_mut()
+                .for_each(|row| eliminate32(row, prow, c, fp));
+        }
+    }
+    Some(pivots)
+}
+
+#[inline]
+fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+    for (x, &y) in acc[from..].iter_mut().zip(&pivot[from..]) {
+        *x += factor * u64::from(y);
+    }
+    count_ops(acc.len() - from);
+}
+
+#[inline]
+fn normalize_lazy(acc: &mut [u64], fp: Barrett) {
+    for x in acc {
+        *x = fp.reduce(*x);
+    }
+}
+
+/// Row-oriented RREF.  Each row keeps a 64-bit scratch accumulator while
+/// it meets the existing 32-bit pivots, reducing only the next pivot
+/// coefficient and the row when it is stored.  A bounded normalization
+/// keeps even the largest supported prime far below `u64` overflow.
+fn rref32_deferred(
+    rows: &mut Vec<Vec<u32>>,
+    fp32: Barrett32,
+    fp: Barrett,
+    deadline: Option<Instant>,
+) -> Option<Vec<usize>> {
+    const NORMALIZE_AFTER: usize = 256;
+    let mut known: Vec<(usize, Vec<u32>)> = Vec::new();
+    for source in std::mem::take(rows) {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let mut acc: Vec<u64> = source.into_iter().map(u64::from).collect();
+        let mut pending = 0usize;
+        for (j, (c, pivot)) in known.iter().enumerate() {
+            if j % 32 == 0 && deadline.is_some_and(|d| Instant::now() > d) {
+                return None;
+            }
+            let f = fp.reduce(acc[*c]);
+            if f != 0 {
+                add_lazy(&mut acc, pivot, *c, fp.p - f);
+                pending += 1;
+                if pending == NORMALIZE_AFTER {
+                    normalize_lazy(&mut acc, fp);
+                    pending = 0;
+                }
+            }
+        }
+        let mut row: Vec<u32> = acc.into_iter().map(|v| fp.reduce(v) as u32).collect();
+        let Some(c) = row.iter().position(|&v| v != 0) else {
+            continue;
+        };
+        let inv = invmod(u64::from(row[c]), fp.p) as u32;
+        for x in &mut row[c..] {
+            *x = fp32.reduce(*x * inv);
+        }
+        count_ops(row.len() - c);
+        let at = known.partition_point(|(pc, _)| *pc < c);
+        known.insert(at, (c, row));
+    }
+    for i in (0..known.len()).rev() {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let (earlier, later) = known.split_at_mut(i + 1);
+        let row = &mut earlier[i].1;
+        let mut acc: Vec<u64> = row.iter().copied().map(u64::from).collect();
+        let mut pending = 0usize;
+        for (c, pivot) in later.iter().rev() {
+            let f = fp.reduce(acc[*c]);
+            if f != 0 {
+                add_lazy(&mut acc, pivot, *c, fp.p - f);
+                pending += 1;
+                if pending == NORMALIZE_AFTER {
+                    normalize_lazy(&mut acc, fp);
+                    pending = 0;
+                }
+            }
+        }
+        for (x, v) in row.iter_mut().zip(acc) {
+            *x = fp.reduce(v) as u32;
+        }
+    }
+    let pivots = known.iter().map(|(c, _)| *c).collect();
+    *rows = known.into_iter().map(|(_, row)| row).collect();
+    Some(pivots)
+}
+
+/// Row-reduce `rows` (dense, entries in `[0, p)`) to reduced echelon form
+/// in place: zero rows are dropped, the rest sorted by pivot column, whose
+/// list is returned.  `None` when the deadline passed first.
+fn rref(rows: &mut Vec<Vec<u64>>, fp: Barrett, deadline: Option<Instant>) -> Option<Vec<usize>> {
+    let p = fp.p;
+    let n_cols = rows.first().map_or(0, |r| r.len());
+    let mut pivots: Vec<usize> = Vec::new();
+    let mut pr = 0usize;
+    // forward: echelon form
+    for c in 0..n_cols {
+        if pr >= rows.len() {
+            break;
+        }
+        if c % 32 == 0 && deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let Some(r) = (pr..rows.len()).find(|&r| rows[r][c] != 0) else {
+            continue;
+        };
+        rows.swap(pr, r);
+        let inv = invmod(rows[pr][c], p);
+        let mut ops = 0usize;
+        for x in rows[pr][c..].iter_mut() {
+            if *x != 0 {
+                *x = fp.reduce(*x * inv);
+                ops += 1;
+            }
+        }
+        count_ops(ops);
+        let (head, tail) = rows.split_at_mut(pr + 1);
+        let prow = &head[pr];
+        if tail.len() * (n_cols - c) > PAR_WORK {
+            tail.par_iter_mut()
+                .for_each(|row| eliminate(row, prow, c, fp));
+        } else {
+            tail.iter_mut().for_each(|row| eliminate(row, prow, c, fp));
+        }
+        pivots.push(c);
+        pr += 1;
+    }
+    rows.truncate(pr);
+    // backward: clear each pivot column above its pivot
+    for i in (1..pr).rev() {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let c = pivots[i];
+        let (head, tail) = rows.split_at_mut(i);
+        let prow = &tail[0];
+        if head.len() * (n_cols - c) > PAR_WORK {
+            head.par_iter_mut()
+                .for_each(|row| eliminate(row, prow, c, fp));
+        } else {
+            head.iter_mut().for_each(|row| eliminate(row, prow, c, fp));
+        }
+    }
+    Some(pivots)
 }
 
 /// Degree-bounded F4.
 pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
+    static MODE: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
+    let mode = *MODE.get_or_init(|| {
+        std::env::var("F4_FP_NARROW")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .filter(|&mode| mode <= 2)
+            .unwrap_or(2)
+    });
+    f4_with_arithmetic(input, n_vars, p, opts, mode)
+}
+
+fn f4_with_arithmetic(
+    input: &[Poly],
+    n_vars: usize,
+    p: u64,
+    opts: &F4Options,
+    mode: u8,
+) -> F4Report {
     let t0 = Instant::now();
+    let ops0 = field_ops_now();
+    let mut blocked_steps = 0usize;
     let debug = std::env::var("F4_DEBUG").is_ok();
     if debug {
         eprintln!(
@@ -276,12 +705,28 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                 .collect::<Vec<_>>()
         );
     }
+    let fp = Barrett::new(p);
+    let narrow = mode != 0 && p <= 1 << 16;
+    let deferred = mode == 2 && narrow;
+    let fp32 = narrow.then(|| Barrett32::new(p));
     let ord = opts.order;
     let mut basis: Vec<Poly> = Vec::new();
     let mut alive: Vec<bool> = Vec::new();
     let mut pairs: Vec<Pair> = Vec::new();
     let mut pairs_above_bound = 0usize;
-    let report = |basis: &[Poly], alive: &[bool], inconsistent, dr, sd, steps, mr, mc, to, pab| {
+    // `learned` is (solving_degree_max, max_cols_to_solution, steps_to_solution).
+    let report = |basis: &[Poly],
+                  alive: &[bool],
+                  inconsistent,
+                  dr,
+                  sd,
+                  steps,
+                  mr,
+                  mc,
+                  to,
+                  pab,
+                  learned: (u32, usize, usize),
+                  bs: usize| {
         let b: Vec<Poly> = if inconsistent {
             vec![vec![(vec![0; n_vars], 1)]]
         } else {
@@ -297,12 +742,18 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
             inconsistent,
             degree_reached: dr,
             solving_degree: sd,
+            solving_degree_max: learned.0,
+            max_cols_to_solution: learned.1,
+            steps_to_solution: learned.2,
             steps,
             max_rows: mr,
             max_cols: mc,
             ms: t0.elapsed().as_secs_f64() * 1e3,
             timed_out: to,
             pairs_above_bound: pab,
+            staircase_at_stop: None,
+            field_ops: field_ops_now() - ops0,
+            blocked_steps: bs,
         }
     };
 
@@ -357,7 +808,7 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
             continue;
         }
         if total_degree(&f[0].0) == 0 {
-            return report(&basis, &alive, true, 0, 0, 0, 0, 0, false, 0);
+            return report(&basis, &alive, true, 0, 0, 0, 0, 0, false, 0, (0, 0, 0), 0);
         }
         add(
             f,
@@ -374,6 +825,9 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
     let mut max_cols = 0usize;
     let mut degree_reached = 0u32;
     let mut solving_degree = 0u32;
+    // (solving_degree_max, max_cols_to_solution, steps_to_solution)
+    let mut learned = (0u32, 0usize, 0usize);
+    let mut staircase_at_stop: Option<usize> = None;
 
     while !pairs.is_empty() {
         if debug {
@@ -392,6 +846,8 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                     max_cols,
                     true,
                     pairs_above_bound,
+                    learned,
+                    blocked_steps,
                 );
             }
         }
@@ -402,7 +858,7 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
         pairs = rest;
         // symbolic preprocessing
         let mut rows_poly: Vec<(usize, Vec<u32>)> = Vec::new(); // (basis index, multiplier)
-        let mut seen: HashSet<(usize, Vec<u32>)> = HashSet::new();
+        let mut seen: FxSet<(usize, Vec<u32>)> = FxSet::default();
         for pr in &selected {
             for &idx in &[pr.i, pr.j] {
                 let m: Vec<u32> = pr
@@ -416,8 +872,9 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                 }
             }
         }
-        let mut monomials: HashSet<Vec<u32>> = HashSet::new();
-        let mut done: HashSet<Vec<u32>> = HashSet::new();
+        let n_pair_rows = rows_poly.len();
+        let mut monomials: FxSet<Vec<u32>> = FxSet::default();
+        let mut done: FxSet<Vec<u32>> = FxSet::default();
         let mut queue: Vec<Vec<u32>> = Vec::new();
         for (idx, m) in &rows_poly {
             for (e, _) in &basis[*idx] {
@@ -455,41 +912,225 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                 }
             }
         }
-        // matrix
+        // matrix: columns in decreasing monomial order, rows sparse
         let mut cols: Vec<Vec<u32>> = monomials.into_iter().collect();
-        cols.sort_by(|a, b| cmp_monomial(b, a, ord));
-        let col_of: HashMap<Vec<u32>, usize> = cols
+        cols.sort_unstable_by(|a, b| cmp_monomial(b, a, ord));
+        let col_of: FxMap<&[u32], u32> = cols
             .iter()
-            .cloned()
             .enumerate()
-            .map(|(i, m)| (m, i))
+            .map(|(i, m)| (m.as_slice(), i as u32))
             .collect();
         let n_cols = cols.len();
-        let input_lms: HashSet<usize> = rows_poly
-            .iter()
-            .map(|(idx, m)| {
-                let lm: Vec<u32> = basis[*idx][0].0.iter().zip(m).map(|(x, y)| x + y).collect();
-                col_of[&lm]
-            })
-            .collect();
-        let mut rows: Vec<Vec<u64>> = rows_poly
-            .par_iter()
-            .map(|(idx, m)| dense_row(&basis[*idx], m, &col_of, n_cols))
-            .collect();
-        max_rows = max_rows.max(rows.len());
+        // `(column, coefficient)` in increasing column order, so the
+        // leading term first; every row is monic
+        let to_sparse = |(idx, m): &(usize, Vec<u32>)| -> Vec<(u32, u64)> {
+            let mut em = vec![0u32; n_vars];
+            basis[*idx]
+                .iter()
+                .map(|(e, c)| {
+                    for (k, x) in em.iter_mut().enumerate() {
+                        *x = e[k] + m[k];
+                    }
+                    (col_of[em.as_slice()], *c)
+                })
+                .collect()
+        };
+        // small steps (most of them, and all of `solve`'s specialised
+        // runs) are cheaper on one thread than dispatched
+        let parallel = rows_poly.len() * n_cols > PAR_WORK;
+        let sparse: Vec<Vec<(u32, u64)>> = if parallel {
+            rows_poly.par_iter().map(to_sparse).collect()
+        } else {
+            rows_poly.iter().map(to_sparse).collect()
+        };
+        let mut input_lm = vec![false; n_cols];
+        for r in &sparse {
+            input_lm[r[0].0 as usize] = true;
+        }
+        max_rows = max_rows.max(sparse.len());
         max_cols = max_cols.max(n_cols);
         steps += 1;
-        let (pivots, timed_out) = row_reduce(&mut rows, p, opts.deadline);
+        // The reducer rows of symbolic preprocessing have distinct leading
+        // columns, none of them an lcm: they are already an echelon form.
+        // Reduce each pair row by them alone, column by column, then take
+        // the reduced echelon form of what is left, which lives on the
+        // other columns only.  Its rows are exactly the rows of the whole
+        // matrix's reduced echelon form whose pivot is not a reducer's
+        // leading monomial — the only ones that can be new.
+        let (pair_rows, reducers) = sparse.split_at(n_pair_rows);
+        const NONE: u32 = u32::MAX;
+        let mut reducer_at = vec![NONE; n_cols];
+        for (k, r) in reducers.iter().enumerate() {
+            reducer_at[r[0].0 as usize] = k as u32;
+        }
+        let free_cols: Vec<usize> = (0..n_cols).filter(|&c| reducer_at[c] == NONE).collect();
+        let deadline = opts.deadline;
+        // Block-aware reduction: with every row in one weight class the
+        // reduced pair rows split by class over the free columns.
+        let block_classes: Option<Vec<u8>> = opts.weights.as_ref().and_then(|w| {
+            let col_w: Vec<u8> = cols.iter().map(|m| z3_weight(m, w)).collect();
+            let homogeneous = sparse.iter().all(|r| {
+                let cw = col_w[r[0].0 as usize];
+                r.iter().all(|&(c, _)| col_w[c as usize] == cw)
+            });
+            homogeneous.then(|| free_cols.iter().map(|&c| col_w[c]).collect())
+        });
+        if block_classes.is_some() {
+            blocked_steps += 1;
+        }
+        let pivots: Option<(Vec<Vec<u64>>, Vec<usize>)> = if deferred {
+            let fp32 = fp32.expect("deferred mode has narrow arithmetic");
+            let reduce_pair_row = |r: &Vec<(u32, u64)>| -> Option<Vec<u32>> {
+                if deadline.is_some_and(|d| Instant::now() > d) {
+                    return None;
+                }
+                let mut acc = vec![0u64; n_cols];
+                for &(c, v) in r {
+                    acc[c as usize] = v;
+                }
+                let mut pending = 0usize;
+                for c in r[0].0 as usize..n_cols {
+                    if reducer_at[c] == NONE {
+                        continue;
+                    }
+                    let f = fp.reduce(acc[c]);
+                    if f == 0 {
+                        continue;
+                    }
+                    acc[c] = 0;
+                    let neg = p - f;
+                    let reducer = &reducers[reducer_at[c] as usize][1..];
+                    for &(cc, v) in reducer {
+                        acc[cc as usize] += neg * v;
+                    }
+                    count_ops(reducer.len());
+                    pending += 1;
+                    if pending == 256 {
+                        normalize_lazy(&mut acc, fp);
+                        pending = 0;
+                    }
+                }
+                Some(
+                    free_cols
+                        .iter()
+                        .map(|&c| fp.reduce(acc[c]) as u32)
+                        .collect(),
+                )
+            };
+            let reduced: Option<Vec<Vec<u32>>> = if parallel {
+                pair_rows.par_iter().map(reduce_pair_row).collect()
+            } else {
+                pair_rows.iter().map(reduce_pair_row).collect()
+            };
+            reduced.and_then(|mut rows| {
+                rows.retain(|r| r.iter().any(|&v| v != 0));
+                let piv = match &block_classes {
+                    Some(cls) => {
+                        rref_blocked(&mut rows, cls, |b| rref32_deferred(b, fp32, fp, deadline))
+                    }
+                    None => rref32_deferred(&mut rows, fp32, fp, deadline),
+                };
+                piv.map(|piv| {
+                    let wide = rows
+                        .into_iter()
+                        .map(|row| row.into_iter().map(u64::from).collect())
+                        .collect();
+                    (wide, piv)
+                })
+            })
+        } else if let Some(fp32) = fp32 {
+            let reduce_pair_row = |r: &Vec<(u32, u64)>| -> Option<Vec<u32>> {
+                if deadline.is_some_and(|d| Instant::now() > d) {
+                    return None;
+                }
+                let mut acc = vec![0u32; n_cols];
+                for &(c, v) in r {
+                    acc[c as usize] = v as u32;
+                }
+                for c in r[0].0 as usize..n_cols {
+                    let f = acc[c];
+                    if f == 0 || reducer_at[c] == NONE {
+                        continue;
+                    }
+                    acc[c] = 0;
+                    let neg = fp32.p - f;
+                    let reducer = &reducers[reducer_at[c] as usize][1..];
+                    for &(cc, v) in reducer {
+                        let x = &mut acc[cc as usize];
+                        *x = fp32.reduce(*x + neg * v as u32);
+                    }
+                    count_ops(reducer.len());
+                }
+                Some(free_cols.iter().map(|&c| acc[c]).collect())
+            };
+            let reduced: Option<Vec<Vec<u32>>> = if parallel {
+                pair_rows.par_iter().map(reduce_pair_row).collect()
+            } else {
+                pair_rows.iter().map(reduce_pair_row).collect()
+            };
+            reduced.and_then(|mut rows| {
+                rows.retain(|r| r.iter().any(|&v| v != 0));
+                let piv = match &block_classes {
+                    Some(cls) => rref_blocked(&mut rows, cls, |b| rref32(b, fp32, deadline)),
+                    None => rref32(&mut rows, fp32, deadline),
+                };
+                piv.map(|piv| {
+                    let wide = rows
+                        .into_iter()
+                        .map(|row| row.into_iter().map(u64::from).collect())
+                        .collect();
+                    (wide, piv)
+                })
+            })
+        } else {
+            let reduce_pair_row = |r: &Vec<(u32, u64)>| -> Option<Vec<u64>> {
+                if deadline.is_some_and(|d| Instant::now() > d) {
+                    return None;
+                }
+                let mut acc = vec![0u64; n_cols];
+                for &(c, v) in r {
+                    acc[c as usize] = v;
+                }
+                for c in r[0].0 as usize..n_cols {
+                    let f = acc[c];
+                    if f == 0 || reducer_at[c] == NONE {
+                        continue;
+                    }
+                    acc[c] = 0;
+                    let neg = p - f;
+                    let reducer = &reducers[reducer_at[c] as usize][1..];
+                    for &(cc, v) in reducer {
+                        let x = &mut acc[cc as usize];
+                        *x = fp.reduce(*x + neg * v);
+                    }
+                    count_ops(reducer.len());
+                }
+                Some(free_cols.iter().map(|&c| acc[c]).collect())
+            };
+            let reduced: Option<Vec<Vec<u64>>> = if parallel {
+                pair_rows.par_iter().map(reduce_pair_row).collect()
+            } else {
+                pair_rows.iter().map(reduce_pair_row).collect()
+            };
+            reduced.and_then(|mut rows| {
+                rows.retain(|r| r.iter().any(|&v| v != 0));
+                let piv = match &block_classes {
+                    Some(cls) => rref_blocked(&mut rows, cls, |b| rref(b, fp, deadline)),
+                    None => rref(&mut rows, fp, deadline),
+                };
+                piv.map(|piv| (rows, piv))
+            })
+        };
         if debug {
             eprintln!(
                 "f4 step {steps}: degree {d}, {} pairs, {} rows × {n_cols} cols, {} pivots, basis {}",
                 selected.len(),
-                rows.len(),
-                pivots.len(),
+                sparse.len(),
+                reducers.len() + pivots.as_ref().map_or(0, |(_, pv)| pv.len()),
                 basis.len()
             );
         }
-        if timed_out {
+        let Some((rows, pivots)) = pivots else {
             return report(
                 &basis,
                 &alive,
@@ -501,19 +1142,21 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                 max_cols,
                 true,
                 pairs_above_bound,
+                learned,
+                blocked_steps,
             );
-        }
+        };
         // new polynomials: rows whose pivot column is not an input leading monomial
         let mut new_polys: Vec<Poly> = Vec::new();
-        for (r, &c) in pivots.iter().enumerate() {
-            if input_lms.contains(&c) {
+        for (row, &c) in rows.iter().zip(&pivots) {
+            if input_lm[free_cols[c]] {
                 continue;
             }
-            let poly: Poly = rows[r]
+            let poly: Poly = row
                 .iter()
                 .enumerate()
                 .filter(|(_, &v)| v != 0)
-                .map(|(j, &v)| (cols[j].clone(), v))
+                .map(|(j, &v)| (cols[free_cols[j]].clone(), v))
                 .collect();
             if total_degree(&poly[0].0) == 0 {
                 return report(
@@ -527,13 +1170,17 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                     max_cols,
                     false,
                     pairs_above_bound,
+                    (learned.0.max(d), max_cols, steps),
+                    blocked_steps,
                 );
             }
             new_polys.push(poly);
         }
         if !new_polys.is_empty() {
             solving_degree = d;
+            learned = (learned.0.max(d), max_cols, steps);
         }
+        let learned_now = !new_polys.is_empty();
         for f in new_polys {
             add(
                 f,
@@ -543,6 +1190,18 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
                 opts.max_degree,
                 &mut pairs_above_bound,
             );
+        }
+        if let (Some(bound), true) = (opts.stop_staircase, learned_now && !pairs.is_empty()) {
+            let lms: Vec<&[u32]> = basis
+                .iter()
+                .zip(&alive)
+                .filter(|(_, &a)| a)
+                .map(|(f, _)| f[0].0.as_slice())
+                .collect();
+            if let Some(count) = staircase_at_most(&lms, n_vars, bound) {
+                staircase_at_stop = Some(count);
+                break;
+            }
         }
     }
     // final interreduction of the alive basis (tails)
@@ -558,43 +1217,95 @@ pub fn f4(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> F4Report {
         inconsistent: false,
         degree_reached,
         solving_degree,
+        solving_degree_max: learned.0,
+        max_cols_to_solution: learned.1,
+        steps_to_solution: learned.2,
         steps,
         max_rows,
         max_cols,
         ms: t0.elapsed().as_secs_f64() * 1e3,
         timed_out: false,
         pairs_above_bound,
+        staircase_at_stop,
+        field_ops: field_ops_now() - ops0,
+        blocked_steps,
+    }
+}
+
+/// A monomial ordered by `cmp_monomial` under a fixed ordering, for the
+/// work heap of [`reduce`].
+struct Keyed<'a>(Vec<u32>, &'a Ordering);
+
+impl PartialEq for Keyed<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+impl Eq for Keyed<'_> {}
+impl PartialOrd for Keyed<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Keyed<'_> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        cmp_monomial(&self.0, &other.0, *self.1)
     }
 }
 
 /// Reduce `f` by `basis` (full reduction of every term).
 pub fn reduce(f: &Poly, basis: &[Poly], p: u64, ord: Ordering) -> Poly {
-    let mut work: BTreeMap<Vec<u32>, u64> = f.iter().map(|(e, c)| (e.clone(), *c)).collect();
+    reduce_skipping(f, basis, usize::MAX, p, ord)
+}
+
+/// [`reduce`] by every element of `basis` except `basis[skip]`.
+fn reduce_skipping(f: &Poly, basis: &[Poly], skip: usize, p: u64, ord: Ordering) -> Poly {
+    // coefficients of the pending terms, and a max-heap of their
+    // monomials; a reduction only adds monomials below the one it
+    // removes, so each monomial leaves the heap once
+    let mut work: FxMap<Vec<u32>, u64> = FxMap::default();
+    let mut heap: std::collections::BinaryHeap<Keyed> = std::collections::BinaryHeap::new();
+    for (e, c) in f {
+        let v = work.entry(e.clone()).or_insert_with(|| {
+            heap.push(Keyed(e.clone(), &ord));
+            0
+        });
+        *v = (*v + c % p) % p;
+    }
     let mut out: Vec<(Vec<u32>, u64)> = Vec::new();
-    loop {
-        // largest monomial still in work
-        let Some(mono) = work.keys().max_by(|a, b| cmp_monomial(a, b, ord)).cloned() else {
-            break;
+    while let Some(Keyed(mono, _)) = heap.pop() {
+        let Some(c) = work.remove(&mono) else {
+            continue;
         };
-        let c = work.remove(&mono).unwrap();
         if c == 0 {
             continue;
         }
-        if let Some(g) = basis.iter().find(|g| divides(&g[0].0, &mono)) {
-            let m: Vec<u32> = mono.iter().zip(&g[0].0).map(|(a, b)| a - b).collect();
+        let g = basis
+            .iter()
+            .enumerate()
+            .find(|&(j, g)| j != skip && divides(&g[0].0, &mono));
+        if let Some((_, g)) = g {
             // `g` is monic: `mono − c·m·g` cancels the leading term (already
             // removed from `work`) and adds the shifted tail
             let neg = p - c;
-            for (e, gc) in shift(g, &m).into_iter().skip(1) {
-                let v = work.entry(e).or_insert(0);
-                *v = (*v + mulmod(neg, gc, p)) % p;
+            for (e, gc) in &g[1..] {
+                let em: Vec<u32> = e
+                    .iter()
+                    .zip(&mono)
+                    .zip(&g[0].0)
+                    .map(|((x, a), b)| x + a - b)
+                    .collect();
+                let v = work.entry(em).or_insert_with_key(|k| {
+                    heap.push(Keyed(k.clone(), &ord));
+                    0
+                });
+                *v = (*v + mulmod(neg, *gc, p)) % p;
             }
-            work.retain(|_, v| *v != 0);
         } else {
             out.push((mono, c));
         }
     }
-    out.sort_by(|(a, _), (b, _)| cmp_monomial(b, a, ord));
+    // popped in decreasing order: already leading-first
     out
 }
 
@@ -611,16 +1322,9 @@ pub fn interreduce(basis: &[Poly], p: u64, ord: Ordering) -> Vec<Poly> {
             keep.push(f.clone());
         }
     }
-    let n = keep.len();
-    let mut out = keep.clone();
-    for i in 0..n {
-        let others: Vec<Poly> = out
-            .iter()
-            .enumerate()
-            .filter(|(j, _)| *j != i)
-            .map(|(_, g)| g.clone())
-            .collect();
-        let r = reduce(&out[i], &others, p, ord);
+    let mut out = keep;
+    for i in 0..out.len() {
+        let r = reduce_skipping(&out[i], &out, i, p, ord);
         if !r.is_empty() {
             out[i] = normalise(&r, p, ord);
         }
@@ -644,13 +1348,7 @@ pub fn autoreduce(polys: &[Poly], p: u64, ord: Ordering) -> Vec<Poly> {
         let mut changed = false;
         let mut i = 0;
         while i < set.len() {
-            let others: Vec<Poly> = set
-                .iter()
-                .enumerate()
-                .filter(|(j, _)| *j != i)
-                .map(|(_, g)| g.clone())
-                .collect();
-            let r = normalise(&reduce(&set[i], &others, p, ord), p, ord);
+            let r = normalise(&reduce_skipping(&set[i], &set, i, p, ord), p, ord);
             if r != set[i] {
                 changed = true;
                 if r.is_empty() {
@@ -691,6 +1389,11 @@ pub struct SolveReport {
     pub f4_runs: usize,
     pub ms: f64,
     pub timed_out: bool,
+    /// `F_p` multiplications spent in row reduction, summed over the F4
+    /// runs of the substitution tree.
+    pub field_ops: u64,
+    /// Block-reduced steps of the top-level run.
+    pub blocked_steps: usize,
 }
 
 /// Roots in `F_p` of a univariate polynomial given as `(degree, coeff)`.
@@ -734,11 +1437,13 @@ fn specialise(f: &Poly, i: usize, a: u64, p: u64) -> Vec<(Vec<u32>, u64)> {
 /// substitution.  Solutions are full assignments `(x_0, …, x_{n−1})`.
 pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveReport {
     let t0 = Instant::now();
+    let ops0 = field_ops_now();
     let mut runs = 0usize;
     let mut max_rows = 0;
     let mut max_cols = 0;
     let mut top: Option<(u32, u32)> = None;
     let mut timed_out = false;
+    let mut blocked = 0usize;
     let verdict = solve_rec(
         input,
         n_vars,
@@ -749,6 +1454,7 @@ pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveRe
         &mut max_cols,
         &mut top,
         &mut timed_out,
+        &mut blocked,
     );
     let (solving_degree, degree_reached) = top.unwrap_or((0, 0));
     SolveReport {
@@ -760,6 +1466,8 @@ pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveRe
         f4_runs: runs,
         ms: t0.elapsed().as_secs_f64() * 1e3,
         timed_out,
+        field_ops: field_ops_now() - ops0,
+        blocked_steps: blocked,
     }
 }
 
@@ -774,6 +1482,7 @@ fn solve_rec(
     max_cols: &mut usize,
     top: &mut Option<(u32, u32)>,
     timed_out: &mut bool,
+    blocked: &mut usize,
 ) -> Verdict {
     if n_vars == 0 {
         // constants only: consistent iff all zero
@@ -790,6 +1499,7 @@ fn solve_rec(
     *max_cols = (*max_cols).max(r.max_cols);
     if top.is_none() {
         *top = Some((r.solving_degree, r.degree_reached));
+        *blocked = r.blocked_steps;
     }
     if r.timed_out {
         *timed_out = true;
@@ -809,7 +1519,7 @@ fn solve_rec(
             let i = *vars.iter().next().unwrap();
             let coeffs: Vec<(u32, u64)> = g.iter().map(|(e, c)| (e[i], *c)).collect();
             let roots = roots_univariate(&coeffs, p);
-            if best.as_ref().map_or(true, |(_, rs)| roots.len() < rs.len()) {
+            if best.as_ref().is_none_or(|(_, rs)| roots.len() < rs.len()) {
                 best = Some((i, roots));
             }
         }
@@ -848,6 +1558,7 @@ fn solve_rec(
             max_cols,
             top,
             timed_out,
+            blocked,
         ) {
             Verdict::Inconsistent => {}
             Verdict::Undetermined => return Verdict::Undetermined,
@@ -918,6 +1629,110 @@ mod tests {
         };
         sols.sort();
         assert_eq!(sols, vec![vec![2, 2], vec![5, 5]]);
+    }
+
+    #[test]
+    fn solving_degree_max_sees_the_highest_productive_step() {
+        // x⁸ − 1 and x² + x + 1 over F_7 have no common root (x⁸ = 1 and
+        // x³ = 1 force x² = 1).  The only pair has degree 8 and falls to a
+        // linear element; the pair after it, of degree 2, yields 1.  The last
+        // productive step is at degree 2, but the run learned something at
+        // degree 8 first.
+        let p = 7;
+        let f = poly(&[(&[8], 1), (&[0], 6)]);
+        let g = poly(&[(&[2], 1), (&[1], 1), (&[0], 1)]);
+        let r = f4(&[f, g], 1, p, &F4Options::new(Ordering::Grevlex, 16));
+        assert!(r.inconsistent);
+        assert_eq!(r.solving_degree, 2);
+        assert_eq!(r.solving_degree_max, 8);
+        assert!(r.max_cols_to_solution <= r.max_cols);
+        assert!(r.steps_to_solution <= r.steps);
+    }
+
+    #[test]
+    fn staircase_counts_standard_monomials() {
+        // (x², y²) leaves 1, x, y, xy; adding xy leaves three; no pure power
+        // of y leaves infinitely many.
+        let x2: &[u32] = &[2, 0];
+        let y2: &[u32] = &[0, 2];
+        let xy: &[u32] = &[1, 1];
+        assert_eq!(staircase_at_most(&[x2, y2], 2, 10), Some(4));
+        assert_eq!(staircase_at_most(&[x2, y2, xy], 2, 10), Some(3));
+        assert_eq!(staircase_at_most(&[x2, y2], 2, 3), None);
+        assert_eq!(staircase_at_most(&[x2, xy], 2, 100), None);
+    }
+
+    #[test]
+    fn stopping_below_a_staircase_keeps_every_solution() {
+        // Two Kummer towers over F_17 (y0² = y1, y1² = 1 and the same for
+        // z), linked by y0 + z0 = c.  The towers alone leave 16 standard
+        // monomials, so zero-dimensionality is there from the start and must
+        // not stop the run; a bound of 2 may.  When it does, every root of
+        // the system must still be a zero of every element of the basis, and
+        // the staircase it stopped at bounds the number of roots.
+        let p = 17;
+        // variables: y0, y1, z0, z1
+        let tower = |a: usize, b: usize| {
+            let mut sq = vec![0u32; 4];
+            sq[a] = 2;
+            let mut nx = vec![0u32; 4];
+            nx[b] = 1;
+            vec![(sq, 1), (nx, p - 1)]
+        };
+        let last = |a: usize| {
+            let mut sq = vec![0u32; 4];
+            sq[a] = 2;
+            vec![(sq, 1), (vec![0; 4], p - 1)]
+        };
+        for c in 0..p {
+            let link = vec![
+                (vec![1, 0, 0, 0], 1),
+                (vec![0, 0, 1, 0], 1),
+                (vec![0; 4], (p - c) % p),
+            ];
+            let sys: Vec<Poly> = vec![tower(0, 1), last(1), tower(2, 3), last(3), link];
+            let mut roots = Vec::new();
+            for y0 in 0..p {
+                for z0 in 0..p {
+                    let x = [y0, y0 * y0 % p, z0, z0 * z0 % p];
+                    if sys.iter().all(|f| eval(f, &x, p) == 0) {
+                        roots.push(x);
+                    }
+                }
+            }
+            let r = f4(
+                &sys,
+                4,
+                p,
+                &F4Options::new(Ordering::Grevlex, 12).stopping_below(2),
+            );
+            if r.inconsistent {
+                assert!(roots.is_empty(), "c = {c}: refuted a system with roots");
+                continue;
+            }
+            if let Some(s) = r.staircase_at_stop {
+                assert!(
+                    s <= 2 && s >= roots.len(),
+                    "c = {c}: stopped at {s} with {} roots",
+                    roots.len()
+                );
+            }
+            for x in &roots {
+                for b in &r.basis {
+                    assert_eq!(eval(b, x, p), 0, "c = {c}: a basis element misses a root");
+                }
+            }
+            // A bound of zero can only be met by 1, which is a refutation, so
+            // it never stops a run early.
+            let full = f4(
+                &sys,
+                4,
+                p,
+                &F4Options::new(Ordering::Grevlex, 12).stopping_below(0),
+            );
+            assert_eq!(full.staircase_at_stop, None);
+            assert_eq!(full.inconsistent, roots.is_empty(), "c = {c}");
+        }
     }
 
     #[test]
@@ -1025,6 +1840,193 @@ mod tests {
             got.sort();
             expected.sort();
             assert_eq!(got, expected);
+        }
+    }
+
+    #[test]
+    fn barrett_matches_the_hardware_remainder() {
+        let mut x = 0x0123_4567_89ab_cdefu64;
+        for p in [2u64, 3, 31, 65_521, 2_147_483_647, 4_294_967_291] {
+            let fp = Barrett::new(p);
+            for probe in [0, 1, p - 1, p, p + 1, p * p - 1, u64::MAX, u64::MAX - 1] {
+                assert_eq!(fp.reduce(probe), probe % p, "{probe} mod {p}");
+            }
+            for _ in 0..10_000 {
+                x ^= x << 13;
+                x ^= x >> 7;
+                x ^= x << 17;
+                assert_eq!(fp.reduce(x), x % p, "{x} mod {p}");
+            }
+        }
+    }
+
+    #[test]
+    fn narrow_arithmetic_matches_wide_rref() {
+        let mut x = 0x0123_4567_89ab_cdefu64;
+        let mut next = || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        for p in [2u64, 3, 29, 31, 101, 65_521] {
+            let fp = Barrett::new(p);
+            let narrow = Barrett32::new(p);
+            let max_update = (p * (p - 1)) as u32;
+            for probe in [0, 1, (p - 1) as u32, p as u32, max_update - 1] {
+                assert_eq!(narrow.reduce(probe) as u64, fp.reduce(probe as u64));
+            }
+            for _ in 0..10_000 {
+                let probe = (next() % p.saturating_mul(p - 1)) as u32;
+                assert_eq!(narrow.reduce(probe) as u64, probe as u64 % p);
+            }
+            for (rows, cols) in [(1, 1), (7, 9), (20, 15), (25, 40)] {
+                let mut wide: Vec<Vec<u64>> = (0..rows)
+                    .map(|_| (0..cols).map(|_| next() % p).collect())
+                    .collect();
+                let mut narrow_rows: Vec<Vec<u32>> = wide
+                    .iter()
+                    .map(|row| row.iter().map(|&v| v as u32).collect())
+                    .collect();
+                let mut deferred_rows = narrow_rows.clone();
+                let want = rref(&mut wide, fp, None).unwrap();
+                let got = rref32(&mut narrow_rows, narrow, None).unwrap();
+                let got_deferred = rref32_deferred(&mut deferred_rows, narrow, fp, None).unwrap();
+                assert_eq!(got, want, "p={p}, shape={rows}x{cols}");
+                assert_eq!(got_deferred, want, "deferred p={p}, shape={rows}x{cols}");
+                let widened: Vec<Vec<u64>> = narrow_rows
+                    .into_iter()
+                    .map(|row| row.into_iter().map(u64::from).collect())
+                    .collect();
+                assert_eq!(widened, wide, "p={p}, shape={rows}x{cols}");
+                let widened_deferred: Vec<Vec<u64>> = deferred_rows
+                    .into_iter()
+                    .map(|row| row.into_iter().map(u64::from).collect())
+                    .collect();
+                assert_eq!(
+                    widened_deferred, wide,
+                    "deferred p={p}, shape={rows}x{cols}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn narrow_f4_matches_wide_basis() {
+        let monomials = [
+            vec![0, 0, 0],
+            vec![1, 0, 0],
+            vec![0, 1, 0],
+            vec![0, 0, 1],
+            vec![2, 0, 0],
+            vec![0, 2, 0],
+            vec![0, 0, 2],
+            vec![1, 1, 0],
+            vec![1, 0, 1],
+            vec![0, 1, 1],
+        ];
+        let mut seed = 0x5eed_2026_u64;
+        let mut next = || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        for p in [29u64, 31, 65_521] {
+            let sys: Vec<Poly> = (0..3)
+                .map(|_| monomials.iter().map(|m| (m.clone(), next() % p)).collect())
+                .collect();
+            let opts = F4Options::new(Ordering::Grevlex, 6);
+            let wide = f4_with_arithmetic(&sys, 3, p, &opts, 0);
+            let narrow = f4_with_arithmetic(&sys, 3, p, &opts, 1);
+            let deferred = f4_with_arithmetic(&sys, 3, p, &opts, 2);
+            assert_eq!(narrow.basis, wide.basis, "p={p}");
+            assert_eq!(narrow.steps, wide.steps, "p={p}");
+            assert_eq!(
+                (narrow.max_rows, narrow.max_cols),
+                (wide.max_rows, wide.max_cols)
+            );
+            assert_eq!(narrow.inconsistent, wide.inconsistent, "p={p}");
+            assert_eq!(deferred.basis, wide.basis, "deferred p={p}");
+            assert_eq!(deferred.steps, wide.steps, "deferred p={p}");
+            assert_eq!(
+                (deferred.max_rows, deferred.max_cols),
+                (wide.max_rows, wide.max_cols),
+                "deferred p={p}"
+            );
+            assert_eq!(deferred.inconsistent, wide.inconsistent, "deferred p={p}");
+        }
+    }
+
+    /// `S(f, g)` of two monic polynomials.
+    fn spoly(f: &Poly, g: &Poly, p: u64, ord: Ordering) -> Poly {
+        let l: Vec<u32> = f[0].0.iter().zip(&g[0].0).map(|(a, b)| *a.max(b)).collect();
+        let mut terms: Vec<(Vec<u32>, u64)> = Vec::new();
+        for (h, sign) in [(f, 1), (g, p - 1)] {
+            for (e, c) in h {
+                let em = e
+                    .iter()
+                    .zip(&l)
+                    .zip(&h[0].0)
+                    .map(|((x, a), b)| x + a - b)
+                    .collect();
+                terms.push((em, mulmod(*c, sign, p)));
+            }
+        }
+        let mut map: BTreeMap<Vec<u32>, u64> = BTreeMap::new();
+        for (e, c) in terms {
+            let v = map.entry(e).or_insert(0);
+            *v = (*v + c) % p;
+        }
+        let mut out: Poly = map.into_iter().filter(|(_, c)| *c != 0).collect();
+        out.sort_by(|(a, _), (b, _)| cmp_monomial(b, a, ord));
+        out
+    }
+
+    #[test]
+    fn basis_from_the_parallel_path_is_a_reduced_groebner_basis() {
+        // six random quadrics in six unknowns over F_65521: the larger
+        // steps exceed `PAR_WORK` and run the row reductions in parallel
+        let (n, p, ord) = (6usize, 65_521u64, Ordering::Grevlex);
+        let mut seed = 0x0bad_c0de_1234_5678u64;
+        let mut rnd = || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed % p
+        };
+        let mut monos: Vec<Vec<u32>> = Vec::new();
+        for m in 0u32..(3u32.pow(n as u32)) {
+            let e: Vec<u32> = (0..n).map(|i| (m / 3u32.pow(i as u32)) % 3).collect();
+            if e.iter().sum::<u32>() <= 2 {
+                monos.push(e);
+            }
+        }
+        let sys: Vec<Poly> = (0..n)
+            .map(|_| monos.iter().map(|m| (m.clone(), rnd())).collect())
+            .collect();
+        let r = f4(&sys, n, p, &F4Options::new(ord, 20));
+        assert!(!r.inconsistent && !r.timed_out);
+        assert_eq!(r.pairs_above_bound, 0);
+        assert!(r.max_rows * r.max_cols > PAR_WORK, "not the parallel path");
+        let g = &r.basis;
+        for f in &sys {
+            assert!(reduce(&normalise(f, p, ord), g, p, ord).is_empty());
+        }
+        for i in 0..g.len() {
+            for j in i + 1..g.len() {
+                let s = spoly(&g[i], &g[j], p, ord);
+                assert!(reduce(&s, g, p, ord).is_empty(), "S({i}, {j})");
+            }
+            // reduced: no term of g[i] is divisible by another leading monomial
+            for (e, _) in &g[i] {
+                for (j, h) in g.iter().enumerate() {
+                    assert!(
+                        j == i || !divides(&h[0].0, e),
+                        "g[{i}] not reduced by g[{j}]"
+                    );
+                }
+            }
         }
     }
 }

@@ -133,6 +133,10 @@ ENVELOPE_SUFFIX = ".bin.json"
 # which is the cadence the dashboard and the alarms want; the backlog itself
 # is unbounded and the next pass simply takes the next slice.
 PASS_OBJECTS = 256
+# Records decoded and COPYed at a time within one object. 250k decoded rows is
+# about 140 MB of Python objects; see ingestObject for the object sizes that
+# made a bound necessary.
+INGEST_CHUNK_RECORDS = int(os.environ.get("RHO_INGEST_CHUNK_RECORDS", "250000"))
 
 
 def log(msg):
@@ -238,11 +242,22 @@ CREATE TABLE IF NOT EXISTS dp_ingest_progress (
     PRIMARY KEY (campaign_id, object_key)
 )
 """
+# Records of an object whose point the store already held *under the same
+# seed*. ON CONFLICT DO NOTHING drops them, correctly -- a resumed worker
+# re-reporting its own point is what that clause is for -- but the same
+# clause also drops a whole run that is walking another run's seeds, and did:
+# Modal run 3 replayed AWS slot 2 for two days on 2026-09-19/20, 813k of its
+# 912k records landed as silent re-reports, and the page showed a new worker
+# adding points. This column is how that reads as what it is.
+PROGRESS_DUPLICATES_DDL = """
+ALTER TABLE dp_ingest_progress ADD COLUMN IF NOT EXISTS duplicates bigint NOT NULL DEFAULT 0
+"""
 
 
 def ensureProgress(conn):
     with conn.cursor() as cur:
         cur.execute(PROGRESS_DDL)
+        cur.execute(PROGRESS_DUPLICATES_DDL)
     conn.commit()
 
 
@@ -587,21 +602,29 @@ def seedOf(coeff):
 
 
 def findCollisions(cur, key):
-    """Records of this object whose point is already stored under another seed.
+    """Sort this object's conflicting records into meetings and re-reports.
 
-    Runs against the temp table after the insert, so a record that was just
-    inserted joins to itself and compares equal. What is left is a point that
-    two different walks reached -- within this object or against the corpus --
-    which is the whole point of the campaign.
+    Returns `(collisions, duplicates)`. Runs against the temp table after the
+    insert, so every record of the object joins to the stored row for its
+    point -- its own row when it was just inserted, someone else's when it was
+    not. A point stored under a *different* seed is a collision, two walks
+    meeting, which is the whole point of the campaign. A point stored under
+    the *same* seed by a different object is a re-report: harmless from a
+    resumed worker, and the entire output of a run that is walking another
+    run's seeds, so it is counted rather than dropped in silence. The
+    object's own rows are neither.
     """
     cur.execute(
         "SELECT i.point_key, i.a, i.walk_seed, d.a, d.walk_seed, d.worker_id "
         "FROM dp_in i JOIN distinguished_points d "
-        "  ON d.campaign_id = %s AND d.point_key = i.point_key "
-        "WHERE d.a IS DISTINCT FROM i.a",
+        "  ON d.campaign_id = %s AND d.point_key = i.point_key",
         (CAMPAIGN,))
+    mine = workerId(key)
     out = []
+    duplicates = 0
     for point_key, mineA, mineSeed, theirsA, theirsSeed, worker in cur.fetchall():
+        if worker == mine:
+            continue
         if theirsA is None:
             # `a` is NOT NULL for everything this program writes, but the
             # corpus predates it. A stored point with no seed cannot be
@@ -611,10 +634,11 @@ def findCollisions(cur, key):
             log("WARNING: point %s is stored with no seed (%s); cannot tell a "
                 "re-report from a collision" % (bytes(point_key).hex(), worker))
             continue
-        # Byte inequality is the cheap filter the database can do; equality of
-        # the seeds themselves is the question, and a width difference between
-        # eras is not a collision.
+        # Byte inequality would be the cheap filter; equality of the seeds
+        # themselves is the question, and a width difference between eras is
+        # not a collision.
         if seedOf(mineA) == seedOf(theirsA):
+            duplicates += 1
             continue
         out.append({
             "point_key": bytes(point_key),
@@ -623,10 +647,10 @@ def findCollisions(cur, key):
             "worker_id1": worker,
             "a2": bytes(mineA),
             "walk_seed2": bytes(mineSeed),
-            "worker_id2": workerId(key),
+            "worker_id2": mine,
             "object_key": key,
         })
-    return out
+    return out, duplicates
 
 
 def recordCollisions(cur, found):
@@ -675,6 +699,15 @@ def readEnvelope(s3, bucket, key):
         return None
 
 
+def tableRecordBody(body):
+    """Strip the v3 table header; signatures are checked over the original bytes."""
+    if body[:8] != b"ECC2KDT3":
+        return body
+    if len(body) < 16 or struct.unpack_from("<II", body, 8) != (3, RECORD_BYTES):
+        raise ValueError("invalid table-v3 corpus header")
+    return body[16:]
+
+
 def checkEnvelope(key, body, manifest):
     """Refuse a body that does not match its own commit marker.
 
@@ -706,6 +739,7 @@ def ingestObject(conn, s3, bucket, key, found_at):
     body = s3.get_object(Bucket=bucket, Key=key)["Body"].read()
     manifest = readEnvelope(s3, bucket, key)
     checkEnvelope(key, body, manifest)
+    body = tableRecordBody(body)
     # The producer's own clock, where it recorded one. found_at from the
     # caller is the object's S3 LastModified for the orbit key shape, and that
     # is storage metadata: a copy, a replication or a lifecycle transition
@@ -716,48 +750,67 @@ def ingestObject(conn, s3, bucket, key, found_at):
     whole = len(body) - len(body) % RECORD_BYTES
     wid = workerId(key)
     added = 0
+    collisions = []
+    duplicates = 0
     with conn.cursor() as cur:
         # A temp table plus one INSERT ... ON CONFLICT is both fast and
         # idempotent; row-at-a-time INSERT was the old ingester's ceiling.
         cur.execute("CREATE TEMP TABLE IF NOT EXISTS dp_in "
                     "(point_key bytea, a bytea, b bytea, walk_seed bytea) ON COMMIT DROP")
-        cur.execute("TRUNCATE dp_in")
-        # Sorted by the key the target is indexed on. point_key is a hash, so
-        # an object's records arrive in random index order and each insert
-        # walks to a different leaf page: on the 60 M-row table that measured
-        # ~2.2 random reads per row inserted. Sorting costs nothing here and
-        # turns a batch into a smaller set of pages touched repeatedly.
-        rows = sorted((decode(body[off:off + RECORD_BYTES])
-                       for off in range(0, whole, RECORD_BYTES)),
-                      key=lambda r: r["point_key"])
-        with cur.copy("COPY dp_in (point_key, a, b, walk_seed) FROM STDIN (FORMAT BINARY)") as cp:
-            cp.set_types(["bytea", "bytea", "bytea", "bytea"])
-            for r in rows:
-                cp.write_row((r["point_key"], r["a"], r["b"], r["walk_seed"]))
-        cur.execute(
-            "INSERT INTO distinguished_points "
-            "  (campaign_id, point_key, a, b, walk_seed, worker_id, found_at) "
-            "SELECT %s, point_key, a, b, walk_seed, %s, %s FROM dp_in "
-            "ORDER BY point_key "
-            "ON CONFLICT (campaign_id, point_key) DO NOTHING",
-            (CAMPAIGN, wid, found_at))
-        added = cur.rowcount
-        # Every record inserted means nothing conflicted, so there is nothing
-        # to look for: in the steady state, where each object is new points,
-        # the check below never runs and costs nothing. It runs on the
-        # re-reports and the resumed walks -- and on the one object that ends
-        # the campaign.
-        collisions = []
-        if added < len(rows):
-            collisions = findCollisions(cur, key)
-            recordCollisions(cur, collisions)
+        # One object, several COPY batches, one transaction. A worker's delta
+        # is a few thousand records, but a sync loop whose state was reset
+        # re-sends a whole corpus as one object -- 6.5 M records on
+        # 2026-09-21, four times over -- and decoding that into Python dicts in
+        # one go is ~3.5 GB; six threads of it is how the ingest died at 10:30
+        # that day and stalled again at 14:00. The bytes stay whole (210 MB);
+        # only the decoded rows are bounded.
+        for start in range(0, whole, INGEST_CHUNK_RECORDS * RECORD_BYTES):
+            end = min(whole, start + INGEST_CHUNK_RECORDS * RECORD_BYTES)
+            cur.execute("TRUNCATE dp_in")
+            # Sorted by the key the target is indexed on. point_key is a hash,
+            # so an object's records arrive in random index order and each
+            # insert walks to a different leaf page: on the 60 M-row table
+            # that measured ~2.2 random reads per row inserted. Sorting costs
+            # nothing here and turns a batch into a smaller set of pages
+            # touched repeatedly.
+            rows = sorted((decode(body[off:off + RECORD_BYTES])
+                           for off in range(start, end, RECORD_BYTES)),
+                          key=lambda r: r["point_key"])
+            with cur.copy("COPY dp_in (point_key, a, b, walk_seed) FROM STDIN (FORMAT BINARY)") as cp:
+                cp.set_types(["bytea", "bytea", "bytea", "bytea"])
+                for r in rows:
+                    cp.write_row((r["point_key"], r["a"], r["b"], r["walk_seed"]))
+            cur.execute(
+                "INSERT INTO distinguished_points "
+                "  (campaign_id, point_key, a, b, walk_seed, worker_id, found_at) "
+                "SELECT %s, point_key, a, b, walk_seed, %s, %s FROM dp_in "
+                "ORDER BY point_key "
+                "ON CONFLICT (campaign_id, point_key) DO NOTHING",
+                (CAMPAIGN, wid, found_at))
+            addedHere = cur.rowcount
+            added += addedHere
+            # Every record inserted means nothing conflicted, so there is
+            # nothing to look for: in the steady state, where each object is
+            # new points, the check below never runs and costs nothing. It
+            # runs on the re-reports and the resumed walks -- and on the one
+            # object that ends the campaign.
+            if addedHere < len(rows):
+                found, dupes = findCollisions(cur, key)
+                recordCollisions(cur, found)
+                collisions += found
+                duplicates += dupes
+            del rows
+        if duplicates:
+            log("%s: %d of %d records are re-reports of points the store already "
+                "holds under the same seed" % (key, duplicates, whole // RECORD_BYTES))
         # Same transaction as the points, so the record of having ingested an
         # object cannot outlive the insert that it describes.
         cur.execute(
-            "INSERT INTO dp_ingest_progress (campaign_id, object_key, records) "
-            "VALUES (%s, %s, %s) ON CONFLICT (campaign_id, object_key) "
-            "DO UPDATE SET records = EXCLUDED.records, ingested_at = now()",
-            (CAMPAIGN, key, whole // RECORD_BYTES))
+            "INSERT INTO dp_ingest_progress (campaign_id, object_key, records, duplicates) "
+            "VALUES (%s, %s, %s, %s) ON CONFLICT (campaign_id, object_key) "
+            "DO UPDATE SET records = EXCLUDED.records, "
+            "  duplicates = EXCLUDED.duplicates, ingested_at = now()",
+            (CAMPAIGN, key, whole // RECORD_BYTES, duplicates))
         # Also this transaction, so the counters the snapshot reads cannot
         # drift from the rows they summarise. Last, because every ingest
         # thread contends on the one totals row and the lock it takes is held
@@ -783,7 +836,8 @@ def verify(conn, s3, bucket, sample=64):
         return False
     key, records = complete[len(complete) // 2]
     body = s3.get_object(Bucket=bucket, Key=key,
-                         Range="bytes=0-%d" % (sample * RECORD_BYTES - 1))["Body"].read()
+                         Range="bytes=0-%d" % (sample * RECORD_BYTES + 16 - 1))["Body"].read()
+    body = tableRecordBody(body)[:sample * RECORD_BYTES]
     keys = [decode(body[o:o + RECORD_BYTES])["point_key"]
             for o in range(0, len(body) - len(body) % RECORD_BYTES, RECORD_BYTES)]
     with conn.cursor() as cur:
@@ -832,6 +886,108 @@ FRESH_CHECKPOINT_S = 1800
 # Below this the checkpoint granularity dominates the difference between two
 # consecutive status.json writes.
 MIN_WALK_RATE_SPAN_S = 600
+
+# The campaign's distinguished-point rule, and what it costs in iterations per
+# point: measured on the live fleet from each client's own counters, every GPU
+# family agreeing to 0.04 in the exponent (aws/README.md, benchmarks/dp-interval).
+# Walks stop at their own distinguished point, so a slot walking at another
+# cutoff can meet a campaign walk and neither records the same point -- about
+# 12% of meetings survive at weight 34, 4% at 35. The ratio of a slot's
+# checkpointed iterations to the records it uploaded gives its cutoff away
+# without reading a point, and that is what `dpWeightVerdict` reads. Weights
+# 31 and 33 sit 1.6 either side of 32, so a tolerance of 1.0 separates
+# neighbours; below DP_RATIO_MIN_RECORDS the ratio is mostly the lag between
+# the checkpoint listing and the ingest.
+CAMPAIGN_DP_WEIGHT = 32
+CAMPAIGN_ITER_PER_DP_LOG2 = 28.41
+DP_RATIO_TOLERANCE_LOG2 = 1.0
+DP_RATIO_MIN_RECORDS = 50000
+FIELD_BITS = 131
+
+
+def theoreticalIterPerDpLog2(weight, m=FIELD_BITS):
+    """Iterations per point for HW(x) <= weight over uniform m-bit strings."""
+    total = 0
+    for k in range(0, int(weight) + 1):
+        total += math.comb(m, k)
+    return m - math.log2(total)
+
+
+def estimateDpWeight(log2IterPerDp, m=FIELD_BITS):
+    """The cutoff that gives about this interval.
+
+    The curve's x-coordinates run 0.6 shorter in the exponent than uniform
+    strings at both measured weights (32: 28.41 vs 29.01; 34: 25.27 vs 25.84),
+    so the binomial tail is shifted by that before the nearest weight is read.
+    """
+    shift = CAMPAIGN_ITER_PER_DP_LOG2 - theoreticalIterPerDpLog2(CAMPAIGN_DP_WEIGHT, m)
+    best, bestGap = None, None
+    for k in range(1, m):
+        gap = abs(theoreticalIterPerDpLog2(k, m) + shift - log2IterPerDp)
+        if bestGap is None or gap < bestGap:
+            best, bestGap = k, gap
+    return best
+
+
+def dpWeightVerdict(iterations, records):
+    """(log2 iterations per point, estimated weight, at campaign weight?).
+
+    The last is True, False, or None when there is too little to judge.
+    """
+    if not records or int(records) < DP_RATIO_MIN_RECORDS or not iterations or iterations <= 0:
+        return None, None, None
+    ratio = math.log2(float(iterations) / float(records))
+    ok = abs(ratio - CAMPAIGN_ITER_PER_DP_LOG2) <= DP_RATIO_TOLERANCE_LOG2
+    return round(ratio, 3), estimateDpWeight(ratio), ok
+
+
+SLOT_OF_KEY_RE = re.compile(r"^dp/slot-(\d+)/")
+
+
+def slotOfKey(key):
+    m = SLOT_OF_KEY_RE.match(key or "")
+    return int(m.group(1)) if m else None
+
+
+def coveredRecords(rows):
+    """Records each slot has actually produced, from what it uploaded.
+
+    `rows` are `(slot, stream, records, covered)`: the records summed over a
+    slot's objects in one stream, and the furthest `offset / 32 + records`
+    any of them reaches. Summing object sizes over-counts a stream that was
+    uploaded twice -- modal_sync.py re-sent every Modal corpus from offset 0
+    twice on 2026-09-21 when its state directory was reset, and the bucket
+    then listed each Modal record about three times, which read as one point
+    per 2^26.5 iterations and would have called runs at the campaign's own
+    cutoff off-weight. Within one stream offsets are a file position and
+    never overlap (worker.py starts a new stream when it rotates the file,
+    modal_sync.py keeps one per run), so the furthest end is the count; the
+    legacy key shape carries no stream and its era had no re-uploads, so it
+    is summed.
+    """
+    out = {}
+    for slot, stream, records, covered in rows:
+        if slot is None:
+            continue
+        n = int(covered or 0) if stream else int(records or 0)
+        out[int(slot)] = out.get(int(slot), 0) + n
+    return out
+
+
+def coverageRows(objects):
+    """`(slot, stream, records, covered)` per stream from a bucket listing."""
+    groups = {}
+    for key, records, _ in objects:
+        slot = slotOfKey(key)
+        if slot is None:
+            continue
+        m = ORBIT_KEY_RE.match(key)
+        stream = m.group(2) if m else None
+        end = (int(m.group(3)) // RECORD_BYTES + int(records)) if m else 0
+        acc = groups.setdefault((slot, stream), [0, 0])
+        acc[0] += int(records)
+        acc[1] = max(acc[1], end)
+    return [(slot, stream, acc[0], acc[1]) for (slot, stream), acc in groups.items()]
 
 
 def parseIso(value):
@@ -962,10 +1118,16 @@ def checkpointWork(s3, bucket, staleAfter=1800.0):
     the old one silently under-reports.
 
     The client prints "N iterations of M walks": `iterBase` is per-walk steps,
-    not a total, so the work of one slot is `iterBase * threads * batch`.  Every
-    factor comes out of the checkpoint header, so a slot is self-describing and
-    a geometry change needs no bookkeeping here.  Retired slots are included --
-    their work is part of the campaign whether or not they still run.
+    not a total, so the work of one slot is `iterBase * walks`, and the client's
+    `walksPerLaunch()` is `threads * BATCH * LANES` -- one for the packed
+    engine, the word width for the bitsliced ones, and the header carries it.
+    Until 2026-09-21 this read `threads * batch` and undercounted every
+    bitsliced slot by its lane count (slot 195, 256 lanes, by 256x; about
+    10^-4 of the campaign total, so an accounting correction and not a
+    finding). Every factor comes out of the checkpoint header, so a slot is
+    self-describing and a geometry change needs no bookkeeping here.  Retired
+    slots are included -- their work is part of the campaign whether or not
+    they still run.
 
     The contract path leaves every earlier blob in place, so a slot may have
     many `.ck` objects.  Only the newest one is the walk; summing the rest
@@ -998,7 +1160,7 @@ def checkpointWork(s3, bucket, staleAfter=1800.0):
             continue
         version, m131, threads, batch, lanes, runId = struct.unpack_from("<6I", head, 8)
         iterBase, = struct.unpack_from("<Q", head, 32)
-        walks = threads * batch
+        walks = threads * batch * max(1, lanes)
         age = time.time() - modified
         slots.append({
             "slot": int(m.group(2)),
@@ -1043,11 +1205,42 @@ def campaignSnapshot(conn):
               AND hour >= date_trunc('hour', now() - interval '48 hours')
             ORDER BY hour""", (CAMPAIGN,))
         hourly = cur.fetchall()
+        # One row per (slot, upload stream) from the progress table -- one row
+        # per object there, tens of thousands, never the points: what each
+        # slot uploaded, how far its stream reaches (see coveredRecords for
+        # why that and not the sum), and how much of it the store already
+        # held. `statusPayload` divides the checkpointed iterations by the
+        # covered records to read the slot's cutoff.
+        cur.execute(r"""
+            SELECT substring(object_key from '^dp/slot-([0-9]+)/') AS slot,
+                   substring(object_key from '^dp/slot-[0-9]+/([0-9a-f]{32})-[0-9]+-[0-9a-f]{64}\.bin$') AS stream,
+                   sum(records),
+                   max(substring(object_key from '^dp/slot-[0-9]+/[0-9a-f]{32}-([0-9]+)-[0-9a-f]{64}\.bin$')::bigint / 32 + records),
+                   sum(duplicates),
+                   sum(records) FILTER (WHERE ingested_at > now() - interval '24 hours'),
+                   sum(duplicates) FILTER (WHERE ingested_at > now() - interval '24 hours')
+            FROM dp_ingest_progress
+            WHERE campaign_id = %s
+            GROUP BY 1, 2""", (CAMPAIGN,))
+        streams = cur.fetchall()
+        covered = coveredRecords([(s, st, n, c) for s, st, n, c, _, _, _ in streams])
+        perSlot = {}
+        for slot, _, records, _, duplicates, recordsDay, duplicatesDay in streams:
+            if slot is None:
+                continue
+            entry = perSlot.setdefault(int(slot), {
+                "records": covered.get(int(slot), 0), "uploaded": 0, "duplicates": 0,
+                "records_last_day": 0, "duplicates_last_day": 0})
+            entry["uploaded"] += int(records or 0)
+            entry["duplicates"] += int(duplicates or 0)
+            entry["records_last_day"] += int(recordsDay or 0)
+            entry["duplicates_last_day"] += int(duplicatesDay or 0)
 
     def iso(v):
         return v.isoformat() if hasattr(v, "isoformat") else v
 
     return {
+        "per_slot_records": perSlot,
         "curve_id": row[1] if row else None,
         "dp_mask_bits": row[2] if row else None,
         "campaign_created_at": iso(row[3]) if row else None,
@@ -1093,6 +1286,26 @@ def statusPayload(conn, s3, bucket, ingest=None, snapshot=None):
         slot for slot in per_slot
         if not slot["retired"] and slot["checkpoint_age_s"] <= FRESH_CHECKPOINT_S
     ]
+    # Each slot against the campaign's cutoff, and what it re-reported. The
+    # per-slot rows stay private (publicStatus strips them); the counts are
+    # what the page gets, and they are the two numbers that would have named
+    # both 2026-09-20 Modal problems within an hour.
+    perSlotRecords = snapshot.get("per_slot_records") or {}
+    for slot in per_slot:
+        counts = perSlotRecords.get(slot["slot"]) or {}
+        slot["records"] = int(counts.get("records") or 0)
+        slot["uploaded"] = int(counts.get("uploaded") or slot["records"])
+        slot["duplicates"] = int(counts.get("duplicates") or 0)
+        slot["duplicates_last_day"] = int(counts.get("duplicates_last_day") or 0)
+        ratio, estimate, ok = dpWeightVerdict(slot["iterations"], slot["records"])
+        slot["iterations_per_dp_log2"] = ratio
+        slot["dp_weight_estimate"] = estimate
+        slot["dp_weight_ok"] = ok
+    offWeight = [slot for slot in per_slot if slot["dp_weight_ok"] is False]
+    offWeightWalking = [slot for slot in offWeight if slot in walking]
+    duplicateRecords = sum(c.get("duplicates") or 0 for c in perSlotRecords.values())
+    duplicateRecordsDay = sum(c.get("duplicates_last_day") or 0 for c in perSlotRecords.values())
+    duplicateSlotsDay = sum(1 for c in perSlotRecords.values() if c.get("duplicates_last_day"))
     payload = {
         "schema_version": 1,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -1122,6 +1335,13 @@ def statusPayload(conn, s3, bucket, ingest=None, snapshot=None):
             "density_independent": True,
             "slots": len(per_slot),
             "walking_slots": len(walking),
+            # Slots whose iterations-per-point says they are not walking at
+            # the campaign's cutoff: their points mostly cannot meet anyone
+            # else's, however many they upload.
+            "campaign_dp_weight": CAMPAIGN_DP_WEIGHT,
+            "iterations_per_dp_log2_expected": CAMPAIGN_ITER_PER_DP_LOG2,
+            "off_weight_slots": len(offWeight),
+            "off_weight_walking_slots": len(offWeightWalking),
             "per_slot": per_slot,
         },
         "walkers": sum(1 for s in per_slot if not s["retired"]),
@@ -1135,6 +1355,12 @@ def statusPayload(conn, s3, bucket, ingest=None, snapshot=None):
                 if ingest.get("newest") else None),
             "lag_seconds": (int(time.time() - ingest["newest"])
                             if ingest.get("newest") else None),
+            # Records dropped as the same walk's point again. A resumed
+            # worker produces a few; a run walking another run's seeds
+            # produces nothing else.
+            "duplicate_records": duplicateRecords,
+            "duplicate_records_last_day": duplicateRecordsDay,
+            "duplicate_slots_last_day": duplicateSlotsDay,
         },
         "claim_boundary": (
             "Public research campaign aggregates for Certicom ECC2K-130 "
@@ -1198,11 +1424,20 @@ def publishStatus(conn, s3, bucket, statusBucket, ingest=None, snapshot=None,
     # should stay flat; walker refresh is a list of ckpt/ objects. If the
     # elapsed time starts climbing, the counters are not being read.
     log("published status.json in %.1fs (%s): dps=%d state=%s work=2^%.3f walkers=%d "
-        "outstanding=%d unreadable=%d"
+        "outstanding=%d unreadable=%d off_weight_walking=%d duplicates_24h=%d"
         % (time.time() - started, kind, payload["dps"], payload["state"],
            payload["work"]["iterations_log2"] or 0, payload["walkers"],
            payload["ingest"]["outstanding_objects"],
-           payload["ingest"]["unrecognised_objects"]))
+           payload["ingest"]["unrecognised_objects"],
+           payload["work"]["off_weight_walking_slots"],
+           payload["ingest"]["duplicate_records_last_day"]))
+    for slot in payload["work"]["per_slot"]:
+        if slot.get("dp_weight_ok") is False and not slot["retired"]:
+            log("WARNING: slot %05d run %d reports one point per 2^%.2f iterations; the "
+                "campaign's weight-%d cutoff gives 2^%.2f, so it looks like weight %s and "
+                "its meetings with campaign walks mostly go unrecorded"
+                % (slot["slot"], slot["run_id"], slot["iterations_per_dp_log2"],
+                   CAMPAIGN_DP_WEIGHT, CAMPAIGN_ITER_PER_DP_LOG2, slot["dp_weight_estimate"]))
     return payload
 
 
@@ -1499,10 +1734,18 @@ def main(argv=None):
 
     if args.work:  # needs no database, so the driver is not imported yet
         total, per_slot = checkpointWork(s3, args.bucket)
+        # Records per slot from the bucket listing rather than the store, so
+        # this stays a no-database report; the ratio reads the cutoff either way.
+        objects, _ = s3Objects(s3, args.bucket, args.prefix)
+        recordsBySlot = coveredRecords(coverageRows(objects))
         for s in per_slot:
-            log("slot %05d run %d %-8s ckpt %5ds old  %d walks x %d steps = %.6g iterations"
+            ratio, estimate, ok = dpWeightVerdict(s["iterations"], recordsBySlot.get(s["slot"], 0))
+            verdict = ("" if ok is None else
+                       "  2^%.2f it/point %s" % (ratio, "ok" if ok else "OFF WEIGHT (~%d)" % estimate))
+            log("slot %05d run %d %-8s ckpt %5ds old  %d walks x %d steps = %.6g iterations%s"
                 % (s["slot"], s["run_id"], "retired" if s["retired"] else "walking",
-                   s["checkpoint_age_s"], s["walks"], s["per_walk_steps"], s["iterations"]))
+                   s["checkpoint_age_s"], s["walks"], s["per_walk_steps"], s["iterations"],
+                   verdict))
         log("exact total: %d iterations = 2^%.3f (no density assumption)"
             % (total, math.log2(total) if total else 0))
         return 0

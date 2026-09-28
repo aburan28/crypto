@@ -3,30 +3,66 @@
  *
  * Walk definition (the plain step matches ecref.py `RhoWalk` bit-for-bit):
  *
- *   partition(P)  = limb0(x) & (R-1)              R = 2^r_bits table entries
- *   step          P <- P + M[partition(P)]        M[j] = c_j P + d_j Q
- *   negation map  if y > (p-1)/2: y <- -y         (optional)
+ *   partition(P)  = limb0(x) & (R-1)                    R = 2^r_bits entries
+ *   step          P <- canonical(P + M[partition(P)])   M[j] = c_j P + d_j Q
  *   distinguished ((limb0(x) >> 8) & dp_mask) == 0
  *
- * x and y here are the field's *internal* representation (Montgomery form
- * for generic curves, canonical for secp256k1 fast mode).  Hashing the
- * internal form saves a conversion per step; it is still a deterministic
- * function of the point, which is all a random walk needs.
+ * canonical() folds the walk by an automorphism subgroup of order `fold`,
+ * so that it is a function on E/<aut> rather than on E and the expected
+ * number of steps to a collision falls from sqrt(pi n / 2) to
+ * sqrt(pi n / (2 fold)):
  *
- * FRUITLESS CYCLES.  With the negation map the walk can fall into a
- * 2-cycle: if P + M[j] happens to be negated by the canonical-y rule, the
- * next step may add the same M[j] and return to P.  This happens with
- * probability ~1/(2R) per step, so with a small table essentially every
- * walk is trapped within a few hundred steps and the search stalls.  We
- * detect it (x of the new point equals x of the point two steps back) and
- * escape by DOUBLING the cycle's canonical element -- the member with the
- * lexicographically smaller x.  Escaping from a canonical element, rather
- * than from wherever the walk happened to notice, is what keeps the walk a
- * deterministic function of the point: two walks that enter the same cycle
- * at different members still leave it identically, so their collision is
- * preserved.  Longer cycles (probability ~1/R^2 and down) are not detected;
- * they are broken by the `max_steps` abort, so keep R >= 256 when the
- * negation map is on.
+ *   fold 1   canonical(P) = P
+ *   fold 2   negation map:  if y > (p-1)/2: y <- -y
+ *   fold 6   beta orbit, then the negation map:  x <- beta^k x for the k in
+ *            {0, 1, 2} that minimises it.  j = 0 curves only (secp256k1),
+ *            where (beta x, y) = lambda (x, y) for the cube roots of unity
+ *            beta mod p and lambda mod n that ecref.py emits.  Costs one
+ *            field multiplication (beta x; then beta^2 x = -(x + beta x),
+ *            since 1 + beta + beta^2 = 0) and two 256-bit comparisons per
+ *            step.  fold 6 is all of Aut(E) for j = 0, so sqrt(6) is the
+ *            ceiling for this kind of folding (Wiener-Zuccherato 1998;
+ *            Duursma-Gaudry-Morain 1999).
+ *
+ * x and y here are the field's *internal* representation (Montgomery form
+ * for generic curves, canonical for secp256k1 fast mode).  Hashing and
+ * comparing the internal form saves a conversion per step; it is still a
+ * deterministic function of the point, which is all a random walk needs.
+ *
+ * canonical() returns an AUT CODE, (k << 1) | negated, naming the
+ * automorphism it applied.  The kernel ignores it; the host replay uses it
+ * to keep a walk's (a, b) coefficients right, multiplying them by that
+ * automorphism's scalar action (-1)^negated * lambda^k.
+ *
+ * FRUITLESS CYCLES.  Folding lets the walk close short cycles that carry
+ * no information.  Per step, with R table entries (see the README for the
+ * derivation):
+ *
+ *   length 2   same index twice, canonicalisation applied [-1] in between:
+ *                                                     1 / (fold R)
+ *   length 3   fold 6 only: same index three times, [w] applied twice
+ *              (1 + w + w^2 = 0):                     1 / (18 R^2)
+ *   length 4   indices j j' j j' with the automorphisms (a, -1/a, a, -1/a):
+ *                                                     (R-1) / (fold^2 R^3)
+ *   longer     O(1/R^3) and down (fold 2: even lengths only)
+ *
+ * A trapped walk emits no distinguished point until `max_steps` aborts it.
+ * With R = 256 and one DP per 2^20 steps, 4-cycles alone would trap most
+ * negation-map walks, and 3-cycles most fold-6 walks, before their first
+ * DP -- so detection has to reach past length 2.  Each walk keeps the
+ * hashes (low limb of x) of its last RHO_CYCLE_DEPTH points; when the new
+ * point matches one of them the walk has closed a cycle of length
+ * 2 .. RHO_CYCLE_DEPTH+1 whose members it has all just seen.  It escapes by
+ * DOUBLING THE MEMBER WITH THE SMALLEST HASH.  That member is a function of
+ * the cycle alone, not of where the walk entered it, so two walks trapped
+ * in the same cycle leave it identically and their collision survives.
+ * Reaching it costs at most `length - 1` further steps around the cycle,
+ * counted down in `escape`, which also bounds a false match: a 32-bit hash
+ * coincidence with a non-member lapses after RHO_CYCLE_DEPTH+1 checks and
+ * changes nothing but the DP tests it skipped.  Steps spent inside a cycle
+ * are neither counted nor tested for distinguished points.  Cycles longer
+ * than RHO_CYCLE_DEPTH+1 are still left to `max_steps`: keep it a small
+ * multiple of the DP period, and read the abort counter.
  *
  * Each walk is identified by (walk index, restart counter).  Its start point
  * is a*P + b*Q with (a, b) derived from that pair by a fixed PRNG, so a
@@ -51,13 +87,33 @@
  * field elements do not fill the upper limbs. */
 #define RHO_DP_SHIFT 8
 
+/* Order of the automorphism subgroup the walk is folded by. */
+#define RHO_FOLD_NONE 1
+#define RHO_FOLD_NEG  2
+#define RHO_FOLD_AUT6 6
+
+/* Recent point hashes kept per walk: detects fruitless cycles of length
+ * 2 .. RHO_CYCLE_DEPTH+1.  Each extra entry costs one 32-bit compare and
+ * one word of state per walk-step.  5 reaches length 6, leaving cycles at
+ * O(1/R^4) and below to max_steps: under fold 6, 5-cycles (two indices,
+ * one paired by [-1] and one tripled by [w]) already occur at O(1/R^3). */
+#ifndef RHO_CYCLE_DEPTH
+#define RHO_CYCLE_DEPTH 5
+#endif
+
 struct rho_params {
     uint32_t r_bits;      /* log2 table size, <= RHO_MAX_RBITS */
     uint32_t dp_mask;     /* distinguished iff ((x>>8) & dp_mask) == 0 */
-    uint32_t neg_map;     /* 1 = use the negation map (sqrt(2) fewer steps) */
+    uint32_t fold;        /* RHO_FOLD_NONE, RHO_FOLD_NEG or RHO_FOLD_AUT6 */
     uint32_t max_steps;   /* abandon a walk after this many steps */
     uint32_t table_seed;  /* seed for the c_j, d_j table coefficients */
 };
+
+/* fold 6 needs the curve's beta; the other two work on any curve. */
+FP_HD int rho_fold_supported(uint32_t fold) {
+    return fold == RHO_FOLD_NONE || fold == RHO_FOLD_NEG ||
+           (fold == RHO_FOLD_AUT6 && CURVE_HAS_AUT6);
+}
 
 struct rho_dp {
     uint32_t x[8];
@@ -67,12 +123,13 @@ struct rho_dp {
     uint32_t pad;
 };
 
-/* Per-walk state.  `hprev` is the low 64 bits of the previous point's x,
- * used for 2-cycle detection; `escape` marks that the next step must double
- * the current point instead of adding a table entry. */
+/* Per-walk state.  `h[i]` is the hash of the point i+1 steps back, for
+ * cycle detection.  `escape` is 0 on a normal step; k > 0 means the walk is
+ * inside a detected fruitless cycle with k checks left to reach the member
+ * whose hash is h[0], which it then doubles. */
 struct rho_state {
     affine_pt P;
-    uint32_t hprev[2];
+    uint32_t h[RHO_CYCLE_DEPTH];
     uint32_t escape;
 };
 
@@ -81,6 +138,11 @@ struct rho_state {
 #define RHO_MODE_DOUBLE 1   /* P + M[j] with M[j] == P */
 #define RHO_MODE_INF    2   /* P + M[j] == O, or 2-torsion: caller reseeds */
 #define RHO_MODE_ESCAPE 3   /* cycle escape: P + P */
+
+/* phase_b results: RHO_STEP_ADVANCED, RHO_STEP_SEEK, or -(length) when a
+ * fruitless cycle of that length was just detected (also a seek step). */
+#define RHO_STEP_ADVANCED 1   /* on a new point: count it, test for a DP */
+#define RHO_STEP_SEEK     0   /* moved along a detected cycle: no count, no DP */
 
 /* ---- deterministic PRNG for seeds (splitmix64) ------------------------ */
 FP_HD uint64_t rho_splitmix64(uint64_t &s) {
@@ -127,34 +189,59 @@ FP_HD int rho_is_dp(const affine_pt &P, const rho_params &prm) {
     return ((P.x.v[0] >> RHO_DP_SHIFT) & prm.dp_mask) == 0;
 }
 
-/* Apply the negation map in place; returns 1 if the point was negated. */
+/* Point hash for cycle detection: the low limb of x. */
+FP_HD uint32_t rho_hash(const affine_pt &P) { return P.x.v[0]; }
+
+/* Fold P onto its orbit representative, in place.  Returns the aut code
+ * (k << 1) | negated of the automorphism applied: P_out = beta^k-scaled,
+ * possibly negated, P_in. */
 FP_HD int rho_canonical(affine_pt &P, const rho_params &prm) {
-    if (!prm.neg_map || P.inf) return 0;
+    if (prm.fold == RHO_FOLD_NONE || P.inf) return 0;
+    uint32_t k = 0;
+#if CURVE_HAS_AUT6
+    if (prm.fold == RHO_FOLD_AUT6) {
+        fp256 x1 = Fp::mul(P.x, Curve::beta());     /* beta x */
+        fp256 x2 = Fp::neg(Fp::add(P.x, x1));      /* beta^2 x = -(1 + beta) x */
+        uint32_t f1 = (uint32_t)Fp::lt(x1, P.x);
+        Fp::cmov(P.x, x1, f1);
+        uint32_t f2 = (uint32_t)Fp::lt(x2, P.x);
+        Fp::cmov(P.x, x2, f2);
+        k = f2 ? 2u : f1;
+    }
+#endif
     uint32_t f = (uint32_t)Fp::gt_half(P.y);
     fp256 ny = Fp::neg(P.y);
     Fp::cmov(P.y, ny, f);
-    return (int)f;
+    return (int)((k << 1) | f);
 }
 
-/* Lexicographic x comparison (top limb first): 1 if a < b. */
-FP_HD int rho_x_less(const affine_pt &a, const affine_pt &b) {
-    for (int l = 7; l >= 0; l--) {
-        if (a.x.v[l] != b.x.v[l]) return a.x.v[l] < b.x.v[l];
-    }
-    return 0;
+/* The automorphism named by an aut code, applied to P: (beta^k x, +-y).
+ * rho_apply_aut(P, rho_canonical(C = P)) == C.  Test and replay helper. */
+FP_HD affine_pt rho_apply_aut(const affine_pt &P, int code) {
+    affine_pt r = P;
+    if (P.inf) return r;
+#if CURVE_HAS_AUT6
+    for (int i = 0; i < (code >> 1); i++) r.x = Fp::mul(r.x, Curve::beta());
+#endif
+    if (code & 1) r.y = Fp::neg(r.y);
+    return r;
 }
 
-FP_HD void rho_set_hprev(rho_state &st, const affine_pt &P) {
-    st.hprev[0] = P.x.v[0];
-    st.hprev[1] = P.x.v[1];
+/* Forget the walk's history: every recent hash becomes P's, and no cycle
+ * is being escaped.  Used at (re)seeding and after an escape. */
+FP_HD void rho_reset_cycle(rho_state &st, const affine_pt &P) {
+    uint32_t h = rho_hash(P);
+#pragma unroll
+    for (int i = 0; i < RHO_CYCLE_DEPTH; i++) st.h[i] = h;
+    st.escape = 0;
 }
 
 /* ---- phase A: pick the addend and the denominator to invert ------------ *
  * Returns the mode; *j_out is the table index (RHO_MODE_ADD / DOUBLE). */
 FP_HD int rho_phase_a(const rho_state &st, const affine_pt *table,
                       const rho_params &prm, fp256 &den, uint32_t &j_out) {
-    if (st.escape) {
-        /* cycle escape: double the current point */
+    if (st.escape && rho_hash(st.P) == st.h[0]) {
+        /* at the detected cycle's canonical member: escape by doubling it */
         den = Fp::dbl(st.P.y);
         j_out = 0;
         if (Fp::is_zero(den)) return RHO_MODE_INF;   /* 2-torsion */
@@ -174,53 +261,67 @@ FP_HD int rho_phase_a(const rho_state &st, const affine_pt *table,
 }
 
 /* ---- phase B: finish the step given inv = 1/den ------------------------ *
- * Advances `st`.  Returns 1 if the walk landed on a normal new point
- * (caller should count the step and test for a distinguished point), or 0
- * if the step was consumed by a cycle escape (state rewound to the cycle's
- * canonical element, no DP test).  RHO_MODE_INF must be handled by the
- * caller before calling this.
+ * Advances `st`.  Returns RHO_STEP_ADVANCED if the walk landed on a normal
+ * new point (caller counts the step and tests for a distinguished point),
+ * RHO_STEP_SEEK if the step moved the walk along a detected fruitless cycle
+ * towards its canonical member, or -(length) if it just detected a cycle of
+ * that length (which is also a seek step).  RHO_MODE_INF must be handled by
+ * the caller before calling this.
  *
- * `neg_out` receives 1 if the negation map flipped the new point, and
- * `jc_out` the index whose coefficients must be added -- the host replay
- * uses these to track (a, b).  For an escape step the coefficients are
- * doubled instead; that is signalled by the return value 0 together with
- * *esc_from_prev telling the replay which cycle member was canonical. */
+ * `aut_out` receives the aut code of the canonicalisation applied to the
+ * new point.  The host replay tracks (a, b) with it: an ordinary step adds
+ * the table entry's coefficients, an escape step doubles them, and either
+ * is then multiplied by the automorphism's scalar action. */
 FP_HD int rho_phase_b(rho_state &st, const affine_pt *table, const rho_params &prm,
-                      int mode, uint32_t j, const fp256 &inv,
-                      int *neg_out, int *esc_from_prev) {
-    *neg_out = 0;
-    *esc_from_prev = 0;
+                      int mode, uint32_t j, const fp256 &inv, int *aut_out) {
     if (mode == RHO_MODE_ESCAPE) {
         affine_pt nxt = Curve::affine_add_with_inv(st.P, st.P, inv, 1);
-        *neg_out = rho_canonical(nxt, prm);
-        rho_set_hprev(st, st.P);
+        *aut_out = rho_canonical(nxt, prm);
+        rho_reset_cycle(st, st.P);
         st.P = nxt;
-        st.escape = 0;
-        return 1;
+        return RHO_STEP_ADVANCED;
     }
     const affine_pt &M = table[j];
     affine_pt nxt = Curve::affine_add_with_inv(st.P, M, inv, mode == RHO_MODE_DOUBLE);
-    *neg_out = rho_canonical(nxt, prm);
-    /* 2-cycle: the new point is the one we were at two steps ago. */
-    if (prm.neg_map && nxt.x.v[0] == st.hprev[0] && nxt.x.v[1] == st.hprev[1]) {
-        /* cycle members are {st.P, nxt}; escape from the canonical one */
-        int prev_is_canon = rho_x_less(nxt, st.P);
-        if (prev_is_canon) st.P = nxt;      /* else keep st.P */
-        *esc_from_prev = prev_is_canon;
-        st.escape = 1;
-        rho_set_hprev(st, st.P);
-        return 0;
+    *aut_out = rho_canonical(nxt, prm);
+    uint32_t hn = rho_hash(nxt);
+    if (st.escape) {
+        /* walking a detected cycle towards its canonical member */
+        st.P = nxt;
+        if (--st.escape == 0) rho_reset_cycle(st, nxt);   /* hash coincidence, not a cycle */
+        return RHO_STEP_SEEK;
     }
-    rho_set_hprev(st, st.P);
+    if (prm.fold != RHO_FOLD_NONE) {
+        /* has the walk returned to one of its last RHO_CYCLE_DEPTH points?
+         * (the smallest match wins: the shortest cycle is the true one) */
+        int len = 0;
+#pragma unroll
+        for (int i = RHO_CYCLE_DEPTH - 1; i >= 0; i--) if (hn == st.h[i]) len = i + 2;
+        if (len) {
+            /* members: nxt, P, and the len-2 points before P.  Aim for the
+             * smallest hash among them. */
+            uint32_t hp = rho_hash(st.P);
+            uint32_t target = hn < hp ? hn : hp;
+#pragma unroll
+            for (int i = 0; i < RHO_CYCLE_DEPTH; i++)
+                if (i + 2 < len && st.h[i] < target) target = st.h[i];
+            st.h[0] = target;
+            st.P = nxt;
+            st.escape = RHO_CYCLE_DEPTH + 1;
+            return -len;
+        }
+    }
+#pragma unroll
+    for (int i = RHO_CYCLE_DEPTH - 1; i > 0; i--) st.h[i] = st.h[i - 1];
+    st.h[0] = rho_hash(st.P);
     st.P = nxt;
-    st.escape = 0;
-    return 1;
+    return RHO_STEP_ADVANCED;
 }
 
 /* One unbatched step, no cycle handling: the primitive tested against the
  * Python vectors.  Returns the new point; may be infinity. */
 FP_HD affine_pt rho_step_single(const affine_pt &P, const affine_pt *table,
-                                const rho_params &prm, int *j_out, int *neg_out) {
+                                const rho_params &prm, int *j_out, int *aut_out) {
     uint32_t j = rho_partition(P, prm);
     const affine_pt &M = table[j];
     affine_pt r;
@@ -236,7 +337,7 @@ FP_HD affine_pt rho_step_single(const affine_pt &P, const affine_pt *table,
         r = Curve::affine_add_with_inv(P, M, inv, 0);
     }
     *j_out = (int)j;
-    *neg_out = rho_canonical(r, prm);
+    *aut_out = rho_canonical(r, prm);
     return r;
 }
 
@@ -259,8 +360,8 @@ FP_BIG affine_pt rho_start_point(const affine_pt &P, const affine_pt &Q,
  * T owns walks {t + w*T : 0 <= w < W}. */
 struct rho_ctx {
     uint32_t *X, *Y;            /* [8][nwalks] */
-    uint32_t *H;                /* [2][nwalks] previous-x low limbs */
-    uint32_t *esc;              /* [nwalks] escape flag */
+    uint32_t *H;                /* [RHO_CYCLE_DEPTH][nwalks] recent hashes */
+    uint32_t *esc;              /* [nwalks] escape countdown */
     uint32_t *steps;            /* [nwalks] */
     uint32_t *restarts;         /* [nwalks] */
     uint32_t nthreads;          /* T */
@@ -271,7 +372,8 @@ struct rho_ctx {
     rho_dp *dp_out;
     uint32_t *dp_count;
     uint32_t dp_cap;
-    unsigned long long *cycle_counter;  /* optional: escapes performed */
+    unsigned long long *cycles; /* optional: [RHO_CYCLE_DEPTH] cycles detected, by length - 2 */
+    unsigned long long *aborts; /* optional: walks reseeded by max_steps */
 };
 
 FP_HD uint32_t rho_nwalks(const rho_ctx &c) { return c.nthreads * c.walks_per_thread; }
@@ -281,8 +383,8 @@ FP_HD void rho_load(const rho_ctx &c, uint32_t idx, rho_state &st) {
 #pragma unroll
     for (int l = 0; l < 8; l++) { st.P.x.v[l] = c.X[l * n + idx]; st.P.y.v[l] = c.Y[l * n + idx]; }
     st.P.inf = 0;
-    st.hprev[0] = c.H[idx];
-    st.hprev[1] = c.H[n + idx];
+#pragma unroll
+    for (int i = 0; i < RHO_CYCLE_DEPTH; i++) st.h[i] = c.H[i * n + idx];
     st.escape = c.esc[idx];
 }
 
@@ -290,9 +392,17 @@ FP_HD void rho_store(const rho_ctx &c, uint32_t idx, const rho_state &st) {
     uint32_t n = rho_nwalks(c);
 #pragma unroll
     for (int l = 0; l < 8; l++) { c.X[l * n + idx] = st.P.x.v[l]; c.Y[l * n + idx] = st.P.y.v[l]; }
-    c.H[idx] = st.hprev[0];
-    c.H[n + idx] = st.hprev[1];
+#pragma unroll
+    for (int i = 0; i < RHO_CYCLE_DEPTH; i++) c.H[i * n + idx] = st.h[i];
     c.esc[idx] = st.escape;
+}
+
+FP_HD void rho_count(unsigned long long *ctr) {
+#ifdef __CUDA_ARCH__
+    atomicAdd(ctr, 1ull);
+#else
+    (*ctr)++;
+#endif
 }
 
 FP_HD void rho_emit_dp(const rho_ctx &c, const affine_pt &P, uint32_t idx) {
@@ -316,8 +426,7 @@ FP_BIG void rho_reseed(const rho_ctx &c, uint32_t idx, rho_state &st, int first)
     uint32_t r = first ? c.restarts[idx] : c.restarts[idx] + 1;
     st.P = rho_start_point(c.P, c.Q, idx, r);
     rho_canonical(st.P, c.prm);
-    rho_set_hprev(st, st.P);
-    st.escape = 0;
+    rho_reset_cycle(st, st.P);
     c.restarts[idx] = r;
     c.steps[idx] = 0;
 }
@@ -335,13 +444,9 @@ FP_BIG void rho_init_thread(const rho_ctx &c, uint32_t t) {
 
 /* Bookkeeping shared by the batched and reference steppers: count the step,
  * emit a distinguished point, reseed when needed. */
-FP_HD void rho_post(const rho_ctx &c, uint32_t idx, rho_state &st, int advanced) {
-    if (!advanced) {
-#ifdef __CUDA_ARCH__
-        if (c.cycle_counter) atomicAdd(c.cycle_counter, 1ull);
-#else
-        if (c.cycle_counter) (*c.cycle_counter)++;
-#endif
+FP_HD void rho_post(const rho_ctx &c, uint32_t idx, rho_state &st, int step) {
+    if (step != RHO_STEP_ADVANCED) {
+        if (step < 0 && c.cycles) rho_count(c.cycles + (-step - 2));
         return;
     }
     uint32_t s = c.steps[idx] + 1;
@@ -350,6 +455,7 @@ FP_HD void rho_post(const rho_ctx &c, uint32_t idx, rho_state &st, int advanced)
         rho_emit_dp(c, st.P, idx);
         rho_reseed(c, idx, st, 0);
     } else if (s >= c.prm.max_steps) {
+        if (c.aborts) rho_count(c.aborts);
         rho_reseed(c, idx, st, 0);
     }
 }
@@ -357,9 +463,9 @@ FP_HD void rho_post(const rho_ctx &c, uint32_t idx, rho_state &st, int advanced)
 /* One batched step for all W walks of thread t: a single field inversion
  * (Montgomery's trick) serves all W affine additions.
  *
- * Per walk: ~3 mul (trick) + 1 mul (lambda) + 1 sqr + 1 mul + inv/W.
- * With Fermat inversion at ~320 mul-equivalents, W = 64 gives ~11 mul per
- * step; W = 128 gives ~8.5. */
+ * Per walk: ~3 mul (trick) + 1 mul (lambda) + 1 sqr + 1 mul + inv/W, plus
+ * 1 mul for the beta orbit under fold 6.  With Fermat inversion at ~320
+ * mul-equivalents, W = 64 gives ~11-12 mul per step; W = 128 gives ~9. */
 template <int W>
 FP_HD void rho_step_batch(const rho_ctx &c, uint32_t t) {
     rho_state st[W];
@@ -383,10 +489,9 @@ FP_HD void rho_step_batch(const rho_ctx &c, uint32_t t) {
         if (mode[w] == RHO_MODE_INF) {
             rho_reseed(c, idx, st[w], 0);
         } else {
-            int neg, esc_prev;
-            int advanced = rho_phase_b(st[w], c.table, c.prm, mode[w], part[w],
-                                       den[w], &neg, &esc_prev);
-            rho_post(c, idx, st[w], advanced);
+            int aut;
+            int step = rho_phase_b(st[w], c.table, c.prm, mode[w], part[w], den[w], &aut);
+            rho_post(c, idx, st[w], step);
         }
         rho_store(c, idx, st[w]);
     }
@@ -395,7 +500,7 @@ FP_HD void rho_step_batch(const rho_ctx &c, uint32_t t) {
 /* Low-memory variant of the same step.
  *
  * rho_step_batch<W> keeps all W walk states plus 2W field elements of
- * scratch live at once: 20W + 16W words per thread, which for any W big
+ * scratch live at once: ~21W + 16W words per thread, which for any W big
  * enough to amortise the inversion lands in local memory and costs more
  * traffic than the walk state itself.  This version keeps only the W prefix
  * products (8W words) and re-reads each walk's point in the backward pass,
@@ -440,9 +545,9 @@ FP_HD void rho_step_batch_lowmem(const rho_ctx &c, uint32_t t) {
         } else {
             fp256 inv = (w == 0) ? run : Fp::mul(run, chain[w - 1]);
             run = Fp::mul(run, den);
-            int neg, esc_prev;
-            int advanced = rho_phase_b(st, c.table, c.prm, m, j, inv, &neg, &esc_prev);
-            rho_post(c, idx, st, advanced);
+            int aut;
+            int step = rho_phase_b(st, c.table, c.prm, m, j, inv, &aut);
+            rho_post(c, idx, st, step);
         }
         rho_store(c, idx, st);
     }
@@ -461,9 +566,9 @@ FP_HD void rho_step_thread_ref(const rho_ctx &c, uint32_t t) {
         if (m == RHO_MODE_INF) {
             rho_reseed(c, idx, st, 0);
         } else {
-            int neg, esc_prev;
-            int advanced = rho_phase_b(st, c.table, c.prm, m, j, Fp::inv(den), &neg, &esc_prev);
-            rho_post(c, idx, st, advanced);
+            int aut;
+            int step = rho_phase_b(st, c.table, c.prm, m, j, Fp::inv(den), &aut);
+            rho_post(c, idx, st, step);
         }
         rho_store(c, idx, st);
     }

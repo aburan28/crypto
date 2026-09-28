@@ -1,0 +1,114 @@
+{
+  "cell": "n13a0",
+  "comparative_claims": {
+    "cold_speedup": null,
+    "normalized_S": null,
+    "online_speedup": null
+  },
+  "distinct_record_ids": 162,
+  "exposed_points": 5,
+  "improvement_rounds_used": 0,
+  "next_gate": "Registered five-cell generic/reference and observer qualification; no improvement round consumed.",
+  "performance_qualified": false,
+  "promotion_eligible": false,
+  "recorded_id_note": "Prepared records describe pairs; generic records distinguish native/profile, including reserved NOT_RUN native IDs.",
+  "retained_expected_incomplete_profiles": 12,
+  "schema_version": 1,
+  "scope": "mixed-adapter wiring control; no research reference or observer qualification",
+  "source_commit": "717879287fa389c1f2eb3817316446dc86664f97",
+  "status": "PASS",
+  "subgroup_order": 2003,
+  "table": [
+    {
+      "alias": "incumbent",
+      "base": {
+        "folded_columns": 7,
+        "usable_points": 182
+      },
+      "identity": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0hf9a5f422ebe3",
+      "planned_slots": 15,
+      "retained_incomplete_profiles": 0,
+      "verified_pairs": 15
+    },
+    {
+      "alias": "aa_control",
+      "base": {
+        "folded_columns": 7,
+        "usable_points": 182
+      },
+      "identity": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0hf9a5f422ebe3",
+      "planned_slots": 3,
+      "retained_incomplete_profiles": 0,
+      "verified_pairs": 3
+    },
+    {
+      "alias": "generic_dense",
+      "base": {
+        "folded_columns": 7,
+        "usable_points": 182
+      },
+      "identity": "IC1N13Ckb0fb182PDP3pairRCsampleLAgaussTDpdpISO0h93ff1ef88559",
+      "planned_slots": 12,
+      "retained_incomplete_profiles": 0,
+      "verified_pairs": 12
+    },
+    {
+      "alias": "generic_sparse",
+      "base": {
+        "folded_columns": 7,
+        "usable_points": 182
+      },
+      "identity": "IC1N13Ckb0fb182PDP3pairRCsampleLAbwTDpdpISO0h514b17a111ca",
+      "planned_slots": 12,
+      "retained_incomplete_profiles": 0,
+      "verified_pairs": 12
+    },
+    {
+      "alias": "generic_budget",
+      "base": {
+        "folded_columns": 7,
+        "usable_points": 182
+      },
+      "identity": "IC1N13Ckb0fb182PDP3pairRCsampleLAgaussTDpdpISO0ha7e5328f485d",
+      "planned_slots": 12,
+      "retained_incomplete_profiles": 12,
+      "verified_pairs": 0
+    },
+    {
+      "alias": "rho_incumbent_1",
+      "base": null,
+      "identity": "RHO1h05599b0e9def",
+      "planned_slots": 12,
+      "retained_incomplete_profiles": 0,
+      "verified_pairs": 12
+    },
+    {
+      "alias": "rho_incumbent_4",
+      "base": null,
+      "identity": "RHO1hedcd68d309e9",
+      "planned_slots": 12,
+      "retained_incomplete_profiles": 0,
+      "verified_pairs": 12
+    },
+    {
+      "alias": "rho_generic_dense_1",
+      "base": null,
+      "identity": "RHO1h748282e002f2",
+      "planned_slots": 12,
+      "retained_incomplete_profiles": 0,
+      "verified_pairs": 12
+    },
+    {
+      "alias": "rho_generic_dense_4",
+      "base": null,
+      "identity": "RHO1h2dc8e23a7f09",
+      "planned_slots": 12,
+      "retained_incomplete_profiles": 0,
+      "verified_pairs": 12
+    }
+  ],
+  "trial_slots": 102,
+  "unstarted_native_record_ids": 12,
+  "verified_native_profile_pairs": 90,
+  "workflow_run": 36280983990
+}

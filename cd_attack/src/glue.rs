@@ -15,7 +15,7 @@
 //! Reference: Castryck-Decru ePrint 2022/975, Magma code `richelot_aux.m`
 //! function `FromProdToJac` (lines 1-103).
 
-use crate::field::{F2, Fp2};
+use crate::field::{Fp2, F2};
 use crate::jacobian::Curve;
 use crate::poly::Poly;
 
@@ -125,10 +125,12 @@ mod tests {
     use super::*;
     use crate::field::{Fp, Fp2};
     use num_bigint::BigInt;
-    use num_integer::Integer;
+
     use num_traits::{One, Zero};
 
-    fn ctx() -> Fp2 { Fp2::new(Fp::new(BigInt::from(431u64))) }
+    fn ctx() -> Fp2 {
+        Fp2::new(Fp::new(BigInt::from(431u64)))
+    }
 
     /// 2-torsion x-coords of a Montgomery curve y² = x³ + Ax² + x. These are
     /// the roots of x(x² + Ax + 1) (excluding the point at infinity).
@@ -165,9 +167,12 @@ mod tests {
         // Check disc(h) ≠ 0  ⇔  gcd(h, h') = constant.
         let h_prime = c.f.derivative(&fp2);
         let g = crate::poly::gcd(&c.f, &h_prime, &fp2);
-        assert_eq!(g.degree(), Some(0),
-                   "glued curve has repeated root: gcd(h, h') has degree {:?}",
-                   g.degree());
+        assert_eq!(
+            g.degree(),
+            Some(0),
+            "glued curve has repeated root: gcd(h, h') has degree {:?}",
+            g.degree()
+        );
     }
 
     /// Point count on a Montgomery curve y² = x(x² + Ax + 1) over F_p, when A ∈ F_p.
@@ -177,9 +182,15 @@ mod tests {
         for x_int in 0..p_u {
             let x = BigInt::from(x_int);
             let x_sq = fp.mul(&x, &x);
-            let rhs = fp.mul(&x, &fp.add(&fp.add(&x_sq, &fp.mul(big_a, &x)), &BigInt::one()));
-            if rhs.is_zero() { n += 1; }
-            else if fp.is_square(&rhs) { n += 2; }
+            let rhs = fp.mul(
+                &x,
+                &fp.add(&fp.add(&x_sq, &fp.mul(big_a, &x)), &BigInt::one()),
+            );
+            if rhs.is_zero() {
+                n += 1;
+            } else if fp.is_square(&rhs) {
+                n += 2;
+            }
         }
         n
     }
@@ -190,14 +201,19 @@ mod tests {
         let mut n: u64 = 0;
         // h has degree 6, so 2 points at infinity if leading is a square in F_p, else 0.
         let lc = c.f.leading(fp2);
-        if lc.b.is_zero() && fp2.fp.is_square(&lc.a) { n += 2; }
+        if lc.b.is_zero() && fp2.fp.is_square(&lc.a) {
+            n += 2;
+        }
         // else: 0 (or 1 if non-square but we'd get F_{p²}-points which we're not counting)
         for x_int in 0..p_u {
             let x = fp2.from_int(x_int as i64);
             let rhs = c.f.eval(&x, fp2);
             assert!(rhs.b.is_zero(), "test expects h ∈ F_p[x]");
-            if rhs.a.is_zero() { n += 1; }
-            else if fp2.fp.is_square(&rhs.a) { n += 2; }
+            if rhs.a.is_zero() {
+                n += 1;
+            } else if fp2.fp.is_square(&rhs.a) {
+                n += 2;
+            }
         }
         n
     }
@@ -216,14 +232,22 @@ mod tests {
         if !fp2.is_zero(&lc) {
             // Every non-zero element of F_{p²} is a square in F_{p²} when |F_{p²}*| is even,
             // which holds whenever p > 2. Specifically, x is a square iff x^((p²-1)/2) = 1.
-            if fp2.pow(&lc, &exp) == fp2.one() { n2 += 2; }
+            if fp2.pow(&lc, &exp) == fp2.one() {
+                n2 += 2;
+            }
         }
         for a_u in 0..p_u {
             for b_u in 0..p_u {
-                let x = F2 { a: BigInt::from(a_u), b: BigInt::from(b_u) };
+                let x = F2 {
+                    a: BigInt::from(a_u),
+                    b: BigInt::from(b_u),
+                };
                 let rhs = c.f.eval(&x, fp2);
-                if fp2.is_zero(&rhs) { n2 += 1; }
-                else if fp2.pow(&rhs, &exp) == fp2.one() { n2 += 2; }
+                if fp2.is_zero(&rhs) {
+                    n2 += 1;
+                } else if fp2.pow(&rhs, &exp) == fp2.one() {
+                    n2 += 2;
+                }
             }
         }
         let p = 431i128;
@@ -233,26 +257,42 @@ mod tests {
     }
 
     /// Build a divisor on J(h) from two distinct affine x-coords on the curve.
-    fn random_deg2_div_on(c: &Curve, fp2: &Fp2, x1_try: i64, x2_try: i64) -> Option<crate::jacobian::Div> {
+    fn random_deg2_div_on(
+        c: &Curve,
+        fp2: &Fp2,
+        x1_try: i64,
+        x2_try: i64,
+    ) -> Option<crate::jacobian::Div> {
         let lift = |k: i64| -> Option<(F2, F2)> {
             let x = fp2.from_int(k);
             let rhs = c.f.eval(&x, fp2);
-            if !rhs.b.is_zero() { return None; }
-            if rhs.a.is_zero() { return None; }
+            if !rhs.b.is_zero() {
+                return None;
+            }
+            if rhs.a.is_zero() {
+                return None;
+            }
             let y_re = fp2.fp.sqrt(&rhs.a)?;
-            Some((x, F2 { a: y_re, b: BigInt::zero() }))
+            Some((
+                x,
+                F2 {
+                    a: y_re,
+                    b: BigInt::zero(),
+                },
+            ))
         };
         let (x1, y1) = lift(x1_try)?;
         let (x2, y2) = lift(x2_try)?;
-        if x1 == x2 { return None; }
+        if x1 == x2 {
+            return None;
+        }
         // u(x) = (x - x1)(x - x2)
         let neg_x1 = fp2.neg(&x1);
         let neg_x2 = fp2.neg(&x2);
-        let u = Poly::new(vec![
-            fp2.mul(&x1, &x2),
-            fp2.add(&neg_x1, &neg_x2),
-            fp2.one(),
-        ], fp2);
+        let u = Poly::new(
+            vec![fp2.mul(&x1, &x2), fp2.add(&neg_x1, &neg_x2), fp2.one()],
+            fp2,
+        );
         // v(x) linear with v(x1) = y1, v(x2) = y2
         // v(x) = (y2 - y1)/(x2 - x1) * (x - x1) + y1
         let slope = fp2.div(&fp2.sub(&y2, &y1), &fp2.sub(&x2, &x1));
@@ -280,7 +320,10 @@ mod tests {
             .filter_map(|k| random_deg2_div_on(&c, &fp2, k, k + 7))
             .next()
             .expect("couldn't find a deg-2 divisor on glued curve");
-        assert!(d1.is_valid(&c, &fp2), "constructed divisor must be valid Mumford");
+        assert!(
+            d1.is_valid(&c, &fp2),
+            "constructed divisor must be valid Mumford"
+        );
 
         // [n] D1 must be valid for various small n.
         for n in [2u64, 3, 5, 7, 13, 17] {
@@ -288,7 +331,8 @@ mod tests {
             assert!(
                 nd.is_valid(&c, &fp2),
                 "[{n}]D must be valid on J(h) (deg-6 curve); got u={:?} v={:?}",
-                nd.u, nd.v
+                nd.u,
+                nd.v
             );
         }
 
@@ -310,13 +354,19 @@ mod tests {
         let (c, partition) = from_prod_to_jac_with_partition(&alpha, &beta, &fp2);
 
         // Verify partition product = h
-        let prod = partition[0].mul(&partition[1], &fp2).mul(&partition[2], &fp2);
+        let prod = partition[0]
+            .mul(&partition[1], &fp2)
+            .mul(&partition[2], &fp2);
         assert_eq!(prod, c.f, "partition factors must multiply to h");
 
         // Each factor should be quadratic
         for f in &partition {
-            assert_eq!(f.degree(), Some(2),
-                       "natural partition factors must be quadratic; got {:?}", f.degree());
+            assert_eq!(
+                f.degree(),
+                Some(2),
+                "natural partition factors must be quadratic; got {:?}",
+                f.degree()
+            );
         }
 
         // δ = 0 ⇔ Kani inverse split
@@ -324,7 +374,8 @@ mod tests {
         let d = crate::richelot::delta(&splitting, &fp2);
         assert!(
             fp2.is_zero(&d),
-            "Kani natural partition must give δ = 0 (split back to product); got δ = {:?}", d
+            "Kani natural partition must give δ = 0 (split back to product); got δ = {:?}",
+            d
         );
     }
 
@@ -345,7 +396,10 @@ mod tests {
         let beta = mont_2_torsion_xs(&big_a_bet, &fp2).expect("E_β");
         // Ensure each α_i, β_i is F_p-rational
         for v in alpha.iter().chain(beta.iter()) {
-            assert!(v.b.is_zero(), "torsion x-coord must be in F_p for this test");
+            assert!(
+                v.b.is_zero(),
+                "torsion x-coord must be in F_p for this test"
+            );
         }
         let c = from_prod_to_jac(&alpha, &beta, &fp2);
 

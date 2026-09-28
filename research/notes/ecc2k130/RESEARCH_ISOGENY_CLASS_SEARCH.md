@@ -126,6 +126,116 @@ at a lower degree, that is a route into ECC2K-130.  If none does, the reason
 that the solving degree is a property of the field and the factor base, not
 of the curve.
 
+### 1.1 The transport, derived — and why the degree never enters it
+
+This note's opening sentence asserts that "the ECDLP transports along an
+isogeny of degree coprime to the subgroup order".  Every boundary below rests
+on it, and it had been cited rather than derived.  It is worth deriving,
+because the derivation is precisely what shows the **degree is absent from
+the answer** — which is why the 57-bit `p`-isogeny of Boundary B buys
+nothing even though it is the only way out of the 263-vertex neighbourhood.
+
+**The transfer.**  Let `φ: E → E'` be an isogeny over `F_q`, let `P ∈ E` have
+prime order `n`, and let `Q = [k]P`.  An isogeny is by definition a group
+homomorphism, so
+
+```
+    φ(Q) = φ([k]P) = [k]φ(P).
+```
+
+Setting `P' = φ(P)` and `Q' = φ(Q)` gives `Q' = [k]P'` on `E'` with the
+**same `k`**.  There is no scaling factor and no dependence on `deg φ`: that
+one line is the entire transfer.  An attacker solves on `E'` and reads off
+the logarithm they wanted.
+
+**The side condition, and where "coprime" comes from.**  `ker φ ∩ ⟨P⟩` is a
+subgroup of `⟨P⟩`, which has prime order, so it is either trivial or all of
+`⟨P⟩`.  The second case requires `⟨P⟩ ⊆ ker φ` and hence `n | deg φ`.
+Therefore
+
+```
+    gcd(deg φ, n) = 1   ⟹   φ is injective on ⟨P⟩   ⟹   P' ≠ O,
+```
+
+which is the whole content of the phrase.  Here it is free: by Boundary B the
+only available degrees are `263` and `p = 146505763881528721`, and the
+130-bit prime `r` of Boundary A divides neither.
+
+**If `E'` carries its own generator.**  Using `φ(P)` as the generator on `E'`
+is what makes the logarithm literally invariant.  Against a pre-existing
+generator `G'`, write `φ(P) = [μ]G'`; then `Q' = [kμ]G'` and
+
+```
+    k = log_{G'}(Q') · μ⁻¹  (mod n),      μ = log_{G'}(φ(P)),
+```
+
+i.e. two discrete logarithms instead of one.  Nothing is gained by doing so.
+
+**The dual does not rescue the degree either.**  `φ̂ ∘ φ = [deg φ]`, so
+pulling an image back multiplies by `d = deg φ`.  Since `gcd(d, n) = 1`, `d`
+is invertible mod `n`: nothing is lost on the round trip, and nothing is
+gained.
+
+**The one place a scalar does appear** is the *endomorphism* case, and it
+belongs to ρ rather than to this thread.  If `ψ ∈ End(E)` stabilises `⟨P⟩`
+then, `⟨P⟩` being cyclic of order `n`, `ψ` acts on it as multiplication by
+some `λ ∈ Z/n`; restricting `ψ`'s characteristic equation
+`ψ² − [t]ψ + [deg ψ] = 0` to `⟨P⟩` pins the scalar:
+
+```
+    λ² − tλ + deg ψ ≡ 0   (mod n),      λ = (t ± √(t² − 4 deg ψ))/2  mod n.
+```
+
+ρ's speedup from such a map is `√ord(λ)`, and it is realised only when `ψ` is
+cheaper to evaluate than a group operation — true of Frobenius, false of any
+large-degree separable isogeny, whose evaluation is priced next.
+
+**What applying `φ` costs.**  The transfer is free; the *map* is not.  Vélu's
+formulas sum over a half-set of the kernel, `Θ(ℓ)` field operations per
+point; √élu (Bernstein–De Feo–Leroux–Smith, ANTS 2020) rewrites those sums as
+resultants and reaches `Õ(√ℓ)`.  For the blocked prime of Boundary B that is
+a kernel polynomial of degree `2^56.0` and `2^28.5` field operations per point
+evaluation, with the kernel points living in an extension of degree dividing
+`ℓ − 1`.  A large *smooth* degree is by contrast cheap — a degree-`2^k`
+isogeny is `k` composed 2-isogenies — but the degrees this class offers are
+one small prime and one 57-bit prime, neither of which is smooth.
+
+**Why this closes the lever rather than opening it.**  The transported
+instance has the same `k`, the same subgroup order `n`, and therefore the
+same ρ cost; Boundary C adds that it has the same `d_reg`.  So the entire
+value of an isogeny to an attacker has to come from the destination curve
+being *structurally* easier, which is what Boundaries C and D rule out.
+Paying `2^28.5` per point evaluation to arrive at an identical problem is the
+whole of lever L5 in one sentence.
+
+**Checked, not cited.**  `src/isogeny/velu.rs` carries
+`transfer_preserves_the_discrete_logarithm`, which verifies
+`φ([k]P) = [k]φ(P)` for **every** `k` in `1..n` on a curve with
+`#E = 2019 = 3 · 673` (so `ℓ = 3`, `n = 673`, `gcd = 1`), and
+`kernel_points_die_and_the_subgroup_survives`, which checks the side
+condition from the other end.
+
+> **A correctness fix came out of writing those tests.**  Until 2026-09-21
+> `src/isogeny/velu.rs` used `v(Q) = 4 x_Q g_y(Q)² + 2 g_x(Q)²` for
+> non-2-torsion kernel points, where Vélu's value is `2 g_x(Q)` (and
+> `g_x(Q)` on the T-row); the module docstring stated the same wrong
+> formula.  The images it produced did not satisfy its own codomain
+> equation — on the curve above it returned `a' = 1103, b' = 1442` against
+> the correct `a' = 739, b' = 792`.  The older tests missed it because they
+> checked a subgroup *count* and that the codomain shared the domain's
+> prime, never that a point's image lands on the codomain.  Fixed, with
+> `codomain_and_image_match_an_independent_reference` pinning the values
+> against a separately written implementation.  This module is the
+> prime-field toy used by `isogeny::{graph, volcano}`; the ECC2K-130 work
+> in this note runs on `cryptanalysis::binary_isogeny`, so **no measurement
+> in this note or in `experiments/` moves.**
+
+**Class, per `AGENTS.md` §3: accounting.**  A premise the thread had been
+citing is now derived and machine-checked, and a latent bug in an adjacent
+module is fixed.  No attack quantity moved and no ratio to any boundary
+changed, so there is no new scoreboard row: `docs/index-calculus-scoreboard.html`
+carries no figure that this round alters.
+
 ---
 
 ## 2. The boundaries, before measuring
