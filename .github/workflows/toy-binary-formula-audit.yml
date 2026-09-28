@@ -1,0 +1,33 @@
+name: Toy binary formula audit
+on:
+  pull_request:
+    paths:
+      - 'research/toy_binary_formula_audit_20260924/**'
+      - '.github/workflows/toy-binary-formula-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exhaustive bounded replay
+        working-directory: research/toy_binary_formula_audit_20260924
+        run: |
+          python3 audit.py --output /tmp/binary-formula-replay.json
+          cmp results.json /tmp/binary-formula-replay.json
+      - name: Verify evidence hashes
+        working-directory: research/toy_binary_formula_audit_20260924
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          receipt = json.loads(Path('receipt.json').read_text())
+          for name, expected in receipt['source_input_hashes'].items():
+              assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == expected, name
+          PY

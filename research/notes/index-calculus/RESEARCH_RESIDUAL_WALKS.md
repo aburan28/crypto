@@ -1671,6 +1671,946 @@ weight-2 relations that is a cycle, and it arrives long before the
 `|F|`-row system is anywhere near full rank: `38` relations against
 `130` unknowns at `p = 271`.
 
+### 11.10 Pre-registration: does a merge-level cap restore `n^{4/9}`?
+
+**Written before the experiment was built or run.**  §11.7 leaves one loose
+end and names it: the large-prime linear algebra measures `n^{0.56}` against
+its own `4/9`, because row weight grows `8.9 → 17.9` as the eliminator chains
+merges, and "sieve implementations cap the merge level for exactly this reason,
+and that is the piece this module does not have."  This registers the
+experiment that supplies it.
+
+**Where the excess comes from, derived.**  The large-prime variant runs
+Wiedemann, so its linear algebra costs `≈ N² w` — `2N` matrix-vector products
+of `N w` nonzeros each — with `N` unknowns and mean row weight `w`.  The small
+base is Gaudry's rule, `N = |F|^{2/3}` (`SmallBase::Rule`), and `|F| ~ n^{1/3}`,
+so `N ~ n^{2/9}` and
+
+```text
+    N² ~ n^{4/9}                    exactly the relation-phase exponent
+    w  ~ n^{0.113}                  measured, 8.9 → 17.9 over 2^24.2 → 2^33.1
+    N² w ~ n^{0.557}                against the fitted n^{0.56}
+```
+
+**Fill-in is therefore the entire excess.**  Not part of it — all of it.  A cap
+that holds `w` to a constant puts the linear algebra exactly on `n^{4/9}`.
+
+**What it costs.**  `LargePrimeEliminator::feed` loops until every large prime
+is cancelled, subtracting one stored pivot per step and merging that pivot's
+columns in.  A cap abandons a relation once it has been reduced against `k`
+pivots.  Every abandoned relation is a residual that was paid for and thrown
+away, so the relation phase pays for the linear algebra's saving.  **The
+question this experiment answers is whether that repayment is a constant factor
+or a growing one**, because only the first leaves `n^{4/9}` end to end.
+
+**The falsifier, and the three outcomes.**  Fit the end-to-end exponent `e`
+over the same four sizes, same seeds, same `--protocol-la --groebner` as
+`experiments/21_gaudry_cubic_la.json`, with correctness preserved on every run:
+
+| outcome | `e` | what it means |
+|---|---|---|
+| **a** | `e ≤ 0.444` | the cap restores `n^{4/9}` end to end; §11.7's loose end closes, and the exponent is the method's rather than the relation phase's |
+| **b** | `0.444 < e ≤ 0.56` | the cap buys part of the gap; `n^{4/9}` stays a relation-phase exponent and the note says so as a measurement |
+| **c** | `e ≥ 0.56` | the cap does not help |
+
+**Predicted: (b), and (a) is live.**  Capping cannot raise `w` and cannot lower
+`N`, so `e` cannot exceed the uncapped `0.56` except through repayment; and it
+cannot fall below `4/9` at all.  Which of (a) and (b) lands depends entirely on
+how the discarded-residual count scales, which is the thing being measured and
+is not predicted here.
+
+**`S` will not move, and that is not a failure.**  The linear algebra is
+`0.02–0.03 %` of `S` at these four sizes, so any cap changes total cost by well
+under `1 %` and the `S / rho` column stays at its published `1,989×` to
+`4,000×`.  The deliverable is a fitted exponent, not a cheaper attack, and a
+flat `S` column is what a correct run looks like.  By §11.7's own arithmetic
+the exponent does not start paying until `n ≈ 2^{98}`.
+
+**Inadmissible**, by §6 and the standing rules of this note: changing the four
+sizes or the two seeds; changing `SmallBase::Rule`; reporting the linear-algebra
+exponent alone as the end-to-end one, which is the mistake §11.7 exists to
+record; quoting an improvement in `S` from a cap whose LA share is `0.03 %`;
+and counting a run whose recovered logarithm was not checked.
+
+### 11.11 The merge-level cap, measured: the phase improves, the method does not
+
+**Runner:** `cargo run --release --example gaudry_cubic_bench -- --protocol-la
+--groebner --sizes 271,523,1039,2083 --seeds 6 --merge-cap K --json …`
+**Frozen:** `experiments/22_gaudry_merge_cap_uncapped.json`,
+`experiments/22_gaudry_merge_cap_k12.json` (six seeds), and
+`…_k10_2seed.json`, `…_k16_2seed.json` (the bracketing caps, two seeds)
+**Summary:** `python3 scripts/summarize_merge_cap.py <uncapped> <capped>`
+**Registered in advance:** §11.10.  Every one of the 48 runs recovered its
+planted logarithm.
+
+§11.7 named the missing piece — "sieve implementations cap the merge level for
+exactly this reason, and that is the piece this module does not have".  It is
+now built (`GaudryOptions::max_merge_level`) and measured.  **It does not
+help.**
+
+**Paired, because the noise is bigger than the effect.**  The fitted exponent
+moves by about `0.04` between seeds, which is the size of what a cap does, so a
+difference of means across two arms says almost nothing — and a two-seed
+version of this table said the opposite of the truth.  Each seed is therefore
+run capped and uncapped and the statistic is the mean of the per-seed
+differences, which cancels the spread.
+
+| quantity | uncapped | `k = 12` | paired `Δ` | `±` | worse/better |
+|---|---:|---:|---:|---:|---:|
+| **end-to-end total** | 0.424 | 0.475 | **`+0.051`** | 0.031 | 5/1 |
+| linear algebra | 0.516 | 0.507 | `−0.009` | 0.019 | 2/4 |
+| — of which **solve** | 0.542 | 0.498 | **`−0.045`** | 0.017 | 1/5 |
+| — of which **merge** | 0.382 | 0.425 | `+0.043` | 0.030 | 5/1 |
+| residuals | 0.418 | 0.468 | `+0.051` | 0.031 | 5/1 |
+
+**The cap does exactly what it was designed to do.**  The solve exponent falls
+`0.045 ± 0.017`, `2.6σ`, on five of six seeds; row weight at `p = 2083` drops
+from `20.93` to `11.89`.  The sparser matrix is real.
+
+**And the eliminator cancels it exactly.**  Merge work rises `+0.043 ± 0.030`,
+so the linear algebra as a whole moves `−0.009 ± 0.019` — indistinguishable
+from zero, on a 2/4 sign split.  Capping does not lower the linear-algebra
+exponent.  It moves work from the solve into the eliminator.
+
+**End to end it is worse**, `+0.051 ± 0.031` on five of six seeds, and the
+residual row is identical to it: the total is the relation phase, and the cap
+damages the relation phase.
+
+### What the cap actually costs
+
+Not the relations it discards.  Those are `0.3 %` to `2.0 %` of residuals,
+which could never move an exponent.  The cost is the full relations that
+**never form**, because a chain the cap truncates is a relation that would have
+closed:
+
+| `p` | full relations per residual, uncapped | capped | yield |
+|---:|---:|---:|---:|
+| 271 | 0.0192 | 0.0182 | `0.95×` |
+| 523 | 0.0123 | 0.0114 | `0.93×` |
+| 1039 | 0.0105 | 0.0067 | **`0.64×`** |
+| 2083 | 0.0073 | 0.0046 | **`0.64×`** |
+
+**And the loss grows with `n`** — `5 %` at the small sizes, `36 %` at the two
+large ones.  That is the whole mechanism: a yield loss that grows in `n` is a
+residual exponent that rises, which is what the table above measures.  Mean
+merge depth is roughly flat across the ladder (`9.1, 9.8, 12.2, 10.6`), so
+chains are not getting longer on average; **the tail past the cap thickens**,
+and a fixed cap excludes a growing share of exactly the chains that close.
+
+### Against §11.10's registered outcomes
+
+The capped end-to-end exponent is `0.475`, which falls in band **(b)**,
+`0.444 < e ≤ 0.56`.  But reading it as "the cap buys part of the gap" would be
+wrong, and the registration is what is at fault: its three bands were written
+assuming a cap could only help or do nothing.  **The uncapped exponent is
+`0.424 ± 0.016`** — already below `4/9`, so there was no end-to-end gap to buy,
+and the cap moved the number the wrong way.  Recorded here rather than quietly
+re-banded: the prediction (b) was met by coincidence of arithmetic, not because
+the experiment came out as expected.
+
+**Two things §11.7 got right and one it got wrong.**  Right: the linear-algebra
+exponent is genuinely above `4/9` — six seeds give `0.516 ± 0.027`, `2.7σ`
+above — and fill-in is why.  Right: the module lacked the cap.  Wrong: the
+implication that the cap was therefore the fix.  It is not, and the
+`n^{0.56}` that motivated it was itself a two-seed number quoted without an
+error bar; the six-seed value is `0.516 ± 0.027`, and `0.56` sits inside a
+two-seed `±0.046`.
+
+**The `n^{4/9}` is end-to-end here after all.**  §11.7 worried it was "a
+relation-phase exponent, not an end-to-end one".  Measured over these four
+sizes the total is `0.424 ± 0.016`, consistent with `4/9`, because the linear
+algebra is only about `2 %` of the cost.  The higher linear-algebra exponent is
+real and will eventually dominate — §11.7's own arithmetic puts that near
+`n ≈ 2^{98}` — but it does not bite on this ladder, and capping the merge level
+is not how to meet it when it does.
+
+**Class: `engineering`, and negative.**  The algorithm gained a lever, the
+lever was measured, and it costs more than it saves.  `S` is untouched at these
+sizes, exactly as §11.10 said in advance it would be, so nothing here moves the
+standing against rho.
+
+### 11.12 Pre-registration: a border basis in place of the fixed-degree Macaulay cut
+
+**Written before the border basis existed.**  The scoreboard has carried "the
+open direction is a border basis in place of the fixed-degree Macaulay cut"
+since §11.6.  This registers it, and registers first the arithmetic that says
+what class of result it can possibly be — because that arithmetic is available
+now, from measurements already in this note, and stating it afterwards would be
+worthless.
+
+**It cannot be an advance.  It is `engineering` by construction.**  §11.5's
+protocol table measures `C₃` at `1.53, 1.53, 1.55, 1.55, 1.57, 1.58, 1.57,
+1.57` (`×10⁶`) across `n = 2^{24.2}` to `2^{33.1}`.  **`C₃` is flat in `n`** —
+the `S₄` system has three unknowns and 64 solutions at every size, so its cost
+does not scale.  A lever on a quantity that does not scale cannot move an
+exponent, and by §3 of `AGENTS.md` that is `engineering`: "legitimate, bounded,
+and not a finding".
+
+**Its ceiling is about `1.2×`, and an earlier revision of this section said
+`2.3×`.**  That was wrong and the error is worth stating, because it is the
+kind that makes a registration flatter itself.  §11.6 splits the
+post-row-selection `C₃` into forward elimination `17 %`, normal forms `40 %`,
+characteristic polynomial `31 %`, eigenvectors and roots `10 %`.  The first
+revision claimed a border basis replaces the first two.  **It cannot replace
+the normal forms: a border basis *is* the normal forms of the border
+monomials.**  That 40 % is the thing being computed, not overhead being
+removed.  Nor does the charpoly of the `64 × 64` multiplication matrix or its
+eigen-solve care how the matrix was reached, so `31 %` and `10 %` survive
+untouched.
+
+What is actually available is the forward elimination — and only the part of it
+spent on rows that never reach the border, since Macaulay's row selection
+(§11.6) has already dropped the 26 Koszul-redundant ones.  Driving **all** of
+it to zero gives `1/(1 − 0.17) ≈ 1.2×`.  The realistic expectation is `≈ 1×` or
+worse, because reducing the border monomials still needs enough of the row
+space to do it.  Registered at `1.2×` so that a measured `0.9×` reads as this
+section having been right about the ceiling, not as the experiment failing.
+
+**And a far larger constant has already failed to matter.**  Decomposing into
+`k − 1` points cut the per-residual constant `580×`, from `0.9` million field
+multiplications to `1,513`, and still landed `1,037×` above rho.  Against
+§11.7's remaining `1,989×` closing as `n^{-1/18}` — about two hundred doublings
+— a `1.2×` is worth roughly a third of one.  **The verdict does not move, and this section
+says so in advance so that a `C₃` improvement cannot later be read as one.**
+
+**What it might fix that is not a constant.**  `solve_at_degree` carries a
+documented failure: the multiplication matrix needs the normal form of `e₁ · b`
+for every standard `b`, and a product landing on a non-pivot column of degree
+exactly `degree` has none.  The note records that this "recurs identically one
+degree up, which is why every retry in the measured runs ended in the fallback
+and none in a solution".  That is the staircase's border truncated by a
+fixed-degree cut, and closing the border is exactly what a border basis does.
+Whether it removes the fallbacks is a **correctness** question, separate from
+the constant, and is registered as its own outcome below.
+
+**The staircase, measured before the build** (`GAUDRY_DEBUG_SOLVE=1`,
+`p = 271`, seed 1, 20 residuals).  It decides how much algorithm this needs,
+so it was looked at rather than assumed:
+
+```text
+  degree 10: rows 226 cols 286 pivots 222 standard(dim) 64
+             maxima [3,4,9] box=false        — identical on all 20
+```
+
+The order ideal is **the same 64 monomials on every residual**, and it is not
+the box `[0,4)³` that `64 = 4³` invites you to guess.  It is
+`z < 2(5 − x − y)`:
+
+| `x` | admissible `z` by `y = 0, 1, 2, 3, 4` |
+|---:|---|
+| 0 | `<10`, `<8`, `<6`, `<4`, `<2` |
+| 1 | `<8`, `<6`, `<4`, `<2` |
+| 2 | `<6`, `<4` |
+| 3 | `<4` |
+
+Two things follow.  **Mourrain's iteration is not needed**: a residual-
+independent order ideal means the staircase and its border can be computed once
+per curve rather than rediscovered on each of the 941 residuals, which is the
+only structural saving on offer here.  And of the 64 products `x · b`, exactly
+**30** leave `O` and need a border normal form; the other 34 are shifts within
+it.
+
+**The coverage outcome is below the resolution of this cell.**  Zero
+`border_unreachable` events in those 20 residuals, and §11.5 recorded one
+fallback in 941 at `p = 271` seed 1 — `0.1 %`.  Whatever the border basis does
+to the fallbacks cannot be established here, and this section will not claim it
+was.
+
+**The falsifier.**  Measured on §11.5's protocol — same `p ∈ {271, 523, 1039,
+2083}`, same seeds, `--cross-check` on so the residual stream is identical and
+every output is compared against the meet-in-the-middle oracle on every
+residual:
+
+| outcome | condition |
+|---|---|
+| **success (engineering)** | `C₃` below §11.6's `0.88 × 10⁶` with **zero** cross-check mismatches |
+| **coverage gain** | the fallback count reaches zero where the Macaulay cut had 1–6 per run.  *Coverage*, not correctness: a fallback residual is not a wrong answer, it is one the fixed-degree cut could not solve algebraically and the meet-in-the-middle oracle solved correctly but more slowly |
+| **failure** | `C₃` at or above `0.88 × 10⁶`, or any cross-check mismatch |
+
+A mismatch is disqualifying on its own, whatever the cost column says: a
+cheaper solver that returns a wrong decomposition is not a cheaper solver.
+
+**Inadmissible**, by §6: changing the sizes, seeds or residual stream; turning
+`--cross-check` off; quoting the `C₃` improvement as a change in `S / rho`
+beyond the same factor; and reporting a fallback reduction as a cost result,
+since the fallbacks are 1–6 residuals of thousands and cannot move `C₃` either
+way.  Also inadmissible: describing the fallbacks as unsoundness in the current
+solver.  They are residuals it declines and hands on, and the answer that comes
+back is right.
+
+### 11.13 The border basis, measured before it was written: a `1.06×` ceiling
+
+> **Corrected in §11.14 — class `accounting`.**  The `5.6 %` below charges each
+> elimination multiplication to the pivot row doing the subtracting.  What an
+> elimination that builds only the rows it needs can skip is the work done *on*
+> rows nothing reads, and the rows the normal forms depend on — the ones they
+> read and, transitively, every pivot row subtracted from those — are **202 of
+> 222**, not 149.  The skippable work is `1.1 %` of the elimination and `0.19 %`
+> of `C₃`: the ceiling is **`1.002×`**, not `1.06×`.  The staircase is also not
+> identical on every residual, only on `98 %` of them at `p = 271`.  The section
+> is left as it was written; its figures are the "before" marks of §11.14.
+
+**Instrumentation:** `GAUDRY_DEBUG_SOLVE=1`, `p = 271`, seed 1, `--cross-check`,
+25 residuals — §11.5's cell, so these numbers sit beside §11.6's directly.
+`solve_at_degree` now prints the staircase, how much of the echelon the normal
+forms reach, and the elimination cost attributed per pivot column.
+
+§11.12 registered this as `engineering` by construction and put its ceiling at
+`1.2×`.  Three measurements taken before writing the solver put it at **`1.06×`**,
+and that is the result.
+
+**1. The staircase is fixed and is not the box.**  Identical on all 25
+residuals — `rows 226, cols 286, pivots 222, dim 64` — with shape
+`z < 2(5 − x − y)`, maxima `[3, 4, 9]`.  So no Mourrain iteration is needed, and
+of the 64 products `x · b` exactly 30 leave the order ideal.
+
+**2. The normal forms reach `67 %` of the echelon.**  `149` of `222` pivots,
+`183` of `286` columns, again identical on every residual.  A third of the
+elimination produces pivot rows that nothing afterwards consults.
+
+**3. That third is `5.6 %` of `C₃`.**  Attributing elimination multiplications
+to the pivot column that caused them:
+
+| | per residual | of `C₃ ≈ 0.88 × 10⁶` |
+|---|---:|---:|
+| elimination, total | `≈ 150 300` | `17.0 %` |
+| — on pivots the normal forms never reach | `≈ 49 000` | **`5.6 %`** |
+
+`32.4 %` to `32.8 %` of the elimination across 25 residuals, a very tight band.
+The `17.0 %` is worth noting on its own: it reproduces §11.6's `17 %` forward-
+elimination share from an independent counter, so the split that ceiling rests
+on is confirmed rather than assumed.
+
+**The ceiling, therefore, is `1/(1 − 0.056) = 1.06×`** — and that is an
+*upper* bound reached only by an elimination that skips every unreached pivot
+at zero cost.  A real lazy elimination cannot: the unreached columns are zero
+in the reached rows *because* the elimination zeroed them, so skipping a pivot
+leaves live entries below it and the dependency has to be tracked rather than
+assumed away.  The achievable figure is below `1.06×`.
+
+**Why the solver was not then written.**  §11.12's falsifier asks for `C₃`
+below `0.88 × 10⁶`, and §11.12's stop condition says not to reach for a harder
+algorithm when the minimal one does not clear it.  A `1.06×` ceiling clears it
+by `5.6 %` at most, on a phase that §11.5 measures as **flat in `n`** and that
+§11.7 shows is `2 %` of a method sitting `1,989×` from rho.  The implementation
+would confirm a number already bounded by the repo's own counters, at the price
+of a lazy elimination whose correctness surface is the part of this that could
+actually go wrong.
+
+**What this closes.**  The scoreboard has carried "the open direction is a
+border basis in place of the fixed-degree Macaulay cut" since §11.6.  It is not
+open any more, and it did not need the build to close it: **the direction is
+worth at most `1.06×`, measured.**  §11.5's own description of what it already
+does — "forward elimination plus back-substitution restricted, by memoisation,
+to the pivot columns those products actually reach" — is a border-basis
+computation in all but name, which is why so little is left.  The `5.6 %` is
+the gap between *lazy back-substitution*, which this solver has, and *lazy
+elimination*, which it does not.
+
+**Class: `engineering`, negative, and `0 / 25` cross-check mismatches** on the
+instrumented runs — the diagnostics do not touch the arithmetic.
+
+### 11.14 The border basis, written: the ceiling was `1.002×`, and the solver gets 99 % of it where it runs
+
+**Runner:** `GAUDRY_LAZY_VERIFY=1 cargo run --release --example gaudry_cubic_bench --
+--protocol --groebner --cross-check --sizes 271,523,1039,2083 --seeds 2 --json …`,
+and the same without the variable for the baseline.
+**Frozen:** `experiments/23_gaudry_lazy_elim_baseline.json` and
+`experiments/23_gaudry_lazy_elim_verify.json` (with their `.log`),
+`experiments/23_gaudry_lazy_elim_lazy.json` (the same run under
+`GAUDRY_LAZY_ELIM=1`, whose operation counts equal the verified run's in every
+cell — verification is uncharged), and `experiments/23_gaudry_lazy_elim_closure.log`
+(the per-residual closure and lazy-cost lines).
+**Summary:** `python3 scripts/summarize_lazy_elim.py <baseline> <verify>`
+**Source:** `src/cryptanalysis/gaudry_cubic.rs` as of commit `55fd0dfa`; both
+arms run the same binary, the switch is the environment variable.
+**Registered in advance:** §11.12 (falsifier); §11.13 (ceiling — corrected below).
+**Suite:** `AGENTS.md` §8's frozen WDSat regression prices a SAT-solver stage on
+binary-field encodings and does not apply to this `F_p` Macaulay solve; the
+matched suite is §11.5's protocol — same sizes, seeds and `--cross-check` —
+run baseline and candidate, full pipeline, cold.
+
+§11.13 declined to write the solver on the strength of a `1.06×` ceiling.  It is
+now written — `GAUDRY_LAZY_ELIM=1`, off by default — and writing it showed the
+ceiling was wrong by a factor of thirty.
+
+**What was built.**  The solve keeps the Macaulay rows exactly as constructed
+and reduces a row only when a normal form first reads it: `NormalForms` asks for
+the pivot row of a column, and that row is cleared left of its leading column —
+finding and reducing, first, each pivot row it has to be cleared with — then
+normalised.  It is the forward elimination taken row by row instead of column
+by column, so a row that is read costs exactly what it costs there and a row
+nothing reads is never touched.  Which row leads which column comes from a plan
+learned once per curve from the first full solve.  Nothing in the plan is
+trusted: a planned row whose entry cancels at its column (an accident of the
+values, about `1/p` per entry) is replaced by another row that leads there, and
+a row that leads at a column the plan does not pivot proves this residual's
+staircase is not the plan's, which sends it back to the full elimination with
+the lazy work still charged.  `GAUDRY_LAZY_VERIFY=1` re-runs every solve through
+the full elimination, uncharged, and counts any `M_{e₁}` entry or staircase that
+differs, and any fallback on a residual whose staircase was the plan's after
+all.  It is a diagnostic, not a guard: it counts, and the lazy answer is used.
+
+**1. The ceiling was `1.002×`, not `1.06×` — class `accounting`.**  §11.13
+charged each elimination multiplication to the pivot row doing the subtracting
+and counted as skippable the work of every pivot the normal forms never read.
+But a pivot nobody reads can still be one that was *subtracted from* a row
+somebody does read, and that subtraction is what puts the read row in echelon
+form; skip it and the row is wrong.  What can be skipped is the work done *on*
+rows outside the **closure**: the pivot rows the normal forms read and,
+transitively, every pivot row subtracted from one of those.  `echelon_traced`
+now records which original row went where at what cost, so both attributions
+are priced on the same residuals (`GAUDRY_DEBUG_SOLVE=1`, seed 1,
+`--cross-check`; the first 300 residuals above `p = 271`):
+
+| `p` | residuals | pivot rows read | closure | work outside the closure | §11.13's attribution |
+|---:|---:|---:|---:|---:|---:|
+| 271 | 727 | 148–151 of 222 | **201–202** of 222 | 1,648 muls, **1.10 %** of elimination | 48,929, 32.6 % |
+| 523 | 300 | 146–151 | 202 | 1,642, 1.09 % | 49,107, 32.6 % |
+| 1039 | 300 | 148–149 | 201–202 | 1,655, 1.10 % | 49,213, 32.6 % |
+| 2083 | 300 | 149 | 202 | 1,643, 1.09 % | 49,260, 32.6 % |
+
+The normal forms read two thirds of the pivot rows, as §11.13 said, but those
+rows were reduced through almost all the rest: the closure is **202 of 222** at
+every size.  Elimination is `17.1 %` of `C₃` (`150,099` of `875,934`), so the
+skippable part is `0.19 %` of `C₃` and the ceiling is
+**`1/(1 − 0.0019) = 1.002×`**.  §11.12 had registered that "the realistic
+expectation is `≈ 1×` or worse, because reducing the border monomials still
+needs enough of the row space to do it"; that sentence was right, and §11.13's
+revision of it was not.
+
+**2. The staircase is not the same on every residual.**  §11.12 and §11.13 saw
+one staircase on 20 and 25 residuals.  Over whole runs it is the same on
+`97.6–98.1 %` of residuals at `p = 271`, rising to `99.6 %` at `p = 2083`; the
+rest — the `border_unreachable` ones among them — have a different order ideal
+(`[0,0,8]` leaves it and the dimension drops to 61, or `[3,0,3]` leaves and
+`[0,4,2]` joins).  No per-curve plan serves those, and they are exactly the lazy
+solver's fallbacks: the verification mode finds **zero** fallbacks on a residual
+whose staircase was the plan's.  The fraction falls roughly as `1/p`.  So
+§11.12's "Mourrain's iteration is not needed" holds for the generic residual
+and not for these.
+
+**3. The measurement.**  Paired cell by cell.  `summarize_lazy_elim.py` first
+asserts that residuals, decompositions, independent relations, the planted
+logarithm, and the charpoly, eigenvector and root counters — none of which the
+elimination touches — are identical in both arms, so the residual streams did
+not diverge and every difference below is exact, not statistical.  The equal
+charpoly and root counters prove more than that: a lazy attempt that got as far
+as `M_{e₁}` and then fell back would have paid for a second characteristic
+polynomial, so every one of the 128 fallbacks happened before the random stream
+was touched.  `C₃` is
+everything the solve spends per residual, including each lazy attempt that
+fell back and the full elimination that followed; the speedup is `AGENTS.md`
+§8's `baseline_total_operations / candidate_total_operations`, whole method,
+cold.
+
+| `p` | `log₂ n` | baseline `C₃` | lazy `C₃` | ratio | elimination / residual, base → lazy | lazy solves (all verified) | fallbacks | `M_{e₁}` mismatches | cross-check | **speedup** |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 271 | 24.2 | 875,934 | 876,618 | 1.0008 | 150,099 → 150,798 | 713 | 14 | 0 | 0 / 728 | **0.9992** |
+| 271 | 24.2 | 878,665 | 879,905 | 1.0014 | 150,150 → 151,476 | 699 | 17 | 0 | 0 / 719 | **0.9986** |
+| 523 | 27.1 | 890,109 | 889,649 | 0.9995 | 150,623 → 150,161 | 1,587 | 15 | 0 | 0 / 1,604 | **1.0005** |
+| 523 | 27.1 | 888,956 | 888,223 | 0.9992 | 150,621 → 149,931 | 1,430 | 12 | 0 | 0 / 1,444 | **1.0008** |
+| 1039 | 30.1 | 904,961 | 903,920 | 0.9989 | 150,941 → 149,910 | 2,411 | 14 | 0 | 0 / 2,428 | **1.0011** |
+| 1039 | 30.1 | 909,048 | 908,149 | 0.9990 | 150,967 → 150,072 | 2,625 | 18 | 0 | 0 / 2,645 | **1.0009** |
+| 2083 | 33.1 | 919,672 | 918,394 | 0.9986 | 151,096 → 149,830 | 5,257 | 18 | 0 | 0 / 5,276 | **1.0012** |
+| 2083 | 33.1 | 920,087 | 918,826 | 0.9986 | 151,104 → 149,851 | 5,276 | 20 | 0 | 0 / 5,302 | **1.0012** |
+
+**Pooled speedup `1.0009`.**  Every run recovered its planted logarithm;
+`S / rho` moves by the same factor in every cell, below the precision the
+scoreboard draws it at.
+
+On the 713 residuals it solves at `p = 271`, seed 1, the lazy elimination spends
+`148,450` multiplications where the full one spends `150,080` on the same
+residuals: `1,630` saved of the `1,648` their closure allows — **`98.9 %` of the
+ceiling**.  Each fallback costs
+the lazy attempt that found the staircase off the plan, about `120,000`, on top
+of the full elimination.  The two cross at a fallback rate of about `1.3 %`:
+above it, at `p = 271` (`1.9–2.4 %`), the lazy solver loses; below it, from
+`p = 523` on, it wins — by `0.14 %` at `p = 2083` against the `0.18 %` the
+closure allows there.
+
+**Against §11.12's falsifier.**  Zero cross-check mismatches in all eight cells
+(20,146 residuals per arm) and zero `M_{e₁}` mismatches over 19,998 verified
+lazy solves, so the disqualifying condition is not met.  The cost condition was
+written as "`C₃` below §11.6's `0.88 × 10⁶`".  Read literally it passes at
+`p = 271` and fails from `p = 523` on — but only because the baseline itself
+rises from `0.876` to `0.920 × 10⁶` with `p` — `28,000` of the `44,000` is root
+finding, which grows with `log p` — and that says nothing about the solver.  The registration meant the matched
+baseline, and against that: **failure at `p = 271` on both seeds, the
+registered `engineering` success at every larger size on both seeds**, `0.14 %`
+at best.  That is the size §11.12 said in advance it would be.  The **coverage**
+outcome is none: `border_unreachable` and the unsolved count are identical in
+the two arms, because the residuals the fixed-degree cut cannot close are among
+the ones whose staircase no plan fits.  Whether Mourrain's full iteration would
+close them is not answered by this build; they are 0–7 residuals per run of
+thousands, and the meet-in-the-middle oracle solves them correctly.
+
+**Two bugs the guards caught.**  The first version used the plan's row for
+every column and fell back on `53` of `199` test residuals at `p = 271` —
+consistent with a `1/p` chance of cancellation at each of some eighty exposed
+pivot entries — which is what the row substitution is for.  A later version
+passed `unwrap_or` an argument with a side effect, so a row adopted as the pivot
+of an earlier column was filed under the wrong one.  In these runs both showed
+up as fallbacks rather than wrong answers — a row cleared with a misfiled pivot
+leaves the row space and leads at a column the plan calls standard, which the
+solver reads as an off-plan staircase and refuses — and an uncharged full
+elimination on each fallback, now the verification mode's needless-fallback
+count, found the one "off-plan" residual whose staircase was in fact the plan's.
+That, and `the_lazy_elimination_reads_the_same_normal_forms` (200 residuals in
+lockstep against the full solve: identical answers, identical `M_{e₁}`, no
+needless fallback), is the evidence the solver is right; the cross-check column
+is the evidence its answers are.
+
+**Class.**  The ceiling correction is `accounting`: nothing ran faster, a number
+was wrong.  The solver is `engineering` — `−0.14 %` to `+0.14 %` of `C₃`,
+`1.0009×` pooled, on a phase §11.5 measures as flat in `n`, in a method `1,989×`
+from rho.  It does not move the verdict and §11.12 registered that it could not.
+It stays in the tree behind `GAUDRY_LAZY_ELIM`, off by default so every earlier
+run reproduces, because the verified negative is the result and the closure
+diagnostic it brought is the instrument that would have caught §11.13's mistake
+before it was published.
+
+**What this closes.**  With the Macaulay cut, the order of the rows, the row
+selection, the retries and now the elimination itself each measured, what is
+left in `C₃` is the normal forms (`40 %`), which a border basis computes rather
+than avoids, and the characteristic polynomial and eigen-solve (`41 %`), which
+do not care how `M_{e₁}` was reached.  There is no open lever on `C₃` left in
+this design, and none of the ones measured was worth more than its registration
+said.
+
+### 11.15 Close-out: what §11 established, and what would count now
+
+§11.14 closed the last lever this section had listed.  This is the ledger of
+all of them, in the note's unit, and the one question left open by the
+arithmetic rather than by a missing build.
+
+**The ledger.**  Every row was measured end to end and every run recovered its
+planted logarithm.  The class column is the one each section recorded; §11.4
+and §11.7 predate the practice and recorded none, so those rows say what
+moved instead of being classed after the fact.
+
+| § | lever | what moved | class, as recorded | result |
+|---|---|---|---|---|
+| 11.4 | `O(1)` Gröbner solve replaces the loop over the base | relation phase `n^{0.69} → n^{1/3}` | — | `C₃ = 4.82·10⁶`, flat in `n`; dearer than the loop below `n ≈ 2^{34}` |
+| 11.5 | honest multiplication count | the count, not the algorithm | accounting | `C₃ = 3.23·10⁶` |
+| 11.5 | echelon form with back-substitution | `C₃` | engineering | `1.53·10⁶` |
+| 11.6 | Macaulay's row selection | `C₃` | engineering | `0.879·10⁶` |
+| 11.8 | no retries once the border is unreachable | `C₃` | engineering | `0.876·10⁶` |
+| 11.7 | Wiedemann with filtering | linear algebra `n^{0.85} → n^{0.68}` | engineering | plain method bottoms at `≈ 200×` rho near `2^{50}`, then rises |
+| 11.7 | double large primes, `\|F'\| = \|F\|^{2/3}` | total exponent `0.32 → 0.44`, *below* rho's `1/2` | — | `1,989×` rho at `2^{33.1}` (`3.8×` the plain method's work), closing as `n^{-1/18}` |
+| 11.9 | Joux–Vitse: decompose into `k − 1 = 2` points | `C₃ → 1,513`, `580×`; residuals `n^{1/3} → n^{2/3}` | advance below `2^{28.5}`, relabelling above | `1,037×` rho at `2^{33.1}`, exponent worse |
+| 11.11 | merge-level cap on the large-prime eliminator | solve exponent `−0.045 ± 0.017`, merge `+0.043 ± 0.030` | engineering, negative | end to end `+0.051 ± 0.031` **worse** |
+| 11.14 | border basis (demand-driven elimination) | `C₃` by at most `0.19 %` | accounting (ceiling) + engineering | `1.0009×` pooled; off by default |
+
+**The verdict, restated with nothing left to try at `k = 3`.**  On
+`E(F_{p³})` the best variant measured is the plain method at `528×` rho
+(`2^{33.1}`).  Its linear algebra grows as `n^{0.68}`, faster than rho's
+`n^{1/2}`, so it bottoms near `200×` rho around `2^{50}` and loses ground
+after.  The double-large-prime variant is the only one with an exponent below
+rho's — `n^{0.424 ± 0.016}` end to end over six seeds, against the theorem's
+`4/9` — and it closes the measured `1,989×` at `n^{-1/18}`: past `2^{230}`,
+extrapolated on those two exponents.  The four constant levers since §11.4
+bought `5.5×` on `C₃`, and §11.12 showed before the last of them that no `C₃`
+lever can move an exponent, because `C₃` is flat in `n`.
+
+**What would count now is a change in the closing rate, not in a constant.**
+Two exponents set it: the relation phase's, and the linear algebra's over
+`|F| ∝ n^{1/k}` unknowns.  At `k = 3` the linear algebra is the obstacle —
+`|F|² ∝ n^{2/3}` for any sparse solver — and the large-prime cure trades it
+for a residual count that closes only at `n^{-1/18}`.  **The one structural
+lever left is the extension degree.**  Derived, not measured: at `k = 4`,
+`|F| ∝ n^{1/4}`, so the linear algebra is `|F|² ∝ n^{1/2}` — *the same
+exponent as rho* — and the relation phase is `k!·|F|·C₄ ∝ n^{1/4}`.  The plain
+method's `S / rho` then tends to a constant instead of growing without bound
+as it does at `k = 3`.  That constant is `c_LA / c_rho`, the sparse solver's
+cost against rho's, and it does **not** depend on the solve: it follows from
+§11.7's measured Wiedemann counters and the cost of `F_{p⁴}` arithmetic, and
+§11.16 derives it.  `C₄`, the cost of one `S₅` solve over `F_{p⁴}`, which
+nothing in this module has measured, sets only *where* the relation phase
+stops dominating.
+
+**What does not count, and is not worth building here:**
+
+- any lever on `C₃`, `C₄` or the linear-algebra constant at fixed `k`: flat in
+  `n`, `engineering` by construction (§11.12);
+- Mourrain's full border-basis iteration for the residuals whose staircase is
+  not the generic one: `0–7` residuals per run of thousands, already solved
+  correctly by the fallback oracle, and unable to move cost (§11.14);
+- a larger merge cap, a different large-prime budget, or a different small
+  base at `k = 3`: §11.11 measured the family and the method got worse.
+
+### 11.16 Pre-registration: `k = 4`, derived before anything is built
+
+**Written before any `F_{p⁴}` code exists.**  §11.15 named the extension degree
+as the one lever that changes the closing rate.  Most of what decides the
+`k = 4` question can be derived from counters this note has already measured,
+so it is derived here first — as §11.12 did for the border basis — and the
+build is registered only for the part the derivation cannot reach.
+Everything below is derived or extrapolated, and says which.
+
+**The setting.**  `E` over `F_{p⁴}`, base `F = {P : x(P) ∈ F_p}` with
+`|F| ≈ p/2`, group order `n ≈ p⁴`.  A residual decomposes as a signed sum of
+four base points; the Weil restriction of the symmetrised `S₅` gives four
+equations over `F_p` in `e₁, …, e₄`, each of total degree `≤ 8`, with
+`8⁴ = 2^{k(k−1)} = 4,096` solutions — against `4³ = 64` at `k = 3`, which §11.4
+measured the solver attaining.
+
+**Inputs, and where each comes from.**
+
+| input | value | source |
+|---|---:|---|
+| residuals per relation | `k! = 24` | the count of §11.3; `≈ 6` at `k = 3` measured `0.15–0.18` against `1/6` |
+| `F_p` multiplications per `F_{p⁴}` multiplication | `19` | schoolbook with `t⁴ = c`, the convention behind §11.1's `11` at `k = 3` |
+| per `F_{p⁴}` inversion | `40` | norm to `F_{p²}`: `24` multiplications plus the `F_p` inversion, charged `16` as `Fp3::inv`'s count of `30` implies (it performs `14`) |
+| per affine addition, `c_add` | **`97`** | one inversion and three multiplications, the decomposition that gives exactly `63` at `k = 3` |
+| per multiplication mod `n` | `16` | schoolbook limbs, as §11.7 charges `9` for `n ≈ p³` |
+| Wiedemann, per unknown² | `(5 + 3w) = 20` at row weight `w = k + 1 = 5` | §11.7 measured `17.0·N²` at `w = 4` at all four sizes; the split `2N` dot products, `3wN²` mat-vecs, `≈ 2N²` Berlekamp–Massey reproduces the `17` |
+| unknowns after filtering, `φ` | `0.73–1.0` of `\|F\|` | `0.71–0.76` measured at `k = 3`; `1.0` if filtering finds nothing to drop |
+| rho | `S ≈ 1.3` | the reference `AGENTS.md` fixes for this thread's unit |
+
+**1. The asymptotic constant: `r∞ = c_LA / c_rho ≈ 0.34–0.63`.**  With
+`N = φp/2` unknowns, the linear algebra costs `20·16·(φp/2)² = 80φ² p²` `F_p`
+multiplications and rho `1.3 · p² · 97 = 126 p²`, both `∝ n^{1/2}`.  Their ratio
+is `r∞ = 0.634 φ²`: **`0.34`** at `k = 3`'s filtering rate, `0.63` with none.
+Below one either way, so the plain `k = 4` method, unlike `k = 3`'s, does have
+a regime where it beats rho — by a factor between `1.6` and `3`, never more,
+because the linear algebra it would converge to is itself `∝ n^{1/2}`.  This
+number does not depend on the solve at all.
+
+**2. Where the relation phase hands over.**  `24|F| = 12p` residuals at `C₄`
+each put the relation phase at `12p·C₄ / 126p² = 0.095·C₄/p` of rho, so
+
+```text
+S / rho  =  0.095 · C₄ / p  +  r∞        crossover:  p* = 0.095 · C₄ / (1 − r∞)
+```
+
+**3. A floor on `C₄`, from this note's own solver.**  §11.4–11.6's design reads
+the eigenvalues off the characteristic polynomial of a `D × D` multiplication
+matrix.  That step alone measured `272,392 = 1.039·64³` per solve at `k = 3`
+(`experiments/23_gaudry_lazy_elim_baseline.json`, `p = 271`, seed 1).  At
+`D = 4,096` it is **`C₄ ≥ 7.1·10¹⁰`** before any Macaulay elimination — whose
+matrix at the regularity degree `4·7 + 1 = 29` has `C(33, 4) = 40,920` columns
+against `k = 3`'s `286` — or any normal form.  At `k = 3` the characteristic
+polynomial was `31 %` of `C₃`.
+
+**4. The crossover the floor implies — extrapolated on the exponents
+`n^{1/4}` (relations) and `n^{1/2}` (linear algebra and rho).**
+
+| `C₄` | `r∞ = 0.34` (`φ = 0.73`) | `r∞ = 0.63` (`φ = 1`) |
+|---|---:|---:|
+| floor, `7.1·10¹⁰` | **`n* ≈ 2^{133}`** | `2^{136.5}` |
+| `3×` the floor | `2^{139}` | `2^{143}` |
+| `10×` the floor | `2^{146}` | `2^{150}` |
+
+At the smallest size this note runs, `p = 271` (`n ≈ 2^{32}`), the formula puts
+`k = 4` at **`2.5·10⁷×` rho**, against `k = 3`'s `528×` at `2^{33}`.  Past
+`n*` it would sit at `0.34–0.63×` rho; before it, the relation phase decides
+everything.  Against `k = 3`'s double-large-prime crossover past `2^{230}`,
+`k = 4` hands over about a hundred doublings sooner.  That is a statement
+about exponents already derived, not a measurement.
+
+**What a measurement can and cannot change.**  A measured `C₄` in this design
+cannot fall below the floor, so it can only move `n*` **later** — by `4 log₂ m`
+bits for a `C₄` that is `m×` the floor.  It cannot touch `r∞`.  What is not in
+this design is not bounded by it: an `F₄` / sparse-FGLM solver, or the
+symmetries Faugère, Gaudry, Huot and Renault use on curves with rational
+torsion, lower `D` or the `D³`, and in this model a factor `f` off `C₄` moves
+`n*` about `4 log₂ f` bits earlier.  Those are levers on a constant, and would
+be registered as `engineering` if built.
+
+**Two variants the derivation settles without a build.**
+
+- **Joux–Vitse, decompositions into `k − 1 = 3` points.**  A residual is a
+  three-point sum about `1/(6p)` of the time, so `≈ 3p²` residuals —
+  `∝ n^{1/2}`, rho's exponent again — at `C′` each, where `C′` is the
+  overdetermined `S₄` solve.  `S / rho` tends to `3C′/126 + r∞`: below one only
+  if `C′ < 28` `F_p` multiplications (`15` if `φ = 1`).  `k = 3`'s two-point
+  solve already costs `1,513`, so at any `C′` of that order this variant sits
+  near **`36×` rho at every size**.  The solve cost enters its asymptote; it
+  does not enter the full-decomposition variant's.
+- **Double large primes.**  They trade the `p²` linear algebra for more
+  residuals, `Õ(p^{3/2})` of them.  The extra residuals cost a factor
+  `∝ p^{1/2}` of `C₄` each and save linear algebra `∝ p²`, so the variant beats
+  the plain method only once `p^{1/2}` outgrows `C₄` up to constants — `p` of
+  order `C₄²`, far past `n*`.  It is the asymptote (`n^{3/8}`, closing on rho
+  as `n^{-1/8}`), not the crossover.
+
+**The build this leaves.**  Only `C₄` — the one measured input the crossover
+depends on, and the check that the `S₅` system behaves generically
+(`D = 4,096`, regularity `29`).  Registered target: `C₄` per residual, for a
+full solve in §11.4–11.6's design, at `p = 271` on at least three residuals,
+with **every** output cross-checked against a meet-in-the-middle decomposition
+oracle (zero mismatches), counted under this note's accounting.  Prediction:
+`C₄ ≥ 7.1·10¹⁰`, so `n* ≥ 2^{133}`.  Inadmissible: a special curve family or
+symmetry without registering it as a separate lever; changing the
+multiplication charges above; quoting `n*` as anything but an extrapolation.
+Abandoned, with whatever bound was reached recorded, if the degree-`29` solve
+cannot run in this container (`15 GB`; a dense `36,824 × 40,920` matrix is
+`6 GB` in `u32` and `12 GB` in `u64`) or takes more than a few hours a
+residual.
+
+**What it costs.**  None of the `k = 3` code carries over directly: `Fp3`,
+`E3`, the symbolic `S₄` and the solver are all hard-wired to three.  The build
+is `F_{p⁴}` arithmetic and a curve generator; `S₅` via
+`Res_Y(S₄(x₁, x₂, x₃, Y), S₃(x₄, x₅, Y))`, symmetrised into `e₁, …, e₄`, which
+is `≤ 495 · 9` coefficients; its Weil restriction; a four-variable Macaulay
+solve at degree `29` with row selection, normal forms and a `4,096`-dimensional
+eigen-solve; and a meet-in-the-middle oracle to check it.  That is days of
+work, and runs of minutes to hours per residual.  Its payoff is one number
+that can only confirm the floor or move `n*` later.
+
+### 11.17 `C₄`, measured: `17×` the floor, and the crossover moves to `2^{150}`
+
+**Runner:** `cargo run --release --example gaudry_quartic_c4 -- --p 269 --seed 1
+--residuals 4 --json …`, and `-- --generic 2,3,4,5,6,7` for the scaling panel.
+**Frozen:** `experiments/24_gaudry_quartic_c4.json` (and `.log`, with the phase
+progress), `experiments/24_gaudry_quartic_generic.json` (and `.log`).
+**Summary:** `python3 scripts/summarize_quartic_c4.py <c4> <generic>`
+**Source:** `src/cryptanalysis/gaudry_quartic.rs`, `examples/gaudry_quartic_c4.rs`.
+**Registered in advance:** §11.16, pushed (`4d4f4cb8`) before any `F_{p⁴}` code
+existed (`220b8883`).
+
+**One deviation from the registration.**  §11.16 named `p = 271`.  For
+`p ≡ 3 (mod 4)` every binomial `t⁴ − c` is reducible, so `F_p[t]/(t⁴ − c)` is not
+a field there; the run uses `p = 269`, the nearest prime `≡ 1 (mod 4)`.  `C₄`
+depends on `p` only through root finding, `10⁻⁶` of it.
+
+**What was built** (`gaudry_quartic`): `F_{p⁴}` under `Fp3`'s counting
+convention; a curve with coefficients outside `F_{p²}`; `S₅` evaluated
+numerically as `Res_Y(S₃(x₁, x₂, Y), S₄(x₃, x₄, x₅, Y))`; the symmetrised `S₅` by
+interpolation — `495` `e`-monomials by `9` powers of `x_R`, solved once per curve
+(`1.2·10⁹` multiplications, outside `C₄` as `k = 3`'s precomputation is) and
+checked against fresh resultant evaluations; and the §11.4–11.6 solver in four
+unknowns — Macaulay matrix at degree `29` with Macaulay's row selection, forward
+elimination by leading column, normal forms memoised right to left, `M_{e₁}`,
+and the characteristic polynomial, roots and eigenvectors through the same
+counted routines as `k = 3`.  A meet-in-the-middle oracle over pairs of base
+points checks every decomposition.  Tests: `S₅` vanishes on four-point sums and
+is symmetric in its first four arguments; the solver recovers planted roots of
+random quadrics and cubics in four unknowns at the Bézout dimension `d⁴`.
+
+**1. The inputs §11.16 derived hold.**  `F_p` multiplications per `F_{p⁴}`
+addition measure **`97.0`**, the derived figure.  The quotient has dimension
+**`4,096`** on every residual at the Macaulay bound `29`: the `S₅` system is as
+generic as §11.16 assumed.  The matrix is `41,780 × 40,920` (`3.4 GB` as `u16`),
+rank `36,824`.
+
+**2. `C₄`.**
+
+| residual | `C₄` | elimination | normal forms | charpoly | eigenvectors | rational eigenvalues | solver = oracle | wall |
+|---|---:|---:|---:|---:|---:|---:|---|---:|
+| 0, constructed | `1.227·10¹²` | `5.825·10¹¹` | `5.461·10¹¹` | `7.06·10¹⁰` | `2.77·10¹⁰` | 2 | `{41, 122, 180, 226}` = planted | `1,625 s` |
+| 1 | `1.213·10¹²` | `5.825·10¹¹` | `5.460·10¹¹` | `7.06·10¹⁰` | `1.39·10¹⁰` | 1 | `∅ = ∅` | `1,460 s` |
+| 2 | `1.213·10¹²` | `5.825·10¹¹` | `5.461·10¹¹` | `7.06·10¹⁰` | `1.39·10¹⁰` | 1 | `∅ = ∅` | `1,499 s` |
+| 3 | `1.199·10¹²` | `5.825·10¹¹` | `5.460·10¹¹` | `7.06·10¹⁰` | `0` | 0 | `∅ = ∅` | `1,450 s` |
+
+**`C₄ = 1.213·10¹²`, `17.0×` the registered floor.**  The `2.3 %` spread is the
+eigenvector step alone, which scales with the number of rational eigenvalues;
+elimination, normal forms and the characteristic polynomial agree to four
+figures on every residual.  The cross-check agrees on all four, but three of
+those agreements are on the empty set — a residual decomposes about one time in
+`24` — so the constructed residual, whose planted decomposition both the solver
+and the oracle return, is the check that carries weight.
+
+Elimination is `48 %` of `C₄` and the normal forms `45 %`, each alone about `8×`
+the floor.  The characteristic polynomial costs `1.027·D³`, a shade under the
+`1.039` §11.16 carried over from `k = 3`: the generic runs show the coefficient
+drifting down with `D` (`1.063` at `81`, `1.032` at `2,401`), so the floor's own
+component was `1.2 %` high.  It is `6 %` of `C₄`.
+
+**3. The same solver on generic systems predicts it.**  Four random equations of
+degree `d` in four unknowns with a planted root, every root found, every
+quotient at the Bézout dimension:
+
+| `d` | columns | `D = d⁴` | `C` | elimination / normal forms | charpoly / `D³` | wall |
+|---:|---:|---:|---:|---|---:|---:|
+| 2 | 126 | 16 | `4.6·10⁴` | 44 % / 31 % | 1.010 | — |
+| 3 | 715 | 81 | `6.2·10⁶` | 47 % / 41 % | 1.063 | — |
+| 4 | 2,380 | 256 | `2.3·10⁸` | 46 % / 42 % | 1.054 | `1 s` |
+| 5 | 5,985 | 625 | `3.7·10⁹` | 47 % / 44 % | 1.045 | `5 s` |
+| 6 | 12,650 | 1,296 | `3.5·10¹⁰` | 47 % / 44 % | 1.038 | `58 s` |
+| 7 | 23,751 | 2,401 | `2.4·10¹¹` | 47 % / 44 % | 1.032 | `419 s` |
+
+`C ∝ D^{3.11}` over `d = 4 … 7` predicts `1.26·10¹²` at `D = 4,096`, **`4 %`**
+above the `S₅` measurement.  Nothing about the summation polynomial makes this
+system cheaper or dearer than a generic one of its degrees: `C₄` is what a
+Macaulay solve of four octics in four unknowns costs, and `C_k` in this design
+is `≈ D^{3.1}` with `D = 2^{k(k−1)}`.
+
+**4. The crossover, extrapolated** on §11.16's formula
+`p* = 0.095·C₄ / (1 − r∞)` and the exponents `n^{1/4}` and `n^{1/2}`:
+
+| `C₄` | `r∞ = 0.34` | `r∞ = 0.63` |
+|---|---:|---:|
+| registered floor, `7.1·10¹⁰` | ~~`2^{133}`~~ | ~~`2^{136.5}`~~ |
+| **measured, `1.21·10¹²`** | **`n* ≈ 2^{149.4}`** | **`2^{152.8}`** |
+
+`17×` the floor moves `n*` `4 log₂ 17 ≈ 16` bits later — the only direction the
+registration allowed.  At `p = 269` (`n ≈ 2^{32}`) the relation phase alone
+would be **`4.3·10⁸×` rho**.  Against `k = 3`'s double-large-prime crossover
+past `2^{230}`, the full-decomposition `k = 4` method still hands over about
+**eighty doublings sooner**, and past `n*` it would sit at `0.34–0.63×` rho
+rather than tend to zero.
+
+**Class.**  A stage diagnostic: `C₄` prices one phase, and `n*` extrapolates the
+method from it on derived exponents.  No end-to-end `S` exists for `k = 4`, and
+none is claimed.  Nothing here changes an existing method's cost, so none of
+§3's four classes applies.  §11.16's prediction — `C₄ ≥ 7.1·10¹⁰`,
+`n* ≥ 2^{133}` — is met, and its abandonment condition was not reached: each
+solve took under half an hour in `3.7 GB`.
+
+**What this leaves.**  At `k = 4` the crossover is a question about one
+constant.  Every factor `f` taken off `C₄` moves `n*` about `4 log₂ f` bits
+earlier, and in this design `C₄ ≈ D^{3.1}`, so the levers are the ones that
+shrink `D` or its exponent — `F₄` with sparse FGLM, or the Faugère–Gaudry–Huot–
+Renault symmetries on curves with rational torsion.  Any of them would be
+registered as `engineering`: none changes `r∞`, which caps a plain `k = 4`
+method at `1.6–3×` better than rho however cheap the solve gets.
+
+### 11.18 Pre-registration: measuring `r∞`, the one claim that puts `k = 4` below rho
+
+**Written before the measurement exists.**  §11.16 derived that a plain `k = 4`
+method tends to `r∞ = c_LA / c_rho = 0.34–0.63×` rho, and §11.17 carried it
+into the scoreboard as "would eventually beat rho by `1.6–3×`".  It is the only
+statement in §11 that puts anything below rho, and every input to it is
+borrowed or derived: the Wiedemann constant from `k = 3` rescaled to row
+weight `5`, the filtering fraction `φ` from `k = 3`, the decomposition rate from
+a count, rho's `S` from the thread's convention.  None of them needs the `S₅`
+solve, so all of them can be measured directly, at sizes where the method
+runs end to end.
+
+**What runs.**  Prime-order curves over `F_{p⁴}` for `p ∈ {269, 521, 769, 1033}`
+(`n ≈ 2^{32.3}, 2^{36.1}, 2^{38.3}, 2^{40.0}`), two seeds each.  Relations come
+from the meet-in-the-middle oracle of §11.17 — **not** the `S₅` solve: the
+relation phase is not what is measured here, and its cost is reported beside
+the table and kept out of the ratio.  Relations are filtered to a square core
+and solved by the §11.7 Wiedemann, with every attempt's operations counted;
+the logarithm is accepted only if `[d]G = Q`.  Rho runs `16` times per curve on
+the same group, because a single rho run's `S` moves by `2×` between seeds.
+
+**The statistic.**  On each curve, both measured in `F_p` multiplications:
+
+```text
+r  =  LA  /  rho  =  (la_ops · 16)  /  (S_rho · √n · c_add)
+```
+
+with multiplications mod `n` charged `16` and `c_add` the measured `97.0`, as
+§11.16 did.  Both terms grow as `n^{1/2}` if §11.16 is right, so `r` should be
+flat across the four sizes; its value is `r∞`.  Reported beside it, each input
+§11.16 derived: the decomposition rate against `1/24`, `φ` against `0.73`, the
+Wiedemann constant `la_ops / N²` against `20`, the row weight against `5`, rho's
+`S` against `1.3`, and the linear algebra's exponent in `n` against `1/2`.
+
+**Registered outcomes.**
+
+| outcome | condition |
+|---|---|
+| **confirmed** | `r` flat within its seed spread and inside `0.34–0.63` |
+| **corrected** | `r` flat and below `1`, but outside `0.34–0.63`: the cap becomes `1/r` |
+| **withdrawn** | `r ≥ 1`, or `r` rising with `n`: a plain `k = 4` method never beats rho, and §11.16–11.17's "`1.6–3×`" comes off the scoreboard |
+
+**Inadmissible:** changing the `16` charge or `c_add` after seeing the data;
+dropping filtering or failed Wiedemann attempts from `la_ops`; excluding a
+seed; using fewer than `16` rho runs for any curve; any run without a verified
+logarithm.  An `S₅`-based relation phase would change nothing here, since
+`r∞` does not depend on the solve.
+
+### 11.19 `r∞`, measured: `0.52×` rho, inside the band §11.16 derived
+
+**Runner:** `cargo run --release --example gaudry_quartic_la -- --sizes
+269,521,769,1033 --seeds 2 --rho-runs 16 --json …`.
+**Frozen:** `experiments/25_gaudry_quartic_la.json` (and `.log`).
+**Summary:** `python3 scripts/summarize_quartic_la.py
+experiments/25_gaudry_quartic_la.json experiments/24_gaudry_quartic_c4.json`
+**Source:** `src/cryptanalysis/gaudry_quartic.rs` (`run_k4_la`, `rho4`),
+`examples/gaudry_quartic_la.rs`.
+**Registered in advance:** §11.18, pushed before the pipeline existed.
+
+Eight curves, two per size, run as §11.18 registered.  Relations come from the
+meet-in-the-middle oracle.  They are filtered to a square core and solved by
+the §11.7 Wiedemann, with every attempt counted.  The logarithm is accepted
+only if `[d]G = Q`, and rho runs `16` times on each curve.  **Every logarithm
+verified, and all `128` rho runs.**  Every Wiedemann solve succeeded on its
+first attempt, no seed was excluded, and nothing deviated from §11.18.
+
+| `p` | `log₂ n` | `\|F\|` | rate (`1/24 = 0.042`) | `φ` (`0.73`) | row weight (`5`) | LA, mod-`n` mults | LA `/ N²` (`20`) | rho `S`, 16 runs | `r`, this curve's rho | **`r`, pooled rho** | MITM relation phase `/` rho (not in `r`) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 269 | 32.3 | 132 | 0.0374 | 0.909 | 5.00 | `2.89·10⁵` | 20.05 | 1.454 ± 0.230 | 0.453 | **0.499** | 1,301 |
+| 269 | 32.3 | 145 | 0.0612 | 0.910 | 5.00 | `3.49·10⁵` | 20.05 | 1.297 ± 0.134 | 0.614 | **0.604** | 1,054 |
+| 521 | 36.1 | 264 | 0.0418 | 0.913 | 5.00 | `1.16·10⁶` | 20.02 | 1.231 ± 0.183 | 0.574 | **0.536** | 2,469 |
+| 521 | 36.1 | 259 | 0.0363 | 0.907 | 5.00 | `1.11·10⁶` | 20.03 | 1.277 ± 0.227 | 0.526 | **0.509** | 2,689 |
+| 769 | 38.3 | 404 | 0.0503 | 0.889 | 5.00 | `2.58·10⁶` | 20.02 | 1.574 ± 0.158 | 0.457 | **0.546** | 3,371 |
+| 769 | 38.3 | 371 | 0.0355 | 0.884 | 5.00 | `2.15·10⁶` | 20.02 | 1.047 ± 0.177 | 0.574 | **0.455** | 3,704 |
+| 1033 | 40.1 | 496 | 0.0348 | 0.883 | 5.00 | `3.84·10⁶` | 20.01 | 1.291 ± 0.201 | 0.460 | **0.450** | 4,988 |
+| 1033 | 40.1 | 548 | 0.0538 | 0.878 | 5.00 | `4.63·10⁶` | 20.01 | 1.381 ± 0.155 | 0.518 | **0.543** | 4,353 |
+
+Rho's `S` does not depend on `n`, and one curve's `16` runs leave it a
+standard error near `15 %`, so the ratio is taken against rho pooled over all
+`128` runs: **`S = 1.319 ± 0.065`**.  The per-curve column is kept for
+comparison.  By size, `r` averages `0.551, 0.523, 0.500, 0.496`.
+
+**1. The registered outcome: confirmed.**  **`r∞ = 0.518 ± 0.031`**, inside
+§11.16's `0.34–0.63`.  `r` is flat.  Its fitted exponent in `n` is `−0.021 ±
+0.017`, and the two-standard-error interval `[−0.054, +0.013]` contains zero.
+The linear algebra itself grows as `n^{0.479 ± 0.017}` against the `n^{1/2}`
+§11.16 derived.  The confirmation does not rest on pooling rho.  §11.18
+registered `r` against each curve's own rho, and on that statistic every one
+of the eight curves lands at `0.453–0.614`, inside the band too.  So a plain `k = 4` method's linear algebra costs about half
+of rho.  Past the handover such a method would beat rho by **`1/r∞ ≈ 1.9×`**
+and no more.  That replaces the derived `1.6–3×`.
+
+**2. The inputs, measured against what §11.16 derived.**
+
+| input | derived | measured | effect on `r∞` |
+|---|---:|---:|---|
+| decomposition rate | `1/24 = 0.0417` | `0.0439` | none: it sets how many residuals are tried, not the matrix |
+| filtering fraction `φ` | `0.73`, borrowed from `k = 3` | `0.897` | `r∞ = 0.634·φ²`: the one input that was off |
+| row weight | `5` | `5.00` | — |
+| Wiedemann constant, `la_ops / N²` | `20` | `20.03` | — |
+| rho's `S` | `1.3`, the convention | `1.319 ± 0.065` | — |
+| linear algebra's exponent in `n` | `1/2` | `0.479 ± 0.017` | — |
+
+The only derived input that moved is `φ`.  Filtering keeps `0.897` of the
+unknowns at `k = 4`, against the `0.73` §11.16 borrowed from `k = 3`.  §11.16's
+band was `r∞ = 0.634·φ²` over `φ ∈ [0.73, 1]`.  At the measured `φ` that
+formula gives `0.510`, and the measurement is `0.518`, `1.6 %` above it.  So
+the model §11.16 wrote down holds, and its band was wide only because one of
+its inputs was borrowed.  The run-to-run scatter in `r` follows the core size:
+`N/(p/2)` ranges over `0.85–0.98`, and `r` goes as its square.
+
+One drift is worth recording and not extrapolating.  `φ` falls by `0.016` per
+doubling of `p` across these sizes, which is what the linear algebra's
+exponent sitting a shade under `1/2` reflects.  At sizes that fit, it moves
+`r` less than the seed spread does.
+
+**3. The crossover, re-derived at the measured `r∞`.**  §11.17 carried the
+derived band into `n* ≈ 2^{149.4}–2^{152.8}`.  At the measured value, with
+§11.17's `C₄ = 1.213·10¹²`, the measured rho `S` and `c_add = 97.0`:
+
+| | `r∞` | `n*` (extrapolated) |
+|---|---:|---:|
+| §11.17, derived band | `0.338–0.634` | ~~`2^{149.4}–2^{152.8}`~~ |
+| **measured** | **`0.518 ± 0.031`** | **`2^{151.1}`** (`2^{150.8}–2^{151.5}`) |
+
+This is still an extrapolation.  It rests on the same exponents, `n^{1/4}` for
+relations and `n^{1/2}` for the linear algebra and rho, and on §11.17's `C₄`.
+`scripts/summarize_quartic_c4.py` keeps §11.17's derived `r∞` constants,
+because it prints §11.17's frozen view; this section supersedes them.
+
+**4. What this does not say.**  `r∞` is a ratio of two phases, the linear
+algebra against rho, and at these sizes the method's `S` is nowhere near it.
+Here the meet-in-the-middle oracle stands in for the `S₅` solve.  Its relation
+phase is `1,054–4,988×` rho, reported beside the table and kept out of `r` as
+§11.18 registered, and it grows with `p`.  The `S₅` relation phase §11.17
+measured is `4.3·10⁸×` rho at `p = 269`.  No end-to-end `k = 4` `S` below rho
+exists, and none is claimed.  What is measured is the ceiling on what such an
+`S` could ever reach.
+
+**Class.**  A stage diagnostic: it prices one phase against the reference.
+No existing method's cost changed, so none of §3's four classes applies.
+§11.18's prediction is confirmed.  Wall-clock, as a practicality note: `1.9` h
+for the eight curves on four cores.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,

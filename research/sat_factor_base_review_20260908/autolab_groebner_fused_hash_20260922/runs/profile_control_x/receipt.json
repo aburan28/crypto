@@ -1,0 +1,23 @@
+{
+  "child_system_ms": 4.862,
+  "child_user_ms": 865.389,
+  "command": [
+    "target/release/examples/koblitz_f4_frontier_probe",
+    "x",
+    "3",
+    "solve"
+  ],
+  "ended_unix_ns": 1790092460840801000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/koblitz_f4_frontier_probe",
+  "executable_sha256": "e6c9af23d505c7a554e841a47fbaadd59ff06b50bf8798e64cba97c0c6a9838d",
+  "exit_code": 0,
+  "peak_rss_bytes": 34521088,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790092459968110000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 544,
+  "stdout_sha256": "b5bd25ea0c01e9bf2aa586febd5f9cd3c1a017a5ba3676ca1223388bea04aa3f",
+  "task_id": "TASK-KIC-GROEBNER-FUSED-HASH-PROFILE-CONTROL-X-20260922",
+  "wall_ms": 872.691
+}
