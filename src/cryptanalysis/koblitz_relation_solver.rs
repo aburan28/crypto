@@ -67,24 +67,112 @@ fn mulmod(a: u64, b: u64, m: u64) -> u64 {
     ((a as u128 * b as u128) % m as u128) as u64
 }
 
+/// `a − b mod m` for reduced `b`, without a branch: which side of `b` the
+/// value `a` falls on is data, a coin flip in the elimination loops, and
+/// a mispredicted branch there costs more than the arithmetic.
 #[inline]
 fn submod(a: u64, b: u64, m: u64) -> u64 {
-    if a >= b {
-        a - b
-    } else {
-        a + (m - b)
+    let (d, borrow) = a.overflowing_sub(b);
+    d.wrapping_add(m & (borrow as u64).wrapping_neg())
+}
+
+/// How many pivot rows ahead the back-substitution asks for the word it
+/// will read; see [`prefetch`].
+const PREFETCH_ROWS: usize = 32;
+
+/// Ask the processor to start fetching this word.
+///
+/// The back-substitution reads one word, the entry in column `lead`, from
+/// every pivot row to its left, only to learn whether that row needs any
+/// work.  Each row is its own allocation, so once the matrix outgrows the
+/// cache every such read is a miss, and most rows turn out to need
+/// nothing.  The addresses are all known before they are read, which is
+/// the case a prefetch is for.
+#[inline(always)]
+fn prefetch(word: &u64) {
+    #[cfg(target_arch = "x86_64")]
+    // SAFETY: a prefetch has no architectural effect beyond the cache,
+    // and SSE is part of the x86-64 baseline.
+    unsafe {
+        std::arch::x86_64::_mm_prefetch::<{ std::arch::x86_64::_MM_HINT_T0 }>(
+            (word as *const u64).cast(),
+        );
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    let _ = word;
+}
+
+/// A scalar `w` prepared for many multiplications modulo `m`.
+///
+/// Every inner loop of the elimination multiplies one scalar — a pivot
+/// factor or an inverse — into a whole row, so the division a `u128 %`
+/// performs per product can be paid once per row instead.  This is
+/// Shoup's form of Barrett reduction: with `w' = ⌊w·2^64 / m⌋` stored
+/// beside `w`, the estimate `q = ⌊w'·x / 2^64⌋` of `⌊w·x / m⌋` is exact
+/// or one too small for every word `x` (the two floors lose less than
+/// `x/2^64 + 1 < 2`), so `w·x − q·m` lies in `[0, 2m)` and one
+/// conditional subtraction of `m` finishes the reduction.  The result is
+/// `(w·x) mod m` exactly, for every `x < 2^64` and every modulus; that
+/// `m` is prime is not used.
+///
+/// The remainder before correction is below `2m`, which fits a word only
+/// while `m < 2^63`; the `WIDE` form carries it in 128 bits for the
+/// moduli above that.  Both corrections are written as masks rather
+/// than comparisons because the compiler turns a comparison against a
+/// freshly loaded value into a branch, and this one is unpredictable.
+#[derive(Clone, Copy, Debug)]
+struct Scalar {
+    w: u64,
+    quotient: u64,
+}
+
+impl Scalar {
+    #[inline]
+    fn new(w: u64, m: u64) -> Self {
+        let w = w % m;
+        // `w < m`, so the quotient is below 2^64.
+        let quotient = (((w as u128) << 64) / m as u128) as u64;
+        Self { w, quotient }
+    }
+
+    /// `w·x mod m`.  `WIDE` must be set when `m ≥ 2^63`.
+    #[inline(always)]
+    fn mul<const WIDE: bool>(self, x: u64, m: u64) -> u64 {
+        let q = ((self.quotient as u128 * x as u128) >> 64) as u64;
+        if WIDE {
+            // `t = w·x − q·m − m` lies in `[−m, m)`, so its high word is
+            // all ones exactly when `t` is negative, i.e. when the
+            // subtraction of `m` was one too many.
+            let t = (self.w as u128 * x as u128)
+                .wrapping_sub(q as u128 * m as u128)
+                .wrapping_sub(m as u128);
+            (t as u64).wrapping_add(m & (t >> 64) as u64)
+        } else {
+            // With `m < 2^63` the same `t` fits a signed word.
+            let t = self
+                .w
+                .wrapping_mul(x)
+                .wrapping_sub(q.wrapping_mul(m))
+                .wrapping_sub(m);
+            t.wrapping_add(m & ((t as i64 >> 63) as u64))
+        }
     }
 }
 
 /// Modular inverse by the extended Euclidean algorithm; `None` when
 /// `a` and `m` are not coprime (impossible for prime `m` and `a ≠ 0`).
+///
+/// The remainders never exceed `max(a, m)`, so they stay in words and
+/// each step is one hardware division rather than a 128-bit one; only
+/// the cofactors, bounded by `m` in absolute value, need a signed type
+/// wider than a word.
 fn invmod(a: u64, m: u64) -> Option<u64> {
-    let (mut old_r, mut r) = (a as i128, m as i128);
+    let (mut old_r, mut r) = (a, m);
     let (mut old_s, mut s) = (1i128, 0i128);
     while r != 0 {
         let q = old_r / r;
         (old_r, r) = (r, old_r - q * r);
-        (old_s, s) = (s, old_s - q * s);
+        (old_s, s) = (s, old_s - q as i128 * s);
     }
     if old_r != 1 {
         return None;
@@ -165,8 +253,18 @@ impl IncrementalRelationSolver {
     }
 
     /// Feed a raw row `[c_0, …, c_{U−1}, c_d | rhs]` reduced mod `r`.
-    pub fn add_row(&mut self, mut row: Vec<u64>) -> RowStatus {
+    pub fn add_row(&mut self, row: Vec<u64>) -> RowStatus {
         assert_eq!(row.len(), self.unknowns + 2, "row width");
+        // The reduction width is fixed by the modulus, so it is chosen
+        // once per row here rather than once per product.
+        if self.modulus < 1 << 63 {
+            self.eliminate::<false>(row)
+        } else {
+            self.eliminate::<true>(row)
+        }
+    }
+
+    fn eliminate<const WIDE: bool>(&mut self, mut row: Vec<u64>) -> RowStatus {
         let m = self.modulus;
         let width = self.unknowns + 2;
         self.rows_seen += 1;
@@ -179,9 +277,10 @@ impl IncrementalRelationSolver {
                 continue;
             }
             if let Some(pivot) = &self.pivot_rows[col] {
-                for k in col..width {
-                    if pivot[k] != 0 {
-                        row[k] = submod(row[k], mulmod(factor, pivot[k], m), m);
+                let factor = Scalar::new(factor, m);
+                for (r, &p) in row[col..].iter_mut().zip(&pivot[col..]) {
+                    if p != 0 {
+                        *r = submod(*r, factor.mul::<WIDE>(p, m), m);
                     }
                 }
             }
@@ -198,21 +297,26 @@ impl IncrementalRelationSolver {
         // Normalise, then clear this column from every other pivot row
         // so the form stays fully reduced.
         let inv = invmod(row[lead], m).expect("prime modulus: nonzero entries invert");
-        for k in lead..width {
-            row[k] = mulmod(row[k], inv, m);
+        let inv = Scalar::new(inv, m);
+        for r in &mut row[lead..] {
+            *r = inv.mul::<WIDE>(*r, m);
         }
-        for col in 0..=self.unknowns {
-            if col == lead {
-                continue;
+        // Only pivots left of `lead` can have an entry in its column: a
+        // pivot row is zero before its own pivot column, and the rows
+        // right of it would each cost a cache miss to find that out.
+        for col in 0..lead {
+            if let Some(Some(ahead)) = self.pivot_rows[..lead].get(col + PREFETCH_ROWS) {
+                prefetch(&ahead[lead]);
             }
             if let Some(pivot) = self.pivot_rows[col].as_mut() {
                 let factor = pivot[lead];
                 if factor == 0 {
                     continue;
                 }
-                for k in lead..width {
-                    if row[k] != 0 {
-                        pivot[k] = submod(pivot[k], mulmod(factor, row[k], m), m);
+                let factor = Scalar::new(factor, m);
+                for (p, &r) in pivot[lead..width].iter_mut().zip(&row[lead..]) {
+                    if r != 0 {
+                        *p = submod(*p, factor.mul::<WIDE>(r, m), m);
                     }
                 }
             }
@@ -349,6 +453,147 @@ mod tests {
         assert_eq!(solver.add_row(vec![0, 1, 1, 4]), RowStatus::Independent);
         // x0 + x1 + d = 5, x0 + d = 3, x1 + d = 4  ⇒  x0 = 1, x1 = 2, d = 2.
         assert_eq!(solver.target(), Some(2));
+    }
+
+    /// Moduli at the edges of both reduction widths: the smallest ones,
+    /// word-size primes, and the primes either side of 2^63 and just
+    /// below 2^64, where the pre-correction remainder `< 2m` stops
+    /// fitting a word.
+    const EDGE_PRIMES: [u64; 10] = [
+        2,
+        3,
+        5,
+        127,
+        2_147_483_647,
+        4_294_967_291,
+        (1 << 61) - 1,
+        (1 << 63) - 25,
+        (1 << 63) + 29,
+        u64::MAX - 58,
+    ];
+
+    #[test]
+    fn scalar_mul_matches_the_u128_remainder() {
+        let mut rng = StdRng::seed_from_u64(0x5ca1a);
+        let mut moduli: Vec<u64> = EDGE_PRIMES.to_vec();
+        moduli.extend([4, 1 << 32, (1 << 63) - 1, 1 << 63, (1 << 63) + 1, u64::MAX]);
+        // Arbitrary moduli of every bit length: nothing here needs a prime.
+        for bits in 2..=64u32 {
+            let low = 1u64 << (bits - 1);
+            moduli.push(low | (rng.gen::<u64>() & (low - 1)));
+        }
+        for &m in &moduli {
+            let mut words = vec![0, 1, 2, m - 1, m, m.wrapping_add(1), 1 << 63, u64::MAX];
+            words.extend((0..24).map(|_| rng.gen_range(0..m)));
+            words.extend((0..8).map(|_| rng.gen::<u64>()));
+            // The scalar is reduced on construction, so an unreduced one
+            // is tested too; the operand may be any word.
+            for &w in &words {
+                let scalar = Scalar::new(w, m);
+                for &x in &words {
+                    let expected = mulmod(w % m, x, m);
+                    assert_eq!(scalar.mul::<true>(x, m), expected, "wide w={w} x={x} m={m}");
+                    if m < 1 << 63 {
+                        assert_eq!(scalar.mul::<false>(x, m), expected, "w={w} x={x} m={m}");
+                    }
+                }
+            }
+        }
+    }
+
+    /// The elimination as it was written with a `u128 %` per product and
+    /// branching subtraction, kept as the reference the solver must match
+    /// bit for bit.
+    fn reference_add_row(
+        pivot_rows: &mut [Option<Vec<u64>>],
+        unknowns: usize,
+        m: u64,
+        mut row: Vec<u64>,
+    ) -> RowStatus {
+        let sub = |a: u64, b: u64| if a >= b { a - b } else { a + (m - b) };
+        let width = unknowns + 2;
+        for col in 0..=unknowns {
+            let factor = row[col];
+            if factor == 0 {
+                continue;
+            }
+            if let Some(pivot) = &pivot_rows[col] {
+                for k in col..width {
+                    if pivot[k] != 0 {
+                        row[k] = sub(row[k], mulmod(factor, pivot[k], m));
+                    }
+                }
+            }
+        }
+        let Some(lead) = (0..=unknowns).find(|&c| row[c] != 0) else {
+            return if row[unknowns + 1] != 0 {
+                RowStatus::Inconsistent
+            } else {
+                RowStatus::Dependent
+            };
+        };
+        let inv = invmod(row[lead], m).unwrap();
+        for k in lead..width {
+            row[k] = mulmod(row[k], inv, m);
+        }
+        for col in 0..=unknowns {
+            if col == lead {
+                continue;
+            }
+            if let Some(pivot) = pivot_rows[col].as_mut() {
+                let factor = pivot[lead];
+                if factor == 0 {
+                    continue;
+                }
+                for k in lead..width {
+                    if row[k] != 0 {
+                        pivot[k] = sub(pivot[k], mulmod(factor, row[k], m));
+                    }
+                }
+            }
+        }
+        pivot_rows[lead] = Some(row);
+        RowStatus::Independent
+    }
+
+    #[test]
+    fn elimination_matches_the_division_reference_bit_for_bit() {
+        let mut rng = StdRng::seed_from_u64(0xe11a);
+        let mut seen = [0usize; 3];
+        for &m in &EDGE_PRIMES {
+            for (unknowns, density) in [(6usize, 2usize), (24, 3), (40, 12)] {
+                let big = BigUint::from(m);
+                let mut solver = IncrementalRelationSolver::new(unknowns, &big).unwrap();
+                let mut reference = vec![None; unknowns + 1];
+                // More rows than columns, so dependent rows occur, and
+                // some repeated rows with a shifted right-hand side, so
+                // inconsistent ones do too.
+                let mut fed: Vec<Vec<u64>> = Vec::new();
+                for i in 0..unknowns + 12 {
+                    let row = if i % 7 == 6 {
+                        let mut again = fed[rng.gen_range(0..fed.len())].clone();
+                        again[unknowns + 1] = rng.gen_range(0..m);
+                        again
+                    } else {
+                        let mut row = vec![0u64; unknowns + 2];
+                        for _ in 0..density {
+                            row[rng.gen_range(0..unknowns)] = rng.gen_range(1..m);
+                        }
+                        row[unknowns] = rng.gen_range(0..m);
+                        row[unknowns + 1] = rng.gen_range(0..m);
+                        row
+                    };
+                    fed.push(row.clone());
+                    let expected = reference_add_row(&mut reference, unknowns, m, row.clone());
+                    assert_eq!(solver.add_row(row), expected, "m={m} U={unknowns} row {i}");
+                    assert_eq!(solver.pivot_rows, reference, "m={m} U={unknowns} row {i}");
+                    seen[expected as usize] += 1;
+                }
+                assert_eq!(solver.rows_seen(), unknowns + 12);
+            }
+        }
+        // Every outcome of a row was exercised, not only the pivot path.
+        assert!(seen.iter().all(|&n| n > 0), "statuses seen {seen:?}");
     }
 
     #[test]
