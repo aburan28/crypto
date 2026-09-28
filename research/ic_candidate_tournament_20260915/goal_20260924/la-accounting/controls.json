@@ -1,0 +1,30 @@
+{
+  "scope": "toy unit and correctness controls; no performance selection",
+  "base_commit": "94acd673588f37affb554934d6c2d846c1d834f5",
+  "depends_on_pr": 789,
+  "files": {
+    "src/cryptanalysis/koblitz_index_calculus.rs": "02b38b68b3ee9a8f2b17e4afac0fe1040513295134aca561212904d1a70de7f5",
+    "research/ic_candidate_tournament_20260915/ci/Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627"
+  },
+  "logs": {
+    "accounting.log": {
+      "sha256": "3bf639af66926bc7cd982013f3360db7ef4bebe4ccd7cb51b720931389da505e",
+      "bytes": 2437
+    },
+    "equivalence.log": {
+      "sha256": "88bae6858daa3c93b7b1f4b138960555509f4d2058641ead0509f609f05b80d7",
+      "bytes": 2280
+    }
+  },
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "release_tests_passed": 3,
+  "promotion_eligible": false,
+  "performance": {
+    "single_target_online_ms": null,
+    "cold_ms": null,
+    "cold_Ir": null,
+    "S": null,
+    "rho_ratio": null,
+    "speedup": null
+  }
+}

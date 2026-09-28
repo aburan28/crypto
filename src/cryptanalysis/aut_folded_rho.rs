@@ -98,7 +98,7 @@ use crate::cryptanalysis::cga_hnc::{pt_add, pt_double, pt_scalar_mul, Pt2};
 use crate::utils::mod_inverse;
 use num_bigint::{BigInt, RandBigInt, ToBigInt};
 use num_integer::Integer;
-use num_traits::{One, Signed, Zero};
+use num_traits::{One, Zero};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -517,12 +517,12 @@ mod tests {
         if n < 4 {
             return true;
         }
-        if n % 2 == 0 {
+        if n.is_multiple_of(2) {
             return false;
         }
         let mut d = 3u64;
         while d.saturating_mul(d) <= n {
-            if n % d == 0 {
+            if n.is_multiple_of(d) {
                 return false;
             }
             d += 2;

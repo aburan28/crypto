@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "python": "3.12.14",
+  "command": "python3 research/toy_binary_elimination_20260924/verify.py",
+  "sha256": {
+    "PROTOCOL.md": "a9fb96369a43082215003a7460b48c38f8b80cc60e9805877821d56ff648c504",
+    "FOLLOWUP_PROTOCOL.md": "b74feb2843470d75d56079261fa665f95bfa07b44d865f4c843a4b90676b4555",
+    "run_initial.py": "aa6ed6c87ba1a0af409b6a10276fda2d01b2de01e3d40cbe0694ef33037bd4ad",
+    "run.py": "e79e88cf23ced9c11359618352f2413e9c0369f8680c00c803e53224fff1e534",
+    "verify.py": "46e95e7ee98718d574bc89532be4a27f3647db448826060ab59b4ef2ae5dd2c7",
+    "results.json": "e5a5367433886e09b9fe95f989687f37b43597be36541c5fe82e1af036701d73",
+    "refined.json": "2e5e87ea5e4a1a49a7b0c53523db9fb5a3dbd178d4d0e153ffb1bb6d3bd91d0f",
+    "../toy_binary_formula_audit_20260924/audit.py": "8f3a52bdf388a473ed794f783988c8101fb1836d3b397d16cb175a1772ea7585"
+  },
+  "checks": {
+    "frozen_replays": 2,
+    "point_pairs": 40064,
+    "frobenius_pairs": 53,
+    "independent_linear_dimensions": 106,
+    "elementary_ideals": 3
+  },
+  "initial_verifier_failure": "Python tuple versus JSON list replay comparison; serialization normalization fixed; frozen outputs unchanged",
+  "end_to_end_operations": null,
+  "speedup": null,
+  "degree_of_regularity": null
+}

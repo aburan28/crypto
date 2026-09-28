@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "scope": "Standalone generic Boolean degree-3 construction plus canonical GF2 reduced-row-space computation. This is a complete bounded linear-algebra workload, not complete Groebner closure or polynomial solving. No production solver integration, curve inputs, scalar recovery, relation campaigns or rho runs.",
+  "variables": [
+    12,
+    20,
+    28,
+    36
+  ],
+  "matrix_degree": 3,
+  "discovery_seeds": [
+    17,
+    937
+  ],
+  "holdout_seeds": [
+    20260930,
+    262147
+  ],
+  "families": [
+    "quadratic",
+    "linear_drop",
+    "restricted_cycle"
+  ],
+  "batches": [
+    1,
+    4,
+    8
+  ],
+  "repetitions": 30,
+  "variants": [
+    "sorted_reduce",
+    "ranked_reduce",
+    "sparse_reduce",
+    "stream_reduce",
+    "incidence_reduce"
+  ],
+  "bridge_variants": [
+    "sorted_reduce",
+    "ranked_reduce",
+    "sparse_reduce",
+    "stream_reduce",
+    "incidence_reduce",
+    "dense_reduce"
+  ],
+  "bridge_n": 12,
+  "limits": {
+    "variables": 36,
+    "matrix_degree": 3,
+    "generators": 12,
+    "terms_per_generator": 32,
+    "rows": 4096,
+    "columns": 8192,
+    "batch": 8,
+    "worker_seconds": 60,
+    "campaign_seconds": 600,
+    "dense_max_n": 12
+  },
+  "fixture_generators": 8,
+  "fixtures": "Same unscreened fixture generator as the coordinate study: eight generators, sixteen quadratic support monomials plus constant and ten linear terms, fresh coefficients for every input. Full-mask quadratic and linear-drop families, and restricted eight-variable quadratic/linear/constant/zero cycles. New holdouts; no post-holdout tuning.",
+  "contract": "Return ascending original compact column labels and the unique nonzero RREF rows of the complete capped degree-D product matrix. The source-row budget counts every nonzero generated row before elimination, including dependent rows. No early exit on rank saturation or a constant row. Context changes fall back to direct construction and the same reducer. This is not a SAT/UNSAT or full Groebner-basis verdict.",
+  "candidate": "incidence_reduce retains sparse-intermediate construction and compact coordinates. Forward elimination caches the nonzero word positions of immutable pivot rows. A pivot-column mask builds target-row incidence from the forward-echelon basis. Higher-pivot backward eliminations cannot change lower-pivot incidence, so those lists stay valid. Refresh each pivot row nonzero-word list after all higher pivots have been eliminated. Charge every cache, mask, list, update, final output and destruction.",
+  "controls": {
+    "sorted_reduce": "Direct sorted/parity construction followed by incremental pivot-indexed reduction and full backward elimination.",
+    "ranked_reduce": "Packed ranked construction followed by the identical reducer on compact coordinates.",
+    "sparse_reduce": "Sparse-intermediate construction followed by that same reducer.",
+    "dense_reduce": "Small n=12 direct-lookup construction followed by that same reducer; absent above the bridge.",
+    "stream_reduce": "Original ambient-coordinate streaming candidate, retained as a fresh control after its run_01 rejection."
+  },
+  "correctness": "Independent recursive/set-parity construction followed by column-oriented Gauss-Jordan reduction. Every measured output and original source-row count must agree exactly. Test all 5050 binary matrices with 1..3 rows and 1..4 columns against canonical form and explicit row-span enumeration; all 6144 small Boolean coefficient/degree/active-mask cases; larger family fixtures; dependent-row caps; word boundaries; context guards; and 400 small polynomial systems over all eight Boolean points. The incidence reducer joins every exhaustive matrix, polynomial and larger-fixture check, preserving exact canonical outputs and logical row-XOR counts.",
+  "accounting": "Cold context setup, construction, complete forward and backward reduction, compaction, output allocation, exact output validation and destruction. Construction and reduction are separately timed for staged arms. Streaming has one measured fused phase; its separate construction/reduction values remain null. Thirty balanced rotations of five arms, or six at n=12. All nonzero-word cache and backward-incidence preparation belongs to reduction_ns. Common fixture and independent oracle generation are outside arm timing but inside process receipts.",
+  "memory": "Retained context capacity bytes exclude allocator metadata. basis_max_bytes is the maximum across inputs of basis storage at the end of insertion, before backward elimination; it is not total peak memory and excludes incoming row and output-compaction temporaries. Whole-worker RSS includes every arm and the reference corpus. auxiliary_max_bytes records the maximum incidence-mask/list capacity storage at preparation over the batch. It excludes later nonzero-cache growth and is not process peak memory. Incidence reducer basis storage includes nonzero-word lists at the end of insertion.",
+  "operation_counters": "Count logical row XORs and executed u64 XORs in the shared reducer, including backward elimination. Logical row-XOR counts must agree across arms on matched inputs; word counts may differ with coordinate width. These are reduction-phase diagnostics, not complete calibrated operation costs.",
+  "performance_gate": "At batch8 and every family at n=20/28/36, require the 95 percent paired-bootstrap lower bound of the pointwise fastest prior pipeline / incidence_reduce total_ns above 2.0. Prior pipelines are sorted_reduce,ranked_reduce,sparse_reduce,stream_reduce. All nine gates must pass. Also report cumulative comparisons against sorted_reduce without discarding failures. No holdout tuning.",
+  "projection": "A construction-only zero-time projection holds all other measured phases fixed: total_ns / (total_ns - construction_ns), evaluated on sorted_reduce. This is a diagnostic counterfactual, not a bound on coupled implementations or full solving.",
+  "classification": "Bounded construction-plus-linear-reduction engineering diagnostic. Complete polynomial solving, Groebner iteration/root extraction, full IC operations and rho ratio remain null. The full thread goal remains open unless evidence covers that broader scope.",
+  "enable_incidence": true,
+  "candidate_arm": "incidence_reduce",
+  "comparison_controls": [
+    "sorted_reduce",
+    "ranked_reduce",
+    "sparse_reduce",
+    "stream_reduce"
+  ],
+  "reference_label": "pointwise fastest prior arm",
+  "predecessor": "run_01 is immutable: streaming lost every comparison against the fastest staged path. This additive successor targets reduction work with a different mechanism and fresh holdouts.",
+  "predecessor_worker_sha256": "75223b5c15f9924838561d60a97622938123f8a514c28ea70c245b1cdd16ccf7"
+}
