@@ -5,7 +5,9 @@ on:
     types: [opened, synchronize, reopened, labeled]
     paths:
       - 'examples/koblitz_s5_sat_instance.rs'
+      - 'Cargo.toml'
       - 'research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/**'
+      - 'research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/**'
       - '.github/workflows/n53-target-cyclic-rank.yml'
 
 permissions:
@@ -22,15 +24,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify held hashes and disjoint target schedule; never run n53 producer
+      - name: Verify replay freeze and released protocol bytes
+        run: python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/replay.py --mode freeze
+      - name: Verify held hashes and disjoint target schedule against pinned release sources; never run n53 producer
         run: |
-          python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/check_protocol.py
+          python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/replay.py --mode preflight
           git diff --check
+      - name: Check fail-closed snapshot substitution
+        run: python3 -m unittest discover -s research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928 -p 'test_replay.py' -v
       - name: Rehash immutable attempted outcome if later committed
         run: |
           bundle=research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/evidence
           if test -f "$bundle/archive_manifest.json"; then
-            python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/verify_archive.py --bundle "$bundle"
+            python3 research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_replay_20260928/replay.py --mode archive --bundle "$bundle"
           fi
 
   outcome:
