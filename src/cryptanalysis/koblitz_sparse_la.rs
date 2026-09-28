@@ -1982,6 +1982,50 @@ mod tests {
     }
 
     #[test]
+    fn lazy_strided_sums_match_per_product_sums() {
+        // The Krylov projection's and `z_times`' shape: reduced
+        // coefficients against arbitrary lanes at a stride, from empty to
+        // long enough that at 63 bits the sum, and the slice with it, is
+        // split at every second product.
+        let mut rng = StdRng::seed_from_u64(15);
+        for &modulus in &[2, 3, P, 21_044_858_204_113, Q, Q63] {
+            let red = Reducer::new(modulus).expect("in range");
+            let terms = red.lazy_terms(modulus - 1);
+            for len in 0..24 {
+                let coeffs: Vec<u64> = (0..len).map(|_| rng.gen_range(0..modulus)).collect();
+                for stride in [1, 4, 5] {
+                    let x: Vec<u64> = (0..len * stride + 4)
+                        .map(|_| {
+                            if rng.gen_bool(0.3) {
+                                u64::MAX
+                            } else {
+                                rng.gen()
+                            }
+                        })
+                        .collect();
+                    let expect: Vec<u64> = (0..4)
+                        .map(|l| {
+                            coeffs.iter().enumerate().fold(0, |acc, (k, &a)| {
+                                addmod(acc, mulmod(a, x[k * stride + l], modulus), modulus)
+                            })
+                        })
+                        .collect();
+                    let mut four = [0u64; 4];
+                    let mut acc = LazyLanes::<4>::new(&red, terms);
+                    acc.add_strided(&coeffs, &x, stride);
+                    acc.finish(&mut four);
+                    assert_eq!(four[..], expect[..], "m = {modulus}, len {len}");
+                    let mut one = 0u64;
+                    let mut acc = LazyLanes::<1>::new(&red, terms);
+                    acc.add_strided(&coeffs, &x, stride);
+                    acc.finish(std::slice::from_mut(&mut one));
+                    assert_eq!(one, expect[0], "m = {modulus}, len {len}");
+                }
+            }
+        }
+    }
+
+    #[test]
     fn block_wiedemann_solves_systems_modulo_a_63_bit_prime() {
         // Two products per accumulator: every row, the homogenising
         // column and the Krylov projection reduce part-way.
