@@ -1,6 +1,6 @@
 //! Dense Gaussian elimination over `F_2`: the Method of Four Russians
 //! with several Gray-code tables per pass, a word-strip pivot search, and
-//! an AVX-512 row update selected at run time.
+//! an AVX2 or AVX-512 row update selected at run time.
 //!
 //! The matrix is a slice of rows, each `n_cols.div_ceil(64)` words long
 //! with bit `c % 64` of word `c / 64` holding column `c` — the layout
@@ -671,6 +671,15 @@ fn simd_kind(enabled: bool) -> SimdKind {
     {
         static KIND: std::sync::OnceLock<SimdKind> = std::sync::OnceLock::new();
         *KIND.get_or_init(|| {
+            // The experiment can force AVX2 on an AVX-512 machine without
+            // changing the normal preference for the wider instruction set.
+            if std::env::var("KIC_GF2_FORCE_AVX2").as_deref() == Ok("1") {
+                return if std::arch::is_x86_feature_detected!("avx2") {
+                    SimdKind::Avx2
+                } else {
+                    SimdKind::Scalar
+                };
+            }
             if std::arch::is_x86_feature_detected!("avx512f") {
                 SimdKind::Avx512
             } else if std::arch::is_x86_feature_detected!("avx2") {

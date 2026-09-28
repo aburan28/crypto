@@ -32,6 +32,8 @@ jobs:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
       - name: Exact RREF, echelon, and word-count tests
+        env:
+          KIC_GF2_FORCE_AVX2: '1'
         run: cargo test --release --lib gf2_elim::tests -- --test-threads=1
       - name: Build and retain unmodified reference
         run: |
