@@ -10,25 +10,24 @@ rho cold instructions and `rho_pairinv_4` for rho online time. PR 765 merged the
 including exact Linux replay of 22 retained evidence sets and every exported table.
 Independent macOS receipt replay passed all 1,290 jobs, with two one-ULP
 derived-summary differences documented in the report.
-No reference selection is a promotion. One of the three improvement rounds has
-completed: [round one](improvement/round1/README.md), from
+No reference selection is a promotion. Two of the three improvement rounds have
+completed. [Round one](improvement/round1/README.md), from
 [workflow 36140265516](https://github.com/aburan28/crypto/actions/runs/36140265516),
-retained the incumbent. Its frozen checker verified 3,243/3,243 native/profile
-pairs across all six stages, plus 30/30 policy controls. The selected `stop6`
-challenger had confirmation ratios of 1.064757 online time, 0.956822 cold Ir and
-0.964563 cold native time; replay also failed promotion. Neither complete cold
-metric reached the required 0.8 ratio, the instruction familywise upper bound
-exceeded one, and online regression also failed its aggregate and cell gates.
-The full run export and scoreboard retain every measured variant. Exact Linux
-transport replay and byte-exact JSON/CSV/table reproduction passed on the merged
-evidence head. [PR 782](https://github.com/aburan28/crypto/pull/782) merged at
-`b338522537f316f2379ed8cc11bb317212e573ec` with all applicable CI passing.
-The [bounded protocol](improvement/PROTOCOL.md) fixes the nominal familywise rule,
-5,133-point historical exclusions and the first 16-pipeline registry. PR 772
-merged that implementation at `5915da9d56758f81ceabbf978e796cd6be9740c3`.
-Do not dispatch round one again. A second round must be registered from
-development evidence only, with a new source identity and all prior generated
-targets excluded. No qualifying winner has been found; the full goal remains active.
+retained the incumbent after 3,243/3,243 verified pairs; selected `stop6` failed
+promotion. [PR 782](https://github.com/aburan28/crypto/pull/782) merged that
+evidence at `b338522537f316f2379ed8cc11bb317212e573ec`.
+[Round two](improvement/round2/README.md) ran the registered version-two panel
+(seed `2026092552`) once under the calibrated Linux/musl/Valgrind contract after
+GitHub `workflow_dispatch` was denied locally; its frozen checker verified
+3,480/3,480 native/profile pairs plus 20/20 policy controls and retained the
+incumbent. Selected `stop5_word` confirmation ratios were 1.093655 online time
+(vs qualified `ic_online`), 0.922725 cold Ir and 0.987022 cold native time;
+replay also failed the familywise and complete-cost gates. Neither cold metric
+reached 0.8. The full export and scoreboard retain every measured variant.
+The [bounded protocol](improvement/PROTOCOL.md) and
+[version-two protocol](improvement-v2/PROTOCOL.md) remain frozen. Do not
+redispatch round one or round two. One registered attempt remains. No qualifying
+winner has been found; the full goal remains active.
 Canonical admission is merged in both drivers; the earlier
 [driver controls](driver-admission/README.md) preserve their fixed-vector scope.
 Public-point input and single-target native intervals are implemented in the
@@ -219,3 +218,19 @@ still precedes comparative ranking. Preserve all five exposed points in
 `generic-reference-readiness/fixtures.json` as exclusions for the next registered
 confirmation panel; keep the sealed round-one history unchanged. One round is
 closed, no challenger qualified, and two remain.
+
+## Round-two measurement
+
+The version-two reference binding from [PR 881](https://github.com/aburan28/crypto/pull/881)
+and the registered panel from [PR 892](https://github.com/aburan28/crypto/pull/892)
+are in tree. Round two completed under
+[improvement-v2/round2.json](improvement-v2/round2.json) with runner
+`run_improvement_v2.py`, seed `2026092552`, and candidate source
+`8582e4ab4b63e98696a0ff00ee296e2902923a2c39c325ab0f3e3950ffbb2b28`.
+[The evidence report](improvement/round2/EVIDENCE.md) and
+[archive](../evidence/ic-improvement-round2-20260928.tar.zst) retain the local
+calibrated run (GitHub dispatch denied), every receipt, and the negative
+promotion decision. Do not redispatch `run_round_two=true`. A third attempt needs
+a new registered source/configuration panel, the next frozen seed, and exclusions
+for every prior generated point, including all round-two fixtures; never retune
+on confirmation or replay. One attempt remains and no qualifying winner exists.

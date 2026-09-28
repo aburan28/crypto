@@ -337,10 +337,16 @@ pub fn run_pipeline<G: CountedGroup>(
         let (gae, priced_by, ns_per_op) = match (t.op_unit.as_str(), calib.ns_per_word_xor) {
             ("word XORs", Some(ns)) if calib.ns_per_add > 0.0 => (
                 t.ops as f64 * ns / calib.ns_per_add,
-                if calib.is_pinned("ns_per_word_xor") { "pinned" } else { "measured" },
+                if calib.is_pinned("ns_per_word_xor") {
+                    "pinned"
+                } else {
+                    "measured"
+                },
                 Some(ns),
             ),
-            _ if calib.ns_per_add > 0.0 => (t.wall_ns as f64 / calib.ns_per_add, "measured", wall_per_op),
+            _ if calib.ns_per_add > 0.0 => {
+                (t.wall_ns as f64 / calib.ns_per_add, "measured", wall_per_op)
+            }
             _ => (0.0, "unpriced", wall_per_op),
         };
         rel.count("solver_calls", t.calls);
@@ -484,9 +490,8 @@ mod tests {
         let g = inst.generator_point();
         let mut ops = GroupOps::default();
         let planted = 30_011 % inst.r;
-        let q = crate::cryptanalysis::ic_boundary::CountedGroup::mul(
-            &inst.curve, &mut ops, g, planted,
-        );
+        let q =
+            crate::cryptanalysis::ic_boundary::CountedGroup::mul(&inst.curve, &mut ops, g, planted);
         (
             InstanceCtx {
                 group: &inst.curve,
@@ -559,21 +564,34 @@ mod tests {
 
         let mut subtract = SubtractOracle;
         let a = run_pipeline(
-            &ctx, &spec, &base, &mut subtract, planted,
-            &Calibration::default(), None,
+            &ctx,
+            &spec,
+            &base,
+            &mut subtract,
+            planted,
+            &Calibration::default(),
+            None,
         )
         .unwrap();
 
         spec.oracle = "mitm".into();
         let mut mitm = MitmOracle::new(2);
         let b = run_pipeline(
-            &ctx, &spec, &base, &mut mitm, planted,
-            &Calibration::default(), None,
+            &ctx,
+            &spec,
+            &base,
+            &mut mitm,
+            planted,
+            &Calibration::default(),
+            None,
         )
         .unwrap();
 
         assert!(a.verified && b.verified, "both must recover the logarithm");
-        assert_eq!(a.recovered, b.recovered, "the answer cannot depend on the oracle");
+        assert_eq!(
+            a.recovered, b.recovered,
+            "the answer cannot depend on the oracle"
+        );
         assert_eq!(
             a.factor_base.columns, b.factor_base.columns,
             "the base is the same, so its column count must be"
@@ -602,8 +620,13 @@ mod tests {
         spec.factor_base_params.set("size", "16");
         let mut oracle = MitmOracle::new(2);
         let r = run_pipeline(
-            &ctx, &spec, &base, &mut oracle, planted,
-            &Calibration::default(), None,
+            &ctx,
+            &spec,
+            &base,
+            &mut oracle,
+            planted,
+            &Calibration::default(),
+            None,
         )
         .unwrap();
         // A prime base folds P and −P onto one column, so the base has
@@ -624,7 +647,10 @@ mod tests {
     ) -> InstanceCtx<'a, crate::cryptanalysis::ic_boundary::BinaryGroup<'a>> {
         let mut ops = GroupOps::default();
         let q = crate::cryptanalysis::ic_boundary::CountedGroup::mul(
-            group, &mut ops, inst.generator, planted,
+            group,
+            &mut ops,
+            inst.generator,
+            planted,
         );
         InstanceCtx {
             group,
@@ -696,7 +722,10 @@ mod tests {
         assert_eq!(solver.name, "buchberger-f2");
         assert!(solver.calls >= 1, "the solver was never called");
         assert_eq!(solver.priced_by, "measured");
-        assert!(solver.ops > 0 && solver.gae > 0.0, "solver work was not priced");
+        assert!(
+            solver.ops > 0 && solver.gae > 0.0,
+            "solver work was not priced"
+        );
         assert!(
             (solver.gae - solver.wall_ns as f64).abs() < 1e-6,
             "a measured price is the wall time over the addition time"
@@ -716,7 +745,10 @@ mod tests {
             report.total_gae >= report.decomposition.cost.gae,
             "the decomposition phase must sit inside the total"
         );
-        assert!(solver.semi_regular_degree.is_some(), "the degree bound is derived, not optional");
+        assert!(
+            solver.semi_regular_degree.is_some(),
+            "the degree bound is derived, not optional"
+        );
         assert_eq!(report.decomposition.cost.get("solver_calls"), solver.calls);
         // Every call ended one of three ways, and each way is counted:
         // a relation, a system with no liftable solution, or no
@@ -725,7 +757,10 @@ mod tests {
             report.decomposition.relations_found + oracle.unliftable <= solver.calls,
             "more outcomes than calls"
         );
-        assert_eq!(report.decomposition.cost.get("unliftable_systems"), oracle.unliftable);
+        assert_eq!(
+            report.decomposition.cost.get("unliftable_systems"),
+            oracle.unliftable
+        );
 
         // Without a calibration the solver is *unpriced*, and the report
         // says so instead of quietly dropping the cost from S.
@@ -737,11 +772,19 @@ mod tests {
             Some(std::time::Duration::from_secs(60)),
         );
         let bare = run_pipeline(
-            &ctx, &spec, &base, &mut oracle, planted,
-            &Calibration::default(), None,
+            &ctx,
+            &spec,
+            &base,
+            &mut oracle,
+            planted,
+            &Calibration::default(),
+            None,
         )
         .unwrap();
-        assert_eq!(bare.decomposition.solver.as_ref().unwrap().priced_by, "unpriced");
+        assert_eq!(
+            bare.decomposition.solver.as_ref().unwrap().priced_by,
+            "unpriced"
+        );
     }
 
     /// An engine that reports its work as `word XORs`, the one unit with
@@ -813,11 +856,15 @@ mod tests {
             ..Default::default()
         };
         let mut oracle = engine();
-        let measured = run_pipeline(&ctx, &spec, &base, &mut oracle, planted, &calib, None).unwrap();
+        let measured =
+            run_pipeline(&ctx, &spec, &base, &mut oracle, planted, &calib, None).unwrap();
         let s = measured.decomposition.solver.as_ref().unwrap();
         assert_eq!(s.op_unit, "word XORs");
         assert_eq!(s.priced_by, "measured");
-        assert!((s.gae - s.ops as f64 * 0.5 / 2.0).abs() < 1e-6, "count times the measured ratio");
+        assert!(
+            (s.gae - s.ops as f64 * 0.5 / 2.0).abs() < 1e-6,
+            "count times the measured ratio"
+        );
         assert_eq!(s.ns_per_op, Some(0.5));
 
         // The table replaced the factor: pinned, same arithmetic.
@@ -859,8 +906,13 @@ mod tests {
 
         let mut mitm = MitmOracle::new(2);
         let a = run_pipeline(
-            &ctx, &spec, &base, &mut mitm, planted,
-            &Calibration::default(), None,
+            &ctx,
+            &spec,
+            &base,
+            &mut mitm,
+            planted,
+            &Calibration::default(),
+            None,
         )
         .unwrap();
 
@@ -874,17 +926,34 @@ mod tests {
             None,
         );
         let b = run_pipeline(
-            &ctx, &spec, &base, &mut algebraic, planted,
-            &Calibration::default(), None,
+            &ctx,
+            &spec,
+            &base,
+            &mut algebraic,
+            planted,
+            &Calibration::default(),
+            None,
         )
         .unwrap();
 
         assert!(a.verified && b.verified, "both must recover the logarithm");
-        assert_eq!(a.recovered, b.recovered, "the answer cannot depend on the oracle");
+        assert_eq!(
+            a.recovered, b.recovered,
+            "the answer cannot depend on the oracle"
+        );
         assert_eq!(a.factor_base.columns, b.factor_base.columns);
-        assert!(a.decomposition.solver.is_none(), "the pair table has no solver");
-        assert!(b.decomposition.solver.is_some(), "the algebraic oracle has one");
-        assert_eq!(b.decomposition.cost.get("unliftable_systems"), algebraic.unliftable);
+        assert!(
+            a.decomposition.solver.is_none(),
+            "the pair table has no solver"
+        );
+        assert!(
+            b.decomposition.solver.is_some(),
+            "the algebraic oracle has one"
+        );
+        assert_eq!(
+            b.decomposition.cost.get("unliftable_systems"),
+            algebraic.unliftable
+        );
 
         // Target by target, the two must agree on *whether* a point
         // decomposes over the base: both are complete over it, and a
@@ -893,9 +962,12 @@ mod tests {
         use super::stages::{DecompositionOracle, FactorBaseBuilder};
         use crate::cryptanalysis::ic_boundary::{CountedGroup, OracleCounters};
         let mut ops = GroupOps::default();
-        let fb = base.build(&ctx, &spec.factor_base_params, &mut ops).unwrap();
+        let fb = base
+            .build(&ctx, &spec.factor_base_params, &mut ops)
+            .unwrap();
         let mut mitm = MitmOracle::new(2);
-        mitm.prepare(&ctx, &fb, &Params::default(), &mut ops).unwrap();
+        mitm.prepare(&ctx, &fb, &Params::default(), &mut ops)
+            .unwrap();
         let mut algebraic = DescentAlgebraicOracle::new(
             2,
             &inst,
@@ -903,7 +975,9 @@ mod tests {
             Params::default(),
             None,
         );
-        algebraic.prepare(&ctx, &fb, &Params::default(), &mut ops).unwrap();
+        algebraic
+            .prepare(&ctx, &fb, &Params::default(), &mut ops)
+            .unwrap();
         let (mut ctr_a, mut ctr_b) = (OracleCounters::default(), OracleCounters::default());
         let mut hits = 0u32;
         for k in 1..=150u64 {
@@ -920,11 +994,17 @@ mod tests {
                 for &i in indices {
                     acc = group.add(&mut ops, acc, fb.points[i]);
                 }
-                assert!(acc == point, "an algebraic decomposition that does not sum to its target");
+                assert!(
+                    acc == point,
+                    "an algebraic decomposition that does not sum to its target"
+                );
                 hits += 1;
             }
         }
-        assert!(hits > 0, "no target decomposed, so nothing was cross-checked");
+        assert!(
+            hits > 0,
+            "no target decomposed, so nothing was cross-checked"
+        );
         assert_eq!(ctr_b.unliftable_systems, algebraic.unliftable);
     }
 
@@ -951,25 +1031,44 @@ mod tests {
 
         let mut oracle = MitmOracle::new(2);
         let dense = run_pipeline(
-            &ctx, &spec, &base, &mut oracle, planted,
-            &Calibration::default(), None,
+            &ctx,
+            &spec,
+            &base,
+            &mut oracle,
+            planted,
+            &Calibration::default(),
+            None,
         )
         .unwrap();
 
         spec.linalg = "structured-gauss".into();
         let mut oracle = MitmOracle::new(2);
         let sparse = run_pipeline(
-            &ctx, &spec, &base, &mut oracle, planted,
-            &Calibration::default(), None,
+            &ctx,
+            &spec,
+            &base,
+            &mut oracle,
+            planted,
+            &Calibration::default(),
+            None,
         )
         .unwrap();
 
-        assert!(dense.verified && sparse.verified, "both must recover the logarithm");
+        assert!(
+            dense.verified && sparse.verified,
+            "both must recover the logarithm"
+        );
         assert_eq!(dense.recovered, sparse.recovered);
         assert_eq!(dense.linear_algebra.name, "incremental-gauss");
         assert_eq!(sparse.linear_algebra.name, "structured-gauss");
-        assert_eq!(dense.linear_algebra.rows, sparse.linear_algebra.rows, "same relations");
-        assert_eq!(dense.linear_algebra.rank, sparse.linear_algebra.rank, "same rank");
+        assert_eq!(
+            dense.linear_algebra.rows, sparse.linear_algebra.rows,
+            "same relations"
+        );
+        assert_eq!(
+            dense.linear_algebra.rank, sparse.linear_algebra.rank,
+            "same rank"
+        );
         assert_eq!(dense.linear_algebra.work_unit, "row_ops");
         assert_eq!(sparse.linear_algebra.work_unit, "row_ops");
         assert!(dense.linear_algebra.work > 0 && sparse.linear_algebra.work > 0);
@@ -980,5 +1079,81 @@ mod tests {
             dense.decomposition.cost.group_ops, sparse.decomposition.cost.group_ops,
             "the matrix must not change what the oracle did"
         );
+    }
+    /// **The torsion-symmetrised configuration is a complete index
+    /// calculus.**  On `K_1 / F_{2^17}` the `u`-frame base is closed
+    /// under translation by the rational 2-torsion point `T = (0, 1)`
+    /// (that closure is what the `w = u² + u`, `s = Σu` rewriting
+    /// assumes), the symmetrised oracle's relations lift back to the
+    /// base and solve for the planted logarithm, and its solver is
+    /// priced inside the decomposition phase like every other oracle's.
+    #[test]
+    fn the_symmetrised_koblitz_pipeline_recovers_the_logarithm_over_a_torsion_closed_base() {
+        use super::plugins::{KoblitzSymmetrisedBase, SymmetrisedOracle};
+        use crate::cryptanalysis::ic_boundary::{koblitz_instance, BinaryGroup, CountedGroup};
+        use crate::cryptanalysis::koblitz_fast::FastPoint;
+
+        let inst = koblitz_instance(1, 17).expect("K_1 / F_{2^17} is in the roster");
+        let group = BinaryGroup(&inst.fast);
+        let planted = 1 + 30_011 % (inst.r - 1);
+        let ctx = binary_ctx_and_planted(&inst, &group, planted);
+        let base = KoblitzSymmetrisedBase { instance: &inst };
+        let mut spec = PipelineSpec {
+            factor_base: "koblitz-symmetrised".into(),
+            oracle: "symmetrised".into(),
+            targets: Targets::Walk,
+            max_trials: 200_000,
+            seed: 7,
+            ..Default::default()
+        };
+        spec.factor_base_params.set("divisor", "0;1");
+        spec.oracle_params.set("divisor", "0;1");
+        spec.oracle_params.set("m", "2");
+
+        // The base is closed under P ↦ P + T, and carries V's dimension.
+        let fb = base
+            .build(&ctx, &spec.factor_base_params, &mut GroupOps::default())
+            .expect("the u-frame base builds at divisor 0;1");
+        assert_eq!(fb.dimension, Some(9));
+        let t = FastPoint::affine(0, 1);
+        assert!(
+            fb.index_of_key(group.key(&t)).is_some(),
+            "T itself is in the base"
+        );
+        let mut ops = GroupOps::default();
+        for p in &fb.points {
+            let q = group.add(&mut ops, *p, t);
+            if group.is_identity(&q) {
+                continue; // T + T = O
+            }
+            assert!(
+                fb.index_of_key(group.key(&q)).is_some(),
+                "P + T left the base for P = ({:#x}, {:#x})",
+                p.x,
+                p.y
+            );
+        }
+
+        let mut oracle = SymmetrisedOracle::new(2, &inst);
+        let calib = Calibration {
+            ns_per_add: 200.0,
+            ns_per_word_xor: Some(0.4),
+            ..Default::default()
+        };
+        let report = run_pipeline(&ctx, &spec, &base, &mut oracle, planted, &calib, None)
+            .expect("the configuration should run");
+        assert!(report.verified, "did not recover the planted logarithm");
+        assert_eq!(report.recovered, Some(planted));
+        let solver = report
+            .decomposition
+            .solver
+            .as_ref()
+            .expect("the symmetrised oracle reports its solver");
+        assert!(solver.calls >= 1 && solver.ops > 0 && solver.gae > 0.0);
+        assert!(
+            report.decomposition.cost.gae >= solver.gae,
+            "the solver is inside the phase"
+        );
+        assert!(report.s > 0.0 && report.s.is_finite());
     }
 }

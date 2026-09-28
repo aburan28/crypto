@@ -110,7 +110,9 @@ def stage_diagnostics(rows):
 def export(root):
     c = read(root/'contract.json')
     decision = read(root/'decision.json')
-    if c['purpose'] != 'bounded-improvement-20260924-v1':
+    if c['purpose'] not in (
+            'bounded-improvement-20260924-v1',
+            'bounded-improvement-20260924-v2'):
         raise ValueError('not a bounded improvement round')
     fixtures = read(root/'fixtures.json')
     stages, runs = {}, []
