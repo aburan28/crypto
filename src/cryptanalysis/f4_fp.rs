@@ -525,10 +525,70 @@ fn rref32(
     Some(pivots)
 }
 
-#[inline]
-fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+#[inline(always)]
+fn add_lazy_scalar(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
     for (x, &y) in acc[from..].iter_mut().zip(&pivot[from..]) {
         *x += factor * u64::from(y);
+    }
+}
+
+/// Four bounded 32-bit products accumulated in 64-bit lanes. The caller's
+/// existing normalization interval proves these additions cannot overflow.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn add_lazy_avx2(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+    use std::arch::x86_64::{
+        __m128i, __m256i, _mm256_add_epi64, _mm256_cvtepu32_epi64, _mm256_loadu_si256,
+        _mm256_mul_epu32, _mm256_set1_epi64x, _mm256_storeu_si256, _mm_loadu_si128,
+    };
+    let (acc, pivot) = (&mut acc[from..], &pivot[from..]);
+    let multiplier = _mm256_set1_epi64x(factor as i64);
+    let mut i = 0;
+    while i + 4 <= acc.len() {
+        // SAFETY: the loop bounds cover four u32 pivot entries and four
+        // u64 accumulator entries; both intrinsics accept unaligned data.
+        let values = unsafe { _mm_loadu_si128(pivot.as_ptr().add(i) as *const __m128i) };
+        let wide = _mm256_cvtepu32_epi64(values);
+        let products = _mm256_mul_epu32(wide, multiplier);
+        let current = unsafe { _mm256_loadu_si256(acc.as_ptr().add(i) as *const __m256i) };
+        let updated = _mm256_add_epi64(current, products);
+        unsafe { _mm256_storeu_si256(acc.as_mut_ptr().add(i) as *mut __m256i, updated) };
+        i += 4;
+    }
+    for (x, &y) in acc[i..].iter_mut().zip(&pivot[i..]) {
+        *x += factor * u64::from(y);
+    }
+}
+
+fn lazy_avx2_enabled() -> bool {
+    #[cfg(target_arch = "x86_64")]
+    {
+        static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        *ENABLED.get_or_init(|| {
+            std::env::var("F4_FP_LAZY_AVX2").as_deref() == Ok("1")
+                && std::arch::is_x86_feature_detected!("avx2")
+        })
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        false
+    }
+}
+
+#[inline]
+fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64, avx2: bool) {
+    debug_assert_eq!(acc.len(), pivot.len());
+    #[cfg(target_arch = "x86_64")]
+    if avx2 {
+        // SAFETY: `lazy_avx2_enabled` verified AVX2 before this call.
+        unsafe { add_lazy_avx2(acc, pivot, from, factor) };
+    } else {
+        add_lazy_scalar(acc, pivot, from, factor);
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        let _ = avx2;
+        add_lazy_scalar(acc, pivot, from, factor);
     }
     count_ops(acc.len() - from);
 }
@@ -551,6 +611,7 @@ fn rref32_deferred(
     deadline: Option<Instant>,
 ) -> Option<Vec<usize>> {
     const NORMALIZE_AFTER: usize = 256;
+    let avx2 = lazy_avx2_enabled();
     let mut known: Vec<(usize, Vec<u32>)> = Vec::new();
     for source in std::mem::take(rows) {
         if deadline.is_some_and(|d| Instant::now() > d) {
@@ -564,7 +625,7 @@ fn rref32_deferred(
             }
             let f = fp.reduce(acc[*c]);
             if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f);
+                add_lazy(&mut acc, pivot, *c, fp.p - f, avx2);
                 pending += 1;
                 if pending == NORMALIZE_AFTER {
                     normalize_lazy(&mut acc, fp);
@@ -595,7 +656,7 @@ fn rref32_deferred(
         for (c, pivot) in later.iter().rev() {
             let f = fp.reduce(acc[*c]);
             if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f);
+                add_lazy(&mut acc, pivot, *c, fp.p - f, avx2);
                 pending += 1;
                 if pending == NORMALIZE_AFTER {
                     normalize_lazy(&mut acc, fp);
@@ -1595,6 +1656,37 @@ pub fn eval(f: &Poly, x: &[u64], p: u64) -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn avx2_lazy_accumulation_matches_scalar_at_boundaries() {
+        if !std::arch::is_x86_feature_detected!("avx2") {
+            return;
+        }
+        let fp = Barrett::new(65521);
+        for width in [0, 1, 3, 4, 5, 7, 8, 15, 16, 17, 33, 257, 4097] {
+            let pivot: Vec<u32> = (0..width)
+                .map(|i| ((i * 7919 + 137) % 65521) as u32)
+                .collect();
+            for from in [0, width.min(1), width / 3, width] {
+                let initial: Vec<u64> = (0..width)
+                    .map(|i| ((i * 1_000_003 + 17) as u64) % 65521)
+                    .collect();
+                let mut scalar = initial.clone();
+                let mut vector = initial;
+                for update in 0..256 {
+                    let factor = ((update * 4093 + 1) % 65521) as u64;
+                    add_lazy_scalar(&mut scalar, &pivot, from, factor);
+                    // SAFETY: the runtime AVX2 feature was checked above.
+                    unsafe { add_lazy_avx2(&mut vector, &pivot, from, factor) };
+                    assert_eq!(vector, scalar, "width={width} from={from} update={update}");
+                }
+                normalize_lazy(&mut scalar, fp);
+                normalize_lazy(&mut vector, fp);
+                assert_eq!(vector, scalar, "normalization width={width} from={from}");
+            }
+        }
+    }
 
     fn poly(terms: &[(&[u32], u64)]) -> Poly {
         terms.iter().map(|(e, c)| (e.to_vec(), *c)).collect()
