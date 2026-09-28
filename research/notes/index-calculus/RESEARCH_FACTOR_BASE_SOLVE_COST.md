@@ -17,12 +17,22 @@ what the solver then does?
 **Bottom line.  No — at `K_1/2^15` the selection objective ranks the candidate
 bases almost exactly backwards.**  `koblitz_factor_base_search` minimises
 expected *trials*; over five admissible invariant subspaces of that curve the
-Spearman correlation between that ranking and measured whole-run cost is
-`−0.90`, and the trials-optimal base costs **`12.12×`** the cheapest one over 60
-complete, verified discrete logarithms.  At the other degrees measured the two
+Spearman correlation between that ranking and measured F4 word-XOR count is
+`−0.90`, and the trials-optimal base incurs **`12.12×`** the cheapest one's F4
+word-XOR count over 60 complete, verified discrete logarithms. This is a stage
+diagnostic collected during complete runs, not a total-cost ratio.
+At the other degrees measured the two
 objectives agree or their difference is inside sampling error.  **And at
-`n = 131` the question does not arise: the invariant-subspace lattice has two
-members and neither is usable.**
+`n = 131` the question does not arise: the invariant-subspace lattice has only
+two nonzero proper members and neither is usable at the intended scale.**
+
+**Accounting correction (2026-09-22).** No new solver measurement is introduced
+here. The complete lattice has dimensions `{0, 1, 130, 131}`. The enumeration
+model below is not a lower bound on arbitrary decomposition algorithms. The
+recorded F4 counters omit other phases, so total calibrated operations, `S`,
+and ratios to rho or a problem-wide floor remain **unmeasured**. Historical
+stage counters and their ratios are preserved; they establish neither an
+ECC2K-130 improvement nor an end-to-end speedup.
 
 ## 0. Boundaries, stated before measuring
 
@@ -38,12 +48,16 @@ members and neither is usable.**
   can trade them off."*  The proxies are `|F|^{m−1}` enumeration work and a SAT
   variable count; neither is what the Gröbner oracle costs.
 
-**The floor.**  Unchanged and untouchable from here: the counting bound of
-`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` §5, `m·2^131` group operations for the
-whole attack *independently of `ℓ`*, because a larger base needs proportionally
-fewer targets and makes each target proportionally dearer.  Choosing a better
-base inside the family cannot move it, so every ratio to the floor below is
-flat.
+**The model and its scope.** The `m·2^131` group-operation estimate in
+`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` §5 comes from its
+enumeration-oracle and yield assumptions. It is not an unconditional lower
+bound for an algebraic oracle or for ECDLP; that source explicitly calls it an
+upper bound for the modelled family in its limitations. Its dimension
+cancellation does not establish a constant ratio between measured F4 work
+and a floor. This note supplies neither a calibrated conversion from F4 word
+XORs to group operations nor full-pipeline accounting, so the boundary ratios
+are unmeasured. The hypothetical free-oracle model in that source is a separate
+conditional model, not evidence that every possible algorithm has its cost.
 
 **The unit.**  64-bit word XORs in the Macaulay elimination, as in
 `research/notes/ecc2k130/RESEARCH_GROEBNER_STAGE.md` — now also reported per whole run by
@@ -117,16 +131,16 @@ interval; `C`'s band is `C` evaluated at the ends of it.
 
 | divisor | `ℓ` | `\|F\|` | `U` | `Tr=0` | coverage (95% CI) | ops/target | `T` | `C` | `C`/best | ratio to floor |
 |:--|--:|--:|--:|:-:|--:|--:|--:|--:|--:|:--|
-| `1·4` | 6 | 77 | 5 | yes | 44% (36–53%) | 1.13e5 | 13.71 | **1.48e6** | 1.00× | flat |
-| `1·3` | 6 | 67 | 4 | yes | 36% (28–45%) | 1.19e5 | 15.24 | 1.66e6 | 1.12× | flat |
-| `0·1·3` | 7 | 133 | 7 | no | 48% (40–57%) | 3.28e5 | 16.52 | 5.41e6 | 3.66× | flat |
-| `3·4` | 8 | 251 | 10 | yes | 99% (96–100%) | 9.42e5 | 11.09 | 1.04e7 | 7.07× | flat |
-| `2·4` | 8 | 281 | 11 | yes | 99% (96–100%) | 1.15e6 | 12.09 | 1.39e7 | 9.39× | flat |
-| `2·3` ← **trials pick** | 8 | 211 | 8 | yes | 85% (78–90%) | 1.45e6 | **10.57** | 1.53e7 | **10.35×** | flat |
+| `1·4` | 6 | 77 | 5 | yes | 44% (36–53%) | 1.13e5 | 13.71 | **1.48e6** | 1.00× | unmeasured |
+| `1·3` | 6 | 67 | 4 | yes | 36% (28–45%) | 1.19e5 | 15.24 | 1.66e6 | 1.12× | unmeasured |
+| `0·1·3` | 7 | 133 | 7 | no | 48% (40–57%) | 3.28e5 | 16.52 | 5.41e6 | 3.66× | unmeasured |
+| `3·4` | 8 | 251 | 10 | yes | 99% (96–100%) | 9.42e5 | 11.09 | 1.04e7 | 7.07× | unmeasured |
+| `2·4` | 8 | 281 | 11 | yes | 99% (96–100%) | 1.15e6 | 12.09 | 1.39e7 | 9.39× | unmeasured |
+| `2·3` ← **trials pick** | 8 | 211 | 8 | yes | 85% (78–90%) | 1.45e6 | **10.57** | 1.53e7 | **10.35×** | unmeasured |
 
-**Class: engineering** by §3 of `AGENTS.md` — a cost fell, the ratio to the
-floor did not move — with an **accounting** component: the objective being
-corrected was under-counting, not mis-measured.
+**Class: engineering stage diagnostic**, with an **accounting** correction
+to its presentation. A measured stage counter fell; the ratio to a floor was
+not measured and cannot be declared flat.
 
 The mechanism is visible in the two middle columns.  Coverage saturates: past
 `ℓ = 8` every target decomposes and there is nothing left to win.  Cost does
@@ -152,7 +166,7 @@ same-dimension preference is established there** and the row says so.  The `n =
 15` disagreement is the one that survives its own error bars, and it survives
 them by `7.99×`.
 
-## 3. The whole pipeline, on the pair the objectives disagree about
+## 3. F4 counters collected during complete verified runs
 
 Stage cost is a model.  The five admissible bases were therefore run end to end:
 `ic run` at `K_1/2^15`, twelve random known-answer targets each (seeds 11…133),
@@ -169,7 +183,7 @@ identical curve, subgroup and solver, every logarithm recovered and verified.
 Read the trials column and the word-XOR column together.  `3·4` needs the
 **fewest trials of any base** and costs `6×` the cheapest; `2·3`, the base the
 trials objective selects, costs `12.12×`.  Over these five bases the rank
-correlation between `T` and measured whole-run cost is `ρ = −0.90`.  The stage
+correlation between `T` and measured F4 word-XOR count is `ρ = −0.90`.  The stage
 model predicted `10.35×` for `2·3` against `1·4`; the complete runs measured
 `11.35×`, so the model is good to 10% on the quantity it is used for.
 
@@ -193,8 +207,9 @@ noise, so "the cheapest base" is that pair, not either one.
 - **The free bit is worth taking.**  Prefer a divisor not divisible by `(x+1)`:
   it puts the base inside `ker Tr` and doubles the yield, decided without
   solving anything.
-- **Nothing here bears on ECC2K-130.**  At `n = 131` the lattice is `{1, 130}`.
-  The attack cost stays where `research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` §5 put it,
+- **No ECC2K-130 improvement is established.** At `n = 131` the nonzero proper
+  invariant dimensions are `{1, 130}`.
+  The enumeration cost model stays where `research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` §5 put it,
   `m·2^131` and `2^71.77` times rho, and an order of magnitude in a toy-scale
   stage constant is `2^3.6` against `2^131`.
 - **Not measured here:** base construction (`|F|` point enumeration), lifting,
@@ -279,12 +294,12 @@ verified — 72 runs, `72/72`.
 
 | divisor | `ℓ` | ranked first by | verified | `\|F\|` | columns | trials | F4 reductions | **word XORs** | ratio | ratio to floor |
 |:--|--:|:--|:-:|--:|--:|--:|--:|--:|--:|:--|
-| `0·3` | 5 | `C` (`--solve-cost-targets`) | 12/12 | 31 | 1 | 152 | 232 | **2,405,397** | 1.00× | flat |
-| `1·3` | 6 | — (§3's cheapest) | 12/12 | 67 | 2 | 53 | 365 | 9,543,849 | 3.97× | flat |
-| `1·4` | 6 | — | 12/12 | 77 | 1 | 56 | 374 | 10,144,324 | 4.22× | flat |
-| `3·4` | 8 | `T` (trials) | 12/12 | 251 | 5 | 42 | 1,053 | 53,895,954 | **22.41×** | flat |
-| `2·4` | 8 | — | 12/12 | 281 | 6 | 63 | 1,742 | 88,192,793 | 36.66× | flat |
-| `2·3` | 8 | — (§3's trials pick) | 12/12 | 211 | 4 | 52 | 2,157 | 109,566,018 | 45.55× | flat |
+| `0·3` | 5 | `C` (`--solve-cost-targets`) | 12/12 | 31 | 1 | 152 | 232 | **2,405,397** | 1.00× | unmeasured |
+| `1·3` | 6 | — (§3's cheapest) | 12/12 | 67 | 2 | 53 | 365 | 9,543,849 | 3.97× | unmeasured |
+| `1·4` | 6 | — | 12/12 | 77 | 1 | 56 | 374 | 10,144,324 | 4.22× | unmeasured |
+| `3·4` | 8 | `T` (trials) | 12/12 | 251 | 5 | 42 | 1,053 | 53,895,954 | **22.41×** | unmeasured |
+| `2·4` | 8 | — | 12/12 | 281 | 6 | 63 | 1,742 | 88,192,793 | 36.66× | unmeasured |
+| `2·3` | 8 | — (§3's trials pick) | 12/12 | 211 | 4 | 52 | 2,157 | 109,566,018 | 45.55× | unmeasured |
 
 **Read against §3.**  Trials, F4 reductions, base sizes and column counts
 are *identical* to §3's table row for row — the pipeline is the same one.
@@ -312,8 +327,8 @@ its trials solves a 10-unknown system instead of a 16-unknown one.  Trials
 are the cheap axis.  That is the whole finding, and it is now what the
 selector optimises.
 
-**Unchanged.**  The floor, the ratio to it, and everything §4 says about
-`n = 131`: the invariant-subspace lattice there is `{1, 130}` and an
+**Unchanged.** The historical stage measurements and the structural obstruction
+at `n = 131`: the nonzero proper invariant dimensions are `{1, 130}` and an
 objective cannot choose from a set with nothing usable in it.  Still not in
 the score: base construction, lifting, filtering and the relation linear
 algebra, all of which grow with `|F|` and so would favour the smaller base

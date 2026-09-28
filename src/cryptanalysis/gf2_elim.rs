@@ -1,6 +1,6 @@
 //! Dense Gaussian elimination over `F_2`: the Method of Four Russians
 //! with several Gray-code tables per pass, a word-strip pivot search, and
-//! an AVX-512 row update selected at run time.
+//! an AVX2 or AVX-512 row update selected at run time.
 //!
 //! The matrix is a slice of rows, each `n_cols.div_ceil(64)` words long
 //! with bit `c % 64` of word `c / 64` holding column `c` — the layout
@@ -78,7 +78,7 @@ pub struct Config {
     pub tables: usize,
     /// Row words per block from which rows are cleared in parallel.
     pub parallel_words: usize,
-    /// Use the AVX-512 row update when the CPU has it.
+    /// Use AVX-512 when available, or an explicitly requested AVX2 update.
     pub simd: bool,
 }
 
@@ -179,7 +179,7 @@ fn eliminate_with(
     let tables = config.tables.clamp(1, 4);
     let bits = table_bits(rows);
     let block_cap = tables * bits;
-    let simd = config.simd && simd_available();
+    let simd = simd_kind(config.simd);
 
     let mut strip: Vec<u64> = vec![0; rows];
     let mut pivot_cols: Vec<usize> = Vec::with_capacity(block_cap);
@@ -400,7 +400,7 @@ impl DeferredTable {
     }
 
     #[inline]
-    fn apply(&self, row: &mut [u64], simd: bool) -> u64 {
+    fn apply(&self, row: &mut [u64], simd: SimdKind) -> u64 {
         let pattern = gather_bits(row[self.pivot_word], self.mask, self.bmi2);
         if pattern == 0 {
             return 0;
@@ -438,7 +438,7 @@ fn clear_block(
     word_range: std::ops::Range<usize>,
     table: &mut Vec<u64>,
     config: Config,
-    simd: bool,
+    simd: SimdKind,
     word_ops: &mut u64,
 ) {
     let b = pivot_cols.len();
@@ -527,7 +527,7 @@ fn xor_entries(
     offsets: &[usize],
     suffix: usize,
     table_size: usize,
-    simd: bool,
+    simd: SimdKind,
 ) -> usize {
     // Offsets pointing at entry 0 of a table are zero rows: skip them.
     let mut live = [0usize; 4];
@@ -540,11 +540,18 @@ fn xor_entries(
     }
     let live = &live[..n];
     #[cfg(target_arch = "x86_64")]
-    if simd {
-        // SAFETY: `simd` is only true when `simd_available()` said the CPU
-        // has AVX-512F.
-        unsafe { xor_entries_avx512(dst, table, live, suffix) };
-        return n;
+    match simd {
+        SimdKind::Avx512 => {
+            // SAFETY: `simd_kind` checked AVX-512F for this process.
+            unsafe { xor_entries_avx512(dst, table, live, suffix) };
+            return n;
+        }
+        SimdKind::Avx2 => {
+            // SAFETY: `simd_kind` checked AVX2 for this process.
+            unsafe { xor_entries_avx2(dst, table, live, suffix) };
+            return n;
+        }
+        SimdKind::Scalar => {}
     }
     let _ = simd;
     xor_entries_generic(dst, table, live, suffix);
@@ -595,6 +602,13 @@ unsafe fn xor_entries_avx512(dst: &mut [u64], table: &[u64], live: &[usize], suf
     xor_entries_generic(dst, table, live, suffix)
 }
 
+/// Compile the existing table XORs for four words per vector instruction.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn xor_entries_avx2(dst: &mut [u64], table: &[u64], live: &[usize], suffix: usize) {
+    xor_entries_generic(dst, table, live, suffix)
+}
+
 #[inline(always)]
 fn xor_into(dst: &mut [u64], src: &[u64]) {
     for (d, &s) in dst.iter_mut().zip(src) {
@@ -640,17 +654,46 @@ fn bmi2_available() -> bool {
     }
 }
 
-/// Whether the AVX-512 row update can run on this CPU.
-pub fn simd_available() -> bool {
+#[derive(Clone, Copy)]
+enum SimdKind {
+    Scalar,
+    #[cfg(target_arch = "x86_64")]
+    Avx2,
+    #[cfg(target_arch = "x86_64")]
+    Avx512,
+}
+
+fn simd_kind(enabled: bool) -> SimdKind {
+    if !enabled {
+        return SimdKind::Scalar;
+    }
     #[cfg(target_arch = "x86_64")]
     {
-        static HAS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-        *HAS.get_or_init(|| std::arch::is_x86_feature_detected!("avx512f"))
+        static KIND: std::sync::OnceLock<SimdKind> = std::sync::OnceLock::new();
+        *KIND.get_or_init(|| {
+            // The experiment can force AVX2 on an AVX-512 machine without
+            // changing the normal preference for the wider instruction set.
+            if std::env::var("KIC_GF2_FORCE_AVX2").as_deref() == Ok("1") {
+                return if std::arch::is_x86_feature_detected!("avx2") {
+                    SimdKind::Avx2
+                } else {
+                    SimdKind::Scalar
+                };
+            }
+            if std::arch::is_x86_feature_detected!("avx512f") {
+                SimdKind::Avx512
+            } else {
+                SimdKind::Scalar
+            }
+        })
     }
     #[cfg(not(target_arch = "x86_64"))]
-    {
-        false
-    }
+    SimdKind::Scalar
+}
+
+/// Whether a vector row update is selected in this process.
+pub fn simd_available() -> bool {
+    !matches!(simd_kind(true), SimdKind::Scalar)
 }
 
 #[cfg(test)]

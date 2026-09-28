@@ -1,12 +1,60 @@
 """Reporting guards: target weighting, unknown rates and retained failures."""
 import copy
+import hashlib
+import json
 import math
+from pathlib import Path
 import unittest
 
-from goal_20260924.improvement.export_report import aggregate, rate_interval, stage_diagnostics
+from goal_20260924.improvement.export_report import aggregate, rate_interval, stage_diagnostics, reference_ratios
 
 
 class ImprovementExportTests(unittest.TestCase):
+    def test_correction_receipt_preserves_the_exact_previous_export(self):
+        root = Path(__file__).parent/'goal_20260924/improvement/round2'
+        raw = (root/'RESULTS.json').read_bytes()
+        receipt = json.loads((root/'REPORTING-CORRECTION.json').read_text())
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), receipt['corrected_RESULTS_sha256'])
+        previous = json.loads(raw)
+        for change in receipt['rows']:
+            row = next(r for r in previous['stages'][change['stage']]['table'] if r['alias'] == change['alias'])
+            for key, values in change['fields'].items():
+                self.assertEqual(row[key], values['after'])
+                if key == 'online_ic_reference':
+                    del row[key]
+                else:
+                    row[key] = values['before']
+        reconstructed = (json.dumps(previous, indent=2, sort_keys=True, allow_nan=False)+'\n').encode()
+        self.assertEqual(hashlib.sha256(reconstructed).hexdigest(), receipt['original_RESULTS_sha256'])
+
+    def test_rho_speedup_does_not_divide_ratios_to_different_ic_references(self):
+        # incumbent=100, ic_online=50, challenger=40, rho_online=200.
+        # (rho/incumbent)/(challenger/ic_online) is 2.5, but rho/challenger is 5.
+        rows = [dict(alias='incumbent', online_ms=100, online_over_ic=1,
+                     cold_Ir_over_ic=1, complete=True, comparison=None),
+                dict(alias='candidate', online_ms=40, online_over_ic=.8,
+                     cold_Ir_over_ic=.7, complete=True,
+                     comparison=dict(metric_references=dict(online_ns='ic_online'))),
+                dict(alias='rho_online', online_ms=200, online_over_ic=2,
+                     cold_Ir_over_ic=3, complete=True, comparison=None)]
+        reference_ratios(rows, versioned=True)
+        self.assertEqual(rows[1]['rho_online_over_IC_online'], 5)
+        self.assertEqual(rows[1]['online_ic_reference'], 'ic_online')
+        self.assertEqual(rows[0]['online_ic_reference'], 'incumbent')
+        self.assertEqual(rows[2]['rho_online_over_IC_online'], 1)
+        rows[2]['complete'] = False
+        reference_ratios(rows, versioned=True)
+        self.assertIsNone(rows[1]['rho_online_over_IC_online'])
+
+    def test_legacy_common_denominator_export_is_unchanged(self):
+        rows = [dict(alias='candidate', online_over_ic=.5, cold_Ir_over_ic=.75),
+                dict(alias='rho_online', online_over_ic=2, cold_Ir_over_ic=3),
+                dict(alias='rho', online_over_ic=3, cold_Ir_over_ic=2)]
+        reference_ratios(rows, versioned=False)
+        self.assertEqual(rows[0]['rho_online_over_IC_online'], 4)
+        self.assertEqual(rows[0]['cold_Ir_over_cold_rho'], .375)
+        self.assertNotIn('online_ic_reference', rows[0])
+
     def test_process_repetitions_are_not_targets_and_cells_have_equal_weight(self):
         rows = []
         for cell, case, values in (('a', 'a1', [1, 1, 100]), ('a', 'a2', [4, 4, 100]),
