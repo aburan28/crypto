@@ -37,7 +37,7 @@ jobs:
           cargo test --release --lib f4_fp::tests -- --test-threads=1
       - name: Build and retain unmodified reference
         run: |
-          git worktree add --detach --no-checkout "$RUNNER_TEMP/fp-f4-avx512-reference" 4eaa93aeeac8f502cb55f0932cb7c00b091201e4
+          git worktree add --detach --no-checkout "$RUNNER_TEMP/fp-f4-avx512-reference" 8402153b941b9b78e1b04a5e4906fc211099decf
           git -C "$RUNNER_TEMP/fp-f4-avx512-reference" sparse-checkout set src examples docs/ic research/f4_linear_algebra_20260914
           git -C "$RUNNER_TEMP/fp-f4-avx512-reference" reset --hard HEAD
           CARGO_TARGET_DIR="$RUNNER_TEMP/fp-f4-avx512-reference-target" cargo build --release --manifest-path "$RUNNER_TEMP/fp-f4-avx512-reference/Cargo.toml" --example f4_fp_bench
