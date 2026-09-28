@@ -1,0 +1,51 @@
+name: Matrix-F5 combined opt-in complete-call experiment
+
+on:
+  pull_request:
+    paths:
+      - 'research/f5_combined_2x_20260928/PROTOCOL.md'
+      - 'research/f5_combined_2x_20260928/paired_f5.py'
+      - '.github/workflows/f5-combined-2x.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-row-space-and-paired-complete-f5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RAYON_NUM_THREADS: '1'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Existing F5 and GF2 exactness tests
+        run: |
+          cargo test --release --lib cryptanalysis::matrix_f5_f2::tests -- --test-threads=1
+          KIC_GF2_FORCE_AVX2=1 cargo test --release --lib gf2_elim::tests -- --test-threads=1
+      - name: Build frozen F5 stage benchmark
+        run: cargo build --release --example f4_f2_bench
+      - name: Five A/A and five paired complete-call samples per seed
+        run: |
+          python3 research/f5_combined_2x_20260928/paired_f5.py \
+            target/release/examples/f4_f2_bench \
+            research/f5_combined_2x_20260928/ci-result.json \
+            --pairs 5 --threads 1
+      - name: Preserve every call and the binary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f5-combined-2x-${{ github.sha }}
+          path: |
+            research/f5_combined_2x_20260928/ci-result.json
+            target/release/examples/f4_f2_bench
+          if-no-files-found: warn
