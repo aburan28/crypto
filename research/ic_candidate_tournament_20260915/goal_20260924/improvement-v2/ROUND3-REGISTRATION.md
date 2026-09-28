@@ -29,9 +29,10 @@ collects verified ordinary-query relations, solves its own final scalar-field
 matrix, descends the supplied public point and replays the recovered scalar.
 No candidate inherits another candidate's cheapest measured phase.
 
-The tournament's family key now recognizes orbit target, pair-table coverage,
-collection batch and adapter. That prevents a different mechanism being
-silently counted as the same family when the development portfolio reserves
+The tournament's family key now recognizes exact factor-base recipes, orbit
+target, pair-table coverage, collection batch and adapter. That prevents a
+different mechanism being silently counted as the same family when the
+development portfolio reserves
 its diversity slots. The frozen evaluator retains this selector; prior rounds
 are reverified with their original frozen evaluators and decisions.
 

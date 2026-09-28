@@ -75,6 +75,8 @@ class PortfolioTests(unittest.TestCase):
             {'id':'specialist', 'config':dict(BASE_CONFIG, pair_table='heuristic', orbit_target=4)},
         ]
         self.assertNotEqual(family(arms[0]), family(arms[1]))
+        self.assertNotEqual(family(arms[0]), family(dict(arms[0], config=dict(
+            arms[0]['config'], factor_base={'kind':'frobenius_union', 'seed_masks':[1, 2, 8]}))))
         rows = [self.row('leader', .8, {'small':.8, 'large':.8}),
                 self.row('half', .9, {'small':.7, 'large':1.1}),
                 self.row('specialist', 1.0, {'small':.6, 'large':1.4})]

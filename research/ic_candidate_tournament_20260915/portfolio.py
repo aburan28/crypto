@@ -5,6 +5,7 @@ algorithm. Complete implementations, not sums of the best stage times, compete.
 """
 import copy
 import itertools
+import json
 import math
 
 from oracle import require
@@ -16,7 +17,7 @@ AXES = ('factor_base', 'solver', 'linear_algebra', 'batch_trials', 'collection_w
 def family(arm):
     cfg = arm['config']
     base = cfg.get('factor_base', {})
-    return (arm.get('adapter'), base.get('kind', 'subgroup_orbits'),
+    return (arm.get('adapter'), json.dumps(base, sort_keys=True, separators=(',', ':')),
             cfg.get('solver', 'pair_table'), cfg.get('linear_algebra', 'sparse'),
             cfg.get('row_kernel', 'full'), cfg.get('orbit_batch', 8),
             cfg.get('orbit_target'), cfg.get('pair_table',
