@@ -3608,8 +3608,7 @@ impl PairSumTable {
         let payload_bits = filter_bits.max(if tagged { 16 } else { 32 });
         let payload_mask = (1u64 << payload_bits) - 1;
         let token_bits = bucket_bits + payload_bits;
-        let mut cached: Option<Vec<[u8; 6]>> =
-            (token_bits <= 48).then(|| vec![[0; 6]; total]);
+        let mut cached: Option<Vec<[u8; 6]>> = (token_bits <= 48).then(|| vec![[0; 6]; total]);
         let cache_slots = cached.as_mut().map(|v| v.as_mut_ptr() as usize);
         (0..reps.len()).into_par_iter().for_each(|r| {
             let (orbit, rep) = reps[r];
@@ -3684,11 +3683,7 @@ impl PairSumTable {
                 let mut scratch = BatchScratch::default();
                 curve.add_many(points[rep], &by_orbit[from..], &mut sums, &mut scratch);
                 for p in sums {
-                    let hash = pair_filter_hash(Self::canon_key_with(
-                        &curve,
-                        canon.as_ref(),
-                        p,
-                    ));
+                    let hash = pair_filter_hash(Self::canon_key_with(&curve, canon.as_ref(), p));
                     scatter((hash >> bucket_shift) as usize, hash, orbit);
                 }
             });
