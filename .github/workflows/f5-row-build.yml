@@ -1,0 +1,64 @@
+name: Matrix-F5 fused row-build experiment
+
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/koblitz_groebner.rs'
+      - 'src/cryptanalysis/matrix_f5_f2.rs'
+      - 'research/f5_row_build_20260928/PROTOCOL.md'
+      - 'research/f5_row_build_20260928/paired_f5.py'
+      - '.github/workflows/f5-row-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-output-and-paired-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      RAYON_NUM_THREADS: '1'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Exact F5 row and cap tests
+        run: |
+          cargo test --release --lib fused_row_build_matches_two_pass_rows_and_full_count -- --test-threads=1
+          cargo test --release --lib fused_f5_count_applies_the_full_f4_row_cap -- --test-threads=1
+      - name: Build and retain unmodified reference
+        run: |
+          git worktree add --detach --no-checkout "$RUNNER_TEMP/f5-row-reference" 7b77244d1ddc60b32b34e3cd010722b7ae45197c
+          git -C "$RUNNER_TEMP/f5-row-reference" sparse-checkout set src examples research/f4_linear_algebra_20260914
+          git -C "$RUNNER_TEMP/f5-row-reference" reset --hard HEAD
+          CARGO_TARGET_DIR="$RUNNER_TEMP/f5-row-reference-target" cargo build --release --manifest-path "$RUNNER_TEMP/f5-row-reference/Cargo.toml" --example f4_f2_bench
+          cp "$RUNNER_TEMP/f5-row-reference-target/release/examples/f4_f2_bench" "$RUNNER_TEMP/f5-row-reference-binary"
+      - name: Build candidate
+        run: cargo build --release --example f4_f2_bench
+      - name: Five A/A and five paired A/B samples per workload
+        run: |
+          python3 research/f5_row_build_20260928/paired_f5.py \
+            "$RUNNER_TEMP/f5-row-reference-binary" \
+            target/release/examples/f4_f2_bench \
+            research/f5_row_build_20260928/ci-result.json \
+            --pairs 5 --threads 1
+      - name: Preserve raw calls and both binaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f5-row-build-${{ github.sha }}
+          path: |
+            research/f5_row_build_20260928/ci-result.json
+            ${{ runner.temp }}/f5-row-reference-binary
+            target/release/examples/f4_f2_bench
+          if-no-files-found: warn
