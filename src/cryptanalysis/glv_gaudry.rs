@@ -71,8 +71,10 @@ fn sm(a: u64, b: u64, p: u64) -> u64 {
     }
 }
 
-/// Peak resident set size of this process, in bytes (`getrusage`).
+/// Peak resident set size of this process, in bytes (`getrusage`); 0 on
+/// targets without `getrusage`.
 pub fn peak_rss_bytes() -> u64 {
+    #[cfg(unix)]
     // SAFETY: getrusage writes into the zeroed struct we hand it.
     unsafe {
         let mut ru: libc::rusage = std::mem::zeroed();
@@ -80,6 +82,8 @@ pub fn peak_rss_bytes() -> u64 {
         let unit = if cfg!(target_os = "macos") { 1 } else { 1024 };
         (ru.ru_maxrss as u64) * unit
     }
+    #[cfg(not(unix))]
+    0
 }
 
 // ── j = 0 instances over F_{p³} ─────────────────────────────────────────
