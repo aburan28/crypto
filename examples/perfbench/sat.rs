@@ -1,10 +1,11 @@
-//! Area `sat`: SAT solving: CDCL with native XOR clauses, Semaev/WDSat encodings.
+//! Area `sat`: SAT solving: CDCL with native XOR clauses, Semaev/Boolean encodings.
 //!
-//! Every kernel builds its solver in the untimed `prepare` (a
+//! Every kernel builds its solvers in the untimed `prepare` (a
 //! [`sat::Solver`] is consumed by a solve and is not `Clone`), then times
 //! `Solver::solve` alone and fingerprints the verdict, the model, and the
 //! solver's counted units: `conflicts()`, `n_clauses()` and every work
-//! counter in `SolverStats` except the `ns_*` phase timings.
+//! counter in `SolverStats` except the `ns_*` phase timings.  Every SAT
+//! model is checked against its instance before it is fingerprinted.
 //!
 //! * `semaev_s4_*` — the symmetrised binary-Semaev `S₄` decomposition
 //!   instances of the reference corpus (`semaev_corpus::CORPUS`, the
@@ -12,13 +13,19 @@
 //!   `semaev_sat::encode_semaev_s4_with` exactly as `semaev_sat_bench` and
 //!   `ic_corpus` encode them.  Satisfiable instances are decoded and
 //!   checked against `S₄` over `F_{2ⁿ}`; unsatisfiable ones are the
-//!   instances exhaustive search proves have no decomposition.
+//!   instances exhaustive search proves have no decomposition.  The
+//!   `_encode_` kernel times the encoder itself (Weil descent + install).
 //! * `koblitz_bool_*` — the Weil-restricted Koblitz decomposition systems
 //!   `sat_decompose` / `koblitz_symmetrised` hand to
-//!   `semaev_sat::encode_boolean_system_with`.
-//! * `random3sat_*`, `xor_planted_*` — seeded generic CNF near the 3-SAT
-//!   threshold and a parity-heavy planted mix, through `add_clause` /
-//!   `add_xor`.
+//!   `semaev_sat::encode_boolean_system_with`, native XOR and the CNF
+//!   control (the latter under a conflict budget, ending `Unknown`).
+//! * `random3sat_*`, `xor_planted_*` — seeded generic CNF at the 3-SAT
+//!   threshold (both verdicts) and a planted parity-heavy mix, through
+//!   `add_clause` / `add_xor`.
+//!
+//! Instances were chosen per kernel so a run takes 50–300 ms at one
+//! thread; solve cost varies over three orders of magnitude between
+//! instances of one family.
 
 use crate::harness::{Fp, Kernel, Tier, Workload};
 use crypto_lib::binary_ecc::BinaryPoint;
@@ -27,7 +34,7 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base, KoblitzCurve,
 };
 use crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly;
-use crypto_lib::cryptanalysis::sat::{Lit, SolveResult, Solver, SolverStats};
+use crypto_lib::cryptanalysis::sat::{check_model, Lit, SolveResult, Solver, SolverStats};
 use crypto_lib::cryptanalysis::semaev_corpus::{CorpusInstance, CORPUS};
 use crypto_lib::cryptanalysis::semaev_sat::{
     encode_boolean_system_with, encode_semaev_s4_with, S4Options, S4SatEncoding, XorEncoding,
@@ -189,23 +196,12 @@ fn semaev_s4(names: &'static [&'static str], encoding: XorEncoding) -> Box<dyn W
     )
 }
 
-const N15L5_SAT: &[&str] = &[
-    "n15l5-1-S",
-    "n15l5-2-S",
-    "n15l5-3-S",
-    "n15l5-4-S",
-    "n15l5-5-S",
-    "n15l5-6-S",
-    "n15l5-7-S",
-    "n15l5-8-S",
-    "n15l5-9-S",
-    "n15l5-10-S",
-];
-const N15L5_UNSAT: &[&str] = &["n15l5-11-U", "n15l5-12-U", "n15l5-13-U", "n15l5-14-U"];
-const N17L6_SAT: &[&str] = &["n17l6-1-S", "n17l6-2-S", "n17l6-3-S", "n17l6-4-S"];
+const N15L5_SAT: &[&str] = &["n15l5-2-S", "n15l5-4-S", "n15l5-8-S", "n15l5-10-S"];
+const N15L5_UNSAT: &[&str] = &["n15l5-11-U"];
+const N17L6_SAT: &[&str] = &["n17l6-8-S"];
 const N17L6_UNSAT: &[&str] = &["n17l6-11-U"];
-const N19L6_SAT: &[&str] = &["n19l6-1-S", "n19l6-2-S"];
-const N15L5_CNF: &[&str] = &["n15l5-1-S", "n15l5-2-S"];
+const N19L6_SAT: &[&str] = &["n19l6-1-S"];
+const N15L5_CNF: &[&str] = &["n15l5-8-S", "n15l5-10-S"];
 
 fn semaev_s4_n15l5_sat() -> Box<dyn Workload> {
     semaev_s4(N15L5_SAT, XorEncoding::Native)
@@ -249,51 +245,51 @@ fn semaev_s4_encode_n19l6() -> Box<dyn Workload> {
 
 // ── Koblitz decomposition systems via encode_boolean_system_with ───
 
-/// Decomposition systems for `planted` sums of `m` factor-base points on
-/// `K_a / F_{2ⁿ}` (factor-base divisor `fi`) and `random` multiples of the
-/// generator, as `koblitz_symmetrised` / `sat_decompose` build them.
+/// The Weil-restricted decomposition systems of eight targets on
+/// `K_a / F_{2ⁿ}` with the factor base of divisor index `fi`: targets
+/// `0..4` are planted sums of `m` factor-base points, `4..8` are fixed
+/// multiples of the generator — the systems `sat_decompose` /
+/// `koblitz_symmetrised` build.  `pick` selects which ones the kernel
+/// solves (the solve cost varies over three orders of magnitude).
 fn koblitz_bool_systems(
     a: u8,
     n: u32,
     fi: usize,
     m: usize,
-    planted: usize,
-    random: u64,
-    seed: u64,
+    pick: &[usize],
 ) -> Vec<(Vec<F2BoolPoly>, usize)> {
     let kc = KoblitzCurve::new(a, n).expect("Koblitz curve exists");
     let fb = build_frobenius_factor_base(&kc, fi).expect("factor base exists");
     assert!(fb.m_can_decompose(&kc, m), "cell admissible for m");
     let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
-    let mut rng = SplitMix(seed);
-    let mut targets = Vec::new();
-    while targets.len() < planted {
-        let t = (0..m).fold(BinaryPoint::Infinity, |acc, _| {
-            kc.add(&acc, &fb.points[rng.below(fb.points.len() as u64) as usize])
-        });
-        if matches!(t, BinaryPoint::Affine { .. }) {
-            targets.push(t);
-        }
-    }
+    let mut rng = SplitMix(15);
     let g = kc.generator().clone();
-    for i in 0..random {
-        let k = num_bigint::BigUint::from(1 + i.wrapping_mul(2_654_435_761) % 1_000_003);
-        targets.push(kc.mul(&g, &k));
-    }
-    targets
-        .iter()
-        .filter_map(|t| match t {
-            BinaryPoint::Affine { x, .. } => Some(x.clone()),
-            BinaryPoint::Infinity => None,
+    let targets: Vec<BinaryPoint> = (0..8u64)
+        .map(|i| {
+            if i < 4 {
+                (0..m).fold(BinaryPoint::Infinity, |acc, _| {
+                    kc.add(&acc, &fb.points[rng.below(fb.points.len() as u64) as usize])
+                })
+            } else {
+                let k = num_bigint::BigUint::from(1 + i.wrapping_mul(2_654_435_761) % 1_000_003);
+                kc.mul(&g, &k)
+            }
         })
-        .map(|x_r| {
-            let sys = build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, m, &st)
+        .collect();
+    pick.iter()
+        .map(|&i| {
+            let BinaryPoint::Affine { x: x_r, .. } = &targets[i] else {
+                panic!("target {i} is the point at infinity");
+            };
+            let sys = build_decomposition_system(&fb.subspace_basis, x_r, &kc.curve.b, m, &st)
                 .expect("system fits in 64 unknowns");
             (sys.equations.clone(), sys.n_vars)
         })
         .collect()
 }
 
+/// Encode each system (untimed, in `prepare`) and time the solves under
+/// `budget` conflicts each; a SAT model is checked against the system.
 fn koblitz_bool(
     systems: Vec<(Vec<F2BoolPoly>, usize)>,
     encoding: XorEncoding,
@@ -313,11 +309,13 @@ fn koblitz_bool(
         },
         move |encs| {
             let mut fp = Fp::new();
-            for enc in encs.iter_mut() {
+            for ((eqs, _), enc) in systems.iter().zip(encs.iter_mut()) {
                 let res = enc.solver.solve();
                 fp = fp_solve(fp, res, &enc.solver);
                 if res == SolveResult::Sat {
-                    fp = fp.u64(enc.model_assignment());
+                    let a = enc.model_assignment();
+                    assert!(eqs.iter().all(|e| e.eval(a) == 0), "bad model");
+                    fp = fp.u64(a);
                 }
             }
             fp.finish()
@@ -327,7 +325,7 @@ fn koblitz_bool(
 
 fn koblitz_bool_native_m3_n15() -> Box<dyn Workload> {
     koblitz_bool(
-        koblitz_bool_systems(0, 15, 1, 3, 4, 4, 15),
+        koblitz_bool_systems(0, 15, 1, 3, &[1, 2, 7]),
         XorEncoding::Native,
         u64::MAX,
     )
@@ -335,8 +333,21 @@ fn koblitz_bool_native_m3_n15() -> Box<dyn Workload> {
 
 fn koblitz_bool_cnf_m3_n15() -> Box<dyn Workload> {
     koblitz_bool(
-        koblitz_bool_systems(0, 15, 1, 3, 4, 4, 15),
+        koblitz_bool_systems(0, 15, 1, 3, &[0, 3]),
         XorEncoding::Cnf,
+        KOBLITZ_CNF_BUDGET,
+    )
+}
+
+/// Conflict budget of the CNF control: both systems exhaust it, so the
+/// kernel is a fixed amount of search ending in `Unknown`, as a budgeted
+/// `sat_decompose_with` call that gives up does.
+const KOBLITZ_CNF_BUDGET: u64 = 1500;
+
+fn koblitz_bool_native_m2_n19() -> Box<dyn Workload> {
+    koblitz_bool(
+        koblitz_bool_systems(0, 19, 0, 2, &[0, 6]),
+        XorEncoding::Native,
         u64::MAX,
     )
 }
@@ -364,9 +375,10 @@ fn random_3sat(n: u32, m: usize, seed: u64) -> Vec<Vec<Lit>> {
 /// verdicts are whatever they are (both occur near the threshold).
 fn random3sat(n: u32, m: usize, seeds: &'static [u64]) -> Box<dyn Workload> {
     let instances: Vec<Vec<Vec<Lit>>> = seeds.iter().map(|&s| random_3sat(n, m, s)).collect();
+    let for_build = instances.clone();
     rebuild(
         move || {
-            instances
+            for_build
                 .iter()
                 .map(|cls| {
                     let mut s = Solver::new(n);
@@ -377,10 +389,14 @@ fn random3sat(n: u32, m: usize, seeds: &'static [u64]) -> Box<dyn Workload> {
                 })
                 .collect::<Vec<_>>()
         },
-        |solvers| {
+        move |solvers| {
             let mut fp = Fp::new();
-            for s in solvers.iter_mut() {
+            for (cls, s) in instances.iter().zip(solvers.iter_mut()) {
                 let res = s.solve();
+                assert_ne!(res, SolveResult::Unknown, "no budget is set");
+                if res == SolveResult::Sat {
+                    assert!(check_model(cls, &s.model()), "model violates a clause");
+                }
                 fp = fp_solve(fp, res, s);
             }
             fp.finish()
@@ -389,11 +405,11 @@ fn random3sat(n: u32, m: usize, seeds: &'static [u64]) -> Box<dyn Workload> {
 }
 
 fn random3sat_n200_r426() -> Box<dyn Workload> {
-    random3sat(200, 852, &[1, 2, 3, 4, 5, 6, 7, 8])
+    random3sat(200, 852, &[1, 3, 4, 6, 10])
 }
 
-fn random3sat_n300_r426() -> Box<dyn Workload> {
-    random3sat(300, 1278, &[11, 12])
+fn random3sat_n150_r426() -> Box<dyn Workload> {
+    random3sat(150, 639, &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 }
 
 /// A planted parity-heavy instance: `rows` random XORs of width `width`
@@ -465,8 +481,9 @@ fn xor_mix(insts: Vec<XorInstance>) -> Box<dyn Workload> {
             for (x, s) in insts.iter().zip(solvers.iter_mut()) {
                 let res = s.solve();
                 assert_eq!(res, SolveResult::Sat, "planted instance");
-                assert!(s.check_xors(&s.model()));
-                let _ = x;
+                let model = s.model();
+                assert!(s.check_xors(&model), "model violates a parity row");
+                assert!(check_model(&x.clauses, &model), "model violates a clause");
                 fp = fp_solve(fp, res, s);
             }
             fp.finish()
@@ -474,10 +491,10 @@ fn xor_mix(insts: Vec<XorInstance>) -> Box<dyn Workload> {
     )
 }
 
-fn xor_planted_n400() -> Box<dyn Workload> {
+fn xor_planted_n120() -> Box<dyn Workload> {
     xor_mix(
-        (0..4)
-            .map(|i| xor_planted(400, 300, 6, 1000, 0x5eed_0000 + i))
+        (0..6)
+            .map(|i| xor_planted(120, 90, 5, 350, 0x5eed_0000 + i))
             .collect(),
     )
 }
@@ -493,32 +510,32 @@ pub fn register(kernels: &mut Vec<Kernel>) {
         })
     };
     add(
-        "sat/semaev_s4_n15l5_sat_x10",
-        "Solver::solve on the ten n15l5 -S Semaev S4 corpus instances (native XOR, symmetry broken)",
+        "sat/semaev_s4_n15l5_sat_x4",
+        "Solver::solve on four n15l5 -S Semaev S4 corpus instances (native XOR, symmetry broken)",
         Tier::Quick,
         semaev_s4_n15l5_sat,
     );
     add(
-        "sat/semaev_s4_n15l5_unsat_x4",
-        "Solver::solve on four unsatisfiable n15l5 Semaev S4 corpus instances (native XOR)",
+        "sat/semaev_s4_n15l5_unsat_x1",
+        "Solver::solve on the unsatisfiable n15l5-11-U Semaev S4 corpus instance (native XOR)",
         Tier::Quick,
         semaev_s4_n15l5_unsat,
     );
     add(
-        "sat/semaev_s4_n17l6_sat_x4",
-        "Solver::solve on four n17l6 -S Semaev S4 corpus instances (native XOR)",
-        Tier::Full,
+        "sat/semaev_s4_n17l6_sat_x1",
+        "Solver::solve on the n17l6-8-S Semaev S4 corpus instance (native XOR)",
+        Tier::Quick,
         semaev_s4_n17l6_sat,
     );
     add(
         "sat/semaev_s4_n17l6_unsat_x1",
-        "Solver::solve on one unsatisfiable n17l6 Semaev S4 corpus instance (native XOR)",
+        "Solver::solve on the unsatisfiable n17l6-11-U Semaev S4 corpus instance (native XOR)",
         Tier::Full,
         semaev_s4_n17l6_unsat,
     );
     add(
-        "sat/semaev_s4_n19l6_sat_x2",
-        "Solver::solve on two n19l6 -S Semaev S4 corpus instances (native XOR)",
+        "sat/semaev_s4_n19l6_sat_x1",
+        "Solver::solve on the n19l6-1-S Semaev S4 corpus instance (native XOR)",
         Tier::Full,
         semaev_s4_n19l6_sat,
     );
@@ -535,33 +552,39 @@ pub fn register(kernels: &mut Vec<Kernel>) {
         semaev_s4_encode_n19l6,
     );
     add(
-        "sat/koblitz_bool_native_m3_n15_x8",
-        "encode_boolean_system_with(Native) + solve on 8 Koblitz K0/F2^15 m=3 decomposition systems",
+        "sat/koblitz_bool_native_m3_n15_x3",
+        "Solver::solve on 3 Koblitz K0/F2^15 m=3 decomposition systems (encode_boolean_system_with, native XOR)",
         Tier::Quick,
         koblitz_bool_native_m3_n15,
     );
     add(
-        "sat/koblitz_bool_cnf_m3_n15_x8",
-        "encode_boolean_system_with(Cnf) + solve on 8 Koblitz K0/F2^15 m=3 decomposition systems",
+        "sat/koblitz_bool_cnf_m3_n15_b1500_x2",
+        "Solver::solve, 1500-conflict budget, on 2 Koblitz K0/F2^15 m=3 systems (CNF parity)",
         Tier::Quick,
         koblitz_bool_cnf_m3_n15,
     );
     add(
-        "sat/random3sat_n200_r426_x8",
-        "Solver::solve on eight seeded random 3-SAT instances, n=200, m/n=4.26",
+        "sat/koblitz_bool_native_m2_n19_x2",
+        "Solver::solve on 2 Koblitz K0/F2^19 m=2 decomposition systems (native XOR)",
+        Tier::Quick,
+        koblitz_bool_native_m2_n19,
+    );
+    add(
+        "sat/random3sat_n200_r426_x5",
+        "Solver::solve on five seeded random 3-SAT instances, n=200, m/n=4.26 (SAT and UNSAT)",
         Tier::Quick,
         random3sat_n200_r426,
     );
     add(
-        "sat/random3sat_n300_r426_x2",
-        "Solver::solve on two seeded random 3-SAT instances, n=300, m/n=4.26",
+        "sat/random3sat_n150_r426_x12",
+        "Solver::solve on twelve seeded random 3-SAT instances, n=150, m/n=4.26 (6 SAT, 6 UNSAT)",
         Tier::Quick,
-        random3sat_n300_r426,
+        random3sat_n150_r426,
     );
     add(
-        "sat/xor_planted_n400_x4",
-        "Solver::solve on four planted instances: 300 width-6 XOR rows + 1000 3-clauses, n=400",
+        "sat/xor_planted_n120_x6",
+        "Solver::solve on six planted instances: 90 width-5 XOR rows + 350 3-clauses, n=120",
         Tier::Quick,
-        xor_planted_n400,
+        xor_planted_n120,
     );
 }
