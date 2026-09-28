@@ -1,0 +1,17 @@
+name: NIST GPU arithmetic
+on:
+  pull_request:
+    paths:
+      - 'gpu/nist/**'
+      - '.github/workflows/nist-gpu-arithmetic.yml'
+  workflow_dispatch:
+concurrency:
+  group: nist-gpu-arithmetic-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  cpu-oracle:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libboost-dev
+      - run: make -C gpu/nist test
