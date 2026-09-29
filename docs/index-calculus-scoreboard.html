@@ -8799,6 +8799,27 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <p>On these same new batches compact/v2 CPU ratios are 0.782/0.391/0.344 at n37/41/53, while compact/normal ratios are 2.081/2.989/3.086. The earlier lead against v2 was real for that weaker comparator and does not survive this stronger one. At n41 and n53, compact S3 index construction alone takes more wall time than the entire normal-rho process in all five blocks. Rank attempts already equal K, so index/base construction and target probes are the next measured bottlenecks. The normal rho performs more walk steps than v2 at n41/n53 batch, and all recovered logs independently verify; the reversal is not a missing-completion artifact. Every S, ratio to the generic-group floor, n=83 confidence gate and GF(2<sup>131</sup>) transfer remains unset. The selected-panel <code>vs_rho</code> verdict is unchanged. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_orbit_strong_rho_20260929/RESULT.md">Result, six raw archives and decisions</a>; <a href="https://github.com/aburan28/crypto/pull/943">PR #943</a>.</p>
 </section>
 <!-- END compact-orbit-strong-rho-20260929 -->
+<!-- BEGIN compact-k-boundary-20260929 -->
+<section class="panel" id="compact-k-boundary-20260929">
+<div class="panel-head"><h2>Held-out K sweep: eager compact index still loses to normal-basis rho <span class="chip">K/base-size gate</span></h2>
+<p>Four preregistered K choices at each of n=41 and n=53 solved the same 1,024 new point-only Q as the strongest matched rho in five balanced cold blocks. Every compact arm reached full rank and recovered every log; all 51,200 arm-target outputs passed independent replay on a second machine. The repeats measure runner variation on one Q corpus, not target-distribution variation.</p></div>
+<div class="table-scroll"><table>
+<caption>Complete cold user+system CPU seconds; IC/rho is paired within each host. S is uncalibrated. The n41 and n53 hosts differ, so cross-size timing ratios are not fitted.</caption>
+<thead><tr><th>n</th><th>L</th><th>Arm</th><th>CPU median, s</th><th>Wall median, s</th><th>RSS median, MiB</th><th>IC / rho CPU</th><th>95% paired interval</th><th>Verified</th><th>S, whole pipeline</th></tr></thead><tbody>
+<tr><td>41</td><td>1,024</td><td>compact K=128</td><td>4.4844</td><td>4.4899</td><td>87.8</td><td>3.491</td><td>3.461&ndash;3.509</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>41</td><td>1,024</td><td>compact K=192</td><td>3.1510</td><td>3.1551</td><td>173.5</td><td>2.443</td><td>2.422&ndash;2.478</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>41</td><td>1,024</td><td>compact K=255, prior control</td><td>3.2144</td><td>3.2191</td><td>329.4</td><td>2.493</td><td>2.462&ndash;2.530</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>41</td><td>1,024</td><td>compact K=320</td><td>3.8953</td><td>3.8992</td><td>621.4</td><td>3.029</td><td>3.009&ndash;3.049</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>41</td><td>1,024</td><td>normal-basis rho</td><td>1.2891</td><td>1.2923</td><td>39.6</td><td>1.000</td><td>reference</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>53</td><td>1,024</td><td>compact K=220</td><td>34.9846</td><td>34.9917</td><td>327.9</td><td>5.553</td><td>5.527&ndash;5.574</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>53</td><td>1,024</td><td>compact K=330</td><td>19.4660</td><td>19.4730</td><td>661.7</td><td>3.087</td><td>3.077&ndash;3.102</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>53</td><td>1,024</td><td>compact K=440, prior control</td><td>16.4827</td><td>16.4891</td><td>1281.3</td><td>2.616</td><td>2.565&ndash;2.727</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>53</td><td>1,024</td><td>compact K=550</td><td>17.4305</td><td>17.4376</td><td>1420.0</td><td>2.766</td><td>2.749&ndash;2.786</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>53</td><td>1,024</td><td>normal-basis rho</td><td>6.3025</td><td>6.3057</td><td>150.2</td><td>1.000</td><td>reference</td><td>5,120/5,120</td><td>unset</td></tr>
+</tbody></table></div>
+<p>The n41 grid minimum K=192 improves the old K=255 by a direct paired CPU ratio of 0.979 (95% interval 0.974&ndash;0.990); selection from this grid is exploratory until a second Q corpus confirms it. At n53, K=440 remains the grid minimum. Smaller K reduces the K²&middot;n eager-index build but increases rank and target probes; at both minima the target phase alone exceeds the complete rho wall median. This is a measured no-go for this eager-index K grid on these Q, not a verdict on a different index/query policy, degree-263 descendants, n=83 or GF(2<sup>131</sup>). Common-unit S and algorithmic speed ratio remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_k_boundary_20260929/RESULT.md">Result, frozen protocol and raw archives</a>; <a href="https://github.com/aburan28/crypto/pull/944">PR #944</a>.</p>
+</section>
+<!-- END compact-k-boundary-20260929 -->
 </body>
 </html>
 

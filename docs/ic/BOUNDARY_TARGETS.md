@@ -256,9 +256,27 @@ algorithmic `vs_rho` and n=131 transfer remain unset, so the selected-panel
 row is not promoted. Evidence:
 [`compact_orbit_strong_rho_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_orbit_strong_rho_20260929/RESULT.md).
 
-**Next beat:** freeze a disjoint n41/n53 L=1,024 K/base-size and index-policy
-sweep against normal-basis batched rho, and build a complete calibrated common
-operation unit for both methods. Precomputed starts alone are deprioritized:
+**2026-09-29 held-out K/base-size gate:** a new disjoint point-only n41/n53
+L=1,024 corpus tested four frozen K choices per size against the same stronger
+rho. All 40 compact full-rank runs and 10 rho runs solved and independently
+replayed every target. The lowest complete CPU costs in the tested eager-index
+grid were n41 K=192 at **2.443× rho** (95% paired interval 2.422–2.478) and
+n53 K=440 at **2.616× rho** (2.565–2.727). The n41 K=192 choice improves the
+prior K=255's CPU cost by a direct paired ratio of 0.979 (0.974–0.990), but
+this selection is exploratory until tested on another Q corpus. Smaller K
+reduces K²·n index construction and increases rank/target probes; at both
+grid minima the target phase alone exceeds the complete matched rho wall
+median. This is a no-go for the tested eager-index K grid on these Q, not for
+an untested index policy or a descendant oracle. Common-unit S and n=131
+transfer remain unset. Evidence and raw archives:
+[`compact_k_boundary_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_k_boundary_20260929/RESULT.md).
+
+**Next beat:** freeze a joint S3 index/query policy that preserves full-rank,
+full-log recovery on held-out Q and measures both construction and probes at
+equal useful workload; build a complete calibrated common operation unit for
+IC and normal-basis batched rho. A swap/Frobenius quotient of ordered S3
+states is an untested candidate and needs a reachability proof and exceptional-
+case tests before performance claims. Precomputed starts alone are deprioritized:
 in the earlier n53/L=1,024 rho, 20,134,104 direct walk additions dominated at
 most 279,360 scalar-multiplication additions (<1.4%). Then run the n=83
 confidence gate and the pending n=61 L=65,536 batch-size probe as resources
@@ -267,7 +285,7 @@ permit. Do not use 32-target panels as a substitute. Historical evidence:
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz compact-orbit `vs_rho` → shrink the cold S3 index and count a complete common operation unit against normal-basis batched rho.** The former 0.309/0.252 batch CPU ratios at n41/n53 against corrected v2 reverse to 2.989/3.086 against the stronger same-Q reference. Index build alone exceeds full rho in both cells; the next K/base-policy sweep must include all failures, rank probes, targets and RSS. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels.
+1. **Koblitz compact-orbit `vs_rho` → jointly reduce S3 index and query costs, then count a complete common operation unit against normal-basis batched rho.** A held-out n41/n53 K sweep found best tested complete CPU ratios of 2.443/2.616 against matched rho; shrinking K alone traded index construction for rank/target probes and did not cross. The next frozen index/query policy needs full-rank, full-log recovery, failures, probes and RSS on held-out points. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels.
 2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
 3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
    On the autolab `signed_expanded` family the nearest charged gap is `n = 37`
