@@ -1,0 +1,63 @@
+name: ECC2K-130 native m3 counting admission
+
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/native_m3_counting_admission_20260929/**'
+      - 'research/ecc2k130_leaf_native_m3_gate_20260926/PROTOCOL.md'
+      - 'docs/index-calculus-scoreboard.html'
+      - '.github/workflows/ecc2k130-native-m3-counting.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/notes/ecc2k130/native_m3_counting_admission_20260929/**'
+      - 'research/ecc2k130_leaf_native_m3_gate_20260926/PROTOCOL.md'
+      - 'docs/index-calculus-scoreboard.html'
+      - '.github/workflows/ecc2k130-native-m3-counting.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Regenerate exact result from frozen source and inputs
+        run: |
+          python3 research/notes/ecc2k130/native_m3_counting_admission_20260929/compute.py \
+            --out "$RUNNER_TEMP/native-m3-result.json"
+          cmp "$RUNNER_TEMP/native-m3-result.json" \
+            research/notes/ecc2k130/native_m3_counting_admission_20260929/RESULT.json
+      - name: Independently replay integer brackets and parent admission
+        run: |
+          python3 research/notes/ecc2k130/native_m3_counting_admission_20260929/verify.py \
+            --result "$RUNNER_TEMP/native-m3-result.json" \
+            --out "$RUNNER_TEMP/native-m3-verify.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          directory = Path('research/notes/ecc2k130/native_m3_counting_admission_20260929')
+          archived = json.loads((directory / 'VERIFY.json').read_text())
+          replay = json.loads((Path(os.environ['RUNNER_TEMP']) / 'native-m3-verify.json').read_text())
+          for key in ('classification', 'result_sha256', 'verifier_sha256',
+                      'parent_admission_sha256', 'parent_admission_stdout_sha256',
+                      'checks'):
+              assert replay[key] == archived[key], key
+          print('NATIVE_M3_COUNTING_REPLAY_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-m3-counting-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/native-m3-result.json
+            ${{ runner.temp }}/native-m3-verify.json
+          if-no-files-found: warn
+          retention-days: 30
