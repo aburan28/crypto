@@ -131,12 +131,17 @@ does not replace group replay, natural-query auditing or the family gate.
 The post-registration [static feasibility audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/STATIC-FEASIBILITY.md)
 proves that this panel's four F4/F5 arms exceed the pinned 64-variable encoder
 cap on every cell; wait for the run's raw receipts for its empirical outcome.
-The SAT encoding is separate and remains empirically undecided. Before any new
-algebraic panel generates fresh targets, run
+The SAT encoding is separate and remains empirically undecided. The disclosed-point
+[dimension-6 subspace pilot](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-f4-subspace-pilot/run-20260929/RESULT.md)
+has already run `generic_solver_feasibility.py --require-pass` and one
+`max_trials=1` pass on the five inventory points. All ten jobs entered the
+named MatrixF4/MatrixF5 engines and exhausted `node_budget=4096` with zero
+accepted relations. Do not rerun that budget or treat it as family
+qualification. Before any new algebraic panel generates fresh targets, run
 `generic_solver_feasibility.py --require-pass` against its exact worker source
 checkout and registered panel. A static pass is only an encoder preflight:
 also pilot actual dispatch and natural failed-attempt accounting on disclosed
-points. The independent factor-base auditor now supports `standard_subspace`;
+points, under a budget frozen before the first job. The independent factor-base auditor now supports `standard_subspace`;
 changing from the incumbent orbit base is a factor-base-policy comparison.
 The gate requires every smoke and development job to be verified for at least
 one F4/F5 arm and one SAT arm; a reference-selection status alone does not

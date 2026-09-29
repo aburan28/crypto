@@ -1,6 +1,6 @@
 # Disclosed-point F4/F5 standard-subspace recovery pilot
 
-Status: **budget frozen in `run_pilot.py`; measurement pending**.
+Status: **one local execution retained** in [`run-20260929`](run-20260929/RESULT.md). `promotion_eligible=false`.
 
 The ambient-orbit F4/F5 arms in
 [generic-backend-qualification-v2](../generic-backend-qualification-v2/README.md)
@@ -18,10 +18,10 @@ See [PROTOCOL.md](PROTOCOL.md).
 
 | Gate | State |
 | --- | --- |
-| Feasibility gate + d6 inventory control | Depends on PR #952 (or merged equivalent) |
-| Live v2 measurement | In progress / do not retry |
-| This pilot execution | Budget frozen (`max_trials=1`, 180s, 8 GiB); not yet run |
-| Fresh competitive F4/F5 registration | Blocked until pilot + v2 exposure census |
+| Feasibility gate + d6 inventory control | Merged in PR #952; this run's preflight passed |
+| Live v2 measurement | Sole dispatch 36580669479; do not retry |
+| This pilot execution | Done once: 10/10 jobs entered MatrixF4/MatrixF5, node budget exhausted, zero relations |
+| Fresh competitive F4/F5 registration | Not authorized by this pilot |
 
-No scoreboard competitive row is updated from this directory until a later
-evidence PR lands measured, verified receipts.
+No scoreboard competitive row is updated from this directory. The retained
+run is a disclosed-point diagnostic with unknown complete cost.

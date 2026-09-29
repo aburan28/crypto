@@ -1,6 +1,6 @@
 # Disclosed-point F4/F5 standard-subspace recovery pilot
 
-Status: **budget frozen; local execution not yet started**. This protocol
+Status: **executed once locally** as [`run-20260929`](run-20260929/RESULT.md). This protocol
 freezes a bounded diagnostic before any fresh competitive panel. It does not
 consume the one-dispatch slot of
 [generic-backend-qualification-v2](../generic-backend-qualification-v2/PROTOCOL.md)

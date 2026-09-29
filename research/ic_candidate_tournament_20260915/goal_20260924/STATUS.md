@@ -238,11 +238,14 @@ seed `2026092902`, panel SHA-256
 `d283a869b0412228d1c66260fdfd8f387d7243bd15456c7febf3c46ee5da27a8`,
 one process on each of 25 distinct points and 250 trial slots. It excludes the
 25 reconstructed first-run points and keeps the same source-bound F4/F5, SAT,
-incumbent and matched-rho arms. Its one permitted dispatch is live as
+incumbent and matched-rho arms. Its one permitted dispatch is
 [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
-(attempt one); never redispatch this seed. Qualification and cost rows remain
-pending until that run's packed artifact, frozen verifier, natural-query audit
-and family gate finish. A timed-out or partial archive is operationally
+(attempt one); never redispatch this seed. On 2026-09-29 the measured step
+recorded a 300-minute timeout, `pack_partial_campaign.py` failed, and the
+upload step found no campaign archive (only the earlier pack-smoke artifact).
+The workflow object was still `in_progress` when those step conclusions were
+read, so this note does not replace a terminal closeout. Qualification and
+cost rows stay unknown. A timed-out run with no retained bundle is operationally
 censored for family verdicts.
 
 Post-registration source audit (PR
@@ -250,8 +253,12 @@ Post-registration source audit (PR
 template needs `4n` Boolean variables on the registered ambient
 `subgroup_orbits` bases, which exceeds `MAX_VARS=64` on every cell, so all
 twenty v2 F4/F5-family layouts are statically `unsupported` before solving.
-That finding does not rewrite live receipts or decide SAT arms. The next
-bounded step is the disclosed-point
-[standard-subspace dimension-6 F4/F5 recovery pilot](generic-f4-subspace-pilot/PROTOCOL.md):
-encoder-feasible layouts on already exposed targets only, then a new seed for
-any fresh competitive panel.
+That finding does not rewrite live receipts or decide SAT arms. The disclosed-point
+[standard-subspace dimension-6 F4/F5 pilot](generic-f4-subspace-pilot/run-20260929/RESULT.md)
+has executed once on the five inventory-control points (`max_trials=1`,
+`node_budget=4096`). All ten `f4`/`f5` jobs dispatched into MatrixF4/MatrixF5
+with `unsupported: false`, exhausted the node budget, and accepted zero
+relations. It is a factor-base-policy diagnostic with `promotion_eligible=false`.
+Do not rerun that budget. Do not register a fresh competitive F4/F5 panel from
+it. Actions run 36580669479 is the sole empirical record for seed `2026092902`;
+do not redispatch that seed.
