@@ -26,7 +26,7 @@ without promotion. Rounds 0023, 0024 and 0025 produced no win against a matched 
 | `m = 4` is closed on the frozen engine | `ĉ = 0.985` [0.983, 1.018] against `c* = 0.25`; controls pass | [ic_m4_exponent_audit_20260928](../../ic_m4_exponent_audit_20260928/RESULTS.md) |
 | `m = 4` is closed on the current engine | `ĉ = 1.060` [1.058, 1.093]; 1.4–3.2× cheaper per cell, but steeper | [ic_m4_head_engine_20260929](../../ic_m4_head_engine_20260929/RESULTS.md) |
 | Torsion symmetrisation is a constant lever | refutation degree rises about 1 per unit `ℓ`, `s̄ = 1.033` | [ic_symmetry_lever_slope_20260929](../../ic_symmetry_lever_slope_20260929/RESULTS.md) |
-| The one IC advantage left is a constant in time | in-process 0.74–0.84 of the strongest rho at the four cells with `n ≤ 19`, parity at `n = 23`; it comes from higher instructions per second (1.65–2.03×), not from fewer instructions | [walltime_isolation_20260929](walltime_isolation_20260929/RESULTS.md), [walltime_strong_rho_20260929](walltime_strong_rho_20260929/RESULTS.md) |
+| The one IC advantage left is a constant in time | in-process 0.74–0.84 of the strongest rho at the four cells with `n ≤ 19`, parity at `n = 23`; it comes from higher instructions per second (1.65–2.03×), mostly because rho zero-fills a fixed 160 KB cache per solve | [walltime_isolation_20260929](walltime_isolation_20260929/RESULTS.md), [walltime_strong_rho_20260929](walltime_strong_rho_20260929/RESULTS.md), [throughput_gap_20260929](throughput_gap_20260929/RESULTS.md) |
 
 **Classification (AGENTS.md §3).** The small-cell time lead is **engineering**. Nothing in
 this line is an **advance**: no ratio to the generic floor fell with `n`.
@@ -37,9 +37,15 @@ this line is an **advance**: no ratio to the generic floor fell with `n`.
   audits. There is no measurement near `m = 83` (AGENTS.md §8a) or at the challenge's 131.
 - **Engines and solvers.** One IC implementation family. One Gröbner engine family
   (Macaulay/F4 degree growth), on two engine versions.
-- **The throughput gap is unexplained.** The IC arm runs 1.65–2.03× more instructions per
-  second than rho. A batched rho does not close the gap at these sizes, so the explanation
-  from a latency-bound walk is unconfirmed. It is a constant either way.
+- **The throughput gap is attributed, but no fix has been measured.** The IC arm runs
+  1.65–2.03× more instructions per second than rho, and a batched rho does not close the gap
+  at these sizes.
+  - A cache and branch simulation
+    ([throughput_gap_20260929](throughput_gap_20260929/RESULTS.md)) traces most of it to rho
+    zero-filling a fixed 163,840-byte cycle-detection cache (`RECENT_SLOTS`) on every solve.
+  - A rho with the cache sized to the walk would probably remove IC's small-cell time lead.
+    That rho has not been built or measured.
+  - It is a constant either way.
 
 ## What would reopen it
 
