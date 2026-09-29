@@ -91,8 +91,8 @@ def generate():
         "counters_consumed": {"B": b_counter, "Q": q_counter},
         "counts": {"A": 512, "B": 512, "Q": 384, "old_training": 512, "old_Q": 384},
         "overlaps": {"A_B": 0, "A_Q": 0, "B_Q": 0,
-                     "B_old_training": 0, "Q_old_training": 0,
-                     "B_old_Q": 0, "Q_old_Q": 0},
+                     "A_old_training": 0, "B_old_training": 0, "Q_old_training": 0,
+                     "A_old_Q": 0, "B_old_Q": 0, "Q_old_Q": 0},
         "sha256": {name: sha(data) for name, data in files.items()},
     }
     return files, report
