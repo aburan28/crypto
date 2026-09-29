@@ -67,8 +67,7 @@
 //!   requires Schoof, not implemented here.
 
 use num_bigint::BigInt;
-use num_integer::Integer;
-use num_traits::{One, Signed, Zero};
+use num_traits::{One, Zero};
 
 // ── Truncated p-adic integers ─────────────────────────────────────────────
 //
@@ -482,7 +481,7 @@ pub fn find_anomalous_curve(p: u64) -> Option<(u64, u64)> {
     None
 }
 
-fn mod_pow_u64(mut base: u64, mut exp: u64, modulus: u64) -> u64 {
+fn mod_pow_u64(base: u64, mut exp: u64, modulus: u64) -> u64 {
     let mut result = 1u128;
     let mut base = base as u128 % modulus as u128;
     let m = modulus as u128;

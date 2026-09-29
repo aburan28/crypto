@@ -1,0 +1,110 @@
+name: Rust lint
+
+# Lint for the Rust crates maintained in place: the root `crypto` crate
+# (src/, tests/, examples/, benches/) and cd_attack/. The crates under
+# research/ are archived snapshots and are not linted.
+#
+# - Format is PR-scoped, because the tree predates the check: a changed
+#   .rs file must be rustfmt-clean, the rest of the tree is left alone
+#   until someone touches it.
+# - Clippy runs with -D warnings: every compiler and clippy warning fails
+#   the build. The allow list lives in Cargo.toml `[lints]`, and each
+#   remaining exception is an item-level #[allow] next to the code.
+
+on:
+  pull_request:
+    paths:
+      - '**/*.rs'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'cd_attack/Cargo.toml'
+      - '.github/workflows/rust-lint.yml'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.rs'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'cd_attack/Cargo.toml'
+      - '.github/workflows/rust-lint.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # Pinned: under -D warnings, lints added by a new stable clippy would turn
+  # main red with no code change. Bump deliberately, fixing what it flags.
+  RUST_TOOLCHAIN: "1.98"
+
+jobs:
+  fmt:
+    name: rustfmt (changed files)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: rustfmt
+      - name: Changed Rust files are formatted
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          mapfile -t files < <(git diff --name-only --diff-filter=AMR "$BASE"...HEAD -- \
+            'src/**.rs' 'tests/**.rs' 'examples/**.rs' 'benches/**.rs' 'cd_attack/**.rs')
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "no linted Rust files changed"; exit 0
+          fi
+          printf '%s\n' "${files[@]}"
+          # rustfmt follows `mod` declarations into child files, so keep only
+          # the diffs that land in files this PR changed.
+          out=$(rustfmt --edition 2021 --check "${files[@]}" 2>&1 || true)
+          bad=0
+          for f in "${files[@]}"; do
+            if grep -q "^Diff in $PWD/$f" <<<"$out"; then
+              echo "::error file=$f::not rustfmt-clean; run: rustfmt --edition 2021 $f"
+              bad=1
+            fi
+          done
+          if [ "$bad" -ne 0 ]; then
+            echo "$out"
+          fi
+          exit $bad
+
+  clippy:
+    name: clippy (${{ matrix.crate }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        crate: [crypto, cd_attack]
+        include:
+          - crate: crypto
+            dir: .
+          - crate: cd_attack
+            dir: cd_attack
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ${{ matrix.dir }}
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings

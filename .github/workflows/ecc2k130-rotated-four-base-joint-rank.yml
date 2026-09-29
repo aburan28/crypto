@@ -1,0 +1,36 @@
+name: ECC2K130 rotated four-base joint rank
+
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/rotated_four_base_joint_rank_20260925/**'
+      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/**'
+      - 'research/notes/ecc2k130/rotated_beta_sweep_20260925/**'
+      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/**'
+      - '.github/workflows/ecc2k130-rotated-four-base-joint-rank.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/notes/ecc2k130/rotated_four_base_joint_rank_20260925/**'
+      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/**'
+      - 'research/notes/ecc2k130/rotated_beta_sweep_20260925/**'
+      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/**'
+      - '.github/workflows/ecc2k130-rotated-four-base-joint-rank.yml'
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Frozen pre-outcome protocol and input preflight
+        run: python3 research/notes/ecc2k130/rotated_four_base_joint_rank_20260925/ci_replay.py
+      - name: Independent evidence replay when committed
+        shell: bash
+        run: |
+          if test -f research/notes/ecc2k130/rotated_four_base_joint_rank_20260925/evidence/receipt.json; then
+            python3 research/notes/ecc2k130/rotated_four_base_joint_rank_20260925/ci_replay.py --evidence research/notes/ecc2k130/rotated_four_base_joint_rank_20260925/evidence
+          fi

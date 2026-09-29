@@ -124,14 +124,14 @@ pub fn hamming(a: &[u8], b: &[u8]) -> u32 {
 pub fn pkcs7_pad(data: &[u8], block_size: usize) -> Vec<u8> {
     let pad = block_size - (data.len() % block_size);
     let mut out = data.to_vec();
-    out.extend(std::iter::repeat(pad as u8).take(pad));
+    out.extend(std::iter::repeat_n(pad as u8, pad));
     out
 }
 
 /// Strip and validate PKCS#7 padding.  Returns `None` on bad
 /// padding.
 pub fn pkcs7_unpad(data: &[u8], block_size: usize) -> Option<Vec<u8>> {
-    if data.is_empty() || data.len() % block_size != 0 {
+    if data.is_empty() || !data.len().is_multiple_of(block_size) {
         return None;
     }
     let pad = *data.last()? as usize;

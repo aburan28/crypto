@@ -342,7 +342,7 @@ pub fn format_census(c: &Census) -> String {
 /// 2-cyclotomic cosets mod `n` together with the cosets themselves.
 /// Requires `n` odd (for even `n`, `t^n − 1` is not squarefree).
 pub fn cyclotomic_cosets(n: u32) -> Option<Vec<Vec<u32>>> {
-    if n == 0 || n % 2 == 0 {
+    if n == 0 || n.is_multiple_of(2) {
         return None;
     }
     let mut seen = vec![false; n as usize];
@@ -451,7 +451,7 @@ pub struct StableCandidate {
 /// `2^{(j_max+1)·n}` of the full census, which is what lets this reach
 /// field sizes the census cannot.
 pub fn stable_candidates(n: u32, n0: u32) -> Option<Vec<StableCandidate>> {
-    if n == 0 || n % 2 == 0 || n0 == 0 || n0 >= n || n0 >= 64 {
+    if n == 0 || n.is_multiple_of(2) || n0 == 0 || n0 >= n || n0 >= 64 {
         return None;
     }
     let j_max = max_j(n, n0)?;
@@ -467,7 +467,7 @@ pub fn stable_candidates(n: u32, n0: u32) -> Option<Vec<StableCandidate>> {
         if !divides_t_n_minus_one(g, n) {
             continue;
         }
-        let j = 63 - (low as u64).leading_zeros();
+        let j = 63 - low.leading_zeros();
         out.push(StableCandidate { n, n0, g, j });
     }
     out.sort_by_key(|c| c.j);
@@ -510,11 +510,7 @@ pub fn stable_subspace_dimensions(n: u32) -> Option<Vec<u32>> {
             }
         }
     }
-    Some(
-        (0..=n)
-            .filter(|&d| reachable[d as usize])
-            .collect(),
-    )
+    Some((0..=n).filter(|&d| reachable[d as usize]).collect())
 }
 
 /// Whether `F_{2^n}` admits **no** usable Frobenius-stable factor base:
