@@ -743,4 +743,89 @@ mod tests {
         }
         assert!(solved > 200, "only {solved} solved columns");
     }
+
+    /// Systems of the perfbench shape at a few hundred columns (weight-3
+    /// rows, one in eight heavier), where elimination runs long enough
+    /// and fills in enough that a single missed count update would pick
+    /// a different pivot or stop the candidate scan early, agree with
+    /// the reference on a sample of columns.  Each system is then
+    /// solved again with one more row, `x_top ≡ 5`, whose column sits
+    /// one below and exactly at the relabelling threshold
+    /// (`2 · entries + 64`), so the same rows take the direct and the
+    /// relabelled path.  `N = 1` (every value ≡ 0, every coefficient
+    /// a "unit" with inverse 0) trips the solver's own debug assertion
+    /// that the pivot is 1, so it is compared only where that is
+    /// compiled out.
+    #[test]
+    fn agrees_with_reference_at_scale_and_at_the_relabel_threshold() {
+        use rand::rngs::StdRng;
+        use rand::{Rng, SeedableRng};
+        let mut moduli: Vec<BigUint> = vec![
+            (BigUint::one() << 127u32) - 1u32,
+            BigUint::from(6u64 * ((1u64 << 61) - 1)),
+            BigUint::from(15u32),
+            BigUint::from(1u32 << 12),
+        ];
+        if !cfg!(debug_assertions) {
+            moduli.push(BigUint::one());
+        }
+        let mut rng = StdRng::seed_from_u64(0x5eed_a11e);
+        let mut solved = 0usize;
+        for case in 0..20 {
+            let n = &moduli[case % moduli.len()];
+            // Values are reduced, except mod 1, where they would all vanish.
+            let value = |rng: &mut StdRng| {
+                let v = BigUint::from(rng.gen::<u128>());
+                if n.is_one() {
+                    v % 1000u32
+                } else {
+                    v % n
+                }
+            };
+            let cols = rng.gen_range(48..=160usize);
+            let n_rows = rng.gen_range(cols - 16..=cols + 24);
+            let x: Vec<BigUint> = (0..cols).map(|_| value(&mut rng)).collect();
+            let rows: Vec<SparseRow> = (0..n_rows)
+                .map(|_| {
+                    let weight = if rng.gen_range(0..8) == 0 {
+                        rng.gen_range(5..=12usize)
+                    } else {
+                        3
+                    };
+                    let entries: Vec<(usize, BigUint)> = (0..weight)
+                        .map(|_| (rng.gen_range(0..cols), value(&mut rng)))
+                        .collect();
+                    let rhs = entries
+                        .iter()
+                        .fold(BigUint::zero(), |acc, (c, a)| acc + a * &x[*c])
+                        % n;
+                    SparseRow::from_entries(entries, rhs)
+                })
+                .collect();
+            let mut targets: Vec<usize> = (0..5).map(|_| rng.gen_range(0..cols)).collect();
+            targets.extend([0, cols - 1, cols]);
+            for &t in &targets {
+                let got = sparse_solve_mod_n(rows.clone(), cols, t, n);
+                let want = reference_sparse_solve(rows.clone(), t, n);
+                assert_eq!(got, want, "case {case}, column {t}, n = {n}");
+                solved += usize::from(got.is_some());
+            }
+            let entries = rows.iter().map(SparseRow::degree).sum::<usize>() + 1;
+            let threshold = 2 * entries + 64;
+            for top in [threshold - 1, threshold] {
+                let mut with_top = rows.clone();
+                with_top.push(SparseRow::from_entries(
+                    vec![(top, BigUint::one())],
+                    BigUint::from(5u32),
+                ));
+                for t in [top, 0, targets[0]] {
+                    let got = sparse_solve_mod_n(with_top.clone(), top + 1, t, n);
+                    let want = reference_sparse_solve(with_top.clone(), t, n);
+                    assert_eq!(got, want, "case {case}, top {top}, column {t}, n = {n}");
+                    solved += usize::from(got.is_some());
+                }
+            }
+        }
+        assert!(solved > 60, "only {solved} solved columns");
+    }
 }

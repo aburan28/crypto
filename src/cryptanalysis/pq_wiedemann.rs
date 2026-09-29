@@ -1010,4 +1010,44 @@ mod tests {
             );
         }
     }
+
+    /// Planted weight-3 systems of a few dozen columns, square and
+    /// rectangular: the normal-equations path reuses its `M v` scratch
+    /// and both Krylov buffers across some 60 steps and the solution
+    /// sum, and BM runs on sequences of that length from a real matrix
+    /// rather than random terms.  Every outcome, success or `None`,
+    /// matches the reference, over prime and composite moduli.
+    #[test]
+    fn wiedemann_solve_agrees_with_reference_on_larger_rectangular_systems() {
+        let mut rng = rand::rngs::StdRng::seed_from_u64(0x5eed_4ec7);
+        let mut solved = 0usize;
+        for (k, n) in test_moduli().iter().enumerate().cycle().take(24) {
+            let n_cols = rng.gen_range(12..=32usize);
+            let n_rows = match k % 3 {
+                0 => n_cols,
+                1 => n_cols + rng.gen_range(1..=8usize),
+                _ => n_cols - rng.gen_range(1..=6usize),
+            };
+            let m: Vec<SparseRow> = (0..n_rows)
+                .map(|_| {
+                    let entries = (0..3)
+                        .map(|_| (rng.gen_range(0..n_cols), random_value(&mut rng, n)))
+                        .collect();
+                    SparseRow::from_entries(entries, BigUint::zero())
+                })
+                .collect();
+            let x: Vec<BigUint> = (0..n_cols).map(|_| random_value(&mut rng, n)).collect();
+            let b = reference::mat_vec(&m, &x, n);
+            for seed in 0..2u64 {
+                let got = wiedemann_solve(&m, &b, n_cols, n, seed);
+                assert_eq!(
+                    got,
+                    reference::wiedemann_solve(&m, &b, n_cols, n, seed),
+                    "n #{k}, {n_rows} x {n_cols}, seed {seed}"
+                );
+                solved += usize::from(got.is_some());
+            }
+        }
+        assert!(solved > 4, "only {solved} solves succeeded");
+    }
 }
