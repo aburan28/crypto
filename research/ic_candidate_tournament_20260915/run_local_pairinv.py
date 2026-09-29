@@ -2,6 +2,7 @@
 """Run one presealed local pairinv incumbent or signed rho reference arm."""
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -85,10 +86,14 @@ def audit_rho(report, process, data):
     certificate = verify(report, data['inventory']['fixture'],
                          expected_mode='rho')
     timing = native_intervals(report, process['process_wall_ns'])
+    subgroup_order = int(report['fixture']['subgroup_order'])
+    degree = int(report['fixture']['degree'])
+    expected_steps = math.sqrt(math.pi * subgroup_order / 2) / math.sqrt(2 * degree)
+    expected_walks = min(4, max(1, int(expected_steps / 64)))
     require(report['executed_method'] == {
-                'reference':'signed_frobenius_rho', 'requested_walks':1}
+                'reference':'signed_frobenius_rho', 'requested_walks':4}
             and len(report['solutions']) == 1
-            and report['solutions'][0]['effective_walks'] == 1
+            and report['solutions'][0]['effective_walks'] == expected_walks
             and report['automorphism_order']
                 == 2 * int(report['fixture']['degree'])
             and certificate['verified_targets'] == 1,

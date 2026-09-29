@@ -26,7 +26,7 @@ class LocalPairinvRegistrationTests(unittest.TestCase):
                              {'kind': 'subgroup_orbits', 'seed': 43,
                               'points': 102})
             self.assertNotIn('target_scalar', job)
-        self.assertEqual(rho['config']['rho_parallel_walks'], 1)
+        self.assertEqual(rho['config']['rho_parallel_walks'], 4)
 
     def test_unaccepted_prepared_source_cannot_enter_local_build(self):
         with tempfile.TemporaryDirectory() as temporary:

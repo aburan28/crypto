@@ -32,7 +32,7 @@ def jobs():
     rho = dict(common, mode='rho', algorithm_seed=2026092961,
                config=dict(solver='pair_table', linear_algebra='tiny_gauss',
                            summands=3, batch_trials=1, max_trials=65536,
-                           rho_parallel_walks=1))
+                           rho_parallel_walks=4))
     return ic, rho
 
 
@@ -102,6 +102,8 @@ def register(prepared, built):
     method = method_record(ic_job, report['fixture'], source, IC_SOURCE,
                            'pairinv', build_flags)
     candidate = candidate_manifest(report['fixture'], report, method)
+    require(candidate['record']['curve']['curve_id'] == read(TARGET)['curve_id'],
+            'local incumbent does not use the frozen curve')
     ic_workload = workload_manifest(
         report['fixture'], input_law=INPUT_LAW,
         algorithm_seed=ic_job['algorithm_seed'],

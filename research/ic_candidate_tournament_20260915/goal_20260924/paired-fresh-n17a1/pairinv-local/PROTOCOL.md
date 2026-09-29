@@ -22,7 +22,10 @@ policies, not an isolated solver substitution.
 The IC arm uses the optimized three-summand pair table, one collection trial
 per batch, at most 65,536 trials, and the final tiny Gaussian relation solve.
 The rho arm uses the same public point, same checked source and binary, signed
-Frobenius walks, one requested walk and at most 65,536 iterations per restart.
+Frobenius walks, the historically selected four requested walks and at most
+65,536 iterations per restart. The source's small-group affordability rule
+reduces this n17 arm to one effective interleaved walk; registration and audit
+retain both requested and effective widths.
 Both receive the target point `[52411,72106]` directly, with seed
 `2026092948` recorded only as provenance. No known scalar is supplied. They
 run on the same physical local host, with one worker thread and no hard outer
@@ -40,8 +43,9 @@ checks the exact walk width, scalar replay and exclusive online interval.
 The [target allocation](../target-panel.json) predeclared F5, SAT, incumbent
 and rho in that order. SAT was actually launched before F5. Preserve and
 report this scheduling deviation when interpreting the four rows; it cannot
-be repaired by relabelling their execution order. The local one-walk rho is
-also distinct from the historical selected four-walk Linux reference. These
+be repaired by relabelling their execution order. The four-walk setting
+matches the historical selected source/configuration, while the local binary
+and hardware are separately bound and have no Linux calibration. These
 one-shot diagnostics do not establish a global winner, calibrated operation
 speedup, or confirmation-stage claim. All four rows and an explicit host/order
 review are required before even a conditional same-point online comparison.
