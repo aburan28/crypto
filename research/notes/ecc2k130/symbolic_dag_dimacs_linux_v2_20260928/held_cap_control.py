@@ -63,6 +63,10 @@ def main() -> int:
                 'stderr_sha256': hashlib.sha256(completed.stderr).hexdigest(),
             })
             if completed.returncode != 0:
+                token = os.environ.get('GH_TOKEN', '')
+                for stream in ('stdout', 'stderr'):
+                    tail = getattr(completed, stream).decode('utf-8', 'replace')[-3000:]
+                    row[stream + '_tail'] = tail.replace(token, '[REDACTED]') if token else tail
                 raise RuntimeError(f'{label} exited {completed.returncode}')
             return completed.stdout
         finally:
