@@ -80,6 +80,10 @@ impl Fp5 {
     fn count(&self, k: u64) {
         self.muls.set(self.muls.get() + k);
     }
+    /// Charge `k` multiplications performed elsewhere (a parallel elimination).
+    pub fn count_public(&self, k: u64) {
+        self.count(k);
+    }
     pub fn muls(&self) -> u64 {
         self.muls.get()
     }
