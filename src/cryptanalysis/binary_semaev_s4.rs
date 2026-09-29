@@ -1324,4 +1324,137 @@ mod tests {
             }
         }
     }
+
+    /// A reduction polynomial `z^n + Σ low_terms` with `z⁰` and a random
+    /// subset of the other powers below `z^n`, sparse or dense.  The
+    /// symbolic reduction is a linear map for any such modulus, so it
+    /// need not be irreducible to pin one implementation to another.
+    fn random_modulus(rng: &mut StdRng, n: u32, density: f64) -> IrreduciblePoly {
+        let mut low_terms = vec![0];
+        low_terms.extend((1..n).filter(|_| rng.gen_bool(density)));
+        IrreduciblePoly {
+            degree: n,
+            low_terms,
+        }
+    }
+
+    /// The word edges the first comparison skips: fields of one, two and
+    /// three coefficients, and widths on each side of 64 and 128 bits,
+    /// each against a sparse, a half-full and a dense modulus (so an
+    /// image `z^d mod f` can fill most of a word), with elements up to
+    /// three times the field width (so reduction folds repeatedly).
+    #[test]
+    fn symbolic_field_ops_agree_with_toggles_at_word_edges() {
+        let mut rng = StdRng::seed_from_u64(0x7764_6765);
+        let palettes = palettes();
+        for (round, &n) in [1u32, 2, 3, 64, 65, 127, 128, 129]
+            .iter()
+            .cycle()
+            .take(24)
+            .enumerate()
+        {
+            let palette = &palettes[round % palettes.len()];
+            let irr = random_modulus(&mut rng, n, [0.05, 0.5, 0.95][round % 3]);
+            let bits: Vec<u32> = (0..n).filter(|_| rng.gen_bool(0.5)).collect();
+            let c = F2mElement::from_bit_positions(&bits, n);
+
+            let len_a = rng.gen_range(0..6);
+            let a = random_f2m(&mut rng, len_a, palette, 4);
+            assert_eq!(
+                a.mul_const(&c, n).coeffs,
+                toggle_reference::mul_const(&a, &c, n).coeffs,
+                "mul_const, n = {n}, round {round}"
+            );
+
+            let len = rng.gen_range(0..=3 * n as usize);
+            let long = random_f2m(&mut rng, len, palette, 3);
+            let mut got = long.clone();
+            got.reduce(n, &irr);
+            let mut want = long;
+            toggle_reference::reduce(&mut want, n, &irr);
+            assert_eq!(got.coeffs, want.coeffs, "reduce, n = {n}, round {round}");
+        }
+    }
+
+    /// Both halves of [`weil_descend_s4`] against the toggles on the
+    /// smallest fields, on `l = n` (where `e₃⁴` has `12n − 11`
+    /// coefficients and folds about a dozen times), across the 64- and
+    /// 128-bit word boundaries, and under dense moduli.
+    #[test]
+    fn weil_descent_agrees_with_toggle_reference_at_edges() {
+        let mut rng = StdRng::seed_from_u64(0x6564_6765);
+        let cases: [(u32, u32, f64); 10] = [
+            (1, 1, 0.5),
+            (2, 2, 0.5),
+            (3, 3, 0.5),
+            (5, 5, 0.9),
+            (8, 8, 0.5),
+            (63, 3, 0.5),
+            (64, 3, 0.1),
+            (65, 3, 0.9),
+            (65, 8, 0.05),
+            (129, 3, 0.5),
+        ];
+        for (n, l, density) in cases {
+            let irr = random_modulus(&mut rng, n, density);
+            let b = F2mElement::one(n);
+            for _ in 0..2 {
+                let bits: Vec<u32> = (0..n).filter(|_| rng.gen_bool(0.5)).collect();
+                let x_r = F2mElement::from_bit_positions(&bits, n);
+                let sys = weil_descend_s4(n, l, &irr, &b, &x_r);
+                let (correspondence, semaev) = toggle_reference::weil_descend_s4(n, l, &irr, &x_r);
+                assert_eq!(sys.correspondence, correspondence, "n = {n}, l = {l}");
+                assert_eq!(sys.semaev, semaev, "n = {n}, l = {l}");
+            }
+        }
+    }
+
+    /// `xor_assign` on lopsided operands — a handful of monomials into a
+    /// set of thousands and the reverse, disjoint, contained, and
+    /// overlapping — and `mul` on the smallest operands, where a product
+    /// of one monomial with a sum can still cancel (`x₁ · (x₂ + x₁x₂)`).
+    /// These are the shapes a size-dependent choice between merging and
+    /// toggling has to get right on both sides of its threshold.
+    #[test]
+    fn anf_sums_agree_with_toggles_on_lopsided_operands() {
+        let mut rng = StdRng::seed_from_u64(0x6c6f_7073);
+        let wide: Vec<u32> = (0..80).collect();
+        for round in 0..60 {
+            let big = random_anf(&mut rng, &wide, 3, 3000);
+            let small = random_anf(&mut rng, &wide, 3, [1, 2, 3, 5][round % 4]);
+            // Some of `big`'s own monomials, so that some of them cancel.
+            let mut inside = AnfPoly::zero();
+            for m in big.monomials().step_by(97 + round) {
+                inside.monomials.insert(m.clone());
+            }
+            let mut mixed = inside.clone();
+            mixed.xor_assign(&small);
+            for (x, y) in [
+                (&big, &small),
+                (&small, &big),
+                (&big, &inside),
+                (&inside, &big),
+                (&big, &mixed),
+            ] {
+                let mut got = x.clone();
+                got.xor_assign(y);
+                let mut want = x.clone();
+                toggle_reference::xor_assign(&mut want, y);
+                assert_eq!(got, want, "xor_assign, round {round}");
+            }
+        }
+
+        let x1 = AnfPoly::var(1);
+        let mut cancel = AnfPoly::var(2);
+        cancel.xor_assign(&x1.mul(&AnfPoly::var(2)));
+        assert!(x1.mul(&cancel).is_zero(), "x₁·(x₂ + x₁x₂) = 0");
+        let palette: Vec<u32> = (0..5).collect();
+        for round in 0..400 {
+            let a = random_anf(&mut rng, &palette, 3, [0, 1, 2, 4][round % 4]);
+            let b = random_anf(&mut rng, &palette, 3, [1, 1, 3, 8][(round / 4) % 4]);
+            for (x, y) in [(&a, &b), (&b, &a), (&AnfPoly::one(), &b), (&a, &a)] {
+                assert_eq!(x.mul(y), toggle_reference::mul(x, y), "mul, round {round}");
+            }
+        }
+    }
 }
