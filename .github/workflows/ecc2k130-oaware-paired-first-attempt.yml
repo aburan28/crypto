@@ -1,0 +1,28 @@
+name: ECC2K-130 n13 paired SAT first-attempt archive
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/n13_oaware_sparse_dense_sat_20260925/**'
+      - '.github/workflows/ecc2k130-oaware-paired-first-attempt.yml'
+permissions:
+  contents: read
+jobs:
+  archive-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recheck frozen source and first local admission archive
+        run: |
+          python3 research/notes/ecc2k130/n13_oaware_sparse_dense_sat_20260925/ci_replay.py
+          python3 research/notes/ecc2k130/n13_oaware_sparse_dense_sat_20260925/verify_first_attempt.py
+          python3 -m py_compile \
+            research/notes/ecc2k130/n13_oaware_sparse_dense_sat_20260925/host_gate.py \
+            research/notes/ecc2k130/n13_oaware_sparse_dense_sat_20260925/verify_first_attempt.py
+          git diff --check "$(git merge-base HEAD "${{ github.event.pull_request.base.sha }}")" HEAD
