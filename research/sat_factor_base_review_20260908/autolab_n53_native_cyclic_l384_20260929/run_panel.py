@@ -23,6 +23,8 @@ RHO_EXE = REPO / "target/release/examples/koblitz_rho_batch_ks"
 POINTS = HERE / "points_L384.jsonl"
 MAX_RSS = 2 * 1024**3
 MAX_WALL = 4200
+MAX_AUDIT_WALL = 1200
+MAX_OPERATIONAL_WALL = MAX_WALL - MAX_AUDIT_WALL
 
 def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -121,6 +123,83 @@ def complete(receipt: dict) -> bool:
     )
 
 
+def stage_timeout(key: str, requested: float, steps: dict) -> float:
+    """Reserve the full audit child slot even after operational cap exhaustion."""
+    if key == "independent_audit":
+        return min(requested, MAX_AUDIT_WALL)
+    used = sum(receipt.get("wall_ms", 0) for name, receipt in steps.items()
+               if name != "independent_audit") / 1000
+    return max(0.0, min(requested, MAX_OPERATIONAL_WALL - used))
+
+
+def audit_input_files(panel: Path) -> dict[str, Path]:
+    files = {"audit_source": HERE / "audit.py", "points": POINTS,
+             "validator_scalars": HERE / "validator_scalars_L384.txt"}
+    for arm in ("A", "B"):
+        for label, path in {
+            f"{arm}_training_raw": panel / arm / "training/producer.stdout.jsonl",
+            f"{arm}_rank": panel / arm / "training/operational_solution.json",
+            f"{arm}_ic_raw": panel / arm / "ic/ic.stdout.jsonl",
+            f"{arm}_recovery": panel / arm / "ic/operational_recovery.json",
+        }.items():
+            if path.is_file():
+                files[label] = path
+    rho_raw = panel / "rho/rho.stdout.jsonl"
+    if rho_raw.is_file():
+        files["rho_raw"] = rho_raw
+    return files
+
+
+def audit_command(panel: Path) -> list[str]:
+    return [sys.executable, str(HERE / "audit.py"), "--panel", str(panel),
+            "--out", str(panel / "audit.json")]
+
+
+def has_complete_raw_prefix(panel: Path) -> bool:
+    children = [(panel / "rho", "rho")]
+    children.extend((panel / arm / stage, name)
+                    for arm in ("A", "B")
+                    for stage, name in (("training", "producer"), ("ic", "ic")))
+    for directory, basename in children:
+        receipt_path = directory / "resource_receipt.json"
+        raw_path = directory / f"{basename}.stdout.jsonl"
+        if receipt_path.is_file() and raw_path.is_file():
+            try:
+                if complete(json.loads(receipt_path.read_text())):
+                    return True
+            except (KeyError, ValueError):
+                continue
+    return False
+
+
+def audit_after_exception(panel: Path, summary: dict) -> dict:
+    """Attempt one independent replay of successful raw prefixes after a runner error."""
+    if not has_complete_raw_prefix(panel):
+        return summary
+    sequence = summary.setdefault("stage_sequence", [])
+    if "independent_audit" in sequence:
+        receipt_path = panel / "audit_driver/resource_receipt.json"
+        if receipt_path.is_file() and "independent_audit" not in summary.get("steps", {}):
+            receipt = json.loads(receipt_path.read_text())
+            summary.setdefault("steps", {})["independent_audit"] = receipt
+            if complete(receipt) and (panel / "audit.json").is_file():
+                summary["replay"] = json.loads((panel / "audit.json").read_text())
+        return summary  # An audit was already attempted; never retry it.
+    sequence.append("independent_audit")
+    try:
+        receipt = measure(audit_command(panel), clean_env(), panel / "audit_driver",
+                          "audit", MAX_AUDIT_WALL, audit_input_files(panel))
+        summary.setdefault("steps", {})["independent_audit"] = receipt
+        if complete(receipt):
+            summary["replay"] = json.loads((panel / "audit.json").read_text())
+    except Exception as exc:
+        failure = {"error": f"{type(exc).__name__}: {exc}", "traceback": traceback.format_exc()}
+        failure_path = panel / "audit_failure.json"
+        failure_path.write_text(json.dumps(failure, indent=2, sort_keys=True) + "\n")
+        summary["audit_failure_sha256"] = sha(failure_path)
+    return summary
+
+
 def preflight(panel: Path):
     import check_protocol
     frozen = check_protocol.preflight(require_release=True)
@@ -165,6 +244,8 @@ def run(args):
         "github_run_id": os.environ.get("GITHUB_RUN_ID"),
         "github_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
         "steps": {}, "stage_sequence": [], "arms": {},
+        "stage_budget_seconds": {"operational": MAX_OPERATIONAL_WALL,
+                                 "independent_audit": MAX_AUDIT_WALL},
     }
     path = args.out / "panel.json"
 
@@ -174,12 +255,14 @@ def run(args):
 
     def stage(key, command, env, directory, basename, timeout, files):
         root["stage_sequence"].append(key)
-        if time.monotonic() - started >= MAX_WALL:
+        save()  # Preserve the attempted stage even if the child cannot start.
+        allowed = stage_timeout(key, timeout, root["steps"])
+        if allowed <= 0:
+            assert key != "independent_audit", "independent audit has a reserved slot"
             root["steps"][key] = {"not_run": "GLOBAL_WALL_CAP"}
             save()
             return None
-        remaining = MAX_WALL - (time.monotonic() - started)
-        receipt = measure(command, env, directory, basename, min(timeout, remaining), files)
+        receipt = measure(command, env, directory, basename, allowed, files)
         root["steps"][key] = receipt
         save()
         return receipt
@@ -303,26 +386,9 @@ def run(args):
         state["status"] = ("OPERATIONAL_384_LOGS" if recovery_report["count"] == 384
                            else "INCOMPLETE_POINT_LOGS")
         save()
-    audit_inputs = {"audit_source": HERE / "audit.py", "points": POINTS,
-                    "validator_scalars": HERE / "validator_scalars_L384.txt"}
-    for arm in ("A", "B"):
-        for label, file in {
-            f"{arm}_training_raw": args.out / arm / "training/producer.stdout.jsonl",
-            f"{arm}_rank": args.out / arm / "training/operational_solution.json",
-            f"{arm}_ic_raw": args.out / arm / "ic/ic.stdout.jsonl",
-            f"{arm}_recovery": args.out / arm / "ic/operational_recovery.json",
-        }.items():
-            if file.is_file():
-                audit_inputs[label] = file
-    rho_raw = args.out / "rho/rho.stdout.jsonl"
-    if rho_raw.is_file():
-        audit_inputs["rho_raw"] = rho_raw
-    audit = stage(
-        "independent_audit",
-        [sys.executable, str(HERE / "audit.py"), "--panel", str(args.out),
-         "--out", str(args.out / "audit.json")],
-        clean_env(), args.out / "audit_driver", "audit", 1200, audit_inputs,
-    )
+    audit = stage("independent_audit", audit_command(args.out), clean_env(),
+                  args.out / "audit_driver", "audit", MAX_AUDIT_WALL,
+                  audit_input_files(args.out))
     if audit is None or not complete(audit):
         root["classification"] = "INVALID_OR_CENSORED_INDEPENDENT_AUDIT"
         save()
@@ -389,6 +455,7 @@ def main():
             panel = json.loads(panel_path.read_text()) if panel_path.is_file() else {}
             panel["classification"] = "INVALID_RUNNER_EXCEPTION"
             panel["failure_sha256"] = sha(args.out / "failure.json")
+            panel = audit_after_exception(args.out, panel)
             panel_path.write_text(json.dumps(panel, indent=2, sort_keys=True) + "\n")
         raise
     classification = json.loads((args.out / "panel.json").read_text())["classification"]

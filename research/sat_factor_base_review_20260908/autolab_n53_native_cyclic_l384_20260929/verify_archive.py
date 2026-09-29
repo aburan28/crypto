@@ -158,15 +158,29 @@ def check_receipts(panel: Path, summary: dict, frozen: dict):
     sequence = summary["stage_sequence"]
     assert isinstance(sequence, list) and len(sequence) == len(set(sequence))
     assert sequence and sequence[0] == "rho"
-    assert set(sequence) == set(summary["steps"])
+    exception = summary["classification"] == "INVALID_RUNNER_EXCEPTION"
+    recorded_keys = set(summary["steps"])
+    unreceipted = set(sequence) - recorded_keys
+    assert recorded_keys <= set(sequence)
+    assert not unreceipted or (exception and len(unreceipted) <= 2)
+    if unreceipted:
+        assert (panel / "failure.json").is_file()
     assert sequence == [key for key in ordered if key in sequence], "stage order changed"
-    assert sequence[-1] == "independent_audit" or summary["classification"] == "INVALID_RUNNER_EXCEPTION"
+    assert sequence[-1] == "independent_audit" or exception
+    assert summary["stage_budget_seconds"] == {"operational": 3000, "independent_audit": 1200}
+    prior_operational_ms = 0.0
     for key in sequence:
+        directory, basename, stage = stage_location(key)
+        expected_timeout = (1200.0 if key == "independent_audit" else
+                            max(0.0, min(CAPS[stage], 3000.0 - prior_operational_ms / 1000)))
+        if key not in summary["steps"]:
+            assert exception
+            continue
         recorded = summary["steps"][key]
         if "not_run" in recorded:
+            assert key != "independent_audit" and expected_timeout == 0.0
             assert recorded == {"not_run": "GLOBAL_WALL_CAP"}
             continue
-        directory, basename, stage = stage_location(key)
         root = panel / directory
         receipt = json.loads((root / "resource_receipt.json").read_text())
         manifest = json.loads((root / "manifest.json").read_text())
@@ -176,7 +190,10 @@ def check_receipts(panel: Path, summary: dict, frozen: dict):
         assert receipt["stderr_sha256"] == sha(root / f"{basename}.stderr.txt")
         assert manifest["checkout_head"] == summary["checkout_head"]
         assert 0 < manifest["timeout_s"] <= CAPS[stage]
+        assert math.isclose(manifest["timeout_s"], expected_timeout, rel_tol=0, abs_tol=1e-6)
         assert receipt["wall_ms"] >= 0
+        if key != "independent_audit":
+            prior_operational_ms += receipt["wall_ms"]
         assert receipt["user_cpu_s"] >= 0 and receipt["system_cpu_s"] >= 0
         assert receipt["peak_rss_bytes"] >= 0 and receipt["observed_group_peak_rss_bytes"] >= 0
         if summary["classification"].startswith("COMPLETE"):
@@ -267,7 +284,9 @@ def check_complete(panel: Path, summary: dict):
 
 def replay_audit(panel: Path, summary: dict):
     audit_receipt = summary["steps"].get("independent_audit", {})
-    if "returncode" not in audit_receipt or audit_receipt["returncode"] != 0:
+    if (audit_receipt.get("returncode") != 0 or audit_receipt.get("timed_out")
+            or audit_receipt.get("rss_gate") or not (panel / "audit.json").is_file()
+            or "replay" not in summary):
         return "RAW_INTEGRITY_ONLY"
     archived = json.loads((panel / "audit.json").read_text())
     with tempfile.TemporaryDirectory() as tmp:
@@ -316,7 +335,7 @@ def main():
                 assert build is None
             else:
                 assert gate["run_attempt"] == "1"
-            print(json.dumps({"verdict": "PASS_PREDISPATCH_OR_BUILD_RAW_INTEGRITY",
+            print(json.dumps({"verdict": "PASS_PREDISPATCH_OR_BUILD_RAW_INTEGRITY_ONLY",
                               "gate": gate["status"], "archive_sha256": sha(archive)}, sort_keys=True))
             return
         assert gate["status"] == "ADMITTED" and gate["run_attempt"] == "1"
@@ -324,14 +343,17 @@ def main():
         assert sha(summary_path) == manifest["panel_sha256"]
         if (bundle / "panel.json").is_file():
             assert (bundle / "panel.json").read_bytes() == summary_path.read_bytes()
-        if summary["classification"] == "INVALID_RUNNER_EXCEPTION":
+        exception = summary["classification"] == "INVALID_RUNNER_EXCEPTION"
+        if exception:
             assert summary["failure_sha256"] == sha(panel / "failure.json")
             assert manifest["classification"] == "INVALID_RUNNER_EXCEPTION"
-            if "checkout_head" in summary:
-                assert gate["reviewed_head"] == summary["checkout_head"]
-            print(json.dumps({"verdict": "PASS_RUNNER_FAILURE_RAW_INTEGRITY",
-                              "archive_sha256": sha(archive)}, sort_keys=True))
-            return
+            if "audit_failure_sha256" in summary:
+                assert summary["audit_failure_sha256"] == sha(panel / "audit_failure.json")
+            if "steps" not in summary:
+                assert "stage_sequence" not in summary
+                print(json.dumps({"verdict": "PASS_RUNNER_FAILURE_RAW_INTEGRITY_ONLY",
+                                  "archive_sha256": sha(archive)}, sort_keys=True))
+                return
         assert build is not None and build["status"] == "SUCCESS"
         assert summary["github_run_id"] == gate["run_id"]
         assert summary["github_run_attempt"] == gate["run_attempt"]
@@ -356,9 +378,14 @@ def main():
             assert verdict == "INDEPENDENT_FULL_REPLAY"
         else:
             assert summary["classification"].startswith(("PARTIAL", "INVALID", "CENSORED"))
-        print(json.dumps({"verdict": "PASS_COMPLETE_INDEPENDENT_REPLAY" if verdict == "INDEPENDENT_FULL_REPLAY"
-                          else "PASS_PARTIAL_REPLAY" if verdict == "INDEPENDENT_PARTIAL_REPLAY"
-                          else "PASS_RAW_INTEGRITY_ONLY",
+        if exception:
+            verdict_label = ("PASS_EXCEPTION_PREFIX_REPLAY" if verdict != "RAW_INTEGRITY_ONLY"
+                             else "PASS_RUNNER_FAILURE_RAW_INTEGRITY_ONLY")
+        else:
+            verdict_label = ("PASS_COMPLETE_INDEPENDENT_REPLAY" if verdict == "INDEPENDENT_FULL_REPLAY"
+                             else "PASS_PARTIAL_REPLAY" if verdict == "INDEPENDENT_PARTIAL_REPLAY"
+                             else "PASS_RAW_INTEGRITY_ONLY")
+        print(json.dumps({"verdict": verdict_label, "audit_classification": verdict,
                           "classification": summary["classification"],
                           "archive_sha256": sha(archive)}, sort_keys=True))
 

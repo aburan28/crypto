@@ -12,9 +12,11 @@
   ],
   "caps_seconds": {
     "audit": 1200,
+    "audit_reserved": 1200,
     "base_each": 90,
     "global": 4200,
     "ic_each": 300,
+    "operational_global": 3000,
     "rank_each": 180,
     "recovery_each": 180,
     "rho": 600,
@@ -80,14 +82,14 @@
   "parent_pr_819_merge_commit": "e07fd850596eb326a16542e034ec95832cc99e88",
   "parent_pr_823_merge_commit": "016dc58a816ea1765116717dd7a4c3568c0bdcb1",
   "process_group_rss_cap_bytes": 2147483648,
-  "protocol_sha256": "3ade75b9065d7bff43a11066ce9c1e2794a3f6bf39b68d7c2898b30bc546c94c",
+  "protocol_sha256": "4107dfe50cfb0411aea9e13a6c844e4381e087abe851c8c8a1e613e0b920234d",
   "python_version": "3.12",
   "release_main_head": null,
   "rust_toolchain_version": "1.93.1",
   "schema": "n53_native_cyclic_l384_freeze_v1",
   "source_sha256": {
     "archive_sealer": "cc8cd03f4478dc82b240b35efc9915d6697cc095f32e58dae5ec1346f788c9d4",
-    "archive_verifier": "4fe3af30f9ece9326cf6bd1b2d27153444a89d498eb60468c899b9d4301e6e96",
+    "archive_verifier": "192fdd9c5893a4a71887930043cfdc63bb8ff686aaf6b312d221a582ec3ec300",
     "audit": "3b7b05b8988bc2df39e9b206aa31d5c666aa41c947ca82643a0d0f8138bf6282",
     "build": "b2d5011c14984c2b56f65caeeeb3e2546ea709ed8e6ebeec990c42bdbc72c1b1",
     "cargo_lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
@@ -104,9 +106,9 @@
     "operational": "ed1903dd513471341b12a7ce2c9ce015a5f83e1dfa29ddb9b61c27964898e1c6",
     "preflight": "3cd318e72126002a89db44189c047918d6cdc0c967940d415462aa1c19a76a38",
     "rho": "fedacb54e441979c8c32860e7b5639e43799234741d49677010164564536d2c8",
-    "runner": "6a5f2a2ed58813156e8f9c446d12fcc7b49dc9dc53a7739eccb45a4c392f399c",
-    "tests": "d6afc5566e3f7b4035e4f23541962adbef475e95f69a523f76e2be7ae7720ff6",
-    "workflow": "265dfd1a5195c4246bcae02f7196a58c84e6a3bf5a51cf136802854a22bcb64c"
+    "runner": "3ad468ec29d17148659d4c453dff14012b54452726af440a7e17fc659f415774",
+    "tests": "81856c60fa67391d82eb720f2e3e591e2ece28f4c53b5e482e94d88e639413d8",
+    "workflow": "85f4ae9098c71c363eeb58946e4ad0969446d9cf377e42bfe0e5f410462fbbfc"
   },
   "status": "held_no_outcome"
 }

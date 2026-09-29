@@ -50,7 +50,7 @@ jobs:
     if: github.event.action == 'labeled' && github.event.label.name == 'run-n53-native-cyclic-l384-once' && github.event.pull_request.head.repo.full_name == github.repository
     needs: hash-only
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 130
     concurrency:
       group: n53-native-cyclic-l384-${{ github.event.pull_request.number }}
       cancel-in-progress: false
