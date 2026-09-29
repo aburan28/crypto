@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 135, 2026-09-21. The historical optimization chain is
+Current through Stage 136, 2026-09-21. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
@@ -91,6 +91,11 @@ summand scans, reducing default-thread IC wall by 4.81 percent and one-worker
 wall by 17.23 percent.  Peak RSS rises by about 4.8 times, and full IC still
 loses to rho by three orders of magnitude on one worker.
 
+Stage 136 holds the selected `n=59, ell=15` instance fixed while tuning its
+collector.  Equal 102.4-million-summand arms reject windows 512 and 2048 in
+favour of 1024.  Two source-pinned buffer-reuse pilots preserve every relation
+but regress relation-unit wall, so that implementation is rejected and archived.
+
 The campaign has target-independent algebraic factor bases; matched native-XOR,
 WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a
 balanced 160-instance PDP panel through `n=59`; public unknown-scalar end-to-end
@@ -100,7 +105,7 @@ does not establish a new state of the art.
 
 | Gate | Status | Current evidence | Remaining requirement |
 |:--|:--|:--|:--|
-| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds / 245,972,992 B maximum RSS. Stage 135 separately charges four `n=59, ell=15` pilot/full processes: 1,383.985970 sequential wall-seconds, 2,681.661715 core-seconds and 4,375,724,032 B maximum RSS. | Licensed Magma process resources are absent. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
+| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds / 245,972,992 B maximum RSS. Stage 135 charges four `n=59, ell=15` pilot/full processes: 1,383.985970 wall-seconds and 2,681.661715 core-seconds. Stage 136 adds four rejected tuning processes: 115.333875 wall-seconds, 1,078.171690 core-seconds and 4,378,951,680 B maximum RSS. | Licensed Magma process resources are absent. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
 | 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract, seal the return before truth scoring, and report F4 resources. |
 | 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | Every executed Phase-B arm retains wall, core-seconds, peak RSS, conflicts or operations, tree memory, and workflow wall. The selected `n=59, ell=15` run reports default-thread IC 126.398334 s / 1,194.982194 core-seconds / 4,375,724,032 B RSS and one-worker IC 1,009.627483 s / 1,000.180872 core-seconds / 4,082,794,496 B RSS. | Supply the same fields for licensed Magma F4. SAT conflicts remain inapplicable to exact pair-table arms and are reported as null. |
 | 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage including one completed larger IC run** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and `n=59`. Stages 132--133 retain the standard `n=59` cap and exact width frontier. Stages 134--135 complete and optimize the cofactor-projected `n=59, m=3` public unknown-scalar workflow at `ell=14` and `15`. | The evidence is finite and toy-sized; it is not an asymptotic scaling law or a literature-scale speed record. |
@@ -315,6 +320,15 @@ same scalar as Stage 134.  Against `ell=14`, default IC wall falls from
 1,009.627483 seconds and whole CPU from 1,190.875026 to 1,000.180872 seconds.
 Peak RSS grows by 4.888 times default and 4.798 times one-worker.  The selected
 full-cost ratios remain 229.710 and 1,811.815 times rho.
+
+Stage 136 runs two equal-scan neighboring windows and two repetitions of a
+source-pinned buffer-reuse candidate.  Window 512 reaches 95.52 percent and
+window 2048 reaches 91.47 percent of the selected window-1024 relation
+throughput.  Reusing window scratch buffers preserves the 2,157-relation pilot
+hash but takes 1.1235 and 1.1725 times the selected relation-unit wall.  The four
+fresh rejected processes charge 115.333875 sequential wall-seconds,
+1,078.171690 core-seconds and 4,378,951,680 B peak RSS.  The selected Stage 135
+source remains unchanged.
 
 ## The n=53 crossover against a batched rho
 
