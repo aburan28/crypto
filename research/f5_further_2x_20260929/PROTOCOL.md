@@ -30,13 +30,21 @@ Neither hypothesis is assumed beneficial before paired measurement.
 The third bounded hypothesis is that six- or seven-bit Gray-code tables
 reduce table-construction work enough to offset additional matrix passes;
 compare widths 8 (reference), 7, and 6 at four tables per pass.
+The fourth hypothesis is that rows remain sparse across the leading
+degree-four monomial band. Convert packed rows to sorted column indices,
+echelonize that band with a lowest-weight pivot per leading-column bucket,
+then use the existing packed kernel on the lower-degree suffix. Return the
+complete echelon basis as canonical `F2BoolPoly` rows and exact rank. Charge
+the sparse phase's term visits separately from dense word XORs; its output
+and operation counts may differ, while canonical row space must match.
 
 Before reserving an eligible x86-64 runner, run a nonpromoting Apple ARM64
 screen on the frozen seed and holdout A. Use one thread, one binary, one warmup
 per arm, and three alternating reference/candidate pairs per seed. Compare
 four, six, and eight tables, then pivot-candidate windows 1 and 4, then table
-widths 8, 7, and 6 as separate arms. This screen can reject a regression or a
-correctness failure, but its
+widths 8, 7, and 6, then dense reference versus hybrid sparse leading band
+as separate arms. This screen can reject a regression or a correctness
+failure, but its
 ratios cannot establish the requested gain. Preserve the raw screen receipt.
 
 ## Frozen workload and accounting
