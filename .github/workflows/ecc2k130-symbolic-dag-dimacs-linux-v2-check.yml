@@ -1,0 +1,36 @@
+name: ECC2K-130 symbolic DAG DIMACS Linux v2 held replay
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/**'
+      - '.github/workflows/ecc2k130-symbolic-dag-dimacs-linux-v2-check.yml'
+      - '.github/workflows/ecc2k130-symbolic-dag-dimacs-linux-v2-measure.yml'
+permissions:
+  contents: read
+jobs:
+  exact-head-hash-and-archive-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and verify inherited and v2 frozen bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          python3 -m py_compile research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/{ci_replay,run,v2_child,selftest}.py
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/ci_replay.py
+      - name: Prove both entrypoints remain nonmeasuring on this exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/v2_child.py --gate-only
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/run.py \
+            --gate-only --expected-head "${{ github.event.pull_request.head.sha }}"
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/selftest.py

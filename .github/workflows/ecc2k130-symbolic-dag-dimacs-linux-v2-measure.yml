@@ -1,0 +1,54 @@
+name: ECC2K-130 symbolic DAG DIMACS Linux v2 one-shot measure
+on:
+  pull_request:
+    types: [labeled]
+    branches: [main]
+    paths:
+      - 'research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/**'
+      - '.github/workflows/ecc2k130-symbolic-dag-dimacs-linux-v2-measure.yml'
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+concurrency:
+  group: dag-dimacs-linux-v2-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  one-shot-cold-three-phase:
+    if: github.event.label.name == 'ecc2k130-dag-linux-v2-measure-once'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recheck exact head and frozen predecessor bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/ci_replay.py
+      - name: Run at most one cold toy then n13 then n131 attempt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/run.py \
+            --expected-head "${{ github.event.pull_request.head.sha }}" \
+            --out "$RUNNER_TEMP/dag-linux-v2-${{ github.run_id }}" \
+            --fallback-refusal "$RUNNER_TEMP/dag-linux-v2-refusal-${{ github.run_id }}.json"
+      - name: Preserve success, censoring or pre-dispatch refusal
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dag-linux-v2-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            ${{ runner.temp }}/dag-linux-v2-${{ github.run_id }}
+            ${{ runner.temp }}/dag-linux-v2-refusal-${{ github.run_id }}.json

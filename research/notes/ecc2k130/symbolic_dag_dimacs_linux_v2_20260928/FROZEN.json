@@ -1,0 +1,108 @@
+{
+  "archive_relative": "evidence/run1",
+  "base_main_head": "c739ccf69972c0c0c7c79323d42548a5d319cdcc",
+  "caps": {
+    "n131": {
+      "cnf_bytes": 67108864,
+      "node_cap": 500000,
+      "rss_bytes": 536870912,
+      "wall_seconds": 90
+    },
+    "panel": {
+      "checker_compile_wall_seconds": 60,
+      "checker_wall_seconds": 60,
+      "cnf_bytes": 8388608,
+      "proof_bytes": 134217728,
+      "query_rss_bytes": 1073741824,
+      "rss_bytes": 2147483648,
+      "solver_wall_seconds": 30,
+      "wall_seconds": 1800
+    },
+    "toy": {
+      "cnf_bytes": 1048576,
+      "rss_bytes": 536870912,
+      "wall_seconds": 60
+    }
+  },
+  "domain": "k0-symbolic-dag-dimacs-linux-v2",
+  "first": {
+    "freeze_sha256": "7514910d5111f76bd50c6ccf5a70a2b25043c55d7cb515218a63a7f6c16fdd57",
+    "input_sha256": "e36aad434c29e0b4c756575111d1a4289b5f21c2cfbc66d9745cd336d10b4b4b",
+    "manifest_sha256": "ae39923e93f6c908d7b2bd32568463d606a13f375dbb8406407f9f1acc9bc755",
+    "merge_commit": "8105788c1ddd4d4680f79f5d9041d5bc6a6a7150",
+    "pr_head": "ca5cdef8b24c6118b5c1c9bb2b8faa8d1774533b",
+    "receipt_sha256": "ec34b6a01e729a7f2a1815373e9b17450c30d2472b808c88792a6f22dedecd17",
+    "semantic_source_sha256": {
+      "bounded.py": "4aec662e171996654383f9364ace3240bf3164927ff97cab96234a9da1c050ba",
+      "export.py": "77159083a897f65b91d0f762ef425eda2df73460a91b997e754351c7c331e8fe",
+      "produce.py": "1224b1a27af2a142d6a90182ffa10b63163a02a94f28925758edd9ceeda49060",
+      "third_party/LICENSE": "71ab2a9dc5a294ad8fba4ccb8c45aaa8a439596d314a2a046ac9b62266872a18",
+      "third_party/drat-trim.c": "d834b649f437e091597f5347f259b9f681087f89ca0844d0cee250a1a1a0c2ee",
+      "verify.py": "b87fa827308c964679c8c5d7e6d457406a9edfd3cfef15952017f0056aae5d7c"
+    },
+    "source_sha256": {
+      "INPUT.json": "e36aad434c29e0b4c756575111d1a4289b5f21c2cfbc66d9745cd336d10b4b4b",
+      "PROTOCOL.md": "5052b3e1c4c189541e8e76b6c551dcabe811dae6c676e36dce28ea65f5352edd",
+      "bounded.py": "4aec662e171996654383f9364ace3240bf3164927ff97cab96234a9da1c050ba",
+      "ci_replay.py": "61473960ce74f3be070e6efcd1f074e204940ae6338fd73e4bfc43eab6948b92",
+      "export.py": "77159083a897f65b91d0f762ef425eda2df73460a91b997e754351c7c331e8fe",
+      "produce.py": "1224b1a27af2a142d6a90182ffa10b63163a02a94f28925758edd9ceeda49060",
+      "run.py": "367a25d180981956e3d5aa23b9a2847297fcedd4fafe76a57719c5150dd68da2",
+      "third_party/LICENSE": "71ab2a9dc5a294ad8fba4ccb8c45aaa8a439596d314a2a046ac9b62266872a18",
+      "third_party/drat-trim.c": "d834b649f437e091597f5347f259b9f681087f89ca0844d0cee250a1a1a0c2ee",
+      "verify.py": "b87fa827308c964679c8c5d7e6d457406a9edfd3cfef15952017f0056aae5d7c"
+    },
+    "workflow_sha256": "791de43079c0f49a2dd0260fae427fe9bc2a192fd638b20ed2142eb12b0db006"
+  },
+  "linux_binary_bytes": 1732064,
+  "linux_binary_git_blob": "3f50d3a4218609874b01e02bdf61ad699e6b3f71",
+  "linux_binary_path": "symbolic_dag_dimacs_linux_attempt2_20260926/preparation_run_1/cadical_prepare/cadical",
+  "linux_binary_sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51",
+  "preparation": {
+    "build_receipt_sha256": "84dbc7a11eebe596a31a7b6c6f3f6c2c9502532c058d32ff25be24c6d1adc3f0",
+    "cap_probe_receipt_sha256": "4f08ba27e869012a3b36cf1bffb7171261510cc22116aa3b3864c9edf50d9d1e",
+    "freeze_sha256": "2b9aa7f69ead646ab5e527c5747efffd1b58d43cc747ffa2f1630e7899bdc88f",
+    "github_actions_run_id": 36220351050,
+    "linux_binary_sha256": "dc5dc5754a25e03c3459d2e3220b6b5cc651b7b1628cdbacf76ee5ae12c57a51",
+    "manifest_sha256": "30f3bbd79974d07535bb2ca5de84c6069a8981895828a7b1e07427c2a4f9d4f8",
+    "merge_commit": "aa2c05c9ddbf15133878aa64e2cace8ee5cef1d8",
+    "pr_head": "2f0489cf638168dd8a62b719f9c60fd1ea203bee",
+    "prepare_sha256": "b4e49436c5e4cdcc01e50f1ccbc991194a2cccb4fcb6ba85bc033d96e082ada6",
+    "source_commit": "c60730422e758ef1cebe7aeddf2dda31c996bf04",
+    "source_manifest_sha256": "d6b6be954a455b1ea8bd0d75d00f52b3fef5ff7d41ecb65e53a80a9fc47f51c2",
+    "source_sha256": {
+      "PROTOCOL.md": "cc99005d376ce1171802842649b8c492a95de818de886993c7e5c66b9b31eabd",
+      "check_parent.py": "71ee7ae9424c0f7a1581936bf5984f186b32f4ee29c4bc5d583e16c06e545b84",
+      "harmless_cap_probe.py": "d853a1b07752a4c0f3936ac33dc02ea452daa69c1626c4cba4f1ec7c5f7b4d60",
+      "prepare_cadical.py": "5cf4ebf9742a563ebf1f9abc934900bd12105ed48da3655a26a670455cee9489",
+      "source_manifest.py": "3bed5c307ae4ca63e4b2a8ebe26905649a70f1bc6eda3ecc8bb226f4cfa046dd",
+      "verify_preparation.py": "d208a9b6e6bf904c42fcd993db4f97ac7eb508dba0065f1a4f6d46d1665c90dc"
+    },
+    "source_tree": "9630ba7aaccee77f6fec916e5babd6d1ccedd404",
+    "workflow_sha256": "a4ad7a9f0c567d28e5bdcd4477d5e0c6a4d234193cf66a4c6927bd46d6e2d79a"
+  },
+  "release_branch": "codex/ecc2k130-symbolic-dag-dimacs-linux-v2-held-20260928",
+  "release_main_head": null,
+  "release_pr_number": null,
+  "schema": "k0-dag-linux-v2-freeze-v1",
+  "source_sha256": {
+    "PROTOCOL.md": "e83f784e58d749d7a763c7ca63acb520a1efb16f0c3fc5b015198a0048543c50",
+    "ci_replay.py": "01cbc557b88da00bbdfb7e1a1ad0013eeb9876b092e840ac73910dcb0d7729b4",
+    "run.py": "1a0b5fbcab36507c77be52bb4d9c102790ad655841775328934f59ee3a07e3c1",
+    "selftest.py": "4d703cc4266197e932818b579e88eb0bbc60444125c8c8c35e0dae1d07175577",
+    "v2_child.py": "ec1a4e45ae6673e4c09c996ba2d355dc59060e591a29257ff437daed1c41afd0"
+  },
+  "status": "HELD",
+  "upstream_guard_paths": [
+    ".github/workflows/ecc2k130-symbolic-dag-dimacs-gate.yml",
+    ".github/workflows/ecc2k130-symbolic-dag-dimacs-linux-preparation.yml",
+    "research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/panel/Q0T3-cadical.stdout",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/",
+    "research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/"
+  ],
+  "workflow_sha256": {
+    "ecc2k130-symbolic-dag-dimacs-linux-v2-check.yml": "f416623d2a5a2d1fa335bed8664cb06a8a3a9b5ad2a494e0378071edd5355fd8",
+    "ecc2k130-symbolic-dag-dimacs-linux-v2-measure.yml": "5d8bafd873c97fb5836e49b7b7ce193eebf7aa52a443787d44b40ba832dfd4b9"
+  }
+}
