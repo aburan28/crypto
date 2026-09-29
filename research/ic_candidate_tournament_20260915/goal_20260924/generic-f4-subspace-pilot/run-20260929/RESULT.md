@@ -62,4 +62,7 @@ family qualification, or an ECC2K-130 transfer.
 3. Do not rerun this budget. Do not redispatch seeds `2026092901` or `2026092902`. Do not open a fresh competitive F4/F5 panel from these reused points.
 
 Raw jobs, stdout, stderr, and `report.json` files are under `runs/`. The
-controlled build receipt is under `build/`.
+controlled build receipt is under `build-receipt/` because this tournament
+ignores `**/build/` and `**/worker`. The local executable and source tar
+remain on the measurement host; `build-receipt/local-artifacts.json` records
+their SHA-256 and byte counts.
