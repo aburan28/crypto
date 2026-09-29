@@ -27,6 +27,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            docs/ic/calibration.json
             src
             examples/koblitz_rho_batch_ks_v2_n61.rs
             research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
@@ -49,6 +50,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            docs/ic/calibration.json
             src
             examples/koblitz_orbit_dlp_fast.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
