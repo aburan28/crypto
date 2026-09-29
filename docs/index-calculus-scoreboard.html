@@ -8820,5 +8820,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <p>The n41 grid minimum K=192 improves the old K=255 by a direct paired CPU ratio of 0.979 (95% interval 0.974&ndash;0.990); selection from this grid is exploratory until a second Q corpus confirms it. At n53, K=440 remains the grid minimum. Smaller K reduces the K²&middot;n eager-index build but increases rank and target probes; at both minima the target phase alone exceeds the complete rho wall median. This is a measured no-go for this eager-index K grid on these Q, not a verdict on a different index/query policy, degree-263 descendants, n=83 or GF(2<sup>131</sup>). Common-unit S and algorithmic speed ratio remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_k_boundary_20260929/RESULT.md">Result, frozen protocol and raw archives</a>; <a href="https://github.com/aburan28/crypto/pull/944">PR #944</a>.</p>
 </section>
 <!-- END compact-k-boundary-20260929 -->
+<!-- BEGIN compact-swap-quotient-20260929 -->
+<section class="panel" id="compact-swap-quotient-20260929">
+<div class="panel-head"><h2>Swap/Frobenius S3 quotient: half the states, no rho crossover <span class="chip">engineering</span></h2>
+<p>The preregistered quotient keeps one of each ordered-pair/Frobenius mate. On new point-only E<sub>0</sub>/GF(2<sup>41</sup>) and GF(2<sup>53</sup>) corpora, nine balanced cold blocks per cell compare each K with the unchanged eager-index baseline and 32-walk normal-basis rho. All arms reach full rank where applicable and recover the same 1,024 logarithms per block; the hosted independent verifier passes all 162 processes and 165,888 arm-target outputs. A second-machine raw replay returned byte-identical PASS receipts for both cells. The intervals are paired within each cell and measure repeated-run variation on one Q corpus.</p></div>
+<div class="table-scroll"><table>
+<caption>Median full-process CPU seconds. CPU/rho is a matched-host timing diagnostic, not the common fully charged operation unit S. The quotient halves retained regular states while preserving the same root-table entry count at each K.</caption>
+<thead><tr><th>n</th><th>Arm</th><th>CPU s</th><th>RSS MiB</th><th>CPU / rho</th><th>95% paired CPU interval</th><th>Verified</th><th>S</th></tr></thead><tbody>
+<tr><td>41</td><td>baseline K=128</td><td>2.7847</td><td>87.5</td><td>3.624</td><td>3.486&ndash;3.693</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>swap K=128</td><td>2.1923</td><td>48.5</td><td>2.904</td><td>2.543&ndash;3.062</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>baseline K=192</td><td>2.0249</td><td>173.7</td><td>2.636</td><td>2.577&ndash;2.732</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>swap K=192</td><td>1.6243</td><td>92.2</td><td>2.156</td><td>2.076&ndash;2.274</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>baseline K=255</td><td>2.1899</td><td>329.6</td><td>2.856</td><td>2.813&ndash;2.956</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>swap K=255</td><td>1.6124</td><td>171.4</td><td>2.119</td><td>2.062&ndash;2.193</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>baseline K=320</td><td>2.7425</td><td>621.5</td><td>3.555</td><td>3.520&ndash;3.688</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>swap K=320</td><td>1.8203</td><td>317.5</td><td>2.358</td><td>2.305&ndash;2.516</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>normal-basis rho</td><td>0.7706</td><td>39.8</td><td>1.000</td><td>reference</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>baseline K=220</td><td>30.0774</td><td>328.0</td><td>7.125</td><td>7.067&ndash;7.265</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>swap K=220</td><td>27.0738</td><td>170.9</td><td>6.555</td><td>6.306&ndash;6.706</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>baseline K=330</td><td>15.6223</td><td>662.9</td><td>3.747</td><td>3.645&ndash;3.788</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>swap K=330</td><td>14.1864</td><td>340.2</td><td>3.458</td><td>3.330&ndash;3.493</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>baseline K=440</td><td>13.2248</td><td>1281.6</td><td>3.160</td><td>3.116&ndash;3.209</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>swap K=440</td><td>11.0721</td><td>652.6</td><td>2.611</td><td>2.576&ndash;2.645</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>baseline K=550</td><td>14.2665</td><td>1420.1</td><td>3.414</td><td>3.379&ndash;3.467</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>swap K=550</td><td>10.7630</td><td>725.2</td><td>2.562</td><td>2.540&ndash;2.590</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>normal-basis rho</td><td>4.1868</td><td>150.4</td><td>1.000</td><td>reference</td><td>9,216/9,216</td><td>unset</td></tr>
+</tbody></table></div>
+<p>The same-K quotient saves 8&ndash;34% CPU, but all eight quotient/rho intervals lie above parity. At n=53, the exploratory grid minimum K=550 builds its index in 4.243 s and spends another 2.525 s on rank and 3.882 s on targets; rho's entire wall median is 4.188 s. The next measured lever must jointly reduce construction and relation-query cost. Instrument every S3 solver call, including no-root returns, before testing batch inversion in both phases. There is no n=83 confidence result, GF(2<sup>131</sup>) transfer or calibrated S. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_swap_quotient_20260929/RESULT.md">Decision and evidence</a>; <a href="https://github.com/aburan28/crypto/pull/947">PR #947</a>.</p>
+</section>
+<!-- END compact-swap-quotient-20260929 -->
 </body>
 </html>
