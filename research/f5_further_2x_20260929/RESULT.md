@@ -40,14 +40,47 @@ from about 22.3 to 18.0 ms while keeping the same 13.73 million terms.
 
 ## Eligible x86-64 one-thread run
 
-Pending. The predeclared [paired runner](paired_f5.py) pins one allowed CPU,
-requires AVX2 and BMI2, and retains all 88 processes across four seeds,
-including failures. It compares the accepted opt-in fast mode with and
-without `KIC_F5_UNPACK_DIRECT=1` under identical flags. The new path will be
-retained only if the frozen primary paired median and lower exact five-pair
-bootstrap bound exceed 1.03 and the holdout and smaller-case guards pass.
-The requested further 2× remains unproved until the stronger 2.00 gate in
-the [protocol](PROTOCOL.md) passes on that eligible host.
+[CI run 36601441800](https://github.com/aburan28/crypto/actions/runs/36601441800)
+completed all 88 same-binary processes on one pinned CPU of an AMD EPYC 7763
+with AVX2 and BMI2. The release F5 tests passed. Every process succeeded;
+on all seven cases and four seeds, prior and new matched raw and canonical
+row fingerprints, rank, output term count, row and column counts, pruning,
+criterion work, and reduction word operations. The complete 804,971-byte
+receipt is [runs/36601441800-t1.json.gz](runs/36601441800-t1.json.gz),
+with compressed SHA-256
+`594cfb3bf0cd4339119b0b3df824a7a3267f5243c7e1d15bc1c5436c9e0c5e10`
+and uncompressed SHA-256
+`6389462398f461c677179840d0508298f1f8aa936b3031323f1ea09dadc96bca`.
+It retains every process output and status, source and binary hashes, CPU
+features, affinity, load, phase timings and signatures. The Actions artifact
+retains the same full JSON. The measured source SHA-256
+`bf35680f431ab7ac13a7615d334ec9b060217b84bdde36f03ce00319491d42da`
+matches the submitted `matrix_f5_f2.rs`.
+
+The reference and candidate both select selective echelon output, fused row
+counting, direct packed rows, AVX2 XOR, and table reuse. Only the candidate
+sets `KIC_F5_UNPACK_DIRECT=1`. The table reports medians of five paired
+**complete-call** ratios, exact five-pair bootstrap 95% intervals, and each
+seed's reference/reference A/A maximum. Larger ratios are better.
+
+| Seed | Prior / direct unpack (95% interval) | A/A maximum |
+| --- | ---: | ---: |
+| Frozen | **1.048× (1.031–1.056×)** | 1.014× |
+| Holdout A | 1.042× (1.034–1.075×) | 1.004× |
+| Holdout B | 1.041× (1.008–1.045×) | 1.012× |
+| Holdout C | 1.040× (1.034–1.048×) | 1.005× |
+
+On the frozen primary, marginal median complete calls were 128.31 ms prior
+and 122.96 ms with direct unpack on this runner. The paired unpack-phase
+ratio was 1.099× (1.091–1.110×). All smaller-case complete-call medians
+exceeded their own A/A minima; the smallest margin was 0.0053× on frozen
+`f5_n12_m12_d4`. The predeclared **incremental** gate passes, so the path
+remains opt-in. The further 2× gate fails: the frozen complete-call ratio is
+1.048×, far below 2.00. Reaching that gate on this workload would require
+about 64 ms or less against the 128.31 ms reference under matched resources.
+
+The one-off CI workflow source is archived as [WORKFLOW.yml](WORKFLOW.yml)
+after its successful run; it no longer triggers on every later F5 PR.
 
 These are matrix-F5 solver-call diagnostics. They establish neither
 one-target IC online time nor a DLP speedup.
