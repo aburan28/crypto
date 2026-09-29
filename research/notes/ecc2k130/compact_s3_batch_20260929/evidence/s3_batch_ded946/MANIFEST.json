@@ -1,0 +1,378 @@
+{
+  "cases": {
+    "n41_L1024": {
+      "host_path": "hosts/n41_L1024.json",
+      "host_sha256": "bd001e28b8faa5301e533d9acfde753c4cb66b1709d21904f547eef5ae9bc6f5",
+      "k_grid": [
+        192,
+        255
+      ],
+      "paired": {
+        "batch16_k192_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.7686645151788647,
+            1.7939444509184126
+          ],
+          "cpu_ratio_median": 1.777721327214952,
+          "wall_ratio_95pct_log_t_interval": [
+            1.767736893241777,
+            1.7931534979530237
+          ],
+          "wall_ratio_median": 1.7779229599817516
+        },
+        "batch16_k192_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.8292807371555027,
+            0.8383527769043111
+          ],
+          "cpu_ratio_median": 0.8342013033423622,
+          "wall_ratio_95pct_log_t_interval": [
+            0.8286080785869312,
+            0.8389221402572726
+          ],
+          "wall_ratio_median": 0.8352754113510249
+        },
+        "batch16_k255_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.536356236848371,
+            1.5688384826524373
+          ],
+          "cpu_ratio_median": 1.5518570520835469,
+          "wall_ratio_95pct_log_t_interval": [
+            1.534470491811388,
+            1.5672558443531315
+          ],
+          "wall_ratio_median": 1.5492539230582065
+        },
+        "batch16_k255_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.8391914302748553,
+            0.8504466086887397
+          ],
+          "cpu_ratio_median": 0.8423743001999628,
+          "wall_ratio_95pct_log_t_interval": [
+            0.8389434932216733,
+            0.8500802566906378
+          ],
+          "wall_ratio_median": 0.8425251332755775
+        },
+        "batch64_k192_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.7381682904271074,
+            1.760485360191022
+          ],
+          "cpu_ratio_median": 1.7444001309226869,
+          "wall_ratio_95pct_log_t_interval": [
+            1.736924304473469,
+            1.759406695067509
+          ],
+          "wall_ratio_median": 1.7481472116140173
+        },
+        "batch64_k192_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.8148660127395844,
+            0.8228335052056533
+          ],
+          "cpu_ratio_median": 0.8174498615604576,
+          "wall_ratio_95pct_log_t_interval": [
+            0.81348676420612,
+            0.8238200679795493
+          ],
+          "wall_ratio_median": 0.8175282822469611
+        },
+        "batch64_k255_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.517584042003898,
+            1.5544620099553936
+          ],
+          "cpu_ratio_median": 1.5349423231672765,
+          "wall_ratio_95pct_log_t_interval": [
+            1.5172821502778653,
+            1.5537921286148464
+          ],
+          "wall_ratio_median": 1.534945107423262
+        },
+        "batch64_k255_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.8283385662240492,
+            0.8432627457205031
+          ],
+          "cpu_ratio_median": 0.8343847847750421,
+          "wall_ratio_95pct_log_t_interval": [
+            0.8290205520558827,
+            0.8433117840387746
+          ],
+          "wall_ratio_median": 0.8347507911319636
+        },
+        "scalar_a_k192_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.1201005690535073,
+            2.1526310798815387
+          ],
+          "cpu_ratio_median": 2.1407326540265394,
+          "wall_ratio_95pct_log_t_interval": [
+            2.1175014923708217,
+            2.15347854470742
+          ],
+          "wall_ratio_median": 2.1391083833958886
+        },
+        "scalar_a_k255_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.8276827853641657,
+            1.8478267349781954
+          ],
+          "cpu_ratio_median": 1.8399454900582695,
+          "wall_ratio_95pct_log_t_interval": [
+            1.8256325248399523,
+            1.8471086203990237
+          ],
+          "wall_ratio_median": 1.8386819403369288
+        },
+        "scalar_b_k192_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.9931117460732264,
+            1.0018793041836374
+          ],
+          "cpu_ratio_median": 0.9991385469360238,
+          "wall_ratio_95pct_log_t_interval": [
+            0.9910191920753031,
+            1.0022712913873448
+          ],
+          "wall_ratio_median": 0.9998373600287095
+        },
+        "scalar_b_k255_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.9978541655969658,
+            1.0036965710463457
+          ],
+          "cpu_ratio_median": 1.0030125861868124,
+          "wall_ratio_95pct_log_t_interval": [
+            0.9978198800799499,
+            1.0034327441202884
+          ],
+          "wall_ratio_median": 1.0025556426914253
+        }
+      },
+      "raw_bytes": 33435092,
+      "raw_path": "raw/n41_L1024.tar.gz",
+      "raw_sha256": "561e5302ccdd231a8b1012ce10880803a99c053b03ec93c6653e56919023614d",
+      "receipt_path": "receipts/n41_L1024.json",
+      "receipt_sha256": "d23e8ca0ab09c084416e7b8d59bc3085149b90fb15e16d76410950920b7a01e6",
+      "second_host_replay_path": "second_host_replay/n41_L1024.json",
+      "second_host_replay_sha256": "d23e8ca0ab09c084416e7b8d59bc3085149b90fb15e16d76410950920b7a01e6",
+      "status": "PASS",
+      "targets_verified_per_arm": 9216
+    },
+    "n53_L1024": {
+      "host_path": "hosts/n53_L1024.json",
+      "host_sha256": "f4b944ee7fdc3133c59e39c7a5d9126f4bb280ac6b6c565580a42efda9406002",
+      "k_grid": [
+        440,
+        550
+      ],
+      "paired": {
+        "batch16_k440_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.6023698432143316,
+            1.6444528100298914
+          ],
+          "cpu_ratio_median": 1.6231964672232104,
+          "wall_ratio_95pct_log_t_interval": [
+            1.60190345637401,
+            1.6443025519094678
+          ],
+          "wall_ratio_median": 1.6230516549289111
+        },
+        "batch16_k440_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.7523551721107687,
+            0.778979090571562
+          ],
+          "cpu_ratio_median": 0.7673160242607371,
+          "wall_ratio_95pct_log_t_interval": [
+            0.7523748540283871,
+            0.7791042920059058
+          ],
+          "wall_ratio_median": 0.7675650248608687
+        },
+        "batch16_k550_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.6086761020123106,
+            1.6578798820833613
+          ],
+          "cpu_ratio_median": 1.6296620283476388,
+          "wall_ratio_95pct_log_t_interval": [
+            1.608503111051337,
+            1.6577222991078613
+          ],
+          "wall_ratio_median": 1.6294394431010164
+        },
+        "batch16_k550_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.7676797351858927,
+            0.7837393934689026
+          ],
+          "cpu_ratio_median": 0.7771829549166748,
+          "wall_ratio_95pct_log_t_interval": [
+            0.7678293858637004,
+            0.783898148674211
+          ],
+          "wall_ratio_median": 0.7774630523761972
+        },
+        "batch64_k440_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.558750972851232,
+            1.6130550441355165
+          ],
+          "cpu_ratio_median": 1.5816809417160334,
+          "wall_ratio_95pct_log_t_interval": [
+            1.558345239092653,
+            1.6127101095192
+          ],
+          "wall_ratio_median": 1.581163760092689
+        },
+        "batch64_k440_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.7341700610323103,
+            0.7617172450606319
+          ],
+          "cpu_ratio_median": 0.7421950042237513,
+          "wall_ratio_95pct_log_t_interval": [
+            0.7341811600628124,
+            0.7617782185429156
+          ],
+          "wall_ratio_median": 0.7423605198761385
+        },
+        "batch64_k550_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.5647652718578386,
+            1.616678474775294
+          ],
+          "cpu_ratio_median": 1.5968654525813988,
+          "wall_ratio_95pct_log_t_interval": [
+            1.564485961829382,
+            1.6162147883211748
+          ],
+          "wall_ratio_median": 1.5964929459913733
+        },
+        "batch64_k550_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.7477004707609591,
+            0.7632648841043923
+          ],
+          "cpu_ratio_median": 0.7559516302346347,
+          "wall_ratio_95pct_log_t_interval": [
+            0.7477919390195288,
+            0.7632743195154122
+          ],
+          "wall_ratio_median": 0.75572834675334
+        },
+        "scalar_a_k440_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.088590250383117,
+            2.1526936039367697
+          ],
+          "cpu_ratio_median": 2.1148235599610876,
+          "wall_ratio_95pct_log_t_interval": [
+            2.087885771242751,
+            2.152194244845596
+          ],
+          "wall_ratio_median": 2.114546132717695
+        },
+        "scalar_a_k550_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.0659035449781205,
+            2.1456549250748305
+          ],
+          "cpu_ratio_median": 2.1037936191811544,
+          "wall_ratio_95pct_log_t_interval": [
+            2.065419684042114,
+            2.144870149636172
+          ],
+          "wall_ratio_median": 2.1038367211463243
+        },
+        "scalar_b_k440_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.9834170728416602,
+            1.0260151340344108
+          ],
+          "cpu_ratio_median": 1.001216528854581,
+          "wall_ratio_95pct_log_t_interval": [
+            0.9833717508621822,
+            1.02600753255523
+          ],
+          "wall_ratio_median": 1.0014903767634749
+        },
+        "scalar_b_k550_to_scalar_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.9777293344344757,
+            1.006239055231733
+          ],
+          "cpu_ratio_median": 0.9880240282738216,
+          "wall_ratio_95pct_log_t_interval": [
+            0.9778278124998541,
+            1.0062700690678033
+          ],
+          "wall_ratio_median": 0.9879850468084601
+        }
+      },
+      "raw_bytes": 84564574,
+      "raw_parts": [
+        {
+          "bytes": 20971520,
+          "path": "raw/n53_L1024.tar.gz.part000",
+          "sha256": "28bb6c3d25f7b043a5028a2db2aa550476bbd93b510f09a2fecd1cc00f286457"
+        },
+        {
+          "bytes": 20971520,
+          "path": "raw/n53_L1024.tar.gz.part001",
+          "sha256": "6a9f583075685f685e629532f7b9ef350eca0aedf1a669534832bfed1bafa2bf"
+        },
+        {
+          "bytes": 20971520,
+          "path": "raw/n53_L1024.tar.gz.part002",
+          "sha256": "a09fafa92121498bc7253fc8e6a9ac666b673aa3a8f47f8f65f036729b9d5eb1"
+        },
+        {
+          "bytes": 20971520,
+          "path": "raw/n53_L1024.tar.gz.part003",
+          "sha256": "8dcc0f427a9042f044c66e487eb90046eb9614c493a514c19d7c0d9836ea704a"
+        },
+        {
+          "bytes": 678494,
+          "path": "raw/n53_L1024.tar.gz.part004",
+          "sha256": "854f24ebacd9700dcb68bf461d78947c60f6a34fc9dd1525fbfcfed44d5cc01f"
+        }
+      ],
+      "raw_path": null,
+      "raw_reassembly": "cat raw/n53_L1024.tar.gz.part000 raw/n53_L1024.tar.gz.part001 raw/n53_L1024.tar.gz.part002 raw/n53_L1024.tar.gz.part003 raw/n53_L1024.tar.gz.part004 > n53_L1024.tar.gz",
+      "raw_sha256": "36b60bc0bb2a371caba499000fb45f31d3affee0e731ee616c3b1137a9a4083d",
+      "receipt_path": "receipts/n53_L1024.json",
+      "receipt_sha256": "948ed4ba272ec6e9c3394fdbd5355b1f655a6024538109d312ba49050147bae4",
+      "second_host_replay_path": "second_host_replay/n53_L1024.json",
+      "second_host_replay_sha256": "948ed4ba272ec6e9c3394fdbd5355b1f655a6024538109d312ba49050147bae4",
+      "status": "PASS",
+      "targets_verified_per_arm": 9216
+    }
+  },
+  "checkout_main_parent": "af2a925bc924e15d4167487a477893eda9ca85b8",
+  "checkout_merge_commit": "6ec1d5afc211f5139b677728ba43aade55abb4a7",
+  "extraction": "tar -xzf raw/n41_L1024.tar.gz -C DEST; for n53 first reassemble its five ordered raw_parts, verify raw_sha256, then tar -xzf n53_L1024.tar.gz -C DEST",
+  "frozen_sha256": "c1218c0a989c0f97cc5d6ff9af2908ada8250b25bb546df441ee450c3d29a59b",
+  "frozen_verifier_source_sha256": "a0e9ab1e8ab36e1e7e64e6942a451b8a8267408e94bff58faccc5d8cf8618585",
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36598036253",
+  "independent_replay": "python3 verify_panel.py --n 41 --run-dir DEST/n41_L1024 --out NEW_RECEIPT.json",
+  "portable_replay_source": "research/notes/ecc2k130/compact_s3_batch_20260929/portable_replay.py",
+  "portable_replay_source_sha256": "7ff137c6eafdfa1d0a08da531b8469f5427d4a444093b728bb4320bab1aad316",
+  "schema": "compact-s3-batch-hosted-archive-v1",
+  "second_host_initial_failure": {
+    "bytes": 631,
+    "cause": "frozen verifier compared Actions absolute Q path to local checkout absolute path; mathematical checks not reached",
+    "path": "second_host_replay/n41_nonportable_fail.json",
+    "sha256": "a178e73be489d9f67331b48ed737fef097c98bc16306d8416c2ded502bae8778"
+  },
+  "second_host_replay_host_path": "second_host_replay/HOST.json",
+  "second_host_replay_host_sha256": "c667ac02c8bf26ebc5ebeeed5557c7420f8368488b17fb52a932af54b1ce3f85",
+  "source_head": "ded946e49e506d05954cbfd0a644dc2928f7d468",
+  "source_head_kind": "PR head; Actions compiled the recorded PR merge checkout"
+}

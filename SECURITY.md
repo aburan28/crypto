@@ -529,7 +529,8 @@ does not change this conclusion.
   256-bit curve order gives ~128-bit security.  **Two variants:**
     - **Floyd tortoise-and-hare** (`pollard_rho_dlp` /
       `pollard_rho_dlp_zp`) — generic over four closures (`op`,
-      `eq`, `partition`, `pow`).  Automatic restart on sterile
+      `eq`, `partition`, `pow`); `pollard_rho_dlp_zp` runs the same
+      walk on machine words when `p` and `n` fit.  Automatic restart on sterile
       collisions (up to 16 with random `(a₀, b₀)`).
     - **Distinguished points** (`pollard_rho_dp_dlp_zp` /
       `pollard_rho_dp_dlp_zp_multi`) — Van Oorschot-Wiener 1999.

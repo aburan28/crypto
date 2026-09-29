@@ -1,0 +1,47 @@
+{
+  "cell": "n23a0",
+  "classification": {
+    "accepted_relations": 0,
+    "collection_blocks": 1,
+    "collector_dispatch": {
+      "collection_window": null,
+      "field_kernel": "pclmulqdq",
+      "pair_table": false,
+      "query_rule": "trial-keyed-sample",
+      "strategy": "Groebner"
+    },
+    "descent_dispatch": null,
+    "effective_solver": "f4",
+    "engines": [
+      {
+        "MatrixF4": {
+          "max_degree": 3
+        }
+      }
+    ],
+    "online_wall_ns": null,
+    "outcome_sample": [
+      "incomplete"
+    ],
+    "rejected_relations": 0,
+    "solutions": 0,
+    "status": "incomplete",
+    "trials": 1,
+    "unsupported_false": 1,
+    "unsupported_true": 0
+  },
+  "parse_error": null,
+  "process": {
+    "exit_code": 2,
+    "process_status": "EXITED",
+    "timeout_seconds": 180,
+    "wall_seconds": 23.795565843582153
+  },
+  "report_status": "incomplete",
+  "solver": "f4",
+  "stdout_sha256": "76fd9e28aa4da0635232d5643d28b2e1eb7d6c4ece20336ca354c20ea0e882cc",
+  "target": [
+    "6400420",
+    "2778193"
+  ]
+}

@@ -1,0 +1,38 @@
+| n | L | K | log2 r | IC Ir | rho R3 Ir | IC / rho | IC wall s | rho wall s |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 37 | 1,024 | 42 | 27.78 | 560,613,246 | 705,849,698 | 0.794 | 0.2 | 0.1 |
+| 41 | 1,024 | 255 | 39.00 | 12,441,253,531 | 8,184,739,666 | 1.520 | 4.2 | 1.3 |
+| 53 | 1,024 | 440 | 44.26 | 89,190,346,806 | 46,384,789,571 | 1.923 | n/a | 5.3 |
+| 61 | 1,024 | 600 | 47.21 | 292,412,736,909 | 127,304,678,714 | 2.297 | 89.3 | 15.6 |
+| 53 | 4,096 | 660 | 44.26 | 153,201,588,995 | 95,528,133,576 | 1.604 | 52.6 | 11.9 |
+| 53 | 16,384 | 880 | 44.26 | 298,529,760,485 | 199,039,001,579 | 1.500 | 111.4 | 24.6 |
+
+slope IC: 0.459 +/- 0.029 (95% CI 0.335..0.583, df=2)
+slope rho R3: 0.381 +/- 0.031 (95% CI 0.249..0.513, df=2)
+slope log2(IC/rho) = slope difference: 0.078 +/- 0.003 (95% CI 0.067..0.089, df=2)
+
+(i) any cell IC/rho < 0.8: True -- met only by: n=37 L=1,024 (0.794);  (ii) slope gap <= -0.05 with CI excluding 0: False
+Decision (pre-registered rule, literal): SURVIVES as a scaling result
+
+POST HOC sensitivity (not registered):
+  slope difference without n=37: +0.072
+  slope difference without n=41: +0.078
+  slope difference without n=53: +0.079
+  slope difference without n=61: +0.078
+  local slope difference n=37->41: +0.083 per doubling of r
+  local slope difference n=41->53: +0.064 per doubling of r
+  local slope difference n=53->61: +0.087 per doubling of r
+  n=53 IC/rho trend in L, 1,024->4,096: -0.131 per doubling of L
+  n=53 IC/rho trend in L, 4,096->16,384: -0.048 per doubling of L
+
+EXPLORATORY (unregistered) operation-count table: IC probes vs rho canonicalizations
+| n | L | K | IC rank probes | IC target probes | IC total | rho canon | rho steps | IC/rho probes |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 37 | 1,024 | 42 | 2,068 | 49,733 | 51,801 | 214,002 | 170,613 | 0.242 |
+| 41 | 1,024 | 255 | 632,771 | 2,507,965 | 3,140,736 | 4,116,013 | 3,827,005 | 0.763 |
+| 53 | 1,024 | 440 | 8,776,297 | 20,886,249 | 29,662,546 | 20,914,156 | 19,569,835 | 1.418 |
+| 61 | 1,024 | 600 | 38,395,628 | 64,415,777 | 102,811,405 | 53,208,577 | 49,842,039 | 1.932 |
+| 53 | 4,096 | 660 | 5,705,875 | 34,611,165 | 40,317,040 | 43,110,831 | 40,288,078 | 0.935 |
+| 53 | 16,384 | 880 | 4,277,050 | 79,244,562 | 83,521,612 | 88,242,834 | 82,225,263 | 0.946 |
+
+EXPLORATORY slope of log2(IC probes / rho canonicalizations) on log2 r (L=1024, four sizes): 0.155 +/- 0.003 (95% CI 0.141..0.168, df=2)

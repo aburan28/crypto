@@ -177,6 +177,14 @@ def construct(c, recipe, depth=0):
         require(len(basis) == dimension, 'invariant kernel dimension mismatch')
         xs = span(basis)
         detail.update(divisor_polynomial=polynomial, nominal_dimension=dimension, basis=basis)
+    elif kind == 'standard_subspace':
+        exact_fields(recipe, ('dimension',))
+        dimension = uint(recipe['dimension'], 32, 'standard subspace dimension')
+        require(1 <= dimension <= 20 and dimension < c.n,
+                'standard subspace dimension outside producer bounds')
+        basis = [1 << i for i in range(dimension)]
+        xs = span(basis)
+        detail.update(nominal_dimension=dimension, basis=basis)
     elif kind == 'frobenius_union':
         exact_fields(recipe, ('seed_masks',))
         basis = recipe['seed_masks']
