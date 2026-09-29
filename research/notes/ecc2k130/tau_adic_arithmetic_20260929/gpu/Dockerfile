@@ -6,4 +6,5 @@ WORKDIR /study
 COPY tools/curve_identity.py /study/tools/curve_identity.py
 COPY research/notes/ecc2k130/tau_adic_arithmetic_20260929 /study/research/notes/ecc2k130/tau_adic_arithmetic_20260929
 ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
-CMD ["timeout", "--signal=TERM", "540s", "python3", "research/notes/ecc2k130/tau_adic_arithmetic_20260929/gpu/run_gpu.py", "--output", "/results/gpu-run.json"]
+ENTRYPOINT ["timeout", "--signal=TERM", "--kill-after=10s", "540s", "python3", "research/notes/ecc2k130/tau_adic_arithmetic_20260929/gpu/run_gpu.py"]
+CMD ["--mode", "smoke", "--output", "/results/gpu-smoke.json"]

@@ -39,6 +39,10 @@ HD F times(F a,F b) {
 HD F square(F a,const U* columns) {
 #if FAST_SQUARE
     F out=zero();
+#if defined(__CUDACC__) && defined(LINEAR_SQUARE_NOUNROLL)
+    // Opt-in compiler-resource experiment; the timing runner keeps its default.
+#pragma unroll 1
+#endif
     for(int i=0;i<FIELD_M;++i) {
         const U mask=0ULL-((a.v[i/64]>>(i%64))&1ULL);
         for(int j=0;j<W;++j)out.v[j]^=columns[i*W+j]&mask;
