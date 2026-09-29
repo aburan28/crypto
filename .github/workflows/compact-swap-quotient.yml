@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/workflows/compact-swap-quotient.yml'
       - 'research/notes/ecc2k130/compact_swap_quotient_20260929/**'
+      - 'research/notes/ecc2k130/compact_frozen_source_replay_20260929/**'
       - 'examples/koblitz_orbit_dlp_fast.rs'
       - 'examples/koblitz_orbit_dlp_swap.rs'
       - 'examples/koblitz_rho_batch_ks_v3.rs'
@@ -19,6 +20,7 @@ on:
     paths:
       - '.github/workflows/compact-swap-quotient.yml'
       - 'research/notes/ecc2k130/compact_swap_quotient_20260929/**'
+      - 'research/notes/ecc2k130/compact_frozen_source_replay_20260929/**'
   workflow_dispatch:
 
 jobs:
@@ -50,13 +52,27 @@ jobs:
             research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures
             research/notes/ecc2k130/compact_k_boundary_20260929/fixtures
             research/notes/ecc2k130/compact_swap_quotient_20260929
+            research/notes/ecc2k130/compact_frozen_source_replay_20260929
             .github/workflows/compact-swap-quotient.yml
+      - name: Check fail-closed frozen-source materialization
+        run: python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+      - name: Materialize frozen source tree from committed snapshots
+        run: |
+          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+            --freeze research/notes/ecc2k130/compact_swap_quotient_20260929/FROZEN.json \
+            --dest "${{ runner.temp }}/frozen-src"
       - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+        working-directory: ${{ runner.temp }}/frozen-src
       - run: cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap
+        working-directory: ${{ runner.temp }}/frozen-src
       - name: Exhaustive swap identity and exceptional-state test
+        working-directory: ${{ runner.temp }}/frozen-src
         run: cargo test --release --locked --example koblitz_orbit_dlp_swap exhaustive_odd_degree_swap_preserves_roots_and_table_witnesses
       - name: Run nine Latin-balanced cold arms on the same public points
         id: run
+        working-directory: ${{ runner.temp }}/frozen-src
+        env:
+          GIT_DIR: ${{ github.workspace }}/.git
         run: |
           python3 research/notes/ecc2k130/compact_swap_quotient_20260929/run_panel.py \
             --n ${{ matrix.n }} \
@@ -66,6 +82,7 @@ jobs:
             --out "${{ runner.temp }}/compact-swap/n${{ matrix.n }}_L1024"
       - name: Independently replay every rank and logarithm
         if: always() && steps.run.outcome != 'skipped'
+        working-directory: ${{ runner.temp }}/frozen-src
         run: |
           python3 research/notes/ecc2k130/compact_swap_quotient_20260929/verify_panel.py \
             --n ${{ matrix.n }} \

@@ -1,0 +1,155 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index cd730af6..12e2151b 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -2424,6 +2424,23 @@ fn pair_filter_hash(key: u64) -> u64 {
+     h.wrapping_mul(0xc4ce_b9fe_1a85_ec53)
+ }
+ 
++/// Two independent bit positions in equal halves of the existing presence
++/// filter. `hash` is already [`pair_filter_hash`] of the table key; deriving
++/// the second position from its retained filter bits also works for folded
++/// builders whose cached token intentionally keeps only those bits.
++#[inline]
++fn pair_filter_positions(hash: u64, mask: u64) -> (usize, usize) {
++    let bits = mask.count_ones();
++    debug_assert!(bits >= 2);
++    let half_bits = bits - 1;
++    let half = 1u64 << half_bits;
++    let half_mask = half - 1;
++    let retained = hash & mask;
++    let first = retained & half_mask;
++    let second = half | (pair_filter_hash(retained) & half_mask);
++    (first as usize, second as usize)
++}
++
+ /// **Every pair sum of a factor base**, `P_i + P_j` for `i ≤ j`, sorted
+ /// by packed point identity so a sum can be looked up by binary search.
+ ///
+@@ -2907,8 +2924,9 @@ impl PairSumTable {
+         let present_mask = (1u64 << filter_bits) - 1;
+         let mut present = vec![0u64; (1usize << filter_bits) / 64];
+         for &(key, _, _) in &entries {
+-            let h = (pair_filter_hash(key) & present_mask) as usize;
+-            present[h >> 6] |= 1u64 << (h & 63);
++            let (first, second) = pair_filter_positions(pair_filter_hash(key), present_mask);
++            present[first >> 6] |= 1u64 << (first & 63);
++            present[second >> 6] |= 1u64 << (second & 63);
+         }
+         Some(Self {
+             entries,
+@@ -3017,8 +3035,11 @@ impl PairSumTable {
+                 unsafe {
+                     *(slots as *mut u32).add(slot) = Self::compact_rest(key);
+                 }
+-                let h = (pair_filter_hash(key) & present_mask) as usize;
+-                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
++                let (first, second) = pair_filter_positions(pair_filter_hash(key), present_mask);
++                present_atomic[first >> 6]
++                    .fetch_or(1u64 << (first & 63), Ordering::Relaxed);
++                present_atomic[second >> 6]
++                    .fetch_or(1u64 << (second & 63), Ordering::Relaxed);
+             });
+         });
+         let present: Vec<u64> = present_atomic
+@@ -3136,8 +3157,11 @@ impl PairSumTable {
+                     *(rest_slots as *mut u32).add(slot) = Self::compact_rest(key);
+                     *(witness_slots as *mut u32).add(slot) = ((i as u32) << 16) | j;
+                 }
+-                let h = (pair_filter_hash(key) & present_mask) as usize;
+-                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
++                let (first, second) = pair_filter_positions(pair_filter_hash(key), present_mask);
++                present_atomic[first >> 6]
++                    .fetch_or(1u64 << (first & 63), Ordering::Relaxed);
++                present_atomic[second >> 6]
++                    .fetch_or(1u64 << (second & 63), Ordering::Relaxed);
+             }
+         });
+         drop(cached_keys);
+@@ -3337,8 +3361,9 @@ impl PairSumTable {
+                     low_hash as u32
+                 };
+             }
+-            let h = (low_hash & present_mask) as usize;
+-            present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
++            let (first, second) = pair_filter_positions(low_hash, present_mask);
++            present_atomic[first >> 6].fetch_or(1u64 << (first & 63), Ordering::Relaxed);
++            present_atomic[second >> 6].fetch_or(1u64 << (second & 63), Ordering::Relaxed);
+         };
+         if let Some(cached) = cached {
+             (0..reps.len()).into_par_iter().for_each(|r| {
+@@ -3623,18 +3648,13 @@ impl PairSumTable {
+         }
+     }
+ 
+-    /// Index of the filter word holding this key's bit.
+-    #[inline]
+-    fn filter_word(&self, key: u64) -> usize {
+-        ((pair_filter_hash(key) & self.present_mask) as usize) >> 6
+-    }
+-
+     /// Whether the filter admits this key.  A `false` is certain; a
+     /// `true` still has to be checked against the entries.
+     #[inline]
+     fn admitted(&self, key: u64) -> bool {
+-        let h = (pair_filter_hash(key) & self.present_mask) as usize;
+-        self.present[h >> 6] >> (h & 63) & 1 == 1
++        let (first, second) = pair_filter_positions(pair_filter_hash(key), self.present_mask);
++        self.present[first >> 6] >> (first & 63) & 1 == 1
++            && self.present[second >> 6] >> (second & 63) & 1 == 1
+     }
+ 
+     /// All `(i, j)` with `P_i + P_j` equal to the packed point.
+@@ -3759,7 +3779,9 @@ impl PairSumTable {
+     /// exposed so a benchmark can model that loop exactly.
+     #[doc(hidden)]
+     pub fn prefetch_key(&self, key: u64) {
+-        prefetch(&self.present[self.filter_word(key)]);
++        let (first, second) = pair_filter_positions(pair_filter_hash(key), self.present_mask);
++        prefetch(&self.present[first >> 6]);
++        prefetch(&self.present[second >> 6]);
+     }
+ 
+     /// The lookup half of [`Self::contains_pair`].
+@@ -4009,11 +4031,11 @@ impl PairSumTable {
+         for (b, block) in rests.chunks(BLOCK).enumerate() {
+             self.keys_of(block, &mut keys);
+             for &key in keys.iter().take(LOOKAHEAD) {
+-                prefetch(&self.present[self.filter_word(key)]);
++                self.prefetch_key(key);
+             }
+             for (within, rest) in block.iter().enumerate() {
+                 if let Some(&ahead) = keys.get(within + LOOKAHEAD) {
+-                    prefetch(&self.present[self.filter_word(ahead)]);
++                    self.prefetch_key(ahead);
+                 }
+                 if !self.admitted(keys[within]) {
+                     continue;
+@@ -4141,11 +4163,11 @@ impl PairSumTable {
+                     let block = &rests[..];
+                     self.keys_of(block, &mut keys);
+                     for &key in keys.iter().take(LOOKAHEAD) {
+-                        prefetch(&self.present[self.filter_word(key)]);
++                        self.prefetch_key(key);
+                     }
+                     for (offset, rest) in block.iter().enumerate() {
+                         if let Some(&ahead) = keys.get(offset + LOOKAHEAD) {
+-                            prefetch(&self.present[self.filter_word(ahead)]);
++                            self.prefetch_key(ahead);
+                         }
+                         if !self.admitted(keys[offset]) {
+                             continue;
+@@ -4209,11 +4231,11 @@ impl PairSumTable {
+                     self.curve.add_many(target, &negs, &mut rests, &mut scratch);
+                     self.keys_of(&rests, &mut keys);
+                     for &key in keys.iter().take(LOOKAHEAD) {
+-                        prefetch(&self.present[self.filter_word(key)]);
++                        self.prefetch_key(key);
+                     }
+                     for (k, rest) in rests.iter().enumerate() {
+                         if let Some(&ahead) = keys.get(k + LOOKAHEAD) {
+-                            prefetch(&self.present[self.filter_word(ahead)]);
++                            self.prefetch_key(ahead);
+                         }
+                         if !self.admitted(keys[k]) {
+                             continue;
