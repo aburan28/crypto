@@ -140,7 +140,11 @@ def binary_digits(k, naf=False):
 
 
 def point_json(p):
-    return None if p is None else [hex(int(c.integer_representation())) for c in p]
+    # Both Sage's Givaro (small fields) and NTL GF2E expose polynomial().
+    return None if p is None else [
+        hex(sum(int(bit) << i for i, bit in enumerate(c.polynomial().list())))
+        for c in p
+    ]
 
 
 class Arithmetic:
