@@ -29,7 +29,9 @@ the formerly accepted synthetic `p cnf 1 1` are regression controls. The
 measure workflow now archives checkout/setup/static preflight refusals before
 the supervisor. Hosted harmless control on the target image showed that
 `git merge-base` exits 128 under the inherited toy 512-MiB address-space cap:
-Git cannot map the checkout packfile. The full Git/GitHub/preparation gate
+Git cannot map the checkout packfile. Under the same cap, the Go-based `gh`
+CLI exits 2 before reading a PR because it cannot reserve page-summary memory.
+The full Git/GitHub/preparation gate
 therefore stays in the uncapped supervisor before dispatch; capped children
 verify its sealed dispatch and local byte identities. CI probes both paths
 without starting a measured phase. The hosted control receipt is evidence of

@@ -146,41 +146,67 @@ def main() -> int:
                     raise RuntimeError('capped preparation gate failed for another reason')
             elif b'PASS_HARMLESS_PREPARATION_ONLY' not in prep_raw:
                 raise RuntimeError('preparation archive gate did not pass')
-            for number, key in ((804, 'first'), (831, 'preparation')):
-                parent = json.loads(run(f'gh_parent_{number}', [
-                    'gh', 'pr', 'view', str(number), '--repo', 'aburan28/crypto',
-                    '--json', 'state,headRefOid,mergeCommit',
-                ]))
-                if (parent['state'] != 'MERGED' or
-                        parent['headRefOid'] != frozen[key]['pr_head'] or
-                        parent['mergeCommit']['oid'] != frozen[key]['merge_commit']):
-                    raise RuntimeError(f'parent PR {number} differs from freeze')
             event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
             pr_number = event['pull_request']['number']
             if event['pull_request']['head']['sha'] != args.expected_head:
                 raise RuntimeError('event PR head differs from checkout')
-            live = json.loads(run('gh_live_pr', [
-                'gh', 'pr', 'view', str(pr_number),
-                '--repo', 'aburan28/crypto',
-                '--json', 'state,isDraft,baseRefName,headRefName,headRefOid',
-            ]))
-            if (live['state'] != 'OPEN' or live['baseRefName'] != 'main' or
-                    live['headRefOid'] != args.expected_head or
-                    live['headRefName'] != frozen['release_branch']):
-                raise RuntimeError('live PR differs from held exact head')
             run_id = int(os.environ['GITHUB_RUN_ID'])
-            current = json.loads(run('gh_actions_current_run', [
-                'gh', 'api', f'repos/aburan28/crypto/actions/runs/{run_id}',
-            ]))
-            if current['id'] != run_id or not isinstance(current['workflow_id'], int):
-                raise RuntimeError('Actions current-run API result drifted')
-            listed = run('gh_actions_workflow_runs', [
-                'gh', 'api', '--paginate', '--jq', '.workflow_runs[] | @json',
-                'repos/aburan28/crypto/actions/workflows/' +
-                str(current['workflow_id']) + '/runs?event=pull_request&per_page=100',
-            ])
-            if run_id not in [json.loads(line)['id'] for line in listed.splitlines()]:
-                raise RuntimeError('Actions workflow run listing omitted current run')
+            first_raw = run('gh_parent_804', [
+                'gh', 'pr', 'view', '804', '--repo', 'aburan28/crypto',
+                '--json', 'state,headRefOid,mergeCommit',
+            ], allow_failure=True)
+            first_row = receipt['commands'][-1]
+            if (first_row['exit_code'] == 2 and
+                    'fatal error: failed to reserve page summary memory' in
+                    first_row.get('stderr_tail', '')):
+                receipt['capped_gh_classification'] = 'GO_PAGE_SUMMARY_REFUSAL'
+                run('gh_actions_current_run', [
+                    'gh', 'api', f'repos/aburan28/crypto/actions/runs/{run_id}',
+                ], allow_failure=True)
+                api_row = receipt['commands'][-1]
+                if (api_row['exit_code'] != 2 or
+                        'fatal error: failed to reserve page summary memory' not in
+                        api_row.get('stderr_tail', '')):
+                    raise RuntimeError('capped gh API failed for another reason')
+            elif first_row['exit_code'] == 0:
+                receipt['capped_gh_classification'] = 'PASS'
+                first = json.loads(first_raw)
+                if (first['state'] != 'MERGED' or
+                        first['headRefOid'] != frozen['first']['pr_head'] or
+                        first['mergeCommit']['oid'] != frozen['first']['merge_commit']):
+                    raise RuntimeError('parent PR 804 differs from freeze')
+                parent = json.loads(run('gh_parent_831', [
+                    'gh', 'pr', 'view', '831', '--repo', 'aburan28/crypto',
+                    '--json', 'state,headRefOid,mergeCommit',
+                ]))
+                if (parent['state'] != 'MERGED' or
+                        parent['headRefOid'] != frozen['preparation']['pr_head'] or
+                        parent['mergeCommit']['oid'] !=
+                        frozen['preparation']['merge_commit']):
+                    raise RuntimeError('parent PR 831 differs from freeze')
+                live = json.loads(run('gh_live_pr', [
+                    'gh', 'pr', 'view', str(pr_number),
+                    '--repo', 'aburan28/crypto',
+                    '--json', 'state,isDraft,baseRefName,headRefName,headRefOid',
+                ]))
+                if (live['state'] != 'OPEN' or live['baseRefName'] != 'main' or
+                        live['headRefOid'] != args.expected_head or
+                        live['headRefName'] != frozen['release_branch']):
+                    raise RuntimeError('live PR differs from held exact head')
+                current = json.loads(run('gh_actions_current_run', [
+                    'gh', 'api', f'repos/aburan28/crypto/actions/runs/{run_id}',
+                ]))
+                if current['id'] != run_id or not isinstance(current['workflow_id'], int):
+                    raise RuntimeError('Actions current-run API result drifted')
+                listed = run('gh_actions_workflow_runs', [
+                    'gh', 'api', '--paginate', '--jq', '.workflow_runs[] | @json',
+                    'repos/aburan28/crypto/actions/workflows/' +
+                    str(current['workflow_id']) + '/runs?event=pull_request&per_page=100',
+                ])
+                if run_id not in [json.loads(line)['id'] for line in listed.splitlines()]:
+                    raise RuntimeError('Actions workflow run listing omitted current run')
+            else:
+                raise RuntimeError('unexpected capped gh prerequisite failure')
             if not capped_refusal:
                 if run('git_clean_checkout', ['git', 'status', '--porcelain']).strip():
                     raise RuntimeError('held checkout is dirty')
@@ -199,9 +225,11 @@ def main() -> int:
                     frozen['base_main_head'] + '..origin/main', '--',
                     *frozen['upstream_guard_paths'],
                 ])
+            cap_limited = (capped_refusal or
+                           receipt['capped_gh_classification'] == 'GO_PAGE_SUMMARY_REFUSAL')
             receipt['decision'] = (
-                'PASS_CHILD_BYTE_GATE_WITH_CAPPED_GIT_REFUSAL' if capped_refusal else
-                'PASS_HARMLESS_TOY_CAP_CONTROL')
+                'PASS_CHILD_BYTE_GATE_WITH_CAPPED_PREREQUISITE_REFUSALS'
+                if cap_limited else 'PASS_HARMLESS_TOY_CAP_CONTROL')
     except Exception as exc:
         receipt['error'] = f'{type(exc).__name__}: {exc}'
     out.write_text(json.dumps(receipt, sort_keys=True, indent=2) + '\n')
@@ -212,7 +240,7 @@ def main() -> int:
         'error': receipt.get('error'),
     }, sort_keys=True))
     return 0 if receipt['decision'] in ('PASS_HARMLESS_TOY_CAP_CONTROL',
-                                       'PASS_CHILD_BYTE_GATE_WITH_CAPPED_GIT_REFUSAL',
+                                       'PASS_CHILD_BYTE_GATE_WITH_CAPPED_PREREQUISITE_REFUSALS',
                                        'SKIPPED_AFTER_ARCHIVED_OUTCOME') else 1
 
 

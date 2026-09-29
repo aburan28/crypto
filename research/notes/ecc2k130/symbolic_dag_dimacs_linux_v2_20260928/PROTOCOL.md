@@ -63,11 +63,14 @@ on the Ubuntu target image, `git merge-base` exits 128 under the toy
 the full gate inside the toy child would falsely refuse a valid ancestor.
 
 The hash-only Ubuntu workflow exercises the actual Git-free child byte gate
-under that hard toy cap. It also probes Git, GitHub PR/Actions API and the
-preparation gate under the same cap, recording the pack-map refusal as a
-specific host limitation rather than an ancestry result. Its harmless receipt
-archives command outcomes and zero measured children. A new or different
-failure refuses the held control. The separately opt-in measure workflow is triggered only by the unique PR label
+under that hard toy cap. It probes Git, GitHub PR/Actions API and the
+preparation gate under the same cap. On the prepared image, Git's pack mapping
+and Go-based `gh` startup both fail specifically because of the 512-MiB
+address-space limit; the receipt classifies these exact host limitations
+without misreporting the ancestry. It also exercises Git and GitHub API reads
+outside the cap, where the supervisor actually runs them. The harmless
+control archives command outcomes and zero measured children; a new or
+different failure refuses it. The separately opt-in measure workflow is triggered only by the unique PR label
 `ecc2k130-dag-linux-v2-measure-once`. It cannot release this held freeze.
 
 Before that label can be applied, a new commit must fill `status=RELEASED`,
