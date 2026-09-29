@@ -553,6 +553,16 @@ cd ecc2k130/aws
 ./ingest.sh pending          # backlog report, writes nothing
 ```
 
+On macOS, `./launchd/install-macos.sh` keeps that loop up under launchd.
+It copies `dp_ingest.py` and `ingest.sh` into
+`~/Library/Application Support/ECC2K130/ingest`, writes the LaunchAgent
+`com.adamburan.ecc2k130-dp-ingest`, and bootstraps it. The agent starts at
+login and is restarted if it exits. Each start sets `INGEST_ENSURE_ACCESS=1`
+and `AWS_PROFILE` (default `ecc2k130`), and unsets any
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, or `AWS_SESSION_TOKEN` so a
+stale token cannot override that profile. The agent runs those copies;
+run the installer again after a new `dp_ingest.py` lands.
+
 Or from the Modal tree: `./run.sh ingest` (same script; sets
 `INGEST_ENSURE_ACCESS=1` to add this host's egress /32 before connecting).
 Set `DATABASE_URL` to skip Secrets Manager, or `RHO_DB_HOST` plus the
@@ -695,8 +705,7 @@ mechanism here and a vacuum per deploy is not a cost this table can carry.
 With both in place, measured at 137 M rows on the host deployed at 21:05Z: the
 vacuum took 42 s, the per-object aggregate fell from ~3 min to 46 s, and the
 snapshot from over six minutes to **142.8 s** (`published status.json in
-142.8s`, which is why that line carries a duration). It is still O(corpus)
-for this program's own `publishStatus`. The Pages snapshot no longer is:
+142.8s`, which is why that line carries a duration). The Pages snapshot is no longer O(corpus):
 `scripts/rho_status/snapshot.py` backfills `rho_dp_hour` / `rho_dp_recent`
 once and installs a statement-level insert trigger on
 `distinguished_points`, so the ingest's existing `INSERT ... SELECT` keeps
@@ -704,6 +713,73 @@ the buckets current without a code deploy on this host. Later Pages runs
 read the rollup. This program's `--status-every` (default 180 s) still buys
 room for the count query until an ingest-host deploy starts reading the
 same tables.
+
+**Neither is the count here, and waiting to fix that cost a day.** The 142.8 s
+was measured with a visibility map that had just been vacuumed, and `VACUUM`
+marks only the pages that exist when it runs. Every row added afterwards costs
+the heap fetch the index-only scan was meant to avoid, so the same query grew
+far faster than the corpus: 143 s at 137 M rows on 2026-09-17, then **1,663 s at
+14:15Z, 2,010 s at 15:20Z and 2,916 s at 17:38Z** on 2026-09-18 at 188 M. The
+loop is pass, publish, pass, so those are minutes in which the store is not
+ingesting; the 16:49Z-to-18:05Z gap in the log is one of them. `campaignTotals`
+therefore read the same rollup the Pages job does, which is O(hours), and kept
+the scan only for a store whose rollup is missing or not yet backfilled. The
+ingest's own counters (`dp_ingest_totals`, `dp_ingest_hourly`) have since become
+the first source; `campaignSnapshot` falls back to `campaignTotals` only when
+those counters are missing or unreadable. Which one answered is in the log line
+and in the document's `source` and `totals_source`, because this repository has
+already paid once for a figure whose origin was ambiguous.
+The ingest connects as the `rho/dp-rds` role while those tables belong to the
+walker role — the reason the trigger needs `SECURITY DEFINER` — so a refused
+`SELECT` is an expected answer and not an error: it falls back and says so.
+Granting that role `SELECT` on `rho_dp_hour`, `rho_dp_recent` and `rho_dp_meta`
+is what keeps it on the fast path.
+
+**A backfill that locks the table it reports on is worse than no backfill.**
+The rollup's first backfill was one statement holding `SHARE` on
+`distinguished_points`. At 187 M rows it does not finish inside its 800 s
+timeout, and `SHARE` conflicts with the `ROW EXCLUSIVE` an `INSERT` takes, so
+from about 16:00Z on 2026-09-18 every 15-minute Pages run queued behind this
+ingest, held this ingest behind itself for the rest of the attempt, timed out,
+rolled back, and left `ready` false for the next run to repeat. The page stayed
+on its 11:25Z snapshot throughout — the backfill meant to unstick it was also
+what kept the store from moving. The fleet never stopped: S3 had fresh objects
+the whole time. It is chunked by hour now (#450, #454), one committed
+transaction per hour under `REPEATABLE READ` with a 15 s `lock_timeout` and no
+lock on the table, resumable from `backfill_through`, and the page publishes an
+index-only fallback count before the backfill rather than after it — so a rollup
+that is still filling costs the page accuracy on the hourly series, not its
+existence.
+
+`scripts/rho_status/test_rollup_postgres.py` runs that against a real server,
+because none of it is a claim about the text of the SQL: that an hour rebuilt
+over the trigger's own work counts each row once, that a spent budget leaves a
+cursor the next call finishes, that the published document matches the table's
+own histogram, that the fallback count and the rollup agree, and the one that
+matters — the backfill completes while another session holds `ROW EXCLUSIVE`,
+where the first shape waits out its timeout. It skips where there is no
+Postgres, so it is a no-op in CI and a real check on any host that can reach
+one.
+
+**The page reading `IDLE_OR_STALE` with no new points is not always a bug in
+any of the above.** Since 19:02Z on 2026-09-18 it is the truth: spot reclaimed
+every worker, and `RunInstances` is refused account-wide — `Blocked … not
+recognized as a valid account`, an account-verification hold that no IAM
+permission overrides — so nothing can replace them. The document says which
+kind of stop it is without needing this paragraph: `walking_slots: 0`,
+`workers: 0`, `iterations_per_second: 0.0` and `outstanding_objects: 0` beside
+an 11-hour `lag_seconds` is a fleet that stopped with an ingest that is caught
+up, where a stopped ingest shows a rising `outstanding_objects` and a fresh
+`newest_object_at`. Both ASGs still hold their launch template and an available
+AMI, and they track `$Latest`, so recovery once the hold clears is capacity
+only:
+
+```
+aws autoscaling update-auto-scaling-group --region us-west-2 \
+  --auto-scaling-group-name ecc2k130-g7 --min-size 0 --max-size 8 --desired-capacity 8
+```
+
+They are at `min=max=desired=0`, which is why `max-size` is in that line.
 
 While a snapshot runs, this program used to stop ingesting — the loop was
 pass, publish, pass — so a slow `pending()` aggregate or a long drain froze

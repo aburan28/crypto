@@ -146,6 +146,50 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 asymptotic sub-ρ, not key recovery, not deployed-curve security impact, not a
 full-cost/core crossover, and not a state-of-the-art result.
 
+### Compact S3 swap quotient, 2026-09-29 — engineering, no rho crossover
+
+The [frozen swap-quotient panel](../../research/notes/ecc2k130/compact_swap_quotient_20260929/RESULT.md)
+keeps one of each ordered S3 pair/Frobenius mate. Nine balanced cold blocks on
+new point-only n=41 and n=53 L=1,024 corpora completed all 162 baseline,
+quotient and strong-rho processes; the hosted independent verifier replayed
+144 full-rank compact traces and all 165,888 arm-target outputs. A second-machine
+raw replay returned byte-identical PASS receipts for both cells. At the exploratory best tested K, quotient CPU is
+2.119× rho at n=41 and 2.562× at n=53, with paired 95% intervals
+2.062–2.193 and 2.540–2.590. Same-K quotient CPU falls 8–34%, retained states
+roughly halve, and root-table entry counts remain equal. The n=53 K=550
+quotient's median index/target phases are 4.243/3.882 s against rho's
+4.188 s complete wall. The next gate is a frozen joint index/query cost
+experiment: count all S3 calls, no-root returns, exceptional inversions,
+table probes and lifts, then test batch inversion with early-stop waste charged.
+This is a matched-host complete-process timing diagnostic; common calibrated
+operation-counted S, an n=83 confidence result and GF(2^131) transfer remain
+unset. It does not alter the selected-panel `vs_rho` verdict above.
+
+### Compact S3 inversion batching, 2026-09-29 — engineering, no rho crossover
+
+The [frozen v2 full-process panel](../../research/notes/ecc2k130/compact_s3_batch_20260929/RESULT.md)
+uses one compiled swap-quotient producer at scalar W=1 and Montgomery W=16/64,
+with two A/A scalar controls at each K and 32-walk normal-basis rho on the
+same 1,024 point-only public Q. Seed 622936 was committed after the lint-only
+source amendment and is disjoint from 5,123 earlier points per n, including
+the excluded seed-622935 pilot. Nine balanced blocks per arm completed 162/162
+children, 144 full-rank compact traces and 165,888 verified arm-target
+outputs. All four A/A noise gates pass. The second-host replay is documented
+in the result and its portability note.
+
+Every batch/scalar paired 95% CPU interval excludes one on the improving side,
+saving 16–26% complete cold CPU at fixed K. Yet the best observed W64 cells
+remain **1.535× rho at n=41 K255** (95% interval 1.518–1.554) and **1.582×
+rho at n=53 K440** (1.559–1.613). The n=53 W64 arm spends median 2.336 s
+building the index, 2.542 s on rank and 5.084 s on targets, versus rho's
+6.335 s complete CPU. It makes 27,632,196 rank-plus-target root-table
+lookups and 42,477,310 slot probes for 1,464 full-point lift attempts. A
+no-false-negative blocked Bloom or xor prefilter is the next bounded
+hypothesis, but its construction, memory and lookup hashes must be charged
+cold against W64 and rho. These host-specific timing diagnostics do not set
+common calibrated S, an n=83 result, GF(2^131) transfer or a descendant-native
+PDP verdict, and they do not alter the selected-panel `vs_rho` row above.
+
 ### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
 
 Separate measurement, separate base family, not a competing record. The
@@ -219,21 +263,107 @@ should be quoted without its configuration.
 
 `examples/koblitz_orbit_dlp_fast.rs` is a pair-table-free compact-orbit producer:
 one Frobenius-quotiented S3 index, normal-basis one-probe lookup, rank-guided
-relations, and K grown with batch size L. Against the frozen Kuhn–Struik batched
-rho (`d=4`) it wins all 15 paired n=53 blocks (L=32..16,384, wall 0.24–0.74),
+relations, and K grown with batch size L. Against the historical Kuhn–Struik batched
+rho (`d=4`, before the later backend and normal-basis corrections) it wins all
+15 paired n=53 blocks (L=32..16,384, wall 0.24–0.74),
 all 3 n=41 blocks at L=1,024 (0.34), and all 3 n=61 blocks at L=1,024 / 4,096 /
 16,384 (K=600/800/1,400, wall 0.14–0.63; 64,512/64,512 replayed).
 Constant-factor: both arms ~√(L·r/n) at optimal K. Status
 `PENDING_INDEPENDENT_VALIDATION` — do **not** promote the selected-panel
 `vs_rho` row from this arm alone.
 
-**Next beat:** a=0 n=61 vs `examples/koblitz_rho_batch_ks_v2_n61.rs` at
-**L=65,536 only**. Do not run 32-target panels. Evidence:
+**2026-09-29 point-only full-rank check:** fresh held-out n=37/41/53 L=1 and
+L=1,024 public points, five cold paired blocks per cell, independent rank and
+target replay on Linux and a second machine. With the corrected x86 PCLMUL /
+Itoh–Tsujii rho, median IC/rho CPU ratios are 1.545/0.789 at n37,
+2.727/0.309 at n41 and 2.283/0.252 at n53 (single/batch). The original
+software-rho batch ratios 0.154/0.099/0.086 were accounting artifacts; a
+same-runner backend A/B reproduced the rho acceleration with identical Q,
+scalars, walks and charges. All selected rank stages reached the K-equation
+floor in exactly K attempts, but n53 still averaged ~85,007 rank probes per
+equation at L=1. The n53 batch used ~1.28 GiB peak RSS. This is a wall/CPU
+diagnostic only: common-unit S and full-operation attack-speed ratios remain
+unset; the selected-panel `vs_rho` row is not promoted. Evidence:
+[`compact_orbit_point_panel_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_orbit_point_panel_20260929/RESULT.md).
+
+**2026-09-29 stronger-rho follow-up:** a disjoint point-only four-arm panel
+compared compact orbit, corrected rho v2, 32-walk batch-inversion rho, and the
+same batched rho with normal-basis signed-Frobenius canonicalization. All six
+n=37/41/53 × L=1/1,024 cells passed five cold blocks and independent
+second-machine replay. On the same new L=1,024 Q, compact/v2 paired CPU ratios
+were 0.782/0.391/0.344, but compact/normal-rho ratios were **2.081/2.989/3.086**
+(95% intervals 2.073–2.090 / 2.877–3.116 / 3.021–3.131). The earlier batch
+timing lead is a weaker-comparator result. At n41 and n53 the current compact
+S3 index build alone exceeds the full stronger-rho process in every block;
+rank-attempt yield is already at its K-equation counting floor. Common-unit S,
+algorithmic `vs_rho` and n=131 transfer remain unset, so the selected-panel
+row is not promoted. Evidence:
+[`compact_orbit_strong_rho_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_orbit_strong_rho_20260929/RESULT.md).
+
+**2026-09-29 held-out K/base-size gate:** a new disjoint point-only n41/n53
+L=1,024 corpus tested four frozen K choices per size against the same stronger
+rho. All 40 compact full-rank runs and 10 rho runs solved and independently
+replayed every target. The lowest complete CPU costs in the tested eager-index
+grid were n41 K=192 at **2.443× rho** (95% paired interval 2.422–2.478) and
+n53 K=440 at **2.616× rho** (2.565–2.727). The n41 K=192 choice improves the
+prior K=255's CPU cost by a direct paired ratio of 0.979 (0.974–0.990), but
+this selection is exploratory until tested on another Q corpus. Smaller K
+reduces K²·n index construction and increases rank/target probes; at both
+grid minima the target phase alone exceeds the complete matched rho wall
+median. This is a no-go for the tested eager-index K grid on these Q, not for
+an untested index policy or a descendant oracle. Common-unit S and n=131
+transfer remain unset. Evidence and raw archives:
+[`compact_k_boundary_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_k_boundary_20260929/RESULT.md).
+
+**Next beat:** freeze a joint S3 index/query policy that preserves full-rank,
+full-log recovery on held-out Q and measures both construction and probes at
+equal useful workload; build a complete calibrated common operation unit for
+IC and normal-basis batched rho. A swap/Frobenius quotient of ordered S3
+states is an untested candidate and needs a reachability proof and exceptional-
+case tests before performance claims. Precomputed starts alone are deprioritized:
+in the earlier n53/L=1,024 rho, 20,134,104 direct walk additions dominated at
+most 279,360 scalar-multiplication additions (<1.4%). Then run the n=83
+confidence gate and the pending n=61 L=65,536 batch-size probe as resources
+permit. Do not use 32-target panels as a substitute. Historical evidence:
 [`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
+
+**Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
+`vs_rho` comparator (`examples/koblitz_rho_batch_ks.rs`) walks its
+signed-Frobenius canonicalization by real field squaring and inverts by
+Fermat's square-and-multiply — an unmatched baseline against the IC arm's own
+normal-basis rotation / Itoh–Tsujii inversion. A new
+`examples/koblitz_rho_batch_ks_matched_arith.rs` gives rho that exact same
+rotation/inversion machinery (four correctness gates: `Gf2` agrees with the
+raw field arithmetic, rotation reproduces chained squaring, canonicalization
+output is bit-identical to the original, `raw_inverse` is a genuine inverse —
+all passing) and reruns the frozen n=53, L=1,024, K=440, batch_seed=531310,
+dp_bits=4 cell. Wall clock: matched rho is **7.071× faster than the
+unmodified rho** (215.240 s → 30.442 s) and now within 1.1% of IC's 30.772 s
+(0.989×) — near parity, wall-clock only. Operation count (valgrind
+`--tool=callgrind` retired instructions, whole process, both binaries, same
+host): matched rho 371,102,176,689 vs IC 89,164,459,930, i.e. **IC costs
+0.2403× matched rho's instructions** (equivalently matched rho costs 4.162×
+IC's) — decisively the same direction as the original 0.246 wall-clock
+figure, on a real total-operation unit this time. All 1,024 targets verified
+correct on every one of four runs (unmodified-KS corpus, matched-arith
+native, matched-arith under callgrind, IC native and under callgrind);
+`total_walk_steps` is bit-identical (19,103,507) between the unmodified and
+matched-arithmetic KS runs, confirming the rewrite changed cost, not the walk.
+Per the pre-registered rule (IC/rho, this repo's usual challenger/reference
+convention — the task dispatching this check had transcribed the ratio
+direction backwards, corrected in the note below against the original
+wording): 0.2403 < 0.8, so **the lead survives** at this one cell, on the
+operation-count metric. This is one rerun on one host, still
+`PENDING_INDEPENDENT_VALIDATION`, and does not by itself promote the
+selected-panel `vs_rho` row. Full numbers, host manifest, and raw
+JSON/callgrind output are in
+[`RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md`](../../research/notes/index-calculus/RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md)
+and
+[`matched_rho_orbit_dlp_20260928_run/`](../../research/notes/index-calculus/matched_rho_orbit_dlp_20260928_run/).
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz compact-orbit `vs_rho` → a=0 n=61 vs batched rho at L=65,536** (L=1,024 / 4,096 / 16,384 already 3/3). No 32-target panels. After that: independent-host rerun and Bernstein–Lange.
+1. **Koblitz compact-orbit `vs_rho` → jointly reduce S3 index and query costs, then count a complete common operation unit against normal-basis batched rho.** A held-out n41/n53 K sweep found best tested complete CPU ratios of 2.443/2.616 against matched rho; shrinking K alone traded index construction for rank/target probes and did not cross. The next frozen index/query policy needs full-rank, full-log recovery, failures, probes and RSS on held-out points. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels.
 2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
 3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
    On the autolab `signed_expanded` family the nearest charged gap is `n = 37`

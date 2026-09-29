@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "pilot": "generic-f4-f5-sat-disclosed-recovery-20260929",
+  "status": "REGISTERED_BEFORE_MEASUREMENT",
+  "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "inventory_file": "goal_20260924/generic-backend-qualification-v2/standard-subspace-d6-inventory-control.json",
+  "inventory_sha256": "be3053b4b637311e8255f294807fde412510fbda2464e678a6a16fdea397d403",
+  "cells": ["n17a1", "n19a0", "n23a0", "n23a1", "n31a0"],
+  "solvers": ["f4", "f5", "sat_xor", "sat_cnf"],
+  "factor_base": {"kind": "standard_subspace", "dimension": 6},
+  "algorithm_seed": 2026092921,
+  "config": {
+    "linear_algebra": "dense",
+    "summands": 3,
+    "groebner_degree": 3,
+    "node_budget": 4096,
+    "conflict_budget": 100000
+  },
+  "per_cell_limits": {
+    "n17a1": {"max_trials": 128, "batch_trials": 8, "timeout_seconds": 300},
+    "n19a0": {"max_trials": 24, "batch_trials": 8, "timeout_seconds": 300},
+    "n23a0": {"max_trials": 4, "batch_trials": 4, "timeout_seconds": 180},
+    "n23a1": {"max_trials": 4, "batch_trials": 4, "timeout_seconds": 180},
+    "n31a0": {"max_trials": 1, "batch_trials": 1, "timeout_seconds": 180}
+  },
+  "memory_bytes": 8589934592,
+  "memory_policy": "poll-child-rss-and-kill-above-limit",
+  "memory_poll_ms": 100,
+  "worker_threads": 1,
+  "schedule": "all twenty jobs once in listed cell-then-solver order; no adaptive gate or retry",
+  "question": "Can the pinned F4/F5 and native/CNF SAT backends collect natural relations, attain rank, and recover the disclosed target under frozen per-cell bounds?",
+  "scope": "disclosed-target scientific admission only; no fresh-target, paired-rho, or promotion claim"
+}

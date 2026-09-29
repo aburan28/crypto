@@ -292,6 +292,18 @@ def frozen_inputs(round_dir):
             require(type(c['target_exposure_schema']) is int and c['target_exposure_schema'] == 1,
                     'unknown supplemental target exposure schema')
             history.verify_exposures(round_dir/'target-exposures', read(round_dir/'target-history.json'))
+    if c.get('qualification_reference_schema') == 1:
+        require(c['purpose'] == 'reference-qualification' and c['stages'] == QUALIFICATION_STAGES
+                and c['execution_number_stride'] == 2,
+                'invalid frozen qualification schedule')
+        require(c['reference_qualification'] == bounded_v2.qualified_binding(
+            read(round_dir/'qualified-references.json'),
+            read(round_dir/'qualified-observer.json'), arms[0], c['reference_arms']),
+            'changed qualified IC/rho references')
+        excluded = read(round_dir/'target-history.json')
+        history.verify_exposures(round_dir/'target-exposures', excluded)
+        require(history.validate_fresh(fixtures, excluded) == c['fresh_target_count'],
+                'changed fresh qualification target census')
     return c, fixtures, arms
 
 
@@ -343,8 +355,14 @@ def snapshot_build(source,destination, *, scientific=False):
 
 def prepare(args):
     out = args.out.resolve()
-    require(not getattr(args, 'exposed_fixtures', []) or getattr(args, 'attempt_number', 0),
-            'supplemental exposures require the bounded campaign protocol')
+    qualification = getattr(args, 'qualification', False)
+    repetitions = getattr(args, 'repetitions', 3)
+    require(repetitions == 3 or (qualification and repetitions == 1),
+            'one process per public point is permitted only for development qualification')
+    frozen_qualification = qualification and bool(getattr(args, 'reference_registry', None))
+    require(not getattr(args, 'exposed_fixtures', []) or getattr(args, 'attempt_number', 0)
+            or frozen_qualification,
+            'supplemental exposures require a bounded campaign or frozen qualification protocol')
     require(args.targets == 1, 'scientific admission requires a single public target')
     require(args.candidates is not None, 'supply an explicit registry of admitted optimized candidates')
     registry = read(args.candidates)
@@ -359,9 +377,18 @@ def prepare(args):
         require(objhash(read(args.qualified_report)) == rules.QUALIFICATION_SHA256
                 and objhash(read(args.qualified_observer)) == rules.OBSERVER_SHA256,
                 'unaccepted v2 qualification/observer evidence')
+    elif frozen_qualification:
+        require(args.qualified_report and args.qualified_observer and args.target_history
+                and len(args.prior_round) == 3 and not args.rho_source_root and not args.rho_config,
+                'frozen qualification needs accepted references and all three sealed rounds')
+        require(objhash(read(args.qualified_report)) == bounded_v2.QUALIFICATION_SHA256
+                and objhash(read(args.qualified_observer)) == bounded_v2.OBSERVER_SHA256,
+                'unaccepted qualification or observer evidence')
+        declared_references = read(args.reference_registry)
+        bounded_v2.validate_reference_declarations(declared_references)
     else:
         require(not getattr(args, 'reference_registry', None) and not getattr(args, 'qualified_observer', None),
-                'separate metric references require campaign version 2')
+                'separate metric references need a frozen campaign protocol')
         declared_references = []
     declarations = registry + declared_references
     generic = any(a.get('adapter') == 'generic-v1' for a in declarations)
@@ -390,19 +417,21 @@ def prepare(args):
     for name in EVALUATOR:
         (evaluator/name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(HERE/name,evaluator/name)
-    qualification = getattr(args, 'qualification', False)
     attempt = getattr(args, 'attempt_number', 0)
     bounded_run = attempt != 0
     require(not (qualification and bounded_run), 'qualification is not an improvement round')
     prior_rounds = []
     excluded = None
-    if bounded_run:
-        require(1 <= attempt <= 3 and args.seed == 2026092550 + attempt, 'invalid bounded round/seed')
+    if bounded_run or frozen_qualification:
+        if bounded_run:
+            require(1 <= attempt <= 3 and args.seed == 2026092550 + attempt, 'invalid bounded round/seed')
         require(args.qualified_report and args.target_history and
-                (versioned or (args.rho_source_root and args.rho_config)),
-                'bounded round needs qualified evidence, target history and bound references')
-        require(len(args.prior_round) == attempt - 1, 'every preceding round must be retained')
-        require(digest(args.target_history) == rules.HISTORY_SHA256, 'changed initial target exclusions')
+                (versioned or frozen_qualification or (args.rho_source_root and args.rho_config)),
+                'campaign needs qualified evidence, target history and bound references')
+        require(len(args.prior_round) == (attempt - 1 if bounded_run else 3),
+                'every preceding round must be retained')
+        expected_history = bounded_v2.HISTORY_SHA256 if frozen_qualification else rules.HISTORY_SHA256
+        require(digest(args.target_history) == expected_history, 'changed initial target exclusions')
         parent_history = read(args.target_history)
         for number, previous in enumerate(args.prior_round, 1):
             previous = previous.resolve()
@@ -423,7 +452,7 @@ def prepare(args):
         history.verify_exposures(out/'target-exposures', excluded)
         write(out/'target-history.json', excluded, exclusive=True)
         write(out/'qualified-references.json', read(args.qualified_report), exclusive=True)
-        if versioned:
+        if versioned or frozen_qualification:
             write(out/'qualified-observer.json', read(args.qualified_observer), exclusive=True)
     require(not qualification or not (args.rho_source_root or args.rho_config),
             'qualification measures rho from every IC source; separate rho overrides are not used')
@@ -504,12 +533,12 @@ def prepare(args):
         require(isinstance(rho_reference['config'],dict) and 'summands' in rho_reference['config'],
                 'rho config must be a complete worker configuration')
     rho_reference['configuration_sha256']=objhash(rho_reference['config'])
-    references = (declared_references if versioned else
+    references = (declared_references if versioned or frozen_qualification else
                   qualification_references(arms, args.qualification_widths) if qualification else [rho_reference])
     reference_binding = None
-    if versioned:
+    if versioned or frozen_qualification:
         rho_reference = references[1]
-        reference_binding = rules.qualified_binding(read(out/'qualified-references.json'),
+        reference_binding = bounded_v2.qualified_binding(read(out/'qualified-references.json'),
             read(out/'qualified-observer.json'), arms[0], references)
     elif bounded_run:
         online_reference = synthetic_arm('rho_online', arms[0])
@@ -560,7 +589,7 @@ def prepare(args):
     limits = {'timeout_seconds':args.timeout,'memory_bytes':8*1024**3,'cpu':cpu,
               'worker_threads':1,'max_profiled_jobs':args.max_processes}
     fixtures = {}
-    used_targets = history.history_sets(excluded) if bounded_run else {}
+    used_targets = history.history_sets(excluded) if excluded is not None else {}
     rng = random.Random(args.seed)
     for stage in stages:
         stage_cells = cells+holdout if stage in ('confirmation','replay') else cells
@@ -577,7 +606,7 @@ def prepare(args):
                            'target_seeds':[],'algorithm_seed':rng.getrandbits(64),
                            'factor_base':{'kind':'subgroup_orbits','seed':43,'points':6*degree},
                            'config':arms[0]['config']}}
-                used = None if bounded_run else used_targets.setdefault((degree,a),set())
+                used = None if excluded is not None else used_targets.setdefault((degree,a),set())
                 for fixture_attempt in range(1000):
                     case['job']['target_seeds']=[rng.getrandbits(64) for _ in range(args.targets)]
                     directory=out/'fixture_generation'/stage/case['id']/f'attempt-{fixture_attempt}'
@@ -588,7 +617,7 @@ def prepare(args):
                             'fixture generation failed; raw preparation evidence retained')
                     fixture = read(directory/'stdout.json')['fixture']
                     curve = Curve(fixture)
-                    if bounded_run:
+                    if excluded is not None:
                         used = used_targets.setdefault(history.key_for(fixture), set())
                     require(curve.r-1-len(used)>=args.targets,'too few unused public targets for independent confirmation')
                     if reserve_targets(fixture,used):
@@ -651,7 +680,7 @@ def prepare(args):
             ('Development reference qualification only; no final suite generated.' if qualification else
              'The final suite has '+str(confirmation_cases)+' inputs.')),
         'curve_diversity_limit':'Only the declared Koblitz curve/subgroup cells; no broad family or scaling claim.',
-        'limits':limits,'repetitions':3,'confirmation_ratio':0.8,'max_cell_ratio':1.1,
+        'limits':limits,'repetitions':repetitions,'confirmation_ratio':0.8,'max_cell_ratio':1.1,
         'selection_width':args.selection_width,'exploration_slots':args.exploration_slots,
         'rho_reference':rho_reference,
         'require_native_progress':args.require_native_progress,'parity_margin':1.10,
@@ -681,10 +710,20 @@ def prepare(args):
         protocol=getattr(args, 'qualification_protocol', None) or HERE/'goal_20260924/reference-qualification/PROTOCOL.md'
         shutil.copy2(protocol,out/'qualification-protocol.md')
         c['pinned_files']['qualification-protocol.md']=digest(out/'qualification-protocol.md')
+    if frozen_qualification:
+        c.update(qualification_reference_schema=1, target_exposure_schema=1,
+                 fresh_target_count=history.validate_fresh(fixtures, excluded),
+                 prior_rounds=prior_rounds,
+                 target_uniqueness='Exact canonical curve ID plus public point; all sealed prior rounds and supplemental exposures excluded.')
+        for name in ('target-history.json', 'qualified-references.json', 'qualified-observer.json'):
+            c['pinned_files'][name] = digest(out/name)
+        c['pinned_files'].update({str(p.relative_to(out)):digest(p)
+            for p in (out/'target-exposures').rglob('*') if p.is_file()})
     if generic:
         c['execution_number_stride'] = 2
         c['qualification_scope'] = ('fully charged instrumented pipelines with accepted observer binding'
-            if versioned else 'mixed prepared/generic instrumented pipelines; no observer or promotion qualification')
+            if versioned or frozen_qualification else
+            'mixed prepared/generic instrumented pipelines; no observer or promotion qualification')
     if bounded_run:
         protocol = HERE/('goal_20260924/improvement-v2/PROTOCOL.md' if versioned
                          else 'goal_20260924/improvement/PROTOCOL.md')
@@ -979,6 +1018,20 @@ def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000, match_su
         if any(type(v) not in (int,float) or not math.isfinite(v) or v<=0 for v in values):
             return {'candidate':candidate_id,'eligible':False,'reason':'invalid or missing full cost'}
         require(len({x['case_sha256'] for x in a+b})==1,'changed paired fixtures')
+        if scientific:
+            require(all(type(x.get('measurement')) is dict for x in a+b),
+                    'mixed scientific and unmeasured comparison rows')
+            workloads={x['measurement'].get('workload_id') for x in a+b}
+            require(len(workloads)==1 and all(type(v) is str and v for v in workloads),
+                    'paired comparison rows use different workloads')
+            for arm_rows in (a,b):
+                modes={x.get('mode') for x in arm_rows}
+                require(len(modes)==1 and modes <= {'ic','rho'},
+                        'paired comparison repetitions use different modes')
+                key='reference_id' if 'rho' in modes else 'candidate_id'
+                identities={x['measurement'].get(key) for x in arm_rows}
+                require(len(identities)==1 and all(type(v) is str and v for v in identities),
+                        'paired comparison repetitions use different method identities')
         if candidate_id!='rho' and baseline!='rho' and not any(x.get('mode')=='rho' for x in a+b):
             if match_support:
                 require(len({x['certificate']['factor_base_sha256'] for x in a+b})==1,'changed paired factor-base support')
@@ -1363,13 +1416,13 @@ def main():
     p.add_argument('--campaign-version', type=int, choices=(1, 2), default=1,
         help='Version 2 binds separate cold/online IC references for rounds 2 and 3.')
     p.add_argument('--reference-registry', type=Path,
-        help='Version 2 declarations, in order: ic_online, rho, rho_online.')
+        help='Accepted declarations, in order: ic_online, rho, rho_online; also enables fresh-target qualification.')
     p.add_argument('--qualified-observer', type=Path, help='Accepted whole-mode observer summary for version 2.')
     p.add_argument('--qualified-report', type=Path, help='Accepted qualification.json from the retained reference archive')
     p.add_argument('--target-history', type=Path, help='Pinned initial cross-campaign point exclusions')
     p.add_argument('--prior-round', type=Path, action='append', default=[], help='Every preceding completed bounded round, in order')
     p.add_argument('--exposed-fixtures', type=Path, action='append', default=[],
-        help='Additional JSON fixture evidence already exposed during development; repeat for every source.')
+        help='Additional exposed fixture evidence for a bounded round or frozen qualification.')
     p.add_argument('--qualification-widths',type=int,nargs='+',default=[1,8,32],
         help='Requested rho widths in qualification mode; the full protocol uses 1 2 4 8 16 32.')
     p.add_argument('--confirmation-cases',default='',
@@ -1379,6 +1432,8 @@ def main():
     p.add_argument('--holdout-cells',default='19a1',
         help='cells added in confirmation and replay only; must not repeat a --cells entry')
     p.add_argument('--seed',type=int,default=20260915)
+    p.add_argument('--repetitions',type=int,choices=(1,3),default=3,
+        help='One process per distinct point is allowed only for development qualification; bounded improvement rounds retain three.')
     p.add_argument('--cpu',type=int)
     p.add_argument('--timeout',type=float,default=60)
     p.add_argument('--max-processes',type=int,default=1800)

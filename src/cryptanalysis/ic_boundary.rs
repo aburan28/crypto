@@ -2863,6 +2863,67 @@ impl<E: Copy> FactorBase<E> {
             subspace_basis: None,
         }
     }
+
+    /// A base from an explicit column map: `points[i]` contributes
+    /// `coef_of[i]` to unknown `col_of[i]`.  This is the constructor a
+    /// fold by any finite group of endomorphisms uses
+    /// (`glv_invariant_base`), so that the column map is the only thing
+    /// a new symmetry has to produce; the indexes every oracle relies on
+    /// (`point_index`, `x_index`, `neg_index`) are derived here, once,
+    /// the same way for every base.
+    ///
+    /// `key_of` is the group's own key, `abscissa_of` the value that
+    /// groups points into `x_index`, and `neg_key_of` the key of `−P`.
+    /// Fails when the point set is not closed under negation, when a
+    /// key repeats, or when the map's lengths disagree.
+    pub fn from_column_map(
+        description: String,
+        points: Vec<E>,
+        col_of: Vec<usize>,
+        coef_of: Vec<u64>,
+        columns: usize,
+        key_of: impl Fn(&E) -> u64,
+        neg_key_of: impl Fn(&E) -> u64,
+        abscissa_of: impl Fn(&E) -> u64,
+    ) -> Result<Self, String> {
+        if points.len() != col_of.len() || points.len() != coef_of.len() {
+            return Err(format!(
+                "column map lengths disagree: {} points, {} columns, {} coefficients",
+                points.len(),
+                col_of.len(),
+                coef_of.len()
+            ));
+        }
+        if let Some(&c) = col_of.iter().find(|&&c| c >= columns) {
+            return Err(format!(
+                "column {c} is outside the {columns} declared columns"
+            ));
+        }
+        let mut fb = FactorBase::empty(description);
+        fb.point_index = fast_map(points.len());
+        fb.x_index = fast_map(points.len());
+        for (i, p) in points.iter().enumerate() {
+            if fb.point_index.insert(key_of(p), i).is_some() {
+                return Err(format!("point {i} repeats an earlier point's key"));
+            }
+            fb.x_index.entry(abscissa_of(p)).or_default().push(i);
+        }
+        for p in &points {
+            let k = neg_key_of(p);
+            let Some(&j) = fb.point_index.get(&k) else {
+                return Err("the base is not closed under negation".into());
+            };
+            fb.neg_index.push(j);
+        }
+        fb.abscissae = fb.x_index.len();
+        fb.abscissa_list = fb.x_index.keys().copied().collect();
+        fb.abscissa_list.sort_unstable();
+        fb.points = points;
+        fb.col_of = col_of;
+        fb.coef_of = coef_of;
+        fb.columns = columns;
+        Ok(fb)
+    }
 }
 
 /// The prime-field base: the `size` smallest abscissae that are on the

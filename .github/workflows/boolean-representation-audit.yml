@@ -1,0 +1,27 @@
+name: Boolean representation audit
+on:
+  pull_request:
+    paths:
+      - 'boolean_representation_audit/**'
+      - '.github/workflows/boolean-representation-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify frozen source and exact algebra controls
+        working-directory: boolean_representation_audit
+        run: |
+          sha256sum -c PRE_RUN_SHA256SUMS
+          python -m unittest -v test_backends
+          python audit_results.py
+      - name: Replay original correctness tests
+        working-directory: boolean_representation_audit/prior
+        run: python -m unittest -v test_boolean_closure

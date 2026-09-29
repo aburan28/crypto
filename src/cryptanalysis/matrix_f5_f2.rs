@@ -456,6 +456,10 @@ pub struct F5Timings {
     pub reduce_ns: u64,
     /// Turning the pivot rows back into polynomials.
     pub unpack_ns: u64,
+    /// Whether the full-column direct packed-row builder was used.
+    pub direct_pack_used: bool,
+    /// Whether the scalar preallocated direct-write unpack path was used.
+    pub direct_unpack_used: bool,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -467,6 +471,107 @@ pub enum F5OutputForm {
     /// Echelon only for degree-4 systems with at least 20 variables,
     /// where the saved reduction outweighed unpacking in the first study.
     SelectiveEchelon,
+}
+
+/// Expand a packed pivot row into its canonical, descending monomial list.
+fn unpack_row_scalar(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolPoly {
+    let terms = row.iter().map(|w| w.count_ones() as usize).sum();
+    let mut monos = Vec::with_capacity(terms);
+    for (w, &word) in row.iter().enumerate() {
+        let mut bits = word;
+        while bits != 0 {
+            let c = w * 64 + bits.trailing_zeros() as usize;
+            bits &= bits - 1;
+            monos.push(F2BoolMono::from_mask(cols[c]));
+        }
+    }
+    F2BoolPoly {
+        terms: monos,
+        n_vars,
+    }
+}
+
+/// Expand a packed row into the exact preallocated number of terms.
+fn unpack_row_scalar_direct(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolPoly {
+    let terms = row.iter().map(|w| w.count_ones() as usize).sum();
+    let mut monos = Vec::<F2BoolMono>::with_capacity(terms);
+    let out = monos.as_mut_ptr();
+    let mut written = 0;
+    for (w, &word) in row.iter().enumerate() {
+        let mut bits = word;
+        while bits != 0 {
+            let c = w * 64 + bits.trailing_zeros() as usize;
+            bits &= bits - 1;
+            let mono = F2BoolMono::from_mask(cols[c]);
+            // SAFETY: `written` increases once per set bit and `terms` is
+            // exactly the number of set bits in the whole row.
+            unsafe { out.add(written).write(mono) };
+            written += 1;
+        }
+    }
+    debug_assert_eq!(written, terms);
+    // SAFETY: all `terms` slots have been written above.
+    unsafe { monos.set_len(terms) };
+    F2BoolPoly {
+        terms: monos,
+        n_vars,
+    }
+}
+
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx512f")]
+unsafe fn unpack_row_avx512(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolPoly {
+    use std::arch::x86_64::{_mm512_loadu_si512, _mm512_mask_compressstoreu_epi64};
+
+    let terms: usize = row.iter().map(|w| w.count_ones() as usize).sum();
+    let mut monos: Vec<F2BoolMono> = Vec::with_capacity(terms);
+    let out = monos.as_mut_ptr().cast::<u64>();
+    let mut written = 0;
+    for (w, &word) in row.iter().enumerate() {
+        for byte in 0..8 {
+            let bits = (word >> (byte * 8)) as u8;
+            if bits == 0 {
+                continue;
+            }
+            let base = w * 64 + byte * 8;
+            if base + 8 <= cols.len() {
+                // SAFETY: the eight columns exist; `out` has capacity for
+                // every set bit and F2BoolMono is transparent over u64.
+                let values = unsafe { _mm512_loadu_si512(cols.as_ptr().add(base).cast()) };
+                unsafe { _mm512_mask_compressstoreu_epi64(out.add(written).cast(), bits, values) };
+                written += bits.count_ones() as usize;
+            } else {
+                let mut tail = bits;
+                while tail != 0 {
+                    let c = base + tail.trailing_zeros() as usize;
+                    debug_assert!(c < cols.len());
+                    unsafe { out.add(written).write(cols[c]) };
+                    written += 1;
+                    tail &= tail - 1;
+                }
+            }
+        }
+    }
+    debug_assert_eq!(written, terms);
+    // SAFETY: each of the `terms` slots was initialized exactly once.
+    unsafe { monos.set_len(terms) };
+    F2BoolPoly {
+        terms: monos,
+        n_vars,
+    }
+}
+
+fn unpack_row(row: &[u64], cols: &[u64], n_vars: usize, avx512: bool, direct: bool) -> F2BoolPoly {
+    #[cfg(target_arch = "x86_64")]
+    if avx512 {
+        // SAFETY: the caller selects this path only after a runtime check.
+        return unsafe { unpack_row_avx512(row, cols, n_vars) };
+    }
+    let _ = avx512;
+    if direct {
+        return unpack_row_scalar_direct(row, cols, n_vars);
+    }
+    unpack_row_scalar(row, cols, n_vars)
 }
 
 /// [`matrix_f5_f2`] with the wall time of each phase.
@@ -490,7 +595,8 @@ pub fn matrix_f5_f2_with_form_timed(
     use std::time::Instant;
     let mut timings = F5Timings::default();
     use crate::cryptanalysis::koblitz_groebner::{
-        echelon_f2_counted, f5_rows_monos_with_mask, macaulay_row_count, pack_rows, rref_f2_counted,
+        echelon_f2_counted, f5_rows_monos_with_f4_count, f5_rows_monos_with_mask,
+        f5_rows_packed_full_columns, macaulay_row_count, pack_rows, rref_f2_counted,
     };
     let mut report = F5Report {
         degree,
@@ -506,15 +612,49 @@ pub fn matrix_f5_f2_with_form_timed(
     let t = Instant::now();
     report.criterion_word_ops = criterion.word_ops();
     report.criterion_rows = criterion.lower_level_rows().0;
-    report.rows_f4 = macaulay_row_count(polys, n_vars, degree)? as u64;
-    let rows_monos = f5_rows_monos_with_mask(polys, n_vars, degree, mask, &criterion)?;
-    report.rows_built = rows_monos.len() as u64;
+    static FUSED_BUILD: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let fused_build =
+        *FUSED_BUILD.get_or_init(|| std::env::var("KIC_F5_FUSED_BUILD").as_deref() == Ok("1"));
+    static DIRECT_PACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let direct_pack =
+        *DIRECT_PACK.get_or_init(|| std::env::var("KIC_F5_DIRECT_PACK").as_deref() == Ok("1"));
+    let (cols, mut matrix) = if direct_pack {
+        if let Some((rows_f4, cols, matrix)) =
+            f5_rows_packed_full_columns(polys, n_vars, degree, &criterion)
+        {
+            timings.direct_pack_used = true;
+            report.rows_f4 = rows_f4 as u64;
+            (cols, matrix)
+        } else {
+            let (rows_f4, rows) =
+                f5_rows_monos_with_f4_count(polys, n_vars, degree, mask, &criterion)?;
+            report.rows_f4 = rows_f4 as u64;
+            let cols = macaulay_columns(&rows)?;
+            let matrix = pack_rows(&rows, &cols);
+            (cols, matrix)
+        }
+    } else {
+        let rows_monos = if fused_build {
+            let (rows_f4, rows) =
+                f5_rows_monos_with_f4_count(polys, n_vars, degree, mask, &criterion)?;
+            report.rows_f4 = rows_f4 as u64;
+            rows
+        } else {
+            report.rows_f4 = macaulay_row_count(polys, n_vars, degree)? as u64;
+            f5_rows_monos_with_mask(polys, n_vars, degree, mask, &criterion)?
+        };
+        if rows_monos.is_empty() {
+            return Some((Vec::new(), report, timings));
+        }
+        let cols = macaulay_columns(&rows_monos)?;
+        let matrix = pack_rows(&rows_monos, &cols);
+        (cols, matrix)
+    };
+    report.rows_built = matrix.len() as u64;
     report.rows_pruned = report.rows_f4 - report.rows_built;
-    if rows_monos.is_empty() {
+    if matrix.is_empty() {
         return Some((Vec::new(), report, timings));
     }
-    let cols = macaulay_columns(&rows_monos)?;
-    let mut matrix = pack_rows(&rows_monos, &cols);
     timings.build_ns = t.elapsed().as_nanos() as u64;
     let t = Instant::now();
     let mut word_ops = 0u64;
@@ -534,30 +674,29 @@ pub fn matrix_f5_f2_with_form_timed(
     report.zero_reductions = report.rows_built - rank as u64;
     report.reduce_word_ops = word_ops;
     let n_vars_out = polys[0].n_vars;
-    // one polynomial per pivot row, independently: dense rows after the
-    // back-substitution make this as long as the elimination on one thread
+    // One polynomial per pivot row. Dense rows make this a material part
+    // of the complete call even when back-substitution is skipped.
     use rayon::prelude::*;
+    static AVX512_UNPACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let avx512_unpack = *AVX512_UNPACK.get_or_init(|| {
+        #[cfg(target_arch = "x86_64")]
+        {
+            std::env::var("KIC_F5_AVX512_UNPACK").as_deref() == Ok("1")
+                && std::arch::is_x86_feature_detected!("avx512f")
+        }
+        #[cfg(not(target_arch = "x86_64"))]
+        {
+            false
+        }
+    });
+    static DIRECT_UNPACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let direct_unpack =
+        *DIRECT_UNPACK.get_or_init(|| std::env::var("KIC_F5_UNPACK_DIRECT").as_deref() == Ok("1"));
+    timings.direct_unpack_used = direct_unpack && !avx512_unpack;
     let out = matrix[..rank]
         .par_iter()
         .map(|row| {
-            // walk the set bits, not every column
-            let terms = row.iter().map(|w| w.count_ones() as usize).sum();
-            let mut monos: Vec<F2BoolMono> = Vec::with_capacity(terms);
-            for (w, &word) in row.iter().enumerate() {
-                let mut bits = word;
-                while bits != 0 {
-                    let c = w * 64 + bits.trailing_zeros() as usize;
-                    bits &= bits - 1;
-                    monos.push(F2BoolMono::from_mask(cols[c]));
-                }
-            }
-            // The columns are distinct and in descending order, so the
-            // walk yields the canonical term list; `from_monos` would
-            // re-sort it for nothing.
-            let p = F2BoolPoly {
-                terms: monos,
-                n_vars: n_vars_out,
-            };
+            let p = unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack);
             debug_assert!(p.is_canonical());
             p
         })
@@ -599,7 +738,97 @@ pub fn canonical_row_space_fingerprint(rows: &[F2BoolPoly]) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cryptanalysis::koblitz_groebner::matrix_f4_f2;
+    use crate::cryptanalysis::koblitz_groebner::{
+        f5_rows_monos_with_f4_count, f5_rows_packed_full_columns, matrix_f4_f2, pack_rows,
+    };
+
+    #[test]
+    fn direct_scalar_unpack_matches_push_path() {
+        for cols_len in [1usize, 7, 64, 65, 127, 129, 4097] {
+            let cols: Vec<u64> = (0..cols_len)
+                .map(|i| (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15))
+                .collect();
+            for salt in [0u64, 1, 3, 7, u64::MAX] {
+                let row: Vec<u64> = (0..cols_len.div_ceil(64))
+                    .map(|w| {
+                        let bits = (w as u64).wrapping_mul(0xd6e8_feb8_6659_fd93) ^ salt;
+                        let valid = (cols_len - w * 64).min(64);
+                        bits & (u64::MAX >> (64 - valid))
+                    })
+                    .collect();
+                assert_eq!(
+                    unpack_row_scalar_direct(&row, &cols, 24),
+                    unpack_row_scalar(&row, &cols, 24),
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn direct_packed_f5_build_matches_sorted_builder_and_falls_back_on_sparse_columns() {
+        let n_vars = 4;
+        let degree = 3;
+        let mask = all_variable_mask(n_vars);
+        let dense = F2BoolPoly::from_monos(
+            monomials_up_to_mask(mask, 2)
+                .into_iter()
+                .map(F2BoolMono::from_mask)
+                .collect(),
+            n_vars,
+        );
+        let criterion = F5Criterion::new(std::slice::from_ref(&dense), n_vars, degree, mask);
+        let (direct_count, direct_cols, direct_rows) =
+            f5_rows_packed_full_columns(std::slice::from_ref(&dense), n_vars, degree, &criterion)
+                .expect("dense polynomial spans the complete column universe");
+        let (normal_count, rows_monos) = f5_rows_monos_with_f4_count(
+            std::slice::from_ref(&dense),
+            n_vars,
+            degree,
+            mask,
+            &criterion,
+        )
+        .unwrap();
+        let normal_cols = macaulay_columns(&rows_monos).unwrap();
+        let normal_rows = pack_rows(&rows_monos, &normal_cols);
+        assert_eq!(direct_count, normal_count);
+        assert_eq!(direct_cols, normal_cols);
+        assert_eq!(direct_rows, normal_rows);
+
+        let sparse = poly(n_vars, &[&[0], &[1]]);
+        let sparse_criterion =
+            F5Criterion::new(std::slice::from_ref(&sparse), n_vars, degree, mask);
+        assert!(f5_rows_packed_full_columns(
+            std::slice::from_ref(&sparse),
+            n_vars,
+            degree,
+            &sparse_criterion
+        )
+        .is_none());
+    }
+
+    #[test]
+    fn avx512_unpack_matches_scalar_for_sparse_dense_and_partial_words() {
+        #[cfg(target_arch = "x86_64")]
+        if std::arch::is_x86_feature_detected!("avx512f") {
+            for cols_len in [1usize, 7, 8, 9, 63, 64, 65, 127, 128, 129, 4097] {
+                let cols: Vec<u64> = (0..cols_len)
+                    .map(|i| (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15))
+                    .collect();
+                for salt in [0u64, 1, 3, 7, u64::MAX] {
+                    let row: Vec<u64> = (0..cols_len.div_ceil(64))
+                        .map(|w| {
+                            let bits = (w as u64).wrapping_mul(0xd6e8_feb8_6659_fd93) ^ salt;
+                            let valid = (cols_len - w * 64).min(64);
+                            bits & (u64::MAX >> (64 - valid))
+                        })
+                        .collect();
+                    let scalar = unpack_row_scalar(&row, &cols, 24);
+                    let simd = unsafe { unpack_row_avx512(&row, &cols, 24) };
+                    assert_eq!(simd, scalar, "cols_len={cols_len}, salt={salt}");
+                }
+            }
+        }
+    }
 
     fn poly(n_vars: usize, monos: &[&[u32]]) -> F2BoolPoly {
         F2BoolPoly::from_monos(
@@ -690,6 +919,36 @@ mod tests {
                 );
                 assert_eq!(f4.len() as u64, report.rank, "rank must agree");
                 assert_eq!(report.rows_built + report.rows_pruned, report.rows_f4);
+            }
+        }
+    }
+
+    #[test]
+    fn fused_row_build_matches_two_pass_rows_and_full_count() {
+        use crate::cryptanalysis::koblitz_groebner::{
+            f5_rows_monos_with_f4_count, f5_rows_monos_with_mask, macaulay_row_count,
+        };
+        let mut seed = 0x7a11_f5c0_1d5e_2028u64;
+        for trial in 0..32 {
+            let n_vars = 5 + trial % 4;
+            let mut polys: Vec<F2BoolPoly> = (0..(3 + trial % 5))
+                .map(|k| random_poly(n_vars, 2, 4 + k, &mut seed))
+                .filter(|p| poly_degree(p) >= 1)
+                .collect();
+            // Distinct terms can map to the same mask after multiplication
+            // by x_1, so the F4 count must exclude a cancelled zero row.
+            polys.push(poly(n_vars, &[&[0], &[0, 1]]));
+            polys.push(poly(n_vars, &[&[0], &[0, 1], &[2]]));
+            let mask = all_variable_mask(n_vars);
+            for degree in 2..=4 {
+                let criterion = F5Criterion::new(&polys, n_vars, degree, mask);
+                let old_count = macaulay_row_count(&polys, n_vars, degree).unwrap();
+                let old_rows =
+                    f5_rows_monos_with_mask(&polys, n_vars, degree, mask, &criterion).unwrap();
+                let (new_count, new_rows) =
+                    f5_rows_monos_with_f4_count(&polys, n_vars, degree, mask, &criterion).unwrap();
+                assert_eq!(new_count, old_count, "trial {trial} degree {degree}");
+                assert_eq!(new_rows, old_rows, "trial {trial} degree {degree}");
             }
         }
     }
