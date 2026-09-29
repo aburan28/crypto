@@ -30,7 +30,7 @@ IC_ALIASES = ('incumbent', 'prepared_both', 'generic_pair_dense',
               'generic_f5_dense', 'generic_sat_xor_dense',
               'generic_sat_cnf_dense', 'generic_inherited_f4_dense')
 GENERIC_SOURCE_OBJECTS = {
-    'src': '6caf5dd2de704de77fd3cae5affab8b0ec3b6911',
+    'src': 'f87695b9adbc21b2e1af15a3923675dcae1c3dd7',
     'examples/ic_tournament_worker.rs': '745247f3d89d46cdffb6d1f28778971caae7aa21',
     'Cargo.toml': '4177c1daa3b7f779abcf5fdeecb3b284d93b0f19',
     'research/ic_candidate_tournament_20260915/ci/Cargo.lock':

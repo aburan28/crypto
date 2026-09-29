@@ -66,6 +66,8 @@ jobs:
           cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
           cargo fetch --locked
       - name: Run registered source-bound complete-solve comparison
+        env:
+          KIC_F5_AVX512_UNPACK: '0'
         run: |
           test "$GITHUB_RUN_ATTEMPT" = 1
           python research/ic_candidate_tournament_20260915/run_generic_backend_qualification.py \
