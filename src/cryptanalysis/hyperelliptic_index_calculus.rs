@@ -1346,89 +1346,112 @@ fn sparse_solve_for_k(
     n: &BigUint,
 ) -> Option<(BigUint, usize)> {
     let mut ops = 0usize;
-    // column -> rows still carrying it (may contain stale entries; they
-    // are filtered on use, which is cheaper than eager deletion).
-    let mut col_rows: HashMap<usize, Vec<usize>> = HashMap::new();
+    // Rows stay sorted by column throughout: `solve_for_logarithm` builds
+    // them sorted and the merge below preserves the order, so membership
+    // is a binary search rather than a scan.
+    //
+    // `col_count[j]` is exact — the number of live rows carrying column
+    // `j` — so choosing a pivot column is a scan of `m` integers.  The
+    // previous version recomputed every column's live rows on every
+    // pivot, re-testing membership by a linear search of each row; that
+    // work multiplies nothing mod `N`, so it never appeared in the counted
+    // mul-mods, and it was most of the solve's wall time.
+    //
+    // `holders[j]` may still hold stale rows (eliminated, or cancelled out
+    // of `j`), filtered when `j` is pivoted on, but a row is only pushed
+    // when it *gains* `j`, so the lists no longer fill with duplicates.
+    let mut col_count = vec![0usize; m + 1];
+    let mut holders: Vec<Vec<usize>> = vec![Vec::new(); m + 1];
     for (i, row) in rows.iter().enumerate() {
-        for (j, _) in row {
-            col_rows.entry(*j).or_default().push(i);
+        for &(j, _) in row {
+            col_count[j] += 1;
+            holders[j].push(i);
         }
     }
     let mut eliminated = vec![false; rows.len()];
+    let has = |row: &[(usize, BigUint)], col: usize| row.binary_search_by_key(&col, |&(j, _)| j);
 
     loop {
         // Markowitz-lite: the factor-base column with the fewest live
         // rows, and within it the shortest row — this is what keeps
         // fill-in from turning the sparse solve back into a dense one.
-        let mut best: Option<(usize, usize, usize)> = None; // (count, col, row)
-        for (&col, holders) in col_rows.iter() {
-            if col == m {
-                continue;
-            }
-            let live: Vec<usize> = holders
-                .iter()
-                .copied()
-                .filter(|&i| !eliminated[i] && rows[i].iter().any(|(j, _)| *j == col))
-                .collect();
-            if live.is_empty() {
-                continue;
-            }
-            let count = live.len();
-            let row = *live
-                .iter()
-                .min_by_key(|&&i| rows[i].len())
-                .expect("live is non-empty");
-            if best.map(|(c, _, _)| count < c).unwrap_or(true) {
-                best = Some((count, col, row));
-            }
-        }
-        let (_, col, pivot) = match best {
-            Some(v) => v,
+        // Ties go to the lowest column, so the elimination order — and
+        // with it the mul-mod count — is deterministic; the `HashMap`
+        // iteration it replaces was not.
+        let col = match (0..m)
+            .filter(|&j| col_count[j] > 0)
+            .min_by_key(|&j| col_count[j])
+        {
+            Some(c) => c,
             None => break, // nothing left but the k column
         };
+        let mut live = std::mem::take(&mut holders[col]);
+        live.retain(|&i| !eliminated[i] && has(&rows[i], col).is_ok());
+        debug_assert_eq!(live.len(), col_count[col]);
+        let pivot = *live.iter().min_by_key(|&&i| rows[i].len())?;
 
         // Normalise the pivot row.
-        let pivot_val = rows[pivot]
-            .iter()
-            .find(|(j, _)| *j == col)
-            .map(|(_, v)| v.clone())?;
-        let inv = mod_inverse(&pivot_val, n)?;
+        let at = has(&rows[pivot], col).ok()?;
+        let inv = mod_inverse(&rows[pivot][at].1, n)?;
         for (_, v) in rows[pivot].iter_mut() {
             *v = (&*v * &inv) % n;
             ops += 1;
         }
         rhs[pivot] = (&rhs[pivot] * &inv) % n;
         ops += 1;
-        let pivot_row = rows[pivot].clone();
-        let pivot_rhs = rhs[pivot].clone();
         eliminated[pivot] = true;
+        let pivot_row = std::mem::take(&mut rows[pivot]);
+        let pivot_rhs = rhs[pivot].clone();
+        for &(j, _) in &pivot_row {
+            col_count[j] -= 1;
+        }
 
-        // Eliminate `col` from every other live row carrying it.
-        let holders = col_rows.get(&col).cloned().unwrap_or_default();
-        for i in holders {
-            if i == pivot || eliminated[i] {
+        // Eliminate `col` from every other live row carrying it:
+        // row_i ← row_i − factor·pivot_row, as one merge of two sorted
+        // rows.
+        for i in live {
+            if i == pivot {
                 continue;
             }
-            let factor = match rows[i].iter().find(|(j, _)| *j == col) {
-                Some((_, v)) => v.clone(),
-                None => continue,
-            };
-            let mut merged: HashMap<usize, BigUint> = rows[i].iter().cloned().collect();
-            for (j, v) in &pivot_row {
-                let term = (&factor * v) % n;
+            let old = std::mem::take(&mut rows[i]);
+            let factor = old[has(&old, col).ok()?].1.clone();
+            let mut merged: Vec<(usize, BigUint)> = Vec::with_capacity(old.len() + pivot_row.len());
+            let (mut a, mut b) = (0, 0);
+            while a < old.len() || b < pivot_row.len() {
+                let ja = old.get(a).map_or(usize::MAX, |e| e.0);
+                let jb = pivot_row.get(b).map_or(usize::MAX, |e| e.0);
+                if ja < jb {
+                    merged.push(old[a].clone());
+                    a += 1;
+                    continue;
+                }
+                let term = (&factor * &pivot_row[b].1) % n;
                 ops += 1;
-                let e = merged.entry(*j).or_insert_with(BigUint::zero);
-                *e = (&*e + n - &term) % n;
+                let v = if ja == jb {
+                    let v = (&old[a].1 + n - &term) % n;
+                    a += 1;
+                    v
+                } else {
+                    // Fill-in: a column the row did not carry before.
+                    (n - &term) % n
+                };
+                if !v.is_zero() {
+                    if ja != jb {
+                        holders[jb].push(i);
+                    }
+                    merged.push((jb, v));
+                }
+                b += 1;
+            }
+            for &(j, _) in &old {
+                col_count[j] -= 1;
+            }
+            for &(j, _) in &merged {
+                col_count[j] += 1;
             }
             rhs[i] = (&rhs[i] + n - &((&factor * &pivot_rhs) % n)) % n;
             ops += 1;
-            let mut sparse: Vec<(usize, BigUint)> =
-                merged.into_iter().filter(|(_, v)| !v.is_zero()).collect();
-            sparse.sort_unstable_by_key(|&(j, _)| j);
-            for (j, _) in &sparse {
-                col_rows.entry(*j).or_default().push(i);
-            }
-            rows[i] = sparse;
+            rows[i] = merged;
         }
     }
 
@@ -2369,6 +2392,79 @@ mod tests {
             sparse_rep.solve_row_ops,
             dense_rep.solve_row_ops
         );
+    }
+
+    /// The sparse solver against dense elimination on planted random
+    /// systems, many more of them than a DLP run produces.  A planted
+    /// solution always satisfies the system, so the sparse answer must be
+    /// the planted `k` or nothing — never a wrong `k` — and it must
+    /// answer whenever the dense solver does.  Small `N` is included
+    /// because that is where eliminations cancel to zero and a merge that
+    /// mishandles a cancelled or filled-in column would show.
+    #[test]
+    fn sparse_solve_matches_dense_on_planted_systems() {
+        let mut rng = StdRng::seed_from_u64(0x5a_0e5e);
+        let mut answered = 0;
+        for &n_u64 in &[101u64, 1009, 1_000_003, 16_790_591] {
+            let n = BigUint::from(n_u64);
+            for trial in 0..60 {
+                let m = 5 + (rng.next_u64() % 40) as usize;
+                // Half the systems are short of rows, so `k` is often
+                // undetermined and the solver must decline.
+                let rows_wanted = if trial % 2 == 0 {
+                    m + 1 + (rng.next_u64() % 6) as usize
+                } else {
+                    (rng.next_u64() as usize % (m + 1)) + 1
+                };
+                let y: Vec<BigUint> = (0..=m).map(|_| rand_below(&mut rng, &n)).collect();
+                let mut rows = Vec::new();
+                let mut rhs = Vec::new();
+                for _ in 0..rows_wanted {
+                    let weight = 1 + (rng.next_u64() % 4) as usize;
+                    let mut cols: Vec<usize> = (0..weight)
+                        .map(|_| (rng.next_u64() % m as u64) as usize)
+                        .collect();
+                    cols.push(m);
+                    cols.sort_unstable();
+                    cols.dedup();
+                    let row: Vec<(usize, BigUint)> = cols
+                        .into_iter()
+                        .map(|j| {
+                            let v = BigUint::from(1 + rng.next_u64() % (n_u64 - 1));
+                            (j, v)
+                        })
+                        .collect();
+                    let b = row.iter().fold(BigUint::zero(), |acc, (j, v)| (acc + v * &y[*j]) % &n);
+                    rows.push(row);
+                    rhs.push(b);
+                }
+
+                let mut dense: Vec<Vec<BigUint>> = rows
+                    .iter()
+                    .map(|row| {
+                        let mut d = vec![BigUint::zero(); m + 1];
+                        for (j, v) in row {
+                            d[*j] = v.clone();
+                        }
+                        d
+                    })
+                    .collect();
+                let mut dense_rhs = rhs.clone();
+                let dense_k = gaussian_eliminate_mod_n(&mut dense, &mut dense_rhs, &n)
+                    .map(|s| s[m].clone());
+                let sparse_k = sparse_solve_for_k(rows, rhs, m, &n).map(|(k, _)| k);
+
+                if let Some(k) = &sparse_k {
+                    assert_eq!(k, &y[m], "wrong k: n={n_u64} m={m} trial={trial}");
+                    answered += 1;
+                }
+                if dense_k.is_some() {
+                    assert_eq!(sparse_k, dense_k, "sparse declined: n={n_u64} m={m} trial={trial}");
+                }
+            }
+        }
+        // Guard against a test that passes by never answering.
+        assert!(answered >= 100, "only {answered} systems answered");
     }
 
     #[test]
