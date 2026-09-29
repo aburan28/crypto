@@ -45,6 +45,23 @@ class NaturalYieldTests(unittest.TestCase):
         self.assertEqual(rate['ci95'], [0, 0])
         self.assertGreater(rate['point_mean_hoeffding95'][1], 0)
 
+    def test_single_process_schedule_uses_distinct_points_only(self):
+        observations = [row(f'p{i}', 0, witness=i % 2, queries=2)
+                        for i in range(4)]
+        result = summarize(observations, repetitions=1)[0]
+        self.assertEqual(result['natural_witness_rate']['distinct_points'], 4)
+        self.assertEqual(result['natural_witness_rate']['rate'], .25)
+        self.assertEqual(result['scheduled_runs'], 4)
+        with self.assertRaises(InvalidEvidence):
+            summarize(observations)
+
+    def test_audited_zero_query_point_is_not_zero_natural_yield(self):
+        observations = [row('p0', 0, witness=0, queries=0)]
+        rate = summarize(observations, repetitions=1)[0]['natural_witness_rate']
+        self.assertIsNone(rate['rate'])
+        self.assertEqual(rate['distinct_points'], 0)
+        self.assertEqual(rate['zero_query_points'], 1)
+
 
 if __name__ == '__main__':
     unittest.main()

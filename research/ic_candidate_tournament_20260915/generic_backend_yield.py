@@ -84,11 +84,14 @@ def observed_run(root, case, arm, stage, repetition):
 
 def case_rate_interval(cases):
     """Resample distinct public points, not deterministic process repetitions."""
+    zero_query_points = sum(row['query_count'] == 0 for row in cases)
+    cases = [row for row in cases if row['query_count'] > 0]
     if not cases:
         return dict(rate=None, ci95=None, distinct_points=0,
-                    point_mean=None, point_mean_hoeffding95=None)
+                    zero_query_points=zero_query_points,
+                    point_mean=None, point_mean_hoeffding95=None,
+                    uncertainty='no ordinary query exposure; rate is unknown')
     total = sum(row['query_count'] for row in cases)
-    require(total > 0, 'observed case has no ordinary queries')
     estimate = sum(row['witness_count'] for row in cases)/total
     point_rates = [row['witness_count']/row['query_count'] for row in cases]
     point_mean = sum(point_rates)/len(point_rates)
@@ -96,6 +99,7 @@ def case_rate_interval(cases):
     conservative = [max(0, point_mean-radius), min(1, point_mean+radius)]
     if len(cases) == 1:
         return dict(rate=estimate, ci95=None, distinct_points=1,
+                    zero_query_points=zero_query_points,
                     point_mean=point_mean, point_mean_hoeffding95=conservative,
                     uncertainty='one distinct point; bootstrap interval uninformative')
     rng = random.Random(SEED)
@@ -106,13 +110,15 @@ def case_rate_interval(cases):
                      / sum(row['query_count'] for row in sample))
     draws.sort()
     return dict(rate=estimate, ci95=[draws[int(.025*DRAWS)], draws[int(.975*DRAWS)]],
-                distinct_points=len(cases), point_mean=point_mean,
+                distinct_points=len(cases), zero_query_points=zero_query_points,
+                point_mean=point_mean,
                 point_mean_hoeffding95=conservative,
                 uncertainty='query-weighted point-cluster bootstrap is descriptive; '
                             'Hoeffding bound is for the distinct-point mean under the frozen point law')
 
 
-def summarize(observations):
+def summarize(observations, repetitions=3):
+    require(repetitions in (1, 3), 'unknown process repetition schedule')
     groups = defaultdict(list)
     for row in observations:
         groups[(row['stage'], row['arm'], row['cell'])].append(row)
@@ -122,15 +128,17 @@ def summarize(observations):
         for row in runs:
             by_case[row['case']].append(row)
         stable_cases = []
-        for case, repetitions in sorted(by_case.items()):
-            require(len(repetitions) == 3, 'lost process repetition: '+case)
-            if all(row['audited'] for row in repetitions):
+        for case, case_runs in sorted(by_case.items()):
+            require({row['repetition'] for row in case_runs} == set(range(repetitions))
+                    and len(case_runs) == repetitions,
+                    'lost or repeated process repetition: '+case)
+            if all(row['audited'] for row in case_runs):
                 signatures = {(row['query_count'], row['witness_count'],
                                tuple(sorted(row['outcome_mix'].items())),
-                               row['accepted_rows'], row['rank']) for row in repetitions}
+                               row['accepted_rows'], row['rank']) for row in case_runs}
                 require(len(signatures) == 1,
                         'deterministic query/rank history differs across process repetitions')
-                stable_cases.append(repetitions[0])
+                stable_cases.append(case_runs[0])
         outcomes = Counter()
         descent_outcomes = Counter()
         for row in runs:
@@ -184,9 +192,10 @@ def audit_campaign(root):
                 for repetition in range(contract['repetitions']):
                     observations.append(observed_run(root, case, arm, stage, repetition))
     return dict(schema_version=1, status='AUDITED', observations=observations,
-                rows=summarize(observations), bootstrap_seed=SEED, bootstrap_draws=DRAWS,
+                rows=summarize(observations, contract['repetitions']), bootstrap_seed=SEED, bootstrap_draws=DRAWS,
                 rate_scope='natural sampled ordinary queries; one independent point per case; '
-                           'censored runs excluded from rate denominator and counted separately',
+                           'censored runs and audited zero-query points excluded from rate '
+                           'denominator and counted separately',
                 planted_decompositions_used_for_yield=False)
 
 

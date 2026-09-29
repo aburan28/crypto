@@ -1,4 +1,4 @@
-name: IC generic backend qualification
+name: IC generic backend qualification (archived)
 on:
   pull_request:
     paths:
@@ -9,18 +9,10 @@ on:
       - 'research/ic_candidate_tournament_20260915/run_generic_backend_qualification.py'
       - 'research/ic_candidate_tournament_20260915/test_generic_backend_yield.py'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/**'
-  workflow_dispatch:
-    inputs:
-      execute_registered_campaign:
-        description: Execute the single registered 2026-09-29 F4/F5/SAT development campaign; never retry a measured failure
-        type: boolean
-        default: false
 permissions:
   contents: read
 concurrency:
-  # A long measured dispatch must not block PR-only registration checks.
-  # Preserve the campaign's existing serialization key for workflow_dispatch.
-  group: ${{ github.event_name == 'pull_request' && format('ic-generic-backend-qualification-pr-{0}', github.event.pull_request.number) || 'ic-generic-backend-qualification-20260929' }}
+  group: ic-generic-backend-qualification-archived-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 jobs:
   preflight:
@@ -48,47 +40,3 @@ jobs:
           check_generic_source()
           assert len(registry(panel, '/tmp/controlled-build')) == 9
           PY
-  campaign:
-    if: github.event_name == 'workflow_dispatch' && inputs.execute_registered_campaign && github.ref == 'refs/heads/main'
-    needs: preflight
-    runs-on: ubuntu-24.04
-    timeout-minutes: 360
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: 765c3c5f19032bd852163805f257c56babef2040
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: dtolnay/rust-toolchain@1.94.1
-        with:
-          targets: x86_64-unknown-linux-musl
-      - name: Install calibrated profiler and archive decoder
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y valgrind musl-tools zstd
-          test "$(valgrind --version)" = valgrind-3.22.0
-          [[ "$(rustc --version)" == 'rustc 1.94.1 '* ]]
-      - name: Freeze dependency resolution
-        run: |
-          test "$(git rev-parse HEAD)" = 765c3c5f19032bd852163805f257c56babef2040
-          cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
-          cargo fetch --locked
-      - name: Run registered source-bound complete-solve comparison
-        env:
-          KIC_F5_AVX512_UNPACK: '0'
-        run: |
-          test "$GITHUB_RUN_ATTEMPT" = 1
-          python research/ic_candidate_tournament_20260915/run_generic_backend_qualification.py \
-            --out "$RUNNER_TEMP/ic-generic-backend-qualification"
-      - name: Preserve every result and partial failure
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ic-generic-backend-qualification-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            ${{ runner.temp }}/ic-generic-backend-qualification
-            Cargo.lock
-          retention-days: 30
-          include-hidden-files: true
-          if-no-files-found: warn
