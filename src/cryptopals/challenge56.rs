@@ -99,11 +99,7 @@ fn argmax(counts: &[u64]) -> u8 {
 pub fn recover_byte(cookie: &[u8], cookie_index: usize, most_likely_z16: u8, n_samples: u64) -> u8 {
     // We want cookie[cookie_index] at ciphertext position 15.
     // Path length = 15 - cookie_index (0 if cookie_index = 15).
-    let path_len = if cookie_index <= 15 {
-        15 - cookie_index
-    } else {
-        0
-    };
+    let path_len = 15_usize.saturating_sub(cookie_index);
     let path = vec![b'/'; path_len];
     let mut counts = [0u64; 256];
     for _ in 0..n_samples {
@@ -177,9 +173,7 @@ pub fn run() -> Report {
         100 * matching / n_to_recover.max(1),
         16
     ));
-    r.line(format!(
-        "(More samples ⇒ better recovery; AlFardan et al. used 2^32.)"
-    ));
+    r.line("(More samples ⇒ better recovery; AlFardan et al. used 2^32.)");
     // Bias detection is the real takeaway: we observe a clear,
     // reproducible deviation from uniform — proof that RC4's
     // keystream is *not* random.  Full plaintext recovery is a
