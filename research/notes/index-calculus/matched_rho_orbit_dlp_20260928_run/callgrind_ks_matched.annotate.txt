@@ -1,0 +1,32 @@
+--------------------------------------------------------------------------------
+Profile data file 'callgrind_ks_matched.out' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 39678843842
+Trigger: Program termination
+Profiled target:  /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_matched_arith 53 0 signed_frobenius 1024 531310 (PID 7811, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                       
+--------------------------------------------------------------------------------
+371,102,176,689 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                        file:function
+--------------------------------------------------------------------------------
+188,577,544,163 (50.82%)  ???:koblitz_rho_batch_ks_matched_arith::raw_canonicalize [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_matched_arith]
+ 79,662,066,207 (21.47%)  ???:koblitz_rho_batch_ks_matched_arith::raw_mul_field [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_matched_arith]
+ 34,364,994,387 ( 9.26%)  ???:koblitz_rho_batch_ks_matched_arith::raw_square [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_matched_arith]
+ 34,326,460,020 ( 9.25%)  ???:koblitz_rho_batch_ks_matched_arith::main [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_matched_arith]
+ 15,959,179,437 ( 4.30%)  ???:koblitz_rho_batch_ks_matched_arith::raw_inverse [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_matched_arith]
+ 15,409,915,206 ( 4.15%)  ???:__umodti3 [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_matched_arith]
+
