@@ -8148,10 +8148,29 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     </tbody>
   </table></div>
   <div class="panel-head">
-    <p>The preregistered native structural gate passes: cyclic reached rank 220 by target 512 with no extra failures and all relation/label checks, whereas native lex stopped at rank 219. Both lex arms selected first-pair column 0 for all 512 targets; each cyclic arm selected it twice. The single-process wall differences are descriptive, not a speed claim. The next test is a separately frozen, fully charged native-cyclic L = 384 same-Q log-recovery comparison. PR #819's exact-certified-base setup plus mandatory rank already cost 199.233 s against 149.927 s matched rho, so the successor must measure whether the complete native pipeline changes that cost barrier. This stage supplies no IC/rho ratio or n = 131 transfer.</p>
+    <p>The preregistered native structural gate passes: cyclic reached rank 220 by target 512 with no extra failures and all relation/label checks, whereas native lex stopped at rank 219. Both lex arms selected first-pair column 0 for all 512 targets; each cyclic arm selected it twice. The single-process wall differences are descriptive, not a speed claim. The separately frozen <a href="https://github.com/aburan28/crypto/pull/923">#923 full-cost successor</a> later recovered all 384 same-Q logs in both native-cyclic arms, but its fresh B arm cost 331.296 s against 161.081 s matched rho (2.057&times;). This rank-stage lead was real and did not yield a fixed-stream crossover. The #823 stage alone supplied no IC/rho ratio or n = 131 transfer.</p>
   </div>
 </section>
 <!-- END ecc2k130-n53-target-cyclic-rank-20260925 -->
+<!-- BEGIN ecc2k130-n53-native-cyclic-l384-first-20260929 -->
+<section class="panel" id="ecc2k130-n53-native-cyclic-l384-first-20260929">
+  <div class="panel-head">
+    <h2>Native cyclic n = 53 full logs complete, but remain 2.057&times; matched rho <span class="chip">fixed-stream no crossover</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/923">PR #923</a> froze a fresh disjoint B training stream, the #823 A control stream, and one new 384-Q batch before its sole <a href="https://github.com/aburan28/crypto/actions/runs/36532278977">Ubuntu run 36532278977</a>. Both arms independently built the same ordered 23,320-point/220-column native ascending-x base, reached rank 220/220 with zero failed training targets, and recovered all 384 Q logarithms. The signed-Frobenius rho process recovered the same 384 Qs. The sealed 64-file archive passed independent full group-law replay; every child exited zero without a resource censor.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One fixed n = 53 stream, cold operational wall seconds. Each IC total includes fresh training, base materialization, rank/log solve, 384-Q point descent and scalar recovery. The separate 250.049-s audit is verification overhead, not included in IC wall. Same-Q batched rho wall is 161.081 s.</caption>
+    <thead><tr><th>Arm</th><th class="n">Training</th><th class="n">Base</th><th class="n">Rank/solve</th><th class="n">Point child</th><th class="n">Recovery</th><th class="n">Full IC / rho s</th><th class="n">IC / rho</th></tr></thead>
+    <tbody>
+      <tr><td>Fresh disjoint B, primary</td><td class="n">126.082</td><td class="n">0.115</td><td class="n">57.745</td><td class="n">115.288</td><td class="n">32.066</td><td class="n"><strong>331.296 / 161.081</strong></td><td class="n"><strong>2.057&times;</strong></td></tr>
+      <tr><td>#823 A control</td><td class="n">207.972</td><td class="n">0.116</td><td class="n">57.641</td><td class="n">96.518</td><td class="n">31.717</td><td class="n">393.964 / 161.081</td><td class="n">2.446&times;</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The B training + materialization + point-child subtotal is already 241.485 s, or 1.499&times; rho, even if rank solving and scalar recovery were free. Improving either of those latter stages alone cannot cross on this measured stream; a future native route must jointly reduce charged acquisition and descent costs. This one deterministic run does not establish a runtime distribution, n = 131 transfer, common-unit <code>S</code>, or a Certicom logarithm. <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/RESULT.md">Result and provenance</a>; raw artifact ZIP SHA-256 <code>1ec46f66868eff353c640cb763751ed7ed64a8845ea9e57d467740c82a833bcb</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n53-native-cyclic-l384-first-20260929 -->
 <!-- BEGIN ecc2k130-compact-sparse-base-sweep-20260925 -->
 <section class="panel" id="ecc2k130-compact-sparse-base-sweep-20260925">
   <div class="panel-head">
