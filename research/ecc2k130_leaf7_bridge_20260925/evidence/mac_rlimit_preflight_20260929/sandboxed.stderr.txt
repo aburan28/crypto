@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import resource; limit=2*1024**3; resource.setrlimit(resource.RLIMIT_AS,(limit,limit)); import sage.all; from sage.version import version; print(version)
+                                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: current limit exceeds maximum limit

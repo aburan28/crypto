@@ -1,0 +1,58 @@
+{
+  "source_root": "/workspace",
+  "source_files": {
+    "Cargo.toml": true,
+    "Cargo.lock": false,
+    "examples/ic_tournament_worker.rs": true,
+    "src/cryptanalysis/koblitz_index_calculus.rs": true
+  },
+  "host": {
+    "system": "Linux",
+    "node": "cursor",
+    "release": "6.12.94+",
+    "version": "#1 SMP PREEMPT_DYNAMIC Thu Sep 24 16:04:37 UTC 2026",
+    "machine": "x86_64",
+    "processor": "x86_64"
+  },
+  "native_build_ready": false,
+  "instruction_protocol_ready": false,
+  "valgrind": null,
+  "scientific_admission": "Prepared optimized schema-3 and source-bound generic-v1 workers have independent stage checks. Accepted generic/reference and observer development studies do not qualify F4/F5 or SAT: their registered complete-solve campaign requires frozen replay, natural-query audit, and the two-family gate.",
+  "baseline_quality": "Requires fresh rho sensitivity screen and arithmetic equivalence tests; no global-best certification.",
+  "native_scope": "Development diagnostic; no operation-count or hardware-independent speedup claim.",
+  "stages": {
+    "factor_base": [
+      "subgroup_orbits",
+      "factor",
+      "divisor",
+      "frobenius_union",
+      "pruned",
+      "two_torsion_saturated"
+    ],
+    "pdp": [
+      "pair_table",
+      "enumerate",
+      "f4",
+      "f5",
+      "inherited_f4",
+      "sat_xor",
+      "sat_cnf"
+    ],
+    "relation_processing": [
+      "verify",
+      "deduplicate",
+      "rank over subgroup scalar field"
+    ],
+    "linear_algebra": [
+      "dense",
+      "sparse filtering and block Wiedemann"
+    ],
+    "descent": [
+      "verified factor-base relation per target"
+    ],
+    "reference": [
+      "signed Frobenius rho, packed arithmetic, batched inversions"
+    ],
+    "external_adapters": "WDSat/GPU/other solvers require executable pinning, equivalent certificates and child/device accounting before admission."
+  }
+}

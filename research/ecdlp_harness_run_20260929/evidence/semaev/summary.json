@@ -1,0 +1,140 @@
+[
+  {
+    "id": "RUN-SEMAEV-gb-b10-s1",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "groebner_seconds": 0.085288,
+      "groebner_basis_size": 1,
+      "groebner_basis_max_degree_proxy": 0,
+      "is_trivial_ideal": true,
+      "decomposition_found": false,
+      "rho_baseline_group_operations": 6
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-gb-b10-s2",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "groebner_seconds": 0.10285,
+      "groebner_basis_size": 2,
+      "groebner_basis_max_degree_proxy": 2,
+      "is_trivial_ideal": false,
+      "decomposition_found": true,
+      "rho_baseline_group_operations": 12
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-gb-b12-s1",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "groebner_seconds": 0.08746,
+      "groebner_basis_size": 1,
+      "groebner_basis_max_degree_proxy": 0,
+      "is_trivial_ideal": true,
+      "decomposition_found": false,
+      "rho_baseline_group_operations": 15
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-gb-b12-s2",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "groebner_seconds": 0.092791,
+      "groebner_basis_size": 1,
+      "groebner_basis_max_degree_proxy": 0,
+      "is_trivial_ideal": true,
+      "decomposition_found": false,
+      "rho_baseline_group_operations": 6
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-gb-b8-s1",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "groebner_seconds": 0.097206,
+      "groebner_basis_size": 2,
+      "groebner_basis_max_degree_proxy": 2,
+      "is_trivial_ideal": false,
+      "decomposition_found": true,
+      "rho_baseline_group_operations": 15
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-gb-b8-s2",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "groebner_seconds": 0.078206,
+      "groebner_basis_size": 4,
+      "groebner_basis_max_degree_proxy": 4,
+      "is_trivial_ideal": false,
+      "decomposition_found": true,
+      "rho_baseline_group_operations": 30
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-rho-b10-s1",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "group_operations": 6,
+      "iterations": 2,
+      "solved": true
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-rho-b10-s2",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "group_operations": 12,
+      "iterations": 4,
+      "solved": true
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-rho-b12-s1",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "group_operations": 15,
+      "iterations": 5,
+      "solved": true
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-rho-b12-s2",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "group_operations": 6,
+      "iterations": 2,
+      "solved": true
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-rho-b8-s1",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "group_operations": 15,
+      "iterations": 5,
+      "solved": true
+    }
+  },
+  {
+    "id": "RUN-SEMAEV-rho-b8-s2",
+    "status": "completed_valid",
+    "valid": true,
+    "metrics": {
+      "group_operations": 30,
+      "iterations": 10,
+      "solved": true
+    }
+  }
+]
