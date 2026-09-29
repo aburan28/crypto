@@ -28,6 +28,13 @@ hypothesis can change raw echelon rows while preserving rank and canonical
 row space, so it requires its own arm and an explicit output contract check.
 Neither hypothesis is assumed beneficial before paired measurement.
 
+Before reserving an eligible x86-64 runner, run a nonpromoting Apple ARM64
+screen on the frozen seed and holdout A. Use one thread, one binary, one warmup
+per arm, and three alternating reference/candidate pairs per seed. Compare
+four, six, and eight tables, then pivot-candidate windows 1 and 4 as separate
+arms. This screen can reject a regression or a correctness failure, but its
+ratios cannot establish the requested gain. Preserve the raw screen receipt.
+
 ## Frozen workload and accounting
 
 Use the seven F5 cases in `examples/f4_f2_bench.rs` with the four seeds
