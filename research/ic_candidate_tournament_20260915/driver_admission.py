@@ -242,6 +242,13 @@ def online_table(rows, cases, arms, repetitions, rho_aliases):
                     {r['repetition'] for r in group} == set(range(repetitions)) and
                     all(r['status'] == 'VERIFIED' and r['measurement']['native_timing'] is not None for r in group)
                     for group in (ic, rho))
+                if complete:
+                    require(len({r['measurement']['workload_id'] for r in ic+rho}) == 1,
+                            'paired online rows use different workloads')
+                    require(len({r['measurement']['candidate_id'] for r in ic}) == 1,
+                            'paired online IC repetitions use different candidates')
+                    require(len({r['measurement']['reference_id'] for r in rho}) == 1,
+                            'paired online rho repetitions use different references')
                 ic_ns = statistics.median(r['measurement']['native_timing']['online']['wall_ns'] for r in ic) if complete else None
                 rho_ns = statistics.median(r['measurement']['native_timing']['online']['wall_ns'] for r in rho) if complete else None
                 table.append(dict(case=case['id'], public_target=case['fixture']['targets'][0],
