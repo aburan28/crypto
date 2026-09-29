@@ -112,14 +112,22 @@ excludes all 25 public points the censored first run could have generated.
 It keeps the five cells and 25 independent targets, with one process per point
 and 250 paired trial slots. The runner is
 `run_generic_backend_qualification_v2.py` in workflow
-`ic-generic-backend-qualification-v2.yml`. Before a single dispatch, verify its
-PR preflight, one-file artifact-upload smoke, source checkout pin and reviewed
-panel/exclusion hashes. The measured step has a shorter cap than the job; the
-`if: always()` packer retains complete or partial evidence as one checksummed
-archive. A timed-out step with incomplete receipts remains operationally
-censored. Never retry seed `2026092902`; register a new panel and exclude all
-of its potentially generated points. Only a complete frozen verifier,
-natural-query audit and `generic_backend_gate_v2.py` can qualify both families.
+`ic-generic-backend-qualification-v2.yml`. Its one permitted dispatch is
+[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479),
+attempt one; never dispatch this seed again. Its PR preflight and one-file
+artifact-upload smoke passed before the run. Check the source checkout pin and
+reviewed panel/exclusion hashes when auditing its artifact. The measured step has
+a shorter cap than the job, leaving time for the `if: always()` packer to
+retain complete or partial evidence as one checksummed archive. A timed-out
+step with incomplete receipts remains operationally
+censored; register a new panel and exclude all of its potentially generated
+points for any later measurement. Verify the archive manifest and SHA-256
+before extracting it. Only a complete frozen verifier, natural-query audit and
+`generic_backend_gate_v2.py` can qualify both families. Also run the separately
+committed [independent receipt audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/independent_pairs.py)
+against the extracted bundle to recalculate all 400 same-point IC/rho online
+pairs from raw receipts and native worker outputs. Its timing/pairing cross-check
+does not replace group replay, natural-query auditing or the family gate.
 The gate requires every smoke and development job to be verified for at least
 one F4/F5 arm and one SAT arm; a reference-selection status alone does not
 qualify either family. Describe the current `f4` backend as a bounded Macaulay
