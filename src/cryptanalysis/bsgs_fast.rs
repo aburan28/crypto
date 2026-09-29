@@ -83,7 +83,7 @@ pub struct FastField {
 impl FastField {
     /// Build the arithmetic for an odd prime `p` below `2^63`.
     pub fn new(p: u64) -> Option<Self> {
-        if p < 3 || p % 2 == 0 || p >= 1u64 << 63 {
+        if p < 3 || p.is_multiple_of(2) || p >= 1u64 << 63 {
             return None;
         }
         // -p^{-1} mod 2^64 by Newton iteration: x_{k+1} = x_k (2 - p x_k)
@@ -619,7 +619,7 @@ impl BsgsFastPlan {
             }
             s
         };
-        let ceil_div = |a: u64, b: u64| (a + b - 1) / b;
+        let ceil_div = |a: u64, b: u64| a.div_ceil(b);
         let m = if neg_map {
             ceil_div(isqrt(width), 2).max(1)
         } else {

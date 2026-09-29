@@ -1,26 +1,70 @@
 #!/usr/bin/env python3
-"""Compose current gates with the rejected n59 prefetch-64 pilot."""
+"""Compose current gates with the rejected n59 rank-solve cadence."""
 from __future__ import annotations
-import argparse,hashlib,json,subprocess,sys
+import argparse, hashlib, json, subprocess, sys
 from pathlib import Path
-R=Path(__file__).resolve().parents[1];E=R/'research/sat_factor_base_review_20260908/continuation-05-sota-gates';S=E/'stage-143-current-gate-audit-20260922';F=R/'docs/ic/runs/koblitz-n59-prefetch64-rejection-20260922.json';P=R/'docs/ic/params/k1n59-cofactor-projected-l15-prefetch64-pilot-public-59001.json';G=E/'GATE_STATUS.md';SC='koblitz_stage144_current_gate_audit.v1';SS='koblitz_stage144_current_gate_audit_seal.v1';MARK='Current through Stage 144'
-class Error(RuntimeError):pass
-def req(v,m):
- if not v:raise Error(m)
-def load(p,c):v=json.loads(p.read_text());req(isinstance(v,dict),f'{c} object');return v
-def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
-def replay():
- x=subprocess.run([sys.executable,str(R/'scripts/compose_koblitz_stage143_gate_audit.py'),'verify','--output',str(S)],cwd=R,text=True,capture_output=True,check=True);v=json.loads(x.stdout);req(v.get('schema')=='koblitz_stage143_current_gate_audit.v1','Stage-143 replay changed');return v
-def compose():
- p=replay();f=load(F,'prefetch evidence');params=load(P,'prefetch params');req(f.get('operation')=='koblitz_n59_prefetch64_rejection','identity');req(params.get('name')=='k1n59-prefetch-lookahead-pilot','params identity');req(params['collection']['units']==1 and params['collection']['max_units']==1,'pilot volume');req(f['candidate_params']['sha256']==sha(P),'params pin');patch=R/f['source_patch']['path'];req(f['source_patch']['sha256']==sha(patch),'patch pin');panel=f['panel'];req(panel['exact_relation_equality'] is True and len(panel['runs'])==8 and panel['order']==['baseline','candidate','candidate','baseline','baseline','candidate','candidate','baseline'],'panel');c=panel['comparison'];req(c['relation_unit_wall_seconds']['change_fraction']>.32 and c['relation_unit_cpu_seconds']['change_fraction']>.058 and c['whole_wall_seconds']['change_fraction']>.12,'rejection');a=f['process_accounting'];req(a['retained_processes']==8 and a['retained_total_core_seconds']>1291 and a['retained_peak_rss_bytes']==10080190464,'accounting');req(f['decision']['status']=='rejected' and f['decision']['selected_stage143_unchanged'] is True,'decision');req(MARK in G.read_text(),'marker');g=dict(p['gates']);g['1_all_stage_resource_charging']='partial_prefetch64_rejection_charged_magma_and_one_preliminary_receipt_missing';g['6_full_cost_vs_automorphism_rho']='failed_current_n59_coverage_tail_selected_prefetch64_rejected'
- return {'schema':SC,'status':'current_seven_gate_audit_verified','all_seven_gates_passed':False,'koblitz_index_calculus_sota':False,'claim_boundary':'finite same-target prefetch-64 rejection; the exact relation stream is unchanged while scoped and inclusive costs regress, so the Stage-143 selected result is unchanged and remains far behind rho','predecessor':{'stage143_audit_sha256':sha(S/'audit.json'),'stage143_seal_sha256':sha(S/'result-seal.json'),'stage143_status':p['status']},'evidence_pins':{'prefetch64_evidence_sha256':sha(F),'candidate_params_sha256':sha(P),'candidate_patch_sha256':sha(patch),'gate_status_sha256':sha(G)},**{k:p[k] for k in p if k.startswith('inherited_')},'inherited_current_n59_null_support_rejection':p['current_n59_null_support_rejection'],'current_n59_prefetch64_rejection':f,'gates':g,'next_targets':p['next_targets'],'licensed_magma_complete':False,'independent_external_reproduction_satisfied':False,'full_cost_gate_passed':False}
-def new(p,v):req(not p.exists(),f'overwrite {p}');p.write_text(json.dumps(v,indent=2,sort_keys=True)+'\n')
-def build(o):req(not o.exists(),f'overwrite {o}');o.mkdir(parents=True);a=compose();new(o/'audit.json',a);new(o/'result-seal.json',{'schema':SS,'status':'audit_frozen','audit_sha256':sha(o/'audit.json')});return a
-def verify(o):s=load(o/'result-seal.json','seal');req(s.get('schema')==SS,'seal schema');req(sha(o/'audit.json')==s.get('audit_sha256'),'seal');a=load(o/'audit.json','audit');req(a.get('schema')==SC,'audit schema');req(a.get('status')=='current_seven_gate_audit_verified','audit status');return a
-def main():
- p=argparse.ArgumentParser();sp=p.add_subparsers(dest='cmd',required=True)
- for c in ('build','verify'):q=sp.add_parser(c);q.add_argument('--output',type=Path,required=True)
- a=p.parse_args()
- try:r=build(a.output.resolve()) if a.cmd=='build' else verify(a.output.resolve(strict=True));print(json.dumps(r,indent=2,sort_keys=True))
- except (OSError,ValueError,KeyError,subprocess.CalledProcessError,Error) as e:raise SystemExit(f'stage144-gate-audit: {e}')
-if __name__=='__main__':main()
+from typing import Any
+
+R = Path(__file__).resolve().parents[1]
+E = R / "research/sat_factor_base_review_20260908/continuation-05-sota-gates"
+S = E / "stage-143-current-gate-audit-20260922"
+F = R / "docs/ic/runs/koblitz-n59-rank-solve-interval4-rejection-20260922.json"
+P = R / "docs/ic/params/k1n59-cofactor-projected-l15-rank-interval4-control-public-59001.json"
+G = E / "GATE_STATUS.md"
+SC = "koblitz_stage144_current_gate_audit.v1"
+SS = "koblitz_stage144_current_gate_audit_seal.v1"
+MARK = "Current through Stage 144"
+
+class Error(RuntimeError): pass
+def req(v: bool, m: str) -> None:
+    if not v: raise Error(m)
+def load(p: Path, c: str) -> dict[str, Any]:
+    v = json.loads(p.read_text()); req(isinstance(v, dict), f"{c} object"); return v
+def sha(p: Path) -> str: return hashlib.sha256(p.read_bytes()).hexdigest()
+
+def replay() -> dict[str, Any]:
+    x = subprocess.run([sys.executable, str(R / "scripts/compose_koblitz_stage143_gate_audit.py"), "verify", "--output", str(S)], cwd=R, text=True, capture_output=True, check=True)
+    value = json.loads(x.stdout); req(value.get("schema") == "koblitz_stage143_current_gate_audit.v1", "Stage-143 replay changed"); return value
+
+def compose() -> dict[str, Any]:
+    predecessor = replay(); cadence = load(F, "cadence evidence"); params = load(P, "cadence params")
+    req(cadence.get("operation") == "koblitz_n59_rank_solve_interval4_rejection", "evidence identity changed")
+    req(params.get("name") == "k1n59-rank-interval4-prefix14-control", "parameter identity changed")
+    req(params["collection"]["units"] == 14 and params["collection"]["targeted_tail_rank_columns"] == 64 and params["collection"]["targeted_tail_solve_interval"] == 4, "cadence changed")
+    req(cadence["candidate_params"]["sha256"] == sha(P), "parameter pin changed")
+    patch = R / cadence["source_patch"]["path"]; req(cadence["source_patch"]["sha256"] == sha(patch), "patch pin changed")
+    result = cadence["result"]
+    req(result["verified"] is True and result["recovered_scalar"] == 17861472351607, "solution changed")
+    req(result["targeted_tail"]["pair_lookups"] == 20030000 and result["combined_relations"] == 29982, "relation-tail charge changed")
+    req(result["linear_algebra"]["attempts"] == 27 and result["linear_algebra"]["seconds"] < 5, "linear algebra changed")
+    req(cadence["comparison"]["versus_selected_stage139"]["ic_wall_ratio"] > 2, "selected comparison changed")
+    accounting = cadence["process_accounting"]; req(accounting["retained_processes"] == 1 and accounting["retained_total_core_seconds"] > 676 and accounting["retained_peak_rss_bytes"] == 9350201344, "accounting changed")
+    req(cadence["decision"]["status"] == "rejected" and cadence["decision"]["selected_stage140_unchanged"] is True, "selection changed")
+    req(MARK in G.read_text(), "gate marker changed")
+    gates = dict(predecessor["gates"])
+    gates["1_all_stage_resource_charging"] = "partial_rank_solve_cadence_rejection_charged_magma_and_one_preliminary_receipt_missing"
+    gates["6_full_cost_vs_automorphism_rho"] = "failed_current_n59_coverage_tail_selected_rank_interval4_rejected"
+    return {
+        "schema": SC, "status": "current_seven_gate_audit_verified", "all_seven_gates_passed": False, "koblitz_index_calculus_sota": False,
+        "claim_boundary": "finite same-target rank-solve-cadence rejection; fewer sparse solves are outweighed by targeted-lookup overshoot, so the Stage-143 selected result is unchanged and remains far behind rho",
+        "predecessor": {"stage143_audit_sha256": sha(S / "audit.json"), "stage143_seal_sha256": sha(S / "result-seal.json"), "stage143_status": predecessor["status"]},
+        "evidence_pins": {"rank_cadence_evidence_sha256": sha(F), "candidate_params_sha256": sha(P), "candidate_patch_sha256": sha(patch), "gate_status_sha256": sha(G)},
+        **{k: predecessor[k] for k in predecessor if k.startswith("inherited_")},
+        "inherited_current_n59_first_hit_rejection": predecessor["current_n59_first_hit_rejection"],
+        "current_n59_rank_solve_cadence_rejection": cadence, "gates": gates, "next_targets": predecessor["next_targets"],
+        "licensed_magma_complete": False, "independent_external_reproduction_satisfied": False, "full_cost_gate_passed": False,
+    }
+
+def write_new(p: Path, v: dict[str, Any]) -> None: req(not p.exists(), f"overwrite {p}"); p.write_text(json.dumps(v, indent=2, sort_keys=True) + "\n")
+def build(o: Path) -> dict[str, Any]:
+    req(not o.exists(), f"overwrite {o}"); o.mkdir(parents=True); audit = compose(); write_new(o / "audit.json", audit); write_new(o / "result-seal.json", {"schema": SS, "status": "audit_frozen", "audit_sha256": sha(o / "audit.json")}); return audit
+def verify(o: Path) -> dict[str, Any]:
+    seal = load(o / "result-seal.json", "seal"); req(seal.get("schema") == SS, "seal schema"); req(sha(o / "audit.json") == seal.get("audit_sha256"), "seal changed"); audit = load(o / "audit.json", "audit"); req(audit.get("schema") == SC, "audit schema"); req(audit.get("status") == "current_seven_gate_audit_verified", "audit status"); return audit
+def main() -> None:
+    parser=argparse.ArgumentParser(); sub=parser.add_subparsers(dest="cmd",required=True)
+    for command in ("build","verify"): p=sub.add_parser(command); p.add_argument("--output",type=Path,required=True)
+    args=parser.parse_args()
+    try:
+        result=build(args.output.resolve()) if args.cmd=="build" else verify(args.output.resolve(strict=True)); print(json.dumps(result,indent=2,sort_keys=True))
+    except (OSError,ValueError,KeyError,subprocess.CalledProcessError,Error) as exc: raise SystemExit(f"stage144-gate-audit: {exc}")
+if __name__=="__main__": main()

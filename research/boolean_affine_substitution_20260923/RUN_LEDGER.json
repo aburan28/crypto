@@ -1,0 +1,65 @@
+{
+  "artifacts": [
+    {
+      "kind": "complete-solve comparison",
+      "manifest_sha256": "15eeb41ffb3f00801f63d068e0507cbf385cef15726426245f284a0cd1dd4dd6",
+      "path": "run_01"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "d85a2294949c88bb07aa8845a40ff7c150bf1cab52b55514a683acf1c79e627a",
+      "path": "native_resource_probe_01"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "456e86a0fc35a89129e81cc23be02b05d562e0249c4c504e84eefbb7eed41e9e",
+      "path": "resource_probe_01"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "c649ad74fd54035d713c6e723bfbacc274e7e6dd4ebb081da16d29ec2923fbb1",
+      "path": "resource_probe_02"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "856810472772bce3687b120ea8cc6bad4f13353681ce4189642c31c3baf6e763",
+      "path": "resource_probe_03"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "53e1ca6ffc550b0a13622ab158e978b085a6edeeab5a13b73778e82b96d6f657",
+      "path": "resource_probe_04"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "1b9e7a11ed42aa4f0698063002dbb01c703e8cdd945013adc83235724905b4d7",
+      "path": "resource_probe_05"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "91b35c4e07a51e30817fb1deccb9440866dea8944dc5437c3d394f0ebcc539de",
+      "path": "resource_probe_06"
+    },
+    {
+      "kind": "discovery only",
+      "manifest_sha256": "695aae0d3d09413f1e2f41026335f4a127be1371b52e8523a7e73c646cc40a0c",
+      "path": "resource_probe_07"
+    }
+  ],
+  "classification": "engineering",
+  "combined_gates": {
+    "affine_sl_basis_fast": "REJECTED",
+    "gray_simd": "REJECTED",
+    "packed_gray12_simd": "REJECTED",
+    "packed_gray16_simd": "REJECTED"
+  },
+  "confirmation_guard_sha256": "3dfea79ee9c6db8e9e359e0b728d16709a723632d53f692f434a956d9b7bcb5f",
+  "full_ic_cost": null,
+  "production_solver_cost": null,
+  "rho_ratio": null,
+  "schema_version": 1,
+  "scope": "Complete bounded generated Boolean solves. Paired timing intervals concern fixed fixtures; no production, generic-exponent or cryptanalytic crossover claim.",
+  "source_lineage_sha256": "28becb95b99982134bcc1a5fcd7a36bfd757bbb01ae550fc3c151d319a8e5888",
+  "summarizer_sha256": "ac84ab3cb8dfbb6238e39f7459096c8aa595d52c64540fdba06538702b3b03d4",
+  "summary_sha256": "e554e8a9d359b0d8fce3c7bbe60b5117c7b0cd37cad2412af9348b6f943794ac"
+}
