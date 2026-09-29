@@ -70,42 +70,39 @@ seed `2026092553`, ten new complete-pipeline configurations and the checked
 round-two executable source. Workflow `36463687634` ran it once and verified
 3,480/3,480 pairs. Its selected `stop7_word` failed the complete cold and
 familywise gates, so no challenger qualified within the three-attempt budget.
-Do not redispatch any of the three registered attempts. The next registered
-comparison was
-[generic-backend-qualification](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/README.md)
-(seed `2026092901`, panel SHA-256
-`83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf`);
-its runner and workflow are merged, and the single measured dispatch was
-[workflow run 36532455386](https://github.com/aburan28/crypto/actions/runs/36532455386).
-It reached the six-hour job cap and artifact upload failed. Read its
-[censored result](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/RESULT.md)
-before planning a fresh protocol. Completed-trial count and comparative costs
-are unknown. Never redispatch this registration or retune on the sealed
-rounds' confirmation or replay.
+Do not redispatch any of the three registered attempts. The first generic
+backend qualification
+([README](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/README.md),
+seed `2026092901`, panel SHA-256
+`83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf`) was
+measured once in
+[workflow run 36532455386](https://github.com/aburan28/crypto/actions/runs/36532455386)
+and operationally censored at the six-hour job cap with a failed artifact
+upload. Read its
+[censored result](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/RESULT.md).
+Never redispatch that registration or retune on the sealed rounds'
+confirmation or replay. The next registered comparison is
+[generic-backend-qualification-v2](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/README.md)
+(seed `2026092902`, panel SHA-256
+`319d8f624c7c5dcbc156ba97f85ea34850352c7d307aa06c9906f9a2d4010e91`):
+smoke-first family qualification that excludes the
+[reconstructed 25 points](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/RECONSTRUCTION.md)
+from seed `2026092901`, soft-stops measurement at 300 minutes, and packages a
+single archive. Its runner and workflow are not yet landed; do not dispatch
+measurement until they are.
 
-The registered comparison uses `run_generic_backend_qualification.py` through
-`ic-generic-backend-qualification.yml`. Its measured job checks out reviewed
-implementation commit `765c3c5f19032bd852163805f257c56babef2040`, even
-if `main` changes later. The explicit reference registry carries the accepted
-`ic_online`, cold rho, and online rho roles; the registered `prepared_both`
-alias maps to `ic_online` once.
-The runner restores and verifies all three sealed rounds, freezes supplemental
-point exclusions, builds the new generic source with a controlled receipt,
-and then runs the frozen tournament once. This dispatch published no artifact,
-so no trial, yield or family gate can be replayed. If an intact copy is later
-recovered, replay its unmodified `tournament/evaluator/tournament.py verify`
-before the natural-yield audit. The frozen 2026-09-29 auditor has a report-hash
-defect: preserve its original failure and follow
+The censored comparison used `run_generic_backend_qualification.py` through
+`ic-generic-backend-qualification.yml` at reviewed commit
+`765c3c5f19032bd852163805f257c56babef2040`. That dispatch published no
+artifact, so no trial, yield or family gate can be replayed. If an intact copy
+is later recovered, follow
 [AUDITOR-REPAIR.md](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/AUDITOR-REPAIR.md)
-on a separate artifact copy. Require the exact archived auditor/contract hashes
-and certified receipt-digest cross-checks from
-`recover_generic_backend_yield.py`; do not edit or rerun the measurement.
-Apply `generic_backend_gate.py --bundle <retained-output> --out <new-result.json>`
-only after the frozen verifier and the labelled post-hoc audit pass. Future
-campaigns use the corrected auditor, with their own new source freeze.
-The gate requires every smoke and development job to be verified for at least
-one F4/F5 arm and one SAT arm; a reference-selection status alone does not
-qualify either family. Describe the current `f4` backend as a bounded Macaulay
+on a separate artifact copy with `recover_generic_backend_yield.py`; do not edit
+or rerun the measurement. The v2 registration requires a new runner that pins a
+fresh generic source, includes the reconstructed 2026092901 exclusions, prepares
+development fixtures without executing them, runs only A/A and smoke, soft-stops
+at 300 minutes, and uploads one `tar.zst`. Future campaigns use the corrected
+auditor from PR 941. Describe the current `f4` backend as a bounded Macaulay
 matrix engine and `f5` as that engine with an F5 row criterion; neither is a
 full incremental Gröbner-basis implementation. `generic_backend_yield.py` checks
 natural ordinary-query attempts in both complete and bounded-incomplete

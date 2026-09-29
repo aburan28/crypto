@@ -22,8 +22,11 @@ failed the 0.8 cold gates and/or familywise online rules. Altogether
 10,203/10,203 native/profile pairs were verified. Do not redispatch any of the
 three registered attempts or retune on their confirmation/replay points. The
 next registered comparison is
-[generic-backend-qualification](generic-backend-qualification/README.md)
-(seed `2026092901`); its measurement is pending.
+[generic-backend-qualification-v2](generic-backend-qualification-v2/README.md)
+(seed `2026092902`); the first
+[generic-backend-qualification](generic-backend-qualification/RESULT.md)
+dispatch (seed `2026092901`) was operationally censored and must not be
+redispatched. Measurement of v2 is pending its runner.
 Canonical admission is merged in both drivers; the earlier
 [driver controls](driver-admission/README.md) preserve their fixed-vector scope.
 Public-point input and single-target native intervals are implemented in the
@@ -231,5 +234,14 @@ from all three sealed rounds. Panel byte SHA-256
 `2026092901`. Its one measured dispatch was canceled at the six-hour job cap;
 artifact upload also failed, leaving completion and comparative costs unknown.
 The [censored result](generic-backend-qualification/RESULT.md) is not a family
-qualification or solver-performance verdict. A fresh protocol must exclude all
-potentially exposed points and retain partial results before a job timeout.
+qualification or solver-performance verdict. Do not redispatch that registration.
+
+The next preregistered comparison is
+[generic-backend-qualification-v2](generic-backend-qualification-v2/PROTOCOL.md):
+smoke-first F4/F5/SAT family qualification on seed `2026092902`, panel byte
+SHA-256 `319d8f624c7c5dcbc156ba97f85ea34850352c7d307aa06c9906f9a2d4010e91`,
+210 executed pairs, 180-second child timeout, soft 300-minute measure wall with
+single-archive packaging. It excludes all 25 points reconstructed from the
+censored seed
+([RECONSTRUCTION.md](generic-backend-qualification-v2/RECONSTRUCTION.md)).
+Measurement is pending until its versioned runner and workflow land.

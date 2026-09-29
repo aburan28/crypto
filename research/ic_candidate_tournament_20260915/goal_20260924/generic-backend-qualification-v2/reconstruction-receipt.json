@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "status": "RECONSTRUCTED_EXCLUSION",
+  "censored_campaign_seed": 2026092901,
+  "censored_panel_sha256": "83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf",
+  "frozen_execution_checkout": "765c3c5f19032bd852163805f257c56babef2040",
+  "workflow_run": "36532455386",
+  "reconstructed_tournament_fixtures_sha256": "78055bac6b560aa67ddf89c768e3d5173bc1c5115424409ad195f7354cd7aab5",
+  "exclusion_fixtures_path": "censored-2026092901-fixtures.json",
+  "exclusion_fixtures_sha256": "30f496a561aa0814adbf2822d94ec4e98c808e1a3fa9219d592b182521438004",
+  "points": 25,
+  "stages": {
+    "aa": 5,
+    "development": 15,
+    "smoke": 5
+  },
+  "method": "Replayed frozen run_generic_backend_qualification restore/build/prepare path at the pinned checkout through tournament.py prepare --qualification --seed 2026092901; stopped before measurement."
+}
