@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 137, 2026-09-21. The historical optimization chain is
+Current through Stage 138, 2026-09-21. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
@@ -102,6 +102,12 @@ candidate is re-added in the exact fast group, then exact candidates are sorted
 before selection.  Both complete modes reproduce Stage 135's relation hash and
 reduce full wall and core cost while raising peak memory by about 1.5 times.
 
+Stage 138 caches each first-pass packed pair-sum key in row-major order and
+derives its witness from the row and offset.  Scatter then avoids the second
+quadratic group-addition pass.  Full time and CPU fall again in both thread
+classes, while the temporary 4.34 GB key cache raises construction peak RSS to
+about 10 GB.
+
 The campaign has target-independent algebraic factor bases; matched native-XOR,
 WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a
 balanced 160-instance PDP panel through `n=59`; public unknown-scalar end-to-end
@@ -111,9 +117,9 @@ does not establish a new state of the art.
 
 | Gate | Status | Current evidence | Remaining requirement |
 |:--|:--|:--|:--|
-| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds. Stages 135--136 charge eight `n=59` selected/rejected processes. Stage 137 adds four witnessed-table discovery/full processes: 861.940321 wall-seconds, 2,094.577955 core-seconds and 6,565,560,320 B maximum RSS. | Licensed Magma process resources are absent. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
+| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds. Stages 135--137 retain every selected and rejected `n=59` process. Stage 138 adds three cached-build processes: 743.666397 wall-seconds, 1,576.843696 core-seconds and 10,073,538,560 B maximum RSS. | Licensed Magma process resources are absent. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
 | 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract, seal the return before truth scoring, and report F4 resources. |
-| 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | Every executed Phase-B arm retains wall, core-seconds, peak RSS, conflicts or operations, tree memory, and workflow wall. The selected `n=59` witnessed run reports default-thread IC 85.747666 s / 853.002930 core-seconds / 6,565,560,320 B RSS and one-worker IC 724.574469 s / 720.258242 core-seconds / 6,253,510,656 B RSS. | Supply the same fields for licensed Magma F4. SAT conflicts remain inapplicable to exact pair-table arms and are reported as null. |
+| 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | Every executed Phase-B arm retains wall, core-seconds, peak RSS, conflicts or operations, tree memory, and workflow wall. The selected cached `n=59` run reports default-thread IC 76.342293 s / 774.241342 core-seconds / 10,072,309,760 B RSS and one-worker IC 648.780325 s / 635.617997 core-seconds / 10,044,899,328 B RSS. | Supply the same fields for licensed Magma F4. SAT conflicts remain inapplicable to exact pair-table arms and are reported as null. |
 | 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage including one completed larger IC run** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and `n=59`. Stages 132--133 retain the standard `n=59` cap and exact width frontier. Stages 134--135 complete and optimize the cofactor-projected `n=59, m=3` public unknown-scalar workflow at `ell=14` and `15`. | The evidence is finite and toy-sized; it is not an asymptotic scaling law or a literature-scale speed record. |
 | 5. Unknown scalar with no constructed factor-base logs | **Satisfied for finite degrees 23, 31, 41, 53, and 59** | Stage 108 archives the `n=53` public hash-seed-53001 run. Stage 135 retains public hash-seed-59001 at `n=59`: both thread modes derive all 16,344 logs from the same 54,749 relations, recover `d=17861472351607`, and verify `[d]G=Q`. Neither target scalar nor factor-base logs are supplied. | Repeat on independent public seeds and obtain unaffiliated replay; these strengthen rather than replace the finite gate-5 execution. |
 | 6. Full cost against automorphism-optimized Pollard rho | **False. The online wall gate passed only against the fixture rho control; full-cost/core gate false** | Stage 108 selects the four-shard direct route after five direct/mixed wins with 0.904540 median wall and 0.912199 median core ratios. Its identified EPYC 9V74 panel has five direct/rho wins and 0.839190 median wall ratio. Median direct core remains 2.261565 times rho, retained support is 738,197,504 B, and fresh build plus direct is 17.636692 times rho. The rho control in that panel (`koblitz_rho_fixture`) inverts once per step, canonicalises by squaring chains, stores every point and runs on one thread, about 9.5 µs a step. Against a batched signed-Frobenius rho on the same target (cryptanalysis `suite/examples/koblitz_batched_rho.rs`, M4 Pro, portable arithmetic for all arms), the selected direct takes a median 17.3 s against 0.49 s for 1-thread and 0.20 s for 4-thread rho. That is 46.3M support queries against about 0.56M rho steps. | Beat an automorphism-optimized rho (shared inversion, orbit key, distinguished points), not the fixture control, first on the EPYC gate host. The query count `r/(n·|F|)` grows as `r^{2/3}` against rho's `r^{1/2}`, so constant-factor improvements (including an orbit-folded support table) cannot close this gate toward larger degrees. |
@@ -348,6 +354,14 @@ relation SHA-256
 `e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99`
 and recover the same verified unknown scalar.  Full cost remains 152.615 and
 1,329.575 times rho.
+
+Stage 138 caches 542,340,645 packed keys (4,338,725,160 temporary bytes) from
+the counting pass.  Default build wall falls from 21.389824 to 11.712773 seconds
+and full IC from 85.747666 to 76.342293 seconds; one-worker build falls from
+198.245643 to 101.933057 seconds and full IC from 724.574469 to 648.780325
+seconds.  Both full modes preserve the 54,749-relation hash and verified scalar.
+Peak RSS rises to 10,072,309,760 B default and 10,044,899,328 B one-worker.
+Full cost remains 140.153 and 1,158.501 times rho.
 
 ## The n=53 crossover against a batched rho
 
