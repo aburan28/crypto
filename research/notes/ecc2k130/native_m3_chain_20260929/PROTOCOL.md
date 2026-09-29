@@ -1,6 +1,6 @@
 # Native degree-263 three-summand implicit-domain chain
 
-Status: preregistered before candidate source or held evaluation. This is the
+Status: preregistered in the first PR commit before candidate source or held evaluation. This is the
 next semantic and representation gate after the generic full-point edge in
 [#973](https://github.com/aburan28/crypto/pull/973). It does not estimate
 natural PDP yield, relation rank, a full logarithm cost, or crossover with rho.
@@ -47,6 +47,9 @@ solver emits no independently checked UNSAT proof here, label the negative
 `SOLVER_UNSAT_ORACLE_CONFIRMED_TOY`, not general checked UNSAT.
 A timeout, unsupported solver output, incomplete assignment or replay
 mismatch is STOP, not a negative PDP result.
+The containing toy producer and verifier have 300-second reported wall
+acceptance caps and 330-second external watchdogs, each with a 1-GiB peak-RSS
+acceptance cap.
 
 ## Frozen n131 capacity panel
 
@@ -60,14 +63,16 @@ rank 131, each slot has its declared rank, and the union has rank 131.
 The x domain is implicit: do not enumerate its approximately 2^43 members.
 Build each leaf chain in a separate process. Count the exact generic and
 canonical-infinity-target DIMACS size under a 2,000,000-node DAG cap and
-256-MiB target CNF cap. Each child has a 600-second external wall cap and a
-2-GiB peak-RSS acceptance cap; RSS is checked after exit, not represented
+256-MiB target CNF cap. Each child has a 600-second reported wall acceptance cap and a
+2-GiB peak-RSS acceptance cap; an external watchdog kills it after 630 seconds.
+RSS is checked after exit, not represented
 as an OS-enforced limit. Preserve full or partial counts and errors. A cap
 is `CAPACITY_CENSORED`, not evidence of PDP hardness. Do not submit n131
 CNF to a solver in this gate or infer attack speed from representation size.
 
-Commit the candidate, producer, independent verifier, fixed inputs and SHA-256
-source lock in a second revision before any held panel. Archive the exact raw
+Commit the candidate, producer and independent verifier in a second revision;
+commit their SHA-256 source/input lock in a separate third revision before
+any held panel. Archive the exact raw
 toy CNFs, model and solver streams; two leaf count receipts; frozen source and
 input hashes; child process resource records; all failures; and an
 independent replay. CI must validate the archive without depending on the
