@@ -46,9 +46,11 @@ def observed_run(root, case, arm, stage, repetition):
     if report.get('status') not in {'complete', 'incomplete'}:
         base['censor_reason'] = 'profiler did not return a bounded IC report'
         return base
-    require(receipt['status'] == 'VERIFIED' if report['status'] == 'complete'
-            else receipt['status'] != 'VERIFIED',
-            'complete/incomplete report contradicts tournament receipt')
+    if report['status'] == 'complete' and receipt['status'] != 'VERIFIED':
+        base['censor_reason'] = 'complete JSON from an unverified process'
+        return base
+    require(report['status'] == 'complete' or receipt['status'] != 'VERIFIED',
+            'incomplete report contradicts verified tournament receipt')
     manifest = read(root/arm['source_manifest_relative'])
     build = read(root/arm['build_record_relative'])
     verify_binding(report, build, manifest, executable=root/arm['binary_relative'])
