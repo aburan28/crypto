@@ -324,9 +324,20 @@ pub struct Solver {
     /// Clauses, original + learnt; learnt start at `n_orig_clauses`.
     clauses: Vec<Vec<Lit>>,
     n_orig_clauses: usize,
-    /// Per-variable assignment: None = unassigned.
-    assignment: Vec<Option<bool>>,
-    /// Bitset mirror of `assignment`: `assigned_w` marks assigned
+    /// Truth value of every *literal* under the trail, indexed by
+    /// `lit + n_vars`: slot `n_vars + 1 + v` holds variable `v`'s value,
+    /// slot `n_vars - 1 - v` its negation's, and slot `n_vars` (literal
+    /// 0) is never used.
+    ///
+    /// Watched-literal propagation asks "is this literal true?" a few
+    /// times per clause visit.  Against a per-variable `Option<bool>`
+    /// each answer cost an absolute value, a sign test and a
+    /// conditional negation; here it is one add and one load, paid for
+    /// by a second byte store per assignment.  The upper half is the
+    /// per-variable assignment itself (`None` = unassigned), which is
+    /// what `assignment()` hands out.
+    values: Vec<Option<bool>>,
+    /// Bitset mirror of the assignment: `assigned_w` marks assigned
     /// variables, `value_w` their values.  Parity rows are bitmasks, so
     /// with this the whole read-off is `mask & !assigned` and a
     /// popcount — `O(words)` per row instead of `O(set bits)` with a
@@ -484,7 +495,7 @@ impl Solver {
             n_vars,
             clauses: Vec::new(),
             n_orig_clauses: 0,
-            assignment: vec![None; n],
+            values: vec![None; 2 * n + 1],
             assigned_w: vec![0; bs_words(n_vars)],
             value_w: vec![0; bs_words(n_vars)],
             level: vec![-1; n],
@@ -575,7 +586,16 @@ impl Solver {
         let new_total = old + count;
         let n = new_total as usize;
         let words = bs_words(new_total);
-        self.assignment.resize(n, None);
+        // The literal-value table is centred on `n_vars`, so widening
+        // it moves every entry; at level 0 only root facts are there.
+        let mut values = vec![None; 2 * n + 1];
+        for (v, &value) in self.assignment().iter().enumerate() {
+            if let Some(b) = value {
+                values[n + 1 + v] = Some(b);
+                values[n - 1 - v] = Some(!b);
+            }
+        }
+        self.values = values;
         self.assigned_w.resize(words, 0);
         self.value_w.resize(words, 0);
         self.level.resize(n, -1);
@@ -642,7 +662,7 @@ impl Solver {
     /// Current value of a variable (1-indexed), if assigned.
     #[cfg(test)]
     pub(crate) fn value_of_for_test(&self, v: u32) -> Option<bool> {
-        self.assignment[(v - 1) as usize]
+        self.var_value((v - 1) as usize)
     }
 
     /// Verify a model against the installed XOR rows.  The CNF part is
@@ -776,9 +796,21 @@ impl Solver {
     }
 
     /// Look up the truth value of a literal under the current trail.
+    #[inline]
     fn lit_value(&self, lit: Lit) -> Option<bool> {
-        let v = var_of(lit) as usize;
-        self.assignment[v].map(|b| if is_neg(lit) { !b } else { b })
+        self.values[(lit + self.n_vars as i32) as usize]
+    }
+
+    /// Value of 0-indexed variable `v`, if assigned.
+    #[inline]
+    fn var_value(&self, v: usize) -> Option<bool> {
+        self.values[self.n_vars as usize + 1 + v]
+    }
+
+    /// Per-variable assignment, 0-indexed (`None` = unassigned): the
+    /// positive-literal half of `values`.
+    fn assignment(&self) -> &[Option<bool>] {
+        &self.values[self.n_vars as usize + 1..]
     }
 
     /// Assign `lit` to true with the given reason. Returns `Err` if it
@@ -789,7 +821,9 @@ impl Solver {
             Some(false) => Err(()),
             None => {
                 let v = var_of(lit) as usize;
-                self.assignment[v] = Some(!is_neg(lit));
+                let n = self.n_vars as i32;
+                self.values[(n + lit) as usize] = Some(true);
+                self.values[(n - lit) as usize] = Some(false);
                 let (w, bit) = (v / 64, 1u64 << (v % 64));
                 self.assigned_w[w] |= bit;
                 if is_neg(lit) {
@@ -869,7 +903,7 @@ impl Solver {
         };
         for i in 0..self.matrix.len() {
             let intact = match self.pivot[i] {
-                Some(p) => self.assignment[p as usize].is_none(),
+                Some(p) => self.var_value(p as usize).is_none(),
                 None => false,
             };
             if intact {
@@ -1031,7 +1065,7 @@ impl Solver {
                 if Some(v) == implied_var {
                     continue;
                 }
-                match self.assignment[v as usize] {
+                match self.var_value(v as usize) {
                     Some(true) => clause.push(-((v + 1) as Lit)),
                     Some(false) => clause.push((v + 1) as Lit),
                     None => debug_assert!(false, "reason clause over an unassigned variable"),
@@ -1372,7 +1406,9 @@ impl Solver {
         while self.trail.len() > target {
             let l = self.trail.pop().unwrap();
             let v = var_of(l) as usize;
-            self.assignment[v] = None;
+            let n = self.n_vars as i32;
+            self.values[(n + l) as usize] = None;
+            self.values[(n - l) as usize] = None;
             self.assigned_w[v / 64] &= !(1u64 << (v % 64));
             self.level[v] = -1;
             self.order
@@ -1391,7 +1427,7 @@ impl Solver {
     /// so we skip those.
     fn pick_branching_variable(&mut self) -> Option<u32> {
         while let Some(v) = self.order.pop_max(&self.activity, &self.branch_priority) {
-            if self.assignment[v as usize].is_none() {
+            if self.var_value(v as usize).is_none() {
                 return Some(v);
             }
         }
@@ -1568,9 +1604,9 @@ impl Solver {
                 if !trigger_vars.is_empty()
                     && trigger_vars
                         .iter()
-                        .all(|&variable| self.assignment[(variable - 1) as usize].is_some())
+                        .all(|&variable| self.var_value((variable - 1) as usize).is_some())
                 {
-                    if let Some(clauses) = theory(&self.assignment) {
+                    if let Some(clauses) = theory(self.assignment()) {
                         assert!(!clauses.is_empty(), "lazy theory returned an empty update");
                         let mut normalized = Vec::with_capacity(clauses.len());
                         for mut clause in clauses {
@@ -1625,7 +1661,10 @@ impl Solver {
 
     /// Get the satisfying assignment after a successful `solve()`.
     pub fn model(&self) -> Vec<bool> {
-        self.assignment.iter().map(|a| a.unwrap_or(false)).collect()
+        self.assignment()
+            .iter()
+            .map(|a| a.unwrap_or(false))
+            .collect()
     }
 
     /// Number of variables.
@@ -2520,5 +2559,214 @@ mod tests {
         // Either SAT or UNSAT is acceptable; what we're checking is
         // that the solver terminates.
         assert_ne!(result, SolveResult::Unknown);
+    }
+
+    /// Fold a solve's verdict, every work counter (the `ns_*` timers
+    /// excepted), the clause count and the model into one digest.
+    fn trace_digest(h: u64, res: SolveResult, s: &Solver) -> u64 {
+        let st = &s.stats;
+        let verdict = match res {
+            SolveResult::Sat => 1,
+            SolveResult::Unsat => 2,
+            SolveResult::Unknown => 3,
+        };
+        let mut words = vec![
+            verdict,
+            st.decisions,
+            st.conflicts,
+            st.restarts,
+            st.propagations,
+            st.xor_passes,
+            st.xor_propagations,
+            st.xor_conflicts,
+            st.xor_repivots,
+            st.learnt_clauses,
+            st.xor_row_ops,
+            st.xor_row_scans,
+            st.xor_reason_lits,
+            st.clause_visits,
+            st.clause_lit_visits,
+            st.analyze_lit_visits,
+            st.learnt_lits_raw,
+            st.learnt_lits_kept,
+            st.conflict_level_sum,
+            st.max_level,
+            s.conflicts(),
+            s.n_clauses() as u64,
+            s.n_original_clauses() as u64,
+        ];
+        if res == SolveResult::Sat {
+            words.extend(s.model().iter().map(|&b| b as u64));
+        }
+        words
+            .into_iter()
+            .fold(h, |h, w| (h ^ w).wrapping_mul(0x0000_0100_0000_01B3))
+    }
+
+    /// **The search trace is pinned.**  The solver's data layout is
+    /// tuned for speed, and no layout change may alter a single step of
+    /// the search: every decision, propagation, learnt literal and
+    /// counter must come out the same.  These digests were recorded
+    /// from the textbook layout (per-clause vectors, `Option<bool>` per
+    /// variable, a vector per parity row) and cover what the perfbench
+    /// fingerprints may not: restarts with clause forgetting under a
+    /// tiny budget, parity rows rebuilt at restarts, `add_vars` after
+    /// clauses exist, branching priority, incremental model enumeration
+    /// through `reset_search`, lazy theory clauses, and a conflict
+    /// budget running out.
+    #[test]
+    fn search_trace_is_pinned() {
+        let mut state = 0x6A09_E667_F3BC_C908u64;
+        let mut next = move || {
+            state ^= state >> 12;
+            state ^= state << 25;
+            state ^= state >> 27;
+            state.wrapping_mul(0x2545_F491_4F6C_DD1D)
+        };
+        fn random_clause(n: u32, next: &mut dyn FnMut() -> u64) -> Vec<Lit> {
+            let mut c: Vec<Lit> = Vec::with_capacity(3);
+            while c.len() < 3 {
+                let v = 1 + (next() % n as u64) as i32;
+                if c.iter().all(|&l| l.abs() != v) {
+                    c.push(if next() % 2 == 0 { v } else { -v });
+                }
+            }
+            c
+        }
+        /// A random 3-clause that `planted` satisfies.
+        fn planted_clause(planted: &[bool], next: &mut dyn FnMut() -> u64) -> Vec<Lit> {
+            loop {
+                let c = random_clause(planted.len() as u32, next);
+                if c.iter()
+                    .any(|&l| planted[(l.abs() - 1) as usize] == (l > 0))
+                {
+                    return c;
+                }
+            }
+        }
+        let mut digests = Vec::new();
+
+        // Random 3-SAT at the threshold, big enough to restart several
+        // times; half under a tiny learnt budget so `reduce_db` runs at
+        // most restarts.
+        for inst in 0..4u32 {
+            let n = 110;
+            let mut s = Solver::new(n);
+            for _ in 0..469 {
+                s.add_clause(random_clause(n, &mut next));
+            }
+            if inst % 2 == 1 {
+                s.max_learnts = 60;
+            }
+            let res = s.solve();
+            digests.push(trace_digest(0, res, &s));
+        }
+
+        // Planted parity + CNF, widened by `add_vars` after the fact,
+        // with a branching priority, then enumerated model by model.
+        for _ in 0..3 {
+            let n = 90u32;
+            let mut planted: Vec<bool> = (0..n).map(|_| next() % 2 == 0).collect();
+            let mut s = Solver::new(n);
+            for _ in 0..30 {
+                let vars: Vec<u32> = (1..=n).filter(|_| next() % 8 == 0).collect();
+                let rhs = vars.iter().filter(|&&v| planted[(v - 1) as usize]).count() % 2 == 1;
+                s.add_xor(&vars, rhs);
+            }
+            for _ in 0..300 {
+                s.add_clause(planted_clause(&planted, &mut next));
+            }
+            for v in s.add_vars(8) {
+                // v = a AND b as three clauses, and v ⊕ c as a row, all
+                // satisfied by the planted assignment extended to v.
+                let pick = |x: u64| 1 + (x % n as u64) as u32;
+                let (a, b, c) = (pick(next()), pick(next()), pick(next()));
+                let value = planted[(a - 1) as usize] && planted[(b - 1) as usize];
+                planted.push(value);
+                let (v, a, b) = (v as Lit, a as Lit, b as Lit);
+                s.add_clause(vec![-v, a]);
+                s.add_clause(vec![-v, b]);
+                s.add_clause(vec![v, -a, -b]);
+                s.add_xor(&[v as u32, c], value ^ planted[(c - 1) as usize]);
+            }
+            s.set_branch_priority(&(1..=30).collect::<Vec<u32>>());
+            let mut h = 0;
+            for _ in 0..5 {
+                let res = s.solve();
+                h = trace_digest(h, res, &s);
+                if res != SolveResult::Sat {
+                    break;
+                }
+                let m = s.model();
+                let block: Vec<Lit> = (1..=30)
+                    .map(|v: Lit| if m[(v - 1) as usize] { -v } else { v })
+                    .collect();
+                s.reset_search();
+                if !s.add_clause(block) {
+                    break;
+                }
+            }
+            digests.push(h);
+        }
+
+        // Lazy theory clauses: an odd pattern on the trigger variables
+        // is refuted by a clause whose side literal the planted
+        // assignment satisfies; depending on the trail it arrives unit,
+        // satisfied or already false, so both install paths run.
+        for _ in 0..3 {
+            let n = 60u32;
+            let planted: Vec<bool> = (0..n).map(|_| next() % 2 == 0).collect();
+            let mut s = Solver::new(n);
+            for _ in 0..230 {
+                s.add_clause(planted_clause(&planted, &mut next));
+            }
+            let side_var = 5 + (next() % 50) as usize;
+            let side = if planted[side_var] {
+                side_var as Lit + 1
+            } else {
+                -(side_var as Lit + 1)
+            };
+            let mut seen = HashSet::new();
+            let mut theory = |a: &[Option<bool>]| {
+                let bits: Vec<bool> = (0..4).map(|i| a[i].unwrap()).collect();
+                if bits.iter().filter(|&&b| b).count() % 2 == 0 || !seen.insert(bits.clone()) {
+                    return None;
+                }
+                let mut clause: Vec<Lit> = (1..=4)
+                    .map(|v: Lit| if bits[(v - 1) as usize] { -v } else { v })
+                    .collect();
+                clause.push(side);
+                Some(vec![clause])
+            };
+            let res = s.solve_with_lazy_clauses(&[1, 2, 3, 4], &mut theory);
+            digests.push(trace_digest(0, res, &s));
+        }
+
+        // A conflict budget that runs out: the counters at the cut.
+        {
+            let n = 150;
+            let mut s = Solver::new(n);
+            for _ in 0..639 {
+                s.add_clause(random_clause(n, &mut next));
+            }
+            s.conflict_budget = 700;
+            let res = s.solve();
+            digests.push(trace_digest(0, res, &s));
+        }
+
+        let want: [u64; 11] = [
+            0xb2e0_4683_836a_bf61,
+            0x67b3_5419_5935_88e6,
+            0x3cc2_9eed_b852_d8cf,
+            0xe09e_bb2c_f03b_80ee,
+            0x8c81_db2b_bfca_bb47,
+            0xa4b5_88b1_8057_a75c,
+            0xadab_f077_7d3f_d049,
+            0x1988_b235_e614_2f45,
+            0x1c6e_5944_639b_6e22,
+            0xd078_af6e_2f95_b4e1,
+            0x0623_2f40_9d26_5579,
+        ];
+        assert_eq!(digests, want, "search trace moved: {digests:#018x?}");
     }
 }
