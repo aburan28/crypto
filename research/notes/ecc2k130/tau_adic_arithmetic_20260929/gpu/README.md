@@ -86,8 +86,9 @@ remote receipts mean unknown execution, not proof that nothing ran.
 
 The frozen extension is [READINESS_PROTOCOL.md](READINESS_PROTOCOL.md). One
 candidate adds `#pragma unroll 1` to the linear squaring loop, guarded by
-`LINEAR_SQUARE_NOUNROLL`. It changes no arithmetic and is **not enabled by
-the timing runner**. Both recodings share a kernel, so these are kernel-level
+`LINEAR_SQUARE_NOUNROLL`. It changes no arithmetic. The paired device runner
+can now select it with `--study square-unroll`; `original` remains the default.
+Both recodings share a kernel, so these are kernel-level
 resource counts, not measurements of either recoding's runtime.
 
 | Target | m | Squaring | Registers: default / candidate | Candidate/default registers | Default spill store/load bytes | Candidate spill store/load bytes |
@@ -167,8 +168,49 @@ modal run cloud_modal.py --mode smoke --output results/modal-smoke.json
 
 After a verified smoke receipt, request the full original four-arm comparison
 with `--mode benchmark` and a new output path. It repeats the smoke gate.
-The compiler candidate is not part of that original timing protocol; its paired
-device comparison remains pending.
+
+The no-unroll comparison now has its own frozen
+[device protocol](UNROLL_DEVICE_PROTOCOL.md). To exercise the candidate and
+its matched controls in the same invocation:
+
+```bash
+modal run cloud_modal.py --study square-unroll --mode smoke --output results/unroll-smoke.json
+modal run cloud_modal.py --study square-unroll --mode benchmark --output results/unroll-benchmark.json
+```
+
+Run the second command only after verified smoke. It retains default and
+no-unroll kernels for each recoding, separate compiled modules, five A/A pairs
+for each control, and seven alternating rounds. Each candidate is compared
+with its own recoding's control. Samples shorter than 50 ms are ineligible
+for the screening result. The overall screen requires both degrees and both
+training/holdout panels to pass. No new device measurements exist yet.
+
+Modal and Docker use the shared `launch_gpu.py` entrypoint. Timed mode invokes
+the current repository `tools/isolated_bench.py run`, reserves a complete
+visible SMT sibling group while leaving another CPU free, and retains its
+conditions record. A busy machine, unavailable isolation, contention, or user
+threads left on reserved CPUs prevents an accepted timing result. The outer
+receipt's `timing_eligible` field governs acceptance; inner kernel summaries
+are diagnostics and must not override it. Smoke mode is correctness-only.
+CPU isolation does not establish exclusive GPU use or isolate other VM tenants.
+Dedicated GPU allocation and the recorded hardware/noise checks remain necessary.
+
+RunPod/local-container users can invoke the same study by appending
+`--study square-unroll --mode smoke --output /results/unroll-smoke.json` to
+the Docker command below, then use benchmark mode with a new output path.
+Within an existing GPU environment, use
+`python launch_gpu.py --study square-unroll --mode smoke --output results/unroll-smoke.json`.
+The raw `run_gpu.py` is the worker; use the launcher for timed execution.
+
+Validation of this wiring is retained in
+[paired-runner-validation-02.json](results/paired-runner-validation-02.json).
+Fifteen tests cover the cache, matched denominators/noise, complete alternating
+loop, short samples, isolation policy, timeout/interruption cleanup, and prior receipt gates.
+CuPy calls and event durations in these tests are explicit CPU stubs, with no
+saved device-performance receipt. A real subprocess test confirms termination
+of a parent/child group and cleanup on timeout. The
+[local candidate smoke attempt](results/paired-smoke-local-01.json) stopped
+before device execution because CuPy is absent; its failure is retained.
 
 This uses one RTX-PRO-6000, at most one container, zero retries, a 600-second
 function timeout and a 540-second benchmark-process timeout. It is an
@@ -212,7 +254,8 @@ grace period if necessary.
 - [x] Add the device smoke gate and test receipt/failure handling locally.
 - [ ] Build the remote image and complete device correctness checks.
 - [ ] Collect paired GPU timing/metadata receipts and apply the screening rule.
-- [ ] Freeze and run a matched device comparison of the no-unroll candidate.
+- [x] Freeze and wire the matched no-unroll device comparison and isolated launcher.
+- [ ] Execute that comparison on a GPU and retain uncontended device results.
 - [ ] Establish an eligible runtime fraction or any end-to-end rho benefit.
 
 The next concrete requirement is a working authorized Modal connection or

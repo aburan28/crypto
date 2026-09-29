@@ -14,11 +14,6 @@ on:
       - 'research/ic_candidate_tournament_20260915/test_pack_partial_campaign.py'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/**'
   workflow_dispatch:
-    inputs:
-      execute_registered_campaign:
-        description: Execute the fresh 2026092902 F4/F5/SAT campaign once; never retry a measured failure
-        type: boolean
-        default: false
 permissions:
   contents: read
 concurrency:
@@ -31,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && 'e0fadb5ca5e99a3815c36a127fbdd1d1a5d12b43' || github.sha }}
+          ref: ${{ github.sha }}
       - uses: actions/checkout@v4
         with:
           ref: 765c3c5f19032bd852163805f257c56babef2040
@@ -66,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && 'e0fadb5ca5e99a3815c36a127fbdd1d1a5d12b43' || github.sha }}
+          ref: ${{ github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -87,10 +82,13 @@ jobs:
           path: |
             ${{ runner.temp }}/ic-pack-smoke.tar.zst
             ${{ runner.temp }}/ic-pack-smoke.tar.zst.manifest.json
+            ${{ runner.temp }}/ic-pack-smoke.tar.zst.tar.stderr
           retention-days: 3
           if-no-files-found: error
   campaign:
-    if: github.event_name == 'workflow_dispatch' && inputs.execute_registered_campaign && github.ref == 'refs/heads/main'
+    # Seed 2026092902 ran exactly once as Actions 36580669479. Its producer
+    # timed out and its partial archive failed to upload. No redispatch.
+    if: ${{ false }}
     needs: [preflight, artifact-smoke]
     runs-on: ubuntu-24.04
     timeout-minutes: 360
@@ -146,5 +144,6 @@ jobs:
           path: |
             ${{ runner.temp }}/ic-generic-backend-qualification-v2-${{ github.run_id }}-${{ github.run_attempt }}.tar.zst
             ${{ runner.temp }}/ic-generic-backend-qualification-v2-${{ github.run_id }}-${{ github.run_attempt }}.tar.zst.manifest.json
+            ${{ runner.temp }}/ic-generic-backend-qualification-v2-${{ github.run_id }}-${{ github.run_attempt }}.tar.zst.tar.stderr
           retention-days: 30
           if-no-files-found: error
