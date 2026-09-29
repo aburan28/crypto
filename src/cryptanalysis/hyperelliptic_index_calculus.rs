@@ -778,6 +778,20 @@ pub struct HecIndexCalculusReport {
     /// rho's branch precomputation does.  Split out for the same
     /// reason: the per-trial price is the thing the walk changed.
     pub precompute_ops: usize,
+    /// Wall-clock nanoseconds spent on the relation search's group
+    /// operations, excluding the oracle.
+    ///
+    /// Divided by `jacobian_ops` this gives the cost of one group
+    /// operation **in situ** — in the run itself, with its allocation
+    /// and cache behaviour — which is what the oracle and the solve must
+    /// be converted by.  A tight calibration loop under-measures it: it
+    /// repeats one addition on cache-resident operands, so converting a
+    /// measured oracle time by it overstates the oracle instead.  Both
+    /// errors were live in this file at different times, in opposite
+    /// directions, and only wall clock caught either.
+    pub walk_wall_ns: u64,
+    /// Wall-clock nanoseconds spent in the linear algebra.
+    pub solve_wall_ns: u64,
     /// Wall-clock nanoseconds spent inside the smoothness oracle.
     ///
     /// The `smoothness_field_ops` count below is a hand-derived charge —
@@ -1100,6 +1114,7 @@ pub fn collect_relations(
     while relations.len() < wanted && report.trials < params.max_trials {
         report.trials += 1;
 
+        let step_started = Instant::now();
         let mut pos = match current.take() {
             Some(pos) if walking => {
                 // One step of the walk: one group operation.
@@ -1207,6 +1222,8 @@ pub fn collect_relations(
             }
         }
 
+        report.walk_wall_ns += step_started.elapsed().as_nanos() as u64;
+
         let (a, b, r) = (pos.a.clone(), pos.b.clone(), pos.r.clone());
         let taken = pos.taken.clone();
         if walking {
@@ -1289,7 +1306,10 @@ pub fn hec_index_calculus_dlp(
         if collected.len() < m + 1 {
             return (None, report);
         }
-        if let Some(candidate) = solve_for_logarithm(curve, &collected, m, n, params, &mut report) {
+        let solve_started = Instant::now();
+        let solved = solve_for_logarithm(curve, &collected, m, n, params, &mut report);
+        report.solve_wall_ns += solve_started.elapsed().as_nanos() as u64;
+        if let Some(candidate) = solved {
             if &d1.scalar_mul(&candidate, curve) == d2 {
                 k = Some(candidate);
                 break;

@@ -714,6 +714,8 @@ pub fn head_to_head(
     let mut ic_la_modmuls = 0f64;
     let mut ic_oracle_modmuls = 0f64;
     let mut ic_oracle_ns = 0f64;
+    let mut ic_walk_ns = 0f64;
+    let mut ic_solve_ns = 0f64;
     let mut ic_precompute_ops = 0f64;
     let mut ic_ops_per_trial = 0f64;
     let mut ic_wall_ms = 0f64;
@@ -730,6 +732,8 @@ pub fn head_to_head(
         ic_la_modmuls += rep.solve_row_ops as f64;
         ic_oracle_modmuls += rep.smoothness_field_ops as f64;
         ic_oracle_ns += rep.smoothness_wall_ns as f64;
+        ic_walk_ns += rep.walk_wall_ns as f64;
+        ic_solve_ns += rep.solve_wall_ns as f64;
         ic_precompute_ops += rep.precompute_ops as f64;
         ic_ops_per_trial += rep.ops_per_trial();
         ic_smooth += rep.smoothness_rate();
@@ -738,7 +742,8 @@ pub fn head_to_head(
     }
     let f = ic_runs as f64;
     let (ic_precompute_ops, ic_ops_per_trial) = (ic_precompute_ops / f, ic_ops_per_trial / f);
-    let ic_oracle_ns = ic_oracle_ns / f;
+    let (ic_oracle_ns, ic_walk_ns, ic_solve_ns) =
+        (ic_oracle_ns / f, ic_walk_ns / f, ic_solve_ns / f);
     let (ic_relation_ops, ic_la_modmuls, ic_oracle_modmuls, ic_wall_ms, ic_smooth) = (
         ic_relation_ops / f,
         ic_la_modmuls / f,
@@ -774,11 +779,21 @@ pub fn head_to_head(
         (rho_ops / g, rho_pre / g, rho_walk / g, rho_wall_ms / g);
 
     let root_n = sqrt_big(n);
-    let la_group_equiv = ic_la_modmuls / conv.max(f64::MIN_POSITIVE);
-    // Measured, not charged: nanoseconds in the oracle divided by
-    // measured seconds per group operation.
-    let oracle_group_equiv = ic_oracle_ns / 1e9 / secs_per_group_op.max(f64::MIN_POSITIVE);
+    // One group operation's cost **in situ**: the relation search's own
+    // time divided by the operations it counted.  Converting the oracle
+    // and the solve by this is apples-to-apples; converting them by a
+    // tight calibration loop is not, and overstated the oracle by the
+    // same margin the hand count understated it.  Fall back to the
+    // calibrated figure only if the walk was too short to time.
+    let in_situ_per_op = if ic_relation_ops > 0.0 && ic_walk_ns > 0.0 {
+        ic_walk_ns / 1e9 / ic_relation_ops
+    } else {
+        secs_per_group_op
+    };
+    let oracle_group_equiv = ic_oracle_ns / 1e9 / in_situ_per_op.max(f64::MIN_POSITIVE);
+    let solve_group_equiv = ic_solve_ns / 1e9 / in_situ_per_op.max(f64::MIN_POSITIVE);
     let oracle_group_equiv_charged = ic_oracle_modmuls / conv.max(f64::MIN_POSITIVE);
+    let la_group_equiv = solve_group_equiv;
     let ic_total = ic_relation_ops + la_group_equiv + oracle_group_equiv;
 
     let m = ic_fb as f64;
@@ -983,6 +998,50 @@ mod tests {
                 r.group_ops
             );
         }
+    }
+
+    #[test]
+    fn the_unit_tracks_wall_clock() {
+        // The accounting has now been wrong twice in opposite
+        // directions: a hand-derived multiplication charge understated
+        // the oracle about 20x, and converting its measured time by a
+        // tight calibration loop overstated it about as much.  Both
+        // times the only signal was that wall clock disagreed with `S`.
+        // So make that disagreement a test: the ratio the unit reports
+        // and the ratio the clock reports must be within a factor of
+        // three of each other.  Anything worse means a cost is being
+        // counted in a unit it does not belong to.
+        let (curve, d1, d2, n, k) = instance(251);
+        let params = HecIndexCalculusParams {
+            fb_size: usize::MAX,
+            extra_relations: 8,
+            max_trials: 200_000,
+            seed: 31337,
+            search: RelationSearch::factor_base_walk(),
+            linear_algebra: LinearAlgebra::Sparse,
+            smoothness: SmoothnessTest::Gcd,
+        };
+        let row = head_to_head(
+            &curve,
+            &d1,
+            &d2,
+            &n,
+            &params,
+            7,
+            1_000_000,
+            &k,
+            &HeadToHeadTrials { ic: 3, rho: 9 },
+            &RhoVariant::DistinguishedPoints,
+        );
+        assert!(row.ic_correct && row.rho_correct, "{row:?}");
+        let by_unit = row.ratio_to_reference();
+        let by_clock = row.ic_wall_ms / row.rho_wall_ms.max(f64::MIN_POSITIVE);
+        let disagreement = (by_unit / by_clock).max(by_clock / by_unit);
+        assert!(
+            disagreement < 3.0,
+            "S says {by_unit:.2} and the clock says {by_clock:.2} \
+             (factor {disagreement:.1}); a cost is in the wrong unit"
+        );
     }
 
     #[test]
