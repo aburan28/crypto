@@ -60,17 +60,94 @@ The [version-two protocol](../../../research/ic_candidate_tournament_20260915/go
 binds that accepted evidence for attempts two and three. Use
 `reference_registry_v2.py` to verify and declare all three extra references,
 then `tournament.py prepare --campaign-version 2` with the registry, accepted
-qualification and observer reports, and complete target exclusions. Round two
-has completed and retained the incumbent:
+qualification and observer reports, and complete target exclusions. Rounds two
+and three completed and retained the incumbent:
 [report](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/README.md),
-archive `ic-improvement-round2-20260928`. Do not redispatch `run_round_two=true`
-or `run_round_one=true`. The [third-round registration](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/ROUND3-REGISTRATION.md)
-pins a new configuration panel and seed `2026092553` while reusing the checked
-round-two executable source. Its workflow measures once when the panel first
-lands on `main`; inspect the live or completed workflow before attempting any
-manual run. The runner restores both prior rounds and excludes all their
-generated points, including failed preparation; never retune on confirmation
-or replay.
+archive `ic-improvement-round2-20260928`; and
+[report](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md),
+archive `ic-improvement-round3-20260928`. The third-round registration pinned
+seed `2026092553`, ten new complete-pipeline configurations and the checked
+round-two executable source. Workflow `36463687634` ran it once and verified
+3,480/3,480 pairs. Its selected `stop7_word` failed the complete cold and
+familywise gates, so no challenger qualified within the three-attempt budget.
+Do not redispatch any of the three registered attempts. The next registered
+comparison was
+[generic-backend-qualification](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/README.md)
+(seed `2026092901`, panel SHA-256
+`83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf`);
+its runner and workflow are merged, and the single measured dispatch was
+[workflow run 36532455386](https://github.com/aburan28/crypto/actions/runs/36532455386).
+It reached the six-hour job cap and artifact upload failed. Read its
+[censored result](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/RESULT.md)
+before planning a fresh protocol. Completed-trial count and comparative costs
+are unknown. Never redispatch this registration or retune on the sealed
+rounds' confirmation or replay.
+
+The first registered comparison used `run_generic_backend_qualification.py` through
+`ic-generic-backend-qualification.yml`. Its measured job checks out reviewed
+implementation commit `765c3c5f19032bd852163805f257c56babef2040`, even
+if `main` changes later. The explicit reference registry carries the accepted
+`ic_online`, cold rho, and online rho roles; the registered `prepared_both`
+alias maps to `ic_online` once.
+The runner restores and verifies all three sealed rounds, freezes supplemental
+point exclusions, builds the new generic source with a controlled receipt,
+and then runs the frozen tournament once. This dispatch published no artifact,
+so no trial, yield or family gate can be replayed. If an intact copy is later
+recovered, replay its unmodified `tournament/evaluator/tournament.py verify`
+before the natural-yield audit. The frozen 2026-09-29 auditor has a report-hash
+defect: preserve its original failure and follow
+[AUDITOR-REPAIR.md](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/AUDITOR-REPAIR.md)
+on a separate artifact copy. Require the exact archived auditor/contract hashes
+and certified receipt-digest cross-checks from
+`recover_generic_backend_yield.py`; do not edit or rerun the measurement.
+Apply `generic_backend_gate.py --bundle <retained-output> --out <new-result.json>`
+only after the frozen verifier and the labelled post-hoc audit pass. Future
+campaigns use the corrected auditor, with their own new source freeze.
+
+The [second registration](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/PROTOCOL.md)
+has a fresh seed `2026092902` and panel SHA-256
+`d283a869b0412228d1c66260fdfd8f387d7243bd15456c7febf3c46ee5da27a8`.
+Its [reproduced exposure corpus](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/lost-campaign-exposures.json)
+excludes all 25 public points the censored first run could have generated.
+It keeps the five cells and 25 independent targets, with one process per point
+and 250 paired trial slots. The runner is
+`run_generic_backend_qualification_v2.py` in workflow
+`ic-generic-backend-qualification-v2.yml`. Its one permitted dispatch is
+[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479),
+attempt one; never dispatch this seed again. Its PR preflight and one-file
+artifact-upload smoke passed before the run. Check the source checkout pin and
+reviewed panel/exclusion hashes when auditing its artifact. The measured step has
+a shorter cap than the job, leaving time for the `if: always()` packer to
+retain complete or partial evidence as one checksummed archive. A timed-out
+step with incomplete receipts remains operationally
+censored; register a new panel and exclude all of its potentially generated
+points for any later measurement. Verify the archive manifest and SHA-256
+before extracting it. Only a complete frozen verifier, natural-query audit and
+`generic_backend_gate_v2.py` can qualify both families. Also run the separately
+committed [independent receipt audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/independent_pairs.py)
+against the extracted bundle to recalculate all 400 same-point IC/rho online
+pairs from raw receipts and native worker outputs. Its timing/pairing cross-check
+does not replace group replay, natural-query auditing or the family gate.
+The post-registration [static feasibility audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/STATIC-FEASIBILITY.md)
+proves that this panel's four F4/F5 arms exceed the pinned 64-variable encoder
+cap on every cell; wait for the run's raw receipts for its empirical outcome.
+The SAT encoding is separate and remains empirically undecided. Before any new
+algebraic panel generates fresh targets, run
+`generic_solver_feasibility.py --require-pass` against its exact worker source
+checkout and registered panel. A static pass is only an encoder preflight:
+also pilot actual dispatch and natural failed-attempt accounting on disclosed
+points. The independent factor-base auditor now supports `standard_subspace`;
+changing from the incumbent orbit base is a factor-base-policy comparison.
+The gate requires every smoke and development job to be verified for at least
+one F4/F5 arm and one SAT arm; a reference-selection status alone does not
+qualify either family. Describe the current `f4` backend as a bounded Macaulay
+matrix engine and `f5` as that engine with an F5 row criterion; neither is a
+full incremental Gröbner-basis implementation. `generic_backend_yield.py` checks
+natural ordinary-query attempts in both complete and bounded-incomplete
+reports; timeouts without a full report are censored. Report distinct-point
+rate uncertainty and preserve zero-yield cells. An incomplete arm cannot gain
+a verified speedup or qualification by dropping its failed jobs. Preserve any
+interrupted execution; never redispatch the same registration to replace it.
 
 Before a rho comparison, inspect the actual reference path and run its release
 tests for reference/packed agreement, fruitless-cycle escape, charge closure,
@@ -127,17 +204,16 @@ configuration and count a new family/size/resource regime as a separate panel.
 
 Use `tournament.py prepare` for the calibrated instruction tournament and
 `--selection-width` / `--exploration-slots` to freeze its portfolio budget.
-Two bounded rounds have completed and retained the incumbent: round one in
-workflow `36140265516` (3,243/3,243 pairs) and round two under the version-two
-registry (3,480/3,480 pairs; selected `stop5_word` failed promotion). Read
-[round one](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/README.md)
-and [round two](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/README.md),
-including development-stage evidence, before interpreting the registered third
-attempt. Do not dispatch `run_round_one=true` or `run_round_two=true` again.
-The third panel, seed and prior-point exclusions are fixed in
-`improvement-v2/round3.json` and `run_improvement_v3.py`; verify its workflow
-status before any further execution. A duplicate dispatch or a retry of a
-measured failure is not a new round; retain partial evidence and investigate it.
+Three bounded rounds completed and retained the incumbent: round one in
+workflow `36140265516` (3,243/3,243 pairs), round two under the version-two
+registry (3,480/3,480 pairs; selected `stop5_word`), and round three in
+workflow `36463687634` (3,480/3,480 pairs; selected `stop7_word`). Read
+[round one](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/README.md),
+[round two](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/README.md)
+and [round three](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md)
+with their provenance notes before proposing a new campaign. The old panel,
+seed and exclusions remain fixed in `improvement-v2/round3.json` and
+`run_improvement_v3.py`; neither permits another execution of that attempt.
 
 Selection locks one challenger; confirmation and replay cannot be used to
 retune it. Preserve final failures. Subsequent tuning requires new held-out

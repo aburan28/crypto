@@ -19,7 +19,12 @@ EXPORT_ORDER = ("dense", "sparse", "sparse", "dense")
 def freeze():
     f = json.loads((HERE / "FROZEN.json").read_text())
     assert f["domain"] == "ecc2k130-n13-m5-paired-dense-sparse-cnf-v1"
+    assert f["status"] == "HELD_NO_MEASURED_PANEL"
     assert f["solver_order"] == list(SOLVERS) and f["export_order"] == list(EXPORT_ORDER)
+    assert f["aggregate_wall_cap_seconds"] == 3900.0
+    assert f["rss_policy"] == "sampled-process-tree-20ms-kill-on-observation"
+    assert f["poll_interval_seconds"] == 0.02
+    verify.source_ancestry(f)
     assert f["export_wall_cap_seconds"] == 180.0 and f["export_rss_cap_bytes"] == 512*1024**2
     assert f["solver_wall_cap_seconds"] == 15.0 and f["solver_rss_cap_bytes"] == 2*1024**3
     paths = {
@@ -29,7 +34,8 @@ def freeze():
         "ci_replay_sha256": HERE / "ci_replay.py",
         "analyze_sha256": HERE / "analyze.py",
         "selftest_sha256": HERE / "selftest.py",
-        "workflow_sha256": Path(".github/workflows/ecc2k130-oaware-sparse-dense-sat.yml"),
+        "runtime_controls_sha256": HERE / "runtime_controls.py",
+        "workflow_sha256": verify.REPO / ".github/workflows/ecc2k130-oaware-sparse-dense-sat.yml",
         "dense_export_sha256": verify.DENSE / "export.py",
         "sparse_export_sha256": verify.SPARSE / "export.py",
         "dense_base_sha256": verify.DENSE_DIR / "base.cnf",
@@ -48,8 +54,14 @@ def freeze():
         assert verify.sha(path) == f[key], (key, str(path))
     summary = json.loads((verify.SPARSE / "evidence/final/summary.json").read_text())
     assert summary["decision"] == "PASS"
-    assert sorted(f["binaries"]) == sorted(SOLVERS)
-    assert all(len(row["sha256"]) == 64 and row["version"] for row in f["binaries"].values())
+    prior = json.loads((verify.OLD / "FROZEN.json").read_text())
+    assert f["binaries"] == prior["binaries"]
+    assert f["python_version"] == prior["python_version"] == "3.12.8"
+    assert f["psutil_version"] == prior["psutil_version"] == "7.2.2"
+    assert f["python_executable"] and f["psutil_module_path"] and f["psutil_native_module_path"]
+    for key in ("python_executable_sha256", "psutil_module_sha256",
+                "psutil_native_module_sha256"):
+        assert len(f[key]) == 64 and all(ch in "0123456789abcdef" for ch in f[key])
     schemas, truth, curve, point, old = verify.schemas_and_truth()
     assert [r["id"] for r in schemas["dense"]["targets"][:32]] == [
         f"Q{q}T{t}" for q in range(8) for t in range(4)]

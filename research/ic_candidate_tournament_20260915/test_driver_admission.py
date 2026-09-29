@@ -175,6 +175,25 @@ class DriverAdmissionTests(unittest.TestCase):
         self.assertEqual(paired['rho_runs'][0]['native_process_peak_rss_bytes'], 123456)
         self.assertEqual(paired['rho_runs'][0]['context'], context)
         self.assertEqual(paired['rho_runs'][0]['certificate'], record['certificate'])
+        wrong_workload = copy.deepcopy(rows)
+        wrong_workload[1]['measurement']['workload_id'] = '0'*12
+        with self.assertRaisesRegex(InvalidEvidence, 'different workloads'):
+            online_table(wrong_workload, [dict(id='one', fixture=self.fixture)],
+                         [dict(id='incumbent'), dict(id='rho')], 1, ['rho'])
+        second_repetition = copy.deepcopy(rows)
+        for row in second_repetition:
+            row['repetition'] = 1
+            row['measurement']['run_id'] = row['measurement']['run_id'].rsplit('R', 1)[0]+'R2'
+        for arm, identity, message in (
+                ('incumbent', 'candidate_id', 'different candidates'),
+                ('rho', 'reference_id', 'different references')):
+            with self.subTest(arm=arm):
+                mixed = copy.deepcopy(rows+second_repetition)
+                next(row for row in mixed if row['arm'] == arm and row['repetition'] == 1)[
+                    'measurement'][identity] += '0'
+                with self.assertRaisesRegex(InvalidEvidence, message):
+                    online_table(mixed, [dict(id='one', fixture=self.fixture)],
+                                 [dict(id='incumbent'), dict(id='rho')], 2, ['rho'])
 
     def test_online_pair_preserves_failed_reference_instead_of_a_win(self):
         ic = self.complete(make_admission(**self.kwargs))

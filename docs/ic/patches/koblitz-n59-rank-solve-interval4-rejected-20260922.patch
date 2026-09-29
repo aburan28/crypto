@@ -43,8 +43,8 @@ index 47c80aab..861a2f75 100644
 +        return Err("collection.targeted_tail_solve_interval must be 1..=100000".into());
 +    }
      for (i, t) in p.targets.iter().enumerate() {
-         if [t.known_log.is_some(), t.random_seed.is_some(), t.public_hash_seed.is_some()]
-             .into_iter().filter(|set| *set).count() != 1
+         if [
+             t.known_log.is_some(),
 @@ -577,6 +592,8 @@ pub struct TargetedTailDocument {
      pub base_seed: u64,
      pub trials_per_column: u64,
@@ -54,10 +54,9 @@ index 47c80aab..861a2f75 100644
      pub attempts: Vec<TargetedTailAttempt>,
  }
  
-@@ -1416,6 +1433,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
+@@ -1416,5 +1433,6 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                  || document.trials_per_column != p.collection.targeted_tail_trials
-                 || document.rank_columns_per_round
-                     != p.collection.targeted_tail_rank_columns
+                 || document.rank_columns_per_round != p.collection.targeted_tail_rank_columns
 +                || document.rank_solve_interval != p.collection.targeted_tail_solve_interval
              {
                  return Err(format!(

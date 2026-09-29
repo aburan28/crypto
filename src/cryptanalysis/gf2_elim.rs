@@ -44,6 +44,10 @@
 //! a 64-bit word XORed into a row.  A table entry built costs its suffix,
 //! and a row cleared against `t` tables costs `t` suffixes, however the
 //! hardware groups them.
+//! The opt-in `KIC_GF2_REUSE_TABLE=1` keeps the table buffer across pivot
+//! blocks and clears only each table's zero entry before rebuilding it;
+//! every other addressable entry is overwritten. Its complete-call
+//! comparison is recorded in `research/gf2_table_reuse_20260929`.
 
 use rayon::prelude::*;
 
@@ -148,8 +152,11 @@ pub fn eliminate(
     // Preserve the measured ordering until the tiled path has a valid
     // performance comparison.  Echelon callers never need the reverse pass.
     static DEFER_ABOVE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    static REUSE_TABLE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let defer_above = reduce_above
         && *DEFER_ABOVE.get_or_init(|| std::env::var("KIC_GF2_DEFER_ABOVE").as_deref() == Ok("1"));
+    let reuse_table =
+        *REUSE_TABLE.get_or_init(|| std::env::var("KIC_GF2_REUSE_TABLE").as_deref() == Ok("1"));
     eliminate_with(
         matrix,
         n_cols,
@@ -158,6 +165,7 @@ pub fn eliminate(
         config,
         word_ops,
         None,
+        reuse_table,
     )
 }
 
@@ -169,6 +177,7 @@ fn eliminate_with(
     config: Config,
     word_ops: &mut u64,
     reverse_tile_words: Option<usize>,
+    reuse_table: bool,
 ) -> usize {
     let rows = matrix.len();
     let words = n_cols.div_ceil(64);
@@ -285,6 +294,7 @@ fn eliminate_with(
                 config,
                 simd,
                 word_ops,
+                reuse_table,
             );
             if defer_above {
                 blocks.push((block_start, pivot_cols.clone()));
@@ -440,6 +450,7 @@ fn clear_block(
     config: Config,
     simd: SimdKind,
     word_ops: &mut u64,
+    reuse_table: bool,
 ) {
     let b = pivot_cols.len();
     if reduce_above && !reduce_below && block_start == 0 {
@@ -454,13 +465,20 @@ fn clear_block(
     let suffix = end_word - first_word;
     let n_tables = b.div_ceil(bits);
     let table_size = 1usize << bits;
-    table.clear();
+    if !reuse_table {
+        table.clear();
+    }
     table.resize(n_tables * table_size * suffix, 0);
     // Gray-code tables: entry g of table t is the XOR of the pivots whose
     // bits within the table's group are set in g.
     for t in 0..n_tables {
         let group = &pivot_cols[t * bits..((t + 1) * bits).min(b)];
         let base = t * table_size * suffix;
+        if reuse_table {
+            // Entry zero is read while building each nonzero Gray-code
+            // entry. All other addressable entries are overwritten below.
+            table[base..base + suffix].fill(0);
+        }
         for g in 1usize..(1 << group.len()) {
             let low_bit = g.trailing_zeros() as usize;
             let prev = g & (g - 1);
@@ -756,6 +774,52 @@ mod tests {
     }
 
     #[test]
+    fn reused_tables_preserve_rows_rank_and_counted_xors() {
+        let mut rng = StdRng::seed_from_u64(117);
+        for &(rows, cols) in &[(135, 321), (310, 777)] {
+            for density in [0.08, 0.5] {
+                let input = random_matrix(&mut rng, rows, cols, density);
+                for tables in [1, 2, 4] {
+                    for reduce_above in [false, true] {
+                        let config = Config {
+                            tables,
+                            parallel_words: usize::MAX,
+                            simd: false,
+                        };
+                        let mut old = input.clone();
+                        let mut new = input.clone();
+                        let mut old_ops = 0;
+                        let mut new_ops = 0;
+                        let old_rank = eliminate_with(
+                            &mut old,
+                            cols,
+                            reduce_above,
+                            false,
+                            config,
+                            &mut old_ops,
+                            None,
+                            false,
+                        );
+                        let new_rank = eliminate_with(
+                            &mut new,
+                            cols,
+                            reduce_above,
+                            false,
+                            config,
+                            &mut new_ops,
+                            None,
+                            true,
+                        );
+                        assert_eq!(new_rank, old_rank);
+                        assert_eq!(new, old);
+                        assert_eq!(new_ops, old_ops);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
     fn rref_matches_the_textbook_elimination() {
         let mut rng = StdRng::seed_from_u64(7);
         let shapes = [
@@ -785,6 +849,7 @@ mod tests {
                             config,
                             &mut ops,
                             Some(2),
+                            false,
                         );
                         assert_eq!(
                             r, rank,
@@ -839,7 +904,8 @@ mod tests {
                             defer_above,
                             config,
                             &mut ops,
-                            Some(3)
+                            Some(3),
+                            false,
                         ),
                         rank
                     );
@@ -897,7 +963,8 @@ mod tests {
                     true,
                     Config::default(),
                     &mut ops,
-                    width
+                    width,
+                    false,
                 ),
                 rank
             );
