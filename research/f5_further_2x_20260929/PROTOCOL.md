@@ -59,13 +59,16 @@ cannot establish the requested gain. Preserve the raw screen receipt.
 ## Frozen workload and accounting
 
 Use the seven F5 cases in `examples/f4_f2_bench.rs` with the four seeds
-`0`, `badc0de1`, `5eed2026`, `f5c02a28`, each case run in a separate process
-under one release binary. The primary is `f5_n24_m24_d4`. Reference and
+`0`, `badc0de1`, `5eed2026`, `f5c02a28`. Each process emits all seven cases;
+the two arms run in separate processes under one release binary. The primary
+is `f5_n24_m24_d4`. Reference and
 candidate share `KIC_F5_ECHELON=2`, `KIC_F5_FUSED_BUILD=1`,
 `KIC_F5_DIRECT_PACK=1`, `KIC_GF2_FORCE_AVX2=1`,
 `KIC_GF2_REUSE_TABLE=1`, `KIC_GF2_SIMD=1`,
 `KIC_GF2_DEFER_ABOVE=0`, and `KIC_GF2_WORD_BATCH=0`.
-The reference disables each new option. Use one pinned CPU on a Linux
+The reference uses `KIC_F5_UNPACK_DIRECT=0` and the candidate uses `=1`;
+other exploratory options are absent from the promotion build. Use one pinned
+CPU on a Linux
 x86-64 host with AVX2 and BMI2 and `RAYON_NUM_THREADS=1`; do not claim a
 Linux gain from Apple ARM64 screening. Record unsupported hosts explicitly.
 
