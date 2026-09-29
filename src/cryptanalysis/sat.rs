@@ -423,10 +423,18 @@ pub struct Solver {
     ///
     /// Backjumping only *unassigns* variables, which cannot break the
     /// invariant, so it costs no work there either.
-    matrix: Vec<XorRow>,
+    ///
+    /// Stored flat, row `i` at `matrix[i * words .. (i + 1) * words]`
+    /// with its right-hand side in `matrix_rhs[i]`: the elimination's
+    /// column test and row XOR then index one allocation instead of
+    /// chasing a pointer per row.
+    matrix: Vec<u64>,
+    matrix_rhs: Vec<bool>,
     /// `pivot[i]` is row `i`'s basic variable; `None` once the row has
     /// no unassigned variable left.
     pivot: Vec<Option<u32>>,
+    /// Scratch copy of the row being pivoted on, reused across passes.
+    xor_src: Vec<u64>,
     /// `analyze` scratch: which variables have been resolved on.  Only
     /// the entries in `seen_stack` are dirty, so clearing is O(touched)
     /// rather than O(variables).
@@ -492,6 +500,17 @@ fn bs_flip(mask: &mut [u64], v: u32) {
     mask[v as usize / 64] ^= 1u64 << (v % 64);
 }
 
+/// `dst ^= src`, word by word.  Kept out of line on purpose: inlined
+/// into the elimination's column scan, which calls it for about a third
+/// of the rows, its vectorised loop made the compiler carry several
+/// row pointers through the scan and spill them.
+#[inline(never)]
+fn xor_into(dst: &mut [u64], src: &[u64]) {
+    for (d, &s) in dst.iter_mut().zip(src) {
+        *d ^= s;
+    }
+}
+
 #[inline]
 fn watch_index(lit: Lit) -> usize {
     let v = var_of(lit) as usize;
@@ -535,7 +554,9 @@ impl Solver {
             xor_reason: vec![Vec::new(); n],
             xor_conflict: Vec::new(),
             matrix: Vec::new(),
+            matrix_rhs: Vec::new(),
             pivot: Vec::new(),
+            xor_src: Vec::new(),
             seen: vec![false; n],
             seen_stack: Vec::new(),
             redundant_stack: Vec::new(),
@@ -579,7 +600,7 @@ impl Solver {
             return true;
         }
         self.xors.push(XorRow { mask, rhs });
-        self.matrix.clear(); // rebuilt on the next pass
+        self.clear_matrix(); // rebuilt on the next pass
         self.xor_epoch = u64::MAX; // force a pass on the next propagate
         true
     }
@@ -629,7 +650,7 @@ impl Solver {
         for row in &mut self.xors {
             row.mask.resize(words, 0);
         }
-        self.matrix.clear();
+        self.clear_matrix();
         self.pivot.clear();
         self.xor_epoch = u64::MAX;
         self.n_vars = new_total;
@@ -933,9 +954,10 @@ impl Solver {
     fn propagate_xors(&mut self) -> XorStep {
         self.stats.xor_passes += 1;
         let words = bs_words(self.n_vars);
-        if self.matrix.len() != self.xors.len() {
+        if self.matrix_rhs.len() != self.xors.len() {
             self.rebuild_matrix();
         }
+        let rows = self.matrix_rhs.len();
 
         // ── Phase 1: restore the pivot invariant ────────────────────
         //
@@ -943,11 +965,7 @@ impl Solver {
         // the usual cost is `O(broken rows × rows × words)` rather than
         // the `O(rows² × words)` of re-eliminating from scratch.
         let mut step = XorStep::Fixpoint;
-        let mut src = XorRow {
-            mask: vec![0; words],
-            rhs: false,
-        };
-        for i in 0..self.matrix.len() {
+        for i in 0..rows {
             let intact = match self.pivot[i] {
                 Some(p) => self.var_value(p as usize).is_none(),
                 None => false,
@@ -957,15 +975,14 @@ impl Solver {
             }
             self.stats.xor_repivots += 1;
 
-            match self.lowest_unassigned(&self.matrix[i].mask) {
+            let row_i = i * words..(i + 1) * words;
+            match self.lowest_unassigned(&self.matrix[row_i.clone()]) {
                 None => {
                     // No unassigned variable left: the row is decided.
                     self.pivot[i] = None;
-                    if self.row_residual(i) {
+                    if self.row_residual(i, words) {
                         let mut buf = std::mem::take(&mut self.xor_conflict);
-                        let mask = std::mem::take(&mut self.matrix[i].mask);
-                        self.write_xor_reason(&mask, None, &mut buf);
-                        self.matrix[i].mask = mask;
+                        self.write_xor_reason(&self.matrix[row_i], None, &mut buf);
                         self.xor_conflict = buf;
                         self.stats.xor_conflicts += 1;
                         return XorStep::Conflict;
@@ -974,19 +991,29 @@ impl Solver {
                 Some(p) => {
                     self.pivot[i] = Some(p);
                     // Clear `p` from every other row, so it lives in
-                    // this one alone.
-                    src.rhs = self.matrix[i].rhs;
-                    src.mask.copy_from_slice(&self.matrix[i].mask);
-                    for j in 0..self.matrix.len() {
-                        if j == i || !bs_get(&self.matrix[j].mask, p) {
+                    // this one alone.  The row is copied out once, the
+                    // matrix is walked through local slices with a local
+                    // counter, and the row XOR is out of line: the
+                    // column test then compiles to a load and a test per
+                    // row instead of sharing registers with the XOR.
+                    let (pw, pbit) = (p as usize / 64, 1u64 << (p % 64));
+                    let src_rhs = self.matrix_rhs[i];
+                    let mut src = std::mem::take(&mut self.xor_src);
+                    src.clear();
+                    src.extend_from_slice(&self.matrix[row_i]);
+                    let matrix = &mut self.matrix[..rows * words];
+                    let matrix_rhs = &mut self.matrix_rhs[..rows];
+                    let mut row_ops = 0u64;
+                    for j in 0..rows {
+                        if j == i || matrix[j * words + pw] & pbit == 0 {
                             continue;
                         }
-                        self.stats.xor_row_ops += 1;
-                        self.matrix[j].rhs ^= src.rhs;
-                        for w in 0..words {
-                            self.matrix[j].mask[w] ^= src.mask[w];
-                        }
+                        row_ops += 1;
+                        matrix_rhs[j] ^= src_rhs;
+                        xor_into(&mut matrix[j * words..(j + 1) * words], &src);
                     }
+                    self.stats.xor_row_ops += row_ops;
+                    self.xor_src = src;
                 }
             }
         }
@@ -997,30 +1024,30 @@ impl Solver {
         // when its pivot is its *only* unassigned variable — so this is
         // a popcount, and no further elimination is needed.
         let mut propagated = false;
-        'rows: for i in 0..self.matrix.len() {
+        'rows: for i in 0..rows {
             let p = match self.pivot[i] {
                 Some(p) => p,
                 None => continue, // decided in phase 1
             };
             self.stats.xor_row_scans += 1;
-            let mut parity = self.matrix[i].rhs;
-            let mut lone = true;
-            for w in 0..words {
-                let m = self.matrix[i].mask[w];
+            let row = &self.matrix[i * words..(i + 1) * words];
+            let mut parity = self.matrix_rhs[i];
+            for (w, ((&m, &assigned), &value)) in row
+                .iter()
+                .zip(&self.assigned_w)
+                .zip(&self.value_w)
+                .enumerate()
+            {
                 if m == 0 {
                     continue;
                 }
-                let free = m & !self.assigned_w[w];
+                let free = m & !assigned;
                 if free.count_ones() > 1
                     || (free != 0 && free.trailing_zeros() + (w * 64) as u32 != p)
                 {
-                    lone = false;
-                    break;
+                    continue 'rows;
                 }
-                parity ^= ((m & self.assigned_w[w] & self.value_w[w]).count_ones() & 1) == 1;
-            }
-            if !lone {
-                continue 'rows;
+                parity ^= ((m & assigned & value).count_ones() & 1) == 1;
             }
 
             let lit = if parity {
@@ -1029,9 +1056,11 @@ impl Solver {
                 -((p + 1) as Lit)
             };
             let mut buf = std::mem::take(&mut self.xor_reason[p as usize]);
-            let mask = std::mem::take(&mut self.matrix[i].mask);
-            self.write_xor_reason(&mask, Some(lit), &mut buf);
-            self.matrix[i].mask = mask;
+            self.write_xor_reason(
+                &self.matrix[i * words..(i + 1) * words],
+                Some(lit),
+                &mut buf,
+            );
             self.stats.xor_reason_lits += buf.len() as u64;
             self.xor_reason[p as usize] = buf;
             self.stats.xor_propagations += 1;
@@ -1065,16 +1094,26 @@ impl Solver {
     /// the trail is empty anyway, bounds that drift.
     fn rebuild_matrix(&mut self) {
         self.matrix.clear();
-        self.matrix.extend_from_slice(&self.xors);
+        self.matrix_rhs.clear();
+        for row in &self.xors {
+            self.matrix.extend_from_slice(&row.mask);
+            self.matrix_rhs.push(row.rhs);
+        }
         self.pivot.clear();
-        self.pivot.resize(self.matrix.len(), None);
+        self.pivot.resize(self.matrix_rhs.len(), None);
+    }
+
+    /// Drop the working matrix; the next pass rebuilds it from `xors`.
+    fn clear_matrix(&mut self) {
+        self.matrix.clear();
+        self.matrix_rhs.clear();
     }
 
     /// `rhs ⊕ parity(assigned-true variables of the row)` — zero when a
     /// fully assigned row is satisfied.
-    fn row_residual(&self, i: usize) -> bool {
-        let mut parity = self.matrix[i].rhs;
-        for (w, &m) in self.matrix[i].mask.iter().enumerate() {
+    fn row_residual(&self, i: usize, words: usize) -> bool {
+        let mut parity = self.matrix_rhs[i];
+        for (w, &m) in self.matrix[i * words..(i + 1) * words].iter().enumerate() {
             if m != 0 {
                 parity ^= ((m & self.assigned_w[w] & self.value_w[w]).count_ones() & 1) == 1;
             }
@@ -1097,25 +1136,39 @@ impl Solver {
     /// every assigned variable of the row appears negated-as-assigned,
     /// so the clause is false under the current trail except for
     /// `implied` (absent for a conflict clause, which is wholly false).
+    ///
+    /// Only the row's *assigned* variables are walked, and each sign is
+    /// read from the `value_w` bit already in the word being scanned.
+    /// Every variable of the row but `implied`'s is assigned — that is
+    /// what made the row unit or conflicting — and `implied`'s is not,
+    /// so this writes exactly the literals the per-variable lookup did.
     fn write_xor_reason(&self, mask: &[u64], implied: Option<Lit>, clause: &mut Vec<Lit>) {
         clause.clear();
         if let Some(l) = implied {
+            debug_assert!(
+                self.lit_value(l).is_none(),
+                "implied literal already assigned"
+            );
             clause.push(l);
         }
-        let implied_var = implied.map(var_of);
         for (w, &word) in mask.iter().enumerate() {
-            let mut bits = word;
+            if cfg!(debug_assertions) {
+                let implied_bit = match implied {
+                    Some(l) if var_of(l) as usize / 64 == w => 1u64 << (var_of(l) % 64),
+                    _ => 0,
+                };
+                assert_eq!(
+                    word & !self.assigned_w[w] & !implied_bit,
+                    0,
+                    "reason clause over an unassigned variable"
+                );
+            }
+            let (mut bits, value) = (word & self.assigned_w[w], self.value_w[w]);
             while bits != 0 {
-                let v = (w * 64) as u32 + bits.trailing_zeros();
+                let b = bits.trailing_zeros();
                 bits &= bits - 1;
-                if Some(v) == implied_var {
-                    continue;
-                }
-                match self.var_value(v as usize) {
-                    Some(true) => clause.push(-((v + 1) as Lit)),
-                    Some(false) => clause.push((v + 1) as Lit),
-                    None => debug_assert!(false, "reason clause over an unassigned variable"),
-                }
+                let v = ((w * 64) as u32 + b + 1) as Lit;
+                clause.push(if (value >> b) & 1 == 1 { -v } else { v });
             }
         }
     }
