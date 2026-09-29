@@ -183,7 +183,9 @@ The native screen is diagnostic and always sets `promotion_eligible=false`.
 
 Keep a portfolio: total-cost leaders, alternatives on the Pareto frontier,
 different solver/base families, cell specialists, and predeclared exploration
-slots. Use development evidence only. `autolab.py recombine` builds explicit
+slots. Sample those slots across previously unrepresented complete-solve
+families before revisiting a family with many similar variants. Use development
+evidence only. `autolab.py recombine` builds explicit
 combinations of disjoint configuration changes; source combinations need their
 own builds. Measure each combination as a complete algorithm. Never sum cheap
 phases from different runs. Include some initially slower mechanisms: interaction

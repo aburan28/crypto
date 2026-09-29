@@ -192,7 +192,9 @@ are never a candidate. Retain slower distinct mechanisms too.
 
 The instruction tournament defaults to `--selection-width 6 --exploration-slots 1`.
 Development retains the instruction leader, native leader, nondominated families,
-cell specialists, and a deterministic random outsider. The vector uses complete
+cell specialists, and deterministic family-balanced exploration slots. Those
+slots prefer eligible, previously unrepresented solver/base families, so a family
+with many near-identical registrations cannot crowd out a new mechanism. The vector uses complete
 costs across both metrics and all cells. Everything else remains in raw evidence.
 The portfolio budget and seed are frozen before runs. Only one challenger reaches
 confirmation, selected on separate selection targets. Do not retune on confirmation.
