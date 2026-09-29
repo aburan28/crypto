@@ -8420,6 +8420,27 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
 </section>
 <!-- END ic-tournament-round-0024 -->
 <section><h2>Curve identities and archived measurements</h2><p>New cross-repository comparisons use exact field, curve and subgroup identities. <a href="https://github.com/aburan28/crypto/blob/e51d15f03d92a1fa61b81ebb7e09081b574b905d/docs/curve-identities.md">Naming and provenance contract</a>. Existing historical rows retain their original labels until source-specific identity mappings are available. The <a href="https://aburan28.github.io/crypto-autoresearcher/#/compare">research dashboard</a> integration is pending the UI PR deployment.</p></section>
+
+<!-- BEGIN boolean-representation-audit-20260929 -->
+<section class="panel" id="boolean-representation-audit-20260929">
+<div class="panel-head"><h2>Boolean row representations <span class="chip">stage diagnostic</span></h2>
+<p>Standalone synthetic algebra at 6/8 polynomial variables, not curve field degrees.
+Sparse and packed backends produced identical certificates and algebraic-work counters:
+12 systems, 504 worker samples, 1,416 verified computations. Classification: representation engineering.
+Full ECDLP cost, ratio to rho, ratio to the cryptographic floor and end-to-end speedup: unset.</p>
+<p>Provisional frontier compute-time ratios (packed/sparse) on the four new cases are
+0.974, 0.994, 0.291 and 0.203. Frontier fails its all-holdout improvement gate;
+the exhaustive schedule passes the numerical gate. No robust hardware claim:
+baseline-only controls revealed substantial host noise and NUMA memory binding failed.</p></div>
+<div class="table-wrap"><table><caption>Observed support growth from the frozen synthetic audit; heuristic interaction width is not an application-level result.</caption>
+<thead><tr><th>Case</th><th>Max input row terms</th><th>Peak reduced/pivot row terms</th><th>Min-fill width upper bound</th><th>Exactness</th></tr></thead>
+<tbody><tr><td>chain-linear-8</td><td>2</td><td>2</td><td>1</td><td>verified</td></tr><tr><td>cycle-quadratic-8</td><td>1</td><td>1</td><td>2</td><td>verified</td></tr><tr><td>sparse-quadratic-8</td><td>6</td><td>50</td><td>7</td><td>verified</td></tr><tr><td>dense-quadratic-8</td><td>18</td><td>76</td><td>7</td><td>verified</td></tr></tbody></table></div>
+<div class="panel-head"><p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/boolean_representation_audit/README.md">protocol interpretation and all variants</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/boolean_representation_audit/runs/20260929/results.json">frozen results</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/boolean_representation_audit/AUDIT_RECEIPT.json">receipt reconciliation</a>.
+Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-130 improvement is established.</p></div>
+</section>
+<!-- END boolean-representation-audit-20260929 -->
 </body>
 </html>
 

@@ -1,0 +1,66 @@
+{
+  "scope": "standalone synthetic algebra stage diagnostic",
+  "source_commit": "aa56cbb51ff53d8df64d65bdebd8aaefeb594d51",
+  "cases": 12,
+  "worker_samples": 504,
+  "verified_computations": 1416,
+  "gate": {
+    "exhaustive": true,
+    "frontier": false
+  },
+  "end_to_end_speedup": null,
+  "rows": [
+    {
+      "case": "holdout-chain-linear-8",
+      "width_upper_bound": 1,
+      "max_input_terms": 2,
+      "peak_reduced_terms": 2,
+      "ratio": {
+        "median": 0.9737252097008865,
+        "bootstrap_95pct": [
+          0.9330929583453406,
+          1.0804004818409803
+        ]
+      }
+    },
+    {
+      "case": "holdout-cycle-quadratic-8",
+      "width_upper_bound": 2,
+      "max_input_terms": 1,
+      "peak_reduced_terms": 1,
+      "ratio": {
+        "median": 0.9939997208991153,
+        "bootstrap_95pct": [
+          0.883774244284055,
+          1.0509115833427725
+        ]
+      }
+    },
+    {
+      "case": "holdout-sparse-quadratic-8",
+      "width_upper_bound": 7,
+      "max_input_terms": 6,
+      "peak_reduced_terms": 50,
+      "ratio": {
+        "median": 0.2907478729392181,
+        "bootstrap_95pct": [
+          0.28196136365764335,
+          0.3122586699502868
+        ]
+      }
+    },
+    {
+      "case": "holdout-dense-quadratic-8",
+      "width_upper_bound": 7,
+      "max_input_terms": 18,
+      "peak_reduced_terms": 76,
+      "ratio": {
+        "median": 0.20339499475603803,
+        "bootstrap_95pct": [
+          0.19919756014997847,
+          0.20950596762812895
+        ]
+      }
+    }
+  ]
+}
