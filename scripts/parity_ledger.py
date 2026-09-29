@@ -275,7 +275,7 @@ def main():
         rho_p, rho_se, nr = jv["dlp_rho_pooled"]
         ratio = S[-1] / rho_p
         span = f"2^{math.log2(sizes[0]):.1f}–2^{math.log2(sizes[-1]):.1f}"
-        print(f"| **k = 4, Joux–Vitse three-point decompositions (this note)** | {span} | {S[-1]:,.0f} | {rho_p:.2f} (pooled, {nr} runs) | **{ratio:,.0f}×** | 1/2 (derived; measured below) | 1/2 (derived) | {c:+.2f} ± {cse:.2f} | **constant**: 3C′/(S_rho·c_add) + r | needs C′ < {(1 - d[-1]['r_last']) * rho_p * d[-1]['c_add'] / 3:.0f} F_p multiplications; measured C′ = {d[-1]['c_prime']:,.0f} |")
+        print(f"| **k = 4, Joux–Vitse three-point decompositions (this note)** | {span} | {S[-1]:,.0f} | {rho_p:.2f} (pooled, {nr} runs) | **{ratio:,.0f}×** | 1/2 (derived; measured below) | 1/2 (derived) | {c:+.2f} ± {cse:.2f} | **constant**: 3C′/(S_rho·c_add) + r | needs C′ < {(1 - sum(x['r_last'] for x in d) / len(d)) * rho_p * d[-1]['c_add'] / 3:.0f} F_p multiplications; measured C′ = {d[-1]['c_prime']:,.0f} |")
 
     print("\n## B. The k = 4 Joux–Vitse route, measured\n")
     if jv and "cprime" in jv:
@@ -310,7 +310,7 @@ def main():
                 print(f"- k = 4, full decompositions, parity at 2^{bits}: C₄ < {c4_needed:.2e} F_p multiplications — met by the measured {k4['C4']:.2e} (the handover 2^{4*math.log2(12*k4['C4']/(k4['S_rho']*k4['c_add']*(1-k4['r_inf']))):.0f} is below 2^{bits}); an extrapolation on n^{{1/4}} and n^{{1/2}}.")
     if jv and "cprime" in jv:
         x = jv["cprime"][-1]
-        r = jv["dlp"][-1]["r_last"] if "dlp" in jv else 0.518
+        r = (sum(x["r_last"] for x in jv["dlp"]) / len(jv["dlp"])) if "dlp" in jv else 0.518
         rho_ref = jv["dlp_rho_pooled"][0] if "dlp" in jv else 1.319
         need = (1 - r) * rho_ref * x["c_add"] / 3
         print(f"- k = 4, Joux–Vitse three-point: parity needs C′ < {need:.1f} F_p multiplications at r = {r:.3f} (last attempt); the Weil restriction alone costs {x['weil']:,.0f} and the measured C′ is {x['c_prime']:,.0f} ({x['c_prime']/need:,.0f}× over).  A test {x['c_prime']/1513:.0f}× cheaper would reach §11.16's assumed 36×; no test reaches one.")

@@ -2,7 +2,7 @@
 
 **Module:** `src/cryptanalysis/jv_quartic.rs` (the Joux–Vitse three-point decomposition at `k = 4`; `f4_fp::field_ops_total` exposed for batch accounting)
 **Bench:**  `cargo run --release --example jv_quartic -- --exp {cprime,dlp} --sizes 269,521,769,1033 --seeds 2 [--residuals 200 --constructed 40 | --rho-runs 16 --check-every 256] --json experiments/26_jv_quartic_<exp>.json`
-**Data:**   `experiments/26_jv_quartic_cprime.{json,log}`, `experiments/26_jv_quartic_dlp.{json,log}` (2026-09-28); every earlier route from its own frozen file (`22_glv_quotient_seeds6.json`, `21_gaudry_cubic_la.json`, `24_gaudry_quartic_c4.json`, `25_gaudry_quartic_la.json`)
+**Data:**   `experiments/26_jv_quartic_cprime.{json,log}`, `experiments/26_jv_quartic_dlp.{json,log}` (2026-09-28/29); every earlier route from its own frozen file (`22_glv_quotient_seeds6.json`, `21_gaudry_cubic_la.json`, `24_gaudry_quartic_c4.json`, `25_gaudry_quartic_la.json`)
 **Tables:** `python3 scripts/parity_ledger.py` (every number in §§2–4 is printed by it from the frozen files; the two pair-only figures are copied from `RESEARCH_RESIDUAL_WALKS.md` §11.9 and marked so)
 **Setting:** Gaudry's subspace base `{P : x(P) ∈ F_p}` on `E(F_{p^k})`, the harness of `RESEARCH_RESIDUAL_WALKS.md` §11 (`k = 3`, §11.16–11.19 for `k = 4`) and `RESEARCH_GLV_INDEX_CALCULUS.md`.
 
@@ -10,8 +10,8 @@
 > ratio, and on this harness every measured route is bounded away from
 > `S / rho = 1` by an exponent, not a constant — except one, whose distance
 > to parity *is* a constant, and it was measured here for the first time:
-> Joux–Vitse three-point decompositions at `k = 4` cost `S / rho ≈ RATIO_JV×`
-> flat from `2^32` to `2^40` (residuals `∝ n^{RES_EXP}`, `S ∝ n^{S_EXP}`),
+> Joux–Vitse three-point decompositions at `k = 4` cost `S / rho ≈ 6,945×`
+> flat from `2^32` to `2^40` (residuals `∝ n^{0.496}`, `S ∝ n^{-0.003}`),
 > because one three-point test costs `C′ = 1.6·10⁵` `F_p` multiplications
 > against the `1,513` §11.16 had borrowed from the `k = 3` pair test, and
 > parity on that route needs `C′ < 21`, which the Weil restriction alone
@@ -42,30 +42,15 @@ get there:
 3. **The constants**, which only matter when the exponents allow parity at
    all: `S / rho ∝ n^{max(a, b) − 1/2}`.
 
-| `k` | route | `a` | `b` | `S / rho` moves as | parity is |
-|---:|:--|--:|--:|:--|:--|
-| 3 | full (three-point) | 1/3 | 2/3 | `n^{+1/6}` past the minimum | never |
-| 3 | double large primes | 4/9 | 4/9 (`0.56` as built) | `n^{−1/18}` | a size: `2^237` extrapolated |
-| 3 | Joux–Vitse pair-only | 2/3 | — | `n^{+1/6}` | never |
-| 4 | full (four-point) | 1/4 | 1/2 | `→ r∞ = 0.52` | a size: `2^151` extrapolated |
-| 4 | **Joux–Vitse three-point** | **1/2** | **1/2** | **constant** | **a constant: `3C′/(S_rho·c_add) + r∞`** |
-| 5 | Joux–Vitse four-point | 2/5 | 2/5 | `n^{−1/10}` | a size, set by `C″` (§6) |
-
-The `k = 4` Joux–Vitse row is the only one where "how far from parity" does
-not depend on `n`, so it is the one place a constant can be measured once
-and read as the verdict at every size.  §11.16 of the residual-walk note
-derived that constant as `≈ 36×` by borrowing `C′ ≈ 1,513` from the `k = 3`
-pair test; it had never been built.  This note builds it, with every phase
-priced, and measures `C′` with every test cross-checked.
-
-## 2. The parity ledger, from the frozen files
-
-`python3 scripts/parity_ledger.py`, section A.  Exponents are least-squares
-fits over the four sizes of each file; "parity" is where `S / rho` would
-reach `1` on those exponents, and is an extrapolation wherever it names a
-size.
-
-LEDGER_A
+| `k` | route | sizes | S at top | rho S | S / rho | relation phase ∝ n^a | linear algebra ∝ n^b | S / rho ∝ n^c (measured) | asymptote | parity |
+|:--|:--|--:|--:|--:|--:|--:|--:|:--|:--|
+| k = 3, plain, ⟨−1⟩ base, O(1) S₄ solve | 2^24.2–2^33.1 | 964 | 1.39 | 691× | 0.34 ± 0.00 | 0.66 ± 0.00 | -0.15 ± 0.00 | relations n^{1/3}, LA n^{2/3}: S rises after its minimum | never; minimum ≈ 177× rho near 2^52 (extrapolated on a = 0.34, b = 0.66) |
+| k = 3, ⟨ψ⟩ quotient (j = 0) | 2^24.2–2^33.1 | 312 | 1.39 | 224× | 0.34 ± 0.00 | 0.64 ± 0.00 | -0.16 ± 0.00 | relations n^{1/3}, LA n^{2/3}: S rises after its minimum | never; minimum ≈ 26× rho near 2^59 (extrapolated on a = 0.34, b = 0.64) |
+| k = 3, plain, Wiedemann (§11.7) | 2^24.2–2^33.1 | 974 | 1.30 | 750× | 0.32 ± 0.01 | 0.68 ± 0.02 | -0.18 ± 0.01 | relations n^{1/3}, LA n^{0.68} | never; minimum ≈ 183× rho near 2^50 (extrapolated) |
+| k = 3, double large primes (§11.7) | 2^24.2–2^33.1 | 3,378 | 1.30 | 2,599× | 0.44 ± 0.01 | 0.56 ± 0.01 | -0.06 ± 0.01 | n^{4/9} end to end: closes as n^{-1/18} | 2^237 at the measured n^{-0.056}; 2^237 at n^{-1/18} (extrapolated) |
+| k = 3, pair-only (k − 1) decompositions (§11.9, from the note) | 2^24.2–2^33.1 | 1,659 | 1.6 | 1,037× | 0.72 | — | +0.22 | residuals n^{2/3}: S rises | never |
+| k = 4, full decompositions (S₅ solve, §11.17 C₄ + §11.19 r∞) | 2^32.3–2^40.1 | — | 1.32 | relation phase ≫ 10⁸× at 2^32 | 1/4 (derived) | 0.48 ± 0.02 measured (1/2 derived) | → r∞ = 0.518 ± 0.018 | tends to r∞ below one | 2^151 (extrapolated on C₄ = 1.21e+12, n^{1/4}, n^{1/2}) |
+| **k = 4, Joux–Vitse three-point decompositions (this note)** | 2^32.3–2^40.1 | 8,126 | 1.32 (pooled, 128 runs) | **6,160×** | 1/2 (derived; measured below) | 1/2 (derived) | +0.00 ± 0.05 | **constant**: 3C′/(S_rho·c_add) + r | needs C′ < 21 F_p multiplications; measured C′ = 161,869 |
 
 Reading it:
 
@@ -85,7 +70,7 @@ Reading it:
   at `2^80` (`2·10⁵×` below the measurement and `10⁴×` below the solver's
   own `7.1·10¹⁰` floor), `2.2·10¹⁰` at `2^128`.  Not a constant this design
   can reach.
-- **`k = 4` Joux–Vitse is a constant, and the constant is `RATIO_JV×`**, §3.
+- **`k = 4` Joux–Vitse is a constant, and the constant is `6,945×`**, §3.
 
 ## 3. The `k = 4` Joux–Vitse route, built and measured
 
@@ -148,7 +133,12 @@ unknowns are inconsistent with a certificate at degree `7`, whose matrix is
 `80 × 120` — against §11.16's borrowed `1,513`; falsification of "`36×`"
 at `C′ > 3,000`.
 
-LEDGER_B1
+| p | n | \|F\| | random residuals | constructed, planted found | mismatches vs oracle | undetermined | C′ (F_p muls, mean over random) | Weil | F4 | F4 matrix (rows × cols) | F4 ms | oracle (group ops) |
+|---:|:--|--:|--:|:--|--:|--:|--:|--:|--:|:--|--:|--:|
+| 269 | 2^32.3 | 138 | 400 | 80/80 | 0 | 0 | 161,213 | 3,401 | 157,810 | 85 × 118 | 1.69 | 277 |
+| 521 | 2^36.1 | 262 | 400 | 80/80 | 0 | 0 | 161,453 | 3,401 | 158,052 | 84 × 117 | 1.79 | 523 |
+| 769 | 2^38.3 | 388 | 400 | 80/80 | 0 | 0 | 161,487 | 3,401 | 158,086 | 84 × 117 | 1.48 | 775 |
+| 1033 | 2^40.1 | 522 | 400 | 80/80 | 0 | 0 | 161,540 | 3,401 | 158,139 | 84 × 117 | 1.74 | 1,044 |
 
 - `C′ = 1.61·10⁵` `F_p` multiplications, flat in `p` (`±0.2 %` over
   `2^32–2^40`), `98 %` of it F4's row reductions on matrices of at most
@@ -165,28 +155,35 @@ LEDGER_B1
 
 ### 3.3 The method end to end
 
-LEDGER_B2
+| p | n | seeds | \|F\| | residuals | relations | rate (1/6p) | residuals / floor | C′ paid | S | walk | oracle | LA | rho S (16 runs per seed) | S / rho | relation phase / rho | r (LA / rho, every attempt) | attempts | r, last attempt | formula 3C′/(S_rho c_add) + r | cross-checked, mismatches | correct |
+|---:|:--|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
+| 269 | 2^32.3 | 2 | 138 | 402,919 | 289 | 0.00071 (0.00062) | 1.78 | 161,041 | 9,269 | 0.1 % | 99.7 % | 0.2 % | 1.38 | 6,805× | 6,791× | 14.138 | 26 | 0.541 | 3,647× | 3149, 0 | yes |
+| 521 | 2^36.1 | 2 | 262 | 1,264,888 | 416 | 0.00033 (0.00032) | 1.54 | 161,576 | 7,775 | 0.1 % | 99.8 % | 0.1 % | 1.25 | 6,223× | 6,216× | 6.678 | 15 | 0.506 | 3,992× | 9883, 0 | yes |
+| 769 | 2^38.3 | 2 | 388 | 4,059,135 | 889 | 0.00022 (0.00022) | 2.26 | 161,763 | 11,472 | 0.1 % | 99.8 % | 0.2 % | 1.31 | 8,882× | 8,869× | 13.232 | 30 | 0.540 | 3,991× | 31713, 0 | yes |
+| 1033 | 2^40.1 | 2 | 522 | 5,187,982 | 822 | 0.00017 (0.00016) | 1.62 | 161,869 | 8,126 | 0.1 % | 99.8 % | 0.1 % | 1.34 | 6,143× | 6,137× | 5.837 | 15 | 0.468 | 3,758× | 40532, 0 | yes |
 
-LEDGER_B2_TEXT
+Pooled rho S = 1.319 ± 0.065 over 128 runs.  Fitted exponents over 4 sizes: S ∝ n^{+0.001 ± 0.053} (rho: 0), residuals ∝ n^{0.500 ± 0.053} (derived 1/2), C′ ∝ n^{+0.001 ± 0.000} (derived 0).
+S / rho against the pooled reference: 7,027× at 2^32.3, 5,894× at 2^36.1, 8,697× at 2^38.3, 6,160× at 2^40.1.
 
 Reading it:
 
-- **The ratio is flat, as derived.**  `S ∝ n^{S_EXP}` over four sizes
-  against rho's `0`; residuals `∝ n^{RES_EXP}` against the derived `1/2`;
-  `C′ ∝ n^{0}`.  The residual count sits at `RES_FLOOR` of its floor
+- **The ratio is flat, as derived.**  `S ∝ n^{-0.003}` over the eight runs
+  (`+0.001 ± 0.053` over the four size means) against rho's `0`; residuals
+  `∝ n^{0.496}` against the derived `1/2`;
+  `C′ ∝ n^{0}`.  The residual count sits at `1.80` of its floor
   `6p·(|F| + 1)`.
-- **The constant is `RATIO_JV×` rho**, of which the oracle is `ORACLE_PCT`,
-  the walk `WALK_PCT`, the linear algebra `LA_PCT` (`r = R_MEAS`, against
+- **The constant is `6,945×` rho**, of which the oracle is `99.8 %`,
+  the walk `0.06 %`, the linear algebra `0.12 %` (`r = 9.97 over every attempt, 0.514 on the last`, against
   §11.19's `0.518` measured on the same curves with a different relation
-  stream).  §11.16's formula `3C′/(S_rho·c_add) + r` predicts `FORMULA×`
+  stream).  §11.16's formula `3C′/(S_rho·c_add) + r` predicts `3,789×`
   from the run's own `C′`; the measured constant is above it by the
   residual surplus over the floor `6p·(|F| + 1)` — weight-`3` rows over
-  `|F|` unknowns need about `RES_FLOOR×` the square count before
+  `|F|` unknowns need about `1.80×` the square count before
   singleton filtering leaves a core that determines `d` — and by the
   verification and setup the formula leaves out.
-- **Every logarithm verified**, every rho run correct, `CHECKED` residuals
+- **Every logarithm verified**, every rho run correct, `85,277` residuals
   cross-checked against the oracle with `0` mismatches.
-- **Against the board:** `RATIO_JV×` is worse than every `k = 3` cell at
+- **Against the board:** `6,945×` is worse than every `k = 3` cell at
   `2^33` (`224–2,599×`) and, unlike them, does not move with `n`; it is the
   price of an exponent that rho cannot beat, paid in a constant rho does
   not have to pay.
@@ -194,11 +191,11 @@ Reading it:
 **Class.**  A measurement of a route the board carried as a derivation
 (`36×` at every size, §11.16): the derivation's structure is confirmed
 (flat ratio, `n^{1/2}` residuals, `r` at `r∞`) and its constant is
-superseded by a factor of `SUPERSEDE×`, because the input it borrowed
+superseded by a factor of `193×`, because the input it borrowed
 (`C′`) was `107×` too small.  For the `k = 4` full route it is a
 *relabelling* in §3's sense — the four-point solve's `C₄` was moved into a
 `p`-fold residual count and a three-point `C′`, and `S` at these sizes
-fell from `≫ 10⁸×` rho to `RATIO_JV×` while the asymptote rose from `0.52`
+fell from `≫ 10⁸×` rho to `6,945×` while the asymptote rose from `0.52`
 to a constant above `10³` — and no class applies to the parity verdict,
 which is a boundary statement.
 
@@ -206,15 +203,20 @@ which is a boundary statement.
 
 `scripts/parity_ledger.py`, section C:
 
-LEDGER_C
+- k = 4, full decompositions, parity at 2^80: C₄ < 5.39e+06 F_p multiplications (224,931× below the measured 1.21e+12); the S₅ solve's own floor is 7.1·10¹⁰ (§11.16).
+- k = 4, full decompositions, parity at 2^128: C₄ < 2.21e+10 F_p multiplications (55× below the measured 1.21e+12); the S₅ solve's own floor is 7.1·10¹⁰ (§11.16).
+- k = 4, full decompositions, parity at 2^160: C₄ < 5.65e+12 F_p multiplications — met by the measured 1.21e+12 (the handover 2^151 is below 2^160); an extrapolation on n^{1/4} and n^{1/2}.
+- k = 4, Joux–Vitse three-point: parity needs C′ < 20.7 F_p multiplications at r = 0.514 (last attempt); the Weil restriction alone costs 3,401 and the measured C′ is 161,540 (7,787× over).  A test 107× cheaper would reach §11.16's assumed 36×; no test reaches one.
+- k = 3, double large primes: at n^{-1/18} the constant must fall by the whole gap for parity at any size that fits: 2,599× at 2^33.1; each 2× on C₃ buys 18 doublings of n.
+- k = 3, plain: no constant reaches parity (the linear algebra's n^{2/3} decides it).
 
 The `k = 4` Joux–Vitse condition deserves the arithmetic in full, because
 it is the one that closes the route.  `S / rho → 3C′/(S_rho·c_add) + r` with
-`S_rho = RHO_POOLED`, `c_add = 97`, `r = R_LAST` (one Wiedemann attempt, as
-§11.19 priced it): parity is `C′ < C_NEED`.  The Weil restriction of a
+`S_rho = 1.319`, `c_add = 97`, `r = 0.514` (one Wiedemann attempt, as
+§11.19 priced it): parity is `C′ < 20.7`.  The Weil restriction of a
 `35`-term `H` at one `x_R` is `35 × 5` products in `F_{p⁴}` at `19` each —
 `3,401` — before any linear algebra, so **no three-point test on this
-formulation can reach parity**; the cheapest conceivable one is `WEIL_OVER×`
+formulation can reach parity**; the cheapest conceivable one is `164×`
 too dear.  A trace-driven elimination of the
 `80 × 120` certificate matrix (the "F4 remake" of Joux–Vitse) would cut the
 F4 term by a small factor — the matrix is `85 × 117` and F4 already spends
@@ -242,12 +244,12 @@ verbatim:
 > the overdetermined-solve cost.
 
 Outcome: `C′ = 1.61·10⁵` (the top of the predicted band; the matrix is
-`84–85 × 117–118` against the predicted `80 × 120`), `S / rho = RATIO_JV×`,
+`84–85 × 117–118` against the predicted `80 × 120`), `S / rho = 6,945×`,
 flat.  "`36×`" is falsified.  One correction to the registration: it
 carried a factor `6` where §11.16's formula has `3` (residuals `3p²`
 against rho's `S_rho·p²`), so its band should read `C′/42.7 + 0.52`,
 `250–2,500×`, and parity `C′ < 21`; the measured constant sits above the
-corrected band by the residual surplus of §3.3 (`RES_FLOOR×` the floor),
+corrected band by the residual surplus of §3.3 (`1.80×` the floor),
 which the estimate did not include.  Inadmissible moves
 (none made): a smaller base, a different rate, dropping a phase, counting
 an unverified relation.
@@ -307,5 +309,5 @@ that the only sub-parity asymptote measured (`r∞ = 0.52` at `k = 4`) is
   worth `≈ 3–10×` on `C′`, which cannot move the constant below `10³×`.
 - `k = 5`: registered above, not built.
 - Two seeds per size for the end-to-end run, `16` rho walks each; the rho
-  reference is pooled over all `128` walks (`RHO_POOLED ± RHO_SE`), as
+  reference is pooled over all `128` walks (`1.319 ± 0.065`), as
   §11.19 does, because one curve's `16` walks leave a `15 %` standard error.
