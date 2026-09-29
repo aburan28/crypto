@@ -437,6 +437,7 @@ and
 ## Related documents
 
 - [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) — the operation-counted ledger (`ic boundary`): three regimes, one unit, every phase priced against the generic floor and a counted ρ; frozen runs under `docs/ic/runs/`, §10 the Round-2 engineering ledger and the collision correction it records
+- [`docs/ic/LEADERBOARD.md`](LEADERBOARD.md) and [`docs/ic-leaderboard.html`](../ic-leaderboard.html) — every priced curve, its best recipe, phase split and ratio to the matched reference; curves named by ICV1 slug ([`docs/curves/ICV1.md`](../curves/ICV1.md))
 - [`docs/ic/README.md`](README.md) — `ic` runner, fixtures, comparison limits
 - [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab) — agent autolab runner (`boundary_autolab.py`) wired to this ledger
 - [`research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md) — unknowns formula, FFD ladder, F₄/SAT medians

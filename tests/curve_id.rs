@@ -91,8 +91,18 @@ fn the_constructors_name_curves_by_the_registry() {
     // legacy spelling a frozen report used resolves to that slug.
     let kc = KoblitzCurve::new(0, 41).unwrap();
     assert_eq!(kc.label(), "icv1-f2m41-tm2308219-7f48b14a");
-    for legacy in ["K_0 / GF(2^41)", "K_0/GF(2^41)", "k0n41", "`K_0/2^41`", "K₀/GF(2^41)"] {
-        assert_eq!(resolve(legacy), Some("icv1-f2m41-tm2308219-7f48b14a"), "{legacy}");
+    for legacy in [
+        "K_0 / GF(2^41)",
+        "K_0/GF(2^41)",
+        "k0n41",
+        "`K_0/2^41`",
+        "K₀/GF(2^41)",
+    ] {
+        assert_eq!(
+            resolve(legacy),
+            Some("icv1-f2m41-tm2308219-7f48b14a"),
+            "{legacy}"
+        );
     }
     let inst = koblitz_instance(1, 19).unwrap();
     assert!(same_curve(&inst.name, "K_1 / GF(2^19)"));

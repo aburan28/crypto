@@ -468,6 +468,47 @@ conditions both sides ran under.  Before changing code for speed:
   the A/B table with identical-output checks, and the changes that were
   tried and rejected with their numbers.
 
+### 11. Name every curve by its ICV1 slug
+
+A number quoted against the wrong curve is a wrong number, and until this
+rule one Koblitz curve went by five spellings, a prime curve by whichever
+generator found it, and no name said which modulus or model it meant.
+Every elliptic curve is now named by an identity computed from the curve,
+specified in [`docs/curves/ICV1.md`](docs/curves/ICV1.md).
+
+- **Write the slug.** In prose, tables, scoreboard rows, report `name`
+  fields, parameter and run file names, a curve is its ICV1 slug
+  (`icv1-f2m41-tm2308219-7f48b14a`).  A curve a standards body or public
+  challenge published may go by that name (`ECC2K-130`, `sect163k1`,
+  `secp256k1`, `P-256`).  Family notation with a free parameter is fine
+  when a sentence is about the family.
+- **Never write a retired form.** The spellings in `ICV1.md`'s table of
+  retired names carry no model and may not appear in new text or be
+  emitted by new code.  Frozen reports keep them; the registry resolves
+  them, and code that replays a report or reads a table keyed the old way
+  matches through `curve_id::same_curve`, never by string equality.
+- **Register before you cite.** Every slug written must be in
+  [`docs/curves/registry.json`](docs/curves/registry.json).  A new curve is
+  registered in the pull request that first names it
+  (`python3 scripts/build_curve_registry.py`; a curve built from a seed
+  also goes in `docs/curves/sources/specs.txt`).
+- **Join on EC1, write ICV1.** The slug names a curve *model*.  A
+  comparison, UI export or candidate manifest that joins across
+  repositories carries the EC1 alias and curve UID of the exact
+  representation measured, subgroup and generator included, as the
+  cross-repository section below and
+  [`docs/curve-identities.md`](docs/curve-identities.md) require.  The
+  registry lists each model's EC1 representations.
+- **Do not rename evidence.** Frozen run JSON, hash-pinned files and
+  anything under a `results/`, `runs/`, `raw/`, `evidence/` or `archives/`
+  directory keep the names they were written with.  Prose about them uses
+  the slug.
+
+`scripts/check_curve_names.py` enforces this in CI (`curve-names`): no
+retired form in Markdown or HTML outside a code fence, every slug
+registered, and no retired form on a line a pull request adds to prose or
+code.  `--fix` rewrites retired names in place.
+
 ## Worked example
 
 `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
@@ -495,3 +536,6 @@ For new curve comparisons and UI exports, follow [docs/curve-identities.md](docs
 and `tools/curve_identity.py`. Reuse EC1 aliases and full curve UIDs across IC and
 Pollard rho; keep factor-base/isogeny candidate identities separate. Preserve
 immutable historical names and never infer exact identity from field degree alone.
+Within this repository the text name is the ICV1 slug (§11); the curve
+registry, [docs/curves/registry.json](docs/curves/registry.json), maps each
+slug to the EC1 identities of its recorded representations.

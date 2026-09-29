@@ -954,9 +954,11 @@ pipeline now takes that fact at its generality (GGMP §4 with `q = 2^k`):
 
 Two structural observations from the first instances:
 
-- Point counts check out against full enumeration on `E_{0,2}/GF(4)`
-  over `GF(2^6)`, `GF(2^10)` and `GF(2^14)` (76, 964 and 16 636 points);
-  `E_{0,2}/GF(4)` over `GF(2^14)` has `r = 4159`, `h = 4`, and `x^7 − 1`
+- Point counts check out against full enumeration on the curve with
+  subfield coordinates `a = 0`, `b = 2` in `GF(4)`, taken over `GF(2^6)`,
+  `GF(2^10)` and `GF(2^14)`: `icv1-f2m6-tm11-a69b70b8`,
+  `icv1-f2m10-t61-31ce0e65` and `icv1-f2m14-tm251-b69e8b8b` (76, 964 and
+  16 636 points); `icv1-f2m14-tm251-b69e8b8b` has `r = 4159`, `h = 4`, and `x^7 − 1`
   factors over `GF(4)` as degrees `(1, 3, 3)`, giving invariant bases
   of 3, 43 and 71 points — the 71-point one solves the DLP and
   precomputes a certified log database with two summands (pinned by
@@ -967,7 +969,8 @@ Two structural observations from the first instances:
   reciprocal factor's coset, which has absolute trace `0`.  With
   `Tr(a) = 1` and `b = 1` the Artin–Schreier condition
   `Tr(x + a + b/x²) = 0` then fails for every `x ≠ 0` in every such
-  subspace: `E_{2,1}/GF(4)` over `GF(2^18)` has *no* factor-base points
+  subspace: `icv1-f2m18-t999-40751283` (subfield coordinates `a = 2`,
+  `b = 1` in `GF(4)`, taken over `GF(2^18)`) has *no* factor-base points
   at all beyond `(0, √b)`, on any of its five invariant subspaces, while
   `b ∈ {ω, ω²}` on the same field restores them.  The search scores
   such bases at zero and a run over one reports a base with no usable
