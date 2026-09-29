@@ -1,0 +1,121 @@
+name: n53 native-cyclic L384 two-arm cold comparison
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/**'
+      - '.github/workflows/n53-native-cyclic-l384.yml'
+
+permissions:
+  actions: read
+  contents: write
+  pull-requests: read
+
+jobs:
+  hash-only:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.93.1
+      - name: Rebuild disjoint input proof and freeze hashes without producer work
+        run: |
+          python3 research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/check_protocol.py
+          git diff --check
+      - name: Check native materializer and one-shot gate without measurement
+        run: |
+          python3 -m unittest discover -s research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929 -p 'test_*.py' -v
+          python3 - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+          root = Path('research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929')
+          if json.loads((root / 'FROZEN.json').read_text())['status'] == 'held_no_outcome':
+              subprocess.run(['python3', str(root / 'run_panel.py'), '--gate-only'], check=True)
+          PY
+      - name: Independently rehash and replay an archive if later committed
+        run: |
+          bundle=research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/evidence
+          if test -f "$bundle/archive_manifest.json"; then
+            python3 research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/verify_archive.py --bundle "$bundle"
+          fi
+
+  outcome:
+    if: github.event.action == 'labeled' && github.event.label.name == 'run-n53-native-cyclic-l384-once' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: hash-only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    concurrency:
+      group: n53-native-cyclic-l384-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: dtolnay/rust-toolchain@1.93.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Preserve first-attempt gate receipt and refuse prior outcome jobs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KIC_NATIVE_L384_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python3 research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/dispatch_gate.py --panel /tmp/n53-native-cyclic-l384-panel
+      - name: Build two pinned producers before timing
+        run: |
+          cp research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/Cargo.lock Cargo.lock
+          rustc --version | grep '^rustc 1.93.1 '
+          cargo --version | grep '^cargo 1.93.1 '
+          python3 research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/build.py --panel /tmp/n53-native-cyclic-l384-panel
+      - name: Run one rho and both frozen native-cyclic arms
+        env:
+          KIC_NATIVE_L384_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python3 research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/run_panel.py --out /tmp/n53-native-cyclic-l384-panel
+      - name: Seal and independently verify every attempted output
+        if: always()
+        run: |
+          if test -d /tmp/n53-native-cyclic-l384-panel; then
+            python3 research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/archive.py \
+              --panel /tmp/n53-native-cyclic-l384-panel --out /tmp/n53-native-cyclic-l384-sealed
+            python3 research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/verify_archive.py \
+              --bundle /tmp/n53-native-cyclic-l384-sealed
+          fi
+      - name: Commit immutable first-attempt evidence
+        if: always()
+        env:
+          STARTING_HEAD: ${{ github.event.pull_request.head.sha }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if ! test -f /tmp/n53-native-cyclic-l384-sealed/archive_manifest.json; then exit 0; fi
+          git fetch origin "$HEAD_BRANCH:refs/remotes/origin/$HEAD_BRANCH"
+          test "$(git rev-parse "origin/$HEAD_BRANCH")" = "$STARTING_HEAD"
+          git checkout -B "$HEAD_BRANCH" "origin/$HEAD_BRANCH"
+          bundle=research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/evidence
+          mkdir -p "$bundle"
+          test ! -e "$bundle/archive_manifest.json"
+          cp /tmp/n53-native-cyclic-l384-sealed/evidence.tar.gz /tmp/n53-native-cyclic-l384-sealed/archive_manifest.json "$bundle/"
+          if test -f /tmp/n53-native-cyclic-l384-sealed/panel.json; then
+            cp /tmp/n53-native-cyclic-l384-sealed/panel.json "$bundle/"
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$bundle"
+          git commit -m 'research: preserve first native-cyclic n53 L384 attempt'
+          git push origin "HEAD:$HEAD_BRANCH"
+      - name: Upload raw attempt even if evidence commit fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n53-native-cyclic-l384-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/n53-native-cyclic-l384-panel/
+          if-no-files-found: warn
+          retention-days: 30
