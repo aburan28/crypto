@@ -180,8 +180,22 @@ fn eliminate_with(
     reuse_table: bool,
 ) -> usize {
     static BRANCHLESS_STRIP: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    let branchless_strip = *BRANCHLESS_STRIP
-        .get_or_init(|| std::env::var("KIC_GF2_BRANCHLESS_STRIP").as_deref() == Ok("1"));
+    let branchless_strip = *BRANCHLESS_STRIP.get_or_init(|| {
+        match std::env::var("KIC_GF2_BRANCHLESS_STRIP").as_deref() {
+            Ok("0") => false,
+            Ok("1") => true,
+            _ => {
+                #[cfg(target_arch = "x86_64")]
+                {
+                    std::arch::is_x86_feature_detected!("avx2")
+                }
+                #[cfg(not(target_arch = "x86_64"))]
+                {
+                    false
+                }
+            }
+        }
+    });
     #[cfg(target_arch = "x86_64")]
     let avx2_strip = branchless_strip && std::arch::is_x86_feature_detected!("avx2");
     let rows = matrix.len();
