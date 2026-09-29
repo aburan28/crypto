@@ -46,280 +46,21 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde::Serialize;
 
+use crate::cryptanalysis::ext_curve::random_point;
 use crate::cryptanalysis::glv_invariant_base::{
-    addm, factor_u64, fold_by_endomorphisms, mulm, subm, verify_endomorphism, Closure,
-    Endomorphism, FoldReport, Negation,
+    addm, factor_u64, fold_by_endomorphisms, mulm, verify_endomorphism, Closure, Endomorphism,
+    FoldReport, Negation,
 };
 use crate::cryptanalysis::ic_boundary::{CountedGroup, FactorBase, GroupOps};
-use crate::cryptanalysis::residual_walk::{inv_mod, is_prime_u64, sqrt_mod};
+use crate::cryptanalysis::residual_walk::{inv_mod, is_prime_u64, pow_mod, sqrt_mod};
 
-/// `a + b·s` with `s² = ν`, as `[a, b]`.
-pub type Fp2El = [u64; 2];
+use crate::cryptanalysis::ext_curve::ExtDiagonalAutomorphism;
+pub use crate::cryptanalysis::ext_curve::{jacobi, ExtCurve, ExtField, ExtPoint, Fp2, Fp2El};
 
-/// `F_{p²} = F_p[s] / (s² − ν)`, `ν` the smallest non-residue.
-#[derive(Clone, Copy, Debug, Serialize, PartialEq, Eq)]
-pub struct Fp2 {
-    pub p: u64,
-    pub nu: u64,
-}
-
-fn jacobi(mut a: u64, mut n: u64) -> i32 {
-    let mut result = 1i32;
-    a %= n;
-    while a != 0 {
-        while a.is_multiple_of(2) {
-            a /= 2;
-            if n % 8 == 3 || n % 8 == 5 {
-                result = -result;
-            }
-        }
-        std::mem::swap(&mut a, &mut n);
-        if a % 4 == 3 && n % 4 == 3 {
-            result = -result;
-        }
-        a %= n;
-    }
-    if n == 1 {
-        result
-    } else {
-        0
-    }
-}
-
-impl Fp2 {
-    /// The field for an odd prime `p < 2^31`.
-    pub fn new(p: u64) -> Result<Self, String> {
-        if !(3..(1 << 31)).contains(&p) || !is_prime_u64(p) {
-            return Err(format!("p = {p} must be an odd prime below 2^31"));
-        }
-        let nu = (2..p)
-            .find(|&n| jacobi(n, p) == -1)
-            .ok_or("no quadratic non-residue")?;
-        Ok(Self { p, nu })
-    }
-    pub fn zero(&self) -> Fp2El {
-        [0, 0]
-    }
-    pub fn one(&self) -> Fp2El {
-        [1, 0]
-    }
-    /// The generator `s` of `F_{p²}` over `F_p`.
-    pub fn s(&self) -> Fp2El {
-        [0, 1]
-    }
-    pub fn from_fp(&self, a: u64) -> Fp2El {
-        [a % self.p, 0]
-    }
-    pub fn is_zero(&self, a: Fp2El) -> bool {
-        a == [0, 0]
-    }
-    pub fn add(&self, a: Fp2El, b: Fp2El) -> Fp2El {
-        [addm(a[0], b[0], self.p), addm(a[1], b[1], self.p)]
-    }
-    pub fn sub(&self, a: Fp2El, b: Fp2El) -> Fp2El {
-        [subm(a[0], b[0], self.p), subm(a[1], b[1], self.p)]
-    }
-    pub fn neg(&self, a: Fp2El) -> Fp2El {
-        [subm(0, a[0], self.p), subm(0, a[1], self.p)]
-    }
-    pub fn mul(&self, a: Fp2El, b: Fp2El) -> Fp2El {
-        let p = self.p;
-        let a0b0 = mulm(a[0], b[0], p);
-        let a1b1 = mulm(a[1], b[1], p);
-        let cross = addm(mulm(a[0], b[1], p), mulm(a[1], b[0], p), p);
-        [addm(a0b0, mulm(self.nu, a1b1, p), p), cross]
-    }
-    pub fn scale(&self, a: Fp2El, k: u64) -> Fp2El {
-        [mulm(a[0], k, self.p), mulm(a[1], k, self.p)]
-    }
-    pub fn sqr(&self, a: Fp2El) -> Fp2El {
-        self.mul(a, a)
-    }
-    /// `a₀² − ν a₁²`, the norm to `F_p`.
-    pub fn norm(&self, a: Fp2El) -> u64 {
-        subm(
-            mulm(a[0], a[0], self.p),
-            mulm(self.nu, mulm(a[1], a[1], self.p), self.p),
-            self.p,
-        )
-    }
-    /// `a^p = a₀ − a₁ s`: the conjugate.
-    pub fn frob(&self, a: Fp2El) -> Fp2El {
-        [a[0], subm(0, a[1], self.p)]
-    }
-    pub fn inv(&self, a: Fp2El) -> Option<Fp2El> {
-        let n = self.norm(a);
-        if n == 0 {
-            return None;
-        }
-        let ni = inv_mod(n, self.p);
-        Some(self.scale(self.frob(a), ni))
-    }
-    pub fn pow(&self, mut a: Fp2El, mut e: u64) -> Fp2El {
-        let mut acc = self.one();
-        while e > 0 {
-            if e & 1 == 1 {
-                acc = self.mul(acc, a);
-            }
-            a = self.sqr(a);
-            e >>= 1;
-        }
-        acc
-    }
-    /// Whether `a` is a square in `F_{p²}`: `a^{(p²−1)/2} = 1`.
-    pub fn is_square(&self, a: Fp2El) -> bool {
-        if self.is_zero(a) {
-            return true;
-        }
-        self.pow(a, (self.p * self.p - 1) / 2) == self.one()
-    }
-    /// A square root in `F_{p²}`, or `None` for a non-square.
-    pub fn sqrt(&self, a: Fp2El) -> Option<Fp2El> {
-        let p = self.p;
-        if self.is_zero(a) {
-            return Some(self.zero());
-        }
-        if a[1] == 0 {
-            return match sqrt_mod(a[0], p) {
-                Some(r) => Some([r, 0]),
-                None => sqrt_mod(mulm(a[0], inv_mod(self.nu, p), p), p).map(|r| [0, r]),
-            };
-        }
-        // (x₀ + x₁ s)² = a: x₀² − ν x₁² = ±√N and 2 x₀ x₁ = a₁.
-        let n = sqrt_mod(self.norm(a), p)?;
-        let half = inv_mod(2, p);
-        for sign in [n, subm(0, n, p)] {
-            let x0_sq = mulm(addm(a[0], sign, p), half, p);
-            if let Some(x0) = sqrt_mod(x0_sq, p) {
-                if x0 == 0 {
-                    continue;
-                }
-                let x1 = mulm(a[1], inv_mod(mulm(2, x0, p), p), p);
-                let root = [x0, x1];
-                if self.sqr(root) == a {
-                    return Some(root);
-                }
-            }
-        }
-        None
-    }
-    /// `a₀ + a₁ p`: an injective packing into a word.
-    pub fn pack(&self, a: Fp2El) -> u64 {
-        a[0] + a[1] * self.p
-    }
-}
-
-/// A point of `E'(F_{p²})`.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
-pub struct Fp2Point {
-    pub x: Fp2El,
-    pub y: Fp2El,
-    pub infinity: bool,
-}
-
-impl Fp2Point {
-    pub const INFINITY: Self = Self {
-        x: [0, 0],
-        y: [0, 0],
-        infinity: true,
-    };
-    pub fn affine(x: Fp2El, y: Fp2El) -> Self {
-        Self {
-            x,
-            y,
-            infinity: false,
-        }
-    }
-}
-
-/// `y² = x³ + Ax + B` over `F_{p²}`, every operation charged.
-#[derive(Clone, Copy, Debug, Serialize)]
-pub struct Fp2Curve {
-    pub f: Fp2,
-    pub a: Fp2El,
-    pub b: Fp2El,
-}
-
-impl Fp2Curve {
-    /// `x³ + Ax + B`.
-    pub fn rhs(&self, x: Fp2El) -> Fp2El {
-        let f = &self.f;
-        f.add(f.add(f.mul(f.sqr(x), x), f.mul(self.a, x)), self.b)
-    }
-    pub fn is_on_curve(&self, pt: Fp2Point) -> bool {
-        pt.infinity || self.f.sqr(pt.y) == self.rhs(pt.x)
-    }
-    /// The two points above `x`, if any (one if `y = 0`).
-    pub fn lift_x(&self, x: Fp2El) -> Vec<Fp2Point> {
-        match self.f.sqrt(self.rhs(x)) {
-            None => Vec::new(),
-            Some(y) if self.f.is_zero(y) => vec![Fp2Point::affine(x, y)],
-            Some(y) => vec![Fp2Point::affine(x, y), Fp2Point::affine(x, self.f.neg(y))],
-        }
-    }
-    fn add_raw(&self, a: Fp2Point, b: Fp2Point) -> Fp2Point {
-        if a.infinity {
-            return b;
-        }
-        if b.infinity {
-            return a;
-        }
-        let f = &self.f;
-        if a.x == b.x {
-            if f.is_zero(f.add(a.y, b.y)) {
-                return Fp2Point::INFINITY;
-            }
-            return self.double_raw(a);
-        }
-        let lambda = f.mul(f.sub(b.y, a.y), f.inv(f.sub(b.x, a.x)).expect("distinct x"));
-        let x3 = f.sub(f.sub(f.sqr(lambda), a.x), b.x);
-        let y3 = f.sub(f.mul(lambda, f.sub(a.x, x3)), a.y);
-        Fp2Point::affine(x3, y3)
-    }
-    fn double_raw(&self, a: Fp2Point) -> Fp2Point {
-        if a.infinity || self.f.is_zero(a.y) {
-            return Fp2Point::INFINITY;
-        }
-        let f = &self.f;
-        let num = f.add(f.scale(f.sqr(a.x), 3), self.a);
-        let lambda = f.mul(num, f.inv(f.scale(a.y, 2)).expect("y ≠ 0"));
-        let x3 = f.sub(f.sqr(lambda), f.scale(a.x, 2));
-        let y3 = f.sub(f.mul(lambda, f.sub(a.x, x3)), a.y);
-        Fp2Point::affine(x3, y3)
-    }
-}
-
-impl CountedGroup for Fp2Curve {
-    type Elt = Fp2Point;
-    fn identity(&self) -> Fp2Point {
-        Fp2Point::INFINITY
-    }
-    fn is_identity(&self, p: &Fp2Point) -> bool {
-        p.infinity
-    }
-    fn add(&self, ops: &mut GroupOps, p: Fp2Point, q: Fp2Point) -> Fp2Point {
-        ops.adds += 1;
-        self.add_raw(p, q)
-    }
-    fn double(&self, ops: &mut GroupOps, p: Fp2Point) -> Fp2Point {
-        ops.doubles += 1;
-        self.double_raw(p)
-    }
-    fn neg(&self, p: Fp2Point) -> Fp2Point {
-        if p.infinity {
-            p
-        } else {
-            Fp2Point::affine(p.x, self.f.neg(p.y))
-        }
-    }
-    fn key(&self, p: &Fp2Point) -> u64 {
-        if p.infinity {
-            return 0;
-        }
-        let sign = u64::from(self.f.pack(p.y) > self.f.pack(self.f.neg(p.y)));
-        ((self.f.pack(p.x) + 1) << 1) | sign
-    }
-}
+/// The GLS twist as a counted group: `ExtCurve` over `F_{p²}`.
+pub type Fp2Curve = ExtCurve<Fp2>;
+/// A point of the twist.
+pub type Fp2Point = ExtPoint<Fp2El>;
 
 /// `ψ(x, y) = (cx · x^p, cy · y^p)`.
 #[derive(Clone, Copy, Debug, Serialize)]
@@ -369,16 +110,60 @@ pub struct GlsInstance {
     pub psi: GlsEndomorphism,
     /// The `ψ`-stable line's direction, `u·s`.
     pub line: Fp2El,
+    /// `generic`, `j0` or `j1728`: the base curve's family.
+    pub family: &'static str,
+    /// The base curve's automorphism lifted to the twist (`ζ` on
+    /// `j = 0`, `ι` on `j = 1728`), with its eigenvalue decided on `G`.
+    pub automorphism: Option<ExtDiagonalAutomorphism<Fp2El>>,
 }
 
-fn random_point(curve: &Fp2Curve, rng: &mut StdRng) -> Fp2Point {
-    loop {
-        let x = [rng.gen_range(0..curve.f.p), rng.gen_range(0..curve.f.p)];
-        let pts = curve.lift_x(x);
-        if let Some(&pt) = pts.first() {
-            if !curve.f.is_zero(pt.y) {
-                return pt;
-            }
+/// The base curve's family for [`generate_gls_instance_of`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+pub enum GlsFamily {
+    Generic,
+    /// `y² = x³ + b` over `F_p`, `p ≡ 1 (mod 3)`, twisted: carries `ζ`.
+    J0,
+    /// `y² = x³ + ax` over `F_p`, `p ≡ 1 (mod 4)`, twisted: carries `ι`.
+    J1728,
+}
+
+impl GlsFamily {
+    pub fn parse(s: &str) -> Result<Self, String> {
+        match s {
+            "generic" => Ok(Self::Generic),
+            "j0" => Ok(Self::J0),
+            "j1728" => Ok(Self::J1728),
+            other => Err(format!(
+                "unknown GLS family `{other}`; try generic, j0 or j1728"
+            )),
+        }
+    }
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Generic => "generic",
+            Self::J0 => "j0",
+            Self::J1728 => "j1728",
+        }
+    }
+}
+
+/// Which generators [`gls_line_base_by`] folds the line by (always
+/// with negation).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+pub enum GlsFold {
+    Negation,
+    Psi,
+    Aut,
+    PsiAut,
+}
+
+impl GlsFold {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Negation => "negation",
+            Self::Psi => "psi",
+            Self::Aut => "aut",
+            Self::PsiAut => "psi+aut",
         }
     }
 }
@@ -394,6 +179,19 @@ pub fn generate_gls_instance(
     seed: u64,
     max_cofactor: u64,
 ) -> Result<GlsInstance, String> {
+    generate_gls_instance_of(GlsFamily::Generic, p_bits, seed, max_cofactor)
+}
+
+/// [`generate_gls_instance`] with the base curve drawn from `family`:
+/// `j = 0` (`p ≡ 1 (mod 3)`) or `j = 1728` (`p ≡ 1 (mod 4)`) base
+/// curves carry their automorphism, lifted to the twist and verified,
+/// so that the composite fold `⟨−1, ψ, aut⟩` can be measured (E3).
+pub fn generate_gls_instance_of(
+    family: GlsFamily,
+    p_bits: u32,
+    seed: u64,
+    max_cofactor: u64,
+) -> Result<GlsInstance, String> {
     if !(6..=24).contains(&p_bits) {
         return Err(format!("p_bits = {p_bits} outside 6..=24"));
     }
@@ -401,13 +199,21 @@ pub fn generate_gls_instance(
     for _ in 0..20_000u32 {
         let p = loop {
             let c = rng.gen_range((1u64 << (p_bits - 1))..(1u64 << p_bits)) | 1;
-            if is_prime_u64(c) {
+            let admissible = match family {
+                GlsFamily::Generic => true,
+                GlsFamily::J0 => c % 3 == 1,
+                GlsFamily::J1728 => c % 4 == 1,
+            };
+            if admissible && is_prime_u64(c) {
                 break c;
             }
         };
         let f = Fp2::new(p)?;
-        let a = rng.gen_range(1..p);
-        let b = rng.gen_range(1..p);
+        let (a, b) = match family {
+            GlsFamily::Generic => (rng.gen_range(1..p), rng.gen_range(1..p)),
+            GlsFamily::J0 => (0, rng.gen_range(1..p)),
+            GlsFamily::J1728 => (rng.gen_range(1..p), 0),
+        };
         let disc = addm(
             mulm(4, mulm(mulm(a, a, p), a, p), p),
             mulm(27, mulm(b, b, p), p),
@@ -487,8 +293,61 @@ pub fn generate_gls_instance(
             return Err(format!("no sign of ψ acts as √−1 on G at p = {p}"));
         };
         verify_endomorphism(&curve, generator, r, &psi, 20, seed)?;
+        // The base curve's automorphism, lifted: it commutes with the
+        // twist isomorphism since its constants lie in F_p.
+        let automorphism = match family {
+            GlsFamily::Generic => None,
+            GlsFamily::J0 => {
+                if r % 3 != 1 {
+                    continue;
+                }
+                let zeta = (2..p)
+                    .map(|g| pow_mod(g, (p - 1) / 3, p))
+                    .find(|&z| z != 1)
+                    .ok_or("no cube root of unity")?;
+                let sq3 = sqrt_mod(r - 3, r).ok_or("−3 is not a square mod r")?;
+                let half = inv_mod(2, r);
+                let cands = [
+                    mulm(addm(r - 1, sq3, r), half, r),
+                    mulm(addm(r - 1, r - sq3, r), half, r),
+                ];
+                let img = ExtPoint::affine(f.scale(generator.x, zeta), generator.y);
+                let eig = cands
+                    .into_iter()
+                    .find(|&l| curve.mul(&mut ops, generator, l) == img)
+                    .ok_or("neither root of λ² + λ + 1 is the eigenvalue of ζ on G")?;
+                Some(ExtDiagonalAutomorphism {
+                    cx: f.from_fp(zeta),
+                    cy: f.one(),
+                    eigenvalue: eig,
+                    order: 3,
+                    label: "zeta3",
+                })
+            }
+            GlsFamily::J1728 => {
+                let i = (2..p)
+                    .map(|g| pow_mod(g, (p - 1) / 4, p))
+                    .find(|&z| mulm(z, z, p) == p - 1)
+                    .ok_or("no fourth root of unity")?;
+                let img = ExtPoint::affine(f.neg(generator.x), f.scale(generator.y, i));
+                let eig = [s, r - s]
+                    .into_iter()
+                    .find(|&l| curve.mul(&mut ops, generator, l) == img)
+                    .ok_or("neither square root of −1 is the eigenvalue of ι on G")?;
+                Some(ExtDiagonalAutomorphism {
+                    cx: f.from_fp(p - 1),
+                    cy: f.from_fp(i),
+                    eigenvalue: eig,
+                    order: 4,
+                    label: "iota4",
+                })
+            }
+        };
+        if let Some(aut) = &automorphism {
+            verify_endomorphism(&curve, generator, r, aut, 20, seed)?;
+        }
         return Ok(GlsInstance {
-            name: format!("gls-p{p_bits}bit-p{p}"),
+            name: format!("gls-{}-p{p_bits}bit-p{p}", family.name()),
             p,
             base_a: a,
             base_b: b,
@@ -501,6 +360,8 @@ pub fn generate_gls_instance(
             generator,
             psi,
             line: f.mul(u, f.s()),
+            family: family.name(),
+            automorphism,
         });
     }
     Err(format!(
@@ -516,6 +377,24 @@ pub fn gls_line_base(
     inst: &GlsInstance,
     fold: bool,
 ) -> Result<(FactorBase<Fp2Point>, FoldReport), String> {
+    gls_line_base_by(
+        inst,
+        if fold {
+            GlsFold::Psi
+        } else {
+            GlsFold::Negation
+        },
+    )
+}
+
+/// The line base folded by the chosen generators.  Under `Aut` and
+/// `PsiAut` the seed is closed under the maps (`Closure::Close`): `ζ`
+/// with `ζ ∈ F_p` and `ι` preserve the line, so nothing is added and
+/// the closure is a check.
+pub fn gls_line_base_by(
+    inst: &GlsInstance,
+    fold: GlsFold,
+) -> Result<(FactorBase<Fp2Point>, FoldReport), String> {
     let start = std::time::Instant::now();
     let curve = &inst.curve;
     let f = &curve.f;
@@ -527,15 +406,28 @@ pub fn gls_line_base(
         seed.extend(curve.lift_x(x));
     }
     let neg = Negation { r: inst.r };
-    let gens: Vec<&dyn Endomorphism<Fp2Curve>> = if fold {
-        vec![&neg, &inst.psi]
-    } else {
-        vec![&neg]
-    };
+    let mut gens: Vec<&dyn Endomorphism<Fp2Curve>> = vec![&neg];
+    match fold {
+        GlsFold::Negation => {}
+        GlsFold::Psi => gens.push(&inst.psi),
+        GlsFold::Aut => gens.push(
+            inst.automorphism
+                .as_ref()
+                .ok_or("no automorphism on this family")?,
+        ),
+        GlsFold::PsiAut => {
+            gens.push(&inst.psi);
+            gens.push(
+                inst.automorphism
+                    .as_ref()
+                    .ok_or("no automorphism on this family")?,
+            );
+        }
+    }
     let description = format!(
         "the ψ-stable line x ∈ u·s·F_p ({} abscissae), folded by {}",
         inst.p - 1,
-        if fold { "⟨−1, ψ⟩" } else { "negation" }
+        fold.name()
     );
     let (mut fb, report) = fold_by_endomorphisms(
         curve,
@@ -543,8 +435,8 @@ pub fn gls_line_base(
         inst.cofactor,
         seed,
         &gens,
-        Closure::Strict,
-        8,
+        Closure::Close,
+        16,
         |p| curve.key(p),
         |p| f.pack(p.x),
         description,
@@ -625,6 +517,46 @@ mod tests {
         assert!(
             on_other_line <= 3,
             "u·F_p carries only 2-torsion: {on_other_line}"
+        );
+    }
+
+    /// **E3, the composite fold.**  On a `j = 0` twist the eigenvalues of
+    /// `ζ` (order 3) and `ψ` (order 4) generate the twelfth roots of
+    /// unity, so `⟨−1, ψ, ζ⟩` folds twelve points to a column; on a
+    /// `j = 1728` twist `ψ` and `ι` both square to `−1` and coincide on
+    /// the subgroup up to sign, so `⟨−1, ψ, ι⟩` folds four, as `⟨−1, ψ⟩`
+    /// alone does.
+    #[test]
+    fn composite_folds_are_the_distinct_roots_of_unity_the_generators_realise() {
+        let inst = generate_gls_instance_of(GlsFamily::J0, 8, 7, 64).unwrap();
+        let aut = inst.automorphism.as_ref().unwrap();
+        assert_eq!(eigenvalue_order(aut.eigenvalue, inst.r), 3);
+        let (_, psi) = gls_line_base_by(&inst, GlsFold::Psi).unwrap();
+        let (_, both) = gls_line_base_by(&inst, GlsFold::PsiAut).unwrap();
+        assert!((psi.points_per_orbit - 4.0).abs() < 1e-9);
+        assert!(
+            (both.points_per_orbit - 12.0).abs() < 1e-9,
+            "{}",
+            both.points_per_orbit
+        );
+
+        // A j = 1728 twist's order always carries a cofactor of about p
+        // (its `ψ` and `ι` coincide up to sign as maps of the subgroup,
+        // and the twist is isogenous to a curve over F_p), so r ≈ p.
+        let inst = generate_gls_instance_of(GlsFamily::J1728, 8, 8, 4096).unwrap();
+        let aut = inst.automorphism.as_ref().unwrap();
+        assert_eq!(eigenvalue_order(aut.eigenvalue, inst.r), 4);
+        assert!(
+            aut.eigenvalue == inst.psi.eigenvalue || aut.eigenvalue == inst.r - inst.psi.eigenvalue,
+            "ι = ±ψ on the subgroup"
+        );
+        let (_, psi) = gls_line_base_by(&inst, GlsFold::Psi).unwrap();
+        let (_, both) = gls_line_base_by(&inst, GlsFold::PsiAut).unwrap();
+        assert!((psi.points_per_orbit - 4.0).abs() < 1e-9);
+        assert!(
+            (both.points_per_orbit - 4.0).abs() < 1e-9,
+            "{}",
+            both.points_per_orbit
         );
     }
 
