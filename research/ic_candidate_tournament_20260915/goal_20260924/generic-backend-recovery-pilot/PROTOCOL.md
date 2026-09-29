@@ -54,8 +54,9 @@ frozen Linux/Valgrind profile with a strong source-bound incumbent and matched
 one-target rho, fresh paired points, no prior exposures, and confidence
 intervals. Failed cells and solvers are retained rather than filtered out.
 
-The v2 seed `2026092902` remains a single live dispatch
+The v2 seed `2026092902` was dispatched once
 ([Actions 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479))
-and is never retried. Its artifact, when terminal, must be independently
-audited before any fresh competitive registration. This pilot neither
-relabels nor reopens that campaign.
+and is [operationally censored](../generic-backend-qualification-v2/RESULT.md);
+never retry it. Any fresh competitive registration must exclude the v2 exposure
+corpus before sampling new points. This pilot neither relabels nor reopens that
+campaign.
