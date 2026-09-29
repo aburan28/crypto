@@ -6810,4 +6810,159 @@ mod reference_equivalence_tests {
             }
         }
     }
+
+    /// Templates read back from arbitrary encodings against the old chain
+    /// of adds: random polynomials (canonical, or raw lists in any order
+    /// with repeats), masks over the whole word, `n` from 1 to 64, and
+    /// shapes the bitsets do and do not cover (extra target bits, fewer
+    /// bits than `n`, a bit with one coefficient too many or too few).
+    /// Each is also instantiated through a clone, as the algebra cache's
+    /// in-process hits hand it out.
+    #[test]
+    fn deserialised_templates_match_the_old_chain_on_any_fields() {
+        let mut next = rng(0x7e3b_0000_0000_00a1);
+        let base = {
+            let st = FieldStructure::new(5, &find_irreducible(5).unwrap());
+            let fe5 = |v: u64| F2mElement::from_biguint(&num_bigint::BigUint::from(v), 5);
+            DecompositionTemplate::build(&[fe5(1), fe5(6)], &fe5(1), 2, &st).unwrap()
+        };
+        let mut shapes = [0usize; 4];
+        for trial in 0..3_000u64 {
+            let n = [1u32, 2, 5, 13, 23, 57, 63, 64][(trial % 8) as usize];
+            let eqs = (next() % 6) as usize;
+            let n_vars = [4usize, 20, 57, 58, 64][(trial / 8 % 5) as usize];
+            let span = if n_vars == 64 {
+                u64::MAX
+            } else {
+                (1u64 << n_vars) - 1
+            };
+            let pool: Vec<u64> = (0..1 + next() % 24)
+                .map(|_| next() & next() & span)
+                .collect();
+            let raw = trial % 5 == 0;
+            let poly = |next: &mut dyn FnMut() -> u64| -> F2BoolPoly {
+                let terms: Vec<F2BoolMono> = (0..next() % 12)
+                    .map(|_| {
+                        F2BoolMono::from_mask(if next().is_multiple_of(4) {
+                            next() & span
+                        } else {
+                            pool[(next() % pool.len() as u64) as usize]
+                        })
+                    })
+                    .collect();
+                if raw && next().is_multiple_of(3) {
+                    F2BoolPoly { terms, n_vars }
+                } else {
+                    F2BoolPoly::from_monos(terms, n_vars)
+                }
+            };
+            let constant: Vec<F2BoolPoly> = (0..eqs).map(|_| poly(&mut next)).collect();
+            // 0: n bits; 1: two extra bits; 2: fewer bits than n; 3: one
+            // bit with a coefficient too many or too few
+            let shape = (trial / 40 % 4) as usize;
+            let bits = match shape {
+                1 => n as usize + 2,
+                2 => (next() % u64::from(n)) as usize,
+                _ => n as usize,
+            };
+            let mut coefficients: Vec<Vec<F2BoolPoly>> = (0..bits)
+                .map(|_| (0..eqs).map(|_| poly(&mut next)).collect())
+                .collect();
+            if shape == 3 {
+                let k = (next() % u64::from(n)) as usize;
+                if next().is_multiple_of(2) {
+                    coefficients[k].pop();
+                } else {
+                    coefficients[k].push(poly(&mut next));
+                }
+            }
+            shapes[shape] += 1;
+            let mut v = serde_json::to_value(&base).unwrap();
+            v["n"] = n.into();
+            v["n_vars"] = n_vars.into();
+            v["constant"] = serde_json::to_value(&constant).unwrap();
+            v["coefficients"] = serde_json::to_value(&coefficients).unwrap();
+            let t: DecompositionTemplate = serde_json::from_value(v).unwrap();
+            assert_eq!(t.constant, constant);
+            assert_eq!(t.coefficients, coefficients);
+            let copy = t.clone();
+            // targets whose set bits all have coefficients (the old code
+            // indexed past the end otherwise, and still does)
+            let reach = bits.min(n as usize);
+            let low = if reach >= 64 {
+                u64::MAX
+            } else {
+                (1u64 << reach) - 1
+            };
+            for r in [0, low, next() & low, next() & next() & low] {
+                let mut last = constant.clone();
+                for k in 0..n as usize {
+                    if r & (1u64 << k) != 0 {
+                        for (p, c) in last.iter_mut().zip(&coefficients[k]) {
+                            *p = old_add(p, c);
+                        }
+                    }
+                }
+                let mut expected = t.prefix.clone();
+                expected.extend(last);
+                let x_r = F2mElement::from_biguint(&num_bigint::BigUint::from(r), 64);
+                assert_eq!(
+                    t.instantiate(&x_r).equations,
+                    expected,
+                    "trial {trial}, n {n}, shape {shape}, r {r:#x}"
+                );
+                assert_eq!(copy.instantiate(&x_r).equations, expected);
+            }
+        }
+        assert!(shapes.iter().all(|&c| c > 500), "{shapes:?}");
+    }
+
+    /// Operands with coordinates past `n` on either side, and `S₃` with
+    /// such an operand anywhere: the old code read the first `n` of each
+    /// and ignored the rest.
+    #[test]
+    fn long_operands_match_the_old_code_on_either_side() {
+        let mut next = rng(0x1047_0000_0000_00b2);
+        for trial in 0..200u64 {
+            let n = [3u32, 5, 7, 13][(trial % 4) as usize];
+            let st = FieldStructure::new(n, &find_irreducible(n).unwrap());
+            let n_vars = [12usize, 58][(trial / 4 % 2) as usize];
+            let density = next() % 5;
+            let a = random_element(n, n_vars, density, false, &mut next);
+            let b = random_element(n, n_vars, density, false, &mut next);
+            let c = random_element(n, n_vars, density, false, &mut next);
+            let mut long = a.clone();
+            for _ in 0..1 + next() % 3 {
+                long.coords
+                    .push(random_element(1, n_vars, 3, false, &mut next).coords[0].clone());
+            }
+            assert_eq!(long.mul(&b, &st).coords, old_mul(&long, &b, &st).coords);
+            assert_eq!(b.mul(&long, &st).coords, old_mul(&b, &long, &st).coords);
+            assert_eq!(
+                long.mul(&long, &st).coords,
+                old_mul(&long, &long, &st).coords
+            );
+            let bf = F2mElement::from_biguint(&num_bigint::BigUint::from(next() & 0x7), n);
+            for (x1, x2) in [(&long, &b), (&b, &long)] {
+                assert_eq!(
+                    sym_semaev_s3(x1, x2, &c, &bf, &st),
+                    old_s3(x1, x2, &c, &bf, &st),
+                    "trial {trial}"
+                );
+            }
+            // a long x₃ is squared whole, so the old code indexed past the
+            // squaring table on any nonzero extra coordinate, and still does
+            if long.coords[n as usize..].iter().all(F2BoolPoly::is_zero) {
+                assert_eq!(
+                    sym_semaev_s3(&b, &c, &long, &bf, &st),
+                    old_s3(&b, &c, &long, &bf, &st)
+                );
+            } else {
+                assert!(std::panic::catch_unwind(|| old_s3(&b, &c, &long, &bf, &st)).is_err());
+                assert!(
+                    std::panic::catch_unwind(|| sym_semaev_s3(&b, &c, &long, &bf, &st)).is_err()
+                );
+            }
+        }
+    }
 }
