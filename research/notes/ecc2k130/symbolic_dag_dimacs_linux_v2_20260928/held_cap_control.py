@@ -93,6 +93,14 @@ def main() -> int:
             ]))
             if observed != [CAP, CAP]:
                 raise RuntimeError('hard address-space cap was not inherited')
+            run('git_cap_rev_parse', ['git', 'rev-parse', 'HEAD'])
+            run('git_cap_base_object', [
+                'git', 'cat-file', '-t', frozen['base_main_head'],
+            ])
+            run('git_cap_checkout_ancestry', [
+                'git', 'merge-base', '--is-ancestor',
+                frozen['base_main_head'], args.expected_head,
+            ])
             check = json.loads(run('preparation_and_v2_hash_gate', [
                 sys.executable, str(HERE / 'ci_replay.py'),
             ]))
