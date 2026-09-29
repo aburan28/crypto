@@ -26,14 +26,22 @@ def git(*args: str) -> str:
     return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
 
-def main_blob_sha(relative: str) -> str:
-    data = subprocess.check_output(["git", "show", f"origin/main:{relative}"], cwd=ROOT)
+def blob_sha(ref: str, relative: str) -> str:
+    data = subprocess.check_output(["git", "show", f"{ref}:{relative}"], cwd=ROOT)
     return hashlib.sha256(data).hexdigest()
 
 
+def is_ancestor(ancestor: str, descendant: str) -> bool:
+    return subprocess.run(["git", "merge-base", "--is-ancestor", ancestor, descendant],
+                          cwd=ROOT, check=False).returncode == 0
+
+
 def release_gate(frozen: dict) -> dict:
-    if frozen["release_main_head"] is None:
+    frozen_main = frozen["release_main_head"]
+    if frozen_main is None:
         raise RuntimeError("NOT_ADMITTED: #802, #804 and #784 must merge; rebase and re-freeze")
+    if frozen["release_main_head_role"] != "pre_release_main_ancestor":
+        raise RuntimeError("NOT_ADMITTED: unknown release-main role")
     pr_states = {}
     for number in PARENTS:
         item = json.loads(subprocess.check_output(
@@ -43,20 +51,25 @@ def release_gate(frozen: dict) -> dict:
             raise RuntimeError(f"NOT_ADMITTED: prerequisite #{number} unmerged")
         pr_states[str(number)] = item["mergeCommit"]["oid"]
     subprocess.run(["git", "fetch", "origin", "main"], cwd=ROOT, check=True)
-    main_head = git("rev-parse", "origin/main")
-    if main_head != frozen["release_main_head"]:
-        raise RuntimeError("NOT_ADMITTED: main moved after capacity re-freeze")
+    observed_main = git("rev-parse", "origin/main")
+    checkout = git("rev-parse", "HEAD")
+    if not is_ancestor(frozen_main, observed_main):
+        raise RuntimeError("NOT_ADMITTED: frozen main is not an ancestor of current main")
+    if not is_ancestor(frozen_main, checkout):
+        raise RuntimeError("NOT_ADMITTED: frozen main is not an ancestor of checkout")
+    if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT).strip():
+        raise RuntimeError("NOT_ADMITTED: measured checkout is dirty")
     for number, merge_oid in pr_states.items():
-        check = subprocess.run(["git", "merge-base", "--is-ancestor", merge_oid, main_head],
-                               cwd=ROOT, check=False)
-        if check.returncode != 0:
+        if not is_ancestor(merge_oid, frozen_main):
             raise RuntimeError(f"NOT_ADMITTED: prerequisite #{number} is not in frozen main")
-    subprocess.run(["git", "merge-base", "--is-ancestor", main_head, "HEAD"],
-                   cwd=ROOT, check=True)
+    for relative, expected in frozen["input_sha256"].items():
+        if blob_sha(observed_main, relative) != expected or blob_sha(checkout, relative) != expected:
+            raise RuntimeError(f"NOT_ADMITTED: frozen input drift: {relative}")
     for relative, expected in PARENT_BLOBS.items():
-        if main_blob_sha(relative) != expected:
+        if blob_sha(observed_main, relative) != expected or blob_sha(checkout, relative) != expected:
             raise RuntimeError(f"NOT_ADMITTED: merged parent blob drift: {relative}")
-    return {"main_head": main_head, "merged_parent_commits": pr_states}
+    return {"frozen_main_ancestor": frozen_main, "observed_main_head": observed_main,
+            "checkout_head": checkout, "merged_parent_commits": pr_states}
 
 
 def manifest(out: Path):

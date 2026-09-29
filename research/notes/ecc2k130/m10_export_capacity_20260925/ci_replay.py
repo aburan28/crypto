@@ -27,8 +27,8 @@ def main() -> int:
     spec = json.loads((HERE / "INPUT.json").read_text())
     assert frozen["schema"] == "ecc2k130-m10-capacity-frozen-v1"
     assert frozen["source_base_head"] == "708e3c884c1707affbd186288639b67972047d2c"
-    assert frozen["release_main_head"] is None or re.fullmatch(
-        r"[0-9a-f]{40}", frozen["release_main_head"])
+    assert re.fullmatch(r"[0-9a-f]{40}", frozen["release_main_head"])
+    assert frozen["release_main_head_role"] == "pre_release_main_ancestor"
     assert spec["schema"] == "ecc2k130-m10-complete-chain-capacity-input-v1"
     assert spec["field_degree"] == 131 and spec["normal_beta"] == 3
     assert [row["dimensions"] for row in spec["arms"]] == (
