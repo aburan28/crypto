@@ -143,7 +143,7 @@ def check_static() -> dict:
             '3f50d3a4218609874b01e02bdf61ad699e6b3f71', 'binary Git identity')
     require(set(frozen['source_sha256']) ==
             {'PROTOCOL.md', 'ci_replay.py', 'run.py', 'v2_child.py',
-             'selftest.py'}, 'v2 source set')
+             'selftest.py', 'held_cap_control.py'}, 'v2 source set')
     for name, digest in frozen['source_sha256'].items():
         require(sha(HERE / name) == digest, f'v2 source drift: {name}')
     require(set(frozen['workflow_sha256']) == set(WORKFLOWS), 'workflow set')
@@ -350,7 +350,7 @@ def _replay_panel(archive: Path, result: dict, frozen: dict,
 
 def _replay_n131(archive: Path, result: dict, frozen: dict) -> str:
     sys.path.insert(0, str(FIRST))
-    from verify import parse_cnf
+    from export import build_relation, expected_clauses
     require(result['decision'] == 'PASS' and result['single_edge_only'] is True and
             result['n'] == 131 and result['modulus'] ==
             load(FIRST / 'INPUT.json')['n131_single_edge_modulus'],
@@ -366,13 +366,72 @@ def _replay_n131(archive: Path, result: dict, frozen: dict) -> str:
                 cnf.stat().st_size == result['cnf']['bytes'] and
                 result['cnf']['dag']['variables'] == 920 and
                 result['cnf']['dag']['model_limbs'] == 15 and
-                result['cnf']['dag']['total_nodes'] <= cap['node_cap'],
+                result['cnf']['dag']['variables'] + 2 <=
+                result['cnf']['dag']['total_nodes'] ==
+                result['cnf']['variables'] <= cap['node_cap'],
                 'n131 CNF/width/node metadata')
-        variables, clauses, _ = parse_cnf(cnf, keep_clauses=False)
-        require((variables, clauses) ==
-                (result['cnf']['variables'], result['cnf']['clauses']),
-                'n131 DIMACS dimensions')
+        relation = build_relation(131, result['modulus'])
+        counts = relation.dag.counts()
+        require(counts == result['cnf']['dag'] and
+                counts['total_nodes'] <= cap['node_cap'] and
+                result['cnf']['variables'] == counts['total_nodes'] and
+                result['cnf']['clauses'] == expected_clauses(relation.dag, []) and
+                result['cnf']['relation_output_literal'] == relation.output + 1,
+                'n131 reconstructed relation metadata/output')
+        _check_relation_stream(relation, cnf, result['cnf']['clauses'])
     return result['cnf']['sha256']
+
+
+def _check_relation_stream(relation, cnf: Path, expected_count: int) -> None:
+    """Check canonical clauses against the frozen DAG without retaining a large CNF.
+
+    Unlike a dimension-only parse, this binds every gate's inputs, operation,
+    output ID and clause order to the reconstructed relation, then binds the
+    asserted final unit to that relation's actual output node.
+    """
+    nodes = relation.dag.nodes
+    with cnf.open('rt', encoding='ascii') as stream:
+        require(stream.readline() == f'p cnf {len(nodes)} {expected_count}\n',
+                'relation DIMACS header differs from reconstructed DAG')
+        seen = 0
+
+        def clause() -> tuple[int, ...]:
+            nonlocal seen
+            line = stream.readline()
+            require(bool(line), 'relation DIMACS ended early')
+            parts = line.split()
+            require(len(parts) >= 2 and parts[-1] == '0',
+                    'malformed relation clause')
+            try:
+                values = tuple(int(part) for part in parts[:-1])
+            except ValueError as exc:
+                raise AssertionError('noninteger relation literal') from exc
+            require(all(lit != 0 and abs(lit) <= len(nodes) for lit in values),
+                    'relation literal outside reconstructed DAG')
+            require(line == ' '.join(map(str, values)) + ' 0\n',
+                    'relation DIMACS clause is not canonical')
+            seen += 1
+            return values
+
+        require(clause() == (-1,) and clause() == (2,),
+                'relation constant clauses changed')
+        for node_id, (op, a, b) in enumerate(nodes[2:], 2):
+            if op == 'var':
+                continue
+            x, y, z = a + 1, b + 1, node_id + 1
+            if op == 'xor':
+                expected = ((-x, -y, -z), (x, y, -z),
+                            (x, -y, z), (-x, y, z))
+            elif op == 'and':
+                expected = ((-x, -y, z), (x, -z), (y, -z))
+            else:
+                raise AssertionError('unknown reconstructed DAG gate')
+            require(tuple(clause() for _ in expected) == expected,
+                    f'relation {op} clauses changed at node {node_id}')
+        require(clause() == (relation.output + 1,),
+                'relation output assertion changed')
+        require(seen == expected_count and stream.read(1) == '',
+                'relation DIMACS has missing or extra clauses')
 
 
 def check_archive(receipt_path: Path, frozen: dict) -> dict:

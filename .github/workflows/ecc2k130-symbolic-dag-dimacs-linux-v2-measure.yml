@@ -21,20 +21,40 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - id: checkout
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - id: setup
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Recheck exact head and frozen predecessor bytes
+      - id: static
+        name: Recheck exact head and frozen predecessor bytes
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
           python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/ci_replay.py
+      - name: Preserve checkout, setup or static pre-dispatch refusal
+        if: always()
+        shell: bash
+        env:
+          CHECKOUT_OUTCOME: ${{ steps.checkout.outcome }}
+          SETUP_OUTCOME: ${{ steps.setup.outcome }}
+          STATIC_OUTCOME: ${{ steps.static.outcome }}
+          EVENT_HEAD: ${{ github.event.pull_request.head.sha }}
+          EVENT_PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          if [[ "$CHECKOUT_OUTCOME" != success || "$SETUP_OUTCOME" != success || "$STATIC_OUTCOME" != success ]]; then
+            printf '{"schema":"k0-dag-linux-v2-workflow-refusal-v1","decision":"PRE_DISPATCH_REFUSAL","run_id":%s,"pr_number":%s,"expected_head":"%s","checkout_outcome":"%s","setup_outcome":"%s","static_outcome":"%s","measured_children_started":0}\n' \
+              "${{ github.run_id }}" "$EVENT_PR" "$EVENT_HEAD" "$CHECKOUT_OUTCOME" "$SETUP_OUTCOME" "$STATIC_OUTCOME" \
+              > "$RUNNER_TEMP/dag-linux-v2-refusal-${{ github.run_id }}.json"
+          fi
       - name: Run at most one cold toy then n13 then n131 attempt
+        if: steps.checkout.outcome == 'success' && steps.setup.outcome == 'success' && steps.static.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail

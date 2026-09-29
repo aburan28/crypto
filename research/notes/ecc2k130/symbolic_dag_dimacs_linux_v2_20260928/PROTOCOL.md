@@ -41,16 +41,22 @@ Its sole phase-configuration override changes the original Homebrew
 `cadical_path` to #831's pinned Linux binary. The original `INPUT.json`,
 `bounded.py`, `export.py`, `produce.py`, `verify.py`, DRAT-trim source and all
 caps remain byte-identical. `run.py` supplies a new release gate, raw archive
-and failure-preserving supervisor. The exact new wrapper, supervisor, replay,
-protocol and both workflows are SHA-pinned by `FROZEN.json`.
+and failure-preserving supervisor. The exact new wrapper, supervisor,
+replay, harmless held cap control, protocol and both workflows are SHA-pinned
+by `FROZEN.json`.
 
 ## Release and one-shot gate
 
 The hash-only workflow checks out the PR's exact head, checks all frozen bytes,
-compiles the v2 scripts, runs four no-network one-shot/refusal controls,
-replays any committed archive, and executes *both*
+compiles the v2 scripts, runs six no-network one-shot/refusal and
+relation-mutation controls, replays any committed archive, and executes *both*
 `v2_child.py --gate-only` and `run.py --gate-only --expected-head <event head>`.
-Neither gate-only command executes a measured phase. The separately opt-in
+Neither gate-only command executes a measured phase. On the held Ubuntu
+runner, the workflow also runs the preparation/static gate, Git fetch/history
+checks, GitHub PR and Actions API reads in separate children under the toy
+512-MiB hard `RLIMIT_AS`. It archives the harmless control receipt, including
+any failed command and zero measured children. This catches a host-specific
+prerequisite failure before consuming the one-shot label. The separately opt-in
 measure workflow is triggered only by the unique PR label
 `ecc2k130-dag-linux-v2-measure-once`. It cannot release this held freeze.
 
@@ -70,7 +76,11 @@ necessary because the successful #831 labeled Actions run reports an empty
 label event blocks another label event on the same PR. Other labels on this
 workflow are conservatively blocking too; a new reviewed PR/release is needed
 if the one-shot event is consumed without a usable archive. A refusal is
-recorded before any child and uploaded by the workflow.
+recorded before any child and uploaded by the workflow. If checkout, Python
+setup or frozen-byte preflight fails before the supervisor can start, an
+`always()` workflow step writes a separate pre-dispatch refusal JSON with the
+exact run/head and step outcomes, and uploads it even though the job failed.
+The measured step requires all three preflight steps to have succeeded.
 
 Before any measured child, the supervisor reruns #831’s pinned *harmless*
 `harmless_cap_probe.py` on the actual target Actions image and archives its
@@ -95,8 +105,13 @@ by its wrong-output UNSAT case, then two invalid-point UNSAT cases. SAT
 admission requires a *complete* clause-valid model lifted to the exact full
 points and independent group sum. UNSAT admission requires a nonempty text
 DRAT file, a bounded checker receipt with exit 0, and fresh checker replay on
-the exact archived CNF. n131 admission checks only single-edge export
-structure, width, dimensions and caps. It is not an n131 PDP or attack claim.
+the exact archived CNF. n131 replay rebuilds the frozen 131-bit relation,
+checks all DAG metadata against the producer receipt, then streams the DIMACS and
+compares every gate clause and the asserted output literal with the rebuilt
+relation. Dimension-preserving gate and output mutations, plus the previously
+accepted one-variable fake, are rejected by no-network controls. n131
+admission remains only a single-edge export check under caps. It is not an
+n131 PDP or attack claim.
 
 The one cold run writes a new `evidence/run1/` archive after download. Its
 `MANIFEST.json` hashes every raw file, including streams, per-case CNFs,

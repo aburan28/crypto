@@ -7,10 +7,14 @@ on:
       - '.github/workflows/ecc2k130-symbolic-dag-dimacs-linux-v2-measure.yml'
 permissions:
   contents: read
+  actions: read
+  pull-requests: read
 jobs:
   exact-head-hash-and-archive-replay:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
-          python3 -m py_compile research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/{ci_replay,run,v2_child,selftest}.py
+          python3 -m py_compile research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/{ci_replay,run,v2_child,selftest,held_cap_control}.py
           python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/ci_replay.py
       - name: Prove both entrypoints remain nonmeasuring on this exact checkout
         shell: bash
@@ -34,3 +38,18 @@ jobs:
           python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/run.py \
             --gate-only --expected-head "${{ github.event.pull_request.head.sha }}"
           python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/selftest.py
+      - name: Control harmless gh, Git and preparation gate under toy RLIMIT_AS
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/held_cap_control.py \
+            --expected-head "${{ github.event.pull_request.head.sha }}" \
+            --out "$RUNNER_TEMP/dag-linux-v2-held-cap-${{ github.run_id }}.json"
+      - name: Preserve harmless held cap control
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dag-linux-v2-held-cap-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 30
+          path: ${{ runner.temp }}/dag-linux-v2-held-cap-${{ github.run_id }}.json

@@ -2,14 +2,18 @@
 """No-network controls for the one-shot and pre-dispatch archive boundary."""
 from __future__ import annotations
 
+import gzip
+import hashlib
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 import run
-from ci_replay import check_archive, check_static
+from ci_replay import (FIRST, _check_relation_stream, _replay_n131,
+                       check_archive, check_static)
 
 
 class GateControls(unittest.TestCase):
@@ -51,6 +55,57 @@ class GateControls(unittest.TestCase):
                 'event context must not be inspected while held')):
             with self.assertRaisesRegex(RuntimeError, 'v2 remains held'):
                 run.release_gate(self.frozen, run.git('rev-parse', 'HEAD'))
+
+    def test_n131_rejects_original_equal_dimension_fake(self) -> None:
+        # The former replay accepted this arbitrary one-variable CNF because
+        # only its self-reported dimensions were compared with its header.
+        raw = b'p cnf 1 1\n1 0\n'
+        packed = gzip.compress(raw, mtime=0)
+        modulus = json.loads((FIRST / 'INPUT.json').read_text())[
+            'n131_single_edge_modulus']
+        result = {
+            'decision': 'PASS', 'single_edge_only': True, 'n': 131,
+            'modulus': modulus, 'cnf_gzip_sha256': hashlib.sha256(packed).hexdigest(),
+            'cnf_gzip_bytes': len(packed),
+            'cnf': {'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw),
+                    'variables': 1, 'clauses': 1,
+                    'dag': {'variables': 920, 'model_limbs': 15, 'total_nodes': 922}},
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            archive = Path(directory)
+            (archive / 'n131').mkdir()
+            (archive / 'n131/single_edge.cnf.gz').write_bytes(packed)
+            with self.assertRaisesRegex(AssertionError, 'n131 CNF/width/node metadata'):
+                _replay_n131(archive, result, self.frozen)
+
+    def test_relation_stream_rejects_same_dimensions_mutations(self) -> None:
+        sys.path.insert(0, str(FIRST))
+        from export import build_relation, write_cnf
+        from verify import parse_cnf
+
+        relation = build_relation(2, 0x7)
+        with tempfile.TemporaryDirectory() as directory:
+            cnf = Path(directory) / 'relation.cnf'
+            meta = write_cnf(relation, cnf, byte_cap=1 << 20)
+            original = cnf.read_text().splitlines()
+            dimensions = parse_cnf(cnf, keep_clauses=False)[:2]
+            _check_relation_stream(relation, cnf, meta['clauses'])
+
+            changed_gate = original.copy()
+            literals = changed_gate[3].split()
+            literals[0] = str(-int(literals[0]))
+            changed_gate[3] = ' '.join(literals)
+            cnf.write_text('\n'.join(changed_gate) + '\n')
+            self.assertEqual(parse_cnf(cnf, keep_clauses=False)[:2], dimensions)
+            with self.assertRaisesRegex(AssertionError, 'relation .* clauses changed'):
+                _check_relation_stream(relation, cnf, meta['clauses'])
+
+            changed_output = original.copy()
+            changed_output[-1] = f'-{relation.output + 1} 0'
+            cnf.write_text('\n'.join(changed_output) + '\n')
+            self.assertEqual(parse_cnf(cnf, keep_clauses=False)[:2], dimensions)
+            with self.assertRaisesRegex(AssertionError, 'output assertion changed'):
+                _check_relation_stream(relation, cnf, meta['clauses'])
 
     def test_pre_dispatch_refusal_is_replayable(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
