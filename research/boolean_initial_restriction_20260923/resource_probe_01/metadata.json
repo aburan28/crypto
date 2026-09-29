@@ -1,0 +1,35 @@
+{
+  "complete": true,
+  "ended_utc": "2026-09-23T21:08:09.593545+00:00",
+  "git_base": "b30d57d9105f18db47bf07893e3e5d7a7f0160a6",
+  "host": {
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O"
+  },
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "source_hashes": {
+    "affine.rs": "a20a64c7ecb516f58168a894ae76fcb72b76b9ce904510c5cbbce3e06a4063b9",
+    "affine_tests.rs": "28f59747902a5c2de6a2c8c74d11133539b1d27a5c859b18d589df767d0a915c",
+    "basis.rs": "716b439439daf82512904bf20b4afd7d0c54379be2043f7a8dfc37dfc879eabc",
+    "basis_tests.rs": "58331a341cfe02a2bfac5622727f3e9f58e5e293ce5270bfe0c8f85b02507046",
+    "compact.rs": "563c1662a73bfac3dbe6fd316138256ce50249abe283a0d2891ebc5778fc584b",
+    "delta.rs": "ba9f6c6d68243b85056a3fbac06f609260f2886ead4d1264ebe2b64575391cc0",
+    "initial.rs": "2746a7225173e056fcbf80e0a0e782b59790b792eee227cbe373d1f7f430383f",
+    "initial_tests.rs": "53440d359a768889f4ebcd96f9ccaac1e64936afdf2e8fe13a374fcf0a04e5c5",
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "leaf.rs": "f403e9c92b607dc38265730ff313410e673635f8e8713c59f3f3325794348bf9",
+    "linearization.rs": "842aa9addfed48dc8c0fc6e6d4a8d5d08178056f82aaa4218c0f107d614a6898",
+    "linearization_tests.rs": "542e34dc6b2720855adc177d602bc394538f6346a9fa816b0e0dbaad967abb57",
+    "packed.rs": "240e363ee53a79952225f8eacc9dd9d0a4ace0ce5d09b3b59a69de0edcd5d464",
+    "probe.py": "d8e64490fb0a7a52eae5073d3c2575f9345cc9f786b7883f25613e8b296edd68",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "run.py": "bddfc04f46bc9e912360add3068ab878c5975bb5ea85819e26743c88de20e808",
+    "syndrome.rs": "6f218f3fdf6868534d2792c3c9c71d2b6b4f9bc4aed865d5fb6ef2105cb54f0e",
+    "syndrome_tests.rs": "078bbab9f9b9dcdeb1064b418fb69a7e2a9e0a67cad5c992e3d1bc597f7446fc",
+    "untraced.rs": "81dbeaebf494a5e5810cc32ae10991dc51a3c30d3d9e0a7e25643c86b3d448d4",
+    "worker.rs": "0160286f9d91498d93373337453d79837e4966158a7e9a788329db21a5bc8aaa"
+  },
+  "started_utc": "2026-09-23T21:06:59.967334+00:00",
+  "tests_sha256": "6abe69f3f917d32d89f21c4b374cbc7f9fc2cddd379ec1fb0a26bfff3e2c2843",
+  "worker_sha256": "b29d5a7ba843a2cb2c73ffdd49dbde9e6ecf6c0ec7ef00dc986f23050d5469e7"
+}

@@ -875,7 +875,7 @@ mod tests {
     /// I.e., the trivial-middle sandwich is just a boomerang.
     #[test]
     fn sandwich_with_identity_middle_matches_boomerang() {
-        let cipher = ToySpn::new(serpent_s0(), 2, 0xC0FFEE);
+        let _cipher = ToySpn::new(serpent_s0(), 2, 0xC0FFEE);
         let e0 = |b: &[u8]| {
             // Round 1 only.
             let cipher1 = ToySpn::new(serpent_s0(), 1, 0xC0FFEE);

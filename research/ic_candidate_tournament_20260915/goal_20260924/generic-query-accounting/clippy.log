@@ -1,0 +1,82 @@
+    Checking crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/ic-autolab-la-accounting)
+warning[E0602]: unknown lint: `clippy::chunks_exact_to_as_chunks`
+  |
+  = note: requested on the command line with `-A clippy::chunks_exact_to_as_chunks`
+  = note: `#[warn(unknown_lints)]` on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:432:9
+    |
+432 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:407:5
+    |
+407 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+   --> src/cryptanalysis/f4_fp_tower.rs:916:5
+    |
+914 | enum Lanes {
+    |      ----- variants in this enum
+915 |     Scalar,
+916 |     Avx2,
+    |     ^^^^
+917 |     Avx512,
+    |     ^^^^^^
+    |
+    = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+   --> src/cryptanalysis/koblitz_fast.rs:889:5
+    |
+885 | pub struct BatchScratch {
+    |            ------------ fields in this struct
+...
+889 |     qx: Vec<u64>,
+    |     ^^
+890 |     qy: Vec<u64>,
+    |     ^^
+    |
+    = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: this `else { if .. }` block can be collapsed
+   --> src/binary_ecc/f2m.rs:663:16
+    |
+663 |           } else {
+    |  ________________^
+664 | |             if bit_at == 0 {
+665 | |                 high.push(bits[i]);
+666 | |             } else {
+...   |
+673 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#collapsible_else_if
+    = note: `#[warn(clippy::collapsible_else_if)]` on by default
+help: collapse nested if block
+    |
+663 ~         } else if bit_at == 0 {
+664 +             high.push(bits[i]);
+665 +         } else {
+666 +             // bits[i] contributes to high at offset (i - word_at).
+667 +             if let Some(last) = high.last_mut() {
+668 +                 *last ^= bits[i] << (64 - bit_at);
+669 +             }
+670 +             high.push(bits[i] >> bit_at);
+671 +         }
+    |
+
+For more information about this error, try `rustc --explain E0602`.
+warning: `crypto` (lib) generated 6 warnings (run `cargo clippy --fix --lib -p crypto` to apply 3 suggestions)
+warning: `crypto` (example "ic_tournament_worker") generated 1 warning (1 duplicate)
+    Finished `release` profile [optimized] target(s) in 27.68s

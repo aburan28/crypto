@@ -1,0 +1,26 @@
+{
+  "child_system_ms": 2478.9089999999997,
+  "child_user_ms": 207211.706,
+  "command": [
+    "/opt/homebrew/bin/cargo",
+    "test",
+    "--release",
+    "-q",
+    "--lib",
+    "cryptanalysis::koblitz_groebner::rref_tests::"
+  ],
+  "ended_unix_ns": 1790124716957863000,
+  "environment_overrides": {},
+  "executable": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+  "executable_sha256": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+  "exit_code": 0,
+  "peak_rss_bytes": 3878846464,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790124654683863000,
+  "stderr_bytes": 29439,
+  "stderr_sha256": "e7f660a36c474fa77ae9473c78bc39a6c19ad771f286e0897021ac240bf1ff5f",
+  "stdout_bytes": 129,
+  "stdout_sha256": "516dd8f8357aeb5595182ed90ce8b2afe1a7588336ffccc0ebeab7c74b47b666",
+  "task_id": "TASK-KIC-INHERITED-LAYOUT-FUSED-EXACT-NORESCAN-20260922",
+  "wall_ms": 62274.787458
+}

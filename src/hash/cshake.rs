@@ -67,7 +67,7 @@ pub fn encode_string(s: &[u8]) -> Vec<u8> {
 pub fn bytepad(x: &[u8], w: usize) -> Vec<u8> {
     let mut out = left_encode(w as u64);
     out.extend_from_slice(x);
-    while out.len() % w != 0 {
+    while !out.len().is_multiple_of(w) {
         out.push(0);
     }
     out
@@ -83,7 +83,7 @@ fn cshake_sponge(msg: &[u8], rate: usize, output_len: usize) -> Vec<u8> {
 
     let mut padded = msg.to_vec();
     padded.push(0x04); // cSHAKE domain suffix
-    while padded.len() % rate != 0 {
+    while !padded.len().is_multiple_of(rate) {
         padded.push(0x00);
     }
     *padded.last_mut().unwrap() |= 0x80;

@@ -699,17 +699,3 @@ mod tests {
         }
     }
 }
-
-// ── Default impl for DescentRow (test scaffold) ──────────────────────
-
-impl Default for crate::cryptanalysis::ec_trapdoor::DescentRow {
-    fn default() -> Self {
-        Self {
-            n: 0,
-            l: 0,
-            magic_m: 0,
-            genus: 0,
-            type_i: false,
-        }
-    }
-}
