@@ -30,6 +30,8 @@ jobs:
           echo '4d8be7c3077fc1b40b08611d43063e24b4b189ac76d6f97e58c63de57d36e125  research/ecc2k130_leaf7_bridge_20260925/FROZEN.json' | sha256sum -c -
       - name: Check source and implementation hashes only
         run: python3 research/ecc2k130_leaf7_bridge_20260925/ci_replay.py
+      - name: Replay first hosted preflight artifact without bridge work
+        run: python3 research/ecc2k130_leaf7_bridge_20260925/verify_hosted_preflight.py
       - name: Check Python syntax only
         run: |
           python3 -m py_compile \
@@ -38,7 +40,8 @@ jobs:
             research/ecc2k130_leaf7_bridge_20260925/verify.py \
             research/ecc2k130_leaf7_bridge_20260925/verify_extension.py \
             research/ecc2k130_leaf7_bridge_20260925/ci_replay.py \
-            research/ecc2k130_leaf7_bridge_20260925/host_preflight.py
+            research/ecc2k130_leaf7_bridge_20260925/host_preflight.py \
+            research/ecc2k130_leaf7_bridge_20260925/verify_hosted_preflight.py
 
   host-preflight:
     needs: freeze
