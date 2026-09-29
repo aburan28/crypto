@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "scope": "Standalone generic Boolean degree-3 construction plus canonical GF2 reduced-row-space computation. This is a complete bounded linear-algebra workload, not complete Groebner closure or polynomial solving. No production solver integration, curve inputs, scalar recovery, relation campaigns or rho runs.",
+  "variables": [
+    12,
+    20,
+    28,
+    36
+  ],
+  "matrix_degree": 3,
+  "discovery_seeds": [
+    17,
+    937
+  ],
+  "holdout_seeds": [
+    20260929,
+    196613
+  ],
+  "families": [
+    "quadratic",
+    "linear_drop",
+    "restricted_cycle"
+  ],
+  "batches": [
+    1,
+    4,
+    8
+  ],
+  "repetitions": 20,
+  "variants": [
+    "sorted_reduce",
+    "ranked_reduce",
+    "sparse_reduce",
+    "stream_reduce"
+  ],
+  "bridge_variants": [
+    "sorted_reduce",
+    "ranked_reduce",
+    "sparse_reduce",
+    "stream_reduce",
+    "dense_reduce"
+  ],
+  "bridge_n": 12,
+  "limits": {
+    "variables": 36,
+    "matrix_degree": 3,
+    "generators": 12,
+    "terms_per_generator": 32,
+    "rows": 4096,
+    "columns": 8192,
+    "batch": 8,
+    "worker_seconds": 60,
+    "campaign_seconds": 600,
+    "dense_max_n": 12
+  },
+  "fixture_generators": 8,
+  "fixtures": "Same unscreened fixture generator as the coordinate study: eight generators, sixteen quadratic support monomials plus constant and ten linear terms, fresh coefficients for every input. Full-mask quadratic and linear-drop families, and restricted eight-variable quadratic/linear/constant/zero cycles. New holdouts; no post-holdout tuning.",
+  "contract": "Return ascending original compact column labels and the unique nonzero RREF rows of the complete capped degree-D product matrix. The source-row budget counts every nonzero generated row before elimination, including dependent rows. No early exit on rank saturation or a constant row. Context changes fall back to direct construction and the same reducer. This is not a SAT/UNSAT or full Groebner-basis verdict.",
+  "candidate": "stream_reduce generates each product row in ambient ranked coordinates, counts it and accumulates its support before reduction, inserts it immediately into a pivot-indexed basis, performs full backward elimination, and compacts the output to the original actual column support.",
+  "controls": {
+    "sorted_reduce": "Direct sorted/parity construction followed by incremental pivot-indexed reduction and full backward elimination.",
+    "ranked_reduce": "Packed ranked construction followed by the identical reducer on compact coordinates.",
+    "sparse_reduce": "Sparse-intermediate construction followed by that same reducer.",
+    "dense_reduce": "Small n=12 direct-lookup construction followed by that same reducer; absent above the bridge."
+  },
+  "correctness": "Independent recursive/set-parity construction followed by column-oriented Gauss-Jordan reduction. Every measured output and original source-row count must agree exactly. Test all 5050 binary matrices with 1..3 rows and 1..4 columns against canonical form and explicit row-span enumeration; all 6144 small Boolean coefficient/degree/active-mask cases; larger family fixtures; dependent-row caps; word boundaries; context guards; and 400 small polynomial systems over all eight Boolean points.",
+  "accounting": "Cold context setup, construction, complete forward and backward reduction, compaction, output allocation, exact output validation and destruction. Construction and reduction are separately timed for staged arms. Streaming has one measured fused phase; its separate construction/reduction values remain null. Twenty balanced rotations of four arms, or five at n=12. Common fixture and independent oracle generation are outside arm timing but inside process receipts.",
+  "memory": "Retained context capacity bytes exclude allocator metadata. basis_max_bytes is the maximum across inputs of basis storage at the end of insertion, before backward elimination; it is not total peak memory and excludes incoming row and output-compaction temporaries. Whole-worker RSS includes every arm and the reference corpus.",
+  "operation_counters": "Count logical row XORs and executed u64 XORs in the shared reducer, including backward elimination. Logical row-XOR counts must agree across arms on matched inputs; word counts may differ with coordinate width. These are reduction-phase diagnostics, not complete calibrated operation costs.",
+  "performance_gate": "At batch8, each n=20/28/36 and every family: stream_reduce must have a 95 percent paired-bootstrap lower bound above 2.0 against the pointwise fastest of sorted_reduce,ranked_reduce,sparse_reduce. All nine comparisons must pass for dramatic combined-workload promotion. Also report each optimized staged/streamed arm against sorted_reduce without discarding failing cells; n=12 dense bridge is retained.",
+  "projection": "A construction-only zero-time projection holds all other measured phases fixed: total_ns / (total_ns - construction_ns), evaluated on sorted_reduce. This is a diagnostic counterfactual, not a bound on coupled implementations or full solving.",
+  "classification": "Bounded construction-plus-linear-reduction engineering diagnostic. Complete polynomial solving, Groebner iteration/root extraction, full IC operations and rho ratio remain null. The full thread goal remains open unless evidence covers that broader scope."
+}

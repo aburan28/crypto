@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-solve-trace-9056xdnw/tests"
+  ],
+  "exit_code": 0,
+  "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+  "peak_rss_bytes": 3981312,
+  "process_wall_ns": 485536542,
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "\nrunning 4 tests\ntest tests::specialization_and_affine_completion_preserve_solutions ... ok\ntest tests::cap_is_unknown_not_unsat ... ok\ntest tests::exhaustive_small_systems_agree_with_boolean_enumeration ... ok\ntest tests::kernel_variants_have_identical_traces_and_verified_models ... ok\n\ntest result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n",
+  "stdout_sha256": "f61626d042621ff85649aaf6a43a264ce5a170b33c41df9e2fca7ede53f1207b",
+  "system_seconds": 0.004783,
+  "timed_out": false,
+  "user_seconds": 0.028495
+}

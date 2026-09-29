@@ -58,6 +58,7 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum Cmd {
     /// Hash a message with the given algorithm (sha256 | sha3 | blake3)
     Hash { algorithm: String, message: String },
@@ -207,6 +208,7 @@ enum VisualOp {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum CryptanalysisOp {
     /// List all registered ciphers known to the auto-attack runner.
     ListCiphers,
@@ -1116,19 +1118,38 @@ fn cmd_isogeny(op: IsogenyOp) {
             println!("Frobenius trace: {}", m.start_cm.trace);
             println!("#E(F_p):         {}", m.start_cm.order);
             println!(
-                "End(E) disc:     {}   (fundamental {}, conductor {})",
-                m.start_cm.endomorphism_disc, m.start_cm.fundamental_disc, m.start_cm.conductor,
+                "Z[π] disc:       {}   (fundamental {}, Frobenius-order conductor {})",
+                m.start_cm.frobenius_disc,
+                m.start_cm.fundamental_disc,
+                m.start_cm.frobenius_order_conductor,
+            );
+            let label =
+                |v: Option<i64>| v.map(|n| n.to_string()).unwrap_or_else(|| "unknown".into());
+            println!(
+                "End(E) disc:     {}   (conductor {}; evidence {:?})",
+                label(m.start_cm.endomorphism_disc),
+                label(m.start_cm.endomorphism_conductor),
+                m.start_cm.endomorphism_evidence,
             );
             println!(
-                "Position:        depth {}, crater_size {}, on_crater = {}",
-                pos.depth, pos.crater_size, pos.on_crater,
+                "Position:        depth {}, max rational depth {}, crater_size {}, on_crater = {}",
+                label(pos.depth.map(i64::from)),
+                label(pos.max_depth.map(i64::from)),
+                label(pos.crater_size.map(i64::from)),
+                pos.on_crater
+                    .map(|b| b.to_string())
+                    .unwrap_or_else(|| "unknown".into())
+            );
+            println!(
+                "Neighborhood:    BFS distances; rational-kernel enumeration complete = {}",
+                m.rational_kernel_enumeration_complete
             );
             println!();
             for level in &m.levels {
                 let n = level.j_invariants.len();
                 println!(
-                    "Level {:>2}: {:>3} vertices  j = {:?}",
-                    level.level, n, level.j_invariants
+                    "BFS distance {:>2}: {:>3} vertices  j = {:?}",
+                    level.bfs_distance, n, level.j_invariants
                 );
             }
         }
@@ -1231,7 +1252,7 @@ fn cmd_isogeny(op: IsogenyOp) {
             // Cap scales with √n.  Hasse interval is centred at p, so
             // √n ≈ √p = 2^{bits/2}.  Allow 8× headroom for the
             // geometric-distribution tail.
-            let half_bits = (cfg.bits.min(60) / 2) as u32;
+            let half_bits = cfg.bits.min(60) / 2;
             cfg.rho_max_iters =
                 rho_cap.unwrap_or_else(|| 8u64.checked_shl(half_bits).unwrap_or(u64::MAX));
             eprintln!(
@@ -1790,7 +1811,7 @@ fn cmd_rsa(op: RsaOp) {
             let kp = RsaKeyPair::generate(1024);
             println!(
                 "n (256-bit prefix): {}…",
-                to_hex(&bigint_to_bytes_be(&kp.public.n, 128))[..64].to_string()
+                &to_hex(&bigint_to_bytes_be(&kp.public.n, 128))[..64]
             );
             println!("e: {}", kp.public.e);
         }

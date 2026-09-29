@@ -44,7 +44,7 @@ fn generate_biased_sigs(
     let mut sigs = Vec::with_capacity(count);
 
     while sigs.len() < count {
-        let bytes_count = ((k_bits + 7) / 8) as usize;
+        let bytes_count = k_bits.div_ceil(8) as usize;
         let mut buf = vec![0u8; bytes_count];
         rng.fill_bytes(&mut buf);
         let extra = (bytes_count as u32) * 8 - k_bits;
