@@ -474,6 +474,7 @@ impl RootTable {
         }
     }
 
+    #[cfg(test)]
     #[inline(always)]
     fn get(&self, key: u64) -> Option<u64> {
         self.get_counted(key).0

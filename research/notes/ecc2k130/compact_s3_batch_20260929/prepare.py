@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 import subprocess
 
-SEED = 622935
+SEED = 622936
 N_VALUES = (41, 53)
 LENGTH = 1024
 ROOT = Path(__file__).resolve().parents[4]
@@ -18,6 +18,7 @@ PRIOR_PANELS = (
     "compact_orbit_strong_rho_20260929",
     "compact_k_boundary_20260929",
     "compact_swap_quotient_20260929",
+    "compact_s3_batch_20260929/pilot_622935",
 )
 
 
@@ -26,7 +27,7 @@ def sha(path: Path) -> str:
 
 
 def corpus(n: int) -> str:
-    return f"compact-s3-batch-n{n}-L1024-eval-20260929-v1"
+    return f"compact-s3-batch-n{n}-L1024-eval-20260929-v2"
 
 
 def generate(rho_v2: Path, out: Path) -> dict:
