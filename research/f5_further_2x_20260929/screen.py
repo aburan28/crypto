@@ -32,6 +32,9 @@ ARMS = {
                ("t8", {"KIC_GF2_TABLES": "8"})),
     "pivot": (("p1", {"KIC_GF2_PIVOT_CANDIDATES": "1"}),
               ("p4", {"KIC_GF2_PIVOT_CANDIDATES": "4"})),
+    "width": (("k8", {"KIC_GF2_TABLE_BITS": "8"}),
+              ("k7", {"KIC_GF2_TABLE_BITS": "7"}),
+              ("k6", {"KIC_GF2_TABLE_BITS": "6"})),
 }
 
 
@@ -60,7 +63,7 @@ def run(seed, name, options, phase, pair):
 def main():
     group = sys.argv[1]
     if group not in ARMS:
-        raise SystemExit("usage: screen.py tables|pivot")
+        raise SystemExit("usage: screen.py tables|pivot|width")
     arms = ARMS[group]
     report = {
         "group": group, "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

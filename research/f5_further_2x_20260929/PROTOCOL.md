@@ -27,12 +27,16 @@ from more eight-bit tables may reduce repeated matrix sweeps. The first
 hypothesis can change raw echelon rows while preserving rank and canonical
 row space, so it requires its own arm and an explicit output contract check.
 Neither hypothesis is assumed beneficial before paired measurement.
+The third bounded hypothesis is that six- or seven-bit Gray-code tables
+reduce table-construction work enough to offset additional matrix passes;
+compare widths 8 (reference), 7, and 6 at four tables per pass.
 
 Before reserving an eligible x86-64 runner, run a nonpromoting Apple ARM64
 screen on the frozen seed and holdout A. Use one thread, one binary, one warmup
 per arm, and three alternating reference/candidate pairs per seed. Compare
-four, six, and eight tables, then pivot-candidate windows 1 and 4 as separate
-arms. This screen can reject a regression or a correctness failure, but its
+four, six, and eight tables, then pivot-candidate windows 1 and 4, then table
+widths 8, 7, and 6 as separate arms. This screen can reject a regression or a
+correctness failure, but its
 ratios cannot establish the requested gain. Preserve the raw screen receipt.
 
 ## Frozen workload and accounting
