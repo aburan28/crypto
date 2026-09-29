@@ -328,7 +328,10 @@
       their generic-group floor and matched Pollard rho reference. The residual-walk thread's
       hundreds-of-times-behind-rho verdict on E(F<sub>p</sub><sup>3</sup>) is unchanged (its best
       cell is now the <code>j = 0</code> orbit quotient of the subspace base at 224&times; plain rho,
-      388&times; a rho folded by the same automorphism, an engineering step from 898 to 312). In the
+      388&times; a rho folded by the same automorphism, an engineering step from 898 to 312; the one route whose distance to parity is a
+      constant, Joux&ndash;Vitse three-point decompositions at k = 4, measures 6,945&times; rho flat from
+      2<sup>32</sup> to 2<sup>40</sup>, and the <a href="#rho-parity-ledger">rho-parity ledger</a> shows every
+      measured route bounded away from parity below 2<sup>151</sup>). In the
       three-regime whole-pipeline ledger that heads the page, none of its elliptic-curve rows is
       below rho: its best rows are <b>13.5&times;</b> the matched rho on a 23-bit
       prime-order curve, <b>38.2&times;</b> on a 24-bit random binary curve and <b>4.3&times;</b>
@@ -1270,6 +1273,8 @@
           <tr><td>O(1) S&#8324; solve, <code>&lang;&minus;1&rang;</code> base <em>(control on the same stream)</em></td><td class="n">963.8 <em>(two seeds 991.5)</em></td><td class="n">693&times;</td><td class="n">1.00</td><td><span class="chip">baseline</span></td></tr>
           <tr><td><code>&lang;&psi;&rang;</code> orbit quotient of the base, orientation as <code>&lambda;<sup>k</sup></code></td><td class="n">312.1 <em>(before 963.8; two seeds 329.6)</em></td><td class="n">224&times; plain, 388&times; folded rho</td><td class="n">0.98</td><td><span class="chip">engineering</span></td></tr>
           <tr><td>Canonical residuals and decompositions, uniform stream</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">0 saved of &le; 0.011 expected</td><td><span class="chip">accounting</span></td></tr>
+          <tr class="group"><td colspan="5">Subspace base on E(F_p&#8308;), Joux&ndash;Vitse three-point decompositions, 2<sup>32.3</sup>&ndash;2<sup>40.1</sup>, two seeds per size (<code>experiments/26_jv_quartic_dlp.json</code>; C&prime; in <code>26_jv_quartic_cprime.json</code>)</td></tr>
+          <tr><td>Three-point decompositions by F4 on the overdetermined symmetrised S&#8324;, the method end to end at 2<sup>40.1</sup></td><td class="n">8,126</td><td class="n">6,945&times; (flat: 4,583–9,832× over the eight runs)</td><td class="n">1.80 of 6p(|F|+1)</td><td><span class="chip relabel">relabelling</span> of the k = 4 solve; measurement of a derived route</td></tr>
         </tbody>
       </table>
     </div>
@@ -1411,6 +1416,54 @@
         elimination never multiplies across blocks that a sparse-aware elimination would have
         multiplied anyway, so it is a footprint lever (3&times;) and not a field-operation lever
         (1.4&ndash;5 %). <code>S</code> is unchanged by everything in this panel.</p>
+    </div>
+  </div>
+
+  <!-- ============ RHO PARITY LEDGER ============ -->
+  <div class="panel" id="rho-parity-ledger">
+    <div class="panel-head">
+      <h2>The rho-parity ledger: every measured route, its exponent, and what parity would need <span class="chip">measurement</span></h2>
+      <p>Frozen source: <code>experiments/22_glv_quotient_seeds6.json</code>, <code>21_gaudry_cubic_la.json</code>,
+        <code>24_gaudry_quartic_c4.json</code>, <code>25_gaudry_quartic_la.json</code> and the new
+        <code>26_jv_quartic_{cprime,dlp}.json</code>, tables by <code>scripts/parity_ledger.py</code>
+        (<code>research/notes/index-calculus/RESEARCH_RHO_PARITY_PROGRAMME.md</code>). Parity is
+        <code>S / rho = 1</code> end to end. Exponents are least-squares fits over the four sizes of each
+        file; every size named in the last column is an extrapolation on the exponents beside it.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>The question "how far from parity" has a size-independent answer on exactly one route, the
+          Joux&ndash;Vitse three-point decomposition at k = 4, whose residual count and linear algebra both
+          grow as n<sup>1/2</sup>; that route was built and measured here (two seeds per size, 16 rho walks
+          each, every logarithm verified, 85,277 residuals cross-checked against an independent oracle with
+          0 mismatches).</caption>
+        <thead><tr><th scope="col">Route</th><th scope="col">Sizes</th><th scope="col" class="n">S at top</th>
+          <th scope="col" class="n">S / rho</th><th scope="col" class="n">relations &prop; n<sup>a</sup></th>
+          <th scope="col" class="n">linear algebra &prop; n<sup>b</sup></th><th scope="col" class="n">S / rho &prop; n<sup>c</sup></th>
+          <th scope="col">Parity</th></tr></thead>
+        <tbody>
+          <tr class="group"><td colspan="8">k = 3, E(F<sub>p&sup3;</sub>)</td></tr>
+          <tr><td>Plain, <code>&lang;&minus;1&rang;</code> base, O(1) S&#8324; solve</td><td>2<sup>24.2</sup>&ndash;2<sup>33.1</sup></td><td class="n">964</td><td class="n">691&times;</td><td class="n">0.34</td><td class="n">0.66</td><td class="n">&minus;0.15</td><td>never: the two-term fit bottoms at &asymp; 177&times; rho near 2<sup>52</sup> and rises</td></tr>
+          <tr><td><code>&lang;&psi;&rang;</code> orbit quotient, <code>j = 0</code></td><td>2<sup>24.2</sup>&ndash;2<sup>33.1</sup></td><td class="n">312</td><td class="n">224&times;</td><td class="n">0.34</td><td class="n">0.64</td><td class="n">&minus;0.16</td><td>never: bottoms at &asymp; 26&times; rho near 2<sup>59</sup></td></tr>
+          <tr><td>Plain, Wiedemann (&sect;11.7)</td><td>2<sup>24.2</sup>&ndash;2<sup>33.1</sup></td><td class="n">974</td><td class="n">750&times;</td><td class="n">0.32</td><td class="n">0.68</td><td class="n">&minus;0.18</td><td>never: bottoms at &asymp; 183&times; rho near 2<sup>50</sup></td></tr>
+          <tr><td>Double large primes (&sect;11.7)</td><td>2<sup>24.2</sup>&ndash;2<sup>33.1</sup></td><td class="n">3,378</td><td class="n">2,599&times;</td><td class="n">0.44</td><td class="n">0.56</td><td class="n">&minus;0.06</td><td>2<sup>237</sup> at the measured n<sup>&minus;0.056</sup> (2<sup>237</sup> at n<sup>&minus;1/18</sup>)</td></tr>
+          <tr><td>Pair-only (k &minus; 1) decompositions (&sect;11.9)</td><td>2<sup>24.2</sup>&ndash;2<sup>33.1</sup></td><td class="n">1,659</td><td class="n">1,037&times;</td><td class="n">0.72</td><td class="n">&mdash;</td><td class="n">+0.22</td><td>never</td></tr>
+          <tr class="group"><td colspan="8">k = 4, E(F<sub>p&#8308;</sub>)</td></tr>
+          <tr><td>Full four-point decompositions: C&#8324; (&sect;11.17) and r&#8734; (&sect;11.19)</td><td>2<sup>32.3</sup>&ndash;2<sup>40.1</sup></td><td class="n">&mdash;</td><td class="n">&gt; 10<sup>8</sup>&times; at 2<sup>32</sup></td><td class="n">1/4 (derived)</td><td class="n">0.48</td><td class="n">&rarr; 0.518</td><td>2<sup>151</sup> on C&#8324; = 1.2&middot;10<sup>12</sup>; parity at 2<sup>80</sup> would need C&#8324; &lt; 5.4&middot;10<sup>6</sup>, 10<sup>4</sup>&times; below the solver's own floor</td></tr>
+          <tr><td><strong>Joux&ndash;Vitse three-point decompositions</strong> (this round)</td><td>2<sup>32.3</sup>&ndash;2<sup>40.1</sup></td><td class="n"><strong>8,126</strong></td><td class="n"><strong>6,945&times;</strong> (4,583–9,832× over the eight runs)</td><td class="n">0.496 (1/2 derived)</td><td class="n">1/2 (derived), r = 9.97 over every attempt, 0.514 on the last</td><td class="n">-0.003</td><td><strong>never</strong>: constant 6C&prime;/(S<sub>rho</sub>c<sub>add</sub>) + r needs C&prime; &lt; 10; measured C&prime; = 1.6&middot;10<sup>5</sup>, of which the Weil restriction alone is 3,401</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p>The k = 4 Joux&ndash;Vitse row supersedes the derived &ldquo;near 36&times; rho at every size&rdquo;
+        of &sect;11.16, which borrowed C&prime; = 1,513 from the k = 3 pair test: the three-point test is four
+        quartics in three unknowns, inconsistent with a certificate at degree 7 on an 84 &times; 117 matrix, and
+        F4 spends 1.6&middot;10<sup>5</sup> multiplications on it at every size (2,400 tests, 320 planted triples all
+        found, 0 mismatches against the pair-table oracle). The ratio is flat as derived, and the constant is
+        193&times; the derivation. Class: a measurement of a derived route; relabelling of the k = 4 solve
+        (C&#8324; moved into a p-fold residual count), no class for the boundary statement. Parity at a size
+        that fits a machine needs a route this harness does not have &mdash; k &ge; 5 with torsion symmetries,
+        or a cover &mdash; and the note registers the first before building it.</p>
     </div>
   </div>
 
@@ -2082,8 +2135,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         4,096-dimensional multiplication matrix alone, which put the handover at
         <s>n &asymp; 2<sup>133</sup>&ndash;2<sup>137</sup></s>, extrapolated on the exponents
         n<sup>1/4</sup> and n<sup>1/2</sup>, and a measured C&#8324; in this design could only
-        move it later. Decomposing into three points instead (Joux&ndash;Vitse) sits near
-        36&times; rho at every size.</p>
+        move it later. Decomposing into three points instead (Joux&ndash;Vitse) <s>sits near 36&times; rho at every size</s> &mdash; <strong>measured at 6,945&times; rho, flat from 2<sup>32</sup> to 2<sup>40</sup></strong> (the rho-parity ledger below): one three-point test costs C&prime; = 1.6&middot;10<sup>5</sup> multiplications, not the 1,513 borrowed from the k = 3 pair test.</p>
       <p><strong>Then measured</strong> (&sect;11.17, four residuals at p&thinsp;=&thinsp;269, each
         solve cross-checked against a meet-in-the-middle oracle, the constructed one returning
         its planted decomposition): the S&#8325; system has the predicted dimension 4,096,
@@ -2094,8 +2146,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <s>n &asymp; 2<sup>149</sup>&ndash;2<sup>153</sup></s> (extrapolated over the derived
         constant; narrowed below), with the
         relation phase at 4.3&middot;10<sup>8</sup>&times; rho at 32 bits &mdash; still about
-        eighty doublings before the k&thinsp;=&thinsp;3 crossover. A stage diagnostic: no
-        end-to-end S exists for k&thinsp;=&thinsp;4, and none is claimed.</p>
+        eighty doublings before the k&thinsp;=&thinsp;3 crossover. A stage diagnostic: no end-to-end S exists for the full four-point method, and none is claimed; the three-point variant's end-to-end S is 8,126 at 2<sup>40.1</sup> (6,945&times; rho, the ledger below).</p>
       <p><strong>Then the constant, measured</strong> (&sect;11.19, registered in &sect;11.18: eight
         prime-order curves over F<sub>p&#8308;</sub> at p&thinsp;=&thinsp;269&ndash;1033,
         n&thinsp;&asymp;&thinsp;2<sup>32</sup>&ndash;2<sup>40</sup>, relations from a
