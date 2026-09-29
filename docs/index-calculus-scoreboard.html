@@ -318,11 +318,19 @@
   <header>
     <div class="eyebrow">Cryptanalysis cost ledger · aburan28/crypto</div>
     <h1>Index Calculus Scoreboard</h1>
+    <p><span class="chip">accounting</span> Volcano metadata correction:
+      Frobenius-order conductors are now distinct from certified endomorphism
+      conductors; unknown strata remain unknown. Historical volcano labels are
+      superseded. <a href="https://github.com/aburan28/crypto/blob/main/research/volcano_metadata_20260922/README.md">Correction and regression fixtures</a>.
+      <a href="https://github.com/aburan28/crypto/blob/main/research/volcano_metadata_20260923/README.md">Bounded exhaustive validation</a>: 7,968 curve models and 9,984 capped neighborhoods; three correctness defects corrected, no ECDLP speedup measured.
+      No ECDLP performance gain or ratio to rho is claimed.</p>
     <p class="verdict">The calibrated index-calculus families below are scored against
-      their generic-group floor and matched Pollard rho reference. On elliptic curves nothing
-      measured end to end is below rho: the residual-walk thread's 500&times;-or-worse verdict on
-      E(F<sub>p</sub><sup>3</sup>) is unchanged, and the three-regime ledger that heads the page
-      puts the best whole-pipeline variant at <b>13.5&times;</b> the matched rho on a 23-bit
+      their generic-group floor and matched Pollard rho reference. The residual-walk thread's
+      hundreds-of-times-behind-rho verdict on E(F<sub>p</sub><sup>3</sup>) is unchanged (its best
+      cell is now the <code>j = 0</code> orbit quotient of the subspace base at 224&times; plain rho,
+      388&times; a rho folded by the same automorphism, an engineering step from 898 to 312). In the
+      three-regime whole-pipeline ledger that heads the page, none of its elliptic-curve rows is
+      below rho: its best rows are <b>13.5&times;</b> the matched rho on a 23-bit
       prime-order curve, <b>38.2&times;</b> on a 24-bit random binary curve and <b>4.3&times;</b>
       <small>was 4.9&times;</small> on a 39-bit Koblitz subgroup, with no fitted exponent below the
       reference's. The Koblitz figure
@@ -401,7 +409,7 @@
       exponent matching the derived law. That is a toy-size result
       (<code>p &le; 251</code>) whose reference needed correcting, not a statement about
       any deployed curve. The newer binary-field solver, the
-      Crossbred decomposition oracle, the WDSat Riemann-Roch panel and the
+      Crossbred decomposition oracle, the WDSat Riemann-Roch panel, the Weil-descent SAT round on the challenge curve and the
       parameter-sweep pilots are explicitly uncalibrated: their component counts
       do not establish an end-to-end speedup or belong in that normalized claim.</p>
 
@@ -458,7 +466,8 @@
     <p><a href="#koblitz-constructions-20260926">Koblitz constructions, built once</a>: the whole pipeline is <b>1.04&ndash;2.25&times; faster</b> at all nine sizes, every phase priced. All 180 of 180 pairs have identical counts and logarithms. Still no crossing with batch rho: 4.28&times; at best.</p>
     <p><b>10.7% fewer field products</b> per specialization (1,342 → 1,199; p = 67, seed = 11).</p>
     <p>Timing diagnostics: <b>55.4% less specialization time</b> and <b>1.2% less setup time</b>. Full-DLP confirmation remains inconclusive.</p>
-    <p><span class="chip">accounting</span> <a href="#ic-bounded-round-1-20260925">Bounded IC autolab, round one</a>: incumbent retained after 3,243 verified toy-panel pairs. The selected challenger&rsquo;s single-target online time was 6.5% higher on confirmation; neither complete cold metric met the 20% improvement gate.</p></div>
+    <p><span class="chip">accounting</span> <a href="#ic-bounded-round-1-20260925">Bounded IC autolab, round one</a>: incumbent retained after 3,243 verified toy-panel pairs. The selected challenger&rsquo;s single-target online time was 6.5% higher on confirmation; neither complete cold metric met the 20% improvement gate.</p>
+    <p><span class="chip">accounting</span> <a href="#ic-bounded-round-2-20260925">Bounded IC autolab, round two</a>: incumbent retained after 3,480 verified toy-panel pairs. Selected <code>stop5_word</code> confirmation ratios were 1.093655 online, 0.922725 cold Ir and 0.987022 cold native; neither cold gate reached 0.8. One round remains.</p></div>
     <nav aria-label="Performance evidence"><a href="algorithm-lab.html">Factor bases, linear algebra &amp; SAT demos →</a><a href="performance-gains.html">Explore performance charts →</a><a href="#summation-polynomials-20260914">Summation-polynomial evidence</a><a href="#gaudry-allocation-20260914">Earlier Gaudry gains</a><a href="#macaulay-cpu-gpu-pipeline">CPU/GPU pipeline</a></nav>
   </aside>
 
@@ -1360,8 +1369,151 @@
           <tr><td>O(1) S&#8324; solve, tuned</td><td class="n">898</td><td class="n">528&times;</td><td class="n">&mdash;</td><td><span class="chip">engineering</span></td></tr>
           <tr><td>Double large primes</td><td class="n">3,378</td><td class="n">1,987&times;</td><td class="n">&mdash;</td><td><span class="chip advance">advance, exponent</span></td></tr>
           <tr><td>Pair-only (k&minus;1) decompositions</td><td class="n">1,659</td><td class="n">1,037&times;</td><td class="n">&mdash;</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr class="group"><td colspan="5">Subspace base on a <code>j = 0</code> curve over E(F_p&sup3;), 2<sup>33.1</sup>, six seeds (<code>experiments/22_glv_quotient_seeds6.json</code>; two-seed run in <code>22_glv_quotient.json</code>)</td></tr>
+          <tr><td>O(1) S&#8324; solve, <code>&lang;&minus;1&rang;</code> base <em>(control on the same stream)</em></td><td class="n">963.8 <em>(two seeds 991.5)</em></td><td class="n">693&times;</td><td class="n">1.00</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td><code>&lang;&psi;&rang;</code> orbit quotient of the base, orientation as <code>&lambda;<sup>k</sup></code></td><td class="n">312.1 <em>(before 963.8; two seeds 329.6)</em></td><td class="n">224&times; plain, 388&times; folded rho</td><td class="n">0.98</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>Canonical residuals and decompositions, uniform stream</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">0 saved of &le; 0.011 expected</td><td><span class="chip">accounting</span></td></tr>
         </tbody>
       </table>
+    </div>
+    <div class="panel-head">
+      <p>The <code>j = 0</code> rows use the rho reference measured on their own instances
+        (mean <code>S = 1.39</code> over 48 walks, eight on each of six instances, single walks
+        0.16&ndash;3.35); the folded figure divides
+        that by &radic;3, the gain a rho that folds by <code>&lang;&minus;1, &psi;&rang;</code> takes from
+        the same group, and is an extrapolation. Columns, relations, residuals, solver calls and
+        non-zeros all fall by 3.0&times; with the count staying on its fold-aware floor
+        (<code>research/notes/index-calculus/RESEARCH_GLV_INDEX_CALCULUS.md</code> &sect;3).</p>
+    </div>
+  </div>
+
+  <!-- ============ ENDOMORPHISM-INVARIANT FACTOR BASES (PLAN + PILOT) ============ -->
+  <div class="panel" id="glv-invariant-bases">
+    <div class="panel-head">
+      <h2>Endomorphism-invariant factor bases across curve families <span class="chip">engineering</span> <span class="chip">plan</span></h2>
+      <p>Frozen source: <code>experiments/23_glv_invariant_pilot.json</code> and
+        <code>experiments/23_glv_invariant_gls_pilot.json</code> (2026-09-28), tables by
+        <code>scripts/glv_invariant_tables.py</code>; note
+        <code>research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md</code>.
+        One fold (<code>fold_by_endomorphisms</code>) over the framework&rsquo;s counted groups,
+        the control the same call with negation alone on the same points. A pilot, not the
+        plan&rsquo;s experiments: two seeds per size, <code>r</code> from 2<sup>12.8</sup> to
+        2<sup>23.9</sup>, every row&rsquo;s answer checked against the planted logarithm. Each
+        <em>vs rho</em> figure is against the counted negation walk (<code>A = 2</code>); the
+        matched folded walk is &radic;(w/2) cheaper still, measured in E6 (next panel).</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>family</th><th>fold</th><th class="n">points a column</th><th class="n">columns, control / fold</th><th class="n">S control / S fold (subtract oracle)</th><th class="n">S control / S fold (pair table)</th><th class="n">S fold vs rho (A = 2)</th><th>class</th></tr></thead>
+        <tbody>
+          <tr><td><code>j = 0</code> over F<sub>p</sub></td><td><code>&lang;&minus;1, &zeta;&rang;</code>, order 6</td><td class="n">6.0</td><td class="n">3.00</td><td class="n">1.00&ndash;2.65</td><td class="n">1.00&ndash;1.02</td><td class="n">18&times;&ndash;1,328&times;</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td><code>j = 1728</code> over F<sub>p</sub></td><td><code>&lang;&iota;&rang;</code>, order 4</td><td class="n">4.0</td><td class="n">2.00</td><td class="n">1.00&ndash;3.82</td><td class="n">1.00&ndash;1.13</td><td class="n">16&times;&ndash;2,834&times;</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>GLS twist over F<sub>p&sup2;</sub>, the <code>&psi;</code>-stable line</td><td><code>&lang;&minus;1, &psi;&rang;</code>, order 4</td><td class="n">4.0</td><td class="n">2.00</td><td class="n">1.31&ndash;1.98</td><td class="n">&mdash;</td><td class="n">40&times;&ndash;796&times;</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>generic, <code>D = &minus;7</code>, <code>D = &minus;8</code> (controls)</td><td>negation</td><td class="n">2.0</td><td class="n">1.00</td><td class="n">1.00</td><td class="n">1.00</td><td class="n">5&times;&ndash;4,250&times;</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td>degree-2 CM maps on <code>D = &minus;7, &minus;8</code> (type C)</td><td>none: <code>ord<sub>r</sub>(&lambda;)</code> 3.5&middot;10&sup3;&ndash;3.4&middot;10<sup>6</sup></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">0 of 38&ndash;362 base points kept in the base</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td><span class="chip">accounting</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p>The fold divides the columns by the group&rsquo;s order over two and the relation count
+        moves with them, so the count stays on its floor: the same reading as the
+        <code>&lang;&psi;&rang;</code> quotient row above. Where the relation phase is the cost
+        (<code>subtract</code>, <code>|F|</code> additions a target) <code>S</code> falls with the
+        trials; where the pair table is (<code>mitm</code>) both arms build the same table and
+        <code>S</code> does not move. The plan&rsquo;s experiments E1&ndash;E7 are run and read in
+        the next panel; these pilot figures stand as the only end-to-end <code>S</code> measured.</p>
+    </div>
+  </div>
+
+  <!-- ============ ENDOMORPHISM-INVARIANT FACTOR BASES: EXPERIMENTS E1-E7 ============ -->
+  <div class="panel" id="glv-invariant-experiments">
+    <div class="panel-head">
+      <h2>Endomorphism-invariant factor bases: experiments E1&ndash;E7 <span class="chip">engineering</span> <span class="chip">accounting</span></h2>
+      <p>Frozen source: <code>experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.json</code> (2026-09-29),
+        tables by <code>scripts/glv_invariant_experiment_tables.py</code>; note
+        <code>research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md</code> &sect;6.
+        The plan&rsquo;s seven experiments run: one relation stream per instance feeds the folded
+        base and its negation control to <em>full rank</em> (the rank a two-summand stream can
+        reach on a cofactor curve, <code>columns + 1 &minus; D</code>, &sect;6.0), four to six
+        seeds per size, <code>r</code> from 2<sup>13</sup> to 2<sup>32</sup>, every row&rsquo;s
+        answer checked against the planted logarithm. Relations to full rank carry a
+        coupon-collector factor on both arms, so the size-matched column is the <em>rank fraction
+        after exactly <code>columns</code> relations</em>. No row claims a speed; <code>S</code>
+        stays the pilot panel&rsquo;s.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>experiment</th><th>group, curve</th><th class="n">points a column</th><th class="n">columns, control / fold</th><th class="n">rank fraction after <code>columns</code> relations, fold / control</th><th class="n">relations to full rank, control / fold</th><th>what it settles</th><th>class</th></tr></thead>
+        <tbody>
+          <tr><td>E1, <code>j = 0</code> over F<sub>p</sub>, 2<sup>14</sup>&ndash;2<sup>30</sup></td><td><code>&lang;&minus;1, &zeta;&rang;</code>, order 6</td><td class="n">6.0</td><td class="n">3.00</td><td class="n">0.79&ndash;0.84 / 0.84&ndash;0.85</td><td class="n">2.8&ndash;5.5 (means; <code>&ln;(columns)</code> factor)</td><td>the fold moves the columns and nothing else; both arms fill at the same rate</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E1, <code>j = 1728</code> over F<sub>p</sub>, 2<sup>13</sup>&ndash;2<sup>31</sup></td><td><code>&lang;&iota;&rang;</code>, order 4</td><td class="n">4.0</td><td class="n">2.00</td><td class="n">0.79&ndash;0.84 / 0.79&ndash;0.84</td><td class="n">2.2&ndash;3.0</td><td>as above; <code>subtract</code> and <code>mitm</code> give the same stream</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E1, generic (control of the control)</td><td>negation</td><td class="n">2.0</td><td class="n">1.00</td><td class="n">0.83&ndash;0.85 / same</td><td class="n">1.00</td><td>the two arms are one run</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td>E2, GLS twist over F<sub>p&sup2;</sub>, the <code>&psi;</code>-line, <code>p</code> = 2<sup>8</sup>&ndash;2<sup>12</sup></td><td><code>&lang;&minus;1, &psi;&rang;</code>, order 4</td><td class="n">4.0</td><td class="n">2.00</td><td class="n">0.82 / 0.84</td><td class="n">2.20 (1.31&ndash;3.41)</td><td>the line oracle (E2b) agrees with <code>subtract</code> on 3,600 of 3,600 targets at about 2,600 F<sub>p</sub> multiplications a target</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E2, Koblitz <code>n</code> = 15, 17, 23, 31 (13: fold only), the Frobenius orbit</td><td><code>&lang;&minus;1, &tau;&rang;</code>, order <code>2n</code></td><td class="n">19.4&ndash;59.0 (up to <code>2n</code>)</td><td class="n">9.8&ndash;29.5</td><td class="n">0.70&ndash;1.00 / 0.58&ndash;0.85</td><td class="n">12&ndash;54</td><td>the same fold in the same unit: <code>ord<sub>r</sub>(&lambda;)</code>, 4 against <code>2n</code></td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E3, <code>j = 0</code> GLS twist, <code>p</code> = 2<sup>8</sup>&ndash;2<sup>12</sup></td><td><code>&lang;&minus;1, &zeta;, &psi;&rang;</code>: eigenvalues generate the 12th roots of unity</td><td class="n">12.0</td><td class="n">6.00</td><td class="n">&mdash;</td><td class="n">4.0&ndash;13.2 (12 instances)</td><td>the composite fold is the order of the eigenvalue subgroup of (Z/rZ)<sup>*</sup></td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E3, <code>j = 1728</code> GLS twist, <code>p</code> = 2<sup>8</sup>&ndash;2<sup>12</sup></td><td><code>&lang;&minus;1, &iota;, &psi;&rang;</code>: <code>&iota; = &plusmn;&psi;</code> on <code>&lang;G&rang;</code>, every instance</td><td class="n">4.0 (not 8)</td><td class="n">2.00</td><td class="n">&mdash;</td><td class="n">&mdash; (<code>r &asymp; p</code>, folds only)</td><td>the composite adds nothing: two square roots of &minus;1 mod <code>r</code></td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E4, degree 2: <code>D = &minus;7, &minus;8</code>, <code>1 + i</code> on <code>j = 1728</code>, 2<sup>16</sup>&ndash;2<sup>28</sup></td><td>type C, <code>ord<sub>r</sub>(&lambda;)</code> 41&ndash;1.2&middot;10<sup>8</sup></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">0 of 43,684 base points kept in the base</td><td class="n">&mdash;</td><td>no fold, no free relations, at every size</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E4b, degree 3: <code>D = &minus;11</code>, <code>&radic;&minus;3</code> on <code>j = 0</code>, 2<sup>16</sup>&ndash;2<sup>28</sup></td><td>type C, <code>ord<sub>r</sub>(&lambda;)</code> 33&ndash;2.5&middot;10<sup>8</sup></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">0 of 47,520 base points kept in the base</td><td class="n">&mdash;</td><td>as degree 2; V&eacute;lu with an odd kernel, six maps on <code>j = 0</code></td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E5, generic <code>E/F<sub>p</sub></code> on E(F<sub>p&sup3;</sub>), the Frobenius line, <code>p</code> = 2<sup>7</sup>&ndash;2<sup>11</sup></td><td><code>&lang;&minus;1, &pi;&rang;</code>, order 6</td><td class="n">6.0</td><td class="n">3.00</td><td class="n">0.60&ndash;0.68 / 0.81&ndash;0.92 at <code>h = #E(F<sub>p</sub>)</code></td><td class="n">1.2&ndash;1.6 against a column ratio of 3</td><td>columns fall, relations do not: <code>E(F<sub>p</sub>)</code> is cofactor and <code>&pi;</code>-fixed, so every folded two-summand row is a single-column row and both arms are coupon collectors over the same blocks</td><td><span class="chip">engineering</span> <span class="chip">accounting</span></td></tr>
+          <tr><td>E5, <code>j = 0</code> on E(F<sub>p&sup3;</sub>)</td><td><code>&lang;&minus;1, &pi;, &zeta;&rang;</code>: <code>&zeta; &isin; &lang;&pi;&rang;</code> on <code>&lang;G&rang;</code>, every instance</td><td class="n">6.0 (not 18)</td><td class="n">3.00</td><td class="n">&mdash;</td><td class="n">&mdash; (the line is the subgroup)</td><td><code>r &asymp; p</code>: the new part splits in Z[&omega;]; the descent degenerates</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E6, matched rho, <code>j = 0</code> / <code>j = 1728</code>, 2<sup>13</sup>&ndash;2<sup>27</sup>, 384 walks</td><td>rho folded by <code>Aut</code> vs the <code>A = 2</code> walk</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">steps ratio 1.72 (expected &radic;3 = 1.73) / 1.51 (expected &radic;2 = 1.41)</td><td class="n">&mdash;</td><td>the reference every &ldquo;vs rho&rdquo; above should have used; all answers verified</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E7, <code>j = 0</code>, three summands, 2<sup>17</sup>&ndash;2<sup>26</sup></td><td><code>&lang;&minus;1, &zeta;&rang;</code> at <code>m = 3</code></td><td class="n">6.0</td><td class="n">3.00</td><td class="n">&mdash;</td><td class="n">1.4&ndash;5.7</td><td>0 rows fold to <code>0 = 0</code>; orbit duplicates at the birthday count <code>3T&sup2;/r</code></td><td><span class="chip">accounting</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p>Verdict of the seven: the fold by any finite group of endomorphisms is the order of the
+        subgroup of (Z/rZ)<sup>*</sup> that the group&rsquo;s eigenvalues generate &mdash; the
+        automorphism group&rsquo;s roots of unity, the Frobenius&rsquo;s, and their products, and no
+        more &mdash; and the matched rho takes the square root of the same number. Nothing moved a
+        ratio to a floor. Where the endomorphisms fix a cofactor (E5) the fold buys columns and
+        not relations. Not done: Q-curves of degree 2 and 3 (the second half of E4b), the
+        three-summand line oracle on E(F<sub>p&sup3;</sub>), a matched folded rho on the
+        F<sub>p&sup2;</sub> and F<sub>p&sup3;</sub> groups, and a full-rank <code>S</code>; the
+        pilot panel&rsquo;s <code>S</code> figures stand as measured there.</p>
+    </div>
+  </div>
+
+  <!-- ============ GLV / C3 SOLVER LEVERS ============ -->
+  <div class="panel" id="glv-c3-levers">
+    <div class="panel-head">
+      <h2>GLV / C&#8323; levers on the <code>j = 0</code> subspace harness <span class="chip relabel">relabelling</span></h2>
+      <p>Frozen source: <code>experiments/22_glv_{canonical,graded,invariant}.json</code> (branch F4
+        engine), <code>experiments/22_glv_{graded,invariant}_v2.json</code> (replay on the merged
+        engine) and <code>experiments/22_glv_veronese.json</code>, tables by
+        <code>scripts/glv_gaudry_tables.py</code>. Unit: <code>F_p</code> multiplications of one
+        point-decomposition solve on the same residuals, so the boundary is the ordinary
+        symmetrised-S&#8324; solve at 1.0&times;. A C&#8323;-invariant formulation solves the
+        whole orbit <code>{R, &psi;R, &psi;&sup2;R}</code>, whose three relations are
+        <code>&lambda;</code>-multiples of one another, so nothing in this panel can beat 1.0&times;;
+        the column says how far below parity each lever lands.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Twelve decomposable residuals, four at each of p = 271, 541, 1051; every F4 solution
+          set checked against the harness (orbit = 3 &times; ordinary on 12/12; invariant identical
+          on 12/12; every harness triple satisfies the function-first system).</caption>
+        <thead><tr><th scope="col">Formulation / lever</th><th scope="col" class="n">Solve size</th>
+          <th scope="col" class="n">Mults vs ordinary</th><th scope="col">Correct</th><th scope="col">Class</th></tr></thead>
+        <tbody>
+          <tr><td>Ordinary symmetrised S&#8324; <em>(reference)</em>: Macaulay 252&times;286 at D = 10, dim 64</td><td class="n">6.1&middot;10<sup>5</sup> (harness 0.9&ndash;1.0&middot;10<sup>6</sup>)</td><td class="n">1.0&times;</td><td>yes</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td>C&#8323;-invariant coordinates <code>(e&#8321;/X, e&#8322;/X&sup2;, e&#8323;; c_R = X&sup3;)</code></td><td class="n">identical, term for term</td><td class="n">1.0&times;</td><td>yes</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>Z/3-graded orbit system <code>(e, z), z&sup3; = 1</code>, F4 plain</td><td class="n">1,668&times;1,632; single-degree Macaulay open at D = 19</td><td class="n">12&ndash;30&times; merged engine (34&ndash;70&times; branch)</td><td>yes, 3&times; solutions</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>&hellip; F4 block-aware by weight (14 blocked steps)</td><td class="n">3.0&times; fewer dense cells; 0.85&ndash;1.2&times; wall (0.5&ndash;1.1&times; on the branch engine)</td><td class="n">12&ndash;29&times; (0.95 of plain; 0.986 on the branch engine)</td><td>yes</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>Veronese: the orbit PDP in the 20 cubic invariants of the diagonal C&#8323; action (130 equations)</td><td class="n">299-element basis, staircase 384 = 6 &times; 64, 67,363&times;63,555 at D = 9</td><td class="n">19,400&times; (536&times; the orbit basis)</td><td>witnessed by every harness triple</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>Function-first Nagao <code>L(4O)</code> coefficient system, 9 unknowns</td><td class="n">132-element basis, staircase 64 (the same variety), 10,641&times;8,789 at D = 9</td><td class="n">3,110&times; (complete basis vs complete basis)</td><td>witnessed by every harness triple</td><td><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>Canonical generation on a pair sieve <code>P_i + P_j</code></td><td class="n">95 % of rows fold to 0 = 0, 3 % unit-dependent</td><td class="n">&mdash;</td><td>337 duplicates verified, 0 mismatches</td><td><span class="chip">engineering</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p>The grading is real &mdash; S&#8324; on a <code>j = 0</code> curve is &psi;-invariant term by term
+        &mdash; but with <code>x_R</code> fixed every Macaulay row couples all three weight classes
+        (100 % on every residual); the only object it grades is the orbit system, which has
+        three times the solutions and 456 of its 648 B&eacute;zout solutions at infinity. Block-aware
+        elimination never multiplies across blocks that a sparse-aware elimination would have
+        multiplied anyway, so it is a footprint lever (3&times;) and not a field-operation lever
+        (1.4&ndash;5 %). <code>S</code> is unchanged by everything in this panel.</p>
     </div>
   </div>
 
@@ -1982,7 +2134,6 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <span class="chip">accounting</span>. Two toy rungs, one base each, one seed: nothing is
         inferred about a full ECDLP and <strong>no speedup is claimed</strong>
         (<code>experiments/ecc2k130_e3_solver_panel.json</code>).</p>
-    </div>
     <div class="note">
       <h3>What would count next</h3>
       <p><strong>The candidate this panel named has been measured.</strong> Decomposing into two base
@@ -3116,7 +3267,30 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
-  <section class="panel" id="fixed-parameter-ic">
+  <!-- BEGIN boolean-degree-replay-20260922 -->
+<section class="panel" id="boolean-degree-replay-20260922">
+  <div class="panel-head"><h2>Boolean degree evidence replay <span class="chip">accounting</span></h2></div>
+  <p>The frozen point-decomposition corpus contains 1,152 systems with at most
+  eight Boolean variables. Exhaustive input-root checks, reduced-basis checks,
+  degree-limited closure replay, and independent SymPy bases all agree.
+  Rebased and membership variants are paired observations, not independent trials.</p>
+  <div class="table-scroll"><table>
+    <caption>Validation coverage; no cost or boundary-ratio comparison</caption>
+    <thead><tr><th>Check</th><th>Records</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Exact input roots</td><td>1,152</td><td>338 SAT; 814 UNSAT</td></tr>
+      <tr><td>Reduced bases and truncated closure</td><td>1,152</td><td>All match</td></tr>
+      <tr><td>Independent SymPy bases</td><td>1,152</td><td>All match</td></tr>
+    </tbody>
+  </table></div>
+  <p>Completion bounds are 2 (559 records), 3 (433), 4 (96), and 6 (64).
+  The degree-six cases already have degree-six inputs. These bounds are not
+  homogeneous regularity or F4/F5 measurements, and imply no result at degree 131.
+  Curve encoding and relation yield are outside this replay.</p>
+  <p><a href="https://github.com/aburan28/crypto/blob/main/research/boolean_degree_replay_20260922/README.md">Corpus, definitions, checker, and tamper tests</a>.</p>
+</section>
+<!-- END boolean-degree-replay-20260922 -->
+<section class="panel" id="fixed-parameter-ic">
     <div class="panel-head"><h2>Fixed parameters and persistent index calculus</h2>
       <p>The CPU <code>ic fixed</code> workflow accepts full-width K_0 parameters through degree 131,
       stores pair tables and verified relations, and resumes both precomputation and target equations.
@@ -3176,7 +3350,6 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <a href="https://github.com/aburan28/crypto/blob/main/research/ic_solver_selection_20260915/final-audit.json">Independent final audit</a> ·
       <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/SOLVER_SELECTION.md">Run and train</a></p>
     </div>
-  </div>
   </section>
 
   <section aria-labelledby="genus-crossover" style="margin:3rem 0;overflow-x:auto">
@@ -4535,7 +4708,7 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <!-- BEGIN auxiliary-inputs-20260918 -->
 <section class="panel" id="auxiliary-inputs-20260918">
 <div class="panel-head"><h2>Auxiliary inputs and torsion points against rho <span class="chip advance">advance, DLPwAI only</span></h2>
-<p>Frozen source: <code>research/torsion_auxiliary_inputs_20260918/results/*.json</code>, tables in its <code>RESULTS.md</code>; note <code>research/notes/ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md</code>. Unit S = ops / &radic;p, affine additions, every phase charged, medians over three planted secrets, every row verified. Rows marked DLPwAI were handed <code>[&alpha;^d]G</code> (or <code>[&alpha;^i]G</code>, i &le; 2d) by the problem and are scored against that problem's generic floor &radic;(p/d); no row that sees only G and [&alpha;]G moved, as the &Omega;(&radic;p) floor requires. The torsion-embedding route (an auxiliary curve's [d]-map in place of F<sub>p</sub><sup>*</sup>) is closed by measurement. No index-calculus row exists: the inputs' logarithms are polynomially related and the relation matrix is linear.</p></div>
+<p>Frozen source: <code>research/torsion_auxiliary_inputs_20260918/results/*.json</code>, tables in its <code>RESULTS.md</code>; note <code>research/notes/ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md</code>. Unit S = ops / &radic;p, affine additions, every phase charged, medians over three planted secrets, every row verified. Rows marked DLPwAI were handed <code>[&alpha;^d]G</code> (or <code>[&alpha;^i]G</code>, i &le; 2d) by the problem and are scored against that problem's generic floor &radic;(p/d); no row that sees only G and [&alpha;]G moved, as the &Omega;(&radic;p) floor requires. The torsion-embedding route (an auxiliary curve's [d]-map in place of F<sub>p</sub><sup>*</sup>) is closed by measurement. No index-calculus row exists: the inputs' logarithms are polynomially related and the relation matrix is linear. Torsion points on the target curve enter index calculus only as symmetries (negation, 2-torsion translation, automorphisms, Frobenius); the counting floor &kappa; &ge; &radic;(2(B+1)/&gamma;) falls with the automorphism order &gamma; by the same factor the generic yield bound &gamma;P&sup2;/2n rises, so a symmetry is already priced into the boundary and quotienting by it leaves the ratio to the floor unchanged: engineering, never advance.</p></div>
 <div class="table-scroll"><table>
 <caption>p &minus; 1 case, d &asymp; p<sup>1/2</sup>, inputs G, [&alpha;]G, [&alpha;<sup>d</sup>]G. Fitted exponents over seven sizes (24&ndash;48 bits): rho 0.487, comb 0.231, naive 0.297, kangaroo 0.310.</caption>
 <thead><tr><th>Variant</th><th>bits</th><th>S</th><th>vs rho</th><th>ops / &radic;(p/d)</th><th>Verified</th><th>Class</th></tr></thead><tbody>
@@ -4558,8 +4731,39 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <tr><td>torsion embedding, oracle quotient</td><td>14 / 16 / 18 / 20</td><td>8.6&ndash;27.5 / 10.6&ndash;35.0 / 8.6&ndash;20.6 / 9.8&ndash;22.0</td><td>&mdash;</td><td>33&ndash;139</td><td>collision 12/12</td><td>not a row (uses &alpha;)</td></tr>
 </tbody></table></div>
 <p>What a leak would buy on standard curves (<code>results/curve_divisors.md</code>): the largest divisor of n&minus;1 below 2<sup>32</sup> is 18,051,648 on secp256k1, 4.26&middot;10<sup>9</sup> on P-256, 2<sup>32</sup> on BLS12-381 and 4.29&middot;10<sup>9</sup> on BN254, so a protocol publishing 2<sup>32</sup> powers hands over a 2<sup>12</sup>&ndash;2<sup>16</sup> exponent-side reduction; Curve25519's &ell;&minus;1 has nothing above 132. The 2<sup>256</sup> extrapolation with d &asymp; 2<sup>128</sup> (&asymp; 21&middot;2<sup>64</sup> operations) rests on the 0.231 exponent and on a leak no protocol provides; it is marked as extrapolation.</p>
+<div class="table-scroll"><table>
+<caption>Deployed setups (census 2026-09-27, <code>research/srs_auxiliary_census_20260927/results/srs_census.json</code>; note <code>RESEARCH_SRS_CHEON_CENSUS.md</code>). q = largest public exponent of [&tau;<sup>i</sup>]G<sub>1</sub>, read from each project's own specification; d = largest divisor of r&minus;1 with d &le; q. Costs are generic floors &radic;(r/d)+&radic;d and &radic;(&pi;r/4) at constant 1, <b>not measurements at size</b>; the measured &asymp;20&times; practical constant above would add &asymp;4.3 bits. Loss = &frac12;log<sub>2</sub>d &minus; 0.17 on every row. The published analyses (ethresear.ch #6692) used the largest power of two below q; the largest admissible d makes each attack &asymp;0.5 bit cheaper (accounting). No row sees only G and [&tau;]G.</caption>
+<thead><tr><th>Setup</th><th>curve</th><th>q</th><th>d</th><th>Cheon floor</th><th>rho</th><th>bits lost</th><th>Class</th></tr></thead><tbody>
+<tr><td>EIP-4844 KZG (mainnet, n=12)</td><td>BLS12-381</td><td>4,095</td><td>3,648</td><td>2<sup>121.51</sup></td><td>2<sup>127.25</sup></td><td>5.74</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>EIP-4844 KZG (largest, n=15)</td><td>BLS12-381</td><td>32,767</td><td>30,531</td><td>2<sup>119.98</sup></td><td>2<sup>127.25</sup></td><td>7.27</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Zcash Sapling powers of tau</td><td>BLS12-381</td><td>4,194,302</td><td>4,142,391</td><td>2<sup>116.44</sup></td><td>2<sup>127.25</sup></td><td>10.82</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Filecoin powers of tau</td><td>BLS12-381</td><td>268,435,454</td><td>265,113,024</td><td>2<sup>113.44</sup></td><td>2<sup>127.25</sup></td><td>13.82</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Aztec Ignition</td><td>BN254</td><td>100,800,000</td><td>100,663,296</td><td>2<sup>113.51</sup></td><td>2<sup>126.62</sup></td><td>13.12</td><td><span class="chip">extrapolation</span></td></tr>
+<tr><td>Perpetual Powers of Tau</td><td>BN254</td><td>536,870,910</td><td>536,259,126</td><td>2<sup>112.30</sup></td><td>2<sup>126.62</sup></td><td>14.32</td><td><span class="chip">extrapolation</span></td></tr>
+</tbody></table></div>
 </section>
 <!-- END auxiliary-inputs-20260918 -->
+<!-- BEGIN koblitz-symmetrised-e2e-20260927 -->
+<section class="panel" id="koblitz-symmetrised-e2e-20260927">
+<div class="panel-head"><h2>Torsion-symmetrised index calculus on Koblitz curves, end to end <span class="chip">engineering at n = 17, 23; refuted at n = 31</span></h2>
+<p>Frozen source: <code>research/koblitz_symmetrised_e2e_20260927/results/*.json</code> (every <code>ic bench</code> report) and <code>*.fb.json</code> (every factor base point by point, with each point's u = 1/(x+1), column and BLAKE3 of the list); contract in its <code>README.md</code>, tables in <code>RESULTS.md</code>; note <code>research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md</code> &sect;20. Unit S = GAE / &radic;r over the whole pipeline (base, walk, every decomposition attempt, matrix, verification), mean of three planted logarithms, every run verified, eight counted rho runs per instance on the same seeds. The two algebraic arms are priced by measured wall at the host's ns/add (their word-XOR count covers the eliminations only), serially; <code>S_xor</code> in <code>RESULTS.md</code> is the counted floor. Both arms share the runner, the relation loop, the pricing rule and the rho column: <code>sym</code> is the base F<sub>u</sub> = {P : 1/(x+1) &isin; V} closed under +T with the summation polynomial in w = u&sup2;+u, s = &Sigma;u; <code>x</code> is the plain x-frame base {P : x &isin; V} with the plain Weil descent, same V, same inherited-F4, Macaulay cap 3.</p></div>
+<div class="table-scroll"><table>
+<caption>m = 2, same V (dim 9 / 12 / 12 / 11), same seeds. The +T-closed base decomposes about 0.6&times; as many targets (representations come in pairs), the w, s solve is 1.5&ndash;2.4&times; cheaper per trial in measured wall; the net is the product.</caption>
+<thead><tr><th>Instance</th><th>base pts (x / u)</th><th>hit rate (x / u)</th><th>S<sub>x</sub></th><th>S<sub>sym</sub></th><th>S<sub>sym</sub> / S<sub>x</sub></th><th>S<sub>sym4</sub> / S<sub>x</sub> (cap 4)</th><th>rho S</th><th>S<sub>sym</sub> / S<sub>rho</sub></th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>K<sub>1</sub> / F<sub>2<sup>17</sup></sub></td><td>443 / 409</td><td>0.60 / 0.31</td><td>2083</td><td>1742</td><td>0.84</td><td>4.9</td><td>1.76</td><td>990&times;</td><td>6/6</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>K<sub>0</sub> / F<sub>2<sup>23</sup></sub></td><td>4235 / 4049</td><td>0.62 / 0.38</td><td>11020</td><td>8460</td><td>0.77</td><td>4.4</td><td>1.10</td><td>7700&times;</td><td>6/6</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>K<sub>1</sub> / F<sub>2<sup>23</sup></sub></td><td>3957 / 4141</td><td>0.59 / 0.42</td><td>6825</td><td>5156</td><td>0.76</td><td>4.5</td><td>0.89</td><td>5800&times;</td><td>6/6</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>K<sub>0</sub> / F<sub>2<sup>31</sup></sub></td><td>2049 / 2357</td><td>0.002 / 0.002</td><td>16713</td><td>67025</td><td>4.0</td><td>48.5</td><td>1.06</td><td>63500&times;</td><td>6/6</td><td><span class="chip relabel">refuted</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Controls on the same bases. mitm-frobenius is the combinatorial oracle (no algebra), so its S is what the base alone costs; m = 3 at n = 17 is the one degree where both algebraic arms were run above m = 2.</caption>
+<thead><tr><th>Row</th><th>instance</th><th>S</th><th>vs rho</th><th>Reads</th></tr></thead><tbody>
+<tr><td>mitm-frobenius on the x-base / the u-base</td><td>2<sup>17</sup> / 2<sup>23</sup> (K<sub>0</sub>) / 2<sup>23</sup> (K<sub>1</sub>) / 2<sup>31</sup></td><td>17.1 / 15.2 &middot; 142.9 / 128.4 &middot; 86.7 / 94.8 &middot; 34.4 / 43.8</td><td>9&ndash;131&times;</td><td>the algebraic solve is the whole gap to rho; the bases themselves are within 0.9&ndash;1.3&times; of each other</td></tr>
+<tr><td>sym, m = 3 / x, m = 3</td><td>K<sub>1</sub> / F<sub>2<sup>17</sup></sub></td><td>116502 / no solve (3 h cap, 0 relations)</td><td>66000&times; / &mdash;</td><td>the plain S<sub>4</sub> descent (27 variables, degree 6, semi-regular degree 14) is outside the engine: every call gives up oversize (12/12 in the bounded diagnostic <code>x-m3-probe</code>, 0 relations, 6.7 s each) and the 3-hour run found no relation; the symmetrised S<sub>4</sub> (degrees [2,2,2,2,1] in w, s) solved all three logarithms in 20 s. A solver-feasibility gain, still 66000&times; rho: engineering</td></tr>
+</tbody></table></div>
+<p>Classification against the contract's boundaries: engineering where S<sub>sym</sub> / S<sub>x</sub> &lt; 1 (a constant on the solve, paid for in part by the base's halved yield), refuted at n = 31 where the u-base needed 2.6&times; the trials to a solvable matrix; the ratio to rho grows with n (990&times; &rarr; 63500&times;) and no arm approaches the floor, as the counting floor &kappa; &ge; &radic;(2(B+1)/&gamma;) says a symmetry cannot. The oracle-only refutation wins of &sect;8 (&times;300&ndash;6000 at n = 15) do not survive the pipeline: a base that refutes faster also decomposes fewer targets.</p>
+</section>
+<!-- END koblitz-symmetrised-e2e-20260927 -->
 <!-- BEGIN ic-tournament-round-0016 -->
 <section class="panel" id="ic-tournament-round-0016">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4829,6 +5033,43 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0020 -->
+<section class="panel" id="solver16-weil-descent-sat-20260920">
+<h2>Weil-descent SAT on the ECC2K-130 curve: the cheap regime ends at d = 7</h2>
+<p>The successor to the two Riemann&ndash;Roch lines above, on the real curve. The Nagao norm encoding and
+Trimoska's S&prime;4 are compiled to F<sub>2</sub> in a polynomial basis with the factor base
+<code>V = {deg x &lt; d}</code> &mdash; the layout that keeps S&prime;4 to <code>9d &minus; 3</code> variables &mdash;
+and given to CryptoMiniSat with native XOR clauses (conflicts recovered by bisection on
+<code>confl_limit</code>, so the reference arm finally has the declared unit) and to WDSat, against
+brute-force pair enumeration as the null object. Contract frozen with its prediction before the run.
+Frozen source: <a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/solver_16/RESULTS.md">RESULTS.md</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/solver_16/contract.json">contract</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/solver_16/raw.jsonl">raw (CryptoMiniSat)</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/nagao_relations/solver_16/raw_wdsat.jsonl">raw (WDSat)</a>.
+Write-up: <code>research/notes/ecc2k130/RESEARCH_ECC2K130_RR_SOLVER_PANEL.md</code> &sect;11.</p>
+<div class="table-scroll"><table>
+<caption>K<sub>0</sub> over GF(2<sup>131</sup>), four uniform and four planted targets per d, 300 s per solve.
+Unit: CryptoMiniSat conflicts to decide (mean of the four uniform exhaustions); WDSat decisions. Boundary:
+pair enumeration, C(A, 2) unordered abscissa pairs. Decompositions of uniform targets begin to exist at
+d = 45; every row measures exhaustion, never yield. S against the group order is uncalibrated: this prices
+an oracle, not an attack.</caption>
+<thead><tr><th>Variant</th><th>Full-DLP S</th><th>Cost / rho</th><th>d = 4&ndash;6</th><th>d = 7</th><th>d = 8</th><th>d = 9, 10</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>Pair enumeration (null object), pairs</td><td>Uncalibrated</td><td>Uncalibrated</td><td>45 / 136 / 561</td><td>2,701</td><td>8,515</td><td>31,626 / 134,421</td><td>Reference (solver_12: identical solution sets)</td><td><span class="chip">boundary</span></td></tr>
+<tr><td>S&prime;4 &mdash; CryptoMiniSat, uniform exhaustion</td><td>Uncalibrated</td><td>Uncalibrated</td><td><strong>1</strong> (linear certificate)</td><td><strong>839</strong> (0.31&times; pairs)</td><td><strong>312,231</strong> (36.7&times; pairs)</td><td>censored at 300 s</td><td>24/24 planted enumerations complete, all six permutations, every witness re-derived in the group</td><td><span class="chip">closure &mdash; measured negative</span></td></tr>
+<tr><td>RR norm (b eliminated) &mdash; CryptoMiniSat, matched instances</td><td>Uncalibrated</td><td>Uncalibrated</td><td>d = 5: 35,163 (3.5&times;10<sup>4</sup>&times; S&prime;4); d = 6: 38&ndash;43 s vs 0.01 s</td><td>censored (S&prime;4: 0.03 s)</td><td>censored</td><td>&mdash;</td><td>16/16 planted enumerations complete at d &le; 6; every witness verified</td><td><span class="chip">closure &mdash; linearly equivalent to S&prime;4, strictly dearer</span></td></tr>
+<tr><td>S&prime;4 &mdash; WDSat plain (<code>-b</code>)</td><td>Uncalibrated</td><td>Uncalibrated</td><td>10/12 refuted at XORGAUSS init; else 0.999 of 2<sup>3d</sup>/3!</td><td>1.000&ndash;1.002 of 2<sup>3d</sup>/3!</td><td>1.000&ndash;1.001 of 2<sup>3d</sup>/3!</td><td>&mdash;</td><td>16/16 planted first solutions verified</td><td><span class="chip">brute-force tree, control</span></td></tr>
+<tr><td>S&prime;4 &mdash; WDSat <code>-x</code> (Gaussian during search)</td><td>&mdash;</td><td>&mdash;</td><td colspan="4">completeness audit only: <strong>1 of 16</strong> <code>-x -b</code> cells declares a decomposable target UNSAT (49 decisions); 16/16 without <code>-b</code>; propagation sound, backtracking not</td><td>Defect reproduced on two seeds</td><td><span class="chip">tool defect &mdash; no cost read</span></td></tr>
+<tr><td>Reading the d &le; 6 one-conflict refutations as a fast oracle</td><td>&mdash;</td><td>&mdash;</td><td colspan="4">&mdash;</td><td>&mdash;</td><td><span class="chip relabel">relabelling &mdash; the certificate expires 39 dimensions before decompositions exist</span></td></tr>
+</tbody></table></div>
+<p>The contract's falsifier asked for a slope of log<sub>2</sub>(conflicts) below 1.8 per dimension over at least
+four complete sizes. Five exist (d = 4&ndash;8) and their least-squares slope is <strong>4.62</strong> with a residual
+standard error of 4.38 &mdash; two regimes joined at d = 7, not a power law: one dimension costs 370&times; in
+conflicts where it costs 3.2&times; in pairs, and the next is out of budget. The obstruction is the one &sect;9 of the
+panel note measured &mdash; the S<sub>4</sub> value-set span saturates F<sub>2</sub><sup>131</sup> at d = 7 &mdash; seen from
+the solver's side, and it closes the SAT route on this descended system and the coefficient encoding under
+SAT. It does not speak to an encoding whose value set stays proper at d = 45, or to a factor base that is not an
+F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 2<sup>131</sup>.</p>
+</section>
+<!-- END solver16-weil-descent-sat-20260920 -->
 <!-- BEGIN ic-crossover-20260922 -->
 <section class="panel" id="ic-crossover-20260922">
 <div class="panel-head"><h2>Where the tournament collector crosses rho <span class="chip">engineering</span></h2>
@@ -5023,6 +5264,89 @@ factor base, and this prices a decomposition oracle.</p>
   <p>The prior binary <code>k=4</code> probe is censored after 90 seconds;
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
+</section>
+<section id="toy-subfield-geometry-20260922" class="panel">
+  <h2>Subfield factor bases: toy relation geometry <span class="chip">structural diagnostic</span></h2>
+  <p>New exhaustive experiment: 96 variants on four fixed fields of at most
+    12 bits, with 431,576 verified nonidentity pair witnesses. A narrower
+    product span retained at least the generic base's target coverage in all
+    four initial holdout cells and all four independently selected follow-up
+    cells. The latter require an odd prime factor with cofactor at most eight.
+    This is a geometric screen; no polynomial solver or DLP is executed.</p>
+  <p>Source: <a href="https://github.com/aburan28/crypto/blob/main/research/toy_subfield_relation_geometry_20260922/README.md">experiment and limitations</a>,
+    <a href="https://github.com/aburan28/crypto/blob/main/research/toy_subfield_relation_geometry_20260922/RESULTS.md">all 96 matched rows</a>,
+    <a href="https://github.com/aburan28/crypto/blob/main/research/toy_subfield_relation_geometry_20260922/results_followup.json">follow-up raw evidence</a>.
+    The table shows the independent follow-up at coordinate dimension k.
+    Coverage is over the whole toy curve, not just its prime-order subgroup.</p>
+  <div class="table-scroll"><table>
+    <thead><tr><th>n / k</th><th>Family</th><th>Base points</th><th>Product-span rank</th><th>Distinct targets / curve order</th><th>Total S / vs rho</th></tr></thead>
+    <tbody>
+      <tr><td>6 / 2</td><td>Generic linear</td><td>3</td><td>3</td><td>2 / 52</td><td>Unmeasured</td></tr>
+      <tr><td>6 / 2</td><td>Subfield linear</td><td>3</td><td>2</td><td>2 / 52</td><td>Unmeasured</td></tr>
+      <tr><td>6 / 2</td><td>Scaled subfield linear</td><td>3</td><td>2</td><td>2 / 52</td><td>Unmeasured</td></tr>
+      <tr><td>9 / 3</td><td>Generic linear</td><td>7</td><td>5</td><td>18 / 548</td><td>Unmeasured</td></tr>
+      <tr><td>9 / 3</td><td>Subfield linear</td><td>11</td><td>3</td><td>50 / 548</td><td>Unmeasured</td></tr>
+      <tr><td>9 / 3</td><td>Scaled subfield linear</td><td>3</td><td>3</td><td>2 / 548</td><td>Unmeasured</td></tr>
+      <tr><td>10 / 2</td><td>Generic linear</td><td>1</td><td>3</td><td>0 / 1048</td><td>Unmeasured</td></tr>
+      <tr><td>10 / 2</td><td>Subfield linear</td><td>7</td><td>2</td><td>18 / 1048</td><td>Unmeasured</td></tr>
+      <tr><td>10 / 2</td><td>Scaled subfield linear</td><td>7</td><td>2</td><td>18 / 1048</td><td>Unmeasured</td></tr>
+      <tr><td>12 / 4</td><td>Generic linear</td><td>13</td><td>10</td><td>72 / 4184</td><td>Unmeasured</td></tr>
+      <tr><td>12 / 4</td><td>Subfield linear</td><td>23</td><td>4</td><td>242 / 4184</td><td>Unmeasured</td></tr>
+      <tr><td>12 / 4</td><td>Scaled subfield linear</td><td>19</td><td>4</td><td>162 / 4184</td><td>Unmeasured</td></tr>
+    </tbody>
+  </table></div>
+  <p>Product-span rank bounds the rank of quadratic coefficient vectors; it is
+    not a measured solving degree. Equal coordinate dimensions can produce
+    different numbers of base points. The scaled family regresses at n=9.
+    At dimension 2k in the degree-five toy extension n=10, the ranks are 10,
+    6 and 6, with 86, 187 and 204 covered targets respectively; the base point
+    counts are 15, 23 and 23. No end-to-end speedup or Oakley-size result follows.</p>
+<!-- BEGIN degree-reporting-correction-20260922 -->
+<section class="panel" id="degree-reporting-correction-20260922">
+  <div class="panel-head"><h2>Degree sweep interpretation <span class="chip">accounting</span></h2></div>
+  <p>The legacy <code>dreg_sweep</code> measures rank deficiency and bounded
+  refutation/pinning, not certified first fall degree, F4/F5 solving degree,
+  or homogeneous regularity. Both random-control arms have an all-zero root;
+  the former <code>ctrl(unsat)</code> label was incorrect. New output calls it
+  <code>D_pin(extra)</code>. Unresolved multi-solution systems do not establish
+  a solving-degree lower bound. Numerical results and earlier cost rows are retained.</p>
+  <p><a href="https://github.com/aburan28/crypto/blob/main/research/degree_reporting_20260922/README.md">Definitions and regression checks</a>.
+  No performance or boundary-ratio improvement is claimed.</p>
+</section>
+<!-- END degree-reporting-correction-20260922 -->
+<section id="factor-base-accounting-audit-20260922" class="panel">
+  <h2>Factor-base selector: accounting correction <span class="chip">accounting</span></h2>
+  <p>The archived selector comparison measures F4 word XORs during complete toy
+    runs. It does not measure total calibrated operations. The enumeration model
+    in the decomposition note is not a lower bound on arbitrary algebraic
+    solvers. Ratios to rho and a problem-wide floor remain unmeasured; no new
+    solver run or end-to-end speedup is claimed.</p>
+  <p>Source: <a href="https://github.com/aburan28/crypto/blob/main/research/factor_base_selector_20260915/end_to_end/summary.json">frozen summary</a>;
+    <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md">corrected research note</a>.
+    Each row aggregates twelve archived runs on the same toy curve. Counts are
+    preserved; this panel corrects their interpretation.</p>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Divisor</th><th>F4 word XORs</th><th>Verified runs</th><th>Total S</th><th>vs rho / floor</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0·3</td><td>2,405,397</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>1·3</td><td>9,543,849</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>1·4</td><td>10,144,324</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>3·4</td><td>53,895,954</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>2·4</td><td>88,192,793</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>2·3</td><td>109,566,018</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+    </tbody>
+  </table></div>
+  <p>At extension degree 131 the Frobenius-stable linear-subspace dimensions
+    are exactly {0, 1, 130, 131}. This rules out a small intermediate-dimensional
+    stable linear subspace; it does not rule out all nonlinear invariant sets
+    or all index-calculus algorithms.</p>
+
+<section class="panel" id="toy-ic-e2e-candidates-20260922">
+<h2>Fixed toy IC pipeline: 360 verified runs; rho still leads</h2>
+<p>Five relation adapters now share a complete miniature DLP pipeline. Fields GF(2^5) and GF(2^9), subgroup orders 11 and 127. No ECC2K-130 timing or extrapolation. Cached Nagao has the lowest observed IC time; plain rho is faster. This is integration and accounting, not a calibrated algorithmic speedup.</p>
+<table><thead><tr><th>Variant</th><th>5-bit cold median ms</th><th>9-bit cold median ms</th><th>Verified</th><th>Full-DLP S</th><th>Cost/rho</th><th>Cost/floor</th><th>Class</th></tr></thead><tbody><tr><td>Nagao: quadratic image</td><td>39.46</td><td>409.70</td><td>60/60</td><td>null</td><td>null</td><td>null</td><td>accounting</td></tr><tr><td>Nagao: coefficient pullback</td><td>28.46</td><td>299.75</td><td>60/60</td><td>null</td><td>null</td><td>null</td><td>accounting</td></tr><tr><td>Nagao: cached pullback</td><td>22.89</td><td>222.53</td><td>60/60</td><td>null</td><td>null</td><td>null</td><td>accounting</td></tr><tr><td>Symmetric S4 + CryptoMiniSat</td><td>49.75</td><td>1434.49</td><td>60/60</td><td>null</td><td>null</td><td>null</td><td>accounting</td></tr><tr><td>Chained S3 + CryptoMiniSat</td><td>49.93</td><td>1435.44</td><td>60/60</td><td>null</td><td>null</td><td>null</td><td>accounting</td></tr><tr><td>Plain Pollard rho</td><td>4.72</td><td>91.50</td><td>60/60</td><td>null</td><td>null</td><td>null</td><td>accounting</td></tr></tbody></table>
+<p>3,306 relation calls audited, including 498 complete empty answers; 215 exhaustive five-bit adapter checks; 18 exact historical counter replays. Three repetitions for each of ten seeds. SAT work has no common-operation conversion. Dense tiny matrix and plain rho controls do not establish large-scale behavior.</p>
+<p><a href="https://github.com/aburan28/crypto/blob/main/research/toy_ic_e2e_candidates_20260922/RESULTS.md">Results and limitations</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/toy_ic_e2e_candidates_20260922/results_v1/summary.json">Frozen measurements</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/toy_ic_e2e_candidates_20260922/README.md">Literature and reproduction</a></p>
 </section>
 <section class="panel" id="boolean-implicit-minors-20260923">
   <div class="panel-head">
@@ -6314,6 +6638,12 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0023 -->
+<p><strong>Accounting / correctness: neighboring-curve control (24 September 2026).</strong>
+At F_103, 240 transported source-neighbor pairs had equal d_reg_top in both
+raw and support-reduced encodings; all 504 decomposition-count comparisons
+matched. Preprocessing changed the metric in 160/480 individual systems.
+No solver speedup or n=53/n=83 neighbor result is measured.
+<a href="https://github.com/aburan28/crypto/blob/main/research/volcano_regularity_control_20260924/README.md">Frozen setup and certificates</a>.</p>
 <!-- BEGIN ic-reference-qualification-20260925 -->
 <section id="ic-reference-qualification-20260925">
 <h2>Archived reference qualification — 2026-09-25</h2>
@@ -6665,6 +6995,261 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Complete cold Ir is user-space guest instructions, not curve additions. The K-instruction collector floor is implementation-specific and inapplicable to rho. Engineering rows test implementation changes; accounting rows are references or compatibility controls. Per-target identities, exact admitted bases, phase ledgers, uncertainty, retained failures and the final gate are available in the linked frozen report.</p>
 </section>
 <!-- END ic-bounded-round-1-20260925 -->
+<!-- BEGIN ic-bounded-round-2-20260925 -->
+<section class="panel" id="ic-bounded-round-2-20260925">
+<h2>Bounded IC round 2: retained</h2>
+<p>Round 2: retained. Selected challenger: stop5_word; retained/promoted winner: incumbent. 3480/3480 native/profile pairs independently verified by the measured round&#x27;s frozen checker. Fresh Linux transport replay is the evidence-PR merge gate. All results are limited to the registered synthetic toy panel.</p>
+<p>Primary metric: single-target online native time, reusable preparation excluded and scalar replay included. Cold cost remains an additional acceptance gate. Engineering/accounting only; no global-optimum or asymptotic claim. <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/README.md">Full report</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/EVIDENCE.md">Provenance and reproduction</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RESULTS.json">Frozen tables and stage diagnostics</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/RUNS.csv">Every run, including failures</a>.</p>
+<h3>Confirmation</h3>
+<div class="table-scroll"><table><caption>Confirmation: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>IC denominator</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0300712</td><td>incumbent</td><td>1</td><td>reference</td><td>5.53271</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>0.0302927</td><td>incumbent</td><td>1.00737</td><td>[0.995238, 1.01899]</td><td>5.49226</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.225603</td><td>incumbent</td><td>7.50231</td><td>[6.79684, 8.33391]</td><td>0.737468</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.166375</td><td>incumbent</td><td>5.53271</td><td>[5.11118, 6.01516]</td><td>1</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0331297</td><td>ic_online</td><td>1.09365</td><td>[1.02861, 1.15887]</td><td>5.02193</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Confirmation: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.78088e+06</td><td>2788.01</td><td>1</td><td>reference</td><td>0.706919</td><td>222610</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>1.80886e+06</td><td>2831.81</td><td>1.01571</td><td>[1.00708, 1.0248]</td><td>0.718025</td><td>226108</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>2.51922e+06</td><td>3943.89</td><td>1.41459</td><td>[1.28029, 1.56319]</td><td>1</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>4.58321e+06</td><td>7175.12</td><td>2.57356</td><td>[2.07447, 3.108]</td><td>1.8193</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>1.64326e+06</td><td>2572.57</td><td>0.922725</td><td>[0.891417, 0.954667]</td><td>0.652292</td><td>328653</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Confirmation: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.776046</td><td>1</td><td>reference</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>0.785151</td><td>1.01173</td><td>[0.978519, 1.04686]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.823813</td><td>1.06155</td><td>[1.02343, 1.10013]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>1.60659</td><td>2.07023</td><td>[1.98018, 2.17453]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.765974</td><td>0.987022</td><td>[0.959326, 1.01544]</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<h3>Replay</h3>
+<div class="table-scroll"><table><caption>Replay: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>IC denominator</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0301787</td><td>incumbent</td><td>1</td><td>reference</td><td>5.60364</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>0.0304443</td><td>incumbent</td><td>1.0088</td><td>[0.994649, 1.0208]</td><td>5.55476</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.227286</td><td>incumbent</td><td>7.53133</td><td>[6.83563, 8.34729]</td><td>0.744044</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.169111</td><td>incumbent</td><td>5.60364</td><td>[5.18522, 6.08137]</td><td>1</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0329592</td><td>ic_online</td><td>1.08261</td><td>[1.01826, 1.14675]</td><td>5.13091</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Replay: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.78088e+06</td><td>2788.01</td><td>1</td><td>reference</td><td>0.70692</td><td>222610</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>1.80886e+06</td><td>2831.81</td><td>1.01571</td><td>[1.00708, 1.0248]</td><td>0.718027</td><td>226107</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>2.51921e+06</td><td>3943.88</td><td>1.41459</td><td>[1.28029, 1.5632]</td><td>1</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>4.58322e+06</td><td>7175.13</td><td>2.57357</td><td>[2.07451, 3.10801]</td><td>1.81931</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>1.64326e+06</td><td>2572.57</td><td>0.922726</td><td>[0.891419, 0.954669]</td><td>0.652294</td><td>328653</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Replay: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.782402</td><td>1</td><td>reference</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>ic_online</td><td>0.807039</td><td>1.03149</td><td>[0.994054, 1.06489]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.838329</td><td>1.07148</td><td>[1.03267, 1.11189]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>1.6424</td><td>2.09918</td><td>[1.99526, 2.18742]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.785639</td><td>1.00414</td><td>[0.979479, 1.0295]</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<h3>Development</h3>
+<div class="table-scroll"><table><caption>Development: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>IC denominator</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0324391</td><td>incumbent</td><td>1</td><td>reference</td><td>5.4419</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>0.031925</td><td>ic_online</td><td>0.988777</td><td>[0.958135, 1.01936]</td><td>5.52952</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>0.0322854</td><td>ic_online</td><td>0.999939</td><td>[0.952806, 1.07447]</td><td>5.4678</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>0.0308678</td><td>ic_online</td><td>0.956032</td><td>[0.894381, 1.01261]</td><td>5.71891</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>0.0307428</td><td>ic_online</td><td>0.95216</td><td>[0.910193, 0.979171]</td><td>5.74217</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.0322874</td><td>incumbent</td><td>0.995324</td><td>[0.9508, 1.03375]</td><td>5.46746</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.240285</td><td>incumbent</td><td>7.40729</td><td>[6.20784, 8.86932]</td><td>0.734668</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.17653</td><td>incumbent</td><td>5.4419</td><td>[4.60466, 6.34739]</td><td>1</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0368943</td><td>ic_online</td><td>1.14268</td><td>[1.04381, 1.25609]</td><td>4.78475</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>0.0343731</td><td>ic_online</td><td>1.0646</td><td>[0.969192, 1.24539]</td><td>5.1357</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>0.0348506</td><td>ic_online</td><td>1.07939</td><td>[0.984671, 1.24676]</td><td>5.06534</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>0.0349149</td><td>ic_online</td><td>1.08138</td><td>[0.979282, 1.25134]</td><td>5.05602</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>0.0326492</td><td>ic_online</td><td>1.01121</td><td>[0.951769, 1.08414]</td><td>5.40687</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>0.0310254</td><td>ic_online</td><td>0.960914</td><td>[0.910474, 1.00331]</td><td>5.68986</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Development: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.84007e+06</td><td>2297.31</td><td>1</td><td>reference</td><td>0.695632</td><td>230009</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>1.84334e+06</td><td>2301.39</td><td>1.00178</td><td>[1.00092, 1.00258]</td><td>0.696868</td><td>230417</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>1.84043e+06</td><td>2297.76</td><td>1.00019</td><td>[0.999721, 1.0007]</td><td>0.695767</td><td>230053</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>2.92164e+06</td><td>3647.65</td><td>1.58779</td><td>[1.26462, 1.9492]</td><td>1.10452</td><td>365205</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>2.32126e+06</td><td>2898.08</td><td>1.26151</td><td>[1.07197, 1.45119]</td><td>0.877544</td><td>290157</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>1.87399e+06</td><td>2339.66</td><td>1.01843</td><td>[1.00803, 1.02973]</td><td>0.708454</td><td>234248</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>2.64518e+06</td><td>3302.48</td><td>1.43754</td><td>[1.17677, 1.72102]</td><td>1</td><td>not applicable</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>4.3996e+06</td><td>5492.87</td><td>2.391</td><td>[1.77221, 3.0715]</td><td>1.66326</td><td>not applicable</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>1.7647e+06</td><td>2203.21</td><td>0.959039</td><td>[0.889063, 1.07556]</td><td>0.667138</td><td>352940</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>1.99384e+06</td><td>2489.3</td><td>1.08357</td><td>[0.991588, 1.14722]</td><td>0.753764</td><td>332307</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>1.76314e+06</td><td>2201.27</td><td>0.958194</td><td>[0.896201, 1.03968]</td><td>0.66655</td><td>293857</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>1.99171e+06</td><td>2486.64</td><td>1.08241</td><td>[0.99081, 1.14589]</td><td>0.75296</td><td>331952</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>2.20854e+06</td><td>2757.35</td><td>1.20025</td><td>[1.04028, 1.35899]</td><td>0.834931</td><td>315506</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>2.31756e+06</td><td>2893.46</td><td>1.2595</td><td>[1.07083, 1.44848]</td><td>0.876147</td><td>289695</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Development: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.78059</td><td>1</td><td>reference</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>0.786094</td><td>1.00705</td><td>[0.9669, 1.05491]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>0.788452</td><td>1.01007</td><td>[0.954645, 1.05953]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>0.884694</td><td>1.13336</td><td>[1.05871, 1.23197]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>0.801723</td><td>1.02707</td><td>[0.943319, 1.11723]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.801967</td><td>1.02739</td><td>[0.957903, 1.09589]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.844018</td><td>1.08126</td><td>[1.02359, 1.14318]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>1.56977</td><td>2.011</td><td>[1.86215, 2.16501]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.764284</td><td>0.97911</td><td>[0.900617, 1.06604]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>0.796603</td><td>1.02051</td><td>[0.951836, 1.0937]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>0.771569</td><td>0.988442</td><td>[0.926275, 1.06167]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>0.806693</td><td>1.03344</td><td>[0.97319, 1.10112]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>0.771435</td><td>0.988271</td><td>[0.917037, 1.07152]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>0.82124</td><td>1.05207</td><td>[0.982673, 1.13446]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<h3>Smoke</h3>
+<div class="table-scroll"><table><caption>Smoke: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>IC denominator</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0343879</td><td>incumbent</td><td>1</td><td>reference</td><td>5.77961</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>0.0340717</td><td>ic_online</td><td>0.969299</td><td>[0.932079, 0.998657]</td><td>5.83326</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>0.0341205</td><td>ic_online</td><td>0.970689</td><td>[0.921854, 1.00575]</td><td>5.8249</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>0.0336985</td><td>ic_online</td><td>0.958684</td><td>[0.939401, 0.972397]</td><td>5.89785</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>0.0334549</td><td>ic_online</td><td>0.951754</td><td>[0.904468, 0.981786]</td><td>5.94079</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.0351508</td><td>incumbent</td><td>1.02219</td><td>[0.978404, 1.08059]</td><td>5.65417</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.264357</td><td>incumbent</td><td>7.68749</td><td>[6.55676, 9.20841]</td><td>0.75182</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.198749</td><td>incumbent</td><td>5.77961</td><td>[5.148, 6.79648]</td><td>1</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.0365239</td><td>ic_online</td><td>1.03906</td><td>[0.950518, 1.20629]</td><td>5.4416</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>0.0331454</td><td>ic_online</td><td>0.942949</td><td>[0.903755, 0.983814]</td><td>5.99626</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>0.0345409</td><td>ic_online</td><td>0.982649</td><td>[0.909099, 1.06425]</td><td>5.75401</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>0.033814</td><td>ic_online</td><td>0.961968</td><td>[0.911507, 1.02496]</td><td>5.87771</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>0.0328168</td><td>ic_online</td><td>0.9336</td><td>[0.902179, 0.966443]</td><td>6.05631</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>0.0345434</td><td>ic_online</td><td>0.98272</td><td>[0.907491, 1.08555]</td><td>5.75359</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Smoke: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.95591e+06</td><td>2441.95</td><td>1</td><td>reference</td><td>0.668756</td><td>244489</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>1.95893e+06</td><td>2445.72</td><td>1.00154</td><td>[1.00033, 1.00278]</td><td>0.669789</td><td>244867</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>1.95601e+06</td><td>2442.06</td><td>1.00005</td><td>[0.999089, 1.00101]</td><td>0.668789</td><td>244501</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>2.8749e+06</td><td>3589.29</td><td>1.46985</td><td>[1.12193, 1.85791]</td><td>0.982971</td><td>359362</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>2.22654e+06</td><td>2779.83</td><td>1.13837</td><td>[0.900282, 1.38731]</td><td>0.761289</td><td>278318</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>1.99761e+06</td><td>2494.01</td><td>1.02132</td><td>[1.00994, 1.03359]</td><td>0.683015</td><td>249702</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>2.9247e+06</td><td>3651.47</td><td>1.49531</td><td>[1.41065, 1.57653]</td><td>1</td><td>not applicable</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>4.65417e+06</td><td>5810.7</td><td>2.37954</td><td>[1.93471, 2.79046]</td><td>1.59133</td><td>not applicable</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>1.64788e+06</td><td>2057.37</td><td>0.842514</td><td>[0.739185, 0.937249]</td><td>0.563436</td><td>329577</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>1.78125e+06</td><td>2223.88</td><td>0.910698</td><td>[0.717783, 1.07938]</td><td>0.609035</td><td>296875</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>1.60664e+06</td><td>2005.88</td><td>0.821426</td><td>[0.695266, 0.925538]</td><td>0.549334</td><td>267773</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>1.77942e+06</td><td>2221.59</td><td>0.909764</td><td>[0.717054, 1.07808]</td><td>0.60841</td><td>296570</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>2.0637e+06</td><td>2576.51</td><td>1.05511</td><td>[0.808529, 1.30343]</td><td>0.705609</td><td>294814</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>2.22329e+06</td><td>2775.76</td><td>1.1367</td><td>[0.899087, 1.38493]</td><td>0.760175</td><td>277911</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Smoke: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.883762</td><td>1</td><td>reference</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>batch4_stop6_word</td><td>0.806024</td><td>0.912038</td><td>[0.824216, 0.989386]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>compatibility</td><td>0.769606</td><td>0.87083</td><td>[0.822997, 0.926405]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>cover_table</td><td>0.87437</td><td>0.989373</td><td>[0.914658, 1.10576]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>half_table</td><td>0.836014</td><td>0.945973</td><td>[0.841427, 1.0603]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>ic_online</td><td>0.834291</td><td>0.944023</td><td>[0.867752, 1.027]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.834498</td><td>0.944257</td><td>[0.907044, 0.982996]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>1.64785</td><td>1.86459</td><td>[1.79109, 1.9345]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop5_word</td><td>0.751737</td><td>0.850611</td><td>[0.784426, 0.914588]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_half</td><td>0.779652</td><td>0.882198</td><td>[0.817026, 0.961222]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word</td><td>0.795277</td><td>0.899877</td><td>[0.864115, 0.936088]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_word_half</td><td>0.785345</td><td>0.888639</td><td>[0.819207, 0.978242]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop7_half</td><td>0.783953</td><td>0.887064</td><td>[0.814203, 0.956984]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>word_half</td><td>0.893904</td><td>1.01148</td><td>[0.909177, 1.12712]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<p>Complete cold Ir is user-space guest instructions, not curve additions. The K-instruction collector floor is implementation-specific and inapplicable to rho. Engineering rows test implementation changes; accounting rows are references or compatibility controls. Per-target identities, exact admitted bases, phase ledgers, uncertainty, retained failures and the final gate are available in the linked frozen report.</p>
+</section>
+<!-- END ic-bounded-round-2-20260925 -->
+
 <section class="panel" id="ic-pdp-outcome-controls-20260925">
   <h2>PDP admission: unsupported inputs are not refutations</h2>
   <p><span class="chip">accounting</span> Toy correctness controls now distinguish an unsupported encoding from budget exhaustion and a completed algebraic refutation. Twenty-two local release tests passed, including a 39-target F5 comparison with exhaustive enumeration and independent witness checks. These controls do not qualify a new performance winner: online time, cold cost, S and speedup remain unknown. Generic solver timing and per-query statistics still need scientific admission. See the <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/pdp-admission/PROTOCOL.md">protocol</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/pdp-admission/RESULTS.md">retained results</a>. One of three improvement rounds is complete; the incumbent is retained.</p>
@@ -6698,6 +7283,201 @@ factor base, and this prices a decomposition oracle.</p>
   <h2>Generic scientific admission: bind the executed pipeline</h2>
   <p><span class="chip">accounting</span> Independent replay passes 69 controls: 44 complete IC solves, two rho solves, nine intended preparation failures and fourteen factor-base inventories. Build receipts bind source/dependency contents, compiler, flags and executable; undeclared runtime overrides are rejected. The checker reconstructs all six base families, compares actual stored matrices with query witnesses, and checks effective dispatch, rank and batch attempts. Supplementary controls retain paid failed LA calls and execute nonempty block-Wiedemann cores. A later identity audit found four duplicate run keys among 53 IC records. The version-two export restores 53 unique keys with explicit execution numbers; all measurements and original evidence are unchanged. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md">protocol, raw reports and immutable records</a> preserve the full evidence. One-target online timing stays primary, with separate closed cold accounting. Comparative costs, S and speedup remain unknown until reference and observer qualification. No improvement round is consumed; the incumbent remains selected and two rounds remain.</p>
 </section>
+
+<section class="panel" id="ic-reference-binding-v2-20260926">
+  <h2>Remaining rounds: separate qualified cold and online references</h2>
+  <p><span class="chip">accounting</span> The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement-v2/PROTOCOL.md">version-two protocol</a> binds the accepted reference and observer evidence below. Cold instruction and native costs use the prepared pair-inversion incumbent; primary single-target online time uses the prepared combined implementation. Both qualified rho references remain mandatory. Reference failures block a complete result, and reference arms cannot enter challenger selection. Instrumentation costs remain charged.</p>
+  <p>The original three-attempt familywise budget, 72 fresh confirmation targets and three repetitions remain fixed. Ten challengers plus the incumbent and three additional references fit a maximum schedule of 3,480 native/profile pairs under the existing 3,500-pair cap. Six diverse challengers, including an exploration slot, remain eligible for selection. Round two executed under that registry and retained the incumbent: see <a href="#ic-bounded-round-2-20260925">the round-two evidence</a>. Selected <code>stop5_word</code> failed the frozen familywise and complete-cost gates on confirmation and replay. No challenger has qualified; one registered attempt remains. Do not redispatch round two or round one.</p>
+</section>
+
+<!-- BEGIN ic-generic-reference-qualification-20260926 -->
+<section class="panel" id="ic-generic-reference-qualification-20260926">
+<h2>Generic/reference qualification: complete evidence, no promoted IC winner</h2>
+<p><span class="chip">accounting</span> <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/README.md">Research note and archive</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/RESULTS.json">Frozen results</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/PROTOCOL.md">Registered protocol</a></p>
+<h3>Measured development comparison; no promoted winner</h3>
+<p>The registered run 36290704597 completed all 1,350 native/profile pairs (30 A/A, 330 smoke and 990 development), with zero research failures. The whole-mode observer study completed all 360 pairs, with zero incomplete or failed pairs. This is accounting and reference qualification on public synthetic toy groups. It consumes no improvement round and does not change the accepted reference binding. One of three improvement rounds is complete; two remain. No global optimum or held-out improvement is established.</p>
+<h3>Decision and comparison scope</h3>
+<p>The optimized pairinv incumbent remains the cold IC leader. Prepared both is the online point-estimate leader, at 0.9770794 times incumbent time, with a descriptive 95% interval [0.9176026, 1.043898]; this does not establish an IC improvement. Generic dense and sparse IC are roughly 3.7 times slower online, ten times slower in cold native time and 37 times more costly in cold instructions than the optimized incumbent. Future rounds must retain the optimized reference. Choosing the generic worker as a weaker baseline would not establish progress. The frozen selectors choose rho_incumbent_8 for cold instructions and rho_generic_dense_16 for online time. These are development selections; a reviewed, versioned binding is still required.</p>
+<h3>Primary metric and uncertainty</h3>
+<p>Every job solves one supplied public point. Native online time begins after reusable factor-base, index and log preparation, includes all target-dependent attempts, and ends after scalar replay. Fixture construction, launch and input loading remain outside this interval. Three process repetitions are medianed per point; equal-cell geometric means combine 15 development points across five cells. The repetitions are not 45 independent targets and this is not shared-target amortization. Intervals are descriptive paired development bootstraps, with the frozen estimator and seed; they do not correct for selecting leaders on this panel. IC/rho intervals resample their paired observations directly, rather than dividing marginal confidence endpoints.</p>
+<h3>Single-target online wall time: all 22 configurations</h3>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>Online ms</th><th>/ incumbent</th><th>Descriptive 95% interval</th><th>Selected online rho / variant</th><th>Paired rho/IC 95% interval</th><th>Verified / scheduled</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>0.03564707</td><td>1</td><td>[1, 1]</td><td>7.407728</td><td>[6.127355, 8.983053]</td><td>45/45</td></tr>
+<tr><td>prepared_both</td><td>0.03483002</td><td>0.9770794</td><td>[0.9176026, 1.043898]</td><td>7.5815</td><td>[6.447833, 9.08608]</td><td>45/45</td></tr>
+<tr><td>generic_dense</td><td>0.1317613</td><td>3.696273</td><td>[3.147132, 4.194848]</td><td>2.004107</td><td>[1.751399, 2.36352]</td><td>45/45</td></tr>
+<tr><td>generic_sparse</td><td>0.1331706</td><td>3.735807</td><td>[3.158101, 4.305252]</td><td>1.982899</td><td>[1.758373, 2.330959]</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_1</td><td>0.3244606</td><td>9.102027</td><td>[7.171945, 12.1651]</td><td>0.8138547</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_2</td><td>0.303651</td><td>8.518258</td><td>[7.064248, 10.17534]</td><td>0.8696294</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_4</td><td>0.2976156</td><td>8.348948</td><td>[6.967493, 9.902724]</td><td>0.8872648</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_8</td><td>0.2920471</td><td>8.192736</td><td>[6.775364, 9.869981]</td><td>0.9041824</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_16</td><td>0.2949671</td><td>8.274651</td><td>[6.818359, 9.967512]</td><td>0.8952314</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_32</td><td>0.2978373</td><td>8.355169</td><td>[6.918814, 9.947265]</td><td>0.8866041</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_1</td><td>0.3236894</td><td>9.080393</td><td>[7.170246, 12.09378]</td><td>0.8157937</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_2</td><td>0.3045554</td><td>8.543631</td><td>[7.103577, 10.19957]</td><td>0.8670468</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_4</td><td>0.2971817</td><td>8.336778</td><td>[6.961106, 9.859495]</td><td>0.88856</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_8</td><td>0.2986676</td><td>8.378461</td><td>[7.03723, 9.9969]</td><td>0.8841394</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_16</td><td>0.2983169</td><td>8.368624</td><td>[6.85242, 10.14203]</td><td>0.8851787</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_32</td><td>0.2896356</td><td>8.125087</td><td>[6.726716, 9.812233]</td><td>0.9117106</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_1</td><td>0.2975753</td><td>8.34782</td><td>[6.755088, 10.82661]</td><td>0.8873847</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_2</td><td>0.2775978</td><td>7.787394</td><td>[6.550785, 9.379188]</td><td>0.951246</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_4</td><td>0.2815038</td><td>7.896969</td><td>[6.557484, 9.483427]</td><td>0.938047</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_8</td><td>0.2711357</td><td>7.606114</td><td>[6.403084, 8.861318]</td><td>0.9739175</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_16</td><td>0.2640638</td><td>7.407728</td><td>[6.127355, 8.983053]</td><td>1</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_32</td><td>0.2646889</td><td>7.425264</td><td>[6.469343, 8.496569]</td><td>0.9976383</td><td>unknown / not applicable</td><td>45/45</td></tr>
+</tbody></table></div>
+<h3>Paired supplied points</h3>
+<p>The next table shows the selected online IC and rho on each of the 15 development points. Every interval is one supplied point after reusable preparation through scalar replay. Full IC1 candidate IDs, RHO1 reference IDs, workload IDs, execution IDs and all four IC comparisons are retained in RESULTS.json; aliases below map to those exact manifests. Speedup is rho_online_ms / IC_online_ms, limited to this charged instrumented-worker comparison.</p>
+<h3>Selected online IC and rho: point-level observations</h3>
+<div class="table-scroll"><table><thead><tr><th>Case</th><th>Public Q (x,y)</th><th>Workload</th><th>IC alias</th><th>IC ms</th><th>Rho alias</th><th>Rho ms</th><th>Rho / IC</th><th>Verified</th></tr></thead><tbody>
+<tr><td>n17a1-000</td><td>13339,66814</td><td>9a33222ec2d9</td><td>prepared_both</td><td>0.030817</td><td>rho_generic_dense_16</td><td>0.184645</td><td>5.99166</td><td>True</td></tr>
+<tr><td>n17a1-001</td><td>56873,110715</td><td>07c397c45d01</td><td>prepared_both</td><td>0.028533</td><td>rho_generic_dense_16</td><td>0.202739</td><td>7.105422</td><td>True</td></tr>
+<tr><td>n17a1-002</td><td>51397,57521</td><td>c32b90bc5602</td><td>prepared_both</td><td>0.030837</td><td>rho_generic_dense_16</td><td>0.182851</td><td>5.929598</td><td>True</td></tr>
+<tr><td>n19a0-000</td><td>296334,340408</td><td>f31b422d6fae</td><td>prepared_both</td><td>0.026941</td><td>rho_generic_dense_16</td><td>0.181931</td><td>6.752942</td><td>True</td></tr>
+<tr><td>n19a0-001</td><td>448223,478555</td><td>b3b34806a9a1</td><td>prepared_both</td><td>0.027351</td><td>rho_generic_dense_16</td><td>0.174265</td><td>6.371431</td><td>True</td></tr>
+<tr><td>n19a0-002</td><td>123350,229349</td><td>11877dbd59fd</td><td>prepared_both</td><td>0.029425</td><td>rho_generic_dense_16</td><td>0.235541</td><td>8.004792</td><td>True</td></tr>
+<tr><td>n23a0-000</td><td>3078340,7150380</td><td>382eb968aa38</td><td>prepared_both</td><td>0.044463</td><td>rho_generic_dense_16</td><td>0.257622</td><td>5.794076</td><td>True</td></tr>
+<tr><td>n23a0-001</td><td>3481084,224419</td><td>3cfca02b926f</td><td>prepared_both</td><td>0.038532</td><td>rho_generic_dense_16</td><td>0.398495</td><td>10.34192</td><td>True</td></tr>
+<tr><td>n23a0-002</td><td>2882272,5658981</td><td>e7824ff19518</td><td>prepared_both</td><td>0.040696</td><td>rho_generic_dense_16</td><td>0.275496</td><td>6.769609</td><td>True</td></tr>
+<tr><td>n23a1-000</td><td>6292485,1304930</td><td>da9c44af019d</td><td>prepared_both</td><td>0.037029</td><td>rho_generic_dense_16</td><td>0.305391</td><td>8.247347</td><td>True</td></tr>
+<tr><td>n23a1-001</td><td>4304213,1360375</td><td>df590c7f4d1e</td><td>prepared_both</td><td>0.034955</td><td>rho_generic_dense_16</td><td>0.481079</td><td>13.76281</td><td>True</td></tr>
+<tr><td>n23a1-002</td><td>4316435,4581027</td><td>c1af3f76b644</td><td>prepared_both</td><td>0.058129</td><td>rho_generic_dense_16</td><td>0.265036</td><td>4.559445</td><td>True</td></tr>
+<tr><td>n31a0-000</td><td>2137032792,1243931738</td><td>bedcd6bd70d3</td><td>prepared_both</td><td>0.035236</td><td>rho_generic_dense_16</td><td>0.284933</td><td>8.086417</td><td>True</td></tr>
+<tr><td>n31a0-001</td><td>645710776,1570337940</td><td>7803cf52aac1</td><td>prepared_both</td><td>0.034905</td><td>rho_generic_dense_16</td><td>0.394889</td><td>11.31325</td><td>True</td></tr>
+<tr><td>n31a0-002</td><td>1069130512,1602516399</td><td>aabc9ccee14a</td><td>prepared_both</td><td>0.035506</td><td>rho_generic_dense_16</td><td>0.334165</td><td>9.411508</td><td>True</td></tr>
+</tbody></table></div>
+<h3>Supplementary complete cold accounting</h3>
+<p>Cold native time is the full cold child process, including launch, input and reporting tail. It is not the primary single-target online metric. Cold Ir is Valgrind 3.22 amd64 user-space guest instructions with exclusive complete phase closure; it is not curve additions. S = Ir / sqrt(r) uses subgroup order r, not field size. The existing K-instruction floor applies only to these full-rank relation collectors and is not a universal IC bound; it is inapplicable to rho. No observer or witness overhead is subtracted.</p>
+<h3>Supplementary cold native wall time</h3>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>Cold process ms</th><th>/ incumbent</th><th>Descriptive 95% interval</th><th>Verified / scheduled</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>0.9671105</td><td>1</td><td>[1, 1]</td><td>45/45</td></tr>
+<tr><td>prepared_both</td><td>0.9671934</td><td>1.000086</td><td>[0.9437302, 1.053397]</td><td>45/45</td></tr>
+<tr><td>generic_dense</td><td>9.718014</td><td>10.0485</td><td>[8.437789, 12.73373]</td><td>45/45</td></tr>
+<tr><td>generic_sparse</td><td>9.698364</td><td>10.02819</td><td>[8.467366, 12.7153]</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_1</td><td>0.9732892</td><td>1.006389</td><td>[0.9330855, 1.106445]</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_2</td><td>0.9460796</td><td>0.9782538</td><td>[0.9236538, 1.032655]</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_4</td><td>0.9318276</td><td>0.9635172</td><td>[0.908026, 1.015199]</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_8</td><td>0.9318193</td><td>0.9635086</td><td>[0.9021839, 1.026448]</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_16</td><td>0.9296367</td><td>0.9612517</td><td>[0.9014169, 1.02424]</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_32</td><td>0.9297516</td><td>0.9613706</td><td>[0.9002262, 1.024885]</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_1</td><td>0.9873451</td><td>1.020923</td><td>[0.9383698, 1.126567]</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_2</td><td>0.9469785</td><td>0.9791833</td><td>[0.9273201, 1.030762]</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_4</td><td>0.9326889</td><td>0.9644077</td><td>[0.9120017, 1.013289]</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_8</td><td>0.9372449</td><td>0.9691187</td><td>[0.8976228, 1.040794]</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_16</td><td>0.9407592</td><td>0.9727525</td><td>[0.9064158, 1.036223]</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_32</td><td>0.9286504</td><td>0.9602319</td><td>[0.8992078, 1.023721]</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_1</td><td>2.03265</td><td>2.101776</td><td>[1.949268, 2.268944]</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_2</td><td>2.001914</td><td>2.069995</td><td>[1.91672, 2.240392]</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_4</td><td>2.02344</td><td>2.092253</td><td>[1.932762, 2.285182]</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_8</td><td>1.997169</td><td>2.065088</td><td>[1.89729, 2.253677]</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_16</td><td>2.000877</td><td>2.068923</td><td>[1.913883, 2.249989]</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_32</td><td>1.996225</td><td>2.064112</td><td>[1.908056, 2.243763]</td><td>45/45</td></tr>
+</tbody></table></div>
+<h3>Supplementary complete cold instructions and boundaries</h3>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>Cold Ir</th><th>S = Ir/sqrt(r)</th><th>/ incumbent</th><th>Descriptive 95% interval</th><th>/ selected cold rho</th><th>/ K-instruction floor</th><th>Verified / scheduled</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1826648</td><td>2280.558</td><td>1</td><td>[1, 1]</td><td>0.7281677</td><td>228330.9</td><td>45/45</td></tr>
+<tr><td>prepared_both</td><td>1859774</td><td>2321.915</td><td>1.018135</td><td>[1.009134, 1.026871]</td><td>0.7413729</td><td>232471.7</td><td>45/45</td></tr>
+<tr><td>generic_dense</td><td>6.810338e+07</td><td>85026.63</td><td>37.28326</td><td>[29.65719, 46.23664]</td><td>27.14847</td><td>8512922</td><td>45/45</td></tr>
+<tr><td>generic_sparse</td><td>6.807298e+07</td><td>84988.67</td><td>37.26662</td><td>[29.65709, 46.23805]</td><td>27.13635</td><td>8509122</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_1</td><td>2822509</td><td>3523.885</td><td>1.545185</td><td>[1.333969, 1.85461]</td><td>1.125154</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_2</td><td>2615622</td><td>3265.587</td><td>1.431925</td><td>[1.322881, 1.537357]</td><td>1.042682</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_4</td><td>2571092</td><td>3209.991</td><td>1.407547</td><td>[1.239192, 1.547416]</td><td>1.02493</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_8</td><td>2508553</td><td>3131.913</td><td>1.37331</td><td>[1.205196, 1.528233]</td><td>1</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_16</td><td>2508557</td><td>3131.918</td><td>1.373312</td><td>[1.205226, 1.528208]</td><td>1.000002</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_incumbent_32</td><td>2508572</td><td>3131.936</td><td>1.37332</td><td>[1.205224, 1.528203]</td><td>1.000007</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_1</td><td>2822736</td><td>3524.168</td><td>1.54531</td><td>[1.334079, 1.854718]</td><td>1.125245</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_2</td><td>2615828</td><td>3265.845</td><td>1.432038</td><td>[1.322983, 1.537509]</td><td>1.042764</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_4</td><td>2571307</td><td>3210.26</td><td>1.407664</td><td>[1.239309, 1.547556]</td><td>1.025016</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_8</td><td>2508725</td><td>3132.127</td><td>1.373404</td><td>[1.205294, 1.52833]</td><td>1.000068</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_16</td><td>2508754</td><td>3132.164</td><td>1.37342</td><td>[1.20534, 1.528258]</td><td>1.00008</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_prepared_both_32</td><td>2508806</td><td>3132.228</td><td>1.373448</td><td>[1.205366, 1.528315]</td><td>1.000101</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_1</td><td>4565777</td><td>5700.344</td><td>2.499539</td><td>[2.134634, 2.886798]</td><td>1.820084</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_2</td><td>4392212</td><td>5483.649</td><td>2.404521</td><td>[2.027831, 2.848576]</td><td>1.750894</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_4</td><td>4366872</td><td>5452.011</td><td>2.390648</td><td>[2.029696, 2.839163]</td><td>1.740793</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_8</td><td>4317113</td><td>5389.887</td><td>2.363408</td><td>[1.969635, 2.833795]</td><td>1.720957</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_16</td><td>4317109</td><td>5389.882</td><td>2.363405</td><td>[1.969619, 2.833833]</td><td>1.720955</td><td>unknown / not applicable</td><td>45/45</td></tr>
+<tr><td>rho_generic_dense_32</td><td>4317119</td><td>5389.895</td><td>2.363411</td><td>[1.969642, 2.833814]</td><td>1.72096</td><td>unknown / not applicable</td><td>45/45</td></tr>
+</tbody></table></div>
+<h3>Actual factor bases and clipped rho widths</h3>
+<p>All four IC arms have the following independently checked usable base counts B before sign/Frobenius folding and effective column counts K. The requested points = 6n is a construction parameter, never B. Factor-base policy was explicitly a comparison variable. The raw receipts retain rank, verified yield, unsuccessful PDP attempts, query histories, matrix work, descent and certificates. Larger unresolved PDP queries remain unresolved; they do not become unsatisfiability proofs.</p>
+<h3>Actual base inventory, shared counts across four IC arms</h3>
+<div class="table-scroll"><table><thead><tr><th>Cell</th><th>Usable points B</th><th>Folded columns K</th></tr></thead><tbody>
+<tr><td>n17a1</td><td>272</td><td>8</td></tr>
+<tr><td>n19a0</td><td>304</td><td>8</td></tr>
+<tr><td>n23a0</td><td>368</td><td>8</td></tr>
+<tr><td>n23a1</td><td>368</td><td>8</td></tr>
+<tr><td>n31a0</td><td>496</td><td>8</td></tr>
+</tbody></table></div>
+<h3>Effective rho widths, in n17a1 / n19a0 / n23a0 / n23a1 / n31a0 order</h3>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>Observed widths by cell</th></tr></thead><tbody>
+<tr><td>rho_incumbent_1</td><td>n17a1: [1]; n19a0: [1]; n23a0: [1]; n23a1: [1]; n31a0: [1]</td></tr>
+<tr><td>rho_incumbent_2</td><td>n17a1: [1]; n19a0: [1]; n23a0: [2]; n23a1: [2]; n31a0: [2]</td></tr>
+<tr><td>rho_incumbent_4</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [4]; n31a0: [2]</td></tr>
+<tr><td>rho_incumbent_8</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [5]; n31a0: [2]</td></tr>
+<tr><td>rho_incumbent_16</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [5]; n31a0: [2]</td></tr>
+<tr><td>rho_incumbent_32</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [5]; n31a0: [2]</td></tr>
+<tr><td>rho_prepared_both_1</td><td>n17a1: [1]; n19a0: [1]; n23a0: [1]; n23a1: [1]; n31a0: [1]</td></tr>
+<tr><td>rho_prepared_both_2</td><td>n17a1: [1]; n19a0: [1]; n23a0: [2]; n23a1: [2]; n31a0: [2]</td></tr>
+<tr><td>rho_prepared_both_4</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [4]; n31a0: [2]</td></tr>
+<tr><td>rho_prepared_both_8</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [5]; n31a0: [2]</td></tr>
+<tr><td>rho_prepared_both_16</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [5]; n31a0: [2]</td></tr>
+<tr><td>rho_prepared_both_32</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [5]; n31a0: [2]</td></tr>
+<tr><td>rho_generic_dense_1</td><td>n17a1: [1]; n19a0: [1]; n23a0: [1]; n23a1: [1]; n31a0: [1]</td></tr>
+<tr><td>rho_generic_dense_2</td><td>n17a1: [1]; n19a0: [1]; n23a0: [2]; n23a1: [2]; n31a0: [2]</td></tr>
+<tr><td>rho_generic_dense_4</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [4]; n31a0: [2]</td></tr>
+<tr><td>rho_generic_dense_8</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [5]; n31a0: [2]</td></tr>
+<tr><td>rho_generic_dense_16</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [5]; n31a0: [2]</td></tr>
+<tr><td>rho_generic_dense_32</td><td>n17a1: [1]; n19a0: [1]; n23a0: [4]; n23a1: [5]; n31a0: [2]</td></tr>
+</tbody></table></div>
+<h3>Interpretation of width comparisons</h3>
+<p>Requested widths 8, 16 and 32 clip to the same widths 1, 1, 4, 5 and 2 on this panel. They are retained as scheduled configurations, but do not constitute independent algorithms or additional target samples. A selected width cannot support a general batching advantage.</p>
+<h3>Cold instruction phase shares: stage diagnostics only</h3>
+<div class="table-scroll"><table><thead><tr><th>Phase</th><th>incumbent (%)</th><th>prepared_both (%)</th><th>generic_dense (%)</th><th>generic_sparse (%)</th></tr></thead><tbody>
+<tr><td>factor_base</td><td>9.19431</td><td>9.03158</td><td>2.83991</td><td>2.84105</td></tr>
+<tr><td>isogeny</td><td>0.00000</td><td>0.00000</td><td>0.00000</td><td>0.00000</td></tr>
+<tr><td>matrix_build</td><td>0.34291</td><td>0.33800</td><td>2.12701</td><td>2.16075</td></tr>
+<tr><td>pdp</td><td>21.41665</td><td>22.55614</td><td>3.73324</td><td>3.74131</td></tr>
+<tr><td>precompute</td><td>22.28751</td><td>21.91274</td><td>76.97399</td><td>76.98531</td></tr>
+<tr><td>queries</td><td>1.13315</td><td>1.11416</td><td>0.26451</td><td>0.26501</td></tr>
+<tr><td>recovery_check</td><td>9.81296</td><td>9.67559</td><td>0.14503</td><td>0.14529</td></tr>
+<tr><td>relation_check</td><td>5.65615</td><td>5.56964</td><td>2.76250</td><td>2.36337</td></tr>
+<tr><td>relation_la</td><td>1.56821</td><td>1.53935</td><td>0.17364</td><td>0.13795</td></tr>
+<tr><td>setup</td><td>24.93305</td><td>24.56466</td><td>10.11048</td><td>10.48977</td></tr>
+<tr><td>target_descent</td><td>3.65510</td><td>3.69815</td><td>0.86969</td><td>0.87018</td></tr>
+</tbody></table></div>
+<h3>What the phase ledger supports</h3>
+<p>Shares are means of per-run fractions of complete cold Ir, with equal target and cell weight. Generic precomputation accounts for about 77%; final relation LA accounts for less than 0.2%. The optimized incumbent spends about 1.6% in final relation LA. Eliminating that stage alone therefore cannot supply a 20% complete-cold improvement on these measurements. This is prioritization evidence, not attribution of cost to timers or witness generation. F4/F5 internal matrix reduction and final relation LA remain distinct stages.</p>
+<h3>Whole-mode observer effects</h3>
+<p>The registered enabled/legacy study checks semantic agreement and retains both outputs. It changes more than timers: collection mode, tracing and matrix/batch reporting also differ. Both modes retain witness reporting. Legacy has OBS1 observation identifiers and null scientific admission and phase costs. The common outer interval omits enabled phase-boundary bookkeeping, so it cannot replace the fully charged scientific online interval. Ratios near one do not establish zero or low timer overhead. No overhead is subtracted. The following 95% intervals are descriptive, from 10,000 paired within-cell resamples; they do not supply promotion evidence.</p>
+<h3>Observer: Common supplied-point outer wall interval</h3>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>Enabled / legacy</th><th>Descriptive 95% interval</th><th>Complete pairs</th></tr></thead><tbody>
+<tr><td>generic_dense</td><td>1.002486</td><td>[0.9722461, 1.036954]</td><td>45</td></tr>
+<tr><td>generic_sparse</td><td>0.9796783</td><td>[0.9516532, 1.008251]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_1</td><td>1.072294</td><td>[1.02128, 1.13056]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_16</td><td>0.9947425</td><td>[0.9581826, 1.034325]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_2</td><td>1.000835</td><td>[0.9519597, 1.053193]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_32</td><td>1.016135</td><td>[0.9725968, 1.063648]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_4</td><td>1.033987</td><td>[0.9952481, 1.073919]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_8</td><td>1.02511</td><td>[0.9769169, 1.079501]</td><td>45</td></tr>
+</tbody></table></div>
+<h3>Observer: Whole-process wall time</h3>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>Enabled / legacy</th><th>Descriptive 95% interval</th><th>Complete pairs</th></tr></thead><tbody>
+<tr><td>generic_dense</td><td>0.9991448</td><td>[0.9878167, 1.011534]</td><td>45</td></tr>
+<tr><td>generic_sparse</td><td>1.018569</td><td>[1.00936, 1.027498]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_1</td><td>1.13504</td><td>[1.095328, 1.176311]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_16</td><td>1.060653</td><td>[1.003871, 1.124465]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_2</td><td>1.066009</td><td>[1.001955, 1.125561]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_32</td><td>1.083342</td><td>[1.02697, 1.14215]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_4</td><td>1.030169</td><td>[0.9734824, 1.089787]</td><td>45</td></tr>
+<tr><td>rho_generic_dense_8</td><td>1.062823</td><td>[1.008795, 1.115971]</td><td>45</td></tr>
+</tbody></table></div>
+<h3>Noise control and environment</h3>
+<p>The 30-run A/A instruction gate passed. A/A online ratio is 0.9558727, interval [0.8785708, 1.005275]; cold process ratio is 0.9752561, interval [0.9240123, 1.025244]. This shows material wall-time noise. The experiment used the same Linux x86-64 Azure CI host, Rust 1.94.1, Valgrind 3.22.0, CPU affinity 3, one Rayon thread, 8 GiB and a 180-second child cap. The generic worker reported pclmulqdq dispatch. This is a virtualized CI environment; no bare-metal, ARM, GPU or FPGA result is implied. Host/runtime/build records are retained. The host manifest does not record the physical CPU model or concurrent host load; neither is inferred.</p>
+<h3>Retained failures, portability and delivery gate</h3>
+<p>Research failures are zero, but the prerequisite controls retain intentional incomplete runs, including 12 incomplete mixed-adapter profiles and nine incomplete observer-control pairs. Nine prerequisite audits and the 360-pair observer replay passed locally without workers. Strict macOS replay of the main comparison failed on a one-ULP statistic: development/rho_comparisons/rho_prepared_both_8/per_cell/n23a0 was stored as 1.1843664724946852 and recomputed as 1.1843664724946854. Original Linux bytes and this failure are preserved. The dedicated Linux evidence CI must freshly restore the archive, reconstruct every export and pass all eleven frozen audits without worker execution. The verifier has not been weakened to accommodate the local difference.</p>
+<h3>Next bounded research step</h3>
+<p>Do not redispatch this qualification, sealed round one, or sealed round two. The reviewed observer evidence and separate cold/online IC and rho leaders remain bound in the version-two reference contract. Round two completed under seed 2026092552 and retained the incumbent; selected stop5_word failed the frozen familywise and complete-cost gates. Exclude all exposed points from that round and earlier panels, including the readiness, qualification and adapter-control corpora. A third attempt needs a new registered panel and seed; never retune on confirmation or replay. Promotion still requires fresh confirmation and replay under the predeclared familywise rule, at least 20% lower complete cold Ir and cold native time, no online regression, no cell regression above 10%, and independently verified answers. One round remains.</p>
+</section>
+<!-- END ic-generic-reference-qualification-20260926 -->
 
 <section class="panel" id="ic-generic-adapter-control-20260926">
   <h2>Generic workers in the calibrated tournament: control passed</h2>
@@ -7068,7 +7848,7 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     <p>The table includes field setup, kernel/map and base construction, cofactor projection, the target prefix to rank, pair-table work, matrix recovery, and scalar verification. Inversion's internal multiplications are counted once; separate audit replay is not a candidate cost. Original/transported and native/pullback have identical hit and rank trajectories as required by subgroup transport. Native selection fails the predeclared lower-total-cost gate on this one toy stream. The 421-point pullback inverse table is an audit control, not a scalable candidate.</p>
 <p><a href="https://github.com/aburan28/crypto/pull/753">PR #753</a> replayed all 8,192 toy policy-target outcomes, 2,137 target draws, four base constructions and all recovered scalars. Native-to-original cold field-multiplication components are 2.087–3.700 in the four held-out cells; native is cheaper than transported in two and dearer in two. Dual pullback and tagged source-orbit classification are charged. The conditional exact degree-263 smoke tested 32 public Certicom P,Q targets on each nonconjugate descending line [1,0] and [1,4] with 16 useful source/leaf points and one charged native leaf-orbit neighbor per selected point. All four 136-pair policies had 0/32 hits and rank 0 on both lines; 64 exact targets and 256 policy-target cases were independently replayed. Under uniform subgroup targets, the m=2 32-target union-bound expectation is at most 6.40e-36 hits per arm. Prior torsion discovery has a separate 3.267-second receipt without compatible field-operation metering, so no complete exact-target cost ratio is asserted. <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/README.md">Scope and decision</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/results.json">toy cases</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/replay.json">toy replay</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/exact_smoke.json">exact smoke</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/exact_replay.json">exact replay</a> preserve the evidence.</p>
     <p>Exact-target transport: <a href="https://github.com/aburan28/crypto/pull/717">PR #717</a> passed eight saved degree-263 representatives, 40 independent full-coordinate checks, 2,096 actual-degree kernel inputs, and 122 invalid-input controls. Its original validation did not include a reverse map. PR #750 now verifies a normalized dual for all eight saved degree-263 maps; a general arbitrary-kernel dual interface and exact-target PDP yield remain open. Compact producer: <a href="https://github.com/aburan28/crypto/pull/720">PR #720</a> promoted the n = 53 source and frozen 23,320-point base to main; its 12 archived witnesses were replayed in PR validation. The archived claim JSON still has its historical pending-validation label and does not by itself certify a main-based full-rank recovery. These are not cost rows in the toy table.</p>
-    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/results_final.json">frozen degree-7 raw stream</a> (SHA-256 <code>50d95459b97ee6c5d4b3b3559d33a71b08ac2df35b5cc1cb2abb682eb795aa07</code>), <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/RESULT.md">scope and accounting</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_oriented_transport_20260924/validation.json">oriented-map validation</a>, and <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/COMPACT_ORBIT_PRODUCER.md">producer provenance and replay</a>. Next gates: preregister an implicit m ≥ 3 exact-target producer with supported target mass for useful rank, charged native leaf action, and a counting/memory admission bound; separately, use a fresh-stream exact group-law oracle to classify compact four-sum support versus extractor misses. The verified n = 53 full-rank and rho controls, and the completed n = 37/41 sparse-base sweep, appear below.</p>
+    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/results_final.json">frozen degree-7 raw stream</a> (SHA-256 <code>50d95459b97ee6c5d4b3b3559d33a71b08ac2df35b5cc1cb2abb682eb795aa07</code>), <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/RESULT.md">scope and accounting</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_oriented_transport_20260924/validation.json">oriented-map validation</a>, and <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/COMPACT_ORBIT_PRODUCER.md">producer provenance and replay</a>. The next exact-target gate is an implicit m ≥ 3 producer with supported target mass for useful rank, charged native leaf action, and a counting/memory admission bound. The separate fresh-stream group-law four-sum oracle is complete in <a href="https://github.com/aburan28/crypto/pull/757">PR #757</a>; its support-versus-extractor result appears below with the verified n = 53 full-rank and rho controls and the completed n = 37/41 sparse-base sweep.</p>
   </div>
 </section>
 <!-- END ecc2k130-directed-gates-20260925 -->
@@ -7138,11 +7918,11 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     <p><a href="https://github.com/aburan28/crypto/pull/760">PR #760</a> preregistered the byte-exact union of the three disjoint L128 public-Q blocks from PR #754. One fresh 512-target/220-column training solve reached rank 220 at relation 461; an operational rank stage solved 220 base logs, then one compact point-index process produced 384 relations and operational recovery returned all Q logs. One fresh signed-Frobenius rho table solved the identical 384 Q values. Independent full group-law replay checked 512 training relations, 23,320 orbit labels, and every IC/rho scalar. Raw receipts, source and input hashes, and the retained archive-checker-only failure are in <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_combined_l384_n53_20260925/RESULT.md">the result</a>.</p>
   </div>
   <div class="table-scroll"><table>
-    <caption>One GitHub-hosted Ubuntu fixed stream; wall seconds include fresh processes. Complete operational IC = training producer + mandatory rank/linear solve + one-index point producer + mandatory scalar recovery. Audit is separate from both operational costs; the child-only lower omits necessary recovery. The certified factor-base construction is excluded. Ratios use the same-Q one-table rho wall.</caption>
+    <caption>One GitHub-hosted Ubuntu fixed stream; wall seconds include fresh processes. Post-certified-base operational IC = training producer + mandatory rank/linear solve + one-index point producer + mandatory scalar recovery. Audit is separate from both operational costs; the child-only lower omits necessary recovery. The certified factor-base construction is excluded. Ratios use the same-Q one-table rho wall.</caption>
     <thead><tr><th>Arm / accounting bound</th><th class="n">Cold wall s</th><th class="n">IC / rho</th><th>Correctness / scope</th></tr></thead>
     <tbody>
       <tr><td>Compact IC, two-child lower</td><td class="n">276.592</td><td class="n">1.787</td><td>Incomplete: rank and scalar recovery omitted</td></tr>
-      <tr><td><strong>Compact IC, complete operational</strong></td><td class="n"><strong>353.649</strong></td><td class="n"><strong>2.285</strong></td><td>384/384 logs; pre-certified base</td></tr>
+      <tr><td><strong>Compact IC, post-certified-base operational</strong></td><td class="n"><strong>353.649</strong></td><td class="n"><strong>2.285</strong></td><td>384/384 logs; pre-certified base</td></tr>
       <tr><td>Compact IC, audit-inclusive diagnostic</td><td class="n">504.545</td><td class="n">3.259</td><td>Independent replay added</td></tr>
       <tr><td><strong>Signed-Frobenius rho, one table</strong></td><td class="n"><strong>154.799</strong></td><td class="n"><strong>1.000</strong></td><td>384/384 same-Q logs</td></tr>
     </tbody>
@@ -7199,6 +7979,27 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n53-certified-coldbase-20260925 -->
+<!-- BEGIN ecc2k130-n53-target-cyclic-rank-20260925 -->
+<section class="panel" id="ecc2k130-n53-target-cyclic-rank-20260925">
+  <div class="panel-head">
+    <h2>n = 53 first-relation selection: cyclic scan restores full rank <span class="chip">structural lead</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/823">PR #823</a> fixed a new, disjoint 512-target known-scalar stream and compared lexicographic versus public-target-derived cyclic starts on each of two unchanged 220-column factor bases. All four arms produced 512/512 group-law-replayed relations with zero failed targets and identical point/label/representative arrays within their base. The <a href="https://github.com/aburan28/crypto/blob/c7aba25487e80cc5fdf8d014add575b009aea5e5/research/sat_factor_base_review_20260908/autolab_n53_rank_rotation_20260925/RESULT.md">first-attempt result and sealed archive</a> record source, input and process-cost receipts and an independent modular rank replay.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One fixed-order GitHub-hosted n = 53 rank/selection stage. Full child wall includes base construction or loading, setup, all 512 queries, failures and serialization. Compare policies only within the same base; certified and native point sets differ. No charged operational rank/solve, point-log recovery or rho process was run in this panel.</caption>
+    <thead><tr><th>Base and first-relation scan</th><th class="n">Rank / 220</th><th class="n">First full-rank target</th><th class="n">Full child wall s</th><th>First-pair column diversity / absent columns</th></tr></thead>
+    <tbody>
+      <tr><td>Native ascending-x, lex</td><td class="n">219</td><td class="n">&mdash;</td><td class="n">133.227</td><td>1 / column 89 absent</td></tr>
+      <tr><td><strong>Native ascending-x, cyclic</strong></td><td class="n"><strong>220</strong></td><td class="n"><strong>273</strong></td><td class="n">126.981</td><td>200 / none absent</td></tr>
+      <tr><td>Certified LCG, lex</td><td class="n">217</td><td class="n">&mdash;</td><td class="n">129.057</td><td>1 / columns 91, 165, 202 absent</td></tr>
+      <tr><td>Certified LCG, cyclic</td><td class="n">220</td><td class="n">367</td><td class="n">132.301</td><td>199 / none absent</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The preregistered native structural gate passes: cyclic reached rank 220 by target 512 with no extra failures and all relation/label checks, whereas native lex stopped at rank 219. Both lex arms selected first-pair column 0 for all 512 targets; each cyclic arm selected it twice. The single-process wall differences are descriptive, not a speed claim. The next test is a separately frozen, fully charged native-cyclic L = 384 same-Q log-recovery comparison. PR #819's exact-certified-base setup plus mandatory rank already cost 199.233 s against 149.927 s matched rho, so the successor must measure whether the complete native pipeline changes that cost barrier. This stage supplies no IC/rho ratio or n = 131 transfer.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n53-target-cyclic-rank-20260925 -->
 <!-- BEGIN ecc2k130-compact-sparse-base-sweep-20260925 -->
 <section class="panel" id="ecc2k130-compact-sparse-base-sweep-20260925">
   <div class="panel-head">
@@ -7462,7 +8263,7 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
 <section class="panel" id="ecc2k130-n13-oaware-sat-benchmark-20260925">
   <div class="panel-head">
     <h2>O-aware n = 13 SAT stage: all 96 cold toy queries complete; n = 131 remains unpriced <span class="chip">solver stage</span></h2>
-    <p><a href="https://github.com/aburan28/crypto/pull/785">PR #785</a> ran the exact #781 17.6 MB dense CNF with each of the 32 frozen #767 Q+T unit assumptions in three cold engines: CryptoMiniSat, Kissat and CaDiCaL. Each returned five SAT and 27 UNSAT branch statuses. All 15 SAT models were independently converted from chosen x values to complete rational point fibres and a signed tuple summing to the exact full point. The 81 UNSAT outputs agree with #767's complete point oracle, but no separate UNSAT proof certificate was checked. All six tiny interface smokes and 96 target children finished within the frozen 15 s/2 GiB caps with zero invalid models or timeouts.</p>
+    <p><a href="https://github.com/aburan28/crypto/pull/785">PR #785</a> ran the exact #781 17.6 MB dense CNF with each of the 32 frozen #767 Q+T unit assumptions in three cold engines: CryptoMiniSat, Kissat and CaDiCaL. Each returned five SAT and 27 UNSAT branch statuses. All 15 SAT models were independently converted from chosen x values to complete rational point fibres and a signed tuple summing to the exact full point. The 81 UNSAT outputs agree with #767's complete point oracle; at the time, no separate UNSAT proof certificate was checked. All six tiny interface smokes and 96 target children finished within the frozen 15 s/2 GiB caps with zero invalid models or timeouts.</p>
   </div>
   <div class="table-scroll"><table>
     <caption>One fixed macOS panel. Charged portfolio wall includes source/schema/oracle preflight, one base read, 32 derived query files, cold child wall and point verification for each engine. The per-child maximum is not a portfolio cost. These are solver-stage diagnostics, not full IC operations S or matched rho.</caption>
@@ -7478,6 +8279,43 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n13-oaware-sat-benchmark-20260925 -->
+<!-- BEGIN ecc2k130-s3-sparse-cnf-20260925 -->
+<section class="panel" id="ecc2k130-s3-sparse-cnf-20260925">
+  <div class="panel-head">
+    <h2>Sparse O-aware S3 CNF: exact toy paths pass at 0.40% of dense n = 13 bytes <span class="chip">engineering</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/786">PR #786</a> pins every #781 dense base/schema/path byte and checks a Sinz sequential one-hot plus allowed-output implication encoding on the identical four panels and 32 n = 13 Q+T labels plus O. The independent verifier parsed both CNFs, compared every local relation with full signed-point addition, then matched all 24,955 primary-state paths, 56,394 signed point tuples and 61 exact target assumptions. All five mutation controls rejected, including one that falsely opens an n = 13 empty-output pair. No SAT solver ran in this gate.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One fixed dense-then-sparse cold panel; fractions are exact sparse/dense representation ratios. The three n = 13 empty-admitted-output input pairs each become a binary ban. Full ECDLP S and matched-rho ratios remain unset.</caption>
+    <thead><tr><th>Panel</th><th>Path / target counts</th><th>Variables dense → sparse</th><th>Clauses dense → sparse (ratio)</th><th>Raw CNF bytes dense → sparse (ratio)</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 2, m = 4</td><td>949 / 8</td><td>31 → 55</td><td>258 → 128 (128/258)</td><td>3,310 → 1,530 (1530/3310)</td><td>unset / unset</td></tr>
+      <tr><td>n = 3, m = 5</td><td>70 / 4</td><td>22 → 35</td><td>66 → 61 (61/66)</td><td>824 → 687 (687/824)</td><td>unset / unset</td></tr>
+      <tr><td>n = 4, m = 4</td><td>22,373 / 16</td><td>59 → 111</td><td>1,744 → 364 (364/1744)</td><td>23,102 → 4,743 (4743/23102)</td><td>unset / unset</td></tr>
+      <tr><td>n = 13, m = 5</td><td>1,563 / 33</td><td>1,263 → 2,517</td><td>1,195,344 → 4,731 (4731/1195344)</td><td>17,630,779 → 70,166 (70166/17630779)</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The n = 13 sparse clause and byte ratios are 0.3958% and 0.3980%; 1,254 auxiliaries nearly double variables. External cold child walls were dense export/replay 1.536/2.850 s and sparse export/replay 0.818/10.394 s; peak child RSS was 236,011,520/478,478,336 versus 56,311,808/72,744,960 bytes. The stronger sparse independent replay is slower, so these are representation/verifier diagnostics, not a solver speedup. The first exporter assertion failure and second archive-path audit failure remain archived; a fresh third run passed untouched archive replay under freeze SHA-256 <code>d748bc12bc67d94b8a578cd8707e8154c1b7bbe4d7dc02d943b59073bdcfabe9</code>. This admits a toy sparse semantic reference for a separate same-target SAT comparison. Explicit prefix-state enumeration has no established n = 131 scale path. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/RESULT.md">Exact decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/evidence/README.md">raw attempts, receipts and replay</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-sparse-cnf-20260925 -->
+<!-- BEGIN ecc2k130-n13-oaware-unsat-proof-20260925 -->
+<section class="panel" id="ecc2k130-n13-oaware-unsat-proof-20260925">
+  <div class="panel-head">
+    <h2>Five fixed n = 13 O-aware negative branches gain external DRAT certificates <span class="chip">toy proof pipeline</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/790">PR #790</a> froze the exact #785 base/query hashes, Q0T0 and all four Q4 torsion assumptions, CaDiCaL 3.0.1 binary, vendored upstream DRAT-trim source, checker controls and resource caps before producing any selected proof. Each of the five 8,490-byte text DRAT streams checks as UNSAT against its exact one-assumption CNF with a separate checker. A non-unit XOR proof is accepted while its mutated proof with essential steps removed is rejected; Q0T0's actual proof is also rejected on the fixed SAT Q0T3 query. Freshly compiled archive-only replay passed all five certificates and both controls.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Stage walls are summed over five cold proof-generation and five external-check children, then the wrong-input control separately. They do not price CNF export, relation rank, a full ECDLP or rho.</caption>
+    <thead><tr><th>Fixed branches</th><th>External proofs verified</th><th>Raw / gzip proof bytes</th><th>CaDiCaL wall sum</th><th>DRAT-trim wall sum</th><th>Wrong-input check</th><th>Full S / rho</th></tr></thead>
+    <tbody><tr><td>Q0T0; Q4T0..T3</td><td>5 / 5</td><td>42,450 / 11,672</td><td>1.976 s</td><td>3.353 s</td><td>0.950 s, rejected</td><td>unset / unset</td></tr></tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Q0T0 is only a negative full-point branch of a projected-positive Q0. All four Q4 branches have certificates, so Q4 is projected-negative within this exact toy CNF, consistent with #781's complete point semantics and #767's point oracle. The first pre-outcome checker-control failure was retained and corrected before freeze; the first selected run passed every 60/180 s, 1 GiB RSS, 128 MiB proof, 320 MiB temporary and 512 MiB archive cap. Peak cumulative child RSS upper bound was 161,300,480 bytes. No other #785 negative, n19/n131 PDP, challenge log or IC/rho speed is certified. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_unsat_proof_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_unsat_proof_20260925/EVIDENCE.md">raw hashes and replay</a>. Freeze SHA-256 <code>8941c739264bd0dc94eceb1d6d2efe3e108e13f6ee9f5ecec898f42456bd3cc4</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n13-oaware-unsat-proof-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
@@ -7564,6 +8402,29 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-beta-portfolio-20260925 -->
+<!-- BEGIN ecc2k130-rotated-slot-placement-20260925 -->
+<section class="panel" id="ecc2k130-rotated-slot-placement-20260925">
+  <div class="panel-head">
+    <h2>Full-rank n = 19 slot placement: all six projected supports saturate <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/793">PR #793</a> froze the six positions for the one leftover normal coordinate in a 19-bit, six-slot beta-3 frame. Every arm has five 3-bit slots and one 4-bit slot, joint normal rank 19, and the same q = 130,873 subgroup. An independent bit-serial/Fermat implementation replayed all q multiplicities and the same 64 point labels for each position. The positional-support gate fails: every arm supports all q targets.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact finite toy support. N/q is a labelled-tuple capacity ratio; N²/(M2q) is a proven Cauchy support lower-bound ratio, not a hit estimate. The frozen equal-budget comparison requires the same N and per-slot signed-column budget B. Full-cost S and matched rho are unset.</caption>
+    <thead><tr><th>Fourth-bit slot</th><th class="n">B / global C</th><th class="n">N / q</th><th class="n">Exact support / q</th><th class="n">Cauchy lower bound / q</th><th class="n">64 archived-row rank / C</th><th>All-q replay</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>0 (23 &times; 13<sup>5</sup>)</td><td class="n">41 / 41</td><td class="n">65.252</td><td class="n">130,873 / 130,873</td><td class="n">98.2265%</td><td class="n">31 / 41</td><td>PASS</td><td>unset / unset</td></tr>
+      <tr><td>1 (19 &times; 13<sup>5</sup>)</td><td class="n">39 / 39</td><td class="n">53.904</td><td class="n">130,873 / 130,873</td><td class="n">97.9329%</td><td class="n">34 / 39</td><td>PASS</td><td>unset / unset</td></tr>
+      <tr><td>2 (19 &times; 13<sup>5</sup>)</td><td class="n">39 / 39</td><td class="n">53.904</td><td class="n">130,873 / 130,873</td><td class="n">97.5873%</td><td class="n">34 / 39</td><td>PASS</td><td>unset / unset</td></tr>
+      <tr><td>3 (19 &times; 13<sup>5</sup>)</td><td class="n">39 / 39</td><td class="n">53.904</td><td class="n">130,873 / 130,873</td><td class="n">97.9085%</td><td class="n">33 / 39</td><td>PASS</td><td>unset / unset</td></tr>
+      <tr><td>4 (21 &times; 13<sup>5</sup>)</td><td class="n">40 / 40</td><td class="n">59.578</td><td class="n">130,873 / 130,873</td><td class="n">97.9842%</td><td class="n">34 / 40</td><td>PASS</td><td>unset / unset</td></tr>
+      <tr><td>5 (23 &times; 13<sup>5</sup>)</td><td class="n">41 / 41</td><td class="n">65.252</td><td class="n">130,873 / 130,873</td><td class="n">98.2265%</td><td class="n">34 / 41</td><td>PASS</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Equal-budget pairs (0,5), (1,2), (1,3) and (2,3) each have zero exact support difference, zero support symmetric difference and zero membership flips among the 64 shared targets; position 4 has no equal-budget partner. Their second moments and deterministic first-witness ranks can differ without changing support. The 72.947-second sequential run and separate 2.16&ndash;3.17 million sparse integer updates per arm are diagnostics, not attack costs. This saturated toy rung does not justify n = 131 position tuning, solver speed, an ECC2K-130 log, full S or a rho ratio. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_slot_placement_20260925/RESULT.md">Decision and exact comparisons</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_slot_placement_20260925/evidence/README.md">raw arrays and replay</a>. Archive SHA-256 <code>495e522064f440f0317640d28d812c5ef012f3dd12580a07e3b941c806b92d68</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-slot-placement-20260925 -->
 <!-- BEGIN ecc2k130-rotated-four-base-joint-rank-20260925 -->
 <section class="panel" id="ecc2k130-rotated-four-base-joint-rank-20260925">
   <div class="panel-head">
@@ -7605,5 +8466,65 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-compact-shared-log-20260925 -->
+<!-- BEGIN isogeny-invariant-torus-20260926 -->
+<section class="panel" id="isogeny-invariant-torus-20260926">
+  <div class="panel-head">
+    <h2>Eligible torus invariant base: exact small-field incidence <span class="chip">stage diagnostic</span></h2>
+    <p>F3, extension degree 4: compare the 27-element torus fraction set with both 27-element Frobenius invariant linear hyperplanes. Units are affine base points / affine targets covered by ordered two-point sums. Full ECDLP cost, rho ratio and speedup: unset. Six short supersingular curve models were exhaustively enumerated; 325,998 summation-equation/point-lift checks passed.</p>
+  </div>
+  <div class="table-wrap"><table>
+    <caption>Exact target incidence from <a href="https://github.com/aburan28/crypto/blob/main/research/isogeny_invariant_baseline_20260926/results/summary-001.json">frozen stage summary</a>. Every field set has 27 elements; curve-point sizes differ.</caption>
+    <thead><tr><th>Curve (a,b)</th><th>Torus V1</th><th>Invariant W1</th><th>Invariant W2</th><th>End-to-end S</th></tr></thead>
+    <tbody>
+      <tr><td>1,1</td><td>5 / 7</td><td>21 / 63</td><td>30 / 63</td><td>unset</td></tr>
+      <tr><td>1,0</td><td>5 / 7</td><td>21 / 63</td><td>3 / 3</td><td>unset</td></tr>
+      <tr><td>1,2</td><td>5 / 7</td><td>21 / 63</td><td>30 / 63</td><td>unset</td></tr>
+      <tr><td>2,0</td><td>51 / 63</td><td>3 / 3</td><td>21 / 63</td><td>unset</td></tr>
+      <tr><td>2,1</td><td>30 / 90</td><td>30 / 90</td><td>30 / 90</td><td>unset</td></tr>
+      <tr><td>2,2</td><td>30 / 90</td><td>30 / 90</td><td>30 / 90</td><td>unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head"><p>The published F13 degree-7 construction independently passed its exact 2,197-element Frobenius-invariance control. No polynomial solver comparison has been run. <a href="https://github.com/aburan28/crypto/blob/main/research/isogeny_invariant_baseline_20260926/README.md">Protocol, counting rules and limits</a>.</p></div>
+</section>
+<!-- END isogeny-invariant-torus-20260926 -->
+<!-- BEGIN ic-tournament-round-0024 -->
+<section class="panel" id="ic-tournament-round-0024">
+<p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0024/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0024/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0024/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,790</td><td>1</td><td>1.282</td><td>3.985e+05</td><td>24/24</td><td>reference</td></tr>
+<tr><td>counted</td><td>3,883</td><td>1.392</td><td>1.784</td><td>2.595e+06</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>2,176</td><td>0.7801</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,765</td><td>1</td><td>1.253</td><td>3.95e+05</td><td>72/72</td><td>reference</td></tr>
+<tr><td>counted</td><td>3,499</td><td>1.265</td><td>1.585</td><td>2.338e+06</td><td>72/72</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>2,207</td><td>0.7982</td><td>1</td><td>unmeasured</td><td>72/72</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,087</td><td>1</td><td>1.379</td><td>6.312e+05</td><td>684/684</td><td>reference</td></tr>
+<tr><td>counted</td><td>3,908</td><td>1.266</td><td>1.746</td><td>4.261e+06</td><td>684/684</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>2,238</td><td>0.7249</td><td>1</td><td>unmeasured</td><td>684/684</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: False.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2.81</td><td>1</td><td>reference</td><td>1.488</td><td>684/684</td></tr>
+<tr><td>counted</td><td>2.44</td><td>0.8684</td><td>[0.6422386367575259, 1.1260054304083487]</td><td>1.292</td><td>684/684</td></tr>
+<tr><td>rho</td><td>1.888</td><td>0.6721</td><td>[0.4135153090638848, 1.007512970924649]</td><td>1</td><td>684/684</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0024 -->
+<section><h2>Curve identities and archived measurements</h2><p>New cross-repository comparisons use exact field, curve and subgroup identities. <a href="https://github.com/aburan28/crypto/blob/e51d15f03d92a1fa61b81ebb7e09081b574b905d/docs/curve-identities.md">Naming and provenance contract</a>. Existing historical rows retain their original labels until source-specific identity mappings are available. The <a href="https://aburan28.github.io/crypto-autoresearcher/#/compare">research dashboard</a> integration is pending the UI PR deployment.</p></section>
 </body>
 </html>
+

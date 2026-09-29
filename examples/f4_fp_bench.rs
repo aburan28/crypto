@@ -6,12 +6,14 @@
 //! engine can be compared for speed *and* for identical output.
 //!
 //! ```text
-//! cargo run --release --example f4_fp_bench -- [repeats] [large]
+//! cargo run --release --example f4_fp_bench -- [repeats] [large] [seed_xor_hex]
 //! ```
 //!
 //! With `large`, the larger cases run after the standard ones: systems
 //! whose F4 takes from about a tenth of a second to several seconds, where
 //! the matrices are big enough for the elimination to dominate.
+//! An optional hexadecimal seed XOR selects a fresh system; omitting it
+//! preserves the original fixed suite exactly.
 
 use crypto_lib::cryptanalysis::f4_fp::{f4, solve, F4Options, Ordering, Poly, Verdict};
 use serde_json::json;
@@ -67,6 +69,10 @@ fn main() {
         .map(|s| s.parse().expect("repeats"))
         .unwrap_or(3);
     let large = std::env::args().nth(2).is_some_and(|a| a == "large");
+    let seed_xor = std::env::args()
+        .nth(3)
+        .map(|s| u64::from_str_radix(s.trim_start_matches("0x"), 16).expect("seed_xor_hex"))
+        .unwrap_or(0);
     // (name, n, m, deg, p, max_degree, solve?)
     let cases: &[(&str, usize, usize, u32, u64, u32, bool)] = &[
         ("quad_n4_p31", 4, 4, 2, 31, 12, true),
@@ -92,7 +98,7 @@ fn main() {
             m,
             d,
             p,
-            0x9e37_79b9_7f4a_7c15 ^ (n as u64 * 131 + d as u64),
+            0x9e37_79b9_7f4a_7c15 ^ (n as u64 * 131 + d as u64) ^ seed_xor,
         );
         let opts = F4Options::new(Ordering::Grevlex, dmax);
         let mut times = Vec::new();

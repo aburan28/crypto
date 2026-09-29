@@ -133,6 +133,10 @@ ENVELOPE_SUFFIX = ".bin.json"
 # which is the cadence the dashboard and the alarms want; the backlog itself
 # is unbounded and the next pass simply takes the next slice.
 PASS_OBJECTS = 256
+# Records decoded and COPYed at a time within one object. 250k decoded rows is
+# about 140 MB of Python objects; see ingestObject for the object sizes that
+# made a bound necessary.
+INGEST_CHUNK_RECORDS = int(os.environ.get("RHO_INGEST_CHUNK_RECORDS", "250000"))
 
 
 def log(msg):
@@ -746,45 +750,59 @@ def ingestObject(conn, s3, bucket, key, found_at):
     whole = len(body) - len(body) % RECORD_BYTES
     wid = workerId(key)
     added = 0
+    collisions = []
+    duplicates = 0
     with conn.cursor() as cur:
         # A temp table plus one INSERT ... ON CONFLICT is both fast and
         # idempotent; row-at-a-time INSERT was the old ingester's ceiling.
         cur.execute("CREATE TEMP TABLE IF NOT EXISTS dp_in "
                     "(point_key bytea, a bytea, b bytea, walk_seed bytea) ON COMMIT DROP")
-        cur.execute("TRUNCATE dp_in")
-        # Sorted by the key the target is indexed on. point_key is a hash, so
-        # an object's records arrive in random index order and each insert
-        # walks to a different leaf page: on the 60 M-row table that measured
-        # ~2.2 random reads per row inserted. Sorting costs nothing here and
-        # turns a batch into a smaller set of pages touched repeatedly.
-        rows = sorted((decode(body[off:off + RECORD_BYTES])
-                       for off in range(0, whole, RECORD_BYTES)),
-                      key=lambda r: r["point_key"])
-        with cur.copy("COPY dp_in (point_key, a, b, walk_seed) FROM STDIN (FORMAT BINARY)") as cp:
-            cp.set_types(["bytea", "bytea", "bytea", "bytea"])
-            for r in rows:
-                cp.write_row((r["point_key"], r["a"], r["b"], r["walk_seed"]))
-        cur.execute(
-            "INSERT INTO distinguished_points "
-            "  (campaign_id, point_key, a, b, walk_seed, worker_id, found_at) "
-            "SELECT %s, point_key, a, b, walk_seed, %s, %s FROM dp_in "
-            "ORDER BY point_key "
-            "ON CONFLICT (campaign_id, point_key) DO NOTHING",
-            (CAMPAIGN, wid, found_at))
-        added = cur.rowcount
-        # Every record inserted means nothing conflicted, so there is nothing
-        # to look for: in the steady state, where each object is new points,
-        # the check below never runs and costs nothing. It runs on the
-        # re-reports and the resumed walks -- and on the one object that ends
-        # the campaign.
-        collisions = []
-        duplicates = 0
-        if added < len(rows):
-            collisions, duplicates = findCollisions(cur, key)
-            recordCollisions(cur, collisions)
-            if duplicates:
-                log("%s: %d of %d records are re-reports of points the store already "
-                    "holds under the same seed" % (key, duplicates, len(rows)))
+        # One object, several COPY batches, one transaction. A worker's delta
+        # is a few thousand records, but a sync loop whose state was reset
+        # re-sends a whole corpus as one object -- 6.5 M records on
+        # 2026-09-21, four times over -- and decoding that into Python dicts in
+        # one go is ~3.5 GB; six threads of it is how the ingest died at 10:30
+        # that day and stalled again at 14:00. The bytes stay whole (210 MB);
+        # only the decoded rows are bounded.
+        for start in range(0, whole, INGEST_CHUNK_RECORDS * RECORD_BYTES):
+            end = min(whole, start + INGEST_CHUNK_RECORDS * RECORD_BYTES)
+            cur.execute("TRUNCATE dp_in")
+            # Sorted by the key the target is indexed on. point_key is a hash,
+            # so an object's records arrive in random index order and each
+            # insert walks to a different leaf page: on the 60 M-row table
+            # that measured ~2.2 random reads per row inserted. Sorting costs
+            # nothing here and turns a batch into a smaller set of pages
+            # touched repeatedly.
+            rows = sorted((decode(body[off:off + RECORD_BYTES])
+                           for off in range(start, end, RECORD_BYTES)),
+                          key=lambda r: r["point_key"])
+            with cur.copy("COPY dp_in (point_key, a, b, walk_seed) FROM STDIN (FORMAT BINARY)") as cp:
+                cp.set_types(["bytea", "bytea", "bytea", "bytea"])
+                for r in rows:
+                    cp.write_row((r["point_key"], r["a"], r["b"], r["walk_seed"]))
+            cur.execute(
+                "INSERT INTO distinguished_points "
+                "  (campaign_id, point_key, a, b, walk_seed, worker_id, found_at) "
+                "SELECT %s, point_key, a, b, walk_seed, %s, %s FROM dp_in "
+                "ORDER BY point_key "
+                "ON CONFLICT (campaign_id, point_key) DO NOTHING",
+                (CAMPAIGN, wid, found_at))
+            addedHere = cur.rowcount
+            added += addedHere
+            # Every record inserted means nothing conflicted, so there is
+            # nothing to look for: in the steady state, where each object is
+            # new points, the check below never runs and costs nothing. It
+            # runs on the re-reports and the resumed walks -- and on the one
+            # object that ends the campaign.
+            if addedHere < len(rows):
+                found, dupes = findCollisions(cur, key)
+                recordCollisions(cur, found)
+                collisions += found
+                duplicates += dupes
+            del rows
+        if duplicates:
+            log("%s: %d of %d records are re-reports of points the store already "
+                "holds under the same seed" % (key, duplicates, whole // RECORD_BYTES))
         # Same transaction as the points, so the record of having ingested an
         # object cannot outlive the insert that it describes.
         cur.execute(
@@ -1164,29 +1182,137 @@ def checkpointWork(s3, bucket, staleAfter=1800.0):
     return total, slots
 
 
-def campaignSnapshot(conn):
-    """SQL half of the dashboard: the insert-maintained rollup, not the table."""
+# Counting the corpus is the one thing here that grows with the corpus, and it
+# has stopped being affordable. The aggregate below was 143 s on 2026-09-17 at
+# 137 M rows with a fresh visibility map; by 2026-09-18 at 188 M it took 1,663 s
+# at 14:15Z, 2,010 s at 15:20Z and 2,916 s at 17:38Z, and the ingest does not
+# ingest while it runs. The growth is worse than the row count because a
+# one-time VACUUM only marks the pages that existed then: every row added since
+# costs a heap fetch that the index-only scan was supposed to avoid.
+#
+# #448 put a maintained rollup in the store for the Pages job, keyed by hour and
+# worker and kept current by a statement-level trigger on the very INSERTs this
+# program issues. Reading it is O(hours), not O(rows), so this asks the rollup
+# first and keeps the scan only as the answer for a store that has not got one
+# yet. The ingest's own counters (dp_ingest_totals, below) now come first;
+# campaignSnapshot falls back to this only when they are missing or unreadable. Both paths are named in the log, because a status figure whose source is
+# ambiguous is how the key-shape incident stayed invisible for five hours.
+ROLLUP_STATUS_SQL = """
+    SELECT c.campaign_id, c.curve_id, c.dp_mask_bits, c.created_at,
+           COALESCE(h.dps, 0), COALESCE(r.dps_last_hour, 0), COALESCE(r.dps_last_day, 0),
+           h.first_dp_at, h.last_dp_at
+    FROM rho_campaigns c
+    JOIN rho_dp_meta m ON m.campaign_id = c.campaign_id AND m.ready
+    LEFT JOIN LATERAL (
+      SELECT sum(dps)::bigint AS dps, min(first_at) AS first_dp_at, max(last_at) AS last_dp_at
+      FROM rho_dp_hour WHERE campaign_id = c.campaign_id
+    ) h ON true
+    LEFT JOIN LATERAL (
+      SELECT
+        COALESCE(sum(dps) FILTER (WHERE found_at > now() - interval '1 hour'), 0)::bigint
+          AS dps_last_hour,
+        COALESCE(sum(dps) FILTER (WHERE found_at > now() - interval '1 day'), 0)::bigint
+          AS dps_last_day
+      FROM rho_dp_recent WHERE campaign_id = c.campaign_id
+    ) r ON true
+    WHERE c.campaign_id = %s
+"""
+
+ROLLUP_HOURLY_SQL = """
+    SELECT hour, sum(dps)::bigint
+    FROM rho_dp_hour
+    WHERE campaign_id = %s AND hour > now() - interval '48 hours'
+    GROUP BY 1 HAVING sum(dps) > 0 ORDER BY 1
+"""
+
+SCAN_STATUS_SQL = """
+    SELECT c.campaign_id, c.curve_id, c.dp_mask_bits, c.created_at,
+           count(d.point_key) AS dps,
+           count(d.point_key) FILTER (WHERE d.found_at > now() - interval '1 hour') AS dps_last_hour,
+           count(d.point_key) FILTER (WHERE d.found_at > now() - interval '1 day') AS dps_last_day,
+           min(d.found_at) AS first_dp_at, max(d.found_at) AS last_dp_at
+    FROM rho_campaigns c LEFT JOIN distinguished_points d USING (campaign_id)
+    WHERE c.campaign_id = %s GROUP BY 1,2,3,4
+"""
+
+SCAN_HOURLY_SQL = """
+    SELECT date_trunc('hour', found_at) AS hour, count(*)
+    FROM distinguished_points
+    WHERE campaign_id = %s AND found_at > now() - interval '48 hours'
+    GROUP BY 1 ORDER BY 1
+"""
+
+
+TOTALS_SOURCE_LABELS = {"counters": "ingest counters", "rollup": "rollup", "scan": "corpus scan"}
+
+
+def campaignTotals(conn):
+    """Campaign aggregates and the hourly series, from the rollup if it has one.
+
+    Returns `(row, hourly, source)`. The rollup is missing, unreadable or not
+    yet backfilled on a store that predates #448, and the ingest connects as the
+    rho/dp-rds role rather than the role that owns those tables, so a refusal
+    here is expected rather than exceptional: fall back and say which was used.
+    """
+    try:
+        with conn.cursor() as cur:
+            cur.execute(ROLLUP_STATUS_SQL, (CAMPAIGN,))
+            row = cur.fetchone()
+            if row:
+                cur.execute(ROLLUP_HOURLY_SQL, (CAMPAIGN,))
+                return row, cur.fetchall(), "rollup"
+        conn.rollback()
+        reason = "rollup is not backfilled yet"
+    except Exception as exc:
+        conn.rollback()
+        reason = str(exc).strip().splitlines()[-1] if str(exc).strip() else exc.__class__.__name__
+    log("status: %s; counting distinguished_points instead (O(corpus))" % reason)
     with conn.cursor() as cur:
-        # One row from the counters instead of a count over the campaign, and
-        # 48 from the rollup instead of a GROUP BY over two days of points.
-        # Neither reads distinguished_points, so the cost of a publish no
-        # longer grows with the corpus.
-        cur.execute("""
-            SELECT c.campaign_id, c.curve_id, c.dp_mask_bits, c.created_at,
-                   COALESCE(t.dps, 0) AS dps, t.first_dp_at, t.last_dp_at
-            FROM rho_campaigns c
-            LEFT JOIN dp_ingest_totals t USING (campaign_id)
-            WHERE c.campaign_id = %s""", (CAMPAIGN,))
+        cur.execute(SCAN_STATUS_SQL, (CAMPAIGN,))
         row = cur.fetchone() or ()
+        cur.execute(SCAN_HOURLY_SQL, (CAMPAIGN,))
+        return row, cur.fetchall(), "scan"
+
+
+def campaignSnapshot(conn):
+    """SQL half of the dashboard: the insert-maintained counters, not the table."""
+    # One row from the counters instead of a count over the campaign, and
+    # 48 from the rollup instead of a GROUP BY over two days of points.
+    # Neither reads distinguished_points, so the cost of a publish no
+    # longer grows with the corpus. A store whose counters have not been
+    # seeded (no dp_ingest_totals row, or no table) is answered by
+    # campaignTotals instead, which says which source it used.
+    row, hourly, totals_source = None, [], "counters"
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT c.campaign_id, c.curve_id, c.dp_mask_bits, c.created_at,
+                       t.dps, t.first_dp_at, t.last_dp_at
+                FROM rho_campaigns c
+                LEFT JOIN dp_ingest_totals t USING (campaign_id)
+                WHERE c.campaign_id = %s""", (CAMPAIGN,))
+            row = cur.fetchone()
+            if row and row[4] is not None:
+                cur.execute("""
+                    SELECT hour, dps FROM dp_ingest_hourly
+                    WHERE campaign_id = %s
+                      AND hour >= date_trunc('hour', now() - interval '48 hours')
+                    ORDER BY hour""", (CAMPAIGN,))
+                hourly = cur.fetchall()
+    except Exception as exc:
+        conn.rollback()
+        log("status: ingest counters unreadable (%s)" % (
+            str(exc).strip().splitlines()[-1] if str(exc).strip() else exc.__class__.__name__))
+        row = None
+    if not row or row[4] is None:
+        totals, hourly, totals_source = campaignTotals(conn)
+        # campaignTotals rows also carry the last-hour and last-day counts
+        # (columns 5 and 6); the snapshot derives those from `hourly`.
+        row = tuple(totals[:5]) + tuple(totals[7:9]) if totals else ()
+    with conn.cursor() as cur:
         cur.execute("SELECT count(*), max(detected_at) FROM rho_collisions WHERE campaign_id = %s",
                     (CAMPAIGN,))
         collisions, latest_collision = cur.fetchone()
-        cur.execute("""
-            SELECT hour, dps FROM dp_ingest_hourly
-            WHERE campaign_id = %s
-              AND hour >= date_trunc('hour', now() - interval '48 hours')
-            ORDER BY hour""", (CAMPAIGN,))
-        hourly = cur.fetchall()
         # One row per (slot, upload stream) from the progress table -- one row
         # per object there, tens of thousands, never the points: what each
         # slot uploaded, how far its stream reaches (see coveredRecords for
@@ -1222,6 +1348,7 @@ def campaignSnapshot(conn):
         return v.isoformat() if hasattr(v, "isoformat") else v
 
     return {
+        "totals_source": totals_source,
         "per_slot_records": perSlot,
         "curve_id": row[1] if row else None,
         "dp_mask_bits": row[2] if row else None,
@@ -1251,6 +1378,7 @@ def statusPayload(conn, s3, bucket, ingest=None, snapshot=None):
     """
     if snapshot is None:
         snapshot = campaignSnapshot(conn)
+    totals_source = snapshot.get("totals_source", "counters")
     ingest = dict(ingest or {})
     dps = int(snapshot.get("dps") or 0)
     dps_last_hour = int(snapshot.get("dps_last_hour") or 0)
@@ -1291,7 +1419,9 @@ def statusPayload(conn, s3, bucket, ingest=None, snapshot=None):
     payload = {
         "schema_version": 1,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "source": "dp_ingest.py (live, direct from rho-dp + slot checkpoints)",
+        "source": "dp_ingest.py (live, %s from rho-dp + slot checkpoints)" % (
+            TOTALS_SOURCE_LABELS[totals_source]),
+        "totals_source": totals_source,
         "campaign_id": CAMPAIGN,
         "curve_id": snapshot.get("curve_id"),
         "dp_mask_bits": snapshot.get("dp_mask_bits"),
@@ -1404,10 +1534,14 @@ def publishStatus(conn, s3, bucket, statusBucket, ingest=None, snapshot=None,
         CacheControl="public, max-age=30")
     # The SQL half now reads the counters the insert maintains, so its cost
     # should stay flat; walker refresh is a list of ckpt/ objects. If the
-    # elapsed time starts climbing, the counters are not being read.
+    # elapsed time starts climbing, the counters are not being read -- the
+    # line names the totals source, and "corpus scan" is the one that grows
+    # with the corpus (143 s at 137 M rows, 2,916 s at 188 M).
     log("published status.json in %.1fs (%s): dps=%d state=%s work=2^%.3f walkers=%d "
         "outstanding=%d unreadable=%d off_weight_walking=%d duplicates_24h=%d"
-        % (time.time() - started, kind, payload["dps"], payload["state"],
+        % (time.time() - started,
+           "%s, %s" % (kind, TOTALS_SOURCE_LABELS.get(payload.get("totals_source"), "unknown")),
+           payload["dps"], payload["state"],
            payload["work"]["iterations_log2"] or 0, payload["walkers"],
            payload["ingest"]["outstanding_objects"],
            payload["ingest"]["unrecognised_objects"],

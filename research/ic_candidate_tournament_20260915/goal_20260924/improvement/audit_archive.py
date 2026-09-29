@@ -69,7 +69,8 @@ def control_audit(bundle, campaign):
             require(read(directory/'receipt.json') == outcome, 'changed control receipt')
             outcomes.append(outcome)
     summary = read(controls/'summary.json')
-    require(summary['scheduled'] == summary['verified'] == len(outcomes) == 30 and
+    expected = 2 * len(panel['candidates'][1:])
+    require(summary['scheduled'] == summary['verified'] == len(outcomes) == expected and
             summary['outcomes'] == outcomes and summary['promotion_eligible'] is False,
             'changed control summary')
     return dict(status='VERIFIED', pairs=len(outcomes),

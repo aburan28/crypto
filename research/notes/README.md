@@ -17,6 +17,7 @@ its old name still identify it.
 |:--|:--|
 | [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](ecdlp-general/RESEARCH_ECDLP_STATE_OF_THE_ART.md) | The ECDLP: state of the art, 2025–2026 |
 | [`RESEARCH_TORSION_AUXILIARY_INPUTS.md`](ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md) | Auxiliary inputs (Cheon) and torsion points against rho and index calculus |
+| [`RESEARCH_SRS_CHEON_CENSUS.md`](ecdlp-general/RESEARCH_SRS_CHEON_CENSUS.md) | Cheon's attack on deployed powers-of-tau setups: EIP-4844, Sapling, Filecoin, Ignition, PPoT |
 | [`RESEARCH_REPRESENTATION_STRUCTURE.md`](ecdlp-general/RESEARCH_REPRESENTATION_STRUCTURE.md) | Where exploitable structure can come from: the transfer pattern, an R1–R5 admissibility test for candidate handles, and why murmurations fail it |
 | [`RESEARCH_BENCH_LOG.md`](ecdlp-general/RESEARCH_BENCH_LOG.md) | Cryptanalysis research bench: empirical log |
 | [`RESEARCH_P256_RHO_ARITHMETIC.md`](ecdlp-general/RESEARCH_P256_RHO_ARITHMETIC.md) | Pre-registered P-256 rho engineering matrix: fused Solinas reduction, weak reduction, invariant partitioning, table sweeps, batched affine inversion, DP batching, and CPU/GPU/FPGA ablations |
@@ -27,6 +28,7 @@ its old name still identify it.
 |:--|:--|
 | [`RESEARCH_RESIDUAL_WALKS.md`](index-calculus/RESEARCH_RESIDUAL_WALKS.md) | Residual walks over partial decompositions; the reference thread for the boundary-table-ratio rule |
 | [`RESEARCH_IC_BOUNDARY_LEDGER.md`](index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) | The boundary ledger: prime, random-binary and Koblitz index calculus end to end in one unit against the generic floor and a counted rho (`ic boundary`, frozen runs under `docs/ic/runs/`); §10 is the Round-2 engineering ledger (folded pair tables, walk targets, exact ceiling, balanced base) with every first-round row kept as its before mark |
+| [`RESEARCH_GLV_INVARIANT_FACTOR_BASES.md`](index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md) | Endomorphism-invariant factor bases across curve families: one fold over the framework's counted groups (`j = 0`, `j = 1728`, GLS over `F_{p²}`, subfield curves on `F_{p³}`, Koblitz), the degree-2 and degree-3 CM maps measured as having none, a pilot at `2^13`–`2^24` and the seven experiments E1–E7 run to full rank at `2^13`–`2^32`: the fold is the order of the eigenvalue subgroup of `(Z/rZ)^*`, and where the group fixes a cofactor it buys columns, not relations |
 | [`RESEARCH_SEMAEV_DECOMPOSITION.md`](index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md) | Fast factor-base decomposition for binary Semaev `S₄` |
 | [`RESEARCH_SYMMETRIZED_SEMAEV.md`](index-calculus/RESEARCH_SYMMETRIZED_SEMAEV.md) | Symmetrised summation polynomials (FGHR) |
 | [`RESEARCH_HIGHER_SEMAEV.md`](index-calculus/RESEARCH_HIGHER_SEMAEV.md) | Higher-order Semaev polynomials over prime fields |

@@ -899,15 +899,35 @@ pub fn matrix_f4_f2_blocked(
     let n_vars_out = polys[0].n_vars;
     let mut out = Vec::with_capacity(rank);
     for row in matrix.iter().take(rank) {
-        let monos: Vec<F2BoolMono> = (0..cols.len())
-            .filter(|c| row[c / 64] & (1u64 << (c % 64)) != 0)
-            .map(|c| F2BoolMono::from_mask(cols[c]))
-            .collect();
+        let monos = row_monos(row, &cols);
         if !monos.is_empty() {
             out.push(F2BoolPoly::from_monos(monos, n_vars_out));
         }
     }
     Some((out, word_ops))
+}
+
+/// The monomials of one packed Macaulay row, in column order.
+///
+/// Walks the row's set bits a word at a time rather than testing every
+/// column: a reduced row is sparse, so testing all `cols.len()` bits of
+/// every row was about half of a full readback.  Bits at or past
+/// `cols.len()` are never read, as before.
+fn row_monos(row: &[u64], cols: &[u64]) -> Vec<F2BoolMono> {
+    let set: u32 = row.iter().map(|w| w.count_ones()).sum();
+    let mut monos = Vec::with_capacity(set as usize);
+    for (word_index, &packed) in row.iter().enumerate() {
+        let mut bits = packed;
+        while bits != 0 {
+            let c = word_index * 64 + bits.trailing_zeros() as usize;
+            if c >= cols.len() {
+                return monos;
+            }
+            monos.push(F2BoolMono::from_mask(cols[c]));
+            bits &= bits - 1;
+        }
+    }
+    monos
 }
 
 // ── Matrix-F4 over the Boolean ring ────────────────────────────────
@@ -1274,10 +1294,7 @@ fn matrix_f4_f2_counted_impl(
                     }
                 }
             } else {
-                let monos: Vec<F2BoolMono> = (0..cols.len())
-                    .filter(|c| row[c / 64] & (1u64 << (c % 64)) != 0)
-                    .map(|c| F2BoolMono::from_mask(cols[c]))
-                    .collect();
+                let monos = row_monos(row, &cols);
                 if !monos.is_empty() {
                     out.push(F2BoolPoly::from_monos(monos, n_vars_out));
                 }
@@ -1650,6 +1667,29 @@ pub(crate) fn macaulay_row_count(
     )
 }
 
+/// Build the F5-surviving rows while counting all nonempty F4 rows in the
+/// same product traversal. F5's report needs the latter count even for rows
+/// pruned by its criterion.
+pub(crate) fn f5_rows_monos_with_f4_count(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    criterion: &F5Criterion,
+) -> Option<(usize, Vec<Vec<u64>>)> {
+    let mut rows_monos = Vec::new();
+    let (_, full_count) = visit_macaulay_rows_counted::<true>(
+        polys,
+        n_vars,
+        degree,
+        multiplier_mask,
+        Some(criterion),
+        max_f4_rows(),
+        |row| rows_monos.push(row.to_vec()),
+    )?;
+    Some((full_count, rows_monos))
+}
+
 /// Hand every non-empty Macaulay row (ascending monomial masks, odd
 /// multiplicities kept) to `visit`, in generator-then-multiplier order;
 /// returns the row count, or `None` once it exceeds the size limits.
@@ -1659,12 +1699,34 @@ fn visit_macaulay_rows(
     degree: u32,
     multiplier_mask: u64,
     criterion: Option<&F5Criterion>,
-    mut visit: impl FnMut(&[u64]),
+    visit: impl FnMut(&[u64]),
 ) -> Option<usize> {
-    // Read once per build, not once per row: the cap is an environment
-    // lookup, and the loop below runs once per Macaulay row.
-    let row_cap = max_f4_rows();
-    let mut count = 0usize;
+    visit_macaulay_rows_counted::<false>(
+        polys,
+        n_vars,
+        degree,
+        multiplier_mask,
+        criterion,
+        max_f4_rows(),
+        visit,
+    )
+    .map(|(selected, _)| selected)
+}
+
+/// When `COUNT_PRUNED` is true, visit only criterion survivors but count
+/// nonempty pruned rows toward the full F4 size limit as well.
+fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    criterion: Option<&F5Criterion>,
+    row_cap: usize,
+    mut visit: impl FnMut(&[u64]),
+) -> Option<(usize, usize)> {
+    // The caller reads the configured cap once per build, not once per row.
+    let mut selected_count = 0usize;
+    let mut full_count = 0usize;
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
     let mut all: Vec<u64> = Vec::new();
     let mut row: Vec<u64> = Vec::new();
@@ -1687,7 +1749,8 @@ fn visit_macaulay_rows(
             }
         });
         for &mult in multipliers.iter() {
-            if criterion.is_some_and(|c| c.prunes(i, mult)) {
+            let pruned = criterion.is_some_and(|c| c.prunes(i, mult));
+            if pruned && !COUNT_PRUNED {
                 continue;
             }
             // Multiplying by a monomial is a union of masks, so two
@@ -1709,15 +1772,18 @@ fn visit_macaulay_rows(
                 i = j;
             }
             if !row.is_empty() {
-                visit(&row);
-                count += 1;
+                full_count += 1;
+                if !pruned {
+                    visit(&row);
+                    selected_count += 1;
+                }
             }
-            if count > row_cap {
+            if full_count > row_cap {
                 return None;
             }
         }
     }
-    Some(count)
+    Some((selected_count, full_count))
 }
 
 /// Column masks of the Macaulay matrix at `degree`, in descending
@@ -3048,20 +3114,11 @@ pub fn macaulay_profile_sparse(
     })
 }
 
-/// **First fall degree** of `polys`: the smallest `D ≥ 2` whose Macaulay
-/// matrix has `rank < rows` *and* `rank < cols` — a non-trivial syzygy
-/// appears and the system has not saturated.
-///
-/// This is the same operational definition
-/// [`crate::cryptanalysis::ffd_harness`] uses for the full-field
-/// Weil descent of `S₃`, so the numbers are directly comparable: that
-/// harness measures the `2n`-variable system, this one the system
-/// restricted to a Frobenius-invariant subspace, which is the version
-/// the subfield-curve attack actually solves.
-///
-/// Returns the fall degree (if any up to `d_max`) and the per-degree
-/// profiles.  A profile is omitted for degrees whose matrix exceeded
-/// the size limits.
+/// Legacy name for a **rank-deficiency proxy**: the smallest `D >= 2`
+/// with `rank < rows` and `rank < cols` in the original-generator matrix.
+/// Row dependence alone does not certify a degree fall; this is not the
+/// mathematical first fall degree. Duplicate equations can trigger it.
+/// Returns the proxy (if observed) and the per-degree rank profiles.
 pub fn first_fall_degree(
     polys: &[F2BoolPoly],
     n_vars: usize,
@@ -3084,15 +3141,10 @@ pub fn first_fall_degree(
 
 // ── Solving degree ─────────────────────────────────────────────────
 
-/// What the reduced Macaulay rows at one degree actually *determine*.
-///
-/// [`MacaulayProfile`] records rank; this records whether that rank is
-/// enough to finish.  The distinction is the whole point: the first
-/// fall degree is where the rank first drops below generic, and the
-/// solving degree is where linear algebra alone pins every unknown.
-/// Complexity claims for Semaev systems are stated in terms of the
-/// first and assume it tracks the second, which is precisely the
-/// assumption Kosters–Yeo (arXiv:1503.08001) show can fail.
+/// What bounded multiples of the original equations determine.
+/// A refutation or full pinning is sufficient to decide this diagnostic.
+/// Multi-solution SAT ideals may already have a complete Gröbner basis
+/// while remaining unresolved by this test.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct SolvingProfile {
     /// Degree the matrix was built at.
@@ -3363,18 +3415,15 @@ pub fn solving_profile_sparse(
     })
 }
 
-/// **Solving degree** of `polys`: the smallest `D ≥ 1` at which the
-/// reduced Macaulay matrix resolves the system outright — a refutation,
-/// or every occurring variable pinned by a linear row.
+/// Legacy name for the first **bounded-Macaulay resolution degree**:
+/// a refutation or pinning of every occurring variable from bounded
+/// multiples of the original generators. The scan starts at the input
+/// degree (at least one). It is not an iterative F4/F5 trace, a complete
+/// Gröbner-basis test, or homogeneous degree of regularity.
 ///
-/// This is the degree that governs cost: the Macaulay matrix at `D` has
-/// `Θ(binom(n_vars, D))` columns, so an attack's exponent is set by the
-/// solving degree, not by the first fall degree.  Compare against
-/// [`first_fall_degree`] on the same system — the gap between them is
-/// the quantity the first-fall-degree assumption asserts is small.
-///
-/// Returns the solving degree (if reached at or below `d_max`) and the
-/// per-degree profiles.
+/// `None` includes multi-solution SAT systems and resource exhaustion;
+/// it must not be interpreted as a lower bound on solving degree.
+/// Returns the resolution degree, if reached, and per-degree profiles.
 pub fn solving_degree(
     polys: &[F2BoolPoly],
     n_vars: usize,
@@ -4564,6 +4613,58 @@ mod tests {
     use crate::binary_ecc::BinaryCurve;
     use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
     use crate::cryptanalysis::koblitz_index_calculus::{find_irreducible, KoblitzCurve};
+
+    #[test]
+    fn fused_f5_count_applies_the_full_f4_row_cap() {
+        let n_vars = 4;
+        let f = F2BoolPoly::from_monos(
+            vec![
+                F2BoolMono::from_mask(0b0011),
+                F2BoolMono::from_mask(0b0100),
+                F2BoolMono::from_mask(0),
+            ],
+            n_vars,
+        );
+        let polys = [f];
+        let mask = all_variable_mask(n_vars);
+        let criterion = F5Criterion::new(&polys, n_vars, 4, mask);
+        let (selected, full) = visit_macaulay_rows_counted::<true>(
+            &polys,
+            n_vars,
+            4,
+            mask,
+            Some(&criterion),
+            usize::MAX,
+            |_| {},
+        )
+        .unwrap();
+        assert!(full > selected);
+        let cap = full - 1;
+        assert!(visit_macaulay_rows_counted::<true>(
+            &polys,
+            n_vars,
+            4,
+            mask,
+            Some(&criterion),
+            cap,
+            |_| {},
+        )
+        .is_none());
+        assert_eq!(
+            visit_macaulay_rows_counted::<false>(
+                &polys,
+                n_vars,
+                4,
+                mask,
+                Some(&criterion),
+                cap,
+                |_| {},
+            )
+            .unwrap()
+            .0,
+            selected
+        );
+    }
 
     fn fe(v: u64, n: u32) -> F2mElement {
         F2mElement::from_biguint(&num_bigint::BigUint::from(v), n)
@@ -5869,5 +5970,28 @@ mod tests {
             }
         }
         assert!(compared > 100, "the comparison must actually run");
+    }
+
+    #[test]
+    fn degree_reporting_duplicate_rows_can_trigger_rank_proxy() {
+        // xy + x has roots (0,0), (0,1), (1,1), and is already a
+        // principal Boolean relation. Duplicating it adds no information.
+        let p = F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(3), F2BoolMono::var(0)], 2);
+        let (single, _) = first_fall_degree(std::slice::from_ref(&p), 2, 2);
+        let (duplicate, _) = first_fall_degree(&[p.clone(), p], 2, 2);
+        assert_eq!(single, None);
+        assert_eq!(duplicate, Some(2));
+    }
+
+    #[test]
+    fn degree_reporting_multiple_roots_need_not_pin() {
+        let p = F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(3)], 2);
+        // <xy> is a complete Boolean basis with three roots, but neither
+        // variable is pinned. An unresolved diagnostic is expected.
+        let (degree, profiles) = solving_degree(&[p], 2, 3);
+        assert_eq!(degree, None);
+        assert!(profiles
+            .iter()
+            .all(|p| !p.refuted && p.vars_determined == 0));
     }
 }

@@ -23,11 +23,13 @@ def main():
     parser.add_argument('--prepared', type=Path, required=True)
     parser.add_argument('--worker', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--panel', type=Path,
+                        default=HERE.parent/'goal_20260924/improvement/round1.json')
     parser.add_argument('--profile', action='store_true')
     args = parser.parse_args()
     prepared, worker, out = args.prepared.resolve(), args.worker.resolve(), args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
-    panel = read(HERE.parent/'goal_20260924/improvement/round1.json')
+    panel = read(args.panel.resolve())
     manifest = read(prepared/'source-manifest.json')
     require(sha256(manifest) == panel['candidate_source_sha256'], 'unregistered source')
     for name, value in manifest.items():
@@ -43,11 +45,13 @@ def main():
                      timeout_seconds='180')
     host_id = sha256(platform.uname()._asdict())
     outcomes = []
+    challengers = panel['candidates'][1:]
+    expected = 2 * len(challengers)
     for vector in ('n13-public.json', 'n23.json'):
         stored = read(HERE/'testdata'/vector)
         stored = stored['ic'] if 'ic' in stored else stored
         fixture = stored['report']['fixture']
-        for arm in panel['candidates'][1:]:
+        for arm in challengers:
             directory = out/vector.removesuffix('.json')/arm['id']
             directory.mkdir(parents=True)
             job = dict(copy.deepcopy(stored['job']), mode='ic', config=arm['config'],
@@ -101,10 +105,10 @@ def main():
             outcomes.append(result)
             print(json.dumps(result), flush=True)
     summary = dict(scope='fixed archived toy vectors; wiring and correctness only',
-        promotion_eligible=False, scheduled=len(outcomes),
+        promotion_eligible=False, panel=panel['candidate_panel'], scheduled=len(outcomes),
         verified=sum(row['status'] == 'VERIFIED' for row in outcomes), outcomes=outcomes)
     write(out/'summary.json', summary, exclusive=True)
-    require(summary['verified'] == summary['scheduled'] == 30, 'retained candidate control failures')
+    require(summary['verified'] == summary['scheduled'] == expected, 'retained candidate control failures')
 
 
 if __name__ == '__main__':

@@ -308,6 +308,76 @@ complete an iteration. The equivalent-suite exception below still applies.
   Update the research note and canonical scoreboard in the same PR, retaining
   the prior baseline and classifying the change by §3.
 
+### 8a. Require m=83 for high-fidelity ECC2K-130 IC evidence
+
+For every index-calculus improvement intended to transfer to ECC2K-130,
+**always use m=83 as the highest-fidelity smaller-curve confidence gate**
+before claiming that the improvement survives scaling toward m=131. Use the
+same Koblitz family as the challenge:
+`E_0: y² + xy = x³ + 1` over `GF(2^83)`. Its group order is
+`4 * 2417851639230796216685689`, with the second factor prime. A verified
+polynomial-basis modulus is `z^83 + z^45 + z² + z + 1`; a different basis
+is acceptable only when the field representation and conversions are recorded.
+Freeze the exact curve, basis, prime-order subgroup, generator, and cofactor
+clearing in each candidate/workload manifest. Frobenius has 83 phases on
+nonidentity points in that subgroup, and `ord_83(2) = 82`, so the nontrivial
+cyclotomic block is irreducible over `GF(2)`, as for m=131.
+
+- Use smaller degrees, including m=53, for smoke tests, solver tuning, and
+  inexpensive falsification. They do not discharge the m=83 gate.
+- On m=83, run the unmodified baseline and candidate with matching curve,
+  subgroup, factor-base policy, targets, seeds, resource limits, and independent
+  holdouts. Preserve failed searches, timeouts, and out-of-memory outcomes.
+  Apply the full-cost, verified-DLP, matched-rho, and scoreboard rules above;
+  a solver-only or relation-only gain remains a stage diagnostic.
+- If the m=83 comparison is missing or incomplete, report that explicitly and
+  leave high-fidelity ECC2K-130 improvement unestablished. A successful m=83
+  result is evidence at m=83; any transfer to m=131 remains an extrapolation
+  until separately checked there.
+
+### 8b. ECC2K-130 is the reference family; disclose subfield structure
+
+User direction, 2026-09-28: the ECC2K-130 binary Koblitz challenge is the
+archetype for this workstream. The challenge field is GF(2^131); "130" in
+the challenge name is not the field-extension degree. Use smaller members
+of the same E_0 family for exploratory evidence, and record the exact field,
+curve, subgroup and Frobenius action. A generic binary curve, another
+Koblitz model, or an isogenous neighbor is not silently the same instance.
+
+Say **no proper intermediate subfields over GF(2)**, not "no subfields".
+GF(2^m) contains GF(2^d) exactly when d divides m. In every case GF(2)
+is present.
+
+| Field degree m | Proper intermediate subfields over GF(2) | Evidence role |
+| --- | --- | --- |
+| 31 | None | Primary exploratory size; disclose its different Frobenius-module structure |
+| 51 | GF(2^3), GF(2^17) | Composite-degree comparison; keep subfield-dependent findings separate |
+| 53 | None | Additional prime-degree exploratory comparison |
+| 83 | None | Required smaller-curve confidence gate under section 8a |
+| 131 | None | Exact challenge field; target-specific conclusions require separate evidence |
+
+- Use m=31 as the primary exploratory size when a smaller instance is needed.
+  Preserve the m=83 requirement in section 8a. A result at 31, 51 or 53
+  does not replace that gate.
+- Prime extension degree alone does not guarantee structural fidelity.
+  In particular, ord_31(2)=5, whereas ord_53(2)=52, ord_83(2)=82 and
+  ord_131(2)=130. Thus the nontrivial cyclotomic block splits at m=31,
+  unlike the irreducible block at 53, 83 and 131. State this difference
+  whenever an argument uses invariant linear subspaces or that block.
+- Label methods that depend on a proper intermediate subfield as such.
+  A gain at m=51 that uses its subfields cannot support a claim at
+  m=31, 53, 83 or 131 without a separate applicable argument and evidence.
+- Distinguish a curve defined over GF(2) from its field of rational points.
+  Koblitz coefficients in GF(2) do not place all challenge points in GF(2).
+  Absence of an intermediate field does not remove Frobenius or rule out
+  every Weil-restriction formulation.
+- Keep field degree m, subgroup order r, and polynomial-variable count
+  separate in all manifests and reports. Matching bit counts is not
+  matching instances.
+
+For the general-algebra follow-up and its current limits, see
+[SPARSE_ALGEBRA_FOLLOWUP.md](SPARSE_ALGEBRA_FOLLOWUP.md).
+
 ### 9. AWS GPU hosts use the `meow34` key pair
 
 For AWS EC2 benchmark and validation hosts, including G7/G7e instances, use the
@@ -392,3 +462,10 @@ exponents against rho's one half, and the extrapolated crossovers
 marked as extrapolations.
 
 That is what a finished thread looks like when the answer is no.
+
+## Cross-repository curve identity in comparisons
+
+For new curve comparisons and UI exports, follow [docs/curve-identities.md](docs/curve-identities.md)
+and `tools/curve_identity.py`. Reuse EC1 aliases and full curve UIDs across IC and
+Pollard rho; keep factor-base/isogeny candidate identities separate. Preserve
+immutable historical names and never infer exact identity from field degree alone.

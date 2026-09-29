@@ -221,6 +221,8 @@ pub struct F4Stats {
     pub basis_len: u64,
     /// Largest matrix held, in bytes of packed words.
     pub peak_matrix_bytes: u64,
+    /// Largest live lookup-table allocation, in bytes of packed words.
+    pub peak_table_bytes: u64,
     /// Wall time spent building matrices (products, columns, packing)
     /// and eliminating them.
     pub build_ns: u64,
@@ -328,8 +330,9 @@ struct MonomialSet {
 
 impl MonomialSet {
     fn new(n_vars: usize) -> Self {
-        let dense =
-            n_vars <= 20 && std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() != Ok("1");
+        let dense = n_vars <= 20
+            && std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() != Ok("1")
+            && std::env::var("F4_F2_BITMAP_SEEN").as_deref() != Ok("0");
         Self {
             masks: Vec::new(),
             membership: if dense {
@@ -513,6 +516,102 @@ enum ColumnIndex {
 /// Variables up to which [`Columns`] indexes by array: `4 · 2^22` bytes at
 /// most, against a hash lookup per term packed.
 const DENSE_INDEX_VARS: u32 = 22;
+
+/// Set membership during symbolic preprocessing.  For up to 22 variables
+/// one bit per possible mask is smaller than the column index and avoids
+/// hashing every repeated term.  Values are retained in insertion order
+/// only to enumerate the final column set; `Columns` sorts them itself.
+enum MonomialSeen {
+    Bitmap {
+        bits: Vec<u64>,
+        limit: u64,
+        overflow: FxSet<u64>,
+        values: Vec<u64>,
+    },
+    Hashed(FxSet<u64>),
+}
+
+impl MonomialSeen {
+    fn new(n_vars: usize) -> Self {
+        static BITMAP: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        let enabled =
+            *BITMAP.get_or_init(|| std::env::var("F4_F2_BITMAP_SEEN").as_deref() != Ok("0"));
+        Self::with_bitmap(n_vars, enabled)
+    }
+
+    fn with_bitmap(n_vars: usize, enabled: bool) -> Self {
+        if enabled && n_vars <= DENSE_INDEX_VARS as usize {
+            let limit = 1u64 << n_vars;
+            Self::Bitmap {
+                bits: vec![0; (limit as usize).div_ceil(64)],
+                limit,
+                overflow: FxSet::default(),
+                values: Vec::new(),
+            }
+        } else {
+            Self::Hashed(FxSet::default())
+        }
+    }
+
+    #[inline]
+    fn insert(&mut self, mask: u64) -> bool {
+        match self {
+            Self::Bitmap {
+                bits,
+                limit,
+                overflow,
+                values,
+            } => {
+                let fresh = if mask < *limit {
+                    let slot = &mut bits[mask as usize / 64];
+                    let bit = 1u64 << (mask % 64);
+                    let fresh = *slot & bit == 0;
+                    *slot |= bit;
+                    fresh
+                } else {
+                    overflow.insert(mask)
+                };
+                if fresh {
+                    values.push(mask);
+                }
+                fresh
+            }
+            Self::Hashed(set) => set.insert(mask),
+        }
+    }
+
+    #[cfg(test)]
+    fn contains(&self, mask: &u64) -> bool {
+        match self {
+            Self::Bitmap {
+                bits,
+                limit,
+                overflow,
+                ..
+            } => {
+                if *mask < *limit {
+                    bits[*mask as usize / 64] & (1u64 << (*mask % 64)) != 0
+                } else {
+                    overflow.contains(mask)
+                }
+            }
+            Self::Hashed(set) => set.contains(mask),
+        }
+    }
+
+    fn extend(&mut self, values: impl IntoIterator<Item = u64>) {
+        for mask in values {
+            self.insert(mask);
+        }
+    }
+
+    fn into_values(self) -> Vec<u64> {
+        match self {
+            Self::Bitmap { values, .. } => values,
+            Self::Hashed(set) => set.into_iter().collect(),
+        }
+    }
+}
 
 impl Columns {
     fn from_monomials(set: impl IntoIterator<Item = u64>) -> Self {
@@ -777,10 +876,14 @@ fn echelon_streaming(
     // The leading block's tables, where enough rows follow it to pay and
     // they take no more words than the matrix; later pivots join them
     // within twice that.
-    let budget = (pivots.len() + rest.len()) * words;
+    let matrix_words = (pivots.len() + rest.len()) * words;
+    let budget = matrix_words * TABLE_INITIAL_BUDGET_MULT;
     let mut tables = (rest.len() >= TABLE_ROWS && pivots.len() >= TABLE_ROWS)
         .then(|| BlockTables::build(&pivot_of, &pivots, budget))
         .flatten();
+    if let Some(t) = &tables {
+        st.peak_table_bytes = st.peak_table_bytes.max((t.held_words * 8) as u64);
+    }
     let mut xors = 0u64;
     let mut performed = 0u64;
     if let Some(t) = &tables {
@@ -936,7 +1039,13 @@ fn echelon_streaming(
         done = end;
         if let Some(t) = &mut tables {
             if rest.len() - done >= TABLE_ROWS && pivots.len() > made {
-                performed += t.extend(&pivot_of, &pivots, &pivots[made..], 2 * budget);
+                performed += t.extend(
+                    &pivot_of,
+                    &pivots,
+                    &pivots[made..],
+                    matrix_words * TABLE_EXTENDED_BUDGET_MULT,
+                );
+                st.peak_table_bytes = st.peak_table_bytes.max((t.held_words * 8) as u64);
             }
         }
     }
@@ -1483,7 +1592,27 @@ const TABLE_ROWS: usize = 256;
 
 /// Pivot columns per table: an aligned group of them never straddles a
 /// word, so a row's pattern on it is one shift and mask.
-const TABLE_BLOCK: usize = 4;
+const TABLE_BLOCK: usize = if cfg!(feature = "f4-wide-tables") {
+    6
+} else if cfg!(feature = "f4-four-tables") {
+    4
+} else {
+    5
+};
+const TABLE_INITIAL_BUDGET_MULT: usize = if cfg!(feature = "f4-wide-tables") {
+    4
+} else if cfg!(feature = "f4-four-tables") {
+    1
+} else {
+    2
+};
+const TABLE_EXTENDED_BUDGET_MULT: usize = if cfg!(feature = "f4-wide-tables") {
+    4
+} else if cfg!(feature = "f4-four-tables") {
+    2
+} else {
+    3
+};
 
 /// One table: the leading block's pivots on up to [`TABLE_BLOCK`]
 /// consecutive columns from `first`, all of which have one.
@@ -1999,7 +2128,10 @@ fn critical_pair_survives(p: &Pair, lh: u64, lm: &[u64]) -> bool {
 
 fn batch_basis_insert_enabled() -> bool {
     static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    *ENABLED.get_or_init(|| std::env::var("PQ_F4_DISABLE_BATCH_INSERT").as_deref() != Ok("1"))
+    *ENABLED.get_or_init(|| {
+        std::env::var("PQ_F4_DISABLE_BATCH_INSERT").as_deref() != Ok("1")
+            && std::env::var("F4_F2_BATCH_INSERTS").as_deref() != Ok("0")
+    })
 }
 
 fn critical_pair_survives_batch(
@@ -2835,7 +2967,8 @@ fn interreduce(
         }
     }
     let lms: Vec<u64> = minimal.iter().map(|p| p.lt().unwrap().mask).collect();
-    let mut examined: FastU64Set = lms.iter().copied().collect();
+    let mut examined = MonomialSeen::new(n_vars);
+    examined.extend(lms.iter().copied());
     let mut queue: Vec<u64> = Vec::new();
     for p in &minimal {
         for t in &p.terms[1..] {
@@ -2864,7 +2997,7 @@ fn interreduce(
             reducers.push(r);
         }
     }
-    let cols = Columns::from_monomials(examined.iter().copied());
+    let cols = Columns::from_monomials(examined.into_values());
     cols.record_dense_cost(st);
     let mut rows: Vec<(usize, Row)> = minimal
         .iter()
@@ -2988,6 +3121,34 @@ mod tests {
     use rand::rngs::StdRng;
     use rand::{Rng, SeedableRng};
 
+    #[test]
+    fn monomial_bitmap_matches_hash_set() {
+        let mut rng = StdRng::seed_from_u64(0x5eed_2026);
+        for n_vars in [0usize, 1, 6, 12, 20, 22, 23] {
+            let mut bitmap = MonomialSeen::with_bitmap(n_vars, true);
+            let mut hashed = MonomialSeen::with_bitmap(n_vars, false);
+            let within = (1u64 << n_vars) - 1;
+            let masks = (0..2_000)
+                .map(|i| {
+                    if i % 17 == 0 {
+                        1u64 << 40 | rng.gen::<u64>() & within
+                    } else {
+                        rng.gen::<u64>() & within
+                    }
+                })
+                .collect::<Vec<_>>();
+            for &m in &masks {
+                assert_eq!(bitmap.insert(m), hashed.insert(m), "n_vars={n_vars}");
+                assert_eq!(bitmap.contains(&m), hashed.contains(&m));
+            }
+            let mut actual = bitmap.into_values();
+            let mut expected = hashed.into_values();
+            actual.sort_unstable();
+            expected.sort_unstable();
+            assert_eq!(actual, expected, "n_vars={n_vars}");
+        }
+    }
+
     /// The row-by-row forward elimination `echelon` must match: each row
     /// reduced by the pivots before it while its lead has one.
     fn echelon_reference(rows: &[Row], n_cols: usize) -> (Vec<(usize, Vec<u64>, usize)>, u64) {
@@ -3078,6 +3239,53 @@ mod tests {
 
     fn poly(masks: &[u64], n: usize) -> F2BoolPoly {
         F2BoolPoly::from_monos(masks.iter().map(|&m| F2BoolMono::from_mask(m)).collect(), n)
+    }
+
+    #[test]
+    fn batched_insert_keeps_pairs_and_skip_counts() {
+        let empty = || State {
+            n_vars: 10,
+            polys: Vec::new(),
+            lm: Vec::new(),
+            active: Vec::new(),
+            active_indices: Vec::new(),
+            pairs: Vec::new(),
+            pair_select_scratch: PairSelectScratch::default(),
+        };
+        let (mut serial, mut batched) = (empty(), empty());
+        let (mut serial_st, mut batched_st) = (F4Stats::default(), F4Stats::default());
+        let mut rng = StdRng::seed_from_u64(0xba7c_2026);
+        for _ in 0..30 {
+            let mut group = Vec::new();
+            for _ in 0..rng.gen_range(1..6) {
+                let p = loop {
+                    let masks: Vec<u64> = (0..rng.gen_range(1..20))
+                        .map(|_| rng.gen_range(0..(1u64 << 10)))
+                        .collect();
+                    let p = poly(&masks, 10);
+                    if !p.is_zero() {
+                        break p;
+                    }
+                };
+                group.push(p);
+            }
+            for p in &group {
+                serial.insert(p.clone(), &mut serial_st);
+            }
+            batched.insert_batch(group, &mut batched_st);
+            assert_eq!(batched.polys, serial.polys);
+            assert_eq!(batched.lm, serial.lm);
+            assert_eq!(batched.active, serial.active);
+            assert_eq!(batched.pairs, serial.pairs);
+            assert_eq!(
+                batched_st.pairs_chain_skipped,
+                serial_st.pairs_chain_skipped
+            );
+            assert_eq!(
+                batched_st.pairs_product_skipped,
+                serial_st.pairs_product_skipped
+            );
+        }
     }
 
     fn brute_force(eqs: &[F2BoolPoly], n: usize) -> Vec<u64> {
