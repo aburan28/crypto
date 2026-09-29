@@ -37,10 +37,11 @@ def assemble_ptx(ptx, arch, ptxas):
         return row
 
 
-def main(output, assemble=False):
+def main(output, assemble=False, square_no_unroll=False):
     result={'status':'started','gpu_executed':False,'compilations':[],
             'source_sha256':fx.sha((fx.HERE/'arithmetic.cuh').read_bytes()),
-            'checker_sha256':fx.sha(Path(__file__).read_bytes()),'assemble':assemble}
+            'checker_sha256':fx.sha(Path(__file__).read_bytes()),'assemble':assemble,
+            'linear_square_no_unroll':square_no_unroll}
     reserve(output,result)
     try:
         ptxas=None
@@ -69,10 +70,12 @@ def main(output, assemble=False):
                     assert nv.nvrtcCreateProgram(C.byref(p),src,b'arithmetic.cuh',0,None,None)==0
                     try:
                         opts=[b'--std=c++17',f'--gpu-architecture={arch}'.encode(),f'-DFIELD_M={m}'.encode(),f'-DFAST_SQUARE={fast}'.encode()]
+                        if square_no_unroll:opts.append(b'-DLINEAR_SQUARE_NOUNROLL=1')
                         rc=nv.nvrtcCompileProgram(p,len(opts),(C.c_char_p*len(opts))(*opts))
                         size=C.c_size_t();nv.nvrtcGetProgramLogSize(p,C.byref(size))
                         log=C.create_string_buffer(size.value);nv.nvrtcGetProgramLog(p,log)
-                        row={'arch':arch,'m':m,'fast_square':fast,'returncode':rc,'log':log.value.decode()}
+                        row={'arch':arch,'m':m,'fast_square':fast,'returncode':rc,'log':log.value.decode(),
+                             'options':[o.decode() for o in opts]}
                         result['compilations'].append(row)
                         assert rc==0,row
                         assert nv.nvrtcGetPTXSize(p,C.byref(size))==0
@@ -94,5 +97,6 @@ def main(output, assemble=False):
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('--output',type=Path,required=True)
     ap.add_argument('--assemble',action='store_true',help='Also assemble PTX and retain register/spill reports; no GPU needed')
+    ap.add_argument('--square-no-unroll',action='store_true',help='Opt-in compiler screen; no device runtime claim')
     args=ap.parse_args();args.output.parent.mkdir(parents=True,exist_ok=True)
-    raise SystemExit(main(args.output,args.assemble))
+    raise SystemExit(main(args.output,args.assemble,args.square_no_unroll))
