@@ -40,18 +40,23 @@ services:
       timeout: 3s
       retries: 30
 
-  # From quay.io, not Docker Hub: `minio/minio` there refuses anonymous pulls
-  # (a token request for it answers 401), which is what failed the first run
-  # of this workflow.  quay is MinIO's own registry and answers 200 for the
-  # same image, linux/amd64 among its platforms.
+  # From Chainguard, not MinIO's own registries: `minio/minio` on Docker Hub
+  # and `quay.io/minio/minio` (every tag, dated releases included) now answer
+  # an anonymous manifest request with 401, which failed this workflow's runs
+  # from late September 2026 ("minio Error unauthorized").
+  # cgr.dev/chainguard/minio is MinIO built from source, current, linux/amd64
+  # and arm64, and anonymous; the suite passed against the binary in its
+  # RELEASE.2026-09-22 image (51 tests, 1,016 objects written).
   #
-  # The only unpinned image here: MinIO publishes dated release tags rather
-  # than a stable series, and the S3 surface this uses -- put, head, get,
-  # list_objects_v2 with a continuation token -- has been the same for years.
-  # `services.sh` waits on its health endpoint rather than on a healthcheck
-  # inside the container, because what matters is that it answers from here.
+  # The only unpinned image here: the anonymous tier publishes `latest` and
+  # `latest-dev` and no version tags, and the S3 surface this uses -- put,
+  # head, get, list_objects_v2 with a continuation token -- has been the same
+  # for years.  The image runs as a non-root user and ships a world-writable
+  # /data, so `server /data` needs no override.  `services.sh` waits on its
+  # health endpoint rather than on a healthcheck inside the container (the
+  # image has no shell), because what matters is that it answers from here.
   minio:
-    image: quay.io/minio/minio:latest
+    image: cgr.dev/chainguard/minio:latest
     command: server /data --address ":9000"
     environment:
       MINIO_ROOT_USER: ecc2k130

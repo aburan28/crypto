@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "scope": "Standalone generic Boolean matrix construction on 12,20,28,36 variables. No production solver integration, curve inputs, targets, scalar recovery, relation collection or rho campaigns.",
+  "variables": [
+    12,
+    20,
+    28,
+    36
+  ],
+  "matrix_degree": 3,
+  "discovery_seeds": [
+    17,
+    937
+  ],
+  "holdout_seeds": [
+    20260927,
+    130363
+  ],
+  "families": [
+    "quadratic",
+    "linear_drop",
+    "restricted_cycle"
+  ],
+  "batches": [
+    1,
+    8,
+    32
+  ],
+  "repetitions": 12,
+  "variants": [
+    "sorted",
+    "binary",
+    "ranked"
+  ],
+  "bridge_variants": [
+    "sorted",
+    "binary",
+    "ranked",
+    "dense"
+  ],
+  "bridge_n": 12,
+  "limits": {
+    "variables": 36,
+    "matrix_degree": 3,
+    "generators": 12,
+    "terms_per_generator": 32,
+    "rows": 4096,
+    "columns": 8192,
+    "batch": 32,
+    "worker_seconds": 30,
+    "campaign_seconds": 300,
+    "dense_max_n": 12
+  },
+  "fixture_generators": 8,
+  "fixtures": "Each generator has 16 distinct quadratic support monomials, a constant and the first min(n,10) linear terms. Every input samples its coefficients anew and forces a quadratic term except explicit first-generator degree changes. All inputs in a batch must be distinct. Fixtures depend only on the supplied seed; no performance screening.",
+  "families_contract": {
+    "quadratic": "All generators remain quadratic; all variables eligible for multipliers.",
+    "linear_drop": "All variables eligible; first generator cycles quadratic, linear, quadratic, zero.",
+    "restricted_cycle": "Exactly eight evenly spaced variables eligible for multipliers; first generator cycles quadratic, linear, constant, zero."
+  },
+  "candidate": "Ranked packed construction. Prefix counts B(b,r)=sum_{j=0}^r binomial(b,j). For set bits h_i of monomial m in descending order, its ascending numeric index among degree<=D monomials is sum_i B(h_i,D-i+1). Uses O(nD) rank-table entries instead of a 2^n mask lookup. Ambient basis, eligible multiplier lists and dense packed rows remain polynomial-sized and fully charged.",
+  "controls": {
+    "sorted": "Port of direct sort/parity/compact constructor to u64 monomials, matching current caps.",
+    "binary": "Same packed rows and occupancy compaction as candidate, with binary search in the sorted ambient basis. Strong scalable lookup control.",
+    "dense": "Same packed constructor with a 2^n direct lookup; executed only at the n=12 bridge. Larger dimensions are NOT_EXECUTED by design, not failures or inferred times."
+  },
+  "correctness": "Independent recursive multiplier enumeration, set parity and column-major incidence oracle. Exhaustive rank agreement with numeric enumeration through n=12; independent combination enumeration at n=20/28/36. All 6144 n=3 coefficient/degree/active-mask cases checked across all constructors, plus context changes, invalid inputs, current caps and a full-width constant-generator resource refusal.",
+  "accounting": "Cold batch includes context construction, every application, output allocation, support compaction, exact equality validation, output accounting and destruction. Fixture and oracle generation are common supplied-input setup outside arm totals and inside fresh-worker process receipts. Twelve repetitions rotate three arms, or four at the bridge, evenly. No post-holdout tuning.",
+  "memory": "Retained Rust structure and Vec capacities, excluding allocator metadata. Separate output payload, total rows/columns and lookup-entry count. Fresh-worker peak RSS includes all variants and reference matrices and is not candidate-specific. Ranked removes only the exponential lookup, not the ambient degree<=D basis or dense-row footprint.",
+  "performance_gate": "At n=20,28,36, batch32, all three families: require 95 percent paired-bootstrap lower bound for sorted total_ns / ranked total_ns >2.0 and binary total_ns / ranked total_ns >1.05. All 18 gates must pass for dramatic scalable-construction promotion. Report n=12 versus dense separately; do not drop failing families or infer skipped dense costs.",
+  "classification": "Finite generic construction engineering diagnostic. Full solver time, operation calibration, end-to-end IC cost and rho ratio remain null. Goal of dramatic complete-algorithm improvement is not proven by this stage experiment."
+}

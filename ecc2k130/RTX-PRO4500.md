@@ -1,5 +1,16 @@
 # RTX PRO 4500 (EC2 g7) — the rate, and the decision it settles
 
+> **Update, [POWER-BOUND.md](POWER-BOUND.md):** both receipts below are for
+> builds the tree has since superseded on the RTX PRO 6000. The 4500 sits on
+> its 165 W limit, so its rate ranks builds by updates per joule; measured on
+> a 6000, `make gpu-rtx-pro4500` (the 20 B/s build plus one fused pass per
+> step) is 1.072× per joule over the 20 B/s build, which is itself 1.25× the
+> table-walk receipt's. **Predicted 7.2 – 7.4 B/s on a 4500, against 5.552
+> and 5.107 here — a prediction, not a receipt** (EC2 launches are blocked in
+> the session that made it; POWER-BOUND.md §5 has the command that measures
+> it). The break-evens below were computed against the 6000's shipping rate
+> and have to be redone with both cards on their best builds.
+
 Every audited throughput figure in this tree is for the **RTX PRO 6000**:
 14.637530 B/s benchmarking and 14.1 B/s collecting
 ([THROUGHPUT-30B.md](THROUGHPUT-30B.md), [aws/README.md](aws/README.md)). The
