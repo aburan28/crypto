@@ -156,6 +156,13 @@ def main():
     write(out/'registered-panel.json', panel, exclusive=True)
     shutil.copy2(REGISTRATION/'PROTOCOL.md', out/'PROTOCOL.md')
     shutil.copy2(Path(__file__), out/'registered-runner.py')
+    archive_manifest = read(HERE/'evidence/manifest.json')
+    needed = {'ic-generic-reference-qualification-20260926', *ARCHIVES}
+    inventory = {entry['file'].removesuffix('.tar.zst'): entry
+                 for entry in archive_manifest['archives']
+                 if entry['file'].removesuffix('.tar.zst') in needed}
+    require(set(inventory) == needed, 'missing sealed archive in evidence manifest')
+    write(out/'restored-archives.json', inventory, exclusive=True)
     commands = []
 
     def run(command):
@@ -172,7 +179,10 @@ def main():
 
     run([sys.executable, HERE/'target_history.py', '--history', HISTORY,
          '--repository', ROOT])
-    references_root = out/'reference-evidence'
+    # The tournament snapshots every executed source and reference into `out`.
+    # Keep the already-published million-file prior archives outside the new
+    # upload, while retaining their hashes and restore receipts in `out`.
+    references_root = out.parent/(out.name+'-reference-evidence')
     run([sys.executable, HERE/'evidence/restore.py', '--archive',
          'ic-generic-reference-qualification-20260926', '--out', references_root])
     bundle = references_root/'ic-generic-reference-qualification'
@@ -187,8 +197,8 @@ def main():
             == rules.IC_SOURCE, 'weakened accepted incumbent')
     for archive in ARCHIVES:
         run([sys.executable, HERE/'evidence/restore.py', '--archive', archive,
-             '--out', out/archive])
-    previous = [out/archive/archive.replace('-20260925','').replace('-20260928','')
+             '--out', out.parent/(out.name+'-'+archive)])
+    previous = [out.parent/(out.name+'-'+archive)/archive.replace('-20260925','').replace('-20260928','')
                 /'round/tournament' for archive in ARCHIVES]
     for path in previous:
         require((path/'contract.json').is_file() and (path/'decision.json').is_file(),
