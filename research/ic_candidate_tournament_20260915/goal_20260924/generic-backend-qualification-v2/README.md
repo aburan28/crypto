@@ -9,7 +9,7 @@ uses seed `2026092902`, one process for each of 25 distinct public targets,
 algorithm arms. It does not use the sealed improvement confirmation sets.
 
 The first run's entire possible 25-point fixture schedule is in
-[lost-campaign-exposures.json](lost-campaign-exposures.json). It was reproduced
+[lost-campaign-exposures.json](lost-campaign-exposures.json). An independent full-prepare replay matches that corpus byte-for-byte on all 25 points; see [INDEPENDENT-RECONSTRUCTION.md](INDEPENDENT-RECONSTRUCTION.md). It was reproduced
 from the pinned worker and sealed historical exclusions using
 [reconstruct_exposures.py](reconstruct_exposures.py); five retained prior
 fixtures matched exactly and a second local reconstruction matched the checked
