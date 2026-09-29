@@ -41,7 +41,11 @@ def doctor(source):
             'native_build_ready': all(checks.values()) and bool(shutil.which('cargo')),
             'instruction_protocol_ready': platform.system() == 'Linux' and platform.machine() == 'x86_64'
                 and version == 'valgrind-3.22.0', 'valgrind': version,
-            'scientific_admission': 'Prepared optimized schema-3 sources; source-bound generic-v1 workers may enter explicit development qualification, with independent stage checks. Generic improvement eligibility and observer qualification remain pending.',
+            'scientific_admission': (
+                'Prepared optimized schema-3 and source-bound generic-v1 workers have independent stage checks. '
+                'Accepted generic/reference and observer development studies do not qualify F4/F5 or SAT: '
+                'their registered complete-solve campaign requires frozen replay, natural-query audit, and the two-family gate.'
+            ),
             'baseline_quality': 'Requires fresh rho sensitivity screen and arithmetic equivalence tests; no global-best certification.',
             'native_scope': 'Development diagnostic; no operation-count or hardware-independent speedup claim.',
             'stages': {

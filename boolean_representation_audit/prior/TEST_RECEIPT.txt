@@ -1,0 +1,5 @@
+Command: python3 -m unittest -v test_boolean_closure
+Observed on 2026-09-28: Ran 9 tests in 0.217s; OK.
+The seeded-controls test checks 60 systems (n=1,...,6; ten per n).
+All eight measurement cases also passed independent exact-ideal verification, equal-span checks, and the solution-count dimension identity.
+Baseline manifest: all four entries verified OK before use.

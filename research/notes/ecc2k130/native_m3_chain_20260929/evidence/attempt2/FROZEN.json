@@ -1,0 +1,72 @@
+{
+  "cnf_byte_cap": 268435456,
+  "dag_node_cap": 2000000,
+  "leaf": {
+    "beta": 3,
+    "dimensions": [
+      44,
+      44,
+      43
+    ],
+    "lines": [
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        4
+      ]
+    ],
+    "modulus": "0x800000000000000000000000000002007",
+    "n": 131
+  },
+  "leaf_child_wall_seconds": 600,
+  "leaf_external_wall_seconds": 630,
+  "leaf_rss_cap_bytes": 2147483648,
+  "schema": "ecc2k130-native-m3-chain-freeze-v1",
+  "sha256": {
+    ".github/workflows/ecc2k130-native-m3-chain.yml": "cf44a5b0b2407b0029fd7cfd999053553f52a2cca3d58283604c986ae8461e0b",
+    "research/ecc2k130_factor_base_replication_20260925/exact_replay.json": "982750f272271a566e48724f470b6bca51d9d3ba159114c7628693b3a2fe9865",
+    "research/ecc2k130_factor_base_replication_20260925/exact_smoke.json": "d83873d46f810c75045131ab57b3110e313f1185ba75831c1fa3739862f48e0c",
+    "research/ecc2k130_relations/fastfield.py": "b5990fda51700bbfba363251c41f02febfd0fc92edfea4f5ddd647bab472789e",
+    "research/ecc2k130_relations/relations.py": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f",
+    "research/notes/ecc2k130/m10_export_capacity_20260925/capacity.py": "ef6b27752992ce44c663b2f0a825efac9a4bec009cf20868ee8a85948c64cd23",
+    "research/notes/ecc2k130/native_fullpoint_edge_20260929/native_relation.py": "2f6793509ac7ae6fbe4050af3441889c266f86c33397df1482bcb4457ebb29fc",
+    "research/notes/ecc2k130/native_fullpoint_edge_20260929/produce.py": "1b9710dc9a3db081e6475a333af05e84d8214d61f2bcfb69607b0cdca842a99c",
+    "research/notes/ecc2k130/native_fullpoint_edge_20260929/verify.py": "7d50fe688fb494ad6a35085007d1ce16a5ddf156b85d3f2dcee57f32f492859d",
+    "research/notes/ecc2k130/native_m3_chain_20260929/PROTOCOL.md": "c4648eb2cb50008e463b37d5a29a10937ce848173e4ed7769d12a5192d1340ef",
+    "research/notes/ecc2k130/native_m3_chain_20260929/chain.py": "03b3e97b74e35a100ab60a7c5be0cea09108405e185cccda74c6942a94b21944",
+    "research/notes/ecc2k130/native_m3_chain_20260929/ci_replay.py": "99c605ca08d8daa1538780a95572548b99f2c0ea26b1847a9d3e3f9349393490",
+    "research/notes/ecc2k130/native_m3_chain_20260929/panel.py": "e159f6fd8b05dfda30724c480698e60b15a840bab7cb9403d47670932a9811ca",
+    "research/notes/ecc2k130/native_m3_chain_20260929/reference.py": "6bfb95f6126a2ffaa47201a95ebdf15937d377d4562a28055eba9ebe8f9a5b84",
+    "research/notes/ecc2k130/native_m3_chain_20260929/run.py": "c4eed70e350d34b9a02d61d5a1e13416ea89948fc27dc8207a0bedaf7216623a",
+    "research/notes/ecc2k130/native_m3_chain_20260929/verify_panel.py": "e5d630ab021dc4265f49ee6a0655513be9577610a7f618ecdb7416db85711def",
+    "research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py": "d3f0f6e1515282a25efb4eb6a5f68ad754f1d9be68e4a741f17a748d9a58d782",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/export.py": "77159083a897f65b91d0f762ef425eda2df73460a91b997e754351c7c331e8fe",
+    "research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/verify.py": "b87fa827308c964679c8c5d7e6d457406a9edfd3cfef15952017f0056aae5d7c",
+    "research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/dag.py": "a277fb1b2f9b58ca8cc7cb33713950015f8c0446651b1d4e8657650819bcd419"
+  },
+  "source_commit": "d068fcffb2725a06b2f148c046983a84511859d2",
+  "source_main_parent": "a218e41182cda97f4be6f636333202882142eec9",
+  "toy": {
+    "a": 0,
+    "b": 1,
+    "bases": [
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        4
+      ]
+    ],
+    "modulus": "0x25",
+    "n": 5
+  },
+  "toy_child_wall_seconds": 300,
+  "toy_external_wall_seconds": 330,
+  "toy_rss_cap_bytes": 1073741824
+}

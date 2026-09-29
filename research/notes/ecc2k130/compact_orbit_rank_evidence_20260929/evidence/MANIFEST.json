@@ -1,0 +1,71 @@
+{
+  "files": [
+    {
+      "bytes": 1388,
+      "path": "control/base.jsonl",
+      "sha256": "dcea2e583bce7d89524a009a388b9c8b7dce5c6ca8233068ec7bec1c5e384ead"
+    },
+    {
+      "bytes": 606,
+      "path": "control/command.json",
+      "sha256": "c0c71cccdaafaabbbf1c86cf25b4b432e26b0c1c6187681b2db59782aaa71a45"
+    },
+    {
+      "bytes": 0,
+      "path": "control/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1012,
+      "path": "control/summary.jsonl",
+      "sha256": "5ac908f9c24c8e57c453446615f33fa2e9831893de7c2da4ceea70bd20ed4677"
+    },
+    {
+      "bytes": 585,
+      "path": "control/targets.jsonl",
+      "sha256": "5c1c6808ceb64a74ccf3827b138088fd4a2f18fdd3a5954c221fef30ed612ce5"
+    },
+    {
+      "bytes": 613,
+      "path": "independent_rank_replay.json",
+      "sha256": "1a35968a420271a2cd67acf9df09dc5ffa68a1ef08999271bbf06ae4735c6ca5"
+    },
+    {
+      "bytes": 1418,
+      "path": "receipt.json",
+      "sha256": "fcd6b5f88b3cef075848cb7378b731bf9dddc1b12a7cb1ed70beaafa97f73e07"
+    },
+    {
+      "bytes": 1388,
+      "path": "traced/base.jsonl",
+      "sha256": "dcea2e583bce7d89524a009a388b9c8b7dce5c6ca8233068ec7bec1c5e384ead"
+    },
+    {
+      "bytes": 604,
+      "path": "traced/command.json",
+      "sha256": "ba3ca858b28c6809546bada71dab11e78982888b03dc1b40c01ea3a702aee489"
+    },
+    {
+      "bytes": 953,
+      "path": "traced/rank.jsonl",
+      "sha256": "0de00af2a9c89d55ed61d3430af96db055e631a76c784a5e63d721b5fd6713bf"
+    },
+    {
+      "bytes": 0,
+      "path": "traced/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1013,
+      "path": "traced/summary.jsonl",
+      "sha256": "d9f53330f4edd7334bccacc543488b13e53e4b2b42ebcaab266830c071c3f265"
+    },
+    {
+      "bytes": 605,
+      "path": "traced/targets.jsonl",
+      "sha256": "428ecb26f345b817c941b973b02a822bde96320c7c0b379c5fa0164ca1616965"
+    }
+  ],
+  "schema": "compact-orbit-rank-control-archive-v1",
+  "source_commit": "7916ac1e"
+}

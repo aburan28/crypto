@@ -73,6 +73,7 @@ use std::collections::HashSet;
 /// A monomial in `F_2[v_0, …, v_{n-1}] / (v_i² − v_i)` represented as a
 /// bitmask: bit `k` is set iff `v_k` divides the monomial.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, serde::Serialize, serde::Deserialize)]
+#[repr(transparent)]
 pub struct F2BoolMono {
     pub mask: u64,
 }
@@ -171,6 +172,10 @@ pub fn cmp_mono(a: F2BoolMono, b: F2BoolMono) -> Ordering {
 /// of its complemented mask (see [`sort_masks_descending`]).
 const PACKED_KEY_VARS: usize = 57;
 
+/// Terms up to which [`F2BoolPoly::from_monos`] sorts with a per-comparison
+/// key; longer lists are keyed once each by [`sort_masks_descending`].
+const FROM_MONOS_KEYED: usize = 16;
+
 /// An integer key whose natural order is [`cmp_mono`]: degree first, and
 /// within a degree the monomial lacking the highest differing variable is
 /// larger, i.e. the one with the *smaller* mask.  Sorting by the key is a
@@ -247,7 +252,17 @@ impl F2BoolPoly {
     /// duplicate pairs (since `1 + 1 = 0` in `F_2`).
     pub fn from_monos(mut monos: Vec<F2BoolMono>, n_vars: usize) -> Self {
         // descending; equal keys are equal monomials, so unstable is exact
-        monos.sort_unstable_by_key(|m| std::cmp::Reverse(mono_key(*m)));
+        if monos.len() <= FROM_MONOS_KEYED {
+            monos.sort_unstable_by_key(|m| std::cmp::Reverse(mono_key(*m)));
+        } else {
+            // A long list is keyed once per mask rather than once per
+            // comparison (the u128 key above was half of a large rebuild).
+            let mut masks: Vec<u64> = monos.iter().map(|m| m.mask).collect();
+            sort_masks_descending(&mut masks);
+            for (m, mask) in monos.iter_mut().zip(masks) {
+                *m = F2BoolMono::from_mask(mask);
+            }
+        }
         let mut out: Vec<F2BoolMono> = Vec::with_capacity(monos.len());
         for m in monos {
             if out.last() == Some(&m) {
