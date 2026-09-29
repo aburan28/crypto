@@ -64,6 +64,7 @@ pub mod mitm;
 pub mod mixture;
 pub mod quantum_grover;
 pub mod reduced;
+pub mod related_differential;
 pub mod related_key;
 pub mod slide;
 pub mod small_scale;
@@ -91,6 +92,11 @@ pub use visualize::{
     format_table_8bit_summary, format_trail,
 };
 
+pub use related_differential::{
+    classify, diagonal_positions, diffusion_confinement, mix_columns_shifted_family,
+    shifted_family_report, DiagonalDifference, DiffusionReport, RelatedDifferenceClass,
+    ShiftedFamilyReport, DIAGONALS,
+};
 pub use related_key::{
     biryukov_khovratovich_4round_demo, format_key_schedule_diff, key_schedule_difference,
     related_key_avalanche, related_key_boomerang_distinguisher, KeyScheduleDiff,
