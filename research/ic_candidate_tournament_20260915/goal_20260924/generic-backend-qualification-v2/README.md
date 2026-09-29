@@ -1,6 +1,7 @@
 # Fresh F4/F5/SAT complete-solve qualification
 
-Status: **registered, not yet measured**. The scientific question, schedule,
+Status: **dispatched once; result pending** in [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479).
+The scientific question, schedule,
 resources, success/stop rules and accounting are frozen in [PROTOCOL.md](PROTOCOL.md).
 The first registration was [operationally censored](../generic-backend-qualification/RESULT.md);
 it established no solver result and must never be redispatched. This panel
@@ -29,6 +30,13 @@ family qualification and competitive costs; do not retry this seed.
 After the campaign, verify the archive SHA-256, extract it, inspect the frozen
 `tournament/evaluator/tournament.py verify` receipt, `natural-yield.json`,
 `family-gate.json`, target history, source/build record, and all failure rows.
+Run the separately committed [independent_pairs.py](independent_pairs.py)
+against the extracted bundle to recalculate the 400 one-target online pairs
+from raw receipts and native worker outputs. It checks phase and instruction
+closure, target/host/resource pairing, and the published online table. It
+withholds aggregate speedups for an arm missing any scheduled paired point.
+This post-registration cross-check does not replace the frozen group replay,
+natural-query audit, or family gate.
 Publish the bundle's durable artifact link, exact hash and results in a new
 evidence PR. A complete, independently verified F4/F5 and SAT arm is the
 qualification goal; the development panel is not a held-out or global speed
