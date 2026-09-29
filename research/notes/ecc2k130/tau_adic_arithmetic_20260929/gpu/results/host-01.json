@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "gpu_executed": false,
+  "source_sha256": "a77b4fb391185946013ff129c42637ff362567c88fb76d4c5174bf6a4eff8036",
+  "field_checks": 536,
+  "point_checks": 504,
+  "panels": [
+    {
+      "m": 83,
+      "fast_square": 0,
+      "status": "passed"
+    },
+    {
+      "m": 83,
+      "fast_square": 1,
+      "status": "passed"
+    },
+    {
+      "m": 131,
+      "fast_square": 0,
+      "status": "passed"
+    },
+    {
+      "m": 131,
+      "fast_square": 1,
+      "status": "passed"
+    }
+  ],
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+}

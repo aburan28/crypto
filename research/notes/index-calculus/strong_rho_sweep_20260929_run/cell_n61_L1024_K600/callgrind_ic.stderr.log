@@ -1,0 +1,11 @@
+==3263== Callgrind, a call-graph generating cache profiler
+==3263== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==3263== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==3263== Command: /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_orbit_dlp_fast construct:61:0:600 scalars.txt 7 callgrind_ic.stdout.jsonl
+==3263== 
+==3263== For interactive control, run 'callgrind_control -h'.
+==3263== 
+==3263== Events    : Ir
+==3263== Collected : 292412736909
+==3263== 
+==3263== I   refs:      292,412,736,909
