@@ -62,6 +62,7 @@ jobs:
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py
             research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929/test_point_mode.py
             research/notes/ecc2k130/compact_orbit_strong_rho_20260929
             .github/workflows/compact-orbit-strong-rho.yml
       - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock

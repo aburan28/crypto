@@ -214,6 +214,7 @@ def main() -> None:
     except BaseException as error:
         receipt = {"status": "FAIL", "error_type": type(error).__name__,
                    "error": str(error), "traceback": traceback.format_exc()}
+        args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
         raise
     args.out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
