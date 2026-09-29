@@ -112,31 +112,29 @@ excludes all 25 public points the censored first run could have generated.
 It keeps the five cells and 25 independent targets, with one process per point
 and 250 paired trial slots. The runner is
 `run_generic_backend_qualification_v2.py` in workflow
-`ic-generic-backend-qualification-v2.yml`. Its one permitted dispatch is
-[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479),
-attempt one; never dispatch this seed again. Its PR preflight and one-file
-artifact-upload smoke passed before the run. Check the source checkout pin and
-reviewed panel/exclusion hashes when auditing its artifact. The measured step has
-a shorter cap than the job, leaving time for the `if: always()` packer to
-retain complete or partial evidence as one checksummed archive. A timed-out
-step with incomplete receipts remains operationally
-censored; register a new panel and exclude all of its potentially generated
-points for any later measurement. Verify the archive manifest and SHA-256
-before extracting it. Only a complete frozen verifier, natural-query audit and
-`generic_backend_gate_v2.py` can qualify both families. Also run the separately
-committed [independent receipt audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/independent_pairs.py)
-against the extracted bundle to recalculate all 400 same-point IC/rho online
-pairs from raw receipts and native worker outputs. Its timing/pairing cross-check
-does not replace group replay, natural-query auditing or the family gate.
-The post-registration [static feasibility audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/STATIC-FEASIBILITY.md)
+`ic-generic-backend-qualification-v2.yml`. Its one permitted dispatch,
+[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
+attempt one, is [operationally censored](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/RESULT.md):
+the measured step hit its 300-minute cap and the reserved pack/upload steps
+failed without retaining a campaign archive. Never dispatch seed `2026092902`
+again. Register a new panel and exclude all potentially generated v2 points
+before any later measurement. The post-registration
+[static feasibility audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/STATIC-FEASIBILITY.md)
 proves that this panel's four F4/F5 arms exceed the pinned 64-variable encoder
-cap on every cell; wait for the run's raw receipts for its empirical outcome.
-The SAT encoding is separate and remains empirically undecided. Before any new
-algebraic panel generates fresh targets, run
+cap on every cell; that static finding is separate from the censoring event.
+The SAT encoding is separate and remains empirically undecided. The disclosed-point
+dimension-6 pilot already has a canonical series in
+[RESULT.md](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-f4-subspace-pilot/RESULT.md)
+(PR #961): both `f4` and `f5` entered MatrixF4/MatrixF5 on the five inventory
+points at `max_trials=1` and `node_budget=4096`, with zero accepted relations.
+[`run-20260929`](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-f4-subspace-pilot/run-20260929/RESULT.md)
+is a same-budget replay of that series, not a new registration, and
+`run_pilot.py` refuses another dispatch. Do not rerun this budget or treat it
+as family qualification. Before any new algebraic panel generates fresh targets, run
 `generic_solver_feasibility.py --require-pass` against its exact worker source
 checkout and registered panel. A static pass is only an encoder preflight:
 also pilot actual dispatch and natural failed-attempt accounting on disclosed
-points. The independent factor-base auditor now supports `standard_subspace`;
+points, under a budget frozen before the first job. The independent factor-base auditor now supports `standard_subspace`;
 changing from the incumbent orbit base is a factor-base-policy comparison.
 The gate requires every smoke and development job to be verified for at least
 one F4/F5 arm and one SAT arm; a reference-selection status alone does not
