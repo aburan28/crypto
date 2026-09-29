@@ -355,4 +355,130 @@ mod tests {
         assert!(s.contains("d = 73"));
         assert!(s.contains("baby steps"));
     }
+
+    /// [`recover_in_prime_power_subgroup`] as it was before the digit
+    /// search moved to [`Point::linear_dlog_vartime`]: affine steps and
+    /// the constant-time point operations.
+    fn recover_reference(
+        curve: &CurveParams,
+        g: &Point,
+        q: &Point,
+        prime: &BigUint,
+        exponent: u32,
+    ) -> Option<(BigUint, u64)> {
+        let a_fe = curve.a_fe();
+        let mut d = BigUint::zero();
+        let mut accumulator = BigUint::one();
+        let mut total_steps = 0u64;
+        let g_prime = g.scalar_mul(&prime.pow(exponent - 1), &a_fe);
+        for j in 0..exponent {
+            let neg_dg = g.scalar_mul(&d, &a_fe).neg();
+            let q_minus_dg = q.add(&neg_dg, &a_fe);
+            let q_j = q_minus_dg.scalar_mul(&prime.pow(exponent - 1 - j), &a_fe);
+            let mut found = None;
+            let mut current = Point::Infinity;
+            let q_u64 = prime.to_u64_digits().first().copied().unwrap_or(0);
+            for k in 0..q_u64 {
+                total_steps += 1;
+                if current == q_j {
+                    found = Some(BigUint::from(k));
+                    break;
+                }
+                current = current.add(&g_prime, &a_fe);
+            }
+            d += &found? * &accumulator;
+            accumulator *= prime;
+        }
+        Some((d, total_steps))
+    }
+
+    /// The digit search returns what the affine search returned — the
+    /// digits and the baby-step count, or the failure — on every
+    /// prime-power part of random curves over small primes (counted by
+    /// brute force), for targets inside the subgroup and outside it, and
+    /// for a mis-stated exponent or prime.
+    #[test]
+    fn prime_power_recovery_matches_affine_search() {
+        use num_bigint::RandBigInt;
+        use rand::rngs::StdRng;
+        use rand::{Rng, SeedableRng};
+        let mut rng = StdRng::seed_from_u64(0x9_4011);
+        for p in [211u64, 1009, 2003, 4001] {
+            let mut root = vec![None; p as usize];
+            for y in 0..p {
+                root[(y * y % p) as usize] = Some(y);
+            }
+            for _ in 0..6 {
+                let (a, b) = (rng.gen_range(0..p), rng.gen_range(0..p));
+                if (4 * a * a * a + 27 * b * b).is_multiple_of(p) {
+                    continue;
+                }
+                let mut count = 1u64;
+                let mut on: Vec<(u64, u64)> = Vec::new();
+                for x in 0..p {
+                    let r = (x * x % p * x + a * x + b) % p;
+                    if r == 0 {
+                        count += 1;
+                        on.push((x, 0));
+                    } else if let Some(y) = root[r as usize] {
+                        count += 2;
+                        on.push((x, y));
+                    }
+                }
+                let curve = CurveParams {
+                    name: "ph-differential",
+                    p: BigUint::from(p),
+                    a: BigUint::from(a),
+                    b: BigUint::from(b),
+                    gx: BigUint::zero(),
+                    gy: BigUint::zero(),
+                    n: BigUint::from(count),
+                    h: 1,
+                };
+                let pt = |(x, y): (u64, u64)| Point::Affine {
+                    x: curve.fe(BigUint::from(x)),
+                    y: curve.fe(BigUint::from(y)),
+                };
+                let a_fe = curve.a_fe();
+                let mut factors = Vec::new();
+                let mut m = count;
+                let mut f = 2;
+                while m > 1 {
+                    let mut e = 0;
+                    while m.is_multiple_of(f) {
+                        m /= f;
+                        e += 1;
+                    }
+                    if e > 0 {
+                        factors.push((f, e));
+                    }
+                    f += 1;
+                }
+                let g = pt(on[rng.gen_range(0..on.len())]);
+                for &(q, e) in &factors {
+                    let cof = BigUint::from(count / q.pow(e));
+                    let g_i = g.scalar_mul(&cof, &a_fe);
+                    let prime = BigUint::from(q);
+                    for trial in 0..6 {
+                        let target = if trial < 3 {
+                            g.scalar_mul(&rng.gen_biguint(24), &a_fe)
+                        } else {
+                            pt(on[rng.gen_range(0..on.len())])
+                        };
+                        let t_i = target.scalar_mul(&cof, &a_fe);
+                        for (pr, ex) in [(&prime, e), (&prime, e + 1), (&BigUint::from(2u32), e)] {
+                            if ex == 0 {
+                                continue;
+                            }
+                            assert_eq!(
+                                recover_in_prime_power_subgroup(&curve, &g_i, &t_i, pr, ex),
+                                recover_reference(&curve, &g_i, &t_i, pr, ex),
+                                "p={p} a={a} b={b} #E={count} q={pr}^{ex} g={g_i:?} t={t_i:?}"
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

@@ -78,9 +78,11 @@ impl Point {
     /// [`add`](Self::add) in **variable time**, for public points only.
     ///
     /// The same affine formulas and the same identity, doubling and
-    /// `P + (−P)` cases, so on reduced coordinates (every point the
-    /// arithmetic produces has them) the result is exactly
-    /// `self.add(other, a)`.  What differs is how the field arithmetic
+    /// `P + (−P)` cases, so over a prime `p` the result is exactly
+    /// `self.add(other, a)`.  (On a modulus that is not prime, where
+    /// neither computes a group law, the point can differ as
+    /// [`FieldElement::inv_vartime`] says, but neither call panics where
+    /// the other does not.)  What differs is how the field arithmetic
     /// runs, and its running time now depends on the coordinates:
     ///
     /// - the slope's inversion is [`FieldElement::inv_vartime`], a
@@ -150,7 +152,9 @@ impl Point {
     }
 
     /// [`scalar_mul`](Self::scalar_mul) in **variable time**, for public
-    /// points and scalars only: exactly `self.scalar_mul(k, a)`.
+    /// points and scalars only: over a prime `p`, exactly
+    /// `self.scalar_mul(k, a)` (on other moduli, as for
+    /// [`add_vartime`](Self::add_vartime)).
     ///
     /// When `p` fits a word the same Jacobian ladder runs on word
     /// arithmetic and inverts once at the end with the word Euclid of
@@ -204,8 +208,21 @@ impl Point {
             Point::Affine { x, y } => (x, y),
         };
         let m = &gx.modulus;
-        // An affine target with an unreduced coordinate equals no point the
-        // arithmetic produces, so no `k` finds it.
+        // A base with an unreduced coordinate (no constructor makes one) is
+        // itself the multiple `1·self` compared, unreduced, so it is
+        // stepped affinely as the search this stands for does.
+        if gx.value >= *m || gy.value >= *m {
+            let mut current = Point::Infinity;
+            for k in 0..bound {
+                if current == *target {
+                    return Some(k);
+                }
+                current = current.add_vartime(self, a);
+            }
+            return None;
+        }
+        // Every other multiple is reduced, so an affine target with an
+        // unreduced coordinate equals none of them.
         let t = match target {
             Point::Infinity => None,
             Point::Affine { x, y } if x.value < *m && y.value < *m => Some((x, y)),
@@ -482,9 +499,10 @@ impl Jacobian {
 /// Here an element is its canonical value in a `u64`, a multiplication
 /// is one 128-bit product and one remainder, an addition or subtraction
 /// a compare, and an inversion [`inv_mod_u64`]; only results are turned
-/// back into [`BigUint`].  Every value is exact mod `p`, so the formulas
-/// below take the same branches and produce the same points as their
-/// [`FieldElement`] counterparts.  Variable time, like its callers.
+/// back into [`BigUint`].  Every value is exact mod `p`, and an inversion
+/// is [`FieldElement::inv_vartime`]'s (see [`Word::inv`]), so the
+/// formulas below take the same branches and produce the same points as
+/// their [`FieldElement`] counterparts.  Variable time, like its callers.
 #[derive(Clone, Copy)]
 struct Word {
     p: u64,
@@ -545,10 +563,41 @@ impl Word {
         (u128::from(a) * u128::from(b) % u128::from(self.p)) as u64
     }
 
-    /// `a⁻¹`; the callers have ruled out `a = 0`, as [`Point::add`] has
-    /// before its `unwrap`.
+    /// `a⁻¹`, as [`FieldElement::inv_vartime`] computes it: Euclid, and
+    /// [`non_unit_inv`](Self::non_unit_inv) where Euclid finds no inverse.
     fn inv(self, a: u64) -> u64 {
-        inv_mod_u64(a, self.p).expect("p is prime and a != 0")
+        match inv_mod_u64(a, self.p) {
+            Some(i) => i,
+            None => self.non_unit_inv(a),
+        }
+    }
+
+    /// [`FieldElement::inv`]'s value `a^(p−2)` for an `a` with no inverse,
+    /// which for nonzero `a` means a non-unit modulo a `p` that is not
+    /// prime.  Zero has no value to take and panics, as `inv`'s `None`
+    /// does at the `unwrap` in [`Point::add`] and [`Point::double`]; their
+    /// callers rule it out the same way these do.  Out of line and cold:
+    /// over a prime no walk reaches it, and it would otherwise weigh on
+    /// the inlining of every formula that inverts.
+    #[cold]
+    #[inline(never)]
+    fn non_unit_inv(self, a: u64) -> u64 {
+        assert!(a != 0, "inverse of zero");
+        self.pow(a, self.p - 2)
+    }
+
+    /// `a^e`, square and multiply; only for
+    /// [`non_unit_inv`](Self::non_unit_inv).
+    fn pow(self, a: u64, mut e: u64) -> u64 {
+        let (mut base, mut acc) = (a, 1 % self.p);
+        while e != 0 {
+            if e & 1 == 1 {
+                acc = self.mul(acc, base);
+            }
+            base = self.mul(base, base);
+            e >>= 1;
+        }
+        acc
     }
 }
 
@@ -982,5 +1031,293 @@ mod tests {
         // P + (-P) = ∞
         let sum = g.add(&neg_g, &a());
         assert_eq!(sum, Point::Infinity);
+    }
+}
+
+/// Random differential tests of the `*_vartime` operations against the
+/// operations they stand in for, over primes on both sides of every
+/// width the word path distinguishes (8, 16, 31, 32 … 64 bits, and just
+/// above one word, where the `BigUint` fallback takes over).  The
+/// affine and Jacobian formulas are rational expressions in the
+/// coordinates, so the pairs need not lie on a common curve; the
+/// special cases (`x₁ = x₂`, `y₂ = ±y₁`, `y = 0`, values at `0`, `1`
+/// and `p − 1`) are drawn deliberately.  Results are compared value
+/// *and* modulus.
+#[cfg(test)]
+mod vartime_differential {
+    use super::*;
+    use num_bigint::RandBigInt;
+    use num_traits::Zero;
+    use rand::rngs::StdRng;
+    use rand::{Rng, SeedableRng};
+
+    const PRIMES: [&str; 13] = [
+        "251",
+        "65521",
+        "2147483647",
+        "4294967291",
+        "8589934583",
+        "281474976710597",
+        "4611686018427387847",
+        "9223372036854775783",
+        "9223372036854775837",
+        "18446744073709551557",
+        "18446744073709551629",
+        "36893488147419103183",
+        "340282366920938463463374607431768211297",
+    ];
+
+    fn primes() -> Vec<BigUint> {
+        PRIMES
+            .iter()
+            .map(|s| BigUint::parse_bytes(s.as_bytes(), 10).unwrap())
+            .collect()
+    }
+
+    fn same(a: &Point, b: &Point) -> bool {
+        match (a, b) {
+            (Point::Infinity, Point::Infinity) => true,
+            (Point::Affine { x: x1, y: y1 }, Point::Affine { x: x2, y: y2 }) => {
+                x1.value == x2.value
+                    && y1.value == y2.value
+                    && x1.modulus == x2.modulus
+                    && y1.modulus == y2.modulus
+            }
+            _ => false,
+        }
+    }
+
+    /// A coordinate: uniform, or one of the edge values.
+    fn coord(rng: &mut StdRng, p: &BigUint) -> BigUint {
+        match rng.gen_range(0..8) {
+            0 => BigUint::zero(),
+            1 => BigUint::from(1u32),
+            2 => p - 1u32,
+            3 => p - 2u32,
+            _ => rng.gen_biguint_below(p),
+        }
+    }
+
+    fn fe(v: BigUint, p: &BigUint) -> FieldElement {
+        FieldElement::new(v, p.clone())
+    }
+
+    fn random_point(rng: &mut StdRng, p: &BigUint) -> Point {
+        if rng.gen_range(0..16) == 0 {
+            return Point::Infinity;
+        }
+        let y = if rng.gen_range(0..8) == 0 {
+            BigUint::zero()
+        } else {
+            coord(rng, p)
+        };
+        Point::Affine {
+            x: fe(coord(rng, p), p),
+            y: fe(y, p),
+        }
+    }
+
+    /// A second operand related to the first as the branches need it:
+    /// the same point, its negative, the same `x` with an unrelated `y`,
+    /// or unrelated.
+    fn partner(rng: &mut StdRng, p: &BigUint, q: &Point) -> Point {
+        match (rng.gen_range(0..6), q) {
+            (0, _) => q.clone(),
+            (1, _) => q.neg(),
+            (2, Point::Affine { x, .. }) => Point::Affine {
+                x: x.clone(),
+                y: fe(coord(rng, p), p),
+            },
+            _ => random_point(rng, p),
+        }
+    }
+
+    #[test]
+    fn field_vartime_matches_constant_time() {
+        let mut rng = StdRng::seed_from_u64(0x7e57_0001);
+        for p in primes() {
+            for _ in 0..400 {
+                let a = fe(coord(&mut rng, &p), &p);
+                let b = fe(coord(&mut rng, &p), &p);
+                let (s, t) = (a.sub_vartime(&b), a.sub(&b));
+                assert_eq!((&s.value, &s.modulus), (&t.value, &t.modulus), "{a} - {b}");
+                let (s, t) = (a.neg_vartime(), a.neg());
+                assert_eq!((&s.value, &s.modulus), (&t.value, &t.modulus), "-{a}");
+                match (a.inv_vartime(), a.inv()) {
+                    (None, None) => {}
+                    (Some(s), Some(t)) => {
+                        assert_eq!((&s.value, &s.modulus), (&t.value, &t.modulus), "1/{a}")
+                    }
+                    (s, t) => panic!("1/{a} mod {p}: {s:?} vs {t:?}"),
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn point_vartime_matches_constant_time() {
+        let mut rng = StdRng::seed_from_u64(0x7e57_0002);
+        for p in primes() {
+            for _ in 0..300 {
+                let a = fe(coord(&mut rng, &p), &p);
+                let p1 = random_point(&mut rng, &p);
+                let p2 = partner(&mut rng, &p, &p1);
+                assert!(
+                    same(&p1.add_vartime(&p2, &a), &p1.add(&p2, &a)),
+                    "{p1:?}+{p2:?}"
+                );
+                assert!(same(&p1.double_vartime(&a), &p1.double(&a)), "2·{p1:?}");
+                assert!(same(&p1.neg_vartime(), &p1.neg()), "-{p1:?}");
+                let k = match rng.gen_range(0..4) {
+                    0 => BigUint::from(rng.gen_range(0..4u32)),
+                    1 => BigUint::from(rng.gen::<u64>()),
+                    _ => {
+                        let bits = rng.gen_range(1..200);
+                        rng.gen_biguint(bits)
+                    }
+                };
+                assert!(
+                    same(&p1.scalar_mul_vartime(&k, &a), &p1.scalar_mul(&k, &a)),
+                    "{k}·{p1:?}"
+                );
+            }
+        }
+    }
+
+    /// A base or target with an unreduced coordinate (the fields are
+    /// public; no constructor makes one) is found where the affine search
+    /// finds it: an unreduced base is its own first multiple, compared
+    /// unreduced, and every later multiple is reduced.
+    #[test]
+    fn linear_dlog_vartime_unreduced_points_match_reference_search() {
+        // (0, 10) on y² = x³ + 2x + 3 over F_97 has order 50, so no
+        // multiple inside the bounds is ±g again (which would send an
+        // unreduced chord to `x₂ − x₁ ≡ 0`, where both searches panic).
+        let p = BigUint::from(97u32);
+        let a = fe(BigUint::from(2u32), &p);
+        let g = Point::Affine {
+            x: fe(BigUint::zero(), &p),
+            y: fe(BigUint::from(10u32), &p),
+        };
+        let lift = |pt: &Point| match pt {
+            Point::Affine { x, y } => Point::Affine {
+                x: FieldElement {
+                    value: &x.value + &p,
+                    modulus: p.clone(),
+                },
+                y: y.clone(),
+            },
+            Point::Infinity => Point::Infinity,
+        };
+        let g2 = g.add(&g, &a);
+        let g3 = g2.add(&g, &a);
+        for base in [g.clone(), lift(&g)] {
+            for target in [
+                Point::Infinity,
+                g.clone(),
+                lift(&g),
+                g2.clone(),
+                lift(&g2),
+                g3.clone(),
+            ] {
+                for bound in [0, 1, 2, 3, 5] {
+                    assert_eq!(
+                        base.linear_dlog_vartime(&target, bound, &a),
+                        linear_dlog_reference(&base, &target, bound, &a),
+                        "base={base:?} target={target:?} bound={bound}"
+                    );
+                }
+            }
+        }
+    }
+
+    /// On a modulus that is not prime, outside the fields this type is
+    /// for, a non-unit has no Euclidean inverse; the vartime operations
+    /// then take `inv`'s value `a^(p−2)`, as the constant-time ones do,
+    /// rather than panicking.  On one word (1009 · 2003) and on several
+    /// ((2³¹ − 1)(2⁸⁹ − 1)): an inversion, a chord whose `x₂ − x₁` is a
+    /// non-unit, a tangent whose `2y` is, and a ladder whose final `Z` is
+    /// (1019 is the order of `(5, 7)` mod 1009 on `y² = x³ + 2x + b`).
+    #[test]
+    fn composite_modulus_non_units_match_constant_time() {
+        let q1 = BigUint::from(2_147_483_647u32);
+        let q2 = (BigUint::from(1u32) << 89) - 1u32;
+        let cases = [
+            (BigUint::from(1009u32 * 2003), BigUint::from(1009u32)),
+            (&q1 * &q2, q1),
+        ];
+        for (n, q) in cases {
+            let elem = |v: BigUint| fe(v, &n);
+            let a = elem(BigUint::from(2u32));
+            let z = elem(&q * 5u32);
+            let (s, t) = (z.inv_vartime().unwrap(), z.inv().unwrap());
+            assert_eq!((&s.value, &s.modulus), (&t.value, &t.modulus));
+            let p1 = Point::Affine {
+                x: elem(BigUint::from(7u32)),
+                y: elem(BigUint::from(11u32)),
+            };
+            let p2 = Point::Affine {
+                x: elem(&q * 3u32 + 7u32),
+                y: elem(BigUint::from(13u32)),
+            };
+            assert!(same(&p1.add_vartime(&p2, &a), &p1.add(&p2, &a)), "{n}");
+            let p3 = Point::Affine {
+                x: elem(BigUint::from(5u32)),
+                y: elem(&q * 2u32),
+            };
+            assert!(same(&p3.double_vartime(&a), &p3.double(&a)), "{n}");
+            let g = Point::Affine {
+                x: elem(BigUint::from(5u32)),
+                y: elem(BigUint::from(7u32)),
+            };
+            let k = BigUint::from(1019u32);
+            assert!(
+                same(&g.scalar_mul_vartime(&k, &a), &g.scalar_mul(&k, &a)),
+                "{n}"
+            );
+        }
+    }
+
+    /// The search `linear_dlog_vartime` replaced.
+    fn linear_dlog_reference(g: &Point, t: &Point, bound: u64, a: &FieldElement) -> Option<u64> {
+        let mut current = Point::Infinity;
+        for k in 0..bound {
+            if current == *t {
+                return Some(k);
+            }
+            current = current.add(g, a);
+        }
+        None
+    }
+
+    /// Random curves through a random base, targets among its multiples
+    /// (so small-order bases wrap through the identity on the small
+    /// primes) and off them.
+    #[test]
+    fn linear_dlog_vartime_matches_reference_search() {
+        let mut rng = StdRng::seed_from_u64(0x7e57_0003);
+        for p in primes() {
+            let small = p.bits() <= 16;
+            let rounds = if small { 300 } else { 40 };
+            for _ in 0..rounds {
+                let a = fe(coord(&mut rng, &p), &p);
+                let g = random_point(&mut rng, &p);
+                let bound: u64 = if small {
+                    rng.gen_range(0..600)
+                } else {
+                    rng.gen_range(0..60)
+                };
+                let t = match rng.gen_range(0..4) {
+                    0 => random_point(&mut rng, &p),
+                    1 => Point::Infinity,
+                    _ => g.scalar_mul(&BigUint::from(rng.gen_range(0..=bound + 2)), &a),
+                };
+                assert_eq!(
+                    g.linear_dlog_vartime(&t, bound, &a),
+                    linear_dlog_reference(&g, &t, bound, &a),
+                    "p={p} g={g:?} t={t:?} bound={bound}"
+                );
+            }
+        }
     }
 }

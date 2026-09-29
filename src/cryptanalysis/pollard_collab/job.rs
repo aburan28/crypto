@@ -583,4 +583,25 @@ mod tests {
         assert!((ctx.expected_steps() - 394.1).abs() < 2.0);
         assert!(biguint_to_f64(&(BigUint::one() << 100)) > 1e30);
     }
+
+    /// A job whose "field prime" is composite, 1009 · 2003, is refused
+    /// with the error the constant-time arithmetic gave it, not a panic:
+    /// the order check's ladder ends on a `Z` divisible by 1009, which
+    /// has no Euclidean inverse, and the variable-time arithmetic then
+    /// takes `inv`'s value as that arithmetic did.
+    #[test]
+    fn composite_modulus_job_is_refused_as_before() {
+        let (_, spec, _) = mid_job();
+        let mut bad = spec.clone();
+        bad.p = "1ed6a3".into(); // 1009 · 2003
+        bad.a = "2".into();
+        bad.b = "1ed64d".into(); // puts (5, 7) on the curve
+        bad.generator = HexPoint {
+            x: "5".into(),
+            y: "7".into(),
+        };
+        bad.target = bad.generator.clone();
+        bad.order = "3fb".into(); // 1019, the order of (5, 7) mod 1009
+        assert_eq!(bad.build().unwrap_err(), "n·P ≠ ∞: order is wrong");
+    }
 }

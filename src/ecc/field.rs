@@ -66,12 +66,19 @@ impl FieldElement {
     /// is exactly `sub`'s `(a + p − b) mod p`, without its division; the
     /// comparison it branches on is the one `sub` avoids, so protocol code
     /// keeps `sub`.  Used by the `*_vartime` point operations.
+    ///
+    /// An unreduced operand (no constructor makes one, but the fields are
+    /// public) can leave that difference at or above `p`; it is reduced
+    /// then, so the value is `sub`'s for every input.
     pub fn sub_vartime(&self, rhs: &Self) -> Self {
-        let value = if self.value >= rhs.value {
+        let mut value = if self.value >= rhs.value {
             &self.value - &rhs.value
         } else {
             &self.value + &self.modulus - &rhs.value
         };
+        if value >= self.modulus {
+            value %= &self.modulus;
+        }
         FieldElement {
             value,
             modulus: self.modulus.clone(),
@@ -148,22 +155,32 @@ impl FieldElement {
     /// [`BigUint::modinv`] otherwise — whose running time depends on the
     /// value.  Never call it on anything derived from a secret; the
     /// callers are the `*_vartime` point operations, which carry the same
-    /// rule.
+    /// rule, and the cryptanalysis group's batch inversion.
     ///
-    /// `p` is prime and `self` reduced (as every constructor leaves it),
-    /// so the inverse is unique and this returns exactly `self.inv()`.
+    /// Over a prime `p`, the modulus this type is for (see the module
+    /// note), a nonzero element has exactly one inverse, so this returns
+    /// exactly `self.inv()`.  Where Euclid finds none — a nonzero multiple
+    /// of `p` left unreduced, or a non-unit when `p` is not prime — it
+    /// returns `inv`'s value instead, so it is `None` exactly when `inv`
+    /// is and the operations built on it panic nowhere `inv`'s callers
+    /// did not.  The one input on which the two differ is a unit modulo
+    /// a composite `p`: this returns its inverse there, `inv` returns
+    /// `a^(p−2)`, which is not one.
     pub fn inv_vartime(&self) -> Option<Self> {
         if self.is_zero() {
             return None;
         }
         let value = match (single_word(&self.modulus), single_word(&self.value)) {
-            (Some(p), Some(a)) if a < p => BigUint::from(inv_mod_u64(a, p)?),
-            _ => self.value.modinv(&self.modulus)?,
+            (Some(p), Some(a)) if a < p => inv_mod_u64(a, p).map(BigUint::from),
+            _ => self.value.modinv(&self.modulus),
         };
-        Some(FieldElement {
-            value,
-            modulus: self.modulus.clone(),
-        })
+        match value {
+            Some(value) => Some(FieldElement {
+                value,
+                modulus: self.modulus.clone(),
+            }),
+            None => self.inv(),
+        }
     }
 }
 
@@ -284,6 +301,17 @@ mod tests {
             modulus: BigUint::from(10_007u32),
         };
         assert_eq!(unreduced.inv_vartime(), unreduced.inv());
+        // An unreduced nonzero multiple of p has no inverse; both return
+        // the Fermat value 0.
+        let multiple = FieldElement {
+            value: BigUint::from(20_014u32),
+            modulus: BigUint::from(10_007u32),
+        };
+        assert_eq!(multiple.inv_vartime(), multiple.inv());
+        assert_eq!(
+            multiple.inv_vartime().map(|v| v.value),
+            Some(BigUint::zero())
+        );
         let p256 = crate::ecc::curve::CurveParams::p256().p;
         let x = FieldElement::new(BigUint::from(0xdead_beefu32).pow(9), p256.clone());
         assert_eq!(x.inv_vartime(), x.inv());
@@ -291,7 +319,7 @@ mod tests {
     }
 
     /// `sub_vartime` is `sub` on reduced operands, on both sides of the
-    /// wrap and on a multi-word modulus.
+    /// wrap and on a multi-word modulus, and on unreduced ones.
     #[test]
     fn sub_vartime_matches_sub() {
         for p in [2u64, 7, 10_007, u64::MAX - 58] {
@@ -308,6 +336,26 @@ mod tests {
         let b = FieldElement::new(BigUint::from(5u32).pow(100), p256);
         assert_eq!(a.sub_vartime(&b).value, a.sub(&b).value);
         assert_eq!(b.sub_vartime(&a).value, b.sub(&a).value);
+        // Unreduced operands (no constructor makes them) come out reduced,
+        // as from `sub`: differences at and above p on both branches.
+        let p = BigUint::from(10_007u32);
+        for (a, b) in [
+            (20_020u32, 3u32),
+            (10_007, 0),
+            (30_000, 29_999),
+            (3, 5),
+            (10_010, 10_012),
+        ] {
+            let x = FieldElement {
+                value: BigUint::from(a),
+                modulus: p.clone(),
+            };
+            let y = FieldElement {
+                value: BigUint::from(b),
+                modulus: p.clone(),
+            };
+            assert_eq!(x.sub_vartime(&y).value, x.sub(&y).value, "{a} - {b}");
+        }
     }
 
     /// `neg_vartime` is `neg` on reduced values, zero included, on one

@@ -165,8 +165,9 @@ fn add_mod(u: &BigUint, s: &BigUint, n: &BigUint) -> BigUint {
     }
 }
 
-/// `−u mod n`.  The walk keeps every coefficient below `n`, so this is
-/// `sub_mod(0, u, n)` without its reductions.
+/// `−u mod n` for `u ≤ n`: `sub_mod(0, u, n)` without its reductions.
+/// The walk keeps every coefficient below `n` (the one start at `v = 1`
+/// meets `n` only when `n = 1`), so that is every value it passes.
 fn neg_mod(u: &BigUint, n: &BigUint) -> BigUint {
     match (single_word(u), single_word(n)) {
         (Some(u), Some(n)) if u <= n => BigUint::from(if u == 0 { 0 } else { n - u }),
@@ -646,6 +647,8 @@ mod tests {
             }
             let wide = BigUint::from(u64::MAX);
             assert_eq!(add_mod(&wide, &wide, n), (&wide + &wide) % n);
+            // `u = n`, the walk's `v = 1` start when `n = 1`.
+            assert_eq!(neg_mod(n, n), sub_mod(&zero, n, n), "n={n} u=n");
         }
         for bits in [0u8, 1, 8, 63, 64, 65, 130] {
             let mask = dp_mask(bits);
