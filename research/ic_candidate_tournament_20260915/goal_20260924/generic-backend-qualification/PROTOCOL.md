@@ -87,6 +87,16 @@ usable support, orbit folding and rank are independently checked. Prepared arms
 keep their existing tiny_gauss configuration. Reference arms cannot win
 challenger selection.
 
+The follow-on runner pins the new generic worker source *before target
+generation*: Git tree `src` object
+`6caf5dd2de704de77fd3cae5affab8b0ec3b6911`, example worker object
+`745247f3d89d46cdffb6d1f28778971caae7aa21`, `Cargo.toml` object
+`4177c1daa3b7f779abcf5fdeecb3b284d93b0f19`, and checked-in CI lockfile
+object `a3181ddde6d0a7460f0d9a1c6e87e3bead801980`. The controlled build
+then binds all actual compiled source and dependency bytes, compiler, flags and
+executable. A later main-branch source change stops this registration before
+fixture generation; it cannot silently change the F4/SAT candidate.
+
 Rho arms for continuity: `rho_incumbent_8` and `rho_generic_dense_16` only
 (the accepted cold and online rho leaders). Do not expand the width screen in
 this registration; a separate rho-sensitivity note may follow if a new IC

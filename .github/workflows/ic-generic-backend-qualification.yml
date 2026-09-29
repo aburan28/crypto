@@ -35,10 +35,11 @@ jobs:
           python - <<'PY'
           import sys
           sys.path.insert(0, 'research/ic_candidate_tournament_20260915')
-          from run_generic_backend_qualification import PANEL, registration_check, registry
+          from run_generic_backend_qualification import PANEL, check_generic_source, registration_check, registry
           from tournament import read
           panel = read(PANEL)
           registration_check(panel)
+          check_generic_source()
           assert len(registry(panel, '/tmp/controlled-build')) == 9
           PY
   campaign:

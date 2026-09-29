@@ -29,6 +29,21 @@ IC_ALIASES = ('incumbent', 'prepared_both', 'generic_pair_dense',
               'generic_pair_sparse', 'generic_f4_dense', 'generic_f4_sparse',
               'generic_f5_dense', 'generic_sat_xor_dense',
               'generic_sat_cnf_dense', 'generic_inherited_f4_dense')
+GENERIC_SOURCE_OBJECTS = {
+    'src': '6caf5dd2de704de77fd3cae5affab8b0ec3b6911',
+    'examples/ic_tournament_worker.rs': '745247f3d89d46cdffb6d1f28778971caae7aa21',
+    'Cargo.toml': '4177c1daa3b7f779abcf5fdeecb3b284d93b0f19',
+    'research/ic_candidate_tournament_20260915/ci/Cargo.lock':
+        'a3181ddde6d0a7460f0d9a1c6e87e3bead801980',
+}
+
+
+def check_generic_source(root=ROOT):
+    """Reject main-branch worker drift before any fixture is generated."""
+    for path, expected in GENERIC_SOURCE_OBJECTS.items():
+        actual = subprocess.check_output(['git', 'rev-parse', 'HEAD:'+path],
+                                         cwd=root, text=True).strip()
+        require(actual == expected, 'registered generic worker source changed: '+path)
 
 
 def registry(panel, generic_build):
@@ -131,6 +146,7 @@ def main():
     out.mkdir(parents=True, exist_ok=False)
     panel = read(PANEL)
     registration_check(panel)
+    check_generic_source()
     require(digest(HISTORY) == rules.HISTORY_SHA256, 'changed original point census')
     expected_exposures = read(ROUND3_PANEL)['exposed_fixture_sha256']
     for path in EXPOSED:
