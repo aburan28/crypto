@@ -182,7 +182,9 @@ def k4_jv():
                  ratio=mean([r["s_over_rho"] for r in g]),
                  rel_ratio=mean([r["relation_over_rho"] for r in g]),
                  r=mean([r["r"] for r in g]),
-                 formula=mean([r["predicted_s_over_rho"] for r in g]),
+                 r_last=mean([r["r_last"] for r in g]),
+                 la_attempts=mean([r["la_attempts"] for r in g]),
+                 formula=mean([3.0 * r["c_prime"] / (r["rho_s_mean"] * r["fp_muls_per_add"]) + r["r"] for r in g]),
                  checked=sum(r["cross_checked"] for r in g),
                  mismatches=sum(r["mismatches"] for r in g),
                  correct=all(r["correct"] for r in g) and all(x["correct"] for r in g for x in r["rho"]),
@@ -273,7 +275,7 @@ def main():
         rho_p, rho_se, nr = jv["dlp_rho_pooled"]
         ratio = S[-1] / rho_p
         span = f"2^{math.log2(sizes[0]):.1f}–2^{math.log2(sizes[-1]):.1f}"
-        print(f"| **k = 4, Joux–Vitse three-point decompositions (this note)** | {span} | {S[-1]:,.0f} | {rho_p:.2f} (pooled, {nr} runs) | **{ratio:,.0f}×** | 1/2 (derived; measured below) | 1/2 (derived) | {c:+.2f} ± {cse:.2f} | **constant**: 6C′/(S_rho·c_add) + r | needs C′ < {(1 - d[-1]['r']) * rho_p * d[-1]['c_add'] / 6:.0f} F_p multiplications; measured C′ = {d[-1]['c_prime']:,.0f} |")
+        print(f"| **k = 4, Joux–Vitse three-point decompositions (this note)** | {span} | {S[-1]:,.0f} | {rho_p:.2f} (pooled, {nr} runs) | **{ratio:,.0f}×** | 1/2 (derived; measured below) | 1/2 (derived) | {c:+.2f} ± {cse:.2f} | **constant**: 3C′/(S_rho·c_add) + r | needs C′ < {(1 - d[-1]['r_last']) * rho_p * d[-1]['c_add'] / 3:.0f} F_p multiplications; measured C′ = {d[-1]['c_prime']:,.0f} |")
 
     print("\n## B. The k = 4 Joux–Vitse route, measured\n")
     if jv and "cprime" in jv:
@@ -284,10 +286,10 @@ def main():
             print(f"| {x['p']} | 2^{math.log2(x['n']):.1f} | {x['base']:.0f} | {x['random']} | {x['planted']}/{x['constructed']} | {x['mismatches']} | {x['undetermined']} | {x['c_prime']:,.0f} | {x['weil']:,.0f} | {x['f4']:,.0f} | {x['rows']:.0f} × {x['cols']:.0f} | {x['ms']:.2f} | {x['mitm']:,.0f} |")
     if jv and "dlp" in jv:
         print("\n### B.2 The method end to end (26_jv_quartic_dlp.json)\n")
-        print("| p | n | seeds | \\|F\\| | residuals | relations | rate (1/6p) | residuals / floor | C′ paid | S | walk | oracle | LA | rho S (16 runs per seed) | S / rho | relation phase / rho | r (LA / rho) | formula 6C′/(S_rho c_add) + r | cross-checked, mismatches | correct |")
-        print("|---:|:--|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|")
+        print("| p | n | seeds | \\|F\\| | residuals | relations | rate (1/6p) | residuals / floor | C′ paid | S | walk | oracle | LA | rho S (16 runs per seed) | S / rho | relation phase / rho | r (LA / rho, every attempt) | attempts | r, last attempt | formula 3C′/(S_rho c_add) + r | cross-checked, mismatches | correct |")
+        print("|---:|:--|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|")
         for x in jv["dlp"]:
-            print(f"| {x['p']} | 2^{math.log2(x['n']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['residuals']:,.0f} | {x['relations']:.0f} | {x['rate']:.5f} ({x['expected_rate']:.5f}) | {x['res_floor']:.2f} | {x['c_prime']:,.0f} | {x['S']:,.0f} | {100*x['walk']:.1f} % | {100*x['oracle']:.1f} % | {100*x['la']:.1f} % | {x['rho']:.2f} | {x['ratio']:,.0f}× | {x['rel_ratio']:,.0f}× | {x['r']:.3f} | {x['formula']:,.0f}× | {x['checked']}, {x['mismatches']} | {'yes' if x['correct'] else 'NO'} |")
+            print(f"| {x['p']} | 2^{math.log2(x['n']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['residuals']:,.0f} | {x['relations']:.0f} | {x['rate']:.5f} ({x['expected_rate']:.5f}) | {x['res_floor']:.2f} | {x['c_prime']:,.0f} | {x['S']:,.0f} | {100*x['walk']:.1f} % | {100*x['oracle']:.1f} % | {100*x['la']:.1f} % | {x['rho']:.2f} | {x['ratio']:,.0f}× | {x['rel_ratio']:,.0f}× | {x['r']:.3f} | {x['la_attempts']:.0f} | {x['r_last']:.3f} | {x['formula']:,.0f}× | {x['checked']}, {x['mismatches']} | {'yes' if x['correct'] else 'NO'} |")
         rho_p, rho_se, nr = jv["dlp_rho_pooled"]
         sizes = [x["n"] for x in jv["dlp"]]
         if len(sizes) > 1:
@@ -302,13 +304,16 @@ def main():
         for bits in (80, 128, 160):
             p = 2 ** (bits / 4)
             c4_needed = p * k4["S_rho"] * k4["c_add"] * (1 - k4["r_inf"]) / 12
-            print(f"- k = 4, full decompositions, parity at 2^{bits}: C₄ < {c4_needed:.2e} F_p multiplications ({k4['C4']/c4_needed:,.0f}× below the measured {k4['C4']:.2e}); the S₅ solve's own floor is 7.1·10¹⁰ (§11.16).")
+            if c4_needed < k4["C4"]:
+                print(f"- k = 4, full decompositions, parity at 2^{bits}: C₄ < {c4_needed:.2e} F_p multiplications ({k4['C4']/c4_needed:,.0f}× below the measured {k4['C4']:.2e}); the S₅ solve's own floor is 7.1·10¹⁰ (§11.16).")
+            else:
+                print(f"- k = 4, full decompositions, parity at 2^{bits}: C₄ < {c4_needed:.2e} F_p multiplications — met by the measured {k4['C4']:.2e} (the handover 2^{4*math.log2(12*k4['C4']/(k4['S_rho']*k4['c_add']*(1-k4['r_inf']))):.0f} is below 2^{bits}); an extrapolation on n^{{1/4}} and n^{{1/2}}.")
     if jv and "cprime" in jv:
         x = jv["cprime"][-1]
-        r = jv["dlp"][-1]["r"] if "dlp" in jv else 0.518
+        r = jv["dlp"][-1]["r_last"] if "dlp" in jv else 0.518
         rho_ref = jv["dlp_rho_pooled"][0] if "dlp" in jv else 1.319
-        need = (1 - r) * rho_ref * x["c_add"] / 6
-        print(f"- k = 4, Joux–Vitse three-point: parity needs C′ < {need:.1f} F_p multiplications at r = {r:.3f}; the Weil restriction alone costs {x['weil']:,.0f} and the measured C′ is {x['c_prime']:,.0f} ({x['c_prime']/need:,.0f}× over).  A test {x['c_prime']/1513:.0f}× cheaper would reach §11.16's assumed 36×; no test reaches one.")
+        need = (1 - r) * rho_ref * x["c_add"] / 3
+        print(f"- k = 4, Joux–Vitse three-point: parity needs C′ < {need:.1f} F_p multiplications at r = {r:.3f} (last attempt); the Weil restriction alone costs {x['weil']:,.0f} and the measured C′ is {x['c_prime']:,.0f} ({x['c_prime']/need:,.0f}× over).  A test {x['c_prime']/1513:.0f}× cheaper would reach §11.16's assumed 36×; no test reaches one.")
     if la3 and "double large primes" in la3:
         d = la3["double large primes"]
         print(f"- k = 3, double large primes: at n^{{-1/18}} the constant must fall by the whole gap for parity at any size that fits: {d['S'][-1]/1.3:,.0f}× at 2^{math.log2(d['sizes'][-1]):.1f}; each 2× on C₃ buys 18 doublings of n.")

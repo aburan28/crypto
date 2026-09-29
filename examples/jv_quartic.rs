@@ -29,6 +29,7 @@ fn main() {
     let mut exp = "cprime".to_string();
     let mut sizes: Vec<u64> = vec![269, 521, 769, 1033];
     let mut seeds = 2u64;
+    let mut first_seed = 1u64;
     let mut residuals = 200usize;
     let mut constructed = 40usize;
     let mut rho_runs = 16usize;
@@ -51,6 +52,10 @@ fn main() {
             "--seeds" => {
                 i += 1;
                 seeds = args[i].parse().expect("--seeds");
+            }
+            "--first-seed" => {
+                i += 1;
+                first_seed = args[i].parse().expect("--first-seed");
             }
             "--residuals" => {
                 i += 1;
@@ -78,7 +83,7 @@ fn main() {
     }
     let mut rows: Vec<Row> = Vec::new();
     for &p in &sizes {
-        for seed in 1..=seeds {
+        for seed in first_seed..first_seed + seeds {
             match exp.as_str() {
                 "cprime" => {
                     let r = run_jv4_cprime(p, seed, residuals, constructed);

@@ -7,7 +7,7 @@
 //! relation phase built on three-point decompositions tries `≈ 3p²`
 //! residuals — `∝ n^{1/2}`, rho's own exponent — and the linear algebra over
 //! `|F| ≈ p/2` unknowns is `∝ p² = n^{1/2}` too.  The method's `S / rho`
-//! therefore tends to a constant, `C′ / (S_rho · c_add) · 6 + r∞` with `C′`
+//! therefore tends to a constant, `3C′ / (S_rho · c_add) + r∞` with `C′`
 //! the cost of one three-point test, and that constant is the distance to
 //! parity at every size.  `RESEARCH_RESIDUAL_WALKS.md` §11.16 derived it as
 //! `≈ 36×` on the assumption `C′ ≈ 1,513` (the two-unknown pair test of
@@ -636,8 +636,14 @@ pub struct Jv4DlpReport {
     pub relation_over_rho: f64,
     pub r: f64,
     /// The constant §11.16's formula predicts from this run's own `C′`:
-    /// `6·C′ / (S_rho · c_add) + r`.
+    /// `3·C′ / (S_rho · c_add) + r` (residuals `3p²` against rho's
+    /// `S_rho · p²`, both in `F_p` multiplications at `c_add` per step).
     pub predicted_s_over_rho: f64,
+    /// Multiplications modulo `n` of the last (successful) Wiedemann
+    /// attempt alone, and `r` computed from it: the figure comparable to
+    /// §11.19's `r∞`, which priced one attempt per curve.
+    pub la_ops_last: u64,
+    pub r_last: f64,
     pub wall_ms: f64,
 }
 
@@ -798,6 +804,7 @@ pub fn run_jv4_dlp(p: u64, seed: u64, rho_runs: usize, check_every: u64) -> Jv4D
                             rhs: full_rels[i].rhs,
                         })
                         .collect();
+                    let before = la_ops;
                     let x = wiedemann_u64(&sel, sel.len(), n, &mut rng, &mut la_ops);
                     let dd = x.map(|x| x[map[small]]);
                     if dd.is_some_and(|dd| curve.mul(&inst.g, dd) == inst.q) {
@@ -805,6 +812,7 @@ pub fn run_jv4_dlp(p: u64, seed: u64, rho_runs: usize, check_every: u64) -> Jv4D
                         rep.correct = dd == Some(inst.d);
                         rep.unknowns = sel.len();
                         rep.filtered_out = full_rels.len() - sel.len();
+                        rep.la_ops_last = la_ops - before;
                         break 'collect;
                     }
                     next_attempt = full_rels.len() + (sel.len() / 20).max(1);
@@ -857,7 +865,8 @@ pub fn run_jv4_dlp(p: u64, seed: u64, rho_runs: usize, check_every: u64) -> Jv4D
             as f64
             / rho_muls;
     rep.r = rep.la_muls as f64 / rho_muls;
-    rep.predicted_s_over_rho = 6.0 * rep.c_prime / (rep.rho_s_mean * fp_per_add) + rep.r;
+    rep.predicted_s_over_rho = 3.0 * rep.c_prime / (rep.rho_s_mean * fp_per_add) + rep.r;
+    rep.r_last = rep.la_ops_last as f64 * 16.0 / rho_muls;
     rep.wall_ms = start.elapsed().as_secs_f64() * 1e3;
     rep
 }

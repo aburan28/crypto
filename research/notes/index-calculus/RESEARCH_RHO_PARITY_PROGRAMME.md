@@ -14,7 +14,7 @@
 > flat from `2^32` to `2^40` (residuals `∝ n^{RES_EXP}`, `S ∝ n^{S_EXP}`),
 > because one three-point test costs `C′ = 1.6·10⁵` `F_p` multiplications
 > against the `1,513` §11.16 had borrowed from the `k = 3` pair test, and
-> parity on that route needs `C′ < 10`, which the Weil restriction alone
+> parity on that route needs `C′ < 21`, which the Weil restriction alone
 > (`3,401`) rules out.  The ledger's parity conditions are: `k = 3` plain,
 > never (its linear algebra is `n^{2/3}`; the `⟨ψ⟩` quotient bottoms near
 > `26×` rho around `2^59`, extrapolated); `k = 3` double large primes,
@@ -48,7 +48,7 @@ get there:
 | 3 | double large primes | 4/9 | 4/9 (`0.56` as built) | `n^{−1/18}` | a size: `2^237` extrapolated |
 | 3 | Joux–Vitse pair-only | 2/3 | — | `n^{+1/6}` | never |
 | 4 | full (four-point) | 1/4 | 1/2 | `→ r∞ = 0.52` | a size: `2^151` extrapolated |
-| 4 | **Joux–Vitse three-point** | **1/2** | **1/2** | **constant** | **a constant: `6C′/(S_rho·c_add) + r∞`** |
+| 4 | **Joux–Vitse three-point** | **1/2** | **1/2** | **constant** | **a constant: `3C′/(S_rho·c_add) + r∞`** |
 | 5 | Joux–Vitse four-point | 2/5 | 2/5 | `n^{−1/10}` | a size, set by `C″` (§6) |
 
 The `k = 4` Joux–Vitse row is the only one where "how far from parity" does
@@ -178,9 +178,12 @@ Reading it:
 - **The constant is `RATIO_JV×` rho**, of which the oracle is `ORACLE_PCT`,
   the walk `WALK_PCT`, the linear algebra `LA_PCT` (`r = R_MEAS`, against
   §11.19's `0.518` measured on the same curves with a different relation
-  stream).  §11.16's formula `6C′/(S_rho·c_add) + r` predicts `FORMULA×`
-  from the run's own `C′`; the difference is the verification and setup
-  it leaves out.
+  stream).  §11.16's formula `3C′/(S_rho·c_add) + r` predicts `FORMULA×`
+  from the run's own `C′`; the measured constant is above it by the
+  residual surplus over the floor `6p·(|F| + 1)` — weight-`3` rows over
+  `|F|` unknowns need about `RES_FLOOR×` the square count before
+  singleton filtering leaves a core that determines `d` — and by the
+  verification and setup the formula leaves out.
 - **Every logarithm verified**, every rho run correct, `CHECKED` residuals
   cross-checked against the oracle with `0` mismatches.
 - **Against the board:** `RATIO_JV×` is worse than every `k = 3` cell at
@@ -206,12 +209,13 @@ which is a boundary statement.
 LEDGER_C
 
 The `k = 4` Joux–Vitse condition deserves the arithmetic in full, because
-it is the one that closes the route.  `S / rho → 6C′/(S_rho·c_add) + r` with
-`S_rho = RHO_POOLED`, `c_add = 97`, `r = R_MEAS`: parity is `C′ < 10.3`.
-The Weil restriction of a `35`-term `H` at one `x_R` is `35 × 5` products
-in `F_{p⁴}` at `19` each — `3,401` — before any linear algebra, so **no
-three-point test on this formulation can reach parity**; the cheapest
-conceivable one is `330×` too dear.  A trace-driven elimination of the
+it is the one that closes the route.  `S / rho → 3C′/(S_rho·c_add) + r` with
+`S_rho = RHO_POOLED`, `c_add = 97`, `r = R_LAST` (one Wiedemann attempt, as
+§11.19 priced it): parity is `C′ < C_NEED`.  The Weil restriction of a
+`35`-term `H` at one `x_R` is `35 × 5` products in `F_{p⁴}` at `19` each —
+`3,401` — before any linear algebra, so **no three-point test on this
+formulation can reach parity**; the cheapest conceivable one is `WEIL_OVER×`
+too dear.  A trace-driven elimination of the
 `80 × 120` certificate matrix (the "F4 remake" of Joux–Vitse) would cut the
 F4 term by a small factor — the matrix is `85 × 117` and F4 already spends
 `1.6·10⁵` on it, `2.5×` its dense elimination cost, so the room is
@@ -238,9 +242,13 @@ verbatim:
 > the overdetermined-solve cost.
 
 Outcome: `C′ = 1.61·10⁵` (the top of the predicted band; the matrix is
-`84–85 × 117–118` against the predicted `80 × 120`), `S / rho = RATIO_JV×`
-(above the predicted band by the F4-over-dense factor and the verification
-the estimate left out), flat.  "`36×`" is falsified.  Inadmissible moves
+`84–85 × 117–118` against the predicted `80 × 120`), `S / rho = RATIO_JV×`,
+flat.  "`36×`" is falsified.  One correction to the registration: it
+carried a factor `6` where §11.16's formula has `3` (residuals `3p²`
+against rho's `S_rho·p²`), so its band should read `C′/42.7 + 0.52`,
+`250–2,500×`, and parity `C′ < 21`; the measured constant sits above the
+corrected band by the residual surplus of §3.3 (`RES_FLOOR×` the floor),
+which the estimate did not include.  Inadmissible moves
 (none made): a smaller base, a different rate, dropping a phase, counting
 an unverified relation.
 
