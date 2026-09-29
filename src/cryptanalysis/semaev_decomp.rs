@@ -2051,3 +2051,575 @@ mod tests {
         }
     }
 }
+
+/// Differential tests against the pair loop as it stood at `994784af`,
+/// before the quartic route.  Everything under `old` is that revision's
+/// code copied verbatim (the `Poly` methods as free functions over the
+/// same `Poly`), so these tests do not lean on any routine the change
+/// touched or might touch later: the reference is frozen here.
+#[cfg(test)]
+mod reference_994784af {
+    use super::*;
+    use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+
+    mod old {
+        use super::super::{GeneralTargetPowers, Gf2, Poly, SubspaceOracle, TargetPowers, MAX_DEG};
+
+        fn scale_in_place(p: &mut Poly, k: u64, hi: usize, gf: &Gf2) {
+            for i in 0..=hi {
+                p.c[i] = gf.mul(p.c[i], k);
+            }
+        }
+
+        fn rem_monic(p: &Poly, m: &Poly, dm: usize, gf: &Gf2) -> Poly {
+            let mut r = *p;
+            let mut dr = MAX_DEG;
+            loop {
+                while r.c[dr] == 0 {
+                    if dr == 0 || dr == dm {
+                        return r;
+                    }
+                    dr -= 1;
+                }
+                if dr < dm {
+                    return r;
+                }
+                let factor = r.c[dr];
+                for i in 0..dm {
+                    r.c[dr - dm + i] ^= gf.mul(m.c[i], factor);
+                }
+                r.c[dr] = 0;
+                if dr == 0 {
+                    return r;
+                }
+                dr -= 1;
+            }
+        }
+
+        fn sqr_mod_monic(p: &Poly, m: &Poly, dm: usize, gf: &Gf2) -> Poly {
+            let mut wide = Poly::zero();
+            for i in 0..=MAX_DEG / 2 {
+                if p.c[i] != 0 {
+                    wide.c[2 * i] = gf.sqr(p.c[i]);
+                }
+            }
+            rem_monic(&wide, m, dm, gf)
+        }
+
+        fn prem(p: &Poly, b: &Poly, gf: &Gf2) -> Poly {
+            let db = match b.deg() {
+                Some(d) => d,
+                None => return *p,
+            };
+            let lb = b.c[db];
+            let mut r = *p;
+            while let Some(dr) = r.deg() {
+                if dr < db {
+                    break;
+                }
+                let lr = r.c[dr];
+                scale_in_place(&mut r, lb, dr, gf);
+                for i in 0..=db {
+                    r.c[dr - db + i] ^= gf.mul(b.c[i], lr);
+                }
+                r.c[dr] = 0;
+            }
+            r
+        }
+
+        fn gcd(p: &Poly, other: &Poly, gf: &Gf2) -> Poly {
+            let mut a = *p;
+            let mut b = *other;
+            loop {
+                match b.deg() {
+                    None => return a,
+                    Some(0) => return b,
+                    Some(_) => {}
+                }
+                let r = prem(&a, &b, gf);
+                a = b;
+                b = r;
+            }
+        }
+
+        pub fn roots_in_subspace(f: &Poly, df: usize, lv: &[u64], gf: &Gf2) -> Poly {
+            let mut t = Poly::zero();
+            t.c[1] = 1; // t
+            let mut acc = Poly::zero();
+            let mut pow = rem_monic(&t, f, df, gf); // t^(2^0) mod f
+            for (i, &ai) in lv.iter().enumerate() {
+                if ai != 0 {
+                    for j in 0..df.max(1) {
+                        acc.c[j] ^= gf.mul(pow.c[j], ai);
+                    }
+                }
+                if i + 1 < lv.len() {
+                    pow = sqr_mod_monic(&pow, f, df, gf);
+                }
+            }
+            gcd(f, &acc, gf)
+        }
+
+        /// The old route from an arbitrary non-zero `q`: made monic by
+        /// `scale_in_place`, as the pair loops did.
+        pub fn roots_of(q: &Poly, d: usize, lead_inv: u64, lv: &[u64], gf: &Gf2) -> Poly {
+            let mut monic = *q;
+            scale_in_place(&mut monic, lead_inv, d, gf);
+            roots_in_subspace(&monic, d, lv, gf)
+        }
+
+        fn quartic_general_with(x1: u64, x2: u64, t: &GeneralTargetPowers, gf: &Gf2) -> Poly {
+            let s = x1 ^ x2;
+            let p = gf.mul(x1, x2);
+            let s2 = gf.sqr(s);
+            let p2 = gf.sqr(p);
+            let b = t.b;
+            let bp2 = b ^ p2; // b + p²
+            let s2x2 = gf.mul(s2, t.xr2); // s² x²
+            let px = gf.mul(p, t.xr); // p x
+            let p2x2 = gf.mul(p2, t.xr2); // p² x²
+
+            let mut q = Poly::zero();
+            q.c[4] = gf.sqr(s2x2 ^ bp2) ^ p2x2;
+            q.c[3] = gf.mul(px, bp2 ^ s2x2);
+            q.c[2] = gf.mul(p2, b) ^ gf.mul(s2x2, bp2) ^ gf.mul(p2, t.xr4);
+            q.c[1] = gf.mul(px, gf.mul(s2, b) ^ gf.mul(t.xr2, bp2));
+            q.c[0] = gf.sqr(gf.mul(t.xr2, p2) ^ gf.mul(b, s2) ^ gf.mul(b, t.xr2)) ^ gf.mul(p2x2, b);
+            q
+        }
+
+        pub fn quartic_in_x3_general(x1: u64, x2: u64, xr: u64, b: u64, gf: &Gf2) -> Poly {
+            quartic_general_with(x1, x2, &GeneralTargetPowers::new(xr, b, gf), gf)
+        }
+
+        pub fn decompose(xr: u64, l: u32, gf: &Gf2) -> Option<[u64; 3]> {
+            let lv = super::super::subspace_poly(l, gf);
+            let tp = TargetPowers::new(xr, gf);
+            let span = 1u64 << l;
+
+            let mut qs: Vec<Poly> = Vec::with_capacity(span as usize);
+            let mut leads: Vec<u64> = Vec::with_capacity(span as usize);
+            let mut scratch: Vec<u64> = Vec::with_capacity(span as usize);
+
+            for x1 in 0..span {
+                qs.clear();
+                leads.clear();
+                for x2 in x1..span {
+                    let q = super::super::quartic_with(x1, x2, &tp, gf);
+                    match q.deg() {
+                        None => return Some([x1, x2, 0]),
+                        Some(d) => leads.push(q.c[d]),
+                    }
+                    qs.push(q);
+                }
+                gf.batch_inv(&mut leads, &mut scratch);
+
+                for (i, q) in qs.iter().enumerate() {
+                    let d = q.deg().expect("zero quartics returned above");
+                    let mut monic = *q;
+                    scale_in_place(&mut monic, leads[i], d, gf);
+                    let g = roots_in_subspace(&monic, d, &lv, gf);
+                    let x2 = x1 + i as u64;
+                    match g.deg() {
+                        None | Some(0) => continue,
+                        Some(1) => return Some([x1, x2, gf.mul(g.c[0], gf.inv(g.c[1]))]),
+                        Some(_) => {
+                            for t in 0..span {
+                                let mut v = 0u64;
+                                for j in (0..=MAX_DEG).rev() {
+                                    v = gf.mul(v, t) ^ g.c[j];
+                                }
+                                if v == 0 {
+                                    return Some([x1, x2, t]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            None
+        }
+
+        pub fn oracle_decompose(o: &SubspaceOracle, xr: u64, gf: &Gf2) -> (Option<[u64; 3]>, u64) {
+            let tp = GeneralTargetPowers::new(xr, o.b, gf);
+            let span = &o.span;
+            let count = span.len();
+            let mut pairs = 0u64;
+
+            let mut qs: Vec<Poly> = Vec::with_capacity(count);
+            let mut leads: Vec<u64> = Vec::with_capacity(count);
+            let mut scratch: Vec<u64> = Vec::with_capacity(count);
+
+            for i1 in 0..count {
+                let x1 = span[i1];
+                qs.clear();
+                leads.clear();
+                for &x2 in &span[i1..] {
+                    let q = quartic_general_with(x1, x2, &tp, gf);
+                    pairs += 1;
+                    match q.deg() {
+                        None => {
+                            let x3 = span.iter().copied().find(|&v| v != 0).unwrap_or(0);
+                            return (Some([x1, x2, x3]), pairs);
+                        }
+                        Some(d) => leads.push(q.c[d]),
+                    }
+                    qs.push(q);
+                }
+                gf.batch_inv(&mut leads, &mut scratch);
+
+                for (i, q) in qs.iter().enumerate() {
+                    let d = q.deg().expect("zero quartics returned above");
+                    let mut monic = *q;
+                    scale_in_place(&mut monic, leads[i], d, gf);
+                    let g = roots_in_subspace(&monic, d, &o.lv, gf);
+                    let x2 = span[i1 + i];
+                    match g.deg() {
+                        None | Some(0) => continue,
+                        Some(1) => {
+                            return (Some([x1, x2, gf.mul(g.c[0], gf.inv(g.c[1]))]), pairs);
+                        }
+                        Some(_) => {
+                            for &t in span.iter() {
+                                let mut v = 0u64;
+                                for j in (0..=MAX_DEG).rev() {
+                                    v = gf.mul(v, t) ^ g.c[j];
+                                }
+                                if v == 0 {
+                                    return (Some([x1, x2, t]), pairs);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            (None, pairs)
+        }
+    }
+
+    fn xorshift(state: &mut u64) -> u64 {
+        *state ^= *state >> 12;
+        *state ^= *state << 25;
+        *state ^= *state >> 27;
+        state.wrapping_mul(0x2545_F491_4F6C_DD1D)
+    }
+
+    /// Both multiplies of the field of degree `n`: the carry-less
+    /// instruction where the host has it, and the portable fallback.
+    fn both_fields(n: u32) -> [Gf2; 2] {
+        let fast = Gf2::new(&find_irreducible_sparse(n).unwrap());
+        let mut portable = fast.clone();
+        portable.has_clmul = false;
+        [fast, portable]
+    }
+
+    fn random_independent(l: u32, gf: &Gf2, s: &mut u64) -> Vec<u64> {
+        'retry: loop {
+            let cand: Vec<u64> = (0..l).map(|_| xorshift(s) & gf.mask).collect();
+            let mut seen = std::collections::HashSet::new();
+            for idx in 0..1u64 << l {
+                let v = (0..l as usize)
+                    .filter(|j| (idx >> j) & 1 == 1)
+                    .fold(0, |v, j| v ^ cand[j]);
+                if !seen.insert(v) {
+                    continue 'retry;
+                }
+            }
+            return cand;
+        }
+    }
+
+    fn span_of(basis: &[u64]) -> Vec<u64> {
+        (0..1u64 << basis.len())
+            .map(|idx| {
+                (0..basis.len())
+                    .filter(|j| (idx >> j) & 1 == 1)
+                    .fold(0, |v, j| v ^ basis[j])
+            })
+            .collect()
+    }
+
+    /// Subspace polynomials of every dimension `0..=min(n, 12)` (on the
+    /// low-order and on a random basis) with the subspace they vanish
+    /// on, then degenerate coefficient vectors and random ones of every
+    /// short length, including lengths past `n` where the inverse
+    /// Frobenius wraps; those come with the span `{0, 1}` to plant from.
+    fn lv_family(gf: &Gf2, s: &mut u64) -> Vec<(Vec<u64>, Vec<u64>)> {
+        let n = gf.n;
+        let mut out = Vec::new();
+        for l in 0..=n.min(12) {
+            let low: Vec<u64> = (0..l).map(|i| 1u64 << i).collect();
+            let random = random_independent(l, gf, s);
+            for basis in [low, random] {
+                out.push((subspace_poly_for_basis(&basis, gf), span_of(&basis)));
+            }
+        }
+        let mut odd: Vec<Vec<u64>> = vec![
+            vec![],
+            vec![0],
+            vec![0, 0, 0, 0, 1],
+            vec![1, 0, 0, 0, 0, 0, 0, 0, 0],
+        ];
+        for len in 1..=9 {
+            odd.push((0..len).map(|_| xorshift(s) & gf.mask).collect());
+        }
+        out.extend(odd.into_iter().map(|lv| (lv, vec![0, 1])));
+        out
+    }
+
+    /// Every monic quartic over `F_{2^n}`, `n = 1..=4` (all `2^{4n}` of
+    /// them), each scaled by a random non-zero leading coefficient, on
+    /// every vector of `lv_family`: at these sizes each of the six
+    /// leading coefficients the written-out gcd relies on vanishes on a
+    /// large fraction of inputs, so every fallback exit and every gcd
+    /// degree is taken many times.
+    #[test]
+    fn quartic_route_matches_994784af_on_every_quartic_of_tiny_fields() {
+        let mut s = 0x0994_784A_F000_0001u64;
+        for n in 1..=4u32 {
+            for gf in both_fields(n) {
+                let mut by_degree = [0usize; 5];
+                for (lv, _) in lv_family(&gf, &mut s) {
+                    let horner = LvHorner::new(&lv, &gf);
+                    for idx in 0..1u64 << (4 * n) {
+                        let k = (xorshift(&mut s) & gf.mask).max(1);
+                        let mut q = Poly::zero();
+                        for j in 0..4 {
+                            q.c[j] = gf.mul((idx >> (j as u32 * n)) & gf.mask, k);
+                        }
+                        q.c[4] = k;
+                        let lead_inv = gf.inv(k);
+                        let want = old::roots_of(&q, 4, lead_inv, &lv, &gf);
+                        let got = subspace_roots_of(&q, 4, lead_inv, &lv, &horner, &gf);
+                        assert_eq!(
+                            got.c,
+                            want.c,
+                            "n={n} lv={lv:?} q={:?} {}",
+                            q.c,
+                            gf.kernel_name()
+                        );
+                        by_degree[want.deg().unwrap()] += 1;
+                    }
+                }
+                assert!(by_degree.iter().all(|&c| c > 0), "n={n}: {by_degree:?}");
+            }
+        }
+    }
+
+    /// Random and structured quartics at mid and top widths (up to the
+    /// `n = 63` limit of `Gf2`): squares (`f₁ = f₃ = 0`), `f₃ = 0`,
+    /// `f₀ = 0` (the root 0 lies in every subspace), repeated subspace
+    /// roots, and one to four planted subspace roots, against every
+    /// degree `0..=4` of `q` so the dispatch is exercised as well.
+    #[test]
+    fn quartic_route_matches_994784af_at_wide_fields() {
+        let mut s = 0x0994_784A_F000_0002u64;
+        for n in [5u32, 8, 17, 24, 31, 40, 53, 62, 63] {
+            for gf in both_fields(n) {
+                let mut by_degree = [0usize; 5];
+                for (lv, span) in lv_family(&gf, &mut s) {
+                    let horner = LvHorner::new(&lv, &gf);
+                    for trial in 0..400 {
+                        let mut r = || xorshift(&mut s) & gf.mask;
+                        let k = r().max(1);
+                        let mut f = [r(), r(), r(), r()];
+                        match trial % 8 {
+                            0 => {}
+                            1 => {
+                                f[1] = 0;
+                                f[3] = 0;
+                            }
+                            2 => f[3] = 0,
+                            3 => f[0] = 0,
+                            _ => {
+                                // Roots: 1..=4 planted in the span (possibly
+                                // repeated), the rest random.
+                                let planted = trial % 8 - 3;
+                                let roots: Vec<u64> = (0..4)
+                                    .map(|i| {
+                                        let x = xorshift(&mut s);
+                                        if i < planted {
+                                            span[(x >> 11) as usize % span.len()]
+                                        } else if trial % 3 == 0 && i > 0 {
+                                            0
+                                        } else {
+                                            x & gf.mask
+                                        }
+                                    })
+                                    .collect();
+                                let mut p = [1u64, 0, 0, 0, 0];
+                                for &root in &roots {
+                                    let mut next = [0u64; 5];
+                                    for i in 0..4 {
+                                        next[i + 1] ^= p[i];
+                                        next[i] ^= gf.mul(p[i], root);
+                                    }
+                                    p = next;
+                                }
+                                f.copy_from_slice(&p[..4]);
+                            }
+                        }
+                        // Degree 4 mostly; every 16th trial drops leading
+                        // coefficients to reach the generic route.
+                        let d = if trial % 16 == 15 {
+                            (trial / 16) % 4
+                        } else {
+                            4
+                        };
+                        let mut q = Poly::zero();
+                        for j in 0..d {
+                            q.c[j] = gf.mul(f[j], k);
+                        }
+                        q.c[d] = k;
+                        let lead_inv = gf.inv(k);
+                        let want = old::roots_of(&q, d, lead_inv, &lv, &gf);
+                        let got = subspace_roots_of(&q, d, lead_inv, &lv, &horner, &gf);
+                        assert_eq!(
+                            got.c,
+                            want.c,
+                            "n={n} d={d} lv={lv:?} q={:?} {}",
+                            q.c,
+                            gf.kernel_name()
+                        );
+                        if d == 4 {
+                            by_degree[want.deg().unwrap()] += 1;
+                        }
+                    }
+                }
+                assert!(
+                    by_degree[0] > 0 && by_degree[1] > 0 && by_degree[2] > 0,
+                    "n={n}: {by_degree:?}"
+                );
+            }
+        }
+    }
+
+    /// The `b = 1` decomposer must return exactly what `994784af`'s did,
+    /// with and without the carry-less multiply, on every target of the
+    /// tiny fields and on random targets (plus 0, 1 and subspace
+    /// elements) of larger ones.
+    #[test]
+    fn decompose_matches_994784af() {
+        let mut s = 0x0994_784A_F000_0003u64;
+        let mut found = [0usize; 2];
+        for (n, ls) in [
+            (2u32, &[0u32, 1, 2][..]),
+            (3, &[0, 1, 2, 3]),
+            (4, &[1, 2, 3]),
+            (5, &[1, 2, 3]),
+            (7, &[2, 3]),
+            (11, &[3, 4]),
+            (16, &[4, 5]),
+            (20, &[5]),
+            (63, &[3, 4]),
+        ] {
+            for gf in both_fields(n) {
+                for &l in ls {
+                    let xrs: Vec<u64> = if n <= 5 {
+                        (0..1u64 << n).collect()
+                    } else {
+                        let mut v = vec![0, 1, (1u64 << l) - 1, 1u64 << l];
+                        v.extend((0..12).map(|_| xorshift(&mut s) & gf.mask));
+                        v
+                    };
+                    for xr in xrs {
+                        let want = old::decompose(xr, l, &gf);
+                        assert_eq!(
+                            decompose(xr, l, &gf),
+                            want,
+                            "n={n} l={l} x_R={xr} {}",
+                            gf.kernel_name()
+                        );
+                        found[want.is_some() as usize] += 1;
+                    }
+                }
+            }
+        }
+        assert!(found[0] > 0 && found[1] > 0, "degenerate: {found:?}");
+    }
+
+    /// `SubspaceOracle::decompose` against `994784af`'s loop verbatim
+    /// (batched inverses, the old general quartic, the `rem_monic` gcd):
+    /// witnesses and pair counts, every target of the tiny fields, random
+    /// bases and `b`, up to `n = 63`.
+    #[test]
+    fn subspace_oracle_matches_994784af() {
+        let mut s = 0x0994_784A_F000_0004u64;
+        let mut found = [0usize; 2];
+        for (n, ls) in [
+            (1u32, &[0u32, 1][..]),
+            (2, &[0, 1, 2]),
+            (3, &[1, 2, 3]),
+            (4, &[1, 2, 3, 4]),
+            (6, &[2, 3, 4]),
+            (9, &[3, 4]),
+            (13, &[4, 5]),
+            (24, &[5]),
+            (40, &[4]),
+            (63, &[3, 5]),
+        ] {
+            for gf in both_fields(n) {
+                for &l in ls {
+                    let bases = [
+                        (0..l).map(|i| 1u64 << i).collect::<Vec<_>>(),
+                        random_independent(l, &gf, &mut s),
+                    ];
+                    for basis in bases {
+                        for b in [1, (xorshift(&mut s) & gf.mask).max(1)] {
+                            let oracle = SubspaceOracle::new(&basis, b, &gf);
+                            let xrs: Vec<u64> = if n <= 4 {
+                                (0..1u64 << n).collect()
+                            } else {
+                                let mut v = vec![0, 1, oracle.span[oracle.span.len() - 1]];
+                                v.extend((0..8).map(|_| xorshift(&mut s) & gf.mask));
+                                v
+                            };
+                            for xr in xrs {
+                                let want = old::oracle_decompose(&oracle, xr, &gf);
+                                assert_eq!(
+                                    oracle.decompose(xr, &gf),
+                                    want,
+                                    "n={n} l={l} b={b} basis={basis:?} x_R={xr} {}",
+                                    gf.kernel_name()
+                                );
+                                found[want.0.is_some() as usize] += 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        assert!(found[0] > 0 && found[1] > 0, "degenerate: {found:?}");
+    }
+
+    /// The general quartic against `994784af`'s formula, including a
+    /// curve constant with bits above the field width (the oracle does
+    /// not reduce `b`): the rewrite leans on `reduce` being linear, which
+    /// holds for any 128-bit input, so even that case must agree.
+    #[test]
+    fn general_quartic_matches_994784af_even_for_unreduced_b() {
+        let mut s = 0x0994_784A_F000_0005u64;
+        for n in [1u32, 2, 3, 7, 20, 33, 63] {
+            for gf in both_fields(n) {
+                for i in 0..4000 {
+                    let mut r = || xorshift(&mut s) & gf.mask;
+                    let (x1, x2, xr) = (r(), r(), r());
+                    let b = if i % 2 == 0 {
+                        r()
+                    } else {
+                        r() | (1u64 << 63) >> (i % 7)
+                    };
+                    // Unreduced b overflows the fold's table only when the
+                    // product exceeds 2n−1 bits; `reduce`'s debug check
+                    // would fire there, so keep that case to release.
+                    if cfg!(debug_assertions) && b > gf.mask {
+                        continue;
+                    }
+                    let want = old::quartic_in_x3_general(x1, x2, xr, b, &gf);
+                    let got = quartic_in_x3_general(x1, x2, xr, b, &gf);
+                    assert_eq!(got.c, want.c, "n={n} b={b} {}", gf.kernel_name());
+                }
+            }
+        }
+    }
+}
