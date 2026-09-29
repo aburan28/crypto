@@ -18,7 +18,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ic-generic-backend-qualification-20260929
+  # A long measured dispatch must not block PR-only registration checks.
+  # Preserve the campaign's existing serialization key for workflow_dispatch.
+  group: ${{ github.event_name == 'pull_request' && format('ic-generic-backend-qualification-pr-{0}', github.event.pull_request.number) || 'ic-generic-backend-qualification-20260929' }}
   cancel-in-progress: false
 jobs:
   preflight:
