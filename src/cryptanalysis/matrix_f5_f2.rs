@@ -456,6 +456,8 @@ pub struct F5Timings {
     pub reduce_ns: u64,
     /// Turning the pivot rows back into polynomials.
     pub unpack_ns: u64,
+    /// Whether the full-column direct packed-row builder was used.
+    pub direct_pack_used: bool,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -562,7 +564,7 @@ pub fn matrix_f5_f2_with_form_timed(
     let mut timings = F5Timings::default();
     use crate::cryptanalysis::koblitz_groebner::{
         echelon_f2_counted, f5_rows_monos_with_f4_count, f5_rows_monos_with_mask,
-        macaulay_row_count, pack_rows, rref_f2_counted,
+        f5_rows_packed_full_columns, macaulay_row_count, pack_rows, rref_f2_counted,
     };
     let mut report = F5Report {
         degree,
@@ -581,21 +583,46 @@ pub fn matrix_f5_f2_with_form_timed(
     static FUSED_BUILD: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let fused_build =
         *FUSED_BUILD.get_or_init(|| std::env::var("KIC_F5_FUSED_BUILD").as_deref() == Ok("1"));
-    let rows_monos = if fused_build {
-        let (rows_f4, rows) = f5_rows_monos_with_f4_count(polys, n_vars, degree, mask, &criterion)?;
-        report.rows_f4 = rows_f4 as u64;
-        rows
+    static DIRECT_PACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let direct_pack =
+        *DIRECT_PACK.get_or_init(|| std::env::var("KIC_F5_DIRECT_PACK").as_deref() == Ok("1"));
+    let (cols, mut matrix) = if direct_pack {
+        if let Some((rows_f4, cols, matrix)) =
+            f5_rows_packed_full_columns(polys, n_vars, degree, &criterion)
+        {
+            timings.direct_pack_used = true;
+            report.rows_f4 = rows_f4 as u64;
+            (cols, matrix)
+        } else {
+            let (rows_f4, rows) =
+                f5_rows_monos_with_f4_count(polys, n_vars, degree, mask, &criterion)?;
+            report.rows_f4 = rows_f4 as u64;
+            let cols = macaulay_columns(&rows)?;
+            let matrix = pack_rows(&rows, &cols);
+            (cols, matrix)
+        }
     } else {
-        report.rows_f4 = macaulay_row_count(polys, n_vars, degree)? as u64;
-        f5_rows_monos_with_mask(polys, n_vars, degree, mask, &criterion)?
+        let rows_monos = if fused_build {
+            let (rows_f4, rows) =
+                f5_rows_monos_with_f4_count(polys, n_vars, degree, mask, &criterion)?;
+            report.rows_f4 = rows_f4 as u64;
+            rows
+        } else {
+            report.rows_f4 = macaulay_row_count(polys, n_vars, degree)? as u64;
+            f5_rows_monos_with_mask(polys, n_vars, degree, mask, &criterion)?
+        };
+        if rows_monos.is_empty() {
+            return Some((Vec::new(), report, timings));
+        }
+        let cols = macaulay_columns(&rows_monos)?;
+        let matrix = pack_rows(&rows_monos, &cols);
+        (cols, matrix)
     };
-    report.rows_built = rows_monos.len() as u64;
+    report.rows_built = matrix.len() as u64;
     report.rows_pruned = report.rows_f4 - report.rows_built;
-    if rows_monos.is_empty() {
+    if matrix.is_empty() {
         return Some((Vec::new(), report, timings));
     }
-    let cols = macaulay_columns(&rows_monos)?;
-    let mut matrix = pack_rows(&rows_monos, &cols);
     timings.build_ns = t.elapsed().as_nanos() as u64;
     let t = Instant::now();
     let mut word_ops = 0u64;
@@ -675,7 +702,51 @@ pub fn canonical_row_space_fingerprint(rows: &[F2BoolPoly]) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cryptanalysis::koblitz_groebner::matrix_f4_f2;
+    use crate::cryptanalysis::koblitz_groebner::{
+        f5_rows_monos_with_f4_count, f5_rows_packed_full_columns, matrix_f4_f2, pack_rows,
+    };
+
+    #[test]
+    fn direct_packed_f5_build_matches_sorted_builder_and_falls_back_on_sparse_columns() {
+        let n_vars = 4;
+        let degree = 3;
+        let mask = all_variable_mask(n_vars);
+        let dense = F2BoolPoly::from_monos(
+            monomials_up_to_mask(mask, 2)
+                .into_iter()
+                .map(F2BoolMono::from_mask)
+                .collect(),
+            n_vars,
+        );
+        let criterion = F5Criterion::new(std::slice::from_ref(&dense), n_vars, degree, mask);
+        let (direct_count, direct_cols, direct_rows) =
+            f5_rows_packed_full_columns(std::slice::from_ref(&dense), n_vars, degree, &criterion)
+                .expect("dense polynomial spans the complete column universe");
+        let (normal_count, rows_monos) = f5_rows_monos_with_f4_count(
+            std::slice::from_ref(&dense),
+            n_vars,
+            degree,
+            mask,
+            &criterion,
+        )
+        .unwrap();
+        let normal_cols = macaulay_columns(&rows_monos).unwrap();
+        let normal_rows = pack_rows(&rows_monos, &normal_cols);
+        assert_eq!(direct_count, normal_count);
+        assert_eq!(direct_cols, normal_cols);
+        assert_eq!(direct_rows, normal_rows);
+
+        let sparse = poly(n_vars, &[&[0], &[1]]);
+        let sparse_criterion =
+            F5Criterion::new(std::slice::from_ref(&sparse), n_vars, degree, mask);
+        assert!(f5_rows_packed_full_columns(
+            std::slice::from_ref(&sparse),
+            n_vars,
+            degree,
+            &sparse_criterion
+        )
+        .is_none());
+    }
 
     #[test]
     fn avx512_unpack_matches_scalar_for_sparse_dense_and_partial_words() {
