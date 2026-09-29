@@ -1,0 +1,189 @@
+{
+  "entries": {
+    "mask512": {
+      "compact_receipt_bytes": 193856,
+      "compact_receipt_path": "research/ecc2k130_pdp_chain_holdout_20260925/receipt_mask512.json",
+      "compact_receipt_sha256": "53b55bcda356a44fd319021c39e9b142c6795808effba76a77f1c75fcfdfd321",
+      "extract_command": "cat research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part000 research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part001 research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part002 research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part003 research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part004 research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part005 > /tmp/pdp-mask512.json.gz && gzip -cd /tmp/pdp-mask512.json.gz > /tmp/pdp-mask512-raw.json",
+      "raw_gzip_bytes": 804701,
+      "raw_gzip_parts": [
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part000",
+          "sha256": "c9250a1e4072273c0c93167da38f108ebafeb032b5e9a1c820e7c9a9bea2dcd0"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part001",
+          "sha256": "38d271597c9776af60f8b0a34e3b2ab8a91f07d35d04d0ddbe4f28af2a18d72d"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part002",
+          "sha256": "339674ae0ec9b9091d907f85cee5a48f903665f1644a442dcdc12bdb2939c031"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part003",
+          "sha256": "fee627abdadb01e31bb2b8de59ad3760778b6b95a17d90ac15af538c5b76245b"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part004",
+          "sha256": "b9c7f7ffa40489732e11de341b305c08dd038a94209345e392a63ed594434b32"
+        },
+        {
+          "bytes": 4701,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/mask512.raw.json.gz.part005",
+          "sha256": "ebd69828e5a2e824bcf40623169c4d0bca20d3aff79af0742b0cbf3b36572323"
+        }
+      ],
+      "raw_gzip_path": null,
+      "raw_gzip_sha256": "dec0c219407396b73241570f6a2f3bd36ee124d01c12b07f91e46aaafe4fe65f",
+      "raw_uncompressed_bytes": 9340431,
+      "raw_uncompressed_sha256": "3c938a877deb29e281dafc6e10ea80852540b6a335e9c8429f429efb944666dd"
+    },
+    "power2048": {
+      "compact_receipt_bytes": 698791,
+      "compact_receipt_path": "research/ecc2k130_pdp_chain_holdout_20260925/receipt_power2048.json",
+      "compact_receipt_sha256": "a07f06ef79910a0479ea3ffbce5844fcd4bbfa5ff300ca0bff3db677f762c8e3",
+      "extract_command": "cat research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part000 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part001 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part002 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part003 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part004 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part005 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part006 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part007 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part008 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part009 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part010 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part011 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part012 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part013 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part014 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part015 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part016 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part017 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part018 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part019 research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part020 > /tmp/pdp-power2048.json.gz && gzip -cd /tmp/pdp-power2048.json.gz > /tmp/pdp-power2048-raw.json",
+      "raw_gzip_bytes": 3214846,
+      "raw_gzip_parts": [
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part000",
+          "sha256": "9ee0bc3b90f3f86d7c8c51e0aafadff96b13d8060b769db646b6f35cfff8ba09"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part001",
+          "sha256": "766fd682466bb393dd25d4bacf52ea8d815492f6e67686030c6b70caa9fc7994"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part002",
+          "sha256": "520f88c2dfad243ebcacb513e9bf6b93f416fab1f5ea1caca9e6b7b5929b503d"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part003",
+          "sha256": "08998e24f1c763a85ed5fe17c4a42731e4303faab417b1f0b313829e68099a94"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part004",
+          "sha256": "a2b8668ebec781b86bf7cf1935c0f3395ff237b9b0dfd11a6e0b38a3edd6fd8c"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part005",
+          "sha256": "99a3f9940d62c8b19085b8619331e09c56a4b4d8405d37d0fe0d4173916094d2"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part006",
+          "sha256": "7ce3a015bff5a37c89fdda1545cd7f5085f16f6667596ba64e690dbc9321ce38"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part007",
+          "sha256": "b96e1cb0ad6ce723e596779474e353ba0d706166ff99697fb44f3de106422971"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part008",
+          "sha256": "a3dfe3e992e6969beac8b7cc6077f958d8ccfbfeeedda578062af7776df7cef1"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part009",
+          "sha256": "a5cb15fe76bb64917ffc167b166cd4d4a8488274b79d64d2916b056693feef7f"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part010",
+          "sha256": "a27f3deb693d1111508e3991dbba5ec4b96dac7ed13c5f885f4d72c8361b3770"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part011",
+          "sha256": "6412e1a383fe9375af30b72ec9149cbd8179a0fd8ce28725aa232f1c70f7d3df"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part012",
+          "sha256": "57846e74c7c8decdff5e9108af1d2fba63a402c4e068152e6c7ed59219510f0a"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part013",
+          "sha256": "75633345b7c64ab11e552344e3296779a13d6f345c9d4a8bdf49a63df231ac67"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part014",
+          "sha256": "12ed8b71ec3ddb95b71dc8334ecbe6518ea2d7d2206985d3bb1734bf0147f7ac"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part015",
+          "sha256": "fcc4a710769d0d6ae90b338a1e3bb875977cb3ed30fd169d12f9a75fe61ead92"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part016",
+          "sha256": "600ee172f617ee0500b2ee469295a08325394a98dd5d0b2f8f0e0f5edf6903e7"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part017",
+          "sha256": "6d93f9507f21ae5224c40b0ed11677f5988e6b94d7a0a70ad98ebab3dfb84d60"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part018",
+          "sha256": "d080e91906b4dcad02370d097f0d1d74ee4ead96f802d7fc26df01d195721923"
+        },
+        {
+          "bytes": 160000,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part019",
+          "sha256": "1c62a57f1408bbba6e0801d75a14de98c945e109f14a4552ee8a6ec4c0f1ba57"
+        },
+        {
+          "bytes": 14846,
+          "path": "research/ecc2k130_pdp_chain_holdout_20260925/power2048.raw.json.gz.part020",
+          "sha256": "58dea29d3b899e366705f234afce4a1852ae9855848f65aa688ca0493e444980"
+        }
+      ],
+      "raw_gzip_path": null,
+      "raw_gzip_sha256": "9aaeb1cb94f30efb905342529116ce0d4081279c2132ad84fbce71e0a4eda1a4",
+      "raw_uncompressed_bytes": 37774673,
+      "raw_uncompressed_sha256": "dc0bf916453b46d2a17e95eac111d94bbcc133ec18d8db019bc9d69f09942cd6"
+    },
+    "projected": {
+      "compact_receipt_bytes": 84924,
+      "compact_receipt_path": "research/ecc2k130_pdp_chain_holdout_20260925/receipt_projected.json",
+      "compact_receipt_sha256": "f1f490bea4cb84d42fe58111f925128b69d81d9a0180a90a6b63c75e289b426b",
+      "extract_command": "gzip -cd research/ecc2k130_pdp_chain_holdout_20260925/projected.raw.json.gz > /tmp/pdp-projected-raw.json",
+      "raw_gzip_bytes": 78434,
+      "raw_gzip_path": "research/ecc2k130_pdp_chain_holdout_20260925/projected.raw.json.gz",
+      "raw_gzip_sha256": "7f41eabc34e22b1a3dde9d6de71dba9ab8d1face552131ec54a03340f1ada095",
+      "raw_uncompressed_bytes": 1858434,
+      "raw_uncompressed_sha256": "68a2e0ba56c4d2e122379e71ef1c4fe9ce51fb644482196bf29d69af34ad77e4"
+    },
+    "raw": {
+      "compact_receipt_bytes": 135269,
+      "compact_receipt_path": "research/ecc2k130_pdp_chain_holdout_20260925/receipt_raw.json",
+      "compact_receipt_sha256": "42311c85746e7b274a3c5953c2006b529ecfe9bf94017cce3aa690f1b47af948",
+      "extract_command": "gzip -cd research/ecc2k130_pdp_chain_holdout_20260925/raw.raw.json.gz > /tmp/pdp-raw-raw.json",
+      "raw_gzip_bytes": 129761,
+      "raw_gzip_path": "research/ecc2k130_pdp_chain_holdout_20260925/raw.raw.json.gz",
+      "raw_gzip_sha256": "68bf6f182dd259e091c6af0bf7b06fe52b0e84fbd2f9be256ed40b84a6922c27",
+      "raw_uncompressed_bytes": 3480354,
+      "raw_uncompressed_sha256": "632d6b1a92e3a233bcd3a76eab5700dbae537498ad4595dce91dea96900cd593"
+    }
+  },
+  "purpose": "Byte-exact durable full raw intermediates; compact receipts remain the event-level review surface",
+  "schema": "ecc2k130-pdp-chained-raw-manifest-v1"
+}

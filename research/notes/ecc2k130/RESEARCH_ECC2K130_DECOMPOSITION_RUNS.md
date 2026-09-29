@@ -9,9 +9,11 @@
 
 Six experiments were pre-registered with a boundary, a metric and a falsifier
 each.  This note is what happened when they were run.  **No falsifier fired.**
-That is the headline, and the more interesting content is in the three places
-where the runs disagreed with the *model* without crossing the line that had
-been drawn in advance.
+That is the headline.  The more interesting content is what happened to the
+places where the runs appeared to disagree with the *model*: measured properly,
+**both** of them turned out to be artefacts of the harness's own counting and
+are retracted here (§0.5, E4), and both were the same coupon-collector error in
+different guises.
 
 ## 0. The unit, and the counting rule that decides everything
 
@@ -126,13 +128,23 @@ more, and see whether that finishes.
 | `n = 19`, `l = 8` | 279 | 0.0645 | 0.0498 | 0.0896 | 1 | **2.224** |
 | `n = 19`, `l = 8` | 279 | 0.0323 | 0.0498 | 0.0824 | 1 | **3.040** |
 | `n = 19`, `l = 8` | 279 | 0.0573 | 0.0498 | 0.0645 | 1 | **3.034** |
+| `n = 23`, `l = 9` | 527 | 0.0436 | 0.0498 | 0.0721 | 1 | **3.091** |
+| `n = 23`, `l = 9` | 527 | 0.0361 | 0.0498 | 0.1063 | 2 | **3.058** |
+| `n = 23`, `l = 9` | 527 | 0.0493 | 0.0498 | 0.0740 | 1 | **2.910** |
+
+`Λ` at the budget averages `3.082` over all twelve runs against the predicted
+`m = 3`, and the new rung is the closest of the three: `3.091, 3.058, 2.910`.
 
 **These relations are themselves correlated by target, and it does not
 matter.** `budget_run` collects under the `full` rule, so its `|F|` relations
 come from roughly forty targets — correlated in exactly the sense the
-superseded claim meant. They still determine `91 %` to `95 %` of the base, and
-**every descent landed**, in one to three attempts, with `Λ` at `3.103` on
-average against the predicted `m = 3`. The `Λ` of `5.136` and
+superseded claim meant. They still determine `88 %` to `95 %` of the base, and
+**every descent landed**, in one to three attempts, with `Λ` at `3.082` on
+average against the predicted `m = 3`.  A landing is a triple over determined
+columns *whose logarithms give back the planted secret*: the harness carries
+the right-hand side through the elimination, reads the logarithm off the
+triple, and fails the run if it is not the one it planted.  Every cell above
+passed that check. The `Λ` of `5.136` and
 `5.993` that E1 reports below, and the disagreement with the model that the
 last round read off them, are both properties of the stopping rule and not of
 the method.
@@ -166,24 +178,90 @@ with `ρ = 1` and always did. What is withdrawn is the claim that the figure was
 optimistic by a factor of two. The retraction removes a caveat; it does not
 buy a bit.
 
-**One number does move, and it is worth saying out loud.** E1's slope of
+**The slope, and why a two-point fit was not one.** E1's slope of
 `log₂(total)` against `n` is `1.037` under the full-rank rule. Recomputed on
-the budget rule's means — `Λ = 3.489` at `n = 13` and `2.766` at `n = 19` — it
-is **`0.944 ± 0.028`**, the error propagated from the three seeds at each rung.
-E1's falsifier is a slope below `0.95`.
+the budget rule at `n = 13` and `n = 19` alone it was `0.944 ± 0.028`, which an
+earlier revision of this section reported as landing on the wrong side of E1's
+`0.95` falsifier. **A third rung reverses that**, and the reversal is the
+point:
 
-Two reasons that is not a falsification, and neither of them is a get-out.
-The falsifier requires **four or more rungs** and this is a two-point fit,
-which is exactly the shortfall E1 already reports below. And `0.95` is
-`0.21` standard errors from `0.944`: at this precision the measurement does not
-distinguish the two sides of the line at all. The honest statement is that the
-budget rule's slope is consistent with the falsifier's threshold and with `1`,
-and that **four rungs would settle which**, as the design asked for and this
-round still cannot supply.
+| `n` | mean `Λ` | `log₂(ops)` | residual |
+|---:|---:|---:|---:|
+| 13 | 3.489 | 14.8030 | `+0.055` |
+| 19 | 2.766 | 20.4678 | `−0.138` |
+| 23 | 3.020 | 24.5944 | `+0.083` |
+
+Least squares over the three gives **`0.976 ± 0.024`** — now `1.1` standard
+errors *above* the falsifier rather than below it. `n = 19` sits `0.138` under
+the fitted line and was dragging a two-point join down with it, and a
+two-point join has no residual in which that could show. The two error
+estimates are quoted separately in the artefact and agree closely here — `0.0241`
+propagated from the three seeds at each rung, `0.0239` from the scatter about
+the line — which is itself a check a two-point fit cannot perform.
+
+**This still does not fire E1's falsifier, and nothing will.** That falsifier
+wants four or more rungs. There is no fourth rung to have: see §0.6.
 
 ---
 
-## E1 — The scale model: **not falsified**, on two rungs instead of four
+## 0.6 There is no fourth rung
+
+E1 pre-registered the ladder `11, 13, 19, 29, 37` and its falsifier needs
+**four or more rungs**. The first round reported the two missing upper rungs as
+a tooling shortfall — "`n = 29` and `n = 37` need the Rust pipeline". That is
+the wrong explanation, and it made a limit of the curve family look like a
+limit of the harness.
+
+**They are not rungs.** A rung has to carry a prime subgroup that is nearly the
+whole curve, because the ladder's x-axis is `n` and its unit is `ops / 2^n`.
+Every rung this ladder uses has `#E = 4r`, the ECC2K-130 shape. At `n = 29` the
+largest prime factor of `#E` is `16 067` against a cofactor of `33 412`: that
+"`2^29` rung" is a `2^14` logarithm wearing a `2^29` label, and a slope fitted
+through it would be reading cofactors rather than the method. `n = 37` has
+cofactor `596`.
+
+Censused over `11 ≤ n ≤ 61` — `rung_census` in the runner — **exactly four
+degrees qualify**, and every one of them has cofactor exactly `4`:
+
+| `n` | `p` | `log₂ p` | cofactor | `l` | oracle operations | reachable |
+|---:|---:|---:|---:|---:|---:|---|
+| 13 | 2 003 | 11.0 | 4 | 6 | `2.5 × 10⁴` | yes |
+| 19 | 130 873 | 17.0 | 4 | 8 | `1.6 × 10⁶` | yes |
+| 23 | 2 095 853 | 21.0 | 4 | 9 | `2.5 × 10⁷` | yes |
+| 41 | 549 756 390 943 | 39.0 | 4 | 15 | `6.6 × 10¹²` | **no** |
+
+So the ladder is `13, 19, 23`, and the fourth rung that exists costs `6.6 ×
+10¹²` oracle operations — out of reach of this harness, and of the Rust
+pipeline too at the factor-base dimensions it will materialise
+(`MAX_FACTOR_DIMENSION = 13` against `ord_41(2) = 20`).
+
+**E1's falsifier cannot be fired on this curve family at any size this
+repository can run.** That is a fact about the family, and it is a better
+answer than the one it replaces, because a tooling shortfall invites someone to
+go and build the tool.
+
+**What the new rung cost, and where.** `n = 23` runs in §0.5's budget table
+rather than in E1's below, because E1 stops only at full rank over every
+column: at `|F| = 527` that is the `|F| ln|F| / m ≈ 1 100` relations §0.5
+retracted, and measured, `535` relations reach rank `494`. The phase split at
+this rung also corrects a guess this note has been carrying — the constraint is
+**not** the linear algebra:
+
+| phase | cost |
+|---|---:|
+| relation collection | `353.3 s` |
+| rank check | `0.4 s` |
+| `solve_mod_p` | `1.9 s` |
+
+The oracle dominates by about `150×`.
+
+---
+
+## E1 — The scale model: **not falsified**, on two rungs under this rule
+
+The budget rule's ladder is three rungs (§0.5); this table is the two that
+the full-rank rule can afford, and §0.6 says why there is no fourth under
+either.
 
 **Falsifier:** a least-squares slope of `log₂(total)` against `n` below `0.95`
 over four or more rungs, or any rung with `Λ < 0.5·m`.
@@ -226,7 +304,7 @@ is not padded with composed rows.
 **`Λ` above is a property of the stopping rule, not of the method.**  It came
 in at `5.1` and `6.0` against a predicted `3` because this table stops only at
 full rank over every column, which costs `|F| ln|F| / m` relations rather than
-`|F|`.  §0.5 collects the budgeted `|F|` instead and lands at `Λ = 3.103` with
+`|F|`.  §0.5 collects the budgeted `|F|` instead and lands at `Λ = 3.082` with
 every descent succeeding.  The `5.136` and `5.993` here are kept as the
 **before** marks; the row that speaks for the method is §0.5's.  The earlier
 reading of the gap — that relations harvested from one target are correlated —
@@ -269,9 +347,10 @@ flatness verdict reads.  Collecting the budgeted `|F|` relations instead:
 
 `l = 5` has no verified answer, so by §2 it is not a result and is excluded
 from the flat line rather than averaged into it — the rank ceiling above says
-why there is nothing there for a descent to land on.  Over the four cells that
-did finish the flat line is `3.449` and the minimum is `3.111`, well above half
-of it.  **The verdict is unchanged and the numbers under it are now the
+why there is nothing there for a descent to land on.  The four that landed
+each gave back the planted logarithm, checked as in §0.5.  Over the four cells
+that did finish the flat line is `3.449` and the minimum is `3.111`, well above
+half of it.  **The verdict is unchanged and the numbers under it are now the
 method's rather than the harness's**, and they are flat at `m` where the
 superseded ones ranged `5.027` to `7.402`.
 
@@ -318,61 +397,81 @@ charges for `R`?**  If it does not, the swap saves queries and loses the saving
 back at the till.  This was the only part of the six designs no run in this
 repository had touched.
 
-**Stage diagnostic** in the sense of `AGENTS.md` §8 — one oracle call on one
-rung, priced.  Nothing below is a speedup, nothing is inferred about a full
-discrete logarithm, and no phase outside the solver is charged.
+**Stage diagnostic** in the sense of `AGENTS.md` §8 — one oracle call priced
+against another, on toy rungs.  Nothing below is a speedup, nothing is
+inferred about a full discrete logarithm, and no phase outside the solver is
+charged.
 
 **Runner:** `scripts/ecc2k130_e3_solver_panel.py`
 **Frozen artefact:** `experiments/ecc2k130_e3_solver_panel.json`
-`./target/release/ic run --degree 13 --summands 3 --solver S --known-log K`,
-sweeping `K ∈ {53, 211, 499, 887, 1289, 1613, 1987}` — the only lever that
-moves the descent target while the curve, the factor base, the summand count
-and the seed all stay fixed.  All 28 completed runs verified.
+`./target/release/ic swap --cells 13:3,13:2,15:3 --pairs 64 --json`
 
-The denominator is `counts.trials`, which counts **every attempt to decompose a
-target, successful or not**.  On all 28 runs `trials` equalled the relation
-count, so no call failed: the ratios below cannot be flat because a shifting
-failure rate is hiding inside them.
+**The pair is built, not swept.**  §3.2's condition is pairwise — the same
+solver, once on `R` and once on `R − P + Q` — so that is what is priced.
+`ic swap` draws `m` distinct base points whose sum `R` lies in `⟨G⟩`, takes a
+summand `P` and a base point `Q` of `P`'s cofactor class that is neither a
+summand of `R` nor the negative of one, and forms `R − P + Q`: literally
+another `m`-sum of base points, which is the branch the swap relies on.  Every
+decomposition oracle the repository has — enumeration, meet in the middle, the
+`S₄` pairs-and-solve, matrix-F4, CDCL SAT — sees both points of every pair and
+is counted in its own native unit.  The statistic is the per-pair ratio
+`cost(R − P + Q) / cost(R)`.  A control runs beside it: the same ratio taken
+between two consecutive *unrelated* built targets, which is how far a
+solver's price already moves with no swap involved.
 
-| solver | unit | per call | spread | calls |
-|---|---|---:|---:|---:|
-| `groebner` | F4 word operations per call | 58 280 966 – 61 951 239 | **6.3 %** | 12 – 24 |
-| `sat` | SAT conflicts per call | 10 162.9 – 13 457.6 | **32.4 %** | 20 – 68 |
-| `wdsat` | — | not exercised | — | — |
+**A retraction first.**  The previous revision of this section swept
+`ic run --known-log` over seven descent targets at fixed seed and reported
+`groebner` "flat to `6.3 %`" per call.  No swapped point was ever built: those
+runs decompose the random probes `[a]G + [b]Q` of a relation collection, and
+the `6.3 %` was an average over the 12–24 such calls of each run, which hid a
+per-call spread that is in fact `2.4×` (below).  It priced a target family,
+not the swap, and could not have detected a swap that cost more.  Class
+**accounting**; the figure is kept in the artefact under `superseded` and is
+not read.
 
-**`groebner` is the answer**, because it is the one solver here that exposes a
-hardware-independent operation count per call. Seven targets, `6.3 %`
-peak-to-trough. The price of a call does not depend on which target it is
-handed, which is what §3.2 leans on.
+Degree 13, `m = 3`, the base `ic run` used (4 005 points, dimension 12),
+64 pairs, every call conclusive:
 
-**`sat` is not flat, and is not a counter-example either.** A third
-peak-to-trough is a real swing, but it has no trend in the target: mean
-`11 576` conflicts per call, coefficient of variation about `10 %`, and the
-largest and smallest both sit in the middle of the target range. That is the
-wobble of a randomised search restarted on a different instance, not a cost
-that tracks which target it was given.
+| oracle | unit | ratio swap / `R`: min / median / max | swap dearer / cheaper | sign test `p` | control: worst unrelated pair | swapped points decomposed |
+|---|---|---:|---:|---:|---:|---:|
+| `enumerate` | group additions | 1.000 / 1.000 / 1.000 | 0 / 0 | — | 1.000 | 64 / 64 |
+| `meet_in_the_middle` | pair-table probes | 1.000 / 1.000 / 1.000 | 0 / 0 | — | 1.000 | 64 / 64 |
+| `semaev_s4_pairs_and_solve` | pairs | 1.000 / 1.000 / 1.000 | 0 / 0 | — | 1.000 | 64 / 64 |
+| `matrix_f4_splitting` | F4 word operations | 0.502 / **1.000** / 1.363 | 32 / 32 | 1.00 | 1.814 | 64 / 64 |
+| `cdcl_sat_native_xor` | SAT conflicts | 0.017 / **0.968** / 100.2 | 31 / 33 | 0.90 | 53.7 | 64 / 64 |
 
-**Two solvers establish nothing here, and are excluded from the finding.**
-`enumerate` and `pair-table` expose no operation counter, so they could only be
-timed — and their whole-run totals move by `2.6 %` and `4.9 %` while the number
-of calls those runs make moves from 12 to 20. A total that does not follow the
-call count is paying for something fixed, setup, not for the calls; dividing it
-by the call count returns the reciprocal of the call count and nothing else
-(`0.0022 s` at 12 calls against `0.0013 s` at 20, which is exactly `20/12`).
-The artefact flags both `setup_dominated`. By §6 those rows would in any case
-be wall clock, a practicality note and never the metric.
+**No oracle is systematically dearer on the swapped point.**  Matrix-F4, the
+deterministic solver with an operation count, has a median ratio of exactly
+`1.000` and is dearer on the swap in exactly half the pairs.  Its price on `R`
+alone runs `45.9M`–`109.6M` word operations, a `2.4×` spread between targets,
+and the dearest swapped pair (`1.36×`) is *below* the dearest unrelated pair
+(`1.81×`): the paired ratio is the solver's own target-to-target wobble.  SAT
+is heavy-tailed per target — `363` to `71 845` conflicts on `R` alone, `200×`
+— so a single pair at `100×` against a control worst of `54×` is the tail of
+a randomised search, and the sign test sees no direction (`31 / 33`).  The
+three enumerative oracles are trivially flat on this base — nearly every
+point of the field is in it, so `R` and `R − P + Q` are both found on the
+first probe — and establish nothing beyond that.
 
-**Scope.** One rung (`degree 13`), one base (4 005 points collapsed by
-Frobenius onto 77 orbit columns), one seed, `m = 3`. `wdsat` was swept and
-returned `--solver wdsat requires --wdsat-binary` on every target; the
-repository does not vendor that binary, so it is recorded as attempted and not
-exercised rather than skipped. The `enumerate` oracle early-exits at its first
-witness (`decompose` in `src/cryptanalysis/koblitz_index_calculus.rs`), so its
-runs are not a whole-base sweep; `groebner` and `sat` dispatch elsewhere.
+Two more cells say the same thing where the enumerative oracles do move.  At
+`13:2` matrix-F4 runs `0.752 / 0.983 / 1.246` (`26 / 38`, `p = 0.17`, control
+worst `1.30`) and SAT `0.037 / 0.883 / 10.9` (`32 / 32`).  At `15:3` (dimension
+5, 33 points) enumeration, meet in the middle and `S₄` now vary `0.2`–`4×` with
+the target and their worst swapped pair sits inside the control's; matrix-F4
+runs `0.139 / 0.996 / 10.1` (`31 / 33`, control worst `11.3`); SAT exhausted
+its `200 000`-conflict budget on one side or the other of 43 of its 64 pairs
+there and is **not read**.  Every swapped point every conclusive oracle was
+handed decomposed, as it must.
+
+**Scope.**  One base per rung, one seed, `m ∈ {2, 3}`, degrees 13 and 15.
+`wdsat` is not among the oracles `ic swap` prices; the repository does not
+vendor its binary.  The per-call price is a property of the solver's search
+and not of whether the target was swapped, which is the condition §3.2 needs
+— on two toy rungs, and nothing here is a speedup.
 
 ---
 
-## E4 — Large primes: **the guard holds, and the relations are 5–11× redundant**
+## E4 — Large primes: **the guard holds; the `5–11×` is withdrawn**
 
 **Falsifier:** a guarded cell below the BSGS line at the same memory.  None was.
 The measurement the design actually demanded is the **rank**, "not assumed":
@@ -385,17 +484,57 @@ The measurement the design actually demanded is the **rank**, "not assumed":
 
 Two findings, both on the caveat the design wrote in advance.
 
-**Paired relations are highly dependent.**  Only `9%` to `20%` of them add rank.
-The model prices the partials and the pairing; it does not price the fact that
-five to eleven paired relations are needed per independent one.  That is a real
-cost the `2^70.50` optimum does not carry.
+**"Paired relations are `5–11×` redundant" is withdrawn.**  Class:
+**accounting** — the algorithm did not change, the denominator did, and the
+number being corrected is one this thread published.  It divided the rank by
+however many paired relations the run happened to collect, and that is a
+harness choice, not a cost the method pays.
 
-**And at `m = 2` they cannot be independent.**  A paired relation is
-`R − R' = P_i − P_j`: a **difference** of two unknowns and nothing else.  The
-matrix of differences has rank at most `|F| − 1` by construction, which is
-exactly what the last column shows saturating at.  A large-prime pipeline at
-`m = 2` therefore cannot pin the absolute logarithms at all without mixing in
-ordinary relations — a structural limit, not a sampling shortfall.
+The rows above say so themselves.  The first two share a factor base —
+`n = 19`, `l = 7`, `|F| = 139` — and differ only in `l'`.  The second collects
+`2.2×` the relations, moves the rank by **exactly one**, `134 → 135`, and
+halves the ratio.  Run long enough on a small base the statistic is unbounded:
+at `n = 13`, `l = 6` it reads `0.0069`, which by the same convention is "`145×`
+redundant", with the ceiling reached at relation `145` of `8 883`.
+
+`e4_pairing_crossing` separates the two quantities that one statistic was
+conflating — the **ceiling**, which is structural, and the **crossing**, which
+is the cost:
+
+| `\|F\|` | `l'` | collected | ceiling | reached at | `rank/rels` as published | `rank/rels` at the crossing | `2/ln\|F\|` |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 139 | 10 | 674 | 134/139 | 453 | `0.1988` | **0.2958** | 0.405 |
+| 139 | 11 | 1 463 | 135/139 | 383 | `0.0923` | **0.3525** | 0.405 |
+| 279 | 11 | 2 122 | 275/279 | 1 140 | `0.1296` | **0.2412** | 0.355 |
+| 65 | 9 | 159 | 57/65 | 118 | `0.3585` | **0.4831** | 0.479 |
+| 65 | 9 | 8 883 | 61/65 | 145 | `0.0069` | **0.4207** | 0.479 |
+
+The published column spans **`52×`**; the crossing column spans **`2.0×`**.
+The cost is about `3×`, not `5–11×`.
+
+**And it is the coupon collector again.**  §0.5 retracted one statistic for
+being `ln|F|/m` in disguise; this is the same error in a second guise.  Paired
+relations at `m = 2` are differences, so they are *edges of a graph* on the
+base, and reaching the ceiling is graph connectivity — about `(|F|/2)·ln|F|`
+edges, making `rank/relations` at the crossing `≈ 2/ln|F|`.  Measured against
+that prediction the ratios are `0.73, 0.87, 0.68, 1.01, 0.88`.  So it is not a
+constant either, and this thread has now published the same counting error
+twice.
+
+**The structural half survives, and is the real finding.**  A paired relation
+at `m = 2` is `R − R' = P_i − P_j`: a **difference** of two unknowns and
+nothing else.  The matrix of differences has rank at most `|F| − 1` by
+construction — every row is orthogonal to the all-ones vector — which is what
+the ceiling column saturates at, a little under it because some base points
+never appear in a partial at all.  A large-prime pipeline at `m = 2` therefore
+cannot pin the absolute logarithms without mixing in ordinary relations.  That
+is a structural limit and it is untouched by the retraction above.
+
+**What the model owes, restated.**  `cost_cell` has no large-prime arm at all —
+it prices `m`, `l`, the split and the Frobenius collapse, and nothing else — so
+neither figure was ever inside the `2^124.99` headline.  A large-prime variant,
+were one priced, would owe about `3×` the relations rather than `5–11×`, and
+would owe the `|F| − 1` ceiling as a hard constraint rather than a cost.
 
 ---
 
@@ -471,11 +610,12 @@ there.
 
 | | what the run says | class |
 |---|---|---|
-| §0.5 | the published `2.0×` relation constant is **withdrawn**: it is the coupon collector `ln\|F\|/m`, not a constant, not target correlation, and not something the model owes.  At the budgeted `\|F\|` relations every descent lands and `Λ = 3.103` against a predicted `3` | **accounting** |
+| §0.5 | the published `2.0×` relation constant is **withdrawn**: it is the coupon collector `ln\|F\|/m`, not a constant, not target correlation, and not something the model owes.  At the budgeted `\|F\|` relations every descent lands and `Λ = 3.082` against a predicted `3` | **accounting** |
 | E1 | the law's exponent survives at `n = 13, 19`; the `Λ` gap the last round reported is the stopping rule, and closes on the budget | constant belongs to the harness |
 | E2 | `λ` moves `6 600×` and `Λ` moves `2.4×` — the dimension is not a lever, measured on both stopping rules; the model's predicted rise above saturation does not occur.  The `l = 5` outlier is a **structural rank ceiling of 28/29**, exhaustive over all 810 reachable decompositions, not a relation count | model conservative; `l = 5` an accounting correction |
-| E3 | a real solver's price per oracle call does not depend on the target: `6.3 %` across seven targets in F4 word operations | **stage diagnostic**, §8 |
-| E4 | the guard holds; paired relations are `5–11×` redundant, and at `m = 2` they are differences and **cannot** span | a cost the model omits |
+| E3 | no solver is systematically dearer on `R − P + Q` than on `R`: matrix-F4's median ratio over 64 built pairs is `1.000`, dearer in exactly half, and the worst swapped pair is below the worst unrelated one.  The earlier "`6.3 %` flat across seven targets" priced a target family, not the swap, and is withdrawn | **stage diagnostic**, §8; the withdrawal **accounting** |
+| §0.6 | E1's four-rung falsifier **cannot be fired on this curve family**: only `13, 19, 23, 41` have the ECC2K-130 shape below `n = 62`, and `41` costs `6.6 × 10¹²` oracle operations.  `29` and `37` were never rungs | a fact about the family, not the tooling |
+| E4 | the guard holds, and at `m = 2` paired relations are differences that **cannot** span — but `5–11× redundant` is **withdrawn**: measured at the rank ceiling the cost is `3×`, and it tracks `2/ln\|F\|` | **accounting** |
 | E5 | Poisson is right for the decompositions that count; the raw over-dispersion is `±P` degeneracy | no correction needed |
 | E6 | the Frobenius collapse delivers exactly `n`, with independent relations | §6.1 confirmed |
 
@@ -486,25 +626,39 @@ untouched by the retraction too: `cost_cell` prices `2^l` relations with
 `ρ = 1` and always did, so withdrawing the `2.0×` removes a caveat and does
 not buy a bit.
 
-What has changed is that the product law is now *evidence* at `n = 13` and
-`n = 19` rather than arithmetic; that **one** of the constants it was said to
-price optimistically really is (large-prime pairing, `5–11×` redundant), while
-the other was an artefact of the harness and is withdrawn; and that at the
-relation budget the law actually charges, `Λ` sits at the predicted `m`.
+What has changed is that the product law is now *evidence* at `n = 13`, `19`
+and `23` rather than arithmetic; that **both** of the constants it was said to
+price optimistically were artefacts of the harness and are withdrawn, the
+second the same coupon-collector error as the first in a different guise; and
+that at the relation budget the law actually charges, `Λ` sits at `3.082`
+against the predicted `m = 3` across twelve runs on three rungs.
+
+The one thing E4 leaves standing is structural rather than a constant: at
+`m = 2` paired relations are differences, so their rank is capped at `|F| − 1`
+and a large-prime pipeline cannot pin absolute logarithms on its own.
 
 ## What this does not settle
 
-- **Two end-to-end rungs, not four.**  The slope fit cannot fire its own
-  falsifier.  `n = 29` and `n = 37` need the Rust pipeline.
+- **Three end-to-end rungs, not four, and there is no fourth to have.**  E1's
+  falsifier wants four; only `13, 19, 23, 41` have the ECC2K-130 shape below
+  `n = 62` and `41` costs `6.6 × 10¹²` oracle operations.  This is a limit of
+  the curve family, not of the tooling — §0.6.  What it means is that E1's
+  slope falsifier is **unfireable here**, and a falsifier that cannot fire is
+  not doing the work §4 asks of it.
 - **`m = 3` only, and `m = 2` only for E4 and E5's pair cells.**  Every
   conclusion in §0.5 is at one summand count.
-- **The budget rule's slope is `0.944 ± 0.028` against a falsifier of `0.95`.**
-  It does not fire — the falsifier wants four rungs, this is two — and the
-  threshold is `0.21` standard errors away, so the measurement does not say
-  which side of it the truth is on.  Four rungs would.  See §0.5.
-- **The two residuals §0.5 leaves unpriced are measured only at `\|F\| ≤ 279`.**
+- **The budget slope is `0.976 ± 0.024` against a falsifier of `0.95`**, about
+  `1.1` standard errors above it.  It was `0.944 ± 0.028` on two rungs, *below*
+  the line, and the third rung reversed the sign — which is the clearest
+  statement available of how much a two-point fit is worth.  A fourth rung
+  could move it again and cannot be had.
+- **The two residuals §0.5 leaves unpriced are measured only at `\|F\| ≤ 527`.**
   One to three descent retries, and three dead base points per base.  Whether
   either matters at `\|F\| = 2^44.5` is not something these rungs can say, which
   is why neither is folded into the model.
-- **E3 is one rung, one base, one seed**, and two of its four solvers turned out
-  setup-dominated and answer nothing.  `wdsat` was not exercised at all.
+- **E4's `3×` crossing is measured on five cells at `\|F\| ≤ 279`**, and it is a
+  law (`2/ln\|F\|`) rather than a constant, so quoting it as a number at
+  `\|F\| = 2^44.5` would repeat the error this round retracted twice.
+- **E3 is two toy rungs, one base each, one seed.**  Its enumerative oracles
+  are trivially flat on the degree-13 base and only move at `15:3`, and SAT's
+  `15:3` row exhausted its budget and is not read.  `wdsat` was not exercised.

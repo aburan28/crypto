@@ -1,0 +1,11 @@
+2026-09-25T14:29:09Z start, pending [('7:4:7', 'all'), ('8:4:7', 'all'), ('11:5:6', 'u0'), ('11:5:6', 'u1'), ('11:5:6', 'u2'), ('11:5:6', 'u3')]
+2026-09-25T14:29:09Z launch 7:4:7 all pid 525
+2026-09-25T14:29:09Z launch 8:4:7 all pid 526
+2026-09-25T14:44:42Z runner stopped by hand (pids 518, 524); (7,4) and (8,4) processes left running; (11,5) u0-u3 launched by hand with run.py's command, up to four processes at a time
+2026-09-25T14:44:42Z launch 11:5:6 u0 pid 1014
+2026-09-25T14:44:42Z launch 11:5:6 u1 pid 1016
+2026-09-25T16:05:06Z launch 11:5:6 u2 pid 3049
+2026-09-25T16:05:06Z done 11:5:6 u0 (by hand)
+2026-09-25T16:29:00Z done 11:5:6 u1 (by hand)
+2026-09-25T16:29:00Z launch 11:5:6 u3 pid 3730
+Later completions (7,4) and (8,4) whole cells, (11,5) u2 and u3 are recorded by each job's own .log and .jsonl (per-draw secs); this log was not appended live after 16:29.

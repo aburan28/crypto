@@ -54,8 +54,8 @@ pub fn faulty(p1: &Pt, p2: &Pt, mask: u128) -> bool {
     match (p1, p2) {
         (Pt::Aff(x1, _), Pt::Aff(x2, _)) => {
             let prod = (x1 * x2).to_u64_digits();
-            let lo = prod.get(0).copied().unwrap_or(0) as u128;
-            (lo & (mask as u128 - 1)) == 0
+            let lo = prod.first().copied().unwrap_or(0) as u128;
+            (lo & (mask - 1)) == 0
         }
         _ => false,
     }
@@ -224,7 +224,7 @@ mod tests {
 
     #[test]
     fn faulty_add_detects_marked_inputs() {
-        let curve = Curve {
+        let _curve = Curve {
             p: BigUint::from(101u32),
             a: BigUint::zero(),
             b: BigUint::from(7u32),
