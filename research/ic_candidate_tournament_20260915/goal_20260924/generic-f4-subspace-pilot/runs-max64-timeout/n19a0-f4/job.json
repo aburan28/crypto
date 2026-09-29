@@ -3,12 +3,12 @@
   "config": {
     "batch_trials": 1,
     "linear_algebra": "dense",
-    "max_trials": 1,
+    "max_trials": 64,
     "solver": "f4",
     "summands": 3
   },
-  "curve_a": 1,
-  "degree": 17,
+  "curve_a": 0,
+  "degree": 19,
   "exclusive_phases": true,
   "factor_base": {
     "dimension": 6,
@@ -17,8 +17,8 @@
   "mode": "ic",
   "public_targets": [
     [
-      "853",
-      "39791"
+      "319974",
+      "349085"
     ]
   ]
 }

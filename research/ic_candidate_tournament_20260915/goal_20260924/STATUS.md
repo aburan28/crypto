@@ -250,8 +250,10 @@ Post-registration source audit (PR
 template needs `4n` Boolean variables on the registered ambient
 `subgroup_orbits` bases, which exceeds `MAX_VARS=64` on every cell, so all
 twenty v2 F4/F5-family layouts are statically `unsupported` before solving.
-That finding does not rewrite live receipts or decide SAT arms. The next
-bounded step is the disclosed-point
-[standard-subspace dimension-6 F4/F5 recovery pilot](generic-f4-subspace-pilot/PROTOCOL.md):
-encoder-feasible layouts on already exposed targets only, then a new seed for
-any fresh competitive panel.
+That finding does not rewrite live receipts or decide SAT arms. The disclosed-point
+[standard-subspace dimension-6 F4/F5 recovery pilot](generic-f4-subspace-pilot/RESULT.md)
+shows both `f4` and `f5` dispatch into MatrixF4/MatrixF5 with
+`unsupported: false` on all five inventory points at `max_trials=1`, with zero
+relations/solutions under that budget. It is a factor-base-policy diagnostic,
+not a family qualification. A fresh competitive registration still needs a new
+seed, the v2 exposure census, and a recovery-capable budget.

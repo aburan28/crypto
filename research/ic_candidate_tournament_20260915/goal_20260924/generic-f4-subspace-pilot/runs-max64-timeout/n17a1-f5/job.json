@@ -3,8 +3,8 @@
   "config": {
     "batch_trials": 1,
     "linear_algebra": "dense",
-    "max_trials": 1,
-    "solver": "f4",
+    "max_trials": 64,
+    "solver": "f5",
     "summands": 3
   },
   "curve_a": 1,
