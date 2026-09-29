@@ -10,15 +10,27 @@ import numpy as np
 import fixtures as fx
 from receipt_io import reserve, save
 
-VARIANTS=(('binary_naf',0),('reduced_tau_naf',0),('binary_naf',1),('reduced_tau_naf',1))
+VARIANTS=(('binary_naf',0,0),('reduced_tau_naf',0,0),('binary_naf',1,0),('reduced_tau_naf',1,0))
+STUDIES=('original','square-unroll')
 
 
-def label(v):return f'{v[0]}:linear_square={v[1]}'
+def variants_for(study):
+    if study=='original':return VARIANTS
+    if study=='square-unroll':
+        return tuple((method,1,no_unroll) for method in ('binary_naf','reduced_tau_naf') for no_unroll in (0,1))
+    raise ValueError(study)
 
 
-def load_kernel(cp,modules,m,fast):
-    start=time.perf_counter();key=(m,fast);was_cached=key in modules
+def control_for(v,study):return (v[0],1,0) if study=='square-unroll' else VARIANTS[0]
+
+
+def label(v):return f'{v[0]}:linear_square={v[1]}'+(':square_no_unroll=1' if v[2] else '')
+
+
+def load_kernel(cp,modules,m,fast,no_unroll=0):
+    start=time.perf_counter();key=(m,fast,no_unroll);was_cached=key in modules
     options=('--std=c++17',f'-DFIELD_M={m}',f'-DFAST_SQUARE={fast}')
+    if no_unroll:options+=('-DLINEAR_SQUARE_NOUNROLL=1',)
     if not was_cached:
         modules[key]=cp.RawModule(code=(fx.HERE/'arithmetic.cuh').read_text(),options=options)
     kernel=modules[key].get_function('evaluate')
@@ -26,7 +38,7 @@ def load_kernel(cp,modules,m,fast):
                    'explicit_options':options,'attributes':kernel.attributes}
 
 
-def check_device(cp,panels,modules,receipt,output):
+def check_device(cp,panels,modules,receipt,output,variants=VARIANTS):
     """Run the 96 unique archived cases in all four arms before any timing."""
     receipt['stage']='device_smoke';save(output,receipt)
     for panel in panels:
@@ -36,9 +48,9 @@ def check_device(cp,panels,modules,receipt,output):
         row.update(invocations={},unique_cases=len(panel['cases']))
         receipt['smoke']['panels'].append(row)
         dc=cp.asarray(fx.columns(m))
-        for method,fast in VARIANTS:
-            key=label((method,fast));hp,hd,hl,expected,meta=prepared[method]
-            kernel,compiled=load_kernel(cp,modules,m,fast)
+        for method,fast,no_unroll in variants:
+            key=label((method,fast,no_unroll));hp,hd,hl,expected,meta=prepared[method]
+            kernel,compiled=load_kernel(cp,modules,m,fast,no_unroll)
             dp,dd,dl=cp.asarray(hp),cp.asarray(hd),cp.asarray(hl)
             out=cp.empty_like(dp);n=len(hl)
             row['invocations'][key]={'status':'launch_pending','compile':compiled,
@@ -62,9 +74,29 @@ def hardware():
     return fx.ref.command(['nvidia-smi','--query-gpu=name,uuid,driver_version,memory.total,clocks.sm,clocks.mem,power.draw,temperature.gpu','--format=csv,noheader'])
 
 
-def run(output,mode='benchmark'):
+def summarize(row,variants,study):
+    result={}
+    for v in variants:
+        name=label(v);control=label(control_for(v,study))
+        aa=row['aa_by_control'][control]
+        noise=max(abs(a['event_ms']/b['event_ms']-1) for a,b in aa)
+        samples=[r['samples'][name]['ms_per_launch'] for r in row['rounds']]
+        ratios=[r['samples'][name]['event_ms']/r['samples'][control]['event_ms'] for r in row['rounds']]
+        ratio=statistics.median(ratios)
+        short=any(r['samples'][k]['event_ms']<50 for r in row['rounds'] for k in (name,control))
+        result[name]={'control':control,'median_ms_per_launch':statistics.median(samples),
+                      'min_ms_per_launch':min(samples),'median_paired_kernel_cost_ratio':ratio,
+                      'aa_max_deviation':noise,'short_samples':short,
+                      'screen_passed':ratio<=.90 and 1-ratio>noise and not short}
+    return result
+
+
+def run(output,mode='benchmark',study='original'):
     if mode not in ('smoke','benchmark'):raise ValueError(mode)
-    receipt={'status':'started','stage':'initializing','mode':mode,
+    variants=variants_for(study)
+    controls=tuple(dict.fromkeys(control_for(v,study) for v in variants))
+    receipt={'status':'started','stage':'initializing','mode':mode,'study':study,'schema_version':2,
+             'variant_order':[label(v) for v in variants],
              'gpu_executed':False,'gpu_launch_submitted':False,
              'classification':'known-scalar GPU arithmetic stage diagnostic',
              'smoke':{'status':'pending','verified_outputs':0,'panels':[]},
@@ -86,7 +118,7 @@ def run(output,mode='benchmark'):
         modules={};start_all=time.perf_counter()
         panels=list(fx.panels())
         receipt['oracle_seconds']=sum(p['oracle_seconds'] for p in panels)
-        check_device(cp,panels,modules,receipt,output)
+        check_device(cp,panels,modules,receipt,output,variants)
         receipt['stage']='benchmark' if mode=='benchmark' else 'device_smoke_complete'
         save(output,receipt)
         for panel in (panels if mode=='benchmark' else ()):
@@ -96,21 +128,22 @@ def run(output,mode='benchmark'):
                 prepared[method]=arrays[:4];prep_meta[method]=arrays[4]
             start=time.perf_counter();cols=fx.columns(m);table_seconds=time.perf_counter()-start
             functions={};compile_meta={}
-            for fast in (0,1):
-                functions[fast],compile_meta[str(fast)]=load_kernel(cp,modules,m,fast)
+            for fast,no_unroll in dict.fromkeys((v[1],v[2]) for v in variants):
+                functions[fast,no_unroll],compile_meta[f'{fast}:{no_unroll}']=load_kernel(cp,modules,m,fast,no_unroll)
             row={k:panel[k] for k in ('m','holdout','seed','identity','field','curve','source_receipt_sha256','input_sha256','sage_output_sha256','oracle_seconds')}
             row.update(prepare=prep_meta,table_seconds=table_seconds,compile=compile_meta,
-                       block_size=128,unique_cases=24,evaluations_per_launch=24576,aa=[],rounds=[],invocations={})
+                       block_size=128,unique_cases=len(panel['cases']),evaluations_per_launch=len(prepared['binary_naf'][2]),
+                       aa_by_control={label(v):[] for v in controls},rounds=[],invocations={})
             receipt['panels'].append(row);save(output,receipt)
             resident={}
-            for v in VARIANTS:
-                method,fast=v;hp,hd,hl,expected=prepared[method]
+            for v in variants:
+                method,fast,no_unroll=v;hp,hd,hl,expected=prepared[method]
                 start=time.perf_counter()
                 dp,dd,dl=cp.asarray(hp),cp.asarray(hd),cp.asarray(hl)
                 dc=cp.asarray(cols);out=cp.empty_like(dp);cp.cuda.Stream.null.synchronize()
                 uploaded=time.perf_counter()
                 args=(dp,dd,dl,np.int32(len(hl)),dc,out,np.int32(method=='reduced_tau_naf'))
-                kernel=functions[fast];grid=((len(hl)+127)//128,)
+                kernel=functions[fast,no_unroll];grid=((len(hl)+127)//128,)
                 kernel(grid,(128,),args);cp.cuda.Stream.null.synchronize()
                 launched=time.perf_counter();got=out.get();downloaded=time.perf_counter()
                 if not np.array_equal(got,expected):raise AssertionError((m,label(v),'warm invocation'))
@@ -119,7 +152,7 @@ def run(output,mode='benchmark'):
                     'kernel_host_seconds':launched-uploaded,'download_seconds':downloaded-launched,
                     'verification_seconds':verified-downloaded,'warm_gpu_invocation_seconds':downloaded-start,
                     'output_sha256':fx.sha(got.tobytes()),
-                    'accounted_stage_seconds':prep_meta[method]['prepare_seconds']+table_seconds+compile_meta[str(fast)]['seconds']+verified-start}
+                    'accounted_stage_seconds':prep_meta[method]['prepare_seconds']+table_seconds+compile_meta[f'{fast}:{no_unroll}']['seconds']+verified-start}
                 resident[v]=(kernel,grid,args,out,expected)
                 save(output,receipt)
 
@@ -131,34 +164,30 @@ def run(output,mode='benchmark'):
                 got=out.get()
                 if not np.array_equal(got,expected):raise AssertionError((m,label(v),'timed result'))
                 return {'event_ms':ms,'launches':repeats,'ms_per_launch':ms/repeats,
-                        'known_scalar_evaluations_per_second':24576*repeats/(ms/1000),
+                        'known_scalar_evaluations_per_second':row['evaluations_per_launch']*repeats/(ms/1000),
                         'output_sha256':fx.sha(got.tobytes())}
 
-            pilot=measure(VARIANTS[0],1)
+            pilot=measure(controls[0],1)
             repeats=min(16,max(1,int(np.ceil(50/max(pilot['event_ms'],.001)))))
             row.update(pilot=pilot,launches_per_sample=repeats)
             for _ in range(5):
-                row['aa'].append([measure(VARIANTS[0],repeats),measure(VARIANTS[0],repeats)])
-                save(output,receipt)
+                for control in controls:
+                    row['aa_by_control'][label(control)].append([measure(control,repeats),measure(control,repeats)])
+                    save(output,receipt)
             for rep in range(7):
-                order=VARIANTS if rep%2==0 else VARIANTS[::-1]
+                order=variants if rep%2==0 else variants[::-1]
                 row['rounds'].append({'order':[label(v) for v in order],
                                       'samples':{label(v):measure(v,repeats) for v in order}})
                 save(output,receipt)
-            baseline=label(VARIANTS[0]);row['summary']={}
-            noise=max(abs(a['event_ms']/b['event_ms']-1) for a,b in row['aa'])
-            row['aa_max_deviation']=noise
-            for v in VARIANTS:
-                k=label(v);samples=[r['samples'][k]['ms_per_launch'] for r in row['rounds']]
-                ratios=[r['samples'][k]['event_ms']/r['samples'][baseline]['event_ms'] for r in row['rounds']]
-                ratio=statistics.median(ratios)
-                row['summary'][k]={'median_ms_per_launch':statistics.median(samples),'min_ms_per_launch':min(samples),
-                    'median_paired_kernel_cost_ratio':ratio,'screen_passed':ratio<=.90 and 1-ratio>noise,
-                    'short_samples':any(r['samples'][k]['event_ms']<50 for r in row['rounds'])}
+            row['summary']=summarize(row,variants,study)
             row['after']=hardware();save(output,receipt)
             del resident
             cp.get_default_memory_pool().free_all_blocks()
         receipt['total_benchmark_seconds']=time.perf_counter()-start_all
+        if mode=='benchmark':
+            complete={(p['m'],p['holdout']) for p in receipt['panels']}=={(83,False),(83,True),(131,False),(131,True)}
+            receipt['screen_by_candidate']={label(v):complete and all(p['summary'][label(v)]['screen_passed'] for p in receipt['panels'])
+                                            for v in variants if v!=control_for(v,study)}
         receipt['status']='passed';receipt['stage']='complete';receipt['after']=hardware()
     except Exception:
         receipt['status']='failed';receipt['error']=traceback.format_exc()
@@ -171,5 +200,6 @@ def run(output,mode='benchmark'):
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('--output',required=True,type=Path)
     ap.add_argument('--mode',choices=('smoke','benchmark'),default='benchmark')
+    ap.add_argument('--study',choices=STUDIES,default='original')
     args=ap.parse_args();args.output.parent.mkdir(parents=True,exist_ok=True)
-    raise SystemExit(run(args.output,args.mode))
+    raise SystemExit(run(args.output,args.mode,args.study))
