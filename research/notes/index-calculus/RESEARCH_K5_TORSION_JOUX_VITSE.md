@@ -18,8 +18,8 @@
 > cut, flat in `p`, every planted quadruple found and every test agreeing
 > with an independent oracle.  On the derived exponents (`n^{2/5}` residuals
 > against rho's `n^{1/2}`) the plain route reaches parity at `2^302` and the
-> 2-torsion route at `2^205`, extrapolated; parity at `2^128` would need
-> `C″ < 3.5·10⁵`, `210×` below the measurement.  §6's falsification line
+> 2-torsion route at `2^203` (subgroup order, `n = p⁵/4`), extrapolated;
+> parity at `2^128` would need `C″ < 4.0·10⁵`, `181×` below the measurement.  §6's falsification line
 > (`C″ > 10⁷` with symmetries) is crossed: **the `k = 5` route on this F4
 > engine is not a parity programme at a size that fits a machine**, and
 > the levers left are the ones §5 names, each with the factor it must buy.
@@ -109,10 +109,10 @@ Crossovers implied by the measured C″, extrapolated on residuals ∝ n^{2/5} a
 
 | symmetrisation | C″ (top size) | columns per p | rho S reference | parity at p* | n* |
 |:--|--:|--:|--:|--:|--:|
-| plain | 3.04e+10 | 0.5 | 1.30 (√n = p^{5/2}) | 1.62e+18 | 2^302 |
-| 2-torsion | 7.26e+07 | 0.25 | 0.65 (√n = p^{5/2}/2) | 2.20e+12 | 2^205 |
+| plain | 3.04e+10 | 0.5 | 1.30 (√n = p^{5/2}) | 1.62e+18 | 2^302 (n = p⁵) |
+| 2-torsion | 7.26e+07 | 0.25 | 0.65 (√n = p^{5/2}/2) | 2.20e+12 | 2^203 (n = p⁵/4) |
 
-The 2-torsion symmetry cuts C″ by 418× at the top size.  For parity at 2^128 on the 2-torsion route: p* = 2^25.6, so C″ < 3.49e+05; at 2^160: C″ < 3.21e+06.
+The 2-torsion symmetry cuts C″ by 418× at the top size.  For parity at a subgroup order of 2^128 on the 2-torsion route (p = (4·2^128)^{1/5} = 2^26.0): C″ < 4.01e+05, 181× below the measurement; at 2^160: C″ < 3.69e+06 (20×); at 2^100: C″ < 5.76e+04 (1,261×).
 
 Reading it:
 
@@ -132,7 +132,10 @@ Reading it:
   disagreement with the oracle.
 - **Neither reaches parity at a size that fits.**  On the derived exponents
   the plain route crosses rho at `2^302` and the 2-torsion route at
-  `2^205` — the `k = 3` double-large-prime route's `2^237` sits between
+  `2^203` (both in the order of the group the logarithm lives in: `p⁵`
+  for the prime-order Weierstrass curves, `p⁵/4` for the Edwards subgroup,
+  the convention of the tables' size column) — the `k = 3`
+  double-large-prime route's `2^237` sits between
   them, and the full `k = 4` route's `2^151` below both.  These are
   extrapolations on `n^{2/5}` and `n^{1/2}` from a phase cost; no
   end-to-end `k = 5` `S` exists and none is claimed.
@@ -156,7 +159,7 @@ than `k = 3` large primes); with them `C″ ≈ 10⁵–10⁶` on this F4
 | plain: `C″ ≥ 10⁸`, certificate `7,315` columns | `3.0·10¹⁰`, `8,444` columns at degree `19` | confirmed (`300×` above the floor named) |
 | plain: `n* > 2^235` | `2^302` | confirmed |
 | 2-torsion: `C″ ≈ 10⁵–10⁶` | `7.3·10⁷` | **wrong by `73–730×`**: the certificate is at degree `9` on `1,633` columns, not degree `8` on `495` — the product variable `π` and its relation `π² = e₄` add a fifth unknown the estimate did not count |
-| 2-torsion: `n* ≈ 2^135–2^168` | `2^205` | wrong, same cause |
+| 2-torsion: `n* ≈ 2^135–2^168` | `2^203` | wrong, same cause |
 | falsification line `C″ > 10⁷` | crossed | **the route is falsified as a parity programme on this engine** |
 
 Inadmissible moves (none made): a smaller base, a different rate, dropping
@@ -166,13 +169,13 @@ unverified quadruple.
 ## 5. What is left, with the factor each lever must buy
 
 `n* ∝ C″^{10}` on this route (`p* ∝ C″²`, `n = p⁵`), so a factor `f` on `C″`
-moves the crossover by `10 log₂ f` bits.  From `2^205`:
+moves the crossover by `10 log₂ f` bits.  From `2^203`:
 
 | target | `C″` needed | factor below `7.3·10⁷` |
 |:--|--:|--:|
-| `2^160` | `3.2·10⁶` | `23×` |
-| `2^128` | `3.5·10⁵` | `210×` |
-| `2^100` | `5.3·10⁴` | `1,400×` |
+| `2^160` | `3.7·10⁶` | `20×` |
+| `2^128` | `4.0·10⁵` | `181×` |
+| `2^100` | `5.8·10⁴` | `1,260×` |
 
 - **4-torsion** (FGHR): a rational point of order four halves the degree
   once more (the group acting on the `y`-line grows from `(Z/2)^{k−1} ⋊ S_k`
@@ -182,12 +185,12 @@ moves the crossover by `10 log₂ f` bits.  From `2^205`:
   system has the same shape, so the sequence of reductions can be learned
   once and replayed; F4 here spends `7.3·10⁷` on a `1,513 × 1,633` matrix,
   and a fixed-pattern elimination could take `≈ 3–10×` off.
-- **Together** they are `12–100×`, short of the `210×` parity at `2^128`
-  needs and inside the `23×` parity at `2^160` needs.  So the honest
-  statement is: with both levers built and both delivering at the top of
-  their ranges, the `k = 5` route would reach parity somewhere between
-  `2^160` and `2^175`, extrapolated — a curve size at which rho itself is
-  `2^80`–`2^88` operations.  That is the literature's regime, not a
+- **Together** they are `12–100×`, short of the `181×` parity at `2^128`
+  needs and inside the `20×` parity at `2^160` needs.  So the honest
+  statement is: with both levers built and delivering anywhere in their
+  ranges, the `k = 5` route would reach parity somewhere between `2^137`
+  and `2^167`, extrapolated — a subgroup size at which rho itself is
+  `2^68`–`2^83` operations.  That is the literature's regime, not a
   machine's.
 
 Nothing here threatens a deployed curve, and nothing is claimed to.

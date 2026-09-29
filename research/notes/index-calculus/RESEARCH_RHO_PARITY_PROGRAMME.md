@@ -295,9 +295,10 @@ measured size are both outside this harness:
   measured.  Plain symmetrisation `C″ = 3.0·10¹⁰` (registered `≥ 10⁸`:
   confirmed; `n* = 2^302`); with the 2-torsion symmetry `C″ = 7.3·10⁷`
   (registered `10⁵–10⁶`: wrong by `73–730×`, the product variable's fifth
-  unknown was not counted; `n* = 2^205`).  The falsification line
-  `C″ > 10⁷` is crossed: the route is not a parity programme at a size
-  that fits a machine on this engine; parity at `2^128` needs `C″ < 3.5·10⁵`.
+  unknown was not counted; `n* = 2^203` in the subgroup's order).  The
+  falsification line `C″ > 10⁷` is crossed: the route is not a parity
+  programme at a size that fits a machine on this engine; parity at
+  `2^128` needs `C″ < 4.0·10⁵`.
 - **A cover** (Joux–Vitse 2012, `E(F_{p⁶})` → genus-`3` hyperelliptic over
   `F_{p²}`; the GHS work elsewhere in this repository): changes the target,
   not the constant, and belongs to a different ledger.

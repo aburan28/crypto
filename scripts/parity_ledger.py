@@ -234,14 +234,22 @@ def k5():
     return out
 
 
-def k5_crossover(c_second, c_add, columns_per_p, rho_s=1.3):
+def k5_crossover(c_second, c_add, columns_per_p, rho_s=1.3, cofactor=1):
     """Residuals = columns / rate = (columns_per_p · p) · 24p; rho = rho_s · √n
-    with n ≈ p⁵ (Weierstrass, prime order) or p⁵/4 (Edwards, cofactor 4 —
-    the caller passes rho_s already scaled).  S/rho = 24·columns_per_p·C″ /
-    (rho_s · c_add · √p): parity at √p = 24·columns_per_p·C″/(rho_s·c_add)."""
+    with n = p⁵ / cofactor (prime order: cofactor 1; Edwards: cofactor 4, and
+    the caller passes rho_s already scaled by 1/√cofactor).  S/rho =
+    24·columns_per_p·C″ / (rho_s · c_add · √p): parity at √p =
+    24·columns_per_p·C″/(rho_s·c_add).  `n*` is the subgroup order at `p*`,
+    the convention of the tables' size column."""
     sqrt_p = 24 * columns_per_p * c_second / (rho_s * c_add)
     p_star = sqrt_p ** 2
-    return p_star, 5 * math.log2(p_star)
+    return p_star, 5 * math.log2(p_star) - math.log2(cofactor)
+
+
+def k5_c_needed(bits, c_add, columns_per_p, rho_s, cofactor=1):
+    """C″ for parity at subgroup order 2^bits: p = (cofactor · 2^bits)^{1/5}."""
+    p = (cofactor * 2.0 ** bits) ** 0.2
+    return math.sqrt(p) * rho_s * c_add / (24 * columns_per_p)
 
 
 def two_term_minimum(sizes, rel, la, rho_s, c_add):
@@ -356,16 +364,18 @@ def main():
         print("\nCrossovers implied by the measured C″, extrapolated on residuals ∝ n^{2/5} and rho ∝ n^{1/2} (a stage diagnostic: no end-to-end k = 5 S exists):\n")
         print("| symmetrisation | C″ (top size) | columns per p | rho S reference | parity at p* | n* |")
         print("|:--|--:|--:|--:|--:|--:|")
-        for key, label, cpp, rho_s in (("weierstrass", "plain", 0.5, 1.3), ("edwards", "2-torsion", 0.25, 1.3 / 2.0)):
+        for key, label, cpp, rho_s, cof in (("weierstrass", "plain", 0.5, 1.3, 1), ("edwards", "2-torsion", 0.25, 1.3 / 2.0, 4)):
             xs = k5d.get(key)
             if not xs:
                 continue
             x = xs[-1]
-            p_star, bits = k5_crossover(x["c_second"], x["c_add"], cpp, rho_s)
-            print(f"| {label} | {x['c_second']:.2e} | {cpp} | {rho_s:.2f} (√n = p^{{5/2}}{'/2' if key == 'edwards' else ''}) | {p_star:.2e} | 2^{bits:.0f} |")
+            p_star, bits = k5_crossover(x["c_second"], x["c_add"], cpp, rho_s, cof)
+            print(f"| {label} | {x['c_second']:.2e} | {cpp} | {rho_s:.2f} (√n = p^{{5/2}}{'/2' if key == 'edwards' else ''}) | {p_star:.2e} | 2^{bits:.0f} (n = p⁵{'/4' if cof == 4 else ''}) |")
         if "edwards" in k5d and "weierstrass" in k5d:
             e = k5d["edwards"][-1]["c_second"]; w = k5d["weierstrass"][-1]["c_second"]
-            print(f"\nThe 2-torsion symmetry cuts C″ by {w/e:,.0f}× at the top size.  For parity at 2^128 on the 2-torsion route: p* = 2^25.6, so C″ < {math.sqrt(2**25.6) * (1.3/2) * k5d['edwards'][-1]['c_add'] / (24*0.25):.2e}; at 2^160: C″ < {math.sqrt(2**32) * (1.3/2) * k5d['edwards'][-1]['c_add'] / (24*0.25):.2e}.")
+            ca = k5d["edwards"][-1]["c_add"]
+            n128 = k5_c_needed(128, ca, 0.25, 1.3 / 2.0, 4); n160 = k5_c_needed(160, ca, 0.25, 1.3 / 2.0, 4); n100 = k5_c_needed(100, ca, 0.25, 1.3 / 2.0, 4)
+            print(f"\nThe 2-torsion symmetry cuts C″ by {w/e:,.0f}× at the top size.  For parity at a subgroup order of 2^128 on the 2-torsion route (p = (4·2^128)^{{1/5}} = 2^{(130/5):.1f}): C″ < {n128:.2e}, {e/n128:,.0f}× below the measurement; at 2^160: C″ < {n160:.2e} ({e/n160:,.0f}×); at 2^100: C″ < {n100:.2e} ({e/n100:,.0f}×).")
 
     print("\n## C. What parity needs, per route\n")
     if k4:
