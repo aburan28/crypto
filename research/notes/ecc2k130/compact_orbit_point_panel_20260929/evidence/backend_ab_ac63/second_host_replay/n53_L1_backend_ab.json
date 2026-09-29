@@ -1,0 +1,92 @@
+{
+  "L": 1,
+  "baseline_binary_sha256": "03922461e83aa0c8aa3d5552b3e7558fe64aa16d49343d07a648ce4694b03665",
+  "blocks": 5,
+  "candidate_binary_sha256": "97b46cefd7854b64bd89d6a4472e6db9811cc9b2a861cc8a23bcc42c88bf33f4",
+  "candidate_over_baseline_cpu_95pct_log_t_interval": [
+    0.23652110375724938,
+    0.23805191112397686
+  ],
+  "candidate_over_baseline_cpu_median": 0.23723616214990254,
+  "candidate_over_baseline_cpu_range": [
+    0.23654957841403249,
+    0.23825775334422433
+  ],
+  "candidate_over_baseline_wall_95pct_log_t_interval": [
+    0.23681220145377332,
+    0.23828404555306998
+  ],
+  "candidate_over_baseline_wall_median": 0.23759742371469078,
+  "candidate_over_baseline_wall_range": [
+    0.2367159951713719,
+    0.2383759596790629
+  ],
+  "host_cpu_flags_sha256": "cfa72cab683fd623a3df983c6c3ccca18a39bab6f8976756582fe94f20a9d529",
+  "host_cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+  "measurements": {
+    "0": {
+      "baseline": {
+        "cpu_seconds": 12.959956,
+        "rss_kib": 13404,
+        "wall_seconds": 12.962821087999998
+      },
+      "candidate": {
+        "cpu_seconds": 3.08781,
+        "rss_kib": 13872,
+        "wall_seconds": 3.090024916999994
+      }
+    },
+    "1": {
+      "baseline": {
+        "cpu_seconds": 12.947025,
+        "rss_kib": 13884,
+        "wall_seconds": 12.951529795999988
+      },
+      "candidate": {
+        "cpu_seconds": 3.072092,
+        "rss_kib": 13884,
+        "wall_seconds": 3.077714087000004
+      }
+    },
+    "2": {
+      "baseline": {
+        "cpu_seconds": 12.949573000000001,
+        "rss_kib": 13884,
+        "wall_seconds": 12.951458395000003
+      },
+      "candidate": {
+        "cpu_seconds": 3.072107,
+        "rss_kib": 13884,
+        "wall_seconds": 3.077233148000005
+      }
+    },
+    "3": {
+      "baseline": {
+        "cpu_seconds": 12.973885000000001,
+        "rss_kib": 13884,
+        "wall_seconds": 12.980065939000013
+      },
+      "candidate": {
+        "cpu_seconds": 3.076165,
+        "rss_kib": 13884,
+        "wall_seconds": 3.0816655890000106
+      }
+    },
+    "4": {
+      "baseline": {
+        "cpu_seconds": 12.950858,
+        "rss_kib": 13884,
+        "wall_seconds": 12.955079904000002
+      },
+      "candidate": {
+        "cpu_seconds": 3.06352,
+        "rss_kib": 13884,
+        "wall_seconds": 3.0666746320000016
+      }
+    }
+  },
+  "n": 53,
+  "same_Q_scalar_walk_and_charges": true,
+  "status": "PASS",
+  "targets_verified_per_arm": 5
+}

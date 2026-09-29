@@ -8759,6 +8759,29 @@ baseline-only controls revealed substantial host noise and NUMA memory binding f
 Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-130 improvement is established.</p></div>
 </section>
 <!-- END boolean-representation-audit-20260929 -->
+<!-- BEGIN compact-orbit-point-panel-20260929 -->
+<section class="panel" id="compact-orbit-point-panel-20260929">
+<div class="panel-head"><h2>Compact-orbit full-rank public-point panel <span class="chip">diagnostic</span></h2>
+<p>Cold E<sub>0</sub>/GF(2<sup>37,41,53</sup>) logarithms on the same published Q per cell. Five alternating full-process IC and signed-Frobenius rho pairs, with independently replayed rank and target relations and a second-machine archive replay. Rho now uses runtime PCLMUL and Itoh&ndash;Tsujii inversion; the original x86 software rho is retained in the archive as an accounting control. CPU ratios are paired within each cell, but different cells used different runner CPU models. One target is repeated at L=1; 1,024 distinct targets are repeated in five blocks at L=1,024.</p></div>
+<div class="table-scroll"><table>
+<caption>Median cold user+system CPU seconds; IC / rho is a runtime diagnostic, not an S or attack-speed ratio.</caption>
+<thead><tr><th>n</th><th>L</th><th>Arm</th><th>CPU s</th><th>CPU / rho</th><th>95% paired ratio interval</th><th>Verified</th><th>S, whole pipeline</th></tr></thead><tbody>
+<tr><td>37</td><td>1</td><td>rho, corrected</td><td>0.0061</td><td>1</td><td>reference</td><td>5/5</td><td>unset</td></tr>
+<tr><td>37</td><td>1</td><td>compact orbit, K=7</td><td>0.0093</td><td>1.545</td><td>1.465&ndash;1.682</td><td>5/5</td><td>unset</td></tr>
+<tr><td>37</td><td>1,024</td><td>rho, corrected</td><td>0.3145</td><td>1</td><td>reference</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>37</td><td>1,024</td><td>compact orbit, K=42</td><td>0.2484</td><td>0.789</td><td>0.788&ndash;0.791</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>41</td><td>1</td><td>rho, corrected</td><td>0.3033</td><td>1</td><td>reference</td><td>5/5</td><td>unset</td></tr>
+<tr><td>41</td><td>1</td><td>compact orbit, K=85</td><td>0.8274</td><td>2.727</td><td>2.674&ndash;2.774</td><td>5/5</td><td>unset</td></tr>
+<tr><td>41</td><td>1,024</td><td>rho, corrected</td><td>8.2928</td><td>1</td><td>reference</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>41</td><td>1,024</td><td>compact orbit, K=255</td><td>2.5655</td><td>0.309</td><td>0.306&ndash;0.313</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>53</td><td>1</td><td>rho, corrected</td><td>3.2631</td><td>1</td><td>reference</td><td>5/5</td><td>unset</td></tr>
+<tr><td>53</td><td>1</td><td>compact orbit, K=220</td><td>7.4374</td><td>2.283</td><td>2.261&ndash;2.300</td><td>5/5</td><td>unset</td></tr>
+<tr><td>53</td><td>1,024</td><td>rho, corrected</td><td>63.1452</td><td>1</td><td>reference</td><td>5,120/5,120</td><td>unset</td></tr>
+<tr><td>53</td><td>1,024</td><td>compact orbit, K=440</td><td>15.9048</td><td>0.252</td><td>0.251&ndash;0.256</td><td>5,120/5,120</td><td>unset</td></tr>
+</tbody></table></div>
+<p><span class="chip">accounting</span> The earlier software-rho batch CPU ratios of 0.154/0.099/0.086 at n37/41/53 move to 0.789/0.309/0.252 after the matched field-backend correction; same-runner rho A/B retains identical Q, scalars, walks and charges. Current rho still pays two scalar multiplications per target for walk starts. Common operation S, ratio to the generic-group floor, n=83 confidence and GF(2<sup>131</sup>) transfer remain unmeasured. The existing attack-speed verdict is unchanged. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_orbit_point_panel_20260929/RESULT.md">Result, raw archives and decisions</a>.</p>
+</section>
+<!-- END compact-orbit-point-panel-20260929 -->
 </body>
 </html>
 

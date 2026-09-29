@@ -148,42 +148,13 @@ fn carryless_product_software(left: u64, right: u64) -> u128 {
     product
 }
 
-#[cfg(target_arch = "x86_64")]
-#[target_feature(enable = "pclmulqdq")]
-unsafe fn carryless_product_pclmul(left: u64, right: u64) -> u128 {
-    use std::arch::x86_64::*;
-    let a = _mm_set_epi64x(0, left as i64);
-    let b = _mm_set_epi64x(0, right as i64);
-    let product = _mm_clmulepi64_si128::<0x00>(a, b);
-    let low = _mm_cvtsi128_si64(product) as u64;
-    let high = _mm_cvtsi128_si64(_mm_srli_si128::<8>(product)) as u64;
-    ((high as u128) << 64) | low as u128
-}
-
 #[cfg(target_arch = "aarch64")]
 #[target_feature(enable = "aes")]
 unsafe fn carryless_product_pmull(left: u64, right: u64) -> u128 {
     std::arch::aarch64::vmull_p64(left, right)
 }
 
-fn field_product_backend() -> &'static str {
-    #[cfg(target_arch = "x86_64")]
-    if std::arch::is_x86_feature_detected!("pclmulqdq") {
-        return "pclmulqdq";
-    }
-    #[cfg(target_arch = "aarch64")]
-    if std::arch::is_aarch64_feature_detected!("aes") {
-        return "pmull";
-    }
-    "portable"
-}
-
 fn carryless_product(left: u64, right: u64) -> u128 {
-    #[cfg(target_arch = "x86_64")]
-    if std::arch::is_x86_feature_detected!("pclmulqdq") {
-        // SAFETY: guarded by the runtime CPU-feature check above.
-        return unsafe { carryless_product_pclmul(left, right) };
-    }
     #[cfg(target_arch = "aarch64")]
     if std::arch::is_aarch64_feature_detected!("aes") {
         // SAFETY: the runtime feature check above proves PMULL availability.
@@ -198,25 +169,16 @@ fn raw_mul_field(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
 
 fn raw_inverse(curve: &KoblitzCurve, value: u64) -> u64 {
     assert_ne!(value, 0);
-    // The same Itoh–Tsujii addition chain used by the IC field backend.
-    // beta_k = value^(2^k - 1); n - 1 squarings and O(log n) multiplies.
-    let exponent = curve.n - 1;
-    let mut beta = value;
-    let mut length = 1u32;
-    for bit in (0..(31 - exponent.leading_zeros())).rev() {
-        let mut raised = beta;
-        for _ in 0..length {
-            raised = raw_square(curve, raised);
-        }
-        beta = raw_mul_field(curve, raised, beta);
-        length *= 2;
+    let exponent = (1u64 << curve.n) - 2;
+    let mut result = 1u64;
+    let mut base = value;
+    for bit in 0..curve.n {
         if (exponent >> bit) & 1 == 1 {
-            beta = raw_mul_field(curve, raw_square(curve, beta), value);
-            length += 1;
+            result = raw_mul_field(curve, result, base);
         }
+        base = raw_square(curve, base);
     }
-    debug_assert_eq!(length, exponent);
-    raw_square(curve, beta)
+    result
 }
 
 fn raw_neg(point: RawPoint) -> RawPoint {
@@ -673,12 +635,10 @@ fn main() {
     println!(
         "{}",
         json!({
-            "kind":"rho_ks_batch_summary","producer_version":"v2_stride_starts_pclmul_itoh",
+            "kind":"rho_ks_batch_summary","producer_version":"v2_stride_starts",
             "n":n,"a":a,"quotient_mode":mode.name(),"automorphism_size":automorphisms,
             "fixtures":fixtures,"batch_seed":batch_seed,"corpus":shared_corpus,"dp_bits":dp_bits,"jump_count":JUMPS,
             "target_source":if point_input.is_some() { "public_point_jsonl" } else { "generated_fixture" },
-            "field_product_backend":field_product_backend(),
-            "inversion_backend":"itoh_tsujii",
             "all_verified":true,"cross_target_solves":cross_solves,
             "total_walk_steps":total_steps,"table_entries":table.len(),
             "table_payload_lower_bound_bytes":table.len() * (1 + 4 * std::mem::size_of::<u64>()),
@@ -695,55 +655,4 @@ fn main() {
             "scope":"published synthetic toy fixtures; no external point, unknown scalar, or production key"
         })
     );
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn runtime_carryless_product_matches_bit_serial_reference() {
-        let mut state = 0x6a09_e667_f3bc_c909u64;
-        for _ in 0..128 {
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1442695040888963407);
-            let left = state;
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1442695040888963407);
-            let right = state;
-            assert_eq!(
-                carryless_product(left, right),
-                carryless_product_software(left, right)
-            );
-        }
-    }
-
-    #[test]
-    fn itoh_inverse_matches_square_and_multiply_reference() {
-        for n in [13, 37, 41, 53] {
-            let curve = KoblitzCurve::new(0, n).unwrap();
-            let mask = (1u64 << n) - 1;
-            let exponent = (1u64 << n) - 2;
-            let mut state = 0x243f_6a88_85a3_08d3u64;
-            for _ in 0..64 {
-                state = state
-                    .wrapping_mul(6364136223846793005)
-                    .wrapping_add(1442695040888963407);
-                let value = (state & mask).max(1);
-                let mut reference = 1u64;
-                let mut base = value;
-                for bit in 0..n {
-                    if (exponent >> bit) & 1 == 1 {
-                        reference = raw_mul_field(&curve, reference, base);
-                    }
-                    base = raw_square(&curve, base);
-                }
-                let candidate = raw_inverse(&curve, value);
-                assert_eq!(candidate, reference, "n={n} value={value}");
-                assert_eq!(raw_mul_field(&curve, value, candidate), 1);
-            }
-        }
-    }
 }
