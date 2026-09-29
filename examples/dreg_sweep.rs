@@ -1,14 +1,12 @@
-//! Solving degree vs first fall degree on Koblitz decomposition systems.
+//! Bounded Macaulay diagnostics (legacy executable name).
 //!
-//! The Petit–Quisquater complexity argument for ECDLP over `F_{2^n}` is
-//! stated in terms of the *first fall degree*, and assumes it tracks the
-//! degree at which the system is actually solved.  Kosters–Yeo
-//! (arXiv:1503.08001) show that assumption can fail.  This sweep measures
-//! both quantities on the same systems, against a matched random control.
+//! Reports rank deficiency, refutation, and pinning; these are not
+//! certified first fall degree, F4/F5 solving degree, or regularity.
+//! Targets are unlifted field abscissas. Both random controls have zero
+//! as a solution. See research/degree_reporting_20260922/README.md.
 //!
 //! ```sh
-//! cargo run --release --example dreg_sweep
-//! cargo run --release --example dreg_sweep -- --d-max 6 --trials 16
+//! cargo run --release --example dreg_sweep -- --n-max 7 --d-max 2 --trials 2
 //! ```
 
 use crypto_lib::cryptanalysis::koblitz_bench::{
@@ -41,7 +39,7 @@ fn main() {
         })
         .unwrap_or_else(|| vec![2, 3]);
 
-    println!("# Solving degree vs first fall degree");
+    println!("# Bounded Macaulay rank and resolution diagnostics");
     println!();
     println!("d_max = {d_max}, trials = {trials}, seed = {seed:#x}");
     println!();
@@ -64,9 +62,12 @@ fn main() {
 
     println!("{}", format_dreg_table(&rows));
     println!(
-        "`gap` = D_solve − FFD.  `ctrl` is the mean solving degree of random\n\
-         systems of identical shape; where it matches D_solve, the Semaev\n\
-         structure is buying nothing.  `unres` counts draws that neither\n\
-         resolved by `d_max` nor fit the Macaulay size caps."
+        "`D_rank_proxy` is rank deficiency, not certified first fall degree.\n\
+         `D_refute` is bounded-Macaulay refutation; `delta_means` subtracts\n\
+         conditional means over potentially different draws. Both controls\n\
+         always have the all-zero root; their degrees measure pinning.\n\
+         `unres` combines no refutation/pinning with resource caps; it is\n\
+         not a solving-degree lower bound. Targets are not point-lifted.\n\
+         These measurements do not certify a complete basis or regularity."
     );
 }

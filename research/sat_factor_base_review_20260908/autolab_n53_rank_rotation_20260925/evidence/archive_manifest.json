@@ -1,0 +1,8 @@
+{
+  "archive_bytes": 2577878,
+  "archive_sha256": "325a5cb9242d9279faf398fcbb1afb7d2a6ad8c5df1af562199d32154c8fe74a",
+  "classification": "RANK_STAGE_REPLAYED",
+  "files": 23,
+  "panel_sha256": "c227c5eee8929685b25771c9721d8b0f972ba4461ca885957a8d71efcacf4995",
+  "reassembly": "tar -xzf evidence.tar.gz && shasum -a 256 -c SHA256SUMS"
+}

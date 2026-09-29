@@ -41,9 +41,9 @@ pub fn cmac<C: BlockCipher128>(cipher: &C, message: &[u8]) -> CmacTag {
     let n_blocks = if message.is_empty() {
         1
     } else {
-        (message.len() + 15) / 16
+        message.len().div_ceil(16)
     };
-    let last_complete = !message.is_empty() && message.len() % 16 == 0;
+    let last_complete = !message.is_empty() && message.len().is_multiple_of(16);
 
     let mut state = [0u8; 16];
     for i in 0..n_blocks - 1 {

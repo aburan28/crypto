@@ -56,7 +56,7 @@ pub fn cbc_mac_hash(key: &AesKey, msg: &[u8]) -> [u8; 16] {
 
 fn zero_pad(buf: &[u8]) -> Vec<u8> {
     let mut v = buf.to_vec();
-    while v.len() % 16 != 0 {
+    while !v.len().is_multiple_of(16) {
         v.push(0);
     }
     v
@@ -166,7 +166,7 @@ mod tests {
         let prefix = b"alert('xss');//padpadpadpadpadpadpadpadpad";
         // Pad to block boundary first to make assertion clean.
         let mut p = prefix.to_vec();
-        while p.len() % 16 != 0 {
+        while !p.len().is_multiple_of(16) {
             p.push(b' ');
         }
         let target = [0x55u8; 16];

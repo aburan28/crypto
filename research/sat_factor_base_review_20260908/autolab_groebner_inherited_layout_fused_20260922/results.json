@@ -1,0 +1,529 @@
+{
+  "claim_boundary": "Public-synthetic decomposition-stage engineering evidence only. This changes root construction overhead, not the factor base, Macaulay row space, solver tree, relation yield, asymptotic complexity, Pollard-rho comparison, external-target capability, or any key-recovery result.",
+  "classification": "INHERITED_F4_QUADRATIC_LAYOUT_FUSED_ROOT_AND_STAGE_PASS",
+  "exact_tests": {
+    "receipt": {
+      "child_system_ms": 2478.9089999999997,
+      "child_user_ms": 207211.706,
+      "command": [
+        "/opt/homebrew/bin/cargo",
+        "test",
+        "--release",
+        "-q",
+        "--lib",
+        "cryptanalysis::koblitz_groebner::rref_tests::"
+      ],
+      "ended_unix_ns": 1790124716957863000,
+      "environment_overrides": {},
+      "executable": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+      "executable_sha256": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+      "exit_code": 0,
+      "peak_rss_bytes": 3878846464,
+      "schema_version": "1.0",
+      "started_unix_ns": 1790124654683863000,
+      "stderr_bytes": 29439,
+      "stderr_sha256": "e7f660a36c474fa77ae9473c78bc39a6c19ad771f286e0897021ac240bf1ff5f",
+      "stdout_bytes": 129,
+      "stdout_sha256": "516dd8f8357aeb5595182ed90ce8b2afe1a7588336ffccc0ebeab7c74b47b666",
+      "task_id": "TASK-KIC-INHERITED-LAYOUT-FUSED-EXACT-NORESCAN-20260922",
+      "wall_ms": 62274.787458
+    },
+    "status": "PASS"
+  },
+  "fused_root_kernel": {
+    "aggregate_paired_ratio_median": 1.1146801614661455,
+    "cells": [
+      {
+        "case": "binary-n13-ell12-m2-d3",
+        "cols": 1885,
+        "fixture_hash": "dde4d514b1fa4eacde1f3f4feeb1a4251d53e55a5738def11f8a11e336ccb03d",
+        "fused_median_ns": 175125.0,
+        "materialized_median_ns": 197750.5,
+        "median_speedup": 1.1291962883654532,
+        "paired_ratio_median": 1.1315377299474125,
+        "rows": 325,
+        "samples": 100
+      },
+      {
+        "case": "binary-n19-ell18-m2-d3",
+        "cols": 6175,
+        "fixture_hash": "45ba30eee08e5bf8a5a890686c6962d294af95b71f4e338d3b168f4460898407",
+        "fused_median_ns": 1099750.0,
+        "materialized_median_ns": 1171770.5,
+        "median_speedup": 1.0654880654694248,
+        "paired_ratio_median": 1.064851590768075,
+        "rows": 703,
+        "samples": 100
+      },
+      {
+        "case": "binary-n23-ell11-m2-d3",
+        "cols": 1464,
+        "fixture_hash": "1db653510b48674f8555bf78234766e838c5bb9d2bd41c7eeec77b18820c8020",
+        "fused_median_ns": 275083.5,
+        "materialized_median_ns": 308542.0,
+        "median_speedup": 1.1216303413327227,
+        "paired_ratio_median": 1.1196767397833545,
+        "rows": 529,
+        "samples": 100
+      },
+      {
+        "case": "binary-n31-ell16-m2-d3",
+        "cols": 4369,
+        "fixture_hash": "ca3154fbf82be2da500e00bab718996b3bf1b88e8037b7216c3b1d7c81f11095",
+        "fused_median_ns": 644666.5,
+        "materialized_median_ns": 719749.5,
+        "median_speedup": 1.1164679721995792,
+        "paired_ratio_median": 1.1132216110664248,
+        "rows": 1023,
+        "samples": 100
+      }
+    ],
+    "receipt": {
+      "child_system_ms": 34.208999999999996,
+      "child_user_ms": 503.00499999999994,
+      "command": [
+        "/opt/homebrew/bin/cargo",
+        "test",
+        "--release",
+        "-q",
+        "--lib",
+        "cryptanalysis::koblitz_groebner::rref_tests::paired_inherited_root_fused_packing_benchmark",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "ended_unix_ns": 1790124730135497000,
+      "environment_overrides": {
+        "KIC_F4_FUSED_BENCH_REPEATS": "100"
+      },
+      "executable": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+      "executable_sha256": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+      "exit_code": 0,
+      "peak_rss_bytes": 45989888,
+      "schema_version": "1.0",
+      "started_unix_ns": 1790124729540424000,
+      "stderr_bytes": 29439,
+      "stderr_sha256": "e7f660a36c474fa77ae9473c78bc39a6c19ad771f286e0897021ac240bf1ff5f",
+      "stdout_bytes": 114575,
+      "stdout_sha256": "e74d4d5db1322cf8738cf40cfb8808d9d566a5a258062c8674367762a4bae30f",
+      "task_id": "TASK-KIC-INHERITED-FUSED-ROOT-KERNEL-NORESCAN-20260922",
+      "wall_ms": 595.076583
+    },
+    "samples": 400
+  },
+  "interpretation": {
+    "cubic_policy": "BYPASS: the automatic policy leaves the unstable cubic support uncached",
+    "quadratic_stage": "PASS: every quadratic frozen and holdout rung improved against uncached roots",
+    "root_packing": "PASS: every real Semaev root cell improved with byte-identical matrices",
+    "scientific_promotion": "engineering only"
+  },
+  "schema_version": "1.0",
+  "selected_policy": {
+    "controls": {
+      "KIC_F4_DISABLE_INHERIT_FUSED_PACK": "1 retains materialized sparse rows on layout hits",
+      "KIC_F4_INHERIT_LAYOUT_CACHE": "0 disables and 1 forces layout reuse; unset selects quadratic systems"
+    },
+    "exact_guard": "a hit is accepted only if every product maps and every cached column is observed",
+    "fused_pack": "on an exact hit, form, cancel, and pack each shifted polynomial row directly into the nested dense matrix",
+    "layout_cache": "automatic for quadratic generator systems; cubic systems retain uncached construction"
+  },
+  "stage_panels": {
+    "frozen": {
+      "exact_gate": "PASS",
+      "exact_scientific_fields": [
+        "curve",
+        "a",
+        "n",
+        "m",
+        "ell",
+        "targets",
+        "decomposed",
+        "verdict_digest",
+        "word_ops",
+        "f4_calls",
+        "f4_oversize",
+        "reductions",
+        "infeasible_branches",
+        "propagations",
+        "splits",
+        "matrix_rows",
+        "matrix_cols",
+        "rows_pruned",
+        "criterion_word_ops",
+        "specialise_word_ops",
+        "exhausted",
+        "oversize"
+      ],
+      "medians": {
+        "fused": {
+          "build_ms": 160.239247,
+          "child_cpu_ms": 300.7265,
+          "peak_rss_bytes": 8880128.0,
+          "process_wall_ms": 302.1020415,
+          "reduce_ms": 2.6509514999999997,
+          "stage_wall_ms": 287.2056675
+        },
+        "materialized": {
+          "build_ms": 162.02442200000002,
+          "child_cpu_ms": 300.6585,
+          "peak_rss_bytes": 9134080.0,
+          "process_wall_ms": 302.17545800000005,
+          "reduce_ms": 2.6118925,
+          "stage_wall_ms": 287.145312
+        },
+        "uncached": {
+          "build_ms": 180.650025,
+          "child_cpu_ms": 320.40749999999997,
+          "peak_rss_bytes": 9240576.0,
+          "process_wall_ms": 322.095917,
+          "reduce_ms": 2.6286705,
+          "stage_wall_ms": 307.1314375
+        }
+      },
+      "repetitions_per_policy": 10,
+      "rungs": [
+        {
+          "curve": "K_0/2^9",
+          "ell": 6,
+          "layout_hits_median": 72.0,
+          "layout_misses_median": 6.0,
+          "m": 2,
+          "medians": {
+            "fused": {
+              "build_ms": 4.8241945,
+              "stage_wall_ms": 10.3288125
+            },
+            "materialized": {
+              "build_ms": 4.9815695,
+              "stage_wall_ms": 10.472146
+            },
+            "uncached": {
+              "build_ms": 5.966689,
+              "stage_wall_ms": 11.450979
+            }
+          },
+          "speedups": {
+            "materialized": {
+              "build_ms": 1.0326220263299914,
+              "stage_wall_ms": 1.0138770550825664
+            },
+            "uncached": {
+              "build_ms": 1.236825961308152,
+              "stage_wall_ms": 1.1086442899413655
+            }
+          }
+        },
+        {
+          "curve": "K_0/2^9",
+          "ell": 6,
+          "layout_hits_median": 0.0,
+          "layout_misses_median": 0.0,
+          "m": 3,
+          "medians": {
+            "fused": {
+              "build_ms": 14.8915055,
+              "stage_wall_ms": 22.678417
+            },
+            "materialized": {
+              "build_ms": 14.8861745,
+              "stage_wall_ms": 22.6759585
+            },
+            "uncached": {
+              "build_ms": 14.9077915,
+              "stage_wall_ms": 22.6698125
+            }
+          },
+          "speedups": {
+            "materialized": {
+              "build_ms": 0.9996420106751464,
+              "stage_wall_ms": 0.9998915929625952
+            },
+            "uncached": {
+              "build_ms": 1.0010936436211906,
+              "stage_wall_ms": 0.9996205863927804
+            }
+          }
+        },
+        {
+          "curve": "K_0/2^13",
+          "ell": 12,
+          "layout_hits_median": 39.0,
+          "layout_misses_median": 1.0,
+          "m": 2,
+          "medians": {
+            "fused": {
+              "build_ms": 26.2294615,
+              "stage_wall_ms": 43.682958
+            },
+            "materialized": {
+              "build_ms": 26.8458505,
+              "stage_wall_ms": 44.145062
+            },
+            "uncached": {
+              "build_ms": 36.463363,
+              "stage_wall_ms": 54.252
+            }
+          },
+          "speedups": {
+            "materialized": {
+              "build_ms": 1.0234998724621167,
+              "stage_wall_ms": 1.0105785876496733
+            },
+            "uncached": {
+              "build_ms": 1.3901681893088047,
+              "stage_wall_ms": 1.2419488625289525
+            }
+          }
+        },
+        {
+          "curve": "K_1/2^15",
+          "ell": 4,
+          "layout_hits_median": 53.0,
+          "layout_misses_median": 2.0,
+          "m": 2,
+          "medians": {
+            "fused": {
+              "build_ms": 1.234151,
+              "stage_wall_ms": 2.510271
+            },
+            "materialized": {
+              "build_ms": 1.380667,
+              "stage_wall_ms": 2.6445415
+            },
+            "uncached": {
+              "build_ms": 1.6717505,
+              "stage_wall_ms": 2.933688
+            }
+          },
+          "speedups": {
+            "materialized": {
+              "build_ms": 1.1187180498982703,
+              "stage_wall_ms": 1.0534884480599904
+            },
+            "uncached": {
+              "build_ms": 1.354575331543709,
+              "stage_wall_ms": 1.1686738204759566
+            }
+          }
+        },
+        {
+          "curve": "K_1/2^17",
+          "ell": 8,
+          "layout_hits_median": 62.0,
+          "layout_misses_median": 2.0,
+          "m": 2,
+          "medians": {
+            "fused": {
+              "build_ms": 25.6481695,
+              "stage_wall_ms": 54.1219165
+            },
+            "materialized": {
+              "build_ms": 26.0539425,
+              "stage_wall_ms": 54.007021
+            },
+            "uncached": {
+              "build_ms": 28.957363,
+              "stage_wall_ms": 57.1528545
+            }
+          },
+          "speedups": {
+            "materialized": {
+              "build_ms": 1.0158207391759477,
+              "stage_wall_ms": 0.9978770984578863
+            },
+            "uncached": {
+              "build_ms": 1.1290225994490561,
+              "stage_wall_ms": 1.056002044938671
+            }
+          }
+        },
+        {
+          "curve": "K_1/2^23",
+          "ell": 11,
+          "layout_hits_median": 30.0,
+          "layout_misses_median": 2.0,
+          "m": 2,
+          "medians": {
+            "fused": {
+              "build_ms": 87.48865,
+              "stage_wall_ms": 153.9419585
+            },
+            "materialized": {
+              "build_ms": 87.7862165,
+              "stage_wall_ms": 153.120354
+            },
+            "uncached": {
+              "build_ms": 92.3730265,
+              "stage_wall_ms": 158.2623125
+            }
+          },
+          "speedups": {
+            "materialized": {
+              "build_ms": 1.003401201184382,
+              "stage_wall_ms": 0.9946628943271499
+            },
+            "uncached": {
+              "build_ms": 1.055828687492606,
+              "stage_wall_ms": 1.0280648241850192
+            }
+          }
+        }
+      ],
+      "speedups": {
+        "materialized": {
+          "build_ms": 1.01114068515312,
+          "child_cpu_ms": 0.999773880918376,
+          "peak_rss_bytes": 1.0285977859778597,
+          "process_wall_ms": 1.000243018880758,
+          "reduce_ms": 0.9852660450408092,
+          "stage_wall_ms": 0.9997898526845749
+        },
+        "uncached": {
+          "build_ms": 1.1273768966225859,
+          "child_cpu_ms": 1.0654448477270875,
+          "peak_rss_bytes": 1.040590405904059,
+          "process_wall_ms": 1.066182523629189,
+          "reduce_ms": 0.9915950933089498,
+          "stage_wall_ms": 1.0693780529243908
+        }
+      }
+    },
+    "holdout": {
+      "exact_gate": "PASS",
+      "exact_scientific_fields": [
+        "curve",
+        "a",
+        "n",
+        "m",
+        "ell",
+        "targets",
+        "decomposed",
+        "verdict_digest",
+        "word_ops",
+        "f4_calls",
+        "f4_oversize",
+        "reductions",
+        "infeasible_branches",
+        "propagations",
+        "splits",
+        "matrix_rows",
+        "matrix_cols",
+        "rows_pruned",
+        "criterion_word_ops",
+        "specialise_word_ops",
+        "exhausted",
+        "oversize"
+      ],
+      "medians": {
+        "fused": {
+          "build_ms": 62.0831945,
+          "child_cpu_ms": 711.737,
+          "peak_rss_bytes": 120266752.0,
+          "process_wall_ms": 713.7538125,
+          "reduce_ms": 0.5464105,
+          "stage_wall_ms": 97.75533300000001
+        },
+        "materialized": {
+          "build_ms": 63.079546,
+          "child_cpu_ms": 716.6410000000001,
+          "peak_rss_bytes": 121888768.0,
+          "process_wall_ms": 718.6315830000001,
+          "reduce_ms": 0.550246,
+          "stage_wall_ms": 98.67824949999999
+        },
+        "uncached": {
+          "build_ms": 78.71031500000001,
+          "child_cpu_ms": 729.0435,
+          "peak_rss_bytes": 121708544.0,
+          "process_wall_ms": 730.8682289999999,
+          "reduce_ms": 0.547694,
+          "stage_wall_ms": 114.6826245
+        }
+      },
+      "repetitions_per_policy": 10,
+      "rungs": [
+        {
+          "curve": "K_0/2^19",
+          "ell": 18,
+          "layout_hits_median": 11.0,
+          "layout_misses_median": 1.0,
+          "m": 2,
+          "medians": {
+            "fused": {
+              "build_ms": 43.3386345,
+              "stage_wall_ms": 59.5583745
+            },
+            "materialized": {
+              "build_ms": 43.9927715,
+              "stage_wall_ms": 60.014646
+            },
+            "uncached": {
+              "build_ms": 57.543108,
+              "stage_wall_ms": 73.9977705
+            }
+          },
+          "speedups": {
+            "materialized": {
+              "build_ms": 1.0150936227582346,
+              "stage_wall_ms": 1.007660912572421
+            },
+            "uncached": {
+              "build_ms": 1.327755446471208,
+              "stage_wall_ms": 1.242441069307558
+            }
+          }
+        },
+        {
+          "curve": "K_1/2^17",
+          "ell": 8,
+          "layout_hits_median": 46.0,
+          "layout_misses_median": 2.0,
+          "m": 2,
+          "medians": {
+            "fused": {
+              "build_ms": 18.707374,
+              "stage_wall_ms": 38.1768955
+            },
+            "materialized": {
+              "build_ms": 19.137192,
+              "stage_wall_ms": 38.5801665
+            },
+            "uncached": {
+              "build_ms": 21.167207,
+              "stage_wall_ms": 40.5146875
+            }
+          },
+          "speedups": {
+            "materialized": {
+              "build_ms": 1.0229758596797176,
+              "stage_wall_ms": 1.0105632214122806
+            },
+            "uncached": {
+              "build_ms": 1.1314900209938605,
+              "stage_wall_ms": 1.0612357806831099
+            }
+          }
+        }
+      ],
+      "speedups": {
+        "materialized": {
+          "build_ms": 1.0160486506537612,
+          "child_cpu_ms": 1.0068901855601158,
+          "peak_rss_bytes": 1.0134868196989306,
+          "process_wall_ms": 1.0068339676994722,
+          "reduce_ms": 1.0070194478327192,
+          "stage_wall_ms": 1.009441085940549
+        },
+        "uncached": {
+          "build_ms": 1.2678199895142317,
+          "child_cpu_ms": 1.0243158638654448,
+          "peak_rss_bytes": 1.0119882841768273,
+          "process_wall_ms": 1.0239780386462034,
+          "reduce_ms": 1.0023489665736658,
+          "stage_wall_ms": 1.173159775334201
+        }
+      }
+    }
+  },
+  "task_id": "TASK-KIC-INHERITED-LAYOUT-FUSED-20260922"
+}
