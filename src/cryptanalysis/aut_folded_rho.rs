@@ -1295,4 +1295,416 @@ mod tests {
             );
         }
     }
+
+    // ── The whole original stack, on word-sized fields of every width ───
+    //
+    // The tests above pin the walk to its original on the new group law
+    // and `mod_inverse`, and pin those to their originals separately.
+    // This copies the whole stack as it was — `utils::mod_inverse`, the
+    // `cga_hnc` group law and the walk — and runs it next to the new
+    // code on j = 0 curves whose moduli straddle each boundary of the
+    // word paths: below and above 2³² (one-word products vs the `u128`
+    // remainder), 2⁴⁰, 2⁶², above 2⁶³ (sums that carry out of the word),
+    // within 2⁴⁰ of 2⁶⁴, and above 2⁶⁴ (`BigInt` only).  Each curve has
+    // a prime-order subgroup of 16 or 17 bits, so every walk collides
+    // within a few hundred iterations and the iteration count pins the
+    // trajectory.
+    mod original_stack {
+        use super::super::{
+            bigint_to_f64, compare_pt, AutElt, FoldedRhoOptions, FoldedRhoSolution, J0CurveAut,
+        };
+        use crate::cryptanalysis::cga_hnc::Pt2;
+        use num_bigint::{BigInt, BigUint, RandBigInt, Sign, ToBigInt};
+        use num_integer::Integer;
+        use num_traits::{One, Zero};
+        use rand::rngs::StdRng;
+        use rand::SeedableRng;
+
+        pub fn mod_inverse(a: &BigUint, m: &BigUint) -> Option<BigUint> {
+            if a.is_zero() {
+                return None;
+            }
+            let a_i = BigInt::from_biguint(Sign::Plus, a.clone());
+            let m_i = BigInt::from_biguint(Sign::Plus, m.clone());
+            let (mut old_r, mut r) = (a_i.clone(), m_i.clone());
+            let (mut old_s, mut s) = (BigInt::one(), BigInt::zero());
+            while !r.is_zero() {
+                let q = &old_r / &r;
+                let tmp = old_r - &q * &r;
+                old_r = r;
+                r = tmp;
+                let tmp = old_s - q * &s;
+                old_s = s;
+                s = tmp;
+            }
+            if old_r != BigInt::one() && old_r != BigInt::from(-1i32) {
+                return None;
+            }
+            let result = ((old_s % &m_i) + &m_i) % &m_i;
+            result.to_biguint()
+        }
+
+        fn mod_pos(x: BigInt, p: &BigInt) -> BigInt {
+            ((x % p) + p) % p
+        }
+
+        fn modular_inverse(x: &BigInt, p: &BigInt) -> Option<BigInt> {
+            let x_pos = mod_pos(x.clone(), p);
+            let xu = x_pos.to_biguint()?;
+            let pu = p.to_biguint()?;
+            let inv_u = mod_inverse(&xu, &pu)?;
+            Some(inv_u.to_bigint().unwrap())
+        }
+
+        pub fn pt_double(p: &Pt2, a: &BigInt, p_mod: &BigInt) -> Pt2 {
+            match p {
+                Pt2::Inf => Pt2::Inf,
+                Pt2::Aff(x, y) => {
+                    if y.is_zero() {
+                        return Pt2::Inf;
+                    }
+                    let two_y = mod_pos(BigInt::from(2) * y, p_mod);
+                    let inv = match modular_inverse(&two_y, p_mod) {
+                        Some(v) => v,
+                        None => return Pt2::Inf,
+                    };
+                    let lam = mod_pos((BigInt::from(3) * x.pow(2) + a) * inv, p_mod);
+                    let x3 = mod_pos(lam.pow(2) - BigInt::from(2) * x, p_mod);
+                    let y3 = mod_pos(&lam * (x - &x3) - y, p_mod);
+                    Pt2::Aff(x3, y3)
+                }
+            }
+        }
+
+        pub fn pt_add(p: &Pt2, q: &Pt2, a: &BigInt, p_mod: &BigInt) -> Pt2 {
+            match (p, q) {
+                (Pt2::Inf, x) | (x, Pt2::Inf) => x.clone(),
+                (Pt2::Aff(x1, y1), Pt2::Aff(x2, y2)) => {
+                    if x1 == x2 {
+                        if y1 == y2 {
+                            return pt_double(p, a, p_mod);
+                        }
+                        return Pt2::Inf;
+                    }
+                    let dx = mod_pos(x2 - x1, p_mod);
+                    let inv = match modular_inverse(&dx, p_mod) {
+                        Some(v) => v,
+                        None => return Pt2::Inf,
+                    };
+                    let lam = mod_pos((y2 - y1) * inv, p_mod);
+                    let x3 = mod_pos(lam.pow(2) - x1 - x2, p_mod);
+                    let y3 = mod_pos(&lam * (x1 - &x3) - y1, p_mod);
+                    Pt2::Aff(x3, y3)
+                }
+            }
+        }
+
+        pub fn pt_scalar_mul(p: &Pt2, k: &BigInt, a: &BigInt, p_mod: &BigInt) -> Pt2 {
+            let mut result = Pt2::Inf;
+            let mut addend = p.clone();
+            let k_abs = k.magnitude().clone();
+            for i in 0..k_abs.bits() {
+                if k_abs.bit(i) {
+                    result = pt_add(&result, &addend, a, p_mod);
+                }
+                addend = pt_double(&addend, a, p_mod);
+            }
+            if k.sign() == Sign::Minus {
+                match result {
+                    Pt2::Aff(x, y) => Pt2::Aff(x, mod_pos(-y, p_mod)),
+                    Pt2::Inf => Pt2::Inf,
+                }
+            } else {
+                result
+            }
+        }
+
+        fn apply_aut(point: &Pt2, alpha: AutElt, aut: &J0CurveAut) -> Pt2 {
+            let (sign, omega_pow) = alpha.encode();
+            let beta_pow = match omega_pow {
+                0 => BigInt::one(),
+                1 => aut.beta.clone(),
+                2 => mod_pos(&aut.beta * &aut.beta, &aut.p),
+                _ => unreachable!(),
+            };
+            let with_omega = match point {
+                Pt2::Inf => Pt2::Inf,
+                Pt2::Aff(x, y) => {
+                    let x_new = mod_pos(x * &beta_pow, &aut.p);
+                    Pt2::Aff(x_new, y.clone())
+                }
+            };
+            if sign == 1 {
+                with_omega
+            } else {
+                match with_omega {
+                    Pt2::Inf => Pt2::Inf,
+                    Pt2::Aff(x, y) => Pt2::Aff(x, mod_pos(-y, &aut.p)),
+                }
+            }
+        }
+
+        pub fn canonical_form(point: &Pt2, aut: &J0CurveAut) -> (Pt2, AutElt) {
+            let mut best_pt = apply_aut(point, AutElt::Id, aut);
+            let mut best_alpha = AutElt::Id;
+            for &alpha in AutElt::ALL.iter().skip(1) {
+                let candidate = apply_aut(point, alpha, aut);
+                if compare_pt(&candidate, &best_pt) == std::cmp::Ordering::Less {
+                    best_pt = candidate;
+                    best_alpha = alpha;
+                }
+            }
+            (best_pt, best_alpha)
+        }
+
+        pub fn aut_folded_rho_dlp(
+            g: &Pt2,
+            h: &Pt2,
+            aut: &J0CurveAut,
+            opts: &FoldedRhoOptions,
+        ) -> Result<FoldedRhoSolution, &'static str> {
+            let n = &aut.n;
+            if n.is_zero() || n.is_one() {
+                return Err("group order must be ≥ 2");
+            }
+            let mut rng: StdRng = match opts.seed {
+                Some(s) => StdRng::seed_from_u64(s),
+                None => StdRng::seed_from_u64(0xFADE_F00D_BABE_BEEFu64),
+            };
+            let mut total_iters: u64 = 0;
+            let curve_a = &aut.a;
+            let p_mod = &aut.p;
+            let step = |x: &Pt2, a: &BigInt, b: &BigInt| -> (Pt2, BigInt, BigInt) {
+                let (canon, _) = canonical_form(x, aut);
+                let bucket = match &canon {
+                    Pt2::Inf => 0u8,
+                    Pt2::Aff(cx, _) => {
+                        let bytes = cx.to_signed_bytes_be();
+                        let last = bytes.last().copied().unwrap_or(0);
+                        (last as u32 % 3) as u8
+                    }
+                };
+                match bucket {
+                    0 => {
+                        let nx = pt_add(x, g, curve_a, p_mod);
+                        let na = mod_pos(a + BigInt::one(), n);
+                        (nx, na, b.clone())
+                    }
+                    1 => {
+                        let nx = pt_add(x, h, curve_a, p_mod);
+                        let nb = mod_pos(b + BigInt::one(), n);
+                        (nx, a.clone(), nb)
+                    }
+                    _ => {
+                        let nx = pt_double(x, curve_a, p_mod);
+                        let na = mod_pos(a * BigInt::from(2), n);
+                        let nb = mod_pos(b * BigInt::from(2), n);
+                        (nx, na, nb)
+                    }
+                }
+            };
+            for restart in 0..=opts.max_restarts {
+                let (a0, b0) = if restart == 0 {
+                    (BigInt::one(), BigInt::zero())
+                } else {
+                    (
+                        rng.gen_bigint_range(&BigInt::zero(), n),
+                        rng.gen_bigint_range(&BigInt::zero(), n),
+                    )
+                };
+                let pow_a = pt_scalar_mul(g, &a0, curve_a, p_mod);
+                let pow_b = pt_scalar_mul(h, &b0, curve_a, p_mod);
+                let x0 = pt_add(&pow_a, &pow_b, curve_a, p_mod);
+                let mut t = x0.clone();
+                let mut t_a = a0.clone();
+                let mut t_b = b0.clone();
+                let mut h_pt = x0;
+                let mut h_a = a0;
+                let mut h_b = b0;
+                let mut iters: u64 = 0;
+                let mut sterile = false;
+                while iters < opts.max_iterations {
+                    let (nt, na, nb) = step(&t, &t_a, &t_b);
+                    t = nt;
+                    t_a = na;
+                    t_b = nb;
+                    let (nh, nha, nhb) = step(&h_pt, &h_a, &h_b);
+                    h_pt = nh;
+                    h_a = nha;
+                    h_b = nhb;
+                    let (nh, nha, nhb) = step(&h_pt, &h_a, &h_b);
+                    h_pt = nh;
+                    h_a = nha;
+                    h_b = nhb;
+                    iters += 1;
+                    total_iters += 1;
+                    let (t_canon, t_alpha) = canonical_form(&t, aut);
+                    let (h_canon, h_alpha) = canonical_form(&h_pt, aut);
+                    if compare_pt(&t_canon, &h_canon) == std::cmp::Ordering::Equal {
+                        let gamma = h_alpha.inv().compose(t_alpha);
+                        let mu = gamma.integer_action(&aut.lambda, n);
+                        let lhs = mod_pos((&mu * &t_a) - &h_a, n);
+                        let rhs = mod_pos(&h_b - (&mu * &t_b), n);
+                        if rhs.is_zero() {
+                            sterile = true;
+                            break;
+                        }
+                        let g_factor = rhs.gcd(n);
+                        if !g_factor.is_one() {
+                            sterile = true;
+                            break;
+                        }
+                        let rhs_u = rhs.to_biguint().expect("non-zero positive after mod_pos");
+                        let n_u = n.to_biguint().expect("n positive");
+                        let rhs_inv_u = mod_inverse(&rhs_u, &n_u)
+                            .ok_or("rhs not invertible despite gcd=1 — internal inconsistency")?;
+                        let rhs_inv = rhs_inv_u.to_bigint().expect("biguint→bigint");
+                        let d = mod_pos(&lhs * &rhs_inv, n);
+                        let check = pt_scalar_mul(g, &d, curve_a, p_mod);
+                        if compare_pt(&check, h) == std::cmp::Ordering::Equal {
+                            let n_f64 = bigint_to_f64(n);
+                            let expected = (n_f64 / 6.0).sqrt();
+                            let factor = total_iters as f64 / expected;
+                            return Ok(FoldedRhoSolution {
+                                d,
+                                iterations: total_iters,
+                                restarts: restart,
+                                effective_rho_factor: factor,
+                            });
+                        }
+                        sterile = true;
+                        break;
+                    }
+                }
+                if !sterile {
+                    return Err("rho exceeded max_iterations without finding a collision");
+                }
+            }
+            Err("aut-folded rho exhausted max_restarts on sterile collisions")
+        }
+    }
+
+    #[test]
+    fn folded_rho_matches_the_original_stack_across_word_widths() {
+        // (p, b, n, β, λ, G.x, G.y): y² = x³ + b with a subgroup of prime
+        // order n ≡ 1 (mod 3), λ matched to β so that [λ]G = (β·x, y).
+        // Found offline (Cornacchia for the six j = 0 traces, then a
+        // random point times the cofactor); checked below.
+        #[rustfmt::skip]
+        let curves: [(u128, u64, u64, u128, u64, u128, u128); 7] = [
+            (2_790_913_597, 1, 114_967, 2_318_331_837, 39_400,
+             1_565_400_886, 2_021_363_098),
+            (5_486_869_291, 3, 85_081, 2_252_878_623, 13_559,
+             3_891_712_341, 1_451_530_097),
+            (1_718_933_335_831, 4, 63_541, 334_881_807_347, 40_395,
+             1_301_312_732_909, 426_535_702_432),
+            (6_681_231_359_065_941_163, 16, 140_317, 4_348_341_793_990_554_497, 110_705,
+             2_591_368_914_137_066_277, 2_655_452_393_404_747_067),
+            (15_532_268_153_442_727_957, 2, 77_863, 11_169_005_699_780_753_580, 35_062,
+             10_325_685_930_842_972_537, 14_946_954_999_118_537_943),
+            (18_446_743_996_931_373_379, 2, 44_179, 8_855_494_519_501_363_420, 9_675,
+             1_675_201_009_986_212_036, 3_283_819_915_291_178_453),
+            (43_031_671_274_336_716_483, 2, 130_693, 21_311_858_547_619_077_642, 101_254,
+             1_670_257_532_644_218_207, 28_209_223_485_156_684_719),
+        ];
+        let (p25, g25) = aut_p25();
+        let mut instances: Vec<(J0CurveAut, Pt2)> = vec![(p25, g25)];
+        for &(p, b, n, beta, lambda, gx, gy) in &curves {
+            let aut = J0CurveAut {
+                p: BigInt::from(p),
+                a: BigInt::zero(),
+                b: BigInt::from(b),
+                n: BigInt::from(n),
+                beta: BigInt::from(beta),
+                lambda: BigInt::from(lambda),
+            };
+            let g = Pt2::Aff(BigInt::from(gx), BigInt::from(gy));
+            assert_eq!(
+                original_stack::pt_scalar_mul(&g, &aut.n, &aut.a, &aut.p),
+                Pt2::Inf,
+                "n·G at p = {p}"
+            );
+            assert_eq!(
+                original_stack::pt_scalar_mul(&g, &aut.lambda, &aut.a, &aut.p),
+                Pt2::Aff(
+                    mod_pos(BigInt::from(gx) * &aut.beta, &aut.p),
+                    BigInt::from(gy)
+                ),
+                "[λ]G at p = {p}"
+            );
+            instances.push((aut, g));
+        }
+        let mut rng = StdRng::seed_from_u64(0x7265_7669_6577);
+        for (i, (aut, g)) in instances.iter().enumerate() {
+            let p = &aut.p;
+            let mut skewed = aut.clone();
+            skewed.lambda = mod_pos(&aut.lambda * &aut.lambda, &aut.n);
+            // `G` with an unreduced x (the `BigInt` fallbacks), and `∞`.
+            let g_wide = match g {
+                Pt2::Aff(x, y) => Pt2::Aff(x + p, y.clone()),
+                Pt2::Inf => unreachable!(),
+            };
+            // The perfbench curve's walks are a hundred times longer.
+            let seeds = if i == 0 { 1 } else { 3 };
+            let mut solved = 0;
+            for seed in 0..seeds {
+                let d = rng.gen_bigint_range(&BigInt::one(), &aut.n);
+                let h = original_stack::pt_scalar_mul(g, &d, &aut.a, p);
+                let h_neg_y = match &h {
+                    Pt2::Aff(x, y) => Pt2::Aff(x.clone(), y - p),
+                    Pt2::Inf => Pt2::Inf,
+                };
+                let cases = [
+                    (aut, g, &h, 1u64 << 16, 8u32),
+                    (aut, &g_wide, &h, 1 << 16, 4),
+                    (aut, g, &h_neg_y, 1 << 16, 4),
+                    (&skewed, g, &h, 1 << 16, 3),
+                    (aut, g, &h, 7, 2),
+                    (aut, g, &h, 0, 1),
+                    (aut, &Pt2::Inf, &h, 64, 1),
+                    (aut, g, &Pt2::Inf, 64, 1),
+                ];
+                for (aut, g, h, max_iterations, max_restarts) in cases {
+                    let opts = FoldedRhoOptions {
+                        max_iterations,
+                        max_restarts,
+                        seed: Some(seed),
+                    };
+                    let got = outcome(aut_folded_rho_dlp(g, h, aut, &opts));
+                    assert_eq!(
+                        got,
+                        outcome(original_stack::aut_folded_rho_dlp(g, h, aut, &opts)),
+                        "p = {p}, d = {d}, seed = {seed}, g = {g:?}, h = {h:?}, \
+                         max_iterations = {max_iterations}"
+                    );
+                    solved += u64::from(got.is_ok_and(|(found, ..)| found == d));
+                }
+            }
+            // Not vacuous: the matched walks find the planted logarithm.
+            assert!(solved >= seeds, "p = {p}: {solved} walks solved");
+            // Canonical forms and the group law on this curve's points.
+            let mut pt = g.clone();
+            for _ in 0..200 {
+                assert_eq!(
+                    canonical_form(&pt, aut),
+                    original_stack::canonical_form(&pt, aut)
+                );
+                let k = rng.gen_bigint_range(&BigInt::zero(), &aut.n);
+                let q = original_stack::pt_scalar_mul(g, &k, &aut.a, p);
+                assert_eq!(
+                    pt_add(&pt, &q, &aut.a, p),
+                    original_stack::pt_add(&pt, &q, &aut.a, p)
+                );
+                assert_eq!(
+                    pt_scalar_mul(&pt, &k, &aut.a, p),
+                    original_stack::pt_scalar_mul(&pt, &k, &aut.a, p)
+                );
+                pt = original_stack::pt_double(&pt, &aut.a, p);
+                assert_eq!(
+                    pt_double(&q, &aut.a, p),
+                    original_stack::pt_double(&q, &aut.a, p)
+                );
+            }
+        }
+    }
 }

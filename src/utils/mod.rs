@@ -334,4 +334,20 @@ mod tests {
             }
         }
     }
+
+    /// Consecutive Fibonacci numbers take the most division steps for
+    /// their size, every quotient 1, and drive the coefficient magnitudes
+    /// up to the modulus: the widest intermediate values the word
+    /// recurrence adds, up to `F₉₃ < 2⁶⁴`.
+    #[test]
+    fn mod_inverse_word_path_on_fibonacci_pairs() {
+        let (mut f0, mut f1) = (1u64, 2u64);
+        while let Some(f2) = f0.checked_add(f1) {
+            for (a, m) in [(f0, f1), (f1, f2), (f0, f2), (f2 - 1, f2), (f1, u64::MAX)] {
+                check(&BigUint::from(a), &BigUint::from(m));
+                check(&BigUint::from(m - a), &BigUint::from(m));
+            }
+            (f0, f1) = (f1, f2);
+        }
+    }
 }
