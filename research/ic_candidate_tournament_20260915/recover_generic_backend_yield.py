@@ -5,7 +5,7 @@ The 2026-09-29 campaign keeps its original evaluator and measured receipts.
 Its natural-yield auditor mistakenly applies the candidate-identity hash to a
 worker report containing floating-point timing diagnostics. This read-only
 wrapper loads the sealed evaluator, replaces only that hash function with the
-evaluator's ordinary JSON-object hash, and writes a separately labelled audit.
+evaluator's already-admitted report hash, and writes a separately labelled audit.
 It is not a measurement retry or a replacement for `tournament.py verify`.
 """
 import argparse
@@ -44,28 +44,42 @@ def recover(bundle):
     # Import all checker dependencies from the immutable archived evaluator.
     # `frozen_inputs` then checks every source and evaluator digest in the
     # contract; the raw receipts are checked by its separate `verify` command.
-    if any(name in sys.modules for name in ('tournament', 'identity', 'oracle',
+    if any(name in sys.modules for name in ('tournament', 'measurement', 'identity', 'oracle',
                                            'generic_stages', 'generic_phases')):
         raise RuntimeError('run this recovery in a fresh Python process')
     sys.path.insert(0, str(evaluator))
     spec = importlib.util.spec_from_file_location('frozen_generic_backend_yield', auditor_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    from tournament import objhash
+    from measurement import report_sha256
+    from tournament import read
     if Path(sys.modules['tournament'].__file__).resolve() != (evaluator / 'tournament.py').resolve():
         raise RuntimeError('archived evaluator was not imported')
 
     if module.sha256.__module__ != 'identity':
         raise ValueError('frozen auditor has an unexpected report-hash helper')
-    module.sha256 = objhash
+    module.sha256 = report_sha256
     result = module.audit_campaign(round_dir)
+    verified = 0
+    for observation in result['observations']:
+        if not observation['audited'] or observation['execution_status'] != 'VERIFIED':
+            continue
+        directory = (round_dir / 'runs' / observation['stage'] / observation['case'] /
+                     observation['arm'] / f"rep-{observation['repetition']}")
+        receipt = read(directory / 'receipt.json')
+        if (receipt['status'] != 'VERIFIED'
+                or receipt['measurement']['provenance']['report_sha256']
+                != observation['report_sha256']):
+            raise ValueError('repaired natural report digest differs from certified trial receipt')
+        verified += 1
     result['posthoc_audit_repair'] = dict(
         classification='post-hoc evaluator repair; no measured input or outcome changed',
         frozen_auditor_sha256=FROZEN_AUDITOR_SHA256,
         repair_script_sha256=file_sha256(__file__),
         contract_file_sha256=file_sha256(contract_path),
-        change='report_sha256 uses sealed tournament.objhash, which accepts finite JSON timing floats; '
+        change='report_sha256 uses sealed measurement.report_sha256, which accepts finite JSON timing floats; '
                'all natural-query, build, group, matrix and phase checks remain in the frozen auditor',
+        certified_profile_digests_cross_checked=verified,
         prerequisite='run the unmodified archived tournament.py verify on all retained receipts')
     return result
 

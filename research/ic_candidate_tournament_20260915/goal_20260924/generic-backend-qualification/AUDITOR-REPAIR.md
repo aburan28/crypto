@@ -23,7 +23,9 @@ registered campaign again. After the original Actions artifact is retained:
    `627b5b84c2bbb9b9a9abb922a0ae2b6ed39ea70a9f212f087de7064e95637dc5`,
    the registered seed and schema, and the archive's own complete evaluator
    seal. It changes only the in-memory hash helper used for the report digest:
-   the sealed tournament's `objhash` accepts finite JSON timing floats.
+   the sealed `measurement.report_sha256` already used for admitted profile
+   reports accepts finite JSON timing floats. The recovery cross-checks those
+   digests against every verified generic trial receipt.
    All independent query, group, matrix, build and phase checks execute from
    the archived evaluator. The output records the repair script and contract
    hashes and labels itself post hoc.

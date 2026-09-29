@@ -5,9 +5,9 @@ import tempfile
 import unittest
 
 from identity import sha256
+from measurement import report_sha256
 from oracle import InvalidEvidence
 from recover_generic_backend_yield import FROZEN_AUDITOR_SHA256, recover
-from tournament import objhash
 
 
 HERE = Path(__file__).resolve().parent
@@ -21,7 +21,7 @@ class FrozenAuditorRepairTests(unittest.TestCase):
         self.assertIsInstance(report['elapsed_seconds'], float)
         with self.assertRaises(InvalidEvidence):
             sha256(report)
-        self.assertEqual(len(objhash(report)), 64)
+        self.assertEqual(len(report_sha256(report)), 64)
 
     def test_changed_archived_auditor_is_rejected_before_import(self):
         with tempfile.TemporaryDirectory() as temporary:
