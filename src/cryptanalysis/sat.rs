@@ -2794,7 +2794,7 @@ mod tests {
             while c.len() < 3 {
                 let v = 1 + (next() % n as u64) as i32;
                 if c.iter().all(|&l| l.abs() != v) {
-                    c.push(if next() % 2 == 0 { v } else { -v });
+                    c.push(if next().is_multiple_of(2) { v } else { -v });
                 }
             }
             c
@@ -2932,6 +2932,104 @@ mod tests {
             0x1c6e_5944_639b_6e22,
             0xd078_af6e_2f95_b4e1,
             0x0623_2f40_9d26_5579,
+        ];
+        assert_eq!(digests, want, "search trace moved: {digests:#018x?}");
+    }
+
+    /// **The search trace is pinned across bitset word boundaries.**
+    /// The flat parity matrix, the bit-read XOR reasons and the
+    /// literal-indexed tables that `add_vars` re-centres are all laid out
+    /// by 64-bit word, and the instances above never put a variable
+    /// count next to a word boundary or widen one across it.  Here the
+    /// count sits on each side of 64 and 128, parity rows exist before
+    /// `add_vars` carries it past the next boundary, and every solve is
+    /// enumerated through `reset_search`.  Recorded from the textbook
+    /// layout, like the digests above.
+    #[test]
+    fn search_trace_is_pinned_across_word_boundaries() {
+        let mut state = 0x243F_6A88_85A3_08D3u64;
+        let mut next = move || {
+            state ^= state >> 12;
+            state ^= state << 25;
+            state ^= state >> 27;
+            state.wrapping_mul(0x2545_F491_4F6C_DD1D)
+        };
+        let mut digests = Vec::new();
+        for (inst, n) in [63u32, 64, 65, 127, 128, 129].into_iter().enumerate() {
+            let mut planted: Vec<bool> = (0..n).map(|_| next().is_multiple_of(2)).collect();
+            let mut s = Solver::new(n);
+            let parity = |vars: &[u32], planted: &[bool]| {
+                vars.iter().filter(|&&v| planted[(v - 1) as usize]).count() % 2 == 1
+            };
+            for _ in 0..n / 4 {
+                let vars: Vec<u32> = (1..=n).filter(|_| next().is_multiple_of(8)).collect();
+                s.add_xor(&vars, parity(&vars, &planted));
+            }
+            // Past the next word boundary: each new variable is the parity
+            // of two old ones, and the planted 3-clauses below range over
+            // old and new variables alike.
+            let extra = 64 - n % 64 + 3;
+            for v in s.add_vars(extra) {
+                let pick = |x: u64| 1 + (x % n as u64) as u32;
+                let (a, b) = (pick(next()), pick(next()));
+                planted.push(planted[(a - 1) as usize] ^ planted[(b - 1) as usize]);
+                s.add_xor(&[v, a, b], false);
+            }
+            let total = n + extra;
+            for _ in 0..3 * total / 2 {
+                loop {
+                    let c: Vec<Lit> = (0..3)
+                        .map(|_| {
+                            let v = 1 + (next() % total as u64) as Lit;
+                            if next().is_multiple_of(2) {
+                                v
+                            } else {
+                                -v
+                            }
+                        })
+                        .collect();
+                    if c.iter()
+                        .any(|&l| planted[(l.abs() - 1) as usize] == (l > 0))
+                    {
+                        s.add_clause(c);
+                        break;
+                    }
+                }
+            }
+            // A ceiling on the test's cost; none of these solves reaches it
+            // (the largest takes under 3,000 conflicts).
+            s.conflict_budget = 20_000;
+            if inst % 2 == 1 {
+                s.max_learnts = 40;
+            } else {
+                s.set_branch_priority(&(1..=n / 2).collect::<Vec<u32>>());
+            }
+            let mut h = 0;
+            for _ in 0..4 {
+                let res = s.solve();
+                h = trace_digest(h, res, &s);
+                if res != SolveResult::Sat {
+                    break;
+                }
+                let m = s.model();
+                let block: Vec<Lit> = (1..=24)
+                    .map(|v: Lit| if m[(v - 1) as usize] { -v } else { v })
+                    .collect();
+                s.reset_search();
+                if !s.add_clause(block) {
+                    break;
+                }
+            }
+            digests.push(h);
+        }
+
+        let want: [u64; 6] = [
+            0x2f44_afb1_4835_6b36,
+            0x789b_fbc1_a19c_dd9e,
+            0x63c9_5cf5_cfc3_44c9,
+            0xcad3_2ba2_aced_18ca,
+            0x51b7_bb50_5809_12f2,
+            0x0318_2ef1_4e1c_41f9,
         ];
         assert_eq!(digests, want, "search trace moved: {digests:#018x?}");
     }
