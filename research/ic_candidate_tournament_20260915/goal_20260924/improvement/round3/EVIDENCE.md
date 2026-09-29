@@ -117,9 +117,12 @@ passed the archive hash, every reconstructed-profile hash, file count and byte
 count. The measured Linux frozen checker had already verified all 3,480 pairs.
 Exact cross-platform floating-summary replay is Linux/Python 3.12-specific;
 a local macOS replay rejected a stage-summary/provisional-selection value.
-The evidence PR's Linux/Python 3.12 archive audit, byte-exact table export and
-scoreboard check are the independent transport gate; a successful replay does
-not convert the rejected challenger into a win.
+[Independent Linux transport replay](TRANSPORT_LINUX.json) in
+[PR 916](https://github.com/aburan28/crypto/pull/916) verified all 3,480 run
+receipts, 1,878 source files and 20 fixed-vector controls from the restored
+archive. It regenerated `RESULTS.json` and `RUNS.csv` byte-for-byte and passed
+the scoreboard check; rounds one and two passed the same strict replay matrix.
+The passing transport audit does not convert the rejected challenger into a win.
 
 From the repository root on Linux with Python 3.12 and zstd, choose an empty
 output directory and run:
