@@ -1,9 +1,11 @@
 # Fresh F4/F5/SAT complete-solve qualification
 
 Status: **producer/preservation failure, no campaign artifact** in
-[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479).
-See the [run analysis](RESULT.md) and [machine-readable failure record](RUN-2026092902-FAILURE.md).
-The seed is closed and cannot be redispatched; no candidate result or speedup is admitted.
+[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
+(attempt one). See the [run analysis](RESULT.md), the
+[machine-readable failure record](RUN-2026092902-FAILURE.md), and the retained
+[complete job log](workflow-job-109448846736.log). Seed `2026092902` is closed
+and cannot be redispatched; no candidate result or speedup is admitted.
 The scientific question, schedule,
 resources, success/stop rules and accounting are frozen in [PROTOCOL.md](PROTOCOL.md).
 The subsequent [source feasibility audit](STATIC-FEASIBILITY.md) identifies a
