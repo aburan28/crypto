@@ -1,4 +1,4 @@
-# DRAFT, not yet registered: Does torsion symmetrisation lower the degree slope? An `m = 3` refutation-degree ladder
+# Does torsion symmetrisation lower the degree slope? An `m = 3` refutation-degree ladder
 
 Registered before any measured cell runs. §2 lists what was run before registration.
 
@@ -29,13 +29,36 @@ degree is 5, 6, 6, ≥7 at `ℓ = 2, 3, 4, 5`, a slope of at least 0.6 per unit 
 
 ## 2. Disclosed before registration
 
-(Filled in after the smoke run, before this file is committed.)
+Smoke runs used seed 7, never the registered seed. They are not data, and none is
+pooled with the registered run.
+
+- **Output lost.** `K0n13l2`, `K1n19l4`, `K1n19l6`, `K1n19l7` and `K0n13l7` at
+  `d_max = 8`, with only the last lines of output kept.
+  - Seen: `K0n13l2` resolved at 4 on 2 draws, and `K1n19l4` at 5 on 2 draws.
+  - `K0n13l7` had 64 satisfiable draws out of 64. That is why `n = 13` stops at `ℓ = 5`.
+  - The `ℓ = 6, 7` lines at `n = 19` were cut off by the truncation.
+- **`K1n19l6` at `d_max = 8`.** Killed at 1,500 CPU-seconds before finishing its first
+  draw. That is why `d_max` is 7 rather than 8.
+- **At `d_max = 7`:**
+  - `K1n19l5` resolved at 7 in 46 s;
+  - `K1n19l6` read `≥ 8` in 361 s.
+
+Taken together, the smoke already reads `D` rising with `ℓ` at `n = 19`: 5, 7 and `≥ 8`
+at `ℓ = 4, 5, 6`, one or two draws each. Prediction 1 was written before any smoke. The
+grid and limits in §4 were set after it, for cost only: `d_max`, the `ℓ` ranges and the
+CPU limit.
 
 ## 3. Instrument
 
 [`examples/sym_degree_ladder.rs`](../../examples/sym_degree_ladder.rs), built at the
-registered commit. There is one process per cell `(K_a, n, ℓ)`. Each draw does the
-following:
+registered commit. It is built against the library at `4ff512f2`, the same tree as the
+head-engine `m = 4` rerun, with the pinned lock, under the benchmark lock.
+
+- Source sha256: `3e18c80bcc015533aa4ece2e63a119f0d7767735e5e325b2de2747c3a37eb4a5`.
+- Binary `sym_degree_ladder-9dcdadd5`, sha256
+  `193d61a88ef4b36331efee00c1566ea53a6a8a2cefdb1429a7019dbc9d011161`.
+
+There is one process per cell `(K_a, n, ℓ)`. Each draw does the following:
 
 - **Base.** `V = ⟨1, v₂, …, v_ℓ⟩` in the `u`-frame, with `v_i` drawn by
   `random_subspace_basis`. A dependent base, or one whose Artin–Schreier image is
@@ -45,17 +68,21 @@ following:
 - **Exact root count.** Brute force over the cube. It is independent of every Macaulay
   code path.
 - **Measurement.** A system with **no** root is measured by `solving_degree` up to
-  `d_max = 8`. The outcome is `resolved D`, `at_least 9`, or `caps`.
+  `d_max = 7`, with the dreg caps `F4_F2_MAX_ROWS = F4_F2_MAX_COLS = 50,000,000`. The
+  outcome is `resolved D`, `at_least 8`, or `caps`.
 - **Stop.** A cell stops at 4 unsatisfiable draws or 256 draws.
 
 ## 4. Cells
 
-- **Curves.** `K_0/2^13`, `K_1/2^17`, `K_1/2^19`. These are the degrees that give room for
-  `ℓ` up to 7 with the target still usually unsatisfiable: the expected root count is about
-  `2^{3ℓ − 2 − n}`.
-- **Dimensions.** `ℓ ∈ {2, 3, 4, 5, 6, 7}` at every `n`. That is 18 cells.
+- **Curves and dimensions.**
+  - `K_0/2^13`: `ℓ = 2, 3, 4, 5`;
+  - `K_1/2^17`: `ℓ = 2, 3, 4, 5, 6`;
+  - `K_1/2^19`: `ℓ = 2, 3, 4, 5, 6`.
+
+  That is 14 cells. Each curve stops where unsatisfiable targets stay common: the
+  expected root count is about `2^{3ℓ − 2 − n}`.
 - **Seed.** `20260929`.
-- **Limits.** Per cell, `ulimit -t 900` and `ulimit -v 10000000`. These are machine
+- **Limits.** Per cell, `ulimit -t 1800` and `ulimit -v 10000000`. These are machine
   protection: a killed cell keeps its lines, and its unwritten draws are censored, never
   negative evidence.
 - **Pinning.** Cells run one at a time, pinned to CPU 3, under the benchmark lock
@@ -64,7 +91,7 @@ following:
 ## 5. Metric and decision rule (`analyze.py`)
 
 - **Per cell:** the median resolved `D` over its unsatisfiable draws.
-  - If more than half the draws are lower bounds, the cell reads `≥ 9` and is left out of
+  - If more than half the draws are lower bounds, the cell reads `≥ 8` and is left out of
     the fit, but listed.
   - A cell with fewer than 3 unsatisfiable draws is left out of the fit.
 - **Per curve:** `s_n` is the least-squares slope of the cell medians on `ℓ`, fitted only
@@ -73,9 +100,9 @@ following:
 
 The decision:
 
-- **Constant lever** if `s̄ ≥ 0.35`, or if at every curve a lower-bound cell appears
-  below `ℓ = 7`. Symmetrisation then does not flatten the degree.
-- **Slope lever** if `s̄ ≤ 0.15` and no cell below `ℓ = 6` reads `≥ 9`.
+- **Constant lever** if `s̄ ≥ 0.35`, or if every curve has a lower-bound cell (`≥ 8`) at
+  `ℓ ≤ 6`. Symmetrisation then does not flatten the degree.
+- **Slope lever** if `s̄ ≤ 0.15` and no cell below `ℓ = 6` reads `≥ 8`.
 - **Inconclusive** otherwise, and whenever fewer than two curves are fitted.
 
 ## 6. Predictions

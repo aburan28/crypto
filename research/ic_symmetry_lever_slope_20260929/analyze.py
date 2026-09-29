@@ -9,7 +9,7 @@ import statistics as st
 import sys
 from pathlib import Path
 
-LOWER = 9  # d_max + 1
+LOWER = 8  # d_max + 1
 
 
 def fit(points):
@@ -69,9 +69,9 @@ def main(runs):
         verdict = 'INCONCLUSIVE (fewer than two curves fitted)'
     else:
         mean = st.mean(slopes.values())
-        early_lower_everywhere = all(any(e < 7 for e in lower_below.get(k, [])) for k in curves)
+        early_lower_everywhere = all(any(e <= 6 for e in lower_below.get(k, [])) for k in curves)
         early_lower_any = any(e < 6 for v in lower_below.values() for e in v)
-        print(f's_bar = {mean:.3f}; lower-bound cells below l=7: {dict(lower_below)}')
+        print(f's_bar = {mean:.3f}; lower-bound cells: {dict(lower_below)}')
         if mean >= 0.35 or early_lower_everywhere:
             verdict = 'CONSTANT LEVER (symmetrisation does not flatten the degree)'
         elif mean <= 0.15 and not early_lower_any:
