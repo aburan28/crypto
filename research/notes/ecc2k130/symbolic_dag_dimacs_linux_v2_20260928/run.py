@@ -272,12 +272,17 @@ def main() -> int:
         if frozen['status'] == 'RELEASED':
             probe_path = out / 'target_rlimit_probe.json'
             os.environ['V2_CAP_PROBE_PATH'] = str(probe_path)
-            cap_probe = subprocess.run(
-                [sys.executable, str(PREPARATION / 'harmless_cap_probe.py'),
-                 '--out', str(probe_path)], cwd=ROOT, capture_output=True,
-                text=True, timeout=90)
-            (out / 'target_rlimit_probe.stdout.txt').write_text(cap_probe.stdout)
-            (out / 'target_rlimit_probe.stderr.txt').write_text(cap_probe.stderr)
+            try:
+                cap_probe = subprocess.run(
+                    [sys.executable, str(PREPARATION / 'harmless_cap_probe.py'),
+                     '--out', str(probe_path)], cwd=ROOT, capture_output=True,
+                    timeout=90)
+            except subprocess.TimeoutExpired as exc:
+                (out / 'target_rlimit_probe.stdout.txt').write_bytes(exc.stdout or b'')
+                (out / 'target_rlimit_probe.stderr.txt').write_bytes(exc.stderr or b'')
+                raise RuntimeError('fresh target-image cap probe exceeded 90 s') from exc
+            (out / 'target_rlimit_probe.stdout.txt').write_bytes(cap_probe.stdout)
+            (out / 'target_rlimit_probe.stderr.txt').write_bytes(cap_probe.stderr)
             require(cap_probe.returncode == 0,
                     'fresh target-image hard-cap probe failed')
         gate = release_gate(frozen, args.expected_head)
