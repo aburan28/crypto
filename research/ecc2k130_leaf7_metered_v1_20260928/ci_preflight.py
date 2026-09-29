@@ -123,7 +123,27 @@ def check_arithmetic(spec: dict) -> dict:
     assert cost["unit"] == "Fq multiplication equivalent"
     assert cost["calibration_batches"] == 11
     assert cost["calibration_operands_per_batch"] == 10000
+    assert cost["square_weight_label"] == "leaf-seven-cost-v1"
+    assert len(cost["calibration_operand_pair_sha256"]) == 11
+    for batch, expected in enumerate(cost["calibration_operand_pair_sha256"]):
+        stream = hashlib.sha256()
+        for i in range(cost["calibration_operands_per_batch"]):
+            for suffix in ("a", "b"):
+                label = f"{cost['square_weight_label']}|{batch}|{i}|{suffix}"
+                h = hashlib.sha256(label.encode()).digest()
+                value = 1 + int.from_bytes(h, "big") % ((1 << 131) - 1)
+                stream.update(value.to_bytes(17, "big"))
+        assert stream.hexdigest() == expected, f"calibration batch {batch} changed"
     assert cost["max_calibration_relative_mad"] == 0.05
+    assert "first_leaf_panel_transport" in cost["bridge_phases"]
+    assert "first_leaf_panel_transport" not in cost["common_phases"]
+    producer = spec["metering_producer"]
+    assert producer["status"] == "NOT_IMPLEMENTED"
+    assert producer["sha256"] is None
+    assert producer["commit"] is None
+    assert all(path in spec["input_sha256"] for path in cost["field_primitive_paths"])
+    assert producer["required_before_release"] is True
+    assert not (REPO / producer["path"]).exists()
     assert cost["incremental_bridge_over_direct_at_most"] == 0.9
     assert cost["cold_bridge_over_direct_below"] == 1.0
     assert cost["inversion_internals_in_mul_and_sq"] is True
@@ -140,6 +160,7 @@ def check_arithmetic(spec: dict) -> dict:
         "unique_conjugacy_exponent": hits[0],
         "coefficient_pairs_sha256": projection,
         "input_panel_size": len(labels),
+        "calibration_batches_checked": 11,
     }
 
 

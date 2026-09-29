@@ -11,6 +11,13 @@ on:
       - 'research/ecc2k130_endo_ring_263_20260925/receipt.json'
       - 'research/ecc2k130_dual_transport_20260925/receipt.json'
       - 'research/ecc2k130_relations/relations.py'
+      - 'research/ecc2k130_relations/fastfield.py'
+      - 'research/ecc2k130_oriented_transport_20260924/oriented_velu.py'
+      - 'research/ecc2k130_dual_transport_20260925/dual_transport.py'
+      - 'research/ecc2k130_leaf7_bridge_20260925/cubic_velu.py'
+      - 'research/ecc2k130_leaf7_bridge_20260925/run.py'
+      - 'research/ecc2k130_leaf7_bridge_20260925/verify.py'
+      - 'research/ecc2k130_leaf7_bridge_20260925/verify_extension.py'
       - '.github/workflows/ecc2k130-leaf7-metered-freeze.yml'
   workflow_dispatch:
 
@@ -28,7 +35,7 @@ jobs:
           python-version: '3.12'
       - name: Pin exact protocol freeze
         run: |
-          echo 'da40012c7da9e22cbfdb6f127f6679f07c12635357ebbc76c0d77c5717eb883f  research/ecc2k130_leaf7_metered_v1_20260928/FROZEN.json' | sha256sum -c -
+          echo '85df56fce7c97376c074cb7a0beef8e9b7265fafdcd4fea83360312b93c82282  research/ecc2k130_leaf7_metered_v1_20260928/FROZEN.json' | sha256sum -c -
       - name: Check input hashes and static algebra only
         run: python3 research/ecc2k130_leaf7_metered_v1_20260928/ci_preflight.py
       - name: Check cost-scope negative controls only

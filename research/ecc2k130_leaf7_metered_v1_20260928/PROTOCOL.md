@@ -1,7 +1,11 @@
 # Held protocol: meter the degree-7 route to a paired ECC2K-130 leaf
 
-**Status: draft protocol only.** No explicit degree-7 map, cost receipt, PDP
-relation, or logarithm is produced by this PR. The structural producer in
+**Status: draft protocol only.** No explicit degree-7 map, metering
+producer, cost receipt, PDP relation, or logarithm is produced by this
+PR. The frozen `run_metered.py` path is absent and its source hash and
+commit are null. Implementing and independently reviewing an instrumented
+producer is an additional release prerequisite; this checker cannot turn
+self-declared counters into evidence. The structural producer in
 [PR #810](https://github.com/aburan28/crypto/pull/810) is itself frozen with
 `release_main_head: null`; it has no accepted map outcome. This successor
 stays held until that producer is refrozen after its parent merge, its exact
@@ -93,11 +97,15 @@ opposite-cycle `[1,4]` map is a structural control for unique
 23-conjugacy; it is not charged to either route arm.
 
 The cost producer must bind its receipt to the exact hashes of the
-structural producer and extension replay. The checker derives the
-expected labelled *full affine point* digest from those archived
-outputs and requires the direct and bridge cost-arm output digests to
-match it. These receipt checks do not replace independent review of
-the metering implementation.
+structural producer, independent Fq replay, and extension replay.
+The checker requires the Fq replay to report `FQ_REPLAY_PASS` on all
+twelve labels and the extension replay to bind that exact Fq file.
+A `MEASURED` receipt must archive both arms' ordered, labelled
+full affine `(x,y)` arrays; the checker recomputes each digest and
+compares every point with the independently checked parent outputs.
+A `STOP` receipt may lack outputs and still remains STOP. These
+receipt checks do not replace independent review of the metering
+implementation.
 
 ## Two matched route arms and one unit
 
@@ -111,21 +119,34 @@ forward-and-dual capability and the same twelve oriented leaf outputs.
 
 | Cost block | Exclusively charged work |
 | --- | --- |
-| Shared cold `S` | Recover the frozen 263-torsion basis from seed 20260924; build the first degree-263 map and normalized dual; materialize the twelve points. Archived torsion is a verification reference, not a free cold input. |
-| Direct incremental `D` | Derive `Cprime`; construct the second degree-263 map and dual; apply source `alpha` to the panel; normalize the model; transport all twelve full points. |
-| Bridge incremental `B` | Discover/factor the 7-kernel including extension arithmetic; construct the 7-map and dual; apply the 23 conjugacy squarings; normalize the model; transport the same twelve full points. |
+| Shared cold `S` | Recover the frozen 263-torsion basis from seed 20260924; build the first degree-263 map and normalized dual; materialize the twelve source points. **No** `phi_C(T)` panel evaluation is shared: the direct arm does not need one. Archived torsion is a verification reference, not a free cold input. |
+| Direct incremental `D` | Derive `Cprime`; construct the second degree-263 map and dual; apply source `alpha` to the panel; normalize the model; evaluate `phi_Cprime(alpha(T))` on all twelve full points. |
+| Bridge incremental `B` | Discover/factor the 7-kernel including extension arithmetic; construct the 7-map and dual; charge twelve `phi_C(T)` first-leaf evaluations; apply the 23 conjugacy squarings; normalize the model; evaluate `psi(phi_C(T))` on the same twelve full points. |
 
 The only headline unit is an `F_q` multiplication equivalent:
 `mul + w_sq*sqr`. Count every underlying Fq multiply and square,
 including Sage polynomial/kernel discovery, extension arithmetic,
 inversion internals, model conversion, validation needed by the route,
 and all failed work. Record inversion calls separately as diagnostics;
-do not add their internals twice. Measure `w_sq` on the same host
-with eleven batches of 10,000 SHA-fixed nonzero operands labelled
-`leaf-seven-cost-v1`. If either relevant calibration's relative
-median absolute deviation exceeds 5%, or any shared/arm phase is
-unmetered, leave both ratios null. Report CPU, wall, peak RSS, host,
-Sage/Python versions, and exact source/implementation hashes as
+do not add their internals twice. The frozen input hashes include the
+field primitives, both 263-map/dual implementations, and the structural
+7-map producer. A metering producer must be added in a new reviewed
+commit; its own SHA-256 and commit must be frozen before release.
+
+Measure `w_sq` on the **same host and code checkout** with eleven raw
+batches of 10,000 SHA-fixed nonzero operand pairs labelled
+`leaf-seven-cost-v1`. For batch `b`, index `i`, suffix `a` or
+`b`, the operand is `1+int(SHA256("leaf-seven-cost-v1|b|i|suffix"))
+mod (2^131-1)`, encoded as 17 big-endian bytes. Each multiplication uses `a*b` and each square uses `a²` from the same indexed pair. The ordered pair-stream
+SHA-256 for each batch is frozen in the manifest. Archive each batch's
+pair hash, operation count, multiply seconds, square seconds, and host
+digest. The checker recomputes median per-operation times, square
+weight, and both relative median absolute deviations from those raw
+batches. It requires a host manifest with OS, architecture, CPU,
+Python/Sage versions, checkout commit, and the exact field-primitive
+hashes; calibration and all three children must bind its digest.
+If either MAD exceeds 5%, or any shared/arm phase is unmetered, leave
+both ratios null. Report CPU, wall, peak RSS and failed work as
 secondary data. This first protocol makes no wall-time speed claim.
 
 Compute `R_incremental=B/D` and
@@ -133,8 +154,9 @@ Compute `R_incremental=B/D` and
 common block paid **once per route**, not omitted or double-counted.
 The cost receipt lists exactly the frozen phases. The
 [cost-scope checker](cost_scope.py) rejects missing/extra categories,
-nonexclusive or unmetered declarations, a mismatched twelve-point
-output, a different parent certificate, and caps. It recomputes both
+nonexclusive or unmetered declarations, missing or mismatched archived
+full-point arrays, an unbound Fq replay or parent certificate, raw
+calibration inconsistencies, cross-host records, and caps. It recomputes both
 ratios rather than trusting a reported headline. A green schema check
 is not proof that the producer counted its internals; that code needs
 separate pre-outcome review.
@@ -144,8 +166,9 @@ separate pre-outcome review.
 Do not start a cost child until structural admission passes. Stop each
 common, direct, or bridge child at **300 wall seconds or 2 GiB peak
 RSS**; preserve a STOP, timeout, crash, or OOM receipt, with no
-favorable ratio inferred from a censored run. A missing complete
-receipt remains STOP. If structural checks fail, retire the proposed
+favorable ratio inferred from a censored run. A STOP receipt does
+not need target outputs or calibration arrays; a missing STOP receipt
+remains unresolved and cannot become a pass. If structural checks fail, retire the proposed
 bridge map and do not measure. If all checks pass but
 `R_incremental>0.90`, retire this bridge-cost lead. If the
 incremental ratio passes but `R_cold>=1`, report only a stage
