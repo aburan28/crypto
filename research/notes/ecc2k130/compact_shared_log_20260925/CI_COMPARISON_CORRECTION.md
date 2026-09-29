@@ -1,0 +1,7 @@
+# Post-outcome CI-only correction: derived float serialization
+
+The first completed-archive [CI replay job](https://github.com/aburan28/crypto/actions/runs/36127004831/job/108045324867) independently verified all 26/26 raw children, every recovered scalar, source/input/receipt hashes and the immutable archive ledger (`84ad0e494880e51360491276e130aea93ec16ab095ca22fe6ee53f491612f207`). It then failed only at a bytewise `cmp` of the derived `analysis.json`. Its [raw failed log](ci_failure_analysis_cmp.log) is retained with SHA-256 `efe10e835a22ef0d06a3b83d5ccdca8b02642d6b3b564c1df27ffad8d28717ac`.
+
+The committed analysis was rendered by Python 3.9.10 on the measured Mac. Python 3.12 on CI rendered one three-block floating-point sum as `6838.750375` rather than `6838.7503750000005`; local Python 3.13 also changed another sum from `68057.765417` to `68057.76541699999`. These differences are one ulp each and do not affect any per-block inequality, gate or scalar.
+
+The workflow now compares parsed analysis recursively: dictionary keys, array lengths, types, strings, integers, booleans and null values must match **exactly**; finite floats may differ by at most four ulps. It also independently asserts all four negative gates, complete three-block pairs, null n=131/S claims, and the exact raw ledger hash. The existing archive replay remains strict and unchanged. No producer, frozen input, raw receipt, rank result, scalar, decision threshold or measured outcome was changed after this failure.

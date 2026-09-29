@@ -1,0 +1,23 @@
+{
+  "command": "python3 research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/run_point_batch.py --training research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/cold_rank_20260924_codex --out <this-study>/ic_point_1_raw --targets 1 --timeout 90",
+  "cost_accounting": "Add archived cold full-rank training process wall (512 relations, first full rank at 461) and the one fresh point-positive process wall. The script\u2019s negative-control processes are validation only and excluded from DLP cost. No warm lookup or stage-only speed claim.",
+  "decision_rule": "If the scalar independently verifies and this inclusive two-process IC wall exceeds each of the three preregistered rho L1 process walls, classify only this fixed point as a measured cold no-crossover; otherwise unresolved.",
+  "declared_before_ic_single_run_utc": "2026-09-25T07:34:37.520389+00:00",
+  "dependency": "https://github.com/aburan28/crypto/pull/735",
+  "hypothesis": "The fixed single-point compact-IC cost (archived cold full-rank training plus one fresh point process) exceeds all three already frozen point-only signed-Frobenius rho L1 walls.",
+  "limits": "The rho panel was observed before this addendum; this is a follow-up measurement, not prospective selection. Runs are same host but not contemporaneously paired and wall is load-sensitive.",
+  "point_coordinates": [
+    1982694855789544,
+    1466753660120656
+  ],
+  "point_executable_sha256": "01ab8d0b09f72908281124ae3ae4fdde88f538abdc1fc2c574309dfc1777990c",
+  "point_sha256": "e3f422b5b4b5141e89ef35facd50b52db7595678303b3cfceba7ea23a6200304",
+  "point_source_sha256": "b88ab958f3044211ddcb230863a4175916000c2c15307a7572dec40a4e55204d",
+  "question": "What is a like-for-like measured cold full-rank compact-IC cost for the first frozen n53 public point alone?",
+  "schema_version": "1.0",
+  "status": "Post-rho-panel confirmatory addendum; rho seeds/timings already observed and not selected or rerun.",
+  "stopping_rule": "One cold positive process on the exact first frozen point, then the script\u2019s three negative controls; preserve all outputs and failures, no seed replacement or rerun.",
+  "training_manifest_sha256": "057952c19e5f4f87bc66bea59a85b1057aca29aea4aa431b8f19209b5f7f3ea0",
+  "training_validation_sha256": "d5c87025740036476e0d8d492c93a23ede8ed144ce665125d3cebc4c0d0ec285",
+  "verification": "Run #735 recover_point_batch.py against the new point output and the archived full-rank training solution; independently verify recovered [d]G=Q before reading its validator scalar."
+}

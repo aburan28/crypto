@@ -57,7 +57,7 @@ pub fn compress(state: &[u8], block: &[u8; 16], b_bytes: usize) -> Vec<u8> {
 /// bytes (callers prepad as needed — multicollision construction
 /// stays inside block boundaries so this is fine).
 pub fn weak_hash(message: &[u8], iv: &[u8], b_bytes: usize) -> Vec<u8> {
-    assert!(message.len() % 16 == 0);
+    assert!(message.len().is_multiple_of(16));
     let mut state = iv.to_vec();
     for chunk in message.chunks_exact(16) {
         let mut block = [0u8; 16];

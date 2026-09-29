@@ -9,7 +9,7 @@ fn global_pool(
     let m = groups.len();
     assert_eq!(m, 37);
     let r = kc.subgroup_order.to_u64().unwrap();
-    let words = (exact_targets.len() + 63) / 64;
+    let words = exact_targets.len().div_ceil(64);
     let group_points: Vec<_> = groups.values().collect();
     let keys: Vec<_> = groups.keys().cloned().collect();
     let mut target_index = HashMap::new();

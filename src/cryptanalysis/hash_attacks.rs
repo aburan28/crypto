@@ -252,7 +252,7 @@ pub fn birthday_collision_search<H: HashFunction>(
     seed: u64,
 ) -> Option<(Vec<u8>, Vec<u8>, Vec<u8>)> {
     assert!(truncate_bits as usize <= hash.output_bytes() * 8);
-    let truncate_bytes = (truncate_bits as usize + 7) / 8;
+    let truncate_bytes = (truncate_bits as usize).div_ceil(8);
     let mut rng = StdRng::seed_from_u64(seed);
     let mut seen: HashMap<Vec<u8>, Vec<u8>> = HashMap::new();
     for _ in 0..max_trials {
@@ -303,7 +303,7 @@ pub fn joux_multicollision<H: MerkleDamgardHash>(
     seed: u64,
 ) -> Option<Vec<(Vec<u8>, Vec<u8>)>> {
     assert!(truncate_bits as usize <= hash.state_bytes() * 8);
-    let truncate_bytes = (truncate_bits as usize + 7) / 8;
+    let truncate_bytes = (truncate_bits as usize).div_ceil(8);
     let leftover = (truncate_bytes * 8) as u32 - truncate_bits;
     let bb = hash.block_bytes();
 
