@@ -1,0 +1,49 @@
+name: GF(2) table reuse in F5 complete-call experiment
+
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/gf2_elim.rs'
+      - 'research/gf2_table_reuse_20260929/**'
+      - '.github/workflows/gf2-table-reuse.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exactness-and-paired-f5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      RAYON_NUM_THREADS: '1'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: GF2 elimination table-reuse exactness tests
+        run: cargo test --release --lib cryptanalysis::gf2_elim::tests -- --test-threads=1
+      - name: F5 row-space tests
+        run: cargo test --release --lib cryptanalysis::matrix_f5_f2::tests -- --test-threads=1
+      - name: Build F5 stage benchmark
+        run: cargo build --release --example f4_f2_bench
+      - name: Frozen one-thread triads
+        run: |
+          python3 research/gf2_table_reuse_20260929/paired_f5.py \
+            target/release/examples/f4_f2_bench \
+            research/gf2_table_reuse_20260929/ci-result.json \
+            --pairs 5 --threads 1
+      - name: Preserve raw runs and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gf2-table-reuse-${{ github.sha }}
+          path: research/gf2_table_reuse_20260929/ci-result.json
+          if-no-files-found: warn
