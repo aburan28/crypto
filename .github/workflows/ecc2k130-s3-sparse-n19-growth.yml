@@ -1,12 +1,15 @@
 name: ECC2K-130 n19 sparse S3 growth gate
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
     paths:
       - 'research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/**'
       - '.github/workflows/ecc2k130-s3-sparse-n19-growth.yml'
   workflow_dispatch:
 permissions:
   contents: read
+  pull-requests: read
+  issues: read
 jobs:
   frozen-and-archive:
     runs-on: ubuntu-24.04
@@ -17,7 +20,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: Compile frozen sources without executing n19 growth
-        run: python -m py_compile research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/{export,verify,run,ci_replay}.py
+        run: python -m py_compile research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/{export,verify,run,ci_replay,release_gate,test_resource_cap}.py
+      - name: Exercise harmless Linux wall, direct-memory and descendant controls
+        run: python research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/test_resource_cap.py
       - name: Check source and input hashes; replay archive only when committed
         run: |
           python research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/ci_replay.py
@@ -25,3 +30,45 @@ jobs:
             python research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/ci_replay.py \
               --evidence research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/evidence/final
           fi
+  measured-first-attempt:
+    if: ${{ github.event.action == 'labeled' && github.event.label.name == 'ecc2k130-n19-sparse-measure-once' && github.run_attempt == 1 && github.event.pull_request.number == 795 }}
+    needs: frozen-and-archive
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch current main ancestry
+        run: git fetch origin main
+      - name: Verify live draft PR head, merged parent and unique label event
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/release_gate.py \
+            > "$RUNNER_TEMP/n19-release-gate.json"
+      - name: Cold first exporter and independent verifier
+        run: |
+          python research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/run.py \
+            --out "$RUNNER_TEMP/n19-first-attempt"
+      - name: Audit immutable first attempt when present
+        if: ${{ always() }}
+        run: |
+          if test -f "$RUNNER_TEMP/n19-first-attempt/MANIFEST.json"; then
+            python research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/ci_replay.py \
+              --evidence "$RUNNER_TEMP/n19-first-attempt"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: ecc2k130-n19-sparse-first-attempt-${{ github.run_id }}
+          retention-days: 90
+          include-hidden-files: true
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/n19-release-gate.json
+            ${{ runner.temp }}/n19-first-attempt

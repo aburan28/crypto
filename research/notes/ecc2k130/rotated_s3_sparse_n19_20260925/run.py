@@ -7,6 +7,9 @@ import datetime as dt
 import hashlib
 import importlib.util
 import json
+import os
+import platform
+import signal
 import subprocess
 import sys
 import time
@@ -32,42 +35,124 @@ def manifest(root: Path, freeze_sha: str) -> None:
 
 
 def verify_parent_merged(frozen: dict) -> None:
-    result = subprocess.run(["git", "merge-base", "--is-ancestor",
-                             frozen["required_parent_head"], "origin/main"],
-                            cwd=REPO, capture_output=True, check=False)
-    if result.returncode != 0:
-        raise RuntimeError("#786 exact parent head is not yet in fetched origin/main")
+    for key in ("preregistered_parent_head", "required_parent_head",
+                "required_parent_merge_commit"):
+        result = subprocess.run(["git", "merge-base", "--is-ancestor",
+                                 frozen[key], "origin/main"],
+                                cwd=REPO, capture_output=True, check=False)
+        if result.returncode != 0:
+            raise RuntimeError(f"#786 {key} is not in fetched origin/main")
+
+
+def require_linux_proc() -> None:
+    if sys.platform != "linux" or not Path("/proc/self/status").is_file():
+        raise RuntimeError("Linux /proc is required before the first attempt")
+
+
+def process_group_snapshot(pgid: int) -> tuple[int, int]:
+    """Return sampled resident bytes and non-zombie processes in a session group."""
+    total = live = 0
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdecimal():
+            continue
+        try:
+            stat = (entry / "stat").read_text()
+            fields = stat[stat.rfind(")") + 2:].split()
+            if int(fields[2]) != pgid or fields[0] == "Z":
+                continue
+            live += 1
+            for line in (entry / "status").read_text().splitlines():
+                if line.startswith("VmRSS:"):
+                    total += int(line.split()[1]) * 1024
+                    break
+        except (FileNotFoundError, PermissionError, ProcessLookupError, ValueError):
+            continue
+    return total, live
 
 
 def child(receipt: dict, out: Path, name: str, command: list[str],
-          expected: Path, timeout: int) -> None:
+          expected: Path, timeout: float, rss_cap: int) -> None:
+    require_linux_proc()
     start = dt.datetime.now(dt.timezone.utc).isoformat()
     wall = time.perf_counter()
-    try:
-        result = subprocess.run(command, cwd=REPO, capture_output=True, text=True,
-                                check=False, timeout=timeout)
-        code, stdout, stderr, timed_out = result.returncode, result.stdout, result.stderr, False
-    except subprocess.TimeoutExpired as error:
-        code, timed_out = None, True
-        stdout, stderr = error.stdout or "", error.stderr or ""
-        if isinstance(stdout, bytes):
-            stdout = stdout.decode(errors="replace")
-        if isinstance(stderr, bytes):
-            stderr = stderr.decode(errors="replace")
-        stderr += f"\nexternal {timeout}s cap reached\n"
     stdout_path, stderr_path = out / f"{name}.stdout.txt", out / f"{name}.stderr.txt"
-    stdout_path.write_text(stdout)
-    stderr_path.write_text(stderr)
+    with stdout_path.open("wb") as stdout, stderr_path.open("wb") as stderr:
+        process = subprocess.Popen(command, cwd=REPO, stdout=stdout, stderr=stderr,
+                                   start_new_session=True)
+        stop = monitor_error = None
+        sampled_peak = 0
+        status = usage = None
+        try:
+            while True:
+                try:
+                    rss, _ = process_group_snapshot(process.pid)
+                    sampled_peak = max(sampled_peak, rss)
+                    if sampled_peak >= rss_cap:
+                        stop = "PROCESS_GROUP_RSS_CAP"
+                    elif time.perf_counter() - wall >= timeout:
+                        stop = "EXTERNAL_WALL_CAP"
+                    if stop is not None:
+                        break
+                    pid, status, usage = os.wait4(process.pid, os.WNOHANG)
+                    if pid:
+                        break
+                    status = usage = None
+                    time.sleep(0.05)
+                except Exception as error:
+                    stop = "MONITOR_ERROR"
+                    monitor_error = repr(error)
+                    break
+        finally:
+            # Also terminate descendants if the direct child exited first.
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            if usage is None:
+                _, status, usage = os.wait4(process.pid, 0)
+            quiescence_start = time.perf_counter()
+            group_quiesced = False
+            while time.perf_counter() - quiescence_start < 5:
+                _, live = process_group_snapshot(process.pid)
+                if live == 0:
+                    group_quiesced = True
+                    break
+                time.sleep(0.05)
+            group_quiescence_seconds = time.perf_counter() - quiescence_start
+        code = os.waitstatus_to_exitcode(status)
+        process.returncode = code
+        # wait4 covers a direct child's transient RSS, while descendants have
+        # only the 50 ms process-group samples. This is a sampled group cap.
+        maxrss = usage.ru_maxrss * 1024
+        sampled_peak = max(sampled_peak, maxrss)
+        if sampled_peak >= rss_cap and stop is None:
+            stop = "PEAK_RSS_CAP_AT_EXIT"
+        if not group_quiesced:
+            stop = "PROCESS_GROUP_LEAK"
+        if stop is not None:
+            stderr.write(f"\nexternal resource stop: {stop}\n".encode())
+        if monitor_error is not None:
+            stderr.write(f"monitor error: {monitor_error}\n".encode())
     receipt["attempts"].append({"phase": name, "command": command,
                                  "started_utc": start,
                                  "ended_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
                                  "wall_seconds": time.perf_counter() - wall,
-                                 "exit_code": code, "external_timeout": timed_out,
+                                 "exit_code": code,
+                                 "external_timeout": stop == "EXTERNAL_WALL_CAP",
+                                 "resource_stop": stop,
+                                 "rss_cap_bytes": rss_cap,
+                                 "sampled_group_peak_rss_bytes": sampled_peak,
+                                 "direct_child_peak_rss_bytes": maxrss,
+                                 "group_quiesced": group_quiesced,
+                                 "group_quiescence_seconds": group_quiescence_seconds,
+                                 "user_cpu_seconds": usage.ru_utime,
+                                 "system_cpu_seconds": usage.ru_stime,
+                                 "host": platform.platform(),
                                  "expected_sha256": sha(expected) if expected.exists() else None,
                                  "stdout_sha256": sha(stdout_path),
                                  "stderr_sha256": sha(stderr_path)})
     save(out / "receipt.json", receipt)
-    if code != 0 or not expected.exists():
+    if stop is not None or code != 0 or not expected.exists():
         raise RuntimeError(f"{name} failed or censored; first artifacts retained")
 
 
@@ -78,7 +163,9 @@ def run(out: Path):
                       ("export_sha256", HERE / "export.py"),
                       ("verify_sha256", HERE / "verify.py"),
                       ("run_sha256", Path(__file__)),
-                      ("ci_replay_sha256", HERE / "ci_replay.py")):
+                      ("ci_replay_sha256", HERE / "ci_replay.py"),
+                      ("resource_test_sha256", HERE / "test_resource_cap.py"),
+                      ("release_gate_sha256", HERE / "release_gate.py")):
         assert sha(path) == frozen[key], key
     spec = importlib.util.spec_from_file_location("n19_frozen_archive_gate", HERE / "ci_replay.py")
     assert spec is not None and spec.loader is not None
@@ -86,19 +173,25 @@ def run(out: Path):
     spec.loader.exec_module(audit)
     assert audit.check_freeze() == frozen
     verify_parent_merged(frozen)
+    require_linux_proc()
     out.mkdir(parents=True, exist_ok=False)
     receipt = {"domain": frozen["domain"], "freeze_sha256": sha(HERE / "FROZEN.json"),
-               "decision": "INCOMPLETE", "attempts": []}
+               "decision": "INCOMPLETE", "attempts": [],
+               "run_out": str(out), "source_root": str(HERE),
+               "python_executable": sys.executable,
+               "python_version": platform.python_version()}
     save(out / "receipt.json", receipt)
     try:
         producer = out / "producer"
         child(receipt, out, "export", [sys.executable, str(HERE / "export.py"),
                                         "--out", str(producer)],
-              producer / "result.json", 195)
+              producer / "result.json", frozen["caps"]["external_export_seconds"],
+              frozen["caps"]["child_rss_bytes"])
         verifier = out / "verify.json"
         child(receipt, out, "verify", [sys.executable, str(HERE / "verify.py"),
                                         "--produced", str(producer), "--out", str(verifier)],
-              verifier, 630)
+              verifier, frozen["caps"]["external_verify_seconds"],
+              frozen["caps"]["child_rss_bytes"])
         produced_row = json.loads((producer / "result.json").read_text())
         verified_row = json.loads(verifier.read_text())
         assert verified_row["decision"] == "PASS"
@@ -130,8 +223,8 @@ def run(out: Path):
                 except (ValueError, OSError):
                     pass
         receipt["decision"] = "CENSORED" if "CENSORED" in statuses or any(
-            row["external_timeout"] or (row["exit_code"] is not None and
-                                        row["exit_code"] < 0)
+            row["resource_stop"] is not None or row["external_timeout"] or
+            (row["exit_code"] is not None and row["exit_code"] < 0)
             for row in receipt["attempts"]) else "FAILED"
         receipt["error"] = repr(error)
         save(out / "receipt.json", receipt)
