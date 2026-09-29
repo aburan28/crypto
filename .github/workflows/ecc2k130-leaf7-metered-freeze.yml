@@ -35,7 +35,7 @@ jobs:
           python-version: '3.12'
       - name: Pin exact protocol freeze
         run: |
-          echo 'a66ec9d13410f759352f417acf6166fe5e0b847a3d6fb8877dd5f2817d7538e4  research/ecc2k130_leaf7_metered_v1_20260928/FROZEN.json' | sha256sum -c -
+          echo '03c5c779b20db26b3f9eecc3e28fac4c5db76ad8ac946bcaae3eea71b1553927  research/ecc2k130_leaf7_metered_v1_20260928/FROZEN.json' | sha256sum -c -
       - name: Check input hashes and static algebra only
         run: python3 research/ecc2k130_leaf7_metered_v1_20260928/ci_preflight.py
       - name: Check cost-scope negative controls only
