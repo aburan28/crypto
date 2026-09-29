@@ -944,4 +944,70 @@ mod tests {
             assert_eq!(reference::mat_vec(&m, got.as_ref().expect("solved"), &n), b);
         }
     }
+
+    /// Inputs the random tests above reach rarely, pinned to the
+    /// reference: the moduli 1 and 2; sequence terms that are nonzero
+    /// multiples of `n` (a discrepancy with no terms is taken as given,
+    /// so it is nonzero yet ≡ 0 and `coef` is 0) or far above `n²`;
+    /// long sequences, where `c` goes longest between reductions; and
+    /// matrices with explicit zero entries.
+    #[test]
+    fn edge_inputs_agree_with_reference() {
+        use std::collections::BTreeMap;
+        let mut rng = rand::rngs::StdRng::seed_from_u64(0x5eed_ed9e);
+        let mut moduli = test_moduli();
+        moduli.extend([1u32, 2].map(BigUint::from));
+        for (k, n) in moduli.iter().enumerate().cycle().take(400) {
+            let value = |rng: &mut rand::rngs::StdRng| match rng.gen_range(0..6) {
+                0 => BigUint::zero(),
+                1 => n * rng.gen_range(1u32..4),
+                2 => n * n * BigUint::from(rng.gen::<u128>()) + 1u32,
+                _ => random_value(rng, n),
+            };
+            let len = if k % 5 == 0 {
+                rng.gen_range(60..=160usize)
+            } else {
+                rng.gen_range(0..=12usize)
+            };
+            let seq: Vec<BigUint> = (0..len).map(|_| value(&mut rng)).collect();
+            assert_eq!(
+                berlekamp_massey(&seq, n),
+                reference::berlekamp_massey(&seq, n),
+                "n #{k}, seq {seq:?}"
+            );
+
+            let n_cols = rng.gen_range(1..=8usize);
+            let n_rows = if k % 2 == 0 {
+                n_cols
+            } else {
+                rng.gen_range(1..=n_cols + 2)
+            };
+            let m: Vec<SparseRow> = (0..n_rows)
+                .map(|_| {
+                    let mut entries = BTreeMap::new();
+                    for _ in 0..rng.gen_range(0..=3) {
+                        entries.insert(rng.gen_range(0..n_cols), value(&mut rng));
+                    }
+                    SparseRow {
+                        entries,
+                        rhs: BigUint::zero(),
+                    }
+                })
+                .collect();
+            let v: Vec<BigUint> = (0..n_cols).map(|_| value(&mut rng)).collect();
+            let w: Vec<BigUint> = (0..n_rows).map(|_| value(&mut rng)).collect();
+            assert_eq!(mat_vec(&m, &v, n), reference::mat_vec(&m, &v, n));
+            assert_eq!(
+                mat_t_vec(&m, &w, n_cols, n),
+                reference::mat_t_vec(&m, &w, n_cols, n)
+            );
+            assert_eq!(dot(&v, &v, n), reference::dot(&v, &v, n));
+            let seed = rng.gen::<u64>();
+            assert_eq!(
+                wiedemann_solve(&m, &w, n_cols, n, seed),
+                reference::wiedemann_solve(&m, &w, n_cols, n, seed),
+                "n #{k}"
+            );
+        }
+    }
 }

@@ -656,4 +656,57 @@ mod tests {
         // The comparison is only as good as the answers it compares.
         assert!(solved > 1000, "only {solved} solved columns");
     }
+
+    /// Rows built directly, not through `from_entries`, can hold
+    /// explicit zeros and nonzero multiples of `N` (both ≡ 0, and a
+    /// zero pivot-column coefficient is removed without eliminating),
+    /// and right-hand sides of the same kind.  Nothing on the PQ path
+    /// builds such rows, but the solver's answer on them is pinned to
+    /// the reference all the same, over the small moduli where they
+    /// are common.  `N = 1` is left out: there the pivot is never 1
+    /// and the solver's own debug assertion fires, as it always did.
+    #[test]
+    fn agrees_with_reference_on_explicit_zeros_and_multiples_of_n() {
+        use rand::rngs::StdRng;
+        use rand::{Rng, SeedableRng};
+        let moduli = [2u32, 4, 6, 15, 97].map(BigUint::from);
+        let mut rng = StdRng::seed_from_u64(0x5eed_2e20);
+        let mut solved = 0usize;
+        for case in 0..500 {
+            let n = &moduli[case % moduli.len()];
+            let n_cols = rng.gen_range(1..=10usize);
+            // 0, a nonzero multiple of n, or a small value (often unreduced).
+            let value = |rng: &mut StdRng| match rng.gen_range(0..4) {
+                0 => BigUint::zero(),
+                1 => n * rng.gen_range(1u32..4),
+                _ => BigUint::from(rng.gen_range(1u32..300)),
+            };
+            // Three cases in four plant a solution (the right-hand side
+            // left unreduced), so most columns have a value to agree on.
+            let planted = case % 4 != 3;
+            let x: Vec<BigUint> = (0..n_cols).map(|_| value(&mut rng)).collect();
+            let rows: Vec<SparseRow> = (0..rng.gen_range(1..=n_cols + 3))
+                .map(|_| {
+                    let mut row = SparseRow::zero();
+                    for _ in 0..rng.gen_range(0..=4) {
+                        let c = rng.gen_range(0..n_cols);
+                        row.entries.insert(c, value(&mut rng));
+                    }
+                    row.rhs = if planted {
+                        row.entries.iter().map(|(&c, a)| a * &x[c]).sum()
+                    } else {
+                        value(&mut rng)
+                    };
+                    row
+                })
+                .collect();
+            for col in 0..=n_cols {
+                let got = sparse_solve_mod_n(rows.clone(), n_cols, col, n);
+                let want = reference_sparse_solve(rows.clone(), col, n);
+                assert_eq!(got, want, "case {case}, column {col}, n = {n}");
+                solved += usize::from(got.is_some());
+            }
+        }
+        assert!(solved > 200, "only {solved} solved columns");
+    }
 }
