@@ -112,26 +112,23 @@ excludes all 25 public points the censored first run could have generated.
 It keeps the five cells and 25 independent targets, with one process per point
 and 250 paired trial slots. The runner is
 `run_generic_backend_qualification_v2.py` in workflow
-`ic-generic-backend-qualification-v2.yml`. Its one permitted dispatch is
-[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479),
-attempt one; never dispatch this seed again. Its PR preflight and one-file
-artifact-upload smoke passed before the run. Check the source checkout pin and
-reviewed panel/exclusion hashes when auditing its artifact. The measured step has
-a shorter cap than the job, leaving time for the `if: always()` packer to
-retain complete or partial evidence as one checksummed archive. A timed-out
-step with incomplete receipts remains operationally
-censored; register a new panel and exclude all of its potentially generated
-points for any later measurement. Verify the archive manifest and SHA-256
-before extracting it. Only a complete frozen verifier, natural-query audit and
-`generic_backend_gate_v2.py` can qualify both families. Also run the separately
-committed [independent receipt audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/independent_pairs.py)
-against the extracted bundle to recalculate all 400 same-point IC/rho online
-pairs from raw receipts and native worker outputs. Its timing/pairing cross-check
-does not replace group replay, natural-query auditing or the family gate.
-The post-registration [static feasibility audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/STATIC-FEASIBILITY.md)
-proves that this panel's four F4/F5 arms exceed the pinned 64-variable encoder
-cap on every cell; wait for the run's raw receipts for its empirical outcome.
-The SAT encoding is separate and remains empirically undecided. Before any new
+`ic-generic-backend-qualification-v2.yml`. Its one permitted dispatch,
+[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
+(attempt one), is **operationally censored** per
+[censored result](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/RESULT.md):
+measure step timeout at 300 minutes, `pack_partial_campaign.py` failed while
+callgrind files were still mutating, and GitHub uploaded zero campaign bundle.
+Never dispatch seed `2026092902` again. PR preflight and artifact-upload smoke
+passed; that does not substitute for retained receipts. Register a new panel
+and exclude all potentially generated points from this run (prepare replay at
+the pinned checkout) before any later measurement. Without a bundle, do not run
+`generic_backend_gate_v2.py` or
+[independent_pairs.py](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/independent_pairs.py)
+as if qualification were established. The post-registration
+[static feasibility audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/STATIC-FEASIBILITY.md)
+shows all four F4/F5 arms exceed the pinned 64-variable encoder cap on every
+cell; the censored log did not yield verified generic F4/F5/SAT receipts anyway.
+SAT encoding feasibility remains a separate empirical question on a future panel. Before any new
 algebraic panel generates fresh targets, run
 `generic_solver_feasibility.py --require-pass` against its exact worker source
 checkout and registered panel. A static pass is only an encoder preflight:
