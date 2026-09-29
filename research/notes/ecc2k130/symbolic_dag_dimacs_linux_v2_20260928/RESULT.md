@@ -36,3 +36,16 @@ therefore stays in the uncapped supervisor before dispatch; capped children
 verify its sealed dispatch and local byte identities. CI probes both paths
 without starting a measured phase. The hosted control receipt is evidence of
 this host limitation, not an attempt-2 outcome.
+
+The exact held code head `981fdb39c6437b2cf70b6c744b0c172a8b5ba7ac` passed
+[Actions run 36530704726](https://github.com/aburan28/crypto/actions/runs/36530704726):
+frozen-byte replay, nine no-network controls, both gate-only entrypoints,
+uncapped Git/GitHub API reads and the harmless capped host control all
+succeeded. The control itself returned
+`PASS_CHILD_BYTE_GATE_WITH_CAPPED_PREREQUISITE_REFUSALS`; its raw
+[receipt](evidence/held_cap_control_36530704726.json) has SHA-256
+`fedef83d89e4c109adc1b376ddabbfcb5a05adb5fe46dd71f923b698b3ec951a`.
+It records zero measured children. GitHub's temporary
+[artifact 11016158422](https://github.com/aburan28/crypto/actions/runs/36530704726/artifacts/11016158422)
+also contains the supervisor run-list control and has reported ZIP digest
+`sha256:1753ec368784c8a8c5021e52f8d67b049874b8ba6638fdb4990b32c8b04f4e6e`.

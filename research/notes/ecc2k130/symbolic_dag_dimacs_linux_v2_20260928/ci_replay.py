@@ -63,6 +63,48 @@ def check_static() -> dict:
             'codex/ecc2k130-symbolic-dag-dimacs-linux-v2-held-20260928',
             'branch identity')
     require(frozen['archive_relative'] == 'evidence/run1', 'archive namespace')
+    held = frozen['held_control']
+    require(held['path'] == 'evidence/held_cap_control_36530704726.json' and
+            held['run_id'] == 36530704726 and
+            held['artifact_id'] == 11016158422 and
+            held['artifact_digest'] ==
+            'sha256:1753ec368784c8a8c5021e52f8d67b049874b8ba6638fdb4990b32c8b04f4e6e' and
+            held['checkout_head'] == '981fdb39c6437b2cf70b6c744b0c172a8b5ba7ac' and
+            held['decision'] ==
+            'PASS_CHILD_BYTE_GATE_WITH_CAPPED_PREREQUISITE_REFUSALS',
+            'held Ubuntu control identity')
+    held_path = HERE / held['path']
+    require(sha(held_path) == held['receipt_sha256'],
+            'held Ubuntu control bytes changed')
+    held_receipt = load(held_path)
+    require(held_receipt['schema'] == 'k0-dag-linux-v2-held-toy-cap-control-v1' and
+            held_receipt['decision'] == held['decision'] and
+            held_receipt['checkout_head'] == held['checkout_head'] and
+            held_receipt['cap_bytes'] == frozen['caps']['toy']['rss_bytes'] and
+            held_receipt['runner_image_os'] == 'ubuntu24' and
+            held_receipt['runner_image_version'] == '20260920.314.1' and
+            held_receipt['measured_children_started'] == 0 and
+            held_receipt['capped_git_classification'] == 'PACK_MMAP_REFUSAL' and
+            held_receipt['capped_gh_classification'] == 'GO_PAGE_SUMMARY_REFUSAL',
+            'held Ubuntu control classification')
+    rows = {row['label']: row for row in held_receipt['commands']}
+    require(rows['hard_limit_observation']['exit_code'] == 0 and
+            rows['capped_child_local_byte_gate']['exit_code'] == 0 and
+            rows['git_cap_rev_parse']['exit_code'] == 0 and
+            rows['git_cap_checkout_ancestry']['exit_code'] == 128 and
+            'cannot be mapped' in
+            rows['git_cap_checkout_ancestry']['stderr_tail'] and
+            rows['preparation_and_v2_hash_gate']['exit_code'] == 1 and
+            rows['preparation_archive_gate']['exit_code'] == 1 and
+            rows['gh_parent_804']['exit_code'] ==
+            rows['gh_actions_current_run']['exit_code'] == 2 and
+            'failed to reserve page summary memory' in
+            rows['gh_parent_804']['stderr_tail'],
+            'held Ubuntu control command outcomes')
+    require(subprocess.run(['git', 'merge-base', '--is-ancestor',
+                            held['checkout_head'], 'HEAD'], cwd=ROOT,
+                           capture_output=True).returncode == 0,
+            'held Ubuntu control head is not ancestor of this PR')
     require(frozen['first']['pr_head'] ==
             'ca5cdef8b24c6118b5c1c9bb2b8faa8d1774533b' and
             frozen['first']['merge_commit'] ==

@@ -70,7 +70,11 @@ address-space limit; the receipt classifies these exact host limitations
 without misreporting the ancestry. It also exercises Git and GitHub API reads
 outside the cap, where the supervisor actually runs them. The harmless
 control archives command outcomes and zero measured children; a new or
-different failure refuses it. The separately opt-in measure workflow is triggered only by the unique PR label
+different failure refuses it. The successful held control from Actions run
+[36530704726](https://github.com/aburan28/crypto/actions/runs/36530704726)
+is retained byte-for-byte in `evidence/held_cap_control_36530704726.json`,
+with its SHA-256 and artifact identity pinned in `FROZEN.json`. It is a host
+control, not an attempt-2 archive. The separately opt-in measure workflow is triggered only by the unique PR label
 `ecc2k130-dag-linux-v2-measure-once`. It cannot release this held freeze.
 
 Before that label can be applied, a new commit must fill `status=RELEASED`,

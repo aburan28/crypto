@@ -54,6 +54,15 @@
     },
     "workflow_sha256": "791de43079c0f49a2dd0260fae427fe9bc2a192fd638b20ed2142eb12b0db006"
   },
+  "held_control": {
+    "artifact_digest": "sha256:1753ec368784c8a8c5021e52f8d67b049874b8ba6638fdb4990b32c8b04f4e6e",
+    "artifact_id": 11016158422,
+    "checkout_head": "981fdb39c6437b2cf70b6c744b0c172a8b5ba7ac",
+    "decision": "PASS_CHILD_BYTE_GATE_WITH_CAPPED_PREREQUISITE_REFUSALS",
+    "path": "evidence/held_cap_control_36530704726.json",
+    "receipt_sha256": "fedef83d89e4c109adc1b376ddabbfcb5a05adb5fe46dd71f923b698b3ec951a",
+    "run_id": 36530704726
+  },
   "linux_binary_bytes": 1732064,
   "linux_binary_git_blob": "3f50d3a4218609874b01e02bdf61ad699e6b3f71",
   "linux_binary_path": "symbolic_dag_dimacs_linux_attempt2_20260926/preparation_run_1/cadical_prepare/cadical",
@@ -86,8 +95,8 @@
   "release_pr_number": null,
   "schema": "k0-dag-linux-v2-freeze-v1",
   "source_sha256": {
-    "PROTOCOL.md": "f4e509a21dee3bb0a58f5d69be3be06adb6ce205a36498a619d8c196b6a564f9",
-    "ci_replay.py": "1bf200474ca00931d80dfe1d3b5d8fefa4b3656a032119e5f4decd6ad2f74879",
+    "PROTOCOL.md": "fd7c4ba5103bce04b78183cdf0a4f74288266f99d3ccc9fab2fd87072345da95",
+    "ci_replay.py": "e662285253049cfad766f3ea4f48283ad77d1ca93e53884024280fbeb739b176",
     "held_cap_control.py": "b216f29c646ebdd2661eee63efbe7224da28f13e08d33aff76bc64f21d027379",
     "run.py": "c2e0e92aff9ed35464fb3560fa539454e48d662c2b664ad67de91a9e6b3cea99",
     "selftest.py": "fa9467b7b31b5de49a15ca9211cdb2935d3fc6f61e30b75708e5e49a2371d037",
