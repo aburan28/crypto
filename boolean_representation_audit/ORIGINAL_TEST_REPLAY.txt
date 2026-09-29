@@ -1,0 +1,14 @@
+test_budget_means_incomplete (test_boolean_closure.ClosureTests.test_budget_means_incomplete) ... ok
+test_cancellation_and_idempotence (test_boolean_closure.ClosureTests.test_cancellation_and_idempotence) ... ok
+test_edge_cases (test_boolean_closure.ClosureTests.test_edge_cases) ... ok
+test_forged_provenance_is_rejected (test_boolean_closure.ClosureTests.test_forged_provenance_is_rejected) ... ok
+test_high_degree_is_retained (test_boolean_closure.ClosureTests.test_high_degree_is_retained) ... ok
+test_missing_closure_is_rejected (test_boolean_closure.ClosureTests.test_missing_closure_is_rejected) ... ok
+test_omitted_input_is_rejected (test_boolean_closure.ClosureTests.test_omitted_input_is_rejected) ... ok
+test_seeded_controls (test_boolean_closure.ClosureTests.test_seeded_controls) ... ok
+test_zero_coordinates_survive (test_boolean_closure.ClosureTests.test_zero_coordinates_survive) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.187s
+
+OK
