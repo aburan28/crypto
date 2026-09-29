@@ -1,0 +1,207 @@
+{
+  "factorisations": {
+    "BLS12-381": {
+      "r": "52435875175126190479447740508185965837690552500527637822603658699938581184513",
+      "r_minus_1": {
+        "2": 32,
+        "3": 1,
+        "11": 1,
+        "19": 1,
+        "10177": 1,
+        "125527": 1,
+        "859267": 1,
+        "906349": 2,
+        "2508409": 1,
+        "2529403": 1,
+        "254760293": 2,
+        "52437899": 1
+      },
+      "r_minus_1_unsplit": [],
+      "r_plus_1": {
+        "2": 1,
+        "2437": 1,
+        "242243": 1
+      },
+      "r_plus_1_unsplit": [
+        "44411123485275600329441052079377239377911521496144994880303766286127"
+      ]
+    },
+    "BN254": {
+      "r": "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "r_minus_1": {
+        "2": 28,
+        "3": 2,
+        "13": 1,
+        "29": 1,
+        "983": 1,
+        "11003": 1,
+        "237073": 1,
+        "405928799": 1
+      },
+      "r_minus_1_unsplit": [
+        "23088226308677670388631582763742451703676949"
+      ],
+      "r_plus_1": {
+        "2": 1,
+        "7": 1,
+        "19": 1,
+        "37": 1,
+        "179": 1,
+        "269": 1,
+        "613": 1,
+        "31567": 1,
+        "346501": 1,
+        "72844297": 1,
+        "6248149": 1,
+        "6076493": 1
+      },
+      "r_plus_1_unsplit": [
+        "2490714873744791481943264301013281"
+      ]
+    }
+  },
+  "rows": [
+    {
+      "setup": "EIP-4844 KZG (mainnet, n=12)",
+      "curve": "BLS12-381",
+      "q": 4095,
+      "log2_q": 12.0,
+      "source": "ethereum/kzg-ceremony-specs README + docs/participant/participant.md (4 sub-ceremonies, independent secrets; mainnet blobs use FIELD_ELEMENTS_PER_BLOB = 4096)",
+      "d_pminus1": 3648,
+      "log2_d_pminus1": 11.833,
+      "d_pplus1": 2,
+      "log2_d_pplus1": 1.0,
+      "log2_cost_pminus1": 121.51,
+      "log2_cost_pplus1": 126.93,
+      "best_side": "p-1",
+      "log2_cost_best": 121.51,
+      "log2_rho": 127.25,
+      "bits_lost_vs_rho": 5.74,
+      "log2_cost_at_measured_constant": 125.83,
+      "prior": null
+    },
+    {
+      "setup": "EIP-4844 KZG (largest, n=15)",
+      "curve": "BLS12-381",
+      "q": 32767,
+      "log2_q": 15.0,
+      "source": "ethereum/kzg-ceremony-specs (separate secret; not the mainnet transcript)",
+      "d_pminus1": 30531,
+      "log2_d_pminus1": 14.898,
+      "d_pplus1": 4874,
+      "log2_d_pplus1": 12.251,
+      "log2_cost_pminus1": 119.98,
+      "log2_cost_pplus1": 121.3,
+      "best_side": "p-1",
+      "log2_cost_best": 119.98,
+      "log2_rho": 127.25,
+      "bits_lost_vs_rho": 7.27,
+      "log2_cost_at_measured_constant": 124.3,
+      "prior": null
+    },
+    {
+      "setup": "Zcash Sapling powers of tau",
+      "curve": "BLS12-381",
+      "q": 4194302,
+      "log2_q": 22.0,
+      "source": "powersoftau src/lib.rs: TAU_POWERS_G1_LENGTH = (1<<21 << 1) - 1",
+      "d_pminus1": 4142391,
+      "log2_d_pminus1": 21.982,
+      "d_pplus1": 484486,
+      "log2_d_pplus1": 18.886,
+      "log2_cost_pminus1": 116.44,
+      "log2_cost_pplus1": 117.99,
+      "best_side": "p-1",
+      "log2_cost_best": 116.44,
+      "log2_rho": 127.25,
+      "bits_lost_vs_rho": 10.82,
+      "log2_cost_at_measured_constant": 120.76,
+      "prior": {
+        "d": 2097152,
+        "cost": "2^117.2 exponentiations",
+        "by": "ethresear.ch #6692 (daira)"
+      },
+      "prior_d_divides": true,
+      "prior_d_leq_q": true,
+      "d_gain_over_prior_bits": 0.982
+    },
+    {
+      "setup": "Filecoin powers of tau",
+      "curve": "BLS12-381",
+      "q": 268435454,
+      "log2_q": 28.0,
+      "source": "Filecoin 'Trusted setup' posts (64x Zcash, 2^27 tau powers); G1 = 2*2^27 - 1",
+      "d_pminus1": 265113024,
+      "log2_d_pminus1": 27.982,
+      "d_pplus1": 484486,
+      "log2_d_pplus1": 18.886,
+      "log2_cost_pminus1": 113.44,
+      "log2_cost_pplus1": 117.99,
+      "best_side": "p-1",
+      "log2_cost_best": 113.44,
+      "log2_rho": 127.25,
+      "bits_lost_vs_rho": 13.82,
+      "log2_cost_at_measured_constant": 117.76,
+      "prior": {
+        "d": 134217728,
+        "cost": "~2^114",
+        "by": "ethresear.ch #6692"
+      },
+      "prior_d_divides": true,
+      "prior_d_leq_q": true,
+      "d_gain_over_prior_bits": 0.982
+    },
+    {
+      "setup": "Aztec Ignition",
+      "curve": "BN254",
+      "q": 100800000,
+      "log2_q": 26.587,
+      "source": "AztecProtocol/ignition-verification Transcript_spec.md: x^1..x^100,800,000 in G1",
+      "d_pminus1": 100663296,
+      "log2_d_pminus1": 26.585,
+      "d_pplus1": 46084633,
+      "log2_d_pplus1": 25.458,
+      "log2_cost_pminus1": 113.51,
+      "log2_cost_pplus1": 114.07,
+      "best_side": "p-1",
+      "log2_cost_best": 113.51,
+      "log2_rho": 126.62,
+      "bits_lost_vs_rho": 13.12,
+      "log2_cost_at_measured_constant": 117.83,
+      "prior": {
+        "d": 100663296,
+        "cost": "~2^114",
+        "by": "ethresear.ch #6692"
+      },
+      "prior_d_divides": true,
+      "prior_d_leq_q": true,
+      "d_gain_over_prior_bits": 0.0
+    },
+    {
+      "setup": "Perpetual Powers of Tau",
+      "curve": "BN254",
+      "q": 536870910,
+      "log2_q": 29.0,
+      "source": "privacy-ethereum/perpetualpowersoftau: 'up to 536870911 powers' = 2^29 - 1 points",
+      "d_pminus1": 536259126,
+      "log2_d_pminus1": 28.998,
+      "d_pplus1": 243590203,
+      "log2_d_pplus1": 27.86,
+      "log2_cost_pminus1": 112.3,
+      "log2_cost_pplus1": 112.87,
+      "best_side": "p-1",
+      "log2_cost_best": 112.3,
+      "log2_rho": 126.62,
+      "bits_lost_vs_rho": 14.32,
+      "log2_cost_at_measured_constant": 116.62,
+      "prior": {
+        "d": 268435456,
+        "cost": "~2^114",
+        "by": "ethresear.ch #6692"
+      },
+      "prior_d_divides": true,
+      "prior_d_leq_q": true,
+      "d_gain_over_prior_bits": 0.998
+    }
+  ]
+}

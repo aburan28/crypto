@@ -1,0 +1,14 @@
+==31542== Callgrind, a call-graph generating cache profiler
+==31542== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==31542== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==31542== Command: /home/user/crypto/target/release/examples/groebner_stage_bench --label A0 --ladder chain-holdout-2 --rung 0 --out /home/user/crypto/research/groebner_instructions_20260925/stage/chain-holdout-2/A0/rung0/stage
+==31542== 
+==31542== For interactive control, run 'callgrind_control -h'.
+==31542== brk segment overflow in thread #1: can't grow to 0x484c000
+==31542== (see section Limitations in user manual)
+==31542== NOTE: further instances of this message will not be shown
+==31542== 
+==31542== Events    : Ir
+==31542== Collected : 17649391740
+==31542== 
+==31542== I   refs:      17,649,391,740

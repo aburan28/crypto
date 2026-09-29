@@ -39,9 +39,8 @@
 //! the failure case is what gives us the factor.
 
 use num_bigint::{BigUint, RandBigInt};
-use num_integer::Integer;
 use num_traits::{One, Zero};
-use rand::{rngs::SmallRng, Rng, SeedableRng};
+use rand::{rngs::SmallRng, SeedableRng};
 
 /// Result of running ECM on a single curve.
 pub enum EcmResult {
@@ -197,7 +196,7 @@ pub fn ecm_one_curve(n: &BigUint, b1: u64, seed: u64) -> EcmResult {
                 break;
             }
         }
-        if matches!(pt, None) {
+        if pt.is_none() {
             // Hit identity early — curve degenerated.
             return EcmResult::NoFactor;
         }
@@ -275,7 +274,7 @@ mod tests {
         assert!(result.is_some(), "ECM should find a factor of 8051");
         let g = result.unwrap();
         assert!(
-            &g == &BigUint::from(83u64) || &g == &BigUint::from(97u64),
+            g == BigUint::from(83u64) || g == BigUint::from(97u64),
             "factor should be 83 or 97, got {}",
             g
         );
@@ -293,7 +292,7 @@ mod tests {
         assert!(result.is_some(), "ECM should find a factor at B1=1000");
         let g = result.unwrap();
         assert!(
-            &g == &p || &g == &q,
+            g == p || g == q,
             "found factor {} should be {} or {}",
             g,
             p,

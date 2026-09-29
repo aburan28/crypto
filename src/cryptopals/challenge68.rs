@@ -141,7 +141,7 @@ fn generate_weak_d_key(bits: u64) -> crate::asymmetric::rsa::RsaKeyPair {
         let n = &p * &q;
         let phi = (&p - BigUint::one()) * (&q - BigUint::one());
         // Small d: choose d ≈ N^0.2 (well within Wiener's bound).
-        let bound = (&n).nth_root(5);
+        let bound = n.nth_root(5);
         let mut d = bound;
         if d.is_even() {
             d += BigUint::one();

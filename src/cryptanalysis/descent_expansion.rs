@@ -568,9 +568,9 @@ fn prime_factors(mut n: u32) -> Vec<u32> {
     let mut out = Vec::new();
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             out.push(d);
-            while n % d == 0 {
+            while n.is_multiple_of(d) {
                 n /= d;
             }
         }

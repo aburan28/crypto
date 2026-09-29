@@ -1,0 +1,32 @@
+{
+  "artifacts": [
+    {
+      "kind": "original execution with analysis failure",
+      "manifest_sha256": "5bf26a1260ca188b1b50fcf9c5a8c3cd2881f347479313c1f05246ff78d09a90",
+      "path": "run_01"
+    },
+    {
+      "kind": "additive corrected analysis",
+      "manifest_sha256": "af525bbbfa93b81fc25050a7e198bea3b0c87f78306ab6053195d3e28b272ff5",
+      "path": "analysis_01"
+    },
+    {
+      "kind": "discovery algebra only",
+      "manifest_sha256": "1413c68c14a334d189f1dec285d615d3a033a82d91de2cf4ffb41bb872766c60",
+      "path": "quotient_census_01"
+    }
+  ],
+  "classification": "accounting",
+  "constructor_optimization_implemented": false,
+  "corrected_analyzer_sha256": "46d7ebcf3133de1fa0b1079c5668af0129e163a54d5b93958b0f66202cccea5d",
+  "full_ic_cost": null,
+  "performance_promotion": null,
+  "production_solver_cost": null,
+  "replay_controller_sha256": "95556a9e93d6415fed596b6a3486d13905c5620856fbd1bcd8a32e09adfe8607",
+  "reporter_sha256": "14a30d1597605b91f4d82bc93d31f606cada203b042a3bdeefa70a19e35d107e",
+  "rho_ratio": null,
+  "schema_version": 1,
+  "source_lineage_sha256": "51870a598f44febe1255f9e064de2fe8f49bb5d31c900ae42f983506466c30fd",
+  "summary_sha256": "8889222cf9e65d0e38953592144de808225d0f270050740262d308cd39da2159",
+  "timed_rust_sources_unchanged": true
+}
