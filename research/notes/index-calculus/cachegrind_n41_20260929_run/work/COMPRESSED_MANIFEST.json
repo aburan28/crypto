@@ -1,0 +1,173 @@
+{
+ "note": "per-target JSONL streams over 100 kB, gzip -9 (mtime 0); sha256 of the uncompressed bytes recorded; decompress with gunzip -k",
+ "files": [
+  {
+   "file": "work/cg_ic_ll2M.stdout.jsonl",
+   "uncompressed_bytes": 775037,
+   "uncompressed_sha256": "96b6ff0d0974451a5be8261aa7f096ac94e1f523f30af51a1556b26c5bff51f4",
+   "gz_bytes": 149209
+  },
+  {
+   "file": "work/cg_ic_ll32M.stdout.jsonl",
+   "uncompressed_bytes": 773819,
+   "uncompressed_sha256": "69a0f87829c39754afe037179a792984b885740c4fb3085857db07b765ac31c7",
+   "gz_bytes": 149211
+  },
+  {
+   "file": "work/cg_ic_ll8M.stdout.jsonl",
+   "uncompressed_bytes": 774914,
+   "uncompressed_sha256": "61f44a1536b6614fe40572be22eccf56e0a395cc87cf9a94feae3db8a1028736",
+   "gz_bytes": 149251
+  },
+  {
+   "file": "work/cg_rho_ll2M.stdout.jsonl",
+   "uncompressed_bytes": 682553,
+   "uncompressed_sha256": "9e197ca3e2e2eac9ea8fb7f38043b982ea08f5b97b108c2c977329229ba94eea",
+   "gz_bytes": 77298
+  },
+  {
+   "file": "work/cg_rho_ll32M.stdout.jsonl",
+   "uncompressed_bytes": 682462,
+   "uncompressed_sha256": "8dd2d90b89bfba3f520a2b5aec90b6843d3dfd4fa68fb7282e97547c9dc0d2ba",
+   "gz_bytes": 77234
+  },
+  {
+   "file": "work/cg_rho_ll8M.stdout.jsonl",
+   "uncompressed_bytes": 682482,
+   "uncompressed_sha256": "5a8696901ef95a286dbbbbc6c74bf6bf78e122421d72d4a84b384c55e476d414",
+   "gz_bytes": 77261
+  },
+  {
+   "file": "work/ic_alone0.jsonl",
+   "uncompressed_bytes": 777650,
+   "uncompressed_sha256": "126cee50a98f7ac13ce7bd540cd8a32152ac6a604646e26d244e5b0be046c340",
+   "gz_bytes": 141021
+  },
+  {
+   "file": "work/ic_alone1.jsonl",
+   "uncompressed_bytes": 776994,
+   "uncompressed_sha256": "69bddf4e5c4b75d77a1e0909c86691e34ad92bbcf836f0925c10884b3d36492f",
+   "gz_bytes": 141350
+  },
+  {
+   "file": "work/ic_alone2.jsonl",
+   "uncompressed_bytes": 778585,
+   "uncompressed_sha256": "6735ce1ffc14b97a0e4c924750b496a3ec4de5af3f7c64375e235bbe0e6e3ecc",
+   "gz_bytes": 141042
+  },
+  {
+   "file": "work/ic_loaded0.jsonl",
+   "uncompressed_bytes": 776248,
+   "uncompressed_sha256": "7b1f7c605a5f79ce77d4bb89456b878db4c23005daa71c430a035f845e0e0f85",
+   "gz_bytes": 141289
+  },
+  {
+   "file": "work/ic_loaded1.jsonl",
+   "uncompressed_bytes": 778014,
+   "uncompressed_sha256": "46d1596660c922499e8db8c4591faa7fe430b0f1662f2beac5555b38ede37ede",
+   "gz_bytes": 140876
+  },
+  {
+   "file": "work/ic_loaded2.jsonl",
+   "uncompressed_bytes": 773668,
+   "uncompressed_sha256": "45000991b7bd86d662dce89e2e5334c265388a0afebed4c21dfa17bd68496c77",
+   "gz_bytes": 141407
+  },
+  {
+   "file": "work/ic_native0.jsonl",
+   "uncompressed_bytes": 778190,
+   "uncompressed_sha256": "c0c6e2109fc7df27cbbba2c291ade06268f0cb19605a183a317a79af7cf3107e",
+   "gz_bytes": 141402
+  },
+  {
+   "file": "work/ic_native1.jsonl",
+   "uncompressed_bytes": 778543,
+   "uncompressed_sha256": "1c53f272b2ba4207315b6ebad2a55f2a5a7a741327a97a3b329af9e9b9c91e78",
+   "gz_bytes": 140960
+  },
+  {
+   "file": "work/ic_native2.jsonl",
+   "uncompressed_bytes": 778591,
+   "uncompressed_sha256": "cbc684e685671f4e222c63b90e63d5fd6827a2095c6b96f18efec839e196cbb3",
+   "gz_bytes": 141033
+  },
+  {
+   "file": "work/ic_native3.jsonl",
+   "uncompressed_bytes": 775613,
+   "uncompressed_sha256": "fcc6b7c8d97f8598f4eebee83e36b74c87ee4f23e82fa9fc2586e5d8b9251297",
+   "gz_bytes": 140916
+  },
+  {
+   "file": "work/ic_native4.jsonl",
+   "uncompressed_bytes": 778854,
+   "uncompressed_sha256": "6d524e28de024234c0ea0809f73bcca9d2d63508481c774fc81d5a8fff294f2e",
+   "gz_bytes": 141585
+  },
+  {
+   "file": "work/rho_alone0.jsonl",
+   "uncompressed_bytes": 682033,
+   "uncompressed_sha256": "78d6163226b9c403259eaf60847ee1cdd23c5128bb64f08052305f3368c5f0d0",
+   "gz_bytes": 75767
+  },
+  {
+   "file": "work/rho_alone1.jsonl",
+   "uncompressed_bytes": 681898,
+   "uncompressed_sha256": "ba6c40c4f0e2d19703e78ce897a2a10fe6cfa0b06332a0eabc9a117b7b7f6f9d",
+   "gz_bytes": 75753
+  },
+  {
+   "file": "work/rho_alone2.jsonl",
+   "uncompressed_bytes": 681895,
+   "uncompressed_sha256": "6221644178bf7f84e8138892016810ba3f14e83743f7a49366fea6d8d8fe0840",
+   "gz_bytes": 75856
+  },
+  {
+   "file": "work/rho_loaded0.jsonl",
+   "uncompressed_bytes": 681636,
+   "uncompressed_sha256": "f14a843fefdacaaf51be04cf16a8605f6f84d32af48fa855aafd2b3999121dd7",
+   "gz_bytes": 75828
+  },
+  {
+   "file": "work/rho_loaded1.jsonl",
+   "uncompressed_bytes": 681645,
+   "uncompressed_sha256": "cca7a97d617c650cd2f93971e36b6ecf21d2aa37d50128ae10665cb4aed8cb53",
+   "gz_bytes": 75748
+  },
+  {
+   "file": "work/rho_loaded2.jsonl",
+   "uncompressed_bytes": 681739,
+   "uncompressed_sha256": "61abeb4045ba442fa7ced25a68a91acc9f4dfc4added28f076a79eb7ad3d6b30",
+   "gz_bytes": 75727
+  },
+  {
+   "file": "work/rho_native0.jsonl",
+   "uncompressed_bytes": 681722,
+   "uncompressed_sha256": "c9587dce8b0ce0611f9d660738014367a5384b49858a31335fa91255a816d164",
+   "gz_bytes": 75762
+  },
+  {
+   "file": "work/rho_native1.jsonl",
+   "uncompressed_bytes": 682081,
+   "uncompressed_sha256": "ec22d0798426b58b023d7c38614f5f09a9d3540ca41ddf3b2d8bcbc5fe84eaaa",
+   "gz_bytes": 75773
+  },
+  {
+   "file": "work/rho_native2.jsonl",
+   "uncompressed_bytes": 681857,
+   "uncompressed_sha256": "19eb972cd8373db85b6618823742d2cfa9170a9912f77a703887b3a259618974",
+   "gz_bytes": 75763
+  },
+  {
+   "file": "work/rho_native3.jsonl",
+   "uncompressed_bytes": 681766,
+   "uncompressed_sha256": "260423ecfcd9dc1a14c78b2a78472cda4e89cde07a1f936573bf0574a748774c",
+   "gz_bytes": 75773
+  },
+  {
+   "file": "work/rho_native4.jsonl",
+   "uncompressed_bytes": 681817,
+   "uncompressed_sha256": "9799679b7a2a81a8322d71857824b4812ff59b727af8a0b710f1354de70c4d59",
+   "gz_bytes": 75831
+  }
+ ]
+}

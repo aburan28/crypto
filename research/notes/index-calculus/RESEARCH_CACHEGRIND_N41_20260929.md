@@ -208,3 +208,75 @@ branch-mispredict count as a measurement of hardware mispredicts.
 ---
 
 <!-- Results are appended below by the commit that follows the runs. Nothing above this line is edited after seeing them. -->
+
+## Amendment A1 (additive; written after the four registered stages ran, before any follow-up run)
+
+**What I had seen when writing this.** All four registered stages had completed and
+`analyze.py` had been run on them; their raw outputs and `analysis.txt` are committed
+in the same commit as this amendment, so the order is checkable. The registered
+outcome is:
+
+- Gates: G1, G3, G4 pass; G2 passes (cachegrind `Ir` IC 12,442,73x,xxx and rho
+  8,185,26x,xxx, within 0.013 % of the sweep's callgrind counts); **G5 fails** (native
+  CPU-time spread over the five repetitions: IC 0.230, rho 0.122, against the
+  registered ≤ 0.10; one IC repetition ran 18 % above the median on this shared VM).
+- Model: `F_high = 1.91` (above 1, i.e. the no-overlap bound over-explains the whole
+  gap and is vacuous as a bound), `F_low = 0.077`. Interference: IC slowed by −1.5 %
+  and rho by +4.6 % with the antagonists, but the alone-run spread was 0.11 for both
+  arms (> 0.05), so `S = ambiguous`.
+- **Registered verdict: UNDETERMINED (a registered gate failed).** Nothing in this
+  amendment changes it, and no result below can.
+
+I had also looked at the raw simulated counts (IC 12.15 D1 misses per 1,000
+instructions and 1.21 LL misses per 1,000 at 2 MiB; rho 6.63 and 0.147) and at the
+`cg_annotate` per-function tables before writing this.
+
+**Why an amendment.** Three weaknesses of the registered instrument are visible now,
+and none of them is about the direction of the answer:
+
+1. A five-repetition max/min noise gate on a shared VM is failed by one slow
+   repetition; the medians may still be stable, but the registered stage cannot say.
+2. The interference test has **no positive control**: "IC did not slow down" cannot be
+   read unless the same antagonists demonstrably slow a memory-bound loop.
+3. Neither the simulator nor the contention test isolates **address translation**:
+   IC's 338 MB index on 4 KiB pages far exceeds the TLB's reach, and cachegrind has no
+   TLB. Transparent huge pages (this VM: THP `madvise`; glibc 2.39 accepts
+   `GLIBC_TUNABLES=glibc.malloc.hugetlb=1`) remove that term natively without
+   touching the algorithm or its instruction count.
+
+**Unregistered follow-ups (all exploratory; run once each unless a run dies on
+infrastructure, in which case rerun that stage once and report both).**
+
+- **E3 replicate.** Ten more interleaved repetitions of (rho, IC), core 0. Pooled
+  median cpu-time over all fifteen repetitions gives `cpi_pooled`; spread is reported as
+  max/min − 1 and as (Q3 − Q1)/median. `F_high` and `F_low` are recomputed with
+  `cpi_pooled` and the same formulas and labelled post hoc.
+- **E1 interference controls.** A random pointer chase over 256 MiB (positive control)
+  and over 16 KiB (negative control), each alone on core 0 and with the same three
+  antagonists, three interleaved repetitions. The registered `S` is *informative*
+  only if the positive control slows by ≥ 0.10 and the negative control by ≤ 0.03; if
+  not, `S` is uninformative regardless of IC's value.
+- **E2 huge pages.** Seven interleaved repetitions of {rho, IC} × {4 KiB pages,
+  `glibc.malloc.hugetlb=1`}, CPU time, core 0, sampling `AnonHugePages` from
+  `/proc/<pid>/smaps_rollup`. *Valid* only if IC's sampled `AnonHugePages` reaches
+  at least half of its peak RSS **and** a 256 MiB pointer-chase control runs at least
+  1.3× faster with the tunable than without. With `d_a = (cpu_a,4K − cpu_a,THP) / Ir_a`
+  (ns per instruction, medians), the **translation share** of the gap is
+  `(d_IC − d_rho) / Δ`, with `Δ` from the 4 KiB medians of E3's pooled set.
+
+**Reading rules for E2 (fixed now).** If E2 is valid and the translation share is
+≥ 0.25, address-translation stalls that huge pages remove account for at least a
+quarter of the per-instruction gap, natively measured — a lower bound on the memory
+share, since huge pages leave the cache misses in place. If valid and the share is
+< 0.05, translation stalls are not the mechanism (cache-miss latency remains
+unresolved and stays an interval `[F_low, F_high]`). Anything else: unresolved.
+If E2 is invalid, it is reported as not informative.
+
+**Inadmissible, stated in advance:** using E1-E3 to change the registered verdict or
+any threshold above; adding stages, repetitions or configurations to the follow-ups
+after seeing their results; reporting only the direction that favours or disfavours
+H_mem.
+
+---
+
+<!-- A1 results are appended below. Nothing above this line is edited after seeing them. -->
