@@ -11,7 +11,7 @@ criterion work matched. Direct scalar unpack also matched raw row fingerprints,
 output term counts, and reduction word operations on every call. Each
 compressed receipt retains the full process output, phase times, options,
 source and binary hashes, and host details. The complete exploratory source
-is in [exploratory-implementation.patch](exploratory-implementation.patch),
+is in [exploratory-implementation.patch.gz](exploratory-implementation.patch.gz),
 generated against commit `aa38ca38eff9fcce5b51fcdb70910aea8343616e`;
 the SHA-256 and byte counts are in the manifest. The submitted source keeps
 only the direct-unpack option; rejected options are reproducible from the
