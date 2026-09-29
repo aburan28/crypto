@@ -327,7 +327,55 @@ confidence gate and the pending n=61 L=65,536 batch-size probe as resources
 permit. Do not use 32-target panels as a substitute. Historical evidence:
 [`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
 
-**Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
+**2026-09-29 ERRATUM to the matched-arithmetic recheck below (PR #955): its
+verdict "the lead survives, IC/rho = 0.2403" is superseded and must not be
+quoted.** That rho was neither hardware-matched (on x86-64 its field multiply
+was a software bit-loop while IC used `pclmulqdq`) nor best-effort (its orbit
+canonicalization was still a Θ(n) polynomial-basis scan with a `u128 %` per
+position and it inverted once per step). Re-measured as a ladder of stronger
+references on the identical n=53, L=1,024, K=440 targets, whole-process retired
+instructions (callgrind), IC = 89,190,346,806: PR #955's rho 371.1 B (IC/rho
+0.240); + library `Gf2` field 281.0 B (0.317); + normal-coordinate
+canonicalization 68.9 B (**1.294**); + 32 lockstep walks with `Gf2::batch_inv`
+46.4 B (**1.923**). Every rung verified 1,024/1,024 targets and replayed
+independently in pure Python; rungs 0–1 walk PR #955's trajectory bit for bit.
+By the pre-registered rule the lead **dies** at this cell (IC/rho ≥ 1.0), in
+agreement with the same-day wall/CPU results above (PRs #940, #943, #944), and
+an independently written strong rho (`koblitz_rho_batch_ks_v3.rs`, PR #943)
+reproduces the strongest rung's walk on all 1,024 targets step for step. The
+arithmetic-asymmetry finding of PR #955 stands; its verdict does not. Class:
+`accounting` for the hardware-matched rung, `engineering` for the two stronger
+rungs. Ladder and evidence:
+[`RESEARCH_STRONG_RHO_LADDER_20260929.md`](../../research/notes/index-calculus/RESEARCH_STRONG_RHO_LADDER_20260929.md),
+[`strong_rho_ladder_20260929_run/`](../../research/notes/index-calculus/strong_rho_ladder_20260929_run/).
+
+**2026-09-29 strong-rho size and batch sweep (whole-process retired instructions,
+callgrind; class: measured ratio-to-boundary trend, not an advance).** IC as merged
+against `koblitz_rho_batch_ks_strong` R3, K as chosen in PR #830, every target of
+every cell verified and the rho records replayed independently. IC/rho at L =
+1,024: **0.794 (n = 37), 1.520 (n = 41), 1.923 (n = 53), 2.297 (n = 61)**; at n = 53:
+**1.923, 1.604, 1.500** for L = 1,024 / 4,096 / 16,384 (IC then holds 4.94 GiB against
+rho's 0.58 GiB, at 4.5× rho's wall time). The registered slope test gives
+`log₂(IC/rho)` on `log₂ r` = **+0.078 ± 0.003 (95 % interval 0.067–0.089)**: IC's cost
+grows faster than the reference's, and dropping any single size leaves it at
++0.072…+0.079. **Read this carefully:** the pre-registered rule, applied literally,
+prints "survives as a scaling result" because clause (i) ("some cell < 0.8") is met by
+the single smallest cell, n = 37 at 0.794 (0.6 B-instruction runs dominated by fixed
+costs, inside the ~10 % build-to-build scale, with IC slower in wall time there). That
+clause was badly designed (any one cell could satisfy it) and is recorded as
+written, not corrected; no cell with n ≥ 41 is below 1.5 and clause (ii), the
+actual scaling test, fails in the unfavourable direction. Extrapolation, marked as
+such: were the fitted slope to persist, IC/rho would grow about 7× by r ≈ 2^83 and
+about 89× by r ≈ 2^130. Exploratory (unregistered): IC needs 1.418× as many probes
+as rho needs canonicalizations at n = 53, L = 1,024, but 0.935× and 0.946× at L =
+4,096 and 16,384 — its instruction total still exceeds the reference there because of
+the K² index build. The n = 61, L = 65,536 probe listed below is not expected to
+change this (n = 61 is at 2.30 at L = 1,024). Note, evidence and per-cell
+archives:
+[`RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md`](../../research/notes/index-calculus/RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md),
+[`strong_rho_sweep_20260929_run/`](../../research/notes/index-calculus/strong_rho_sweep_20260929_run/).
+
+**[SUPERSEDED by the erratum above] Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
 `vs_rho` comparator (`examples/koblitz_rho_batch_ks.rs`) walks its
 signed-Frobenius canonicalization by real field squaring and inverts by
 Fermat's square-and-multiply — an unmatched baseline against the IC arm's own
@@ -363,7 +411,7 @@ and
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz compact-orbit `vs_rho` → jointly reduce S3 index and query costs, then count a complete common operation unit against normal-basis batched rho.** A held-out n41/n53 K sweep found best tested complete CPU ratios of 2.443/2.616 against matched rho; shrinking K alone traded index construction for rank/target probes and did not cross. The next frozen index/query policy needs full-rank, full-log recovery, failures, probes and RSS on held-out points. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels.
+1. **Koblitz compact-orbit `vs_rho` → jointly reduce S3 index and query costs, then count a complete common operation unit against normal-basis batched rho.** A held-out n41/n53 K sweep found best tested complete CPU ratios of 2.443/2.616 against matched rho; shrinking K alone traded index construction for rank/target probes and did not cross. The next frozen index/query policy needs full-rank, full-log recovery, failures, probes and RSS on held-out points. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels. Instruction-count constraints from the strong-rho ladder and sweep (2026-09-29): IC must become at least 1.9× cheaper at n = 53, L = 1,024 (2.3× at n = 61) to tie the strongest rho built, its cost ratio to that rho rises with n (+0.078 per doubling of r) and falls only slowly with L (1.50 at L = 16,384), and IC and rho are bound by the same per-operation primitive (least-rotation canonical form and basis change), so faster primitives help both; a candidate must reduce the *number* of probes-plus-index work, not their unit cost. The pending n = 61, L = 65,536 probe is deprioritised.
 2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
 3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
    On the autolab `signed_expanded` family the nearest charged gap is `n = 37`
