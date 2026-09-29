@@ -1,6 +1,9 @@
 # Generic backend qualification
 
-Status: **registered, measurement pending.**
+Status: **registered campaign running; outcome pending.** The single measured
+[workflow run 36532455386](https://github.com/aburan28/crypto/actions/runs/36532455386)
+uses the reviewed PR 920 head `765c3c5f19032bd852163805f257c56babef2040`
+as its immutable execution checkout.
 
 The three sealed pair-table improvement rounds retained the incumbent
 ([bounded goal result](../BOUNDED-GOAL-RESULT.md)). This directory freezes the
@@ -13,21 +16,26 @@ identical public targets.
 | [PROTOCOL.md](PROTOCOL.md) | Hypothesis, freeze, schedule, exclusions, success/stop |
 | [panel.json](panel.json) | Exact arms, seed `2026092901`, resource envelope; byte SHA-256 `83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf` |
 
-No worker has been scheduled under this registration. Do not treat admission
-controls, readiness panels or the earlier generic/reference pair-table study as
-substitutes. The follow-on implementation adds
+Do not treat admission controls, readiness panels or the earlier
+generic/reference pair-table study as substitutes. The implementation adds
 `run_generic_backend_qualification.py` and
 `.github/workflows/ic-generic-backend-qualification.yml`; execution is gated to
-one explicit main-branch dispatch after both PRs merge. The runner restores
+one explicit main-branch dispatch. The runner restores
 the three sealed archives, verifies the accepted references and prior point
 exclusions, builds the new generic source, and runs prepare/run/verify once.
 It also independently checks the ordinary-query histories of bounded
-incomplete reports. Until an evidence PR lands, leave measured end-to-end
-cost and speedup unset.
+incomplete reports. After the pinned tournament verifier and natural-yield
+auditor pass, `generic_backend_gate.py --bundle <retained-output> --out
+<new-result.json>` applies the protocol's stricter two-family rule. A generic
+reference-selection status alone never qualifies F4/F5 or SAT: at least one arm
+from each family must finish every smoke and development job with independently
+audited natural queries. The gate keeps incomplete arms, non-witness outcomes
+and censored reports visible; it does not assert a paired performance gain.
+Until an evidence PR lands, leave measured end-to-end cost and speedup unset.
 
 The workflow's PR job checks registration and Python scientific controls; it
-does not run the campaign. On main, dispatch `IC generic backend qualification`
-with `execute_registered_campaign=true` once. The full output, including
+does not run the campaign. The one authorized main-branch dispatch used
+`execute_registered_campaign=true`. The full output, including
 interrupted directories and failures, is uploaded as an artifact. Do not use a
 second dispatch to replace a failed or incomplete registered execution.
 
