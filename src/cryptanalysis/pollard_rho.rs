@@ -1687,6 +1687,250 @@ mod tests {
         );
     }
 
+    /// The word exponent arithmetic at the edges of `n`: `a = n − 1`, where
+    /// `inc` wraps, and `a` around `n / 2`, where `dbl` switches between
+    /// `2a` and `2a − n`, for `n` up to `2^64 − 1`, where `a + a` itself
+    /// would overflow.  The random states of `word_step_matches_biguint_step`
+    /// reach these values only by chance.
+    #[test]
+    fn word_exponent_arithmetic_at_the_edges_of_n() {
+        let mut rng = StdRng::seed_from_u64(0xed6e_0f_17);
+        let mut orders = vec![
+            2,
+            3,
+            4,
+            255,
+            256,
+            257,
+            1 << 32,
+            (1 << 63) - 1,
+            1 << 63,
+            (1 << 63) + 1,
+            u64::MAX - 1,
+            u64::MAX,
+        ];
+        orders.extend((0..100).map(|_| any_word(&mut rng).max(2)));
+        for n in orders {
+            let w = WordZp::new(&BigUint::from(23u32), &BigUint::from(n)).unwrap();
+            let half = n / 2;
+            let mut exps = vec![0, 1, n - 1, n - 2, half, half.saturating_sub(1), half + 1];
+            exps.extend((0..50).map(|_| rng.gen_range(0..n)));
+            for a in exps.into_iter().filter(|&a| a < n) {
+                let (a128, n128) = (a as u128, n as u128);
+                assert_eq!(w.inc(a) as u128, (a128 + 1) % n128, "inc: n {n} a {a}");
+                assert_eq!(w.dbl(a) as u128, (2 * a128) % n128, "dbl: n {n} a {a}");
+            }
+        }
+    }
+
+    /// Both public walks against the original code on inputs at the edges
+    /// of the single-word path: moduli from 3 to `2^64 − 1` (prime and
+    /// composite, with and without the top bit), exponent moduli at the
+    /// top of the word, elements `0`, `p`, `p ± 1` and unreduced past
+    /// `2^64`, zero budgets (`max_iterations`, `max_walkers`,
+    /// `max_steps_per_walker`), up to six targets with repeats, and every
+    /// `dp_bits` boundary of the byte rule.  With an `n` unrelated to the
+    /// group, the Floyd walk returns whatever its first non-degenerate
+    /// collision gives, unverified, so equal answers pin the steps too.
+    #[test]
+    fn public_walks_match_the_original_code_at_the_edges() {
+        let mut rng = StdRng::seed_from_u64(0xed6e_5_0f_c0de);
+        let moduli: [u64; 18] = [
+            3,
+            5,
+            7,
+            9,
+            15,
+            21,
+            255,
+            257,
+            65_535,
+            65_537,
+            (1 << 32) - 1,
+            (1 << 32) + 1,
+            (1 << 63) - 25,
+            (1 << 63) + 1,
+            u64::MAX,
+            u64::MAX - 58,
+            18_446_744_073_709_551_437,
+            131_267,
+        ];
+        let orders: [u64; 11] = [
+            2,
+            3,
+            4,
+            255,
+            256,
+            1 << 32,
+            1 << 63,
+            (1 << 63) + 1,
+            u64::MAX - 1,
+            u64::MAX,
+            65_633,
+        ];
+        let dp_bits: [u8; 22] = [
+            0, 1, 2, 3, 6, 7, 8, 9, 15, 16, 17, 23, 24, 31, 32, 48, 55, 56, 63, 64, 65, 255,
+        ];
+        let two64 = BigUint::one() << 64;
+        let element = |rng: &mut StdRng, p: u64| -> BigUint {
+            let pb = BigUint::from(p);
+            match rng.gen_range(0..10) {
+                0 => BigUint::zero(),
+                1 => BigUint::one(),
+                2 => BigUint::from(p - 1),
+                3 => pb,
+                4 => pb + 1u32,
+                5 => &two64 + rng.gen::<u64>(),
+                6 => BigUint::from(u128::MAX),
+                _ => BigUint::from(rng.gen_range(0..p)),
+            }
+        };
+
+        // The primes among `moduli`: for these `n = p − 1` is a multiple of
+        // every element's order, so planted targets can be solved.
+        let primes: [u64; 9] = [
+            3,
+            5,
+            7,
+            257,
+            65_537,
+            131_267,
+            (1 << 63) - 25,
+            u64::MAX - 58,
+            18_446_744_073_709_551_437,
+        ];
+
+        let mut floyd = [0usize; 3];
+        let mut dp = [0usize; 2];
+        let mut dp_targets = [0usize; 2];
+        for &p in &moduli {
+            let pb = BigUint::from(p);
+            for _ in 0..40 {
+                let planted = primes.contains(&p) && rng.gen_bool(0.4);
+                let n = if planted {
+                    p - 1
+                } else if rng.gen_bool(0.7) {
+                    orders[rng.gen_range(0..orders.len())]
+                } else {
+                    any_word(&mut rng).max(2)
+                };
+                let nb = BigUint::from(n);
+                let w = WordZp::new(&pb, &nb).expect("a single-word instance");
+                let g = element(&mut rng, p);
+                let pool: Vec<BigUint> = (0..3)
+                    .map(|_| {
+                        if planted {
+                            g.modpow(&BigUint::from(rng.gen_range(0..n)), &pb)
+                        } else {
+                            element(&mut rng, p)
+                        }
+                    })
+                    .collect();
+                let hs: Vec<BigUint> = (0..rng.gen_range(1..=6))
+                    .map(|_| pool[rng.gen_range(0..pool.len())].clone())
+                    .collect();
+
+                let opts = RhoOptions {
+                    max_iterations: [0, 1, 2, 7, 100, 3000][rng.gen_range(0..6)],
+                    max_restarts: [0, 1, 3, 16][rng.gen_range(0..4)],
+                    seed: rng.gen_bool(0.8).then(|| rng.gen()),
+                };
+                let got = pollard_rho_dlp_zp(&g, &hs[0], &pb, &nb, &opts);
+                let want = original::pollard_rho_dlp_zp(&g, &hs[0], &pb, &nb, &opts);
+                assert_eq!(got, want, "p {p} n {n} g {g} h {} {opts:?}", hs[0]);
+                floyd[match want {
+                    Ok(_) => 0,
+                    Err(ERR_NO_COLLISION) => 1,
+                    Err(_) => 2,
+                }] += 1;
+
+                let opts = DpRhoOptions {
+                    dp_bits: dp_bits[rng.gen_range(0..dp_bits.len())],
+                    max_walkers: [0, 1, 2, 17, 200][rng.gen_range(0..5)],
+                    max_steps_per_walker: [0, 1, 2, 40, 300][rng.gen_range(0..5)],
+                    seed: rng.gen_bool(0.8).then(|| rng.gen()),
+                };
+                let got = pollard_rho_dp_dlp_zp_multi(&g, &hs, &pb, &nb, &opts);
+                let want = original::pollard_rho_dp_dlp_zp_multi(&g, &hs, &pb, &nb, &opts);
+                assert_eq!(got, want, "p {p} n {n} g {g} targets {hs:?} {opts:?}");
+                dp[want.is_ok() as usize] += 1;
+
+                // The public result says only which target failed first; the
+                // walkers' per-target results and the RNG state they leave
+                // pin every draw on these inputs as well.
+                let mut rng_big = StdRng::seed_from_u64(rng.gen());
+                let mut rng_word = rng_big.clone();
+                let big = dp_walks_big(&g, &hs, &pb, &nb, &opts, &mut rng_big);
+                let word = dp_walks_word(&w, &g, &hs, &pb, &nb, &opts, &mut rng_word);
+                assert_eq!(word, big, "p {p} n {n} g {g} targets {hs:?} {opts:?}");
+                assert!(rng_word == rng_big, "RNG streams diverged: p {p} n {n}");
+                for sol in big.unwrap() {
+                    dp_targets[sol.is_some() as usize] += 1;
+                }
+            }
+        }
+        // Every outcome is reached often enough to count as tested.  A DP
+        // run succeeds only when all its targets verify, which the planted
+        // runs on the small primes do; the per-target count is the larger
+        // sample.
+        assert!(floyd.iter().all(|&c| c >= 40), "Floyd outcomes {floyd:?}");
+        assert!(dp[0] >= 40 && dp[1] >= 20, "DP outcomes {dp:?}");
+        assert!(
+            dp_targets.iter().all(|&c| c >= 100),
+            "DP targets {dp_targets:?}"
+        );
+    }
+
+    /// Multi-target DP runs to completion against the original: six planted
+    /// targets, a repeat of one and an unreduced copy of another, so the
+    /// target pick draws from every size of unsolved set as targets are
+    /// solved, and the same with a target outside `<g>` added.  The
+    /// unreduced copy never solves and keeps the pick going until the
+    /// walker budget runs out.  Then eight planted targets, all solved.
+    #[test]
+    fn dp_multi_target_runs_match_the_original_code_to_completion() {
+        let (p, q) = (BigUint::from(131_267u32), BigUint::from(65_633u32));
+        let g = order_q_element(&p, &q);
+        let mut rng = StdRng::seed_from_u64(0x8_7a_26e7);
+        for round in 0..6 {
+            let mut hs: Vec<BigUint> = (0..6)
+                .map(|_| g.modpow(&BigUint::from(rng.gen_range(0..65_633u32)), &p))
+                .collect();
+            hs.push(hs[1].clone());
+            hs.push(&hs[4] + &p);
+            if round % 2 == 1 {
+                // 2 has order 2q modulo this safe prime, so it is not in <g>.
+                hs.insert(3, BigUint::from(2u32));
+            }
+            let opts = DpRhoOptions {
+                dp_bits: [3, 4, 5][round % 3],
+                max_walkers: 20_000,
+                max_steps_per_walker: 400,
+                seed: (round != 0).then(|| rng.gen()),
+            };
+            let got = pollard_rho_dp_dlp_zp_multi(&g, &hs, &p, &q, &opts);
+            let want = original::pollard_rho_dp_dlp_zp_multi(&g, &hs, &p, &q, &opts);
+            assert_eq!(got, want, "round {round} {opts:?}");
+            // The unreduced target is never matched by `g^x mod p`, so
+            // neither code solves it: both give the same error.
+            assert!(want.is_err());
+        }
+        // Without the unreduced and foreign targets every target solves.
+        let hs: Vec<BigUint> = (0..8)
+            .map(|i| g.modpow(&BigUint::from(1_000u32 + 7_919 * i), &p))
+            .collect();
+        let opts = DpRhoOptions {
+            dp_bits: 4,
+            max_walkers: 20_000,
+            max_steps_per_walker: 400,
+            seed: Some(0x5eed),
+        };
+        let got = pollard_rho_dp_dlp_zp_multi(&g, &hs, &p, &q, &opts);
+        let want = original::pollard_rho_dp_dlp_zp_multi(&g, &hs, &p, &q, &opts);
+        assert_eq!(got, want);
+        assert_eq!(want.map(|v| v.len()), Ok(8));
+    }
+
     /// `pollard_rho_dlp_zp` (with the generic walk it wraps) and
     /// `pollard_rho_dp_dlp_zp_multi` as they were before the single-word
     /// walks, verbatim: the reference
