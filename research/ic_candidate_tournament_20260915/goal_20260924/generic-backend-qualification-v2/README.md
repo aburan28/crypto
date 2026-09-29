@@ -3,6 +3,9 @@
 Status: **dispatched once; result pending** in [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479).
 The scientific question, schedule,
 resources, success/stop rules and accounting are frozen in [PROTOCOL.md](PROTOCOL.md).
+The subsequent [source feasibility audit](STATIC-FEASIBILITY.md) identifies a
+hard F4/F5 encoder limit in this registration; it is not a measured campaign
+verdict and leaves the live run untouched.
 The first registration was [operationally censored](../generic-backend-qualification/RESULT.md);
 it established no solver result and must never be redispatched. This panel
 uses seed `2026092902`, one process for each of 25 distinct public targets,
