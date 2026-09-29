@@ -146,6 +146,25 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 asymptotic sub-ρ, not key recovery, not deployed-curve security impact, not a
 full-cost/core crossover, and not a state-of-the-art result.
 
+### Compact S3 swap quotient, 2026-09-29 — engineering, no rho crossover
+
+The [frozen swap-quotient panel](../../research/notes/ecc2k130/compact_swap_quotient_20260929/RESULT.md)
+keeps one of each ordered S3 pair/Frobenius mate. Nine balanced cold blocks on
+new point-only n=41 and n=53 L=1,024 corpora completed all 162 baseline,
+quotient and strong-rho processes; the hosted independent verifier replayed
+144 full-rank compact traces and all 165,888 arm-target outputs. A second-machine
+raw replay returned byte-identical PASS receipts for both cells. At the exploratory best tested K, quotient CPU is
+2.119× rho at n=41 and 2.562× at n=53, with paired 95% intervals
+2.062–2.193 and 2.540–2.590. Same-K quotient CPU falls 8–34%, retained states
+roughly halve, and root-table entry counts remain equal. The n=53 K=550
+quotient's median index/target phases are 4.243/3.882 s against rho's
+4.188 s complete wall. The next gate is a frozen joint index/query cost
+experiment: count all S3 calls, no-root returns, exceptional inversions,
+table probes and lifts, then test batch inversion with early-stop waste charged.
+This is a matched-host complete-process timing diagnostic; common calibrated
+operation-counted S, an n=83 confidence result and GF(2^131) transfer remain
+unset. It does not alter the selected-panel `vs_rho` verdict above.
+
 ### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
 
 Separate measurement, separate base family, not a competing record. The
