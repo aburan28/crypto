@@ -462,3 +462,10 @@ exponents against rho's one half, and the extrapolated crossovers
 marked as extrapolations.
 
 That is what a finished thread looks like when the answer is no.
+
+## Cross-repository curve identity in comparisons
+
+For new curve comparisons and UI exports, follow [docs/curve-identities.md](docs/curve-identities.md)
+and `tools/curve_identity.py`. Reuse EC1 aliases and full curve UIDs across IC and
+Pollard rho; keep factor-base/isogeny candidate identities separate. Preserve
+immutable historical names and never infer exact identity from field degree alone.
