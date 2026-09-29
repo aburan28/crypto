@@ -1,7 +1,12 @@
 # Native degree-263 three-summand implicit-domain chain
 
-Status: preregistered in the first PR commit before candidate source or held evaluation. This is the
-next semantic and representation gate after the generic full-point edge in
+Status: preregistered in the first PR commit before candidate source or held
+evaluation. The initial frozen panel passed its declared controls, but its
+selected SAT witness was the x=0 triple, exercising only inverse and copy.
+The expanded semantic control below was specified **after inspecting that
+result and before its own source revision or run**; the initial raw archive
+is retained in `evidence/initial`. This is the next semantic and
+representation gate after the generic full-point edge in
 [#973](https://github.com/aburan28/crypto/pull/973). It does not estimate
 natural PDP yield, relation rank, a full logarithm cost, or crossover with rho.
 The conditional paired native/pullback experiment remains governed by
@@ -50,6 +55,21 @@ mismatch is STOP, not a negative PDP result.
 The containing toy producer and verifier have 300-second reported wall
 acceptance caps and 330-second external watchdogs, each with a 1-GiB peak-RSS
 acceptance cap.
+
+The expanded panel must evaluate the native three-factor DAG for **every
+ordered physical factor triple**: the independent exact `S2` and `SUM` with
+exact slopes must be accepted. Replacing `SUM` with the first different
+rational point in canonical order while retaining all other inputs must be
+rejected. Archive every row and a stream SHA-256, not only aggregate counts.
+Count the branch type at each edge and require the initial panel's 27 triples,
+including 24 generic/generic triples, to be independently replayed. Select
+one additional solver target: the canonical first supported point for which
+**every** witness tuple uses generic addition at both edges. If none exists,
+STOP. Its complete SAT model must lift to a generic/generic witness. Keep the
+original first-positive and first-negative targets and the same binary/caps.
+These three toy solver queries are disclosed controls, not a natural-target
+PDP yield sample. Only the expanded panel can support
+`PASS_SEMANTIC_AND_CAPACITY`.
 
 ## Frozen n131 capacity panel
 
