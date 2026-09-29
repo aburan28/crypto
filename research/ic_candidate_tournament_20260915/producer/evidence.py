@@ -17,18 +17,29 @@ def check_build_identity(report, expected, kernel=None):
 
 
 def executed_policy(config, panel=None):
-    names = {'orbit_batch', 'orbit_target', 'row_kernel', 'full_pair_table'}
+    names = {'orbit_batch', 'orbit_target', 'row_kernel', 'full_pair_table', 'pair_table'}
     if panel is None:
         require(not (names & config.keys()), 'candidate policy requested from an archived worker')
         return None
-    require(panel == 'round1-v1', 'unknown candidate policy adapter')
+    require(panel in ('round1-v1', 'round2-v1', 'round3-v1'), 'unknown candidate policy adapter')
+    require(type(config.get('orbit_batch', 8)) is int and config.get('orbit_batch', 8) in (1, 2, 4, 8),
+            'invalid orbit batch')
+    require(config.get('orbit_target') is None or (type(config.get('orbit_target')) is int and
+            1 <= config['orbit_target'] <= 64), 'invalid orbit target')
+    require(config.get('row_kernel', 'full') in ('full', 'suffix', 'bounded', 'word'),
+            'invalid row kernel')
+    if panel == 'round1-v1':
+        require('pair_table' not in config, 'round1 policies use full_pair_table')
+        policy = dict(orbit_batch=config.get('orbit_batch', 8), orbit_target=config.get('orbit_target'),
+                      row_kernel=config.get('row_kernel', 'full'),
+                      full_pair_table=config.get('full_pair_table', False))
+        require(type(policy['full_pair_table']) is bool, 'invalid row/table policy')
+        return policy
+    require('full_pair_table' not in config, 'round2/round3 policies use pair_table modes')
     policy = dict(orbit_batch=config.get('orbit_batch', 8), orbit_target=config.get('orbit_target'),
-                  row_kernel=config.get('row_kernel', 'full'), full_pair_table=config.get('full_pair_table', False))
-    require(type(policy['orbit_batch']) is int and policy['orbit_batch'] in (1, 2, 4, 8), 'invalid orbit batch')
-    require(policy['orbit_target'] is None or (type(policy['orbit_target']) is int and
-            1 <= policy['orbit_target'] <= 64), 'invalid orbit target')
-    require(policy['row_kernel'] in ('full', 'suffix', 'bounded', 'word') and
-            type(policy['full_pair_table']) is bool, 'invalid row/table policy')
+                  row_kernel=config.get('row_kernel', 'full'),
+                  pair_table=config.get('pair_table', 'heuristic'))
+    require(policy['pair_table'] in ('heuristic', 'full', 'half', 'cover'), 'invalid pair-table mode')
     return policy
 
 
@@ -60,10 +71,21 @@ def audit_stages(report, fixture, algorithm_seed):
     require(report.get('phase_schema') in (2, 3), 'missing scientific producer schema')
     policy = report.get('diagnostics', {}).get('implementation_policy')
     if policy is not None:
-        require(policy == executed_policy(policy, 'round1-v1'), 'invalid executed candidate policy')
-    full = policy is not None and policy['full_pair_table']
+        panel = 'round2-v1' if 'pair_table' in policy else 'round1-v1'
+        require(policy == executed_policy(policy, panel), 'invalid executed candidate policy')
+    if policy is None:
+        pdp = 'partial_folded_pair_table'
+        full = False
+    elif 'pair_table' in policy:
+        mode = policy['pair_table']
+        pdp = {'heuristic': 'partial_folded_pair_table', 'full': 'full_folded_pair_table',
+               'half': 'half_folded_pair_table', 'cover': 'cover_folded_pair_table'}[mode]
+        full = mode == 'full'
+    else:
+        full = policy['full_pair_table']
+        pdp = 'full_folded_pair_table' if full else 'partial_folded_pair_table'
     require(report.get('executed_method') == {
-        'pdp': 'full_folded_pair_table' if full else 'partial_folded_pair_table', 'collection': 'additive_walk',
+        'pdp': pdp, 'collection': 'additive_walk',
         'relation_la': 'incremental_gauss', 'descent': 'walked_pdp', 'direct_collision': False},
         'unexpected executed backend')
     proof = verify(report, fixture, summands=3)
@@ -75,6 +97,10 @@ def audit_stages(report, fixture, algorithm_seed):
     if full:
         require(report['pair_table']['rows'] == report['pair_table']['rows_possible'] == columns,
                 'full-table policy omitted a row')
+    elif policy is not None and policy.get('pair_table') == 'half':
+        require(report['pair_table']['rows'] == (columns + 1) // 2, 'half-table row count differs')
+    elif policy is not None and policy.get('pair_table') == 'cover':
+        require(report['pair_table']['rows'] == max(1, columns - 1), 'cover-table row count differs')
     for column, entry in enumerate(report['column_logs']):
         p, coefficient = c.decode(entry['point']), 1
         for _ in range(c.n):
@@ -214,7 +240,13 @@ def method_record(job, fixture, source_manifest, source_manifest_sha256, referen
         if variant['orbit_target'] is not None:
             method['factor_base']['nominal_bound'] = 2 * fixture['degree'] * variant['orbit_target']
         method['implementation']['flags']['candidate_policy'] = variant
-        if variant['full_pair_table']:
+        if variant.get('full_pair_table') or variant.get('pair_table') == 'full':
             method['point_decomposition']['encoding'] = 'normal-basis-signed-Frobenius-keyed-full-pair-table'
             method['target_descent']['recursive_solvers'] = 'same-full-pair-table; no recursion'
+        elif variant.get('pair_table') == 'half':
+            method['point_decomposition']['encoding'] = 'normal-basis-signed-Frobenius-keyed-half-pair-table'
+            method['target_descent']['recursive_solvers'] = 'same-half-pair-table; no recursion'
+        elif variant.get('pair_table') == 'cover':
+            method['point_decomposition']['encoding'] = 'normal-basis-signed-Frobenius-keyed-cover-pair-table'
+            method['target_descent']['recursive_solvers'] = 'same-cover-pair-table; no recursion'
     return method

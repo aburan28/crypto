@@ -1,6 +1,6 @@
 //! Dense Gaussian elimination over `F_2`: the Method of Four Russians
 //! with several Gray-code tables per pass, a word-strip pivot search, and
-//! an AVX-512 row update selected at run time.
+//! an AVX2 or AVX-512 row update selected at run time.
 //!
 //! The matrix is a slice of rows, each `n_cols.div_ceil(64)` words long
 //! with bit `c % 64` of word `c / 64` holding column `c` — the layout
@@ -44,6 +44,10 @@
 //! a 64-bit word XORed into a row.  A table entry built costs its suffix,
 //! and a row cleared against `t` tables costs `t` suffixes, however the
 //! hardware groups them.
+//! The opt-in `KIC_GF2_REUSE_TABLE=1` keeps the table buffer across pivot
+//! blocks and clears only each table's zero entry before rebuilding it;
+//! every other addressable entry is overwritten. Its complete-call
+//! comparison is recorded in `research/gf2_table_reuse_20260929`.
 
 use rayon::prelude::*;
 
@@ -78,7 +82,7 @@ pub struct Config {
     pub tables: usize,
     /// Row words per block from which rows are cleared in parallel.
     pub parallel_words: usize,
-    /// Use the AVX-512 row update when the CPU has it.
+    /// Use AVX-512 when available, or an explicitly requested AVX2 update.
     pub simd: bool,
 }
 
@@ -148,8 +152,11 @@ pub fn eliminate(
     // Preserve the measured ordering until the tiled path has a valid
     // performance comparison.  Echelon callers never need the reverse pass.
     static DEFER_ABOVE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    static REUSE_TABLE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let defer_above = reduce_above
         && *DEFER_ABOVE.get_or_init(|| std::env::var("KIC_GF2_DEFER_ABOVE").as_deref() == Ok("1"));
+    let reuse_table =
+        *REUSE_TABLE.get_or_init(|| std::env::var("KIC_GF2_REUSE_TABLE").as_deref() == Ok("1"));
     eliminate_with(
         matrix,
         n_cols,
@@ -158,6 +165,7 @@ pub fn eliminate(
         config,
         word_ops,
         None,
+        reuse_table,
     )
 }
 
@@ -169,6 +177,7 @@ fn eliminate_with(
     config: Config,
     word_ops: &mut u64,
     reverse_tile_words: Option<usize>,
+    reuse_table: bool,
 ) -> usize {
     let rows = matrix.len();
     let words = n_cols.div_ceil(64);
@@ -179,7 +188,7 @@ fn eliminate_with(
     let tables = config.tables.clamp(1, 4);
     let bits = table_bits(rows);
     let block_cap = tables * bits;
-    let simd = config.simd && simd_available();
+    let simd = simd_kind(config.simd);
 
     let mut strip: Vec<u64> = vec![0; rows];
     let mut pivot_cols: Vec<usize> = Vec::with_capacity(block_cap);
@@ -285,6 +294,7 @@ fn eliminate_with(
                 config,
                 simd,
                 word_ops,
+                reuse_table,
             );
             if defer_above {
                 blocks.push((block_start, pivot_cols.clone()));
@@ -400,7 +410,7 @@ impl DeferredTable {
     }
 
     #[inline]
-    fn apply(&self, row: &mut [u64], simd: bool) -> u64 {
+    fn apply(&self, row: &mut [u64], simd: SimdKind) -> u64 {
         let pattern = gather_bits(row[self.pivot_word], self.mask, self.bmi2);
         if pattern == 0 {
             return 0;
@@ -438,8 +448,9 @@ fn clear_block(
     word_range: std::ops::Range<usize>,
     table: &mut Vec<u64>,
     config: Config,
-    simd: bool,
+    simd: SimdKind,
     word_ops: &mut u64,
+    reuse_table: bool,
 ) {
     let b = pivot_cols.len();
     if reduce_above && !reduce_below && block_start == 0 {
@@ -454,13 +465,20 @@ fn clear_block(
     let suffix = end_word - first_word;
     let n_tables = b.div_ceil(bits);
     let table_size = 1usize << bits;
-    table.clear();
+    if !reuse_table {
+        table.clear();
+    }
     table.resize(n_tables * table_size * suffix, 0);
     // Gray-code tables: entry g of table t is the XOR of the pivots whose
     // bits within the table's group are set in g.
     for t in 0..n_tables {
         let group = &pivot_cols[t * bits..((t + 1) * bits).min(b)];
         let base = t * table_size * suffix;
+        if reuse_table {
+            // Entry zero is read while building each nonzero Gray-code
+            // entry. All other addressable entries are overwritten below.
+            table[base..base + suffix].fill(0);
+        }
         for g in 1usize..(1 << group.len()) {
             let low_bit = g.trailing_zeros() as usize;
             let prev = g & (g - 1);
@@ -527,7 +545,7 @@ fn xor_entries(
     offsets: &[usize],
     suffix: usize,
     table_size: usize,
-    simd: bool,
+    simd: SimdKind,
 ) -> usize {
     // Offsets pointing at entry 0 of a table are zero rows: skip them.
     let mut live = [0usize; 4];
@@ -540,11 +558,18 @@ fn xor_entries(
     }
     let live = &live[..n];
     #[cfg(target_arch = "x86_64")]
-    if simd {
-        // SAFETY: `simd` is only true when `simd_available()` said the CPU
-        // has AVX-512F.
-        unsafe { xor_entries_avx512(dst, table, live, suffix) };
-        return n;
+    match simd {
+        SimdKind::Avx512 => {
+            // SAFETY: `simd_kind` checked AVX-512F for this process.
+            unsafe { xor_entries_avx512(dst, table, live, suffix) };
+            return n;
+        }
+        SimdKind::Avx2 => {
+            // SAFETY: `simd_kind` checked AVX2 for this process.
+            unsafe { xor_entries_avx2(dst, table, live, suffix) };
+            return n;
+        }
+        SimdKind::Scalar => {}
     }
     let _ = simd;
     xor_entries_generic(dst, table, live, suffix);
@@ -595,6 +620,13 @@ unsafe fn xor_entries_avx512(dst: &mut [u64], table: &[u64], live: &[usize], suf
     xor_entries_generic(dst, table, live, suffix)
 }
 
+/// Compile the existing table XORs for four words per vector instruction.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn xor_entries_avx2(dst: &mut [u64], table: &[u64], live: &[usize], suffix: usize) {
+    xor_entries_generic(dst, table, live, suffix)
+}
+
 #[inline(always)]
 fn xor_into(dst: &mut [u64], src: &[u64]) {
     for (d, &s) in dst.iter_mut().zip(src) {
@@ -640,17 +672,46 @@ fn bmi2_available() -> bool {
     }
 }
 
-/// Whether the AVX-512 row update can run on this CPU.
-pub fn simd_available() -> bool {
+#[derive(Clone, Copy)]
+enum SimdKind {
+    Scalar,
+    #[cfg(target_arch = "x86_64")]
+    Avx2,
+    #[cfg(target_arch = "x86_64")]
+    Avx512,
+}
+
+fn simd_kind(enabled: bool) -> SimdKind {
+    if !enabled {
+        return SimdKind::Scalar;
+    }
     #[cfg(target_arch = "x86_64")]
     {
-        static HAS: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-        *HAS.get_or_init(|| std::arch::is_x86_feature_detected!("avx512f"))
+        static KIND: std::sync::OnceLock<SimdKind> = std::sync::OnceLock::new();
+        *KIND.get_or_init(|| {
+            // The experiment can force AVX2 on an AVX-512 machine without
+            // changing the normal preference for the wider instruction set.
+            if std::env::var("KIC_GF2_FORCE_AVX2").as_deref() == Ok("1") {
+                return if std::arch::is_x86_feature_detected!("avx2") {
+                    SimdKind::Avx2
+                } else {
+                    SimdKind::Scalar
+                };
+            }
+            if std::arch::is_x86_feature_detected!("avx512f") {
+                SimdKind::Avx512
+            } else {
+                SimdKind::Scalar
+            }
+        })
     }
     #[cfg(not(target_arch = "x86_64"))]
-    {
-        false
-    }
+    SimdKind::Scalar
+}
+
+/// Whether a vector row update is selected in this process.
+pub fn simd_available() -> bool {
+    !matches!(simd_kind(true), SimdKind::Scalar)
 }
 
 #[cfg(test)]
@@ -713,6 +774,52 @@ mod tests {
     }
 
     #[test]
+    fn reused_tables_preserve_rows_rank_and_counted_xors() {
+        let mut rng = StdRng::seed_from_u64(117);
+        for &(rows, cols) in &[(135, 321), (310, 777)] {
+            for density in [0.08, 0.5] {
+                let input = random_matrix(&mut rng, rows, cols, density);
+                for tables in [1, 2, 4] {
+                    for reduce_above in [false, true] {
+                        let config = Config {
+                            tables,
+                            parallel_words: usize::MAX,
+                            simd: false,
+                        };
+                        let mut old = input.clone();
+                        let mut new = input.clone();
+                        let mut old_ops = 0;
+                        let mut new_ops = 0;
+                        let old_rank = eliminate_with(
+                            &mut old,
+                            cols,
+                            reduce_above,
+                            false,
+                            config,
+                            &mut old_ops,
+                            None,
+                            false,
+                        );
+                        let new_rank = eliminate_with(
+                            &mut new,
+                            cols,
+                            reduce_above,
+                            false,
+                            config,
+                            &mut new_ops,
+                            None,
+                            true,
+                        );
+                        assert_eq!(new_rank, old_rank);
+                        assert_eq!(new, old);
+                        assert_eq!(new_ops, old_ops);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
     fn rref_matches_the_textbook_elimination() {
         let mut rng = StdRng::seed_from_u64(7);
         let shapes = [
@@ -742,6 +849,7 @@ mod tests {
                             config,
                             &mut ops,
                             Some(2),
+                            false,
                         );
                         assert_eq!(
                             r, rank,
@@ -796,7 +904,8 @@ mod tests {
                             defer_above,
                             config,
                             &mut ops,
-                            Some(3)
+                            Some(3),
+                            false,
                         ),
                         rank
                     );
@@ -854,7 +963,8 @@ mod tests {
                     true,
                     Config::default(),
                     &mut ops,
-                    width
+                    width,
+                    false,
                 ),
                 rank
             );

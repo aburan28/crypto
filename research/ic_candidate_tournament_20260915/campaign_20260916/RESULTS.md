@@ -899,6 +899,244 @@ panel cell stays below rho. Two of the four crossover cells are in-sample for
 the base rule; `n59a0` and `n61a1` are its first out-of-sample test and it
 held. Classification **accounting**, in the round's own decision record.
 
+## Round 0024: a matched rho, and the triple table
+
+[ROUND24-pair-inverse.md](ROUND24-pair-inverse.md) §7 is the pre-registration
+as amended before any stage ran; [report](../runs/round-0024/REPORT.md). Seed
+2026092424, twelve cells, 228 confirmation cases (forty at `n23a1`, `n37a0`
+and `n43a1`), 4,656 trials, audit VERIFIED over 4,656 receipts and 453 source
+files. Run on round 0023's frozen evaluator, because main's harness admits
+only three-summand pair-table sources.
+
+**The round's rho is matched.** Every arm's source carries
+`research/ic_triple_counted_20260923/rho-normal-basis.patch`, so rho names
+Frobenius classes with the same normal-basis rotation as the IC arm. The old
+rho walked the orbit by squaring. The incumbent is round 0023's `scaled`, the
+best pair arm measured. The challenger `counted` is the triple-sum collector
+with counted sizing, at four summands.
+
+**Result: `retained`, as registered.** All three arms recover the same
+logarithm on every one of the 1,560 (stage, case, repetition) groups, and the
+A/A stage passed.
+
+| cell | pair/rho, instr | native | triple/rho, instr | native | triple/pair, instr |
+|:--|--:|--:|--:|--:|--:|
+| `n13a0` | 0.695 | 0.878 | 1.368 | 0.951 | 1.967 |
+| `n17a1` | 0.609 | 0.894 | 1.344 | 1.015 | 2.205 |
+| `n19a0` | 0.611 | 0.882 | 1.423 | 0.979 | 2.327 |
+| `n19a1` | 0.626 | 0.890 | 1.325 | 1.106 | 2.115 |
+| `n23a0` | 0.971 | 0.960 | 1.497 | 1.091 | 1.542 |
+| `n23a1` | **1.126** | **1.041** | 1.490 | 1.098 | 1.323 |
+| `n29a1` | 0.819 | 0.911 | 3.140 | 1.287 | 3.835 |
+| `n31a0` | 0.793 | 0.945 | 2.585 | 1.320 | 3.260 |
+| `n37a0` | 2.783 | 2.323 | 1.459 | 1.374 | 0.524 |
+| `n43a1` | 9.264 | 7.663 | 2.698 | 2.523 | 0.291 |
+| `n59a0` | 1.880 | 1.558 | 1.219 | 1.133 | 0.648 |
+| `n61a1` | 8.514 | 8.021 | 2.673 | 2.591 | 0.314 |
+
+The table shows confirmation. Replay agrees to the fourth digit in
+instructions and within 0.05 in native time. Over the whole panel the pair arm
+reads 1.380 [0.847, 2.387] of rho in instructions and 1.488 [0.999, 2.420]
+natively. The triple arm reads 1.746 [1.462, 2.117] and 1.292.
+
+### The correction this round was registered to make
+
+**The eight-cell strict win of rounds 0017, 0019 and 0020 does not survive a
+matched rho.** Under the rule fixed in §7.4 before the run, it needed every
+panel cell below one in both metrics on both stages. It fails at **`n23a1`**:
+1.126 in instructions on both stages, and 1.041 (confirmation) and 1.019
+(replay) natively. At `n23a0` it is below one, but only by 3% in instructions and
+0.4–4% natively.
+
+This round's incumbent is the arm those rounds promoted, plus three patches:
+
+- the round-0021 widening, measured at 1.0007×;
+- round 0023's base policy, 1.0001–1.0006× on the panel;
+- the rho patch, whose cost on the IC side this round does not isolate.
+
+What does survive: **six of the eight cells** (`n13a0`, `n17a1`, `n19a0`,
+`n19a1`, `n29a1`, `n31a0`) are below a matched rho in both metrics on both
+stages, at 0.61–0.82 of its instructions and 0.87–0.95 of its native time.
+Those rounds' records are unchanged. This section is the correction, and it is
+scoped to this seed.
+
+**Past the crossing, the old rho understated rho's lead by 1.5× to 4.5×.**
+Round 0023 measured the pair arm at 1.08, 2.61, 1.23 and 1.90× the old rho at
+the four crossover cells, on another seed. Against a matched rho it is 2.78,
+9.26, 1.88 and 8.51×. In the pre-round probe the matched rho was 4–5× cheaper than the old one at
+`n43a1` and `n61a1`, because the orbit walk it replaces costs about `1.5n` squarings a
+step.
+
+### The triple table
+
+It does what `research/ic_triple_table_20260923` said it would do to the pair
+collector: 0.29–0.65 of its cost past the crossing, 1.3–3.8× below it. **It
+does not beat a matched rho at any cell in instructions**: 1.22–3.14×, closest
+at `n59a0` (1.22). Natively it reads just under one at `n13a0` and
+`n19a0` (0.95–0.98; replay 0.96, 1.03) and at `n17a1` on replay (0.92). Those
+are three of the four smallest cells, and in instructions the same arm is
+1.34–1.42× rho there. This round does not measure what closes that gap
+natively. It
+fails the incumbent gate because it is dearer than the pair arm on the whole
+panel.
+
+### Predictions (§7.4): five confirmed, one missed by a margin
+
+**1 confirmed**: correctness, above. **3 confirmed**: 2.78, 9.26, 1.88 and
+8.51 each inside its band. **4 confirmed**: the triple arm is above the pair
+arm on all eight panel cells (1.32–3.84, inside [1.2, 4.5]) and below it at
+all four crossover cells (0.29–0.65, inside [0.15, 0.95]). **5 confirmed**:
+`counted`/rho is above one at every cell, in instructions, which is what it
+registered. Native time was reported and not predicted, and its sub-one
+readings are above. **6 confirmed**: `retained`, `beats_rho_strict` and
+`rho_parity` false.
+
+**2 is missed at one cell.** Seven small cells were registered in
+[0.55, 0.95]; `n23a0` reads 0.971. `n23a1` at 1.126 is inside its
+direction-free [0.90, 1.40]. The four-fixture probe put `n23a0` at 0.766, and
+twelve fixtures read higher.
+
+### Curve and candidate identities
+
+In the ICV1/ICCAN1 convention of
+`research/isogeny_volcano_ic_20260924/identity_schema.json`, computed by
+[round24_identities.py](round24_identities.py) into
+[round24-identities.json](round24-identities.json). That file also has every
+arm's ICCAN1 identity per cell, with its factor base read off this round's
+receipts:
+
+- the pair arm is `orbit7` at `n13a0`, `orbit8` on the rest of the panel,
+  `orbit16` at `n37a0` and `orbit24` beyond;
+- the triple arm is `orbit2` everywhere except `orbit3` at `n43a1`.
+
+The script pins the canonical JSON, `modhash8` and field-element encodings the
+schema leaves open. The cell labels in earlier records are unchanged.
+
+| cell | ICV1 identity |
+|:--|:--|
+| `n13a0` | `ICV1:f2m-13-e068f4ed:181:8012:0x1:unk:unk:r:a349c2b58170` |
+| `n17a1` | `ICV1:f2m-17-4a8d1ed1:-101:131174:0x1:unk:unk:r:b7e2f44c2089` |
+| `n19a0` | `ICV1:f2m-19-185c144b:797:523492:0x1:unk:unk:r:999b48f556de` |
+| `n19a1` | `ICV1:f2m-19-185c144b:-797:525086:0x1:unk:unk:r:03eeaf6a7913` |
+| `n23a0` | `ICV1:f2m-23-6b551aa3:5197:8383412:0x1:unk:unk:r:9d6c7fef45ff` |
+| `n23a1` | `ICV1:f2m-23-6b551aa3:-5197:8393806:0x1:unk:unk:r:0d04e4cf5538` |
+| `n29a1` | `ICV1:f2m-29-272bc8c7:-40309:536911222:0x1:unk:unk:r:0dceaf5202f9` |
+| `n31a0` | `ICV1:f2m-31-900f9445:-90707:2147574356:0x1:unk:unk:r:7bd17fd4c3c0` |
+| `n37a0` | `ICV1:f2m-37-f364a2d2:-534059:137439487532:0x1:unk:unk:r:f7add3ce6190` |
+| `n43a1` | `ICV1:f2m-43-eecf2bb3:-998717:8796094020926:0x1:unk:unk:r:062c88f5f4c1` |
+| `n59a0` | `ICV1:f2m-59-736d7ac5:943548413:576460751359875076:0x1:unk:unk:r:8d9129b59298` |
+| `n61a1` | `ICV1:f2m-61-54d52be2:-158598901:2305843009372292854:0x1:unk:unk:r:abf8907f5e39` |
+
+### What this leaves
+
+On this seed and these cells, **no index-calculus arm this campaign has built
+beats a matched rho** except the pair collector on six small cells, where it
+wins by a constant factor and loses the lead by `r` ≈ 4·10⁶. The triple
+table's better cost law does not close the gap at the cells measured. The
+pair arm's lead over the triple arm reverses between `n31a0` and `n37a0`,
+while both stay above rho. Classification **accounting**: no algorithm got
+worse; the baseline it was counted against changed.
+
+## Round 0025: a lean rho, and the pair/triple switch
+
+[ROUND25-lean-rho-switch.md](ROUND25-lean-rho-switch.md) is the
+pre-registration; [report](../runs/round-0025/REPORT.md). Seed 2026092525,
+round 0024's twelve cells and allocation, 4,656 trials on `evaluator-r25`.
+The audit verified all 4,656 receipts and 453 source files.
+
+**The round's rho is the lean rho**: the matched rho's exact walk, run in the
+IC arm's own single-word arithmetic
+([notes](round25-rho-lean-notes.md)). The incumbent is round 0024's pair arm.
+The challenger `switch` prices the pair collector and the counted triple table
+by their own sizing models before drawing a base point, and runs the cheaper
+([notes](round25-switch-notes.md)). It is scored by an additive checker
+amendment that lets a report declare fewer summands than configured.
+
+**Result: `retained`, as registered.**
+
+- All three arms recover the same logarithm in every one of the 1,560
+  (stage, case, repetition) groups, and the A/A stage passed.
+- The switch chose the pair collector on every fixture of the eight panel
+  cells and the triple table on every fixture of the four crossover cells.
+  Each report declared the summand count it used.
+- The switch passes the incumbent gate on both final stages: 0.771
+  [0.601, 0.957] of the incumbent in instructions and 0.780 [0.614, 0.954]
+  natively. It fails `rho_gate`.
+
+| cell | pair / rho, instr | native | switch / rho, instr | native | switch / pair, instr |
+|:--|--:|--:|--:|--:|--:|
+| `n13a0` | 1.426 | 0.920 | 1.439 | 0.893 | 1.009 |
+| `n17a1` | 1.378 | 0.943 | 1.387 | 0.917 | 1.007 |
+| `n19a0` | 1.356 | 0.889 | 1.364 | 0.885 | 1.006 |
+| `n19a1` | 1.381 | 0.910 | 1.391 | 0.935 | 1.007 |
+| `n23a0` | 1.859 | 1.138 | 1.872 | 1.096 | 1.007 |
+| `n23a1` | 2.538 | 1.154 | 2.558 | 1.153 | 1.008 |
+| `n29a1` | 1.716 | 1.052 | 1.720 | 0.995 | 1.003 |
+| `n31a0` | 1.744 | 1.048 | 1.754 | 1.102 | 1.006 |
+| `n37a0` | 5.846 | 2.953 | 3.239 | 1.779 | 0.554 |
+| `n43a1` | 13.52 | 9.653 | 4.351 | 3.379 | 0.322 |
+| `n59a0` | 2.091 | 1.661 | 1.348 | 1.198 | 0.645 |
+| `n61a1` | 13.68 | 10.92 | 5.009 | 3.938 | 0.366 |
+
+The table shows confirmation. Replay agrees to the third decimal in
+instructions and within 0.1 natively. Over the panel, the pair arm reads
+2.646 [1.742, 4.323] of rho in instructions and the switch 2.040
+[1.610, 2.688].
+
+### Against a rho in the IC arm's own arithmetic, no IC arm wins in instructions at any cell
+
+Prediction 4, and the re-reading of round 0024 fixed before the run, both
+hold. **In instructions, both IC arms are above the lean rho at every one of
+the twelve cells on both stages.** They cost 1.36–2.56× rho on the panel,
+2.1–13.7× at the crossover cells for the pair arm, and 1.35–5.0× there for the
+switch. That covers the six small cells where round 0024's pair arm was below
+the matched rho. The rho was not faster because it walked differently: it
+walked the matched rho's exact walk, and was faster because of the arithmetic
+it ran in. This is an additive correction, scoped to this seed, and no
+earlier record changes.
+
+### Native time says something different at the smallest cells, and it was not predicted
+
+Native time was reported, not predicted. At `n13a0`, `n17a1`, `n19a0` and
+`n19a1`, both IC arms are **below** the lean rho in native wall time:
+0.87–0.98 on both stages, while above it by 1.36–1.44× in instructions.
+`n29a1` is near one natively (0.975–1.052). At `n23a0`, `n23a1`, `n31a0` and
+every crossover cell, both metrics agree that rho wins. This round does not
+measure why the two metrics part at the smallest jobs. The strict
+gate requires both metrics, and it is not met.
+
+### Predictions: all five confirmed
+
+- **1** Correctness, as above.
+- **2** The switch's choices, as above, on every fixture.
+- **3** `switch`/`incumbent` is 1.0025–1.009 on the panel, inside
+  [1.000, 1.015]. At the crossover cells it is 0.554, 0.322, 0.645 and 0.366,
+  each inside its band.
+- **4** Both arms are above rho in instructions at every cell, with the panel
+  inside [1.1, 3.5] and the crossover cells above 1.2.
+- **5** `retained`, `beats_rho_strict` and `rho_parity` false.
+
+The unpredicted part is the native-time reading above, and whether the switch
+would pass the incumbent gate. It passed.
+
+### Where the three directions stand
+
+- **Leaner rho: done.** It is the baseline any further round must carry.
+- **Pair/triple switch: done.** It takes the better collector at every cell for
+  under 1%, and it is still 1.35–5.0× above rho.
+- **A different decomposition:**
+  [DECOMPOSITION-SURVEY.md](DECOMPOSITION-SURVEY.md) closes generic table
+  decompositions as to the exponent. The one open family, algebraic `m ≥ 4`,
+  is in a pre-registered exponent audit,
+  `research/ic_m4_exponent_audit_20260928/`, reported there. Its registered
+  verdict is **closed for the frozen engine at `n ≤ 19`**. The Semaev solve
+  cost grows at 0.985 bits per unit `n`, band [0.983, 1.018], against the
+  bar of 0.25, and both nulls passed. See
+  [its results](../../ic_m4_exponent_audit_20260928/RESULTS.md). That closes
+  `m = 4` for that engine only. The next rung is `m = 5`.
+
+Classification **accounting**.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.

@@ -35,6 +35,8 @@
 #   TABLE_FUSED  one fused pass per step, alternating slot order (default 0)
 #   TABLE_PIPE_SELECT  forward pass issues slot k's products before slot k+1's
 #                      selection (default 0)
+#   TABLE_PHASE_POPC  phase via eight L-bit popc planes (default 0;
+#                     CHEAPER-SELECTION.md)
 #   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
 #   PACKED_CHAINS  independent Montgomery chains per thread, 1 or 2 (default 1;
 #                  TWO-CHAINS.md; 2 needs TAG_DENOM and an even BATCH)
@@ -97,6 +99,9 @@ PACKED_ALU_SQR ?= 0
 WALK_TABLE ?= 0
 TABLE_BRANCHES ?= 8
 TABLE_PIVOT_BYTES ?= 0
+# Phase via eight L-bit popc planes instead of 17 byte-table lookups
+# (CHEAPER-SELECTION.md). Off by default.
+TABLE_PHASE_POPC ?= 0
 # Read the table from global memory instead of a per-block shared copy.
 # Drops the 48 KB smem tax so 80-register builds can resident 3 blocks on
 # this SKU's 100 KB/SM; random table lookups then miss the LDS pipe.
@@ -233,6 +238,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_ALU_SQR=$(PACKED_ALU_SQR) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
+       -DECC_TABLE_PHASE_POPC=$(TABLE_PHASE_POPC) \
        -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_PACKED_CHAINS=$(PACKED_CHAINS) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
@@ -367,6 +373,7 @@ test-production: ecc2k130-cpu build/test-production
 	./build/test-production
 	python3 -m unittest discover -s aws -p test_certification.py -v
 	python3 -m unittest discover -s aws -p test_bootstrap_contract.py -v
+	python3 -m unittest discover -s aws -p test_campaign_guard.py -v
 	python3 -m unittest discover -s aws -p test_worker_family.py -v
 	python3 -m unittest discover -s aws -p test_status_walks.py -v
 	python3 -m unittest discover -s aws -p test_fleet_roll.py -v
@@ -374,6 +381,8 @@ test-production: ecc2k130-cpu build/test-production
 	python3 -m unittest discover -s aws -p test_dp_ingest.py -v
 	python3 -m unittest discover -s aws -p test_worker_spool.py -v
 	python3 -m unittest discover -s aws -p test_controlplane.py -v
+	python3 -m unittest discover -s aws -p test_seed_registry.py -v
+	python3 -m unittest discover -s aws -p test_seed_audit.py -v
 	python3 -m unittest discover -s . -p test_modal_sync.py -v
 	python3 -m unittest discover -s . -p test_modal_app.py -v
 	python3 -m unittest discover -s . -p test_modal_campaign.py -v
@@ -503,14 +512,33 @@ test-cycle-rule:
 
 # Device primitives of the table walk against the host reference; needs a GPU.
 # The same probe on the host, for both selection layouts, so a layout change
-# is held to the reference before any GPU sees it.
+# is held to the reference before any GPU sees it.  PHASE_POPC is checked on
+# top of each pivot layout (CHEAPER-SELECTION.md).
 TABLE_PROBE_POINTS ?= 4096
 test-table-walk-host:
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble
-	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -DECC_TABLE_PHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -DECC_TABLE_PHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble-popc
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=$(TABLE_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes-popc
 	./build/test-table-walk-host-nibble
 	./build/test-table-walk-host-bytes
+	./build/test-table-walk-host-nibble-popc
+	./build/test-table-walk-host-bytes-popc
+
+# Host static price of twPhase byte-table vs popc planes (CHEAPER-SELECTION.md).
+test-phase-cost:
+	mkdir -p build
+	$(CXX) -O3 -std=c++17 -DPHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function src/testphasecost.cpp -o build/test-phase-cost-table
+	$(CXX) -O3 -std=c++17 -DPHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function src/testphasecost.cpp -o build/test-phase-cost-popc
+	./build/test-phase-cost-table
+	./build/test-phase-cost-popc
+
+# GPU paired measurement of TABLE_PHASE_POPC (needs Modal/RunPod/AWS + a 6000).
+#   make bench-cheaper-selection OUT=/tmp/cheaper-selection
+bench-cheaper-selection:
+	@test -n "$(OUT)" || (echo "usage: make bench-cheaper-selection OUT=DIR"; exit 1)
+	modal run --detach modal_job.py --job benchmarks/cheaper-selection/gpujob.sh --out "$(OUT)" --gpu "RTX PRO 6000"
 
 # The walks' iteration constants on the device walks' own host reference
 # (WALK-CONSTANT.md): the n = 23 rows of benchmarks/walk-constant, at the
@@ -879,7 +907,7 @@ clean:
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
 	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
 
 # Cold cycle escape, entry-phase invariance, F131 regression and packed parity.
 test-cycle-escape:

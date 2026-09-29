@@ -43,6 +43,7 @@
 //! the descent systems of the coordinate thread can be timed at `m = 3`.
 
 use std::collections::{BTreeMap, HashSet};
+use std::sync::atomic::{AtomicU64, Ordering as AtomicOrdering};
 use std::time::{Duration, Instant};
 
 use rayon::prelude::*;
@@ -56,6 +57,22 @@ pub use super::groebner_f4::Ordering;
 pub type Poly = Vec<(Vec<u32>, u64)>;
 
 // ── Field arithmetic ───────────────────────────────────────────────
+
+/// Process-wide count of `F_p` multiplications spent in row reduction
+/// (reducer applications, pivot normalisation and elimination).  Reports
+/// carry the difference over their own run, so nested and parallel runs
+/// stay additive; one atomic add per row operation keeps it off the hot
+/// loops.
+static FIELD_OPS: AtomicU64 = AtomicU64::new(0);
+
+fn field_ops_now() -> u64 {
+    FIELD_OPS.load(AtomicOrdering::Relaxed)
+}
+
+#[inline]
+fn count_ops(n: usize) {
+    FIELD_OPS.fetch_add(n as u64, AtomicOrdering::Relaxed);
+}
 
 #[inline]
 fn mulmod(a: u64, b: u64, p: u64) -> u64 {
@@ -236,6 +253,13 @@ pub struct F4Options {
     /// reports the staircase it stopped at in
     /// `F4Report::staircase_at_stop`.
     pub stop_staircase: Option<usize>,
+    /// A `Z/3`-weight per variable.  When set, every step whose rows are
+    /// all weight-homogeneous (each row's monomials in one class
+    /// `Σ wᵢeᵢ (mod 3)`) reduces the three weight blocks of its matrix
+    /// separately: the row spaces are direct summands, so the pivots and
+    /// the reduced rows are those of the whole matrix.  A step with a
+    /// mixed row falls back to the plain reduction.
+    pub weights: Option<Vec<u8>>,
 }
 
 impl F4Options {
@@ -245,7 +269,13 @@ impl F4Options {
             max_degree,
             deadline: None,
             stop_staircase: None,
+            weights: None,
         }
+    }
+    /// Block-aware reduction by the given `Z/3`-weights.
+    pub fn with_weights(mut self, weights: Vec<u8>) -> Self {
+        self.weights = Some(weights);
+        self
     }
     pub fn with_budget(mut self, budget: Duration) -> Self {
         self.deadline = Some(Instant::now() + budget);
@@ -341,6 +371,58 @@ pub struct F4Report {
     /// of standard monomials it stopped at, with pairs still pending: the
     /// basis is then not certified complete.
     pub staircase_at_stop: Option<usize>,
+    /// `F_p` multiplications spent in row reduction over this run.
+    pub field_ops: u64,
+    /// Steps reduced block by block under `F4Options::weights`.
+    pub blocked_steps: usize,
+}
+
+fn z3_weight(e: &[u32], w: &[u8]) -> u8 {
+    (e.iter().zip(w).map(|(&a, &b)| a * b as u32).sum::<u32>() % 3) as u8
+}
+
+/// Reduce `rows` (over the free columns, whose weight classes are
+/// `col_class`) block by block: every row lies in one class, so each
+/// class is reduced on its own by `reduce`, and the pivots and reduced
+/// rows are re-assembled in column order.  A `None` from `reduce` (the
+/// deadline) is passed through.
+fn rref_blocked<T: Copy + Default + PartialEq + Send>(
+    rows: &mut Vec<Vec<T>>,
+    col_class: &[u8],
+    reduce: impl Fn(&mut Vec<Vec<T>>) -> Option<Vec<usize>>,
+) -> Option<Vec<usize>> {
+    let width = col_class.len();
+    let mut out: Vec<(usize, Vec<T>)> = Vec::new();
+    for class in 0..3u8 {
+        let bcols: Vec<usize> = (0..width).filter(|&c| col_class[c] == class).collect();
+        if bcols.is_empty() {
+            continue;
+        }
+        let mut block: Vec<Vec<T>> = rows
+            .iter()
+            .filter(|r| {
+                r.iter()
+                    .position(|v| *v != T::default())
+                    .is_some_and(|c| col_class[c] == class)
+            })
+            .map(|r| bcols.iter().map(|&c| r[c]).collect())
+            .collect();
+        if block.is_empty() {
+            continue;
+        }
+        let piv = reduce(&mut block)?;
+        for (row, &lc) in block.iter().zip(&piv) {
+            let mut full = vec![T::default(); width];
+            for (j, &v) in row.iter().enumerate() {
+                full[bcols[j]] = v;
+            }
+            out.push((bcols[lc], full));
+        }
+    }
+    out.sort_by_key(|(c, _)| *c);
+    let pivots = out.iter().map(|(c, _)| *c).collect();
+    *rows = out.into_iter().map(|(_, r)| r).collect();
+    Some(pivots)
 }
 
 struct Pair {
@@ -365,11 +447,14 @@ fn eliminate(row: &mut [u64], pivot: &[u64], col: usize, fp: Barrett) {
         return;
     }
     let neg = fp.p - f;
+    let mut ops = 0usize;
     for (x, &y) in row[col..].iter_mut().zip(&pivot[col..]) {
         if y != 0 {
             *x = fp.reduce(*x + neg * y);
+            ops += 1;
         }
     }
+    count_ops(ops);
 }
 
 #[inline]
@@ -382,6 +467,7 @@ fn eliminate32(row: &mut [u32], pivot: &[u32], col: usize, fp: Barrett32) {
     for (x, &y) in row[col..].iter_mut().zip(&pivot[col..]) {
         *x = fp.reduce(*x + neg * y);
     }
+    count_ops(row.len() - col);
 }
 
 fn rref32(
@@ -407,6 +493,7 @@ fn rref32(
         for x in &mut rows[pr][c..] {
             *x = fp.reduce(*x * inv);
         }
+        count_ops(n_cols - c);
         let (head, tail) = rows.split_at_mut(pr + 1);
         let prow = &head[pr];
         if tail.len() * (n_cols - c) > PAR_WORK {
@@ -438,11 +525,116 @@ fn rref32(
     Some(pivots)
 }
 
-#[inline]
-fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+#[inline(always)]
+fn add_lazy_scalar(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
     for (x, &y) in acc[from..].iter_mut().zip(&pivot[from..]) {
         *x += factor * u64::from(y);
     }
+}
+
+/// Four bounded 32-bit products accumulated in 64-bit lanes. The caller's
+/// existing normalization interval proves these additions cannot overflow.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn add_lazy_avx2(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+    use std::arch::x86_64::{
+        __m128i, __m256i, _mm256_add_epi64, _mm256_cvtepu32_epi64, _mm256_loadu_si256,
+        _mm256_mul_epu32, _mm256_set1_epi64x, _mm256_storeu_si256, _mm_loadu_si128,
+    };
+    let (acc, pivot) = (&mut acc[from..], &pivot[from..]);
+    let multiplier = _mm256_set1_epi64x(factor as i64);
+    let mut i = 0;
+    while i + 4 <= acc.len() {
+        // SAFETY: the loop bounds cover four u32 pivot entries and four
+        // u64 accumulator entries; both intrinsics accept unaligned data.
+        let values = unsafe { _mm_loadu_si128(pivot.as_ptr().add(i) as *const __m128i) };
+        let wide = _mm256_cvtepu32_epi64(values);
+        let products = _mm256_mul_epu32(wide, multiplier);
+        let current = unsafe { _mm256_loadu_si256(acc.as_ptr().add(i) as *const __m256i) };
+        let updated = _mm256_add_epi64(current, products);
+        unsafe { _mm256_storeu_si256(acc.as_mut_ptr().add(i) as *mut __m256i, updated) };
+        i += 4;
+    }
+    for (x, &y) in acc[i..].iter_mut().zip(&pivot[i..]) {
+        *x += factor * u64::from(y);
+    }
+}
+
+/// Eight bounded 32-bit products accumulated in 64-bit lanes. The same
+/// 256-update normalization interval used by the scalar and AVX2 paths
+/// bounds every lane before it is reduced.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx512f")]
+unsafe fn add_lazy_avx512(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+    use std::arch::x86_64::{
+        __m256i, __m512i, _mm256_loadu_si256, _mm512_add_epi64, _mm512_cvtepu32_epi64,
+        _mm512_loadu_si512, _mm512_mul_epu32, _mm512_set1_epi64, _mm512_storeu_si512,
+    };
+    let (acc, pivot) = (&mut acc[from..], &pivot[from..]);
+    let multiplier = _mm512_set1_epi64(factor as i64);
+    let mut i = 0;
+    while i + 8 <= acc.len() {
+        // SAFETY: the loop bounds cover eight pivot and accumulator entries;
+        // both loads and the store accept unaligned pointers.
+        let values = unsafe { _mm256_loadu_si256(pivot.as_ptr().add(i) as *const __m256i) };
+        let wide = _mm512_cvtepu32_epi64(values);
+        let products = _mm512_mul_epu32(wide, multiplier);
+        let current = unsafe { _mm512_loadu_si512(acc.as_ptr().add(i) as *const __m512i) };
+        let updated = _mm512_add_epi64(current, products);
+        unsafe { _mm512_storeu_si512(acc.as_mut_ptr().add(i) as *mut __m512i, updated) };
+        i += 8;
+    }
+    for (x, &y) in acc[i..].iter_mut().zip(&pivot[i..]) {
+        *x += factor * u64::from(y);
+    }
+}
+
+/// Zero selects scalar accumulation, one forces AVX2, and two forces
+/// AVX-512F. Both vector paths remain explicit opt-ins.
+fn lazy_simd_kind() -> u8 {
+    #[cfg(target_arch = "x86_64")]
+    {
+        static KIND: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
+        *KIND.get_or_init(|| {
+            if std::env::var("F4_FP_LAZY_AVX512").as_deref() == Ok("1")
+                && std::arch::is_x86_feature_detected!("avx512f")
+                && std::arch::is_x86_feature_detected!("avx2")
+            {
+                2
+            } else if std::env::var("F4_FP_LAZY_AVX2").as_deref() == Ok("1")
+                && std::arch::is_x86_feature_detected!("avx2")
+            {
+                1
+            } else {
+                0
+            }
+        })
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        0
+    }
+}
+
+#[inline]
+fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64, simd: u8) {
+    debug_assert_eq!(acc.len(), pivot.len());
+    #[cfg(target_arch = "x86_64")]
+    if simd == 0 {
+        add_lazy_scalar(acc, pivot, from, factor);
+    } else if simd == 2 {
+        // SAFETY: `lazy_simd_kind` verified AVX-512F and AVX2.
+        unsafe { add_lazy_avx512(acc, pivot, from, factor) };
+    } else {
+        // SAFETY: `lazy_simd_kind` verified AVX2 before this call.
+        unsafe { add_lazy_avx2(acc, pivot, from, factor) };
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        let _ = simd;
+        add_lazy_scalar(acc, pivot, from, factor);
+    }
+    count_ops(acc.len() - from);
 }
 
 #[inline]
@@ -463,6 +655,7 @@ fn rref32_deferred(
     deadline: Option<Instant>,
 ) -> Option<Vec<usize>> {
     const NORMALIZE_AFTER: usize = 256;
+    let simd = lazy_simd_kind();
     let mut known: Vec<(usize, Vec<u32>)> = Vec::new();
     for source in std::mem::take(rows) {
         if deadline.is_some_and(|d| Instant::now() > d) {
@@ -476,7 +669,7 @@ fn rref32_deferred(
             }
             let f = fp.reduce(acc[*c]);
             if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f);
+                add_lazy(&mut acc, pivot, *c, fp.p - f, simd);
                 pending += 1;
                 if pending == NORMALIZE_AFTER {
                     normalize_lazy(&mut acc, fp);
@@ -492,6 +685,7 @@ fn rref32_deferred(
         for x in &mut row[c..] {
             *x = fp32.reduce(*x * inv);
         }
+        count_ops(row.len() - c);
         let at = known.partition_point(|(pc, _)| *pc < c);
         known.insert(at, (c, row));
     }
@@ -506,7 +700,7 @@ fn rref32_deferred(
         for (c, pivot) in later.iter().rev() {
             let f = fp.reduce(acc[*c]);
             if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f);
+                add_lazy(&mut acc, pivot, *c, fp.p - f, simd);
                 pending += 1;
                 if pending == NORMALIZE_AFTER {
                     normalize_lazy(&mut acc, fp);
@@ -544,11 +738,14 @@ fn rref(rows: &mut Vec<Vec<u64>>, fp: Barrett, deadline: Option<Instant>) -> Opt
         };
         rows.swap(pr, r);
         let inv = invmod(rows[pr][c], p);
+        let mut ops = 0usize;
         for x in rows[pr][c..].iter_mut() {
             if *x != 0 {
                 *x = fp.reduce(*x * inv);
+                ops += 1;
             }
         }
+        count_ops(ops);
         let (head, tail) = rows.split_at_mut(pr + 1);
         let prow = &head[pr];
         if tail.len() * (n_cols - c) > PAR_WORK {
@@ -600,6 +797,8 @@ fn f4_with_arithmetic(
     mode: u8,
 ) -> F4Report {
     let t0 = Instant::now();
+    let ops0 = field_ops_now();
+    let mut blocked_steps = 0usize;
     let debug = std::env::var("F4_DEBUG").is_ok();
     if debug {
         eprintln!(
@@ -631,7 +830,8 @@ fn f4_with_arithmetic(
                   mc,
                   to,
                   pab,
-                  learned: (u32, usize, usize)| {
+                  learned: (u32, usize, usize),
+                  bs: usize| {
         let b: Vec<Poly> = if inconsistent {
             vec![vec![(vec![0; n_vars], 1)]]
         } else {
@@ -657,6 +857,8 @@ fn f4_with_arithmetic(
             timed_out: to,
             pairs_above_bound: pab,
             staircase_at_stop: None,
+            field_ops: field_ops_now() - ops0,
+            blocked_steps: bs,
         }
     };
 
@@ -711,7 +913,7 @@ fn f4_with_arithmetic(
             continue;
         }
         if total_degree(&f[0].0) == 0 {
-            return report(&basis, &alive, true, 0, 0, 0, 0, 0, false, 0, (0, 0, 0));
+            return report(&basis, &alive, true, 0, 0, 0, 0, 0, false, 0, (0, 0, 0), 0);
         }
         add(
             f,
@@ -750,6 +952,7 @@ fn f4_with_arithmetic(
                     true,
                     pairs_above_bound,
                     learned,
+                    blocked_steps,
                 );
             }
         }
@@ -867,6 +1070,19 @@ fn f4_with_arithmetic(
         }
         let free_cols: Vec<usize> = (0..n_cols).filter(|&c| reducer_at[c] == NONE).collect();
         let deadline = opts.deadline;
+        // Block-aware reduction: with every row in one weight class the
+        // reduced pair rows split by class over the free columns.
+        let block_classes: Option<Vec<u8>> = opts.weights.as_ref().and_then(|w| {
+            let col_w: Vec<u8> = cols.iter().map(|m| z3_weight(m, w)).collect();
+            let homogeneous = sparse.iter().all(|r| {
+                let cw = col_w[r[0].0 as usize];
+                r.iter().all(|&(c, _)| col_w[c as usize] == cw)
+            });
+            homogeneous.then(|| free_cols.iter().map(|&c| col_w[c]).collect())
+        });
+        if block_classes.is_some() {
+            blocked_steps += 1;
+        }
         let pivots: Option<(Vec<Vec<u64>>, Vec<usize>)> = if deferred {
             let fp32 = fp32.expect("deferred mode has narrow arithmetic");
             let reduce_pair_row = |r: &Vec<(u32, u64)>| -> Option<Vec<u32>> {
@@ -888,9 +1104,11 @@ fn f4_with_arithmetic(
                     }
                     acc[c] = 0;
                     let neg = p - f;
-                    for &(cc, v) in &reducers[reducer_at[c] as usize][1..] {
+                    let reducer = &reducers[reducer_at[c] as usize][1..];
+                    for &(cc, v) in reducer {
                         acc[cc as usize] += neg * v;
                     }
+                    count_ops(reducer.len());
                     pending += 1;
                     if pending == 256 {
                         normalize_lazy(&mut acc, fp);
@@ -911,7 +1129,13 @@ fn f4_with_arithmetic(
             };
             reduced.and_then(|mut rows| {
                 rows.retain(|r| r.iter().any(|&v| v != 0));
-                rref32_deferred(&mut rows, fp32, fp, deadline).map(|piv| {
+                let piv = match &block_classes {
+                    Some(cls) => {
+                        rref_blocked(&mut rows, cls, |b| rref32_deferred(b, fp32, fp, deadline))
+                    }
+                    None => rref32_deferred(&mut rows, fp32, fp, deadline),
+                };
+                piv.map(|piv| {
                     let wide = rows
                         .into_iter()
                         .map(|row| row.into_iter().map(u64::from).collect())
@@ -935,10 +1159,12 @@ fn f4_with_arithmetic(
                     }
                     acc[c] = 0;
                     let neg = fp32.p - f;
-                    for &(cc, v) in &reducers[reducer_at[c] as usize][1..] {
+                    let reducer = &reducers[reducer_at[c] as usize][1..];
+                    for &(cc, v) in reducer {
                         let x = &mut acc[cc as usize];
                         *x = fp32.reduce(*x + neg * v as u32);
                     }
+                    count_ops(reducer.len());
                 }
                 Some(free_cols.iter().map(|&c| acc[c]).collect())
             };
@@ -949,7 +1175,11 @@ fn f4_with_arithmetic(
             };
             reduced.and_then(|mut rows| {
                 rows.retain(|r| r.iter().any(|&v| v != 0));
-                rref32(&mut rows, fp32, deadline).map(|piv| {
+                let piv = match &block_classes {
+                    Some(cls) => rref_blocked(&mut rows, cls, |b| rref32(b, fp32, deadline)),
+                    None => rref32(&mut rows, fp32, deadline),
+                };
+                piv.map(|piv| {
                     let wide = rows
                         .into_iter()
                         .map(|row| row.into_iter().map(u64::from).collect())
@@ -973,10 +1203,12 @@ fn f4_with_arithmetic(
                     }
                     acc[c] = 0;
                     let neg = p - f;
-                    for &(cc, v) in &reducers[reducer_at[c] as usize][1..] {
+                    let reducer = &reducers[reducer_at[c] as usize][1..];
+                    for &(cc, v) in reducer {
                         let x = &mut acc[cc as usize];
                         *x = fp.reduce(*x + neg * v);
                     }
+                    count_ops(reducer.len());
                 }
                 Some(free_cols.iter().map(|&c| acc[c]).collect())
             };
@@ -987,7 +1219,11 @@ fn f4_with_arithmetic(
             };
             reduced.and_then(|mut rows| {
                 rows.retain(|r| r.iter().any(|&v| v != 0));
-                rref(&mut rows, fp, deadline).map(|piv| (rows, piv))
+                let piv = match &block_classes {
+                    Some(cls) => rref_blocked(&mut rows, cls, |b| rref(b, fp, deadline)),
+                    None => rref(&mut rows, fp, deadline),
+                };
+                piv.map(|piv| (rows, piv))
             })
         };
         if debug {
@@ -1012,6 +1248,7 @@ fn f4_with_arithmetic(
                 true,
                 pairs_above_bound,
                 learned,
+                blocked_steps,
             );
         };
         // new polynomials: rows whose pivot column is not an input leading monomial
@@ -1039,6 +1276,7 @@ fn f4_with_arithmetic(
                     false,
                     pairs_above_bound,
                     (learned.0.max(d), max_cols, steps),
+                    blocked_steps,
                 );
             }
             new_polys.push(poly);
@@ -1094,6 +1332,8 @@ fn f4_with_arithmetic(
         timed_out: false,
         pairs_above_bound,
         staircase_at_stop,
+        field_ops: field_ops_now() - ops0,
+        blocked_steps,
     }
 }
 
@@ -1254,6 +1494,11 @@ pub struct SolveReport {
     pub f4_runs: usize,
     pub ms: f64,
     pub timed_out: bool,
+    /// `F_p` multiplications spent in row reduction, summed over the F4
+    /// runs of the substitution tree.
+    pub field_ops: u64,
+    /// Block-reduced steps of the top-level run.
+    pub blocked_steps: usize,
 }
 
 /// Roots in `F_p` of a univariate polynomial given as `(degree, coeff)`.
@@ -1297,11 +1542,13 @@ fn specialise(f: &Poly, i: usize, a: u64, p: u64) -> Vec<(Vec<u32>, u64)> {
 /// substitution.  Solutions are full assignments `(x_0, …, x_{n−1})`.
 pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveReport {
     let t0 = Instant::now();
+    let ops0 = field_ops_now();
     let mut runs = 0usize;
     let mut max_rows = 0;
     let mut max_cols = 0;
     let mut top: Option<(u32, u32)> = None;
     let mut timed_out = false;
+    let mut blocked = 0usize;
     let verdict = solve_rec(
         input,
         n_vars,
@@ -1312,6 +1559,7 @@ pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveRe
         &mut max_cols,
         &mut top,
         &mut timed_out,
+        &mut blocked,
     );
     let (solving_degree, degree_reached) = top.unwrap_or((0, 0));
     SolveReport {
@@ -1323,6 +1571,8 @@ pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveRe
         f4_runs: runs,
         ms: t0.elapsed().as_secs_f64() * 1e3,
         timed_out,
+        field_ops: field_ops_now() - ops0,
+        blocked_steps: blocked,
     }
 }
 
@@ -1337,6 +1587,7 @@ fn solve_rec(
     max_cols: &mut usize,
     top: &mut Option<(u32, u32)>,
     timed_out: &mut bool,
+    blocked: &mut usize,
 ) -> Verdict {
     if n_vars == 0 {
         // constants only: consistent iff all zero
@@ -1353,6 +1604,7 @@ fn solve_rec(
     *max_cols = (*max_cols).max(r.max_cols);
     if top.is_none() {
         *top = Some((r.solving_degree, r.degree_reached));
+        *blocked = r.blocked_steps;
     }
     if r.timed_out {
         *timed_out = true;
@@ -1411,6 +1663,7 @@ fn solve_rec(
             max_cols,
             top,
             timed_out,
+            blocked,
         ) {
             Verdict::Inconsistent => {}
             Verdict::Undetermined => return Verdict::Undetermined,
@@ -1447,6 +1700,70 @@ pub fn eval(f: &Poly, x: &[u64], p: u64) -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn avx2_lazy_accumulation_matches_scalar_at_boundaries() {
+        if !std::arch::is_x86_feature_detected!("avx2") {
+            return;
+        }
+        let fp = Barrett::new(65521);
+        for width in [0, 1, 3, 4, 5, 7, 8, 15, 16, 17, 33, 257, 4097] {
+            let pivot: Vec<u32> = (0..width)
+                .map(|i| ((i * 7919 + 137) % 65521) as u32)
+                .collect();
+            for from in [0, width.min(1), width / 3, width] {
+                let initial: Vec<u64> = (0..width)
+                    .map(|i| ((i * 1_000_003 + 17) as u64) % 65521)
+                    .collect();
+                let mut scalar = initial.clone();
+                let mut vector = initial;
+                for update in 0..256 {
+                    let factor = ((update * 4093 + 1) % 65521) as u64;
+                    add_lazy_scalar(&mut scalar, &pivot, from, factor);
+                    // SAFETY: the runtime AVX2 feature was checked above.
+                    unsafe { add_lazy_avx2(&mut vector, &pivot, from, factor) };
+                    assert_eq!(vector, scalar, "width={width} from={from} update={update}");
+                }
+                normalize_lazy(&mut scalar, fp);
+                normalize_lazy(&mut vector, fp);
+                assert_eq!(vector, scalar, "normalization width={width} from={from}");
+            }
+        }
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn avx512_lazy_accumulation_matches_scalar_at_boundaries() {
+        if !std::arch::is_x86_feature_detected!("avx512f")
+            || !std::arch::is_x86_feature_detected!("avx2")
+        {
+            return;
+        }
+        let fp = Barrett::new(65521);
+        for width in [0, 1, 7, 8, 9, 15, 16, 17, 33, 257, 4097] {
+            let pivot: Vec<u32> = (0..width)
+                .map(|i| ((i * 7919 + 137) % 65521) as u32)
+                .collect();
+            for from in [0, width.min(1), width / 3, width] {
+                let initial: Vec<u64> = (0..width)
+                    .map(|i| ((i * 1_000_003 + 17) as u64) % 65521)
+                    .collect();
+                let mut scalar = initial.clone();
+                let mut vector = initial;
+                for update in 0..256 {
+                    let factor = ((update * 4093 + 1) % 65521) as u64;
+                    add_lazy_scalar(&mut scalar, &pivot, from, factor);
+                    // SAFETY: the runtime AVX-512F and AVX2 features were checked above.
+                    unsafe { add_lazy_avx512(&mut vector, &pivot, from, factor) };
+                    assert_eq!(vector, scalar, "width={width} from={from} update={update}");
+                }
+                normalize_lazy(&mut scalar, fp);
+                normalize_lazy(&mut vector, fp);
+                assert_eq!(vector, scalar, "normalization width={width} from={from}");
+            }
+        }
+    }
 
     fn poly(terms: &[(&[u32], u64)]) -> Poly {
         terms.iter().map(|(e, c)| (e.to_vec(), *c)).collect()

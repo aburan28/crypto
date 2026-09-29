@@ -253,19 +253,33 @@ def cpuThreadCount():
     return max(1, int(os.cpu_count() or 1))
 
 
-def gpuName(gpu):
+def gpuName(gpu, attempts=3):
     # Non-GPU clients (CPU / FPGA host) have no nvidia-smi; the bootstrap
     # tells us what the device is instead.
     if os.environ.get("ECC_DEVICE_NAME"):
         return os.environ["ECC_DEVICE_NAME"]
     if isCpuDevice():
         return "cpu/%d" % cpuThreadCount()
-    try:
-        r = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader", "-i", str(gpu)],
-                           capture_output=True, text=True)
-    except OSError:
-        return "cpu"
-    return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else "cpu"
+    for attempt in range(attempts):
+        try:
+            r = subprocess.run(
+                ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader", "-i", str(gpu)],
+                capture_output=True, text=True)
+        except OSError:
+            break
+        if r.returncode == 0 and r.stdout.strip():
+            return r.stdout.strip()
+        if attempt + 1 < attempts:
+            time.sleep(1 + attempt)
+    # Never "cpu" on a host that did not say it was one. A CPU-shaped gpuName
+    # goes into the slot record, isCpuSlotRecord then reads it as a CPU slot,
+    # and idleSlotClaimable refuses CPU slots to every GPU claimant -- so one
+    # failed nvidia-smi call would strand that slot's checkpoint behind a
+    # claimant that can only be a CPU worker, which would refuse the packed
+    # shape anyway (exit 6). An unreadable GPU is unknown, not absent.
+    log("nvidia-smi did not name GPU %d after %d attempts; "
+        "claiming as an unknown GPU rather than a CPU slot" % (gpu, attempts))
+    return "gpu%d-unknown" % gpu
 
 
 # campaign.json workers=385024 is the RTX PRO 6000 / g7e preset. Ada (g6 L4,
@@ -1416,6 +1430,31 @@ class Worker:
 
     # ---- one client run ---------------------------------------------------
     def runClient(self, slot):
+        try:
+            from seed_registry import worker_guard
+        except ModuleNotFoundError as exc:
+            if exc.name != "seed_registry" or not hasattr(self.store, "bucket"):
+                raise
+            # Older bootstraps fetched worker.py alone. Install the pinned
+            # guard before starting a client, without requiring a kernel roll.
+            import hashlib
+            import importlib.util
+            expected = "2488a983bf57c4e284363a1f01b9e7c08fccf06c459bcb56509979c26da4bd70"
+            path = os.path.join(self.work, "seed_registry.py")
+            sh(["aws", "s3", "cp", "s3://%s/aws/seed-guard/%s/seed_registry.py"
+                % (self.store.bucket, expected), path, "--only-show-errors"])
+            with open(path, "rb") as source:
+                if hashlib.sha256(source.read()).hexdigest() != expected:
+                    raise RuntimeError("seed guard hash mismatch; refusing launch")
+            spec = importlib.util.spec_from_file_location("seed_registry", path)
+            guard = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(guard)
+            sys.modules["seed_registry"] = guard
+            worker_guard = guard.worker_guard
+        with worker_guard(self, slot, slot + 1):
+            return self._runClient(slot)
+
+    def _runClient(self, slot):
         """Run the client until it exits or a stop/restart is due.
 
         Returns (returncode, solvedLine)."""

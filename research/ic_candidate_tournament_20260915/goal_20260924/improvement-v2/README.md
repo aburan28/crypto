@@ -60,6 +60,12 @@ Preparation, execution and replay all bind these references. Generic native and
 profiled executions retain separate run numbers. A failed or missing reference
 blocks a complete comparison; it cannot become a successful-subset estimate.
 
+Newly frozen evaluators also retain [single-target rho context](RHO-REPORTING.md)
+beside paired online rows: source/configuration/seed, worker and walk counts,
+collision policy, correctness and timing, and whole-process peak RSS. Separate
+collision-table memory is unmeasured and remains explicitly unknown. Historical
+records retain their own evaluators.
+
 ## Validation and remaining work
 
 Controls exercise the accepted report/build/source binding, changed reference
@@ -70,7 +76,12 @@ against separate metric baselines. A replay of the committed development run
 records checks the new online comparison against the observed online leader.
 These are software controls, not additional research measurements.
 
-A dedicated candidate panel and dispatch wrapper for round two still need to be
-registered before its execution. This protocol/driver update generates no new
-research target, consumes no improvement round and promotes no candidate.
-The campaign remains active with two rounds left.
+Round two completed under [round2.json](round2.json): eleven arms on source
+digest `8582e4ab4b63e98696a0ff00ee296e2902923a2c39c325ab0f3e3950ffbb2b28`, seed
+`2026092552`, wrapper [`run_improvement_v2.py`](../../run_improvement_v2.py).
+The frozen checker verified 3,480/3,480 pairs and retained the incumbent;
+selected `stop5_word` failed promotion. See
+[the evidence report](../improvement/round2/EVIDENCE.md) and archive
+`ic-improvement-round2-20260928`. Do not redispatch `run_round_two=true`. One
+registered attempt remains; a third round needs a new panel, seed and complete
+target exclusions, and must not retune on confirmation or replay.

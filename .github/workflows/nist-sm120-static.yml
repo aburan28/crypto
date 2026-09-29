@@ -1,0 +1,31 @@
+name: NIST sm120 static CUDA
+on:
+  pull_request:
+    paths:
+      - 'gpu/nist/**'
+      - '.github/workflows/nist-sm120-static.yml'
+  workflow_dispatch:
+concurrency:
+  group: nist-sm120-static-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  ptxas:
+    runs-on: ubuntu-24.04
+    container:
+      image: nvidia/cuda:13.0.2-devel-ubuntu24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ptx: [0, 1]
+        maxreg: [0, 96, 128, 160]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile sm_120
+        working-directory: gpu/nist
+        run: |
+          make -B bench ARCH=sm_120 NIST_PTX=${{ matrix.ptx }} MAXREG=${{ matrix.maxreg }} 2>&1 | tee ptxas-${{ matrix.ptx }}-${{ matrix.maxreg }}.log
+          grep -E 'Used [0-9]+ registers|stack frame|spill|Function properties' ptxas-${{ matrix.ptx }}-${{ matrix.maxreg }}.log || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sm120-ptxas-${{ matrix.ptx }}-${{ matrix.maxreg }}
+          path: gpu/nist/ptxas-${{ matrix.ptx }}-${{ matrix.maxreg }}.log
