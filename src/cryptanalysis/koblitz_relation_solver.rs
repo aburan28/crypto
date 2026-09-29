@@ -603,3 +603,327 @@ mod tests {
         assert!(IncrementalRelationSolver::new(4, &BigUint::zero()).is_none());
     }
 }
+
+/// Differential check against the solver as it stood before the
+/// precomputed-quotient reduction (994784af): the division-based
+/// `mulmod`, the branching `submod`, the 128-bit Euclid and the
+/// back-substitution over every pivot, copied verbatim.  The whole state —
+/// every pivot row and every counter — must agree after every row, and
+/// where the old code panicked (a non-prime modulus, an unreduced row)
+/// the new one must panic on the same row and leave the same state.
+#[cfg(test)]
+mod division_reference {
+    use super::{IncrementalRelationSolver, RowStatus};
+    use num_bigint::BigUint;
+    use rand::{rngs::StdRng, Rng, SeedableRng};
+    use std::panic::{catch_unwind, AssertUnwindSafe};
+
+    fn mulmod(a: u64, b: u64, m: u64) -> u64 {
+        ((a as u128 * b as u128) % m as u128) as u64
+    }
+
+    fn submod(a: u64, b: u64, m: u64) -> u64 {
+        if a >= b {
+            a - b
+        } else {
+            a + (m - b)
+        }
+    }
+
+    fn invmod(a: u64, m: u64) -> Option<u64> {
+        let (mut old_r, mut r) = (a as i128, m as i128);
+        let (mut old_s, mut s) = (1i128, 0i128);
+        while r != 0 {
+            let q = old_r / r;
+            (old_r, r) = (r, old_r - q * r);
+            (old_s, s) = (s, old_s - q * s);
+        }
+        if old_r != 1 {
+            return None;
+        }
+        Some(old_s.rem_euclid(m as i128) as u64)
+    }
+
+    #[derive(Clone, Debug, PartialEq, Eq)]
+    struct Old {
+        modulus: u64,
+        unknowns: usize,
+        pivot_rows: Vec<Option<Vec<u64>>>,
+        rank: usize,
+        rows_seen: usize,
+        dependent_rows: usize,
+        inconsistent: bool,
+    }
+
+    impl Old {
+        fn new(unknowns: usize, modulus: u64) -> Self {
+            Self {
+                modulus,
+                unknowns,
+                pivot_rows: vec![None; unknowns + 1],
+                rank: 0,
+                rows_seen: 0,
+                dependent_rows: 0,
+                inconsistent: false,
+            }
+        }
+
+        fn add_row(&mut self, mut row: Vec<u64>) -> RowStatus {
+            assert_eq!(row.len(), self.unknowns + 2, "row width");
+            let m = self.modulus;
+            let width = self.unknowns + 2;
+            self.rows_seen += 1;
+            for col in 0..=self.unknowns {
+                let factor = row[col];
+                if factor == 0 {
+                    continue;
+                }
+                if let Some(pivot) = &self.pivot_rows[col] {
+                    for k in col..width {
+                        if pivot[k] != 0 {
+                            row[k] = submod(row[k], mulmod(factor, pivot[k], m), m);
+                        }
+                    }
+                }
+            }
+            let lead = (0..=self.unknowns).find(|&c| row[c] != 0);
+            let Some(lead) = lead else {
+                if row[self.unknowns + 1] != 0 {
+                    self.inconsistent = true;
+                    return RowStatus::Inconsistent;
+                }
+                self.dependent_rows += 1;
+                return RowStatus::Dependent;
+            };
+            let inv = invmod(row[lead], m).expect("prime modulus: nonzero entries invert");
+            for k in lead..width {
+                row[k] = mulmod(row[k], inv, m);
+            }
+            for col in 0..=self.unknowns {
+                if col == lead {
+                    continue;
+                }
+                if let Some(pivot) = self.pivot_rows[col].as_mut() {
+                    let factor = pivot[lead];
+                    if factor == 0 {
+                        continue;
+                    }
+                    for k in lead..width {
+                        if row[k] != 0 {
+                            pivot[k] = submod(pivot[k], mulmod(factor, row[k], m), m);
+                        }
+                    }
+                }
+            }
+            self.pivot_rows[lead] = Some(row);
+            self.rank += 1;
+            RowStatus::Independent
+        }
+    }
+
+    fn same_state(new: &IncrementalRelationSolver, old: &Old) -> bool {
+        new.modulus == old.modulus
+            && new.unknowns == old.unknowns
+            && new.pivot_rows == old.pivot_rows
+            && new.rank == old.rank
+            && new.rows_seen == old.rows_seen
+            && new.dependent_rows == old.dependent_rows
+            && new.inconsistent == old.inconsistent
+    }
+
+    fn is_prime(n: u64) -> bool {
+        if n < 2 {
+            return false;
+        }
+        for p in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
+            if n.is_multiple_of(p) {
+                return n == p;
+            }
+        }
+        let (mut d, mut s) = (n - 1, 0);
+        while d % 2 == 0 {
+            d /= 2;
+            s += 1;
+        }
+        let pow = |mut b: u64, mut e: u64| {
+            let mut acc = 1u64;
+            while e > 0 {
+                if e & 1 == 1 {
+                    acc = mulmod(acc, b, n);
+                }
+                b = mulmod(b, b, n);
+                e >>= 1;
+            }
+            acc
+        };
+        'witness: for a in [2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
+            let mut x = pow(a, d);
+            if x == 1 || x == n - 1 {
+                continue;
+            }
+            for _ in 1..s {
+                x = mulmod(x, x, n);
+                if x == n - 1 {
+                    continue 'witness;
+                }
+            }
+            return false;
+        }
+        true
+    }
+
+    /// Primes and composites across both reduction widths.
+    fn moduli(rng: &mut StdRng) -> Vec<u64> {
+        let mut out = vec![
+            2,
+            3,
+            4,
+            6,
+            7,
+            127,
+            (1 << 31) - 1,
+            1 << 32,
+            (1 << 61) - 1,
+            (1 << 62) + 1,
+            (1 << 63) - 25,
+            (1 << 63) - 1,
+            1 << 63,
+            (1 << 63) + 1,
+            (1 << 63) + 29,
+            u64::MAX - 58,
+            u64::MAX,
+        ];
+        for bits in [2u32, 8, 17, 32, 33, 48, 62, 63, 64] {
+            let low = 1u64 << (bits - 1);
+            loop {
+                let m = low | (rng.gen::<u64>() & (low - 1));
+                if is_prime(m) {
+                    out.push(m);
+                    break;
+                }
+            }
+            out.push(low | (rng.gen::<u64>() & (low - 1)));
+        }
+        out
+    }
+
+    /// Feed `row` to both and compare the outcome and the whole state.
+    fn feed(
+        new: &mut IncrementalRelationSolver,
+        old: &mut Old,
+        row: Vec<u64>,
+        ctx: &str,
+    ) -> Option<RowStatus> {
+        let a = catch_unwind(AssertUnwindSafe(|| new.add_row(row.clone())));
+        let b = catch_unwind(AssertUnwindSafe(|| old.add_row(row.clone())));
+        let status = match (a, b) {
+            (Ok(x), Ok(y)) => {
+                assert_eq!(x, y, "{ctx}: status");
+                Some(x)
+            }
+            (Err(_), Err(_)) => None,
+            (x, y) => panic!("{ctx}: new {:?} vs old {:?}", x.is_ok(), y.is_ok()),
+        };
+        assert!(same_state(new, old), "{ctx}: state differs");
+        status
+    }
+
+    #[test]
+    fn invmod_and_submod_match_the_old_routines() {
+        let mut rng = StdRng::seed_from_u64(0x1a7e);
+        for m in moduli(&mut rng) {
+            let mut words = vec![0, 1, 2, m - 1, m, m.wrapping_add(1), 1 << 63, u64::MAX];
+            words.extend((0..64).map(|_| rng.gen_range(0..m)));
+            words.extend((0..16).map(|_| rng.gen::<u64>()));
+            for &a in &words {
+                assert_eq!(super::invmod(a, m), invmod(a, m), "invmod a={a} m={m}");
+                for &b in &words {
+                    // The old form is only defined for reduced `b`.
+                    if b < m {
+                        assert_eq!(super::submod(a, b, m), submod(a, b, m), "a={a} b={b} m={m}");
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn solver_state_matches_the_old_solver_after_every_row() {
+        let mut rng = StdRng::seed_from_u64(0xd1ff);
+        let (mut statuses, mut panics) = ([0usize; 3], 0usize);
+        for m in moduli(&mut rng) {
+            for (unknowns, density) in [
+                (0usize, 1usize),
+                (1, 1),
+                (2, 3),
+                (31, 2),
+                (63, 3),
+                (64, 64),
+                (65, 5),
+                (100, 100),
+                (130, 3),
+            ] {
+                let big = BigUint::from(m);
+                let mut new = IncrementalRelationSolver::new(unknowns, &big).unwrap();
+                let mut old = Old::new(unknowns, m);
+                let width = unknowns + 2;
+                let mut fed: Vec<Vec<u64>> = Vec::new();
+                for i in 0..unknowns + 24 {
+                    let kind = rng.gen_range(0..10);
+                    let row = if kind < 6 || fed.is_empty() {
+                        let mut row = vec![0u64; width];
+                        for _ in 0..density.min(unknowns.max(1)) {
+                            let c = rng.gen_range(0..=unknowns);
+                            row[c] = rng.gen_range(0..m);
+                        }
+                        row[width - 1] = rng.gen_range(0..m);
+                        row
+                    } else if kind < 8 {
+                        // A combination of earlier rows: dependent, or
+                        // inconsistent when the right-hand side moves.
+                        let mut row = vec![0u64; width];
+                        for _ in 0..rng.gen_range(1..=3) {
+                            let src = &fed[rng.gen_range(0..fed.len())];
+                            let c = rng.gen_range(0..m);
+                            for (r, &s) in row.iter_mut().zip(src) {
+                                let sum = *r as u128 + mulmod(c, s % m, m) as u128;
+                                *r = (sum % m as u128) as u64;
+                            }
+                        }
+                        if kind == 7 {
+                            row[width - 1] = rng.gen_range(0..m);
+                        }
+                        row
+                    } else if kind == 8 {
+                        // Only a right-hand side, or nothing at all.
+                        let mut row = vec![0u64; width];
+                        row[width - 1] = if rng.gen() { 0 } else { rng.gen_range(0..m) };
+                        row
+                    } else {
+                        // Unreduced words: outside the documented
+                        // contract, but the behaviour must not change.
+                        let mut row = vec![0u64; width];
+                        for _ in 0..density.min(unknowns.max(1)) {
+                            row[rng.gen_range(0..=unknowns)] = rng.gen();
+                        }
+                        row[width - 1] = rng.gen();
+                        row
+                    };
+                    fed.push(row.clone());
+                    let ctx = format!("m={m} U={unknowns} row {i}");
+                    match feed(&mut new, &mut old, row, &ctx) {
+                        Some(s) => statuses[s as usize] += 1,
+                        None => panics += 1,
+                    }
+                }
+                let old_target = old.pivot_rows[unknowns].as_ref().map(|r| r[unknowns + 1]);
+                assert_eq!(new.target(), old_target, "m={m} U={unknowns}");
+            }
+        }
+        // Every outcome was exercised, the old panic included.
+        assert!(
+            statuses.iter().all(|&n| n > 0) && panics > 0,
+            "statuses seen {statuses:?}, panics {panics}"
+        );
+    }
+}
