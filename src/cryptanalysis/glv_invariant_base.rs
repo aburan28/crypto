@@ -12,8 +12,9 @@
 //! | type | example | `deg φ` | `ord_r(λ_φ)` | invariant base exists? |
 //! |:--|:--|--:|:--|:--|
 //! | A. automorphism | `j = 0`: `(x, y) ↦ (ζx, y)`; `j = 1728`: `(x, y) ↦ (−x, iy)`; negation | 1 | 3, 4, 2 | yes: any abscissa set closed under `x ↦ ζx` (`x ↦ −x`) |
-//! | B. Frobenius-type | Koblitz `τ`; GLS `ψ = τ_u ∘ π_p ∘ τ_u⁻¹` on the twist over `F_{p²}` | `p` | `n`; 4 | yes: a `π`-stable subspace; the line `x ∈ u·s·F_p` (`gls_fp2`) |
-//! | C. small-degree CM | `D = −7, −8`: degree 2 by Vélu; `1 + i` on `j = 1728` | 2, 3 | large | **no** inside a prime-order subgroup (below) |
+//! | B. Frobenius-type | Koblitz `τ`; GLS `ψ = τ_u ∘ π_p ∘ τ_u⁻¹` on the twist over `F_{p²}`; `π_p` on a subfield curve over `F_{p³}` (`subfield_fp3`) | `p` | `n`; 4; 3 | yes: a `π`-stable subspace; the line `x ∈ u·s·F_p` (`gls_fp2`); the eigenline `x ∈ s^k·F_p` |
+//! | A × B. composite | `ζ` and `ψ` on a `j = 0` twist over `F_{p²}`; `ι` and `ψ` on a `j = 1728` twist; `ζ` and `π` on a `j = 0` subfield curve | — | 12; 4; 3 | yes, and the fold is the **order of the subgroup of `(Z/rZ)^*` the eigenvalues generate**: 12 on the `j = 0` twist, but 4 on the `j = 1728` twist (`ι = ±ψ` on `⟨G⟩`) and 3 on the `j = 0` subfield curve (`ζ = π^{±1}` on `⟨G⟩`) |
+//! | C. small-degree CM | `D = −7, −8`: degree 2 by Vélu; `1 + i` on `j = 1728`; `D = −11` and `√−3` on `j = 0`: degree 3 by Vélu | 2, 3 | large | **no** inside a prime-order subgroup (below) |
 //!
 //! ## The one fact the fold rests on, and its converse
 //!
@@ -793,6 +794,8 @@ pub enum CmFamily {
     D7,
     /// `j = 8000`, `D = −8`: a degree-2 endomorphism, `φ² + 2 = 0`.
     D8,
+    /// `j = −32768`, `D = −11`: a degree-3 endomorphism, `φ² − φ + 3 = 0`.
+    D11,
     /// A random `(a, b)`: negation only (the control family).
     Generic,
 }
@@ -804,9 +807,10 @@ impl CmFamily {
             "j1728" => Ok(Self::J1728),
             "d7" => Ok(Self::D7),
             "d8" => Ok(Self::D8),
+            "d11" => Ok(Self::D11),
             "generic" => Ok(Self::Generic),
             other => Err(format!(
-                "unknown family `{other}`; try j0, j1728, d7, d8 or generic"
+                "unknown family `{other}`; try j0, j1728, d7, d8, d11 or generic"
             )),
         }
     }
@@ -816,6 +820,7 @@ impl CmFamily {
             Self::J1728 => "j1728",
             Self::D7 => "d7",
             Self::D8 => "d8",
+            Self::D11 => "d11",
             Self::Generic => "generic",
         }
     }
@@ -892,6 +897,10 @@ pub fn cm_candidate_orders(family: CmFamily, p: u64) -> Option<Vec<u64>> {
             let (t, _) = cornacchia_4p(p, 8)?;
             Some(vec![n(t as i128), n(-(t as i128))])
         }
+        CmFamily::D11 => {
+            let (t, _) = cornacchia_4p(p, 11)?;
+            Some(vec![n(t as i128), n(-(t as i128))])
+        }
         CmFamily::Generic => None,
     }
 }
@@ -945,8 +954,8 @@ fn random_point(curve: &PrimeCurve, rng: &mut StdRng) -> PrimePoint {
 /// three random points, and `r` is its largest prime factor with the
 /// cofactor at most `max_cofactor`.  Deterministic in `seed`.
 ///
-/// `J0` and `J1728` are searched to prime order (`max_cofactor = 1`
-/// is satisfiable); `D7` and `D8` always have a rational 2-torsion
+/// `J0` is searched to prime order (`max_cofactor = 1` is
+/// satisfiable); `J1728`, `D7` and `D8` always have a rational 2-torsion
 /// point (the kernel of their degree-2 map), so their cofactor is at
 /// least 2 and `max_cofactor` must allow it.  `Generic` counts points
 /// in `O(p)` and is meant for `bits ≤ 26`.
@@ -967,6 +976,7 @@ pub fn generate_cm_instance(
             CmFamily::J1728 => p % 4 == 1,
             CmFamily::D7 => pow_mod(p - 7, (p - 1) / 2, p) == 1,
             CmFamily::D8 => pow_mod(p - 8, (p - 1) / 2, p) == 1,
+            CmFamily::D11 => pow_mod(p - 11, (p - 1) / 2, p) == 1,
             CmFamily::Generic => bits <= 26,
         };
         if !admissible {
@@ -978,8 +988,12 @@ pub fn generate_cm_instance(
         let (a, b) = match family {
             CmFamily::J0 => (0, rng.gen_range(1..p)),
             CmFamily::J1728 => (rng.gen_range(1..p), 0),
-            CmFamily::D7 | CmFamily::D8 => {
-                let j = if family == CmFamily::D7 { -3375 } else { 8000 };
+            CmFamily::D7 | CmFamily::D8 | CmFamily::D11 => {
+                let j = match family {
+                    CmFamily::D7 => -3375,
+                    CmFamily::D8 => 8000,
+                    _ => -32768,
+                };
                 let Some((a0, b0)) = curve_with_j(j, p) else {
                     continue;
                 };
@@ -1061,7 +1075,7 @@ fn poly_trim(mut v: Vec<u64>) -> Vec<u64> {
     v
 }
 
-fn poly_mul(a: &[u64], b: &[u64], p: u64) -> Vec<u64> {
+fn poly_mul(a: &[u64], b: &[u64], p: u64, muls: &mut u64) -> Vec<u64> {
     if a.is_empty() || b.is_empty() {
         return Vec::new();
     }
@@ -1072,22 +1086,25 @@ fn poly_mul(a: &[u64], b: &[u64], p: u64) -> Vec<u64> {
         }
         for (j, &y) in b.iter().enumerate() {
             out[i + j] = addm(out[i + j], mulm(x, y, p), p);
+            *muls += 1;
         }
     }
     poly_trim(out)
 }
 
-fn poly_rem(a: &[u64], m: &[u64], p: u64) -> Vec<u64> {
+fn poly_rem(a: &[u64], m: &[u64], p: u64, muls: &mut u64) -> Vec<u64> {
     let mut a = a.to_vec();
     let dm = m.len() - 1;
     let inv_lead = inv_mod(m[dm], p);
     while a.len() > dm {
         let da = a.len() - 1;
         let c = mulm(a[da], inv_lead, p);
+        *muls += 1;
         if c != 0 {
             for k in 0..=dm {
                 a[da - dm + k] = subm(a[da - dm + k], mulm(c, m[k], p), p);
             }
+            *muls += dm as u64 + 1;
         }
         a.pop();
         a = poly_trim(a);
@@ -1095,10 +1112,10 @@ fn poly_rem(a: &[u64], m: &[u64], p: u64) -> Vec<u64> {
     a
 }
 
-fn poly_gcd(a: &[u64], b: &[u64], p: u64) -> Vec<u64> {
+fn poly_gcd(a: &[u64], b: &[u64], p: u64, muls: &mut u64) -> Vec<u64> {
     let (mut a, mut b) = (poly_trim(a.to_vec()), poly_trim(b.to_vec()));
     while !b.is_empty() {
-        let r = poly_rem(&a, &b, p);
+        let r = poly_rem(&a, &b, p, muls);
         a = b;
         b = r;
     }
@@ -1107,19 +1124,20 @@ fn poly_gcd(a: &[u64], b: &[u64], p: u64) -> Vec<u64> {
         for c in &mut a {
             *c = mulm(*c, inv, p);
         }
+        *muls += a.len() as u64;
     }
     a
 }
 
 /// `base^e mod m`.
-fn poly_powmod(base: &[u64], mut e: u64, m: &[u64], p: u64) -> Vec<u64> {
+fn poly_powmod(base: &[u64], mut e: u64, m: &[u64], p: u64, muls: &mut u64) -> Vec<u64> {
     let mut acc = vec![1u64];
-    let mut b = poly_rem(base, m, p);
+    let mut b = poly_rem(base, m, p, muls);
     while e > 0 {
         if e & 1 == 1 {
-            acc = poly_rem(&poly_mul(&acc, &b, p), m, p);
+            acc = poly_rem(&poly_mul(&acc, &b, p, muls), m, p, muls);
         }
-        b = poly_rem(&poly_mul(&b, &b, p), m, p);
+        b = poly_rem(&poly_mul(&b, &b, p, muls), m, p, muls);
         e >>= 1;
     }
     acc
@@ -1129,18 +1147,27 @@ fn poly_powmod(base: &[u64], mut e: u64, m: &[u64], p: u64) -> Vec<u64> {
 /// `gcd(x^p − x, f)` and Cantor–Zassenhaus splitting.  Deterministic
 /// in `seed`.
 pub fn poly_roots_fp(f: &[u64], p: u64, seed: u64) -> Vec<u64> {
+    let mut muls = 0u64;
+    poly_roots_fp_counted(f, p, seed, &mut muls)
+}
+
+/// [`poly_roots_fp`] with its `F_p` multiplications added to `muls`.
+pub fn poly_roots_fp_counted(f: &[u64], p: u64, seed: u64, muls: &mut u64) -> Vec<u64> {
     let f = poly_trim(f.to_vec());
     if f.len() <= 1 {
         return Vec::new();
     }
+    if f.len() == 2 {
+        return vec![negm(mulm(f[0], inv_mod(f[1], p), p), p)];
+    }
     // x^p − x mod f
-    let xp = poly_powmod(&[0, 1], p, &f, p);
+    let xp = poly_powmod(&[0, 1], p, &f, p, muls);
     let mut xp_minus_x = xp;
     if xp_minus_x.len() < 2 {
         xp_minus_x.resize(2, 0);
     }
     xp_minus_x[1] = subm(xp_minus_x[1], 1, p);
-    let g = poly_gcd(&f, &poly_trim(xp_minus_x), p);
+    let g = poly_gcd(&f, &poly_trim(xp_minus_x), p, muls);
     let mut rng = StdRng::seed_from_u64(seed ^ 0x524F_4F54);
     let mut out = Vec::new();
     let mut stack = vec![g];
@@ -1151,12 +1178,12 @@ pub fn poly_roots_fp(f: &[u64], p: u64, seed: u64) -> Vec<u64> {
             _ => {
                 // Split h with gcd((x + δ)^((p−1)/2) − 1, h).
                 let delta = rng.gen_range(0..p);
-                let mut s = poly_powmod(&[delta, 1], (p - 1) / 2, &h, p);
+                let mut s = poly_powmod(&[delta, 1], (p - 1) / 2, &h, p, muls);
                 if s.is_empty() {
                     s.push(0);
                 }
                 s[0] = subm(s[0], 1, p);
-                let d = poly_gcd(&h, &poly_trim(s), p);
+                let d = poly_gcd(&h, &poly_trim(s), p, muls);
                 if d.len() <= 1 || d.len() == h.len() {
                     stack.push(h);
                     continue;
@@ -1173,6 +1200,7 @@ pub fn poly_roots_fp(f: &[u64], p: u64, seed: u64) -> Vec<u64> {
                         q[dq - (d.len() - 1) + k] =
                             subm(q[dq - (d.len() - 1) + k], mulm(c, d[k], p), p);
                     }
+                    *muls += d.len() as u64 + 1;
                     q.pop();
                     q = poly_trim(q);
                 }
@@ -1230,6 +1258,77 @@ impl Endomorphism<PrimeCurve> for VeluDegree2 {
     }
 }
 
+/// The rational isomorphisms `(X, Y) ↦ (u²X, u³Y)` from
+/// `y² = x³ + a₂x + b₂` to `y² = x³ + ax + b`, as `(u², u³)` pairs:
+/// none when the curves are not `F_p`-isomorphic (a twist, or a
+/// different `j`), otherwise both signs of `u`.
+pub fn isomorphism_scalings(p: u64, a: u64, b: u64, a2: u64, b2: u64) -> Vec<(u64, u64)> {
+    let u2_candidates: Vec<u64> = if a != 0 && b != 0 {
+        if a2 == 0 || b2 == 0 {
+            return Vec::new();
+        }
+        vec![mulm(mulm(b, a2, p), inv_mod(mulm(a, b2, p), p), p)]
+    } else if b == 0 {
+        if a2 == 0 || b2 != 0 {
+            return Vec::new();
+        }
+        // u⁴ = a / a₂
+        poly_roots_fp(&[negm(mulm(a, inv_mod(a2, p), p), p), 0, 1], p, 3)
+    } else {
+        if b2 == 0 || a2 != 0 {
+            return Vec::new();
+        }
+        // u⁶ = b / b₂
+        poly_roots_fp(&[negm(mulm(b, inv_mod(b2, p), p), p), 0, 0, 1], p, 3)
+    };
+    let mut out = Vec::new();
+    for u2 in u2_candidates {
+        if mulm(mulm(u2, u2, p), a2, p) != a || mulm(mulm(mulm(u2, u2, p), u2, p), b2, p) != b {
+            continue;
+        }
+        let Some(u) = sqrt_mod(u2, p) else {
+            continue; // the isomorphism is over F_{p²}: a twist, not rational
+        };
+        for uu in [u, p - u] {
+            out.push((u2, mulm(u2, uu, p)));
+        }
+    }
+    out
+}
+
+/// The eigenvalue of a degree-`d` endomorphism on `⟨G⟩` from its image
+/// of `G`, among the roots of `λ² − tλ + d` for `t² < 4d`: `(trace, λ)`.
+fn eigenvalue_of_degree(
+    inst: &PrimeInstance,
+    image_of_g: PrimePoint,
+    d: u64,
+) -> Option<(i64, u64)> {
+    let r = inst.r;
+    let g = inst.generator_point();
+    let mut ops = GroupOps::default();
+    let half = inv_mod(2, r);
+    let tmax = ((4 * d) as f64).sqrt() as i64;
+    for t in -tmax..=tmax {
+        if (t * t) as u64 >= 4 * d {
+            continue;
+        }
+        let tm = t.rem_euclid(r as i64) as u64;
+        let disc = subm(mulm(tm, tm, r), (4 * d) % r, r);
+        let Some(sq) = sqrt_mod(disc, r) else {
+            continue;
+        };
+        for l in [
+            mulm(addm(tm, sq, r), half, r),
+            mulm(subm(tm, sq, r), half, r),
+        ] {
+            if inst.curve.mul(&mut ops, g, l) == image_of_g {
+                return Some((t, l));
+            }
+        }
+    }
+    None
+}
+
 /// Every rational degree-2 endomorphism of the instance's curve found
 /// through its rational 2-torsion points, each verified on `G` with an
 /// eigenvalue among the roots of `λ² − tλ + 2` for `|t| ≤ 2`.  Empty
@@ -1237,77 +1336,248 @@ impl Endomorphism<PrimeCurve> for VeluDegree2 {
 /// are not isomorphic to it over `F_p` (every generic curve).
 pub fn velu_degree2_endomorphisms(inst: &PrimeInstance) -> Vec<VeluDegree2> {
     let curve = &inst.curve;
-    let (p, r, a, b) = (curve.p, inst.r, curve.a, curve.b);
+    let (p, a, b) = (curve.p, curve.a, curve.b);
     let mut out = Vec::new();
     let roots = poly_roots_fp(&[b, a, 0, 1], p, 7);
     let g = inst.generator_point();
-    let mut ops = GroupOps::default();
-    // Eigenvalue candidates: roots of λ² − tλ + 2 for |t| ≤ 2.
-    let mut lambda_candidates: Vec<(i64, u64)> = Vec::new();
-    for t in -2i64..=2 {
-        let tm = t.rem_euclid(r as i64) as u64;
-        let disc = subm(mulm(tm, tm, r), 8 % r, r);
-        if let Some(s) = sqrt_mod(disc, r) {
-            let half = inv_mod(2, r);
-            lambda_candidates.push((t, mulm(addm(tm, s, r), half, r)));
-            lambda_candidates.push((t, mulm(subm(tm, s, r), half, r)));
-        }
-    }
     for x0 in roots {
         let t = addm(mulm(3, mulm(x0, x0, p), p), a, p);
         let w = mulm(x0, t, p);
         let a2 = subm(a, mulm(5, t, p), p);
         let b2 = subm(b, mulm(7, w, p), p);
-        // Isomorphism (X, Y) ↦ (u²X, u³Y) from y² = x³ + a2 x + b2 to E.
-        let u2_candidates: Vec<u64> = if a != 0 && b != 0 {
-            if a2 == 0 || b2 == 0 {
-                continue;
-            }
-            vec![mulm(mulm(b, a2, p), inv_mod(mulm(a, b2, p), p), p)]
-        } else if b == 0 {
-            if a2 == 0 {
-                continue;
-            }
-            match sqrt_mod(mulm(a, inv_mod(a2, p), p), p) {
-                Some(s) => vec![s, p - s],
-                None => continue,
-            }
-        } else {
-            // a == 0: no element of norm 2 in Z[ω].
-            continue;
-        };
-        for u2 in u2_candidates {
-            if mulm(mulm(u2, u2, p), a2, p) != a || mulm(mulm(mulm(u2, u2, p), u2, p), b2, p) != b {
-                continue;
-            }
-            let Some(u) = sqrt_mod(u2, p) else {
-                continue; // the isomorphism is over F_{p²}: a twist, not rational
+        for (u2, u3) in isomorphism_scalings(p, a, b, a2, b2) {
+            let mut endo = VeluDegree2 {
+                x0,
+                t,
+                u2,
+                u3,
+                eigenvalue: 0,
+                trace: 0,
             };
-            for uu in [u, p - u] {
-                let mut endo = VeluDegree2 {
-                    x0,
-                    t,
-                    u2,
-                    u3: mulm(u2, uu, p),
-                    eigenvalue: 0,
-                    trace: 0,
-                };
-                let img = endo.apply(curve, g);
-                if !curve.is_on_curve(img) {
-                    continue;
-                }
-                if let Some(&(tr, l)) = lambda_candidates
-                    .iter()
-                    .find(|(_, l)| curve.mul(&mut ops, g, *l) == img)
-                {
-                    endo.eigenvalue = l;
-                    endo.trace = tr;
-                    out.push(endo);
-                }
+            let img = endo.apply(curve, g);
+            if !curve.is_on_curve(img) {
+                continue;
+            }
+            if let Some((tr, l)) = eigenvalue_of_degree(inst, img, 2) {
+                endo.eigenvalue = l;
+                endo.trace = tr;
+                out.push(endo);
             }
         }
     }
     out
+}
+
+// ── Degree-3 CM endomorphisms by Vélu (type C) ─────────────────────
+
+/// A degree-3 endomorphism: the 3-isogeny with kernel `{O, ±Q}`,
+/// `Q = (x0, y0)` with `x0 ∈ F_p` a root of the 3-division polynomial
+/// (`y0` may lie in `F_{p²}`; only `y0²` enters the formulas), by
+/// Vélu's formulas for an odd-order kernel, composed with the
+/// isomorphism back to the curve.  Exists over `F_p` when the CM order
+/// has an element of norm 3: `D = −11` (`φ² − φ + 3 = 0`) and `√−3` on
+/// `j = 0` (`φ² + 3 = 0`, kernel `x0 = 0`).
+#[derive(Clone, Debug, Serialize)]
+pub struct VeluDegree3 {
+    pub x0: u64,
+    /// `y0² = x0³ + a x0 + b`.
+    pub y0_sq: u64,
+    /// Vélu's `g^x = 3x0² + a`, `t = 2g^x`, `u = 4y0²`.
+    pub gx: u64,
+    pub t: u64,
+    pub u: u64,
+    pub u2: u64,
+    pub u3: u64,
+    pub eigenvalue: u64,
+    /// `φ² − trace·φ + 3 = 0`.
+    pub trace: i64,
+}
+
+impl Endomorphism<PrimeCurve> for VeluDegree3 {
+    fn name(&self) -> String {
+        format!("velu3[x0={}, trace={}]", self.x0, self.trace)
+    }
+    fn degree(&self) -> u64 {
+        3
+    }
+    fn eigenvalue(&self) -> u64 {
+        self.eigenvalue
+    }
+    fn apply(&self, g: &PrimeCurve, pt: PrimePoint) -> PrimePoint {
+        if pt.infinity || pt.x == self.x0 {
+            return PrimePoint::INFINITY;
+        }
+        let p = g.p;
+        let inv = inv_mod(subm(pt.x, self.x0, p), p);
+        let inv2 = mulm(inv, inv, p);
+        let inv3 = mulm(inv2, inv, p);
+        let xx = addm(
+            addm(pt.x, mulm(self.t, inv, p), p),
+            mulm(self.u, inv2, p),
+            p,
+        );
+        let factor = subm(
+            subm(1, mulm(2, mulm(self.u, inv3, p), p), p),
+            mulm(2, mulm(self.gx, inv2, p), p),
+            p,
+        );
+        let yy = mulm(pt.y, factor, p);
+        PrimePoint::affine(mulm(self.u2, xx, p), mulm(self.u3, yy, p))
+    }
+}
+
+/// Every rational degree-3 endomorphism of the instance's curve found
+/// through the `F_p`-rational roots of its 3-division polynomial
+/// `3x⁴ + 6ax² + 12bx − a²`, each verified on `G`.
+pub fn velu_degree3_endomorphisms(inst: &PrimeInstance) -> Vec<VeluDegree3> {
+    let curve = &inst.curve;
+    let (p, a, b) = (curve.p, curve.a, curve.b);
+    let mut out = Vec::new();
+    let psi3 = [negm(mulm(a, a, p), p), mulm(12, b, p), mulm(6, a, p), 0, 3];
+    let g = inst.generator_point();
+    for x0 in poly_roots_fp(&psi3, p, 11) {
+        let y0_sq = curve.rhs(x0);
+        let gx = addm(mulm(3, mulm(x0, x0, p), p), a, p);
+        let t = mulm(2, gx, p);
+        let u = mulm(4, y0_sq, p);
+        let w = addm(u, mulm(x0, t, p), p);
+        let a2 = subm(a, mulm(5, t, p), p);
+        let b2 = subm(b, mulm(7, w, p), p);
+        for (u2, u3) in isomorphism_scalings(p, a, b, a2, b2) {
+            let mut endo = VeluDegree3 {
+                x0,
+                y0_sq,
+                gx,
+                t,
+                u,
+                u2,
+                u3,
+                eigenvalue: 0,
+                trace: 0,
+            };
+            let img = endo.apply(curve, g);
+            if !curve.is_on_curve(img) {
+                continue;
+            }
+            if let Some((tr, l)) = eigenvalue_of_degree(inst, img, 3) {
+                endo.eigenvalue = l;
+                endo.trace = tr;
+                out.push(endo);
+            }
+        }
+    }
+    out
+}
+
+// ── Rho folded by the same group (E6) ──────────────────────────────
+
+/// Classes of a Pollard walk under the finite group generated by a
+/// list of endomorphisms: the representative of a point is the
+/// least-keyed point of its orbit, with the scalar `μ` (a product of
+/// eigenvalues) such that `rep = [μ]P`.  This is the matched rho
+/// reference for a base folded by the same generators — the `√A`
+/// that AGENTS.md §1 says a generic algorithm already takes.
+pub struct EndomorphismClasses<'a, G: CountedGroup> {
+    pub gens: Vec<&'a dyn Endomorphism<G>>,
+    pub r: u64,
+    /// The orbit length of the generator: the `A` of the floor.
+    pub group_order: u32,
+    max_orbit: usize,
+}
+
+impl<'a, G: CountedGroup> EndomorphismClasses<'a, G> {
+    /// Build the classes and measure the group's order on `generator`.
+    pub fn new(
+        g: &G,
+        generator: G::Elt,
+        r: u64,
+        gens: Vec<&'a dyn Endomorphism<G>>,
+    ) -> Result<Self, String> {
+        let mut classes = Self {
+            gens,
+            r,
+            group_order: 1,
+            max_orbit: 256,
+        };
+        let orbit = classes.orbit(g, generator)?;
+        classes.group_order = orbit.len() as u32;
+        Ok(classes)
+    }
+
+    /// Every `(Q, μ)` with `Q = [μ]P` in the orbit of `P`.
+    fn orbit(&self, g: &G, p: G::Elt) -> Result<Vec<(G::Elt, u64)>, String> {
+        let mut out: Vec<(G::Elt, u64)> = vec![(p, 1)];
+        let mut i = 0usize;
+        while i < out.len() {
+            let (pt, c) = out[i];
+            for e in &self.gens {
+                let img = e.apply(g, pt);
+                let coef = mulm(c, e.eigenvalue(), self.r);
+                if let Some(&(_, c2)) = out.iter().find(|(q, _)| *q == img) {
+                    if c2 != coef {
+                        return Err(format!(
+                            "{} reaches a point with two eigenvalue products",
+                            e.name()
+                        ));
+                    }
+                } else {
+                    out.push((img, coef));
+                    if out.len() > self.max_orbit {
+                        return Err(
+                            "the orbit does not close: a generator has infinite order".into()
+                        );
+                    }
+                }
+            }
+            i += 1;
+        }
+        Ok(out)
+    }
+}
+
+impl<G: CountedGroup> crate::cryptanalysis::ic_boundary::RhoClasses<G>
+    for EndomorphismClasses<'_, G>
+{
+    fn automorphisms(&self) -> u32 {
+        self.group_order
+    }
+    fn canon(&self, g: &G, p: G::Elt) -> (G::Elt, u64) {
+        let orbit = match self.orbit(g, p) {
+            Ok(o) => o,
+            Err(_) => return (p, 1),
+        };
+        orbit
+            .into_iter()
+            .min_by_key(|(q, _)| g.key(q))
+            .expect("the orbit holds p")
+    }
+    fn method(&self) -> &'static str {
+        "endomorphism-folded r-adding walk: least-keyed orbit representative, look-ahead, short-cycle escape by doubling, distinguished points, stride starts"
+    }
+}
+
+/// A counted rho whose classes are the orbits of `gens`: the matched
+/// reference for a base folded by the same generators.
+pub fn rho_reference_folded<G: CountedGroup>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    seed: u64,
+    max_steps: u64,
+    gens: &[&dyn Endomorphism<G>],
+) -> Result<crate::cryptanalysis::ic_boundary::RhoResult, String> {
+    let classes = EndomorphismClasses::new(g, generator, r, gens.to_vec())?;
+    Ok(crate::cryptanalysis::ic_boundary::rho_walk_with(
+        g,
+        &classes,
+        generator,
+        target,
+        r,
+        seed,
+        max_steps,
+        crate::cryptanalysis::ic_boundary::RhoWalk::negation(),
+    ))
 }
 
 // ── Tests ──────────────────────────────────────────────────────────
@@ -1384,7 +1654,13 @@ mod tests {
     fn poly_roots_finds_every_root_of_a_split_cubic() {
         // (x − 2)(x − 5)(x − 9) over F_101.
         let p = 101;
-        let f = poly_mul(&poly_mul(&[p - 2, 1], &[p - 5, 1], p), &[p - 9, 1], p);
+        let mut muls = 0u64;
+        let f = poly_mul(
+            &poly_mul(&[p - 2, 1], &[p - 5, 1], p, &mut muls),
+            &[p - 9, 1],
+            p,
+            &mut muls,
+        );
         assert_eq!(poly_roots_fp(&f, p, 1), vec![2, 5, 9]);
         // x² + 1 over F_7 (7 ≡ 3 mod 4) has no root.
         assert!(poly_roots_fp(&[1, 0, 1], 7, 1).is_empty());
@@ -1628,6 +1904,73 @@ mod tests {
         let phi = &endos[0];
         assert_eq!(phi.trace.abs(), 2, "1 ± i has trace ±2");
         verify_endomorphism(&inst.curve, inst.generator_point(), inst.r, phi, 20, 51).unwrap();
+    }
+
+    /// **E4b.**  `D = −11` carries a rational degree-3 endomorphism with
+    /// `φ² ∓ φ + 3 = 0`, and every `j = 0` curve carries `√−3` (kernel
+    /// `x0 = 0`, `φ² + 3 = 0`); Vélu finds both, verification accepts
+    /// them, and their eigenvalue orders are large.
+    #[test]
+    fn degree_three_cm_endomorphisms_exist_and_verify() {
+        let inst = generate_cm_instance(CmFamily::D11, 16, 71, 16).unwrap();
+        let endos = velu_degree3_endomorphisms(&inst);
+        assert!(!endos.is_empty(), "D = −11: no degree-3 endomorphism found");
+        let phi = &endos[0];
+        assert_eq!(phi.trace.abs(), 1, "trace of (1 ± √−11)/2");
+        let check =
+            verify_endomorphism(&inst.curve, inst.generator_point(), inst.r, phi, 30, 71).unwrap();
+        let (l, r) = (phi.eigenvalue, inst.r);
+        let tm = phi.trace.rem_euclid(r as i64) as u64;
+        assert_eq!(addm(subm(mulm(l, l, r), mulm(tm, l, r), r), 3, r), 0);
+        assert!(
+            check.eigenvalue_order > 64,
+            "ord = {}",
+            check.eigenvalue_order
+        );
+
+        let inst = generate_cm_instance(CmFamily::J0, 16, 72, 4).unwrap();
+        let endos = velu_degree3_endomorphisms(&inst);
+        assert!(!endos.is_empty(), "j = 0: √−3 not found");
+        let phi = endos.iter().find(|e| e.x0 == 0).expect("kernel at x = 0");
+        assert_eq!(phi.trace, 0, "φ² = −3");
+        verify_endomorphism(&inst.curve, inst.generator_point(), inst.r, phi, 30, 72).unwrap();
+        assert_eq!(
+            mulm(phi.eigenvalue, phi.eigenvalue, inst.r),
+            inst.r - 3,
+            "λ² ≡ −3"
+        );
+        assert!(eigenvalue_order(phi.eigenvalue, inst.r) > 64);
+    }
+
+    /// **E6.**  The rho folded by `⟨−1, ζ⟩` walks on classes of six
+    /// points, verifies its answer, and takes fewer steps than the
+    /// negation walk on the same instance and targets.
+    #[test]
+    fn the_folded_rho_walks_on_the_group_s_classes() {
+        use crate::cryptanalysis::ic_boundary::rho_reference_negation;
+        let inst = generate_cm_instance(CmFamily::J0, 18, 81, 1).unwrap();
+        let gens = automorphism_generators(&inst, AutomorphismGroup::Auto).unwrap();
+        let refs: Vec<&dyn Endomorphism<PrimeCurve>> = gens.iter().map(|b| b.as_ref()).collect();
+        let g = inst.generator_point();
+        let mut ops = GroupOps::default();
+        let (mut folded_steps, mut neg_steps) = (0u64, 0u64);
+        for k in 0..6u64 {
+            let planted = 1 + (k * 7919) % (inst.r - 1);
+            let q = inst.curve.mul(&mut ops, g, planted);
+            let f =
+                rho_reference_folded(&inst.curve, g, q, inst.r, 100 + k, 1 << 30, &refs).unwrap();
+            assert_eq!(f.automorphisms, 6);
+            assert!(f.verified, "the folded walk must verify its answer");
+            assert_eq!(f.recovered, Some(planted));
+            let n = rho_reference_negation(&inst.curve, g, q, inst.r, 100 + k, 1 << 30);
+            assert!(n.verified);
+            folded_steps += f.steps;
+            neg_steps += n.steps;
+        }
+        assert!(
+            folded_steps < neg_steps,
+            "folded {folded_steps} steps against negation {neg_steps}"
+        );
     }
 
     /// The counted rho reference runs on a generated instance, so the

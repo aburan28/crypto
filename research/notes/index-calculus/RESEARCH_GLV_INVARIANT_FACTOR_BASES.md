@@ -1,24 +1,30 @@
-# Endomorphism-invariant factor bases across curve families: plan and pilot
+# Endomorphism-invariant factor bases across curve families: plan, pilot, and experiments E1–E7
 
-**Modules:** `src/cryptanalysis/glv_invariant_base.rs` (the fold, prime-field automorphisms, Vélu degree-2 endomorphisms, CM instance generators), `src/cryptanalysis/gls_fp2.rs` (`F_{p²}` group, GLS `ψ`, the `ψ`-stable line), `src/cryptanalysis/ic_framework/plugins.rs` (`glv-orbit`, `gls-line`), `src/cryptanalysis/ic_boundary.rs` (`FactorBase::from_column_map`)
+**Modules:** `src/cryptanalysis/glv_invariant_base.rs` (the fold, prime-field automorphisms, Vélu degree-2 and degree-3 endomorphisms, CM instance generators, the folded rho classes), `src/cryptanalysis/ext_curve.rs` (`ExtField` over `F_{p²}` and `F_{p³}`, the generic `ExtCurve` counted group, diagonal automorphisms and Frobenius-type maps on it), `src/cryptanalysis/gls_fp2.rs` (GLS `ψ`, the `ψ`-stable line, the `j = 0` and `j = 1728` twists with their lifted automorphisms), `src/cryptanalysis/subfield_fp3.rs` (`E/F_p` on `E(F_{p³})`, the Frobenius eigenline), `src/cryptanalysis/line_oracle.rs` (the Weil-descent resultant oracle for a line, E2b), `src/cryptanalysis/glv_invariant_experiments.rs` (one relation stream feeding both arms to full rank), `src/cryptanalysis/ic_framework/plugins.rs` (`glv-orbit`, `gls-line`), `src/cryptanalysis/ic_boundary.rs` (`FactorBase::from_column_map`)
 **CLI:** `ic bench --bits 20 --family j0 --factor-base glv-orbit:size=64 --oracle mitm:negation_folded=1` (control: `glv-orbit:size=64,no_fold=1`)
-**Bench:** `cargo run --release --example glv_invariant_bench -- --families j0,j1728,generic,d7,d8 --bits 16,20,24 --seeds 2 --oracles subtract,mitm --json experiments/23_glv_invariant_pilot.json`; `--families gls --bits 8,10,12 --oracles subtract --json experiments/23_glv_invariant_gls_pilot.json`
-**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28, this host: Linux x86-64, 4 threads; wall time is not reported)
-**Tables:** `python3 scripts/glv_invariant_tables.py experiments/23_glv_invariant_pilot.json experiments/23_glv_invariant_gls_pilot.json` (every number in §5 is printed by it from the frozen files)
+**Bench (pilot):** `cargo run --release --example glv_invariant_bench -- --families j0,j1728,generic,d7,d8 --bits 16,20,24 --seeds 2 --oracles subtract,mitm --json experiments/23_glv_invariant_pilot.json`; `--families gls --bits 8,10,12 --oracles subtract --json experiments/23_glv_invariant_gls_pilot.json`
+**Runner (E1–E7):** `cargo run --release --example glv_invariant_experiments -- --exp e1 --bits 16,20,24,28 --seeds 6 --json experiments/23_glv_invariant_e1.json` (the exact command of every file is its `command` field)
+**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
+**Tables:** `python3 scripts/glv_invariant_tables.py experiments/23_glv_invariant_pilot.json experiments/23_glv_invariant_gls_pilot.json` (§5) and `python3 scripts/glv_invariant_experiment_tables.py experiments/23_glv_invariant_e*.json` (§6); every number in §5 and §6 is printed by them from the frozen files
 
-> **Status.**  Implementation and pilot.  The fold is one function over
-> the framework's `CountedGroup`, verified end to end on five curve
-> families; the pilot is at `2^13`–`2^24` with two seeds per size and is
-> **not** a measurement of the plan's experiments, whose protocols (§4)
-> stay pending.  What the pilot establishes: the fold is exact (every
-> row recovers its planted logarithm), the column count is the orbit
-> count (`3×` on `j = 0`, `2×` on `j = 1728` and on GLS, `1×` on
-> generic and on the degree-2 CM families), the relation count tracks
-> the columns, and the degree-2 CM endomorphisms keep **zero** base
-> points in the base at eigenvalue orders of `10³`–`10⁶`.  Class,
-> where anything moved: **engineering** — the count moves with its
-> floor, as `RESEARCH_GLV_INDEX_CALCULUS.md` §3 found for the `j = 0`
-> quotient on `E(F_{p³})`.
+> **Status.**  Implementation, pilot, and the seven experiments of §4
+> run and read (§6).  The fold is one function over the framework's
+> `CountedGroup`, verified end to end on `F_p`, `F_{p²}` and `F_{p³}`
+> groups; the pilot (§5) is at `2^13`–`2^24` with two seeds per size,
+> the experiments (§6) at `2^13`–`2^32` with four to six seeds, both
+> arms fed one relation stream to full rank.  What they establish: the
+> fold is exact (every row recovers its planted logarithm); the column
+> count is the orbit count; after `columns` relations both arms reach
+> the same rank fraction, so the relation count moves with its floor
+> and nothing else moves; the fold by **any** finite group of
+> endomorphisms is the order of the subgroup of `(Z/rZ)^*` its
+> eigenvalues generate (`12` on the `j = 0` GLS twist, `4` — not `8` —
+> on the `j = 1728` twist, `3` — not `9` — on the `j = 0` subfield
+> curve); the degree-2 and degree-3 CM endomorphisms keep **zero** base
+> points in the base at eigenvalue orders of `10²`–`10⁸`; and the rho
+> folded by the same group takes `√(w/2)` fewer steps, verified.
+> Class, where anything moved: **engineering** (§6.8); nothing moved a
+> ratio to a floor, and no scoreboard row claims a speed.
 
 ## 1. What is new, against what exists
 
@@ -149,15 +155,15 @@ least six so the rho reference has its own spread
 
 | id | question | families | sizes | arms | measure | prediction | status |
 |:--|:--|:--|:--|:--|:--|:--|:--|
-| **E1** | Does the automorphism fold move anything but the column count on `F_p`? | `j0`, `j1728`, `generic` | `2^16`–`2^32`, six seeds | `glv-orbit` vs `no_fold`, oracles `subtract` and `mitm` | relations to **full rank** on one target stream (a second matrix fed the same rows until every column is pinned; the loop's first-determination count kept beside it), `S`, `S / rho` | `relations / columns ≈ 1.0` on both arms; `S` ratio `→ w/2` only where the relation phase dominates and `→ 1.0` where the pair table does (§5.2) | pilot only (§5) |
-| **E2** | Does the GLS line fold match the Koblitz orbit fold in the same unit? | `gls` at `p = 2^8`–`2^16`; Koblitz `n = 13`–`31` from the ledger | six seeds | `gls-line` vs `no_fold`; `koblitz-orbit` vs `no_fold` | column ratio, relations, `S`, `S / rho`; the `descent-algebraic` analogue for `F_{p²}` (E2b) | `2×` on GLS against `n×` on Koblitz: the fold is the eigenvalue order, `4` against `2n`, and nothing else | pilot only (§5); E2b pending |
-| **E2b** | An `O(1)` decomposition oracle for the line: Weil-descend `S₃(u s t₁, u s t₂, x_R)` to two `F_p` equations in `(t₁, t₂)`, resultant, roots by `gcd(t^p − t, ·)` | `gls` | as E2 | `subtract` vs the resultant oracle on the same base | oracle cost per target, hit rate agreement target by target (AGENTS.md §6 cross-check) | same hits, `O(p)` fewer group operations per target; the fold ratio unchanged | pending |
-| **E3** | Does a composite group fold as its order says? | `j = 1728` twisted over `F_{p²}` (`⟨ι, ψ⟩`, order 8); `j = 0` twisted over `F_{p²}` (`⟨ψ₃, ψ⟩`, order 12) | `p = 2^8`–`2^14` | the line stable under both vs negation | points a column, verification, `S` | `8` and `12` points a column; engineering | pending; needs the twisted-CM instance generator (`generate_gls_instance` with `a = 0` or `b = 0` and the automorphism lifted to the twist) |
-| **E4** | How much of a base does a type-C map keep in the base? | `d7`, `d8`, `1 + i` on `j1728` | `2^16`–`2^28` | one base per size, every rational degree-2 map | `ord_r(λ)`, `images_in_base / base_points` against `|F| / #E` | chance level; zero at pilot sizes | pilot only (§5.3) |
-| **E4b** | The same for degree 3 (`D = −11`, `√−3` on `j = 0`) and for a Q-curve of degree 2 or 3 over `F_{p²}` | as named | as E4 | as E4 | chance level | pending; needs Vélu for an odd-order kernel and Smith's construction |
-| **E5** | Subfield curves on `E(F_{p^n})`: a `π`-stable subspace not inside `F_p` | `E/F_p` on `E(F_{p³})`, with and without `j = 0` | `p = 2^6`–`2^11` | `⟨π⟩`, `⟨ψ⟩`, `⟨π, ψ⟩` folds vs negation on one base | points a column (`3`, `3`, `9`), relations, `S` | multiplicative; `glv_gaudry`'s `3.0×` is the `⟨ψ⟩` row | pending; needs an `F_{p³}` `CountedGroup` (the `gaudry_cubic` arithmetic wrapped) |
-| **E6** | The matched reference | all folding families | as E1 | rho folded by the same `Aut` (counted) beside the `A = 2` walk | `S / rho_folded` | the fold's `w/2` in the relation count against rho's `√(w/2)` in steps: the gap widens by `√(w/2)` | pending; port `aut_folded_rho` to the counted `CountedGroup` walk |
-| **E7** | Does the fold interact with a three-summand oracle? | `j0` | `2^18`–`2^30` | `mitm` at `m = 3` and the `S₄` oracle on folded vs control | relations, solver calls, rows that fold to `0 = 0` (the pair-generator finding of `RESEARCH_GLV_INDEX_CALCULUS.md` §4) | canonicalisation saves nothing on a uniform stream and everything on a pair sieve | pending |
+| **E1** | Does the automorphism fold move anything but the column count on `F_p`? | `j0`, `j1728`, `generic` | `2^16`–`2^32`, six seeds | `glv-orbit` vs `no_fold`, oracles `subtract` and `mitm` | relations to **full rank** on one target stream (a second matrix fed the same rows until every column is pinned; the loop's first-determination count kept beside it), `S`, `S / rho` | `relations / columns ≈ 1.0` on both arms; `S` ratio `→ w/2` only where the relation phase dominates and `→ 1.0` where the pair table does (§5.2) | **done** (§6.1): column ratio exactly `3`, `2`; same rank fraction after `columns` relations on both arms at every size to `2^32`; engineering |
+| **E2** | Does the GLS line fold match the Koblitz orbit fold in the same unit? | `gls` at `p = 2^8`–`2^16`; Koblitz `n = 13`–`31` from the ledger | six seeds | `gls-line` vs `no_fold`; `koblitz-orbit` vs `no_fold` | column ratio, relations, `S`, `S / rho`; the `descent-algebraic` analogue for `F_{p²}` (E2b) | `2×` on GLS against `n×` on Koblitz: the fold is the eigenvalue order, `4` against `2n`, and nothing else | **done** (§6.2): `4` and `2n` points a column, column ratios `2` and `n`, one driver; engineering |
+| **E2b** | An `O(1)` decomposition oracle for the line: Weil-descend `S₃(u s t₁, u s t₂, x_R)` to two `F_p` equations in `(t₁, t₂)`, resultant, roots by `gcd(t^p − t, ·)` | `gls` | as E2 | `subtract` vs the resultant oracle on the same base | oracle cost per target, hit rate agreement target by target (AGENTS.md §6 cross-check) | same hits, `O(p)` fewer group operations per target; the fold ratio unchanged | **done** (§6.2): agrees with `subtract` on every target, `O(10³)` `F_p` multiplications a target against `|F|` additions; engineering |
+| **E3** | Does a composite group fold as its order says? | `j = 1728` twisted over `F_{p²}` (`⟨ι, ψ⟩`, order 8); `j = 0` twisted over `F_{p²}` (`⟨ψ₃, ψ⟩`, order 12) | `p = 2^8`–`2^14` | the line stable under both vs negation | points a column, verification, `S` | `8` and `12` points a column; engineering | **done** (§6.3): `12` on `j = 0`; `4`, not `8`, on `j = 1728` (`ι = ±ψ` on `⟨G⟩`); the fold is the order of the eigenvalue subgroup of `(Z/rZ)^*` |
+| **E4** | How much of a base does a type-C map keep in the base? | `d7`, `d8`, `1 + i` on `j1728` | `2^16`–`2^28` | one base per size, every rational degree-2 map | `ord_r(λ)`, `images_in_base / base_points` against `|F| / #E` | chance level; zero at pilot sizes | **done** (§6.4): `0` of `43,684` base points at `2^16`–`2^28`; accounting |
+| **E4b** | The same for degree 3 (`D = −11`, `√−3` on `j = 0`) and for a Q-curve of degree 2 or 3 over `F_{p²}` | as named | as E4 | as E4 | chance level | **done for degree 3** (§6.4): `0` of `47,520` base points on `D = −11` and `j = 0`; Q-curves **not done** (§7) |
+| **E5** | Subfield curves on `E(F_{p^n})`: a `π`-stable subspace not inside `F_p` | `E/F_p` on `E(F_{p³})`, with and without `j = 0` | `p = 2^6`–`2^11` | `⟨π⟩`, `⟨ψ⟩`, `⟨π, ψ⟩` folds vs negation on one base | points a column (`3`, `3`, `9`), relations, `S` | multiplicative; `glv_gaudry`'s `3.0×` is the `⟨ψ⟩` row | **done** (§6.5): `6` a column for `⟨−1, π⟩` (generic and `j = 0`) and for `⟨−1, π, ζ⟩` alike — `ζ` is a power of `π` on `⟨G⟩`, so not `9`; the `j = 0` line is the subgroup itself and its descent degenerates |
+| **E6** | The matched reference | all folding families | as E1 | rho folded by the same `Aut` (counted) beside the `A = 2` walk | `S / rho_folded` | the fold's `w/2` in the relation count against rho's `√(w/2)` in steps: the gap widens by `√(w/2)` | **done** (§6.6): steps ratio `1.72` on `j = 0` (expected `1.73`), `1.51` on `j = 1728` (expected `1.41`), 384 walks, every answer verified |
+| **E7** | Does the fold interact with a three-summand oracle? | `j0` | `2^18`–`2^30` | `mitm` at `m = 3` and the `S₄` oracle on folded vs control | relations, solver calls, rows that fold to `0 = 0` (the pair-generator finding of `RESEARCH_GLV_INDEX_CALCULUS.md` §4) | canonicalisation saves nothing on a uniform stream and everything on a pair sieve | **done** (§6.7): fold unchanged at `m = 3`; `0` rows fold to `0 = 0`; orbit duplicates at the birthday count |
 
 What every experiment owes on completion, per AGENTS.md: the frozen
 JSON under `experiments/23_glv_invariant_<id>.json`, the table printed
@@ -300,7 +306,7 @@ The `1 + i` map on `j = 1728` is the same object next to a type-A
 automorphism: the automorphism folds, its degree-2 relative does not
 (`one_plus_i_is_a_degree_two_endomorphism_of_a_j1728_curve`).
 
-## 6. Verdict, for the pilot
+### 5.4 Verdict, for the pilot
 
 | lever | what moved | class | test against the boundary |
 |:--|:--|:--|:--|
@@ -309,19 +315,334 @@ automorphism: the automorphism folds, its degree-2 relative does not
 | degree-2 CM maps | `0` base points kept in the base, `ord_r(λ) ∈ [3.5·10³, 3.4·10⁶]` | accounting | the first boundary of §2 holds at every size |
 | the unified fold itself | one function for five families; the control is the same call | engineering | — |
 
+## 6. Experiments E1–E7: what was run and what it says
+
+**Runner:** `cargo run --release --example glv_invariant_experiments -- --exp e<k> …` (the exact
+commands are in each file's `command` field).  **Data:** `experiments/23_glv_invariant_e1.json`
+(`2^16`–`2^28`, six seeds), `…_e1_32.json` (`2^32`, two seeds), `…_e2.json`, `…_e3.json`,
+`…_e4.json`, `…_e5.json`, `…_e6.json`, `…_e7.json`, each with its `.log`.  **Tables:**
+`python3 scripts/glv_invariant_experiment_tables.py experiments/23_glv_invariant_e*.json`; every
+number below is printed by it.  Host: this container (Linux x86-64, 4 threads); wall time is
+recorded in the files and is not a result.
+
+### 6.0 Two things the runs taught the driver before they taught anything else
+
+- **Full rank has a structural ceiling on cofactor curves.**  A two-summand relation
+  `R = εP + ε'Q` with `R ∈ ⟨G⟩` forces the `E[h]`-components of `P` and `Q` to be negatives
+  (`εu + ε'u' = 0`), so every odd function `χ` on `E[h]` — with `χ(gu) = λ_g χ(u)` on a folded
+  arm — is a functional `Σ χ(u_i)x_i` no row can ever determine.  The rank saturates `D` short
+  of `columns + 1`, `D` the number of classes of components that are not their own negatives
+  (`glv_invariant_experiments.rs`, header).  The logarithm is pinned all the same, which is why
+  the pilot never saw it.  The driver computes `D` from `[r]P` for every base point and calls a
+  matrix **full** at `rank = columns + 1 − D`; the tables carry `D` for both arms.  Three-summand
+  relations carry no such constraint.
+- **Full rank is a coupon-collector count.**  The last column has to be touched and its component
+  connected, so "relations to full rank" carries a `ln(columns)` factor on both arms and the ratio
+  between arms overshoots the column ratio by the ratio of those logarithms.  The size-matched
+  reading is the **rank fraction reached after exactly `columns` relations**; it is reported
+  beside the full-rank count and is the number to read the floor against.  The framework's own
+  first-determination count (the pilot's) is kept as well.
+- **On a subfield curve the cofactor is fixed by the Frobenius.**  `E(F_p) ⊂ E(F_{p³})` is
+  cofactor, `π` fixes it, so two-summand relations on the Frobenius line pair a point with its
+  own orbit and the matrix is block-diagonal by `E(F_p)`-component on both arms (§6.5).  The
+  driver reports single-column rows and `D` per arm so this reads off the table.
+
+### 6.1 E1 — the automorphism fold at full rank
+
+**Summary by family, oracle and size (means over seeds; per-row table: the script, 106 rows)**
+
+| family | oracle | log2 r (mean) | seeds | column ratio | full-rank ratio mean (min–max) | full-rank rel / cols, fold | full-rank rel / cols, control | rank fraction at k = cols, fold | control | first-pin ratio mean | all correct |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
+| generic | mitm | 14.4 | 6 | 1.0 | 1.00 (1.00–1.00) | 1.94 | 1.94 | 0.84 | 0.84 | 1.00 | yes |
+| generic | mitm | 18.4 | 6 | 1.0 | 1.00 (1.00–1.00) | 2.54 | 2.54 | 0.85 | 0.85 | 1.00 | yes |
+| generic | mitm | 22.6 | 6 | 1.0 | 1.00 (1.00–1.00) | 3.14 | 3.14 | 0.83 | 0.83 | 1.00 | yes |
+| generic | subtract | 14.4 | 6 | 1.0 | 1.00 (1.00–1.00) | 1.94 | 1.94 | 0.84 | 0.84 | 1.00 | yes |
+| generic | subtract | 18.4 | 6 | 1.0 | 1.00 (1.00–1.00) | 2.54 | 2.54 | 0.85 | 0.85 | 1.00 | yes |
+| j0 | mitm | 14.2 | 6 | 3.0 | 5.48 (2.23–8.88) | 2.17 | 3.47 | 0.79 | 0.84 | 2.63 | yes |
+| j0 | mitm | 18.0 | 6 | 3.0 | 4.24 (3.05–5.77) | 2.10 | 2.83 | 0.82 | 0.84 | 4.20 | yes |
+| j0 | mitm | 21.9 | 6 | 3.0 | 2.83 (2.35–3.76) | 3.30 | 3.03 | 0.83 | 0.85 | 2.95 | yes |
+| j0 | mitm | 25.5 | 6 | 3.0 | 3.34 (2.73–4.12) | 3.48 | 3.83 | 0.84 | 0.84 | 2.43 | yes |
+| j0 | mitm | 29.5 | 2 | 3.0 | 3.46 (3.15–3.77) | 3.53 | 4.07 | 0.84 | 0.84 | 2.50 | yes |
+| j0 | subtract | 14.2 | 6 | 3.0 | 5.48 (2.23–8.88) | 2.17 | 3.47 | 0.79 | 0.84 | 2.63 | yes |
+| j0 | subtract | 18.0 | 6 | 3.0 | 4.65 (3.39–5.77) | 2.00 | 2.98 | 0.82 | 0.84 | 4.17 | yes |
+| j1728 | mitm | 13.4 | 6 | 2.0 | 2.22 (1.63–4.03) | 2.73 | 2.79 | 0.79 | 0.79 | 2.94 | yes |
+| j1728 | mitm | 17.7 | 6 | 2.0 | 2.96 (1.25–4.07) | 2.73 | 3.51 | 0.81 | 0.81 | 2.27 | yes |
+| j1728 | mitm | 21.8 | 6 | 2.0 | 2.41 (1.45–3.14) | 2.77 | 3.23 | 0.84 | 0.83 | 1.97 | yes |
+| j1728 | mitm | 26.0 | 6 | 2.0 | 2.76 (2.32–3.09) | 3.12 | 4.30 | 0.84 | 0.84 | 1.98 | yes |
+| j1728 | mitm | 30.6 | 2 | 2.0 | 2.63 (1.97–3.30) | 3.17 | 4.04 | 0.83 | 0.83 | 1.95 | yes |
+| j1728 | subtract | 13.4 | 6 | 2.0 | 2.22 (1.63–4.03) | 2.73 | 2.79 | 0.79 | 0.79 | 2.94 | yes |
+| j1728 | subtract | 17.7 | 6 | 2.0 | 2.96 (1.25–4.07) | 2.73 | 3.51 | 0.81 | 0.81 | 2.27 | yes |
+
+
+Reading.  The column ratio is exactly `3` on `j = 0` and `2` on `j = 1728` at every size and
+seed, and `1` on the generic control where the two arms are the same run.  After `columns`
+relations both arms sit at the same rank fraction (folded and control within a few percent of
+each other at every size), so the fold changes the number of unknowns and nothing about how fast
+relations fill them: the count moves with its floor.  Relations to full rank fall by more than the
+column ratio (the `ln(columns)` factor), and the first-determination count by about the column
+ratio with the scatter the pilot showed.  `subtract` and `mitm` see the same relation stream
+except where a target has more than one decomposition and the two oracles return different ones
+(`2^18` on `j = 0`: `4.65` against `4.24`), so the oracle changes the cost of a target and little
+else.
+**Class: engineering**, as predicted; no `ratio-to-floor` fell.
+
+### 6.2 E2 — GLS line against Koblitz orbit, in one driver
+
+**Summary by family and eigenvalue order (per-row table: the script)**
+
+| family | eigenvalue order | instances | log2 r | points per column | column ratio | full-rank ratio mean (min–max) | rank fraction at k = cols, fold / control | oracle F_p muls / call | agreement with subtract | all correct |
+|:--|--:|--:|:--|--:|--:|--:|--:|--:|:--|:--|
+| gls | 4 | 18 | 9.3–24.0 | 4.0 | 2.0 | 2.20 (1.31–3.41) | 0.82 / 0.84 | 2606 | 3600/3600 (0 disagree) | yes |
+| koblitz | 13 | 6 | 11.0–11.0 | 25.8 | 12.92 | — (—–—) | 0.45 / — | — | — | yes |
+| koblitz | 15 | 6 | 7.7–7.7 | 19.4 | 9.8 | 12.00 (9.50–13.50) | 1.00 / — | — | — | yes |
+| koblitz | 17 | 6 | 16.0–16.0 | 29.3 | 14.71 | 25.80 (17.11–36.22) | 0.90 / 0.85 | — | — | yes |
+| koblitz | 23 | 6 | 22.0–22.0 | 45.0 | 22.52 | 45.69 (25.45–88.58) | 0.88 / 0.84 | — | — | yes |
+| koblitz | 31 | 6 | 20.5–20.5 | 59.0 | 29.5 | 54.33 (28.09–83.70) | 0.70 / 0.58 | — | — | yes |
+
+
+Reading.  On the GLS twist the fold is `4` points a column and the column ratio `2`; on the
+Koblitz curves it is up to `2n` points a column (`19`–`59` on average, the abscissae in a proper
+subfield having shorter orbits) and the column ratio `n` less that shortfall — `ord_r(λ)` in both
+cases, which is the whole content of "Frobenius-type".  Both arms sit at the same rank fraction
+after `columns` relations on the GLS twist (`0.82` against `0.84`) and on Koblitz `n = 17, 23`
+(`0.90` / `0.85`, `0.88` / `0.84`); on `n = 31` the folded arm is ahead (`0.70` / `0.58`).  The
+line oracle (E2b) agrees with `subtract` on every one of `3,600` targets across the small
+instances and costs about `2,600` `F_p` multiplications a target where `subtract` costs
+`|F| ≈ p` group additions, so the GLS arm runs at `p = 2^12` (`r ≈ 2^24`) in seconds.  On the
+Koblitz arm only degrees whose `x^n − 1` has a factor of intermediate degree have a base of the
+right size (`n = 15, 17, 23, 31`); `n = 13`'s only divisor gives a `2,003`-column base on a
+group of order `2^11`, and its stream exhausts the group's targets before either arm reaches
+full rank, so its row carries the fold (`25.8` a column) and no ratio.  The Koblitz controls
+carry the coupon-collector factor of a `500`–`1,000`-column base, which is why their full-rank
+ratios (`12`–`54`) exceed `n`.  **Class: engineering** on both arms.
+
+### 6.3 E3 — composite groups on twisted CM curves
+
+**Every instance**
+
+| family | p | log2 r | h | ord λ_ψ | ord λ_aut | aut = ±ψ on ⟨G⟩ | pts/col negation | pts/col ψ | pts/col aut | pts/col ψ+aut | cols ψ+aut | square ratio ψ+aut vs negation | square ratio ψ vs negation | correct |
+|:--|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|:--|
+| j0 | 2^8 | 13.8 | 4 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 20 | 10.33 | 2.10 | yes |
+| j0 | 2^8 | 15.2 | 1 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 20 | 10.63 | 2.30 | yes |
+| j0 | 2^8 | 12.7 | 4 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 15 | 5.27 | 2.30 | yes |
+| j0 | 2^8 | 11.0 | 25 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 16 | 13.18 | 1.07 | yes |
+| j0 | 2^10 | 16.5 | 4 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 54 | 10.82 | 2.77 | yes |
+| j0 | 2^10 | 17.1 | 4 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 63 | 3.99 | 1.24 | yes |
+| j0 | 2^10 | 17.6 | 4 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 73 | 12.72 | 1.90 | yes |
+| j0 | 2^10 | 18.0 | 4 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 84 | 5.70 | 2.60 | yes |
+| j0 | 2^12 | 19.2 | 13 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 240 | 7.14 | 1.76 | yes |
+| j0 | 2^12 | 20.0 | 13 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 309 | 8.77 | 2.20 | yes |
+| j0 | 2^12 | 19.8 | 13 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 273 | 7.95 | 1.85 | yes |
+| j0 | 2^12 | 23.0 | 1 | 4 | 3 | False | 2.0 | 4.0 | 6.0 | 12.0 | 236 | 6.34 | 1.99 | yes |
+| j1728 | 2^8 | 6.8 | 340 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 56 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^8 | 6.7 | 324 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 50 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^8 | 6.7 | 324 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 50 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^8 | 6.2 | 340 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 36 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^10 | 8.4 | 1220 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 174 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^10 | 6.6 | 9860 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 240 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^10 | 8.8 | 1780 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 216 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^10 | 8.8 | 1508 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 216 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^12 | 8.1 | 28260 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 690 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^12 | 10.3 | 5380 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 644 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^12 | 7.1 | 34112 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 544 | — | — | folds only (r < 16·columns) |
+| j1728 | 2^12 | 11.0 | 7780 | 4 | 4 | True | 2.0 | 4.0 | 4.0 | 4.0 | 1034 | — | — | folds only (r < 16·columns) |
+
+
+Reading.  The composite fold is not the product of the generators' orders; it is the **order of
+the subgroup of `(Z/rZ)^*` their eigenvalues generate**.  On a `j = 0` twist `λ_ζ` (order 3) and
+`λ_ψ` (order 4) generate the twelfth roots of unity and the line folds `12` to a column, exactly.
+On a `j = 1728` twist `ψ² = −1 = ι²` and there are only two square roots of `−1` modulo `r`, so
+`ι = ±ψ` on `⟨G⟩` (measured on every instance) and `⟨−1, ψ, ι⟩` folds `4`, as `⟨−1, ψ⟩` alone
+does.  A `j = 1728` GLS twist also always carries a cofactor of about `p` (its `ψ` and `ι`
+coincide up to sign as maps of the subgroup, and the twist is isogenous to a curve over `F_p`),
+so its usable `r` is only about `p`; the rows say so.  The `j = 0` composite arm recovers the
+logarithm over the line oracle with the control on the same points.  This corrects the plan's
+prediction of `8` for the `j = 1728` composite.  **Class: engineering** on `j = 0`;
+**accounting** on `j = 1728` (the composite adds nothing).
+
+### 6.4 E4 — type C, degree 2 and degree 3
+
+**Summary (per-map table: the script, 80 rows)**
+
+| family | degree | instances | maps per instance | ord_r(λ) min–max | images in base, total | base points, total | all verified |
+|:--|--:|--:|--:|--:|--:|--:|:--|
+| d11 | 3 | 16 | 4 | 33–245977410 | 0 | 22056 | yes |
+| d7 | 2 | 16 | 4 | 337–37072938 | 0 | 15568 | yes |
+| d8 | 2 | 16 | 2 | 4613–28560484 | 0 | 9484 | yes |
+| j0 | 3 | 16 | 6 | 263–66152880 | 0 | 25464 | yes |
+| j1728 | 2 | 16 | 4 | 41–124755636 | 0 | 18632 | yes |
+
+
+Reading.  Vélu finds every rational degree-2 map on `D = −7`, `D = −8` and `1 + i` on
+`j = 1728`, and every rational degree-3 map on `D = −11` and `√−3` on `j = 0` (six on `j = 0`:
+three cube roots of the isomorphism scaling, two signs), each verified as `[λ]` on `⟨G⟩`.  The
+eigenvalue orders run from `10²` to `2·10⁸` — comparable to `r` at every size — and **no** base
+point maps into the base on any instance, `2^13`–`2^28`, against a chance expectation of
+`10⁻⁵`–`10⁻³` per point.  §2's boundary holds at every size for both degrees: no type-C map
+folds, and none offers free relations worth harvesting.  **Class: accounting.**
+
+### 6.5 E5 — subfield curves on E(F_{p³})
+
+**Summary by family (per-instance table: the script)**
+
+| family | instances | log2 r | pts/col negation | pts/col π | pts/col ζ | pts/col π+ζ | ζ ∈ ⟨π⟩ on ⟨G⟩ | streams | full-rank ratio mean (min–max) | rank fraction at k = cols, π / negation | oracle muls/call | degenerate | all correct |
+|:--|--:|:--|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|:--|
+| subfield | 20 | 10.7–21.7 | 2.0 | 6.0 | — | — | — | 20 | 1.61 (1.19–3.31) | 0.80 / 0.83 | 1997 | 0 | yes |
+| subfield-j0 | 20 | 6.2–10.8 | 2.0 | 6.0 | 6.0 | 6.0 | all | 0 | — (—–—) | — / — | — | — | folds only |
+
+
+Reading.  On a generic subfield curve the Frobenius eigenline `x ∈ s^k·F_p` (the line whose
+points survive `[h]`; the other line carries the other cubic twist) folds `6` to a column,
+column ratio `3`, and the line oracle over `F_{p³}` recovers the logarithm on both arms — the
+odd-characteristic twin of the Koblitz fold, at `ord_r(λ_π) = 3`.  But the relation count does
+**not** fall with the columns: relations to full rank fall by `1.2`–`1.6` against a column ratio
+of `3`, and after `columns` relations the folded arm is at `0.60`–`0.68` of its full rank against
+the control's `0.81`–`0.92` (the rows with `h = #E(F_p)`).  The files say why.  `E(F_p)` is a
+subgroup of `E(F_{p³})` and never of `⟨G⟩`, so it is always in the cofactor, and `π` fixes it:
+every point of a `π`-orbit has the **same** `E(F_p)`-component.  A two-summand relation
+`R = εP + ε'Q` forces those components to be negatives (§6.0), so — up to the birthday
+coincidences between orbits — `Q = −π^i P` and the relation is `(1 − λ^i)·x_c = log R`: a
+**single-column row**.  The tables carry the count: on the folded arm `1,338` of the `1,339`
+relations of the `2^21.3` instance pin one column each (`D = 0`, nothing is void), and on the
+control the matrix is block-diagonal with a block of three columns and one undetermined
+functional per block (`D = 232` against `264` orbits: a block per distinct `±` component, a few blocks holding two orbits that share one).  Both arms are then coupon collectors over
+the **same** set of blocks — the fold merges each block's three unknowns into one and lowers the
+rank a block needs from two to one, which is what the `1.2`–`1.6` is — and the rank fractions
+are those of a coupon collector at one row per coupon (`1 − 1/e ≈ 0.63`) against two rows per
+coupon at three per block (`≈ 0.80`).  With a cofactor beyond `E(F_p)` (`h / #E(F_p) = 4, 7`)
+the extra component is not fixed by `π`, `D` grows on both arms, and the fold reaches full rank
+before `columns` relations.  This is a property of two-summand decomposition on any subfield
+curve, not of the fold: Gaudry's `E(F_{p³})` index calculus uses three summands for exactly the
+size reason and inherits none of it; the three-summand line oracle was not run here (§7).
+
+On a `j = 0` subfield curve the picture collapses further: `N(π² + π + 1)` splits as
+`N(π − ω)·N(π − ω²)` in `Z[ω]`, so the "new" part of `E(F_{p³})` is two subgroups of about
+`p` each, `r ≈ p`, and the eigenline carrying `⟨G⟩` is the `F_p`-points of a cubic twist — the
+base **is** the subgroup, every target decomposes in about `p/2` ways, `x_R` lies on the line
+and the descent degenerates.  The fold still measures `6` for `⟨−1, π⟩`, `⟨−1, ζ⟩` and
+`⟨−1, π, ζ⟩` alike, because `λ_ζ ∈ {λ_π, λ_π²}` on every instance: `ζ` is a power of `π` on
+`⟨G⟩`, the same rule as E3.  This corrects the plan's prediction of `9` for `⟨π, ζ⟩`.
+**Class: engineering** for the columns on the generic curve, **accounting** for the relation
+count (the block structure, not the fold, sets it) and for `j = 0`.
+
+### 6.6 E6 — the matched folded rho
+
+**Summary (per-instance table: the script, 48 rows)**
+
+| family | instances | walks | S ratio mean (min–max) | steps ratio mean | expected | all verified |
+|:--|--:|--:|--:|--:|--:|:--|
+| j0 | 24 | 192 | 1.58 (1.06–3.01) | 1.72 | 1.73 | True |
+| j1728 | 24 | 192 | 1.41 (0.96–2.23) | 1.51 | 1.41 | True |
+
+
+Reading.  The rho folded by the same group verifies its answer on every walk and takes about
+`√3` (`j = 0`) and `√2` (`j = 1728`) fewer steps than the negation walk, with the spread eight
+walks per instance give.  That is the `√(A/2)` a generic algorithm already takes from the
+group, and it is what every "vs rho" figure of §5 understated: the fold's `w/2` in the relation
+count against rho's `√(w/2)` in steps widens the gap by `√(w/2)`.  **Class: accounting** for the
+reference.
+
+### 6.7 E7 — three summands and orbit duplicates
+
+**Every instance**
+
+| log2 r | seed | m | group order | seed abscissae | points | cols fold | cols control | square rel fold | square rel control | ratio | zero-support rows fold / control | single-column rows fold / control | orbit duplicates | targets | hit rate | correct |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|--:|--:|--:|:--|
+| 17.2 | 3 | 2 | 6 | 19 | 114 | 19 | 57 | 35 | 124 | 3.54 | 0 / 0 | 5 / 1 | 148 | 3101 | 0.0400 | yes |
+| 17.2 | 3 | 3 | 6 | 19 | 114 | 19 | 57 | 30 | 58 | 1.93 | 0 / 0 | 0 / 0 | 0 | 70 | 0.8286 | yes |
+| 17.4 | 4 | 2 | 6 | 20 | 120 | 20 | 60 | 24 | 185 | 7.71 | 0 / 0 | 7 / 2 | 289 | 4800 | 0.0385 | yes |
+| 17.4 | 4 | 3 | 6 | 20 | 120 | 20 | 60 | 46 | 85 | 1.85 | 0 / 0 | 0 / 0 | 0 | 103 | 0.8252 | yes |
+| 17.7 | 2 | 2 | 6 | 21 | 126 | 21 | 63 | 52 | 159 | 3.06 | 0 / 0 | 4 / 0 | 239 | 4679 | 0.0340 | yes |
+| 17.7 | 2 | 3 | 6 | 21 | 126 | 21 | 63 | 41 | 104 | 2.54 | 0 / 0 | 0 / 0 | 1 | 133 | 0.7820 | yes |
+| 17.7 | 1 | 2 | 6 | 21 | 126 | 21 | 63 | 32 | 145 | 4.53 | 0 / 0 | 10 / 3 | 193 | 3966 | 0.0366 | yes |
+| 17.7 | 1 | 3 | 6 | 21 | 126 | 21 | 63 | 25 | 143 | 5.72 | 0 / 0 | 0 / 0 | 0 | 181 | 0.7901 | yes |
+| 18.9 | 4 | 2 | 6 | 26 | 156 | 26 | 78 | 74 | 288 | 3.89 | 0 / 0 | 14 / 4 | 24149 | 82085 | 0.0035 | yes |
+| 18.9 | 4 | 3 | 6 | 26 | 156 | 26 | 78 | 59 | 80 | 1.36 | 0 / 0 | 0 / 0 | 0 | 453 | 0.1766 | yes |
+| 20.0 | 3 | 2 | 6 | 32 | 192 | 32 | 96 | 84 | 193 | 2.30 | 0 / 0 | 14 / 3 | 2946 | 36381 | 0.0053 | yes |
+| 20.0 | 3 | 3 | 6 | 32 | 192 | 32 | 96 | 34 | 155 | 4.56 | 0 / 0 | 0 / 0 | 0 | 449 | 0.3452 | yes |
+| 20.1 | 1 | 2 | 6 | 32 | 192 | 32 | 96 | 71 | 267 | 3.76 | 0 / 0 | 15 / 1 | 5310 | 52344 | 0.0051 | yes |
+| 20.1 | 1 | 3 | 6 | 32 | 192 | 32 | 96 | 33 | 165 | 5.00 | 0 / 0 | 1 / 1 | 1 | 581 | 0.2840 | yes |
+| 20.3 | 2 | 2 | 6 | 33 | 198 | 33 | 99 | 75 | 312 | 4.16 | 0 / 0 | 12 / 1 | 6583 | 62178 | 0.0050 | yes |
+| 20.3 | 2 | 3 | 6 | 33 | 198 | 33 | 99 | 42 | 165 | 3.93 | 0 / 0 | 0 / 0 | 0 | 590 | 0.2797 | yes |
+| 22.8 | 4 | 2 | 6 | 51 | 306 | 51 | 153 | 170 | 602 | 3.54 | 0 / 0 | 18 / 9 | 140858 | 714665 | 0.0008 | yes |
+| 22.8 | 4 | 3 | 6 | 51 | 306 | 51 | 153 | 60 | 227 | 3.78 | 0 / 0 | 0 / 0 | 6 | 2385 | 0.0952 | yes |
+| 23.1 | 2 | 2 | 6 | 54 | 324 | 54 | 162 | 80 | 303 | 3.79 | 0 / 0 | 10 / 2 | 35128 | 373187 | 0.0008 | yes |
+| 23.1 | 2 | 3 | 6 | 54 | 324 | 54 | 162 | 102 | 368 | 3.61 | 0 / 0 | 0 / 0 | 5 | 4134 | 0.0890 | yes |
+| 24.3 | 1 | 2 | 6 | 67 | 402 | 67 | 201 | 115 | 701 | 6.10 | 0 / 0 | 16 / 5 | 36476 | 567338 | 0.0012 | yes |
+| 24.3 | 1 | 3 | 6 | 67 | 402 | 67 | 201 | 132 | 425 | 3.22 | 0 / 0 | 0 / 0 | 0 | 2580 | 0.1647 | yes |
+| 25.7 | 3 | 2 | 6 | 85 | 510 | 85 | 255 | 188 | 664 | 3.53 | 0 / 0 | 5 / 0 | 3524 | 275060 | 0.0024 | yes |
+| 25.7 | 3 | 3 | 6 | 85 | 510 | 85 | 255 | 124 | 641 | 5.17 | 0 / 0 | 0 / 0 | 1 | 1839 | 0.3486 | yes |
+
+
+Reading.  With three summands the fold on `j = 0` divides the columns by `3` as before and the
+full-rank relation count with them; the deficiency of §6.0 does not apply (`h = 1` here in any
+case).  Rows whose base part folds to nothing (`0 = ha + hbd`) do not occur on a uniform target
+stream; single-column rows do (a target that is a sum of points of one orbit), a few percent on
+the folded arm.  Orbit duplicates among the targets — a target whose `⟨−1, ζ⟩`-orbit repeats an
+earlier one's, the solver call canonicalisation would save — are the birthday count
+`3T²/r` and nothing more, as `RESEARCH_GLV_INDEX_CALCULUS.md` §4 found on the `F_{p³}` harness.
+**Class: accounting.**
+
+### 6.8 Verdict after E1–E7
+
+| lever | measured | class |
+|:--|:--|:--|
+| automorphism fold, `F_p` (E1) | columns `÷ 3`, `÷ 2`; same rank fraction after `columns` relations on both arms at every size to `2^32` | engineering |
+| GLS line (E2) | `4` points a column, column ratio `2`, same rank fraction after `columns` relations on both arms; Koblitz up to `2n` on the same driver | engineering |
+| subfield line (E5) | `6` points a column, column ratio `3`; relations to full rank `÷ 1.2–1.6` only, every folded row a single-column row: the cofactor `E(F_p)` is `π`-fixed and two-summand relations stay inside one orbit | engineering (columns) / accounting (relations) |
+| composite groups (E3, E5) | the fold is the order of the eigenvalue subgroup of `(Z/rZ)^*`: `12` on the `j = 0` twist, `4` on the `j = 1728` twist, `3` on the `j = 0` subfield curve | engineering / accounting |
+| type C, degree 2 and 3 (E4) | `0` base points kept in the base at every size; eigenvalue orders `10²`–`10⁸` | accounting |
+| matched folded rho (E6) | `√3`, `√2` fewer steps, verified | accounting (reference) |
+| three summands, orbit duplicates (E7) | fold unchanged; duplicates at the birthday count | accounting |
+| the line oracle (E2b) | about `2,600` `F_p` multiplications a target on `F_{p²}`, `2,000` on `F_{p³}`; agrees with `subtract` on `3,600` of `3,600` targets | engineering |
+
+Nothing here moves a ratio to a floor.  The fold by any finite group of endomorphisms is the
+order of the subgroup of `(Z/rZ)^*` that the group's eigenvalues generate — no more, whatever
+the group of maps looks like — and rho takes the square root of the same number.  Where the
+group has a cofactor the endomorphisms fix, the fold buys columns and not relations (E5).  That is the
+closed form the plan's E3 and E5 predictions lacked, and it is the reason the search for a
+larger fold on a fixed prime-order subgroup ends here: the roots of unity modulo `r` that
+endomorphisms of a curve can realise are the automorphism group's, the Frobenius's, and their
+products.
+
 ## 7. What was not done
 
-- No experiment of §4 was run beyond its pilot: E1 needs the
-  full-rank stopping rule and six seeds at four or more sizes; E2b,
-  E3, E4b, E5, E6 and E7 need the code named in their rows.
-- No matched folded rho on prime fields (E6); every "vs rho" here is
-  the `A = 2` walk and is marked so.
+- **Q-curves (E4b, second half).**  No degree-2 or degree-3 Q-curve over
+  `F_{p²}` was built; Smith's construction is not in the repository and
+  the type-C boundary is only measured on CM curves over `F_p`.
+- **E2's Koblitz arm covers four degrees.**  The ledger's
+  `koblitz_instance` roster has usable divisors of `x^n − 1` of
+  intermediate degree at `n = 15, 17, 23, 31` only; `n = 13` has a hit
+  rate too low to reach full rank within the trial cap and `n = 19` a
+  subspace too large for the pair table.  Four sizes is the minimum the
+  plan asked for and no exponent is fitted to them.
+- **E5 on `j = 0` has no relation stream.**  The eigenline carrying
+  `⟨G⟩` is the subgroup itself, so the descent is degenerate and only
+  the fold is measured; a `j = 0` subfield curve with `r` larger than
+  `p` would need `E(F_{p^n})` for `n` prime to `3` or a different
+  eigenline, neither of which the driver builds.
+- **No three-summand oracle on the subfield line.**  §6.5 shows the
+  two-summand decomposition on `E(F_{p³})` confined to one orbit by the
+  `π`-fixed cofactor `E(F_p)`; the test of the fold's relation count on
+  a subfield curve is the three-summand line oracle (Semaev `S₄` on the
+  line, Weil-descended), which is not written.
+- **`S` and `S / rho` are not re-measured at full rank.**  E1–E7 count
+  relations, rank, trials, oracle cost and rho steps; the end-to-end
+  `S` columns of §5.1 stay the pilot's, and no row of §6 claims a speed.
+  Under the pair-table oracle both arms build the same table (§5.2), so
+  a full-rank `S` would move as §5.1 says, but that is an extrapolation.
+- **The line oracle is a library and example component only.**  It is
+  not a framework plugin and `ic bench` cannot select it; the `subtract`
+  and `mitm` oracles remain what the CLI offers on the line bases.
+- **No matched folded rho on the GLS or subfield groups.**  E6 covers
+  the prime-field automorphism groups; the `F_{p²}` and `F_{p³}` "vs
+  rho" figures of §5 are still the `A = 2` walk and are marked so.
 - The pilot's base build prices no square roots or Legendre symbols
   (no pinned ratio for generated curves); at these sizes the build is
   under `3 %` of `S` on every row, but a larger sweep should pin them
   as `ic bench` does for the roster.
-- The scoreboard carries the pilot as a plan panel with its column
-  and `S` ratios; no scoreboard row claims a speed, and the exponent
-  panel is untouched.
-- Nothing here bears on any deployed curve: `r ≤ 2^24`, certified toy
+- The scoreboard carries the pilot and E1–E7 as two panels with their
+  column, rank and relation ratios; no scoreboard row claims a speed,
+  and the exponent panel is untouched.
+- Nothing here bears on any deployed curve: `r ≤ 2^32`, certified toy
   instances, and a fold that rho already takes as `√(w/2)`.
