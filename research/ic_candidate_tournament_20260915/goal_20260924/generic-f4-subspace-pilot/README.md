@@ -1,27 +1,17 @@
 # Disclosed-point F4/F5 standard-subspace recovery pilot
 
-Status: **plan registered; measurement pending**.
+Status: **dispatch diagnostic measured; recovery under max_trials=1 failed; not a qualification**.
 
-The ambient-orbit F4/F5 arms in
-[generic-backend-qualification-v2](../generic-backend-qualification-v2/README.md)
-are statically encoder-infeasible (`4n > 64` variables) per the post-registration
-audit in that directory's `STATIC-FEASIBILITY` files (PR #952). SAT arms are
-out of scope for that static check. The live v2 campaign
-([run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479))
-remains the sole empirical record for seed `2026092902` and must not be
-redispatched.
-
-This pilot answers the next bounded question on **already disclosed** points:
-does `standard_subspace` dimension 6 let the pinned worker actually dispatch
-F4/F5 and, under a declared budget, recover any verified one-target logs?
-See [PROTOCOL.md](PROTOCOL.md).
+See [RESULT.md](RESULT.md). Encoder-feasible `standard_subspace` d=6 lets pinned
+`f4`/`f5` enter MatrixF4/MatrixF5 with `unsupported: false` on all five
+disclosed inventory points. Zero relations/solutions at `max_trials=1`.
 
 | Gate | State |
 | --- | --- |
-| Feasibility gate + d6 inventory control | Depends on PR #952 (or merged equivalent) |
-| Live v2 measurement | In progress / do not retry |
-| This pilot execution | Pending |
-| Fresh competitive F4/F5 registration | Blocked until pilot + v2 exposure census |
+| Feasibility gate + d6 inventory control | Merged via PR [#952](https://github.com/aburan28/crypto/pull/952) |
+| Live v2 measurement | Do not retry seed `2026092902` |
+| This pilot (dispatch series) | Complete — [RESULT.md](RESULT.md) |
+| Fresh competitive F4/F5 registration | Blocked until recovery mechanism + v2 exposure census |
 
 No scoreboard competitive row is updated from this directory until a later
 evidence PR lands measured, verified receipts.
