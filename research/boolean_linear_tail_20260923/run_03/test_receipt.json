@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-schedule-puo_pkdw/tests"
+  ],
+  "exit_code": 0,
+  "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+  "peak_rss_bytes": 7831552,
+  "process_wall_ns": 456955708,
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "\nrunning 9 tests\ntest tests::source_multiplier_layers_and_input_order_are_exact ... ok\ntest tests::encoded_order_matches_source_degrevlex ... ok\ntest tests::caps_count_sources_and_cache_revalidates_smaller_support ... ok\ntest tests::cancellation_constant_empty_and_invalid_inputs ... ok\ntest tests::census_is_injective_and_counts_actual_columns ... ok\ntest tests::hybrid_dispatch_and_bitmap_caps_preserve_the_same_contract ... ok\ntest tests::exhaustive_boolean_coefficients_all_arms ... ok\ntest tests::small_split_matrices_match_explicit_intersection ... ok\ntest tests::all_larger_families_and_hidden_affine_consequences_match ... ok\n\ntest result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s\n\n",
+  "stdout_sha256": "6f386ca95a99df39f90fe82e23958627e6266d4f47707495b65092495ecebf2a",
+  "system_seconds": 0.005624,
+  "timed_out": false,
+  "user_seconds": 0.10804
+}

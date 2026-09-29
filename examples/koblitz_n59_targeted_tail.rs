@@ -20,9 +20,7 @@ fn process_resources() -> (f64, u64) {
         if libc::getrusage(libc::RUSAGE_SELF, &mut usage) != 0 {
             return (0.0, 0);
         }
-        let seconds = |time: libc::timeval| {
-            time.tv_sec as f64 + time.tv_usec as f64 / 1_000_000.0
-        };
+        let seconds = |time: libc::timeval| time.tv_sec as f64 + time.tv_usec as f64 / 1_000_000.0;
         #[cfg(target_os = "macos")]
         let rss_multiplier = 1u64;
         #[cfg(not(target_os = "macos"))]
@@ -56,9 +54,7 @@ fn main() -> Result<(), String> {
         .nth(1)
         .map(PathBuf::from)
         .unwrap_or_else(|| {
-            PathBuf::from(
-                "/private/tmp/ic-n59-projected-l15-witnessed-cached-full/run/relations",
-            )
+            PathBuf::from("/private/tmp/ic-n59-projected-l15-witnessed-cached-full/run/relations")
         });
     let prefix_units = std::env::args()
         .nth(2)

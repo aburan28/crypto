@@ -1,0 +1,359 @@
+{
+  "schema": "ecc2k130-redteam-full-velu-replay-v1",
+  "status": "PASS",
+  "timestamp_utc": "2026-09-24T16:47:08.562688+00:00",
+  "command_argv": [
+    "/opt/homebrew/opt/python@3.11/bin/python3.11",
+    "/private/tmp/ecc2k130_isogeny_pr_20260924/research/ecc2k130_direction_review_20260924/redteam_velu_replay.py",
+    "--out",
+    "redteam_velu_replay_rerun.json"
+  ],
+  "host": "macOS-26.6-arm64-arm-64bit",
+  "python": "3.11.14 (main, Oct  9 2025, 16:16:55) [Clang 17.0.0 (clang-1700.4.4.1)]",
+  "script_sha256": "c08fbb8de9d54906d783be967a36a6073b2a1d1a3583292badd3adcdd7126790",
+  "input_sha256": "6f1e7b22f3471214d38ec0d3196c88fe9edaf45791e9c05ea67764831fd75368",
+  "source_preflight_sha256": "637ea2cc9de56d374610d83d4555f7a2bb7204c0ceb276210603127b91bcf23e",
+  "contract_sha256": "6f52a6cacead950e897ba57e297ce1a4a3c7462566ac54c2acd05941c6aa4f37",
+  "arithmetic_dependencies": "Python standard library only; no production arithmetic imported",
+  "runs": [
+    {
+      "seed": 20260924,
+      "representatives": [
+        {
+          "kernel_line": [
+            1,
+            0
+          ],
+          "orbit_length": 131,
+          "kernel_generator_on_twist": [
+            "0x5fd49668df5174ff0602020e66e0b8c67",
+            "0x7916a3ba1a2bfe2ca0544fdd949577dcf"
+          ],
+          "half_kernel_size": 131,
+          "half_kernel_sum_t": "0x5542bac581298ff3ec1da551870c309ef",
+          "codomain_b": "0x3aad5ebb6187af0a2c53cbc9010d36552",
+          "full_images": {
+            "P": [
+              "0x48514383b5b38c33f631acdfa4167fe3c",
+              "0x35844139cebd1c1de6b013d5d1ded758a"
+            ],
+            "Q": [
+              "0x6c6fb6ee18ae4c58dbb4964d944cd788d",
+              "0x6e7fed5d7c25ab3f78375ae828bba25dd"
+            ],
+            "P+Q": [
+              "0x37c91248a5ac4cf12173e595bd6c11831",
+              "0x6e59c479329b67fc25284588a20212748"
+            ],
+            "2P": [
+              "0x7dfc6187b4d41a25c5890f04de5270eab",
+              "0x1fd1010f41e23c9302861c49cf4c473b3"
+            ]
+          },
+          "codomain_checks": 4,
+          "saved_x_checks": 2,
+          "full_additivity_checks": 2,
+          "negative_sign_control": "PASS",
+          "status": "PASS"
+        },
+        {
+          "kernel_line": [
+            1,
+            4
+          ],
+          "orbit_length": 131,
+          "kernel_generator_on_twist": [
+            "0x733d47414329a3c82f7630defa385fe1e",
+            "0x6709dca2c826738c0e5fc6ad945f65df1"
+          ],
+          "half_kernel_size": 131,
+          "half_kernel_sum_t": "0x5f5e4629578546bfa9e2e9368f5825327",
+          "codomain_b": "0x3248ef31f25d6830126239dd3fd7c593a",
+          "full_images": {
+            "P": [
+              "0x6a78733b864d938937f30f7ca57185755",
+              "0x7e0d3da523a0959f279bdf02f7393b1cd"
+            ],
+            "Q": [
+              "0x1ff9ed45c93ebc5eacdb6c6418e7bd1de",
+              "0x3c92557ef0c3a2987307323f9ea1ab8ba"
+            ],
+            "P+Q": [
+              "0x3164a612a93c37771a3e8b5963853f8b7",
+              "0x47506d2fd2a91224c77338ab7ac0ff1d0"
+            ],
+            "2P": [
+              "0x5f7de3e1cf48c40ff5be7ba4052a6b46c",
+              "0x1f3806b4bc6e9fccce2db88f20554c56e"
+            ]
+          },
+          "codomain_checks": 4,
+          "saved_x_checks": 2,
+          "full_additivity_checks": 2,
+          "negative_sign_control": "PASS",
+          "status": "PASS"
+        },
+        {
+          "kernel_line": [
+            1,
+            39
+          ],
+          "orbit_length": 1,
+          "kernel_generator_on_twist": [
+            "0x29c434a0026bf39ecb2dae3eea56f681e",
+            "0x69ac0310332d07f057d1c01398a83eb02"
+          ],
+          "half_kernel_size": 131,
+          "half_kernel_sum_t": "0x1",
+          "codomain_b": "0x1",
+          "full_images": {
+            "P": [
+              "0x491f95c8b4769c6a8e9dc9d69863f1ae6",
+              "0x4f7d11079a9c49ff464c74f012327d17"
+            ],
+            "Q": [
+              "0x76d3ed147372bcc637fe8e42041980445",
+              "0x4962586e8f8f957e6b35301338490a5aa"
+            ],
+            "P+Q": [
+              "0x52080f4b7c3141cfaa9fd573c5be0eed2",
+              "0x5af28278f50d24052e22827bf52b48d84"
+            ],
+            "2P": [
+              "0x53296b4625a48871d4dc9e73469051356",
+              "0x3d6389d0204d776117d696fe5a5793063"
+            ]
+          },
+          "codomain_checks": 4,
+          "saved_x_checks": 2,
+          "full_additivity_checks": 2,
+          "negative_sign_control": "PASS",
+          "status": "PASS"
+        },
+        {
+          "kernel_line": [
+            1,
+            64
+          ],
+          "orbit_length": 1,
+          "kernel_generator_on_twist": [
+            "0x6d6ef38656d03cf1fb1bb726e84fd4b8a",
+            "0x5c887ece7c06fcb89104aebc9b21624e2"
+          ],
+          "half_kernel_size": 131,
+          "half_kernel_sum_t": "0x1",
+          "codomain_b": "0x1",
+          "full_images": {
+            "P": [
+              "0x24960265dcbe3428c86cfc13bce1bb49d",
+              "0x51292dd841789bcc51aed7a767413f1f0"
+            ],
+            "Q": [
+              "0x7f88ba6c2d4b2bc5ef92732bd8fefbdef",
+              "0x34f39b1cb84d87253a9ef85c9fec0802c"
+            ],
+            "P+Q": [
+              "0x67b5ba1eb07e45ae38e0e89f75f4cc86b",
+              "0x6d04d2cb8068bf9260cb804917122c324"
+            ],
+            "2P": [
+              "0x4b2af822b8d66519f235991c6403bd8b4",
+              "0x5c2cb6ba849cfce0830292761134c68d6"
+            ]
+          },
+          "codomain_checks": 4,
+          "saved_x_checks": 2,
+          "full_additivity_checks": 2,
+          "negative_sign_control": "PASS",
+          "status": "PASS"
+        }
+      ],
+      "integer_checks": "PASS",
+      "native_field_counts": {
+        "mul": 198978,
+        "sqr": 89789,
+        "inv": 604
+      },
+      "native_group_add_calls": 596
+    },
+    {
+      "seed": 20260925,
+      "representatives": [
+        {
+          "kernel_line": [
+            1,
+            0
+          ],
+          "orbit_length": 131,
+          "kernel_generator_on_twist": [
+            "0x4ed36bb5e27137121b53c022be736d879",
+            "0x2a1b647c02022b54b824d082656d16801"
+          ],
+          "half_kernel_size": 131,
+          "half_kernel_sum_t": "0x5b37784156287eaf2aa4f77735588b933",
+          "codomain_b": "0x33804ac2d6f98bb4947ddda6f5532523e",
+          "full_images": {
+            "P": [
+              "0x7fbdad924c83630909d1f5eb25bfb39bd",
+              "0x59ffbbdfa74dd962749e6660bfda50501"
+            ],
+            "Q": [
+              "0x676b45d8f84b3ad6e02b88f8d0a8402",
+              "0x5b831ce3643cea715e7956693a3bba658"
+            ],
+            "P+Q": [
+              "0x355fb94920a4491ce4030e403f7a104e3",
+              "0x67269e388b66a376cbf667bc8c8ff777f"
+            ],
+            "2P": [
+              "0x7408ef106dd07744c7ebce27368f745a3",
+              "0x54456232b5b82f11c2f457164f25b16d5"
+            ]
+          },
+          "codomain_checks": 4,
+          "saved_x_checks": 2,
+          "full_additivity_checks": 2,
+          "negative_sign_control": "PASS",
+          "status": "PASS"
+        },
+        {
+          "kernel_line": [
+            1,
+            2
+          ],
+          "orbit_length": 131,
+          "kernel_generator_on_twist": [
+            "0x40f4e074e2dd0c3ddbf4710325f4410c3",
+            "0x4fa4e3c8c24298d559d106194f03940a4"
+          ],
+          "half_kernel_size": 131,
+          "half_kernel_sum_t": "0xfac606306248d53e4661c6dff0967ebd",
+          "codomain_b": "0x1cec9f43ce245075b0ea308b7973cd86d",
+          "full_images": {
+            "P": [
+              "0x6d3ff2514417f598ee033c693b19880bb",
+              "0x1fe6408ef4cb61cb154fe843ed04d31f6"
+            ],
+            "Q": [
+              "0x17d05b813e855d68803b3412977c644f2",
+              "0x5a3afac0ef640f455c593989bb548bb8c"
+            ],
+            "P+Q": [
+              "0x51305a1b1d33cc304b146e7b60a30a8a0",
+              "0x78176c58c8d736faadbe9f47c7fc6596e"
+            ],
+            "2P": [
+              "0x441e20e18a86fdfe446982175750ede2e",
+              "0x8ce2227f04f3a35342eed03ef51ed3b8"
+            ]
+          },
+          "codomain_checks": 4,
+          "saved_x_checks": 2,
+          "full_additivity_checks": 2,
+          "negative_sign_control": "PASS",
+          "status": "PASS"
+        },
+        {
+          "kernel_line": [
+            1,
+            30
+          ],
+          "orbit_length": 1,
+          "kernel_generator_on_twist": [
+            "0x5723c7c43b228713539cec8210c46ba9",
+            "0x3cd4a7d71a173a22ca359154f8f676fcf"
+          ],
+          "half_kernel_size": 131,
+          "half_kernel_sum_t": "0x1",
+          "codomain_b": "0x1",
+          "full_images": {
+            "P": [
+              "0x24960265dcbe3428c86cfc13bce1bb49d",
+              "0x51292dd841789bcc51aed7a767413f1f0"
+            ],
+            "Q": [
+              "0x7f88ba6c2d4b2bc5ef92732bd8fefbdef",
+              "0x34f39b1cb84d87253a9ef85c9fec0802c"
+            ],
+            "P+Q": [
+              "0x67b5ba1eb07e45ae38e0e89f75f4cc86b",
+              "0x6d04d2cb8068bf9260cb804917122c324"
+            ],
+            "2P": [
+              "0x4b2af822b8d66519f235991c6403bd8b4",
+              "0x5c2cb6ba849cfce0830292761134c68d6"
+            ]
+          },
+          "codomain_checks": 4,
+          "saved_x_checks": 2,
+          "full_additivity_checks": 2,
+          "negative_sign_control": "PASS",
+          "status": "PASS"
+        },
+        {
+          "kernel_line": [
+            1,
+            142
+          ],
+          "orbit_length": 1,
+          "kernel_generator_on_twist": [
+            "0x219da229d22ffaef5cd258ff2af3a91b6",
+            "0x1a35588f03b6e5debe5dac81b643b968c"
+          ],
+          "half_kernel_size": 131,
+          "half_kernel_sum_t": "0x1",
+          "codomain_b": "0x1",
+          "full_images": {
+            "P": [
+              "0x491f95c8b4769c6a8e9dc9d69863f1ae6",
+              "0x4f7d11079a9c49ff464c74f012327d17"
+            ],
+            "Q": [
+              "0x76d3ed147372bcc637fe8e42041980445",
+              "0x4962586e8f8f957e6b35301338490a5aa"
+            ],
+            "P+Q": [
+              "0x52080f4b7c3141cfaa9fd573c5be0eed2",
+              "0x5af28278f50d24052e22827bf52b48d84"
+            ],
+            "2P": [
+              "0x53296b4625a48871d4dc9e73469051356",
+              "0x3d6389d0204d776117d696fe5a5793063"
+            ]
+          },
+          "codomain_checks": 4,
+          "saved_x_checks": 2,
+          "full_additivity_checks": 2,
+          "negative_sign_control": "PASS",
+          "status": "PASS"
+        }
+      ],
+      "integer_checks": "PASS",
+      "native_field_counts": {
+        "mul": 198978,
+        "sqr": 89789,
+        "inv": 604
+      },
+      "native_group_add_calls": 596
+    }
+  ],
+  "elapsed_seconds": 8.396999832999427,
+  "checks": {
+    "representative_kernels": 8,
+    "kernel_abscissae": 1048,
+    "full_point_images": 32,
+    "codomain_equations": 32,
+    "saved_x_matches": 16,
+    "full_additivity_equalities": 16,
+    "negative_sign_controls": 8,
+    "disagreements": 0
+  },
+  "counter_scope": "mul includes sqr and inv internals; counters are diagnostic native units, not calibrated work",
+  "limitations": [
+    "four representative lines per seed; not all 264 full-point maps",
+    "finite checks do not alone prove an arbitrary-input map theorem",
+    "kernel and infinity inputs are not implemented in direct_velu",
+    "no production transport integration, PDP advantage, relation matrix or DLP result",
+    "no comparison against rho or production arithmetic performance"
+  ]
+}

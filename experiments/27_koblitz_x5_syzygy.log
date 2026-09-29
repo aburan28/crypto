@@ -1,0 +1,30 @@
+== quadratic-part rank of the degree-2 equations (the last link), X5' protocol: random V, seed 0x5EED0005
+n= 9 m=4  x-chained ["8/9", "8/9", "8/9", "8/9", "8/9", "8/9", "8/9", "8/9"]  symmetrised chain ["9/9", "9/9", "9/9", "9/9", "9/9", "9/9", "9/9", "9/9"]
+n=11 m=4  x-chained ["10/11", "10/11", "10/11", "10/11", "10/11", "10/11", "10/11", "10/11"]  symmetrised chain ["11/11", "11/11", "11/11", "11/11", "11/11", "11/11", "11/11", "11/11"]
+n=13 m=4  x-chained ["12/13", "12/13", "12/13", "12/13", "12/13", "12/13", "12/13", "12/13"]  symmetrised chain ["13/13", "13/13", "13/13", "13/13", "13/13", "13/13", "13/13", "13/13"]
+n=15 m=4  x-chained ["14/15", "14/15", "14/15", "14/15", "14/15", "14/15", "14/15", "14/15"]  symmetrised chain ["15/15", "15/15", "15/15", "15/15", "15/15", "15/15", "15/15", "15/15"]
+n=17 m=4  x-chained ["16/17", "16/17", "16/17", "16/17", "16/17", "16/17", "16/17", "16/17"]  symmetrised chain ["17/17", "17/17", "17/17", "17/17", "17/17", "17/17", "17/17", "17/17"]
+n=19 m=4  x-chained ["18/19", "18/19", "18/19", "18/19", "18/19", "18/19", "18/19", "18/19"]  symmetrised chain ["19/19", "19/19", "19/19", "19/19", "19/19", "19/19", "19/19", "19/19"]
+
+== the same, on H1's own protocol: invariant V (factor index 0), x(R) from seed 0x5EED + t
+n= 9 m=3 l=6  x-chained ["8/9", "8/9", "8/9", "8/9", "8/9", "8/9", "8/9", "8/9"]
+n=15 m=3 l=4  x-chained ["14/15", "14/15", "14/15", "14/15", "14/15", "14/15", "14/15", "14/15"]
+n=21 m=3 l=6  x-chained ["20/21", "20/21", "20/21", "20/21", "20/21", "20/21", "20/21", "20/21"]
+n=31 m=3 l=5  x-chained ["30/31", "30/31", "30/31", "30/31", "30/31", "30/31", "30/31", "30/31"]
+n= 9 m=4 l=6  x-chained ["8/9", "8/9", "8/9", "8/9", "8/9", "8/9", "8/9", "8/9"]
+n=15 m=4 l=4  x-chained ["14/15", "14/15", "14/15", "14/15", "14/15", "14/15", "14/15", "14/15"]
+
+== left kernels of the Macaulay matrix at D = 3, n = 11 (the trivial syzygies f(f+1) and f_i f_j = f_j f_i of the n degree-2 equations first appear at D = 4: n + C(n,2) = 66 of them, if independent)
+draw 0 x-chained         rows 451 cols 2595 kernel dim 1: 21 rows over equations 25..=32
+draw 0 symmetrised chain rows 418 cols 1656 kernel dim 0
+draw 1 x-chained         rows 451 cols 2595 kernel dim 1: 28 rows over equations 25..=32
+draw 1 symmetrised chain rows 418 cols 1656 kernel dim 0
+draw 2 x-chained         rows 451 cols 2595 kernel dim 1: 42 rows over equations 22..=31
+draw 2 symmetrised chain rows 418 cols 1656 kernel dim 0
+draw 3 x-chained         rows 451 cols 2595 kernel dim 1: 36 rows over equations 22..=31
+draw 3 symmetrised chain rows 418 cols 1656 kernel dim 0
+== left kernels of the Macaulay matrix at D = 4, n = 9 (the trivial syzygies f(f+1) and f_i f_j = f_j f_i of the n degree-2 equations first appear at D = 4: n + C(n,2) = 45 of them, if independent)
+draw 0 x-chained         rows 5994 cols 27820 kernel dim 84
+draw 0 symmetrised chain rows 5049 cols 16112 kernel dim 89
+draw 1 x-chained         rows 5994 cols 27820 kernel dim 84
+draw 1 symmetrised chain rows 5049 cols 16112 kernel dim 89

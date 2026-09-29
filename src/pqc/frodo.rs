@@ -202,7 +202,7 @@ fn decode(m: &Matrix) -> Vec<u8> {
     let half = 1u32 << (shift - 1);
     let mask = (1u32 << B) - 1;
     let n_bits = M * L * B as usize;
-    let mut out = vec![0u8; (n_bits + 7) / 8];
+    let mut out = vec![0u8; n_bits.div_ceil(8)];
     for i in 0..M {
         for j in 0..L {
             // Round-to-nearest by adding half then truncating.
@@ -292,7 +292,7 @@ pub fn frodo_keygen() -> FrodoKeyPair {
 
 pub fn frodo_encapsulate(pk: &FrodoPublicKey) -> (FrodoCiphertext, [u8; 32]) {
     let mut rng = OsRng;
-    let mut msg_bytes = vec![0u8; (M * L * B as usize + 7) / 8];
+    let mut msg_bytes = vec![0u8; (M * L * B as usize).div_ceil(8)];
     rng.fill(&mut msg_bytes[..]);
 
     let a = expand_a(&pk.seed_a);

@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-KIC-GROEBNER-M4RI-20260921",
+  "base_commit": "59935dc09d7c0ce111ed93bee6c536ae3524308d",
+  "objective": "Reduce exact Boolean matrix-F4 row-reduction work on the public-synthetic n=31 Koblitz decomposition cell without changing the source equations, root set, lift gates, or solver budgets.",
+  "fixture": {
+    "curve": "K_0/F_2^31",
+    "summands": 2,
+    "dimension": 16,
+    "kernel_target_scalar": 66142,
+    "paired_prng_seed": 24301,
+    "node_budget": 50000,
+    "threads": 1
+  },
+  "selected_policy": {
+    "rref": "block-4 M4RI when rows >= 128, columns >= 256, and columns <= 4*rows; active-suffix Gauss-Jordan otherwise",
+    "complete_leaf": "verify the fully assigned point against the untouched equations without constructing another Macaulay matrix",
+    "environment_controls": {
+      "KIC_F4_RREF_SUFFIX": "set to 1 to force the active-suffix control",
+      "KIC_F4_M4RI_BLOCK": "integer block-width ablation, clamped to [2,10]"
+    }
+  },
+  "controls": [
+    "frozen full-width RREF reference across dense, sparse, and rank-deficient matrices",
+    "byte-exact RREF and rank comparison across word boundaries",
+    "exhaustive small-system root-set comparison",
+    "active-suffix repeated kernel timing",
+    "paired x/symmetrised solver run with independent enumeration gates"
+  ],
+  "claim_boundary": "Public-synthetic n=31 decomposition-kernel evidence only. The result is not a relation-yield improvement, an end-to-end index-calculus crossover, an asymptotic improvement, a sub-rho result, an external-target capability, or a key-recovery claim."
+}
