@@ -260,3 +260,9 @@ shows both `f4` and `f5` dispatch into MatrixF4/MatrixF5 with
 relations/solutions under that budget. It is a factor-base-policy diagnostic,
 not a family qualification. A fresh competitive registration still needs a new
 seed, the v2 exposure census, and a recovery-capable budget.
+[`run-20260929`](generic-f4-subspace-pilot/run-20260929/RESULT.md) repeats that
+same budget (build SHA-256
+`de3cb8b896f31f03668f1d0eb14302fef2b1e0bc0be303e7f4021a70dd085335`,
+summary SHA-256
+`04230b42ce3a6392b9a2681ac7ab385e43db41aba5e2617466597246a65a2e4c`).
+It does not replace `RESULT.md`. `run_pilot.py` is closed.
