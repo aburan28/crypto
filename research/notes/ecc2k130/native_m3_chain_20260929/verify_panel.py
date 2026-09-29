@@ -118,7 +118,7 @@ def verify_toy(producer: Path, summary: dict):
             s2 = O if intermediate is None else (0, *intermediate)
             got = alt["curve"].add(intermediate, r[1:])
             total = O if got is None else (0, *got)
-            wrong = next(point for point in alt["points"] if point != total)
+            wrong = next(point for point in sorted(alt["points"]) if point != total)
             slopes = (alternate_slope(alt["curve"], p, q),
                       alternate_slope(alt["curve"], s2, r))
             masks = [int(point[1] == basis[0])

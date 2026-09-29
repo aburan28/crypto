@@ -66,7 +66,7 @@ def produce_toy(out: Path) -> dict:
         for triple in itertools.product(*oracle["factors"]):
             s2 = curve.add(triple[0], triple[1])
             total = curve.add(s2, triple[2])
-            wrong = next(point for point in oracle["points"] if point != total)
+            wrong = next(point for point in sorted(oracle["points"]) if point != total)
             slopes = (curve.slope(triple[0], triple[1]), curve.slope(s2, triple[2]))
             masks = [int(point[1] == basis[0])
                      for point, basis in zip(triple, TOY_BASES, strict=True)]
