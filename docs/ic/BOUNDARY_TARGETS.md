@@ -146,6 +146,25 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 asymptotic sub-ρ, not key recovery, not deployed-curve security impact, not a
 full-cost/core crossover, and not a state-of-the-art result.
 
+### Compact S3 swap quotient, 2026-09-29 — engineering, no rho crossover
+
+The [frozen swap-quotient panel](../../research/notes/ecc2k130/compact_swap_quotient_20260929/RESULT.md)
+keeps one of each ordered S3 pair/Frobenius mate. Nine balanced cold blocks on
+new point-only n=41 and n=53 L=1,024 corpora completed all 162 baseline,
+quotient and strong-rho processes; the hosted independent verifier replayed
+144 full-rank compact traces and all 165,888 arm-target outputs. A second-machine
+raw replay returned byte-identical PASS receipts for both cells. At the exploratory best tested K, quotient CPU is
+2.119× rho at n=41 and 2.562× at n=53, with paired 95% intervals
+2.062–2.193 and 2.540–2.590. Same-K quotient CPU falls 8–34%, retained states
+roughly halve, and root-table entry counts remain equal. The n=53 K=550
+quotient's median index/target phases are 4.243/3.882 s against rho's
+4.188 s complete wall. The next gate is a frozen joint index/query cost
+experiment: count all S3 calls, no-root returns, exceptional inversions,
+table probes and lifts, then test batch inversion with early-stop waste charged.
+This is a matched-host complete-process timing diagnostic; common calibrated
+operation-counted S, an n=83 confidence result and GF(2^131) transfer remain
+unset. It does not alter the selected-panel `vs_rho` verdict above.
+
 ### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
 
 Separate measurement, separate base family, not a competing record. The
@@ -282,6 +301,40 @@ most 279,360 scalar-multiplication additions (<1.4%). Then run the n=83
 confidence gate and the pending n=61 L=65,536 batch-size probe as resources
 permit. Do not use 32-target panels as a substitute. Historical evidence:
 [`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
+
+**Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
+`vs_rho` comparator (`examples/koblitz_rho_batch_ks.rs`) walks its
+signed-Frobenius canonicalization by real field squaring and inverts by
+Fermat's square-and-multiply — an unmatched baseline against the IC arm's own
+normal-basis rotation / Itoh–Tsujii inversion. A new
+`examples/koblitz_rho_batch_ks_matched_arith.rs` gives rho that exact same
+rotation/inversion machinery (four correctness gates: `Gf2` agrees with the
+raw field arithmetic, rotation reproduces chained squaring, canonicalization
+output is bit-identical to the original, `raw_inverse` is a genuine inverse —
+all passing) and reruns the frozen n=53, L=1,024, K=440, batch_seed=531310,
+dp_bits=4 cell. Wall clock: matched rho is **7.071× faster than the
+unmodified rho** (215.240 s → 30.442 s) and now within 1.1% of IC's 30.772 s
+(0.989×) — near parity, wall-clock only. Operation count (valgrind
+`--tool=callgrind` retired instructions, whole process, both binaries, same
+host): matched rho 371,102,176,689 vs IC 89,164,459,930, i.e. **IC costs
+0.2403× matched rho's instructions** (equivalently matched rho costs 4.162×
+IC's) — decisively the same direction as the original 0.246 wall-clock
+figure, on a real total-operation unit this time. All 1,024 targets verified
+correct on every one of four runs (unmodified-KS corpus, matched-arith
+native, matched-arith under callgrind, IC native and under callgrind);
+`total_walk_steps` is bit-identical (19,103,507) between the unmodified and
+matched-arithmetic KS runs, confirming the rewrite changed cost, not the walk.
+Per the pre-registered rule (IC/rho, this repo's usual challenger/reference
+convention — the task dispatching this check had transcribed the ratio
+direction backwards, corrected in the note below against the original
+wording): 0.2403 < 0.8, so **the lead survives** at this one cell, on the
+operation-count metric. This is one rerun on one host, still
+`PENDING_INDEPENDENT_VALIDATION`, and does not by itself promote the
+selected-panel `vs_rho` row. Full numbers, host manifest, and raw
+JSON/callgrind output are in
+[`RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md`](../../research/notes/index-calculus/RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md)
+and
+[`matched_rho_orbit_dlp_20260928_run/`](../../research/notes/index-calculus/matched_rho_orbit_dlp_20260928_run/).
 
 ## Global agent priorities (beat these in order)
 
