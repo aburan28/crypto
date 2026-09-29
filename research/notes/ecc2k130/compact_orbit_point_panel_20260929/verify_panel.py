@@ -108,6 +108,9 @@ def check_run(n: int, length: int, run_dir: Path) -> dict:
     spec = frozen["specs"][f"n{n}_L{length}_eval"]
     known, curve, generator = check_fixture(spec)
     assert run_dir.name == f"n{n}_L{length}"
+    host = json.loads((run_dir / "host.json").read_text())
+    assert host["cpu_model"] and host["cpu_count"] > 0
+    assert host["mem_total_kib"] > 0
     chosen = json.loads((run_dir / "chosen_k.json").read_text())
     k = chosen["k"]
     assert chosen["n"] == n and chosen["L"] == length
@@ -158,6 +161,9 @@ def check_run(n: int, length: int, run_dir: Path) -> dict:
                 assert summary["fixtures"] == length
                 assert summary["corpus"] == spec["corpus"]
                 assert summary["dp_bits"] == frozen["rho_dp_bits"]
+                assert summary["inversion_backend"] == "itoh_tsujii"
+                if "x86_64" in host["platform"] and "pclmulqdq" in host["cpu_flags"]:
+                    assert summary["field_product_backend"] == "pclmulqdq"
                 for index, (record, fixture) in enumerate(zip(data[:-1], known)):
                     assert record["kind"] == "rho_ks_batch_fixture"
                     assert record["fixture_index"] == index

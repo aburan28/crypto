@@ -42,6 +42,7 @@ def child(command: list[str], env_update: dict[str, str], prefix: Path,
                  "KIC_DUMP_BASE", "KIC_DUMP_RANK"):
         env.pop(name, None)
     env.update(env_update)
+    env["RAYON_NUM_THREADS"] = "1"
     before = os.getloadavg()
     with stdout.open("wb") as output, stderr.open("wb") as error:
         started = time.monotonic()
@@ -62,8 +63,8 @@ def child(command: list[str], env_update: dict[str, str], prefix: Path,
         proc.returncode = os.waitstatus_to_exitcode(status)
         wall = time.monotonic() - started
     return {
-        "command": command, "environment": env_update, "exit_code": proc.returncode,
-        "limit_seconds": limit_seconds,
+        "command": command, "environment": dict(env_update, RAYON_NUM_THREADS="1"),
+        "exit_code": proc.returncode, "limit_seconds": limit_seconds,
         "timeout": timed_out, "wall_seconds": wall, "user_seconds": usage.ru_utime,
         "sys_seconds": usage.ru_stime, "max_rss_kib_linux": usage.ru_maxrss
         if sys.platform == "linux" else None,
@@ -109,9 +110,23 @@ def run(n: int, length: int, rho: Path, ic: Path, out: Path) -> None:
     assert sha(fixture) == spec["fixture_sha256"]
     assert not out.exists(), "run directory exists; never overwrite evidence"
     out.mkdir(parents=True)
+    cpuinfo_path = Path("/proc/cpuinfo")
+    cpuinfo = cpuinfo_path.read_text() if cpuinfo_path.exists() else ""
+    cpu_fields = {}
+    for line in cpuinfo.splitlines():
+        if ":" in line:
+            name, value = line.split(":", 1)
+            cpu_fields.setdefault(name.strip(), value.strip())
+    meminfo_path = Path("/proc/meminfo")
+    meminfo = meminfo_path.read_text() if meminfo_path.exists() else ""
     host = {
         "platform": platform.platform(), "uname": tuple(platform.uname()),
         "python": sys.version, "cpu_count": os.cpu_count(),
+        "cpu_model": cpu_fields.get("model name", platform.processor()),
+        "cpu_flags": cpu_fields.get("flags", "").split(),
+        "mem_total_kib": next((int(line.split()[1]) for line in meminfo.splitlines()
+                               if line.startswith("MemTotal:")), None),
+        "rustflags": os.environ.get("RUSTFLAGS"),
         "rustc": subprocess.check_output(["rustc", "--version"], text=True).strip(),
         "git_head": subprocess.check_output(["git", "rev-parse", "HEAD"],
                                             cwd=ROOT, text=True).strip(),

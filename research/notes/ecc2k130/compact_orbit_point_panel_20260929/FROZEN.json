@@ -1,4 +1,18 @@
 {
+  "amendment": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/AMENDMENT.md",
+  "backend_ab_cases": [
+    {
+      "L": 1024,
+      "n": 41
+    },
+    {
+      "L": 1,
+      "n": 53
+    }
+  ],
+  "backend_ab_repetitions": 5,
+  "baseline_frozen_sha256": "b80b6a3fafc45ef4c5d2d9c873661b2662e84363fcb58724f523fe107ceaa8d2",
+  "baseline_source_head": "0839f6905d76c857a5b94de925e75e9bbe1060b8",
   "batch_k": {
     "37": 42,
     "41": 255,
@@ -7,13 +21,15 @@
   "batch_seed": 531310,
   "curves": "E0_y2_plus_xy_equals_x3_plus_1",
   "evaluation_repetitions": 5,
+  "expected_rho_backend_x86": "pclmulqdq",
+  "expected_rho_inversion": "itoh_tsujii",
   "hypothesis": "cold compact-orbit loses L1 setup; may win L1024 batch at n41/n53 in wall and CPU only",
   "per_arm_address_space_limit_bytes": 5368709120,
   "per_arm_timeout_seconds": 900,
   "rank_seed": 7,
   "rho_dp_bits": 4,
   "rho_mode": "signed_frobenius",
-  "schema": "compact-orbit-cold-point-panel-freeze-v1",
+  "schema": "compact-orbit-cold-point-panel-freeze-v2-backend-amendment",
   "single_k_grid": {
     "37": [
       7,
@@ -35,16 +51,21 @@
   },
   "source_base_main": "4eadd7346a63915f81dfde42c65849c191a2da2b",
   "source_sha256": {
-    ".github/workflows/compact-orbit-point-panel.yml": "de368e109d2872ace00e265261fee5812bd91e2b20134052e4409427fad8e660",
+    ".github/workflows/compact-orbit-point-panel.yml": "b466a6b278548a2d7088a7f97bf7f0d273936e04788fa388c92600a4104be9bd",
     "Cargo.toml": "f1b3abc246c4971b48b377d5696bc96594deb729320348c4277307e42ed61721",
     "docs/ic/calibration.json": "425078627bbc38b3f9cb97351b405f52509431c080ed996bfeab72d12d78acfd",
     "examples/koblitz_orbit_dlp_fast.rs": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
-    "examples/koblitz_rho_batch_ks_v2_n61.rs": "cedee579db839e03a2783de2d535d1ce3532f34f5e40429c25e88d0e10aef8b7",
+    "examples/koblitz_rho_batch_ks_v2_n61.rs": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/AMENDMENT.md": "f51cfdc3e23b7b23aa8ce53fabef337c48de7ebdda4e1349a8c592fe1ae43f9c",
     "research/notes/ecc2k130/compact_orbit_point_panel_20260929/PROTOCOL.md": "ad1829a4f41dc0100f8391b20b53d25cbf9edffe8d074fae6065f1a6d60ed88b",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/archive.py": "1a54300da7efd3ff2393cefd11fd0477eb1c2838f76adfa1fd48b8311d2ddafe",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/backend_ab.py": "d620f91f7c1655d1292601b98f1a5027378ecc315a97e911ab331523db72121e",
     "research/notes/ecc2k130/compact_orbit_point_panel_20260929/prepare.py": "480958ce3c6c0578b19a5dad0625f866853a6880747df9085ff3af34c7fa8112",
-    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py": "72a50d62b97050a3b4fef93558d1fabf297d9c1c4c3a4d61a83561b4de88c07d",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/rho_baseline_0839.rs": "cedee579db839e03a2783de2d535d1ce3532f34f5e40429c25e88d0e10aef8b7",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py": "2ba997abbd5e9f17756c101b8ca26567219adf103308701f0c237ae495f23222",
     "research/notes/ecc2k130/compact_orbit_point_panel_20260929/test_point_mode.py": "ec873c8498578b3732cf5d1629d938c9ea9b29ccddb96fa3e6307585d6d16ead",
-    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py": "63a9faa0258bd6c15857140c669832f8e579850c2d95e88877f58a913c12bee9",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_backend_ab.py": "bb9b2984c80f116d8a2159c714d6185e01c8ac07d5d3cbd2701b620b812f1cbc",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py": "649459a53b979b9eaf150ca1973c80b1bde29baf3f5567443c668978d3c06e6d",
     "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py": "254869e52bdbd417e14d74c87940293490160faaa7fbb45f4edcb6b773a4b0f6",
     "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
     "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py": "1df6fc9295cf525be198a19842dfdca7391ac985bfa79ffa1acf8e546cc05ce1",
