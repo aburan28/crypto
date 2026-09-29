@@ -1242,18 +1242,16 @@ impl Solver {
         stack.push(p);
         while let Some(q) = stack.pop() {
             let qv = var_of(q) as usize;
-            let src = self.reason[qv];
-            let len = match src {
+            // The reason is borrowed once per step, field by field, so the
+            // walk below is a slice iteration; re-matching the source and
+            // re-indexing two vectors for every literal was most of what
+            // this loop did.
+            let reason: &[Lit] = match self.reason[qv] {
                 Reason::Decision => continue,
-                Reason::Propagated(idx) => self.clauses[idx as usize].len(),
-                Reason::XorPropagated => self.xor_reason[qv].len(),
+                Reason::Propagated(idx) => &self.clauses[idx as usize],
+                Reason::XorPropagated => &self.xor_reason[qv],
             };
-            for i in 0..len {
-                let r = match src {
-                    Reason::Decision => unreachable!(),
-                    Reason::Propagated(idx) => self.clauses[idx as usize][i],
-                    Reason::XorPropagated => self.xor_reason[qv][i],
-                };
+            for &r in reason {
                 let rv = var_of(r) as usize;
                 // The propagated literal itself, anything already in the
                 // clause, and anything fixed at level 0 are all fine.
@@ -1296,26 +1294,20 @@ impl Solver {
             // Read the reason in place.  Copying it into a scratch
             // buffer was a memcpy of up to a hundred literals at every
             // resolution step, and conflict analysis is the hottest
-            // phase of the solve.
-            let xor_var = if p == 0 {
-                usize::MAX
-            } else {
-                var_of(p) as usize
-            };
-            let len = match src {
-                Conflict::Clause(idx) => self.clauses[idx].len(),
-                Conflict::Xor if xor_var == usize::MAX => self.xor_conflict.len(),
-                Conflict::Xor => self.xor_reason[xor_var].len(),
+            // phase of the solve.  It is borrowed once per step, from
+            // the fields alone, so the bookkeeping below can still
+            // write `seen`, the activities and the heap while the walk
+            // is a plain slice iteration.
+            let reason: &[Lit] = match src {
+                Conflict::Clause(idx) => &self.clauses[idx],
+                Conflict::Xor if p == 0 => &self.xor_conflict,
+                Conflict::Xor => &self.xor_reason[var_of(p) as usize],
             };
 
-            self.stats.analyze_lit_visits += len as u64;
-            for i in 0..len {
-                let q = match src {
-                    Conflict::Clause(idx) => self.clauses[idx][i],
-                    Conflict::Xor if xor_var == usize::MAX => self.xor_conflict[i],
-                    Conflict::Xor => self.xor_reason[xor_var][i],
-                };
-                if p != 0 && q == p {
+            self.stats.analyze_lit_visits += reason.len() as u64;
+            for &q in reason {
+                // `p` is 0 on the first step, which no literal equals.
+                if q == p {
                     continue;
                 }
                 let v = var_of(q) as usize;
