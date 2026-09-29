@@ -131,7 +131,7 @@ use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::inherited_f4::{ChildSystem, InheritCost, ReducedBasis};
 use crate::cryptanalysis::matrix_f5_f2::F5Criterion;
 use crate::cryptanalysis::pq_groebner_f2::{
-    cmp_mono, groebner_basis_f2, mono_key, F2BoolMono, F2BoolPoly,
+    cmp_mono, groebner_basis_f2, mono_key, sum_by_monomial, F2BoolMono, F2BoolPoly, MonoColumns,
 };
 
 /// Hard cap: Boolean monomials are `u64` bitmasks in
@@ -183,6 +183,227 @@ impl FieldStructure {
 pub struct SymElement {
     /// `coords[k]` multiplies `z^k`.  Length `n`.
     pub coords: Vec<F2BoolPoly>,
+}
+
+/// Support pairs up to which a product works over the supports (see
+/// [`FieldSum`]): it holds a product monomial and a coefficient for every
+/// pair, and past this the pairwise sums of [`SymElement::mul`], which
+/// hold no more than the products themselves, are the safer bet on
+/// memory.  The systems built here stay far below it (products of
+/// `ℓ`-variable linear forms, or of their squares).
+const DENSE_MUL_PAIRS: usize = 1 << 16;
+
+/// Whether `st` covers everything [`FieldSum`] reads: at most 64
+/// coordinates (they are the bits of a word), `reduced` at least `n × n`
+/// and `squares` at least `n`.  Tables short of that (the fields are
+/// public) are left to the coordinate operations, which read the entries
+/// of nonzero coordinates only.
+fn field_sums_fit(st: &FieldStructure) -> bool {
+    let n = st.n as usize;
+    n <= 64
+        && st.squares.len() >= n
+        && st.reduced.len() >= n
+        && st.reduced[..n].iter().all(|r| r.len() >= n)
+}
+
+/// A symbolic element over its support, `Σ_s s · A_s`: every monomial
+/// `s` of any coordinate, in canonical order, with the field element
+/// `A_s = Σ_{k : s ∈ x_k} z^k` as a bitmask (never zero).
+///
+/// The field arithmetic acts on the coefficients: a sum adds the `A_s` of
+/// each monomial, a square maps each `A_s` to `A_s²` (as `s² = s`), and a
+/// product is `Σ_{s,t} (s·t) · A_s B_t`.  The coordinates repeat each
+/// monomial in about half of them, and [`F2BoolPoly::add`] re-merged a
+/// running sum per addend, `~n³/2` merges each allocating a new list for
+/// one [`SymElement::mul`]; here each monomial's coefficients are added
+/// once.  XOR is addition over `F_2` at any multiplicity, so the
+/// coordinates read back are the same polynomials, term for term.  Every
+/// operation assumes [`field_sums_fit`].
+struct FieldSum(Vec<(u64, u64)>);
+
+impl FieldSum {
+    /// `x`, at most 64 coordinates, over its support; `None` unless every
+    /// coordinate is canonical.
+    ///
+    /// Each coordinate is placed by one walk along the support: a
+    /// canonical list is strictly decreasing, a subsequence of the support
+    /// in column order.  A walk that runs off the end met some other list
+    /// (the field is public); callers then take the coordinate
+    /// operations, whose sums are set sums only of canonical lists.
+    fn of(x: &[F2BoolPoly]) -> Option<Self> {
+        let mut masks = Vec::with_capacity(x.iter().map(|p| p.terms.len()).sum());
+        masks.extend(x.iter().flat_map(|p| p.terms.iter().map(|t| t.mask)));
+        let support = MonoColumns::new(masks);
+        let mut field = vec![0u64; support.masks().len()];
+        for (k, p) in x.iter().enumerate() {
+            let mut c = 0;
+            for t in &p.terms {
+                c += support
+                    .masks()
+                    .get(c..)?
+                    .iter()
+                    .position(|&u| u == t.mask)?;
+                field[c] |= 1 << k;
+                c += 1;
+            }
+        }
+        Some(Self(support.masks().iter().copied().zip(field).collect()))
+    }
+
+    /// The known field element `b`, as [`SymElement::constant`] lifts it.
+    fn constant(b: &F2mElement, st: &FieldStructure) -> Self {
+        let bits = b.raw_bits().first().copied().unwrap_or(0) & coordinate_bits(st);
+        Self(if bits == 0 {
+            Vec::new()
+        } else {
+            vec![(F2BoolMono::one().mask, bits)]
+        })
+    }
+
+    /// Coordinate-wise sum: one merge of the supports, each cursor keying
+    /// its current monomial once, as [`F2BoolPoly::add`] does.
+    fn add(&self, other: &Self) -> Self {
+        use std::cmp::Ordering;
+        let key = |s: u64| mono_key(F2BoolMono::from_mask(s));
+        let (a, b) = (&self.0, &other.0);
+        let mut out = Vec::with_capacity(a.len() + b.len());
+        let (mut i, mut j) = (0, 0);
+        if !a.is_empty() && !b.is_empty() {
+            let (mut ka, mut kb) = (key(a[0].0), key(b[0].0));
+            loop {
+                match ka.cmp(&kb) {
+                    Ordering::Greater => {
+                        out.push(a[i]);
+                        i += 1;
+                        if i == a.len() {
+                            break;
+                        }
+                        ka = key(a[i].0);
+                    }
+                    Ordering::Less => {
+                        out.push(b[j]);
+                        j += 1;
+                        if j == b.len() {
+                            break;
+                        }
+                        kb = key(b[j].0);
+                    }
+                    Ordering::Equal => {
+                        let f = a[i].1 ^ b[j].1;
+                        if f != 0 {
+                            out.push((a[i].0, f));
+                        }
+                        i += 1;
+                        j += 1;
+                        if i == a.len() || j == b.len() {
+                            break;
+                        }
+                        ka = key(a[i].0);
+                        kb = key(b[j].0);
+                    }
+                }
+            }
+        }
+        out.extend_from_slice(&a[i..]);
+        out.extend_from_slice(&b[j..]);
+        Self(out)
+    }
+
+    /// Field squaring: `A_s² = Σ_{k ∈ A_s} z^{2k} mod f`.
+    fn square(&self, st: &FieldStructure) -> Self {
+        let reach = coordinate_bits(st);
+        Self(
+            self.0
+                .iter()
+                .filter_map(|&(s, f)| {
+                    let mut sq = 0;
+                    let mut bits = f;
+                    while bits != 0 {
+                        sq ^= st.squares[bits.trailing_zeros() as usize];
+                        bits &= bits - 1;
+                    }
+                    let sq = sq & reach;
+                    (sq != 0).then_some((s, sq))
+                })
+                .collect(),
+        )
+    }
+
+    /// Field multiplication, or `None` past `max_pairs` support pairs.
+    ///
+    /// `A_s B_t` is `M(A_s, B_t) = Σ_{i ∈ A_s, j ∈ B_t} reduced[i][j]`,
+    /// the product the structure constants define (bilinear whatever the
+    /// table holds): `row_t[i] = Σ_{j ∈ B_t} reduced[i][j]` is tabulated
+    /// once per `t`, and each pair then costs one XOR per bit of `A_s`.
+    /// The pairs' products `s·t` are collected with their coefficients
+    /// added by [`sum_by_monomial`].
+    fn mul(&self, other: &Self, st: &FieldStructure, max_pairs: usize) -> Option<Self> {
+        let n = st.n as usize;
+        let (a, b) = (&self.0, &other.0);
+        if a.len().checked_mul(b.len())? > max_pairs {
+            return None;
+        }
+        let width = n.max(1);
+        let mut rows = vec![0u64; b.len() * width];
+        for (row, &(_, f)) in rows.chunks_exact_mut(width).zip(b) {
+            for (r, reduced) in row.iter_mut().zip(&st.reduced) {
+                let mut bits = f;
+                while bits != 0 {
+                    *r ^= reduced[bits.trailing_zeros() as usize];
+                    bits &= bits - 1;
+                }
+            }
+        }
+        let reach = coordinate_bits(st);
+        let mut products = Vec::with_capacity(a.len() * b.len());
+        for &(s, f) in a {
+            for (&(t, _), row) in b.iter().zip(rows.chunks_exact(width)) {
+                let mut m = 0;
+                let mut bits = f;
+                while bits != 0 {
+                    m ^= row[bits.trailing_zeros() as usize];
+                    bits &= bits - 1;
+                }
+                products.push((s | t, m & reach));
+            }
+        }
+        sum_by_monomial(&mut products);
+        Some(Self(products))
+    }
+
+    /// The `n` coordinates: coordinate `k` holds the monomials whose
+    /// coefficient has bit `k`, in support order, which is canonical.
+    fn coordinates(&self, n: usize, n_vars: usize) -> Vec<F2BoolPoly> {
+        let mut counts = vec![0usize; n];
+        for &(_, f) in &self.0 {
+            let mut bits = f;
+            while bits != 0 {
+                counts[bits.trailing_zeros() as usize] += 1;
+                bits &= bits - 1;
+            }
+        }
+        let mut coords: Vec<Vec<F2BoolMono>> = counts.into_iter().map(Vec::with_capacity).collect();
+        for &(s, f) in &self.0 {
+            let mut bits = f;
+            while bits != 0 {
+                coords[bits.trailing_zeros() as usize].push(F2BoolMono::from_mask(s));
+                bits &= bits - 1;
+            }
+        }
+        coords
+            .into_iter()
+            .map(|terms| F2BoolPoly { terms, n_vars })
+            .collect()
+    }
+}
+
+/// The bits of the `n` coordinates of `st`'s field.
+fn coordinate_bits(st: &FieldStructure) -> u64 {
+    if st.n >= 64 {
+        u64::MAX
+    } else {
+        (1u64 << st.n) - 1
+    }
 }
 
 /// Product of two Boolean polynomials (the engine ships `mul_mono`
@@ -274,7 +495,37 @@ impl SymElement {
     }
 
     /// Field multiplication via the structure constants.
+    ///
+    /// Coordinate `k` of the product is the sum of `a_i · b_j` over the
+    /// `(i, j)` whose `reduced[i][j]` (`z^{i+j} mod f`) holds `z^k` —
+    /// about `n²/2` Boolean products per coordinate, summed by
+    /// [`F2BoolPoly::add`] in [`SymElement::mul_pairwise`].  The product
+    /// is computed over the operands' supports instead (see
+    /// [`FieldSum`]), to the same polynomials, term for term.  Operands
+    /// whose supports multiply out to more than [`DENSE_MUL_PAIRS`]
+    /// monomial pairs, or that are not canonical, take the pairwise sums.
     pub fn mul(&self, other: &Self, st: &FieldStructure) -> Self {
+        self.mul_dense(other, st, DENSE_MUL_PAIRS)
+            .unwrap_or_else(|| self.mul_pairwise(other, st))
+    }
+
+    /// [`SymElement::mul`] over the supports, or `None` where it defers
+    /// to [`SymElement::mul_pairwise`].
+    fn mul_dense(&self, other: &Self, st: &FieldStructure, max_pairs: usize) -> Option<Self> {
+        let n = st.n as usize;
+        let n_vars = self.coords[0].n_vars;
+        let (a, b) = (&self.coords[..n], &other.coords[..n]);
+        if !field_sums_fit(st) {
+            return None;
+        }
+        let product = FieldSum::of(a)?.mul(&FieldSum::of(b)?, st, max_pairs)?;
+        Some(Self {
+            coords: product.coordinates(n, n_vars),
+        })
+    }
+
+    /// [`SymElement::mul`] by pairwise sums of the cross products.
+    fn mul_pairwise(&self, other: &Self, st: &FieldStructure) -> Self {
         let n = st.n as usize;
         let n_vars = self.coords[0].n_vars;
         // Cross products a_i · b_j, computed once.
@@ -350,7 +601,55 @@ impl SymElement {
 ///
 /// Returns the `n` Boolean coordinate equations of the single
 /// `F_{2^n}`-equation `S₃ = 0`.
+///
+/// Computed over the supports (see [`FieldSum`]) where the operands
+/// allow, reading coordinates back once for the result rather than after
+/// every operation, and otherwise by the coordinate operations; the
+/// equations are the same polynomials either way.
 pub fn sym_semaev_s3(
+    x1: &SymElement,
+    x2: &SymElement,
+    x3: &SymElement,
+    b: &F2mElement,
+    st: &FieldStructure,
+) -> Vec<F2BoolPoly> {
+    sym_semaev_s3_by_field_sums(x1, x2, x3, b, st, DENSE_MUL_PAIRS)
+        .unwrap_or_else(|| sym_semaev_s3_by_coordinates(x1, x2, x3, b, st))
+}
+
+/// [`sym_semaev_s3`] over the supports; `None` unless every operand is
+/// `n` canonical coordinates, the tables fit ([`field_sums_fit`]) and no
+/// product passes `max_pairs` support pairs.
+fn sym_semaev_s3_by_field_sums(
+    x1: &SymElement,
+    x2: &SymElement,
+    x3: &SymElement,
+    b: &F2mElement,
+    st: &FieldStructure,
+    max_pairs: usize,
+) -> Option<Vec<F2BoolPoly>> {
+    let n = st.n as usize;
+    let n_vars = x1.coords[0].n_vars;
+    if !field_sums_fit(st) || [x1, x2, x3].iter().any(|x| x.coords.len() != n) {
+        return None;
+    }
+    let (x1, x2, x3) = (
+        FieldSum::of(&x1.coords)?,
+        FieldSum::of(&x2.coords)?,
+        FieldSum::of(&x3.coords)?,
+    );
+    let sum_sq = x1.add(&x2).square(st);
+    let prod = x1.mul(&x2, st, max_pairs)?;
+    let acc = sum_sq
+        .mul(&x3.square(st), st, max_pairs)?
+        .add(&prod.mul(&x3, st, max_pairs)?)
+        .add(&prod.square(st))
+        .add(&FieldSum::constant(b, st));
+    Some(acc.coordinates(n, n_vars))
+}
+
+/// [`sym_semaev_s3`] by the coordinate operations of [`SymElement`].
+fn sym_semaev_s3_by_coordinates(
     x1: &SymElement,
     x2: &SymElement,
     x3: &SymElement,
@@ -4504,6 +4803,202 @@ mod tests {
             let b = fe(v, n);
             let sym = SymElement::constant(&a, n, 4).mul(&SymElement::constant(&b, n, 4), &st);
             assert_eq!(sym.eval(0, n), a.mul(&b, &irr), "{u} · {v}");
+        }
+    }
+
+    /// Products by field coefficients against the pairwise sums they
+    /// replace, on random operands: canonical ones (sparse and dense
+    /// coordinates, zero coordinates, shared variables), where they must
+    /// agree term for term under the field's table and under any other,
+    /// and raw lists, which `mul` hands to the pairwise sums.
+    #[test]
+    fn field_coefficient_products_match_pairwise_sums() {
+        let mut x = 0x6d75_6c5f_6465_6e73u64;
+        let mut next = move || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        for trial in 0..300u64 {
+            // two trials fill a whole word of coordinates
+            let (n, irr) = if trial % 150 == 149 {
+                let irr = IrreduciblePoly {
+                    degree: 64,
+                    low_terms: vec![0, 1, 3, 4],
+                };
+                (64, irr)
+            } else {
+                let n = [3u32, 5, 7, 9, 13][(trial % 5) as usize];
+                (n, find_irreducible(n).unwrap())
+            };
+            let mut st = FieldStructure::new(n, &irr);
+            let n_vars = 1 + (next() % 24) as usize;
+            let span = (1u64 << n_vars) - 1;
+            let mut element = |raw: bool| -> SymElement {
+                let density = next() % 4;
+                let coords = (0..n)
+                    .map(|_| {
+                        let terms: Vec<F2BoolMono> = (0..next() % (1 + 6 * density))
+                            .map(|_| F2BoolMono::from_mask(next() & next() & span))
+                            .collect();
+                        if raw {
+                            F2BoolPoly { terms, n_vars }
+                        } else {
+                            F2BoolPoly::from_monos(terms, n_vars)
+                        }
+                    })
+                    .collect();
+                SymElement { coords }
+            };
+            let (a, b) = (element(false), element(false));
+            let dense = a
+                .mul_dense(&b, &st, usize::MAX)
+                .expect("canonical operands");
+            assert_eq!(
+                dense.coords,
+                a.mul_pairwise(&b, &st).coords,
+                "trial {trial}"
+            );
+            assert_eq!(a.mul(&b, &st).coords, dense.coords);
+            // past the pair bound, any product with terms defers
+            let has_terms = |e: &SymElement| e.coords.iter().any(|p| !p.is_zero());
+            if has_terms(&a) && has_terms(&b) {
+                assert!(a.mul_dense(&b, &st, 0).is_none());
+            }
+            let raw = element(true);
+            if !raw.coords.iter().all(F2BoolPoly::is_canonical) {
+                assert!(raw.mul_dense(&b, &st, usize::MAX).is_none());
+                assert_eq!(raw.mul(&b, &st).coords, raw.mul_pairwise(&b, &st).coords);
+            }
+            // `M` is bilinear for any table (the field is public), not
+            // only for `z^{i+j} mod f`; one short of `n × n` defers
+            let reach = if n == 64 { u64::MAX } else { (1u64 << n) - 1 };
+            for _ in 0..4 {
+                let (i, j) = (next() % u64::from(n), next() % u64::from(n));
+                st.reduced[i as usize][j as usize] = next() & reach;
+            }
+            assert_eq!(
+                a.mul_dense(&b, &st, usize::MAX).expect("canonical").coords,
+                a.mul_pairwise(&b, &st).coords,
+                "trial {trial}, scrambled table"
+            );
+            st.reduced[next() as usize % n as usize].pop();
+            assert!(a.mul_dense(&b, &st, usize::MAX).is_none());
+        }
+    }
+
+    /// `S₃` over the supports against the coordinate operations, on
+    /// random operands (linear and nonlinear coordinates, constants,
+    /// shared variables) and on the systems' own shapes; raw lists,
+    /// operands of the wrong length and short tables defer.
+    #[test]
+    fn s3_over_supports_matches_coordinate_operations() {
+        let mut x = 0x5333_6669_656c_6473u64;
+        let mut next = move || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        let mut over_supports = 0;
+        for trial in 0..300u64 {
+            // two trials fill a whole word of coordinates, sparsely and
+            // with a constant `x₃`, so that the coordinate operations
+            // they are checked against stay quick
+            let (n, irr) = if trial % 150 == 149 {
+                let irr = IrreduciblePoly {
+                    degree: 64,
+                    low_terms: vec![0, 1, 3, 4],
+                };
+                (64, irr)
+            } else {
+                let n = [3u32, 5, 7, 9, 13][(trial % 5) as usize];
+                (n, find_irreducible(n).unwrap())
+            };
+            let mut st = FieldStructure::new(n, &irr);
+            let n_vars = 1 + (next() % 24) as usize;
+            let span = (1u64 << n_vars) - 1;
+            let mut element = |raw: bool| -> SymElement {
+                let density = next() % if n == 64 { 2 } else { 4 };
+                let coords = (0..n)
+                    .map(|_| {
+                        let terms: Vec<F2BoolMono> = (0..next() % (1 + 4 * density))
+                            .map(|_| F2BoolMono::from_mask(next() & next() & span))
+                            .collect();
+                        if raw {
+                            F2BoolPoly { terms, n_vars }
+                        } else {
+                            F2BoolPoly::from_monos(terms, n_vars)
+                        }
+                    })
+                    .collect();
+                SymElement { coords }
+            };
+            let (x1, x2, x3, raw) = (
+                element(false),
+                element(false),
+                element(false),
+                element(true),
+            );
+            let low = (1u64 << n.min(63)) - 1;
+            let b = fe(next() & low, n);
+            let x3 = if trial % 3 == 0 || n == 64 {
+                SymElement::constant(&fe(next() & low, n), n, n_vars)
+            } else {
+                x3
+            };
+            let coordinatewise = sym_semaev_s3_by_coordinates(&x1, &x2, &x3, &b, &st);
+            assert_eq!(sym_semaev_s3(&x1, &x2, &x3, &b, &st), coordinatewise);
+            // dense operands can pass the pair bound and defer; the rest
+            // are computed over the supports
+            if let Some(equations) =
+                sym_semaev_s3_by_field_sums(&x1, &x2, &x3, &b, &st, DENSE_MUL_PAIRS)
+            {
+                assert_eq!(equations, coordinatewise, "trial {trial}");
+                over_supports += 1;
+            }
+            if [&x1, &x2]
+                .iter()
+                .all(|x| x.coords.iter().any(|p| !p.is_zero()))
+            {
+                assert!(sym_semaev_s3_by_field_sums(&x1, &x2, &x3, &b, &st, 0).is_none());
+            }
+            if !raw.coords.iter().all(F2BoolPoly::is_canonical) {
+                assert!(sym_semaev_s3_by_field_sums(&x1, &raw, &x3, &b, &st, usize::MAX).is_none());
+                assert_eq!(
+                    sym_semaev_s3(&x1, &raw, &x3, &b, &st),
+                    sym_semaev_s3_by_coordinates(&x1, &raw, &x3, &b, &st)
+                );
+            }
+            let mut long = x3.clone();
+            long.coords.push(F2BoolPoly::zero(n_vars));
+            assert!(sym_semaev_s3_by_field_sums(&x1, &x2, &long, &b, &st, usize::MAX).is_none());
+            st.squares.pop();
+            assert!(sym_semaev_s3_by_field_sums(&x1, &x2, &x3, &b, &st, usize::MAX).is_none());
+        }
+        assert!(
+            over_supports >= 200,
+            "{over_supports} of 300 over the supports"
+        );
+        // the chained systems' own links, where the operands share variables
+        for (a, n, m) in [(0u8, 9u32, 3usize), (1, 11, 3), (0, 13, 4)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let st = FieldStructure::new(n, &kc.curve.irreducible);
+            let basis: Vec<F2mElement> = (0..3).map(|k| fe(1 << (2 * k) | 1, n)).collect();
+            let ell = basis.len();
+            let n_vars = m * ell + (m - 2) * n as usize;
+            let x1 = SymElement::from_subspace_vars(&basis, 0, n, n_vars);
+            let x2 = SymElement::from_subspace_vars(&basis, ell, n, n_vars);
+            let e1 = SymElement::from_free_vars(m * ell, n, n_vars);
+            let e2 = SymElement::from_free_vars(m * ell + n as usize, n, n_vars);
+            for (u, v, w) in [(&x1, &x2, &e1), (&e1, &x2, &e2), (&e1, &e1, &x1)] {
+                assert_eq!(
+                    sym_semaev_s3_by_field_sums(u, v, w, &kc.curve.b, &st, DENSE_MUL_PAIRS)
+                        .expect("canonical"),
+                    sym_semaev_s3_by_coordinates(u, v, w, &kc.curve.b, &st)
+                );
+            }
         }
     }
 
