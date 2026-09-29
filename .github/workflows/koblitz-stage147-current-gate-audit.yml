@@ -2,8 +2,9 @@ name: Koblitz Stage 147 current gate audit
 on:
   pull_request:
     paths:
-      - "docs/ic/patches/koblitz-n59-split-filter-rejected-20260922.patch"
-      - "docs/ic/runs/koblitz-n59-split-filter-rejection-20260922.json"
+      - "docs/ic/params/k1n59-cofactor-projected-l15-prefetch64-pilot-public-59001.json"
+      - "docs/ic/patches/koblitz-n59-prefetch64-rejected-20260922.patch"
+      - "docs/ic/runs/koblitz-n59-prefetch64-rejection-20260922.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-146-current-gate-audit-20260922/**"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-147-current-gate-audit-20260922/**"
@@ -22,8 +23,9 @@ jobs:
       - name: Replay Stage 146 historical audit and Stage 147 current audit
         run: |
           python3 -m py_compile scripts/compose_koblitz_stage146_gate_audit.py scripts/compose_koblitz_stage147_gate_audit.py
-          python3 -m json.tool docs/ic/runs/koblitz-n59-split-filter-rejection-20260922.json >/dev/null
-          git apply --check docs/ic/patches/koblitz-n59-split-filter-rejected-20260922.patch
+          python3 -m json.tool docs/ic/params/k1n59-cofactor-projected-l15-prefetch64-pilot-public-59001.json >/dev/null
+          python3 -m json.tool docs/ic/runs/koblitz-n59-prefetch64-rejection-20260922.json >/dev/null
+          git apply --check docs/ic/patches/koblitz-n59-prefetch64-rejected-20260922.patch
           python3 scripts/compose_koblitz_stage146_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-146-current-gate-audit-20260922 > "$RUNNER_TEMP/stage146-historical.json"
           python3 scripts/compose_koblitz_stage147_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-147-current-gate-audit-20260922 > "$RUNNER_TEMP/stage147-current.json"
           git diff --exit-code

@@ -278,10 +278,10 @@ fn short_key_collision_count(
         let mut dhe = vec![0u8; 32];
         rng.fill_bytes(&mut dhe);
         let (_, _, k, _) = tls13_key_schedule(&dhe, transcript_hash, 8);
-        if seen.contains_key(&k) {
-            collisions += 1;
+        if let std::collections::hash_map::Entry::Vacant(e) = seen.entry(k) {
+            e.insert(());
         } else {
-            seen.insert(k, ());
+            collisions += 1;
         }
     }
     collisions

@@ -29,7 +29,7 @@ const DEFAULT_IV: [u8; 8] = [0xA6; 8];
 /// **KW wrap** an `n × 8`-byte plaintext.  Returns `(n + 1) × 8` bytes.
 /// Returns `None` if `plaintext.len() < 16` or not a multiple of 8.
 pub fn kw_wrap<C: BlockCipher<16>>(cipher: &C, plaintext: &[u8]) -> Option<Vec<u8>> {
-    if plaintext.len() < 16 || plaintext.len() % 8 != 0 {
+    if plaintext.len() < 16 || !plaintext.len().is_multiple_of(8) {
         return None;
     }
     let n = plaintext.len() / 8;
@@ -69,7 +69,7 @@ pub fn kw_wrap<C: BlockCipher<16>>(cipher: &C, plaintext: &[u8]) -> Option<Vec<u
 /// **KW unwrap**.  Returns the plaintext if the recovered IV matches
 /// `0xA6A6…A6`, else `None`.
 pub fn kw_unwrap<C: BlockCipher<16>>(cipher: &C, ciphertext: &[u8]) -> Option<Vec<u8>> {
-    if ciphertext.len() < 24 || ciphertext.len() % 8 != 0 {
+    if ciphertext.len() < 24 || !ciphertext.len().is_multiple_of(8) {
         return None;
     }
     let n = ciphertext.len() / 8 - 1;

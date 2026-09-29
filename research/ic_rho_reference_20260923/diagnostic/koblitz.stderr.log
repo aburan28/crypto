@@ -1,0 +1,44 @@
+  koblitz 13: K_0 / GF(2^13) r = 2003
+  koblitz 17: K_1 / GF(2^17) r = 65587
+  koblitz 19: K_1 / GF(2^19) r = 262543
+  koblitz 23: K_1 / GF(2^23) r = 4196903
+  koblitz 31: K_0 / GF(2^31) r = 1439393
+  koblitz 37: K_0 / GF(2^37) r = 230603167
+  koblitz 41: K_0 / GF(2^41) r = 549756390943
+
+| regime | instance | log₂ r | walk | A | jumps | runs | S | S median | S walk | walk / own floor | vs floor (A=2) | vs matched | ok |
+|:--|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
+| koblitz | K_0 / GF(2^13) | 11.0 | frozen-plain | 1 | 16 | 64 | 19.1 | 18.5 | 1.353 | 1.079 | 21.5× | 6.846× | ✓ |
+| koblitz | K_0 / GF(2^13) | 11.0 | negation | 2 | 4 | 64 | 2.784 | 2.726 | 1.119 | 1.263 | 3.141× | 1.000× | ✓ |
+| koblitz | K_0 / GF(2^13) | 11.0 | signed-frobenius | 26 | 16 | 64 | 13.5 | 13.5 | 0.255 | 1.037 | 15.2× | 4.842× | ✓ |
+| koblitz | K_1 / GF(2^17) | 16.0 | frozen-plain | 1 | 16 | 64 | 6.112 | 5.638 | 2.021 | 1.613 | 6.896× | 3.406× | ✓ |
+| koblitz | K_1 / GF(2^17) | 16.0 | negation | 2 | 8 | 64 | 1.795 | 1.542 | 1.135 | 1.281 | 2.025× | 1.000× | ✓ |
+| koblitz | K_1 / GF(2^17) | 16.0 | signed-frobenius | 34 | 16 | 64 | 3.564 | 3.554 | 0.221 | 1.028 | 4.021× | 1.986× | ✓ |
+| koblitz | K_1 / GF(2^19) | 18.0 | frozen-plain | 1 | 16 | 64 | 4.574 | 3.878 | 2.229 | 1.779 | 5.161× | 3.322× | ✓ |
+| koblitz | K_1 / GF(2^19) | 18.0 | negation | 2 | 8 | 64 | 1.377 | 1.288 | 1.005 | 1.134 | 1.554× | 1.000× | ✓ |
+| koblitz | K_1 / GF(2^19) | 18.0 | signed-frobenius | 38 | 16 | 64 | 2.096 | 2.090 | 0.219 | 1.079 | 2.365× | 1.522× | ✓ |
+| koblitz | K_1 / GF(2^23) | 22.0 | frozen-plain | 1 | 16 | 64 | 2.664 | 2.211 | 2.029 | 1.619 | 3.006× | 3.017× | ✓ |
+| koblitz | K_1 / GF(2^23) | 22.0 | negation | 2 | 16 | 64 | 1.174 | 1.088 | 0.966 | 1.090 | 1.325× | 1.329× | ✓ |
+| koblitz | K_1 / GF(2^23) | 22.0 | signed-frobenius | 46 | 16 | 64 | 0.883 | 0.885 | 0.181 | 0.980 | 0.997× | 1.000× | ✓ |
+| koblitz | K_0 / GF(2^31) | 20.5 | frozen-plain | 1 | 16 | 64 | 2.757 | 2.611 | 1.662 | 1.326 | 3.111× | 2.516× | ✓ |
+| koblitz | K_0 / GF(2^31) | 20.5 | negation | 2 | 8 | 64 | 1.185 | 1.080 | 1.016 | 1.147 | 1.337× | 1.081× | ✓ |
+| koblitz | K_0 / GF(2^31) | 20.5 | signed-frobenius | 62 | 16 | 64 | 1.096 | 1.085 | 0.135 | 0.851 | 1.237× | 1.000× | ✓ |
+| koblitz | K_0 / GF(2^37) | 27.8 | frozen-plain | 1 | 16 | 64 | 1.893 | 1.695 | 1.795 | 1.432 | 2.136× | 4.564× | ✓ |
+| koblitz | K_0 / GF(2^37) | 27.8 | negation | 2 | 16 | 64 | 0.932 | 0.826 | 0.900 | 1.016 | 1.052× | 2.248× | ✓ |
+| koblitz | K_0 / GF(2^37) | 27.8 | signed-frobenius | 74 | 16 | 64 | 0.415 | 0.407 | 0.146 | 1.002 | 0.468× | 1.000× | ✓ |
+| koblitz | K_0 / GF(2^41) | 39.0 | frozen-plain | 1 | 16 | 64 | 2.225 | 1.637 | 2.222 | 1.773 | 2.510× | 13.9× | ✓ |
+| koblitz | K_0 / GF(2^41) | 39.0 | negation | 2 | 16 | 64 | 1.025 | 1.007 | 1.023 | 1.154 | 1.156× | 6.424× | ✓ |
+| koblitz | K_0 / GF(2^41) | 39.0 | signed-frobenius | 82 | 16 | 64 | 0.159 | 0.146 | 0.151 | 1.094 | 0.180× | 1.000× | ✓ |
+
+| regime | walk | α (total ops ∝ r^α) | R² | sizes |
+|:--|:--|--:|--:|--:|
+| koblitz | frozen-plain | 0.402 | 0.962 | 7 |
+| koblitz | negation | 0.453 | 0.994 | 7 |
+| koblitz | signed-frobenius | 0.281 | 0.946 | 7 |
+
+Rho references: "complete"; 7 instances, all verified: true
+Report saved: research/ic_rho_reference_20260923/diagnostic/koblitz.json
+
+real	13m9.795s
+user	13m3.773s
+sys	0m0.060s
