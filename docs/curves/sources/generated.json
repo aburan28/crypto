@@ -1,0 +1,701 @@
+{
+  "curves": [
+    {
+      "a": 2574,
+      "b": 2980,
+      "generator_call": "find_prime_order_curve(12, 59297)",
+      "group_order": 3583,
+      "icv1": "ICV1:fp-3529:-53:3583:561:unk:unk:r:6c9ff4bb58cb",
+      "name": "generated-12bit-3529",
+      "p": 3529,
+      "slug": "icv1-fp12-tm53-6c9ff4bb",
+      "subgroup_order": 3583
+    },
+    {
+      "a": 7150,
+      "b": 684,
+      "generator_call": "find_prime_order_curve(14, 59297)",
+      "group_order": 14533,
+      "icv1": "ICV1:fp-14389:-143:14533:7345:unk:unk:r:dec4cf6b8cf5",
+      "name": "generated-14bit-14389",
+      "p": 14389,
+      "slug": "icv1-fp14-tm143-dec4cf6b",
+      "subgroup_order": 14533
+    },
+    {
+      "a": 4589,
+      "b": 186,
+      "generator_call": "find_prime_order_curve(16, 59297)",
+      "group_order": 53117,
+      "icv1": "ICV1:fp-53411:295:53117:36611:unk:unk:r:8d3c316511e3",
+      "name": "generated-16bit-53411",
+      "p": 53411,
+      "slug": "icv1-fp16-t295-8d3c3165",
+      "subgroup_order": 53117
+    },
+    {
+      "a": 188885,
+      "b": 173081,
+      "generator_call": "find_prime_order_curve(18, 59297)",
+      "group_order": 212437,
+      "icv1": "ICV1:fp-212099:-337:212437:4738:unk:unk:r:d28d5e094103",
+      "name": "generated-18bit-212099",
+      "p": 212099,
+      "slug": "icv1-fp18-tm337-d28d5e09",
+      "subgroup_order": 212437
+    },
+    {
+      "a": 51142,
+      "b": 548946,
+      "generator_call": "find_prime_order_curve(20, 59297)",
+      "group_order": 562427,
+      "icv1": "ICV1:fp-563153:727:562427:476305:unk:unk:r:cd198a38cd5f",
+      "name": "generated-20bit-563153",
+      "p": 563153,
+      "slug": "icv1-fp20-t727-cd198a38",
+      "subgroup_order": 562427
+    },
+    {
+      "a": 620112,
+      "b": 1810598,
+      "generator_call": "find_prime_order_curve(22, 59297)",
+      "group_order": 2435809,
+      "icv1": "ICV1:fp-2434423:-1385:2435809:1765340:unk:unk:r:475dcb5fda59",
+      "name": "generated-22bit-2434423",
+      "p": 2434423,
+      "slug": "icv1-fp22-tm1385-475dcb5f",
+      "subgroup_order": 2435809
+    },
+    {
+      "a": 8820674,
+      "b": 11008593,
+      "generator_call": "find_prime_order_curve(24, 59297)",
+      "group_order": 16482251,
+      "icv1": "ICV1:fp-16483309:1059:16482251:3896869:unk:unk:r:6df599dfaebd",
+      "name": "generated-24bit-16483309",
+      "p": 16483309,
+      "slug": "icv1-fp24-t1059-6df599df",
+      "subgroup_order": 16482251
+    },
+    {
+      "a": 26623966,
+      "b": 14210560,
+      "generator_call": "find_prime_order_curve(26, 59297)",
+      "group_order": 42653927,
+      "icv1": "ICV1:fp-42652151:-1775:42653927:38191413:unk:unk:r:7e8fb6df0943",
+      "name": "generated-26bit-42652151",
+      "p": 42652151,
+      "slug": "icv1-fp26-tm1775-7e8fb6df",
+      "subgroup_order": 42653927
+    },
+    {
+      "a": 2309743,
+      "b": 2364262,
+      "generator_call": "find_prime_order_curve(22, 827675)",
+      "group_order": 3911069,
+      "icv1": "ICV1:fp-3914087:3019:3911069:3437178:unk:unk:r:0c6101dea80d",
+      "name": "generated-22bit-3914087",
+      "p": 3914087,
+      "slug": "icv1-fp22-t3019-0c6101de",
+      "subgroup_order": 3911069
+    },
+    {
+      "a": 10159782,
+      "b": 6800760,
+      "generator_call": "find_prime_order_curve(24, 827675)",
+      "group_order": 11919637,
+      "icv1": "ICV1:fp-11921101:1465:11919637:4315753:unk:unk:r:0b7163ca05f4",
+      "name": "generated-24bit-11921101",
+      "p": 11921101,
+      "slug": "icv1-fp24-t1465-0b7163ca",
+      "subgroup_order": 11919637
+    },
+    {
+      "a": 13006379,
+      "b": 18418303,
+      "generator_call": "find_prime_order_curve(26, 827675)",
+      "group_order": 38322941,
+      "icv1": "ICV1:fp-38313677:-9263:38322941:24868434:unk:unk:r:8a1449436748",
+      "name": "generated-26bit-38313677",
+      "p": 38313677,
+      "slug": "icv1-fp26-tm9263-8a144943",
+      "subgroup_order": 38322941
+    },
+    {
+      "a": "0x1",
+      "b": "0x168f",
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator_call": "random_binary_instance(13, 59297, 8)",
+      "group_order": 8202,
+      "icv1": "ICV1:f2m-13-752c6463:-9:8202:0x1333:unk:unk:r:6863a8382a36",
+      "koblitz": false,
+      "name": "random-binary-n13-b168f",
+      "slug": "icv1-f2m13-tm9-6863a838",
+      "subgroup_order": 1367
+    },
+    {
+      "a": "0x1",
+      "b": "0xa3f",
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator_call": "random_binary_instance(13, 827675, 8)",
+      "group_order": 8114,
+      "icv1": "ICV1:f2m-13-752c6463:79:8114:0x1962:unk:unk:r:00b3392ae60c",
+      "koblitz": false,
+      "name": "random-binary-n13-ba3f",
+      "slug": "icv1-f2m13-t79-00b3392a",
+      "subgroup_order": 4057
+    },
+    {
+      "a": "0x1",
+      "b": "0x157a",
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator_call": "random_binary_instance(15, 59297, 8)",
+      "group_order": 32834,
+      "icv1": "ICV1:f2m-15-2d490b65:-65:32834:0x5353:unk:unk:r:372372773e98",
+      "koblitz": false,
+      "name": "random-binary-n15-b157a",
+      "slug": "icv1-f2m15-tm65-37237277",
+      "subgroup_order": 16417
+    },
+    {
+      "a": "0x0",
+      "b": "0x2493",
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator_call": "random_binary_instance(15, 827675, 8)",
+      "group_order": 32764,
+      "icv1": "ICV1:f2m-15-2d490b65:5:32764:0x74e9:unk:unk:r:d9fb183ed6fb",
+      "koblitz": false,
+      "name": "random-binary-n15-b2493",
+      "slug": "icv1-f2m15-t5-d9fb183e",
+      "subgroup_order": 8191
+    },
+    {
+      "a": "0x1",
+      "b": "0x10103",
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator_call": "random_binary_instance(17, 59297, 8)",
+      "group_order": 130542,
+      "icv1": "ICV1:f2m-17-237ceae1:531:130542:0x1361d:unk:unk:r:2048fb7c422b",
+      "koblitz": false,
+      "name": "random-binary-n17-b10103",
+      "slug": "icv1-f2m17-t531-2048fb7c",
+      "subgroup_order": 21757
+    },
+    {
+      "a": "0x1",
+      "b": "0xbe86",
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator_call": "random_binary_instance(17, 827675, 8)",
+      "group_order": 131258,
+      "icv1": "ICV1:f2m-17-237ceae1:-185:131258:0xb189:unk:unk:r:c9e2dceb7f74",
+      "koblitz": false,
+      "name": "random-binary-n17-bbe86",
+      "slug": "icv1-f2m17-tm185-c9e2dceb",
+      "subgroup_order": 65629
+    },
+    {
+      "a": "0x1",
+      "b": "0x770f7",
+      "field": {
+        "degree": 19,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator_call": "random_binary_instance(19, 59297, 8)",
+      "group_order": 524938,
+      "icv1": "ICV1:f2m-19-87f45376:-649:524938:0x334b3:unk:unk:r:a9133fe6c2db",
+      "koblitz": false,
+      "name": "random-binary-n19-b770f7",
+      "slug": "icv1-f2m19-tm649-a9133fe6",
+      "subgroup_order": 262469
+    },
+    {
+      "a": "0x1",
+      "b": "0x5f57e",
+      "field": {
+        "degree": 19,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator_call": "random_binary_instance(19, 827675, 8)",
+      "group_order": 524642,
+      "icv1": "ICV1:f2m-19-87f45376:-353:524642:0x24715:unk:unk:r:a68ceb24da8f",
+      "koblitz": false,
+      "name": "random-binary-n19-b5f57e",
+      "slug": "icv1-f2m19-tm353-a68ceb24",
+      "subgroup_order": 262321
+    },
+    {
+      "a": "0x0",
+      "b": "0x968e",
+      "field": {
+        "degree": 21,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          2
+        ]
+      },
+      "generator_call": "random_binary_instance(21, 59297, 8)",
+      "group_order": 2098648,
+      "icv1": "ICV1:f2m-21-a6f878a4:-1495:2098648:0x479:unk:unk:r:8bd9aa74cf6d",
+      "koblitz": false,
+      "name": "random-binary-n21-b968e",
+      "slug": "icv1-f2m21-tm1495-8bd9aa74",
+      "subgroup_order": 262331
+    },
+    {
+      "a": "0x0",
+      "b": "0x10cc7b",
+      "field": {
+        "degree": 21,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          2
+        ]
+      },
+      "generator_call": "random_binary_instance(21, 827675, 8)",
+      "group_order": 2094308,
+      "icv1": "ICV1:f2m-21-a6f878a4:2845:2094308:0x1df045:unk:unk:r:e2683765c597",
+      "koblitz": false,
+      "name": "random-binary-n21-b10cc7b",
+      "slug": "icv1-f2m21-t2845-e2683765",
+      "subgroup_order": 523577
+    },
+    {
+      "a": "0x1",
+      "b": "0x480f9a",
+      "field": {
+        "degree": 23,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          5
+        ]
+      },
+      "generator_call": "random_binary_instance(23, 59297, 8)",
+      "group_order": 8392738,
+      "icv1": "ICV1:f2m-23-c07a6b8c:-4129:8392738:0x915f0:unk:unk:r:45500fceb478",
+      "koblitz": false,
+      "name": "random-binary-n23-b480f9a",
+      "slug": "icv1-f2m23-tm4129-45500fce",
+      "subgroup_order": 4196369
+    },
+    {
+      "a": "0x1",
+      "b": "0x3a296b",
+      "field": {
+        "degree": 23,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          5
+        ]
+      },
+      "generator_call": "random_binary_instance(23, 827675, 8)",
+      "group_order": 8390566,
+      "icv1": "ICV1:f2m-23-c07a6b8c:-1957:8390566:0x429b7e:unk:unk:r:8891f5a2009b",
+      "koblitz": false,
+      "name": "random-binary-n23-b3a296b",
+      "slug": "icv1-f2m23-tm1957-8891f5a2",
+      "subgroup_order": 4195283
+    },
+    {
+      "a": "0x1",
+      "b": "0x1a9b772",
+      "field": {
+        "degree": 25,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator_call": "random_binary_instance(25, 59297, 8)",
+      "group_order": 33554922,
+      "icv1": "ICV1:f2m-25-38eb3fef:-489:33554922:0x13fd27c:unk:unk:r:c50a8fb91a06",
+      "koblitz": false,
+      "name": "random-binary-n25-b1a9b772",
+      "slug": "icv1-f2m25-tm489-c50a8fb9",
+      "subgroup_order": 5592487
+    },
+    {
+      "a": "0x1",
+      "b": "0x1448ace",
+      "field": {
+        "degree": 25,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator_call": "random_binary_instance(25, 827675, 8)",
+      "group_order": 33549658,
+      "icv1": "ICV1:f2m-25-38eb3fef:4775:33549658:0xafe3a1:unk:unk:r:4830dca7e156",
+      "koblitz": false,
+      "name": "random-binary-n25-b1448ace",
+      "slug": "icv1-f2m25-t4775-4830dca7",
+      "subgroup_order": 16774829
+    },
+    {
+      "a": "0x1",
+      "b": "0x227199e",
+      "field": {
+        "degree": 27,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator_call": "random_binary_instance(27, 59297, 8)",
+      "group_order": 134238022,
+      "icv1": "ICV1:f2m-27-070a37b6:-20293:134238022:0x61af38f:unk:unk:r:ca4ad8afd38c",
+      "koblitz": false,
+      "name": "random-binary-n27-b227199e",
+      "slug": "icv1-f2m27-tm20293-ca4ad8af",
+      "subgroup_order": 67119011
+    },
+    {
+      "a": "0x1",
+      "b": "0x3bfa9c2",
+      "field": {
+        "degree": 27,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          2,
+          5
+        ]
+      },
+      "generator_call": "random_binary_instance(27, 827675, 8)",
+      "group_order": 134196918,
+      "icv1": "ICV1:f2m-27-070a37b6:20811:134196918:0x264118e:unk:unk:r:3d0fd5a19928",
+      "koblitz": false,
+      "name": "random-binary-n27-b3bfa9c2",
+      "slug": "icv1-f2m27-t20811-3d0fd5a1",
+      "subgroup_order": 22366153
+    },
+    {
+      "a": "0x1",
+      "b": "0x1503",
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator_call": "random_binary_instance(13, 20260922, 8)",
+      "group_order": 8182,
+      "icv1": "ICV1:f2m-13-752c6463:11:8182:0x154d:unk:unk:r:f036dc01ecc2",
+      "koblitz": false,
+      "name": "random-binary-n13-b1503",
+      "slug": "icv1-f2m13-t11-f036dc01",
+      "subgroup_order": 4091
+    },
+    {
+      "a": "0x0",
+      "b": "0x1c1b",
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator_call": "random_binary_instance(13, 20260923, 8)",
+      "group_order": 8276,
+      "icv1": "ICV1:f2m-13-752c6463:-83:8276:0xdfe:unk:unk:r:b76daa24117e",
+      "koblitz": false,
+      "name": "random-binary-n13-b1c1b",
+      "slug": "icv1-f2m13-tm83-b76daa24",
+      "subgroup_order": 2069
+    },
+    {
+      "a": "0x1",
+      "b": "0x16da",
+      "field": {
+        "degree": 13,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "generator_call": "random_binary_instance(13, 20260924, 8)",
+      "group_order": 8182,
+      "icv1": "ICV1:f2m-13-752c6463:11:8182:0x9be:unk:unk:r:f12dc95f2ff0",
+      "koblitz": false,
+      "name": "random-binary-n13-b16da",
+      "slug": "icv1-f2m13-t11-f12dc95f",
+      "subgroup_order": 4091
+    },
+    {
+      "a": "0x1",
+      "b": "0x3ecf",
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator_call": "random_binary_instance(15, 20260922, 8)",
+      "group_order": 33006,
+      "icv1": "ICV1:f2m-15-2d490b65:-237:33006:0x6924:unk:unk:r:34b47a4ad861",
+      "koblitz": false,
+      "name": "random-binary-n15-b3ecf",
+      "slug": "icv1-f2m15-tm237-34b47a4a",
+      "subgroup_order": 5501
+    },
+    {
+      "a": "0x1",
+      "b": "0x702a",
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator_call": "random_binary_instance(15, 20260923, 8)",
+      "group_order": 32954,
+      "icv1": "ICV1:f2m-15-2d490b65:-185:32954:0x251a:unk:unk:r:565c166931f1",
+      "koblitz": false,
+      "name": "random-binary-n15-b702a",
+      "slug": "icv1-f2m15-tm185-565c1669",
+      "subgroup_order": 16477
+    },
+    {
+      "a": "0x1",
+      "b": "0x3c06",
+      "field": {
+        "degree": 15,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator_call": "random_binary_instance(15, 20260924, 8)",
+      "group_order": 32986,
+      "icv1": "ICV1:f2m-15-2d490b65:-217:32986:0x1d10:unk:unk:r:f2f901c1afa3",
+      "koblitz": false,
+      "name": "random-binary-n15-b3c06",
+      "slug": "icv1-f2m15-tm217-f2f901c1",
+      "subgroup_order": 16493
+    },
+    {
+      "a": "0x1",
+      "b": "0x1ad26",
+      "field": {
+        "degree": 17,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator_call": "random_binary_instance(17, 20260922, 8)",
+      "group_order": 130618,
+      "icv1": "ICV1:f2m-17-237ceae1:455:130618:0x2628:unk:unk:r:60048e6dde7f",
+      "koblitz": false,
+      "name": "random-binary-n17-b1ad26",
+      "slug": "icv1-f2m17-t455-60048e6d",
+      "subgroup_order": 65309
+    },
+    {
+      "a": "0x0",
+      "b": "0x3a",
+      "field": {
+        "degree": 6,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          1
+        ]
+      },
+      "generator_call": "KoblitzCurve::subfield(2, 6, 0, 2)",
+      "group_order": "76",
+      "icv1": "ICV1:f2m-6-1bc6e4b9:-11:76:0x3b:unk:unk:r:a69b70b889dd",
+      "koblitz": false,
+      "modulus": "0x43",
+      "name": "E_{0,2}/GF(2^2) over GF(2^6)",
+      "slug": "icv1-f2m6-tm11-a69b70b8",
+      "subgroup_order": "19"
+    },
+    {
+      "a": "0x0",
+      "b": "0xec",
+      "field": {
+        "degree": 10,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator_call": "KoblitzCurve::subfield(2, 10, 0, 2)",
+      "group_order": "964",
+      "icv1": "ICV1:f2m-10-2268b575:61:964:0xed:unk:unk:r:31ce0e65c96c",
+      "koblitz": false,
+      "modulus": "0x409",
+      "name": "E_{0,2}/GF(2^2) over GF(2^10)",
+      "slug": "icv1-f2m10-t61-31ce0e65",
+      "subgroup_order": "241"
+    },
+    {
+      "a": "0x0",
+      "b": "0x13f2",
+      "field": {
+        "degree": 14,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          5
+        ]
+      },
+      "generator_call": "KoblitzCurve::subfield(2, 14, 0, 2)",
+      "group_order": "16636",
+      "icv1": "ICV1:f2m-14-33503c25:-251:16636:0x13f3:unk:unk:r:b69e8b8b61b7",
+      "koblitz": false,
+      "modulus": "0x4021",
+      "name": "E_{0,2}/GF(2^2) over GF(2^14)",
+      "slug": "icv1-f2m14-tm251-b69e8b8b",
+      "subgroup_order": "4159"
+    },
+    {
+      "a": "0x9208",
+      "b": "0x1",
+      "field": {
+        "degree": 18,
+        "kind": "binary",
+        "polynomial_low_terms": [
+          0,
+          3
+        ]
+      },
+      "generator_call": "KoblitzCurve::subfield(2, 18, 2, 1)",
+      "group_order": "261146",
+      "icv1": "ICV1:f2m-18-5c53157a:999:261146:0x1:unk:unk:r:407512834cc0",
+      "koblitz": false,
+      "modulus": "0x40009",
+      "name": "E_{2,1}/GF(2^2) over GF(2^18)",
+      "slug": "icv1-f2m18-t999-40751283",
+      "subgroup_order": "3529"
+    }
+  ],
+  "specs": [
+    "prime:12:59297",
+    "prime:14:59297",
+    "prime:16:59297",
+    "prime:18:59297",
+    "prime:20:59297",
+    "prime:22:59297",
+    "prime:24:59297",
+    "prime:26:59297",
+    "prime:22:827675",
+    "prime:24:827675",
+    "prime:26:827675",
+    "char2:13:59297:8",
+    "char2:13:827675:8",
+    "char2:15:59297:8",
+    "char2:15:827675:8",
+    "char2:17:59297:8",
+    "char2:17:827675:8",
+    "char2:19:59297:8",
+    "char2:19:827675:8",
+    "char2:21:59297:8",
+    "char2:21:827675:8",
+    "char2:23:59297:8",
+    "char2:23:827675:8",
+    "char2:25:59297:8",
+    "char2:25:827675:8",
+    "char2:27:59297:8",
+    "char2:27:827675:8",
+    "char2:13:20260922:8",
+    "char2:13:20260923:8",
+    "char2:13:20260924:8",
+    "char2:15:20260922:8",
+    "char2:15:20260923:8",
+    "char2:15:20260924:8",
+    "char2:17:20260922:8",
+    "subfield:2:6:0:2",
+    "subfield:2:10:0:2",
+    "subfield:2:14:0:2",
+    "subfield:2:18:2:1"
+  ],
+  "what_this_is": "Curves the repository generated from a seed, rebuilt by examples/curve_id_generated.rs, with the handle each was reported under before ICV1 and its ICV1 identity computed in Rust."
+}

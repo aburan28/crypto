@@ -1,0 +1,2463 @@
+{
+ "schema_version": 1,
+ "spec": "docs/curves/ICV1.md",
+ "generated_by": "scripts/build_curve_registry.py",
+ "what_this_is": "Every elliptic curve this repository names, by its ICV1 identity, with every legacy spelling that denotes it.",
+ "curves": [
+  {
+   "slug": "icv1-f2m7-t13-616700dd",
+   "icv1": "ICV1:f2m-7-e1a6f45a:13:116:0x1:-7:unk:r:616700ddc6fe",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 7,
+    "modulus": "0x83",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-7-e1a6f45a\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x83\",\"v\":\"1\"}",
+   "trace": 13,
+   "order": "116",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n7",
+    "K_0 / GF(2^7)",
+    "K_0/2^7",
+    "K_0/F_2^7"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/perf/pdp-reference-v1.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m7-tm13-ac10a42c",
+   "icv1": "ICV1:f2m-7-e1a6f45a:-13:142:0x1:-7:unk:r:ac10a42c978c",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 7,
+    "modulus": "0x83",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-7-e1a6f45a\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x83\",\"v\":\"1\"}",
+   "trace": -13,
+   "order": "142",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n7",
+    "K_1 / GF(2^7)",
+    "K_1/2^7",
+    "K_1/F_2^7"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-descent-degrees-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m9-t5-81e744be",
+   "icv1": "ICV1:f2m-9-37f297a3:5:508:0x1:-7:unk:r:81e744bec1a8",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 9,
+    "modulus": "0x203",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-9-37f297a3\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x203\",\"v\":\"1\"}",
+   "trace": 5,
+   "order": "508",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n9",
+    "K_0 / GF(2^9)",
+    "K_0/2^9",
+    "K_0/F_2^9"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-oracle-pricing-inherited-f4-2026-09-22.json",
+    "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
+    "docs/ic/runs/ic-oracle-pricing-matrix-f4-reference-2026-09-22.json",
+    "research/chain_split_order_20260924/oracle_ladder/candidate.json",
+    "research/chain_split_order_20260924/oracle_ladder/reference.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m9-tm5-4a3ea183",
+   "icv1": "ICV1:f2m-9-37f297a3:-5:518:0x1:-7:unk:r:4a3ea18341c5",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 9,
+    "modulus": "0x203",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-9-37f297a3\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x203\",\"v\":\"1\"}",
+   "trace": -5,
+   "order": "518",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n9",
+    "K_1 / GF(2^9)",
+    "K_1/2^9",
+    "K_1/F_2^9"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/perf/pdp-reference-v1.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m11-tm67-f393fc83",
+   "icv1": "ICV1:f2m-11-79b256b0:-67:2116:0x1:-7:unk:r:f393fc839c06",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 11,
+    "modulus": "0x805",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-11-79b256b0\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x805\",\"v\":\"1\"}",
+   "trace": -67,
+   "order": "2116",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n11",
+    "K_0 / GF(2^11)",
+    "K_0/2^11",
+    "K_0/F_2^11"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/notes/ecc2k130/RESEARCH_CHAIN_SPLIT_ORDER.md"
+   ]
+  },
+  {
+   "slug": "icv1-f2m11-t67-05f5aa36",
+   "icv1": "ICV1:f2m-11-79b256b0:67:1982:0x1:-7:unk:r:05f5aa361fec",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 11,
+    "modulus": "0x805",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-11-79b256b0\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x805\",\"v\":\"1\"}",
+   "trace": 67,
+   "order": "1982",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n11",
+    "K_1 / GF(2^11)",
+    "K_1/2^11",
+    "K_1/F_2^11"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m13-t181-515ee569",
+   "icv1": "ICV1:f2m-13-752c6463:181:8012:0x1:-7:unk:r:515ee5696294",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 13,
+    "modulus": "0x201b",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-13-752c6463\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x201b\",\"v\":\"1\"}",
+   "trace": 181,
+   "order": "8012",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n13",
+    "K_0 / GF(2^13)",
+    "K_0/2^13",
+    "K_0/F_2^13"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m13-tm181-25e736d2",
+   "icv1": "ICV1:f2m-13-752c6463:-181:8374:0x1:-7:unk:r:25e736d29ac4",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 13,
+    "modulus": "0x201b",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-13-752c6463\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x201b\",\"v\":\"1\"}",
+   "trace": -181,
+   "order": "8374",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n13",
+    "K_1 / GF(2^13)",
+    "K_1/2^13",
+    "K_1/F_2^13"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/notes/ecc2k130/RESEARCH_CHAIN_SPLIT_ORDER.md"
+   ]
+  },
+  {
+   "slug": "icv1-f2m15-tm275-2d22ff5d",
+   "icv1": "ICV1:f2m-15-2d490b65:-275:33044:0x1:-7:unk:r:2d22ff5d351f",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 15,
+    "modulus": "0x8003",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-15-2d490b65\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8003\",\"v\":\"1\"}",
+   "trace": -275,
+   "order": "33044",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n15",
+    "K_0 / GF(2^15)",
+    "K_0/2^15",
+    "K_0/F_2^15"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m15-t275-b7f03703",
+   "icv1": "ICV1:f2m-15-2d490b65:275:32494:0x1:-7:unk:r:b7f03703e5d7",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 15,
+    "modulus": "0x8003",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-15-2d490b65\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8003\",\"v\":\"1\"}",
+   "trace": 275,
+   "order": "32494",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n15",
+    "K_1 / GF(2^15)",
+    "K_1/2^15",
+    "K_1/F_2^15"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/README.md"
+   ]
+  },
+  {
+   "slug": "icv1-f2m17-t101-e6c4b64d",
+   "icv1": "ICV1:f2m-17-237ceae1:101:130972:0x1:-7:unk:r:e6c4b64dcf8b",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 17,
+    "modulus": "0x20009",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
+   "trace": 101,
+   "order": "130972",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n17",
+    "K_0 / GF(2^17)",
+    "K_0/2^17",
+    "K_0/F_2^17"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/notes/ecc2k130/RESEARCH_CHAIN_SPLIT_ORDER.md"
+   ]
+  },
+  {
+   "slug": "icv1-f2m17-tm101-00378d4e",
+   "icv1": "ICV1:f2m-17-237ceae1:-101:131174:0x1:-7:unk:r:00378d4e488b",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 17,
+    "modulus": "0x20009",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
+   "trace": -101,
+   "order": "131174",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n17",
+    "K_1 / GF(2^17)",
+    "K_1/2^17",
+    "K_1/F_2^17"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m19-t797-b6cf2467",
+   "icv1": "ICV1:f2m-19-87f45376:797:523492:0x1:-7:unk:r:b6cf2467887c",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 19,
+    "modulus": "0x80027",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-19-87f45376\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80027\",\"v\":\"1\"}",
+   "trace": 797,
+   "order": "523492",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n19",
+    "K_0 / GF(2^19)",
+    "K_0/2^19",
+    "K_0/F_2^19"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/index-calculus-scoreboard.html"
+   ]
+  },
+  {
+   "slug": "icv1-f2m19-tm797-9c54981b",
+   "icv1": "ICV1:f2m-19-87f45376:-797:525086:0x1:-7:unk:r:9c54981b5d8c",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 19,
+    "modulus": "0x80027",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-19-87f45376\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80027\",\"v\":\"1\"}",
+   "trace": -797,
+   "order": "525086",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n19",
+    "K_1 / GF(2^19)",
+    "K_1/2^19",
+    "K_1/F_2^19"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m21-t2795-26779965",
+   "icv1": "ICV1:f2m-21-a6f878a4:2795:2094358:0x1:-7:unk:r:26779965ca65",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 21,
+    "modulus": "0x200005",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-21-a6f878a4\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x200005\",\"v\":\"1\"}",
+   "trace": 2795,
+   "order": "2094358",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n21",
+    "K_1 / GF(2^21)",
+    "K_1/2^21",
+    "K_1/F_2^21"
+   ],
+   "standard_names": [],
+   "sources": [
+    "examples/groebner_stage_bench.rs"
+   ]
+  },
+  {
+   "slug": "icv1-f2m23-t5197-69e76b73",
+   "icv1": "ICV1:f2m-23-c07a6b8c:5197:8383412:0x1:-7:unk:r:69e76b739aa7",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 23,
+    "modulus": "0x800021",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-23-c07a6b8c\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800021\",\"v\":\"1\"}",
+   "trace": 5197,
+   "order": "8383412",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n23",
+    "K_0 / GF(2^23)",
+    "K_0/2^23",
+    "K_0/F_2^23"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/perf/pdp-reference-v1.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m23-tm5197-1f85e9e1",
+   "icv1": "ICV1:f2m-23-c07a6b8c:-5197:8393806:0x1:-7:unk:r:1f85e9e1acf0",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 23,
+    "modulus": "0x800021",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-23-c07a6b8c\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800021\",\"v\":\"1\"}",
+   "trace": -5197,
+   "order": "8393806",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n23",
+    "K_1 / GF(2^23)",
+    "K_1/2^23",
+    "K_1/F_2^23"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m29-tm40309-30c52b96",
+   "icv1": "ICV1:f2m-29-1a13acc8:-40309:536911222:0x1:-7:unk:r:30c52b963005",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 29,
+    "modulus": "0x20000005",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-29-1a13acc8\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000005\",\"v\":\"1\"}",
+   "trace": -40309,
+   "order": "536911222",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n29",
+    "K_1 / GF(2^29)",
+    "K_1/2^29",
+    "K_1/F_2^29"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m31-tm90707-c95f16f5",
+   "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 31,
+    "modulus": "0x80000009",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-31-200700ef\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80000009\",\"v\":\"1\"}",
+   "trace": -90707,
+   "order": "2147574356",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n31",
+    "K_0 / GF(2^31)",
+    "K_0/2^31",
+    "K_0/F_2^31"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m31-t90707-8fd18741",
+   "icv1": "ICV1:f2m-31-200700ef:90707:2147392942:0x1:-7:unk:r:8fd187414f75",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 31,
+    "modulus": "0x80000009",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-31-200700ef\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80000009\",\"v\":\"1\"}",
+   "trace": 90707,
+   "order": "2147392942",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n31",
+    "K_1 / GF(2^31)",
+    "K_1/2^31",
+    "K_1/F_2^31"
+   ],
+   "standard_names": [],
+   "sources": [
+    "src/cryptanalysis/koblitz_sparse_la.rs"
+   ]
+  },
+  {
+   "slug": "icv1-f2m37-tm534059-32aad96b",
+   "icv1": "ICV1:f2m-37-754d41e3:-534059:137439487532:0x1:-7:unk:r:32aad96be451",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 37,
+    "modulus": "0x2000000053",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-37-754d41e3\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x2000000053\",\"v\":\"1\"}",
+   "trace": -534059,
+   "order": "137439487532",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n37",
+    "K_0 / GF(2^37)",
+    "K_0/2^37",
+    "K_0/F_2^37"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-headline-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m39-t1481485-829ef1d1",
+   "icv1": "ICV1:f2m-39-bc3344bd:1481485:549754332404:0x1:-7:unk:r:829ef1d1b36b",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 39,
+    "modulus": "0x8000000011",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-39-bc3344bd\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8000000011\",\"v\":\"1\"}",
+   "trace": 1481485,
+   "order": "549754332404",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n39",
+    "K_0 / GF(2^39)",
+    "K_0/2^39",
+    "K_0/F_2^39"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-holdout-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m41-tm2308219-7f48b14a",
+   "icv1": "ICV1:f2m-41-39c74c32:-2308219:2199025563772:0x1:-7:unk:r:7f48b14a43b8",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 41,
+    "modulus": "0x20000000009",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-41-39c74c32\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000009\",\"v\":\"1\"}",
+   "trace": -2308219,
+   "order": "2199025563772",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n41",
+    "K_0 / GF(2^41)",
+    "K_0/2^41",
+    "K_0/F_2^41"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-headline-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m43-tm998717-e2e742b0",
+   "icv1": "ICV1:f2m-43-ac4bb7a2:-998717:8796094020926:0x1:-7:unk:r:e2e742b068ef",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 43,
+    "modulus": "0x80000000059",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-43-ac4bb7a2\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80000000059\",\"v\":\"1\"}",
+   "trace": -998717,
+   "order": "8796094020926",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n43",
+    "K_1 / GF(2^43)",
+    "K_1/2^43",
+    "K_1/F_2^43"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/ic_constructions_20260926/analysis.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m45-tm6236725-40939294",
+   "icv1": "ICV1:f2m-45-512796ce:-6236725:35184378325558:0x1:-7:unk:r:4093929493b9",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 45,
+    "modulus": "0x20000000001b",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-45-512796ce\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000001b\",\"v\":\"1\"}",
+   "trace": -6236725,
+   "order": "35184378325558",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n45",
+    "K_1 / GF(2^45)",
+    "K_1/2^45",
+    "K_1/F_2^45"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/ic_constructions_20260926/analysis.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m47-t22705043-f4e44623",
+   "icv1": "ICV1:f2m-47-6034b035:22705043:140737465650286:0x1:-7:unk:r:f4e4462320d9",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 47,
+    "modulus": "0x800000000021",
+    "modulus_rule": "find_irreducible_sparse(n)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-47-6034b035\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800000000021\",\"v\":\"1\"}",
+   "trace": 22705043,
+   "order": "140737465650286",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n47",
+    "K_1 / GF(2^47)",
+    "K_1/2^47",
+    "K_1/F_2^47"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/ic_constructions_20260926/analysis.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "icv1": "ICV1:f2m-53-8e1a71e5:-56619371:9007199311360364:0x1:-7:unk:r:dac20a8570a8",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 53,
+    "modulus": "0x20000000000047",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-53-8e1a71e5\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000047\",\"v\":\"1\"}",
+   "trace": -56619371,
+   "order": "9007199311360364",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n53",
+    "K_0 / GF(2^53)",
+    "K_0/2^53",
+    "K_0/F_2^53"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/ic_rho_koblitz_20260923/batch/k0n53.json",
+    ".github/workflows/ic-e2e-benchmark.yml"
+   ]
+  },
+  {
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "icv1": "ICV1:f2m-61-78c443be:158598901:2305843009055095052:0x1:-7:unk:r:ab42b6c597c6",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 61,
+    "modulus": "0x2000000000000027",
+    "modulus_rule": "recorded in the run"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-61-78c443be\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x2000000000000027\",\"v\":\"1\"}",
+   "trace": 158598901,
+   "order": "2305843009055095052",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n61",
+    "K_0 / GF(2^61)",
+    "K_0/2^61",
+    "K_0/F_2^61"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/ic_rho_koblitz_20260923/batch/k0n61.json",
+    "docs/ic/ENGINE_AUDIT_AND_DESIGN.md"
+   ]
+  },
+  {
+   "slug": "icv1-f2m97-t378251973071909-f27192f3",
+   "icv1": "ICV1:f2m-97-29242dde:378251973071909:158456325028528296935114828764:0x1:-7:unk:r:f27192f36775",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 97,
+    "modulus": "0x2000000000000000000000041",
+    "modulus_rule": "ECC2K-95 (src/bin/ic/params.rs)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-97-29242dde\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x2000000000000000000000041\",\"v\":\"1\"}",
+   "trace": 378251973071909,
+   "order": "158456325028528296935114828764",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ECC2K-95",
+    "k0n97",
+    "K_0 / GF(2^97)",
+    "K_0/2^97",
+    "K_0/F_2^97"
+   ],
+   "standard_names": [
+    "ECC2K-95"
+   ],
+   "sources": [
+    "ECC2K-95 (src/bin/ic/params.rs)"
+   ]
+  },
+  {
+   "slug": "icv1-f2m131-tm22283658519494248867-115e0dc5",
+   "icv1": "ICV1:f2m-131-5cc3e086:-22283658519494248867:2722258935367507707729280517973639940516:0x1:-7:unk:r:115e0dc5d9eb",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 131,
+    "modulus": "0x800000000000000000000000000002007",
+    "modulus_rule": "ECC2K-130 (src/cryptanalysis/ecc2k130_guard.rs)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-131-5cc3e086\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800000000000000000000000000002007\",\"v\":\"1\"}",
+   "trace": -22283658519494248867,
+   "order": "2722258935367507707729280517973639940516",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "ECC2K-130",
+    "k0n131",
+    "K_0 / GF(2^131)",
+    "K_0/2^131",
+    "K_0/F_2^131"
+   ],
+   "standard_names": [
+    "ECC2K-130"
+   ],
+   "sources": [
+    "ECC2K-130 (src/cryptanalysis/ecc2k130_guard.rs)"
+   ]
+  },
+  {
+   "slug": "icv1-f2m163-tm4845466632539410776804317-e15e581e",
+   "icv1": "ICV1:f2m-163-f36bfbf8:-4845466632539410776804317:11692013098647223345629483507196896696658237148126:0x1:-7:unk:r:e15e581e71c7",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 163,
+    "modulus": "0x800000000000000000000000000000000000000c9",
+    "modulus_rule": "sect163k1, SEC 2 (src/binary_ecc/curve.rs)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-163-f36bfbf8\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800000000000000000000000000000000000000c9\",\"v\":\"1\"}",
+   "trace": -4845466632539410776804317,
+   "order": "11692013098647223345629483507196896696658237148126",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n163",
+    "K_1 / GF(2^163)",
+    "K_1/2^163",
+    "K_1/F_2^163",
+    "sect163k1"
+   ],
+   "standard_names": [
+    "sect163k1"
+   ],
+   "sources": [
+    "sect163k1, SEC 2 (src/binary_ecc/curve.rs)"
+   ]
+  },
+  {
+   "slug": "icv1-f2m233-tm137381546011108235394987299651366779-08b072d7",
+   "icv1": "ICV1:f2m-233-fe75d826:-137381546011108235394987299651366779:13803492693581127574869511724554051042283763955449008505312348098965372:0x1:-7:unk:r:08b072d77568",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 233,
+    "modulus": "0x20000000000000000000000000000000000000004000000000000000001",
+    "modulus_rule": "sect233k1, SEC 2"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-233-fe75d826\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000000000000000004000000000000000001\",\"v\":\"1\"}",
+   "trace": -137381546011108235394987299651366779,
+   "order": "13803492693581127574869511724554051042283763955449008505312348098965372",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n233",
+    "K_0 / GF(2^233)",
+    "K_0/2^233",
+    "K_0/F_2^233",
+    "sect233k1"
+   ],
+   "standard_names": [
+    "sect233k1"
+   ],
+   "sources": [
+    "sect233k1, SEC 2"
+   ]
+  },
+  {
+   "slug": "icv1-f2m239-tm1879124296849029916489117776215138963-fe13c2c6",
+   "icv1": "ICV1:f2m-239-caec06aa:-1879124296849029916489117776215138963:883423532389192164791648750371459259792866245286839395549920876861448852:0x1:-7:unk:r:fe13c2c6c5af",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 239,
+    "modulus": "0x800000000000000000004000000000000000000000000000000000000001",
+    "modulus_rule": "sect239k1, SEC 2"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-239-caec06aa\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800000000000000000004000000000000000000000000000000000000001\",\"v\":\"1\"}",
+   "trace": -1879124296849029916489117776215138963,
+   "order": "883423532389192164791648750371459259792866245286839395549920876861448852",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n239",
+    "K_0 / GF(2^239)",
+    "K_0/2^239",
+    "K_0/F_2^239",
+    "sect239k1"
+   ],
+   "standard_names": [
+    "sect239k1"
+   ],
+   "sources": [
+    "sect239k1, SEC 2"
+   ]
+  },
+  {
+   "slug": "icv1-f2m283-t7777244870872830999287791970962823977569917-ddd7db8c",
+   "icv1": "ICV1:f2m-283-287b50d2:7777244870872830999287791970962823977569917:15541351137805832567355695254588151253139246935172245297183499990119263318817690415492:0x1:-7:unk:r:ddd7db8c0bac",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 283,
+    "modulus": "0x800000000000000000000000000000000000000000000000000000000000000000010a1",
+    "modulus_rule": "sect283k1, SEC 2"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-283-287b50d2\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800000000000000000000000000000000000000000000000000000000000000000010a1\",\"v\":\"1\"}",
+   "trace": 7777244870872830999287791970962823977569917,
+   "order": "15541351137805832567355695254588151253139246935172245297183499990119263318817690415492",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n283",
+    "K_0 / GF(2^283)",
+    "K_0/2^283",
+    "K_0/F_2^283",
+    "sect283k1"
+   ],
+   "standard_names": [
+    "sect283k1"
+   ],
+   "sources": [
+    "sect283k1, SEC 2"
+   ]
+  },
+  {
+   "slug": "icv1-f2m409-t10457288737315625927447685387048320737638796957687575791173829-87b3ee45",
+   "icv1": "ICV1:f2m-409-f951d81c:10457288737315625927447685387048320737638796957687575791173829:1322111937580497197903830616065542079656809365928562438569297580091522845156996764202693033831109832056385466362470925434684:0x1:-7:unk:r:87b3ee45f55b",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 409,
+    "modulus": "0x2000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000001",
+    "modulus_rule": "sect409k1, SEC 2"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-409-f951d81c\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x2000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000001\",\"v\":\"1\"}",
+   "trace": 10457288737315625927447685387048320737638796957687575791173829,
+   "order": "1322111937580497197903830616065542079656809365928562438569297580091522845156996764202693033831109832056385466362470925434684",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n409",
+    "K_0 / GF(2^409)",
+    "K_0/2^409",
+    "K_0/F_2^409",
+    "sect409k1"
+   ],
+   "standard_names": [
+    "sect409k1"
+   ],
+   "sources": [
+    "sect409k1, SEC 2"
+   ]
+  },
+  {
+   "slug": "icv1-f2m571-tm148380926981691413899619140297051490364542574180493936232912339534208516828973111459843-3b150b80",
+   "icv1": "ICV1:f2m-571-78c11972:-148380926981691413899619140297051490364542574180493936232912339534208516828973111459843:7729075046034516689390703781863974688597854659412869997314470502903038284579120849072535914090826847338826851203301405845094699896266469247718729686468370014222934741106692:0x1:-7:unk:r:3b150b806628",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 571,
+    "modulus": "0x80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000425",
+    "modulus_rule": "sect571k1, SEC 2"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-571-78c11972\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000425\",\"v\":\"1\"}",
+   "trace": -148380926981691413899619140297051490364542574180493936232912339534208516828973111459843,
+   "order": "7729075046034516689390703781863974688597854659412869997314470502903038284579120849072535914090826847338826851203301405845094699896266469247718729686468370014222934741106692",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n571",
+    "K_0 / GF(2^571)",
+    "K_0/2^571",
+    "K_0/F_2^571",
+    "sect571k1"
+   ],
+   "standard_names": [
+    "sect571k1"
+   ],
+   "sources": [
+    "sect571k1, SEC 2"
+   ]
+  },
+  {
+   "slug": "icv1-f2m6-tm11-a69b70b8",
+   "icv1": "ICV1:f2m-6-1bc6e4b9:-11:76:0x3b:unk:unk:r:a69b70b889dd",
+   "family": "subfield",
+   "params": {
+    "m": 6,
+    "modulus": "0x43",
+    "a": "0x0",
+    "b": "0x3a",
+    "generator_call": "KoblitzCurve::subfield(2, 6, 0, 2)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x3a\",\"field\":\"f2m-6-1bc6e4b9\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x43\",\"v\":\"1\"}",
+   "trace": -11,
+   "order": "76",
+   "j": "0x3b",
+   "end": "unk",
+   "aliases": [
+    "E_{0,2}/GF(2^2) over GF(2^6)"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m10-t61-31ce0e65",
+   "icv1": "ICV1:f2m-10-2268b575:61:964:0xed:unk:unk:r:31ce0e65c96c",
+   "family": "subfield",
+   "params": {
+    "m": 10,
+    "modulus": "0x409",
+    "a": "0x0",
+    "b": "0xec",
+    "generator_call": "KoblitzCurve::subfield(2, 10, 0, 2)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0xec\",\"field\":\"f2m-10-2268b575\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x409\",\"v\":\"1\"}",
+   "trace": 61,
+   "order": "964",
+   "j": "0xed",
+   "end": "unk",
+   "aliases": [
+    "E_{0,2}/GF(2^2) over GF(2^10)"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m14-tm251-b69e8b8b",
+   "icv1": "ICV1:f2m-14-33503c25:-251:16636:0x13f3:unk:unk:r:b69e8b8b61b7",
+   "family": "subfield",
+   "params": {
+    "m": 14,
+    "modulus": "0x4021",
+    "a": "0x0",
+    "b": "0x13f2",
+    "generator_call": "KoblitzCurve::subfield(2, 14, 0, 2)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x13f2\",\"field\":\"f2m-14-33503c25\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x4021\",\"v\":\"1\"}",
+   "trace": -251,
+   "order": "16636",
+   "j": "0x13f3",
+   "end": "unk",
+   "aliases": [
+    "E_{0,2}/GF(2^2) over GF(2^14)"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m18-t999-40751283",
+   "icv1": "ICV1:f2m-18-5c53157a:999:261146:0x1:unk:unk:r:407512834cc0",
+   "family": "subfield",
+   "params": {
+    "m": 18,
+    "modulus": "0x40009",
+    "a": "0x9208",
+    "b": "0x1",
+    "generator_call": "KoblitzCurve::subfield(2, 18, 2, 1)"
+   },
+   "model_json": "{\"a\":\"0x9208\",\"b\":\"0x1\",\"field\":\"f2m-18-5c53157a\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x40009\",\"v\":\"1\"}",
+   "trace": 999,
+   "order": "261146",
+   "j": "0x1",
+   "end": "unk",
+   "aliases": [
+    "E_{2,1}/GF(2^2) over GF(2^18)"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m13-t11-f036dc01",
+   "icv1": "ICV1:f2m-13-752c6463:11:8182:0x154d:unk:unk:r:f036dc01ecc2",
+   "family": "binary",
+   "params": {
+    "m": 13,
+    "modulus": "0x201b",
+    "a": "0x1",
+    "b": "0x1503",
+    "generator_call": "random_binary_instance(13, 20260922, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1503\",\"field\":\"f2m-13-752c6463\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x201b\",\"v\":\"1\"}",
+   "trace": 11,
+   "order": "8182",
+   "j": "0x154d",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n13-b1503"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m13-t11-f12dc95f",
+   "icv1": "ICV1:f2m-13-752c6463:11:8182:0x9be:unk:unk:r:f12dc95f2ff0",
+   "family": "binary",
+   "params": {
+    "m": 13,
+    "modulus": "0x201b",
+    "a": "0x1",
+    "b": "0x16da",
+    "generator_call": "random_binary_instance(13, 20260924, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x16da\",\"field\":\"f2m-13-752c6463\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x201b\",\"v\":\"1\"}",
+   "trace": 11,
+   "order": "8182",
+   "j": "0x9be",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n13-b16da"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m13-t79-00b3392a",
+   "icv1": "ICV1:f2m-13-752c6463:79:8114:0x1962:unk:unk:r:00b3392ae60c",
+   "family": "binary",
+   "params": {
+    "m": 13,
+    "modulus": "0x201b",
+    "a": "0x1",
+    "b": "0xa3f",
+    "generator_call": "random_binary_instance(13, 827675, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0xa3f\",\"field\":\"f2m-13-752c6463\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x201b\",\"v\":\"1\"}",
+   "trace": 79,
+   "order": "8114",
+   "j": "0x1962",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n13-ba3f"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m13-tm83-b76daa24",
+   "icv1": "ICV1:f2m-13-752c6463:-83:8276:0xdfe:unk:unk:r:b76daa24117e",
+   "family": "binary",
+   "params": {
+    "m": 13,
+    "modulus": "0x201b",
+    "a": "0x0",
+    "b": "0x1c1b",
+    "generator_call": "random_binary_instance(13, 20260923, 8)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1c1b\",\"field\":\"f2m-13-752c6463\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x201b\",\"v\":\"1\"}",
+   "trace": -83,
+   "order": "8276",
+   "j": "0xdfe",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n13-b1c1b"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m13-tm9-6863a838",
+   "icv1": "ICV1:f2m-13-752c6463:-9:8202:0x1333:unk:unk:r:6863a8382a36",
+   "family": "binary",
+   "params": {
+    "m": 13,
+    "modulus": "0x201b",
+    "a": "0x1",
+    "b": "0x168f",
+    "generator_call": "random_binary_instance(13, 59297, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x168f\",\"field\":\"f2m-13-752c6463\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x201b\",\"v\":\"1\"}",
+   "trace": -9,
+   "order": "8202",
+   "j": "0x1333",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n13-b168f"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m15-t131-ed7256f0",
+   "icv1": "ICV1:f2m-15-2d490b65:131:32638:0x5f66:unk:unk:r:ed7256f03846",
+   "family": "binary",
+   "params": {
+    "m": 15,
+    "modulus": "0x8003",
+    "a": "0x1",
+    "b": "0x524b"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x524b\",\"field\":\"f2m-15-2d490b65\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8003\",\"v\":\"1\"}",
+   "trace": 131,
+   "order": "32638",
+   "j": "0x5f66",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n15-b524b"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m15-t5-d9fb183e",
+   "icv1": "ICV1:f2m-15-2d490b65:5:32764:0x74e9:unk:unk:r:d9fb183ed6fb",
+   "family": "binary",
+   "params": {
+    "m": 15,
+    "modulus": "0x8003",
+    "a": "0x0",
+    "b": "0x2493",
+    "generator_call": "random_binary_instance(15, 827675, 8)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x2493\",\"field\":\"f2m-15-2d490b65\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8003\",\"v\":\"1\"}",
+   "trace": 5,
+   "order": "32764",
+   "j": "0x74e9",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n15-b2493"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m15-tm185-565c1669",
+   "icv1": "ICV1:f2m-15-2d490b65:-185:32954:0x251a:unk:unk:r:565c166931f1",
+   "family": "binary",
+   "params": {
+    "m": 15,
+    "modulus": "0x8003",
+    "a": "0x1",
+    "b": "0x702a",
+    "generator_call": "random_binary_instance(15, 20260923, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x702a\",\"field\":\"f2m-15-2d490b65\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8003\",\"v\":\"1\"}",
+   "trace": -185,
+   "order": "32954",
+   "j": "0x251a",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n15-b702a"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m15-tm217-f2f901c1",
+   "icv1": "ICV1:f2m-15-2d490b65:-217:32986:0x1d10:unk:unk:r:f2f901c1afa3",
+   "family": "binary",
+   "params": {
+    "m": 15,
+    "modulus": "0x8003",
+    "a": "0x1",
+    "b": "0x3c06",
+    "generator_call": "random_binary_instance(15, 20260924, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x3c06\",\"field\":\"f2m-15-2d490b65\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8003\",\"v\":\"1\"}",
+   "trace": -217,
+   "order": "32986",
+   "j": "0x1d10",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n15-b3c06"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m15-tm237-34b47a4a",
+   "icv1": "ICV1:f2m-15-2d490b65:-237:33006:0x6924:unk:unk:r:34b47a4ad861",
+   "family": "binary",
+   "params": {
+    "m": 15,
+    "modulus": "0x8003",
+    "a": "0x1",
+    "b": "0x3ecf",
+    "generator_call": "random_binary_instance(15, 20260922, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x3ecf\",\"field\":\"f2m-15-2d490b65\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8003\",\"v\":\"1\"}",
+   "trace": -237,
+   "order": "33006",
+   "j": "0x6924",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n15-b3ecf"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m15-tm65-37237277",
+   "icv1": "ICV1:f2m-15-2d490b65:-65:32834:0x5353:unk:unk:r:372372773e98",
+   "family": "binary",
+   "params": {
+    "m": 15,
+    "modulus": "0x8003",
+    "a": "0x1",
+    "b": "0x157a",
+    "generator_call": "random_binary_instance(15, 59297, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x157a\",\"field\":\"f2m-15-2d490b65\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8003\",\"v\":\"1\"}",
+   "trace": -65,
+   "order": "32834",
+   "j": "0x5353",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n15-b157a"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m17-t455-60048e6d",
+   "icv1": "ICV1:f2m-17-237ceae1:455:130618:0x2628:unk:unk:r:60048e6dde7f",
+   "family": "binary",
+   "params": {
+    "m": 17,
+    "modulus": "0x20009",
+    "a": "0x1",
+    "b": "0x1ad26",
+    "generator_call": "random_binary_instance(17, 20260922, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1ad26\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
+   "trace": 455,
+   "order": "130618",
+   "j": "0x2628",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n17-b1ad26"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m17-t531-2048fb7c",
+   "icv1": "ICV1:f2m-17-237ceae1:531:130542:0x1361d:unk:unk:r:2048fb7c422b",
+   "family": "binary",
+   "params": {
+    "m": 17,
+    "modulus": "0x20009",
+    "a": "0x1",
+    "b": "0x10103",
+    "generator_call": "random_binary_instance(17, 59297, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x10103\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
+   "trace": 531,
+   "order": "130542",
+   "j": "0x1361d",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n17-b10103"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m17-tm185-c9e2dceb",
+   "icv1": "ICV1:f2m-17-237ceae1:-185:131258:0xb189:unk:unk:r:c9e2dceb7f74",
+   "family": "binary",
+   "params": {
+    "m": 17,
+    "modulus": "0x20009",
+    "a": "0x1",
+    "b": "0xbe86",
+    "generator_call": "random_binary_instance(17, 827675, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0xbe86\",\"field\":\"f2m-17-237ceae1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20009\",\"v\":\"1\"}",
+   "trace": -185,
+   "order": "131258",
+   "j": "0xb189",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n17-bbe86"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m18-t393-d2c04152",
+   "icv1": "ICV1:f2m-18-5c53157a:393:261752:0x19d8a:unk:unk:r:d2c04152be25",
+   "family": "binary",
+   "params": {
+    "m": 18,
+    "modulus": "0x40009",
+    "a": "0x0",
+    "b": "0x6507"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x6507\",\"field\":\"f2m-18-5c53157a\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x40009\",\"v\":\"1\"}",
+   "trace": 393,
+   "order": "261752",
+   "j": "0x19d8a",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n18-b6507"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m19-tm353-a68ceb24",
+   "icv1": "ICV1:f2m-19-87f45376:-353:524642:0x24715:unk:unk:r:a68ceb24da8f",
+   "family": "binary",
+   "params": {
+    "m": 19,
+    "modulus": "0x80027",
+    "a": "0x1",
+    "b": "0x5f57e",
+    "generator_call": "random_binary_instance(19, 827675, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x5f57e\",\"field\":\"f2m-19-87f45376\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80027\",\"v\":\"1\"}",
+   "trace": -353,
+   "order": "524642",
+   "j": "0x24715",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n19-b5f57e"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m19-tm649-a9133fe6",
+   "icv1": "ICV1:f2m-19-87f45376:-649:524938:0x334b3:unk:unk:r:a9133fe6c2db",
+   "family": "binary",
+   "params": {
+    "m": 19,
+    "modulus": "0x80027",
+    "a": "0x1",
+    "b": "0x770f7",
+    "generator_call": "random_binary_instance(19, 59297, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x770f7\",\"field\":\"f2m-19-87f45376\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80027\",\"v\":\"1\"}",
+   "trace": -649,
+   "order": "524938",
+   "j": "0x334b3",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n19-b770f7"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m21-t2591-de54d72e",
+   "icv1": "ICV1:f2m-21-a6f878a4:2591:2094562:0x10c870:unk:unk:r:de54d72eef96",
+   "family": "binary",
+   "params": {
+    "m": 21,
+    "modulus": "0x200005",
+    "a": "0x1",
+    "b": "0x1b6f3b"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1b6f3b\",\"field\":\"f2m-21-a6f878a4\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x200005\",\"v\":\"1\"}",
+   "trace": 2591,
+   "order": "2094562",
+   "j": "0x10c870",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n21-b1b6f3b"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m21-t2845-e2683765",
+   "icv1": "ICV1:f2m-21-a6f878a4:2845:2094308:0x1df045:unk:unk:r:e2683765c597",
+   "family": "binary",
+   "params": {
+    "m": 21,
+    "modulus": "0x200005",
+    "a": "0x0",
+    "b": "0x10cc7b",
+    "generator_call": "random_binary_instance(21, 827675, 8)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x10cc7b\",\"field\":\"f2m-21-a6f878a4\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x200005\",\"v\":\"1\"}",
+   "trace": 2845,
+   "order": "2094308",
+   "j": "0x1df045",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n21-b10cc7b"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m21-tm1495-8bd9aa74",
+   "icv1": "ICV1:f2m-21-a6f878a4:-1495:2098648:0x479:unk:unk:r:8bd9aa74cf6d",
+   "family": "binary",
+   "params": {
+    "m": 21,
+    "modulus": "0x200005",
+    "a": "0x0",
+    "b": "0x968e",
+    "generator_call": "random_binary_instance(21, 59297, 8)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x968e\",\"field\":\"f2m-21-a6f878a4\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x200005\",\"v\":\"1\"}",
+   "trace": -1495,
+   "order": "2098648",
+   "j": "0x479",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n21-b968e"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m23-tm1957-8891f5a2",
+   "icv1": "ICV1:f2m-23-c07a6b8c:-1957:8390566:0x429b7e:unk:unk:r:8891f5a2009b",
+   "family": "binary",
+   "params": {
+    "m": 23,
+    "modulus": "0x800021",
+    "a": "0x1",
+    "b": "0x3a296b",
+    "generator_call": "random_binary_instance(23, 827675, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x3a296b\",\"field\":\"f2m-23-c07a6b8c\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800021\",\"v\":\"1\"}",
+   "trace": -1957,
+   "order": "8390566",
+   "j": "0x429b7e",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n23-b3a296b"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m23-tm4129-45500fce",
+   "icv1": "ICV1:f2m-23-c07a6b8c:-4129:8392738:0x915f0:unk:unk:r:45500fceb478",
+   "family": "binary",
+   "params": {
+    "m": 23,
+    "modulus": "0x800021",
+    "a": "0x1",
+    "b": "0x480f9a",
+    "generator_call": "random_binary_instance(23, 59297, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x480f9a\",\"field\":\"f2m-23-c07a6b8c\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800021\",\"v\":\"1\"}",
+   "trace": -4129,
+   "order": "8392738",
+   "j": "0x915f0",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n23-b480f9a"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m24-t1545-54539071",
+   "icv1": "ICV1:f2m-24-4580e493:1545:16775672:0x6fa13b:unk:unk:r:54539071f040",
+   "family": "binary",
+   "params": {
+    "m": 24,
+    "modulus": "0x100001b",
+    "a": "0x1",
+    "b": "0xf19f6f"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0xf19f6f\",\"field\":\"f2m-24-4580e493\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x100001b\",\"v\":\"1\"}",
+   "trace": 1545,
+   "order": "16775672",
+   "j": "0x6fa13b",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n24-bf19f6f"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-round2-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-eager-holdout-2026-09-22.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-holdout-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m24-tm3047-2d0c0e8c",
+   "icv1": "ICV1:f2m-24-4580e493:-3047:16780264:0xd809bd:unk:unk:r:2d0c0e8ceef0",
+   "family": "binary",
+   "params": {
+    "m": 24,
+    "modulus": "0x100001b",
+    "a": "0x0",
+    "b": "0x5fc9da"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x5fc9da\",\"field\":\"f2m-24-4580e493\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x100001b\",\"v\":\"1\"}",
+   "trace": -3047,
+   "order": "16780264",
+   "j": "0xd809bd",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n24-b5fc9da"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m25-t4775-4830dca7",
+   "icv1": "ICV1:f2m-25-38eb3fef:4775:33549658:0xafe3a1:unk:unk:r:4830dca7e156",
+   "family": "binary",
+   "params": {
+    "m": 25,
+    "modulus": "0x2000009",
+    "a": "0x1",
+    "b": "0x1448ace",
+    "generator_call": "random_binary_instance(25, 827675, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1448ace\",\"field\":\"f2m-25-38eb3fef\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x2000009\",\"v\":\"1\"}",
+   "trace": 4775,
+   "order": "33549658",
+   "j": "0xafe3a1",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n25-b1448ace"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m25-tm489-c50a8fb9",
+   "icv1": "ICV1:f2m-25-38eb3fef:-489:33554922:0x13fd27c:unk:unk:r:c50a8fb91a06",
+   "family": "binary",
+   "params": {
+    "m": 25,
+    "modulus": "0x2000009",
+    "a": "0x1",
+    "b": "0x1a9b772",
+    "generator_call": "random_binary_instance(25, 59297, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1a9b772\",\"field\":\"f2m-25-38eb3fef\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x2000009\",\"v\":\"1\"}",
+   "trace": -489,
+   "order": "33554922",
+   "j": "0x13fd27c",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n25-b1a9b772"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m27-t12543-569dca8b",
+   "icv1": "ICV1:f2m-27-070a37b6:12543:134205186:0x5fa276d:unk:unk:r:569dca8b7ccb",
+   "family": "binary",
+   "params": {
+    "m": 27,
+    "modulus": "0x8000027",
+    "a": "0x1",
+    "b": "0x845462"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x845462\",\"field\":\"f2m-27-070a37b6\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8000027\",\"v\":\"1\"}",
+   "trace": 12543,
+   "order": "134205186",
+   "j": "0x5fa276d",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n27-b845462"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-headline-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-headline-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m27-t20811-3d0fd5a1",
+   "icv1": "ICV1:f2m-27-070a37b6:20811:134196918:0x264118e:unk:unk:r:3d0fd5a19928",
+   "family": "binary",
+   "params": {
+    "m": 27,
+    "modulus": "0x8000027",
+    "a": "0x1",
+    "b": "0x3bfa9c2",
+    "generator_call": "random_binary_instance(27, 827675, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x3bfa9c2\",\"field\":\"f2m-27-070a37b6\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8000027\",\"v\":\"1\"}",
+   "trace": 20811,
+   "order": "134196918",
+   "j": "0x264118e",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n27-b3bfa9c2"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m27-t6931-1834c541",
+   "icv1": "ICV1:f2m-27-070a37b6:6931:134210798:0x295869:unk:unk:r:1834c5419e1c",
+   "family": "binary",
+   "params": {
+    "m": 27,
+    "modulus": "0x8000027",
+    "a": "0x1",
+    "b": "0x7ade7fe"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x7ade7fe\",\"field\":\"f2m-27-070a37b6\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8000027\",\"v\":\"1\"}",
+   "trace": 6931,
+   "order": "134210798",
+   "j": "0x295869",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n27-b7ade7fe"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-round2-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-eager-holdout-2026-09-22.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-holdout-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-f2m27-tm20293-ca4ad8af",
+   "icv1": "ICV1:f2m-27-070a37b6:-20293:134238022:0x61af38f:unk:unk:r:ca4ad8afd38c",
+   "family": "binary",
+   "params": {
+    "m": 27,
+    "modulus": "0x8000027",
+    "a": "0x1",
+    "b": "0x227199e",
+    "generator_call": "random_binary_instance(27, 59297, 8)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x227199e\",\"field\":\"f2m-27-070a37b6\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x8000027\",\"v\":\"1\"}",
+   "trace": -20293,
+   "order": "134238022",
+   "j": "0x61af38f",
+   "end": "unk",
+   "aliases": [
+    "random-binary-n27-b227199e"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp6-tm7-fc20da94",
+   "icv1": "ICV1:fp-59:-7:67:52:unk:unk:r:fc20da944826",
+   "family": "prime",
+   "params": {
+    "p": "59",
+    "a": "1",
+    "b": "13"
+   },
+   "model_json": "{\"a\":\"1\",\"b\":\"13\",\"field\":\"fp-59\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"59\",\"v\":\"1\"}",
+   "trace": -7,
+   "order": "67",
+   "j": "52",
+   "end": "unk",
+   "aliases": [
+    "bench-8bit"
+   ],
+   "standard_names": [],
+   "sources": [
+    "src/cryptanalysis/research_bench.rs"
+   ]
+  },
+  {
+   "slug": "icv1-fp10-t5-192cb216",
+   "icv1": "ICV1:fp-827:5:823:463:unk:unk:r:192cb216d592",
+   "family": "prime",
+   "params": {
+    "p": "827",
+    "a": "1",
+    "b": "15"
+   },
+   "model_json": "{\"a\":\"1\",\"b\":\"15\",\"field\":\"fp-827\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"827\",\"v\":\"1\"}",
+   "trace": 5,
+   "order": "823",
+   "j": "463",
+   "end": "unk",
+   "aliases": [
+    "bench-10bit"
+   ],
+   "standard_names": [],
+   "sources": [
+    "src/cryptanalysis/research_bench.rs",
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp12-tm53-6c9ff4bb",
+   "icv1": "ICV1:fp-3529:-53:3583:561:unk:unk:r:6c9ff4bb58cb",
+   "family": "prime",
+   "params": {
+    "p": "3529",
+    "a": "2574",
+    "b": "2980",
+    "generator_call": "find_prime_order_curve(12, 59297)"
+   },
+   "model_json": "{\"a\":\"2574\",\"b\":\"2980\",\"field\":\"fp-3529\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"3529\",\"v\":\"1\"}",
+   "trace": -53,
+   "order": "3583",
+   "j": "561",
+   "end": "unk",
+   "aliases": [
+    "generated-12bit-3529"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp12-t19-d4a315df",
+   "icv1": "ICV1:fp-3907:19:3889:3239:unk:unk:r:d4a315df72ed",
+   "family": "prime",
+   "params": {
+    "p": "3907",
+    "a": "1",
+    "b": "3"
+   },
+   "model_json": "{\"a\":\"1\",\"b\":\"3\",\"field\":\"fp-3907\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"3907\",\"v\":\"1\"}",
+   "trace": 19,
+   "order": "3889",
+   "j": "3239",
+   "end": "unk",
+   "aliases": [
+    "bench-12bit"
+   ],
+   "standard_names": [],
+   "sources": [
+    "src/cryptanalysis/research_bench.rs",
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp14-tm143-dec4cf6b",
+   "icv1": "ICV1:fp-14389:-143:14533:7345:unk:unk:r:dec4cf6b8cf5",
+   "family": "prime",
+   "params": {
+    "p": "14389",
+    "a": "7150",
+    "b": "684",
+    "generator_call": "find_prime_order_curve(14, 59297)"
+   },
+   "model_json": "{\"a\":\"7150\",\"b\":\"684\",\"field\":\"fp-14389\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"14389\",\"v\":\"1\"}",
+   "trace": -143,
+   "order": "14533",
+   "j": "7345",
+   "end": "unk",
+   "aliases": [
+    "generated-14bit-14389"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp14-tm43-158b6914",
+   "icv1": "ICV1:fp-16187:-43:16231:12429:unk:unk:r:158b69140d4b",
+   "family": "prime",
+   "params": {
+    "p": "16187",
+    "a": "1",
+    "b": "12"
+   },
+   "model_json": "{\"a\":\"1\",\"b\":\"12\",\"field\":\"fp-16187\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"16187\",\"v\":\"1\"}",
+   "trace": -43,
+   "order": "16231",
+   "j": "12429",
+   "end": "unk",
+   "aliases": [
+    "bench-14bit"
+   ],
+   "standard_names": [],
+   "sources": [
+    "src/cryptanalysis/research_bench.rs",
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp16-t295-8d3c3165",
+   "icv1": "ICV1:fp-53411:295:53117:36611:unk:unk:r:8d3c316511e3",
+   "family": "prime",
+   "params": {
+    "p": "53411",
+    "a": "4589",
+    "b": "186",
+    "generator_call": "find_prime_order_curve(16, 59297)"
+   },
+   "model_json": "{\"a\":\"4589\",\"b\":\"186\",\"field\":\"fp-53411\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"53411\",\"v\":\"1\"}",
+   "trace": 295,
+   "order": "53117",
+   "j": "36611",
+   "end": "unk",
+   "aliases": [
+    "generated-16bit-53411"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp16-t351-d433f24e",
+   "icv1": "ICV1:fp-65353:351:65003:20412:unk:unk:r:d433f24edf51",
+   "family": "prime",
+   "params": {
+    "p": "65353",
+    "a": "1",
+    "b": "16"
+   },
+   "model_json": "{\"a\":\"1\",\"b\":\"16\",\"field\":\"fp-65353\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"65353\",\"v\":\"1\"}",
+   "trace": 351,
+   "order": "65003",
+   "j": "20412",
+   "end": "unk",
+   "aliases": [
+    "bench-16bit"
+   ],
+   "standard_names": [],
+   "sources": [
+    "src/cryptanalysis/research_bench.rs",
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp18-tm337-d28d5e09",
+   "icv1": "ICV1:fp-212099:-337:212437:4738:unk:unk:r:d28d5e094103",
+   "family": "prime",
+   "params": {
+    "p": "212099",
+    "a": "188885",
+    "b": "173081",
+    "generator_call": "find_prime_order_curve(18, 59297)"
+   },
+   "model_json": "{\"a\":\"188885\",\"b\":\"173081\",\"field\":\"fp-212099\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"212099\",\"v\":\"1\"}",
+   "trace": -337,
+   "order": "212437",
+   "j": "4738",
+   "end": "unk",
+   "aliases": [
+    "generated-18bit-212099"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp18-t175-45770ebc",
+   "icv1": "ICV1:fp-261847:175:261673:864:unk:unk:r:45770ebcfcb2",
+   "family": "prime",
+   "params": {
+    "p": "261847",
+    "a": "3",
+    "b": "2"
+   },
+   "model_json": "{\"a\":\"3\",\"b\":\"2\",\"field\":\"fp-261847\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"261847\",\"v\":\"1\"}",
+   "trace": 175,
+   "order": "261673",
+   "j": "864",
+   "end": "unk",
+   "aliases": [
+    "bench-18bit"
+   ],
+   "standard_names": [],
+   "sources": [
+    "src/cryptanalysis/research_bench.rs",
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp20-t727-cd198a38",
+   "icv1": "ICV1:fp-563153:727:562427:476305:unk:unk:r:cd198a38cd5f",
+   "family": "prime",
+   "params": {
+    "p": "563153",
+    "a": "51142",
+    "b": "548946",
+    "generator_call": "find_prime_order_curve(20, 59297)"
+   },
+   "model_json": "{\"a\":\"51142\",\"b\":\"548946\",\"field\":\"fp-563153\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"563153\",\"v\":\"1\"}",
+   "trace": 727,
+   "order": "562427",
+   "j": "476305",
+   "end": "unk",
+   "aliases": [
+    "generated-20bit-563153"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp20-t1293-3c2999ba",
+   "icv1": "ICV1:fp-1048291:1293:1046999:326892:unk:unk:r:3c2999ba43b0",
+   "family": "prime",
+   "params": {
+    "p": "1048291",
+    "a": "1",
+    "b": "11"
+   },
+   "model_json": "{\"a\":\"1\",\"b\":\"11\",\"field\":\"fp-1048291\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048291\",\"v\":\"1\"}",
+   "trace": 1293,
+   "order": "1046999",
+   "j": "326892",
+   "end": "unk",
+   "aliases": [
+    "bench-20bit"
+   ],
+   "standard_names": [],
+   "sources": [
+    "src/cryptanalysis/research_bench.rs",
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp22-tm1385-475dcb5f",
+   "icv1": "ICV1:fp-2434423:-1385:2435809:1765340:unk:unk:r:475dcb5fda59",
+   "family": "prime",
+   "params": {
+    "p": "2434423",
+    "a": "620112",
+    "b": "1810598",
+    "generator_call": "find_prime_order_curve(22, 59297)"
+   },
+   "model_json": "{\"a\":\"620112\",\"b\":\"1810598\",\"field\":\"fp-2434423\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2434423\",\"v\":\"1\"}",
+   "trace": -1385,
+   "order": "2435809",
+   "j": "1765340",
+   "end": "unk",
+   "aliases": [
+    "generated-22bit-2434423"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp22-t411-86337907",
+   "icv1": "ICV1:fp-2987209:411:2986799:373475:unk:unk:r:86337907077a",
+   "family": "prime",
+   "params": {
+    "p": "2987209",
+    "a": "1396968",
+    "b": "179708"
+   },
+   "model_json": "{\"a\":\"1396968\",\"b\":\"179708\",\"field\":\"fp-2987209\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2987209\",\"v\":\"1\"}",
+   "trace": 411,
+   "order": "2986799",
+   "j": "373475",
+   "end": "unk",
+   "aliases": [
+    "generated-22bit-2987209"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-round2-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-eager-holdout-2026-09-22.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-holdout-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp22-tm1267-a5acaf6d",
+   "icv1": "ICV1:fp-3290411:-1267:3291679:2453699:unk:unk:r:a5acaf6ddb6f",
+   "family": "prime",
+   "params": {
+    "p": "3290411",
+    "a": "2224215",
+    "b": "1791205"
+   },
+   "model_json": "{\"a\":\"2224215\",\"b\":\"1791205\",\"field\":\"fp-3290411\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"3290411\",\"v\":\"1\"}",
+   "trace": -1267,
+   "order": "3291679",
+   "j": "2453699",
+   "end": "unk",
+   "aliases": [
+    "generated-22bit-3290411"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp22-t3019-0c6101de",
+   "icv1": "ICV1:fp-3914087:3019:3911069:3437178:unk:unk:r:0c6101dea80d",
+   "family": "prime",
+   "params": {
+    "p": "3914087",
+    "a": "2309743",
+    "b": "2364262",
+    "generator_call": "find_prime_order_curve(22, 827675)"
+   },
+   "model_json": "{\"a\":\"2309743\",\"b\":\"2364262\",\"field\":\"fp-3914087\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"3914087\",\"v\":\"1\"}",
+   "trace": 3019,
+   "order": "3911069",
+   "j": "3437178",
+   "end": "unk",
+   "aliases": [
+    "generated-22bit-3914087"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp24-t1577-77336155",
+   "icv1": "ICV1:fp-10935329:1577:10933753:2786525:unk:unk:r:773361558ca8",
+   "family": "prime",
+   "params": {
+    "p": "10935329",
+    "a": "5320418",
+    "b": "8535318"
+   },
+   "model_json": "{\"a\":\"5320418\",\"b\":\"8535318\",\"field\":\"fp-10935329\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"10935329\",\"v\":\"1\"}",
+   "trace": 1577,
+   "order": "10933753",
+   "j": "2786525",
+   "end": "unk",
+   "aliases": [
+    "generated-24bit-10935329"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-headline-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round2-unguarded-diagnostic-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-headline-2026-09-21.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp24-t1465-0b7163ca",
+   "icv1": "ICV1:fp-11921101:1465:11919637:4315753:unk:unk:r:0b7163ca05f4",
+   "family": "prime",
+   "params": {
+    "p": "11921101",
+    "a": "10159782",
+    "b": "6800760",
+    "generator_call": "find_prime_order_curve(24, 827675)"
+   },
+   "model_json": "{\"a\":\"10159782\",\"b\":\"6800760\",\"field\":\"fp-11921101\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"11921101\",\"v\":\"1\"}",
+   "trace": 1465,
+   "order": "11919637",
+   "j": "4315753",
+   "end": "unk",
+   "aliases": [
+    "generated-24bit-11921101"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp24-t991-def56de7",
+   "icv1": "ICV1:fp-12832957:991:12831967:10160944:unk:unk:r:def56de7ea9f",
+   "family": "prime",
+   "params": {
+    "p": "12832957",
+    "a": "10182707",
+    "b": "8165260"
+   },
+   "model_json": "{\"a\":\"10182707\",\"b\":\"8165260\",\"field\":\"fp-12832957\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"12832957\",\"v\":\"1\"}",
+   "trace": 991,
+   "order": "12831967",
+   "j": "10160944",
+   "end": "unk",
+   "aliases": [
+    "generated-24bit-12832957"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/ic/runs/ic-boundary-ledger-round2-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round3-rotation-holdout-2026-09-21.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-eager-holdout-2026-09-22.json",
+    "docs/ic/runs/ic-boundary-ledger-round5-holdout-2026-09-22.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp24-t1059-6df599df",
+   "icv1": "ICV1:fp-16483309:1059:16482251:3896869:unk:unk:r:6df599dfaebd",
+   "family": "prime",
+   "params": {
+    "p": "16483309",
+    "a": "8820674",
+    "b": "11008593",
+    "generator_call": "find_prime_order_curve(24, 59297)"
+   },
+   "model_json": "{\"a\":\"8820674\",\"b\":\"11008593\",\"field\":\"fp-16483309\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"16483309\",\"v\":\"1\"}",
+   "trace": 1059,
+   "order": "16482251",
+   "j": "3896869",
+   "end": "unk",
+   "aliases": [
+    "generated-24bit-16483309"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp26-tm9263-8a144943",
+   "icv1": "ICV1:fp-38313677:-9263:38322941:24868434:unk:unk:r:8a1449436748",
+   "family": "prime",
+   "params": {
+    "p": "38313677",
+    "a": "13006379",
+    "b": "18418303",
+    "generator_call": "find_prime_order_curve(26, 827675)"
+   },
+   "model_json": "{\"a\":\"13006379\",\"b\":\"18418303\",\"field\":\"fp-38313677\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"38313677\",\"v\":\"1\"}",
+   "trace": -9263,
+   "order": "38322941",
+   "j": "24868434",
+   "end": "unk",
+   "aliases": [
+    "generated-26bit-38313677"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp26-tm1775-7e8fb6df",
+   "icv1": "ICV1:fp-42652151:-1775:42653927:38191413:unk:unk:r:7e8fb6df0943",
+   "family": "prime",
+   "params": {
+    "p": "42652151",
+    "a": "26623966",
+    "b": "14210560",
+    "generator_call": "find_prime_order_curve(26, 59297)"
+   },
+   "model_json": "{\"a\":\"26623966\",\"b\":\"14210560\",\"field\":\"fp-42652151\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"42652151\",\"v\":\"1\"}",
+   "trace": -1775,
+   "order": "42653927",
+   "j": "38191413",
+   "end": "unk",
+   "aliases": [
+    "generated-26bit-42652151"
+   ],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/generated.json"
+   ]
+  },
+  {
+   "slug": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+   "icv1": "ICV1:fp-115792089210356248762697446949407573530086143415290314195533631308867097853951:89188191154553853111372247798585809583:115792089210356248762697446949407573529996955224135760342422259061068512044369:7958909377132088453074743217357398615041065282494610304372115906626967530147:unk:unk:r:f188c4914bb7",
+   "family": "prime",
+   "params": {
+    "p": "115792089210356248762697446949407573530086143415290314195533631308867097853951",
+    "a": "115792089210356248762697446949407573530086143415290314195533631308867097853948",
+    "b": "41058363725152142129326129780047268409114441015993725554835256314039467401291"
+   },
+   "model_json": "{\"a\":\"115792089210356248762697446949407573530086143415290314195533631308867097853948\",\"b\":\"41058363725152142129326129780047268409114441015993725554835256314039467401291\",\"field\":\"fp-115792089210356248762697446949407573530086143415290314195533631308867097853951\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"115792089210356248762697446949407573530086143415290314195533631308867097853951\",\"v\":\"1\"}",
+   "trace": 89188191154553853111372247798585809583,
+   "order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+   "j": "7958909377132088453074743217357398615041065282494610304372115906626967530147",
+   "end": "unk",
+   "aliases": [
+    "P-256"
+   ],
+   "standard_names": [
+    "P-256"
+   ],
+   "sources": [
+    "src/ecc/curve.rs"
+   ]
+  },
+  {
+   "slug": "icv1-fp256-t432420386565659656852420866390673177327-76dadd18",
+   "icv1": "ICV1:fp-115792089237316195423570985008687907853269984665640564039457584007908834671663:432420386565659656852420866390673177327:115792089237316195423570985008687907852837564279074904382605163141518161494337:0:unk:unk:r:76dadd18862f",
+   "family": "prime",
+   "params": {
+    "p": "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+    "a": "0",
+    "b": "7"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"7\",\"field\":\"fp-115792089237316195423570985008687907853269984665640564039457584007908834671663\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"115792089237316195423570985008687907853269984665640564039457584007908834671663\",\"v\":\"1\"}",
+   "trace": 432420386565659656852420866390673177327,
+   "order": "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+   "j": "0",
+   "end": "unk",
+   "aliases": [
+    "secp256k1"
+   ],
+   "standard_names": [
+    "secp256k1"
+   ],
+   "sources": [
+    "src/ecc/curve.rs"
+   ]
+  }
+ ]
+}

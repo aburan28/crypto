@@ -142,6 +142,7 @@ use crate::cryptanalysis::crossbred::{
     extract_crossbred, solve_crossbred, CrossbredParams, SearchOptions as CrossbredSearchOptions,
     SearchStats as CrossbredSearchStats,
 };
+use crate::cryptanalysis::curve_id;
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
@@ -731,17 +732,23 @@ impl KoblitzCurve {
         acc
     }
 
-    /// Short label: `K_a / GF(2^n)`, or the subfield form
-    /// `E_{a,b}/GF(2^k) over GF(2^n)`.
+    /// The curve's ICV1 identity (`docs/curves/ICV1.md`), in the
+    /// polynomial basis this curve's field is built on.  A Koblitz curve
+    /// (`k = 1`) certifies `End(E) = Z[τ]`, discriminant `−7`; a subfield
+    /// curve leaves the endomorphism ring unknown.
+    pub fn curve_id(&self) -> curve_id::CurveId {
+        let modulus = curve_id::modulus_integer(&self.curve.irreducible);
+        let (a, b) = (self.curve.a.to_biguint(), self.curve.b.to_biguint());
+        let end = (self.k == 1).then_some(-7);
+        curve_id::binary(self.n, &modulus, &a, &b, &self.group_order, end)
+            .expect("a constructed curve is non-singular and inside the Hasse interval")
+    }
+
+    /// The curve's name: its ICV1 slug.  Reports written before ICV1
+    /// named it `K_a / GF(2^n)` or `E_{a,b}/GF(2^k) over GF(2^n)`; the
+    /// registry resolves those to this slug ([`curve_id::same_curve`]).
     pub fn label(&self) -> String {
-        if self.k == 1 {
-            format!("K_{} / GF(2^{})", self.a, self.n)
-        } else {
-            format!(
-                "E_{{{},{}}}/GF(2^{}) over GF(2^{})",
-                self.a_index, self.b_index, self.k, self.n
-            )
-        }
+        self.curve_id().slug
     }
 
     /// `[k]·P` on this curve.
@@ -14521,7 +14528,11 @@ mod subfield_tests {
                 (1, 2, u64::from(a), 1)
             );
             assert_eq!(koblitz.subfield_basis, vec![F2mElement::one(n)]);
-            assert_eq!(koblitz.label(), format!("K_{a} / GF(2^{n})"));
+            assert!(koblitz.label().starts_with(&format!("icv1-f2m{n}-")));
+            assert!(curve_id::same_curve(
+                &koblitz.label(),
+                &format!("K_{a} / GF(2^{n})")
+            ));
             // The factor list and the legacy family are the F_2 ones.
             let masks: Vec<u64> = invariant_factors(&koblitz)
                 .iter()
