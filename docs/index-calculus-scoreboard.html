@@ -1282,6 +1282,93 @@
     </div>
   </div>
 
+  <!-- ============ ENDOMORPHISM-INVARIANT FACTOR BASES (PLAN + PILOT) ============ -->
+  <div class="panel" id="glv-invariant-bases">
+    <div class="panel-head">
+      <h2>Endomorphism-invariant factor bases across curve families <span class="chip">engineering</span> <span class="chip">plan</span></h2>
+      <p>Frozen source: <code>experiments/23_glv_invariant_pilot.json</code> and
+        <code>experiments/23_glv_invariant_gls_pilot.json</code> (2026-09-28), tables by
+        <code>scripts/glv_invariant_tables.py</code>; note
+        <code>research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md</code>.
+        One fold (<code>fold_by_endomorphisms</code>) over the framework&rsquo;s counted groups,
+        the control the same call with negation alone on the same points. A pilot, not the
+        plan&rsquo;s experiments: two seeds per size, <code>r</code> from 2<sup>12.8</sup> to
+        2<sup>23.9</sup>, every row&rsquo;s answer checked against the planted logarithm. Each
+        <em>vs rho</em> figure is against the counted negation walk (<code>A = 2</code>); the
+        matched folded walk is &radic;(w/2) cheaper still, measured in E6 (next panel).</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>family</th><th>fold</th><th class="n">points a column</th><th class="n">columns, control / fold</th><th class="n">S control / S fold (subtract oracle)</th><th class="n">S control / S fold (pair table)</th><th class="n">S fold vs rho (A = 2)</th><th>class</th></tr></thead>
+        <tbody>
+          <tr><td><code>j = 0</code> over F<sub>p</sub></td><td><code>&lang;&minus;1, &zeta;&rang;</code>, order 6</td><td class="n">6.0</td><td class="n">3.00</td><td class="n">1.00&ndash;2.65</td><td class="n">1.00&ndash;1.02</td><td class="n">18&times;&ndash;1,328&times;</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td><code>j = 1728</code> over F<sub>p</sub></td><td><code>&lang;&iota;&rang;</code>, order 4</td><td class="n">4.0</td><td class="n">2.00</td><td class="n">1.00&ndash;3.82</td><td class="n">1.00&ndash;1.13</td><td class="n">16&times;&ndash;2,834&times;</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>GLS twist over F<sub>p&sup2;</sub>, the <code>&psi;</code>-stable line</td><td><code>&lang;&minus;1, &psi;&rang;</code>, order 4</td><td class="n">4.0</td><td class="n">2.00</td><td class="n">1.31&ndash;1.98</td><td class="n">&mdash;</td><td class="n">40&times;&ndash;796&times;</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>generic, <code>D = &minus;7</code>, <code>D = &minus;8</code> (controls)</td><td>negation</td><td class="n">2.0</td><td class="n">1.00</td><td class="n">1.00</td><td class="n">1.00</td><td class="n">5&times;&ndash;4,250&times;</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td>degree-2 CM maps on <code>D = &minus;7, &minus;8</code> (type C)</td><td>none: <code>ord<sub>r</sub>(&lambda;)</code> 3.5&middot;10&sup3;&ndash;3.4&middot;10<sup>6</sup></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">0 of 38&ndash;362 base points kept in the base</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td><span class="chip">accounting</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p>The fold divides the columns by the group&rsquo;s order over two and the relation count
+        moves with them, so the count stays on its floor: the same reading as the
+        <code>&lang;&psi;&rang;</code> quotient row above. Where the relation phase is the cost
+        (<code>subtract</code>, <code>|F|</code> additions a target) <code>S</code> falls with the
+        trials; where the pair table is (<code>mitm</code>) both arms build the same table and
+        <code>S</code> does not move. The plan&rsquo;s experiments E1&ndash;E7 are run and read in
+        the next panel; these pilot figures stand as the only end-to-end <code>S</code> measured.</p>
+    </div>
+  </div>
+
+  <!-- ============ ENDOMORPHISM-INVARIANT FACTOR BASES: EXPERIMENTS E1-E7 ============ -->
+  <div class="panel" id="glv-invariant-experiments">
+    <div class="panel-head">
+      <h2>Endomorphism-invariant factor bases: experiments E1&ndash;E7 <span class="chip">engineering</span> <span class="chip">accounting</span></h2>
+      <p>Frozen source: <code>experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.json</code> (2026-09-29),
+        tables by <code>scripts/glv_invariant_experiment_tables.py</code>; note
+        <code>research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md</code> &sect;6.
+        The plan&rsquo;s seven experiments run: one relation stream per instance feeds the folded
+        base and its negation control to <em>full rank</em> (the rank a two-summand stream can
+        reach on a cofactor curve, <code>columns + 1 &minus; D</code>, &sect;6.0), four to six
+        seeds per size, <code>r</code> from 2<sup>13</sup> to 2<sup>32</sup>, every row&rsquo;s
+        answer checked against the planted logarithm. Relations to full rank carry a
+        coupon-collector factor on both arms, so the size-matched column is the <em>rank fraction
+        after exactly <code>columns</code> relations</em>. No row claims a speed; <code>S</code>
+        stays the pilot panel&rsquo;s.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>experiment</th><th>group, curve</th><th class="n">points a column</th><th class="n">columns, control / fold</th><th class="n">rank fraction after <code>columns</code> relations, fold / control</th><th class="n">relations to full rank, control / fold</th><th>what it settles</th><th>class</th></tr></thead>
+        <tbody>
+          <tr><td>E1, <code>j = 0</code> over F<sub>p</sub>, 2<sup>14</sup>&ndash;2<sup>30</sup></td><td><code>&lang;&minus;1, &zeta;&rang;</code>, order 6</td><td class="n">6.0</td><td class="n">3.00</td><td class="n">0.79&ndash;0.84 / 0.84&ndash;0.85</td><td class="n">2.8&ndash;5.5 (means; <code>&ln;(columns)</code> factor)</td><td>the fold moves the columns and nothing else; both arms fill at the same rate</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E1, <code>j = 1728</code> over F<sub>p</sub>, 2<sup>13</sup>&ndash;2<sup>31</sup></td><td><code>&lang;&iota;&rang;</code>, order 4</td><td class="n">4.0</td><td class="n">2.00</td><td class="n">0.79&ndash;0.84 / 0.79&ndash;0.84</td><td class="n">2.2&ndash;3.0</td><td>as above; <code>subtract</code> and <code>mitm</code> give the same stream</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E1, generic (control of the control)</td><td>negation</td><td class="n">2.0</td><td class="n">1.00</td><td class="n">0.83&ndash;0.85 / same</td><td class="n">1.00</td><td>the two arms are one run</td><td><span class="chip">baseline</span></td></tr>
+          <tr><td>E2, GLS twist over F<sub>p&sup2;</sub>, the <code>&psi;</code>-line, <code>p</code> = 2<sup>8</sup>&ndash;2<sup>12</sup></td><td><code>&lang;&minus;1, &psi;&rang;</code>, order 4</td><td class="n">4.0</td><td class="n">2.00</td><td class="n">0.82 / 0.84</td><td class="n">2.20 (1.31&ndash;3.41)</td><td>the line oracle (E2b) agrees with <code>subtract</code> on 3,600 of 3,600 targets at about 2,600 F<sub>p</sub> multiplications a target</td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E2, Koblitz <code>n</code> = 15, 17, 23, 31 (13: fold only), the Frobenius orbit</td><td><code>&lang;&minus;1, &tau;&rang;</code>, order <code>2n</code></td><td class="n">19.4&ndash;59.0 (up to <code>2n</code>)</td><td class="n">9.8&ndash;29.5</td><td class="n">0.70&ndash;1.00 / 0.58&ndash;0.85</td><td class="n">12&ndash;54</td><td>the same fold in the same unit: <code>ord<sub>r</sub>(&lambda;)</code>, 4 against <code>2n</code></td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E3, <code>j = 0</code> GLS twist, <code>p</code> = 2<sup>8</sup>&ndash;2<sup>12</sup></td><td><code>&lang;&minus;1, &zeta;, &psi;&rang;</code>: eigenvalues generate the 12th roots of unity</td><td class="n">12.0</td><td class="n">6.00</td><td class="n">&mdash;</td><td class="n">4.0&ndash;13.2 (12 instances)</td><td>the composite fold is the order of the eigenvalue subgroup of (Z/rZ)<sup>*</sup></td><td><span class="chip">engineering</span></td></tr>
+          <tr><td>E3, <code>j = 1728</code> GLS twist, <code>p</code> = 2<sup>8</sup>&ndash;2<sup>12</sup></td><td><code>&lang;&minus;1, &iota;, &psi;&rang;</code>: <code>&iota; = &plusmn;&psi;</code> on <code>&lang;G&rang;</code>, every instance</td><td class="n">4.0 (not 8)</td><td class="n">2.00</td><td class="n">&mdash;</td><td class="n">&mdash; (<code>r &asymp; p</code>, folds only)</td><td>the composite adds nothing: two square roots of &minus;1 mod <code>r</code></td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E4, degree 2: <code>D = &minus;7, &minus;8</code>, <code>1 + i</code> on <code>j = 1728</code>, 2<sup>16</sup>&ndash;2<sup>28</sup></td><td>type C, <code>ord<sub>r</sub>(&lambda;)</code> 41&ndash;1.2&middot;10<sup>8</sup></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">0 of 43,684 base points kept in the base</td><td class="n">&mdash;</td><td>no fold, no free relations, at every size</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E4b, degree 3: <code>D = &minus;11</code>, <code>&radic;&minus;3</code> on <code>j = 0</code>, 2<sup>16</sup>&ndash;2<sup>28</sup></td><td>type C, <code>ord<sub>r</sub>(&lambda;)</code> 33&ndash;2.5&middot;10<sup>8</sup></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">0 of 47,520 base points kept in the base</td><td class="n">&mdash;</td><td>as degree 2; V&eacute;lu with an odd kernel, six maps on <code>j = 0</code></td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E5, generic <code>E/F<sub>p</sub></code> on E(F<sub>p&sup3;</sub>), the Frobenius line, <code>p</code> = 2<sup>7</sup>&ndash;2<sup>11</sup></td><td><code>&lang;&minus;1, &pi;&rang;</code>, order 6</td><td class="n">6.0</td><td class="n">3.00</td><td class="n">0.60&ndash;0.68 / 0.81&ndash;0.92 at <code>h = #E(F<sub>p</sub>)</code></td><td class="n">1.2&ndash;1.6 against a column ratio of 3</td><td>columns fall, relations do not: <code>E(F<sub>p</sub>)</code> is cofactor and <code>&pi;</code>-fixed, so every folded two-summand row is a single-column row and both arms are coupon collectors over the same blocks</td><td><span class="chip">engineering</span> <span class="chip">accounting</span></td></tr>
+          <tr><td>E5, <code>j = 0</code> on E(F<sub>p&sup3;</sub>)</td><td><code>&lang;&minus;1, &pi;, &zeta;&rang;</code>: <code>&zeta; &isin; &lang;&pi;&rang;</code> on <code>&lang;G&rang;</code>, every instance</td><td class="n">6.0 (not 18)</td><td class="n">3.00</td><td class="n">&mdash;</td><td class="n">&mdash; (the line is the subgroup)</td><td><code>r &asymp; p</code>: the new part splits in Z[&omega;]; the descent degenerates</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E6, matched rho, <code>j = 0</code> / <code>j = 1728</code>, 2<sup>13</sup>&ndash;2<sup>27</sup>, 384 walks</td><td>rho folded by <code>Aut</code> vs the <code>A = 2</code> walk</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">steps ratio 1.72 (expected &radic;3 = 1.73) / 1.51 (expected &radic;2 = 1.41)</td><td class="n">&mdash;</td><td>the reference every &ldquo;vs rho&rdquo; above should have used; all answers verified</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E7, <code>j = 0</code>, three summands, 2<sup>17</sup>&ndash;2<sup>26</sup></td><td><code>&lang;&minus;1, &zeta;&rang;</code> at <code>m = 3</code></td><td class="n">6.0</td><td class="n">3.00</td><td class="n">&mdash;</td><td class="n">1.4&ndash;5.7</td><td>0 rows fold to <code>0 = 0</code>; orbit duplicates at the birthday count <code>3T&sup2;/r</code></td><td><span class="chip">accounting</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel-head">
+      <p>Verdict of the seven: the fold by any finite group of endomorphisms is the order of the
+        subgroup of (Z/rZ)<sup>*</sup> that the group&rsquo;s eigenvalues generate &mdash; the
+        automorphism group&rsquo;s roots of unity, the Frobenius&rsquo;s, and their products, and no
+        more &mdash; and the matched rho takes the square root of the same number. Nothing moved a
+        ratio to a floor. Where the endomorphisms fix a cofactor (E5) the fold buys columns and
+        not relations. Not done: Q-curves of degree 2 and 3 (the second half of E4b), the
+        three-summand line oracle on E(F<sub>p&sup3;</sub>), a matched folded rho on the
+        F<sub>p&sup2;</sub> and F<sub>p&sup3;</sub> groups, and a full-rank <code>S</code>; the
+        pilot panel&rsquo;s <code>S</code> figures stand as measured there.</p>
+    </div>
+  </div>
+
   <!-- ============ GLV / C3 SOLVER LEVERS ============ -->
   <div class="panel" id="glv-c3-levers">
     <div class="panel-head">

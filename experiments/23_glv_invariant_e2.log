@@ -1,0 +1,66 @@
+e2 gls p=2^8 r=2^10.7: cols 50/100 square Some(94)/Some(287) ratio Some(3.0531914893617023) trials 1530 muls/call 1949 ok true/true [0.1s]
+e2 gls p=2^8 r=2^9.3: cols 39/78 square Some(150)/None ratio None trials 4341 muls/call 1856 ok true/true [0.1s]
+e2 gls p=2^8 r=2^9.5: cols 44/88 square Some(129)/Some(169) ratio Some(1.310077519379845) trials 1043 muls/call 1633 ok true/true [0.0s]
+e2 gls p=2^8 r=2^10.3: cols 60/120 square Some(131)/Some(447) ratio Some(3.4122137404580153) trials 2556 muls/call 2059 ok true/true [0.1s]
+e2 gls p=2^8 r=2^13.0: cols 43/86 square Some(74)/Some(219) ratio Some(2.9594594594594597) trials 606 muls/call 1966 ok true/true [0.1s]
+e2 gls p=2^8 r=2^12.1: cols 42/84 square Some(146)/Some(289) ratio Some(1.9794520547945205) trials 639 muls/call 1962 ok true/true [0.1s]
+e2 gls p=2^10 r=2^17.0: cols 176/352 square Some(391)/Some(1161) ratio Some(2.969309462915601) trials 3039 muls/call 2570 ok true/true [0.3s]
+e2 gls p=2^10 r=2^16.1: cols 238/476 square Some(620)/Some(1354) ratio Some(2.1838709677419357) trials 3585 muls/call 2827 ok true/true [0.3s]
+e2 gls p=2^10 r=2^14.6: cols 201/402 square Some(639)/Some(1609) ratio Some(2.5179968701095463) trials 5294 muls/call 2601 ok true/true [0.3s]
+e2 gls p=2^10 r=2^16.1: cols 182/364 square Some(629)/Some(1038) ratio Some(1.6502384737678855) trials 2834 muls/call 2566 ok true/true [0.2s]
+e2 gls p=2^10 r=2^15.7: cols 208/416 square Some(692)/Some(1546) ratio Some(2.2341040462427744) trials 4023 muls/call 2574 ok true/true [0.3s]
+e2 gls p=2^10 r=2^16.8: cols 247/494 square Some(638)/Some(1792) ratio Some(2.8087774294670846) trials 4471 muls/call 2725 ok true/true [0.3s]
+e2 gls p=2^12 r=2^22.9: cols 704/1408 square Some(2637)/Some(5155) ratio Some(1.9548729616989002) trials 13017 muls/call 3259 ok true/true [1.0s]
+e2 gls p=2^12 r=2^22.9: cols 687/1374 square Some(2444)/Some(5264) ratio Some(2.1538461538461537) trials 13393 muls/call 3132 ok true/true [0.9s]
+e2 gls p=2^12 r=2^19.8: cols 839/1678 square Some(3082)/Some(5270) ratio Some(1.7099286177806619) trials 13632 muls/call 3282 ok true/true [1.0s]
+e2 gls p=2^12 r=2^21.9: cols 997/1994 square Some(4604)/Some(6563) ratio Some(1.4254995655951346) trials 16864 muls/call 3149 ok true/true [1.3s]
+e2 gls p=2^12 r=2^22.6: cols 655/1310 square Some(4456)/Some(6460) ratio Some(1.4497307001795332) trials 15675 muls/call 3275 ok true/true [1.1s]
+e2 gls p=2^12 r=2^24.0: cols 1026/2052 square Some(5453)/Some(9007) ratio Some(1.6517513295433706) trials 22698 muls/call 3524 ok true/true [1.7s]
+e2 koblitz n=13 r=2^11.0 dim 12: cols 155/2003 pts/col 25.8 square None/None ratio None ok true/true [0.7s]
+e2 koblitz n=13 r=2^11.0 dim 12: cols 155/2003 pts/col 25.8 square None/None ratio None ok true/true [0.7s]
+e2 koblitz n=13 r=2^11.0 dim 12: cols 155/2003 pts/col 25.8 square None/None ratio None ok true/true [0.6s]
+e2 koblitz n=13 r=2^11.0 dim 12: cols 155/2003 pts/col 25.8 square None/None ratio None ok true/true [0.7s]
+e2 koblitz n=13 r=2^11.0 dim 12: cols 155/2003 pts/col 25.8 square None/None ratio None ok true/true [0.7s]
+e2 koblitz n=13 r=2^11.0 dim 12: cols 155/2003 pts/col 25.8 square None/None ratio None ok true/true [0.6s]
+e2 koblitz n=14: no instance
+e2 koblitz n=15 r=2^7.7 dim 6: cols 5/49 pts/col 19.4 square Some(2)/Some(27) ratio Some(13.5) ok true/true [0.0s]
+e2 koblitz n=15 r=2^7.7 dim 6: cols 5/49 pts/col 19.4 square Some(2)/Some(27) ratio Some(13.5) ok true/true [0.0s]
+e2 koblitz n=15 r=2^7.7 dim 6: cols 5/49 pts/col 19.4 square Some(2)/Some(24) ratio Some(12.0) ok true/true [0.0s]
+e2 koblitz n=15 r=2^7.7 dim 6: cols 5/49 pts/col 19.4 square Some(2)/Some(27) ratio Some(13.5) ok true/true [0.0s]
+e2 koblitz n=15 r=2^7.7 dim 6: cols 5/49 pts/col 19.4 square Some(2)/Some(19) ratio Some(9.5) ok true/true [0.0s]
+e2 koblitz n=15 r=2^7.7 dim 6: cols 5/49 pts/col 19.4 square Some(2)/Some(20) ratio Some(10.0) ok true/true [0.0s]
+e2 koblitz n=16: no instance
+e2 koblitz n=17 r=2^16.0 dim 8: cols 7/103 pts/col 29.3 square Some(11)/Some(194) ratio Some(17.636363636363637) ok true/true [0.0s]
+e2 koblitz n=17 r=2^16.0 dim 8: cols 7/103 pts/col 29.3 square Some(7)/Some(218) ratio Some(31.142857142857142) ok true/true [0.0s]
+e2 koblitz n=17 r=2^16.0 dim 8: cols 7/103 pts/col 29.3 square Some(7)/Some(174) ratio Some(24.857142857142858) ok true/true [0.0s]
+e2 koblitz n=17 r=2^16.0 dim 8: cols 7/103 pts/col 29.3 square Some(7)/Some(195) ratio Some(27.857142857142858) ok true/true [0.0s]
+e2 koblitz n=17 r=2^16.0 dim 8: cols 7/103 pts/col 29.3 square Some(9)/Some(154) ratio Some(17.11111111111111) ok true/true [0.0s]
+e2 koblitz n=17 r=2^16.0 dim 8: cols 7/103 pts/col 29.3 square Some(9)/Some(326) ratio Some(36.22222222222222) ok true/true [0.0s]
+e2 koblitz n=18: no instance
+e2 koblitz n=19: the invariant subspace of dimension 18 carries 262543 points, too many for a pair table
+e2 koblitz n=20: no instance
+e2 koblitz n=21: no instance
+e2 koblitz n=22: no instance
+e2 koblitz n=23 r=2^22.0 dim 11: cols 46/1036 pts/col 45.0 square Some(52)/Some(4606) ratio Some(88.57692307692308) ok true/true [0.6s]
+e2 koblitz n=23 r=2^22.0 dim 11: cols 46/1036 pts/col 45.0 square Some(122)/Some(3105) ratio Some(25.450819672131146) ok true/true [0.5s]
+e2 koblitz n=23 r=2^22.0 dim 11: cols 46/1036 pts/col 45.0 square Some(109)/Some(3810) ratio Some(34.95412844036697) ok true/true [0.6s]
+e2 koblitz n=23 r=2^22.0 dim 11: cols 46/1036 pts/col 45.0 square Some(90)/Some(3053) ratio Some(33.922222222222224) ok true/true [0.6s]
+e2 koblitz n=23 r=2^22.0 dim 11: cols 46/1036 pts/col 45.0 square Some(59)/Some(3587) ratio Some(60.79661016949152) ok true/true [0.6s]
+e2 koblitz n=23 r=2^22.0 dim 11: cols 46/1036 pts/col 45.0 square Some(106)/Some(3224) ratio Some(30.41509433962264) ok true/true [0.5s]
+e2 koblitz n=24: no instance
+e2 koblitz n=25: no instance
+e2 koblitz n=26: no instance
+e2 koblitz n=27: no instance
+e2 koblitz n=28: no instance
+e2 koblitz n=29: no divisor
+e2 koblitz n=30: no instance
+e2 koblitz n=31 r=2^20.5 dim 10: cols 20/590 pts/col 59.0 square Some(68)/Some(1910) ratio Some(28.08823529411765) ok true/true [44.7s]
+e2 koblitz n=31 r=2^20.5 dim 10: cols 20/590 pts/col 59.0 square Some(23)/Some(1925) ratio Some(83.69565217391305) ok true/true [44.1s]
+e2 koblitz n=31 r=2^20.5 dim 10: cols 20/590 pts/col 59.0 square Some(32)/Some(2023) ratio Some(63.21875) ok true/true [51.4s]
+e2 koblitz n=31 r=2^20.5 dim 10: cols 20/590 pts/col 59.0 square Some(51)/Some(1833) ratio Some(35.94117647058823) ok true/true [40.0s]
+e2 koblitz n=31 r=2^20.5 dim 10: cols 20/590 pts/col 59.0 square Some(53)/Some(1905) ratio Some(35.943396226415096) ok true/true [42.1s]
+e2 koblitz n=31 r=2^20.5 dim 10: cols 20/590 pts/col 59.0 square Some(26)/Some(2056) ratio Some(79.07692307692308) ok true/true [55.9s]
+e2 koblitz n=32: no instance
+e2 koblitz n=33: no instance
+78554
+wrote experiments/23_glv_invariant_e2.json (48 rows, 296s)

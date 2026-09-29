@@ -1,0 +1,5936 @@
+{
+  "command": "glv_invariant_experiments --exp e4 --bits 16,20,24,28 --seeds 4 --json experiments/23_glv_invariant_e4.json",
+  "host": {
+    "arch": "x86_64",
+    "os": "linux",
+    "threads": 4
+  },
+  "rows": [
+    {
+      "base_points": 28,
+      "bits": 16,
+      "cofactor": 16,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-16bit-p54401",
+      "log2_r": 11.71896091198421,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=6276, trace=-1]",
+          "overlap": {
+            "base_points": 28,
+            "chance_fraction": 0.0005191337881934144,
+            "degree": 2,
+            "eigenvalue": 1656,
+            "eigenvalue_order": 337,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=6276, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=6276, trace=1]",
+          "overlap": {
+            "base_points": 28,
+            "chance_fraction": 0.0005191337881934144,
+            "degree": 2,
+            "eigenvalue": 1715,
+            "eigenvalue_order": 674,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=6276, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=28100, trace=-1]",
+          "overlap": {
+            "base_points": 28,
+            "chance_fraction": 0.0005191337881934144,
+            "degree": 2,
+            "eigenvalue": 1714,
+            "eigenvalue_order": 3370,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=28100, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=28100, trace=1]",
+          "overlap": {
+            "base_points": 28,
+            "chance_fraction": 0.0005191337881934144,
+            "degree": 2,
+            "eigenvalue": 1657,
+            "eigenvalue_order": 1685,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=28100, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 3371,
+      "seed": 1
+    },
+    {
+      "base_points": 38,
+      "bits": 16,
+      "cofactor": 8,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-16bit-p57059",
+      "log2_r": 12.79543091954113,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=6604, trace=1]",
+          "overlap": {
+            "base_points": 38,
+            "chance_fraction": 0.000668167112111408,
+            "degree": 2,
+            "eigenvalue": 5654,
+            "eigenvalue_order": 3554,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=6604, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=6604, trace=-1]",
+          "overlap": {
+            "base_points": 38,
+            "chance_fraction": 0.000668167112111408,
+            "degree": 2,
+            "eigenvalue": 1455,
+            "eigenvalue_order": 1777,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=6604, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=28134, trace=-1]",
+          "overlap": {
+            "base_points": 38,
+            "chance_fraction": 0.000668167112111408,
+            "degree": 2,
+            "eigenvalue": 5653,
+            "eigenvalue_order": 7108,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=28134, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=28134, trace=1]",
+          "overlap": {
+            "base_points": 38,
+            "chance_fraction": 0.000668167112111408,
+            "degree": 2,
+            "eigenvalue": 1456,
+            "eigenvalue_order": 7108,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=28134, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 7109,
+      "seed": 2
+    },
+    {
+      "base_points": 44,
+      "bits": 16,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-16bit-p47497",
+      "log2_r": 13.528087774047542,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=12324, trace=1]",
+          "overlap": {
+            "base_points": 44,
+            "chance_fraction": 0.0009311775162956066,
+            "degree": 2,
+            "eigenvalue": 10944,
+            "eigenvalue_order": 11812,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=12324, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=12324, trace=-1]",
+          "overlap": {
+            "base_points": 44,
+            "chance_fraction": 0.0009311775162956066,
+            "degree": 2,
+            "eigenvalue": 869,
+            "eigenvalue_order": 11812,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=12324, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=28117, trace=1]",
+          "overlap": {
+            "base_points": 44,
+            "chance_fraction": 0.0009311775162956066,
+            "degree": 2,
+            "eigenvalue": 870,
+            "eigenvalue_order": 2953,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=28117, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=28117, trace=-1]",
+          "overlap": {
+            "base_points": 44,
+            "chance_fraction": 0.0009311775162956066,
+            "degree": 2,
+            "eigenvalue": 10943,
+            "eigenvalue_order": 5906,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=28117, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 11813,
+      "seed": 3
+    },
+    {
+      "base_points": 40,
+      "bits": 16,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-16bit-p34721",
+      "log2_r": 13.092922275131775,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=2188, trace=1]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0011445576284765937,
+            "degree": 2,
+            "eigenvalue": 4214,
+            "eigenvalue_order": 8736,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=2188, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=2188, trace=-1]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0011445576284765937,
+            "degree": 2,
+            "eigenvalue": 4523,
+            "eigenvalue_order": 8736,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=2188, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=10805, trace=1]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0011445576284765937,
+            "degree": 2,
+            "eigenvalue": 4524,
+            "eigenvalue_order": 8736,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=10805, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=10805, trace=-1]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0011445576284765937,
+            "degree": 2,
+            "eigenvalue": 4213,
+            "eigenvalue_order": 8736,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=10805, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 8737,
+      "seed": 4
+    },
+    {
+      "base_points": 114,
+      "bits": 20,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-20bit-p767309",
+      "log2_r": 17.55079938268114,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=96674, trace=1]",
+          "overlap": {
+            "base_points": 114,
+            "chance_fraction": 0.00014843208841344325,
+            "degree": 2,
+            "eigenvalue": 112535,
+            "eigenvalue_order": 64002,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=96674, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=96674, trace=-1]",
+          "overlap": {
+            "base_points": 114,
+            "chance_fraction": 0.00014843208841344325,
+            "degree": 2,
+            "eigenvalue": 79472,
+            "eigenvalue_order": 32001,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=96674, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=491242, trace=1]",
+          "overlap": {
+            "base_points": 114,
+            "chance_fraction": 0.00014843208841344325,
+            "degree": 2,
+            "eigenvalue": 79473,
+            "eigenvalue_order": 192006,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=491242, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=491242, trace=-1]",
+          "overlap": {
+            "base_points": 114,
+            "chance_fraction": 0.00014843208841344325,
+            "degree": 2,
+            "eigenvalue": 112534,
+            "eigenvalue_order": 96003,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=491242, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 192007,
+      "seed": 1
+    },
+    {
+      "base_points": 112,
+      "bits": 20,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-20bit-p723493",
+      "log2_r": 17.464122924107553,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=506797, trace=-1]",
+          "overlap": {
+            "base_points": 112,
+            "chance_fraction": 0.00015485783497685428,
+            "degree": 2,
+            "eigenvalue": 33546,
+            "eigenvalue_order": 30135,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=506797, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=506797, trace=1]",
+          "overlap": {
+            "base_points": 112,
+            "chance_fraction": 0.00015485783497685428,
+            "degree": 2,
+            "eigenvalue": 147265,
+            "eigenvalue_order": 60270,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=506797, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=553327, trace=-1]",
+          "overlap": {
+            "base_points": 112,
+            "chance_fraction": 0.00015485783497685428,
+            "degree": 2,
+            "eigenvalue": 147264,
+            "eigenvalue_order": 20090,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=553327, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=553327, trace=1]",
+          "overlap": {
+            "base_points": 112,
+            "chance_fraction": 0.00015485783497685428,
+            "degree": 2,
+            "eigenvalue": 33547,
+            "eigenvalue_order": 10045,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=553327, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 180811,
+      "seed": 2
+    },
+    {
+      "base_points": 98,
+      "bits": 20,
+      "cofactor": 8,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-20bit-p955439",
+      "log2_r": 16.862915777807608,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=313251, trace=1]",
+          "overlap": {
+            "base_points": 98,
+            "chance_fraction": 0.0001027762163250581,
+            "degree": 2,
+            "eigenvalue": 30953,
+            "eigenvalue_order": 119190,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=313251, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=313251, trace=-1]",
+          "overlap": {
+            "base_points": 98,
+            "chance_fraction": 0.0001027762163250581,
+            "degree": 2,
+            "eigenvalue": 88238,
+            "eigenvalue_order": 59595,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=313251, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=854004, trace=1]",
+          "overlap": {
+            "base_points": 98,
+            "chance_fraction": 0.0001027762163250581,
+            "degree": 2,
+            "eigenvalue": 88239,
+            "eigenvalue_order": 119190,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=854004, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=854004, trace=-1]",
+          "overlap": {
+            "base_points": 98,
+            "chance_fraction": 0.0001027762163250581,
+            "degree": 2,
+            "eigenvalue": 30952,
+            "eigenvalue_order": 59595,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=854004, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 119191,
+      "seed": 3
+    },
+    {
+      "base_points": 114,
+      "bits": 20,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-20bit-p760657",
+      "log2_r": 17.5365583695089,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=603284, trace=1]",
+          "overlap": {
+            "base_points": 114,
+            "chance_fraction": 0.00014990453448067285,
+            "degree": 2,
+            "eigenvalue": 130419,
+            "eigenvalue_order": 47530,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=603284, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=603284, trace=-1]",
+          "overlap": {
+            "base_points": 114,
+            "chance_fraction": 0.00014990453448067285,
+            "degree": 2,
+            "eigenvalue": 59702,
+            "eigenvalue_order": 23765,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=603284, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=633931, trace=1]",
+          "overlap": {
+            "base_points": 114,
+            "chance_fraction": 0.00014990453448067285,
+            "degree": 2,
+            "eigenvalue": 59703,
+            "eigenvalue_order": 95060,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=633931, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=633931, trace=-1]",
+          "overlap": {
+            "base_points": 114,
+            "chance_fraction": 0.00014990453448067285,
+            "degree": 2,
+            "eigenvalue": 130418,
+            "eigenvalue_order": 95060,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=633931, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 190121,
+      "seed": 4
+    },
+    {
+      "base_points": 300,
+      "bits": 24,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-24bit-p13691897",
+      "log2_r": 21.707276973053183,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=7886291, trace=1]",
+          "overlap": {
+            "base_points": 300,
+            "chance_fraction": 0.000021903815381793724,
+            "degree": 2,
+            "eigenvalue": 722926,
+            "eigenvalue_order": 3424060,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=7886291, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=7886291, trace=-1]",
+          "overlap": {
+            "base_points": 300,
+            "chance_fraction": 0.000021903815381793724,
+            "degree": 2,
+            "eigenvalue": 2701135,
+            "eigenvalue_order": 3424060,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=7886291, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=9762872, trace=1]",
+          "overlap": {
+            "base_points": 300,
+            "chance_fraction": 0.000021903815381793724,
+            "degree": 2,
+            "eigenvalue": 2701136,
+            "eigenvalue_order": 342406,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=9762872, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=9762872, trace=-1]",
+          "overlap": {
+            "base_points": 300,
+            "chance_fraction": 0.000021903815381793724,
+            "degree": 2,
+            "eigenvalue": 722925,
+            "eigenvalue_order": 171203,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=9762872, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 3424061,
+      "seed": 1
+    },
+    {
+      "base_points": 284,
+      "bits": 24,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-24bit-p11675449",
+      "log2_r": 21.476307653703667,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=2281293, trace=-1]",
+          "overlap": {
+            "base_points": 284,
+            "chance_fraction": 0.00002433579559028529,
+            "degree": 2,
+            "eigenvalue": 1123535,
+            "eigenvalue_order": 243126,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=2281293, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=2281293, trace=1]",
+          "overlap": {
+            "base_points": 284,
+            "chance_fraction": 0.00002433579559028529,
+            "degree": 2,
+            "eigenvalue": 1793978,
+            "eigenvalue_order": 121563,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=2281293, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=2891649, trace=-1]",
+          "overlap": {
+            "base_points": 284,
+            "chance_fraction": 0.00002433579559028529,
+            "degree": 2,
+            "eigenvalue": 1793977,
+            "eigenvalue_order": 486252,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=2891649, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=2891649, trace=1]",
+          "overlap": {
+            "base_points": 284,
+            "chance_fraction": 0.00002433579559028529,
+            "degree": 2,
+            "eigenvalue": 1123536,
+            "eigenvalue_order": 486252,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=2891649, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 2917513,
+      "seed": 2
+    },
+    {
+      "base_points": 278,
+      "bits": 24,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-24bit-p10761937",
+      "log2_r": 21.360202497275967,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=3531491, trace=1]",
+          "overlap": {
+            "base_points": 278,
+            "chance_fraction": 0.000025818032279598515,
+            "degree": 2,
+            "eigenvalue": 1118659,
+            "eigenvalue_order": 2691916,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=3531491, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=3531491, trace=-1]",
+          "overlap": {
+            "base_points": 278,
+            "chance_fraction": 0.000025818032279598515,
+            "degree": 2,
+            "eigenvalue": 1573258,
+            "eigenvalue_order": 2691916,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=3531491, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=8826311, trace=1]",
+          "overlap": {
+            "base_points": 278,
+            "chance_fraction": 0.000025818032279598515,
+            "degree": 2,
+            "eigenvalue": 1573259,
+            "eigenvalue_order": 1345958,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=8826311, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=8826311, trace=-1]",
+          "overlap": {
+            "base_points": 278,
+            "chance_fraction": 0.000025818032279598515,
+            "degree": 2,
+            "eigenvalue": 1118658,
+            "eigenvalue_order": 672979,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=8826311, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 2691917,
+      "seed": 3
+    },
+    {
+      "base_points": 188,
+      "bits": 24,
+      "cofactor": 16,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-24bit-p13523017",
+      "log2_r": 19.68813588631008,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=255256, trace=-1]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.000013909720586268088,
+            "degree": 2,
+            "eigenvalue": 45899,
+            "eigenvalue_order": 844732,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=255256, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=255256, trace=1]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.000013909720586268088,
+            "degree": 2,
+            "eigenvalue": 798834,
+            "eigenvalue_order": 844732,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=255256, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=13361718, trace=-1]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.000013909720586268088,
+            "degree": 2,
+            "eigenvalue": 798833,
+            "eigenvalue_order": 422366,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=13361718, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=13361718, trace=1]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.000013909720586268088,
+            "degree": 2,
+            "eigenvalue": 45900,
+            "eigenvalue_order": 211183,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=13361718, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 844733,
+      "seed": 4
+    },
+    {
+      "base_points": 480,
+      "bits": 28,
+      "cofactor": 16,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-28bit-p222109969",
+      "log2_r": 23.72652824219841,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=34752854, trace=-1]",
+          "overlap": {
+            "base_points": 480,
+            "chance_fraction": 2.161347314752903e-6,
+            "degree": 2,
+            "eigenvalue": 8463812,
+            "eigenvalue_order": 6940115,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=34752854, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=34752854, trace=1]",
+          "overlap": {
+            "base_points": 480,
+            "chance_fraction": 2.161347314752903e-6,
+            "degree": 2,
+            "eigenvalue": 5416419,
+            "eigenvalue_order": 13880230,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=34752854, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=219920188, trace=1]",
+          "overlap": {
+            "base_points": 480,
+            "chance_fraction": 2.161347314752903e-6,
+            "degree": 2,
+            "eigenvalue": 8463813,
+            "eigenvalue_order": 283270,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=219920188, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=219920188, trace=-1]",
+          "overlap": {
+            "base_points": 480,
+            "chance_fraction": 2.161347314752903e-6,
+            "degree": 2,
+            "eigenvalue": 5416418,
+            "eigenvalue_order": 141635,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=219920188, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 13880231,
+      "seed": 1
+    },
+    {
+      "base_points": 474,
+      "bits": 28,
+      "cofactor": 16,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-28bit-p213521681",
+      "log2_r": 23.669613364510646,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=1822678, trace=1]",
+          "overlap": {
+            "base_points": 474,
+            "chance_fraction": 2.2202135586886943e-6,
+            "degree": 2,
+            "eigenvalue": 1931954,
+            "eigenvalue_order": 6671655,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=1822678, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=1822678, trace=-1]",
+          "overlap": {
+            "base_points": 474,
+            "chance_fraction": 2.2202135586886943e-6,
+            "degree": 2,
+            "eigenvalue": 11411357,
+            "eigenvalue_order": 13343310,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=1822678, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=189152785, trace=1]",
+          "overlap": {
+            "base_points": 474,
+            "chance_fraction": 2.2202135586886943e-6,
+            "degree": 2,
+            "eigenvalue": 11411358,
+            "eigenvalue_order": 2223885,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=189152785, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=189152785, trace=-1]",
+          "overlap": {
+            "base_points": 474,
+            "chance_fraction": 2.2202135586886943e-6,
+            "degree": 2,
+            "eigenvalue": 1931953,
+            "eigenvalue_order": 4447770,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=189152785, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 13343311,
+      "seed": 2
+    },
+    {
+      "base_points": 666,
+      "bits": 28,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-28bit-p148275493",
+      "log2_r": 25.14386315521571,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=1653058, trace=-1]",
+          "overlap": {
+            "base_points": 666,
+            "chance_fraction": 4.491146493672919e-6,
+            "degree": 2,
+            "eigenvalue": 8775875,
+            "eigenvalue_order": 18536469,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=1653058, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=1653058, trace=1]",
+          "overlap": {
+            "base_points": 666,
+            "chance_fraction": 4.491146493672919e-6,
+            "degree": 2,
+            "eigenvalue": 28297064,
+            "eigenvalue_order": 37072938,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=1653058, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=123121826, trace=-1]",
+          "overlap": {
+            "base_points": 666,
+            "chance_fraction": 4.491146493672919e-6,
+            "degree": 2,
+            "eigenvalue": 28297063,
+            "eigenvalue_order": 37072938,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=123121826, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=123121826, trace=1]",
+          "overlap": {
+            "base_points": 666,
+            "chance_fraction": 4.491146493672919e-6,
+            "degree": 2,
+            "eigenvalue": 8775876,
+            "eigenvalue_order": 18536469,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=123121826, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 37072939,
+      "seed": 3
+    },
+    {
+      "base_points": 634,
+      "bits": 28,
+      "cofactor": 8,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d7",
+      "instance": "d7-28bit-p255160903",
+      "log2_r": 24.927009535339764,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=82122657, trace=1]",
+          "overlap": {
+            "base_points": 634,
+            "chance_fraction": 2.484401018124779e-6,
+            "degree": 2,
+            "eigenvalue": 21228091,
+            "eigenvalue_order": 5316506,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=82122657, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=82122657, trace=-1]",
+          "overlap": {
+            "base_points": 634,
+            "chance_fraction": 2.484401018124779e-6,
+            "degree": 2,
+            "eigenvalue": 10670946,
+            "eigenvalue_order": 2658253,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=82122657, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=240881990, trace=1]",
+          "overlap": {
+            "base_points": 634,
+            "chance_fraction": 2.484401018124779e-6,
+            "degree": 2,
+            "eigenvalue": 10670947,
+            "eigenvalue_order": 10633012,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=240881990, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=240881990, trace=-1]",
+          "overlap": {
+            "base_points": 634,
+            "chance_fraction": 2.484401018124779e-6,
+            "degree": 2,
+            "eigenvalue": 21228090,
+            "eigenvalue_order": 10633012,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=240881990, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 31899037,
+      "seed": 4
+    },
+    {
+      "base_points": 60,
+      "bits": 16,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-16bit-p58963",
+      "log2_r": 14.859292116781756,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=52161, trace=0]",
+          "overlap": {
+            "base_points": 60,
+            "chance_fraction": 0.001009319382296538,
+            "degree": 2,
+            "eigenvalue": 24073,
+            "eigenvalue_order": 14861,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=52161, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=52161, trace=0]",
+          "overlap": {
+            "base_points": 60,
+            "chance_fraction": 0.001009319382296538,
+            "degree": 2,
+            "eigenvalue": 5650,
+            "eigenvalue_order": 29722,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=52161, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 29723,
+      "seed": 1
+    },
+    {
+      "base_points": 40,
+      "bits": 16,
+      "cofactor": 6,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-16bit-p55667",
+      "log2_r": 13.171645941347052,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=40681, trace=0]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0007225172500993462,
+            "degree": 2,
+            "eigenvalue": 8136,
+            "eigenvalue_order": 4613,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=40681, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=40681, trace=0]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0007225172500993462,
+            "degree": 2,
+            "eigenvalue": 1091,
+            "eigenvalue_order": 9226,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=40681, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 9227,
+      "seed": 2
+    },
+    {
+      "base_points": 42,
+      "bits": 16,
+      "cofactor": 6,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-16bit-p61211",
+      "log2_r": 13.32656992956981,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=51160, trace=0]",
+          "overlap": {
+            "base_points": 42,
+            "chance_fraction": 0.0006813978389954249,
+            "degree": 2,
+            "eigenvalue": 1729,
+            "eigenvalue_order": 10272,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=51160, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=51160, trace=0]",
+          "overlap": {
+            "base_points": 42,
+            "chance_fraction": 0.0006813978389954249,
+            "degree": 2,
+            "eigenvalue": 8544,
+            "eigenvalue_order": 10272,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=51160, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 10273,
+      "seed": 3
+    },
+    {
+      "base_points": 50,
+      "bits": 16,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-16bit-p33547",
+      "log2_r": 14.020545954290379,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=26121, trace=0]",
+          "overlap": {
+            "base_points": 50,
+            "chance_fraction": 0.0015043023045911306,
+            "degree": 2,
+            "eigenvalue": 10359,
+            "eigenvalue_order": 8309,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=26121, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=26121, trace=0]",
+          "overlap": {
+            "base_points": 50,
+            "chance_fraction": 0.0015043023045911306,
+            "degree": 2,
+            "eigenvalue": 6260,
+            "eigenvalue_order": 16618,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=26121, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 16619,
+      "seed": 4
+    },
+    {
+      "base_points": 122,
+      "bits": 20,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-20bit-p946513",
+      "log2_r": 17.853802960456658,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=246707, trace=0]",
+          "overlap": {
+            "base_points": 122,
+            "chance_fraction": 0.00012875663307736795,
+            "degree": 2,
+            "eigenvalue": 202236,
+            "eigenvalue_order": 33840,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=246707, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=246707, trace=0]",
+          "overlap": {
+            "base_points": 122,
+            "chance_fraction": 0.00012875663307736795,
+            "degree": 2,
+            "eigenvalue": 34645,
+            "eigenvalue_order": 33840,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=246707, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 236881,
+      "seed": 1
+    },
+    {
+      "base_points": 102,
+      "bits": 20,
+      "cofactor": 6,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-20bit-p824699",
+      "log2_r": 17.066120732244517,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=55353, trace=0]",
+          "overlap": {
+            "base_points": 102,
+            "chance_fraction": 0.00012388954882341366,
+            "degree": 2,
+            "eigenvalue": 131269,
+            "eigenvalue_order": 137218,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=55353, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=55353, trace=0]",
+          "overlap": {
+            "base_points": 102,
+            "chance_fraction": 0.00012388954882341366,
+            "degree": 2,
+            "eigenvalue": 5950,
+            "eigenvalue_order": 68609,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=55353, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 137219,
+      "seed": 2
+    },
+    {
+      "base_points": 110,
+      "bits": 20,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-20bit-p688249",
+      "log2_r": 17.395743308401148,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=183163, trace=0]",
+          "overlap": {
+            "base_points": 110,
+            "chance_fraction": 0.00015947483487105735,
+            "degree": 2,
+            "eigenvalue": 145141,
+            "eigenvalue_order": 172440,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=183163, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=183163, trace=0]",
+          "overlap": {
+            "base_points": 110,
+            "chance_fraction": 0.00015947483487105735,
+            "degree": 2,
+            "eigenvalue": 27300,
+            "eigenvalue_order": 172440,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=183163, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 172441,
+      "seed": 3
+    },
+    {
+      "base_points": 80,
+      "bits": 20,
+      "cofactor": 12,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-20bit-p792713",
+      "log2_r": 16.008450507448284,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=688844, trace=0]",
+          "overlap": {
+            "base_points": 80,
+            "chance_fraction": 0.00010113115193438611,
+            "degree": 2,
+            "eigenvalue": 30339,
+            "eigenvalue_order": 32960,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=688844, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=688844, trace=0]",
+          "overlap": {
+            "base_points": 80,
+            "chance_fraction": 0.00010113115193438611,
+            "degree": 2,
+            "eigenvalue": 35582,
+            "eigenvalue_order": 32960,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=688844, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 65921,
+      "seed": 4
+    },
+    {
+      "base_points": 208,
+      "bits": 24,
+      "cofactor": 12,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-24bit-p13691897",
+      "log2_r": 20.12132229606777,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=1435957, trace=0]",
+          "overlap": {
+            "base_points": 208,
+            "chance_fraction": 0.00001519709314678317,
+            "degree": 2,
+            "eigenvalue": 621148,
+            "eigenvalue_order": 1140568,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=1435957, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=1435957, trace=0]",
+          "overlap": {
+            "base_points": 208,
+            "chance_fraction": 0.00001519709314678317,
+            "degree": 2,
+            "eigenvalue": 519421,
+            "eigenvalue_order": 1140568,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=1435957, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 1140569,
+      "seed": 1
+    },
+    {
+      "base_points": 362,
+      "bits": 24,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-24bit-p11881867",
+      "log2_r": 22.501831597946108,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=1709560, trace=0]",
+          "overlap": {
+            "base_points": 362,
+            "chance_fraction": 0.00003047560293286427,
+            "degree": 2,
+            "eigenvalue": 3727208,
+            "eigenvalue_order": 2969588,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=1709560, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=1709560, trace=0]",
+          "overlap": {
+            "base_points": 362,
+            "chance_fraction": 0.00003047560293286427,
+            "degree": 2,
+            "eigenvalue": 2211969,
+            "eigenvalue_order": 2969588,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=1709560, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 5939177,
+      "seed": 2
+    },
+    {
+      "base_points": 318,
+      "bits": 24,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-24bit-p16374217",
+      "log2_r": 21.965447170289615,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=1902239, trace=0]",
+          "overlap": {
+            "base_points": 318,
+            "chance_fraction": 0.00001941371555805397,
+            "degree": 2,
+            "eigenvalue": 1960889,
+            "eigenvalue_order": 2047521,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=1902239, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=1902239, trace=0]",
+          "overlap": {
+            "base_points": 318,
+            "chance_fraction": 0.00001941371555805397,
+            "degree": 2,
+            "eigenvalue": 2134154,
+            "eigenvalue_order": 4095042,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=1902239, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 4095043,
+      "seed": 3
+    },
+    {
+      "base_points": 254,
+      "bits": 24,
+      "cofactor": 6,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-24bit-p12584771",
+      "log2_r": 20.99940757012905,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=958418, trace=0]",
+          "overlap": {
+            "base_points": 254,
+            "chance_fraction": 0.000020194397310933136,
+            "degree": 2,
+            "eigenvalue": 1904091,
+            "eigenvalue_order": 1048145,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=958418, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=958418, trace=0]",
+          "overlap": {
+            "base_points": 254,
+            "chance_fraction": 0.000020194397310933136,
+            "degree": 2,
+            "eigenvalue": 192200,
+            "eigenvalue_order": 2096290,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=958418, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 2096291,
+      "seed": 4
+    },
+    {
+      "base_points": 970,
+      "bits": 28,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-28bit-p228496243",
+      "log2_r": 26.76751710503341,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=121940832, trace=0]",
+          "overlap": {
+            "base_points": 970,
+            "chance_fraction": 4.245376196658851e-6,
+            "degree": 2,
+            "eigenvalue": 100829960,
+            "eigenvalue_order": 28560484,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=121940832, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=121940832, trace=0]",
+          "overlap": {
+            "base_points": 970,
+            "chance_fraction": 4.245376196658851e-6,
+            "degree": 2,
+            "eigenvalue": 13411977,
+            "eigenvalue_order": 28560484,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=121940832, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 114241937,
+      "seed": 1
+    },
+    {
+      "base_points": 500,
+      "bits": 28,
+      "cofactor": 12,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-28bit-p188684369",
+      "log2_r": 23.90628885188949,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=83544561, trace=0]",
+          "overlap": {
+            "base_points": 500,
+            "chance_fraction": 2.6502004834262505e-6,
+            "degree": 2,
+            "eigenvalue": 14350572,
+            "eigenvalue_order": 15722080,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=83544561, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=83544561, trace=0]",
+          "overlap": {
+            "base_points": 500,
+            "chance_fraction": 2.6502004834262505e-6,
+            "degree": 2,
+            "eigenvalue": 1371509,
+            "eigenvalue_order": 15722080,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=83544561, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 15722081,
+      "seed": 2
+    },
+    {
+      "base_points": 950,
+      "bits": 28,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-28bit-p214404979",
+      "log2_r": 26.675579156496966,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=108949572, trace=0]",
+          "overlap": {
+            "base_points": 950,
+            "chance_fraction": 4.431432431985885e-6,
+            "degree": 2,
+            "eigenvalue": 105134730,
+            "eigenvalue_order": 26797204,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=108949572, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=108949572, trace=0]",
+          "overlap": {
+            "base_points": 950,
+            "chance_fraction": 4.431432431985885e-6,
+            "degree": 2,
+            "eigenvalue": 2054087,
+            "eigenvalue_order": 26797204,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=108949572, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 107188817,
+      "seed": 3
+    },
+    {
+      "base_points": 574,
+      "bits": 28,
+      "cofactor": 6,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "d8",
+      "instance": "d8-28bit-p142301651",
+      "log2_r": 24.499530179811973,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=11935541, trace=0]",
+          "overlap": {
+            "base_points": 574,
+            "chance_fraction": 4.033361776263295e-6,
+            "degree": 2,
+            "eigenvalue": 3946205,
+            "eigenvalue_order": 4743768,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=11935541, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=11935541, trace=0]",
+          "overlap": {
+            "base_points": 574,
+            "chance_fraction": 4.033361776263295e-6,
+            "degree": 2,
+            "eigenvalue": 19772636,
+            "eigenvalue_order": 4743768,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=11935541, trace=0]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 23718841,
+      "seed": 4
+    },
+    {
+      "base_points": 48,
+      "bits": 16,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-16bit-p56533",
+      "log2_r": 13.779001111446892,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 48,
+            "chance_fraction": 0.0008536672120651633,
+            "degree": 2,
+            "eigenvalue": 925,
+            "eigenvalue_order": 1757,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 48,
+            "chance_fraction": 0.0008536672120651633,
+            "degree": 2,
+            "eigenvalue": 13132,
+            "eigenvalue_order": 3514,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 48,
+            "chance_fraction": 0.0008536672120651633,
+            "degree": 2,
+            "eigenvalue": 13130,
+            "eigenvalue_order": 7028,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 48,
+            "chance_fraction": 0.0008536672120651633,
+            "degree": 2,
+            "eigenvalue": 927,
+            "eigenvalue_order": 7028,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 14057,
+      "seed": 1
+    },
+    {
+      "base_points": 42,
+      "bits": 16,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-16bit-p41077",
+      "log2_r": 13.311890193850616,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 42,
+            "chance_fraction": 0.0010325499065788179,
+            "degree": 2,
+            "eigenvalue": 7829,
+            "eigenvalue_order": 41,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 42,
+            "chance_fraction": 0.0010325499065788179,
+            "degree": 2,
+            "eigenvalue": 2340,
+            "eigenvalue_order": 82,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 42,
+            "chance_fraction": 0.0010325499065788179,
+            "degree": 2,
+            "eigenvalue": 2338,
+            "eigenvalue_order": 164,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 42,
+            "chance_fraction": 0.0010325499065788179,
+            "degree": 2,
+            "eigenvalue": 7831,
+            "eigenvalue_order": 164,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 10169,
+      "seed": 2
+    },
+    {
+      "base_points": 32,
+      "bits": 16,
+      "cofactor": 10,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-16bit-p43969",
+      "log2_r": 12.089119397915168,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 32,
+            "chance_fraction": 0.0007344503098462245,
+            "degree": 2,
+            "eigenvalue": 4290,
+            "eigenvalue_order": 4356,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 32,
+            "chance_fraction": 0.0007344503098462245,
+            "degree": 2,
+            "eigenvalue": 67,
+            "eigenvalue_order": 4356,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 32,
+            "chance_fraction": 0.0007344503098462245,
+            "degree": 2,
+            "eigenvalue": 4292,
+            "eigenvalue_order": 2178,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 32,
+            "chance_fraction": 0.0007344503098462245,
+            "degree": 2,
+            "eigenvalue": 65,
+            "eigenvalue_order": 1089,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 4357,
+      "seed": 3
+    },
+    {
+      "base_points": 54,
+      "bits": 16,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-16bit-p40177",
+      "log2_r": 14.295840665684208,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 54,
+            "chance_fraction": 0.0013424153532541143,
+            "degree": 2,
+            "eigenvalue": 18495,
+            "eigenvalue_order": 10056,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 54,
+            "chance_fraction": 0.0013424153532541143,
+            "degree": 2,
+            "eigenvalue": 1618,
+            "eigenvalue_order": 10056,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 54,
+            "chance_fraction": 0.0013424153532541143,
+            "degree": 2,
+            "eigenvalue": 1616,
+            "eigenvalue_order": 10056,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 54,
+            "chance_fraction": 0.0013424153532541143,
+            "degree": 2,
+            "eigenvalue": 18497,
+            "eigenvalue_order": 10056,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 20113,
+      "seed": 4
+    },
+    {
+      "base_points": 122,
+      "bits": 20,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-20bit-p946513",
+      "log2_r": 17.85024178757169,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 122,
+            "chance_fraction": 0.0001290748507175292,
+            "degree": 2,
+            "eigenvalue": 198461,
+            "eigenvalue_order": 59074,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 122,
+            "chance_fraction": 0.0001290748507175292,
+            "degree": 2,
+            "eigenvalue": 37836,
+            "eigenvalue_order": 29537,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 122,
+            "chance_fraction": 0.0001290748507175292,
+            "degree": 2,
+            "eigenvalue": 37834,
+            "eigenvalue_order": 118148,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 122,
+            "chance_fraction": 0.0001290748507175292,
+            "degree": 2,
+            "eigenvalue": 198463,
+            "eigenvalue_order": 118148,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 236297,
+      "seed": 1
+    },
+    {
+      "base_points": 64,
+      "bits": 20,
+      "cofactor": 16,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-20bit-p567121",
+      "log2_r": 15.11703427510276,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 64,
+            "chance_fraction": 0.00011255874159326899,
+            "degree": 2,
+            "eigenvalue": 1737,
+            "eigenvalue_order": 2221,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 64,
+            "chance_fraction": 0.00011255874159326899,
+            "degree": 2,
+            "eigenvalue": 33800,
+            "eigenvalue_order": 4442,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 64,
+            "chance_fraction": 0.00011255874159326899,
+            "degree": 2,
+            "eigenvalue": 33798,
+            "eigenvalue_order": 8884,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 64,
+            "chance_fraction": 0.00011255874159326899,
+            "degree": 2,
+            "eigenvalue": 1739,
+            "eigenvalue_order": 8884,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 35537,
+      "seed": 2
+    },
+    {
+      "base_points": 110,
+      "bits": 20,
+      "cofactor": 4,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-20bit-p680161",
+      "log2_r": 17.372567527982223,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 110,
+            "chance_fraction": 0.0001620573624132993,
+            "degree": 2,
+            "eigenvalue": 78734,
+            "eigenvalue_order": 169692,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 110,
+            "chance_fraction": 0.0001620573624132993,
+            "degree": 2,
+            "eigenvalue": 90959,
+            "eigenvalue_order": 169692,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 110,
+            "chance_fraction": 0.0001620573624132993,
+            "degree": 2,
+            "eigenvalue": 78732,
+            "eigenvalue_order": 42423,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 110,
+            "chance_fraction": 0.0001620573624132993,
+            "degree": 2,
+            "eigenvalue": 90961,
+            "eigenvalue_order": 84846,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 169693,
+      "seed": 3
+    },
+    {
+      "base_points": 134,
+      "bits": 20,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-20bit-p615761",
+      "log2_r": 18.234915640287042,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 134,
+            "chance_fraction": 0.00021717919877083057,
+            "degree": 2,
+            "eigenvalue": 171888,
+            "eigenvalue_order": 154250,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 134,
+            "chance_fraction": 0.00021717919877083057,
+            "degree": 2,
+            "eigenvalue": 136613,
+            "eigenvalue_order": 77125,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 134,
+            "chance_fraction": 0.00021717919877083057,
+            "degree": 2,
+            "eigenvalue": 136615,
+            "eigenvalue_order": 308500,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 134,
+            "chance_fraction": 0.00021717919877083057,
+            "degree": 2,
+            "eigenvalue": 171886,
+            "eigenvalue_order": 308500,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 308501,
+      "seed": 4
+    },
+    {
+      "base_points": 188,
+      "bits": 24,
+      "cofactor": 16,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-24bit-p13691897",
+      "log2_r": 19.706544919176636,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.000013733357800138151,
+            "degree": 2,
+            "eigenvalue": 431741,
+            "eigenvalue_order": 855580,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.000013733357800138151,
+            "degree": 2,
+            "eigenvalue": 423840,
+            "eigenvalue_order": 855580,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.000013733357800138151,
+            "degree": 2,
+            "eigenvalue": 431743,
+            "eigenvalue_order": 427790,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.000013733357800138151,
+            "degree": 2,
+            "eigenvalue": 423838,
+            "eigenvalue_order": 213895,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 855581,
+      "seed": 1
+    },
+    {
+      "base_points": 196,
+      "bits": 24,
+      "cofactor": 10,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-24bit-p9494269",
+      "log2_r": 19.857581655452886,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 196,
+            "chance_fraction": 0.00002063138349215639,
+            "degree": 2,
+            "eigenvalue": 252269,
+            "eigenvalue_order": 237502,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 196,
+            "chance_fraction": 0.00002063138349215639,
+            "degree": 2,
+            "eigenvalue": 697740,
+            "eigenvalue_order": 118751,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 196,
+            "chance_fraction": 0.00002063138349215639,
+            "degree": 2,
+            "eigenvalue": 697738,
+            "eigenvalue_order": 475004,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 196,
+            "chance_fraction": 0.00002063138349215639,
+            "degree": 2,
+            "eigenvalue": 252271,
+            "eigenvalue_order": 475004,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 950009,
+      "seed": 2
+    },
+    {
+      "base_points": 346,
+      "bits": 24,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-24bit-p10375481",
+      "log2_r": 22.307236670131964,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 346,
+            "chance_fraction": 0.00003333486840723494,
+            "degree": 2,
+            "eigenvalue": 2105690,
+            "eigenvalue_order": 5189760,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 346,
+            "chance_fraction": 0.00003333486840723494,
+            "degree": 2,
+            "eigenvalue": 3084071,
+            "eigenvalue_order": 5189760,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 346,
+            "chance_fraction": 0.00003333486840723494,
+            "degree": 2,
+            "eigenvalue": 3084069,
+            "eigenvalue_order": 5189760,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 346,
+            "chance_fraction": 0.00003333486840723494,
+            "degree": 2,
+            "eigenvalue": 2105692,
+            "eigenvalue_order": 5189760,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 5189761,
+      "seed": 3
+    },
+    {
+      "base_points": 230,
+      "bits": 24,
+      "cofactor": 8,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-24bit-p12474229",
+      "log2_r": 20.572719652830166,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 230,
+            "chance_fraction": 0.000018434533042057024,
+            "degree": 2,
+            "eigenvalue": 611653,
+            "eigenvalue_order": 779786,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 230,
+            "chance_fraction": 0.000018434533042057024,
+            "degree": 2,
+            "eigenvalue": 947920,
+            "eigenvalue_order": 389893,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 230,
+            "chance_fraction": 0.000018434533042057024,
+            "degree": 2,
+            "eigenvalue": 947922,
+            "eigenvalue_order": 1559572,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 230,
+            "chance_fraction": 0.000018434533042057024,
+            "degree": 2,
+            "eigenvalue": 611651,
+            "eigenvalue_order": 1559572,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 1559573,
+      "seed": 4
+    },
+    {
+      "base_points": 960,
+      "bits": 28,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-28bit-p222109969",
+      "log2_r": 26.72674552296263,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 960,
+            "chance_fraction": 4.322043648084692e-6,
+            "degree": 2,
+            "eigenvalue": 83549216,
+            "eigenvalue_order": 37019524,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 960,
+            "chance_fraction": 4.322043648084692e-6,
+            "degree": 2,
+            "eigenvalue": 27509357,
+            "eigenvalue_order": 37019524,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 960,
+            "chance_fraction": 4.322043648084692e-6,
+            "degree": 2,
+            "eigenvalue": 83549214,
+            "eigenvalue_order": 18509762,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 960,
+            "chance_fraction": 4.322043648084692e-6,
+            "degree": 2,
+            "eigenvalue": 27509359,
+            "eigenvalue_order": 9254881,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 111058573,
+      "seed": 1
+    },
+    {
+      "base_points": 584,
+      "bits": 28,
+      "cofactor": 8,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-28bit-p199876213",
+      "log2_r": 24.574732156963115,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 584,
+            "chance_fraction": 2.9214021561788797e-6,
+            "degree": 2,
+            "eigenvalue": 23006652,
+            "eigenvalue_order": 199904,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 584,
+            "chance_fraction": 2.9214021561788797e-6,
+            "degree": 2,
+            "eigenvalue": 1981349,
+            "eigenvalue_order": 199904,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 584,
+            "chance_fraction": 2.9214021561788797e-6,
+            "degree": 2,
+            "eigenvalue": 1981347,
+            "eigenvalue_order": 199904,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 584,
+            "chance_fraction": 2.9214021561788797e-6,
+            "degree": 2,
+            "eigenvalue": 23006654,
+            "eigenvalue_order": 199904,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 24988001,
+      "seed": 2
+    },
+    {
+      "base_points": 998,
+      "bits": 28,
+      "cofactor": 2,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-28bit-p249483161",
+      "log2_r": 26.8945297633445,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 998,
+            "chance_fraction": 3.999819262675882e-6,
+            "degree": 2,
+            "eigenvalue": 85173213,
+            "eigenvalue_order": 31188909,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 998,
+            "chance_fraction": 3.999819262675882e-6,
+            "degree": 2,
+            "eigenvalue": 39582424,
+            "eigenvalue_order": 62377818,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 998,
+            "chance_fraction": 3.999819262675882e-6,
+            "degree": 2,
+            "eigenvalue": 85173211,
+            "eigenvalue_order": 124755636,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 998,
+            "chance_fraction": 3.999819262675882e-6,
+            "degree": 2,
+            "eigenvalue": 39582426,
+            "eigenvalue_order": 124755636,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 124755637,
+      "seed": 3
+    },
+    {
+      "base_points": 550,
+      "bits": 28,
+      "cofactor": 10,
+      "degree": 2,
+      "experiment": "e4",
+      "family": "j1728",
+      "instance": "j1728-28bit-p210135973",
+      "log2_r": 24.324852205458225,
+      "maps": [
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 550,
+            "chance_fraction": 2.617294156595755e-6,
+            "degree": 2,
+            "eigenvalue": 12551437,
+            "eigenvalue_order": 21014068,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 550,
+            "chance_fraction": 2.617294156595755e-6,
+            "degree": 2,
+            "eigenvalue": 8462632,
+            "eigenvalue_order": 21014068,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=2]",
+          "overlap": {
+            "base_points": 550,
+            "chance_fraction": 2.617294156595755e-6,
+            "degree": 2,
+            "eigenvalue": 8462634,
+            "eigenvalue_order": 10507034,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=2]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 2,
+          "name": "velu2[x0=0, trace=-2]",
+          "overlap": {
+            "base_points": 550,
+            "chance_fraction": 2.617294156595755e-6,
+            "degree": 2,
+            "eigenvalue": 12551435,
+            "eigenvalue_order": 5253517,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu2[x0=0, trace=-2]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 21014069,
+      "seed": 4
+    },
+    {
+      "base_points": 40,
+      "bits": 16,
+      "cofactor": 4,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-16bit-p34747",
+      "log2_r": 13.099840899000721,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=16599, trace=1]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0011390818999886091,
+            "degree": 3,
+            "eigenvalue": 3892,
+            "eigenvalue_order": 1254,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=16599, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=16599, trace=-1]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0011390818999886091,
+            "degree": 3,
+            "eigenvalue": 4887,
+            "eigenvalue_order": 627,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=16599, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=17115, trace=-1]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0011390818999886091,
+            "degree": 3,
+            "eigenvalue": 3891,
+            "eigenvalue_order": 66,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=17115, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=17115, trace=1]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0011390818999886091,
+            "degree": 3,
+            "eigenvalue": 4888,
+            "eigenvalue_order": 33,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=17115, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 8779,
+      "seed": 1
+    },
+    {
+      "base_points": 74,
+      "bits": 16,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-16bit-p54673",
+      "log2_r": 15.738540920376424,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=1712, trace=-1]",
+          "overlap": {
+            "base_points": 74,
+            "chance_fraction": 0.0013535017284582883,
+            "degree": 3,
+            "eigenvalue": 775,
+            "eigenvalue_order": 4556,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=1712, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=1712, trace=1]",
+          "overlap": {
+            "base_points": 74,
+            "chance_fraction": 0.0013535017284582883,
+            "degree": 3,
+            "eigenvalue": 53898,
+            "eigenvalue_order": 4556,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=1712, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=24819, trace=1]",
+          "overlap": {
+            "base_points": 74,
+            "chance_fraction": 0.0013535017284582883,
+            "degree": 3,
+            "eigenvalue": 776,
+            "eigenvalue_order": 6834,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=24819, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=24819, trace=-1]",
+          "overlap": {
+            "base_points": 74,
+            "chance_fraction": 0.0013535017284582883,
+            "degree": 3,
+            "eigenvalue": 53897,
+            "eigenvalue_order": 3417,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=24819, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 54673,
+      "seed": 2
+    },
+    {
+      "base_points": 50,
+      "bits": 16,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-16bit-p47441",
+      "log2_r": 13.962082633851564,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=24854, trace=-1]",
+          "overlap": {
+            "base_points": 50,
+            "chance_fraction": 0.0010443427950790568,
+            "degree": 3,
+            "eigenvalue": 4528,
+            "eigenvalue_order": 15958,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=24854, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=24854, trace=1]",
+          "overlap": {
+            "base_points": 50,
+            "chance_fraction": 0.0010443427950790568,
+            "degree": 3,
+            "eigenvalue": 11431,
+            "eigenvalue_order": 7979,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=24854, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=38664, trace=1]",
+          "overlap": {
+            "base_points": 50,
+            "chance_fraction": 0.0010443427950790568,
+            "degree": 3,
+            "eigenvalue": 4529,
+            "eigenvalue_order": 7979,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=38664, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=38664, trace=-1]",
+          "overlap": {
+            "base_points": 50,
+            "chance_fraction": 0.0010443427950790568,
+            "degree": 3,
+            "eigenvalue": 11430,
+            "eigenvalue_order": 15958,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=38664, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 15959,
+      "seed": 3
+    },
+    {
+      "base_points": 36,
+      "bits": 16,
+      "cofactor": 9,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-16bit-p52363",
+      "log2_r": 12.518407276671365,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=15751, trace=-1]",
+          "overlap": {
+            "base_points": 36,
+            "chance_fraction": 0.0006817794443497528,
+            "degree": 3,
+            "eigenvalue": 2713,
+            "eigenvalue_order": 2933,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=15751, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=15751, trace=1]",
+          "overlap": {
+            "base_points": 36,
+            "chance_fraction": 0.0006817794443497528,
+            "degree": 3,
+            "eigenvalue": 3154,
+            "eigenvalue_order": 5866,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=15751, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=18037, trace=1]",
+          "overlap": {
+            "base_points": 36,
+            "chance_fraction": 0.0006817794443497528,
+            "degree": 3,
+            "eigenvalue": 2714,
+            "eigenvalue_order": 5866,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=18037, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=18037, trace=-1]",
+          "overlap": {
+            "base_points": 36,
+            "chance_fraction": 0.0006817794443497528,
+            "degree": 3,
+            "eigenvalue": 3153,
+            "eigenvalue_order": 2933,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=18037, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 5867,
+      "seed": 4
+    },
+    {
+      "base_points": 128,
+      "bits": 20,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-20bit-p820559",
+      "log2_r": 18.058768645368243,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=292345, trace=-1]",
+          "overlap": {
+            "base_points": 128,
+            "chance_fraction": 0.00015626354334909398,
+            "degree": 3,
+            "eigenvalue": 233107,
+            "eigenvalue_order": 45507,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=292345, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=292345, trace=1]",
+          "overlap": {
+            "base_points": 128,
+            "chance_fraction": 0.00015626354334909398,
+            "degree": 3,
+            "eigenvalue": 39936,
+            "eigenvalue_order": 91014,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=292345, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=529457, trace=-1]",
+          "overlap": {
+            "base_points": 128,
+            "chance_fraction": 0.00015626354334909398,
+            "degree": 3,
+            "eigenvalue": 39935,
+            "eigenvalue_order": 39006,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=529457, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=529457, trace=1]",
+          "overlap": {
+            "base_points": 128,
+            "chance_fraction": 0.00015626354334909398,
+            "degree": 3,
+            "eigenvalue": 233108,
+            "eigenvalue_order": 19503,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=529457, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 273043,
+      "seed": 1
+    },
+    {
+      "base_points": 164,
+      "bits": 20,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-20bit-p567121",
+      "log2_r": 19.11559998135043,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=138172, trace=-1]",
+          "overlap": {
+            "base_points": 164,
+            "chance_fraction": 0.0002887186700632188,
+            "degree": 3,
+            "eigenvalue": 561766,
+            "eigenvalue_order": 568026,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=138172, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=138172, trace=1]",
+          "overlap": {
+            "base_points": 164,
+            "chance_fraction": 0.0002887186700632188,
+            "degree": 3,
+            "eigenvalue": 6261,
+            "eigenvalue_order": 284013,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=138172, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=420444, trace=-1]",
+          "overlap": {
+            "base_points": 164,
+            "chance_fraction": 0.0002887186700632188,
+            "degree": 3,
+            "eigenvalue": 6260,
+            "eigenvalue_order": 31557,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=420444, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=420444, trace=1]",
+          "overlap": {
+            "base_points": 164,
+            "chance_fraction": 0.0002887186700632188,
+            "degree": 3,
+            "eigenvalue": 561767,
+            "eigenvalue_order": 63114,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=420444, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 568027,
+      "seed": 2
+    },
+    {
+      "base_points": 76,
+      "bits": 20,
+      "cofactor": 15,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-20bit-p870413",
+      "log2_r": 15.827516380923543,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=56797, trace=-1]",
+          "overlap": {
+            "base_points": 76,
+            "chance_fraction": 0.00008712948473227745,
+            "degree": 3,
+            "eigenvalue": 13117,
+            "eigenvalue_order": 29075,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=56797, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=56797, trace=1]",
+          "overlap": {
+            "base_points": 76,
+            "chance_fraction": 0.00008712948473227745,
+            "degree": 3,
+            "eigenvalue": 45034,
+            "eigenvalue_order": 58150,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=56797, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=433943, trace=-1]",
+          "overlap": {
+            "base_points": 76,
+            "chance_fraction": 0.00008712948473227745,
+            "degree": 3,
+            "eigenvalue": 45033,
+            "eigenvalue_order": 29075,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=433943, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=433943, trace=1]",
+          "overlap": {
+            "base_points": 76,
+            "chance_fraction": 0.00008712948473227745,
+            "degree": 3,
+            "eigenvalue": 13118,
+            "eigenvalue_order": 58150,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=433943, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 58151,
+      "seed": 3
+    },
+    {
+      "base_points": 120,
+      "bits": 20,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-20bit-p649157",
+      "log2_r": 17.726517536458672,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=530737, trace=1]",
+          "overlap": {
+            "base_points": 120,
+            "chance_fraction": 0.0001844363394919701,
+            "degree": 3,
+            "eigenvalue": 40730,
+            "eigenvalue_order": 216876,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=530737, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=530737, trace=-1]",
+          "overlap": {
+            "base_points": 120,
+            "chance_fraction": 0.0001844363394919701,
+            "degree": 3,
+            "eigenvalue": 176147,
+            "eigenvalue_order": 216876,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=530737, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=540976, trace=1]",
+          "overlap": {
+            "base_points": 120,
+            "chance_fraction": 0.0001844363394919701,
+            "degree": 3,
+            "eigenvalue": 176148,
+            "eigenvalue_order": 2332,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=540976, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=540976, trace=-1]",
+          "overlap": {
+            "base_points": 120,
+            "chance_fraction": 0.0001844363394919701,
+            "degree": 3,
+            "eigenvalue": 40729,
+            "eigenvalue_order": 2332,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=540976, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 216877,
+      "seed": 4
+    },
+    {
+      "base_points": 282,
+      "bits": 24,
+      "cofactor": 4,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-24bit-p11320369",
+      "log2_r": 21.433109113590877,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=1699427, trace=1]",
+          "overlap": {
+            "base_points": 282,
+            "chance_fraction": 0.000024898912182419674,
+            "degree": 3,
+            "eigenvalue": 1920669,
+            "eigenvalue_order": 235954,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=1699427, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=1699427, trace=-1]",
+          "overlap": {
+            "base_points": 282,
+            "chance_fraction": 0.000024898912182419674,
+            "degree": 3,
+            "eigenvalue": 910780,
+            "eigenvalue_order": 117977,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=1699427, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=9680935, trace=1]",
+          "overlap": {
+            "base_points": 282,
+            "chance_fraction": 0.000024898912182419674,
+            "degree": 3,
+            "eigenvalue": 910781,
+            "eigenvalue_order": 1415724,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=9680935, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=9680935, trace=-1]",
+          "overlap": {
+            "base_points": 282,
+            "chance_fraction": 0.000024898912182419674,
+            "degree": 3,
+            "eigenvalue": 1920668,
+            "eigenvalue_order": 1415724,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=9680935, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 2831449,
+      "seed": 1
+    },
+    {
+      "base_points": 432,
+      "bits": 24,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-24bit-p10188733",
+      "log2_r": 23.279804246806616,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=2676288, trace=1]",
+          "overlap": {
+            "base_points": 432,
+            "chance_fraction": 0.00004241938573783661,
+            "degree": 3,
+            "eigenvalue": 125437,
+            "eigenvalue_order": 5092011,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=2676288, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=2676288, trace=-1]",
+          "overlap": {
+            "base_points": 432,
+            "chance_fraction": 0.00004241938573783661,
+            "degree": 3,
+            "eigenvalue": 10058586,
+            "eigenvalue_order": 10184022,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=2676288, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=6063833, trace=-1]",
+          "overlap": {
+            "base_points": 432,
+            "chance_fraction": 0.00004241938573783661,
+            "degree": 3,
+            "eigenvalue": 125436,
+            "eigenvalue_order": 5092011,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=6063833, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=6063833, trace=1]",
+          "overlap": {
+            "base_points": 432,
+            "chance_fraction": 0.00004241938573783661,
+            "degree": 3,
+            "eigenvalue": 10058587,
+            "eigenvalue_order": 10184022,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=6063833, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 10184023,
+      "seed": 2
+    },
+    {
+      "base_points": 348,
+      "bits": 24,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-24bit-p15989879",
+      "log2_r": 22.345745514911478,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=15587866, trace=1]",
+          "overlap": {
+            "base_points": 348,
+            "chance_fraction": 0.00002176297753554166,
+            "degree": 3,
+            "eigenvalue": 788996,
+            "eigenvalue_order": 2665076,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=15587866, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=15587866, trace=-1]",
+          "overlap": {
+            "base_points": 348,
+            "chance_fraction": 0.00002176297753554166,
+            "degree": 3,
+            "eigenvalue": 4541157,
+            "eigenvalue_order": 2665076,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=15587866, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=15806187, trace=1]",
+          "overlap": {
+            "base_points": 348,
+            "chance_fraction": 0.00002176297753554166,
+            "degree": 3,
+            "eigenvalue": 4541158,
+            "eigenvalue_order": 5330152,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=15806187, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=15806187, trace=-1]",
+          "overlap": {
+            "base_points": 348,
+            "chance_fraction": 0.00002176297753554166,
+            "degree": 3,
+            "eigenvalue": 788995,
+            "eigenvalue_order": 5330152,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=15806187, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 5330153,
+      "seed": 3
+    },
+    {
+      "base_points": 248,
+      "bits": 24,
+      "cofactor": 5,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-24bit-p9543169",
+      "log2_r": 20.864989376714785,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=1619830, trace=-1]",
+          "overlap": {
+            "base_points": 248,
+            "chance_fraction": 0.00002597131949487878,
+            "degree": 3,
+            "eigenvalue": 1251676,
+            "eigenvalue_order": 954899,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=1619830, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=1619830, trace=1]",
+          "overlap": {
+            "base_points": 248,
+            "chance_fraction": 0.00002597131949487878,
+            "degree": 3,
+            "eigenvalue": 658123,
+            "eigenvalue_order": 1909798,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=1619830, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=5784080, trace=1]",
+          "overlap": {
+            "base_points": 248,
+            "chance_fraction": 0.00002597131949487878,
+            "degree": 3,
+            "eigenvalue": 1251677,
+            "eigenvalue_order": 173618,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=5784080, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=5784080, trace=-1]",
+          "overlap": {
+            "base_points": 248,
+            "chance_fraction": 0.00002597131949487878,
+            "degree": 3,
+            "eigenvalue": 658122,
+            "eigenvalue_order": 86809,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=5784080, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 1909799,
+      "seed": 4
+    },
+    {
+      "base_points": 566,
+      "bits": 28,
+      "cofactor": 9,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-28bit-p205653031",
+      "log2_r": 24.44556726384474,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=155146927, trace=1]",
+          "overlap": {
+            "base_points": 566,
+            "chance_fraction": 2.7524847046589017e-6,
+            "degree": 3,
+            "eigenvalue": 2237988,
+            "eigenvalue_order": 22848042,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=155146927, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=155146927, trace=-1]",
+          "overlap": {
+            "base_points": 566,
+            "chance_fraction": 2.7524847046589017e-6,
+            "degree": 3,
+            "eigenvalue": 20610055,
+            "eigenvalue_order": 11424021,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=155146927, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=170280298, trace=-1]",
+          "overlap": {
+            "base_points": 566,
+            "chance_fraction": 2.7524847046589017e-6,
+            "degree": 3,
+            "eigenvalue": 2237987,
+            "eigenvalue_order": 22848042,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=170280298, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=170280298, trace=1]",
+          "overlap": {
+            "base_points": 566,
+            "chance_fraction": 2.7524847046589017e-6,
+            "degree": 3,
+            "eigenvalue": 20610056,
+            "eigenvalue_order": 11424021,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=170280298, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 22848043,
+      "seed": 1
+    },
+    {
+      "base_points": 826,
+      "bits": 28,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-28bit-p212375201",
+      "log2_r": 26.0771062923309,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=94318140, trace=1]",
+          "overlap": {
+            "base_points": 826,
+            "chance_fraction": 3.889265565357556e-6,
+            "degree": 3,
+            "eigenvalue": 57350995,
+            "eigenvalue_order": 1685551,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=94318140, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=94318140, trace=-1]",
+          "overlap": {
+            "base_points": 826,
+            "chance_fraction": 3.889265565357556e-6,
+            "degree": 3,
+            "eigenvalue": 13442148,
+            "eigenvalue_order": 3371102,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=94318140, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=162428007, trace=-1]",
+          "overlap": {
+            "base_points": 826,
+            "chance_fraction": 3.889265565357556e-6,
+            "degree": 3,
+            "eigenvalue": 57350994,
+            "eigenvalue_order": 35396571,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=162428007, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=162428007, trace=1]",
+          "overlap": {
+            "base_points": 826,
+            "chance_fraction": 3.889265565357556e-6,
+            "degree": 3,
+            "eigenvalue": 13442149,
+            "eigenvalue_order": 70793142,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=162428007, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 70793143,
+      "seed": 2
+    },
+    {
+      "base_points": 872,
+      "bits": 28,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-28bit-p249483161",
+      "log2_r": 26.309497153156418,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=117684993, trace=-1]",
+          "overlap": {
+            "base_points": 872,
+            "chance_fraction": 3.4950019007880465e-6,
+            "degree": 3,
+            "eigenvalue": 29419539,
+            "eigenvalue_order": 83166382,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=117684993, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=117684993, trace=1]",
+          "overlap": {
+            "base_points": 872,
+            "chance_fraction": 3.4950019007880465e-6,
+            "degree": 3,
+            "eigenvalue": 53746844,
+            "eigenvalue_order": 41583191,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=117684993, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=247764214, trace=-1]",
+          "overlap": {
+            "base_points": 872,
+            "chance_fraction": 3.4950019007880465e-6,
+            "degree": 3,
+            "eigenvalue": 53746843,
+            "eigenvalue_order": 83166382,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=247764214, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=247764214, trace=1]",
+          "overlap": {
+            "base_points": 872,
+            "chance_fraction": 3.4950019007880465e-6,
+            "degree": 3,
+            "eigenvalue": 29419540,
+            "eigenvalue_order": 41583191,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=247764214, trace=1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 83166383,
+      "seed": 3
+    },
+    {
+      "base_points": 1252,
+      "bits": 28,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "d11",
+      "instance": "d11-28bit-p245963899",
+      "log2_r": 27.873950592815373,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=94955319, trace=-1]",
+          "overlap": {
+            "base_points": 1252,
+            "chance_fraction": 5.0898982752526004e-6,
+            "degree": 3,
+            "eigenvalue": 136577263,
+            "eigenvalue_order": 81992470,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=94955319, trace=-1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=94955319, trace=1]",
+          "overlap": {
+            "base_points": 1252,
+            "chance_fraction": 5.0898982752526004e-6,
+            "degree": 3,
+            "eigenvalue": 109400148,
+            "eigenvalue_order": 40996235,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=94955319, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=187870231, trace=1]",
+          "overlap": {
+            "base_points": 1252,
+            "chance_fraction": 5.0898982752526004e-6,
+            "degree": 3,
+            "eigenvalue": 136577264,
+            "eigenvalue_order": 245977410,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=187870231, trace=1]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=187870231, trace=-1]",
+          "overlap": {
+            "base_points": 1252,
+            "chance_fraction": 5.0898982752526004e-6,
+            "degree": 3,
+            "eigenvalue": 109400147,
+            "eigenvalue_order": 122988705,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=187870231, trace=-1]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 245977411,
+      "seed": 4
+    },
+    {
+      "base_points": 48,
+      "bits": 16,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-16bit-p43189",
+      "log2_r": 13.821674344894602,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 48,
+            "chance_fraction": 0.0011050486912079563,
+            "degree": 3,
+            "eigenvalue": 526,
+            "eigenvalue_order": 2413,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 48,
+            "chance_fraction": 0.0011050486912079563,
+            "degree": 3,
+            "eigenvalue": 13953,
+            "eigenvalue_order": 4826,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 48,
+            "chance_fraction": 0.0011050486912079563,
+            "degree": 3,
+            "eigenvalue": 13430,
+            "eigenvalue_order": 7239,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 48,
+            "chance_fraction": 0.0011050486912079563,
+            "degree": 3,
+            "eigenvalue": 1049,
+            "eigenvalue_order": 14478,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 48,
+            "chance_fraction": 0.0011050486912079563,
+            "degree": 3,
+            "eigenvalue": 523,
+            "eigenvalue_order": 7239,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 48,
+            "chance_fraction": 0.0011050486912079563,
+            "degree": 3,
+            "eigenvalue": 13956,
+            "eigenvalue_order": 14478,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 14479,
+      "seed": 1
+    },
+    {
+      "base_points": 74,
+      "bits": 16,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-16bit-p54631",
+      "log2_r": 15.725499400659091,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 74,
+            "chance_fraction": 0.0013657924364629667,
+            "degree": 3,
+            "eigenvalue": 2294,
+            "eigenvalue_order": 6020,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 74,
+            "chance_fraction": 0.0013657924364629667,
+            "degree": 3,
+            "eigenvalue": 51887,
+            "eigenvalue_order": 6020,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 74,
+            "chance_fraction": 0.0013657924364629667,
+            "degree": 3,
+            "eigenvalue": 49596,
+            "eigenvalue_order": 18060,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 74,
+            "chance_fraction": 0.0013657924364629667,
+            "degree": 3,
+            "eigenvalue": 4585,
+            "eigenvalue_order": 18060,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 74,
+            "chance_fraction": 0.0013657924364629667,
+            "degree": 3,
+            "eigenvalue": 2291,
+            "eigenvalue_order": 18060,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 74,
+            "chance_fraction": 0.0013657924364629667,
+            "degree": 3,
+            "eigenvalue": 51890,
+            "eigenvalue_order": 18060,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 54181,
+      "seed": 2
+    },
+    {
+      "base_points": 76,
+      "bits": 16,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-16bit-p56443",
+      "log2_r": 15.790323039599008,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 76,
+            "chance_fraction": 0.0013410739178768682,
+            "degree": 3,
+            "eigenvalue": 47264,
+            "eigenvalue_order": 18890,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 76,
+            "chance_fraction": 0.0013410739178768682,
+            "degree": 3,
+            "eigenvalue": 9407,
+            "eigenvalue_order": 9445,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 76,
+            "chance_fraction": 0.0013410739178768682,
+            "degree": 3,
+            "eigenvalue": 18811,
+            "eigenvalue_order": 56670,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 76,
+            "chance_fraction": 0.0013410739178768682,
+            "degree": 3,
+            "eigenvalue": 37860,
+            "eigenvalue_order": 28335,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 76,
+            "chance_fraction": 0.0013410739178768682,
+            "degree": 3,
+            "eigenvalue": 47267,
+            "eigenvalue_order": 56670,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 76,
+            "chance_fraction": 0.0013410739178768682,
+            "degree": 3,
+            "eigenvalue": 9404,
+            "eigenvalue_order": 28335,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 56671,
+      "seed": 3
+    },
+    {
+      "base_points": 40,
+      "bits": 16,
+      "cofactor": 7,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-16bit-p64081",
+      "log2_r": 13.156873117949567,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0006256745553800191,
+            "degree": 3,
+            "eigenvalue": 1538,
+            "eigenvalue_order": 9132,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0006256745553800191,
+            "degree": 3,
+            "eigenvalue": 7595,
+            "eigenvalue_order": 9132,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0006256745553800191,
+            "degree": 3,
+            "eigenvalue": 3796,
+            "eigenvalue_order": 9132,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0006256745553800191,
+            "degree": 3,
+            "eigenvalue": 5337,
+            "eigenvalue_order": 9132,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0006256745553800191,
+            "degree": 3,
+            "eigenvalue": 3799,
+            "eigenvalue_order": 3044,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 40,
+            "chance_fraction": 0.0006256745553800191,
+            "degree": 3,
+            "eigenvalue": 5334,
+            "eigenvalue_order": 3044,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 9133,
+      "seed": 4
+    },
+    {
+      "base_points": 188,
+      "bits": 20,
+      "cofactor": 1,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-20bit-p845653",
+      "log2_r": 19.68722701268075,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.00022269577979651766,
+            "degree": 3,
+            "eigenvalue": 628934,
+            "eigenvalue_order": 422100,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.00022269577979651766,
+            "degree": 3,
+            "eigenvalue": 215267,
+            "eigenvalue_order": 422100,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.00022269577979651766,
+            "degree": 3,
+            "eigenvalue": 107635,
+            "eigenvalue_order": 422100,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.00022269577979651766,
+            "degree": 3,
+            "eigenvalue": 736566,
+            "eigenvalue_order": 422100,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.00022269577979651766,
+            "degree": 3,
+            "eigenvalue": 107632,
+            "eigenvalue_order": 422100,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 188,
+            "chance_fraction": 0.00022269577979651766,
+            "degree": 3,
+            "eigenvalue": 736569,
+            "eigenvalue_order": 422100,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 844201,
+      "seed": 1
+    },
+    {
+      "base_points": 126,
+      "bits": 20,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-20bit-p768613",
+      "log2_r": 17.963737136438972,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 126,
+            "chance_fraction": 0.0001642954658363226,
+            "degree": 3,
+            "eigenvalue": 219570,
+            "eigenvalue_order": 1578,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 126,
+            "chance_fraction": 0.0001642954658363226,
+            "degree": 3,
+            "eigenvalue": 36067,
+            "eigenvalue_order": 789,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 126,
+            "chance_fraction": 0.0001642954658363226,
+            "degree": 3,
+            "eigenvalue": 72137,
+            "eigenvalue_order": 526,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 126,
+            "chance_fraction": 0.0001642954658363226,
+            "degree": 3,
+            "eigenvalue": 183500,
+            "eigenvalue_order": 263,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 126,
+            "chance_fraction": 0.0001642954658363226,
+            "degree": 3,
+            "eigenvalue": 219567,
+            "eigenvalue_order": 1578,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 126,
+            "chance_fraction": 0.0001642954658363226,
+            "degree": 3,
+            "eigenvalue": 36070,
+            "eigenvalue_order": 789,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 255637,
+      "seed": 2
+    },
+    {
+      "base_points": 104,
+      "bits": 20,
+      "cofactor": 7,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-20bit-p1041583",
+      "log2_r": 17.18081243482671,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 104,
+            "chance_fraction": 0.00009999894231887931,
+            "degree": 3,
+            "eigenvalue": 107624,
+            "eigenvalue_order": 148572,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 104,
+            "chance_fraction": 0.00009999894231887931,
+            "degree": 3,
+            "eigenvalue": 40949,
+            "eigenvalue_order": 148572,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 104,
+            "chance_fraction": 0.00009999894231887931,
+            "degree": 3,
+            "eigenvalue": 81901,
+            "eigenvalue_order": 148572,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 104,
+            "chance_fraction": 0.00009999894231887931,
+            "degree": 3,
+            "eigenvalue": 66672,
+            "eigenvalue_order": 148572,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 104,
+            "chance_fraction": 0.00009999894231887931,
+            "degree": 3,
+            "eigenvalue": 107621,
+            "eigenvalue_order": 148572,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 104,
+            "chance_fraction": 0.00009999894231887931,
+            "degree": 3,
+            "eigenvalue": 40952,
+            "eigenvalue_order": 148572,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 148573,
+      "seed": 3
+    },
+    {
+      "base_points": 118,
+      "bits": 20,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-20bit-p633469",
+      "log2_r": 17.691245980537712,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 118,
+            "chance_fraction": 0.0001858510639973414,
+            "degree": 3,
+            "eigenvalue": 25415,
+            "eigenvalue_order": 105819,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 118,
+            "chance_fraction": 0.0001858510639973414,
+            "degree": 3,
+            "eigenvalue": 186224,
+            "eigenvalue_order": 211638,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 118,
+            "chance_fraction": 0.0001858510639973414,
+            "degree": 3,
+            "eigenvalue": 198933,
+            "eigenvalue_order": 105819,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 118,
+            "chance_fraction": 0.0001858510639973414,
+            "degree": 3,
+            "eigenvalue": 12706,
+            "eigenvalue_order": 211638,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 118,
+            "chance_fraction": 0.0001858510639973414,
+            "degree": 3,
+            "eigenvalue": 198930,
+            "eigenvalue_order": 35273,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 118,
+            "chance_fraction": 0.0001858510639973414,
+            "degree": 3,
+            "eigenvalue": 12709,
+            "eigenvalue_order": 70546,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 211639,
+      "seed": 4
+    },
+    {
+      "base_points": 186,
+      "bits": 24,
+      "cofactor": 12,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-24bit-p9722191",
+      "log2_r": 19.627040424263132,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 186,
+            "chance_fraction": 0.00001914272693702784,
+            "degree": 3,
+            "eigenvalue": 171989,
+            "eigenvalue_order": 404853,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 186,
+            "chance_fraction": 0.00001914272693702784,
+            "degree": 3,
+            "eigenvalue": 637718,
+            "eigenvalue_order": 809706,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 186,
+            "chance_fraction": 0.00001914272693702784,
+            "degree": 3,
+            "eigenvalue": 723711,
+            "eigenvalue_order": 134951,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 186,
+            "chance_fraction": 0.00001914272693702784,
+            "degree": 3,
+            "eigenvalue": 85996,
+            "eigenvalue_order": 269902,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 186,
+            "chance_fraction": 0.00001914272693702784,
+            "degree": 3,
+            "eigenvalue": 723714,
+            "eigenvalue_order": 404853,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 186,
+            "chance_fraction": 0.00001914272693702784,
+            "degree": 3,
+            "eigenvalue": 85993,
+            "eigenvalue_order": 809706,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 809707,
+      "seed": 1
+    },
+    {
+      "base_points": 226,
+      "bits": 24,
+      "cofactor": 7,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-24bit-p10188733",
+      "log2_r": 20.473992055148212,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 226,
+            "chance_fraction": 0.000022167905404643233,
+            "degree": 3,
+            "eigenvalue": 914056,
+            "eigenvalue_order": 728208,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 226,
+            "chance_fraction": 0.000022167905404643233,
+            "degree": 3,
+            "eigenvalue": 542361,
+            "eigenvalue_order": 728208,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 226,
+            "chance_fraction": 0.000022167905404643233,
+            "degree": 3,
+            "eigenvalue": 271179,
+            "eigenvalue_order": 728208,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 226,
+            "chance_fraction": 0.000022167905404643233,
+            "degree": 3,
+            "eigenvalue": 1185238,
+            "eigenvalue_order": 728208,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 226,
+            "chance_fraction": 0.000022167905404643233,
+            "degree": 3,
+            "eigenvalue": 271182,
+            "eigenvalue_order": 728208,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 226,
+            "chance_fraction": 0.000022167905404643233,
+            "degree": 3,
+            "eigenvalue": 1185235,
+            "eigenvalue_order": 728208,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 1456417,
+      "seed": 2
+    },
+    {
+      "base_points": 292,
+      "bits": 24,
+      "cofactor": 4,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-24bit-p12506311",
+      "log2_r": 21.576913775029468,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 292,
+            "chance_fraction": 0.000023335902413731485,
+            "degree": 3,
+            "eigenvalue": 356537,
+            "eigenvalue_order": 1564113,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 292,
+            "chance_fraction": 0.000023335902413731485,
+            "degree": 3,
+            "eigenvalue": 2771690,
+            "eigenvalue_order": 3128226,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 292,
+            "chance_fraction": 0.000023335902413731485,
+            "degree": 3,
+            "eigenvalue": 2949957,
+            "eigenvalue_order": 1564113,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 292,
+            "chance_fraction": 0.000023335902413731485,
+            "degree": 3,
+            "eigenvalue": 178270,
+            "eigenvalue_order": 3128226,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 292,
+            "chance_fraction": 0.000023335902413731485,
+            "degree": 3,
+            "eigenvalue": 2949960,
+            "eigenvalue_order": 521371,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 292,
+            "chance_fraction": 0.000023335902413731485,
+            "degree": 3,
+            "eigenvalue": 178267,
+            "eigenvalue_order": 1042742,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 3128227,
+      "seed": 3
+    },
+    {
+      "base_points": 208,
+      "bits": 24,
+      "cofactor": 12,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-24bit-p13523017",
+      "log2_r": 20.104730550299035,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 208,
+            "chance_fraction": 0.000015372876510569886,
+            "degree": 3,
+            "eigenvalue": 4627,
+            "eigenvalue_order": 563763,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 208,
+            "chance_fraction": 0.000015372876510569886,
+            "degree": 3,
+            "eigenvalue": 1122900,
+            "eigenvalue_order": 1127526,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 208,
+            "chance_fraction": 0.000015372876510569886,
+            "degree": 3,
+            "eigenvalue": 1118270,
+            "eigenvalue_order": 563763,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 208,
+            "chance_fraction": 0.000015372876510569886,
+            "degree": 3,
+            "eigenvalue": 9257,
+            "eigenvalue_order": 1127526,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 208,
+            "chance_fraction": 0.000015372876510569886,
+            "degree": 3,
+            "eigenvalue": 4630,
+            "eigenvalue_order": 187921,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 208,
+            "chance_fraction": 0.000015372876510569886,
+            "degree": 3,
+            "eigenvalue": 1122897,
+            "eigenvalue_order": 375842,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 1127527,
+      "seed": 4
+    },
+    {
+      "base_points": 808,
+      "bits": 28,
+      "cofactor": 3,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-28bit-p198479287",
+      "log2_r": 25.97930065236937,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 808,
+            "chance_fraction": 4.071377228957471e-6,
+            "degree": 3,
+            "eigenvalue": 3662875,
+            "eigenvalue_order": 66152880,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 808,
+            "chance_fraction": 4.071377228957471e-6,
+            "degree": 3,
+            "eigenvalue": 62490006,
+            "eigenvalue_order": 66152880,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 808,
+            "chance_fraction": 4.071377228957471e-6,
+            "degree": 3,
+            "eigenvalue": 58827128,
+            "eigenvalue_order": 66152880,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 808,
+            "chance_fraction": 4.071377228957471e-6,
+            "degree": 3,
+            "eigenvalue": 7325753,
+            "eigenvalue_order": 66152880,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 808,
+            "chance_fraction": 4.071377228957471e-6,
+            "degree": 3,
+            "eigenvalue": 3662878,
+            "eigenvalue_order": 66152880,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 808,
+            "chance_fraction": 4.071377228957471e-6,
+            "degree": 3,
+            "eigenvalue": 62490003,
+            "eigenvalue_order": 66152880,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 66152881,
+      "seed": 1
+    },
+    {
+      "base_points": 654,
+      "bits": 28,
+      "cofactor": 7,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-28bit-p246727087",
+      "log2_r": 25.07080683316075,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 654,
+            "chance_fraction": 2.6510311820165298e-6,
+            "degree": 3,
+            "eigenvalue": 24871811,
+            "eigenvalue_order": 41075,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 654,
+            "chance_fraction": 2.6510311820165298e-6,
+            "degree": 3,
+            "eigenvalue": 10370540,
+            "eigenvalue_order": 82150,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 654,
+            "chance_fraction": 2.6510311820165298e-6,
+            "degree": 3,
+            "eigenvalue": 20741083,
+            "eigenvalue_order": 123225,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 654,
+            "chance_fraction": 2.6510311820165298e-6,
+            "degree": 3,
+            "eigenvalue": 14501268,
+            "eigenvalue_order": 246450,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 654,
+            "chance_fraction": 2.6510311820165298e-6,
+            "degree": 3,
+            "eigenvalue": 24871808,
+            "eigenvalue_order": 123225,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 654,
+            "chance_fraction": 2.6510311820165298e-6,
+            "degree": 3,
+            "eigenvalue": 10370543,
+            "eigenvalue_order": 246450,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 35242351,
+      "seed": 2
+    },
+    {
+      "base_points": 476,
+      "bits": 28,
+      "cofactor": 12,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-28bit-p161868139",
+      "log2_r": 23.685247014021883,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 476,
+            "chance_fraction": 2.9407350695976848e-6,
+            "degree": 3,
+            "eigenvalue": 11047684,
+            "eigenvalue_order": 13488690,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 476,
+            "chance_fraction": 2.9407350695976848e-6,
+            "degree": 3,
+            "eigenvalue": 2441007,
+            "eigenvalue_order": 6744345,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 476,
+            "chance_fraction": 2.9407350695976848e-6,
+            "degree": 3,
+            "eigenvalue": 4882011,
+            "eigenvalue_order": 4496230,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 476,
+            "chance_fraction": 2.9407350695976848e-6,
+            "degree": 3,
+            "eigenvalue": 8606680,
+            "eigenvalue_order": 2248115,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 476,
+            "chance_fraction": 2.9407350695976848e-6,
+            "degree": 3,
+            "eigenvalue": 11047687,
+            "eigenvalue_order": 13488690,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 476,
+            "chance_fraction": 2.9407350695976848e-6,
+            "degree": 3,
+            "eigenvalue": 2441004,
+            "eigenvalue_order": 6744345,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 13488691,
+      "seed": 3
+    },
+    {
+      "base_points": 620,
+      "bits": 28,
+      "cofactor": 7,
+      "degree": 3,
+      "experiment": "e4",
+      "family": "j0",
+      "instance": "j0-28bit-p210135973",
+      "log2_r": 24.839591284312018,
+      "maps": [
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 620,
+            "chance_fraction": 2.9500650529788624e-6,
+            "degree": 3,
+            "eigenvalue": 17567183,
+            "eigenvalue_order": 6004710,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 620,
+            "chance_fraction": 2.9500650529788624e-6,
+            "degree": 3,
+            "eigenvalue": 12456368,
+            "eigenvalue_order": 3002355,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 620,
+            "chance_fraction": 2.9500650529788624e-6,
+            "degree": 3,
+            "eigenvalue": 24912739,
+            "eigenvalue_order": 6004710,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=0]",
+          "overlap": {
+            "base_points": 620,
+            "chance_fraction": 2.9500650529788624e-6,
+            "degree": 3,
+            "eigenvalue": 5110812,
+            "eigenvalue_order": 3002355,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=0]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=-3]",
+          "overlap": {
+            "base_points": 620,
+            "chance_fraction": 2.9500650529788624e-6,
+            "degree": 3,
+            "eigenvalue": 17567180,
+            "eigenvalue_order": 6004710,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=-3]"
+          },
+          "verified": true
+        },
+        {
+          "degree": 3,
+          "name": "velu3[x0=0, trace=3]",
+          "overlap": {
+            "base_points": 620,
+            "chance_fraction": 2.9500650529788624e-6,
+            "degree": 3,
+            "eigenvalue": 12456371,
+            "eigenvalue_order": 3002355,
+            "fraction": 0.0,
+            "images_in_base": 0,
+            "name": "velu3[x0=0, trace=3]"
+          },
+          "verified": true
+        }
+      ],
+      "r": 30023551,
+      "seed": 4
+    }
+  ],
+  "wall_seconds": 0.251139555,
+  "what_this_is": "Experiment e4 of research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md: rows as measured, every logarithm checked against the planted one.",
+  "what_this_is_not": [
+    "not a speed claim: relation counts and S are reported against their floors and a counted rho; the fold is an engineering lever unless a ratio to the floor falls",
+    "not a claim about any deployed curve: toy instances with certified orders"
+  ]
+}
