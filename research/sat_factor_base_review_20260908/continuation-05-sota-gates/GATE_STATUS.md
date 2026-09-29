@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 158, 2026-09-22. The historical optimization chain is
+Current through Stage 159, 2026-09-22. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
@@ -225,6 +225,10 @@ Stage 158 skips the duplicate filter admission inside selected FIFO
 consumption.  The minimal existing-body fast path preserves exact relations but
 regresses median unit wall 1.99 percent and CPU 5.52 percent.  It is rejected.
 
+Stage 159 halves bucket-index entries from `2^26` to `2^25`, doubling target
+run length from about 16 to 32 while saving 128 MiB theoretically.  Unit wall is
+neutral and CPU regresses 6.21 percent, so the current bucket width is retained.
+
 The campaign has target-independent algebraic factor bases; matched native-XOR,
 WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a
 balanced 160-instance PDP panel through `n=59`; public unknown-scalar end-to-end
@@ -234,7 +238,7 @@ does not establish a new state of the art.
 
 | Gate | Status | Current evidence | Remaining requirement |
 |:--|:--|:--|:--|
-| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds. The Stage 141--158 frontier and optimization controls charge 156 processes: 8,534.795264 sequential wall-seconds, 44,915.417158 core-seconds and 10,091,528,192 B maximum RSS. These incremental charges do not replace Stage 140's 23 processes. One inherited preliminary harness process has 15.614915 s observed wall but no retained CPU/RSS receipt and remains explicitly excluded. | Execute licensed Magma with complete resources and independently recover or repeat the missing preliminary receipt; preinstalled OS/toolchain acquisition remains excluded. |
+| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds. The Stage 141--159 frontier and optimization controls charge 160 processes: 8,623.638676 sequential wall-seconds, 45,588.283924 core-seconds and 10,091,528,192 B maximum RSS. These incremental charges do not replace Stage 140's 23 processes. One inherited preliminary harness process has 15.614915 s observed wall but no retained CPU/RSS receipt and remains explicitly excluded. | Execute licensed Magma with complete resources and independently recover or repeat the missing preliminary receipt; preinstalled OS/toolchain acquisition remains excluded. |
 | 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract, seal the return before truth scoring, and report F4 resources. |
 | 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | The selected bucket-prefetch panel has median default-thread IC 78.619846 s / 504.697434 core-seconds / 9,299,828,736 B median RSS and a matched one-worker candidate at 437.950836 s / 425.370001 core-seconds / 7,217,905,664 B RSS. Against their same-binary baselines, default IC wall improves 12.46% and CPU 4.36%; one-worker IC wall improves 10.97% and CPU 7.89%. | Supply the same fields for licensed Magma F4. SAT conflicts remain inapplicable to exact pair-table arms and are reported as null. |
 | 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage including one completed larger IC run** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and `n=59`. Stages 132--133 retain the standard `n=59` cap and width frontier. Stages 134--141 complete and optimize the cofactor-projected `n=59, ell=15, m=3` public unknown-scalar workflow through persisted coverage and sparse-rank tails. | The evidence is finite and toy-sized; it is not an asymptotic scaling law or a literature-scale speed record. |
@@ -661,6 +665,12 @@ relations.  Candidate median unit wall rises from 2.600805 to 2.652481 seconds
 and CPU from 22.485871 to 23.728118 core-seconds.  They charge 93.739907
 wall-seconds, 686.047697 core-seconds and 10,085,679,104 B peak RSS.  The fast
 path is rejected.
+
+Stage 159 lowers compact bucket bits from 26 to 25.  Four processes emit the
+same 2,157 relations.  Candidate median unit wall changes from 2.628147 to
+2.625274 seconds, while CPU rises from 22.421583 to 23.814860 core-seconds.
+They charge 88.843412 wall-seconds, 672.866766 core-seconds and 10,080,976,896 B
+peak RSS.  The longer compact runs reject the memory trade.
 
 ## The n=53 crossover against a batched rho
 
