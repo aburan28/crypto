@@ -5,6 +5,7 @@ import tempfile
 import unittest
 
 from identity import sha256
+from generic_backend_yield import report_sha256 as yield_report_sha256
 from measurement import report_sha256
 from oracle import InvalidEvidence
 from recover_generic_backend_yield import FROZEN_AUDITOR_SHA256, recover
@@ -22,6 +23,7 @@ class FrozenAuditorRepairTests(unittest.TestCase):
         with self.assertRaises(InvalidEvidence):
             sha256(report)
         self.assertEqual(len(report_sha256(report)), 64)
+        self.assertEqual(yield_report_sha256(report), report_sha256(report))
 
     def test_changed_archived_auditor_is_rejected_before_import(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -14,7 +14,7 @@ import random
 from generic_build import verify_binding
 from generic_phases import verify_native
 from generic_stages import verify_stages
-from identity import sha256
+from measurement import report_sha256
 from oracle import require
 from tournament import executed_job, frozen_inputs, read, stage_arms, trial_path, write
 
@@ -73,7 +73,7 @@ def observed_run(root, case, arm, stage, repetition):
                 accepted_rows=audit['matrix']['accepted_rows'], rank=audit['matrix']['rank'],
                 base_points=audit['base']['inventory']['usable_point_count'],
                 folded_columns=audit['base']['inventory']['effective_columns'],
-                report_sha256=sha256(report),
+                report_sha256=report_sha256(report),
                 target_descent_queries=len(descents),
                 target_outcome_mix=dict(sorted(descent_outcomes.items())),
                 profiled_phase_wall_ns=phases['observed_phases_ns'],

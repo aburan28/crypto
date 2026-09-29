@@ -8,6 +8,8 @@ floats, while the worker reports finite floating-point timing diagnostics
 reproduces `InvalidEvidence: canonical records cannot contain floats or
 non-JSON values`. The frozen auditor therefore cannot finish its natural-yield
 step as written. This is an evaluator defect, not a measured solver outcome.
+The repository auditor now uses `measurement.report_sha256` for future
+campaigns; the running checkout and its archived evaluator remain unchanged.
 
 The registered panel, worker, jobs, targets, timeout, resources, evaluator
 snapshot and raw receipts must remain unchanged. Do **not** dispatch the same
