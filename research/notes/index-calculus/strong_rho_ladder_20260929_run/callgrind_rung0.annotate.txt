@@ -1,0 +1,31 @@
+--------------------------------------------------------------------------------
+Profile data file 'callgrind_rung0.out' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 40731002585
+Trigger: Program termination
+Profiled target:  /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong 53 0 signed_frobenius 1024 531310 (PID 2134, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                       
+--------------------------------------------------------------------------------
+406,208,773,598 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                        file:function
+--------------------------------------------------------------------------------
+223,934,651,611 (55.13%)  ???:koblitz_rho_batch_ks_strong::run [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 96,277,075,472 (23.70%)  ???:koblitz_rho_batch_ks_strong::Field::inv [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 44,595,662,362 (10.98%)  ???:koblitz_rho_batch_ks_strong::raw_square_soft [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 22,919,697,193 ( 5.64%)  ???:koblitz_rho_batch_ks_strong::point_add [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 15,391,996,312 ( 3.79%)  ???:__umodti3 [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+

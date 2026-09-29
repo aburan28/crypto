@@ -229,6 +229,15 @@ def main():
     parser.add_argument('--source-root', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     args = parser.parse_args()
+    # This budget already has a canonical series (RESULT.md, PR #961) and a
+    # retained replay (run-20260929/). A new directory is not a new registration.
+    # The body below is the historical runner and is not reached.
+    raise SystemExit(
+        'dispatch closed: the max_trials=1 dimension-6 budget already ran. '
+        'Canonical receipts are RESULT.md (PR #961). '
+        'run-20260929/ is a same-budget replay and is not a new registration. '
+        'A different budget needs a new protocol amendment and a new runner.'
+    )
     source_root = args.source_root.resolve()
     out = args.out.resolve()
     require(not out.exists(), 'pilot output directory already exists; use a new directory')

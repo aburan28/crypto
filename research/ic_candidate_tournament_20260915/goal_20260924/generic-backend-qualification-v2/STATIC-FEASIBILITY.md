@@ -2,7 +2,9 @@
 
 This is a source-level finding made after the one permitted v2 dispatch, not a
 measurement or a change to its frozen protocol. [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
-continues to supply the empirical record. Its seed must not be retried. The
+ended [operationally censored](RESULT.md) without a retained bundle; the static
+audit does not substitute for that missing empirical record. Its seed must not
+be retried. The
 machine-readable [audit](STATIC-FEASIBILITY.json) has SHA-256
 `a492ef84c38cf77a1d12d2e489d29fab18a27d8c7a94cf9aa645d2ea4342cbb2`.
 

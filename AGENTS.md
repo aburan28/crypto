@@ -411,12 +411,38 @@ conditions both sides ran under.  Before changing code for speed:
   results and counted units (fingerprints, digests, counters) between
   baseline and candidate.  A faster run that decides anything differently
   is a different algorithm, not a speedup.
-- **Account for contention.** Check the load average and running processes
-  before and after (`uptime`, `top`).  Do not benchmark while builds, test
-  suites, other agents' jobs or other workers share the machine; if the
-  host is shared or virtualised (cloud containers, CI runners), expect
-  ±5–10% wall noise and say so.  Fix the thread count explicitly
-  (`RAYON_NUM_THREADS`, `taskset`) when comparing, and report it.
+- **Isolate every timed run: pin it, reserve its core, and record the
+  conditions.  This is mandatory for any wall-clock or native-time number.**
+  Run the benchmark through `tools/isolated_bench.py`: `run` for a single
+  command it pins itself, `reserve` for a harness that pins its own children
+  (such as the tournament evaluator's `--cpu`). The tool does the following:
+  - It takes an exclusive lock, so only one benchmark runs at a time.
+  - It refuses to start while other processes use CPU or while the CPU or
+    memory pressure (PSI) is high.
+  - It moves every other movable thread off the benchmark core and pins
+    the benchmark there.
+  - It records, per run, the context switches, faults, load average, PSI
+    and the CPU time everything else used, and it marks a run `contended`
+    when others used more than the threshold.
+
+  `taskset` alone is not enough. It keeps the benchmark on one core, but
+  it does not keep anything else off that core. It also does nothing about
+  builds on the neighbouring cores, which share the cache and the memory
+  bus.
+
+  While a timed stage runs, start no builds, test suites, lints, audit
+  cells or other agents' jobs on the same machine. Run heavy work through
+  `tools/isolated_bench.py busy -- CMD` so that it waits for the lock.
+
+  Instruction counts and the repository's counted units do not depend on
+  contention, so they stay the primary metric. Wall time is evidence only
+  from uncontended runs. Report how many runs were contended, and do not
+  pool contended and uncontended runs.
+
+  A virtual machine's host neighbours and CPU frequency are outside the
+  tool's reach. Expect ±5–10% residual wall noise on cloud containers and
+  CI runners, and measure it with an A/A run. Fix the thread count
+  explicitly (`RAYON_NUM_THREADS=1`), and report the pinned CPUs.
 - **Measure the noise floor, then interleave.** Run the baseline against a
   copy of itself (A/A) to see the spread, then alternate baseline and
   candidate (ABAB…, at least five rounds) and report median and minimum.

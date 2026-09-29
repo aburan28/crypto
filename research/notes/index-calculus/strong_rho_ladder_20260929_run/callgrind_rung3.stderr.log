@@ -1,0 +1,13 @@
+==2135== Callgrind, a call-graph generating cache profiler
+==2135== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==2135== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==2135== Command: /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong 53 0 signed_frobenius 1024 531310
+==2135== 
+==2135== For interactive control, run 'callgrind_control -h'.
+==2135== 
+==2135== Events    : Ir
+==2135== Collected : 46384789571
+==2135== 
+==2135== I   refs:      46,384,789,571
+rc=0
+CALLGRIND_RUNG3_DONE

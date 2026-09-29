@@ -1,5 +1,13 @@
 # Matched-arithmetic recheck: compact-orbit IC vs batched Kuhn–Struik rho (n=53, L=1,024)
 
+> **Superseded in part (2026-09-29).** The verdict below — "the lead survives,
+> IC/rho = 0.2403" — is withdrawn: its "matched" rho was hardware-mismatched on
+> x86-64 (software carry-less multiply against IC's `pclmulqdq`) and not
+> best-effort. See the erratum at the end of this note and
+> `RESEARCH_STRONG_RHO_LADDER_20260929.md`, where the same targets give
+> IC/rho = 1.923 against the strongest reference built. Every measurement
+> recorded below is retained unchanged; the arithmetic-asymmetry finding stands.
+
 Written and committed **before the matched-arithmetic binary is built or run**,
 per `AGENTS.md` "state the boundary before measuring" / "declare the
 falsification target in advance". Nothing below this line is a result.
@@ -384,3 +392,43 @@ note was written to check has been measured, at the exact frozen n=53,
 L=1,024, K=440 cell, and does not reverse the direction of the original
 claim on this host, on either metric — even though the two metrics disagree
 sharply on the *margin*.
+
+---
+
+## Erratum (2026-09-29, additive)
+
+What this note measured stands: at the frozen n = 53, L = 1,024, K = 440 cell
+the rewrite of the rho's canonicalization and inversion to normal-basis
+rotation and Itoh–Tsujii changed cost and not the walk (19,103,507 steps, 1,024
+targets verified, on every run), and the resulting rho needed 371,102,176,689
+retired instructions against IC's 89,164,459,930.
+
+What does not stand is the inference "IC still costs about a quarter of matched
+rho's retired instructions, so the lead survives". Two properties of that rho
+made the ratio uninformative about IC versus rho, and both were visible in this
+note's own committed callgrind annotation:
+
+1. On x86-64 the rho file multiplies with a software bit-loop
+   (`carryless_product_software`, ~429 instructions per `raw_mul_field`), while
+   the IC arm's library `Gf2` uses one `pclmulqdq`. The word "matched" in this
+   note's title and text was therefore wrong for the host it was measured on.
+2. `raw_canonicalize` was 50.82 % of the run (a Θ(n) polynomial-basis scan with a
+   `u128 %` per orbit position, `__umodti3` 4.15 %), and every step paid a full
+   Itoh–Tsujii inversion, although the repository's `Gf2::batch_inv` exists.
+
+Replacing those, one at a time, on the same 1,024 targets gives the ladder in
+`RESEARCH_STRONG_RHO_LADDER_20260929.md`: 371.1 B → 281.0 B (library field) →
+68.9 B (normal-coordinate canonicalization) → 46.4 B (32 lockstep walks with
+batch inversion), with IC/rho moving 0.240 → 0.317 → 1.294 → **1.923**. The
+verdict under this note's own pre-registered rule (survives < 0.8, dies ≥ 1.0)
+against the strongest reference is "dies". The same-day wall/CPU experiments in
+PRs #940, #943 and #944 (independent hosts, five cold blocks, macOS replay) reach
+the same conclusion for n = 37, 41, 53.
+
+The disclosed gaps in this note (no `docs/index-calculus-scoreboard.html` row;
+the missing frozen comparator binary) are unchanged. The wall-clock and
+instruction-count disagreement discussed above is **not** an explanation of
+anything about IC versus a strong rho: with a strong reference both metrics agree
+on direction (IC costs 1.92× the instructions and about 5.8× the wall time of the
+strongest rung at this cell).
+

@@ -1,6 +1,11 @@
-# Disclosed-point F4/F5 dimension-6 pilot — local result
+# Disclosed-point F4/F5 dimension-6 pilot — same-budget replay
 
-Status: **diagnostic execution complete**. `promotion_eligible=false`.
+Status: **replay of the canonical series, not a new registration**.
+`promotion_eligible=false`. The merged record is
+[../RESULT.md](../RESULT.md) (PR #961). This directory repeats
+`max_trials=1`, `node_budget=4096`, and the five inventory points. Its build
+SHA-256 matches that series. Its worker binary hash does not, because the
+worker was rebuilt from the same source commit. Do not rerun `run_pilot.py`.
 Comparison kind: `factor-base-policy`. Competitive `S`, rho ratios, and
 scoreboard rows stay unset. Valgrind 3.22.0 is absent on this host, so
 `instruction_count` is null on every receipt. `wall_ns` is process

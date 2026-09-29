@@ -458,6 +458,8 @@ pub struct F5Timings {
     pub unpack_ns: u64,
     /// Whether the full-column direct packed-row builder was used.
     pub direct_pack_used: bool,
+    /// Whether the scalar preallocated direct-write unpack path was used.
+    pub direct_unpack_used: bool,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -483,6 +485,33 @@ fn unpack_row_scalar(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolPoly {
             monos.push(F2BoolMono::from_mask(cols[c]));
         }
     }
+    F2BoolPoly {
+        terms: monos,
+        n_vars,
+    }
+}
+
+/// Expand a packed row into the exact preallocated number of terms.
+fn unpack_row_scalar_direct(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolPoly {
+    let terms = row.iter().map(|w| w.count_ones() as usize).sum();
+    let mut monos = Vec::<F2BoolMono>::with_capacity(terms);
+    let out = monos.as_mut_ptr();
+    let mut written = 0;
+    for (w, &word) in row.iter().enumerate() {
+        let mut bits = word;
+        while bits != 0 {
+            let c = w * 64 + bits.trailing_zeros() as usize;
+            bits &= bits - 1;
+            let mono = F2BoolMono::from_mask(cols[c]);
+            // SAFETY: `written` increases once per set bit and `terms` is
+            // exactly the number of set bits in the whole row.
+            unsafe { out.add(written).write(mono) };
+            written += 1;
+        }
+    }
+    debug_assert_eq!(written, terms);
+    // SAFETY: all `terms` slots have been written above.
+    unsafe { monos.set_len(terms) };
     F2BoolPoly {
         terms: monos,
         n_vars,
@@ -532,13 +561,16 @@ unsafe fn unpack_row_avx512(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolP
     }
 }
 
-fn unpack_row(row: &[u64], cols: &[u64], n_vars: usize, avx512: bool) -> F2BoolPoly {
+fn unpack_row(row: &[u64], cols: &[u64], n_vars: usize, avx512: bool, direct: bool) -> F2BoolPoly {
     #[cfg(target_arch = "x86_64")]
     if avx512 {
         // SAFETY: the caller selects this path only after a runtime check.
         return unsafe { unpack_row_avx512(row, cols, n_vars) };
     }
     let _ = avx512;
+    if direct {
+        return unpack_row_scalar_direct(row, cols, n_vars);
+    }
     unpack_row_scalar(row, cols, n_vars)
 }
 
@@ -657,10 +689,14 @@ pub fn matrix_f5_f2_with_form_timed(
             false
         }
     });
+    static DIRECT_UNPACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let direct_unpack =
+        *DIRECT_UNPACK.get_or_init(|| std::env::var("KIC_F5_UNPACK_DIRECT").as_deref() == Ok("1"));
+    timings.direct_unpack_used = direct_unpack && !avx512_unpack;
     let out = matrix[..rank]
         .par_iter()
         .map(|row| {
-            let p = unpack_row(row, &cols, n_vars_out, avx512_unpack);
+            let p = unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack);
             debug_assert!(p.is_canonical());
             p
         })
@@ -705,6 +741,28 @@ mod tests {
     use crate::cryptanalysis::koblitz_groebner::{
         f5_rows_monos_with_f4_count, f5_rows_packed_full_columns, matrix_f4_f2, pack_rows,
     };
+
+    #[test]
+    fn direct_scalar_unpack_matches_push_path() {
+        for cols_len in [1usize, 7, 64, 65, 127, 129, 4097] {
+            let cols: Vec<u64> = (0..cols_len)
+                .map(|i| (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15))
+                .collect();
+            for salt in [0u64, 1, 3, 7, u64::MAX] {
+                let row: Vec<u64> = (0..cols_len.div_ceil(64))
+                    .map(|w| {
+                        let bits = (w as u64).wrapping_mul(0xd6e8_feb8_6659_fd93) ^ salt;
+                        let valid = (cols_len - w * 64).min(64);
+                        bits & (u64::MAX >> (64 - valid))
+                    })
+                    .collect();
+                assert_eq!(
+                    unpack_row_scalar_direct(&row, &cols, 24),
+                    unpack_row_scalar(&row, &cols, 24),
+                );
+            }
+        }
+    }
 
     #[test]
     fn direct_packed_f5_build_matches_sorted_builder_and_falls_back_on_sparse_columns() {

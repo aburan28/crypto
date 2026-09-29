@@ -1,6 +1,7 @@
 # Fresh F4/F5/SAT complete-solve qualification
 
-Status: **dispatched once; result pending** in [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479).
+Status: **dispatched once; operationally censored** — see [RESULT.md](RESULT.md) for
+[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479).
 The scientific question, schedule,
 resources, success/stop rules and accounting are frozen in [PROTOCOL.md](PROTOCOL.md).
 The subsequent [source feasibility audit](STATIC-FEASIBILITY.md) identifies a
