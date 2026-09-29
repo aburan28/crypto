@@ -22,6 +22,16 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def git_blob_sha(ref: str, relative: str) -> str:
+    data = subprocess.check_output(["git", "show", f"{ref}:{relative}"], cwd=ROOT)
+    return hashlib.sha256(data).hexdigest()
+
+
+def is_ancestor(ancestor: str, descendant: str) -> bool:
+    return subprocess.run(["git", "merge-base", "--is-ancestor", ancestor, descendant],
+                          cwd=ROOT, check=False).returncode == 0
+
+
 def independent_dimacs_size(chain, target_O: bool) -> dict:
     """Byte arithmetic independent of capacity.exact_dimacs_size and export.py."""
     d = chain.dag
@@ -92,16 +102,29 @@ def main() -> int:
     receipt = json.loads((out / "receipt.json").read_text())
     assert receipt["status"] == "PRODUCER_ARCHIVED"
     assert receipt["freeze_sha256"] == sha(HERE / "FROZEN.json")
-    assert receipt["release"]["main_head"] == frozen["release_main_head"]
-    assert set(receipt["release"]["merged_parent_commits"]) == {"802", "804", "784"}
-    for merge_oid in receipt["release"]["merged_parent_commits"].values():
-        subprocess.run(["git", "merge-base", "--is-ancestor", merge_oid,
-                        frozen["release_main_head"]], cwd=ROOT, check=True)
+    release = receipt["release"]
+    frozen_main = frozen["release_main_head"]
+    assert frozen["release_main_head_role"] == "pre_release_main_ancestor"
+    assert release["frozen_main_ancestor"] == frozen_main
+    observed_main = release["observed_main_head"]
+    checkout = release["checkout_head"]
+    assert is_ancestor(frozen_main, observed_main)
+    assert is_ancestor(frozen_main, checkout)
+    assert set(release["merged_parent_commits"]) == {"802", "804", "784"}
+    for merge_oid in release["merged_parent_commits"].values():
+        assert is_ancestor(merge_oid, frozen_main)
     check_manifest(out, receipt)
     for rel, expected in frozen["input_sha256"].items():
         assert sha(ROOT / rel) == expected, rel
+        assert git_blob_sha(checkout, rel) == expected, rel
+        assert git_blob_sha(observed_main, rel) == expected, rel
+    workflow = frozen["dispatch_workflow_path"]
+    assert sha(ROOT / workflow) == frozen["dispatch_workflow_sha256"]
+    assert git_blob_sha(checkout, workflow) == frozen["dispatch_workflow_sha256"]
+    here_rel = HERE.relative_to(ROOT).as_posix()
     for name, expected in frozen["source_sha256"].items():
         assert sha(HERE / name) == expected, name
+        assert git_blob_sha(checkout, f"{here_rel}/{name}") == expected, name
     basis = replay_basis()
     assert basis["status"] == "PASS"
     arms = []

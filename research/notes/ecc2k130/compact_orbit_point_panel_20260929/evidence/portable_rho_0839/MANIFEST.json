@@ -1,0 +1,133 @@
+{
+  "cases": {
+    "n37_L1": {
+      "cpu_ratio_median": 0.6976161244117045,
+      "host_path": "hosts/n37_L1.json",
+      "host_sha256": "6457cb2af06bfc9174bb1e3e58397728116062d3b7c5498e281405d720e28a52",
+      "k": 7,
+      "raw_bytes": 56903,
+      "raw_path": "raw/n37_L1.tar.gz",
+      "raw_sha256": "3ba7e64034980742ae5a10fc69bd8f645de2399e5b863bc1d3d66781c27aa586",
+      "receipt_path": "receipts/n37_L1.json",
+      "receipt_sha256": "5b5de17c21b9c9ac5bb4213dab681c1da4d3a475e64a8196728fc797cc1d771d",
+      "status": "PASS",
+      "targets_verified_per_arm": 5,
+      "wall_ratio_median": 0.7678866188080052
+    },
+    "n37_L1024": {
+      "cpu_ratio_median": 0.15445886638420436,
+      "host_path": "hosts/n37_L1024.json",
+      "host_sha256": "1bda8396c966e8e692364fc838959a1081b917bd97dbfc437ac029247f1d9b9c",
+      "k": 42,
+      "raw_bytes": 1118645,
+      "raw_path": "raw/n37_L1024.tar.gz",
+      "raw_sha256": "32ac4067834899aa137b8840346d7c2ba536518e9f9f191d5a4711ffccfd9458",
+      "receipt_path": "receipts/n37_L1024.json",
+      "receipt_sha256": "5baed2c6bddcc5e35a4db3ce918b5d6be70d1cba8f600a646ddf17ea8791d5fc",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120,
+      "wall_ratio_median": 0.1553345541482197
+    },
+    "n41_L1": {
+      "cpu_ratio_median": 0.8359372871094515,
+      "host_path": "hosts/n41_L1.json",
+      "host_sha256": "b08c84b00977bf941391314b6b6c4d2a1d260646cfed3d3bd3d1e21b25e25dfa",
+      "k": 85,
+      "raw_bytes": 578217,
+      "raw_path": "raw/n41_L1.tar.gz",
+      "raw_sha256": "cedd9c63be06f38c06eb301d981ce6376a00ac0237247a34e74bc32c53e4d99a",
+      "receipt_path": "receipts/n41_L1.json",
+      "receipt_sha256": "3e5c2229057ef9dc3b331a9cbc145c3396999cd9198abfe8a317d47326c053c2",
+      "status": "PASS",
+      "targets_verified_per_arm": 5,
+      "wall_ratio_median": 0.8326629228928103
+    },
+    "n41_L1024": {
+      "cpu_ratio_median": 0.09906063889369265,
+      "host_path": "hosts/n41_L1024.json",
+      "host_sha256": "6a688466803ccf46575214cf2a9daf91dd762ab21822c9cfea18a8d44bc800d0",
+      "k": 255,
+      "raw_bytes": 2667353,
+      "raw_path": "raw/n41_L1024.tar.gz",
+      "raw_sha256": "5d4acb4132e5d72ffabb0a09668353b32d43aa5bd737a74358743d7701965b52",
+      "receipt_path": "receipts/n41_L1024.json",
+      "receipt_sha256": "a7d6c6a79ef224b574b67be1caa47077cf7356fde0cf9f1de8084c2eb3cf6dbd",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120,
+      "wall_ratio_median": 0.09924466336724498
+    },
+    "n53_L1": {
+      "cpu_ratio_median": 0.8668330309758402,
+      "host_path": "hosts/n53_L1.json",
+      "host_sha256": "f06ff96a35eb3b97407dc3611a2386d77c97aa3f14084ae129e10d2a316febdf",
+      "k": 220,
+      "raw_bytes": 2184083,
+      "raw_path": "raw/n53_L1.tar.gz",
+      "raw_sha256": "81e9f6eb426ee4662baed066df89d6e1c94d5c5dabe36d89cb62bdb21093b5b5",
+      "receipt_path": "receipts/n53_L1.json",
+      "receipt_sha256": "419019e6fb71d9af17cb1895cac2975b43f21213096827fa63d5d3df0652daae",
+      "status": "PASS",
+      "targets_verified_per_arm": 5,
+      "wall_ratio_median": 0.8669921405335789
+    },
+    "n53_L1024": {
+      "cpu_ratio_median": 0.08586162324777184,
+      "host_path": "hosts/n53_L1024.json",
+      "host_sha256": "1e3dc05751ab5f6dfd76876161972fdacc1b49c68f15c924ddbb2dd2be142305",
+      "k": 440,
+      "raw_bytes": 5493440,
+      "raw_path": "raw/n53_L1024.tar.gz",
+      "raw_sha256": "f0691a48ca8b610d1e8b0f9fbfffa9d095d57c90bf6d3fc760615bff8dff5330",
+      "receipt_path": "receipts/n53_L1024.json",
+      "receipt_sha256": "3836be52e0941a16ed0cbf9ad0daeb9beb6b01e077a2b0609d8ed78be8849923",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120,
+      "wall_ratio_median": 0.08586510038768735
+    }
+  },
+  "checkout_main_parent": "7cb82297ca9a6349e9fbde06219228417ca9e54a",
+  "checkout_merge_commit": "dd859db52b5d1ea22fc729eb2fe0cfe6fbe3c5a0",
+  "extraction": "tar -xzf raw/n37_L1.tar.gz -C DEST; repeat per case",
+  "frozen_sha256": "b80b6a3fafc45ef4c5d2d9c873661b2662e84363fcb58724f523fe107ceaa8d2",
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36554543689",
+  "independent_replay": "python3 verify_panel.py --n 37 --L 1 --run-dir DEST/n37_L1 --out NEW_RECEIPT.json",
+  "schema": "compact-orbit-hosted-panel-archive-v1",
+  "second_host_replay": {
+    "cases": {
+      "n37_L1": {
+        "path": "second_host_replay/n37_L1.json",
+        "sha256": "5b5de17c21b9c9ac5bb4213dab681c1da4d3a475e64a8196728fc797cc1d771d",
+        "targets_verified_per_arm": 5
+      },
+      "n37_L1024": {
+        "path": "second_host_replay/n37_L1024.json",
+        "sha256": "5baed2c6bddcc5e35a4db3ce918b5d6be70d1cba8f600a646ddf17ea8791d5fc",
+        "targets_verified_per_arm": 5120
+      },
+      "n41_L1": {
+        "path": "second_host_replay/n41_L1.json",
+        "sha256": "3e5c2229057ef9dc3b331a9cbc145c3396999cd9198abfe8a317d47326c053c2",
+        "targets_verified_per_arm": 5
+      },
+      "n41_L1024": {
+        "path": "second_host_replay/n41_L1024.json",
+        "sha256": "a7d6c6a79ef224b574b67be1caa47077cf7356fde0cf9f1de8084c2eb3cf6dbd",
+        "targets_verified_per_arm": 5120
+      },
+      "n53_L1": {
+        "path": "second_host_replay/n53_L1.json",
+        "sha256": "419019e6fb71d9af17cb1895cac2975b43f21213096827fa63d5d3df0652daae",
+        "targets_verified_per_arm": 5
+      },
+      "n53_L1024": {
+        "path": "second_host_replay/n53_L1024.json",
+        "sha256": "3836be52e0941a16ed0cbf9ad0daeb9beb6b01e077a2b0609d8ed78be8849923",
+        "targets_verified_per_arm": 5120
+      }
+    },
+    "host_path": "second_host_replay/HOST.json",
+    "host_sha256": "d53cc7385db8193f3e78f201bd9f3c93338abf61ebbbaa6f9e119024aa4ae760"
+  },
+  "source_head": "0839f6905d76c857a5b94de925e75e9bbe1060b8",
+  "source_head_kind": "PR head; GitHub Actions compiled the recorded PR merge checkout"
+}

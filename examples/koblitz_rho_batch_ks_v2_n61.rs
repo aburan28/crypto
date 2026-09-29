@@ -8,6 +8,9 @@
 //! distinguished-point table persists across targets, so later targets can
 //! finish on the trails of earlier, already-solved ones. Targets are derived
 //! exactly as the frozen `packed <batch_seed>` independent runs derive them.
+//! `KIC_RHO_POINT_INPUT` accepts public [x,y] JSONL without reading the
+//! known-answer scalars. `KIC_RHO_GENERATE_ONLY=1` emits a separate fixture
+//! stream for a frozen public-point corpus without running the rho search.
 
 use crypto_lib::binary_ecc::BinaryPoint;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
@@ -145,13 +148,42 @@ fn carryless_product_software(left: u64, right: u64) -> u128 {
     product
 }
 
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "pclmulqdq")]
+unsafe fn carryless_product_pclmul(left: u64, right: u64) -> u128 {
+    use std::arch::x86_64::*;
+    let a = _mm_set_epi64x(0, left as i64);
+    let b = _mm_set_epi64x(0, right as i64);
+    let product = _mm_clmulepi64_si128::<0x00>(a, b);
+    let low = _mm_cvtsi128_si64(product) as u64;
+    let high = _mm_cvtsi128_si64(_mm_srli_si128::<8>(product)) as u64;
+    ((high as u128) << 64) | low as u128
+}
+
 #[cfg(target_arch = "aarch64")]
 #[target_feature(enable = "aes")]
 unsafe fn carryless_product_pmull(left: u64, right: u64) -> u128 {
     std::arch::aarch64::vmull_p64(left, right)
 }
 
+fn field_product_backend() -> &'static str {
+    #[cfg(target_arch = "x86_64")]
+    if std::arch::is_x86_feature_detected!("pclmulqdq") {
+        return "pclmulqdq";
+    }
+    #[cfg(target_arch = "aarch64")]
+    if std::arch::is_aarch64_feature_detected!("aes") {
+        return "pmull";
+    }
+    "portable"
+}
+
 fn carryless_product(left: u64, right: u64) -> u128 {
+    #[cfg(target_arch = "x86_64")]
+    if std::arch::is_x86_feature_detected!("pclmulqdq") {
+        // SAFETY: guarded by the runtime CPU-feature check above.
+        return unsafe { carryless_product_pclmul(left, right) };
+    }
     #[cfg(target_arch = "aarch64")]
     if std::arch::is_aarch64_feature_detected!("aes") {
         // SAFETY: the runtime feature check above proves PMULL availability.
@@ -166,16 +198,25 @@ fn raw_mul_field(curve: &KoblitzCurve, left: u64, right: u64) -> u64 {
 
 fn raw_inverse(curve: &KoblitzCurve, value: u64) -> u64 {
     assert_ne!(value, 0);
-    let exponent = (1u64 << curve.n) - 2;
-    let mut result = 1u64;
-    let mut base = value;
-    for bit in 0..curve.n {
-        if (exponent >> bit) & 1 == 1 {
-            result = raw_mul_field(curve, result, base);
+    // The same Itoh–Tsujii addition chain used by the IC field backend.
+    // beta_k = value^(2^k - 1); n - 1 squarings and O(log n) multiplies.
+    let exponent = curve.n - 1;
+    let mut beta = value;
+    let mut length = 1u32;
+    for bit in (0..(31 - exponent.leading_zeros())).rev() {
+        let mut raised = beta;
+        for _ in 0..length {
+            raised = raw_square(curve, raised);
         }
-        base = raw_square(curve, base);
+        beta = raw_mul_field(curve, raised, beta);
+        length *= 2;
+        if (exponent >> bit) & 1 == 1 {
+            beta = raw_mul_field(curve, raw_square(curve, beta), value);
+            length += 1;
+        }
     }
-    result
+    debug_assert_eq!(length, exponent);
+    raw_square(curve, beta)
 }
 
 fn raw_neg(point: RawPoint) -> RawPoint {
@@ -380,6 +421,64 @@ fn main() {
         Quotient::SignedFrobenius => signed_automorphism_size(lambda, modulus, n),
     };
     let generator = raw_point(curve.generator());
+    let point_input = std::env::var("KIC_RHO_POINT_INPUT").ok().map(|path| {
+        let input = std::fs::read_to_string(path).expect("read public point JSONL");
+        let points: Vec<RawPoint> = input
+            .lines()
+            .filter(|line| !line.trim().is_empty())
+            .map(|line| {
+                let [x, y]: [u64; 2] =
+                    serde_json::from_str(line).expect("public target must be [x,y]");
+                assert!(x < (1u64 << n) && y < (1u64 << n));
+                RawPoint::Affine { x, y }
+            })
+            .collect();
+        assert_eq!(points.len(), fixtures as usize);
+        points
+    });
+    let generate_only = std::env::var("KIC_RHO_GENERATE_ONLY")
+        .map(|value| value == "1")
+        .unwrap_or(false);
+    if generate_only {
+        assert!(
+            point_input.is_none(),
+            "generation and point input are exclusive"
+        );
+        assert!(
+            shared_corpus.is_some(),
+            "generation requires a named corpus"
+        );
+        for index in 0..fixtures {
+            let material = format!(
+                "KIC-SHARED-PUBLIC-FIXTURE-v1|{n}|{a}|{}|{batch_seed}|{index}",
+                shared_corpus.as_ref().unwrap()
+            );
+            let digest = blake3::hash(material.as_bytes());
+            let seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
+            let mut rng = StdRng::seed_from_u64(seed);
+            let scalar = rng.gen_range(1..modulus);
+            let q = raw_key(raw_scalar_mul(&curve, generator, scalar));
+            println!(
+                "{}",
+                json!({
+                    "kind":"rho_ks_public_fixture", "n":n, "a":a,
+                    "fixture_index":index, "fixture_seed":seed,
+                    "batch_seed":batch_seed, "corpus":shared_corpus,
+                    "subgroup_order":modulus, "automorphism_size":automorphisms,
+                    "field_modulus_low_terms":curve.curve.irreducible.low_terms,
+                    "generator":[raw_key(generator).1,raw_key(generator).2],
+                    "published_fixture_scalar":scalar, "published_q":[q.1,q.2],
+                })
+            );
+        }
+        return;
+    }
+    if point_input.is_some() {
+        assert!(
+            shared_corpus.is_some(),
+            "public point input requires a named corpus"
+        );
+    }
     let mut charges = Charges::default();
 
     let setup_started = Instant::now();
@@ -425,10 +524,18 @@ fn main() {
         let digest = blake3::hash(material.as_bytes());
         let seed = u64::from_le_bytes(digest.as_bytes()[..8].try_into().unwrap());
         let mut rng = StdRng::seed_from_u64(seed);
-        let d0 = rng.gen_range(1..modulus);
+        let d0 = if point_input.is_some() {
+            None
+        } else {
+            Some(rng.gen_range(1..modulus))
+        };
         let started = Instant::now();
-        let q = raw_scalar_mul(&curve, generator, d0);
-        charges.scalar_multiplications += 1;
+        let q = if let Some(points) = &point_input {
+            points[index as usize]
+        } else {
+            charges.scalar_multiplications += 1;
+            raw_scalar_mul(&curve, generator, d0.unwrap())
+        };
         let table_before = table.len();
         // Successive walk starts step by a fixed stride: one addition per walk
         // instead of a fresh scalar multiplication.
@@ -533,7 +640,9 @@ fn main() {
         }
         let solve_ms = started.elapsed().as_secs_f64() * 1000.0;
         let recovered = recovered.expect("batched rho exceeded the per-target step cap");
-        assert_eq!(recovered, d0);
+        if let Some(published) = d0 {
+            assert_eq!(recovered, published);
+        }
         let via = via_target.unwrap();
         if via != index {
             cross_solves += 1;
@@ -550,6 +659,7 @@ fn main() {
                 "fixture_index":index,"fixture_seed":seed,"batch_seed":batch_seed,
                 "published_fixture_scalar":d0,"recovered_fixture_scalar":recovered,
                 "published_q":[q_key.1,q_key.2],"verified":true,
+                "target_source":if point_input.is_some() { "public_point_jsonl" } else { "generated_fixture" },
                 "solved_via_target":via,"cross_target_solve":via != index,
                 "walk_steps":steps,"walks":walks,"fruitless_two_cycles":fruitless,
                 "capped_walks":capped,"wasted_merges":wasted_merges,
@@ -563,9 +673,12 @@ fn main() {
     println!(
         "{}",
         json!({
-            "kind":"rho_ks_batch_summary","producer_version":"v2_stride_starts",
+            "kind":"rho_ks_batch_summary","producer_version":"v2_stride_starts_pclmul_itoh",
             "n":n,"a":a,"quotient_mode":mode.name(),"automorphism_size":automorphisms,
             "fixtures":fixtures,"batch_seed":batch_seed,"corpus":shared_corpus,"dp_bits":dp_bits,"jump_count":JUMPS,
+            "target_source":if point_input.is_some() { "public_point_jsonl" } else { "generated_fixture" },
+            "field_product_backend":field_product_backend(),
+            "inversion_backend":"itoh_tsujii",
             "all_verified":true,"cross_target_solves":cross_solves,
             "total_walk_steps":total_steps,"table_entries":table.len(),
             "table_payload_lower_bound_bytes":table.len() * (1 + 4 * std::mem::size_of::<u64>()),
@@ -582,4 +695,55 @@ fn main() {
             "scope":"published synthetic toy fixtures; no external point, unknown scalar, or production key"
         })
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn runtime_carryless_product_matches_bit_serial_reference() {
+        let mut state = 0x6a09_e667_f3bc_c909u64;
+        for _ in 0..128 {
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            let left = state;
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            let right = state;
+            assert_eq!(
+                carryless_product(left, right),
+                carryless_product_software(left, right)
+            );
+        }
+    }
+
+    #[test]
+    fn itoh_inverse_matches_square_and_multiply_reference() {
+        for n in [13, 37, 41, 53] {
+            let curve = KoblitzCurve::new(0, n).unwrap();
+            let mask = (1u64 << n) - 1;
+            let exponent = (1u64 << n) - 2;
+            let mut state = 0x243f_6a88_85a3_08d3u64;
+            for _ in 0..64 {
+                state = state
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1442695040888963407);
+                let value = (state & mask).max(1);
+                let mut reference = 1u64;
+                let mut base = value;
+                for bit in 0..n {
+                    if (exponent >> bit) & 1 == 1 {
+                        reference = raw_mul_field(&curve, reference, base);
+                    }
+                    base = raw_square(&curve, base);
+                }
+                let candidate = raw_inverse(&curve, value);
+                assert_eq!(candidate, reference, "n={n} value={value}");
+                assert_eq!(raw_mul_field(&curve, value, candidate), 1);
+            }
+        }
+    }
 }
