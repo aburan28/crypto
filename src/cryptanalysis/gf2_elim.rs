@@ -80,8 +80,6 @@ pub struct Config {
     /// Gray-code tables per pass, 1 to 4; the block is `k · tables`
     /// pivots for `k`-bit tables.
     pub tables: usize,
-    /// Score at most eight equal-leading-column rows by sampled density.
-    pub bounded_weight_pivot: bool,
     /// Row words per block from which rows are cleared in parallel.
     pub parallel_words: usize,
     /// Use AVX-512 when available, or an explicitly requested AVX2 update.
@@ -92,7 +90,6 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             tables: DEFAULT_TABLES,
-            bounded_weight_pivot: false,
             parallel_words: PARALLEL_WORDS,
             simd: true,
         }
@@ -112,8 +109,6 @@ impl Config {
             {
                 c.tables = t.clamp(1, 4);
             }
-            c.bounded_weight_pivot =
-                std::env::var("KIC_GF2_BOUNDED_WEIGHT_PIVOT").as_deref() == Ok("1");
             if let Some(p) = std::env::var("KIC_GF2_PARALLEL_WORDS")
                 .ok()
                 .and_then(|v| v.parse::<usize>().ok())
@@ -125,20 +120,6 @@ impl Config {
             }
             c
         })
-    }
-}
-
-/// A cheap proxy for current row density, updated once per pivot block.
-/// Eight positions cover the suffix; short suffixes use each word once.
-#[inline]
-fn sampled_suffix_weight(row: &[u64], from: usize) -> u32 {
-    let suffix = &row[from..];
-    if suffix.len() <= 8 {
-        suffix.iter().map(|w| w.count_ones()).sum()
-    } else {
-        (0..8)
-            .map(|sample| suffix[sample * (suffix.len() - 1) / 7].count_ones())
-            .sum()
     }
 }
 
@@ -213,14 +194,6 @@ fn eliminate_with(
     let mut pivot_cols: Vec<usize> = Vec::with_capacity(block_cap);
     let mut table: Vec<u64> = Vec::new();
     let mut blocks: Vec<(usize, Vec<usize>)> = Vec::new();
-    let mut row_weights: Vec<u32> = if config.bounded_weight_pivot {
-        matrix
-            .iter()
-            .map(|row| sampled_suffix_weight(row, 0))
-            .collect()
-    } else {
-        Vec::new()
-    };
 
     let mut pivot_row = 0usize;
     let mut word = 0usize;
@@ -245,23 +218,14 @@ fn eliminate_with(
             let mask = !0u64 << low;
             let mut best = u32::MAX;
             let mut best_row = usize::MAX;
-            let mut lowest_ties = 0;
             for (i, &s) in strip[pivot_row..].iter().enumerate() {
                 let v = s & mask;
                 if v != 0 {
                     let tz = v.trailing_zeros();
-                    let candidate = pivot_row + i;
-                    if tz < best
-                        || (config.bounded_weight_pivot
-                            && tz == best
-                            && row_weights[candidate] < row_weights[best_row])
-                    {
+                    if tz < best {
                         best = tz;
-                        best_row = candidate;
-                    }
-                    if tz == low {
-                        lowest_ties += 1;
-                        if !config.bounded_weight_pivot || lowest_ties == 8 {
+                        best_row = pivot_row + i;
+                        if tz == low {
                             break;
                         }
                     }
@@ -274,9 +238,6 @@ fn eliminate_with(
             let col = word * 64 + best as usize;
             matrix.swap(pivot_row, best_row);
             strip.swap(pivot_row, best_row);
-            if config.bounded_weight_pivot {
-                row_weights.swap(pivot_row, best_row);
-            }
             // Reduce the new pivot row in full by the block's earlier
             // pivots.  They are mutually reduced, so testing the row's
             // current bit on each pivot column in turn is the same as
@@ -342,14 +303,6 @@ fn eliminate_with(
         if !block_full || low >= last_col_in_word {
             word += 1;
             low = 0;
-        }
-        if config.bounded_weight_pivot && word < words {
-            for (weight, row) in row_weights[pivot_row..]
-                .iter_mut()
-                .zip(&matrix[pivot_row..])
-            {
-                *weight = sampled_suffix_weight(row, word);
-            }
         }
     }
     // A forward pass already zeroed every row below each pivot block.
@@ -811,7 +764,6 @@ mod tests {
                 for parallel_words in [0, usize::MAX] {
                     out.push(Config {
                         tables,
-                        bounded_weight_pivot: false,
                         parallel_words,
                         simd,
                     });
@@ -831,7 +783,6 @@ mod tests {
                     for reduce_above in [false, true] {
                         let config = Config {
                             tables,
-                            bounded_weight_pivot: false,
                             parallel_words: usize::MAX,
                             simd: false,
                         };
@@ -990,42 +941,6 @@ mod tests {
                 let mut again = got.clone();
                 naive_rref(&mut again, cols);
                 assert_eq!(again, want);
-            }
-        }
-    }
-
-    #[test]
-    fn bounded_weight_pivots_preserve_rank_and_row_space() {
-        let mut rng = StdRng::seed_from_u64(119);
-        for &(rows, cols, density) in &[
-            (70, 130, 0.04),
-            (130, 70, 0.3),
-            (220, 389, 0.1),
-            (300, 700, 0.5),
-        ] {
-            let input = random_matrix(&mut rng, rows, cols, density);
-            let mut expected = input.clone();
-            let rank = naive_rref(&mut expected, cols);
-            for tables in [1, 2, 4] {
-                for parallel_words in [0, usize::MAX] {
-                    let config = Config {
-                        tables,
-                        bounded_weight_pivot: true,
-                        parallel_words,
-                        simd: false,
-                    };
-                    for reduce_above in [false, true] {
-                        let mut actual = input.clone();
-                        let mut ops = 0;
-                        let actual_rank =
-                            eliminate(&mut actual, cols, reduce_above, config, &mut ops);
-                        assert_eq!(actual_rank, rank, "{config:?} reduce_above={reduce_above}");
-                        if !reduce_above {
-                            naive_rref(&mut actual, cols);
-                        }
-                        assert_eq!(actual, expected, "{config:?} reduce_above={reduce_above}");
-                    }
-                }
             }
         }
     }
