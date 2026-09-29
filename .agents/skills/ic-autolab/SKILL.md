@@ -128,6 +128,16 @@ committed [independent receipt audit](../../../research/ic_candidate_tournament_
 against the extracted bundle to recalculate all 400 same-point IC/rho online
 pairs from raw receipts and native worker outputs. Its timing/pairing cross-check
 does not replace group replay, natural-query auditing or the family gate.
+The post-registration [static feasibility audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/STATIC-FEASIBILITY.md)
+proves that this panel's four F4/F5 arms exceed the pinned 64-variable encoder
+cap on every cell; wait for the run's raw receipts for its empirical outcome.
+The SAT encoding is separate and remains empirically undecided. Before any new
+algebraic panel generates fresh targets, run
+`generic_solver_feasibility.py --require-pass` against its exact worker source
+checkout and registered panel. A static pass is only an encoder preflight:
+also pilot actual dispatch and natural failed-attempt accounting on disclosed
+points. The independent factor-base auditor now supports `standard_subspace`;
+changing from the incumbent orbit base is a factor-base-policy comparison.
 The gate requires every smoke and development job to be verified for at least
 one F4/F5 arm and one SAT arm; a reference-selection status alone does not
 qualify either family. Describe the current `f4` backend as a bounded Macaulay
