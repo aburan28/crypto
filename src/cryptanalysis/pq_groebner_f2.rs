@@ -251,7 +251,7 @@ pub(crate) fn sum_by_monomial(terms: &mut Vec<(u64, u64)>) {
         for t in terms.iter_mut() {
             t.0 = packed_key(t.0);
         }
-        terms.sort_unstable_by(|a, b| b.0.cmp(&a.0));
+        terms.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
         add_equal_keys(terms);
         for t in terms.iter_mut() {
             t.0 = packed_mask(t.0);
@@ -261,7 +261,7 @@ pub(crate) fn sum_by_monomial(terms: &mut Vec<(u64, u64)>) {
             .iter()
             .map(|&(u, c)| (mono_key(F2BoolMono::from_mask(u)), c))
             .collect();
-        keyed.sort_unstable_by(|a, b| b.0.cmp(&a.0));
+        keyed.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
         add_equal_keys(&mut keyed);
         terms.clear();
         terms.extend(keyed.into_iter().map(|(k, c)| (!(k as u64), c)));
