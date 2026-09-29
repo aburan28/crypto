@@ -11424,6 +11424,99 @@
               "evidence": "research/notes/index-calculus/RESEARCH_STRONG_RHO_LADDER_20260929.md",
               "status": "PENDING_INDEPENDENT_VALIDATION",
               "date": "2026-09-29"
+            },
+            "strong_rho_sweep": {
+              "summary": "Size (L=1024; n=37,41,53,61) and batch (n=53; L=1024,4096,16384) sweep of whole-process retired instructions, IC as merged vs strong rho R3, K as chosen in PR #830; every target verified, rho records independently replayed.",
+              "cells": [
+                {
+                  "n": 37,
+                  "L": 1024,
+                  "K": 42,
+                  "ic_ir": 560613246,
+                  "rho_ir": 705849698,
+                  "ic_over_rho": 0.794
+                },
+                {
+                  "n": 41,
+                  "L": 1024,
+                  "K": 255,
+                  "ic_ir": 12441253531,
+                  "rho_ir": 8184739666,
+                  "ic_over_rho": 1.52
+                },
+                {
+                  "n": 53,
+                  "L": 1024,
+                  "K": 440,
+                  "ic_ir": 89190346806,
+                  "rho_ir": 46384789571,
+                  "ic_over_rho": 1.923
+                },
+                {
+                  "n": 61,
+                  "L": 1024,
+                  "K": 600,
+                  "ic_ir": 292412736909,
+                  "rho_ir": 127304678714,
+                  "ic_over_rho": 2.297
+                },
+                {
+                  "n": 53,
+                  "L": 4096,
+                  "K": 660,
+                  "ic_ir": 153201588995,
+                  "rho_ir": 95528133576,
+                  "ic_over_rho": 1.604
+                },
+                {
+                  "n": 53,
+                  "L": 16384,
+                  "K": 880,
+                  "ic_ir": 298529760485,
+                  "rho_ir": 199039001579,
+                  "ic_over_rho": 1.5
+                }
+              ],
+              "slope_log2_ic_over_rho_on_log2_r": {
+                "value": 0.078,
+                "se": 0.003,
+                "ci95": [
+                  0.067,
+                  0.089
+                ],
+                "df": 2,
+                "leave_one_out": [
+                  0.072,
+                  0.078,
+                  0.079,
+                  0.078
+                ],
+                "note": "IC cost grows faster than the reference; post hoc leave-one-out and local slopes (+0.083,+0.064,+0.087) are not part of the registered rule"
+              },
+              "registered_decision_literal": "survives as a scaling result via clause (i) alone, met only by n=37 L=1024 (0.794); clause (ii) (slope gap <= -0.05, CI excluding 0) not met (gap is +0.078, unfavourable)",
+              "assessment": "clause (i) was designed so any single cell could satisfy it; the triggering cell is the smallest (0.6 B instructions, fixed costs dominant, margin inside the ~10% build-to-build scale, IC slower in wall time); no cell with n>=41 is below 1.5. Recorded as written, not corrected.",
+              "extrapolation_marked": "if the fitted slope persisted, IC/rho would grow about 7x by r~2^83 and about 89x by r~2^130 relative to n=61",
+              "exploratory_unregistered_probe_ratio": {
+                "ic_probes_over_rho_canonicalizations_L1024": {
+                  "37": 0.242,
+                  "41": 0.763,
+                  "53": 1.418,
+                  "61": 1.932
+                },
+                "n53_by_L": {
+                  "1024": 1.418,
+                  "4096": 0.935,
+                  "16384": 0.946
+                }
+              },
+              "peak_rss": {
+                "ic_gib_max": 4.94,
+                "rho_mib_max": 591
+              },
+              "class": "measured ratio-to-boundary trend; not an advance",
+              "evidence": "research/notes/index-calculus/RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md",
+              "status": "PENDING_INDEPENDENT_VALIDATION",
+              "date": "2026-09-29"
             }
           },
           "evidence": [

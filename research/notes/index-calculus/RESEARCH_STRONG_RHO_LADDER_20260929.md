@@ -248,3 +248,73 @@ beats batched rho: those compared IC with the unmodified rho; the strengthened
 reference is cheaper than IC at n = 53, L = 1,024 in both instructions and wall
 time. PR #830's own status (`PENDING_INDEPENDENT_VALIDATION`, not promoted)
 already withheld the promotion this result now argues against.
+
+### Cross-check against an independently written strong rho (added after the ladder runs)
+
+`examples/koblitz_rho_batch_ks_v3.rs` (PR #943, written by others and not read
+before rungs 2 and 3 above were implemented) has the same command line and corpus
+derivation as the frozen comparator, so it ran the identical cell
+(`strong_rho_ladder_20260929_run/v3_*`, `callgrind_v3_*`; sha256 of source and
+binary in `SHA256SUMS_v3`).
+
+| independent v3 backend | Ir | IC / rho | per-fixture steps equal to my R3? | verified |
+|:--|--:|--:|:--|--:|
+| `normal_basis` (32 walks, batched inversion, rotation canonicalization) | 65,060,122,697 | **1.371** | **yes, all 1,024** (19,569,835) | 1,024/1,024 |
+| `poly_xfirst` (32 walks, batched inversion, polynomial-basis canonicalization) | 176,583,652,056 | 0.505 | no (19,483,677; a different representative) | 1,024/1,024 |
+
+The two independently written implementations of "32 lockstep walks, normal-basis
+least-rotation canonical form" trace the same walk on every one of the 1,024
+targets, which would be unlikely if either had a bug in its canonicalization,
+lane scheduling or batched addition (a flaw in a specification both share would
+not show here; the planted-scalar checks and the independent Python replay cover
+that). On instructions v3's normal-basis backend is
+40 % more expensive than my R3 for that identical walk — 59.8 % of it in
+`raw_canonicalize` (38.9 B against my 23.9 B) — so IC/rho is 1.37 against v3 and
+1.92 against R3: the spread between two competent implementations of the same
+design. **Both are above 1.0.** It also shows what the verdict depends on: against
+a rho that canonicalizes in the polynomial basis (`poly_xfirst`, 0.505) IC still
+looks cheaper; against the normal-basis form, which is the natural one when
+Frobenius is a rotation and which the IC arm itself uses, it does not. The
+pre-registered decision used the smallest gate-passing rung of this note (R3),
+and v3 is reported only as a cross-check.
+
+### Why the ratio is what it is: probes, steps and per-operation cost
+
+At the frozen cell IC performs 29,662,546 canonical-form probes (8,776,297 in its
+rank stage, 440 attempts at 19,946 on average, plus 20,886,249 over the 1,024
+targets) against R3's 20,914,156 canonicalizations (19,569,835 steps): **1.418×
+as many operations**. Whole-run instructions per operation are about 3,007 for IC
+(an upper bound, since it includes index build) against 2,218 for R3: **1.36×**.
+1.418 × 1.36 ≈ 1.92.
+
+A line-level profile of IC at n = 41, K = 255 (12.44 B Ir; a line-tables-only
+build of the same source at the same optimisation level, hash in
+`ic_profile_n41/SHA256SUMS_dbg_ic`) puts 2.49 B (20 %) on the byte-table basis
+change `acc ^= table[…]`, 2.78 B (22 %) on the Θ(n) least-rotation scan of
+`canonical()` and 1.25 B (10 %) on the `Gf2` table reduction — the same
+primitives that dominate the rho (51.5 % of R3 is one canonicalization). So the
+two arms are bound by the same operation, and a faster least-rotation or a cheaper
+basis change would help both by about the same factor. The ratio is structural: it
+is set by how many such operations each arm needs, which is what the size and batch
+sweep in `RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md` measures. (An n = 41
+profile is not an n = 53 profile; it is used for the proportions only.)
+
+### Relation to same-day results on `main` (PRs #940, #943, #944)
+
+Read after the ladder was run. #940 found and corrected the same x86-64
+software-multiply artifact in the rho comparator with CPU-time panels on two host
+classes; #943 built v3 and measured compact/normal-rho paired CPU ratios of
+2.081 / 2.989 / 3.086 at n = 37 / 41 / 53 (L = 1,024, five cold blocks, macOS
+replay), and compact/v2 0.342, compact/v3-poly 1.10 at n = 53 (from its table:
+14.667 s against 42.841 s and 13.344 s), the same ordering as R1 (0.317), R2 (1.29)
+and R3 (1.92) here; #944 found no crossover on a frozen K grid (best 2.443× at n
+= 41 and 2.616× at n = 53). This note is **confirmation and extension**, not first
+discovery. What it adds: the deterministic instruction unit, where those results
+report CPU time and leave a common unit unset; the rung decomposition showing that
+the verdict is set by the canonicalization algorithm, not the multiplier; a
+step-for-step agreement between two independent implementations; the independent
+Python replay of the rho records; the erratum to PR #955, whose paragraph was the
+one statement in the ledger those PRs did not contradict; and the size and batch
+sweep. What it does not do is replace their five-block statistics: these are
+single runs of deterministic counts, whose only uncertainty is the ~10 %
+build-to-build scale measured above.

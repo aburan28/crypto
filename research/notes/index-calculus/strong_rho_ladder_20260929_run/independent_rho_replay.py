@@ -18,6 +18,7 @@ usage: independent_rho_replay.py <rho.jsonl> <ic_records.jsonl> <n> <a> <order>
 With 'search', the reduction polynomial is found as the low-term set under
 which the generator lies on the curve (used when no header is retained).
 """
+import gzip
 import importlib.util
 import itertools
 import json
@@ -36,6 +37,12 @@ ir = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ir)
 
 
+def _open(path):
+    if not os.path.exists(path) and os.path.exists(path + ".gz"):
+        return gzip.open(path + ".gz", "rt")
+    return open(path)
+
+
 def find_low_terms(n, a, gen):
     """Low-term set (always containing 0) making `gen` a point of the curve."""
     for extra in (1, 2, 3):
@@ -49,7 +56,7 @@ def find_low_terms(n, a, gen):
 def main():
     rho_path, ic_path, n, a, order = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5])
     terms_arg = sys.argv[6] if len(sys.argv) > 6 else "search"
-    with open(ic_path) as fh:
+    with _open(ic_path) as fh:
         gen = tuple(json.loads(fh.readline())["generator"])
     if terms_arg == "search":
         low_terms = find_low_terms(n, a, gen)
@@ -72,7 +79,7 @@ def main():
         "order_r_sampled": 0,
         "failures": [],
     }
-    with open(rho_path) as fh:
+    with _open(rho_path) as fh:
         for line in fh:
             line = line.strip()
             if not line:

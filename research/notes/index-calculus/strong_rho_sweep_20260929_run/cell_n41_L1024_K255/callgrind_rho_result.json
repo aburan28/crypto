@@ -1,0 +1,17 @@
+{
+  "phase": "callgrind_rho",
+  "n": 41,
+  "L": 1024,
+  "K": 255,
+  "corpus": "n41-strong-sweep-L1024-v1",
+  "batch_seed": "531310",
+  "load_before": "17:10:10 up 35 min,  0 user,  load average: 0.83, 1.67, 1.66",
+  "rho": {
+    "rc": 0,
+    "wall_s": 26.735484821000227,
+    "ir": 8184739666,
+    "gates_G1": true,
+    "total_walk_steps": 3827005
+  },
+  "load_after": "17:10:36 up 35 min,  0 user,  load average: 1.57, 1.78, 1.70"
+}
