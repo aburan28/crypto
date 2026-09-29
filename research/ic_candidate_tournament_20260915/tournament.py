@@ -356,6 +356,9 @@ def snapshot_build(source,destination, *, scientific=False):
 def prepare(args):
     out = args.out.resolve()
     qualification = getattr(args, 'qualification', False)
+    repetitions = getattr(args, 'repetitions', 3)
+    require(repetitions == 3 or (qualification and repetitions == 1),
+            'one process per public point is permitted only for development qualification')
     frozen_qualification = qualification and bool(getattr(args, 'reference_registry', None))
     require(not getattr(args, 'exposed_fixtures', []) or getattr(args, 'attempt_number', 0)
             or frozen_qualification,
@@ -677,7 +680,7 @@ def prepare(args):
             ('Development reference qualification only; no final suite generated.' if qualification else
              'The final suite has '+str(confirmation_cases)+' inputs.')),
         'curve_diversity_limit':'Only the declared Koblitz curve/subgroup cells; no broad family or scaling claim.',
-        'limits':limits,'repetitions':3,'confirmation_ratio':0.8,'max_cell_ratio':1.1,
+        'limits':limits,'repetitions':repetitions,'confirmation_ratio':0.8,'max_cell_ratio':1.1,
         'selection_width':args.selection_width,'exploration_slots':args.exploration_slots,
         'rho_reference':rho_reference,
         'require_native_progress':args.require_native_progress,'parity_margin':1.10,
@@ -1429,6 +1432,8 @@ def main():
     p.add_argument('--holdout-cells',default='19a1',
         help='cells added in confirmation and replay only; must not repeat a --cells entry')
     p.add_argument('--seed',type=int,default=20260915)
+    p.add_argument('--repetitions',type=int,choices=(1,3),default=3,
+        help='One process per distinct point is allowed only for development qualification; bounded improvement rounds retain three.')
     p.add_argument('--cpu',type=int)
     p.add_argument('--timeout',type=float,default=60)
     p.add_argument('--max-processes',type=int,default=1800)

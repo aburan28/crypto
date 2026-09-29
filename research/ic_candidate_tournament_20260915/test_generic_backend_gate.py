@@ -2,17 +2,20 @@
 import unittest
 
 from generic_backend_gate import ALIASES, CELLS, FAMILIES, GENERIC, REPETITIONS, STAGES, evaluate
+from generic_backend_gate_v2 import (LOST_EXPOSURES_SHA256, PANEL_SHA256, evaluate_v2)
 from oracle import InvalidEvidence
 
 
-def fixture(qualified=('generic_f4_dense', 'generic_sat_xor_dense')):
+def fixture(qualified=('generic_f4_dense', 'generic_sat_xor_dense'), repetitions=REPETITIONS):
     failures = set(FAMILIES['f4_f5'] + FAMILIES['sat']) - set(qualified)
-    summary = dict(trial_slots=750, verified_native_profile_pairs=750-len(failures),
-                   retained_failures=len(failures), distinct_record_ids=1230,
+    summary = dict(trial_slots=250*repetitions,
+                   verified_native_profile_pairs=250*repetitions-len(failures),
+                   retained_failures=len(failures), distinct_record_ids=410*repetitions,
+                   repetitions=repetitions,
                    exposed_points=25, status='AUDITED_WITH_FAILURES',
                    promotion_eligible=False)
     qualification = dict(schema_version=1, status='DEVELOPMENT_REFERENCES_SELECTED',
-                         cells=list(CELLS), cases=15, repetitions=REPETITIONS,
+                         cells=list(CELLS), cases=15, repetitions=repetitions,
                          measured_stages=['aa', 'smoke', 'development'],
                          heldout_data_used=False, promotion_eligible=False, table=[])
     natural = dict(schema_version=1, status='AUDITED',
@@ -22,7 +25,8 @@ def fixture(qualified=('generic_f4_dense', 'generic_sat_xor_dense')):
         if alias in GENERIC:
             failed = alias in failures
             qualification['table'].append(dict(alias=alias, mode='ic',
-                scheduled_runs=45, verified_runs=44 if failed else 45,
+                scheduled_runs=15*repetitions,
+                verified_runs=15*repetitions-1 if failed else 15*repetitions,
                 failures=[dict(status='INVALID_OR_INCOMPLETE')] if failed else [],
                 smoke_failures=[], qualified=not failed,
                 comparison_to_archived_incumbent=dict(eligible=not failed),
@@ -34,7 +38,7 @@ def fixture(qualified=('generic_f4_dense', 'generic_sat_xor_dense')):
             for cell in CELLS:
                 observations = []
                 for case_number in range(cases_per_cell):
-                    for rep in range(REPETITIONS):
+                    for rep in range(repetitions):
                         failed = (arm in failures and stage == 'development'
                                   and cell == CELLS[0] and case_number == 0 and rep == 0)
                         observations.append(dict(stage=stage, arm=arm, cell=cell,
@@ -91,6 +95,25 @@ class FamilyGateTests(unittest.TestCase):
         natural['observations'].pop()
         with self.assertRaises(InvalidEvidence):
             evaluate(summary, qualification, natural)
+
+    def test_one_process_per_distinct_point_keeps_full_family_gate(self):
+        summary, qualification, natural = fixture(repetitions=1)
+        result = evaluate(summary, qualification, natural, repetitions=1)
+        self.assertEqual(result['status'], 'F4_F5_AND_SAT_QUALIFIED')
+        self.assertEqual(result['arms']['generic_f4_dense']['smoke_scheduled'], 5)
+        self.assertEqual(result['arms']['generic_f4_dense']['development_scheduled'], 15)
+        with self.assertRaises(InvalidEvidence):
+            evaluate(summary, qualification, natural)
+
+    def test_second_registration_requires_frozen_panel_and_exposure_corpus(self):
+        summary, qualification, natural = fixture(repetitions=1)
+        summary.update(registration_panel_sha256=PANEL_SHA256,
+                       prior_censored_exposures_sha256=LOST_EXPOSURES_SHA256)
+        self.assertEqual(evaluate_v2(summary, qualification, natural)['status'],
+                         'F4_F5_AND_SAT_QUALIFIED')
+        summary['prior_censored_exposures_sha256'] = '0'*64
+        with self.assertRaises(InvalidEvidence):
+            evaluate_v2(summary, qualification, natural)
 
 
 if __name__ == '__main__':
