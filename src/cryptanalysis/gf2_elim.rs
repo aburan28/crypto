@@ -80,10 +80,6 @@ pub struct Config {
     /// Gray-code tables per pass, 1 to 4; the block is `k · tables`
     /// pivots for `k`-bit tables.
     pub tables: usize,
-    /// Break leading-column ties using eight sampled suffix words per row.
-    pub sampled_weight_pivot: bool,
-    /// Find the next weighted pivot while clearing the current strip column.
-    pub fuse_pivot_search: bool,
     /// Row words per block from which rows are cleared in parallel.
     pub parallel_words: usize,
     /// Use AVX-512 when available, or an explicitly requested AVX2 update.
@@ -94,8 +90,6 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             tables: DEFAULT_TABLES,
-            sampled_weight_pivot: false,
-            fuse_pivot_search: false,
             parallel_words: PARALLEL_WORDS,
             simd: true,
         }
@@ -115,9 +109,6 @@ impl Config {
             {
                 c.tables = t.clamp(1, 4);
             }
-            c.sampled_weight_pivot =
-                std::env::var("KIC_GF2_SAMPLED_WEIGHT_PIVOT").as_deref() == Ok("1");
-            c.fuse_pivot_search = c.sampled_weight_pivot;
             if let Some(p) = std::env::var("KIC_GF2_PARALLEL_WORDS")
                 .ok()
                 .and_then(|v| v.parse::<usize>().ok())
@@ -129,20 +120,6 @@ impl Config {
             }
             c
         })
-    }
-}
-
-/// A cheap proxy for current row density, updated once per pivot block.
-/// Eight positions cover the suffix; short suffixes use each word once.
-#[inline]
-fn sampled_suffix_weight(row: &[u64], from: usize) -> u32 {
-    let suffix = &row[from..];
-    if suffix.len() <= 8 {
-        suffix.iter().map(|w| w.count_ones()).sum()
-    } else {
-        (0..8)
-            .map(|sample| suffix[sample * (suffix.len() - 1) / 7].count_ones())
-            .sum()
     }
 }
 
@@ -217,14 +194,6 @@ fn eliminate_with(
     let mut pivot_cols: Vec<usize> = Vec::with_capacity(block_cap);
     let mut table: Vec<u64> = Vec::new();
     let mut blocks: Vec<(usize, Vec<usize>)> = Vec::new();
-    let mut row_weights: Vec<u32> = if config.sampled_weight_pivot {
-        matrix
-            .iter()
-            .map(|row| sampled_suffix_weight(row, 0))
-            .collect()
-    } else {
-        Vec::new()
-    };
 
     let mut pivot_row = 0usize;
     let mut word = 0usize;
@@ -244,35 +213,20 @@ fn eliminate_with(
             64
         };
         let mut block_full = false;
-        let fused_search = config.sampled_weight_pivot && config.fuse_pivot_search;
-        let mut next_pivot: Option<(u32, usize)> = None;
-        let mut next_pivot_valid = false;
         while pivot_row < rows && low < last_col_in_word {
             // Lowest set column at or above `low`, over the unpivoted rows.
             let mask = !0u64 << low;
             let mut best = u32::MAX;
             let mut best_row = usize::MAX;
-            if fused_search && next_pivot_valid {
-                if let Some((col, row)) = next_pivot {
-                    best = col;
-                    best_row = row;
-                }
-            } else {
-                for (i, &s) in strip[pivot_row..].iter().enumerate() {
-                    let v = s & mask;
-                    if v != 0 {
-                        let tz = v.trailing_zeros();
-                        let candidate = pivot_row + i;
-                        if tz < best
-                            || (config.sampled_weight_pivot
-                                && tz == best
-                                && row_weights[candidate] < row_weights[best_row])
-                        {
-                            best = tz;
-                            best_row = candidate;
-                            if tz == low && !config.sampled_weight_pivot {
-                                break;
-                            }
+            for (i, &s) in strip[pivot_row..].iter().enumerate() {
+                let v = s & mask;
+                if v != 0 {
+                    let tz = v.trailing_zeros();
+                    if tz < best {
+                        best = tz;
+                        best_row = pivot_row + i;
+                        if tz == low {
+                            break;
                         }
                     }
                 }
@@ -284,9 +238,6 @@ fn eliminate_with(
             let col = word * 64 + best as usize;
             matrix.swap(pivot_row, best_row);
             strip.swap(pivot_row, best_row);
-            if config.sampled_weight_pivot {
-                row_weights.swap(pivot_row, best_row);
-            }
             // Reduce the new pivot row in full by the block's earlier
             // pivots.  They are mutually reduced, so testing the row's
             // current bit on each pivot column in turn is the same as
@@ -316,33 +267,9 @@ fn eliminate_with(
             }
             // Clear the column from the strip of every unpivoted row.
             let ps = strip[pivot_row];
-            if fused_search {
-                next_pivot = None;
-                next_pivot_valid = true;
-                let next_low = best + 1;
-                let inspect = next_low < last_col_in_word && pivot_cols.len() + 1 < block_cap;
-                let next_mask = if inspect { !0u64 << next_low } else { 0 };
-                for (i, s) in strip[pivot_row + 1..].iter_mut().enumerate() {
-                    if *s >> best & 1 != 0 {
-                        *s ^= ps;
-                    }
-                    let v = *s & next_mask;
-                    if v != 0 {
-                        let col = v.trailing_zeros();
-                        let row = pivot_row + 1 + i;
-                        if next_pivot.is_none_or(|(prior_col, prior_row)| {
-                            col < prior_col
-                                || (col == prior_col && row_weights[row] < row_weights[prior_row])
-                        }) {
-                            next_pivot = Some((col, row));
-                        }
-                    }
-                }
-            } else {
-                for s in &mut strip[pivot_row + 1..] {
-                    if *s >> best & 1 != 0 {
-                        *s ^= ps;
-                    }
+            for s in &mut strip[pivot_row + 1..] {
+                if *s >> best & 1 != 0 {
+                    *s ^= ps;
                 }
             }
             pivot_cols.push(col);
@@ -376,14 +303,6 @@ fn eliminate_with(
         if !block_full || low >= last_col_in_word {
             word += 1;
             low = 0;
-        }
-        if config.sampled_weight_pivot && word < words {
-            for (weight, row) in row_weights[pivot_row..]
-                .iter_mut()
-                .zip(&matrix[pivot_row..])
-            {
-                *weight = sampled_suffix_weight(row, word);
-            }
         }
     }
     // A forward pass already zeroed every row below each pivot block.
@@ -845,8 +764,6 @@ mod tests {
                 for parallel_words in [0, usize::MAX] {
                     out.push(Config {
                         tables,
-                        sampled_weight_pivot: false,
-                        fuse_pivot_search: false,
                         parallel_words,
                         simd,
                     });
@@ -866,8 +783,6 @@ mod tests {
                     for reduce_above in [false, true] {
                         let config = Config {
                             tables,
-                            sampled_weight_pivot: false,
-                            fuse_pivot_search: false,
                             parallel_words: usize::MAX,
                             simd: false,
                         };
@@ -1026,58 +941,6 @@ mod tests {
                 let mut again = got.clone();
                 naive_rref(&mut again, cols);
                 assert_eq!(again, want);
-            }
-        }
-    }
-
-    #[test]
-    fn sampled_weight_pivots_preserve_rank_and_row_space() {
-        let mut rng = StdRng::seed_from_u64(119);
-        for &(rows, cols, density) in &[
-            (70, 130, 0.04),
-            (130, 70, 0.3),
-            (220, 389, 0.1),
-            (300, 700, 0.5),
-        ] {
-            let input = random_matrix(&mut rng, rows, cols, density);
-            let mut expected = input.clone();
-            let rank = naive_rref(&mut expected, cols);
-            for tables in [1, 2, 4] {
-                for parallel_words in [0, usize::MAX] {
-                    let config = Config {
-                        tables,
-                        sampled_weight_pivot: true,
-                        fuse_pivot_search: false,
-                        parallel_words,
-                        simd: false,
-                    };
-                    for reduce_above in [false, true] {
-                        let mut actual = input.clone();
-                        let mut ops = 0;
-                        let actual_rank =
-                            eliminate(&mut actual, cols, reduce_above, config, &mut ops);
-                        assert_eq!(actual_rank, rank, "{config:?} reduce_above={reduce_above}");
-                        let mut fused = input.clone();
-                        let mut fused_ops = 0;
-                        let fused_rank = eliminate(
-                            &mut fused,
-                            cols,
-                            reduce_above,
-                            Config {
-                                fuse_pivot_search: true,
-                                ..config
-                            },
-                            &mut fused_ops,
-                        );
-                        assert_eq!(fused_rank, actual_rank);
-                        assert_eq!(fused, actual, "{config:?} reduce_above={reduce_above}");
-                        assert_eq!(fused_ops, ops);
-                        if !reduce_above {
-                            naive_rref(&mut actual, cols);
-                        }
-                        assert_eq!(actual, expected, "{config:?} reduce_above={reduce_above}");
-                    }
-                }
             }
         }
     }
