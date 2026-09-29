@@ -1015,6 +1015,20 @@ def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000, match_su
         if any(type(v) not in (int,float) or not math.isfinite(v) or v<=0 for v in values):
             return {'candidate':candidate_id,'eligible':False,'reason':'invalid or missing full cost'}
         require(len({x['case_sha256'] for x in a+b})==1,'changed paired fixtures')
+        if scientific:
+            require(all(type(x.get('measurement')) is dict for x in a+b),
+                    'mixed scientific and unmeasured comparison rows')
+            workloads={x['measurement'].get('workload_id') for x in a+b}
+            require(len(workloads)==1 and all(type(v) is str and v for v in workloads),
+                    'paired comparison rows use different workloads')
+            for arm_rows in (a,b):
+                modes={x.get('mode') for x in arm_rows}
+                require(len(modes)==1 and modes <= {'ic','rho'},
+                        'paired comparison repetitions use different modes')
+                key='reference_id' if 'rho' in modes else 'candidate_id'
+                identities={x['measurement'].get(key) for x in arm_rows}
+                require(len(identities)==1 and all(type(v) is str and v for v in identities),
+                        'paired comparison repetitions use different method identities')
         if candidate_id!='rho' and baseline!='rho' and not any(x.get('mode')=='rho' for x in a+b):
             if match_support:
                 require(len({x['certificate']['factor_base_sha256'] for x in a+b})==1,'changed paired factor-base support')
