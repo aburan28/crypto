@@ -135,41 +135,82 @@ impl AnfPoly {
         self.monomials.contains(&Vec::new())
     }
 
+    /// XOR one monomial in (adding it twice cancels).  Removing first
+    /// means only a monomial that stays is cloned.
+    fn toggle(&mut self, mono: &Vec<u32>) {
+        if !self.monomials.remove(mono) {
+            self.monomials.insert(mono.clone());
+        }
+    }
+
     /// `self ^= other`.
     ///
-    /// One ordered merge of the two monomial sets rather than a toggle
-    /// per monomial of `other`.  Both sets iterate in the same order, so
-    /// their symmetric difference comes out sorted and is bulk-loaded
-    /// into a fresh tree; a toggle is a search plus an insert or a remove
-    /// with its rebalancing, and it cloned the monomial first even when
-    /// it was about to cancel.  `self`'s monomials are moved, and only
-    /// the survivors of `other` are cloned.
+    /// Two ways to form the symmetric difference, and which is cheaper
+    /// depends on the sizes ([`toggling_is_cheaper`]).  Toggling each
+    /// monomial of `other` into `self` costs one tree search apiece and
+    /// leaves the rest of `self` where it is, so it is how a few
+    /// monomials are added to a large sum — an accumulator gathering one
+    /// product at a time, as `degree_reduction_anf` does.  One ordered
+    /// merge of the two sets ([`merge_xor`]) visits every monomial of
+    /// both and rebuilds the tree, but does no searching and no
+    /// rebalancing, and wins once `other` is a sizeable fraction of
+    /// `self`.  Either way a monomial of `other` that cancels is never
+    /// cloned.
     pub fn xor_assign(&mut self, other: &Self) {
-        if other.monomials.is_empty() {
-            return;
-        }
         if self.monomials.is_empty() {
             self.monomials = other.monomials.clone();
-            return;
+        } else if other.len() == 1 {
+            // A single monomial, the commonest call, is toggled without
+            // setting up a walk of `other`'s tree.
+            if let Some(m) = other.monomials.first() {
+                self.toggle(m);
+            }
+        } else if toggling_is_cheaper(self.len(), other.len()) {
+            for m in &other.monomials {
+                self.toggle(m);
+            }
+        } else {
+            let mine = std::mem::take(&mut self.monomials);
+            self.monomials = merge_xor(mine, &other.monomials);
         }
-        let mine = std::mem::take(&mut self.monomials);
-        self.monomials = merge_xor(mine, &other.monomials);
     }
 
     /// `self * other`, reducing `x² → x` in each product monomial.
     ///
-    /// The products are collected and summed at once by [`xor_sum`],
-    /// not toggled into a tree one by one.
+    /// Three paths, by the number of products.  One monomial times one is
+    /// the commonest call — `degree_reduction_anf` relabels a monomial by
+    /// multiplying in one variable at a time — and is a single product
+    /// that cannot cancel, formed without setting up a walk of either
+    /// tree.  Up to [`SMALL_SUM`] products are toggled straight into the
+    /// tree, which needs no buffer, in plain loops rather than an iterator
+    /// chain whose out-of-line `next` calls would be a good part of so
+    /// small a product.  More are collected and summed at once
+    /// ([`gathered_product`]) rather than one tree operation per product.
     pub fn mul(&self, other: &Self) -> Self {
-        let mut prods = Vec::with_capacity(self.len() * other.len());
+        let count = self.len() * other.len();
+        if count > SMALL_SUM {
+            return Self {
+                monomials: gathered_product(&self.monomials, &other.monomials, count),
+            };
+        }
+        let mut monomials = BTreeSet::new();
+        if count == 1 {
+            if let (Some(a), Some(b)) = (self.monomials.first(), other.monomials.first()) {
+                monomials.insert(merge_squarefree(a, b));
+            }
+            return Self { monomials };
+        }
         for a in &self.monomials {
             for b in &other.monomials {
-                prods.push(merge_squarefree(a, b));
+                let m = merge_squarefree(a, b);
+                // An empty tree has nothing to cancel, so the first
+                // product goes straight in without a search.
+                if monomials.is_empty() || !monomials.remove(&m) {
+                    monomials.insert(m);
+                }
             }
         }
-        Self {
-            monomials: xor_sum(prods, |m| m),
-        }
+        Self { monomials }
     }
 
     /// Evaluate at a Boolean assignment indexed by variable id.
@@ -182,6 +223,78 @@ impl AnfPoly {
         }
         acc
     }
+}
+
+/// Is toggling `theirs` monomials into a set of `mine` cheaper than one
+/// ordered merge of the two ([`AnfPoly::xor_assign`])?
+///
+/// A toggle is a search, `⌊log₂ mine⌋ + 1` levels of comparisons that
+/// each follow a pointer into a monomial; a merge is one sequential pass
+/// over both sets and a bulk rebuild of the tree, whose cost per monomial
+/// is several search levels', plus a fixed cost for the rebuild.
+/// Measured on this module's monomials (x86-64, release, sets of 2 to
+/// 4096), the merge overtakes the toggles once `theirs` is about half of
+/// `mine` in sets of a few hundred and about a fifth in sets of a few
+/// thousand, and never below about 32 monomials in all.  `theirs · depth
+/// < 4 · mine` stays on the toggling side of that crossover.  That is the
+/// side to err on: a misjudged toggle costs what toggling always cost,
+/// where a misjudged merge rebuilds a large tree to add a few monomials.
+///
+/// `depth ≤ mine`, so fewer than four monomials always toggle.  Testing
+/// that first changes no answer and spares the smallest sums the rest.
+fn toggling_is_cheaper(mine: usize, theirs: usize) -> bool {
+    let depth = (usize::BITS - mine.leading_zeros()) as usize;
+    theirs < 4 || mine + theirs <= 32 || theirs.saturating_mul(depth) < mine.saturating_mul(4)
+}
+
+/// At most this many terms, a sum of monomials is toggled into a tree
+/// ([`toggle_sum`]) rather than gathered, sorted and bulk-loaded
+/// ([`xor_sum`]).  They fit in one leaf of the tree, so each toggle is a
+/// short scan, while a gathered sum pays for its buffers however few
+/// terms there are; the two cost about the same at eight terms.
+const SMALL_SUM: usize = 8;
+
+/// The XOR-sum of a few monomials, each toggled into the tree in turn —
+/// removed if present, otherwise inserted as an owned monomial made by
+/// `own`, and into an empty tree without a search.  For [`SMALL_SUM`]
+/// terms or fewer.
+fn toggle_sum<T>(
+    monos: impl IntoIterator<Item = T>,
+    mut own: impl FnMut(T) -> Vec<u32>,
+) -> BTreeSet<Vec<u32>>
+where
+    T: std::borrow::Borrow<Vec<u32>>,
+{
+    let mut sum = BTreeSet::new();
+    for m in monos {
+        let mono: &Vec<u32> = m.borrow();
+        if sum.is_empty() || !sum.remove(mono) {
+            sum.insert(own(m));
+        }
+    }
+    sum
+}
+
+/// The `count` products of every monomial of `a` with every monomial of
+/// `b`, collected and summed at once by [`xor_sum`]: [`AnfPoly::mul`]'s
+/// path for more than [`SMALL_SUM`] of them.
+///
+/// Kept out of line: inlined, its buffers and sort more than double the
+/// machine code of `mul` around the small paths that serve most calls,
+/// for a path taken once per product of more than [`SMALL_SUM`] terms.
+#[inline(never)]
+fn gathered_product(
+    a: &BTreeSet<Vec<u32>>,
+    b: &BTreeSet<Vec<u32>>,
+    count: usize,
+) -> BTreeSet<Vec<u32>> {
+    let mut prods = Vec::with_capacity(count);
+    for x in a {
+        for y in b {
+            prods.push(merge_squarefree(x, y));
+        }
+    }
+    xor_sum(prods, |m| m)
 }
 
 /// The symmetric difference of two monomial sets, as one ordered merge.
@@ -275,11 +388,15 @@ fn packed_key(m: &[u32]) -> Option<u64> {
 /// most quadratic or cubic over a few dozen variables — the sort compares
 /// integers instead of walking two index vectors behind two pointers per
 /// comparison; equal keys are equal monomials, so which of them survives
-/// cannot matter.  Otherwise it sorts the monomials themselves.
+/// cannot matter.  Otherwise it sorts the monomials themselves.  A sum of
+/// [`SMALL_SUM`] terms or fewer is toggled instead ([`toggle_sum`]).
 fn xor_sum<T>(monos: Vec<T>, own: impl FnMut(T) -> Vec<u32>) -> BTreeSet<Vec<u32>>
 where
     T: Ord + std::borrow::Borrow<Vec<u32>>,
 {
+    if monos.len() <= SMALL_SUM {
+        return toggle_sum(monos, own);
+    }
     if monos.iter().all(|m| packed_key(m.borrow()).is_some()) {
         let mut keyed: Vec<(u64, T)> = monos
             .into_iter()
@@ -296,6 +413,12 @@ where
 }
 
 /// Union of two sorted variable lists, deduplicated because `x² = x`.
+///
+/// Forced inline, as the compiler inlined it by itself when it had one
+/// caller: with several it stays out of line, and the call then adds
+/// about 25 instructions to a product of one monomial by one, some 8% of
+/// it (callgrind).
+#[inline(always)]
 fn merge_squarefree(a: &[u32], b: &[u32]) -> Vec<u32> {
     let mut out = Vec::with_capacity(a.len() + b.len());
     let (mut i, mut j) = (0, 0);
@@ -392,16 +515,22 @@ impl AnfF2m {
     /// Polynomial multiplication (convolution).  No reduction.
     ///
     /// Coefficient `k` of the product is `Σ_{i+j=k} a_i·b_j`; all the
-    /// monomial products for one `k` are collected and summed at once by
-    /// [`xor_sum`], so no intermediate `a_i·b_j` is ever built as a set.
+    /// monomial products for one `k` are collected, into a buffer sized
+    /// for them, and summed at once by [`xor_sum`], so no intermediate
+    /// `a_i·b_j` is ever built as a set.
     pub fn mul(&self, other: &Self) -> Self {
         if self.is_empty() || other.is_empty() {
             return Self::zero(0);
         }
         let coeffs = (0..self.len() + other.len() - 1)
             .map(|k| {
-                let mut prods = Vec::new();
-                for i in k.saturating_sub(other.len() - 1)..=k.min(self.len() - 1) {
+                let terms = k.saturating_sub(other.len() - 1)..=k.min(self.len() - 1);
+                let count = terms
+                    .clone()
+                    .map(|i| self.coeffs[i].len() * other.coeffs[k - i].len())
+                    .sum();
+                let mut prods = Vec::with_capacity(count);
+                for i in terms {
                     for a in &self.coeffs[i].monomials {
                         for b in &other.coeffs[k - i].monomials {
                             prods.push(merge_squarefree(a, b));
@@ -1454,6 +1583,48 @@ mod tests {
             let b = random_anf(&mut rng, &palette, 3, [1, 1, 3, 8][(round / 4) % 4]);
             for (x, y) in [(&a, &b), (&b, &a), (&AnfPoly::one(), &b), (&a, &a)] {
                 assert_eq!(x.mul(y), toggle_reference::mul(x, y), "mul, round {round}");
+            }
+        }
+    }
+
+    /// The single-monomial paths: one monomial added to a large sum, both
+    /// where it is new and where it cancels, and the product of one
+    /// monomial by one, including the constant `1`, shared variables and a
+    /// monomial by itself.
+    #[test]
+    fn single_monomial_paths_agree_with_toggles() {
+        let mut rng = StdRng::seed_from_u64(0x6f6e_6573);
+        let wide: Vec<u32> = (0..40).collect();
+        let big = random_anf(&mut rng, &wide, 3, 600);
+        let fresh = random_anf(&mut rng, &wide, 3, 80);
+        let single = |m: &Vec<u32>| AnfPoly {
+            monomials: BTreeSet::from([m.clone()]),
+        };
+        // Every seventh monomial of `big` cancels; most of `fresh` are new.
+        let singles: Vec<AnfPoly> = big
+            .monomials()
+            .step_by(7)
+            .chain(fresh.monomials())
+            .map(single)
+            .collect();
+        for one in &singles {
+            let mut got = big.clone();
+            got.xor_assign(one);
+            let mut want = big.clone();
+            toggle_reference::xor_assign(&mut want, one);
+            assert_eq!(got, want, "xor_assign of {one:?}");
+        }
+
+        let unit = AnfPoly::one();
+        let palette: Vec<u32> = (0..4).collect();
+        let small: Vec<AnfPoly> = (0..40)
+            .map(|_| random_anf(&mut rng, &palette, 3, 1))
+            .filter(|p| p.len() == 1)
+            .chain([unit.clone()])
+            .collect();
+        for a in &small {
+            for b in &small {
+                assert_eq!(a.mul(b), toggle_reference::mul(a, b), "{a:?} · {b:?}");
             }
         }
     }
