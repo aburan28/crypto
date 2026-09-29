@@ -54,9 +54,10 @@
 //!   the divisor down.  One inversion per row, none per pair.
 //! - **The multiply itself.**  The schoolbook shift-and-xor loop runs
 //!   `n` iterations with two unpredictable branches in each.  [`Gf2`]
-//!   uses a carry-less multiply and folds the result down through a
-//!   byte-indexed reduction table; squaring skips the multiply
-//!   altogether, since in characteristic 2 it is bit-spreading.
+//!   uses a carry-less multiply and folds the result down with two
+//!   more, by the modulus's short tail (through a byte-indexed
+//!   reduction table where that does not apply); squaring skips the
+//!   multiply altogether, since in characteristic 2 it is bit-spreading.
 //! - **Branches in straight-line code.**  Zero-operand early-outs and
 //!   a "while the high part is non-zero" reduction loop both cost more
 //!   in mispredictions than the work they skip.
@@ -103,6 +104,8 @@
 //!   polynomials and subspace polynomials.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
+#[cfg(target_arch = "x86_64")]
+use std::arch::x86_64::__m128i;
 
 /// Highest polynomial degree the fixed-size helpers handle.  The
 /// quartic is degree 4 and squaring one of its remainders reaches 6,
@@ -118,9 +121,15 @@ const MAX_DEG: usize = 6;
 ///   runs `n` iterations with two unpredictable branches in each.
 ///   A scalar carry-less loop stands in where the instruction is
 ///   unavailable.
-/// - **Table reduction.**  Folding the high half back down uses a
-///   byte-indexed table of `z^{n+8j} · v mod irr`, so reduction is
-///   `⌈(n−1)/8⌉` lookups rather than `n` conditional shifts.
+/// - **Reduction by folding.**  With the instruction, and a modulus
+///   whose tail `t = irr − zⁿ` is short, the high half `H` of a product
+///   `L + zⁿ·H` goes back down as `H·t`, one more carry-less multiply;
+///   what that pushes above `zⁿ` is folded the same way once more.  See
+///   `Gf2::mul_fold`.
+/// - **Table reduction** everywhere else.  Folding the high half back
+///   down uses a byte-indexed table of `z^{n+8j} · v mod irr`, so
+///   reduction is `⌈(n−1)/8⌉` lookups rather than `n` conditional
+///   shifts.
 ///
 /// Squaring skips the multiply entirely: in characteristic 2 it is the
 /// `F₂`-linear bit-spreading `Σ aᵢ zⁱ ↦ Σ aᵢ z^{2i}`, then the same
@@ -131,12 +140,19 @@ pub struct Gf2 {
     /// The irreducible polynomial including its leading `z^n` bit.
     pub irr: u64,
     pub(crate) mask: u64,
-    /// `red[j][v] = (v · z^{n + 8j}) mod irr`.  Fixed-size rows indexed
-    /// by a byte, so a lookup carries no bounds check; `n ≤ 63` means
-    /// at most eight rows are ever used.
-    red: Box<[[u64; 256]; 8]>,
-    positions: usize,
+    /// `red[j][v] = (v · z^{n + 8j}) mod irr`, a row for each byte of
+    /// the `n − 1` high bits a product can have.  Fixed-size rows indexed
+    /// by a byte, so a lookup carries no bounds check.  Empty when the
+    /// field folds, which never reads it: at `n = 53` its seven rows are
+    /// 14 KB to allocate and fill, which was most of what building a
+    /// `Gf2` cost.
+    red: Box<[[u64; 256]]>,
     has_clmul: bool,
+    /// The tail `irr − zⁿ` shifted up by `64 − n` when this field
+    /// reduces by folding ([`Self::mul_fold`]), and zero when it reduces
+    /// through `red`.  No tail is zero — an irreducible polynomial has a
+    /// constant term — so the one word is also the switch.
+    fold_tail: u64,
 }
 
 /// Spread the low 32 bits of `x` so that bit `i` lands at bit `2i`.
@@ -190,6 +206,20 @@ impl Gf2 {
     }
 
     pub fn new(irr: &IrreduciblePoly) -> Self {
+        #[cfg(target_arch = "x86_64")]
+        let has_clmul = std::arch::is_x86_feature_detected!("pclmulqdq");
+        #[cfg(target_arch = "aarch64")]
+        let has_clmul = std::arch::is_aarch64_feature_detected!("aes");
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+        let has_clmul = false;
+        Self::with_kernels(irr, has_clmul, true)
+    }
+
+    /// [`Self::new`] with the kernels chosen by the caller, so the tests
+    /// can run every combination on one CPU.  `has_clmul` must be false
+    /// unless the CPU has the instruction; `fold` only permits folding,
+    /// which still needs `has_clmul` and a short tail.
+    fn with_kernels(irr: &IrreduciblePoly, has_clmul: bool, fold: bool) -> Self {
         assert!(irr.degree <= 63, "Gf2 handles n ≤ 63");
         let n = irr.degree;
         let bits = irr
@@ -197,6 +227,45 @@ impl Gf2 {
             .iter()
             .fold(1u64 << n, |acc, &t| acc | (1u64 << t));
 
+        // Folding needs the carry-less multiply for `H·t`, and a tail
+        // short enough for two folds to finish: the first leaves a part
+        // above `zⁿ` of degree at most `deg t − 2`, whose product with
+        // `t` has degree at most `2·deg t − 2` and must land below `zⁿ`.
+        // Every modulus `find_irreducible_sparse` picks for `n ≤ 63`
+        // qualifies (its tails have degree 8 or less).  Only the x86-64
+        // path is written and measured; AArch64 keeps the table.
+        let tail = bits ^ (1u64 << n);
+        let short_tail = tail != 0 && 2 * (63 - tail.leading_zeros()) <= n + 1;
+        let fold_tail = if cfg!(target_arch = "x86_64") && fold && has_clmul && short_tail {
+            tail << (64 - n)
+        } else {
+            0
+        };
+        let red = if fold_tail != 0 {
+            Box::default()
+        } else {
+            Self::reduction_table(n, bits)
+        };
+
+        Self {
+            n,
+            irr: bits,
+            mask: (1u64 << n) - 1,
+            red,
+            has_clmul,
+            fold_tail,
+        }
+    }
+
+    /// The same field on the portable multiply and the table, whatever
+    /// the CPU has: the reference the tests pin the faster paths to.
+    #[cfg(test)]
+    pub(crate) fn portable(irr: &IrreduciblePoly) -> Self {
+        Self::with_kernels(irr, false, false)
+    }
+
+    /// The rows of `red` for the modulus `bits` of degree `n`.
+    fn reduction_table(n: u32, bits: u64) -> Box<[[u64; 256]]> {
         // `pow[i] = z^{n+i} mod irr`, enough of them to cover the
         // `n − 1` high bits a product of two field elements can have.
         let positions = (n as usize - 1).div_ceil(8);
@@ -212,46 +281,137 @@ impl Gf2 {
         }
 
         debug_assert!(positions <= 8);
-        let mut red = Box::new([[0u64; 256]; 8]);
+        let mut red = vec![[0u64; 256]; positions];
         for j in 0..positions {
             for v in 1usize..256 {
                 red[j][v] = red[j][v & (v - 1)] ^ pow[j * 8 + v.trailing_zeros() as usize];
             }
         }
+        red.into_boxed_slice()
+    }
 
-        #[cfg(target_arch = "x86_64")]
-        let has_clmul = std::arch::is_x86_feature_detected!("pclmulqdq");
-        #[cfg(target_arch = "aarch64")]
-        let has_clmul = std::arch::is_aarch64_feature_detected!("aes");
-        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-        let has_clmul = false;
-
-        Self {
-            n,
-            irr: bits,
-            mask: (1u64 << n) - 1,
-            red,
-            positions,
-            has_clmul,
-        }
+    /// Whether products are reduced by folding rather than by the table.
+    /// When they are, [`Self::mul`] and [`Self::sqr`] call a
+    /// `pclmulqdq` function, and loops that multiply many times run a
+    /// copy of themselves compiled with that feature so the calls inline
+    /// (see [`Self::batch_inv_clmul`]).  Folding implies the CPU has the
+    /// instruction.
+    #[inline(always)]
+    pub(crate) fn folds(&self) -> bool {
+        self.fold_tail != 0
     }
 
     /// Fold a `< 2^{2n−1}` carry-less product back into the field.
-    ///
-    /// The trip count is fixed at `positions` rather than "while the
-    /// high part is non-zero": a data-dependent exit here is a branch
-    /// the predictor cannot learn, and costs more than the one or two
-    /// redundant lookups it saves.
     #[inline(always)]
     fn reduce(&self, w: u128) -> u64 {
+        #[cfg(target_arch = "x86_64")]
+        if self.folds() {
+            // SAFETY: `fold_tail` is non-zero only when `pclmulqdq` was
+            // detected at construction.
+            return unsafe { self.reduce_fold(w) };
+        }
+        self.reduce_table(w)
+    }
+
+    /// [`Self::reduce`] through the byte table.
+    ///
+    /// The trip count is fixed at the table's row count rather than
+    /// "while the high part is non-zero": a data-dependent exit here is
+    /// a branch the predictor cannot learn, and costs more than the one
+    /// or two redundant lookups it saves.
+    #[inline(always)]
+    fn reduce_table(&self, w: u128) -> u64 {
         let mut acc = (w as u64) & self.mask;
         let mut h = (w >> self.n) as u64;
-        for row in &self.red[..self.positions] {
+        for row in self.red.iter() {
             acc ^= row[usize::from(h as u8)];
             h >>= 8;
         }
         debug_assert_eq!(h, 0, "product wider than the reduction table");
         acc
+    }
+
+    /// `a·b mod irr` by two carry-less folds, in vector registers
+    /// throughout.
+    ///
+    /// Write the product as `L + zⁿ·H` with `deg L < n`.  Since
+    /// `zⁿ ≡ t`, it is `L + H·t`, and when `t` is short `H·t` barely
+    /// crosses `zⁿ`; its part above folds by `t` once more and lands
+    /// below (the condition [`Self::new`] checks).  That is two
+    /// multiplications by a constant instead of the table's
+    /// `⌈(n−1)/8⌉` dependent lookups, and it needs no table at all.
+    ///
+    /// The split into `L` and `H` costs nothing if `b` is shifted up by
+    /// `s = 64 − n` first (it has `n` bits, so it still fits a word):
+    /// the product is then `zˢ(L + zⁿH)`, whose high word is exactly
+    /// `H` and whose low word is `L` at the top.  The tail carries the
+    /// same shift, so each fold again delivers its high part in the high
+    /// word, where the next multiply reads it, and its low part aligned
+    /// with `L`.  The three low words are summed and shifted down once.
+    /// No lane ever crosses between vector and general registers except
+    /// the operands on the way in and the result on the way out; doing
+    /// the folds on general registers cost about as much as the table.
+    ///
+    /// # Safety
+    ///
+    /// The CPU must support `pclmulqdq`, and the field must fold
+    /// (`fold_tail ≠ 0`).
+    #[cfg(target_arch = "x86_64")]
+    #[inline]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn mul_fold(&self, a: u64, b: u64) -> u64 {
+        use std::arch::x86_64::*;
+        let s = 64 - self.n;
+        let r = self.fold_shifted(
+            _mm_cvtsi64_si128(a as i64),
+            _mm_cvtsi64_si128((b << s) as i64),
+        );
+        (_mm_cvtsi128_si64(r) as u64) >> s
+    }
+
+    /// The multiply-and-fold of [`Self::mul_fold`] on operands already in
+    /// vector registers: `a` as it is and `b` shifted up by `s`, each in
+    /// its low word.  The product comes back in the low word shifted up
+    /// by `s` — the form `b` was given in, so a chain of products can
+    /// stay in vector registers, feeding each result back as the shifted
+    /// operand.  The high word is left over and must be ignored.
+    ///
+    /// # Safety
+    ///
+    /// As for [`Self::mul_fold`].
+    #[cfg(target_arch = "x86_64")]
+    #[inline]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn fold_shifted(&self, a: __m128i, b: __m128i) -> __m128i {
+        use std::arch::x86_64::*;
+        let tail = _mm_cvtsi64_si128(self.fold_tail as i64);
+        // [L·zˢ, H]
+        let p = _mm_clmulepi64_si128::<0x00>(a, b);
+        // H·t = [(H·t mod zⁿ)·zˢ, H·t div zⁿ], then the same of the
+        // high word, which has no part above zⁿ left.
+        let f = _mm_clmulepi64_si128::<0x01>(p, tail);
+        let g = _mm_clmulepi64_si128::<0x01>(f, tail);
+        _mm_xor_si128(_mm_xor_si128(p, f), g)
+    }
+
+    /// [`Self::reduce`] by the folds of [`Self::mul_fold`], for a
+    /// product that is already formed: `H` is split off on general
+    /// registers and only the folds run in vector ones.
+    ///
+    /// # Safety
+    ///
+    /// As for [`Self::mul_fold`].
+    #[cfg(target_arch = "x86_64")]
+    #[inline]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn reduce_fold(&self, w: u128) -> u64 {
+        use std::arch::x86_64::*;
+        let tail = _mm_cvtsi64_si128(self.fold_tail as i64);
+        let h = _mm_cvtsi64_si128((w >> self.n) as i64);
+        let f = _mm_clmulepi64_si128::<0x00>(h, tail);
+        let g = _mm_clmulepi64_si128::<0x01>(f, tail);
+        let low = (_mm_cvtsi128_si64(_mm_xor_si128(f, g)) as u64) >> (64 - self.n);
+        low ^ ((w as u64) & self.mask)
     }
 
     #[inline(always)]
@@ -283,15 +443,41 @@ impl Gf2 {
     /// No early-out on a zero operand: `clmul` handles it correctly and
     /// the branch would be unpredictable, which costs more than the
     /// multiply it skips.
-    #[inline]
+    ///
+    /// Always inlined, so that inside a function compiled with
+    /// `pclmulqdq` the folded product inlines too; the table path behind
+    /// it keeps an ordinary inlining hint.
+    #[inline(always)]
     pub fn mul(&self, a: u64, b: u64) -> u64 {
+        #[cfg(target_arch = "x86_64")]
+        if self.folds() {
+            // SAFETY: `fold_tail` is non-zero only when `pclmulqdq` was
+            // detected at construction.
+            return unsafe { self.mul_fold(a, b) };
+        }
+        self.mul_table(a, b)
+    }
+
+    #[inline]
+    fn mul_table(&self, a: u64, b: u64) -> u64 {
         self.reduce(self.clmul(a, b))
+    }
+
+    /// Always inlined, as [`Self::mul`] is.
+    #[inline(always)]
+    pub fn sqr(&self, a: u64) -> u64 {
+        #[cfg(target_arch = "x86_64")]
+        if self.folds() {
+            // SAFETY: as in `mul`.
+            return unsafe { self.mul_fold(a, a) };
+        }
+        self.sqr_table(a)
     }
 
     /// With `pclmulqdq`, `a·a` is one instruction and beats the
     /// twelve-step bit spread; without it the spread is the cheap path.
     #[inline]
-    pub fn sqr(&self, a: u64) -> u64 {
+    fn sqr_table(&self, a: u64) -> u64 {
         #[cfg(target_arch = "x86_64")]
         if self.has_clmul {
             // SAFETY: guarded by the runtime feature detection recorded
@@ -308,11 +494,46 @@ impl Gf2 {
     }
 
     /// `a^(2^k)`.
+    #[inline(always)]
     pub fn sqr_k(&self, mut a: u64, k: u32) -> u64 {
+        #[cfg(target_arch = "x86_64")]
+        if self.folds() {
+            // SAFETY: as in `mul`.
+            return unsafe { self.sqr_k_fold(a, k) };
+        }
         for _ in 0..k {
             a = self.sqr(a);
         }
         a
+    }
+
+    /// [`Self::sqr_k`] by the folds of [`Self::mul_fold`], with the
+    /// element kept in a vector register from one squaring to the next.
+    ///
+    /// It is kept shifted up by `s = 64 − n`, which is the form a fold
+    /// leaves in its low word, and one vector shift down gives the
+    /// unshifted operand `mul_fold` pairs it with.  A chain of squarings
+    /// — most of [`Self::inv`] — then never waits on a move between
+    /// register files, which through `mul_fold` costs two per squaring.
+    ///
+    /// # Safety
+    ///
+    /// As for [`Self::mul_fold`].
+    #[cfg(target_arch = "x86_64")]
+    #[inline]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn sqr_k_fold(&self, a: u64, k: u32) -> u64 {
+        use std::arch::x86_64::*;
+        if k == 0 {
+            return a;
+        }
+        let s = 64 - self.n;
+        let down = _mm_cvtsi32_si128(s as i32);
+        let mut x = _mm_cvtsi64_si128((a << s) as i64);
+        for _ in 0..k {
+            x = self.fold_shifted(_mm_srl_epi64(x, down), x);
+        }
+        (_mm_cvtsi128_si64(x) as u64) >> s
     }
 
     /// `a^{-1}` by Fermat: `a^(2^n − 2)`.  Zero maps to zero.
@@ -324,6 +545,29 @@ impl Gf2 {
     /// multiplications, against `n − 2` for square-and-multiply —
     /// 7 instead of 22 at `n = 24`.
     pub fn inv(&self, a: u64) -> u64 {
+        #[cfg(target_arch = "x86_64")]
+        if self.folds() {
+            // SAFETY: the field folds, as just checked.
+            return unsafe { self.inv_clmul(a) };
+        }
+        self.inv_inline(a)
+    }
+
+    /// [`Self::inv`] compiled with `pclmulqdq`; see [`Self::batch_inv_clmul`].
+    ///
+    /// # Safety
+    ///
+    /// The field must fold.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn inv_clmul(&self, a: u64) -> u64 {
+        // SAFETY: the caller's contract.
+        unsafe { std::hint::assert_unchecked(self.folds()) };
+        self.inv_inline(a)
+    }
+
+    #[inline(always)]
+    fn inv_inline(&self, a: u64) -> u64 {
         if a == 0 || self.n <= 1 {
             return a;
         }
@@ -362,6 +606,88 @@ impl Gf2 {
     /// Both passes walk `xs` and `scratch` as zipped chunks, so the loops
     /// carry no bounds checks and no `Vec` growth checks.
     pub fn batch_inv(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
+        #[cfg(target_arch = "x86_64")]
+        if self.folds() {
+            // SAFETY: the field folds, as just checked.
+            return unsafe { self.batch_inv_clmul(xs, scratch) };
+        }
+        self.batch_inv_inline(xs, scratch);
+    }
+
+    /// [`Self::batch_inv`] compiled with `pclmulqdq`.
+    ///
+    /// [`Self::mul_fold`] is a `#[target_feature]` function, and those
+    /// inline only into code compiled with the same feature: from an
+    /// ordinary function every multiplication is a call, which here
+    /// costs about a fifth of the multiplication.  A loop that multiplies
+    /// many times therefore tests the field once and runs a copy of its
+    /// body compiled with the feature, in which every product inlines.
+    /// `koblitz_fast`'s batched point arithmetic does the same.
+    ///
+    /// The copy also tells the optimiser that the field folds, so the
+    /// test inside every `mul` and `sqr` is removed outright.  Left to
+    /// loop unswitching it is not: [`Self::inv`]'s chain kept the test
+    /// and the table path beside it, with spills, for 10% more
+    /// instructions.
+    ///
+    /// # Safety
+    ///
+    /// The field must fold, which implies the CPU supports `pclmulqdq`.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn batch_inv_clmul(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
+        use std::arch::x86_64::*;
+        // SAFETY: the caller's contract.
+        unsafe { std::hint::assert_unchecked(self.folds()) };
+        // The same passes as `batch_inv_inline`, but each running product
+        // and running inverse stays in a vector register, shifted up by
+        // `s`, and every element is multiplied into it unshifted (see
+        // `fold_shifted`).  A lane's chain then never leaves the vector
+        // unit, which takes a move out, a move back and two shifts off
+        // every link: 7% fewer instructions, and 2–7% less time on the
+        // batched point additions.  Eight lanes instead of four gained
+        // nothing, so the chains' latency is not what limits the loop.
+        const LANES: usize = 4;
+        let s = 64 - self.n;
+        let down = _mm_cvtsi32_si128(s as i32);
+        let plain = |v: __m128i| _mm_cvtsi128_si64(_mm_srl_epi64(v, down)) as u64;
+        let shifted = |v: u64| _mm_cvtsi64_si128((v << s) as i64);
+        scratch.clear();
+        scratch.resize(xs.len(), 0);
+        let mut acc = [shifted(1); LANES];
+        for (xc, pc) in xs.chunks(LANES).zip(scratch.chunks_mut(LANES)) {
+            for ((&x, prefix), a) in xc.iter().zip(pc.iter_mut()).zip(acc.iter_mut()) {
+                *prefix = plain(*a);
+                if x != 0 {
+                    *a = self.fold_shifted(_mm_cvtsi64_si128(x as i64), *a);
+                }
+            }
+        }
+        let [a0, a1, a2, a3] = acc.map(plain);
+        let p01 = self.mul(a0, a1);
+        let p23 = self.mul(a2, a3);
+        let inv_all = self.inv(self.mul(p01, p23));
+        let i01 = self.mul(inv_all, p23);
+        let i23 = self.mul(inv_all, p01);
+        let mut inv_acc = [
+            shifted(self.mul(i01, a1)),
+            shifted(self.mul(i01, a0)),
+            shifted(self.mul(i23, a3)),
+            shifted(self.mul(i23, a2)),
+        ];
+        for (xc, pc) in xs.chunks_mut(LANES).zip(scratch.chunks(LANES)).rev() {
+            for ((x, &prefix), ia) in xc.iter_mut().zip(pc.iter()).zip(inv_acc.iter_mut()) {
+                if *x != 0 {
+                    let xi = _mm_cvtsi64_si128(*x as i64);
+                    *x = plain(self.fold_shifted(_mm_cvtsi64_si128(prefix as i64), *ia));
+                    *ia = self.fold_shifted(xi, *ia);
+                }
+            }
+        }
+    }
+
+    #[inline(always)]
+    fn batch_inv_inline(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
         const LANES: usize = 4;
         scratch.clear();
         scratch.resize(xs.len(), 0);
@@ -1053,6 +1379,107 @@ mod tests {
                 let b = xorshift(&mut s) & gf.mask;
                 assert_eq!(gf.mul(a, b), ref_mul(a, b, gf.irr, n), "mul n={n}");
                 assert_eq!(gf.sqr(a), ref_mul(a, a, gf.irr, n), "sqr n={n}");
+            }
+        }
+    }
+
+    /// The three ways a product can be computed — folded ([`Gf2::mul_fold`]),
+    /// `pclmulqdq` then the table, and the portable multiply then the
+    /// table — give the same field elements at every width
+    /// `find_irreducible_sparse` supplies, for every operation built on
+    /// them.  The fold must also actually be chosen there whenever the
+    /// CPU has the instruction, or this would test the table three times.
+    #[test]
+    fn folded_reduction_matches_the_table_at_every_width() {
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        let mut s = 0xF01D_7AB1_E5EE_D001u64;
+        for n in 1u32..=63 {
+            let Some(irr) = find_irreducible_sparse(n) else {
+                continue;
+            };
+            let fast = Gf2::new(&irr);
+            let table = Gf2::with_kernels(&irr, fast.has_clmul, false);
+            let portable = Gf2::portable(&irr);
+            assert!(!table.folds() && !portable.folds());
+            #[cfg(target_arch = "x86_64")]
+            assert_eq!(fast.folds(), fast.has_clmul, "n = {n}: a sparse tail folds");
+            let wide = (1u128 << (2 * n - 1)) - 1;
+            for _ in 0..2000 {
+                let a = xorshift(&mut s) & fast.mask;
+                let b = xorshift(&mut s) & fast.mask;
+                let want = portable.mul(a, b);
+                assert_eq!(fast.mul(a, b), want, "mul n = {n}");
+                assert_eq!(table.mul(a, b), want, "table mul n = {n}");
+                let want = portable.sqr(a);
+                assert_eq!(fast.sqr(a), want, "sqr n = {n}");
+                assert_eq!(table.sqr(a), want, "table sqr n = {n}");
+                // `reduce` on its own takes any word below 2^{2n−1}, not
+                // only a single product.
+                let w = (((xorshift(&mut s) as u128) << 64) | xorshift(&mut s) as u128) & wide;
+                assert_eq!(fast.reduce(w), portable.reduce(w), "reduce n = {n}");
+            }
+            for k in [0, 1, 2, 3, 13, n, n + 5] {
+                for _ in 0..50 {
+                    let a = xorshift(&mut s) & fast.mask;
+                    let want = portable.sqr_k(a, k);
+                    assert_eq!(fast.sqr_k(a, k), want, "sqr_k n = {n}, k = {k}");
+                }
+            }
+            let mut xs: Vec<u64> = (0..67).map(|_| xorshift(&mut s) & fast.mask).collect();
+            xs[5] = 0;
+            let want: Vec<u64> = xs.iter().map(|&x| portable.inv(x)).collect();
+            assert_eq!(xs.iter().map(|&x| fast.inv(x)).collect::<Vec<_>>(), want);
+            for gf in [&fast, &table, &portable] {
+                let mut got = xs.clone();
+                gf.batch_inv(&mut got, &mut Vec::new());
+                assert_eq!(got, want, "batch_inv n = {n}");
+            }
+        }
+    }
+
+    /// The fold is taken exactly up to the tail degree it is proved for,
+    /// `2·deg t ≤ n + 1`, and one past it the table takes over.  Both
+    /// sides of the boundary agree with the portable path.
+    #[test]
+    fn folding_stops_at_the_tail_degree_bound() {
+        use crate::cryptanalysis::koblitz_index_calculus::is_irreducible_f2;
+        let cases: [(u32, &[u32]); 14] = [
+            (9, &[0, 5]),
+            (9, &[0, 1, 3, 6]),
+            (17, &[0, 2, 3, 9]),
+            (17, &[0, 1, 2, 10]),
+            (25, &[0, 3, 5, 13]),
+            (25, &[0, 1, 5, 14]),
+            (33, &[0, 2, 3, 17]),
+            (33, &[0, 2, 3, 18]),
+            (53, &[0, 2, 7, 27]),
+            (53, &[0, 2, 6, 28]),
+            (62, &[0, 1, 3, 31]),
+            (62, &[0, 2, 3, 32]),
+            (63, &[0, 32]),
+            (63, &[0, 1, 3, 33]),
+        ];
+        let mut s = 0xB0DA_121E_5000_0001u64;
+        for (n, low) in cases {
+            let irr = IrreduciblePoly {
+                degree: n,
+                low_terms: low.to_vec(),
+            };
+            let fast = Gf2::new(&irr);
+            assert!(is_irreducible_f2(fast.irr), "n = {n}, {low:?}");
+            let portable = Gf2::portable(&irr);
+            let t = *low.last().unwrap();
+            #[cfg(target_arch = "x86_64")]
+            assert_eq!(
+                fast.folds(),
+                fast.has_clmul && 2 * t <= n + 1,
+                "n = {n}, t = {t}"
+            );
+            for _ in 0..2000 {
+                let a = xorshift(&mut s) & fast.mask;
+                let b = xorshift(&mut s) & fast.mask;
+                assert_eq!(fast.mul(a, b), portable.mul(a, b), "n = {n}, t = {t}");
+                assert_eq!(fast.sqr(a), portable.sqr(a), "n = {n}, t = {t}");
             }
         }
     }

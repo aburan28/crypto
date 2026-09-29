@@ -179,7 +179,9 @@ impl FastCurve {
         FastPoint::affine(x3, y3)
     }
 
-    #[inline]
+    /// Always inlined, so that in the `pclmulqdq` copies of the batched
+    /// loops its products inline too.
+    #[inline(always)]
     fn add_with_lambda(&self, p: FastPoint, q: FastPoint, lambda: u64) -> FastPoint {
         let f = &self.field;
         let x3 = f.sqr(lambda) ^ lambda ^ p.x ^ q.x ^ self.a;
@@ -211,6 +213,44 @@ impl FastCurve {
     /// denominators `x_P + x_{Q_j}`).  Degenerate pairs (an `O`
     /// operand, `Q_j = ±P`) are handled individually.
     pub fn add_many(
+        &self,
+        p: FastPoint,
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        scratch: &mut BatchScratch,
+    ) {
+        #[cfg(target_arch = "x86_64")]
+        if self.field.folds() {
+            // SAFETY: the field folds, as just checked.
+            return unsafe { self.add_many_clmul(p, qs, out, scratch) };
+        }
+        self.add_many_inline(p, qs, out, scratch);
+    }
+
+    /// [`Self::add_many`] compiled with `pclmulqdq`, so that every field
+    /// multiplication in it inlines instead of being a call (see
+    /// `Gf2::batch_inv_clmul`).  The other batched loops below and the
+    /// scalar ladder have the same pair of bodies.
+    ///
+    /// # Safety
+    ///
+    /// The field must fold.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn add_many_clmul(
+        &self,
+        p: FastPoint,
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        scratch: &mut BatchScratch,
+    ) {
+        // SAFETY: the caller's contract.
+        unsafe { std::hint::assert_unchecked(self.field.folds()) };
+        self.add_many_inline(p, qs, out, scratch);
+    }
+
+    #[inline(always)]
+    fn add_many_inline(
         &self,
         p: FastPoint,
         qs: &[FastPoint],
@@ -285,6 +325,41 @@ impl FastCurve {
         lambdas: &mut Vec<u64>,
         scratch: &mut BatchScratch,
     ) {
+        #[cfg(target_arch = "x86_64")]
+        if self.field.folds() {
+            // SAFETY: the field folds, as just checked.
+            return unsafe { self.add_many_lazy_clmul(p, qs, out, lambdas, scratch) };
+        }
+        self.add_many_lazy_inline(p, qs, out, lambdas, scratch);
+    }
+
+    /// # Safety
+    ///
+    /// The field must fold.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn add_many_lazy_clmul(
+        &self,
+        p: FastPoint,
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        lambdas: &mut Vec<u64>,
+        scratch: &mut BatchScratch,
+    ) {
+        // SAFETY: the caller's contract.
+        unsafe { std::hint::assert_unchecked(self.field.folds()) };
+        self.add_many_lazy_inline(p, qs, out, lambdas, scratch);
+    }
+
+    #[inline(always)]
+    fn add_many_lazy_inline(
+        &self,
+        p: FastPoint,
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        lambdas: &mut Vec<u64>,
+        scratch: &mut BatchScratch,
+    ) {
         let f = &self.field;
         scratch.dens.clear();
         scratch.dens.extend(qs.iter().map(|q| {
@@ -340,6 +415,39 @@ impl FastCurve {
         scratch: &mut BatchScratch,
     ) {
         assert_eq!(ps.len(), qs.len(), "pairwise addition needs equal slices");
+        #[cfg(target_arch = "x86_64")]
+        if self.field.folds() {
+            // SAFETY: the field folds, as just checked.
+            return unsafe { self.add_pairwise_clmul(ps, qs, out, scratch) };
+        }
+        self.add_pairwise_inline(ps, qs, out, scratch);
+    }
+
+    /// # Safety
+    ///
+    /// The field must fold.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn add_pairwise_clmul(
+        &self,
+        ps: &[FastPoint],
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        scratch: &mut BatchScratch,
+    ) {
+        // SAFETY: the caller's contract.
+        unsafe { std::hint::assert_unchecked(self.field.folds()) };
+        self.add_pairwise_inline(ps, qs, out, scratch);
+    }
+
+    #[inline(always)]
+    fn add_pairwise_inline(
+        &self,
+        ps: &[FastPoint],
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        scratch: &mut BatchScratch,
+    ) {
         let f = &self.field;
         scratch.dens.clear();
         scratch.dens.extend(ps.iter().zip(qs).map(|(p, q)| {
@@ -390,6 +498,30 @@ impl FastCurve {
     /// The point is the same, so everything downstream — the probe, the
     /// pair table, the pinned counters — sees no difference.
     fn ladder(&self, p: FastPoint, bits: u64, bit: impl Fn(u64) -> bool) -> FastPoint {
+        #[cfg(target_arch = "x86_64")]
+        if self.field.folds() {
+            // SAFETY: the field folds, as just checked.
+            return unsafe { self.ladder_clmul(p, bits, bit) };
+        }
+        self.ladder_inline(p, bits, bit)
+    }
+
+    /// The doubling and the addition are always inlined into this, or
+    /// their products would be calls again.
+    ///
+    /// # Safety
+    ///
+    /// The field must fold.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    unsafe fn ladder_clmul(&self, p: FastPoint, bits: u64, bit: impl Fn(u64) -> bool) -> FastPoint {
+        // SAFETY: the caller's contract.
+        unsafe { std::hint::assert_unchecked(self.field.folds()) };
+        self.ladder_inline(p, bits, bit)
+    }
+
+    #[inline(always)]
+    fn ladder_inline(&self, p: FastPoint, bits: u64, bit: impl Fn(u64) -> bool) -> FastPoint {
         let mut r = LdPoint::INFINITY;
         for i in (0..bits).rev() {
             r = self.ld_double(r);
@@ -404,7 +536,7 @@ impl FastCurve {
     /// `Z₃ = X₁²Z₁²`, `X₃ = X₁⁴ + bZ₁⁴`,
     /// `Y₃ = bZ₁⁴·Z₃ + X₃·(aZ₃ + Y₁² + bZ₁⁴)`.  `O` and the 2-torsion
     /// point (`X₁ = 0`) both give `Z₃ = 0`, which is `O`.
-    #[inline]
+    #[inline(always)]
     fn ld_double(&self, p: LdPoint) -> LdPoint {
         if p.z == 0 {
             return LdPoint::INFINITY;
@@ -434,7 +566,7 @@ impl FastCurve {
     /// `X₃ = A² + C(A + B² + aC)`,
     /// `Y₃ = (x₂Z₃ + X₃)(AC + Z₃) + (x₂ + y₂)Z₃²`.
     /// `B = 0` means equal abscissae: `Q` again (double it) or `−Q` (`O`).
-    #[inline]
+    #[inline(always)]
     fn ld_add_affine(&self, p: LdPoint, q: FastPoint) -> LdPoint {
         let affine_q = LdPoint {
             x: q.x,
@@ -1619,6 +1751,54 @@ mod tests {
         assert_eq!(out.len(), ps.len());
         for ((p, q), sum) in ps.iter().zip(&qs).zip(&out) {
             assert_eq!(*sum, fc.add(*p, *q));
+        }
+    }
+
+    /// Every batched routine and the ladder give the same points on a
+    /// field that folds, which runs their `pclmulqdq` copies, as on the
+    /// same field held to the portable multiply and the table, which runs
+    /// the ordinary bodies — so both copies stay tested on any CPU.
+    #[test]
+    fn folded_and_portable_fields_give_the_same_points() {
+        for (a, n) in [(1u8, 19u32), (0, 31), (0, 41)] {
+            let Some(kc) = KoblitzCurve::new(a, n) else {
+                continue;
+            };
+            let fast = FastCurve::new(&kc.curve).unwrap();
+            let mut slow = fast.clone();
+            slow.field = Gf2::portable(&kc.curve.irreducible);
+            #[cfg(target_arch = "x86_64")]
+            {
+                slow.simd = None;
+            }
+            assert!(!slow.field.folds());
+            let points: Vec<FastPoint> = random_points(&kc, 24, 5 * u64::from(n))
+                .iter()
+                .map(|p| fast.lift(p))
+                .collect();
+            // Q = P, Q = −P and O among the addends.
+            let mut qs = points.clone();
+            qs.extend([points[0], fast.neg(points[0]), FastPoint::INFINITY]);
+            let mut scratch = BatchScratch::default();
+            for &p in points.iter().take(8) {
+                let (mut want, mut got) = (Vec::new(), Vec::new());
+                slow.add_many(p, &qs, &mut want, &mut scratch);
+                fast.add_many(p, &qs, &mut got, &mut scratch);
+                assert_eq!(got, want, "add_many, n = {n}");
+                let (mut want, mut want_l) = (Vec::new(), Vec::new());
+                let (mut got, mut got_l) = (Vec::new(), Vec::new());
+                slow.add_many_lazy_scalar(p, &qs, &mut want, &mut want_l, &mut scratch);
+                fast.add_many_lazy_scalar(p, &qs, &mut got, &mut got_l, &mut scratch);
+                assert_eq!((got, got_l), (want, want_l), "add_many_lazy, n = {n}");
+                let k = BigUint::from(0x9E37_79B9_7F4A_7C15u64 ^ p.x);
+                assert_eq!(fast.mul(p, &k), slow.mul(p, &k), "mul, n = {n}");
+                assert_eq!(fast.double(p), slow.double(p), "double, n = {n}");
+            }
+            let ps: Vec<FastPoint> = qs.iter().rev().copied().collect();
+            let (mut want, mut got) = (Vec::new(), Vec::new());
+            slow.add_pairwise(&ps, &qs, &mut want, &mut scratch);
+            fast.add_pairwise(&ps, &qs, &mut got, &mut scratch);
+            assert_eq!(got, want, "add_pairwise, n = {n}");
         }
     }
 
