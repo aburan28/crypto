@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 138, 2026-09-21. The historical optimization chain is
+Current through Stage 139, 2026-09-21. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
@@ -108,6 +108,11 @@ quadratic group-addition pass.  Full time and CPU fall again in both thread
 classes, while the temporary 4.34 GB key cache raises construction peak RSS to
 about 10 GB.
 
+Stage 139 doubles the witnessed presence filter from four to eight nominal bits
+per pair in two exact pilots.  Both preserve the relation hash and slightly
+reduce CPU, but relation-unit and build wall regress, so the wider filter is
+source-pinned, charged and rejected; Stage 138 remains selected.
+
 The campaign has target-independent algebraic factor bases; matched native-XOR,
 WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a
 balanced 160-instance PDP panel through `n=59`; public unknown-scalar end-to-end
@@ -117,7 +122,7 @@ does not establish a new state of the art.
 
 | Gate | Status | Current evidence | Remaining requirement |
 |:--|:--|:--|:--|
-| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds. Stages 135--137 retain every selected and rejected `n=59` process. Stage 138 adds three cached-build processes: 743.666397 wall-seconds, 1,576.843696 core-seconds and 10,073,538,560 B maximum RSS. | Licensed Magma process resources are absent. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
+| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds. Stages 135--138 retain every selected and rejected `n=59` process. Stage 139 adds two rejected wider-filter processes: 35.782623 wall-seconds, 328.790212 core-seconds and 10,076,028,928 B maximum RSS. | Licensed Magma process resources are absent. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
 | 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract, seal the return before truth scoring, and report F4 resources. |
 | 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | Every executed Phase-B arm retains wall, core-seconds, peak RSS, conflicts or operations, tree memory, and workflow wall. The selected cached `n=59` run reports default-thread IC 76.342293 s / 774.241342 core-seconds / 10,072,309,760 B RSS and one-worker IC 648.780325 s / 635.617997 core-seconds / 10,044,899,328 B RSS. | Supply the same fields for licensed Magma F4. SAT conflicts remain inapplicable to exact pair-table arms and are reported as null. |
 | 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage including one completed larger IC run** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and `n=59`. Stages 132--133 retain the standard `n=59` cap and exact width frontier. Stages 134--135 complete and optimize the cofactor-projected `n=59, m=3` public unknown-scalar workflow at `ell=14` and `15`. | The evidence is finite and toy-sized; it is not an asymptotic scaling law or a literature-scale speed record. |
@@ -362,6 +367,14 @@ and full IC from 85.747666 to 76.342293 seconds; one-worker build falls from
 seconds.  Both full modes preserve the 54,749-relation hash and verified scalar.
 Peak RSS rises to 10,072,309,760 B default and 10,044,899,328 B one-worker.
 Full cost remains 140.153 and 1,158.501 times rho.
+
+Stage 139 allocates a 1,073,741,824-byte witnessed presence filter in place of
+the selected 536,870,912-byte filter.  Both 2,157-relation pilots preserve
+canonical SHA-256
+`5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054`,
+but relation-unit wall ratios are 1.0824 and 1.0659.  The two rejected processes
+charge 35.782623 wall-seconds, 328.790212 core-seconds and 10,076,028,928 B peak
+RSS.  Stage 138 remains selected.
 
 ## The n=53 crossover against a batched rho
 
