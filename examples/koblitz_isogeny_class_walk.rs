@@ -182,6 +182,9 @@ fn main() {
             4,
             usize::MAX,
             DEFAULT_SEED ^ ((n as u64) << 8) ^ a2 as u64,
+            std::env::var_os("KOBLITZ_WALK_CHECKPOINT")
+                .map(|d| std::path::PathBuf::from(d).join(format!("walk_{n}_{a2}.ckpt")))
+                .as_deref(),
             |r| {
                 if r.reached.len() >= last + 64 {
                     last = r.reached.len();
