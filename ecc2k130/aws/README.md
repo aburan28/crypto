@@ -553,6 +553,16 @@ cd ecc2k130/aws
 ./ingest.sh pending          # backlog report, writes nothing
 ```
 
+On macOS, `./launchd/install-macos.sh` keeps that loop up under launchd.
+It copies `dp_ingest.py` and `ingest.sh` into
+`~/Library/Application Support/ECC2K130/ingest`, writes the LaunchAgent
+`com.adamburan.ecc2k130-dp-ingest`, and bootstraps it. The agent starts at
+login and is restarted if it exits. Each start sets `INGEST_ENSURE_ACCESS=1`
+and `AWS_PROFILE` (default `ecc2k130`), and unsets any
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, or `AWS_SESSION_TOKEN` so a
+stale token cannot override that profile. The agent runs those copies;
+run the installer again after a new `dp_ingest.py` lands.
+
 Or from the Modal tree: `./run.sh ingest` (same script; sets
 `INGEST_ENSURE_ACCESS=1` to add this host's egress /32 before connecting).
 Set `DATABASE_URL` to skip Secrets Manager, or `RHO_DB_HOST` plus the
