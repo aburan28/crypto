@@ -1,15 +1,17 @@
 # Held Linux v2 single-edge DAG-to-DIMACS attempt
 
-**Status: HELD. No measured attempt-2 child has been dispatched.** This
+**Status: RELEASED for exact-head review. No measured attempt-2 child has been dispatched.** This
 successor starts from merged [#804](https://github.com/aburan28/crypto/pull/804)
 and [#831](https://github.com/aburan28/crypto/pull/831). #804's immutable first
 archive records a macOS `RLIMIT_AS` `LAUNCH_ERROR` before `produce.py` executed;
 it is not an algorithmic negative. #831's one Ubuntu 24.04 preparation run
 established hard address-space caps and reproducibly built CaDiCaL 3.0.1, but
 did not launch toy, n13 or n131. This PR freezes a separate attempt-2 wrapper,
-supervisor and replay. `FROZEN.json` deliberately has `status=HELD`,
-`release_main_head=null` and `release_pr_number=null`; its measured entrypoint
-fails closed until a separately reviewed release commit.
+supervisor and replay. The separate release commit sets `status=RELEASED`,
+`release_main_head=ddc62d591d151062efdfcf48105a6fede3f9ce74` and
+`release_pr_number=921` after merging that exact live main into this branch.
+The measured entrypoint still requires an independently reviewed exact head,
+ready-for-review PR, and unique opt-in label.
 
 The narrow hypothesis is that the *unchanged* #804 single-edge semantics can
 complete on the prepared Linux host: exhaustive toy CNF equivalence, then the
@@ -75,11 +77,11 @@ different failure refuses it. The successful held control from Actions run
 is retained byte-for-byte in `evidence/held_cap_control_36530704726.json`,
 with its SHA-256 and artifact identity pinned in `FROZEN.json`. It is a host
 control, not an attempt-2 archive. The separately opt-in measure workflow is triggered only by the unique PR label
-`ecc2k130-dag-linux-v2-measure-once`. It cannot release this held freeze.
+`ecc2k130-dag-linux-v2-measure-once`. It cannot alter the frozen release state.
 
-Before that label can be applied, a new commit must fill `status=RELEASED`,
-`release_main_head` with the exact main SHA, and `release_pr_number` with this
-PR's number; that new exact PR head, complete diff and hash-only CI must be
+The separate release commit fills `status=RELEASED`, `release_main_head` with
+the exact main SHA, and `release_pr_number` with this PR's number. Before that
+label can be applied, its exact PR head, complete diff and hash-only CI must be
 independently reviewed. The PR must be ready for review. At dispatch the
 runner rechecks the exact checkout/event/live PR heads, #804/#831 merge
 identities, Linux x86-64/Python 3.12, the executable, monotonic main ancestry,

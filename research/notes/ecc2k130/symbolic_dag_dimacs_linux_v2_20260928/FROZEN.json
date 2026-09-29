@@ -91,18 +91,18 @@
     "workflow_sha256": "a4ad7a9f0c567d28e5bdcd4477d5e0c6a4d234193cf66a4c6927bd46d6e2d79a"
   },
   "release_branch": "codex/ecc2k130-symbolic-dag-dimacs-linux-v2-held-20260928",
-  "release_main_head": null,
-  "release_pr_number": null,
+  "release_main_head": "ddc62d591d151062efdfcf48105a6fede3f9ce74",
+  "release_pr_number": 921,
   "schema": "k0-dag-linux-v2-freeze-v1",
   "source_sha256": {
-    "PROTOCOL.md": "fd7c4ba5103bce04b78183cdf0a4f74288266f99d3ccc9fab2fd87072345da95",
+    "PROTOCOL.md": "38ff2655be21dd00f941934761a52be8958098510bf374d83272a045c8939f4e",
     "ci_replay.py": "e662285253049cfad766f3ea4f48283ad77d1ca93e53884024280fbeb739b176",
     "held_cap_control.py": "b216f29c646ebdd2661eee63efbe7224da28f13e08d33aff76bc64f21d027379",
     "run.py": "c2e0e92aff9ed35464fb3560fa539454e48d662c2b664ad67de91a9e6b3cea99",
-    "selftest.py": "fa9467b7b31b5de49a15ca9211cdb2935d3fc6f61e30b75708e5e49a2371d037",
+    "selftest.py": "b54dc53c350055c363c9a31cc358119efe3e1280970dd2473d8e3446c6b7a214",
     "v2_child.py": "8e23ef99fdba52268be1213f4df9aa121d6ba372914f3dfa4784ed23a3bee144"
   },
-  "status": "HELD",
+  "status": "RELEASED",
   "upstream_guard_paths": [
     ".github/workflows/ecc2k130-symbolic-dag-dimacs-gate.yml",
     ".github/workflows/ecc2k130-symbolic-dag-dimacs-linux-preparation.yml",

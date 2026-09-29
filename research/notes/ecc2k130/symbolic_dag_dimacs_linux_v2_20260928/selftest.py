@@ -23,6 +23,8 @@ from ci_replay import (FIRST, _check_relation_stream, _replay_n131,
 class GateControls(unittest.TestCase):
     def setUp(self) -> None:
         self.frozen = check_static()
+        self.held = {**self.frozen, 'status': 'HELD',
+                     'release_main_head': None, 'release_pr_number': None}
         self.synthetic = {'release_pr_number': 99999,
                           'release_branch': self.frozen['release_branch']}
         self.current = {'id': 123, 'event': 'pull_request',
@@ -58,7 +60,7 @@ class GateControls(unittest.TestCase):
         with patch.object(run, '_event_context', side_effect=AssertionError(
                 'event context must not be inspected while held')):
             with self.assertRaisesRegex(RuntimeError, 'v2 remains held'):
-                run.release_gate(self.frozen, run.git('rev-parse', 'HEAD'))
+                run.release_gate(self.held, run.git('rev-parse', 'HEAD'))
 
     def test_capped_child_gate_only_does_not_call_git(self) -> None:
         with patch.object(v2_child, 'git', side_effect=AssertionError(
@@ -71,7 +73,7 @@ class GateControls(unittest.TestCase):
 
     def test_capped_child_refuses_held_dispatch(self) -> None:
         with self.assertRaisesRegex(RuntimeError, 'v2 remains held'):
-            v2_child.dispatch_gate(self.frozen, run.git('rev-parse', 'HEAD'),
+            v2_child.dispatch_gate(self.held, run.git('rev-parse', 'HEAD'),
                                    Path('/tmp/toy'), Path('/tmp/DISPATCH.json'),
                                    '0' * 64)
 
@@ -174,9 +176,9 @@ class GateControls(unittest.TestCase):
             (out / 'PRE_DISPATCH_REFUSAL.json').write_text(
                 json.dumps(reason, sort_keys=True) + '\n')
             receipt = run._manifest_and_receipt(
-                out, self.frozen, None, [], 'NOT_ADMITTED: HELD', 0.01)
+                out, self.held, None, [], 'NOT_ADMITTED: HELD', 0.01)
             self.assertEqual(receipt['decision'], 'FAIL_OR_CENSORED')
-            self.assertEqual(check_archive(out / 'receipt.json', self.frozen),
+            self.assertEqual(check_archive(out / 'receipt.json', self.held),
                              {'decision': 'ARCHIVED_PRE_DISPATCH_REFUSAL',
                               'phases': 0})
 
