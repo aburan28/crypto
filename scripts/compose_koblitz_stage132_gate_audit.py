@@ -28,7 +28,7 @@ def build(o:Path)->dict[str,Any]:req(not o.exists(),f'refusing overwrite {o}');o
 # Stage 128 seal) merged, so recomposing here would compare two points in
 # time.  This verify checks the seal and the frozen audit only, as Stage
 # 130's and 131's do.
-def verify(o:Path)->dict[str,Any]:s=load(o/'result-seal.json','seal');req(s.get('schema')==SEAL,'seal schema');req(sha(o/'audit.json')==s.get('audit_sha256'),'audit seal');a=load(o/'audit.json','audit');req(a.get('schema')==SCHEMA,'audit schema changed');req(a.get('status')=='current_seven_gate_audit_verified','audit status changed');return a
+def verify(o:Path)->dict[str,Any]:s=load(o/'result-seal.json','seal');req(s.get('schema')==SEAL,'seal schema');req(sha(o/'audit.json')==s.get('audit_sha256'),'audit seal');a=load(o/'audit.json','audit');req(a.get('schema')==SCHEMA,'audit schema');req(a.get('status')=='current_seven_gate_audit_verified','audit status');return a
 def main()->None:
  p=argparse.ArgumentParser();sp=p.add_subparsers(dest='cmd',required=True);b=sp.add_parser('build');b.add_argument('--output',type=Path,required=True);v=sp.add_parser('verify');v.add_argument('--output',type=Path,required=True);a=p.parse_args()
  try:r=build(a.output.resolve()) if a.cmd=='build' else verify(a.output.resolve(strict=True));print(json.dumps(r,indent=2,sort_keys=True))

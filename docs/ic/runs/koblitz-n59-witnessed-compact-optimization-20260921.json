@@ -1,0 +1,353 @@
+{
+  "schema_version": 1,
+  "operation": "koblitz_n59_witnessed_compact_optimization",
+  "date": "2026-09-21",
+  "claim_boundary": "Finite same-target pair-table representation optimization. Direct exact pair witnesses reduce default-thread and one-worker full cost while increasing peak memory; full IC still loses to automorphism rho by large factors. No SOTA or asymptotic claim.",
+  "params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-witnessed-full-public-59001.json",
+    "sha256": "466ef6a40556111f3e6c0203e9a72ec4a559c3c1758afb0235c2da35e144b14a"
+  },
+  "predecessors": {
+    "ell15_compact": {
+      "path": "docs/ic/runs/koblitz-n59-cofactor-projected-l15-optimization-20260921.json",
+      "sha256": "71ef16b1b78f7fae48e85b778f28a83487782acde8579f88eb8626b9c1e018da"
+    },
+    "ell14_compact": {
+      "path": "docs/ic/runs/koblitz-n59-cofactor-projected-complete-20260921.json",
+      "sha256": "fbb78df18b65f852d40acd177e3b44f618082fa69481fab02e2b8dda1ce3fc5f"
+    }
+  },
+  "instance": {
+    "curve": "K_1 over GF(2^59)",
+    "subgroup_order": 25179555920633,
+    "cofactor": 22894,
+    "ell": 15,
+    "collection_m": 3,
+    "descent_m": 2,
+    "collection_window": 1024,
+    "public_target_seed": 59001,
+    "target_scalar_constructed_or_supplied": false
+  },
+  "factor_base": {
+    "kind": "cofactor_projected",
+    "parent": {
+      "kind": "standard_subspace",
+      "ell": 15
+    },
+    "points": 32934,
+    "signed_negation_orbits": 16467,
+    "projected_columns": 16344,
+    "factor_base_logs_known_by_construction": false,
+    "target_subgroup_enumerated": false,
+    "scalar_preimages_retained": false
+  },
+  "pair_table": {
+    "tier": "witnessed_compact",
+    "byte_ceiling": 8589934592,
+    "pair_entries": 542340645,
+    "estimated_table_bytes": 4878330938,
+    "rest_bytes_per_pair": 4,
+    "witness_bytes_per_pair": 4,
+    "witness_encoding": "two unsigned 16-bit point indices packed into one u32",
+    "exact_candidate_check": "stored pair sum is recomputed in the fast group before return",
+    "deterministic_choice": "all exact candidates are sorted and deduplicated before the first witness is consumed"
+  },
+  "relation_stream": {
+    "units": 26,
+    "trials": 2600000,
+    "relations": 54749,
+    "summands_scanned": 2662400000,
+    "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
+    "rejected": 0,
+    "duplicates": 0
+  },
+  "default_thread": {
+    "mode": "default_threads",
+    "whole_wall_seconds": 86.3733245,
+    "whole_cpu_seconds": 853.00293,
+    "peak_rss_bytes": 6565560320,
+    "ic_wall_seconds": 85.747665958,
+    "rho_wall_seconds": 0.56185575,
+    "ic_over_rho_wall_ratio": 152.61509018640461,
+    "online_descent_seconds": 0.00254375,
+    "online_rho_over_descent_ratio": 220.87695331695332,
+    "stages": {
+      "select": {
+        "wall_seconds": 0.680870375,
+        "cpu_seconds": 3.3370770000000003
+      },
+      "collect": {
+        "wall_seconds": 74.17983975,
+        "cpu_seconds": 825.6194169999999
+      },
+      "logs": {
+        "wall_seconds": 10.919074584,
+        "cpu_seconds": 23.46848
+      },
+      "solve": {
+        "wall_seconds": 0.025650958,
+        "cpu_seconds": 0.010836999999924046
+      },
+      "baseline": {
+        "wall_seconds": 0.562316916,
+        "cpu_seconds": 0.5620569999998679
+      }
+    },
+    "pair_table_build": {
+      "wall_seconds": 21.389824,
+      "cpu_seconds": 228.95913499999997
+    },
+    "relation_units": {
+      "wall_seconds": 49.96443237500001,
+      "cpu_seconds": 594.1255099999998
+    },
+    "trials": 2600000,
+    "units": 26,
+    "units_extended": 0,
+    "relations": 54749,
+    "summands_scanned": 2662400000,
+    "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
+    "linear_algebra": {
+      "attempts": 1,
+      "mode": "sparse",
+      "seconds": 0.651786917,
+      "sparse": {
+        "attempts": 1,
+        "core_dimension": 1640,
+        "core_nonzeros": 23442,
+        "filter": {
+          "columns_in": 16344,
+          "columns_out": 1640,
+          "dependent_rows_dropped": 0,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 38373,
+          "merged_columns": 6581,
+          "nonzeros_in": 164239,
+          "nonzeros_out": 23442,
+          "rows_in": 54749,
+          "rows_out": 1673,
+          "singletons_removed": 8122,
+          "uncovered_columns": 1
+        },
+        "reconstructed_columns": 14704,
+        "wiedemann": {
+          "block_m": 4,
+          "block_n": 4,
+          "dimension": 1641,
+          "extra_steps": 0,
+          "generator_degree": 410,
+          "products": 1241,
+          "sequence_length": 830
+        }
+      }
+    },
+    "verification_seconds": 7.904313709,
+    "recovered_scalar": 17861472351607,
+    "verified": true,
+    "target": {
+      "kind": "public_hash_to_curve_cofactor",
+      "public_hash_counter": 0,
+      "public_hash_seed": 59001,
+      "target_scalar_constructed": false,
+      "x": "551007654412192707",
+      "y": "76595654768815112"
+    },
+    "rho_iterations": 518669,
+    "binary_blake3": "07a006bcbf7251b561a9aad9b4889c31a748e9f8dcdca5a57f49da8d2a7107d3"
+  },
+  "one_worker": {
+    "mode": "one_worker",
+    "whole_wall_seconds": 725.1685665,
+    "whole_cpu_seconds": 720.258242,
+    "peak_rss_bytes": 6253510656,
+    "ic_wall_seconds": 724.574469,
+    "rho_wall_seconds": 0.544967125,
+    "ic_over_rho_wall_ratio": 1329.574639938143,
+    "online_descent_seconds": 0.002468959,
+    "online_rho_over_descent_ratio": 220.72749081697992,
+    "stages": {
+      "select": {
+        "wall_seconds": 2.857439333,
+        "cpu_seconds": 2.836533
+      },
+      "collect": {
+        "wall_seconds": 701.042918041,
+        "cpu_seconds": 696.1974250000001
+      },
+      "logs": {
+        "wall_seconds": 20.695700875,
+        "cpu_seconds": 20.66387199999997
+      },
+      "solve": {
+        "wall_seconds": 0.021584666,
+        "cpu_seconds": 0.010327999999958593
+      },
+      "baseline": {
+        "wall_seconds": 0.54541675,
+        "cpu_seconds": 0.5453629999999521
+      }
+    },
+    "pair_table_build": {
+      "wall_seconds": 198.24564325,
+      "cpu_seconds": 194.253968
+    },
+    "relation_units": {
+      "wall_seconds": 499.990463956,
+      "cpu_seconds": 499.463434
+    },
+    "trials": 2600000,
+    "units": 26,
+    "units_extended": 0,
+    "relations": 54749,
+    "summands_scanned": 2662400000,
+    "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
+    "linear_algebra": {
+      "attempts": 1,
+      "mode": "sparse",
+      "seconds": 0.6356915,
+      "sparse": {
+        "attempts": 1,
+        "core_dimension": 1640,
+        "core_nonzeros": 23442,
+        "filter": {
+          "columns_in": 16344,
+          "columns_out": 1640,
+          "dependent_rows_dropped": 0,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 38373,
+          "merged_columns": 6581,
+          "nonzeros_in": 164239,
+          "nonzeros_out": 23442,
+          "rows_in": 54749,
+          "rows_out": 1673,
+          "singletons_removed": 8122,
+          "uncovered_columns": 1
+        },
+        "reconstructed_columns": 14704,
+        "wiedemann": {
+          "block_m": 4,
+          "block_n": 4,
+          "dimension": 1641,
+          "extra_steps": 0,
+          "generator_degree": 410,
+          "products": 1241,
+          "sequence_length": 830
+        }
+      }
+    },
+    "verification_seconds": 17.767374958,
+    "recovered_scalar": 17861472351607,
+    "verified": true,
+    "target": {
+      "kind": "public_hash_to_curve_cofactor",
+      "public_hash_counter": 0,
+      "public_hash_seed": 59001,
+      "target_scalar_constructed": false,
+      "x": "551007654412192707",
+      "y": "76595654768815112"
+    },
+    "rho_iterations": 518669,
+    "binary_blake3": "07a006bcbf7251b561a9aad9b4889c31a748e9f8dcdca5a57f49da8d2a7107d3"
+  },
+  "selection_pilots": [
+    {
+      "name": "parallel_scatter_first_witness",
+      "decision": "rejected_nondeterministic_witness_order",
+      "whole_wall_seconds": 25.693795292,
+      "whole_core_seconds": 260.807216,
+      "peak_rss_bytes": 6539313152,
+      "build_wall_seconds": 20.429724583,
+      "relation_unit_wall_seconds": 2.057202375,
+      "relations": 2157,
+      "canonical_relations_sha256": "afc35267caef752f7b23f76ab4d29f93e75f9ce71a02c2eae1d0eaf96cceaa84",
+      "binary_blake3": "c3ab83acb157ca1c4b899e8cd77e90259191bf11f9e727e5a159bee3c5ee6994"
+    },
+    {
+      "name": "deterministic_sorted_witness",
+      "decision": "selected",
+      "whole_wall_seconds": 24.7046345,
+      "whole_core_seconds": 260.509567,
+      "peak_rss_bytes": 6543949824,
+      "build_wall_seconds": 19.615474084,
+      "relation_unit_wall_seconds": 1.930118209,
+      "relations": 2157,
+      "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+      "binary_blake3": "07a006bcbf7251b561a9aad9b4889c31a748e9f8dcdca5a57f49da8d2a7107d3"
+    }
+  ],
+  "process_accounting": {
+    "processes": 4,
+    "sequential_wall_seconds": 861.940320792,
+    "total_core_seconds": 2094.5779549999997,
+    "peak_rss_bytes": 6565560320,
+    "scope": "one nondeterministic discovery pilot, one deterministic selection pilot, one complete default-thread workflow, and one complete one-worker workflow; prior compact and collector-tuning processes remain charged in pinned predecessors"
+  },
+  "comparison_to_ell15_compact": {
+    "default_thread": {
+      "ic_wall_reduction_fraction": 0.32160762755157224,
+      "whole_cpu_reduction_fraction": 0.2861793805105016,
+      "collection_wall_reduction_fraction": 0.35323507264598064,
+      "rss_multiple": 1.5004511875030422,
+      "old_ic_over_rho": 229.7102352131501,
+      "new_ic_over_rho": 152.61509018640461,
+      "online_descent_reduction_fraction": 0.6733232735094873,
+      "relation_unit_wall_reduction_fraction": 0.45812810182201236
+    },
+    "one_worker": {
+      "ic_wall_reduction_fraction": 0.2823348403943554,
+      "whole_cpu_reduction_fraction": 0.27987200898999,
+      "collection_wall_reduction_fraction": 0.2887542483455311,
+      "rss_multiple": 1.5316741173543504,
+      "old_ic_over_rho": 1811.8151190858175,
+      "new_ic_over_rho": 1329.574639938143,
+      "online_descent_reduction_fraction": 0.690819735771085,
+      "relation_unit_wall_reduction_fraction": 0.3746936613723483
+    }
+  },
+  "comparison_to_ell14_compact": {
+    "default_thread": {
+      "ic_wall_reduction_fraction": 0.35422431273974675,
+      "whole_cpu_reduction_fraction": 0.38532565182699363,
+      "collection_wall_reduction_fraction": 0.36118748226728714,
+      "rss_multiple": 7.334138618935193,
+      "old_ic_over_rho": 239.82440937484375,
+      "new_ic_over_rho": 152.61509018640461,
+      "online_descent_reduction_fraction": 0.896225005320827
+    },
+    "one_worker": {
+      "ic_wall_reduction_fraction": 0.406009762900576,
+      "whole_cpu_reduction_fraction": 0.39518570271873354,
+      "collection_wall_reduction_fraction": 0.3651517767766952,
+      "rss_multiple": 7.348980495600439,
+      "old_ic_over_rho": 2232.8437982897694,
+      "new_ic_over_rho": 1329.574639938143,
+      "online_descent_reduction_fraction": 0.895885832301803
+    }
+  },
+  "comparison_to_rho": {
+    "default_thread_full_crossover": false,
+    "one_worker_full_crossover": false,
+    "default_thread_full_ic_over_rho_wall": 152.61509018640461,
+    "one_worker_full_ic_over_rho_wall": 1329.574639938143,
+    "default_thread_online_rho_over_descent": 220.87695331695332,
+    "one_worker_online_rho_over_descent": 220.72749081697992,
+    "online_descent_crossover_after_precompute": true
+  },
+  "validation": [
+    "default and one-worker runs reproduce the selected compact tier canonical 54,749-relation hash",
+    "both recover the same unknown scalar and verify [d]G=Q",
+    "every witnessed-table candidate is checked by exact group addition",
+    "all factor-base points remain checked in the prime-order subgroup",
+    "sparse solutions are verified against all relations and reconstructed logs are group-certified"
+  ],
+  "gates": {
+    "same_target_optimization": "finite_pass",
+    "single_core_resources": "pass_current_n59",
+    "full_cost_vs_rho": "fail_large_margin",
+    "independent_external_reproduction": "missing"
+  },
+  "software": {
+    "source_stack_head": "3a8a7f255f044035e72078cd9bec28930d18d9b9",
+    "binary_blake3": "07a006bcbf7251b561a9aad9b4889c31a748e9f8dcdca5a57f49da8d2a7107d3"
+  }
+}

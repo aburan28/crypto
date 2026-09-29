@@ -897,6 +897,10 @@ pub enum FactorBaseDomain {
     /// kernel it need not be Frobenius-closed; its base columns collapse
     /// only by negation before public cofactor projection.
     StandardSubspace,
+    /// Public image `[h]F` of another algebraic base under cofactor
+    /// multiplication.  Every point lies in the prime-order subgroup,
+    /// but no discrete logarithm is computed or retained.
+    CofactorProjection,
     /// A subset of the signed Frobenius orbits of a linear subspace
     /// base, selected by the factor-base search.  The coordinates still
     /// live in the subspace (so the algebraic system keeps its `ℓ`
@@ -1189,7 +1193,10 @@ impl FrobeniusFactorBase {
                 continue;
             };
             let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
-            let steps = if self.domain == FactorBaseDomain::StandardSubspace {
+            let steps = if matches!(
+                self.domain,
+                FactorBaseDomain::StandardSubspace | FactorBaseDomain::CofactorProjection
+            ) {
                 1
             } else {
                 kc.n
@@ -1946,6 +1953,62 @@ pub fn build_standard_subspace_factor_base(
     if points.is_empty() {
         return Err("standard subspace contains no rational curve point".into());
     }
+    finish_negation_only_factor_base(
+        kc,
+        FactorBaseDomain::StandardSubspace,
+        ell,
+        subspace,
+        subspace_basis,
+        points,
+    )
+}
+
+/// Public cofactor image `[h]F` of an algebraic factor base.  The image
+/// is target-independent and all outputs lie in the prime-order
+/// subgroup, but no scalar preimage or discrete logarithm is retained.
+pub fn cofactor_project_factor_base(
+    kc: &KoblitzCurve,
+    parent: &FrobeniusFactorBase,
+) -> Result<FrobeniusFactorBase, String> {
+    let mut points: Vec<BinaryPoint> = parent
+        .points
+        .par_iter()
+        .map(|point| kc.mul(point, &kc.cofactor))
+        .filter(|point| *point != BinaryPoint::Infinity)
+        .collect();
+    points.sort_by_key(point_key);
+    points.dedup_by(|left, right| point_key(left) == point_key(right));
+    if points.is_empty() {
+        return Err("cofactor projection contains no nonidentity point".into());
+    }
+    let mut xs = std::collections::BTreeMap::new();
+    for point in &points {
+        let BinaryPoint::Affine { x, .. } = point else {
+            continue;
+        };
+        xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
+    }
+    let ambient = (0..kc.n)
+        .map(|i| F2mElement::from_bit_positions(&[i], kc.n))
+        .collect();
+    finish_negation_only_factor_base(
+        kc,
+        FactorBaseDomain::CofactorProjection,
+        kc.n,
+        xs.into_values().collect(),
+        ambient,
+        points,
+    )
+}
+
+fn finish_negation_only_factor_base(
+    _kc: &KoblitzCurve,
+    domain: FactorBaseDomain,
+    ell: u32,
+    subspace: Vec<F2mElement>,
+    subspace_basis: Vec<F2mElement>,
+    points: Vec<BinaryPoint>,
+) -> Result<FrobeniusFactorBase, String> {
     let index_of: HashMap<(BigUint, BigUint), usize> = points
         .iter()
         .enumerate()
@@ -1962,7 +2025,7 @@ pub fn build_standard_subspace_factor_base(
         let orbit = signed_orbits.len();
         let negated = *index_of
             .get(&point_key(&point_neg(&points[i])))
-            .ok_or("standard subspace was not closed under point negation")?;
+            .ok_or("explicit factor base was not closed under point negation")?;
         signed_orbit_of[i] = (orbit, 0, false);
         let mut members = vec![i];
         if negated != i {
@@ -1972,7 +2035,7 @@ pub fn build_standard_subspace_factor_base(
         signed_orbits.push(members);
     }
     Ok(FrobeniusFactorBase {
-        domain: FactorBaseDomain::StandardSubspace,
+        domain,
         ell,
         f_j: 0,
         linearised_exponents: Vec::new(),
@@ -2963,6 +3026,11 @@ pub struct PairSumTable {
     /// (`target − P_i` is a base point or it is not), so what the table
     /// returns is right whatever the rest said.
     rests: Vec<u32>,
+    /// Packed `(i, j)` witnesses parallel to `rests` in the explicit
+    /// witnessed-compact tier.  Each index occupies sixteen bits, so
+    /// this tier is available only below 65,536 base points.  Empty in
+    /// every other representation.
+    compact_witnesses: Vec<u32>,
     /// `pack()` of each base point to its index, for recovering the
     /// summands of a compact hit.  `|F|` entries, not `|F|²`.
     index_of_point: PointIndex,
@@ -3357,6 +3425,13 @@ impl PairSumTable {
         pairs * 4 + buckets * 4 + pairs / 2
     }
 
+    /// [`Self::compact_byte_size`] plus one packed pair witness per
+    /// stored rest.  This avoids a full-base recovery scan on every hit
+    /// while retaining half the entry width of the full table.
+    pub fn witnessed_compact_byte_size(points: usize, degree: u32) -> u128 {
+        Self::compact_byte_size(points, degree) + Self::pair_count(points) * 4
+    }
+
     /// Stored keys for a folded table: one per `(orbit representative,
     /// base point)` pair.
     ///
@@ -3608,6 +3683,7 @@ impl PairSumTable {
         Some(Self {
             entries,
             rests: Vec::new(),
+            compact_witnesses: Vec::new(),
             index_of_point: PointIndex::default(),
             curve,
             points,
@@ -3723,7 +3799,127 @@ impl PairSumTable {
         Some(Self {
             entries: Vec::new(),
             rests,
+            compact_witnesses: Vec::new(),
             index_of_point,
+            curve,
+            points,
+            negated,
+            bucket_start,
+            bucket_shift,
+            present,
+            present_mask,
+            fold: false,
+            canon: None,
+            orbit_start: Vec::new(),
+            orbit_members: Vec::new(),
+            tagged: false,
+        })
+    }
+
+    /// The compact table with one packed pair witness beside every
+    /// rest.  A successful lookup verifies the stored pair in the group
+    /// and returns it directly instead of scanning the full base through
+    /// [`Self::recover_pair`].
+    pub fn build_witnessed_compact_within(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        byte_budget: u128,
+    ) -> Option<Self> {
+        let n_points = fb.points.len();
+        if n_points > u16::MAX as usize
+            || Self::witnessed_compact_byte_size(n_points, kc.n) > byte_budget
+        {
+            return None;
+        }
+        let pairs = Self::pair_count(n_points);
+        if pairs > u32::MAX as u128 {
+            return None;
+        }
+        let curve = FastCurve::new(&kc.curve)?;
+        let key_bits = curve.n + 2;
+        let bucket_bits = Self::compact_bucket_bits(pairs, curve.n);
+        let bucket_shift = key_bits - bucket_bits;
+        let buckets = 1usize << bucket_bits;
+        let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+        let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+
+        // Cache the packed sum from the counting pass.  The previous
+        // builder recomputed every one of the `|F|(|F|+1)/2` group
+        // additions during scatter even though this tier already spends
+        // extra memory to buy probe time.  Row-major placement makes the
+        // pair witness implicit in `(row, offset)`, so the temporary
+        // needs only the packed key rather than another pair label.
+        let mut row_start = Vec::with_capacity(n_points + 1);
+        row_start.push(0usize);
+        for i in 0..n_points {
+            row_start.push(row_start[i] + n_points - i);
+        }
+        let total = *row_start.last()?;
+        if total as u128 != pairs {
+            return None;
+        }
+        let mut cached_keys = vec![0u64; total];
+        let cache_slots = cached_keys.as_mut_ptr() as usize;
+        let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
+        (0..n_points).into_par_iter().for_each(|i| {
+            let mut sums = Vec::with_capacity(n_points - i);
+            let mut scratch = BatchScratch::default();
+            curve.add_many(points[i], &points[i..], &mut sums, &mut scratch);
+            for (offset, sum) in sums.into_iter().enumerate() {
+                let key = sum.pack();
+                // SAFETY: each row owns the disjoint range measured in
+                // `row_start`, with exactly one slot per returned sum.
+                unsafe {
+                    *(cache_slots as *mut u64).add(row_start[i] + offset) = key;
+                }
+                counts[(key >> bucket_shift) as usize + 1].fetch_add(1, Ordering::Relaxed);
+            }
+        });
+        let mut bucket_start: Vec<u32> = counts.iter().map(|c| c.load(Ordering::Relaxed)).collect();
+        drop(counts);
+        for b in 0..buckets {
+            bucket_start[b + 1] += bucket_start[b];
+        }
+        if bucket_start[buckets] as usize != total {
+            return None;
+        }
+        let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
+        let mut rests = vec![0u32; total];
+        let mut compact_witnesses = vec![0u32; total];
+        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let present_mask = (1u64 << filter_bits) - 1;
+        let words = (1usize << filter_bits) / 64;
+        let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
+        let rest_slots = rests.as_mut_ptr() as usize;
+        let witness_slots = compact_witnesses.as_mut_ptr() as usize;
+        (0..n_points).into_par_iter().for_each(|i| {
+            for (offset, &key) in cached_keys[row_start[i]..row_start[i + 1]]
+                .iter()
+                .enumerate()
+            {
+                let j = (i + offset) as u32;
+                let bucket = (key >> bucket_shift) as usize;
+                let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
+                // SAFETY: the bucket cursor gives this pair a unique
+                // slot inside the range sized by the counting pass.
+                unsafe {
+                    *(rest_slots as *mut u32).add(slot) = Self::compact_rest(key);
+                    *(witness_slots as *mut u32).add(slot) = ((i as u32) << 16) | j;
+                }
+                let h = (pair_filter_hash(key) & present_mask) as usize;
+                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+            }
+        });
+        drop(cached_keys);
+        let present: Vec<u64> = present_atomic
+            .iter()
+            .map(|w| w.load(Ordering::Relaxed))
+            .collect();
+        Some(Self {
+            entries: Vec::new(),
+            rests,
+            compact_witnesses,
+            index_of_point: PointIndex::default(),
             curve,
             points,
             negated,
@@ -3905,7 +4101,10 @@ impl PairSumTable {
         byte_budget: u128,
         bulk: bool,
     ) -> Option<Self> {
-        if fb.domain == FactorBaseDomain::StandardSubspace {
+        if matches!(
+            fb.domain,
+            FactorBaseDomain::StandardSubspace | FactorBaseDomain::CofactorProjection
+        ) {
             return None;
         }
         let n_points = fb.points.len();
@@ -4090,6 +4289,7 @@ impl PairSumTable {
         Self {
             entries: Vec::new(),
             rests: parts.words,
+            compact_witnesses: Vec::new(),
             index_of_point,
             curve,
             points,
@@ -4427,6 +4627,8 @@ impl PairSumTable {
     pub fn tier(&self) -> &'static str {
         if self.fold {
             "folded"
+        } else if self.is_witnessed_compact() {
+            "witnessed_compact"
         } else if self.is_compact() {
             "compact"
         } else {
@@ -4442,6 +4644,11 @@ impl PairSumTable {
     /// Whether this table keeps the summands of each pair.
     pub fn is_compact(&self) -> bool {
         self.entries.is_empty() && !self.rests.is_empty()
+    }
+
+    /// Whether compact rests carry their pair indices directly.
+    pub fn is_witnessed_compact(&self) -> bool {
+        self.is_compact() && self.compact_witnesses.len() == self.rests.len()
     }
 
     /// Number of stored pair sums (with multiplicity).
@@ -4695,6 +4902,34 @@ impl PairSumTable {
             return;
         }
         if self.is_compact() {
+            if self.is_witnessed_compact() {
+                let bucket = self.bucket_of(key);
+                let Some(&lo) = self.bucket_start.get(bucket) else {
+                    return;
+                };
+                let hi = self.bucket_start[bucket + 1];
+                let rest = Self::compact_rest(key);
+                for slot in lo as usize..hi as usize {
+                    if self.rests[slot] != rest {
+                        continue;
+                    }
+                    let witness = self.compact_witnesses[slot];
+                    let i = witness >> 16;
+                    let j = witness & 0xffff;
+                    if self
+                        .curve
+                        .add(self.points[i as usize], self.points[j as usize])
+                        == target
+                    {
+                        out.push((i, j));
+                    }
+                }
+                if out.len() > 1 {
+                    out.sort_unstable();
+                    out.dedup();
+                }
+                return;
+            }
             if self.compact_contains(key) {
                 self.recover_pair(target, out);
             }
@@ -6080,6 +6315,19 @@ impl<'a> ProjectedFactorBase<'a> {
     /// Native construction counts for full-cost reporting.
     pub fn cost(&self) -> ProjectedFactorBaseCost {
         self.cost
+    }
+
+    /// One public factor-base point contributing to `column`.
+    ///
+    /// This is an index into the materialized algebraic base, not a
+    /// scalar label.  It lets a collector deliberately include an
+    /// uncovered column in a relation without enumerating the subgroup
+    /// or learning any discrete logarithm.
+    pub fn factor_point_for_column(&self, column: usize) -> Option<usize> {
+        self.map
+            .orbit_of
+            .iter()
+            .position(|location| location.is_some_and(|(c, _, _)| c == column))
     }
 
     /// Start a relation-fed factor-base logarithm solve using this map.
@@ -8875,6 +9123,17 @@ impl CollectionChunk {
     }
 }
 
+/// A relation tail that deliberately includes one public factor-base
+/// point and looks up the remaining pair directly.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct TargetedCollectionReport {
+    pub trials: usize,
+    pub relations: usize,
+    /// Exact pair-table membership queries, one per nonidentity probe.
+    pub pair_lookups: u64,
+    pub elapsed_seconds: f64,
+}
+
 /// The probe scalar of trial `t` under `seed`: uniform in `1..r`, drawn
 /// from a generator keyed by the pair, so trials are independent of one
 /// another and of the order in which they are visited.
@@ -9354,6 +9613,72 @@ impl<'a> RelationCollector<'a> {
         };
         (relations, report)
     }
+
+    /// Collect three-summand relations that all include
+    /// `fixed_point_index`.
+    ///
+    /// For every walked probe `R = [a]G`, ask the exact pair table for
+    /// `R − P_fixed = P_j + P_k`.  A hit yields
+    /// `R = P_fixed + P_j + P_k`, so the ordinary relation verifier and
+    /// logarithm solver consume it unchanged.  Selection of the fixed
+    /// point uses only the public projected-column predicate; no scalar
+    /// label or subgroup enumeration is involved.
+    pub fn collect_with_forced_point(
+        &self,
+        unit: RelationWorkUnit,
+        fixed_point_index: usize,
+    ) -> Option<(Vec<CollectedRelation>, TargetedCollectionReport)> {
+        if self.opts.m != 3
+            || self.opts.strategy != DecompositionStrategy::PairTable
+            || fixed_point_index >= self.fb.points.len()
+        {
+            return None;
+        }
+        let (fc, g_fast) = self.fast.as_ref()?;
+        let pair = self.pair_table()?;
+        let begin = std::time::Instant::now();
+        let end = unit.start.saturating_add(unit.count);
+        if end == unit.start {
+            return Some((Vec::new(), TargetedCollectionReport::default()));
+        }
+        let fixed_negated = fc.neg(fc.lift(&self.fb.points[fixed_point_index]));
+        let stride = probe_run_stride(unit.seed, self.r_u64);
+        let stride_point = fc.mul_u64(*g_fast, stride);
+        let first_run = unit.start / PROBE_RUN;
+        let last_run = end.saturating_sub(1) / PROBE_RUN;
+        let mut relations: Vec<CollectedRelation> = (first_run..=last_run)
+            .into_par_iter()
+            .flat_map_iter(|run| {
+                let run_start = (run * PROBE_RUN).max(unit.start);
+                let run_end = ((run + 1) * PROBE_RUN).min(end);
+                let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
+                let mut point = fc.mul_u64(*g_fast, a);
+                let mut found = Vec::new();
+                for trial in run_start..run_end {
+                    if !point.infinity && a != 0 {
+                        let rest = fc.add(point, fixed_negated);
+                        if let Some(mut points) = pair.decompose_fast(rest, 2) {
+                            points.push(fixed_point_index);
+                            points.sort_unstable();
+                            found.push(CollectedRelation { trial, a, points });
+                        }
+                    }
+                    a = ((a as u128 + stride as u128) % self.r_u64.max(2) as u128) as u64;
+                    point = fc.add(point, stride_point);
+                }
+                found
+            })
+            .collect();
+        relations.sort_by_key(|relation| relation.trial);
+        let trials = (end - unit.start) as usize;
+        let report = TargetedCollectionReport {
+            trials,
+            relations: relations.len(),
+            pair_lookups: trials as u64,
+            elapsed_seconds: begin.elapsed().as_secs_f64(),
+        };
+        Some((relations, report))
+    }
 }
 
 /// Re-check a reported relation in the group: exactly `m` indices, all
@@ -9446,6 +9771,49 @@ impl<'a> LogSystem<'a> {
         } else {
             self.dense_matrix.len()
         }
+    }
+
+    fn uncovered_columns(&self) -> Vec<usize> {
+        let mut covered = vec![false; self.n_cols];
+        if self.sparse_opts.is_some() {
+            for row in &self.sparse_rows {
+                for &(column, _) in &row.entries {
+                    covered[column as usize] = true;
+                }
+            }
+        } else {
+            for row in &self.dense_matrix {
+                for (column, value) in row.iter().enumerate() {
+                    covered[column] |= !value.is_zero();
+                }
+            }
+        }
+        covered
+            .into_iter()
+            .enumerate()
+            .filter_map(|(column, present)| (!present).then_some(column))
+            .collect()
+    }
+
+    fn least_covered_columns(&self, limit: usize) -> Vec<usize> {
+        let mut weights = vec![0usize; self.n_cols];
+        if self.sparse_opts.is_some() {
+            for row in &self.sparse_rows {
+                for &(column, _) in &row.entries {
+                    weights[column as usize] += 1;
+                }
+            }
+        } else {
+            for row in &self.dense_matrix {
+                for (column, value) in row.iter().enumerate() {
+                    weights[column] += usize::from(!value.is_zero());
+                }
+            }
+        }
+        let mut columns: Vec<usize> = (0..self.n_cols).collect();
+        columns.sort_unstable_by_key(|&column| (weights[column], column));
+        columns.truncate(limit.min(columns.len()));
+        columns
     }
 
     /// Rewrite `[a]G = Σ P_i` as a row over the projected columns.
@@ -9717,6 +10085,11 @@ impl<'a> FactorBaseLogSolver<'a> {
         self.system.n_cols
     }
 
+    /// Column indices not occurring in any accepted relation so far.
+    pub fn uncovered_columns(&self) -> Vec<usize> {
+        self.system.uncovered_columns()
+    }
+
     /// Export the matrix actually offered to LA, preserving row/column order.
     pub fn matrix_snapshot(&self) -> RelationMatrixSnapshot {
         let system = &self.system;
@@ -9771,6 +10144,11 @@ impl<'a> FactorBaseLogSolver<'a> {
             },
             sparse_options: system.sparse_opts,
         }
+    }
+
+    /// Least-represented columns, ordered by occurrence count and index.
+    pub fn least_covered_columns(&self, limit: usize) -> Vec<usize> {
+        self.system.least_covered_columns(limit)
     }
 
     /// Try to solve with what has been pushed.  `None` means more
@@ -10594,8 +10972,10 @@ mod tests {
         let (points, orbits) = (fb.points.len(), fb.signed_orbits.len());
         let full = PairSumTable::byte_size(points);
         let compact = PairSumTable::compact_byte_size(points, kc.n);
+        let witnessed = PairSumTable::witnessed_compact_byte_size(points, kc.n);
         let folded_bytes = PairSumTable::folded_byte_size(orbits, points, kc.n);
         assert!(compact < full, "the compact table is the narrower one");
+        assert!(compact < witnessed && witnessed < full);
         assert!(folded_bytes < compact, "the folded table is narrower still");
 
         // A base this narrow is far below the crossover, so the cheapest
@@ -10639,7 +11019,13 @@ mod tests {
         let narrow = PairSumTable::build_compact_within(&kc, &fb, compact).expect("fits compactly");
         assert_eq!(narrow.tier(), "compact");
         assert!(PairSumTable::build_compact_within(&kc, &fb, compact - 1).is_none());
+        let direct = PairSumTable::build_witnessed_compact_within(&kc, &fb, witnessed)
+            .expect("fits with packed witnesses");
+        assert_eq!(direct.tier(), "witnessed_compact");
+        assert!(direct.is_witnessed_compact());
+        assert!(PairSumTable::build_witnessed_compact_within(&kc, &fb, witnessed - 1).is_none());
         assert_eq!(wide.len(), narrow.len(), "same base, same pairs");
+        assert_eq!(direct.len(), narrow.len(), "same base, same pairs");
         assert!(tight.len() < narrow.len(), "the fold stored no less");
     }
 
@@ -10655,7 +11041,7 @@ mod tests {
         // does not key, does not probe, and does not know what a tier
         // is.
         //
-        // All three tiers are checked, because the scan reaches the
+        // All four tiers are checked, because the scan reaches the
         // table through `pairs_for_key`, whose compact branch recovers
         // summands by a scan where the folded one reads them out of the
         // entry.  A key computed one way and looked up another is a
@@ -10666,6 +11052,7 @@ mod tests {
         let n_pts = fb.points.len();
         let full = PairSumTable::byte_size(n_pts);
         let compact = PairSumTable::compact_byte_size(n_pts, kc.n);
+        let witnessed = PairSumTable::witnessed_compact_byte_size(n_pts, kc.n);
         let folded = PairSumTable::folded_byte_size(fb.signed_orbits.len(), n_pts, kc.n);
         let tiers = [
             (
@@ -10677,13 +11064,18 @@ mod tests {
                 PairSumTable::build_compact_within(&kc, &fb, compact).expect("compact fits"),
             ),
             (
+                "witnessed_compact",
+                PairSumTable::build_witnessed_compact_within(&kc, &fb, witnessed)
+                    .expect("witnessed compact fits"),
+            ),
+            (
                 "folded",
                 PairSumTable::build_within(&kc, &fb, folded).expect("folded fits"),
             ),
         ];
         assert!(
-            tiers[2].1.is_folded(),
-            "the third tier is not the folded one"
+            tiers[3].1.is_folded(),
+            "the fourth tier is not the folded one"
         );
 
         let fc = FastCurve::new(&kc.curve).expect("fast curve");
@@ -11428,6 +11820,33 @@ mod tests {
             }),
             target
         );
+    }
+
+    #[test]
+    fn cofactor_projected_standard_points_need_no_subgroup_labels() {
+        let kc = KoblitzCurve::new(1, 59).unwrap();
+        let parent = build_standard_subspace_factor_base(&kc, 9).unwrap();
+        let fb = cofactor_project_factor_base(&kc, &parent).unwrap();
+        assert_eq!(fb.domain, FactorBaseDomain::CofactorProjection);
+        assert!(fb.points.len() >= 480);
+        assert!(fb
+            .points
+            .iter()
+            .all(|point| { kc.mul(point, &kc.subgroup_order) == BinaryPoint::Infinity }));
+        assert!(
+            PairSumTable::build_folded_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)
+                .is_none()
+        );
+        let compact =
+            PairSumTable::build_compact_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)
+                .unwrap();
+        let fc = compact.curve();
+        let target = [0usize, 1, 2]
+            .into_iter()
+            .fold(FastPoint::INFINITY, |sum, i| {
+                fc.add(sum, fc.lift(&fb.points[i]))
+            });
+        assert!(compact.decompose_fast(target, 3).is_some());
     }
 
     #[test]
@@ -12432,6 +12851,35 @@ mod tests {
                 dr.solve_attempts
             );
         }
+    }
+
+    #[test]
+    fn an_underdetermined_sparse_attempt_keeps_its_report() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let opts = KoblitzIcOptions {
+            linear_algebra: LinearAlgebra::Sparse(SparseSolveOptions::default()),
+            ..KoblitzIcOptions::default()
+        };
+        let mut system = LogSystem::new(&kc, &fb, &opts).unwrap();
+        let columns = system.n_cols;
+        let modulus = system.r_u64;
+        // Enough rows to trigger a solve, but every row touches only
+        // column zero.  The sparse filter must report the other columns
+        // as uncovered and the failed attempt must remain observable.
+        system.sparse_rows = (0..columns)
+            .map(|_| SparseRow::new(vec![(0, 1)], 1, modulus))
+            .collect();
+        let mut solver = FactorBaseLogSolver::with_system(&kc, &fb, &opts, system).unwrap();
+        assert!(solver.try_solve().is_none());
+        let report = solver.report();
+        assert_eq!(report.solve_attempts, 1);
+        assert!(report.linear_algebra_seconds >= 0.0);
+        let sparse = report.sparse_report.expect("failed sparse report retained");
+        assert_eq!(sparse.filter.columns_in, columns);
+        assert_eq!(sparse.filter.uncovered_columns, columns - 1);
+        assert_eq!(solver.uncovered_columns(), (1..columns).collect::<Vec<_>>());
+        assert_eq!(solver.least_covered_columns(2), vec![1, 2]);
     }
 
     fn collector_options() -> KoblitzIcOptions {
@@ -13678,6 +14126,50 @@ mod tests {
             // Unsorted witnesses are fine; the group equation is not.
             assert!(verify_collected_relation(&kc, &fb, 3, rel));
         }
+    }
+
+    #[test]
+    fn a_forced_point_tail_is_exact_and_partition_independent() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let fixed = 0usize;
+        let unit = RelationWorkUnit {
+            seed: 17,
+            start: 0,
+            count: 1024,
+        };
+        let (whole, report) = collector
+            .collect_with_forced_point(unit, fixed)
+            .expect("targeted pair collector");
+        assert_eq!(report.trials, 1024);
+        assert_eq!(report.pair_lookups, 1024);
+        assert_eq!(report.relations, whole.len());
+        assert!(!whole.is_empty());
+        assert!(whole.iter().all(|relation| {
+            relation.points.contains(&fixed) && verify_collected_relation(&kc, &fb, 3, relation)
+        }));
+
+        let mut split = Vec::new();
+        for (start, count) in [(0, 317), (317, 400), (717, 307)] {
+            split.extend(
+                collector
+                    .collect_with_forced_point(
+                        RelationWorkUnit {
+                            seed: 17,
+                            start,
+                            count,
+                        },
+                        fixed,
+                    )
+                    .unwrap()
+                    .0,
+            );
+        }
+        split.sort_by_key(|relation| relation.trial);
+        assert_eq!(whole, split);
     }
 
     #[test]

@@ -1,0 +1,185 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 875a7341..73ac91bc 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -2580,6 +2580,21 @@ pub struct PairSumTable {
+     tagged: bool,
+ }
+
++/// Buffers reused by consecutive windowed decomposition probes.
++///
++/// A walked collection run contains [`PROBE_RUN`] probes.  Reallocating
++/// the batched-addition, key, and recovery buffers for every probe made
++/// the allocator part of the relation oracle despite every probe using
++/// the same window width.  The public one-shot API still creates one of
++/// these internally; collection keeps one per independent run.
++#[derive(Default)]
++struct PairWindowScratch {
++    rests: Vec<FastPoint>,
++    batch: BatchScratch,
++    keys: Vec<u64>,
++    pairs: Vec<(u32, u32)>,
++}
++
+ /// Probing a run expects to do, which is what decides the tier.
+ ///
+ /// The fold trades a `2n`-times cheaper build for a dearer probe, so
+@@ -3779,12 +3794,33 @@ impl PairSumTable {
+         m: usize,
+         start: usize,
+         len: usize,
++    ) -> Option<Vec<usize>> {
++        let mut scratch = PairWindowScratch::default();
++        self.decompose_fast_window_with(target, m, start, len, &mut scratch)
++    }
++
++    /// [`Self::decompose_fast_window`] while retaining its temporary
++    /// buffers across probes from the same walked run.
++    fn decompose_fast_window_with(
++        &self,
++        target: FastPoint,
++        m: usize,
++        start: usize,
++        len: usize,
++        scratch: &mut PairWindowScratch,
+     ) -> Option<Vec<usize>> {
+         let mut found: Option<Vec<usize>> = None;
+-        self.witnesses_fast_window(target, m, start, len, &mut |witness| {
+-            found = Some(witness.to_vec());
+-            false
+-        });
++        self.witnesses_fast_window_with(
++            target,
++            m,
++            start,
++            len,
++            scratch,
++            &mut |witness| {
++                found = Some(witness.to_vec());
++                false
++            },
++        );
+         let idxs = found?;
+         let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
+             self.curve.add(s, self.points[i])
+@@ -3803,6 +3839,20 @@ impl PairSumTable {
+         start: usize,
+         len: usize,
+         sink: &mut dyn FnMut(&[usize]) -> bool,
++    ) {
++        let mut scratch = PairWindowScratch::default();
++        self.witnesses_fast_window_with(target, m, start, len, &mut scratch, sink)
++    }
++
++    /// [`Self::witnesses_fast_window`] with caller-owned buffers.
++    fn witnesses_fast_window_with(
++        &self,
++        target: FastPoint,
++        m: usize,
++        start: usize,
++        len: usize,
++        scratch: &mut PairWindowScratch,
++        sink: &mut dyn FnMut(&[usize]) -> bool,
+     ) {
+         let base = self.points.len();
+         if m != 3 || base == 0 || len >= base {
+@@ -3814,20 +3864,22 @@ impl PairSumTable {
+         }
+         let start = start % base;
+         let tail = len.min(base - start);
+-        let mut rests = Vec::with_capacity(len);
+-        let mut scratch = BatchScratch::default();
++        scratch.rests.clear();
++        if scratch.rests.capacity() < len {
++            scratch.rests.reserve(len);
++        }
+         self.curve.add_many(
+             target,
+             &self.negated[start..start + tail],
+-            &mut rests,
+-            &mut scratch,
++            &mut scratch.rests,
++            &mut scratch.batch,
+         );
+         if tail < len {
+             self.curve.add_many(
+                 target,
+                 &self.negated[..len - tail],
+-                &mut rests,
+-                &mut scratch,
++                &mut scratch.rests,
++                &mut scratch.batch,
+             );
+         }
+         // Keys a block at a time: enough to keep `LANES`
+@@ -3839,18 +3891,16 @@ impl PairSumTable {
+         // stopping at its first witness has not paid for the rest.
+         const BLOCK: usize = 1024;
+         const LOOKAHEAD: usize = 32;
+-        let mut keys = Vec::with_capacity(BLOCK);
+-        let mut pairs = Vec::new();
+-        for (b, block) in rests.chunks(BLOCK).enumerate() {
+-            self.keys_of(block, &mut keys);
+-            for &key in keys.iter().take(LOOKAHEAD) {
++        for (b, block) in scratch.rests.chunks(BLOCK).enumerate() {
++            self.keys_of(block, &mut scratch.keys);
++            for &key in scratch.keys.iter().take(LOOKAHEAD) {
+                 prefetch(&self.present[self.filter_word(key)]);
+             }
+             for (within, rest) in block.iter().enumerate() {
+-                if let Some(&ahead) = keys.get(within + LOOKAHEAD) {
++                if let Some(&ahead) = scratch.keys.get(within + LOOKAHEAD) {
+                     prefetch(&self.present[self.filter_word(ahead)]);
+                 }
+-                if !self.admitted(keys[within]) {
++                if !self.admitted(scratch.keys[within]) {
+                     continue;
+                 }
+                 let offset = b * BLOCK + within;
+@@ -3859,8 +3909,12 @@ impl PairSumTable {
+                 } else {
+                     offset - tail
+                 };
+-                self.pairs_for_key(*rest, keys[within], &mut pairs);
+-                for &(i, j) in &pairs {
++                self.pairs_for_key(
++                    *rest,
++                    scratch.keys[within],
++                    &mut scratch.pairs,
++                );
++                for &(i, j) in &scratch.pairs {
+                     if !sink(&[i as usize, j as usize, k]) {
+                         return;
+                     }
+@@ -7732,7 +7786,7 @@ impl<'a> RelationCollector<'a> {
+         let last_run = end.saturating_sub(1) / PROBE_RUN;
+         let mut relations: Vec<CollectedRelation> = (first_run..=last_run)
+             .into_par_iter()
+-            .flat_map_iter(|run| {
++            .map_init(PairWindowScratch::default, |window_scratch, run| {
+                 let run_start = (run * PROBE_RUN).max(unit.start);
+                 let run_end = ((run + 1) * PROBE_RUN).min(end);
+                 let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
+@@ -7746,7 +7800,13 @@ impl<'a> RelationCollector<'a> {
+                             pair_filter_hash(unit.seed ^ t.wrapping_mul(0x9e37_79b9_7f4a_7c15))
+                                 as usize
+                                 % base;
+-                        if let Some(points) = pair.decompose_fast_window(point, 3, offset, window) {
++                        if let Some(points) = pair.decompose_fast_window_with(
++                            point,
++                            3,
++                            offset,
++                            window,
++                            window_scratch,
++                        ) {
+                             found.push(CollectedRelation {
+                                 trial: t,
+                                 a,
+@@ -7762,6 +7822,7 @@ impl<'a> RelationCollector<'a> {
+                 }
+                 found
+             })
++            .flatten()
+             .collect();
+         relations.sort_by_key(|r| r.trial);
+         let trials = (end - unit.start) as usize;
