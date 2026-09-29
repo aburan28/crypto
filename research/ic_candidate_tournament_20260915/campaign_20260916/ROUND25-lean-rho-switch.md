@@ -159,3 +159,24 @@ Every conclusion is scoped to these twelve cells, one seed, these two
 collectors, this rho and this checker. The lean rho is not offered as the
 leanest possible rho. It uses the IC arm's own primitives, so that rho is not
 given arithmetic the IC arm lacks.
+
+## 8. Outcome (appended after the round; §1–7 unchanged)
+
+The round ended `retained`, with `beats_rho_strict` and `rho_parity` false:
+prediction 5. The audit verified all 4,656 receipts, and all five predictions
+are confirmed.
+
+- **Rho.** In instructions, both IC arms are above the lean rho at every
+  cell on both stages: 1.36–2.56× on the panel, and at the crossover cells
+  2.1–13.7× for the pair arm and 1.35–5.0× for the switch. Round 0024's six
+  small-cell wins against the matched rho therefore do not hold against the
+  lean rho, as §5 fixed in advance.
+- **Switch.** It chose as its rule says on every fixture. It passed the
+  incumbent gate, which was not predicted: 0.771 [0.601, 0.957] in
+  instructions.
+- **Native time**, which was not predicted, puts both IC arms below the lean
+  rho at the four smallest cells (0.87–0.98).
+
+Full account:
+[RESULTS.md](RESULTS.md#round-0025-a-lean-rho-and-the-pairtriple-switch),
+[report](../runs/round-0025/REPORT.md).
