@@ -16,7 +16,7 @@
 //! doubling the accumulator each step and adding P when the bit is 1.
 //! This is O(log k) point operations.
 
-use super::field::FieldElement;
+use super::field::{inv_mod_u64, single_word, FieldElement};
 use num_bigint::BigUint;
 
 /// A point on a Weierstrass curve, either the identity (point at infinity)
@@ -73,6 +73,184 @@ impl Point {
                 Point::Affine { x: x3, y: y3 }
             }
         }
+    }
+
+    /// [`add`](Self::add) in **variable time**, for public points only.
+    ///
+    /// The same affine formulas and the same identity, doubling and
+    /// `P + (−P)` cases, so on reduced coordinates (every point the
+    /// arithmetic produces has them) the result is exactly
+    /// `self.add(other, a)`.  What differs is how the field arithmetic
+    /// runs, and its running time now depends on the coordinates:
+    ///
+    /// - the slope's inversion is [`FieldElement::inv_vartime`], a
+    ///   Euclidean inversion, instead of the constant-time Fermat ladder
+    ///   that was most of an affine addition's cost;
+    /// - when `p` fits a machine word the whole formula runs on words
+    ///   (the private `Word` arithmetic below) and only the result goes
+    ///   back to [`BigUint`]; otherwise subtractions use
+    ///   [`FieldElement::sub_vartime`].
+    ///
+    /// For the cryptanalysis walks, whose points are public.  Protocol
+    /// code keeps [`add`](Self::add).
+    pub fn add_vartime(&self, other: &Point, a: &FieldElement) -> Point {
+        match (self, other) {
+            (Point::Infinity, p) | (p, Point::Infinity) => p.clone(),
+            (Point::Affine { x: x1, y: y1 }, Point::Affine { x: x2, y: y2 }) => {
+                let m = &x1.modulus;
+                if let Some(w) = Word::of(m) {
+                    if let Some([x1, y1, x2, y2, a]) = w.get([x1, y1, x2, y2, a]) {
+                        return w.point(w.affine_add((x1, y1), (x2, y2), a), m);
+                    }
+                }
+                if x1 == x2 {
+                    if y1 == y2 {
+                        return self.double_vartime(a);
+                    } else {
+                        return Point::Infinity;
+                    }
+                }
+                let lambda = y2
+                    .sub_vartime(y1)
+                    .mul(&x2.sub_vartime(x1).inv_vartime().unwrap());
+                let x3 = lambda.mul(&lambda).sub_vartime(x1).sub_vartime(x2);
+                let y3 = lambda.mul(&x1.sub_vartime(&x3)).sub_vartime(y1);
+                Point::Affine { x: x3, y: y3 }
+            }
+        }
+    }
+
+    /// [`double`](Self::double) in **variable time**, for public points
+    /// only: exactly `self.double(a)`, computed as in
+    /// [`add_vartime`](Self::add_vartime).
+    pub fn double_vartime(&self, a: &FieldElement) -> Point {
+        match self {
+            Point::Infinity => Point::Infinity,
+            Point::Affine { x, y } => {
+                let m = &x.modulus;
+                if let Some(w) = Word::of(m) {
+                    if let Some([x, y, a]) = w.get([x, y, a]) {
+                        return w.point(w.affine_double((x, y), a), m);
+                    }
+                }
+                if y.is_zero() {
+                    return Point::Infinity;
+                }
+                let p = x.modulus.clone();
+                let three = FieldElement::new(BigUint::from(3u32), p.clone());
+                let two = FieldElement::new(BigUint::from(2u32), p);
+                let numerator = three.mul(&x.mul(x)).add(a);
+                let denominator = two.mul(y);
+                let lambda = numerator.mul(&denominator.inv_vartime().unwrap());
+                let x3 = lambda.mul(&lambda).sub_vartime(&two.mul(x));
+                let y3 = lambda.mul(&x.sub_vartime(&x3)).sub_vartime(y);
+                Point::Affine { x: x3, y: y3 }
+            }
+        }
+    }
+
+    /// [`scalar_mul`](Self::scalar_mul) in **variable time**, for public
+    /// points and scalars only: exactly `self.scalar_mul(k, a)`.
+    ///
+    /// When `p` fits a word the same Jacobian ladder runs on word
+    /// arithmetic and inverts once at the end with the word Euclid of
+    /// [`FieldElement::inv_vartime`]; otherwise this is `scalar_mul`
+    /// itself, whose one constant-time inversion is a small part of a
+    /// multi-word ladder.  For the set-up multiplications of the
+    /// cryptanalysis walks and searches (walker starts, subgroup
+    /// projections, verification of a recovered log).
+    pub fn scalar_mul_vartime(&self, k: &BigUint, a: &FieldElement) -> Point {
+        if let Point::Affine { x, y } = self {
+            let m = &x.modulus;
+            if let Some(w) = Word::of(m) {
+                if let Some([x, y, a]) = w.get([x, y, a]) {
+                    let mut acc: Option<WordJacobian> = None;
+                    for i in (0..k.bits()).rev() {
+                        if let Some(j) = acc {
+                            acc = w.jacobian_double(j, a);
+                        }
+                        if k.bit(i) {
+                            acc = match acc {
+                                None => Some(WordJacobian { x, y, z: 1 }),
+                                Some(j) => w.jacobian_add_affine(j, (x, y), a),
+                            };
+                        }
+                    }
+                    return w.point(acc.map(|j| w.jacobian_to_affine(j)), m);
+                }
+            }
+        }
+        self.scalar_mul(k, a)
+    }
+
+    /// The least `k < bound` with `k·self = target`, trying
+    /// `k = 0, 1, 2, …` in turn — a linear discrete-log search, as in a
+    /// Pohlig–Hellman digit — or `None` if there is none below `bound`.
+    /// Variable time; for public points only.
+    ///
+    /// The running multiple `k·self` is kept in Jacobian coordinates and
+    /// compared with the affine `target = (x, y)` by cross-multiplying,
+    /// `X = x·Z²` and `Y = y·Z³`, so a step costs a mixed addition and
+    /// four multiplications and never an inversion.  The multiples, the
+    /// identity among them, and so the `k` returned are exactly those of
+    /// stepping `current = current.add(self, a)` and testing
+    /// `current == *target`.  On word arithmetic when `p` fits a word, on
+    /// the [`BigUint`] Jacobian points of [`scalar_mul`](Self::scalar_mul)
+    /// otherwise.
+    pub fn linear_dlog_vartime(&self, target: &Point, bound: u64, a: &FieldElement) -> Option<u64> {
+        let (gx, gy) = match self {
+            // Every multiple of O is O.
+            Point::Infinity => return (*target == Point::Infinity && bound > 0).then_some(0),
+            Point::Affine { x, y } => (x, y),
+        };
+        let m = &gx.modulus;
+        // An affine target with an unreduced coordinate equals no point the
+        // arithmetic produces, so no `k` finds it.
+        let t = match target {
+            Point::Infinity => None,
+            Point::Affine { x, y } if x.value < *m && y.value < *m => Some((x, y)),
+            Point::Affine { .. } => return None,
+        };
+        if let Some(w) = Word::of(m) {
+            let tw = match t {
+                None => Some(None),
+                Some((x, y)) => w.get([x, y]).map(|[x, y]| Some((x, y))),
+            };
+            if let (Some([gx, gy, a]), Some(t)) = (w.get([gx, gy, a]), tw) {
+                let mut acc: Option<WordJacobian> = None;
+                for k in 0..bound {
+                    let hit = match (acc, t) {
+                        (None, None) => true,
+                        (Some(j), Some(t)) => w.jacobian_is(j, t),
+                        _ => false,
+                    };
+                    if hit {
+                        return Some(k);
+                    }
+                    acc = match acc {
+                        None => Some(WordJacobian { x: gx, y: gy, z: 1 }),
+                        Some(j) => w.jacobian_add_affine(j, (gx, gy), a),
+                    };
+                }
+                return None;
+            }
+        }
+        let mut acc: Option<Jacobian> = None;
+        for k in 0..bound {
+            let hit = match (&acc, t) {
+                (None, None) => true,
+                (Some(j), Some((x, y))) => j.is(x, y),
+                _ => false,
+            };
+            if hit {
+                return Some(k);
+            }
+            acc = match &acc {
+                None => Some(Jacobian::from_affine(gx, gy)),
+                Some(j) => j.add_affine(gx, gy, a),
+            };
+        }
+        None
     }
 
     /// Scalar multiplication kP using the double-and-add algorithm.
@@ -177,6 +355,18 @@ impl Point {
         }
     }
 
+    /// [`neg`](Self::neg) in **variable time**, for public points only:
+    /// exactly `self.neg()`, through [`FieldElement::neg_vartime`].
+    pub fn neg_vartime(&self) -> Point {
+        match self {
+            Point::Infinity => Point::Infinity,
+            Point::Affine { x, y } => Point::Affine {
+                x: x.clone(),
+                y: y.neg_vartime(),
+            },
+        }
+    }
+
     /// Return the x-coordinate as a `BigUint`, or `None` for the point at infinity.
     pub fn x_coord(&self) -> Option<&BigUint> {
         match self {
@@ -188,7 +378,8 @@ impl Point {
 
 /// A finite point in Jacobian coordinates, `(X : Y : Z)` with `Z ≠ 0`
 /// standing for the affine `(X/Z², Y/Z³)`; the identity is `None` where
-/// these are used.  Only [`Point::scalar_mul`] uses it.
+/// these are used.  [`Point::scalar_mul`] and, above one word,
+/// [`Point::linear_dlog_vartime`] use it.
 struct Jacobian {
     x: FieldElement,
     y: FieldElement,
@@ -264,6 +455,13 @@ impl Jacobian {
         })
     }
 
+    /// Is this the affine `(x, y)`?  `X = x·Z²` and `Y = y·Z³`, compared
+    /// without inverting `Z`; `x` and `y` must be reduced.
+    fn is(&self, x: &FieldElement, y: &FieldElement) -> bool {
+        let zz = self.z.mul(&self.z);
+        self.x == x.mul(&zz) && self.y == y.mul(&zz.mul(&self.z))
+    }
+
     fn to_affine(&self) -> Point {
         let zi = self.z.inv().expect("a Jacobian point has Z != 0");
         let zi2 = zi.mul(&zi);
@@ -271,6 +469,213 @@ impl Jacobian {
             x: self.x.mul(&zi2),
             y: self.y.mul(&zi2.mul(&zi)),
         }
+    }
+}
+
+/// `F_p` on bare machine words, for a prime `p < 2⁶⁴`: the arithmetic of
+/// the `*_vartime` operations when the modulus fits one word.
+///
+/// A [`FieldElement`] operation goes through `num-bigint`'s general
+/// multi-limb code, reduces by a division even for an addition, and
+/// clones the modulus into its result, so on a 32-bit curve an affine
+/// addition spent far more in that machinery than in the arithmetic.
+/// Here an element is its canonical value in a `u64`, a multiplication
+/// is one 128-bit product and one remainder, an addition or subtraction
+/// a compare, and an inversion [`inv_mod_u64`]; only results are turned
+/// back into [`BigUint`].  Every value is exact mod `p`, so the formulas
+/// below take the same branches and produce the same points as their
+/// [`FieldElement`] counterparts.  Variable time, like its callers.
+#[derive(Clone, Copy)]
+struct Word {
+    p: u64,
+}
+
+impl Word {
+    /// The word arithmetic mod `modulus`, if `modulus` fits one word.
+    fn of(modulus: &BigUint) -> Option<Self> {
+        single_word(modulus).map(|p| Word { p })
+    }
+
+    /// The elements' values as words, or `None` if one is not a reduced
+    /// residue (never true of an element the arithmetic produced; the
+    /// caller then keeps to the general path).
+    fn get<const N: usize>(self, elems: [&FieldElement; N]) -> Option<[u64; N]> {
+        let mut out = [0u64; N];
+        for (o, e) in out.iter_mut().zip(elems) {
+            *o = single_word(&e.value).filter(|&v| v < self.p)?;
+        }
+        Some(out)
+    }
+
+    /// An affine result (`None` for the identity) as a [`Point`] mod `m`.
+    fn point(self, pt: Option<(u64, u64)>, m: &BigUint) -> Point {
+        match pt {
+            None => Point::Infinity,
+            Some((x, y)) => Point::Affine {
+                x: FieldElement {
+                    value: BigUint::from(x),
+                    modulus: m.clone(),
+                },
+                y: FieldElement {
+                    value: BigUint::from(y),
+                    modulus: m.clone(),
+                },
+            },
+        }
+    }
+
+    fn add(self, a: u64, b: u64) -> u64 {
+        let (s, carry) = a.overflowing_add(b);
+        if carry || s >= self.p {
+            s.wrapping_sub(self.p)
+        } else {
+            s
+        }
+    }
+
+    fn sub(self, a: u64, b: u64) -> u64 {
+        if a >= b {
+            a - b
+        } else {
+            a.wrapping_sub(b).wrapping_add(self.p)
+        }
+    }
+
+    fn mul(self, a: u64, b: u64) -> u64 {
+        (u128::from(a) * u128::from(b) % u128::from(self.p)) as u64
+    }
+
+    /// `a⁻¹`; the callers have ruled out `a = 0`, as [`Point::add`] has
+    /// before its `unwrap`.
+    fn inv(self, a: u64) -> u64 {
+        inv_mod_u64(a, self.p).expect("p is prime and a != 0")
+    }
+}
+
+/// Affine points in words, `None` for the identity: [`Point::add`] and
+/// [`Point::double`] branch for branch.
+impl Word {
+    fn affine_add(self, (x1, y1): (u64, u64), (x2, y2): (u64, u64), a: u64) -> Option<(u64, u64)> {
+        if x1 == x2 {
+            return if y1 == y2 {
+                self.affine_double((x1, y1), a)
+            } else {
+                None
+            };
+        }
+        let lambda = self.mul(self.sub(y2, y1), self.inv(self.sub(x2, x1)));
+        Some(self.chord(lambda, x1, x2, y1))
+    }
+
+    fn affine_double(self, (x, y): (u64, u64), a: u64) -> Option<(u64, u64)> {
+        if y == 0 {
+            return None;
+        }
+        let xx = self.mul(x, x);
+        let numerator = self.add(self.add(self.add(xx, xx), xx), a);
+        let lambda = self.mul(numerator, self.inv(self.add(y, y)));
+        Some(self.chord(lambda, x, x, y))
+    }
+
+    /// The tail both formulas share: `x₃ = λ² − x₁ − x₂`,
+    /// `y₃ = λ(x₁ − x₃) − y₁`.
+    fn chord(self, lambda: u64, x1: u64, x2: u64, y1: u64) -> (u64, u64) {
+        let x3 = self.sub(self.sub(self.mul(lambda, lambda), x1), x2);
+        let y3 = self.sub(self.mul(lambda, self.sub(x1, x3)), y1);
+        (x3, y3)
+    }
+}
+
+/// A finite point `(X : Y : Z)` in Jacobian coordinates on [`Word`]s.
+#[derive(Clone, Copy)]
+struct WordJacobian {
+    x: u64,
+    y: u64,
+    z: u64,
+}
+
+/// [`Jacobian`]'s formulas and branches on words, `None` for the
+/// identity.
+impl Word {
+    /// dbl-2007-bl, as [`Jacobian::double`].
+    fn jacobian_double(self, j: WordJacobian, a: u64) -> Option<WordJacobian> {
+        if j.y == 0 {
+            return None;
+        }
+        let xx = self.mul(j.x, j.x);
+        let yy = self.mul(j.y, j.y);
+        let yyyy = self.mul(yy, yy);
+        let zz = self.mul(j.z, j.z);
+        let t = self.add(j.x, yy);
+        let s = self.sub(self.sub(self.mul(t, t), xx), yyyy);
+        let s = self.add(s, s);
+        let m = self.add(
+            self.add(self.add(xx, xx), xx),
+            self.mul(a, self.mul(zz, zz)),
+        );
+        let x3 = self.sub(self.sub(self.mul(m, m), s), s);
+        let yyyy8 = {
+            let d = self.add(yyyy, yyyy);
+            let q = self.add(d, d);
+            self.add(q, q)
+        };
+        let y3 = self.sub(self.mul(m, self.sub(s, x3)), yyyy8);
+        let yz = self.add(j.y, j.z);
+        let z3 = self.sub(self.sub(self.mul(yz, yz), yy), zz);
+        Some(WordJacobian {
+            x: x3,
+            y: y3,
+            z: z3,
+        })
+    }
+
+    /// madd-2007-bl, as [`Jacobian::add_affine`].
+    fn jacobian_add_affine(
+        self,
+        j: WordJacobian,
+        (x2, y2): (u64, u64),
+        a: u64,
+    ) -> Option<WordJacobian> {
+        let z1z1 = self.mul(j.z, j.z);
+        let u2 = self.mul(x2, z1z1);
+        let s2 = self.mul(self.mul(y2, j.z), z1z1);
+        let h = self.sub(u2, j.x);
+        let r = self.sub(s2, j.y);
+        if h == 0 {
+            return if r == 0 {
+                self.jacobian_double(j, a)
+            } else {
+                None
+            };
+        }
+        let r = self.add(r, r);
+        let hh = self.mul(h, h);
+        let i = self.add(hh, hh);
+        let i = self.add(i, i);
+        let jj = self.mul(h, i);
+        let v = self.mul(j.x, i);
+        let x3 = self.sub(self.sub(self.sub(self.mul(r, r), jj), v), v);
+        let y1j = self.mul(j.y, jj);
+        let y3 = self.sub(self.sub(self.mul(r, self.sub(v, x3)), y1j), y1j);
+        let zh = self.add(j.z, h);
+        let z3 = self.sub(self.sub(self.mul(zh, zh), z1z1), hh);
+        Some(WordJacobian {
+            x: x3,
+            y: y3,
+            z: z3,
+        })
+    }
+
+    /// As [`Jacobian::is`].
+    fn jacobian_is(self, j: WordJacobian, (x, y): (u64, u64)) -> bool {
+        let zz = self.mul(j.z, j.z);
+        j.x == self.mul(x, zz) && j.y == self.mul(y, self.mul(zz, j.z))
+    }
+
+    fn jacobian_to_affine(self, j: WordJacobian) -> (u64, u64) {
+        let zi = self.inv(j.z);
+        let zi2 = self.mul(zi, zi);
+        (self.mul(j.x, zi2), self.mul(j.y, self.mul(zi2, zi)))
     }
 }
 
@@ -335,6 +740,167 @@ mod tests {
         assert_eq!(g.scalar_mul(&curve.n, &a), Point::Infinity);
     }
     use super::*;
+
+    /// Every point of `y² = x³ + 2x + 3` over `F_97`, identity first.
+    fn f97_points() -> (Vec<Point>, FieldElement) {
+        let p = BigUint::from(97u32);
+        let fe = |v: u32| FieldElement::new(BigUint::from(v), p.clone());
+        let mut points = vec![Point::Infinity];
+        for x in 0..97u32 {
+            for y in 0..97u32 {
+                if (y * y) % 97 == (x * x * x + 2 * x + 3) % 97 {
+                    points.push(Point::Affine { x: fe(x), y: fe(y) });
+                }
+            }
+        }
+        (points, fe(2))
+    }
+
+    /// `(G, a)` on a curve over the largest 64-bit prime, `2⁶⁴ − 59`,
+    /// with `b` chosen to put `G` on it: coordinates near `2⁶⁴` exercise
+    /// the carries of the word arithmetic.
+    fn word_edge_curve() -> (Point, FieldElement) {
+        let p = BigUint::from(u64::MAX - 58);
+        let fe = |v: u64| FieldElement::new(BigUint::from(v), p.clone());
+        let g = Point::Affine {
+            x: fe(u64::MAX - 1000),
+            y: fe(u64::MAX - 77),
+        };
+        (g, fe(u64::MAX - 60))
+    }
+
+    /// The multiples `G, 2G, …, nG` by repeated [`Point::add`].
+    fn multiples(g: &Point, a: &FieldElement, n: usize) -> Vec<Point> {
+        let mut out = vec![g.clone()];
+        while out.len() < n {
+            let next = out.last().unwrap().add(g, a);
+            out.push(next);
+        }
+        out
+    }
+
+    /// The vartime operations return exactly what the constant-time ones
+    /// do: on every pair of points of a small curve (the word path, with
+    /// its identity, doubling and `P + (−P)` cases), near the top of a
+    /// 64-bit word, and on P-256 (the multi-word path).
+    #[test]
+    fn vartime_add_double_match_reference() {
+        let (points, a) = f97_points();
+        for p in &points {
+            assert_eq!(p.double_vartime(&a), p.double(&a), "2·{p:?}");
+            for q in &points {
+                assert_eq!(p.add_vartime(q, &a), p.add(q, &a), "{p:?} + {q:?}");
+            }
+        }
+        for p in &points {
+            assert_eq!(p.neg_vartime(), p.neg());
+        }
+        let (g, a) = word_edge_curve();
+        let ms = multiples(&g, &a, 40);
+        for p in &ms {
+            assert_eq!(p.double_vartime(&a), p.double(&a));
+            for q in ms.iter().step_by(3) {
+                assert_eq!(p.add_vartime(q, &a), p.add(q, &a));
+                assert_eq!(p.add_vartime(&q.neg(), &a), p.add(&q.neg(), &a));
+            }
+        }
+        let curve = crate::ecc::curve::CurveParams::p256();
+        let a = curve.a_fe();
+        let ms = multiples(&curve.generator(), &a, 6);
+        for p in &ms {
+            assert_eq!(p.double_vartime(&a), p.double(&a));
+            for q in &ms {
+                assert_eq!(p.add_vartime(q, &a), p.add(q, &a));
+                assert_eq!(p.add_vartime(&q.neg(), &a), p.add(&q.neg(), &a));
+            }
+        }
+    }
+
+    /// `scalar_mul_vartime` is `scalar_mul`: every point and scalar up to
+    /// past the group order of a small curve, scalars of every length
+    /// near the top of a word, and the multi-word fallback on P-256.
+    #[test]
+    fn scalar_mul_vartime_matches_scalar_mul() {
+        let (points, a) = f97_points();
+        let order = points.len() as u32;
+        for pt in &points {
+            for k in 0..(2 * order + 3) {
+                let k = BigUint::from(k);
+                assert_eq!(pt.scalar_mul_vartime(&k, &a), pt.scalar_mul(&k, &a));
+            }
+        }
+        let (g, a) = word_edge_curve();
+        let mut k = BigUint::from(1u32);
+        for _ in 0..70 {
+            assert_eq!(g.scalar_mul_vartime(&k, &a), g.scalar_mul(&k, &a), "k={k}");
+            k = &k * 3u32 + 1u32;
+        }
+        let curve = crate::ecc::curve::CurveParams::p256();
+        let a = curve.a_fe();
+        let k = BigUint::from(0xfeed_beef_dead_f00du64).pow(3);
+        let g = curve.generator();
+        assert_eq!(g.scalar_mul_vartime(&k, &a), g.scalar_mul(&k, &a));
+        assert_eq!(g.scalar_mul_vartime(&curve.n, &a), Point::Infinity);
+    }
+
+    /// The linear search the Pohlig–Hellman digits used before, by affine
+    /// additions.
+    fn linear_dlog_affine(g: &Point, t: &Point, bound: u64, a: &FieldElement) -> Option<u64> {
+        let mut current = Point::Infinity;
+        for k in 0..bound {
+            if current == *t {
+                return Some(k);
+            }
+            current = current.add(g, a);
+        }
+        None
+    }
+
+    /// `linear_dlog_vartime` finds the `k` the affine search finds, or
+    /// fails where it fails: every base/target pair of a small curve with
+    /// bounds short of, at and past the order (a base of small order
+    /// wraps through the identity), an unreduced target, and the
+    /// multi-word path on P-256.
+    #[test]
+    fn linear_dlog_vartime_matches_affine_search() {
+        let (points, a) = f97_points();
+        let order = points.len() as u64;
+        for g in &points {
+            for t in &points {
+                for bound in [0, 1, 3, order / 2, order + 2] {
+                    assert_eq!(
+                        g.linear_dlog_vartime(t, bound, &a),
+                        linear_dlog_affine(g, t, bound, &a),
+                        "{g:?} {t:?} {bound}"
+                    );
+                }
+            }
+        }
+        if let Point::Affine { x, y } = &points[5] {
+            let unreduced = Point::Affine {
+                x: FieldElement {
+                    value: &x.value + 97u32,
+                    modulus: x.modulus.clone(),
+                },
+                y: y.clone(),
+            };
+            let g = &points[5];
+            assert_eq!(g.linear_dlog_vartime(&unreduced, order + 2, &a), None);
+            assert_eq!(linear_dlog_affine(g, &unreduced, order + 2, &a), None);
+        }
+        let (g, a) = word_edge_curve();
+        let t = g.scalar_mul(&BigUint::from(29u32), &a);
+        assert_eq!(g.linear_dlog_vartime(&t, 64, &a), Some(29));
+        assert_eq!(g.linear_dlog_vartime(&t, 29, &a), None);
+        let curve = crate::ecc::curve::CurveParams::p256();
+        let a = curve.a_fe();
+        let g = curve.generator();
+        for k in [0u64, 1, 2, 11] {
+            let t = g.scalar_mul(&BigUint::from(k), &a);
+            assert_eq!(g.linear_dlog_vartime(&t, 12, &a), Some(k));
+            assert_eq!(g.linear_dlog_vartime(&t, k, &a), None);
+        }
+    }
 
     /// Small curve for testing: y² = x³ + 2x + 3 mod 97
     /// Generator G = (3, 6), order 5.

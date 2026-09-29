@@ -95,8 +95,8 @@ pub fn pohlig_hellman_curve(
         }
         let qe = qprime.pow(*e);
         let cofactor = order_of_g / &qe;
-        let g_i = g.scalar_mul(&cofactor, &a_fe);
-        let q_i = q.scalar_mul(&cofactor, &a_fe);
+        let g_i = g.scalar_mul_vartime(&cofactor, &a_fe);
+        let q_i = q.scalar_mul_vartime(&cofactor, &a_fe);
         match recover_in_prime_power_subgroup(curve, &g_i, &q_i, qprime, *e) {
             Some((d_i, steps)) => {
                 residues.push((qe, d_i));
@@ -126,7 +126,11 @@ pub fn pohlig_hellman_curve(
 ///
 /// Strategy: write `d = d_0 + q·d_1 + q²·d_2 + … + q^{e-1}·d_{e-1}`.
 /// Each `d_j ∈ [0, q)` is recovered by computing the right multiple
-/// in the `q`-order subgroup and brute-forcing.
+/// in the `q`-order subgroup and brute-forcing.  The brute force is
+/// [`Point::linear_dlog_vartime`], which keeps the running multiple
+/// projective: a step is a mixed addition and a cross-multiplied
+/// compare, where an affine step paid a field inversion.  The baby-step
+/// count is unchanged, one per multiple compared.
 pub fn recover_in_prime_power_subgroup(
     curve: &CurveParams,
     g: &Point,
@@ -140,26 +144,19 @@ pub fn recover_in_prime_power_subgroup(
     let mut total_steps = 0u64;
     // Precompute G' = q^(e-1) · G, the generator of the q-order subgroup.
     let q_pow_e_minus_1 = prime.pow(exponent - 1);
-    let g_prime = g.scalar_mul(&q_pow_e_minus_1, &a_fe);
+    let g_prime = g.scalar_mul_vartime(&q_pow_e_minus_1, &a_fe);
+    let q_u64 = prime.to_u64_digits().first().copied().unwrap_or(0);
     for j in 0..exponent {
         // Compute Q_j = q^(e-1-j) · (Q - d·G)
-        let neg_dg = g.scalar_mul(&d, &a_fe).neg();
-        let q_minus_dg = q.add(&neg_dg, &a_fe);
+        let neg_dg = g.scalar_mul_vartime(&d, &a_fe).neg();
+        let q_minus_dg = q.add_vartime(&neg_dg, &a_fe);
         let exp = prime.pow(exponent - 1 - j);
-        let q_j = q_minus_dg.scalar_mul(&exp, &a_fe);
-        // Brute-force d_j in [0, prime) such that d_j · G' = Q_j.
-        let mut found = None;
-        let mut current = Point::Infinity;
-        let q_u64 = prime.to_u64_digits().first().copied().unwrap_or(0);
-        for k in 0..q_u64 {
-            total_steps += 1;
-            if current == q_j {
-                found = Some(BigUint::from(k));
-                break;
-            }
-            current = current.add(&g_prime, &a_fe);
-        }
-        let d_j = found?;
+        let q_j = q_minus_dg.scalar_mul_vartime(&exp, &a_fe);
+        // Brute-force d_j in [0, prime) such that d_j · G' = Q_j: the
+        // multiples 0·G', 1·G', …, d_j·G' are d_j + 1 baby steps.
+        let d_j = g_prime.linear_dlog_vartime(&q_j, q_u64, &a_fe)?;
+        total_steps += d_j + 1;
+        let d_j = BigUint::from(d_j);
         d += &d_j * &accumulator;
         accumulator *= prime;
         let _ = j;

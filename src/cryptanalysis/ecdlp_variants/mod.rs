@@ -40,9 +40,10 @@
 //!   computation* (#12, #13) and *Montgomery trick* (#15) variants
 //!   batch `B` additions behind a single inversion via Montgomery's
 //!   trick, driving this down to `≈ group_ops / B` — the whole point
-//!   of that column of the table.  (`FieldElement::inv` is a Fermat
-//!   `a^{p-2}` exponentiation, so an inversion is *much* more
-//!   expensive than a multiplication; batching is a real win.)
+//!   of that column of the table.  (The group inverts with
+//!   [`FieldElement::inv_vartime`], an extended Euclidean inversion,
+//!   since every point here is public; one still costs tens of
+//!   multiplications, so batching is a real win.)
 //! - `table_size` — peak number of stored points (memory).  The
 //!   negation variants (#7–#9) fold `±P` to a single x-keyed entry,
 //!   halving this.
@@ -51,24 +52,30 @@
 //!
 //! # A faster path
 //!
-//! Every solver here uses the crate's general arithmetic — [`BigUint`]
-//! coordinates and a `HashMap` keyed by coordinate bytes — because the
-//! point is to state the algorithms readably and count their operations
-//! exactly.  That costs an allocation per field operation and another per
-//! table probe.  When the *time* matters rather than the exposition,
+//! Every solver here uses the crate's general representation —
+//! [`BigUint`] coordinates and a `HashMap` keyed by coordinate bytes —
+//! because the point is to state the algorithms readably and count their
+//! operations exactly.  Its point operations are the variable-time ones
+//! ([`Point::add_vartime`] and its siblings), which do the field
+//! arithmetic on machine words when `p` fits one; each still converts its
+//! result back to [`BigUint`], and a table probe still allocates.  When
+//! the *time* matters rather than the exposition,
 //! [`crate::cryptanalysis::bsgs_fast`] is the same algorithm over
 //! single-word Montgomery arithmetic and a flat x-keyed table, with the
 //! chains spread across cores: measured at 6.3× to 10.9× this module on
-//! the same instances, and it carries the interval and many-target modes
-//! this one does not.  It is capped at curves whose prime and order fit a
+//! the same instances while this module still did its field arithmetic in
+//! [`BigUint`] (the word path has narrowed that gap by an amount not
+//! re-measured), and it carries the interval and many-target modes this
+//! one does not.  It is capped at curves whose prime and order fit a
 //! word; above that, or for operation counts, stay here.
 //!
 //! These are all `O(√n)` (BSGS family: deterministic; Gaudry–Schost:
 //! randomised, low-memory) — exponential in the bit length, so they
 //! are demonstrated on small curves (a few-thousand- to ~100k-order
-//! subgroup).  They share the crate's real [`Point`] arithmetic, so a
-//! correctness regression in [`Point::add`] would make every test in
-//! this module fail.
+//! subgroup).  They share the crate's real [`Point`] arithmetic — the
+//! variable-time operations, which the `ecc::point` tests pin to
+//! [`Point::add`] and [`Point::double`] — so a correctness regression in
+//! either would make every test in this module fail.
 
 use std::cell::Cell;
 
@@ -114,6 +121,8 @@ pub struct DlpSolution {
 pub struct EcGroup {
     a: FieldElement,
     p: BigUint,
+    /// `⌊p/2⌋`, for the negation map's `±` representative test.
+    half_p: BigUint,
     n: BigUint,
     g: Point,
     group_ops: Cell<u64>,
@@ -127,6 +136,7 @@ impl EcGroup {
     pub fn new(a: FieldElement, p: BigUint, n: BigUint, g: Point) -> Self {
         Self {
             a,
+            half_p: &p >> 1,
             p,
             n,
             g,
@@ -177,7 +187,7 @@ impl EcGroup {
 
     /// Negation `-P` — free (negate `y`), not counted.
     pub fn neg(&self, p: &Point) -> Point {
-        p.neg()
+        p.neg_vartime()
     }
 
     /// Counted addition: one group op, one inversion (unless an
@@ -188,7 +198,7 @@ impl EcGroup {
         if !trivial {
             self.inversions.set(self.inversions.get() + 1);
         }
-        x.add(y, &self.a)
+        x.add_vartime(y, &self.a)
     }
 
     /// Counted doubling.
@@ -197,23 +207,23 @@ impl EcGroup {
         if !matches!(x, Point::Infinity) {
             self.inversions.set(self.inversions.get() + 1);
         }
-        x.double(&self.a)
+        x.double_vartime(&self.a)
     }
 
     /// **Set-up** addition — *not* counted.  For building initial
     /// walker positions and constant offsets before the main loop.
     pub fn add_setup(&self, x: &Point, y: &Point) -> Point {
-        x.add(y, &self.a)
+        x.add_vartime(y, &self.a)
     }
 
     /// **Set-up** scalar multiple of the generator `kG` — not counted.
     pub fn mul_setup(&self, k: &BigUint) -> Point {
-        self.g.scalar_mul(k, &self.a)
+        self.g.scalar_mul_vartime(k, &self.a)
     }
 
     /// **Set-up** scalar multiple of an arbitrary base — not counted.
     pub fn mul_pt_setup(&self, base: &Point, k: &BigUint) -> Point {
-        base.scalar_mul(k, &self.a)
+        base.scalar_mul_vartime(k, &self.a)
     }
 
     /// **Block (Montgomery-trick) addition.**  Adds each `Q_i` to its
@@ -242,7 +252,7 @@ impl EcGroup {
                         // Doubling or P + (-P): can't join the batch;
                         // fall back to a counted single addition.
                         self.inversions.set(self.inversions.get() + 1);
-                        out[i] = Some(pp.add(qq, &self.a));
+                        out[i] = Some(pp.add_vartime(qq, &self.a));
                     } else {
                         denoms.push(x2.sub(x1));
                         generic_idx.push(i);
@@ -290,7 +300,7 @@ pub(crate) fn batch_invert(elems: &[FieldElement], p: &BigUint) -> Vec<FieldElem
         acc = acc.mul(e);
     }
     // One inversion of the full product.
-    let mut inv_acc = acc.inv().expect("batch_invert: zero element");
+    let mut inv_acc = acc.inv_vartime().expect("batch_invert: zero element");
     let mut out = vec![FieldElement::new(BigUint::zero(), p.clone()); k];
     for i in (0..k).rev() {
         out[i] = inv_acc.mul(&prefix[i]);

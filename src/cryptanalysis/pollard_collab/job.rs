@@ -200,6 +200,9 @@ pub struct JobContext {
     pub branches: Vec<Branch>,
     pub dp_mask: BigUint,
     pub step_cap: u64,
+    /// `⌊p/2⌋`: under the negation map a walk keeps the `±`
+    /// representative with `y ≤ ⌊p/2⌋`.
+    pub half_p: BigUint,
 }
 
 impl JobContext {
@@ -248,7 +251,7 @@ impl JobContext {
         if !curve.is_on_curve(&q) {
             return Err("target is not on the curve".into());
         }
-        if g.scalar_mul(&n, &a) != Point::Infinity {
+        if g.scalar_mul_vartime(&n, &a) != Point::Infinity {
             return Err("n·P ≠ ∞: order is wrong".into());
         }
         let job_id = spec.job_id();
@@ -256,7 +259,9 @@ impl JobContext {
         for j in 0..spec.num_branches as u64 {
             let u = derive_scalar(&job_id, "branch-u", j, &n);
             let v = derive_scalar(&job_id, "branch-v", j, &n);
-            let point = g.scalar_mul(&u, &a).add(&q.scalar_mul(&v, &a), &a);
+            let point = g
+                .scalar_mul_vartime(&u, &a)
+                .add_vartime(&q.scalar_mul_vartime(&v, &a), &a);
             branches.push(Branch { u, v, point });
         }
         let dp_mask = (BigUint::one() << spec.dp_bits) - BigUint::one();
@@ -265,6 +270,7 @@ impl JobContext {
         } else {
             spec.max_steps_per_walker
         };
+        let half_p = &p >> 1;
         Ok(Self {
             spec,
             job_id,
@@ -277,6 +283,7 @@ impl JobContext {
             branches,
             dp_mask,
             step_cap,
+            half_p,
         })
     }
 
@@ -286,8 +293,8 @@ impl JobContext {
         let b = derive_scalar(&self.job_id, "walker-b", i, &self.n);
         let r = self
             .g
-            .scalar_mul(&a, &self.a)
-            .add(&self.q.scalar_mul(&b, &self.a), &self.a);
+            .scalar_mul_vartime(&a, &self.a)
+            .add_vartime(&self.q.scalar_mul_vartime(&b, &self.a), &self.a);
         (a, b, r)
     }
 
@@ -301,8 +308,8 @@ impl JobContext {
     /// `a·P + b·Q` — used to verify a claimed distinguished point.
     pub fn combine(&self, a: &BigUint, b: &BigUint) -> Point {
         self.g
-            .scalar_mul(a, &self.a)
-            .add(&self.q.scalar_mul(b, &self.a), &self.a)
+            .scalar_mul_vartime(a, &self.a)
+            .add_vartime(&self.q.scalar_mul_vartime(b, &self.a), &self.a)
     }
 
     /// Is `pt` on the job's curve?
@@ -324,7 +331,13 @@ impl JobContext {
     /// Distinguished-point predicate: low `dp_bits` of `x` are zero.
     pub fn is_dp(&self, pt: &Point) -> bool {
         match pt {
-            Point::Affine { x, .. } => (&x.value & &self.dp_mask).is_zero(),
+            // `x & dp_mask = 0`, word by word, without building the
+            // conjunction.
+            Point::Affine { x, .. } => x
+                .value
+                .iter_u64_digits()
+                .zip(self.dp_mask.iter_u64_digits())
+                .all(|(x, m)| x & m == 0),
             Point::Infinity => false,
         }
     }
