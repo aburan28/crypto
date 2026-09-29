@@ -33,9 +33,8 @@
 //! test suite checks that they do, on random curves, at every
 //! dimension the truth table can still reach.
 
-use std::collections::HashMap;
-
-use crate::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
+use crate::cryptanalysis::fx_hash::MaskMap;
+use crate::cryptanalysis::pq_groebner_f2::{mono_key, F2BoolMono, F2BoolPoly};
 use crate::cryptanalysis::semaev_decomp::Gf2;
 
 /// The most boolean variables a system may have: one bit of a
@@ -54,10 +53,11 @@ pub fn max_n_prime(summands: u32) -> u32 {
 // ── F_{2^n}[v] / (v² − v) ──────────────────────────────────────────
 
 /// A polynomial over `F_{2^n}` in boolean variables: monomial mask to
-/// non-zero coefficient.
+/// non-zero coefficient.  Keyed with the mask hasher: every operation here
+/// accumulates by XOR, so the map's iteration order never reaches a result.
 #[derive(Clone, Debug, Default)]
 pub struct FieldBoolPoly {
-    terms: HashMap<u64, u64>,
+    terms: MaskMap<u64>,
 }
 
 impl FieldBoolPoly {
@@ -150,23 +150,35 @@ impl FieldBoolPoly {
 
     /// The `n` boolean coordinate polynomials: equation `j` holds the
     /// monomials whose coefficient has bit `j` set.
+    ///
+    /// The terms are sorted once into canonical (descending) order and dealt
+    /// out in that order, so each equation's list is already canonical —
+    /// its masks are distinct, being keys of one map — and is taken as is,
+    /// instead of `n` separate sorts of about half the terms each.
     pub fn split(&self, n: u32, n_vars: usize) -> Vec<F2BoolPoly> {
+        let mut keyed: Vec<(u128, u64)> = self
+            .terms
+            .iter()
+            .map(|(&m, &c)| (mono_key(F2BoolMono::from_mask(m)), c))
+            .collect();
+        keyed.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
         let mut monos: Vec<Vec<F2BoolMono>> = (0..n).map(|_| Vec::new()).collect();
-        for (&m, &c) in &self.terms {
+        for &(key, c) in &keyed {
+            let m = F2BoolMono::from_mask(!(key as u64));
             let mut bits = c;
             while bits != 0 {
                 let j = bits.trailing_zeros();
                 if j < n {
-                    monos[j as usize].push(F2BoolMono::from_mask(m));
+                    monos[j as usize].push(m);
                 }
                 bits &= bits - 1;
             }
         }
         monos
             .into_iter()
-            .map(|ms| F2BoolPoly::from_monos(ms, n_vars))
+            .map(|terms| F2BoolPoly { terms, n_vars })
             .collect()
-}
+    }
 }
 
 // ── The summation polynomials, on words ────────────────────────────
@@ -190,7 +202,10 @@ pub fn semaev_s4_word(gf: &Gf2, b: u64, x1: u64, x2: u64, x3: u64, x4: u64) -> u
     let (a1, b1, c1) = s3_in_x3_word(gf, b, x1, x2);
     let (a2, b2, c2) = s3_in_x3_word(gf, b, x3, x4);
     let t1 = gf.sqr(gf.mul(a1, c2) ^ gf.mul(a2, c1));
-    let t2 = gf.mul(gf.mul(a1, b2) ^ gf.mul(a2, b1), gf.mul(b1, c2) ^ gf.mul(b2, c1));
+    let t2 = gf.mul(
+        gf.mul(a1, b2) ^ gf.mul(a2, b1),
+        gf.mul(b1, c2) ^ gf.mul(b2, c1),
+    );
     t1 ^ t2
 }
 
@@ -245,7 +260,9 @@ pub fn descend(
 ) -> Result<SymbolicDescent, String> {
     let n_prime = v_basis.len() as u32;
     if !(2..=3).contains(&summands) {
-        return Err(format!("the symbolic descent takes 2 or 3 summands, not {summands}"));
+        return Err(format!(
+            "the symbolic descent takes 2 or 3 summands, not {summands}"
+        ));
     }
     if n_prime == 0 || n_prime > max_n_prime(summands) {
         return Err(format!(
@@ -342,7 +359,10 @@ mod tests {
             let xs: Vec<u64> = (0..4).map(|_| rng.gen::<u64>() & gf.mask).collect();
             let es: Vec<_> = xs.iter().map(|&x| gf.to_element(x)).collect();
             let s3 = binary_semaev_s3(&es[0], &es[1], &es[2], &curve.b, &curve.irreducible);
-            assert_eq!(gf.from_element(&s3), semaev_s3_word(gf, inst.b, xs[0], xs[1], xs[2]));
+            assert_eq!(
+                gf.from_element(&s3),
+                semaev_s3_word(gf, inst.b, xs[0], xs[1], xs[2])
+            );
             let s4 = binary_semaev_s4(&es[0], &es[1], &es[2], &es[3], &curve.b, &curve.irreducible);
             assert_eq!(
                 gf.from_element(&s4),
@@ -413,26 +433,40 @@ mod tests {
         let x_r = rng.gen::<u64>() & gf.mask;
         let sys = descend(gf, inst.b, x_r, &words, 2).unwrap();
         assert_eq!(sys.n_vars, 24);
-        assert!(sys.equations.iter().all(|e| e.terms.iter().all(|t| t.degree() <= 2)));
+        assert!(sys
+            .equations
+            .iter()
+            .all(|e| e.terms.iter().all(|t| t.degree() <= 2)));
         for _ in 0..2000 {
             let v = rng.gen::<u64>() & ((1u64 << 24) - 1);
             let xs = sys.lift(v);
             let direct = semaev_s3_word(gf, inst.b, xs[0], xs[1], x_r);
             for (j, eq) in sys.equations.iter().enumerate() {
-                assert_eq!(eq.eval(v) as u64, (direct >> j) & 1, "equation {j} at {v:#x}");
+                assert_eq!(
+                    eq.eval(v) as u64,
+                    (direct >> j) & 1,
+                    "equation {j} at {v:#x}"
+                );
             }
         }
         // Three summands at a dimension the truth table could not hold.
         let words = standard_basis(7);
         let sys = descend(gf, inst.b, x_r, &words, 3).unwrap();
         assert_eq!(sys.n_vars, 21);
-        assert!(sys.equations.iter().all(|e| e.terms.iter().all(|t| t.degree() <= 6)));
+        assert!(sys
+            .equations
+            .iter()
+            .all(|e| e.terms.iter().all(|t| t.degree() <= 6)));
         for _ in 0..500 {
             let v = rng.gen::<u64>() & ((1u64 << 21) - 1);
             let xs = sys.lift(v);
             let direct = semaev_s4_word(gf, inst.b, xs[0], xs[1], xs[2], x_r);
             for (j, eq) in sys.equations.iter().enumerate() {
-                assert_eq!(eq.eval(v) as u64, (direct >> j) & 1, "S4 equation {j} at {v:#x}");
+                assert_eq!(
+                    eq.eval(v) as u64,
+                    (direct >> j) & 1,
+                    "S4 equation {j} at {v:#x}"
+                );
             }
         }
     }
