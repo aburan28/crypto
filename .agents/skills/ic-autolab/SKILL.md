@@ -70,9 +70,13 @@ seed `2026092553`, ten new complete-pipeline configurations and the checked
 round-two executable source. Workflow `36463687634` ran it once and verified
 3,480/3,480 pairs. Its selected `stop7_word` failed the complete cold and
 familywise gates, so no challenger qualified within the three-attempt budget.
-Do not redispatch any of the three registered attempts. Future research needs
-a new predeclared protocol and fresh target points; never retune on their
-confirmation or replay.
+Do not redispatch any of the three registered attempts. The next registered
+comparison is
+[generic-backend-qualification](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/README.md)
+(seed `2026092901`, panel SHA-256
+`83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf`);
+measurement is pending until its runner and workflow land. Never retune on the
+sealed rounds' confirmation or replay.
 
 Before a rho comparison, inspect the actual reference path and run its release
 tests for reference/packed agreement, fruitless-cycle escape, charge closure,
