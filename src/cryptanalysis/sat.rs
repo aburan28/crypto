@@ -98,9 +98,14 @@ fn is_neg(lit: Lit) -> bool {
 /// is satisfied and can be skipped without dereferencing it at all —
 /// which is the point, since every clause is its own heap allocation
 /// and touching one is a cache miss.
+///
+/// The clause index is a `u32` (every push goes through
+/// [`Solver::next_cref`], which checks it fits), so an entry is eight
+/// bytes and a watch list scan reads half the memory it did with a
+/// `usize`.
 #[derive(Debug, Clone, Copy)]
 struct Watcher {
-    cref: usize,
+    cref: u32,
     blocker: Lit,
 }
 
@@ -125,7 +130,7 @@ pub enum SolveResult {
 #[derive(Debug, Clone, Copy)]
 enum Reason {
     Decision,
-    Propagated(usize), // clause index in `clauses`
+    Propagated(u32), // clause index in `clauses`
     /// Implied by a reduced XOR row.  The reason clause lives in
     /// `xor_reason[var]` and is rewritten in place on each such
     /// implication, so parity reasoning does not grow the clause
@@ -730,7 +735,7 @@ impl Solver {
             1 => {
                 // Unit clause: assign now (at level 0).
                 let l = lits[0];
-                match self.enqueue(l, Reason::Propagated(self.clauses.len())) {
+                match self.enqueue(l, Reason::Propagated(self.next_cref())) {
                     Ok(()) => {
                         self.clauses.push(vec![l]);
                         self.n_orig_clauses = self.clauses.len();
@@ -743,7 +748,7 @@ impl Solver {
                 }
             }
             _ => {
-                let idx = self.clauses.len();
+                let idx = self.next_cref();
                 let (l0, l1) = (lits[0], lits[1]);
                 self.watches[watch_index(l0)].push(Watcher {
                     cref: idx,
@@ -786,7 +791,7 @@ impl Solver {
             .iter()
             .take_while(|&&lit| self.lit_value(lit) != Some(false))
             .count();
-        let idx = self.clauses.len();
+        let idx = self.next_cref();
         let (l0, l1) = (lits[0], lits[1]);
         self.clauses.push(lits);
         self.watches[watch_index(l0)].push(Watcher {
@@ -803,10 +808,10 @@ impl Solver {
         // costs memory but cannot change an answer.
         self.n_orig_clauses = self.clauses.len();
         match non_false {
-            0 => Some(Conflict::Clause(idx)),
+            0 => Some(Conflict::Clause(idx as usize)),
             1 if self.lit_value(l0).is_none() => {
                 if self.enqueue(l0, Reason::Propagated(idx)).is_err() {
-                    Some(Conflict::Clause(idx))
+                    Some(Conflict::Clause(idx as usize))
                 } else {
                     None
                 }
@@ -833,6 +838,13 @@ impl Solver {
         &self.values[self.n_vars as usize + 1..]
     }
 
+    /// Index the next clause pushed onto `clauses` will have, as the
+    /// `u32` that watchers and reasons store.  Every push takes its
+    /// index from here, so every stored index fits.
+    fn next_cref(&self) -> u32 {
+        u32::try_from(self.clauses.len()).expect("clause database exceeds 2^32 clauses")
+    }
+
     /// Assign `lit` to true with the given reason. Returns `Err` if it
     /// conflicts with the current assignment.
     fn enqueue(&mut self, lit: Lit, r: Reason) -> Result<(), ()> {
@@ -840,26 +852,40 @@ impl Solver {
             Some(true) => Ok(()),
             Some(false) => Err(()),
             None => {
-                let v = var_of(lit) as usize;
-                let n = self.n_vars as i32;
-                self.values[(n + lit) as usize] = Some(true);
-                self.values[(n - lit) as usize] = Some(false);
-                let (w, bit) = (v / 64, 1u64 << (v % 64));
-                self.assigned_w[w] |= bit;
-                if is_neg(lit) {
-                    self.value_w[w] &= !bit;
-                } else {
-                    self.value_w[w] |= bit;
-                }
-                self.level[v] = self.trail_lim.len() as i32;
-                self.reason[v] = r;
-                self.saved_phase[v] = !is_neg(lit);
-                self.trail.push(lit);
-                self.epoch += 1;
-                self.stats.propagations += 1;
+                self.assign(lit, r);
                 Ok(())
             }
         }
+    }
+
+    /// [`Self::enqueue`] for a literal the caller knows is unassigned.
+    ///
+    /// The unit site of clause propagation has just read the literal's
+    /// value, and a decision variable has just been checked free; going
+    /// through `enqueue` there re-derived a value already in hand, behind
+    /// an out-of-line call on the hottest path of the solve.  Forced
+    /// inline: left to itself the compiler keeps it out of line, and the
+    /// call then costs more than the check it saves.
+    #[inline(always)]
+    fn assign(&mut self, lit: Lit, r: Reason) {
+        debug_assert!(self.lit_value(lit).is_none(), "assign over {lit}");
+        let v = var_of(lit) as usize;
+        let n = self.n_vars as i32;
+        self.values[(n + lit) as usize] = Some(true);
+        self.values[(n - lit) as usize] = Some(false);
+        let (w, bit) = (v / 64, 1u64 << (v % 64));
+        self.assigned_w[w] |= bit;
+        if is_neg(lit) {
+            self.value_w[w] &= !bit;
+        } else {
+            self.value_w[w] |= bit;
+        }
+        self.level[v] = self.trail_lim.len() as i32;
+        self.reason[v] = r;
+        self.saved_phase[v] = !is_neg(lit);
+        self.trail.push(lit);
+        self.epoch += 1;
+        self.stats.propagations += 1;
     }
 
     /// Propagate to fixpoint over *both* reasoning engines: watched-
@@ -1120,7 +1146,8 @@ impl Solver {
                     j += 1;
                     continue;
                 }
-                let cidx = w.cref;
+                let cref = w.cref;
+                let cidx = cref as usize;
                 self.stats.clause_visits += 1;
 
                 // Canonical layout: the false watcher sits at [0].
@@ -1131,7 +1158,7 @@ impl Solver {
                 let other_value = self.lit_value(other);
                 if other_value == Some(true) {
                     ws[j] = Watcher {
-                        cref: cidx,
+                        cref,
                         blocker: other,
                     };
                     j += 1;
@@ -1149,7 +1176,7 @@ impl Solver {
                         // `l` is not false and `¬lit` is, so this never
                         // writes back into the list being compacted.
                         self.watches[watch_index(l)].push(Watcher {
-                            cref: cidx,
+                            cref,
                             blocker: other,
                         });
                         moved = true;
@@ -1164,17 +1191,14 @@ impl Solver {
                 // falsified.
                 self.clauses[cidx][0] = -lit;
                 ws[j] = Watcher {
-                    cref: cidx,
+                    cref,
                     blocker: other,
                 };
                 j += 1;
                 match other_value {
-                    None => {
-                        if self.enqueue(other, Reason::Propagated(cidx)).is_err() {
-                            conflict = Some(cidx);
-                            break;
-                        }
-                    }
+                    // Nothing has been assigned since `other_value` was
+                    // read, so `other` is still free.
+                    None => self.assign(other, Reason::Propagated(cref)),
                     Some(false) => {
                         conflict = Some(cidx);
                         break;
@@ -1221,13 +1245,13 @@ impl Solver {
             let src = self.reason[qv];
             let len = match src {
                 Reason::Decision => continue,
-                Reason::Propagated(idx) => self.clauses[idx].len(),
+                Reason::Propagated(idx) => self.clauses[idx as usize].len(),
                 Reason::XorPropagated => self.xor_reason[qv].len(),
             };
             for i in 0..len {
                 let r = match src {
                     Reason::Decision => unreachable!(),
-                    Reason::Propagated(idx) => self.clauses[idx][i],
+                    Reason::Propagated(idx) => self.clauses[idx as usize][i],
                     Reason::XorPropagated => self.xor_reason[qv][i],
                 };
                 let rv = var_of(r) as usize;
@@ -1344,7 +1368,7 @@ impl Solver {
             }
             // The reason of p must be a propagation (not a decision).
             match self.reason[v] {
-                Reason::Propagated(idx) => src = Conflict::Clause(idx),
+                Reason::Propagated(idx) => src = Conflict::Clause(idx as usize),
                 Reason::XorPropagated => src = Conflict::Xor,
                 Reason::Decision => break,
             }
@@ -1480,7 +1504,7 @@ impl Solver {
         let mut locked = vec![false; self.clauses.len()];
         for &l in &self.trail {
             if let Reason::Propagated(idx) = self.reason[var_of(l) as usize] {
-                locked[idx] = true;
+                locked[idx as usize] = true;
             }
         }
 
@@ -1505,15 +1529,10 @@ impl Solver {
             if c.len() < 2 || self.detached.get(idx).copied().unwrap_or(false) {
                 continue;
             }
-            let (l0, l1) = (c[0], c[1]);
-            self.watches[watch_index(l0)].push(Watcher {
-                cref: idx,
-                blocker: l1,
-            });
-            self.watches[watch_index(l1)].push(Watcher {
-                cref: idx,
-                blocker: l0,
-            });
+            // Every clause index was issued by `next_cref`, so it fits.
+            let (cref, l0, l1) = (idx as u32, c[0], c[1]);
+            self.watches[watch_index(l0)].push(Watcher { cref, blocker: l1 });
+            self.watches[watch_index(l1)].push(Watcher { cref, blocker: l0 });
         }
     }
 
@@ -1581,11 +1600,11 @@ impl Solver {
                 // Install the learnt clause.
                 if learnt.len() == 1 {
                     // It's a unit at the backjump level (which is 0).
-                    let _ = self.enqueue(learnt[0], Reason::Propagated(self.clauses.len()));
+                    let _ = self.enqueue(learnt[0], Reason::Propagated(self.next_cref()));
                     self.clauses.push(learnt);
                 } else {
                     self.stats.learnt_clauses += 1;
-                    let idx = self.clauses.len();
+                    let idx = self.next_cref();
                     let l0 = learnt[0];
                     let l1 = learnt[1];
                     self.clauses.push(learnt);
@@ -1676,7 +1695,7 @@ impl Solver {
                         } else {
                             -((v + 1) as i32)
                         };
-                        let _ = self.enqueue(lit, Reason::Decision);
+                        self.assign(lit, Reason::Decision);
                     }
                 }
             }
