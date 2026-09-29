@@ -18,9 +18,9 @@ See [PROTOCOL.md](PROTOCOL.md).
 
 | Gate | State |
 | --- | --- |
-| Feasibility gate + d6 inventory control | Depends on PR #952 (or merged equivalent) |
+| Feasibility gate + d6 inventory control | Merged via PR [#952](https://github.com/aburan28/crypto/pull/952) at `15861092036c3f46c4f5ce8cf4a4d272eb327ed2` |
 | Live v2 measurement | In progress / do not retry |
-| This pilot execution | Pending |
+| This pilot execution | In progress on disclosed inventory points |
 | Fresh competitive F4/F5 registration | Blocked until pilot + v2 exposure census |
 
 No scoreboard competitive row is updated from this directory until a later
