@@ -6317,6 +6317,19 @@ impl<'a> ProjectedFactorBase<'a> {
         self.cost
     }
 
+    /// One public factor-base point contributing to `column`.
+    ///
+    /// This is an index into the materialized algebraic base, not a
+    /// scalar label.  It lets a collector deliberately include an
+    /// uncovered column in a relation without enumerating the subgroup
+    /// or learning any discrete logarithm.
+    pub fn factor_point_for_column(&self, column: usize) -> Option<usize> {
+        self.map
+            .orbit_of
+            .iter()
+            .position(|location| location.is_some_and(|(c, _, _)| c == column))
+    }
+
     /// Start a relation-fed factor-base logarithm solve using this map.
     pub fn log_solver<'b>(&'b self, opts: &'b KoblitzIcOptions) -> Option<FactorBaseLogSolver<'b>> {
         FactorBaseLogSolver::with_projected(self.kc, self.fb, opts, &self.map)
@@ -9110,6 +9123,17 @@ impl CollectionChunk {
     }
 }
 
+/// A relation tail that deliberately includes one public factor-base
+/// point and looks up the remaining pair directly.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct TargetedCollectionReport {
+    pub trials: usize,
+    pub relations: usize,
+    /// Exact pair-table membership queries, one per nonidentity probe.
+    pub pair_lookups: u64,
+    pub elapsed_seconds: f64,
+}
+
 /// The probe scalar of trial `t` under `seed`: uniform in `1..r`, drawn
 /// from a generator keyed by the pair, so trials are independent of one
 /// another and of the order in which they are visited.
@@ -9589,6 +9613,72 @@ impl<'a> RelationCollector<'a> {
         };
         (relations, report)
     }
+
+    /// Collect three-summand relations that all include
+    /// `fixed_point_index`.
+    ///
+    /// For every walked probe `R = [a]G`, ask the exact pair table for
+    /// `R − P_fixed = P_j + P_k`.  A hit yields
+    /// `R = P_fixed + P_j + P_k`, so the ordinary relation verifier and
+    /// logarithm solver consume it unchanged.  Selection of the fixed
+    /// point uses only the public projected-column predicate; no scalar
+    /// label or subgroup enumeration is involved.
+    pub fn collect_with_forced_point(
+        &self,
+        unit: RelationWorkUnit,
+        fixed_point_index: usize,
+    ) -> Option<(Vec<CollectedRelation>, TargetedCollectionReport)> {
+        if self.opts.m != 3
+            || self.opts.strategy != DecompositionStrategy::PairTable
+            || fixed_point_index >= self.fb.points.len()
+        {
+            return None;
+        }
+        let (fc, g_fast) = self.fast.as_ref()?;
+        let pair = self.pair_table()?;
+        let begin = std::time::Instant::now();
+        let end = unit.start.saturating_add(unit.count);
+        if end == unit.start {
+            return Some((Vec::new(), TargetedCollectionReport::default()));
+        }
+        let fixed_negated = fc.neg(fc.lift(&self.fb.points[fixed_point_index]));
+        let stride = probe_run_stride(unit.seed, self.r_u64);
+        let stride_point = fc.mul_u64(*g_fast, stride);
+        let first_run = unit.start / PROBE_RUN;
+        let last_run = end.saturating_sub(1) / PROBE_RUN;
+        let mut relations: Vec<CollectedRelation> = (first_run..=last_run)
+            .into_par_iter()
+            .flat_map_iter(|run| {
+                let run_start = (run * PROBE_RUN).max(unit.start);
+                let run_end = ((run + 1) * PROBE_RUN).min(end);
+                let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
+                let mut point = fc.mul_u64(*g_fast, a);
+                let mut found = Vec::new();
+                for trial in run_start..run_end {
+                    if !point.infinity && a != 0 {
+                        let rest = fc.add(point, fixed_negated);
+                        if let Some(mut points) = pair.decompose_fast(rest, 2) {
+                            points.push(fixed_point_index);
+                            points.sort_unstable();
+                            found.push(CollectedRelation { trial, a, points });
+                        }
+                    }
+                    a = ((a as u128 + stride as u128) % self.r_u64.max(2) as u128) as u64;
+                    point = fc.add(point, stride_point);
+                }
+                found
+            })
+            .collect();
+        relations.sort_by_key(|relation| relation.trial);
+        let trials = (end - unit.start) as usize;
+        let report = TargetedCollectionReport {
+            trials,
+            relations: relations.len(),
+            pair_lookups: trials as u64,
+            elapsed_seconds: begin.elapsed().as_secs_f64(),
+        };
+        Some((relations, report))
+    }
 }
 
 /// Re-check a reported relation in the group: exactly `m` indices, all
@@ -9681,6 +9771,28 @@ impl<'a> LogSystem<'a> {
         } else {
             self.dense_matrix.len()
         }
+    }
+
+    fn uncovered_columns(&self) -> Vec<usize> {
+        let mut covered = vec![false; self.n_cols];
+        if self.sparse_opts.is_some() {
+            for row in &self.sparse_rows {
+                for &(column, _) in &row.entries {
+                    covered[column as usize] = true;
+                }
+            }
+        } else {
+            for row in &self.dense_matrix {
+                for (column, value) in row.iter().enumerate() {
+                    covered[column] |= !value.is_zero();
+                }
+            }
+        }
+        covered
+            .into_iter()
+            .enumerate()
+            .filter_map(|(column, present)| (!present).then_some(column))
+            .collect()
     }
 
     /// Rewrite `[a]G = Σ P_i` as a row over the projected columns.
@@ -9950,6 +10062,11 @@ impl<'a> FactorBaseLogSolver<'a> {
     /// Columns the relations must determine.
     pub fn columns(&self) -> usize {
         self.system.n_cols
+    }
+
+    /// Column indices not occurring in any accepted relation so far.
+    pub fn uncovered_columns(&self) -> Vec<usize> {
+        self.system.uncovered_columns()
     }
 
     /// Export the matrix actually offered to LA, preserving row/column order.
@@ -12710,6 +12827,34 @@ mod tests {
         }
     }
 
+    #[test]
+    fn an_underdetermined_sparse_attempt_keeps_its_report() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let opts = KoblitzIcOptions {
+            linear_algebra: LinearAlgebra::Sparse(SparseSolveOptions::default()),
+            ..KoblitzIcOptions::default()
+        };
+        let mut system = LogSystem::new(&kc, &fb, &opts).unwrap();
+        let columns = system.n_cols;
+        let modulus = system.r_u64;
+        // Enough rows to trigger a solve, but every row touches only
+        // column zero.  The sparse filter must report the other columns
+        // as uncovered and the failed attempt must remain observable.
+        system.sparse_rows = (0..columns)
+            .map(|_| SparseRow::new(vec![(0, 1)], 1, modulus))
+            .collect();
+        let mut solver = FactorBaseLogSolver::with_system(&kc, &fb, &opts, system).unwrap();
+        assert!(solver.try_solve().is_none());
+        let report = solver.report();
+        assert_eq!(report.solve_attempts, 1);
+        assert!(report.linear_algebra_seconds >= 0.0);
+        let sparse = report.sparse_report.expect("failed sparse report retained");
+        assert_eq!(sparse.filter.columns_in, columns);
+        assert_eq!(sparse.filter.uncovered_columns, columns - 1);
+        assert_eq!(solver.uncovered_columns(), (1..columns).collect::<Vec<_>>());
+    }
+
     fn collector_options() -> KoblitzIcOptions {
         KoblitzIcOptions {
             m: 2,
@@ -13954,6 +14099,50 @@ mod tests {
             // Unsorted witnesses are fine; the group equation is not.
             assert!(verify_collected_relation(&kc, &fb, 3, rel));
         }
+    }
+
+    #[test]
+    fn a_forced_point_tail_is_exact_and_partition_independent() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let fixed = 0usize;
+        let unit = RelationWorkUnit {
+            seed: 17,
+            start: 0,
+            count: 1024,
+        };
+        let (whole, report) = collector
+            .collect_with_forced_point(unit, fixed)
+            .expect("targeted pair collector");
+        assert_eq!(report.trials, 1024);
+        assert_eq!(report.pair_lookups, 1024);
+        assert_eq!(report.relations, whole.len());
+        assert!(!whole.is_empty());
+        assert!(whole.iter().all(|relation| {
+            relation.points.contains(&fixed) && verify_collected_relation(&kc, &fb, 3, relation)
+        }));
+
+        let mut split = Vec::new();
+        for (start, count) in [(0, 317), (317, 400), (717, 307)] {
+            split.extend(
+                collector
+                    .collect_with_forced_point(
+                        RelationWorkUnit {
+                            seed: 17,
+                            start,
+                            count,
+                        },
+                        fixed,
+                    )
+                    .unwrap()
+                    .0,
+            );
+        }
+        split.sort_by_key(|relation| relation.trial);
+        assert_eq!(whole, split);
     }
 
     #[test]
