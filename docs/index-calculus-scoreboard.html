@@ -8148,10 +8148,29 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     </tbody>
   </table></div>
   <div class="panel-head">
-    <p>The preregistered native structural gate passes: cyclic reached rank 220 by target 512 with no extra failures and all relation/label checks, whereas native lex stopped at rank 219. Both lex arms selected first-pair column 0 for all 512 targets; each cyclic arm selected it twice. The single-process wall differences are descriptive, not a speed claim. The next test is a separately frozen, fully charged native-cyclic L = 384 same-Q log-recovery comparison. PR #819's exact-certified-base setup plus mandatory rank already cost 199.233 s against 149.927 s matched rho, so the successor must measure whether the complete native pipeline changes that cost barrier. This stage supplies no IC/rho ratio or n = 131 transfer.</p>
+    <p>The preregistered native structural gate passes: cyclic reached rank 220 by target 512 with no extra failures and all relation/label checks, whereas native lex stopped at rank 219. Both lex arms selected first-pair column 0 for all 512 targets; each cyclic arm selected it twice. The single-process wall differences are descriptive, not a speed claim. The separately frozen <a href="https://github.com/aburan28/crypto/pull/923">#923 full-cost successor</a> later recovered all 384 same-Q logs in both native-cyclic arms, but its fresh B arm cost 331.296 s against 161.081 s matched rho (2.057&times;). This rank-stage lead was real and did not yield a fixed-stream crossover. The #823 stage alone supplied no IC/rho ratio or n = 131 transfer.</p>
   </div>
 </section>
 <!-- END ecc2k130-n53-target-cyclic-rank-20260925 -->
+<!-- BEGIN ecc2k130-n53-native-cyclic-l384-first-20260929 -->
+<section class="panel" id="ecc2k130-n53-native-cyclic-l384-first-20260929">
+  <div class="panel-head">
+    <h2>Native cyclic n = 53 full logs complete, but remain 2.057&times; matched rho <span class="chip">fixed-stream no crossover</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/923">PR #923</a> froze a fresh disjoint B training stream, the #823 A control stream, and one new 384-Q batch before its sole <a href="https://github.com/aburan28/crypto/actions/runs/36532278977">Ubuntu run 36532278977</a>. Both arms independently built the same ordered 23,320-point/220-column native ascending-x base, reached rank 220/220 with zero failed training targets, and recovered all 384 Q logarithms. The signed-Frobenius rho process recovered the same 384 Qs. The sealed 64-file archive passed independent full group-law replay; every child exited zero without a resource censor.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One fixed n = 53 stream, cold operational wall seconds. Each IC total includes fresh training, base materialization, rank/log solve, 384-Q point descent and scalar recovery. The separate 250.049-s audit is verification overhead, not included in IC wall. Same-Q batched rho wall is 161.081 s.</caption>
+    <thead><tr><th>Arm</th><th class="n">Training</th><th class="n">Base</th><th class="n">Rank/solve</th><th class="n">Point child</th><th class="n">Recovery</th><th class="n">Full IC / rho s</th><th class="n">IC / rho</th></tr></thead>
+    <tbody>
+      <tr><td>Fresh disjoint B, primary</td><td class="n">126.082</td><td class="n">0.115</td><td class="n">57.745</td><td class="n">115.288</td><td class="n">32.066</td><td class="n"><strong>331.296 / 161.081</strong></td><td class="n"><strong>2.057&times;</strong></td></tr>
+      <tr><td>#823 A control</td><td class="n">207.972</td><td class="n">0.116</td><td class="n">57.641</td><td class="n">96.518</td><td class="n">31.717</td><td class="n">393.964 / 161.081</td><td class="n">2.446&times;</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The B training + materialization + point-child subtotal is already 241.485 s, or 1.499&times; rho, even if rank solving and scalar recovery were free. Improving either of those latter stages alone cannot cross on this measured stream; a future native route must jointly reduce charged acquisition and descent costs. This one deterministic run does not establish a runtime distribution, n = 131 transfer, common-unit <code>S</code>, or a Certicom logarithm. <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/RESULT.md">Result and provenance</a>; raw artifact ZIP SHA-256 <code>1ec46f66868eff353c640cb763751ed7ed64a8845ea9e57d467740c82a833bcb</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n53-native-cyclic-l384-first-20260929 -->
 <!-- BEGIN ecc2k130-compact-sparse-base-sweep-20260925 -->
 <section class="panel" id="ecc2k130-compact-sparse-base-sweep-20260925">
   <div class="panel-head">
@@ -8468,6 +8487,48 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n13-oaware-unsat-proof-20260925 -->
+<!-- BEGIN ecc2k130-s3-sparse-n19-growth-20260925 -->
+<section class="panel" id="ecc2k130-s3-sparse-n19-growth-20260925">
+  <div class="panel-head">
+    <h2>n = 19 sparse S3 exporter completes; independent verifier hits its 600 s cap <span class="chip">censored representation gate</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/795">PR #795</a> froze the #767 six-slot beta-3,d=2 n = 19 factors and #774 32 Q+T targets plus O before the first labeled run. The exporter completed within the fixed state, pair, path, DIMACS, wall and sampled-RSS caps. Its independent verifier reached the 600 s child wall cap inside the large-group Sinz one-hot witness sweep, before full parsed-CNF/path/point-target semantics or five mutation controls were admitted. The result is <strong>CENSORED</strong>, not a semantic pass, SAT result or no-go proof.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>First and only freeze <code>15f38ea4eb18244234fa86c497ef521805ce2f9877a806936796d3d7d2642fe3</code>, Actions run 36526326477. Growth and CNF sizes are producer observations pending independent semantic certification. Full ECDLP S and matched-rho ratios remain unset.</caption>
+    <thead><tr><th>Prefix</th><th>Admitted states</th><th>Cumulative input pairs</th><th>Exporter result</th><th>Verifier decision</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>S2</td><td>25</td><td>16</td><td rowspan="5">97,771 variables; 179,668 clauses; 3,235,040 bytes; 58,825 paths; 68.30 s outer wall; 141,070,336 B direct peak RSS</td><td rowspan="5">CENSORED at 600 s child wall; 600.15 s outer wall; 102,875,136 B direct peak RSS</td><td rowspan="5">unset / unset</td></tr>
+      <tr><td>S3</td><td>167</td><td>116</td></tr>
+      <tr><td>S4</td><td>1,085</td><td>784</td></tr>
+      <tr><td>S5</td><td>6,976</td><td>5,124</td></tr>
+      <tr><td>S6</td><td>40,614</td><td>33,028</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The immutable 12-file archive and first-release label event ID 32052162480 replay as CENSORED, with receipt SHA-256 <code>e5de2330e8fa424e095117f700e3a328763b943453bb2e1c1da75cb23c4fa839</code>. No solver ran, and this attempt cannot be repeated under the same freeze. A separate linear Sinz verifier in <a href="https://github.com/aburan28/crypto/pull/927">PR #927</a> has since replayed the same CNF to a full semantic PASS; this original first-run receipt remains CENSORED. A separately frozen n = 19 same-target SAT comparison is admissible after the smaller n = 13 paired solver gate. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/RESULT.md">Result and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/evidence/README.md">raw archive and replay</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-sparse-n19-growth-20260925 -->
+<!-- BEGIN ecc2k130-s3-sparse-n19-linear-20260929 -->
+<section class="panel" id="ecc2k130-s3-sparse-n19-linear-20260929">
+  <div class="panel-head">
+    <h2>n = 19 sparse S3 CNF passes complete independent point replay <span class="chip">representation semantics pass</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/927">PR #927</a> replaced the #795 verifier's redundant quadratic Sinz witness sweep with an ordered linear structural check and proof. The exact first archive was not regenerated. On <a href="https://github.com/aburan28/crypto/actions/runs/36531075738">Ubuntu replay 36531075738</a>, all 146,640 one-hot clauses matched, all 58,825 parsed primary paths matched the independent full-point oracle, all 117,649 signed tuples and 33 Q+T/O targets passed, and five geometric mutations were rejected. Exhaustive k = 1&ndash;5 truth tables and a sign flip and skipped clause in the actual S6 block also failed as expected.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Same immutable #795 producer archive; exact replay head <code>df5c085ef7eec5de509f4cca84e545488a0b3834</code>. The hosted result and artifact hashes are committed in PR #927. Verifier resources are audit overhead, not ECDLP attack cost.</caption>
+    <thead><tr><th>Gate</th><th>Observed result</th><th>Decision boundary</th></tr></thead>
+    <tbody>
+      <tr><td>Largest exact-one group</td><td>40,614 primary variables; 121,839 ordered clauses</td><td>Linear structural check; original first-run verifier still CENSORED</td></tr>
+      <tr><td>Full representation replay</td><td>58,825 paths; 117,649 signed tuples; 33 targets; five controls</td><td>PASS for n = 19 sparse S3 semantics</td></tr>
+      <tr><td>Hosted verifier resources</td><td>193.38 s wall; 196,317,184 B peak RSS</td><td>Audit overhead only; SAT and full ECDLP S/rho unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Next, execute the separately frozen <a href="https://github.com/aburan28/crypto/pull/787">n = 13 same-target sparse/dense SAT protocol</a>, which has no solver outcome yet. Then freeze an n = 19 same-target SAT panel, independently lift every model, and charge exporter, solver, verification and failed branches. This semantic pass does not establish n = 131 capacity, PDP hardness, or a matched-rho crossover. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_n19_linear_20260929/RESULT.md">Result and archive receipt</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-sparse-n19-linear-20260929 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">

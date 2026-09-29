@@ -78,6 +78,19 @@ comparison is
 measurement is pending until its runner and workflow land. Never retune on the
 sealed rounds' confirmation or replay.
 
+For that registered comparison, use `run_generic_backend_qualification.py`
+through `ic-generic-backend-qualification.yml` on the merged main branch. Its
+explicit reference registry carries the accepted `ic_online`, cold rho, and
+online rho roles; the registered `prepared_both` alias maps to `ic_online` once.
+The runner restores and verifies all three sealed rounds, freezes supplemental
+point exclusions, builds the new generic source with a controlled receipt,
+and then runs the frozen tournament once. `generic_backend_yield.py` checks
+natural ordinary-query attempts in both complete and bounded-incomplete
+reports; timeouts without a full report are censored. Report distinct-point
+rate uncertainty and preserve zero-yield cells. An incomplete arm cannot gain
+a verified speedup or qualification by dropping its failed jobs. Preserve any
+interrupted execution; never redispatch the same registration to replace it.
+
 Before a rho comparison, inspect the actual reference path and run its release
 tests for reference/packed agreement, fruitless-cycle escape, charge closure,
 and birthday-scale walk counts. Screen rho walk widths on the same development
