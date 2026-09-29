@@ -5,7 +5,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import resource
 import shutil
 import subprocess
 import time
@@ -20,7 +19,7 @@ from tournament import read, write
 HERE = Path(__file__).resolve().parent
 REGISTRATION = HERE / 'goal_20260924/generic-backend-disclosed-pilot'
 PANEL = REGISTRATION / 'panel.json'
-PANEL_SHA256 = 'effc5a1862f572b38d6330dd65175116fe0bef84aafb390e37162cd6018eebd2'
+PANEL_SHA256 = '1cd65d2150dc36194354b2475416d24dffabdd0cdbb1774e42a2b84799c913f5'
 CELLS = ('n17a1', 'n19a0', 'n23a0', 'n23a1', 'n31a0')
 SOLVERS = ('f4', 'f5')
 
@@ -53,6 +52,46 @@ def static_preflight(panel):
     return result
 
 
+def run_bounded_worker(worker, job, directory, panel):
+    """Preserve raw streams and apply a diagnostic macOS-compatible RSS watch."""
+    stdout_path, stderr_path = directory/'stdout.json', directory/'stderr.txt'
+    environment = dict(os.environ, RAYON_NUM_THREADS='1', KIC_F5_AVX512_UNPACK='0')
+    ps = shutil.which('ps')
+    require(ps is not None, 'RSS monitor requires ps')
+    started = time.monotonic_ns()
+    disposition, peak_rss = None, 0
+    with stdout_path.open('x') as stdout, stderr_path.open('x') as stderr:
+        process = subprocess.Popen([str(worker)], stdin=subprocess.PIPE,
+                                   stdout=stdout, stderr=stderr, text=True,
+                                   env=environment)
+        try:
+            process.stdin.write(json.dumps(job))
+        except BrokenPipeError:
+            pass
+        finally:
+            process.stdin.close()
+        while process.poll() is None:
+            if (time.monotonic_ns() - started) >= panel['timeout_seconds'] * 10**9:
+                disposition = 'TIMEOUT'
+                process.kill()
+                break
+            sampled = subprocess.run([ps, '-o', 'rss=', '-p', str(process.pid)],
+                                     text=True, capture_output=True, check=False)
+            if sampled.returncode == 0 and sampled.stdout.strip():
+                rss = int(sampled.stdout.strip()) * 1024
+                peak_rss = max(peak_rss, rss)
+                if rss > panel['memory_bytes']:
+                    disposition = 'RSS_LIMIT'
+                    process.kill()
+                    break
+            time.sleep(panel['memory_poll_ms'] / 1000)
+        exit_code = process.wait()
+    if disposition is None:
+        disposition = 'EXITED' if exit_code == 0 else 'PROCESS_FAILURE'
+    return (stdout_path.read_text(), stderr_path.read_text(), exit_code,
+            disposition, time.monotonic_ns() - started, peak_rss)
+
+
 def one_job(out, cell, solver, fixture, panel, worker, record, source):
     directory = out / 'jobs' / cell / solver
     directory.mkdir(parents=True, exist_ok=False)
@@ -61,28 +100,11 @@ def one_job(out, cell, solver, fixture, panel, worker, record, source):
                factor_base=panel['factor_base'],
                config=dict(panel['config'], solver=solver), exclusive_phases=True)
     write(directory/'job.json', job, exclusive=True)
-    environment = dict(os.environ, RAYON_NUM_THREADS='1', KIC_F5_AVX512_UNPACK='0')
-
-    def limit_memory():
-        memory = panel['memory_bytes']
-        resource.setrlimit(resource.RLIMIT_AS, (memory, memory))
-
-    started = time.monotonic_ns()
-    try:
-        process = subprocess.run([str(worker)], input=json.dumps(job), text=True,
-                                 capture_output=True, timeout=panel['timeout_seconds'],
-                                 env=environment, preexec_fn=limit_memory, check=False)
-        stdout, stderr, exit_code = process.stdout, process.stderr, process.returncode
-        disposition = 'EXITED' if exit_code == 0 else 'PROCESS_FAILURE'
-    except subprocess.TimeoutExpired as exc:
-        stdout = exc.stdout.decode(errors='replace') if isinstance(exc.stdout, bytes) else (exc.stdout or '')
-        stderr = exc.stderr.decode(errors='replace') if isinstance(exc.stderr, bytes) else (exc.stderr or '')
-        exit_code, disposition = None, 'TIMEOUT'
-    wall_ns = time.monotonic_ns() - started
-    (directory/'stdout.json').write_text(stdout)
-    (directory/'stderr.txt').write_text(stderr)
+    stdout, stderr, exit_code, disposition, wall_ns, peak_rss = run_bounded_worker(
+        worker, job, directory, panel)
     row = dict(cell=cell, solver=solver, disposition=disposition, exit_code=exit_code,
-               diagnostic_process_wall_ns=wall_ns, dispatched=False,
+               diagnostic_process_wall_ns=wall_ns, sampled_peak_rss_bytes=peak_rss,
+               memory_policy=panel['memory_policy'], dispatched=False,
                competitive_total=None, competitive_speedup=None)
     write(directory/'process.json', row, exclusive=True)
     if disposition == 'EXITED':
@@ -126,10 +148,13 @@ def main():
     args = parser.parse_args()
     require(digest(PANEL) == PANEL_SHA256, 'pilot panel bytes changed after registration')
     panel = read(PANEL)
-    require(panel['source_commit'] == '765c3c5f19032bd852163805f257c56babef2040'
+    require(panel['schema_version'] == 2
+            and panel['source_commit'] == '765c3c5f19032bd852163805f257c56babef2040'
             and panel['stage_a_cells'] == ['n17a1']
             and panel['stage_b_cells'] == list(CELLS[1:])
-            and panel['solvers'] == list(SOLVERS), 'changed pilot schedule')
+            and panel['solvers'] == list(SOLVERS)
+            and panel['memory_policy'] == 'poll-child-rss-and-kill-above-limit'
+            and panel['memory_poll_ms'] == 100, 'changed pilot schedule')
     check_source_checkout(args.source_root)
     fixtures = fixture_map(panel)
     static = static_preflight(panel)

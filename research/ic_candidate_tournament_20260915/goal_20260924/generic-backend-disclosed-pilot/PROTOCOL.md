@@ -7,8 +7,11 @@ previously exposed input corpus and bounded resources. The source-bound
 `generic_build.py` receipt is required before either job runs. This is a
 diagnostic pilot, not another qualification campaign or a competitive
 comparison.
-The panel's SHA-256 is
-`effc5a1862f572b38d6330dd65175116fe0bef84aafb390e37162cd6018eebd2`.
+The amended schema-v2 panel's SHA-256 is
+`1cd65d2150dc36194354b2475416d24dffabdd0cdbb1774e42a2b84799c913f5`.
+The [premeasurement preparation record](PREPARATION-FAILURE.md) explains the
+change from the original, committed schema-v1 registration; no worker began
+under that registration.
 
 **Hypothesis.** On the first previously disclosed A/A point of `n17a1`, both
 F4 and F5 can represent the dimension-six, three-summand Semaev system and
@@ -20,8 +23,10 @@ all count as encoder dispatch; only a verified witness is a relation. They do
 not establish natural yield or complete DLP recovery.
 
 Run the two stage-A jobs once, each with `max_trials=batch_trials=1`, an
-independent 60-second process cap, 8 GiB address-space cap and one Rayon
-thread. The worker receives the point coordinates, not the fixture's known
+independent 60-second process cap, one Rayon thread and an 8 GiB RSS threshold
+sampled every 100 ms. A sampled breach kills the child; short peaks between
+samples might be missed, so this is not a strict memory-bound comparison. The
+worker receives the point coordinates, not the fixture's known
 scalar or target seed. Its `algorithm_seed` is `2026092917`. Keep the raw
 stdout/stderr, process disposition, exact worker build receipt, base/query
 replay receipts and PDP outcome. Treat a timeout, crash, missing report,

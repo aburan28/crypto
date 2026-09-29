@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "pilot": "generic-algebraic-disclosed-layout-pilot-20260929",
-  "status": "PREREGISTERED_BEFORE_EXECUTION",
+  "status": "AMENDED_AFTER_PREEXEC_FAILURE_BEFORE_FIRST_WORKER_START",
   "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
   "exposed_fixture_file": "goal_20260924/generic-backend-qualification-v2/lost-campaign-exposures.json",
   "exposed_fixture_sha256": "a728677b199eac02800d8338204d5306f391ec5da757c910bec1e51955fe7b41",
@@ -22,6 +22,8 @@
   },
   "timeout_seconds": 60,
   "memory_bytes": 8589934592,
+  "memory_policy": "poll-child-rss-and-kill-above-limit",
+  "memory_poll_ms": 100,
   "worker_threads": 1,
   "question": "Can the pinned F4 and F5 implementations execute one naturally sampled PDP attempt over a dimension-six algebraic base without an unsupported encoder result?",
   "scope": "disclosed-target stage feasibility only; no rate, complete-solve, cost, speedup, or promotion claim"
