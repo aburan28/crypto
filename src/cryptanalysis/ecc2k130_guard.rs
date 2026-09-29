@@ -1572,3 +1572,527 @@ mod tests {
         assert_ne!(base, walk_start_bits(&m2, 1, 0, 0));
     }
 }
+
+/// Review differential: the pipeline as it stood before the fixed-width
+/// search (`b072fcf5`), copied verbatim with `BigUint::modpow` and the
+/// `BigUint` walk, against the current one on seeded random inputs.  The
+/// copies are what makes it a differential rather than a self-check: the
+/// module's own [`Search`] is the reference the fixed-width tests already
+/// use, and here nothing on the reference side calls the new code.
+#[cfg(test)]
+mod review_differential {
+    use super::*;
+    use num_bigint::RandBigInt;
+    use rand::rngs::SmallRng;
+    use rand::{Rng, SeedableRng};
+
+    /// `b072fcf5`, verbatim apart from the `pub` qualifiers and doc comments.
+    mod old {
+        use super::super::koblitz_order;
+        use super::super::{orbit_scalars, SMALL_PRIMES};
+        use super::super::{CurveCertificate, CycleHit, CycleVerdict};
+        use super::super::{CHALLENGE_ELL, CHALLENGE_LAMBDA, COINCIDENCE_EXPECTED};
+        use num_bigint::BigUint;
+        use num_traits::{One, ToPrimitive, Zero};
+        use std::collections::HashMap;
+
+        pub fn is_probable_prime(n: &BigUint) -> bool {
+            if *n < BigUint::from(2u32) {
+                return false;
+            }
+            for &p in &SMALL_PRIMES {
+                let p = BigUint::from(p);
+                if *n == p {
+                    return true;
+                }
+                if (n % &p).is_zero() {
+                    return false;
+                }
+            }
+            let one = BigUint::one();
+            let n_minus_1 = n - &one;
+            let mut d = n_minus_1.clone();
+            let mut r = 0u32;
+            while !d.bit(0) {
+                d >>= 1usize;
+                r += 1;
+            }
+            'witness: for &a in &SMALL_PRIMES {
+                let mut x = BigUint::from(a).modpow(&d, n);
+                if x == one || x == n_minus_1 {
+                    continue;
+                }
+                for _ in 1..r {
+                    x = &x * &x % n;
+                    if x == n_minus_1 {
+                        continue 'witness;
+                    }
+                }
+                return false;
+            }
+            true
+        }
+
+        pub fn sqrt_mod(a: &BigUint, p: &BigUint) -> Option<BigUint> {
+            let one = BigUint::one();
+            let a = a % p;
+            if a.is_zero() {
+                return Some(a);
+            }
+            let p_minus_1 = p - &one;
+            let half = &p_minus_1 >> 1usize;
+            if a.modpow(&half, p) != one {
+                return None;
+            }
+            let mut q = p_minus_1.clone();
+            let mut s = 0u32;
+            while !q.bit(0) {
+                q >>= 1usize;
+                s += 1;
+            }
+            let mut z = BigUint::from(2u32);
+            while z.modpow(&half, p) != p_minus_1 {
+                z += 1u32;
+            }
+            let mut m = s;
+            let mut c = z.modpow(&q, p);
+            let mut t = a.modpow(&q, p);
+            let mut r = a.modpow(&((&q + &one) >> 1usize), p);
+            while t != one {
+                let mut i = 0u32;
+                let mut tt = t.clone();
+                while tt != one {
+                    tt = &tt * &tt % p;
+                    i += 1;
+                }
+                let b = c.modpow(&(BigUint::one() << ((m - i - 1) as usize)), p);
+                m = i;
+                c = &b * &b % p;
+                t = &t * &c % p;
+                r = &r * &b % p;
+            }
+            Some(r)
+        }
+
+        pub fn frobenius_eigenvalue(m: u32, ell: &BigUint) -> Option<BigUint> {
+            let seven = BigUint::from(7u32);
+            if *ell <= seven {
+                return None;
+            }
+            let r = sqrt_mod(&(ell - &seven), ell)?;
+            let inv2 = BigUint::from(2u32).modpow(&(ell - 2u32), ell);
+            let minus_one = ell - 1u32;
+            let exponent = BigUint::from(m);
+            [&minus_one + &r, &minus_one + (ell - &r)]
+                .into_iter()
+                .map(|numerator| numerator % ell * &inv2 % ell)
+                .find(|candidate| candidate.modpow(&exponent, ell).is_one())
+        }
+
+        pub struct Search<'a> {
+            pub ell: &'a BigUint,
+            pub steps: &'a [(u32, BigUint)],
+            pub targets: &'a HashMap<BigUint, String>,
+            pub max_length: usize,
+            pub prefix: Vec<u32>,
+            pub checked: u64,
+            pub hits: Vec<CycleHit>,
+        }
+
+        impl Search<'_> {
+            pub fn extend(&mut self, from: usize, product: &BigUint) {
+                if self.prefix.len() == self.max_length {
+                    return;
+                }
+                for i in from..self.steps.len() {
+                    let (j, factor) = &self.steps[i];
+                    let next = product * factor % self.ell;
+                    self.prefix.push(*j);
+                    self.checked += 1;
+                    if let Some(label) = self.targets.get(&next) {
+                        self.hits.push(CycleHit {
+                            length: self.prefix.len(),
+                            exponents: self.prefix.clone(),
+                            orbit_scalar: label.clone(),
+                        });
+                    }
+                    self.extend(i, &next);
+                    self.prefix.pop();
+                }
+            }
+        }
+
+        pub fn search(
+            ell: &BigUint,
+            steps: &[(u32, BigUint)],
+            targets: &HashMap<BigUint, String>,
+            max_length: usize,
+        ) -> (u64, Vec<CycleHit>) {
+            let mut search = Search {
+                ell,
+                steps,
+                targets,
+                max_length,
+                prefix: Vec::with_capacity(max_length),
+                checked: 0,
+                hits: Vec::new(),
+            };
+            search.extend(0, &BigUint::one());
+            (search.checked, search.hits)
+        }
+
+        pub fn certify_curve_with(
+            m: u32,
+            max_length: usize,
+            exponents: &[u32],
+        ) -> CurveCertificate {
+            let order = koblitz_order(m);
+            let mut cert = CurveCertificate {
+                m,
+                verdict: CycleVerdict::Skipped,
+                skip_reason: None,
+                group_order: order.to_string(),
+                ell: None,
+                lambda: None,
+                multisets_checked: 0,
+                orbit_scalars: 0,
+                hits: Vec::new(),
+                expected_by_chance: 0.0,
+                degenerate: Vec::new(),
+                matches_challenge_constants: None,
+            };
+            let four = BigUint::from(4u32);
+            if !(&order % &four).is_zero() {
+                cert.skip_reason = Some("the group order is not divisible by 4".into());
+                return cert;
+            }
+            let ell = &order / &four;
+            if !is_probable_prime(&ell) {
+                cert.skip_reason = Some("the group order over 4 is not prime".into());
+                return cert;
+            }
+            let Some(lambda) = frobenius_eigenvalue(m, &ell) else {
+                cert.skip_reason = Some("no Frobenius eigenvalue of order dividing m".into());
+                return cert;
+            };
+            let minus_one = &ell - 1u32;
+            let mut steps = Vec::with_capacity(exponents.len());
+            for &j in exponents {
+                let power = lambda.modpow(&BigUint::from(j), &ell);
+                if power.is_one() {
+                    cert.degenerate.push(format!(
+                        "j = {j}: sigma^j is the identity, the step is a doubling"
+                    ));
+                }
+                if power == minus_one {
+                    cert.degenerate.push(format!(
+                        "j = {j}: sigma^j(R) = -R, the step lands on infinity"
+                    ));
+                }
+                steps.push((j, (power + 1u32) % &ell));
+            }
+            let targets = orbit_scalars(&lambda, m, &ell);
+            let (checked, hits) = search(&ell, &steps, &targets, max_length);
+            let ell_f = ell.to_f64().unwrap_or(f64::INFINITY);
+            cert.expected_by_chance = checked as f64 * targets.len() as f64 / ell_f;
+            cert.multisets_checked = checked;
+            cert.orbit_scalars = targets.len();
+            cert.hits = hits;
+            cert.verdict = if !cert.degenerate.is_empty() {
+                CycleVerdict::Degenerate
+            } else if cert.hits.is_empty() {
+                CycleVerdict::Clean
+            } else if cert.expected_by_chance > COINCIDENCE_EXPECTED {
+                CycleVerdict::Coincidence
+            } else {
+                CycleVerdict::Real
+            };
+            if m == 131 {
+                cert.matches_challenge_constants = Some(
+                    ell.to_string() == CHALLENGE_ELL && lambda.to_string() == CHALLENGE_LAMBDA,
+                );
+            }
+            cert.ell = Some(ell.to_string());
+            cert.lambda = Some(lambda.to_string());
+            cert
+        }
+    }
+
+    fn to_big<const N: usize>(x: &[u64; N]) -> BigUint {
+        x.iter()
+            .rev()
+            .fold(BigUint::zero(), |acc, &d| (acc << 64usize) + d)
+    }
+
+    /// Odd moduli `N` limbs accept, weighted to the edges of the bound
+    /// argument: the top limb at `2⁶³ − 1` (the most the spare bit
+    /// allows), all-ones and all-zero lower limbs, widths far below the
+    /// top limb, and uniformly random bit lengths.
+    fn odd_moduli<const N: usize>(rng: &mut SmallRng) -> Vec<BigUint> {
+        let one = BigUint::one();
+        let top = 64 * N - 1;
+        let lower_bits = 64 * (N as u64 - 1);
+        let mut out = vec![
+            BigUint::from(1u32),
+            BigUint::from(3u32),
+            (&one << top) - 1u32,
+            (&one << (top - 1)) + 1u32,
+            (&one << (top - 1)) - 1u32,
+        ];
+        for _ in 0..12 {
+            let low = if lower_bits == 0 {
+                BigUint::zero()
+            } else {
+                rng.gen_biguint(lower_bits)
+            };
+            out.push(((BigUint::from(u64::MAX >> 1) << lower_bits as usize) + low) | &one);
+            // A random top limb below `2⁶³ − 1` over all-ones and over
+            // all-zero lower limbs (for one limb, just that limb made odd).
+            let top_limb = BigUint::from(rng.gen_range(1..u64::MAX >> 1));
+            out.push((((top_limb.clone() + 1u32) << lower_bits as usize) - 1u32) | &one);
+            out.push(((top_limb << lower_bits as usize) + 1u32) | &one);
+        }
+        for _ in 0..60 {
+            let bits = rng.gen_range(1..=top as u64);
+            out.push(rng.gen_biguint(bits) | (&one << (bits - 1) as usize) | &one);
+        }
+        out
+    }
+
+    fn check_montgomery<const N: usize>(rng: &mut SmallRng) {
+        let r_shift = 64 * N;
+        for ell in odd_moduli::<N>(rng) {
+            let field = Montgomery::<N>::new(&ell).expect("an odd modulus below 2^(64N-1)");
+            let mut edges = vec![BigUint::zero(), BigUint::one() % &ell];
+            if ell > BigUint::one() {
+                edges.push(&ell - 1u32);
+                edges.push(&ell >> 1usize);
+                edges.push((&ell + 1u32) >> 1usize);
+                edges.push((BigUint::one() << r_shift) % &ell);
+            }
+            if ell > BigUint::from(2u32) {
+                edges.push(&ell - 2u32);
+            }
+            let mut pairs: Vec<(BigUint, BigUint)> = Vec::new();
+            for a in &edges {
+                for b in &edges {
+                    pairs.push((a.clone(), b.clone()));
+                }
+            }
+            for _ in 0..200 {
+                pairs.push((rng.gen_biguint_below(&ell), rng.gen_biguint_below(&ell)));
+            }
+            for (a, b) in &pairs {
+                // The raw product: `mul(a, b)·R ≡ ab`, fully reduced.
+                let got = to_big(&field.mul(&limbs::<N>(a), &limbs::<N>(b)));
+                assert!(
+                    got < ell,
+                    "{N} limbs: {a} * {b} mod {ell} not reduced: {got}"
+                );
+                assert_eq!(
+                    (&got << r_shift) % &ell,
+                    a * b % &ell,
+                    "{N} limbs: {a} * {b} mod {ell}"
+                );
+            }
+            for _ in 0..20 {
+                let x = rng.gen_biguint(3 * 64 * N as u64);
+                let form = field.to_form(&x);
+                assert_eq!(
+                    to_big(&form),
+                    (&x << r_shift) % &ell,
+                    "{N}: to_form {x} mod {ell}"
+                );
+                assert_eq!(
+                    field.out_of_form(&form),
+                    &x % &ell,
+                    "{N}: round trip {x} mod {ell}"
+                );
+                let e_bits = rng.gen_range(0..=200);
+                let e = rng.gen_biguint(e_bits);
+                assert_eq!(
+                    field.out_of_form(&field.pow(&form, &e)),
+                    x.modpow(&e, &ell),
+                    "{N}: {x}^{e} mod {ell}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn montgomery_mul_is_exact_on_random_edge_weighted_moduli() {
+        let mut rng = SmallRng::seed_from_u64(0x5eed_0001);
+        check_montgomery::<1>(&mut rng);
+        check_montgomery::<2>(&mut rng);
+        check_montgomery::<3>(&mut rng);
+        check_montgomery::<4>(&mut rng);
+    }
+
+    #[test]
+    fn modpow_matches_biguint_on_random_inputs() {
+        let mut rng = SmallRng::seed_from_u64(0x5eed_0002);
+        for _ in 0..3000 {
+            let bits = rng.gen_range(1..=320u64);
+            let mut n = rng.gen_biguint(bits) | (BigUint::one() << (bits - 1) as usize);
+            if rng.gen_bool(0.8) {
+                n |= BigUint::one();
+            }
+            let (base_bits, e_bits) = (rng.gen_range(0..=2 * bits), rng.gen_range(0..=260));
+            let base = rng.gen_biguint(base_bits);
+            let e = rng.gen_biguint(e_bits);
+            assert_eq!(
+                modpow(&base, &e, &n),
+                base.modpow(&e, &n),
+                "{base}^{e} mod {n}"
+            );
+        }
+    }
+
+    #[test]
+    fn the_public_number_theory_matches_the_old_code() {
+        let mut rng = SmallRng::seed_from_u64(0x5eed_0003);
+        let mut primes = Vec::new();
+        for _ in 0..3000 {
+            let bits = rng.gen_range(2..=300u64);
+            let n = rng.gen_biguint(bits) | (BigUint::one() << (bits - 1) as usize);
+            let got = is_probable_prime(&n);
+            assert_eq!(got, old::is_probable_prime(&n), "{n}");
+            if got && n.bit(0) {
+                primes.push(n);
+            }
+        }
+        for c in [
+            561u64,
+            1105,
+            1729,
+            2047,
+            3_215_031_751,
+            3_825_123_056_546_413_051,
+        ] {
+            let n = BigUint::from(c);
+            assert_eq!(is_probable_prime(&n), old::is_probable_prime(&n), "{c}");
+        }
+        assert!(primes.len() > 20, "{} primes", primes.len());
+        for p in &primes {
+            for _ in 0..8 {
+                let a = rng.gen_biguint(p.bits() + 3);
+                assert_eq!(sqrt_mod(&a, p), old::sqrt_mod(&a, p), "sqrt {a} mod {p}");
+            }
+            for m in [3u32, 7, 131, 1000] {
+                assert_eq!(
+                    frobenius_eigenvalue(m, p),
+                    old::frobenius_eigenvalue(m, p),
+                    "m = {m}, ell = {p}"
+                );
+            }
+        }
+    }
+
+    /// Random `ℓ` from 2 to 300 bits (both sides of every limb boundary and
+    /// of the fallback), random step factors with zeros, ones, `ℓ − 1` and
+    /// repeats, and targets that include planted products (inside and
+    /// beyond the bound), zero and one; every width and both variants
+    /// must reproduce the old walk's count and hits, in order.
+    #[test]
+    fn every_search_reproduces_the_old_walk_on_random_instances() {
+        let mut rng = SmallRng::seed_from_u64(0x5eed_0004);
+        let mut total_hits = 0usize;
+        for case in 0..600 {
+            let bits = match case % 4 {
+                0 => rng.gen_range(2..=12u64),
+                1 => [63u64, 64, 65, 127, 128, 129, 191, 192, 193, 255, 256, 257][case / 4 % 12],
+                _ => rng.gen_range(2..=300u64),
+            };
+            let ell =
+                rng.gen_biguint(bits) | (BigUint::one() << (bits - 1) as usize) | BigUint::one();
+            let count = rng.gen_range(0..=6usize);
+            let mut steps: Vec<(u32, BigUint)> = Vec::new();
+            for k in 0..count {
+                let factor = match rng.gen_range(0..8) {
+                    0 => BigUint::zero(),
+                    1 => BigUint::one() % &ell,
+                    2 => &ell - 1u32,
+                    3 if k > 0 => steps[rng.gen_range(0..k)].1.clone(),
+                    _ => rng.gen_biguint_below(&ell),
+                };
+                steps.push((rng.gen_range(0..20u32), factor));
+            }
+            let max_length = rng.gen_range(0..=6usize);
+            let mut targets: HashMap<BigUint, String> = HashMap::new();
+            for t in 0..rng.gen_range(0..=30) {
+                targets.insert(rng.gen_biguint_below(&ell), format!("r{t}"));
+            }
+            if !steps.is_empty() {
+                for t in 0..rng.gen_range(0..=6) {
+                    let len = rng.gen_range(1..=max_length + 1);
+                    let product = (0..len).fold(BigUint::one() % &ell, |acc, _| {
+                        acc * &steps[rng.gen_range(0..steps.len())].1 % &ell
+                    });
+                    targets.insert(product, format!("p{t}"));
+                }
+            }
+            if rng.gen_bool(0.3) {
+                targets.insert(BigUint::zero(), "zero".into());
+            }
+            if rng.gen_bool(0.3) {
+                targets.insert(BigUint::one() % &ell, "one".into());
+            }
+            let reference = old::search(&ell, &steps, &targets, max_length);
+            total_hits += reference.1.len();
+            assert_eq!(
+                search_multisets(&ell, &steps, &targets, max_length),
+                reference,
+                "case {case}: ell = {ell}"
+            );
+            for allow_bmi2 in [false, true] {
+                let widths = [
+                    search_fixed_on::<1>(&ell, &steps, &targets, max_length, allow_bmi2),
+                    search_fixed_on::<2>(&ell, &steps, &targets, max_length, allow_bmi2),
+                    search_fixed_on::<3>(&ell, &steps, &targets, max_length, allow_bmi2),
+                    search_fixed_on::<4>(&ell, &steps, &targets, max_length, allow_bmi2),
+                ];
+                for (n, got) in widths.into_iter().enumerate() {
+                    match got {
+                        Some(got) => assert_eq!(
+                            got,
+                            reference,
+                            "case {case}: {} limbs, bmi2 {allow_bmi2}, ell = {ell}",
+                            n + 1
+                        ),
+                        None => assert!(ell.bits() >= 64 * (n as u64 + 1)),
+                    }
+                }
+            }
+        }
+        assert!(total_hits > 1000, "{total_hits} hits");
+    }
+
+    /// Every field degree up to `m = 300` (the curves that are not skipped
+    /// have a 4- to 281-bit `ℓ`, so the fallback too), on the shipping
+    /// schedule and on random ones with exponents that make doublings and
+    /// repeats: the whole certificate, serialised, must be byte-identical
+    /// to the old one.
+    #[test]
+    fn every_certificate_matches_the_old_pipeline() {
+        let mut rng = SmallRng::seed_from_u64(0x5eed_0005);
+        let mut verdicts: HashMap<String, usize> = HashMap::new();
+        for m in 1..=300u32 {
+            let mut schedules = vec![(STEP_EXPONENTS.to_vec(), 4usize)];
+            for _ in 0..2 {
+                let len = rng.gen_range(1..=9);
+                let exps: Vec<u32> = (0..len).map(|_| rng.gen_range(0..=2 * m)).collect();
+                schedules.push((exps, rng.gen_range(0..=4)));
+            }
+            for (exps, max_length) in schedules {
+                let new = serde_json::to_string(&certify_curve_with(m, max_length, &exps)).unwrap();
+                let old =
+                    serde_json::to_string(&old::certify_curve_with(m, max_length, &exps)).unwrap();
+                assert_eq!(new, old, "m = {m}, {exps:?}, length {max_length}");
+                let verdict =
+                    serde_json::from_str::<serde_json::Value>(&new).unwrap()["verdict"].to_string();
+                *verdicts.entry(verdict).or_default() += 1;
+            }
+        }
+        assert!(verdicts.len() >= 4, "{verdicts:?}");
+    }
+}
