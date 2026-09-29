@@ -378,6 +378,63 @@ fn poly_powmod(base: &FpPoly, e: &BigUint, m: &FpPoly, ops: &mut usize) -> FpPol
 /// equals `gcd(u, x^p − x)`, which is the product of its distinct
 /// *linear* factors.  Comparing degrees is enough, both being monic
 /// divisors of `u` and one dividing the other.
+/// `Res(a, b)` over `F_p`, by the Euclidean formula
+/// `Res(a,b) = (−1)^{deg a · deg b} · lc(b)^{deg a − deg r} · Res(b, r)`
+/// with `r = a mod b`.
+fn resultant(a: &FpPoly, b: &FpPoly, ops: &mut usize) -> BigUint {
+    let p = &a.p;
+    if b.is_zero() {
+        return BigUint::zero();
+    }
+    let (da, db) = (a.degree().unwrap_or(0), b.degree().unwrap_or(0));
+    if db == 0 {
+        *ops += da;
+        return b.lead().modpow(&BigUint::from(da as u64), p);
+    }
+    let r = a.rem(b);
+    *ops += (da.saturating_sub(db) + 1) * (db + 1);
+    let dr = if r.is_zero() {
+        0
+    } else {
+        r.degree().unwrap_or(0)
+    };
+    let mut value = resultant(b, &r, ops);
+    if r.is_zero() {
+        return BigUint::zero();
+    }
+    let factor = b.lead().modpow(&BigUint::from((da - dr) as u64), p);
+    *ops += da - dr + 1;
+    value = (value * factor) % p;
+    if (da * db) % 2 == 1 {
+        value = (p - value) % p;
+    }
+    value
+}
+
+/// Discriminant of a monic `u`: `(−1)^{n(n−1)/2} · Res(u, u')`.
+fn discriminant(u: &FpPoly, p: &BigUint, ops: &mut usize) -> BigUint {
+    let n = u.degree().unwrap_or(0);
+    let du = derivative(u, p);
+    if du.is_zero() {
+        return BigUint::zero();
+    }
+    let res = resultant(u, &du, ops);
+    if (n * (n - 1) / 2) % 2 == 1 {
+        (p - res) % p
+    } else {
+        res
+    }
+}
+
+/// Is `a` a square in `F_p`?  One Euler exponentiation.
+fn is_square_mod(a: &BigUint, p: &BigUint, ops: &mut usize) -> bool {
+    if a.is_zero() {
+        return true;
+    }
+    *ops += (p.bits() as usize * 3) / 2;
+    a.modpow(&((p - BigUint::one()) >> 1), p) == BigUint::one()
+}
+
 fn split_by_gcd(u: &FpPoly, p: &BigUint, ops: &mut usize) -> Option<Vec<(BigUint, usize)>> {
     let deg = u.degree()?;
     if deg == 0 {
@@ -391,6 +448,26 @@ fn split_by_gcd(u: &FpPoly, p: &BigUint, ops: &mut usize) -> Option<Vec<(BigUint
     // squarings to learn what one exponentiation already says.
     if deg <= 2 {
         return split_low_degree(u, p, ops);
+    }
+
+    // Discriminant pre-filter.  Frobenius acts on the roots of a
+    // squarefree `u` as a permutation whose cycle type is the
+    // factorisation type, and `disc(u)` is a square exactly when that
+    // permutation is even.  Splitting completely is the identity
+    // permutation, which is even — so a **non-square discriminant
+    // proves `u` does not split**, for one resultant on a degree-`≤ g`
+    // polynomial and one Euler exponentiation.
+    //
+    // It rejects exactly half of all candidates: the odd types are
+    // `(2,1)` at degree 3 (density 1/2) and `(2,1,1) + (4)` at degree 4
+    // (1/4 + 1/4).  That is half the candidates never reaching the
+    // `x^p mod u` that dominates this oracle.
+    //
+    // `disc = 0` means repeated roots, which says nothing either way —
+    // the radical path below handles it.
+    let disc = discriminant(u, p, ops);
+    if !disc.is_zero() && !is_square_mod(&disc, p, ops) {
+        return None;
     }
 
     let du = derivative(u, p);
@@ -568,6 +645,60 @@ pub fn decompose_over_factor_base_counted(
     ops: &mut usize,
 ) -> Option<Vec<(usize, i64)>> {
     decompose_counted_with(curve, d, fb, ops, &SmoothnessTest::default())
+}
+
+/// Why a candidate divisor did or did not yield a relation.
+///
+/// The three cases used to be squeezed into an `Option`, which meant the
+/// caller re-ran the whole oracle on every failure just to learn which
+/// kind of failure it was.  At genus 4 more than nine candidates in ten
+/// fail, so that probe was about half of all the oracle's work —
+/// counted, and wasted.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Decomposition {
+    /// Splits over degree-1 places, all of them in the factor base.
+    Smooth(Vec<(usize, i64)>),
+    /// Splits over degree-1 places, but meets a place the (truncated)
+    /// factor base does not hold.
+    SmoothOffBase,
+    /// Does not split into degree-1 places.
+    NotSmooth,
+}
+
+/// As [`decompose_over_factor_base_counted`], choosing the oracle and
+/// reporting which of the three outcomes occurred.
+pub fn classify_counted_with(
+    curve: &HyperellipticCurveP,
+    d: &MumfordDivisorP,
+    fb: &HecFactorBase,
+    ops: &mut usize,
+    test: &SmoothnessTest,
+) -> Decomposition {
+    let p = &curve.p;
+    let half = (p - BigUint::one()) >> 1;
+    let roots = match split_counted_with(&d.u, p, ops, test) {
+        Some(r) => r,
+        None => return Decomposition::NotSmooth,
+    };
+
+    let mut acc: HashMap<usize, i64> = HashMap::new();
+    for (x, mult) in roots {
+        *ops += d.v.degree().unwrap_or(0);
+        let y = d.v.eval(&x);
+        debug_assert!(curve.is_on_curve(&x, &y));
+        let idx = match fb.index_of_x(&x) {
+            Some(i) => i,
+            // Smooth, but this place is outside a truncated base.
+            None => return Decomposition::SmoothOffBase,
+        };
+        let sign: i64 = if y.is_zero() || y <= half { 1 } else { -1 };
+        debug_assert_eq!(fb.entries[idx].y, if sign > 0 { y.clone() } else { p - &y });
+        *acc.entry(idx).or_insert(0) += sign * mult as i64;
+    }
+
+    let mut out: Vec<(usize, i64)> = acc.into_iter().filter(|&(_, c)| c != 0).collect();
+    out.sort_unstable_by_key(|&(i, _)| i);
+    Decomposition::Smooth(out)
 }
 
 /// As [`decompose_over_factor_base_counted`], choosing the oracle.
@@ -1081,10 +1212,12 @@ pub fn collect_relations(
             continue;
         }
         let mut field_ops = 0usize;
-        let decomposed = decompose_counted_with(curve, &r, fb, &mut field_ops, &params.smoothness);
+        // One oracle call per candidate.  The three outcomes come back
+        // from that call rather than from re-running it on failure.
+        let classified = classify_counted_with(curve, &r, fb, &mut field_ops, &params.smoothness);
         report.smoothness_field_ops += field_ops;
-        match decomposed {
-            Some(entries) => {
+        match classified {
+            Decomposition::Smooth(entries) => {
                 report.smooth_trials += 1;
                 relations.push(HecRelation {
                     coef_a: a,
@@ -1092,19 +1225,11 @@ pub fn collect_relations(
                     entries: subtract_steps(entries, &taken),
                 });
             }
-            None => {
-                // Distinguish "not smooth" from "smooth off base" so a
-                // truncated base can be tuned on evidence.
-                let mut probe_ops = 0usize;
-                let smooth = split_counted_with(&r.u, &curve.p, &mut probe_ops, &params.smoothness)
-                    .is_some();
-                // The probe re-runs the oracle, so it is charged too.
-                report.smoothness_field_ops += probe_ops;
-                if smooth {
-                    report.smooth_trials += 1;
-                    report.discarded_off_base += 1;
-                }
+            Decomposition::SmoothOffBase => {
+                report.smooth_trials += 1;
+                report.discarded_off_base += 1;
             }
+            Decomposition::NotSmooth => {}
         }
     }
     report.relations = relations.len();
@@ -1836,7 +1961,13 @@ mod tests {
         // deg u = 3 is what genus 3 produces and what the closed forms
         // do not cover, so the CZ path is the one carrying the fast
         // oracle there.  Exhaustive over monic cubics for two primes.
-        for p_u in [11u64, 23] {
+        // Both residue classes mod 4.  The discriminant pre-filter
+        // carries a sign `(−1)^{n(n−1)/2}`, and whether −1 is itself a
+        // square depends on `p mod 4` — so a wrong sign would reject
+        // split polynomials at `p ≡ 3 (mod 4)` and pass at
+        // `p ≡ 1 (mod 4)`, or the reverse.  Testing one class only would
+        // miss it.
+        for p_u in [11u64, 13, 23, 29] {
             let p = BigUint::from(p_u);
             for a2 in 0..p_u {
                 for a1 in 0..p_u {
@@ -1856,6 +1987,93 @@ mod tests {
                             split_by_gcd(&u, &p, &mut o2),
                             "p={p_u} u=x^3+{a2}x^2+{a1}x+{a0}"
                         );
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn gcd_oracle_agrees_with_the_scan_on_every_monic_quartic() {
+        // Degree 4 is what genus 4 produces, and it is where the
+        // discriminant pre-filter has to be right about a different set
+        // of cycle types than the cubic case: the odd ones are (2,1,1)
+        // and (4).  Exhaustive over monic quartics at two primes, one in
+        // each class mod 4.
+        for p_u in [11u64, 13] {
+            let p = BigUint::from(p_u);
+            let mut split_count = 0usize;
+            let mut rejected = 0usize;
+            for a3 in 0..p_u {
+                for a2 in 0..p_u {
+                    for a1 in 0..p_u {
+                        for a0 in 0..p_u {
+                            let u = FpPoly::from_coeffs(
+                                vec![
+                                    BigUint::from(a0),
+                                    BigUint::from(a1),
+                                    BigUint::from(a2),
+                                    BigUint::from(a3),
+                                    BigUint::one(),
+                                ],
+                                p.clone(),
+                            );
+                            let (mut o1, mut o2) = (0usize, 0usize);
+                            let scan = split_by_scan(&u, &p, &mut o1);
+                            let gcd = split_by_gcd(&u, &p, &mut o2);
+                            assert_eq!(scan, gcd, "p={p_u} u=x^4+{a3}x^3+{a2}x^2+{a1}x+{a0}");
+                            if scan.is_some() {
+                                split_count += 1;
+                            } else {
+                                rejected += 1;
+                            }
+                        }
+                    }
+                }
+            }
+            // Sanity on the population itself: completely split monic
+            // quartics should be about 1/4! of them.
+            let total = (split_count + rejected) as f64;
+            let rate = split_count as f64 / total;
+            assert!(
+                rate > 0.02 && rate < 0.08,
+                "p={p_u}: split rate {rate:.3} is nowhere near 1/24"
+            );
+        }
+    }
+
+    #[test]
+    fn the_discriminant_filter_never_rejects_a_split_polynomial() {
+        // The filter is the one part of the oracle that returns "not
+        // smooth" without looking for roots at all, so it is the one
+        // that can silently throw away relations.  Build polynomials
+        // that split by construction and require every one to survive
+        // it.
+        for p_u in [11u64, 13, 41, 61] {
+            let p = BigUint::from(p_u);
+            for r0 in 0..p_u.min(9) {
+                for r1 in 0..p_u.min(9) {
+                    for r2 in 0..p_u.min(9) {
+                        for r3 in 0..p_u.min(5) {
+                            let lin = |r: u64| {
+                                FpPoly::from_coeffs(
+                                    vec![(&p - BigUint::from(r)) % &p, BigUint::one()],
+                                    p.clone(),
+                                )
+                            };
+                            for u in [
+                                lin(r0).mul(&lin(r1)).mul(&lin(r2)),
+                                lin(r0).mul(&lin(r1)).mul(&lin(r2)).mul(&lin(r3)),
+                            ] {
+                                let mut ops = 0usize;
+                                let disc = discriminant(&u, &p, &mut ops);
+                                assert!(
+                                    disc.is_zero() || is_square_mod(&disc, &p, &mut ops),
+                                    "p={p_u}: split poly {:?} has non-square discriminant {disc}",
+                                    u.coeffs
+                                );
+                            }
+                        }
                     }
                 }
             }
