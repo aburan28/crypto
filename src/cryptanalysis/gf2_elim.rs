@@ -50,17 +50,6 @@
 //! comparison is recorded in `research/gf2_table_reuse_20260929`.
 
 use rayon::prelude::*;
-use std::time::Instant;
-
-#[derive(Default)]
-struct ElimPhaseProfile {
-    strip_ns: u64,
-    pivot_ns: u64,
-    table_ns: u64,
-    row_clear_ns: u64,
-    reverse_ns: u64,
-    blocks: u64,
-}
 
 /// Largest pattern width of one Gray-code table.
 const MAX_TABLE_BITS: usize = 8;
@@ -190,10 +179,6 @@ fn eliminate_with(
     reverse_tile_words: Option<usize>,
     reuse_table: bool,
 ) -> usize {
-    static PROFILE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    let profiled = *PROFILE.get_or_init(|| std::env::var("KIC_GF2_PROFILE").as_deref() == Ok("1"));
-    let total_start = Instant::now();
-    let mut phases = ElimPhaseProfile::default();
     let rows = matrix.len();
     let words = n_cols.div_ceil(64);
     if rows == 0 || words == 0 {
@@ -217,21 +202,16 @@ fn eliminate_with(
     while pivot_row < rows && word < words {
         let block_start = pivot_row;
         pivot_cols.clear();
-        let strip_start = profiled.then(Instant::now);
         // The strip: each unpivoted row's current word, in reduced form
         // with respect to the (so far empty) block.
         for (s, row) in strip[block_start..].iter_mut().zip(&matrix[block_start..]) {
             *s = row[word];
-        }
-        if let Some(start) = strip_start {
-            phases.strip_ns += start.elapsed().as_nanos() as u64;
         }
         let last_col_in_word = if word + 1 == words && !n_cols.is_multiple_of(64) {
             (n_cols % 64) as u32
         } else {
             64
         };
-        let pivot_start = profiled.then(Instant::now);
         let mut block_full = false;
         while pivot_row < rows && low < last_col_in_word {
             // Lowest set column at or above `low`, over the unpivoted rows.
@@ -300,9 +280,6 @@ fn eliminate_with(
                 break;
             }
         }
-        if let Some(start) = pivot_start {
-            phases.pivot_ns += start.elapsed().as_nanos() as u64;
-        }
         if !pivot_cols.is_empty() {
             clear_block(
                 matrix,
@@ -318,9 +295,7 @@ fn eliminate_with(
                 simd,
                 word_ops,
                 reuse_table,
-                if profiled { Some(&mut phases) } else { None },
             );
-            phases.blocks += 1;
             if defer_above {
                 blocks.push((block_start, pivot_cols.clone()));
             }
@@ -337,7 +312,6 @@ fn eliminate_with(
     // pivot rows by later blocks before building its table.  Then visit
     // every earlier row once and apply all prepared tables while its
     // range is cache-resident.
-    let reverse_start = profiled.then(Instant::now);
     if defer_above {
         let tile_words = reverse_tile_words
             .unwrap_or_else(|| ((1usize << 20) / rows.saturating_mul(8).max(1)).clamp(8, 128))
@@ -372,22 +346,6 @@ fn eliminate_with(
             }
             end = first;
         }
-    }
-    if let Some(start) = reverse_start {
-        phases.reverse_ns = start.elapsed().as_nanos() as u64;
-    }
-    if profiled {
-        eprintln!(
-            "GF2_PHASES {}",
-            serde_json::json!({
-                "rows": rows, "cols": n_cols, "rank": pivot_row,
-                "reduce_above": reduce_above, "blocks": phases.blocks,
-                "total_ns": total_start.elapsed().as_nanos() as u64,
-                "strip_ns": phases.strip_ns, "pivot_ns": phases.pivot_ns,
-                "table_ns": phases.table_ns, "row_clear_ns": phases.row_clear_ns,
-                "reverse_ns": phases.reverse_ns,
-            })
-        );
     }
     pivot_row
 }
@@ -493,9 +451,7 @@ fn clear_block(
     simd: SimdKind,
     word_ops: &mut u64,
     reuse_table: bool,
-    mut profile: Option<&mut ElimPhaseProfile>,
 ) {
-    let table_start = profile.as_ref().map(|_| Instant::now());
     let b = pivot_cols.len();
     if reduce_above && !reduce_below && block_start == 0 {
         return;
@@ -543,10 +499,6 @@ fn clear_block(
     debug_assert!(pivot_cols.iter().all(|&pc| pc / 64 == pivot_word));
     let mask = pivot_cols.iter().fold(0u64, |m, &pc| m | 1u64 << (pc % 64));
     let bmi2 = bmi2_available();
-    if let (Some(start), Some(phases)) = (table_start, profile.as_mut()) {
-        phases.table_ns += start.elapsed().as_nanos() as u64;
-    }
-    let row_clear_start = profile.as_ref().map(|_| Instant::now());
     let clear = |row: &mut Vec<u64>| -> u64 {
         let pattern = gather_bits(row[pivot_word], mask, bmi2);
         if pattern == 0 {
@@ -581,9 +533,6 @@ fn clear_block(
             .chain(below.iter_mut())
             .map(clear)
             .sum::<u64>();
-    }
-    if let (Some(start), Some(phases)) = (row_clear_start, profile.as_mut()) {
-        phases.row_clear_ns += start.elapsed().as_nanos() as u64;
     }
 }
 
