@@ -7,8 +7,10 @@ on:
       - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement/render_report.py'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/**'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement/round2/**'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/**'
       - 'research/ic_candidate_tournament_20260915/evidence/ic-improvement-round1-20260925.tar.zst'
       - 'research/ic_candidate_tournament_20260915/evidence/ic-improvement-round2-20260928.tar.zst'
+      - 'research/ic_candidate_tournament_20260915/evidence/ic-improvement-round3-20260928.tar.zst'
       - 'research/ic_candidate_tournament_20260915/evidence/manifest.json'
       - 'research/ic_candidate_tournament_20260915/evidence/restore.py'
       - '.github/workflows/ic-improvement-evidence.yml'
@@ -28,6 +30,9 @@ jobs:
           - archive: ic-improvement-round2-20260928
             bundle: ic-improvement-round2
             report: round2
+          - archive: ic-improvement-round3-20260928
+            bundle: ic-improvement-round3
+            report: round3
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:

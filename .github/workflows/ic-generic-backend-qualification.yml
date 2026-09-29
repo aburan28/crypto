@@ -1,0 +1,42 @@
+name: IC generic backend qualification (archived)
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ic-generic-backend-qualification.yml'
+      - 'research/ic_candidate_tournament_20260915/tournament.py'
+      - 'research/ic_candidate_tournament_20260915/driver_admission.py'
+      - 'research/ic_candidate_tournament_20260915/generic_backend_yield.py'
+      - 'research/ic_candidate_tournament_20260915/run_generic_backend_qualification.py'
+      - 'research/ic_candidate_tournament_20260915/test_generic_backend_yield.py'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/**'
+permissions:
+  contents: read
+concurrency:
+  group: ic-generic-backend-qualification-archived-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      # Reviewed PR #920 head: freeze worker, evaluator, panel and exclusions together.
+      - uses: actions/checkout@v4
+        with:
+          ref: 765c3c5f19032bd852163805f257c56babef2040
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check registration and Python scientific controls
+        run: |
+          test "$(git rev-parse HEAD)" = 765c3c5f19032bd852163805f257c56babef2040
+          python -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_*.py' -q
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'research/ic_candidate_tournament_20260915')
+          from run_generic_backend_qualification import PANEL, check_generic_source, registration_check, registry
+          from tournament import read
+          panel = read(PANEL)
+          registration_check(panel)
+          check_generic_source()
+          assert len(registry(panel, '/tmp/controlled-build')) == 9
+          PY

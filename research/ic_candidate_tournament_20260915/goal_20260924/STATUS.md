@@ -10,24 +10,20 @@ rho cold instructions and `rho_pairinv_4` for rho online time. PR 765 merged the
 including exact Linux replay of 22 retained evidence sets and every exported table.
 Independent macOS receipt replay passed all 1,290 jobs, with two one-ULP
 derived-summary differences documented in the report.
-No reference selection is a promotion. Two of the three improvement rounds have
-completed. [Round one](improvement/round1/README.md), from
-[workflow 36140265516](https://github.com/aburan28/crypto/actions/runs/36140265516),
-retained the incumbent after 3,243/3,243 verified pairs; selected `stop6` failed
-promotion. [PR 782](https://github.com/aburan28/crypto/pull/782) merged that
-evidence at `b338522537f316f2379ed8cc11bb317212e573ec`.
-[Round two](improvement/round2/README.md) ran the registered version-two panel
-(seed `2026092552`) once under the calibrated Linux/musl/Valgrind contract after
-GitHub `workflow_dispatch` was denied locally; its frozen checker verified
-3,480/3,480 native/profile pairs plus 20/20 policy controls and retained the
-incumbent. Selected `stop5_word` confirmation ratios were 1.093655 online time
-(vs qualified `ic_online`), 0.922725 cold Ir and 0.987022 cold native time;
-replay also failed the familywise and complete-cost gates. Neither cold metric
-reached 0.8. The full export and scoreboard retain every measured variant.
-The [bounded protocol](improvement/PROTOCOL.md) and
-[version-two protocol](improvement-v2/PROTOCOL.md) remain frozen. Do not
-redispatch round one or round two. One registered attempt remains. No qualifying
-winner has been found; the full goal remains active.
+No reference selection is a promotion. The three-attempt pair-table improvement
+budget is complete without a promoted challenger: see
+[BOUNDED-GOAL-RESULT.md](BOUNDED-GOAL-RESULT.md).
+[Round one](improvement/round1/README.md) (workflow `36140265516`),
+[round two](improvement/round2/README.md) (seed `2026092552`) and
+[round three](improvement/round3/README.md) (workflow `36463687634`, seed
+`2026092553`) each retained the qualified `pairinv` incumbent after full
+verification. Selected challengers `stop6`, `stop5_word` and `stop7_word` all
+failed the 0.8 cold gates and/or familywise online rules. Altogether
+10,203/10,203 native/profile pairs were verified. Do not redispatch any of the
+three registered attempts or retune on their confirmation/replay points. The
+next registered comparison is
+[generic-backend-qualification](generic-backend-qualification/README.md)
+(seed `2026092901`); its measurement is pending.
 Canonical admission is merged in both drivers; the earlier
 [driver controls](driver-admission/README.md) preserve their fixed-vector scope.
 Public-point input and single-target native intervals are implemented in the
@@ -219,18 +215,45 @@ still precedes comparative ranking. Preserve all five exposed points in
 confirmation panel; keep the sealed round-one history unchanged. One round is
 closed, no challenger qualified, and two remain.
 
-## Round-two measurement
+## Three-round closeout and next registration
 
-The version-two reference binding from [PR 881](https://github.com/aburan28/crypto/pull/881)
-and the registered panel from [PR 892](https://github.com/aburan28/crypto/pull/892)
-are in tree. Round two completed under
-[improvement-v2/round2.json](improvement-v2/round2.json) with runner
-`run_improvement_v2.py`, seed `2026092552`, and candidate source
-`8582e4ab4b63e98696a0ff00ee296e2902923a2c39c325ab0f3e3950ffbb2b28`.
-[The evidence report](improvement/round2/EVIDENCE.md) and
-[archive](../evidence/ic-improvement-round2-20260928.tar.zst) retain the local
-calibrated run (GitHub dispatch denied), every receipt, and the negative
-promotion decision. Do not redispatch `run_round_two=true`. A third attempt needs
-a new registered source/configuration panel, the next frozen seed, and exclusions
-for every prior generated point, including all round-two fixtures; never retune
-on confirmation or replay. One attempt remains and no qualifying winner exists.
+Rounds two and three are archived
+([PR 893](https://github.com/aburan28/crypto/pull/893),
+[PR 916](https://github.com/aburan28/crypto/pull/916)). The audited negative
+result of the pair-table campaign is
+[BOUNDED-GOAL-RESULT.md](BOUNDED-GOAL-RESULT.md). The next preregistered
+comparison is
+[generic-backend-qualification](generic-backend-qualification/PROTOCOL.md):
+qualify generic F4/F5/SAT and sparse relation-LA complete pipelines against the
+optimized incumbent and strong rho on fresh points that exclude every exposure
+from all three sealed rounds. Panel byte SHA-256
+`83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf`, seed
+`2026092901`. Its one measured dispatch was canceled at the six-hour job cap;
+artifact upload also failed, leaving completion and comparative costs unknown.
+The [censored result](generic-backend-qualification/RESULT.md) is not a family
+qualification or solver-performance verdict. A fresh protocol must exclude all
+potentially exposed points and retain partial results before a job timeout.
+The [second registration](generic-backend-qualification-v2/PROTOCOL.md) freezes
+seed `2026092902`, panel SHA-256
+`d283a869b0412228d1c66260fdfd8f387d7243bd15456c7febf3c46ee5da27a8`,
+one process on each of 25 distinct points and 250 trial slots. It excludes the
+25 reconstructed first-run points and keeps the same source-bound F4/F5, SAT,
+incumbent and matched-rho arms. Its one permitted dispatch is live as
+[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
+(attempt one); never redispatch this seed. Qualification and cost rows remain
+pending until that run's packed artifact, frozen verifier, natural-query audit
+and family gate finish. A timed-out or partial archive is operationally
+censored for family verdicts.
+
+Post-registration source audit (PR
+[#952](https://github.com/aburan28/crypto/pull/952)): the pinned `m=3` Semaev
+template needs `4n` Boolean variables on the registered ambient
+`subgroup_orbits` bases, which exceeds `MAX_VARS=64` on every cell, so all
+twenty v2 F4/F5-family layouts are statically `unsupported` before solving.
+That finding does not rewrite live receipts or decide SAT arms. The disclosed-point
+[standard-subspace dimension-6 F4/F5 recovery pilot](generic-f4-subspace-pilot/RESULT.md)
+shows both `f4` and `f5` dispatch into MatrixF4/MatrixF5 with
+`unsupported: false` on all five inventory points at `max_trials=1`, with zero
+relations/solutions under that budget. It is a factor-base-policy diagnostic,
+not a family qualification. A fresh competitive registration still needs a new
+seed, the v2 exposure census, and a recovery-capable budget.

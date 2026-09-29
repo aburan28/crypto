@@ -1,0 +1,10 @@
+contended runs: 89 processes seen using CPU in them: {'claude': 70, 'migration/3': 9, 'migration/2': 3, 'migration/1': 3, 'rcu_preempt': 2}
+
+Instructions in the worker-timed span (all phases but startup_and_input), from round-0025 confirmation receipts (rep-0),
+against the worker timer here. Throughput = instructions per worker-second, relative to rho.
+cell   Ir inc/rho time inc/rho throughput inc/rho
+n13a0       1.437        0.706               2.03
+n17a1       1.385        0.738               1.88
+n19a0       1.361        0.797               1.71
+n19a1       1.386        0.840               1.65
+n23a0       1.867        1.015               1.84
