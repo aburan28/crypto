@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 import resource
 import signal
+import subprocess
 import sys
 import time
 import traceback
@@ -30,7 +31,7 @@ def digest(path: Path) -> str:
 
 
 def frozen_inputs(spec: dict) -> None:
-    for rel, expected in spec["input_sha256"].items():
+    for rel, expected in (spec["input_sha256"] | spec["host_refusal_sha256"]).items():
         actual = digest(REPO / rel)
         if actual != expected:
             raise AssertionError(f"input hash mismatch: {rel}: {actual}")
@@ -259,6 +260,13 @@ def main():
         assert spec["status"] == "protocol_only_no_outcome"
         if spec["release_main_head"] is None:
             raise RuntimeError("parent note unmerged: post-merge re-freeze and review required before outcome")
+        if spec["release_gate"] != "released_after_review":
+            raise RuntimeError("post-merge hosted preflight and independent release review remain required")
+        checkout_head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()
+        if subprocess.run(["git", "merge-base", "--is-ancestor",
+                           spec["release_main_head"], checkout_head], cwd=REPO).returncode != 0:
+            raise RuntimeError("release main head is not an ancestor of checkout")
+        receipt["checkout_head"] = checkout_head
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.setitimer(signal.ITIMER_REAL, spec["caps"]["child_wall_seconds"])
         try:
