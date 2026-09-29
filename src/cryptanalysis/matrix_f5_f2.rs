@@ -460,6 +460,8 @@ pub struct F5Timings {
     pub direct_pack_used: bool,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
+    /// Whether the shared eliminator used sampled-weight pivots.
+    pub bounded_pivot_used: bool,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -663,6 +665,8 @@ pub fn matrix_f5_f2_with_form_timed(
     let rank = if !echelon {
         rref_f2_counted(&mut matrix, cols.len(), &mut word_ops)
     } else if matrix.len() >= 128 && cols.len() >= 256 {
+        timings.bounded_pivot_used =
+            std::env::var("KIC_GF2_BOUNDED_WEIGHT_PIVOT").as_deref() == Ok("1");
         crate::cryptanalysis::gf2_elim::echelon_counted(&mut matrix, cols.len(), &mut word_ops)
     } else {
         echelon_f2_counted(&mut matrix, cols.len(), &mut word_ops)
