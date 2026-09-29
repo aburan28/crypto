@@ -231,7 +231,7 @@ mod tests {
         // 55 bytes — fits exactly in one padded block (1 byte before length).
         // Verified with `printf 'A...A' | shasum -a 256`.
         assert_eq!(
-            sha256(&vec![b'A'; 55]).as_slice(),
+            sha256(&[b'A'; 55]).as_slice(),
             h("8963cc0afd622cc7574ac2011f93a3059b3d65548a77542a1559e3d202e6ab00").as_slice(),
         );
     }
@@ -240,7 +240,7 @@ mod tests {
     fn sha256_two_blocks_64() {
         // 64 bytes — forces a second padding block.
         assert_eq!(
-            sha256(&vec![b'B'; 64]).as_slice(),
+            sha256(&[b'B'; 64]).as_slice(),
             h("c422e7070cb1cb455b5de9afee0d975e303d0239c72030cd7414ab5c382d3ae8").as_slice(),
         );
     }

@@ -35,8 +35,6 @@
 //!   numbers.  Achieving 93% success rate at 16% interval
 //!   reduction requires the paper's training budget.
 
-use num_bigint::BigUint;
-
 // ── Brute-force trace counting for small p (training labels) ──────
 
 /// Brute-force count of `#E(F_p)` for `y² = x³ + a·x + b` over
@@ -253,12 +251,12 @@ fn is_small_prime(n: u64) -> bool {
     if n < 4 {
         return true;
     }
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         return false;
     }
     let mut i = 3u64;
     while i * i <= n {
-        if n % i == 0 {
+        if n.is_multiple_of(i) {
             return false;
         }
         i += 2;

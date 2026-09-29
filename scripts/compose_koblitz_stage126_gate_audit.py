@@ -256,16 +256,21 @@ def build(output: Path) -> dict[str, Any]:
 
 
 def verify(output: Path) -> dict[str, Any]:
-    # Stage 127 supersedes this audit.  Stage 126 is now an immutable
-    # historical snapshot: verify its own seal and payload, never the live
-    # documents that the successor intentionally moved.
+    # Stage 126 is now an immutable historical snapshot.  The mutable
+    # documents it pinned by hash (the boundary ledger and its Markdown twin,
+    # the gate status) moved again on 2026-09-21 with the boundary ledger's
+    # Round 4, which pins the unit's conversion ratios in the repository, so
+    # recomposing here would compare two points in time.  Stage 127
+    # recomposes the current evidence and chains to this seal
+    # (compose_koblitz_stage127_gate_audit.py); this verify checks the seal
+    # and the frozen audit only, as Stage 109's, 124's and 125's do.
     seal = load(output / "result-seal.json", "Stage-126 seal")
     require(seal.get("schema") == SEAL_SCHEMA, "seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    audit = load(output / "audit.json", "Stage-126 audit")
-    require(audit.get("schema") == SCHEMA, "audit schema changed")
-    require(audit.get("status") == "current_seven_gate_audit_verified", "audit status changed")
-    return audit
+    committed = load(output / "audit.json", "Stage-126 audit")
+    require(committed.get("schema") == SCHEMA, "committed audit schema changed")
+    require(committed.get("status") == "current_seven_gate_audit_verified", "committed audit status changed")
+    return committed
 
 
 def main() -> None:

@@ -1,0 +1,6 @@
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 384 packed threads resident per SM
+packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 1
+packed alu onb square: 0
+packed table walk: 1 (8 branches, 48732 shared bytes)
+  finished: 7.022 M it/s, 1110451 distinguished points (300 verified against the reference, 0 dropped)

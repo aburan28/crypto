@@ -21,7 +21,7 @@ fn modpow(mut a: u64, mut e: u64, r: u64) -> u64 {
     }
     z
 }
-fn add_row(mut row: Vec<u64>, echelon: &mut Vec<Option<Vec<u64>>>, r: u64) -> bool {
+fn add_row(mut row: Vec<u64>, echelon: &mut [Option<Vec<u64>>], r: u64) -> bool {
     for j in 0..row.len() {
         if row[j] == 0 {
             continue;
