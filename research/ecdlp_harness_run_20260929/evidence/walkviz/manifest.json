@@ -1,0 +1,67 @@
+{
+  "figures": {
+    "dp": {
+      "distinguished_points": 10,
+      "files": [
+        "dp_walks.json",
+        "dp_walks.svg"
+      ],
+      "group_operations": 889,
+      "k": 118,
+      "reason": "",
+      "secret_k_matches": true,
+      "solved": true,
+      "steps": 178,
+      "walks": 32,
+      "walks_reaching_dp": 32
+    },
+    "kangaroo": {
+      "distinguished_points": 6,
+      "files": [
+        "kangaroo.json",
+        "kangaroo.svg"
+      ],
+      "group_operations": 213,
+      "interval": [
+        1,
+        232
+      ],
+      "jumps": 74,
+      "k": 118,
+      "reason": "",
+      "secret_k_matches": true,
+      "solved": true
+    },
+    "rho": {
+      "closed": true,
+      "cycle_length": 3,
+      "elements": 233,
+      "files": [
+        "rho_trace.json",
+        "rho_trace.svg"
+      ],
+      "group_operations": 31,
+      "tail_length": 28
+    }
+  },
+  "instance": {
+    "P": [
+      12716,
+      23419
+    ],
+    "Q": [
+      14540,
+      23940
+    ],
+    "a": 34424,
+    "b": 51924,
+    "field_bits": 16,
+    "n": 233,
+    "p": 56711,
+    "seed": 7
+  },
+  "walk_params": {
+    "branches": 16,
+    "dp_bits": 3
+  }
+}

@@ -1,0 +1,280 @@
+diff -ruN -x '*.orig' a/examples/ic_tournament_worker.rs b/examples/ic_tournament_worker.rs
+--- a/examples/ic_tournament_worker.rs	2026-09-26 23:26:20.211445004 +0000
++++ b/examples/ic_tournament_worker.rs	2026-09-28 17:03:51.091224697 +0000
+@@ -329,10 +329,12 @@
+     if job.mode != "ic" { return Err("unknown mode".into()); }
+     // The fast path takes each collector only at its own summand count, so a
+     // `pair_table` job at four summands still goes to the general path, as it
+-    // did before the fast path learned four.
++    // did before the fast path learned four.  `pair_or_triple` is the
++    // switch: configured at four summands, the most either collector uses,
++    // it runs one of the two per curve (`koblitz_tiny_ic::choose_collector`).
+     let fast = matches!(
+         (cfg.solver.as_str(), cfg.summands),
+-        ("pair_table", 3) | ("triple_table", 4) | ("triple_counted", 4)
++        ("pair_table", 3) | ("triple_table", 4) | ("triple_counted", 4) | ("pair_or_triple", 4)
+     );
+     if fast && cfg.collection_window.is_none()
+         && koblitz_tiny_ic::supports(&c, &job.factor_base, cfg.summands) {
+@@ -475,11 +477,35 @@
+ /// field and its JSON type match the general path.
+ fn run_tiny(job: &Job, c: &KoblitzCurve, targets: &[BinaryPoint], metadata: Value, start: Instant) -> Result<Report, String> {
+     let cfg = &job.config;
+-    let collector = match cfg.solver.as_str() {
+-        "triple_table" => koblitz_tiny_ic::Collector::Triple,
+-        "triple_counted" => koblitz_tiny_ic::Collector::TripleCounted,
++    // The switch decides before any base point is drawn, from the curve's
++    // degree and subgroup order and the job's base size, then hands the job
++    // to that collector exactly as its own solver name would.
++    let choice = match (cfg.solver.as_str(), &job.factor_base) {
++        ("pair_or_triple", FactorBaseSpec::SubgroupOrbits { points, .. }) => {
++            let r = num_traits::ToPrimitive::to_u64(&c.subgroup_order).ok_or("order too wide")?;
++            Some(koblitz_tiny_ic::choose_collector(c.n, r, *points))
++        }
++        _ => None,
++    };
++    let collector = match (cfg.solver.as_str(), choice) {
++        (_, Some(choice)) => choice.collector,
++        ("triple_table", _) => koblitz_tiny_ic::Collector::Triple,
++        ("triple_counted", _) => koblitz_tiny_ic::Collector::TripleCounted,
+         _ => koblitz_tiny_ic::Collector::Pair,
+     };
++    // Reported only by the switch, so every other solver's report is
++    // byte-for-byte what it was.
++    let switch_fields = choice.map(|ch| {
++        format!(
++            ",\"collector\":\"{}\",\"collector_model\":{{\"pair_orbits\":{},\"pair_rows\":{},\"pair_work\":{},\"triple_orbits\":{},\"triple_rows\":{},\"triple_work\":{}}}",
++            match ch.collector {
++                koblitz_tiny_ic::Collector::Pair => "pair_table",
++                koblitz_tiny_ic::Collector::Triple => "triple_table",
++                koblitz_tiny_ic::Collector::TripleCounted => "triple_counted",
++            },
++            ch.pair_orbits, ch.pair_rows, ch.pair_work, ch.triple_orbits, ch.triple_rows, ch.triple_work
++        )
++    });
+     let mut ic = TinyIc::new_with(c, &job.factor_base, job.algorithm_seed, cfg.max_trials, collector)?;
+     let expected_columns = ic.columns();
+     dump(b"factor_base_and_tables\0");
+@@ -537,7 +563,9 @@
+         out.push_str(",\"factor_base_orbits\":");
+         out.push_str(&base);
+         out.push_str(",\"column_convention\":\"representative\"");
+-        out.push_str(",\"rejected_relations\":0}");
++        out.push_str(",\"rejected_relations\":0");
++        if let Some(fields) = &switch_fields { out.push_str(fields); }
++        out.push('}');
+         return Ok(Report::Text(out, false));
+     }
+     if !ic.verify_columns() {
+@@ -614,8 +642,11 @@
+     push_u64(&mut out, accepted as u64);
+     out.push_str(",\"duplicate_relations\":");
+     push_u64(&mut out, duplicates as u64);
++    // The collector's own count: the configured one for every solver but the
++    // switch (the fast path admits each collector only at its own count), and
++    // three when the switch ran the pair table.
+     out.push_str(",\"rejected_relations\":0,\"summands\":");
+-    push_u64(&mut out, cfg.summands as u64);
++    push_u64(&mut out, ic.collector().summands() as u64);
+     out.push_str(",\"sparse_report\":null,\"pair_table\":{\"rows\":");
+     push_u64(&mut out, table_rows as u64);
+     out.push_str(",\"rows_possible\":");
+@@ -624,7 +655,9 @@
+     push_u64(&mut out, table_entries as u64);
+     out.push_str(",\"scan_block\":");
+     push_u64(&mut out, scan_block as u64);
+-    out.push_str("},\"elapsed_seconds\":");
++    out.push('}');
++    if let Some(fields) = &switch_fields { out.push_str(fields); }
++    out.push_str(",\"elapsed_seconds\":");
+     out.push_str(&format!("{}", start.elapsed().as_secs_f64()));
+     out.push('}');
+     Ok(Report::Text(out, verified))
+diff -ruN -x '*.orig' a/src/cryptanalysis/koblitz_tiny_ic.rs b/src/cryptanalysis/koblitz_tiny_ic.rs
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-26 23:26:20.213745108 +0000
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-28 17:00:43.121764036 +0000
+@@ -1134,6 +1134,92 @@
+     best.0
+ }
+ 
++// ── Choosing a collector ────────────────────────────────────────────
++
++/// The pair collector's expected work at `K` orbits and `t` rows, the
++/// quantity its row rule minimises in [`TinyIc::new_with`]: `t·|F|` table
++/// entries plus `(K + TABLE_PROBES)/(λ₂·cov₂(t))` rests scanned,
++/// `λ₂ = |F|(|F|+1)/(2r)` and `cov₂ = 1 − ((K−t)/K)²`.  Written out here so
++/// the choice below can price a base before sampling it; the collector
++/// itself is not changed and keeps its own copy of the formula
++/// (`pair_work_matches_the_collectors_row_rule` holds the two together).
++fn pair_work(n: u32, r: u64, orbits: usize, rows: usize) -> f64 {
++    let size = (2 * n as usize * orbits) as f64;
++    let lambda = size * (size + 1.0) / 2.0 / r as f64;
++    let rest = (orbits - rows) as f64 / orbits as f64;
++    let cov = 1.0 - rest * rest;
++    rows as f64 * size + (orbits as f64 + TABLE_PROBES) / (lambda * cov).max(1e-12)
++}
++
++/// Rows minimising [`pair_work`] at `orbits`, with that work; ties go to
++/// the fewer rows, as the collector's `min_by` does.
++fn pair_rows_work(n: u32, r: u64, orbits: usize) -> (usize, f64) {
++    let mut best = (1, pair_work(n, r, orbits, 1));
++    for rows in 2..=orbits {
++        let w = pair_work(n, r, orbits, rows);
++        if w < best.1 {
++            best = (rows, w);
++        }
++    }
++    best
++}
++
++/// The orbit count the pair collector will sample for a job asking for
++/// `points` base points: the base policy's count where it asks for more than
++/// one batch, otherwise whole batches of eight orbits until `2n·K ≥ points`.
++/// A prediction made before sampling: a small group can merge two draws into
++/// one orbit (`n13a0` samples seven), which the choice does not wait for.
++fn pair_orbits_planned(n: u32, r: u64, points: usize) -> usize {
++    let policy = policy_orbits(r);
++    if policy > 8 {
++        return policy;
++    }
++    let per_batch = 8 * 2 * n as usize;
++    8 * points.max(1).div_ceil(per_batch)
++}
++
++/// What [`choose_collector`] priced, for reports.
++#[derive(Clone, Copy, Debug, PartialEq)]
++pub struct CollectorChoice {
++    pub collector: Collector,
++    pub pair_orbits: usize,
++    pub pair_rows: usize,
++    /// [`pair_work`] at the pair plan.
++    pub pair_work: f64,
++    pub triple_orbits: usize,
++    pub triple_rows: usize,
++    /// [`triple_work`] (W₃) at the counted sizing's orbits and rows.
++    pub triple_work: f64,
++}
++
++/// Pair table or triple table, decided per curve before any base point is
++/// drawn, from `(n, r, points)` alone.
++///
++/// Each collector is priced in the same units -- table entries built plus
++/// rests scanned -- by the model it already sizes itself with: the pair
++/// collector's expected work ([`pair_work`]) at its planned base and its own
++/// row rule, and W₃ ([`triple_work`]) at the orbits and rows the counted
++/// sizing chooses ([`counted_orbits`], [`counted_rows`]).  The triple table
++/// is chosen when its modelled work is strictly smaller; a tie keeps the
++/// pair table.  No constant is fitted: the threshold is the two models'
++/// break-even.  The chosen collector then runs exactly as it runs alone.
++pub fn choose_collector(n: u32, r: u64, points: usize) -> CollectorChoice {
++    let pair_orbits = pair_orbits_planned(n, r, points);
++    let (pair_rows, pair_w) = pair_rows_work(n, r, pair_orbits);
++    let triple_orbits = counted_orbits(n, r);
++    let triple_rows = counted_rows(n, r, triple_orbits);
++    let triple_w = triple_work(n, r, triple_orbits, triple_rows);
++    CollectorChoice {
++        collector: if triple_w < pair_w { Collector::TripleCounted } else { Collector::Pair },
++        pair_orbits,
++        pair_rows,
++        pair_work: pair_w,
++        triple_orbits,
++        triple_rows,
++        triple_work: triple_w,
++    }
++}
++
+ // ── Scalar-field rows ───────────────────────────────────────────────
+ 
+ #[inline]
+@@ -2461,6 +2547,91 @@
+         }
+     }
+ 
++    /// The switch prices the pair collector with the formula the collector's
++    /// own row rule minimises: on every supported cell, the rows it predicts
++    /// at the base actually sampled are the rows the collector built; at the
++    /// tournament's `points = 6n` the planned orbit count is the sampled one
++    /// or, where a small group merges draws, just above it.
++    #[test]
++    fn pair_work_matches_the_collectors_row_rule() {
++        for (n, a) in CELLS {
++            if n < 13 { continue; }
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let r = kc.subgroup_order.to_u64().unwrap();
++            for (seed, points) in [(43u64, 6 * n as usize), (7, 2 * n as usize), (43, 20 * n as usize)] {
++                let spec = FactorBaseSpec::SubgroupOrbits { seed, points };
++                let tiny = TinyIc::new_with(&kc, &spec, 1, 4096, Collector::Pair).unwrap();
++                let (rows, orbits, _, _) = tiny.table_shape();
++                assert_eq!(pair_rows_work(n, r, orbits).0, rows, "n={n} a={a} points={points}");
++                if points == 6 * n as usize {
++                    let planned = pair_orbits_planned(n, r, points);
++                    assert!(orbits <= planned && orbits + 2 >= planned, "n={n} a={a}: {orbits} vs {planned}");
++                }
++            }
++        }
++    }
++
++    /// The rule's own output at the tournament's twelve cells, `points = 6n`
++    /// as the tournament's jobs ask: the pair table up to `r ≈ 4.2·10⁶`, the
++    /// triple table from `n37a0` on.  A regression pin of the rule, not a
++    /// measurement; the margins are wide (`W₃/W₂` ≥ 2.0 on the pair side,
++    /// ≤ 0.78 on the triple side).
++    #[test]
++    fn the_switch_rule_at_the_tournament_cells() {
++        let cells = [
++            (13u32, 2_003u64, false),
++            (17, 65_587, false),
++            (19, 130_873, false),
++            (19, 262_543, false),
++            (23, 2_095_853, false),
++            (23, 4_196_903, false),
++            (29, 42_457, false),
++            (31, 1_439_393, false),
++            (37, 230_603_167, true),
++            (43, 4_644_189_029, true),
++            (59, 10_063_074_221, true),
++            (61, 11_514_943_771, true),
++        ];
++        for (n, r, triple) in cells {
++            let c = choose_collector(n, r, 6 * n as usize);
++            let expected = if triple { Collector::TripleCounted } else { Collector::Pair };
++            assert_eq!(c.collector, expected, "n={n} r={r}: {c:?}");
++            assert_eq!((c.triple_orbits, c.triple_rows), (counted_orbits(n, r), counted_rows(n, r, c.triple_orbits)));
++            let q = c.triple_work / c.pair_work;
++            assert!(if triple { q < 0.78 } else { q > 2.0 }, "n={n}: margin {q}");
++        }
++    }
++
++    /// The chosen collector is the collector: built through the switch's
++    /// choice it samples the same base, builds the same table and solves.
++    #[test]
++    fn the_switch_runs_the_chosen_collector() {
++        for (n, a) in CELLS {
++            if n < 13 { continue; }
++            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
++            let r = kc.subgroup_order.to_u64().unwrap();
++            let spec = FactorBaseSpec::SubgroupOrbits { seed: 43, points: 6 * n as usize };
++            let choice = choose_collector(n, r, 6 * n as usize);
++            let mut tiny = TinyIc::new_with(&kc, &spec, 3, 4096, choice.collector).unwrap();
++            let alone = TinyIc::new_with(&kc, &spec, 3, 4096, choice.collector).unwrap();
++            assert_eq!(tiny.base_points(), alone.base_points());
++            assert_eq!(tiny.table_shape(), alone.table_shape());
++            if choice.collector == Collector::TripleCounted {
++                assert_eq!(tiny.table_shape().1, choice.triple_orbits);
++            }
++            let mut solved = false;
++            while tiny.trials() < 4096 && !solved {
++                let rows = tiny.collect(4);
++                for rel in &rows {
++                    assert_eq!(rel.points.len(), choice.collector.summands());
++                }
++                tiny.push(&rows);
++                solved = tiny.try_solve();
++            }
++            assert!(solved, "n={n} a={a}");
++        }
++    }
++
+     #[test]
+     fn seeded_chacha_matches_std_rng() {
+         use rand::{rngs::StdRng, Rng, SeedableRng};

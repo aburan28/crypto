@@ -1,0 +1,76 @@
+name: Compact-orbit S3 batch inversion against matched rho
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/compact-s3-batch.yml'
+      - 'research/notes/ecc2k130/compact_s3_batch_20260929/**'
+      - 'examples/koblitz_orbit_dlp_s3_batch.rs'
+      - 'examples/koblitz_rho_batch_ks_v3.rs'
+      - 'src/cryptanalysis/koblitz_fast.rs'
+      - 'src/cryptanalysis/koblitz_index_calculus.rs'
+      - 'src/cryptanalysis/semaev_decomp.rs'
+      - 'src/lib.rs'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/compact-s3-batch.yml'
+      - 'research/notes/ecc2k130/compact_s3_batch_20260929/**'
+  workflow_dispatch:
+
+jobs:
+  paired-s3-batch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        n: [41, 53]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            docs/ic/calibration.json
+            src
+            examples/koblitz_orbit_dlp_s3_batch.rs
+            examples/koblitz_orbit_dlp_swap.rs
+            examples/koblitz_rho_batch_ks_v2_n61.rs
+            examples/koblitz_rho_batch_ks_v3.rs
+            research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+            research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures
+            research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures
+            research/notes/ecc2k130/compact_k_boundary_20260929/fixtures
+            research/notes/ecc2k130/compact_swap_quotient_20260929/fixtures
+            research/notes/ecc2k130/compact_s3_batch_20260929
+            .github/workflows/compact-s3-batch.yml
+      - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+      - run: cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_s3_batch
+      - name: Exhaustive root equivalence and target-order tests
+        run: cargo test --release --locked --example koblitz_orbit_dlp_s3_batch
+      - name: Run nine Latin-balanced cold arms on the same public points
+        id: run
+        run: |
+          python3 research/notes/ecc2k130/compact_s3_batch_20260929/run_panel.py \
+            --n ${{ matrix.n }} \
+            --rho target/release/examples/koblitz_rho_batch_ks_v3 \
+            --batch target/release/examples/koblitz_orbit_dlp_s3_batch \
+            --out "${{ runner.temp }}/compact-s3-batch/n${{ matrix.n }}_L1024"
+      - name: Independently replay every rank and logarithm
+        if: always() && steps.run.outcome != 'skipped'
+        run: |
+          python3 research/notes/ecc2k130/compact_s3_batch_20260929/verify_panel.py \
+            --n ${{ matrix.n }} \
+            --run-dir "${{ runner.temp }}/compact-s3-batch/n${{ matrix.n }}_L1024" \
+            --out "${{ runner.temp }}/compact-s3-batch/n${{ matrix.n }}_L1024/receipt.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compact-s3-batch-n${{ matrix.n }}-L1024
+          path: ${{ runner.temp }}/compact-s3-batch/n${{ matrix.n }}_L1024
+          if-no-files-found: warn
+          retention-days: 90

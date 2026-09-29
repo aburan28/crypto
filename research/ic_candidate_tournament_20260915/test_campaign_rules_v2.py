@@ -37,6 +37,7 @@ def rows(online_reference=.8):
             item = copy.deepcopy(row)
             item['arm'] = 'ic_online'
             item['certificate']['factor_base_sha256'] = 'ic_online'
+            item['measurement']['candidate_id'] = 'ic_online'
             item['measurement']['native_timing']['online']['wall_ns'] = int(1000000 * online_reference)
             result.append(item)
     return result

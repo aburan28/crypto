@@ -1,0 +1,30 @@
+[
+  {
+    "id": "incumbent",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "round 0024's incumbent (round 0023's scaled + rho-normal-basis.patch) plus round25-rho-lean.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0024",
+    "hypothesis": "Round 0024's incumbent pair arm, unchanged on the IC side, built with the lean rho: the matched rho's exact walk in the IC arm's own single-word arithmetic. Its rho mode is this round's rho."
+  },
+  {
+    "id": "switch",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_or_triple",
+      "summands": 4
+    },
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round25-sources/switch",
+    "parent": "round 0024's counted tree plus round25-switch.patch and round25-rho-lean.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0024",
+    "hypothesis": "Prices the pair collector (W2) and the counted triple table (W3) by their own sizing models before drawing a base point and runs the triple table iff W3 < W2, reporting the relation length it used. Expected: the pair collector on the eight panel cells and the triple table at n37a0, n43a1, n59a0 and n61a1, at most ~1% over the collector it runs.",
+    "falsification": "Any bad, missing or unmatched certificate under evaluator-r25; any logarithm different from the incumbent's or rho's on the same fixture; a choice other than pair on the eight panel cells or triple on the four crossover cells; switch/incumbent above 1.02 on a panel cell."
+  }
+]
