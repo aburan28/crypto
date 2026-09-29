@@ -15,11 +15,21 @@ identical public targets.
 
 No worker has been scheduled under this registration. Do not treat admission
 controls, readiness panels or the earlier generic/reference pair-table study as
-substitutes. An implementation PR must still land a versioned runner and
-workflow that restore the three sealed improvement archives, extend target
-exclusions, materialize prepared and controlled generic builds, and run
-prepare/run/verify once. Until that evidence PR lands, leave end-to-end cost
-and speedup unset.
+substitutes. The follow-on implementation adds
+`run_generic_backend_qualification.py` and
+`.github/workflows/ic-generic-backend-qualification.yml`; execution is gated to
+one explicit main-branch dispatch after both PRs merge. The runner restores
+the three sealed archives, verifies the accepted references and prior point
+exclusions, builds the new generic source, and runs prepare/run/verify once.
+It also independently checks the ordinary-query histories of bounded
+incomplete reports. Until an evidence PR lands, leave measured end-to-end
+cost and speedup unset.
+
+The workflow's PR job checks registration and Python scientific controls; it
+does not run the campaign. On main, dispatch `IC generic backend qualification`
+with `execute_registered_campaign=true` once. The full output, including
+interrupted directories and failures, is uploaded as an artifact. Do not use a
+second dispatch to replace a failed or incomplete registered execution.
 
 This registration consumes no improvement-round slot from the exhausted
 three-attempt budget. It cannot retune on those rounds' confirmation or replay

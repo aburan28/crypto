@@ -8468,6 +8468,48 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n13-oaware-unsat-proof-20260925 -->
+<!-- BEGIN ecc2k130-s3-sparse-n19-growth-20260925 -->
+<section class="panel" id="ecc2k130-s3-sparse-n19-growth-20260925">
+  <div class="panel-head">
+    <h2>n = 19 sparse S3 exporter completes; independent verifier hits its 600 s cap <span class="chip">censored representation gate</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/795">PR #795</a> froze the #767 six-slot beta-3,d=2 n = 19 factors and #774 32 Q+T targets plus O before the first labeled run. The exporter completed within the fixed state, pair, path, DIMACS, wall and sampled-RSS caps. Its independent verifier reached the 600 s child wall cap inside the large-group Sinz one-hot witness sweep, before full parsed-CNF/path/point-target semantics or five mutation controls were admitted. The result is <strong>CENSORED</strong>, not a semantic pass, SAT result or no-go proof.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>First and only freeze <code>15f38ea4eb18244234fa86c497ef521805ce2f9877a806936796d3d7d2642fe3</code>, Actions run 36526326477. Growth and CNF sizes are producer observations pending independent semantic certification. Full ECDLP S and matched-rho ratios remain unset.</caption>
+    <thead><tr><th>Prefix</th><th>Admitted states</th><th>Cumulative input pairs</th><th>Exporter result</th><th>Verifier decision</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>S2</td><td>25</td><td>16</td><td rowspan="5">97,771 variables; 179,668 clauses; 3,235,040 bytes; 58,825 paths; 68.30 s outer wall; 141,070,336 B direct peak RSS</td><td rowspan="5">CENSORED at 600 s child wall; 600.15 s outer wall; 102,875,136 B direct peak RSS</td><td rowspan="5">unset / unset</td></tr>
+      <tr><td>S3</td><td>167</td><td>116</td></tr>
+      <tr><td>S4</td><td>1,085</td><td>784</td></tr>
+      <tr><td>S5</td><td>6,976</td><td>5,124</td></tr>
+      <tr><td>S6</td><td>40,614</td><td>33,028</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The immutable 12-file archive and first-release label event ID 32052162480 replay as CENSORED, with receipt SHA-256 <code>e5de2330e8fa424e095117f700e3a328763b943453bb2e1c1da75cb23c4fa839</code>. No solver ran, and this attempt cannot be repeated under the same freeze. A separate linear Sinz verifier in <a href="https://github.com/aburan28/crypto/pull/927">PR #927</a> has since replayed the same CNF to a full semantic PASS; this original first-run receipt remains CENSORED. A separately frozen n = 19 same-target SAT comparison is admissible after the smaller n = 13 paired solver gate. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/RESULT.md">Result and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/evidence/README.md">raw archive and replay</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-sparse-n19-growth-20260925 -->
+<!-- BEGIN ecc2k130-s3-sparse-n19-linear-20260929 -->
+<section class="panel" id="ecc2k130-s3-sparse-n19-linear-20260929">
+  <div class="panel-head">
+    <h2>n = 19 sparse S3 CNF passes complete independent point replay <span class="chip">representation semantics pass</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/927">PR #927</a> replaced the #795 verifier's redundant quadratic Sinz witness sweep with an ordered linear structural check and proof. The exact first archive was not regenerated. On <a href="https://github.com/aburan28/crypto/actions/runs/36531075738">Ubuntu replay 36531075738</a>, all 146,640 one-hot clauses matched, all 58,825 parsed primary paths matched the independent full-point oracle, all 117,649 signed tuples and 33 Q+T/O targets passed, and five geometric mutations were rejected. Exhaustive k = 1&ndash;5 truth tables and a sign flip and skipped clause in the actual S6 block also failed as expected.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Same immutable #795 producer archive; exact replay head <code>df5c085ef7eec5de509f4cca84e545488a0b3834</code>. The hosted result and artifact hashes are committed in PR #927. Verifier resources are audit overhead, not ECDLP attack cost.</caption>
+    <thead><tr><th>Gate</th><th>Observed result</th><th>Decision boundary</th></tr></thead>
+    <tbody>
+      <tr><td>Largest exact-one group</td><td>40,614 primary variables; 121,839 ordered clauses</td><td>Linear structural check; original first-run verifier still CENSORED</td></tr>
+      <tr><td>Full representation replay</td><td>58,825 paths; 117,649 signed tuples; 33 targets; five controls</td><td>PASS for n = 19 sparse S3 semantics</td></tr>
+      <tr><td>Hosted verifier resources</td><td>193.38 s wall; 196,317,184 B peak RSS</td><td>Audit overhead only; SAT and full ECDLP S/rho unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Next, execute the separately frozen <a href="https://github.com/aburan28/crypto/pull/787">n = 13 same-target sparse/dense SAT protocol</a>, which has no solver outcome yet. Then freeze an n = 19 same-target SAT panel, independently lift every model, and charge exporter, solver, verification and failed branches. This semantic pass does not establish n = 131 capacity, PDP hardness, or a matched-rho crossover. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_n19_linear_20260929/RESULT.md">Result and archive receipt</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-sparse-n19-linear-20260929 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
