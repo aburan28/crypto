@@ -17,9 +17,11 @@ relation LA, can complete independently verified one-target solves on every
 smoke and development job of the five-cell toy panel under the resource
 envelope below, with full scientific admission and exclusive phase closure.
 
-**Success (qualification).** Every scheduled smoke and development job for an
-arm independently verifies source/build, usable base, query law, dispatch,
-stored matrix/rank, logs, descent, scalar replay and native/profile closure.
+**Success (qualification).** At least one F4/F5 arm and at least one SAT arm
+must each complete *every* scheduled smoke and development job. Each verified
+job independently binds source/build, usable base, query law, observed engine
+dispatch, stored matrix/rank, factor logs, target descent, scalar replay and
+native/profile closure. A complete scalar without the checked IC path fails.
 Retain separate cold/online IC and rho leaders, cell tradeoffs and all
 alternatives. No familywise promotion inference is made on this development
 panel. A qualified arm may later enter a new improvement registry only after a
@@ -73,6 +75,12 @@ IC arms (see [panel.json](panel.json)):
 9. `generic_sat_cnf_dense` — generic-v1 sat_cnf + dense LA
 10. `generic_inherited_f4_dense` — generic-v1 inherited_f4 + dense LA
 
+The registered `prepared_both` alias maps to the accepted `ic_online` reference
+role in the executable registry. It is counted once: nine IC candidates
+including `incumbent`, one additional IC reference, and two rho references.
+Scheduling the same source and configuration again as a candidate would create
+a duplicate method identity and artificial replication.
+
 Every generic IC arm uses summands 3, batch_trials 1, max_trials 65536, and
 factor-base recipe subgroup_orbits with seed 43 and requested points 6n. Actual
 usable support, orbit folding and rank are independently checked. Prepared arms
@@ -104,7 +112,23 @@ Primary metric: verified one-target native online wall time after reusable
 preparation through scalar replay. Supplementary: complete cold native time and
 user-space guest instructions with exclusive phase closure. Report
 `S = Ir / sqrt(r)`, actual B/K, paired rho ratios and the weak collector floor
-where applicable. Wall time is secondary.
+where applicable. Use the same supplied public point and frozen resource
+envelope for each IC and rho arm. An online gain does not imply a cold-start
+or total-operation gain; a stage gain does not establish a verified online
+speedup.
+
+Audit every ordinary sampled collection query, including unsuccessful PDP
+calls, before reporting natural relation yield. Keep `unresolved` and budget
+exhaustion distinct from independently proved UNSAT. Report verified witness
+queries, duplicate and accepted rows, novel rank trajectory, final rank,
+matrix and final relation-LA costs, target attempts, scalar replay and actual
+base size before orbit folding. Report base construction and memory when
+measured; absent memory is unknown. Planted correctness vectors are not a
+natural-yield sample. Retain the raw reports of incomplete bounded jobs and
+independently check any attempted-query history used in rates. A timeout with
+no complete report is censored, not a zero-yield query. Process repetitions
+on one point are not additional independent points; descriptive rate
+uncertainty resamples distinct public points within their fixed cells.
 
 ## Exclusions
 
