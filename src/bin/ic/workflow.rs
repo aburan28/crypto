@@ -265,6 +265,11 @@ pub struct CollectionParams {
     /// Targeted rounds allowed before falling back to ordinary units.
     #[serde(default, skip_serializing_if = "is_zero_usize")]
     pub targeted_tail_rounds: usize,
+    /// Least-represented columns forced per round after raw coverage is
+    /// complete but sparse solving remains underdetermined. Zero keeps
+    /// the targeted tail coverage-only.
+    #[serde(default, skip_serializing_if = "is_zero_usize")]
+    pub targeted_tail_rank_columns: usize,
     /// Independent probe-sequence domain for the targeted tail.
     #[serde(
         default = "default_targeted_tail_seed",
@@ -280,6 +285,7 @@ impl Default for CollectionParams {
             max_units: 64,
             targeted_tail_trials: 0,
             targeted_tail_rounds: 0,
+            targeted_tail_rank_columns: 0,
             targeted_tail_seed: default_targeted_tail_seed(),
         }
     }
@@ -485,6 +491,9 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
             "collection targeted tail exceeds its 100000000-trial / 100000-round cap".into(),
         );
     }
+    if col.targeted_tail_rank_columns > 100_000 {
+        return Err("collection.targeted_tail_rank_columns must be at most 100000".into());
+    }
     for (i, t) in p.targets.iter().enumerate() {
         if [
             t.known_log.is_some(),
@@ -611,6 +620,7 @@ pub struct TargetedTailDocument {
     pub spec: FactorBaseSpec,
     pub base_seed: u64,
     pub trials_per_column: u64,
+    pub rank_columns_per_round: usize,
     pub attempts: Vec<TargetedTailAttempt>,
 }
 
@@ -1561,6 +1571,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 || document.spec != spec
                 || document.base_seed != p.collection.targeted_tail_seed
                 || document.trials_per_column != p.collection.targeted_tail_trials
+                || document.rank_columns_per_round != p.collection.targeted_tail_rank_columns
             {
                 return Err(format!(
                     "{} belongs to a different run or targeted-tail policy",
@@ -1579,6 +1590,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 spec: spec.clone(),
                 base_seed: p.collection.targeted_tail_seed,
                 trials_per_column: p.collection.targeted_tail_trials,
+                rank_columns_per_round: p.collection.targeted_tail_rank_columns,
                 attempts: Vec::new(),
             }
         };
@@ -1603,7 +1615,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             && p.collection.targeted_tail_rounds > 0
             && p.summands == 3
             && p.solver == Solver::PairTable
-            && !solver.uncovered_columns().is_empty()
+            && (!solver.uncovered_columns().is_empty()
+                || p.collection.targeted_tail_rank_columns > 0)
         {
             let resource_start = experiment::resource_snapshot();
             if pair.is_none() {
@@ -1620,10 +1633,16 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 .map_or(0, |round| round + 1);
             'rounds: for round in first_round..p.collection.targeted_tail_rounds {
                 let uncovered = solver.uncovered_columns();
-                if uncovered.is_empty() {
+                let columns = if uncovered.is_empty() {
+                    solver.least_covered_columns(p.collection.targeted_tail_rank_columns)
+                } else {
+                    uncovered
+                };
+                if columns.is_empty() {
                     break;
                 }
-                for column in uncovered {
+                let mut round_relations = Vec::new();
+                for column in columns {
                     let fixed_point_index = projected
                         .factor_point_for_column(column)
                         .ok_or("uncovered projected column has no factor-base point")?;
@@ -1645,8 +1664,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                         "      targeted round {round}, column {column}: {} relations from {} direct pair lookups ({:.3}s)",
                         report.relations, report.pair_lookups, report.elapsed_seconds
                     ));
-                    solver.push(&relations);
-                    loaded += relations.len();
+                    round_relations.extend(relations.iter().cloned());
                     targeted_tail.attempts.push(TargetedTailAttempt {
                         round,
                         column,
@@ -1660,10 +1678,12 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     });
                     write_atomic(&targeted_tail_path, &targeted_tail)?;
                     targeted_ran_now += 1;
-                    outcome = solver.try_solve();
-                    if outcome.is_some() {
-                        break 'rounds;
-                    }
+                }
+                solver.push(&round_relations);
+                loaded += round_relations.len();
+                outcome = solver.try_solve();
+                if outcome.is_some() {
+                    break 'rounds;
                 }
             }
             targeted_resources = experiment::resource_delta(resource_start);
@@ -2360,14 +2380,17 @@ mod tests {
         let collection = serde_json::to_value(&p.collection).unwrap();
         assert!(collection.get("targeted_tail_trials").is_none());
         assert!(collection.get("targeted_tail_rounds").is_none());
+        assert!(collection.get("targeted_tail_rank_columns").is_none());
         assert!(collection.get("targeted_tail_seed").is_none());
 
         p.collection.targeted_tail_trials = 10_000;
         p.collection.targeted_tail_rounds = 4;
+        p.collection.targeted_tail_rank_columns = 8;
         p.collection.targeted_tail_seed ^= 1;
         let enabled = serde_json::to_value(&p.collection).unwrap();
         assert_eq!(enabled["targeted_tail_trials"], 10_000);
         assert_eq!(enabled["targeted_tail_rounds"], 4);
+        assert_eq!(enabled["targeted_tail_rank_columns"], 8);
         assert!(enabled.get("targeted_tail_seed").is_some());
     }
 
