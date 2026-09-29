@@ -1,0 +1,40 @@
+name: ECC2K-130 leaf7 metered route freeze
+
+on:
+  pull_request:
+    paths:
+      - 'research/ecc2k130_leaf7_metered_v1_20260928/**'
+      - 'research/notes/ecc2k130/LEAF_HORIZONTAL_SEVEN_BRIDGE_20260925.md'
+      - 'research/ecc2k130_leaf7_bridge_20260925/FROZEN.json'
+      - 'research/ecc2k130_leaf7_bridge_20260925/PROTOCOL.md'
+      - 'research/ecc2k130_direction_review_20260924/twist_torsion_results.json'
+      - 'research/ecc2k130_endo_ring_263_20260925/receipt.json'
+      - 'research/ecc2k130_dual_transport_20260925/receipt.json'
+      - 'research/ecc2k130_relations/relations.py'
+      - '.github/workflows/ecc2k130-leaf7-metered-freeze.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hash-and-scope-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Pin exact protocol freeze
+        run: |
+          echo 'da40012c7da9e22cbfdb6f127f6679f07c12635357ebbc76c0d77c5717eb883f  research/ecc2k130_leaf7_metered_v1_20260928/FROZEN.json' | sha256sum -c -
+      - name: Check input hashes and static algebra only
+        run: python3 research/ecc2k130_leaf7_metered_v1_20260928/ci_preflight.py
+      - name: Check cost-scope negative controls only
+        run: python3 research/ecc2k130_leaf7_metered_v1_20260928/cost_scope.py --self-test
+      - name: Check Python syntax only
+        run: |
+          python3 -m py_compile \
+            research/ecc2k130_leaf7_metered_v1_20260928/ci_preflight.py \
+            research/ecc2k130_leaf7_metered_v1_20260928/cost_scope.py

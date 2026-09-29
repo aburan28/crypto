@@ -1,0 +1,158 @@
+{
+  "schema": "ecc2k130-leaf7-metered-v1",
+  "status": "HELD_PROTOCOL_ONLY",
+  "source_main_commit": "5654c42f6c8d4c8b5f7f25c762097e6fa257ecc2",
+  "release_main_head": null,
+  "release_gate": "hold_until_pr810_structural_PASS_refreeze_exact_head_CI_and_peer_review",
+  "prerequisite": {
+    "structural_directory": "research/ecc2k130_leaf7_bridge_20260925",
+    "producer_status": "PRODUCER_PASS",
+    "fq_replay_status": "FQ_REPLAY_PASS",
+    "extension_replay_status": "PASS",
+    "structural_gate_status": "PASS",
+    "no_accepted_certificate_yet": true
+  },
+  "input_sha256": {
+    "research/notes/ecc2k130/LEAF_HORIZONTAL_SEVEN_BRIDGE_20260925.md": "ed1e10dad22c678bc45dc5b9ffad79826cd674d151bc081f917293389b7efb82",
+    "research/ecc2k130_leaf7_bridge_20260925/FROZEN.json": "b48e9540de68f5c5df7d8f32c4183b39fda2b580efc8fd93cbd99bbb042b0fe3",
+    "research/ecc2k130_leaf7_bridge_20260925/PROTOCOL.md": "4822314b160911854dc08591e4e9d08e9579fbec0a5fdf611a631085dcf009f0",
+    "research/ecc2k130_direction_review_20260924/twist_torsion_results.json": "6f1e7b22f3471214d38ec0d3196c88fe9edaf45791e9c05ea67764831fd75368",
+    "research/ecc2k130_endo_ring_263_20260925/receipt.json": "bbdff7e901b5d33264e1da95bd0cf1655122d2b1bc42ccce30426a1b24a1640e",
+    "research/ecc2k130_dual_transport_20260925/receipt.json": "4f1d6a5ba85b9c33e07c8af3b42448e10e3633128f3ee9bdffa905fc8cbd2ebc",
+    "research/ecc2k130_relations/relations.py": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f"
+  },
+  "instance": {
+    "field_degree": 131,
+    "field_modulus_hex": "0x800000000000000000000000000002007",
+    "curve": "y^2 + x*y = x^3 + 1",
+    "subgroup_order": "680564733841876926932320129493409985129",
+    "cofactor": 4,
+    "full_group_order": "2722258935367507707729280517973639940516",
+    "trace": "-22283658519494248867",
+    "tau_polynomial": "T^2 + T + 2",
+    "tau_131_coefficients": [
+      "8123678690673902378",
+      "38531015900842053623"
+    ],
+    "source_endomorphism_conductor": 1,
+    "source_endomorphism_discriminant": -7,
+    "leaf_endomorphism_conductor": 263,
+    "leaf_endomorphism_discriminant": -484183,
+    "frobenius_order_conductor": "38531015900842053623"
+  },
+  "kernel_panel": {
+    "torsion_seed": 20260924,
+    "first_line": [
+      1,
+      0
+    ],
+    "other_orbit_line": [
+      1,
+      4
+    ],
+    "norm7_image_line": [
+      1,
+      74
+    ],
+    "twist_frobenius_matrix_columns_mod263": [
+      [
+        186,
+        51
+      ],
+      [
+        73,
+        78
+      ]
+    ],
+    "norm7_matrix_rows_mod263": [
+      [
+        155,
+        117
+      ],
+      [
+        161,
+        108
+      ]
+    ],
+    "other_orbit_conjugacy_exponent": 23,
+    "all_projective_line_cycle_lengths": [
+      1,
+      1,
+      131,
+      131
+    ],
+    "descending_orbit_lengths": [
+      131,
+      131
+    ],
+    "horizontal_line_count": 2,
+    "descending_line_count": 262
+  },
+  "point_panel": {
+    "controls": [
+      "P",
+      "Q",
+      "P+Q",
+      "2P"
+    ],
+    "target_count": 8,
+    "target_prefix": "leaf-seven-bridge-v1",
+    "target_u": "sha256(prefix|i|u) mod r",
+    "target_v": "1 + sha256(prefix|i|v) mod (r-1)",
+    "coefficient_pairs_sha256": "b39da29224f3d503d2409195ae1586b2198dcda62a9e70e4f35a47e516aa22bd",
+    "labels": [
+      "P",
+      "Q",
+      "P+Q",
+      "2P",
+      "target-0",
+      "target-1",
+      "target-2",
+      "target-3",
+      "target-4",
+      "target-5",
+      "target-6",
+      "target-7"
+    ],
+    "point_encoding": "canonical full affine (x,y) over Fq; infinity explicit"
+  },
+  "cost": {
+    "unit": "Fq multiplication equivalent",
+    "square_weight_label": "leaf-seven-cost-v1",
+    "calibration_batches": 11,
+    "calibration_operands_per_batch": 10000,
+    "max_calibration_relative_mad": 0.05,
+    "common_phases": [
+      "torsion_discovery",
+      "first_263_map_and_dual_setup",
+      "point_panel_materialization"
+    ],
+    "direct_phases": [
+      "second_263_kernel_derivation",
+      "second_263_map_and_dual_setup",
+      "source_alpha_panel",
+      "model_normalization",
+      "second_leaf_transport"
+    ],
+    "bridge_phases": [
+      "seven_division_and_kernel_discovery",
+      "seven_map_and_dual_setup",
+      "conjugacy_23_squarings",
+      "model_normalization",
+      "second_leaf_transport"
+    ],
+    "direct_reference": "PR810 saved-basis Cprime BinaryVeluMap.from_generator; third [1,4] map is structural control only",
+    "inversion_calls_diagnostic_only": true,
+    "inversion_internals_in_mul_and_sq": true,
+    "extension_arithmetic_reduced_to_Fq": true,
+    "no_unmetered_phases": true,
+    "incremental_bridge_over_direct_at_most": 0.9,
+    "cold_bridge_over_direct_below": 1,
+    "wall_time_claims": false,
+    "ecdlp_or_pdp_claims": false
+  },
+  "caps": {
+    "child_wall_seconds": 300,
+    "child_peak_rss_bytes": 2147483648
+  }
+}
