@@ -38,6 +38,8 @@ def main() -> int:
         assert sha(HERE / name) == expected, name
     for relative, expected in frozen["input_sha256"].items():
         assert sha(ROOT / relative) == expected, relative
+    assert frozen["dispatch_workflow_path"] == ".github/workflows/ecc2k130-m10-capacity-once.yml"
+    assert sha(ROOT / frozen["dispatch_workflow_path"]) == frozen["dispatch_workflow_sha256"]
     for name, expected in spec["source_results_sha256"].items():
         assert sha(HERE / "inputs" / name) == expected, name
     basis = run_json("basis_verify.py")

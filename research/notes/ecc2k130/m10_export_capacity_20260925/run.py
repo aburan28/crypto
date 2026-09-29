@@ -68,6 +68,9 @@ def release_gate(frozen: dict) -> dict:
     for relative, expected in PARENT_BLOBS.items():
         if blob_sha(observed_main, relative) != expected or blob_sha(checkout, relative) != expected:
             raise RuntimeError(f"NOT_ADMITTED: merged parent blob drift: {relative}")
+    workflow = frozen["dispatch_workflow_path"]
+    if blob_sha(checkout, workflow) != frozen["dispatch_workflow_sha256"]:
+        raise RuntimeError("NOT_ADMITTED: reviewed dispatch workflow drift")
     return {"frozen_main_ancestor": frozen_main, "observed_main_head": observed_main,
             "checkout_head": checkout, "merged_parent_commits": pr_states}
 

@@ -118,6 +118,9 @@ def main() -> int:
         assert sha(ROOT / rel) == expected, rel
         assert git_blob_sha(checkout, rel) == expected, rel
         assert git_blob_sha(observed_main, rel) == expected, rel
+    workflow = frozen["dispatch_workflow_path"]
+    assert sha(ROOT / workflow) == frozen["dispatch_workflow_sha256"]
+    assert git_blob_sha(checkout, workflow) == frozen["dispatch_workflow_sha256"]
     here_rel = HERE.relative_to(ROOT).as_posix()
     for name, expected in frozen["source_sha256"].items():
         assert sha(HERE / name) == expected, name

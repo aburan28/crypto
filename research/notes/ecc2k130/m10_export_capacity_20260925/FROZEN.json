@@ -43,6 +43,8 @@
     "per_arm_address_space_and_rss_bytes": 2147483648,
     "per_arm_external_wall_seconds": 600
   },
+  "dispatch_workflow_path": ".github/workflows/ecc2k130-m10-capacity-once.yml",
+  "dispatch_workflow_sha256": "92326f6e97b701c930d904c5e971d0796fa736f825506dbe74adcdb8e5eafe3c",
   "freeze_utc": "2026-09-25T19:22:52.391152+00:00",
   "input_sha256": {
     "research/notes/ecc2k130/rotated_arity_screen_20260925/evidence/raw/m10/producer/result.json": "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
@@ -63,16 +65,18 @@
   "source_base_head": "708e3c884c1707affbd186288639b67972047d2c",
   "source_sha256": {
     "INPUT.json": "2f27dd1b5af73811bcaddb1c125ddca209f26bf6656c93d83e9cadc4e386f70a",
-    "PROTOCOL.md": "b947fe264d4153ea958915654ce2b994c0475bb7ace56a77f37f648147983a3f",
+    "PROTOCOL.md": "9f99cf6f272d3b82d251a6ea6fe94551b71b27cb837524a9452ce9b60280cc6d",
     "basis_verify.py": "d8f8c09f778261483325f76aeb11524db46113f52c706066173847c032986703",
     "capacity.py": "ef6b27752992ce44c663b2f0a825efac9a4bec009cf20868ee8a85948c64cd23",
-    "ci_replay.py": "d4ac4e7574c2130df82fe02b605d9c9e261db01f531132221a344b8e5e2163d1",
+    "ci_replay.py": "ef5ecba0627a0241c4cf9df9b11fb76e6ebb724bfde3a46c3164aee4034d455c",
+    "dispatch_gate.py": "cbdf97e7567cec0b13e6677cceab5086f9f07e8d25bd0274d7db1dc1cd556456",
     "inputs/balanced_m10_result.json": "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
     "inputs/unequal_m10_result.json": "65bc8e10ea1c058a0dddb3a6b8cc2c4de016b3b454b3850baf72552bf557820e",
     "produce.py": "9319235d43550857164ff25ce2acb62e0878a24a0388574228ff27e4b6eb7cb8",
-    "run.py": "b02a21a2c48e499f52eb590b48ff2283fe743ef1e5593ec462e0908d8cc0473b",
+    "run.py": "e8886a47a41670dcabcb0938ebdf70561d08b60b9a017d24b27aa953638024df",
     "selftest.py": "d646da156b1dc5631e0b0aaf03e390dc4f3d351021fc14c987ce80529193ebcf",
-    "verify.py": "07ab88c22eebc0a35f42251f2c6b493e5ea923612dd6dc6f4df0be66c5fba684"
+    "test_dispatch_gate.py": "a063699e76c0e1e5186d88013f2978154e36f0d258b931ef491d459d3cb20820",
+    "verify.py": "a1b282c163c6a935ae3c8a2752bf83ba04b3d9801012769afaaad87b882d3037"
   },
   "toy_expected": {
     "checked_branches": [
