@@ -1,0 +1,33 @@
+# Calibration runs (DEVELOPMENT DATA, seeds 777 and 4242; not campaign evidence)
+## d=7, one uniform + one planted target, WDSat plain and CryptoMiniSat, both encodings (seed 777)
+d 7 admissible 74 pairs 2701 planted [34, 43, 68]
+{"enc": "s4", "stratum": "uniform", "solver": "wdsat-plain", "args": ["-b"], "gen_s": 0.9, "stats": {"vars": 60, "equations": 170, "wdsat_max_id": 1101, "total_terms": 39186}, "status": "UNSAT", "decisions": "349857", "verified": [], "wall": 10.39}
+{"enc": "s4", "stratum": "uniform", "solver": "wdsat-plain", "args": [], "status": "UNSAT", "decisions": "2066328", "verified": [], "wall": 64.3}
+{"enc": "s4", "stratum": "uniform", "solver": "cms", "status": "UNSAT", "wall": 0.03, "verified": [], "cnf": {"cnf_vars": 1101, "clauses": 3466, "xors": 170}}
+{"enc": "s4", "stratum": "planted", "solver": "wdsat-plain", "args": ["-b"], "status": "SAT", "decisions": "117398", "verified": [true], "wall": 2.69}
+{"enc": "s4", "stratum": "planted", "solver": "wdsat-plain", "args": [], "status": "SAT", "decisions": "264875", "verified": [true], "wall": 6.02}
+{"enc": "s4", "stratum": "planted", "solver": "cms", "status": "SAT", "wall": 0.02, "verified": [true]}
+{"enc": "rr", "stratum": "uniform", "solver": "wdsat-plain", "args": ["-b"], "stats": {"vars": 153, "equations": 394, "wdsat_max_id": 3132, "total_terms": 379996}, "status": "FALSE SAT: partial assignment printed with the a-block unassigned (2s)", "decisions": "21", "wall": 0.06}
+{"enc": "rr", "stratum": "uniform", "solver": "wdsat-plain", "args": [], "status": "TIMEOUT 600"}
+{"enc": "rr", "stratum": "uniform", "solver": "cms", "status": "UNSAT", "wall": 477.2, "verified": [], "cnf": {"cnf_vars": 3132, "clauses": 9280, "xors": 394}}
+{"enc": "rr", "stratum": "planted", "solver": "wdsat-plain", "args": ["-b"], "status": "FALSE SAT: partial assignment", "decisions": "21", "wall": 0.06}
+{"enc": "rr", "stratum": "planted", "solver": "wdsat-plain", "args": [], "status": "TIMEOUT 600"}
+{"enc": "rr", "stratum": "planted", "solver": "cms", "status": "SAT", "wall": 23.09, "verified": [true]}
+## CryptoMiniSat on s4, one uniform (+ one planted from d=8) target per d, 300 s budget (seed 4242)
+{"d": 6, "gen_s": 0.6, "vars": 51, "max_id": 767, "status": "UNSAT", "wall": 0.007, "conflicts_decided_at": 1, "bracket_repeat_equal": true, "pairs": 561}
+{"d": 8, "gen_s": 0.9, "vars": 69, "max_id": 1510, "status": "UNSAT", "wall": 6.456, "conflicts_decided_at": 272272, "bracket_repeat_equal": null, "pairs": 8515}
+{"d": 8, "planted": true, "status": "SAT", "wall": 0.303, "verified": [true]}
+{"d": 10, "gen_s": 1.5, "vars": 87, "max_id": 2577, "status": "TIMEOUT", "wall": 300.299, "conflicts_decided_at": null, "bracket_repeat_equal": null, "pairs": 134421}
+{"d": 10, "planted": true, "status": "SAT", "wall": 91.219, "verified": [true]}
+{"d": 12, "gen_s": 2.5, "vars": 105, "max_id": 4016, "status": "TIMEOUT", "wall": 300.401, "conflicts_decided_at": null, "bracket_repeat_equal": null, "pairs": 2003001}
+{"d": 12, "planted": true, "status": "TIMEOUT", "wall": 300.368, "verified": []}
+{"d": 14, "gen_s": 3.7, "vars": 123, "max_id": 5875, "status": "TIMEOUT", "wall": 300.898, "conflicts_decided_at": null, "bracket_repeat_equal": null, "pairs": 33411225}
+{"d": 14, "planted": true, "status": "TIMEOUT", "wall": 300.524, "verified": []}
+## WDSat -x defect reproduction at d=6 (seed 20260920 planted target [see pilot.json])
+FIND_ALL build, -x           : 4 of 6 permutations of the planted triple enumerated, then UNSAT (68 decisions)
+FIND_ALL build, no -x        : 6 of 6 permutations, UNSAT (254,345 decisions)
+first-solution build, -x -b  : UNSAT (51 decisions) on the decomposable target   <-- completeness failure
+first-solution build, -b     : SAT, sorted witness 011100|101110|110001 (35,821 decisions)
+first-solution build, -x     : SAT, witness 101110|011100|110001 (38 decisions)  (not the sorted one)
+abscissae fixed by unit clauses, -x: every permutation SAT (0 decisions); a non-solution: UNSAT on XORGAUSS init  -> propagation sound, backtracking incomplete
+all static arrays over-allocated (ANF 200, ID 4000, XEQ 400, DEGREE 6): -x -b still UNSAT (51)  -> not a sizing effect

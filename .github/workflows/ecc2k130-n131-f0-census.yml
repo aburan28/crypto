@@ -1,0 +1,32 @@
+name: ECC2K130 n131 beta3 F0 exact census
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-n131-f0-census.yml'
+      - 'research/notes/ecc2k130/n131_beta3_f0_census_20260925/**'
+      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py'
+      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/verify.py'
+  push:
+    paths:
+      - '.github/workflows/ecc2k130-n131-f0-census.yml'
+      - 'research/notes/ecc2k130/n131_beta3_f0_census_20260925/**'
+      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py'
+      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/verify.py'
+
+jobs:
+  frozen-controls-and-archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check independent freeze anchor
+        run: echo "bfb69239607652ae71ccfc52cabe939d49ae998596440270396cc08091641dd0  research/notes/ecc2k130/n131_beta3_f0_census_20260925/FROZEN.json" | sha256sum --check
+      - name: Check frozen source, input and independent small/sample controls
+        run: python3 research/notes/ecc2k130/n131_beta3_f0_census_20260925/ci_replay.py
+      - name: Check committed raw hashes and independent-count receipt
+        if: ${{ hashFiles('research/notes/ecc2k130/n131_beta3_f0_census_20260925/evidence/receipt.json') != '' }}
+        run: python3 research/notes/ecc2k130/n131_beta3_f0_census_20260925/ci_replay.py --evidence research/notes/ecc2k130/n131_beta3_f0_census_20260925/evidence

@@ -1,0 +1,16 @@
+{
+  "job": "benchmarks/clmad-price/gpujob.sh",
+  "gpu": "B200",
+  "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+  "gitRev": "40a18e281d7a879c38a199f14be9b52e8a6c4a7a",
+  "gitDirty": true,
+  "env": {
+    "SOURCE_REV": "40a18e281d7a879c38a199f14be9b52e8a6c4a7a (uncommitted changes)"
+  },
+  "provider": "modal",
+  "startedAt": "2026-09-22T16:19:12Z",
+  "exitCode": 0,
+  "seconds": 6.771655559539795,
+  "deviceLine": "NVIDIA B200, 580.95.05",
+  "finishedAt": "2026-09-22T16:19:23Z"
+}

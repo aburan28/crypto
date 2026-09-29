@@ -1,0 +1,44 @@
+test_both_pages_read_the_measured_rate_through_one_shared_block (test_build.BuildTests.test_both_pages_read_the_measured_rate_through_one_shared_block) ... ok
+test_build_is_idempotent (test_build.BuildTests.test_build_is_idempotent) ... ok
+test_dashboard_does_not_claim_zero_workers_on_the_ingest_feed (test_build.BuildTests.test_dashboard_does_not_claim_zero_workers_on_the_ingest_feed) ... ok
+test_dashboard_drops_live_figures_when_the_snapshot_is_stale (test_build.BuildTests.test_dashboard_drops_live_figures_when_the_snapshot_is_stale) ... ok
+test_dashboard_eta_runs_on_the_measured_rate_and_falls_back_to_dps (test_build.BuildTests.test_dashboard_eta_runs_on_the_measured_rate_and_falls_back_to_dps) ... ok
+test_dashboard_fetches_resolve_next_to_the_published_page (test_build.BuildTests.test_dashboard_fetches_resolve_next_to_the_published_page) ... ok
+test_dashboard_iteration_total_matches_the_landing_page (test_build.BuildTests.test_dashboard_iteration_total_matches_the_landing_page) ... ok
+test_dashboard_odds_panel_is_the_birthday_bound_with_the_quoted_mean (test_build.BuildTests.test_dashboard_odds_panel_is_the_birthday_bound_with_the_quoted_mean) ... ok
+test_dashboard_publishes_the_rate_and_the_span_it_measured (test_build.BuildTests.test_dashboard_publishes_the_rate_and_the_span_it_measured) ... ok
+test_dashboard_shows_the_work_share_as_a_number_not_a_bar (test_build.BuildTests.test_dashboard_shows_the_work_share_as_a_number_not_a_bar) ... ok
+test_every_page_declares_title_viewport_and_description (test_build.BuildTests.test_every_page_declares_title_viewport_and_description) ... ok
+test_gf2_23_trails_agree_with_the_clients_own_records (test_build.BuildTests.test_gf2_23_trails_agree_with_the_clients_own_records) ... ok
+test_gf2_23_trails_end_on_their_corpus_records (test_build.BuildTests.test_gf2_23_trails_end_on_their_corpus_records) ... ok
+test_history_json_stays_at_the_site_root (test_build.BuildTests.test_history_json_stays_at_the_site_root) ... ok
+test_internal_links_resolve (test_build.BuildTests.test_internal_links_resolve) ... ok
+test_landing_page_operations_total_cites_the_campaign_constants (test_build.BuildTests.test_landing_page_operations_total_cites_the_campaign_constants) ... ok
+test_missing_source_fails_loudly (test_build.BuildTests.test_missing_source_fails_loudly) ... ok
+test_pages_do_not_render_fetched_data_through_innerhtml (test_build.BuildTests.test_pages_do_not_render_fetched_data_through_innerhtml) ... ok
+test_pages_merge_the_live_feed_with_the_pages_snapshot (test_build.BuildTests.test_pages_merge_the_live_feed_with_the_pages_snapshot) ... ok
+test_pages_prefer_the_counted_iteration_total_over_the_derived_one (test_build.BuildTests.test_pages_prefer_the_counted_iteration_total_over_the_derived_one) ... ok
+test_pages_show_walking_slots_as_gpus_running (test_build.BuildTests.test_pages_show_walking_slots_as_gpus_running) ... ok
+test_publishes_every_expected_path (test_build.BuildTests.test_publishes_every_expected_path) ... ok
+test_research_evidence_is_linked_absolutely (test_build.BuildTests.test_research_evidence_is_linked_absolutely) ... ok
+test_rho_engine_imports_and_fetches_resolve_beside_the_worker (test_build.BuildTests.test_rho_engine_imports_and_fetches_resolve_beside_the_worker) ... ok
+test_rho_engine_is_off_until_the_visitor_switches_it_on (test_build.BuildTests.test_rho_engine_is_off_until_the_visitor_switches_it_on) ... ok
+test_rho_engine_reports_no_rate_before_its_device_is_verified (test_build.BuildTests.test_rho_engine_reports_no_rate_before_its_device_is_verified) ... ok
+test_scoreboard_is_a_copy_of_the_canonical_repository_file (test_build.BuildTests.test_scoreboard_is_a_copy_of_the_canonical_repository_file) ... ok
+test_sitemap_and_robots_point_at_the_published_urls (test_build.BuildTests.test_sitemap_and_robots_point_at_the_published_urls) ... ok
+test_skip_link_is_clipped_until_keyboard_focus (test_build.BuildTests.test_skip_link_is_clipped_until_keyboard_focus) ... ok
+test_snapshot_data_is_byte_identical_in_both_locations (test_build.BuildTests.test_snapshot_data_is_byte_identical_in_both_locations) ... ok
+test_walk_forest_caption_states_the_counts_it_draws (test_build.BuildTests.test_walk_forest_caption_states_the_counts_it_draws) ... ok
+test_walk_forest_explorer_is_wired_and_degrades_to_the_figure (test_build.BuildTests.test_walk_forest_explorer_is_wired_and_degrades_to_the_figure) ... ok
+test_walk_forest_figure_is_what_the_trails_render_to (test_build.BuildTests.test_walk_forest_figure_is_what_the_trails_render_to) ... ok
+test_walk_forest_graphs_are_what_the_trails_export_to (test_build.BuildTests.test_walk_forest_graphs_are_what_the_trails_export_to) ... ok
+test_walk_forest_is_sampled_from_the_challenge_curve (test_build.BuildTests.test_walk_forest_is_sampled_from_the_challenge_curve) ... ok
+test_walk_forest_kernel_replay_agrees_with_the_scalar_reference (test_build.BuildTests.test_walk_forest_kernel_replay_agrees_with_the_scalar_reference) ... ok
+test_walk_forest_trails_end_on_their_recorded_endpoints (test_build.BuildTests.test_walk_forest_trails_end_on_their_recorded_endpoints) ... ok
+test_publish_job_uploads_the_assembled_site (test_build.WorkflowTests.test_publish_job_uploads_the_assembled_site) ... ok
+test_site_sources_trigger_the_workflow (test_build.WorkflowTests.test_site_sources_trigger_the_workflow) ... ok
+
+----------------------------------------------------------------------
+Ran 39 tests in 0.319s
+
+OK

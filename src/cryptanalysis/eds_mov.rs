@@ -13,7 +13,7 @@
 //! elements `(a,b) = a+bi`.  The Miller routine evaluates the `F_p`-rational
 //! function `f_{r,P}` at the `F_{p²}` point `φ(P)`, accumulating in `F_{p²}`.
 
-use crate::cryptanalysis::eds_tate::{ec_add, ec_mul, ec_order, Pt};
+use crate::cryptanalysis::eds_tate::{ec_mul, ec_order, Pt};
 
 // ── F_p helpers ─────────────────────────────────────────────────────────────
 #[inline]
@@ -49,6 +49,7 @@ fn invm(x: u64, p: u64) -> u64 {
 pub type Fp2 = (u64, u64);
 
 #[inline]
+#[allow(dead_code)]
 fn f2_add(x: Fp2, y: Fp2, p: u64) -> Fp2 {
     (addm(x.0, y.0, p), addm(x.1, y.1, p))
 }

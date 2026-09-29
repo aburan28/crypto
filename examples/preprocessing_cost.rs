@@ -62,9 +62,10 @@
 //!   * The largest artifact stored is 1.92 MB against a 4 MB `max_value`.
 //!
 //! So a durable tier under Redis is not warranted for this layer: an S3 GET is
-//! tens of milliseconds and the whole build is at most 9.4 ms. The layer where
-//! an expensive artifact does live is `Parameterized`, measured by
-//! `gb_probe.rs`, and it is off the relation-search path.
+//! tens of milliseconds and the whole build is at most 9.4 ms. The one
+//! artifact that was expensive, a full parametric Gröbner basis, is priced by
+//! `gb_probe.rs`; its `Parameterized` cache was removed after it cost more to
+//! build than solving every target it could replace.
 //!
 //! Superseded figures, kept because deleting them hides how much the method
 //! mattered. Two bugs were found in review, both fixed above:

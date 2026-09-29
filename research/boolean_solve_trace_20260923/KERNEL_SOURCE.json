@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "../boolean_linear_tail_20260923/worker.rs",
+  "source_sha256": "7535e7672ed8a6eef98d29b44b5fdd7ea9d82c202944d53dddb2f8340ea1bb26",
+  "base_commit": "48af1b0d7011d90f481aff177eed6d8fc570e758",
+  "changes": [
+    "retain kernel section only, no older benchmark driver",
+    "generic generator cap raised from 12 to 36 for square/overdetermined fixtures",
+    "bound solve-lifetime layout cache at 128 entries or 200000 retained columns, and schedule cache at 256 entries",
+    "add owned-system wrapper and canonical/affine helpers",
+    "run_02 adds a one-word degree-2 tail implementation, checked against the general flat kernel",
+    "run_03 exposes the source monomial comparator for order-preserving specialization; kernel algorithms otherwise retained"
+  ],
+  "scope": "Standalone generated Boolean systems only; no production solver changes or imported curve/target/scalar data."
+}
