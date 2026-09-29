@@ -7,6 +7,7 @@ Timeouts without a full report remain censored, never zero-yield observations.
 import argparse
 from collections import Counter, defaultdict
 import json
+import math
 from pathlib import Path
 import random
 
@@ -84,13 +85,19 @@ def observed_run(root, case, arm, stage, repetition):
 def case_rate_interval(cases):
     """Resample distinct public points, not deterministic process repetitions."""
     if not cases:
-        return dict(rate=None, ci95=None, distinct_points=0)
+        return dict(rate=None, ci95=None, distinct_points=0,
+                    point_mean=None, point_mean_hoeffding95=None)
     total = sum(row['query_count'] for row in cases)
     require(total > 0, 'observed case has no ordinary queries')
     estimate = sum(row['witness_count'] for row in cases)/total
+    point_rates = [row['witness_count']/row['query_count'] for row in cases]
+    point_mean = sum(point_rates)/len(point_rates)
+    radius = math.sqrt(math.log(40)/(2*len(cases)))
+    conservative = [max(0, point_mean-radius), min(1, point_mean+radius)]
     if len(cases) == 1:
         return dict(rate=estimate, ci95=None, distinct_points=1,
-                    uncertainty='one distinct point; interval uninformative')
+                    point_mean=point_mean, point_mean_hoeffding95=conservative,
+                    uncertainty='one distinct point; bootstrap interval uninformative')
     rng = random.Random(SEED)
     draws = []
     for _ in range(DRAWS):
@@ -99,7 +106,10 @@ def case_rate_interval(cases):
                      / sum(row['query_count'] for row in sample))
     draws.sort()
     return dict(rate=estimate, ci95=[draws[int(.025*DRAWS)], draws[int(.975*DRAWS)]],
-                distinct_points=len(cases), uncertainty='point-cluster bootstrap, descriptive')
+                distinct_points=len(cases), point_mean=point_mean,
+                point_mean_hoeffding95=conservative,
+                uncertainty='query-weighted point-cluster bootstrap is descriptive; '
+                            'Hoeffding bound is for the distinct-point mean under the frozen point law')
 
 
 def summarize(observations):

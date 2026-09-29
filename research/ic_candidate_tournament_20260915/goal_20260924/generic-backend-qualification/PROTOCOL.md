@@ -139,6 +139,10 @@ independently check any attempted-query history used in rates. A timeout with
 no complete report is censored, not a zero-yield query. Process repetitions
 on one point are not additional independent points; descriptive rate
 uncertainty resamples distinct public points within their fixed cells.
+Because a bootstrap can collapse to zero in a zero-yield cell, also report a
+conservative 95% Hoeffding interval for the mean of distinct-point yield
+rates under the frozen point law. Neither interval turns a censored run into
+a measured failure rate.
 
 ## Exclusions
 

@@ -37,6 +37,14 @@ class NaturalYieldTests(unittest.TestCase):
         with self.assertRaises(InvalidEvidence):
             summarize(observations)
 
+    def test_zero_yield_retains_nonzero_distinct_point_uncertainty(self):
+        observations = [row(f'p{point}', rep, witness=0, queries=8)
+                        for point in range(3) for rep in range(3)]
+        rate = summarize(observations)[0]['natural_witness_rate']
+        self.assertEqual(rate['rate'], 0)
+        self.assertEqual(rate['ci95'], [0, 0])
+        self.assertGreater(rate['point_mean_hoeffding95'][1], 0)
+
 
 if __name__ == '__main__':
     unittest.main()
