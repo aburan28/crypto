@@ -57,7 +57,7 @@
 //! 4. **Reports outliers**: ranks the most-correlated bit pairs.
 
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
+use num_traits::Zero;
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 
 /// P-256 prime `p = 2²⁵⁶ − 2²²⁴ + 2¹⁹² + 2⁹⁶ − 1`.
@@ -151,6 +151,7 @@ pub fn solinas_reduce_p256(c: &[u32; 16]) -> BigUint {
 
 /// Validate via direct BigUint reduction: `c mod p` should equal
 /// `solinas_reduce_p256(c)`.  Used in tests.
+#[allow(dead_code)]
 fn direct_reduce(c: &[u32; 16]) -> BigUint {
     fn pack_le(words: &[u32; 16]) -> BigUint {
         let mut result = BigUint::zero();
@@ -177,6 +178,12 @@ pub struct CorrelationTable {
     pub marginal_c: Vec<u64>,
     /// `joint[i * 512 + j]` = count where both `r[i] = 1` AND `c[j] = 1`.
     pub joint: Vec<u64>,
+}
+
+impl Default for CorrelationTable {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl CorrelationTable {
@@ -361,7 +368,7 @@ mod tests {
         let n = table.n_samples as f64;
 
         // Compute |z| for all pairs and bucket.
-        let mut buckets = vec![0u64; 10]; // |z| ∈ [0,1), [1,2), ..., [9,∞)
+        let mut buckets = [0u64; 10]; // |z| ∈ [0,1), [1,2), ..., [9,∞)
         for i in 0..256 {
             let p_r = table.marginal_r[i] as f64 / n;
             for j in 0..512 {
@@ -412,8 +419,8 @@ mod tests {
         let a4 = -1.453152027;
         let a5 = 1.061405429;
         let q = 1.0 / (1.0 + p * t);
-        let erfc = (a1 * q + a2 * q.powi(2) + a3 * q.powi(3) + a4 * q.powi(4) + a5 * q.powi(5))
-            * (-t * t).exp();
-        erfc
+
+        (a1 * q + a2 * q.powi(2) + a3 * q.powi(3) + a4 * q.powi(4) + a5 * q.powi(5))
+            * (-t * t).exp()
     }
 }

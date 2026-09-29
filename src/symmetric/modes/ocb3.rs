@@ -94,7 +94,7 @@ fn xor16_in_place(a: &mut [u8; 16], b: &[u8; 16]) {
 fn bit_slice(stretch: &[u8; 24], bottom: u32) -> [u8; 16] {
     let mut out = [0u8; 16];
     let byte_off = (bottom / 8) as usize;
-    let bit_off = (bottom % 8) as u32;
+    let bit_off = bottom % 8;
     if bit_off == 0 {
         out.copy_from_slice(&stretch[byte_off..byte_off + 16]);
     } else {

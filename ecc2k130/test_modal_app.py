@@ -9,6 +9,8 @@ import sys
 import tempfile
 import types
 import unittest
+from contextlib import nullcontext
+from unittest.mock import patch
 from pathlib import Path
 
 
@@ -33,6 +35,7 @@ if "modal" not in sys.modules:
     stub.is_local = lambda: True
     stub.Image = _Chain()
     stub.Volume = _Chain()
+    stub.Secret = _Chain()
     stub.App = _App
     sys.modules["modal"] = stub
 
@@ -42,6 +45,19 @@ import modal_sync  # noqa: E402
 
 
 class CampaignRules(unittest.TestCase):
+    def test_campaign_search_guards_gpu_and_cpu_ids_before_starting(self):
+        with patch('aws.seed_registry.modal_guard', side_effect=lambda *a: nullcontext()) as guard, \
+                patch.object(modal_app, '_runSearch', return_value={'checkpoint': 'saved'}) as search:
+            modal_app.runSearch(curve=131, runId=8000, cpuThreads=4)
+        self.assertEqual([call.args[0] for call in guard.call_args_list], [8000, 9000])
+        search.assert_called_once()
+
+    def test_campaign_search_refuses_disabling_checkpoints(self):
+        with patch.object(modal_app, '_runSearch') as search:
+            with self.assertRaisesRegex(ValueError, 'requires resumable'):
+                modal_app.runSearch(curve=131, runId=8000, resume=False)
+        search.assert_not_called()
+
     def test_the_range_matches_modal_sync_and_stays_a_five_digit_slot(self):
         self.assertEqual(modal_app.MODAL_RUN_ID_MIN, modal_sync.MODAL_RUN_ID_MIN)
         self.assertEqual(modal_app.MODAL_RUN_ID_MAX, modal_sync.MODAL_RUN_ID_MAX)
@@ -52,7 +68,8 @@ class CampaignRules(unittest.TestCase):
             with self.assertRaises(ValueError, msg=str(bad)):
                 modal_app.checkCampaignRunId(bad)
         self.assertEqual(modal_app.checkCampaignRunId(8000), 8000)
-        self.assertEqual(modal_app.checkCampaignRunId("9999"), 9999)
+        with self.assertRaises(ValueError):
+            modal_app.checkCampaignRunId("9999")
 
     def test_the_weight_comes_from_campaign_json_and_nothing_else(self):
         self.assertEqual(modal_app.campaignDpWeight(), 32)
@@ -114,8 +131,9 @@ class CampaignRules(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             modal_app.checkCampaignRunId(9000, withCpu=True)
         self.assertIn("sidecar", str(ctx.exception))
-        # Without a sidecar the whole range is still a GPU run's to take.
-        self.assertEqual(modal_app.checkCampaignRunId(9500), 9500)
+        # A GPU-only launch must not take another GPU's CPU sidecar seeds.
+        with self.assertRaises(ValueError):
+            modal_app.checkCampaignRunId(9500)
         self.assertEqual(modal_sync.slot_for_run(modal_app.cpuRunId(8999)), 99999)
 
     def test_next_free_run_id_ignores_sidecar_ids(self):
