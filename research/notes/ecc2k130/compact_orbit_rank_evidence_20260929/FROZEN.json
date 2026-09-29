@@ -9,13 +9,15 @@
   },
   "schema": "compact-orbit-rank-evidence-freeze-v1",
   "sha256": {
-    ".github/workflows/compact-orbit-rank-evidence.yml": "de38b76e9345fbf92710fe8f0218179b6c5366582d77633bd591b4dd146dc610",
+    ".github/workflows/compact-orbit-rank-evidence.yml": "356446a02f7d182ad03e134dce736454a33e771dfb22584f059cb4f5c7c6bc55",
     "Cargo.toml": "f1b3abc246c4971b48b377d5696bc96594deb729320348c4277307e42ed61721",
     "examples/koblitz_orbit_dlp_fast.rs": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
     "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/PROTOCOL.md": "1d936ed4da8e4ff5e47021289177697969019e62fb8e5c0fe7d05ce6c1591385",
     "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/ci_replay.py": "b39ef73de3bf797f7a1e2a9b572f7e6ff53e35500269cb93769704e01661ed70",
     "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/run_control.py": "5e5a817f069b8be60c8e320fa74596763aca2ead04b8b8f7934a80ef2300af20",
     "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/targets_n13.txt": "10159baf262b43a92d95db59dae1f72c645127301661e0a3ce4e38b295a97c58",
+    "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/test_verify_rank.py": "793c4307fb3bad9c1085d4f1ad6883fdfe7c2750c067e244c613684d197eea9d",
+    "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_archive.py": "3a1ea0d5b9d8771ab8a97216e3a877c714153a445753f253c5c2ab132261b46c",
     "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py": "254869e52bdbd417e14d74c87940293490160faaa7fbb45f4edcb6b773a4b0f6",
     "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
     "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py": "1df6fc9295cf525be198a19842dfdca7391ac985bfa79ffa1acf8e546cc05ce1"

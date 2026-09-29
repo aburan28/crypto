@@ -25,8 +25,10 @@ jobs:
           python-version: '3.12'
       - name: Check frozen source, input, and syntax
         run: |
-          python3 -m py_compile research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/{ci_replay,run_control,verify_rank}.py
+          python3 -m py_compile research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/{ci_replay,run_control,verify_rank,verify_archive,test_verify_rank}.py
           python3 research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/ci_replay.py
+          python3 research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_archive.py
+          python3 -m unittest discover -s research/notes/ecc2k130/compact_orbit_rank_evidence_20260929 -p 'test_verify_rank.py' -v
       - name: Build exact compact producer
         run: |
           cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
