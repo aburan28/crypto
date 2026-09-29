@@ -41,10 +41,9 @@ index 47c80aab..882ae098 100644
      pub attempts: Vec<TargetedTailAttempt>,
  }
  
-@@ -1416,6 +1427,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
+@@ -1416,5 +1427,6 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                  || document.trials_per_column != p.collection.targeted_tail_trials
-                 || document.rank_columns_per_round
-                     != p.collection.targeted_tail_rank_columns
+                 || document.rank_columns_per_round != p.collection.targeted_tail_rank_columns
 +                || document.first_hit_raw_coverage != p.collection.targeted_tail_first_hit
              {
                  return Err(format!(

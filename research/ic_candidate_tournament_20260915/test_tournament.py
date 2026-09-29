@@ -98,6 +98,33 @@ class DecisionTests(unittest.TestCase):
         data=rows(.5);data[1]['case_sha256']='different'
         with self.assertRaises(InvalidEvidence):comparison(data,'candidate',draws=200)
 
+    def test_scientific_comparison_rejects_mixed_workloads_and_methods(self):
+        data=rows(.5)
+        for row in data:
+            row['mode']='ic'
+            row['measurement']={'workload_id':row['case'], 'candidate_id':row['arm'],
+                'native_timing':{'online':{'wall_ns':1000000}}}
+        self.assertTrue(comparison(data,'candidate',draws=20)['eligible'])
+        wrong_workload=copy.deepcopy(data)
+        wrong_workload[1]['measurement']['workload_id']='different'
+        with self.assertRaisesRegex(InvalidEvidence,'different workloads'):
+            comparison(wrong_workload,'candidate',draws=20)
+        wrong_candidate=copy.deepcopy(data)
+        wrong_candidate[1]['measurement']['candidate_id']='another-candidate'
+        with self.assertRaisesRegex(InvalidEvidence,'different method identities'):
+            comparison(wrong_candidate,'candidate',draws=20)
+        rho=copy.deepcopy(data)
+        for row in rho:
+            if row['arm']=='candidate':
+                row['arm']='rho'
+                row['mode']='rho'
+                row['measurement'].pop('candidate_id')
+                row['measurement']['reference_id']='rho-reference'
+        self.assertTrue(comparison(rho,'rho',draws=20)['eligible'])
+        next(row for row in rho if row['arm']=='rho')['measurement']['reference_id']='another-rho'
+        with self.assertRaisesRegex(InvalidEvidence,'different method identities'):
+            comparison(rho,'rho',draws=20)
+
     def test_changed_factor_base_is_not_a_matched_implementation_gain(self):
         data=rows(.5)
         data[1]['certificate']['factor_base_sha256']='different-base'

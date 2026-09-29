@@ -1,0 +1,248 @@
+{
+  "impossible_algebraic_cells": 20,
+  "interpretation": "Static encoder check only; dispatch, natural yield, complete recovery and cost remain unmeasured.",
+  "layout": "m*ell+(m-2)*n",
+  "max_boolean_variables": 64,
+  "rows": [
+    {
+      "candidate": "incumbent",
+      "solver": "pair_table",
+      "status": "OUTSIDE_ALGEBRAIC_GATE"
+    },
+    {
+      "candidate": "prepared_both",
+      "solver": "pair_table",
+      "status": "OUTSIDE_ALGEBRAIC_GATE"
+    },
+    {
+      "candidate": "generic_pair_dense",
+      "solver": "pair_table",
+      "status": "OUTSIDE_ALGEBRAIC_GATE"
+    },
+    {
+      "candidate": "generic_pair_sparse",
+      "solver": "pair_table",
+      "status": "OUTSIDE_ALGEBRAIC_GATE"
+    },
+    {
+      "basis_length": 17,
+      "boolean_variables": 68,
+      "candidate": "generic_f4_dense",
+      "cell": "n17a1",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 19,
+      "boolean_variables": 76,
+      "candidate": "generic_f4_dense",
+      "cell": "n19a0",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 23,
+      "boolean_variables": 92,
+      "candidate": "generic_f4_dense",
+      "cell": "n23a0",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 23,
+      "boolean_variables": 92,
+      "candidate": "generic_f4_dense",
+      "cell": "n23a1",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 31,
+      "boolean_variables": 124,
+      "candidate": "generic_f4_dense",
+      "cell": "n31a0",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 17,
+      "boolean_variables": 68,
+      "candidate": "generic_f4_sparse",
+      "cell": "n17a1",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 19,
+      "boolean_variables": 76,
+      "candidate": "generic_f4_sparse",
+      "cell": "n19a0",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 23,
+      "boolean_variables": 92,
+      "candidate": "generic_f4_sparse",
+      "cell": "n23a0",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 23,
+      "boolean_variables": 92,
+      "candidate": "generic_f4_sparse",
+      "cell": "n23a1",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 31,
+      "boolean_variables": 124,
+      "candidate": "generic_f4_sparse",
+      "cell": "n31a0",
+      "max_boolean_variables": 64,
+      "solver": "f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 17,
+      "boolean_variables": 68,
+      "candidate": "generic_f5_dense",
+      "cell": "n17a1",
+      "max_boolean_variables": 64,
+      "solver": "f5",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 19,
+      "boolean_variables": 76,
+      "candidate": "generic_f5_dense",
+      "cell": "n19a0",
+      "max_boolean_variables": 64,
+      "solver": "f5",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 23,
+      "boolean_variables": 92,
+      "candidate": "generic_f5_dense",
+      "cell": "n23a0",
+      "max_boolean_variables": 64,
+      "solver": "f5",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 23,
+      "boolean_variables": 92,
+      "candidate": "generic_f5_dense",
+      "cell": "n23a1",
+      "max_boolean_variables": 64,
+      "solver": "f5",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 31,
+      "boolean_variables": 124,
+      "candidate": "generic_f5_dense",
+      "cell": "n31a0",
+      "max_boolean_variables": 64,
+      "solver": "f5",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "candidate": "generic_sat_xor_dense",
+      "solver": "sat_xor",
+      "status": "SEPARATE_SAT_PATH_UNCHECKED"
+    },
+    {
+      "candidate": "generic_sat_cnf_dense",
+      "solver": "sat_cnf",
+      "status": "SEPARATE_SAT_PATH_UNCHECKED"
+    },
+    {
+      "basis_length": 17,
+      "boolean_variables": 68,
+      "candidate": "generic_inherited_f4_dense",
+      "cell": "n17a1",
+      "max_boolean_variables": 64,
+      "solver": "inherited_f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 19,
+      "boolean_variables": 76,
+      "candidate": "generic_inherited_f4_dense",
+      "cell": "n19a0",
+      "max_boolean_variables": 64,
+      "solver": "inherited_f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 23,
+      "boolean_variables": 92,
+      "candidate": "generic_inherited_f4_dense",
+      "cell": "n23a0",
+      "max_boolean_variables": 64,
+      "solver": "inherited_f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 23,
+      "boolean_variables": 92,
+      "candidate": "generic_inherited_f4_dense",
+      "cell": "n23a1",
+      "max_boolean_variables": 64,
+      "solver": "inherited_f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    },
+    {
+      "basis_length": 31,
+      "boolean_variables": 124,
+      "candidate": "generic_inherited_f4_dense",
+      "cell": "n31a0",
+      "max_boolean_variables": 64,
+      "solver": "inherited_f4",
+      "status": "ABOVE_LAYOUT_CAP",
+      "summands": 3
+    }
+  ],
+  "schema_version": 1,
+  "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "source_objects": {
+    "examples/ic_tournament_worker.rs": "745247f3d89d46cdffb6d1f28778971caae7aa21",
+    "src/cryptanalysis/koblitz_factor_base_search.rs": "8aacd0b9c0c4b4e8702c97d631319afdaa4e22e6",
+    "src/cryptanalysis/koblitz_groebner.rs": "91ee5d6cfd99166697895aac62dbabb1f4d9778c",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "16a102a9be61630da2d1c49bcabcc55eaf5ab2f0",
+    "src/cryptanalysis/polynomial_reuse.rs": "f79411c0f2309090b4ba7ddfd9b80bb202859796"
+  },
+  "status": "FAIL_STATIC_LAYOUT"
+}

@@ -42,9 +42,9 @@ index 47c80aab..60b9240d 100644
  }
  
 @@ -1416,6 +1427,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
+                 || document.base_seed != p.collection.targeted_tail_seed
                  || document.trials_per_column != p.collection.targeted_tail_trials
-                 || document.rank_columns_per_round
-                     != p.collection.targeted_tail_rank_columns
+                 || document.rank_columns_per_round != p.collection.targeted_tail_rank_columns
 +                || document.null_support_policy != p.collection.targeted_tail_null_support
              {
                  return Err(format!(

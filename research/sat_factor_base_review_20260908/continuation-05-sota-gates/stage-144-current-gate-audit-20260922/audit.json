@@ -180,7 +180,7 @@
     },
     "source_patch": {
       "path": "docs/ic/patches/koblitz-n59-rank-solve-interval4-rejected-20260922.patch",
-      "sha256": "fff8f0fd27097a0644e2487d553fdcd9bccd27c2c44f60bb374d26a23a9ae592",
+      "sha256": "787ff736e841061e9aa8c8faaebb72d0c299023e78b88be2919855ce1a61115a",
       "status": "archived_rejected_not_applied_to_selected_source"
     },
     "validation": [
@@ -192,9 +192,9 @@
   },
   "evidence_pins": {
     "candidate_params_sha256": "4fcd15e683e6efbba9b9bc567d3c5222be0f71830f1593afe74a11f25ed43aa7",
-    "candidate_patch_sha256": "fff8f0fd27097a0644e2487d553fdcd9bccd27c2c44f60bb374d26a23a9ae592",
+    "candidate_patch_sha256": "787ff736e841061e9aa8c8faaebb72d0c299023e78b88be2919855ce1a61115a",
     "gate_status_sha256": "95ed9bcb6fbfa5095e65ab20209594d8266958eddcd09393dcd1e9afd26f263f",
-    "rank_cadence_evidence_sha256": "fa9c37cba6693cae0bcb677094f17855e748637388a313a7c1395d2781f154aa"
+    "rank_cadence_evidence_sha256": "78c55be3f0d13a14e04ae2933d4a8254b8ea0bc55bce96d10023768569d02d4c"
   },
   "full_cost_gate_passed": false,
   "gates": {
@@ -2305,7 +2305,7 @@
     },
     "source_patch": {
       "path": "docs/ic/patches/koblitz-n59-first-hit-tail-rejected-20260922.patch",
-      "sha256": "9f5d9d24c904f2ae34c258bff8050d4acfe9fe9495d4f700a73ca70a3083c0a7",
+      "sha256": "161797d42211552f17f05c1731f4b0929ab7f12a0d4a2cd982a8582dcd916e6e",
       "status": "archived_rejected_not_applied_to_selected_source"
     },
     "unmatched_candidate_default": {
@@ -5630,8 +5630,8 @@
     "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
   ],
   "predecessor": {
-    "stage143_audit_sha256": "2f08e178955985152d34e2b49218cac1331da983c07b7fcd8b789c6aa9579352",
-    "stage143_seal_sha256": "509194dd6c423d836394244d010c86134c0978a2b5ee751e8fa648211b59cc2f",
+    "stage143_audit_sha256": "6a1afe703e4bfe6f1f65a52331e506a438608ca6c35331035c1d028ab6b32669",
+    "stage143_seal_sha256": "553735c8744b9cfd4b01b39884971fb3a348867c438b47c6a148d6bb7478d008",
     "stage143_status": "current_seven_gate_audit_verified"
   },
   "schema": "koblitz_stage144_current_gate_audit.v1",
