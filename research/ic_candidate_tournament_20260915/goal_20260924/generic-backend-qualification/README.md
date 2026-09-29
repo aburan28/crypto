@@ -1,9 +1,12 @@
 # Generic backend qualification
 
-Status: **registered campaign running; outcome pending.** The single measured
+Status: **first registered campaign operationally censored.** The single measured
 [workflow run 36532455386](https://github.com/aburan28/crypto/actions/runs/36532455386)
 uses the reviewed PR 920 head `765c3c5f19032bd852163805f257c56babef2040`
-as its immutable execution checkout.
+as its immutable execution checkout. The six-hour job limit canceled the
+measurement, and artifact upload failed. [RESULT.md](RESULT.md) preserves the
+terminal log and the resulting unknowns. No F4/F5 or SAT family qualification
+was established, and no matched-rho speedup was measured in this run.
 
 The three sealed pair-table improvement rounds retained the incumbent
 ([bounded goal result](../BOUNDED-GOAL-RESULT.md)). This directory freezes the
@@ -15,6 +18,7 @@ identical public targets.
 | --- | --- |
 | [PROTOCOL.md](PROTOCOL.md) | Hypothesis, freeze, schedule, exclusions, success/stop |
 | [panel.json](panel.json) | Exact arms, seed `2026092901`, resource envelope; byte SHA-256 `83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf` |
+| [RESULT.md](RESULT.md) | Operationally censored first dispatch, terminal log, missing evidence and next-run constraints |
 
 Do not treat admission controls, readiness panels or the earlier
 generic/reference pair-table study as substitutes. The implementation adds
@@ -35,9 +39,9 @@ Until an evidence PR lands, leave measured end-to-end cost and speedup unset.
 
 The workflow's PR job checks registration and Python scientific controls; it
 does not run the campaign. The one authorized main-branch dispatch used
-`execute_registered_campaign=true`. The full output, including
-interrupted directories and failures, is uploaded as an artifact. Do not use a
-second dispatch to replace a failed or incomplete registered execution.
+`execute_registered_campaign=true`. The intended artifact upload failed after
+job cancellation, so completed trial count and partial raw results are unknown.
+Do not use a second dispatch to replace this registered execution.
 
 This registration consumes no improvement-round slot from the exhausted
 three-attempt budget. It cannot retune on those rounds' confirmation or replay

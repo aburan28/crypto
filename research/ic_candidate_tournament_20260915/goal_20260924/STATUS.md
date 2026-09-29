@@ -228,5 +228,8 @@ qualify generic F4/F5/SAT and sparse relation-LA complete pipelines against the
 optimized incumbent and strong rho on fresh points that exclude every exposure
 from all three sealed rounds. Panel byte SHA-256
 `83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf`, seed
-`2026092901`. Measurement, runner and workflow remain pending; this status
-update does not authorize dispatch.
+`2026092901`. Its one measured dispatch was canceled at the six-hour job cap;
+artifact upload also failed, leaving completion and comparative costs unknown.
+The [censored result](generic-backend-qualification/RESULT.md) is not a family
+qualification or solver-performance verdict. A fresh protocol must exclude all
+potentially exposed points and retain partial results before a job timeout.
