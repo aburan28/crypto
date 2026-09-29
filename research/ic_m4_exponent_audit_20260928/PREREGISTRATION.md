@@ -448,3 +448,20 @@ Only whitespace and line breaks changed; no token did.
   point.
 
 The binary with the new hash is the registered engine. Nothing else changes.
+
+### Amendment 2 — 2026-09-29, before any audit cell ran: `clippy` on the module doc comment
+
+The repository's `clippy (crypto)` CI check (`cargo clippy --all-targets -- -D warnings`,
+Rust 1.98) failed with 18 `doc_overindented_list_items` errors in the module doc comment of
+`examples/m4_exponent_audit.rs`. The continuation lines of the four arm descriptions are
+re-indented from 17 spaces to 2. Only comment whitespace changes; no line is added or
+removed.
+
+- **Source sha256:** `c13e9efc…bfdf8` (Amendment 1) became
+  `5bfe99f0ece7d8fe1345b947136948b7588bd1179a02aa8a7770b744ffab1cc8`.
+- **The binary is unchanged.** `m4_exponent_audit-2809b498` rebuilt by `build.sh` is
+  byte-identical to Amendment 1's
+  (`79ccfdf395bc22776ce061921851386dc47038a7d1b0fe3a7dda44e139acb55e`), and so is
+  `groebner_stage_bench-2809b498` (`95565496…7fc5`). The registered engine is unchanged.
+- **Checked locally** with clippy 0.1.94 at `-D warnings`: the previous file fails with the
+  same lint, and this one passes.

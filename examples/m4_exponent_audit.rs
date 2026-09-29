@@ -14,27 +14,27 @@
 //! Arms (`--arm`):
 //!
 //! - `semaev`    — the chained `m = 4` Semaev system through
-//!                 `koblitz_index_calculus::groebner_decompose`, the oracle
-//!                 `examples/groebner_stage_bench.rs` measures, with its
-//!                 20,000-node budget.  Metric: 64-bit word XORs in the
-//!                 Macaulay eliminations for that target (deterministic).
-//!                 Each target's ground truth (does an `m = 4` decomposition
-//!                 over `F` exist?) comes from exhaustive enumeration,
-//!                 uncharged, and is compared with the oracle's verdict.
+//!   `koblitz_index_calculus::groebner_decompose`, the oracle
+//!   `examples/groebner_stage_bench.rs` measures, with its
+//!   20,000-node budget.  Metric: 64-bit word XORs in the
+//!   Macaulay eliminations for that target (deterministic).
+//!   Each target's ground truth (does an `m = 4` decomposition
+//!   over `F` exist?) comes from exhaustive enumeration,
+//!   uncharged, and is compared with the oracle's verdict.
 //! - `enumerate` — the enumeration null: non-decreasing index tuples,
-//!                 depth first, stopping at the first decomposition, exactly
-//!                 the library's `decompose`.  Metric: point additions.
+//!   depth first, stopping at the first decomposition, exactly
+//!   the library's `decompose`.  Metric: point additions.
 //! - `null`      — the random-system null: per target, a random Boolean
-//!                 system (`koblitz_bench::random_control_system`) with the
-//!                 target's own Semaev system's unknown count, equation
-//!                 count, degree and mean terms per equation, solved by the
-//!                 same engine, options and node budget with every root
-//!                 rejected (a full-tree search, the refutation analogue).
-//!                 Metric: word XORs.
+//!   system (`koblitz_bench::random_control_system`) with the
+//!   target's own Semaev system's unknown count, equation
+//!   count, degree and mean terms per equation, solved by the
+//!   same engine, options and node budget with every root
+//!   rejected (a full-tree search, the refutation analogue).
+//!   Metric: word XORs.
 //! - `degree`    — the secondary check: exact Boolean solution count of the
-//!                 target's chained system, then, on systems with none, the
-//!                 refutation degree (`solving_degree`, natural layout) up to
-//!                 `--d-max`.
+//!   target's chained system, then, on systems with none, the
+//!   refutation degree (`solving_degree`, natural layout) up to
+//!   `--d-max`.
 //!
 //! ```sh
 //! KIC_CHAIN_ORDER=interleaved KIC_LINEAR_ELIM=1 KIC_F4_DROP=complete \
