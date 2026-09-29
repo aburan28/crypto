@@ -41,14 +41,19 @@ The fifth hypothesis is that a stable lightest-first ordering of packed
 input rows gives the dense kernel lighter pivots and less fill, without the
 billions of list merges seen in a full sparse pass. Charge the sort within
 the reduction phase and keep output, rank, and row-space checks unchanged.
+The sixth hypothesis is that preallocating each output row and writing its
+known number of terms directly removes per-term `Vec::push` capacity checks.
+The scalar direct-write arm must match raw row fingerprints and term counts
+exactly, with the same complete-call accounting.
 
 Before reserving an eligible x86-64 runner, run a nonpromoting Apple ARM64
 screen on the frozen seed and holdout A. Use one thread, one binary, one warmup
 per arm, and three alternating reference/candidate pairs per seed. Compare
 four, six, and eight tables, then pivot-candidate windows 1 and 4, then table
 widths 8, 7, and 6, then dense reference versus hybrid sparse leading band,
-then unsorted versus stable lightest-first packed rows as separate arms. This
-screen can reject a regression or a correctness failure, but its ratios
+then unsorted versus stable lightest-first packed rows, then ordinary versus
+direct-write scalar unpack as separate arms. This screen can reject a
+regression or a correctness failure, but its ratios
 cannot establish the requested gain. Preserve the raw screen receipt.
 
 ## Frozen workload and accounting

@@ -39,6 +39,8 @@ ARMS = {
                ("hybrid", {"KIC_F5_SPARSE_LEADING": "1"})),
     "sort": (("original", {"KIC_F5_SORT_ROWS": "0"}),
              ("light", {"KIC_F5_SORT_ROWS": "1"})),
+    "unpack": (("push", {"KIC_F5_UNPACK_DIRECT": "0"}),
+               ("direct", {"KIC_F5_UNPACK_DIRECT": "1"})),
 }
 
 
@@ -67,7 +69,7 @@ def run(seed, name, options, phase, pair):
 def main():
     group = sys.argv[1]
     if group not in ARMS:
-        raise SystemExit("usage: screen.py tables|pivot|width|hybrid|sort")
+        raise SystemExit("usage: screen.py tables|pivot|width|hybrid|sort|unpack")
     arms = ARMS[group]
     report = {
         "group": group, "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
