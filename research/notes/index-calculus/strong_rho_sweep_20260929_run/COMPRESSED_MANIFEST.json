@@ -1,0 +1,61 @@
+{
+  "note": "per-fixture JSONL streams over 1 MB, gzip -9 (mtime 0); sha256 of the uncompressed bytes recorded; decompress with gunzip -k",
+  "files": [
+    {
+      "file": "cell_n53_L16384_K880/callgrind_ic.stdout.jsonl",
+      "uncompressed_bytes": 13140359,
+      "uncompressed_sha256": "da34cc6d5628926c378e64b81141f8d2b2a7b0b3283faaeb217ca1426eb3068b",
+      "gz_bytes": 2688454,
+      "gz_sha256": "38d2d8caa5385e812d01e6234978b5e3e6743b9eeac268c58139fec97ae066c2"
+    },
+    {
+      "file": "cell_n53_L16384_K880/callgrind_rho.stdout.jsonl",
+      "uncompressed_bytes": 11119383,
+      "uncompressed_sha256": "d2cd3ca3126aabf52e17965f495d9363721a8d7902ac9110de62c60a214ebd42",
+      "gz_bytes": 1323226,
+      "gz_sha256": "18b2ac58d088751da4e7742e7e500f3505750234b99f384b340d1f5cf1df2f89"
+    },
+    {
+      "file": "cell_n53_L16384_K880/ic_native.jsonl",
+      "uncompressed_bytes": 13133282,
+      "uncompressed_sha256": "4db9159ee92fc518b1554765a57a8597f154968de3a48b3051c17c9e42e7cf35",
+      "gz_bytes": 2577564,
+      "gz_sha256": "808472b67a4d93b29ece0281ff742ace1e8729c25a76344f38986cc3ab9155da"
+    },
+    {
+      "file": "cell_n53_L16384_K880/rho_native.jsonl",
+      "uncompressed_bytes": 11110629,
+      "uncompressed_sha256": "69ac6f7018696a77807490cf462c5297264ad336326abe632ef9064c96a90c67",
+      "gz_bytes": 1302581,
+      "gz_sha256": "92e72b8fcac12c06bf377706a0036dadf7ae230c813c1ba5c7ecc0855bff62f3"
+    },
+    {
+      "file": "cell_n53_L4096_K660/callgrind_ic.stdout.jsonl",
+      "uncompressed_bytes": 3285324,
+      "uncompressed_sha256": "b45b2349a043451330a98b60cbddf556a290bed0e08ef51d6692d6c85ff61984",
+      "gz_bytes": 674485,
+      "gz_sha256": "45960a2a1f859a71decdba05cadb23867f679028f22434a12f80007f2be0f102"
+    },
+    {
+      "file": "cell_n53_L4096_K660/callgrind_rho.stdout.jsonl",
+      "uncompressed_bytes": 2777962,
+      "uncompressed_sha256": "a1e37c69617ef464106116379183e6af423461b747b915403e16312b7b9cf299",
+      "gz_bytes": 335343,
+      "gz_sha256": "32bfdd1a0b9b8fa5d9aa03bd3c5b4eec333332ca73a9e0c1d836381ea0651a30"
+    },
+    {
+      "file": "cell_n53_L4096_K660/ic_native.jsonl",
+      "uncompressed_bytes": 3282634,
+      "uncompressed_sha256": "d8846e5d310b95ba6e7ff9a1d29e794540f9b7dd0df8e9e2200b069156042ff5",
+      "gz_bytes": 646785,
+      "gz_sha256": "08277c742b4cfe9224ec2444979815ef7634a219861595008ccaaac8b7afbf53"
+    },
+    {
+      "file": "cell_n53_L4096_K660/rho_native.jsonl",
+      "uncompressed_bytes": 2774502,
+      "uncompressed_sha256": "e2fe6ef8b5e995d55edfa0b8459e50ac6ad6706ec7abfc8b46b199a77aba91ee",
+      "gz_bytes": 329603,
+      "gz_sha256": "82d9a422393960c23e78f158681eb41d92bc005a251e1d20c6f9743e4e9fcdfb"
+    }
+  ]
+}

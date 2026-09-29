@@ -763,3 +763,153 @@ factor-base build is `O(p)` and the whole pipeline would need rebuilding.
 The prime-order subgroup is required to carry most of the Jacobian, which
 also keeps `l² ∤ #Jac` and so the `l`-Sylow cyclic — the condition that
 makes "`log F_j` mod `l`" well defined at all.
+
+
+---
+
+# Round six: the oracle, and an accounting error that ran through
+# everything before it
+
+Round five named the smoothness oracle as the dominant field cost at
+high genus. Attacking it worked. Checking the result against wall clock
+then showed that the cost model this whole thread has been reporting was
+wrong by more than the optimisation was worth.
+
+Class: **engineering** for the oracle; **accounting** for the rest, and
+the accounting part supersedes the `S_ic` figures in rounds three, four
+and five.
+
+## The oracle is 1.4 – 2.8× cheaper
+
+Two changes, both exact — the oracle's answers are unchanged, and
+exhaustive tests hold it to that.
+
+1. **One oracle call per candidate instead of two.** `decompose`
+   returned an `Option`, so on failure the caller re-ran the whole
+   oracle to learn whether the failure was "not smooth" or "smooth but
+   off a truncated base". At genus 4 more than nine candidates in ten
+   fail, so that probe was about half of all oracle work. It now returns
+   the three outcomes from one call.
+2. **A non-square discriminant proves `u` does not split**, for one
+   resultant on a degree-`≤ g` polynomial and one Euler exponentiation,
+   where the full test needs `x^p mod u`. Frobenius acts on the roots of
+   a squarefree `u` as a permutation whose cycle type is the
+   factorisation type, and `disc(u)` is a square exactly when that
+   permutation is even; splitting completely is the identity, which is
+   even. The odd types are `(2,1)` at degree 3 and `(2,1,1) + (4)` at
+   degree 4 — so this rejects **exactly half** of all candidates before
+   the step that dominates the oracle.
+
+Measured, like-for-like (factor-base walk, same instances, same seeds,
+oracle multiplications as counted at the time):
+
+| genus | oracle before | after | cut | wall before | after |
+|--:|--:|--:|--:|--:|--:|
+| 3, `p = 61` | 82,552 | 32,478 | 2.54× | 61 ms | 32 ms |
+| 3, `p = 211` | 276,160 | 115,835 | 2.38× | 241 ms | 160 ms |
+| 4, `p = 41` | 248,186 | 92,526 | 2.68× | 160 ms | 102 ms |
+| 4, `p = 61` | 304,834 | 112,513 | 2.71× | 159 ms | 73 ms |
+
+Genus 2 gains only 1.4 – 1.6×, from the duplicate call alone: its
+`deg u ≤ 2` closed form never reaches the discriminant filter.
+
+The discriminant carries a sign `(−1)^{n(n−1)/2}`, and whether `−1` is
+itself a square depends on `p mod 4`, so a wrong sign would reject split
+polynomials at one residue class and pass at the other. The exhaustive
+scan-versus-gcd equivalence now covers both classes at degree 3 and, new
+here, at degree 4 — the degree genus 4 actually produces, where the odd
+cycle types are a different set. A third test builds polynomials that
+split by construction and requires every one to survive the filter,
+since this is the only part of the oracle that answers "not smooth"
+without looking for roots at all.
+
+## The cost model was wrong, twice, in opposite directions
+
+Cutting the oracle's **counted** multiplications by 60% cut wall clock
+by 1.5 – 2.2×. If the count were faithful it would have predicted a few
+percent: the oracle was charged at 3 – 6% of `S` while behaving like a
+third of the run. The charge counts coefficient multiplications and
+misses what the implementation does per multiplication — allocation, the
+division loop inside `rem`, clones.
+
+Replacing the charge with the oracle's **measured time**, converted by
+the calibrated seconds-per-group-operation, overshot the other way: that
+calibration repeats one Cantor addition on cache-resident operands, so
+it under-measures what a group operation costs inside a real run, and
+dividing a measured time by too small a number inflates everything
+converted through it. At genus 3, `p = 61` that put `S` at a 1.2×
+disadvantage where the clock said a 1.7× *advantage*.
+
+What the unit now does: the relation search times its own group
+operations, and one operation's in-situ cost is that time divided by the
+operations it counted. The oracle and the solve convert through that.
+`S` and wall clock now agree within 1.6× on every row and within 1.3% –
+33% on most — and that agreement is a test, because it is the only thing
+that caught either error.
+
+**Two previously reported conclusions do not survive this:**
+
+- The sparse solve was reported as "rounds to zero" and as 1 – 29
+  group-op equivalents. Measured, it is 79 – 1350, and at the largest
+  genus-3 instance it is the **single largest term** (1350 of 3033,
+  against the oracle's 999 and the relation stage's 684). "The linear
+  algebra is not the bottleneck" was an artifact of the same
+  under-charge.
+- The headline ratios were optimistic. Rounds four and five reported
+  0.45 (g=2), 0.20 (g=3), 0.08 (g=4) at the largest instance of each
+  genus. Corrected: **1.81, 0.72, 0.16**. The clock in those same runs
+  had already disagreed — 159 ms against 783 ms at genus 4 is 4.9×, not
+  the 12× that `S = 0.08` claimed — and I reported the clock without
+  noticing it contradicted the unit.
+
+## Corrected table
+
+Factor-base walk, DP rho reference, in-situ accounting. `clock` is
+`wall_ic / wall_rho` measured in the same run, as an independent check
+on the unit.
+
+| genus | `p` | `N` | `S_ic/S_rho` | `clock` |
+|--:|--:|--:|--:|--:|
+| 2 | 41 | 1321 | 0.30 | 0.33 |
+| 2 | 101 | 4663 | 0.60 | 0.61 |
+| 2 | 151 | 7949 | 1.24 | 1.10 |
+| 2 | 211 | 11813 | 2.00 | 1.76 |
+| 2 | 251 | 61667 | 1.81 | 1.61 |
+| 3 | 23 | 6299 | 0.57 | 0.44 |
+| 3 | 61 | 124459 | 0.78 | 0.62 |
+| 3 | 101 | 364747 | 0.87 | 0.91 |
+| 3 | 151 | 1180351 | 0.84 | 0.79 |
+| 3 | 211 | 4620611 | 0.72 | 0.56 |
+| 4 | 17 | 5639 | 2.45 | 1.53 |
+| 4 | 23 | 30223 | 1.79 | 1.26 |
+| 4 | 31 | 239753 | 1.22 | 0.89 |
+| 4 | 41 | 333041 | 1.17 | 0.90 |
+| 4 | 61 | 16790591 | **0.16** | **0.15** |
+
+## Reading it
+
+1. **Genus 2 now gets worse with `p`**, 0.30 → 2.00, because the solve's
+   real cost grows faster in `m` than rho's `sqrt(N)` grows in `p`. The
+   old accounting hid this by charging the solve almost nothing.
+2. **Genus 3 is flat at 0.7 – 0.9** rather than falling to 0.20. Index
+   calculus is modestly ahead across five instances spanning `N` from
+   `6·10³` to `4.6·10⁶`, not several times ahead.
+3. **Genus 4 still shows the crossover, and it is still large at the one
+   big instance**: 0.16 by the unit, 0.15 by the clock, 105 ms against
+   rho's 712 ms at `N = 1.7·10⁷`. The four smaller genus-4 rows lose
+   (1.17 – 2.45), so the single winning row carries the claim, and it is
+   one instance.
+4. **The oracle is still the largest or second-largest term** at genus
+   3 and 4 after a 2.5× cut — 746 of 1396 equivalents at genus 4
+   `p = 61`. Closed-form cubic and quartic root finding (Cardano,
+   Ferrari) would replace the remaining Cantor–Zassenhaus
+   exponentiations, and the solve now deserves the same treatment the
+   oracle just got.
+
+## Caveat on the instrumentation
+
+Timing the loop costs something: the instrumented build is slower than
+the uninstrumented one on the same instance, and rho is not instrumented
+the same way, so the measured ratio is biased slightly **against** index
+calculus. That is the conservative direction for a claim about index
+calculus, so it stands as reported rather than being corrected out.

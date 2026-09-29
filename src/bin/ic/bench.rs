@@ -17,6 +17,7 @@
 use clap::Args;
 use serde_json::{json, Value};
 
+use crypto_lib::cryptanalysis::glv_invariant_base::{generate_cm_instance, CmFamily};
 use crypto_lib::cryptanalysis::ic_boundary::{
     calibrate_binary_instance, calibrate_group, calibrate_row_ops, calibrate_word_xor,
     generic_floor_ops, koblitz_instance, random_binary_instance, rho_reference,
@@ -25,8 +26,9 @@ use crypto_lib::cryptanalysis::ic_boundary::{
 };
 use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
-    BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, KoblitzOrbitBase,
-    KoblitzSymmetrisedBase, MitmOracle, PrimeAbscissaBase, SubtractOracle, SymmetrisedOracle,
+    BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, GlvOrbitBase,
+    KoblitzOrbitBase, KoblitzSymmetrisedBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
+    SymmetrisedOracle,
 };
 use crypto_lib::cryptanalysis::ic_framework::solvers::{
     solver_by_name, solver_registry, validate_solver_params,
@@ -47,6 +49,13 @@ pub struct BenchArgs {
     /// Prime-field instance of this subgroup bit length.
     #[arg(long)]
     pub bits: Option<u32>,
+    /// With `--bits`: the prime-field curve family.  `generic` takes the
+    /// roster's curve at that size; `j0`, `j1728`, `d7` and `d8` generate
+    /// a CM curve of that family (order certified against the Cornacchia
+    /// candidates, deterministic in `--seed`) so that `glv-orbit` has an
+    /// automorphism group to fold by.
+    #[arg(long, default_value = "generic")]
+    pub family: String,
     /// Binary-field instance of this field degree (random curve).
     #[arg(long)]
     pub char2_degree: Option<u32>,
@@ -208,6 +217,14 @@ fn listing() -> Value {
                 "plugins": [
                     {"name": "prime-abscissa", "regimes": ["prime"],
                      "parameters": [{"name": "size", "means": "abscissae in the base; the family optimum is about #E^(1/3)"}]},
+                    {"name": "glv-orbit", "regimes": ["prime"],
+                     "parameters": [
+                        {"name": "size", "means": "seed abscissae; the base is their closure under the curve's automorphism group"},
+                        {"name": "group", "means": "auto, negation, j0 or j1728 (use --family j0 or j1728 for a curve that has one)"},
+                        {"name": "no_fold", "means": "1 to fold the same points by negation only: the control that shows what the fold buys"}]},
+                    {"name": "gls-line", "regimes": ["gls (examples/glv_invariant_bench.rs)"],
+                     "parameters": [
+                        {"name": "no_fold", "means": "1 to fold the same points by negation only"}]},
                     {"name": "binary-subspace", "regimes": ["char2", "koblitz"],
                      "parameters": [{"name": "dimension", "means": "F_2-dimension of the abscissa subspace"}]},
                     {"name": "koblitz-orbit", "regimes": ["koblitz"],
@@ -490,12 +507,17 @@ fn run_prime(
 ) -> Result<Vec<RunReport>, String> {
     let fb_name = spec.factor_base.as_str();
     let or_name = spec.oracle.as_str();
-    if fb_name != "prime-abscissa" {
-        return Err(format!(
-            "factor base `{fb_name}` is not available on a prime-field curve; try prime-abscissa"
-        ));
-    }
-    let base = PrimeAbscissaBase { instance: inst };
+    let abscissa = PrimeAbscissaBase { instance: inst };
+    let orbit = GlvOrbitBase { instance: inst };
+    let base: &dyn FactorBaseBuilder<_> = match fb_name {
+        "prime-abscissa" => &abscissa,
+        "glv-orbit" => &orbit,
+        other => {
+            return Err(format!(
+                "factor base `{other}` is not available on a prime-field curve; try prime-abscissa or glv-orbit"
+            ))
+        }
+    };
     let mut out = Vec::new();
     for rep in 0..args.repeats.max(1) {
         let mut ops = GroupOps::default();
@@ -527,7 +549,7 @@ fn run_prime(
             }
         };
         out.push(run_pipeline(
-            &ctx, &spec, &base, oracle, planted, calib, rho_s,
+            &ctx, &spec, base, oracle, planted, calib, rho_s,
         )?);
     }
     Ok(out)
@@ -670,6 +692,10 @@ struct SweepFile {
 struct SweepInstance {
     regime: String,
     degree: u32,
+    /// `prime` only: the curve family (`generic`, `j0`, `j1728`, `d7`,
+    /// `d8`); the `--family` default when absent.
+    #[serde(default)]
+    family: Option<String>,
     /// `char2` only: the largest cofactor the random curve may have;
     /// the `--max-cofactor` default when absent.
     #[serde(default)]
@@ -781,6 +807,9 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
             if let Some(v) = file.instance.max_cofactor {
                 a.max_cofactor = v;
             }
+            if let Some(v) = &file.instance.family {
+                a.family = v.clone();
+            }
             let mut configs = file.configurations.clone();
             configs.extend(expand_matrix(&file.matrix));
             if configs.is_empty() {
@@ -826,10 +855,11 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
 
     let (regime, degree) = instance_spec;
     let instance = match regime.as_str() {
-        "prime" => Instance::Prime(
-            roster_prime_instance(degree)
+        "prime" => Instance::Prime(match CmFamily::parse(&args.family)? {
+            CmFamily::Generic => roster_prime_instance(degree)
                 .ok_or_else(|| format!("no prime instance at {degree} bits"))?,
-        ),
+            family => generate_cm_instance(family, degree, args.seed, args.max_cofactor)?,
+        }),
         "char2" => Instance::Binary(
             random_binary_instance(degree, args.seed, args.max_cofactor).ok_or_else(|| {
                 format!(

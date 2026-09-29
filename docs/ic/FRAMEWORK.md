@@ -310,6 +310,18 @@ whose column map does not respect the group law, since the relation
 matrix will then be solving a different problem than the one that was
 posed. (The runner's verification catches this, loudly.)
 
+A column map for any finite group of endomorphisms is one call:
+`glv_invariant_base::fold_by_endomorphisms` takes the group as a list
+of `Endomorphism`s (each a map on points and its eigenvalue modulo
+`r`), closes a seed set under them or checks that it is closed, and
+returns the base with one column per orbit and coefficient `Π λ` along
+the orbit. `glv-orbit` (prime curves; `--family j0` or `j1728` for a
+curve with an automorphism to fold by) and `gls-line` (a GLS twist over
+`F_{p²}`, `examples/glv_invariant_bench.rs`) are that call with the
+family's generators; their `no_fold` parameter is the same call with
+negation alone, which is the control on the same points. See
+`research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md`.
+
 ### `Targets` — where trial points come from
 
 A small enum rather than a trait, because there are two designs that
@@ -736,9 +748,9 @@ worse than none:
 
 | stage | trait | plug-ins |
 |:--|:--|:--|
-| factor base | `FactorBaseBuilder` | `prime-abscissa`, `binary-subspace`, `koblitz-orbit` |
+| factor base | `FactorBaseBuilder` | `prime-abscissa`, `glv-orbit`, `binary-subspace`, `koblitz-orbit`, `koblitz-symmetrised`, `gls-line` |
 | targets | `Targets` | `random`, `walk` |
-| point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic` |
+| point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic`, `symmetrised`; `line-resultant` (library and `examples/glv_invariant_experiments.rs`: the `O(log p)` Weil-descent oracle for a line base over `F_{p^k}`, `line_oracle.rs`) |
 | polynomial solver | `SystemSolver` | `f4-f2`, `buchberger-f2`, `matrix-f4`, `matrix-f5`, `inherited-f4`, `crossbred-f2`, `xl-f2`, `sat-cdcl`, `fes-f2`, `fes-f2-wide`, `exhaustive` |
 | relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss` |
 

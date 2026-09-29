@@ -1,0 +1,290 @@
+{
+  "amendment": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/AMENDMENT.md",
+  "backend_ab_cases": [
+    {
+      "L": 1024,
+      "n": 41
+    },
+    {
+      "L": 1,
+      "n": 53
+    }
+  ],
+  "backend_ab_repetitions": 5,
+  "baseline_frozen_sha256": "b80b6a3fafc45ef4c5d2d9c873661b2662e84363fcb58724f523fe107ceaa8d2",
+  "baseline_source_head": "0839f6905d76c857a5b94de925e75e9bbe1060b8",
+  "batch_k": {
+    "37": 42,
+    "41": 255,
+    "53": 440
+  },
+  "batch_seed": 531310,
+  "curves": "E0_y2_plus_xy_equals_x3_plus_1",
+  "evaluation_repetitions": 5,
+  "expected_rho_backend_x86": "pclmulqdq",
+  "expected_rho_inversion": "itoh_tsujii",
+  "hypothesis": "cold compact-orbit loses L1 setup; may win L1024 batch at n41/n53 in wall and CPU only",
+  "per_arm_address_space_limit_bytes": 5368709120,
+  "per_arm_timeout_seconds": 900,
+  "rank_seed": 7,
+  "rho_dp_bits": 4,
+  "rho_mode": "signed_frobenius",
+  "schema": "compact-orbit-cold-point-panel-freeze-v2-backend-amendment",
+  "single_k_grid": {
+    "37": [
+      7,
+      14,
+      28,
+      42
+    ],
+    "41": [
+      85,
+      170,
+      255,
+      340
+    ],
+    "53": [
+      220,
+      440,
+      660
+    ]
+  },
+  "source_base_main": "4eadd7346a63915f81dfde42c65849c191a2da2b",
+  "source_sha256": {
+    ".github/workflows/compact-orbit-point-panel.yml": "b466a6b278548a2d7088a7f97bf7f0d273936e04788fa388c92600a4104be9bd",
+    "Cargo.toml": "f1b3abc246c4971b48b377d5696bc96594deb729320348c4277307e42ed61721",
+    "docs/ic/calibration.json": "425078627bbc38b3f9cb97351b405f52509431c080ed996bfeab72d12d78acfd",
+    "examples/koblitz_orbit_dlp_fast.rs": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
+    "examples/koblitz_rho_batch_ks_v2_n61.rs": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/AMENDMENT.md": "f51cfdc3e23b7b23aa8ce53fabef337c48de7ebdda4e1349a8c592fe1ae43f9c",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/PROTOCOL.md": "ad1829a4f41dc0100f8391b20b53d25cbf9edffe8d074fae6065f1a6d60ed88b",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/archive.py": "1a54300da7efd3ff2393cefd11fd0477eb1c2838f76adfa1fd48b8311d2ddafe",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/backend_ab.py": "d620f91f7c1655d1292601b98f1a5027378ecc315a97e911ab331523db72121e",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/prepare.py": "480958ce3c6c0578b19a5dad0625f866853a6880747df9085ff3af34c7fa8112",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/rho_baseline_0839.rs": "cedee579db839e03a2783de2d535d1ce3532f34f5e40429c25e88d0e10aef8b7",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py": "2ba997abbd5e9f17756c101b8ca26567219adf103308701f0c237ae495f23222",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/test_point_mode.py": "ec873c8498578b3732cf5d1629d938c9ea9b29ccddb96fa3e6307585d6d16ead",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_backend_ab.py": "bb9b2984c80f116d8a2159c714d6185e01c8ac07d5d3cbd2701b620b812f1cbc",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py": "649459a53b979b9eaf150ca1973c80b1bde29baf3f5567443c668978d3c06e6d",
+    "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py": "254869e52bdbd417e14d74c87940293490160faaa7fbb45f4edcb6b773a4b0f6",
+    "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py": "1df6fc9295cf525be198a19842dfdca7391ac985bfa79ffa1acf8e546cc05ce1",
+    "src/cryptanalysis/koblitz_fast.rs": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "747596aa01a360ca4b010457a739ea12c829a81e845100b4cc7d8f6cb226cd20",
+    "src/lib.rs": "f1e13bc7fa51ff57dd4cd056036669577d1f07a0cb06502b4b839b9af50ffba6"
+  },
+  "specs": {
+    "n37_L1024_eval": {
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 74,
+      "corpus": "point-panel-n37-L1024-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        4,
+        6
+      ],
+      "fixture_file": "fixtures/n37_L1024_eval.fixture.jsonl",
+      "fixture_sha256": "411e85382680a4b85d7b0b2bb7abeb68935e3b66e96e082f807a7beda1c1bdf5",
+      "generator": [
+        99424589043,
+        35163014771
+      ],
+      "kind": "eval",
+      "n": 37,
+      "points_file": "fixtures/n37_L1024_eval.points.jsonl",
+      "points_sha256": "3e249b1ddb41f7c3f6e73cbe893d12db87ce58bebcf92013c8b39d2ee0ec05d6",
+      "seed": 531310,
+      "subgroup_order": 230603167
+    },
+    "n37_L1_eval": {
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 74,
+      "corpus": "point-panel-n37-L1-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        4,
+        6
+      ],
+      "fixture_file": "fixtures/n37_L1_eval.fixture.jsonl",
+      "fixture_sha256": "00db023e7d66edc2393e813389c500c1f6629ddf57d8c428f5b5df007026c532",
+      "generator": [
+        99424589043,
+        35163014771
+      ],
+      "kind": "eval",
+      "n": 37,
+      "points_file": "fixtures/n37_L1_eval.points.jsonl",
+      "points_sha256": "ff47666b9ff626be49fcaf430502694c4081f8d37187715750083025d1731f58",
+      "seed": 531310,
+      "subgroup_order": 230603167
+    },
+    "n37_L1_tune": {
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 74,
+      "corpus": "point-panel-n37-L1-tune-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        4,
+        6
+      ],
+      "fixture_file": "fixtures/n37_L1_tune.fixture.jsonl",
+      "fixture_sha256": "87648190dc7410e3c0c39486693afc5068a72793244133a9501f8e345b21ba5c",
+      "generator": [
+        99424589043,
+        35163014771
+      ],
+      "kind": "tune",
+      "n": 37,
+      "points_file": "fixtures/n37_L1_tune.points.jsonl",
+      "points_sha256": "bd035115583fd695251147cda9b0b1a56263d93810225f69256d986b3c95849b",
+      "seed": 531310,
+      "subgroup_order": 230603167
+    },
+    "n41_L1024_eval": {
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 82,
+      "corpus": "point-panel-n41-L1024-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        3
+      ],
+      "fixture_file": "fixtures/n41_L1024_eval.fixture.jsonl",
+      "fixture_sha256": "b2c040801ad51f1ff82f8cea7585a95d37670ee66d3bae3328b141ca34aa939f",
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "kind": "eval",
+      "n": 41,
+      "points_file": "fixtures/n41_L1024_eval.points.jsonl",
+      "points_sha256": "ca17f683dd60460f8a348979dd0da945d99043323b64c84c2fdbac99591e933b",
+      "seed": 531310,
+      "subgroup_order": 549756390943
+    },
+    "n41_L1_eval": {
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 82,
+      "corpus": "point-panel-n41-L1-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        3
+      ],
+      "fixture_file": "fixtures/n41_L1_eval.fixture.jsonl",
+      "fixture_sha256": "e7b8a3d3a0a40096d3c4b645c0be0a6baac0d8842b7969cd3e498b9beafe7386",
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "kind": "eval",
+      "n": 41,
+      "points_file": "fixtures/n41_L1_eval.points.jsonl",
+      "points_sha256": "fff82518e01fa70ef0facfc8273ed112eb2ebfc18ba5c9a71d472d3af1aeb739",
+      "seed": 531310,
+      "subgroup_order": 549756390943
+    },
+    "n41_L1_tune": {
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 82,
+      "corpus": "point-panel-n41-L1-tune-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        3
+      ],
+      "fixture_file": "fixtures/n41_L1_tune.fixture.jsonl",
+      "fixture_sha256": "cef53782cc12599892923a2c1034737e45bf6dd32deb20dfec6d2abd2211b562",
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "kind": "tune",
+      "n": 41,
+      "points_file": "fixtures/n41_L1_tune.points.jsonl",
+      "points_sha256": "95c131fa3115a7224e3eaf3924c9c2c3cb9f52b604557a4afa72e6933d35c9ff",
+      "seed": 531310,
+      "subgroup_order": 549756390943
+    },
+    "n53_L1024_eval": {
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 106,
+      "corpus": "point-panel-n53-L1024-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "fixture_file": "fixtures/n53_L1024_eval.fixture.jsonl",
+      "fixture_sha256": "708124ae1187ff97159075880f756b359e667ba432dcc89badf35ad7182d80dc",
+      "generator": [
+        198217578752339,
+        7929897206038174
+      ],
+      "kind": "eval",
+      "n": 53,
+      "points_file": "fixtures/n53_L1024_eval.points.jsonl",
+      "points_sha256": "80befa6d82d95d7fc579ea6fdb2f03af9c7573b12b73a30e09593cc81d532601",
+      "seed": 531310,
+      "subgroup_order": 21044858204113
+    },
+    "n53_L1_eval": {
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 106,
+      "corpus": "point-panel-n53-L1-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "fixture_file": "fixtures/n53_L1_eval.fixture.jsonl",
+      "fixture_sha256": "78c7b284b136613d26df5c9cb58a3b736c23351babc3c11f9aec4fbdf8689f37",
+      "generator": [
+        198217578752339,
+        7929897206038174
+      ],
+      "kind": "eval",
+      "n": 53,
+      "points_file": "fixtures/n53_L1_eval.points.jsonl",
+      "points_sha256": "d71cd294f88cc87f85f0da9f6f3bd6585072f9128b2542047127307fb0c043c5",
+      "seed": 531310,
+      "subgroup_order": 21044858204113
+    },
+    "n53_L1_tune": {
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 106,
+      "corpus": "point-panel-n53-L1-tune-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "fixture_file": "fixtures/n53_L1_tune.fixture.jsonl",
+      "fixture_sha256": "30bb1ef4c896bd271e762beb5a94cdf038a19202cea7b40717eb2bd697885058",
+      "generator": [
+        198217578752339,
+        7929897206038174
+      ],
+      "kind": "tune",
+      "n": 53,
+      "points_file": "fixtures/n53_L1_tune.points.jsonl",
+      "points_sha256": "c8bb7695417a3b19ca7956c9125056bb27f6799442585ed97e46583a4e9c9574",
+      "seed": 531310,
+      "subgroup_order": 21044858204113
+    }
+  },
+  "tuning_repetitions": 5,
+  "tuning_timeout_seconds": 180
+}

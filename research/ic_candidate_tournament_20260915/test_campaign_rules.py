@@ -49,7 +49,8 @@ def paired_rows(ratio):
                         total_operations=cost, mode='ic',
                         certificate={'factor_base_sha256':alias},
                         native_process={'process_wall_seconds':cost/1e9},
-                        measurement={'native_timing':{'cold':{'wall_ns':cost}, 'online':{'wall_ns':cost}}}))
+                        measurement={'workload_id':f'{cell}-{target}', 'candidate_id':alias,
+                            'native_timing':{'cold':{'wall_ns':cost}, 'online':{'wall_ns':cost}}}))
     return rows
 
 
