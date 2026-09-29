@@ -397,7 +397,12 @@ fn raw_add(curve: &KoblitzCurve, nb: &NormalBasis, left: RawPoint, right: RawPoi
     }
 }
 
-fn raw_scalar_mul(curve: &KoblitzCurve, nb: &NormalBasis, point: RawPoint, scalar: u64) -> RawPoint {
+fn raw_scalar_mul(
+    curve: &KoblitzCurve,
+    nb: &NormalBasis,
+    point: RawPoint,
+    scalar: u64,
+) -> RawPoint {
     let mut result = RawPoint::Infinity;
     for bit in (0..64 - scalar.leading_zeros()).rev() {
         result = raw_double(curve, nb, result);
@@ -418,7 +423,11 @@ fn raw_on_curve(curve: &KoblitzCurve, point: RawPoint) -> bool {
     left == right
 }
 
-fn public_point_targets(curve: &KoblitzCurve, nb: &NormalBasis, modulus: u64) -> Option<Vec<RawPoint>> {
+fn public_point_targets(
+    curve: &KoblitzCurve,
+    nb: &NormalBasis,
+    modulus: u64,
+) -> Option<Vec<RawPoint>> {
     let path = std::env::var("KIC_RHO_TARGET_POINTS_JSONL").ok()?;
     let input = fs::read_to_string(path).expect("rho point target file must be readable");
     let limit = 1u64 << curve.n;
