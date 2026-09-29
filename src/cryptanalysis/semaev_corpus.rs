@@ -822,7 +822,7 @@ mod tests {
         );
         for x in &xs {
             assert!(
-                x.degree().map_or(true, |d| d < inst.l),
+                x.degree().is_none_or(|d| d < inst.l),
                 "the witness must lie in the factor base"
             );
         }

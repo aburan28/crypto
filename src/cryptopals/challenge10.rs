@@ -29,7 +29,7 @@ pub fn cbc_encrypt_no_iv_prefix(pt: &[u8], key: &AesKey, iv: &[u8; 16]) -> Vec<u
 }
 
 pub fn cbc_decrypt_no_iv_prefix(ct: &[u8], key: &AesKey, iv: &[u8; 16]) -> Option<Vec<u8>> {
-    if ct.len() % 16 != 0 {
+    if !ct.len().is_multiple_of(16) {
         return None;
     }
     let mut out = Vec::with_capacity(ct.len());

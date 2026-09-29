@@ -1,0 +1,45 @@
+{
+  "attempts": [
+    {
+      "argv": [
+        "/Users/adamburan/.pyenv/versions/3.9.10/bin/python3",
+        "/private/tmp/ecc2k130-symbolic-dag-dimacs-gate-20260925/research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/produce.py",
+        "--phase",
+        "toy",
+        "--out",
+        "/private/tmp/ecc2k130-804-cold-panel-fc953ea-20260926-01/toy"
+      ],
+      "cwd": "/private/tmp/ecc2k130-symbolic-dag-dimacs-gate-20260925",
+      "exit_code": null,
+      "file_size_cap_bytes": null,
+      "phase": "toy",
+      "reported_cpu_seconds": null,
+      "reported_decision": null,
+      "reported_peak_rss_bytes": null,
+      "result_sha256": null,
+      "rss_address_space_cap_bytes": 536870912,
+      "sampled_peak_rss_bytes": 0,
+      "stderr_sha256": "65e49b7221c9e1715f1b2285f4fbf26782bf6e410112857c9bef5dfc1132fa80",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stop_reason": "LAUNCH_ERROR",
+      "utc_start": "2026-09-26T04:49:14.232624+00:00",
+      "wall_seconds": 0.013700582999999433,
+      "watched_file_bytes": null,
+      "watched_file_sha256": null
+    }
+  ],
+  "decision": "FAIL_OR_CENSORED",
+  "domain": "k0-symbolic-dag-dimacs-gate-v1",
+  "freeze_sha256": "7514910d5111f76bd50c6ccf5a70a2b25043c55d7cb515218a63a7f6c16fdd57",
+  "manifest_sha256": "ae39923e93f6c908d7b2bd32568463d606a13f375dbb8406407f9f1acc9bc755",
+  "release_gate": {
+    "checkout_head": "fc953ea13458abaaf56a21ed3af953031ece09a5",
+    "dispatch_main_head": "8bc8841509b26661662283bc7d4624471552f1b0",
+    "parent_merge_commit": "4962062cb5e981529a9c089113e098bf2af6ddb0",
+    "parent_pr_state": "MERGED",
+    "pr_head": "fc953ea13458abaaf56a21ed3af953031ece09a5",
+    "release_main_head": "6c69273aa1b5011897ea3dd493a3ce00d55bd20a",
+    "reviewed_head": "fc953ea13458abaaf56a21ed3af953031ece09a5",
+    "upstream_changed_paths": []
+  }
+}

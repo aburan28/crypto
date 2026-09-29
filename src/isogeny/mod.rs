@@ -4,9 +4,9 @@
 //! structure of CM elliptic curves leaks information about the discrete
 //! logarithm.  The intended workflow is:
 //!
-//! 1. Pick a small curve `E/F_p` (60–80 bits in this implementation).
-//! 2. Compute its Frobenius trace, CM discriminant, and endomorphism
-//!    ring conductor ([`cm`]).
+//! 1. Pick a tiny curve `E/F_p` in characteristic greater than three.
+//! 2. Compute its Frobenius order, retaining unknown endomorphism-order
+//!    labels when the available evidence is insufficient ([`cm`]).
 //! 3. Walk the `ℓ`-isogeny volcano around `E` ([`volcano`], [`velu`]).
 //! 4. Build the full `ℓ`-isogeny graph for a chosen set of small
 //!    primes ([`graph`]).
@@ -63,11 +63,11 @@ pub mod volcano;
 
 // ── Top-level re-exports for the most-used types ──────────────────────────────
 pub use class_group::{class_number, BinaryQuadraticForm, ClassGroup};
-pub use cm::{cm_discriminant, frobenius_trace, CmData, EndomorphismRing};
+pub use cm::{cm_discriminant, frobenius_trace, CmData, EndomorphismEvidence, EndomorphismRing};
 pub use experiment::{run_experiment, ExperimentConfig, ExperimentReport};
 pub use graph::{IsogenyGraph, IsogenyNode};
 pub use velu::{velu_isogeny_2, velu_isogeny_odd, VeluIsogeny};
-pub use volcano::{VolcanoLevel, VolcanoMap};
+pub use volcano::{VolcanoEdge, VolcanoLevel, VolcanoMap};
 
 // ── Small toy curves used by the unit tests and CLI demo ─────────────────────
 //
@@ -79,7 +79,7 @@ pub use volcano::{VolcanoLevel, VolcanoMap};
 use num_bigint::BigUint;
 
 /// Toy curve `y² = x³ + 4x + 4` over `F_2003`.  Ordinary, with CM by
-/// the order of discriminant `D = -7995` (after Frobenius trace
+/// the order of discriminant `D = -7787` (after Frobenius trace
 /// computation), good for shaking out volcano walks at `ℓ ∈ {2, 3, 5}`.
 pub fn toy_curve_a() -> SmallCurve {
     SmallCurve {
@@ -91,8 +91,8 @@ pub fn toy_curve_a() -> SmallCurve {
 }
 
 /// Toy curve `y² = x³ + x + 1` over `F_101`.  The textbook example
-/// used by Sutherland's *Isogeny volcanoes* lecture notes; the
-/// 2-volcano has crater size 1 and depth 1.
+/// used as a graph fixture. Its Frobenius conductor is 1, so its
+/// rational 2-volcano has depth zero; the crater size is not assumed.
 pub fn toy_curve_b() -> SmallCurve {
     SmallCurve {
         name: "toy-101",

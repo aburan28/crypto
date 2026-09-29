@@ -1,0 +1,34 @@
+name: Compact orbit rank and point replay
+on:
+  pull_request:
+    paths:
+      - 'examples/koblitz_s5_sat_instance.rs'
+      - 'research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/**'
+      - '.github/workflows/compact-orbit-rank-replay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recheck frozen source and evidence scripts
+        run: python3 -m py_compile research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/{cold_batch_rank,run_point_batch,recover_point_batch}.py
+      - name: Fetch immutable source of archived point run
+        run: git fetch --depth=1 origin d92439080c2d5c3a858f71abfc8e749e273125bb
+      - name: Independently replay all 512 relations and 8 recovered point logs
+        run: |
+          evidence=research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924
+          before_rank=$(sha256sum "$evidence/cold_rank_20260924_codex/validation.json" | cut -d' ' -f1)
+          before_point=$(sha256sum "$evidence/point_recovery_20260924_codex/validation.json" | cut -d' ' -f1)
+          python3 "$evidence/cold_batch_rank.py" --out "$evidence/cold_rank_20260924_codex" --targets 512 --replay-only
+          python3 "$evidence/recover_point_batch.py" --training "$evidence/cold_rank_20260924_codex" --point-batch "$evidence/point_recovery_20260924_codex"
+          after_rank=$(sha256sum "$evidence/cold_rank_20260924_codex/validation.json" | cut -d' ' -f1)
+          after_point=$(sha256sum "$evidence/point_recovery_20260924_codex/validation.json" | cut -d' ' -f1)
+          test "$before_rank" = "$after_rank"
+          test "$before_point" = "$after_point"
