@@ -52,12 +52,12 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
 #if ECC_WALK_TABLE && !ECC_TABLE_GLOBAL
     static size_t dynamicSharedBytes() { return eccPacked131::TW_SHARED_BYTES; }
-    unsigned checkpointVersion() const override { return 3u; }
+    unsigned checkpointVersion() const override { return 35u; }
     int laneArrayCount() const override { return 3; }
     u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
 #elif ECC_WALK_TABLE
     static size_t dynamicSharedBytes() { return 0; }
-    unsigned checkpointVersion() const override { return 3u; }
+    unsigned checkpointVersion() const override { return 35u; }
     int laneArrayCount() const override { return 3; }
     u64 *laneArray(int i) const override { return i == 2 ? P.hist : (i ? P.startIter : P.seed); }
 #else
@@ -319,6 +319,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed onb inv: %d\n", ECC_PACKED_ONB_INV);
         printf("packed from reduced: %d\n", ECC_PACKED_FROM_REDUCED);
         printf("packed slot unroll: %d\n", ECC_UNROLL_SLOTS);
+        printf("packed chains: %d\n", ECC_PACKED_CHAINS);
         printf("packed slot prefetch: %d\n", ECC_PACKED_SLOT_PREFETCH);
         printf("packed slot pipeline: %d\n", ECC_PACKED_SLOT_PIPELINE);
         printf("packed L2 persist: %d\n", ECC_PACKED_L2_PERSIST);
@@ -335,9 +336,12 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed add combine: %d\n", ECC_PACKED_ADD_COMBINE);
         printf("packed alu square: %d\n", ECC_PACKED_ALU_SQUARE);
         printf("packed alu onb square: %d\n", ECC_PACKED_ALU_SQR);
+        printf("packed square table: %d\n", ECC_PACKED_SQUARE_TABLE);
+        printf("packed polynomial inversion: %d\n", ECC_PACKED_INV_POLY);
         printf("packed profile ranges: %d\n", ECC_PROFILE_RANGE);
 #if ECC_WALK_TABLE
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);
+        printf("packed table phase popc: %d\n", ECC_TABLE_PHASE_POPC);
         printf("packed table global: %d\n", ECC_TABLE_GLOBAL);
         printf("packed table addend global: %d\n", ECC_TABLE_ADDEND_GLOBAL);
 #endif

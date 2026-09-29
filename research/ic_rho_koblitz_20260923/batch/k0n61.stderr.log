@@ -1,0 +1,23 @@
+  K_0 / GF(2^61): r = 162888033982417 (2^47.21), A = 122
+    k =  1 batch  0: S/target 0.1314, 1 of 1 verified, 2.2 s
+    k =  1 batch  1: S/target 0.0960, 1 of 1 verified, 1.6 s
+    k =  1 batch  2: S/target 0.0570, 1 of 1 verified, 1.0 s
+    k =  1 batch  3: S/target 0.1071, 1 of 1 verified, 1.8 s
+    k =  1 batch  4: S/target 0.0254, 1 of 1 verified, 0.4 s
+    k =  1 batch  5: S/target 0.0497, 1 of 1 verified, 0.8 s
+    k =  1 batch  6: S/target 0.2109, 1 of 1 verified, 3.4 s
+    k =  1 batch  7: S/target 0.2431, 1 of 1 verified, 4.1 s
+    k = 32 batch  0: S/target 0.0210, 32 of 32 verified, 11.3 s
+    k = 32 batch  1: S/target 0.0215, 32 of 32 verified, 11.5 s
+    k = 32 batch  2: S/target 0.0219, 32 of 32 verified, 11.8 s
+    k = 32 batch  3: S/target 0.0224, 32 of 32 verified, 12.1 s
+    k = 32 batch  4: S/target 0.0220, 32 of 32 verified, 12.1 s
+    k = 32 batch  5: S/target 0.0187, 32 of 32 verified, 10.0 s
+    k = 32 batch  6: S/target 0.0240, 32 of 32 verified, 13.0 s
+    k = 32 batch  7: S/target 0.0237, 32 of 32 verified, 12.5 s
+
+| curve | log₂ r | A | k | batches | S per target | sd | walk S per target | over k = 1 | batch law | floor S (one target) | own trail | earlier trail | ok |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
+| K_0 / GF(2^61) | 47.21 | 122 | 1 | 8 | 0.115 | 0.077 | 0.115 | 1.000 | 1.000 | 0.1135 | 8 | 0 | ✓ |
+| K_0 / GF(2^61) | 47.21 | 122 | 32 | 8 | 0.022 | 0.002 | 0.022 | 0.190 | 0.199 | 0.1135 | 21 | 235 | ✓ |
+

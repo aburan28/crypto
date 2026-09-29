@@ -1,0 +1,47 @@
+name: Degree-7 paired factor-base pilot
+on:
+  pull_request:
+    paths:
+      - 'research/ecc2k130_factor_base_pilot_20260924/**'
+      - 'research/ecc2k130_oriented_transport_20260924/oriented_velu.py'
+      - 'research/ecc2k130_relations/fastfield.py'
+      - 'research/ecc2k130_relations/relations.py'
+      - '.github/workflows/degree7-factor-base-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify saved group lifts, witnesses, rank and scalar
+        run: python3 research/ecc2k130_factor_base_pilot_20260924/verify.py research/ecc2k130_factor_base_pilot_20260924/results_final.json
+      - name: Fresh paired replay
+        run: |
+          python3 research/ecc2k130_factor_base_pilot_20260924/run.py --out /tmp/degree7-fresh.json
+          python3 research/ecc2k130_factor_base_pilot_20260924/verify.py /tmp/degree7-fresh.json
+      - name: Match all deterministic evidence and native counters
+        run: |
+          python3 - <<'PYCODE'
+          import json
+          from pathlib import Path
+
+          saved = json.loads(Path('research/ecc2k130_factor_base_pilot_20260924/results_final.json').read_text())
+          fresh = json.loads(Path('/tmp/degree7-fresh.json').read_text())
+
+          def deterministic(value):
+              if isinstance(value, dict):
+                  return {k: deterministic(v) for k, v in value.items()
+                          if k not in {'cpu_ns', 'timestamp_utc', 'platform', 'python'}}
+              if isinstance(value, list):
+                  return [deterministic(v) for v in value]
+              return value
+
+          assert deterministic(fresh) == deterministic(saved)
+          assert fresh['status'] == 'PASS'
+          PYCODE

@@ -46,13 +46,13 @@
 //! challenge degree**, which is why this sweep runs at the degrees where
 //! the lattice is non-trivial and reports the census beside it.
 
-use crypto_lib::binary_ecc::F2mElement;
 use crypto_lib::cryptanalysis::koblitz_groebner::{
     f4_profile, f4_profile_reset, FieldStructure, SolverEngine,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    all_factors_of_x_n_minus_1, available_subspace_dimensions, build_frobenius_factor_base_from_divisor,
-    cyclotomic_cosets, groebner_decompose, order_of_2_mod_n, top_factor_indices, KoblitzCurve,
+    all_factors_of_x_n_minus_1, available_subspace_dimensions,
+    build_frobenius_factor_base_from_divisor, cyclotomic_cosets, groebner_decompose,
+    order_of_2_mod_n, top_factor_indices, KoblitzCurve,
 };
 use num_bigint::BigUint;
 use std::time::Instant;
@@ -67,12 +67,42 @@ struct Rung {
 /// Degrees whose divisor lattice offers a choice at all, with `m` set so
 /// that `m·ℓ ≥ n` is reachable within the variable cap below.
 const RUNGS: &[Rung] = &[
-    Rung { a: 0, n: 9, m: 2, targets: 64 },
-    Rung { a: 0, n: 9, m: 3, targets: 32 },
-    Rung { a: 1, n: 15, m: 2, targets: 64 },
-    Rung { a: 1, n: 17, m: 2, targets: 48 },
-    Rung { a: 1, n: 23, m: 2, targets: 24 },
-    Rung { a: 0, n: 31, m: 2, targets: 12 },
+    Rung {
+        a: 0,
+        n: 9,
+        m: 2,
+        targets: 64,
+    },
+    Rung {
+        a: 0,
+        n: 9,
+        m: 3,
+        targets: 32,
+    },
+    Rung {
+        a: 1,
+        n: 15,
+        m: 2,
+        targets: 64,
+    },
+    Rung {
+        a: 1,
+        n: 17,
+        m: 2,
+        targets: 48,
+    },
+    Rung {
+        a: 1,
+        n: 23,
+        m: 2,
+        targets: 24,
+    },
+    Rung {
+        a: 0,
+        n: 31,
+        m: 2,
+        targets: 12,
+    },
 ];
 
 /// The Boolean system has `m·ℓ` unknowns for `m = 2` and `m·ℓ + (m−2)·n`
@@ -141,7 +171,10 @@ fn candidate_divisors(n: u32, m: usize) -> Vec<Vec<usize>> {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let out = args.windows(2).find(|w| w[0] == "--out").map(|w| w[1].clone());
+    let out = args
+        .windows(2)
+        .find(|w| w[0] == "--out")
+        .map(|w| w[1].clone());
     // A different target seed draws an independent target sample, which
     // is how the ranking below is checked rather than assumed.
     let seed: u64 = args
@@ -170,14 +203,25 @@ fn main() {
             *sizes.entry(c.len()).or_default() += 1;
         }
         let shown = if dims.len() > 12 {
-            format!("{:?} … {:?} ({} in all)", &dims[..4], dims.last().unwrap(), dims.len())
+            format!(
+                "{:?} … {:?} ({} in all)",
+                &dims[..4],
+                dims.last().unwrap(),
+                dims.len()
+            )
         } else {
             format!("{dims:?}")
         };
         println!(
             "| {n} | {} | {} | {shown} |",
-            order_of_2_mod_n(n).map(|o| o.to_string()).unwrap_or_else(|| "—".into()),
-            sizes.iter().map(|(k, v)| format!("{k}×{v}")).collect::<Vec<_>>().join(", "),
+            order_of_2_mod_n(n)
+                .map(|o| o.to_string())
+                .unwrap_or_else(|| "—".into()),
+            sizes
+                .iter()
+                .map(|(k, v)| format!("{k}×{v}"))
+                .collect::<Vec<_>>()
+                .join(", "),
         );
         census.push(serde_json::json!({
             "n": n,
@@ -205,16 +249,23 @@ fn main() {
                 continue;
             }
         }
-        let Some(kc) = KoblitzCurve::new(rung.a, rung.n) else { continue };
+        let Some(kc) = KoblitzCurve::new(rung.a, rung.n) else {
+            continue;
+        };
         let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
         let g = kc.generator().clone();
         let mut scored: Vec<serde_json::Value> = Vec::new();
         // What the pipeline picks today with no factor-base recipe: the
         // first of the largest-degree factors.
-        let default_divisor: Vec<usize> = top_factor_indices(&kc).first().map(|&i| vec![i]).unwrap_or_default();
+        let default_divisor: Vec<usize> = top_factor_indices(&kc)
+            .first()
+            .map(|&i| vec![i])
+            .unwrap_or_default();
 
         for divisor in candidate_divisors(rung.n, rung.m) {
-            let Some(fb) = build_frobenius_factor_base_from_divisor(&kc, &divisor) else { continue };
+            let Some(fb) = build_frobenius_factor_base_from_divisor(&kc, &divisor) else {
+                continue;
+            };
             let vars = rung.m * fb.ell as usize + rung.m.saturating_sub(2) * rung.n as usize;
             if vars > MAX_VARS || fb.points.len() > MAX_POINTS || fb.points.is_empty() {
                 continue;
@@ -240,8 +291,14 @@ fn main() {
                 }
                 let target = kc.mul(&g, &target_scalar(i, seed));
                 let (idxs, stats) = groebner_decompose(
-                    &kc, &fb, &index_of, &st, &target, rung.m,
-                    SolverEngine::default(), 20_000,
+                    &kc,
+                    &fb,
+                    &index_of,
+                    &st,
+                    &target,
+                    rung.m,
+                    SolverEngine::default(),
+                    20_000,
                 );
                 decided += 1;
                 if idxs.is_some() {
@@ -285,8 +342,18 @@ fn main() {
             .filter(|c| c.is_finite())
             .fold(f64::INFINITY, f64::min);
         let show = |c: &serde_json::Value| -> String {
-            let d: Vec<i64> = c["divisor"].as_array().unwrap().iter().map(|x| x.as_i64().unwrap()).collect();
-            let mut s = format!("{}", d.iter().map(|x| x.to_string()).collect::<Vec<_>>().join("·"));
+            let d: Vec<i64> = c["divisor"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| x.as_i64().unwrap())
+                .collect();
+            let mut s = d
+                .iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<_>>()
+                .join("·")
+                .to_string();
             if c["is_pipeline_default"] == serde_json::Value::Bool(true) {
                 s.push_str(" ᴅ");
             }
@@ -297,7 +364,11 @@ fn main() {
             if c["admissible"] == serde_json::Value::Bool(false) {
                 println!(
                     "| {label} | {} | {} | {} | {} | {} | — | — | — | — | inadmissible |",
-                    rung.m, show(c), c["ell"], c["points"], c["unknowns"],
+                    rung.m,
+                    show(c),
+                    c["ell"],
+                    c["points"],
+                    c["unknowns"],
                 );
                 continue;
             }
@@ -306,12 +377,22 @@ fn main() {
             let mark = |is_best: bool| if is_best { " ★" } else { "" };
             println!(
                 "| {label} | {} | {} | {} | {} | {} | {:.0}%{} | {:.3e} | {}{} | {}{} | {} |",
-                rung.m, show(c), c["ell"], c["points"], c["unknowns"],
+                rung.m,
+                show(c),
+                c["ell"],
+                c["points"],
+                c["unknowns"],
                 100.0 * c["coverage"].as_f64().unwrap_or(0.0),
-                if c["budget_exhausted"] == serde_json::Value::Bool(true) { " (budget)" } else { "" },
+                if c["budget_exhausted"] == serde_json::Value::Bool(true) {
+                    " (budget)"
+                } else {
+                    ""
+                },
                 c["ops_per_target"].as_f64().unwrap_or(0.0),
-                fmt(trials), mark(trials <= best_trials * 1.0000001),
-                fmt(cost), mark(cost <= best * 1.0000001),
+                fmt(trials),
+                mark(trials <= best_trials * 1.0000001),
+                fmt(cost),
+                mark(cost <= best * 1.0000001),
                 if cost.is_finite() && best.is_finite() {
                     format!("{:.2}×", cost / best)
                 } else {

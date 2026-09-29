@@ -120,10 +120,10 @@ const fn compute_sbox4() -> [u8; 16] {
     while i < 16 {
         let x = inv[i];
         // Compute A · x in GF(2):
-        let b0 = ((x >> 0) ^ (x >> 1) ^ (x >> 2)) & 1;
+        let b0 = (x ^ (x >> 1) ^ (x >> 2)) & 1;
         let b1 = ((x >> 1) ^ (x >> 2) ^ (x >> 3)) & 1;
-        let b2 = ((x >> 0) ^ (x >> 2) ^ (x >> 3)) & 1;
-        let b3 = ((x >> 0) ^ (x >> 1) ^ (x >> 3)) & 1;
+        let b2 = (x ^ (x >> 2) ^ (x >> 3)) & 1;
+        let b3 = (x ^ (x >> 1) ^ (x >> 3)) & 1;
         let ax = b0 | (b1 << 1) | (b2 << 2) | (b3 << 3);
         sbox[i] = ax ^ 0x6;
         i += 1;
@@ -199,9 +199,7 @@ impl SmallAes {
     fn shift_rows(state: &mut [u8; 4]) {
         // State = [col0_r0, col0_r1, col1_r0, col1_r1].
         // Row 0 unchanged. Row 1: swap cells.
-        let t = state[1];
-        state[1] = state[3];
-        state[3] = t;
+        state.swap(1, 3);
     }
     fn inv_shift_rows(state: &mut [u8; 4]) {
         // Self-inverse for 2-column case.
@@ -282,7 +280,7 @@ mod tests {
             let cipher = SmallAes::new(key, nr);
             for p in 0u16..256 {
                 let pt = [
-                    ((p >> 0) & 0xf) as u8,
+                    (p & 0xf) as u8,
                     ((p >> 4) & 0xf) as u8,
                     ((p >> 8) & 0xf) as u8,
                     ((p >> 12) & 0xf) as u8,
@@ -308,7 +306,7 @@ mod tests {
         let mut recovered = None;
         for k in 0u32..(1 << 16) {
             let candidate_key = [
-                ((k >> 0) & 0xf) as u8,
+                (k & 0xf) as u8,
                 ((k >> 4) & 0xf) as u8,
                 ((k >> 8) & 0xf) as u8,
                 ((k >> 12) & 0xf) as u8,

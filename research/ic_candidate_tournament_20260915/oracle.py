@@ -2,6 +2,7 @@
 import math
 import hashlib
 import json
+from functools import lru_cache
 
 
 class InvalidEvidence(ValueError):
@@ -13,17 +14,57 @@ def require(condition, message):
         raise InvalidEvidence(message)
 
 
+def polynomial_remainder(a, b):
+    """GF(2)[x] division in the checker's integer coefficient encoding."""
+    require(b > 0, 'zero polynomial divisor')
+    while a.bit_length() >= b.bit_length():
+        a ^= b << (a.bit_length() - b.bit_length())
+    return a
+
+
+@lru_cache(maxsize=128)
+def irreducible_binary_polynomial(modulus):
+    """Exact bounded-degree test, HAC Algorithm 4.69 (p=2).
+
+    https://cacr.uwaterloo.ca/hac/about/chap4.pdf, section 4.5.1.
+    Eliminate every possible irreducible factor of degree <= floor(n/2)
+    using gcd(f, x^(2^i)-x). This does not trust the producer's field claim.
+    """
+    degree = modulus.bit_length()-1
+    if degree < 1:
+        return False
+    power = 2
+    for _ in range(degree//2):
+        square = sum(1 << (2*i) for i in range(power.bit_length()) if power & (1 << i))
+        power = polynomial_remainder(square, modulus)
+        a, b = modulus, power ^ 2
+        while b:
+            a, b = b, polynomial_remainder(a, b)
+        if a != 1:
+            return False
+    return True
+
+
 class Curve:
     def __init__(self, fixture):
         self.n = int(fixture['degree'])
         self.a = int(fixture['curve_a'])
         self.r = int(fixture['subgroup_order'])
-        require(5 <= self.n <= 31 and self.n % 2 == 1, 'unsupported degree')
+        # The upper bound mirrors `koblitz_tiny_ic::MAX_DEGREE`, which is what
+        # the collector can run, not what this checker can read: the arithmetic
+        # here is Python integers over the fixture's own irreducible polynomial
+        # and has no width of its own. The Rust ceiling was 31 because the pair
+        # table packed coordinates into `u32`; widening that to `u64` lifted it
+        # to 61, and this follows so the checker keeps refusing exactly what the
+        # collector refuses. Additive: it accepts strictly more than before and
+        # reads every earlier fixture identically.
+        require(5 <= self.n <= 61 and self.n % 2 == 1, 'unsupported degree')
         require(self.a in (0, 1), 'unsupported coefficient')
         terms = fixture['irreducible']['low_terms']
         require(fixture['irreducible']['degree'] == self.n, 'field degree mismatch')
         require(len(set(terms)) == len(terms) and all(0 <= x < self.n for x in terms), 'bad modulus')
         self.modulus = (1 << self.n) | sum(1 << t for t in terms)
+        require(irreducible_binary_polynomial(self.modulus), 'reducible field modulus')
         require(self.r > 2 and all(self.r % d for d in range(2, math.isqrt(self.r) + 1)), 'nonprime subgroup')
         t = -1 if self.a == 0 else 1
         s0, s1 = 2, t
@@ -239,7 +280,7 @@ def verify(report, expected_fixture, *, expected_mode='ic', summands=3):
         require(isinstance(rel, dict), 'missing descent relation: logarithm not certified as index calculus')
         a, b, ids = rel.get('a'), rel.get('b'), rel.get('points')
         require(type(a) is int and type(b) is int and 0 <= a < c.r and 0 < b < c.r, 'invalid descent scalars')
-        require(isinstance(ids, list) and len(ids) in (0, summands)
+        require(isinstance(ids, list) and len(ids) == summands
                 and all(type(i) is int and 0 <= i < len(base) for i in ids), 'bad descent relation indices')
         q = targets[s['index']]
         probe = c.add(c.mul(c.g, a), c.mul(q, b))

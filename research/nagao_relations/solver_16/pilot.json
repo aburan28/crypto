@@ -1,0 +1,872 @@
+{
+ "field_poly_terms": [
+  8,
+  3,
+  2
+ ],
+ "rows": [
+  {
+   "d": 4,
+   "stratum": "uniform",
+   "encoding": "s4",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 10,
+   "pairs": 45,
+   "gen_seconds": 0.25,
+   "stats": {
+    "vars": 33,
+    "equations": 152,
+    "distinct_monomials": 300,
+    "non_unary_monomials": 267,
+    "max_terms_per_equation": 105,
+    "max_degree": 3,
+    "wdsat_max_id": 300
+   },
+   "history_mb": 1.8,
+   "status": "UNSAT",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.002,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 4,
+   "stratum": "uniform",
+   "encoding": "s4",
+   "args": [
+    "-x"
+   ],
+   "admissible": 10,
+   "pairs": 45,
+   "gen_seconds": 0.25,
+   "stats": {
+    "vars": 33,
+    "equations": 152,
+    "distinct_monomials": 300,
+    "non_unary_monomials": 267,
+    "max_terms_per_equation": 105,
+    "max_degree": 3,
+    "wdsat_max_id": 300
+   },
+   "history_mb": 1.8,
+   "status": "UNSAT",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.002,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 4,
+   "stratum": "uniform",
+   "encoding": "rr",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 10,
+   "pairs": 45,
+   "gen_seconds": 0.36,
+   "stats": {
+    "vars": 144,
+    "equations": 394,
+    "distinct_monomials": 1566,
+    "non_unary_monomials": 1422,
+    "max_terms_per_equation": 775,
+    "max_degree": 3,
+    "wdsat_max_id": 1566
+   },
+   "history_mb": 75.5,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.015,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 4,
+   "stratum": "uniform",
+   "encoding": "rr",
+   "args": [
+    "-x"
+   ],
+   "admissible": 10,
+   "pairs": 45,
+   "gen_seconds": 0.36,
+   "stats": {
+    "vars": 144,
+    "equations": 394,
+    "distinct_monomials": 1566,
+    "non_unary_monomials": 1422,
+    "max_terms_per_equation": 775,
+    "max_degree": 3,
+    "wdsat_max_id": 1566
+   },
+   "history_mb": 75.5,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.014,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 4,
+   "stratum": "planted",
+   "encoding": "s4",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 10,
+   "pairs": 45,
+   "gen_seconds": 0.23,
+   "stats": {
+    "vars": 33,
+    "equations": 152,
+    "distinct_monomials": 300,
+    "non_unary_monomials": 267,
+    "max_terms_per_equation": 113,
+    "max_degree": 3,
+    "wdsat_max_id": 300
+   },
+   "history_mb": 1.8,
+   "status": "UNSAT",
+   "solutions": 1,
+   "conflicts": 26,
+   "wall": 0.003,
+   "warnings": [],
+   "verified": [
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 0,
+     "sum_is_R": true
+    }
+   ],
+   "planted": [
+    14,
+    6,
+    7
+   ]
+  },
+  {
+   "d": 4,
+   "stratum": "planted",
+   "encoding": "s4",
+   "args": [
+    "-x"
+   ],
+   "admissible": 10,
+   "pairs": 45,
+   "gen_seconds": 0.23,
+   "stats": {
+    "vars": 33,
+    "equations": 152,
+    "distinct_monomials": 300,
+    "non_unary_monomials": 267,
+    "max_terms_per_equation": 113,
+    "max_degree": 3,
+    "wdsat_max_id": 300
+   },
+   "history_mb": 1.8,
+   "status": "UNSAT",
+   "solutions": 6,
+   "conflicts": 22,
+   "wall": 0.003,
+   "warnings": [],
+   "verified": [
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 0,
+     "sum_is_R": true
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 0,
+     "sum_is_R": true
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 0,
+     "sum_is_R": true
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 0,
+     "sum_is_R": true
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 0,
+     "sum_is_R": true
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 0,
+     "sum_is_R": true
+    }
+   ],
+   "planted": [
+    14,
+    6,
+    7
+   ]
+  },
+  {
+   "d": 4,
+   "stratum": "planted",
+   "encoding": "rr",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 10,
+   "pairs": 45,
+   "gen_seconds": 0.33,
+   "stats": {
+    "vars": 144,
+    "equations": 394,
+    "distinct_monomials": 1566,
+    "non_unary_monomials": 1422,
+    "max_terms_per_equation": 777,
+    "max_degree": 3,
+    "wdsat_max_id": 1566
+   },
+   "history_mb": 75.5,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.014,
+   "warnings": [],
+   "verified": null,
+   "planted": [
+    14,
+    6,
+    7
+   ]
+  },
+  {
+   "d": 4,
+   "stratum": "planted",
+   "encoding": "rr",
+   "args": [
+    "-x"
+   ],
+   "admissible": 10,
+   "pairs": 45,
+   "gen_seconds": 0.33,
+   "stats": {
+    "vars": 144,
+    "equations": 394,
+    "distinct_monomials": 1566,
+    "non_unary_monomials": 1422,
+    "max_terms_per_equation": 777,
+    "max_degree": 3,
+    "wdsat_max_id": 1566
+   },
+   "history_mb": 75.5,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.014,
+   "warnings": [],
+   "verified": null,
+   "planted": [
+    14,
+    6,
+    7
+   ]
+  },
+  {
+   "d": 5,
+   "stratum": "uniform",
+   "encoding": "s4",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 17,
+   "pairs": 136,
+   "gen_seconds": 0.36,
+   "stats": {
+    "vars": 42,
+    "equations": 158,
+    "distinct_monomials": 502,
+    "non_unary_monomials": 460,
+    "max_terms_per_equation": 154,
+    "max_degree": 3,
+    "wdsat_max_id": 502
+   },
+   "history_mb": 4.6,
+   "status": "UNSAT",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.003,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 5,
+   "stratum": "uniform",
+   "encoding": "s4",
+   "args": [
+    "-x"
+   ],
+   "admissible": 17,
+   "pairs": 136,
+   "gen_seconds": 0.36,
+   "stats": {
+    "vars": 42,
+    "equations": 158,
+    "distinct_monomials": 502,
+    "non_unary_monomials": 460,
+    "max_terms_per_equation": 154,
+    "max_degree": 3,
+    "wdsat_max_id": 502
+   },
+   "history_mb": 4.6,
+   "status": "UNSAT",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.003,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 5,
+   "stratum": "uniform",
+   "encoding": "rr",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 17,
+   "pairs": 136,
+   "gen_seconds": 0.35,
+   "stats": {
+    "vars": 147,
+    "equations": 394,
+    "distinct_monomials": 2050,
+    "non_unary_monomials": 1903,
+    "max_terms_per_equation": 993,
+    "max_degree": 3,
+    "wdsat_max_id": 2050
+   },
+   "history_mb": 127.6,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.016,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 5,
+   "stratum": "uniform",
+   "encoding": "rr",
+   "args": [
+    "-x"
+   ],
+   "admissible": 17,
+   "pairs": 136,
+   "gen_seconds": 0.35,
+   "stats": {
+    "vars": 147,
+    "equations": 394,
+    "distinct_monomials": 2050,
+    "non_unary_monomials": 1903,
+    "max_terms_per_equation": 993,
+    "max_degree": 3,
+    "wdsat_max_id": 2050
+   },
+   "history_mb": 127.6,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.016,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 5,
+   "stratum": "planted",
+   "encoding": "s4",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 17,
+   "pairs": 136,
+   "gen_seconds": 0.29,
+   "stats": {
+    "vars": 42,
+    "equations": 158,
+    "distinct_monomials": 502,
+    "non_unary_monomials": 460,
+    "max_terms_per_equation": 178,
+    "max_degree": 3,
+    "wdsat_max_id": 502
+   },
+   "history_mb": 4.6,
+   "status": "UNSAT",
+   "solutions": 1,
+   "conflicts": 52,
+   "wall": 0.005,
+   "warnings": [],
+   "verified": [
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 3,
+     "sum_is_R": false
+    }
+   ],
+   "planted": [
+    2,
+    6,
+    12
+   ]
+  },
+  {
+   "d": 5,
+   "stratum": "planted",
+   "encoding": "s4",
+   "args": [
+    "-x"
+   ],
+   "admissible": 17,
+   "pairs": 136,
+   "gen_seconds": 0.29,
+   "stats": {
+    "vars": 42,
+    "equations": 158,
+    "distinct_monomials": 502,
+    "non_unary_monomials": 460,
+    "max_terms_per_equation": 178,
+    "max_degree": 3,
+    "wdsat_max_id": 502
+   },
+   "history_mb": 4.6,
+   "status": "UNSAT",
+   "solutions": 6,
+   "conflicts": 58,
+   "wall": 0.006,
+   "warnings": [],
+   "verified": [
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 3,
+     "sum_is_R": false
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 2,
+     "sum_is_R": true
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 3,
+     "sum_is_R": false
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 2,
+     "sum_is_R": true
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 1,
+     "sum_is_R": true
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 1,
+     "sum_is_R": true
+    }
+   ],
+   "planted": [
+    2,
+    6,
+    12
+   ]
+  },
+  {
+   "d": 5,
+   "stratum": "planted",
+   "encoding": "rr",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 17,
+   "pairs": 136,
+   "gen_seconds": 0.33,
+   "stats": {
+    "vars": 147,
+    "equations": 394,
+    "distinct_monomials": 2050,
+    "non_unary_monomials": 1903,
+    "max_terms_per_equation": 1018,
+    "max_degree": 3,
+    "wdsat_max_id": 2050
+   },
+   "history_mb": 127.6,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.017,
+   "warnings": [],
+   "verified": null,
+   "planted": [
+    2,
+    6,
+    12
+   ]
+  },
+  {
+   "d": 5,
+   "stratum": "planted",
+   "encoding": "rr",
+   "args": [
+    "-x"
+   ],
+   "admissible": 17,
+   "pairs": 136,
+   "gen_seconds": 0.33,
+   "stats": {
+    "vars": 147,
+    "equations": 394,
+    "distinct_monomials": 2050,
+    "non_unary_monomials": 1903,
+    "max_terms_per_equation": 1018,
+    "max_degree": 3,
+    "wdsat_max_id": 2050
+   },
+   "history_mb": 127.6,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.016,
+   "warnings": [],
+   "verified": null,
+   "planted": [
+    2,
+    6,
+    12
+   ]
+  },
+  {
+   "d": 6,
+   "stratum": "uniform",
+   "encoding": "s4",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 34,
+   "pairs": 561,
+   "gen_seconds": 0.46,
+   "stats": {
+    "vars": 51,
+    "equations": 164,
+    "distinct_monomials": 767,
+    "non_unary_monomials": 716,
+    "max_terms_per_equation": 253,
+    "max_degree": 3,
+    "wdsat_max_id": 767
+   },
+   "history_mb": 10.9,
+   "status": "UNSAT",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.005,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 6,
+   "stratum": "uniform",
+   "encoding": "s4",
+   "args": [
+    "-x"
+   ],
+   "admissible": 34,
+   "pairs": 561,
+   "gen_seconds": 0.46,
+   "stats": {
+    "vars": 51,
+    "equations": 164,
+    "distinct_monomials": 767,
+    "non_unary_monomials": 716,
+    "max_terms_per_equation": 253,
+    "max_degree": 3,
+    "wdsat_max_id": 767
+   },
+   "history_mb": 10.9,
+   "status": "UNSAT",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.004,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 6,
+   "stratum": "uniform",
+   "encoding": "rr",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 34,
+   "pairs": 561,
+   "gen_seconds": 0.36,
+   "stats": {
+    "vars": 150,
+    "equations": 394,
+    "distinct_monomials": 2570,
+    "non_unary_monomials": 2420,
+    "max_terms_per_equation": 1230,
+    "max_degree": 3,
+    "wdsat_max_id": 2570
+   },
+   "history_mb": 197.7,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.021,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 6,
+   "stratum": "uniform",
+   "encoding": "rr",
+   "args": [
+    "-x"
+   ],
+   "admissible": 34,
+   "pairs": 561,
+   "gen_seconds": 0.36,
+   "stats": {
+    "vars": 150,
+    "equations": 394,
+    "distinct_monomials": 2570,
+    "non_unary_monomials": 2420,
+    "max_terms_per_equation": 1230,
+    "max_degree": 3,
+    "wdsat_max_id": 2570
+   },
+   "history_mb": 197.7,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.02,
+   "warnings": [],
+   "verified": null,
+   "planted": null
+  },
+  {
+   "d": 6,
+   "stratum": "planted",
+   "encoding": "s4",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 34,
+   "pairs": 561,
+   "gen_seconds": 0.5,
+   "stats": {
+    "vars": 51,
+    "equations": 164,
+    "distinct_monomials": 767,
+    "non_unary_monomials": 716,
+    "max_terms_per_equation": 262,
+    "max_degree": 3,
+    "wdsat_max_id": 767
+   },
+   "history_mb": 10.9,
+   "status": "UNSAT",
+   "solutions": 0,
+   "conflicts": 51,
+   "wall": 0.019,
+   "warnings": [],
+   "verified": null,
+   "planted": [
+    29,
+    14,
+    35
+   ]
+  },
+  {
+   "d": 6,
+   "stratum": "planted",
+   "encoding": "s4",
+   "args": [
+    "-x"
+   ],
+   "admissible": 34,
+   "pairs": 561,
+   "gen_seconds": 0.5,
+   "stats": {
+    "vars": 51,
+    "equations": 164,
+    "distinct_monomials": 767,
+    "non_unary_monomials": 716,
+    "max_terms_per_equation": 262,
+    "max_degree": 3,
+    "wdsat_max_id": 767
+   },
+   "history_mb": 10.9,
+   "status": "UNSAT",
+   "solutions": 4,
+   "conflicts": 68,
+   "wall": 0.024,
+   "warnings": [],
+   "verified": [
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 2,
+     "sum_is_R": true
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 3,
+     "sum_is_R": false
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 2,
+     "sum_is_R": true
+    },
+    {
+     "lifts": true,
+     "relation": true,
+     "degenerate": false,
+     "signs": 3,
+     "sum_is_R": false
+    }
+   ],
+   "planted": [
+    29,
+    14,
+    35
+   ]
+  },
+  {
+   "d": 6,
+   "stratum": "planted",
+   "encoding": "rr",
+   "args": [
+    "-x",
+    "-b"
+   ],
+   "admissible": 34,
+   "pairs": 561,
+   "gen_seconds": 0.38,
+   "stats": {
+    "vars": 150,
+    "equations": 394,
+    "distinct_monomials": 2570,
+    "non_unary_monomials": 2420,
+    "max_terms_per_equation": 1286,
+    "max_degree": 3,
+    "wdsat_max_id": 2570
+   },
+   "history_mb": 197.7,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.019,
+   "warnings": [],
+   "verified": null,
+   "planted": [
+    29,
+    14,
+    35
+   ]
+  },
+  {
+   "d": 6,
+   "stratum": "planted",
+   "encoding": "rr",
+   "args": [
+    "-x"
+   ],
+   "admissible": 34,
+   "pairs": 561,
+   "gen_seconds": 0.38,
+   "stats": {
+    "vars": 150,
+    "equations": 394,
+    "distinct_monomials": 2570,
+    "non_unary_monomials": 2420,
+    "max_terms_per_equation": 1286,
+    "max_degree": 3,
+    "wdsat_max_id": 2570
+   },
+   "history_mb": 197.7,
+   "status": "SAT?",
+   "solutions": 0,
+   "conflicts": null,
+   "wall": 0.02,
+   "warnings": [],
+   "verified": null,
+   "planted": [
+    29,
+    14,
+    35
+   ]
+  }
+ ]
+}

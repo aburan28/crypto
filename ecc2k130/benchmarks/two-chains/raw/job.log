@@ -1,0 +1,137 @@
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05, 2430 MHz, 600.00 W, 97887 MiB
+Cuda compilation tools, release 13.3, V13.3.73
+Build cuda_13.3.r13.3/compiler.38244171_0
+source: 40a18e281d7a879c38a199f14be9b52e8a6c4a7a
+=== build ref: gpu-rtx-pro6000-20b
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 116 registers, used 1 barriers
+=== build ref-alusqr: gpu-rtx-pro6000-20b PACKED_ALU_SQR=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 116 registers, used 1 barriers
+=== build c2-256x32: gpu-rtx-pro6000-chains2
+    40 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 182 registers, used 1 barriers, 40 bytes cumulative stack size
+=== build c2-384x32: gpu-rtx-pro6000-chains2 CHAINS2_THREADS=384
+    40 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 166 registers, used 1 barriers, 40 bytes cumulative stack size
+=== build c2-512x16: gpu-rtx-pro6000-chains2 CHAINS2_THREADS=512 CHAINS2_BATCH=16
+    40 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 128 registers, used 1 barriers, 40 bytes cumulative stack size
+=== build c2-256x32-alusqr: gpu-rtx-pro6000-chains2 PACKED_ALU_SQR=1
+    40 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 182 registers, used 1 barriers, 40 bytes cumulative stack size
+=== build ref-prof: gpu-rtx-pro6000-20b PHASE_PROFILE=1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 112 registers, used 1 barriers
+=== build c2-256x32-prof: gpu-rtx-pro6000-chains2 PHASE_PROFILE=1
+    40 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 186 registers, used 1 barriers, 40 bytes cumulative stack size
+=== verify ref (threads 96256)
+packed L2 persist window: 78544896 of 78544896 field bytes, cap 83886080
+packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 1
+packed L2 persist: 1
+  finished: 4.983 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify ref-alusqr (threads 96256)
+packed L2 persist window: 78544896 of 78544896 field bytes, cap 83886080
+packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 1
+packed L2 persist: 1
+  finished: 4.852 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify c2-256x32 (threads 48128)
+packed L2 persist window: 78544896 of 78544896 field bytes, cap 83886080
+packed kernel: 182 registers/thread, 40 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 2
+packed L2 persist: 1
+  finished: 4.944 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify c2-384x32 (threads 48128)
+packed L2 persist window: 78544896 of 78544896 field bytes, cap 83886080
+packed kernel: 166 registers/thread, 40 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 2
+packed L2 persist: 1
+  finished: 4.907 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify c2-512x16 (threads 96256)
+packed L2 persist window: 78544896 of 78544896 field bytes, cap 83886080
+packed kernel: 128 registers/thread, 40 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 2
+packed L2 persist: 1
+  finished: 4.944 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify c2-256x32-alusqr (threads 48128)
+packed L2 persist window: 78544896 of 78544896 field bytes, cap 83886080
+packed kernel: 182 registers/thread, 40 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed chains: 2
+packed L2 persist: 1
+  finished: 4.852 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+ref                   1480482 records  sha256 6cb064cdc55d1a81  IDENTICAL to ref
+ref-alusqr            1480482 records  sha256 6cb064cdc55d1a81  IDENTICAL to ref
+c2-256x32             1480482 records  sha256 6cb064cdc55d1a81  IDENTICAL to ref
+c2-384x32             1480482 records  sha256 6cb064cdc55d1a81  IDENTICAL to ref
+c2-512x16             1480482 records  sha256 6cb064cdc55d1a81  IDENTICAL to ref
+c2-256x32-alusqr      1480482 records  sha256 6cb064cdc55d1a81  IDENTICAL to ref
+=== bench ref rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 20073.392 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 562.40 W, 49
+=== bench c2-256x32 rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM   finished: 13894.729 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 442.22 W, 58
+=== bench c2-384x32 rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 384 packed threads resident per SM   finished: 15778.361 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2400 MHz, 558.59 W, 55
+=== bench c2-512x16 rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 15684.968 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 537.61 W, 58
+=== bench ref-alusqr rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19908.502 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2415 MHz, 599.52 W, 68
+=== bench c2-256x32-alusqr rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM   finished: 13420.136 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 433.24 W, 58
+=== bench ref rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19994.244 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2400 MHz, 571.77 W, 63
+=== bench c2-256x32 rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM   finished: 13902.772 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 433.64 W, 58
+=== bench c2-384x32 rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 384 packed threads resident per SM   finished: 15648.257 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2377 MHz, 591.83 W, 67
+=== bench c2-512x16 rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 15687.111 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 581.68 W, 70
+=== bench ref-alusqr rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19840.122 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2415 MHz, 565.72 W, 62
+=== bench c2-256x32-alusqr rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM   finished: 13420.531 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 449.92 W, 66
+=== bench ref rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19920.049 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2415 MHz, 563.36 W, 66
+=== bench c2-256x32 rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM   finished: 13902.043 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 450.52 W, 66
+=== bench c2-384x32 rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 384 packed threads resident per SM   finished: 15621.102 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2392 MHz, 564.88 W, 67
+=== bench c2-512x16 rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 15694.391 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 545.78 W, 66
+=== bench ref-alusqr rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19817.862 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2400 MHz, 573.84 W, 70
+=== bench c2-256x32-alusqr rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM   finished: 13422.212 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 456.80 W, 66
+=== bench ref rep 4
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19980.744 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2415 MHz, 595.58 W, 70
+=== bench c2-256x32 rep 4
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM   finished: 13905.166 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 441.34 W, 66
+=== bench c2-384x32 rep 4
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 384 packed threads resident per SM   finished: 15625.236 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2370 MHz, 594.56 W, 65
+=== bench c2-512x16 rep 4
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 15690.126 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 590.78 W, 69
+=== bench ref-alusqr rep 4
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19773.823 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2392 MHz, 564.84 W, 60
+=== bench c2-256x32-alusqr rep 4
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM   finished: 13429.124 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 443.72 W, 60
+=== bench ref rep 5
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19904.262 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2415 MHz, 592.23 W, 69
+=== bench c2-256x32 rep 5
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM   finished: 13912.341 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 468.46 W, 66
+=== bench c2-384x32 rep 5
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 384 packed threads resident per SM   finished: 15626.554 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2362 MHz, 589.49 W, 68
+=== bench c2-512x16 rep 5
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 15694.056 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 575.95 W, 67
+=== bench ref-alusqr rep 5
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19814.043 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2407 MHz, 585.32 W, 71
+=== bench c2-256x32-alusqr rep 5
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM   finished: 13431.619 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 463.49 W, 66
+=== phase profile ref-prof
+  finished: 19918.973 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+phase profile: per warp-step 184285 cycles = forward 69639 (37.8%) + inversion 31087 (16.9%) + reverse 83560 (45.3%); per update 11517.8 warp-cycles
+=== phase profile c2-256x32-prof
+  finished: 13677.254 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+phase profile: per warp-step 259949 cycles = forward 110121 (42.4%) + inversion 41724 (16.1%) + reverse 108103 (41.6%); per update 8123.4 warp-cycles
+=== done

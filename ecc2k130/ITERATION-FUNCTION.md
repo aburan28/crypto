@@ -1,5 +1,11 @@
 # Iteration function and the 28 B/s question
 
+> Table-walk correctness update (2026-09-26): [cycle escape v3](CYCLE-ESCAPE-V3.md)
+> replaces history-dependent exits with a validated raw-cycle anchor. Older
+> table-walk measurements below describe their recorded revisions, not v3.
+> V3 requires a new table corpus; the default sigma iteration is unchanged.
+
+
 Question: can a different iteration function take one RTX PRO 6000 from the
 audited 14.64 B updates/s to 28 B/s?
 
@@ -92,7 +98,7 @@ What would move the floor, and why each is out of reach here:
 
 | lever | effect | status |
 |---|---|---|
-| fewer than ~4.8 products per step | lowers both floors | no affine formula does it; projective forms need the affine `x` for the hash anyway (an inversion), λ-coordinates cost 1I+3M+2S, `2P+Q` single-inversion tricks cost ≥ 8M |
+| fewer than ~4.8 products per step | lowers both floors | no affine formula does it; projective forms need the affine `x` for the hash anyway (an inversion), and even with that hash free the cheapest inversion-free addition, λ-projective mixed at 8M + 2S, is 60.5 clmad per update against this row's 38.1 — priced in [LAMBDA-PROJECTIVE.md](LAMBDA-PROJECTIVE.md); `2P+Q` single-inversion tricks cost ≥ 8M |
 | a product in fewer than 6 clmad | lowers the clmad floor | 32-bit limbs need 9 `lo` products; 3-limb splits need `hi` anyway; no 128-bit `CLMAD` form exists |
 | products off the carry-less unit | trades pipes | software `clmul` costs ~9 SM-clocks per product on the FMA pipe vs 3.9 on clmad; bit-sliced ALU products cost ~300 ALU each and the ALU is the tighter pipe; tensor cores need a shared matrix operand, and every walk's operands differ |
 | a walk that is not one addition per step | changes the count | `x`-only doubling is 1I+1S but a single multiplier `[2]` is a permutation, not a random function; mixed doubling/addition diverges per lane, and SIMT pays both |
@@ -401,7 +407,11 @@ walks carry the same ≈ 1.5× harness overhead over the bare prediction (the
 sample standard deviation is half the mean, as rho's is). What §4.4 asks is
 the *ratio*: table over shipping is **0.96 ± 0.07**, consistent with the
 r-adding constant `1 + 1/(2H) = 1.06` at `H = 8` and excluding a degradation
-above 1.10 at two standard errors. Raw runs in
+above 1.10 at two standard errors. ([WALK-CONSTANT.md](WALK-CONSTANT.md)
+measures the ratio of the two walks' constants directly: the table walk at a
+random mapping's `c = 1.00`, the σ walk at `1.09–1.10`, a ratio of 0.92,
+equally consistent with this row. `1 + 1/(2H)` is the model of a walk
+injective on each branch, which the table walk is not on classes.) Raw runs in
 [`benchmarks/table-walk/raw/small-curve-gf2_41.txt`](benchmarks/table-walk/raw/small-curve-gf2_41.txt).
 
 `GF(2^83)` planted logs, the second curve §4.4 asks for, need ≈ 2^37 steps of
@@ -521,7 +531,14 @@ Measured: **16.35 B/s** in that geometry (3.8% short) and **16.56** at the
 automatic worker count (2.6% short). The rule is applied as written: `aws/campaign.json` keeps
 `"walk": "sigma"`, and the table walk stays in the tree behind
 `WALK_TABLE=1` / `"walk": "table"` with its own campaign identity, so that
-choosing it later is a configuration change and not a code change. The three
+choosing it later is a configuration change and not a code change. *(Not so:
+[WALK-CONSTANT.md](WALK-CONSTANT.md) §5 finds fruitless cycles the §4.1 rule
+lets through, four-step ones from Frobenius's relation and six-step pairwise
+ones, which at the live `dpWeight = 32` trap about half the walks; the walk
+needed a cycle check before it could be chosen, and priced end to end it
+cost five to six times the σ walk per solve as first built.  §11 there
+extends the rule to refuse those cycles; the walk is then projected at
+0.81–0.86× σ's cost per solve, pending the new kernel's paired rate.)* The three
 facts a reader needs to revisit that policy are on this page: the gain is
 real and reproducible (nine of nine paired repetitions across both
 geometries), it is worth +9% to +15% depending on worker count and never

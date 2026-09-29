@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "scope": "Complete standalone generic Boolean solves on generated public systems. No curve inputs, imported targets, scalar/key recovery, production solver changes, index-calculus or rho campaigns. This driver is not the repository inherited-F4 solver.",
+  "variables": [
+    12,
+    16,
+    20,
+    24
+  ],
+  "families": [
+    "planted",
+    "cross_planted",
+    "unplanted"
+  ],
+  "discovery_seeds": [
+    17,
+    937
+  ],
+  "holdout_seeds": [
+    20261015,
+    1966087
+  ],
+  "variants": [
+    "search",
+    "flat",
+    "bucket",
+    "hybrid",
+    "small_flat",
+    "word_tail",
+    "merge_search",
+    "quadratic_state",
+    "packed_state",
+    "basis_list",
+    "basis_wide",
+    "tail_list",
+    "tail_wide"
+  ],
+  "repetitions": 13,
+  "limits": {
+    "nodes": 200000,
+    "variables": 24,
+    "generators": 36,
+    "terms_per_generator": 32,
+    "kernel_degree": 3,
+    "rows": 4096,
+    "columns": 8192,
+    "worker_seconds": 180,
+    "campaign_seconds": 2400,
+    "basis_columns": 667,
+    "basis_rows": 36
+  },
+  "fixtures": "n+2 equations, twelve distinct quadratic monomials and up to four linear monomials per equation. Planted families choose constants to satisfy a public reproducible Boolean witness that is never passed to the solver. Cross-planted makes a pair differ by a valid affine consequence. Unplanted constants are independent; its status is established by complete search when available. No fixture screening.",
+  "solver": "Exact Boolean specialization with parity cancellation; zero/constant checks; canonical affine reduction and forced assignments; degree-3 linear-tail calls for kernel arms; most-frequent-variable branching with low-index ties, zero branch first. Complete affine residuals are solved directly. Search-only uses identical non-kernel operations. Every solve has fresh solve-lifetime caches and a deterministic node budget.",
+  "controls": {
+    "search": "Complete search with exact specialization and cheap affine propagation, without a Macaulay kernel. Also supplies the independent status reference when it completes.",
+    "flat": "Same search, with retained cached flat linear-tail strategy.",
+    "bucket": "Same search, with retained sparse-bucket tail strategy.",
+    "hybrid": "Same search, with the measured fixed 512-column dispatcher and exact-bitmap streamed kernel.",
+    "small_flat": "Call the existing flat degree-2 tail only when at most ten variables remain active; otherwise continue exact search. This is the same inference policy as word_tail.",
+    "word_tail": "The same selective degree-2 policy, with compressed active-variable coordinates. Its entire possible degree<=2 space has at most 56 columns and fits in one u64. Generate and eliminate complete degree-2 rows directly in that word; return the identical canonical affine tail.",
+    "merge_search": "Identical search-only algorithm, but specialize zero assignments by in-place filtering and one true variable by an order-preserving symmetric-difference merge. Multiple true assignments retain the canonical sorting fallback. Generator order and deduplication are unchanged.",
+    "quadratic_state": "Same complete search policy as merge_search. Compile immutable quadratic neighbor masks once per cold solve, then retain active variables, live equations, linear masks, constants and exact quadratic edge counts. Assignments update coefficients by XOR, detect all degree drops and remove exact duplicate equations in original order. Non-quadratic inputs fall back to merge_search; every fixture in this protocol has degree at most two.",
+    "packed_state": "One u64 coefficient word per residual equation: local ordered quadratic positions followed by common linear-variable coordinates and a constant. At most 32 original quadratic terms and q+n<64 are required; otherwise use the retained quadratic-state implementation. Fixed touch masks implement assignments, a stack pivot basis replaces affine allocations, and exact equality checks hash-bucket candidates for deduplication. Every benchmark fixture fits without fallback.",
+    "basis_list": "Transport a coefficient-row-space basis of quadratic polynomials through assignments. Recompute canonical full RREF with sorted polynomial-list symmetric differences; use all affine consequences, then branch by term frequencies in the reduced basis.",
+    "basis_wide": "Identical full-RREF inference and branching policy to basis_list, using at most eleven u64 words per row and global degree<=2 coordinates. No Macaulay multiplication rows.",
+    "tail_list": "Transport a quadratic echelon basis and canonically reduce its affine tail. Keep a separately charged packed copy of original residual equations for the legacy frequency branching heuristic. Sorted polynomial-list elimination supplies an exact policy reference.",
+    "tail_wide": "Same inference, source-equation branching, outcomes/models, logical counters and trace as tail_list. Use packed global coefficient rows for basis transport. The extra original-equation state and all its updates are charged."
+  },
+  "correctness": "Verify every SAT assignment independently against original equations. An UNSAT output counts as independently verified only when complete search-only also returns UNSAT. Kernel arms must match outcome/model, every logical search counter and a stable trace digest. The digest is a reproducibility diagnostic, not a collision-resistant proof. Exhaustive small-system tests compare all arms with full Boolean enumeration. Node/kernel caps return UNKNOWN, never UNSAT. Small-flat and word-tail policies must match outcomes/models, all logical counters and trace digests. Word-kernel tails/source dimensions are cross-checked against the existing degree-2 flat kernel on embedded variable sets. All solver modes join exhaustive small-system tests. Exhaustively compare ordered specialization with the sorting reference for all 256 small Boolean polynomials and all 27 partial assignments, including duplicated equations and constant cancellation. Confirm complete search trace equality on larger seeded cases. The quadratic state must materialize identical residual equations for all 128 degree-at-most-two polynomials on three variables, every partial assignment and a second assignment; tests include duplicates, zero equations and coefficient cancellation. Search, merge_search and quadratic_state must match exact logical counters, outcomes/models and streamed canonical trace digests on every benchmark cell. Packed-state outcomes/models, all logical counters and trace digests must match all three retained search-only arms. Exhaustive tests compare every 3-variable affine row space in both insertion orders; local-coordinate residuals under every first and second partial assignment; and fallback at the 64-bit coordinate limit. Hash buckets only shortlist candidates: accepted equality is exact. Each new list/packed pair must match all logical counters, models and trace digests. Exhaustively verify 442368 three-variable row-span/assignment cases, including equality with rebuilding after specialization; independently check solution sets. Dense tests cover global coordinate word boundaries through n36 and repeated assignments. Canonical full RREF and quadratic-echelon/affine-tail policies are distinct groups.",
+  "accounting": "Cold total includes solver creation, source validation and compilation/copy, specialization, propagation, recursive decisions, any matrix calls, solver/context destruction and independent result validation. Kernel time is a measured subset. Fixture generation, completed status-reference preparation and diagnostic-record formatting are outside arm timing and inside fresh-process receipts. Thirteen rotated repetitions balance thirteen arm positions. All source compilation into coefficient words, touch/neighbor tables and solver destruction are charged to each cold solve. Logical term counts are representation-independent work diagnostics, not calibrated operation totals. Repeated timing bootstrap intervals apply to two fixed holdout fixtures per size/family; they do not establish a population-wide confidence interval. Every new reduction counts input rows including zero rows and the actual union of input coefficient columns. New-policy specialization counters sum input terms over all carried representations, including the original-equation copy in tail arms. New basis histograms use nominal unassigned-variable count. Source coordinate setup, copies, row-space reduction, tracing, inference, all decisions, destruction and validation are inside cold arm totals.",
+  "performance_gate": "For each of search,bucket,hybrid against flat separately, require every n=16/20/24 and every family holdout cell to have a 95 percent paired-bootstrap lower bound above 2.0. Also test hybrid against the pointwise fastest of all three controls. All arms on the full grid must complete with verified results before any unqualified full-solve promotion. Missing/censored cells retain null completion costs and block promotion.",
+  "memory": "Fresh-worker peak RSS includes fixtures, completed status-reference preparation and all thirteen arms. The new coefficient domain has C(n,2)+n+1<=667 columns and at most 36 basis rows; intermediate rows may become dense. Tail policies additionally retain original packed equations. Candidate-specific peak memory is not measured. Previous kernel cache caps remain unchanged.",
+  "classification": "Complete bounded generic Boolean-search diagnostic, not a production inherited-solver benchmark or a cryptanalytic result. Index-calculus cost and rho ratios remain null.",
+  "enable_word": true,
+  "candidate_arms": [
+    "search",
+    "bucket",
+    "hybrid",
+    "small_flat",
+    "word_tail",
+    "merge_search",
+    "quadratic_state",
+    "packed_state",
+    "basis_wide",
+    "tail_wide"
+  ],
+  "word_gate": "On every family at n=16/20/24, require the 95 percent paired lower bound above 2.0 against the pointwise fastest of all four prior whole-solve methods and above 1.05 against the same-policy small_flat control. All 18 comparisons and all grid completions/verification must pass. Gates against flat are also retained, without dropping any failures.",
+  "predecessor": "PR 665 packed_state is retained unchanged and is mandatory in the strongest reference. Carry the entire preceding discovery/regression/holdout grid forward, including its remaining n16 cross-planted failure, and add two unused holdout seeds.",
+  "predecessor_source_hashes": {
+    "research/boolean_quadratic_frontier_20260923/worker.rs": "da104b6feb1aae756d63b7d95351c9547eaf9e856b63d600527e1541508f9861",
+    "research/boolean_quadratic_frontier_20260923/kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "research/boolean_quadratic_frontier_20260923/quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "research/boolean_quadratic_frontier_20260923/packed.rs": "240e363ee53a79952225f8eacc9dd9d0a4ace0ce5d09b3b59a69de0edcd5d464"
+  },
+  "enable_merge": true,
+  "merge_gate": "On every family at n=16/20/24, require the 95 percent paired-bootstrap lower bound above 2.0 against the pointwise fastest of all six prior complete-solve methods. Require all grid completions and independent verification. Search and merge_search must have identical outcomes/models, logical counters and trace digests.",
+  "enable_quadratic": true,
+  "quadratic_gate": "On every family at n=16/20/24, require the 95 percent paired-bootstrap lower bound above 2.0 against the pointwise fastest of all seven prior complete-solve methods. All nine comparisons and every grid completion/verification must pass. All search-only arms must have identical outcomes/models, logical counters and trace digests. Any missing/censored result blocks promotion. No parameter tuning after holdout measurements.",
+  "splits": [
+    "discovery",
+    "regression",
+    "holdout"
+  ],
+  "regression_seeds": [
+    20261013,
+    1703939,
+    20261014,
+    1835009
+  ],
+  "enable_packed": true,
+  "packed_gate": "Require a 95 percent paired-bootstrap lower bound above 2.0 versus the pointwise fastest of all eight retained complete-solve methods, including quadratic_state, on every n=16/20/24 and family in BOTH regression and fresh-holdout splits. All 18 comparisons and all 72 grid completions must pass. A separate >1.0 lower-bound gate reports incremental improvement without calling it dramatic. Retain a separate cumulative >2.0 comparison versus the historical seven methods; it cannot replace the current-frontier gate. No tuning after holdout measurements.",
+  "enable_basis": true,
+  "enable_tail": true,
+  "resource_probes": "resource_probe_01 retains the initial full-RREF policy. resource_probe_02 retains the quadratic-echelon/affine-tail variant with source-equation branching. Both use n24/seed17 and all families, one repetition, no holdouts. Both lost to packed_state on these discovery inputs; the full comparison must retain regressions rather than promote backend-only gains.",
+  "basis_gate": "For basis_wide and tail_wide separately, require a 95 percent paired-bootstrap lower bound above 2.0 against the pointwise fastest of ALL twelve other arms at every n16/20/24 and family in BOTH regression and fresh-holdout splits. All 18 comparisons and all 96 grid completions/verification must pass. Also report an incremental lower-bound >1.0 gate against the same strongest reference and a separate >1.05 same-policy backend gate. Backend gains do not substitute for complete-method gains. No tuning after holdout measurement."
+}

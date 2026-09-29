@@ -1,0 +1,2792 @@
+{
+  "cells": [
+    {
+      "curve": "random-binary-n33-b4c7bb7d7",
+      "d_semireg_max": 7,
+      "d_semireg_min": 7,
+      "engines": [
+        {
+          "agrees_with_reference": true,
+          "d_learn_max": null,
+          "d_learn_mean": null,
+          "d_reach_max": 3,
+          "d_reach_mean": 3.0,
+          "decided": 8,
+          "declined": false,
+          "engine": "inherited-f4",
+          "ms_max": 3300.534694,
+          "ms_mean": 3192.48557075,
+          "op_unit": "word XORs (elimination and specialisation only)",
+          "ops_mean": 249998246.0,
+          "over_budget": 0,
+          "peak_kib_max": 0.0,
+          "wall_over_reference": 1.2144061175415028,
+          "workload": "complete enumeration"
+        },
+        {
+          "agrees_with_reference": true,
+          "d_learn_max": null,
+          "d_learn_mean": null,
+          "d_reach_max": 3,
+          "d_reach_mean": 3.0,
+          "decided": 8,
+          "declined": false,
+          "engine": "matrix-f4",
+          "ms_max": 7454.147041,
+          "ms_mean": 6793.360043625,
+          "op_unit": "word XORs (elimination only)",
+          "ops_mean": 1416106664.0,
+          "over_budget": 0,
+          "peak_kib_max": 0.0,
+          "wall_over_reference": 2.584161404276007,
+          "workload": "complete enumeration"
+        },
+        {
+          "agrees_with_reference": true,
+          "d_learn_max": null,
+          "d_learn_mean": null,
+          "d_reach_max": 3,
+          "d_reach_mean": 3.0,
+          "decided": 8,
+          "declined": false,
+          "engine": "matrix-f5",
+          "ms_max": 7307.458842,
+          "ms_mean": 6806.846352250001,
+          "op_unit": "word XORs (elimination only)",
+          "ops_mean": 1416046123.375,
+          "over_budget": 0,
+          "peak_kib_max": 0.0,
+          "wall_over_reference": 2.589291531048485,
+          "workload": "complete enumeration"
+        },
+        {
+          "agrees_with_reference": true,
+          "d_learn_max": null,
+          "d_learn_mean": null,
+          "d_reach_max": null,
+          "d_reach_mean": null,
+          "decided": 0,
+          "declined": false,
+          "engine": "crossbred-f2",
+          "ms_max": 23.566744,
+          "ms_mean": 20.427397499999998,
+          "op_unit": "word operations (partial: extraction, transform and filter; per-point solves in solve_row_ops)",
+          "ops_mean": 5531372.0,
+          "over_budget": 8,
+          "peak_kib_max": 0.0,
+          "wall_over_reference": null,
+          "workload": "complete enumeration"
+        },
+        {
+          "agrees_with_reference": true,
+          "d_learn_max": null,
+          "d_learn_mean": null,
+          "d_reach_max": null,
+          "d_reach_mean": null,
+          "decided": 0,
+          "declined": true,
+          "engine": "fes-f2",
+          "ms_max": 0.0,
+          "ms_mean": 0.0,
+          "op_unit": "",
+          "ops_mean": 0.0,
+          "over_budget": 0,
+          "peak_kib_max": 0.0,
+          "wall_over_reference": null,
+          "workload": "complete enumeration"
+        },
+        {
+          "agrees_with_reference": true,
+          "d_learn_max": null,
+          "d_learn_mean": null,
+          "d_reach_max": null,
+          "d_reach_mean": null,
+          "decided": 8,
+          "declined": false,
+          "engine": "fes-f2-wide",
+          "ms_max": 2714.912789,
+          "ms_mean": 2628.8450993750002,
+          "op_unit": "vector XORs (Gray-code steps, 16 lanes of 32 bits)",
+          "ops_mean": 2147483648.0,
+          "over_budget": 0,
+          "peak_kib_max": 0.0,
+          "wall_over_reference": 1.0,
+          "workload": "complete enumeration"
+        }
+      ],
+      "equations": 33,
+      "family": "R",
+      "n": 33,
+      "n_prime": 17,
+      "n_vars": 34,
+      "per_target": [
+        {
+          "runs": {
+            "crossbred-f2": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "exhausted": 1,
+                  "filters": 0,
+                  "kernel_dim": 74,
+                  "linear_solves": 256,
+                  "macaulay_cols": 5220,
+                  "macaulay_rows": 1155,
+                  "points": 256,
+                  "solve_row_ops": 38819,
+                  "survivors": 256
+                },
+                "ops": 5466872,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "budget",
+                "wall_ns": 21166676
+              }
+            ],
+            "fes-f2": [
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              }
+            ],
+            "fes-f2-wide": [
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 10,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 58380
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2839692230
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 10,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 58380
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2714912789
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 10,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 58380
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2637612070
+              }
+            ],
+            "inherited-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1962,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 706,
+                  "reduction_cache_on": 0,
+                  "reductions": 4087,
+                  "splits": 1967,
+                  "verification_tests": 35028
+                },
+                "ops": 251837052,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3401557994
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1962,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 706,
+                  "reduction_cache_on": 0,
+                  "reductions": 4087,
+                  "splits": 1967,
+                  "verification_tests": 35028
+                },
+                "ops": 251837052,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3261531880
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1962,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 706,
+                  "reduction_cache_on": 0,
+                  "reductions": 4087,
+                  "splits": 1967,
+                  "verification_tests": 35028
+                },
+                "ops": 251837052,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3155920654
+              }
+            ],
+            "matrix-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 4930,
+                  "reduction_cache_on": 0,
+                  "reductions": 2133,
+                  "splits": 1030,
+                  "verification_tests": 35028
+                },
+                "ops": 1400853053,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6817348132
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 4930,
+                  "reduction_cache_on": 0,
+                  "reductions": 2133,
+                  "splits": 1030,
+                  "verification_tests": 35028
+                },
+                "ops": 1400853053,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 7041110095
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 4930,
+                  "reduction_cache_on": 0,
+                  "reductions": 2133,
+                  "splits": 1030,
+                  "verification_tests": 35028
+                },
+                "ops": 1400853053,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6922326374
+              }
+            ],
+            "matrix-f5": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 4930,
+                  "reduction_cache_on": 0,
+                  "reductions": 2133,
+                  "splits": 1030,
+                  "verification_tests": 35028
+                },
+                "ops": 1400824696,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 7026401857
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 4930,
+                  "reduction_cache_on": 0,
+                  "reductions": 2133,
+                  "splits": 1030,
+                  "verification_tests": 35028
+                },
+                "ops": 1400824696,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6708740159
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 4930,
+                  "reduction_cache_on": 0,
+                  "reductions": 2133,
+                  "splits": 1030,
+                  "verification_tests": 35028
+                },
+                "ops": 1400824696,
+                "peak_bytes": 0,
+                "solutions": [
+                  1472775922,
+                  2161741530,
+                  4707381478,
+                  6675508196,
+                  8083246154,
+                  13383254124
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6431999154
+              }
+            ]
+          },
+          "semi_regular_degree": 7,
+          "system_blake3": "4cc7ff021a9553f978c1b07777f78abcbf5728ba6eae9eb1385f5cfedaf30259",
+          "terms": 5838,
+          "x_r": 2514343205
+        },
+        {
+          "runs": {
+            "crossbred-f2": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "exhausted": 1,
+                  "filters": 0,
+                  "kernel_dim": 74,
+                  "linear_solves": 256,
+                  "macaulay_cols": 5220,
+                  "macaulay_rows": 1155,
+                  "points": 256,
+                  "solve_row_ops": 37301,
+                  "survivors": 256
+                },
+                "ops": 5389872,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "budget",
+                "wall_ns": 20051511
+              }
+            ],
+            "fes-f2": [
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              }
+            ],
+            "fes-f2-wide": [
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 4,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 20972
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2708241440
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 4,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 20972
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2643250853
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 4,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 20972
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2626704101
+              }
+            ],
+            "inherited-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1927,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 670,
+                  "reduction_cache_on": 0,
+                  "reductions": 4027,
+                  "splits": 1928,
+                  "verification_tests": 10486
+                },
+                "ops": 248148077,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3049574389
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1927,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 670,
+                  "reduction_cache_on": 0,
+                  "reductions": 4027,
+                  "splits": 1928,
+                  "verification_tests": 10486
+                },
+                "ops": 248148077,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3029898625
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1927,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 670,
+                  "reduction_cache_on": 0,
+                  "reductions": 4027,
+                  "splits": 1928,
+                  "verification_tests": 10486
+                },
+                "ops": 248148077,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3153346615
+              }
+            ],
+            "matrix-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1015,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7658,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1016,
+                  "verification_tests": 10486
+                },
+                "ops": 1464520469,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 7223594819
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1015,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7658,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1016,
+                  "verification_tests": 10486
+                },
+                "ops": 1464520469,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 7395445769
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1015,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7658,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1016,
+                  "verification_tests": 10486
+                },
+                "ops": 1464520469,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 7431057696
+              }
+            ],
+            "matrix-f5": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1015,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7658,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1016,
+                  "verification_tests": 10486
+                },
+                "ops": 1464446422,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 7219327027
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1015,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7658,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1016,
+                  "verification_tests": 10486
+                },
+                "ops": 1464446422,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 7299702345
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1015,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7658,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1016,
+                  "verification_tests": 10486
+                },
+                "ops": 1464446422,
+                "peak_bytes": 0,
+                "solutions": [
+                  4407889602,
+                  9085158237
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 7132643018
+              }
+            ]
+          },
+          "semi_regular_degree": 7,
+          "system_blake3": "8f59d0820a4ba3b8d1f5954f0f91a7723e80b8a0c31fa4fc5b1e04b5340f78c8",
+          "terms": 5243,
+          "x_r": 306559263
+        },
+        {
+          "runs": {
+            "crossbred-f2": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "exhausted": 1,
+                  "filters": 0,
+                  "kernel_dim": 75,
+                  "linear_solves": 256,
+                  "macaulay_cols": 5220,
+                  "macaulay_rows": 1155,
+                  "points": 256,
+                  "solve_row_ops": 33748,
+                  "survivors": 256
+                },
+                "ops": 5525376,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "budget",
+                "wall_ns": 22757590
+              }
+            ],
+            "fes-f2": [
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              }
+            ],
+            "fes-f2-wide": [
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 12028
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2658073227
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 12028
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2695536902
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 12028
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2625921344
+              }
+            ],
+            "inherited-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1911,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 871,
+                  "reduction_cache_on": 0,
+                  "reductions": 3993,
+                  "splits": 1910,
+                  "verification_tests": 0
+                },
+                "ops": 253951112,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3300534694
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1911,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 871,
+                  "reduction_cache_on": 0,
+                  "reductions": 3993,
+                  "splits": 1910,
+                  "verification_tests": 0
+                },
+                "ops": 253951112,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3185086891
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1911,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 871,
+                  "reduction_cache_on": 0,
+                  "reductions": 3993,
+                  "splits": 1910,
+                  "verification_tests": 0
+                },
+                "ops": 253951112,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3435824010
+              }
+            ],
+            "matrix-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7730,
+                  "reduction_cache_on": 0,
+                  "reductions": 2864,
+                  "splits": 1024,
+                  "verification_tests": 0
+                },
+                "ops": 1454584764,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7454147041
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7730,
+                  "reduction_cache_on": 0,
+                  "reductions": 2864,
+                  "splits": 1024,
+                  "verification_tests": 0
+                },
+                "ops": 1454584764,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7980210953
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7730,
+                  "reduction_cache_on": 0,
+                  "reductions": 2864,
+                  "splits": 1024,
+                  "verification_tests": 0
+                },
+                "ops": 1454584764,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7242869266
+              }
+            ],
+            "matrix-f5": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7730,
+                  "reduction_cache_on": 0,
+                  "reductions": 2864,
+                  "splits": 1024,
+                  "verification_tests": 0
+                },
+                "ops": 1454440725,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7307458842
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7730,
+                  "reduction_cache_on": 0,
+                  "reductions": 2864,
+                  "splits": 1024,
+                  "verification_tests": 0
+                },
+                "ops": 1454440725,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7227425679
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1025,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7730,
+                  "reduction_cache_on": 0,
+                  "reductions": 2864,
+                  "splits": 1024,
+                  "verification_tests": 0
+                },
+                "ops": 1454440725,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 8033655174
+              }
+            ]
+          },
+          "semi_regular_degree": 7,
+          "system_blake3": "b8d2c1ff8c0b0fc9adf1c1e7e42f9119274438dd87b25199716a47114a15e4f9",
+          "terms": 6014,
+          "x_r": 2292441760
+        },
+        {
+          "runs": {
+            "crossbred-f2": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "exhausted": 1,
+                  "filters": 0,
+                  "kernel_dim": 74,
+                  "linear_solves": 256,
+                  "macaulay_cols": 5220,
+                  "macaulay_rows": 1155,
+                  "points": 256,
+                  "solve_row_ops": 39501,
+                  "survivors": 256
+                },
+                "ops": 5578192,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "budget",
+                "wall_ns": 23566744
+              }
+            ],
+            "fes-f2": [
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              }
+            ],
+            "fes-f2-wide": [
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 11334
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2587952106
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 11334
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2670846054
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 11334
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2748460454
+              }
+            ],
+            "inherited-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1910,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 731,
+                  "reduction_cache_on": 0,
+                  "reductions": 3984,
+                  "splits": 1909,
+                  "verification_tests": 0
+                },
+                "ops": 245659327,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3114142243
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1910,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 731,
+                  "reduction_cache_on": 0,
+                  "reductions": 3984,
+                  "splits": 1909,
+                  "verification_tests": 0
+                },
+                "ops": 245659327,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3294563692
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1910,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 731,
+                  "reduction_cache_on": 0,
+                  "reductions": 3984,
+                  "splits": 1909,
+                  "verification_tests": 0
+                },
+                "ops": 245659327,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3374021179
+              }
+            ],
+            "matrix-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1026,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7421,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1025,
+                  "verification_tests": 0
+                },
+                "ops": 1424620324,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6988807216
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1026,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7421,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1025,
+                  "verification_tests": 0
+                },
+                "ops": 1424620324,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7274513351
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1026,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7421,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1025,
+                  "verification_tests": 0
+                },
+                "ops": 1424620324,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7007576349
+              }
+            ],
+            "matrix-f5": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1026,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7421,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1025,
+                  "verification_tests": 0
+                },
+                "ops": 1424593921,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7232429287
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1026,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7421,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1025,
+                  "verification_tests": 0
+                },
+                "ops": 1424593921,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7212999160
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1026,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7421,
+                  "reduction_cache_on": 0,
+                  "reductions": 2858,
+                  "splits": 1025,
+                  "verification_tests": 0
+                },
+                "ops": 1424593921,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7420681737
+              }
+            ]
+          },
+          "semi_regular_degree": 7,
+          "system_blake3": "7b04afde0af951d12186e8b4ca7fccd9469a0e8a4a7a3ff4885fdc08609efeee",
+          "terms": 5667,
+          "x_r": 4728323221
+        },
+        {
+          "runs": {
+            "crossbred-f2": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "exhausted": 1,
+                  "filters": 0,
+                  "kernel_dim": 74,
+                  "linear_solves": 256,
+                  "macaulay_cols": 5220,
+                  "macaulay_rows": 1155,
+                  "points": 256,
+                  "solve_row_ops": 33537,
+                  "survivors": 256
+                },
+                "ops": 5522136,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "budget",
+                "wall_ns": 19790115
+              }
+            ],
+            "fes-f2": [
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              }
+            ],
+            "fes-f2-wide": [
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 8,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 47736
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2605425227
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 8,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 47736
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2572522943
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 8,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 47736
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2572543444
+              }
+            ],
+            "inherited-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1981,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 552,
+                  "reduction_cache_on": 0,
+                  "reductions": 4086,
+                  "splits": 1984,
+                  "verification_tests": 23868
+                },
+                "ops": 253290802,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3167766250
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1981,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 552,
+                  "reduction_cache_on": 0,
+                  "reductions": 4086,
+                  "splits": 1984,
+                  "verification_tests": 23868
+                },
+                "ops": 253290802,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3260710291
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1981,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 552,
+                  "reduction_cache_on": 0,
+                  "reductions": 4086,
+                  "splits": 1984,
+                  "verification_tests": 23868
+                },
+                "ops": 253290802,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3307001112
+              }
+            ],
+            "matrix-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 976,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5091,
+                  "reduction_cache_on": 0,
+                  "reductions": 2049,
+                  "splits": 979,
+                  "verification_tests": 23868
+                },
+                "ops": 1344861698,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6165008630
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 976,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5091,
+                  "reduction_cache_on": 0,
+                  "reductions": 2049,
+                  "splits": 979,
+                  "verification_tests": 23868
+                },
+                "ops": 1344861698,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6391488438
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 976,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5091,
+                  "reduction_cache_on": 0,
+                  "reductions": 2049,
+                  "splits": 979,
+                  "verification_tests": 23868
+                },
+                "ops": 1344861698,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6487270893
+              }
+            ],
+            "matrix-f5": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 976,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5091,
+                  "reduction_cache_on": 0,
+                  "reductions": 2049,
+                  "splits": 979,
+                  "verification_tests": 23868
+                },
+                "ops": 1344861719,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6372652209
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 976,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5091,
+                  "reduction_cache_on": 0,
+                  "reductions": 2049,
+                  "splits": 979,
+                  "verification_tests": 23868
+                },
+                "ops": 1344861719,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6536942190
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 976,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5091,
+                  "reduction_cache_on": 0,
+                  "reductions": 2049,
+                  "splits": 979,
+                  "verification_tests": 23868
+                },
+                "ops": 1344861719,
+                "peak_bytes": 0,
+                "solutions": [
+                  5447189630,
+                  8109400979,
+                  13035676246,
+                  14078636461
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6389322200
+              }
+            ]
+          },
+          "semi_regular_degree": 7,
+          "system_blake3": "218a4b6b01420911377cc39076416cd83557b58b9503164d3a47990605c3c9c4",
+          "terms": 5967,
+          "x_r": 5377924587
+        },
+        {
+          "runs": {
+            "crossbred-f2": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "exhausted": 1,
+                  "filters": 0,
+                  "kernel_dim": 74,
+                  "linear_solves": 256,
+                  "macaulay_cols": 5220,
+                  "macaulay_rows": 1155,
+                  "points": 256,
+                  "solve_row_ops": 33849,
+                  "survivors": 256
+                },
+                "ops": 5680448,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "budget",
+                "wall_ns": 18857558
+              }
+            ],
+            "fes-f2": [
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              }
+            ],
+            "fes-f2-wide": [
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 10448
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2576349895
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 10448
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2559391533
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 10448
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 2546321999
+              }
+            ],
+            "inherited-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1977,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 558,
+                  "reduction_cache_on": 0,
+                  "reductions": 4086,
+                  "splits": 1978,
+                  "verification_tests": 10448
+                },
+                "ops": 248261804,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3213313719
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1977,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 558,
+                  "reduction_cache_on": 0,
+                  "reductions": 4086,
+                  "splits": 1978,
+                  "verification_tests": 10448
+                },
+                "ops": 248261804,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3031834427
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1977,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 558,
+                  "reduction_cache_on": 0,
+                  "reductions": 4086,
+                  "splits": 1978,
+                  "verification_tests": 10448
+                },
+                "ops": 248261804,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 3127176770
+              }
+            ],
+            "matrix-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1016,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5508,
+                  "reduction_cache_on": 0,
+                  "reductions": 2125,
+                  "splits": 1017,
+                  "verification_tests": 10448
+                },
+                "ops": 1361696779,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6130755126
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1016,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5508,
+                  "reduction_cache_on": 0,
+                  "reductions": 2125,
+                  "splits": 1017,
+                  "verification_tests": 10448
+                },
+                "ops": 1361696779,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6186363563
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1016,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5508,
+                  "reduction_cache_on": 0,
+                  "reductions": 2125,
+                  "splits": 1017,
+                  "verification_tests": 10448
+                },
+                "ops": 1361696779,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6163545822
+              }
+            ],
+            "matrix-f5": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1016,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5508,
+                  "reduction_cache_on": 0,
+                  "reductions": 2125,
+                  "splits": 1017,
+                  "verification_tests": 10448
+                },
+                "ops": 1361696779,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6299866148
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1016,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5508,
+                  "reduction_cache_on": 0,
+                  "reductions": 2125,
+                  "splits": 1017,
+                  "verification_tests": 10448
+                },
+                "ops": 1361696779,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6309035575
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1016,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5508,
+                  "reduction_cache_on": 0,
+                  "reductions": 2125,
+                  "splits": 1017,
+                  "verification_tests": 10448
+                },
+                "ops": 1361696779,
+                "peak_bytes": 0,
+                "solutions": [
+                  14099923287,
+                  15077450805
+                ],
+                "solving_degree": null,
+                "verdict": "solved",
+                "wall_ns": 6194666857
+              }
+            ]
+          },
+          "semi_regular_degree": 7,
+          "system_blake3": "b15d997c038af616581958811204b9bd9832fdd41abacb17c38abf3c87bb6690",
+          "terms": 5224,
+          "x_r": 8049060009
+        },
+        {
+          "runs": {
+            "crossbred-f2": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "exhausted": 1,
+                  "filters": 0,
+                  "kernel_dim": 75,
+                  "linear_solves": 256,
+                  "macaulay_cols": 5220,
+                  "macaulay_rows": 1155,
+                  "points": 256,
+                  "solve_row_ops": 35399,
+                  "survivors": 256
+                },
+                "ops": 5632648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "budget",
+                "wall_ns": 19510189
+              }
+            ],
+            "fes-f2": [
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              }
+            ],
+            "fes-f2-wide": [
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 11606
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2532304726
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 11606
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2691999394
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 2,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 11606
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2548974346
+              }
+            ],
+            "inherited-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1972,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 448,
+                  "reduction_cache_on": 0,
+                  "reductions": 4083,
+                  "splits": 1971,
+                  "verification_tests": 0
+                },
+                "ops": 249944829,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3057966074
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1972,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 448,
+                  "reduction_cache_on": 0,
+                  "reductions": 4083,
+                  "splits": 1971,
+                  "verification_tests": 0
+                },
+                "ops": 249944829,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3119054671
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1972,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 448,
+                  "reduction_cache_on": 0,
+                  "reductions": 4083,
+                  "splits": 1971,
+                  "verification_tests": 0
+                },
+                "ops": 249944829,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2980536101
+              }
+            ],
+            "matrix-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1019,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5205,
+                  "reduction_cache_on": 0,
+                  "reductions": 2109,
+                  "splits": 1018,
+                  "verification_tests": 0
+                },
+                "ops": 1456752437,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6170996182
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1019,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5205,
+                  "reduction_cache_on": 0,
+                  "reductions": 2109,
+                  "splits": 1018,
+                  "verification_tests": 0
+                },
+                "ops": 1456752437,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6377441913
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1019,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5205,
+                  "reduction_cache_on": 0,
+                  "reductions": 2109,
+                  "splits": 1018,
+                  "verification_tests": 0
+                },
+                "ops": 1456752437,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6492665881
+              }
+            ],
+            "matrix-f5": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1019,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5205,
+                  "reduction_cache_on": 0,
+                  "reductions": 2109,
+                  "splits": 1018,
+                  "verification_tests": 0
+                },
+                "ops": 1456749606,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6394609791
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1019,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5205,
+                  "reduction_cache_on": 0,
+                  "reductions": 2109,
+                  "splits": 1018,
+                  "verification_tests": 0
+                },
+                "ops": 1456749606,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6403670489
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1019,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 5205,
+                  "reduction_cache_on": 0,
+                  "reductions": 2109,
+                  "splits": 1018,
+                  "verification_tests": 0
+                },
+                "ops": 1456749606,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6274891336
+              }
+            ]
+          },
+          "semi_regular_degree": 7,
+          "system_blake3": "fc640502119ececccf20408b88a64b444c3ef0ecbc36a754dc4b17781c5118fe",
+          "terms": 5803,
+          "x_r": 5388793282
+        },
+        {
+          "runs": {
+            "crossbred-f2": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "exhausted": 1,
+                  "filters": 0,
+                  "kernel_dim": 74,
+                  "linear_solves": 256,
+                  "macaulay_cols": 5220,
+                  "macaulay_rows": 1155,
+                  "points": 256,
+                  "solve_row_ops": 32808,
+                  "survivors": 256
+                },
+                "ops": 5455432,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "budget",
+                "wall_ns": 17718797
+              }
+            ],
+            "fes-f2": [
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              },
+              {
+                "degree_reached": null,
+                "extra": {},
+                "ops": 0,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "declined",
+                "wall_ns": 0
+              }
+            ],
+            "fes-f2-wide": [
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 4,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 20128
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2662768549
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 4,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 20128
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2707154520
+              },
+              {
+                "degree_reached": null,
+                "extra": {
+                  "candidates": 4,
+                  "lanes": 16,
+                  "points": 17179869184,
+                  "verification_tests": 20128
+                },
+                "ops": 2147483648,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 2615167264
+              }
+            ],
+            "inherited-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1889,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 814,
+                  "reduction_cache_on": 0,
+                  "reductions": 3956,
+                  "splits": 1888,
+                  "verification_tests": 0
+                },
+                "ops": 248892965,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3581391635
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1889,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 814,
+                  "reduction_cache_on": 0,
+                  "reductions": 3956,
+                  "splits": 1888,
+                  "verification_tests": 0
+                },
+                "ops": 248892965,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3187826776
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1889,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 814,
+                  "reduction_cache_on": 0,
+                  "reductions": 3956,
+                  "splits": 1888,
+                  "verification_tests": 0
+                },
+                "ops": 248892965,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 3097298435
+              }
+            ],
+            "matrix-f4": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1024,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7759,
+                  "reduction_cache_on": 0,
+                  "reductions": 2850,
+                  "splits": 1023,
+                  "verification_tests": 0
+                },
+                "ops": 1420963788,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6915855726
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1024,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7759,
+                  "reduction_cache_on": 0,
+                  "reductions": 2850,
+                  "splits": 1023,
+                  "verification_tests": 0
+                },
+                "ops": 1420963788,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6477786910
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1024,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7759,
+                  "reduction_cache_on": 0,
+                  "reductions": 2850,
+                  "splits": 1023,
+                  "verification_tests": 0
+                },
+                "ops": 1420963788,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6634908643
+              }
+            ],
+            "matrix-f5": [
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1024,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7759,
+                  "reduction_cache_on": 0,
+                  "reductions": 2850,
+                  "splits": 1023,
+                  "verification_tests": 0
+                },
+                "ops": 1420755119,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6903017364
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1024,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7759,
+                  "reduction_cache_on": 0,
+                  "reductions": 2850,
+                  "splits": 1023,
+                  "verification_tests": 0
+                },
+                "ops": 1420755119,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 7216344184
+              },
+              {
+                "degree_reached": 3,
+                "extra": {
+                  "engine_overridden_by_environment": 0,
+                  "infeasible_branches": 1024,
+                  "max_degree": 3,
+                  "oversize": 0,
+                  "propagations": 7759,
+                  "reduction_cache_on": 0,
+                  "reductions": 2850,
+                  "splits": 1023,
+                  "verification_tests": 0
+                },
+                "ops": 1420755119,
+                "peak_bytes": 0,
+                "solutions": [],
+                "solving_degree": null,
+                "verdict": "unsatisfiable",
+                "wall_ns": 6807460085
+              }
+            ]
+          },
+          "semi_regular_degree": 7,
+          "system_blake3": "a71454856b93670d74c204cdb0fa3c3affaf7856fe9ea147f1a073eefbb2f77a",
+          "terms": 5032,
+          "x_r": 3029962761
+        }
+      ],
+      "reference_engine": "fes-f2-wide",
+      "repeats": 3,
+      "summands": 2,
+      "targets": 8,
+      "verdict_digest": "6e56873a72ef423f74da732b634cd6a038b472ff696ac3974001825559850dbf"
+    }
+  ],
+  "cells_measured": 1,
+  "cells_skipped": [
+    {
+      "family": "K",
+      "m": 2,
+      "n": 33,
+      "n_prime": 17,
+      "why": "no instance of this family at this degree, or past the descent cap"
+    }
+  ],
+  "config": {
+    "budget_seconds_per_call": 120,
+    "cells": [
+      {
+        "m": 2,
+        "n": 33,
+        "n_prime": 17
+      }
+    ],
+    "engines": [
+      {
+        "describe": "the same with each child specialising its parent's reduced basis (InheritedF4, the Koblitz oracle's default)",
+        "engine": "inherited-f4",
+        "finds_every_solution": true,
+        "spec": "inherited-f4"
+      },
+      {
+        "describe": "boolean Macaulay matrices to a fixed degree, propagation, splitting (koblitz_groebner MatrixF4)",
+        "engine": "matrix-f4",
+        "finds_every_solution": true,
+        "spec": "matrix-f4"
+      },
+      {
+        "describe": "the same with rows the Boolean F5 criterion predicts to vanish left out (MatrixF5)",
+        "engine": "matrix-f5",
+        "finds_every_solution": true,
+        "spec": "matrix-f5"
+      },
+      {
+        "describe": "Joux–Vitse crossbred: Macaulay left kernel at degree D, then 2^k bit-sliced linear solves",
+        "engine": "crossbred-f2",
+        "finds_every_solution": true,
+        "spec": "crossbred-f2"
+      },
+      {
+        "describe": "fast exhaustive search (libfes-lite Gray code): two word XORs per point, quadratic systems only",
+        "engine": "fes-f2",
+        "finds_every_solution": true,
+        "spec": "fes-f2"
+      },
+      {
+        "describe": "fast exhaustive search over 8 (AVX2) or 16 (AVX-512) sub-cubes per Gray-code step, the first 32 equations in the lanes and the rest as a filter; the scalar search where the lanes do not fit: quadratic systems",
+        "engine": "fes-f2-wide",
+        "finds_every_solution": true,
+        "spec": "fes-f2-wide"
+      }
+    ],
+    "families": [
+      "K",
+      "R"
+    ],
+    "repeats": 3,
+    "seed": 233164359,
+    "targets": 8,
+    "worker_threads": 1
+  },
+  "disagreements": [],
+  "elapsed_seconds": 1068.016653503,
+  "markdown": "| E | n | n' | m | vars | engine | finds | decided | over budget | D_learn | D_reach | D_sr | ops | ms | wall / reference | agrees |\n|:--|--:|--:|--:|--:|:--|:--|--:|--:|--:|--:|:--|--:|--:|--:|:--|\n| R | 33 | 17 | 2 | 34 | inherited-f4 | all | 8/8 | 0 | — | 3.0 | 7 | 2.500e8 wx | 3192.5 | 1.2× | yes |\n| R | 33 | 17 | 2 | 34 | matrix-f4 | all | 8/8 | 0 | — | 3.0 | 7 | 1.416e9 wx | 6793.4 | 2.6× | yes |\n| R | 33 | 17 | 2 | 34 | matrix-f5 | all | 8/8 | 0 | — | 3.0 | 7 | 1.416e9 wx | 6806.8 | 2.6× | yes |\n| R | 33 | 17 | 2 | 34 | crossbred-f2 | all | 0/8 | 8 | — | — | 7 | 5.531e6 wo | 20.4 | — | — |\n| R | 33 | 17 | 2 | 34 | fes-f2 | | declined | | | | 7 | | | | |\n| R | 33 | 17 | 2 | 34 | fes-f2-wide | all | 8/8 | 0 | — | — | 7 | 2.147e9 ? | 2628.8 | ref | yes |\n",
+  "operation": "descent-engines",
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "9bd8f534e9f8cff985ababab93a8dd0a4ee57b9870214006304fa591d47fd6dc",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete",
+  "what_this_is": "For each (curve family, n, n', m) cell: the Weil descent of the Semaev polynomial over the same seeded targets as the descent-degrees table, solved by every listed engine in every repetition, interleaved per target with the engine order rotated each repetition. Each engine's answers are checked against the reference engine's (fes-f2 where it applies, else exhaustive); each system carries a blake3 fingerprint and each cell a digest of the reference answers, so a rerun can prove it solved the same inputs and decided them the same way. The ms column is the mean over targets of the per-target median over repetitions.",
+  "what_this_is_not": [
+    "not a speed: this prices one decomposition oracle call on one target, which AGENTS.md section 2 calls a stage diagnostic and never a speed",
+    "not a common unit: each engine counts in its own unit (ops column, unit named per engine); only wall time is common, and it is a host-dependent practicality note",
+    "not a group relation: a boolean root is not yet a point decomposition until it is lifted and checked on the curve, which the whole-pipeline run does",
+    "not one leaderboard: a first-solution engine (sat-cdcl) and the complete-enumeration engines are different workloads and are listed apart"
+  ]
+}

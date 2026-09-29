@@ -1,0 +1,14 @@
+==658== Callgrind, a call-graph generating cache profiler
+==658== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==658== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==658== Command: /home/user/crypto/target/release/examples/groebner_stage_bench --label A1 --ladder r2-holdout --rung 17 --out /home/user/crypto/research/groebner_instructions_20260925/stage/r2-holdout/A1/rung17/stage
+==658== 
+==658== For interactive control, run 'callgrind_control -h'.
+==658== brk segment overflow in thread #1: can't grow to 0x483f000
+==658== (see section Limitations in user manual)
+==658== NOTE: further instances of this message will not be shown
+==658== 
+==658== Events    : Ir
+==658== Collected : 2541541782
+==658== 
+==658== I   refs:      2,541,541,782

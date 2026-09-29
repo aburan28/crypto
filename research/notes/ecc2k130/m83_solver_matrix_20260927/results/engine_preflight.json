@@ -1,0 +1,122 @@
+[
+  {
+    "boolean_variables": 347,
+    "case": "phase-s260938-implicit",
+    "engine": "f4-boolean",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "286687326998758938951352611912760867599570623646035140467198604923365359511060601008752319138765710819328",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 347,
+    "case": "phase-s260938-implicit",
+    "engine": "f5b-boolean",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "286687326998758938951352611912760867599570623646035140467198604923365359511060601008752319138765710819328",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 347,
+    "case": "phase-s260938-implicit",
+    "engine": "fes",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "286687326998758938951352611912760867599570623646035140467198604923365359511060601008752319138765710819328",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 95,
+    "case": "phase-s260938-ternary_inline",
+    "engine": "f4-boolean",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "39614081257132168796771975168",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 95,
+    "case": "phase-s260938-ternary_inline",
+    "engine": "f5b-boolean",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "39614081257132168796771975168",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 95,
+    "case": "phase-s260938-ternary_inline",
+    "engine": "fes",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "39614081257132168796771975168",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 347,
+    "case": "phase-s260939-implicit",
+    "engine": "f4-boolean",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "286687326998758938951352611912760867599570623646035140467198604923365359511060601008752319138765710819328",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 347,
+    "case": "phase-s260939-implicit",
+    "engine": "f5b-boolean",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "286687326998758938951352611912760867599570623646035140467198604923365359511060601008752319138765710819328",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 347,
+    "case": "phase-s260939-implicit",
+    "engine": "fes",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "286687326998758938951352611912760867599570623646035140467198604923365359511060601008752319138765710819328",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 95,
+    "case": "phase-s260939-ternary_inline",
+    "engine": "f4-boolean",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "39614081257132168796771975168",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 95,
+    "case": "phase-s260939-ternary_inline",
+    "engine": "f5b-boolean",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "39614081257132168796771975168",
+    "status": "unsupported_memory"
+  },
+  {
+    "boolean_variables": 95,
+    "case": "phase-s260939-ternary_inline",
+    "engine": "fes",
+    "reason": "full squarefree monomial/assignment layout exceeds 1 GiB",
+    "squarefree_columns": "39614081257132168796771975168",
+    "status": "unsupported_memory"
+  },
+  {
+    "engine": "msolve-F4",
+    "path": null,
+    "status": "unavailable"
+  },
+  {
+    "engine": "WDSat",
+    "path": null,
+    "status": "unavailable"
+  },
+  {
+    "engine": "Sage",
+    "path": null,
+    "status": "unavailable"
+  },
+  {
+    "engine": "CryptoMiniSat-CLI",
+    "path": "/usr/bin/cryptominisat5",
+    "status": "available"
+  },
+  {
+    "engine": "pycryptosat-native-XOR",
+    "status": "available"
+  }
+]

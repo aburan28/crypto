@@ -1070,8 +1070,8 @@ mod tests {
                 got.to_biguint(),
                 want,
                 "mont_pow_ct mismatch:\n  base={}\n  exp={}",
-                &base,
-                &exp,
+                base,
+                exp,
             );
         }
     }
