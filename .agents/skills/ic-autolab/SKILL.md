@@ -83,7 +83,7 @@ before planning a fresh protocol. Completed-trial count and comparative costs
 are unknown. Never redispatch this registration or retune on the sealed
 rounds' confirmation or replay.
 
-The registered comparison uses `run_generic_backend_qualification.py` through
+The first registered comparison used `run_generic_backend_qualification.py` through
 `ic-generic-backend-qualification.yml`. Its measured job checks out reviewed
 implementation commit `765c3c5f19032bd852163805f257c56babef2040`, even
 if `main` changes later. The explicit reference registry carries the accepted
@@ -103,6 +103,23 @@ and certified receipt-digest cross-checks from
 Apply `generic_backend_gate.py --bundle <retained-output> --out <new-result.json>`
 only after the frozen verifier and the labelled post-hoc audit pass. Future
 campaigns use the corrected auditor, with their own new source freeze.
+
+The [second registration](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/PROTOCOL.md)
+has a fresh seed `2026092902` and panel SHA-256
+`d283a869b0412228d1c66260fdfd8f387d7243bd15456c7febf3c46ee5da27a8`.
+Its [reproduced exposure corpus](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/lost-campaign-exposures.json)
+excludes all 25 public points the censored first run could have generated.
+It keeps the five cells and 25 independent targets, with one process per point
+and 250 paired trial slots. The runner is
+`run_generic_backend_qualification_v2.py` in workflow
+`ic-generic-backend-qualification-v2.yml`. Before a single dispatch, verify its
+PR preflight, one-file artifact-upload smoke, source checkout pin and reviewed
+panel/exclusion hashes. The measured step has a shorter cap than the job; the
+`if: always()` packer retains complete or partial evidence as one checksummed
+archive. A timed-out step with incomplete receipts remains operationally
+censored. Never retry seed `2026092902`; register a new panel and exclude all
+of its potentially generated points. Only a complete frozen verifier,
+natural-query audit and `generic_backend_gate_v2.py` can qualify both families.
 The gate requires every smoke and development job to be verified for at least
 one F4/F5 arm and one SAT arm; a reference-selection status alone does not
 qualify either family. Describe the current `f4` backend as a bounded Macaulay

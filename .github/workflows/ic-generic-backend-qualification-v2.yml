@@ -30,6 +30,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && 'dbb2028363ff42859fe8641f3a6e421cbbbed884' || github.sha }}
       - uses: actions/checkout@v4
         with:
           ref: 765c3c5f19032bd852163805f257c56babef2040
@@ -63,6 +65,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && 'dbb2028363ff42859fe8641f3a6e421cbbbed884' || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -92,7 +96,10 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
-        # Replace this checkout with the reviewed source commit before dispatch.
+        with:
+          # Reviewed implementation snapshot; the final workflow/skill commit
+          # may follow it without changing any measured runner source.
+          ref: dbb2028363ff42859fe8641f3a6e421cbbbed884
       - uses: actions/checkout@v4
         with:
           ref: 765c3c5f19032bd852163805f257c56babef2040
@@ -112,6 +119,7 @@ jobs:
       - name: Freeze dependency resolution
         run: |
           test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$(git rev-parse HEAD)" = dbb2028363ff42859fe8641f3a6e421cbbbed884
           cp research/ic_candidate_tournament_20260915/ci/Cargo.lock frozen-generic/Cargo.lock
           cargo fetch --locked --manifest-path frozen-generic/Cargo.toml
       - name: Run fresh source-bound complete-solve comparison

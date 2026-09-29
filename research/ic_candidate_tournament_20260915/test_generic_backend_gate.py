@@ -2,6 +2,7 @@
 import unittest
 
 from generic_backend_gate import ALIASES, CELLS, FAMILIES, GENERIC, REPETITIONS, STAGES, evaluate
+from generic_backend_gate_v2 import (LOST_EXPOSURES_SHA256, PANEL_SHA256, evaluate_v2)
 from oracle import InvalidEvidence
 
 
@@ -103,6 +104,16 @@ class FamilyGateTests(unittest.TestCase):
         self.assertEqual(result['arms']['generic_f4_dense']['development_scheduled'], 15)
         with self.assertRaises(InvalidEvidence):
             evaluate(summary, qualification, natural)
+
+    def test_second_registration_requires_frozen_panel_and_exposure_corpus(self):
+        summary, qualification, natural = fixture(repetitions=1)
+        summary.update(registration_panel_sha256=PANEL_SHA256,
+                       prior_censored_exposures_sha256=LOST_EXPOSURES_SHA256)
+        self.assertEqual(evaluate_v2(summary, qualification, natural)['status'],
+                         'F4_F5_AND_SAT_QUALIFIED')
+        summary['prior_censored_exposures_sha256'] = '0'*64
+        with self.assertRaises(InvalidEvidence):
+            evaluate_v2(summary, qualification, natural)
 
 
 if __name__ == '__main__':

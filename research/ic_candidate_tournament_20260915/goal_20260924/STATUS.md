@@ -233,3 +233,11 @@ artifact upload also failed, leaving completion and comparative costs unknown.
 The [censored result](generic-backend-qualification/RESULT.md) is not a family
 qualification or solver-performance verdict. A fresh protocol must exclude all
 potentially exposed points and retain partial results before a job timeout.
+The [second registration](generic-backend-qualification-v2/PROTOCOL.md) freezes
+seed `2026092902`, panel SHA-256
+`d283a869b0412228d1c66260fdfd8f387d7243bd15456c7febf3c46ee5da27a8`,
+one process on each of 25 distinct points and 250 trial slots. It excludes the
+25 reconstructed first-run points and keeps the same source-bound F4/F5, SAT,
+incumbent and matched-rho arms. Its separate measured-step cap and one-file
+artifact upload are pre-dispatch controls; qualification and cost rows remain
+pending until the frozen run, verifier and natural-query audit finish.
