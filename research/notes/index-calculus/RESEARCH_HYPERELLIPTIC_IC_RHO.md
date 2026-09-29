@@ -913,3 +913,69 @@ the uninstrumented one on the same instance, and rho is not instrumented
 the same way, so the measured ratio is biased slightly **against** index
 calculus. That is the conservative direction for a claim about index
 calculus, so it stands as reported rather than being corrected out.
+
+## Round seven: the sparse solve — protocol, written before measuring
+
+Round six priced the solve for the first time and found it the single
+largest term at genus 3 `p = 211` (1350 of 3033 group-op equivalents).
+This round attacks it. Protocol fixed here, before any candidate code
+runs; the baseline binary is built from `main` at `4ccaf6e5`.
+
+**Hypothesis.** The solve's cost is bookkeeping, not arithmetic. Reading
+`sparse_solve_for_k`: every pivot rescans every column's holder list and
+re-tests membership by a linear search of the row; a row is pushed onto
+a holder list again on every update, so those lists grow with
+duplicates; and each row update round-trips through a `HashMap`. None of
+that is a multiplication mod `N`, so none of it was in the counted
+mul-mods, and all of it is in the wall time the unit now charges.
+Replacing it with exact column counts, holder lists that only gain a row
+when it gains the column, and sorted two-pointer row merges should cut
+the solve's charge without touching its arithmetic.
+
+**Held fixed.** The arithmetic stays `BigUint`. Word-sized arithmetic
+mod `N` would be much faster, and every `N` here fits in a word, but
+the group operations it is converted against are `BigUint` Cantor
+arithmetic; making only one side word-sized would move the ratio by
+changing the implementation's arithmetic, not the algorithm. The
+harness, curves, seeds (`20260916` for index calculus, `0xC0FFEE` for
+rho), trial counts (5 and 40), primes, the in-situ unit and the floor
+are unchanged. The command is `examples/hyperelliptic_ic_vs_rho.rs`,
+unmodified.
+
+**Reference and boundary.** Distinguished-point rho in the same run, as
+in round six. The floor is `(m+1)·(1 + g/c) + m²/c`, unchanged.
+
+**Pinned output.** The solver cannot change which relations are
+collected unless it changes whether a solve succeeds, and with `N`
+prime it should not. So on every row the relation-stage operations, the
+oracle mul-mods and the recovered `k` must be **identical** between
+baseline and candidate; only the solve's cost may move. A row that
+differs anywhere else means the candidate is a different algorithm and
+the comparison stops there. The candidate is also cross-checked against
+dense Gaussian elimination on random systems before it is measured.
+
+**Timing discipline.** The solve is charged by measured time, so wall
+noise enters `S`. Every sweep runs through `tools/isolated_bench.py` on
+one reserved core with `RAYON_NUM_THREADS=1`: one A/A pair to measure
+the spread, then five interleaved baseline/candidate rounds, reporting
+the median and minimum per row. A difference inside the A/A spread is
+not a result. Contended sweeps are reported and not pooled.
+
+**Success.** On the fb-walk rows, the median solve charge falls by at
+least 2×, outside the A/A spread, with every row pinned as above.
+
+**Stop.** If the cut is under 1.2×, the hypothesis is wrong: the solve's
+cost is arithmetic, not bookkeeping. That is recorded as the result, and
+the next lever is the arithmetic itself, argued separately.
+
+**Expected class: engineering.** The change touches constants in one
+phase, not how any phase grows with `m`, so it should not move the
+ratio to the floor's shape. If the solve's growth with `m` changes, that
+is reported as what it is.
+
+**Owed from round six.** `docs/index-calculus-scoreboard.html` still
+carries the ratios from before round six's accounting correction (0.21
+at genus 4, 0.38 at genus 3). Round six should have updated it and did
+not. This round updates it from its own frozen file, and the earlier
+fit (`experiments/hyperelliptic_exponent_fit.json`) stays as it is,
+superseded but not rewritten.
