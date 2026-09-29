@@ -1,0 +1,22 @@
+cell       draws  sat unsat  degrees                 median
+K0n13l2        4    0     4  4 4 4 4                 4
+K0n13l3        4    0     4  5 5 5 5                 5
+K0n13l4        5    1     4  6 6 6 6                 6
+K0n13l5        4    0     4  7 7 7 7                 7
+K1n17l2        4    0     4  4 4 4 4                 4
+K1n17l3        4    0     4  4 5 4 5                 4
+K1n17l4        4    0     4  6 6 5 6                 6
+K1n17l5        4    0     4  7 7 7 7                 7
+K1n17l6        4    0     4  >=8 >=8 >=8 >=8         >=8
+K1n19l2        4    0     4  4 4 4 4                 4
+K1n19l3        4    0     4  5 4 4 4                 4
+K1n19l4        4    0     4  5 5 5 5                 5
+K1n19l5        4    0     4  6 7 7 7                 7
+K1n19l6        4    0     4  >=8 >=8 >=8 >=8         >=8
+
+K_0/2^13: s_n = 1.000 over l = [2, 3, 4, 5]
+K_1/2^17: s_n = 1.100 over l = [2, 3, 4, 5]
+K_1/2^19: s_n = 1.000 over l = [2, 3, 4, 5]
+
+s_bar = 1.033; lower-bound cells: {(1, 17): [6], (1, 19): [6]}
+REGISTERED VERDICT: CONSTANT LEVER (symmetrisation does not flatten the degree)

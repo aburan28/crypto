@@ -1105,6 +1105,23 @@ every crossover cell, both metrics agree that rho wins. This round does not
 measure why the two metrics part at the smallest jobs. The strict
 gate requires both metrics, and it is not met.
 
+**Follow-up, 2026-09-29.** This note was added after the round. The paragraph
+above is unchanged.
+
+- **Contention was a possible cause.** The round's confirmation stage
+  overlapped a build on the same container. The native column was also
+  measured without the isolation that AGENTS.md §10 now requires.
+- **An isolated re-timing reproduced the reading.** It was pre-registered and
+  ran on a reserved CPU
+  ([walltime_isolation_20260929](walltime_isolation_20260929/RESULTS.md)).
+  The incumbent/rho ratios were 0.872, 0.921, 0.912 and 0.940 at the four
+  cells, against an A/A band of [0.949, 1.051].
+- **The cause is throughput, not contention.** Over the worker-timed span,
+  the IC arm executes 1.65–2.03× more instructions per second than rho. So
+  instructions overstate rho's lead in time by about that factor, between
+  these two arms on this host.
+- **The round's decision stands.**
+
 ### Predictions: all five confirmed
 
 - **1** Correctness, as above.
