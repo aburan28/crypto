@@ -65,6 +65,9 @@ def main() -> None:
     run.require_linux_proc()
     print(json.dumps({"decision": "FIRST_RELEASE_APPROVED", "pr": number,
                       "head_sha": event_head, "label_event_id": labeled[0]["id"],
+                      "run_id": int(os.environ["GITHUB_RUN_ID"]),
+                      "run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+                      "repository": os.environ["GITHUB_REPOSITORY"],
                       "freeze_sha256": ci_replay.sha(ci_replay.HERE / "FROZEN.json")},
                      sort_keys=True))
 

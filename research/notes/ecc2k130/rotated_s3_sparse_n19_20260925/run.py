@@ -156,7 +156,7 @@ def child(receipt: dict, out: Path, name: str, command: list[str],
         raise RuntimeError(f"{name} failed or censored; first artifacts retained")
 
 
-def run(out: Path):
+def run(out: Path, release_gate: Path):
     out = out.resolve()
     frozen = json.loads((HERE / "FROZEN.json").read_text())
     for key, path in (("protocol_sha256", HERE / "PROTOCOL.md"),
@@ -174,8 +174,24 @@ def run(out: Path):
     assert audit.check_freeze() == frozen
     verify_parent_merged(frozen)
     require_linux_proc()
+    gate = json.loads(release_gate.read_text())
+    head = subprocess.check_output(["git", "rev-parse", "HEAD"],
+                                   cwd=REPO, text=True).strip()
+    if not (gate["decision"] == "FIRST_RELEASE_APPROVED"
+            and gate["pr"] == frozen["release_pr_number"]
+            and gate["head_sha"] == head
+            and gate["repository"] == "aburan28/crypto"
+            and gate["run_attempt"] == 1
+            and isinstance(gate["run_id"], int) and gate["run_id"] > 0
+            and isinstance(gate["label_event_id"], int) and gate["label_event_id"] > 0
+            and gate["freeze_sha256"] == sha(HERE / "FROZEN.json")):
+        raise RuntimeError("first-release gate receipt does not bind this source and run")
     out.mkdir(parents=True, exist_ok=False)
+    (out / "release_gate.json").write_bytes(release_gate.read_bytes())
     receipt = {"domain": frozen["domain"], "freeze_sha256": sha(HERE / "FROZEN.json"),
+               "release_gate_sha256": sha(out / "release_gate.json"),
+               "release_head_sha": head, "release_run_id": gate["run_id"],
+               "release_label_event_id": gate["label_event_id"],
                "decision": "INCOMPLETE", "attempts": [],
                "run_out": str(out), "source_root": str(HERE),
                "python_executable": sys.executable,
@@ -239,8 +255,9 @@ def run(out: Path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--release-gate", type=Path, required=True)
     args = parser.parse_args()
-    run(args.out)
+    run(args.out, args.release_gate)
 
 
 if __name__ == "__main__":

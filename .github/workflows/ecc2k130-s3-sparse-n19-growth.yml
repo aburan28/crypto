@@ -33,6 +33,9 @@ jobs:
   measured-first-attempt:
     if: ${{ github.event.action == 'labeled' && github.event.label.name == 'ecc2k130-n19-sparse-measure-once' && github.run_attempt == 1 && github.event.pull_request.number == 795 }}
     needs: frozen-and-archive
+    concurrency:
+      group: ecc2k130-n19-sparse-first-release-795
+      cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -54,7 +57,8 @@ jobs:
       - name: Cold first exporter and independent verifier
         run: |
           python research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/run.py \
-            --out "$RUNNER_TEMP/n19-first-attempt"
+            --out "$RUNNER_TEMP/n19-first-attempt" \
+            --release-gate "$RUNNER_TEMP/n19-release-gate.json"
       - name: Audit immutable first attempt when present
         if: ${{ always() }}
         run: |

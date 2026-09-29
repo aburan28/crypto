@@ -128,6 +128,20 @@ def audit_archive(root: Path, frozen):
     receipt = json.loads((root / "receipt.json").read_text())
     assert receipt["domain"] == frozen["domain"]
     assert receipt["freeze_sha256"] == sha(HERE / "FROZEN.json")
+    gate = json.loads((root / "release_gate.json").read_text())
+    assert gate == {"decision": "FIRST_RELEASE_APPROVED",
+                    "pr": frozen["release_pr_number"],
+                    "head_sha": receipt["release_head_sha"],
+                    "label_event_id": receipt["release_label_event_id"],
+                    "run_id": receipt["release_run_id"],
+                    "run_attempt": 1,
+                    "repository": "aburan28/crypto",
+                    "freeze_sha256": receipt["freeze_sha256"]}
+    assert len(gate["head_sha"]) == 40 and all(
+        char in "0123456789abcdef" for char in gate["head_sha"])
+    assert isinstance(gate["run_id"], int) and gate["run_id"] > 0
+    assert isinstance(gate["label_event_id"], int) and gate["label_event_id"] > 0
+    assert receipt["release_gate_sha256"] == sha(root / "release_gate.json")
     passed = audit_attempts(root, receipt, frozen)
     if receipt["decision"] == "PASS":
         assert passed == [True, True]
