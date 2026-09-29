@@ -645,22 +645,25 @@ impl MonoColumns {
         }
         Some(())
     }
+}
 
-    /// The polynomial `row` holds: its set columns' monomials, in order.
-    pub(crate) fn read(&self, row: &[u64], n_vars: usize) -> F2BoolPoly {
-        let count = row.iter().map(|w| w.count_ones() as usize).sum();
-        let mut terms = Vec::with_capacity(count);
-        for (w, &word) in row.iter().enumerate() {
-            let mut bits = word;
-            while bits != 0 {
-                terms.push(F2BoolMono::from_mask(
-                    self.masks[w * 64 + bits.trailing_zeros() as usize],
-                ));
-                bits &= bits - 1;
-            }
+/// The polynomial a row over a [`MonoColumns`] holds: its set columns'
+/// monomials, in order.  It takes the columns' masks alone, since reading
+/// back looks nothing up, so that a caller keeping rows for good can drop
+/// the keys, two thirds of a column set's memory.
+pub(crate) fn read_columns(masks: &[u64], row: &[u64], n_vars: usize) -> F2BoolPoly {
+    let count = row.iter().map(|w| w.count_ones() as usize).sum();
+    let mut terms = Vec::with_capacity(count);
+    for (w, &word) in row.iter().enumerate() {
+        let mut bits = word;
+        while bits != 0 {
+            terms.push(F2BoolMono::from_mask(
+                masks[w * 64 + bits.trailing_zeros() as usize],
+            ));
+            bits &= bits - 1;
         }
-        F2BoolPoly { terms, n_vars }
     }
+    F2BoolPoly { terms, n_vars }
 }
 
 // ── S-polynomial and reduction ─────────────────────────────────────
@@ -1519,7 +1522,7 @@ mod tests {
                     .expect("a term outside the columns");
                 chain = chain.add(p);
             }
-            assert_eq!(columns.read(&row, n), chain);
+            assert_eq!(read_columns(columns.masks(), &row, n), chain);
             for (c, &m) in columns.masks().iter().enumerate() {
                 assert_eq!(columns.column(m), Some(c));
             }

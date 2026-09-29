@@ -131,7 +131,8 @@ use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::inherited_f4::{ChildSystem, InheritCost, ReducedBasis};
 use crate::cryptanalysis::matrix_f5_f2::F5Criterion;
 use crate::cryptanalysis::pq_groebner_f2::{
-    cmp_mono, groebner_basis_f2, mono_key, sum_by_monomial, F2BoolMono, F2BoolPoly, MonoColumns,
+    cmp_mono, groebner_basis_f2, mono_key, sort_masks_descending, sum_by_monomial, F2BoolMono,
+    F2BoolPoly,
 };
 
 /// Hard cap: Boolean monomials are `u64` bitmasks in
@@ -187,10 +188,11 @@ pub struct SymElement {
 
 /// Support pairs up to which a product works over the supports (see
 /// [`FieldSum`]): it holds a product monomial and a coefficient for every
-/// pair, and past this the pairwise sums of [`SymElement::mul`], which
-/// hold no more than the products themselves, are the safer bet on
-/// memory.  The systems built here stay far below it (products of
-/// `ℓ`-variable linear forms, or of their squares).
+/// pair (16 bytes, so 1 MiB at the bound) and a block of tabulated rows of
+/// at most this many words (512 KiB), and past this the pairwise sums of
+/// [`SymElement::mul`], which hold no more than the products themselves,
+/// are the safer bet on memory.  The systems built here stay far below it
+/// (products of `ℓ`-variable linear forms, or of their squares).
 const DENSE_MUL_PAIRS: usize = 1 << 16;
 
 /// Whether `st` covers everything [`FieldSum`] reads: at most 64
@@ -229,25 +231,25 @@ impl FieldSum {
     /// canonical list is strictly decreasing, a subsequence of the support
     /// in column order.  A walk that runs off the end met some other list
     /// (the field is public); callers then take the coordinate
-    /// operations, whose sums are set sums only of canonical lists.
+    /// operations, whose sums are set sums only of canonical lists.  The
+    /// walks compare masks, so the support is sorted without the lookup
+    /// keys a [`MonoColumns`](crate::cryptanalysis::pq_groebner_f2::MonoColumns)
+    /// would derive for it.
     fn of(x: &[F2BoolPoly]) -> Option<Self> {
-        let mut masks = Vec::with_capacity(x.iter().map(|p| p.terms.len()).sum());
-        masks.extend(x.iter().flat_map(|p| p.terms.iter().map(|t| t.mask)));
-        let support = MonoColumns::new(masks);
-        let mut field = vec![0u64; support.masks().len()];
+        let mut support = Vec::with_capacity(x.iter().map(|p| p.terms.len()).sum());
+        support.extend(x.iter().flat_map(|p| p.terms.iter().map(|t| t.mask)));
+        sort_masks_descending(&mut support);
+        support.dedup();
+        let mut field = vec![0u64; support.len()];
         for (k, p) in x.iter().enumerate() {
             let mut c = 0;
             for t in &p.terms {
-                c += support
-                    .masks()
-                    .get(c..)?
-                    .iter()
-                    .position(|&u| u == t.mask)?;
+                c += support.get(c..)?.iter().position(|&u| u == t.mask)?;
                 field[c] |= 1 << k;
                 c += 1;
             }
         }
-        Some(Self(support.masks().iter().copied().zip(field).collect()))
+        Some(Self(support.into_iter().zip(field).collect()))
     }
 
     /// The known field element `b`, as [`SymElement::constant`] lifts it.
@@ -337,6 +339,12 @@ impl FieldSum {
     /// once per `t`, and each pair then costs one XOR per bit of `A_s`.
     /// The pairs' products `s·t` are collected with their coefficients
     /// added by [`sum_by_monomial`].
+    ///
+    /// The rows are `n` words each, so they are tabulated for a block of
+    /// `other`'s support at a time, at most `max_pairs` words: one support
+    /// monomial against a wide operand would otherwise hold `n` words per
+    /// pair, not two.  [`sum_by_monomial`] sorts the products, so the
+    /// order the blocks leave them in does not reach the result.
     fn mul(&self, other: &Self, st: &FieldStructure, max_pairs: usize) -> Option<Self> {
         let n = st.n as usize;
         let (a, b) = (&self.0, &other.0);
@@ -344,27 +352,29 @@ impl FieldSum {
             return None;
         }
         let width = n.max(1);
-        let mut rows = vec![0u64; b.len() * width];
-        for (row, &(_, f)) in rows.chunks_exact_mut(width).zip(b) {
-            for (r, reduced) in row.iter_mut().zip(&st.reduced) {
-                let mut bits = f;
-                while bits != 0 {
-                    *r ^= reduced[bits.trailing_zeros() as usize];
-                    bits &= bits - 1;
-                }
-            }
-        }
         let reach = coordinate_bits(st);
         let mut products = Vec::with_capacity(a.len() * b.len());
-        for &(s, f) in a {
-            for (&(t, _), row) in b.iter().zip(rows.chunks_exact(width)) {
-                let mut m = 0;
-                let mut bits = f;
-                while bits != 0 {
-                    m ^= row[bits.trailing_zeros() as usize];
-                    bits &= bits - 1;
+        for b in b.chunks((max_pairs / width).max(1)) {
+            let mut rows = vec![0u64; b.len() * width];
+            for (row, &(_, f)) in rows.chunks_exact_mut(width).zip(b) {
+                for (r, reduced) in row.iter_mut().zip(&st.reduced) {
+                    let mut bits = f;
+                    while bits != 0 {
+                        *r ^= reduced[bits.trailing_zeros() as usize];
+                        bits &= bits - 1;
+                    }
                 }
-                products.push((s | t, m & reach));
+            }
+            for &(s, f) in a {
+                for (&(t, _), row) in b.iter().zip(rows.chunks_exact(width)) {
+                    let mut m = 0;
+                    let mut bits = f;
+                    while bits != 0 {
+                        m ^= row[bits.trailing_zeros() as usize];
+                        bits &= bits - 1;
+                    }
+                    products.push((s | t, m & reach));
+                }
             }
         }
         sum_by_monomial(&mut products);
@@ -511,13 +521,18 @@ impl SymElement {
 
     /// [`SymElement::mul`] over the supports, or `None` where it defers
     /// to [`SymElement::mul_pairwise`].
+    ///
+    /// An operand with fewer than `n` coordinates (the field is public)
+    /// defers too: the pairwise sums read `other`'s coordinates only for
+    /// nonzero ones of `self`, so a zero times a short operand is zero
+    /// there, and anything else short fails there as it always has.
     fn mul_dense(&self, other: &Self, st: &FieldStructure, max_pairs: usize) -> Option<Self> {
         let n = st.n as usize;
-        let n_vars = self.coords[0].n_vars;
-        let (a, b) = (&self.coords[..n], &other.coords[..n]);
         if !field_sums_fit(st) {
             return None;
         }
+        let (a, b) = (self.coords.get(..n)?, other.coords.get(..n)?);
+        let n_vars = self.coords[0].n_vars;
         let product = FieldSum::of(a)?.mul(&FieldSum::of(b)?, st, max_pairs)?;
         Some(Self {
             coords: product.coordinates(n, n_vars),
@@ -6474,6 +6489,8 @@ mod reference_equivalence_tests {
                 [0, 1, 3, 65][trial / 6 % 4],
             );
             let (s, t) = (list(la), list(lb));
+            // The raw pair differs from the canonical one in term order
+            // only: `add` asserts equal widths in debug builds, as it did.
             for (p, q) in [
                 (
                     F2BoolPoly::from_monos(s.clone(), 64),
@@ -6486,7 +6503,7 @@ mod reference_equivalence_tests {
                     },
                     F2BoolPoly {
                         terms: t.clone(),
-                        n_vars: 7,
+                        n_vars: 64,
                     },
                 ),
             ] {
@@ -6532,7 +6549,7 @@ mod reference_equivalence_tests {
             .map(|_| {
                 let terms: Vec<F2BoolMono> = (0..next() % (1 + density))
                     .map(|_| {
-                        F2BoolMono::from_mask(if next() % 2 == 0 {
+                        F2BoolMono::from_mask(if next().is_multiple_of(2) {
                             pool[(next() % pool.len() as u64) as usize]
                         } else {
                             next() & next() & span
@@ -6670,6 +6687,85 @@ mod reference_equivalence_tests {
                 old_mul(&a, &b, &st).coords,
                 "support {support}"
             );
+        }
+    }
+
+    /// Bounds just wide enough for the pairs, so that the rows of the
+    /// second operand, `n` words a monomial, are tabulated a block at a
+    /// time (one monomial a block at the tightest).
+    #[test]
+    fn mul_matches_the_old_code_with_rows_in_blocks() {
+        let mut next = rng(0xb10c_0000_0000_0005);
+        let mut blocked = 0;
+        for trial in 0..300u64 {
+            let n = [3u32, 7, 13, 31, 64][(trial % 5) as usize];
+            let st = random_table(n, &mut next);
+            let n_vars = [20usize, 58][(trial / 5 % 2) as usize];
+            let a = if trial % 3 == 0 {
+                let bits = next() & coordinate_bits(&st);
+                SymElement::constant(
+                    &F2mElement::from_biguint(&num_bigint::BigUint::from(bits), n),
+                    n,
+                    n_vars,
+                )
+            } else {
+                random_element(n, n_vars, next() % 4, false, &mut next)
+            };
+            let b = random_element(n, n_vars, 2 + next() % 5, false, &mut next);
+            let (sa, sb) = (
+                FieldSum::of(&a.coords).unwrap().0.len(),
+                FieldSum::of(&b.coords).unwrap().0.len(),
+            );
+            let expected = old_mul(&a, &b, &st).coords;
+            for max_pairs in [sa * sb, sa * sb + n as usize] {
+                if sb > (max_pairs / n as usize).max(1) {
+                    blocked += 1;
+                }
+                let dense = a.mul_dense(&b, &st, max_pairs).expect("within the bound");
+                assert_eq!(dense.coords, expected, "trial {trial}, bound {max_pairs}");
+            }
+        }
+        assert!(blocked > 200, "{blocked}");
+    }
+
+    /// Operands shorter than `n` (the field is public).  The old product
+    /// read `b`'s coordinates only under nonzero ones of `a`, so a zero
+    /// times a short operand was zero, and an `S₃` whose `x₁x₂` is such a
+    /// product was defined; both still are.  Every other short product
+    /// failed, and still does.
+    #[test]
+    fn short_operands_match_the_old_code() {
+        let n = 5u32;
+        let st = FieldStructure::new(n, &find_irreducible(n).unwrap());
+        let n_vars = 8;
+        let full = SymElement::from_free_vars(0, n, n_vars);
+        let zero = SymElement::zero(n, n_vars);
+        let b = F2mElement::from_biguint(&num_bigint::BigUint::from(3u32), n);
+        for len in 1..n as usize {
+            let short = SymElement {
+                coords: full.coords[..len].to_vec(),
+            };
+            assert!(zero.mul_dense(&short, &st, usize::MAX).is_none());
+            assert_eq!(
+                zero.mul(&short, &st).coords,
+                old_mul(&zero, &short, &st).coords
+            );
+            assert_eq!(
+                zero.mul(&short, &st).coords,
+                zero.mul_pairwise(&short, &st).coords
+            );
+            assert_eq!(
+                sym_semaev_s3(&zero, &short, &full, &b, &st),
+                old_s3(&zero, &short, &full, &b, &st),
+                "length {len}"
+            );
+        }
+        let short = SymElement {
+            coords: full.coords[..2].to_vec(),
+        };
+        for (x, y) in [(&short, &full), (&full, &short), (&short, &zero)] {
+            assert!(std::panic::catch_unwind(|| old_mul(x, y, &st)).is_err());
+            assert!(std::panic::catch_unwind(|| x.mul(y, &st)).is_err());
         }
     }
 
