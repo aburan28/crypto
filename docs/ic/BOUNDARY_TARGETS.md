@@ -302,7 +302,29 @@ confidence gate and the pending n=61 L=65,536 batch-size probe as resources
 permit. Do not use 32-target panels as a substitute. Historical evidence:
 [`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
 
-**Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
+**2026-09-29 ERRATUM to the matched-arithmetic recheck below (PR #955): its
+verdict "the lead survives, IC/rho = 0.2403" is superseded and must not be
+quoted.** That rho was neither hardware-matched (on x86-64 its field multiply
+was a software bit-loop while IC used `pclmulqdq`) nor best-effort (its orbit
+canonicalization was still a Θ(n) polynomial-basis scan with a `u128 %` per
+position and it inverted once per step). Re-measured as a ladder of stronger
+references on the identical n=53, L=1,024, K=440 targets, whole-process retired
+instructions (callgrind), IC = 89,190,346,806: PR #955's rho 371.1 B (IC/rho
+0.240); + library `Gf2` field 281.0 B (0.317); + normal-coordinate
+canonicalization 68.9 B (**1.294**); + 32 lockstep walks with `Gf2::batch_inv`
+46.4 B (**1.923**). Every rung verified 1,024/1,024 targets and replayed
+independently in pure Python; rungs 0–1 walk PR #955's trajectory bit for bit.
+By the pre-registered rule the lead **dies** at this cell (IC/rho ≥ 1.0), in
+agreement with the same-day wall/CPU results above (PRs #940, #943, #944), and
+an independently written strong rho (`koblitz_rho_batch_ks_v3.rs`, PR #943)
+reproduces the strongest rung's walk on all 1,024 targets step for step. The
+arithmetic-asymmetry finding of PR #955 stands; its verdict does not. Class:
+`accounting` for the hardware-matched rung, `engineering` for the two stronger
+rungs. Ladder and evidence:
+[`RESEARCH_STRONG_RHO_LADDER_20260929.md`](../../research/notes/index-calculus/RESEARCH_STRONG_RHO_LADDER_20260929.md),
+[`strong_rho_ladder_20260929_run/`](../../research/notes/index-calculus/strong_rho_ladder_20260929_run/).
+
+**[SUPERSEDED by the erratum above] Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
 `vs_rho` comparator (`examples/koblitz_rho_batch_ks.rs`) walks its
 signed-Frobenius canonicalization by real field squaring and inverts by
 Fermat's square-and-multiply — an unmatched baseline against the IC arm's own
