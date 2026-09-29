@@ -11369,6 +11369,30 @@
               "rho": "examples/koblitz_rho_batch_ks_v2_n61.rs",
               "evidence": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/RESULT.md",
               "status": "PENDING_INDEPENDENT_VALIDATION"
+            },
+            "matched_arithmetic_check": {
+              "summary": "Gave the growing-n vs_rho comparator's rho (koblitz_rho_batch_ks.rs, squaring-walk canonicalization + Fermat inversion) the IC arm's own normal-basis rotation and Itoh-Tsujii inversion (new koblitz_rho_batch_ks_matched_arith.rs, 4 passing correctness gates), and reran the frozen n=53 L=1024 K=440 batch_seed=531310 dp_bits=4 cell.",
+              "producer": "examples/koblitz_orbit_dlp_fast.rs",
+              "rho": "examples/koblitz_rho_batch_ks_matched_arith.rs",
+              "wall_seconds": {
+                "ks_unmodified": 215.24,
+                "ks_matched_arithmetic": 30.442,
+                "ic": 30.772,
+                "ks_matched_over_ic": 0.989,
+                "ks_unmodified_over_ic": 6.995
+              },
+              "callgrind_ir_whole_process": {
+                "ks_matched_arithmetic": 371102176689,
+                "ic": 89164459930,
+                "ic_over_rho": 0.2403,
+                "rho_over_ic": 4.162,
+                "note": "pre-registered rule is IC_ops/rho_ops (repo-standard challenger/reference convention, matching PR #830's own 0.246 wall figure and docs/ic S/S_rho<1): 0.2403 < 0.8 survive-threshold, so the lead survives on this metric at this cell. rho_over_ic=4.162 is the same measurement stated the other way round, kept for completeness."
+              },
+              "verdict": "survives (pre-registered rule, operation-count metric): IC/matched-rho = 0.2403 < 0.8",
+              "correctness": "1024/1024 targets verified on every one of 4 runs (unmodified-KS corpus, matched-arith native, matched-arith callgrind, IC native+callgrind); total_walk_steps bit-identical (19103507) between unmodified and matched-arithmetic KS",
+              "evidence": "research/notes/index-calculus/RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md",
+              "status": "PENDING_INDEPENDENT_VALIDATION",
+              "date": "2026-09-28"
             }
           },
           "evidence": [

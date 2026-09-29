@@ -8886,5 +8886,34 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <p>The same-K quotient saves 8&ndash;34% CPU, but all eight quotient/rho intervals lie above parity. At n=53, the exploratory grid minimum K=550 builds its index in 4.243 s and spends another 2.525 s on rank and 3.882 s on targets; rho's entire wall median is 4.188 s. The next measured lever must jointly reduce construction and relation-query cost. Instrument every S3 solver call, including no-root returns, before testing batch inversion in both phases. There is no n=83 confidence result, GF(2<sup>131</sup>) transfer or calibrated S. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_swap_quotient_20260929/RESULT.md">Decision and evidence</a>; <a href="https://github.com/aburan28/crypto/pull/947">PR #947</a>.</p>
 </section>
 <!-- END compact-swap-quotient-20260929 -->
+<!-- BEGIN compact-s3-batch-20260929 -->
+<section class="panel" id="compact-s3-batch-20260929">
+<div class="panel-head"><h2>Montgomery S3 batch inversion: complete-process gain, rho still ahead <span class="chip">engineering</span></h2>
+<p>Nine Latin-balanced cold blocks compare same-binary scalar W=1 (two A/A controls), W=16 and W=64 at two fixed K values per n, plus 32-walk normal-basis rho on the same 1,024 point-only public Q. All 162 children pass; independent hosted replay verifies 144 full-rank traces and 165,888 arm-target outputs. Both A/A gates pass. The n=41 runner was Intel Xeon Platinum 8573C; n=53 was AMD EPYC 7763, so only within-n paired ratios are comparable. Seed 622936 was frozen after a lint-only source correction; seed 622935 was excluded as a pilot.</p></div>
+<div class="table-scroll"><table>
+<caption>Median cold whole-process user+system CPU seconds; all setup, rank, linear algebra, target recovery and checks included. Paired 95% log-ratio t intervals are within each host/Q cell. S remains unset.</caption>
+<thead><tr><th>n</th><th>Arm</th><th>CPU s</th><th>RSS MiB</th><th>CPU / rho</th><th>95% interval</th><th>CPU / scalar A</th><th>95% interval</th><th>Verified</th><th>S</th></tr></thead><tbody>
+<tr><td>41</td><td>scalar_a_k192</td><td>2.0948</td><td>92.2</td><td>2.141</td><td>2.120&ndash;2.153</td><td>&mdash;</td><td>&mdash;</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>batch16_k192</td><td>1.7437</td><td>92.3</td><td>1.778</td><td>1.769&ndash;1.794</td><td>0.834</td><td>0.829&ndash;0.838</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>batch64_k192</td><td>1.7139</td><td>91.5</td><td>1.744</td><td>1.738&ndash;1.760</td><td>0.817</td><td>0.815&ndash;0.823</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>scalar_b_k192</td><td>2.0926</td><td>92.0</td><td>&mdash;</td><td>&mdash;</td><td>0.999</td><td>0.993&ndash;1.002</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>scalar_a_k255</td><td>1.8028</td><td>171.3</td><td>1.840</td><td>1.828&ndash;1.848</td><td>&mdash;</td><td>&mdash;</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>batch16_k255</td><td>1.5174</td><td>171.3</td><td>1.552</td><td>1.536&ndash;1.569</td><td>0.842</td><td>0.839&ndash;0.850</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>batch64_k255</td><td>1.5088</td><td>170.8</td><td>1.535</td><td>1.518&ndash;1.554</td><td>0.834</td><td>0.828&ndash;0.843</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>scalar_b_k255</td><td>1.8066</td><td>171.5</td><td>&mdash;</td><td>&mdash;</td><td>1.003</td><td>0.998&ndash;1.004</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>41</td><td>rho_normal</td><td>0.9789</td><td>39.8</td><td>1.000</td><td>reference</td><td>&mdash;</td><td>&mdash;</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>scalar_a_k440</td><td>13.4643</td><td>652.3</td><td>2.115</td><td>2.089&ndash;2.153</td><td>&mdash;</td><td>&mdash;</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>batch16_k440</td><td>10.3305</td><td>652.4</td><td>1.623</td><td>1.602&ndash;1.644</td><td>0.767</td><td>0.752&ndash;0.779</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>batch64_k440</td><td>10.0206</td><td>652.6</td><td>1.582</td><td>1.559&ndash;1.613</td><td>0.742</td><td>0.734&ndash;0.762</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>scalar_b_k440</td><td>13.4338</td><td>652.6</td><td>&mdash;</td><td>&mdash;</td><td>1.001</td><td>0.983&ndash;1.026</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>scalar_a_k550</td><td>13.3194</td><td>724.4</td><td>2.104</td><td>2.066&ndash;2.146</td><td>&mdash;</td><td>&mdash;</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>batch16_k550</td><td>10.3246</td><td>724.1</td><td>1.630</td><td>1.609&ndash;1.658</td><td>0.777</td><td>0.768&ndash;0.784</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>batch64_k550</td><td>10.1290</td><td>724.3</td><td>1.597</td><td>1.565&ndash;1.617</td><td>0.756</td><td>0.748&ndash;0.763</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>scalar_b_k550</td><td>13.2272</td><td>724.1</td><td>&mdash;</td><td>&mdash;</td><td>0.988</td><td>0.978&ndash;1.006</td><td>9,216/9,216</td><td>unset</td></tr>
+<tr><td>53</td><td>rho_normal</td><td>6.3347</td><td>150.1</td><td>1.000</td><td>reference</td><td>&mdash;</td><td>&mdash;</td><td>9,216/9,216</td><td>unset</td></tr>
+</tbody></table></div>
+<p>Every W16/W64 versus scalar interval is below one, saving 16&ndash;26% complete CPU at fixed K. The best observed arms remain above matched rho: n=41 W64 K=255 is 1.535&times; rho (1.518&ndash;1.554), n=53 W64 K=440 is 1.582&times; (1.559&ndash;1.613). At n=53 the W64 rank and target phases still require 2.542 and 5.084 s, and 27.6 million root-table lookups lead to only 1,464 full-point lifts. The next preregistered direction is a no-false-negative root-key prefilter, with cold filter construction and all query work charged. There is no common calibrated S, n=83 result, GF(2<sup>131</sup>) transfer or descendant-native PDP conclusion. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_s3_batch_20260929/RESULT.md">Decision and evidence</a>; <a href="https://github.com/aburan28/crypto/pull/957">PR #957</a>.</p>
+</section>
+<!-- END compact-s3-batch-20260929 -->
 </body>
 </html>
