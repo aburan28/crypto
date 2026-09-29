@@ -209,14 +209,21 @@ struct VarHeap {
     pos: Vec<i32>,
 }
 
-/// Branching order key: priority class first, then VSIDS activity.
+/// Branching order key: priority class first, then VSIDS activity,
+/// packed into one integer so the heap compares one word per variable
+/// instead of looking up two flags and two floats.
+///
+/// The priority flag takes the top bit and the activity's IEEE bits the
+/// rest.  That orders exactly as "priority, then activity" because every
+/// activity is a non-negative non-NaN double: it starts at `+0.0` and
+/// only ever grows by a positive increment or shrinks by the positive
+/// factor `1e-100`, so its sign bit is always clear and, for such
+/// doubles, bit order *is* numeric order — and equal values have equal
+/// bits, so the strict comparison ties exactly where the float one did.
 #[inline]
-fn key_gt(a: u32, b: u32, act: &[f64], prio: &[bool]) -> bool {
-    let (pa, pb) = (prio[a as usize], prio[b as usize]);
-    if pa != pb {
-        return pa;
-    }
-    act[a as usize] > act[b as usize]
+fn order_key(activity: f64, priority: bool) -> u64 {
+    debug_assert!(activity >= 0.0 && activity.is_sign_positive());
+    ((priority as u64) << 63) | activity.to_bits()
 }
 
 impl VarHeap {
@@ -233,11 +240,12 @@ impl VarHeap {
         self.pos[v as usize] >= 0
     }
 
-    fn percolate_up(&mut self, mut i: usize, act: &[f64], prio: &[bool]) {
+    fn percolate_up(&mut self, mut i: usize, key: &[u64]) {
         let v = self.heap[i];
+        let kv = key[v as usize];
         while i > 0 {
             let parent = (i - 1) >> 1;
-            if !key_gt(v, self.heap[parent], act, prio) {
+            if kv <= key[self.heap[parent] as usize] {
                 break;
             }
             self.heap[i] = self.heap[parent];
@@ -248,8 +256,9 @@ impl VarHeap {
         self.pos[v as usize] = i as i32;
     }
 
-    fn percolate_down(&mut self, mut i: usize, act: &[f64], prio: &[bool]) {
+    fn percolate_down(&mut self, mut i: usize, key: &[u64]) {
         let v = self.heap[i];
+        let kv = key[v as usize];
         loop {
             let left = 2 * i + 1;
             if left >= self.heap.len() {
@@ -257,13 +266,13 @@ impl VarHeap {
             }
             let right = left + 1;
             let child = if right < self.heap.len()
-                && key_gt(self.heap[right], self.heap[left], act, prio)
+                && key[self.heap[right] as usize] > key[self.heap[left] as usize]
             {
                 right
             } else {
                 left
             };
-            if !key_gt(self.heap[child], v, act, prio) {
+            if key[self.heap[child] as usize] <= kv {
                 break;
             }
             self.heap[i] = self.heap[child];
@@ -275,33 +284,33 @@ impl VarHeap {
     }
 
     /// Re-insert a variable that left the heap (on unassignment).
-    fn insert(&mut self, v: u32, act: &[f64], prio: &[bool]) {
+    fn insert(&mut self, v: u32, key: &[u64]) {
         if self.contains(v) {
             return;
         }
         self.heap.push(v);
         self.pos[v as usize] = (self.heap.len() - 1) as i32;
-        self.percolate_up(self.heap.len() - 1, act, prio);
+        self.percolate_up(self.heap.len() - 1, key);
     }
 
     /// A variable's activity rose; restore the heap property.
-    fn bumped(&mut self, v: u32, act: &[f64], prio: &[bool]) {
+    fn bumped(&mut self, v: u32, key: &[u64]) {
         if self.contains(v) {
             let i = self.pos[v as usize] as usize;
-            self.percolate_up(i, act, prio);
+            self.percolate_up(i, key);
         }
     }
 
     /// Rebuild after a wholesale change of the ordering key.
-    fn rebuild(&mut self, n_vars: u32, act: &[f64], prio: &[bool]) {
+    fn rebuild(&mut self, n_vars: u32, key: &[u64]) {
         self.heap.clear();
         self.pos.iter_mut().for_each(|p| *p = -1);
         for v in 0..n_vars {
-            self.insert(v, act, prio);
+            self.insert(v, key);
         }
     }
 
-    fn pop_max(&mut self, act: &[f64], prio: &[bool]) -> Option<u32> {
+    fn pop_max(&mut self, key: &[u64]) -> Option<u32> {
         if self.heap.is_empty() {
             return None;
         }
@@ -311,7 +320,7 @@ impl VarHeap {
         if !self.heap.is_empty() {
             self.heap[0] = last;
             self.pos[last as usize] = 0;
-            self.percolate_down(0, act, prio);
+            self.percolate_down(0, key);
         }
         Some(top)
     }
@@ -429,6 +438,9 @@ pub struct Solver {
     /// Variables to branch on before any others.  See
     /// [`Solver::set_branch_priority`].
     branch_priority: Vec<bool>,
+    /// `order_key(activity[v], branch_priority[v])`, the heap's
+    /// comparison key, refreshed wherever either input changes.
+    heap_key: Vec<u64>,
     /// Learnt clauses that have been detached from the watch lists and
     /// are no longer propagated.  They stay in `clauses` so that every
     /// index — in `reason`, in `watches` — remains valid.
@@ -525,6 +537,7 @@ impl Solver {
             learnt_buf: Vec::new(),
             order: VarHeap::new(n_vars),
             branch_priority: vec![false; n],
+            heap_key: vec![order_key(0.0, false); n],
             detached: Vec::new(),
             max_learnts: 0,
             stats: SolverStats::default(),
@@ -606,6 +619,7 @@ impl Solver {
         self.xor_reason.resize(n, Vec::new());
         self.seen.resize(n, false);
         self.branch_priority.resize(n, false);
+        self.heap_key.resize(n, order_key(0.0, false));
         self.order.pos.resize(n, -1);
         for row in &mut self.xors {
             row.mask.resize(words, 0);
@@ -615,7 +629,7 @@ impl Solver {
         self.xor_epoch = u64::MAX;
         self.n_vars = new_total;
         for v in old..new_total {
-            self.order.insert(v, &self.activity, &self.branch_priority);
+            self.order.insert(v, &self.heap_key);
         }
         (old + 1)..=new_total
     }
@@ -644,8 +658,14 @@ impl Solver {
             debug_assert!(v >= 1 && v <= self.n_vars, "priority var {v} out of range");
             self.branch_priority[(v - 1) as usize] = true;
         }
-        self.order
-            .rebuild(self.n_vars, &self.activity, &self.branch_priority);
+        for (k, (&a, &p)) in self
+            .heap_key
+            .iter_mut()
+            .zip(self.activity.iter().zip(&self.branch_priority))
+        {
+            *k = order_key(a, p);
+        }
+        self.order.rebuild(self.n_vars, &self.heap_key);
     }
 
     /// Propagate to fixpoint at the current level without deciding.
@@ -1287,13 +1307,18 @@ impl Solver {
                     // Bump activity, and reposition in the branching heap.
                     self.activity[v] += self.activity_inc;
                     if self.activity[v] > 1e100 {
-                        for a in self.activity.iter_mut() {
+                        for (a, (k, &p)) in self
+                            .activity
+                            .iter_mut()
+                            .zip(self.heap_key.iter_mut().zip(&self.branch_priority))
+                        {
                             *a *= 1e-100;
+                            *k = order_key(*a, p);
                         }
                         self.activity_inc *= 1e-100;
                     }
-                    self.order
-                        .bumped(v as u32, &self.activity, &self.branch_priority);
+                    self.heap_key[v] = order_key(self.activity[v], self.branch_priority[v]);
+                    self.order.bumped(v as u32, &self.heap_key);
                     if self.level[v] >= current_level {
                         counter += 1;
                     } else {
@@ -1411,8 +1436,7 @@ impl Solver {
             self.values[(n - l) as usize] = None;
             self.assigned_w[v / 64] &= !(1u64 << (v % 64));
             self.level[v] = -1;
-            self.order
-                .insert(v as u32, &self.activity, &self.branch_priority);
+            self.order.insert(v as u32, &self.heap_key);
         }
         self.trail_lim.truncate(level);
         self.qhead = target;
@@ -1426,7 +1450,7 @@ impl Solver {
     /// surface because unassignment re-inserts rather than repositions,
     /// so we skip those.
     fn pick_branching_variable(&mut self) -> Option<u32> {
-        while let Some(v) = self.order.pop_max(&self.activity, &self.branch_priority) {
+        while let Some(v) = self.order.pop_max(&self.heap_key) {
             if self.var_value(v as usize).is_none() {
                 return Some(v);
             }
