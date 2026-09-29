@@ -108,7 +108,7 @@ pub fn mod_inverse_prime_ct(a: &BigUint, p: &BigUint) -> Option<BigUint> {
 ///
 /// The inverse returned is the representative in `[0, m)`, and `a` may
 /// be any size.  When `2 ≤ m < 2⁶⁴` the recurrence runs on machine
-/// words ([`mod_inverse_u64`]) rather than on heap-allocated `BigInt`s:
+/// words (`mod_inverse_u64`) rather than on heap-allocated `BigInt`s:
 /// the inverse is unique, so the answer is the same, and the
 /// cryptanalysis walks that invert once per group operation over a
 /// word-sized field otherwise spend half their time allocating here.
