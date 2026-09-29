@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "kind": "stage diagnostic",
+  "classification": "accounting",
+  "python": "3.12.14",
+  "command": "python3 audit.py --output /tmp/binary-formula-replay.json",
+  "byte_identical_replay": true,
+  "source_input_hashes": {
+    "audit.py": "8f3a52bdf388a473ed794f783988c8101fb1836d3b397d16cb175a1772ea7585",
+    "PROTOCOL.md": "6486e503fdcce5da13e83287e4688875f7b2a0925bffabb815f25c438c87516c",
+    "results.json": "8b68bb62988f7350842e0f09423d878f3ce8fc12b38ca131b3bab5ed97f0a393"
+  },
+  "checks": {
+    "field_inverse": 53,
+    "anf_roundtrip": 34,
+    "constants_only": 798,
+    "frobenius_covariance": 219968,
+    "permutation_symmetry": 219968
+  },
+  "end_to_end_operations": null,
+  "S": null,
+  "rho_ratio": null,
+  "speedup": null,
+  "degree_of_regularity": null
+}

@@ -1,0 +1,109 @@
+rtx-pro-6000 base (20 B/s knob set)         512x1 b16     19.960 B/s   22.75 clk  alu  1319.6 fma  188.6 clmad  33.13 issue  1698.9
+rtx-pro-6000 geo-640x1                      640x1 b16     20.065 B/s   22.63 clk  alu  1315.9 fma  190.8 clmad  33.13 issue  1708.2
+rtx-pro-6000 fused                          512x1 b16     19.992 B/s   22.71 clk  alu  1305.8 fma  172.0 clmad  33.13 issue  1685.3
+rtx-pro-6000 no-pair-ilp                    512x1 b16     19.973 B/s   22.73 clk  alu  1323.3 fma  188.6 clmad  33.13 issue  1699.7
+rtx-pro-6000 clmul-flat                     512x1 b16     19.966 B/s   22.74 clk  alu  1320.4 fma  188.6 clmad  33.13 issue  1697.7
+rtx-pro-6000 no-pipe-select                 512x1 b16     19.931 B/s   22.78 clk  alu  1316.3 fma  182.5 clmad  33.13 issue  1689.5
+rtx-pro-6000 no-chain-first                 512x1 b16     19.927 B/s   22.78 clk  alu  1319.6 fma  188.6 clmad  33.13 issue  1699.8
+rtx-pro-6000 alu-sqr                        512x1 b16     19.876 B/s   22.84 clk  alu  1345.1 fma  195.4 clmad  31.88 issue  1725.8
+rtx-pro-6000 no-from-reduced                512x1 b16     19.865 B/s   22.86 clk  alu  1324.6 fma  189.6 clmad  33.13 issue  1704.9
+rtx-pro-6000 unroll2                        512x1 b16     19.796 B/s   22.94 clk  alu  1320.1 fma  184.5 clmad  33.13 issue  1705.5
+rtx-pro-6000 fused-pipe                     512x1 b16     19.551 B/s   23.22 clk  alu  1346.4 fma  184.0 clmad  33.13 issue  1744.7
+rtx-pro-6000 pivot-nibble                   512x1 b16     19.540 B/s   23.24 clk  alu  1366.0 fma  185.6 clmad  33.13 issue  1751.5
+rtx-pro-6000 inline-poly-1                  512x1 b16     19.314 B/s   23.51 clk  alu  1325.0 fma  190.6 clmad  33.13 issue  1725.9
+rtx-pro-6000 inline-poly-0                  512x1 b16     19.164 B/s   23.69 clk  alu  1329.8 fma  191.6 clmad  33.13 issue  1743.1
+rtx-pro-6000 no-l2-persist                  512x1 b16     18.741 B/s   24.23 clk  alu  1319.6 fma  188.6 clmad  33.13 issue  1698.9
+rtx-pro-6000 geo-768x1                      768x1 b16     18.592 B/s   24.42 clk  alu  1337.1 fma  190.1 clmad  33.13 issue  1760.0
+rtx-pro-6000 geo-384x1                      384x1 b16     18.435 B/s   24.63 clk  alu  1319.6 fma  188.7 clmad  33.13 issue  1698.9
+rtx-pro-6000 geo-256x2                      256x2 b16     18.129 B/s   25.04 clk  alu  1319.6 fma  188.7 clmad  33.13 issue  1698.9
+rtx-pro-6000 batch32-256x1                  256x1 b32     17.189 B/s   26.41 clk  alu  1212.7 fma  178.3 clmad  31.56 issue  1570.5
+rtx-pro-6000 batch32-512x1                  512x1 b32     16.994 B/s   26.72 clk  alu  1212.7 fma  178.3 clmad  31.56 issue  1570.4
+rtx-pro-6000 karat3-not-topclmad            512x1 b16     13.894 B/s   32.68 clk  alu  1145.8 fma  138.0 clmad  54.38 issue  1583.9
+b200         base (PACKED_TOP_CLMAD=1 PACKE 512x1 b16     15.372 B/s   18.92 clk  alu   943.8 fma  187.3 clmad  64.38 issue  1296.1
+b200         fused                          512x1 b16     17.456 B/s   16.66 clk  alu   946.5 fma  167.5 clmad  64.38 issue  1288.1
+b200         fused-pipe                     512x1 b16     17.144 B/s   16.96 clk  alu   961.7 fma  208.5 clmad  64.38 issue  1344.4
+b200         batch32-256x1                  256x1 b32     16.153 B/s   18.00 clk  alu   888.6 fma  174.7 clmad  59.69 issue  1214.1
+b200         karat3-not-topclmad            512x1 b16     16.062 B/s   18.11 clk  alu   890.7 fma  171.3 clmad  64.38 issue  1226.9
+b200         batch32-512x1                  512x1 b32     15.909 B/s   18.28 clk  alu   888.6 fma  174.7 clmad  59.69 issue  1214.1
+b200         no-pipe-select                 512x1 b16     15.786 B/s   18.42 clk  alu   956.5 fma  182.8 clmad  64.38 issue  1312.9
+b200         no-chain-first                 512x1 b16     15.398 B/s   18.89 clk  alu   943.8 fma  187.3 clmad  64.38 issue  1296.1
+b200         no-pair-ilp                    512x1 b16     15.356 B/s   18.94 clk  alu   943.8 fma  189.2 clmad  64.38 issue  1297.9
+b200         unroll2                        512x1 b16     15.341 B/s   18.96 clk  alu   944.0 fma  179.8 clmad  64.38 issue  1290.5
+b200         clmul-flat                     512x1 b16     15.307 B/s   19.00 clk  alu   943.8 fma  187.3 clmad  64.38 issue  1296.0
+b200         inline-poly-0                  512x1 b16     15.303 B/s   19.00 clk  alu   951.7 fma  202.6 clmad  64.38 issue  1324.1
+b200         geo-640x1                      640x1 b16     15.296 B/s   19.01 clk  alu   944.3 fma  189.4 clmad  64.38 issue  1295.7
+b200         geo-768x1                      768x1 b16     15.237 B/s   19.09 clk  alu   953.3 fma  202.5 clmad  64.38 issue  1340.2
+b200         no-l2-persist                  512x1 b16     15.226 B/s   19.10 clk  alu   943.8 fma  187.3 clmad  64.38 issue  1296.1
+b200         no-from-reduced                512x1 b16     15.216 B/s   19.11 clk  alu   949.8 fma  188.3 clmad  64.38 issue  1304.1
+b200         geo-256x2                      256x2 b16     15.026 B/s   19.35 clk  alu   943.9 fma  187.4 clmad  64.38 issue  1296.2
+b200         geo-384x1                      384x1 b16     14.948 B/s   19.46 clk  alu   943.8 fma  187.3 clmad  64.38 issue  1296.1
+b200         inline-poly-1                  512x1 b16     14.850 B/s   19.58 clk  alu   949.6 fma  191.6 clmad  64.38 issue  1308.9
+b200         pivot-nibble                   512x1 b16     14.822 B/s   19.62 clk  alu   973.3 fma  178.0 clmad  64.38 issue  1333.8
+b200         alu-sqr                        512x1 b16     14.621 B/s   19.89 clk  alu   970.2 fma  193.0 clmad  63.13 issue  1325.8
+b200         greedy combo1                  512x1 b16     17.482 B/s   16.64 clk  alu   946.5 fma  167.5 clmad  64.38 issue  1288.1
+b200         greedy combo3                  256x1 b32     17.753 B/s   16.38 clk  alu   890.5 fma  152.8 clmad  59.69 issue  1203.6
+b200         greedy combo4                  256x1 b32     18.641 B/s   15.60 clk  alu   842.4 fma  134.4 clmad  59.69 issue  1137.1
+b200         greedy combo5                  512x1 b32     19.402 B/s   14.99 clk  alu   842.4 fma  134.4 clmad  59.69 issue  1137.1
+
+RTX PRO 6000 Blackwell Server Edition (sm_120): efficiency eta = model floor / measured time, per model (<= 1 unless the model is refuted)
+  arm                            geometry                M1             M2             M3             M4             M5             M6
+  base (20 B/s knob set)         512x1 b16      0.899 clmad    0.728 clmad    0.906 alu      0.906 alu      0.961 int      0.728 clmad
+  geo-640x1                      640x1 b16      0.904 clmad    0.732 clmad    0.909 alu      0.909 alu      0.965 int      0.732 clmad
+  fused                          512x1 b16      0.900 clmad    0.729 clmad    0.900 clmad    0.898 alu      0.943 int      0.729 clmad
+  no-pair-ilp                    512x1 b16      0.900 clmad    0.729 clmad    0.910 alu      0.910 alu      0.964 int      0.729 clmad
+  clmul-flat                     512x1 b16      0.899 clmad    0.728 clmad    0.907 alu      0.907 alu      0.962 int      0.728 clmad
+  no-pipe-select                 512x1 b16      0.898 clmad    0.727 clmad    0.903 alu      0.903 alu      0.954 int      0.727 clmad
+  no-chain-first                 512x1 b16      0.897 clmad    0.727 clmad    0.905 alu      0.905 alu      0.959 int      0.727 clmad
+  alu-sqr                        512x1 b16      0.861 clmad    0.698 clmad    0.920 alu      0.920 alu      0.977 int      0.698 clmad
+  no-from-reduced                512x1 b16      0.895 clmad    0.725 clmad    0.906 alu      0.906 alu      0.960 int      0.725 clmad
+  unroll2                        512x1 b16      0.892 clmad    0.722 clmad    0.899 alu      0.899 alu      0.951 int      0.722 clmad
+  fused-pipe                     512x1 b16      0.881 clmad    0.713 clmad    0.906 alu      0.906 alu      0.955 int      0.713 clmad
+  pivot-nibble                   512x1 b16      0.880 clmad    0.713 clmad    0.919 alu      0.919 alu      0.968 int      0.713 clmad
+  inline-poly-1                  512x1 b16      0.870 clmad    0.705 clmad    0.881 alu      0.881 alu      0.934 int      0.705 clmad
+  inline-poly-0                  512x1 b16      0.863 clmad    0.699 clmad    0.877 alu      0.877 alu      0.931 int      0.699 clmad
+  no-l2-persist                  512x1 b16      0.844 clmad    0.684 clmad    0.851 alu      0.851 alu      0.902 int      0.684 clmad
+  geo-768x1                      768x1 b16      0.837 clmad    0.678 clmad    0.855 alu      0.855 alu      0.906 int      0.678 clmad
+  geo-384x1                      384x1 b16      0.830 clmad    0.672 clmad    0.837 alu      0.837 alu      0.888 int      0.672 clmad
+  geo-256x2                      256x2 b16      0.816 clmad    0.661 clmad    0.823 alu      0.823 alu      0.873 int      0.661 clmad
+  batch32-256x1                  256x1 b32      0.738 clmad    0.597 clmad    0.738 clmad    0.717 alu      0.763 int      0.597 clmad
+  batch32-512x1                  512x1 b32      0.729 clmad    0.591 clmad    0.729 clmad    0.709 alu      0.755 int      0.591 clmad
+  karat3-not-topclmad            512x1 b16      1.027 clmad    0.832 clmad    1.027 clmad    0.832 clmad    0.832 clmad    0.832 clmad
+  models:
+    M1 clmad 1.62 only (ONE-BLOCK-GEOMETRY)     max eta 1.027; 512x1 b16 geometry: mean 0.894 sd 0.041 over 15 builds -- REFUTED by karat3-not-topclmad (eta 1.027)
+    M2 clmad 2.00 only                          max eta 0.832; 512x1 b16 geometry: mean 0.724 sd 0.033 over 15 builds -- consistent
+    M3 alu 64, clmad 1.62                       max eta 1.027; 512x1 b16 geometry: mean 0.908 sd 0.037 over 15 builds -- REFUTED by karat3-not-topclmad (eta 1.027)
+    M4 alu 64, clmad 2.00                       max eta 0.920; 512x1 b16 geometry: mean 0.895 sd 0.025 over 15 builds -- consistent
+    M5 int 69 (alu+fma), clmad 2.00             max eta 0.977; 512x1 b16 geometry: mean 0.944 sd 0.036 over 15 builds -- consistent
+    M6 alu 128 (Nsight's peak), clmad 2.00      max eta 0.832; 512x1 b16 geometry: mean 0.724 sd 0.033 over 15 builds -- consistent
+
+B200 (sm_100): efficiency eta = model floor / measured time, per model (<= 1 unless the model is refuted)
+  arm                            geometry                M1             M2             M3
+  base (PACKED_TOP_CLMAD=1 PACKE 512x1 b16      0.783 alu      0.867 int      0.535 issue
+  fused                          512x1 b16      0.892 alu      0.969 int      0.604 issue
+  fused-pipe                     512x1 b16      0.890 alu      1.000 int      0.619 issue
+  batch32-256x1                  256x1 b32      0.775 alu      0.856 int      0.527 issue
+  karat3-not-topclmad            512x1 b16      0.772 alu      0.850 int      0.529 issue
+  batch32-512x1                  512x1 b32      0.763 alu      0.843 int      0.519 issue
+  no-pipe-select                 512x1 b16      0.815 alu      0.896 int      0.557 issue
+  no-chain-first                 512x1 b16      0.784 alu      0.868 int      0.536 issue
+  no-pair-ilp                    512x1 b16      0.782 alu      0.867 int      0.535 issue
+  unroll2                        512x1 b16      0.782 alu      0.859 int      0.532 issue
+  clmul-flat                     512x1 b16      0.780 alu      0.863 int      0.533 issue
+  inline-poly-0                  512x1 b16      0.786 alu      0.880 int      0.544 issue
+  geo-640x1                      640x1 b16      0.780 alu      0.864 int      0.532 issue
+  geo-768x1                      768x1 b16      0.784 alu      0.878 int      0.549 issue
+  no-l2-persist                  512x1 b16      0.776 alu      0.858 int      0.530 issue
+  no-from-reduced                512x1 b16      0.780 alu      0.863 int      0.533 issue
+  geo-256x2                      256x2 b16      0.766 alu      0.847 int      0.523 issue
+  geo-384x1                      384x1 b16      0.762 alu      0.843 int      0.520 issue
+  inline-poly-1                  512x1 b16      0.761 alu      0.845 int      0.522 issue
+  pivot-nibble                   512x1 b16      0.779 alu      0.850 int      0.531 issue
+  alu-sqr                        512x1 b16      0.766 alu      0.848 int      0.521 issue
+  greedy combo1                  512x1 b16      0.893 alu      0.971 int      0.605 issue
+  greedy combo3                  256x1 b32      0.853 alu      0.923 int      0.574 issue
+  greedy combo4                  256x1 b32      0.848 alu      0.907 int      0.569 issue
+  greedy combo5                  512x1 b32      0.882 alu      0.944 int      0.593 issue
+  models:
+    M1 alu 63.7, clmad 29.1                     max eta 0.893; 512x1 b16 geometry: mean 0.801 sd 0.046 over 16 builds -- consistent
+    M2 int 69 (alu+fma), clmad 29.1             max eta 1.000; 512x1 b16 geometry: mean 0.885 sd 0.049 over 16 builds -- consistent
+    M3 alu 128 (Nsight's peak), clmad 29.1      max eta 0.619; 512x1 b16 geometry: mean 0.548 sd 0.032 over 16 builds -- consistent

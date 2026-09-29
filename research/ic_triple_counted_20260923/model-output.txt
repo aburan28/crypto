@@ -1,0 +1,18 @@
+1. The count against the triple arm's committed trials (32 fixtures a cell, not fitted):
+   n23a1: K=2 t=1  predicted mean trials    5.9   measured    6.1
+   n37a0: K=2 t=1  predicted mean trials   37.1   measured   36.3
+   n43a1: K=2 t=1  predicted mean trials  396.1   measured  387.6
+
+2. What each sizing chooses, in the count's units:
+   n23a1: W3 -> K=2 t=1 (   4822)   count -> K=2 t=1 (   4822)   ratio 1.000, with one extra hit 1.038
+   n37a0: W3 -> K=2 t=1 (  16513)   count -> K=2 t=1 (  16513)   ratio 1.000, with one extra hit 1.111
+   n43a1: W3 -> K=2 t=1 (  83001)   count -> K=3 t=1 (  65631)   ratio 0.791, with one extra hit 0.888
+   n59a0: W3 -> K=2 t=1 (  85746)   count -> K=2 t=1 (  85746)   ratio 1.000, with one extra hit 1.225
+   n61a1: W3 -> K=2 t=1 (  89759)   count -> K=2 t=1 (  89759)   ratio 1.000, with one extra hit 1.222
+
+3. n43a1 whole job, counted/triple: 0.795 (K+1 hits) .. 0.890 (one extra hit); 1132 instructions a unit
+
+4. counted/rho, carried from n43a1's triple/rho = 0.933 (secondary in the last study):
+   n43a1: 0.742 .. 0.830
+   n59a0: units x1.033, rho steps x1.257 -> 0.767
+   n61a1: units x1.081, rho steps x1.322 -> 0.763

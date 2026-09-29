@@ -1,0 +1,59 @@
+{
+  "claim_boundary": "Public-synthetic decomposition-stage engineering evidence only. The retained result changes allocation overhead, not the Macaulay row space, solver tree, relation yield, asymptotic complexity, Pollard-rho comparison, external-target capability, or any key-recovery result.",
+  "claim_boundary_non_claims": [
+    "not relation-yield evidence",
+    "not an end-to-end index-calculus crossover",
+    "not an asymptotic or sub-rho result",
+    "not external or private targets",
+    "not a key-recovery claim"
+  ],
+  "dimension_l_or_dim": 16,
+  "eq_var_ratio": 0.96875,
+  "executable_or_source_hash": {
+    "sources": {
+      "f4_rref_tests.rs": "4e631e3a764881c9f642df9fb793b1408b629c361df92ec6360718f2c6255154",
+      "groebner_stage_bench.rs": "ddec1dd6ffe9064e51e8dc2d1ebc273e6ec265f9edb085b2ee8ae2b21293b467",
+      "inherited_f4.rs": "d678beaecd97e896664182e0ae14860d7543449e305668219f80247c116bc89f",
+      "koblitz_groebner.rs": "2a05f7a70dc59ca7bd2c2002f8fefefcc51d8e8a26c522ec138ccf7cc19f29eb"
+    },
+    "stage_executable": "115fc83567cf9eb4f4a7a1769ea10603987ff62abafa17922046e05a40faca57"
+  },
+  "ffd_or_degree_of_regularity": 3,
+  "fixture_hash": "e2e30f7adbd5e0a38be6cc8cee14f485fad9416de88280d141dfcc64a46a211c",
+  "host_id": {
+    "hostname": "Adams-MacBook-Pro.local",
+    "machine": "arm64",
+    "system": "Darwin"
+  },
+  "largest_solvable": {
+    "m": 2,
+    "n": 31,
+    "root_rank": 1021,
+    "unknowns": 32
+  },
+  "m_summands": 2,
+  "median_ms_per_target": {
+    "n31_root_arena_ms": 2.157625
+  },
+  "n_or_bits": 31,
+  "oracle_class": "inherited matrix-F4 with reusable block-4 M4RI scratch",
+  "resource_caps": {
+    "block_width": 4,
+    "frozen_stage_repetitions_per_policy": 13,
+    "holdout_stage_repetitions_per_policy": 15,
+    "semaev_root_repetitions": 100,
+    "synthetic_repetitions": 100,
+    "threads": 1
+  },
+  "schema_version": 2,
+  "seeds": [
+    17,
+    937,
+    20260914,
+    66142
+  ],
+  "stage": "decomposition",
+  "system_degree": "quadratic generators, degree-3 Macaulay root",
+  "task_id": "TASK-KIC-GROEBNER-M4RI-ARENA-20260922",
+  "unknowns": 32
+}

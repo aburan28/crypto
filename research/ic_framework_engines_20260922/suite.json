@@ -1,0 +1,216 @@
+{
+ "suite": "ic-framework-engines",
+ "version": "2026-09-22.1",
+ "declared_in": "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md \u00a717.1-17.2",
+ "parent_contract": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+ "why_not_the_wdsat_suite": "The frozen regression suite of AGENTS.md section 8 (research/index_calculus_baseline_20260914/regression/) pins the WDSat SAT protocol and counters and says of itself that it is not an adapter for other engines. The engines here are Groebner-family and exhaustive solvers with their own native units on Weil-descent systems, so this is the equivalent matched suite the section asks for, under the parent contract.",
+ "baseline_engine": "buchberger-f2",
+ "reference_engine": {
+  "quadratic": "fes-f2",
+  "general": "exhaustive"
+ },
+ "f4_family": [
+  "f4-f2",
+  "matrix-f4",
+  "matrix-f5",
+  "inherited-f4"
+ ],
+ "algebraic_engines": [
+  "buchberger-f2",
+  "f4-f2",
+  "matrix-f4",
+  "matrix-f5",
+  "inherited-f4",
+  "crossbred-f2"
+ ],
+ "first_solution_engines": [
+  "sat-cdcl"
+ ],
+ "stage_defaults": {
+  "targets": 8,
+  "repeats": 3,
+  "budget_seconds": 120,
+  "families": [
+   "K",
+   "R"
+  ]
+ },
+ "stage_parts": [
+  {
+   "id": "A1-m2-to18",
+   "seed": 233164359,
+   "cells": [
+    "7:4:2",
+    "9:5:2",
+    "11:6:2",
+    "13:7:2",
+    "15:8:2",
+    "17:9:2"
+   ],
+   "engines": [
+    "buchberger-f2",
+    "f4-f2",
+    "matrix-f4",
+    "matrix-f5",
+    "inherited-f4",
+    "crossbred-f2",
+    "fes-f2",
+    "exhaustive",
+    "sat-cdcl"
+   ]
+  },
+  {
+   "id": "A2-m2-20-22",
+   "seed": 233164359,
+   "cells": [
+    "19:10:2",
+    "21:11:2"
+   ],
+   "engines": [
+    "buchberger-f2",
+    "f4-f2",
+    "matrix-f4",
+    "matrix-f5",
+    "inherited-f4",
+    "crossbred-f2",
+    "fes-f2",
+    "exhaustive",
+    "sat-cdcl"
+   ]
+  },
+  {
+   "id": "A3-m3",
+   "seed": 233164359,
+   "cells": [
+    "7:3:3",
+    "9:3:3",
+    "11:4:3"
+   ],
+   "engines": [
+    "buchberger-f2",
+    "f4-f2",
+    "matrix-f4",
+    "matrix-f5",
+    "inherited-f4",
+    "crossbred-f2",
+    "fes-f2",
+    "exhaustive",
+    "sat-cdcl"
+   ]
+  },
+  {
+   "id": "B-m2-24-26",
+   "seed": 233164359,
+   "cells": [
+    "23:12:2",
+    "25:13:2"
+   ],
+   "engines": [
+    "f4-f2",
+    "matrix-f4",
+    "matrix-f5",
+    "inherited-f4",
+    "crossbred-f2",
+    "fes-f2",
+    "exhaustive"
+   ],
+   "why_engines": "buchberger-f2 hit the budget on every call at 22 unknowns (ledger 16.5); sat-cdcl is on the separate first-solution leaderboard"
+  },
+  {
+   "id": "H1-holdout",
+   "seed": 256859885,
+   "cells": [
+    "15:8:2",
+    "17:9:2",
+    "21:11:2",
+    "9:3:3"
+   ],
+   "engines": [
+    "buchberger-f2",
+    "f4-f2",
+    "matrix-f4",
+    "matrix-f5",
+    "inherited-f4",
+    "crossbred-f2",
+    "fes-f2",
+    "exhaustive",
+    "sat-cdcl"
+   ]
+  },
+  {
+   "id": "H2-holdout-24",
+   "seed": 256859885,
+   "cells": [
+    "23:12:2"
+   ],
+   "engines": [
+    "f4-f2",
+    "matrix-f4",
+    "matrix-f5",
+    "inherited-f4",
+    "crossbred-f2",
+    "fes-f2",
+    "exhaustive"
+   ]
+  }
+ ],
+ "bench_parts": [
+  {
+   "id": "W13-s20260922",
+   "sweep": "sweeps/bench-n13-s20260922.json",
+   "rho_runs": 16
+  },
+  {
+   "id": "W13-s20260923",
+   "sweep": "sweeps/bench-n13-s20260923.json",
+   "rho_runs": 16
+  },
+  {
+   "id": "W13-s20260924",
+   "sweep": "sweeps/bench-n13-s20260924.json",
+   "rho_runs": 16
+  },
+  {
+   "id": "W15-s20260922",
+   "sweep": "sweeps/bench-n15-s20260922.json",
+   "rho_runs": 16
+  },
+  {
+   "id": "W15-s20260923",
+   "sweep": "sweeps/bench-n15-s20260923.json",
+   "rho_runs": 16
+  },
+  {
+   "id": "W15-s20260924",
+   "sweep": "sweeps/bench-n15-s20260924.json",
+   "rho_runs": 16
+  },
+  {
+   "id": "W17-s20260922",
+   "sweep": "sweeps/bench-n17-s20260922.json",
+   "rho_runs": 16
+  }
+ ],
+ "environment_must_be_unset": [
+  "KIC_F4_INHERIT",
+  "KIC_F4_CRITERION",
+  "KIC_F4_MAX_DEGREE_ONLY",
+  "KIC_F4_INHERIT_RREF",
+  "SOLVER_SPLIT_RULE",
+  "IC_REDUCTION_CACHE"
+ ],
+ "analysis": {
+  "pairing_unit_stage": "a target: each engine's median wall over its repetitions on that target",
+  "pairing_unit_bench": "a (curve seed, planted target) pair, matched by the recovered logarithm",
+  "bootstrap": {
+   "resamples": 10000,
+   "seed": 20260922,
+   "interval": 0.95,
+   "statistic": "median of per-pair ratios"
+  },
+  "target_1_reach": "some f4_family engine decides every two-summand target at 16-22 unknowns (main and holdout) in every repetition within budget, zero disagreements",
+  "target_2_gate": "at n=13 and n=15, all three curves pooled per n: some f4_family engine's total_gae per verified relation over buchberger-f2's has median <= 0.8 and bootstrap upper bound < 1",
+  "target_3_question": "on some two-summand stage cell (family, n), some algebraic engine's median over targets of wall/fes-f2 is < 1 with bootstrap upper bound < 1",
+  "abandon": "no algebraic engine's pooled median ratio to fes-f2 at 26 unknowns is below its pooled median ratio at 16 unknowns"
+ }
+}

@@ -1,0 +1,5248 @@
+{
+  "all_verified": true,
+  "config": {
+    "batch_koblitz": [
+      "0/61"
+    ],
+    "batch_sizes": [
+      1,
+      32
+    ],
+    "batches": 8,
+    "seed": 764868,
+    "walk": "RhoWalk::negation() shape on SignedFrobeniusClasses; per-target budget rho_cap(r, 64)"
+  },
+  "curves": [
+    {
+      "a": 0,
+      "automorphisms": 122,
+      "cofactor": 14156,
+      "curve": {
+        "a": 0,
+        "b": "0x1",
+        "cofactor": 14156,
+        "field": {
+          "degree": 61,
+          "kind": "binary",
+          "polynomial_low_terms": [
+            0,
+            1,
+            2,
+            5
+          ]
+        },
+        "generator": {
+          "x": "0x5cc1d6ba365013e",
+          "y": "0x171d9a59a2d31eb9"
+        },
+        "group_order": 2305843009055095052,
+        "koblitz": true,
+        "name": "K_0 / GF(2^61)",
+        "subgroup_order": 162888033982417
+      },
+      "exclusions": {
+        "defined_over_proper_subfields_of_degree": [
+          1
+        ],
+        "koblitz": true,
+        "matched_rho_eligible": "Koblitz: signed Frobenius (A = 2n) and negation"
+      },
+      "floor_s_single": 0.11346973044749432,
+      "instance": "K_0 / GF(2^61)",
+      "log2_r": 47.21087395347554,
+      "n": 61,
+      "r": 162888033982417,
+      "regime": "koblitz",
+      "sizes": [
+        {
+          "all_verified": true,
+          "batch_law": 1.0,
+          "batches": 8,
+          "k": 1,
+          "mean_s_per_target": 0.11506293817535486,
+          "mean_s_walk_per_target": 0.11493872914509866,
+          "per_target_over_k1": 1.0,
+          "runs": [
+            {
+              "all_verified": true,
+              "batch": 0,
+              "counters": {
+                "canonicalisations_uncharged": 1675410,
+                "cycle_escape_doublings": 0,
+                "cycles_length_2": 0,
+                "cycles_length_4": 0,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 396,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 840,
+                "setup_additions": 364,
+                "setup_doublings": 725,
+                "solved_on_an_earlier_trail": 0,
+                "solved_on_own_trail": 1,
+                "start_additions": 396,
+                "target_setup_additions": 35,
+                "target_setup_doublings": 45,
+                "targets": 1,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 69,
+                "walk_operations": 1675013,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 1676647.0,
+              "per_target": [
+                {
+                  "distinguished_points": 397,
+                  "gae": 1675558.0,
+                  "group_ops": {
+                    "adds": 1675466,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 144332518583367,
+                  "recovered": 144332518583367,
+                  "solved_by": "own",
+                  "steps": 1674173,
+                  "verified": true,
+                  "walks": 397,
+                  "wall_ms": 2225.144379
+                }
+              ],
+              "planted": [
+                144332518583367
+              ],
+              "s_per_target": 0.1313702557653177,
+              "s_walk_per_target": 0.1312422270282487,
+              "setup_gae": 1089.0,
+              "target_seed": 2862375056839336686,
+              "walk_seed": 16839060895972420790,
+              "wall_ms": 2226.453321
+            },
+            {
+              "all_verified": true,
+              "batch": 1,
+              "counters": {
+                "canonicalisations_uncharged": 1224383,
+                "cycle_escape_doublings": 0,
+                "cycles_length_2": 0,
+                "cycles_length_4": 0,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 315,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 627,
+                "setup_additions": 341,
+                "setup_doublings": 716,
+                "solved_on_an_earlier_trail": 0,
+                "solved_on_own_trail": 1,
+                "start_additions": 315,
+                "target_setup_additions": 38,
+                "target_setup_doublings": 45,
+                "targets": 1,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 72,
+                "walk_operations": 1224067,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 1225594.0,
+              "per_target": [
+                {
+                  "distinguished_points": 316,
+                  "gae": 1224537.0,
+                  "group_ops": {
+                    "adds": 1224445,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 153476073559395,
+                  "recovered": 153476073559395,
+                  "solved_by": "own",
+                  "steps": 1223440,
+                  "verified": true,
+                  "walks": 316,
+                  "wall_ms": 1625.561896
+                }
+              ],
+              "planted": [
+                153476073559395
+              ],
+              "s_per_target": 0.09602891798001534,
+              "s_walk_per_target": 0.09590927300969443,
+              "setup_gae": 1057.0,
+              "target_seed": 1262874210643337870,
+              "walk_seed": 5732932441317424694,
+              "wall_ms": 1626.771089
+            },
+            {
+              "all_verified": true,
+              "batch": 2,
+              "counters": {
+                "canonicalisations_uncharged": 725931,
+                "cycle_escape_doublings": 0,
+                "cycles_length_2": 0,
+                "cycles_length_4": 0,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 189,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 403,
+                "setup_additions": 366,
+                "setup_doublings": 715,
+                "solved_on_an_earlier_trail": 0,
+                "solved_on_own_trail": 1,
+                "start_additions": 189,
+                "target_setup_additions": 34,
+                "target_setup_doublings": 46,
+                "targets": 1,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 66,
+                "walk_operations": 725741,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 727157.0,
+              "per_target": [
+                {
+                  "distinguished_points": 190,
+                  "gae": 726076.0,
+                  "group_ops": {
+                    "adds": 725984,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 105943895557765,
+                  "recovered": 105943895557765,
+                  "solved_by": "own",
+                  "steps": 725338,
+                  "verified": true,
+                  "walks": 190,
+                  "wall_ms": 1037.052875
+                }
+              ],
+              "planted": [
+                105943895557765
+              ],
+              "s_per_target": 0.056974903525632475,
+              "s_walk_per_target": 0.05686395573390071,
+              "setup_gae": 1081.0,
+              "target_seed": 17371946142042835637,
+              "walk_seed": 12713050849714212916,
+              "wall_ms": 1038.284641
+            },
+            {
+              "all_verified": true,
+              "batch": 3,
+              "counters": {
+                "canonicalisations_uncharged": 1365077,
+                "cycle_escape_doublings": 0,
+                "cycles_length_2": 0,
+                "cycles_length_4": 0,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 350,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 656,
+                "setup_additions": 368,
+                "setup_doublings": 722,
+                "solved_on_an_earlier_trail": 0,
+                "solved_on_own_trail": 1,
+                "start_additions": 350,
+                "target_setup_additions": 37,
+                "target_setup_doublings": 47,
+                "targets": 1,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 72,
+                "walk_operations": 1364726,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 1366322.0,
+              "per_target": [
+                {
+                  "distinguished_points": 351,
+                  "gae": 1365232.0,
+                  "group_ops": {
+                    "adds": 1365139,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 121454794950102,
+                  "recovered": 121454794950102,
+                  "solved_by": "own",
+                  "steps": 1364070,
+                  "verified": true,
+                  "walks": 351,
+                  "wall_ms": 1846.244366
+                }
+              ],
+              "planted": [
+                121454794950102
+              ],
+              "s_per_target": 0.10705537337184297,
+              "s_walk_per_target": 0.10693032204726395,
+              "setup_gae": 1090.0,
+              "target_seed": 5919279010042144196,
+              "walk_seed": 10578174293685341349,
+              "wall_ms": 1847.558033
+            },
+            {
+              "all_verified": true,
+              "batch": 4,
+              "counters": {
+                "canonicalisations_uncharged": 323131,
+                "cycle_escape_doublings": 0,
+                "cycles_length_2": 0,
+                "cycles_length_4": 0,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 88,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 177,
+                "setup_additions": 336,
+                "setup_doublings": 723,
+                "solved_on_an_earlier_trail": 0,
+                "solved_on_own_trail": 1,
+                "start_additions": 88,
+                "target_setup_additions": 35,
+                "target_setup_doublings": 47,
+                "targets": 1,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 75,
+                "walk_operations": 323042,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 324346.0,
+              "per_target": [
+                {
+                  "distinguished_points": 89,
+                  "gae": 323287.0,
+                  "group_ops": {
+                    "adds": 323194,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 140053111672543,
+                  "recovered": 140053111672543,
+                  "solved_by": "own",
+                  "steps": 322865,
+                  "verified": true,
+                  "walks": 89,
+                  "wall_ms": 409.605366
+                }
+              ],
+              "planted": [
+                140053111672543
+              ],
+              "s_per_target": 0.025413469249315885,
+              "s_walk_per_target": 0.025311296989133526,
+              "setup_gae": 1059.0,
+              "target_seed": 7506229178542910393,
+              "walk_seed": 12165124466072837960,
+              "wall_ms": 410.815486
+            },
+            {
+              "all_verified": true,
+              "batch": 5,
+              "counters": {
+                "canonicalisations_uncharged": 632613,
+                "cycle_escape_doublings": 0,
+                "cycles_length_2": 0,
+                "cycles_length_4": 0,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 154,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 315,
+                "setup_additions": 354,
+                "setup_doublings": 725,
+                "solved_on_an_earlier_trail": 0,
+                "solved_on_own_trail": 1,
+                "start_additions": 154,
+                "target_setup_additions": 34,
+                "target_setup_doublings": 47,
+                "targets": 1,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 62,
+                "walk_operations": 632458,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 633834.0,
+              "per_target": [
+                {
+                  "distinguished_points": 155,
+                  "gae": 632755.0,
+                  "group_ops": {
+                    "adds": 632664,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 20328115798723,
+                  "recovered": 20328115798723,
+                  "solved_by": "own",
+                  "steps": 632143,
+                  "verified": true,
+                  "walks": 155,
+                  "wall_ms": 801.880865
+                }
+              ],
+              "planted": [
+                20328115798723
+              ],
+              "s_per_target": 0.049662770215050854,
+              "s_walk_per_target": 0.049554956541729596,
+              "setup_gae": 1079.0,
+              "target_seed": 10148214820297804574,
+              "walk_seed": 5489319541922015179,
+              "wall_ms": 803.133122
+            },
+            {
+              "all_verified": true,
+              "batch": 6,
+              "counters": {
+                "canonicalisations_uncharged": 2690464,
+                "cycle_escape_doublings": 0,
+                "cycles_length_2": 0,
+                "cycles_length_4": 0,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 651,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 1396,
+                "setup_additions": 358,
+                "setup_doublings": 727,
+                "solved_on_an_earlier_trail": 0,
+                "solved_on_own_trail": 1,
+                "start_additions": 651,
+                "target_setup_additions": 35,
+                "target_setup_doublings": 46,
+                "targets": 1,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 71,
+                "walk_operations": 2689812,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 2691700.0,
+              "per_target": [
+                {
+                  "distinguished_points": 652,
+                  "gae": 2690615.0,
+                  "group_ops": {
+                    "adds": 2690523,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 119377562689421,
+                  "recovered": 119377562689421,
+                  "solved_by": "own",
+                  "steps": 2688416,
+                  "verified": true,
+                  "walks": 652,
+                  "wall_ms": 3443.789922
+                }
+              ],
+              "planted": [
+                119377562689421
+              ],
+              "s_per_target": 0.21090266313869624,
+              "s_walk_per_target": 0.21075473274972056,
+              "setup_gae": 1085.0,
+              "target_seed": 8698576330314704883,
+              "walk_seed": 4039681046563965590,
+              "wall_ms": 3445.092327
+            },
+            {
+              "all_verified": true,
+              "batch": 7,
+              "counters": {
+                "canonicalisations_uncharged": 3101374,
+                "cycle_escape_doublings": 2,
+                "cycles_length_2": 0,
+                "cycles_length_4": 2,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 749,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 1613,
+                "setup_additions": 328,
+                "setup_doublings": 718,
+                "solved_on_an_earlier_trail": 0,
+                "solved_on_own_trail": 1,
+                "start_additions": 749,
+                "target_setup_additions": 35,
+                "target_setup_doublings": 46,
+                "targets": 1,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 65,
+                "walk_operations": 3100624,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 3102565.0,
+              "per_target": [
+                {
+                  "distinguished_points": 750,
+                  "gae": 3101519.0,
+                  "group_ops": {
+                    "adds": 3101425,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 70988267077282,
+                  "recovered": 70988267077282,
+                  "solved_by": "own",
+                  "steps": 3099009,
+                  "verified": true,
+                  "walks": 750,
+                  "wall_ms": 4054.618475
+                }
+              ],
+              "planted": [
+                70988267077282
+              ],
+              "s_per_target": 0.2430951521569674,
+              "s_walk_per_target": 0.24294306906109778,
+              "setup_gae": 1046.0,
+              "target_seed": 14529155506043558592,
+              "walk_seed": 10059097284227907420,
+              "wall_ms": 4055.794781
+            }
+          ],
+          "sd_s_per_target": 0.07742117958780072,
+          "solved_on_an_earlier_trail": 0,
+          "solved_on_own_trail": 8
+        },
+        {
+          "all_verified": true,
+          "batch_law": 0.19869350749593379,
+          "batches": 8,
+          "k": 32,
+          "mean_s_per_target": 0.02189195390896968,
+          "mean_s_walk_per_target": 0.021872397499794156,
+          "per_target_over_k1": 0.19026068911613,
+          "runs": [
+            {
+              "all_verified": true,
+              "batch": 0,
+              "counters": {
+                "canonicalisations_uncharged": 8556961,
+                "cycle_escape_doublings": 2,
+                "cycles_length_2": 0,
+                "cycles_length_4": 2,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 2010,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 4386,
+                "setup_additions": 361,
+                "setup_doublings": 739,
+                "solved_on_an_earlier_trail": 27,
+                "solved_on_own_trail": 5,
+                "start_additions": 2010,
+                "target_setup_additions": 1115,
+                "target_setup_doublings": 1474,
+                "targets": 32,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 2150,
+                "walk_operations": 8554919,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 8562768.0,
+              "per_target": [
+                {
+                  "distinguished_points": 362,
+                  "gae": 1550348.0,
+                  "group_ops": {
+                    "adds": 1550257,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 155567803505141,
+                  "recovered": 155567803505141,
+                  "solved_by": "own",
+                  "steps": 1549040,
+                  "verified": true,
+                  "walks": 362,
+                  "wall_ms": 2067.149879
+                },
+                {
+                  "distinguished_points": 78,
+                  "gae": 260874.0,
+                  "group_ops": {
+                    "adds": 260784,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 135484918744072,
+                  "recovered": 135484918744072,
+                  "solved_by": "own",
+                  "steps": 260526,
+                  "verified": true,
+                  "walks": 78,
+                  "wall_ms": 347.008209
+                },
+                {
+                  "distinguished_points": 97,
+                  "gae": 401031.0,
+                  "group_ops": {
+                    "adds": 400938,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 80425875630661,
+                  "recovered": 80425875630661,
+                  "solved_by": "own",
+                  "steps": 400589,
+                  "verified": true,
+                  "walks": 97,
+                  "wall_ms": 527.187338
+                },
+                {
+                  "distinguished_points": 3,
+                  "gae": 32564.0,
+                  "group_ops": {
+                    "adds": 32472,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 100021698531796,
+                  "recovered": 100021698531796,
+                  "solved_by": "earlier",
+                  "steps": 32399,
+                  "verified": true,
+                  "walks": 3,
+                  "wall_ms": 41.354156
+                },
+                {
+                  "distinguished_points": 82,
+                  "gae": 320073.0,
+                  "group_ops": {
+                    "adds": 319982,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 28371515474086,
+                  "recovered": 28371515474086,
+                  "solved_by": "earlier",
+                  "steps": 319686,
+                  "verified": true,
+                  "walks": 82,
+                  "wall_ms": 404.999819
+                },
+                {
+                  "distinguished_points": 54,
+                  "gae": 248878.0,
+                  "group_ops": {
+                    "adds": 248787,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 90558634123406,
+                  "recovered": 90558634123406,
+                  "solved_by": "earlier",
+                  "steps": 248561,
+                  "verified": true,
+                  "walks": 54,
+                  "wall_ms": 331.074364
+                },
+                {
+                  "distinguished_points": 36,
+                  "gae": 170038.0,
+                  "group_ops": {
+                    "adds": 169948,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 28235561099704,
+                  "recovered": 28235561099704,
+                  "solved_by": "earlier",
+                  "steps": 169761,
+                  "verified": true,
+                  "walks": 36,
+                  "wall_ms": 252.025941
+                },
+                {
+                  "distinguished_points": 40,
+                  "gae": 205972.0,
+                  "group_ops": {
+                    "adds": 205878,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 160851811683017,
+                  "recovered": 160851811683017,
+                  "solved_by": "own",
+                  "steps": 205678,
+                  "verified": true,
+                  "walks": 40,
+                  "wall_ms": 276.069638
+                },
+                {
+                  "distinguished_points": 131,
+                  "gae": 505466.0,
+                  "group_ops": {
+                    "adds": 505373,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 97453913698830,
+                  "recovered": 97453913698830,
+                  "solved_by": "earlier",
+                  "steps": 504935,
+                  "verified": true,
+                  "walks": 131,
+                  "wall_ms": 698.335902
+                },
+                {
+                  "distinguished_points": 74,
+                  "gae": 270162.0,
+                  "group_ops": {
+                    "adds": 270071,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 63443029369736,
+                  "recovered": 63443029369736,
+                  "solved_by": "earlier",
+                  "steps": 269820,
+                  "verified": true,
+                  "walks": 74,
+                  "wall_ms": 365.619225
+                },
+                {
+                  "distinguished_points": 48,
+                  "gae": 157643.0,
+                  "group_ops": {
+                    "adds": 157554,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 26619563123063,
+                  "recovered": 26619563123063,
+                  "solved_by": "earlier",
+                  "steps": 157379,
+                  "verified": true,
+                  "walks": 48,
+                  "wall_ms": 198.025052
+                },
+                {
+                  "distinguished_points": 30,
+                  "gae": 126063.0,
+                  "group_ops": {
+                    "adds": 125970,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 107789741507887,
+                  "recovered": 107789741507887,
+                  "solved_by": "earlier",
+                  "steps": 125829,
+                  "verified": true,
+                  "walks": 30,
+                  "wall_ms": 159.281612
+                },
+                {
+                  "distinguished_points": 3,
+                  "gae": 10939.0,
+                  "group_ops": {
+                    "adds": 10848,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 32068679556443,
+                  "recovered": 32068679556443,
+                  "solved_by": "earlier",
+                  "steps": 10777,
+                  "verified": true,
+                  "walks": 3,
+                  "wall_ms": 13.898623
+                },
+                {
+                  "distinguished_points": 56,
+                  "gae": 261275.0,
+                  "group_ops": {
+                    "adds": 261182,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 93877696360288,
+                  "recovered": 93877696360288,
+                  "solved_by": "earlier",
+                  "steps": 260924,
+                  "verified": true,
+                  "walks": 56,
+                  "wall_ms": 343.003324
+                },
+                {
+                  "distinguished_points": 91,
+                  "gae": 355010.0,
+                  "group_ops": {
+                    "adds": 354918,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 121707212300809,
+                  "recovered": 121707212300809,
+                  "solved_by": "earlier",
+                  "steps": 354592,
+                  "verified": true,
+                  "walks": 91,
+                  "wall_ms": 463.165958
+                },
+                {
+                  "distinguished_points": 66,
+                  "gae": 265474.0,
+                  "group_ops": {
+                    "adds": 265382,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 130062709757372,
+                  "recovered": 130062709757372,
+                  "solved_by": "earlier",
+                  "steps": 265117,
+                  "verified": true,
+                  "walks": 66,
+                  "wall_ms": 342.348041
+                },
+                {
+                  "distinguished_points": 165,
+                  "gae": 676494.0,
+                  "group_ops": {
+                    "adds": 676403,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 32869581250416,
+                  "recovered": 32869581250416,
+                  "solved_by": "earlier",
+                  "steps": 675830,
+                  "verified": true,
+                  "walks": 165,
+                  "wall_ms": 855.705847
+                },
+                {
+                  "distinguished_points": 34,
+                  "gae": 105603.0,
+                  "group_ops": {
+                    "adds": 105511,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 48496250776672,
+                  "recovered": 48496250776672,
+                  "solved_by": "earlier",
+                  "steps": 105356,
+                  "verified": true,
+                  "walks": 34,
+                  "wall_ms": 135.24057
+                },
+                {
+                  "distinguished_points": 1,
+                  "gae": 8236.0,
+                  "group_ops": {
+                    "adds": 8144,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 115844231076715,
+                  "recovered": 115844231076715,
+                  "solved_by": "earlier",
+                  "steps": 8084,
+                  "verified": true,
+                  "walks": 1,
+                  "wall_ms": 10.77247
+                },
+                {
+                  "distinguished_points": 3,
+                  "gae": 12940.0,
+                  "group_ops": {
+                    "adds": 12847,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 77462673300324,
+                  "recovered": 77462673300324,
+                  "solved_by": "earlier",
+                  "steps": 12779,
+                  "verified": true,
+                  "walks": 3,
+                  "wall_ms": 16.847014
+                },
+                {
+                  "distinguished_points": 23,
+                  "gae": 115033.0,
+                  "group_ops": {
+                    "adds": 114940,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 140982424426229,
+                  "recovered": 140982424426229,
+                  "solved_by": "earlier",
+                  "steps": 114796,
+                  "verified": true,
+                  "walks": 23,
+                  "wall_ms": 151.749063
+                },
+                {
+                  "distinguished_points": 279,
+                  "gae": 1171810.0,
+                  "group_ops": {
+                    "adds": 1171721,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 32365710729317,
+                  "recovered": 32365710729317,
+                  "solved_by": "earlier",
+                  "steps": 1170792,
+                  "verified": true,
+                  "walks": 279,
+                  "wall_ms": 1543.065347
+                },
+                {
+                  "distinguished_points": 46,
+                  "gae": 179648.0,
+                  "group_ops": {
+                    "adds": 179556,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 78179514678627,
+                  "recovered": 78179514678627,
+                  "solved_by": "earlier",
+                  "steps": 179363,
+                  "verified": true,
+                  "walks": 46,
+                  "wall_ms": 237.7771
+                },
+                {
+                  "distinguished_points": 22,
+                  "gae": 108274.0,
+                  "group_ops": {
+                    "adds": 108182,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 125987682601222,
+                  "recovered": 125987682601222,
+                  "solved_by": "earlier",
+                  "steps": 108031,
+                  "verified": true,
+                  "walks": 22,
+                  "wall_ms": 140.049858
+                },
+                {
+                  "distinguished_points": 59,
+                  "gae": 300557.0,
+                  "group_ops": {
+                    "adds": 300466,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 31281665035831,
+                  "recovered": 31281665035831,
+                  "solved_by": "own",
+                  "steps": 300199,
+                  "verified": true,
+                  "walks": 59,
+                  "wall_ms": 399.063849
+                },
+                {
+                  "distinguished_points": 28,
+                  "gae": 83387.0,
+                  "group_ops": {
+                    "adds": 83296,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 25159465092952,
+                  "recovered": 25159465092952,
+                  "solved_by": "earlier",
+                  "steps": 83170,
+                  "verified": true,
+                  "walks": 28,
+                  "wall_ms": 108.288048
+                },
+                {
+                  "distinguished_points": 47,
+                  "gae": 216317.0,
+                  "group_ops": {
+                    "adds": 216226,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 39629621433833,
+                  "recovered": 39629621433833,
+                  "solved_by": "earlier",
+                  "steps": 216020,
+                  "verified": true,
+                  "walks": 47,
+                  "wall_ms": 271.333038
+                },
+                {
+                  "distinguished_points": 19,
+                  "gae": 109506.0,
+                  "group_ops": {
+                    "adds": 109416,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 20867545401217,
+                  "recovered": 20867545401217,
+                  "solved_by": "earlier",
+                  "steps": 109288,
+                  "verified": true,
+                  "walks": 19,
+                  "wall_ms": 143.688023
+                },
+                {
+                  "distinguished_points": 4,
+                  "gae": 28616.0,
+                  "group_ops": {
+                    "adds": 28526,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 44724018897654,
+                  "recovered": 44724018897654,
+                  "solved_by": "earlier",
+                  "steps": 28455,
+                  "verified": true,
+                  "walks": 4,
+                  "wall_ms": 40.703032
+                },
+                {
+                  "distinguished_points": 49,
+                  "gae": 255798.0,
+                  "group_ops": {
+                    "adds": 255705,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 143180405197877,
+                  "recovered": 143180405197877,
+                  "solved_by": "earlier",
+                  "steps": 255455,
+                  "verified": true,
+                  "walks": 49,
+                  "wall_ms": 330.429721
+                },
+                {
+                  "distinguished_points": 1,
+                  "gae": 10020.0,
+                  "group_ops": {
+                    "adds": 9927,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 158120059500595,
+                  "recovered": 158120059500595,
+                  "solved_by": "earlier",
+                  "steps": 9859,
+                  "verified": true,
+                  "walks": 1,
+                  "wall_ms": 12.715632
+                },
+                {
+                  "distinguished_points": 11,
+                  "gae": 37619.0,
+                  "group_ops": {
+                    "adds": 37533,
+                    "doubles": 86,
+                    "scalar_mults": 2
+                  },
+                  "planted": 2104218492969,
+                  "recovered": 2104218492969,
+                  "solved_by": "earlier",
+                  "steps": 37441,
+                  "verified": true,
+                  "walks": 11,
+                  "wall_ms": 48.392213
+                }
+              ],
+              "planted": [
+                155567803505141,
+                135484918744072,
+                80425875630661,
+                100021698531796,
+                28371515474086,
+                90558634123406,
+                28235561099704,
+                160851811683017,
+                97453913698830,
+                63443029369736,
+                26619563123063,
+                107789741507887,
+                32068679556443,
+                93877696360288,
+                121707212300809,
+                130062709757372,
+                32869581250416,
+                48496250776672,
+                115844231076715,
+                77462673300324,
+                140982424426229,
+                32365710729317,
+                78179514678627,
+                125987682601222,
+                31281665035831,
+                25159465092952,
+                39629621433833,
+                20867545401217,
+                44724018897654,
+                143180405197877,
+                158120059500595,
+                2104218492969
+              ],
+              "s_per_target": 0.02096619440129388,
+              "s_walk_per_target": 0.020946975889259485,
+              "setup_gae": 1100.0,
+              "target_seed": 13436768226442521704,
+              "walk_seed": 8966709999415781436,
+              "wall_ms": 11277.731471
+            },
+            {
+              "all_verified": true,
+              "batch": 1,
+              "counters": {
+                "canonicalisations_uncharged": 8760489,
+                "cycle_escape_doublings": 4,
+                "cycles_length_2": 0,
+                "cycles_length_4": 4,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 2107,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 4552,
+                "setup_additions": 369,
+                "setup_doublings": 728,
+                "solved_on_an_earlier_trail": 29,
+                "solved_on_own_trail": 3,
+                "start_additions": 2107,
+                "target_setup_additions": 1111,
+                "target_setup_doublings": 1469,
+                "targets": 32,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 2166,
+                "walk_operations": 8758350,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 8766300.0,
+              "per_target": [
+                {
+                  "distinguished_points": 333,
+                  "gae": 1325622.0,
+                  "group_ops": {
+                    "adds": 1325528,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 134941228792518,
+                  "recovered": 134941228792518,
+                  "solved_by": "own",
+                  "steps": 1324471,
+                  "verified": true,
+                  "walks": 333,
+                  "wall_ms": 1754.973998
+                },
+                {
+                  "distinguished_points": 115,
+                  "gae": 442595.0,
+                  "group_ops": {
+                    "adds": 442504,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 53460315303801,
+                  "recovered": 53460315303801,
+                  "solved_by": "own",
+                  "steps": 442114,
+                  "verified": true,
+                  "walks": 115,
+                  "wall_ms": 606.294679
+                },
+                {
+                  "distinguished_points": 4,
+                  "gae": 8632.0,
+                  "group_ops": {
+                    "adds": 8540,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 111022853671370,
+                  "recovered": 111022853671370,
+                  "solved_by": "earlier",
+                  "steps": 8475,
+                  "verified": true,
+                  "walks": 4,
+                  "wall_ms": 11.689932
+                },
+                {
+                  "distinguished_points": 21,
+                  "gae": 67503.0,
+                  "group_ops": {
+                    "adds": 67412,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 62666969066665,
+                  "recovered": 62666969066665,
+                  "solved_by": "earlier",
+                  "steps": 67307,
+                  "verified": true,
+                  "walks": 21,
+                  "wall_ms": 90.348228
+                },
+                {
+                  "distinguished_points": 81,
+                  "gae": 412784.0,
+                  "group_ops": {
+                    "adds": 412691,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 151270157863753,
+                  "recovered": 151270157863753,
+                  "solved_by": "own",
+                  "steps": 412336,
+                  "verified": true,
+                  "walks": 81,
+                  "wall_ms": 547.988601
+                },
+                {
+                  "distinguished_points": 78,
+                  "gae": 347454.0,
+                  "group_ops": {
+                    "adds": 347362,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 114080860340624,
+                  "recovered": 114080860340624,
+                  "solved_by": "earlier",
+                  "steps": 347058,
+                  "verified": true,
+                  "walks": 78,
+                  "wall_ms": 453.402387
+                },
+                {
+                  "distinguished_points": 76,
+                  "gae": 298802.0,
+                  "group_ops": {
+                    "adds": 298710,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 114881497064188,
+                  "recovered": 114881497064188,
+                  "solved_by": "earlier",
+                  "steps": 298424,
+                  "verified": true,
+                  "walks": 76,
+                  "wall_ms": 378.081236
+                },
+                {
+                  "distinguished_points": 11,
+                  "gae": 33859.0,
+                  "group_ops": {
+                    "adds": 33767,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 151886653477996,
+                  "recovered": 151886653477996,
+                  "solved_by": "earlier",
+                  "steps": 33679,
+                  "verified": true,
+                  "walks": 11,
+                  "wall_ms": 49.855989
+                },
+                {
+                  "distinguished_points": 305,
+                  "gae": 1239812.0,
+                  "group_ops": {
+                    "adds": 1239720,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 66252549189409,
+                  "recovered": 66252549189409,
+                  "solved_by": "earlier",
+                  "steps": 1238689,
+                  "verified": true,
+                  "walks": 305,
+                  "wall_ms": 1632.863825
+                },
+                {
+                  "distinguished_points": 11,
+                  "gae": 48961.0,
+                  "group_ops": {
+                    "adds": 48871,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 36392908753799,
+                  "recovered": 36392908753799,
+                  "solved_by": "earlier",
+                  "steps": 48783,
+                  "verified": true,
+                  "walks": 11,
+                  "wall_ms": 61.399903
+                },
+                {
+                  "distinguished_points": 46,
+                  "gae": 196881.0,
+                  "group_ops": {
+                    "adds": 196789,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 140259382047869,
+                  "recovered": 140259382047869,
+                  "solved_by": "earlier",
+                  "steps": 196576,
+                  "verified": true,
+                  "walks": 46,
+                  "wall_ms": 251.341299
+                },
+                {
+                  "distinguished_points": 92,
+                  "gae": 424869.0,
+                  "group_ops": {
+                    "adds": 424777,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 72194931553857,
+                  "recovered": 72194931553857,
+                  "solved_by": "earlier",
+                  "steps": 424413,
+                  "verified": true,
+                  "walks": 92,
+                  "wall_ms": 539.020313
+                },
+                {
+                  "distinguished_points": 36,
+                  "gae": 141903.0,
+                  "group_ops": {
+                    "adds": 141815,
+                    "doubles": 88,
+                    "scalar_mults": 2
+                  },
+                  "planted": 4665661930107,
+                  "recovered": 4665661930107,
+                  "solved_by": "earlier",
+                  "steps": 141668,
+                  "verified": true,
+                  "walks": 36,
+                  "wall_ms": 183.064334
+                },
+                {
+                  "distinguished_points": 146,
+                  "gae": 613435.0,
+                  "group_ops": {
+                    "adds": 613343,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 89001380630045,
+                  "recovered": 89001380630045,
+                  "solved_by": "earlier",
+                  "steps": 612816,
+                  "verified": true,
+                  "walks": 146,
+                  "wall_ms": 793.200437
+                },
+                {
+                  "distinguished_points": 52,
+                  "gae": 216703.0,
+                  "group_ops": {
+                    "adds": 216609,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 76831731095701,
+                  "recovered": 76831731095701,
+                  "solved_by": "earlier",
+                  "steps": 216391,
+                  "verified": true,
+                  "walks": 52,
+                  "wall_ms": 278.997063
+                },
+                {
+                  "distinguished_points": 13,
+                  "gae": 46207.0,
+                  "group_ops": {
+                    "adds": 46115,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 99582192755302,
+                  "recovered": 99582192755302,
+                  "solved_by": "earlier",
+                  "steps": 46028,
+                  "verified": true,
+                  "walks": 13,
+                  "wall_ms": 59.746037
+                },
+                {
+                  "distinguished_points": 24,
+                  "gae": 95320.0,
+                  "group_ops": {
+                    "adds": 95229,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 120634257981447,
+                  "recovered": 120634257981447,
+                  "solved_by": "earlier",
+                  "steps": 95099,
+                  "verified": true,
+                  "walks": 24,
+                  "wall_ms": 121.609762
+                },
+                {
+                  "distinguished_points": 17,
+                  "gae": 63638.0,
+                  "group_ops": {
+                    "adds": 63545,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 112814789795288,
+                  "recovered": 112814789795288,
+                  "solved_by": "earlier",
+                  "steps": 63432,
+                  "verified": true,
+                  "walks": 17,
+                  "wall_ms": 82.566879
+                },
+                {
+                  "distinguished_points": 68,
+                  "gae": 309637.0,
+                  "group_ops": {
+                    "adds": 309546,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 23869824826519,
+                  "recovered": 23869824826519,
+                  "solved_by": "earlier",
+                  "steps": 309256,
+                  "verified": true,
+                  "walks": 68,
+                  "wall_ms": 395.679526
+                },
+                {
+                  "distinguished_points": 55,
+                  "gae": 213683.0,
+                  "group_ops": {
+                    "adds": 213591,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 153622661008563,
+                  "recovered": 153622661008563,
+                  "solved_by": "earlier",
+                  "steps": 213357,
+                  "verified": true,
+                  "walks": 55,
+                  "wall_ms": 281.793506
+                },
+                {
+                  "distinguished_points": 3,
+                  "gae": 1857.0,
+                  "group_ops": {
+                    "adds": 1766,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 44966735035227,
+                  "recovered": 44966735035227,
+                  "solved_by": "earlier",
+                  "steps": 1706,
+                  "verified": true,
+                  "walks": 3,
+                  "wall_ms": 2.373236
+                },
+                {
+                  "distinguished_points": 91,
+                  "gae": 344746.0,
+                  "group_ops": {
+                    "adds": 344655,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 30232613889548,
+                  "recovered": 30232613889548,
+                  "solved_by": "earlier",
+                  "steps": 344342,
+                  "verified": true,
+                  "walks": 91,
+                  "wall_ms": 446.265602
+                },
+                {
+                  "distinguished_points": 172,
+                  "gae": 643002.0,
+                  "group_ops": {
+                    "adds": 642911,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 97110340818976,
+                  "recovered": 97110340818976,
+                  "solved_by": "earlier",
+                  "steps": 642345,
+                  "verified": true,
+                  "walks": 172,
+                  "wall_ms": 835.243719
+                },
+                {
+                  "distinguished_points": 19,
+                  "gae": 64795.0,
+                  "group_ops": {
+                    "adds": 64702,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 96861206637063,
+                  "recovered": 96861206637063,
+                  "solved_by": "earlier",
+                  "steps": 64601,
+                  "verified": true,
+                  "walks": 19,
+                  "wall_ms": 85.338049
+                },
+                {
+                  "distinguished_points": 46,
+                  "gae": 184161.0,
+                  "group_ops": {
+                    "adds": 184069,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 160084687437713,
+                  "recovered": 160084687437713,
+                  "solved_by": "earlier",
+                  "steps": 183865,
+                  "verified": true,
+                  "walks": 46,
+                  "wall_ms": 231.459841
+                },
+                {
+                  "distinguished_points": 99,
+                  "gae": 395841.0,
+                  "group_ops": {
+                    "adds": 395751,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 67880660528932,
+                  "recovered": 67880660528932,
+                  "solved_by": "earlier",
+                  "steps": 395387,
+                  "verified": true,
+                  "walks": 99,
+                  "wall_ms": 569.05796
+                },
+                {
+                  "distinguished_points": 2,
+                  "gae": 6125.0,
+                  "group_ops": {
+                    "adds": 6033,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 56810379348021,
+                  "recovered": 56810379348021,
+                  "solved_by": "earlier",
+                  "steps": 5970,
+                  "verified": true,
+                  "walks": 2,
+                  "wall_ms": 8.407157
+                },
+                {
+                  "distinguished_points": 5,
+                  "gae": 19393.0,
+                  "group_ops": {
+                    "adds": 19305,
+                    "doubles": 88,
+                    "scalar_mults": 2
+                  },
+                  "planted": 23847543977803,
+                  "recovered": 23847543977803,
+                  "solved_by": "earlier",
+                  "steps": 19237,
+                  "verified": true,
+                  "walks": 5,
+                  "wall_ms": 26.321096
+                },
+                {
+                  "distinguished_points": 72,
+                  "gae": 352024.0,
+                  "group_ops": {
+                    "adds": 351934,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 27688003689463,
+                  "recovered": 27688003689463,
+                  "solved_by": "earlier",
+                  "steps": 351616,
+                  "verified": true,
+                  "walks": 72,
+                  "wall_ms": 462.743941
+                },
+                {
+                  "distinguished_points": 7,
+                  "gae": 27320.0,
+                  "group_ops": {
+                    "adds": 27228,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 107949873585322,
+                  "recovered": 107949873585322,
+                  "solved_by": "earlier",
+                  "steps": 27154,
+                  "verified": true,
+                  "walks": 7,
+                  "wall_ms": 34.295564
+                },
+                {
+                  "distinguished_points": 18,
+                  "gae": 104512.0,
+                  "group_ops": {
+                    "adds": 104420,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 126144417215636,
+                  "recovered": 126144417215636,
+                  "solved_by": "earlier",
+                  "steps": 104287,
+                  "verified": true,
+                  "walks": 18,
+                  "wall_ms": 139.314342
+                },
+                {
+                  "distinguished_points": 21,
+                  "gae": 73127.0,
+                  "group_ops": {
+                    "adds": 73035,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 81512769451477,
+                  "recovered": 81512769451477,
+                  "solved_by": "earlier",
+                  "steps": 72912,
+                  "verified": true,
+                  "walks": 21,
+                  "wall_ms": 101.335122
+                }
+              ],
+              "planted": [
+                134941228792518,
+                53460315303801,
+                111022853671370,
+                62666969066665,
+                151270157863753,
+                114080860340624,
+                114881497064188,
+                151886653477996,
+                66252549189409,
+                36392908753799,
+                140259382047869,
+                72194931553857,
+                4665661930107,
+                89001380630045,
+                76831731095701,
+                99582192755302,
+                120634257981447,
+                112814789795288,
+                23869824826519,
+                153622661008563,
+                44966735035227,
+                30232613889548,
+                97110340818976,
+                96861206637063,
+                160084687437713,
+                67880660528932,
+                56810379348021,
+                23847543977803,
+                27688003689463,
+                107949873585322,
+                126144417215636,
+                81512769451477
+              ],
+              "s_per_target": 0.021464548610923777,
+              "s_walk_per_target": 0.021445082797358548,
+              "setup_gae": 1097.0,
+              "target_seed": 14271022948624893915,
+              "walk_seed": 9612127674558369910,
+              "wall_ms": 11517.39818
+            },
+            {
+              "all_verified": true,
+              "batch": 2,
+              "counters": {
+                "canonicalisations_uncharged": 8937474,
+                "cycle_escape_doublings": 1,
+                "cycles_length_2": 0,
+                "cycles_length_4": 1,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 2155,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 4485,
+                "setup_additions": 371,
+                "setup_doublings": 727,
+                "solved_on_an_earlier_trail": 30,
+                "solved_on_own_trail": 2,
+                "start_additions": 2155,
+                "target_setup_additions": 1136,
+                "target_setup_doublings": 1472,
+                "targets": 32,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 2140,
+                "walk_operations": 8935287,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 8943288.0,
+              "per_target": [
+                {
+                  "distinguished_points": 248,
+                  "gae": 1001431.0,
+                  "group_ops": {
+                    "adds": 1001340,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 121860085257233,
+                  "recovered": 121860085257233,
+                  "solved_by": "own",
+                  "steps": 1000551,
+                  "verified": true,
+                  "walks": 248,
+                  "wall_ms": 1381.277307
+                },
+                {
+                  "distinguished_points": 293,
+                  "gae": 1258783.0,
+                  "group_ops": {
+                    "adds": 1258690,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 126647467214321,
+                  "recovered": 126647467214321,
+                  "solved_by": "earlier",
+                  "steps": 1257696,
+                  "verified": true,
+                  "walks": 293,
+                  "wall_ms": 1718.347801
+                },
+                {
+                  "distinguished_points": 38,
+                  "gae": 175932.0,
+                  "group_ops": {
+                    "adds": 175843,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 13247740265899,
+                  "recovered": 13247740265899,
+                  "solved_by": "earlier",
+                  "steps": 175658,
+                  "verified": true,
+                  "walks": 38,
+                  "wall_ms": 278.664327
+                },
+                {
+                  "distinguished_points": 2,
+                  "gae": 13960.0,
+                  "group_ops": {
+                    "adds": 13867,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 123357254704844,
+                  "recovered": 123357254704844,
+                  "solved_by": "earlier",
+                  "steps": 13795,
+                  "verified": true,
+                  "walks": 2,
+                  "wall_ms": 18.326436
+                },
+                {
+                  "distinguished_points": 221,
+                  "gae": 847359.0,
+                  "group_ops": {
+                    "adds": 847266,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 106800576404260,
+                  "recovered": 106800576404260,
+                  "solved_by": "own",
+                  "steps": 846582,
+                  "verified": true,
+                  "walks": 221,
+                  "wall_ms": 1093.318716
+                },
+                {
+                  "distinguished_points": 43,
+                  "gae": 183873.0,
+                  "group_ops": {
+                    "adds": 183781,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 65396964858218,
+                  "recovered": 65396964858218,
+                  "solved_by": "earlier",
+                  "steps": 183598,
+                  "verified": true,
+                  "walks": 43,
+                  "wall_ms": 238.959878
+                },
+                {
+                  "distinguished_points": 193,
+                  "gae": 733409.0,
+                  "group_ops": {
+                    "adds": 733322,
+                    "doubles": 87,
+                    "scalar_mults": 2
+                  },
+                  "planted": 17037926766156,
+                  "recovered": 17037926766156,
+                  "solved_by": "earlier",
+                  "steps": 732673,
+                  "verified": true,
+                  "walks": 193,
+                  "wall_ms": 934.951691
+                },
+                {
+                  "distinguished_points": 110,
+                  "gae": 431569.0,
+                  "group_ops": {
+                    "adds": 431475,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 153532740225096,
+                  "recovered": 153532740225096,
+                  "solved_by": "earlier",
+                  "steps": 431096,
+                  "verified": true,
+                  "walks": 110,
+                  "wall_ms": 552.734228
+                },
+                {
+                  "distinguished_points": 117,
+                  "gae": 545481.0,
+                  "group_ops": {
+                    "adds": 545390,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 108754934602938,
+                  "recovered": 108754934602938,
+                  "solved_by": "earlier",
+                  "steps": 544937,
+                  "verified": true,
+                  "walks": 117,
+                  "wall_ms": 726.066045
+                },
+                {
+                  "distinguished_points": 23,
+                  "gae": 108753.0,
+                  "group_ops": {
+                    "adds": 108661,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 89394845378802,
+                  "recovered": 89394845378802,
+                  "solved_by": "earlier",
+                  "steps": 108512,
+                  "verified": true,
+                  "walks": 23,
+                  "wall_ms": 143.000738
+                },
+                {
+                  "distinguished_points": 55,
+                  "gae": 200741.0,
+                  "group_ops": {
+                    "adds": 200650,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 42162935946755,
+                  "recovered": 42162935946755,
+                  "solved_by": "earlier",
+                  "steps": 200439,
+                  "verified": true,
+                  "walks": 55,
+                  "wall_ms": 257.927049
+                },
+                {
+                  "distinguished_points": 31,
+                  "gae": 141226.0,
+                  "group_ops": {
+                    "adds": 141138,
+                    "doubles": 88,
+                    "scalar_mults": 2
+                  },
+                  "planted": 7707123258259,
+                  "recovered": 7707123258259,
+                  "solved_by": "earlier",
+                  "steps": 140986,
+                  "verified": true,
+                  "walks": 31,
+                  "wall_ms": 187.674373
+                },
+                {
+                  "distinguished_points": 28,
+                  "gae": 75839.0,
+                  "group_ops": {
+                    "adds": 75747,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 71359085786723,
+                  "recovered": 71359085786723,
+                  "solved_by": "earlier",
+                  "steps": 75633,
+                  "verified": true,
+                  "walks": 28,
+                  "wall_ms": 95.97903
+                },
+                {
+                  "distinguished_points": 6,
+                  "gae": 27208.0,
+                  "group_ops": {
+                    "adds": 27115,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 158858405561383,
+                  "recovered": 158858405561383,
+                  "solved_by": "earlier",
+                  "steps": 27047,
+                  "verified": true,
+                  "walks": 6,
+                  "wall_ms": 34.383919
+                },
+                {
+                  "distinguished_points": 110,
+                  "gae": 428767.0,
+                  "group_ops": {
+                    "adds": 428674,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 112221642582032,
+                  "recovered": 112221642582032,
+                  "solved_by": "earlier",
+                  "steps": 428302,
+                  "verified": true,
+                  "walks": 110,
+                  "wall_ms": 577.382302
+                },
+                {
+                  "distinguished_points": 24,
+                  "gae": 83515.0,
+                  "group_ops": {
+                    "adds": 83424,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 58926691847054,
+                  "recovered": 58926691847054,
+                  "solved_by": "earlier",
+                  "steps": 83303,
+                  "verified": true,
+                  "walks": 24,
+                  "wall_ms": 107.290765
+                },
+                {
+                  "distinguished_points": 38,
+                  "gae": 193290.0,
+                  "group_ops": {
+                    "adds": 193198,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 123614632797266,
+                  "recovered": 123614632797266,
+                  "solved_by": "earlier",
+                  "steps": 193020,
+                  "verified": true,
+                  "walks": 38,
+                  "wall_ms": 256.799273
+                },
+                {
+                  "distinguished_points": 69,
+                  "gae": 315681.0,
+                  "group_ops": {
+                    "adds": 315589,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 97249080805563,
+                  "recovered": 97249080805563,
+                  "solved_by": "earlier",
+                  "steps": 315298,
+                  "verified": true,
+                  "walks": 69,
+                  "wall_ms": 394.304924
+                },
+                {
+                  "distinguished_points": 18,
+                  "gae": 71358.0,
+                  "group_ops": {
+                    "adds": 71268,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 23856404024213,
+                  "recovered": 23856404024213,
+                  "solved_by": "earlier",
+                  "steps": 71157,
+                  "verified": true,
+                  "walks": 18,
+                  "wall_ms": 86.709385
+                },
+                {
+                  "distinguished_points": 48,
+                  "gae": 175779.0,
+                  "group_ops": {
+                    "adds": 175686,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 116073190917047,
+                  "recovered": 116073190917047,
+                  "solved_by": "earlier",
+                  "steps": 175501,
+                  "verified": true,
+                  "walks": 48,
+                  "wall_ms": 217.383353
+                },
+                {
+                  "distinguished_points": 22,
+                  "gae": 99583.0,
+                  "group_ops": {
+                    "adds": 99491,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 131798902400751,
+                  "recovered": 131798902400751,
+                  "solved_by": "earlier",
+                  "steps": 99349,
+                  "verified": true,
+                  "walks": 22,
+                  "wall_ms": 124.689126
+                },
+                {
+                  "distinguished_points": 75,
+                  "gae": 309257.0,
+                  "group_ops": {
+                    "adds": 309169,
+                    "doubles": 88,
+                    "scalar_mults": 2
+                  },
+                  "planted": 59352645689893,
+                  "recovered": 59352645689893,
+                  "solved_by": "earlier",
+                  "steps": 308886,
+                  "verified": true,
+                  "walks": 75,
+                  "wall_ms": 377.33323
+                },
+                {
+                  "distinguished_points": 47,
+                  "gae": 199855.0,
+                  "group_ops": {
+                    "adds": 199764,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 35342728873181,
+                  "recovered": 35342728873181,
+                  "solved_by": "earlier",
+                  "steps": 199565,
+                  "verified": true,
+                  "walks": 47,
+                  "wall_ms": 261.92422
+                },
+                {
+                  "distinguished_points": 2,
+                  "gae": 3861.0,
+                  "group_ops": {
+                    "adds": 3767,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 153486845018070,
+                  "recovered": 153486845018070,
+                  "solved_by": "earlier",
+                  "steps": 3701,
+                  "verified": true,
+                  "walks": 2,
+                  "wall_ms": 5.04634
+                },
+                {
+                  "distinguished_points": 35,
+                  "gae": 138234.0,
+                  "group_ops": {
+                    "adds": 138141,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 142544773219054,
+                  "recovered": 142544773219054,
+                  "solved_by": "earlier",
+                  "steps": 137992,
+                  "verified": true,
+                  "walks": 35,
+                  "wall_ms": 174.636126
+                },
+                {
+                  "distinguished_points": 12,
+                  "gae": 65538.0,
+                  "group_ops": {
+                    "adds": 65447,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 91451053959974,
+                  "recovered": 91451053959974,
+                  "solved_by": "earlier",
+                  "steps": 65340,
+                  "verified": true,
+                  "walks": 12,
+                  "wall_ms": 84.366227
+                },
+                {
+                  "distinguished_points": 37,
+                  "gae": 134347.0,
+                  "group_ops": {
+                    "adds": 134258,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 26289925948728,
+                  "recovered": 26289925948728,
+                  "solved_by": "earlier",
+                  "steps": 134104,
+                  "verified": true,
+                  "walks": 37,
+                  "wall_ms": 183.805241
+                },
+                {
+                  "distinguished_points": 114,
+                  "gae": 482612.0,
+                  "group_ops": {
+                    "adds": 482520,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 94417494889969,
+                  "recovered": 94417494889969,
+                  "solved_by": "earlier",
+                  "steps": 482090,
+                  "verified": true,
+                  "walks": 114,
+                  "wall_ms": 661.494341
+                },
+                {
+                  "distinguished_points": 43,
+                  "gae": 170272.0,
+                  "group_ops": {
+                    "adds": 170180,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 53030040603149,
+                  "recovered": 53030040603149,
+                  "solved_by": "earlier",
+                  "steps": 169990,
+                  "verified": true,
+                  "walks": 43,
+                  "wall_ms": 220.111453
+                },
+                {
+                  "distinguished_points": 13,
+                  "gae": 29037.0,
+                  "group_ops": {
+                    "adds": 28951,
+                    "doubles": 86,
+                    "scalar_mults": 2
+                  },
+                  "planted": 1491136333582,
+                  "recovered": 1491136333582,
+                  "solved_by": "earlier",
+                  "steps": 28863,
+                  "verified": true,
+                  "walks": 13,
+                  "wall_ms": 36.719577
+                },
+                {
+                  "distinguished_points": 32,
+                  "gae": 160663.0,
+                  "group_ops": {
+                    "adds": 160569,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 144125678249056,
+                  "recovered": 144125678249056,
+                  "solved_by": "earlier",
+                  "steps": 160390,
+                  "verified": true,
+                  "walks": 32,
+                  "wall_ms": 203.299479
+                },
+                {
+                  "distinguished_points": 40,
+                  "gae": 134977.0,
+                  "group_ops": {
+                    "adds": 134884,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 162728536200724,
+                  "recovered": 162728536200724,
+                  "solved_by": "earlier",
+                  "steps": 134747,
+                  "verified": true,
+                  "walks": 40,
+                  "wall_ms": 170.199749
+                }
+              ],
+              "planted": [
+                121860085257233,
+                126647467214321,
+                13247740265899,
+                123357254704844,
+                106800576404260,
+                65396964858218,
+                17037926766156,
+                153532740225096,
+                108754934602938,
+                89394845378802,
+                42162935946755,
+                7707123258259,
+                71359085786723,
+                158858405561383,
+                112221642582032,
+                58926691847054,
+                123614632797266,
+                97249080805563,
+                23856404024213,
+                116073190917047,
+                131798902400751,
+                59352645689893,
+                35342728873181,
+                153486845018070,
+                142544773219054,
+                91451053959974,
+                26289925948728,
+                94417494889969,
+                53030040603149,
+                1491136333582,
+                144125678249056,
+                162728536200724
+              ],
+              "s_per_target": 0.021897909040015887,
+              "s_walk_per_target": 0.02187831835142024,
+              "setup_gae": 1098.0,
+              "target_seed": 10631819213391538726,
+              "walk_seed": 5972923934051710795,
+              "wall_ms": 11806.430723
+            },
+            {
+              "all_verified": true,
+              "batch": 3,
+              "counters": {
+                "canonicalisations_uncharged": 9124722,
+                "cycle_escape_doublings": 2,
+                "cycles_length_2": 0,
+                "cycles_length_4": 2,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 2177,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 4630,
+                "setup_additions": 356,
+                "setup_doublings": 724,
+                "solved_on_an_earlier_trail": 28,
+                "solved_on_own_trail": 4,
+                "start_additions": 2177,
+                "target_setup_additions": 1117,
+                "target_setup_doublings": 1474,
+                "targets": 32,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 2194,
+                "walk_operations": 9122513,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 9130555.0,
+              "per_target": [
+                {
+                  "distinguished_points": 105,
+                  "gae": 486040.0,
+                  "group_ops": {
+                    "adds": 485949,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 125616078356262,
+                  "recovered": 125616078356262,
+                  "solved_by": "own",
+                  "steps": 485540,
+                  "verified": true,
+                  "walks": 105,
+                  "wall_ms": 624.679166
+                },
+                {
+                  "distinguished_points": 5,
+                  "gae": 23881.0,
+                  "group_ops": {
+                    "adds": 23790,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 63090632426518,
+                  "recovered": 63090632426518,
+                  "solved_by": "earlier",
+                  "steps": 23715,
+                  "verified": true,
+                  "walks": 5,
+                  "wall_ms": 31.132274
+                },
+                {
+                  "distinguished_points": 442,
+                  "gae": 1860662.0,
+                  "group_ops": {
+                    "adds": 1860569,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 153489649180309,
+                  "recovered": 153489649180309,
+                  "solved_by": "own",
+                  "steps": 1859147,
+                  "verified": true,
+                  "walks": 442,
+                  "wall_ms": 2430.894074
+                },
+                {
+                  "distinguished_points": 10,
+                  "gae": 37441.0,
+                  "group_ops": {
+                    "adds": 37349,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 135855862325953,
+                  "recovered": 135855862325953,
+                  "solved_by": "earlier",
+                  "steps": 37268,
+                  "verified": true,
+                  "walks": 10,
+                  "wall_ms": 49.642305
+                },
+                {
+                  "distinguished_points": 219,
+                  "gae": 901963.0,
+                  "group_ops": {
+                    "adds": 901870,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 96937571202395,
+                  "recovered": 96937571202395,
+                  "solved_by": "earlier",
+                  "steps": 901133,
+                  "verified": true,
+                  "walks": 219,
+                  "wall_ms": 1182.127471
+                },
+                {
+                  "distinguished_points": 58,
+                  "gae": 243906.0,
+                  "group_ops": {
+                    "adds": 243815,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 114997541274412,
+                  "recovered": 114997541274412,
+                  "solved_by": "own",
+                  "steps": 243578,
+                  "verified": true,
+                  "walks": 58,
+                  "wall_ms": 318.306285
+                },
+                {
+                  "distinguished_points": 40,
+                  "gae": 161020.0,
+                  "group_ops": {
+                    "adds": 160928,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 122519143788963,
+                  "recovered": 122519143788963,
+                  "solved_by": "earlier",
+                  "steps": 160751,
+                  "verified": true,
+                  "walks": 40,
+                  "wall_ms": 219.161164
+                },
+                {
+                  "distinguished_points": 4,
+                  "gae": 12415.0,
+                  "group_ops": {
+                    "adds": 12324,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 49934208935706,
+                  "recovered": 49934208935706,
+                  "solved_by": "earlier",
+                  "steps": 12256,
+                  "verified": true,
+                  "walks": 4,
+                  "wall_ms": 16.549897
+                },
+                {
+                  "distinguished_points": 41,
+                  "gae": 210397.0,
+                  "group_ops": {
+                    "adds": 210303,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 156107980672212,
+                  "recovered": 156107980672212,
+                  "solved_by": "earlier",
+                  "steps": 210109,
+                  "verified": true,
+                  "walks": 41,
+                  "wall_ms": 293.628639
+                },
+                {
+                  "distinguished_points": 103,
+                  "gae": 415331.0,
+                  "group_ops": {
+                    "adds": 415238,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 132539672364445,
+                  "recovered": 132539672364445,
+                  "solved_by": "earlier",
+                  "steps": 414885,
+                  "verified": true,
+                  "walks": 103,
+                  "wall_ms": 587.757307
+                },
+                {
+                  "distinguished_points": 72,
+                  "gae": 275234.0,
+                  "group_ops": {
+                    "adds": 275146,
+                    "doubles": 88,
+                    "scalar_mults": 2
+                  },
+                  "planted": 7213331643748,
+                  "recovered": 7213331643748,
+                  "solved_by": "earlier",
+                  "steps": 274885,
+                  "verified": true,
+                  "walks": 72,
+                  "wall_ms": 351.747757
+                },
+                {
+                  "distinguished_points": 21,
+                  "gae": 82467.0,
+                  "group_ops": {
+                    "adds": 82375,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 47171000505085,
+                  "recovered": 47171000505085,
+                  "solved_by": "earlier",
+                  "steps": 82249,
+                  "verified": true,
+                  "walks": 21,
+                  "wall_ms": 107.533283
+                },
+                {
+                  "distinguished_points": 3,
+                  "gae": 16935.0,
+                  "group_ops": {
+                    "adds": 16842,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 103459260746071,
+                  "recovered": 103459260746071,
+                  "solved_by": "earlier",
+                  "steps": 16770,
+                  "verified": true,
+                  "walks": 3,
+                  "wall_ms": 21.483483
+                },
+                {
+                  "distinguished_points": 50,
+                  "gae": 183211.0,
+                  "group_ops": {
+                    "adds": 183119,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 160413096728669,
+                  "recovered": 160413096728669,
+                  "solved_by": "earlier",
+                  "steps": 182901,
+                  "verified": true,
+                  "walks": 50,
+                  "wall_ms": 238.700944
+                },
+                {
+                  "distinguished_points": 108,
+                  "gae": 501817.0,
+                  "group_ops": {
+                    "adds": 501729,
+                    "doubles": 88,
+                    "scalar_mults": 2
+                  },
+                  "planted": 5996327190474,
+                  "recovered": 5996327190474,
+                  "solved_by": "earlier",
+                  "steps": 501273,
+                  "verified": true,
+                  "walks": 108,
+                  "wall_ms": 638.808633
+                },
+                {
+                  "distinguished_points": 43,
+                  "gae": 226125.0,
+                  "group_ops": {
+                    "adds": 226035,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 49259741018018,
+                  "recovered": 49259741018018,
+                  "solved_by": "earlier",
+                  "steps": 225830,
+                  "verified": true,
+                  "walks": 43,
+                  "wall_ms": 287.917576
+                },
+                {
+                  "distinguished_points": 125,
+                  "gae": 502667.0,
+                  "group_ops": {
+                    "adds": 502574,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 160865487187293,
+                  "recovered": 160865487187293,
+                  "solved_by": "earlier",
+                  "steps": 502134,
+                  "verified": true,
+                  "walks": 125,
+                  "wall_ms": 658.070073
+                },
+                {
+                  "distinguished_points": 8,
+                  "gae": 51018.0,
+                  "group_ops": {
+                    "adds": 50925,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 162024242237507,
+                  "recovered": 162024242237507,
+                  "solved_by": "earlier",
+                  "steps": 50829,
+                  "verified": true,
+                  "walks": 8,
+                  "wall_ms": 70.739694
+                },
+                {
+                  "distinguished_points": 33,
+                  "gae": 135254.0,
+                  "group_ops": {
+                    "adds": 135161,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 94258486408439,
+                  "recovered": 94258486408439,
+                  "solved_by": "earlier",
+                  "steps": 134986,
+                  "verified": true,
+                  "walks": 33,
+                  "wall_ms": 187.944573
+                },
+                {
+                  "distinguished_points": 56,
+                  "gae": 230278.0,
+                  "group_ops": {
+                    "adds": 230187,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 21539733030666,
+                  "recovered": 21539733030666,
+                  "solved_by": "earlier",
+                  "steps": 229977,
+                  "verified": true,
+                  "walks": 56,
+                  "wall_ms": 312.683904
+                },
+                {
+                  "distinguished_points": 5,
+                  "gae": 33756.0,
+                  "group_ops": {
+                    "adds": 33664,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 50394457182861,
+                  "recovered": 50394457182861,
+                  "solved_by": "earlier",
+                  "steps": 33590,
+                  "verified": true,
+                  "walks": 5,
+                  "wall_ms": 44.438135
+                },
+                {
+                  "distinguished_points": 110,
+                  "gae": 384549.0,
+                  "group_ops": {
+                    "adds": 384457,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 109243533566364,
+                  "recovered": 109243533566364,
+                  "solved_by": "earlier",
+                  "steps": 384108,
+                  "verified": true,
+                  "walks": 110,
+                  "wall_ms": 622.146842
+                },
+                {
+                  "distinguished_points": 95,
+                  "gae": 367948.0,
+                  "group_ops": {
+                    "adds": 367857,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 69165287136665,
+                  "recovered": 69165287136665,
+                  "solved_by": "earlier",
+                  "steps": 367488,
+                  "verified": true,
+                  "walks": 95,
+                  "wall_ms": 494.273367
+                },
+                {
+                  "distinguished_points": 14,
+                  "gae": 58481.0,
+                  "group_ops": {
+                    "adds": 58386,
+                    "doubles": 95,
+                    "scalar_mults": 2
+                  },
+                  "planted": 154079337505054,
+                  "recovered": 154079337505054,
+                  "solved_by": "earlier",
+                  "steps": 58286,
+                  "verified": true,
+                  "walks": 14,
+                  "wall_ms": 75.261643
+                },
+                {
+                  "distinguished_points": 64,
+                  "gae": 293678.0,
+                  "group_ops": {
+                    "adds": 293589,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 30600247716674,
+                  "recovered": 30600247716674,
+                  "solved_by": "earlier",
+                  "steps": 293332,
+                  "verified": true,
+                  "walks": 64,
+                  "wall_ms": 374.777935
+                },
+                {
+                  "distinguished_points": 146,
+                  "gae": 548376.0,
+                  "group_ops": {
+                    "adds": 548285,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 71777726361215,
+                  "recovered": 71777726361215,
+                  "solved_by": "own",
+                  "steps": 547817,
+                  "verified": true,
+                  "walks": 146,
+                  "wall_ms": 710.767187
+                },
+                {
+                  "distinguished_points": 110,
+                  "gae": 421311.0,
+                  "group_ops": {
+                    "adds": 421220,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 19850578654302,
+                  "recovered": 19850578654302,
+                  "solved_by": "earlier",
+                  "steps": 420852,
+                  "verified": true,
+                  "walks": 110,
+                  "wall_ms": 568.734387
+                },
+                {
+                  "distinguished_points": 29,
+                  "gae": 96527.0,
+                  "group_ops": {
+                    "adds": 96435,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 126960667023806,
+                  "recovered": 126960667023806,
+                  "solved_by": "earlier",
+                  "steps": 96296,
+                  "verified": true,
+                  "walks": 29,
+                  "wall_ms": 151.223613
+                },
+                {
+                  "distinguished_points": 12,
+                  "gae": 59098.0,
+                  "group_ops": {
+                    "adds": 59005,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 128824879929724,
+                  "recovered": 128824879929724,
+                  "solved_by": "earlier",
+                  "steps": 58909,
+                  "verified": true,
+                  "walks": 12,
+                  "wall_ms": 76.867946
+                },
+                {
+                  "distinguished_points": 53,
+                  "gae": 234893.0,
+                  "group_ops": {
+                    "adds": 234802,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 82095779836502,
+                  "recovered": 82095779836502,
+                  "solved_by": "earlier",
+                  "steps": 234550,
+                  "verified": true,
+                  "walks": 53,
+                  "wall_ms": 304.238785
+                },
+                {
+                  "distinguished_points": 19,
+                  "gae": 53567.0,
+                  "group_ops": {
+                    "adds": 53475,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 138066362325744,
+                  "recovered": 138066362325744,
+                  "solved_by": "earlier",
+                  "steps": 53364,
+                  "verified": true,
+                  "walks": 19,
+                  "wall_ms": 70.926403
+                },
+                {
+                  "distinguished_points": 6,
+                  "gae": 19229.0,
+                  "group_ops": {
+                    "adds": 19138,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 84048205188894,
+                  "recovered": 84048205188894,
+                  "solved_by": "earlier",
+                  "steps": 19073,
+                  "verified": true,
+                  "walks": 6,
+                  "wall_ms": 24.933483
+                }
+              ],
+              "planted": [
+                125616078356262,
+                63090632426518,
+                153489649180309,
+                135855862325953,
+                96937571202395,
+                114997541274412,
+                122519143788963,
+                49934208935706,
+                156107980672212,
+                132539672364445,
+                7213331643748,
+                47171000505085,
+                103459260746071,
+                160413096728669,
+                5996327190474,
+                49259741018018,
+                160865487187293,
+                162024242237507,
+                94258486408439,
+                21539733030666,
+                50394457182861,
+                109243533566364,
+                69165287136665,
+                154079337505054,
+                30600247716674,
+                71777726361215,
+                19850578654302,
+                126960667023806,
+                128824879929724,
+                82095779836502,
+                138066362325744,
+                84048205188894
+              ],
+              "s_per_target": 0.022356437909062332,
+              "s_walk_per_target": 0.022336746830736352,
+              "setup_gae": 1080.0,
+              "target_seed": 15221382562099930727,
+              "walk_seed": 1433533765640140931,
+              "wall_ms": 12149.389182
+            },
+            {
+              "all_verified": true,
+              "batch": 4,
+              "counters": {
+                "canonicalisations_uncharged": 8959176,
+                "cycle_escape_doublings": 1,
+                "cycles_length_2": 0,
+                "cycles_length_4": 1,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 2085,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 4544,
+                "setup_additions": 370,
+                "setup_doublings": 726,
+                "solved_on_an_earlier_trail": 31,
+                "solved_on_own_trail": 1,
+                "start_additions": 2085,
+                "target_setup_additions": 1147,
+                "target_setup_doublings": 1475,
+                "targets": 32,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 2166,
+                "walk_operations": 8957059,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 8965028.0,
+              "per_target": [
+                {
+                  "distinguished_points": 601,
+                  "gae": 2616144.0,
+                  "group_ops": {
+                    "adds": 2616053,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 20236729083573,
+                  "recovered": 20236729083573,
+                  "solved_by": "own",
+                  "steps": 2614119,
+                  "verified": true,
+                  "walks": 601,
+                  "wall_ms": 3556.510579
+                },
+                {
+                  "distinguished_points": 139,
+                  "gae": 653278.0,
+                  "group_ops": {
+                    "adds": 653187,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 52865096380854,
+                  "recovered": 52865096380854,
+                  "solved_by": "earlier",
+                  "steps": 652674,
+                  "verified": true,
+                  "walks": 139,
+                  "wall_ms": 928.461673
+                },
+                {
+                  "distinguished_points": 22,
+                  "gae": 103328.0,
+                  "group_ops": {
+                    "adds": 103236,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 119703696528129,
+                  "recovered": 119703696528129,
+                  "solved_by": "earlier",
+                  "steps": 103101,
+                  "verified": true,
+                  "walks": 22,
+                  "wall_ms": 151.675788
+                },
+                {
+                  "distinguished_points": 102,
+                  "gae": 365207.0,
+                  "group_ops": {
+                    "adds": 365114,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 91417779041201,
+                  "recovered": 91417779041201,
+                  "solved_by": "earlier",
+                  "steps": 364768,
+                  "verified": true,
+                  "walks": 102,
+                  "wall_ms": 578.509316
+                },
+                {
+                  "distinguished_points": 66,
+                  "gae": 268608.0,
+                  "group_ops": {
+                    "adds": 268515,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 98170031763504,
+                  "recovered": 98170031763504,
+                  "solved_by": "earlier",
+                  "steps": 268247,
+                  "verified": true,
+                  "walks": 66,
+                  "wall_ms": 345.642031
+                },
+                {
+                  "distinguished_points": 114,
+                  "gae": 439480.0,
+                  "group_ops": {
+                    "adds": 439391,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 7826662145710,
+                  "recovered": 7826662145710,
+                  "solved_by": "earlier",
+                  "steps": 439005,
+                  "verified": true,
+                  "walks": 114,
+                  "wall_ms": 591.159441
+                },
+                {
+                  "distinguished_points": 118,
+                  "gae": 434225.0,
+                  "group_ops": {
+                    "adds": 434134,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 57464210798837,
+                  "recovered": 57464210798837,
+                  "solved_by": "earlier",
+                  "steps": 433725,
+                  "verified": true,
+                  "walks": 118,
+                  "wall_ms": 581.473135
+                },
+                {
+                  "distinguished_points": 11,
+                  "gae": 34009.0,
+                  "group_ops": {
+                    "adds": 33916,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 98416853441054,
+                  "recovered": 98416853441054,
+                  "solved_by": "earlier",
+                  "steps": 33836,
+                  "verified": true,
+                  "walks": 11,
+                  "wall_ms": 65.383219
+                },
+                {
+                  "distinguished_points": 4,
+                  "gae": 16455.0,
+                  "group_ops": {
+                    "adds": 16365,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 25452594960632,
+                  "recovered": 25452594960632,
+                  "solved_by": "earlier",
+                  "steps": 16298,
+                  "verified": true,
+                  "walks": 4,
+                  "wall_ms": 21.901069
+                },
+                {
+                  "distinguished_points": 4,
+                  "gae": 11950.0,
+                  "group_ops": {
+                    "adds": 11860,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 31679232559853,
+                  "recovered": 31679232559853,
+                  "solved_by": "earlier",
+                  "steps": 11781,
+                  "verified": true,
+                  "walks": 4,
+                  "wall_ms": 15.741686
+                },
+                {
+                  "distinguished_points": 32,
+                  "gae": 88491.0,
+                  "group_ops": {
+                    "adds": 88403,
+                    "doubles": 88,
+                    "scalar_mults": 2
+                  },
+                  "planted": 5853072477390,
+                  "recovered": 5853072477390,
+                  "solved_by": "earlier",
+                  "steps": 88270,
+                  "verified": true,
+                  "walks": 32,
+                  "wall_ms": 117.226237
+                },
+                {
+                  "distinguished_points": 44,
+                  "gae": 255641.0,
+                  "group_ops": {
+                    "adds": 255549,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 55524736350075,
+                  "recovered": 55524736350075,
+                  "solved_by": "earlier",
+                  "steps": 255309,
+                  "verified": true,
+                  "walks": 44,
+                  "wall_ms": 338.383167
+                },
+                {
+                  "distinguished_points": 90,
+                  "gae": 316057.0,
+                  "group_ops": {
+                    "adds": 315965,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 82511886691928,
+                  "recovered": 82511886691928,
+                  "solved_by": "earlier",
+                  "steps": 315666,
+                  "verified": true,
+                  "walks": 90,
+                  "wall_ms": 415.25679
+                },
+                {
+                  "distinguished_points": 138,
+                  "gae": 592539.0,
+                  "group_ops": {
+                    "adds": 592447,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 100943303383740,
+                  "recovered": 100943303383740,
+                  "solved_by": "earlier",
+                  "steps": 591959,
+                  "verified": true,
+                  "walks": 138,
+                  "wall_ms": 780.536283
+                },
+                {
+                  "distinguished_points": 84,
+                  "gae": 369304.0,
+                  "group_ops": {
+                    "adds": 369213,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 54045869897628,
+                  "recovered": 54045869897628,
+                  "solved_by": "earlier",
+                  "steps": 368882,
+                  "verified": true,
+                  "walks": 84,
+                  "wall_ms": 469.755847
+                },
+                {
+                  "distinguished_points": 59,
+                  "gae": 242043.0,
+                  "group_ops": {
+                    "adds": 241953,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 26077351270194,
+                  "recovered": 26077351270194,
+                  "solved_by": "earlier",
+                  "steps": 241719,
+                  "verified": true,
+                  "walks": 59,
+                  "wall_ms": 319.470221
+                },
+                {
+                  "distinguished_points": 16,
+                  "gae": 102325.0,
+                  "group_ops": {
+                    "adds": 102233,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 120904261912973,
+                  "recovered": 120904261912973,
+                  "solved_by": "earlier",
+                  "steps": 102106,
+                  "verified": true,
+                  "walks": 16,
+                  "wall_ms": 168.455677
+                },
+                {
+                  "distinguished_points": 20,
+                  "gae": 68567.0,
+                  "group_ops": {
+                    "adds": 68481,
+                    "doubles": 86,
+                    "scalar_mults": 2
+                  },
+                  "planted": 22050475949044,
+                  "recovered": 22050475949044,
+                  "solved_by": "earlier",
+                  "steps": 68375,
+                  "verified": true,
+                  "walks": 20,
+                  "wall_ms": 88.89374
+                },
+                {
+                  "distinguished_points": 151,
+                  "gae": 671386.0,
+                  "group_ops": {
+                    "adds": 671293,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 132039388120417,
+                  "recovered": 132039388120417,
+                  "solved_by": "earlier",
+                  "steps": 670718,
+                  "verified": true,
+                  "walks": 151,
+                  "wall_ms": 864.458734
+                },
+                {
+                  "distinguished_points": 19,
+                  "gae": 69067.0,
+                  "group_ops": {
+                    "adds": 68977,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 31350316109400,
+                  "recovered": 31350316109400,
+                  "solved_by": "earlier",
+                  "steps": 68866,
+                  "verified": true,
+                  "walks": 19,
+                  "wall_ms": 87.823789
+                },
+                {
+                  "distinguished_points": 6,
+                  "gae": 42379.0,
+                  "group_ops": {
+                    "adds": 42290,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 16622031332758,
+                  "recovered": 16622031332758,
+                  "solved_by": "earlier",
+                  "steps": 42205,
+                  "verified": true,
+                  "walks": 6,
+                  "wall_ms": 53.348396
+                },
+                {
+                  "distinguished_points": 25,
+                  "gae": 144241.0,
+                  "group_ops": {
+                    "adds": 144152,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 10371701076827,
+                  "recovered": 10371701076827,
+                  "solved_by": "earlier",
+                  "steps": 143979,
+                  "verified": true,
+                  "walks": 25,
+                  "wall_ms": 179.111894
+                },
+                {
+                  "distinguished_points": 49,
+                  "gae": 211766.0,
+                  "group_ops": {
+                    "adds": 211673,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 162239723621388,
+                  "recovered": 162239723621388,
+                  "solved_by": "earlier",
+                  "steps": 211472,
+                  "verified": true,
+                  "walks": 49,
+                  "wall_ms": 268.353085
+                },
+                {
+                  "distinguished_points": 4,
+                  "gae": 10583.0,
+                  "group_ops": {
+                    "adds": 10491,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 100721427824764,
+                  "recovered": 100721427824764,
+                  "solved_by": "earlier",
+                  "steps": 10427,
+                  "verified": true,
+                  "walks": 4,
+                  "wall_ms": 13.638527
+                },
+                {
+                  "distinguished_points": 91,
+                  "gae": 287588.0,
+                  "group_ops": {
+                    "adds": 287500,
+                    "doubles": 88,
+                    "scalar_mults": 2
+                  },
+                  "planted": 8264668655848,
+                  "recovered": 8264668655848,
+                  "solved_by": "earlier",
+                  "steps": 287192,
+                  "verified": true,
+                  "walks": 91,
+                  "wall_ms": 359.023942
+                },
+                {
+                  "distinguished_points": 71,
+                  "gae": 352634.0,
+                  "group_ops": {
+                    "adds": 352543,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 48789497950477,
+                  "recovered": 48789497950477,
+                  "solved_by": "earlier",
+                  "steps": 352215,
+                  "verified": true,
+                  "walks": 71,
+                  "wall_ms": 448.638439
+                },
+                {
+                  "distinguished_points": 1,
+                  "gae": 3575.0,
+                  "group_ops": {
+                    "adds": 3485,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 29871506852191,
+                  "recovered": 29871506852191,
+                  "solved_by": "earlier",
+                  "steps": 3426,
+                  "verified": true,
+                  "walks": 1,
+                  "wall_ms": 4.587983
+                },
+                {
+                  "distinguished_points": 7,
+                  "gae": 50246.0,
+                  "group_ops": {
+                    "adds": 50153,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 106853263136061,
+                  "recovered": 106853263136061,
+                  "solved_by": "earlier",
+                  "steps": 50063,
+                  "verified": true,
+                  "walks": 7,
+                  "wall_ms": 64.011584
+                },
+                {
+                  "distinguished_points": 10,
+                  "gae": 61692.0,
+                  "group_ops": {
+                    "adds": 61601,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 74345780236331,
+                  "recovered": 74345780236331,
+                  "solved_by": "earlier",
+                  "steps": 61499,
+                  "verified": true,
+                  "walks": 10,
+                  "wall_ms": 77.262255
+                },
+                {
+                  "distinguished_points": 11,
+                  "gae": 34680.0,
+                  "group_ops": {
+                    "adds": 34587,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 128974612227512,
+                  "recovered": 128974612227512,
+                  "solved_by": "earlier",
+                  "steps": 34500,
+                  "verified": true,
+                  "walks": 11,
+                  "wall_ms": 42.343717
+                },
+                {
+                  "distinguished_points": 4,
+                  "gae": 21857.0,
+                  "group_ops": {
+                    "adds": 21768,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 16286284945313,
+                  "recovered": 16286284945313,
+                  "solved_by": "earlier",
+                  "steps": 21692,
+                  "verified": true,
+                  "walks": 4,
+                  "wall_ms": 27.582747
+                },
+                {
+                  "distinguished_points": 4,
+                  "gae": 24587.0,
+                  "group_ops": {
+                    "adds": 24494,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 150709420547699,
+                  "recovered": 150709420547699,
+                  "solved_by": "earlier",
+                  "steps": 24420,
+                  "verified": true,
+                  "walks": 4,
+                  "wall_ms": 31.166618
+                }
+              ],
+              "planted": [
+                20236729083573,
+                52865096380854,
+                119703696528129,
+                91417779041201,
+                98170031763504,
+                7826662145710,
+                57464210798837,
+                98416853441054,
+                25452594960632,
+                31679232559853,
+                5853072477390,
+                55524736350075,
+                82511886691928,
+                100943303383740,
+                54045869897628,
+                26077351270194,
+                120904261912973,
+                22050475949044,
+                132039388120417,
+                31350316109400,
+                16622031332758,
+                10371701076827,
+                162239723621388,
+                100721427824764,
+                8264668655848,
+                48789497950477,
+                29871506852191,
+                106853263136061,
+                74345780236331,
+                128974612227512,
+                16286284945313,
+                150709420547699
+              ],
+              "s_per_target": 0.021951140082394256,
+              "s_walk_per_target": 0.021931627746758872,
+              "setup_gae": 1096.0,
+              "target_seed": 7696811425710500919,
+              "walk_seed": 12355706701885799219,
+              "wall_ms": 12057.020356
+            },
+            {
+              "all_verified": true,
+              "batch": 5,
+              "counters": {
+                "canonicalisations_uncharged": 7649829,
+                "cycle_escape_doublings": 2,
+                "cycles_length_2": 0,
+                "cycles_length_4": 1,
+                "cycles_other_length": 1,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 1751,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 3837,
+                "setup_additions": 363,
+                "setup_doublings": 721,
+                "solved_on_an_earlier_trail": 30,
+                "solved_on_own_trail": 2,
+                "start_additions": 1751,
+                "target_setup_additions": 1123,
+                "target_setup_doublings": 1473,
+                "targets": 32,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 2169,
+                "walk_operations": 7648046,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 7655646.0,
+              "per_target": [
+                {
+                  "distinguished_points": 223,
+                  "gae": 918332.0,
+                  "group_ops": {
+                    "adds": 918240,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 89434527841968,
+                  "recovered": 89434527841968,
+                  "solved_by": "own",
+                  "steps": 917518,
+                  "verified": true,
+                  "walks": 223,
+                  "wall_ms": 1171.851423
+                },
+                {
+                  "distinguished_points": 21,
+                  "gae": 97894.0,
+                  "group_ops": {
+                    "adds": 97802,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 71232430562690,
+                  "recovered": 71232430562690,
+                  "solved_by": "earlier",
+                  "steps": 97679,
+                  "verified": true,
+                  "walks": 21,
+                  "wall_ms": 121.870494
+                },
+                {
+                  "distinguished_points": 102,
+                  "gae": 436939.0,
+                  "group_ops": {
+                    "adds": 436848,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 37660188250971,
+                  "recovered": 37660188250971,
+                  "solved_by": "earlier",
+                  "steps": 436485,
+                  "verified": true,
+                  "walks": 102,
+                  "wall_ms": 560.635444
+                },
+                {
+                  "distinguished_points": 235,
+                  "gae": 920679.0,
+                  "group_ops": {
+                    "adds": 920587,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 49975408435741,
+                  "recovered": 49975408435741,
+                  "solved_by": "earlier",
+                  "steps": 919851,
+                  "verified": true,
+                  "walks": 235,
+                  "wall_ms": 1193.619877
+                },
+                {
+                  "distinguished_points": 66,
+                  "gae": 250541.0,
+                  "group_ops": {
+                    "adds": 250449,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 73109522403340,
+                  "recovered": 73109522403340,
+                  "solved_by": "earlier",
+                  "steps": 250183,
+                  "verified": true,
+                  "walks": 66,
+                  "wall_ms": 312.726596
+                },
+                {
+                  "distinguished_points": 149,
+                  "gae": 646020.0,
+                  "group_ops": {
+                    "adds": 645927,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 162115339369613,
+                  "recovered": 162115339369613,
+                  "solved_by": "earlier",
+                  "steps": 645396,
+                  "verified": true,
+                  "walks": 149,
+                  "wall_ms": 814.04576
+                },
+                {
+                  "distinguished_points": 20,
+                  "gae": 76876.0,
+                  "group_ops": {
+                    "adds": 76785,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 44562039600471,
+                  "recovered": 44562039600471,
+                  "solved_by": "earlier",
+                  "steps": 76678,
+                  "verified": true,
+                  "walks": 20,
+                  "wall_ms": 98.880693
+                },
+                {
+                  "distinguished_points": 25,
+                  "gae": 148145.0,
+                  "group_ops": {
+                    "adds": 148055,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 128677967178127,
+                  "recovered": 128677967178127,
+                  "solved_by": "earlier",
+                  "steps": 147907,
+                  "verified": true,
+                  "walks": 25,
+                  "wall_ms": 190.501781
+                },
+                {
+                  "distinguished_points": 330,
+                  "gae": 1420359.0,
+                  "group_ops": {
+                    "adds": 1420265,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 138721028253686,
+                  "recovered": 138721028253686,
+                  "solved_by": "own",
+                  "steps": 1419150,
+                  "verified": true,
+                  "walks": 330,
+                  "wall_ms": 1959.828068
+                },
+                {
+                  "distinguished_points": 17,
+                  "gae": 73606.0,
+                  "group_ops": {
+                    "adds": 73514,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 73816837957554,
+                  "recovered": 73816837957554,
+                  "solved_by": "earlier",
+                  "steps": 73397,
+                  "verified": true,
+                  "walks": 17,
+                  "wall_ms": 90.380243
+                },
+                {
+                  "distinguished_points": 74,
+                  "gae": 299653.0,
+                  "group_ops": {
+                    "adds": 299561,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 114522696023908,
+                  "recovered": 114522696023908,
+                  "solved_by": "earlier",
+                  "steps": 299272,
+                  "verified": true,
+                  "walks": 74,
+                  "wall_ms": 380.361894
+                },
+                {
+                  "distinguished_points": 12,
+                  "gae": 100322.0,
+                  "group_ops": {
+                    "adds": 100232,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 27833024439990,
+                  "recovered": 27833024439990,
+                  "solved_by": "earlier",
+                  "steps": 100105,
+                  "verified": true,
+                  "walks": 12,
+                  "wall_ms": 128.819148
+                },
+                {
+                  "distinguished_points": 45,
+                  "gae": 186763.0,
+                  "group_ops": {
+                    "adds": 186672,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 59517336969429,
+                  "recovered": 59517336969429,
+                  "solved_by": "earlier",
+                  "steps": 186483,
+                  "verified": true,
+                  "walks": 45,
+                  "wall_ms": 241.157651
+                },
+                {
+                  "distinguished_points": 7,
+                  "gae": 28458.0,
+                  "group_ops": {
+                    "adds": 28364,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 156859797501505,
+                  "recovered": 156859797501505,
+                  "solved_by": "earlier",
+                  "steps": 28290,
+                  "verified": true,
+                  "walks": 7,
+                  "wall_ms": 37.320511
+                },
+                {
+                  "distinguished_points": 29,
+                  "gae": 152734.0,
+                  "group_ops": {
+                    "adds": 152645,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 10367487846430,
+                  "recovered": 10367487846430,
+                  "solved_by": "earlier",
+                  "steps": 152477,
+                  "verified": true,
+                  "walks": 29,
+                  "wall_ms": 191.677207
+                },
+                {
+                  "distinguished_points": 43,
+                  "gae": 157644.0,
+                  "group_ops": {
+                    "adds": 157553,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 47999574296668,
+                  "recovered": 47999574296668,
+                  "solved_by": "earlier",
+                  "steps": 157370,
+                  "verified": true,
+                  "walks": 43,
+                  "wall_ms": 195.583068
+                },
+                {
+                  "distinguished_points": 9,
+                  "gae": 26186.0,
+                  "group_ops": {
+                    "adds": 26095,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 89210103011621,
+                  "recovered": 89210103011621,
+                  "solved_by": "earlier",
+                  "steps": 26032,
+                  "verified": true,
+                  "walks": 9,
+                  "wall_ms": 33.477485
+                },
+                {
+                  "distinguished_points": 35,
+                  "gae": 175152.0,
+                  "group_ops": {
+                    "adds": 175060,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 127657135839639,
+                  "recovered": 127657135839639,
+                  "solved_by": "earlier",
+                  "steps": 174888,
+                  "verified": true,
+                  "walks": 35,
+                  "wall_ms": 245.918868
+                },
+                {
+                  "distinguished_points": 6,
+                  "gae": 21010.0,
+                  "group_ops": {
+                    "adds": 20918,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 76026913219232,
+                  "recovered": 76026913219232,
+                  "solved_by": "earlier",
+                  "steps": 20848,
+                  "verified": true,
+                  "walks": 6,
+                  "wall_ms": 41.554745
+                },
+                {
+                  "distinguished_points": 11,
+                  "gae": 86724.0,
+                  "group_ops": {
+                    "adds": 86631,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 143426186829687,
+                  "recovered": 143426186829687,
+                  "solved_by": "earlier",
+                  "steps": 86525,
+                  "verified": true,
+                  "walks": 11,
+                  "wall_ms": 152.153817
+                },
+                {
+                  "distinguished_points": 28,
+                  "gae": 105383.0,
+                  "group_ops": {
+                    "adds": 105291,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 136514719984831,
+                  "recovered": 136514719984831,
+                  "solved_by": "earlier",
+                  "steps": 105140,
+                  "verified": true,
+                  "walks": 28,
+                  "wall_ms": 131.888868
+                },
+                {
+                  "distinguished_points": 59,
+                  "gae": 285636.0,
+                  "group_ops": {
+                    "adds": 285547,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 16697973497785,
+                  "recovered": 16697973497785,
+                  "solved_by": "earlier",
+                  "steps": 285279,
+                  "verified": true,
+                  "walks": 59,
+                  "wall_ms": 364.727021
+                },
+                {
+                  "distinguished_points": 57,
+                  "gae": 277669.0,
+                  "group_ops": {
+                    "adds": 277578,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 60918208391456,
+                  "recovered": 60918208391456,
+                  "solved_by": "earlier",
+                  "steps": 277335,
+                  "verified": true,
+                  "walks": 57,
+                  "wall_ms": 386.463764
+                },
+                {
+                  "distinguished_points": 2,
+                  "gae": 14240.0,
+                  "group_ops": {
+                    "adds": 14148,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 140327220779071,
+                  "recovered": 140327220779071,
+                  "solved_by": "earlier",
+                  "steps": 14081,
+                  "verified": true,
+                  "walks": 2,
+                  "wall_ms": 17.846947
+                },
+                {
+                  "distinguished_points": 3,
+                  "gae": 3129.0,
+                  "group_ops": {
+                    "adds": 3036,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 159634677823594,
+                  "recovered": 159634677823594,
+                  "solved_by": "earlier",
+                  "steps": 2976,
+                  "verified": true,
+                  "walks": 3,
+                  "wall_ms": 3.875753
+                },
+                {
+                  "distinguished_points": 14,
+                  "gae": 75194.0,
+                  "group_ops": {
+                    "adds": 75104,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 25793608393927,
+                  "recovered": 25793608393927,
+                  "solved_by": "earlier",
+                  "steps": 74992,
+                  "verified": true,
+                  "walks": 14,
+                  "wall_ms": 94.841248
+                },
+                {
+                  "distinguished_points": 88,
+                  "gae": 332092.0,
+                  "group_ops": {
+                    "adds": 332000,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 48695838165671,
+                  "recovered": 48695838165671,
+                  "solved_by": "earlier",
+                  "steps": 331674,
+                  "verified": true,
+                  "walks": 88,
+                  "wall_ms": 416.220743
+                },
+                {
+                  "distinguished_points": 5,
+                  "gae": 25684.0,
+                  "group_ops": {
+                    "adds": 25591,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 85258039020017,
+                  "recovered": 85258039020017,
+                  "solved_by": "earlier",
+                  "steps": 25523,
+                  "verified": true,
+                  "walks": 5,
+                  "wall_ms": 32.205488
+                },
+                {
+                  "distinguished_points": 12,
+                  "gae": 66944.0,
+                  "group_ops": {
+                    "adds": 66852,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 160088429776331,
+                  "recovered": 160088429776331,
+                  "solved_by": "earlier",
+                  "steps": 66751,
+                  "verified": true,
+                  "walks": 12,
+                  "wall_ms": 80.109302
+                },
+                {
+                  "distinguished_points": 4,
+                  "gae": 19762.0,
+                  "group_ops": {
+                    "adds": 19671,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 44218479001426,
+                  "recovered": 44218479001426,
+                  "solved_by": "earlier",
+                  "steps": 19591,
+                  "verified": true,
+                  "walks": 4,
+                  "wall_ms": 23.05852
+                },
+                {
+                  "distinguished_points": 29,
+                  "gae": 98104.0,
+                  "group_ops": {
+                    "adds": 98013,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 66162841499645,
+                  "recovered": 66162841499645,
+                  "solved_by": "earlier",
+                  "steps": 97877,
+                  "verified": true,
+                  "walks": 29,
+                  "wall_ms": 120.667821
+                },
+                {
+                  "distinguished_points": 23,
+                  "gae": 126688.0,
+                  "group_ops": {
+                    "adds": 126595,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 75085147165838,
+                  "recovered": 75085147165838,
+                  "solved_by": "earlier",
+                  "steps": 126454,
+                  "verified": true,
+                  "walks": 23,
+                  "wall_ms": 157.660332
+                }
+              ],
+              "planted": [
+                89434527841968,
+                71232430562690,
+                37660188250971,
+                49975408435741,
+                73109522403340,
+                162115339369613,
+                44562039600471,
+                128677967178127,
+                138721028253686,
+                73816837957554,
+                114522696023908,
+                27833024439990,
+                59517336969429,
+                156859797501505,
+                10367487846430,
+                47999574296668,
+                89210103011621,
+                127657135839639,
+                76026913219232,
+                143426186829687,
+                136514719984831,
+                16697973497785,
+                60918208391456,
+                140327220779071,
+                159634677823594,
+                25793608393927,
+                48695838165671,
+                85258039020017,
+                160088429776331,
+                44218479001426,
+                66162841499645,
+                75085147165838
+              ],
+              "s_per_target": 0.01874507896319133,
+              "s_walk_per_target": 0.018726470135128976,
+              "setup_gae": 1084.0,
+              "target_seed": 5239329178203402737,
+              "walk_seed": 580433896058763377,
+              "wall_ms": 9993.170775
+            },
+            {
+              "all_verified": true,
+              "batch": 6,
+              "counters": {
+                "canonicalisations_uncharged": 9803272,
+                "cycle_escape_doublings": 4,
+                "cycles_length_2": 0,
+                "cycles_length_4": 4,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 2371,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 5011,
+                "setup_additions": 331,
+                "setup_doublings": 726,
+                "solved_on_an_earlier_trail": 30,
+                "solved_on_own_trail": 2,
+                "start_additions": 2372,
+                "target_setup_additions": 1137,
+                "target_setup_doublings": 1474,
+                "targets": 32,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 2169,
+                "walk_operations": 9800868,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 1
+              },
+              "gae": 9809077.0,
+              "per_target": [
+                {
+                  "distinguished_points": 660,
+                  "gae": 2747937.0,
+                  "group_ops": {
+                    "adds": 2747841,
+                    "doubles": 96,
+                    "scalar_mults": 2
+                  },
+                  "planted": 87939231459799,
+                  "recovered": 87939231459799,
+                  "solved_by": "own",
+                  "steps": 2745768,
+                  "verified": true,
+                  "walks": 661,
+                  "wall_ms": 3686.106297
+                },
+                {
+                  "distinguished_points": 108,
+                  "gae": 444071.0,
+                  "group_ops": {
+                    "adds": 443980,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 99383663412310,
+                  "recovered": 99383663412310,
+                  "solved_by": "earlier",
+                  "steps": 443580,
+                  "verified": true,
+                  "walks": 108,
+                  "wall_ms": 598.34463
+                },
+                {
+                  "distinguished_points": 225,
+                  "gae": 843583.0,
+                  "group_ops": {
+                    "adds": 843492,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 49234894408271,
+                  "recovered": 49234894408271,
+                  "solved_by": "earlier",
+                  "steps": 842792,
+                  "verified": true,
+                  "walks": 225,
+                  "wall_ms": 1149.707168
+                },
+                {
+                  "distinguished_points": 20,
+                  "gae": 81470.0,
+                  "group_ops": {
+                    "adds": 81380,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 25166362344555,
+                  "recovered": 25166362344555,
+                  "solved_by": "earlier",
+                  "steps": 81266,
+                  "verified": true,
+                  "walks": 20,
+                  "wall_ms": 104.980812
+                },
+                {
+                  "distinguished_points": 55,
+                  "gae": 246255.0,
+                  "group_ops": {
+                    "adds": 246164,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 45538644859672,
+                  "recovered": 45538644859672,
+                  "solved_by": "earlier",
+                  "steps": 245940,
+                  "verified": true,
+                  "walks": 55,
+                  "wall_ms": 314.783308
+                },
+                {
+                  "distinguished_points": 51,
+                  "gae": 152934.0,
+                  "group_ops": {
+                    "adds": 152842,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 73942080618934,
+                  "recovered": 73942080618934,
+                  "solved_by": "earlier",
+                  "steps": 152658,
+                  "verified": true,
+                  "walks": 51,
+                  "wall_ms": 198.81413
+                },
+                {
+                  "distinguished_points": 92,
+                  "gae": 406020.0,
+                  "group_ops": {
+                    "adds": 405928,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 121532021345865,
+                  "recovered": 121532021345865,
+                  "solved_by": "earlier",
+                  "steps": 405597,
+                  "verified": true,
+                  "walks": 92,
+                  "wall_ms": 520.315793
+                },
+                {
+                  "distinguished_points": 46,
+                  "gae": 185669.0,
+                  "group_ops": {
+                    "adds": 185577,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 55828355212491,
+                  "recovered": 55828355212491,
+                  "solved_by": "earlier",
+                  "steps": 185361,
+                  "verified": true,
+                  "walks": 46,
+                  "wall_ms": 240.649676
+                },
+                {
+                  "distinguished_points": 6,
+                  "gae": 25985.0,
+                  "group_ops": {
+                    "adds": 25892,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 122751888411481,
+                  "recovered": 122751888411481,
+                  "solved_by": "earlier",
+                  "steps": 25822,
+                  "verified": true,
+                  "walks": 6,
+                  "wall_ms": 33.628075
+                },
+                {
+                  "distinguished_points": 108,
+                  "gae": 448464.0,
+                  "group_ops": {
+                    "adds": 448371,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 81015380345559,
+                  "recovered": 81015380345559,
+                  "solved_by": "own",
+                  "steps": 447924,
+                  "verified": true,
+                  "walks": 108,
+                  "wall_ms": 600.793675
+                },
+                {
+                  "distinguished_points": 55,
+                  "gae": 228917.0,
+                  "group_ops": {
+                    "adds": 228825,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 62444134449751,
+                  "recovered": 62444134449751,
+                  "solved_by": "earlier",
+                  "steps": 228620,
+                  "verified": true,
+                  "walks": 55,
+                  "wall_ms": 298.585004
+                },
+                {
+                  "distinguished_points": 111,
+                  "gae": 461982.0,
+                  "group_ops": {
+                    "adds": 461890,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 112836610770157,
+                  "recovered": 112836610770157,
+                  "solved_by": "earlier",
+                  "steps": 461463,
+                  "verified": true,
+                  "walks": 111,
+                  "wall_ms": 594.988574
+                },
+                {
+                  "distinguished_points": 35,
+                  "gae": 167101.0,
+                  "group_ops": {
+                    "adds": 167008,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 75978262610927,
+                  "recovered": 75978262610927,
+                  "solved_by": "earlier",
+                  "steps": 166841,
+                  "verified": true,
+                  "walks": 35,
+                  "wall_ms": 217.849026
+                },
+                {
+                  "distinguished_points": 199,
+                  "gae": 825965.0,
+                  "group_ops": {
+                    "adds": 825871,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 146916523319690,
+                  "recovered": 146916523319690,
+                  "solved_by": "earlier",
+                  "steps": 825175,
+                  "verified": true,
+                  "walks": 199,
+                  "wall_ms": 1063.611308
+                },
+                {
+                  "distinguished_points": 20,
+                  "gae": 74072.0,
+                  "group_ops": {
+                    "adds": 73980,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 128063245108386,
+                  "recovered": 128063245108386,
+                  "solved_by": "earlier",
+                  "steps": 73868,
+                  "verified": true,
+                  "walks": 20,
+                  "wall_ms": 91.20436
+                },
+                {
+                  "distinguished_points": 29,
+                  "gae": 141889.0,
+                  "group_ops": {
+                    "adds": 141799,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 29852089331201,
+                  "recovered": 29852089331201,
+                  "solved_by": "earlier",
+                  "steps": 141636,
+                  "verified": true,
+                  "walks": 29,
+                  "wall_ms": 181.283334
+                },
+                {
+                  "distinguished_points": 14,
+                  "gae": 55759.0,
+                  "group_ops": {
+                    "adds": 55666,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 97691155173466,
+                  "recovered": 97691155173466,
+                  "solved_by": "earlier",
+                  "steps": 55568,
+                  "verified": true,
+                  "walks": 14,
+                  "wall_ms": 71.514265
+                },
+                {
+                  "distinguished_points": 17,
+                  "gae": 82800.0,
+                  "group_ops": {
+                    "adds": 82708,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 117546528924128,
+                  "recovered": 117546528924128,
+                  "solved_by": "earlier",
+                  "steps": 82590,
+                  "verified": true,
+                  "walks": 17,
+                  "wall_ms": 105.180078
+                },
+                {
+                  "distinguished_points": 49,
+                  "gae": 213458.0,
+                  "group_ops": {
+                    "adds": 213368,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 108776168884607,
+                  "recovered": 108776168884607,
+                  "solved_by": "earlier",
+                  "steps": 213145,
+                  "verified": true,
+                  "walks": 49,
+                  "wall_ms": 273.099485
+                },
+                {
+                  "distinguished_points": 13,
+                  "gae": 53064.0,
+                  "group_ops": {
+                    "adds": 52974,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 108476987819939,
+                  "recovered": 108476987819939,
+                  "solved_by": "earlier",
+                  "steps": 52890,
+                  "verified": true,
+                  "walks": 13,
+                  "wall_ms": 68.184219
+                },
+                {
+                  "distinguished_points": 27,
+                  "gae": 79830.0,
+                  "group_ops": {
+                    "adds": 79738,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 155633558371919,
+                  "recovered": 155633558371919,
+                  "solved_by": "earlier",
+                  "steps": 79613,
+                  "verified": true,
+                  "walks": 27,
+                  "wall_ms": 102.424176
+                },
+                {
+                  "distinguished_points": 67,
+                  "gae": 273914.0,
+                  "group_ops": {
+                    "adds": 273821,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 159348348620162,
+                  "recovered": 159348348620162,
+                  "solved_by": "earlier",
+                  "steps": 273553,
+                  "verified": true,
+                  "walks": 67,
+                  "wall_ms": 385.811062
+                },
+                {
+                  "distinguished_points": 26,
+                  "gae": 90260.0,
+                  "group_ops": {
+                    "adds": 90167,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 116514549623240,
+                  "recovered": 116514549623240,
+                  "solved_by": "earlier",
+                  "steps": 90026,
+                  "verified": true,
+                  "walks": 26,
+                  "wall_ms": 120.670558
+                },
+                {
+                  "distinguished_points": 61,
+                  "gae": 192291.0,
+                  "group_ops": {
+                    "adds": 192201,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 18998426538266,
+                  "recovered": 18998426538266,
+                  "solved_by": "earlier",
+                  "steps": 191979,
+                  "verified": true,
+                  "walks": 61,
+                  "wall_ms": 252.218146
+                },
+                {
+                  "distinguished_points": 56,
+                  "gae": 249140.0,
+                  "group_ops": {
+                    "adds": 249048,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 72942553708690,
+                  "recovered": 72942553708690,
+                  "solved_by": "earlier",
+                  "steps": 248808,
+                  "verified": true,
+                  "walks": 56,
+                  "wall_ms": 333.140072
+                },
+                {
+                  "distinguished_points": 45,
+                  "gae": 158924.0,
+                  "group_ops": {
+                    "adds": 158832,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 140044791834625,
+                  "recovered": 140044791834625,
+                  "solved_by": "earlier",
+                  "steps": 158650,
+                  "verified": true,
+                  "walks": 45,
+                  "wall_ms": 206.750236
+                },
+                {
+                  "distinguished_points": 51,
+                  "gae": 219218.0,
+                  "group_ops": {
+                    "adds": 219127,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 41543254773360,
+                  "recovered": 41543254773360,
+                  "solved_by": "earlier",
+                  "steps": 218912,
+                  "verified": true,
+                  "walks": 51,
+                  "wall_ms": 310.567528
+                },
+                {
+                  "distinguished_points": 21,
+                  "gae": 92881.0,
+                  "group_ops": {
+                    "adds": 92789,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 126111293640942,
+                  "recovered": 126111293640942,
+                  "solved_by": "earlier",
+                  "steps": 92670,
+                  "verified": true,
+                  "walks": 21,
+                  "wall_ms": 123.027948
+                },
+                {
+                  "distinguished_points": 54,
+                  "gae": 249309.0,
+                  "group_ops": {
+                    "adds": 249221,
+                    "doubles": 88,
+                    "scalar_mults": 2
+                  },
+                  "planted": 8183579700578,
+                  "recovered": 8183579700578,
+                  "solved_by": "earlier",
+                  "steps": 248987,
+                  "verified": true,
+                  "walks": 54,
+                  "wall_ms": 326.493129
+                },
+                {
+                  "distinguished_points": 1,
+                  "gae": 13775.0,
+                  "group_ops": {
+                    "adds": 13689,
+                    "doubles": 86,
+                    "scalar_mults": 2
+                  },
+                  "planted": 1220621211325,
+                  "recovered": 1220621211325,
+                  "solved_by": "earlier",
+                  "steps": 13629,
+                  "verified": true,
+                  "walks": 1,
+                  "wall_ms": 19.589482
+                },
+                {
+                  "distinguished_points": 40,
+                  "gae": 191805.0,
+                  "group_ops": {
+                    "adds": 191713,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 91957929887958,
+                  "recovered": 91957929887958,
+                  "solved_by": "earlier",
+                  "steps": 191502,
+                  "verified": true,
+                  "walks": 40,
+                  "wall_ms": 253.783008
+                },
+                {
+                  "distinguished_points": 41,
+                  "gae": 109278.0,
+                  "group_ops": {
+                    "adds": 109186,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 135282383885219,
+                  "recovered": 135282383885219,
+                  "solved_by": "earlier",
+                  "steps": 109020,
+                  "verified": true,
+                  "walks": 41,
+                  "wall_ms": 143.674931
+                }
+              ],
+              "planted": [
+                87939231459799,
+                99383663412310,
+                49234894408271,
+                25166362344555,
+                45538644859672,
+                73942080618934,
+                121532021345865,
+                55828355212491,
+                122751888411481,
+                81015380345559,
+                62444134449751,
+                112836610770157,
+                75978262610927,
+                146916523319690,
+                128063245108386,
+                29852089331201,
+                97691155173466,
+                117546528924128,
+                108776168884607,
+                108476987819939,
+                155633558371919,
+                159348348620162,
+                116514549623240,
+                18998426538266,
+                72942553708690,
+                140044791834625,
+                41543254773360,
+                126111293640942,
+                8183579700578,
+                1220621211325,
+                91957929887958,
+                135282383885219
+              ],
+              "s_per_target": 0.024017819387289318,
+              "s_walk_per_target": 0.02399771940445197,
+              "setup_gae": 1057.0,
+              "target_seed": 13588170823553073331,
+              "walk_seed": 18058229059288587386,
+              "wall_ms": 12992.903481
+            },
+            {
+              "all_verified": true,
+              "batch": 7,
+              "counters": {
+                "canonicalisations_uncharged": 9688308,
+                "cycle_escape_doublings": 3,
+                "cycles_length_2": 0,
+                "cycles_length_4": 3,
+                "cycles_other_length": 0,
+                "distinguished_point_bits": 12,
+                "distinguished_points_stored": 2367,
+                "jump_coefficient_bits": 12,
+                "jumps": 16,
+                "look_ahead_additions": 4919,
+                "setup_additions": 372,
+                "setup_doublings": 722,
+                "solved_on_an_earlier_trail": 30,
+                "solved_on_own_trail": 2,
+                "start_additions": 2367,
+                "target_setup_additions": 1139,
+                "target_setup_doublings": 1475,
+                "targets": 32,
+                "unsolved": 0,
+                "useless_collisions": 0,
+                "verification_operations": 2201,
+                "walk_operations": 9685909,
+                "walks_abandoned_in_a_cycle": 0,
+                "walks_capped": 0
+              },
+              "gae": 9694185.0,
+              "per_target": [
+                {
+                  "distinguished_points": 344,
+                  "gae": 1389672.0,
+                  "group_ops": {
+                    "adds": 1389581,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 88641115673303,
+                  "recovered": 88641115673303,
+                  "solved_by": "own",
+                  "steps": 1388466,
+                  "verified": true,
+                  "walks": 344,
+                  "wall_ms": 1842.2336
+                },
+                {
+                  "distinguished_points": 142,
+                  "gae": 547956.0,
+                  "group_ops": {
+                    "adds": 547862,
+                    "doubles": 94,
+                    "scalar_mults": 2
+                  },
+                  "planted": 148964972051036,
+                  "recovered": 148964972051036,
+                  "solved_by": "earlier",
+                  "steps": 547373,
+                  "verified": true,
+                  "walks": 142,
+                  "wall_ms": 725.431876
+                },
+                {
+                  "distinguished_points": 211,
+                  "gae": 814137.0,
+                  "group_ops": {
+                    "adds": 814046,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 43052351473105,
+                  "recovered": 43052351473105,
+                  "solved_by": "earlier",
+                  "steps": 813371,
+                  "verified": true,
+                  "walks": 211,
+                  "wall_ms": 1051.922234
+                },
+                {
+                  "distinguished_points": 33,
+                  "gae": 156022.0,
+                  "group_ops": {
+                    "adds": 155930,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 118868847631557,
+                  "recovered": 118868847631557,
+                  "solved_by": "earlier",
+                  "steps": 155764,
+                  "verified": true,
+                  "walks": 33,
+                  "wall_ms": 195.666744
+                },
+                {
+                  "distinguished_points": 204,
+                  "gae": 820651.0,
+                  "group_ops": {
+                    "adds": 820559,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 98790430986460,
+                  "recovered": 98790430986460,
+                  "solved_by": "earlier",
+                  "steps": 819888,
+                  "verified": true,
+                  "walks": 204,
+                  "wall_ms": 1055.993973
+                },
+                {
+                  "distinguished_points": 192,
+                  "gae": 725035.0,
+                  "group_ops": {
+                    "adds": 724942,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 107038729716593,
+                  "recovered": 107038729716593,
+                  "solved_by": "earlier",
+                  "steps": 724349,
+                  "verified": true,
+                  "walks": 192,
+                  "wall_ms": 958.308081
+                },
+                {
+                  "distinguished_points": 94,
+                  "gae": 356564.0,
+                  "group_ops": {
+                    "adds": 356473,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 53709730162890,
+                  "recovered": 53709730162890,
+                  "solved_by": "earlier",
+                  "steps": 356148,
+                  "verified": true,
+                  "walks": 94,
+                  "wall_ms": 465.636533
+                },
+                {
+                  "distinguished_points": 185,
+                  "gae": 739567.0,
+                  "group_ops": {
+                    "adds": 739475,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 120442668883830,
+                  "recovered": 120442668883830,
+                  "solved_by": "earlier",
+                  "steps": 738845,
+                  "verified": true,
+                  "walks": 185,
+                  "wall_ms": 925.929307
+                },
+                {
+                  "distinguished_points": 28,
+                  "gae": 104661.0,
+                  "group_ops": {
+                    "adds": 104568,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 112865636549341,
+                  "recovered": 112865636549341,
+                  "solved_by": "earlier",
+                  "steps": 104437,
+                  "verified": true,
+                  "walks": 28,
+                  "wall_ms": 136.229717
+                },
+                {
+                  "distinguished_points": 15,
+                  "gae": 46319.0,
+                  "group_ops": {
+                    "adds": 46227,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 92110612522937,
+                  "recovered": 92110612522937,
+                  "solved_by": "earlier",
+                  "steps": 46128,
+                  "verified": true,
+                  "walks": 15,
+                  "wall_ms": 57.739692
+                },
+                {
+                  "distinguished_points": 18,
+                  "gae": 29307.0,
+                  "group_ops": {
+                    "adds": 29219,
+                    "doubles": 88,
+                    "scalar_mults": 2
+                  },
+                  "planted": 20924663281799,
+                  "recovered": 20924663281799,
+                  "solved_by": "earlier",
+                  "steps": 29127,
+                  "verified": true,
+                  "walks": 18,
+                  "wall_ms": 34.450291
+                },
+                {
+                  "distinguished_points": 15,
+                  "gae": 53963.0,
+                  "group_ops": {
+                    "adds": 53872,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 118711199420250,
+                  "recovered": 118711199420250,
+                  "solved_by": "earlier",
+                  "steps": 53767,
+                  "verified": true,
+                  "walks": 15,
+                  "wall_ms": 68.379716
+                },
+                {
+                  "distinguished_points": 149,
+                  "gae": 637573.0,
+                  "group_ops": {
+                    "adds": 637480,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 142813472381306,
+                  "recovered": 142813472381306,
+                  "solved_by": "own",
+                  "steps": 636917,
+                  "verified": true,
+                  "walks": 149,
+                  "wall_ms": 801.027479
+                },
+                {
+                  "distinguished_points": 217,
+                  "gae": 943595.0,
+                  "group_ops": {
+                    "adds": 943502,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 118185567312588,
+                  "recovered": 118185567312588,
+                  "solved_by": "earlier",
+                  "steps": 942750,
+                  "verified": true,
+                  "walks": 217,
+                  "wall_ms": 1254.184174
+                },
+                {
+                  "distinguished_points": 56,
+                  "gae": 209569.0,
+                  "group_ops": {
+                    "adds": 209482,
+                    "doubles": 87,
+                    "scalar_mults": 2
+                  },
+                  "planted": 2514015428000,
+                  "recovered": 2514015428000,
+                  "solved_by": "earlier",
+                  "steps": 209262,
+                  "verified": true,
+                  "walks": 56,
+                  "wall_ms": 261.907442
+                },
+                {
+                  "distinguished_points": 22,
+                  "gae": 73765.0,
+                  "group_ops": {
+                    "adds": 73673,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 110479883547818,
+                  "recovered": 110479883547818,
+                  "solved_by": "earlier",
+                  "steps": 73568,
+                  "verified": true,
+                  "walks": 22,
+                  "wall_ms": 98.340634
+                },
+                {
+                  "distinguished_points": 18,
+                  "gae": 77144.0,
+                  "group_ops": {
+                    "adds": 77053,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 32370738857621,
+                  "recovered": 32370738857621,
+                  "solved_by": "earlier",
+                  "steps": 76932,
+                  "verified": true,
+                  "walks": 18,
+                  "wall_ms": 93.711487
+                },
+                {
+                  "distinguished_points": 13,
+                  "gae": 39656.0,
+                  "group_ops": {
+                    "adds": 39565,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 124524665014064,
+                  "recovered": 124524665014064,
+                  "solved_by": "earlier",
+                  "steps": 39482,
+                  "verified": true,
+                  "walks": 13,
+                  "wall_ms": 46.494341
+                },
+                {
+                  "distinguished_points": 2,
+                  "gae": 5569.0,
+                  "group_ops": {
+                    "adds": 5476,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 127113714527166,
+                  "recovered": 127113714527166,
+                  "solved_by": "earlier",
+                  "steps": 5404,
+                  "verified": true,
+                  "walks": 2,
+                  "wall_ms": 6.289551
+                },
+                {
+                  "distinguished_points": 3,
+                  "gae": 16491.0,
+                  "group_ops": {
+                    "adds": 16401,
+                    "doubles": 90,
+                    "scalar_mults": 2
+                  },
+                  "planted": 20833864740960,
+                  "recovered": 20833864740960,
+                  "solved_by": "earlier",
+                  "steps": 16340,
+                  "verified": true,
+                  "walks": 3,
+                  "wall_ms": 20.482859
+                },
+                {
+                  "distinguished_points": 210,
+                  "gae": 867397.0,
+                  "group_ops": {
+                    "adds": 867305,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 114126134368018,
+                  "recovered": 114126134368018,
+                  "solved_by": "earlier",
+                  "steps": 866617,
+                  "verified": true,
+                  "walks": 210,
+                  "wall_ms": 1093.930213
+                },
+                {
+                  "distinguished_points": 40,
+                  "gae": 151240.0,
+                  "group_ops": {
+                    "adds": 151151,
+                    "doubles": 89,
+                    "scalar_mults": 2
+                  },
+                  "planted": 15271022899636,
+                  "recovered": 15271022899636,
+                  "solved_by": "earlier",
+                  "steps": 150959,
+                  "verified": true,
+                  "walks": 40,
+                  "wall_ms": 194.099881
+                },
+                {
+                  "distinguished_points": 39,
+                  "gae": 212335.0,
+                  "group_ops": {
+                    "adds": 212243,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 100657779758280,
+                  "recovered": 100657779758280,
+                  "solved_by": "earlier",
+                  "steps": 212041,
+                  "verified": true,
+                  "walks": 39,
+                  "wall_ms": 266.471696
+                },
+                {
+                  "distinguished_points": 13,
+                  "gae": 46370.0,
+                  "group_ops": {
+                    "adds": 46277,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 154720809776059,
+                  "recovered": 154720809776059,
+                  "solved_by": "earlier",
+                  "steps": 46173,
+                  "verified": true,
+                  "walks": 13,
+                  "wall_ms": 62.407921
+                },
+                {
+                  "distinguished_points": 9,
+                  "gae": 42103.0,
+                  "group_ops": {
+                    "adds": 42010,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 84919828855142,
+                  "recovered": 84919828855142,
+                  "solved_by": "earlier",
+                  "steps": 41922,
+                  "verified": true,
+                  "walks": 9,
+                  "wall_ms": 55.810472
+                },
+                {
+                  "distinguished_points": 68,
+                  "gae": 316572.0,
+                  "group_ops": {
+                    "adds": 316480,
+                    "doubles": 92,
+                    "scalar_mults": 2
+                  },
+                  "planted": 46356690635233,
+                  "recovered": 46356690635233,
+                  "solved_by": "earlier",
+                  "steps": 316188,
+                  "verified": true,
+                  "walks": 68,
+                  "wall_ms": 408.370434
+                },
+                {
+                  "distinguished_points": 11,
+                  "gae": 57389.0,
+                  "group_ops": {
+                    "adds": 57296,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 135616006633260,
+                  "recovered": 135616006633260,
+                  "solved_by": "earlier",
+                  "steps": 57193,
+                  "verified": true,
+                  "walks": 11,
+                  "wall_ms": 67.223618
+                },
+                {
+                  "distinguished_points": 3,
+                  "gae": 12364.0,
+                  "group_ops": {
+                    "adds": 12273,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 58944096158252,
+                  "recovered": 58944096158252,
+                  "solved_by": "earlier",
+                  "steps": 12203,
+                  "verified": true,
+                  "walks": 3,
+                  "wall_ms": 15.834314
+                },
+                {
+                  "distinguished_points": 3,
+                  "gae": 7048.0,
+                  "group_ops": {
+                    "adds": 6955,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 80835871674390,
+                  "recovered": 80835871674390,
+                  "solved_by": "earlier",
+                  "steps": 6902,
+                  "verified": true,
+                  "walks": 3,
+                  "wall_ms": 9.018112
+                },
+                {
+                  "distinguished_points": 9,
+                  "gae": 35768.0,
+                  "group_ops": {
+                    "adds": 35675,
+                    "doubles": 93,
+                    "scalar_mults": 2
+                  },
+                  "planted": 95252027019301,
+                  "recovered": 95252027019301,
+                  "solved_by": "earlier",
+                  "steps": 35592,
+                  "verified": true,
+                  "walks": 9,
+                  "wall_ms": 44.875215
+                },
+                {
+                  "distinguished_points": 30,
+                  "gae": 144751.0,
+                  "group_ops": {
+                    "adds": 144660,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 120035448640014,
+                  "recovered": 120035448640014,
+                  "solved_by": "earlier",
+                  "steps": 144493,
+                  "verified": true,
+                  "walks": 30,
+                  "wall_ms": 184.124523
+                },
+                {
+                  "distinguished_points": 3,
+                  "gae": 12538.0,
+                  "group_ops": {
+                    "adds": 12447,
+                    "doubles": 91,
+                    "scalar_mults": 2
+                  },
+                  "planted": 33302133434518,
+                  "recovered": 33302133434518,
+                  "solved_by": "earlier",
+                  "steps": 12386,
+                  "verified": true,
+                  "walks": 3,
+                  "wall_ms": 15.802787
+                }
+              ],
+              "planted": [
+                88641115673303,
+                148964972051036,
+                43052351473105,
+                118868847631557,
+                98790430986460,
+                107038729716593,
+                53709730162890,
+                120442668883830,
+                112865636549341,
+                92110612522937,
+                20924663281799,
+                118711199420250,
+                142813472381306,
+                118185567312588,
+                2514015428000,
+                110479883547818,
+                32370738857621,
+                124524665014064,
+                127113714527166,
+                20833864740960,
+                114126134368018,
+                15271022899636,
+                100657779758280,
+                154720809776059,
+                84919828855142,
+                46356690635233,
+                135616006633260,
+                58944096158252,
+                80835871674390,
+                95252027019301,
+                120035448640014,
+                33302133434518
+              ],
+              "s_per_target": 0.02373650287758668,
+              "s_walk_per_target": 0.023716238843238778,
+              "setup_gae": 1094.0,
+              "target_seed": 5289404617335023253,
+              "walk_seed": 819346382586176863,
+              "wall_ms": 12519.672151
+            }
+          ],
+          "sd_s_per_target": 0.0016511241478722068,
+          "solved_on_an_earlier_trail": 235,
+          "solved_on_own_trail": 21
+        }
+      ]
+    }
+  ],
+  "markdown": "| curve | log₂ r | A | k | batches | S per target | sd | walk S per target | over k = 1 | batch law | floor S (one target) | own trail | earlier trail | ok |\n|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|\n| K_0 / GF(2^61) | 47.21 | 122 | 1 | 8 | 0.115 | 0.077 | 0.115 | 1.000 | 1.000 | 0.1135 | 8 | 0 | ✓ |\n| K_0 / GF(2^61) | 47.21 | 122 | 32 | 8 | 0.022 | 0.002 | 0.022 | 0.190 | 0.199 | 0.1135 | 21 | 235 | ✓ |\n",
+  "operation": "rho-batch",
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "7c0d189154fe977504def85b7a983e1656e997ba247c37b4aa9d1394149bc49e",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete",
+  "what_this_is": "Batch Pollard rho (Kuhn-Struik) on Koblitz curves: k targets solved in sequence by the tuned walk on the signed-Frobenius classes (A = 2n), jumps in G only, one distinguished-point table shared by the batch, so a later target's walk can finish on an earlier target's trail. S per target = the batch's group-addition equivalents (the shared jump table, each target's start stride, starts, walks and verification) / (k sqrt r). Every target is fresh and its recovered logarithm is checked against the planted one.",
+  "what_this_is_not": [
+    "not an index-calculus result: no relation is collected here",
+    "not the price of a step: canonicalisations are counted (canonicalisations_uncharged) and not charged, as in every rho count in the ledger",
+    "not a wall-clock benchmark: wall time is a practicality note"
+  ]
+}

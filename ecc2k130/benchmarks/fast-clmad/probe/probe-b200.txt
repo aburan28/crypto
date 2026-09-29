@@ -1,0 +1,48 @@
+{"gpu":"NVIDIA B200","sms":148,"clockMaxKHz":1965000,"blocks":1184,"threads":256,"chains":16,"rounds":20000}
+clmad verified against host carryless multiply
+{"stream":"LOP3","laneOpsPerSecond":1.852272e+13,"tLaneOpsPerSecond":18.523,"lop3Equivalents":1.000}
+{"stream":"CLMAD.lo","laneOpsPerSecond":4.906318e+12,"tLaneOpsPerSecond":4.906,"lop3Equivalents":3.775}
+{"stream":"CLMAD product (lo+hi)","laneOpsPerSecond":8.465481e+12,"tLaneOpsPerSecond":8.465,"lop3Equivalents":2.188}
+{"stream":"CLMAD.lo + LOP3 mix","laneOpsPerSecond":9.220917e+12,"tLaneOpsPerSecond":9.221,"lop3Equivalents":2.009}
+{"stream":"IMAD.WIDE","laneOpsPerSecond":6.649847e+12,"tLaneOpsPerSecond":6.650,"lop3Equivalents":2.785}
+{"stream":"POPC","laneOpsPerSecond":4.638717e+12,"tLaneOpsPerSecond":4.639,"lop3Equivalents":3.993}
+{"stream":"FLO","laneOpsPerSecond":4.641104e+12,"tLaneOpsPerSecond":4.641,"lop3Equivalents":3.991}
+{"stream":"SHF","laneOpsPerSecond":1.848353e+13,"tLaneOpsPerSecond":18.484,"lop3Equivalents":1.002}
+{"stream":"ISETP + SEL","laneOpsPerSecond":1.841134e+13,"tLaneOpsPerSecond":18.411,"lop3Equivalents":1.006}
+{"stream":"PRMT","laneOpsPerSecond":1.855538e+13,"tLaneOpsPerSecond":18.555,"lop3Equivalents":0.998}
+{"stream":"IMNMX","laneOpsPerSecond":9.245937e+12,"tLaneOpsPerSecond":9.246,"lop3Equivalents":2.003}
+{"stream":"LDS.U8 random","laneOpsPerSecond":2.671023e+12,"tLaneOpsPerSecond":2.671,"lop3Equivalents":6.935}
+one clmad costs 3.78 LOP3 slots; one 64x64 carryless product (lo+hi) costs 4.38
+1965 MHz, 328.48 W, 35
+{"gpu":"NVIDIA B200","sms":148,"clockMaxKHz":1965000,"blocks":1184,"threads":256,"chains":16,"rounds":20000}
+clmad verified against host carryless multiply
+{"stream":"LOP3","laneOpsPerSecond":1.852193e+13,"tLaneOpsPerSecond":18.522,"lop3Equivalents":1.000}
+{"stream":"CLMAD.lo","laneOpsPerSecond":4.905254e+12,"tLaneOpsPerSecond":4.905,"lop3Equivalents":3.776}
+{"stream":"CLMAD product (lo+hi)","laneOpsPerSecond":8.462290e+12,"tLaneOpsPerSecond":8.462,"lop3Equivalents":2.189}
+{"stream":"CLMAD.lo + LOP3 mix","laneOpsPerSecond":9.221647e+12,"tLaneOpsPerSecond":9.222,"lop3Equivalents":2.009}
+{"stream":"IMAD.WIDE","laneOpsPerSecond":6.649963e+12,"tLaneOpsPerSecond":6.650,"lop3Equivalents":2.785}
+{"stream":"POPC","laneOpsPerSecond":4.638100e+12,"tLaneOpsPerSecond":4.638,"lop3Equivalents":3.993}
+{"stream":"FLO","laneOpsPerSecond":4.639584e+12,"tLaneOpsPerSecond":4.640,"lop3Equivalents":3.992}
+{"stream":"SHF","laneOpsPerSecond":1.848804e+13,"tLaneOpsPerSecond":18.488,"lop3Equivalents":1.002}
+{"stream":"ISETP + SEL","laneOpsPerSecond":1.840944e+13,"tLaneOpsPerSecond":18.409,"lop3Equivalents":1.006}
+{"stream":"PRMT","laneOpsPerSecond":1.855345e+13,"tLaneOpsPerSecond":18.553,"lop3Equivalents":0.998}
+{"stream":"IMNMX","laneOpsPerSecond":9.242892e+12,"tLaneOpsPerSecond":9.243,"lop3Equivalents":2.004}
+{"stream":"LDS.U8 random","laneOpsPerSecond":2.670986e+12,"tLaneOpsPerSecond":2.671,"lop3Equivalents":6.934}
+one clmad costs 3.78 LOP3 slots; one 64x64 carryless product (lo+hi) costs 4.38
+1965 MHz, 331.68 W, 35
+{"gpu":"NVIDIA B200","sms":148,"clockMaxKHz":1965000,"blocks":1184,"threads":256,"chains":16,"rounds":20000}
+clmad verified against host carryless multiply
+{"stream":"LOP3","laneOpsPerSecond":1.852306e+13,"tLaneOpsPerSecond":18.523,"lop3Equivalents":1.000}
+{"stream":"CLMAD.lo","laneOpsPerSecond":4.906342e+12,"tLaneOpsPerSecond":4.906,"lop3Equivalents":3.775}
+{"stream":"CLMAD product (lo+hi)","laneOpsPerSecond":8.465587e+12,"tLaneOpsPerSecond":8.466,"lop3Equivalents":2.188}
+{"stream":"CLMAD.lo + LOP3 mix","laneOpsPerSecond":9.218856e+12,"tLaneOpsPerSecond":9.219,"lop3Equivalents":2.009}
+{"stream":"IMAD.WIDE","laneOpsPerSecond":6.649292e+12,"tLaneOpsPerSecond":6.649,"lop3Equivalents":2.786}
+{"stream":"POPC","laneOpsPerSecond":4.637681e+12,"tLaneOpsPerSecond":4.638,"lop3Equivalents":3.994}
+{"stream":"FLO","laneOpsPerSecond":4.640301e+12,"tLaneOpsPerSecond":4.640,"lop3Equivalents":3.992}
+{"stream":"SHF","laneOpsPerSecond":1.848466e+13,"tLaneOpsPerSecond":18.485,"lop3Equivalents":1.002}
+{"stream":"ISETP + SEL","laneOpsPerSecond":1.840809e+13,"tLaneOpsPerSecond":18.408,"lop3Equivalents":1.006}
+{"stream":"PRMT","laneOpsPerSecond":1.855402e+13,"tLaneOpsPerSecond":18.554,"lop3Equivalents":0.998}
+{"stream":"IMNMX","laneOpsPerSecond":9.243117e+12,"tLaneOpsPerSecond":9.243,"lop3Equivalents":2.004}
+{"stream":"LDS.U8 random","laneOpsPerSecond":2.670880e+12,"tLaneOpsPerSecond":2.671,"lop3Equivalents":6.935}
+one clmad costs 3.78 LOP3 slots; one 64x64 carryless product (lo+hi) costs 4.38
+1965 MHz, 329.46 W, 35

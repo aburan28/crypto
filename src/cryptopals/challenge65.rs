@@ -36,7 +36,7 @@ pub fn solve_inhomogeneous(t_mat: &BitMatrix, t_vec: &[u64]) -> Option<Vec<u64>>
     let cols = t_mat.cols;
     // Augment one extra column.
     let new_cols = cols + 1;
-    let words = (new_cols + 63) / 64;
+    let words = new_cols.div_ceil(64);
     let mut data = vec![vec![0u64; words]; rows];
     for r in 0..rows {
         for w in 0..t_mat.data[r].len() {
@@ -97,7 +97,7 @@ pub fn solve_inhomogeneous(t_mat: &BitMatrix, t_vec: &[u64]) -> Option<Vec<u64>>
     }
     // Back-substitute: free variables = 0, pivots take whatever the
     // augmented column says.
-    let mut d = vec![0u64; (cols + 63) / 64];
+    let mut d = vec![0u64; cols.div_ceil(64)];
     for r in 0..rows {
         if let Some(col) = pivot_col[r] {
             if (data[r][cols / 64] >> (cols % 64)) & 1 != 0 {
@@ -167,7 +167,7 @@ pub fn run() -> Report {
         let mut full = ct_prime.clone();
         full.extend_from_slice(tag);
         // Verify with truncated comparison.
-        if let Ok(_) = crate::symmetric::aes::aes_gcm_decrypt(&full, &key, &nonce, aad) {
+        if crate::symmetric::aes::aes_gcm_decrypt(&full, &key, &nonce, aad).is_ok() {
             succeeded = true;
             break;
         }

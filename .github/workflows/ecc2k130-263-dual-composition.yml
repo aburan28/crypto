@@ -1,0 +1,38 @@
+name: ECC2K-130 degree-263 dual composition
+on:
+  pull_request:
+    paths:
+      - 'research/ecc2k130_dual_transport_20260925/**'
+      - 'research/ecc2k130_direction_review_20260924/twist_torsion_results.json'
+      - 'research/ecc2k130_direction_review_20260924/redteam_velu_replay.py'
+      - 'research/ecc2k130_oriented_transport_20260924/oriented_velu.py'
+      - 'research/ecc2k130_relations/fastfield.py'
+      - 'research/ecc2k130_relations/relations.py'
+      - '.github/workflows/ecc2k130-263-dual-composition.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Replay exact dual and exceptional inputs
+        run: python3 research/ecc2k130_dual_transport_20260925/certificate.py --out /tmp/dual_263_replay.json
+      - name: Compare deterministic full-point and cost evidence
+        run: |
+          python3 - <<'PYCODE'
+          import json
+          from pathlib import Path
+          frozen = json.loads(Path('research/ecc2k130_dual_transport_20260925/receipt.json').read_text())
+          fresh = json.loads(Path('/tmp/dual_263_replay.json').read_text())
+          assert frozen['status'] == fresh['status'] == 'PASS'
+          for key in ('source_sha256', 'input_sha256', 'deterministic_sha256'):
+              assert fresh[key] == frozen[key], key
+          assert len(fresh['rows']) == 8
+          assert all(row['raw_reverse_scalar_sign'] == -1 for row in fresh['rows'])
+          PYCODE

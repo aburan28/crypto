@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/private/tmp/rotated-s3-sparse-20260925/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/export.py", line 200, in <module>
+    main()
+    ~~~~^^
+  File "/private/tmp/rotated-s3-sparse-20260925/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/export.py", line 196, in main
+    run(args.out)
+    ~~~^^^^^^^^^^
+  File "/private/tmp/rotated-s3-sparse-20260925/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/export.py", line 175, in run
+    panels = [export_panel(dense, frozen, panel, out / panel[0]) for panel in PANELS]
+              ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/rotated-s3-sparse-20260925/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/export.py", line 110, in export_panel
+    assert len(outputs) == len(permitted) and outputs
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
