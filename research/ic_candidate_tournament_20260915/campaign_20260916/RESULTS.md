@@ -1128,7 +1128,12 @@ would pass the incumbent gate. It passed.
   [DECOMPOSITION-SURVEY.md](DECOMPOSITION-SURVEY.md) closes generic table
   decompositions as to the exponent. The one open family, algebraic `m ≥ 4`,
   is in a pre-registered exponent audit,
-  `research/ic_m4_exponent_audit_20260928/`, reported there.
+  `research/ic_m4_exponent_audit_20260928/`, reported there. Its registered
+  verdict is **closed for the frozen engine at `n ≤ 19`**. The Semaev solve
+  cost grows at 0.985 bits per unit `n`, band [0.983, 1.018], against the
+  bar of 0.25, and both nulls passed. See
+  [its results](../../ic_m4_exponent_audit_20260928/RESULTS.md). That closes
+  `m = 4` for that engine only. The next rung is `m = 5`.
 
 Classification **accounting**.
 
