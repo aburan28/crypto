@@ -460,8 +460,6 @@ pub struct F5Timings {
     pub direct_pack_used: bool,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
-    /// Whether F5 rows were ordered once by their initial packed density.
-    pub initial_density_sort_used: bool,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -576,12 +574,6 @@ fn unpack_row(row: &[u64], cols: &[u64], n_vars: usize, avx512: bool, direct: bo
     unpack_row_scalar(row, cols, n_vars)
 }
 
-/// Prefer initially sparse input rows as pivots while preserving the order
-/// among rows of equal weight. The count and sort are part of reduction cost.
-fn sort_rows_by_initial_density(matrix: &mut [Vec<u64>]) {
-    matrix.sort_by_cached_key(|row| row.iter().map(|w| w.count_ones() as usize).sum::<usize>());
-}
-
 /// [`matrix_f5_f2`] with the wall time of each phase.
 pub fn matrix_f5_f2_timed(
     polys: &[F2BoolPoly],
@@ -665,13 +657,6 @@ pub fn matrix_f5_f2_with_form_timed(
     }
     timings.build_ns = t.elapsed().as_nanos() as u64;
     let t = Instant::now();
-    static INITIAL_DENSITY_SORT: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    let initial_density_sort = *INITIAL_DENSITY_SORT
-        .get_or_init(|| std::env::var("KIC_F5_INITIAL_DENSITY_SORT").as_deref() == Ok("1"));
-    if initial_density_sort {
-        sort_rows_by_initial_density(&mut matrix);
-        timings.initial_density_sort_used = true;
-    }
     let mut word_ops = 0u64;
     let echelon = matches!(form, F5OutputForm::Echelon)
         || (matches!(form, F5OutputForm::SelectiveEchelon) && degree == 4 && n_vars >= 20);
@@ -775,48 +760,6 @@ mod tests {
                     unpack_row_scalar_direct(&row, &cols, 24),
                     unpack_row_scalar(&row, &cols, 24),
                 );
-            }
-        }
-    }
-
-    #[test]
-    fn initial_density_order_preserves_rank_and_row_space() {
-        for n_cols in [1usize, 7, 64, 65, 129, 257] {
-            let words = n_cols.div_ceil(64);
-            let mut seed = 0x8d12_3f9a_6704_55b1u64;
-            for density in [1u64, 3, 7, 15] {
-                let mut matrix = Vec::new();
-                for i in 0..40 {
-                    let mut row = Vec::new();
-                    for w in 0..words {
-                        seed ^= seed << 13;
-                        seed ^= seed >> 7;
-                        seed ^= seed << 17;
-                        let valid = (n_cols - w * 64).min(64);
-                        let mut bits = seed;
-                        for rot in 1..density.count_ones() {
-                            bits &= seed.rotate_left(rot);
-                        }
-                        row.push(bits & (u64::MAX >> (64 - valid)));
-                    }
-                    if i % 7 == 0 {
-                        row.fill(0);
-                    }
-                    matrix.push(row);
-                }
-                let mut sorted = matrix.clone();
-                sort_rows_by_initial_density(&mut sorted);
-                let mut ops = 0;
-                let rank_a =
-                    crate::cryptanalysis::gf2_elim::echelon_counted(&mut matrix, n_cols, &mut ops);
-                let rank_b =
-                    crate::cryptanalysis::gf2_elim::echelon_counted(&mut sorted, n_cols, &mut ops);
-                assert_eq!(rank_a, rank_b, "n_cols={n_cols}, density={density}");
-                matrix.truncate(rank_a);
-                sorted.truncate(rank_b);
-                crate::cryptanalysis::gf2_elim::rref_counted(&mut matrix, n_cols, &mut ops);
-                crate::cryptanalysis::gf2_elim::rref_counted(&mut sorted, n_cols, &mut ops);
-                assert_eq!(matrix, sorted, "n_cols={n_cols}, density={density}");
             }
         }
     }
