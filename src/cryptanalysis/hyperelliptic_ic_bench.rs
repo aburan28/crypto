@@ -532,6 +532,21 @@ pub fn calibrate_modmuls_per_group_op(
     n: &BigUint,
     rounds: usize,
 ) -> f64 {
+    calibrate(curve, d, n, rounds).0
+}
+
+/// Measure `(mul-mods per group operation, seconds per group operation)`.
+///
+/// The second number is what lets a wall-clock measurement be converted
+/// into the same unit as everything else, which is how the oracle is
+/// now charged: its hand-derived multiplication count understated its
+/// real cost by about an order of magnitude.
+pub fn calibrate(
+    curve: &HyperellipticCurveP,
+    d: &MumfordDivisorP,
+    n: &BigUint,
+    rounds: usize,
+) -> (f64, f64) {
     let mut acc = d.clone();
     let start = Instant::now();
     for _ in 0..rounds {
@@ -550,9 +565,9 @@ pub fn calibrate_modmuls_per_group_op(
     std::hint::black_box(&x);
 
     if per_modmul <= 0.0 {
-        return f64::NAN;
+        return (f64::NAN, per_group_op);
     }
-    per_group_op / per_modmul
+    (per_group_op / per_modmul, per_group_op)
 }
 
 // ── Head-to-head ───────────────────────────────────────────────────────
@@ -576,10 +591,17 @@ pub struct HeadToHeadRow {
     pub ic_ops_per_trial: f64,
     /// Linear algebra, in mul-mods.
     pub ic_la_modmuls: f64,
-    /// Smoothness oracle (root finding + decomposition), in mul-mods.
+    /// Smoothness oracle (root finding + decomposition), in mul-mods —
+    /// the hand-derived charge, kept for comparison.
     pub ic_oracle_modmuls: f64,
-    /// The same, converted to group-operation equivalents.
+    /// The oracle in group-operation equivalents, from its **measured**
+    /// wall time divided by the measured seconds per group operation.
+    /// This is the number that enters `S`.
     pub ic_oracle_group_equiv: f64,
+    /// What the hand-derived mul-mod charge would have claimed instead.
+    /// Reported because the gap between the two is large (roughly 10x)
+    /// and was only visible in wall clock.
+    pub ic_oracle_group_equiv_charged: f64,
     /// The same, converted to group-operation equivalents.
     pub ic_la_group_equiv: f64,
     pub ic_total_group_ops: f64,
@@ -685,12 +707,13 @@ pub fn head_to_head(
     rho_variant: &RhoVariant,
 ) -> HeadToHeadRow {
     let p_u = curve.p.to_u64_digits().first().copied().unwrap_or(0);
-    let conv = calibrate_modmuls_per_group_op(curve, d1, n, 2_000);
+    let (conv, secs_per_group_op) = calibrate(curve, d1, n, 2_000);
 
     let ic_runs = trials.ic.max(1);
     let mut ic_relation_ops = 0f64;
     let mut ic_la_modmuls = 0f64;
     let mut ic_oracle_modmuls = 0f64;
+    let mut ic_oracle_ns = 0f64;
     let mut ic_precompute_ops = 0f64;
     let mut ic_ops_per_trial = 0f64;
     let mut ic_wall_ms = 0f64;
@@ -706,6 +729,7 @@ pub fn head_to_head(
         ic_relation_ops += rep.jacobian_ops as f64;
         ic_la_modmuls += rep.solve_row_ops as f64;
         ic_oracle_modmuls += rep.smoothness_field_ops as f64;
+        ic_oracle_ns += rep.smoothness_wall_ns as f64;
         ic_precompute_ops += rep.precompute_ops as f64;
         ic_ops_per_trial += rep.ops_per_trial();
         ic_smooth += rep.smoothness_rate();
@@ -714,6 +738,7 @@ pub fn head_to_head(
     }
     let f = ic_runs as f64;
     let (ic_precompute_ops, ic_ops_per_trial) = (ic_precompute_ops / f, ic_ops_per_trial / f);
+    let ic_oracle_ns = ic_oracle_ns / f;
     let (ic_relation_ops, ic_la_modmuls, ic_oracle_modmuls, ic_wall_ms, ic_smooth) = (
         ic_relation_ops / f,
         ic_la_modmuls / f,
@@ -750,7 +775,10 @@ pub fn head_to_head(
 
     let root_n = sqrt_big(n);
     let la_group_equiv = ic_la_modmuls / conv.max(f64::MIN_POSITIVE);
-    let oracle_group_equiv = ic_oracle_modmuls / conv.max(f64::MIN_POSITIVE);
+    // Measured, not charged: nanoseconds in the oracle divided by
+    // measured seconds per group operation.
+    let oracle_group_equiv = ic_oracle_ns / 1e9 / secs_per_group_op.max(f64::MIN_POSITIVE);
+    let oracle_group_equiv_charged = ic_oracle_modmuls / conv.max(f64::MIN_POSITIVE);
     let ic_total = ic_relation_ops + la_group_equiv + oracle_group_equiv;
 
     let m = ic_fb as f64;
@@ -796,6 +824,7 @@ pub fn head_to_head(
         ic_la_group_equiv: la_group_equiv,
         ic_oracle_modmuls,
         ic_oracle_group_equiv: oracle_group_equiv,
+        ic_oracle_group_equiv_charged: oracle_group_equiv_charged,
         ic_total_group_ops: ic_total,
         ic_s: ic_total / root_n,
         ic_wall_ms,

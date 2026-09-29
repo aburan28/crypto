@@ -76,6 +76,7 @@
 //!   Jacobians and refuses a composite answer.
 
 use std::collections::HashMap;
+use std::time::Instant;
 
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
@@ -777,6 +778,18 @@ pub struct HecIndexCalculusReport {
     /// rho's branch precomputation does.  Split out for the same
     /// reason: the per-trial price is the thing the walk changed.
     pub precompute_ops: usize,
+    /// Wall-clock nanoseconds spent inside the smoothness oracle.
+    ///
+    /// The `smoothness_field_ops` count below is a hand-derived charge —
+    /// coefficient multiplications — and it turned out to understate the
+    /// oracle's real cost by roughly an order of magnitude: cutting that
+    /// count by 60% cut wall clock by 1.5x, where a faithful charge
+    /// would have predicted a few percent.  The charge misses what the
+    /// implementation actually does per multiplication (allocation, the
+    /// division loop inside `rem`, clones).  This field is measured
+    /// instead, so a caller can convert the oracle at the same measured
+    /// rate it converts everything else.
+    pub smoothness_wall_ns: u64,
     /// `F_p` multiplications spent in the smoothness oracle (root
     /// finding and the decomposition's evaluations).  Reported in field
     /// operations, not group operations — the caller converts, because
@@ -1214,7 +1227,9 @@ pub fn collect_relations(
         let mut field_ops = 0usize;
         // One oracle call per candidate.  The three outcomes come back
         // from that call rather than from re-running it on failure.
+        let oracle_started = Instant::now();
         let classified = classify_counted_with(curve, &r, fb, &mut field_ops, &params.smoothness);
+        report.smoothness_wall_ns += oracle_started.elapsed().as_nanos() as u64;
         report.smoothness_field_ops += field_ops;
         match classified {
             Decomposition::Smooth(entries) => {
