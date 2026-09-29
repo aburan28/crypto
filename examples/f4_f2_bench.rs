@@ -201,6 +201,7 @@ fn main() {
             last = Some(r);
         }
         let (rows, rep, phases) = last.unwrap();
+        let output_terms: usize = rows.iter().map(|p| p.terms.len()).sum();
         let row_space_fp = canonical_row_space_fingerprint(&rows)
             .expect("returned F5 rows have a valid column set");
         let mut h = DefaultHasher::new();
@@ -215,7 +216,10 @@ fn main() {
             json!({
                 "case": format!("f5_n{n}_m{m}_d{degree}"), "wall_ms": median(walls),
                 "criterion_word_ops": rep.criterion_word_ops, "reduce_word_ops": rep.reduce_word_ops,
+                "rows_f4": rep.rows_f4, "rows_built": rep.rows_built, "cols": rep.cols,
                 "rows_pruned": rep.rows_pruned, "rank": rep.rank, "rows_fp": format!("{:016x}", h.finish()),
+                "output_terms": output_terms,
+                "direct_pack_used": phases.direct_pack_used,
                 "row_space_fp": format!("{row_space_fp:016x}"),
                 "criterion_ms": phases.criterion_ns as f64 / 1e6, "f5_build_ms": phases.build_ns as f64 / 1e6,
                 "reduce_ms": phases.reduce_ns as f64 / 1e6, "unpack_ms": phases.unpack_ns as f64 / 1e6,
