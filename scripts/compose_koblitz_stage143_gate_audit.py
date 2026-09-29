@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compose current gates with the Stage-141 mechanism-attribution correction."""
+"""Compose current gates with the rejected n59 first-hit targeted tail."""
 from __future__ import annotations
 import argparse, hashlib, json, subprocess, sys
 from pathlib import Path
@@ -7,13 +7,13 @@ from typing import Any
 
 R = Path(__file__).resolve().parents[1]
 E = R / "research/sat_factor_base_review_20260908/continuation-05-sota-gates"
-S = E / "stage-141-current-gate-audit-20260922"
-A = R / "docs/ic/runs/koblitz-n59-rank-tail-attribution-correction-20260922.json"
-P = R / "docs/ic/params/k1n59-cofactor-projected-l15-coverage-tail-control-public-59001.json"
+S = E / "stage-142-current-gate-audit-20260922"
+F = R / "docs/ic/runs/koblitz-n59-first-hit-tail-rejection-20260922.json"
+P = R / "docs/ic/params/k1n59-cofactor-projected-l15-first-hit-control-public-59001.json"
 G = E / "GATE_STATUS.md"
-SC = "koblitz_stage142_current_gate_audit.v1"
-SS = "koblitz_stage142_current_gate_audit_seal.v1"
-MARK = "Current through Stage 142"
+SC = "koblitz_stage143_current_gate_audit.v1"
+SS = "koblitz_stage143_current_gate_audit_seal.v1"
+MARK = "Current through Stage 143"
 
 
 class Error(RuntimeError): pass
@@ -26,43 +26,45 @@ def sha(p: Path) -> str: return hashlib.sha256(p.read_bytes()).hexdigest()
 
 def replay() -> dict[str, Any]:
     x = subprocess.run(
-        [sys.executable, str(R / "scripts/compose_koblitz_stage141_gate_audit.py"), "verify", "--output", str(S)],
+        [sys.executable, str(R / "scripts/compose_koblitz_stage142_gate_audit.py"), "verify", "--output", str(S)],
         cwd=R, text=True, capture_output=True, check=True,
     )
     value = json.loads(x.stdout)
-    req(value.get("schema") == "koblitz_stage141_current_gate_audit.v1", "Stage-141 replay changed")
+    req(value.get("schema") == "koblitz_stage142_current_gate_audit.v1", "Stage-142 replay changed")
     return value
 
 
 def compose() -> dict[str, Any]:
-    predecessor = replay(); correction = load(A, "attribution correction"); params = load(P, "control params")
-    req(correction.get("operation") == "koblitz_n59_rank_tail_attribution_correction", "correction identity changed")
-    req(params.get("name") == "k1n59-coverage-prefix15-control", "control identity changed")
-    req(params.get("targets") == [{"public_hash_seed": 59001}], "control target changed")
-    req("targeted_tail_rank_columns" not in params["collection"], "rank fallback is not disabled")
-    req(correction["control_params"]["sha256"] == sha(P), "control parameter pin changed")
-    attribution = correction["attribution"]
-    req(attribution["selected_attempts"] == 295 and attribution["selected_rank_phase_attempts"] == 0 and attribution["selected_raw_uncovered_phase_attempts"] == 295, "selected phase attribution changed")
-    control = correction["rank_disabled_control"]
-    req(control["params_rank_columns_per_round"] == 0 and control["targeted_attempts"] == 295 and control["targeted_relations"] == 71, "rank-disabled control changed")
-    req(control["combined_relations"] == 31798 and control["combined_relations_sha256"] == "32cb1609d40513a12750254ba291fb2a8a262a6eaeb05e598b28212a53fbf3aa", "control relation stream changed")
-    req(control["exact_match_to_stage138_selected_stream"] is True, "selected stream no longer matches control")
-    accounting = correction["process_accounting"]
-    req(accounting["incremental_processes"] == 2 and accounting["incremental_total_core_seconds"] > 194 and accounting["cumulative_stage138_and_correction_processes"] == 21, "correction accounting changed")
-    req(accounting["cumulative_stage138_and_correction_peak_rss_bytes"] == 10091528192, "cumulative RSS changed")
-    effect = correction["effect_on_results"]
-    req(effect["selected_performance_measurements_changed"] is False and effect["selected_relation_stream_changed"] is False and effect["full_cost_gate_passed"] is False, "result boundary changed")
+    predecessor = replay(); first = load(F, "first-hit evidence"); params = load(P, "first-hit params")
+    req(first.get("operation") == "koblitz_n59_first_hit_tail_rejection", "evidence identity changed")
+    req(params.get("name") == "k1n59-first-hit32-full-control", "parameter identity changed")
+    req(params.get("targets") == [{"public_hash_seed": 59001}], "target changed")
+    req(params["collection"].get("targeted_tail_first_hit") is True, "first-hit switch changed")
+    req(first["candidate_params"]["sha256"] == sha(P), "parameter pin changed")
+    patch = R / first["source_patch"]["path"]
+    req(first["source_patch"]["sha256"] == sha(patch), "candidate patch pin changed")
+    streams = first["relation_streams"]
+    req(streams["uniform_relations"] == 31727 and streams["candidate"]["targeted_relations"] == 58 and streams["candidate"]["combined_relations"] == 31785, "candidate stream changed")
+    req(streams["candidate"]["combined_relations_sha256"] == "dcbf0aad8eabce6f22241801f70ade6f4d948e2d1bc67d39a5dd1d2fd140e76c" and streams["candidate_repeated_hash_match"] is True, "candidate hash changed")
+    abba = first["matched_default_abba"]
+    req(abba["order"] == ["baseline", "candidate", "candidate", "baseline"], "ABBA order changed")
+    req(abba["comparison"]["whole_wall_seconds"]["change_fraction"] > .04, "wall rejection changed")
+    req(abba["comparison"]["whole_cpu_seconds"]["change_fraction"] > 0, "CPU rejection changed")
+    req(abba["comparison"]["targeted_pair_lookups"]["change_fraction"] < -.08, "lookup reduction changed")
+    req(all(x["verified"] is True and x["recovered_scalar"] == 17861472351607 for x in abba["runs"]), "solution changed")
+    accounting = first["process_accounting"]
+    req(accounting["retained_processes"] == 9 and accounting["retained_total_core_seconds"] > 3806 and accounting["retained_peak_rss_bytes"] == 10080059392, "process accounting changed")
+    req(first["decision"]["status"] == "rejected" and first["decision"]["selected_stage139_unchanged"] is True, "selection changed")
     req(MARK in G.read_text(), "gate marker changed")
     gates = dict(predecessor["gates"])
-    gates["1_all_stage_resource_charging"] = "partial_rank_disabled_attribution_control_charged_magma_and_one_preliminary_receipt_missing"
-    gates["3_single_core_core_memory_conflicts_wall"] = "partial_current_n59_coverage_tail_complete_magma_missing"
-    gates["6_full_cost_vs_automorphism_rho"] = "failed_current_n59_coverage_tail_improved_far_behind_rho_attribution_corrected"
+    gates["1_all_stage_resource_charging"] = "partial_first_hit_rejection_charged_magma_and_one_preliminary_receipt_missing"
+    gates["6_full_cost_vs_automorphism_rho"] = "failed_current_n59_coverage_tail_selected_first_hit_rejected"
     return {
         "schema": SC, "status": "current_seven_gate_audit_verified",
         "all_seven_gates_passed": False, "koblitz_index_calculus_sota": False,
-        "claim_boundary": "additive Stage-141 mechanism-attribution correction: selected speedup comes from the 15-unit raw-uncovered-column tail, while sparse-rank targeting is a frontier fallback; performance is unchanged and full cost remains far behind rho",
-        "predecessor": {"stage141_audit_sha256": sha(S / "audit.json"), "stage141_seal_sha256": sha(S / "result-seal.json"), "stage141_status": predecessor["status"]},
-        "evidence_pins": {"attribution_correction_sha256": sha(A), "control_params_sha256": sha(P), "gate_status_sha256": sha(G)},
+        "claim_boundary": "finite same-target first-hit optimization rejection; pair lookups fall but matched default full wall and CPU regress, so the Stage-142 selected result is unchanged and remains far behind rho",
+        "predecessor": {"stage142_audit_sha256": sha(S / "audit.json"), "stage142_seal_sha256": sha(S / "result-seal.json"), "stage142_status": predecessor["status"]},
+        "evidence_pins": {"first_hit_evidence_sha256": sha(F), "candidate_params_sha256": sha(P), "candidate_patch_sha256": sha(patch), "gate_status_sha256": sha(G)},
         "inherited_phase_b_same_instance_matrix": predecessor["inherited_phase_b_same_instance_matrix"],
         "inherited_current_n53": predecessor["inherited_current_n53"], "inherited_current_n41": predecessor["inherited_current_n41"],
         "inherited_current_n59_standard_cap": predecessor["inherited_current_n59_standard_cap"],
@@ -74,8 +76,9 @@ def compose() -> dict[str, Any]:
         "inherited_current_n59_cached_witnessed": predecessor["inherited_current_n59_cached_witnessed"],
         "inherited_current_n59_filter_rejection": predecessor["inherited_current_n59_filter_rejection"],
         "inherited_current_n59_targeted_tail": predecessor["inherited_current_n59_targeted_tail"],
-        "inherited_current_n59_rank_tail": predecessor["current_n59_rank_tail"],
-        "current_n59_attribution_correction": correction, "gates": gates,
+        "inherited_current_n59_rank_tail": predecessor["inherited_current_n59_rank_tail"],
+        "inherited_current_n59_attribution_correction": predecessor["current_n59_attribution_correction"],
+        "current_n59_first_hit_rejection": first, "gates": gates,
         "next_targets": predecessor["next_targets"],
         "licensed_magma_complete": False, "independent_external_reproduction_satisfied": False, "full_cost_gate_passed": False,
     }
@@ -102,5 +105,5 @@ def main() -> None:
         result = build(args.output.resolve()) if args.cmd == "build" else verify(args.output.resolve(strict=True))
         print(json.dumps(result, indent=2, sort_keys=True))
     except (OSError, ValueError, KeyError, subprocess.CalledProcessError, Error) as exc:
-        raise SystemExit(f"stage142-gate-audit: {exc}")
+        raise SystemExit(f"stage143-gate-audit: {exc}")
 if __name__ == "__main__": main()
