@@ -37,15 +37,19 @@ then use the existing packed kernel on the lower-degree suffix. Return the
 complete echelon basis as canonical `F2BoolPoly` rows and exact rank. Charge
 the sparse phase's term visits separately from dense word XORs; its output
 and operation counts may differ, while canonical row space must match.
+The fifth hypothesis is that a stable lightest-first ordering of packed
+input rows gives the dense kernel lighter pivots and less fill, without the
+billions of list merges seen in a full sparse pass. Charge the sort within
+the reduction phase and keep output, rank, and row-space checks unchanged.
 
 Before reserving an eligible x86-64 runner, run a nonpromoting Apple ARM64
 screen on the frozen seed and holdout A. Use one thread, one binary, one warmup
 per arm, and three alternating reference/candidate pairs per seed. Compare
 four, six, and eight tables, then pivot-candidate windows 1 and 4, then table
-widths 8, 7, and 6, then dense reference versus hybrid sparse leading band
-as separate arms. This screen can reject a regression or a correctness
-failure, but its
-ratios cannot establish the requested gain. Preserve the raw screen receipt.
+widths 8, 7, and 6, then dense reference versus hybrid sparse leading band,
+then unsorted versus stable lightest-first packed rows as separate arms. This
+screen can reject a regression or a correctness failure, but its ratios
+cannot establish the requested gain. Preserve the raw screen receipt.
 
 ## Frozen workload and accounting
 
