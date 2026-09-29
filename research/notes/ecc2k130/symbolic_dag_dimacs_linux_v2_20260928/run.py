@@ -192,6 +192,7 @@ def release_gate(frozen: dict, expected_head: str) -> dict:
             'pinned Linux solver is missing or nonexecutable')
     once = _one_shot_run(frozen, context['run_id'])
     return {'reviewed_head': expected_head, 'checkout_head': checkout_head,
+            'freeze_sha256': sha(HERE / 'FROZEN.json'),
             'pr_head': live['headRefOid'], 'pr_number': frozen['release_pr_number'],
             'checkout_root': str(ROOT), 'release_main_head': frozen['release_main_head'],
             'dispatch_main_head': main_head, 'parent_merge_commits': parent_states,
@@ -286,13 +287,17 @@ def main() -> int:
             require(cap_probe.returncode == 0,
                     'fresh target-image hard-cap probe failed')
         gate = release_gate(frozen, args.expected_head)
-        (out / 'DISPATCH.json').write_text(json.dumps(gate, sort_keys=True, indent=2) + '\n')
+        dispatch_path = out / 'DISPATCH.json'
+        dispatch_path.write_text(json.dumps(gate, sort_keys=True, indent=2) + '\n')
+        dispatch_sha256 = sha(dispatch_path)
         sys.path.insert(0, str(FIRST))
         from bounded import run_child
         for phase in ('toy', 'panel', 'n131'):
             cap = frozen['caps'][phase]
             command = [sys.executable, str(HERE / 'v2_child.py'), '--phase', phase,
-                       '--out', str(out / phase), '--expected-head', args.expected_head]
+                       '--out', str(out / phase), '--expected-head', args.expected_head,
+                       '--dispatch', str(dispatch_path),
+                       '--dispatch-sha256', dispatch_sha256]
             raw = run_child(command, cwd=ROOT,
                             stdout=out / f'{phase}.stdout.txt',
                             stderr=out / f'{phase}.stderr.txt',

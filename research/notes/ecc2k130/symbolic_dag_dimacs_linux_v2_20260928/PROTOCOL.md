@@ -48,16 +48,26 @@ by `FROZEN.json`.
 ## Release and one-shot gate
 
 The hash-only workflow checks out the PR's exact head, checks all frozen bytes,
-compiles the v2 scripts, runs six no-network one-shot/refusal and
+compiles the v2 scripts, runs nine no-network one-shot/refusal and
 relation-mutation controls, replays any committed archive, and executes *both*
 `v2_child.py --gate-only` and `run.py --gate-only --expected-head <event head>`.
-Neither gate-only command executes a measured phase. On the held Ubuntu
-runner, the workflow also runs the preparation/static gate, Git fetch/history
-checks, GitHub PR and Actions API reads in separate children under the toy
-512-MiB hard `RLIMIT_AS`. It archives the harmless control receipt, including
-any failed command and zero measured children. This catches a host-specific
-prerequisite failure before consuming the one-shot label. The separately opt-in
-measure workflow is triggered only by the unique PR label
+Neither gate-only command executes a measured phase. The outer supervisor
+runs full Git ancestry, GitHub API and preparation/archive checks before
+dispatch, outside any child address-space cap. Its sealed `DISPATCH.json`
+records the reviewed head, event, one-shot run, probe and frozen bytes.
+Each capped child consumes that exact dispatch digest, verifies its local
+source/input/solver bytes, current checkout head and run identity, then starts
+one phase. It cannot start while `status=HELD`. This split is necessary:
+on the Ubuntu target image, `git merge-base` exits 128 under the toy
+512-MiB `RLIMIT_AS` because Git cannot map the checkout packfile. Repeating
+the full gate inside the toy child would falsely refuse a valid ancestor.
+
+The hash-only Ubuntu workflow exercises the actual Git-free child byte gate
+under that hard toy cap. It also probes Git, GitHub PR/Actions API and the
+preparation gate under the same cap, recording the pack-map refusal as a
+specific host limitation rather than an ancestry result. Its harmless receipt
+archives command outcomes and zero measured children. A new or different
+failure refuses the held control. The separately opt-in measure workflow is triggered only by the unique PR label
 `ecc2k130-dag-linux-v2-measure-once`. It cannot release this held freeze.
 
 Before that label can be applied, a new commit must fill `status=RELEASED`,

@@ -2,16 +2,20 @@
 """No-network controls for the one-shot and pre-dispatch archive boundary."""
 from __future__ import annotations
 
+import contextlib
 import gzip
 import hashlib
+import io
 import json
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 import run
+import v2_child
 from ci_replay import (FIRST, _check_relation_stream, _replay_n131,
                        check_archive, check_static)
 
@@ -55,6 +59,61 @@ class GateControls(unittest.TestCase):
                 'event context must not be inspected while held')):
             with self.assertRaisesRegex(RuntimeError, 'v2 remains held'):
                 run.release_gate(self.frozen, run.git('rev-parse', 'HEAD'))
+
+    def test_capped_child_gate_only_does_not_call_git(self) -> None:
+        with patch.object(v2_child, 'git', side_effect=AssertionError(
+                'child gate-only must not call Git')):
+            with patch.object(sys, 'argv', ['v2_child.py', '--gate-only']):
+                with contextlib.redirect_stdout(io.StringIO()) as output:
+                    self.assertEqual(v2_child.main(), 0)
+        self.assertEqual(json.loads(output.getvalue())['decision'],
+                         'HASH_ONLY_NO_MEASURED_CHILD')
+
+    def test_capped_child_refuses_held_dispatch(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, 'v2 remains held'):
+            v2_child.dispatch_gate(self.frozen, run.git('rev-parse', 'HEAD'),
+                                   Path('/tmp/toy'), Path('/tmp/DISPATCH.json'),
+                                   '0' * 64)
+
+    def test_capped_child_accepts_only_sealed_dispatch(self) -> None:
+        released = dict(self.frozen)
+        released.update(status='RELEASED',
+                        release_main_head=self.frozen['base_main_head'],
+                        release_pr_number=921)
+        head = run.git('rev-parse', 'HEAD')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            probe = root / 'target_rlimit_probe.json'
+            probe.write_text('{}\n')
+            gate = {
+                'reviewed_head': head, 'checkout_head': head, 'pr_head': head,
+                'freeze_sha256': run.sha(run.HERE / 'FROZEN.json'),
+                'release_main_head': released['release_main_head'],
+                'pr_number': 921,
+                'preparation_freeze_sha256':
+                    released['preparation']['freeze_sha256'],
+                'linux_binary_sha256': released['linux_binary_sha256'],
+                'event': {'run_id': 123, 'event_head': head},
+                'one_shot': {'run_id': 123, 'matching_labeled_runs': [123]},
+                'target_cap_probe': {'receipt_sha256': run.sha(probe)},
+            }
+            dispatch = root / 'DISPATCH.json'
+            dispatch.write_text(json.dumps(gate, sort_keys=True) + '\n')
+            with patch.dict(v2_child.os.environ, {'GITHUB_ACTIONS': 'true',
+                                                   'GITHUB_RUN_ID': '123'}):
+                with patch.object(v2_child.sys, 'platform', 'linux'):
+                    with patch.object(v2_child.os, 'uname',
+                                      return_value=types.SimpleNamespace(
+                                          machine='x86_64')):
+                        with patch.object(v2_child, 'git', return_value=head):
+                            self.assertEqual(
+                                v2_child.dispatch_gate(released, head, root / 'toy',
+                                                       dispatch, run.sha(dispatch)),
+                                gate)
+                            with self.assertRaisesRegex(RuntimeError,
+                                                        'dispatch file path or digest'):
+                                v2_child.dispatch_gate(released, head, root / 'toy',
+                                                       dispatch, '0' * 64)
 
     def test_n131_rejects_original_equal_dimension_fake(self) -> None:
         # The former replay accepted this arbitrary one-variable CNF because

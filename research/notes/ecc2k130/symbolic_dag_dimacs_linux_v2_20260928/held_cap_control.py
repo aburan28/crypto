@@ -47,7 +47,8 @@ def main() -> int:
         'commands': [],
     }
 
-    def run(label: str, argv: list[str], timeout: int = 120) -> bytes:
+    def run(label: str, argv: list[str], timeout: int = 120,
+            *, allow_failure: bool = False) -> bytes:
         start = time.monotonic()
         row: dict = {'label': label, 'argv': argv, 'cap_bytes': CAP}
         receipt['commands'].append(row)
@@ -67,7 +68,8 @@ def main() -> int:
                 for stream in ('stdout', 'stderr'):
                     tail = getattr(completed, stream).decode('utf-8', 'replace')[-3000:]
                     row[stream + '_tail'] = tail.replace(token, '[REDACTED]') if token else tail
-                raise RuntimeError(f'{label} exited {completed.returncode}')
+                if not allow_failure:
+                    raise RuntimeError(f'{label} exited {completed.returncode}')
             return completed.stdout
         finally:
             row['wall_seconds'] = time.monotonic() - start
@@ -93,6 +95,11 @@ def main() -> int:
             ]))
             if observed != [CAP, CAP]:
                 raise RuntimeError('hard address-space cap was not inherited')
+            child = json.loads(run('capped_child_local_byte_gate', [
+                sys.executable, str(HERE / 'v2_child.py'), '--gate-only',
+            ]))
+            if child['decision'] != 'HASH_ONLY_NO_MEASURED_CHILD':
+                raise RuntimeError('actual child byte gate did not pass under toy cap')
             run('git_cap_rev_parse', ['git', 'rev-parse', 'HEAD'])
             run('git_cap_base_object', [
                 'git', 'cat-file', '-t', frozen['base_main_head'],
@@ -100,14 +107,45 @@ def main() -> int:
             run('git_cap_checkout_ancestry', [
                 'git', 'merge-base', '--is-ancestor',
                 frozen['base_main_head'], args.expected_head,
-            ])
-            check = json.loads(run('preparation_and_v2_hash_gate', [
+            ], allow_failure=True)
+            ancestry = receipt['commands'][-1]
+            if ancestry['exit_code'] == 0:
+                receipt['capped_git_classification'] = 'PASS'
+            elif (ancestry['exit_code'] == 128 and
+                    'packfile ' in ancestry.get('stderr_tail', '') and
+                    'cannot be mapped' in ancestry['stderr_tail']):
+                receipt['capped_git_classification'] = 'PACK_MMAP_REFUSAL'
+            else:
+                raise RuntimeError('unexpected capped Git ancestry failure')
+            capped_refusal = receipt['capped_git_classification'] == 'PACK_MMAP_REFUSAL'
+            check_raw = run('preparation_and_v2_hash_gate', [
                 sys.executable, str(HERE / 'ci_replay.py'),
-            ]))
-            if (check['decision'] != 'PASS_HASH_AND_ARCHIVE_REPLAY' or
-                    check['release_status'] != frozen['status'] or
-                    check['evidence'] is not None):
-                raise RuntimeError('held preparation/static gate did not pass')
+            ], allow_failure=capped_refusal)
+            check_row = receipt['commands'][-1]
+            if capped_refusal:
+                if (check_row['exit_code'] != 1 or
+                        'AssertionError: v2 branch does not descend' not in
+                        check_row.get('stderr_tail', '')):
+                    raise RuntimeError('capped static gate failed for another reason')
+            else:
+                check = json.loads(check_raw)
+                if (check['decision'] != 'PASS_HASH_AND_ARCHIVE_REPLAY' or
+                        check['release_status'] != frozen['status'] or
+                        check['evidence'] is not None):
+                    raise RuntimeError('preparation/static gate did not pass')
+            prep_raw = run('preparation_archive_gate', [
+                sys.executable,
+                str(HERE.parent / 'symbolic_dag_dimacs_linux_attempt2_20260926' /
+                    'verify_preparation.py'),
+            ], allow_failure=capped_refusal)
+            prep_row = receipt['commands'][-1]
+            if capped_refusal:
+                if (prep_row['exit_code'] == 0 or
+                        'NOT_ADMITTED: first-failure record is not an ancestor' not in
+                        prep_row.get('stderr_tail', '')):
+                    raise RuntimeError('capped preparation gate failed for another reason')
+            elif b'PASS_HARMLESS_PREPARATION_ONLY' not in prep_raw:
+                raise RuntimeError('preparation archive gate did not pass')
             for number, key in ((804, 'first'), (831, 'preparation')):
                 parent = json.loads(run(f'gh_parent_{number}', [
                     'gh', 'pr', 'view', str(number), '--repo', 'aburan28/crypto',
@@ -143,24 +181,27 @@ def main() -> int:
             ])
             if run_id not in [json.loads(line)['id'] for line in listed.splitlines()]:
                 raise RuntimeError('Actions workflow run listing omitted current run')
-            if run('git_clean_checkout', ['git', 'status', '--porcelain']).strip():
-                raise RuntimeError('held checkout is dirty')
-            run('git_fetch_main', ['git', 'fetch', '--quiet', 'origin', 'main'])
-            run('git_main_ancestry', [
-                'git', 'merge-base', '--is-ancestor',
-                frozen['base_main_head'], 'origin/main',
-            ])
-            run('git_guarded_diff', [
-                'git', 'diff', '--name-only',
-                frozen['base_main_head'] + '..origin/main', '--',
-                *frozen['upstream_guard_paths'],
-            ])
-            run('git_guarded_full_history', [
-                'git', 'log', '--full-history', '--format=%H',
-                frozen['base_main_head'] + '..origin/main', '--',
-                *frozen['upstream_guard_paths'],
-            ])
-            receipt['decision'] = 'PASS_HARMLESS_TOY_CAP_CONTROL'
+            if not capped_refusal:
+                if run('git_clean_checkout', ['git', 'status', '--porcelain']).strip():
+                    raise RuntimeError('held checkout is dirty')
+                run('git_fetch_main', ['git', 'fetch', '--quiet', 'origin', 'main'])
+                run('git_main_ancestry', [
+                    'git', 'merge-base', '--is-ancestor',
+                    frozen['base_main_head'], 'origin/main',
+                ])
+                run('git_guarded_diff', [
+                    'git', 'diff', '--name-only',
+                    frozen['base_main_head'] + '..origin/main', '--',
+                    *frozen['upstream_guard_paths'],
+                ])
+                run('git_guarded_full_history', [
+                    'git', 'log', '--full-history', '--format=%H',
+                    frozen['base_main_head'] + '..origin/main', '--',
+                    *frozen['upstream_guard_paths'],
+                ])
+            receipt['decision'] = (
+                'PASS_CHILD_BYTE_GATE_WITH_CAPPED_GIT_REFUSAL' if capped_refusal else
+                'PASS_HARMLESS_TOY_CAP_CONTROL')
     except Exception as exc:
         receipt['error'] = f'{type(exc).__name__}: {exc}'
     out.write_text(json.dumps(receipt, sort_keys=True, indent=2) + '\n')
@@ -171,6 +212,7 @@ def main() -> int:
         'error': receipt.get('error'),
     }, sort_keys=True))
     return 0 if receipt['decision'] in ('PASS_HARMLESS_TOY_CAP_CONTROL',
+                                       'PASS_CHILD_BYTE_GATE_WITH_CAPPED_GIT_REFUSAL',
                                        'SKIPPED_AFTER_ARCHIVED_OUTCOME') else 1
 
 

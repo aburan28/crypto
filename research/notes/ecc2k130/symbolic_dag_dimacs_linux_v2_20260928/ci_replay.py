@@ -187,6 +187,32 @@ def check_static() -> dict:
     return frozen
 
 
+
+def check_child_bytes() -> dict:
+    """Git-free byte gate for a child already admitted by the supervisor.
+
+    The 512-MiB toy limit prevents Git from mapping this checkout's packfile.
+    The supervisor therefore performs the full ancestry, GitHub and
+    preparation replay before dispatch; this child check pins the local code
+    and solver bytes that can be used after that admission.
+    """
+    frozen = load(HERE / 'FROZEN.json')
+    require(frozen['domain'] == DOMAIN and frozen['schema'] == 'k0-dag-linux-v2-freeze-v1',
+            'child freeze domain/schema')
+    require(frozen['status'] in ('HELD', 'RELEASED'), 'child release state')
+    for name, digest in frozen['source_sha256'].items():
+        require(sha(HERE / name) == digest, f'child v2 source drift: {name}')
+    for name, digest in frozen['first']['source_sha256'].items():
+        require(sha(FIRST / name) == digest, f'child predecessor source drift: {name}')
+    require(sha(FIRST / 'INPUT.json') == frozen['first']['input_sha256'],
+            'child predecessor input drift')
+    binary = HERE.parent / frozen['linux_binary_path']
+    require(binary.is_file() and sha(binary) == frozen['linux_binary_sha256'] and
+            binary.stat().st_size == frozen['linux_binary_bytes'] and
+            binary.read_bytes()[:6] == b'\x7fELF\x02\x01',
+            'child Linux solver bytes drift')
+    return frozen
+
 def _expected_panel() -> list[tuple[str, str, dict]]:
     inputs = load(FIRST / 'INPUT.json')
     cases: list[tuple[str, str, dict]] = []
@@ -503,6 +529,7 @@ def check_archive(receipt_path: Path, frozen: dict) -> dict:
         require((archive / 'RUNNER_ERROR.json').is_file(),
                 'missing runner error receipt')
     require(gate['release_main_head'] == frozen['release_main_head'] and
+            gate['freeze_sha256'] == sha(HERE / 'FROZEN.json') and
             gate['preparation_freeze_sha256'] ==
             frozen['preparation']['freeze_sha256'] and
             gate['linux_binary_sha256'] == frozen['linux_binary_sha256'] and
@@ -543,10 +570,12 @@ def check_archive(receipt_path: Path, frozen: dict) -> dict:
                 row['sampled_peak_rss_bytes'] >= 0,
                 'phase command context/cap')
         argv = row['argv']
-        require(len(argv) == 8 and argv[1] == gate['checkout_root'] +
+        require(len(argv) == 12 and argv[1] == gate['checkout_root'] +
                 '/research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/v2_child.py' and
                 argv[2:4] == ['--phase', phase] and argv[4] == '--out' and
-                argv[6:] == ['--expected-head', gate['reviewed_head']],
+                argv[6:8] == ['--expected-head', gate['reviewed_head']] and
+                argv[8:10] == ['--dispatch', str(Path(argv[5]).parent / 'DISPATCH.json')] and
+                argv[10:] == ['--dispatch-sha256', sha(archive / 'DISPATCH.json')],
                 'phase child command')
         result_path = archive / phase / 'result.json'
         result = None
