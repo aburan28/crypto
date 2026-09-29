@@ -1628,4 +1628,292 @@ mod tests {
             }
         }
     }
+
+    // ── Adversarial review: the private sums and every size threshold ──
+
+    /// The XOR-sum of a multiset of monomials by counting: each monomial
+    /// kept once if it occurs an odd number of times.  Independent of
+    /// both the toggles and the sort-and-cancel under test.
+    fn parity_sum<'a>(monos: impl IntoIterator<Item = &'a Vec<u32>>) -> BTreeSet<Vec<u32>> {
+        let mut count = std::collections::BTreeMap::<&Vec<u32>, usize>::new();
+        for m in monos {
+            *count.entry(m).or_default() += 1;
+        }
+        count
+            .into_iter()
+            .filter(|(_, c)| c % 2 == 1)
+            .map(|(m, _)| m.clone())
+            .collect()
+    }
+
+    /// A random monomial of degree ≤ `max_deg` over `palette`, strictly
+    /// increasing (what the module stores).
+    fn random_mono(rng: &mut StdRng, palette: &[u32], max_deg: usize) -> Vec<u32> {
+        let deg = rng.gen_range(0..=max_deg);
+        let mut m: Vec<u32> = (0..deg)
+            .map(|_| palette[rng.gen_range(0..palette.len())])
+            .collect();
+        m.sort_unstable();
+        m.dedup();
+        m
+    }
+
+    /// `packed_key` orders exactly as the index vectors do and is
+    /// injective, at the 16-bit field edges and at the degree cap.
+    #[test]
+    fn review_packed_key_is_order_preserving() {
+        let mut rng = StdRng::seed_from_u64(0x7061_636b);
+        let palette = [0u32, 1, 2, 255, 256, 65_532, 65_533, 65_534, 65_535, 65_536];
+        let monos: Vec<Vec<u32>> = (0..3000)
+            .map(|_| random_mono(&mut rng, &palette, 6))
+            .collect();
+        for a in &monos {
+            let ka = packed_key(a);
+            let fits = a.len() <= 4 && a.iter().all(|&v| v < 65_535);
+            assert_eq!(ka.is_some(), fits, "{a:?}");
+            for b in monos.iter().take(200) {
+                if let (Some(x), Some(y)) = (ka, packed_key(b)) {
+                    assert_eq!(x.cmp(&y), a.cmp(b), "{a:?} vs {b:?}");
+                }
+            }
+        }
+    }
+
+    /// `retain_odd` keeps each run of odd length once, in order.
+    #[test]
+    fn review_retain_odd_is_parity() {
+        let mut rng = StdRng::seed_from_u64(0x006f_6464);
+        for _ in 0..2000 {
+            let len = rng.gen_range(0..40);
+            let mut v: Vec<u8> = (0..len).map(|_| rng.gen_range(0..6)).collect();
+            v.sort_unstable();
+            let mut want = Vec::new();
+            for x in 0..6u8 {
+                if v.iter().filter(|&&y| y == x).count() % 2 == 1 {
+                    want.push(x);
+                }
+            }
+            retain_odd(&mut v, |a, b| a == b);
+            assert_eq!(v, want);
+        }
+    }
+
+    /// `xor_sum`, owned and borrowed, on multisets of every length across
+    /// the `SMALL_SUM` switch, with multiplicities one to five, on
+    /// all-packable, all-unpackable and mixed monomials.
+    #[test]
+    fn review_xor_sum_is_parity_sum() {
+        let mut rng = StdRng::seed_from_u64(0x7873_756d);
+        let packable: Vec<u32> = (0..12).collect();
+        let unpackable: Vec<u32> = vec![3, 65_534, 65_535, 70_000, u32::MAX];
+        for round in 0..3000 {
+            let distinct = rng.gen_range(1..12);
+            let pool: Vec<Vec<u32>> = (0..distinct)
+                .map(|k| match round % 3 {
+                    0 => random_mono(&mut rng, &packable, 4),
+                    1 => {
+                        // Degree five or a variable past the key's range.
+                        let mut m = random_mono(&mut rng, &unpackable, 3);
+                        if m.last().is_none_or(|&v| v < 65_535) {
+                            m = (0..5).map(|i| i * 3 + k as u32).collect();
+                        }
+                        m
+                    }
+                    _ => {
+                        let from = if rng.gen_bool(0.2) {
+                            &unpackable
+                        } else {
+                            &packable
+                        };
+                        random_mono(&mut rng, from, 6)
+                    }
+                })
+                .collect();
+            let len = rng.gen_range(0..=2 * SMALL_SUM + 3);
+            let mut multiset: Vec<Vec<u32>> = Vec::with_capacity(len);
+            while multiset.len() < len {
+                let m = &pool[rng.gen_range(0..pool.len())];
+                for _ in 0..rng.gen_range(1..=5) {
+                    multiset.push(m.clone());
+                }
+            }
+            // Unsorted, as the gathered products arrive.
+            for i in (1..multiset.len()).rev() {
+                multiset.swap(i, rng.gen_range(0..=i));
+            }
+            let want = parity_sum(&multiset);
+            let borrowed: Vec<&Vec<u32>> = multiset.iter().collect();
+            assert_eq!(
+                xor_sum(borrowed, Vec::clone),
+                want,
+                "borrowed, round {round}"
+            );
+            assert_eq!(
+                xor_sum(multiset.clone(), |m| m),
+                want,
+                "owned, round {round}"
+            );
+        }
+    }
+
+    /// `xor_assign` over a grid of sizes that crosses every branch of
+    /// `toggling_is_cheaper` (and the empty and single-monomial paths),
+    /// with the overlap swept from disjoint through equal.
+    #[test]
+    fn review_xor_assign_across_size_grid() {
+        let mut rng = StdRng::seed_from_u64(0x6772_6964);
+        let wide: Vec<u32> = (0..60).collect();
+        let sizes = [
+            0usize, 1, 2, 3, 4, 5, 15, 16, 17, 28, 31, 33, 64, 100, 257, 1000, 2500,
+        ];
+        for &mine in &sizes {
+            for &theirs in &sizes {
+                for overlap in [0.0, 0.3, 1.0] {
+                    let mut a = BTreeSet::new();
+                    while a.len() < mine {
+                        a.insert(random_mono(&mut rng, &wide, 4));
+                    }
+                    let mut b = BTreeSet::new();
+                    let from_a: Vec<&Vec<u32>> = a.iter().collect();
+                    // Drawn from `a` only while `a` has monomials `b`
+                    // does not yet hold, so `b` always reaches `theirs`.
+                    while b.len() < theirs {
+                        if b.len() < from_a.len() && rng.gen_bool(overlap) {
+                            b.insert(from_a[rng.gen_range(0..from_a.len())].clone());
+                        } else {
+                            b.insert(random_mono(&mut rng, &wide, 4));
+                        }
+                    }
+                    let (a, b) = (AnfPoly { monomials: a }, AnfPoly { monomials: b });
+                    let mut got = a.clone();
+                    got.xor_assign(&b);
+                    let mut want = a.clone();
+                    toggle_reference::xor_assign(&mut want, &b);
+                    assert_eq!(got, want, "mine {mine}, theirs {theirs}, overlap {overlap}");
+                    assert_eq!(
+                        got.monomials,
+                        parity_sum(a.monomials().chain(b.monomials())),
+                        "parity, mine {mine}, theirs {theirs}"
+                    );
+                }
+            }
+        }
+    }
+
+    /// `mul` at every product count from 0 to 30 — through the one-by-one,
+    /// toggled and gathered paths — with cancelling products (a shared
+    /// variable collapses `x·xy` and `xy·y` onto `xy`), unpackable
+    /// monomials that force the gathered sum's fallback sort, and the
+    /// constant.
+    #[test]
+    fn review_mul_across_small_sum_threshold() {
+        let mut rng = StdRng::seed_from_u64(0x6d75_6c74);
+        let palettes: [Vec<u32>; 3] = [
+            (0..4).collect(),
+            vec![1, 2, 65_534, 65_535, 1 << 20],
+            (0..9).collect(),
+        ];
+        for round in 0..4000 {
+            let palette = &palettes[round % 3];
+            let deg = if round % 3 == 2 { 6 } else { 3 };
+            let (la, lb) = (rng.gen_range(0..=6), rng.gen_range(0..=6));
+            let mut a = AnfPoly::zero();
+            for _ in 0..la {
+                a.monomials.insert(random_mono(&mut rng, palette, deg));
+            }
+            let mut b = AnfPoly::zero();
+            for _ in 0..lb {
+                b.monomials.insert(random_mono(&mut rng, palette, deg));
+            }
+            let want = toggle_reference::mul(&a, &b);
+            assert_eq!(a.mul(&b), want, "{a:?} · {b:?}");
+            let mut products = Vec::new();
+            for x in a.monomials() {
+                for y in b.monomials() {
+                    products.push(merge_squarefree(x, y));
+                }
+            }
+            assert_eq!(
+                want.monomials,
+                parity_sum(&products),
+                "parity {a:?} · {b:?}"
+            );
+        }
+    }
+
+    /// `AnfF2m::{xor, mul, mul_const, reduce}` against the toggles on
+    /// coefficients of dozens to hundreds of monomials, with zero
+    /// coefficients scattered in, so every per-coefficient sum is well
+    /// past `SMALL_SUM` and many products cancel.
+    #[test]
+    fn review_symbolic_field_ops_on_dense_coefficients() {
+        let mut rng = StdRng::seed_from_u64(0x6465_6e73);
+        let narrow: Vec<u32> = (0..7).collect();
+        let odd: Vec<u32> = vec![0, 1, 2, 3, 65_535, 65_536];
+        for round in 0..40 {
+            let palette = if round % 4 == 3 { &odd } else { &narrow };
+            let n = [3u32, 7, 17, 64, 65][round % 5];
+            let irr = random_modulus(&mut rng, n, [0.1, 0.5, 0.9][round % 3]);
+            let mk = |rng: &mut StdRng, len: usize| AnfF2m {
+                coeffs: (0..len)
+                    .map(|_| {
+                        if rng.gen_bool(0.25) {
+                            AnfPoly::zero()
+                        } else {
+                            random_anf(rng, palette, 4, 60)
+                        }
+                    })
+                    .collect(),
+            };
+            let (la, lb) = (rng.gen_range(0..9), rng.gen_range(0..9));
+            let a = mk(&mut rng, la);
+            let b = mk(&mut rng, lb);
+            assert_eq!(a.xor(&b).coeffs, toggle_reference::xor(&a, &b).coeffs);
+            let prod = a.mul(&b);
+            assert_eq!(prod.coeffs, toggle_reference::f2m_mul(&a, &b).coeffs);
+            let bits: Vec<u32> = (0..n).filter(|_| rng.gen_bool(0.5)).collect();
+            let c = F2mElement::from_bit_positions(&bits, n);
+            assert_eq!(
+                prod.mul_const(&c, n).coeffs,
+                toggle_reference::mul_const(&prod, &c, n).coeffs,
+                "mul_const, n = {n}, round {round}"
+            );
+            let mut got = prod.clone();
+            got.reduce(n, &irr);
+            let mut want = prod;
+            toggle_reference::reduce(&mut want, n, &irr);
+            assert_eq!(got.coeffs, want.coeffs, "reduce, n = {n}, round {round}");
+        }
+    }
+
+    /// The descent against the toggle reference on a sweep of `(n, l)`
+    /// with every `l` from 1 to `n` at small `n`, the perfbench and corpus
+    /// widths, and the zero and one targets.
+    #[test]
+    fn review_weil_descent_sweep() {
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        let mut rng = StdRng::seed_from_u64(0x7377_6570);
+        let mut cells: Vec<(u32, u32)> = Vec::new();
+        for n in 1..=7 {
+            for l in 1..=n {
+                cells.push((n, l));
+            }
+        }
+        cells.extend([(13, 5), (17, 4), (17, 6), (19, 6), (23, 8), (31, 5)]);
+        for (n, l) in cells {
+            let irr = find_irreducible_sparse(n).expect("irreducible");
+            let b = F2mElement::one(n);
+            let random: Vec<u32> = (0..n).filter(|_| rng.gen_bool(0.5)).collect();
+            for x_r in [
+                F2mElement::zero(n),
+                F2mElement::one(n),
+                F2mElement::from_bit_positions(&random, n),
+            ] {
+                let sys = weil_descend_s4(n, l, &irr, &b, &x_r);
+                let (correspondence, semaev) = toggle_reference::weil_descend_s4(n, l, &irr, &x_r);
+                assert_eq!(sys.correspondence, correspondence, "n = {n}, l = {l}");
+                assert_eq!(sys.semaev, semaev, "n = {n}, l = {l}");
+            }
+        }
+    }
 }
