@@ -1,0 +1,241 @@
+j0 bits=16 seed=1: j0-16bit-p43189 r=2^13.8 h=3
+  j0-16bit-p43189 subtract fold=true: base 144 cols 24 pts/col 6.0 trials 72 S 81.39 correct true
+  j0-16bit-p43189 subtract fold=false: base 144 cols 72 pts/col 2.0 trials 156 S 168.53 correct true
+  j0-16bit-p43189 mitm fold=true: base 144 cols 24 pts/col 6.0 trials 72 S 51.99 correct true
+  j0-16bit-p43189 mitm fold=false: base 144 cols 72 pts/col 2.0 trials 156 S 52.86 correct true
+j0 bits=16 seed=2: j0-16bit-p54631 r=2^15.7 h=1
+  j0-16bit-p54631 subtract fold=true: base 222 cols 37 pts/col 6.0 trials 49 S 40.01 correct true
+  j0-16bit-p54631 subtract fold=false: base 222 cols 111 pts/col 2.0 trials 49 S 40.00 correct true
+  j0-16bit-p54631 mitm fold=true: base 222 cols 37 pts/col 6.0 trials 49 S 56.89 correct true
+  j0-16bit-p54631 mitm fold=false: base 222 cols 111 pts/col 2.0 trials 49 S 56.89 correct true
+j0 bits=20 seed=1: j0-20bit-p845653 r=2^19.7 h=1
+  j0-20bit-p845653 subtract fold=true: base 564 cols 94 pts/col 6.0 trials 340 S 182.02 correct true
+  j0-20bit-p845653 subtract fold=false: base 564 cols 282 pts/col 2.0 trials 845 S 456.47 correct true
+  j0-20bit-p845653 mitm fold=true: base 564 cols 94 pts/col 6.0 trials 340 S 88.34 correct true
+  j0-20bit-p845653 mitm fold=false: base 564 cols 282 pts/col 2.0 trials 845 S 89.00 correct true
+j0 bits=20 seed=2: j0-20bit-p768613 r=2^18.0 h=3
+  j0-20bit-p768613 subtract fold=true: base 378 cols 63 pts/col 6.0 trials 354 S 250.28 correct true
+  j0-20bit-p768613 subtract fold=false: base 378 cols 189 pts/col 2.0 trials 941 S 663.89 correct true
+  j0-20bit-p768613 mitm fold=true: base 378 cols 63 pts/col 6.0 trials 354 S 74.98 correct true
+  j0-20bit-p768613 mitm fold=false: base 378 cols 189 pts/col 2.0 trials 941 S 76.35 correct true
+j0 bits=24 seed=1: j0-24bit-p15500833 r=2^22.3 h=3
+  j0-24bit-p15500833 subtract fold=true: base 1032 cols 172 pts/col 6.0 trials 2611 S 1159.70 correct true
+  j0-24bit-p15500833 subtract fold=false: base 1032 cols 516 pts/col 2.0 trials 6245 S 2768.97 correct true
+  j0-24bit-p15500833 mitm fold=true: base 1032 cols 172 pts/col 6.0 trials 2611 S 119.90 correct true
+  j0-24bit-p15500833 mitm fold=false: base 1032 cols 516 pts/col 2.0 trials 6245 S 121.62 correct true
+j0 bits=24 seed=2: j0-24bit-p10188733 r=2^20.5 h=7
+  j0-24bit-p10188733 subtract fold=true: base 678 cols 113 pts/col 6.0 trials 3560 S 1972.61 correct true
+  j0-24bit-p10188733 subtract fold=false: base 678 cols 339 pts/col 2.0 trials 5597 S 3095.14 correct true
+  j0-24bit-p10188733 mitm fold=true: base 678 cols 113 pts/col 6.0 trials 3560 S 101.83 correct true
+  j0-24bit-p10188733 mitm fold=false: base 678 cols 339 pts/col 2.0 trials 5597 S 103.98 correct true
+j1728 bits=16 seed=1: j1728-16bit-p56533 r=2^13.8 h=4
+  j1728-16bit-p56533 subtract fold=true: base 96 cols 24 pts/col 4.0 trials 31 S 30.70 correct true
+  j1728-16bit-p56533 subtract fold=false: base 96 cols 48 pts/col 2.0 trials 147 S 117.35 correct true
+  j1728-16bit-p56533 mitm fold=true: base 96 cols 24 pts/col 4.0 trials 31 S 27.14 correct true
+  j1728-16bit-p56533 mitm fold=false: base 96 cols 48 pts/col 2.0 trials 147 S 29.17 correct true
+j1728 bits=16 seed=2: j1728-16bit-p41077 r=2^13.3 h=4
+  j1728-16bit-p41077 subtract fold=true: base 84 cols 21 pts/col 4.0 trials 153 S 130.17 correct true
+  j1728-16bit-p41077 subtract fold=false: base 84 cols 42 pts/col 2.0 trials 153 S 130.16 correct true
+  j1728-16bit-p41077 mitm fold=true: base 84 cols 21 pts/col 4.0 trials 153 S 27.48 correct true
+  j1728-16bit-p41077 mitm fold=false: base 84 cols 42 pts/col 2.0 trials 153 S 27.47 correct true
+j1728 bits=20 seed=1: j1728-20bit-p946513 r=2^17.9 h=4
+  j1728-20bit-p946513 subtract fold=true: base 244 cols 61 pts/col 4.0 trials 604 S 302.11 correct true
+  j1728-20bit-p946513 subtract fold=false: base 244 cols 122 pts/col 2.0 trials 2227 S 1100.61 correct true
+  j1728-20bit-p946513 mitm fold=true: base 244 cols 61 pts/col 4.0 trials 604 S 34.96 correct true
+  j1728-20bit-p946513 mitm fold=false: base 244 cols 122 pts/col 2.0 trials 2227 S 39.63 correct true
+j1728 bits=20 seed=2: j1728-20bit-p768613 r=2^16.6 h=8
+  j1728-20bit-p768613 subtract fold=true: base 180 cols 45 pts/col 4.0 trials 1584 S 912.96 correct true
+  j1728-20bit-p768613 subtract fold=false: base 180 cols 90 pts/col 2.0 trials 2481 S 1417.72 correct true
+  j1728-20bit-p768613 mitm fold=true: base 180 cols 45 pts/col 4.0 trials 1584 S 37.51 correct true
+  j1728-20bit-p768613 mitm fold=false: base 180 cols 90 pts/col 2.0 trials 2481 S 41.07 correct true
+j1728 bits=24 seed=1: j1728-24bit-p15571037 r=2^20.9 h=8
+  j1728-24bit-p15571037 subtract fold=true: base 496 cols 124 pts/col 4.0 trials 7944 S 2811.10 correct true
+  j1728-24bit-p15571037 subtract fold=false: base 496 cols 248 pts/col 2.0 trials 11651 S 4116.22 correct true
+  j1728-24bit-p15571037 mitm fold=true: base 496 cols 124 pts/col 4.0 trials 7944 S 52.07 correct true
+  j1728-24bit-p15571037 mitm fold=false: base 496 cols 248 pts/col 2.0 trials 11651 S 55.18 correct true
+j1728 bits=24 seed=2: j1728-24bit-p16662697 r=2^23.0 h=2
+  j1728-24bit-p16662697 subtract fold=true: base 808 cols 202 pts/col 4.0 trials 6483 S 1792.92 correct true
+  j1728-24bit-p16662697 subtract fold=false: base 808 cols 404 pts/col 2.0 trials 10828 S 2994.47 correct true
+  j1728-24bit-p16662697 mitm fold=true: base 808 cols 202 pts/col 4.0 trials 6483 S 59.76 correct true
+  j1728-24bit-p16662697 mitm fold=false: base 808 cols 404 pts/col 2.0 trials 10828 S 61.39 correct true
+generic bits=16 seed=1: generic-16bit-p43189 r=2^12.8 h=6
+  generic-16bit-p43189 subtract fold=true: base 38 cols 19 pts/col 2.0 trials 575 S 268.38 correct true
+  generic-16bit-p43189 subtract fold=false: base 38 cols 19 pts/col 2.0 trials 575 S 268.38 correct true
+  generic-16bit-p43189 mitm fold=true: base 38 cols 19 pts/col 2.0 trials 575 S 23.86 correct true
+  generic-16bit-p43189 mitm fold=false: base 38 cols 19 pts/col 2.0 trials 575 S 23.86 correct true
+generic bits=16 seed=2: generic-16bit-p47843 r=2^15.5 h=1
+  generic-16bit-p47843 subtract fold=true: base 72 cols 36 pts/col 2.0 trials 381 S 126.16 correct true
+  generic-16bit-p47843 subtract fold=false: base 72 cols 36 pts/col 2.0 trials 381 S 126.16 correct true
+  generic-16bit-p47843 mitm fold=true: base 72 cols 36 pts/col 2.0 trials 381 S 11.48 correct true
+  generic-16bit-p47843 mitm fold=false: base 72 cols 36 pts/col 2.0 trials 381 S 11.48 correct true
+generic bits=20 seed=1: generic-20bit-p661877 r=2^18.3 h=2
+  generic-20bit-p661877 subtract fold=true: base 138 cols 69 pts/col 2.0 trials 2181 S 521.04 correct true
+  generic-20bit-p661877 subtract fold=false: base 138 cols 69 pts/col 2.0 trials 2181 S 521.04 correct true
+  generic-20bit-p661877 mitm fold=true: base 138 cols 69 pts/col 2.0 trials 2181 S 14.34 correct true
+  generic-20bit-p661877 mitm fold=false: base 138 cols 69 pts/col 2.0 trials 2181 S 14.34 correct true
+generic bits=20 seed=2: generic-20bit-p828673 r=2^19.7 h=1
+  generic-20bit-p828673 subtract fold=true: base 186 cols 93 pts/col 2.0 trials 2004 S 406.16 correct true
+  generic-20bit-p828673 subtract fold=false: base 186 cols 93 pts/col 2.0 trials 2004 S 406.16 correct true
+  generic-20bit-p828673 mitm fold=true: base 186 cols 93 pts/col 2.0 trials 2004 S 13.03 correct true
+  generic-20bit-p828673 mitm fold=false: base 186 cols 93 pts/col 2.0 trials 2004 S 13.03 correct true
+generic bits=24 seed=1: generic-24bit-p15542957 r=2^21.9 h=4
+  generic-24bit-p15542957 subtract fold=true: base 314 cols 157 pts/col 2.0 trials 35384 S 5620.86 correct true
+  generic-24bit-p15542957 subtract fold=false: base 314 cols 157 pts/col 2.0 trials 35384 S 5620.86 correct true
+  generic-24bit-p15542957 mitm fold=true: base 314 cols 157 pts/col 2.0 trials 35384 S 31.94 correct true
+  generic-24bit-p15542957 mitm fold=false: base 314 cols 157 pts/col 2.0 trials 35384 S 31.94 correct true
+generic bits=24 seed=2: generic-24bit-p15412471 r=2^23.9 h=1
+  generic-24bit-p15412471 subtract fold=true: base 496 cols 248 pts/col 2.0 trials 5020 S 631.62 correct true
+  generic-24bit-p15412471 subtract fold=false: base 496 cols 248 pts/col 2.0 trials 5020 S 631.62 correct true
+  generic-24bit-p15412471 mitm fold=true: base 496 cols 248 pts/col 2.0 trials 5020 S 17.32 correct true
+  generic-24bit-p15412471 mitm fold=false: base 496 cols 248 pts/col 2.0 trials 5020 S 17.32 correct true
+d7 bits=16 seed=1: d7-16bit-p55631 r=2^12.8 h=8
+  d7-16bit-p55631 subtract fold=true: base 38 cols 19 pts/col 2.0 trials 163 S 83.00 correct true
+  d7-16bit-p55631 subtract fold=false: base 38 cols 19 pts/col 2.0 trials 163 S 83.00 correct true
+  d7-16bit-p55631 type C: 4 found, ord_r(λ) = 6910, 0/38 images in base (chance 0.0007)
+  d7-16bit-p55631 mitm fold=true: base 38 cols 19 pts/col 2.0 trials 163 S 16.34 correct true
+  d7-16bit-p55631 mitm fold=false: base 38 cols 19 pts/col 2.0 trials 163 S 16.34 correct true
+d7 bits=16 seed=2: d7-16bit-p57059 r=2^12.8 h=8
+  d7-16bit-p57059 subtract fold=true: base 38 cols 19 pts/col 2.0 trials 365 S 174.36 correct true
+  d7-16bit-p57059 subtract fold=false: base 38 cols 19 pts/col 2.0 trials 365 S 174.36 correct true
+  d7-16bit-p57059 type C: 4 found, ord_r(λ) = 3554, 0/38 images in base (chance 0.0007)
+  d7-16bit-p57059 mitm fold=true: base 38 cols 19 pts/col 2.0 trials 365 S 20.89 correct true
+  d7-16bit-p57059 mitm fold=false: base 38 cols 19 pts/col 2.0 trials 365 S 20.89 correct true
+d7 bits=20 seed=1: d7-20bit-p767309 r=2^17.6 h=4
+  d7-20bit-p767309 subtract fold=true: base 114 cols 57 pts/col 2.0 trials 3323 S 866.76 correct true
+  d7-20bit-p767309 subtract fold=false: base 114 cols 57 pts/col 2.0 trials 3323 S 866.76 correct true
+  d7-20bit-p767309 type C: 4 found, ord_r(λ) = 64002, 0/114 images in base (chance 0.0001)
+  d7-20bit-p767309 mitm fold=true: base 114 cols 57 pts/col 2.0 trials 3323 S 19.33 correct true
+  d7-20bit-p767309 mitm fold=false: base 114 cols 57 pts/col 2.0 trials 3323 S 19.33 correct true
+d7 bits=20 seed=2: d7-20bit-p723493 r=2^17.5 h=4
+  d7-20bit-p723493 subtract fold=true: base 112 cols 56 pts/col 2.0 trials 2938 S 770.21 correct true
+  d7-20bit-p723493 subtract fold=false: base 112 cols 56 pts/col 2.0 trials 2938 S 770.21 correct true
+  d7-20bit-p723493 type C: 4 found, ord_r(λ) = 30135, 0/112 images in base (chance 0.0002)
+  d7-20bit-p723493 mitm fold=true: base 112 cols 56 pts/col 2.0 trials 2938 S 18.70 correct true
+  d7-20bit-p723493 mitm fold=false: base 112 cols 56 pts/col 2.0 trials 2938 S 18.70 correct true
+d7 bits=24 seed=1: d7-24bit-p13691897 r=2^21.7 h=4
+  d7-24bit-p13691897 subtract fold=true: base 300 cols 150 pts/col 2.0 trials 15453 S 2504.51 correct true
+  d7-24bit-p13691897 subtract fold=false: base 300 cols 150 pts/col 2.0 trials 15453 S 2504.51 correct true
+  d7-24bit-p13691897 type C: 4 found, ord_r(λ) = 3424060, 0/300 images in base (chance 0.0000)
+  d7-24bit-p13691897 mitm fold=true: base 300 cols 150 pts/col 2.0 trials 15453 S 22.02 correct true
+  d7-24bit-p13691897 mitm fold=false: base 300 cols 150 pts/col 2.0 trials 15453 S 22.02 correct true
+d7 bits=24 seed=2: d7-24bit-p11675449 r=2^21.5 h=4
+  d7-24bit-p11675449 subtract fold=true: base 284 cols 142 pts/col 2.0 trials 22768 S 3779.34 correct true
+  d7-24bit-p11675449 subtract fold=false: base 284 cols 142 pts/col 2.0 trials 22768 S 3779.34 correct true
+  d7-24bit-p11675449 type C: 4 found, ord_r(λ) = 243126, 0/284 images in base (chance 0.0000)
+  d7-24bit-p11675449 mitm fold=true: base 284 cols 142 pts/col 2.0 trials 22768 S 26.77 correct true
+  d7-24bit-p11675449 mitm fold=false: base 284 cols 142 pts/col 2.0 trials 22768 S 26.77 correct true
+d8 bits=16 seed=1: d8-16bit-p58963 r=2^14.9 h=2
+  d8-16bit-p58963 subtract fold=true: base 60 cols 30 pts/col 2.0 trials 347 S 123.86 correct true
+  d8-16bit-p58963 subtract fold=false: base 60 cols 30 pts/col 2.0 trials 347 S 123.86 correct true
+  d8-16bit-p58963 type C: 2 found, ord_r(λ) = 14861, 0/60 images in base (chance 0.0010)
+  d8-16bit-p58963 mitm fold=true: base 60 cols 30 pts/col 2.0 trials 347 S 11.78 correct true
+  d8-16bit-p58963 mitm fold=false: base 60 cols 30 pts/col 2.0 trials 347 S 11.78 correct true
+d8 bits=16 seed=2: d8-16bit-p55667 r=2^13.2 h=6
+  d8-16bit-p55667 subtract fold=true: base 40 cols 20 pts/col 2.0 trials 412 S 180.57 correct true
+  d8-16bit-p55667 subtract fold=false: base 40 cols 20 pts/col 2.0 trials 412 S 180.57 correct true
+  d8-16bit-p55667 type C: 2 found, ord_r(λ) = 4613, 0/40 images in base (chance 0.0007)
+  d8-16bit-p55667 mitm fold=true: base 40 cols 20 pts/col 2.0 trials 412 S 19.78 correct true
+  d8-16bit-p55667 mitm fold=false: base 40 cols 20 pts/col 2.0 trials 412 S 19.78 correct true
+d8 bits=20 seed=1: d8-20bit-p946513 r=2^17.9 h=4
+  d8-20bit-p946513 subtract fold=true: base 122 cols 61 pts/col 2.0 trials 3078 S 772.00 correct true
+  d8-20bit-p946513 subtract fold=false: base 122 cols 61 pts/col 2.0 trials 3078 S 772.00 correct true
+  d8-20bit-p946513 type C: 2 found, ord_r(λ) = 33840, 0/122 images in base (chance 0.0001)
+  d8-20bit-p946513 mitm fold=true: base 122 cols 61 pts/col 2.0 trials 3078 S 18.09 correct true
+  d8-20bit-p946513 mitm fold=false: base 122 cols 61 pts/col 2.0 trials 3078 S 18.09 correct true
+d8 bits=20 seed=2: d8-20bit-p824699 r=2^17.1 h=6
+  d8-20bit-p824699 subtract fold=true: base 102 cols 51 pts/col 2.0 trials 4592 S 1255.40 correct true
+  d8-20bit-p824699 subtract fold=false: base 102 cols 51 pts/col 2.0 trials 4592 S 1255.40 correct true
+  d8-20bit-p824699 type C: 2 found, ord_r(λ) = 137218, 0/102 images in base (chance 0.0001)
+  d8-20bit-p824699 mitm fold=true: base 102 cols 51 pts/col 2.0 trials 4592 S 24.65 correct true
+  d8-20bit-p824699 mitm fold=false: base 102 cols 51 pts/col 2.0 trials 4592 S 24.65 correct true
+d8 bits=24 seed=1: d8-24bit-p15279203 r=2^21.3 h=6
+  d8-24bit-p15279203 subtract fold=true: base 272 cols 136 pts/col 2.0 trials 6640 S 1134.18 correct true
+  d8-24bit-p15279203 subtract fold=false: base 272 cols 136 pts/col 2.0 trials 6640 S 1134.18 correct true
+  d8-24bit-p15279203 type C: 2 found, ord_r(λ) = 2545240, 0/272 images in base (chance 0.0000)
+  d8-24bit-p15279203 mitm fold=true: base 272 cols 136 pts/col 2.0 trials 6640 S 17.44 correct true
+  d8-24bit-p15279203 mitm fold=false: base 272 cols 136 pts/col 2.0 trials 6640 S 17.44 correct true
+d8 bits=24 seed=2: d8-24bit-p11881867 r=2^22.5 h=2
+  d8-24bit-p11881867 subtract fold=true: base 362 cols 181 pts/col 2.0 trials 20821 S 3084.66 correct true
+  d8-24bit-p11881867 subtract fold=false: base 362 cols 181 pts/col 2.0 trials 20821 S 3084.66 correct true
+  d8-24bit-p11881867 type C: 2 found, ord_r(λ) = 2969588, 0/362 images in base (chance 0.0000)
+  d8-24bit-p11881867 mitm fold=true: base 362 cols 181 pts/col 2.0 trials 20821 S 23.12 correct true
+  d8-24bit-p11881867 mitm fold=false: base 362 cols 181 pts/col 2.0 trials 20821 S 23.12 correct true
+| family | log2 r | h | oracle | base | cols fold | cols control | pts/col | trials fold | trials control | S fold | S control | S control / S fold | rho S | S fold / rho | correct |
+|:--|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
+| j0 | 13.8 | 3 | subtract | 144 | 24 | 72 | 6.0 | 72 | 156 | 81.39 | 168.53 | 2.07 | 2.48 | 32.8× | yes |
+| j0 | 13.8 | 3 | mitm | 144 | 24 | 72 | 6.0 | 72 | 156 | 51.99 | 52.86 | 1.02 | 2.48 | 20.9× | yes |
+| j0 | 15.7 | 1 | subtract | 222 | 37 | 111 | 6.0 | 49 | 49 | 40.01 | 40.00 | 1.00 | 2.27 | 17.6× | yes |
+| j0 | 15.7 | 1 | mitm | 222 | 37 | 111 | 6.0 | 49 | 49 | 56.89 | 56.89 | 1.00 | 2.27 | 25.0× | yes |
+| j0 | 19.7 | 1 | subtract | 564 | 94 | 282 | 6.0 | 340 | 845 | 182.02 | 456.47 | 2.51 | 1.24 | 147.1× | yes |
+| j0 | 19.7 | 1 | mitm | 564 | 94 | 282 | 6.0 | 340 | 845 | 88.34 | 89.00 | 1.01 | 1.24 | 71.4× | yes |
+| j0 | 18.0 | 3 | subtract | 378 | 63 | 189 | 6.0 | 354 | 941 | 250.28 | 663.89 | 2.65 | 1.56 | 160.4× | yes |
+| j0 | 18.0 | 3 | mitm | 378 | 63 | 189 | 6.0 | 354 | 941 | 74.98 | 76.35 | 1.02 | 1.56 | 48.0× | yes |
+| j0 | 22.3 | 3 | subtract | 1032 | 172 | 516 | 6.0 | 2611 | 6245 | 1159.70 | 2768.97 | 2.39 | 1.47 | 787.6× | yes |
+| j0 | 22.3 | 3 | mitm | 1032 | 172 | 516 | 6.0 | 2611 | 6245 | 119.90 | 121.62 | 1.01 | 1.47 | 81.4× | yes |
+| j0 | 20.5 | 7 | subtract | 678 | 113 | 339 | 6.0 | 3560 | 5597 | 1972.61 | 3095.14 | 1.57 | 1.49 | 1328.1× | yes |
+| j0 | 20.5 | 7 | mitm | 678 | 113 | 339 | 6.0 | 3560 | 5597 | 101.83 | 103.98 | 1.02 | 1.49 | 68.6× | yes |
+| j1728 | 13.8 | 4 | subtract | 96 | 24 | 48 | 4.0 | 31 | 147 | 30.70 | 117.35 | 3.82 | 1.89 | 16.2× | yes |
+| j1728 | 13.8 | 4 | mitm | 96 | 24 | 48 | 4.0 | 31 | 147 | 27.14 | 29.17 | 1.07 | 1.89 | 14.4× | yes |
+| j1728 | 13.3 | 4 | subtract | 84 | 21 | 42 | 4.0 | 153 | 153 | 130.17 | 130.16 | 1.00 | 2.07 | 62.8× | yes |
+| j1728 | 13.3 | 4 | mitm | 84 | 21 | 42 | 4.0 | 153 | 153 | 27.48 | 27.47 | 1.00 | 2.07 | 13.3× | yes |
+| j1728 | 17.9 | 4 | subtract | 244 | 61 | 122 | 4.0 | 604 | 2227 | 302.11 | 1100.61 | 3.64 | 1.92 | 157.5× | yes |
+| j1728 | 17.9 | 4 | mitm | 244 | 61 | 122 | 4.0 | 604 | 2227 | 34.96 | 39.63 | 1.13 | 1.92 | 18.2× | yes |
+| j1728 | 16.6 | 8 | subtract | 180 | 45 | 90 | 4.0 | 1584 | 2481 | 912.96 | 1417.72 | 1.55 | 1.33 | 685.3× | yes |
+| j1728 | 16.6 | 8 | mitm | 180 | 45 | 90 | 4.0 | 1584 | 2481 | 37.51 | 41.07 | 1.10 | 1.33 | 28.2× | yes |
+| j1728 | 20.9 | 8 | subtract | 496 | 124 | 248 | 4.0 | 7944 | 11651 | 2811.10 | 4116.22 | 1.46 | 1.05 | 2674.7× | yes |
+| j1728 | 20.9 | 8 | mitm | 496 | 124 | 248 | 4.0 | 7944 | 11651 | 52.07 | 55.18 | 1.06 | 1.05 | 49.5× | yes |
+| j1728 | 23.0 | 2 | subtract | 808 | 202 | 404 | 4.0 | 6483 | 10828 | 1792.92 | 2994.47 | 1.67 | 0.63 | 2834.4× | yes |
+| j1728 | 23.0 | 2 | mitm | 808 | 202 | 404 | 4.0 | 6483 | 10828 | 59.76 | 61.39 | 1.03 | 0.63 | 94.5× | yes |
+| generic | 12.8 | 6 | subtract | 38 | 19 | 19 | 2.0 | 575 | 575 | 268.38 | 268.38 | 1.00 | 1.93 | 139.1× | yes |
+| generic | 12.8 | 6 | mitm | 38 | 19 | 19 | 2.0 | 575 | 575 | 23.86 | 23.86 | 1.00 | 1.93 | 12.4× | yes |
+| generic | 15.5 | 1 | subtract | 72 | 36 | 36 | 2.0 | 381 | 381 | 126.16 | 126.16 | 1.00 | 2.32 | 54.4× | yes |
+| generic | 15.5 | 1 | mitm | 72 | 36 | 36 | 2.0 | 381 | 381 | 11.48 | 11.48 | 1.00 | 2.32 | 4.9× | yes |
+| generic | 18.3 | 2 | subtract | 138 | 69 | 69 | 2.0 | 2181 | 2181 | 521.04 | 521.04 | 1.00 | 1.52 | 343.7× | yes |
+| generic | 18.3 | 2 | mitm | 138 | 69 | 69 | 2.0 | 2181 | 2181 | 14.34 | 14.34 | 1.00 | 1.52 | 9.5× | yes |
+| generic | 19.7 | 1 | subtract | 186 | 93 | 93 | 2.0 | 2004 | 2004 | 406.16 | 406.16 | 1.00 | 1.54 | 264.1× | yes |
+| generic | 19.7 | 1 | mitm | 186 | 93 | 93 | 2.0 | 2004 | 2004 | 13.03 | 13.03 | 1.00 | 1.54 | 8.5× | yes |
+| generic | 21.9 | 4 | subtract | 314 | 157 | 157 | 2.0 | 35384 | 35384 | 5620.86 | 5620.86 | 1.00 | 1.32 | 4249.9× | yes |
+| generic | 21.9 | 4 | mitm | 314 | 157 | 157 | 2.0 | 35384 | 35384 | 31.94 | 31.94 | 1.00 | 1.32 | 24.1× | yes |
+| generic | 23.9 | 1 | subtract | 496 | 248 | 248 | 2.0 | 5020 | 5020 | 631.62 | 631.62 | 1.00 | 0.88 | 715.6× | yes |
+| generic | 23.9 | 1 | mitm | 496 | 248 | 248 | 2.0 | 5020 | 5020 | 17.32 | 17.32 | 1.00 | 0.88 | 19.6× | yes |
+| d7 | 12.8 | 8 | subtract | 38 | 19 | 19 | 2.0 | 163 | 163 | 83.00 | 83.00 | 1.00 | 2.32 | 35.8× | yes |
+| d7 | 12.8 | 8 | mitm | 38 | 19 | 19 | 2.0 | 163 | 163 | 16.34 | 16.34 | 1.00 | 2.32 | 7.1× | yes |
+| d7 | 12.8 | 8 | subtract | 38 | 19 | 19 | 2.0 | 365 | 365 | 174.36 | 174.36 | 1.00 | 2.28 | 76.4× | yes |
+| d7 | 12.8 | 8 | mitm | 38 | 19 | 19 | 2.0 | 365 | 365 | 20.89 | 20.89 | 1.00 | 2.28 | 9.2× | yes |
+| d7 | 17.6 | 4 | subtract | 114 | 57 | 57 | 2.0 | 3323 | 3323 | 866.76 | 866.76 | 1.00 | 1.75 | 495.6× | yes |
+| d7 | 17.6 | 4 | mitm | 114 | 57 | 57 | 2.0 | 3323 | 3323 | 19.33 | 19.33 | 1.00 | 1.75 | 11.0× | yes |
+| d7 | 17.5 | 4 | subtract | 112 | 56 | 56 | 2.0 | 2938 | 2938 | 770.21 | 770.21 | 1.00 | 1.39 | 552.2× | yes |
+| d7 | 17.5 | 4 | mitm | 112 | 56 | 56 | 2.0 | 2938 | 2938 | 18.70 | 18.70 | 1.00 | 1.39 | 13.4× | yes |
+| d7 | 21.7 | 4 | subtract | 300 | 150 | 150 | 2.0 | 15453 | 15453 | 2504.51 | 2504.51 | 1.00 | 0.92 | 2717.5× | yes |
+| d7 | 21.7 | 4 | mitm | 300 | 150 | 150 | 2.0 | 15453 | 15453 | 22.02 | 22.02 | 1.00 | 0.92 | 23.9× | yes |
+| d7 | 21.5 | 4 | subtract | 284 | 142 | 142 | 2.0 | 22768 | 22768 | 3779.34 | 3779.34 | 1.00 | 1.47 | 2577.0× | yes |
+| d7 | 21.5 | 4 | mitm | 284 | 142 | 142 | 2.0 | 22768 | 22768 | 26.77 | 26.77 | 1.00 | 1.47 | 18.3× | yes |
+| d8 | 14.9 | 2 | subtract | 60 | 30 | 30 | 2.0 | 347 | 347 | 123.86 | 123.86 | 1.00 | 1.95 | 63.6× | yes |
+| d8 | 14.9 | 2 | mitm | 60 | 30 | 30 | 2.0 | 347 | 347 | 11.78 | 11.78 | 1.00 | 1.95 | 6.1× | yes |
+| d8 | 13.2 | 6 | subtract | 40 | 20 | 20 | 2.0 | 412 | 412 | 180.57 | 180.57 | 1.00 | 2.62 | 68.9× | yes |
+| d8 | 13.2 | 6 | mitm | 40 | 20 | 20 | 2.0 | 412 | 412 | 19.78 | 19.78 | 1.00 | 2.62 | 7.5× | yes |
+| d8 | 17.9 | 4 | subtract | 122 | 61 | 61 | 2.0 | 3078 | 3078 | 772.00 | 772.00 | 1.00 | 1.41 | 547.4× | yes |
+| d8 | 17.9 | 4 | mitm | 122 | 61 | 61 | 2.0 | 3078 | 3078 | 18.09 | 18.09 | 1.00 | 1.41 | 12.8× | yes |
+| d8 | 17.1 | 6 | subtract | 102 | 51 | 51 | 2.0 | 4592 | 4592 | 1255.40 | 1255.40 | 1.00 | 1.74 | 720.7× | yes |
+| d8 | 17.1 | 6 | mitm | 102 | 51 | 51 | 2.0 | 4592 | 4592 | 24.65 | 24.65 | 1.00 | 1.74 | 14.2× | yes |
+| d8 | 21.3 | 6 | subtract | 272 | 136 | 136 | 2.0 | 6640 | 6640 | 1134.18 | 1134.18 | 1.00 | 1.35 | 843.1× | yes |
+| d8 | 21.3 | 6 | mitm | 272 | 136 | 136 | 2.0 | 6640 | 6640 | 17.44 | 17.44 | 1.00 | 1.35 | 13.0× | yes |
+| d8 | 22.5 | 2 | subtract | 362 | 181 | 181 | 2.0 | 20821 | 20821 | 3084.66 | 3084.66 | 1.00 | 0.96 | 3227.1× | yes |
+| d8 | 22.5 | 2 | mitm | 362 | 181 | 181 | 2.0 | 20821 | 20821 | 23.12 | 23.12 | 1.00 | 0.96 | 24.2× | yes |
+
+
+| family | log2 r | degree-2 maps | ord_r(λ) | images in base | base points | chance fraction | verified |
+|:--|--:|--:|--:|--:|--:|--:|:--|
+| d7 | 12.8 | 4 | 6910 | 0 | 38 | 0.00069 | true |
+| d7 | 12.8 | 4 | 3554 | 0 | 38 | 0.00067 | true |
+| d7 | 17.6 | 4 | 64002 | 0 | 114 | 0.00015 | true |
+| d7 | 17.5 | 4 | 30135 | 0 | 112 | 0.00015 | true |
+| d7 | 21.7 | 4 | 3424060 | 0 | 300 | 0.00002 | true |
+| d7 | 21.5 | 4 | 243126 | 0 | 284 | 0.00002 | true |
+| d8 | 14.9 | 2 | 14861 | 0 | 60 | 0.00101 | true |
+| d8 | 13.2 | 2 | 4613 | 0 | 40 | 0.00072 | true |
+| d8 | 17.9 | 2 | 33840 | 0 | 122 | 0.00013 | true |
+| d8 | 17.1 | 2 | 137218 | 0 | 102 | 0.00012 | true |
+| d8 | 21.3 | 2 | 2545240 | 0 | 272 | 0.00002 | true |
+| d8 | 22.5 | 2 | 2969588 | 0 | 362 | 0.00003 | true |
+wrote experiments/23_glv_invariant_pilot.json
