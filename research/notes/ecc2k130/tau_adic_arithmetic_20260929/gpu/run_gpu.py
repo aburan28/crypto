@@ -26,6 +26,10 @@ def run(output):
     with output.open('x') as f:f.write('{}\n')
     receipt={'status':'started','gpu_executed':False,'classification':'known-scalar GPU arithmetic stage diagnostic',
              'sources':{p.name:fx.sha(p.read_bytes()) for p in fx.HERE.iterdir() if p.suffix in ('.py','.cuh','.md')},
+             'dependency_sources':{
+                 'parent_benchmark.py':fx.sha((fx.PARENT/'benchmark.py').read_bytes()),
+                 'curve_identity.py':fx.sha((fx.HERE.parents[4]/'tools/curve_identity.py').read_bytes()),
+                 'parent_run-02.json':fx.sha((fx.PARENT/'results/run-02.json').read_bytes())},
              'rho_speedup':None,'walk_iterations_per_second':None,'panels':[]}
     try:
         import cupy as cp
@@ -45,11 +49,12 @@ def run(output):
             functions={};compile_meta={}
             for fast in (0,1):
                 start=time.perf_counter();key=(m,fast);was_cached=key in modules
+                options=('--std=c++17',f'-DFIELD_M={m}',f'-DFAST_SQUARE={fast}')
                 if not was_cached:
-                    options=('--std=c++17',f'-DFIELD_M={m}',f'-DFAST_SQUARE={fast}')
                     modules[key]=cp.RawModule(code=(fx.HERE/'arithmetic.cuh').read_text(),options=options)
                 functions[fast]=modules[key].get_function('evaluate')
                 compile_meta[str(fast)]={'seconds':time.perf_counter()-start,'reused_module':was_cached,
+                                        'explicit_options':options,
                                         'attributes':functions[fast].attributes}
             row={k:panel[k] for k in ('m','holdout','seed','identity','field','curve','source_receipt_sha256','input_sha256','sage_output_sha256','oracle_seconds')}
             row.update(prepare=prep_meta,table_seconds=table_seconds,compile=compile_meta,
