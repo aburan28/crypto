@@ -1,0 +1,389 @@
+{
+  "schema_version": 1,
+  "operation": "koblitz_n59_witness_key_cache_optimization",
+  "date": "2026-09-21",
+  "claim_boundary": "Finite same-target witnessed-table construction optimization. Caching first-pass packed keys removes the second quadratic group-addition pass and lowers full default and one-worker time while raising construction peak memory to about 10 GB. Full IC remains far behind rho. No SOTA or asymptotic claim.",
+  "params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-witness-cached-full-public-59001.json",
+    "sha256": "d40bbe0e7bf81dcf99ee4af27b332d3c5fbf24e8fc5c838756348e7c1b4a1ec7"
+  },
+  "predecessors": {
+    "ell15_compact": {
+      "path": "docs/ic/runs/koblitz-n59-cofactor-projected-l15-optimization-20260921.json",
+      "sha256": "71ef16b1b78f7fae48e85b778f28a83487782acde8579f88eb8626b9c1e018da"
+    },
+    "ell14_compact": {
+      "path": "docs/ic/runs/koblitz-n59-cofactor-projected-complete-20260921.json",
+      "sha256": "fbb78df18b65f852d40acd177e3b44f618082fa69481fab02e2b8dda1ce3fc5f"
+    }
+  },
+  "instance": {
+    "curve": "K_1 over GF(2^59)",
+    "subgroup_order": 25179555920633,
+    "cofactor": 22894,
+    "ell": 15,
+    "collection_m": 3,
+    "descent_m": 2,
+    "collection_window": 1024,
+    "public_target_seed": 59001,
+    "target_scalar_constructed_or_supplied": false
+  },
+  "factor_base": {
+    "kind": "cofactor_projected",
+    "parent": {
+      "kind": "standard_subspace",
+      "ell": 15
+    },
+    "points": 32934,
+    "signed_negation_orbits": 16467,
+    "projected_columns": 16344,
+    "factor_base_logs_known_by_construction": false,
+    "target_subgroup_enumerated": false,
+    "scalar_preimages_retained": false
+  },
+  "pair_table": {
+    "tier": "witnessed_compact",
+    "byte_ceiling": 8589934592,
+    "pair_entries": 542340645,
+    "estimated_table_bytes": 4878330938,
+    "rest_bytes_per_pair": 4,
+    "witness_bytes_per_pair": 4,
+    "witness_encoding": "two unsigned 16-bit point indices packed into one u32",
+    "exact_candidate_check": "stored pair sum is recomputed in the fast group before return",
+    "deterministic_choice": "all exact candidates are sorted and deduplicated before the first witness is consumed",
+    "builder": "cached_first_pass_packed_keys",
+    "cached_key_bytes_per_pair": 8,
+    "cached_key_entries": 542340645,
+    "temporary_cache_bytes": 4338725160
+  },
+  "relation_stream": {
+    "units": 26,
+    "trials": 2600000,
+    "relations": 54749,
+    "summands_scanned": 2662400000,
+    "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
+    "rejected": 0,
+    "duplicates": 0
+  },
+  "default_thread": {
+    "mode": "default_threads",
+    "whole_wall_seconds": 76.93405775,
+    "whole_cpu_seconds": 774.2413419999999,
+    "peak_rss_bytes": 10072309760,
+    "ic_wall_seconds": 76.342292915,
+    "rho_wall_seconds": 0.544706042,
+    "ic_over_rho_wall_ratio": 140.15319645563986,
+    "online_descent_seconds": 0.00248525,
+    "online_rho_over_descent_ratio": 219.1755525601046,
+    "stages": {
+      "select": {
+        "wall_seconds": 0.644183166,
+        "cpu_seconds": 3.3062240000000003
+      },
+      "collect": {
+        "wall_seconds": 65.151280875,
+        "cpu_seconds": 747.6172310000001
+      },
+      "logs": {
+        "wall_seconds": 10.568563458,
+        "cpu_seconds": 22.757929000000104
+      },
+      "solve": {
+        "wall_seconds": 0.020203459,
+        "cpu_seconds": 0.010027999999920212
+      },
+      "baseline": {
+        "wall_seconds": 0.545161209,
+        "cpu_seconds": 0.5451649999998835
+      }
+    },
+    "pair_table_build": {
+      "wall_seconds": 11.712772791,
+      "cpu_seconds": 137.237669
+    },
+    "relation_units": {
+      "wall_seconds": 50.677377625000005,
+      "cpu_seconds": 607.885612
+    },
+    "trials": 2600000,
+    "units": 26,
+    "units_extended": 0,
+    "relations": 54749,
+    "summands_scanned": 2662400000,
+    "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
+    "linear_algebra": {
+      "attempts": 1,
+      "mode": "sparse",
+      "seconds": 0.637785291,
+      "sparse": {
+        "attempts": 1,
+        "core_dimension": 1640,
+        "core_nonzeros": 23442,
+        "filter": {
+          "columns_in": 16344,
+          "columns_out": 1640,
+          "dependent_rows_dropped": 0,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 38373,
+          "merged_columns": 6581,
+          "nonzeros_in": 164239,
+          "nonzeros_out": 23442,
+          "rows_in": 54749,
+          "rows_out": 1673,
+          "singletons_removed": 8122,
+          "uncovered_columns": 1
+        },
+        "reconstructed_columns": 14704,
+        "wiedemann": {
+          "block_m": 4,
+          "block_n": 4,
+          "dimension": 1641,
+          "extra_steps": 0,
+          "generator_degree": 410,
+          "products": 1241,
+          "sequence_length": 830
+        }
+      }
+    },
+    "verification_seconds": 7.625883458,
+    "recovered_scalar": 17861472351607,
+    "verified": true,
+    "target": {
+      "kind": "public_hash_to_curve_cofactor",
+      "public_hash_counter": 0,
+      "public_hash_seed": 59001,
+      "target_scalar_constructed": false,
+      "x": "551007654412192707",
+      "y": "76595654768815112"
+    },
+    "rho_iterations": 518669,
+    "binary_blake3": "91d5881ef8aaa82b6b02dd17f958b8cc81b3945a72c1d5b68c80c8f160035523"
+  },
+  "one_worker": {
+    "mode": "one_worker",
+    "whole_wall_seconds": 649.396030334,
+    "whole_cpu_seconds": 635.6179970000001,
+    "peak_rss_bytes": 10044899328,
+    "ic_wall_seconds": 648.7803248340001,
+    "rho_wall_seconds": 0.56001725,
+    "ic_over_rho_wall_ratio": 1158.500608390188,
+    "online_descent_seconds": 0.002569708,
+    "online_rho_over_descent_ratio": 217.9303057001029,
+    "stages": {
+      "select": {
+        "wall_seconds": 2.857176417,
+        "cpu_seconds": 2.838947
+      },
+      "collect": {
+        "wall_seconds": 625.069023292,
+        "cpu_seconds": 611.364111
+      },
+      "logs": {
+        "wall_seconds": 20.878702709,
+        "cpu_seconds": 20.83749499999999
+      },
+      "solve": {
+        "wall_seconds": 0.026277792,
+        "cpu_seconds": 0.010200000000054388
+      },
+      "baseline": {
+        "wall_seconds": 0.560470917,
+        "cpu_seconds": 0.5599459999999681
+      }
+    },
+    "pair_table_build": {
+      "wall_seconds": 101.933056666,
+      "cpu_seconds": 101.63323199999999
+    },
+    "relation_units": {
+      "wall_seconds": 520.1066009980002,
+      "cpu_seconds": 507.2064439999999
+    },
+    "trials": 2600000,
+    "units": 26,
+    "units_extended": 0,
+    "relations": 54749,
+    "summands_scanned": 2662400000,
+    "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
+    "linear_algebra": {
+      "attempts": 1,
+      "mode": "sparse",
+      "seconds": 0.644403917,
+      "sparse": {
+        "attempts": 1,
+        "core_dimension": 1640,
+        "core_nonzeros": 23442,
+        "filter": {
+          "columns_in": 16344,
+          "columns_out": 1640,
+          "dependent_rows_dropped": 0,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 38373,
+          "merged_columns": 6581,
+          "nonzeros_in": 164239,
+          "nonzeros_out": 23442,
+          "rows_in": 54749,
+          "rows_out": 1673,
+          "singletons_removed": 8122,
+          "uncovered_columns": 1
+        },
+        "reconstructed_columns": 14704,
+        "wiedemann": {
+          "block_m": 4,
+          "block_n": 4,
+          "dimension": 1641,
+          "extra_steps": 0,
+          "generator_degree": 410,
+          "products": 1241,
+          "sequence_length": 830
+        }
+      }
+    },
+    "verification_seconds": 17.903506916,
+    "recovered_scalar": 17861472351607,
+    "verified": true,
+    "target": {
+      "kind": "public_hash_to_curve_cofactor",
+      "public_hash_counter": 0,
+      "public_hash_seed": 59001,
+      "target_scalar_constructed": false,
+      "x": "551007654412192707",
+      "y": "76595654768815112"
+    },
+    "rho_iterations": 518669,
+    "binary_blake3": "91d5881ef8aaa82b6b02dd17f958b8cc81b3945a72c1d5b68c80c8f160035523"
+  },
+  "selection_pilots": [
+    {
+      "name": "parallel_scatter_first_witness",
+      "decision": "rejected_nondeterministic_witness_order",
+      "whole_wall_seconds": 25.693795292,
+      "whole_core_seconds": 260.807216,
+      "peak_rss_bytes": 6539313152,
+      "build_wall_seconds": 20.429724583,
+      "relation_unit_wall_seconds": 2.057202375,
+      "relations": 2157,
+      "canonical_relations_sha256": "afc35267caef752f7b23f76ab4d29f93e75f9ce71a02c2eae1d0eaf96cceaa84",
+      "binary_blake3": "c3ab83acb157ca1c4b899e8cd77e90259191bf11f9e727e5a159bee3c5ee6994"
+    },
+    {
+      "name": "deterministic_sorted_witness",
+      "decision": "selected",
+      "whole_wall_seconds": 24.7046345,
+      "whole_core_seconds": 260.509567,
+      "peak_rss_bytes": 6543949824,
+      "build_wall_seconds": 19.615474084,
+      "relation_unit_wall_seconds": 1.930118209,
+      "relations": 2157,
+      "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+      "binary_blake3": "07a006bcbf7251b561a9aad9b4889c31a748e9f8dcdca5a57f49da8d2a7107d3"
+    }
+  ],
+  "process_accounting": {
+    "processes": 3,
+    "sequential_wall_seconds": 743.666397042,
+    "total_core_seconds": 1576.843696,
+    "peak_rss_bytes": 10073538560,
+    "scope": "one cached-key selection pilot, one complete default-thread workflow, and one complete one-worker workflow; Stage134 and earlier processes remain charged in pinned predecessors"
+  },
+  "comparison_to_ell15_compact": {
+    "default_thread": {
+      "ic_wall_reduction_fraction": 0.32160762755157224,
+      "whole_cpu_reduction_fraction": 0.2861793805105016,
+      "collection_wall_reduction_fraction": 0.35323507264598064,
+      "rss_multiple": 1.5004511875030422,
+      "old_ic_over_rho": 229.7102352131501,
+      "new_ic_over_rho": 152.61509018640461,
+      "online_descent_reduction_fraction": 0.6733232735094873,
+      "relation_unit_wall_reduction_fraction": 0.45812810182201236
+    },
+    "one_worker": {
+      "ic_wall_reduction_fraction": 0.2823348403943554,
+      "whole_cpu_reduction_fraction": 0.27987200898999,
+      "collection_wall_reduction_fraction": 0.2887542483455311,
+      "rss_multiple": 1.5316741173543504,
+      "old_ic_over_rho": 1811.8151190858175,
+      "new_ic_over_rho": 1329.574639938143,
+      "online_descent_reduction_fraction": 0.690819735771085,
+      "relation_unit_wall_reduction_fraction": 0.3746936613723483
+    }
+  },
+  "comparison_to_ell14_compact": {
+    "default_thread": {
+      "ic_wall_reduction_fraction": 0.42505727563062434,
+      "whole_cpu_reduction_fraction": 0.4420812924728833,
+      "rss_multiple": 11.251395523344131,
+      "old_ic_over_rho": 239.82440937484375,
+      "new_ic_over_rho": 140.15319645563986
+    },
+    "one_worker": {
+      "ic_wall_reduction_fraction": 0.4681441377510238,
+      "whole_cpu_reduction_fraction": 0.4662596971783335,
+      "rss_multiple": 11.804532414271137,
+      "old_ic_over_rho": 2232.8437982897694,
+      "new_ic_over_rho": 1158.500608390188
+    }
+  },
+  "comparison_to_rho": {
+    "default_thread_full_crossover": false,
+    "one_worker_full_crossover": false,
+    "default_thread_full_ic_over_rho_wall": 140.15319645563986,
+    "one_worker_full_ic_over_rho_wall": 1158.500608390188,
+    "default_thread_online_rho_over_descent": 219.1755525601046,
+    "one_worker_online_rho_over_descent": 217.9303057001029,
+    "online_descent_crossover_after_precompute": true
+  },
+  "validation": [
+    "pilot and both full modes reproduce their Stage134 canonical relation hashes",
+    "both full modes recover the same unknown scalar and verify [d]G=Q",
+    "cached rows are disjoint and cover the exact triangular pair count",
+    "final witnessed lookup and exact candidate verification are unchanged",
+    "all logs and sparse solutions remain independently group-certified"
+  ],
+  "gates": {
+    "same_target_optimization": "finite_pass",
+    "single_core_resources": "pass_current_n59",
+    "full_cost_vs_rho": "fail_large_margin",
+    "independent_external_reproduction": "missing"
+  },
+  "software": {
+    "source_stack_head": "da4a21de17b880dac8d86c188c9dde038315d7b7",
+    "binary_blake3": "91d5881ef8aaa82b6b02dd17f958b8cc81b3945a72c1d5b68c80c8f160035523"
+  },
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-witnessed-compact-optimization-20260921.json",
+    "sha256": "96f616e3b34dacb322bcb05ccd4d7bdcb53a5045dd1496c9a34e23f49ec40d93"
+  },
+  "selection_pilot": {
+    "name": "cached_key_selection_pilot",
+    "whole_wall_seconds": 17.336308958,
+    "whole_core_seconds": 166.984357,
+    "peak_rss_bytes": 10073538560,
+    "build_wall_seconds": 12.241086625,
+    "build_core_seconds": 137.433409,
+    "relation_unit_wall_seconds": 1.931625666,
+    "relations": 2157,
+    "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+    "binary_blake3": "91d5881ef8aaa82b6b02dd17f958b8cc81b3945a72c1d5b68c80c8f160035523"
+  },
+  "comparison_to_stage134_two_pass": {
+    "default_thread": {
+      "ic_wall_reduction_fraction": 0.1096866362240908,
+      "whole_cpu_reduction_fraction": 0.09233448705738923,
+      "build_wall_reduction_fraction": 0.45241378372257757,
+      "build_cpu_reduction_fraction": 0.40060190653672745,
+      "rss_multiple": 1.5341127442417588,
+      "old_ic_over_rho": 152.61509018640461,
+      "new_ic_over_rho": 140.15319645563986
+    },
+    "one_worker": {
+      "ic_wall_reduction_fraction": 0.10460504393786463,
+      "whole_cpu_reduction_fraction": 0.1175137472428951,
+      "build_wall_reduction_fraction": 0.4858244802007774,
+      "build_cpu_reduction_fraction": 0.4768022859641148,
+      "rss_multiple": 1.6062816361178356,
+      "old_ic_over_rho": 1329.574639938143,
+      "new_ic_over_rho": 1158.500608390188
+    }
+  }
+}

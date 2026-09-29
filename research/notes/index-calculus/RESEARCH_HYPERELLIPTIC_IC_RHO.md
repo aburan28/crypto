@@ -633,3 +633,283 @@ crossover survives an uncorrected reference it is no longer arguable. (2) Push
 genus 4 past `N = 2^24`, where the law predicts the ratio keeps falling as
 `N^{−0.25}`. (3) Only then ask what any of it costs at a size anyone cares
 about.
+
+
+---
+
+# Round five: a walk that costs nothing to prepare, at genus 2, 3 and 4
+
+Round four left precomputation as 43% of the genus-3 relation stage: 64
+branch divisors `a_j D₁ + b_j D₂`, each a pair of scalar
+multiplications. Index calculus does not need its steps to have known
+coefficients.
+
+Class: **engineering**, with one **accounting** correction to the floor
+(below).
+
+## The factor-base walk
+
+`log F_j` is already one of the unknowns, so the walk can step by
+**factor-base places**: it carries `R = a·D₁ + b·D₂ + Σ n_j F_j`, and a
+decomposition `Σ c_i F_i` gives the row
+
+```
+Σ (c_i − n_i) y_i − b·k ≡ a   (mod N)
+```
+
+the same shape as before. The steps are places the factor base already
+holds, so the step precomputation disappears: measured precomputation
+per run falls from ~300 group operations to **1** (the starting point
+`D₁ + D₂`).
+
+**Pollard rho cannot do this.** Its steps must have known `(a_j, b_j)`
+or a collision says nothing about the logarithm. This is a structural
+asymmetry between the two methods, not an optimisation withheld from the
+reference — the first such asymmetry this thread has found.
+
+Two things it needed, both found by tests rather than by reasoning:
+
+1. **`D₁` and `D₂` must stay in the step set.** A step by a place moves
+   neither `a` nor `b`, so a walk stepping only through places yields
+   rows that all share one `(a, b)`: every row reads
+   `a + b·k = (something in the y's)`, subtracting any two eliminates
+   `k`, and the system pins every `y_i` while leaving `k` free. The rows
+   are all true identities in the Jacobian and say nothing whatever
+   about the logarithm — the first version did exactly this, and the
+   solve simply returned nothing. A quarter of the steps are now `D₁` or
+   `D₂`, which are free to use as well. A test now checks every
+   collected row is an identity, at two genera, and that rows really do
+   carry step counts.
+2. **Walked rows are correlated**, so a fixed margin of spare rows is
+   sometimes short: seed 20260919 at `p = 41` produced 24 rows that
+   pinned the `y`'s and left `k` free. The driver now grows the margin
+   and solves again, up to four rounds, counting the extra rows like any
+   others.
+
+## The floor was not a floor
+
+The genus-3 `p = 41` row measured **below** the old floor, which a real
+floor cannot do. That floor took the trial count to be `(m+1)·g!` from
+heuristic H1 — yield `≈ 1/g!` — and H1 holds for divisors drawn
+uniformly. A walk stepping through the factor base does not draw
+uniformly, and the measured yield sits above `1/g!` at every genus:
+
+| genus | H1 yield `1/g!` | measured |
+|--:|--:|--:|
+| 2 | 0.500 | 0.49 – 0.56 |
+| 3 | 0.167 | 0.166 – 0.27 |
+| 4 | 0.042 | 0.053 – 0.081 |
+
+So the floor is now **unconditional** — `(m+1)·(1 + g/c) + m²/c`, one
+group operation and one oracle call per relation, plus one read of the
+solve's matrix — and H1 is reported beside it as a *prediction* the
+search may beat (`IC/H1`). At genus 4 the measured cost is 0.78 – 2.77×
+the prediction, so H1 is not far wrong, but it is not a bound.
+
+## Table
+
+`S = group operations / sqrt(N)`, DP rho reference, 5 index-calculus and
+40 rho runs per row, every run verified. `ab-walk` is round four's
+`(a_j, b_j)` walk; `fb-walk` is the factor-base walk.
+
+| genus | `p` | `N` | `m` | `S_ic` ab | `S_ic` fb | `S_rho` | **fb `S_ic/S_rho`** | `IC/H1` |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 2 | 41 | 1321 | 15 | 9.65 | 2.08 | 9.09 | **0.23** | 2.35 |
+| 2 | 101 | 4663 | 46 | 5.90 | 1.83 | 5.45 | **0.34** | 1.32 |
+| 2 | 211 | 11813 | 112 | 4.66 | 2.17 | 3.96 | **0.55** | 1.02 |
+| 2 | 251 | 61667 | 123 | 2.28 | 1.08 | 2.41 | **0.45** | 1.06 |
+| 3 | 23 | 6299 | 12 | 5.00 | 1.27 | 4.74 | **0.27** | 1.29 |
+| 3 | 61 | 124459 | 33 | 1.51 | 0.84 | 2.30 | **0.37** | 1.45 |
+| 3 | 101 | 364747 | 53 | 1.11 | 0.63 | 1.90 | **0.33** | 1.16 |
+| 3 | 151 | 1180351 | 77 | 0.80 | 0.52 | 1.98 | **0.26** | 1.21 |
+| 3 | 211 | 4620611 | 104 | 0.53 | 0.38 | 1.96 | **0.20** | 1.30 |
+| 4 | 17 | 5639 | 7 | 9.26 | 7.10 | 5.20 | **1.36** | 2.77 |
+| 4 | 23 | 30223 | 11 | 4.40 | 2.82 | 2.89 | **0.98** | 1.70 |
+| 4 | 31 | 239753 | 16 | 1.79 | 1.22 | 1.90 | **0.64** | 1.46 |
+| 4 | 41 | 333041 | 24 | 1.45 | 1.15 | 1.86 | **0.62** | 1.10 |
+| 4 | 61 | 16790591 | 36 | 0.27 | 0.17 | 2.17 | **0.08** | 0.78 |
+
+## Reading it
+
+1. **The factor-base walk is worth 1.3 – 4.6×**, most at small `m` where
+   the fixed precomputation was the largest share, least at large `m`
+   where walked trials dominate anyway. It is not genus-specific: genus
+   2 gains as much as genus 4.
+2. **The genus trend is now unambiguous.** At the largest instance of
+   each genus, fb-walk `S_ic/S_rho` is 0.45 (g=2, `N ≈ 6·10⁴`), 0.20
+   (g=3, `N ≈ 5·10⁶`), 0.08 (g=4, `N ≈ 1.7·10⁷`). Wall clock agrees at
+   the extreme: 159 ms against rho's 783 ms at genus 4, `p = 61`.
+3. **Small `p` at high genus is fixed-cost territory.** Genus 4 at
+   `p = 17` has `m = 7` — a seven-column system, where the starting
+   point and the oracle swamp everything and index calculus loses at
+   1.36. The genus advantage needs `N` large enough for rho's `sqrt(N)`
+   to matter.
+4. **The oracle is now the dominant field cost at high genus**: 117
+   group-op equivalents of 692 total at genus 4 `p = 61`, against 5 for
+   the linear algebra. Cantor–Zassenhaus on quartics is what that buys,
+   and it is the next thing to attack.
+5. **Rows got denser, as predicted.** The linear algebra rose from ~1 to
+   5 – 29 group-op equivalents, since each row now carries its step
+   counts as well as its decomposition. Still nowhere near the
+   bottleneck.
+
+## Scope
+
+Genus 2, 3, 4; odd characteristic; `p ≤ 251`; full degree-1 factor base;
+one machine. The genus-4 rows are five instances on one curve family,
+and `p = 61` is a single instance whose `N` happens to be large; nothing
+here is a claim about genus-4 curves at cryptographic size, where the
+factor-base build is `O(p)` and the whole pipeline would need rebuilding.
+The prime-order subgroup is required to carry most of the Jacobian, which
+also keeps `l² ∤ #Jac` and so the `l`-Sylow cyclic — the condition that
+makes "`log F_j` mod `l`" well defined at all.
+
+
+---
+
+# Round six: the oracle, and an accounting error that ran through
+# everything before it
+
+Round five named the smoothness oracle as the dominant field cost at
+high genus. Attacking it worked. Checking the result against wall clock
+then showed that the cost model this whole thread has been reporting was
+wrong by more than the optimisation was worth.
+
+Class: **engineering** for the oracle; **accounting** for the rest, and
+the accounting part supersedes the `S_ic` figures in rounds three, four
+and five.
+
+## The oracle is 1.4 – 2.8× cheaper
+
+Two changes, both exact — the oracle's answers are unchanged, and
+exhaustive tests hold it to that.
+
+1. **One oracle call per candidate instead of two.** `decompose`
+   returned an `Option`, so on failure the caller re-ran the whole
+   oracle to learn whether the failure was "not smooth" or "smooth but
+   off a truncated base". At genus 4 more than nine candidates in ten
+   fail, so that probe was about half of all oracle work. It now returns
+   the three outcomes from one call.
+2. **A non-square discriminant proves `u` does not split**, for one
+   resultant on a degree-`≤ g` polynomial and one Euler exponentiation,
+   where the full test needs `x^p mod u`. Frobenius acts on the roots of
+   a squarefree `u` as a permutation whose cycle type is the
+   factorisation type, and `disc(u)` is a square exactly when that
+   permutation is even; splitting completely is the identity, which is
+   even. The odd types are `(2,1)` at degree 3 and `(2,1,1) + (4)` at
+   degree 4 — so this rejects **exactly half** of all candidates before
+   the step that dominates the oracle.
+
+Measured, like-for-like (factor-base walk, same instances, same seeds,
+oracle multiplications as counted at the time):
+
+| genus | oracle before | after | cut | wall before | after |
+|--:|--:|--:|--:|--:|--:|
+| 3, `p = 61` | 82,552 | 32,478 | 2.54× | 61 ms | 32 ms |
+| 3, `p = 211` | 276,160 | 115,835 | 2.38× | 241 ms | 160 ms |
+| 4, `p = 41` | 248,186 | 92,526 | 2.68× | 160 ms | 102 ms |
+| 4, `p = 61` | 304,834 | 112,513 | 2.71× | 159 ms | 73 ms |
+
+Genus 2 gains only 1.4 – 1.6×, from the duplicate call alone: its
+`deg u ≤ 2` closed form never reaches the discriminant filter.
+
+The discriminant carries a sign `(−1)^{n(n−1)/2}`, and whether `−1` is
+itself a square depends on `p mod 4`, so a wrong sign would reject split
+polynomials at one residue class and pass at the other. The exhaustive
+scan-versus-gcd equivalence now covers both classes at degree 3 and, new
+here, at degree 4 — the degree genus 4 actually produces, where the odd
+cycle types are a different set. A third test builds polynomials that
+split by construction and requires every one to survive the filter,
+since this is the only part of the oracle that answers "not smooth"
+without looking for roots at all.
+
+## The cost model was wrong, twice, in opposite directions
+
+Cutting the oracle's **counted** multiplications by 60% cut wall clock
+by 1.5 – 2.2×. If the count were faithful it would have predicted a few
+percent: the oracle was charged at 3 – 6% of `S` while behaving like a
+third of the run. The charge counts coefficient multiplications and
+misses what the implementation does per multiplication — allocation, the
+division loop inside `rem`, clones.
+
+Replacing the charge with the oracle's **measured time**, converted by
+the calibrated seconds-per-group-operation, overshot the other way: that
+calibration repeats one Cantor addition on cache-resident operands, so
+it under-measures what a group operation costs inside a real run, and
+dividing a measured time by too small a number inflates everything
+converted through it. At genus 3, `p = 61` that put `S` at a 1.2×
+disadvantage where the clock said a 1.7× *advantage*.
+
+What the unit now does: the relation search times its own group
+operations, and one operation's in-situ cost is that time divided by the
+operations it counted. The oracle and the solve convert through that.
+`S` and wall clock now agree within 1.6× on every row and within 1.3% –
+33% on most — and that agreement is a test, because it is the only thing
+that caught either error.
+
+**Two previously reported conclusions do not survive this:**
+
+- The sparse solve was reported as "rounds to zero" and as 1 – 29
+  group-op equivalents. Measured, it is 79 – 1350, and at the largest
+  genus-3 instance it is the **single largest term** (1350 of 3033,
+  against the oracle's 999 and the relation stage's 684). "The linear
+  algebra is not the bottleneck" was an artifact of the same
+  under-charge.
+- The headline ratios were optimistic. Rounds four and five reported
+  0.45 (g=2), 0.20 (g=3), 0.08 (g=4) at the largest instance of each
+  genus. Corrected: **1.81, 0.72, 0.16**. The clock in those same runs
+  had already disagreed — 159 ms against 783 ms at genus 4 is 4.9×, not
+  the 12× that `S = 0.08` claimed — and I reported the clock without
+  noticing it contradicted the unit.
+
+## Corrected table
+
+Factor-base walk, DP rho reference, in-situ accounting. `clock` is
+`wall_ic / wall_rho` measured in the same run, as an independent check
+on the unit.
+
+| genus | `p` | `N` | `S_ic/S_rho` | `clock` |
+|--:|--:|--:|--:|--:|
+| 2 | 41 | 1321 | 0.30 | 0.33 |
+| 2 | 101 | 4663 | 0.60 | 0.61 |
+| 2 | 151 | 7949 | 1.24 | 1.10 |
+| 2 | 211 | 11813 | 2.00 | 1.76 |
+| 2 | 251 | 61667 | 1.81 | 1.61 |
+| 3 | 23 | 6299 | 0.57 | 0.44 |
+| 3 | 61 | 124459 | 0.78 | 0.62 |
+| 3 | 101 | 364747 | 0.87 | 0.91 |
+| 3 | 151 | 1180351 | 0.84 | 0.79 |
+| 3 | 211 | 4620611 | 0.72 | 0.56 |
+| 4 | 17 | 5639 | 2.45 | 1.53 |
+| 4 | 23 | 30223 | 1.79 | 1.26 |
+| 4 | 31 | 239753 | 1.22 | 0.89 |
+| 4 | 41 | 333041 | 1.17 | 0.90 |
+| 4 | 61 | 16790591 | **0.16** | **0.15** |
+
+## Reading it
+
+1. **Genus 2 now gets worse with `p`**, 0.30 → 2.00, because the solve's
+   real cost grows faster in `m` than rho's `sqrt(N)` grows in `p`. The
+   old accounting hid this by charging the solve almost nothing.
+2. **Genus 3 is flat at 0.7 – 0.9** rather than falling to 0.20. Index
+   calculus is modestly ahead across five instances spanning `N` from
+   `6·10³` to `4.6·10⁶`, not several times ahead.
+3. **Genus 4 still shows the crossover, and it is still large at the one
+   big instance**: 0.16 by the unit, 0.15 by the clock, 105 ms against
+   rho's 712 ms at `N = 1.7·10⁷`. The four smaller genus-4 rows lose
+   (1.17 – 2.45), so the single winning row carries the claim, and it is
+   one instance.
+4. **The oracle is still the largest or second-largest term** at genus
+   3 and 4 after a 2.5× cut — 746 of 1396 equivalents at genus 4
+   `p = 61`. Closed-form cubic and quartic root finding (Cardano,
+   Ferrari) would replace the remaining Cantor–Zassenhaus
+   exponentiations, and the solve now deserves the same treatment the
+   oracle just got.
+
+## Caveat on the instrumentation
+
+Timing the loop costs something: the instrumented build is slower than
+the uninstrumented one on the same instance, and rho is not instrumented
+the same way, so the measured ratio is biased slightly **against** index
+calculus. That is the conservative direction for a claim about index
+calculus, so it stands as reported rather than being corrected out.

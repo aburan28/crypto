@@ -16,11 +16,11 @@ from producer.evidence import audit_stages, check_build_identity, method_record,
 from producer.timing import native_intervals
 
 EVALUATOR = ('autolab.py', 'tournament.py', 'portfolio.py', 'oracle.py', 'identity.py',
-             'campaign_rules.py', 'target_history.py',
+             'campaign_rules.py', 'campaign_rules_v2.py', 'target_history.py',
              'measurement.py', 'driver_admission.py', 'qualification.py', 'producer/evidence.py', 'producer/timing.py')
 EVALUATOR += ('generic_driver.py', 'generic_admission.py', 'generic_build.py',
               'generic_bases.py', 'generic_stages.py', 'generic_queries.py',
-              'generic_query_law.py', 'generic_phases.py')
+              'generic_query_law.py', 'generic_phases.py', 'generic_backend_yield.py')
 INPUT_LAW = ('public-hash-to-curve-cofactor-v1; independently generated fixture, '
              'one supplied public point, no planted scalar')
 
@@ -128,6 +128,33 @@ def distinct_candidates(named_admissions):
         seen.add(identity)
 
 
+def rho_context(admitted, native):
+    """Describe the admitted single-target reference without inventing memory data."""
+    require(admitted['mode'] == 'rho' and len(admitted['fixture']['targets']) == 1,
+            'rho context requires one admitted public target')
+    resources = admitted['workload']['record']['resource_envelope']
+    require(resources['worker_threads'] == 1, 'rho context requires the admitted serial worker')
+    effective = None
+    if native is not None:
+        require(len(native['solutions']) == 1
+                and type(native['solutions'][0]['effective_walks']) is int
+                and native['solutions'][0]['effective_walks'] > 0,
+                'rho context lacks its observed walk width')
+        effective = native['solutions'][0]['effective_walks']
+    return dict(public_target=admitted['fixture']['targets'][0], target_count=1,
+        source_manifest_sha256=admitted['source_manifest_sha256'],
+        configuration=copy.deepcopy(admitted['job']['config']),
+        algorithm_seed=admitted['job']['algorithm_seed'],
+        resource_envelope=copy.deepcopy(resources), worker_count=1,
+        requested_walks=admitted['job']['config'].get('rho_parallel_walks', 32),
+        effective_walks=effective,
+        walk_policy='serially interleaved signed-Frobenius walks on this one target',
+        collision_policy='source-bound stored-point table and recent-state cycle detection; scalar replay verifies recovery',
+        sharing_policy='target/restart-local state; no cross-target collision table or amortization',
+        distinguished_point_peak_bytes=None,
+        distinguished_point_memory_status='unknown: qualified worker has no separate collision-table allocation counter')
+
+
 def run_record(admitted, *, number, host_id, status, native=None, process_wall_ns=None,
                profile=None, costs=None, manifest=None, executable=None, profile_wall_ns=None,
                native_status=None, profile_status=None):
@@ -196,6 +223,7 @@ def run_record(admitted, *, number, host_id, status, native=None, process_wall_n
             instruction_phases=costs, total_operations=sum(costs.values()) if costs else None,
             native_wall_ns=process_wall_ns, certificate=proof, provenance=provenance,
             promotion_eligible=False)
+        record['rho_context'] = rho_context(admitted, native)
     record['native_timing'] = timing
     return record
 
@@ -214,6 +242,13 @@ def online_table(rows, cases, arms, repetitions, rho_aliases):
                     {r['repetition'] for r in group} == set(range(repetitions)) and
                     all(r['status'] == 'VERIFIED' and r['measurement']['native_timing'] is not None for r in group)
                     for group in (ic, rho))
+                if complete:
+                    require(len({r['measurement']['workload_id'] for r in ic+rho}) == 1,
+                            'paired online rows use different workloads')
+                    require(len({r['measurement']['candidate_id'] for r in ic}) == 1,
+                            'paired online IC repetitions use different candidates')
+                    require(len({r['measurement']['reference_id'] for r in rho}) == 1,
+                            'paired online rho repetitions use different references')
                 ic_ns = statistics.median(r['measurement']['native_timing']['online']['wall_ns'] for r in ic) if complete else None
                 rho_ns = statistics.median(r['measurement']['native_timing']['online']['wall_ns'] for r in rho) if complete else None
                 table.append(dict(case=case['id'], public_target=case['fixture']['targets'][0],
@@ -225,6 +260,13 @@ def online_table(rows, cases, arms, repetitions, rho_aliases):
                     IC_online_ms=ic_ns/1e6 if complete else None,
                     rho_online_ms=rho_ns/1e6 if complete else None,
                     online_speedup=rho_ns/ic_ns if complete else None,
+                    rho_runs=[dict(run_id=r['measurement']['run_id'], status=r['status'],
+                        context=r['measurement']['rho_context'],
+                        native_timing=r['measurement']['native_timing'],
+                        certificate=r['measurement']['certificate'],
+                        native_process_peak_rss_bytes=r.get('native_process', {}).get('peak_rss_bytes'),
+                        memory_scope='whole native process peak RSS; not collision-table allocation')
+                        for r in sorted(rho, key=lambda row: row['repetition'])],
                     boundary='one supplied point, after reusable preparation through scalar replay',
                     aggregation='median of process repetitions of this same point; no target amortization'))
     return table

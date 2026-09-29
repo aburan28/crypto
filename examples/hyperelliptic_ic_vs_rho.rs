@@ -162,7 +162,7 @@ fn main() {
     );
 
     println!(
-        "{:>5} {:>9} {:>8} {:>6} {:>10} {:>10} {:>9} {:>9} {:>8} {:>8} {:>7}",
+        "{:>5} {:>9} {:>8} {:>6} {:>10} {:>10} {:>9} {:>9} {:>8} {:>8} {:>7} {:>6}",
         "p",
         "search",
         "N",
@@ -173,10 +173,15 @@ fn main() {
         "S_rho",
         "S_ic/S_rho",
         "S_walk",
-        "IC/flr"
+        "IC/flr",
+        "IC/H1"
     );
 
-    for (genus, primes) in [(2u32, &primes2[..]), (3u32, &primes3[..]), (4u32, &primes4[..])] {
+    for (genus, primes) in [
+        (2u32, &primes2[..]),
+        (3u32, &primes3[..]),
+        (4u32, &primes4[..]),
+    ] {
         println!("\n--- genus {genus} ---");
         for &p in primes {
             // Flushed per line: this example is long-running and its
@@ -203,8 +208,14 @@ fn main() {
                     SmoothnessTest::Scan,
                 ),
                 (
-                    "optimised",
+                    "ab-walk",
                     RelationSearch::walk(),
+                    LinearAlgebra::Sparse,
+                    SmoothnessTest::Gcd,
+                ),
+                (
+                    "fb-walk",
+                    RelationSearch::factor_base_walk(),
                     LinearAlgebra::Sparse,
                     SmoothnessTest::Gcd,
                 ),
@@ -241,7 +252,7 @@ fn main() {
                 };
 
                 println!(
-                    "{:>5} {:>9} {:>8} {:>6} {:>10.0} {:>10.0} {:>9.2} {:>9.2} {:>8.2} {:>8.2} {:>7.2}{}",
+                    "{:>5} {:>9} {:>8} {:>6} {:>10.0} {:>10.0} {:>9.2} {:>9.2} {:>8.2} {:>8.2} {:>7.2} {:>6.2}{}",
                     p,
                     label,
                     row.n,
@@ -253,12 +264,14 @@ fn main() {
                     row.ratio_to_reference(),
                     row.rho_walk_s,
                     row.ratio_to_floor(),
+                    row.ic_s / row.ic_h1_predicted_s.max(f64::MIN_POSITIVE),
                     mark
                 );
                 io::stdout().flush().ok();
                 println!(
                     "        c = {}, relation stage {:.0} ops ({:.0} precompute, {:.2} ops/trial) \
-                     + oracle {:.0} mul-mods ({:.0} equiv) + linear algebra {:.0} mul-mods \
+                     + oracle {:.0} mul-mods ({:.0} equiv measured, {:.0} charged) \
+                     + linear algebra {:.0} mul-mods \
                      ({:.0} equiv), conv {:.0}; smoothness {:.3}; IC floor S = {:.2}; \
                      wall {:.0} ms IC vs {:.0} ms rho",
                     c,
@@ -267,6 +280,7 @@ fn main() {
                     row.ic_ops_per_trial,
                     row.ic_oracle_modmuls,
                     row.ic_oracle_group_equiv,
+                    row.ic_oracle_group_equiv_charged,
                     row.ic_la_modmuls,
                     row.ic_la_group_equiv,
                     row.modmuls_per_group_op,

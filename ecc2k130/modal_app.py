@@ -145,6 +145,16 @@ if TABLE_PIVOT_BYTES not in ("0", "1"):
     raise ValueError("ECC_TABLE_PIVOT_BYTES must be 0 or 1")
 if TABLE_PIVOT_BYTES == "1" and WALK_TABLE != "1":
     raise ValueError("ECC_TABLE_PIVOT_BYTES=1 requires ECC_WALK_TABLE=1")
+# Cairn witness counters. Campaign default is WITNESS=0: on an RTX PRO 6000
+# the counters cost ~35% throughput (14.0 -> 9.2 B/s, measured 2026-09-25)
+# and emit 72-byte v2 DP records that modal_sync still frames as 32-byte v1.
+# The Makefile still defaults WITNESS=1 for local cairn measurement; Modal
+# collection is the other way round. Override with ECC_WITNESS=1 when needed.
+WITNESS = os.environ.get("ECC_WITNESS", os.environ.get("WITNESS", "0"))
+if WITNESS not in ("0", "1"):
+    raise ValueError("ECC_WITNESS must be 0 or 1")
+if WITNESS == "1" and WALK_TABLE == "1":
+    raise ValueError("ECC_WITNESS=1 is incompatible with ECC_WALK_TABLE=1")
 PACKED_STATE_TILE = os.environ.get("ECC_PACKED_STATE_TILE", "0")
 if PACKED_STATE_TILE not in ("0", "256"):
     raise ValueError("ECC_PACKED_STATE_TILE must be 0 or 256")
@@ -237,7 +247,8 @@ BAKED = {"batch": 32, "threads": 256 if PACKED_STATE_TILE == "256" else 128, "le
          "walkTable": WALK_TABLE == "1",
          "tablePivotBytes": TABLE_PIVOT_BYTES == "1",
          "packedWeightedPrefix": int(PACKED_WEIGHTED_PREFIX),
-         "packedStateTile": int(PACKED_STATE_TILE)}
+         "packedStateTile": int(PACKED_STATE_TILE),
+         "witness": WITNESS == "1"}
 
 # Cleared the first time buildFor actually builds.  `make -B gpu` replaces
 # ./ecc2k130 in place, so once anything has rebuilt, the image's baked binary is
@@ -247,6 +258,9 @@ BAKED = {"batch": 32, "threads": 256 if PACKED_STATE_TILE == "256" else 128, "le
 # generator comment in buildFor warns about, one level up.
 bakedIntact = [True]
 
+# A guard-only rollout can retain the exact already-validated client image.
+# Keep this override in the image environment so remote module imports agree.
+SEED_BASE_IMAGE = os.environ.get("ECC_SEED_BASE_IMAGE", "")
 image = (
     modal.Image.from_registry(
         f"nvidia/cuda:{CUDA_VERSION}-devel-ubuntu24.04", add_python="3.12"
@@ -275,8 +289,10 @@ image = (
           "ECC_WALK_TABLE": WALK_TABLE,
           "ECC_TABLE_PIVOT_BYTES": TABLE_PIVOT_BYTES,
           "ECC_PACKED_WEIGHTED_PREFIX": PACKED_WEIGHTED_PREFIX,
-          "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE})
+          "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE,
+          "ECC_WITNESS": WITNESS})
     .apt_install("build-essential")
+    .pip_install("awscli")
     .add_local_dir(
         LOCAL,
         remote_path=REMOTE,
@@ -304,9 +320,18 @@ image = (
         f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
         f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
         f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
-        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES}',
+        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES} WITNESS={WITNESS}',
     )
 )
+# The full image stays the module-level `image` assignment (codegen tests read
+# it); a guard-only rollout replaces it with the exact already-validated one.
+if SEED_BASE_IMAGE:
+    image = (modal.Image.from_id(SEED_BASE_IMAGE)
+        .pip_install("awscli")
+        .env({"ECC_SEED_BASE_IMAGE": SEED_BASE_IMAGE})
+        .add_local_file(LOCAL / "aws" / "seed_registry.py",
+                        REMOTE + "/aws/seed_registry.py", copy=True))
+
 
 # Nsight Compute lives in its own image.  It is about two gigabytes and only the
 # profiler wants it, so putting it in the main image would slow every bench and
@@ -407,7 +432,8 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
             "walkTable": WALK_TABLE == "1",
             "tablePivotBytes": TABLE_PIVOT_BYTES == "1",
             "packedWeightedPrefix": int(PACKED_WEIGHTED_PREFIX),
-            "packedStateTile": int(PACKED_STATE_TILE)}
+            "packedStateTile": int(PACKED_STATE_TILE),
+            "witness": WITNESS == "1"}
     if smemSpill and int(CUDA_VERSION.split('.')[0]) < 13:
         return False, "--smem-spill requires ECC_CUDA_VERSION=13.x.y (CUDA 13 or newer)"
     experimental = streamKarat or smemSpill or globalCg
@@ -433,7 +459,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} "
         f"PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} "
         f"PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} "
-        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES}",
+        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES} WITNESS={WITNESS}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -659,7 +685,8 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 walkTable=WALK_TABLE == '1',
                 tablePivotBytes=TABLE_PIVOT_BYTES == '1',
                 packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX),
-                packedStateTile=int(PACKED_STATE_TILE))
+                packedStateTile=int(PACKED_STATE_TILE),
+                witness=WITNESS == '1')
     if not rebuild and (streamKarat or smemSpill or globalCg or not bakedIntact[0]
                         or want != BAKED or info['cc'] not in BAKED_ARCHES):
         raise ValueError('rebuild=False requires the untouched matching baked binary')
@@ -1004,7 +1031,7 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
 #    were launched with the run-sized default and collected at 34 and 35.
 #
 # So a campaign run refuses both: its weight comes from aws/campaign.json and
-# its run id from a range no AWS slot can reach. AWS slots are 16-bit and the
+# its run id from the Modal convention, protected by the shared registry. AWS slots are 16-bit and the
 # fleet has used 0-195; 90000 + run id must stay a five-digit slot.
 CAMPAIGN_CURVE = 131
 MODAL_RUN_ID_MIN = 8000
@@ -1084,11 +1111,10 @@ def checkCampaignRunId(runId, withCpu=False):
             "above it modal_sync.py has no slot number. Pass --run-id from the range "
             "(::next_run_id suggests the next free one) or --off-campaign to collect "
             "outside the campaign corpus." % (runId, MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX))
-    if withCpu and runId > MODAL_GPU_RUN_ID_MAX:
+    if runId > MODAL_GPU_RUN_ID_MAX:
         raise ValueError(
-            "run id %d cannot carry a CPU walker: its sidecar id %d is past %d. GPU runs "
-            "with a CPU sidecar take %d-%d." % (runId, cpuRunId(runId), MODAL_RUN_ID_MAX,
-                                                MODAL_RUN_ID_MIN, MODAL_GPU_RUN_ID_MAX))
+            "run id %d is reserved for a CPU sidecar; GPU runs take %d-%d"
+            % (runId, MODAL_RUN_ID_MIN, MODAL_GPU_RUN_ID_MAX))
     return runId
 
 
@@ -1348,12 +1374,18 @@ def humanBytes(n):
     return "%d B" % n
 
 
-@app.function(image=image, timeout=10 * 60, volumes={"/data": volume})
+@app.function(image=image, timeout=10 * 60, volumes={"/data": volume},
+              secrets=[modal.Secret.from_name(os.environ.get("ECC_MODAL_SEED_SECRET", "ecc2k130-cloud"))])
 def runNextRunId(curve=CAMPAIGN_CURVE):
-    """Suggest the next unused run id on the volume (no GPU rented)."""
-    return {"curve": int(curve), "runId": nextFreeRunId(curve),
+    """Check the permanent registry before suggesting a pair; no GPU rented."""
+    if int(curve) == CAMPAIGN_CURVE:
+        from aws.seed_registry import SeedRegistry, S3Json
+        next_id = SeedRegistry(S3Json(os.environ.get("ECC_BUCKET"))).next_modal_run(usedRunIds(curve))
+    else:
+        next_id = nextFreeRunId(curve)
+    return {"curve": int(curve), "runId": next_id,
             "used": sorted(usedRunIds(curve)),
-            "range": ([MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX]
+            "range": ([MODAL_RUN_ID_MIN, MODAL_GPU_RUN_ID_MAX]
                       if int(curve) == CAMPAIGN_CURVE else None)}
 
 
@@ -1483,11 +1515,42 @@ class CpuWalker:
 
 
 @app.function(image=image, gpu=DEFAULT_GPU, cpu=CPU_CORES_REQUEST, timeout=24 * HOUR,
-              volumes={"/data": volume})
+              volumes={"/data": volume},
+              secrets=[modal.Secret.from_name(os.environ.get("ECC_MODAL_SEED_SECRET", "ecc2k130-cloud"))])
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
               checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0,
               offCampaign=False, cpuThreads=None):
+    """Own every campaign seed space before building or starting a client."""
+    if not isCampaignRun(curve, offCampaign):
+        return _runSearch(hours, curve, batch, threads, leaf, dpWeight, runId, steps,
+                          workers, rebuild, walksTarget, checkpointEvery, resume,
+                          loadMax, packed, verify, offCampaign, cpuThreads)
+    if not resume:
+        raise ValueError("campaign collection requires resumable checkpoints")
+    from contextlib import ExitStack
+    from aws.seed_registry import modal_guard
+    cpuThreads = CPU_THREADS if cpuThreads is None else int(cpuThreads)
+    checkCampaignRunId(runId, withCpu=cpuThreads > 0)
+    completed = False
+    started = False
+    with ExitStack() as guards:
+        ids = [runId] + ([cpuRunId(runId)] if cpuThreads > 0 else [])
+        for rid in ids:
+            guards.enter_context(modal_guard(rid, f"/data/ckpt/curve{curve}-run{rid}.ck",
+                                             lambda: completed or not started))
+        started = True
+        result = _runSearch(hours, curve, batch, threads, leaf, dpWeight, runId, steps,
+                            workers, rebuild, walksTarget, checkpointEvery, resume,
+                            loadMax, packed, verify, offCampaign, cpuThreads)
+        completed = True
+        return result
+
+
+def _runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
+               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
+               checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0,
+               offCampaign=False, cpuThreads=None):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
@@ -1528,7 +1591,8 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
         runId = checkCampaignRunId(runId, withCpu=cpuThreads > 0)
         dpWeight = campaignDpWeightFor(dpWeight)
         print("campaign run: curve %d, run id %d (campaign slot %d), dp weight %d from "
-              "aws/campaign.json" % (curve, runId, 90000 + runId, dpWeight), flush=True)
+              "aws/campaign.json, WITNESS=%s" % (curve, runId, 90000 + runId, dpWeight, WITNESS),
+              flush=True)
         if cpuThreads > 0:
             print("campaign run: CPU walker run id %d (campaign slot %d) on %d threads"
                   % (cpuRunId(runId), 90000 + cpuRunId(runId), cpuThreads), flush=True)
@@ -1734,6 +1798,7 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     # snapshot rather than the one before it.
     tryCommitVolume(volume, ckFile)
     return {"gpu": name, "distinguishedPoints": corpusCount(dpFile), "file": dpFile,
+            "returncode": proc.returncode,
             "runId": int(runId), "dpWeight": int(dpWeight), "campaign": campaign,
             "checkpoint": ckFile if os.path.exists(ckFile) else None,
             "checkpointBytes": os.path.getsize(ckFile) if os.path.exists(ckFile) else 0,
@@ -2073,4 +2138,3 @@ def merge(curve: int = 131, solve: bool = True, load_max: int = 0):
     if solve and r.get("collisionCount"):
         print("\n%d collision(s); recovering the logarithm" % r["collisionCount"])
         print(json.dumps(solveCorpus.remote(curve=curve, loadMax=load_max), indent=2))
-

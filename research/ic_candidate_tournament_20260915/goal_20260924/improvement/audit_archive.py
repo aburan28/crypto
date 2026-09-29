@@ -29,6 +29,15 @@ def control_audit(bundle, campaign):
     preparation = read(prepared/'preparation.json')
     manifest = read(prepared/'source-manifest.json')
     panel = read(bundle/'round/registered-panel.json')
+    if panel.get('round') == 3:
+        registered = Path(__file__).resolve().parent.parent/'improvement-v2/round3.json'
+        require(digest(registered) == '6c87dafb98945bb49038f9389dc37881536700a9b9709d3862f9dbf79782763c',
+                'committed third-round registration changed')
+        require(panel == read(registered), 'archived third-round panel differs from registration')
+        candidates = read(bundle/'round/candidates.json')
+        require([(row['id'], row['config']) for row in candidates] ==
+                [(row['id'], row['config']) for row in panel['candidates']],
+                'measured third-round candidate registry differs from registration')
     source = sha256(manifest)
     require(source == preparation['source_manifest_sha256'] == panel['candidate_source_sha256'],
             'control source differs from registered candidate')
@@ -69,7 +78,8 @@ def control_audit(bundle, campaign):
             require(read(directory/'receipt.json') == outcome, 'changed control receipt')
             outcomes.append(outcome)
     summary = read(controls/'summary.json')
-    require(summary['scheduled'] == summary['verified'] == len(outcomes) == 30 and
+    expected = 2 * len(panel['candidates'][1:])
+    require(summary['scheduled'] == summary['verified'] == len(outcomes) == expected and
             summary['outcomes'] == outcomes and summary['promotion_eligible'] is False,
             'changed control summary')
     return dict(status='VERIFIED', pairs=len(outcomes),

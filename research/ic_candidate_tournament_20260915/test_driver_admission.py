@@ -159,6 +159,41 @@ class DriverAdmissionTests(unittest.TestCase):
         self.assertTrue(record['reference_id'].startswith('RHO1h'))
         self.assertEqual(record['workload_id'], ic['workload']['workload_id'])
         self.assertTrue(record['native_timing']['online']['scalar_replay_included'])
+        context = record['rho_context']
+        self.assertEqual(context['public_target'], self.fixture['targets'][0])
+        self.assertEqual(context['worker_count'], 1)
+        self.assertEqual(context['requested_walks'], report['executed_method']['requested_walks'])
+        self.assertEqual(context['effective_walks'], report['solutions'][0]['effective_walks'])
+        self.assertIsNone(context['distinguished_point_peak_bytes'])
+        rows = [dict(case='one', arm='incumbent', repetition=0, status='VERIFIED',
+                     measurement=self.complete(ic)),
+                dict(case='one', arm='rho', repetition=0, status='VERIFIED',
+                     measurement=record, native_process=dict(peak_rss_bytes=123456))]
+        paired = online_table(rows, [dict(id='one', fixture=self.fixture)],
+                              [dict(id='incumbent'), dict(id='rho')], 1, ['rho'])[0]
+        self.assertTrue(paired['verified'])
+        self.assertEqual(paired['rho_runs'][0]['native_process_peak_rss_bytes'], 123456)
+        self.assertEqual(paired['rho_runs'][0]['context'], context)
+        self.assertEqual(paired['rho_runs'][0]['certificate'], record['certificate'])
+        wrong_workload = copy.deepcopy(rows)
+        wrong_workload[1]['measurement']['workload_id'] = '0'*12
+        with self.assertRaisesRegex(InvalidEvidence, 'different workloads'):
+            online_table(wrong_workload, [dict(id='one', fixture=self.fixture)],
+                         [dict(id='incumbent'), dict(id='rho')], 1, ['rho'])
+        second_repetition = copy.deepcopy(rows)
+        for row in second_repetition:
+            row['repetition'] = 1
+            row['measurement']['run_id'] = row['measurement']['run_id'].rsplit('R', 1)[0]+'R2'
+        for arm, identity, message in (
+                ('incumbent', 'candidate_id', 'different candidates'),
+                ('rho', 'reference_id', 'different references')):
+            with self.subTest(arm=arm):
+                mixed = copy.deepcopy(rows+second_repetition)
+                next(row for row in mixed if row['arm'] == arm and row['repetition'] == 1)[
+                    'measurement'][identity] += '0'
+                with self.assertRaisesRegex(InvalidEvidence, message):
+                    online_table(mixed, [dict(id='one', fixture=self.fixture)],
+                                 [dict(id='incumbent'), dict(id='rho')], 2, ['rho'])
 
     def test_online_pair_preserves_failed_reference_instead_of_a_win(self):
         ic = self.complete(make_admission(**self.kwargs))
@@ -172,6 +207,13 @@ class DriverAdmissionTests(unittest.TestCase):
         self.assertFalse(table[0]['verified'])
         self.assertIsNone(table[0]['online_speedup'])
         self.assertEqual(len(table[0]['run_ids']), 2)
+        reference = table[0]['rho_runs'][0]
+        self.assertEqual(reference['status'], 'TIMEOUT')
+        self.assertIsNone(reference['context']['effective_walks'])
+        self.assertIsNone(reference['context']['distinguished_point_peak_bytes'])
+        self.assertIsNone(reference['native_process_peak_rss_bytes'])
+        self.assertIsNone(reference['native_timing'])
+        self.assertIsNone(reference['certificate'])
 
     def test_admission_alone_cannot_promote(self):
         from test_tournament import rows

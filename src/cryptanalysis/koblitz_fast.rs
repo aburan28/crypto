@@ -597,6 +597,62 @@ impl FrobeniusCanon {
         self.least_rotation(self.coords(x)).0
     }
 
+    /// Canonical folded-table keys for a slice of points, keeping eight
+    /// independent rotation chains in flight.  A scalar call to
+    /// [`Self::canon`] carries a dependency from every rotation to the
+    /// next; the relation scan has a whole block of unrelated points, so
+    /// interleaving their chains exposes the instruction-level
+    /// parallelism without changing the key.  `out` is cleared first.
+    #[inline]
+    pub(crate) fn point_keys(&self, points: &[FastPoint], out: &mut Vec<u64>) {
+        const LANES: usize = 8;
+        out.clear();
+        #[cfg(target_arch = "x86_64")]
+        if canon_simd_enabled() {
+            out.extend(points.iter().map(|p| p.x));
+            self.canon_in_place(out);
+            for (key, p) in out.iter_mut().zip(points) {
+                *key = if p.infinity { 0 } else { *key + 1 };
+            }
+            return;
+        }
+        out.resize(points.len(), 0);
+        let full = points.len() / LANES * LANES;
+        for base in (0..full).step_by(LANES) {
+            let chunk = &points[base..base + LANES];
+            let keys = &mut out[base..base + LANES];
+            let mut v = [0u64; LANES];
+            let mut best = [0u64; LANES];
+            for lane in 0..LANES {
+                let point = chunk[lane];
+                if !point.infinity {
+                    let c = self.coords(point.x);
+                    v[lane] = c;
+                    best[lane] = c;
+                }
+            }
+            for _ in 1..self.n {
+                for lane in 0..LANES {
+                    v[lane] = ((v[lane] << 1) | (v[lane] >> (self.n - 1))) & self.mask;
+                    if v[lane] < best[lane] {
+                        best[lane] = v[lane];
+                    }
+                }
+            }
+            for lane in 0..LANES {
+                let point = chunk[lane];
+                keys[lane] = if point.infinity { 0 } else { best[lane] + 1 };
+            }
+        }
+        for (point, key) in points[full..].iter().zip(&mut out[full..]) {
+            *key = if point.infinity {
+                0
+            } else {
+                self.canon(point.x) + 1
+            };
+        }
+    }
+
     /// The canonical name together with the rotation that produced it:
     /// `(c, t)` with `c = rotl^t(coords(x))`, `0 ≤ t < n`.  Two abscissae
     /// with one name are Frobenius conjugates, and the shift says which
@@ -1261,6 +1317,32 @@ mod tests {
                     v = f.sqr(v);
                 }
                 assert_eq!(v, x, "degree {n}: the orbit did not close");
+            }
+        }
+    }
+
+    #[test]
+    fn the_laned_point_keys_equal_scalar_canonicalisation() {
+        for n in NB_DEGREES {
+            let f = nb_field(n);
+            let canon = FrobeniusCanon::new(&f, n).unwrap();
+            let mask = (1u64 << n) - 1;
+            let mut rng = StdRng::seed_from_u64(0x1A4E_0000 + n as u64);
+            let mut points: Vec<FastPoint> = (0..257)
+                .map(|_| FastPoint::affine(rng.gen::<u64>() & mask, 0))
+                .collect();
+            points.insert(0, FastPoint::INFINITY);
+            points.push(FastPoint::INFINITY);
+            let mut keys = Vec::new();
+            canon.point_keys(&points, &mut keys);
+            assert_eq!(keys.len(), points.len());
+            for (&point, &key) in points.iter().zip(&keys) {
+                let want = if point.infinity {
+                    0
+                } else {
+                    canon.canon(point.x) + 1
+                };
+                assert_eq!(key, want, "degree {n}, x = {:#x}", point.x);
             }
         }
     }
