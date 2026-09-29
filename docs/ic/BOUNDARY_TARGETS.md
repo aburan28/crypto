@@ -165,6 +165,31 @@ This is a matched-host complete-process timing diagnostic; common calibrated
 operation-counted S, an n=83 confidence result and GF(2^131) transfer remain
 unset. It does not alter the selected-panel `vs_rho` verdict above.
 
+### Compact S3 inversion batching, 2026-09-29 — engineering, no rho crossover
+
+The [frozen v2 full-process panel](../../research/notes/ecc2k130/compact_s3_batch_20260929/RESULT.md)
+uses one compiled swap-quotient producer at scalar W=1 and Montgomery W=16/64,
+with two A/A scalar controls at each K and 32-walk normal-basis rho on the
+same 1,024 point-only public Q. Seed 622936 was committed after the lint-only
+source amendment and is disjoint from 5,123 earlier points per n, including
+the excluded seed-622935 pilot. Nine balanced blocks per arm completed 162/162
+children, 144 full-rank compact traces and 165,888 verified arm-target
+outputs. All four A/A noise gates pass. The second-host replay is documented
+in the result and its portability note.
+
+Every batch/scalar paired 95% CPU interval excludes one on the improving side,
+saving 16–26% complete cold CPU at fixed K. Yet the best observed W64 cells
+remain **1.535× rho at n=41 K255** (95% interval 1.518–1.554) and **1.582×
+rho at n=53 K440** (1.559–1.613). The n=53 W64 arm spends median 2.336 s
+building the index, 2.542 s on rank and 5.084 s on targets, versus rho's
+6.335 s complete CPU. It makes 27,632,196 rank-plus-target root-table
+lookups and 42,477,310 slot probes for 1,464 full-point lift attempts. A
+no-false-negative blocked Bloom or xor prefilter is the next bounded
+hypothesis, but its construction, memory and lookup hashes must be charged
+cold against W64 and rho. These host-specific timing diagnostics do not set
+common calibrated S, an n=83 result, GF(2^131) transfer or a descendant-native
+PDP verdict, and they do not alter the selected-panel `vs_rho` row above.
+
 ### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
 
 Separate measurement, separate base family, not a competing record. The
