@@ -44,8 +44,10 @@
 //! available — `2^18` rather than `2^767`.
 //!
 //! It is **not competitive** with state-of-the-art solvers like kissat
-//! on general CNF: the data layout follows the textbook and there is no
-//! inprocessing, vivification, or LBD-based clause scoring.
+//! on general CNF.  Its data layout is close to MiniSat's — one clause
+//! arena named by 32-bit offsets, watch lists indexed by literal — but
+//! there is no inprocessing, vivification, or LBD-based clause scoring,
+//! and forgotten clauses are never compacted out of the arena.
 //!
 //! ## DIMACS I/O
 //!
@@ -365,6 +367,18 @@ impl VarHeap {
 pub struct Solver {
     /// Number of variables (1-indexed externally).
     n_vars: u32,
+    /// Centre of the literal-indexed tables `values` and `watches`:
+    /// literal `l` lives at slot `l + lit_base`.  Always at least
+    /// `n_vars`; the slots of variables beyond `n_vars` are unassigned
+    /// and watched by nothing.
+    ///
+    /// It is not simply `n_vars` because widening the tables moves every
+    /// slot.  Centred on `n_vars`, each [`Solver::add_vars`] call cost
+    /// `O(n_vars)`, and a caller that adds its auxiliaries one at a time
+    /// paid quadratically for its encoding.  [`Solver::add_vars`] grows
+    /// the base geometrically instead, so only `O(log n_vars)` calls
+    /// re-centre.
+    lit_base: u32,
     /// **Clause arena**: every clause, original and learnt, stored back
     /// to back as a length word followed by its literals, and named
     /// everywhere (watchers, reasons, conflicts) by the offset of that
@@ -375,6 +389,15 @@ pub struct Solver {
     /// A vector per clause cost a heap allocation per learnt clause and,
     /// on every visit, a load of the vector's header before the load of
     /// its literals; here the header is the literal array's first word.
+    ///
+    /// Keeping every clause in one vector has two costs, both of which
+    /// only show at tens of gigabytes.  Offsets are `u32`, so the arena
+    /// holds at most `2^32` words (16 GiB of literals) and
+    /// [`Solver::next_cref`] panics past that, where per-clause vectors
+    /// had no cap.  And growing it by doubling briefly holds the old and
+    /// the new buffer together, about three times the arena at once.
+    /// Forgotten clauses are never freed, which was already so with a
+    /// vector per clause.
     arena: Vec<Lit>,
     /// `clause_at[i]` is clause `i`'s arena offset, in the order clauses
     /// were added; learnt clauses start at `n_orig_clauses`.  Offsets
@@ -382,17 +405,17 @@ pub struct Solver {
     clause_at: Vec<u32>,
     n_orig_clauses: usize,
     /// Truth value of every *literal* under the trail, indexed by
-    /// `lit + n_vars`: slot `n_vars + 1 + v` holds variable `v`'s value,
-    /// slot `n_vars - 1 - v` its negation's, and slot `n_vars` (literal
-    /// 0) is never used.
+    /// `lit + lit_base`: slot `lit_base + 1 + v` holds variable `v`'s
+    /// value, slot `lit_base - 1 - v` its negation's, and slot
+    /// `lit_base` (literal 0) is never used.
     ///
     /// Watched-literal propagation asks "is this literal true?" a few
     /// times per clause visit.  Against a per-variable `Option<bool>`
     /// each answer cost an absolute value, a sign test and a
     /// conditional negation; here it is one add and one load, paid for
-    /// by a second byte store per assignment.  The upper half is the
-    /// per-variable assignment itself (`None` = unassigned), which is
-    /// what `assignment()` hands out.
+    /// by a second byte store per assignment.  The upper half starts
+    /// with the per-variable assignment itself (`None` = unassigned),
+    /// which is what `assignment()` hands out.
     values: Vec<Option<bool>>,
     /// Bitset mirror of the assignment: `assigned_w` marks assigned
     /// variables, `value_w` their values.  Parity rows are bitmasks, so
@@ -418,7 +441,7 @@ pub struct Solver {
     /// `trail_lim[d] = trail.len() when decision level d began`.
     trail_lim: Vec<usize>,
     /// Two-watched-literal scheme: for each literal, at slot
-    /// `lit + n_vars` exactly as in `values`, the clauses watching it.
+    /// `lit + lit_base` exactly as in `values`, the clauses watching it.
     watches: Vec<Vec<Watcher>>,
     /// Counter of conflicts since the last restart.
     conflicts_since_restart: u64,
@@ -566,6 +589,7 @@ impl Solver {
         let n = n_vars as usize;
         Solver {
             n_vars,
+            lit_base: n_vars,
             arena: Vec::new(),
             clause_at: Vec::new(),
             n_orig_clauses: 0,
@@ -663,29 +687,15 @@ impl Solver {
         let new_total = old + count;
         let n = new_total as usize;
         let words = bs_words(new_total);
-        // The literal-value table is centred on `n_vars`, so widening
-        // it moves every entry; at level 0 only root facts are there.
-        let mut values = vec![None; 2 * n + 1];
-        for (v, &value) in self.assignment().iter().enumerate() {
-            if let Some(b) = value {
-                values[n + 1 + v] = Some(b);
-                values[n - 1 - v] = Some(!b);
-            }
+        if new_total > self.lit_base {
+            self.recentre_literal_tables(new_total);
         }
-        self.values = values;
         self.assigned_w.resize(words, 0);
         self.value_w.resize(words, 0);
         self.level.resize(n, -1);
         self.reason.resize(n, Reason::Decision);
         self.saved_phase.resize(n, true);
         self.activity.resize(n, 0.0);
-        // Watch slots are centred on `n_vars` too: literal `l` moves from
-        // `l + old` to `l + new_total`, i.e. every list shifts up by `count`.
-        let mut watches: Vec<Vec<Watcher>> = Vec::with_capacity(2 * n + 1);
-        watches.resize_with(count as usize, Vec::new);
-        watches.append(&mut self.watches);
-        watches.resize_with(2 * n + 1, Vec::new);
-        self.watches = watches;
         self.xor_reason.resize(n, Vec::new());
         self.seen.resize(n, false);
         self.branch_priority.resize(n, false);
@@ -702,6 +712,33 @@ impl Solver {
             self.order.insert(v, &self.heap_key);
         }
         (old + 1)..=new_total
+    }
+
+    /// Re-centre `values` and `watches` on a base of at least `n_vars`.
+    ///
+    /// The base at least doubles, so a run of [`Solver::add_vars`]
+    /// calls re-centres `O(log n_vars)` times and each call costs
+    /// amortised `O(count)`, as it did before the tables were indexed
+    /// by literal.  Doubling stops at `i32::MAX / 2`, past which
+    /// `lit + lit_base` could overflow; only `n_vars` itself can take
+    /// the base beyond that.
+    fn recentre_literal_tables(&mut self, n_vars: u32) {
+        let base = n_vars.max(self.lit_base.saturating_mul(2).min(i32::MAX as u32 / 2));
+        let len = 2 * base as usize + 1;
+        // Literal `l` moves from `l + lit_base` to `l + base`, so both
+        // tables shift up whole by the difference.  The slots of
+        // variables not yet added are unassigned and watched by nothing,
+        // and move along with the rest.
+        let shift = (base - self.lit_base) as usize;
+        let mut values = vec![None; len];
+        values[shift..shift + self.values.len()].copy_from_slice(&self.values);
+        self.values = values;
+        let mut watches: Vec<Vec<Watcher>> = Vec::with_capacity(len);
+        watches.resize_with(shift, Vec::new);
+        watches.append(&mut self.watches);
+        watches.resize_with(len, Vec::new);
+        self.watches = watches;
+        self.lit_base = base;
     }
 
     /// **Branch on these variables first**, exhausting them before any
@@ -774,6 +811,16 @@ impl Solver {
     pub fn add_clause(&mut self, mut lits: Vec<Lit>) -> bool {
         // Deduplicate and remove tautologies.
         lits.sort_by_key(|&l| (var_of(l), l));
+        // 0 ends a clause in DIMACS and is no literal.  The value table
+        // gives it the unused centre slot, where it would read as a
+        // literal that is never false and quietly weaken the clause, so
+        // it is refused in release builds too.  `var_of(0)` underflows:
+        // with overflow checks that is already a panic, and without them
+        // it is `u32::MAX`, above every real variable, so a 0 that gets
+        // here has sorted last.  One comparison rather than a scan of the
+        // clause, which cost an encoding-heavy kernel 0.3% of its
+        // instructions.
+        assert!(lits.last() != Some(&0), "0 is not a literal");
         lits.dedup();
         for w in lits.windows(2) {
             if w[0] == -w[1] {
@@ -886,21 +933,27 @@ impl Solver {
     }
 
     /// Look up the truth value of a literal under the current trail.
+    ///
+    /// Literal 0 has a slot of its own, the centre, which is never
+    /// assigned: it would read as a literal that is never false.  Debug
+    /// builds catch it here, and [`Solver::add_clause`] refuses it in
+    /// release builds too.
     #[inline]
     fn lit_value(&self, lit: Lit) -> Option<bool> {
-        self.values[(lit + self.n_vars as i32) as usize]
+        debug_assert!(lit != 0, "0 is not a literal");
+        self.values[(lit + self.lit_base as i32) as usize]
     }
 
     /// Value of 0-indexed variable `v`, if assigned.
     #[inline]
     fn var_value(&self, v: usize) -> Option<bool> {
-        self.values[self.n_vars as usize + 1 + v]
+        self.values[self.lit_base as usize + 1 + v]
     }
 
     /// Per-variable assignment, 0-indexed (`None` = unassigned): the
-    /// positive-literal half of `values`.
+    /// first `n_vars` slots of the positive-literal half of `values`.
     fn assignment(&self) -> &[Option<bool>] {
-        &self.values[self.n_vars as usize + 1..]
+        &self.values[self.lit_base as usize + 1..][..self.n_vars as usize]
     }
 
     /// Arena offset the next clause pushed will have, as the `u32` that
@@ -923,7 +976,8 @@ impl Solver {
     /// Watch-list slot of `lit`.
     #[inline]
     fn watch_slot(&self, lit: Lit) -> usize {
-        (lit + self.n_vars as i32) as usize
+        debug_assert!(lit != 0, "0 is not a literal");
+        (lit + self.lit_base as i32) as usize
     }
 
     /// Assign `lit` to true with the given reason. Returns `Err` if it
@@ -951,7 +1005,7 @@ impl Solver {
     fn assign(&mut self, lit: Lit, r: Reason) {
         debug_assert!(self.lit_value(lit).is_none(), "assign over {lit}");
         let v = var_of(lit) as usize;
-        let n = self.n_vars as i32;
+        let n = self.lit_base as i32;
         self.values[(n + lit) as usize] = Some(true);
         self.values[(n - lit) as usize] = Some(false);
         let (w, bit) = (v / 64, 1u64 << (v % 64));
@@ -1244,7 +1298,7 @@ impl Solver {
     /// out of one in the blocker loop, which cost up to 2% more
     /// instructions than the in-place increments.
     fn propagate_clauses(&mut self) -> Option<u32> {
-        let n = self.n_vars as i32;
+        let n = self.lit_base as i32;
         let mut conflict: Option<u32> = None;
         while conflict.is_none() && self.qhead < self.trail.len() {
             let lit = self.trail[self.qhead];
@@ -1446,13 +1500,13 @@ impl Solver {
                     // Bump activity, and reposition in the branching heap.
                     self.activity[v] += self.activity_inc;
                     if self.activity[v] > 1e100 {
-                        for (a, (k, &p)) in self
+                        for (a, (k, &prio)) in self
                             .activity
                             .iter_mut()
                             .zip(self.heap_key.iter_mut().zip(&self.branch_priority))
                         {
                             *a *= 1e-100;
-                            *k = order_key(*a, p);
+                            *k = order_key(*a, prio);
                         }
                         self.activity_inc *= 1e-100;
                     }
@@ -1570,7 +1624,7 @@ impl Solver {
         while self.trail.len() > target {
             let l = self.trail.pop().unwrap();
             let v = var_of(l) as usize;
-            let n = self.n_vars as i32;
+            let n = self.lit_base as i32;
             self.values[(n + l) as usize] = None;
             self.values[(n - l) as usize] = None;
             self.assigned_w[v / 64] &= !(1u64 << (v % 64));
@@ -1646,7 +1700,7 @@ impl Solver {
         for w in self.watches.iter_mut() {
             w.clear();
         }
-        let n = self.n_vars as i32;
+        let n = self.lit_base as i32;
         for idx in 0..n_clauses {
             let cref = self.clause_at[idx];
             let c = clause_in(&self.arena, cref);
@@ -2773,13 +2827,13 @@ mod tests {
     /// tuned for speed, and no layout change may alter a single step of
     /// the search: every decision, propagation, learnt literal and
     /// counter must come out the same.  These digests were recorded
-    /// from the textbook layout (per-clause vectors, `Option<bool>` per
-    /// variable, a vector per parity row) and cover what the perfbench
-    /// fingerprints may not: restarts with clause forgetting under a
-    /// tiny budget, parity rows rebuilt at restarts, `add_vars` after
-    /// clauses exist, branching priority, incremental model enumeration
-    /// through `reset_search`, lazy theory clauses, and a conflict
-    /// budget running out.
+    /// from the solver before its layout was tuned (a vector per clause,
+    /// `Option<bool>` per variable, a vector per parity row) and cover
+    /// what the perfbench fingerprints may not: restarts with clause
+    /// forgetting under a tiny budget, parity rows rebuilt at restarts,
+    /// `add_vars` after clauses exist, branching priority, incremental
+    /// model enumeration through `reset_search`, lazy theory clauses,
+    /// and a conflict budget running out.
     #[test]
     fn search_trace_is_pinned() {
         let mut state = 0x6A09_E667_F3BC_C908u64;
@@ -2943,8 +2997,8 @@ mod tests {
     /// count next to a word boundary or widen one across it.  Here the
     /// count sits on each side of 64 and 128, parity rows exist before
     /// `add_vars` carries it past the next boundary, and every solve is
-    /// enumerated through `reset_search`.  Recorded from the textbook
-    /// layout, like the digests above.
+    /// enumerated through `reset_search`.  Recorded from the untuned
+    /// solver, like the digests above.
     #[test]
     fn search_trace_is_pinned_across_word_boundaries() {
         let mut state = 0x243F_6A88_85A3_08D3u64;
@@ -3032,5 +3086,70 @@ mod tests {
             0x0318_2ef1_4e1c_41f9,
         ];
         assert_eq!(digests, want, "search trace moved: {digests:#018x?}");
+    }
+
+    /// **Adding variables one at a time stays linear.**  The literal
+    /// tables are re-centred only when `add_vars` outgrows their base,
+    /// which at least doubles each time, so a caller that adds every
+    /// auxiliary separately (`examples/koblitz_s5_sat_instance.rs` does)
+    /// moves them a logarithmic number of times rather than once per
+    /// call.  Counted rather than timed: a move is a fresh allocation
+    /// of `values` and of `watches`.  Root facts, watch lists and a
+    /// parity row all have to survive every move, and the grown solver
+    /// must still answer correctly.
+    #[test]
+    fn add_vars_one_at_a_time_recentres_logarithmically() {
+        let mut s = Solver::new(1000);
+        assert!(s.add_clause(vec![1]));
+        assert!(s.add_xor(&[2, 3], true));
+        let (mut value_moves, mut watch_moves) = (0, 0);
+        let (mut forced, mut chain) = (Vec::new(), vec![2]);
+        for i in 0..30_000 {
+            let (values, watches) = (s.values.as_ptr(), s.watches.as_ptr());
+            let v = *s.add_vars(1).start() as Lit;
+            value_moves += (s.values.as_ptr() != values) as u32;
+            watch_moves += (s.watches.as_ptr() != watches) as u32;
+            let prev = *chain.last().unwrap();
+            if i % 2 == 0 {
+                // `x1` is true at the root, so this is the unit `±v`,
+                // assigned at once and carried by every later move.
+                let lit = if i % 4 == 0 { v } else { -v };
+                assert!(s.add_clause(vec![lit, -1]));
+                forced.push(lit);
+            } else {
+                // Left free and made equivalent to the previous free
+                // variable: two watched binary clauses per link.
+                assert!(s.add_clause(vec![-v, prev]));
+                assert!(s.add_clause(vec![v, -prev]));
+                chain.push(v);
+            }
+        }
+        // From a base of 1000, doubling reaches the 31000 variables in
+        // five moves; a table centred on `n_vars` moved 30000 times.
+        assert!(
+            value_moves <= 5 && watch_moves <= 5,
+            "{value_moves} and {watch_moves} moves"
+        );
+        assert!(s.lit_base >= s.n_vars && s.lit_base <= 2 * s.n_vars);
+
+        // Pin the far end of the chain: propagation walks the watch lists
+        // back to `x2`, and the parity row then fixes `x3`.
+        assert!(s.add_clause(vec![-*chain.last().unwrap()]));
+        assert_eq!(s.solve(), SolveResult::Sat);
+        let m = s.model();
+        assert_eq!(m.len(), 31_000);
+        let holds = |l: Lit| m[var_of(l) as usize] == (l > 0);
+        assert!(holds(1) && holds(3));
+        assert!(forced.iter().all(|&l| holds(l)));
+        assert!(chain.iter().all(|&v| holds(-v)));
+
+        // From no variables at all, where there is no base to double.
+        let mut z = Solver::new(0);
+        for _ in 0..3 {
+            z.add_vars(1);
+        }
+        assert!(z.add_clause(vec![-1, 3]) && z.add_clause(vec![1]));
+        assert_eq!(z.solve(), SolveResult::Sat);
+        assert!(z.model()[0] && z.model()[2]);
     }
 }
