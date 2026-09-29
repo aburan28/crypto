@@ -2326,7 +2326,10 @@ be registered as `engineering` if built.
   overdetermined `S₄` solve.  `S / rho` tends to `3C′/126 + r∞`: below one only
   if `C′ < 28` `F_p` multiplications (`15` if `φ = 1`).  `k = 3`'s two-point
   solve already costs `1,513`, so at any `C′` of that order this variant sits
-  near **`36×` rho at every size**.  The solve cost enters its asymptote; it
+  near ~~**`36×` rho at every size**~~ — **measured at `6,945×`, flat over
+  `2^32–2^40`** (`RESEARCH_RHO_PARITY_PROGRAMME.md` §3: the three-point test is
+  four quartics in three unknowns and costs `C′ = 1.6·10⁵`, not the `1,513`
+  borrowed here).  The solve cost enters its asymptote; it
   does not enter the full-decomposition variant's.
 - **Double large primes.**  They trade the `p²` linear algebra for more
   residuals, `Õ(p^{3/2})` of them.  The extra residuals cost a factor
