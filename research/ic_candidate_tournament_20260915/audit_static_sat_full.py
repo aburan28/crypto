@@ -168,6 +168,11 @@ def verify_query(root, prefix, row, point, curve, base, pairs):
                 'solver UNSAT contradicts exact three-sum oracle')
     elif status=='TIMEOUT':
         require(cms['timed_out'],'timeout has no process watchdog evidence')
+    elif status=='CONFLICT_BUDGET_INCONCLUSIVE':
+        require(cms['returncode']==15 and not cms['timed_out']
+                and b's INDETERMINATE' in stdout
+                and '--maxconfl' in cms['command'],
+                'censored conflict-budget row lacks solver evidence')
     else:
         require(status in {'SOLVER_ERROR','UNKNOWN_INCONCLUSIVE',
                            'INVALID_SOURCE_MODEL'},
