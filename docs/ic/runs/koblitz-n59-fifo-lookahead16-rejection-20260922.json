@@ -1,0 +1,362 @@
+{
+  "candidate": {
+    "baseline_presence_lookahead": 32,
+    "candidate_presence_lookahead": 16,
+    "mathematical_output_changed": false,
+    "selected_fifo_bucket_prefetch": true
+  },
+  "claim_boundary": "Finite same-target selected-stack retune. Halving presence-filter lookahead to 16 marginally reduces wall but increases charged CPU, so Stage 149 remains selected. No SOTA claim.",
+  "date": "2026-09-22",
+  "decision": {
+    "full_workflow_followup": false,
+    "reason": "candidate median relation-unit wall improves only 0.57 percent while unit CPU regresses 3.25 percent",
+    "selected_stage149_unchanged": true,
+    "status": "rejected_cpu_regression"
+  },
+  "factor_base": {
+    "factor_base_logs_known_by_construction": false,
+    "kind": "cofactor_projected",
+    "points": 32934,
+    "projected_columns": 16344,
+    "target_subgroup_enumerated": false
+  },
+  "gates": {
+    "all_seven_gates_passed": false,
+    "full_cost_vs_rho": "unchanged_failed_large_margin",
+    "independent_external_reproduction": "missing",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_f4": "missing"
+  },
+  "instance": {
+    "collection_m": 3,
+    "collection_window": 1024,
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "uniform_summands_scanned": 102400000,
+    "uniform_trials": 100000,
+    "uniform_units": 1
+  },
+  "operation": "koblitz_n59_fifo_lookahead16_rejection",
+  "panel": {
+    "comparison": {
+      "collect_cpu_seconds": {
+        "baseline_median": 165.859645,
+        "candidate_median": 165.3453755,
+        "candidate_over_baseline": 0.996899369343278,
+        "change_fraction": -0.003100630656721903
+      },
+      "collect_wall_seconds": {
+        "baseline_median": 21.7690906875,
+        "candidate_median": 21.1947138335,
+        "candidate_over_baseline": 0.9736150277361005,
+        "change_fraction": -0.026384972263899503
+      },
+      "pair_table_build_cpu_seconds": {
+        "baseline_median": 140.62433850000002,
+        "candidate_median": 139.35745649999998,
+        "candidate_over_baseline": 0.9909910189550862,
+        "change_fraction": -0.009008981044913772
+      },
+      "pair_table_build_wall_seconds": {
+        "baseline_median": 16.4119584375,
+        "candidate_median": 16.117249104,
+        "candidate_over_baseline": 0.9820430124398429,
+        "change_fraction": -0.017956987560157043
+      },
+      "relation_unit_cpu_seconds": {
+        "baseline_median": 22.743259499999994,
+        "candidate_median": 23.48204699999998,
+        "candidate_over_baseline": 1.0324838003101529,
+        "change_fraction": 0.032483800310152855
+      },
+      "relation_unit_wall_seconds": {
+        "baseline_median": 2.562382687,
+        "candidate_median": 2.5478814585,
+        "candidate_over_baseline": 0.9943407249145217,
+        "change_fraction": -0.005659275085478248
+      },
+      "relations": {
+        "baseline_median": 2157.0,
+        "candidate_median": 2157.0,
+        "candidate_over_baseline": 1.0,
+        "change_fraction": 0.0
+      },
+      "whole_cpu_seconds": {
+        "baseline_median": 169.42082,
+        "candidate_median": 168.7479745,
+        "candidate_over_baseline": 0.9960285548139833,
+        "change_fraction": -0.003971445186016654
+      },
+      "whole_wall_seconds": {
+        "baseline_median": 22.512267458,
+        "candidate_median": 21.936858062,
+        "candidate_over_baseline": 0.9744401847981988,
+        "change_fraction": -0.02555981520180113
+      }
+    },
+    "exact_relation_equality": true,
+    "medians": {
+      "baseline": {
+        "collect_cpu_seconds": 165.859645,
+        "collect_wall_seconds": 21.7690906875,
+        "pair_table_build_cpu_seconds": 140.62433850000002,
+        "pair_table_build_wall_seconds": 16.4119584375,
+        "relation_unit_cpu_seconds": 22.743259499999994,
+        "relation_unit_wall_seconds": 2.562382687,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 169.42082,
+        "whole_wall_seconds": 22.512267458
+      },
+      "candidate": {
+        "collect_cpu_seconds": 165.3453755,
+        "collect_wall_seconds": 21.1947138335,
+        "pair_table_build_cpu_seconds": 139.35745649999998,
+        "pair_table_build_wall_seconds": 16.117249104,
+        "relation_unit_cpu_seconds": 23.48204699999998,
+        "relation_unit_wall_seconds": 2.5478814585,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 168.7479745,
+        "whole_wall_seconds": 21.936858062
+      }
+    },
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline",
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+    "runs": [
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "collect_cpu_seconds": 171.038768,
+        "collect_wall_seconds": 22.539433,
+        "label": "a1",
+        "pair_table_build_cpu_seconds": 144.57324200000002,
+        "pair_table_build_wall_seconds": 17.459552667,
+        "peak_rss_bytes": 9641508864,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.97820200000001,
+        "relation_unit_wall_seconds": 2.554219541,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 174.544127,
+        "whole_wall_seconds": 23.278179458
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "5ad537e3e4eedab1ebe01b342ca6e1deab645e22188b1a60dedf6ff0fef119b8",
+        "collect_cpu_seconds": 162.536213,
+        "collect_wall_seconds": 21.390855625,
+        "label": "b1",
+        "pair_table_build_cpu_seconds": 136.22690000000003,
+        "pair_table_build_wall_seconds": 16.324978292,
+        "peak_rss_bytes": 10075865088,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.81226399999997,
+        "relation_unit_wall_seconds": 2.542789625,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 165.768124,
+        "whole_wall_seconds": 22.153538708
+      },
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "collect_cpu_seconds": 167.37591600000002,
+        "collect_wall_seconds": 22.56076025,
+        "label": "a2",
+        "pair_table_build_cpu_seconds": 141.874389,
+        "pair_table_build_wall_seconds": 16.892675125,
+        "peak_rss_bytes": 9807396864,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.004432999999977,
+        "relation_unit_wall_seconds": 3.144256333,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 170.951505,
+        "whole_wall_seconds": 23.312996958
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "5ad537e3e4eedab1ebe01b342ca6e1deab645e22188b1a60dedf6ff0fef119b8",
+        "collect_cpu_seconds": 168.154538,
+        "collect_wall_seconds": 20.701406959,
+        "label": "b2",
+        "pair_table_build_cpu_seconds": 142.403489,
+        "pair_table_build_wall_seconds": 15.609490583,
+        "peak_rss_bytes": 10077339648,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.24583899999999,
+        "relation_unit_wall_seconds": 2.552973292,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 171.727825,
+        "whole_wall_seconds": 21.450593041
+      },
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "collect_cpu_seconds": 162.55354100000002,
+        "collect_wall_seconds": 20.854394667,
+        "label": "a3",
+        "pair_table_build_cpu_seconds": 138.07527299999998,
+        "pair_table_build_wall_seconds": 15.760881,
+        "peak_rss_bytes": 10076094464,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 21.98235299999999,
+        "relation_unit_wall_seconds": 2.5705458329999997,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 165.99715700000002,
+        "whole_wall_seconds": 21.593731791
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "5ad537e3e4eedab1ebe01b342ca6e1deab645e22188b1a60dedf6ff0fef119b8",
+        "collect_cpu_seconds": 161.436709,
+        "collect_wall_seconds": 21.319024542,
+        "label": "b3",
+        "pair_table_build_cpu_seconds": 136.588632,
+        "pair_table_build_wall_seconds": 16.235845667,
+        "peak_rss_bytes": 10080862208,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.355133999999993,
+        "relation_unit_wall_seconds": 2.561802625,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 164.773161,
+        "whole_wall_seconds": 22.052533208
+      },
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "collect_cpu_seconds": 164.343374,
+        "collect_wall_seconds": 20.998748375,
+        "label": "a4",
+        "pair_table_build_cpu_seconds": 139.374288,
+        "pair_table_build_wall_seconds": 15.93124175,
+        "peak_rss_bytes": 10080960512,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.48208600000001,
+        "relation_unit_wall_seconds": 2.549699459,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 167.890135,
+        "whole_wall_seconds": 21.746355458
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "5ad537e3e4eedab1ebe01b342ca6e1deab645e22188b1a60dedf6ff0fef119b8",
+        "collect_cpu_seconds": 168.349205,
+        "collect_wall_seconds": 21.070403125,
+        "label": "b4",
+        "pair_table_build_cpu_seconds": 142.12628099999998,
+        "pair_table_build_wall_seconds": 15.998652541,
+        "peak_rss_bytes": 10079485952,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.71825499999997,
+        "relation_unit_wall_seconds": 2.531708375,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 171.95041,
+        "whole_wall_seconds": 21.821182916
+      }
+    ]
+  },
+  "params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-prefetch64-pilot-public-59001.json",
+    "sha256": "f837bf3ca5be26da1431c759e00309e2ac637445da2256d92a9719574a84c288"
+  },
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-fifo-lookahead64-rejection-20260922.json",
+    "sha256": "df3f170b3b8dc59d73683c60d7a0127846813c9fdf0f92ac29e5ed5ca64f71c0"
+  },
+  "process_accounting": {
+    "retained_peak_rss_bytes": 10080960512,
+    "retained_processes": 8,
+    "retained_processes_detail": [
+      {
+        "core_seconds": 174.544127,
+        "label": "a1",
+        "peak_rss_bytes": 9641508864,
+        "status": "stopped",
+        "wall_seconds": 23.278179458
+      },
+      {
+        "core_seconds": 165.768124,
+        "label": "b1",
+        "peak_rss_bytes": 10075865088,
+        "status": "stopped",
+        "wall_seconds": 22.153538708
+      },
+      {
+        "core_seconds": 170.951505,
+        "label": "a2",
+        "peak_rss_bytes": 9807396864,
+        "status": "stopped",
+        "wall_seconds": 23.312996958
+      },
+      {
+        "core_seconds": 171.727825,
+        "label": "b2",
+        "peak_rss_bytes": 10077339648,
+        "status": "stopped",
+        "wall_seconds": 21.450593041
+      },
+      {
+        "core_seconds": 165.99715700000002,
+        "label": "a3",
+        "peak_rss_bytes": 10076094464,
+        "status": "stopped",
+        "wall_seconds": 21.593731791
+      },
+      {
+        "core_seconds": 164.773161,
+        "label": "b3",
+        "peak_rss_bytes": 10080862208,
+        "status": "stopped",
+        "wall_seconds": 22.052533208
+      },
+      {
+        "core_seconds": 167.890135,
+        "label": "a4",
+        "peak_rss_bytes": 10080960512,
+        "status": "stopped",
+        "wall_seconds": 21.746355458
+      },
+      {
+        "core_seconds": 171.95041,
+        "label": "b4",
+        "peak_rss_bytes": 10079485952,
+        "status": "stopped",
+        "wall_seconds": 21.821182916
+      }
+    ],
+    "retained_sequential_wall_seconds": 177.409111538,
+    "retained_total_core_seconds": 1353.602444,
+    "scope": "eight complete one-unit stop-after-collect workflows; compilation excluded"
+  },
+  "schema_version": 1,
+  "software": {
+    "baseline_binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+    "candidate_binary_blake3": "5ad537e3e4eedab1ebe01b342ca6e1deab645e22188b1a60dedf6ff0fef119b8",
+    "selected_source_stack_head": "efc79bf9"
+  },
+  "source_patch": {
+    "path": "docs/ic/patches/koblitz-n59-fifo-lookahead16-rejected-20260922.patch",
+    "sha256": "6b88f1023f146b8bfee6c9ef83271d47545da8e71d48924294cd93956f878c48",
+    "status": "archived_rejected_not_applied_to_selected_source"
+  },
+  "validation": [
+    "all eight arms emit exactly 2157 relations with one canonical hash",
+    "candidate passes exact windowed-witness test",
+    "source-pinned binaries distinguish candidate and Stage-149 baseline",
+    "rejected patch applies cleanly to Stage-153 selected source"
+  ]
+}

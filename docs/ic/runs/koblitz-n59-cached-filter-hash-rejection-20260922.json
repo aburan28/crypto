@@ -1,0 +1,261 @@
+{
+  "candidate": {
+    "mathematical_output_changed": false,
+    "rule": "compute pair_filter_hash once per key block and reuse it for prefetch and admission",
+    "scratch_bytes_per_block": 8192
+  },
+  "claim_boundary": "Finite same-target rejected query micro-optimization. Caching one presence-filter hash per window entry preserves exact relations but the block scratch traffic costs more than recomputing the multiply-mix. The selected Stage-147 source remains unchanged. No SOTA claim.",
+  "date": "2026-09-22",
+  "decision": {
+    "full_workflow_followup": false,
+    "reason": "candidate median relation-unit wall regresses 0.58 percent and unit CPU 0.31 percent",
+    "selected_stage147_unchanged": true,
+    "status": "rejected"
+  },
+  "factor_base": {
+    "factor_base_logs_known_by_construction": false,
+    "kind": "cofactor_projected",
+    "points": 32934,
+    "projected_columns": 16344,
+    "target_subgroup_enumerated": false
+  },
+  "gates": {
+    "all_seven_gates_passed": false,
+    "full_cost_vs_rho": "unchanged_failed_large_margin",
+    "independent_external_reproduction": "missing",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_f4": "missing"
+  },
+  "instance": {
+    "collection_m": 3,
+    "collection_window": 1024,
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "uniform_summands_scanned": 102400000,
+    "uniform_trials": 100000,
+    "uniform_units": 1
+  },
+  "operation": "koblitz_n59_cached_filter_hash_rejection",
+  "panel": {
+    "comparison": {
+      "collect_cpu_seconds": {
+        "baseline_median": 162.61859450000003,
+        "candidate_median": 161.90587499999998,
+        "candidate_over_baseline": 0.9956172324438578,
+        "change_fraction": -0.0043827675561422235
+      },
+      "collect_wall_seconds": {
+        "baseline_median": 15.3294102705,
+        "candidate_median": 15.3218730415,
+        "candidate_over_baseline": 0.9995083157886051,
+        "change_fraction": -0.0004916842113949489
+      },
+      "pair_table_build_cpu_seconds": {
+        "baseline_median": 137.634558,
+        "candidate_median": 136.8459295,
+        "candidate_over_baseline": 0.9942701272742854,
+        "change_fraction": -0.0057298727257146225
+      },
+      "pair_table_build_wall_seconds": {
+        "baseline_median": 11.104626833,
+        "candidate_median": 11.0794735,
+        "candidate_over_baseline": 0.9977348781387908,
+        "change_fraction": -0.002265121861209208
+      },
+      "relation_unit_cpu_seconds": {
+        "baseline_median": 22.50627250000001,
+        "candidate_median": 22.57557100000001,
+        "candidate_over_baseline": 1.0030790749556597,
+        "change_fraction": 0.003079074955659678
+      },
+      "relation_unit_wall_seconds": {
+        "baseline_median": 1.733608083,
+        "candidate_median": 1.7435896875,
+        "candidate_over_baseline": 1.0057577053302191,
+        "change_fraction": 0.005757705330219133
+      },
+      "relations": {
+        "baseline_median": 2157.0,
+        "candidate_median": 2157.0,
+        "candidate_over_baseline": 1.0,
+        "change_fraction": 0.0
+      },
+      "whole_cpu_seconds": {
+        "baseline_median": 165.948552,
+        "candidate_median": 165.22931350000002,
+        "candidate_over_baseline": 0.9956658946924708,
+        "change_fraction": -0.00433410530752922
+      },
+      "whole_wall_seconds": {
+        "baseline_median": 15.9639156665,
+        "candidate_median": 15.960862854,
+        "candidate_over_baseline": 0.9998087679386577,
+        "change_fraction": -0.0001912320613423357
+      }
+    },
+    "exact_relation_equality": true,
+    "medians": {
+      "baseline": {
+        "collect_cpu_seconds": 162.61859450000003,
+        "collect_wall_seconds": 15.3294102705,
+        "pair_table_build_cpu_seconds": 137.634558,
+        "pair_table_build_wall_seconds": 11.104626833,
+        "relation_unit_cpu_seconds": 22.50627250000001,
+        "relation_unit_wall_seconds": 1.733608083,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 165.948552,
+        "whole_wall_seconds": 15.9639156665
+      },
+      "candidate": {
+        "collect_cpu_seconds": 161.90587499999998,
+        "collect_wall_seconds": 15.3218730415,
+        "pair_table_build_cpu_seconds": 136.8459295,
+        "pair_table_build_wall_seconds": 11.0794735,
+        "relation_unit_cpu_seconds": 22.57557100000001,
+        "relation_unit_wall_seconds": 1.7435896875,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 165.22931350000002,
+        "whole_wall_seconds": 15.960862854
+      }
+    },
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+    "runs": [
+      {
+        "arm": "baseline",
+        "binary_blake3": "b41633577c07b9dafad2b087fba8ea0339c88223da7770298143157e30982d83",
+        "collect_cpu_seconds": 161.91716200000002,
+        "collect_wall_seconds": 15.377069583,
+        "label": "a1",
+        "pair_table_build_cpu_seconds": 137.096883,
+        "pair_table_build_wall_seconds": 11.167974,
+        "peak_rss_bytes": 10071523328,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.35006200000001,
+        "relation_unit_wall_seconds": 1.725971291,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 165.259397,
+        "whole_wall_seconds": 16.012043875
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "bfe21477601635133808ff0e615db3f04deaaaeb4baa13110d5e6f6be4d9d07d",
+        "collect_cpu_seconds": 160.931302,
+        "collect_wall_seconds": 15.476736083,
+        "label": "b1",
+        "pair_table_build_cpu_seconds": 135.875061,
+        "pair_table_build_wall_seconds": 11.251430083,
+        "peak_rss_bytes": 10069491712,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.573781000000025,
+        "relation_unit_wall_seconds": 1.728588375,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 164.26763100000002,
+        "whole_wall_seconds": 16.125235208
+      },
+      {
+        "arm": "baseline",
+        "binary_blake3": "b41633577c07b9dafad2b087fba8ea0339c88223da7770298143157e30982d83",
+        "collect_cpu_seconds": 163.320027,
+        "collect_wall_seconds": 15.281750958,
+        "label": "a2",
+        "pair_table_build_cpu_seconds": 138.172233,
+        "pair_table_build_wall_seconds": 11.041279666,
+        "peak_rss_bytes": 10069557248,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.66248300000001,
+        "relation_unit_wall_seconds": 1.741244875,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 166.637707,
+        "whole_wall_seconds": 15.915787458
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "bfe21477601635133808ff0e615db3f04deaaaeb4baa13110d5e6f6be4d9d07d",
+        "collect_cpu_seconds": 162.88044799999997,
+        "collect_wall_seconds": 15.16701,
+        "label": "b2",
+        "pair_table_build_cpu_seconds": 137.816798,
+        "pair_table_build_wall_seconds": 10.907516917,
+        "peak_rss_bytes": 10072932352,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.577360999999996,
+        "relation_unit_wall_seconds": 1.758591,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 166.190996,
+        "whole_wall_seconds": 15.7964905
+      }
+    ]
+  },
+  "params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-prefetch64-pilot-public-59001.json",
+    "sha256": "f837bf3ca5be26da1431c759e00309e2ac637445da2256d92a9719574a84c288"
+  },
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-split-filter-rejection-20260922.json",
+    "sha256": "b7f82e7842b0488154884c2e3576139e5888d6980ceb28a8d47e21d336a9abc8"
+  },
+  "process_accounting": {
+    "retained_peak_rss_bytes": 10072932352,
+    "retained_processes": 4,
+    "retained_processes_detail": [
+      {
+        "core_seconds": 165.259397,
+        "label": "a1",
+        "peak_rss_bytes": 10071523328,
+        "status": "stopped",
+        "wall_seconds": 16.012043875
+      },
+      {
+        "core_seconds": 164.26763100000002,
+        "label": "b1",
+        "peak_rss_bytes": 10069491712,
+        "status": "stopped",
+        "wall_seconds": 16.125235208
+      },
+      {
+        "core_seconds": 166.637707,
+        "label": "a2",
+        "peak_rss_bytes": 10069557248,
+        "status": "stopped",
+        "wall_seconds": 15.915787458
+      },
+      {
+        "core_seconds": 166.190996,
+        "label": "b2",
+        "peak_rss_bytes": 10072932352,
+        "status": "stopped",
+        "wall_seconds": 15.7964905
+      }
+    ],
+    "retained_sequential_wall_seconds": 63.849557041,
+    "retained_total_core_seconds": 662.3557310000001,
+    "scope": "four complete one-unit stop-after-collect workflows; compilation excluded"
+  },
+  "schema_version": 1,
+  "software": {
+    "baseline_binary_blake3": "b41633577c07b9dafad2b087fba8ea0339c88223da7770298143157e30982d83",
+    "candidate_binary_blake3": "bfe21477601635133808ff0e615db3f04deaaaeb4baa13110d5e6f6be4d9d07d",
+    "selected_source_stack_head": "0772c9fa"
+  },
+  "source_patch": {
+    "path": "docs/ic/patches/koblitz-n59-cached-filter-hash-rejected-20260922.patch",
+    "sha256": "2a5f549b77cca6413f3a053e6915e0c12224c88f4b52f8b2a1cc8488001bce9f",
+    "status": "archived_rejected_not_applied_to_selected_source"
+  },
+  "validation": [
+    "all four arms emit exactly 2157 relations with one canonical hash",
+    "the candidate passes the exact windowed-witness test",
+    "source-pinned binaries distinguish candidate and baseline",
+    "the rejected patch applies cleanly to the Stage-147 selected source"
+  ]
+}
