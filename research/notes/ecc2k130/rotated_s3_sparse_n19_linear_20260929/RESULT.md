@@ -1,0 +1,7 @@
+# n19 immutable-archive semantic replay (pending hosted review)
+
+The new linear structural Sinz checker returned `PASS` in a provisional local Python 3.12 replay of PR #795's **unchanged first archive**. It independently parsed 58,825 primary CNF paths, replayed all 117,649 signed point tuples, checked all 33 Q+T/O targets, and rejected the five inherited geometric mutations. The full standalone replay took 71.93 seconds wall and 207,339,520 bytes peak process RSS on the local Darwin arm64 host. Those are verifier resource observations, not attack costs. `evidence/local/result.json` and `receipt.json` preserve the complete output and hashes.
+
+The original archived verifier remains `CENSORED` at its 600-second wall cap; its 12-file archive and freeze replay without alteration. `test_linear.py` exhausts every primary/auxiliary assignment for k=1..5 and rejects a sign flip and a skipped clause in the actual 40,614-primary-variable S6 block. The new checker compares all 146,640 one-hot clauses once before replaying the original parsed transitions, paths, point fibres, and targets.
+
+This local result is **not yet an accepted hosted or independently reviewed semantic pass**. The exact-head Ubuntu workflow must repeat the complete result and retain its artifact, and an independent reviewer must examine the theorem, source diff from the archived verifier, freeze and controls. Only then may a separately frozen n19 same-target SAT comparison begin. Nothing here measures n131 feasibility, PDP hardness, full ECDLP cost, or rho crossover.
