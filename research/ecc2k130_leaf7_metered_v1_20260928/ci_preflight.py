@@ -45,6 +45,7 @@ def check_arithmetic(spec: dict) -> dict:
     assert spec["schema"] == "ecc2k130-leaf7-metered-v1"
     assert spec["status"] == "HELD_PROTOCOL_ONLY"
     assert spec["release_main_head"] is None
+    assert spec["release_main_head_role"] == "pre_release_main_ancestor_not_checkout"
     assert spec["prerequisite"]["no_accepted_certificate_yet"] is True
     assert instance["field_degree"] == 131
     assert instance["field_modulus_hex"] == "0x800000000000000000000000000002007"
@@ -140,7 +141,7 @@ def check_arithmetic(spec: dict) -> dict:
     producer = spec["metering_producer"]
     assert producer["status"] == "NOT_IMPLEMENTED"
     assert producer["sha256"] is None
-    assert producer["commit"] is None
+    assert producer["introduction_commit"] is None
     assert all(path in spec["input_sha256"] for path in cost["field_primitive_paths"])
     assert producer["required_before_release"] is True
     assert not (REPO / producer["path"]).exists()

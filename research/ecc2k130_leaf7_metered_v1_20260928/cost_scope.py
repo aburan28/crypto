@@ -13,6 +13,8 @@ import json
 import math
 import re
 import statistics
+import subprocess
+import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -32,6 +34,25 @@ def digest(data: bytes) -> str:
 
 def file_digest(path: Path) -> str:
     return digest(path.read_bytes())
+
+
+def git_head(repo: Path) -> str:
+    head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    require(HEX40.fullmatch(head) is not None, "checkout has no full commit SHA")
+    return head
+
+
+def git_is_ancestor(repo: Path, older: str, newer: str) -> bool:
+    result = subprocess.run(
+        ["git", "-C", str(repo), "merge-base", "--is-ancestor", older, newer],
+        check=False, capture_output=True, text=True,
+    )
+    require(result.returncode in (0, 1),
+            "git could not verify commit ancestry in this checkout")
+    return result.returncode == 0
 
 
 def canonical(data: object) -> bytes:
@@ -171,6 +192,9 @@ def audit(
     extension_sha: str | None = None,
     bridge_freeze_sha: str | None = None,
     metering_producer_sha: str | None = None,
+    checkout_head_sha: str | None = None,
+    producer_ancestry_verified: bool = False,
+    release_ancestry_verified: bool = False,
 ) -> dict:
     require(receipt.get("schema") == "ecc2k130-leaf7-metered-receipt-v1",
             "wrong cost receipt schema")
@@ -184,19 +208,30 @@ def audit(
         # Preserve it without requiring a structural producer or cost arrays.
         return held_result("STOP", str(receipt.get("error", "producer STOP")))
     require(status == "MEASURED", "invalid cost receipt status")
-    require(spec["release_main_head"] is not None,
-            "metered gate remains held; refreeze before a measured receipt")
+    release_head = spec["release_main_head"]
+    require(isinstance(release_head, str) and HEX40.fullmatch(release_head),
+            "metered gate remains held; exact release checkout required")
+    require(isinstance(checkout_head_sha, str)
+            and HEX40.fullmatch(checkout_head_sha)
+            and receipt.get("release_checkout_sha") == checkout_head_sha,
+            "receipt checkout differs from actual git HEAD")
+    require(release_ancestry_verified is True,
+            "frozen release-main ancestor does not precede checkout")
     metering = spec["metering_producer"]
+    introduced = metering["introduction_commit"]
     require(metering["status"] == "REVIEWED"
             and isinstance(metering["sha256"], str)
             and HEX64.fullmatch(metering["sha256"]) is not None
-            and isinstance(metering["commit"], str)
-            and HEX40.fullmatch(metering["commit"]) is not None,
-            "reviewed metering producer and frozen source commit required")
+            and isinstance(introduced, str)
+            and HEX40.fullmatch(introduced) is not None,
+            "reviewed metering producer and source provenance commit required")
+    require(introduced != checkout_head_sha
+            and producer_ancestry_verified is True,
+            "producer introduction commit must precede checkout")
     require(metering_producer_sha == metering["sha256"]
             and receipt.get("metering_producer_sha256") == metering["sha256"]
-            and receipt.get("metering_producer_commit") == metering["commit"],
-            "metering producer source differs")
+            and receipt.get("metering_producer_commit") == introduced,
+            "metering producer bytes or source provenance differs")
     require(receipt.get("input_sha256") == spec["input_sha256"],
             "cost receipt input/source hashes differ")
     require(all(x is not None for x in (
@@ -252,8 +287,8 @@ def audit(
             continue
         require(isinstance(host[name], str) and host[name],
                 f"host manifest {name} missing")
-    require(host["git_head"] == metering["commit"],
-            "host checkout differs from metering producer commit")
+    require(host["git_head"] == checkout_head_sha,
+            "host checkout differs from actual git HEAD")
     primitives = {
         path: spec["input_sha256"][path]
         for path in spec["cost"]["field_primitive_paths"]
@@ -340,8 +375,36 @@ def audit(
     }
 
 
+def test_git_ancestry() -> None:
+    # Exercise actual Git ancestry on three distinct commits without touching
+    # the research worktree or running a measured producer.
+    with tempfile.TemporaryDirectory(prefix="leaf7-ancestry-") as directory:
+        repo = Path(directory)
+        subprocess.run(["git", "init", "-q", str(repo)], check=True,
+                       capture_output=True, text=True)
+        commits = []
+        for i in range(3):
+            (repo / "marker.txt").write_text(str(i) + "\n")
+            subprocess.run(["git", "-C", str(repo), "add", "marker.txt"],
+                           check=True, capture_output=True, text=True)
+            subprocess.run(
+                ["git", "-C", str(repo), "-c", "user.name=Test",
+                 "-c", "user.email=test@example.invalid",
+                 "-c", "commit.gpgsign=false", "commit", "-q",
+                 "-m", f"synthetic-{i}"],
+                check=True, capture_output=True, text=True,
+            )
+            commits.append(git_head(repo))
+        c1, main_ancestor, c2 = commits
+        assert len(set(commits)) == 3
+        assert git_is_ancestor(repo, c1, c2)
+        assert git_is_ancestor(repo, main_ancestor, c2)
+        assert not git_is_ancestor(repo, c2, c1)
+
+
 def self_test(spec: dict) -> None:
     # Synthetic data exercises gate logic only; it is not a measured result.
+    test_git_ancestry()
     stop = {
         "schema": "ecc2k130-leaf7-metered-receipt-v1",
         "freeze_sha256": "e" * 64,
@@ -353,9 +416,9 @@ def self_test(spec: dict) -> None:
     assert audit(spec, stop, "e" * 64)["cold_ratio"] is None
 
     demo = copy.deepcopy(spec)
-    demo["release_main_head"] = "a" * 40
+    demo["release_main_head"] = "b" * 40
     demo["metering_producer"].update(
-        status="REVIEWED", sha256="d" * 64, commit="c" * 40)
+        status="REVIEWED", sha256="d" * 64, introduction_commit="c" * 40)
     labels = demo["point_panel"]["labels"]
     point = ["0x1", "0x2"]
     cases = [{"label": label, "direct_leaf1": point,
@@ -378,7 +441,7 @@ def self_test(spec: dict) -> None:
     primitives = {p: demo["input_sha256"][p] for p in frozen["field_primitive_paths"]}
     host = {"os": "synthetic", "arch": "synthetic", "cpu_model": "synthetic",
             "python_version": "synthetic", "sage_version": "synthetic",
-            "git_head": "c" * 40, "field_primitive_sha256": primitives}
+            "git_head": "a" * 40, "field_primitive_sha256": primitives}
     host_sha = digest(canonical(host))
     counts = {
         block: {name: {"mul": value, "sqr": 0, "inv_calls": 0}
@@ -397,6 +460,7 @@ def self_test(spec: dict) -> None:
         "status": "MEASURED",
         "freeze_sha256": "e" * 64,
         "release_main_head": demo["release_main_head"],
+        "release_checkout_sha": "a" * 40,
         "metering_producer_sha256": "d" * 64,
         "metering_producer_commit": "c" * 40,
         "input_sha256": demo["input_sha256"],
@@ -441,12 +505,41 @@ def self_test(spec: dict) -> None:
         "extension": extension, "extension_sha": extension_sha,
         "bridge_freeze_sha": "f" * 64,
         "metering_producer_sha": "d" * 64,
+        "checkout_head_sha": "a" * 40,
+        "producer_ancestry_verified": True,
+        "release_ancestry_verified": True,
     }
 
     def check(row: dict) -> dict:
         return audit(demo, row, "e" * 64, **parents)
 
+    assert len({
+        demo["metering_producer"]["introduction_commit"],
+        demo["release_main_head"],
+        parents["checkout_head_sha"],
+    }) == 3
     assert check(receipt)["promotion"] is True
+    bad_parents = dict(parents, producer_ancestry_verified=False)
+    try:
+        audit(demo, receipt, "e" * 64, **bad_parents)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("non-ancestor producer introduction was accepted")
+    bad_parents = dict(parents, release_ancestry_verified=False)
+    try:
+        audit(demo, receipt, "e" * 64, **bad_parents)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("non-ancestor release main was accepted")
+    bad_parents = dict(parents, checkout_head_sha="f" * 40)
+    try:
+        audit(demo, receipt, "e" * 64, **bad_parents)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("different release checkout was accepted")
     bad = copy.deepcopy(receipt)
     del bad["outputs"]
     try:
@@ -565,6 +658,17 @@ def main() -> None:
                 f"source hash changed: {relative}")
     parent_freeze = REPO / spec["prerequisite"]["structural_directory"] / "FROZEN.json"
     metering_path = REPO / spec["metering_producer"]["path"]
+    require(isinstance(spec["release_main_head"], str)
+            and HEX40.fullmatch(spec["release_main_head"]),
+            "metered gate remains held; release main head is null")
+    require(metering_path.is_file(),
+            "metering producer is absent; measured gate remains held")
+    checkout = git_head(REPO)
+    introduced = spec["metering_producer"]["introduction_commit"]
+    require(isinstance(introduced, str) and HEX40.fullmatch(introduced),
+            "producer introduction commit is not frozen")
+    producer_ancestry = git_is_ancestor(REPO, introduced, checkout)
+    release_ancestry = git_is_ancestor(REPO, spec["release_main_head"], checkout)
     result = audit(
         spec, receipt, own_freeze,
         producer=json.loads(args.bridge_producer.read_text()),
@@ -575,6 +679,9 @@ def main() -> None:
         extension_sha=file_digest(args.bridge_extension_replay),
         bridge_freeze_sha=file_digest(parent_freeze),
         metering_producer_sha=file_digest(metering_path),
+        checkout_head_sha=checkout,
+        producer_ancestry_verified=producer_ancestry,
+        release_ancestry_verified=release_ancestry,
     )
     print(json.dumps(result, sort_keys=True))
 

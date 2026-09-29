@@ -131,7 +131,15 @@ and all failed work. Record inversion calls separately as diagnostics;
 do not add their internals twice. The frozen input hashes include the
 field primitives, both 263-map/dual implementations, and the structural
 7-map producer. A metering producer must be added in a new reviewed
-commit; its own SHA-256 and commit must be frozen before release.
+commit C1; its source SHA-256 and **introduction commit** must be frozen
+before release. C1 is provenance, not the eventual run checkout. The
+frozen `release_main_head` is the pre-release main ancestor M. A later
+checkout C2 may contain the reviewed freeze and must record its actual
+`git rev-parse HEAD` in both the cost receipt and host manifest. The
+checker hashes the producer file **at C2**, requires C1 and M to be
+ancestors of C2, and binds all three records to C2. It never requires
+C2 to equal C1 or pins C2 inside the file committed at C2, avoiding a
+self-referential commit constraint.
 
 Measure `w_sq` on the **same host and code checkout** with eleven raw
 batches of 10,000 SHA-fixed nonzero operand pairs labelled
@@ -145,7 +153,8 @@ weight, and both relative median absolute deviations from those raw
 batches. It requires a host manifest with OS, architecture, CPU,
 Python/Sage versions, checkout commit, and the exact field-primitive
 hashes; calibration and all three children must bind its digest.
-If either MAD exceeds 5%, or any shared/arm phase is unmetered, leave
+An ancestry check that cannot be proven from the checkout's Git history
+fails closed. If either MAD exceeds 5%, or any shared/arm phase is unmetered, leave
 both ratios null. Report CPU, wall, peak RSS and failed work as
 secondary data. This first protocol makes no wall-time speed claim.
 
