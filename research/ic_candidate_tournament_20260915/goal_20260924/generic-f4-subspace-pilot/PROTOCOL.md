@@ -70,8 +70,10 @@ zero yield for the ambient-orbit v2 arms.
 | Summands | 3 |
 | Cells | n17a1, n19a0, n23a0, n23a1, n31a0 |
 | Points | Exactly the five public targets already used in the dimension-6 inventory control (one per cell). Digests and coordinates are sealed by that JSON once #952 merges; do not substitute readiness or improvement-round points without amending this protocol. |
-| Budget | Declare `max_trials` and wall/memory caps in the runner before the first job; exhaustion is incomplete, not UNSAT |
-| Host label | Record `rustc --version`, CPU, threads (`RAYON_NUM_THREADS=1`), and that Valgrind instruction counts are out of scope unless 3.22.0 is present |
+| Budget | Dispatch series (measured): `max_trials=1`, `batch_trials=1`, child wall 180s, `RAYON_NUM_THREADS=1`. Exhaustion is incomplete, not UNSAT. Prior `max_trials=64` / 300s series timed out without receipts on n17a1 (`runs-max64-timeout/`). |
+| Host label | Record `rustc --version`, CPU, threads. Valgrind instruction counts stay out of scope unless 3.22.0 is present. |
+| Inventory points SHA-256 | `be3053b4b637311e8255f294807fde412510fbda2464e678a6a16fdea397d403` (`standard-subspace-d6-inventory-control.json`) |
+| Runtime env | Tournament-style child env only: `PATH`/`HOME`/`LANG`/`LC_ALL`/`TZ`, `RAYON_NUM_THREADS=1`, `IC_ARTIFACT_CACHE=off`, `IC_F2_BACKEND=cpu`. Do **not** set `KIC_F5_AVX512_UNPACK` for this exclusive-phase pin. |
 
 Classification of any later cost movement against the incumbent on these points
 is at most **engineering** or **factor-base-policy**; it cannot be an **advance**
