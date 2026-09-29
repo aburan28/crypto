@@ -96,12 +96,18 @@ def case_rate_interval(cases):
     point_rates = [row['witness_count']/row['query_count'] for row in cases]
     point_mean = sum(point_rates)/len(point_rates)
     radius = math.sqrt(math.log(40)/(2*len(cases)))
-    conservative = [max(0, point_mean-radius), min(1, point_mean+radius)]
+    conservative = ([max(0, point_mean-radius), min(1, point_mean+radius)]
+                    if zero_query_points == 0 else None)
+    scope = ('zero-query audited points make the full point-law mean unknown; '
+             'rate and bootstrap are conditional on positive query exposure'
+             if zero_query_points else
+             'query-weighted point-cluster bootstrap is descriptive; '
+             'Hoeffding bound is for the distinct-point mean under the frozen point law')
     if len(cases) == 1:
         return dict(rate=estimate, ci95=None, distinct_points=1,
                     zero_query_points=zero_query_points,
                     point_mean=point_mean, point_mean_hoeffding95=conservative,
-                    uncertainty='one distinct point; bootstrap interval uninformative')
+                    uncertainty='one distinct point; bootstrap interval uninformative; '+scope)
     rng = random.Random(SEED)
     draws = []
     for _ in range(DRAWS):
@@ -113,8 +119,7 @@ def case_rate_interval(cases):
                 distinct_points=len(cases), zero_query_points=zero_query_points,
                 point_mean=point_mean,
                 point_mean_hoeffding95=conservative,
-                uncertainty='query-weighted point-cluster bootstrap is descriptive; '
-                            'Hoeffding bound is for the distinct-point mean under the frozen point law')
+                uncertainty=scope)
 
 
 def summarize(observations, repetitions=3):

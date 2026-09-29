@@ -62,6 +62,14 @@ class NaturalYieldTests(unittest.TestCase):
         self.assertEqual(rate['distinct_points'], 0)
         self.assertEqual(rate['zero_query_points'], 1)
 
+    def test_zero_query_point_prevents_full_point_law_uncertainty_claim(self):
+        observations = [row('p0', 0, witness=0, queries=0),
+                        row('p1', 0, witness=1, queries=2)]
+        rate = summarize(observations, repetitions=1)[0]['natural_witness_rate']
+        self.assertEqual(rate['rate'], .5)
+        self.assertEqual(rate['zero_query_points'], 1)
+        self.assertIsNone(rate['point_mean_hoeffding95'])
+
 
 if __name__ == '__main__':
     unittest.main()
