@@ -20,7 +20,7 @@ EVALUATOR = ('autolab.py', 'tournament.py', 'portfolio.py', 'oracle.py', 'identi
              'measurement.py', 'driver_admission.py', 'qualification.py', 'producer/evidence.py', 'producer/timing.py')
 EVALUATOR += ('generic_driver.py', 'generic_admission.py', 'generic_build.py',
               'generic_bases.py', 'generic_stages.py', 'generic_queries.py',
-              'generic_query_law.py', 'generic_phases.py')
+              'generic_query_law.py', 'generic_phases.py', 'generic_backend_yield.py')
 INPUT_LAW = ('public-hash-to-curve-cofactor-v1; independently generated fixture, '
              'one supplied public point, no planted scalar')
 

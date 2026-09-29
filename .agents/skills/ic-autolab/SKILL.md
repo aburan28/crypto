@@ -70,9 +70,39 @@ seed `2026092553`, ten new complete-pipeline configurations and the checked
 round-two executable source. Workflow `36463687634` ran it once and verified
 3,480/3,480 pairs. Its selected `stop7_word` failed the complete cold and
 familywise gates, so no challenger qualified within the three-attempt budget.
-Do not redispatch any of the three registered attempts. Future research needs
-a new predeclared protocol and fresh target points; never retune on their
-confirmation or replay.
+Do not redispatch any of the three registered attempts. The next registered
+comparison is
+[generic-backend-qualification](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/README.md)
+(seed `2026092901`, panel SHA-256
+`83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf`);
+its runner and workflow are merged, and the single measured dispatch is
+[workflow run 36532455386](https://github.com/aburan28/crypto/actions/runs/36532455386).
+Inspect that run and its retained artifact before any further action. Never
+redispatch this registration or retune on the sealed rounds' confirmation or
+replay.
+
+The registered comparison uses `run_generic_backend_qualification.py` through
+`ic-generic-backend-qualification.yml`. Its measured job checks out reviewed
+implementation commit `765c3c5f19032bd852163805f257c56babef2040`, even
+if `main` changes later. The explicit reference registry carries the accepted
+`ic_online`, cold rho, and online rho roles; the registered `prepared_both`
+alias maps to `ic_online` once.
+The runner restores and verifies all three sealed rounds, freezes supplemental
+point exclusions, builds the new generic source with a controlled receipt,
+and then runs the frozen tournament once. Replay the artifact's archived
+`tournament/evaluator/tournament.py verify` and rerun its archived
+`generic_backend_yield.py` before using
+`generic_backend_gate.py --bundle <retained-output> --out <new-result.json>`.
+The gate requires every smoke and development job to be verified for at least
+one F4/F5 arm and one SAT arm; a reference-selection status alone does not
+qualify either family. Describe the current `f4` backend as a bounded Macaulay
+matrix engine and `f5` as that engine with an F5 row criterion; neither is a
+full incremental Gröbner-basis implementation. `generic_backend_yield.py` checks
+natural ordinary-query attempts in both complete and bounded-incomplete
+reports; timeouts without a full report are censored. Report distinct-point
+rate uncertainty and preserve zero-yield cells. An incomplete arm cannot gain
+a verified speedup or qualification by dropping its failed jobs. Preserve any
+interrupted execution; never redispatch the same registration to replace it.
 
 Before a rho comparison, inspect the actual reference path and run its release
 tests for reference/packed agreement, fruitless-cycle escape, charge closure,

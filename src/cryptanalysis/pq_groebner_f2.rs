@@ -73,6 +73,7 @@ use std::collections::HashSet;
 /// A monomial in `F_2[v_0, …, v_{n-1}] / (v_i² − v_i)` represented as a
 /// bitmask: bit `k` is set iff `v_k` divides the monomial.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, serde::Serialize, serde::Deserialize)]
+#[repr(transparent)]
 pub struct F2BoolMono {
     pub mask: u64,
 }
