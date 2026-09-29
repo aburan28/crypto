@@ -71,15 +71,17 @@ round-two executable source. Workflow `36463687634` ran it once and verified
 3,480/3,480 pairs. Its selected `stop7_word` failed the complete cold and
 familywise gates, so no challenger qualified within the three-attempt budget.
 Do not redispatch any of the three registered attempts. The next registered
-comparison is
+comparison was
 [generic-backend-qualification](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/README.md)
 (seed `2026092901`, panel SHA-256
 `83c640a03b4239b918851f6f1b8450e2fe27dc710fb99f306e3481a99d8875cf`);
-its runner and workflow are merged, and the single measured dispatch is
+its runner and workflow are merged, and the single measured dispatch was
 [workflow run 36532455386](https://github.com/aburan28/crypto/actions/runs/36532455386).
-Inspect that run and its retained artifact before any further action. Never
-redispatch this registration or retune on the sealed rounds' confirmation or
-replay.
+It reached the six-hour job cap and artifact upload failed. Read its
+[censored result](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/RESULT.md)
+before planning a fresh protocol. Completed-trial count and comparative costs
+are unknown. Never redispatch this registration or retune on the sealed
+rounds' confirmation or replay.
 
 The registered comparison uses `run_generic_backend_qualification.py` through
 `ic-generic-backend-qualification.yml`. Its measured job checks out reviewed
@@ -89,10 +91,11 @@ if `main` changes later. The explicit reference registry carries the accepted
 alias maps to `ic_online` once.
 The runner restores and verifies all three sealed rounds, freezes supplemental
 point exclusions, builds the new generic source with a controlled receipt,
-and then runs the frozen tournament once. Replay the artifact's unmodified
-`tournament/evaluator/tournament.py verify` before the natural-yield audit.
-The frozen 2026-09-29 auditor has a report-hash defect: preserve its original
-failure and follow
+and then runs the frozen tournament once. This dispatch published no artifact,
+so no trial, yield or family gate can be replayed. If an intact copy is later
+recovered, replay its unmodified `tournament/evaluator/tournament.py verify`
+before the natural-yield audit. The frozen 2026-09-29 auditor has a report-hash
+defect: preserve its original failure and follow
 [AUDITOR-REPAIR.md](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/AUDITOR-REPAIR.md)
 on a separate artifact copy. Require the exact archived auditor/contract hashes
 and certified receipt-digest cross-checks from
