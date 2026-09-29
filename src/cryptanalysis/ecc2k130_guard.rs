@@ -477,6 +477,9 @@ impl<const N: usize> TargetTable<N> {
         // The map's keys are distinct residues below `ℓ`, so their
         // Montgomery forms are distinct too and no key is inserted twice.
         for (value, label) in targets {
+            // A key at or above `ℓ` would reduce onto a residue the BigUint
+            // search never compares equal to it, and report a hit it misses.
+            debug_assert!(value < &field.ell, "target {value} is not reduced below ℓ");
             let key = field.to_form(value);
             let mut s = table.slot(&key);
             while table.slots[s] != 0 {
@@ -681,6 +684,7 @@ fn search_fixed_on<const N: usize>(
             unsafe { search.extend_bmi2(0, &one, 0, max_length) };
             return Some((search.checked, search.hits));
         }
+        // Read only by the x86-64 dispatch above.
         let _ = allow_bmi2;
         search.extend_portable(0, &one, 0, max_length);
     }
