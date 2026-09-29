@@ -1458,6 +1458,9 @@
           <tr class="group"><td colspan="8">k = 4, E(F<sub>p&#8308;</sub>)</td></tr>
           <tr><td>Full four-point decompositions: C&#8324; (&sect;11.17) and r&#8734; (&sect;11.19)</td><td>2<sup>32.3</sup>&ndash;2<sup>40.1</sup></td><td class="n">&mdash;</td><td class="n">&gt; 10<sup>8</sup>&times; at 2<sup>32</sup></td><td class="n">1/4 (derived)</td><td class="n">0.48</td><td class="n">&rarr; 0.518</td><td>2<sup>151</sup> on C&#8324; = 1.2&middot;10<sup>12</sup>; parity at 2<sup>80</sup> would need C&#8324; &lt; 5.4&middot;10<sup>6</sup>, 10<sup>4</sup>&times; below the solver's own floor</td></tr>
           <tr><td><strong>Joux&ndash;Vitse three-point decompositions</strong> (this round)</td><td>2<sup>32.3</sup>&ndash;2<sup>40.1</sup></td><td class="n"><strong>8,126</strong></td><td class="n"><strong>6,945&times;</strong> (4,583–9,832× over the eight runs)</td><td class="n">0.496 (1/2 derived)</td><td class="n">1/2 (derived), r = 9.97 over every attempt, 0.514 on the last</td><td class="n">-0.003</td><td><strong>never</strong>: constant 6C&prime;/(S<sub>rho</sub>c<sub>add</sub>) + r needs C&prime; &lt; 10; measured C&prime; = 1.6&middot;10<sup>5</sup>, of which the Weil restriction alone is 3,401</td></tr>
+          <tr class="group"><td colspan="8">k = 5, E(F<sub>p&#8309;</sub>): Joux&ndash;Vitse four-point decompositions, C&Prime; only (<code>experiments/27_jv_quintic{,_edwards}_csecond.json</code>, <code>RESEARCH_K5_TORSION_JOUX_VITSE.md</code>)</td></tr>
+          <tr><td>Plain symmetrisation, Weierstrass <code>x</code>: five octics in four unknowns</td><td>2<sup>40.4</sup>&ndash;2<sup>50.0</sup></td><td class="n">&mdash;</td><td class="n">C&Prime; = 3.0&middot;10<sup>10</sup> per test (8,826 &times; 8,444 at degree 19)</td><td class="n">2/5 (derived)</td><td class="n">2/5 (derived)</td><td class="n">&minus;1/10 (derived)</td><td>2<sup>302</sup> (extrapolated on C&Prime;; a stage diagnostic)</td></tr>
+          <tr><td>2-torsion symmetry, Edwards <code>y</code>: e(y&sup2;) and &pi;, degrees 4 and 3</td><td>2<sup>38.4</sup>&ndash;2<sup>48.0</sup></td><td class="n">&mdash;</td><td class="n">C&Prime; = 7.3&middot;10<sup>7</sup> per test (1,513 &times; 1,633 at degree 9), 416&times; cheaper</td><td class="n">2/5 (derived)</td><td class="n">2/5 (derived)</td><td class="n">&minus;1/10 (derived)</td><td>2<sup>203</sup> in the subgroup's order (extrapolated); parity at 2<sup>128</sup> needs C&Prime; &lt; 4.0&middot;10<sup>5</sup>, 181&times; below &mdash; the registered line C&Prime; &gt; 10<sup>7</sup> is crossed</td></tr>
         </tbody>
       </table>
     </div>
@@ -1470,7 +1473,7 @@
         193&times; the derivation. Class: a measurement of a derived route; relabelling of the k = 4 solve
         (C&#8324; moved into a p-fold residual count), no class for the boundary statement. Parity at a size
         that fits a machine needs a route this harness does not have &mdash; k &ge; 5 with torsion symmetries,
-        or a cover &mdash; and the note registers the first before building it.</p>
+        or a cover &mdash; and the note registered the first before building it. Built and measured (the two k = 5 rows): the 2-torsion symmetry cuts the four-point test 416&times;, to 7.3&middot;10<sup>7</sup> multiplications, and the route still crosses rho only at 2<sup>203</sup>; the levers left (4-torsion, a trace-driven elimination) are priced in <code>RESEARCH_K5_TORSION_JOUX_VITSE.md</code> &sect;5.</p>
     </div>
   </div>
 

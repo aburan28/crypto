@@ -473,7 +473,7 @@ impl Curve4 {
 // ── The symmetrised S₅, by interpolation ──────────────────────────────────
 
 /// Monomials `e₁^a e₂^b e₃^c e₄^d` of total degree `≤ d`.
-fn exponents4(d: u8) -> Vec<[u8; 4]> {
+pub(crate) fn exponents4(d: u8) -> Vec<[u8; 4]> {
     let mut v = Vec::new();
     for a in 0..=d {
         for b in 0..=(d - a) {
