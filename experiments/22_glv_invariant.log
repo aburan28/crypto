@@ -1,0 +1,76 @@
+p=  271 n=2^ 24.2 seed=1 generators (1,2,0,1): ["X^3", "e3", "e2·X", "e2^3", "e1·X^2", "e1·e2", "e1^2·X", "e1^3"] hilbert [0, 1, 3, 8, 11]; diagonal (1,1,1,1): 20 generators, hilbert [0, 0, 0, 20, 0]
+  residual 0 harness triples=Some(1) e_sols=3 muls=1018348 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=608542 | invariant Macaulay D=Some(10) dim=Some(64) muls=608542 | function-first Macaulay D=None peak=1980x5005 muls=3168541 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=275 ops=6499860 sols=Some(3) basis=None ms=2388
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=275 ops=6499860 sols=Some(3) basis=None ms=2317
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=826 ops=433816277 sols=Some(9) basis=None ms=8767
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=7 max=10641x7394 runs=1 ops=24550618006 sols=None basis=Some(132) ms=120012 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 23]
+  residual 1 harness triples=Some(1) e_sols=2 muls=946918 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=608794 | invariant Macaulay D=Some(10) dim=Some(64) muls=608794 | function-first Macaulay D=None peak=1980x5005 muls=3170525 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=274 ops=6345421 sols=Some(2) basis=None ms=2934
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=274 ops=6345421 sols=Some(2) basis=None ms=2947
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=823 ops=434904913 sols=Some(6) basis=None ms=10194
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=7 max=10641x7394 runs=1 ops=37278681892 sols=None basis=Some(132) ms=120007 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 23]
+  residual 2 harness triples=Some(1) e_sols=1 muls=876661 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=608028 | invariant Macaulay D=Some(10) dim=Some(64) muls=608028 | function-first Macaulay D=None peak=1980x5005 muls=3169741 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=273 ops=6193124 sols=Some(1) basis=None ms=2923
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=273 ops=6193124 sols=Some(1) basis=None ms=3093
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=820 ops=434921844 sols=Some(3) basis=None ms=14429
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=8 max=10641x8789 runs=1 ops=42213408026 sols=None basis=Some(132) ms=120008 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 23]
+  residual 3 harness triples=Some(1) e_sols=3 muls=1020194 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=608013 | invariant Macaulay D=Some(10) dim=Some(64) muls=608013 | function-first Macaulay D=None peak=1980x5005 muls=3178973 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=275 ops=6490649 sols=Some(3) basis=None ms=2374
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=275 ops=6490649 sols=Some(3) basis=None ms=2279
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=826 ops=435768915 sols=Some(9) basis=None ms=9303
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=8 max=10639x8789 runs=1 ops=45078146170 sols=None basis=Some(132) ms=120008 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 23]
+p=  541 n=2^ 27.2 seed=1 generators (1,2,0,1): ["X^3", "e3", "e2·X", "e2^3", "e1·X^2", "e1·e2", "e1^2·X", "e1^3"] hilbert [0, 1, 3, 8, 11]; diagonal (1,1,1,1): 20 generators, hilbert [0, 0, 0, 20, 0]
+  residual 0 harness triples=Some(1) e_sols=2 muls=960361 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=610709 | invariant Macaulay D=Some(10) dim=Some(64) muls=610709 | function-first Macaulay D=None peak=1980x5005 muls=3167737 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=544 ops=8765471 sols=Some(2) basis=None ms=4068
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=544 ops=8765471 sols=Some(2) basis=None ms=3021
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=1633 ops=443399424 sols=Some(6) basis=None ms=11360
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=8 max=10641x8789 runs=1 ops=45566469932 sols=None basis=Some(132) ms=120026 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 11]
+  residual 1 harness triples=Some(2) e_sols=3 muls=1031150 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=611205 | invariant Macaulay D=Some(10) dim=Some(64) muls=611205 | function-first Macaulay D=None peak=1980x5005 muls=3181118 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=545 ops=8894372 sols=Some(3) basis=None ms=3009
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=545 ops=8894372 sols=Some(3) basis=None ms=2948
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=1636 ops=443698248 sols=Some(9) basis=None ms=11587
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=8 max=10641x8789 runs=1 ops=45729352696 sols=None basis=Some(132) ms=120016 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (2 witnesses) [skipped residuals so far: 11]
+  residual 2 harness triples=Some(1) e_sols=1 muls=888398 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=611442 | invariant Macaulay D=Some(10) dim=Some(64) muls=611442 | function-first Macaulay D=None peak=1980x5005 muls=3182301 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=543 ops=8622352 sols=Some(1) basis=None ms=2867
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=543 ops=8622352 sols=Some(1) basis=None ms=2841
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=1630 ops=442628580 sols=Some(3) basis=None ms=9775
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=8 max=10641x8789 runs=1 ops=45369462113 sols=None basis=Some(132) ms=120031 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 11]
+  residual 3 harness triples=Some(1) e_sols=2 muls=961236 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=612282 | invariant Macaulay D=Some(10) dim=Some(64) muls=612282 | function-first Macaulay D=None peak=1980x5005 muls=3179427 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=544 ops=8833977 sols=Some(2) basis=None ms=4704
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=544 ops=8833977 sols=Some(2) basis=None ms=4594
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=1633 ops=443408121 sols=Some(6) basis=None ms=14132
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=8 max=10641x8789 runs=1 ops=45117573954 sols=None basis=Some(132) ms=120006 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 11]
+p= 1051 n=2^ 30.1 seed=1 generators (1,2,0,1): ["X^3", "e3", "e2·X", "e2^3", "e1·X^2", "e1·e2", "e1^2·X", "e1^3"] hilbert [0, 1, 3, 8, 11]; diagonal (1,1,1,1): 20 generators, hilbert [0, 0, 0, 20, 0]
+  residual 0 harness triples=Some(1) e_sols=2 muls=968890 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=611246 | invariant Macaulay D=Some(10) dim=Some(64) muls=611246 | function-first Macaulay D=None peak=1980x5005 muls=3156225 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=1054 ops=13307633 sols=Some(2) basis=None ms=8582
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=1054 ops=13307633 sols=Some(2) basis=None ms=8573
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=3163 ops=457606857 sols=Some(6) basis=None ms=27402
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=8 max=10641x8789 runs=1 ops=45879500681 sols=None basis=Some(132) ms=120014 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 21]
+  residual 1 harness triples=Some(1) e_sols=2 muls=969871 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=611885 | invariant Macaulay D=Some(10) dim=Some(64) muls=611885 | function-first Macaulay D=None peak=1980x5005 muls=3181983 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=1054 ops=13326384 sols=Some(2) basis=None ms=5678
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=1054 ops=13326384 sols=Some(2) basis=None ms=5557
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=3163 ops=456596950 sols=Some(6) basis=None ms=19528
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=8 max=10641x8789 runs=1 ops=44764414957 sols=None basis=Some(132) ms=120010 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 21]
+  residual 2 harness triples=Some(1) e_sols=1 muls=894320 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=610440 | invariant Macaulay D=Some(10) dim=Some(64) muls=610440 | function-first Macaulay D=None peak=1980x5005 muls=3182497 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=1053 ops=13183071 sols=Some(1) basis=None ms=5922
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=1053 ops=13183071 sols=Some(1) basis=None ms=5949
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1668x1632 runs=3160 ops=457427761 sols=Some(3) basis=None ms=21209
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=8 max=10641x8789 runs=1 ops=44639686939 sols=None basis=Some(132) ms=120003 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 21]
+  residual 3 harness triples=Some(1) e_sols=1 muls=898621 | orbit-invariant-only=true identical=true | ordinary Macaulay D=Some(10) dim=Some(64) muls=611938 | invariant Macaulay D=Some(10) dim=Some(64) muls=611938 | function-first Macaulay D=None peak=1980x5005 muls=3184221 Some("no closure up to degree 6")
+    F4 ordinary: vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=1053 ops=13180087 sols=Some(1) basis=None ms=5904
+    F4 invariant (u-coordinates): vars=3 eqs=3 D_solve=10 D_reach=14 max=221x277 runs=1053 ops=13180087 sols=Some(1) basis=None ms=5896
+    F4 orbit (z-homogenised): vars=4 eqs=4 D_solve=10 D_reach=14 max=1680x1654 runs=3160 ops=461313952 sols=Some(3) basis=None ms=20493
+    F4 function-first (Nagao L(4O)): vars=9 eqs=9 D_solve=4 D_reach=8 max=10641x8788 runs=1 ops=44593476023 sols=None basis=Some(132) ms=120022 TIMED OUT
+    checks: ordinary F4 = harness Some(true); orbit = 3 × ordinary Some(true); function-first witnessed by harness triples Some(true) (1 witnesses) [skipped residuals so far: 21]
+wrote experiments/22_glv_invariant.json

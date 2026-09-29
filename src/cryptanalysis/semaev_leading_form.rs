@@ -1091,3 +1091,234 @@ mod tests {
         assert_eq!(leading_form_profile(3, false).a6_carrying_max, 4);
     }
 }
+
+// ── cross-process caching of the symbolic forms ──────────────────────────
+//
+// `semaev(m)` takes no curve parameters: it is S_{m+1} over F_2[a6], so one
+// build serves every curve in the family and specialising a6 is the per-curve
+// step. That makes it worth sharing between processes -- but only at m = 5.
+// Measured on a 4-core x86_64 container, rustc 1.90.0, release:
+//
+//     S_3   0.01 ms        5 monomials
+//     S_4   0.01 ms       24
+//     S_5   0.96 ms      729
+//     S_6 503.48 ms  190,252
+//
+// S_3..S_5 cost less than a cache round trip in this repository (a local hit
+// measures 3.7-167 us, a Redis hit 250 us-5 ms), so caching them would be a
+// loss. S_6 is the one that pays.
+
+use crate::cryptanalysis::algebra_cache::{self, Layer};
+use base64::Engine;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+/// Bumped when the packing below changes, so old bytes are never decoded by a
+/// reader that would read them differently.
+const ENCODER_TAG: &str = "f2poly-mask-packed-v1";
+
+/// `F2Poly` in a form the shared cache can hold.
+///
+/// The cache encodes with `serde_json`, and S_6 is 190,252 monomials. As a JSON
+/// array of `NVARS`-element arrays that is about 5 MB, past the 4 MB value cap
+/// -- which is fatal by default, so the obvious encoding would stop the run
+/// rather than cache. Packed over live slots it is 1.33 MB, and base64 adds a
+/// third, leaving the stored artifact under the cap with room rather than
+/// against it.
+///
+/// Two properties the encoding has to have:
+///
+/// * **Deterministic.** `terms` is a `HashSet`, whose iteration order varies
+///   between runs. Encoding it unsorted would give one polynomial many
+///   encodings, so each process would write a different artifact for the same
+///   value and the checksum would describe the run rather than the polynomial.
+///   Monomials are sorted before packing.
+/// * **Self-describing.** Only the slots a polynomial actually uses are
+///   stored, behind a mask header -- S_6 lives in 7 of `NVARS` -- so the
+///   encoding adapts to what it is given instead of hard-coding one
+///   polynomial's shape.
+///
+/// Layout: `u16` slot mask, `u32` monomial count, then `count` monomials of
+/// one byte per set bit. The count is not redundant with the mask: a mask of
+/// zero is the zero polynomial *and* the constant 1, and only the count tells
+/// them apart.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CompactF2Poly(pub F2Poly);
+
+impl CompactF2Poly {
+    /// Pack to bytes. Sorted, so one polynomial has exactly one encoding.
+    pub fn pack(&self) -> Vec<u8> {
+        let mut mask: u16 = 0;
+        for t in &self.0.terms {
+            for (i, &e) in t.iter().enumerate() {
+                if e != 0 {
+                    mask |= 1 << i;
+                }
+            }
+        }
+        let live: Vec<usize> = (0..NVARS).filter(|&i| mask & (1 << i) != 0).collect();
+
+        let mut monos: Vec<&Mono> = self.0.terms.iter().collect();
+        monos.sort_unstable();
+
+        let mut out = Vec::with_capacity(6 + monos.len() * live.len());
+        out.extend_from_slice(&mask.to_le_bytes());
+        out.extend_from_slice(&(monos.len() as u32).to_le_bytes());
+        for m in monos {
+            for &i in &live {
+                out.push(m[i]);
+            }
+        }
+        out
+    }
+
+    /// Unpack, refusing anything whose length does not match its own header.
+    pub fn unpack(bytes: &[u8]) -> Option<Self> {
+        if bytes.len() < 6 {
+            return None;
+        }
+        let mask = u16::from_le_bytes([bytes[0], bytes[1]]);
+        let count = u32::from_le_bytes([bytes[2], bytes[3], bytes[4], bytes[5]]) as usize;
+        let live: Vec<usize> = (0..NVARS).filter(|&i| mask & (1 << i) != 0).collect();
+        if bytes.len() != 6 + count.checked_mul(live.len())? {
+            return None;
+        }
+        let mut terms = HashSet::with_capacity(count);
+        for c in 0..count {
+            let mut m: Mono = [0u8; NVARS];
+            for (j, &i) in live.iter().enumerate() {
+                m[i] = bytes[6 + c * live.len() + j];
+            }
+            terms.insert(m);
+        }
+        Some(CompactF2Poly(F2Poly { terms }))
+    }
+}
+
+impl Serialize for CompactF2Poly {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        // base64 rather than a byte array: `serde_json` renders `Vec<u8>` as
+        // one decimal number per byte, which is larger than the packing saved.
+        s.serialize_str(&base64::engine::general_purpose::STANDARD.encode(self.pack()))
+    }
+}
+
+impl<'de> Deserialize<'de> for CompactF2Poly {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let text = String::deserialize(d)?;
+        let bytes = base64::engine::general_purpose::STANDARD
+            .decode(text.as_bytes())
+            .map_err(serde::de::Error::custom)?;
+        CompactF2Poly::unpack(&bytes)
+            .ok_or_else(|| serde::de::Error::custom("F2Poly packing is malformed"))
+    }
+}
+
+/// [`semaev`], shared between processes through the algebra cache.
+///
+/// Keyed on `m` and the encoder tag only, because the polynomial depends on
+/// nothing else -- not the curve, not the factor base. Keying it per curve
+/// would store one identical artifact per curve.
+///
+/// A cache that cannot answer is not an error: this falls back to computing,
+/// like every other path in `algebra_cache`.
+pub fn semaev_cached(m: usize) -> F2Poly {
+    assert!((2..=5).contains(&m), "supported for m in 2..=5");
+    let key = serde_json::to_vec(&("semaev-leading-form", m, ENCODER_TAG))
+        .expect("key inputs are plain data");
+    algebra_cache::memoize(Layer::Preprocessing, &key, || {
+        Some(CompactF2Poly(semaev(m)))
+    })
+    .map(|c| c.0)
+    .unwrap_or_else(|| semaev(m))
+}
+
+#[cfg(test)]
+mod cache_tests {
+    use super::*;
+
+    /// Exactness, at every supported index. A lossy packing would be worse
+    /// than no cache: it would hand back a polynomial that is not S_{m+1}.
+    #[test]
+    fn packing_round_trips_every_supported_index() {
+        for m in 2..=5 {
+            let original = semaev(m);
+            let packed = CompactF2Poly(original.clone()).pack();
+            let back = CompactF2Poly::unpack(&packed).expect("well-formed").0;
+            assert_eq!(back, original, "S_{} did not survive the round trip", m + 1);
+        }
+    }
+
+    /// `terms` is a `HashSet`, so an unsorted encoding would vary run to run:
+    /// one polynomial, many artifacts, and a checksum describing the run
+    /// rather than the value. Build the same polynomial twice and require the
+    /// bytes to agree.
+    #[test]
+    fn the_packing_is_deterministic() {
+        for m in 2..=4 {
+            let first = CompactF2Poly(semaev(m)).pack();
+            let second = CompactF2Poly(semaev(m)).pack();
+            assert_eq!(first, second, "S_{} packed two ways", m + 1);
+        }
+        // And a set built in a different insertion order packs identically.
+        let p = semaev(3);
+        let mut reversed: Vec<Mono> = p.terms.iter().copied().collect();
+        reversed.reverse();
+        let shuffled = F2Poly {
+            terms: reversed.into_iter().collect(),
+        };
+        assert_eq!(
+            CompactF2Poly(p).pack(),
+            CompactF2Poly(shuffled).pack(),
+            "insertion order leaked into the encoding"
+        );
+    }
+
+    /// A mask of zero is both the zero polynomial and the constant 1; only the
+    /// count separates them, which is why the header carries one.
+    #[test]
+    fn zero_and_one_are_distinguishable() {
+        let zero = CompactF2Poly(F2Poly::zero());
+        let one = CompactF2Poly(F2Poly::one());
+        assert_ne!(zero.pack(), one.pack());
+        assert_eq!(CompactF2Poly::unpack(&zero.pack()).unwrap().0, F2Poly::zero());
+        assert_eq!(CompactF2Poly::unpack(&one.pack()).unwrap().0, F2Poly::one());
+    }
+
+    /// Malformed input is refused rather than decoded into a wrong polynomial.
+    #[test]
+    fn a_truncated_packing_is_refused() {
+        let good = CompactF2Poly(semaev(3)).pack();
+        assert!(CompactF2Poly::unpack(&good[..good.len() - 1]).is_none());
+        assert!(CompactF2Poly::unpack(&good[..3]).is_none());
+        assert!(CompactF2Poly::unpack(&[]).is_none());
+    }
+
+    /// The whole reason for the packing: S_6 has to fit under the value cap,
+    /// which is fatal to exceed. Checks the serialized form the cache actually
+    /// stores, not the raw bytes.
+    #[test]
+    fn s6_fits_under_the_cache_value_cap() {
+        const MAX_VALUE: usize = 4 * 1024 * 1024;
+        let encoded = serde_json::to_string(&CompactF2Poly(semaev(5))).unwrap();
+        assert!(
+            encoded.len() < MAX_VALUE,
+            "S_6 encodes to {} bytes, at or past the {MAX_VALUE} byte cap",
+            encoded.len()
+        );
+        // As a plain JSON array of monomials it would not fit -- that is the
+        // comparison the packing exists to win.
+        let naive: usize = semaev(5).terms.len() * (2 + NVARS * 2);
+        assert!(
+            naive > MAX_VALUE,
+            "naive encoding is only {naive} bytes; the packing may no longer be needed"
+        );
+    }
+
+    /// The cached accessor must agree with the function it caches.
+    #[test]
+    fn cached_matches_uncached() {
+        for m in 2..=4 {
+            assert_eq!(semaev_cached(m), semaev(m), "S_{} disagreed", m + 1);
+        }
+    }
+}

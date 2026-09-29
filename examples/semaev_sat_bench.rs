@@ -60,6 +60,7 @@ fn planted_s3(irr: &IrreduciblePoly, x3: &F2mElement) -> F2mElement {
 /// Find an `x_R` that genuinely decomposes over the `l`-dimensional
 /// factor base, by exhaustive search.  Used for the small ladder rungs
 /// the reference corpus does not cover.
+#[allow(dead_code)]
 fn find_decomposable(n: u32, l: u32, irr: &IrreduciblePoly) -> F2mElement {
     let elt = |v: u32| {
         let bits: Vec<u32> = (0..l).filter(|j| (v >> j) & 1 == 1).collect();
@@ -97,8 +98,8 @@ fn fmt(d: Duration) -> String {
 
 fn header() {
     println!(
-        "  {:<15} {:<8} {:>6} {:>8} {:>5} {:>10} {:>10} {:>9}  {}",
-        "params", "parity", "vars", "clauses", "rows", "decisions", "conflicts", "solve", "result"
+        "  {:<15} {:<8} {:>6} {:>8} {:>5} {:>10} {:>10} {:>9}  result",
+        "params", "parity", "vars", "clauses", "rows", "decisions", "conflicts", "solve"
     );
 }
 
