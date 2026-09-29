@@ -162,10 +162,15 @@ impl FieldElement {
     /// exactly `self.inv()`.  Where Euclid finds none — a nonzero multiple
     /// of `p` left unreduced, or a non-unit when `p` is not prime — it
     /// returns `inv`'s value instead, so it is `None` exactly when `inv`
-    /// is and the operations built on it panic nowhere `inv`'s callers
-    /// did not.  The one input on which the two differ is a unit modulo
-    /// a composite `p`: this returns its inverse there, `inv` returns
-    /// `a^(p−2)`, which is not one.
+    /// is.  The one input on which the two differ is a unit modulo a
+    /// composite `p`: this returns its inverse there, `inv` returns
+    /// `a^(p−2)`, which is not one.  On reduced coordinates that changes
+    /// values only, and the operations built on this panic on exactly the
+    /// inputs `inv`'s callers did.  An unreduced coordinate as well (the
+    /// fields are public; no constructor makes one) can move a panic too:
+    /// [`sub`](Self::sub) underflows when it subtracts an unreduced value
+    /// greater than the other operand plus `p`, and that other operand
+    /// may be one of the values that differ.
     pub fn inv_vartime(&self) -> Option<Self> {
         if self.is_zero() {
             return None;

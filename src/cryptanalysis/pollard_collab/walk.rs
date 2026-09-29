@@ -8,11 +8,10 @@
 //! instance.
 
 use num_bigint::BigUint;
-use num_traits::Zero;
 use serde::{Deserialize, Serialize};
 
 use super::job::{hex_of, parse_hex, JobContext};
-use crate::ecc::field::single_word;
+use crate::cryptanalysis::ecdlp_variants::{add_mod, neg_mod};
 use crate::ecc::point::Point;
 
 /// A distinguished point reached by one walker, as shipped in a
@@ -96,30 +95,6 @@ fn needs_flip(pt: &Point, half_p: &BigUint) -> bool {
     }
 }
 
-// The coefficient bookkeeping of a step.  On the one-word values of the
-// curves these walks reach, `num-bigint`'s general multi-limb code costs
-// more than the point addition's own arithmetic, so both helpers work on
-// words when their operands fit one and are the `BigUint` expressions
-// otherwise.
-
-/// `(a + b) mod n`.
-fn add_mod(a: &BigUint, b: &BigUint, n: &BigUint) -> BigUint {
-    match (single_word(a), single_word(b), single_word(n)) {
-        (Some(a), Some(b), Some(n)) => {
-            BigUint::from(((u128::from(a) + u128::from(b)) % u128::from(n)) as u64)
-        }
-        _ => (a + b) % n,
-    }
-}
-
-fn neg_mod(v: &BigUint, n: &BigUint) -> BigUint {
-    match (single_word(v), single_word(n)) {
-        (Some(v), Some(n)) if v <= n => BigUint::from(if v == 0 { 0 } else { n - v }),
-        _ if v.is_zero() => BigUint::zero(),
-        _ => n - v,
-    }
-}
-
 /// One step of the walk.  Pure in `(R, a, b)` except for the 2-cycle
 /// escape under the negation map, which also looks at the previous
 /// point.
@@ -192,6 +167,7 @@ pub fn run_walker(ctx: &JobContext, i: u64) -> WalkerOutcome {
 mod tests {
     use super::super::job::{demo_curve, JobSpec};
     use super::*;
+    use num_traits::Zero;
 
     fn ctx(negation: bool) -> JobContext {
         let curve = demo_curve("demo-mid").unwrap();

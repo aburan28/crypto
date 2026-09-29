@@ -83,7 +83,7 @@ use num_bigint::BigUint;
 use num_traits::{One, Zero};
 
 use crate::ecc::curve::CurveParams;
-use crate::ecc::field::FieldElement;
+use crate::ecc::field::{single_word, FieldElement};
 use crate::ecc::point::Point;
 
 pub mod bsgs;
@@ -335,6 +335,55 @@ pub(crate) fn sub_mod(a: &BigUint, b: &BigUint, n: &BigUint) -> BigUint {
     } else {
         n - (b - a)
     }
+}
+
+// The coefficient bookkeeping and distinguished-point test of a walk
+// step, shared by the Gaudry–Schost walk here and the collaborative rho
+// walk of `pollard_collab`.  On the one-word values of the curves these
+// walks reach, `num-bigint`'s general multi-limb code costs more than the
+// point addition's own arithmetic, so each works on words when its
+// operands fit one and is the `BigUint` expression otherwise.
+
+/// `(a + b) mod n`.
+pub(crate) fn add_mod(a: &BigUint, b: &BigUint, n: &BigUint) -> BigUint {
+    match (single_word(a), single_word(b), single_word(n)) {
+        // Reduced operands, as the walks keep them: their sum is below
+        // `2n`, so one conditional subtraction reduces it, where a
+        // 128-bit remainder is a call into the runtime.
+        (Some(a), Some(b), Some(n)) if a < n && b < n => {
+            let (s, carry) = a.overflowing_add(b);
+            let s = if carry || s >= n {
+                s.wrapping_sub(n)
+            } else {
+                s
+            };
+            BigUint::from(s)
+        }
+        (Some(a), Some(b), Some(n)) => {
+            BigUint::from(((u128::from(a) + u128::from(b)) % u128::from(n)) as u64)
+        }
+        _ => (a + b) % n,
+    }
+}
+
+/// `−u mod n` for `u ≤ n`: `0` for zero, else `n − u`, which is
+/// [`sub_mod`]`(0, u, n)` without its reductions.  (Above `n` it is still
+/// `n − u`, which underflows and panics.)  The walks keep every
+/// coefficient below `n`, so that is every value they pass.
+pub(crate) fn neg_mod(u: &BigUint, n: &BigUint) -> BigUint {
+    match (single_word(u), single_word(n)) {
+        (Some(u), Some(n)) if u <= n => BigUint::from(if u == 0 { 0 } else { n - u }),
+        _ if u.is_zero() => BigUint::zero(),
+        _ => n - u,
+    }
+}
+
+/// `x & mask = 0`, tested word by word without building the
+/// conjunction: the distinguished-point test on an x-coordinate.
+pub(crate) fn masked_is_zero(x: &BigUint, mask: &BigUint) -> bool {
+    x.iter_u64_digits()
+        .zip(mask.iter_u64_digits())
+        .all(|(x, m)| x & m == 0)
 }
 
 /// `⌈√n⌉`.

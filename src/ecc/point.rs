@@ -81,9 +81,10 @@ impl Point {
     /// `P + (−P)` cases, so over a prime `p` the result is exactly
     /// `self.add(other, a)`.  (On a modulus that is not prime, where
     /// neither computes a group law, the point can differ as
-    /// [`FieldElement::inv_vartime`] says, but neither call panics where
-    /// the other does not.)  What differs is how the field arithmetic
-    /// runs, and its running time now depends on the coordinates:
+    /// [`FieldElement::inv_vartime`] says; on reduced coordinates the
+    /// two calls panic on the same inputs, with the same message.)  What
+    /// differs is how the field arithmetic runs, and its running time now
+    /// depends on the coordinates:
     ///
     /// - the slope's inversion is [`FieldElement::inv_vartime`], a
     ///   Euclidean inversion, instead of the constant-time Fermat ladder
@@ -195,12 +196,14 @@ impl Point {
     /// The running multiple `k·self` is kept in Jacobian coordinates and
     /// compared with the affine `target = (x, y)` by cross-multiplying,
     /// `X = x·Z²` and `Y = y·Z³`, so a step costs a mixed addition and
-    /// four multiplications and never an inversion.  The multiples, the
-    /// identity among them, and so the `k` returned are exactly those of
-    /// stepping `current = current.add(self, a)` and testing
-    /// `current == *target`.  On word arithmetic when `p` fits a word, on
-    /// the [`BigUint`] Jacobian points of [`scalar_mul`](Self::scalar_mul)
-    /// otherwise.
+    /// four multiplications and never an inversion.  Over a prime `p`,
+    /// where a finite point's `Z` is a unit, the multiples, the identity
+    /// among them, and so the `k` returned are exactly those of stepping
+    /// `current = current.add(self, a)` and testing `current == *target`.
+    /// (On another modulus a `Z` can be a zero divisor and `add`'s
+    /// `a^(p−2)` need not be an inverse, so the `k` can differ.)  On word
+    /// arithmetic when `p` fits a word, on the [`BigUint`] Jacobian
+    /// points of [`scalar_mul`](Self::scalar_mul) otherwise.
     pub fn linear_dlog_vartime(&self, target: &Point, bound: u64, a: &FieldElement) -> Option<u64> {
         let (gx, gy) = match self {
             // Every multiple of O is O.
@@ -564,26 +567,27 @@ impl Word {
     }
 
     /// `a⁻¹`, as [`FieldElement::inv_vartime`] computes it: Euclid, and
-    /// [`non_unit_inv`](Self::non_unit_inv) where Euclid finds no inverse.
-    fn inv(self, a: u64) -> u64 {
+    /// [`non_unit_inv`](Self::non_unit_inv) where Euclid finds no inverse;
+    /// `None` for zero, as there.  The callers unwrap it where
+    /// [`Point::add`], [`Point::double`] and [`Jacobian`]'s `to_affine`
+    /// unwrap [`FieldElement::inv`], so an input they panic on panics
+    /// here too, with the same message.
+    fn inv(self, a: u64) -> Option<u64> {
         match inv_mod_u64(a, self.p) {
-            Some(i) => i,
+            Some(i) => Some(i),
             None => self.non_unit_inv(a),
         }
     }
 
     /// [`FieldElement::inv`]'s value `a^(p−2)` for an `a` with no inverse,
     /// which for nonzero `a` means a non-unit modulo a `p` that is not
-    /// prime.  Zero has no value to take and panics, as `inv`'s `None`
-    /// does at the `unwrap` in [`Point::add`] and [`Point::double`]; their
-    /// callers rule it out the same way these do.  Out of line and cold:
-    /// over a prime no walk reaches it, and it would otherwise weigh on
-    /// the inlining of every formula that inverts.
+    /// prime, and `None` for zero.  Out of line and cold: over a prime no
+    /// walk reaches it, and it would otherwise weigh on the inlining of
+    /// every formula that inverts.
     #[cold]
     #[inline(never)]
-    fn non_unit_inv(self, a: u64) -> u64 {
-        assert!(a != 0, "inverse of zero");
-        self.pow(a, self.p - 2)
+    fn non_unit_inv(self, a: u64) -> Option<u64> {
+        (a != 0).then(|| self.pow(a, self.p - 2))
     }
 
     /// `a^e`, square and multiply; only for
@@ -612,7 +616,7 @@ impl Word {
                 None
             };
         }
-        let lambda = self.mul(self.sub(y2, y1), self.inv(self.sub(x2, x1)));
+        let lambda = self.mul(self.sub(y2, y1), self.inv(self.sub(x2, x1)).unwrap());
         Some(self.chord(lambda, x1, x2, y1))
     }
 
@@ -622,7 +626,7 @@ impl Word {
         }
         let xx = self.mul(x, x);
         let numerator = self.add(self.add(self.add(xx, xx), xx), a);
-        let lambda = self.mul(numerator, self.inv(self.add(y, y)));
+        let lambda = self.mul(numerator, self.inv(self.add(y, y)).unwrap());
         Some(self.chord(lambda, x, x, y))
     }
 
@@ -722,7 +726,7 @@ impl Word {
     }
 
     fn jacobian_to_affine(self, j: WordJacobian) -> (u64, u64) {
-        let zi = self.inv(j.z);
+        let zi = self.inv(j.z).expect("a Jacobian point has Z != 0");
         let zi2 = self.mul(zi, zi);
         (self.mul(j.x, zi2), self.mul(j.y, self.mul(zi2, zi)))
     }
@@ -1276,6 +1280,79 @@ mod vartime_differential {
                 "{n}"
             );
         }
+    }
+
+    /// The message `f` panics with, or `None` if it returns.  (The test
+    /// harness captures what the panic hook prints.)
+    fn panic_message<T>(f: impl FnOnce() -> T) -> Option<String> {
+        let err = std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).err()?;
+        Some(match err.downcast::<String>() {
+            Ok(s) => *s,
+            Err(err) => err
+                .downcast_ref::<&str>()
+                .map_or_else(String::new, |s| s.to_string()),
+        })
+    }
+
+    /// On reduced coordinates modulo a composite, where the points can
+    /// differ, the vartime operations panic on exactly the inputs the
+    /// constant-time ones do, with the same message: a tangent whose `2y`
+    /// is zero modulo an even `p` (2 · 1009), a ladder whose final `Z` is
+    /// zero modulo 101 · 103 (the `Z ≡ 0` a malformed pollard_collab job
+    /// can reach), and random operands on small composites.
+    #[test]
+    fn composite_modulus_panics_match_constant_time() {
+        let n = BigUint::from(2 * 1009u32);
+        let a = fe(BigUint::from(2u32), &n);
+        let p = Point::Affine {
+            x: fe(BigUint::from(5u32), &n),
+            y: fe(BigUint::from(1009u32), &n),
+        };
+        let msg = panic_message(|| p.double(&a));
+        assert!(msg.is_some());
+        assert_eq!(panic_message(|| p.double_vartime(&a)), msg);
+
+        let n = BigUint::from(101 * 103u32);
+        let a = fe(BigUint::from(3584u32), &n);
+        let g = Point::Affine {
+            x: fe(BigUint::from(7530u32), &n),
+            y: fe(BigUint::from(4748u32), &n),
+        };
+        let k = BigUint::from(48u32);
+        let msg = panic_message(|| g.scalar_mul(&k, &a));
+        assert_eq!(msg.as_deref(), Some("a Jacobian point has Z != 0"));
+        assert_eq!(panic_message(|| g.scalar_mul_vartime(&k, &a)), msg);
+
+        let mut rng = StdRng::seed_from_u64(0x7e57_0004);
+        let mut panics = 0;
+        for n in [15u32, 21, 91, 2 * 1009, 101 * 103] {
+            let n = BigUint::from(n);
+            for _ in 0..400 {
+                let a = fe(coord(&mut rng, &n), &n);
+                let p1 = random_point(&mut rng, &n);
+                let p2 = partner(&mut rng, &n, &p1);
+                let k = BigUint::from(rng.gen_range(0u32..300));
+                let runs = [
+                    (
+                        panic_message(|| p1.add(&p2, &a)),
+                        panic_message(|| p1.add_vartime(&p2, &a)),
+                    ),
+                    (
+                        panic_message(|| p1.double(&a)),
+                        panic_message(|| p1.double_vartime(&a)),
+                    ),
+                    (
+                        panic_message(|| p1.scalar_mul(&k, &a)),
+                        panic_message(|| p1.scalar_mul_vartime(&k, &a)),
+                    ),
+                ];
+                for (s, t) in runs {
+                    panics += usize::from(s.is_some());
+                    assert_eq!(s, t, "n={n} a={a:?} {p1:?} {p2:?} k={k}");
+                }
+            }
+        }
+        assert!(panics > 0, "no case reached a panic");
     }
 
     /// The search `linear_dlog_vartime` replaced.

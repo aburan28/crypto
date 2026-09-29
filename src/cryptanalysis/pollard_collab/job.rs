@@ -26,6 +26,7 @@ use num_bigint::BigUint;
 use num_traits::{One, Zero};
 use serde::{Deserialize, Serialize};
 
+use crate::cryptanalysis::ecdlp_variants::masked_is_zero;
 use crate::ecc::curve::CurveParams;
 use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
@@ -206,6 +207,15 @@ pub struct JobContext {
 }
 
 impl JobContext {
+    /// Validate `spec` and expand it into the curve context, the branch
+    /// table and the DP mask.
+    ///
+    /// The field modulus `p` is taken to be prime, as [`FieldElement`]
+    /// requires, and is not tested.  Over a composite `p` there is no
+    /// group law: the table and the walks then follow
+    /// [`FieldElement::inv_vartime`]'s Euclidean inverses, and differ from
+    /// what [`FieldElement::inv`]'s `a^(p−2)`, not an inverse there, would
+    /// give.
     pub fn new(spec: JobSpec) -> Result<Self, String> {
         if spec.version != PROTOCOL_VERSION {
             return Err(format!(
@@ -331,13 +341,7 @@ impl JobContext {
     /// Distinguished-point predicate: low `dp_bits` of `x` are zero.
     pub fn is_dp(&self, pt: &Point) -> bool {
         match pt {
-            // `x & dp_mask = 0`, word by word, without building the
-            // conjunction.
-            Point::Affine { x, .. } => x
-                .value
-                .iter_u64_digits()
-                .zip(self.dp_mask.iter_u64_digits())
-                .all(|(x, m)| x & m == 0),
+            Point::Affine { x, .. } => masked_is_zero(&x.value, &self.dp_mask),
             Point::Infinity => false,
         }
     }

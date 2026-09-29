@@ -47,8 +47,7 @@ use num_traits::Zero;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
-use super::{key, sub_mod, xkey, DlpSolution, EcGroup};
-use crate::ecc::field::single_word;
+use super::{add_mod, key, masked_is_zero, neg_mod, sub_mod, xkey, DlpSolution, EcGroup};
 use crate::ecc::point::Point;
 use crate::utils::mod_inverse;
 
@@ -131,11 +130,7 @@ fn branch(p: &Point, r: usize) -> usize {
 /// conjunction.
 fn is_dp(p: &Point, dp_mask: &BigUint) -> bool {
     match p {
-        Point::Affine { x, .. } => x
-            .value
-            .iter_u64_digits()
-            .zip(dp_mask.iter_u64_digits())
-            .all(|(x, m)| x & m == 0),
+        Point::Affine { x, .. } => masked_is_zero(&x.value, dp_mask),
         Point::Infinity => false,
     }
 }
@@ -146,33 +141,6 @@ fn needs_flip(p: &Point, half_p: &BigUint) -> bool {
     match p {
         Point::Affine { y, .. } => y.value > *half_p,
         Point::Infinity => false,
-    }
-}
-
-// The coefficient bookkeeping of a step.  On the one-word values of the
-// curves these walks reach, `num-bigint`'s general multi-limb code costs
-// more than the point addition's own arithmetic, so both helpers work on
-// words when their operands fit one and are the `BigUint` expressions
-// otherwise.
-
-/// `(u + s) mod n`.
-fn add_mod(u: &BigUint, s: &BigUint, n: &BigUint) -> BigUint {
-    match (single_word(u), single_word(s), single_word(n)) {
-        (Some(u), Some(s), Some(n)) => {
-            BigUint::from(((u128::from(u) + u128::from(s)) % u128::from(n)) as u64)
-        }
-        _ => (u + s) % n,
-    }
-}
-
-/// `−u mod n` for `u ≤ n`: `sub_mod(0, u, n)` without its reductions.
-/// The walk keeps every coefficient below `n` (the one start at `v = 1`
-/// meets `n` only when `n = 1`), so that is every value it passes.
-fn neg_mod(u: &BigUint, n: &BigUint) -> BigUint {
-    match (single_word(u), single_word(n)) {
-        (Some(u), Some(n)) if u <= n => BigUint::from(if u == 0 { 0 } else { n - u }),
-        _ if u.is_zero() => BigUint::zero(),
-        _ => n - u,
     }
 }
 
@@ -312,6 +280,8 @@ fn gaudry_schost_core(
                 BigUint::from(1u32),
             )
         };
+        // `neg_mod` wants its argument at most `n`: `u < n`, and the wild
+        // start's `v = 1` meets `n` only when `n = 1`.
         if negate && needs_flip(&p, group.half_field_prime()) {
             p = group.neg(&p);
             u = neg_mod(&u, n);
