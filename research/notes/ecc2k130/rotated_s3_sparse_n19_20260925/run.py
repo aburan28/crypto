@@ -181,6 +181,10 @@ def run(out: Path, release_gate: Path):
             and gate["pr"] == frozen["release_pr_number"]
             and gate["head_sha"] == head
             and gate["repository"] == "aburan28/crypto"
+            and os.environ.get("GITHUB_REPOSITORY") == gate["repository"]
+            and os.environ.get("GITHUB_EVENT_NAME") == "pull_request"
+            and os.environ.get("GITHUB_RUN_ID") == str(gate["run_id"])
+            and os.environ.get("GITHUB_RUN_ATTEMPT") == "1"
             and gate["run_attempt"] == 1
             and isinstance(gate["run_id"], int) and gate["run_id"] > 0
             and isinstance(gate["label_event_id"], int) and gate["label_event_id"] > 0
