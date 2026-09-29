@@ -37,7 +37,7 @@ def sha_bytes(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def preflight(panel):
+def preflight(panel, *, require_local_solver=True):
     require(digest(PANEL) == PANEL_SHA256, 'registered SAT control panel changed')
     require(panel['schema_version'] == 1
             and panel['status'] == 'REGISTERED_BEFORE_EXECUTION'
@@ -58,9 +58,12 @@ def preflight(panel):
     require(digest(SCRIPTS/'process_meter.py') == panel['process_meter_sha256']
             and digest(SCRIPTS/'run_koblitz_pdp_matrix.py') == panel['cms_parser_sha256'],
             'meter or SAT model parser changed')
-    cms = Path(panel['cms_path'])
-    require(cms.is_file() and digest(cms) == panel['cms_executable_sha256'],
-            'external SAT executable changed')
+    # Execution requires the registered local binary. Portable evidence replay
+    # instead verifies its sealed archived bytes (and can run on Linux CI).
+    if require_local_solver:
+        cms = Path(panel['cms_path'])
+        require(cms.is_file() and digest(cms) == panel['cms_executable_sha256'],
+                'external SAT executable changed')
     exact_panel = read(EXACT_PANEL)
     require(digest(EXACT_PANEL.parent/'RESULT.json') == panel['parent_exact_result_sha256']
             and digest(HERE/panel['parent_recovery_archive_file'])

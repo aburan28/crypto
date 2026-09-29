@@ -11,7 +11,7 @@ class CmsS4ControlsTests(unittest.TestCase):
     def test_frozen_source_binary_and_disclosed_points(self):
         self.assertEqual(sha_bytes(PANEL.read_bytes()), PANEL_SHA256)
         panel = read(PANEL)
-        _, curve, base = preflight(panel)
+        _, curve, base = preflight(panel, require_local_solver=False)
         self.assertEqual(len(base), 65)
         self.assertEqual([p['trial'] for p in panel['schedule']], [0, 1, 3, 10])
         self.assertEqual([p['exact_relation_exists'] for p in panel['schedule']],
@@ -19,7 +19,7 @@ class CmsS4ControlsTests(unittest.TestCase):
         self.assertEqual(panel['cms_max_models_per_query'], 1)
 
     def test_coordinate_decoder_requires_a_group_witness(self):
-        _, curve, base = preflight(read(PANEL))
+        _, curve, base = preflight(read(PANEL), require_local_solver=False)
         positive = [base[i] for i in (4, 22, 45)]
         xs = [point[0] for point in positive]
         model = [bool(x >> j & 1) for x in xs for j in range(6)]

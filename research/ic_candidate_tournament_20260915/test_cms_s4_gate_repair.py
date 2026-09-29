@@ -13,7 +13,7 @@ from tournament import read
 class CmsS4GateRepairTests(unittest.TestCase):
     def test_sealed_exports_and_no_original_sat_dispatch(self):
         panel = read(PANEL)
-        _, curve, base = preflight(panel)
+        _, curve, base = preflight(panel, require_local_solver=False)
         self.assertEqual(sha_bytes(
             (PANEL.parent/'stage-a-evidence.tar.gz').read_bytes()), STAGE_A_SHA256)
         files = stage_a_files()

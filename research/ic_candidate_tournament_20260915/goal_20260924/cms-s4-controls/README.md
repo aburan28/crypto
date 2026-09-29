@@ -1,9 +1,9 @@
 # Registered wide-S4 external-SAT correctness controls
 
-Status: **all four exporters ran; no SAT job dispatched yet**. The original
-manifest-key error and exact [gate repair](GATE-REPAIR.md) preserve the
-[stage-A raw bundle](stage-a-evidence.tar.gz). The continuation runner has
-been versioned before starting any of the four already registered SAT jobs.
+Status: **closed with four solver-loader errors and no SAT verdict**. See the
+[results](RESULTS.md), original [stage-A raw bundle](stage-a-evidence.tar.gz),
+and continuation [stage-B raw bundle](stage-b-evidence.tar.gz). The original
+manifest-key error and exact [gate repair](GATE-REPAIR.md) remain visible.
 The [protocol](PROTOCOL.md) and [panel](panel.json) freeze four disclosed
 n19a0 queries: two exact-negative and two exact-positive, selected from the
 [exact-yield audit](../generic-exact-yield-audit/RESULTS.md). The pilot tests
