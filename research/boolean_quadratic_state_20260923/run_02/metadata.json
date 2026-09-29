@@ -1,0 +1,27 @@
+{
+  "campaign_seconds": 279.0749298340015,
+  "complete": true,
+  "ended_utc": "2026-09-23T11:27:43.131783+00:00",
+  "git_base": "0527f5dfdd8627fab75fce221fbb16adbf8828a8",
+  "git_status": "?? ../../.github/workflows/boolean-quadratic-state.yml\n?? ./\n",
+  "host": {
+    "cpus": 14,
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "system": "Darwin"
+  },
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "schema_version": 1,
+  "scope": "Complete standalone generic Boolean solves on generated public systems. No curve inputs, imported targets, scalar/key recovery, production solver changes, index-calculus or rho campaigns. This driver is not the repository inherited-F4 solver.",
+  "source_hashes": {
+    "analyze.py": "d6bae37806a17eaae9a81b75867c8e1496a644dbd98cf58a8c36ba553f8a856e",
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "protocol.json": "c47996c152217b86e75712cfc3a904d0802aa13ced6922a54e45e41eac07e264",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "run.py": "3057660764ca7ca281dc9b43ca3fa3bdcb90d989dbab78e9a19b1a44f23a7853",
+    "worker.rs": "46d9dc6adfecc655784234a045e08126787291546d27178ffe5fefa40652fd2d"
+  },
+  "started_utc": "2026-09-23T11:23:02.035832+00:00",
+  "test_executable_sha256": "5d0b6f4c89ddfb265cd698711c589a641d52d612ff0ac8ebd74f3e13383eb4a2",
+  "worker_sha256": "0d2d7b5198eb166de97ea9d06465dc95693460d3fcd0cb243fc8ca704c7cdecc"
+}

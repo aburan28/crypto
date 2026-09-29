@@ -1,85 +1,47 @@
 {
   "all_seven_gates_passed": false,
-  "claim_boundary": "finite same-target n59 cached witnessed-build improvement with exact time and 10 GB peak charge; full cost remains far behind rho and is not a SOTA",
-  "current_n59_cached_witnessed": {
-    "claim_boundary": "Finite same-target witnessed-table construction optimization. Caching first-pass packed keys removes the second quadratic group-addition pass and lowers full default and one-worker time while raising construction peak memory to about 10 GB. Full IC remains far behind rho. No SOTA or asymptotic claim.",
-    "comparison_to_ell14_compact": {
+  "claim_boundary": "finite same-target n59 ell14-to-ell15 improvement with fully charged time and memory; full cost remains far behind rho, so this is not a SOTA",
+  "current_n59_cofactor_projected_ell15": {
+    "claim_boundary": "Finite same-target ell=14 to ell=15 optimization. The wider public cofactor-projected algebraic base reduces default-thread wall, total core-seconds and one-worker wall, but costs about 4.1-4.4 GB peak RSS and remains far slower than automorphism rho. No SOTA or asymptotic claim.",
+    "comparison_to_ell14": {
       "default_thread": {
-        "ic_wall_reduction_fraction": 0.42505727563062434,
-        "new_ic_over_rho": 140.15319645563986,
+        "ic_wall_reduction_fraction": 0.04807938077259866,
+        "new_ic_over_rho": 229.7102352131501,
         "old_ic_over_rho": 239.82440937484375,
-        "rss_multiple": 11.251395523344131,
-        "whole_cpu_reduction_fraction": 0.4420812924728833
+        "probe_reduction_fraction": 0.5094339622641509,
+        "rss_multiple": 4.887955489668552,
+        "summand_scan_reduction_fraction": 0.5094339622641509,
+        "whole_cpu_reduction_fraction": 0.13889521906413715
       },
       "one_worker": {
-        "ic_wall_reduction_fraction": 0.4681441377510238,
-        "new_ic_over_rho": 1158.500608390188,
+        "ic_wall_reduction_fraction": 0.1723295618449412,
+        "new_ic_over_rho": 1811.8151190858175,
         "old_ic_over_rho": 2232.8437982897694,
-        "rss_multiple": 11.804532414271137,
-        "whole_cpu_reduction_fraction": 0.4662596971783335
-      }
-    },
-    "comparison_to_ell15_compact": {
-      "default_thread": {
-        "collection_wall_reduction_fraction": 0.35323507264598064,
-        "ic_wall_reduction_fraction": 0.32160762755157224,
-        "new_ic_over_rho": 152.61509018640461,
-        "old_ic_over_rho": 229.7102352131501,
-        "online_descent_reduction_fraction": 0.6733232735094873,
-        "relation_unit_wall_reduction_fraction": 0.45812810182201236,
-        "rss_multiple": 1.5004511875030422,
-        "whole_cpu_reduction_fraction": 0.2861793805105016
-      },
-      "one_worker": {
-        "collection_wall_reduction_fraction": 0.2887542483455311,
-        "ic_wall_reduction_fraction": 0.2823348403943554,
-        "new_ic_over_rho": 1329.574639938143,
-        "old_ic_over_rho": 1811.8151190858175,
-        "online_descent_reduction_fraction": 0.690819735771085,
-        "relation_unit_wall_reduction_fraction": 0.3746936613723483,
-        "rss_multiple": 1.5316741173543504,
-        "whole_cpu_reduction_fraction": 0.27987200898999
+        "probe_reduction_fraction": 0.5094339622641509,
+        "rss_multiple": 4.798005275622389,
+        "summand_scan_reduction_fraction": 0.5094339622641509,
+        "whole_cpu_reduction_fraction": 0.16012944249953576
       }
     },
     "comparison_to_rho": {
       "default_thread_full_crossover": false,
-      "default_thread_full_ic_over_rho_wall": 140.15319645563986,
-      "default_thread_online_rho_over_descent": 219.1755525601046,
+      "default_thread_full_ic_over_rho_wall": 229.7102352131501,
+      "default_thread_online_rho_over_descent": 70.66506668378977,
       "one_worker_full_crossover": false,
-      "one_worker_full_ic_over_rho_wall": 1158.500608390188,
-      "one_worker_online_rho_over_descent": 217.9303057001029,
+      "one_worker_full_ic_over_rho_wall": 1811.8151190858175,
+      "one_worker_online_rho_over_descent": 69.7822825120531,
       "online_descent_crossover_after_precompute": true
-    },
-    "comparison_to_stage134_two_pass": {
-      "default_thread": {
-        "build_cpu_reduction_fraction": 0.40060190653672745,
-        "build_wall_reduction_fraction": 0.45241378372257757,
-        "ic_wall_reduction_fraction": 0.1096866362240908,
-        "new_ic_over_rho": 140.15319645563986,
-        "old_ic_over_rho": 152.61509018640461,
-        "rss_multiple": 1.5341127442417588,
-        "whole_cpu_reduction_fraction": 0.09233448705738923
-      },
-      "one_worker": {
-        "build_cpu_reduction_fraction": 0.4768022859641148,
-        "build_wall_reduction_fraction": 0.4858244802007774,
-        "ic_wall_reduction_fraction": 0.10460504393786463,
-        "new_ic_over_rho": 1158.500608390188,
-        "old_ic_over_rho": 1329.574639938143,
-        "rss_multiple": 1.6062816361178356,
-        "whole_cpu_reduction_fraction": 0.1175137472428951
-      }
     },
     "date": "2026-09-21",
     "default_thread": {
-      "binary_blake3": "91d5881ef8aaa82b6b02dd17f958b8cc81b3945a72c1d5b68c80c8f160035523",
+      "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16",
       "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
-      "ic_over_rho_wall_ratio": 140.15319645563986,
-      "ic_wall_seconds": 76.342292915,
+      "ic_over_rho_wall_ratio": 229.7102352131501,
+      "ic_wall_seconds": 126.398334416,
       "linear_algebra": {
         "attempts": 1,
         "mode": "sparse",
-        "seconds": 0.637785291,
+        "seconds": 0.654715792,
         "sparse": {
           "attempts": 1,
           "core_dimension": 1640,
@@ -111,41 +73,41 @@
         }
       },
       "mode": "default_threads",
-      "online_descent_seconds": 0.00248525,
-      "online_rho_over_descent_ratio": 219.1755525601046,
+      "online_descent_seconds": 0.00778675,
+      "online_rho_over_descent_ratio": 70.66506668378977,
       "pair_table_build": {
-        "cpu_seconds": 137.237669,
-        "wall_seconds": 11.712772791
+        "cpu_seconds": 224.336631,
+        "wall_seconds": 19.682786541
       },
-      "peak_rss_bytes": 10072309760,
+      "peak_rss_bytes": 4375724032,
       "recovered_scalar": 17861472351607,
       "relation_units": {
-        "cpu_seconds": 607.885612,
-        "wall_seconds": 50.677377625000005
+        "cpu_seconds": 940.8840299999999,
+        "wall_seconds": 92.207092752
       },
       "relations": 54749,
       "rho_iterations": 518669,
-      "rho_wall_seconds": 0.544706042,
+      "rho_wall_seconds": 0.550251208,
       "stages": {
         "baseline": {
-          "cpu_seconds": 0.5451649999998835,
-          "wall_seconds": 0.545161209
+          "cpu_seconds": 0.5505450000000565,
+          "wall_seconds": 0.550700708
         },
         "collect": {
-          "cpu_seconds": 747.6172310000001,
-          "wall_seconds": 65.151280875
+          "cpu_seconds": 1167.7268430000001,
+          "wall_seconds": 114.69366475
         },
         "logs": {
-          "cpu_seconds": 22.757929000000104,
-          "wall_seconds": 10.568563458
+          "cpu_seconds": 23.344400000000178,
+          "wall_seconds": 11.060544958
         },
         "select": {
-          "cpu_seconds": 3.3062240000000003,
-          "wall_seconds": 0.644183166
+          "cpu_seconds": 3.340095,
+          "wall_seconds": 0.651045084
         },
         "solve": {
-          "cpu_seconds": 0.010027999999920212,
-          "wall_seconds": 0.020203459
+          "cpu_seconds": 0.015393000000130996,
+          "wall_seconds": 0.028557958
         }
       },
       "summands_scanned": 2662400000,
@@ -160,20 +122,33 @@
       "trials": 2600000,
       "units": 26,
       "units_extended": 0,
-      "verification_seconds": 7.625883458,
+      "verification_seconds": 8.119980708,
       "verified": true,
-      "whole_cpu_seconds": 774.2413419999999,
-      "whole_wall_seconds": 76.93405775
+      "whole_cpu_seconds": 1194.9821940000002,
+      "whole_wall_seconds": 126.989469666
     },
     "factor_base": {
+      "construction": "public [h] image of every point in the standard polynomial subspace; identity removal and point-identity deduplication only",
       "factor_base_logs_known_by_construction": false,
+      "folded_table_forbidden": true,
       "kind": "cofactor_projected",
+      "pair_entries": 542340645,
+      "pair_table_tier": "compact",
       "parent": {
         "ell": 15,
         "kind": "standard_subspace"
       },
       "points": 32934,
       "projected_columns": 16344,
+      "projected_predicate_cost": {
+        "canonical_frobenius_coordinate_squarings": 3857184,
+        "cofactor_multiplications": 16467,
+        "derived_frobenius_coordinate_squarings": 0,
+        "derived_negations": 16467,
+        "input_points": 32934,
+        "input_signed_orbits": 16467,
+        "output_columns": 16344
+      },
       "scalar_preimages_retained": false,
       "signed_negation_orbits": 16467,
       "target_subgroup_enumerated": false
@@ -190,20 +165,19 @@
       "collection_window": 1024,
       "curve": "K_1 over GF(2^59)",
       "descent_m": 2,
-      "ell": 15,
       "public_target_seed": 59001,
       "subgroup_order": 25179555920633,
       "target_scalar_constructed_or_supplied": false
     },
     "one_worker": {
-      "binary_blake3": "91d5881ef8aaa82b6b02dd17f958b8cc81b3945a72c1d5b68c80c8f160035523",
+      "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16",
       "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
-      "ic_over_rho_wall_ratio": 1158.500608390188,
-      "ic_wall_seconds": 648.7803248340001,
+      "ic_over_rho_wall_ratio": 1811.8151190858175,
+      "ic_wall_seconds": 1009.6274833770001,
       "linear_algebra": {
         "attempts": 1,
         "mode": "sparse",
-        "seconds": 0.644403917,
+        "seconds": 0.651717375,
         "sparse": {
           "attempts": 1,
           "core_dimension": 1640,
@@ -235,41 +209,41 @@
         }
       },
       "mode": "one_worker",
-      "online_descent_seconds": 0.002569708,
-      "online_rho_over_descent_ratio": 217.9303057001029,
+      "online_descent_seconds": 0.0079855,
+      "online_rho_over_descent_ratio": 69.7822825120531,
       "pair_table_build": {
-        "cpu_seconds": 101.63323199999999,
-        "wall_seconds": 101.933056666
+        "cpu_seconds": 183.040625,
+        "wall_seconds": 183.204325166
       },
-      "peak_rss_bytes": 10044899328,
+      "peak_rss_bytes": 4082794496,
       "recovered_scalar": 17861472351607,
       "relation_units": {
-        "cpu_seconds": 507.2064439999999,
-        "wall_seconds": 520.1066009980002
+        "cpu_seconds": 790.145741,
+        "wall_seconds": 799.592828458
       },
       "relations": 54749,
       "rho_iterations": 518669,
-      "rho_wall_seconds": 0.56001725,
+      "rho_wall_seconds": 0.557246417,
       "stages": {
         "baseline": {
-          "cpu_seconds": 0.5599459999999681,
-          "wall_seconds": 0.560470917
+          "cpu_seconds": 0.5571770000000242,
+          "wall_seconds": 0.557695166
         },
         "collect": {
-          "cpu_seconds": 611.364111,
-          "wall_seconds": 625.069023292
+          "cpu_seconds": 975.674814,
+          "wall_seconds": 985.654981292
         },
         "logs": {
-          "cpu_seconds": 20.83749499999999,
-          "wall_seconds": 20.878702709
+          "cpu_seconds": 21.11382500000002,
+          "wall_seconds": 21.145754917
         },
         "select": {
-          "cpu_seconds": 2.838947,
-          "wall_seconds": 2.857176417
+          "cpu_seconds": 2.815069,
+          "wall_seconds": 2.8383969589999998
         },
         "solve": {
-          "cpu_seconds": 0.010200000000054388,
-          "wall_seconds": 0.026277792
+          "cpu_seconds": 0.015135999999870364,
+          "wall_seconds": 0.028539208
         }
       },
       "summands_scanned": 2662400000,
@@ -284,51 +258,55 @@
       "trials": 2600000,
       "units": 26,
       "units_extended": 0,
-      "verification_seconds": 17.903506916,
+      "verification_seconds": 18.150847541,
       "verified": true,
-      "whole_cpu_seconds": 635.6179970000001,
-      "whole_wall_seconds": 649.396030334
+      "whole_cpu_seconds": 1000.180872,
+      "whole_wall_seconds": 1010.230950916
     },
-    "operation": "koblitz_n59_witness_key_cache_optimization",
-    "pair_table": {
-      "builder": "cached_first_pass_packed_keys",
-      "byte_ceiling": 8589934592,
-      "cached_key_bytes_per_pair": 8,
-      "cached_key_entries": 542340645,
-      "deterministic_choice": "all exact candidates are sorted and deduplicated before the first witness is consumed",
-      "estimated_table_bytes": 4878330938,
-      "exact_candidate_check": "stored pair sum is recomputed in the fast group before return",
-      "pair_entries": 542340645,
-      "rest_bytes_per_pair": 4,
-      "temporary_cache_bytes": 4338725160,
-      "tier": "witnessed_compact",
-      "witness_bytes_per_pair": 4,
-      "witness_encoding": "two unsigned 16-bit point indices packed into one u32"
-    },
+    "operation": "koblitz_n59_cofactor_projected_width_optimization",
     "params": {
-      "path": "docs/ic/params/k1n59-cofactor-projected-l15-witness-cached-full-public-59001.json",
-      "sha256": "d40bbe0e7bf81dcf99ee4af27b332d3c5fbf24e8fc5c838756348e7c1b4a1ec7"
+      "path": "docs/ic/params/k1n59-cofactor-projected-l15-full-public-59001.json",
+      "sha256": "027b614912a6668b09d0f67382422d405dbe66c1541d46a2bd4655b0899628b3"
     },
-    "predecessor": {
-      "path": "docs/ic/runs/koblitz-n59-witnessed-compact-optimization-20260921.json",
-      "sha256": "96f616e3b34dacb322bcb05ccd4d7bdcb53a5045dd1496c9a34e23f49ec40d93"
-    },
-    "predecessors": {
-      "ell14_compact": {
-        "path": "docs/ic/runs/koblitz-n59-cofactor-projected-complete-20260921.json",
-        "sha256": "fbb78df18b65f852d40acd177e3b44f618082fa69481fab02e2b8dda1ce3fc5f"
+    "pilots": [
+      {
+        "mode": "default_threads",
+        "pair_table_build_core_seconds": 222.79336999999998,
+        "pair_table_build_wall_seconds": 18.904693083,
+        "peak_rss_bytes": 4372676608,
+        "relation_unit_core_seconds": 36.50245799999999,
+        "relation_unit_wall_seconds": 3.039272334,
+        "relations": 2157,
+        "summands_scanned": 102400000,
+        "total_core_seconds": 265.100201,
+        "trials": 100000,
+        "wall_seconds": 25.080593833000002
       },
-      "ell15_compact": {
-        "path": "docs/ic/runs/koblitz-n59-cofactor-projected-l15-optimization-20260921.json",
-        "sha256": "71ef16b1b78f7fae48e85b778f28a83487782acde8579f88eb8626b9c1e018da"
+      {
+        "mode": "one_worker",
+        "pair_table_build_core_seconds": 186.01389600000002,
+        "pair_table_build_wall_seconds": 186.238502583,
+        "peak_rss_bytes": 4083580928,
+        "relation_unit_core_seconds": 30.013892,
+        "relation_unit_wall_seconds": 30.041034542,
+        "relations": 2157,
+        "summands_scanned": 102400000,
+        "total_core_seconds": 221.398448,
+        "trials": 100000,
+        "wall_seconds": 221.684955541
       }
+    ],
+    "predecessor": {
+      "ell": 14,
+      "path": "docs/ic/runs/koblitz-n59-cofactor-projected-complete-20260921.json",
+      "sha256": "fbb78df18b65f852d40acd177e3b44f618082fa69481fab02e2b8dda1ce3fc5f"
     },
     "process_accounting": {
-      "peak_rss_bytes": 10073538560,
-      "processes": 3,
-      "scope": "one cached-key selection pilot, one complete default-thread workflow, and one complete one-worker workflow; Stage134 and earlier processes remain charged in pinned predecessors",
-      "sequential_wall_seconds": 743.666397042,
-      "total_core_seconds": 1576.843696
+      "peak_rss_bytes": 4375724032,
+      "processes": 4,
+      "scope": "two target-independent width pilots plus one complete default-thread and one complete one-worker workflow; predecessor ell14 discovery and runs remain charged in their pinned record",
+      "sequential_wall_seconds": 1383.985969956,
+      "total_core_seconds": 2681.661715
     },
     "relation_stream": {
       "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
@@ -340,69 +318,30 @@
       "units": 26
     },
     "schema_version": 1,
-    "selection_pilot": {
-      "binary_blake3": "91d5881ef8aaa82b6b02dd17f958b8cc81b3945a72c1d5b68c80c8f160035523",
-      "build_core_seconds": 137.433409,
-      "build_wall_seconds": 12.241086625,
-      "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
-      "name": "cached_key_selection_pilot",
-      "peak_rss_bytes": 10073538560,
-      "relation_unit_wall_seconds": 1.931625666,
-      "relations": 2157,
-      "whole_core_seconds": 166.984357,
-      "whole_wall_seconds": 17.336308958
-    },
-    "selection_pilots": [
-      {
-        "binary_blake3": "c3ab83acb157ca1c4b899e8cd77e90259191bf11f9e727e5a159bee3c5ee6994",
-        "build_wall_seconds": 20.429724583,
-        "canonical_relations_sha256": "afc35267caef752f7b23f76ab4d29f93e75f9ce71a02c2eae1d0eaf96cceaa84",
-        "decision": "rejected_nondeterministic_witness_order",
-        "name": "parallel_scatter_first_witness",
-        "peak_rss_bytes": 6539313152,
-        "relation_unit_wall_seconds": 2.057202375,
-        "relations": 2157,
-        "whole_core_seconds": 260.807216,
-        "whole_wall_seconds": 25.693795292
-      },
-      {
-        "binary_blake3": "07a006bcbf7251b561a9aad9b4889c31a748e9f8dcdca5a57f49da8d2a7107d3",
-        "build_wall_seconds": 19.615474084,
-        "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
-        "decision": "selected",
-        "name": "deterministic_sorted_witness",
-        "peak_rss_bytes": 6543949824,
-        "relation_unit_wall_seconds": 1.930118209,
-        "relations": 2157,
-        "whole_core_seconds": 260.509567,
-        "whole_wall_seconds": 24.7046345
-      }
-    ],
     "software": {
-      "binary_blake3": "91d5881ef8aaa82b6b02dd17f958b8cc81b3945a72c1d5b68c80c8f160035523",
-      "source_stack_head": "da4a21de17b880dac8d86c188c9dde038315d7b7"
+      "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16",
+      "source_stack_head": "8083d939a093dc8c7530daab4a88f0fa9587db8c"
     },
     "validation": [
-      "pilot and both full modes reproduce their Stage134 canonical relation hashes",
-      "both full modes recover the same unknown scalar and verify [d]G=Q",
-      "cached rows are disjoint and cover the exact triangular pair count",
-      "final witnessed lookup and exact candidate verification are unchanged",
-      "all logs and sparse solutions remain independently group-certified"
+      "default and one-worker runs have identical 54,749-relation canonical hash",
+      "both recover the same unknown scalar and verify [d]G=Q",
+      "all factor-base points are checked in the prime-order subgroup",
+      "sparse solutions are verified against all relations and reconstructed column logs are group-certified"
     ]
   },
   "evidence_pins": {
-    "cache_evidence_sha256": "b00db32420c5fe4eda6e1f1b603af60dc373466907a26c845d8c8b9cf62ff00e",
-    "gate_status_sha256": "d8cdf3c5fefaaa79072ae51b49eea7a2d595e6c709090c34960182b9e6dbc28e",
-    "params_sha256": "d40bbe0e7bf81dcf99ee4af27b332d3c5fbf24e8fc5c838756348e7c1b4a1ec7"
+    "gate_status_sha256": "173a0278794b67084d1837711191828c47639fd39110541166267568e907cbcc",
+    "optimization_sha256": "71ef16b1b78f7fae48e85b778f28a83487782acde8579f88eb8626b9c1e018da",
+    "params_sha256": "027b614912a6668b09d0f67382422d405dbe66c1541d46a2bd4655b0899628b3"
   },
   "full_cost_gate_passed": false,
   "gates": {
     "1_all_stage_resource_charging": "partial_missing_licensed_magma_resources",
     "2_same_instance_solver_panel": "partial_phase_b_native_wdsat_cms_mitm_ggmp_complete_magma_missing",
-    "3_single_core_core_memory_conflicts_wall": "partial_current_n59_cached_witness_complete_magma_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_current_n59_ell15_complete_magma_missing",
     "4_n31_n41_larger_pdp_scaling": "satisfied_finite_n59_complete_single_public_target",
     "5_unknown_scalar_without_constructed_base_logs": "satisfied_finite_degrees_23_31_41_53_59",
-    "6_full_cost_vs_automorphism_rho": "failed_current_n59_cached_witness_improved_time_at_10gb_peak",
+    "6_full_cost_vs_automorphism_rho": "failed_current_n59_ell15_improved_time_at_4_8x_memory",
     "7_external_reproduction_novelty": "missing"
   },
   "independent_external_reproduction_satisfied": false,
@@ -893,486 +832,6 @@
       "all factor-base points are independently checked in the prime-order subgroup",
       "sparse solution is verified against all relations and every column log is group-certified"
     ]
-  },
-  "inherited_current_n59_cofactor_projected_ell15_compact": {
-    "claim_boundary": "Finite same-target ell=14 to ell=15 optimization. The wider public cofactor-projected algebraic base reduces default-thread wall, total core-seconds and one-worker wall, but costs about 4.1-4.4 GB peak RSS and remains far slower than automorphism rho. No SOTA or asymptotic claim.",
-    "comparison_to_ell14": {
-      "default_thread": {
-        "ic_wall_reduction_fraction": 0.04807938077259866,
-        "new_ic_over_rho": 229.7102352131501,
-        "old_ic_over_rho": 239.82440937484375,
-        "probe_reduction_fraction": 0.5094339622641509,
-        "rss_multiple": 4.887955489668552,
-        "summand_scan_reduction_fraction": 0.5094339622641509,
-        "whole_cpu_reduction_fraction": 0.13889521906413715
-      },
-      "one_worker": {
-        "ic_wall_reduction_fraction": 0.1723295618449412,
-        "new_ic_over_rho": 1811.8151190858175,
-        "old_ic_over_rho": 2232.8437982897694,
-        "probe_reduction_fraction": 0.5094339622641509,
-        "rss_multiple": 4.798005275622389,
-        "summand_scan_reduction_fraction": 0.5094339622641509,
-        "whole_cpu_reduction_fraction": 0.16012944249953576
-      }
-    },
-    "comparison_to_rho": {
-      "default_thread_full_crossover": false,
-      "default_thread_full_ic_over_rho_wall": 229.7102352131501,
-      "default_thread_online_rho_over_descent": 70.66506668378977,
-      "one_worker_full_crossover": false,
-      "one_worker_full_ic_over_rho_wall": 1811.8151190858175,
-      "one_worker_online_rho_over_descent": 69.7822825120531,
-      "online_descent_crossover_after_precompute": true
-    },
-    "date": "2026-09-21",
-    "default_thread": {
-      "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16",
-      "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
-      "ic_over_rho_wall_ratio": 229.7102352131501,
-      "ic_wall_seconds": 126.398334416,
-      "linear_algebra": {
-        "attempts": 1,
-        "mode": "sparse",
-        "seconds": 0.654715792,
-        "sparse": {
-          "attempts": 1,
-          "core_dimension": 1640,
-          "core_nonzeros": 23442,
-          "filter": {
-            "columns_in": 16344,
-            "columns_out": 1640,
-            "dependent_rows_dropped": 0,
-            "duplicates_removed": 0,
-            "excess_rows_removed": 38373,
-            "merged_columns": 6581,
-            "nonzeros_in": 164239,
-            "nonzeros_out": 23442,
-            "rows_in": 54749,
-            "rows_out": 1673,
-            "singletons_removed": 8122,
-            "uncovered_columns": 1
-          },
-          "reconstructed_columns": 14704,
-          "wiedemann": {
-            "block_m": 4,
-            "block_n": 4,
-            "dimension": 1641,
-            "extra_steps": 0,
-            "generator_degree": 410,
-            "products": 1241,
-            "sequence_length": 830
-          }
-        }
-      },
-      "mode": "default_threads",
-      "online_descent_seconds": 0.00778675,
-      "online_rho_over_descent_ratio": 70.66506668378977,
-      "pair_table_build": {
-        "cpu_seconds": 224.336631,
-        "wall_seconds": 19.682786541
-      },
-      "peak_rss_bytes": 4375724032,
-      "recovered_scalar": 17861472351607,
-      "relation_units": {
-        "cpu_seconds": 940.8840299999999,
-        "wall_seconds": 92.207092752
-      },
-      "relations": 54749,
-      "rho_iterations": 518669,
-      "rho_wall_seconds": 0.550251208,
-      "stages": {
-        "baseline": {
-          "cpu_seconds": 0.5505450000000565,
-          "wall_seconds": 0.550700708
-        },
-        "collect": {
-          "cpu_seconds": 1167.7268430000001,
-          "wall_seconds": 114.69366475
-        },
-        "logs": {
-          "cpu_seconds": 23.344400000000178,
-          "wall_seconds": 11.060544958
-        },
-        "select": {
-          "cpu_seconds": 3.340095,
-          "wall_seconds": 0.651045084
-        },
-        "solve": {
-          "cpu_seconds": 0.015393000000130996,
-          "wall_seconds": 0.028557958
-        }
-      },
-      "summands_scanned": 2662400000,
-      "target": {
-        "kind": "public_hash_to_curve_cofactor",
-        "public_hash_counter": 0,
-        "public_hash_seed": 59001,
-        "target_scalar_constructed": false,
-        "x": "551007654412192707",
-        "y": "76595654768815112"
-      },
-      "trials": 2600000,
-      "units": 26,
-      "units_extended": 0,
-      "verification_seconds": 8.119980708,
-      "verified": true,
-      "whole_cpu_seconds": 1194.9821940000002,
-      "whole_wall_seconds": 126.989469666
-    },
-    "factor_base": {
-      "construction": "public [h] image of every point in the standard polynomial subspace; identity removal and point-identity deduplication only",
-      "factor_base_logs_known_by_construction": false,
-      "folded_table_forbidden": true,
-      "kind": "cofactor_projected",
-      "pair_entries": 542340645,
-      "pair_table_tier": "compact",
-      "parent": {
-        "ell": 15,
-        "kind": "standard_subspace"
-      },
-      "points": 32934,
-      "projected_columns": 16344,
-      "projected_predicate_cost": {
-        "canonical_frobenius_coordinate_squarings": 3857184,
-        "cofactor_multiplications": 16467,
-        "derived_frobenius_coordinate_squarings": 0,
-        "derived_negations": 16467,
-        "input_points": 32934,
-        "input_signed_orbits": 16467,
-        "output_columns": 16344
-      },
-      "scalar_preimages_retained": false,
-      "signed_negation_orbits": 16467,
-      "target_subgroup_enumerated": false
-    },
-    "gates": {
-      "full_cost_vs_rho": "fail_large_margin",
-      "independent_external_reproduction": "missing",
-      "same_target_optimization": "finite_pass",
-      "single_core_resources": "pass_current_n59"
-    },
-    "instance": {
-      "cofactor": 22894,
-      "collection_m": 3,
-      "collection_window": 1024,
-      "curve": "K_1 over GF(2^59)",
-      "descent_m": 2,
-      "public_target_seed": 59001,
-      "subgroup_order": 25179555920633,
-      "target_scalar_constructed_or_supplied": false
-    },
-    "one_worker": {
-      "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16",
-      "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
-      "ic_over_rho_wall_ratio": 1811.8151190858175,
-      "ic_wall_seconds": 1009.6274833770001,
-      "linear_algebra": {
-        "attempts": 1,
-        "mode": "sparse",
-        "seconds": 0.651717375,
-        "sparse": {
-          "attempts": 1,
-          "core_dimension": 1640,
-          "core_nonzeros": 23442,
-          "filter": {
-            "columns_in": 16344,
-            "columns_out": 1640,
-            "dependent_rows_dropped": 0,
-            "duplicates_removed": 0,
-            "excess_rows_removed": 38373,
-            "merged_columns": 6581,
-            "nonzeros_in": 164239,
-            "nonzeros_out": 23442,
-            "rows_in": 54749,
-            "rows_out": 1673,
-            "singletons_removed": 8122,
-            "uncovered_columns": 1
-          },
-          "reconstructed_columns": 14704,
-          "wiedemann": {
-            "block_m": 4,
-            "block_n": 4,
-            "dimension": 1641,
-            "extra_steps": 0,
-            "generator_degree": 410,
-            "products": 1241,
-            "sequence_length": 830
-          }
-        }
-      },
-      "mode": "one_worker",
-      "online_descent_seconds": 0.0079855,
-      "online_rho_over_descent_ratio": 69.7822825120531,
-      "pair_table_build": {
-        "cpu_seconds": 183.040625,
-        "wall_seconds": 183.204325166
-      },
-      "peak_rss_bytes": 4082794496,
-      "recovered_scalar": 17861472351607,
-      "relation_units": {
-        "cpu_seconds": 790.145741,
-        "wall_seconds": 799.592828458
-      },
-      "relations": 54749,
-      "rho_iterations": 518669,
-      "rho_wall_seconds": 0.557246417,
-      "stages": {
-        "baseline": {
-          "cpu_seconds": 0.5571770000000242,
-          "wall_seconds": 0.557695166
-        },
-        "collect": {
-          "cpu_seconds": 975.674814,
-          "wall_seconds": 985.654981292
-        },
-        "logs": {
-          "cpu_seconds": 21.11382500000002,
-          "wall_seconds": 21.145754917
-        },
-        "select": {
-          "cpu_seconds": 2.815069,
-          "wall_seconds": 2.8383969589999998
-        },
-        "solve": {
-          "cpu_seconds": 0.015135999999870364,
-          "wall_seconds": 0.028539208
-        }
-      },
-      "summands_scanned": 2662400000,
-      "target": {
-        "kind": "public_hash_to_curve_cofactor",
-        "public_hash_counter": 0,
-        "public_hash_seed": 59001,
-        "target_scalar_constructed": false,
-        "x": "551007654412192707",
-        "y": "76595654768815112"
-      },
-      "trials": 2600000,
-      "units": 26,
-      "units_extended": 0,
-      "verification_seconds": 18.150847541,
-      "verified": true,
-      "whole_cpu_seconds": 1000.180872,
-      "whole_wall_seconds": 1010.230950916
-    },
-    "operation": "koblitz_n59_cofactor_projected_width_optimization",
-    "params": {
-      "path": "docs/ic/params/k1n59-cofactor-projected-l15-full-public-59001.json",
-      "sha256": "027b614912a6668b09d0f67382422d405dbe66c1541d46a2bd4655b0899628b3"
-    },
-    "pilots": [
-      {
-        "mode": "default_threads",
-        "pair_table_build_core_seconds": 222.79336999999998,
-        "pair_table_build_wall_seconds": 18.904693083,
-        "peak_rss_bytes": 4372676608,
-        "relation_unit_core_seconds": 36.50245799999999,
-        "relation_unit_wall_seconds": 3.039272334,
-        "relations": 2157,
-        "summands_scanned": 102400000,
-        "total_core_seconds": 265.100201,
-        "trials": 100000,
-        "wall_seconds": 25.080593833000002
-      },
-      {
-        "mode": "one_worker",
-        "pair_table_build_core_seconds": 186.01389600000002,
-        "pair_table_build_wall_seconds": 186.238502583,
-        "peak_rss_bytes": 4083580928,
-        "relation_unit_core_seconds": 30.013892,
-        "relation_unit_wall_seconds": 30.041034542,
-        "relations": 2157,
-        "summands_scanned": 102400000,
-        "total_core_seconds": 221.398448,
-        "trials": 100000,
-        "wall_seconds": 221.684955541
-      }
-    ],
-    "predecessor": {
-      "ell": 14,
-      "path": "docs/ic/runs/koblitz-n59-cofactor-projected-complete-20260921.json",
-      "sha256": "fbb78df18b65f852d40acd177e3b44f618082fa69481fab02e2b8dda1ce3fc5f"
-    },
-    "process_accounting": {
-      "peak_rss_bytes": 4375724032,
-      "processes": 4,
-      "scope": "two target-independent width pilots plus one complete default-thread and one complete one-worker workflow; predecessor ell14 discovery and runs remain charged in their pinned record",
-      "sequential_wall_seconds": 1383.985969956,
-      "total_core_seconds": 2681.661715
-    },
-    "relation_stream": {
-      "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
-      "duplicates": 0,
-      "rejected": 0,
-      "relations": 54749,
-      "summands_scanned": 2662400000,
-      "trials": 2600000,
-      "units": 26
-    },
-    "schema_version": 1,
-    "software": {
-      "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16",
-      "source_stack_head": "8083d939a093dc8c7530daab4a88f0fa9587db8c"
-    },
-    "validation": [
-      "default and one-worker runs have identical 54,749-relation canonical hash",
-      "both recover the same unknown scalar and verify [d]G=Q",
-      "all factor-base points are checked in the prime-order subgroup",
-      "sparse solutions are verified against all relations and reconstructed column logs are group-certified"
-    ]
-  },
-  "inherited_current_n59_collector_tuning": {
-    "claim_boundary": "Finite single-target tuning on the selected n59 ell15 cofactor-projected base. Equal-scan window arms and a source-pinned scratch-reuse candidate were charged; window 1024 remains selected and scratch reuse is rejected. No SOTA claim.",
-    "date": "2026-09-21",
-    "equal_scan_window_sweep": {
-      "arms": [
-        {
-          "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16",
-          "canonical_relations_sha256": "e54d2ab7b0c0616c14b668de4ea7fb8a5d8bb5790f4a8ada2c757ccafdd98216",
-          "collection_window": 512,
-          "name": "ic-n59-projected-l15-window512-pilot",
-          "pair_table_build_wall_seconds": 18.790464792,
-          "peak_rss_bytes": 4372054016,
-          "relation_unit_core_seconds": 38.34394100000003,
-          "relation_unit_wall_seconds": 3.152399208,
-          "relations": 2137,
-          "relations_per_relation_unit_wall_second": 677.8963763779756,
-          "summands_scanned": 102400000,
-          "trials": 200000,
-          "whole_core_seconds": 270.02095,
-          "whole_wall_seconds": 25.088887042
-        },
-        {
-          "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16",
-          "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
-          "collection_window": 1024,
-          "name": "ic-n59-projected-l15-pilot",
-          "pair_table_build_wall_seconds": 18.904693083,
-          "peak_rss_bytes": 4372676608,
-          "relation_unit_core_seconds": 36.50245799999999,
-          "relation_unit_wall_seconds": 3.039272334,
-          "relations": 2157,
-          "relations_per_relation_unit_wall_second": 709.709352422908,
-          "summands_scanned": 102400000,
-          "trials": 100000,
-          "whole_core_seconds": 265.100201,
-          "whole_wall_seconds": 25.080593833000002
-        },
-        {
-          "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16",
-          "canonical_relations_sha256": "e841d0804a536032b9ef5c123628f462dbdd6d0ea483877f52d778fa05ee1bde",
-          "collection_window": 2048,
-          "name": "ic-n59-projected-l15-window2048-pilot",
-          "pair_table_build_wall_seconds": 19.641564584,
-          "peak_rss_bytes": 4372250624,
-          "relation_unit_core_seconds": 35.965655,
-          "relation_unit_wall_seconds": 3.094597333,
-          "relations": 2009,
-          "relations_per_relation_unit_wall_second": 649.1959320770216,
-          "summands_scanned": 102400000,
-          "trials": 50000,
-          "whole_core_seconds": 266.144855,
-          "whole_wall_seconds": 25.915713917
-        }
-      ],
-      "conclusion": "window 512 loses to probe overhead; window 2048 loses relation yield per equal scan; window 1024 remains the finite local selection",
-      "selected_window": 1024,
-      "summands_scanned_per_arm": 102400000,
-      "throughput_ratios_vs_selected": {
-        "window2048": 0.9147349261506883,
-        "window512": 0.9551746416524952
-      }
-    },
-    "gates": {
-      "factor_base_boundary_preserved": true,
-      "full_cost_vs_rho": "unchanged_failed",
-      "independent_external_reproduction": "missing"
-    },
-    "instance": {
-      "curve": "K_1 over GF(2^59)",
-      "ell": 15,
-      "factor_base_kind": "cofactor_projected",
-      "m": 3,
-      "public_target_seed": 59001,
-      "target_scalar_constructed_or_supplied": false
-    },
-    "new_process_accounting": {
-      "peak_rss_bytes": 4378951680,
-      "processes": 4,
-      "scope": "two fresh equal-scan window arms and two fresh scratch-reuse candidate repetitions; the selected window1024 baseline remains charged in the pinned Stage132 evidence and is not double-counted",
-      "sequential_wall_seconds": 115.333874543,
-      "total_core_seconds": 1078.1716900000001
-    },
-    "operation": "koblitz_n59_l15_collector_tuning",
-    "rejected_scratch_reuse": {
-      "baseline": {
-        "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16",
-        "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
-        "collection_window": 1024,
-        "name": "ic-n59-projected-l15-pilot",
-        "pair_table_build_wall_seconds": 18.904693083,
-        "peak_rss_bytes": 4372676608,
-        "relation_unit_core_seconds": 36.50245799999999,
-        "relation_unit_wall_seconds": 3.039272334,
-        "relations": 2157,
-        "relations_per_relation_unit_wall_second": 709.709352422908,
-        "summands_scanned": 102400000,
-        "trials": 100000,
-        "whole_core_seconds": 265.100201,
-        "whole_wall_seconds": 25.080593833000002
-      },
-      "candidate_binary_blake3": "db029141a9439d5edacf1bce6aef43f0fbfa24bfe843543f875aa6f095f7f679",
-      "candidate_repetitions": [
-        {
-          "binary_blake3": "db029141a9439d5edacf1bce6aef43f0fbfa24bfe843543f875aa6f095f7f679",
-          "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
-          "collection_window": 1024,
-          "name": "ic-n59-projected-l15-scratch-pilot",
-          "pair_table_build_wall_seconds": 29.512040917,
-          "peak_rss_bytes": 4377919488,
-          "relation_unit_core_seconds": 38.39871500000001,
-          "relation_unit_wall_seconds": 3.414503417,
-          "relations": 2157,
-          "relations_per_relation_unit_wall_second": 631.7170424433639,
-          "summands_scanned": 102400000,
-          "trials": 100000,
-          "whole_core_seconds": 274.28287,
-          "whole_wall_seconds": 36.125548667
-        },
-        {
-          "binary_blake3": "db029141a9439d5edacf1bce6aef43f0fbfa24bfe843543f875aa6f095f7f679",
-          "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
-          "collection_window": 1024,
-          "name": "ic-n59-projected-l15-scratch-pilot-b",
-          "pair_table_build_wall_seconds": 21.437286666,
-          "peak_rss_bytes": 4378951680,
-          "relation_unit_core_seconds": 36.88055799999995,
-          "relation_unit_wall_seconds": 3.5634866670000003,
-          "relations": 2157,
-          "relations_per_relation_unit_wall_second": 605.306039159652,
-          "summands_scanned": 102400000,
-          "trials": 100000,
-          "whole_core_seconds": 267.723015,
-          "whole_wall_seconds": 28.203724917
-        }
-      ],
-      "conclusion": "buffer reuse preserved every relation but increased relation-unit wall by 12.35% and 17.25% in the two candidate pilots",
-      "decision": "rejected_wall_regression",
-      "relation_hash_preserved": true,
-      "relation_unit_wall_ratios_vs_baseline": [
-        1.1234608293578472,
-        1.1724802108503647
-      ],
-      "source_patch": "research/ic_candidate_tournament_20260921/n59-public-59001/rejected-window-scratch-reuse.patch",
-      "source_patch_sha256": "13ea058f3cfe92e8f5624c72e51de575a1daa5d49204f9f9161282e24f78743a"
-    },
-    "schema_version": 1,
-    "selected_predecessor": {
-      "path": "docs/ic/runs/koblitz-n59-cofactor-projected-l15-optimization-20260921.json",
-      "sha256": "71ef16b1b78f7fae48e85b778f28a83487782acde8579f88eb8626b9c1e018da",
-      "window": 1024
-    }
   },
   "inherited_current_n59_standard_cap": {
     "bounded_collection": {
@@ -2137,359 +1596,6 @@
       "ell14 exact relation pilot returns zero relations consistently with its class-aware expectation"
     ]
   },
-  "inherited_current_n59_witnessed_two_pass": {
-    "claim_boundary": "Finite same-target pair-table representation optimization. Direct exact pair witnesses reduce default-thread and one-worker full cost while increasing peak memory; full IC still loses to automorphism rho by large factors. No SOTA or asymptotic claim.",
-    "comparison_to_ell14_compact": {
-      "default_thread": {
-        "collection_wall_reduction_fraction": 0.36118748226728714,
-        "ic_wall_reduction_fraction": 0.35422431273974675,
-        "new_ic_over_rho": 152.61509018640461,
-        "old_ic_over_rho": 239.82440937484375,
-        "online_descent_reduction_fraction": 0.896225005320827,
-        "rss_multiple": 7.334138618935193,
-        "whole_cpu_reduction_fraction": 0.38532565182699363
-      },
-      "one_worker": {
-        "collection_wall_reduction_fraction": 0.3651517767766952,
-        "ic_wall_reduction_fraction": 0.406009762900576,
-        "new_ic_over_rho": 1329.574639938143,
-        "old_ic_over_rho": 2232.8437982897694,
-        "online_descent_reduction_fraction": 0.895885832301803,
-        "rss_multiple": 7.348980495600439,
-        "whole_cpu_reduction_fraction": 0.39518570271873354
-      }
-    },
-    "comparison_to_ell15_compact": {
-      "default_thread": {
-        "collection_wall_reduction_fraction": 0.35323507264598064,
-        "ic_wall_reduction_fraction": 0.32160762755157224,
-        "new_ic_over_rho": 152.61509018640461,
-        "old_ic_over_rho": 229.7102352131501,
-        "online_descent_reduction_fraction": 0.6733232735094873,
-        "relation_unit_wall_reduction_fraction": 0.45812810182201236,
-        "rss_multiple": 1.5004511875030422,
-        "whole_cpu_reduction_fraction": 0.2861793805105016
-      },
-      "one_worker": {
-        "collection_wall_reduction_fraction": 0.2887542483455311,
-        "ic_wall_reduction_fraction": 0.2823348403943554,
-        "new_ic_over_rho": 1329.574639938143,
-        "old_ic_over_rho": 1811.8151190858175,
-        "online_descent_reduction_fraction": 0.690819735771085,
-        "relation_unit_wall_reduction_fraction": 0.3746936613723483,
-        "rss_multiple": 1.5316741173543504,
-        "whole_cpu_reduction_fraction": 0.27987200898999
-      }
-    },
-    "comparison_to_rho": {
-      "default_thread_full_crossover": false,
-      "default_thread_full_ic_over_rho_wall": 152.61509018640461,
-      "default_thread_online_rho_over_descent": 220.87695331695332,
-      "one_worker_full_crossover": false,
-      "one_worker_full_ic_over_rho_wall": 1329.574639938143,
-      "one_worker_online_rho_over_descent": 220.72749081697992,
-      "online_descent_crossover_after_precompute": true
-    },
-    "date": "2026-09-21",
-    "default_thread": {
-      "binary_blake3": "07a006bcbf7251b561a9aad9b4889c31a748e9f8dcdca5a57f49da8d2a7107d3",
-      "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
-      "ic_over_rho_wall_ratio": 152.61509018640461,
-      "ic_wall_seconds": 85.747665958,
-      "linear_algebra": {
-        "attempts": 1,
-        "mode": "sparse",
-        "seconds": 0.651786917,
-        "sparse": {
-          "attempts": 1,
-          "core_dimension": 1640,
-          "core_nonzeros": 23442,
-          "filter": {
-            "columns_in": 16344,
-            "columns_out": 1640,
-            "dependent_rows_dropped": 0,
-            "duplicates_removed": 0,
-            "excess_rows_removed": 38373,
-            "merged_columns": 6581,
-            "nonzeros_in": 164239,
-            "nonzeros_out": 23442,
-            "rows_in": 54749,
-            "rows_out": 1673,
-            "singletons_removed": 8122,
-            "uncovered_columns": 1
-          },
-          "reconstructed_columns": 14704,
-          "wiedemann": {
-            "block_m": 4,
-            "block_n": 4,
-            "dimension": 1641,
-            "extra_steps": 0,
-            "generator_degree": 410,
-            "products": 1241,
-            "sequence_length": 830
-          }
-        }
-      },
-      "mode": "default_threads",
-      "online_descent_seconds": 0.00254375,
-      "online_rho_over_descent_ratio": 220.87695331695332,
-      "pair_table_build": {
-        "cpu_seconds": 228.95913499999997,
-        "wall_seconds": 21.389824
-      },
-      "peak_rss_bytes": 6565560320,
-      "recovered_scalar": 17861472351607,
-      "relation_units": {
-        "cpu_seconds": 594.1255099999998,
-        "wall_seconds": 49.96443237500001
-      },
-      "relations": 54749,
-      "rho_iterations": 518669,
-      "rho_wall_seconds": 0.56185575,
-      "stages": {
-        "baseline": {
-          "cpu_seconds": 0.5620569999998679,
-          "wall_seconds": 0.562316916
-        },
-        "collect": {
-          "cpu_seconds": 825.6194169999999,
-          "wall_seconds": 74.17983975
-        },
-        "logs": {
-          "cpu_seconds": 23.46848,
-          "wall_seconds": 10.919074584
-        },
-        "select": {
-          "cpu_seconds": 3.3370770000000003,
-          "wall_seconds": 0.680870375
-        },
-        "solve": {
-          "cpu_seconds": 0.010836999999924046,
-          "wall_seconds": 0.025650958
-        }
-      },
-      "summands_scanned": 2662400000,
-      "target": {
-        "kind": "public_hash_to_curve_cofactor",
-        "public_hash_counter": 0,
-        "public_hash_seed": 59001,
-        "target_scalar_constructed": false,
-        "x": "551007654412192707",
-        "y": "76595654768815112"
-      },
-      "trials": 2600000,
-      "units": 26,
-      "units_extended": 0,
-      "verification_seconds": 7.904313709,
-      "verified": true,
-      "whole_cpu_seconds": 853.00293,
-      "whole_wall_seconds": 86.3733245
-    },
-    "factor_base": {
-      "factor_base_logs_known_by_construction": false,
-      "kind": "cofactor_projected",
-      "parent": {
-        "ell": 15,
-        "kind": "standard_subspace"
-      },
-      "points": 32934,
-      "projected_columns": 16344,
-      "scalar_preimages_retained": false,
-      "signed_negation_orbits": 16467,
-      "target_subgroup_enumerated": false
-    },
-    "gates": {
-      "full_cost_vs_rho": "fail_large_margin",
-      "independent_external_reproduction": "missing",
-      "same_target_optimization": "finite_pass",
-      "single_core_resources": "pass_current_n59"
-    },
-    "instance": {
-      "cofactor": 22894,
-      "collection_m": 3,
-      "collection_window": 1024,
-      "curve": "K_1 over GF(2^59)",
-      "descent_m": 2,
-      "ell": 15,
-      "public_target_seed": 59001,
-      "subgroup_order": 25179555920633,
-      "target_scalar_constructed_or_supplied": false
-    },
-    "one_worker": {
-      "binary_blake3": "07a006bcbf7251b561a9aad9b4889c31a748e9f8dcdca5a57f49da8d2a7107d3",
-      "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
-      "ic_over_rho_wall_ratio": 1329.574639938143,
-      "ic_wall_seconds": 724.574469,
-      "linear_algebra": {
-        "attempts": 1,
-        "mode": "sparse",
-        "seconds": 0.6356915,
-        "sparse": {
-          "attempts": 1,
-          "core_dimension": 1640,
-          "core_nonzeros": 23442,
-          "filter": {
-            "columns_in": 16344,
-            "columns_out": 1640,
-            "dependent_rows_dropped": 0,
-            "duplicates_removed": 0,
-            "excess_rows_removed": 38373,
-            "merged_columns": 6581,
-            "nonzeros_in": 164239,
-            "nonzeros_out": 23442,
-            "rows_in": 54749,
-            "rows_out": 1673,
-            "singletons_removed": 8122,
-            "uncovered_columns": 1
-          },
-          "reconstructed_columns": 14704,
-          "wiedemann": {
-            "block_m": 4,
-            "block_n": 4,
-            "dimension": 1641,
-            "extra_steps": 0,
-            "generator_degree": 410,
-            "products": 1241,
-            "sequence_length": 830
-          }
-        }
-      },
-      "mode": "one_worker",
-      "online_descent_seconds": 0.002468959,
-      "online_rho_over_descent_ratio": 220.72749081697992,
-      "pair_table_build": {
-        "cpu_seconds": 194.253968,
-        "wall_seconds": 198.24564325
-      },
-      "peak_rss_bytes": 6253510656,
-      "recovered_scalar": 17861472351607,
-      "relation_units": {
-        "cpu_seconds": 499.463434,
-        "wall_seconds": 499.990463956
-      },
-      "relations": 54749,
-      "rho_iterations": 518669,
-      "rho_wall_seconds": 0.544967125,
-      "stages": {
-        "baseline": {
-          "cpu_seconds": 0.5453629999999521,
-          "wall_seconds": 0.54541675
-        },
-        "collect": {
-          "cpu_seconds": 696.1974250000001,
-          "wall_seconds": 701.042918041
-        },
-        "logs": {
-          "cpu_seconds": 20.66387199999997,
-          "wall_seconds": 20.695700875
-        },
-        "select": {
-          "cpu_seconds": 2.836533,
-          "wall_seconds": 2.857439333
-        },
-        "solve": {
-          "cpu_seconds": 0.010327999999958593,
-          "wall_seconds": 0.021584666
-        }
-      },
-      "summands_scanned": 2662400000,
-      "target": {
-        "kind": "public_hash_to_curve_cofactor",
-        "public_hash_counter": 0,
-        "public_hash_seed": 59001,
-        "target_scalar_constructed": false,
-        "x": "551007654412192707",
-        "y": "76595654768815112"
-      },
-      "trials": 2600000,
-      "units": 26,
-      "units_extended": 0,
-      "verification_seconds": 17.767374958,
-      "verified": true,
-      "whole_cpu_seconds": 720.258242,
-      "whole_wall_seconds": 725.1685665
-    },
-    "operation": "koblitz_n59_witnessed_compact_optimization",
-    "pair_table": {
-      "byte_ceiling": 8589934592,
-      "deterministic_choice": "all exact candidates are sorted and deduplicated before the first witness is consumed",
-      "estimated_table_bytes": 4878330938,
-      "exact_candidate_check": "stored pair sum is recomputed in the fast group before return",
-      "pair_entries": 542340645,
-      "rest_bytes_per_pair": 4,
-      "tier": "witnessed_compact",
-      "witness_bytes_per_pair": 4,
-      "witness_encoding": "two unsigned 16-bit point indices packed into one u32"
-    },
-    "params": {
-      "path": "docs/ic/params/k1n59-cofactor-projected-l15-witnessed-full-public-59001.json",
-      "sha256": "466ef6a40556111f3e6c0203e9a72ec4a559c3c1758afb0235c2da35e144b14a"
-    },
-    "predecessors": {
-      "ell14_compact": {
-        "path": "docs/ic/runs/koblitz-n59-cofactor-projected-complete-20260921.json",
-        "sha256": "fbb78df18b65f852d40acd177e3b44f618082fa69481fab02e2b8dda1ce3fc5f"
-      },
-      "ell15_compact": {
-        "path": "docs/ic/runs/koblitz-n59-cofactor-projected-l15-optimization-20260921.json",
-        "sha256": "71ef16b1b78f7fae48e85b778f28a83487782acde8579f88eb8626b9c1e018da"
-      }
-    },
-    "process_accounting": {
-      "peak_rss_bytes": 6565560320,
-      "processes": 4,
-      "scope": "one nondeterministic discovery pilot, one deterministic selection pilot, one complete default-thread workflow, and one complete one-worker workflow; prior compact and collector-tuning processes remain charged in pinned predecessors",
-      "sequential_wall_seconds": 861.940320792,
-      "total_core_seconds": 2094.5779549999997
-    },
-    "relation_stream": {
-      "canonical_relations_sha256": "e2004ac6e81979caf984e4fa745dc1a1ee99d13892a3f60615a5662179e3ad99",
-      "duplicates": 0,
-      "rejected": 0,
-      "relations": 54749,
-      "summands_scanned": 2662400000,
-      "trials": 2600000,
-      "units": 26
-    },
-    "schema_version": 1,
-    "selection_pilots": [
-      {
-        "binary_blake3": "c3ab83acb157ca1c4b899e8cd77e90259191bf11f9e727e5a159bee3c5ee6994",
-        "build_wall_seconds": 20.429724583,
-        "canonical_relations_sha256": "afc35267caef752f7b23f76ab4d29f93e75f9ce71a02c2eae1d0eaf96cceaa84",
-        "decision": "rejected_nondeterministic_witness_order",
-        "name": "parallel_scatter_first_witness",
-        "peak_rss_bytes": 6539313152,
-        "relation_unit_wall_seconds": 2.057202375,
-        "relations": 2157,
-        "whole_core_seconds": 260.807216,
-        "whole_wall_seconds": 25.693795292
-      },
-      {
-        "binary_blake3": "07a006bcbf7251b561a9aad9b4889c31a748e9f8dcdca5a57f49da8d2a7107d3",
-        "build_wall_seconds": 19.615474084,
-        "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
-        "decision": "selected",
-        "name": "deterministic_sorted_witness",
-        "peak_rss_bytes": 6543949824,
-        "relation_unit_wall_seconds": 1.930118209,
-        "relations": 2157,
-        "whole_core_seconds": 260.509567,
-        "whole_wall_seconds": 24.7046345
-      }
-    ],
-    "software": {
-      "binary_blake3": "07a006bcbf7251b561a9aad9b4889c31a748e9f8dcdca5a57f49da8d2a7107d3",
-      "source_stack_head": "3a8a7f255f044035e72078cd9bec28930d18d9b9"
-    },
-    "validation": [
-      "default and one-worker runs reproduce the selected compact tier canonical 54,749-relation hash",
-      "both recover the same unknown scalar and verify [d]G=Q",
-      "every witnessed-table candidate is checked by exact group addition",
-      "all factor-base points remain checked in the prime-order subgroup",
-      "sparse solutions are verified against all relations and reconstructed logs are group-certified"
-    ]
-  },
   "inherited_phase_b_same_instance_matrix": {
     "backends": {
       "cryptominisat": {
@@ -2539,12 +1645,12 @@
   "licensed_magma_complete": false,
   "next_targets": [
     "execute the frozen 160-input packet under licensed Magma F4 with complete resource and terminal receipts",
-    "reduce the same n59 cached witnessed full cost without hiding its 10 GB construction peak",
+    "optimize the same n59 public target below the selected ell15 full cost without hiding its 4.8x memory tradeoff",
     "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
   ],
   "predecessor": {
-    "stage134_audit_sha256": "2fbfb00e493dfbb14ddbbd036516f32c423707bdc2b1ee52c2bb52282cd19f84",
-    "stage134_seal_sha256": "33cc3219a6a4cfbce081bcd5c2748e22d39c5e374e3010ee750ce15779d1cf37",
+    "stage134_audit_sha256": "619a718a801c0d474be4bef832ec0227aca0784b315086211820414e2b675e99",
+    "stage134_seal_sha256": "e9ec8b9ee80ea41558d18e37a74b109d4edd55fef72f7cf40266fa77a4ddc9c4",
     "stage134_status": "current_seven_gate_audit_verified"
   },
   "schema": "koblitz_stage135_current_gate_audit.v1",

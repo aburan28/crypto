@@ -1,0 +1,65 @@
+{
+  "claim_boundary": "Public-synthetic n=31 decomposition-construction evidence only. This is not relation-yield evidence, an end-to-end index-calculus crossover, an asymptotic improvement, a sub-rho result, an external-target capability, or a key-recovery claim.",
+  "claim_boundary_non_claims": [
+    "not relation-yield evidence",
+    "not end-to-end index calculus",
+    "not asymptotic or sub-rho evidence",
+    "not external or private targets",
+    "not a key-recovery claim"
+  ],
+  "dimension_l_or_dim": 16,
+  "eq_var_ratio": 0.96875,
+  "executable_or_source_hash": {
+    "frontier_probe_source": "db6da85033c56a771ef798ed6e1269422ab9b69a3a94dd2956911fda28f7c1e6",
+    "koblitz_groebner_source": "a454f54c09d0b9ca9c754631ebef0965fcc4df280c79e6bb82b45fe2369b3991",
+    "paired_executable_receipt": "5db8a4c68662ccdd3956c700265828ea8b56d8d6f9c5ced1436aed3cfb2bcf8d",
+    "profile_executable_receipt": "4779e71dfefaa0588aae745f3ae22d00b8372642da2d7e88ab7f1b9a4ed0f764",
+    "rref_tests_source": "d4e1874092366711dd0cad60bbec3d4f147b701feb2a6fccc1f104d7f18001e4"
+  },
+  "f4_splits": {
+    "sym": 4095,
+    "x": 7056
+  },
+  "ffd_or_degree_of_regularity": {
+    "symmetrised": 4,
+    "x_chained": 3
+  },
+  "fixture_hash": "193ac70636d5f1ce52b0a2687fce44e229691c80dab54033771f00a8013ae11d",
+  "host_id": {
+    "hostname": "Adams-MacBook-Pro.local",
+    "machine": "arm64",
+    "system": "Darwin"
+  },
+  "largest_solvable": {
+    "m": 2,
+    "n": 31,
+    "node_budget": 50000,
+    "unknowns": 32
+  },
+  "m_summands": 2,
+  "macaulay_degree_max": 3,
+  "median_ms_per_target": {
+    "sym_refuted_selected": 7441.0,
+    "x_found_selected": 12203.0
+  },
+  "n_or_bits": 31,
+  "oracle_class": "Boolean matrix-F4 with active-variable multipliers and exact support-verified layout reuse",
+  "resource_caps": {
+    "node_budget": 50000,
+    "targets_per_arm": 2,
+    "threads": 1
+  },
+  "schema_version": 2,
+  "seeds": [
+    24301
+  ],
+  "stage": "decomposition",
+  "system_degree": "quadratic",
+  "task_id": "TASK-KIC-GROEBNER-ACTIVE-LAYOUT-20260921",
+  "unknowns": 32,
+  "verdict_mix": {
+    "inconclusive": 0,
+    "sym_refuted": 2,
+    "x_found": 2
+  }
+}

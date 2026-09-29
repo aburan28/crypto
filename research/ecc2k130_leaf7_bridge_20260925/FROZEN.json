@@ -1,0 +1,113 @@
+{
+  "schema": "ecc2k130-leaf7-bridge-frozen-v1",
+  "status": "protocol_only_no_outcome",
+  "source_main_commit": "62ef21ec1e083f197593edbe1309c5ddf60b7789",
+  "parent_note_commit": "e5de58c8be2984139734c31acb3d8824532f1b14",
+  "sage_version": "10.9",
+  "field": {
+    "degree": 131,
+    "modulus_hex": "0x800000000000000000000000000002007",
+    "curve_a": 0,
+    "curve_b": 1,
+    "subgroup_order": "680564733841876926932320129493409985129",
+    "cofactor": 4
+  },
+  "saved_kernel": {
+    "torsion_seed": 20260924,
+    "source_line": [
+      1,
+      0
+    ],
+    "other_orbit_line": [
+      1,
+      4
+    ],
+    "twist_frobenius_matrix_columns_mod263": [
+      [
+        186,
+        51
+      ],
+      [
+        73,
+        78
+      ]
+    ],
+    "source_norm7_matrix_rows_mod263": [
+      [
+        155,
+        117
+      ],
+      [
+        161,
+        108
+      ]
+    ],
+    "norm7_image_line": [
+      1,
+      74
+    ],
+    "other_orbit_frobenius_exponent": 23
+  },
+  "public_target_labels": {
+    "count": 8,
+    "prefix": "leaf-seven-bridge-v1",
+    "u": "sha256(prefix|i|u) mod r",
+    "v": "1 + sha256(prefix|i|v) mod (r-1)"
+  },
+  "caps": {
+    "child_wall_seconds": 300,
+    "child_peak_rss_bytes": 2147483648
+  },
+  "input_sha256": {
+    "research/notes/ecc2k130/LEAF_HORIZONTAL_SEVEN_BRIDGE_20260925.md": "ed1e10dad22c678bc45dc5b9ffad79826cd674d151bc081f917293389b7efb82",
+    "research/ecc2k130_direction_review_20260924/twist_torsion_results.json": "6f1e7b22f3471214d38ec0d3196c88fe9edaf45791e9c05ea67764831fd75368",
+    "research/ecc2k130_endo_ring_263_20260925/receipt.json": "bbdff7e901b5d33264e1da95bd0cf1655122d2b1bc42ccce30426a1b24a1640e",
+    "research/ecc2k130_dual_transport_20260925/receipt.json": "4f1d6a5ba85b9c33e07c8af3b42448e10e3633128f3ee9bdffa905fc8cbd2ebc",
+    "research/ecc2k130_factor_base_replication_20260925/exact_replay.json": "982750f272271a566e48724f470b6bca51d9d3ba159114c7628693b3a2fe9865",
+    "research/ecc2k130_relations/relations.py": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f",
+    "research/ecc2k130_relations/fastfield.py": "b5990fda51700bbfba363251c41f02febfd0fc92edfea4f5ddd647bab472789e",
+    "research/ecc2k130_oriented_transport_20260924/oriented_velu.py": "a1a656cc32efd612250b1ecf50dff18af79a8f62f970ee79841bfd390603423b",
+    "research/ecc2k130_dual_transport_20260925/dual_transport.py": "c913bef64a115e4b42d6675ddbafac10379b166e58ddb94402ebbd44f1e7df9d"
+  },
+  "gate": {
+    "predicted_cubic_factors": 1,
+    "predicted_kernel_x_orbit_degree": 3,
+    "predicted_forward_kernel_points": 6,
+    "predicted_reverse_kernel_points": 6,
+    "predicted_conjugacy_exponent": 23,
+    "full_point_controls": [
+      "P",
+      "Q",
+      "P+Q",
+      "2P"
+    ],
+    "structural_status_required": "PASS",
+    "cost_promotion_ratio_at_most": 0.9,
+    "cost_ratio_requires_complete_meter": true,
+    "no_pdp_or_dlp_claim": true,
+    "predicted_7_division_factor_degrees": [
+      [
+        3,
+        1
+      ],
+      [
+        21,
+        1
+      ]
+    ],
+    "predicted_dual_composition_controls": 12,
+    "producer_status": "PRODUCER_PASS",
+    "fq_replay_status": "FQ_REPLAY_PASS",
+    "exceptional_point_encoding": "[V^0,V^1] by [U^0,U^1,U^2] canonical Fq bit-polynomial hex"
+  },
+  "implementation_sha256": {
+    "PROTOCOL.md": "4822314b160911854dc08591e4e9d08e9579fbec0a5fdf611a631085dcf009f0",
+    "cubic_velu.py": "aa774740505396c6921691f5ead6ac49e254e17eefce2baf0766fef3faec5839",
+    "run.py": "e90e791b181c04ebff81552007fdd75a1442f4ecb4987669413a3ebb1abba814",
+    "verify.py": "9805862a2f6cc9d44a2f769131f71d683d359be73109ce696eda858b31cc8eba",
+    "verify_extension.py": "5aa49510f4117422288cf6ff34a120143b9a57a25b2a9e7373fee7232fa711a8",
+    "ci_replay.py": "65b956e904dac772bf75c8b28e58c9f9fa5541499e89876068720cb43d9da4a8"
+  },
+  "release_main_head": null,
+  "release_gate": "hold_parent_unmerged"
+}
