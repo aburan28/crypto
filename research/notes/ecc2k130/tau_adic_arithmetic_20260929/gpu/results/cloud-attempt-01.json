@@ -1,0 +1,19 @@
+{
+  "provider": "Modal",
+  "utc_started": "2026-09-29T15:55:02Z",
+  "client_version": "1.6.0",
+  "gpu_requested": "RTX-PRO-6000",
+  "function_timeout_seconds": 600,
+  "process_timeout_seconds": 540,
+  "cli_timeout_seconds": 90,
+  "function_retries": 0,
+  "persistent_deployment": false,
+  "gpu_execution_confirmed": false,
+  "authentication_probe": "25-second timeout; no profile configured",
+  "runpod_unauthenticated_probe": "HTTP 403; no authenticated RunPod call made",
+  "status": "client_finished",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "\u256d\u2500 Error \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Could not connect to the Modal server.                                       \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n",
+  "utc_finished": "2026-09-29T15:55:59Z"
+}

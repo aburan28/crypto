@@ -1,0 +1,31 @@
+name: n53 native-cyclic L384 first outcome archive replay
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_first_outcome_20260929/**'
+      - 'research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_20260929/RESULT.md'
+      - '.github/workflows/n53-native-cyclic-l384-outcome-replay.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  first-outcome-archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recheck first source, bot evidence, raw artifact, and full independent audit
+        run: |
+          git fetch --quiet origin main
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          python3 research/sat_factor_base_review_20260908/autolab_n53_native_cyclic_l384_first_outcome_20260929/verify_outcome.py
+          git diff --check

@@ -1,5 +1,14 @@
 {
   "all_seven_gates_passed": false,
+  "candidate_patch_historical_snapshot": {
+    "patch_applies": true,
+    "path": "docs/ic/patches/historical_snapshots/koblitz_index_calculus.rs.cd730af687555ffff5d3b7f53b59405dce05c765.gz",
+    "postimage_git_blob": "f0d974f00bd29f67131e54f508c24186a7921f5a",
+    "preimage_git_blob": "cd730af687555ffff5d3b7f53b59405dce05c765",
+    "sha256": "e5d4567098f539ec470e54332fde9b22eab524d9f56a164ae44675366d3b1424",
+    "source_path": "src/cryptanalysis/koblitz_index_calculus.rs",
+    "source_sha256": "175aa5b966bc176e281098e536f5611829fc1b01c4f51f795b8762008eefaf56"
+  },
   "claim_boundary": "finite same-target prefetch-64 rejection; the exact relation stream is unchanged while scoped and inclusive costs regress, so the Stage-146 selected result is unchanged and remains far behind rho",
   "current_n59_prefetch64_rejection": {
     "candidate": {
@@ -286,7 +295,7 @@
     },
     "predecessor": {
       "path": "docs/ic/runs/koblitz-n59-null-support-tail-rejection-20260922.json",
-      "sha256": "976a4ebf81201ad4801037a6c30aa4f6ae070d65fe479010f3bddb2bd1ee19a7"
+      "sha256": "c52a869061e793bae68bf846ee5e722a2a4a42bcd2a89c29638aee4a513a8f9f"
     },
     "process_accounting": {
       "retained_peak_rss_bytes": 10080190464,
@@ -374,7 +383,7 @@
     "candidate_params_sha256": "f837bf3ca5be26da1431c759e00309e2ac637445da2256d92a9719574a84c288",
     "candidate_patch_sha256": "a19715040b3b582fee689f65f1c0d34f75f61f983b1f02aacc14d6df9cbc027c",
     "gate_status_sha256": "5c659c1c98277d2ca3f3859667b25f0eb022f2098f90db03a74b5837d9b4acfa",
-    "prefetch64_evidence_sha256": "915daf319e22c83a024d3a5894b5c6ad7f221da5ecc4421f91e58cdfba16b804"
+    "prefetch64_evidence_sha256": "3308db260b1a1b76c2404c8bc9d269878e6257bf415e2bcbbc0d9c75b33b2574"
   },
   "full_cost_gate_passed": false,
   "gates": {
@@ -2485,7 +2494,7 @@
     },
     "source_patch": {
       "path": "docs/ic/patches/koblitz-n59-first-hit-tail-rejected-20260922.patch",
-      "sha256": "9f5d9d24c904f2ae34c258bff8050d4acfe9fe9495d4f700a73ca70a3083c0a7",
+      "sha256": "161797d42211552f17f05c1731f4b0929ab7f12a0d4a2cd982a8582dcd916e6e",
       "status": "archived_rejected_not_applied_to_selected_source"
     },
     "unmatched_candidate_default": {
@@ -2668,7 +2677,7 @@
     },
     "source_patch": {
       "path": "docs/ic/patches/koblitz-n59-null-support-tail-rejected-20260922.patch",
-      "sha256": "45376fb9a86b8b3c00f476c4d2f6a3cc73c6ac931c570f81559f50d75c08342d",
+      "sha256": "d0449052da5cfbc507866f6d2aea49bc349cbbe8544ecf5023138ee3eb9e7a0b",
       "status": "archived_rejected_not_applied_to_selected_source"
     },
     "validation": [
@@ -2875,7 +2884,7 @@
     "operation": "koblitz_n59_parallel_column_tail_rejection",
     "predecessor": {
       "path": "docs/ic/runs/koblitz-n59-rank-solve-interval4-rejection-20260922.json",
-      "sha256": "fa9c37cba6693cae0bcb677094f17855e748637388a313a7c1395d2781f154aa"
+      "sha256": "78c55be3f0d13a14e04ae2933d4a8254b8ea0bc55bce96d10023768569d02d4c"
     },
     "process_accounting": {
       "retained_peak_rss_bytes": 10082500608,
@@ -2918,7 +2927,7 @@
     },
     "source_patch": {
       "path": "docs/ic/patches/koblitz-n59-parallel-column-tail-rejected-20260922.patch",
-      "sha256": "d73080ef7006d5e1edf9b6ca0762bfe6d9c31ef1870a4f7600012a4f29f242d6",
+      "sha256": "44420c42fda9545626dc8bbd47ae0fbf2337be56bf454273258ba7ba72cff7e9",
       "status": "archived_final_serial_column_candidate_not_applied_to_selected_source"
     },
     "validation": [
@@ -3108,7 +3117,7 @@
     },
     "source_patch": {
       "path": "docs/ic/patches/koblitz-n59-rank-solve-interval4-rejected-20260922.patch",
-      "sha256": "fff8f0fd27097a0644e2487d553fdcd9bccd27c2c44f60bb374d26a23a9ae592",
+      "sha256": "787ff736e841061e9aa8c8faaebb72d0c299023e78b88be2919855ce1a61115a",
       "status": "archived_rejected_not_applied_to_selected_source"
     },
     "validation": [
@@ -6409,8 +6418,8 @@
     "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
   ],
   "predecessor": {
-    "stage146_audit_sha256": "8b76e16e781ae1a4bfe94a4d824c1cc12f360cfc14fb7bdba9a616443525d893",
-    "stage146_seal_sha256": "87f4d9d4b4ff4583bc1def42cc5ed051c6d19a10047f4e9e7b4e633b55a3f99c",
+    "stage146_audit_sha256": "a8ad125a894bfa0e1b58427def19137fc254b89b358d7d2335255e60a48c148a",
+    "stage146_seal_sha256": "bf9706e891ab095031509fa7be6b68fde94b4cd44f02e2023aad7d8f06f75ee8",
     "stage146_status": "current_seven_gate_audit_verified"
   },
   "schema": "koblitz_stage147_current_gate_audit.v1",

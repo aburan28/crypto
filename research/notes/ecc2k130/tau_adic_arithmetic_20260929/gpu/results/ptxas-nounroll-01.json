@@ -1,0 +1,240 @@
+{
+  "status": "started",
+  "gpu_executed": false,
+  "compilations": [
+    {
+      "arch": "compute_89",
+      "m": 83,
+      "fast_square": 0,
+      "returncode": 0,
+      "log": "",
+      "options": [
+        "--std=c++17",
+        "--gpu-architecture=compute_89",
+        "-DFIELD_M=83",
+        "-DFAST_SQUARE=0",
+        "-DLINEAR_SQUARE_NOUNROLL=1"
+      ],
+      "ptx_bytes": 92132,
+      "ptx_sha256": "32b419980eb553e3ca4e204e71e14cb19bcfbf9900a8833281cf84badaff3c73",
+      "assembly": {
+        "status": "passed",
+        "returncode": 0,
+        "options": [
+          "--verbose",
+          "--gpu-name=sm_89"
+        ],
+        "stdout": "",
+        "stderr": "ptxas info    : 20 bytes gmem, 24 bytes cmem[4]\nptxas info    : Compiling entry function 'evaluate' for 'sm_89'\nptxas info    : Function properties for evaluate\n    16 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 56 registers, used 0 barriers, 16 bytes cumulative stack size, 404 bytes cmem[0]\nptxas info    : Compile time = 121.810 ms\n",
+        "registers_per_thread": 56,
+        "stack_bytes": 16,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0,
+        "cubin_bytes": 71992,
+        "cubin_sha256": "712f09a45b0a455d550b224486503e059bc7ddefc3ef64da72e8a92312e55fd6"
+      }
+    },
+    {
+      "arch": "compute_89",
+      "m": 83,
+      "fast_square": 1,
+      "returncode": 0,
+      "log": "",
+      "options": [
+        "--std=c++17",
+        "--gpu-architecture=compute_89",
+        "-DFIELD_M=83",
+        "-DFAST_SQUARE=1",
+        "-DLINEAR_SQUARE_NOUNROLL=1"
+      ],
+      "ptx_bytes": 57654,
+      "ptx_sha256": "20fb57ab07418e5e744f3ab1f177357857f7acdb2510c95ff5d1ad8cbf0d4839",
+      "assembly": {
+        "status": "passed",
+        "returncode": 0,
+        "options": [
+          "--verbose",
+          "--gpu-name=sm_89"
+        ],
+        "stdout": "",
+        "stderr": "ptxas info    : 20 bytes gmem, 24 bytes cmem[4]\nptxas info    : Compiling entry function 'evaluate' for 'sm_89'\nptxas info    : Function properties for evaluate\n    16 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 48 registers, used 0 barriers, 16 bytes cumulative stack size, 404 bytes cmem[0]\nptxas info    : Compile time = 83.795 ms\n",
+        "registers_per_thread": 48,
+        "stack_bytes": 16,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0,
+        "cubin_bytes": 43576,
+        "cubin_sha256": "a89727208dd6053f9cb82c7731a996791d037f8675a10c6124927b8d5be6191b"
+      }
+    },
+    {
+      "arch": "compute_89",
+      "m": 131,
+      "fast_square": 0,
+      "returncode": 0,
+      "log": "",
+      "options": [
+        "--std=c++17",
+        "--gpu-architecture=compute_89",
+        "-DFIELD_M=131",
+        "-DFAST_SQUARE=0",
+        "-DLINEAR_SQUARE_NOUNROLL=1"
+      ],
+      "ptx_bytes": 114042,
+      "ptx_sha256": "0ff998c5a5568368c6d980cb4b207bb4316134146ba5a20b6e0522ec7d3880db",
+      "assembly": {
+        "status": "passed",
+        "returncode": 0,
+        "options": [
+          "--verbose",
+          "--gpu-name=sm_89"
+        ],
+        "stdout": "",
+        "stderr": "ptxas info    : 20 bytes gmem, 24 bytes cmem[4]\nptxas info    : Compiling entry function 'evaluate' for 'sm_89'\nptxas info    : Function properties for evaluate\n    24 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 66 registers, used 0 barriers, 24 bytes cumulative stack size, 404 bytes cmem[0]\nptxas info    : Compile time = 194.964 ms\n",
+        "registers_per_thread": 66,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0,
+        "cubin_bytes": 101304,
+        "cubin_sha256": "e380346f2033f2c5cb5a636a42dd81588471ac5f6087db0451e5000d4022abf3"
+      }
+    },
+    {
+      "arch": "compute_89",
+      "m": 131,
+      "fast_square": 1,
+      "returncode": 0,
+      "log": "",
+      "options": [
+        "--std=c++17",
+        "--gpu-architecture=compute_89",
+        "-DFIELD_M=131",
+        "-DFAST_SQUARE=1",
+        "-DLINEAR_SQUARE_NOUNROLL=1"
+      ],
+      "ptx_bytes": 70827,
+      "ptx_sha256": "09653dce91d84d4c490897f21f2fe85e63d91a665563e4aba4a73845f835ee20",
+      "assembly": {
+        "status": "passed",
+        "returncode": 0,
+        "options": [
+          "--verbose",
+          "--gpu-name=sm_89"
+        ],
+        "stdout": "",
+        "stderr": "ptxas info    : 20 bytes gmem, 24 bytes cmem[4]\nptxas info    : Compiling entry function 'evaluate' for 'sm_89'\nptxas info    : Function properties for evaluate\n    24 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 56 registers, used 0 barriers, 24 bytes cumulative stack size, 404 bytes cmem[0]\nptxas info    : Compile time = 111.211 ms\n",
+        "registers_per_thread": 56,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0,
+        "cubin_bytes": 58168,
+        "cubin_sha256": "fbf8f717ba4f30765381d67c98368be2b2dc3954986374e6a30e4cf3ce25f66b"
+      }
+    },
+    {
+      "arch": "compute_120",
+      "m": 83,
+      "fast_square": 0,
+      "returncode": 0,
+      "log": "",
+      "options": [
+        "--std=c++17",
+        "--gpu-architecture=compute_120",
+        "-DFIELD_M=83",
+        "-DFAST_SQUARE=0",
+        "-DLINEAR_SQUARE_NOUNROLL=1"
+      ],
+      "ptx_bytes": 90969,
+      "ptx_sha256": "bb6aa90e5bd8f5599023714f847d0d9a4336b42baa8b28ed792216d6c4ea2c53",
+      "assembly": {
+        "status": "passed",
+        "returncode": 0,
+        "options": [
+          "--verbose",
+          "--gpu-name=sm_120"
+        ],
+        "stdout": "",
+        "stderr": "ptxas info    : 20 bytes gmem\nptxas info    : Compiling entry function 'evaluate' for 'sm_120'\nptxas info    : Function properties for evaluate\n    16 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 56 registers, used 0 barriers, 16 bytes cumulative stack size\nptxas info    : Compile time = 180.504 ms\n",
+        "registers_per_thread": 56,
+        "stack_bytes": 16,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0,
+        "cubin_bytes": 97240,
+        "cubin_sha256": "c0981a455bc1c8e96beda8be732241836f53f3d2f168dc05ecce51f6c07f02a3"
+      }
+    },
+    {
+      "arch": "compute_120",
+      "m": 83,
+      "fast_square": 1,
+      "returncode": 0,
+      "log": "",
+      "options": [
+        "--std=c++17",
+        "--gpu-architecture=compute_120",
+        "-DFIELD_M=83",
+        "-DFAST_SQUARE=1",
+        "-DLINEAR_SQUARE_NOUNROLL=1"
+      ],
+      "ptx_bytes": 56204,
+      "ptx_sha256": "74d2bf50299a98d25d09348b2fafa9d71da89ecd72d786559380799277e30920",
+      "assembly": {
+        "status": "passed",
+        "returncode": 0,
+        "options": [
+          "--verbose",
+          "--gpu-name=sm_120"
+        ],
+        "stdout": "",
+        "stderr": "ptxas info    : 20 bytes gmem\nptxas info    : Compiling entry function 'evaluate' for 'sm_120'\nptxas info    : Function properties for evaluate\n    16 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 48 registers, used 0 barriers, 16 bytes cumulative stack size\nptxas info    : Compile time = 84.531 ms\n",
+        "registers_per_thread": 48,
+        "stack_bytes": 16,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0,
+        "cubin_bytes": 60360,
+        "cubin_sha256": "8b1705329ba23015082bd7df949027f8d2b93f6188692bd1a8d569261176f8ec"
+      }
+    },
+    {
+      "arch": "compute_120",
+      "m": 131,
+      "fast_square": 0,
+      "returncode": 0,
+      "log": "",
+      "options": [
+        "--std=c++17",
+        "--gpu-architecture=compute_120",
+        "-DFIELD_M=131",
+        "-DFAST_SQUARE=0",
+        "-DLINEAR_SQUARE_NOUNROLL=1"
+      ],
+      "ptx_bytes": 112243,
+      "ptx_sha256": "0969466a2f08ccd6e606520753b5eae77ed3d5e5fbd1678053bee77e5e373a4e",
+      "assembly": {
+        "status": "passed",
+        "returncode": 0,
+        "options": [
+          "--verbose",
+          "--gpu-name=sm_120"
+        ],
+        "stdout": "",
+        "stderr": "ptxas info    : 20 bytes gmem\nptxas info    : Compiling entry function 'evaluate' for 'sm_120'\nptxas info    : Function properties for evaluate\n    24 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 80 registers, used 0 barriers, 24 bytes cumulative stack size\nptxas info    : Compile time = 238.608 ms\n",
+        "registers_per_thread": 80,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0,
+        "cubin_bytes": 111936,
+        "cubin_sha256": "c08319373998ae50a6d6885b4d197ba36c1429ed181517c2e19889cab522ab9e"
+      }
+    }
+  ],
+  "source_sha256": "6d86069b3c28a09e83d341b68836d015e03e3759ee372378932fb677c87982a7",
+  "checker_sha256": "85f9fa565af3ee4c6a2ea617e99620dd0d937e229443abff2a982a059e013dbe",
+  "assemble": true,
+  "linear_square_no_unroll": true,
+  "ptxas_version": "ptxas: NVIDIA (R) Ptx optimizing assembler\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Fri_Feb_21_20:21:21_PST_2025\nCuda compilation tools, release 12.8, V12.8.93\nBuild cuda_12.8.r12.8/compiler.35583870_0\n",
+  "ptxas_sha256": "c960a4f238b17d5c5d3c01ad2bbc1ebd2c5aecc459cb4d223bff10b45f9b8fca",
+  "nvrtc_version": [
+    12,
+    8
+  ]
+}
