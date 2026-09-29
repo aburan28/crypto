@@ -80,8 +80,6 @@ pub struct Config {
     /// Gray-code tables per pass, 1 to 4; the block is `k · tables`
     /// pivots for `k`-bit tables.
     pub tables: usize,
-    /// Build Gray-code table entries with AVX2 when the selected kernel supports it.
-    pub avx2_table_build: bool,
     /// Row words per block from which rows are cleared in parallel.
     pub parallel_words: usize,
     /// Use AVX-512 when available, or an explicitly requested AVX2 update.
@@ -92,7 +90,6 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             tables: DEFAULT_TABLES,
-            avx2_table_build: false,
             parallel_words: PARALLEL_WORDS,
             simd: true,
         }
@@ -112,7 +109,6 @@ impl Config {
             {
                 c.tables = t.clamp(1, 4);
             }
-            c.avx2_table_build = std::env::var("KIC_GF2_AVX2_TABLE_BUILD").as_deref() == Ok("1");
             if let Some(p) = std::env::var("KIC_GF2_PARALLEL_WORDS")
                 .ok()
                 .and_then(|v| v.parse::<usize>().ok())
@@ -124,20 +120,6 @@ impl Config {
             }
             c
         })
-    }
-}
-
-/// Whether this process selects AVX2 for Gray-code table construction.
-pub fn avx2_table_build_enabled() -> bool {
-    let config = Config::from_env();
-    #[cfg(target_arch = "x86_64")]
-    {
-        config.avx2_table_build && matches!(simd_kind(config.simd), SimdKind::Avx2)
-    }
-    #[cfg(not(target_arch = "x86_64"))]
-    {
-        let _ = config;
-        false
     }
 }
 
@@ -504,15 +486,9 @@ fn clear_block(
             let (head, tail) = table[base..].split_at_mut(g * suffix);
             let prev_entry = &head[prev * suffix..(prev + 1) * suffix];
             let dst = &mut tail[..suffix];
-            #[cfg(target_arch = "x86_64")]
-            if config.avx2_table_build && matches!(simd, SimdKind::Avx2) {
-                // SAFETY: `simd_kind` selects AVX2 only after a runtime feature check.
-                unsafe { build_entry_avx2(dst, prev_entry, src_row) };
-            } else {
-                build_entry_generic(dst, prev_entry, src_row);
+            for ((d, &p), &s) in dst.iter_mut().zip(prev_entry).zip(src_row) {
+                *d = p ^ s;
             }
-            #[cfg(not(target_arch = "x86_64"))]
-            build_entry_generic(dst, prev_entry, src_row);
             *word_ops += suffix as u64;
         }
     }
@@ -558,29 +534,6 @@ fn clear_block(
             .map(clear)
             .sum::<u64>();
     }
-}
-
-#[inline(always)]
-fn build_entry_generic(dst: &mut [u64], previous: &[u64], pivot: &[u64]) {
-    for ((d, &p), &s) in dst.iter_mut().zip(previous).zip(pivot) {
-        *d = p ^ s;
-    }
-}
-
-#[cfg(target_arch = "x86_64")]
-#[target_feature(enable = "avx2")]
-unsafe fn build_entry_avx2(dst: &mut [u64], previous: &[u64], pivot: &[u64]) {
-    use std::arch::x86_64::{_mm256_loadu_si256, _mm256_storeu_si256, _mm256_xor_si256};
-
-    let mut i = 0;
-    while i + 4 <= dst.len() {
-        // SAFETY: the loop bound proves all four words exist in each slice.
-        let p = unsafe { _mm256_loadu_si256(previous.as_ptr().add(i).cast()) };
-        let s = unsafe { _mm256_loadu_si256(pivot.as_ptr().add(i).cast()) };
-        unsafe { _mm256_storeu_si256(dst.as_mut_ptr().add(i).cast(), _mm256_xor_si256(p, s)) };
-        i += 4;
-    }
-    build_entry_generic(&mut dst[i..], &previous[i..], &pivot[i..]);
 }
 
 /// `dst ^= table[o]` for every offset `o` whose entry is not the zero
@@ -811,7 +764,6 @@ mod tests {
                 for parallel_words in [0, usize::MAX] {
                     out.push(Config {
                         tables,
-                        avx2_table_build: false,
                         parallel_words,
                         simd,
                     });
@@ -831,7 +783,6 @@ mod tests {
                     for reduce_above in [false, true] {
                         let config = Config {
                             tables,
-                            avx2_table_build: false,
                             parallel_words: usize::MAX,
                             simd: false,
                         };
@@ -865,73 +816,6 @@ mod tests {
                     }
                 }
             }
-        }
-    }
-
-    #[test]
-    fn avx2_table_builder_preserves_rows_rank_and_counted_xors() {
-        let mut rng = StdRng::seed_from_u64(181);
-        for &(rows, cols, density) in &[(135, 321, 0.08), (310, 777, 0.5)] {
-            let input = random_matrix(&mut rng, rows, cols, density);
-            for tables in [1, 4] {
-                for reduce_above in [false, true] {
-                    let config = Config {
-                        tables,
-                        parallel_words: usize::MAX,
-                        simd: true,
-                        ..Config::default()
-                    };
-                    let mut prior = input.clone();
-                    let mut new = input.clone();
-                    let mut prior_ops = 0;
-                    let mut new_ops = 0;
-                    let prior_rank = eliminate_with(
-                        &mut prior,
-                        cols,
-                        reduce_above,
-                        false,
-                        config,
-                        &mut prior_ops,
-                        None,
-                        true,
-                    );
-                    let new_rank = eliminate_with(
-                        &mut new,
-                        cols,
-                        reduce_above,
-                        false,
-                        Config {
-                            avx2_table_build: true,
-                            ..config
-                        },
-                        &mut new_ops,
-                        None,
-                        true,
-                    );
-                    assert_eq!(new_rank, prior_rank);
-                    assert_eq!(new_ops, prior_ops);
-                    assert_eq!(new, prior);
-                }
-            }
-        }
-    }
-
-    #[cfg(target_arch = "x86_64")]
-    #[test]
-    fn avx2_table_entry_matches_generic_for_partial_vectors() {
-        if !std::arch::is_x86_feature_detected!("avx2") {
-            return;
-        }
-        let mut rng = StdRng::seed_from_u64(193);
-        for len in [0, 1, 3, 4, 5, 31, 129] {
-            let previous: Vec<u64> = (0..len).map(|_| rng.gen()).collect();
-            let pivot: Vec<u64> = (0..len).map(|_| rng.gen()).collect();
-            let mut expected = vec![0; len];
-            let mut actual = vec![0; len];
-            build_entry_generic(&mut expected, &previous, &pivot);
-            // SAFETY: this test checked AVX2 availability above.
-            unsafe { build_entry_avx2(&mut actual, &previous, &pivot) };
-            assert_eq!(actual, expected);
         }
     }
 

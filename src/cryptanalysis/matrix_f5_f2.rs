@@ -460,8 +460,6 @@ pub struct F5Timings {
     pub direct_pack_used: bool,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
-    /// Whether AVX2 was selected for the shared GF(2) table builder.
-    pub avx2_table_build_used: bool,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -662,10 +660,6 @@ pub fn matrix_f5_f2_with_form_timed(
     let mut word_ops = 0u64;
     let echelon = matches!(form, F5OutputForm::Echelon)
         || (matches!(form, F5OutputForm::SelectiveEchelon) && degree == 4 && n_vars >= 20);
-    timings.avx2_table_build_used = echelon
-        && matrix.len() >= 128
-        && cols.len() >= 256
-        && crate::cryptanalysis::gf2_elim::avx2_table_build_enabled();
     let rank = if !echelon {
         rref_f2_counted(&mut matrix, cols.len(), &mut word_ops)
     } else if matrix.len() >= 128 && cols.len() >= 256 {
