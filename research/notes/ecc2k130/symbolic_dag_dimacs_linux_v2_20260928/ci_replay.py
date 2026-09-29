@@ -101,6 +101,47 @@ def check_static() -> dict:
             'failed to reserve page summary memory' in
             rows['gh_parent_804']['stderr_tail'],
             'held Ubuntu control command outcomes')
+    failed = frozen['release_cap_control_failure']
+    require(failed['run_id'] == 36532472069 and
+            failed['artifact_id'] == 11016841420 and
+            failed['artifact_digest'] ==
+            'sha256:7c3578ac495398016f7694450fac8e67d315a22154a01de3646bf3cda665fcf8' and
+            failed['checkout_head'] == 'c4d4a65f7209bbc3c990113bc46e8b0d7239a043' and
+            failed['receipt_path'] == 'evidence/release_cap_refusal_36532472069.json' and
+            failed['runs_path'] == 'evidence/release_supervisor_runs_36532472069.jsonl',
+            'release harmless-control failure identity')
+    for path_key, sha_key in (('receipt_path', 'receipt_sha256'),
+                              ('runs_path', 'runs_sha256')):
+        require(sha(HERE / failed[path_key]) == failed[sha_key],
+                'release harmless-control failure raw bytes changed')
+    failure = load(HERE / failed['receipt_path'])
+    require(failure['schema'] == 'k0-dag-linux-v2-held-toy-cap-control-v1' and
+            failure['decision'] == 'FAIL_HARMLESS_CONTROL' and
+            failure['release_status'] == 'RELEASED' and
+            failure['measured_children_started'] == 0 and
+            failure['checkout_head'] == failed['checkout_head'] and
+            failure['cap_bytes'] == frozen['caps']['toy']['rss_bytes'] and
+            failure['runner_image_os'] == 'ubuntu24' and
+            failure['error'] == 'RuntimeError: git_cap_base_object exited 128',
+            'release harmless-control failure semantics')
+    failure_rows = failure['commands']
+    require([row['label'] for row in failure_rows] ==
+            ['hard_limit_observation', 'capped_child_local_byte_gate',
+             'git_cap_rev_parse', 'git_cap_base_object'] and
+            [row['exit_code'] for row in failure_rows] == [0, 0, 0, 128] and
+            'packfile ' in failure_rows[-1]['stderr_tail'] and
+            'cannot be mapped' in failure_rows[-1]['stderr_tail'] and
+            'Cannot allocate memory' in failure_rows[-1]['stderr_tail'],
+            'release capped Git base-object failure classification')
+    run_rows = [json.loads(line) for line in
+                (HERE / failed['runs_path']).read_text().splitlines() if line.strip()]
+    require(any(row['id'] == failed['run_id'] and
+                row['head_sha'] == failed['checkout_head'] for row in run_rows),
+            'release control run missing from raw Actions listing')
+    require(subprocess.run(['git', 'merge-base', '--is-ancestor',
+                            failed['checkout_head'], 'HEAD'], cwd=ROOT,
+                           capture_output=True).returncode == 0,
+            'release control failure head is not ancestor of this PR')
     require(subprocess.run(['git', 'merge-base', '--is-ancestor',
                             held['checkout_head'], 'HEAD'], cwd=ROOT,
                            capture_output=True).returncode == 0,
@@ -114,6 +155,15 @@ def check_static() -> dict:
             frozen['preparation']['merge_commit'] ==
             'aa2c05c9ddbf15133878aa64e2cace8ee5cef1d8',
             'merged parent identity')
+    if frozen['status'] == 'RELEASED':
+        for ancestor, descendant in (
+                (frozen['release_main_head'], 'HEAD'),
+                (frozen['first']['merge_commit'], frozen['release_main_head']),
+                (frozen['preparation']['merge_commit'], frozen['release_main_head'])):
+            require(subprocess.run(['git', 'merge-base', '--is-ancestor',
+                                    ancestor, descendant], cwd=ROOT,
+                                   capture_output=True).returncode == 0,
+                    'release main or parent is outside reviewed ancestry')
     for commit in (frozen['first']['merge_commit'],
                    frozen['preparation']['merge_commit']):
         require(subprocess.run(['git', 'merge-base', '--is-ancestor', commit,

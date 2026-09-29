@@ -91,15 +91,25 @@
     "workflow_sha256": "a4ad7a9f0c567d28e5bdcd4477d5e0c6a4d234193cf66a4c6927bd46d6e2d79a"
   },
   "release_branch": "codex/ecc2k130-symbolic-dag-dimacs-linux-v2-held-20260928",
+  "release_cap_control_failure": {
+    "artifact_digest": "sha256:7c3578ac495398016f7694450fac8e67d315a22154a01de3646bf3cda665fcf8",
+    "artifact_id": 11016841420,
+    "checkout_head": "c4d4a65f7209bbc3c990113bc46e8b0d7239a043",
+    "receipt_path": "evidence/release_cap_refusal_36532472069.json",
+    "receipt_sha256": "da4bb579f91b7cb1e429d3ec7ee87d32068b07a37f6efbb5289d59aa7687043d",
+    "run_id": 36532472069,
+    "runs_path": "evidence/release_supervisor_runs_36532472069.jsonl",
+    "runs_sha256": "653c8a9517057e3d60838541d1c93d47eabbf0a50ce53e63ecd9b01f046990d9"
+  },
   "release_main_head": "ddc62d591d151062efdfcf48105a6fede3f9ce74",
   "release_pr_number": 921,
   "schema": "k0-dag-linux-v2-freeze-v1",
   "source_sha256": {
-    "PROTOCOL.md": "38ff2655be21dd00f941934761a52be8958098510bf374d83272a045c8939f4e",
-    "ci_replay.py": "e662285253049cfad766f3ea4f48283ad77d1ca93e53884024280fbeb739b176",
-    "held_cap_control.py": "b216f29c646ebdd2661eee63efbe7224da28f13e08d33aff76bc64f21d027379",
+    "PROTOCOL.md": "febb91a9686df506c8a5c9fd489d4eeec03074af8240f26f0be12b2df0125612",
+    "ci_replay.py": "74e4c87bbfc39614f4509bac31cdffbeb861a1a0ddd574e35048c2a8f7e51db5",
+    "held_cap_control.py": "bbbd33ce1cbad21df31aa0b05f0ae324007b2f35be2e81a69ed44b4c1e2802b3",
     "run.py": "c2e0e92aff9ed35464fb3560fa539454e48d662c2b664ad67de91a9e6b3cea99",
-    "selftest.py": "b54dc53c350055c363c9a31cc358119efe3e1280970dd2473d8e3446c6b7a214",
+    "selftest.py": "dfa91fb59460092f20709dfec5453309a6d3210e06610ac085ed07a2971e152a",
     "v2_child.py": "8e23ef99fdba52268be1213f4df9aa121d6ba372914f3dfa4784ed23a3bee144"
   },
   "status": "RELEASED",

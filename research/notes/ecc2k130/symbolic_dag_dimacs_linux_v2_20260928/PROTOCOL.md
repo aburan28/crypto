@@ -76,7 +76,22 @@ different failure refuses it. The successful held control from Actions run
 [36530704726](https://github.com/aburan28/crypto/actions/runs/36530704726)
 is retained byte-for-byte in `evidence/held_cap_control_36530704726.json`,
 with its SHA-256 and artifact identity pinned in `FROZEN.json`. It is a host
-control, not an attempt-2 archive. The separately opt-in measure workflow is triggered only by the unique PR label
+control, not an attempt-2 archive. After the release-main merge, the first
+released hash-only run
+[36532472069](https://github.com/aburan28/crypto/actions/runs/36532472069)
+reported a further harmless capped-Git refusal: `git cat-file -t` of the
+base commit exited 128 because its packfile could not be mapped under 512 MiB.
+The exact failure receipt and uncapped workflow-run listing are retained in
+`evidence/release_cap_refusal_36532472069.json` and
+`evidence/release_supervisor_runs_36532472069.jsonl`, with both file hashes
+and the source artifact digest pinned in `FROZEN.json`. The corrected control
+classifies this same narrow pack-mapping error for the base-object query and
+for ancestry; a different error still fails. That hosted run passed the
+frozen-byte replay, both gate-only entrypoints, all no-network controls,
+and uncapped Git/GitHub API reads before this harmless control failed. No
+measured child was started.
+
+The separately opt-in measure workflow is triggered only by the unique PR label
 `ecc2k130-dag-linux-v2-measure-once`. It cannot alter the frozen release state.
 
 The separate release commit fills `status=RELEASED`, `release_main_head` with

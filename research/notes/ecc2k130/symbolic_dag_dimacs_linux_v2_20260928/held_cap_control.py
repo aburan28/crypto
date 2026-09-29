@@ -27,6 +27,16 @@ def limits() -> None:
     resource.setrlimit(resource.RLIMIT_AS, (CAP, CAP))
 
 
+def classify_capped_git(row: dict) -> str:
+    if row['exit_code'] == 0:
+        return 'PASS'
+    stderr = row.get('stderr_tail', '')
+    if (row['exit_code'] == 128 and 'packfile ' in stderr and
+            'cannot be mapped' in stderr and 'Cannot allocate memory' in stderr):
+        return 'PACK_MMAP_REFUSAL'
+    raise RuntimeError('unexpected capped Git failure: ' + row['label'])
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--expected-head', required=True)
@@ -100,52 +110,52 @@ def main() -> int:
             ]))
             if child['decision'] != 'HASH_ONLY_NO_MEASURED_CHILD':
                 raise RuntimeError('actual child byte gate did not pass under toy cap')
-            run('git_cap_rev_parse', ['git', 'rev-parse', 'HEAD'])
-            run('git_cap_base_object', [
+            if run('git_cap_rev_parse', ['git', 'rev-parse', 'HEAD']).decode().strip() != args.expected_head:
+                raise RuntimeError('capped Git head differs from event head')
+            base_type = run('git_cap_base_object', [
                 'git', 'cat-file', '-t', frozen['base_main_head'],
-            ])
+            ], allow_failure=True)
+            base_row = receipt['commands'][-1]
+            base_class = classify_capped_git(base_row)
+            if base_class == 'PASS' and base_type.strip() != b'commit':
+                raise RuntimeError('capped Git base object has wrong type')
+            receipt['capped_git_base_object_classification'] = base_class
             run('git_cap_checkout_ancestry', [
                 'git', 'merge-base', '--is-ancestor',
                 frozen['base_main_head'], args.expected_head,
             ], allow_failure=True)
-            ancestry = receipt['commands'][-1]
-            if ancestry['exit_code'] == 0:
-                receipt['capped_git_classification'] = 'PASS'
-            elif (ancestry['exit_code'] == 128 and
-                    'packfile ' in ancestry.get('stderr_tail', '') and
-                    'cannot be mapped' in ancestry['stderr_tail']):
-                receipt['capped_git_classification'] = 'PACK_MMAP_REFUSAL'
-            else:
-                raise RuntimeError('unexpected capped Git ancestry failure')
-            capped_refusal = receipt['capped_git_classification'] == 'PACK_MMAP_REFUSAL'
+            ancestry_class = classify_capped_git(receipt['commands'][-1])
+            receipt['capped_git_ancestry_classification'] = ancestry_class
+            capped_refusal = 'PACK_MMAP_REFUSAL' in (base_class, ancestry_class)
+            receipt['capped_git_classification'] = (
+                'PACK_MMAP_REFUSAL' if capped_refusal else 'PASS')
             check_raw = run('preparation_and_v2_hash_gate', [
                 sys.executable, str(HERE / 'ci_replay.py'),
             ], allow_failure=capped_refusal)
             check_row = receipt['commands'][-1]
-            if capped_refusal:
-                if (check_row['exit_code'] != 1 or
-                        'AssertionError: v2 branch does not descend' not in
-                        check_row.get('stderr_tail', '')):
-                    raise RuntimeError('capped static gate failed for another reason')
-            else:
+            if check_row['exit_code'] == 0:
                 check = json.loads(check_raw)
                 if (check['decision'] != 'PASS_HASH_AND_ARCHIVE_REPLAY' or
                         check['release_status'] != frozen['status'] or
                         check['evidence'] is not None):
                     raise RuntimeError('preparation/static gate did not pass')
+            elif (not capped_refusal or check_row['exit_code'] != 1 or
+                  'AssertionError: v2 branch does not descend' not in
+                  check_row.get('stderr_tail', '')):
+                raise RuntimeError('capped static gate failed for another reason')
             prep_raw = run('preparation_archive_gate', [
                 sys.executable,
                 str(HERE.parent / 'symbolic_dag_dimacs_linux_attempt2_20260926' /
                     'verify_preparation.py'),
             ], allow_failure=capped_refusal)
             prep_row = receipt['commands'][-1]
-            if capped_refusal:
-                if (prep_row['exit_code'] == 0 or
-                        'NOT_ADMITTED: first-failure record is not an ancestor' not in
-                        prep_row.get('stderr_tail', '')):
-                    raise RuntimeError('capped preparation gate failed for another reason')
-            elif b'PASS_HARMLESS_PREPARATION_ONLY' not in prep_raw:
-                raise RuntimeError('preparation archive gate did not pass')
+            if prep_row['exit_code'] == 0:
+                if b'PASS_HARMLESS_PREPARATION_ONLY' not in prep_raw:
+                    raise RuntimeError('preparation archive gate did not pass')
+            elif (not capped_refusal or
+                  'NOT_ADMITTED: first-failure record is not an ancestor' not in
+                  prep_row.get('stderr_tail', '')):
+                raise RuntimeError('capped preparation gate failed for another reason')
             event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
             pr_number = event['pull_request']['number']
             if event['pull_request']['head']['sha'] != args.expected_head:

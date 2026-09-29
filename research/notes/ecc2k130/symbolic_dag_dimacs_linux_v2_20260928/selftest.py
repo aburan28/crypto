@@ -16,6 +16,7 @@ from unittest.mock import patch
 
 import run
 import v2_child
+from held_cap_control import classify_capped_git
 from ci_replay import (FIRST, _check_relation_stream, _replay_n131,
                        check_archive, check_static)
 
@@ -76,6 +77,16 @@ class GateControls(unittest.TestCase):
             v2_child.dispatch_gate(self.held, run.git('rev-parse', 'HEAD'),
                                    Path('/tmp/toy'), Path('/tmp/DISPATCH.json'),
                                    '0' * 64)
+
+    def test_observed_capped_git_base_object_failure_is_narrow(self) -> None:
+        failure = json.loads((run.HERE / 'evidence' /
+            'release_cap_refusal_36532472069.json').read_text())
+        row = next(item for item in failure['commands']
+                   if item['label'] == 'git_cap_base_object')
+        self.assertEqual(classify_capped_git(row), 'PACK_MMAP_REFUSAL')
+        self.assertEqual(classify_capped_git({**row, 'exit_code': 0}), 'PASS')
+        with self.assertRaisesRegex(RuntimeError, 'unexpected capped Git failure'):
+            classify_capped_git({**row, 'stderr_tail': 'fatal: bad object'})
 
     def test_capped_child_accepts_only_sealed_dispatch(self) -> None:
         released = dict(self.frozen)
