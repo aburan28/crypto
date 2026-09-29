@@ -267,7 +267,7 @@ def preflight(args, exclude: set[int]) -> dict:
     return {'settle': quiet, 'conditions': now}
 
 
-def run_pinned(args, cpus: set[int], command: list[str], stdin) -> dict:
+def run_pinned(args, cpus: set[int], command: list[str], stdin, stdout=None) -> dict:
     exclude = {os.getpid()}
     before_ticks = cpu_ticks()
     before = conditions()
@@ -275,7 +275,7 @@ def run_pinned(args, cpus: set[int], command: list[str], stdin) -> dict:
     os.sched_setaffinity(0, cpus)
     start = time.monotonic()
     try:
-        child = subprocess.Popen(command, stdin=stdin)
+        child = subprocess.Popen(command, stdin=stdin, stdout=stdout)
     finally:
         os.sched_setaffinity(0, inherited)
     _, status, usage = os.wait4(child.pid, 0)
