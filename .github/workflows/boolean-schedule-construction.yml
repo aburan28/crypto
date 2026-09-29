@@ -1,0 +1,24 @@
+name: Standalone Boolean construction cost bound
+on:
+  pull_request:
+    paths:
+      - 'research/boolean_schedule_construction_20260923/**'
+      - '.github/workflows/boolean-schedule-construction.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Shared scan and retained algebra checks
+        run: |
+          rustc --edition 2021 -O --test research/boolean_schedule_construction_20260923/measure.rs -o /tmp/boolean-construction-tests
+          /tmp/boolean-construction-tests
+      - name: Frozen cost partition and corruption checks
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 -m unittest discover -s research/boolean_schedule_construction_20260923 -p 'test_*.py' -v

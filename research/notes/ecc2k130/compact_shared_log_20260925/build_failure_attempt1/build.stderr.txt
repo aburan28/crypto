@@ -1,0 +1,14 @@
+    Updating crates.io index
+warning: spurious network error (3 tries remaining): [6] Couldn't resolve host name (Could not resolve host: index.crates.io)
+warning: spurious network error (2 tries remaining): [6] Couldn't resolve host name (Could not resolve host: index.crates.io)
+warning: spurious network error (1 try remaining): [6] Couldn't resolve host name (Could not resolve host: index.crates.io)
+error: failed to get `base64` as a dependency of package `crypto v0.1.0 (/private/tmp/kic-sparse-shared-log-20260925)`
+
+Caused by:
+  download of config.json failed
+
+Caused by:
+  failed to download from `https://index.crates.io/config.json`
+
+Caused by:
+  [6] Couldn't resolve host name (Could not resolve host: index.crates.io)

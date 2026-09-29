@@ -1,0 +1,254 @@
+[
+  {
+    "cell": "n16-17-planted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "16",
+      "17",
+      "planted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 5210112,
+    "process_wall_ns": 524856375,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "ef7b328bcd7b0c0ea4e8dd86be79fa2f12f78049d370029fd764e0bd2a4a52d8",
+    "system_seconds": 0.003289,
+    "timed_out": false,
+    "user_seconds": 0.30008799999999997
+  },
+  {
+    "cell": "n16-17-cross_planted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "16",
+      "17",
+      "cross_planted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 4964352,
+    "process_wall_ns": 210502459,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "899be281006c0b29ac9d394e21807387e291602344c51610f3e5ef9259de69aa",
+    "system_seconds": 0.002141,
+    "timed_out": false,
+    "user_seconds": 0.194324
+  },
+  {
+    "cell": "n16-17-unplanted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "16",
+      "17",
+      "unplanted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 5259264,
+    "process_wall_ns": 365976334,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "bc127f3acfa15cc23fd1b144bec2163b4f2d7d37a41e87e2743998cafef7e08a",
+    "system_seconds": 0.0026579999999999998,
+    "timed_out": false,
+    "user_seconds": 0.347678
+  },
+  {
+    "cell": "n16-937-planted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "16",
+      "937",
+      "planted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 5816320,
+    "process_wall_ns": 373454959,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "40b0f3aefae6321ac47cb3d6de3bd339487da78cbb84a45f40ddf938f7e56678",
+    "system_seconds": 0.002915,
+    "timed_out": false,
+    "user_seconds": 0.360097
+  },
+  {
+    "cell": "n16-937-cross_planted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "16",
+      "937",
+      "cross_planted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 4784128,
+    "process_wall_ns": 192244958,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "7187ddf97bf7602a225d7afee7369268e86a2c8cee04895fc282fd53b4d3e1fe",
+    "system_seconds": 0.0022099999999999997,
+    "timed_out": false,
+    "user_seconds": 0.179582
+  },
+  {
+    "cell": "n16-937-unplanted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "16",
+      "937",
+      "unplanted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 5816320,
+    "process_wall_ns": 480073583,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "a811aab8110b0a511041560d5541a6ced8f04c1442bac09b2d8e5bcfb393293b",
+    "system_seconds": 0.002742,
+    "timed_out": false,
+    "user_seconds": 0.463844
+  },
+  {
+    "cell": "n24-17-planted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "24",
+      "17",
+      "planted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 17825792,
+    "process_wall_ns": 10266013042,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "b656839fc72844d53de6f0041608b52b72aeb81e768c80b23b6a61fd9f0f1890",
+    "system_seconds": 0.016794,
+    "timed_out": false,
+    "user_seconds": 10.230054
+  },
+  {
+    "cell": "n24-17-cross_planted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "24",
+      "17",
+      "cross_planted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 15646720,
+    "process_wall_ns": 5424168000,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "0f0d0f167e6df9b495a8cd50adf6e266708967ddf936f04d6649f771da48809f",
+    "system_seconds": 0.009739,
+    "timed_out": false,
+    "user_seconds": 5.398912
+  },
+  {
+    "cell": "n24-17-unplanted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "24",
+      "17",
+      "unplanted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 19693568,
+    "process_wall_ns": 10139671417,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "ac637cc23605a31fd56c745c0a321d17623d890d0ec0b480a414ee2148d8bbc2",
+    "system_seconds": 0.016351,
+    "timed_out": false,
+    "user_seconds": 10.104968
+  },
+  {
+    "cell": "n24-937-planted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "24",
+      "937",
+      "planted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 18612224,
+    "process_wall_ns": 10154480250,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "faa839b6284b7dfbd278fb84e43a1387812d90fbaebe10b8f2f19a10398703ba",
+    "system_seconds": 0.012903,
+    "timed_out": false,
+    "user_seconds": 10.126095
+  },
+  {
+    "cell": "n24-937-cross_planted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "24",
+      "937",
+      "cross_planted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 13680640,
+    "process_wall_ns": 4641505250,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3a97bbbe9d3b9623f50db2b57dc47b56a3c766e605baf6d3566162d1d1d3ac09",
+    "system_seconds": 0.0066809999999999994,
+    "timed_out": false,
+    "user_seconds": 4.617404
+  },
+  {
+    "cell": "n24-937-unplanted",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-initial-probe-skdiv1og/worker",
+      "24",
+      "937",
+      "unplanted",
+      "3",
+      "200000",
+      "with-final"
+    ],
+    "exit_code": 0,
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "peak_rss_bytes": 18038784,
+    "process_wall_ns": 18861682375,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "f2fa57a2896a2c542f2baf35d65ccff12a6c9209c4ff67049c1c3eff26e02846",
+    "system_seconds": 0.024246,
+    "timed_out": false,
+    "user_seconds": 18.818046
+  }
+]

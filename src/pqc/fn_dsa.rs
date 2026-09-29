@@ -344,7 +344,7 @@ fn solve_f64(a: &[Vec<f64>], b: &[f64]) -> Option<Vec<f64>> {
 /// One step of Babai reduction: `(F, G) −= round((F·f̄ + G·ḡ)/(f·f̄ + g·ḡ))·(f, g)`.
 /// `k` is estimated in floating point (any rounding slop just costs an
 /// extra iteration); the subtraction is exact.
-fn reduce_fg(f: &[BigInt], g: &[BigInt], big_f: &mut Vec<BigInt>, big_g: &mut Vec<BigInt>) -> bool {
+fn reduce_fg(f: &[BigInt], g: &[BigInt], big_f: &mut [BigInt], big_g: &mut [BigInt]) -> bool {
     use num_traits::ToPrimitive;
     let f_adj = poly_adjoint_big(f);
     let g_adj = poly_adjoint_big(g);
@@ -567,7 +567,7 @@ pub fn fn_dsa_sign(sk: &FnDsaSecretKey, msg: &[u8]) -> FnDsaSignature {
         let c = hash_to_point(&salt, msg);
 
         let mut target: Vec<f64> = c.iter().map(|&x| x as f64).collect();
-        target.extend(std::iter::repeat(0f64).take(N));
+        target.extend(std::iter::repeat_n(0f64, N));
         let v = nearest_plane(&basis, &target);
 
         let s1: Vec<i64> = (0..N)
@@ -593,7 +593,7 @@ pub fn fn_dsa_verify(pk: &FnDsaPublicKey, msg: &[u8], sig: &FnDsaSignature) -> b
     // (Falcon's decoder likewise bounds coefficient magnitudes).  The
     // bound is written as a two-sided compare rather than `abs()` so
     // that i64::MIN (whose `abs()` itself overflows) is handled.
-    if sig.s2.iter().any(|&x| x < -BOUND || x > BOUND) {
+    if sig.s2.iter().any(|&x| !(-BOUND..=BOUND).contains(&x)) {
         return false;
     }
     let c = hash_to_point(&sig.salt, msg);
