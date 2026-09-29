@@ -3,9 +3,10 @@ import copy
 import json
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 from generic_bases import construct, verify_base
-from generic_solver_feasibility import (SOURCE_OBJECTS, assess, basis_length,
+from generic_solver_feasibility import (SOURCE_COMMIT, SOURCE_OBJECTS, assess, basis_length,
                                         check_source, check_source_checkout)
 from identity import sha256
 from oracle import Curve, InvalidEvidence
@@ -19,9 +20,22 @@ INVENTORY = HERE / 'goal_20260924/generic-backend-qualification-v2/standard-subs
 
 class GenericSolverFeasibilityTests(unittest.TestCase):
     def test_reviewed_source_and_entire_registered_panel_expose_hard_failure(self):
-        check_source(HERE.parents[1])
-        with self.assertRaisesRegex(InvalidEvidence, 'not the reviewed worker'):
-            check_source_checkout(HERE.parents[1])
+        # CI uses shallow checkouts, so the historical commit need not be in
+        # its object store. Exercise the pin logic without fetching history;
+        # the local CLI control separately checks the real pinned checkout.
+        def reviewed(argv, **_):
+            self.assertEqual(argv[:2], ['git', 'rev-parse'])
+            commit, path = argv[2].split(':', 1)
+            self.assertEqual(commit, SOURCE_COMMIT)
+            return SOURCE_OBJECTS[path] + '\n'
+        with patch('generic_solver_feasibility.subprocess.check_output', side_effect=reviewed):
+            check_source(HERE.parents[1])
+        with patch('generic_solver_feasibility.subprocess.check_output', return_value='0'*40):
+            with self.assertRaisesRegex(InvalidEvidence, 'unreviewed generic source object'):
+                check_source(HERE.parents[1])
+        with patch('generic_solver_feasibility.check_source'):
+            with self.assertRaisesRegex(InvalidEvidence, 'not the reviewed worker'):
+                check_source_checkout(HERE.parents[1])
         result = assess(json.loads(PANEL.read_text()))
         self.assertEqual(result, json.loads(STATIC_AUDIT.read_text()))
         self.assertEqual(result['status'], 'FAIL_STATIC_LAYOUT')
