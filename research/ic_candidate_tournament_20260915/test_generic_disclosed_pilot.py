@@ -1,4 +1,5 @@
 """Controls for the disclosed-input diagnostic pilot's frozen schedule."""
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -48,6 +49,9 @@ class DisclosedPilotTests(unittest.TestCase):
         for solver in ('f4', 'f5'):
             frozen = evidence['raw_stage_a'][solver]
             report, job = frozen['stdout'], frozen['job']
+            self.assertEqual(hashlib.sha256(frozen['stdout_raw'].encode()).hexdigest(),
+                             frozen['stdout_sha256'])
+            self.assertEqual(json.loads(frozen['stdout_raw']), report)
             self.assertEqual(report['status'], 'incomplete')
             self.assertEqual(frozen['process']['exit_code'], 2)
             self.assertEqual(job['algorithm_seed'], panel['algorithm_seed'])
@@ -77,6 +81,49 @@ class DisclosedPilotTests(unittest.TestCase):
             self.assertTrue(row['dispatched'])
             self.assertEqual(row['exit_code'], 2)
             self.assertIsNone(row['competitive_total'])
+
+    def test_frozen_stage_b_retains_timeout_and_replays_every_report(self):
+        evidence = read(PANEL.with_name('RESULT-v3-stage-b.json'))
+        stage_a = read(PANEL.with_name('RESULT-v3-stage-a.json'))
+        panel = read(PANEL)
+        fixtures = fixture_map(panel)
+        rows = evidence['summary']['rows']
+        self.assertEqual(evidence['summary']['status'], 'FEASIBILITY_NOT_ESTABLISHED')
+        self.assertEqual(len(rows), 10)
+        self.assertEqual(sum(row['dispatched'] for row in rows), 9)
+        self.assertTrue(all(row['competitive_total'] is None
+                            and row['competitive_speedup'] is None for row in rows))
+        self.assertEqual(evidence['original_summary_sha256'],
+                         evidence['stage_a_repair']['original_summary_sha256'])
+        for cell in panel['stage_b_cells']:
+            for solver in panel['solvers']:
+                frozen = evidence['raw_stage_b'][cell][solver]
+                self.assertEqual(hashlib.sha256(frozen['stdout_raw'].encode()).hexdigest(),
+                                 frozen['stdout_sha256'])
+                self.assertEqual(frozen['job']['public_targets'], fixtures[cell]['targets'])
+                self.assertEqual(frozen['job']['algorithm_seed'], panel['algorithm_seed'])
+                self.assertEqual(frozen['job']['config']['solver'], solver)
+                self.assertEqual(frozen['result']['cell'], cell)
+                self.assertEqual(frozen['result']['solver'], solver)
+                if (cell, solver) == ('n31a0', 'f4'):
+                    self.assertEqual(frozen['result']['disposition'], 'TIMEOUT')
+                    self.assertFalse(frozen['result']['dispatched'])
+                    self.assertEqual(frozen['stdout_raw'], '')
+                    self.assertTrue(all(audit is None for audit in frozen['audits'].values()))
+                    continue
+                report = json.loads(frozen['stdout_raw'])
+                self.assertEqual(report['status'], 'incomplete')
+                self.assertEqual(frozen['result']['disposition'], 'BOUNDED_INCOMPLETE_REPORT')
+                self.assertTrue(frozen['result']['dispatched'])
+                self.assertEqual(report['generic_build'], stage_a['build_record']['identity'])
+                self.assertEqual(frozen['audits']['build']['worker_sha256'],
+                                 stage_a['build_record']['worker_sha256'])
+                self.assertEqual(verify_base(report, report['fixture'], frozen['job']),
+                                 frozen['audits']['base'])
+                self.assertEqual(verify_query_law(report, report['fixture'], frozen['job']),
+                                 frozen['audits']['query'])
+                self.assertEqual(verify_stages(report, report['fixture'], frozen['job']),
+                                 frozen['audits']['stages'])
 
     def test_rss_watch_preserves_raw_output_and_timeout(self):
         with tempfile.TemporaryDirectory() as directory:
