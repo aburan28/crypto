@@ -2,8 +2,8 @@
 
 Status: **producer/preservation failure, no campaign artifact** in
 [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479).
-See the [failure record](RUN-2026092902-FAILURE.md). The seed is closed and
-cannot be redispatched; no candidate result or speedup is admitted.
+See the [run analysis](RESULT.md) and [machine-readable failure record](RUN-2026092902-FAILURE.md).
+The seed is closed and cannot be redispatched; no candidate result or speedup is admitted.
 The scientific question, schedule,
 resources, success/stop rules and accounting are frozen in [PROTOCOL.md](PROTOCOL.md).
 The subsequent [source feasibility audit](STATIC-FEASIBILITY.md) identifies a

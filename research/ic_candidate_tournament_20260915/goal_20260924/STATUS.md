@@ -238,12 +238,15 @@ seed `2026092902`, panel SHA-256
 `d283a869b0412228d1c66260fdfd8f387d7243bd15456c7febf3c46ee5da27a8`,
 one process on each of 25 distinct points and 250 trial slots. It excludes the
 25 reconstructed first-run points and keeps the same source-bound F4/F5, SAT,
-incumbent and matched-rho arms. Its one permitted dispatch is live as
+incumbent and matched-rho arms. Its one permitted dispatch,
 [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
-(attempt one); never redispatch this seed. Qualification and cost rows remain
-pending until that run's packed artifact, frozen verifier, natural-query audit
-and family gate finish. A timed-out or partial archive is operationally
-censored for family verdicts.
+(attempt one), hit the 300-minute measured-step cap and lost its campaign archive
+when concurrent `tar`/`zstd` packing failed on a ~35 GiB tree; see the
+[censored result](generic-backend-qualification-v2/RESULT.md). Never redispatch
+this seed. Family qualification and competitive costs are unknown; the static
+F4/F5 encoder audit and the disclosed-point
+[dimension-6 pilot](generic-f4-subspace-pilot/RESULT.md) remain separate
+diagnostics.
 
 Post-registration source audit (PR
 [#952](https://github.com/aburan28/crypto/pull/952)): the pinned `m=3` Semaev
