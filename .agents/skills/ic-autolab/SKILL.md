@@ -95,7 +95,9 @@ and then runs the frozen tournament once. Replay the artifact's archived
 `generic_backend_gate.py --bundle <retained-output> --out <new-result.json>`.
 The gate requires every smoke and development job to be verified for at least
 one F4/F5 arm and one SAT arm; a reference-selection status alone does not
-qualify either family. `generic_backend_yield.py` checks
+qualify either family. Describe the current `f4` backend as a bounded Macaulay
+matrix engine and `f5` as that engine with an F5 row criterion; neither is a
+full incremental Gröbner-basis implementation. `generic_backend_yield.py` checks
 natural ordinary-query attempts in both complete and bounded-incomplete
 reports; timeouts without a full report are censored. Report distinct-point
 rate uncertainty and preserve zero-yield cells. An incomplete arm cannot gain
