@@ -231,6 +231,40 @@ Constant-factor: both arms ~√(L·r/n) at optimal K. Status
 **L=65,536 only**. Do not run 32-target panels. Evidence:
 [`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
 
+**Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
+`vs_rho` comparator (`examples/koblitz_rho_batch_ks.rs`) walks its
+signed-Frobenius canonicalization by real field squaring and inverts by
+Fermat's square-and-multiply — an unmatched baseline against the IC arm's own
+normal-basis rotation / Itoh–Tsujii inversion. A new
+`examples/koblitz_rho_batch_ks_matched_arith.rs` gives rho that exact same
+rotation/inversion machinery (four correctness gates: `Gf2` agrees with the
+raw field arithmetic, rotation reproduces chained squaring, canonicalization
+output is bit-identical to the original, `raw_inverse` is a genuine inverse —
+all passing) and reruns the frozen n=53, L=1,024, K=440, batch_seed=531310,
+dp_bits=4 cell. Wall clock: matched rho is **7.071× faster than the
+unmodified rho** (215.240 s → 30.442 s) and now within 1.1% of IC's 30.772 s
+(0.989×) — near parity, wall-clock only. Operation count (valgrind
+`--tool=callgrind` retired instructions, whole process, both binaries, same
+host): matched rho 371,102,176,689 vs IC 89,164,459,930, i.e. **IC costs
+0.2403× matched rho's instructions** (equivalently matched rho costs 4.162×
+IC's) — decisively the same direction as the original 0.246 wall-clock
+figure, on a real total-operation unit this time. All 1,024 targets verified
+correct on every one of four runs (unmodified-KS corpus, matched-arith
+native, matched-arith under callgrind, IC native and under callgrind);
+`total_walk_steps` is bit-identical (19,103,507) between the unmodified and
+matched-arithmetic KS runs, confirming the rewrite changed cost, not the walk.
+Per the pre-registered rule (IC/rho, this repo's usual challenger/reference
+convention — the task dispatching this check had transcribed the ratio
+direction backwards, corrected in the note below against the original
+wording): 0.2403 < 0.8, so **the lead survives** at this one cell, on the
+operation-count metric. This is one rerun on one host, still
+`PENDING_INDEPENDENT_VALIDATION`, and does not by itself promote the
+selected-panel `vs_rho` row. Full numbers, host manifest, and raw
+JSON/callgrind output are in
+[`RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md`](../../research/notes/index-calculus/RESEARCH_MATCHED_RHO_ORBIT_DLP_20260928.md)
+and
+[`matched_rho_orbit_dlp_20260928_run/`](../../research/notes/index-calculus/matched_rho_orbit_dlp_20260928_run/).
+
 ## Global agent priorities (beat these in order)
 
 1. **Koblitz compact-orbit `vs_rho` → a=0 n=61 vs batched rho at L=65,536** (L=1,024 / 4,096 / 16,384 already 3/3). No 32-target panels. After that: independent-host rerun and Bernstein–Lange.

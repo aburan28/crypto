@@ -229,3 +229,158 @@ This one rerun, on one host, does not itself promote or demote
 `PENDING_INDEPENDENT_VALIDATION`; it states plainly that it is one rerun,
 unreplicated on a second host/agent, same limitation the original measurement
 had.
+
+## Result (2026-09-28, additive — nothing above this line was edited after seeing it)
+
+**Host, recorded before running:**
+`Linux vm 6.18.44-fc-v37 x86_64`, `rustc 1.94.1 (e408947bf 2026-03-25)`,
+Intel(R) Xeon(R) Processor @ 2.10GHz, 4 logical cores, 15 GiB RAM, CPU flags
+include `pclmulqdq aes avx2 bmi2 avx512f popcnt` (relevant to the carryless
+multiply this whole comparison is about), no swap. `valgrind-3.22.0`. Repo
+`HEAD` at run time: `32622a2107c01f493c7d361dab900be1c583167d`. Load average
+stayed at 0.44–0.99 (`uptime`, recorded before/after every run below) — quiet,
+no contention, well under the core count. Raw manifests, per-run load
+snapshots, and every command's stdout/stderr are committed under
+`research/notes/index-calculus/matched_rho_orbit_dlp_20260928_run/`, with
+`SHA256SUMS` over both source files and both release binaries.
+
+**Correctness, all four runs (unmodified KS corpus generation, matched-arith
+KS native, matched-arith KS under callgrind, IC native, IC under callgrind):**
+every one of 1,024 fixtures/targets verified on every run
+(`all_verified`/`verified`/`group_verified` all `true`, `targets_solved: 1024`,
+`targets_failed: 0`, `rank_failures: 0`, `rank: 440` = full rank at the
+declared K). `total_walk_steps` is bit-identical — `19,103,507` — across the
+unmodified-KS corpus run, the native matched-arith run, and the
+callgrind-instrumented matched-arith run: the matched-arithmetic rewrite
+provably walks the exact same rho trajectory (same jumps, same distinguished
+points, same collisions), at lower cost per step, exactly as the correctness
+gates required.
+
+**Wall clock** (reference only, per AGENTS.md §6 — not what the pre-registered
+rule is scored on), native runs, single process each, no other load on the
+host:
+
+| arm | in-process wall | vs IC | notes |
+|---|---:|---:|---|
+| KS, unmodified (`koblitz_rho_batch_ks`) | 215.240 s | 6.995× | Fermat inverse + squaring-walk canonicalization |
+| KS, matched-arithmetic (`koblitz_rho_batch_ks_matched_arith`) | 30.442 s | 0.989× | this round's rewrite |
+| IC (`koblitz_orbit_dlp_fast`, unmodified) | 30.772 s | 1.000× | K=440, construct mode |
+
+Removing the arithmetic asymmetry alone is a **7.071×** wall-clock speedup for
+the KS side (215.240 s → 30.442 s), and takes the KS/IC wall ratio from 6.995×
+down to 0.989× — on wall clock, matched-arithmetic rho and IC are within 1.1%
+of each other on this host, with matched rho very slightly faster.
+
+**Operation count — valgrind `--tool=callgrind` retired instructions (`Ir`),
+whole process, the metric the pre-registered rule is scored on:**
+
+| arm | Ir (retired instructions) | source |
+|---|---:|---|
+| KS, matched-arithmetic | 371,102,176,689 | `callgrind_ks_matched.out` / `.annotate.txt` |
+| IC | 89,164,459,930 | `callgrind_ic.out` / `.annotate.txt` |
+
+`callgrind_annotate`'s self-cost breakdown is consistent with the mechanism
+this round targets: on the matched-arithmetic KS side, `raw_canonicalize`
+alone is 50.82% of all instructions and `raw_mul_field`/`raw_square` together
+another 30.73% — canonicalization no longer calls the field at all, but
+walking every one of up to `n = 53` orbit positions to find the least
+representative is still `Θ(n)` **word** operations (two `Linear::apply` byte-
+table lookups per position), just no longer `Θ(n)` **field multiplications**.
+That is the real content of "O(1) rotation instead of a squaring chain": the
+per-position cost drops from one full carryless-multiply-and-reduce to a
+handful of table lookups, not to nothing, and canonicalization remains the
+single largest cost center in absolute instructions. On the IC side, `extract`
+(54.14%) and `main`'s rank/target loops (36.66%) dominate, with `Gf2::sqr` and
+its `clmul_u64` carryless multiply together at 6.96% and `Gf2::inv` at 0.69%.
+
+**Supplementary diagnostic, KS side only** (exact `raw_mul_field`/`raw_square`
+call counts, not the metric the rule is scored on — see "why not exact Gf2
+call counting on both sides" above): `total_mul_calls = 185,811,921`,
+`total_sqr_calls = 82,757,971`, `total_field_ops = 268,569,892`,
+`total_inv_calls = 20,645,769` (the last of these is a call count, not an
+added operation — its own multiplications/squarings are already inside the
+first two numbers). Per `raw_add`/`raw_double` call
+(`group_additions = 20,384,452`), that is about 13.2 field operations and
+about 1.01 field inversions on average, against the unmodified file's `~104`
+per canonicalization call (up to `2×(n−1) = 104` squarings) plus another
+`~104` (Fermat) per inversion — consistent with the double-digit wall-clock
+speedup measured above.
+
+### The pre-registered rule, applied
+
+The task that dispatched this check transcribed the rule's ratio direction
+backwards ("matched-arithmetic rho's operation count divided by IC's
+operation count"). The user's own original wording, which this note treats
+as authoritative, states every ratio in this thread the other way round —
+challenger over reference, IC over rho: "It took 0.25× the time of batched
+rho", "the ratio lands around 0.75–1.25" (both continuing that same IC/rho
+convention), and "the lead survives below 0.8× and dies at 1.0× or above"
+for "the lead", meaning the IC finding. That is also this repository's usual
+convention elsewhere (`docs/ic/BOUNDARY_TARGETS.md`'s `S / S_ρ < 1`, PR
+#830's own headline number, IC-wall / rho-wall = 0.246). The dispatching
+task's own phrasing inverted this; that inversion is corrected here rather
+than carried forward, since the two readings are exact opposites (dies vs.
+survives) and only one matches what was actually asked for.
+
+Ratio, IC over matched-arithmetic rho, in the requested (and repository-
+standard) direction:
+
+```
+89,164,459,930 / 371,102,176,689 = 0.2403
+```
+
+`0.2403 < 0.8`, so by the pre-registered rule: **the lead survives**, on the
+operation-count metric, at this one cell. IC still costs about a quarter of
+matched rho's retired instructions — decisively below the survive threshold,
+and close to PR #830's original unmatched 0.246 wall-clock figure, though
+arrived at through a different mechanism this time (see below). For
+completeness, and because the numbers should stand regardless of which
+direction is read: matched-arithmetic rho costs 371,102,176,689 /
+89,164,459,930 = **4.162×** IC's instruction count, i.e. IC is the cheaper
+arm by that same margin stated the other way round.
+
+At n = 53, L = 1,024, K = 440, with rho given the exact same normal-basis
+Frobenius and Itoh–Tsujii inversion the IC arm uses, **IC still costs about a
+quarter of matched rho's retired instructions on this host** — the
+arithmetic-matching fix does not reverse the original claim; on this metric
+and this host it leaves it intact, close to its original magnitude.
+
+### A second thing worth flagging: wall clock and instruction count disagree here
+
+On wall clock, matched-arithmetic rho and IC are within 1.1% of each other
+(0.989×); on retired instructions, rho costs 4.16× more than IC. Both are
+measured on the same host, same day, same binaries. The likely explanation is
+memory behavior, not arithmetic: IC's index (`root_table_entries: 10,259,234`,
+`regular_states: 10,260,800`, `peak_rss_bytes: 1,363,279,872` ≈ 1.36 GiB in
+the callgrind run) is large enough to miss cache and page repeatedly, which
+costs real wall-clock cycles per instruction without costing additional
+retired instructions; matched rho's distinguished-point table stays small at
+`dp_bits = 4` (`table_entries: 1,273,250`, a few tens of MB) and its inner loop
+is comparatively cache-resident. This is exactly the reasoning AGENTS.md §6
+gives for why "operation counts are the metric because they survive
+hardware" and wall clock does not: on a host whose relative memory/compute
+balance differs from the one PR #830 originally ran on, the wall-clock ratio
+alone would have told a materially different story (near-parity) from the
+instruction-count ratio (IC decisively cheaper). This rerun's own wall-clock
+number is therefore a caution against reading PR #830's original 0.246
+wall-clock figure as portable across hosts, even before the arithmetic
+correction is considered.
+
+### Classification and scope
+
+**Class: accounting** (AGENTS.md §3) — the KS reference's arithmetic was
+corrected to match the IC arm's; no index-calculus count changed, and this
+round does not claim the fixed KS is a better rho than before in any sense
+beyond removing the specific asymmetry named above (Fermat inversion,
+squaring-walk canonicalization). It does not relax AGENTS.md §8's
+end-to-end/whole-pipeline requirements, and it is silent on n = 41, on any
+other L, on n = 61, and on ECC2K-130/m = 83 transfer.
+
+`PENDING_INDEPENDENT_VALIDATION` is **not** changed by this note. This is one
+rerun, on one host, by one agent, with no second host or independent replay —
+the same limitation the original PR #830 measurement carried. What changes is
+narrower and stated plainly: the specific arithmetic-asymmetry concern this
+note was written to check has been measured, at the exact frozen n=53,
+L=1,024, K=440 cell, and does not reverse the direction of the original
+claim on this host, on either metric — even though the two metrics disagree
+sharply on the *margin*.
