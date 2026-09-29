@@ -240,11 +240,15 @@ one process on each of 25 distinct points and 250 trial slots. It excludes the
 25 reconstructed first-run points and keeps the same source-bound F4/F5, SAT,
 incumbent and matched-rho arms. Its one permitted dispatch,
 [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
-(attempt one), hit the 300-minute measured-step cap and lost its campaign archive
-when concurrent `tar`/`zstd` packing failed on a ~35 GiB tree; see the
+(attempt one), ended operationally censored: the 300-minute measure step
+timed out, packing failed on a live ~35 GiB tournament tree, and zero campaign
+artifacts were uploaded; see the
 [censored result](generic-backend-qualification-v2/RESULT.md). Never redispatch
-this seed. Family qualification and competitive costs are unknown; the static
-F4/F5 encoder audit and the disclosed-point
+seed `2026092902`. Family qualification and competitive costs are unknown. Any
+later registration must exclude all three sealed rounds, the 25 reconstructed
+first-run points, and every public point this second dispatch could have
+generated once reconstructed at the pinned checkout. The static F4/F5 encoder
+audit and the disclosed-point
 [dimension-6 pilot](generic-f4-subspace-pilot/RESULT.md) remain separate
 diagnostics.
 

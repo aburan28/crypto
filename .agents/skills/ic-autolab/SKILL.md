@@ -114,15 +114,22 @@ and 250 paired trial slots. The runner is
 `run_generic_backend_qualification_v2.py` in workflow
 `ic-generic-backend-qualification-v2.yml`. Its one permitted dispatch,
 [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
-attempt one, is [operationally censored](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/RESULT.md):
-the measured step hit its 300-minute cap and the reserved pack/upload steps
-failed without retaining a campaign archive. Never dispatch seed `2026092902`
-again. Register a new panel and exclude all potentially generated v2 points
-before any later measurement. The post-registration
+(attempt one), is **operationally censored** per
+[censored result](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/RESULT.md):
+measure step timeout at 300 minutes, `pack_partial_campaign.py` failed while
+callgrind files were still mutating, and GitHub uploaded zero campaign bundle.
+Never dispatch seed `2026092902` again. PR preflight and artifact-upload smoke
+passed; that does not substitute for retained receipts. Register a new panel
+and exclude all potentially generated points from this run (prepare replay at
+the pinned checkout) before any later measurement. Without a bundle, do not run
+`generic_backend_gate_v2.py` or
+[independent_pairs.py](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/independent_pairs.py)
+as if qualification were established. The post-registration
 [static feasibility audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/STATIC-FEASIBILITY.md)
-proves that this panel's four F4/F5 arms exceed the pinned 64-variable encoder
-cap on every cell; that static finding is separate from the censoring event.
-The SAT encoding is separate and remains empirically undecided. The disclosed-point
+shows all four F4/F5 arms exceed the pinned 64-variable encoder cap on every
+cell; that static finding is separate from the censoring event. The censored
+log did not yield verified generic F4/F5/SAT receipts. SAT encoding feasibility
+remains a separate empirical question on a future panel. The disclosed-point
 dimension-6 pilot already has a canonical series in
 [RESULT.md](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-f4-subspace-pilot/RESULT.md)
 (PR #961): both `f4` and `f5` entered MatrixF4/MatrixF5 on the five inventory
