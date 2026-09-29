@@ -169,9 +169,8 @@ impl<E: Copy> Arm<'_, E> {
         if self.relations == self.fb.columns as u64 {
             self.rank_at_columns = Some(self.matrix.rank() as u64);
         }
-        if self.square.is_none()
-            && self.matrix.rank() + self.deficiency_total >= self.fb.columns + 1
-        {
+        // Full rank is `columns + 1 - D` (header): `rank + D > columns`.
+        if self.square.is_none() && self.matrix.rank() + self.deficiency_total > self.fb.columns {
             self.square = Some((self.relations, trials, self.touched.len()));
             self.deficiency_at_square = Some(self.deficiency_total);
             if self.recovered.is_none() {
