@@ -330,9 +330,8 @@ struct MonomialSet {
 
 impl MonomialSet {
     fn new(n_vars: usize) -> Self {
-        let dense = n_vars <= 20
-            && std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() != Ok("1")
-            && std::env::var("F4_F2_BITMAP_SEEN").as_deref() != Ok("0");
+        let dense =
+            n_vars <= 20 && std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() != Ok("1");
         Self {
             masks: Vec::new(),
             membership: if dense {
