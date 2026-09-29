@@ -1,0 +1,68 @@
+{
+  "arm": "leaf10",
+  "basis_rank": 131,
+  "censor": null,
+  "cnf_generic": {
+    "bytes": 48283876,
+    "clauses": 2281954,
+    "dag": {
+      "and": 314297,
+      "model_limbs": 21,
+      "total_nodes": 650376,
+      "variables": 1312,
+      "xor": 334765
+    },
+    "dag_prefix_sha256": "54201c0dd9fe4a710e98da3b369dfc25c098237287d6ef15a6968c2da3c90e24",
+    "target": "generic",
+    "unit_count": 0,
+    "variables": 650376
+  },
+  "cnf_target_O": {
+    "bytes": 48285979,
+    "clauses": 2282217,
+    "dag": {
+      "and": 314297,
+      "model_limbs": 21,
+      "total_nodes": 650376,
+      "variables": 1312,
+      "xor": 334765
+    },
+    "dag_prefix_sha256": "54201c0dd9fe4a710e98da3b369dfc25c098237287d6ef15a6968c2da3c90e24",
+    "target": "O",
+    "unit_count": 263,
+    "variables": 650376
+  },
+  "cpu_seconds": 1.8959,
+  "curve_b": "0x3aad5ebb6187af0a2c53cbc9010d36552",
+  "dag": {
+    "and": 314297,
+    "model_limbs": 21,
+    "total_nodes": 650376,
+    "variables": 1312,
+    "xor": 334765
+  },
+  "decision": "PASS",
+  "dimensions": [
+    44,
+    44,
+    43
+  ],
+  "domain": "ecc2k130-native-m3-chain-20260929-v1",
+  "edge_count": 2,
+  "exact_replay_sha256": "982750f272271a566e48724f470b6bca51d9d3ba159114c7628693b3a2fe9865",
+  "exact_smoke_sha256": "d83873d46f810c75045131ab57b3110e313f1185ba75831c1fa3739862f48e0c",
+  "line": [
+    1,
+    0
+  ],
+  "local_edge_dag": {
+    "and": 174518,
+    "model_limbs": 15,
+    "total_nodes": 357429,
+    "variables": 920,
+    "xor": 181989
+  },
+  "peak_rss_bytes": 203128832,
+  "prefix_sha256": "54201c0dd9fe4a710e98da3b369dfc25c098237287d6ef15a6968c2da3c90e24",
+  "wall_seconds": 1.9011182090034708
+}

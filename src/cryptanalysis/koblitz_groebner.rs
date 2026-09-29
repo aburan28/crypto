@@ -785,15 +785,35 @@ pub fn matrix_f4_f2_blocked(
     let n_vars_out = polys[0].n_vars;
     let mut out = Vec::with_capacity(rank);
     for row in matrix.iter().take(rank) {
-        let monos: Vec<F2BoolMono> = (0..cols.len())
-            .filter(|c| row[c / 64] & (1u64 << (c % 64)) != 0)
-            .map(|c| F2BoolMono::from_mask(cols[c]))
-            .collect();
+        let monos = row_monos(row, &cols);
         if !monos.is_empty() {
             out.push(F2BoolPoly::from_monos(monos, n_vars_out));
         }
     }
     Some((out, word_ops))
+}
+
+/// The monomials of one packed Macaulay row, in column order.
+///
+/// Walks the row's set bits a word at a time rather than testing every
+/// column: a reduced row is sparse, so testing all `cols.len()` bits of
+/// every row was about half of a full readback.  Bits at or past
+/// `cols.len()` are never read, as before.
+fn row_monos(row: &[u64], cols: &[u64]) -> Vec<F2BoolMono> {
+    let set: u32 = row.iter().map(|w| w.count_ones()).sum();
+    let mut monos = Vec::with_capacity(set as usize);
+    for (word_index, &packed) in row.iter().enumerate() {
+        let mut bits = packed;
+        while bits != 0 {
+            let c = word_index * 64 + bits.trailing_zeros() as usize;
+            if c >= cols.len() {
+                return monos;
+            }
+            monos.push(F2BoolMono::from_mask(cols[c]));
+            bits &= bits - 1;
+        }
+    }
+    monos
 }
 
 // ── Matrix-F4 over the Boolean ring ────────────────────────────────
@@ -1160,10 +1180,7 @@ fn matrix_f4_f2_counted_impl(
                     }
                 }
             } else {
-                let monos: Vec<F2BoolMono> = (0..cols.len())
-                    .filter(|c| row[c / 64] & (1u64 << (c % 64)) != 0)
-                    .map(|c| F2BoolMono::from_mask(cols[c]))
-                    .collect();
+                let monos = row_monos(row, &cols);
                 if !monos.is_empty() {
                     out.push(F2BoolPoly::from_monos(monos, n_vars_out));
                 }
@@ -1557,6 +1574,113 @@ pub(crate) fn f5_rows_monos_with_f4_count(
         |row| rows_monos.push(row.to_vec()),
     )?;
     Some((full_count, rows_monos))
+}
+
+/// Pack F5 rows in one product traversal when the full degree-bounded
+/// column universe occurs. Products are XORed directly into bit rows, so
+/// collisions cancel without sorting. Sparse systems fall back to the
+/// ordinary builder to preserve its exact column list and matrix shape.
+pub(crate) fn f5_rows_packed_full_columns(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    criterion: &F5Criterion,
+) -> Option<(usize, Vec<u64>, Vec<Vec<u64>>)> {
+    const MAX_DIRECT_VARS: usize = 24;
+    const MAX_DIRECT_DEGREE: usize = 4;
+    if n_vars > MAX_DIRECT_VARS
+        || degree as usize > MAX_DIRECT_DEGREE
+        || occurring_vars(polys) & !all_variable_mask(n_vars) != 0
+    {
+        return None;
+    }
+
+    // Pascal's triangle gives the colex rank of a mask within its degree:
+    // sum C(bit_position_j, j), with j numbered from one. DegRevLex uses
+    // ascending masks within each descending degree block.
+    let mut choose = [[0usize; MAX_DIRECT_DEGREE + 1]; MAX_DIRECT_VARS + 1];
+    for n in 0..=n_vars {
+        choose[n][0] = 1;
+        for k in 1..=MAX_DIRECT_DEGREE.min(n) {
+            choose[n][k] = if n == 0 {
+                0
+            } else {
+                choose[n - 1][k - 1] + choose[n - 1][k]
+            };
+        }
+    }
+    let mut offsets = [0usize; MAX_DIRECT_DEGREE + 1];
+    let mut full_cols = 0usize;
+    for d in (0..=degree as usize).rev() {
+        offsets[d] = full_cols;
+        full_cols += choose[n_vars][d];
+    }
+    if full_cols == 0 || full_cols > max_f4_cols() {
+        return None;
+    }
+    let words = full_cols.div_ceil(64);
+    let row_cap = max_f4_rows();
+    let mut matrix = Vec::new();
+    let mut full_count = 0usize;
+    let mut schedules: Vec<Option<Vec<u64>>> = vec![None; degree as usize + 1];
+    for (i, p) in polys.iter().enumerate() {
+        let pdeg = p.terms.iter().map(|t| t.degree()).max().unwrap_or(0);
+        if pdeg > degree {
+            continue;
+        }
+        let gap = (degree - pdeg) as usize;
+        let multipliers = schedules[gap]
+            .get_or_insert_with(|| monomials_up_to_mask(all_variable_mask(n_vars), gap as u32));
+        for &mult in multipliers.iter() {
+            let mut row = vec![0u64; words];
+            for term in &p.terms {
+                let mask = term.mask | mult;
+                let mut bits = mask;
+                let mut index = offsets[mask.count_ones() as usize];
+                let mut j = 1;
+                while bits != 0 {
+                    let bit = bits.trailing_zeros() as usize;
+                    index += choose[bit][j];
+                    bits &= bits - 1;
+                    j += 1;
+                }
+                row[index / 64] ^= 1u64 << (index % 64);
+            }
+            if row.iter().all(|&word| word == 0) {
+                continue;
+            }
+            full_count += 1;
+            if full_count > row_cap {
+                return None;
+            }
+            if !criterion.prunes(i, mult) {
+                matrix.push(row);
+            }
+        }
+    }
+    if matrix.is_empty() {
+        return None;
+    }
+
+    let mut used = vec![0u64; words];
+    for row in &matrix {
+        for (seen, &word) in used.iter_mut().zip(row) {
+            *seen |= word;
+        }
+    }
+    let last_bits = full_cols % 64;
+    let last_mask = if last_bits == 0 {
+        u64::MAX
+    } else {
+        (1u64 << last_bits) - 1
+    };
+    if used[..words - 1].iter().any(|&word| word != u64::MAX) || used[words - 1] != last_mask {
+        return None;
+    }
+    let mut cols = monomials_up_to_mask(all_variable_mask(n_vars), degree);
+    cols.sort_unstable_by_key(|&m| std::cmp::Reverse(mono_key(F2BoolMono::from_mask(m))));
+    debug_assert_eq!(cols.len(), full_cols);
+    Some((full_count, cols, matrix))
 }
 
 /// Hand every non-empty Macaulay row (ascending monomial masks, odd

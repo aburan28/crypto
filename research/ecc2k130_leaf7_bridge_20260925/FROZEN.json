@@ -101,13 +101,27 @@
     "exceptional_point_encoding": "[V^0,V^1] by [U^0,U^1,U^2] canonical Fq bit-polynomial hex"
   },
   "implementation_sha256": {
-    "PROTOCOL.md": "4822314b160911854dc08591e4e9d08e9579fbec0a5fdf611a631085dcf009f0",
+    "PROTOCOL.md": "f7e4f83b5515d7f10e9c37bf876350b52d4137e505678fd8d965d97bfa5b8a1b",
+    "ci_replay.py": "aa245c07080f6d9182193e95b59de2b3ac9ecd134af24f2ce96d238a3bed7c0b",
     "cubic_velu.py": "aa774740505396c6921691f5ead6ac49e254e17eefce2baf0766fef3faec5839",
-    "run.py": "e90e791b181c04ebff81552007fdd75a1442f4ecb4987669413a3ebb1abba814",
+    "host_preflight.py": "9bd570d8d88819d73c4a7c31ce5ce89a4b273dbfafb6f725b448e95f226dbbc6",
+    "run.py": "4aff73e269a3926b9b2b4a186e425622bbdbce90db03173a8f600e6688645325",
     "verify.py": "9805862a2f6cc9d44a2f769131f71d683d359be73109ce696eda858b31cc8eba",
-    "verify_extension.py": "5aa49510f4117422288cf6ff34a120143b9a57a25b2a9e7373fee7232fa711a8",
-    "ci_replay.py": "65b956e904dac772bf75c8b28e58c9f9fa5541499e89876068720cb43d9da4a8"
+    "verify_extension.py": "5aa49510f4117422288cf6ff34a120143b9a57a25b2a9e7373fee7232fa711a8"
   },
-  "release_main_head": null,
-  "release_gate": "hold_parent_unmerged"
+  "release_main_head": "8d99c3287a1d01aba8b9827aea9bd15397eb97d3",
+  "release_gate": "hold_host_preflight_and_review",
+  "host_image": {
+    "reference": "sagemath/sagemath:10.9",
+    "manifest_sha256": "2401ffa8e9fc85c7ea17d3649bde5958b4dbf0858b3e504098c4102720151711",
+    "platform": "linux/amd64"
+  },
+  "host_refusal_sha256": {
+    "research/ecc2k130_leaf7_bridge_20260925/evidence/mac_rlimit_preflight_20260929/sandboxed.json": "3051334fc239898620dc1c3f17949a4e26dd6f0af04bd342d2b45dbcd043edc5",
+    "research/ecc2k130_leaf7_bridge_20260925/evidence/mac_rlimit_preflight_20260929/sandboxed.stderr.txt": "3ce8cc6c93f177f64c049a89492597cb500ed3135a7ad680c5f42e16ec592eae",
+    "research/ecc2k130_leaf7_bridge_20260925/evidence/mac_rlimit_preflight_20260929/sandboxed.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "research/ecc2k130_leaf7_bridge_20260925/evidence/mac_rlimit_preflight_20260929/unsandboxed.json": "a5de9c14c4c09a265b2828c5e225a487bda5cee45bb927cd6f29406160db392c",
+    "research/ecc2k130_leaf7_bridge_20260925/evidence/mac_rlimit_preflight_20260929/unsandboxed.stderr.txt": "3ce8cc6c93f177f64c049a89492597cb500ed3135a7ad680c5f42e16ec592eae",
+    "research/ecc2k130_leaf7_bridge_20260925/evidence/mac_rlimit_preflight_20260929/unsandboxed.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
 }

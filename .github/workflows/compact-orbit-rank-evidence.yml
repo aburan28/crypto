@@ -1,0 +1,48 @@
+name: Compact orbit independent rank replay
+
+on:
+  pull_request:
+    paths:
+      - 'examples/koblitz_orbit_dlp_fast.rs'
+      - 'research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/**'
+      - '.github/workflows/compact-orbit-rank-evidence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rank-control:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check frozen source, input, and syntax
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/{ci_replay,run_control,verify_rank,verify_archive,test_verify_rank}.py
+          python3 research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/ci_replay.py
+          python3 research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_archive.py
+          python3 -m unittest discover -s research/notes/ecc2k130/compact_orbit_rank_evidence_20260929 -p 'test_verify_rank.py' -v
+      - name: Build exact compact producer
+        run: |
+          cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+          cargo build --release --locked --example koblitz_orbit_dlp_fast
+      - name: Replay every n13 rank attempt and recovered scalar
+        run: |
+          python3 research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/run_control.py \
+            --binary target/release/examples/koblitz_orbit_dlp_fast \
+            --out /tmp/compact-orbit-rank-control
+      - name: Preserve raw controls and failure receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compact-orbit-rank-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/compact-orbit-rank-control/
+          if-no-files-found: warn
+          retention-days: 30

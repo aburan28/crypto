@@ -1,0 +1,23 @@
+{
+  "frozen_evaluation_source_commit": "ded946e49e506d05954cbfd0a644dc2928f7d468",
+  "frozen_verifier_sha256": "a0e9ab1e8ab36e1e7e64e6942a451b8a8267408e94bff58faccc5d8cf8618585",
+  "host_platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "host_uname": [
+    "Darwin",
+    "Adams-MacBook-Pro.local",
+    "25.6.0",
+    "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041",
+    "arm64",
+    "arm"
+  ],
+  "initial_nonportable_n41_fail_receipt_sha256": "a178e73be489d9f67331b48ed737fef097c98bc16306d8416c2ded502bae8778",
+  "n41_hosted_receipt_sha256": "d23e8ca0ab09c084416e7b8d59bc3085149b90fb15e16d76410950920b7a01e6",
+  "n41_second_host_receipt_sha256": "d23e8ca0ab09c084416e7b8d59bc3085149b90fb15e16d76410950920b7a01e6",
+  "n53_hosted_receipt_sha256": "948ed4ba272ec6e9c3394fdbd5355b1f655a6024538109d312ba49050147bae4",
+  "n53_second_host_receipt_sha256": "948ed4ba272ec6e9c3394fdbd5355b1f655a6024538109d312ba49050147bae4",
+  "portable_change": "Only the runner absolute Q path equality check is replaced by a Q-file basename check; FROZEN fixture and point SHA, every target, rank row, witness, and scalar checks are unchanged.",
+  "portable_replay_sha256": "7ff137c6eafdfa1d0a08da531b8469f5427d4a444093b728bb4320bab1aad316",
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "schema": "compact-s3-batch-second-host-replay-v1"
+}

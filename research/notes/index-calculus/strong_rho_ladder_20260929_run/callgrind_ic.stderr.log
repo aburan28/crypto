@@ -1,0 +1,12 @@
+==1188== Callgrind, a call-graph generating cache profiler
+==1188== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==1188== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==1188== Command: ../../../../target/release/examples/koblitz_orbit_dlp_fast construct:53:0:440 scalars_n53-ks-growing-1024-v1.txt 7 callgrind_ic.stdout.jsonl
+==1188== 
+==1188== For interactive control, run 'callgrind_control -h'.
+==1188== 
+==1188== Events    : Ir
+==1188== Collected : 89190346806
+==1188== 
+==1188== I   refs:      89,190,346,806
+IC_CALLGRIND_DONE
