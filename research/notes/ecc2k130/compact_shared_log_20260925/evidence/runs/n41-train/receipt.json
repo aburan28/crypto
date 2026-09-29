@@ -1,0 +1,19 @@
+{
+  "manifest_sha256": "56ad50d2904f58aeefd2225127eb356bec744bf6f87ca2840dcc53590f5ec0ee",
+  "peak_rss_bytes": 33161216,
+  "psutil_version": "7.2.2",
+  "returncode": 0,
+  "rss_capped": false,
+  "rss_monitor": "psutil.Process.memory_info().rss; 50ms poll",
+  "rss_sample_count": 595,
+  "sampled_peak_rss_bytes": 33161216,
+  "schema_version": "1.0",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "a32100c142f6308ab39ca052f9500cb51c4751fb2311a125ee3a4aa9dacdcbcf",
+  "system_cpu_s": 0.166511,
+  "termination": null,
+  "timed_out": false,
+  "user_cpu_s": 33.168712,
+  "wait4_peak_rss_bytes": 33161216,
+  "wall_ms": 34180.8385
+}

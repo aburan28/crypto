@@ -293,7 +293,7 @@ pub fn argon2(
     p_lanes: u32,
     out_len: u32,
 ) -> Result<Vec<u8>, &'static str> {
-    if p_lanes < 1 || p_lanes > 0x00FF_FFFF {
+    if !(1..=0x00FF_FFFF).contains(&p_lanes) {
         return Err("argon2: p_lanes must be in 1..=2^24-1");
     }
     if t_passes < 1 {

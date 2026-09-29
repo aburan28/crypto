@@ -1,0 +1,14 @@
+==691== Callgrind, a call-graph generating cache profiler
+==691== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==691== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==691== Command: /home/user/crypto/target/release/examples/groebner_stage_bench --label A1 --ladder chain-holdout-2 --rung 7 --out /home/user/crypto/research/groebner_instructions_20260925/determinism/chain-holdout-2/A1/rung7/stage
+==691== 
+==691== For interactive control, run 'callgrind_control -h'.
+==691== brk segment overflow in thread #1: can't grow to 0x484b000
+==691== (see section Limitations in user manual)
+==691== NOTE: further instances of this message will not be shown
+==691== 
+==691== Events    : Ir
+==691== Collected : 2568074860
+==691== 
+==691== I   refs:      2,568,074,860

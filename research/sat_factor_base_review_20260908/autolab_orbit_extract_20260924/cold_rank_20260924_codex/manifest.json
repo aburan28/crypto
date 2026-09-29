@@ -1,0 +1,37 @@
+{
+  "base_gzip_sha256": "23397af2ef668aed0775bcb409e1ae19555357ded635452818c9a3812f679d08",
+  "base_header_sha256": "fedbf03991ef30cb78bf2e074ee044bc71a1e80b240f567184cb0aefc77ab143",
+  "command": [
+    "/private/tmp/kic-compact-pr-base/target/release/examples/koblitz_s5_sat_instance",
+    "53",
+    "0",
+    "1",
+    "10",
+    "natural",
+    "1",
+    "2000",
+    "1",
+    "internal"
+  ],
+  "domain": "ECC2K53-COMPACT-COLD-BATCH-20260924-v1/",
+  "environment": {
+    "KIC_ALGEBRA_ENCODING": "orbit_factorized",
+    "KIC_FACTOR_BASE_JSONL": "base_header.jsonl",
+    "KIC_ORBIT_BATCH_ONLY": "1",
+    "KIC_ORBIT_BRANCH_ORDER": "pair_then_pair",
+    "KIC_ORBIT_LAZY_RELATIVE_SUPPORT": "1",
+    "KIC_ORBIT_REP_ENCODING": "one_hot",
+    "KIC_ORBIT_TARGET_SCALARS": "target_scalars.txt"
+  },
+  "experiment": "cold_compact_orbit_rank_probe",
+  "factor_base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "producer_executable_sha256": "41327941b6021318fb47fdcf36bde1b751b50e0d99a2adb9ae7837cbc71391bd",
+  "producer_source_sha256": "93c3159a0da27d4703727b21041cdf529b3f2206c3a6d3a7878913f951cd08fd",
+  "schema_version": "1.0",
+  "scope": "Public synthetic n=53 known-scalar targets; no unknown-target DLP or rho comparison",
+  "stopping_rule": "Run exactly the first N schedule targets; count every failure and relation rank",
+  "subgroup_order": 21044858204113,
+  "target_schedule_sha256": "6e1336e6e508014eb80efe8ed418f4b6c85b45602a9fbd68aa268bfc3798dc17",
+  "targets": 512,
+  "verifier_sha256": "54767452cfbb3a4ec931c1c5e19b1500c12bc61605a43cebfdade2732770499d"
+}

@@ -150,7 +150,7 @@ pub fn verify_4_round_impossibility(
         if active == 1 {
             one += 1;
         }
-        if active >= 2 && active <= 4 {
+        if (2..=4).contains(&active) {
             low += 1;
         }
         if active == 16 {

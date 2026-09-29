@@ -126,12 +126,12 @@ impl FixedTargetSystem {
         let mut cache: HashMap<usize, Vec<u64>> = HashMap::new();
         let mut out = Vec::with_capacity(self.invariants.len());
         for &(si, size, k) in &self.invariants {
-            if !cache.contains_key(&si) {
+            if let std::collections::hash_map::Entry::Vacant(e) = cache.entry(si) {
                 let set = self.orbit_set(curve, &self.seeds[si], summands)?;
                 if set.len() != size {
                     return None;
                 }
-                cache.insert(si, elementary_symmetric(f, &set));
+                e.insert(elementary_symmetric(f, &set));
             }
             out.push(cache[&si][k - 1]);
         }
