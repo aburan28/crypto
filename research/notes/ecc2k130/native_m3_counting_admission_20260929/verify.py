@@ -15,6 +15,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[4]
 ADMISSION = ROOT / "research/ecc2k130_leaf_native_m3_gate_20260926/admission.py"
 INPUT = ROOT / "research/notes/ecc2k130/m10_export_capacity_20260925/inputs/balanced_m10_result.json"
+FROZEN = Path(__file__).with_name("FROZEN.json")
 EXPECTED_INPUT_HASH = "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25"
 
 
@@ -33,6 +34,11 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     row = json.loads(args.result.read_text())
+    lock = json.loads(FROZEN.read_text())
+    assert row["frozen_manifest_sha256"] == sha(FROZEN)
+    for relative, digest in lock["sha256"].items():
+        assert sha(ROOT / relative) == digest, relative
+    assert row["protocol_commit"] == lock["protocol_commit"]
     assert row["domain"] == "ECC2K130-NATIVE-M3-COUNTING-ADMISSION-20260929-v1"
     assert row["classification"] == "PASS_BOUND"
     assert sha(INPUT) == EXPECTED_INPUT_HASH

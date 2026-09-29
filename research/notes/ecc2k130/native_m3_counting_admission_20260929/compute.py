@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[4]
 INPUT = ROOT / "research/notes/ecc2k130/m10_export_capacity_20260925/inputs/balanced_m10_result.json"
 CHAIN = ROOT / "research/notes/ecc2k130/native_m3_chain_20260929/chain.py"
 ADMISSION = ROOT / "research/ecc2k130_leaf_native_m3_gate_20260926/admission.py"
+FROZEN = Path(__file__).with_name("FROZEN.json")
 HASHES = {
     INPUT: "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
     CHAIN: "03b3e97b74e35a100ab60a7c5be0cea09108405e185cccda74c6942a94b21944",
@@ -79,6 +80,13 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
 
+    lock = json.loads(FROZEN.read_text())
+    if lock["protocol_commit"] != PROTOCOL_COMMIT:
+        raise AssertionError("protocol commit lock drift")
+    for relative, expected in lock["sha256"].items():
+        if sha256(ROOT / relative) != expected:
+            raise AssertionError(f"source/input lock drift: {relative}")
+
     actual_hashes = {}
     for path, expected in HASHES.items():
         actual = sha256(path)
@@ -116,6 +124,7 @@ def main() -> None:
         "classification": "PASS_BOUND",
         "parent_main_commit": PARENT_COMMIT,
         "protocol_commit": PROTOCOL_COMMIT,
+        "frozen_manifest_sha256": sha256(FROZEN),
         "input_sha256": actual_hashes,
         "subgroup_order": str(Q),
         "target_distribution": "uniform_marginal_one_q_coset",
