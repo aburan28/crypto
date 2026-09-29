@@ -152,7 +152,13 @@ pub fn koblitz_family_order(n: u32, a2: u8) -> i128 {
         .to_string()
         .parse::<i128>()
         .expect("a Koblitz order below 2^63 fits i128");
-    if a2 == 0 {
+    // `a₂ = 1` is the quadratic twist of `a₂ = 0` only when `Tr(1) = n mod 2`
+    // is 1.  For even `n` the trace of 1 is 0, `y ↦ y + sx` with
+    // `s² + s = 1` identifies the two families, and they share one order.
+    // An earlier revision took the twist unconditionally; the cost sweep
+    // only ever ran odd `n`, so no measured number was affected, but the
+    // even-`n` census came back empty.
+    if a2 == 0 || n.is_multiple_of(2) {
         base
     } else {
         (1i128 << (n + 1)) + 2 - base
@@ -1588,6 +1594,35 @@ mod tests {
         assert!(report.blocked_because.is_some());
         assert!(!report.modular_polynomial_available);
         assert!(report.log2_exhaustive_scan > EXHAUSTIVE_SCAN_LOG2_BUDGET);
+    }
+
+    #[test]
+    fn the_two_families_coincide_for_even_n_and_twist_for_odd_n() {
+        // Tr(1) = n mod 2 decides whether a₂ = 1 is the twist.
+        for n in [8u32, 12, 16] {
+            let irr = field_for(n).expect("field");
+            let gf = Gf2::new(&irr);
+            let ash = ArtinSchreier::new(&gf);
+            for a2 in [0u8, 1] {
+                assert_eq!(
+                    curve_order(&gf, &ash, a2, 1) as i128,
+                    koblitz_family_order(n, a2),
+                    "n = {n}, a₂ = {a2}"
+                );
+            }
+        }
+        for n in [11u32, 13] {
+            let irr = field_for(n).expect("field");
+            let gf = Gf2::new(&irr);
+            let ash = ArtinSchreier::new(&gf);
+            for a2 in [0u8, 1] {
+                assert_eq!(
+                    curve_order(&gf, &ash, a2, 1) as i128,
+                    koblitz_family_order(n, a2),
+                    "n = {n}, a₂ = {a2}"
+                );
+            }
+        }
     }
 
     #[test]

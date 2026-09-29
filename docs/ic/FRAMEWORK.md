@@ -310,6 +310,18 @@ whose column map does not respect the group law, since the relation
 matrix will then be solving a different problem than the one that was
 posed. (The runner's verification catches this, loudly.)
 
+A column map for any finite group of endomorphisms is one call:
+`glv_invariant_base::fold_by_endomorphisms` takes the group as a list
+of `Endomorphism`s (each a map on points and its eigenvalue modulo
+`r`), closes a seed set under them or checks that it is closed, and
+returns the base with one column per orbit and coefficient `Π λ` along
+the orbit. `glv-orbit` (prime curves; `--family j0` or `j1728` for a
+curve with an automorphism to fold by) and `gls-line` (a GLS twist over
+`F_{p²}`, `examples/glv_invariant_bench.rs`) are that call with the
+family's generators; their `no_fold` parameter is the same call with
+negation alone, which is the control on the same points. See
+`research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md`.
+
 ### `Targets` — where trial points come from
 
 A small enum rather than a trait, because there are two designs that
@@ -705,9 +717,24 @@ worse than none:
     pilot's bounded-degree conjecture;
   - at `m = 3`, to 7 at `N = 15`.
 
-  Whether the growth is linear or slower is open. So is `m = 4` past
-  `N = 12`, the regime that decides the oracle. It ran out of memory at
-  `N = 16`, where a diagnostic gives only `D ≥ 7`. No oracle is built.
+  Round 3 (§12) changed only how the engine stores its basis. The new
+  build reproduces round 2 exactly at 0.51–0.69 of its peak memory, and it
+  finishes `m = 4`, the regime that decides the oracle, at `N = 16`:
+  `D = 7`, as at `N = 12`. One level without a rise closes nothing.
+  Whether the growth is linear or slower is still open, at every `m`, and
+  `m = 4` at `N = 20` is beyond the machine that ran these (the width grew
+  8 times from `N = 12` to 16). No oracle is built.
+
+  Round 4 (§13) built a signature-based F4 for the tower ring
+  (`src/cryptanalysis/sig_fp_tower.rs`, F5/GVW criteria) and checked it
+  against `f4_fp_tower`. It agrees on all 18 systems, and its criteria
+  remove the zero reductions. But it needs rows 1–2 degrees higher on
+  every system and up to 28 times the memory, and it ran out of 14 GB at
+  `m = 3`, `N = 15`. So `f4_fp_tower` stays the engine that measures `D`.
+  A variant taking F4's steps by polynomial degree (§14) matches F4's
+  degree at `m = 3`, `N = 9` but not at `N = 12`, so the signature line
+  stops there; the next lever for F4's zero rows is an exact early exit
+  once a step's residue block reaches full rank.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
@@ -721,9 +748,9 @@ worse than none:
 
 | stage | trait | plug-ins |
 |:--|:--|:--|
-| factor base | `FactorBaseBuilder` | `prime-abscissa`, `binary-subspace`, `koblitz-orbit` |
+| factor base | `FactorBaseBuilder` | `prime-abscissa`, `glv-orbit`, `binary-subspace`, `koblitz-orbit`, `koblitz-symmetrised`, `gls-line` |
 | targets | `Targets` | `random`, `walk` |
-| point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic` |
+| point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic`, `symmetrised`; `line-resultant` (library and `examples/glv_invariant_experiments.rs`: the `O(log p)` Weil-descent oracle for a line base over `F_{p^k}`, `line_oracle.rs`) |
 | polynomial solver | `SystemSolver` | `f4-f2`, `buchberger-f2`, `matrix-f4`, `matrix-f5`, `inherited-f4`, `crossbred-f2`, `xl-f2`, `sat-cdcl`, `fes-f2`, `fes-f2-wide`, `exhaustive` |
 | relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss` |
 

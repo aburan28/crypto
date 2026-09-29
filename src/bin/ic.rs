@@ -13,6 +13,8 @@ mod experiment;
 mod fixed;
 #[path = "ic/params.rs"]
 mod params;
+#[path = "ic/price.rs"]
+mod price;
 #[path = "ic/rho.rs"]
 mod rho;
 #[path = "ic/workflow.rs"]
@@ -86,6 +88,8 @@ enum Action {
     Swap(boundary::SwapArgs),
     /// Run the counted Pollard-rho references paired (the frozen plain walk, the tuned walk, the negation-map walk that is the matched reference), or re-price a frozen boundary or bench report against the matched one.
     Rho(rho::RhoArgs),
+    /// Price the workflow's pipeline phase by phase: the same calls in memory on one thread, each phase on its own clock, converted at one batched addition measured in the same process, beside batch rho on the same targets with its step priced.
+    Price(price::PriceArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -137,6 +141,7 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Bench(args)) => bench::run(args.clone(), cli.json),
         Some(Action::Swap(args)) => boundary::swap(args.clone(), cli.json),
         Some(Action::Rho(args)) => rho::run(args.clone(), cli.json),
+        Some(Action::Price(args)) => price::run(args.clone(), cli.json),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {

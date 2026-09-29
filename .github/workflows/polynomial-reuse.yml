@@ -40,9 +40,12 @@ jobs:
       - run: cargo check --no-default-features --lib --bin ic
       - run: cargo test --release --features redis-cache --lib polynomial_reuse
       - run: cargo test --release --features redis-cache --lib algebra_cache
-      - run: 'cargo test --release --features redis-cache --lib koblitz_groebner::'
-      - run: 'cargo test --release --features redis-cache --lib weil_charts::'
-      - run: 'cargo test --release --features redis-cache --lib semaev_leading_form::'
+      # Quoted because a plain YAML scalar may not end in a colon: unquoted,
+      # the `::` module filter makes the whole file unparseable and every run
+      # of it a startup failure.
+      - run: "cargo test --release --features redis-cache --lib koblitz_groebner::"
+      - run: "cargo test --release --features redis-cache --lib weil_charts::"
+      - run: "cargo test --release --features redis-cache --lib semaev_leading_form::"
       - run: cargo check --release --features redis-cache --example weil_factor_composition
       # The cost harnesses assert nothing and so cannot flake; they are run,
       # not just compiled, because a harness that builds but no longer

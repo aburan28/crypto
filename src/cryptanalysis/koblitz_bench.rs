@@ -21,7 +21,7 @@
 //! [`crate::cryptanalysis::koblitz_index_calculus::MAX_N`], out to
 //! `n = 63`, which is where the interesting scaling lives.  It reports
 //! the unknown/equation counts, the degree, the Macaulay rank profile
-//! and the **first fall degree**, using the same operational definition
+//! and a **rank-deficiency proxy**, using the same operational definition
 //! as [`crate::cryptanalysis::ffd_harness`] so the subspace-restricted
 //! numbers are directly comparable with that harness's full-field ones.
 //!
@@ -104,8 +104,9 @@ pub struct SystemProfile {
     pub n_eqs: usize,
     /// Total degree of the system: 2 for `m = 2`, 3 once chained.
     pub degree: u32,
-    /// First fall degree, by the `ffd_harness` definition: smallest
-    /// `D ≥ 2` with `rank < rows` and `rank < cols`.
+    /// Legacy name for the rank-deficiency proxy: smallest
+    /// `D ≥ 2` with `rank < rows` and `rank < cols`. This does not
+    /// certify mathematical first fall degree.
     pub fall_degree: Option<u32>,
     /// Per-degree Macaulay rank profile.
     pub macaulay: Vec<MacaulayProfile>,
@@ -659,14 +660,12 @@ pub fn subspace_ladder(n_max: u32, max_ell: u32) -> Vec<(u32, u32)> {
 
 // ── Solving degree vs first fall degree ────────────────────────────
 
-/// One `(n, m)` cell of the solving-degree sweep.
+/// One cell of the bounded Macaulay diagnostic (legacy type name).
 ///
-/// The first fall degree is what the Petit–Quisquater complexity
-/// argument is stated in; the solving degree is what the linear algebra
-/// actually costs.  `research/notes/index-calculus/RESEARCH_DREG_MEASUREMENT.md` says why the gap
-/// between them is the measurement worth having, and
-/// `control_solve_mean` is the null object that says whether any of it
-/// is structure rather than shape.
+/// These are original-generator rank/refutation/pinning measurements, not
+/// a completed Gröbner basis, F4/F5 solving degree, or degree of regularity.
+/// Targets are field abscissas without a rational-point lifting check.
+/// Both random-control arms have the all-zero solution by construction.
 #[derive(Clone, Debug)]
 pub struct DregSummary {
     /// Extension degree.
@@ -683,20 +682,16 @@ pub struct DregSummary {
     pub degree: u32,
     /// Target draws taken.
     pub trials: usize,
-    /// Mean first fall degree over the draws that fell.
+    /// Mean rank-deficiency degree, conditional on detecting the proxy.
     pub fall_mean: Option<f64>,
-    /// Mean degree at which a **non-decomposable** target was refuted.
-    ///
-    /// This is the number that sets the attack's cost.  The
-    /// decomposition probability is tiny, so almost every call in
-    /// relation collection is a refutation, and the Macaulay matrix at
-    /// this degree is what each of those calls has to build.
+    /// Mean bounded-Macaulay refutation degree, conditional on refutation.
+    /// This is an algebraic event; targets have not been lifted to the curve.
     pub refute_mean: Option<f64>,
     /// Largest refutation degree seen.
     pub refute_max: Option<u32>,
     /// Draws refuted at or below `d_max`.
     pub refuted: usize,
-    /// Mean degree at which a decomposable target had every variable
+    /// Mean degree at which an algebraic system had every occurring variable
     /// pinned.  Reported separately because it is a different event: a
     /// target with two or more decompositions can never be pinned, and
     /// that is a property of the target, not a failure of the algebra.
@@ -716,33 +711,19 @@ pub struct DregSummary {
     /// caps, and nothing about the system's solving degree has been
     /// established.
     pub max_degree_built: Option<u32>,
-    /// Mean refutation degree of the **shape-matched** control: same
-    /// variable count, equation count, total degree and term density,
-    /// no Semaev structure.
-    ///
-    /// Read this together with [`Self::control_is_satisfiable`].  With
-    /// `n_eqs < n_vars` a random system has `2^(n_vars − n_eqs)`
-    /// expected solutions, so it is satisfiable by construction and can
-    /// neither refute nor pin — it cannot produce the event being
-    /// measured, and a `None` here is uninformative rather than a
-    /// finding.  That is why the second control exists.
+    /// Mean pinning degree of the shape-matched, zero-root control.
+    /// Legacy field name: this is not a completed-basis solving degree.
     pub control_solve_mean: Option<f64>,
-    /// Shape-matched control draws that did not resolve.
+    /// Shape-matched control draws that did not pin all occurring variables.
     pub control_unresolved: usize,
-    /// `2^(n_vars − n_eqs)` expected solutions of the shape-matched
-    /// control: when this exceeds 1 the control cannot refute.
+    /// Legacy density heuristic `2^(n_vars - n_eqs)`. This is NOT the
+    /// expected solution count of this generator, which always has zero
+    /// as a root and does not sample uniformly random Boolean functions.
     pub control_expected_solutions: f64,
-    /// Mean refutation degree of the **infeasible** control: same
-    /// variables, degree and term density, but enough equations
-    /// (`n_vars + 4`) that it has no solution with high probability, so
-    /// it refutes and is comparable like for like with the real
-    /// systems' refutation degree.
-    ///
-    /// Shape and feasibility cannot both be matched at once — matching
-    /// the equation count is what makes the first control satisfiable.
-    /// The two controls bracket the question instead.
+    /// Mean pinning degree of the extra-equation (`n_vars + 4`) control.
+    /// Legacy name: this arm is always SAT, never an UNSAT control.
     pub control_unsat_mean: Option<f64>,
-    /// Infeasible-control draws that did not resolve.
+    /// Extra-equation control draws that did not pin all occurring variables.
     pub control_unsat_unresolved: usize,
     /// Highest Macaulay degree built on a **shape-matched** control draw.
     ///
@@ -752,14 +733,14 @@ pub struct DregSummary {
     /// anything.  Omitting it once forced the `n = 5, m = 3` attribution
     /// to be settled by hand-computing the matrix size.
     pub control_shape_max_degree_built: Option<u32>,
-    /// Highest Macaulay degree built on an **infeasible** control draw.
+    /// Highest Macaulay degree built on an **extra-equation** control draw.
     ///
     /// Kept separate from the shape-matched arm rather than folded into
     /// one maximum, because the two arms have different row counts: the
-    /// infeasible arm carries `n_vars + 4` equations against the
+    /// extra-equation arm carries `n_vars + 4` equations against the
     /// shape-matched arm's `n_eqs`, so it reaches the row cap at a
     /// *lower* degree.  A shared `max()` would report a degree the
-    /// infeasible arm never built — and that arm is precisely the one
+    /// extra-equation arm never built — and that arm is precisely the one
     /// whose non-resolution carries the attribution, so the field meant
     /// to prove "not a cap artifact" would have been the field lying
     /// about it.
@@ -767,10 +748,9 @@ pub struct DregSummary {
 }
 
 impl DregSummary {
-    /// `solve_mean − fall_mean`: how far the degree that costs
-    /// anything sits above the degree the complexity claim is stated
-    /// in.  The first-fall-degree assumption is the assertion that this
-    /// stays bounded as `n` grows.
+    /// Difference of conditional means: refutation minus rank proxy.
+    /// The means can use different subsets of draws; this is not a paired
+    /// degree gap or evidence for the first-fall-degree assumption.
     pub fn gap(&self) -> Option<f64> {
         Some(self.refute_mean? - self.fall_mean?)
     }
@@ -780,9 +760,17 @@ impl DregSummary {
 /// over `n_vars` variables, each a sum of `terms_per_eq` monomials of
 /// degree at most `degree`.
 ///
-/// This is the null object for the sweep.  If the Semaev systems
-/// resolve at the same degree as these, then their algebraic structure
-/// is buying nothing and the measurement is of the shape alone.
+/// Each sampled monomial has positive degree. Consequently the all-zero
+/// assignment satisfies every equation, regardless of equation count.
+/// This generator supplies SAT controls only; matching a pinning degree
+/// cannot establish that Semaev structure has no benefit.
+///
+/// # Panics
+///
+/// Panics before sampling if `n_vars` is outside `1..=64`, or
+/// `degree.max(1) > n_vars`. Squarefree monomials cannot have more
+/// variables than the system; attempting to sample one would never finish.
+/// Degree zero retains its historical interpretation as degree one.
 pub fn random_control_system(
     n_vars: usize,
     n_eqs: usize,
@@ -790,6 +778,14 @@ pub fn random_control_system(
     terms_per_eq: usize,
     seed: u64,
 ) -> Vec<F2BoolPoly> {
+    assert!(
+        (1..=64).contains(&n_vars),
+        "random controls require 1..=64 Boolean variables"
+    );
+    assert!(
+        degree.max(1) <= n_vars as u32,
+        "random control degree cannot exceed the variable count"
+    );
     let mut rng = StdRng::seed_from_u64(seed);
     (0..n_eqs)
         .map(|_| {
@@ -808,12 +804,12 @@ pub fn random_control_system(
         .collect()
 }
 
-/// Measure first fall degree and solving degree on the same systems,
+/// Measure rank-deficiency and bounded-Macaulay resolution on the same systems,
 /// over `trials` independent target draws, against the matched random
 /// control.
 /// `with_control` runs the matched random null object as well.  It is
 /// the expensive half of the sweep by a wide margin — a random system
-/// of this shape does not refute until a high degree, so it pays the
+/// of this shape may remain unpinned at every tested degree, so it pays the
 /// full `binom(n_vars, d_max)` Macaulay cost on every draw, while the
 /// Semaev systems resolve early and stop.  Turn it off to extend the
 /// `n` ladder, on to interpret any single cell.
@@ -873,9 +869,8 @@ pub fn dreg_summary(
 
     let (n_vars, n_eqs, degree, terms_per_eq) = shape?;
 
-    // Matched control, same number of draws.  A random system of this
-    // shape is overwhelmingly infeasible, so its resolving event is a
-    // refutation too, and the two numbers compare like for like.
+    // Both controls have the all-zero root. A resolving event is pinning,
+    // not refutation; do not compare these means as UNSAT evidence.
     let mut control: Vec<u32> = Vec::new();
     let mut control_unresolved = 0usize;
     let mut control_unsat: Vec<u32> = Vec::new();
@@ -902,8 +897,7 @@ pub fn dreg_summary(
             None => control_unresolved += 1,
         }
 
-        // Second control: overdetermined, so infeasible with high
-        // probability, so it can actually refute.
+        // Extra equations change the shape but preserve the all-zero root.
         let unsat = random_control_system(
             n_vars,
             n_vars + 4,
@@ -956,16 +950,14 @@ pub fn dreg_summary(
 /// Render [`DregSummary`] rows as a markdown table.
 pub fn format_dreg_table(rows: &[DregSummary]) -> String {
     let mut out = String::from(
-        "| n | ℓ | m | vars | eqs | deg | FFD | D_refute | gap | ctrl(shape) | ctrl(unsat) | Dc(shape) | Dc(unsat) | refuted | pinned | unres | D_built |\n\
+        "| n | ℓ | m | vars | eqs | deg | D_rank_proxy | D_refute | delta_means | D_pin(shape) | D_pin(extra) | Dc(shape) | Dc(extra) | refuted | pinned | unres | D_built |\n\
          |--:|--:|--:|-----:|----:|----:|----:|---------:|----:|------------:|------------:|----------:|----------:|--------:|-------:|------:|--------:|\n",
     );
     let f = |v: Option<f64>| v.map_or("—".to_string(), |x| format!("{x:.2}"));
-    // A control that reported no degree is either one that never
-    // resolved or one that *could not* resolve because it is
-    // satisfiable by construction. Saying which is the whole point.
-    let ctrl = |v: Option<f64>, unresolved: usize, satisfiable: bool| match v {
+    // Multiple-root SAT systems may have a complete basis without pinning.
+    // No degree is therefore an unresolved diagnostic, not proof of failure.
+    let ctrl = |v: Option<f64>, unresolved: usize| match v {
         Some(x) => format!("{x:.2}"),
-        None if satisfiable => "n/a(sat)".to_string(),
         None if unresolved > 0 => "unres".to_string(),
         None => "—".to_string(),
     };
@@ -981,8 +973,8 @@ pub fn format_dreg_table(rows: &[DregSummary]) -> String {
             f(r.fall_mean),
             f(r.refute_mean),
             f(r.gap()),
-            ctrl(r.control_solve_mean, r.control_unresolved, r.control_expected_solutions > 1.5),
-            ctrl(r.control_unsat_mean, r.control_unsat_unresolved, false),
+            ctrl(r.control_solve_mean, r.control_unresolved),
+            ctrl(r.control_unsat_mean, r.control_unsat_unresolved),
             r.control_shape_max_degree_built
                 .map_or("—".to_string(), |d| d.to_string()),
             r.control_unsat_max_degree_built
@@ -1385,6 +1377,154 @@ pub fn sparse_elimination_cost(
     })
 }
 
+/// Where one degree's structured elimination spends its work, by column
+/// degree band, for one ladder draw given by its recorded `(V, x_R)`.
+///
+/// Runs the same algorithm as
+/// [`crate::cryptanalysis::sparse_macaulay::eliminate_high_columns`]
+/// (lowest-weight pivot per leading column, columns in descending monomial
+/// order) with counters added, so a profile describes the measured path
+/// rather than a model of it.  `ladder_refutation_profile_matches_the_eliminator`
+/// holds the two to the same rank, vanished rows and linear rows.
+#[derive(Clone, Debug)]
+pub struct RefutationBand {
+    /// Monomial degree of the columns in this band.
+    pub degree: u32,
+    pub columns: usize,
+    pub pivots: usize,
+    /// Row additions performed while eliminating this band.
+    pub xors: u64,
+    /// Total length of the rows those additions produced: the work, in
+    /// column indices written.
+    pub xor_output: u64,
+    /// Nonzeros left in the non-pivot rows when the band is done.
+    pub active_nnz_after: u64,
+    pub ms: f64,
+}
+
+/// See [`RefutationBand`].
+#[derive(Clone, Debug)]
+pub struct RefutationProfile {
+    pub n_vars: usize,
+    pub rows: usize,
+    pub cols: usize,
+    pub start_nnz: u64,
+    pub build_ms: f64,
+    pub bands: Vec<RefutationBand>,
+    pub high_rank: usize,
+    pub vanished: usize,
+    pub linear_rows: usize,
+    pub max_weight: usize,
+}
+
+/// Profile one degree of one ladder draw.  `basis` and `x_r` are the
+/// recorded low words of the draw's `V` basis and `x_R`, as the ladder's
+/// JSON lines print them.
+pub fn ladder_refutation_profile(
+    n: u32,
+    basis: &[u64],
+    x_r: u64,
+    degree: u32,
+) -> Option<RefutationProfile> {
+    use crate::cryptanalysis::koblitz_groebner::build_macaulay_sparse;
+    use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+    use crate::cryptanalysis::sparse_macaulay::{low_column_start, xor_sorted};
+    use std::mem::take;
+
+    let irr = find_irreducible_sparse(n)?;
+    let st = FieldStructure::new(n, &irr);
+    let elem = |w: u64| F2mElement::from_biguint(&BigUint::from(w), n);
+    let basis: Vec<F2mElement> = basis.iter().map(|&w| elem(w)).collect();
+    let sys = build_decomposition_system(&basis, &elem(x_r), &F2mElement::one(n), 3, &st)?;
+
+    let t0 = Instant::now();
+    let (cols, mut rows) = build_macaulay_sparse(&sys.equations, sys.n_vars, degree)?;
+    let build_ms = t0.elapsed().as_secs_f64() * 1e3;
+    let n_cols = cols.len();
+    let low_start = low_column_start(&cols);
+    let start_nnz = rows.iter().map(|r| r.len() as u64).sum();
+    let mut max_weight = rows.iter().map(|r| r.len()).max().unwrap_or(0);
+    let n_rows = rows.len();
+
+    let mut buckets: Vec<Vec<usize>> = vec![Vec::new(); n_cols.max(1)];
+    let mut vanished = 0usize;
+    for (i, r) in rows.iter().enumerate() {
+        match r.first() {
+            Some(&lead) => buckets[lead as usize].push(i),
+            None => vanished += 1,
+        }
+    }
+    let mut is_pivot = vec![false; n_rows];
+    let mut bands: Vec<RefutationBand> = Vec::new();
+    let mut c = 0usize;
+    while c < low_start.min(n_cols) {
+        let deg = cols[c].count_ones();
+        let mut band = RefutationBand {
+            degree: deg,
+            columns: 0,
+            pivots: 0,
+            xors: 0,
+            xor_output: 0,
+            active_nnz_after: 0,
+            ms: 0.0,
+        };
+        let tb = Instant::now();
+        while c < low_start.min(n_cols) && cols[c].count_ones() == deg {
+            band.columns += 1;
+            let bucket = take(&mut buckets[c]);
+            if !bucket.is_empty() {
+                let piv = *bucket
+                    .iter()
+                    .min_by_key(|&&i| rows[i].len())
+                    .expect("non-empty");
+                is_pivot[piv] = true;
+                band.pivots += 1;
+                let pivot_row = rows[piv].clone();
+                for i in bucket {
+                    if i == piv {
+                        continue;
+                    }
+                    let reduced = xor_sorted(&rows[i], &pivot_row);
+                    band.xors += 1;
+                    band.xor_output += reduced.len() as u64;
+                    max_weight = max_weight.max(reduced.len());
+                    match reduced.first() {
+                        Some(&lead) => buckets[lead as usize].push(i),
+                        None => vanished += 1,
+                    }
+                    rows[i] = reduced;
+                }
+            }
+            c += 1;
+        }
+        band.ms = tb.elapsed().as_secs_f64() * 1e3;
+        band.active_nnz_after = rows
+            .iter()
+            .zip(&is_pivot)
+            .filter(|(_, &p)| !p)
+            .map(|(r, _)| r.len() as u64)
+            .sum();
+        bands.push(band);
+    }
+    let linear_rows = rows
+        .iter()
+        .zip(&is_pivot)
+        .filter(|(r, &p)| !p && !r.is_empty() && r[0] as usize >= low_start)
+        .count();
+    Some(RefutationProfile {
+        n_vars: sys.n_vars,
+        rows: n_rows,
+        cols: n_cols,
+        start_nnz,
+        build_ms,
+        high_rank: bands.iter().map(|b| b.pivots).sum(),
+        bands,
+        vanished,
+        linear_rows,
+        max_weight,
+    })
+}
+
 /// The dense Macaulay matrix of one frozen decomposition system, for
 /// benchmarking an elimination kernel on the matrices the oracle really
 /// reduces: the system `build_decomposition_system` makes for `m`
@@ -1518,6 +1658,120 @@ mod tests {
         }
     }
 
+    /// The profiler runs the eliminator's own algorithm: same rank, same
+    /// vanished rows, same number of linear rows, same fill-in.
+    #[test]
+    fn ladder_refutation_profile_matches_the_eliminator() {
+        use crate::cryptanalysis::koblitz_groebner::build_macaulay_sparse;
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+
+        let mut rng = StdRng::seed_from_u64(0x9F0F_11E);
+        for (n, ell, degree) in [(5u32, 2usize, 5u32), (7, 2, 5), (7, 3, 5)] {
+            let (basis, x_r) = ladder_sample(n, ell, &mut rng);
+            let word = |e: &F2mElement| e.raw_bits().first().copied().unwrap_or(0);
+            let words: Vec<u64> = basis.iter().map(word).collect();
+            let p = ladder_refutation_profile(n, &words, word(&x_r), degree).unwrap();
+
+            let irr = find_irreducible_sparse(n).unwrap();
+            let st = FieldStructure::new(n, &irr);
+            let sys =
+                build_decomposition_system(&basis, &x_r, &F2mElement::one(n), 3, &st).unwrap();
+            let (cols, rows) = build_macaulay_sparse(&sys.equations, sys.n_vars, degree).unwrap();
+            let e = eliminate_high_columns(rows, cols.len(), low_column_start(&cols));
+            assert_eq!(
+                (p.high_rank, p.vanished, p.linear_rows, p.max_weight),
+                (e.high_rank, e.vanished, e.linear_rows.len(), e.max_weight),
+                "(n, ell, degree) = ({n}, {ell}, {degree})"
+            );
+        }
+    }
+
+    /// The dense finish keeps the row space: on ladder draws of four cells,
+    /// at every degree from the system's own up, and with the switch point
+    /// anywhere from the first column to the linear boundary, it finds the
+    /// same high rank and linear rows spanning the same space as the
+    /// sparse-only eliminator.
+    #[test]
+    fn dense_finish_keeps_the_high_rank_and_the_linear_span() {
+        use crate::cryptanalysis::koblitz_groebner::{
+            build_macaulay_sparse, rref_f2, system_degree,
+        };
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        use crate::cryptanalysis::sparse_macaulay::{
+            eliminate_high_columns, eliminate_high_columns_dense_finish, leading_band_end,
+            low_column_start,
+        };
+
+        // The reduced echelon form of a set of rows over `cols[low..]`: a
+        // canonical name for the space they span.
+        let span = |rows: &[Vec<u32>], low: usize, n_cols: usize| -> Vec<Vec<u64>> {
+            let width = n_cols - low;
+            let mut m: Vec<Vec<u64>> = rows
+                .iter()
+                .map(|r| {
+                    let mut bits = vec![0u64; width.div_ceil(64).max(1)];
+                    for &c in r {
+                        let k = c as usize - low;
+                        bits[k / 64] |= 1 << (k % 64);
+                    }
+                    bits
+                })
+                .collect();
+            let rank = if m.is_empty() {
+                0
+            } else {
+                rref_f2(&mut m, width)
+            };
+            m.truncate(rank);
+            m
+        };
+
+        let mut rng = StdRng::seed_from_u64(0xDE_45E);
+        let mut compared = 0;
+        for (n, ell, d_top) in [(5u32, 2usize, 6u32), (7, 2, 5), (7, 3, 5), (4, 3, 6)] {
+            for _ in 0..3 {
+                let (basis, x_r) = ladder_sample(n, ell, &mut rng);
+                let irr = find_irreducible_sparse(n).unwrap();
+                let st = FieldStructure::new(n, &irr);
+                let sys =
+                    build_decomposition_system(&basis, &x_r, &F2mElement::one(n), 3, &st).unwrap();
+                for degree in system_degree(&sys.equations)..=d_top {
+                    let Some((cols, rows)) =
+                        build_macaulay_sparse(&sys.equations, sys.n_vars, degree)
+                    else {
+                        continue;
+                    };
+                    let low = low_column_start(&cols);
+                    let want = eliminate_high_columns(rows.clone(), cols.len(), low);
+                    for until in [0, leading_band_end(&cols), low / 2, low] {
+                        let got = eliminate_high_columns_dense_finish(
+                            rows.clone(),
+                            cols.len(),
+                            low,
+                            until,
+                        );
+                        assert_eq!(
+                            got.high_rank, want.high_rank,
+                            "({n}, {ell}) degree {degree}"
+                        );
+                        assert_eq!(
+                            span(&got.linear_rows, low, cols.len()),
+                            span(&want.linear_rows, low, cols.len()),
+                            "({n}, {ell}) degree {degree} switch at {until}"
+                        );
+                        assert_eq!(
+                            got.high_rank + got.vanished + got.linear_rows.len(),
+                            rows.len()
+                        );
+                        compared += 1;
+                    }
+                }
+            }
+        }
+        assert!(compared >= 100, "only {compared} comparisons ran");
+    }
+
     /// A draw with solutions is never sent to the Macaulay path, and a
     /// small unsatisfiable draw resolves by refutation within a generous
     /// `d_max` -- the three outcomes the sweep distinguishes are reachable.
@@ -1543,6 +1797,49 @@ mod tests {
             sat > 0 && refuted > 0,
             "{sat} satisfiable, {refuted} refuted"
         );
+    }
+
+    #[test]
+    #[should_panic(expected = "random controls require 1..=64 Boolean variables")]
+    fn control_input_rejects_zero_variables() {
+        random_control_system(0, 1, 1, 1, 7);
+    }
+
+    #[test]
+    #[should_panic(expected = "random controls require 1..=64 Boolean variables")]
+    fn control_input_rejects_mask_overflow() {
+        random_control_system(65, 1, 1, 1, 7);
+    }
+
+    #[test]
+    #[should_panic(expected = "random control degree cannot exceed the variable count")]
+    fn control_input_rejects_unreachable_degree() {
+        random_control_system(1, 1, 2, 1, 7);
+    }
+
+    #[test]
+    #[should_panic(expected = "random control degree cannot exceed the variable count")]
+    fn control_input_rejects_extreme_degree_before_sampling() {
+        random_control_system(2, 1, u32::MAX, 1, 7);
+    }
+
+    #[test]
+    fn control_input_preserves_supported_boundaries() {
+        for n_vars in [1, 64] {
+            let zero = random_control_system(n_vars, 3, 0, 1, 7);
+            let one = random_control_system(n_vars, 3, 1, 1, 7);
+            let masks = |polys: &[F2BoolPoly]| {
+                polys
+                    .iter()
+                    .map(|p| p.terms.iter().map(|t| t.mask).collect::<Vec<_>>())
+                    .collect::<Vec<_>>()
+            };
+            assert_eq!(masks(&zero), masks(&one));
+            assert!(one
+                .iter()
+                .all(|p| p.terms.len() == 1 && p.terms[0].mask.count_ones() == 1));
+        }
+        assert!(random_control_system(2, 0, 2, 1, 7).is_empty());
     }
 
     #[test]
@@ -1702,9 +1999,9 @@ mod tests {
     /// never printed, so the sweep still could not tell a control that
     /// exhausted `d_max` from one that hit the size caps; and a single
     /// shared `max()` across both arms, which can report a degree the
-    /// infeasible arm never built, because that arm carries
+    /// extra-equation arm never built, because that arm carries
     /// `n_vars + 4` equations and so reaches the row cap at a lower
-    /// degree.  The infeasible arm is the one whose non-resolution
+    /// degree.  The extra-equation arm is the one whose non-resolution
     /// carries the attribution, so a field that averages it away is
     /// worse than no field at all.
     #[test]
@@ -1718,20 +2015,61 @@ mod tests {
         );
         assert!(
             r.control_unsat_max_degree_built.is_some(),
-            "so must the infeasible arm, independently"
+            "so must the extra-equation arm, independently"
         );
         assert!(
             r.control_expected_solutions > 0.0,
-            "the shape-matched arm's satisfiability must be visible"
+            "the legacy density heuristic is retained for API compatibility"
         );
 
         let table = format_dreg_table(std::slice::from_ref(&r));
-        for col in ["ctrl(shape)", "ctrl(unsat)", "Dc(shape)", "Dc(unsat)"] {
+        for col in [
+            "D_rank_proxy",
+            "D_pin(shape)",
+            "D_pin(extra)",
+            "Dc(shape)",
+            "Dc(extra)",
+        ] {
             assert!(
                 table.contains(col),
                 "a field that is stored but never printed cannot do its job; \
                  missing {col} in:\n{table}"
             );
         }
+    }
+
+    #[test]
+    fn degree_reporting_controls_always_have_zero_root() {
+        for n_vars in [2, 4, 6] {
+            for n_eqs in [n_vars / 2, n_vars + 4] {
+                for seed in 0..16 {
+                    let polys = random_control_system(n_vars, n_eqs, 2, 5, seed);
+                    assert!(polys.iter().all(|p| p.terms.iter().all(|t| t.mask != 0)));
+                    let (degree, profiles) = solving_degree(&polys, n_vars, 2);
+                    assert!(profiles.iter().all(|p| !p.refuted));
+                    if degree.is_some() {
+                        let last = profiles.last().unwrap();
+                        assert_eq!(last.vars_determined, last.vars_occurring);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn degree_reporting_does_not_infer_sat_from_density() {
+        let mut row = dreg_summary(7, 0, 2, 2, 1, 7, false).unwrap();
+        row.control_solve_mean = None;
+        row.control_unsat_mean = None;
+        row.control_unresolved = 1;
+        row.control_unsat_unresolved = 1;
+        row.control_expected_solutions = 1024.0;
+        let table = format_dreg_table(&[row]);
+        assert!(table.contains("D_rank_proxy"));
+        assert!(table.contains("D_pin(extra)"));
+        assert!(table.contains("unres"));
+        assert!(!table.contains("n/a(sat)"));
+        assert!(!table.contains("FFD"));
+        assert!(!table.contains("ctrl(unsat)"));
     }
 }

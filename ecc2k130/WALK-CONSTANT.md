@@ -1,5 +1,11 @@
 # Iterations per solve: the σ walk against the table walk
 
+> Table-walk correctness update (2026-09-26): [cycle escape v3](CYCLE-ESCAPE-V3.md)
+> replaces history-dependent exits with a validated raw-cycle anchor. Older
+> table-walk measurements below describe their recorded revisions, not v3.
+> V3 requires a new table corpus; the default sigma iteration is unchanged.
+
+
 Question: the campaign has two iteration functions: the shipping walk
 `R ← R + σʲ(R)` and the table walk `R ← R + ε·σᵏ(T_h)` of
 [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md).  The table walk runs
@@ -27,10 +33,14 @@ rate on the card.**
   paired rates; the switch pays unless the new rule costs the kernel 14–19% of
   its rate.  `aws/campaign.json` still names σ, and the switch is the campaign
   owner's.
-- **`maxIters`** is `2^32` in `aws/campaign.json` and in the witness
-  generator's default, up from `2^30`.  Workers read the bucket copy, and
-  `./rollout.sh max-iters 4294967296` raises that one field there.  A raise
-  keeps every collected point and checkpoint (§11.4).
+- **`maxIters`** is `2^32` in `aws/campaign.json`, up from `2^30`, and the
+  replay tools admit it plus the guard's overshoot.  Workers read the bucket
+  copy, and `./rollout.sh max-iters 4294967296` raises that one field there.
+  A raise keeps every collected point and checkpoint (§11.4).  A scale model
+  of the σ walk at the same cap-to-trail ratios measures the loss §6 prices:
+  the guard cuts exactly the trails past it, discarding 14.2% of trail steps
+  at `2^30`'s ratio against 14.2% predicted, and none at `2^32`'s
+  ([benchmarks/max-iters](benchmarks/max-iters/README.md)).
 
 Round 1's answer was **keep the σ walk, and raise `maxIters`**, on these
 findings (the fruitless-cycle ones are about the rule as it was then):
@@ -438,8 +448,8 @@ each range spans the bracket and the three paired sessions:
 
 **Expected work of the σ walk.** On completed trails it is
 `2^60.809 × [1.070, 1.082] = 2^60.91–60.92` iterations (extrapolated
-bracket, hashed branches).  With the current guard it is ×1.185 more,
-`2^61.15–61.17`.  Bailey et al.'s planning budget `2^60.9`, quoted across
+bracket, hashed branches).  With the `2^30` guard it was ×1.185 more,
+`2^61.15–61.17`; with `2^32` it is ×1.00007 (§11.2).  Bailey et al.'s planning budget `2^60.9`, quoted across
 this tree, is the first-order `2^60.809 × 1.069`, and it stands.
 
 ## 7. Falsification target
@@ -709,6 +719,11 @@ independent, which overstates the uncertainty of the correlated ones.
       itself item 3's −2.6 outlier, so it is not cleanly the device's;
     - no v1 replicate exists, so "under v2" is the scope of the observation.
       It does not show a change from v1.
+
+    §11.6 declares the replicate that tests it.  The replicate finds no
+    scatter under either rule: χ² = 8.79 (v2) and 23.30 (v1) on 15 degrees
+    of freedom, p = 0.89 and 0.078.  The device's pooled v2 constant matches
+    the emulation's to 0.05 standard errors.
   - **It does not reach the cost.** The constant pooled from the emulation's
     rows alone is 1.0032 ± 0.0010, against the pool's 1.0034 ± 0.0009.  The cost ratio
     of item 6 moves in its third digit: 0.811–0.863 against 0.811–0.864.
@@ -814,14 +829,14 @@ independent, which overstates the uncertainty of the correlated ones.
   less per solve than σ.
 - **Before it is chosen,** that paired measurement is required: v2 table
   kernel against the σ kernel, alternating, in one session on one card, as
-  §6's rows are.
+  §6's rows are.  §11.5 declares it and its decision rule.
 
 ### 11.2 Classification
 
 | change | class | why |
 |---|---|---|
 | rule v1 → v2 | **engineering** | `c` is at the floor before and after (pooled difference `-0.0003 ± 0.0007`); the cost per solve against σ falls from 4.85–6.26 to 0.81–0.86 (projection) by removing a loss, not by crossing the floor |
-| `maxIters` `2^30` → `2^32`, witness default with it | **engineering** | σ's guard loss ×1.185 → ×1.00007; expected work on the campaign's configuration `2^61.15–61.17` → `2^60.91–60.92` (§6 bracket) |
+| `maxIters` `2^30` → `2^32`, witness default with it | **engineering** | σ's guard loss ×1.185 → ×1.00007; expected work on the campaign's configuration `2^61.15–61.17` → `2^60.91–60.92` (§6 bracket).  A model row, whose mechanism and trail law a scale model measures at the same cap ratios ([benchmarks/max-iters](benchmarks/max-iters/README.md)) |
 | §6's five-tag sketch → four 16-bit tags | **accounting** | a correction to this note's own sketch; nothing measured changes |
 | the residual six-step relations | **accounting** | §6's 0.81–0.86 assumed every cycle caught; what is built leaves `2.0 × 10⁻⁵` of trails trapped, a ×1.0002 difference, so the projection is unchanged to two digits |
 | `README.md`'s `2^60.94` → `2^60.91–60.92` | **accounting** | a figure from a draft of §6 left in the README |
@@ -832,9 +847,13 @@ None is an advance: no row moves the ratio to the floor below one.
 ### 11.3 What changes elsewhere
 
 - `aws/campaign.json`:
-  - `maxIters` is `2^32`, and `src/witness.cpp`'s default `--max-iters` is
-    `2^32` with it.  The bucket copy is still what workers read, and
-    `./rollout.sh max-iters 4294967296` raises it there (§11.4).
+  - `maxIters` is `2^32`.  `src/witness.cpp` and `src/trailforest.cpp`
+    default to `ECC_REPLAY_MAX_ITERS` in `include/kernel.h`: `2^32` plus the
+    `ECC_GUARD_PERIOD − 1` steps a walk can run past the guard between
+    checks, which a default of exactly `2^32` refused.
+    `aws/test_campaign_guard.py` pins it to `campaign.json`.  The bucket copy
+    is still what workers read, and `./rollout.sh max-iters 4294967296`
+    raises it there (§11.4).
   - The live corpus is unversioned: `bootstrap.sh` runs it with
     `ECC_ALLOW_LEGACY_STORAGE=1`.  So `maxIters` is in no campaign id there,
     and a raise costs no collected work (§11.4).
@@ -851,7 +870,7 @@ None is an advance: no row moves the ratio to the floor below one.
   the table walk under v2 is a new walk identity.  No table-walk point
   exists, so nothing forks.
 - Switching needs three things, in order:
-  1. the paired rate above;
+  1. the paired rate above (§11.5);
   2. the owner's decision;
   3. the switch made early, since the walk is part of a corpus's collision
      identity: points from the σ walk never collide with the table walk's.
@@ -884,13 +903,19 @@ already collecting loses nothing.
 - **Storage.**
   - The live corpus is unversioned (`ECC_ALLOW_LEGACY_STORAGE=1`, from
     `bootstrap.sh`), so no campaign id holds `maxIters`.
-  - Under `storageProtocol`, `campaignContract` hashes it into the id
-    together with the binary hashes.  There a raise, like any rebuild, is a
-    new namespace, and `rollout.py` refuses it.
+  - Under `storageProtocol`, the campaign id binds the guard the campaign
+    was created with.  The first raise records that value as
+    `contractMaxIters`, so the id stays the same and so do the slots, the
+    manifests and every bound work directory.  The live `maxIters` may only
+    be at least `contractMaxIters`: `campaignContract` refuses anything
+    lower.  *(This bullet first said a strict raise was a new namespace, which
+    `rollout.py` refused; the follow-up that added `contractMaxIters`
+    changed that.)*
 - **How.**
   - `./rollout.sh max-iters 4294967296` reads `campaign.json` together with
     its ETag and changes `maxIters` and nothing else.
-  - It refuses a lower value, a live value of 0 and a strict campaign.
+  - It refuses a lower value and a live value of 0.  On a strict campaign
+    it records `contractMaxIters` and checks that the id did not move.
   - It writes the file back only if the file did not change in the
     meantime.
   - Workers do not restart for this: it is neither a client-pointer move
@@ -908,12 +933,259 @@ already collecting loses nothing.
   - Lowering the guard cuts trails that are already under way.
 - **Tools that re-walk trails** must accept the longer ones:
   - `merge.py`'s solve step: leave out `--client-arg --max-iters`, since the
-    client's default cap is `2^34`.  A merge work directory bound to the
-    `2^30` argument refuses a changed one.  It is a derived cache, rebuilt
-    from `dp/` without losing a point.
-  - the witness generator, whose default is `2^32` since round 2;
-  - cairn jobs, whose `max_steps_per_walker` must be at least `2^32`.
+    client's default cap is `2^34`, or raise it with the guard.  A merge work
+    directory accepts a raised `--max-iters` and refuses any other change to
+    the arguments it was bound with, because a larger replay cap re-walks
+    every stored point too.
+  - the witness generator and `trailforest`, whose default is
+    `ECC_REPLAY_MAX_ITERS`, the guard plus its overshoot, so a raise in the
+    bucket goes to `aws/campaign.json` and `include/kernel.h` too;
+  - cairn jobs, whose `max_steps_per_walker` must be at least `2^32`.  The
+    production job in the cairn repository sets `2^30`, so the trails the
+    raise recovers are corpus points but not yet claimable there.
+- **Collectors with no guard** are outside all of this: the Modal launcher
+  passes no `--max-iters`, and the FPGA engine has none.  Their trails can
+  be any length, and a strict merge (`merge.py --campaign`) replays only up
+  to the campaign's cap.  At `2^32` that misses 0.0006% of their trails, and
+  0.008% of the length-biased trails a collision lands on, against 4.9% and
+  20% at `2^30`.
 - **What is not recovered.** The steps the `2^30` guard has already
   discarded, 15.6% of the steps so far.  Those trails were restarted, and
   re-walking their seeds costs what new steps cost.  The raise stops the
   loss from here on.
+
+### 11.5 The paired rate: declared before it runs
+
+§11.1 item 6 and §11.3 leave the switch one measurement short: the rate of
+the rule-v2 table kernel against the σ kernel, paired on one card.  This
+declares that measurement and its decision rule before any run
+(`AGENTS.md` §4).  No GPU is reachable from where this was written, so the
+job is prepared here and runs wherever the owner has a card.
+
+**What runs.** [paired-rate/gpujob.sh](benchmarks/walk-constant/paired-rate/gpujob.sh),
+under any of the three launchers, all on one RTX PRO 6000:
+
+```
+modal run --detach modal_job.py --job benchmarks/walk-constant/paired-rate/gpujob.sh --out OUT
+python3 aws/bench_job.py --job benchmarks/walk-constant/paired-rate/gpujob.sh --out OUT
+python3 runpod_job.py --job benchmarks/walk-constant/paired-rate/gpujob.sh --out OUT
+python3 benchmarks/walk-constant/paired-rate/summarize.py OUT --freeze benchmarks/walk-constant/paired-rate/run-1
+```
+
+- **Builds.** σ (`WALK_TABLE=0`) and the table walk under rule v2
+  (`WALK_TABLE=1`), from one tree, with §6's knob set (the audited 256 × 2
+  preset of `benchmarks/table-walk/gpujob.sh`), so the rows compare with
+  §6's.  Each walk gets its shipping witness default: σ carries it, the
+  table walk cannot.
+- **Correctness first.**
+  - `make test-table-walk-cuda`: the CUDA probe of §11.1 item 5, with the
+    rule-v2 histories.  It has only been compiled so far; this is its first
+    run on a GPU.
+  - Each binary's first 300 device reports, re-walked by the host
+    reference: 300 verified and 0 dropped, or the run is void.
+- **Rate.** Six rounds in each of two geometries, the automatic worker count
+  and the campaign's 385,024.  A round runs σ and the table walk back to
+  back, and the order flips each round.  Each sample is `--bench --steps
+  1024 --launches 32` and records the SM clock, power and temperature.
+
+**The cost.** Per solve, table over σ is
+
+```
+cost = (σ rate / table rate) × K,
+K    = c_table (1 + δ/2) / c_σ × table trap loss / σ guard loss = 0.932–0.943,
+```
+
+with every factor of `K` read from the round-2 files by `summarize.py`
+(item 6), across the σ bracket.  Per geometry the bracket is the smallest
+paired ratio times `K`'s low end, to the largest times its high end.  With
+§6's v1 rates this gives item 6's 0.811–0.863.  So the table walk pays while
+its rate is above 0.932–0.943 of σ's, which lets the v2 kernel lose up to
+14–19% of the v1 kernel's rate.
+
+**The decision rule.**
+
+- **Pays:** the bracket's upper end is below 1 in both geometries.
+- **Does not pay:** its lower end is above 1 in either geometry.
+- **Undecided:** anything else.  That calls for a second session, not a
+  switch.
+- **Void:** a failed build, a failed CUDA probe, anything short of 300/300
+  with 0 dropped on either binary, a bench sample with no rate, a missing
+  geometry, or a nonzero job exit.  All three launchers bring the results
+  back whatever the exit code.  A void run is frozen with the rest and run
+  again, never dropped.
+- `summarize.py` also prints the median ratio against §6's v1 session in each
+  geometry.  That comparison crosses sessions, and possibly cards, so it
+  indicates the rule's rate cost without measuring it.
+
+**The switch deadline.** A rate that pays is necessary, not sufficient.
+Points from the σ walk never collide with the table walk's (§11.3), so a
+switch abandons the σ corpus.
+
+- The work `W` to the first collision is Rayleigh distributed.
+- After `w₀ = f·E[W]` with no collision, the σ walk's expected remaining
+  work is `E[W]·exp(x²)·erfc(x)`, where `f = 2x/√π`.
+- A fresh table walk costs `cost × E[W]`, so the switch pays while
+  `exp(x²)·erfc(x) > cost`.
+- At item 6's 0.811–0.863 that is `f` below 15.4–22.3%.
+  `summarize.py --check-deadline` checks the formula by Monte Carlo and
+  reproduces both ends to four digits.
+- `summarize.py` prints `f` for the measured bracket.  Set it against the
+  work behind the σ corpus's stored points, over σ's expected
+  `2^60.91–60.92` (§11.2).  That work is the sum of their trails' lengths,
+  and every record carries its own.
+- Raw iterations overstate it.  The 15.6% of steps the `2^30` guard
+  discarded (§11.4) stored no point, so they add nothing to the corpus's
+  chance of a collision.  The figure lives in the bucket, not here.
+
+**Inadmissible:**
+
+- changing the knob set, the geometries, the repetitions or `K` after
+  seeing a rate;
+- dropping a round, a sample or a void run;
+- deciding on the geometry that favours one walk;
+- quoting wall time, or one geometry's bracket, as the verdict.
+
+**Classification when it lands:** engineering, whichever way it falls.
+Both walks sit at the floor (§11.2), so the rate moves `S` and not the
+ratio to the floor.
+
+### 11.6 The device harness's scatter: declared before it runs
+
+§11.1 item 3 left one thing unexplained: the device harness's constants
+under v2 vary more than their standard errors allow.  It moves the cost in
+its third digit at most, so this is a check on the measurement, not on the
+walk.  Declared before any run (`AGENTS.md` §4).
+
+**What was seen.** The χ² = 13.3 on 4 degrees of freedom mixes two
+questions.
+
+- It sums four device-against-emulation z-scores.  About 5.7 of it is the
+  `n = 41` row, measured against the emulation row that is item 3's own
+  −2.6 outlier.
+- The observation inside the device harness is narrower.  Seeds 230 and 231
+  of one row (`n = 23`, ECC2K-130's distribution, H = 8, W = 8) are 2.7
+  standard errors apart: one degree of freedom, p ≈ 0.007.
+
+**Hypothesis.** The null: the device harness's `c` on that row varies
+between seeds only as its per-run standard errors say.
+
+- The null is the expected result.  Every trial draws a fresh table, salt and
+  start points from a per-thread stream seeded with `seed × 1000003 +
+  thread`, so trials are independent by construction.
+- A failure would point at the harness, through correlated streams or an
+  understated error, not at the walk.
+
+**The runs.** Sixteen seeds per rule, 20,000 trials each, `--threads 4`.
+[scatter.sh](benchmarks/walk-constant/scatter.sh) holds the command lines
+and [scatter.py](benchmarks/walk-constant/scatter.py) the analysis.
+
+- **v2:** this tree's harness, seeds 240–255.
+- **v1:** the same source built from `825f3a84`, the last tree with rule v1,
+  seeds 260–275.  The two trees differ in the rule and in the `--merge`
+  mode, which these runs do not use.
+- **Disjoint seeds.** Under one seed the two rules draw the same tables,
+  salts and start points, trial for trial.  A stream advances only on those
+  draws and on fruitless restarts, which are rare.  Two χ² values from
+  shared instances would be nearly one number, so the v1 replicate gets its
+  own seeds.
+- **`--threads 4` is part of the design.** The map from a seed to its
+  streams depends on the thread count.
+- **A run is not bit-reproducible.** Trials go to threads through an atomic
+  counter.  The frozen `.jsonl` is the record, and a rerun drifts within
+  its standard error.
+- **Seeds 230 and 231 are excluded,** since they prompted the question.
+- Both binaries are compiled as the Makefile's `walk-constant` target
+  compiles `walk-constant-host-h8`.  `scatter-build.txt` records their
+  hashes.
+
+**Tests.**
+
+1. **Heterogeneity, per rule.** The χ² of the 16 constants about their
+   inverse-variance mean, on 15 degrees of freedom.
+   - Scatter is established at p < 0.01 (χ² > 30.58), suggestive at
+     p < 0.05 (χ² > 25.00), and absent otherwise.
+   - If the true spread is 1.8 times the stated error (a variance ratio of
+     3.3, what 13.3 / 4 suggests), the test's power at p < 0.01 is 0.86.
+     At a variance ratio of 2.5 it is 0.66, and at 2.0 it is 0.43.
+2. **Reading the two verdicts.** Only "established" counts here.
+   - v2 established and v1 not: the scatter is new with rule v2.
+   - Both established: the harness's standard error understates its
+     scatter under either rule, and the rule is not the cause.
+   - Neither: the 230/231 gap and the 13.3 were chance, plus the `n = 41`
+     reference outlier.  The question closes.
+   - v1 established and v2 not: reported as found.
+3. **Device against emulation, per rule.** The pooled constant against the
+   emulation's matching row, with both errors: 1.0038 ± 0.0012
+   (`matrix-v3`) under v2, 1.0037 ± 0.0012 (`matrix-v2`) under v1.
+   - Where test 1 established scatter, the pooled error is first scaled by
+     `√(χ²/15)`.
+   - The harnesses disagree under that rule if |z| > 2.58.
+
+**What follows.**
+
+- These rows test the harness.  They are not pooled into item 3's
+  constant, whatever they show.
+- If test 3 finds the harnesses disagree, item 3's pooled constant is
+  withdrawn until that is explained.  Item 3 already commits to this for
+  the `n = 23` row.
+
+**Inadmissible:**
+
+- changing the seeds, the trial count, the thread count or a threshold after
+  seeing a result;
+- dropping a run;
+- rerunning a seed and keeping the better result.  A crashed run is rerun
+  on the same seed, and the crash is recorded.
+
+**Cost and classification.** About 46 minutes on four cores, with no GPU.
+The result is **accounting** whichever way it falls: it checks a
+measurement and moves no cost.
+
+### 11.6.1 Results
+
+Sources:
+- `scatter.txt`, printed by `scatter.py` from the frozen
+  `scatter-v2.jsonl` and `scatter-v1.jsonl`;
+- `scatter-build.txt`, the binaries' hashes and the source commit.
+
+The runs took 03:31:43–04:17:05 UTC on 2026-09-26, on four cores.  The
+declaration's commit `0828682c` is timestamped 03:31:09, before the first
+run, and `scatter-build.txt` records that commit as the source.
+
+| rule | seeds | trials | pooled `c` | ± | χ² (15 dof) | p | test 1 | emulation | test 3 z |
+|---|---|---:|---:|---:|---:|---:|---|---|---:|
+| v2 | 240–255 | 319,902 | 1.00368 | 0.00093 | 8.79 | 0.89 | absent | 1.00375 ± 0.00117 | −0.05 |
+| v1 | 260–275 | 319,917 | 1.00462 | 0.00093 | 23.30 | 0.078 | absent | 1.00369 ± 0.00117 | +0.62 |
+
+- **Test 2: neither rule scatters, so the question closes.** The 2.7
+  standard-error gap between seeds 230 and 231 was chance.  So was the
+  `n = 23` part of the χ² = 13.3.
+- **The `n = 41` row was not rerun.** Its 5.7 of the 13.3 stays what item 3
+  said it was, a comparison against an emulation outlier, and this test
+  does not bear on it.
+- **Where each rule sits against the lines.**
+  - v2 sits well under the "suggestive" line: χ² = 8.79 against 25.00.
+    Its largest single deviation is −1.31 standard errors (seed 244).
+  - v1 sits just under it: χ² = 23.30 against 25.00.  Its largest
+    deviation is −2.08 (seed 275).
+  - v1, not v2, came closer.  A scatter new with v2 would have looked the
+    other way round.
+- **Test 3: the harnesses agree under both rules.**  Item 3's pooled
+  constant, `c = 1.0034 ± 0.0009`, stands, and item 6's cost ratio with it.
+- **The binaries are the rules they claim to be.** Over 84M steps each:
+  - v1's rows show 40 four-step τ-relation returns and 8 six-step pairwise
+    ones.  The harness's own leading-order count predicts 43.3 and 7.0.
+    They also show one six-step τ-relation return, of the residual class
+    item 2 describes.
+  - v2's rows show no return of any kind.
+  - 98 and 83 trials (0.03%) reached the point at infinity and were
+    discarded, as the harness always does.
+- **Not declared, so descriptive only:**
+  - With disjoint seeds the two pools are independent.  `c(v2) − c(v1) =
+    −0.0009 ± 0.0013`, consistent with item 3's `−0.0003 ± 0.0007`.
+  - At 95% confidence, the seed-to-seed spread is at most 1.10 times the
+    stated error under v2 (a variance ratio of 1.21).  Under v1 it is at
+    most 1.79 times (3.21).
+
+**Classification: accounting.** The result checks a measurement.  It moves
+no constant and no cost, and it adds no row to item 3's pool.

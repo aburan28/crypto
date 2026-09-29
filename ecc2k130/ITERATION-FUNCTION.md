@@ -1,5 +1,11 @@
 # Iteration function and the 28 B/s question
 
+> Table-walk correctness update (2026-09-26): [cycle escape v3](CYCLE-ESCAPE-V3.md)
+> replaces history-dependent exits with a validated raw-cycle anchor. Older
+> table-walk measurements below describe their recorded revisions, not v3.
+> V3 requires a new table corpus; the default sigma iteration is unchanged.
+
+
 Question: can a different iteration function take one RTX PRO 6000 from the
 audited 14.64 B updates/s to 28 B/s?
 
@@ -92,7 +98,7 @@ What would move the floor, and why each is out of reach here:
 
 | lever | effect | status |
 |---|---|---|
-| fewer than ~4.8 products per step | lowers both floors | no affine formula does it; projective forms need the affine `x` for the hash anyway (an inversion), λ-coordinates cost 1I+3M+2S, `2P+Q` single-inversion tricks cost ≥ 8M |
+| fewer than ~4.8 products per step | lowers both floors | no affine formula does it; projective forms need the affine `x` for the hash anyway (an inversion), and even with that hash free the cheapest inversion-free addition, λ-projective mixed at 8M + 2S, is 60.5 clmad per update against this row's 38.1 — priced in [LAMBDA-PROJECTIVE.md](LAMBDA-PROJECTIVE.md); `2P+Q` single-inversion tricks cost ≥ 8M |
 | a product in fewer than 6 clmad | lowers the clmad floor | 32-bit limbs need 9 `lo` products; 3-limb splits need `hi` anyway; no 128-bit `CLMAD` form exists |
 | products off the carry-less unit | trades pipes | software `clmul` costs ~9 SM-clocks per product on the FMA pipe vs 3.9 on clmad; bit-sliced ALU products cost ~300 ALU each and the ALU is the tighter pipe; tensor cores need a shared matrix operand, and every walk's operands differ |
 | a walk that is not one addition per step | changes the count | `x`-only doubling is 1I+1S but a single multiplier `[2]` is a permutation, not a random function; mixed doubling/addition diverges per lane, and SIMT pays both |
