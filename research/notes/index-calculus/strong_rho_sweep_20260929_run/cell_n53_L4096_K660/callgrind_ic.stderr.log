@@ -1,0 +1,11 @@
+==9460== Callgrind, a call-graph generating cache profiler
+==9460== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==9460== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==9460== Command: /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_orbit_dlp_fast construct:53:0:660 scalars.txt 7 callgrind_ic.stdout.jsonl
+==9460== 
+==9460== For interactive control, run 'callgrind_control -h'.
+==9460== 
+==9460== Events    : Ir
+==9460== Collected : 153201588995
+==9460== 
+==9460== I   refs:      153,201,588,995
