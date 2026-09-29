@@ -71,19 +71,39 @@ def toy_oracle() -> dict:
                              if point != O and point[1] in xs))
     assert all(factors)
     sums = {}
+    witnesses = {}
     tuples = 0
     for triple in itertools.product(*factors):
         s2 = curve.add(triple[0], triple[1])
         total = curve.add(s2, triple[2])
         sums.setdefault(total, (triple, s2))
+        witnesses.setdefault(total, []).append((triple, s2))
         tuples += 1
     positives = sorted(point for point in sums if point != O)
     negatives = sorted(point for point in points if point not in sums)
     assert positives and negatives
     positive, negative = positives[0], negatives[0]
+    generic = sorted(point for point, paths in witnesses.items()
+                     if point != O and all(branch(path[0][0], path[0][1]) == "generic"
+                                           and branch(path[1], path[0][2]) == "generic"
+                                           for path in paths))
+    assert generic
     return {"curve": curve, "points": points, "factors": factors,
-            "support": sums, "triples": tuples,
-            "positive": positive, "negative": negative}
+            "support": sums, "witnesses": witnesses, "triples": tuples,
+            "positive": positive, "generic_positive": generic[0],
+            "negative": negative}
+
+
+def branch(p, q):
+    if p == O:
+        return "copy_q"
+    if q == O:
+        return "copy_p"
+    if p[1] == q[1] and p[2] ^ q[2] == p[1]:
+        return "inverse"
+    if p[1] == q[1]:
+        return "double"
+    return "generic"
 
 
 def primary_model(chain, triple, s2, target, slopes, masks):

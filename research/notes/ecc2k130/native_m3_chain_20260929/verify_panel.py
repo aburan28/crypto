@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import importlib.util
+import itertools
 import json
 import resource
 import sys
@@ -15,7 +17,7 @@ from chain import (EXACT_MODULUS, NodeCapExceeded, build_native_chain,
                    leaf_slot_bases)
 from reference import (TOY_A, TOY_B, TOY_BASES, TOY_MODULUS, TOY_N,
                        PolynomialCurve, decode_model, independent_leaf_bases,
-                       parse_cnf_and_model, sha)
+                       parse_cnf_and_model, primary_model, sha)
 from panel import DOMAIN, EXACT, EXACT_REPLAY, target_units
 
 HERE = Path(__file__).resolve().parent
@@ -36,6 +38,28 @@ BitField = _edge_module.BitField
 O = (1, 0, 0)
 
 
+def alternate_branch(p, q):
+    if p == O:
+        return "copy_q"
+    if q == O:
+        return "copy_p"
+    if p[1] == q[1] and p[2] ^ q[2] == p[1]:
+        return "inverse"
+    if p[1] == q[1]:
+        return "double"
+    return "generic"
+
+
+def alternate_slope(curve, p, q):
+    kind = alternate_branch(p, q)
+    field = curve.F
+    if kind in ("copy_q", "copy_p", "inverse"):
+        return 0
+    if kind == "double":
+        return p[1] ^ field.mul(p[2], field.inv(p[1]))
+    return field.mul(p[2] ^ q[2], field.inv(p[1] ^ q[1]))
+
+
 def rss_bytes() -> int:
     value = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     return value if sys.platform == "darwin" else value * 1024
@@ -49,15 +73,23 @@ def alternate_toy_support():
     factors = [tuple(p for p in points if p != O and p[1] in (0, basis[0]))
                for basis in TOY_BASES]
     support = set()
-    for p in factors[0]:
-        for q in factors[1]:
-            for r in factors[2]:
-                result = curve.add(curve.add(p[1:], q[1:]), r[1:])
-                support.add(O if result is None else (0, *result))
+    witnesses = {}
+    for p, q, r in itertools.product(*factors):
+        intermediate = curve.add(p[1:], q[1:])
+        result = curve.add(intermediate, r[1:])
+        total = O if result is None else (0, *result)
+        s2 = O if intermediate is None else (0, *intermediate)
+        support.add(total)
+        witnesses.setdefault(total, []).append(((p, q, r), s2))
     positive = min(p for p in support if p != O)
+    generic = min(point for point, paths in witnesses.items()
+                  if point != O and all(alternate_branch(path[0][0], path[0][1]) == "generic"
+                                        and alternate_branch(path[1], path[0][2]) == "generic"
+                                        for path in paths))
     negative = min(p for p in points if p not in support)
     return {"curve": curve, "points": points, "factors": factors,
-            "support": support, "positive": positive, "negative": negative}
+            "support": support, "positive": positive,
+            "generic_positive": generic, "negative": negative}
 
 
 def verify_toy(producer: Path, summary: dict):
@@ -67,6 +99,7 @@ def verify_toy(producer: Path, summary: dict):
     assert summary["distinct_supported_targets"] == len(alt["support"])
     assert summary["rational_curve_points"] == len(alt["points"])
     assert summary["positive"] == list(alt["positive"])
+    assert summary["generic_positive"] == list(alt["generic_positive"])
     assert summary["negative"] == list(alt["negative"])
     chain = build_native_chain(TOY_N, TOY_MODULUS, TOY_A, TOY_B,
                                TOY_BASES, 20000)
@@ -74,8 +107,46 @@ def verify_toy(producer: Path, summary: dict):
     assert chain.dag.prefix_sha256() == summary["prefix_sha256"]
     assert sha(producer / "solver.version.txt") == summary["solver_version_sha256"]
     assert "CryptoMiniSat version 5." in (producer / "solver.version.txt").read_text()
+    rows_path = producer / "triples.jsonl"
+    assert sha(rows_path) == summary["triple_rows_sha256"]
+    branch_counts = Counter()
+    with rows_path.open() as stream:
+        row_count = 0
+        for triple in itertools.product(*alt["factors"]):
+            p, q, r = triple
+            intermediate = alt["curve"].add(p[1:], q[1:])
+            s2 = O if intermediate is None else (0, *intermediate)
+            got = alt["curve"].add(intermediate, r[1:])
+            total = O if got is None else (0, *got)
+            wrong = next(point for point in alt["points"] if point != total)
+            slopes = (alternate_slope(alt["curve"], p, q),
+                      alternate_slope(alt["curve"], s2, r))
+            masks = [int(point[1] == basis[0])
+                     for point, basis in zip(triple, TOY_BASES, strict=True)]
+            kinds = (alternate_branch(p, q), alternate_branch(s2, r))
+            branch_counts[f"edge0_{kinds[0]}"] += 1
+            branch_counts[f"edge1_{kinds[1]}"] += 1
+            correct_model = primary_model(chain, triple, s2, total, slopes, masks)
+            wrong_model = primary_model(chain, triple, s2, wrong, slopes, masks)
+            accepted = chain.dag.evaluate(correct_model, chain.output)
+            rejected = not chain.dag.evaluate(wrong_model, chain.output)
+            expected = {"factors": [list(point) for point in triple],
+                        "masks": masks, "s2": list(s2), "target": list(total),
+                        "wrong_target": list(wrong), "slopes": list(slopes),
+                        "branches": list(kinds), "accepted": accepted,
+                        "wrong_rejected": rejected}
+            line = stream.readline()
+            assert line and json.loads(line) == expected
+            assert accepted and rejected
+            row_count += 1
+        assert stream.readline() == ""
+    assert row_count == summary["triple_rows"] == 27
+    assert dict(sorted(branch_counts.items())) == summary["branch_counts"]
+    assert branch_counts["edge0_generic"] == branch_counts["edge1_generic"] == 24
     checks = []
-    for label, target in (("positive", alt["positive"]), ("negative", alt["negative"])):
+    for label, target in (("positive", alt["positive"]),
+                          ("generic_positive", alt["generic_positive"]),
+                          ("negative", alt["negative"])):
         run = next(row for row in summary["runs"] if row["label"] == label)
         assert run["target"] == list(target)
         cnf = producer / f"{label}.cnf"
@@ -99,7 +170,7 @@ def verify_toy(producer: Path, summary: dict):
         assert (variables, clauses) == (run["cnf"]["variables"], run["cnf"]["clauses"])
         module.check_relation_cnf(chain, rows, target_units(chain, target))
         status, bits, _, _ = parse_cnf_and_model(cnf, stdout.read_text(), run["exit_code"])
-        assert status == run["status"] == ("SAT" if label == "positive" else "UNSAT")
+        assert status == run["status"] == ("UNSAT" if label == "negative" else "SAT")
         assert (target in alt["support"]) == (status == "SAT")
         if status == "SAT":
             lifted = decode_model(chain, bits, PolynomialCurve(TOY_N, TOY_MODULUS,
@@ -112,6 +183,9 @@ def verify_toy(producer: Path, summary: dict):
             assert (O if got is None else (0, *got)) == target
             assert bits[chain.output] == 1
             assert all(bits[node] == 1 for node in chain.edge_outputs)
+            if label == "generic_positive":
+                assert alternate_branch(factors[0], factors[1]) == "generic"
+                assert alternate_branch(tuple(lifted["s2"]), factors[2]) == "generic"
         else:
             assert run["classification"] == "SOLVER_UNSAT_ORACLE_CONFIRMED_TOY"
             assert bits is None and run["lift"] is None
@@ -119,6 +193,8 @@ def verify_toy(producer: Path, summary: dict):
                        "cnf_sha256": sha(cnf), "variables": variables,
                        "clauses": clauses})
     return {"arm": "toy", "decision": "PASS", "checks": checks,
+            "triple_rows": row_count, "triple_rows_sha256": sha(rows_path),
+            "branch_counts": dict(sorted(branch_counts.items())),
             "factor_triples": summary["factor_triples"],
             "supported_targets": len(alt["support"])}
 

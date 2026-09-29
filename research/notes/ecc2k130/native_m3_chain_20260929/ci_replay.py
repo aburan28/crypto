@@ -119,7 +119,8 @@ def replay_archive(directory: Path, frozen: dict) -> dict:
         for key in stable:
             assert fresh[key] == archived[key], (arm, key)
         if arm == "toy":
-            fields = ("checks", "factor_triples", "supported_targets")
+            fields = ("checks", "factor_triples", "supported_targets",
+                      "triple_rows", "triple_rows_sha256", "branch_counts")
         elif result["censor"] == "DAG_NODE_CAP":
             fields = ("censor", "partial_counts")
         else:
