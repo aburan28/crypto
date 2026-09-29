@@ -76,32 +76,6 @@ fn submod(a: u64, b: u64, m: u64) -> u64 {
     d.wrapping_add(m & (borrow as u64).wrapping_neg())
 }
 
-/// How many pivot rows ahead the back-substitution asks for the word it
-/// will read; see [`prefetch`].
-const PREFETCH_ROWS: usize = 32;
-
-/// Ask the processor to start fetching this word.
-///
-/// The back-substitution reads one word, the entry in column `lead`, from
-/// every pivot row to its left, only to learn whether that row needs any
-/// work.  Each row is its own allocation, so once the matrix outgrows the
-/// cache every such read is a miss, and most rows turn out to need
-/// nothing.  The addresses are all known before they are read, which is
-/// the case a prefetch is for.
-#[inline(always)]
-fn prefetch(word: &u64) {
-    #[cfg(target_arch = "x86_64")]
-    // SAFETY: a prefetch has no architectural effect beyond the cache,
-    // and SSE is part of the x86-64 baseline.
-    unsafe {
-        std::arch::x86_64::_mm_prefetch::<{ std::arch::x86_64::_MM_HINT_T0 }>(
-            (word as *const u64).cast(),
-        );
-    }
-    #[cfg(not(target_arch = "x86_64"))]
-    let _ = word;
-}
-
 /// A scalar `w` prepared for many multiplications modulo `m`.
 ///
 /// Every inner loop of the elimination multiplies one scalar — a pivot
@@ -305,9 +279,6 @@ impl IncrementalRelationSolver {
         // pivot row is zero before its own pivot column, and the rows
         // right of it would each cost a cache miss to find that out.
         for col in 0..lead {
-            if let Some(Some(ahead)) = self.pivot_rows[..lead].get(col + PREFETCH_ROWS) {
-                prefetch(&ahead[lead]);
-            }
             if let Some(pivot) = self.pivot_rows[col].as_mut() {
                 let factor = pivot[lead];
                 if factor == 0 {
