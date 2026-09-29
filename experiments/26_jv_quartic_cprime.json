@@ -1,0 +1,594 @@
+[
+  {
+    "p": 269,
+    "seed": 1,
+    "n": 5236127033,
+    "bits": 32.285852952731595,
+    "base": 132,
+    "fp_muls_per_add": 97.0,
+    "precompute_muls": 677477,
+    "random_residuals": 200,
+    "constructed_residuals": 40,
+    "random_decomposable": 0,
+    "decomposition_rate": 0.0,
+    "expected_rate": 0.0006195786864931846,
+    "planted_found": 40,
+    "mismatches": 0,
+    "undetermined": 0,
+    "c_prime": {
+      "mean": 160696.905,
+      "min": 111360,
+      "max": 163951
+    },
+    "weil_muls": {
+      "mean": 3401.0,
+      "min": 3401,
+      "max": 3401
+    },
+    "f4_muls": {
+      "mean": 157295.905,
+      "min": 107959,
+      "max": 160550
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 1.818785,
+      "min": 1409,
+      "max": 3625
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "max_rows": {
+      "mean": 83.985,
+      "min": 83,
+      "max": 84
+    },
+    "max_cols": {
+      "mean": 116.985,
+      "min": 116,
+      "max": 117
+    },
+    "c_prime_decomposable": {
+      "mean": 214386.125,
+      "min": 206943,
+      "max": 215666
+    },
+    "solving_degree_decomposable": {
+      "mean": 3.0,
+      "min": 3,
+      "max": 3
+    },
+    "mitm3_group_ops": 264.0,
+    "wall_ms": 652.810663
+  },
+  {
+    "p": 269,
+    "seed": 2,
+    "n": 5236219543,
+    "bits": 32.285878441521,
+    "base": 145,
+    "fp_muls_per_add": 97.0,
+    "precompute_muls": 677477,
+    "random_residuals": 200,
+    "constructed_residuals": 40,
+    "random_decomposable": 0,
+    "decomposition_rate": 0.0,
+    "expected_rate": 0.0006195786864931846,
+    "planted_found": 40,
+    "mismatches": 0,
+    "undetermined": 0,
+    "c_prime": {
+      "mean": 161729.075,
+      "min": 111271,
+      "max": 214142
+    },
+    "weil_muls": {
+      "mean": 3401.0,
+      "min": 3401,
+      "max": 3401
+    },
+    "f4_muls": {
+      "mean": 158324.625,
+      "min": 107870,
+      "max": 210511
+    },
+    "roots_muls": {
+      "mean": 3.45,
+      "min": 0,
+      "max": 230
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 1.569285,
+      "min": 1205,
+      "max": 7336
+    },
+    "solving_degree": {
+      "mean": 2.02,
+      "min": 2,
+      "max": 3
+    },
+    "max_rows": {
+      "mean": 86.385,
+      "min": 80,
+      "max": 244
+    },
+    "max_cols": {
+      "mean": 118.21,
+      "min": 114,
+      "max": 199
+    },
+    "c_prime_decomposable": {
+      "mean": 212343.475,
+      "min": 171560,
+      "max": 215565
+    },
+    "solving_degree_decomposable": {
+      "mean": 3.0,
+      "min": 3,
+      "max": 3
+    },
+    "mitm3_group_ops": 290.0,
+    "wall_ms": 591.757156
+  },
+  {
+    "p": 521,
+    "seed": 1,
+    "n": 73680149759,
+    "bits": 36.100556942663715,
+    "base": 264,
+    "fp_muls_per_add": 97.0,
+    "precompute_muls": 677477,
+    "random_residuals": 200,
+    "constructed_residuals": 40,
+    "random_decomposable": 0,
+    "decomposition_rate": 0.0,
+    "expected_rate": 0.0003198976327575176,
+    "planted_found": 40,
+    "mismatches": 0,
+    "undetermined": 0,
+    "c_prime": {
+      "mean": 161483.575,
+      "min": 132419,
+      "max": 164196
+    },
+    "weil_muls": {
+      "mean": 3401.0,
+      "min": 3401,
+      "max": 3401
+    },
+    "f4_muls": {
+      "mean": 158082.575,
+      "min": 129018,
+      "max": 160795
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 1.81918,
+      "min": 1563,
+      "max": 3408
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "max_rows": {
+      "mean": 83.96,
+      "min": 80,
+      "max": 84
+    },
+    "max_cols": {
+      "mean": 116.97,
+      "min": 114,
+      "max": 117
+    },
+    "c_prime_decomposable": {
+      "mean": 215245.35,
+      "min": 214512,
+      "max": 217905
+    },
+    "solving_degree_decomposable": {
+      "mean": 3.0,
+      "min": 3,
+      "max": 3
+    },
+    "mitm3_group_ops": 528.0,
+    "wall_ms": 771.199219
+  },
+  {
+    "p": 521,
+    "seed": 2,
+    "n": 73680063791,
+    "bits": 36.1005552593653,
+    "base": 259,
+    "fp_muls_per_add": 97.0,
+    "precompute_muls": 677477,
+    "random_residuals": 200,
+    "constructed_residuals": 40,
+    "random_decomposable": 0,
+    "decomposition_rate": 0.0,
+    "expected_rate": 0.0003198976327575176,
+    "planted_found": 40,
+    "mismatches": 0,
+    "undetermined": 0,
+    "c_prime": {
+      "mean": 161422.62,
+      "min": 111554,
+      "max": 163135
+    },
+    "weil_muls": {
+      "mean": 3401.0,
+      "min": 3401,
+      "max": 3401
+    },
+    "f4_muls": {
+      "mean": 158021.62,
+      "min": 108153,
+      "max": 159734
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 1.768065,
+      "min": 1319,
+      "max": 4242
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "max_rows": {
+      "mean": 83.97,
+      "min": 80,
+      "max": 84
+    },
+    "max_cols": {
+      "mean": 116.975,
+      "min": 114,
+      "max": 117
+    },
+    "c_prime_decomposable": {
+      "mean": 215234.475,
+      "min": 214513,
+      "max": 215939
+    },
+    "solving_degree_decomposable": {
+      "mean": 3.0,
+      "min": 3,
+      "max": 3
+    },
+    "mitm3_group_ops": 518.0,
+    "wall_ms": 712.082035
+  },
+  {
+    "p": 769,
+    "seed": 1,
+    "n": 349707607237,
+    "bits": 38.34735822327881,
+    "base": 404,
+    "fp_muls_per_add": 97.0,
+    "precompute_muls": 677477,
+    "random_residuals": 200,
+    "constructed_residuals": 40,
+    "random_decomposable": 0,
+    "decomposition_rate": 0.0,
+    "expected_rate": 0.00021673168617251842,
+    "planted_found": 40,
+    "mismatches": 0,
+    "undetermined": 0,
+    "c_prime": {
+      "mean": 161348.845,
+      "min": 111799,
+      "max": 162160
+    },
+    "weil_muls": {
+      "mean": 3401.0,
+      "min": 3401,
+      "max": 3401
+    },
+    "f4_muls": {
+      "mean": 157947.845,
+      "min": 108398,
+      "max": 158759
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 1.47439,
+      "min": 1252,
+      "max": 2376
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "max_rows": {
+      "mean": 83.98,
+      "min": 80,
+      "max": 84
+    },
+    "max_cols": {
+      "mean": 116.985,
+      "min": 114,
+      "max": 117
+    },
+    "c_prime_decomposable": {
+      "mean": 215361.1,
+      "min": 214575,
+      "max": 215996
+    },
+    "solving_degree_decomposable": {
+      "mean": 3.0,
+      "min": 3,
+      "max": 3
+    },
+    "mitm3_group_ops": 808.0,
+    "wall_ms": 741.878191
+  },
+  {
+    "p": 769,
+    "seed": 2,
+    "n": 349708594483,
+    "bits": 38.34736229608955,
+    "base": 371,
+    "fp_muls_per_add": 97.0,
+    "precompute_muls": 677477,
+    "random_residuals": 200,
+    "constructed_residuals": 40,
+    "random_decomposable": 0,
+    "decomposition_rate": 0.0,
+    "expected_rate": 0.00021673168617251842,
+    "planted_found": 40,
+    "mismatches": 0,
+    "undetermined": 0,
+    "c_prime": {
+      "mean": 161625.98,
+      "min": 113690,
+      "max": 214415
+    },
+    "weil_muls": {
+      "mean": 3401.0,
+      "min": 3401,
+      "max": 3401
+    },
+    "f4_muls": {
+      "mean": 158223.87,
+      "min": 110289,
+      "max": 210792
+    },
+    "roots_muls": {
+      "mean": 1.11,
+      "min": 0,
+      "max": 222
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 1.49164,
+      "min": 1172,
+      "max": 4374
+    },
+    "solving_degree": {
+      "mean": 2.005,
+      "min": 2,
+      "max": 3
+    },
+    "max_rows": {
+      "mean": 84.795,
+      "min": 83,
+      "max": 244
+    },
+    "max_cols": {
+      "mean": 117.405,
+      "min": 116,
+      "max": 199
+    },
+    "c_prime_decomposable": {
+      "mean": 214770.45,
+      "min": 193029,
+      "max": 215971
+    },
+    "solving_degree_decomposable": {
+      "mean": 3.025,
+      "min": 3,
+      "max": 4
+    },
+    "mitm3_group_ops": 742.0,
+    "wall_ms": 763.217924
+  },
+  {
+    "p": 1033,
+    "seed": 1,
+    "n": 1138679121191,
+    "bits": 40.05049839272947,
+    "base": 496,
+    "fp_muls_per_add": 97.0,
+    "precompute_muls": 677477,
+    "random_residuals": 200,
+    "constructed_residuals": 40,
+    "random_decomposable": 0,
+    "decomposition_rate": 0.0,
+    "expected_rate": 0.00016134236850596966,
+    "planted_found": 40,
+    "mismatches": 0,
+    "undetermined": 0,
+    "c_prime": {
+      "mean": 161695.15,
+      "min": 111821,
+      "max": 163623
+    },
+    "weil_muls": {
+      "mean": 3401.0,
+      "min": 3401,
+      "max": 3401
+    },
+    "f4_muls": {
+      "mean": 158294.15,
+      "min": 108420,
+      "max": 160222
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 1.6267850000000001,
+      "min": 1342,
+      "max": 3349
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "max_rows": {
+      "mean": 84.0,
+      "min": 84,
+      "max": 84
+    },
+    "max_cols": {
+      "mean": 117.0,
+      "min": 117,
+      "max": 117
+    },
+    "c_prime_decomposable": {
+      "mean": 215262.875,
+      "min": 207226,
+      "max": 216189
+    },
+    "solving_degree_decomposable": {
+      "mean": 3.0,
+      "min": 3,
+      "max": 3
+    },
+    "mitm3_group_ops": 992.0,
+    "wall_ms": 968.4427479999999
+  },
+  {
+    "p": 1033,
+    "seed": 2,
+    "n": 1138680514187,
+    "bits": 40.05050015764037,
+    "base": 548,
+    "fp_muls_per_add": 97.0,
+    "precompute_muls": 677477,
+    "random_residuals": 200,
+    "constructed_residuals": 40,
+    "random_decomposable": 0,
+    "decomposition_rate": 0.0,
+    "expected_rate": 0.00016134236850596966,
+    "planted_found": 40,
+    "mismatches": 0,
+    "undetermined": 0,
+    "c_prime": {
+      "mean": 161384.13,
+      "min": 111774,
+      "max": 162165
+    },
+    "weil_muls": {
+      "mean": 3401.0,
+      "min": 3401,
+      "max": 3401
+    },
+    "f4_muls": {
+      "mean": 157983.13,
+      "min": 108373,
+      "max": 158764
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 1.84683,
+      "min": 1485,
+      "max": 2732
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "max_rows": {
+      "mean": 84.0,
+      "min": 84,
+      "max": 84
+    },
+    "max_cols": {
+      "mean": 117.0,
+      "min": 117,
+      "max": 117
+    },
+    "c_prime_decomposable": {
+      "mean": 215460.35,
+      "min": 214809,
+      "max": 216474
+    },
+    "solving_degree_decomposable": {
+      "mean": 3.0,
+      "min": 3,
+      "max": 3
+    },
+    "mitm3_group_ops": 1096.0,
+    "wall_ms": 1138.25706
+  }
+]

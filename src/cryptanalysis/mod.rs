@@ -174,6 +174,7 @@ pub mod invalid_curve_attack;
 pub mod isogeny_class_search;
 pub mod isogeny_degree_search;
 pub mod j0_twists;
+pub mod jv_quartic;
 pub mod koblitz_bench;
 pub mod koblitz_factor_base_search;
 pub mod koblitz_fast;
