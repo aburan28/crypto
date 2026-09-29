@@ -14,7 +14,7 @@ import sys
 import campaign_rules_v2 as rules
 from generic_build import verify_build_record
 from oracle import require
-from run_improvement_v3 import EXPOSED, PANEL as ROUND3_PANEL
+from run_improvement_v3 import EXPOSED, PANEL as ROUND3_PANEL, PANEL_SHA256 as ROUND3_PANEL_SHA256
 from tournament import digest, read, write
 
 HERE = Path(__file__).resolve().parent
@@ -148,6 +148,8 @@ def main():
     registration_check(panel)
     check_generic_source()
     require(digest(HISTORY) == rules.HISTORY_SHA256, 'changed original point census')
+    require(digest(ROUND3_PANEL) == ROUND3_PANEL_SHA256,
+            'changed sealed third-round supplemental exposure registry')
     expected_exposures = read(ROUND3_PANEL)['exposed_fixture_sha256']
     for path in EXPOSED:
         relative = str(path.relative_to(ROOT))
