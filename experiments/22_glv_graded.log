@@ -1,0 +1,67 @@
+p=  271 n=2^ 24.2 seed=1 S4 terms=49 weight histogram=[49, 0, 0] homogeneous=true
+  residual 0 harness: triples=Some(1) dim=64 muls=1018348 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=608542 muls_total=903157 ms=5 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4229012721 ms=27239 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4220008651 ms=15732 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=275 ops=6499860 sols=Some(3) blocked_steps=0 ms=1254
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=826 ops=433816277 sols=Some(9) blocked_steps=0 ms=7345
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=826 ops=428205576 sols=Some(9) blocked_steps=14 ms=5075
+    F4 ratios: ops block/ordinary=Some(65.87919985968928) block/vanilla=Some(0.9870666424994469) ms block/vanilla=Some(0.6910351017902799); orbit = 3 × ordinary Some(true)
+  residual 1 harness: triples=Some(1) dim=64 muls=946918 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=608794 muls_total=902868 ms=6 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4227473494 ms=28183 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4223004948 ms=15365 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=274 ops=6345421 sols=Some(2) blocked_steps=0 ms=422
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=823 ops=434904913 sols=Some(6) blocked_steps=0 ms=7096
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=823 ops=428360888 sols=Some(6) blocked_steps=14 ms=5012
+    F4 ratios: ops block/ordinary=Some(67.50708707901336) block/vanilla=Some(0.9849529752265641) ms block/vanilla=Some(0.7063610294348255); orbit = 3 × ordinary Some(true)
+  residual 2 harness: triples=Some(1) dim=64 muls=876661 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=608028 muls_total=902066 ms=5 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4235437970 ms=29337 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4221716027 ms=15348 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=273 ops=6193124 sols=Some(1) blocked_steps=0 ms=2992
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=820 ops=434921844 sols=Some(3) blocked_steps=0 ms=7061
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=820 ops=428153832 sols=Some(3) blocked_steps=14 ms=4960
+    F4 ratios: ops block/ordinary=Some(69.13374122656029) block/vanilla=Some(0.9844385558155594) ms block/vanilla=Some(0.7023614751023586); orbit = 3 × ordinary Some(true)
+  residual 3 harness: triples=Some(1) dim=64 muls=1020194 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=608013 muls_total=901446 ms=5 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4216921894 ms=24484 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4214838100 ms=14524 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=275 ops=6490649 sols=Some(3) blocked_steps=0 ms=434
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=826 ops=435768915 sols=Some(9) blocked_steps=0 ms=13099
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=826 ops=429450223 sols=Some(9) blocked_steps=14 ms=6597
+    F4 ratios: ops block/ordinary=Some(66.16445027300044) block/vanilla=Some(0.9854999019377048) ms block/vanilla=Some(0.5036123171549689); orbit = 3 × ordinary Some(true)
+  (residuals without an F_p-rational decomposition skipped: 23)
+p=  541 n=2^ 27.2 seed=1 S4 terms=49 weight histogram=[49, 0, 0] homogeneous=true
+  residual 0 harness: triples=Some(1) dim=64 muls=960361 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=610709 muls_total=905663 ms=5 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4249351760 ms=22285 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4238713691 ms=14830 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=544 ops=8765471 sols=Some(2) blocked_steps=0 ms=767
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=1633 ops=443399424 sols=Some(6) blocked_steps=0 ms=7665
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=1633 ops=437349594 sols=Some(6) blocked_steps=14 ms=5979
+    F4 ratios: ops block/ordinary=Some(49.89459140301759) block/vanilla=Some(0.986355800949349) ms block/vanilla=Some(0.7801196177721181); orbit = 3 × ordinary Some(true)
+  residual 1 harness: triples=Some(2) dim=64 muls=1031150 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=611205 muls_total=906169 ms=6 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4251573322 ms=25735 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4237234243 ms=14795 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=545 ops=8894372 sols=Some(3) blocked_steps=0 ms=776
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=1636 ops=443698248 sols=Some(9) blocked_steps=0 ms=7817
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=1636 ops=437312985 sols=Some(9) blocked_steps=14 ms=6061
+    F4 ratios: ops block/ordinary=Some(49.16738191296699) block/vanilla=Some(0.9856089965899527) ms block/vanilla=Some(0.7754114624248818); orbit = 3 × ordinary Some(true)
+  residual 2 harness: triples=Some(1) dim=64 muls=888398 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=611442 muls_total=905565 ms=6 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4245850563 ms=22937 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4237421033 ms=14993 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=543 ops=8622352 sols=Some(1) blocked_steps=0 ms=759
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=1630 ops=442628580 sols=Some(3) blocked_steps=0 ms=7817
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=1630 ops=436665280 sols=Some(3) blocked_steps=14 ms=5976
+    F4 ratios: ops block/ordinary=Some(50.6434068105779) block/vanilla=Some(0.9865275305991312) ms block/vanilla=Some(0.7645526271357367); orbit = 3 × ordinary Some(true)
+  residual 3 harness: triples=Some(1) dim=64 muls=961236 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=612282 muls_total=906986 ms=5 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4248753947 ms=22598 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4239269256 ms=14579 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=544 ops=8833977 sols=Some(2) blocked_steps=0 ms=918
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=1633 ops=443408121 sols=Some(6) blocked_steps=0 ms=7645
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=1633 ops=437094648 sols=Some(6) blocked_steps=14 ms=5957
+    F4 ratios: ops block/ordinary=Some(49.47880756311682) block/vanilla=Some(0.9857614854104126) ms block/vanilla=Some(0.7792617399034505); orbit = 3 × ordinary Some(true)
+  (residuals without an F_p-rational decomposition skipped: 11)
+p= 1051 n=2^ 30.1 seed=1 S4 terms=49 weight histogram=[49, 0, 0] homogeneous=true
+  residual 0 harness: triples=Some(1) dim=64 muls=968890 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=611246 muls_total=906316 ms=5 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4256890187 ms=22674 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4242325534 ms=14691 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=1054 ops=13307633 sols=Some(2) blocked_steps=0 ms=1416
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=3163 ops=457606857 sols=Some(6) blocked_steps=0 ms=13872
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=3163 ops=451574044 sols=Some(6) blocked_steps=14 ms=7880
+    F4 ratios: ops block/ordinary=Some(33.933460894210114) block/vanilla=Some(0.986816602706633) ms block/vanilla=Some(0.5680501960325306); orbit = 3 × ordinary Some(true)
+  residual 1 harness: triples=Some(1) dim=64 muls=969871 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=611885 muls_total=907048 ms=5 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4257366256 ms=26390 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4244757728 ms=14726 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=1054 ops=13326384 sols=Some(2) blocked_steps=0 ms=1414
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=3163 ops=456596950 sols=Some(6) blocked_steps=0 ms=9639
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=3163 ops=451300164 sols=Some(6) blocked_steps=14 ms=10633
+    F4 ratios: ops block/ordinary=Some(33.865162822863276) block/vanilla=Some(0.9883994275476435) ms block/vanilla=Some(1.1031421677731872); orbit = 3 × ordinary Some(true)
+  residual 2 harness: triples=Some(1) dim=64 muls=894320 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=610440 muls_total=904081 ms=5 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4255076684 ms=22985 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4242778051 ms=14521 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=1053 ops=13183071 sols=Some(1) blocked_steps=0 ms=1442
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1668x1632 runs=3160 ops=457427761 sols=Some(3) blocked_steps=0 ms=9651
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1668x1632 runs=3160 ops=451366945 sols=Some(3) blocked_steps=14 ms=8076
+    F4 ratios: ops block/ordinary=Some(34.23837624784089) block/vanilla=Some(0.9867502226214906) ms block/vanilla=Some(0.8368402539977005); orbit = 3 × ordinary Some(true)
+  residual 3 harness: triples=Some(1) dim=64 muls=898621 | ordinary coupled=1.00 D=Some(10) dim=Some(64) peak=252x286 cells=72072 muls@D=611938 muls_total=907427 ms=5 | orbit vanilla D=None dim=None peak=11985x8855 cells=106127175 muls@D=0 muls_total=4257599528 ms=22668 [no closure up to degree 19] | orbit block D=None dim=None peak=11985x8855 cells=35375823 muls@D=0 muls_total=4244573756 ms=14473 [no closure up to degree 19] | ratios block/ordinary=None block/vanilla muls=None cells=None
+    F4 ordinary: D_solve=10 D_reach=14 max=221x277 runs=1053 ops=13180087 sols=Some(1) blocked_steps=0 ms=3291
+    F4 orbit (z-homogenised): D_solve=10 D_reach=14 max=1680x1654 runs=3160 ops=461313952 sols=Some(3) blocked_steps=0 ms=16759
+    F4 orbit (z-homogenised) [block-aware]: D_solve=10 D_reach=14 max=1680x1654 runs=3160 ops=454244927 sols=Some(3) blocked_steps=14 ms=13854
+    F4 ratios: ops block/ordinary=Some(34.464486235940626) block/vanilla=Some(0.9846763251591402) ms block/vanilla=Some(0.8266763190708468); orbit = 3 × ordinary Some(true)
+  (residuals without an F_p-rational decomposition skipped: 21)
+wrote experiments/22_glv_graded.json
