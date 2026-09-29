@@ -219,8 +219,9 @@ should be quoted without its configuration.
 
 `examples/koblitz_orbit_dlp_fast.rs` is a pair-table-free compact-orbit producer:
 one Frobenius-quotiented S3 index, normal-basis one-probe lookup, rank-guided
-relations, and K grown with batch size L. Against the frozen Kuhn–Struik batched
-rho (`d=4`) it wins all 15 paired n=53 blocks (L=32..16,384, wall 0.24–0.74),
+relations, and K grown with batch size L. Against the historical Kuhn–Struik batched
+rho (`d=4`, before the later backend and normal-basis corrections) it wins all
+15 paired n=53 blocks (L=32..16,384, wall 0.24–0.74),
 all 3 n=41 blocks at L=1,024 (0.34), and all 3 n=61 blocks at L=1,024 / 4,096 /
 16,384 (K=600/800/1,400, wall 0.14–0.63; 64,512/64,512 replayed).
 Constant-factor: both arms ~√(L·r/n) at optimal K. Status
@@ -241,15 +242,32 @@ diagnostic only: common-unit S and full-operation attack-speed ratios remain
 unset; the selected-panel `vs_rho` row is not promoted. Evidence:
 [`compact_orbit_point_panel_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_orbit_point_panel_20260929/RESULT.md).
 
-**Next beat:** a same-Q precomputed-start rho and complete common-operation
-accounting at n=41/53 L=1 and L=1,024; then the n=83 confidence gate and the
-pending n=61 L=65,536 batch-size probe as resources permit. Do not use
-32-target panels as a substitute. Historical evidence:
+**2026-09-29 stronger-rho follow-up:** a disjoint point-only four-arm panel
+compared compact orbit, corrected rho v2, 32-walk batch-inversion rho, and the
+same batched rho with normal-basis signed-Frobenius canonicalization. All six
+n=37/41/53 × L=1/1,024 cells passed five cold blocks and independent
+second-machine replay. On the same new L=1,024 Q, compact/v2 paired CPU ratios
+were 0.782/0.391/0.344, but compact/normal-rho ratios were **2.081/2.989/3.086**
+(95% intervals 2.073–2.090 / 2.877–3.116 / 3.021–3.131). The earlier batch
+timing lead is a weaker-comparator result. At n41 and n53 the current compact
+S3 index build alone exceeds the full stronger-rho process in every block;
+rank-attempt yield is already at its K-equation counting floor. Common-unit S,
+algorithmic `vs_rho` and n=131 transfer remain unset, so the selected-panel
+row is not promoted. Evidence:
+[`compact_orbit_strong_rho_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_orbit_strong_rho_20260929/RESULT.md).
+
+**Next beat:** freeze a disjoint n41/n53 L=1,024 K/base-size and index-policy
+sweep against normal-basis batched rho, and build a complete calibrated common
+operation unit for both methods. Precomputed starts alone are deprioritized:
+in the earlier n53/L=1,024 rho, 20,134,104 direct walk additions dominated at
+most 279,360 scalar-multiplication additions (<1.4%). Then run the n=83
+confidence gate and the pending n=61 L=65,536 batch-size probe as resources
+permit. Do not use 32-target panels as a substitute. Historical evidence:
 [`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz compact-orbit `vs_rho` → precomputed-start rho plus complete operation unit at n=41/53 L=1 and L=1,024.** The new point-only full-rank wall/CPU batch ratios 0.309/0.252 are verified but S is unset; n=61 L=65,536 and n=83 scaling follow only after the stronger reference/accounting gate. No 32-target panels.
+1. **Koblitz compact-orbit `vs_rho` → shrink the cold S3 index and count a complete common operation unit against normal-basis batched rho.** The former 0.309/0.252 batch CPU ratios at n41/n53 against corrected v2 reverse to 2.989/3.086 against the stronger same-Q reference. Index build alone exceeds full rho in both cells; the next K/base-policy sweep must include all failures, rank probes, targets and RSS. S is still unset; n=83 scaling follows only after this stronger reference/accounting gate. No 32-target panels.
 2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
 3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
    On the autolab `signed_expanded` family the nearest charged gap is `n = 37`
