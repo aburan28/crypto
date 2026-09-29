@@ -50,8 +50,7 @@ use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_bench::random_control_system;
 use crypto_lib::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, f4_profile, f4_profile_reset, solve_boolean_system_filtered,
-    solving_degree, split_rule_default, system_degree, FieldStructure, SolveOptions,
-    SolverEngine,
+    solving_degree, split_rule_default, system_degree, FieldStructure, SolveOptions, SolverEngine,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_explicit_frobenius_orbit_factor_base, groebner_decompose, point_key, points_with_x,
@@ -70,7 +69,10 @@ const M: usize = 4;
 /// Verbatim copy of `koblitz_bench::random_subspace_basis` (HEAD), so the
 /// subspace draw is the one `dreg_ladder` makes on either source tree.
 fn random_subspace_basis(n: u32, ell: usize, rng: &mut StdRng) -> Vec<F2mElement> {
-    assert!(ell >= 1 && (ell as u32) < n && n < 64, "need 1 ≤ ℓ < n < 64");
+    assert!(
+        ell >= 1 && (ell as u32) < n && n < 64,
+        "need 1 ≤ ℓ < n < 64"
+    );
     let mask = (1u64 << n) - 1;
     let mut echelon: Vec<u64> = Vec::new();
     let mut basis = Vec::with_capacity(ell);
@@ -283,7 +285,10 @@ fn main() {
     };
     let num = |name: &str, default: u64| {
         flag(name)
-            .map(|v| v.parse::<u64>().unwrap_or_else(|_| panic!("{name} takes an integer")))
+            .map(|v| {
+                v.parse::<u64>()
+                    .unwrap_or_else(|_| panic!("{name} takes an integer"))
+            })
             .unwrap_or(default)
     };
     let arm = flag("--arm").expect("--arm semaev|enumerate|null|degree");
@@ -383,8 +388,8 @@ fn main() {
         let sys = build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, M, &st)
             .expect("system fits");
         let deg = system_degree(&sys.equations);
-        let terms = sys.equations.iter().map(|e| e.terms.len()).sum::<usize>()
-            / sys.equations.len().max(1);
+        let terms =
+            sys.equations.iter().map(|e| e.terms.len()).sum::<usize>() / sys.equations.len().max(1);
         let head = format!(
             r#""label":"{label}","arm":"{arm}","cell":"{cell}","a":{a},"n":{n},"ell":{ell},"m":{M},"seed":{seed},"cell_seed":{cell_seed},"subspace_draws":{draws},"v_basis":{v_basis:?},"fb_points":{},"target":{t},"k":{k},"x_r":{},"n_vars":{},"n_eqs":{},"degree":{deg},"terms_per_eq":{terms},"node_budget":{node_budget},"policy":{policy}"#,
             fb.points.len(),
@@ -396,14 +401,18 @@ fn main() {
         let body = match arm.as_str() {
             "semaev" => {
                 // Ground truth first, uncharged.
-                let truth = Enumerator { kc: &kc, neg: neg.clone(), index: &index_of, adds: 0 }
-                    .decompose(&target, M, 0)
-                    .is_some();
+                let truth = Enumerator {
+                    kc: &kc,
+                    neg: neg.clone(),
+                    index: &index_of,
+                    adds: 0,
+                }
+                .decompose(&target, M, 0)
+                .is_some();
                 let started = Instant::now();
                 f4_profile_reset();
-                let (found, stats) = groebner_decompose(
-                    &kc, &fb, &index_of, &st, &target, M, engine, node_budget,
-                );
+                let (found, stats) =
+                    groebner_decompose(&kc, &fb, &index_of, &st, &target, M, engine, node_budget);
                 let p = f4_profile();
                 let secs = started.elapsed().as_secs_f64();
                 let verified = found.as_ref().map(|idxs| {
@@ -442,12 +451,21 @@ fn main() {
                 )
             }
             "enumerate" => {
-                let mut en = Enumerator { kc: &kc, neg: neg.clone(), index: &index_of, adds: 0 };
+                let mut en = Enumerator {
+                    kc: &kc,
+                    neg: neg.clone(),
+                    index: &index_of,
+                    adds: 0,
+                };
                 let found = en.decompose(&target, M, 0);
                 let secs = started.elapsed().as_secs_f64();
                 format!(
                     r#""verdict":"{}","group_adds":{},"secs":{secs:.4}"#,
-                    if found.is_some() { "satisfiable" } else { "refuted" },
+                    if found.is_some() {
+                        "satisfiable"
+                    } else {
+                        "refuted"
+                    },
                     en.adds
                 )
             }
@@ -471,7 +489,11 @@ fn main() {
                 let secs = started.elapsed().as_secs_f64();
                 format!(
                     r#""verdict":"{}","null_seed":{null_seed},"roots_seen":{roots},"word_ops":{},"f4_calls":{},"f4_oversize":{},"reductions":{},"infeasible_branches":{},"splits":{},"oversize":{},"exhausted":{},"secs":{secs:.4}"#,
-                    if stats.exhausted { "censored" } else { "complete" },
+                    if stats.exhausted {
+                        "censored"
+                    } else {
+                        "complete"
+                    },
                     p.word_ops,
                     p.calls,
                     p.oversize,

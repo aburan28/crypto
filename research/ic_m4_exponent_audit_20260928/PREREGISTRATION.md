@@ -428,3 +428,23 @@ All paths are relative to `research/ic_m4_exponent_audit_20260928/` unless state
 ## Amendments
 
 (None. Amendments are appended here, dated, and never edit the sections above.)
+
+### Amendment 1 — 2026-09-29, before any audit cell ran: `rustfmt`, and the binary hash
+
+The repository's `rustfmt (changed files)` CI check failed on
+`examples/m4_exponent_audit.rs`. The file was reformatted with `rustfmt --edition 2021`.
+Only whitespace and line breaks changed; no token did.
+
+- **Source sha256:** `58acf3bd…0e20` became `c13e9efc8579c648c32ce5d6703131655e64e156dd7197e078dcca8a2e0bfdf8`.
+- **`m4_exponent_audit-2809b498` sha256:** `de2ec1b9…00f2` became
+  `79ccfdf395bc22776ce061921851386dc47038a7d1b0fe3a7dda44e139acb55e`. The difference is the
+  line numbers compiled into panic locations.
+- **Unchanged:** `groebner_stage_bench-2809b498` (`95565496…7fc5`) and `Cargo.lock.pinned`
+  (`469209e8…a869`).
+- **Behaviour checked equal.** The new binary re-ran the §9 smoke targets for `semaev`,
+  `enumerate` and `null` (seed 7, `K_0/2^9`). Every field of every report equals the
+  committed `smoke/` output except `secs`, the wall time. That includes word operations, F4
+  calls, matrix rows and columns, reductions, splits, verdicts and the null's censoring
+  point.
+
+The binary with the new hash is the registered engine. Nothing else changes.
