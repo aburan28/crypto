@@ -5,6 +5,9 @@ on:
     paths:
       - 'research/notes/ecc2k130/native_m3_counting_admission_20260929/**'
       - 'research/ecc2k130_leaf_native_m3_gate_20260926/PROTOCOL.md'
+      - 'research/ecc2k130_leaf_native_m3_gate_20260926/admission.py'
+      - 'research/notes/ecc2k130/m10_export_capacity_20260925/inputs/balanced_m10_result.json'
+      - 'research/notes/ecc2k130/native_m3_chain_20260929/chain.py'
       - 'docs/index-calculus-scoreboard.html'
       - '.github/workflows/ecc2k130-native-m3-counting.yml'
   push:
@@ -12,6 +15,9 @@ on:
     paths:
       - 'research/notes/ecc2k130/native_m3_counting_admission_20260929/**'
       - 'research/ecc2k130_leaf_native_m3_gate_20260926/PROTOCOL.md'
+      - 'research/ecc2k130_leaf_native_m3_gate_20260926/admission.py'
+      - 'research/notes/ecc2k130/m10_export_capacity_20260925/inputs/balanced_m10_result.json'
+      - 'research/notes/ecc2k130/native_m3_chain_20260929/chain.py'
       - 'docs/index-calculus-scoreboard.html'
       - '.github/workflows/ecc2k130-native-m3-counting.yml'
 
