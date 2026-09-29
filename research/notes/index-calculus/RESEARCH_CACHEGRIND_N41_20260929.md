@@ -280,3 +280,51 @@ H_mem.
 ---
 
 <!-- A1 results are appended below. Nothing above this line is edited after seeing them. -->
+
+## A1 results, as run (added before Amendment A2; raw outputs `explore_*.json`, `work/`)
+
+- **E3 replicate.** Ten more repetitions: CPU-time spread 0.256 (rho) and 0.262 (IC);
+  this VM's run-to-run noise is about 25 %, so the registered five-repetition ≤ 0.10
+  gate was unreachable here, not merely missed once.
+- **E1 interference controls.** The positive control (pointer chase over 256 MiB) did
+  **not** slow with the antagonists: median 244.2 ns/step alone, 220.1 ns loaded
+  (−9.9 %); the negative control (16 KiB) 1.29 vs 1.28 ns. By the A1 rule (positive
+  slowdown ≥ 0.10 required) the interference test is **uninformative on this VM**:
+  IC's −1.5 % slowdown says nothing about its memory sensitivity.
+- **E2 huge pages, CPU time (user + system).** Validity criteria met: IC had a
+  sampled 272-276 MB in `AnonHugePages` (peak RSS 338 MB), and the 256 MiB chase ran
+  1.33-1.53× faster with the tunable (221.8/226.4/219.8 → 156.4/170.3/143.4 ns).
+  Yet **both arms got slower with huge pages**: median CPU 4.29 → 5.59 s for IC
+  (ratio 0.77) and 1.19 → 1.38 s for rho (0.86). Read literally, the A1 rule ("valid
+  and share < 0.05 ⇒ translation stalls are not the mechanism") would fire on a
+  negative share. **I do not accept that reading**: the measured quantity is user +
+  system CPU time, and first-touching 2 MiB pages costs kernel time (zeroing,
+  compaction, and, in a VM, the host's faults) that A1 did not separate from user
+  time. The rule was written without that confound in view. The literal outcome is
+  recorded here, and the substantive answer is that E2 as run cannot separate the
+  two effects.
+
+## Amendment A2 (additive; after E1-E3, before the run it describes)
+
+**What A2 changes.** Only the E2 measurement: repeat the huge-page test recording
+`ru_utime` and `ru_stime` separately, and score on **user time**, the quantity in which
+address-translation stalls appear (a page walk stalls the user thread; a fault handler
+is kernel time). Everything else in A1 stands, including its validity criteria (the
+chase control above already met the 1.3× criterion; `AnonHugePages` is sampled again).
+
+**Rule (fixed now).** Seven interleaved repetitions of {rho, IC} × {4 KiB,
+`glibc.malloc.hugetlb=1`}, core 0. Medians of user time: `d_a = (user_a,4K −
+user_a,THP) / Ir_a` (ns per instruction; `Ir_a` from the registered cachegrind runs),
+`Δ_user = user_IC,4K / Ir_IC − user_rho,4K / Ir_rho`, and the **user-time translation
+share** `(d_IC − d_rho) / Δ_user`. Reading, as in A1: valid and share ≥ 0.25 ⇒
+translation stalls removed by huge pages are at least a quarter of the per-instruction
+user-time gap (a lower bound on the memory share); valid and share < 0.05 *and* the IC
+system-time increase smaller than 5 % of its 4 KiB user time ⇒ translation is not the
+mechanism (the last clause is what A1 lacked: if system time balloons, a small share is
+uninformative); anything else, including a small share with a large system-time
+increase, is **unresolved**. As before, no result here can change the registered
+verdict.
+
+---
+
+<!-- A2 results are appended below. Nothing above this line is edited after seeing them. -->
