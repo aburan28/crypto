@@ -6,8 +6,12 @@ import unittest
 from unittest.mock import patch
 
 from run_generic_backend_disclosed_pilot import (PANEL, PANEL_SHA256, digest,
-                                                  fixture_map, run_bounded_worker,
+                                                  fixture_map, one_job, run_bounded_worker,
                                                   static_preflight)
+from generic_build import verify_build_record
+from generic_bases import verify_base
+from generic_query_law import verify_query_law
+from generic_stages import verify_stages
 from tournament import read
 
 
@@ -34,6 +38,45 @@ class DisclosedPilotTests(unittest.TestCase):
                              'undeclared algorithm environment override: KIC_F5_AVX512_UNPACK')
         self.assertTrue(all(row['disposition'] == 'NOT_RUN_BY_PREDECLARED_GATE'
                             for row in record['summary']['rows'][2:]))
+
+    def test_frozen_incomplete_reports_have_real_natural_queries_and_valid_stages(self):
+        evidence = read(PANEL.with_name('RESULT-v3-stage-a.json'))
+        panel = read(PANEL)
+        self.assertEqual(evidence['panel_sha256'], PANEL_SHA256)
+        self.assertEqual(evidence['original_summary']['stage_b_opened'], False)
+        verify_build_record(evidence['build_record'], evidence['source_manifest'])
+        for solver in ('f4', 'f5'):
+            frozen = evidence['raw_stage_a'][solver]
+            report, job = frozen['stdout'], frozen['job']
+            self.assertEqual(report['status'], 'incomplete')
+            self.assertEqual(frozen['process']['exit_code'], 2)
+            self.assertEqual(job['algorithm_seed'], panel['algorithm_seed'])
+            self.assertEqual(verify_base(report, report['fixture'], job)
+                             ['inventory']['usable_point_count'], 62)
+            self.assertEqual(verify_query_law(report, report['fixture'], job)
+                             ['collection_queries'], 1)
+            self.assertEqual(verify_stages(report, report['fixture'], job)['status'], 'PASS')
+            self.assertEqual(report['collection_reports'][0]['attempts'][0]['pdp']['outcome'],
+                             'witness')
+            self.assertIs(report['collection_reports'][0]['attempts'][0]['pdp']
+                          ['stats']['stats']['unsupported'], False)
+
+    def test_exit_two_with_incomplete_report_is_audited(self):
+        evidence = read(PANEL.with_name('RESULT-v3-stage-a.json'))
+        report = evidence['raw_stage_a']['f4']['stdout']
+        panel = read(PANEL)
+        fixture = fixture_map(panel)['n17a1']
+        with tempfile.TemporaryDirectory() as directory:
+            with patch('run_generic_backend_disclosed_pilot.run_bounded_worker',
+                       return_value=(json.dumps(report), '', 2, 'PROCESS_FAILURE', 100, 0)):
+                with patch('run_generic_backend_disclosed_pilot.audit_report',
+                           return_value=dict(audit_status='PASS', dispatched=True)):
+                    row = one_job(Path(directory), 'n17a1', 'f4', fixture, panel,
+                                  Path('/unused-worker'), {}, {})
+            self.assertEqual(row['disposition'], 'BOUNDED_INCOMPLETE_REPORT')
+            self.assertTrue(row['dispatched'])
+            self.assertEqual(row['exit_code'], 2)
+            self.assertIsNone(row['competitive_total'])
 
     def test_rss_watch_preserves_raw_output_and_timeout(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -13,6 +13,7 @@ from generic_bases import verify_base
 from generic_build import build, verify_binding, verify_build_record
 from generic_query_law import verify_query_law
 from generic_solver_feasibility import assess, check_source_checkout
+from generic_stages import verify_stages
 from oracle import require
 from tournament import read, write
 
@@ -96,13 +97,50 @@ def run_bounded_worker(worker, job, directory, panel):
             disposition, time.monotonic_ns() - started, peak_rss)
 
 
+def audit_report(report, job, worker, record, source, directory):
+    """Audit an exited worker report even when an incomplete DLP exits 2."""
+    require(report['status'] in ('complete', 'incomplete'),
+            'worker returned an error instead of an IC report')
+    build_receipt = verify_binding(report, record, source, executable=worker)
+    base_receipt = verify_base(report, report['fixture'], job)
+    query_receipt = verify_query_law(report, report['fixture'], job)
+    stages_receipt = verify_stages(report, report['fixture'], job)
+    write(directory/'build-audit.json', build_receipt, exclusive=True)
+    write(directory/'base-audit.json', base_receipt, exclusive=True)
+    write(directory/'query-audit.json', query_receipt, exclusive=True)
+    write(directory/'stages-audit.json', stages_receipt, exclusive=True)
+    attempts = [attempt for batch in report['collection_reports']
+                for attempt in batch['attempts']]
+    require(len(attempts) == 1 and query_receipt['collection_queries'] == 1,
+            'pilot must contain exactly one natural ordinary query')
+    pdp = attempts[0]['pdp']
+    stats = pdp['stats']
+    engine = 'MatrixF4' if job['config']['solver'] == 'f4' else 'MatrixF5'
+    require(stats['family'] == 'groebner'
+            and stats['engine'] == {engine: {'max_degree': 3}},
+            'wrong algebraic dispatch engine')
+    native = stats['stats']
+    return dict(pdp_outcome=pdp['outcome'], pdp_stats=native,
+                worker_status=report['status'],
+                usable_base_points=base_receipt['inventory']['usable_point_count'],
+                folded_columns=base_receipt['inventory']['effective_columns'],
+                dispatched=(native['unsupported'] is False
+                            and pdp['outcome'] in ('witness', 'proved_unsat', 'incomplete')),
+                audit_status='PASS')
+
+
+def declared_job(solver, fixture, panel):
+    require(solver in SOLVERS, 'unknown pilot solver')
+    return dict(mode='ic', degree=fixture['degree'], curve_a=fixture['curve_a'],
+                public_targets=fixture['targets'], algorithm_seed=panel['algorithm_seed'],
+                factor_base=panel['factor_base'],
+                config=dict(panel['config'], solver=solver), exclusive_phases=True)
+
+
 def one_job(out, cell, solver, fixture, panel, worker, record, source):
     directory = out / 'jobs' / cell / solver
     directory.mkdir(parents=True, exist_ok=False)
-    job = dict(mode='ic', degree=fixture['degree'], curve_a=fixture['curve_a'],
-               public_targets=fixture['targets'], algorithm_seed=panel['algorithm_seed'],
-               factor_base=panel['factor_base'],
-               config=dict(panel['config'], solver=solver), exclusive_phases=True)
+    job = declared_job(solver, fixture, panel)
     write(directory/'job.json', job, exclusive=True)
     stdout, stderr, exit_code, disposition, wall_ns, peak_rss = run_bounded_worker(
         worker, job, directory, panel)
@@ -111,34 +149,17 @@ def one_job(out, cell, solver, fixture, panel, worker, record, source):
                memory_policy=panel['memory_policy'], dispatched=False,
                competitive_total=None, competitive_speedup=None)
     write(directory/'process.json', row, exclusive=True)
-    if disposition == 'EXITED':
+    if disposition == 'EXITED' or (disposition == 'PROCESS_FAILURE' and exit_code == 2):
         try:
             report = json.loads(stdout)
-            build_receipt = verify_binding(report, record, source, executable=worker)
-            base_receipt = verify_base(report, report['fixture'], job)
-            query_receipt = verify_query_law(report, report['fixture'], job)
-            write(directory/'build-audit.json', build_receipt, exclusive=True)
-            write(directory/'base-audit.json', base_receipt, exclusive=True)
-            write(directory/'query-audit.json', query_receipt, exclusive=True)
-            attempts = [attempt for batch in report['collection_reports']
-                        for attempt in batch['attempts']]
-            require(len(attempts) == 1 and query_receipt['collection_queries'] == 1,
-                    'pilot must contain exactly one natural ordinary query')
-            pdp = attempts[0]['pdp']
-            stats = pdp['stats']
-            engine = 'MatrixF4' if solver == 'f4' else 'MatrixF5'
-            require(stats['family'] == 'groebner'
-                    and stats['engine'] == {engine: {'max_degree': 3}},
-                    'wrong algebraic dispatch engine')
-            native = stats['stats']
-            row.update(pdp_outcome=pdp['outcome'], pdp_stats=native,
-                       usable_base_points=base_receipt['inventory']['usable_point_count'],
-                       folded_columns=base_receipt['inventory']['effective_columns'],
-                       dispatched=(native['unsupported'] is False
-                                   and pdp['outcome'] in ('witness', 'proved_unsat', 'incomplete')),
-                       audit_status='PASS')
-        except (ValueError, KeyError, TypeError) as exc:
-            row.update(audit_status='FAIL', reason=str(exc))
+            require((exit_code == 0 and report['status'] == 'complete')
+                    or (exit_code == 2 and report['status'] == 'incomplete'),
+                    'worker exit code and report status disagree')
+            row.update(audit_report(report, job, worker, record, source, directory))
+            if exit_code == 2:
+                row['disposition'] = 'BOUNDED_INCOMPLETE_REPORT'
+        except Exception as exc:
+            row.update(audit_status='FAIL', reason=f'{type(exc).__name__}: {exc}')
     else:
         row.update(audit_status='NOT_AVAILABLE', reason='process did not exit with a report')
     write(directory/'result.json', row, exclusive=True)
