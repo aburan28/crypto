@@ -1154,6 +1154,20 @@ would pass the incumbent gate. It passed.
 
 Classification **accounting**.
 
+## Stop decision, 2026-09-29
+
+The line this file records is stopped: collector rounds against rho, the `m = 4`
+algebraic route at `n ≤ 19`, and an `m = 5` audit. The evidence, the scope and the reopen
+conditions are in [DECISION-20260929-stop.md](DECISION-20260929-stop.md).
+
+Two isolated re-timings came after round 0025:
+
+- **[walltime_isolation_20260929](walltime_isolation_20260929/RESULTS.md).** Round 0025's
+  small-cell time lead is real, and it comes from the IC arm running more instructions per
+  second.
+- **[walltime_strong_rho_20260929](walltime_strong_rho_20260929/RESULTS.md).** The lead
+  survives main's strongest rho, at 0.74–0.84 in-process, and is gone by `n = 23`.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.
