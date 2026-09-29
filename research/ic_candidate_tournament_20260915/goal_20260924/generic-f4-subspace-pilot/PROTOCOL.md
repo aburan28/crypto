@@ -95,7 +95,7 @@ the disclosed set, register a **new** competitive protocol (new seed) that:
 1. Runs `generic_solver_feasibility.py --require-pass` on the panel before
    fixture generation.
 2. Excludes every point seed `2026092902` could have generated (full v2
-   exposure corpus once run 36580669479 finishes or is censored), plus all
+   exposure corpus from the censored v2 run), plus all
    prior sealed/supplemental exposures.
 3. Labels the comparison `factor-base-policy` when `standard_subspace` replaces
    orbit sampling.

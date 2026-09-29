@@ -127,8 +127,9 @@ the pinned checkout) before any later measurement. Without a bundle, do not run
 as if qualification were established. The post-registration
 [static feasibility audit](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/STATIC-FEASIBILITY.md)
 shows all four F4/F5 arms exceed the pinned 64-variable encoder cap on every
-cell; the censored log did not yield verified generic F4/F5/SAT receipts anyway.
-SAT encoding feasibility remains a separate empirical question on a future panel. Before any new
+cell; that static finding is separate from the censoring event. The censored
+log did not yield verified generic F4/F5/SAT receipts. SAT encoding feasibility
+remains a separate empirical question on a future panel. Before any new
 algebraic panel generates fresh targets, run
 `generic_solver_feasibility.py --require-pass` against its exact worker source
 checkout and registered panel. A static pass is only an encoder preflight:

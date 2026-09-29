@@ -1,6 +1,6 @@
 # Fresh F4/F5/SAT complete-solve qualification
 
-Status: **operationally censored** — see [RESULT.md](RESULT.md) for
+Status: **dispatched once; operationally censored** — see [RESULT.md](RESULT.md) for
 [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
 (attempt one; no auditable bundle; never redispatch seed `2026092902`).
 The scientific question, schedule,

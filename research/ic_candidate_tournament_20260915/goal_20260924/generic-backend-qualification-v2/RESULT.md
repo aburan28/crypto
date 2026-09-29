@@ -1,23 +1,25 @@
 # Second registered generic-backend campaign: operationally censored
 
 The single measured [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479),
-attempt 1, executed frozen checkout
-`e0fadb5ca5e99a3815c36a127fbdd1d1a5d12b43` (generic worker tree
-`765c3c5f19032bd852163805f257c56babef2040`) for panel seed
+attempt 1, executed workflow checkout
+`e0fadb5ca5e99a3815c36a127fbdd1d1a5d12b43` with frozen generic worker
+`765c3c5f19032bd852163805f257c56babef2040` for panel seed
 `2026092902` (panel SHA-256
 `d283a869b0412228d1c66260fdfd8f387d7243bd15456c7febf3c46ee5da27a8`).
 It did **not** produce an auditable tournament bundle. The measured step
 started at 2026-09-29 14:15:33 UTC and GitHub stopped it at 19:15:46 UTC
-when the 300-minute step timeout fired. The follow-on
-`pack_partial_campaign.py` step ran for 24 minutes but `tar` exited
-nonzero while the tournament tree was still mutating (callgrind files
-removed or changed during the archive pass; orphan runner processes were
-terminated only after packing finished). The script deleted the partial
-`tar.zst` and raised `RuntimeError('partial campaign archive failed')`.
-The `if: always()` upload step then failed with `No files were found` for
-the expected archive path. GitHub listed zero campaign artifacts. The
-retained [complete campaign job log](workflow-job-109448846736.log) is
-3,378,181 bytes, SHA-256
+when the 300-minute step timeout fired. The reserved `if: always()` pack step
+then tarred a ~35.4 GiB ephemeral tree while measure processes were still
+alive; `tar` reported files removed and directories changing during read
+(including live `callgrind.out.*` under development trees), `zstd` aborted,
+`pack_partial_campaign.py` deleted the partial archive and raised
+`RuntimeError('partial campaign archive failed')`, and orphan runner processes
+were terminated only after packing finished. `actions/upload-artifact@v4`
+failed with `if-no-files-found: error`. GitHub listed only the PR smoke
+artifact `ic-generic-pack-smoke-36580669479` (917 bytes), not the campaign
+archive `ic-generic-backend-qualification-v2-36580669479-1`. The retained
+[complete campaign job log](workflow-job-109448846736.log) is 3,378,181 bytes,
+SHA-256
 `d8a7931f7b43922d2dc7968a4df2d5aa36f4804c5ea140738b9a97a28270c8d3`.
 
 Without a checksummed archive, no frozen `tournament.py verify`,
@@ -45,16 +47,20 @@ was incomplete and generic backends hit the 300-second child cap repeatedly
 on this panel.
 
 This is an **operationally censored campaign**, not a negative result about
-F4, F5 or SAT as mathematical algorithms. No candidate or rho row gains a
-measured `S`, online time, confidence interval, or correctness claim in
-the scoreboard from this dispatch.
+F4, F5, SAT, or the optimized incumbent as mathematical algorithms. No
+candidate or rho row gains a measured `S`, online time, confidence interval,
+or correctness claim in the scoreboard from this dispatch. The
+post-registration [static feasibility audit](STATIC-FEASIBILITY.md) shows the
+registered ambient F4/F5 layouts are encoder-unsupported at `m=3`; that
+static finding is separate from this censoring event and does not substitute
+for measured family qualification.
 
-Do not dispatch this registration again. The runner generated fresh public
-points for seed `2026092902` before measurement; treat every point that
-registration could have reached as exposed once reconstructed (prepare replay
-at the pinned checkout), even though no bundle was uploaded. A new campaign
-needs a new frozen panel and seed, exclusion of all three sealed improvement
-archives, the 25 lost first-run points, and every point from this second
-dispatch, plus packaging that quiesces or excludes live callgrind trees
-before `tar` runs. Neither the sealed improvement confirmation sets nor
-this interrupted run can be used as a favourable retry.
+Do not dispatch seed `2026092902` again. Treat all 25 points in
+[lost-campaign-exposures.json](lost-campaign-exposures.json) as exposed together
+with every public point this registration could have reached once reconstructed
+(prepare replay at the pinned checkout), even though no bundle was uploaded.
+A new campaign needs a new frozen panel and seed, exclusion of all three sealed
+improvement archives, the 25 lost first-run points, and every point from this
+second dispatch, plus packaging that quiesces or excludes live callgrind trees
+before `tar` runs. Neither the sealed improvement confirmation sets nor this
+interrupted run can be used as a favourable retry.
