@@ -6,13 +6,15 @@ PR. The frozen `run_metered.py` path is absent and its source hash and
 commit are null. Implementing and independently reviewing an instrumented
 producer is an additional release prerequisite; this checker cannot turn
 self-declared counters into evidence. The structural producer in
-[PR #810](https://github.com/aburan28/crypto/pull/810) is itself frozen with
-`release_main_head: null`; it has no accepted map outcome. This successor
-stays held until that producer is refrozen after its parent merge, its exact
-head passes CI and peer review, and its producer, Fq replay, and extension
-replay yield the required `PRODUCER_PASS`, `FQ_REPLAY_PASS`, and structural
-`PASS`. Because that refreeze changes a source hash here, this protocol
-must then be refrozen and reviewed **before** any metered outcome. The
+[PR #810](https://github.com/aburan28/crypto/pull/810) was refrozen in
+[PR #933](https://github.com/aburan28/crypto/pull/933) after its parent
+merge and passed its exact-head hash and hosted Sage 10.9 preflight.
+Its `release_main_head` is still null, and it has no accepted map
+outcome. This successor now pins those refrozen structural source bytes.
+It remains held until independent release review and structural producer,
+Fq replay, and extension replay yield the required `PRODUCER_PASS`,
+`FQ_REPLAY_PASS`, and structural `PASS`. The missing instrumented
+metering producer needs its own pre-outcome freeze and review. The
 `release_main_head: null` in [FROZEN.json](FROZEN.json) is intentional.
 
 The question is narrow and falsifiable. Once the first descending
