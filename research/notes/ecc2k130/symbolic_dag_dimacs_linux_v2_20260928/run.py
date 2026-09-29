@@ -47,8 +47,15 @@ def _one_shot_run(frozen: dict, run_id: int) -> dict:
     pull_request.labeled trigger.  Any previous event for this PR branch is
     conservatively treated as an attempted dispatch, regardless of outcome.
     """
-    endpoint = ('repos/aburan28/crypto/actions/workflows/' + WORKFLOW +
-                '/runs?event=pull_request&per_page=100')
+    current = _gh_json('api', f'repos/aburan28/crypto/actions/runs/{run_id}')
+    require(current.get('id') == run_id and
+            current.get('path') == '.github/workflows/' + WORKFLOW and
+            current.get('head_branch') == frozen['release_branch'] and
+            current.get('event') == 'pull_request' and
+            isinstance(current.get('workflow_id'), int),
+            'current labeled workflow identity drift')
+    endpoint = ('repos/aburan28/crypto/actions/workflows/' +
+                str(current['workflow_id']) + '/runs?event=pull_request&per_page=100')
     raw = subprocess.check_output(
         ['gh', 'api', '--paginate', '--jq', '.workflow_runs[] | @json', endpoint],
         cwd=ROOT, text=True)
@@ -63,7 +70,8 @@ def _one_shot_run(frozen: dict, run_id: int) -> dict:
     require(len(matching) == 1 and matching[0].get('id') == run_id,
             'measured workflow already has a labeled run for this PR')
     require(matching[0].get('event') == 'pull_request', 'wrong workflow event')
-    return {'workflow': WORKFLOW, 'run_id': run_id,
+    return {'workflow': WORKFLOW, 'workflow_id': current['workflow_id'],
+            'run_id': run_id,
             'matching_labeled_runs': [row['id'] for row in matching]}
 
 

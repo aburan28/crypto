@@ -62,7 +62,8 @@ runner rechecks the exact checkout/event/live PR heads, #804/#831 merge
 identities, Linux x86-64/Python 3.12, the executable, monotonic main ancestry,
 and all guarded paths. It rejects any guarded commit between release and live
 main, including a changed-then-reverted path. It requires the current Actions
-`run_attempt=1` and queries *all* runs of the dedicated label-only workflow:
+`run_attempt=1` and queries *all* runs of the dedicated label-only workflow by the
+current run’s numeric workflow ID:
 the current run must be its sole run for this PR branch. The branch check is
 necessary because the successful #831 labeled Actions run reports an empty
 `pull_requests` array in GitHub’s run API. Even a failed first

@@ -18,6 +18,8 @@ class GateControls(unittest.TestCase):
         self.synthetic = {'release_pr_number': 99999,
                           'release_branch': self.frozen['release_branch']}
         self.current = {'id': 123, 'event': 'pull_request',
+                        'path': '.github/workflows/' + run.WORKFLOW,
+                        'workflow_id': 456,
                         'head_branch': self.synthetic['release_branch'],
                         'pull_requests': [{'number': 99999}]}
 
@@ -26,18 +28,21 @@ class GateControls(unittest.TestCase):
 
     def test_one_shot_accepts_current_event_only(self) -> None:
         with patch.object(run.subprocess, 'check_output',
-                          return_value=self.runs([self.current])):
+                          side_effect=[json.dumps(self.current),
+                                       self.runs([self.current])]):
             observed = run._one_shot_run(self.synthetic, 123)
         self.assertEqual(observed['matching_labeled_runs'], [123])
 
     def test_readded_label_or_missing_current_run_is_refused(self) -> None:
         prior = {**self.current, 'id': 122, 'pull_requests': []}
         with patch.object(run.subprocess, 'check_output',
-                          return_value=self.runs([prior, self.current])):
+                          side_effect=[json.dumps(self.current),
+                                       self.runs([prior, self.current])]):
             with self.assertRaisesRegex(RuntimeError, 'already has a labeled run'):
                 run._one_shot_run(self.synthetic, 123)
         with patch.object(run.subprocess, 'check_output',
-                          return_value=self.runs([prior])):
+                          side_effect=[json.dumps(self.current),
+                                       self.runs([prior])]):
             with self.assertRaisesRegex(RuntimeError, 'already has a labeled run'):
                 run._one_shot_run(self.synthetic, 123)
 
