@@ -78,7 +78,7 @@ pub struct RhoOptions {
     /// sterile collisions; larger groups almost never.
     pub max_restarts: u32,
     /// Optional deterministic seed for the random-restart RNG.
-    /// `None` ⇒ thread RNG.
+    /// `None` ⇒ a fixed default seed, so runs are reproducible.
     pub seed: Option<u64>,
 }
 
@@ -1328,7 +1328,7 @@ mod tests {
 
     /// Which moduli take the single-word walks.
     #[test]
-    fn word_walks_cover_odd_single_word_moduli() {
+    fn rho_word_walks_cover_odd_single_word_moduli() {
         let big = |x: u128| BigUint::from(x);
         let two64 = 1u128 << 64;
         for (p, n, word) in [
@@ -1351,7 +1351,7 @@ mod tests {
     /// words of every length, including the boundaries of the length
     /// clause and of the whole-byte rounding.
     #[test]
-    fn word_dp_test_matches_byte_rule() {
+    fn rho_word_dp_test_matches_byte_rule() {
         let mut rng = StdRng::seed_from_u64(0xd15_7000);
         let mut xs: Vec<u64> = (0..=600).collect();
         for k in 0..64 {
@@ -1385,7 +1385,7 @@ mod tests {
     /// to just below 2^64 (prime and composite) and exponent moduli up to
     /// 2^64 − 1.
     #[test]
-    fn word_step_matches_biguint_step() {
+    fn rho_word_step_matches_biguint_step() {
         let mut rng = StdRng::seed_from_u64(0x57e9);
         let mut moduli = vec![
             3,
@@ -1464,7 +1464,7 @@ mod tests {
     /// iteration count covers every restart, so equal counts pin the
     /// restart draws as well as the steps.
     #[test]
-    fn floyd_word_walk_matches_biguint_walk() {
+    fn rho_floyd_word_walk_matches_biguint_walk() {
         /// Runs both walks on one instance; returns whether it solved, and
         /// whether it solved only after a restart.
         fn run(g: &BigUint, h: &BigUint, p: &BigUint, n: &BigUint, opts: &RhoOptions) -> [bool; 2] {
@@ -1537,7 +1537,7 @@ mod tests {
     /// (so which targets finish within budget depends on every draw and
     /// step).
     #[test]
-    fn dp_word_walks_match_biguint_walks() {
+    fn rho_dp_word_walks_match_biguint_walks() {
         let mut rng = StdRng::seed_from_u64(0xd9_3a1c);
         let (mut solved, mut unsolved) = (0, 0);
         for _ in 0..250 {
@@ -1575,7 +1575,7 @@ mod tests {
     /// The `BigUint` walks remain the path above 2^64 and still solve:
     /// `p = 2^64 + 37`, subgroup order `q = 25873`.
     #[test]
-    fn biguint_walks_solve_above_two_to_the_64() {
+    fn rho_biguint_walks_solve_above_two_to_the_64() {
         let p = (BigUint::one() << 64) + 37u32;
         let q = BigUint::from(25_873u32);
         assert!(WordZp::new(&p, &q).is_none());
@@ -1608,7 +1608,7 @@ mod tests {
     /// walks; this holds the `BigUint` walks, whose collision handling and
     /// target pick the word walks now share, to the original.
     #[test]
-    fn public_walks_match_the_original_code() {
+    fn rho_public_walks_match_the_original_code() {
         let mut rng = StdRng::seed_from_u64(0x0_1d_c0de);
         let p64 = (BigUint::one() << 64) + 37u32;
         let q64 = BigUint::from(25_873u32);
@@ -1690,10 +1690,10 @@ mod tests {
     /// The word exponent arithmetic at the edges of `n`: `a = n − 1`, where
     /// `inc` wraps, and `a` around `n / 2`, where `dbl` switches between
     /// `2a` and `2a − n`, for `n` up to `2^64 − 1`, where `a + a` itself
-    /// would overflow.  The random states of `word_step_matches_biguint_step`
+    /// would overflow.  The random states of `rho_word_step_matches_biguint_step`
     /// reach these values only by chance.
     #[test]
-    fn word_exponent_arithmetic_at_the_edges_of_n() {
+    fn rho_word_exponent_arithmetic_at_the_edges_of_n() {
         let mut rng = StdRng::seed_from_u64(0xed6e_0f_17);
         let mut orders = vec![
             2,
@@ -1733,7 +1733,7 @@ mod tests {
     /// group, the Floyd walk returns whatever its first non-degenerate
     /// collision gives, unverified, so equal answers pin the steps too.
     #[test]
-    fn public_walks_match_the_original_code_at_the_edges() {
+    fn rho_public_walks_match_the_original_code_at_the_edges() {
         let mut rng = StdRng::seed_from_u64(0xed6e_5_0f_c0de);
         let moduli: [u64; 18] = [
             3,
@@ -1888,7 +1888,7 @@ mod tests {
     /// unreduced copy never solves and keeps the pick going until the
     /// walker budget runs out.  Then eight planted targets, all solved.
     #[test]
-    fn dp_multi_target_runs_match_the_original_code_to_completion() {
+    fn rho_dp_multi_target_runs_match_the_original_code_to_completion() {
         let (p, q) = (BigUint::from(131_267u32), BigUint::from(65_633u32));
         let g = order_q_element(&p, &q);
         let mut rng = StdRng::seed_from_u64(0x8_7a_26e7);
@@ -1934,7 +1934,7 @@ mod tests {
     /// `pollard_rho_dlp_zp` (with the generic walk it wraps) and
     /// `pollard_rho_dp_dlp_zp_multi` as they were before the single-word
     /// walks, verbatim: the reference
-    /// `public_walks_match_the_original_code` holds both paths to.
+    /// `rho_public_walks_match_the_original_code` holds both paths to.
     mod original {
         use super::super::{sub_mod, DpRhoOptions, RhoOptions, RhoSolution};
         use crate::utils::mod_inverse;
