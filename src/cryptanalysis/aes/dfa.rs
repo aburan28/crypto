@@ -50,7 +50,6 @@
 
 use super::reduced::{ReducedAes128, RoundOps};
 use super::visualize::{format_recovery_progress, format_state_grid};
-use crate::symmetric::aes::{key_expansion, AesKey};
 
 // ── AES inverse S-box (FIPS PUB 197) ─────────────────────────────────
 
@@ -353,6 +352,7 @@ pub fn format_dfa_visualization(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::symmetric::aes::{key_expansion, AesKey};
 
     /// **Fault injection produces a different ciphertext** when the
     /// fault is non-zero.

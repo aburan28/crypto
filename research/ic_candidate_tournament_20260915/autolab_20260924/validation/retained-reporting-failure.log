@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto-ic-autolab/research/ic_candidate_tournament_20260915/autolab_20260924/implementation/evaluator/autolab.py", line 354, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/SSD990/crypto-ic-autolab/research/ic_candidate_tournament_20260915/autolab_20260924/implementation/evaluator/autolab.py", line 346, in main
+    run(args.round.resolve())
+    ~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto-ic-autolab/research/ic_candidate_tournament_20260915/autolab_20260924/implementation/evaluator/autolab.py", line 310, in run
+    write(root/'summary.json', summarize(contract, rows))
+                               ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto-ic-autolab/research/ic_candidate_tournament_20260915/autolab_20260924/implementation/evaluator/autolab.py", line 141, in summarize
+    'rank_range': [min(r['certificate']['rank'] for r in records),
+                   ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: '<' not supported between instances of 'NoneType' and 'NoneType'
+Command '['/Library/Frameworks/Python.framework/Versions/3.13/bin/python3', '/Volumes/SSD990/crypto-ic-autolab/research/ic_candidate_tournament_20260915/autolab_20260924/implementation/evaluator/autolab.py', 'run', '--round', '/Volumes/SSD990/crypto-ic-autolab/research/ic_candidate_tournament_20260915/autolab_20260924/implementation']' returned non-zero exit status 1.

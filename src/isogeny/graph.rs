@@ -38,7 +38,7 @@ fn two_isogenies_via_cubic_roots(curve: &SmallCurve) -> Vec<VeluIsogeny> {
     use crate::ecc::point::Point;
     use std::collections::HashSet;
     let cm = crate::isogeny::cm::cm_discriminant(curve);
-    if cm.order <= 0 || (cm.order as u64) % 2 != 0 {
+    if cm.order <= 0 || !(cm.order as u64).is_multiple_of(2) {
         return Vec::new();
     }
     let cofactor = (cm.order as u64) / 2;
@@ -46,7 +46,8 @@ fn two_isogenies_via_cubic_roots(curve: &SmallCurve) -> Vec<VeluIsogeny> {
     let a_fe = cp.a_fe();
     let mut seen: HashSet<u64> = HashSet::new();
     let mut result = Vec::new();
-    let mut rng: u64 = (curve.p as u64)
+    let mut rng: u64 = curve
+        .p
         .wrapping_mul(0xB492B66FBE98F273)
         .wrapping_add(curve.a)
         .wrapping_mul(0x9FB21C651E98DF25)
@@ -163,11 +164,9 @@ impl IsogenyGraph {
         let mut best = 0;
         for src in 0..self.nodes.len() {
             let dists = self.bfs_distances(src);
-            for d in dists {
-                if let Some(d) = d {
-                    if d > best {
-                        best = d;
-                    }
+            for d in dists.into_iter().flatten() {
+                if d > best {
+                    best = d;
                 }
             }
         }
