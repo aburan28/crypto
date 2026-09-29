@@ -6,7 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from verify_rank import verify
+from verify_rank import Curve, Field, point, read_jsonl, verify
 
 HERE = Path(__file__).resolve().parent
 EVIDENCE = HERE / 'evidence'
@@ -38,9 +38,38 @@ def check_archive(folder: str, manifest_name: str) -> dict:
     replay = verify(traced / 'rank.jsonl', traced / 'base.jsonl', traced / 'summary.jsonl')
     assert replay == json.loads((raw / 'independent_rank_replay.json').read_text())
     assert replay['status'] == 'PASS' and replay['rank'] == 2
+    base = read_jsonl(traced / 'base.jsonl')[0]
+    targets = read_jsonl(traced / 'targets.jsonl')
+    assert len(targets) == 1
+    target = targets[0]
+    assert target['n'] == 13 and target['a'] == 0
+    assert target['published_fixture_scalar'] == target['recovered_scalar'] == 7
+    assert target['group_verified'] is True
+    curve = Curve(Field(13, base['field_modulus_low_terms']), 0)
+    generator, q = point(target['generator']), point(target['target'])
+    assert curve.on_curve(generator) and curve.on_curve(q)
+    assert curve.mul(base['subgroup_order'], generator) is None
+    assert curve.mul(7, generator) == q
+    indices, codes = target['point_indices'], target['x_codes']
+    assert len(indices) == len(codes) == 4
+    members = []
+    reps = [point(raw) for raw in base['factor_base_representatives']]
+    for index, code in zip(indices, codes):
+        member = point(base['factor_base_point_coordinates'][index])
+        column, coefficient = base['factor_base_point_labels'][index]
+        assert member is not None and member[0] == code and curve.on_curve(member)
+        assert curve.mul(base['subgroup_order'], member) is None
+        assert curve.mul(coefficient, reps[column]) == member
+        members.append(member)
+    left = curve.add(members[0], members[1])
+    right = curve.add(members[2], members[3])
+    assert left is not None and right is not None
+    assert {left[0], right[0]} == set(target['pinned_intermediates'])
+    assert curve.add(left, right) == q
     return {'raw_files': len(observed), 'manifest_sha256': sha(manifest_path),
             'trace_sha256': replay['trace_sha256'], 'base_sha256': replay['base_sha256'],
-            'rank': replay['rank'], 'rank_attempts': replay['attempts']}
+            'rank': replay['rank'], 'rank_attempts': replay['attempts'],
+            'target_scalars_verified': 1}
 
 
 def main() -> None:
