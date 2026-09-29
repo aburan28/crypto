@@ -19,7 +19,7 @@ from tournament import read, write
 HERE = Path(__file__).resolve().parent
 REGISTRATION = HERE / 'goal_20260924/generic-backend-disclosed-pilot'
 PANEL = REGISTRATION / 'panel.json'
-PANEL_SHA256 = '1cd65d2150dc36194354b2475416d24dffabdd0cdbb1774e42a2b84799c913f5'
+PANEL_SHA256 = '48db71af3c5f297b834f2476056201caec8378f96f6da6992d1aa8ecbe523685'
 CELLS = ('n17a1', 'n19a0', 'n23a0', 'n23a1', 'n31a0')
 SOLVERS = ('f4', 'f5')
 
@@ -55,7 +55,11 @@ def static_preflight(panel):
 def run_bounded_worker(worker, job, directory, panel):
     """Preserve raw streams and apply a diagnostic macOS-compatible RSS watch."""
     stdout_path, stderr_path = directory/'stdout.json', directory/'stderr.txt'
-    environment = dict(os.environ, RAYON_NUM_THREADS='1', KIC_F5_AVX512_UNPACK='0')
+    # Exclusive-phase workers reject every undeclared KIC_ / F4_ / SOLVER_
+    # override. Do not inherit algorithm controls from the interactive shell.
+    environment = {key: os.environ[key] for key in
+                   ('PATH', 'HOME', 'TMPDIR', 'LANG', 'LC_ALL') if key in os.environ}
+    environment['RAYON_NUM_THREADS'] = '1'
     ps = shutil.which('ps')
     require(ps is not None, 'RSS monitor requires ps')
     started = time.monotonic_ns()
@@ -148,8 +152,10 @@ def main():
     args = parser.parse_args()
     require(digest(PANEL) == PANEL_SHA256, 'pilot panel bytes changed after registration')
     panel = read(PANEL)
-    require(panel['schema_version'] == 2
+    require(panel['schema_version'] == 3
             and panel['source_commit'] == '765c3c5f19032bd852163805f257c56babef2040'
+            and panel['fixture_stage'] == 'smoke'
+            and panel['algorithm_seed'] == 2026092918
             and panel['stage_a_cells'] == ['n17a1']
             and panel['stage_b_cells'] == list(CELLS[1:])
             and panel['solvers'] == list(SOLVERS)
@@ -188,6 +194,7 @@ def main():
                    source_commit=panel['source_commit'],
                    source_manifest_sha256=record['source_manifest_sha256'],
                    worker_sha256=record['worker_sha256'],
+                   worker_environment_policy='PATH/HOME/TMPDIR/LANG/LC_ALL plus RAYON_NUM_THREADS=1',
                    stage_b_opened=stage_b, rows=results,
                    status='ALL_DISPATCHED_AUDITED' if all(r['dispatched'] for r in results)
                           else 'FEASIBILITY_NOT_ESTABLISHED',

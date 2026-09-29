@@ -7,13 +7,16 @@ previously exposed input corpus and bounded resources. The source-bound
 `generic_build.py` receipt is required before either job runs. This is a
 diagnostic pilot, not another qualification campaign or a competitive
 comparison.
-The amended schema-v2 panel's SHA-256 is
-`1cd65d2150dc36194354b2475416d24dffabdd0cdbb1774e42a2b84799c913f5`.
+The schema-v3 panel's SHA-256 is
+`48db71af3c5f297b834f2476056201caec8378f96f6da6992d1aa8ecbe523685`.
 The [premeasurement preparation record](PREPARATION-FAILURE.md) explains the
 change from the original, committed schema-v1 registration; no worker began
-under that registration.
+under that registration. The [schema-v2 worker rejection](WORKER-REJECTION.md)
+and its [raw record](RESULT-v2.json) show that no algebraic work began in its
+two stage-A processes. Schema v3 uses different disclosed points and a new
+algorithm seed; no schema-v2 job is retried.
 
-**Hypothesis.** On the first previously disclosed A/A point of `n17a1`, both
+**Hypothesis.** On the first previously disclosed smoke-stage point of `n17a1`, both
 F4 and F5 can represent the dimension-six, three-summand Semaev system and
 execute one naturally sampled ordinary PDP attempt. The condition is a valid
 worker report with exactly one independently replayed query, independently
@@ -34,7 +37,7 @@ auditor failure, or `unsupported` as a failed/inconclusive pilot row, never as
 zero yield or a speedup.
 
 Only if **both** stage-A jobs meet the dispatch condition, run the same two
-jobs on the first disclosed A/A point of each of `n19a0`, `n23a0`, `n23a1`
+jobs on the first disclosed smoke-stage point of each of `n19a0`, `n23a0`, `n23a1`
 and `n31a0`. Otherwise record all eight stage-B jobs as unexecuted by the
 predeclared gate. Do not retry a job, change its point, enlarge its resource
 limit, or replace this pilot with a favorable stage subset. Source/build
