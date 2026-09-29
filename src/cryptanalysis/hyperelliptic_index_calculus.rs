@@ -1371,22 +1371,24 @@ fn sparse_solve_for_k(
     let mut eliminated = vec![false; rows.len()];
     let has = |row: &[(usize, BigUint)], col: usize| row.binary_search_by_key(&col, |&(j, _)| j);
 
-    loop {
-        // Markowitz-lite: the factor-base column with the fewest live
-        // rows, and within it the shortest row — this is what keeps
-        // fill-in from turning the sparse solve back into a dense one.
-        // Ties go to the lowest column, so the elimination order — and
-        // with it the mul-mod count — is deterministic; the `HashMap`
-        // iteration it replaces was not.
-        let col = match (0..m)
-            .filter(|&j| col_count[j] > 0)
-            .min_by_key(|&j| col_count[j])
-        {
-            Some(c) => c,
-            None => break, // nothing left but the k column
-        };
+    // Markowitz-lite: the factor-base column with the fewest live rows,
+    // and within it the shortest row — this is what keeps fill-in from
+    // turning the sparse solve back into a dense one.  Ties go to the
+    // lowest column, so the elimination order — and with it the mul-mod
+    // count — is deterministic; the `HashMap` iteration it replaces was
+    // not.  The loop ends when nothing is left but the k column.
+    while let Some(col) = (0..m)
+        .filter(|&j| col_count[j] > 0)
+        .min_by_key(|&j| col_count[j])
+    {
         let mut live = std::mem::take(&mut holders[col]);
         live.retain(|&i| !eliminated[i] && has(&rows[i], col).is_ok());
+        // A row that cancels out of `col` and later fills back into it is
+        // pushed again while its stale entry is still here, so the list
+        // can name a row twice.  Visiting it twice would find `col`
+        // already gone on the second visit.
+        live.sort_unstable();
+        live.dedup();
         debug_assert_eq!(live.len(), col_count[col]);
         let pivot = *live.iter().min_by_key(|&&i| rows[i].len())?;
 
@@ -2394,20 +2396,65 @@ mod tests {
         );
     }
 
-    /// The sparse solver against dense elimination on planted random
-    /// systems, many more of them than a DLP run produces.  A planted
-    /// solution always satisfies the system, so the sparse answer must be
-    /// the planted `k` or nothing — never a wrong `k` — and it must
-    /// answer whenever the dense solver does.  Small `N` is included
+    /// Rank of `rows` (dense, over `F_n`, `n < 2^32`), by plain Gaussian
+    /// elimination — an oracle written independently of both solvers.
+    fn rank_mod(mut rows: Vec<Vec<u64>>, n: u64) -> usize {
+        let cols = rows.first().map_or(0, |r| r.len());
+        let inv = |a: u64| {
+            // Fermat: n is prime.
+            let (mut base, mut e, mut acc) = (a % n, n - 2, 1u64);
+            while e > 0 {
+                if e & 1 == 1 {
+                    acc = ((acc as u128 * base as u128) % n as u128) as u64;
+                }
+                base = ((base as u128 * base as u128) % n as u128) as u64;
+                e >>= 1;
+            }
+            acc
+        };
+        let mut rank = 0;
+        for c in 0..cols {
+            let Some(p) = (rank..rows.len()).find(|&r| rows[r][c] != 0) else {
+                continue;
+            };
+            rows.swap(rank, p);
+            let iv = inv(rows[rank][c]);
+            for r in 0..rows.len() {
+                if r != rank && rows[r][c] != 0 {
+                    let f = ((rows[r][c] as u128 * iv as u128) % n as u128) as u64;
+                    for cc in 0..cols {
+                        let t = ((f as u128 * rows[rank][cc] as u128) % n as u128) as u64;
+                        rows[r][cc] = (rows[r][cc] + n - t) % n;
+                    }
+                }
+            }
+            rank += 1;
+        }
+        rank
+    }
+
+    /// The sparse solver on planted random systems, many more of them
+    /// than a DLP run produces, against an independent rank oracle: `k`
+    /// is determined exactly when `e_k` lies in the row space, i.e. when
+    /// appending `e_k` does not raise the rank.  The solver must answer
+    /// exactly then, and with the planted `k`.  Small `N` is included
     /// because that is where eliminations cancel to zero and a merge that
-    /// mishandles a cancelled or filled-in column would show.
+    /// mishandles a cancelled or filled-in column would show; `N = 3, 5, 7`
+    /// make a row cancel out of a column and fill back into it often
+    /// enough to catch a row visited twice, which larger `N` never did.
+    ///
+    /// Dense elimination is *not* the oracle here: on an under-determined
+    /// system `gaussian_eliminate_mod_n` returns a particular solution
+    /// with the free unknowns at zero rather than `None`, so "dense
+    /// answered" does not mean "`k` is determined".  The DLP driver is
+    /// protected by its `[k]D₁ = D₂` check; this test would not be.
     #[test]
     fn sparse_solve_matches_dense_on_planted_systems() {
         let mut rng = StdRng::seed_from_u64(0x5a_0e5e);
         let mut answered = 0;
-        for &n_u64 in &[101u64, 1009, 1_000_003, 16_790_591] {
+        for &n_u64 in &[3u64, 5, 7, 101, 1009, 1_000_003, 16_790_591] {
             let n = BigUint::from(n_u64);
-            for trial in 0..60 {
+            for trial in 0..200 {
                 let m = 5 + (rng.next_u64() % 40) as usize;
                 // Half the systems are short of rows, so `k` is often
                 // undetermined and the solver must decline.
@@ -2434,37 +2481,41 @@ mod tests {
                             (j, v)
                         })
                         .collect();
-                    let b = row.iter().fold(BigUint::zero(), |acc, (j, v)| (acc + v * &y[*j]) % &n);
+                    let b = row
+                        .iter()
+                        .fold(BigUint::zero(), |acc, (j, v)| (acc + v * &y[*j]) % &n);
                     rows.push(row);
                     rhs.push(b);
                 }
 
-                let mut dense: Vec<Vec<BigUint>> = rows
+                let dense: Vec<Vec<u64>> = rows
                     .iter()
                     .map(|row| {
-                        let mut d = vec![BigUint::zero(); m + 1];
+                        let mut d = vec![0u64; m + 1];
                         for (j, v) in row {
-                            d[*j] = v.clone();
+                            d[*j] = v.to_u64_digits().first().copied().unwrap_or(0);
                         }
                         d
                     })
                     .collect();
-                let mut dense_rhs = rhs.clone();
-                let dense_k = gaussian_eliminate_mod_n(&mut dense, &mut dense_rhs, &n)
-                    .map(|s| s[m].clone());
-                let sparse_k = sparse_solve_for_k(rows, rhs, m, &n).map(|(k, _)| k);
+                let mut with_ek = dense.clone();
+                let mut ek = vec![0u64; m + 1];
+                ek[m] = 1;
+                with_ek.push(ek);
+                let determined = rank_mod(with_ek, n_u64) == rank_mod(dense, n_u64);
 
-                if let Some(k) = &sparse_k {
-                    assert_eq!(k, &y[m], "wrong k: n={n_u64} m={m} trial={trial}");
+                let sparse_k = sparse_solve_for_k(rows, rhs, m, &n).map(|(k, _)| k);
+                let at = format!("n={n_u64} m={m} trial={trial}");
+                if determined {
+                    assert_eq!(sparse_k.as_ref(), Some(&y[m]), "declined or wrong: {at}");
                     answered += 1;
-                }
-                if dense_k.is_some() {
-                    assert_eq!(sparse_k, dense_k, "sparse declined: n={n_u64} m={m} trial={trial}");
+                } else {
+                    assert_eq!(sparse_k, None, "answered an undetermined k: {at}");
                 }
             }
         }
         // Guard against a test that passes by never answering.
-        assert!(answered >= 100, "only {answered} systems answered");
+        assert!(answered >= 400, "only {answered} systems answered");
     }
 
     #[test]
