@@ -1,0 +1,21 @@
+...............................Fs..........................              [100%]
+=================================== FAILURES ===================================
+_______________ test_md5_pin_mechanism_real_registry_is_distinct _______________
+
+    def test_md5_pin_mechanism_real_registry_is_distinct():
+        """The REAL pinned registry (IMPL-1 hashlib/OpenSSL vs IMPL-3 _md5/
+        CPython) must be distinct at the mechanism level: distinct module files
+        and distinct runtime types, probed through the runner's own callables."""
+        from harness import runner
+    
+        record, distinct = runner._md5_pin_mechanism(runner._MD5_IMPL_FUNCS)
+        assert distinct is True
+        f1, f3 = record["IMPL-1"]["module_file"], record["IMPL-3"]["module_file"]
+        t1, t3 = record["IMPL-1"]["runtime_type"], record["IMPL-3"]["runtime_type"]
+>       assert f1 and f3 and f1 != f3
+E       AssertionError: assert ('/usr/lib/python3.12/lib-dynload/_hashlib.cpython-312-x86_64-linux-gnu.so' and None)
+
+tests/test_harness.py:545: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_harness.py::test_md5_pin_mechanism_real_registry_is_distinct
+1 failed, 57 passed, 1 skipped in 9.23s
