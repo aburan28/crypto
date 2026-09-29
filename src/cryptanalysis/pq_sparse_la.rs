@@ -124,12 +124,15 @@ pub fn sparse_solve_mod_n(
     // among the columns present.  The map is monotone, so every
     // "lowest column" tie-break and every row's entry order is
     // unchanged, and back-substitution works on ranks throughout.
+    // The width saturates rather than wrapping for a column numbered
+    // `usize::MAX`: the old solver took any index, and a saturated
+    // width is far past the threshold, so such a system is relabelled.
     let n_entries: usize = rows.iter().map(|r| r.entries.len()).sum();
     let width = rows
         .iter()
         .filter_map(|r| r.entries.keys().next_back())
         .max()
-        .map_or(0, |&c| c + 1);
+        .map_or(0, |&c| c.saturating_add(1));
     let (width, target_col) = if width > 2 * n_entries + 64 {
         let mut present: Vec<usize> = rows
             .iter()
@@ -577,6 +580,37 @@ mod tests {
             let got = sparse_solve_mod_n(rows.clone(), 2, col, &n);
             assert_eq!(got, Some(big(want)), "column {col}");
             assert_eq!(got, reference_sparse_solve(rows.clone(), col, &n));
+        }
+    }
+
+    /// Columns numbered up to `usize::MAX`, which the old solver took
+    /// like any other.  The width (highest column plus one) must
+    /// saturate rather than wrap to zero and index an empty count
+    /// table (or trip the overflow check), so these systems take the
+    /// relabelled path.  `3x ≡ 7 (mod 11)` gives x = 6 at column
+    /// `usize::MAX`; beside it, `x₀ + x ≡ 8` gives x₀ = 2, both at
+    /// that column and one below it (where the width is exact).
+    #[test]
+    fn solves_columns_numbered_up_to_usize_max() {
+        let n = BigUint::from(11u32);
+        let big = |v: u32| BigUint::from(v);
+        let top = usize::MAX;
+        let single = vec![SparseRow::from_entries(vec![(top, big(3))], big(7))];
+        for (col, want) in [(top, Some(big(6))), (0, None)] {
+            let got = sparse_solve_mod_n(single.clone(), 1, col, &n);
+            assert_eq!(got, want, "single row, target {col}");
+            assert_eq!(got, reference_sparse_solve(single.clone(), col, &n));
+        }
+        for high in [top, top - 1] {
+            let rows = vec![
+                SparseRow::from_entries(vec![(high, big(3))], big(7)),
+                SparseRow::from_entries(vec![(0, big(1)), (high, big(1))], big(8)),
+            ];
+            for (col, want) in [(high, Some(big(6))), (0, Some(big(2))), (1, None)] {
+                let got = sparse_solve_mod_n(rows.clone(), 2, col, &n);
+                assert_eq!(got, want, "highest column {high}, target {col}");
+                assert_eq!(got, reference_sparse_solve(rows.clone(), col, &n));
+            }
         }
     }
 
