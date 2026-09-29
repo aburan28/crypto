@@ -29,6 +29,7 @@ def sealed_inputs(prepared, built, arm):
             and panel['build_record_sha256'] == sha256(build)
             and panel['worker_sha256'] == digest(Path(built)/'worker')
             and panel['target_panel_sha256'] == digest(TARGET)
+            and seal['protocol_sha256'] == digest(REGISTRATION/'PROTOCOL.md')
             and seal['controller_sha256'] == digest(__file__)
             and seal['registration_sha256']
                 == digest(Path(__file__).with_name('register_local_pairinv.py')),

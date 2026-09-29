@@ -152,6 +152,7 @@ def register(prepared, built):
     seal = dict(schema_version=1,
                 files={key: digest(REGISTRATION/(key.replace('_','-')+'.json'))
                        for key in values},
+                protocol_sha256=digest(REGISTRATION/'PROTOCOL.md'),
                 inventory_files={name: digest(inventory/name) for name in
                                  ('job.json', 'stdout.json', 'stderr.txt',
                                   'process.json')},
