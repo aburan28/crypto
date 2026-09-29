@@ -557,9 +557,10 @@ On macOS, `./launchd/install-macos.sh` keeps that loop up under launchd.
 It copies `dp_ingest.py` and `ingest.sh` into
 `~/Library/Application Support/ECC2K130/ingest`, writes the LaunchAgent
 `com.adamburan.ecc2k130-dp-ingest`, and bootstraps it. The agent starts at
-login and is restarted if it exits. Each start sets `INGEST_ENSURE_ACCESS=1`
-and `AWS_PROFILE` (default `ecc2k130`), and unsets any
-`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, or `AWS_SESSION_TOKEN` so a
+login and is restarted if it exits. The runner opens this host's `/32` on the RDS security group at start
+and every two minutes after that, because a laptop address can change while
+the process stays up. It uses `AWS_PROFILE` (default `ecc2k130`) and unsets
+any `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, or `AWS_SESSION_TOKEN` so a
 stale token cannot override that profile. The agent runs those copies;
 run the installer again after a new `dp_ingest.py` lands.
 
