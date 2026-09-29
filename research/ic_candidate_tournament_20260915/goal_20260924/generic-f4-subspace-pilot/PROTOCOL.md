@@ -1,8 +1,8 @@
 # Disclosed-point F4/F5 standard-subspace recovery pilot
 
-Status: **registered plan only; not dispatched**. This protocol freezes a
-bounded diagnostic before any fresh competitive panel. It does not consume the
-one-dispatch slot of
+Status: **budget frozen; local execution not yet started**. This protocol
+freezes a bounded diagnostic before any fresh competitive panel. It does not
+consume the one-dispatch slot of
 [generic-backend-qualification-v2](../generic-backend-qualification-v2/PROTOCOL.md)
 (seed `2026092902`, Actions run
 [36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)).
@@ -70,12 +70,34 @@ zero yield for the ambient-orbit v2 arms.
 | Summands | 3 |
 | Cells | n17a1, n19a0, n23a0, n23a1, n31a0 |
 | Points | Exactly the five public targets already used in the dimension-6 inventory control (one per cell). Digests and coordinates are sealed by that JSON once #952 merges; do not substitute readiness or improvement-round points without amending this protocol. |
-| Budget | Declare `max_trials` and wall/memory caps in the runner before the first job; exhaustion is incomplete, not UNSAT |
+| Budget | Frozen in [`run_pilot.py`](run_pilot.py) before the first job: `f4` and `f5` only, `max_trials=1`, `batch_trials=1`, `groebner_degree=3`, `node_budget=4096`, dense relation LA, child wall cap 180s, address-space cap 8 GiB, `RAYON_NUM_THREADS=1`, no `KIC_`/`F4_`/`SOLVER_` overrides. Exhaustion is incomplete, not UNSAT. `inherited_f4` stays optional and is not in this execution. |
 | Host label | Record `rustc --version`, CPU, threads (`RAYON_NUM_THREADS=1`), and that Valgrind instruction counts are out of scope unless 3.22.0 is present |
 
 Classification of any later cost movement against the incumbent on these points
 is at most **engineering** or **factor-base-policy**; it cannot be an **advance**
 against the encoder floor, which is already satisfied by construction at `ℓ=6`.
+
+## Frozen local execution
+
+[`panel.json`](panel.json) is the encoder preflight only. Its byte digest is
+recorded by the runner. The measured jobs read public points from
+`standard-subspace-d6-inventory-control.json` (SHA-256
+`be3053b4b637311e8255f294807fde412510fbda2464e678a6a16fdea397d403`) and do not
+sample new ones. Build the worker with `generic_build.py` from commit
+`765c3c5f19032bd852163805f257c56babef2040` after copying that commit's
+`research/ic_candidate_tournament_20260915/ci/Cargo.lock` to the checkout root.
+Run:
+
+```sh
+python3.12 research/ic_candidate_tournament_20260915/goal_20260924/generic-f4-subspace-pilot/run_pilot.py \
+  --source-root <detached-765c3c5f-checkout> \
+  --out <new-directory>
+```
+
+This execution is diagnostic (`promotion_eligible=false`). It is not seed
+`2026092901` or `2026092902` and must not be redispatched as either of those
+registrations. A second run needs a new output directory and, if the budget
+changes, a new protocol amendment written before the first new job.
 
 ## Cost accounting
 
