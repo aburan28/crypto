@@ -1,0 +1,10 @@
+exists, compared as is: research/ic_m4_head_engine_20260929/baseline/rerun-4ff512f2/chain-reference
+exists, compared as is: research/ic_m4_head_engine_20260929/baseline/rerun-4ff512f2/holdout-reference
+exists, compared as is: research/ic_m4_head_engine_20260929/baseline/rerun-4ff512f2/chain-candidate
+exists, compared as is: research/ic_m4_head_engine_20260929/baseline/rerun-4ff512f2/holdout-candidate
+NAMED chain    reference K_0/2^9   m=4  1722bad1     595,511  head     595,511  MATCH
+NAMED chain    candidate K_0/2^9   m=4  1722bad1     294,112  head     294,112  MATCH
+NAMED holdout  reference K_1/2^15  m=4  1722bad1  83,790,974  head  83,790,974  MATCH
+NAMED holdout  candidate K_1/2^15  m=4  1722bad1  27,620,511  head  27,620,511  MATCH
+
+named cells reproduce exactly: True; every row of both ladders: True

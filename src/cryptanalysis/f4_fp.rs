@@ -560,34 +560,78 @@ unsafe fn add_lazy_avx2(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64
     }
 }
 
-fn lazy_avx2_enabled() -> bool {
+/// Eight bounded 32-bit products accumulated in 64-bit lanes. The same
+/// 256-update normalization interval used by the scalar and AVX2 paths
+/// bounds every lane before it is reduced.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx512f")]
+unsafe fn add_lazy_avx512(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64) {
+    use std::arch::x86_64::{
+        __m256i, __m512i, _mm256_loadu_si256, _mm512_add_epi64, _mm512_cvtepu32_epi64,
+        _mm512_loadu_si512, _mm512_mul_epu32, _mm512_set1_epi64, _mm512_storeu_si512,
+    };
+    let (acc, pivot) = (&mut acc[from..], &pivot[from..]);
+    let multiplier = _mm512_set1_epi64(factor as i64);
+    let mut i = 0;
+    while i + 8 <= acc.len() {
+        // SAFETY: the loop bounds cover eight pivot and accumulator entries;
+        // both loads and the store accept unaligned pointers.
+        let values = unsafe { _mm256_loadu_si256(pivot.as_ptr().add(i) as *const __m256i) };
+        let wide = _mm512_cvtepu32_epi64(values);
+        let products = _mm512_mul_epu32(wide, multiplier);
+        let current = unsafe { _mm512_loadu_si512(acc.as_ptr().add(i) as *const __m512i) };
+        let updated = _mm512_add_epi64(current, products);
+        unsafe { _mm512_storeu_si512(acc.as_mut_ptr().add(i) as *mut __m512i, updated) };
+        i += 8;
+    }
+    for (x, &y) in acc[i..].iter_mut().zip(&pivot[i..]) {
+        *x += factor * u64::from(y);
+    }
+}
+
+/// Zero selects scalar accumulation, one forces AVX2, and two forces
+/// AVX-512F. Both vector paths remain explicit opt-ins.
+fn lazy_simd_kind() -> u8 {
     #[cfg(target_arch = "x86_64")]
     {
-        static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-        *ENABLED.get_or_init(|| {
-            std::env::var("F4_FP_LAZY_AVX2").as_deref() == Ok("1")
+        static KIND: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
+        *KIND.get_or_init(|| {
+            if std::env::var("F4_FP_LAZY_AVX512").as_deref() == Ok("1")
+                && std::arch::is_x86_feature_detected!("avx512f")
                 && std::arch::is_x86_feature_detected!("avx2")
+            {
+                2
+            } else if std::env::var("F4_FP_LAZY_AVX2").as_deref() == Ok("1")
+                && std::arch::is_x86_feature_detected!("avx2")
+            {
+                1
+            } else {
+                0
+            }
         })
     }
     #[cfg(not(target_arch = "x86_64"))]
     {
-        false
+        0
     }
 }
 
 #[inline]
-fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64, avx2: bool) {
+fn add_lazy(acc: &mut [u64], pivot: &[u32], from: usize, factor: u64, simd: u8) {
     debug_assert_eq!(acc.len(), pivot.len());
     #[cfg(target_arch = "x86_64")]
-    if avx2 {
-        // SAFETY: `lazy_avx2_enabled` verified AVX2 before this call.
-        unsafe { add_lazy_avx2(acc, pivot, from, factor) };
-    } else {
+    if simd == 0 {
         add_lazy_scalar(acc, pivot, from, factor);
+    } else if simd == 2 {
+        // SAFETY: `lazy_simd_kind` verified AVX-512F and AVX2.
+        unsafe { add_lazy_avx512(acc, pivot, from, factor) };
+    } else {
+        // SAFETY: `lazy_simd_kind` verified AVX2 before this call.
+        unsafe { add_lazy_avx2(acc, pivot, from, factor) };
     }
     #[cfg(not(target_arch = "x86_64"))]
     {
-        let _ = avx2;
+        let _ = simd;
         add_lazy_scalar(acc, pivot, from, factor);
     }
     count_ops(acc.len() - from);
@@ -611,7 +655,7 @@ fn rref32_deferred(
     deadline: Option<Instant>,
 ) -> Option<Vec<usize>> {
     const NORMALIZE_AFTER: usize = 256;
-    let avx2 = lazy_avx2_enabled();
+    let simd = lazy_simd_kind();
     let mut known: Vec<(usize, Vec<u32>)> = Vec::new();
     for source in std::mem::take(rows) {
         if deadline.is_some_and(|d| Instant::now() > d) {
@@ -625,7 +669,7 @@ fn rref32_deferred(
             }
             let f = fp.reduce(acc[*c]);
             if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f, avx2);
+                add_lazy(&mut acc, pivot, *c, fp.p - f, simd);
                 pending += 1;
                 if pending == NORMALIZE_AFTER {
                     normalize_lazy(&mut acc, fp);
@@ -656,7 +700,7 @@ fn rref32_deferred(
         for (c, pivot) in later.iter().rev() {
             let f = fp.reduce(acc[*c]);
             if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f, avx2);
+                add_lazy(&mut acc, pivot, *c, fp.p - f, simd);
                 pending += 1;
                 if pending == NORMALIZE_AFTER {
                     normalize_lazy(&mut acc, fp);
@@ -1679,6 +1723,39 @@ mod tests {
                     add_lazy_scalar(&mut scalar, &pivot, from, factor);
                     // SAFETY: the runtime AVX2 feature was checked above.
                     unsafe { add_lazy_avx2(&mut vector, &pivot, from, factor) };
+                    assert_eq!(vector, scalar, "width={width} from={from} update={update}");
+                }
+                normalize_lazy(&mut scalar, fp);
+                normalize_lazy(&mut vector, fp);
+                assert_eq!(vector, scalar, "normalization width={width} from={from}");
+            }
+        }
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn avx512_lazy_accumulation_matches_scalar_at_boundaries() {
+        if !std::arch::is_x86_feature_detected!("avx512f")
+            || !std::arch::is_x86_feature_detected!("avx2")
+        {
+            return;
+        }
+        let fp = Barrett::new(65521);
+        for width in [0, 1, 7, 8, 9, 15, 16, 17, 33, 257, 4097] {
+            let pivot: Vec<u32> = (0..width)
+                .map(|i| ((i * 7919 + 137) % 65521) as u32)
+                .collect();
+            for from in [0, width.min(1), width / 3, width] {
+                let initial: Vec<u64> = (0..width)
+                    .map(|i| ((i * 1_000_003 + 17) as u64) % 65521)
+                    .collect();
+                let mut scalar = initial.clone();
+                let mut vector = initial;
+                for update in 0..256 {
+                    let factor = ((update * 4093 + 1) % 65521) as u64;
+                    add_lazy_scalar(&mut scalar, &pivot, from, factor);
+                    // SAFETY: the runtime AVX-512F and AVX2 features were checked above.
+                    unsafe { add_lazy_avx512(&mut vector, &pivot, from, factor) };
                     assert_eq!(vector, scalar, "width={width} from={from} update={update}");
                 }
                 normalize_lazy(&mut scalar, fp);

@@ -1,0 +1,73 @@
+{
+  "actions_run_id": 36550847279,
+  "artifact_name": "compact-orbit-rank-36550847279-1",
+  "files": [
+    {
+      "bytes": 1388,
+      "path": "control/base.jsonl",
+      "sha256": "dcea2e583bce7d89524a009a388b9c8b7dce5c6ca8233068ec7bec1c5e384ead"
+    },
+    {
+      "bytes": 559,
+      "path": "control/command.json",
+      "sha256": "3a2ab8a9c877c95326b02726440cefde5a68aef88d56edb02a0fdb48e5ebd93e"
+    },
+    {
+      "bytes": 0,
+      "path": "control/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1040,
+      "path": "control/summary.jsonl",
+      "sha256": "9f5fd75bc5a19c6d4e876e8e3e9128aa84c3faf640b7902b92dacfa6e922147d"
+    },
+    {
+      "bytes": 607,
+      "path": "control/targets.jsonl",
+      "sha256": "79e94f187a65bf4402e4638514d6f5cbc8c883fc46dfa13f2d623514b736ace0"
+    },
+    {
+      "bytes": 613,
+      "path": "independent_rank_replay.json",
+      "sha256": "0fe7982f0c132354289049345b544e8b36785659ceb69dfae89413b1259e8b1c"
+    },
+    {
+      "bytes": 1418,
+      "path": "receipt.json",
+      "sha256": "95560342c6a0be4dda260d2102ff3673fbb1b3965034cae5c193764b4c7c0ad3"
+    },
+    {
+      "bytes": 1388,
+      "path": "traced/base.jsonl",
+      "sha256": "dcea2e583bce7d89524a009a388b9c8b7dce5c6ca8233068ec7bec1c5e384ead"
+    },
+    {
+      "bytes": 557,
+      "path": "traced/command.json",
+      "sha256": "df4dec4be5108985ca2b9a6a344cd595d5820f349185e2840336744f55e52bf0"
+    },
+    {
+      "bytes": 953,
+      "path": "traced/rank.jsonl",
+      "sha256": "0de00af2a9c89d55ed61d3430af96db055e631a76c784a5e63d721b5fd6713bf"
+    },
+    {
+      "bytes": 0,
+      "path": "traced/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1028,
+      "path": "traced/summary.jsonl",
+      "sha256": "5aff7a7a3a2a14a1f912ca362d25a9237d31a0f95b904d0e3b3a7abb4111aad7"
+    },
+    {
+      "bytes": 634,
+      "path": "traced/targets.jsonl",
+      "sha256": "5bf10bc685fcb783ce974db3640268c010e7b48ec7e676b9eaff51df6cf21ca8"
+    }
+  ],
+  "schema": "compact-orbit-rank-control-archive-v1",
+  "source_commit": "36592609af4367d589b320711552a2980371f159"
+}
