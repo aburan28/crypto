@@ -89,10 +89,17 @@ if `main` changes later. The explicit reference registry carries the accepted
 alias maps to `ic_online` once.
 The runner restores and verifies all three sealed rounds, freezes supplemental
 point exclusions, builds the new generic source with a controlled receipt,
-and then runs the frozen tournament once. Replay the artifact's archived
-`tournament/evaluator/tournament.py verify` and rerun its archived
-`generic_backend_yield.py` before using
-`generic_backend_gate.py --bundle <retained-output> --out <new-result.json>`.
+and then runs the frozen tournament once. Replay the artifact's unmodified
+`tournament/evaluator/tournament.py verify` before the natural-yield audit.
+The frozen 2026-09-29 auditor has a report-hash defect: preserve its original
+failure and follow
+[AUDITOR-REPAIR.md](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification/AUDITOR-REPAIR.md)
+on a separate artifact copy. Require the exact archived auditor/contract hashes
+and certified receipt-digest cross-checks from
+`recover_generic_backend_yield.py`; do not edit or rerun the measurement.
+Apply `generic_backend_gate.py --bundle <retained-output> --out <new-result.json>`
+only after the frozen verifier and the labelled post-hoc audit pass. Future
+campaigns use the corrected auditor, with their own new source freeze.
 The gate requires every smoke and development job to be verified for at least
 one F4/F5 arm and one SAT arm; a reference-selection status alone does not
 qualify either family. Describe the current `f4` backend as a bounded Macaulay
