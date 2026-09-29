@@ -227,13 +227,29 @@ Constant-factor: both arms ~√(L·r/n) at optimal K. Status
 `PENDING_INDEPENDENT_VALIDATION` — do **not** promote the selected-panel
 `vs_rho` row from this arm alone.
 
-**Next beat:** a=0 n=61 vs `examples/koblitz_rho_batch_ks_v2_n61.rs` at
-**L=65,536 only**. Do not run 32-target panels. Evidence:
+**2026-09-29 point-only full-rank check:** fresh held-out n=37/41/53 L=1 and
+L=1,024 public points, five cold paired blocks per cell, independent rank and
+target replay on Linux and a second machine. With the corrected x86 PCLMUL /
+Itoh–Tsujii rho, median IC/rho CPU ratios are 1.545/0.789 at n37,
+2.727/0.309 at n41 and 2.283/0.252 at n53 (single/batch). The original
+software-rho batch ratios 0.154/0.099/0.086 were accounting artifacts; a
+same-runner backend A/B reproduced the rho acceleration with identical Q,
+scalars, walks and charges. All selected rank stages reached the K-equation
+floor in exactly K attempts, but n53 still averaged ~85,007 rank probes per
+equation at L=1. The n53 batch used ~1.28 GiB peak RSS. This is a wall/CPU
+diagnostic only: common-unit S and full-operation attack-speed ratios remain
+unset; the selected-panel `vs_rho` row is not promoted. Evidence:
+[`compact_orbit_point_panel_20260929/RESULT.md`](../../research/notes/ecc2k130/compact_orbit_point_panel_20260929/RESULT.md).
+
+**Next beat:** a same-Q precomputed-start rho and complete common-operation
+accounting at n=41/53 L=1 and L=1,024; then the n=83 confidence gate and the
+pending n=61 L=65,536 batch-size probe as resources permit. Do not use
+32-target panels as a substitute. Historical evidence:
 [`autolab_orbit_extract_20260924/RESULT.md`](../../research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md).
 
 ## Global agent priorities (beat these in order)
 
-1. **Koblitz compact-orbit `vs_rho` → a=0 n=61 vs batched rho at L=65,536** (L=1,024 / 4,096 / 16,384 already 3/3). No 32-target panels. After that: independent-host rerun and Bernstein–Lange.
+1. **Koblitz compact-orbit `vs_rho` → precomputed-start rho plus complete operation unit at n=41/53 L=1 and L=1,024.** The new point-only full-rank wall/CPU batch ratios 0.309/0.252 are verified but S is unset; n=61 L=65,536 and n=83 scaling follow only after the stronger reference/accounting gate. No 32-target panels.
 2. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
 3. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
    On the autolab `signed_expanded` family the nearest charged gap is `n = 37`

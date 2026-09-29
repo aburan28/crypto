@@ -128,7 +128,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Compact-orbit DLP beats batched rho at n=61 L=1024/4096/16384 (K=600/800/1400, wall 0.14-0.63). L=16384 median wall 0.205, 49152/49152 replayed. Next: n=61 L=65536 only (no 32-target panels). PENDING_INDEPENDENT_VALIDATION; constant-factor; do not promote the selected-panel vs_rho row"
+      "beat": "Compact-orbit point-only full-rank n37/n41/n53 L=1/1024 replayed; corrected rho CPU ratios at n41/n53 are 2.727/0.309 and 2.283/0.252 (single/batch). S is unset; no selected-panel promotion. Next: precomputed-start signed-Frobenius rho and calibrated full-operation unit on identical n41/n53 Q, then n83 and n61 L=65536 transfer probes. No 32-target panels."
     },
     {
       "beat": "Reduce the selected algebraic n=53 exact support from 738,197,504 bytes below 512 MiB without regressing the 95-relation solve, online wall crossover, or charged resources",
@@ -11364,10 +11364,10 @@
             "n53_probe_note": "Selected EPYC 9V74 panel wins 5/5 with a 0.839190 median; scalar-blind EPYC 7763 run is 0.987489x. Median direct core remains 2.261565x rho, retained support is 738,197,504 bytes, and fresh build plus direct is 17.636692x.",
             "summary": "Reduce selected n=53 memory, core, and build costs while refreshing forced-single-core and obtaining independent reproduction",
             "compact_orbit_followup": {
-              "summary": "a=0 n=61 vs n=61-admitted frozen Kuhn-Struik batched rho at L>=1024 (tune K on a disjoint 1024-target corpus; then L=4096 if RSS allows). No L=32 / 32-target panels.",
+              "summary": "Point-only cold full-rank n37/n41/n53 L=1/1024 independently replayed on Linux and macOS; corrected rho backend retains n41/n53 batch wall leads but single-target losses. Next same-Q precomputed-start rho and complete common operation unit; n83/n131 transfer unestablished.",
               "producer": "examples/koblitz_orbit_dlp_fast.rs",
               "rho": "examples/koblitz_rho_batch_ks_v2_n61.rs",
-              "evidence": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/RESULT.md",
+              "evidence": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/RESULT.md",
               "status": "PENDING_INDEPENDENT_VALIDATION"
             }
           },
