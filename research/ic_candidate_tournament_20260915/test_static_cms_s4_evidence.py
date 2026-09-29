@@ -163,11 +163,14 @@ class StaticCmsS4EvidenceTests(unittest.TestCase):
                 independent_formula_check(files[instance+'instance.xor.cnf'],
                                           model)
                 self.assertEqual(row['source_model_sha256'], sha(bytes(model)))
+                self.assertIs(row['source_model_valid'], True)
                 xs, witness = independently_lift(curve, base, model,
                                                   tuple(item['point']))
                 self.assertIsNotNone(witness)
                 self.assertEqual(row['point_witness']['x_coordinates'], xs)
                 self.assertEqual(row['point_witness']['points'], witness)
+                self.assertEqual(row['point_witness']['point_indices'],
+                                 [base.index(tuple(point)) for point in witness])
                 self.assertTrue(row['point_witness']['group_replay'])
             else:
                 self.assertEqual(row['status'], 'SOURCE_UNSAT')
