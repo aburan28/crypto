@@ -97,21 +97,66 @@
     "vs_rho": {
       "required": [
         "n_or_bits",
+        "candidate_id",
+        "candidate_manifest_sha256",
+        "workload_id",
+        "workload_manifest_sha256",
+        "run_id",
+        "target_count",
+        "ic_target_hash",
+        "rho_target_hash",
         "timing_class",
-        "ic_cost",
-        "rho_cost",
-        "automorphism_discount",
-        "all_stages_charged_same_series",
+        "ic_online_wall_ms",
+        "rho_online_wall_ms",
+        "online_speedup",
+        "ic_online_phase_ms",
+        "online_interval",
+        "same_resource_envelope",
+        "independent_validation",
+        "ic_replay_certificate_sha256",
+        "rho_replay_certificate_sha256",
+        "ic_resource_envelope",
+        "rho_resource_envelope",
+        "ic_scalar_verified",
+        "rho_scalar_verified",
+        "rho_policy",
         "verdict",
         "claim_boundary",
         "independent_replay_pointer"
       ],
       "timing_class_enum": [
-        "algorithmic_charged",
-        "projection_matched",
-        "whole_process_wall"
+        "single_target_online_wall"
       ],
-      "koblitz_automorphism_discount_default": "sqrt(2n) with A=2*n signed Frobenius when using that rho control"
+      "ic_online_phase_fields": [
+        "T_target_query_ms",
+        "T_target_PDP_ms",
+        "T_target_relation_check_ms",
+        "T_target_descent_ms",
+        "T_target_recovery_check_ms"
+      ],
+      "online_interval_event_fields": [
+        "ic_start_event",
+        "ic_stop_event",
+        "rho_start_event",
+        "rho_stop_event"
+      ],
+      "online_interval_stage_fields": [
+        "ic_included_stages",
+        "rho_included_stages"
+      ],
+      "rho_policy_integer_fields": [
+        "worker_count",
+        "distinguished_point_memory_bytes"
+      ],
+      "rho_policy_minimums": {
+        "worker_count": 1,
+        "distinguished_point_memory_bytes": 0
+      },
+      "rho_policy_string_fields": [
+        "walk_policy",
+        "collision_policy"
+      ],
+      "notes": "Schema completeness only; scientific replay, source/manifest binding and matched resources must be independently audited. Historical batch and whole-process rows remain supplementary and cannot satisfy this primary single-target online claim."
     }
   },
   "how_to_beat": [

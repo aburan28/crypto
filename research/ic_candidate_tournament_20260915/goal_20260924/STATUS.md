@@ -6,7 +6,12 @@ is accepted. The single [F5 v1 invocation](f5-source-bound-runtime-v1/README.md)
 failed native JSON parsing before any IC query and is closed. The single
 [F5 v2 development solve](f5-source-bound-runtime-v2/README.md) now passes
 complete source/matrix/log/scalar/negative-query admission and isolated archive
-replay in PR #1064, pending exact-head review/CI acceptance. The fresh paired
+replay, accepted in PR #1064 at
+`07d7c63636965a47035c66e37f665d5611b6a7a0` after all applicable exact-head checks
+passed. The [reusable preparation certificates](prepared-ic-state-v1/README.md)
+independently derive identical ordered base/projection/log mathematics from both
+accepted ordinary-query preparations; this follow-up has no new target or
+native execution. The fresh paired
 incumbent/rho comparison remains outstanding;
 no new speedup or promotion is established. The historical confirmation sets
 and censored generic registrations below remain closed.
