@@ -366,7 +366,10 @@ registration. The single [native parser control](f5-source-bound-runtime-v2/inte
 passed: two inputs reproduced every field/default and six adversarial schemas
 rejected, with independent archive/source/input/output replay. The registrar
 requires the exact accepted proof hash before freezing an invocation. Its
-prospective seed is 2026093032; the one v2 IC invocation is not dispatched.
+prospective seed is 2026093032. [PR #1064](https://github.com/aburan28/crypto/pull/1064)
+committed the complete external invocation receipt before the single dispatch;
+[DISPATCH-OBSERVATION.json](f5-source-bound-runtime-v2/DISPATCH-OBSERVATION.json)
+records its owned native process. Terminal independent admission is pending.
 Implementation and parser controls cannot establish natural yield, a complete
 F4/F5 family or a competitive speedup. The parser's direct Python analysis
 inventory is not complete execution attestation; its additional DEFAULTS source
