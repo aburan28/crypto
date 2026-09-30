@@ -399,7 +399,10 @@
       Against a rho in the IC arm&rsquo;s own arithmetic, no collector is below rho in instructions
       at any of twelve cells. Its one lead is 16&ndash;26% in isolated in-process time at
       <code>n</code>&thinsp;&le;&thinsp;19, gone by 23. That is engineering: it comes from more
-      instructions per second, not fewer instructions. The <code>m</code>&thinsp;=&thinsp;4 algebraic
+      instructions per second, not fewer instructions, and
+      <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/sized_cache_rho_20260930/RESULTS.md">a rho with its
+      cache sized to the walk</a> removes it: IC is within 0.98&ndash;1.03 of that rho in wall time at the four
+      small cells, and 4% behind it at <code>n</code>&thinsp;=&thinsp;23. The <code>m</code>&thinsp;=&thinsp;4 algebraic
       audits read <code>&ccirc;</code>&thinsp;&asymp;&thinsp;1.0 against the 0.25 needed, on both
       engines. The derived exponent lies inside that range &mdash; but at a factor base measurably not
       where the same derivation puts it, so the agreement is not yet confirmation of the model. Carried
