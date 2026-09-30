@@ -121,6 +121,9 @@ paired single-target online result. See
 3. Keep current-producer outputs labeled diagnostic-only; do not fill absent
    online fields with estimates. Claim-check can pass only after the producers
    emit the required intervals, matched target, resource policy, and verification.
+   A promotable comparison must also include independent replay certificate
+   SHA-256 digests and identical, nonempty IC/rho resource-envelope records; a
+   boolean flag alone is insufficient.
 4. Independently recompute a complete result on a second process / author.
 5. Promote the bundle: copy `artifacts/`, `inputs/`, `receipts/` and
    `state.json` into `evidence/<date>-<topic>/`. Leave `logs/` behind — it is

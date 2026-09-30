@@ -533,7 +533,12 @@ count as wins. Missing phase costs make the total and speedup unknown. Key resul
 `(candidate_id, workload_id, run_id)`, preserve their manifest hashes, and
 use the canonical run-id convention from the repository's IC measurement
 rules. Keep the five exclusive IC online phase costs; their sum must equal the
-charged IC online wall time.
+charged IC online wall time. Each claim must retain independent replay
+certificate SHA-256 digests and the exact nonempty resource-envelope object for
+both arms; the claim checker requires those envelopes to match and rejects a
+bare boolean verification or resource-match assertion. The IC interval must
+name all five target-dependent phases, and rho must name walk, collision, and
+recovery check.
 
 The current `boundary_autolab.py` producer timing is whole-process or
 operation-counted. Treat those outputs as legacy diagnostics until producers

@@ -96,6 +96,11 @@ FIELD_ALIASES: dict[str, tuple[str, ...]] = {
     "same_resource_envelope": ("same_resource_envelope",),
     "ic_scalar_verified": ("ic_scalar_verified",),
     "rho_scalar_verified": ("rho_scalar_verified",),
+    "independent_validation": ("independent_validation",),
+    "ic_replay_certificate_sha256": ("ic_replay_certificate_sha256",),
+    "rho_replay_certificate_sha256": ("rho_replay_certificate_sha256",),
+    "ic_resource_envelope": ("ic_resource_envelope",),
+    "rho_resource_envelope": ("rho_resource_envelope",),
     "rho_policy": ("rho_policy",),
     "ic_cost": ("ic_cost",),
     "rho_cost": ("rho_cost",),
@@ -117,6 +122,17 @@ FIELD_ALIASES: dict[str, tuple[str, ...]] = {
         "non_claims",
         "claim_boundary",
     ),
+}
+
+ONLINE_REQUIRED_STAGES: dict[str, tuple[str, ...]] = {
+    "ic_included_stages": (
+        "target_query",
+        "target_PDP",
+        "target_relation_check",
+        "target_descent",
+        "target_recovery_check",
+    ),
+    "rho_included_stages": ("walk", "collision", "recovery_check"),
 }
 
 
@@ -259,6 +275,23 @@ def validate_claim(
         for key in ("ic_scalar_verified", "rho_scalar_verified"):
             if report.get(key) is not True:
                 validation_errors.append(f"{key} must be true")
+        if report.get("independent_validation") is not True:
+            validation_errors.append("independent_validation must be true")
+        for key in ("ic_replay_certificate_sha256", "rho_replay_certificate_sha256"):
+            digest = report.get(key)
+            if not isinstance(digest, str) or len(digest) != 64 or any(
+                ch not in "0123456789abcdef" for ch in digest
+            ):
+                validation_errors.append(f"{key} must be a full lowercase SHA-256 digest")
+        ic_resources = report.get("ic_resource_envelope")
+        rho_resources = report.get("rho_resource_envelope")
+        if not isinstance(ic_resources, dict) or not ic_resources:
+            validation_errors.append("ic_resource_envelope must be a nonempty object")
+        if not isinstance(rho_resources, dict) or not rho_resources:
+            validation_errors.append("rho_resource_envelope must be a nonempty object")
+        if isinstance(ic_resources, dict) and isinstance(rho_resources, dict):
+            if ic_resources != rho_resources:
+                validation_errors.append("IC and rho resource envelopes must match exactly")
 
         ic_ms = positive_cost(report.get("ic_online_wall_ms"))
         rho_ms = positive_cost(report.get("rho_online_wall_ms"))
@@ -302,6 +335,14 @@ def validate_claim(
                 )
                 if not valid:
                     validation_errors.append(f"online_interval.{key} is missing or invalid")
+            for included_key, required_stages in ONLINE_REQUIRED_STAGES.items():
+                included = interval.get(included_key)
+                if isinstance(included, list):
+                    missing = sorted(set(required_stages) - set(included))
+                    if missing:
+                        validation_errors.append(
+                            f"online_interval.{included_key} is missing required stages: {', '.join(missing)}"
+                        )
 
         policy = report.get("rho_policy")
         if not isinstance(policy, dict):
@@ -814,6 +855,11 @@ def draft_vs_rho_claim(
         "same_resource_envelope": None,
         "ic_scalar_verified": integrity["status"] == "MATCHED" and producers_ok,
         "rho_scalar_verified": integrity["status"] == "MATCHED" and producers_ok,
+        "independent_validation": False,
+        "ic_replay_certificate_sha256": None,
+        "rho_replay_certificate_sha256": None,
+        "ic_resource_envelope": None,
+        "rho_resource_envelope": None,
         "rho_policy": None,
         "ic_cost": ic_cost,
         "rho_cost": rho_cost,

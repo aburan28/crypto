@@ -74,12 +74,17 @@ class MeasurementSchemaTests(unittest.TestCase):
             "online_interval": {
                 "ic_start_event": "first target-dependent IC query after reusable setup",
                 "ic_stop_event": "scalar recovered and independently verified",
-                "ic_included_stages": ["target_query", "target_PDP", "target_descent", "recovery_check"],
+                "ic_included_stages": ["target_query", "target_PDP", "target_relation_check", "target_descent", "target_recovery_check"],
                 "rho_start_event": "first target-dependent rho walk",
                 "rho_stop_event": "scalar recovered and independently verified",
                 "rho_included_stages": ["walk", "collision", "recovery_check"],
             },
             "same_resource_envelope": True,
+            "independent_validation": True,
+            "ic_replay_certificate_sha256": "a" * 64,
+            "rho_replay_certificate_sha256": "b" * 64,
+            "ic_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
+            "rho_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
             "ic_scalar_verified": True,
             "rho_scalar_verified": True,
             "rho_policy": {
@@ -127,12 +132,17 @@ class MeasurementSchemaTests(unittest.TestCase):
             "online_interval": {
                 "ic_start_event": "target computation after reusable setup",
                 "ic_stop_event": "verified scalar recovered",
-                "ic_included_stages": ["target_query", "target_descent"],
+                "ic_included_stages": ["target_query", "target_PDP", "target_relation_check", "target_descent", "target_recovery_check"],
                 "rho_start_event": "target walk begins",
                 "rho_stop_event": "verified scalar recovered",
-                "rho_included_stages": ["walk", "collision"],
+                "rho_included_stages": ["walk", "collision", "recovery_check"],
             },
             "same_resource_envelope": True,
+            "independent_validation": True,
+            "ic_replay_certificate_sha256": "a" * 64,
+            "rho_replay_certificate_sha256": "b" * 64,
+            "ic_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
+            "rho_resource_envelope": {"worker_count": 1, "memory_limit_bytes": 1073741824},
             "ic_scalar_verified": True,
             "rho_scalar_verified": True,
             "rho_policy": {
@@ -173,6 +183,18 @@ class MeasurementSchemaTests(unittest.TestCase):
         wrong_run_id = copy.deepcopy(base)
         wrong_run_id["run_id"] = "legacy-timestamp-run"
         variants.append(wrong_run_id)
+        no_independent_validation = copy.deepcopy(base)
+        no_independent_validation["independent_validation"] = False
+        variants.append(no_independent_validation)
+        bad_certificate_hash = copy.deepcopy(base)
+        bad_certificate_hash["ic_replay_certificate_sha256"] = "not-a-digest"
+        variants.append(bad_certificate_hash)
+        mismatched_resources = copy.deepcopy(base)
+        mismatched_resources["rho_resource_envelope"]["worker_count"] = 2
+        variants.append(mismatched_resources)
+        missing_relation_check = copy.deepcopy(base)
+        missing_relation_check["online_interval"]["ic_included_stages"].remove("target_relation_check")
+        variants.append(missing_relation_check)
         for report in variants:
             result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
             self.assertEqual(result["status"], "FAIL", result)
