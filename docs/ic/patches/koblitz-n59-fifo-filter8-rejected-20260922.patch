@@ -1,0 +1,26 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 5d5e0683..f1babc0b 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -2654,7 +2654,11 @@ impl PairSumTable {
+     /// stored rest.  This avoids a full-base recovery scan on every hit
+     /// while retaining half the entry width of the full table.
+     pub fn witnessed_compact_byte_size(points: usize, degree: u32) -> u128 {
+-        Self::compact_byte_size(points, degree) + Self::pair_count(points) * 4
++        let pairs = Self::pair_count(points);
++        let buckets = 1u128 << Self::compact_bucket_bits(pairs, degree);
++        let filter_bits = (128 - (pairs.max(1) * 8).leading_zeros()).clamp(6, 33);
++        let filter_bytes = (1u128 << filter_bits) / 8;
++        pairs * 8 + buckets * 4 + filter_bytes
+     }
+ 
+     /// Stored keys for a folded table: one per `(orbit representative,
+@@ -2998,7 +3002,7 @@ impl PairSumTable {
+         let total = bucket_start[buckets] as usize;
+         let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
+         let mut rests = vec![0u32; total];
+-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
++        let filter_bits = (usize::BITS - (total.max(1) * 8).leading_zeros()).clamp(6, 33);
+         let present_mask = (1u64 << filter_bits) - 1;
+         let words = (1usize << filter_bits) / 64;
+         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
