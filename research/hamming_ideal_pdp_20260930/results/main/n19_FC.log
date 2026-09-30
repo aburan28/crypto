@@ -1,3 +1,5 @@
 /home/user/crypto/research/hamming_ideal_pdp_20260930/hamming_pdp/target/release/hamming_pdp --n 19 --w 2 --targets 8 --encodings FC --budget-log2 28 --matrix-cap-log2 26 --out /home/user/crypto/research/hamming_ideal_pdp_20260930/results/main/n19_FC.jsonl.part
 n=19 irr=0x80027 alpha=0x3 #E=523492 odd=130873 |F_wt|=229 (x:115) |F_sub|=243 (x:122) l=8 setup=826ms
 n=19 FC WT2 seed=0 planted label=true pairs=2 found=true ok calls=40 tame=6 wild=34 budget=17 cap=13 depth_mean=19.33 max_depth=38 xor=1390463601 rows=31724 cols=30905 deg=4 prep=32323ms elim=3636ms add=8851ms rref=13ms subst=8210ms post=28941ms branch=5ms 86607ms
+n=19 FC WT2 seed=1 uniform label=false pairs=0 found=false ok calls=175 tame=88 wild=87 budget=87 cap=66 depth_mean=17.86 max_depth=19 xor=7439701286 rows=70421 cols=60328 deg=4 prep=177688ms elim=15154ms add=58218ms rref=47ms subst=173277ms post=160027ms branch=54ms 649166ms
+n=19 FC WT2 seed=2 planted label=true pairs=4 found=true ok calls=64 tame=24 wild=40 budget=31 cap=17 depth_mean=17.42 max_depth=38 xor=4523804040 rows=70021 cols=63116 deg=4 prep=44337ms elim=7143ms add=28193ms rref=20ms subst=61314ms post=50826ms branch=14ms 222324ms
