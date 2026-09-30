@@ -112,7 +112,7 @@ def generate(rho: Path, out: Path) -> dict:
             "generator": first["generator"],
             "field_modulus_low_terms": first["field_modulus_low_terms"],
         }
-    out.mkdir(parents=True)
+    out.mkdir(parents=True, exist_ok=True)
     for relative, data in pending:
         path = out / relative
         path.parent.mkdir(parents=True, exist_ok=True)
