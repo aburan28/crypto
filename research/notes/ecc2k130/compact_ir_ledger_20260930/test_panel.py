@@ -20,7 +20,7 @@ class FrozenPanelTest(unittest.TestCase):
 
     def test_callgrind_total_uses_ir_column_and_rejects_partial_profiles(self) -> None:
         cases = (
-            ("events: Dr Ir Dw\nsummary: 2 101 3\ntotals: 4 103 5\n", 103),
+            ("events: Dr Ir Dw\nsummary: 4 103 5\ntotals: 2 101 3\n", 103),
             ("events: Ir\nsummary: 53\n", 53),
         )
         with tempfile.TemporaryDirectory() as directory:
@@ -31,7 +31,8 @@ class FrozenPanelTest(unittest.TestCase):
                 self.assertEqual(replay_ir(path), expected)
             for content in ("events: Dr\nsummary: 4\n",
                             "events: Ir\n", "events: Ir Ir\nsummary: 1 2\n",
-                            "events: Ir Dr\nsummary: 0 1\n"):
+                            "events: Ir Dr\nsummary: 0 1\n",
+                            "events: Ir\nsummary: 100\ntotals: 101\n"):
                 path.write_text(content)
                 with self.assertRaises(AssertionError):
                     parse_ir(path)

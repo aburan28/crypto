@@ -70,9 +70,10 @@ def load_cell(cell_id: str) -> tuple[dict, dict, dict, Path, Path]:
 
 
 def parse_ir(path: Path) -> int:
-    """Read the final Ir total, rejecting partial or wrongly indexed profiles."""
+    """Use Callgrind's whole-run summary, not a possibly smaller line total."""
     events: list[str] | None = None
-    result: int | None = None
+    summary: int | None = None
+    totals: int | None = None
     with path.open(errors="replace") as stream:
         for line in stream:
             if line.startswith("events:"):
@@ -83,8 +84,14 @@ def parse_ir(path: Path) -> int:
                 values = [int(value) for value in line.split()[1:]]
                 assert len(values) == len(events)
                 value = values[events.index("Ir")]
-                result = value
+                if line.startswith("summary:"):
+                    summary = value
+                else:
+                    totals = value
+    result = summary if summary is not None else totals
     assert result is not None and result > 0, path
+    if summary is not None and totals is not None:
+        assert 0 < totals <= summary, (summary, totals)
     return result
 
 
@@ -216,7 +223,8 @@ def run(cell_id: str, frozen_root: Path, batch: Path, rho: Path, materialization
                        str(cell["L"]), str(spec["seed"])]
         callgrind = prefix.with_suffix(".callgrind.out")
         command = ([
-            "valgrind", "--tool=callgrind", "--collect-atstart=yes",
+            "valgrind", "--tool=callgrind", "--instr-atstart=yes",
+            "--collect-atstart=yes",
             "--cache-sim=no", "--branch-sim=no", "--error-exitcode=97",
             f"--callgrind-out-file={callgrind}", *program,
         ] if backend == "callgrind" else program)

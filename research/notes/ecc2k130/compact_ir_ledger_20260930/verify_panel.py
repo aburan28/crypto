@@ -33,7 +33,8 @@ TARGET_IDENTITY_KEYS = ("target", "published_q", "recovered_scalar", "group_veri
 def replay_ir(path: Path) -> int:
     """Parse Ir independently of the runner and reject absent totals."""
     events: tuple[str, ...] = ()
-    value: int | None = None
+    summary: int | None = None
+    totals: int | None = None
     with path.open(errors="replace") as stream:
         for line in stream:
             if line.startswith("events:"):
@@ -44,7 +45,14 @@ def replay_ir(path: Path) -> int:
                 counts = tuple(int(token) for token in line.split()[1:])
                 assert len(counts) == len(events)
                 value = counts[events.index("Ir")]
+                if line.startswith("summary:"):
+                    summary = value
+                else:
+                    totals = value
+    value = summary if summary is not None else totals
     assert value is not None and value > 0
+    if summary is not None and totals is not None:
+        assert 0 < totals <= summary
     return value
 
 
