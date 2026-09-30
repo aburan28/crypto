@@ -321,3 +321,26 @@ degree-7 run on this binary.
 
 **Verdict rules unchanged.** Q6, `(10, 5)`, is now the primary cell that can
 be measured here. `(11, 5)` is still reported and not decided on.
+
+## Amendment 2, 2026-09-30: `(11, 5)` is out of reach here too
+
+This is additive. It was written after `(10, 5)` u0's outcome (7) and
+before any other degree-7 outcome. It changes only which cells run, never
+a rule.
+
+- **The measurement behind it.** `(10, 5)` u0 switched to dense after
+  band 7 within the 11,000 MB budget, so at most 375,795 of its 665,817 F5
+  rows survived band 7. Its band-7 rank is therefore about 60–65% of the
+  480,700 band-7 columns. The pre-registration's estimates assumed full
+  rank.
+- **`(11, 5)` at that ratio.** 888,986 F5 rows, about 397k–425k band-7
+  pivots, so 464k–492k survivors over 313,912 columns: **18.2–19.3 GB**.
+  That does not fit this 16 GB machine.
+- **`(13, 5)` at that ratio.** 1,515,487 F5 rows, so about 750k–800k
+  survivors over 499,178 columns: **about 47–50 GB**, against the ≥20.7 GB
+  amendment 1 derived under full rank.
+- **So neither `(11, 5)` nor `(13, 5)` runs here.** Both are reported as
+  not measured (memory). `(11, 5)` needs a host with about 24 GB or more,
+  and `(13, 5)` about 64 GB.
+- **The runner was restarted** with the jobs `10-5-7.u1–u3` only. u1 had
+  run about a minute, and it restarts from the beginning (`queue.log`).

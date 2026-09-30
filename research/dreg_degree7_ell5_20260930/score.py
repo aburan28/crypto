@@ -23,6 +23,8 @@ CELLS = {
 }
 # the committed ℓ = 3 and ℓ = 4 values at each surplus, for the growth column
 BELOW = {-5: ("5 5 5 5", "7 7 6 7"), -4: ("6 6 6 6", "6 7 6 7"), -2: ("6 6 6 6", "—")}
+# Cells amendments 1 and 2 do not run on the 16 GB container.
+NOT_RUN = {"13-5-7": "not measured (memory, amendment 1)", "11-5-7": "not measured (memory, amendment 2)"}
 
 
 def value(outcome):
@@ -62,6 +64,8 @@ def verdict(role, reading):
         return f"{role}: at least two degrees above 6"
     if reading.startswith("split"):
         return f"{role}: split between one and at least two above 6"
+    if reading.startswith("not measured"):
+        return f"{role}: not testable, not measured"
     return f"{role}: {reading}"
 
 
@@ -87,6 +91,8 @@ def score(runs):
             shown.append(fmt(v) if v else json.dumps(got["outcome"]))
             notes.append(f"u{k} draw {got['draw']}: {shown[-1]} ffd {got['ffd']} secs {got['secs']:.0f}")
         reading = cell_reading(vals)
+        if not vals and cell in NOT_RUN:
+            reading = NOT_RUN[cell]
         table.append((cell, surplus, role, " ".join(shown), reading, notes))
     print("| cell | S | ℓ = 3 | ℓ = 4 | ℓ = 5 at degree 7 | reading | verdict |")
     print("|---|--:|---|---|---|---|---|")
