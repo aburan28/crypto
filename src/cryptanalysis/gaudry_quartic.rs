@@ -422,7 +422,7 @@ impl Curve4 {
     /// `S₄(x₃, x₄, x₅, Y)` as a polynomial in `Y`, of degree ≤ 4:
     /// `Res_Z(S₃(x₃, x₄, Z), S₃(x₅, Y, Z))`, with the resultant of two
     /// quadratics `(a₂b₀ − a₀b₂)² − (a₂b₁ − a₁b₂)(a₁b₀ − a₀b₁)`.
-    fn s4_in_last(&self, x3: &E4, x4: &E4, x5: &E4) -> Vec<E4> {
+    pub(crate) fn s4_in_last(&self, x3: &E4, x4: &E4, x5: &E4) -> Vec<E4> {
         let f = &self.f;
         let [a0, a1, a2] = self.s3_in_last(x3, x4);
         let (a, b) = (&self.a, &self.b);
@@ -473,7 +473,7 @@ impl Curve4 {
 // ── The symmetrised S₅, by interpolation ──────────────────────────────────
 
 /// Monomials `e₁^a e₂^b e₃^c e₄^d` of total degree `≤ d`.
-fn exponents4(d: u8) -> Vec<[u8; 4]> {
+pub(crate) fn exponents4(d: u8) -> Vec<[u8; 4]> {
     let mut v = Vec::new();
     for a in 0..=d {
         for b in 0..=(d - a) {
@@ -1448,7 +1448,7 @@ pub fn generate_instance4(p: u64, seed: u64) -> Instance4 {
 
 /// `x(P_i + s·P_j) ↦ (i, j, s, y)` over the base, built once per curve.
 pub struct PairTable {
-    map: HashMap<E4, Vec<(u32, u32, i8, E4)>>,
+    pub(crate) map: HashMap<E4, Vec<(u32, u32, i8, E4)>>,
 }
 
 pub fn pair_table(curve: &Curve4, base: &[Pt4]) -> PairTable {

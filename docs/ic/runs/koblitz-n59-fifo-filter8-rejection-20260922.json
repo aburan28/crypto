@@ -1,0 +1,248 @@
+{
+  "candidate": {
+    "baseline_filter_bytes": 536870912,
+    "baseline_nominal_bits_per_pair": 4,
+    "candidate_filter_bytes": 1073741824,
+    "candidate_nominal_bits_per_pair": 8,
+    "mathematical_output_changed": false,
+    "selected_fifo_bucket_prefetch": true
+  },
+  "claim_boundary": "Finite same-target selected-stack filter-density retest. Doubling witnessed filter memory regresses build, query, CPU and RSS, so Stage 149 remains selected. No SOTA claim.",
+  "date": "2026-09-22",
+  "decision": {
+    "full_workflow_followup": false,
+    "reason": "candidate median unit wall regresses 6.06 percent, unit CPU 1.55 percent, build wall 12.71 percent and median RSS about 3.6 percent",
+    "selected_stage149_unchanged": true,
+    "status": "rejected_wall_cpu_memory_regression"
+  },
+  "factor_base": {
+    "factor_base_logs_known_by_construction": false,
+    "kind": "cofactor_projected",
+    "points": 32934,
+    "projected_columns": 16344,
+    "target_subgroup_enumerated": false
+  },
+  "gates": {
+    "all_seven_gates_passed": false,
+    "full_cost_vs_rho": "unchanged_failed_large_margin",
+    "independent_external_reproduction": "missing",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_f4": "missing"
+  },
+  "instance": {
+    "collection_m": 3,
+    "collection_window": 1024,
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "uniform_summands_scanned": 102400000,
+    "uniform_trials": 100000,
+    "uniform_units": 1
+  },
+  "operation": "koblitz_n59_fifo_filter8_rejection",
+  "panel": {
+    "comparison": {
+      "pair_table_build_cpu_seconds": {
+        "baseline_median": 138.6038255,
+        "candidate_median": 140.8640565,
+        "candidate_over_baseline": 1.0163071328792437,
+        "change_fraction": 0.016307132879243687
+      },
+      "pair_table_build_wall_seconds": {
+        "baseline_median": 16.090469729,
+        "candidate_median": 18.134880479,
+        "candidate_over_baseline": 1.1270572447189247,
+        "change_fraction": 0.12705724471892457
+      },
+      "peak_rss_bytes": {
+        "baseline_median": 9729105920.0,
+        "candidate_median": 10080403456.0,
+        "candidate_over_baseline": 1.0361078951024516,
+        "change_fraction": 0.036107895102451514
+      },
+      "relation_unit_cpu_seconds": {
+        "baseline_median": 22.804185000000018,
+        "candidate_median": 23.158461000000003,
+        "candidate_over_baseline": 1.0155355694579737,
+        "change_fraction": 0.015535569457973799
+      },
+      "relation_unit_wall_seconds": {
+        "baseline_median": 2.497083563,
+        "candidate_median": 2.6483915625,
+        "candidate_over_baseline": 1.060593887101727,
+        "change_fraction": 0.060593887101726994
+      },
+      "relations": {
+        "baseline_median": 2157.0,
+        "candidate_median": 2157.0,
+        "candidate_over_baseline": 1.0,
+        "change_fraction": 0.0
+      },
+      "whole_cpu_seconds": {
+        "baseline_median": 167.42727100000002,
+        "candidate_median": 170.03137149999998,
+        "candidate_over_baseline": 1.0155536220858545,
+        "change_fraction": 0.01555362208585457
+      },
+      "whole_wall_seconds": {
+        "baseline_median": 21.8420991045,
+        "candidate_median": 24.075943562,
+        "candidate_over_baseline": 1.1022724256864018,
+        "change_fraction": 0.10227242568640174
+      }
+    },
+    "exact_relation_equality": true,
+    "medians": {
+      "baseline": {
+        "pair_table_build_cpu_seconds": 138.6038255,
+        "pair_table_build_wall_seconds": 16.090469729,
+        "peak_rss_bytes": 9729105920.0,
+        "relation_unit_cpu_seconds": 22.804185000000018,
+        "relation_unit_wall_seconds": 2.497083563,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 167.42727100000002,
+        "whole_wall_seconds": 21.8420991045
+      },
+      "candidate": {
+        "pair_table_build_cpu_seconds": 140.8640565,
+        "pair_table_build_wall_seconds": 18.134880479,
+        "peak_rss_bytes": 10080403456.0,
+        "relation_unit_cpu_seconds": 23.158461000000003,
+        "relation_unit_wall_seconds": 2.6483915625,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 170.03137149999998,
+        "whole_wall_seconds": 24.075943562
+      }
+    },
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+    "runs": [
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "label": "a1",
+        "pair_table_build_cpu_seconds": 140.908839,
+        "pair_table_build_wall_seconds": 16.625508917,
+        "peak_rss_bytes": 9381838848,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.670750000000027,
+        "relation_unit_wall_seconds": 2.705600042,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 170.649247,
+        "whole_wall_seconds": 22.609007084
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "b8db886babc7f50b17a68f8aa4674a0ea26af55b280f3e5ea3fdce8aae2ed735",
+        "label": "b1",
+        "pair_table_build_cpu_seconds": 140.838347,
+        "pair_table_build_wall_seconds": 17.6722175,
+        "peak_rss_bytes": 10082385920,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.313988999999992,
+        "relation_unit_wall_seconds": 2.7467885,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 170.110129,
+        "whole_wall_seconds": 23.697037708
+      },
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "label": "a2",
+        "pair_table_build_cpu_seconds": 136.298812,
+        "pair_table_build_wall_seconds": 15.555430541,
+        "peak_rss_bytes": 10076372992,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 21.93762000000001,
+        "relation_unit_wall_seconds": 2.288567084,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 164.205295,
+        "whole_wall_seconds": 21.075191125
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "b8db886babc7f50b17a68f8aa4674a0ea26af55b280f3e5ea3fdce8aae2ed735",
+        "label": "b2",
+        "pair_table_build_cpu_seconds": 140.889766,
+        "pair_table_build_wall_seconds": 18.597543458,
+        "peak_rss_bytes": 10078420992,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.002933000000013,
+        "relation_unit_wall_seconds": 2.549994625,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 169.95261399999998,
+        "whole_wall_seconds": 24.454849416
+      }
+    ]
+  },
+  "params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-prefetch64-pilot-public-59001.json",
+    "sha256": "f837bf3ca5be26da1431c759e00309e2ac637445da2256d92a9719574a84c288"
+  },
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-bucket-bits27-rejection-20260922.json",
+    "sha256": "82c3f36f99d9f2030391d57d8ad956ab23a2bf06a43a8b5bc8d5b2d0ba8cb52a"
+  },
+  "process_accounting": {
+    "retained_peak_rss_bytes": 10082385920,
+    "retained_processes": 4,
+    "retained_processes_detail": [
+      {
+        "core_seconds": 170.649247,
+        "label": "a1",
+        "peak_rss_bytes": 9381838848,
+        "status": "stopped",
+        "wall_seconds": 22.609007084
+      },
+      {
+        "core_seconds": 170.110129,
+        "label": "b1",
+        "peak_rss_bytes": 10082385920,
+        "status": "stopped",
+        "wall_seconds": 23.697037708
+      },
+      {
+        "core_seconds": 164.205295,
+        "label": "a2",
+        "peak_rss_bytes": 10076372992,
+        "status": "stopped",
+        "wall_seconds": 21.075191125
+      },
+      {
+        "core_seconds": 169.95261399999998,
+        "label": "b2",
+        "peak_rss_bytes": 10078420992,
+        "status": "stopped",
+        "wall_seconds": 24.454849416
+      }
+    ],
+    "retained_sequential_wall_seconds": 91.836085333,
+    "retained_total_core_seconds": 674.917285,
+    "scope": "four complete one-unit stop-after-collect workflows; compilation excluded"
+  },
+  "schema_version": 1,
+  "software": {
+    "baseline_binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+    "candidate_binary_blake3": "b8db886babc7f50b17a68f8aa4674a0ea26af55b280f3e5ea3fdce8aae2ed735",
+    "selected_source_stack_head": "1a2c776a"
+  },
+  "source_patch": {
+    "path": "docs/ic/patches/koblitz-n59-fifo-filter8-rejected-20260922.patch",
+    "sha256": "cbf6226e4a623455258b91776fa5880c809e755ecd09ce003ca5ed3af31ba672",
+    "status": "archived_rejected_not_applied_to_selected_source"
+  },
+  "validation": [
+    "all four arms emit exactly 2157 relations with one canonical hash",
+    "candidate passes compact/full exact-answer test",
+    "source-pinned binaries distinguish candidate and Stage-149 baseline",
+    "rejected patch applies cleanly to Stage-157 selected source"
+  ]
+}

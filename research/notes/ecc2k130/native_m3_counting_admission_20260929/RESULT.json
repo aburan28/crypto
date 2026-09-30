@@ -1,0 +1,67 @@
+{
+  "classification": "PASS_BOUND",
+  "domain": "ECC2K130-NATIVE-M3-COUNTING-ADMISSION-20260929-v1",
+  "fixed_budget_balanced_m3_slots": [
+    26590,
+    26590,
+    26590
+  ],
+  "fixed_budget_expected_supported_probes_upper": "18799877179000000000/680564733841876926932320129493409985129",
+  "fixed_budget_hit_probability_upper": "18799877179000/680564733841876926932320129493409985129",
+  "fixed_budget_ordered_tuple_ceiling": "18799877179000",
+  "fixed_budget_probability_any_hit_upper": "18799877179000000000/680564733841876926932320129493409985129",
+  "fixed_total_physical_slot_choice_budget": 79770,
+  "frozen_manifest_sha256": "a62c9c14ff27212322b567dab79e32dc2a6a1d4858cb7b64f27ac9407e60d5b0",
+  "illustrative_target_probes": 1000000,
+  "input_sha256": {
+    "research/ecc2k130_leaf_native_m3_gate_20260926/admission.py": "2a03a30c337d5dfb4d0d30ddff102293db6c8461ea1520138ef268ea5c8f0ece",
+    "research/notes/ecc2k130/m10_export_capacity_20260925/inputs/balanced_m10_result.json": "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
+    "research/notes/ecc2k130/native_m3_chain_20260929/chain.py": "03b3e97b74e35a100ab60a7c5be0cea09108405e185cccda74c6942a94b21944"
+  },
+  "m10_balanced_physical_points_per_slot": 7977,
+  "native_m3_combined_physical_maximum": 87960930222077,
+  "native_m3_implicit_slot_dimensions": [
+    44,
+    44,
+    43
+  ],
+  "native_m3_slot_physical_maxima": [
+    35184372088831,
+    35184372088831,
+    17592186044415
+  ],
+  "parent_main_commit": "ce79b74645c8e564ec361918dfb72bd990cc56d6",
+  "protocol_commit": "bfa61af45cab9c05e10c85117369e9fb3005fb22",
+  "rows_per_probe_max": 1,
+  "scope": "exact necessary counts; no observed factor counts, PDP yield, rank or cost",
+  "subgroup_order": "680564733841876926932320129493409985129",
+  "target_distribution": "uniform_marginal_one_q_coset",
+  "thresholds": [
+    {
+      "balanced_slot_sizes": [
+        1895060794380,
+        1895060794379,
+        1895060794379
+      ],
+      "conditional_minimum_projected_signed_orbit_log_classes": 5424792351,
+      "maximum_tuples_at_minimum_total": "6805647338419874178600933998837297580",
+      "maximum_tuples_at_previous_total": "6805647338416282923186541632319301939",
+      "minimum_total_physical_slot_choices": 5685182383138,
+      "support_ceiling_threshold": "1/100",
+      "tuple_threshold": "6805647338418769269323201294934099852"
+    },
+    {
+      "balanced_slot_sizes": [
+        6981463658332,
+        6981463658332,
+        6981463658331
+      ],
+      "conditional_minimum_projected_signed_orbit_log_classes": 19985105893,
+      "maximum_tuples_at_minimum_total": "340282366920954193258368692430065748144",
+      "maximum_tuples_at_previous_total": "340282366920905452423556088978696384252",
+      "minimum_total_physical_slot_choices": 20944390974995,
+      "support_ceiling_threshold": "1/2",
+      "tuple_threshold": "340282366920938463466160064746704992565"
+    }
+  ]
+}
