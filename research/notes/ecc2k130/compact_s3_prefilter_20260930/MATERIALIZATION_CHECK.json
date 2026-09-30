@@ -1,0 +1,40 @@
+{
+  "freezes": [
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json"
+  ],
+  "live": [
+    "Cargo.toml",
+    "docs/ic/calibration.json",
+    "examples/koblitz_orbit_dlp_s3_batch.rs",
+    "examples/koblitz_rho_batch_ks_v2_n61.rs",
+    "examples/koblitz_rho_batch_ks_v3.rs",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py",
+    "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/PROTOCOL.md",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/prepare.py",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/run_panel.py",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/verify_panel.py",
+    "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py",
+    "src/cryptanalysis/koblitz_fast.rs",
+    "src/cryptanalysis/semaev_decomp.rs",
+    "src/lib.rs"
+  ],
+  "pinned_files": 20,
+  "replayed_from_snapshot": {
+    ".github/workflows/compact-s3-prefilter.yml": {
+      "frozen_sha256": "29b154568920e1e5aeec0f1d86f63629a43dfd4624a0dfa2bea1d4f1c075893c",
+      "live_sha256": "0a684956150ddafaeb46723c9386a0e718b0bc0a5089228fe39d8790c5a045c6"
+    },
+    "src/cryptanalysis/koblitz_index_calculus.rs": {
+      "frozen_sha256": "22b3601a082e706abf709a9798823a21d6748f84b47647cdfe6a7fcc1c73382c",
+      "live_sha256": "4a2eb45a59244d4c098628b001a7e19bd59f8b3f97a2f696f720b409fc440584"
+    },
+    "tools/isolated_bench.py": {
+      "frozen_sha256": "4575860a5da9a6a6e997b91fc173ac515a2497290c0e830301c83fa3b712c05c",
+      "live_sha256": "ff59e53fd5566078ad493c8be0d06168699c4fd194bc881d99df19fa20e007ef"
+    }
+  },
+  "schema": "compact-frozen-source-materialization-v1"
+}

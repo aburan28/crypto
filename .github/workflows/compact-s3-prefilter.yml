@@ -42,22 +42,37 @@ jobs:
             research/notes/ecc2k130/compact_s3_batch_20260929/fixtures
             research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/fixtures
             research/notes/ecc2k130/compact_s3_prefilter_20260930
+            research/notes/ecc2k130/compact_frozen_source_replay_20260929
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             tools/isolated_bench.py
             .github/workflows/compact-s3-prefilter.yml
+      - name: Check fail-closed frozen-source materialization
+        run: python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+      - name: Materialize the measured source tree from committed snapshots
+        run: |
+          mkdir -p "${{ runner.temp }}/compact-s3-prefilter"
+          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+            --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
+            --dest "${{ runner.temp }}/compact-s3-prefilter/frozen-src" \
+            --receipt "${{ runner.temp }}/compact-s3-prefilter/materialization.json"
       - name: Python syntax and frozen-source check
+        working-directory: ${{ runner.temp }}/compact-s3-prefilter/frozen-src
         run: |
           python3 -m py_compile research/notes/ecc2k130/compact_s3_prefilter_20260930/*.py
           python3 -c 'import sys; sys.path.insert(0, "research/notes/ecc2k130/compact_s3_prefilter_20260930"); from verify_panel import freeze; freeze()'
       - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+        working-directory: ${{ runner.temp }}/compact-s3-prefilter/frozen-src
       - name: Build and test the exact evaluation source
+        working-directory: ${{ runner.temp }}/compact-s3-prefilter/frozen-src
         run: |
           cargo build --release --locked --example koblitz_orbit_dlp_s3_batch --example koblitz_rho_batch_ks_v3
           cargo test --release --locked --example koblitz_orbit_dlp_s3_batch
       - name: Run pinned cold arms on new point-only Q
         id: run
+        working-directory: ${{ runner.temp }}/compact-s3-prefilter/frozen-src
         env:
           RAYON_NUM_THREADS: '1'
+          GIT_DIR: ${{ github.workspace }}/.git
         run: |
           set -euo pipefail
           CPU=$(python3 -c 'import os; print(sorted(os.sched_getaffinity(0))[-1])')
@@ -94,10 +109,12 @@ jobs:
           fi
           if [ -d "$RUN_DIR" ]; then
             cp "$PARENT"/n${{ matrix.n }}_preflight_*.log "$RUN_DIR/"
+            cp "$PARENT/materialization.json" "$RUN_DIR/"
           fi
           exit "$STATUS"
       - name: Independently replay every rank and logarithm
         if: always() && steps.run.outcome != 'skipped'
+        working-directory: ${{ runner.temp }}/compact-s3-prefilter/frozen-src
         run: |
           python3 research/notes/ecc2k130/compact_s3_prefilter_20260930/verify_panel.py \
             --n ${{ matrix.n }} \
