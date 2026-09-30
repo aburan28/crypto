@@ -3301,6 +3301,22 @@ fn sparse_dense_finish() -> bool {
     *ON.get_or_init(|| std::env::var("KIC_SPARSE_DENSE_FINISH").as_deref() == Ok("1"))
 }
 
+/// Memory budget for the dense finish's block (`KIC_SPARSE_DENSE_BUDGET_MB`),
+/// which moves the switch past the leading band when the block would not
+/// fit; see
+/// [`crate::cryptanalysis::sparse_macaulay::eliminate_high_columns_dense_finish_budgeted`].
+/// Unset keeps the switch after the leading band.  It never changes an
+/// outcome, only where the sparse pass stops.
+fn sparse_dense_budget_bytes() -> Option<u64> {
+    static BUDGET: std::sync::OnceLock<Option<u64>> = std::sync::OnceLock::new();
+    *BUDGET.get_or_init(|| {
+        std::env::var("KIC_SPARSE_DENSE_BUDGET_MB")
+            .ok()
+            .and_then(|v| v.parse::<u64>().ok())
+            .map(|mb| mb * 1024 * 1024)
+    })
+}
+
 /// [`solving_profile`] via structured sparse elimination.
 ///
 /// Identical semantics, different representation: the high-degree
@@ -3318,8 +3334,8 @@ pub fn solving_profile_sparse(
     degree: u32,
 ) -> Option<SolvingProfile> {
     use crate::cryptanalysis::sparse_macaulay::{
-        eliminate_high_columns, eliminate_high_columns_dense_finish, leading_band_end,
-        low_column_start,
+        band_ends, eliminate_high_columns, eliminate_high_columns_dense_finish,
+        eliminate_high_columns_dense_finish_budgeted, leading_band_end, low_column_start,
     };
 
     if degree < system_degree(polys) {
@@ -3342,7 +3358,21 @@ pub fn solving_profile_sparse(
 
     let low_start = low_column_start(&cols);
     let elim = if sparse_dense_finish() {
-        eliminate_high_columns_dense_finish(rows, n_cols, low_start, leading_band_end(&cols))
+        match sparse_dense_budget_bytes() {
+            Some(budget) => eliminate_high_columns_dense_finish_budgeted(
+                rows,
+                n_cols,
+                low_start,
+                &band_ends(&cols),
+                budget,
+            ),
+            None => eliminate_high_columns_dense_finish(
+                rows,
+                n_cols,
+                low_start,
+                leading_band_end(&cols),
+            ),
+        }
     } else {
         eliminate_high_columns(rows, n_cols, low_start)
     };
@@ -3422,11 +3452,24 @@ pub fn solving_degree(
     n_vars: usize,
     d_max: u32,
 ) -> (Option<u32>, Vec<SolvingProfile>) {
+    solving_degree_from(polys, n_vars, 1, d_max)
+}
+
+/// [`solving_degree`], scanning from `d_min` (or the input degree, if
+/// higher) instead of from the input degree.  For a system already known
+/// not to resolve below `d_min`, the answer is the same and the lower
+/// degrees are not rebuilt; the caller vouches for that knowledge.
+pub fn solving_degree_from(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    d_min: u32,
+    d_max: u32,
+) -> (Option<u32>, Vec<SolvingProfile>) {
     let mut solved = None;
     let mut profiles = Vec::new();
     // Below the system's own degree the Macaulay matrix drops equations
     // rather than relaxing them; see [`solving_profile`].
-    for d in system_degree(polys).max(1)..=d_max {
+    for d in system_degree(polys).max(1).max(d_min)..=d_max {
         let prof = match solving_profile_sparse(polys, n_vars, d) {
             Some(p) => p,
             None => break,
