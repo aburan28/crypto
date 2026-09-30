@@ -33,6 +33,8 @@ def main() -> None:
     for r in A["sizes"]:
         sp, own, dsc = r["speedup"], r["speedup_own_unit"], r["descent_speedup_stage_diagnostic"]
         share = r["descent_share_before"] * 100
+        # v2's noise floor, the baseline against a byte-identical copy (M1 only).
+        aa = (r.get("noise_floor_aa") or {}).get("time_ratio")
         if mode == "html":
             curve = f"<code>K_{r['a']}/GF(2<sup>{r['n']}</sup>)</code> &middot; r = 2<sup>{r['log2_r']:.1f}</sup>"
             print(
@@ -43,7 +45,9 @@ def main() -> None:
                 f"<td class=\"n\"><b>{times(sp['geomean'], 3)}</b><br><small>{ci(sp, 3)}</small></td>"
                 f"<td class=\"n\">{times(own['geomean'], 3)}</td>"
                 f"<td class=\"n\">{times(dsc['geomean'], 2)}<br><small>{ci(dsc, 2)}</small></td>"
-                f"<td class=\"n\">{share:.0f}</td></tr>"
+                f"<td class=\"n\">{share:.0f}</td>"
+                + (f"<td class=\"n\">{times(aa['geomean'], 3)}<br><small>{ci(aa, 3)}</small></td>" if aa else "")
+                + "</tr>"
             )
         else:
             print(
@@ -54,6 +58,7 @@ def main() -> None:
                 f"| {times(own['geomean'], 3, False)} "
                 f"| {times(dsc['geomean'], 2, False)} {ci(dsc, 2)} "
                 f"| {share:.0f}% |"
+                + (f" {times(aa['geomean'], 3, False)} {ci(aa, 3)} |" if aa else "")
             )
 
 

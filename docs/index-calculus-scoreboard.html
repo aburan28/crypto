@@ -350,7 +350,7 @@
       workflow&rsquo;s constructions once per base, with every count unchanged. That makes the whole
       pipeline 1.04&ndash;2.25&times; faster and takes the same row to 4.3&times;. On current main, which
       later rounds made 12&ndash;33% cheaper at the top, ledger &sect;22 (2026-09-30) cut the descent&rsquo;s
-      fixed cost per target: 1.30&ndash;1.39&times; at the small end, and the row reads 3.6&times;. The first two were
+      fixed cost per target: 1.35&ndash;1.39&times; at the small end in isolated runs, and the row reads 3.6&times;. The first two were
       3.55&times; and 16.0&times; until the reference was matched (ledger &sect;18, 2026-09-23): the
       prime and binary rows had been priced against a walk that used no automorphism and paid
       most of its <code>S</code> in set-up, and against the negation-map walk the contract asks for
@@ -413,10 +413,10 @@
       (<a href="#koblitz-exponent-20260926">&sect;20</a>), it does not, and building its constructions once
       (<a href="#koblitz-constructions-20260926">&sect;21</a>) and cutting its descent&rsquo;s fixed cost
       (<a href="#koblitz-descent-20260930">&sect;22</a>) does not change that. The thread reads
-      7.1&ndash;14.9&times; <small>was 9.7&ndash;20.9&times;</small> below 2<sup>25</sup>, where its
+      7.0&ndash;14.9&times; <small>was 9.7&ndash;20.9&times;</small> below 2<sup>25</sup>, where its
       descent, which no number of targets amortises, still costs more per target than batch rho does. Its
-      least ratio is 3.61&times; <small>was 4.28&times;</small> at 2<sup>39</sup>. Above that the ratio rises
-      again. On current main the declared fit gives <code>r</code><sup>0.143</sup>, 95% [&minus;0.03, 0.32]:
+      least ratio is 3.62&times; <small>was 4.28&times;</small> at 2<sup>39</sup>. Above that the ratio rises
+      again. On current main the declared fit gives <code>r</code><sup>0.137</sup>, 95% [&minus;0.06, 0.33]:
       the rise is not resolved from zero, and it is not separated from 1/6. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
       no such table and its asymptotics are the question this ladder cannot reach. It is also not
       blanket across problems: on hyperelliptic Jacobians at genus 2, 3 and 4 index calculus measures
@@ -456,7 +456,7 @@
         <p>Meet in the middle, m = 2, prime field, folded table, walked targets and a base at the
           family optimum (222 signed points against the rule&rsquo;s 512); every phase counted; against
           the matched negation-map rho. It read 3.55&times; against the plain walk (3.63&times; in Round 4).
-          Amortised over 32 targets, the Koblitz collection thread is 3.61&times; batch rho at best, every
+          Amortised over 32 targets, the Koblitz collection thread is 3.62&times; batch rho at best, every
           phase priced, on current main with its descent&rsquo;s fixed cost cut (&sect;22). It was
           4.28&times; in &sect;21, 4.86&times; in &sect;20 and 6.5&times; in &sect;19. One target alone,
           &sect;20 measured it at 22.6&times; there.</p>
@@ -472,7 +472,7 @@
           measured at <code>r<sup>[0.13, 0.19]</sup></code> across three certified cells spanning
           1100&times; in <code>r</code>, each at its own swept base &mdash; against the tournament
           worker&rsquo;s rho, which the triple-counted control found unmatched. Against batch rho, the
-          Koblitz collection thread fits <code>r</code><sup>0.143</sup> [&minus;0.03, 0.32] over its four
+          Koblitz collection thread fits <code>r</code><sup>0.137</sup> [&minus;0.06, 0.33] over its four
           largest sizes on current main (&sect;22). &sect;21 read <code>r</code><sup>0.165</sup>
           [0.010, 0.320] and &sect;20 <code>r</code><sup>0.137</sup> [&minus;0.10, 0.37].</p>
       </div>
@@ -482,7 +482,7 @@
   <aside class="gain-overview" aria-labelledby="gain-title">
     <div><span class="chip">engineering</span><h2 id="gain-title">Latest measured improvements</h2>
     <p><a href="#genus-crossover">Hyperelliptic sparse solve</a>: the solve&rsquo;s charge is <b>5.1&times; lower</b> (median; 2.0&ndash;18.2&times;) with identical relations, oracle counts and logarithms on all 18 rows and 11 isolated sweeps. Engineering: the arithmetic exponent is unchanged. Pricing it honestly withdraws the genus-3 exponent claim below.</p>
-    <p><a href="#koblitz-descent-20260930">Koblitz descent, fixed cost</a>: the whole pipeline is <b>1.30&ndash;1.39&times; faster</b> at the three smallest sizes and 1.04&ndash;1.07&times; from 2<sup>32</sup> to 2<sup>39</sup>, in paired time with all 180 pairs identical. Two declared targets were missed, to a host stall and to a between-binary layout effect in untouched code.</p>
+    <p><a href="#koblitz-descent-20260930">Koblitz descent, fixed cost</a>: the whole pipeline is <b>1.35&ndash;1.39&times; faster</b> at the three smallest sizes and 1.17&times; at 2<sup>27.8</sup>, in paired time from isolated runs, with all 186 pairs identical. From 2<sup>32</sup> up it moves 0.99&ndash;1.06&times;. The no-regression target was missed at 2<sup>47.2</sup> by 1.4%, which is inside that size&rsquo;s A/A band and in code the change does not touch.</p>
     <p><a href="#koblitz-constructions-20260926">Koblitz constructions, built once</a>: the whole pipeline is <b>1.04&ndash;2.25&times; faster</b> at all nine sizes, every phase priced. All 180 of 180 pairs have identical counts and logarithms. Still no crossing with batch rho: 4.28&times; at best.</p>
     <p><b>10.7% fewer field products</b> per specialization (1,342 → 1,199; p = 67, seed = 11).</p>
     <p>Timing diagnostics: <b>55.4% less specialization time</b> and <b>1.2% less setup time</b>. Full-DLP confirmation remains inconclusive.</p>
@@ -855,7 +855,7 @@
       <span><b>The unit moved.</b> The candidate&rsquo;s batched addition runs at 0.99&ndash;1.11&times; the baseline&rsquo;s speed, from each process&rsquo;s first measurement on. Yet its machine code is identical and identically aligned. So the untouched phases take the same time (0.99&ndash;1.02&times;) but cost up to 11% more units in the candidate, and there the declared speedups understate the change. In wall-clock time the same pairs read 1.05&ndash;2.34&times; (secondary; ledger &sect;21.4).</span>
       <span><b>The top end, refitted.</b> &sect;20&rsquo;s declared fit over the four largest sizes now gives <code>r</code><sup>0.165</sup>, 95% [0.010, 0.320]. In &sect;20 it gave <code>r</code><sup>0.137</sup> [&minus;0.10, 0.37]. The interval now excludes zero, so the ratio does rise at the top. It still cannot separate 1/6 from the model&rsquo;s 0.141.</span>
       <span><span class="chip">engineering</span> No count moved, and S fell 1.04&ndash;2.25&times;. The least ratio is 4.28&times; [3.94, 4.63] at 2<sup>39</sup> <small>was 4.86&times;</small>, and there is still no crossing. The before column is this round&rsquo;s own baseline, which re-measured &sect;20&rsquo;s S at 0.89&ndash;1.00&times; on this host. So only the matched speedup is the change.</span>
-      <span><b>superseded</b>: &sect;22 re-priced current main, whose n59 stack made the top end 12&ndash;33% cheaper with every count unchanged. It then cut the descent&rsquo;s fixed cost per target (<a href="#koblitz-descent-20260930">the round</a>). The least ratio reads 3.61&times; at 2<sup>39</sup> <small>was 4.28&times;</small>, and below 2<sup>25</sup> the thread reads 7.1&ndash;14.9&times; <small>was 9.7&ndash;20.9&times;</small>. The top-end fit is back to an interval that includes zero.</span>
+      <span><b>superseded</b>: &sect;22 re-priced current main, whose n59 stack made the top end 12&ndash;33% cheaper with every count unchanged. It then cut the descent&rsquo;s fixed cost per target (<a href="#koblitz-descent-20260930">the round</a>). The least ratio reads 3.62&times; at 2<sup>39</sup> <small>was 4.28&times;</small>, and below 2<sup>25</sup> the thread reads 7.0&ndash;14.9&times; <small>was 9.7&ndash;20.9&times;</small>. The top-end fit is back to an interval that includes zero.</span>
     </div>
   </div>
 
@@ -868,40 +868,45 @@
         The candidate batches the walk starts off precomputed stride multiples, and does the relation&rsquo;s
         arithmetic modulo r in machine words. It also makes the solver&rsquo;s own check in single words.
         Every walk, trial and logarithm is unchanged. Declared before any candidate code, and measured on
-        &sect;20&rsquo;s 36 frozen files against current main: five rounds interleaved on one thread, 180
-        pairs, counts and logarithms pinned. Because the unit moves between binaries (&sect;21.4), the
-        declared speedup puts both arms at one unit, the paired ratio of time. Frozen source:
-        <code>research/ic_descent_20260930/</code> (<code>analysis.json</code> for every figure here).</p>
+        &sect;20&rsquo;s 36 frozen files against current main: five rounds interleaved on one thread, counts
+        and logarithms pinned in all 186 pairs. Every timed process ran through
+        <code>tools/isolated_bench.py</code> (AGENTS.md &sect;10). One of 481 was contended and was run
+        again, and none failed. A first run pinned with <code>taskset</code> alone is kept, but it is not
+        evidence. Because the unit moves between binaries (&sect;21.4), the declared speedup puts both arms
+        at one unit: the paired ratio of time. Frozen source: <code>research/ic_descent_20260930/</code>
+        (<code>analysis-isolated.json</code> for every figure here).</p>
     </div>
     <div class="table-scroll"><table>
       <caption>S per target at k = 32, both columns in the baseline binary&rsquo;s unit. <b>Was</b> is
         current main, this round&rsquo;s baseline. The ratio is against &sect;20&rsquo;s batch rho on the same
         32 targets, with an interval over four sets. <b>Speedup</b>: paired time, baseline over candidate,
-        the geometric mean of 20 pairs with its 95% interval. <b>Own unit</b>: the same pairs, each process
-        in its own unit. <b>Descent</b>: that phase alone, and the descent&rsquo;s share of S before
-        &mdash; stage diagnostics.</caption>
+        the geometric mean of 20 clean pairs with its 95% interval. <b>Own unit</b>: the same pairs, each
+        process in its own unit. <b>Descent</b>: that phase alone, and the descent&rsquo;s share of S before
+        &mdash; stage diagnostics. <b>A/A</b>: the baseline against a byte-identical copy of itself,
+        M1, five pairs &mdash; the noise floor.</caption>
       <thead><tr><th scope="col">Curve</th><th scope="col" class="n">S, index calculus</th>
         <th scope="col" class="n">ratio to batch rho</th><th scope="col" class="n">speedup</th>
         <th scope="col" class="n">own unit</th><th scope="col" class="n">descent</th>
-        <th scope="col" class="n">descent %</th></tr></thead>
+        <th scope="col" class="n">descent %</th><th scope="col" class="n">A/A</th></tr></thead>
       <tbody>
-        <tr><td><code>K_1/GF(2<sup>19</sup>)</code> &middot; r = 2<sup>18.0</sup></td><td class="n">4.884 <small>was 6.768</small></td><td class="n"><b>14.93&times;</b> <small>was 20.69&times;</small><br><small>[14.04, 15.84]</small></td><td class="n"><b>1.386&times;</b><br><small>[1.346, 1.427]</small></td><td class="n">1.556&times;</td><td class="n">3.23&times;<br><small>[3.13, 3.33]</small></td><td class="n">43</td></tr>
-        <tr><td><code>K_1/GF(2<sup>23</sup>)</code> &middot; r = 2<sup>22.0</sup></td><td class="n">1.455 <small>was 1.996</small></td><td class="n"><b>7.10&times;</b> <small>was 9.74&times;</small><br><small>[4.43, 10.53]</small></td><td class="n"><b>1.372&times;</b><br><small>[1.344, 1.401]</small></td><td class="n">1.558&times;</td><td class="n">2.89&times;<br><small>[2.80, 2.97]</small></td><td class="n">44</td></tr>
-        <tr><td><code>K_1/GF(2<sup>45</sup>)</code> &middot; r = 2<sup>24.8</sup></td><td class="n">0.891 <small>was 1.161</small></td><td class="n"><b>7.48&times;</b> <small>was 9.75&times;</small><br><small>[6.91, 8.09]</small></td><td class="n"><b>1.303&times;</b><br><small>[1.266, 1.340]</small></td><td class="n">1.378&times;</td><td class="n">2.86&times;<br><small>[2.76, 2.97]</small></td><td class="n">38</td></tr>
-        <tr><td><code>K_0/GF(2<sup>37</sup>)</code> &middot; r = 2<sup>27.8</sup></td><td class="n">0.525 <small>was 0.577</small></td><td class="n"><b>5.70&times;</b> <small>was 6.25&times;</small><br><small>[3.42, 7.90]</small></td><td class="n"><b>1.127&times;</b><br><small>[0.942, 1.348]</small></td><td class="n">1.128&times;</td><td class="n">1.66&times;<br><small>[1.59, 1.72]</small></td><td class="n">44</td></tr>
-        <tr><td><code>K_1/GF(2<sup>43</sup>)</code> &middot; r = 2<sup>32.1</sup></td><td class="n">0.327 <small>was 0.350</small></td><td class="n"><b>4.91&times;</b> <small>was 5.26&times;</small><br><small>[4.15, 5.71]</small></td><td class="n"><b>1.071&times;</b><br><small>[1.061, 1.081]</small></td><td class="n">1.130&times;</td><td class="n">1.20&times;<br><small>[1.18, 1.22]</small></td><td class="n">42</td></tr>
-        <tr><td><code>K_1/GF(2<sup>47</sup>)</code> &middot; r = 2<sup>36.6</sup></td><td class="n">0.225 <small>was 0.235</small></td><td class="n"><b>3.73&times;</b> <small>was 3.90&times;</small><br><small>[3.36, 4.13]</small></td><td class="n"><b>1.046&times;</b><br><small>[1.031, 1.061]</small></td><td class="n">1.087&times;</td><td class="n">1.08&times;<br><small>[1.06, 1.09]</small></td><td class="n">34</td></tr>
-        <tr><td><code>K_0/GF(2<sup>41</sup>)</code> &middot; r = 2<sup>39.0</sup></td><td class="n">0.240 <small>was 0.249</small></td><td class="n"><b>3.61&times;</b> <small>was 3.75&times;</small><br><small>[3.36, 3.87]</small></td><td class="n"><b>1.038&times;</b><br><small>[1.010, 1.067]</small></td><td class="n">1.023&times;</td><td class="n">1.08&times;<br><small>[1.04, 1.12]</small></td><td class="n">21</td></tr>
-        <tr><td><code>K_0/GF(2<sup>53</sup>)</code> &middot; r = 2<sup>44.3</sup></td><td class="n">0.272 <small>was 0.265</small></td><td class="n"><b>5.35&times;</b> <small>was 5.21&times;</small><br><small>[3.78, 7.16]</small></td><td class="n"><b>0.974&times;</b><br><small>[0.952, 0.996]</small></td><td class="n">1.060&times;</td><td class="n">1.01&times;<br><small>[0.97, 1.05]</small></td><td class="n">8</td></tr>
-        <tr><td><code>K_0/GF(2<sup>61</sup>)</code> &middot; r = 2<sup>47.2</sup></td><td class="n">0.488 <small>was 0.488</small></td><td class="n"><b>9.19&times;</b> <small>was 9.19&times;</small><br><small>[7.90, 10.57]</small></td><td class="n"><b>1.001&times;</b><br><small>[0.992, 1.010]</small></td><td class="n">1.021&times;</td><td class="n">1.02&times;<br><small>[1.00, 1.05]</small></td><td class="n">9</td></tr>
+        <tr><td><code>K_1/GF(2<sup>19</sup>)</code> &middot; r = 2<sup>18.0</sup></td><td class="n">4.873 <small>was 6.783</small></td><td class="n"><b>14.90&times;</b> <small>was 20.74&times;</small><br><small>[13.78, 16.05]</small></td><td class="n"><b>1.392&times;</b><br><small>[1.376, 1.409]</small></td><td class="n">1.555&times;</td><td class="n">3.22&times;<br><small>[3.17, 3.28]</small></td><td class="n">42</td><td class="n">1.026&times;<br><small>[0.997, 1.056]</small></td></tr>
+        <tr><td><code>K_1/GF(2<sup>23</sup>)</code> &middot; r = 2<sup>22.0</sup></td><td class="n">1.432 <small>was 1.977</small></td><td class="n"><b>6.99&times;</b> <small>was 9.64&times;</small><br><small>[4.44, 10.27]</small></td><td class="n"><b>1.380&times;</b><br><small>[1.366, 1.394]</small></td><td class="n">1.527&times;</td><td class="n">2.87&times;<br><small>[2.82, 2.92]</small></td><td class="n">44</td><td class="n">1.013&times;<br><small>[0.990, 1.036]</small></td></tr>
+        <tr><td><code>K_1/GF(2<sup>45</sup>)</code> &middot; r = 2<sup>24.8</sup></td><td class="n">0.856 <small>was 1.152</small></td><td class="n"><b>7.19&times;</b> <small>was 9.67&times;</small><br><small>[6.41, 8.02]</small></td><td class="n"><b>1.345&times;</b><br><small>[1.321, 1.369]</small></td><td class="n">1.411&times;</td><td class="n">2.92&times;<br><small>[2.85, 2.98]</small></td><td class="n">38</td><td class="n">1.008&times;<br><small>[0.983, 1.034]</small></td></tr>
+        <tr><td><code>K_0/GF(2<sup>37</sup>)</code> &middot; r = 2<sup>27.8</sup></td><td class="n">0.485 <small>was 0.569</small></td><td class="n"><b>5.26&times;</b> <small>was 6.16&times;</small><br><small>[4.40, 6.15]</small></td><td class="n"><b>1.173&times;</b><br><small>[1.132, 1.215]</small></td><td class="n">1.206&times;</td><td class="n">1.59&times;<br><small>[1.51, 1.68]</small></td><td class="n">44</td><td class="n">1.001&times;<br><small>[0.960, 1.044]</small></td></tr>
+        <tr><td><code>K_1/GF(2<sup>43</sup>)</code> &middot; r = 2<sup>32.1</sup></td><td class="n">0.325 <small>was 0.344</small></td><td class="n"><b>4.88&times;</b> <small>was 5.16&times;</small><br><small>[4.16, 5.62]</small></td><td class="n"><b>1.060&times;</b><br><small>[1.043, 1.078]</small></td><td class="n">1.103&times;</td><td class="n">1.18&times;<br><small>[1.15, 1.21]</small></td><td class="n">42</td><td class="n">0.998&times;<br><small>[0.961, 1.037]</small></td></tr>
+        <tr><td><code>K_1/GF(2<sup>47</sup>)</code> &middot; r = 2<sup>36.6</sup></td><td class="n">0.234 <small>was 0.234</small></td><td class="n"><b>3.89&times;</b> <small>was 3.88&times;</small><br><small>[3.46, 4.35]</small></td><td class="n"><b>0.999&times;</b><br><small>[0.956, 1.043]</small></td><td class="n">1.073&times;</td><td class="n">1.06&times;<br><small>[1.02, 1.10]</small></td><td class="n">34</td><td class="n">0.988&times;<br><small>[0.907, 1.077]</small></td></tr>
+        <tr><td><code>K_0/GF(2<sup>41</sup>)</code> &middot; r = 2<sup>39.0</sup></td><td class="n">0.241 <small>was 0.250</small></td><td class="n"><b>3.62&times;</b> <small>was 3.75&times;</small><br><small>[3.28, 3.97]</small></td><td class="n"><b>1.037&times;</b><br><small>[1.005, 1.070]</small></td><td class="n">1.021&times;</td><td class="n">1.09&times;<br><small>[1.03, 1.16]</small></td><td class="n">21</td><td class="n">0.979&times;<br><small>[0.838, 1.144]</small></td></tr>
+        <tr><td><code>K_0/GF(2<sup>53</sup>)</code> &middot; r = 2<sup>44.3</sup></td><td class="n">0.261 <small>was 0.263</small></td><td class="n"><b>5.11&times;</b> <small>was 5.15&times;</small><br><small>[3.82, 6.60]</small></td><td class="n"><b>1.008&times;</b><br><small>[0.986, 1.030]</small></td><td class="n">1.060&times;</td><td class="n">1.05&times;<br><small>[1.00, 1.10]</small></td><td class="n">8</td><td class="n">0.973&times;<br><small>[0.892, 1.062]</small></td></tr>
+        <tr><td><code>K_0/GF(2<sup>61</sup>)</code> &middot; r = 2<sup>47.2</sup></td><td class="n">0.488 <small>was 0.481</small></td><td class="n"><b>9.20&times;</b> <small>was 9.07&times;</small><br><small>[8.24, 10.24]</small></td><td class="n"><b>0.986&times;</b><br><small>[0.973, 0.999]</small></td><td class="n">1.040&times;</td><td class="n">0.98&times;<br><small>[0.95, 1.01]</small></td><td class="n">9</td><td class="n">1.009&times;<br><small>[0.985, 1.033]</small></td></tr>
       </tbody>
     </table></div>
     <div class="legend" style="padding-top:0">
-      <span><b>Declared and graded.</b> Identical outputs: met in all 180 pairs, with Control 1 holding on the candidate at all nine sizes. The relation and its check fell 4.4&ndash;7.7&times;, against a target of 3&times;. The descent per target fell 2.8&ndash;3.3&times; at the three smallest sizes, against 1.8&times;. A speedup interval above 1 at the four smallest sizes: <b>not met</b> at 2<sup>27.8</sup>, where one candidate process stalled on the host (three repetitions of 7.5, 36 and 122 ms). The declared spread rule checks only the baseline and did not fire; without that pair the interval is [1.16, 1.29], post hoc. No regression: <b>not met</b> at 2<sup>44.3</sup>, 0.974 [0.952, 0.996]. There the descent, the only phase changed, is 1.01&times;, and build and collection, which the change does not touch, run 3% slower in the candidate binary.</span>
-      <span><b>Current main, re-priced.</b> The baseline arm is current main. Its counts and logarithms equal &sect;21&rsquo;s in all 36 files, but the n59 stack that has landed since made the top end 12&ndash;33% cheaper. At 2<sup>39</sup> main reads 3.75&times; batch rho, against &sect;21&rsquo;s 4.28&times;; at 2<sup>44.3</sup> 5.21&times;, against 7.77&times;. Those gains are other rounds&rsquo;. Batch rho on the same binary counts exactly as in &sect;20.</span>
-      <span><b>The unit moved again, the other way.</b> The candidate&rsquo;s batched addition runs 0.88&ndash;1.01&times; as fast as the baseline&rsquo;s, where in &sect;21 it ran up to 11% faster. So in each process&rsquo;s own unit the candidate looks up to 14% better than its time says. The declared figure is the time.</span>
-      <span><b>The top end, refitted on current main.</b> &sect;20&rsquo;s declared fit over the four largest sizes gives <code>r</code><sup>0.143</sup>, 95% [&minus;0.03, 0.32]. Main&rsquo;s cheaper top end flattened it: &sect;21&rsquo;s interval excluded zero, this one does not.</span>
-      <span><span class="chip">engineering</span> No count moved. S fell 1.30&ndash;1.39&times; at the three smallest sizes and 1.04&ndash;1.07&times; from 2<sup>32</sup> to 2<sup>39</sup>. The least ratio is 3.61&times; [3.36, 3.87] at 2<sup>39</sup> <small>was 4.28&times;</small>, most of it main&rsquo;s. There is still no crossing.</span>
+      <span><b>Declared and graded, on the isolated run.</b> Identical outputs: met in all 186 pairs, with Control 1 holding at all nine sizes. The relation and its check fell 4.7&ndash;7.4&times;, against a target of 3&times;. The descent per target fell 2.4&ndash;3.1&times; at the three smallest sizes, against 1.8&times;. A speedup interval above 1 at the four smallest sizes: met, with lower bounds 1.13&ndash;1.38. No regression: <b>not met</b> at 2<sup>47.2</sup>, which reads 0.986 [0.973, 0.999]. Every phase there runs 1.4&ndash;2% slower in the candidate binary, including collection, which is 78% of the time and untouched by the change. The A/A there reads 1.009 [0.985, 1.033], so the shortfall is inside the baseline&rsquo;s spread against a copy of itself. Three threads at 2<sup>39</sup> read 0.984 [0.915, 1.059]: no regression.</span>
+      <span><b>Isolation.</b> AGENTS.md &sect;10 makes the isolation tool mandatory for every timed number. The first run was pinned with <code>taskset</code> alone, so it was redone under a protocol amendment declared before the rerun. Below 2<sup>28</sup> the two runs agree within their intervals, and the isolated ones are narrower; the first run&rsquo;s miss at 2<sup>27.8</sup> was one stalled process. Above 2<sup>32</sup> both read within about 3% of 1, and the size reading below 1 moved from 2<sup>44.3</sup> to 2<sup>47.2</sup>.</span>
+      <span><b>Current main, re-priced.</b> The baseline arm is current main. Its counts and logarithms equal &sect;21&rsquo;s in all 36 files, but the n59 stack that has landed since made the top end 12&ndash;34% cheaper. At 2<sup>39</sup> main reads 3.75&times; batch rho, against &sect;21&rsquo;s 4.28&times;; at 2<sup>44.3</sup> it reads 5.15&times;, against 7.77&times;. Those gains are other rounds&rsquo;. Batch rho on the same binary counts exactly as in &sect;20.</span>
+      <span><b>The unit moved again.</b> The candidate&rsquo;s batched addition runs 0.89&ndash;0.97&times; as fast as the baseline&rsquo;s at eight of nine sizes, with its code untouched; in &sect;21 it ran up to 11% faster. So in each process&rsquo;s own unit the candidate looks up to 12% better than its time says. The declared figure is the time.</span>
+      <span><b>The top end, refitted on current main.</b> &sect;20&rsquo;s declared fit over the four largest sizes gives <code>r</code><sup>0.137</sup>, 95% [&minus;0.06, 0.33]. Main&rsquo;s cheaper top end flattened it: &sect;21&rsquo;s interval excluded zero, and this one does not.</span>
+      <span><span class="chip">engineering</span> No count moved. S fell 1.35&ndash;1.39&times; at the three smallest sizes and 1.17&times; at 2<sup>27.8</sup>; from 2<sup>32</sup> up it moved by 0.99&ndash;1.06&times;. The least ratio is 3.62&times; [3.28, 3.97] at 2<sup>39</sup> <small>was 4.28&times;</small>, most of the fall main&rsquo;s. There is still no crossing. The K_0 rows are E_0, the ECC2K-130 family, and the K_1 rows are not. There is no m&thinsp;=&thinsp;83 run, so nothing here speaks to ECC2K-130 at high fidelity (AGENTS.md &sect;8a).</span>
     </div>
   </div>
 

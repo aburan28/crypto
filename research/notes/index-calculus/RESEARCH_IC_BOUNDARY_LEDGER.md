@@ -5292,158 +5292,208 @@ part weighs.
     floor;
   - the thread check at three threads, since the tool will not reserve
     all four CPUs.
-- **Until v2's figures replace them,** §22.2–§22.10 report v1's, which
-  are not evidence under §10.
+- **v2's figures are the evidence** in §22.2–§22.11. v1's are kept in
+  §22.7 for comparison, and are not evidence under §10.
 
 ### 22.2 What ran
 
-Everything is in `research/ic_descent_20260930/`, run in the declared
-order on one host of §20's class (`host.json`).
+Everything is in `research/ic_descent_20260930/`, run twice on one host of
+§20's class.
 
-- **Binaries.**
-  - The baseline `ic` is `57e7ce3a`'s, sha256 `07e527a4…`.
-  - The candidate is `20ff4765`'s, built from a clean tree, sha256
-    `d390908a…`.
-  - Both probe binaries are kept beside them.
-- **The main comparison.** §20's 36 files, hash-checked first. Five
-  rounds of baseline then candidate per file: 360 `ic price` processes,
-  on one Rayon thread under `taskset -c 2`, with nothing else running.
-- **Controls.**
-  - Control 1 on the candidate at every size's `M1`.
-  - Batch rho re-priced on the baseline at `n = 41`, `M1`.
-- **The probe** on both libraries at six sizes, with the log tables
-  committed at the declaration.
-- **Four threads** at `n = 41`, `M1`: three ABAB rounds.
+- **Binaries.** The same in both runs:
+  - the baseline `ic` is `57e7ce3a`'s, sha256 `07e527a4…`;
+  - the candidate is `20ff4765`'s, built from a clean tree, sha256
+    `d390908a…`;
+  - both probe binaries are kept beside them.
+- **v1, `runs/`,** was pinned with `taskset -c 2` alone. That is not
+  evidence under AGENTS.md §10. Its figures are kept in §22.7 and
+  `analysis.json`.
+- **v2, `runs-isolated/`,** ran every timed process through
+  `tools/isolated_bench.py` (sha256 `ff59e53f…`), in the declared order:
+  - **A/A:** the baseline against a byte-identical copy of itself, `M1` at
+    all nine sizes, five rounds: 90 processes.
+  - **The main comparison:** §20's 36 files, hash-checked first, five
+    rounds of baseline then candidate: 372 processes.
+  - **Rho:** batch rho re-priced on the baseline at `n = 41`, `M1`.
+  - **Threads:** three threads on CPUs 1–3 at `n = 41`, `M1`, three ABAB
+    rounds.
+  - **The probe** on both libraries at six sizes, with the log tables
+    committed at the declaration.
+  - Control 1 compares counts only, so v1's stands.
 
-No set's A/A spread exceeded 1.25 (the highest was 1.16), so the spread
-rule never fired.
+**The isolation's own record** (`runs-isolated/`):
+
+- **Contention.** 481 processes ran isolated, and the tool marked one
+  contended: the baseline of `K_1/GF(2^19)`, `M1`, round 5. The agent's
+  own process used 0.31 CPU-seconds during its 1.87 s. That pair is kept,
+  excluded from the figures, and its slot was run again clean.
+- **Failures.** None failed, and every slot has a clean pair.
+- **The spread rule** fired once, on `K_0/GF(2^41)`, `M3`, at 1.256. Its
+  five rounds were rerun with double the repetitions, and that set's
+  figure uses them, as declared.
+- **Refused starts.** The tool refused 319 starts, each retried after
+  15 s:
+  - 302 on CPU pressure that the benchmark before had left (PSI
+    `some avg10` above 5, with nothing else running);
+  - 17 on the agent's own activity.
+- **One restart.** The harness was stopped once between two processes,
+  to leave a two-hour task limit, and then resumed. No process was cut.
 
 ### 22.3 Current `main`, re-priced
 
 This round's baseline arm is `main` at `57e7ce3a`. Its counts and
 recovered logarithms equal §21's candidate's in all 36 files. The n59
 stack that landed on `main` since §21 changed only speed, and its speed
-moved the top end:
+moved the top end (v2's baseline arm):
 
 | curve | `S`, §21 after | `S`, `main` | change | ratio to batch rho, §21 → `main` |
 |:--|--:|--:|--:|--:|
-| `K_1/GF(2^19)` | 6.819 | 6.768 | 0.99× | 20.85× → 20.69× |
-| `K_1/GF(2^23)` | 1.983 | 1.996 | 1.01× | 9.68× → 9.74× |
-| `K_1/GF(2^45)` | 1.182 | 1.161 | 0.98× | 9.93× → 9.75× |
-| `K_0/GF(2^37)` | 0.582 | 0.577 | 0.99× | 6.31× → 6.25× |
-| `K_1/GF(2^43)` | 0.368 | 0.350 | 0.95× | 5.53× → 5.26× |
-| `K_1/GF(2^47)` | 0.267 | 0.235 | 0.88× | 4.44× → 3.90× |
-| `K_0/GF(2^41)` | 0.285 | 0.249 | 0.88× | 4.28× → 3.75× |
-| `K_0/GF(2^53)` | 0.396 | 0.265 | 0.67× | 7.77× → 5.21× |
-| `K_0/GF(2^61)` | 0.644 | 0.488 | 0.76× | 12.12× → 9.19× |
+| `K_1/GF(2^19)` | 6.819 | 6.783 | 0.99× | 20.85× → 20.74× |
+| `K_1/GF(2^23)` | 1.983 | 1.977 | 1.00× | 9.68× → 9.64× |
+| `K_1/GF(2^45)` | 1.182 | 1.152 | 0.97× | 9.93× → 9.67× |
+| `K_0/GF(2^37)` | 0.582 | 0.569 | 0.98× | 6.31× → 6.16× |
+| `K_1/GF(2^43)` | 0.368 | 0.344 | 0.93× | 5.53× → 5.16× |
+| `K_1/GF(2^47)` | 0.267 | 0.234 | 0.87× | 4.44× → 3.88× |
+| `K_0/GF(2^41)` | 0.285 | 0.250 | 0.88× | 4.28× → 3.75× |
+| `K_0/GF(2^53)` | 0.396 | 0.263 | 0.66× | 7.77× → 5.15× |
+| `K_0/GF(2^61)` | 0.644 | 0.481 | 0.75× | 12.12× → 9.07× |
 
 - **Below `2^32`** nothing moved beyond the run-to-run spread.
-- **From `2^36.6` up**, where build and collection are most of `S`,
-  `main` is 12–33% cheaper.
+- **From `2^32`**, where build and collection are most of `S`, `main`
+  is 7% cheaper, and from `2^36.6` up 12–34% cheaper.
 - These are other rounds' gains, measured here, not this round's.
-- Batch rho on the same binary counts exactly as in §20. It prices at
-  0.0595 a target against §20's 0.0610 at `n = 41`.
+- **Batch rho** on the same binary counts exactly as in §20. Isolated,
+  it prices at 0.0600 a target against §20's 0.0610 at `n = 41`.
 
 ### 22.4 The table
 
 **How to read it.**
 
 - `S` is per target at `k = 32`.
-- The primary speedup is the paired ratio of total time: both arms at one
-  unit, as declared.
-- "After" is `S` before over that speedup, so both columns are in the
+- **The primary speedup** is the paired ratio of total time, with both
+  arms at one unit, as declared. It uses clean pairs only.
+- **"After"** is `S` before over that speedup, so both columns are in the
   baseline binary's unit.
-- The ratio is against §20's batch rho on the same 32 targets, with an
+- **The ratio** is against §20's batch rho on the same 32 targets, with an
   interval over the four sets.
-- "Own unit" is the same pairs, each process in its own unit.
-- The descent column is a stage diagnostic, and so is its share, the
+- **"Own unit"** is the same pairs, each process in its own unit.
+- **The descent column** is a stage diagnostic, and so is its share, the
   descent's share of the baseline's `S`.
+- **"A/A"** is the baseline against a byte-identical copy of itself,
+  `M1`, five pairs. It is the noise floor for the speedup beside it.
 
-| curve | log₂ r | `S`, before → after | ratio to batch rho | speedup [95%] | own unit | descent [95%] | descent share |
-|:--|--:|--:|--:|--:|--:|--:|--:|
-| `K_1/GF(2^19)` | 18.0 | 6.768 → 4.884 | 20.69× → **14.93×** [14.04, 15.84] | **1.386×** [1.346, 1.427] | 1.556× | 3.23× [3.13, 3.33] | 43% |
-| `K_1/GF(2^23)` | 22.0 | 1.996 → 1.455 | 9.74× → **7.10×** [4.43, 10.53] | **1.372×** [1.344, 1.401] | 1.558× | 2.89× [2.80, 2.97] | 44% |
-| `K_1/GF(2^45)` | 24.8 | 1.161 → 0.891 | 9.75× → **7.48×** [6.91, 8.09] | **1.303×** [1.266, 1.340] | 1.378× | 2.86× [2.76, 2.97] | 38% |
-| `K_0/GF(2^37)` | 27.8 | 0.577 → 0.525 | 6.25× → **5.70×** [3.42, 7.90] | **1.127×** [0.942, 1.348] | 1.128× | 1.66× [1.59, 1.72] | 44% |
-| `K_1/GF(2^43)` | 32.1 | 0.350 → 0.327 | 5.26× → **4.91×** [4.15, 5.71] | **1.071×** [1.061, 1.081] | 1.130× | 1.20× [1.18, 1.22] | 42% |
-| `K_1/GF(2^47)` | 36.6 | 0.235 → 0.225 | 3.90× → **3.73×** [3.36, 4.13] | **1.046×** [1.031, 1.061] | 1.087× | 1.08× [1.06, 1.09] | 34% |
-| `K_0/GF(2^41)` | 39.0 | 0.249 → 0.240 | 3.75× → **3.61×** [3.36, 3.87] | **1.038×** [1.010, 1.067] | 1.023× | 1.08× [1.04, 1.12] | 21% |
-| `K_0/GF(2^53)` | 44.3 | 0.265 → 0.272 | 5.21× → **5.35×** [3.78, 7.16] | **0.974×** [0.952, 0.996] | 1.060× | 1.01× [0.97, 1.05] | 8% |
-| `K_0/GF(2^61)` | 47.2 | 0.488 → 0.488 | 9.19× → **9.19×** [7.90, 10.57] | **1.001×** [0.992, 1.010] | 1.021× | 1.02× [1.00, 1.05] | 9% |
+| curve | log₂ r | `S`, before → after | ratio to batch rho | speedup [95%] | own unit | descent [95%] | descent share | A/A [95%] |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| `K_1/GF(2^19)` | 18.0 | 6.783 → 4.873 | 20.74× → **14.90×** [13.78, 16.05] | **1.392×** [1.376, 1.409] | 1.555× | 3.22× [3.17, 3.28] | 42% | 1.026× [0.997, 1.056] |
+| `K_1/GF(2^23)` | 22.0 | 1.977 → 1.432 | 9.64× → **6.99×** [4.44, 10.27] | **1.380×** [1.366, 1.394] | 1.527× | 2.87× [2.82, 2.92] | 44% | 1.013× [0.990, 1.036] |
+| `K_1/GF(2^45)` | 24.8 | 1.152 → 0.856 | 9.67× → **7.19×** [6.41, 8.02] | **1.345×** [1.321, 1.369] | 1.411× | 2.92× [2.85, 2.98] | 38% | 1.008× [0.983, 1.034] |
+| `K_0/GF(2^37)` | 27.8 | 0.569 → 0.485 | 6.16× → **5.26×** [4.40, 6.15] | **1.173×** [1.132, 1.215] | 1.206× | 1.59× [1.51, 1.68] | 44% | 1.001× [0.960, 1.044] |
+| `K_1/GF(2^43)` | 32.1 | 0.344 → 0.325 | 5.16× → **4.88×** [4.16, 5.62] | **1.060×** [1.043, 1.078] | 1.103× | 1.18× [1.15, 1.21] | 42% | 0.998× [0.961, 1.037] |
+| `K_1/GF(2^47)` | 36.6 | 0.234 → 0.234 | 3.88× → **3.89×** [3.46, 4.35] | **0.999×** [0.956, 1.043] | 1.073× | 1.06× [1.02, 1.10] | 34% | 0.988× [0.907, 1.077] |
+| `K_0/GF(2^41)` | 39.0 | 0.250 → 0.241 | 3.75× → **3.62×** [3.28, 3.97] | **1.037×** [1.005, 1.070] | 1.021× | 1.09× [1.03, 1.16] | 21% | 0.979× [0.838, 1.144] |
+| `K_0/GF(2^53)` | 44.3 | 0.263 → 0.261 | 5.15× → **5.11×** [3.82, 6.60] | **1.008×** [0.986, 1.030] | 1.060× | 1.05× [1.00, 1.10] | 8% | 0.973× [0.892, 1.062] |
+| `K_0/GF(2^61)` | 47.2 | 0.481 → 0.488 | 9.07× → **9.20×** [8.24, 10.24] | **0.986×** [0.973, 0.999] | 1.040× | 0.98× [0.95, 1.01] | 9% | 1.009× [0.985, 1.033] |
 
-**Where the change pays.** The descent falls 2.9–3.2× at the three
-smallest sizes, and the whole pipeline gets 1.30–1.39× faster there.
-Above `2^32`, where a target needs thousands of probes, its fixed part is
-a few percent of the descent and the gain shrinks to 1.04–1.07×.
+**Where the change pays.**
+- **At the three smallest sizes** the descent falls 2.9–3.2×, and the
+  whole pipeline gets 1.35–1.39× faster.
+- **At `2^27.8`** it gets 1.17× faster.
+- **From `2^32` up** a target needs thousands of probes, and the fixed
+  part is a few percent of the descent. The speedup reads 1.06× at
+  `2^32.1`. Above that it reads 0.99–1.04×, each inside its size's A/A
+  interval.
 
-**The probe, before and after** (both on this host, same log tables).
-Units per target:
+**The probe, before and after** (isolated, with the same log tables).
+Units per target, each process in its own unit:
 
 | `M1` | descent | relation + check | of which relation | walk and lookups |
 |:--|--:|--:|--:|--:|
-| `K_1/GF(2^19)` | 1,477 → 453 (3.26×) | 530 → 68 (7.75×) | 414 → 11 | 852 → 316 |
-| `K_1/GF(2^23)` | 1,851 → 656 (2.82×) | 565 → 82 (6.89×) | 435 → 12 | 1,132 → 478 |
-| `K_1/GF(2^45)` | 2,457 → 887 (2.77×) | 527 → 94 (5.63×) | 373 → 11 | 1,731 → 658 |
-| `K_0/GF(2^37)` | 4,476 → 2,952 (1.52×) | 581 → 109 (5.36×) | 415 → 14 | 3,703 → 2,693 |
-| `K_1/GF(2^43)` | 9,901 → 8,244 (1.20×) | 611 → 133 (4.59×) | 409 → 16 | 9,397 → 8,083 |
-| `K_0/GF(2^41)` | 38,309 → 36,478 (1.05×) | 715 → 163 (4.38×) | 480 → 20 | 37,929 → 36,964 |
+| `K_1/GF(2^19)` | 1,406 → 451 (3.11×) | 503 → 68 (7.38×) | 392 → 11 | 803 → 320 |
+| `K_1/GF(2^23)` | 1,818 → 698 (2.60×) | 566 → 81 (6.96×) | 437 → 12 | 1,111 → 484 |
+| `K_1/GF(2^45)` | 2,405 → 1,008 (2.38×) | 521 → 101 (5.18×) | 369 → 12 | 1,708 → 733 |
+| `K_0/GF(2^37)` | 4,093 → 2,945 (1.39×) | 535 → 106 (5.03×) | 379 → 15 | 3,505 → 2,634 |
+| `K_1/GF(2^43)` | 9,920 → 8,019 (1.24×) | 604 → 128 (4.73×) | 407 → 16 | 9,379 → 7,821 |
+| `K_0/GF(2^41)` | 38,594 → 38,354 (1.01×) | 737 → 151 (4.89×) | 492 → 21 | 37,504 → 38,129 |
 
-The relation assembly falls from 373–480 units to 11–20. The walk start's
-63 additions leave the walk column: 852 → 316 at `n = 19`. The lookups do
-not move (`target_pdp` 117 → 112). Every target's trials are equal
-before and after.
+- **The relation assembly** falls from 369–492 units to 11–21.
+- **The walk start's 63 additions** leave the walk column: 803 → 320 at
+  `n = 19`.
+- **Every target's trials** are equal before and after.
+- **At `2^39` the lookups read 8% slower** in the candidate's own unit
+  (17,387 → 18,808), though their code is untouched. See §22.5.
 
-### 22.5 The unit moved again, the other way
+### 22.5 The unit moved again
 
-In §21 the candidate's unit ran up to 11% faster than the baseline's. In
-this round it runs 0.88–1.01× as fast, slower at eight of the nine sizes.
-The code of the unit is again untouched.
+The code of the unit is untouched in every run below.
 
-The two measures therefore disagree in opposite directions:
+| run | candidate's unit, as fast as the baseline's |
+|:--|:--|
+| §21 | up to 11% faster |
+| §22 v1 | 0.88–1.01× |
+| §22 v2 | 0.89–0.97× at eight of nine sizes, and 1.02× at `2^39` |
 
-- **In each process's own unit** the candidate looks up to 14% better
-  than its paired time says: 1.556× against 1.386× at `2^18`, and 1.060×
-  against 0.974× at `2^44.3`. At `2^39`, where the unit did not shift,
-  it looks 1% worse.
-- **The declared primary**, time at one unit, is the measure §8's "same
-  calibrated unit" asks for. §21.4 is why this round declared it.
+- **In each process's own unit** the candidate therefore looks up to 12%
+  better than its paired time says. It reads 1.555× against 1.392× at
+  `2^18`, and 1.040× against 0.986× at `2^47.2`.
+- **The declared primary** is time at one unit, which is the measure
+  §8's "same calibrated unit" asks for.
 
-### 22.6 The targets, graded
+### 22.6 The targets, graded on v2
 
 1. **Identical outputs: met.**
-   - All 180 pairs agree in counts and recovered logarithms, and every
-     target was verified.
-   - Control 1 holds on the candidate at all nine sizes.
+   - All 186 pairs agree in counts and recovered logarithms, including the
+     retried pair and the doubled rounds. Every target was verified.
+   - Control 1 holds at all nine sizes.
    - The probe's trials agree target by target.
 2. **The relation and its check down at least 3×: met.** It fell
-   4.38–7.75× at every probed size.
+   4.73–7.38× at every probed size.
 3. **The descent per target down at least 1.8× at `n = 19`, `23` and
-   `45`: met.** It fell 3.26×, 2.82× and 2.77×.
-4. **A primary interval above 1 at the four smallest sizes: not met.**
-   - The three smallest pass: 1.346, 1.344 and 1.266 are the lower
-     bounds.
-   - `2^27.8` reads 1.127 [0.942, 1.348]. One candidate process (`M1`,
-     round 4) had a first repetition over 50 ms, so the pricer ran three
-     repetitions instead of fifteen. They took 7.5, 36 and 122 ms against
-     the usual 7.4, and its pair ratio is 0.235.
-   - One baseline process had the same trouble, with its own unit spiking
-     to 222 ns.
-   - The declared spread rule looks only at baseline totals, and did not
-     fire.
-   - *Post hoc, not the declared figure:* without that one pair the 19
-     read 1.224 [1.163, 1.287]. The median of all 20 is 1.195.
+   `45`: met.** It fell 3.11×, 2.60× and 2.38×.
+4. **A primary interval above 1 at the four smallest sizes: met.** The
+   lower bounds are 1.376, 1.366, 1.321 and 1.132.
 5. **No regression: not met.**
-   - At one thread, `2^44.3` reads 0.974 [0.952, 0.996], wholly below 1.
-   - Attribution by phase: the descent, the only phase the change
-     touches, is 1.010× there. Build (0.967×) and collection (0.973×),
-     80% of the time and code this round does not touch, run slower in the
-     candidate binary.
-   - Its unit also runs at 0.935×: the between-binary shift of §22.5, not
-     the change.
-   - At four threads, `n = 41` reads 0.970 [0.872, 1.080] over three
-     pairs, which is not a regression by the declared rule.
+   - **At one thread,** `2^47.2` reads 0.986 [0.973, 0.999]: wholly below
+     1, by 0.001.
+   - **Attribution by phase:** every phase there runs 1.4–2% slower in
+     the candidate. Collection, 78% of the time, reads 0.986×, the build
+     0.98× and the descent 0.981×.
+   - Collection and the build are code this round does not touch. The
+     candidate's unit runs at 0.942× there.
+   - **The A/A** at that size reads 1.009 [0.985, 1.033]. The 1.4%
+     shortfall is inside the spread of the baseline against a copy of
+     itself.
+   - **At three threads,** `n = 41` reads 0.984 [0.915, 1.059] over three
+     pairs. That is not a regression by the declared rule.
 
-### 22.7 Classification
+### 22.7 v1 against v2
+
+v1's figures are not evidence (§22.2). They are kept here because the
+comparison says what isolation changed:
+
+| curve | log₂ r | v1 speedup [95%], not isolated | v2 speedup [95%], isolated | v2 A/A [95%] |
+|:--|--:|--:|--:|--:|
+| `K_1/GF(2^19)` | 18.0 | 1.386× [1.346, 1.427] | **1.392×** [1.376, 1.409] | 1.026× [0.997, 1.056] |
+| `K_1/GF(2^23)` | 22.0 | 1.372× [1.344, 1.401] | **1.380×** [1.366, 1.394] | 1.013× [0.990, 1.036] |
+| `K_1/GF(2^45)` | 24.8 | 1.303× [1.266, 1.340] | **1.345×** [1.321, 1.369] | 1.008× [0.983, 1.034] |
+| `K_0/GF(2^37)` | 27.8 | 1.127× [0.942, 1.348] | **1.173×** [1.132, 1.215] | 1.001× [0.960, 1.044] |
+| `K_1/GF(2^43)` | 32.1 | 1.071× [1.061, 1.081] | **1.060×** [1.043, 1.078] | 0.998× [0.961, 1.037] |
+| `K_1/GF(2^47)` | 36.6 | 1.046× [1.031, 1.061] | **0.999×** [0.956, 1.043] | 0.988× [0.907, 1.077] |
+| `K_0/GF(2^41)` | 39.0 | 1.038× [1.010, 1.067] | **1.037×** [1.005, 1.070] | 0.979× [0.838, 1.144] |
+| `K_0/GF(2^53)` | 44.3 | 0.974× [0.952, 0.996] | **1.008×** [0.986, 1.030] | 0.973× [0.892, 1.062] |
+| `K_0/GF(2^61)` | 47.2 | 1.001× [0.992, 1.010] | **0.986×** [0.973, 0.999] | 1.009× [0.985, 1.033] |
+
+- **Below `2^28`** the two runs agree within their intervals, and v2's
+  intervals are narrower.
+  - v1 missed target 4 at `2^27.8` because of one stalled process. It
+    had three repetitions of 7.5, 36 and 122 ms against the usual 7.4.
+  - Isolated, that size passes.
+- **From `2^32` up** both runs read within about 3% of 1 either way.
+  - The size that reads below 1 moved, from `2^44.3` in v1 (0.974) to
+    `2^47.2` in v2 (0.986).
+  - Both misses are the same thing: code the change does not touch,
+    running slower in the candidate binary.
+
+### 22.8 Classification
 
 **Engineering** (AGENTS.md §3).
 
@@ -5452,9 +5502,9 @@ logarithms, the counting floor and the ratio to it.
 
 **What fell:**
 
-- At the small end `S` fell 1.30–1.39×. Below `2^25` the thread now
-  reads 7.1–14.9× batch rho: `main` read 9.7–20.7×, and §21 9.7–20.9×.
-- At `2^39` the least ratio is 3.61× [3.36, 3.87]: `main` read 3.75×,
+- At the small end `S` fell 1.35–1.39×. Below `2^25` the thread now reads
+  7.0–14.9× batch rho: `main` read 9.6–20.7×, and §21 9.7–20.9×.
+- At `2^39` the least ratio is 3.62× [3.28, 3.97]: `main` read 3.75×,
   §21 4.28× and §20 4.86×. Most of that move is `main`'s n59 stack
   (§22.3). This round adds 1.04×.
 
@@ -5463,48 +5513,67 @@ There is still no crossing.
 **The top end's exponent**, refitted by §20's declared method over the
 four largest sizes:
 
-- **after:** `r^0.143` [−0.029, 0.315];
-- **`main`:** `r^0.135` [−0.048, 0.318];
+- **after:** `r^0.137` [−0.059, 0.332];
+- **`main`:** `r^0.133` [−0.047, 0.314];
 - **§21:** `r^0.165` [0.010, 0.320].
 
 `main`'s cheaper top end flattens the fit. The interval includes zero
 again, so §21's "resolved from zero" does not survive on current `main`.
 The fit separates neither `1/6` nor 0.141 from zero.
 
-### 22.8 What does not count
+### 22.9 What does not count
 
-- **The descent column and the probe's parts** are stage diagnostics.
-- **The own-unit column** mixes two binaries' units (§22.5).
-- **The post-hoc figure at `2^27.8`** is not the declared figure. The
-  declared target fails.
-- **The four-thread check** shows no regression on three pairs. It shows
-  no gain either.
+- **v1's figures:** they were pinned with `taskset` alone (AGENTS.md §10).
+- **Stage diagnostics:** the descent column and the probe's parts, each
+  in its own process's unit.
+- **The own-unit column,** which mixes two binaries' units (§22.5).
+- **The three-thread check.** It shows no regression on three pairs, and
+  no gain either. It ran at three threads because the isolation tool
+  will not reserve all four CPUs.
+- **Scope, per AGENTS.md §8a and §8b:**
+  - The `K_0` rows are `E_0: y² + xy = x³ + 1`, the ECC2K-130 family.
+    The `K_1` rows are `E_1`, a different Koblitz model.
+  - The largest field is `GF(2^61)`, and there is no `m = 83` run. So
+    this round establishes nothing about ECC2K-130 at high fidelity.
+  - `GF(2^45)` has proper intermediate subfields over `GF(2)`:
+    `GF(2^3)`, `GF(2^5)`, `GF(2^9)` and `GF(2^15)`. The change uses none
+    of them.
+  - The nine curves' EC1 aliases and full curve UIDs are in
+    `curve_ids.json` (docs/curve-identities.md). They are metadata
+    hashes, not certification.
 - **The host class:** one x86-64 container. Nothing is claimed for Arm64,
   GPUs or other hosts.
 
-### 22.9 Reproducing
+### 22.10 Reproducing
 
-    # binaries: research/ic_descent_20260930/README.md
+    # binaries and v1: research/ic_descent_20260930/README.md
     cd research/ic_descent_20260930
-    IC_BASELINE=… IC_CANDIDATE=… PROBE_BASELINE=… PROBE_CANDIDATE=… python3 run.py all
-    python3 analyse.py > analysis.json
-    python3 render_rows.py md          # the table in §22.4
+    IC_ISOLATE=1 IC_RUNS=runs-isolated IC_BASELINE=… IC_BASELINE_COPY=… IC_CANDIDATE=… \
+      PROBE_BASELINE=… PROBE_CANDIDATE=… python3 run.py all
+    IC_RUNS=runs-isolated python3 analyse.py > analysis-isolated.json
+    python3 render_rows.py md analysis-isolated.json      # the table in §22.4
 
-### 22.10 What stays open
+### 22.11 What stays open
 
-- **Layout between binaries.** Two rounds now show a rebuilt binary
-  running code it did not change 3–11% faster or slower.
-  - It cost this round its no-regression target at `2^44.3`.
-  - A comparison of binaries on this host cannot resolve a change
-    smaller than that without a way to hold the layout fixed. Candidates
-    are a placebo rebuild measured as an A/A', one codegen unit, or
-    instruction counts beside the time.
+- **Layout between binaries.** Three runs now show a rebuilt binary
+  running code it did not change 1–11% faster or slower: §21, §22 v1 and
+  §22 v2.
+  - It decided target 5 in both of this round's runs, at a different size
+    each time.
+  - A comparison of binaries on this host cannot resolve a change smaller
+    than that without a way to hold the layout fixed. Candidates are a
+    placebo rebuild measured as an A/A', one codegen unit, or instruction
+    counts beside the time.
+- **The isolation gate and a benchmark's own pressure.** The tool's PSI
+  gate refused most starts once, on pressure the benchmark before had
+  left. Each such start waited 15 s. A gate that waits for PSI to decay,
+  or a longer settle, would cost less.
 - **A symmetric spread rule.** The declared rule checks only baseline
-  totals, so a host stall in a candidate process passed it. A rule on
-  both arms would have rerun `2^27.8`'s `M1`.
-- **The walk and the lookups:** about 1.5 units a probe, now almost all
-  of the descent above `2^32`, near the floor of one batched addition and
-  one lookup.
+  totals. Isolation now catches contention from other processes, but a
+  stall on the virtual machine's host would still pass both.
+- **The walk and the lookups:** about 1.5 units a probe. They are now
+  almost all of the descent above `2^32`, near the floor of one batched
+  addition and one lookup.
 - **Carried from §21.10:** `FieldStructure::new`, the two big-integer
   constructions, a cheaper identity check and the curve's setup.
 - **Carried from §20.10:** the builder's eight-orbit minimum, the build's

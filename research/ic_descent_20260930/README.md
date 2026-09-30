@@ -6,10 +6,14 @@ Declared in [`PROTOCOL.md`](PROTOCOL.md) before any candidate code existed;
 written up in `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`
 §22.
 
-**v1 and v2.** v1's runs (`runs/`) were pinned with `taskset` alone, which
-AGENTS.md §10 does not accept for a timed number. PROTOCOL.md v2 runs the
-timed steps again through `tools/isolated_bench.py`, into `runs-isolated/`.
-v1 is kept as it ran and is not pooled with v2.
+**v1 and v2.**
+- **v1** (`runs/`, `analysis.json`) was pinned with `taskset` alone. AGENTS.md
+  §10 does not accept that for a timed number.
+- **v2** (`runs-isolated/`, `analysis-isolated.json`) ran every timed step
+  again through `tools/isolated_bench.py`, under PROTOCOL.md v2, which was
+  declared before the rerun. v2 is the evidence.
+- v1 is kept as it ran and is never pooled with v2. Ledger §22.7 sets the
+  two side by side.
 
 ## Files
 
@@ -22,15 +26,21 @@ v1 is kept as it ran and is not pooled with v2.
 | `run.py` | the runs, in the declared order; resumable, never overwrites (`IC_ISOLATE=1 IC_RUNS=…` for v2) |
 | `curve_records.json` | the nine curves' exact field and curve records, from `examples/koblitz_curve_records.rs` |
 | `curve_ids.py`, `curve_ids.json` | their EC1 aliases and full curve UIDs (docs/curve-identities.md) |
-| `analyse.py` | every figure the note and the page quote → `analysis.json` |
-| `render_rows.py` | the table rows, rendered from `analysis.json` (`html` or `md`) |
-| `host.json` | host manifest and all four binaries' sha256 |
-| `runs/main/k{a}n{n}/M{j}/r{i}-{baseline,candidate}.price.json` | the 360 main-comparison reports, with stderr |
-| `runs/control1/` | `ic workflow` against `ic price` on the candidate, `M1` at every size |
-| `runs/rho/` | batch rho re-priced on the baseline at `n = 41`, `M1`, against §20's counts |
-| `runs/threads/k0n41-M1/` | four Rayon threads, three ABAB rounds |
-| `runs/probe/` | the descent probe on both libraries, six sizes, same log tables |
-| `runs/run.log` | the run's own log |
+| `analyse.py` | every figure the note and the page quote → `analysis.json` (v1) or, with `IC_RUNS=runs-isolated`, `analysis-isolated.json` (v2) |
+| `analysis-isolated.json` | v2's figures: clean pairs only, the A/A noise floor, and the isolation's accounting |
+| `render_rows.py` | the table rows, rendered from `analysis.json` or `analysis-isolated.json` (`html` or `md`) |
+| `host.json` | v1's host manifest and all four binaries' sha256 |
+| `runs-isolated/` | v2, laid out like `runs/`, each report beside its `*.isolation.jsonl` record |
+| `runs-isolated/host.json` | v2's host manifest: the binaries, the byte-identical copy, the isolation tool's sha256, the SMT siblings |
+| `runs-isolated/aa/` | the A/A: the baseline against its copy, `M1`, nine sizes, five rounds |
+| `runs-isolated/refusals.log` | every start the tool refused, with its reason, and the retry after 15 s |
+| `runs-isolated/run.log` | v2's own log, including its one stop and resume between processes |
+| `runs/main/k{a}n{n}/M{j}/r{i}-{baseline,candidate}.price.json` | v1: the 360 main-comparison reports, with stderr |
+| `runs/control1/` | Control 1, `ic workflow` against `ic price` on the candidate, `M1` at every size; counts only, so it stands for v2 too |
+| `runs/rho/` | v1: batch rho re-priced on the baseline at `n = 41`, `M1`, against §20's counts |
+| `runs/threads/k0n41-M1/` | v1: four Rayon threads, three ABAB rounds (v2: `runs-isolated/threads/k0n41-M1-t3/`, three threads) |
+| `runs/probe/` | v1: the descent probe on both libraries, six sizes, same log tables |
+| `runs/run.log` | v1's own log |
 
 ## The probe
 
@@ -49,9 +59,23 @@ It was built at the declaration commit (the library is `main` at
 
 ## Reproducing the comparison
 
+The binaries, kept outside the tree:
+
     git checkout 57e7ce3a && cargo build --release --bin ic                          # baseline ic
     git checkout f231d7d1 && cargo build --release --example koblitz_descent_prices  # baseline probe
     git checkout 20ff4765 && cargo build --release --bin ic --example koblitz_descent_prices
+    cp <baseline ic> <baseline ic copy>                                               # v2's A/A arm
+
+v2, the evidence:
+
+    cd research/ic_descent_20260930
+    IC_ISOLATE=1 IC_RUNS=runs-isolated IC_BASELINE=… IC_BASELINE_COPY=… IC_CANDIDATE=… \
+      PROBE_BASELINE=… PROBE_CANDIDATE=… python3 run.py all
+    IC_RUNS=runs-isolated python3 analyse.py > analysis-isolated.json
+    python3 render_rows.py md analysis-isolated.json
+
+v1, as it ran:
+
     cd research/ic_descent_20260930
     IC_BASELINE=… IC_CANDIDATE=… PROBE_BASELINE=… PROBE_CANDIDATE=… python3 run.py all
     python3 analyse.py > analysis.json
