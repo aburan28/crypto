@@ -5186,6 +5186,99 @@ same 36 files.
   builder's eight-orbit minimum, the build's price as the table leaves
   cache, and Bailey's walk.
 
+## 22. The descent's fixed cost per target
+
+This takes up one of §21.10's open items, the per-target big-integer
+work, carried from §20.10. It is an engineering round: every count,
+relation and recovered logarithm must come out as it was, and `S` must
+fall.
+
+After §21 the descent is the largest phase at six of nine sizes: 37–45% of
+`S` below `2^37`. It is paid per target, so no number of targets amortises
+it. At those sizes a target needs few probes, so what it pays is the
+descent's fixed cost.
+
+**Current `main` first.** `main` has taken the Koblitz "n59" stack since
+§21, which rewrote much of the pair-table code and touched the collector
+and the log solver. At `n = 19` and `n = 41` it reproduces §21's counts
+and recovered logarithms exactly. This round's baseline is `main`, so
+its baseline arm re-prices the thread on current `main` as well.
+
+### 22.1 Declared before any candidate code or timed comparison
+
+The protocol is `research/ic_descent_20260930/PROTOCOL.md` (v1).
+
+**The probe** was made first, and it is the only measurement that was.
+`examples/koblitz_descent_prices.rs`, on the unmodified library, priced
+each target's descent part by part. It used the log table from an
+`ic workflow` run of the same file, and its trials equal the pricer's at
+every size. In units per target:
+
+| `M1` | trials | descent | walk start | of which 63 additions | relation assembly | recovery check |
+|:--|--:|--:|--:|--:|--:|--:|
+| `K_1/GF(2^19)` | 8.2 | 1,481 | 635 | 549 | 391 | 118 |
+| `K_1/GF(2^23)` | 105.5 | 1,984 | 752 | 658 | 429 | 146 |
+| `K_1/GF(2^45)` | 160.8 | 2,449 | 1,162 | 1,045 | 345 | 155 |
+| `K_0/GF(2^37)` | 1,619 | 4,408 | 1,060 | 918 | 387 | 177 |
+| `K_1/GF(2^43)` | 5,115 | 9,530 | 1,120 | 970 | 371 | 190 |
+| `K_0/GF(2^41)` | 24,134 | 38,789 | 1,156 | 986 | 488 | 210 |
+
+**What the probe shows:**
+
+- **The walk start.** The 64 walks start from three scalar
+  multiplications (21–29 units each) and 63 additions made one at a time,
+  each paying its own inversion. The same 63 points, as one batched
+  addition to precomputed multiples of the stride, cost 78–90 units.
+- **The relation assembly.** The one decomposition found becomes `d` in
+  big-integer arithmetic, at 345–490 units.
+- **The recovery check.** `[d]G = Q` in the general arithmetic costs
+  118–210 units, against 61–117 in single words.
+- **Stepping and lookups** cost about 1.5 units a probe, near their
+  floor. This round leaves them alone.
+
+**The change:**
+
+1. The 63 multiples of the stride are precomputed once per solver. Each
+   target's starts come from one batched addition.
+2. The relation's arithmetic modulo `r` is done in machine words.
+3. The solver's own recovery check is done in single-word arithmetic.
+   The pipeline's final check stays in the general arithmetic, as an
+   independent verification.
+
+Every walk, trial and logarithm is unchanged.
+
+**The comparison.**
+
+- **Binaries:** the baseline is `ic` at `57e7ce3a`, sha256 `07e527a4…`,
+  kept outside the tree.
+- **Inputs:** §20's 36 frozen files.
+- **Runs:** five rounds per file, baseline and candidate interleaved on
+  one thread: 180 pairs, with counts and recovered logarithms pinned.
+- **Controls:** Control 1 on the candidate at every size, and batch rho
+  re-priced on the baseline at `n = 41`.
+- **The probe, after,** at the six sizes above.
+- **Many threads:** a four-thread check at `n = 41`.
+
+**The measure.** §21.4 found the unit itself moving between binaries, so
+the primary speedup converts both arms at one unit: the paired ratio of
+total time. The ratio in each process's own unit is reported beside it.
+
+**Targets:**
+
+1. Identical outputs.
+2. The relation and its check fall at least 3× at every probed size.
+3. The descent per target falls at least 1.8× at `n = 19`, `23` and
+   `45`.
+4. A whole-pipeline speedup whose 95% interval excludes 1, at the four
+   sizes where the fixed part is at least 25% of the descent: `2^18`,
+   `2^22`, `2^24.8` and `2^27.8`.
+5. No regression anywhere, at one thread or at four.
+
+**Stop:** on any mismatch in counts or recovered logarithms.
+
+**Class: engineering.** Counts do not move; `S` falls where the fixed
+part weighs.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
