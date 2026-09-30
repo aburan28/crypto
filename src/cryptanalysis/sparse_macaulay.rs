@@ -72,6 +72,9 @@ pub struct SparseElimination {
     /// Fill-in is the one thing that can make this approach lose to the
     /// dense path, so it is measured rather than assumed.
     pub max_weight: usize,
+    /// Where a dense finish took over (the first column it packed), or
+    /// `None` on the all-sparse path.
+    pub dense_from: Option<usize>,
 }
 
 /// Symmetric difference of two ascending, duplicate-free index lists —
@@ -198,52 +201,119 @@ pub fn eliminate_high_columns(
 /// are a different basis of that space, which is all
 /// [`crate::cryptanalysis::koblitz_groebner::solving_profile_sparse`] reads.
 pub fn eliminate_high_columns_dense_finish(
-    mut rows: Vec<Vec<u32>>,
+    rows: Vec<Vec<u32>>,
     n_cols: usize,
     low_start: usize,
     sparse_until: usize,
 ) -> SparseElimination {
+    sparse_then_dense(rows, n_cols, low_start, &[sparse_until], None)
+}
+
+/// [`eliminate_high_columns_dense_finish`] with the switch point chosen by
+/// memory, not fixed: the degree bands end at `band_ends`, and the sparse
+/// pass stops at the first band end where the survivors, packed as bit rows
+/// over the remaining columns, fit in `budget_bytes`.  It stops at the
+/// linear boundary at the latest.
+///
+/// At degree 6 the leading band leaves a dense block of a few GB and the
+/// first check switches, as before.  At degree 7 the block after the
+/// leading band is several times larger, and staying sparse for one more
+/// band is what makes it fit.  The switch point never changes the row
+/// space, so it never changes an outcome
+/// (`dense_finish_keeps_the_high_rank_and_the_linear_span`,
+/// `budgeted_dense_finish_matches_the_sparse_path`); `dense_from` records
+/// where it happened.
+pub fn eliminate_high_columns_dense_finish_budgeted(
+    rows: Vec<Vec<u32>>,
+    n_cols: usize,
+    low_start: usize,
+    band_ends: &[usize],
+    budget_bytes: u64,
+) -> SparseElimination {
+    sparse_then_dense(rows, n_cols, low_start, band_ends, Some(budget_bytes))
+}
+
+/// The shared engine: eliminate sparsely up to each stop in turn and, at
+/// the first stop that is the last one, or whose dense block fits the
+/// budget, pack the survivors and finish densely.
+fn sparse_then_dense(
+    mut rows: Vec<Vec<u32>>,
+    n_cols: usize,
+    low_start: usize,
+    stops: &[usize],
+    budget_bytes: Option<u64>,
+) -> SparseElimination {
     use crate::cryptanalysis::koblitz_groebner::echelon_f2_counted;
 
     let n_rows = rows.len();
-    let sparse_until = sparse_until.min(low_start).min(n_cols);
+    let limit = low_start.min(n_cols);
+    let mut stops: Vec<usize> = stops.iter().map(|&s| s.min(limit)).collect();
+    stops.sort_unstable();
+    stops.dedup();
+    if stops.is_empty() || (budget_bytes.is_some() && *stops.last().unwrap() < limit) {
+        stops.push(limit);
+    }
     let mut out = SparseElimination {
         max_weight: rows.iter().map(|r| r.len()).max().unwrap_or(0),
         ..Default::default()
     };
 
     let mut buckets: Vec<Vec<usize>> = vec![Vec::new(); n_cols.max(1)];
+    let mut empty = 0usize;
     for (i, r) in rows.iter().enumerate() {
-        if let Some(&lead) = r.first() {
-            buckets[lead as usize].push(i);
+        match r.first() {
+            Some(&lead) => buckets[lead as usize].push(i),
+            None => empty += 1,
         }
     }
     let mut is_pivot = vec![false; n_rows];
-    for c in 0..sparse_until {
-        let bucket = take(&mut buckets[c]);
-        if bucket.is_empty() {
-            continue;
-        }
-        let piv = *bucket
-            .iter()
-            .min_by_key(|&&i| rows[i].len())
-            .expect("bucket is non-empty");
-        is_pivot[piv] = true;
-        out.high_rank += 1;
-        let pivot_row = rows[piv].clone();
-        for i in bucket {
-            if i == piv {
+    let mut c = 0usize;
+    let mut sparse_until = limit;
+    for (k, &stop) in stops.iter().enumerate() {
+        while c < stop {
+            let bucket = take(&mut buckets[c]);
+            c += 1;
+            if bucket.is_empty() {
                 continue;
             }
-            let reduced = xor_sorted(&rows[i], &pivot_row);
-            out.max_weight = out.max_weight.max(reduced.len());
-            if let Some(&lead) = reduced.first() {
-                buckets[lead as usize].push(i);
+            let piv = *bucket
+                .iter()
+                .min_by_key(|&&i| rows[i].len())
+                .expect("bucket is non-empty");
+            is_pivot[piv] = true;
+            out.high_rank += 1;
+            // Every row with this lead is in this bucket and no later
+            // reduction produces it again, so the pivot row is never read
+            // after this loop: take it rather than keep it.  At degree 7
+            // the kept pivots were over a million sparse rows alive
+            // beside the dense block.
+            let pivot_row = take(&mut rows[piv]);
+            for i in bucket {
+                if i == piv {
+                    continue;
+                }
+                let reduced = xor_sorted(&rows[i], &pivot_row);
+                out.max_weight = out.max_weight.max(reduced.len());
+                match reduced.first() {
+                    Some(&lead) => buckets[lead as usize].push(i),
+                    None => empty += 1,
+                }
+                rows[i] = reduced;
             }
-            rows[i] = reduced;
+        }
+        let last = k + 1 == stops.len();
+        let fits = budget_bytes.is_none_or(|budget| {
+            let survivors = (n_rows - out.high_rank - empty) as u64;
+            let words = (n_cols - stop).div_ceil(64).max(1) as u64;
+            survivors * words * 8 <= budget
+        });
+        if last || fits {
+            sparse_until = stop;
+            break;
         }
     }
     drop(buckets);
+    out.dense_from = Some(sparse_until);
 
     // Survivors span columns `sparse_until ..` only.  Pack them, freeing
     // each sparse row as it goes.
@@ -295,6 +365,23 @@ pub fn eliminate_high_columns_dense_finish(
     }
     out.vanished = n_rows - out.high_rank - out.linear_rows.len();
     out
+}
+
+/// The end of every degree band before the linear boundary, in column
+/// order: the switch points [`eliminate_high_columns_dense_finish_budgeted`]
+/// considers.  Columns are degree-first descending, so each band is a run.
+pub fn band_ends(cols: &[u64]) -> Vec<usize> {
+    let low = low_column_start(cols);
+    let mut ends = Vec::new();
+    for i in 1..low {
+        if cols[i].count_ones() != cols[i - 1].count_ones() {
+            ends.push(i);
+        }
+    }
+    if low > 0 {
+        ends.push(low);
+    }
+    ends
 }
 
 /// Where [`eliminate_high_columns_dense_finish`] should stop eliminating

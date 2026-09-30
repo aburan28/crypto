@@ -115,7 +115,7 @@ content-hashed archive and transport receipt, then update status and scoreboard.
 Typical commands from the accepted repository, using new output directories:
 
 ```sh
-python3.12 research/ic_candidate_tournament_20260915/f5_runtime_inputs_v2.py --out NEW_ASSETS
+python3.12 research/ic_candidate_tournament_20260915/f5_runtime_inputs_v1.py --out NEW_ASSETS
 python3.12 research/ic_candidate_tournament_20260915/f5_runtime_registration_v2.py \
   --repository ACCEPTED_REPOSITORY --assets NEW_ASSETS \
   --panel research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/panel.json \

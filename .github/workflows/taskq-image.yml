@@ -1,0 +1,33 @@
+name: taskq image
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'taskq/taskq/**'
+      - 'taskq/pyproject.toml'
+      - 'taskq/deploy/Dockerfile'
+      - '.github/workflows/taskq-image.yml'
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: taskq
+          file: taskq/deploy/Dockerfile
+          push: true
+          build-args: TASKQ_IMAGE=ghcr.io/${{ github.repository_owner }}/taskq-worker:${{ github.sha }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/taskq-worker:latest
+            ghcr.io/${{ github.repository_owner }}/taskq-worker:${{ github.sha }}

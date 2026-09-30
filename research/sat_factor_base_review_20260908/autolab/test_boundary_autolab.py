@@ -165,6 +165,10 @@ class MeasurementSchemaTests(unittest.TestCase):
         batched = copy.deepcopy(base)
         batched["target_count"] = 2
         variants.append(batched)
+        for invalid_count in (True, 1.0):
+            malformed = copy.deepcopy(base)
+            malformed["target_count"] = invalid_count
+            variants.append(malformed)
         mismatched = copy.deepcopy(base)
         mismatched["rho_target_hash"] = "another-target"
         variants.append(mismatched)
