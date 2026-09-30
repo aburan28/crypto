@@ -898,8 +898,10 @@ pub struct CsecondEdReport {
     pub random_residuals: usize,
     pub constructed_residuals: usize,
     pub random_decomposable: usize,
-    /// `1/(24p)` on `|F| ≈ p/2` points is `1/(24 p)`; on the `p/4` classes
-    /// with `T` free the rate per residual is the same count of relations.
+    /// `1/(192p)`: eight subgroup points per class-quadruple of the `p/4`
+    /// classes (`rate_census`).  The frozen run `27_jv_quintic_edwards_csecond`
+    /// carries this field as `1/(24p)`, the Weierstrass rate, an error the
+    /// census corrected; the ledger recomputes the rate from `p`.
     pub expected_rate: f64,
     pub planted_found: usize,
     pub unverified: usize,
@@ -970,7 +972,7 @@ pub fn run_jv5_edwards_csecond(
         budget_secs,
         random_residuals: random,
         constructed_residuals: constructed,
-        expected_rate: 1.0 / (24.0 * p as f64),
+        expected_rate: 1.0 / (192.0 * p as f64),
         ..Default::default()
     };
     let mut costs: Vec<Jv4CostE> = Vec::new();
@@ -1071,6 +1073,467 @@ pub fn run_jv5_edwards_csecond(
     rep.f4_ms_decomposable = col(&dd, &|c| c.f4_ms as u64);
     rep.degree_reached_decomposable = col(&dd, &|c| c.degree_reached as u64);
     rep.max_cols_decomposable = col(&dd, &|c| c.max_cols as u64);
+    rep.per_test = costs.iter().chain(costs_dec.iter()).cloned().collect();
+    rep.mitm4_group_ops = mitm_ops as f64 / (random + constructed).max(1) as f64;
+    rep.wall_ms = start.elapsed().as_secs_f64() * 1e3;
+    rep
+}
+
+// ── The rational 4-torsion point: saturation, not symmetry ───────────────
+//
+// `Q₄ = (1, 0)` has order four (`2Q₄ = T`) and translates by
+// `P + Q₄ = (y, −x)`, `P − Q₄ = (−y, x)`: it swaps the coordinates.  No
+// function of `y` alone is `Q₄`-invariant, so — unlike `T`, which the
+// `y²` classes absorb — `Q₄` cannot halve the degree of the symmetrised
+// `S₅`.  The second degree-halving symmetry of the Edwards form is the
+// *other* 2-torsion point, `y ↦ −1/(√d · y)` (the identity
+// `d y₁²y₂² · S₃(−1/(√d y₁), −1/(√d y₂), y₃) = S₃(y₁, y₂, y₃)`, tested
+// below); it keeps `y ∈ F_p` only when `√d ∈ F_p`, i.e. on a curve
+// defined over `F_p`, which the programme excludes.
+//
+// What `Q₄` does buy is saturation of the residual: `R` is decomposable
+// through `Q₄` when `R − t_q Q₄` is a four-point sum for some `t_q ∈ Z/4`,
+// and since `y(R − Q₄) = x_R` and `y(R + Q₄) = −x_R` the classes `t_q`
+// odd share one `y²` value, `x_R²`.  A relation `R = Σ s_i P_i + t_q Q₄`
+// is used through `[4]`, as before.  The rate doubles (`1/(96p)` against
+// `1/(192p)`, §`rate_census`) and the test runs F4 twice (`y_R`, `x_R`):
+// a wash, measured by `run_jv5_edwards4_csecond`.
+
+impl Ed5 {
+    /// `Q₄ = (1, 0)`: `2Q₄ = T`, `P + Q₄ = (y, −x)`, `P − Q₄ = (−y, x)`.
+    pub fn q4(&self) -> PtE {
+        PtE {
+            x: E5::ONE,
+            y: E5::ZERO,
+        }
+    }
+    /// `P − Q₄ = (−y, x)` without a group operation.
+    pub fn sub_q4(&self, pt: &PtE) -> PtE {
+        PtE {
+            x: self.f.neg(&pt.y),
+            y: pt.x,
+        }
+    }
+    /// The homomorphism `E → Z/4` with kernel the prime-order subgroup:
+    /// `φ(P) = c` with `nP = c · (nQ₄)`.  `φ(Q₄) = 1`, `φ(T) = 2`.
+    pub fn torsion_class(&self, n: u64, pt: &PtE) -> u8 {
+        let np = self.mul(pt, n);
+        let nq = self.mul(&self.q4(), n);
+        let mut acc = PtE::ID;
+        for c in 0..4u8 {
+            if acc == np {
+                return c;
+            }
+            acc = self.add(&acc, &nq);
+        }
+        panic!("nP outside <nQ₄>: n is not the odd part of the order");
+    }
+}
+
+/// One decomposition `R = Σ s_t P_{i_t} + t_q Q₄`, `t_q ∈ Z/4`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
+pub struct QuadE4 {
+    pub terms: [(usize, i64); 4],
+    pub tq: u8,
+}
+
+fn saturate(quads: &[QuadE], offset: u8) -> impl Iterator<Item = QuadE4> + '_ {
+    quads.iter().map(move |q| QuadE4 {
+        terms: q.terms,
+        tq: (offset + 2 * q.eps) % 4,
+    })
+}
+
+/// Every `R = Σ s_i P_i + t_q Q₄`: the oracle on `R` (`t_q = 2ε`) and on
+/// `R − Q₄` (`t_q = 1 + 2ε`).
+pub fn mitm4_saturated(curve: &Ed5, base: &[PtE], table: &PairTableE, r: &PtE) -> Vec<QuadE4> {
+    let mut out: BTreeSet<QuadE4> = BTreeSet::new();
+    out.extend(saturate(&mitm4_signed(curve, base, table, r), 0));
+    out.extend(saturate(
+        &mitm4_signed(curve, base, table, &curve.sub_q4(r)),
+        1,
+    ));
+    out.into_iter().collect()
+}
+
+pub fn verify_quad4(curve: &Ed5, base: &[PtE], r: &PtE, q: &QuadE4) -> bool {
+    let mut acc = *r;
+    for &(i, s) in &q.terms {
+        acc = if s == 1 {
+            curve.sub(&acc, &base[i])
+        } else {
+            curve.add(&acc, &base[i])
+        };
+    }
+    for _ in 0..q.tq {
+        acc = curve.sub_q4(&acc);
+    }
+    acc.is_identity()
+}
+
+/// The four-point test on both translates: `jv4_decompose` at `y_R` and at
+/// `y(R − Q₄) = x_R`, with the cost of each run.
+pub fn jv4_decompose_saturated(
+    curve: &Ed5,
+    base: &[PtE],
+    by_y2: &HashMap<u64, usize>,
+    pre: &SymmetrisedS5Ed,
+    r: &PtE,
+    opts: &F4Options,
+    rng: &mut StdRng,
+) -> (Vec<QuadE4>, [Jv4CostE; 2]) {
+    let mut out: BTreeSet<QuadE4> = BTreeSet::new();
+    let (q0, c0) = jv4_decompose(curve, base, by_y2, pre, r, opts, rng);
+    out.extend(saturate(&q0, 0));
+    let (q1, c1) = jv4_decompose(curve, base, by_y2, pre, &curve.sub_q4(r), opts, rng);
+    out.extend(saturate(&q1, 1));
+    (out.into_iter().collect(), [c0, c1])
+}
+
+// ── The rate census ───────────────────────────────────────────────────────
+
+/// Every signed four-point sum over the base, counted exactly: how many
+/// distinct points of the prime-order subgroup are `Σ s_i P_i + εT`
+/// (2-torsion) and `Σ s_i P_i + t_q Q₄` (saturated).  Per class-quadruple
+/// the sixteen sign vectors give sixteen points.  With `Q₄` free each
+/// lands in the subgroup for exactly one of the four translates: `16` per
+/// quadruple.  With `T` free a point lands in the subgroup for one of the
+/// two translates when its `Z/4` class is even, and the parity of
+/// `Σ s_i c_i` does not depend on the signs: a quadruple whose classes
+/// sum to an even number gives `16`, an odd one gives none, `8` on
+/// average.  With `|F| = p/4` this is `1/(192p)` and `1/(96p)` of the
+/// subgroup, not the `1/(24p)` the 2-torsion report field
+/// `expected_rate` carried before this census.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct RateCensus {
+    pub p: u64,
+    pub seed: u64,
+    pub n: u64,
+    pub base: usize,
+    pub quadruples: u64,
+    /// Sign vectors whose sum lies in the subgroup for some `ε`: `16` on
+    /// the quadruples of even class parity, `8` per quadruple on average.
+    pub two_torsion_in_subgroup: u64,
+    pub two_torsion_distinct: u64,
+    pub two_torsion_predicted: u64,
+    pub two_torsion_rate: f64,
+    /// `rate · 192 p`: `1` when `|F| = p/4` exactly.
+    pub two_torsion_rate_x_192p: f64,
+    pub saturated_in_subgroup: u64,
+    pub saturated_distinct: u64,
+    pub saturated_predicted: u64,
+    pub saturated_rate: f64,
+    pub saturated_rate_x_96p: f64,
+    pub group_ops: u64,
+    pub wall_ms: f64,
+}
+
+fn fingerprint(pt: &PtE) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    pt.hash(&mut h);
+    h.finish()
+}
+
+pub fn rate_census(p: u64, seed: u64) -> RateCensus {
+    use std::collections::HashSet;
+    let start = Instant::now();
+    let inst = generate_instance_edwards(p, seed);
+    let curve = &inst.curve;
+    let n = inst.n;
+    let mut rng = StdRng::seed_from_u64(seed ^ 0xED02);
+    let base = factor_base(curve, &mut rng);
+    let m = base.len();
+    curve.reset_ops();
+    let class: Vec<u8> = base.iter().map(|q| curve.torsion_class(n, q)).collect();
+    // Pair sums P_i + s P_j, s = ±1, and their classes.
+    let mut pair: HashMap<(usize, usize, i8), (PtE, u8)> = HashMap::new();
+    for i in 0..m {
+        for j in (i + 1)..m {
+            pair.insert(
+                (i, j, 1),
+                (curve.add(&base[i], &base[j]), (class[i] + class[j]) % 4),
+            );
+            pair.insert(
+                (i, j, -1),
+                (curve.sub(&base[i], &base[j]), (class[i] + 4 - class[j]) % 4),
+            );
+        }
+    }
+    let mut two: HashSet<u64> = HashSet::new();
+    let mut sat: HashSet<u64> = HashSet::new();
+    let mut two_hits = 0u64;
+    let mut sat_hits = 0u64;
+    let mut quadruples = 0u64;
+    for i in 0..m {
+        for j in (i + 1)..m {
+            for k in (j + 1)..m {
+                for l in (k + 1)..m {
+                    quadruples += 1;
+                    for s in [1i8, -1] {
+                        let (a, ca) = pair[&(i, j, s)];
+                        for u in [1i8, -1] {
+                            let (b, cb) = pair[&(k, l, u)];
+                            for v in [1i8, -1] {
+                                let (x, cx) = if v == 1 {
+                                    (curve.add(&a, &b), (ca + cb) % 4)
+                                } else {
+                                    (curve.sub(&a, &b), (ca + 4 - cb) % 4)
+                                };
+                                // x and −x: the sixteen sign vectors.
+                                for (pt, c) in [(x, cx), (curve.neg(&x), (4 - cx) % 4)] {
+                                    // Saturated: the one t_q with c + t_q ≡ 0.
+                                    let tq = (4 - c) % 4;
+                                    let mut w = pt;
+                                    for _ in 0..tq {
+                                        w = PtE {
+                                            x: w.y,
+                                            y: curve.f.neg(&w.x),
+                                        };
+                                    }
+                                    sat_hits += 1;
+                                    sat.insert(fingerprint(&w));
+                                    if c % 2 == 0 {
+                                        two_hits += 1;
+                                        two.insert(fingerprint(&w));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    RateCensus {
+        p,
+        seed,
+        n,
+        base: m,
+        quadruples,
+        two_torsion_in_subgroup: two_hits,
+        two_torsion_distinct: two.len() as u64,
+        two_torsion_predicted: 8 * quadruples,
+        two_torsion_rate: two.len() as f64 / n as f64,
+        two_torsion_rate_x_192p: two.len() as f64 / n as f64 * 192.0 * p as f64,
+        saturated_in_subgroup: sat_hits,
+        saturated_distinct: sat.len() as u64,
+        saturated_predicted: 16 * quadruples,
+        saturated_rate: sat.len() as f64 / n as f64,
+        saturated_rate_x_96p: sat.len() as f64 / n as f64 * 96.0 * p as f64,
+        group_ops: curve.ops(),
+        wall_ms: start.elapsed().as_secs_f64() * 1e3,
+    }
+}
+
+// ── Experiment: C″ with the residual saturated by Q₄ ─────────────────────
+
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct CsecondEd4Report {
+    pub p: u64,
+    pub seed: u64,
+    pub n: u64,
+    pub bits: f64,
+    pub base: usize,
+    pub fp_muls_per_add: f64,
+    pub precompute_muls: u64,
+    pub precompute_ms: f64,
+    pub max_degree: u32,
+    pub budget_secs: f64,
+    pub random_residuals: usize,
+    pub constructed_residuals: usize,
+    pub random_decomposable: usize,
+    /// `1/(96p)` on `|F| = p/4` classes: sixteen subgroup points per
+    /// class-quadruple (`rate_census`).
+    pub expected_rate: f64,
+    pub planted_found: usize,
+    pub planted_by_tq: [usize; 4],
+    pub constructed_by_tq: [usize; 4],
+    pub unverified: usize,
+    pub mismatches: usize,
+    pub undetermined: usize,
+    pub timed_out: usize,
+    /// Both runs together: the cost of one saturated test.
+    pub c_second: CostStatsE,
+    /// The run at `y_R` and the run at `x_R`, separately.
+    pub c_second_at_y: CostStatsE,
+    pub c_second_at_x: CostStatsE,
+    pub weil_muls: CostStatsE,
+    pub f4_muls: CostStatsE,
+    pub roots_muls: CostStatsE,
+    pub sign_group_ops: CostStatsE,
+    pub f4_ms: CostStatsE,
+    pub degree_reached: CostStatsE,
+    pub max_rows: CostStatsE,
+    pub max_cols: CostStatsE,
+    pub c_second_decomposable: CostStatsE,
+    pub f4_ms_decomposable: CostStatsE,
+    pub degree_reached_decomposable: CostStatsE,
+    pub per_test: Vec<[Jv4CostE; 2]>,
+    pub mitm4_group_ops: f64,
+    pub wall_ms: f64,
+}
+
+pub fn run_jv5_edwards4_csecond(
+    p: u64,
+    seed: u64,
+    random: usize,
+    constructed: usize,
+    max_degree: u32,
+    budget_secs: f64,
+) -> CsecondEd4Report {
+    let start = Instant::now();
+    let inst = generate_instance_edwards(p, seed);
+    let curve = &inst.curve;
+    let f = &curve.f;
+    let n = inst.n;
+    let mut rng = StdRng::seed_from_u64(seed ^ 0xED04);
+    let base = factor_base(curve, &mut rng);
+    let by_y2: HashMap<u64, usize> = base
+        .iter()
+        .enumerate()
+        .map(|(i, q)| (y2_key(curve, q), i))
+        .collect();
+    let fp_per_add = {
+        f.reset_muls();
+        let mut acc = base[0];
+        for _ in 0..64 {
+            acc = curve.add(&acc, &base[1]);
+        }
+        f.muls() as f64 / 64.0
+    };
+    let t0 = Instant::now();
+    let pre = SymmetrisedS5Ed::precompute(curve, &mut rng);
+    let precompute_ms = t0.elapsed().as_secs_f64() * 1e3;
+    let table = pair_table(curve, &base);
+    let mut rep = CsecondEd4Report {
+        p,
+        seed,
+        n,
+        bits: (n as f64).log2(),
+        base: base.len(),
+        fp_muls_per_add: fp_per_add,
+        precompute_muls: pre.precompute_muls,
+        precompute_ms,
+        max_degree,
+        budget_secs,
+        random_residuals: random,
+        constructed_residuals: constructed,
+        expected_rate: 1.0 / (96.0 * p as f64),
+        ..Default::default()
+    };
+    let mut costs: Vec<[Jv4CostE; 2]> = Vec::new();
+    let mut costs_dec: Vec<[Jv4CostE; 2]> = Vec::new();
+    let mut mitm_ops = 0u64;
+    let mut check_rng = StdRng::seed_from_u64(seed ^ 0x5EED);
+    let mut check = |r: &PtE, want: Option<QuadE4>, rep: &mut CsecondEd4Report| -> [Jv4CostE; 2] {
+        let opts = jv4_options(max_degree, budget_secs);
+        let (found, cost) =
+            jv4_decompose_saturated(curve, &base, &by_y2, &pre, r, &opts, &mut check_rng);
+        rep.unverified += found
+            .iter()
+            .filter(|q| !verify_quad4(curve, &base, r, q))
+            .count();
+        let g0 = curve.ops();
+        let oracle = mitm4_saturated(curve, &base, &table, r);
+        mitm_ops += curve.ops() - g0;
+        if cost[0].undetermined || cost[1].undetermined {
+            rep.undetermined += 1;
+        } else if found != oracle {
+            rep.mismatches += 1;
+        }
+        if cost[0].timed_out || cost[1].timed_out {
+            rep.timed_out += 1;
+        }
+        if let Some(w) = want {
+            rep.constructed_by_tq[w.tq as usize] += 1;
+            if found.contains(&w) {
+                rep.planted_found += 1;
+                rep.planted_by_tq[w.tq as usize] += 1;
+            }
+        }
+        cost
+    };
+    for _ in 0..random {
+        let a = rng.gen_range(0..n);
+        let b = rng.gen_range(1..n);
+        let r = curve.add(&curve.mul(&inst.g, a), &curve.mul(&inst.q, b));
+        let c = check(&r, None, &mut rep);
+        if c[0].decompositions + c[1].decompositions > 0 {
+            rep.random_decomposable += 1;
+        }
+        costs.push(c);
+    }
+    for t in 0..constructed {
+        let idx: [usize; 4] = loop {
+            let idx: [usize; 4] = core::array::from_fn(|_| rng.gen_range(0..base.len()));
+            let mut s = idx.to_vec();
+            s.sort_unstable();
+            s.dedup();
+            if s.len() == 4 {
+                break idx;
+            }
+        };
+        let signs: [i64; 4] = core::array::from_fn(|_| if rng.gen_bool(0.5) { 1 } else { -1 });
+        // Every t_q in turn, so each translate is planted.
+        let tq = (t % 4) as u8;
+        let mut r = PtE::ID;
+        for k in 0..4 {
+            let q = if signs[k] == 1 {
+                base[idx[k]]
+            } else {
+                curve.neg(&base[idx[k]])
+            };
+            r = curve.add(&r, &q);
+        }
+        for _ in 0..tq {
+            r = curve.add(&r, &curve.q4());
+        }
+        let mut terms = [
+            (idx[0], signs[0]),
+            (idx[1], signs[1]),
+            (idx[2], signs[2]),
+            (idx[3], signs[3]),
+        ];
+        terms.sort_unstable();
+        let c = check(&r, Some(QuadE4 { terms, tq }), &mut rep);
+        costs_dec.push(c);
+    }
+    let one = |c: &Jv4CostE| {
+        c.weil_muls + c.f4_muls + c.roots_muls + (c.group_ops as f64 * fp_per_add) as u64
+    };
+    let done = |v: &[[Jv4CostE; 2]]| -> Vec<[Jv4CostE; 2]> {
+        v.iter()
+            .filter(|c| !c[0].undetermined && !c[1].undetermined)
+            .cloned()
+            .collect()
+    };
+    let both = |v: &[[Jv4CostE; 2]], g: &dyn Fn(&Jv4CostE) -> u64| -> CostStatsE {
+        stats(&v.iter().map(|c| g(&c[0]) + g(&c[1])).collect::<Vec<u64>>())
+    };
+    let pooled = |v: &[[Jv4CostE; 2]], g: &dyn Fn(&Jv4CostE) -> u64| -> CostStatsE {
+        stats(
+            &v.iter()
+                .flat_map(|c| [g(&c[0]), g(&c[1])])
+                .collect::<Vec<u64>>(),
+        )
+    };
+    let cd = done(&costs);
+    let dd = done(&costs_dec);
+    rep.c_second = both(&cd, &one);
+    rep.c_second_at_y = stats(&cd.iter().map(|c| one(&c[0])).collect::<Vec<u64>>());
+    rep.c_second_at_x = stats(&cd.iter().map(|c| one(&c[1])).collect::<Vec<u64>>());
+    rep.weil_muls = both(&cd, &|c| c.weil_muls);
+    rep.f4_muls = both(&cd, &|c| c.f4_muls);
+    rep.roots_muls = both(&cd, &|c| c.roots_muls);
+    rep.sign_group_ops = both(&cd, &|c| c.group_ops);
+    rep.f4_ms = both(&cd, &|c| c.f4_ms as u64);
+    rep.degree_reached = pooled(&cd, &|c| c.degree_reached as u64);
+    rep.max_rows = pooled(&cd, &|c| c.max_rows as u64);
+    rep.max_cols = pooled(&cd, &|c| c.max_cols as u64);
+    rep.c_second_decomposable = both(&dd, &one);
+    rep.f4_ms_decomposable = both(&dd, &|c| c.f4_ms as u64);
+    rep.degree_reached_decomposable = pooled(&dd, &|c| c.degree_reached as u64);
     rep.per_test = costs.iter().chain(costs_dec.iter()).cloned().collect();
     rep.mitm4_group_ops = mitm_ops as f64 / (random + constructed).max(1) as f64;
     rep.wall_ms = start.elapsed().as_secs_f64() * 1e3;
@@ -1184,5 +1647,143 @@ mod tests {
             assert!(found.contains(&want), "{want:?} not in {found:?}");
             assert!(found.iter().all(|q| verify_quad(curve, &base, &r, q)));
         }
+    }
+
+    #[test]
+    fn q4_has_order_four_and_swaps_the_coordinates() {
+        let mut rng = StdRng::seed_from_u64(11);
+        let curve = Ed5::random(31, &mut rng);
+        let f = &curve.f;
+        let q4 = curve.q4();
+        assert!(curve.on_curve(&q4));
+        assert_eq!(curve.add(&q4, &q4), curve.t());
+        assert!(curve.mul(&q4, 4).is_identity());
+        let p1 = random_point(&curve, &mut rng);
+        let plus = curve.add(&p1, &q4);
+        assert_eq!(
+            plus,
+            PtE {
+                x: p1.y,
+                y: f.neg(&p1.x)
+            }
+        );
+        let minus = curve.sub(&p1, &q4);
+        assert_eq!(
+            minus,
+            PtE {
+                x: f.neg(&p1.y),
+                y: p1.x
+            }
+        );
+        assert_eq!(curve.sub_q4(&p1), minus);
+        // y(P − Q₄) = x_P: no function of y alone is Q₄-invariant.
+        assert_eq!(minus.y, p1.x);
+        // The class homomorphism on an instance.
+        let inst = generate_instance_edwards(31, 3);
+        let c = &inst.curve;
+        assert_eq!(c.torsion_class(inst.n, &c.q4()), 1);
+        assert_eq!(c.torsion_class(inst.n, &c.t()), 2);
+        assert_eq!(c.torsion_class(inst.n, &inst.g), 0);
+        let s = random_point(c, &mut rng);
+        let cs = c.torsion_class(inst.n, &s);
+        assert_eq!(c.torsion_class(inst.n, &c.add(&s, &c.q4())), (cs + 1) % 4);
+        assert_eq!(c.torsion_class(inst.n, &c.neg(&s)), (4 - cs) % 4);
+    }
+
+    #[test]
+    fn the_other_two_torsion_needs_a_square_root_of_d() {
+        // d y₁²y₂² · S₃(−1/(δy₁), −1/(δy₂), y₃) = S₃(y₁, y₂, y₃) for δ² = d:
+        // the degree-halving involution y ↦ −1/(δy) exists exactly when d is
+        // a square, and keeps y ∈ F_p exactly when δ ∈ F_p.
+        let mut rng = StdRng::seed_from_u64(12);
+        let f = Fp5::new(31);
+        for _ in 0..8 {
+            let delta = loop {
+                let v = f.random(&mut rng);
+                if !v.is_zero() {
+                    break v;
+                }
+            };
+            let d = f.sq(&delta);
+            let curve = Ed5::with_params(31, d);
+            let y: [E5; 3] = loop {
+                let y: [E5; 3] = core::array::from_fn(|_| f.random(&mut rng));
+                if !y[0].is_zero() && !y[1].is_zero() {
+                    break y;
+                }
+            };
+            let flip = |v: &E5| f.neg(&f.inv(&f.mul(&delta, v)));
+            let lhs = f.mul(
+                &f.mul(&d, &f.mul(&f.sq(&y[0]), &f.sq(&y[1]))),
+                &curve.s3(&[flip(&y[0]), flip(&y[1]), y[2]]),
+            );
+            assert_eq!(lhs, curve.s3(&y));
+            // δ ∈ F_p only when d ∈ F_p: on the programme's curves (d ∉ F_p)
+            // the involution leaves the factor base.
+            let in_fp = f.from_fp(3);
+            assert!(delta.in_fp() == flip(&in_fp).in_fp() || !delta.in_fp());
+        }
+    }
+
+    #[test]
+    fn saturation_finds_every_translate() {
+        let inst = generate_instance_edwards(31, 3);
+        let curve = &inst.curve;
+        let mut rng = StdRng::seed_from_u64(13);
+        let base = factor_base(curve, &mut rng);
+        let table = pair_table(curve, &base);
+        for tq in 0..4u8 {
+            let idx: [usize; 4] = loop {
+                let idx: [usize; 4] = core::array::from_fn(|_| rng.gen_range(0..base.len()));
+                let mut s = idx.to_vec();
+                s.sort_unstable();
+                s.dedup();
+                if s.len() == 4 {
+                    break idx;
+                }
+            };
+            let mut r = idx
+                .iter()
+                .fold(PtE::ID, |acc, &i| curve.add(&acc, &base[i]));
+            for _ in 0..tq {
+                r = curve.add(&r, &curve.q4());
+            }
+            let found = mitm4_saturated(curve, &base, &table, &r);
+            let mut terms = [(idx[0], 1i64), (idx[1], 1), (idx[2], 1), (idx[3], 1)];
+            terms.sort_unstable();
+            let want = QuadE4 { terms, tq };
+            assert!(found.contains(&want), "{want:?} not in {found:?}");
+            assert!(found.iter().all(|q| verify_quad4(curve, &base, &r, q)));
+            // The unsaturated oracle sees it only when t_q is even.
+            let plain = mitm4_signed(curve, &base, &table, &r);
+            assert_eq!(plain.contains(&QuadE { terms, eps: tq / 2 }), tq % 2 == 0);
+        }
+    }
+
+    #[test]
+    fn saturated_four_point_test_agrees_with_the_oracle() {
+        let rep = run_jv5_edwards4_csecond(271, 1, 1, 4, 24, 120.0);
+        assert_eq!(rep.planted_found, 4, "{:?}", rep.planted_by_tq);
+        assert_eq!(rep.planted_by_tq, [1, 1, 1, 1]);
+        assert_eq!(rep.mismatches, 0);
+        assert_eq!(rep.unverified, 0);
+        assert_eq!(rep.undetermined, 0);
+    }
+
+    #[test]
+    fn census_counts_eight_and_sixteen_per_quadruple() {
+        let c = rate_census(31, 3);
+        assert!(c.quadruples > 0);
+        // Collisions are O(1/p); at p = 31 allow a few.
+        let two = c.two_torsion_distinct as f64 / c.two_torsion_predicted as f64;
+        let sat = c.saturated_distinct as f64 / c.saturated_predicted as f64;
+        assert!(two > 0.4 && two <= 2.0, "{c:?}");
+        assert!(sat > 0.8 && sat <= 1.0, "{c:?}");
+        // Even-parity quadruples contribute all sixteen sign vectors, odd
+        // ones none; saturation takes every sign vector of every quadruple.
+        assert_eq!(c.two_torsion_in_subgroup % 16, 0);
+        assert!(c.two_torsion_in_subgroup <= 16 * c.quadruples);
+        assert_eq!(c.saturated_in_subgroup, 16 * c.quadruples);
+        assert_eq!(c.saturated_distinct % 16, 0);
     }
 }
