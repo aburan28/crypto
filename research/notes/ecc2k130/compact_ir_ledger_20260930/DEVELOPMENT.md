@@ -1,0 +1,7 @@
+# Development checks before the frozen instruction dispatch
+
+The protocol and six hashed public-point cells were committed at `9f35e07a` before any Callgrind count. The runner and verifier were then exercised against a local tree whose twenty source files all matched the merged blocked-prefilter freeze. Rust release builds of `koblitz_orbit_dlp_s3_batch` and `koblitz_rho_batch_ks_v3` passed. The parser/freeze tests and the separate materializer's fail-closed tests are part of the PR CI workflow.
+
+All six native **integration smokes** ran their complete fixed arm sequences and passed independent Python group-law rank and point-log replay: n37, n41 and n53 at L=1 and L=1024. The n41/n53 batch smokes checked unfiltered and blocked compact witnesses against each other and against the same public-Q normal-basis rho. These native dry runs report **no Ir, S, speedup, or new timing result**. The hosted PR check reruns n37/L1 from the materialized exact source before a later dispatch may use Callgrind.
+
+The first full n37/L1 smoke's verifier failed because its development-only `--smoke` path assumed one arm even when the runner had correctly executed the full four-arm sequence. The [retained failure receipt](development_n37_full_first_failure.json) identifies that assertion. The verifier now accepts either the full frozen sequence or one named native smoke arm; rerunning it on the unchanged raw four-arm output returned `SMOKE_PASS`. No instruction-count result existed or was selected at that point.
