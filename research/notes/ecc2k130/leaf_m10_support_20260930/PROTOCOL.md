@@ -25,9 +25,11 @@ Do not select a leaf, basis, slot placement, mask or dimension from outcomes.
 For every x in each slot, x=0 has the unique point `(0,√b)`. For nonzero x,
 the two rational y lifts exist exactly when
 `Tr(x + a₂ + b/x²)=0`; otherwise neither exists. Record one canonical row
-`mask,x,lift_count,projected_x_or_sentinel` in natural-mask order, SHA-256
-for the entire row stream and each 1,024-row chunk, exact lift counts and
-physical point counts. On a liftable nonzero x, compute the signed x-class of
+`mask,x,lift_count,projected_x_or_sentinel\n` as decimal ASCII in binary
+Gray-mask traversal order, with SHA-256 for the entire row stream and each
+1,024-row chunk, exact lift counts and physical point counts. Sentinel `-2`
+means nonliftable and `-1` means `[4]P=O`, including x=0. On a liftable
+nonzero x, compute the signed x-class of
 `[4]P` through `u=x²+b/x²`, `x([4]P)=u²+b/u²`, with infinity handled when
 u=0. Record each slot's distinct nonzero projected signed classes, collision
 multiplicities, and the union across all ten slots for each arm. These are
