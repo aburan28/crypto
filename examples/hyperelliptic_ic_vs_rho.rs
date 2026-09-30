@@ -228,6 +228,7 @@ fn main() {
                     search,
                     linear_algebra: la,
                     smoothness: oracle,
+                    large_primes: false,
                 };
                 let row = head_to_head(
                     &curve,

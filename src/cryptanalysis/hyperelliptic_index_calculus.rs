@@ -659,8 +659,17 @@ pub fn decompose_over_factor_base_counted(
 pub enum Decomposition {
     /// Splits over degree-1 places, all of them in the factor base.
     Smooth(Vec<(usize, i64)>),
-    /// Splits over degree-1 places, but meets a place the (truncated)
-    /// factor base does not hold.
+    /// Splits over degree-1 places, all but **one** of them in the
+    /// factor base — a partial relation for the large-prime variation.
+    /// `coef` is the off-base place's coefficient against its canonical
+    /// representative `(x, y ≤ (p−1)/2)`, as for factor-base entries.
+    OneLargePrime {
+        entries: Vec<(usize, i64)>,
+        x: BigUint,
+        coef: i64,
+    },
+    /// Splits over degree-1 places, but meets two or more places the
+    /// (truncated) factor base does not hold.
     SmoothOffBase,
     /// Does not split into degree-1 places.
     NotSmooth,
@@ -683,23 +692,40 @@ pub fn classify_counted_with(
     };
 
     let mut acc: HashMap<usize, i64> = HashMap::new();
+    // At most one place outside a truncated base is kept; `u` has
+    // distinct roots per place (a reduced divisor never holds both `P`
+    // and `−P`), so one `x` is one place.
+    let mut off: Option<(BigUint, i64)> = None;
     for (x, mult) in roots {
         *ops += d.v.degree().unwrap_or(0);
         let y = d.v.eval(&x);
         debug_assert!(curve.is_on_curve(&x, &y));
+        let sign: i64 = if y.is_zero() || y <= half { 1 } else { -1 };
         let idx = match fb.index_of_x(&x) {
             Some(i) => i,
             // Smooth, but this place is outside a truncated base.
-            None => return Decomposition::SmoothOffBase,
+            None => {
+                if off.is_some() {
+                    return Decomposition::SmoothOffBase;
+                }
+                off = Some((x, sign * mult as i64));
+                continue;
+            }
         };
-        let sign: i64 = if y.is_zero() || y <= half { 1 } else { -1 };
         debug_assert_eq!(fb.entries[idx].y, if sign > 0 { y.clone() } else { p - &y });
         *acc.entry(idx).or_insert(0) += sign * mult as i64;
     }
 
     let mut out: Vec<(usize, i64)> = acc.into_iter().filter(|&(_, c)| c != 0).collect();
     out.sort_unstable_by_key(|&(i, _)| i);
-    Decomposition::Smooth(out)
+    match off {
+        None => Decomposition::Smooth(out),
+        Some((x, coef)) => Decomposition::OneLargePrime {
+            entries: out,
+            x,
+            coef,
+        },
+    }
 }
 
 /// As [`decompose_over_factor_base_counted`], choosing the oracle.
@@ -769,8 +795,13 @@ pub struct HecIndexCalculusReport {
     pub factor_base_size: usize,
     pub trials: usize,
     pub smooth_trials: usize,
-    /// Smooth, but met a place outside a truncated factor base.
+    /// Smooth, but met a place outside a truncated factor base and was
+    /// not kept — two or more such places, or large primes off.
     pub discarded_off_base: usize,
+    /// Partial relations (one off-base place) kept for combination.
+    pub partial_relations: usize,
+    /// Full relations made by combining two partials.
+    pub combined_relations: usize,
     pub relations: usize,
     pub jacobian_ops: usize,
     /// Of those, the walk's step precomputation — a fixed cost that
@@ -792,6 +823,12 @@ pub struct HecIndexCalculusReport {
     pub walk_wall_ns: u64,
     /// Wall-clock nanoseconds spent in the linear algebra.
     pub solve_wall_ns: u64,
+    /// Wall-clock nanoseconds spent storing and combining large-prime
+    /// partials.  Bookkeeping multiplies little mod `N` but is not free,
+    /// and uncharged bookkeeping is how round six under-priced the solve
+    /// by an order of magnitude, so it is timed and converted like the
+    /// oracle.
+    pub partial_wall_ns: u64,
     /// Wall-clock nanoseconds spent inside the smoothness oracle.
     ///
     /// The `smoothness_field_ops` count below is a hand-derived charge —
@@ -968,6 +1005,12 @@ pub struct HecIndexCalculusParams {
     pub linear_algebra: LinearAlgebra,
     /// How smoothness is decided; see [`SmoothnessTest`].
     pub smoothness: SmoothnessTest,
+    /// Single large primes (Thériault): with a truncated factor base,
+    /// keep a candidate that has exactly one place outside it, and
+    /// combine two such partials that share the place into one full
+    /// relation.  Off by default; it does nothing with the full base,
+    /// which has no outside places.
+    pub large_primes: bool,
 }
 
 impl Default for HecIndexCalculusParams {
@@ -980,6 +1023,7 @@ impl Default for HecIndexCalculusParams {
             search: RelationSearch::factor_base_walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
+            large_primes: false,
         }
     }
 }
@@ -1110,6 +1154,9 @@ pub fn collect_relations(
 
     let mut current: Option<Position> = None;
     let mut since_restart = 0usize;
+    // Large-prime partials, keyed by the off-base place's `x`: the first
+    // partial seen at each place, which every later one combines with.
+    let mut partials: HashMap<Vec<u32>, (HecRelation, i64)> = HashMap::new();
 
     while relations.len() < wanted && report.trials < params.max_trials {
         report.trials += 1;
@@ -1257,7 +1304,30 @@ pub fn collect_relations(
                     entries: subtract_steps(entries, &taken),
                 });
             }
-            Decomposition::SmoothOffBase => {
+            Decomposition::OneLargePrime { entries, x, coef } if params.large_primes => {
+                report.smooth_trials += 1;
+                let started = Instant::now();
+                let rel = HecRelation {
+                    coef_a: a,
+                    coef_b: b,
+                    entries: subtract_steps(entries, &taken),
+                };
+                match partials.get(&x.to_u32_digits()) {
+                    None => {
+                        report.partial_relations += 1;
+                        partials.insert(x.to_u32_digits(), (rel, coef));
+                    }
+                    Some((first, first_coef)) => {
+                        report.partial_relations += 1;
+                        if let Some(full) = combine_partials(first, *first_coef, &rel, coef, n) {
+                            report.combined_relations += 1;
+                            relations.push(full);
+                        }
+                    }
+                }
+                report.partial_wall_ns += started.elapsed().as_nanos() as u64;
+            }
+            Decomposition::OneLargePrime { .. } | Decomposition::SmoothOffBase => {
                 report.smooth_trials += 1;
                 report.discarded_off_base += 1;
             }
@@ -1266,6 +1336,48 @@ pub fn collect_relations(
     }
     report.relations = relations.len();
     relations
+}
+
+/// `e₂·r₁ − e₁·r₂` for two partials `r₁ = … + e₁·P` and `r₂ = … + e₂·P`
+/// sharing the off-base place `P`: the combination eliminates `log P`
+/// and leaves a relation over the factor base alone.
+///
+/// Returns `None` when the combination is the zero relation — the same
+/// partial reached twice — which says nothing and would only cost a row.
+fn combine_partials(
+    r1: &HecRelation,
+    e1: i64,
+    r2: &HecRelation,
+    e2: i64,
+    n: &BigUint,
+) -> Option<HecRelation> {
+    let scale = |v: &BigUint, k: i64| -> BigUint {
+        let t = (v * BigUint::from(k.unsigned_abs())) % n;
+        if k < 0 {
+            (n - t) % n
+        } else {
+            t
+        }
+    };
+    let coef_a = (scale(&r1.coef_a, e2) + scale(&r2.coef_a, -e1)) % n;
+    let coef_b = (scale(&r1.coef_b, e2) + scale(&r2.coef_b, -e1)) % n;
+    let mut acc: HashMap<usize, i64> = HashMap::new();
+    for &(j, c) in &r1.entries {
+        *acc.entry(j).or_insert(0) += e2 * c;
+    }
+    for &(j, c) in &r2.entries {
+        *acc.entry(j).or_insert(0) -= e1 * c;
+    }
+    let mut entries: Vec<(usize, i64)> = acc.into_iter().filter(|&(_, c)| c != 0).collect();
+    entries.sort_unstable_by_key(|&(j, _)| j);
+    if entries.is_empty() && coef_a.is_zero() && coef_b.is_zero() {
+        return None;
+    }
+    Some(HecRelation {
+        coef_a,
+        coef_b,
+        entries,
+    })
 }
 
 // ── End-to-end DLP ─────────────────────────────────────────────────────
@@ -1848,6 +1960,7 @@ mod tests {
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Dense,
             smoothness: SmoothnessTest::Scan,
+            large_primes: false,
         };
         let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         assert_eq!(found, Some(k), "report: {report:?}");
@@ -1999,6 +2112,7 @@ mod tests {
                     search: RelationSearch::walk(),
                     linear_algebra: LinearAlgebra::Sparse,
                     smoothness: SmoothnessTest::Gcd,
+                    large_primes: false,
                 };
                 let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
                 assert_eq!(found, Some(k), "genus-3 report: {report:?}");
@@ -2184,6 +2298,7 @@ mod tests {
             search: RelationSearch::factor_base_walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Scan,
+            large_primes: false,
         };
         let fast = HecIndexCalculusParams {
             smoothness: SmoothnessTest::Gcd,
@@ -2250,6 +2365,7 @@ mod tests {
                 search: RelationSearch::factor_base_walk(),
                 linear_algebra: LinearAlgebra::Sparse,
                 smoothness: SmoothnessTest::Gcd,
+                large_primes: false,
             };
             let mut report = HecIndexCalculusReport::default();
             let n = &_l;
@@ -2289,6 +2405,7 @@ mod tests {
                 search: RelationSearch::factor_base_walk(),
                 linear_algebra: LinearAlgebra::Sparse,
                 smoothness: SmoothnessTest::Gcd,
+                large_primes: false,
             };
             let (got, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
             assert_eq!(got.as_ref(), Some(&k), "seed {seed}: {report:?}");
@@ -2306,6 +2423,7 @@ mod tests {
             search: RelationSearch::walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
+            large_primes: false,
         };
         let fbw = HecIndexCalculusParams {
             search: RelationSearch::factor_base_walk(),
@@ -2337,6 +2455,7 @@ mod tests {
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
+            large_primes: false,
         };
         let (rnd_k, rnd) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &base);
         let walked = HecIndexCalculusParams {
@@ -2376,6 +2495,7 @@ mod tests {
             search: RelationSearch::walk(),
             linear_algebra: LinearAlgebra::Dense,
             smoothness: SmoothnessTest::Scan,
+            large_primes: false,
         };
         let sparse = HecIndexCalculusParams {
             linear_algebra: LinearAlgebra::Sparse,
@@ -2518,6 +2638,103 @@ mod tests {
         assert!(answered >= 400, "only {answered} systems answered");
     }
 
+    /// Every relation collected from a halved factor base with large
+    /// primes on — the combined ones included — is a true identity in
+    /// the Jacobian.  A wrong sign or scale in the combination would
+    /// still often solve (the retry loop and the final `[k]D₁ = D₂`
+    /// check hide a few bad rows), so the rows are checked directly.
+    #[test]
+    fn large_prime_relations_are_jacobian_identities() {
+        for (g, (curve, d1, d2, l, _k)) in [(2, toy_instance(61)), (3, genus3_instance(31))] {
+            let full = build_factor_base(&curve, usize::MAX).len();
+            let fb = build_factor_base(&curve, full / 2);
+            let params = HecIndexCalculusParams {
+                fb_size: full / 2,
+                large_primes: true,
+                seed: 11,
+                ..HecIndexCalculusParams::default()
+            };
+            let mut report = HecIndexCalculusReport::default();
+            let rels = collect_relations(
+                &curve,
+                &d1,
+                &d2,
+                &l,
+                &fb,
+                fb.len() + 9,
+                &params,
+                &mut report,
+            );
+            assert!(
+                report.combined_relations > 0,
+                "genus {g}: nothing combined: {report:?}"
+            );
+            for (i, rel) in rels.iter().enumerate() {
+                assert!(
+                    relation_holds(&curve, &fb, &d1, &d2, rel),
+                    "genus {g}: relation {i} of {} is not an identity: {rel:?}",
+                    rels.len()
+                );
+            }
+        }
+    }
+
+    /// A halved factor base with large primes still recovers `k`, and
+    /// relies on combined relations to do it.
+    #[test]
+    fn large_primes_solve_with_a_reduced_base() {
+        let (curve, d1, d2, l, k) = toy_instance(61);
+        let full = build_factor_base(&curve, usize::MAX).len();
+        for seed in 0..5 {
+            let params = HecIndexCalculusParams {
+                fb_size: full / 2,
+                large_primes: true,
+                seed,
+                ..HecIndexCalculusParams::default()
+            };
+            let (got, rep) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
+            assert_eq!(got.as_ref(), Some(&k), "seed {seed}: {rep:?}");
+            assert!(rep.combined_relations > 0, "seed {seed}: {rep:?}");
+        }
+    }
+
+    /// With the full factor base there are no off-base places, so large
+    /// primes must change nothing at all: same relations, same counted
+    /// work, same `k`.
+    #[test]
+    fn large_primes_are_inert_on_the_full_base() {
+        let (curve, d1, d2, l, k) = toy_instance(61);
+        let off = HecIndexCalculusParams {
+            seed: 3,
+            ..HecIndexCalculusParams::default()
+        };
+        let on = HecIndexCalculusParams {
+            large_primes: true,
+            ..off.clone()
+        };
+        let (k_off, r_off) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &off);
+        let (k_on, r_on) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &on);
+        assert_eq!(k_off.as_ref(), Some(&k));
+        assert_eq!(k_on, k_off);
+        assert_eq!(
+            (
+                r_on.trials,
+                r_on.relations,
+                r_on.jacobian_ops,
+                r_on.smoothness_field_ops,
+                r_on.solve_row_ops
+            ),
+            (
+                r_off.trials,
+                r_off.relations,
+                r_off.jacobian_ops,
+                r_off.smoothness_field_ops,
+                r_off.solve_row_ops
+            )
+        );
+        assert_eq!((r_on.partial_relations, r_on.combined_relations), (0, 0));
+    }
+
     #[test]
     fn the_smoothness_oracle_is_charged() {
         let (curve, d1, d2, l, _k) = toy_instance(41);
@@ -2529,6 +2746,7 @@ mod tests {
             search: RelationSearch::factor_base_walk(),
             linear_algebra: LinearAlgebra::Sparse,
             smoothness: SmoothnessTest::Gcd,
+            large_primes: false,
         };
         let (_k, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         // Every trial runs the oracle, so its field-operation count can
@@ -2566,6 +2784,7 @@ mod tests {
             search: RelationSearch::Random,
             linear_algebra: LinearAlgebra::Dense,
             smoothness: SmoothnessTest::Scan,
+            large_primes: false,
         };
         let (found, report) = hec_index_calculus_dlp(&curve, &d1, &d2, &l, &params);
         // A reduced base trades trials for solve size; either it got
