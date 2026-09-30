@@ -8,6 +8,7 @@ arithmetic here.
 
     python3 render_rows.py html > rows.html
     python3 render_rows.py md   > rows.md
+    python3 render_rows.py md analysis-isolated.json   # v2, the isolated re-run
 """
 from __future__ import annotations
 
@@ -16,7 +17,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-A = json.loads((HERE / "analysis.json").read_text())
+A = json.loads((HERE / (sys.argv[2] if len(sys.argv) > 2 else "analysis.json")).read_text())
 
 
 def times(v: float, digits: int = 2, html: bool = True) -> str:

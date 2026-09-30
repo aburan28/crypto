@@ -6,6 +6,11 @@ Declared in [`PROTOCOL.md`](PROTOCOL.md) before any candidate code existed;
 written up in `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`
 §22.
 
+**v1 and v2.** v1's runs (`runs/`) were pinned with `taskset` alone, which
+AGENTS.md §10 does not accept for a timed number. PROTOCOL.md v2 runs the
+timed steps again through `tools/isolated_bench.py`, into `runs-isolated/`.
+v1 is kept as it ran and is not pooled with v2.
+
 ## Files
 
 | file | what it is |
@@ -14,7 +19,9 @@ written up in `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`
 | `inputs.sha256` | the 36 frozen §20 parameter files this round prices, by hash (the same as §21's) |
 | `probe/k{a}n{n}-M1.baseline.json` | the probe on the unmodified library: each target's descent, part by part |
 | `probe/k{a}n{n}-M1.logs.json` | the log table the probe used, from `ic workflow` on the same file (baseline binary) |
-| `run.py` | the runs, in the declared order; resumable, never overwrites |
+| `run.py` | the runs, in the declared order; resumable, never overwrites (`IC_ISOLATE=1 IC_RUNS=…` for v2) |
+| `curve_records.json` | the nine curves' exact field and curve records, from `examples/koblitz_curve_records.rs` |
+| `curve_ids.py`, `curve_ids.json` | their EC1 aliases and full curve UIDs (docs/curve-identities.md) |
 | `analyse.py` | every figure the note and the page quote → `analysis.json` |
 | `render_rows.py` | the table rows, rendered from `analysis.json` (`html` or `md`) |
 | `host.json` | host manifest and all four binaries' sha256 |

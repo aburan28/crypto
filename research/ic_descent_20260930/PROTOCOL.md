@@ -1,7 +1,9 @@
 # Ledger §22 protocol, v1: the descent's fixed cost per target
 
 Declared 2026-09-30, before any candidate code existed and before any
-timed comparison.
+timed comparison.  [v2](#v2-the-timed-runs-again-isolated) amends the
+procedure after v1's runs, before any isolated run; everything v2 does
+not name stands as v1 declared it.
 
 The only measurements made first are a pin check and a probe, both on the
 unmodified binary (`main` at `57e7ce3a`):
@@ -175,3 +177,84 @@ inputs, priced as §20 and §21 priced them.
   floor do not move.
 - `S` falls where the descent's fixed part weighs.
 - It is not an advance: nothing the method finds changes.
+
+## v2: the timed runs again, isolated
+
+Declared 2026-09-30, after v1's runs and before any isolated run.
+
+**Why.**
+- AGENTS.md §10 makes `tools/isolated_bench.py` mandatory for every
+  wall-clock or native-time number, and says `taskset` alone is not
+  enough. The rule came with `aa677e4c`, which the baseline `57e7ce3a`
+  already contains, so it was in force when v1 ran.
+- v1 ran every process under `taskset -c 2` alone.
+- Every figure this round quotes is timed:
+  - the primary speedup is a ratio of times;
+  - `S` is time converted by a unit that is itself timed;
+  - the descent and the probe's parts are times.
+- So v1's figures are not evidence under §10. They stay in `runs/` as the
+  first run, labelled as not isolated. Nothing in them is deleted or
+  pooled with v2.
+
+**What does not change:**
+- the change and the four binaries, by sha256;
+- the frozen inputs;
+- the pins;
+- the measures and the analysis;
+- the five targets and the stop rules;
+- the class.
+
+**What changes:**
+
+1. **Isolation.** Every timed process runs as
+   `tools/isolated_bench.py run --wait --cpus 2 -- …` with
+   `RAYON_NUM_THREADS=1`, instead of under `taskset -c 2`.
+   - The tool's defaults stand: a 2 s settle, other processes at most
+     0.10 CPUs on average, PSI `some avg10` at most 5.
+   - A refused start (a busy machine) is logged to `refusals.log` and
+     tried again after 15 s.
+   - Each process's isolation record is kept beside its report
+     (`*.isolation.jsonl`).
+2. **Contention.** A pair is excluded from every figure, but kept, if
+   either process is marked `contended` by the tool or exits non-zero.
+   - It is run again in the same slot, up to twice.
+   - Each slot's figure is its first clean pair. A slot without one is
+     reported as missing.
+   - The contended processes are counted. Contended and clean pairs are
+     never pooled.
+3. **A/A.** Before the comparison, the baseline runs against a
+   byte-identical copy of itself: `M1` at all nine sizes, five rounds,
+   isolated the same way. Its paired ratio is the noise floor, reported
+   beside every speedup.
+4. **Many threads: three, not four.**
+   - The tool will not reserve every CPU of this four-CPU host.
+   - So the thread check runs at three threads on CPUs 1–3
+     (`--cpus 1-3`, `RAYON_NUM_THREADS=3`), instead of four on 0–3.
+   - Target 5's "at four" reads "at three".
+5. **Controls.**
+   - The pin check runs on every pair, retries and A/A included.
+   - Control 1 compares counts only (`control.py`: base, collection,
+     logs, trials, recovered logarithms), not times. v1's stands and is
+     not rerun.
+   - The rho control and the probe are timed, so they run again,
+     isolated.
+6. **Nothing else runs.** No build, test, lint or other job runs on the
+   machine while the timed steps run.
+7. **Order and place.**
+   - The order is: manifest, inputs, A/A, main comparison, rho, threads,
+     probe.
+   - The outputs go to `runs-isolated/`, never over `runs/`. The analysis
+     is `analysis-isolated.json`.
+
+**Recorded beside it, not measured:** the nine curves' EC1 identities
+(`curve_ids.json`, docs/curve-identities.md). They come from
+`examples/koblitz_curve_records.rs`, which reads the defining
+polynomial, subgroup and generator off `KoblitzCurve::new(a, n)`.
+
+**Scope, per AGENTS.md §8a and §8b.**
+- The `K_0` rows are `E_0: y² + xy = x³ + 1`, the ECC2K-130 family. The
+  `K_1` rows are `E_1`, a different Koblitz model.
+- The largest field here is `GF(2^61)`, and there is no `m = 83` run. So
+  this round establishes nothing about ECC2K-130 at high fidelity.
+- `GF(2^45)` has proper intermediate subfields over `GF(2)`: `GF(2^3)`,
+  `GF(2^5)`, `GF(2^9)` and `GF(2^15)`. The change uses none of them.

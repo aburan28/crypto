@@ -5279,6 +5279,22 @@ total time. The ratio in each process's own unit is reported beside it.
 **Class: engineering.** Counts do not move; `S` falls where the fixed
 part weighs.
 
+**Amended before an isolated re-run (PROTOCOL.md v2).**
+- **Why.** v1's runs used `taskset` alone. When they ran, AGENTS.md §10
+  had already made `tools/isolated_bench.py` mandatory for every timed
+  number: `aa677e4c` is in `57e7ce3a`. Every figure this round quotes is
+  timed.
+- **What v2 does.** It runs the timed steps again, isolated, into
+  `runs-isolated/`:
+  - the same binaries, inputs, pins, measures, targets and class;
+  - contended pairs kept, excluded from the figures and run again;
+  - an A/A against a byte-identical copy of the baseline, as the noise
+    floor;
+  - the thread check at three threads, since the tool will not reserve
+    all four CPUs.
+- **Until v2's figures replace them,** §22.2–§22.10 report v1's, which
+  are not evidence under §10.
+
 ### 22.2 What ran
 
 Everything is in `research/ic_descent_20260930/`, run in the declared
