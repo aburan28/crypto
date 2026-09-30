@@ -1,0 +1,75 @@
+name: ECC2K-130 degree-7 m3 four-policy
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-m3-four-policy.yml'
+      - 'research/notes/ecc2k130/m3_four_policy_20260930/**'
+      - 'research/ecc2k130_factor_base_pilot_20260924/**'
+      - 'research/ecc2k130_factor_base_replication_20260925/**'
+      - 'research/ecc2k130_dual_transport_20260925/**'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            research/notes/ecc2k130/m3_four_policy_20260930
+            research/ecc2k130_factor_base_pilot_20260924
+            research/ecc2k130_factor_base_replication_20260925
+            research/ecc2k130_dual_transport_20260925
+            research/ecc2k130_relations
+            research/ecc2k130_oriented_transport_20260924
+            .github/workflows/ecc2k130-m3-four-policy.yml
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify source lock and pinned inputs
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'research/notes/ecc2k130/m3_four_policy_20260930')
+          import verify, produce
+          verify.checked_config()
+          produce.checked_config()
+          PY
+      - name: Compile and run pre-panel semantic tests
+        run: |
+          python -m py_compile research/notes/ecc2k130/m3_four_policy_20260930/{produce,verify,test_arithmetic}.py
+          python -m unittest discover research/notes/ecc2k130/m3_four_policy_20260930 -p 'test_*.py' -v
+
+  frozen-panel:
+    if: github.event_name == 'workflow_dispatch'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            research/notes/ecc2k130/m3_four_policy_20260930
+            research/ecc2k130_factor_base_pilot_20260924
+            research/ecc2k130_factor_base_replication_20260925
+            research/ecc2k130_dual_transport_20260925
+            research/ecc2k130_relations
+            research/ecc2k130_oriented_transport_20260924
+            .github/workflows/ecc2k130-m3-four-policy.yml
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run one frozen panel and independent replay
+        run: |
+          python research/notes/ecc2k130/m3_four_policy_20260930/produce.py --out "$RUNNER_TEMP/m3-four-policy-${GITHUB_RUN_ID}"
+          python research/notes/ecc2k130/m3_four_policy_20260930/verify.py --evidence "$RUNNER_TEMP/m3-four-policy-${GITHUB_RUN_ID}" --out "$RUNNER_TEMP/m3-four-policy-${GITHUB_RUN_ID}/replay.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ecc2k130-m3-four-policy-${{ github.run_id }}
+          path: ${{ runner.temp }}/m3-four-policy-${{ github.run_id }}
+          if-no-files-found: error
