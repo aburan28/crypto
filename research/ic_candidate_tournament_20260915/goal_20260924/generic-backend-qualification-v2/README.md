@@ -1,6 +1,11 @@
 # Fresh F4/F5/SAT complete-solve qualification
 
-Status: **dispatched once; result pending** in [Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479).
+Status: **producer/preservation failure, no campaign artifact** in
+[Actions run 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
+(attempt one). See the [run analysis](RESULT.md), the
+[machine-readable failure record](RUN-2026092902-FAILURE.md), and the retained
+[complete job log](workflow-job-109448846736.log). Seed `2026092902` is closed
+and cannot be redispatched; no candidate result or speedup is admitted.
 The scientific question, schedule,
 resources, success/stop rules and accounting are frozen in [PROTOCOL.md](PROTOCOL.md).
 The subsequent [source feasibility audit](STATIC-FEASIBILITY.md) identifies a
@@ -23,14 +28,14 @@ tournament's exact curve/point exclusion checker before making new targets.
 The workflow is
 [`ic-generic-backend-qualification-v2.yml`](../../../../.github/workflows/ic-generic-backend-qualification-v2.yml).
 Its PR jobs run the scientific controls and prove that a synthetic interrupted
-trial can be packed and uploaded. The campaign job is dispatch-only on main.
-The measured step has a 300-minute cap inside a 360-minute job; complete or
-partial evidence is packed into a single `.tar.zst` file before the job cap.
-Watch the live per-trial log and retain the output archive and manifest. If the
-campaign is incomplete, report it as operationally censored with unknown
-family qualification and competitive costs; do not retry this seed.
+trial can be packed and uploaded. The original campaign job is now disabled
+to prevent reopening this seed. The measured step hit its 300-minute cap;
+the original packer deleted the archive after a concurrent-directory `tar`
+warning, so the expected campaign bundle was never uploaded. The amended
+packer retains and marks an archive from that failure class for future,
+separately registered campaigns. It cannot recover this run's lost artifact.
 
-After the campaign, verify the archive SHA-256, extract it, inspect the frozen
+For a future campaign, verify the archive SHA-256, extract it, inspect the frozen
 `tournament/evaluator/tournament.py verify` receipt, `natural-yield.json`,
 `family-gate.json`, target history, source/build record, and all failure rows.
 Run the separately committed [independent_pairs.py](independent_pairs.py)
@@ -40,7 +45,7 @@ closure, target/host/resource pairing, and the published online table. It
 withholds aggregate speedups for an arm missing any scheduled paired point.
 This post-registration cross-check does not replace the frozen group replay,
 natural-query audit, or family gate.
-Publish the bundle's durable artifact link, exact hash and results in a new
+Publish that campaign's bundle link, exact hash and results in a new
 evidence PR. A complete, independently verified F4/F5 and SAT arm is the
 qualification goal; the development panel is not a held-out or global speed
 claim.

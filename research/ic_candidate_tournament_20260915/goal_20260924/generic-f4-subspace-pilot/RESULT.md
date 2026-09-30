@@ -66,7 +66,8 @@ not UNSAT and not encoder rejection.
 
 ## Next command
 
-After [Actions 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
-finishes: pack-audit the v2 artifact (never redispatch seed `2026092902`). If a
+[Actions 36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)
+is [operationally censored](../generic-backend-qualification-v2/RESULT.md); never
+redispatch seed `2026092902`. If a
 fresh F4/F5 complete-solve campaign is justified, register a new protocol with
 feasible layouts and withhold promotion until verified full-panel recovery.
