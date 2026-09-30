@@ -4,10 +4,11 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from audit_f5_runtime_v2 import natural_queries
 from f5_runtime_inputs_v1 import native_admission, retained_assets
-from f5_runtime_registration_v2 import mathematical_registration, validate_panel
+from f5_runtime_registration_v2 import mathematical_registration, validate_panel, register
 from identity import sha256
 from oracle import InvalidEvidence
 from register_paired_generic import inputs
@@ -96,6 +97,16 @@ class F5RuntimeV2Tests(unittest.TestCase):
             self.assertEqual(spec['arguments']['source']['execution_binding'], spec['binding'])
             self.assertEqual(sha256(spec['arguments']['candidate']),
                              spec['arguments']['seal']['candidate_sha256'])
+
+    def test_live_registrar_requires_retained_parser_proof_before_freezing(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch('f5_runtime_registration_v2.replay_schema_control',
+                       side_effect=InvalidEvidence('changed prerequisite archive')):
+                with self.assertRaisesRegex(InvalidEvidence, 'changed prerequisite'):
+                    register(ROOT, root/'absent-assets', self.panel, root/'registration')
+            self.assertFalse((root/'registration').exists())
+
 
     def test_known_scalar_freshness_wrong_subgroup_and_boolean_resources_fail_closed(self):
         for key, value in [('known_scalar_supplied', True), ('point_was_previously_supplied', False),

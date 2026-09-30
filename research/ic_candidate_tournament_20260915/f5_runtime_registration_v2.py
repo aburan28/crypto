@@ -12,11 +12,14 @@ from identity import candidate_manifest, run_id, sha256, workload_manifest
 from oracle import require
 from sat_runtime_execution_v3 import register as register_runtime
 from static_sat_assets_v3 import verified_assets
+from f5_job_schema_control import CONTROL
+from replay_f5_job_schema_control import replay as replay_schema_control
 
 SETTINGS = {'question', 'resources', 'target_input', 'algorithm_seed', 'config', 'run_number'}
 CONFIG = {'solver', 'linear_algebra', 'summands', 'groebner_degree', 'node_budget',
           'conflict_budget', 'batch_trials', 'max_trials'}
 INPUT_LAW = 'one-supplied-public-point; seed-is-provenance'
+SCHEMA_CONTROL_SHA256 = '05dbb080423e219d7cc9d4fcfb4ae46645a9d09a423ef4f6a76c33b91bc84c58'
 
 
 def validate_panel(panel, curve):
@@ -79,6 +82,7 @@ def mathematical_registration(panel, spec, files, *, check_host=True):
                                                        sha256=sha256(source)))
     method['implementation']['flags'].update(execution_binding=spec['binding'],
         stdin_policy='canonical-registered-job-UTF8; empty-input-seeds-for-unseeded-public-point; fixture-null-provenance',
+        native_input_schema_control_sha256=SCHEMA_CONTROL_SHA256,
         native_watchdog_group='inherit-controller-group-no-native-fork-or-setsid',
         native_thread_environment='all-listed-pools-one-thread',
         online_interval='native first target-dependent work through general scalar replay',
@@ -98,6 +102,11 @@ def mathematical_registration(panel, spec, files, *, check_host=True):
 
 
 def register(repository, assets, panel, output):
+    # Check the accepted parser proof before freezing a new measured invocation.
+    # The frozen controller/auditor reconstructs the known proof hash above;
+    # it does not read a mutable live repository or execute this diagnostic.
+    require(replay_schema_control(CONTROL/'native', SCHEMA_CONTROL_SHA256)['status']
+            == 'PASS_NATIVE_JOB_SCHEMA_ONLY', 'F5 v2 native parser prerequisite failed')
     assets = Path(assets)
     manifest, seal = [json.loads((assets/name).read_text()) for name in ('manifest.json', 'seal.json')]
     files = verified_assets(assets, manifest, seal)

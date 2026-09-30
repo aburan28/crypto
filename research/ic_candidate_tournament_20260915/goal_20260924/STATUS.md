@@ -362,6 +362,13 @@ correct the empty input seed list while preserving null fixture provenance and
 publish finite resource seconds as decimal strings beside the unchanged raw
 receipt. They require the separately frozen actual native Job/Config parser
 control and float-free publication/transport controls before any new IC
-registration. Its prospective seed is 2026093032; the one v2 IC invocation is
-not dispatched. Implementation and parser controls cannot establish natural
-yield, a complete F4/F5 family or a competitive speedup.
+registration. The single [native parser control](f5-source-bound-runtime-v2/interface-control/README.md)
+passed: two inputs reproduced every field/default and six adversarial schemas
+rejected, with independent archive/source/input/output replay. The registrar
+requires the exact accepted proof hash before freezing an invocation. Its
+prospective seed is 2026093032; the one v2 IC invocation is not dispatched.
+Implementation and parser controls cannot establish natural yield, a complete
+F4/F5 family or a competitive speedup. The parser's direct Python analysis
+inventory is not complete execution attestation; its additional DEFAULTS source
+is explicitly retained as postexecution auditor context. The future IC run
+still requires complete Python/package/interpreter/native pre/post gates.

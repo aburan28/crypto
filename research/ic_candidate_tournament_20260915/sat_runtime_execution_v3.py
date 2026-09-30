@@ -215,6 +215,7 @@ def execute(registration, output, *, expected_spec, timeout_seconds):
                '--worker', str(output)]
     started = time.monotonic_ns()
     timed_out = False
+    owned_group_killed = False
     with (output/'stdout.txt').open('x') as stdout, (output/'stderr.txt').open('x') as stderr:
         process = subprocess.Popen(command, cwd=root, env=frozen_environment(),
                                    stdout=stdout, stderr=stderr, start_new_session=True)
@@ -226,17 +227,23 @@ def execute(registration, output, *, expected_spec, timeout_seconds):
             # group, wait for the leader, and retain the incomplete source gate.
             try:
                 os.killpg(process.pid, signal.SIGKILL)
+                owned_group_killed = True
             except ProcessLookupError:
-                pass  # The whole process group exited at the watchdog boundary.
+                owned_group_killed = True  # The entire owned group already exited.
             returncode = process.wait()
         finally:
             # A failed controller can leave an inherited-group meter alive.
             # Reap the entire owned group on every terminal path, including
             # normal leader exit. Native v3 tools never start another group.
-            try:
-                os.killpg(process.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
+            # Once the watchdog killed the group, do not signal it again after
+            # reaping the leader. macOS can return EPERM for a group containing
+            # only orphaned zombies; the first group kill already covered every
+            # inherited child. First-kill permission errors still propagate.
+            if not owned_group_killed:
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
     wall = time.monotonic_ns()-started
     receipt = dict(schema_version=3, execution_sha256=sha256(spec),
                    binding=spec['binding'], exit_code=returncode, timed_out=timed_out,
