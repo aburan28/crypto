@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 149, 2026-09-22. The historical optimization chain is
+Current through Stage 161, 2026-09-22. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
@@ -180,6 +180,63 @@ minimal six-run full panel has 1.22 percent higher median relation-unit wall and
 a paired-ratio median above one, despite small CPU reductions.  The helper and
 minimal variants are both archived and rejected under the predeclared wall rule.
 
+Stage 150 divides the existing presence-filter allocation into two independent
+halves and requires both bits.  Exact relations and memory are unchanged, but
+the second atomic set and filter load raise median unit wall 2.50 percent, unit
+CPU 6.02 percent and build CPU 6.72 percent.  The split filter is rejected.
+
+Stage 151 caches each block's presence-filter hash for both prefetch and
+admission.  The extra 8 KiB scratch stream costs more than recomputing the
+multiply-mix: median unit wall regresses 0.58 percent and CPU 0.31 percent.
+The hash-cache patch is rejected.
+
+Stage 152 separates admitted window probes from bucket consumption, prefetches
+their bucket-index entries in FIFO order, and pins the unchanged exact relation
+verifier out of line.  All paired default-thread relation-unit comparisons win;
+median full IC wall falls 12.46 percent and whole CPU 4.36 percent.  A matched
+one-worker pair improves full IC wall 10.97 percent and whole CPU 7.89 percent.
+The exact relation stream and recovered scalar are unchanged, so this source is
+selected.
+
+Stage 153 adds a second prefetch for the compact-rest payload after the bucket
+index arrives.  Its one-unit panel improves wall 30.25 percent, but complete
+workflow relation-unit wall regresses 19.53 percent and exact verification
+again slows roughly threefold.  The payload-prefetch patch is rejected and
+Stage 152 remains selected.
+
+Stage 154 halves the selected FIFO's internal block from 1,024 to 512 entries.
+Median relation-unit wall falls 6.82 percent, but charged unit CPU rises 2.33
+percent because smaller batched inversions spend more arithmetic.  The candidate
+is rejected under the no-extra-work rule and Stage 152 remains selected.
+
+Stage 155 doubles that internal block to 2,048 entries.  The larger working set
+regresses median relation-unit wall 5.39 percent and CPU 0.95 percent, so it is
+also rejected and the selected 1,024-entry block is retained.
+
+Stage 156 retunes presence-filter lookahead on the selected FIFO from 32 to 64.
+Median unit CPU falls 0.69 percent, but unit wall rises 2.87 percent and whole
+wall 2.85 percent.  The wider lookahead is rejected and 32 remains selected.
+
+Stage 157 retunes the same lookahead from 32 to 16.  Unit wall falls only 0.57
+percent while CPU rises 3.25 percent, so the shorter lookahead is rejected and
+32 remains selected.
+
+Stage 158 skips the duplicate filter admission inside selected FIFO
+consumption.  The minimal existing-body fast path preserves exact relations but
+regresses median unit wall 1.99 percent and CPU 5.52 percent.  It is rejected.
+
+Stage 159 halves bucket-index entries from `2^26` to `2^25`, doubling target
+run length from about 16 to 32 while saving 128 MiB theoretically.  Unit wall is
+neutral and CPU regresses 6.21 percent, so the current bucket width is retained.
+
+Stage 160 doubles bucket-index entries to `2^27`, halving target run length to
+about eight at a theoretical 256 MiB index cost.  Unit CPU falls 1.95 percent,
+but wall rises 1.79 percent and median RSS about 9.3 percent.  It is rejected.
+
+Stage 161 retests the eight-bit witnessed presence filter on the selected FIFO.
+Median unit wall rises 6.06 percent, unit CPU 1.55 percent, build wall 12.71
+percent and median RSS about 3.6 percent.  The four-bit filter remains selected.
+
 The campaign has target-independent algebraic factor bases; matched native-XOR,
 WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a
 balanced 160-instance PDP panel through `n=59`; public unknown-scalar end-to-end
@@ -189,9 +246,9 @@ does not establish a new state of the art.
 
 | Gate | Status | Current evidence | Remaining requirement |
 |:--|:--|:--|:--|
-| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds. The Stage 141--149 frontier and optimization controls charge 78 processes: 4,279.004777 sequential wall-seconds, 24,435.730204 core-seconds and 10,091,528,192 B maximum RSS. These incremental charges do not replace Stage 140's 23 processes. One inherited preliminary harness process has 15.614915 s observed wall but no retained CPU/RSS receipt and remains explicitly excluded. | Execute licensed Magma with complete resources and independently recover or repeat the missing preliminary receipt; preinstalled OS/toolchain acquisition remains excluded. |
+| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds. The Stage 141--161 frontier and optimization controls charge 168 processes: 8,805.864018 sequential wall-seconds, 46,940.856427 core-seconds and 10,620,682,240 B maximum RSS. These incremental charges do not replace Stage 140's 23 processes. One inherited preliminary harness process has 15.614915 s observed wall but no retained CPU/RSS receipt and remains explicitly excluded. | Execute licensed Magma with complete resources and independently recover or repeat the missing preliminary receipt; preinstalled OS/toolchain acquisition remains excluded. |
 | 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract, seal the return before truth scoring, and report F4 resources. |
-| 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | The selected rank-tail `n=59` receipts report default-thread IC 58.027800 s / 526.896900 core-seconds / 10,072,866,816 B RSS and one-worker IC 431.866038 s / 428.938946 core-seconds / 10,043,244,544 B RSS. Against selected Stage 140, default IC wall improves 38.31% and CPU 29.77%; one-worker wall improves 31.49% and CPU 31.51%. | Supply the same fields for licensed Magma F4. SAT conflicts remain inapplicable to exact pair-table arms and are reported as null. |
+| 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | The selected bucket-prefetch panel has median default-thread IC 78.619846 s / 504.697434 core-seconds / 9,299,828,736 B median RSS and a matched one-worker candidate at 437.950836 s / 425.370001 core-seconds / 7,217,905,664 B RSS. Against their same-binary baselines, default IC wall improves 12.46% and CPU 4.36%; one-worker IC wall improves 10.97% and CPU 7.89%. | Supply the same fields for licensed Magma F4. SAT conflicts remain inapplicable to exact pair-table arms and are reported as null. |
 | 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage including one completed larger IC run** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and `n=59`. Stages 132--133 retain the standard `n=59` cap and width frontier. Stages 134--141 complete and optimize the cofactor-projected `n=59, ell=15, m=3` public unknown-scalar workflow through persisted coverage and sparse-rank tails. | The evidence is finite and toy-sized; it is not an asymptotic scaling law or a literature-scale speed record. |
 | 5. Unknown scalar with no constructed factor-base logs | **Satisfied for finite degrees 23, 31, 41, 53, and 59** | Stage 108 archives the `n=53` public hash-seed-53001 run. Stage 141 derives all 16,344 `n=59` logs from 31,727 uniform relations plus 71 public-matrix-selected relations, recovers `d=17861472351607`, and verifies `[d]G=Q` in default and one-worker modes. Neither target scalar nor factor-base logs are supplied. | Repeat on independent public seeds and obtain unaffiliated replay; these strengthen rather than replace the finite gate-5 execution. |
 | 6. Full cost against automorphism-optimized Pollard rho | **False. The online wall gate passed only against the fixture rho control; full-cost/core gate false** | Stage 108 selects the four-shard direct route after five direct/mixed wins with 0.904540 median wall and 0.912199 median core ratios. Its identified EPYC 9V74 panel has five direct/rho wins and 0.839190 median wall ratio. Median direct core remains 2.261565 times rho, retained support is 738,197,504 B, and fresh build plus direct is 17.636692 times rho. The rho control in that panel (`koblitz_rho_fixture`) inverts once per step, canonicalises by squaring chains, stores every point and runs on one thread, about 9.5 µs a step. Against a batched signed-Frobenius rho on the same target (cryptanalysis `suite/examples/koblitz_batched_rho.rs`, M4 Pro, portable arithmetic for all arms), the selected direct takes a median 17.3 s against 0.49 s for 1-thread and 0.20 s for 4-thread rho. That is 46.3M support queries against about 0.56M rho steps. | Beat an automorphism-optimized rho (shared inversion, orbit key, distinguished points), not the fixture control, first on the EPYC gate host. The query count `r/(n·|F|)` grows as `r^{2/3}` against rho's `r^{1/2}`, so constant-factor improvements (including an orbit-folded support table) cannot close this gate toward larger degrees. |
@@ -544,6 +601,98 @@ percent and the paired unit-wall ratio median exceeds one.  All full runs emit
 the same 31,798 relations and verified scalar.  The 24 processes charge
 1,347.433898 sequential wall-seconds, 9,477.238660 core-seconds and
 10,084,401,152 B peak RSS.  Both variants are rejected.
+
+Stage 150 keeps the 512 MiB filter allocation but places one independent bit in
+each half.  The expected false-admission probability falls, while every stored
+pair pays two atomic bit sets and probes may load two filter words.  Four
+source-pinned processes emit the same 2,157 relations.  Candidate median unit
+wall rises from 1.932228 to 1.980474 seconds, unit CPU from 23.218455 to
+24.615690 core-seconds, and build CPU from 139.615756 to 148.997076
+core-seconds.  They charge 72.543322 wall-seconds, 696.357834 core-seconds and
+10,075,766,784 B peak RSS.  The no-extra-memory split is rejected.
+
+Stage 151 computes one filter hash per key block and reuses it for both
+lookahead prefetch and admission.  Four source-pinned one-unit processes emit
+the same 2,157 relations.  Candidate median unit wall rises from 1.733608 to
+1.743590 seconds and unit CPU from 22.506273 to 22.575571 core-seconds.  They
+charge 63.849557 wall-seconds, 662.355731 core-seconds and 10,072,932,352 B
+peak RSS.  The 8 KiB block scratch costs more than the avoided hash and the
+candidate is rejected.
+
+Stage 152 first checks the presence filter for a 1,024-key block, stores the
+admitted offsets in order, prefetches their random `bucket_start` entries, then
+consumes that FIFO without changing witness order.  The exact relation verifier
+is pinned out of line to isolate it from query-loop code layout.  Eight one-unit
+pilots, sixteen complete default-thread processes across the preliminary and
+selected variants, and a matched one-worker pair retain one exact relation hash
+and scalar.  In the selected four-run-per-arm default panel, median unit wall
+falls 19.51 percent, unit CPU 6.39 percent, full IC wall 12.46 percent and whole
+CPU 4.36 percent; every paired unit comparison wins.  One-worker IC wall falls
+from 491.894708 to 437.950836 seconds and CPU from 461.794250 to 425.370001
+core-seconds.  The 26-process campaign charges 2,659.078039 wall-seconds,
+10,455.178415 core-seconds and 10,084,040,704 B peak RSS.  Full cost still loses
+to rho by roughly 140 and 774 times.
+
+Stage 153 adds a middle pass over admitted offsets: after `bucket_start` has
+been prefetched, it reads the run start and prefetches the first compact rest.
+Eight one-unit processes improve median unit wall 30.25 percent and CPU 4.18
+percent.  Four complete workflows reverse that result: candidate median unit
+wall rises 19.53 percent, full IC wall 12.87 percent, and verification 199.10
+percent.  All hashes and scalars still match.  The twelve processes charge
+717.712397 wall-seconds, 3,307.549828 core-seconds and 10,084,892,672 B peak
+RSS.  The patch is archived and rejected.
+
+Stage 154 changes only the selected window loop's internal block constant from
+1,024 to 512.  Eight source-pinned one-unit processes emit the same 2,157
+relations.  Candidate median unit wall falls from 2.904745 to 2.706591 seconds,
+while unit CPU rises from 22.235606 to 22.753293 core-seconds.  The panel charges
+201.720277 wall-seconds, 1,318.438451 core-seconds and 10,085,335,040 B peak RSS.
+The wall-for-work trade is rejected.
+
+Stage 155 changes the same constant from 1,024 to 2,048.  Four source-pinned
+processes emit the same 2,157 relations.  Candidate median unit wall rises from
+2.512955 to 2.648489 seconds and CPU from 22.704948 to 22.920353 core-seconds.
+They charge 87.236383 wall-seconds, 668.786782 core-seconds and 10,084,302,848 B
+peak RSS.  The larger cache footprint is rejected.
+
+Stage 156 changes only the selected FIFO presence-filter lookahead from 32 to
+64.  Eight processes emit the same 2,157 relations.  Candidate median unit wall
+rises from 2.512537 to 2.584736 seconds, while unit CPU falls from 22.580665 to
+22.425630 core-seconds.  They charge 182.501493 wall-seconds, 1,331.369772
+core-seconds and 10,082,418,688 B peak RSS.  The wall regression rejects it.
+
+Stage 157 changes the selected FIFO presence-filter lookahead from 32 to 16.
+Eight processes retain the same 2,157 relations.  Candidate median unit wall
+falls from 2.562383 to 2.547881 seconds, while CPU rises from 22.743259 to
+23.482047 core-seconds.  They charge 177.409112 wall-seconds, 1,353.602444
+core-seconds and 10,080,960,512 B peak RSS.  The extra work rejects it.
+
+Stage 158 adds an `already_admitted` flag to the existing lookup body and uses
+it only from the selected FIFO consumer.  Four processes retain the same 2,157
+relations.  Candidate median unit wall rises from 2.600805 to 2.652481 seconds
+and CPU from 22.485871 to 23.728118 core-seconds.  They charge 93.739907
+wall-seconds, 686.047697 core-seconds and 10,085,679,104 B peak RSS.  The fast
+path is rejected.
+
+Stage 159 lowers compact bucket bits from 26 to 25.  Four processes emit the
+same 2,157 relations.  Candidate median unit wall changes from 2.628147 to
+2.625274 seconds, while CPU rises from 22.421583 to 23.814860 core-seconds.
+They charge 88.843412 wall-seconds, 672.866766 core-seconds and 10,080,976,896 B
+peak RSS.  The longer compact runs reject the memory trade.
+
+Stage 160 raises compact bucket bits from 26 to 27.  Four processes emit the
+same 2,157 relations.  Candidate median unit wall rises from 2.589146 to
+2.635581 seconds, CPU falls from 23.064888 to 22.614644 core-seconds, and median
+peak RSS rises from 9,715,990,528 to 10,618,896,384 B.  They charge 90.389257
+wall-seconds and 677.655218 core-seconds.  The wall-and-memory trade is rejected.
+
+Stage 161 doubles the witnessed presence filter from 536,870,912 to
+1,073,741,824 bytes on the selected FIFO stack.  Four processes retain the same
+2,157 relations.  Candidate median unit wall rises from 2.497084 to 2.648392
+seconds, unit CPU from 22.804185 to 23.158461 core-seconds, build wall from
+16.090470 to 18.134880 seconds, and median RSS from 9,729,105,920 to
+10,080,403,456 B.  They charge 91.836085 wall-seconds and 674.917285
+core-seconds.  The wider filter is rejected again.
 
 ## The n=53 crossover against a batched rho
 

@@ -4828,6 +4828,16 @@ impl PairSumTable {
         prefetch(&self.present[self.filter_word(key)]);
     }
 
+    /// Prefetch the bucket-index entry for a key that passed the presence
+    /// filter. The following entry normally shares its cache line.
+    #[inline]
+    fn prefetch_bucket(&self, key: u64) {
+        let bucket = self.bucket_of(key);
+        if let Some(start) = self.bucket_start.get(bucket) {
+            prefetch((start as *const u32).cast::<u64>());
+        }
+    }
+
     /// The lookup half of [`Self::contains_pair`].
     #[doc(hidden)]
     pub fn contains_key(&self, key: u64) -> bool {
@@ -5154,18 +5164,25 @@ impl PairSumTable {
         // stopping at its first witness has not paid for the rest.
         const BLOCK: usize = 1024;
         const LOOKAHEAD: usize = 32;
+        let mut admitted_offsets = Vec::with_capacity(BLOCK / 8);
         for (b, block) in rests.chunks(BLOCK).enumerate() {
             self.keys_of(block, keys);
+            admitted_offsets.clear();
             for &key in keys.iter().take(LOOKAHEAD) {
                 prefetch(&self.present[self.filter_word(key)]);
             }
-            for (within, rest) in block.iter().enumerate() {
+            for within in 0..block.len() {
                 if let Some(&ahead) = keys.get(within + LOOKAHEAD) {
                     prefetch(&self.present[self.filter_word(ahead)]);
                 }
                 if !self.admitted(keys[within]) {
                     continue;
                 }
+                self.prefetch_bucket(keys[within]);
+                admitted_offsets.push(within);
+            }
+            for &within in &admitted_offsets {
+                let rest = &block[within];
                 let offset = b * BLOCK + within;
                 let k = match scan {
                     Scan::Cyclic { start, .. } => {
@@ -9683,6 +9700,7 @@ impl<'a> RelationCollector<'a> {
 
 /// Re-check a reported relation in the group: exactly `m` indices, all
 /// in range, `0 < a < r`, and `[a]G == Σ P_i`.
+#[inline(never)]
 pub fn verify_collected_relation(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,

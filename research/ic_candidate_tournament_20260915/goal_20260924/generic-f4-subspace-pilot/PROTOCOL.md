@@ -1,8 +1,11 @@
 # Disclosed-point F4/F5 standard-subspace recovery pilot
 
-Status: **registered plan only; not dispatched**. This protocol freezes a
-bounded diagnostic before any fresh competitive panel. It does not consume the
-one-dispatch slot of
+Status: **canonical series merged** in [RESULT.md](RESULT.md) (PR #961).
+[`run_pilot.py`](run_pilot.py) is closed.
+[`run-20260929`](run-20260929/RESULT.md) is a same-budget replay, not a second
+registration. This protocol
+freezes a bounded diagnostic before any fresh competitive panel. It does not
+consume the one-dispatch slot of
 [generic-backend-qualification-v2](../generic-backend-qualification-v2/PROTOCOL.md)
 (seed `2026092902`, Actions run
 [36580669479](https://github.com/aburan28/crypto/actions/runs/36580669479)).
@@ -70,7 +73,7 @@ zero yield for the ambient-orbit v2 arms.
 | Summands | 3 |
 | Cells | n17a1, n19a0, n23a0, n23a1, n31a0 |
 | Points | Exactly the five public targets already used in the dimension-6 inventory control (one per cell). Digests and coordinates are sealed by that JSON once #952 merges; do not substitute readiness or improvement-round points without amending this protocol. |
-| Budget | Dispatch series (measured): `max_trials=1`, `batch_trials=1`, child wall 180s, `RAYON_NUM_THREADS=1`. Exhaustion is incomplete, not UNSAT. Prior `max_trials=64` / 300s series timed out without receipts on n17a1 (`runs-max64-timeout/`). |
+| Budget | Canonical series (measured, PR #961): `max_trials=1`, `batch_trials=1`, `groebner_degree=3`, `node_budget=4096`, `conflict_budget=100000`, dense relation LA, child wall 180s, `RAYON_NUM_THREADS=1`. Exhaustion is incomplete, not UNSAT. Prior `max_trials=64` / 300s series timed out without receipts on n17a1 (`runs-max64-timeout/`). |
 | Host label | Record `rustc --version`, CPU, threads. Valgrind instruction counts stay out of scope unless 3.22.0 is present. |
 | Inventory points SHA-256 | `be3053b4b637311e8255f294807fde412510fbda2464e678a6a16fdea397d403` (`standard-subspace-d6-inventory-control.json`) |
 | Runtime env | Tournament-style child env only: `PATH`/`HOME`/`LANG`/`LC_ALL`/`TZ`, `RAYON_NUM_THREADS=1`, `IC_ARTIFACT_CACHE=off`, `IC_F2_BACKEND=cpu`. Do **not** set `KIC_F5_AVX512_UNPACK` for this exclusive-phase pin. |
@@ -78,6 +81,27 @@ zero yield for the ambient-orbit v2 arms.
 Classification of any later cost movement against the incumbent on these points
 is at most **engineering** or **factor-base-policy**; it cannot be an **advance**
 against the encoder floor, which is already satisfied by construction at `ℓ=6`.
+
+## Dispatch is closed
+
+[`panel.json`](panel.json) is the encoder preflight only. The canonical jobs
+are under `runs/`, with operational failures retained in `runs-env-error/` and
+`runs-max64-timeout/`. [`run_pilot.py`](run_pilot.py) exits before building or
+sampling. Do not invoke it for this budget.
+
+[`run-20260929`](run-20260929/RESULT.md) repeats the canonical `max_trials=1`
+budget on the same five points. Its build SHA-256 matches
+`build-identity.json` (`de3cb8b896f31f03668f1d0eb14302fef2b1e0bc0be303e7f4021a70dd085335`).
+Its worker SHA-256
+`46325885cc72e9c4928f180f6a687e85d198887ef93da4488db471920d7ef62b` differs from
+the canonical worker SHA-256
+`ed8e5a2f7aa5924e81587b9b0ed5bb11935166e226db640b720bc28842faf798`; both name
+the same source commit. The replay's summary SHA-256 is
+`04230b42ce3a6392b9a2681ac7ab385e43db41aba5e2617466597246a65a2e4c`. It is not
+seed `2026092901` or `2026092902` and is not a new registration.
+
+A different budget needs a new protocol amendment and a new runner before any
+job. Changing the output directory is not enough.
 
 ## Cost accounting
 

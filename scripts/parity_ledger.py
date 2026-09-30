@@ -198,6 +198,60 @@ def k4_jv():
     return out
 
 
+# ── k = 5, Joux–Vitse four-point decompositions: C″ (27_jv_quintic_*.json) ─
+
+def k5():
+    """Per size: C″ for the plain (Weierstrass) and the 2-torsion (Edwards)
+    symmetrisation, and the crossover each implies on the derived exponents
+    (residuals ∝ n^{2/5}, rho ∝ n^{1/2})."""
+    out = {}
+    for name, key in (("27_jv_quintic_csecond.json", "weierstrass"), ("27_jv_quintic_edwards_csecond.json", "edwards")):
+        rows = load(name)
+        if not rows:
+            continue
+        groups = by_size(rows, lambda r: r["p"])
+        out[key] = [
+            dict(p=p, n=g[0]["n"], seeds=len(g), base=mean([r["base"] for r in g]),
+                 c_add=g[0]["fp_muls_per_add"],
+                 c_second=mean([r["c_second"]["mean"] for r in g]),
+                 c_second_dec=mean([r["c_second_decomposable"]["mean"] for r in g]),
+                 weil=mean([r["weil_muls"]["mean"] for r in g]),
+                 degree=mean([r["degree_reached"]["mean"] for r in g]),
+                 rows=mean([r["max_rows"]["mean"] for r in g]),
+                 cols=mean([r["max_cols"]["mean"] for r in g]),
+                 ms=mean([r["f4_ms"]["mean"] for r in g]),
+                 random=sum(r["random_residuals"] for r in g),
+                 decomposable=sum(r["random_decomposable"] for r in g),
+                 planted=sum(r["planted_found"] for r in g),
+                 constructed=sum(r["constructed_residuals"] for r in g),
+                 mismatches=sum(r["mismatches"] for r in g),
+                 unverified=sum(r.get("unverified", 0) for r in g),
+                 undetermined=sum(r["undetermined"] for r in g),
+                 timed_out=sum(r["timed_out"] for r in g),
+                 mitm=mean([r["mitm4_group_ops"] for r in g]))
+            for p, g in groups.items()
+        ]
+    return out
+
+
+def k5_crossover(c_second, c_add, columns_per_p, rho_s=1.3, cofactor=1):
+    """Residuals = columns / rate = (columns_per_p · p) · 24p; rho = rho_s · √n
+    with n = p⁵ / cofactor (prime order: cofactor 1; Edwards: cofactor 4, and
+    the caller passes rho_s already scaled by 1/√cofactor).  S/rho =
+    24·columns_per_p·C″ / (rho_s · c_add · √p): parity at √p =
+    24·columns_per_p·C″/(rho_s·c_add).  `n*` is the subgroup order at `p*`,
+    the convention of the tables' size column."""
+    sqrt_p = 24 * columns_per_p * c_second / (rho_s * c_add)
+    p_star = sqrt_p ** 2
+    return p_star, 5 * math.log2(p_star) - math.log2(cofactor)
+
+
+def k5_c_needed(bits, c_add, columns_per_p, rho_s, cofactor=1):
+    """C″ for parity at subgroup order 2^bits: p = (cofactor · 2^bits)^{1/5}."""
+    p = (cofactor * 2.0 ** bits) ** 0.2
+    return math.sqrt(p) * rho_s * c_add / (24 * columns_per_p)
+
+
 def two_term_minimum(sizes, rel, la, rho_s, c_add):
     """S(n) = A n^(a-1/2) + B n^(b-1/2) fitted through the top size; its
     minimum over n and where.  Returns (min S/rho, log2 n at the minimum,
@@ -298,6 +352,30 @@ def main():
             cC, cCe = fit(sizes, [x["c_prime"] for x in jv["dlp"]])
             print(f"\nPooled rho S = {rho_p:.3f} ± {rho_se:.3f} over {nr} runs.  Fitted exponents over {len(sizes)} sizes: S ∝ n^{{{cS:+.3f} ± {cSe:.3f}}} (rho: 0), residuals ∝ n^{{{cR:.3f} ± {cRe:.3f}}} (derived 1/2), C′ ∝ n^{{{cC:+.3f} ± {cCe:.3f}}} (derived 0).")
             print(f"S / rho against the pooled reference: " + ", ".join(f"{x['S']/rho_p:,.0f}× at 2^{math.log2(x['n']):.1f}" for x in jv["dlp"]) + ".")
+
+    k5d = k5()
+    if k5d:
+        print("\n## D. The k = 5 stage: C″ measured (27_jv_quintic_*.json)\n")
+        print("| symmetrisation | p | n | seeds | columns | c_add | C″ (random residuals) | C″ (decomposable) | Weil | F4 degree reached | F4 matrix (rows × cols) | F4 s | random / decomposable | planted found | mismatches | unverified | undetermined / timed out | oracle (group ops) |")
+        print("|:--|---:|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|:--|:--|--:|--:|:--|--:|")
+        for key, label in (("weierstrass", "plain, Weierstrass `x`, e(x)"), ("edwards", "2-torsion, Edwards `y`, e(y²) + π")):
+            for x in k5d.get(key, []):
+                print(f"| {label} | {x['p']} | 2^{math.log2(x['n']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['c_add']:.0f} | {x['c_second']:.3e} | {x['c_second_dec']:.3e} | {x['weil']:,.0f} | {x['degree']:.1f} | {x['rows']:,.0f} × {x['cols']:,.0f} | {x['ms']/1e3:.2f} | {x['random']} / {x['decomposable']} | {x['planted']}/{x['constructed']} | {x['mismatches']} | {x['unverified']} | {x['undetermined']} / {x['timed_out']} | {x['mitm']:,.0f} |")
+        print("\nCrossovers implied by the measured C″, extrapolated on residuals ∝ n^{2/5} and rho ∝ n^{1/2} (a stage diagnostic: no end-to-end k = 5 S exists):\n")
+        print("| symmetrisation | C″ (top size) | columns per p | rho S reference | parity at p* | n* |")
+        print("|:--|--:|--:|--:|--:|--:|")
+        for key, label, cpp, rho_s, cof in (("weierstrass", "plain", 0.5, 1.3, 1), ("edwards", "2-torsion", 0.25, 1.3 / 2.0, 4)):
+            xs = k5d.get(key)
+            if not xs:
+                continue
+            x = xs[-1]
+            p_star, bits = k5_crossover(x["c_second"], x["c_add"], cpp, rho_s, cof)
+            print(f"| {label} | {x['c_second']:.2e} | {cpp} | {rho_s:.2f} (√n = p^{{5/2}}{'/2' if key == 'edwards' else ''}) | {p_star:.2e} | 2^{bits:.0f} (n = p⁵{'/4' if cof == 4 else ''}) |")
+        if "edwards" in k5d and "weierstrass" in k5d:
+            e = k5d["edwards"][-1]["c_second"]; w = k5d["weierstrass"][-1]["c_second"]
+            ca = k5d["edwards"][-1]["c_add"]
+            n128 = k5_c_needed(128, ca, 0.25, 1.3 / 2.0, 4); n160 = k5_c_needed(160, ca, 0.25, 1.3 / 2.0, 4); n100 = k5_c_needed(100, ca, 0.25, 1.3 / 2.0, 4)
+            print(f"\nThe 2-torsion symmetry cuts C″ by {w/e:,.0f}× at the top size.  For parity at a subgroup order of 2^128 on the 2-torsion route (p = (4·2^128)^{{1/5}} = 2^{(130/5):.1f}): C″ < {n128:.2e}, {e/n128:,.0f}× below the measurement; at 2^160: C″ < {n160:.2e} ({e/n160:,.0f}×); at 2^100: C″ < {n100:.2e} ({e/n100:,.0f}×).")
 
     print("\n## C. What parity needs, per route\n")
     if k4:
