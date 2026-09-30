@@ -60,9 +60,18 @@ inputs. Review regenerated receipts whenever the parameter constructors change.
 
 | Panel | Independent Sage parameter/public-S3 checks | Native real-parameter checks | Full-size IC pipeline |
 | --- | --- | --- | --- |
-| P-256 | Passed | CI gate added; execution pending | Unavailable |
-| All five NIST K curves | Passed | CI gate added; execution pending | Unavailable |
-| All five NIST B curves | Passed | CI gate added; execution pending | Unavailable |
+| P-256 | Passed | Passed on all three architectures | Unavailable |
+| All five NIST K curves | Passed | Passed on all three architectures | Unavailable |
+| All five NIST B curves | Passed | Passed on all three architectures | Unavailable |
+
+The native qualification checkpoint is commit
+`90a10a8989d241a41046b3c5afae7170b69d97c6`, workflow run
+[36702295438](https://github.com/aburan28/crypto/actions/runs/36702295438).
+Linux x86-64, Linux aarch64 and Apple silicon passed the unit tests, CLI
+integration comparisons, full eleven-curve diagnostics and smoke commands.
+The workflow archives native receipts and retains diagnostic failures while
+checking the complete panel. This records the qualified implementation;
+the latest PR head must also pass its applicable checks before merge.
 
 The existing `icx run` path remains a smaller-analogue experiment. Its result
 is always `scaled`, even if a caller raises `--envelope`; increasing an
@@ -87,7 +96,7 @@ remain degree 13. The smoke tests use an admitted analogue of each coefficient.
 - [x] Check the Hasse necessary condition without rounding; test both boundaries.
 - [x] Preserve Koblitz `a` and prevent misleading analogue run regimes.
 - [x] Add an exact-parameter solve guard and reject incompatible size flags.
-- [ ] Execute and pass applicable native CI on the final PR head.
+- [x] Execute and pass native CI on the recorded qualification checkpoint.
 - [ ] Implement and qualify a full-width factor-base/decomposition pipeline.
 - [ ] Implement and qualify full-width relation coefficients and linear algebra.
 - [ ] Establish natural verified relation yield and independent rank on real inputs.
