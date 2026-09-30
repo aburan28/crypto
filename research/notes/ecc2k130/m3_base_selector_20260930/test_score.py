@@ -52,8 +52,12 @@ class ScoreRegression(unittest.TestCase):
                     meter = prior_verify.pilot.Meter()
                     field = prior_verify.pilot.CountedField(meter)
                     curve = prior_verify.pilot.CountedCurve(meter, field, 0, 1)
+                    before = meter.snapshot()
                     actual = score_candidate(curve, base, self.universe, meter,
                         prior_verify.pilot.RankTracker)
+                    outer = meter.delta(before, meter.snapshot())
+                    self.assertEqual(actual["score_cost"], {k: v for k, v in
+                        outer.items() if k != "cpu_ns"})
                     brute, _ = prior_verify.brute_triples(self.reference, base)
                     brute.pop(None, None)
                     rows = []

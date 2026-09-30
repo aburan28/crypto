@@ -30,7 +30,10 @@ def score_candidate(curve, base: list[tuple[int, int]], universe: set,
             assert target in universe, "base summand left the prime subgroup"
             first.setdefault(target, (k, i, j))
     after = meter.snapshot()
-    cost = meter.delta(before, after)
+    # The enclosing phase owns elapsed CPU. Two nested snapshots can never
+    # have identical cpu_ns even when their arithmetic counters agree.
+    cost = {key: value for key, value in meter.delta(before, after).items()
+            if key != "cpu_ns"}
     assert cost["group_add"] == 324, cost
     assert len(first) <= 120
 

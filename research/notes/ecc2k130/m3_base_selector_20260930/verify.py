@@ -271,8 +271,9 @@ def replay(folder: Path, manifest: Path) -> dict:
                 assert saved_candidate["occupancy"] == occupancy
                 assert {k: saved_candidate["score"][k] for k in score} == score
                 assert saved_candidate["score"]["score_cost"]["group_add"] == 324
-                assert saved_candidate["score"]["score_cost"] == result[
-                    "phase_costs"][f"score_{role}_{key}_{index}"]
+                assert saved_candidate["score"]["score_cost"] == {
+                    k: v for k, v in result["phase_costs"][
+                        f"score_{role}_{key}_{index}"].items() if k != "cpu_ns"}
                 for P in base:
                     ref = ref0 if role == "source" else ref1
                     assert ref.on_curve(P) and ref.mul(P, R) is None

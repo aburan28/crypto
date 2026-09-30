@@ -187,7 +187,8 @@ def run(output: Path) -> dict:
                 score = rep.phase(meter, ledger, f"score_{name}", lambda back=back:
                     score_candidate(E0, back, set(by_point), meter,
                                     pilot.RankTracker, pilot.R))
-                assert score["score_cost"] == ledger[f"score_{name}"]
+                assert score["score_cost"] == {k: v for k, v in
+                    ledger[f"score_{name}"].items() if k != "cpu_ns"}
                 record = {"base": [pilot.encode_point(P) for P in base],
                           "pullback": [pilot.encode_point(P) for P in back],
                           "meta": meta,
