@@ -87,8 +87,20 @@ def main():
     fits = [f for f in (fit(rows, e) for e in ["C", "FC", "QFC", "MONO", "SUB"]) if f]
     xfits = [f for f in (fit(rows, e, "xor_mean") for e in ["C", "FC", "QFC", "MONO", "SUB"]) if f]
     out = {"rows": rows, "fits_calls": fits, "fits_xor": xfits, "manifests": manifests}
+    # Round floats so that the file re-derives byte-identically across
+    # platforms (the last digit of a fitted slope varies with the summation).
+    def rounded(v):
+        if isinstance(v, float):
+            return round(v, 9)
+        if isinstance(v, list):
+            return [rounded(x) for x in v]
+        if isinstance(v, tuple):
+            return [rounded(x) for x in v]
+        if isinstance(v, dict):
+            return {k: rounded(x) for k, x in v.items()}
+        return v
     with open(os.path.join(HERE, "results", a.tag, "summary.json"), "w") as f:
-        json.dump(out, f, indent=1)
+        json.dump(rounded(out), f, indent=1)
     print(md_table(rows))
     print()
     for f in fits:
