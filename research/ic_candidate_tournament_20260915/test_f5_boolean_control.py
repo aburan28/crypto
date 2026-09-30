@@ -1,8 +1,11 @@
 import copy
 import itertools
 import json
+import importlib.util
 from pathlib import Path
+import subprocess
 import unittest
+from unittest.mock import patch
 
 from f5_boolean_control import (add, audit, checked_rows, equations, evaluate, multiply,
                                 products, rename_mask, rename_rows, row_space, s3_polynomial)
@@ -113,6 +116,20 @@ class BooleanControlTests(unittest.TestCase):
         changed_inputs['controls'][0]['points'][0][1] ^= 1
         with self.assertRaises(InvalidEvidence):
             audit(changed_inputs, exported)
+
+    def test_optional_tool_version_failure_is_retained_and_first_registration_is_closed(self):
+        directory = Path(__file__).parent/'goal_20260924/f5-boolean-system-control-20260930'
+        spec = importlib.util.spec_from_file_location('f5_boolean_control_runner', directory/'run_control.py')
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        version = subprocess.CompletedProcess(['ar', '--version'], 1, '', 'usage: ar')
+        with patch.object(module.subprocess, 'run', return_value=version):
+            receipt = module.tool_receipt(str(directory/'export.rs'), directory, {})
+        self.assertEqual(receipt['exit_code'], 1)
+        self.assertEqual(receipt['stderr'], 'usage: ar')
+        self.assertFalse(receipt['version_probe_succeeded'])
+        with self.assertRaisesRegex(InvalidEvidence, 'first registration closed'):
+            module.run(directory, directory/'unused-first-registration-output', directory/'protocol.json')
 
 
 if __name__ == '__main__':

@@ -43,24 +43,12 @@ def supervised(args, cwd, env, out, name, limit):
     require(not timed_out and child.returncode == 0, name+' failed; terminal/partial output retained')
 
 
-def tool_receipt(path, cwd, env):
-    # A version flag is optional metadata, not the build command. In particular
-    # BSD ar does not implement --version. Retain its actual failure verbatim.
-    args = [path, '--version']
-    cp = subprocess.run(args, cwd=cwd, env=env, capture_output=True, text=True,
-                        check=False, timeout=10)
-    return dict(path=path, binary_sha256=digest(path), argv=args, exit_code=cp.returncode,
-                stdout=cp.stdout, stderr=cp.stderr, version_probe_succeeded=cp.returncode == 0)
-
-
-def run(original, out, protocol_file):
+def run(original, out):
     require(not out.exists(), 'control output exists; do not retry or overwrite')
-    protocol = json.loads(protocol_file.read_text())
-    require(protocol['schema_version'] == 2, 'first registration closed after retained preflight failure')
     out.mkdir(parents=True)
+    protocol = json.loads((HERE/'protocol.json').read_text())
     analysis_files = [Path(__file__), HERE/'export.rs', HERE/'inputs.json', PACKAGE/'f5_boolean_control.py',
-                      PACKAGE/'generic_build.py', PACKAGE/'identity.py', PACKAGE/'oracle.py',
-                      protocol_file, HERE/'PREFLIGHT-CORRECTION.md', HERE/'PROTOCOL.md']
+                      PACKAGE/'generic_build.py', PACKAGE/'identity.py', PACKAGE/'oracle.py']
     frozen = {str(path): digest(path) for path in analysis_files}
     require(digest(HERE/'inputs.json') == protocol['input_sha256'], 'disclosed inputs changed')
     env = controlled_environment(original)
@@ -93,9 +81,10 @@ def run(original, out, protocol_file):
     args = ['cargo', 'build', '--locked', '--offline', '--release', '--no-default-features', '--example', 'f5_boolean_control']
     record = dict(schema_version=1, historical_source_manifest_sha256=sha256(source),
         compiled_source_manifest_sha256=sha256(compiled_source), analysis_sources=frozen,
-        protocol_sha256=digest(protocol_file), protocol_document_sha256=digest(HERE/'PREFLIGHT-CORRECTION.md'),
+        protocol_sha256=digest(HERE/'protocol.json'), protocol_document_sha256=digest(HERE/'PROTOCOL.md'),
         rustc=command(['rustc', '-Vv'], root, env), cargo=command(['cargo', '-Vv'], root, env),
-        cc=tool_receipt(env['CC'], root, env), ar=tool_receipt(env['AR'], root, env),
+        cc=dict(path=env['CC'], sha256=digest(env['CC']), version=command([env['CC'], '--version'], root, env)),
+        ar=dict(path=env['AR'], sha256=digest(env['AR']), version=command([env['AR'], '--version'], root, env)),
         interpreter=dict(executable=sys.executable, sha256=digest(sys.executable), version=sys.version),
         environment=env, build_argv=args, input_sha256=protocol['input_sha256'],
         limits=dict(build_seconds=protocol['build_seconds'], native_seconds=protocol['native_seconds']),
@@ -132,11 +121,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--historical-source', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--protocol', type=Path, default=HERE/'protocol-v2.json')
     args = parser.parse_args()
     require(not args.out.exists(), 'control output exists; do not retry or overwrite')
     try:
-        result = run(args.historical_source.resolve(), args.out.resolve(), args.protocol.resolve())
+        result = run(args.historical_source.resolve(), args.out.resolve())
     except Exception as error:
         if args.out.is_dir() and not (args.out/'RESULT.json').exists():
             write_immutable(args.out/'RESULT.json', dict(schema_version=1, status='CONTROL_FAILURE',
