@@ -1,0 +1,254 @@
+[
+  {
+    "input": {
+      "algorithm_seed": 2026093032,
+      "config": {
+        "batch_trials": 8,
+        "conflict_budget": 100000,
+        "groebner_degree": 3,
+        "linear_algebra": "dense",
+        "max_trials": 512,
+        "node_budget": 8192,
+        "solver": "f5",
+        "summands": 3
+      },
+      "curve_a": 1,
+      "degree": 17,
+      "exclusive_phases": true,
+      "factor_base": {
+        "dimension": 6,
+        "kind": "standard_subspace"
+      },
+      "mode": "ic",
+      "public_targets": [
+        [
+          "52411",
+          "72106"
+        ]
+      ],
+      "target_seeds": []
+    },
+    "label": "corrected-empty-seeds"
+  },
+  {
+    "input": {
+      "algorithm_seed": 2026093032,
+      "config": {
+        "batch_trials": 8,
+        "conflict_budget": 100000,
+        "groebner_degree": 3,
+        "linear_algebra": "dense",
+        "max_trials": 512,
+        "node_budget": 8192,
+        "solver": "f5",
+        "summands": 3
+      },
+      "curve_a": 1,
+      "degree": 17,
+      "exclusive_phases": true,
+      "factor_base": {
+        "dimension": 6,
+        "kind": "standard_subspace"
+      },
+      "mode": "ic",
+      "public_targets": [
+        [
+          "52411",
+          "72106"
+        ]
+      ]
+    },
+    "label": "omitted-default-seeds"
+  },
+  {
+    "input": {
+      "algorithm_seed": 2026093032,
+      "config": {
+        "batch_trials": 8,
+        "conflict_budget": 100000,
+        "groebner_degree": 3,
+        "linear_algebra": "dense",
+        "max_trials": 512,
+        "node_budget": 8192,
+        "solver": "f5",
+        "summands": 3
+      },
+      "curve_a": 1,
+      "degree": 17,
+      "exclusive_phases": true,
+      "factor_base": {
+        "dimension": 6,
+        "kind": "standard_subspace"
+      },
+      "mode": "ic",
+      "public_targets": [
+        [
+          "52411",
+          "72106"
+        ]
+      ],
+      "target_seeds": [
+        null
+      ]
+    },
+    "label": "historical-null-seed"
+  },
+  {
+    "input": {
+      "algorithm_seed": 2026093032,
+      "config": {
+        "batch_trials": 8,
+        "conflict_budget": 100000,
+        "groebner_degree": 3,
+        "linear_algebra": "dense",
+        "max_trials": 512,
+        "node_budget": 8192,
+        "solver": "f5",
+        "summands": 3
+      },
+      "curve_a": 1,
+      "degree": 17,
+      "exclusive_phases": true,
+      "factor_base": {
+        "dimension": 6,
+        "kind": "standard_subspace"
+      },
+      "mode": "ic",
+      "public_targets": [
+        [
+          "52411",
+          "72106"
+        ]
+      ],
+      "target_seeds": [
+        -1
+      ]
+    },
+    "label": "negative-seed"
+  },
+  {
+    "input": {
+      "algorithm_seed": 18446744073709551616,
+      "config": {
+        "batch_trials": 8,
+        "conflict_budget": 100000,
+        "groebner_degree": 3,
+        "linear_algebra": "dense",
+        "max_trials": 512,
+        "node_budget": 8192,
+        "solver": "f5",
+        "summands": 3
+      },
+      "curve_a": 1,
+      "degree": 17,
+      "exclusive_phases": true,
+      "factor_base": {
+        "dimension": 6,
+        "kind": "standard_subspace"
+      },
+      "mode": "ic",
+      "public_targets": [
+        [
+          "52411",
+          "72106"
+        ]
+      ],
+      "target_seeds": []
+    },
+    "label": "algorithm-seed-overflow"
+  },
+  {
+    "input": {
+      "algorithm_seed": 2026093032,
+      "config": {
+        "batch_trials": 8,
+        "conflict_budget": 100000,
+        "groebner_degree": 3,
+        "linear_algebra": "dense",
+        "max_trials": 512,
+        "node_budget": 8192,
+        "solver": "f5",
+        "summands": 3
+      },
+      "curve_a": 1,
+      "degree": 17,
+      "exclusive_phases": true,
+      "factor_base": {
+        "dimension": 6,
+        "kind": "standard_subspace"
+      },
+      "mode": "ic",
+      "public_targets": [
+        [
+          "52411",
+          "72106"
+        ]
+      ],
+      "target_seeds": [],
+      "unknown_flag": true
+    },
+    "label": "unknown-job-field"
+  },
+  {
+    "input": {
+      "algorithm_seed": 2026093032,
+      "config": {
+        "batch_trials": 8,
+        "conflict_budget": 100000,
+        "groebner_degree": 3,
+        "linear_algebra": "dense",
+        "max_trials": 512,
+        "node_budget": 8192,
+        "solver": "f5",
+        "summands": 3,
+        "unknown_flag": true
+      },
+      "curve_a": 1,
+      "degree": 17,
+      "exclusive_phases": true,
+      "factor_base": {
+        "dimension": 6,
+        "kind": "standard_subspace"
+      },
+      "mode": "ic",
+      "public_targets": [
+        [
+          "52411",
+          "72106"
+        ]
+      ],
+      "target_seeds": []
+    },
+    "label": "unknown-config-field"
+  },
+  {
+    "input": {
+      "algorithm_seed": 2026093032,
+      "config": {
+        "batch_trials": 8,
+        "conflict_budget": 100000,
+        "groebner_degree": 3,
+        "linear_algebra": "dense",
+        "max_trials": 512,
+        "node_budget": 8192,
+        "solver": "f5",
+        "summands": 3
+      },
+      "curve_a": 1,
+      "degree": 17,
+      "exclusive_phases": true,
+      "factor_base": {
+        "dimension": 6,
+        "kind": "standard_subspace"
+      },
+      "mode": "ic",
+      "public_targets": [
+        [
+          "52411"
+        ]
+      ],
+      "target_seeds": []
+    },
+    "label": "wrong-coordinate-shape"
+  }
+]

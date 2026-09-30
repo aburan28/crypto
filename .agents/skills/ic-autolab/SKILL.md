@@ -59,6 +59,33 @@ native smoke and a full source-bound development solve are separate gates.
 Exact-oracle mathematical tests and portable C watchdog controls do not establish
 SAT yield or family qualification. Keep all three confirmation rounds closed.
 
+The [F4/F5 v1 protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v1/PROTOCOL.md)
+is closed: its single invocation in PR #1058 failed native JSON parsing before
+any IC query. It conflated the empty `Vec<u64>` input seed list with the output
+fixture's `[null]` provenance. Preserve its failure/source/transport receipts;
+never retry, resume or extend that registration. Its scalar, rank, scientific
+costs and speedup remain unknown.
+
+The corrected controller is
+[`f5_runtime_pipeline_v2.py`](../../../research/ic_candidate_tournament_20260915/f5_runtime_pipeline_v2.py),
+with its [new one-shot development protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/PROTOCOL.md).
+The actual pinned native `Job`/`Config` deserialization control and float-free
+audit-publication controls must pass and be retained before a new registration.
+Use `f5_runtime_inputs_v1.py` for unchanged reusable native assets and
+`f5_runtime_registration_v2.py` for the complete new Python/interpreter/native
+binding. Input seeds are empty for the supplied point; fixture provenance stays
+`[null]`. `audit_f5_runtime_v2.py` verifies natural attempts, observed dispatch,
+matrix/log/target certificates and timing closure. Resource seconds serialize as
+decimal strings, with the unchanged raw metrics file hashed and retained;
+integer scientific clocks are preserved. Use `publish_f5_runtime_v2.py` for
+complete-controller records including native timeouts with unknown math, and
+the v3 failure publisher for partial/failed controllers. Merge the accepted
+adapter and controls, freeze its source, commit the external receipt, then
+execute its distinct prospective registration once. These bounded Macaulay/F5
+row-criterion engines are not full incremental Gröbner-basis implementations.
+Controls and source binding do not establish complete-family admission or fresh
+paired qualification. All three confirmation sets stay closed.
+
 Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use a versioned runner for the intended unexecuted round; the round-one wrapper is historical, and generic pilot defaults do not implement the goal protocol. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass and an accepted, versioned reference binding is committed.
 
 
