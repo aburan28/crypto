@@ -657,6 +657,53 @@ dense-finish path its four draws took 96–104 min each. All four are **≥7**.
     The size of the growth is unmeasured, because the values are lower
     bounds.
 
+## Result 9: the size of the growth — `ℓ = 5` refutes at exactly 7
+
+`research/dreg_degree7_ell5_20260930/` holds everything. It was
+pre-registered before any `ℓ = 5` degree-7 matrix was built, and amended
+twice before the affected outcomes.
+
+It builds degree 7 on the committed `≥7` draws, replayed with `--d-min 7`.
+
+| `S` | `ℓ = 3` | `ℓ = 4` | `ℓ = 5` | semi-regular `D_reg` at `ℓ = 5` |
+|--:|---|---|---|--:|
+| −5 | 5 5 5 5 | 7 7 6 7 | **`(10, 5)`: U3_CELL** | 7 |
+| −4 | 6 6 6 6 | 6 7 6 7 | `(11, 5)`: ≥7 ×4 (degree 7 not run: 18–19 GB) | 7 |
+| −2 | 6 6 6 6 | — | `(13, 5)`: ≥7 ×4 (degree 7 not run: 47–50 GB) | 7 |
+| 0 | 6 6 6 6 | — | `(15, 5)`: ≥7 ×4 (not attempted) | 8 |
+
+- **ℓ = 5 is one degree above 6.** Every `(10, 5)` draw's degree-7 row
+  space contains `1`, so the degree is exactly 7. The FFD is 3.
+  - The prediction was 7, at low confidence.
+  - Q5, `(13, 5)`, is not testable here, which is a memory limit.
+- **The growth is steady, not a jump.**
+  - At `S = −5` the rungs read 5, then 7 (with one draw at 6), then 7 over
+    `ℓ = 3, 4, 5`.
+  - Against the plateau of 6 that `ℓ = 3, 4` hold at `S ≥ −2`, `ℓ = 5` sits
+    one degree higher.
+  - Over the whole program the refutation degree runs 5, 6, 6–7, 7 for
+    `ℓ = 2`–5, while the FFD stays at 3.
+- **The semi-regular reference predicted it.**
+  - It gives 7 for `(10, 5)`. Across the 14 cells with exact values it now
+    matches in 10, and is within one in all 14 (`semireg.py`).
+  - The data therefore do not separate "levels off at 7" from "follows
+    `D_reg`", which grows about linearly in the unknowns. `(15, 5)`, where
+    `D_reg` is 8, is the cell that does.
+- **Engineering, identity-checked (332 rows, 0 mismatches).** Two changes
+  were needed to fit degree 7 in 16 GB:
+  - a dense switch placed by memory budget (`KIC_SPARSE_DENSE_BUDGET_MB`);
+  - F5-criterion rows (`KIC_SPARSE_F5=1`), which drop 20% of the rows and
+    as many band-7 survivors.
+  - Band 7 turned out rank-deficient: only 60–65% of its columns hold a
+    pivot. That is what put `(11, 5)` and `(13, 5)` out of reach.
+- **Scope.** `m = 3`, `n = 10` (GF(2^10), with proper intermediate
+  subfields GF(2²) and GF(2⁵), none chosen), four draws. This is a
+  stage diagnostic.
+- **For ECC2K-130.**
+  `research/notes/ecc2k130/RESEARCH_ECC2K130_DESCENT_DEGREE.md` prices the
+  route at `n = 131` under a constant degree and under `D_reg`. Every
+  figure there is an extrapolation.
+
 ## Reproducing
 
 ```sh
@@ -726,7 +773,16 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
   **Done:** Result 6, confounded.  It did not take seconds: its degree-7
   draws take 35 min to 2 h.
 - **`ℓ = 5` at `S ≥ −2` was the whole open question.** **Answered** (Results 7 and 8): `(13, 5)` at `S = −2` and `(15, 5)` at `S = 0` are both ≥7 on all four draws.
-- **Next: the size of the growth.** The exact `ℓ = 5` degree needs degree 7 at 25–30 unknowns. The dense finish's dense block would be several to tens of GB there. That needs either a machine with more memory or a finish that goes dense only below the top two bands.
+- *Done (Result 9):* **the size of the growth.** `(10, 5)` refutes at
+  exactly 7, one degree above 6. It needed a memory-budgeted dense switch
+  and F5-criterion rows.
+- **Next: `(15, 5)` at degree 7**, the cell where the semi-regular
+  reference (8) and a degree levelled off at 7 disagree.
+  - At `(10, 5)`'s F5 fraction and band-7 rank ratio, its block after
+    band 7 is about 110–120 GB, and `(13, 5)`'s is 47–50 GB.
+  - So it needs a host of about 128 GB, or a finish that does not pack
+    every survivor at once.
+  - Register it before running.
 - *Superseded note:* **`ℓ = 5` at `S ≥ −2` is now the whole open question.**  It is the
   ladder's `(13, 5)` or `(15, 5)`, at 28 or 30 unknowns.  Neither the frozen
   binary nor current `main` reaches it on the four-core container, so it
