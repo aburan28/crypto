@@ -153,6 +153,8 @@ def k4_jv():
                  f4=mean([r["f4_muls"]["mean"] for r in g]),
                  rows=mean([r["max_rows"]["mean"] for r in g]),
                  cols=mean([r["max_cols"]["mean"] for r in g]),
+                 c_second_at_y=mean([r["c_second_at_y"]["mean"] for r in g]) if "c_second_at_y" in g[0] else None,
+                 c_second_at_x=mean([r["c_second_at_x"]["mean"] for r in g]) if "c_second_at_x" in g[0] else None,
                  ms=mean([r["f4_ms"]["mean"] for r in g]),
                  planted=sum(r["planted_found"] for r in g),
                  constructed=sum(r["constructed_residuals"] for r in g),
@@ -205,7 +207,7 @@ def k5():
     symmetrisation, and the crossover each implies on the derived exponents
     (residuals ∝ n^{2/5}, rho ∝ n^{1/2})."""
     out = {}
-    for name, key in (("27_jv_quintic_csecond.json", "weierstrass"), ("27_jv_quintic_edwards_csecond.json", "edwards")):
+    for name, key in (("27_jv_quintic_csecond.json", "weierstrass"), ("27_jv_quintic_edwards_csecond.json", "edwards"), ("28_jv_quintic_edwards4_csecond.json", "edwards4")):
         rows = load(name)
         if not rows:
             continue
@@ -219,6 +221,8 @@ def k5():
                  degree=mean([r["degree_reached"]["mean"] for r in g]),
                  rows=mean([r["max_rows"]["mean"] for r in g]),
                  cols=mean([r["max_cols"]["mean"] for r in g]),
+                 c_second_at_y=mean([r["c_second_at_y"]["mean"] for r in g]) if "c_second_at_y" in g[0] else None,
+                 c_second_at_x=mean([r["c_second_at_x"]["mean"] for r in g]) if "c_second_at_x" in g[0] else None,
                  ms=mean([r["f4_ms"]["mean"] for r in g]),
                  random=sum(r["random_residuals"] for r in g),
                  decomposable=sum(r["random_decomposable"] for r in g),
@@ -231,25 +235,51 @@ def k5():
                  mitm=mean([r["mitm4_group_ops"] for r in g]))
             for p, g in groups.items()
         ]
+    census = load("28_jv_quintic_edwards_rate_census.json")
+    if census:
+        out["census"] = census
     return out
 
 
-def k5_crossover(c_second, c_add, columns_per_p, rho_s=1.3, cofactor=1):
-    """Residuals = columns / rate = (columns_per_p · p) · 24p; rho = rho_s · √n
-    with n = p⁵ / cofactor (prime order: cofactor 1; Edwards: cofactor 4, and
-    the caller passes rho_s already scaled by 1/√cofactor).  S/rho =
-    24·columns_per_p·C″ / (rho_s · c_add · √p): parity at √p =
-    24·columns_per_p·C″/(rho_s·c_add).  `n*` is the subgroup order at `p*`,
-    the convention of the tables' size column."""
-    sqrt_p = 24 * columns_per_p * c_second / (rho_s * c_add)
+# (M, columns per p, rho reference in the subgroup, cofactor) per symmetrisation
+K5_ROUTES = {
+    "weierstrass": dict(label="plain", m=16, cpp=0.5, rho_s=1.3, cof=1, rate="1/(24p)"),
+    "edwards": dict(label="2-torsion", m=32, cpp=0.25, rho_s=1.3, cof=4, rate="1/(192p)"),
+    "edwards4": dict(label="2-torsion, residual saturated by Q₄", m=64, cpp=0.25, rho_s=1.3, cof=4, rate="1/(96p)"),
+}
+
+
+def k5_residuals_per_p2(m, columns_per_p):
+    """Residuals per relation set, in units of p².  A class-quadruple of the
+    base gives 16 signed sums; M of them (with the free torsion translates)
+    are distinct points of the subgroup the residuals live in, so the rate
+    of decomposable residuals is M · columns⁴ / (24 · p⁵) and residuals =
+    columns / rate = 24 p² / (M · columns_per_p³).  Weierstrass: M = 16 on
+    p/2 columns, 12p² (rate 1/(24p)).  Edwards with T free: M = 32 on p/4
+    columns, 48p² (rate 1/(192p); the run's `expected_rate` field carried
+    1/(24p), corrected by the census 28_jv_quintic_edwards_rate_census.json).
+    Edwards with Q₄ free: M = 64, 24p² (rate 1/(96p))."""
+    return 24.0 / (m * columns_per_p ** 3)
+
+
+def k5_crossover(c_second, c_add, m, columns_per_p, rho_s=1.3, cofactor=1):
+    """S/rho = residuals · C″ / (rho_s · √n · c_add) with n = p⁵ / cofactor
+    the order of the subgroup the logarithm lives in (prime order: cofactor
+    1; Edwards: cofactor 4).  With residuals = k5_residuals_per_p2 · p²:
+    S/rho = k · C″ · √cofactor / (rho_s · c_add · √p), parity at
+    √p* = k · C″ · √cofactor / (rho_s · c_add).  `n*` is the subgroup order
+    at `p*`, the convention of the tables' size column."""
+    k = k5_residuals_per_p2(m, columns_per_p)
+    sqrt_p = k * c_second * math.sqrt(cofactor) / (rho_s * c_add)
     p_star = sqrt_p ** 2
     return p_star, 5 * math.log2(p_star) - math.log2(cofactor)
 
 
-def k5_c_needed(bits, c_add, columns_per_p, rho_s, cofactor=1):
+def k5_c_needed(bits, c_add, m, columns_per_p, rho_s=1.3, cofactor=1):
     """C″ for parity at subgroup order 2^bits: p = (cofactor · 2^bits)^{1/5}."""
     p = (cofactor * 2.0 ** bits) ** 0.2
-    return math.sqrt(p) * rho_s * c_add / (24 * columns_per_p)
+    k = k5_residuals_per_p2(m, columns_per_p)
+    return math.sqrt(p) * rho_s * c_add / (k * math.sqrt(cofactor))
 
 
 def two_term_minimum(sizes, rel, la, rho_s, c_add):
@@ -355,27 +385,40 @@ def main():
 
     k5d = k5()
     if k5d:
-        print("\n## D. The k = 5 stage: C″ measured (27_jv_quintic_*.json)\n")
+        print("\n## D. The k = 5 stage: C″ measured (27_jv_quintic_*.json, 28_jv_quintic_edwards4_csecond.json)\n")
         print("| symmetrisation | p | n | seeds | columns | c_add | C″ (random residuals) | C″ (decomposable) | Weil | F4 degree reached | F4 matrix (rows × cols) | F4 s | random / decomposable | planted found | mismatches | unverified | undetermined / timed out | oracle (group ops) |")
         print("|:--|---:|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|:--|:--|--:|--:|:--|--:|")
-        for key, label in (("weierstrass", "plain, Weierstrass `x`, e(x)"), ("edwards", "2-torsion, Edwards `y`, e(y²) + π")):
+        for key, label in (("weierstrass", "plain, Weierstrass `x`, e(x)"), ("edwards", "2-torsion, Edwards `y`, e(y²) + π"), ("edwards4", "2-torsion + Q₄ saturation (F4 at y_R and at x_R)")):
             for x in k5d.get(key, []):
                 print(f"| {label} | {x['p']} | 2^{math.log2(x['n']):.1f} | {x['seeds']} | {x['base']:.0f} | {x['c_add']:.0f} | {x['c_second']:.3e} | {x['c_second_dec']:.3e} | {x['weil']:,.0f} | {x['degree']:.1f} | {x['rows']:,.0f} × {x['cols']:,.0f} | {x['ms']/1e3:.2f} | {x['random']} / {x['decomposable']} | {x['planted']}/{x['constructed']} | {x['mismatches']} | {x['unverified']} | {x['undetermined']} / {x['timed_out']} | {x['mitm']:,.0f} |")
-        print("\nCrossovers implied by the measured C″, extrapolated on residuals ∝ n^{2/5} and rho ∝ n^{1/2} (a stage diagnostic: no end-to-end k = 5 S exists):\n")
-        print("| symmetrisation | C″ (top size) | columns per p | rho S reference | parity at p* | n* |")
-        print("|:--|--:|--:|--:|--:|--:|")
-        for key, label, cpp, rho_s, cof in (("weierstrass", "plain", 0.5, 1.3, 1), ("edwards", "2-torsion", 0.25, 1.3 / 2.0, 4)):
+        if "census" in k5d:
+            print("\nThe rate of decomposable residuals, counted exactly over every signed four-point sum of the base (28_jv_quintic_edwards_rate_census.json).  `predicted` is 8 and 16 subgroup points per class-quadruple, C(|F|, 4) quadruples; `1/(192p)` and `1/(96p)` are these with |F| = p/4 and C(|F|, 4) = |F|⁴/24, so the measured multiple of 1/(192p) is compared with the same multiple predicted from the actual |F|:\n")
+            print("| p | seed | n | columns | class-quadruples | 2-torsion: subgroup points (distinct / predicted) | rate | rate · 192p (measured / predicted) | Q₄-saturated: subgroup points (distinct / predicted) | rate | rate · 96p (measured / predicted) |")
+            print("|---:|--:|:--|--:|--:|:--|--:|:--|:--|--:|:--|")
+            for c in k5d["census"]:
+                pf2 = c['two_torsion_predicted'] / c['n'] * 192 * c['p']; pf4 = c['saturated_predicted'] / c['n'] * 96 * c['p']
+                print(f"| {c['p']} | {c['seed']} | 2^{math.log2(c['n']):.1f} | {c['base']} | {c['quadruples']:,} | {c['two_torsion_distinct']:,} / {c['two_torsion_predicted']:,} | {c['two_torsion_rate']:.3e} | {c['two_torsion_rate_x_192p']:.3f} / {pf2:.3f} | {c['saturated_distinct']:,} / {c['saturated_predicted']:,} | {c['saturated_rate']:.3e} | {c['saturated_rate_x_96p']:.3f} / {pf4:.3f} |")
+        print("\nCrossovers implied by the measured C″, extrapolated on residuals ∝ n^{2/5} and rho ∝ n^{1/2} (a stage diagnostic: no end-to-end k = 5 S exists).  Residuals = 24p²/(M · (columns/p)³) with M the subgroup points per class-quadruple (16 signs × the free translates that land in the subgroup):\n")
+        print("| symmetrisation | C″ (top size) | columns per p | M | rate | residuals | rho reference | parity at p* | n* |")
+        print("|:--|--:|--:|--:|--:|--:|--:|--:|--:|")
+        for key, r in K5_ROUTES.items():
             xs = k5d.get(key)
             if not xs:
                 continue
             x = xs[-1]
-            p_star, bits = k5_crossover(x["c_second"], x["c_add"], cpp, rho_s, cof)
-            print(f"| {label} | {x['c_second']:.2e} | {cpp} | {rho_s:.2f} (√n = p^{{5/2}}{'/2' if key == 'edwards' else ''}) | {p_star:.2e} | 2^{bits:.0f} (n = p⁵{'/4' if cof == 4 else ''}) |")
+            p_star, bits = k5_crossover(x["c_second"], x["c_add"], r["m"], r["cpp"], r["rho_s"], r["cof"])
+            print(f"| {r['label']} | {x['c_second']:.2e} | {r['cpp']} | {r['m']} | {r['rate']} | {k5_residuals_per_p2(r['m'], r['cpp']):.0f}p² | {r['rho_s']}·√n, n = p⁵{'/4' if r['cof'] == 4 else ''} | {p_star:.2e} | 2^{bits:.0f} |")
         if "edwards" in k5d and "weierstrass" in k5d:
             e = k5d["edwards"][-1]["c_second"]; w = k5d["weierstrass"][-1]["c_second"]
             ca = k5d["edwards"][-1]["c_add"]
-            n128 = k5_c_needed(128, ca, 0.25, 1.3 / 2.0, 4); n160 = k5_c_needed(160, ca, 0.25, 1.3 / 2.0, 4); n100 = k5_c_needed(100, ca, 0.25, 1.3 / 2.0, 4)
+            r = K5_ROUTES["edwards"]
+            n128 = k5_c_needed(128, ca, r["m"], r["cpp"], r["rho_s"], r["cof"]); n160 = k5_c_needed(160, ca, r["m"], r["cpp"], r["rho_s"], r["cof"]); n100 = k5_c_needed(100, ca, r["m"], r["cpp"], r["rho_s"], r["cof"])
             print(f"\nThe 2-torsion symmetry cuts C″ by {w/e:,.0f}× at the top size.  For parity at a subgroup order of 2^128 on the 2-torsion route (p = (4·2^128)^{{1/5}} = 2^{(130/5):.1f}): C″ < {n128:.2e}, {e/n128:,.0f}× below the measurement; at 2^160: C″ < {n160:.2e} ({e/n160:,.0f}×); at 2^100: C″ < {n100:.2e} ({e/n100:,.0f}×).")
+        if "edwards4" in k5d and "edwards" in k5d:
+            e = k5d["edwards"][-1]; e4 = k5d["edwards4"][-1]
+            pe = k5_crossover(e["c_second"], e["c_add"], 32, 0.25, 1.3, 4)[1]
+            pe4 = k5_crossover(e4["c_second"], e4["c_add"], 64, 0.25, 1.3, 4)[1]
+            print(f"\nSaturating the residual by Q₄ doubles the rate (1/(96p)) and costs {e4['c_second']/e['c_second']:.2f}× the test ({e4['c_second_at_y']:.2e} at y_R + {e4['c_second_at_x']:.2e} at x_R against {e['c_second']:.2e}): the crossover moves from 2^{pe:.0f} to 2^{pe4:.0f}, a wash (engineering, {2 * e['c_second'] / e4['c_second']:.2f}× on S).")
 
     print("\n## C. What parity needs, per route\n")
     if k4:
