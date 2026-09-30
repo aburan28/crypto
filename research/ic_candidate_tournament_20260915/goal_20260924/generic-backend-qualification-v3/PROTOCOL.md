@@ -1,9 +1,10 @@
 # Generic F4/F5 subspace smoke qualification (third registration)
 
-Status: **planning / frozen protocol only**. No measurement is authorized by
-this document until a separate evidence PR lands the runner, workflow, sealed
-panel digest lock, and a green feasibility preflight. Seed **2026093001** is
-reserved here and must not be reused if this registration is abandoned.
+Status: **dispatch authorized / not measured**. The runner, smoke-schedule
+workflow, sealed panel digest lock, and feasibility preflight land with this
+registration. Seed **2026093001** is reserved here and must not be reused if
+this registration is abandoned. Measurement requires the single
+`workflow_dispatch` campaign job on main.
 
 ## Why this registration exists
 
@@ -127,8 +128,9 @@ per repository §3; a smoke pass is not an end-to-end ECC2K-130 speedup.
 
 ## Run and retention
 
-Dispatch once from main after the runner, workflow and panel digest land.
-Use the amended packer that retains `ARCHIVE_READ_UNVERIFIED` archives and
+Dispatch once from main after this runner and workflow land. The campaign job
+uses measure ≤ 180 minutes, pack ≤ 35 minutes, and job ≤ 240 minutes. Use the
+amended packer that retains `ARCHIVE_READ_UNVERIFIED` archives and
 uploads the `.tar.zst`, manifest and tar stderr. Quiesce or terminate measure
 orphans before tar. After the run: verify archive hash, frozen
 `tournament.py verify`, natural-yield audit, F4/F5 family gate, and independent

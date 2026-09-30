@@ -270,13 +270,12 @@ seed `2026093001`, smoke-only schedule, `standard_subspace` dimension 6 for
 algebraic arms (`factor-base-policy`), F4/F5 family only (SAT deferred), 180/35/240
 minute measure/pack/job caps. Panel intent SHA-256
 `df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`.
-Both exposure corpora are on `main`. The lock checker
-`run_generic_backend_qualification_v3.py` and preflight-only workflow
-`ic-generic-backend-qualification-v3.yml` refuse sampling:
-`dispatch_authorized` stays false and `measurement` stays `not_run`. Seed
-`2026093001` has not been dispatched. A later commit may add the single
-campaign job with the frozen caps; that commit is the only place the
-dispatch flag may become true.
+Both exposure corpora are on `main`. The runner
+`run_generic_backend_qualification_v3.py` and workflow
+`ic-generic-backend-qualification-v3.yml` authorize one `workflow_dispatch`
+campaign on the smoke schedule (`dispatch_authorized` true;
+`measurement` still `not_run` until that job runs with `--out`). Seed
+`2026093001` has not been dispatched.
 
 Post-registration source audit (PR
 [#952](https://github.com/aburan28/crypto/pull/952)): the pinned `m=3` Semaev
