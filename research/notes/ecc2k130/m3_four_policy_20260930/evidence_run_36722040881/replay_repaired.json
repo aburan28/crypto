@@ -1,0 +1,107 @@
+{
+  "bit_polynomial_point_checks": 228,
+  "cases_replayed": 8192,
+  "cells": {
+    "2026093001": {
+      "A": {
+        "descendant_native": {
+          "first_full_rank_attempt": 40,
+          "hits": 100,
+          "rank": 9
+        },
+        "original": {
+          "first_full_rank_attempt": 79,
+          "hits": 109,
+          "rank": 9
+        },
+        "pullback": {
+          "first_full_rank_attempt": 40,
+          "hits": 100,
+          "rank": 9
+        },
+        "transported": {
+          "first_full_rank_attempt": 79,
+          "hits": 109,
+          "rank": 9
+        }
+      },
+      "B": {
+        "descendant_native": {
+          "first_full_rank_attempt": 36,
+          "hits": 131,
+          "rank": 9
+        },
+        "original": {
+          "first_full_rank_attempt": 45,
+          "hits": 126,
+          "rank": 9
+        },
+        "pullback": {
+          "first_full_rank_attempt": 36,
+          "hits": 131,
+          "rank": 9
+        },
+        "transported": {
+          "first_full_rank_attempt": 45,
+          "hits": 126,
+          "rank": 9
+        }
+      }
+    },
+    "2026093002": {
+      "A": {
+        "descendant_native": {
+          "first_full_rank_attempt": 46,
+          "hits": 101,
+          "rank": 9
+        },
+        "original": {
+          "first_full_rank_attempt": 33,
+          "hits": 114,
+          "rank": 9
+        },
+        "pullback": {
+          "first_full_rank_attempt": 46,
+          "hits": 101,
+          "rank": 9
+        },
+        "transported": {
+          "first_full_rank_attempt": 33,
+          "hits": 114,
+          "rank": 9
+        }
+      },
+      "B": {
+        "descendant_native": {
+          "first_full_rank_attempt": 56,
+          "hits": 118,
+          "rank": 9
+        },
+        "original": {
+          "first_full_rank_attempt": 28,
+          "hits": 122,
+          "rank": 9
+        },
+        "pullback": {
+          "first_full_rank_attempt": 56,
+          "hits": 118,
+          "rank": 9
+        },
+        "transported": {
+          "first_full_rank_attempt": 28,
+          "hits": 122,
+          "rank": 9
+        }
+      }
+    }
+  },
+  "cells_replayed": 16,
+  "config_sha256": "89970c831e1337c1973ee2e7e01d40239c226872e43625a79243d608c67115e8",
+  "failed_replay_sha256": "8c7c5a10c5c8def3e5869b0d0d9ba051ee0a31e3fcb093e0ac2d46342958daa7",
+  "frozen_sha256": "1010be473d848fe1c6ba7e76c93b471dca66a7875fef4c78de5847ac229c926c",
+  "panel_status": "PASS_PANEL",
+  "repair_lock_sha256": "9746e6309f1dc750d526be9c1d5d88eb37518a943e4a1a184ff6eb369fb5a9dd",
+  "result_sha256": "f0cb3c18dac3b01da91892a3fb4ecb9c77f9fbab86ccc6b38f6343d5738989aa",
+  "schema": "ecc2k130-degree7-m3-four-policy-replay-v1",
+  "status": "PASS"
+}
