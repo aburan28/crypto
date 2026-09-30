@@ -48,6 +48,9 @@ def analyze(archive: Path) -> dict:
     manifest = json.loads((archive / "MANIFEST.json").read_text())
     assert manifest["schema"] == "ecc2k130-compact-ir-hosted-archive-v1"
     assert manifest["config_sha256"] == sha(CONFIG)
+    if manifest["second_host_path"] is not None:
+        host_path = archive / manifest["second_host_path"]
+        assert sha(host_path) == manifest["second_host_sha256"]
     config = json.loads(CONFIG.read_text())
     assert set(manifest["cases"]) == {cell["id"] for cell in config["cells"]}
     result = {"schema": "ecc2k130-compact-ir-analysis-v1",

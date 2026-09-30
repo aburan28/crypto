@@ -117,6 +117,22 @@ def archive_runs(runs: Path, out: Path, source_head: str, run_url: str,
             elif status == "PASS":
                 raise AssertionError(f"missing independent second-host replay: {cell_id}")
         cases[cell_id] = entry
+    second_host_path = None
+    second_host_sha256 = None
+    if second_host is not None:
+        host_src = second_host / "HOST.json"
+        host = json.loads(host_src.read_text())
+        assert host["schema"] == "ecc2k130-compact-ir-second-host-replay-v1"
+        assert host["run_url"] == run_url and host["measured_main_head"] == source_head
+        assert host["verifier_sha256"] == sha(Path(__file__).with_name("verify_panel.py"))
+        for cell_id, entry in cases.items():
+            if entry["status"] == "PASS":
+                assert host["receipts_sha256"][cell_id] == entry[
+                    "second_host_replay_sha256"]
+        host_dst = out / "second_host_replay" / "HOST.json"
+        shutil.copyfile(host_src, host_dst)
+        second_host_path = str(host_dst.relative_to(out))
+        second_host_sha256 = sha(host_dst)
     manifest = {
         "schema": "ecc2k130-compact-ir-hosted-archive-v1",
         "source_head": source_head,
@@ -125,6 +141,8 @@ def archive_runs(runs: Path, out: Path, source_head: str, run_url: str,
         "config_sha256": sha(CONFIG),
         "source_freeze_sha256": config["source_freeze_sha256"],
         "cases": cases,
+        "second_host_path": second_host_path,
+        "second_host_sha256": second_host_sha256,
         "extraction": "tar -xzf raw/CELL.tar.gz -C DEST",
         "independent_replay": (
             "python3 verify_panel.py --cell CELL --run-dir DEST/CELL "
