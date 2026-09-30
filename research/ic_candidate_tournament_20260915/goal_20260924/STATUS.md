@@ -3,8 +3,11 @@
 Current family-admission status (September 30): the complete source-bound
 [SAT v3 development solve](static-sat-runtime-v3/full-development-20260929/README.md)
 is accepted. The single [F5 v1 invocation](f5-source-bound-runtime-v1/README.md)
-failed native JSON parsing before any IC query and is closed. Complete F4/F5
-admission and a fresh paired incumbent/rho comparison remain outstanding;
+failed native JSON parsing before any IC query and is closed. The single
+[F5 v2 development solve](f5-source-bound-runtime-v2/README.md) now passes
+complete source/matrix/log/scalar/negative-query admission and isolated archive
+replay in PR #1064, pending exact-head review/CI acceptance. The fresh paired
+incumbent/rho comparison remains outstanding;
 no new speedup or promotion is established. The historical confirmation sets
 and censored generic registrations below remain closed.
 
@@ -370,9 +373,21 @@ registration. The single [native parser control](f5-source-bound-runtime-v2/inte
 passed: two inputs reproduced every field/default and six adversarial schemas
 rejected, with independent archive/source/input/output replay. The registrar
 requires the exact accepted proof hash before freezing an invocation. Its
-prospective seed is 2026093032; the one v2 IC invocation is not dispatched.
-Implementation and parser controls cannot establish natural yield, a complete
-F4/F5 family or a competitive speedup. The parser's direct Python analysis
-inventory is not complete execution attestation; its additional DEFAULTS source
-is explicitly retained as postexecution auditor context. The future IC run
-still requires complete Python/package/interpreter/native pre/post gates.
+prospective seed is 2026093032. [PR #1064](https://github.com/aburan28/crypto/pull/1064)
+committed the complete external invocation receipt before the single dispatch;
+[DISPATCH-OBSERVATION.json](f5-source-bound-runtime-v2/DISPATCH-OBSERVATION.json)
+records its owned native process. [TERMINAL.json](f5-source-bound-runtime-v2/TERMINAL.json)
+closes that single invocation: 216 ordinary queries, 61 verified relations,
+full rank 29/29, all logs checked and scalar 24886 recovered on the third target
+attempt. The versioned exact-negative proof verifies all 157 negative queries
+over the exact 63-point geometric PDP input, separate from 62 usable IC points.
+The original v2 gate and first geometric-domain audit rejections are retained.
+Independent source/math/isolated archive replay passes; the exclusive native
+online ledger closes at 10,512,454,542 ns. No speedup, fresh-target qualification
+or promotion is admitted; exact-head CI/review acceptance and the fresh paired
+reference/calibration gate remain outstanding.
+The parser control remains separate: its direct Python analysis inventory is
+not complete execution attestation, and its additional DEFAULTS source is
+explicitly retained as postexecution auditor context. The complete IC result
+above independently passes its full Python/package/interpreter/native pre/post
+gates. Neither development result supplies the pending fresh paired comparison.
