@@ -1,0 +1,180 @@
+{
+  "all_cells_second_host_replayed": true,
+  "all_cells_timing_eligible": true,
+  "all_hosted_cells_pass": true,
+  "binaries_sha256": {
+    "compact_sha256": "3fb436f16a586780615c5058245e823e0c993e8c72165fe0184f561ea4143487",
+    "rho_sha256": "58523da2280f21d8250ce2ae278f4d13eaa6fc02b1f4a0126a39cdb22f67c83e"
+  },
+  "cells": {
+    "n37_L1": {
+      "K": 7,
+      "L": 1,
+      "blocks": 20,
+      "children": 60,
+      "coarse_off_geo_over_rho_wall": {
+        "interval_95pct": [
+          0.9994170283727406,
+          1.003013079077358
+        ],
+        "median": 1.000418593288595
+      },
+      "complete_ir_over_rho": 2.523060776605472,
+      "full_rank_compact_traces": 40,
+      "max_compact_rss_mib": 12.59375,
+      "max_rho_rss_mib": 12.58203125,
+      "method_crossover": null,
+      "n": 37,
+      "off_b_over_off_a": {
+        "interval_95pct": [
+          0.9729631037914762,
+          1.007752456515659
+        ],
+        "median": 0.9860153994639717
+      },
+      "off_cpu_seconds_median": 0.015996581787330523,
+      "off_geo_over_rho_cpu": {
+        "interval_95pct": [
+          3.6901329627407367,
+          3.7802563544573604
+        ],
+        "median": 3.7361961980260263
+      },
+      "rho_cpu_seconds_median": 0.004278,
+      "status": "PASS",
+      "timing_eligible": true,
+      "verified_target_logs": 60,
+      "wall_eligible": false,
+      "wall_reason": "0.2-second wait4 polling coarsens short reference arms"
+    },
+    "n37_L1024": {
+      "K": 42,
+      "L": 1024,
+      "blocks": 5,
+      "children": 15,
+      "coarse_off_geo_over_rho_wall": {
+        "interval_95pct": [
+          0.8823624328470084,
+          1.3035196500989854
+        ],
+        "median": 0.9998070605605679
+      },
+      "complete_ir_over_rho": 0.5164640278265998,
+      "full_rank_compact_traces": 10,
+      "max_compact_rss_mib": 12.65625,
+      "max_rho_rss_mib": 12.65625,
+      "method_crossover": null,
+      "n": 37,
+      "off_b_over_off_a": {
+        "interval_95pct": [
+          0.9912174270439251,
+          1.0092347395938632
+        ],
+        "median": 1.0021768960145265
+      },
+      "off_cpu_seconds_median": 0.19396610691561555,
+      "off_geo_over_rho_cpu": {
+        "interval_95pct": [
+          1.6933163433531466,
+          1.714551615969139
+        ],
+        "median": 1.706369575337612
+      },
+      "rho_cpu_seconds_median": 0.11363799999999999,
+      "status": "PASS",
+      "timing_eligible": true,
+      "verified_target_logs": 15360,
+      "wall_eligible": false,
+      "wall_reason": "0.2-second wait4 polling coarsens short reference arms"
+    },
+    "n41_L1": {
+      "K": 85,
+      "L": 1,
+      "blocks": 5,
+      "children": 15,
+      "coarse_off_geo_over_rho_wall": {
+        "interval_95pct": [
+          2.9765237364323003,
+          2.9933692554802787
+        ],
+        "median": 2.981729789967213
+      },
+      "complete_ir_over_rho": 9.271592102015305,
+      "full_rank_compact_traces": 10,
+      "max_compact_rss_mib": 27.0859375,
+      "max_rho_rss_mib": 12.62890625,
+      "method_crossover": null,
+      "n": 41,
+      "off_b_over_off_a": {
+        "interval_95pct": [
+          0.9355710549779613,
+          1.0479976860441926
+        ],
+        "median": 0.9922275146359469
+      },
+      "off_cpu_seconds_median": 0.527626484464152,
+      "off_geo_over_rho_cpu": {
+        "interval_95pct": [
+          16.07312717311628,
+          18.196151875604755
+        ],
+        "median": 17.049909017777807
+      },
+      "rho_cpu_seconds_median": 0.030945999999999998,
+      "status": "PASS",
+      "timing_eligible": true,
+      "verified_target_logs": 15,
+      "wall_eligible": false,
+      "wall_reason": "0.2-second wait4 polling coarsens short reference arms"
+    },
+    "n53_L1": {
+      "K": 220,
+      "L": 1,
+      "blocks": 5,
+      "children": 15,
+      "coarse_off_geo_over_rho_wall": {
+        "interval_95pct": [
+          26.42124556691935,
+          26.96008086263387
+        ],
+        "median": 26.78231592517433
+      },
+      "complete_ir_over_rho": 13.22930449812205,
+      "full_rank_compact_traces": 10,
+      "max_compact_rss_mib": 171.23046875,
+      "max_rho_rss_mib": 12.5859375,
+      "method_crossover": null,
+      "n": 53,
+      "off_b_over_off_a": {
+        "interval_95pct": [
+          0.9950275758694882,
+          1.0025497511568537
+        ],
+        "median": 0.998330683685734
+      },
+      "off_cpu_seconds_median": 5.219363306153922,
+      "off_geo_over_rho_cpu": {
+        "interval_95pct": [
+          27.195124681651233,
+          27.661593822876004
+        ],
+        "median": 27.448273574155788
+      },
+      "rho_cpu_seconds_median": 0.19003699999999998,
+      "status": "PASS",
+      "timing_eligible": true,
+      "verified_target_logs": 15,
+      "wall_eligible": false,
+      "wall_reason": "0.2-second wait4 polling coarsens short reference arms"
+    }
+  },
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36694337420",
+  "instruction_analysis_sha256": "134f9ddfbed73d1a56a52e93bad377c485361d5735e58b7339d41854bae99331",
+  "manifest_sha256": "0692fdeec82ce07d11c88e84f3c8f24785fb8e7a76701cd5a3f939c0f58dbf1f",
+  "method_crossover": null,
+  "schema": "ecc2k130-compact-ir-cold-analysis-v1",
+  "source_head": "fe75eea69dc66660c3920342d83f17e3f4eb1151",
+  "total_children": 105,
+  "total_full_rank_compact_traces": 70,
+  "total_verified_target_logs": 15450
+}
