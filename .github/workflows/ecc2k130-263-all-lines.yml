@@ -1,0 +1,59 @@
+name: ECC2K-130 degree-263 all-line dual replay
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/dual_all_lines_20260930/**'
+      - 'research/ecc2k130_direction_review_20260924/twist_torsion_results.json'
+      - 'research/ecc2k130_direction_review_20260924/redteam_velu_replay.py'
+      - 'research/ecc2k130_dual_transport_20260925/dual_transport.py'
+      - 'research/ecc2k130_oriented_transport_20260924/oriented_velu.py'
+      - 'research/ecc2k130_relations/fastfield.py'
+      - 'research/ecc2k130_relations/relations.py'
+      - '.github/workflows/ecc2k130-263-all-lines.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/notes/ecc2k130/dual_all_lines_20260930/**'
+      - 'research/ecc2k130_direction_review_20260924/twist_torsion_results.json'
+      - 'research/ecc2k130_direction_review_20260924/redteam_velu_replay.py'
+      - 'research/ecc2k130_dual_transport_20260925/dual_transport.py'
+      - 'research/ecc2k130_oriented_transport_20260924/oriented_velu.py'
+      - 'research/ecc2k130_relations/fastfield.py'
+      - 'research/ecc2k130_relations/relations.py'
+      - '.github/workflows/ecc2k130-263-all-lines.yml'
+permissions:
+  contents: read
+jobs:
+  all-line-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PR_DRAFT: ${{ github.event.pull_request.draft }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check preregistration or replay frozen outcome
+        run: |
+          set -eu
+          dir=research/notes/ecc2k130/dual_all_lines_20260930
+          if test -f "$dir/RESULT.json"; then
+            python3 "$dir/verify.py" --result "$dir/RESULT.json" --out /tmp/dual_all_lines_verify.json
+            python3 - <<'PYCODE'
+          import json
+          from pathlib import Path
+          directory = Path('research/notes/ecc2k130/dual_all_lines_20260930')
+          frozen = json.loads((directory / 'VERIFY.json').read_text())
+          fresh = json.loads(Path('/tmp/dual_all_lines_verify.json').read_text())
+          for key in ('status', 'result_sha256', 'checked_lines',
+                      'checked_kernel_inputs', 'checked_reference_lines',
+                      'checked_negative_controls', 'deterministic_sha256'):
+              assert frozen[key] == fresh[key], key
+          assert fresh['status'] == 'PASS'
+          PYCODE
+          else
+            test "$PR_DRAFT" = true
+            test -f "$dir/PROTOCOL.md"
+            test ! -f "$dir/VERIFY.json"
+          fi

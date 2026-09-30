@@ -295,10 +295,17 @@ measured size are both outside this harness:
   measured.  Plain symmetrisation `C″ = 3.0·10¹⁰` (registered `≥ 10⁸`:
   confirmed; `n* = 2^302`); with the 2-torsion symmetry `C″ = 7.3·10⁷`
   (registered `10⁵–10⁶`: wrong by `73–730×`, the product variable's fifth
-  unknown was not counted; `n* = 2^203` in the subgroup's order).  The
+  unknown was not counted; `n* = 2^233` in the subgroup's order, once the
+  residual rate of the Edwards base was counted — `1/(192p)`, not the
+  `1/(24p)` the first round assumed, which had put it at `2^203`).  The
   falsification line `C″ > 10⁷` is crossed: the route is not a parity
   programme at a size that fits a machine on this engine; parity at
-  `2^128` needs `C″ < 4.0·10⁵`.
+  `2^128` needs `C″ < 5.0·10⁴`.  **Second round (2026-09-30):** the
+  4-torsion lever registered there is retracted — the rational point of
+  order four swaps the Edwards coordinates and halves no degree; the
+  degree-halving involution needs `√d ∈ F_p` — and the variant it does
+  allow, the residual saturated over its four translates, was built and
+  measured as a wash (`2×` on the rate, `2.01×` on the test).
 - **A cover** (Joux–Vitse 2012, `E(F_{p⁶})` → genus-`3` hyperelliptic over
   `F_{p²}`; the GHS work elsewhere in this repository): changes the target,
   not the constant, and belongs to a different ledger.
