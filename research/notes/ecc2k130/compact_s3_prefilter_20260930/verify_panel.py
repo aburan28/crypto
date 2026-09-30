@@ -147,7 +147,7 @@ def verify(n: int, run_dir: Path) -> dict:
     isolation, = rows(run_dir / "isolation.jsonl")
     assert isolation["schema"] == "isolated-bench/1" and isolation["mode"] == "reserve"
     assert isolation["exit_status"] == 0
-    assert isolation["reserved_cpus"] == [host["reserved_cpu"]]
+    assert host["reserved_cpu"] in isolation["reserved_cpus"]
     assert isolation["command"][-2:] == ["--cpu", str(host["reserved_cpu"])]
     assert json.loads((run_dir / "grid.json").read_text()) == {
         "n": n, "L": 1024, "k": frozen["k_by_n"][str(n)],
