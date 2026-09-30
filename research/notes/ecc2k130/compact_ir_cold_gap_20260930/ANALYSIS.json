@@ -40,6 +40,16 @@
         ],
         "median": 3.7361961980260263
       },
+      "phase_diagnostics": {
+        "class": "in_process_wall_timers_not_child_CPU_accounting",
+        "median_index_fraction": 0.035258651441818646,
+        "median_rank_fraction": 0.37071444291360045,
+        "median_rank_probes_per_relation": 1416.142857142857,
+        "median_rank_s3_calls": 5248.0,
+        "median_target_fraction": 0.06900007163888927,
+        "median_target_s3_calls": 512.0,
+        "off_arms": 40
+      },
       "rho_cpu_seconds_median": 0.004278,
       "status": "PASS",
       "timing_eligible": true,
@@ -79,6 +89,16 @@
           1.714551615969139
         ],
         "median": 1.706369575337612
+      },
+      "phase_diagnostics": {
+        "class": "in_process_wall_timers_not_child_CPU_accounting",
+        "median_index_fraction": 0.040099630289870174,
+        "median_rank_fraction": 0.02861974781748241,
+        "median_rank_probes_per_relation": 54.95238095238095,
+        "median_rank_s3_calls": 3136.0,
+        "median_target_fraction": 0.9100156176028988,
+        "median_target_s3_calls": 70272.0,
+        "off_arms": 10
       },
       "rho_cpu_seconds_median": 0.11363799999999999,
       "status": "PASS",
@@ -120,6 +140,16 @@
         ],
         "median": 17.049909017777807
       },
+      "phase_diagnostics": {
+        "class": "in_process_wall_timers_not_child_CPU_accounting",
+        "median_index_fraction": 0.08122688829832343,
+        "median_rank_fraction": 0.8769618805428692,
+        "median_rank_probes_per_relation": 25062.729411764707,
+        "median_rank_s3_calls": 1067520.0,
+        "median_target_fraction": 0.004857886749332848,
+        "median_target_s3_calls": 5312.0,
+        "off_arms": 10
+      },
       "rho_cpu_seconds_median": 0.030945999999999998,
       "status": "PASS",
       "timing_eligible": true,
@@ -159,6 +189,16 @@
           27.661593822876004
         ],
         "median": 27.448273574155788
+      },
+      "phase_diagnostics": {
+        "class": "in_process_wall_timers_not_child_CPU_accounting",
+        "median_index_fraction": 0.09992549384458116,
+        "median_rank_fraction": 0.8831855605623512,
+        "median_rank_probes_per_relation": 94690.94545454545,
+        "median_rank_s3_calls": 10423168.0,
+        "median_target_fraction": 0.0009017517578479119,
+        "median_target_s3_calls": 10368.0,
+        "off_arms": 10
       },
       "rho_cpu_seconds_median": 0.19003699999999998,
       "status": "PASS",

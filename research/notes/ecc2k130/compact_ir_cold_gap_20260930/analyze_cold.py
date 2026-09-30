@@ -31,7 +31,8 @@ def paired(values: list[float]) -> dict:
             "interval_95pct": [math.exp(midpoint - half), math.exp(midpoint + half)]}
 
 
-def read_sealed_cell(archive: Path, cell_id: str, hashes: dict[str, str]) -> tuple[dict, dict]:
+def read_sealed_cell(archive: Path, cell_id: str,
+                     hashes: dict[str, str]) -> tuple[dict, dict, dict[str, bytes]]:
     assert sha(archive) and archive.is_file()
     found = {}
     needed = {f"{cell_id}/cold_run.json", f"{cell_id}/receipt.json"}
@@ -48,7 +49,7 @@ def read_sealed_cell(archive: Path, cell_id: str, hashes: dict[str, str]) -> tup
             found[relative] = data
     assert found.keys() == hashes.keys() and needed <= found.keys()
     return (json.loads(found[f"{cell_id}/cold_run.json"]),
-            json.loads(found[f"{cell_id}/receipt.json"]))
+            json.loads(found[f"{cell_id}/receipt.json"]), found)
 
 
 def analyze(archive: Path) -> dict:
@@ -80,7 +81,8 @@ def analyze(archive: Path) -> dict:
         assert entry["status"] == "PASS"
         raw = archive / entry["raw_path"]
         assert sha(raw) == entry["raw_sha256"] and raw.stat().st_size == entry["raw_bytes"]
-        report, embedded_receipt = read_sealed_cell(raw, cell_id, entry["member_sha256"])
+        report, embedded_receipt, members = read_sealed_cell(
+            raw, cell_id, entry["member_sha256"])
         assert report["host"]["git_head"] == manifest["source_head"]
         assert report["cell"] == cell and report["mode"] == "measure"
         assert report["status"] == "PASS" and report["config_sha256"] == sha(CONFIG)
@@ -105,10 +107,19 @@ def analyze(archive: Path) -> dict:
         assert all(check["targets_verified"] == cell["L"]
                    for check in hosted_receipt["checked"])
         measurements = {block: {} for block in range(cell["blocks"])}
+        compact_summaries = []
         for run in report["runs"]:
             assert run["status"] == "SMOKE_PASS" and run["exit_code"] == 0
             assert run["stopped_for"] is None and run["cpu_seconds"] > 0
             measurements[run["block"]][run["arm"]] = run
+            if run["policy"] == "off":
+                stdout = members[f"{cell_id}/{run['subdir']}/off.stdout.jsonl"]
+                summary = json.loads(stdout.splitlines()[-1])
+                assert summary["kind"] == "compact_orbit_dlp_summary"
+                assert summary["n"] == cell["n"] and summary["rank"] == cell["K"]
+                assert summary["targets_solved"] == cell["L"]
+                compact_summaries.append(summary)
+        assert len(compact_summaries) == 2 * cell["blocks"]
         aa, cpu, wall, off_cpu, rho_cpu = [], [], [], [], []
         for block in range(cell["blocks"]):
             data = measurements[block]
@@ -130,6 +141,24 @@ def analyze(archive: Path) -> dict:
         assert aa_valid == hosted_receipt["aa_valid"]
         assert hosted_receipt["uncontended"] and hosted_receipt["timing_eligible"]
         ir_row, = (row for row in ir["cells"][cell_id]["rows"] if row["arm"] == "off")
+        def median_phase_fraction(phase: str) -> float:
+            return statistics.median(summary["timing_ms"][phase] /
+                                     summary["timing_ms"]["process_total"]
+                                     for summary in compact_summaries)
+
+        phase_diagnostics = {
+            "class": "in_process_wall_timers_not_child_CPU_accounting",
+            "off_arms": len(compact_summaries),
+            "median_rank_fraction": median_phase_fraction("rank_stage"),
+            "median_target_fraction": median_phase_fraction("targets_total"),
+            "median_index_fraction": median_phase_fraction("index_build"),
+            "median_rank_s3_calls": statistics.median(
+                summary["rank_s3_counts"]["calls"] for summary in compact_summaries),
+            "median_target_s3_calls": statistics.median(
+                summary["target_s3_counts"]["calls"] for summary in compact_summaries),
+            "median_rank_probes_per_relation": statistics.median(
+                summary["rank_probes_mean"] for summary in compact_summaries),
+        }
         row = {"status": "PASS", "n": cell["n"], "L": cell["L"],
                "K": cell["K"], "blocks": cell["blocks"],
                "children": len(report["runs"]),
@@ -147,6 +176,7 @@ def analyze(archive: Path) -> dict:
                "max_rho_rss_mib": max(run["max_rss_kib_linux"] for run in
                                        report["runs"] if run["policy"] == "rho") / 1024,
                "complete_ir_over_rho": ir_row["same_Q_Ir_ratio_to_rho"],
+               "phase_diagnostics": phase_diagnostics,
                "timing_eligible": aa_valid and hosted_receipt["uncontended"],
                "method_crossover": None}
         result["cells"][cell_id] = row
