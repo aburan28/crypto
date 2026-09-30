@@ -1,6 +1,7 @@
 """Real isolated imports and incomplete executions retain their source boundary."""
 import copy
 import json
+import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -164,6 +165,30 @@ class SatRuntimeExecutionV3Tests(unittest.TestCase):
             self.assertFalse((output/'after.json').exists())
             with self.assertRaises((FileNotFoundError, InvalidEvidence)):
                 audit_execution(output, spec)
+
+    def test_watchdog_does_not_resignal_a_group_after_successful_kill_and_reap(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root, registration, output = self.fixture(temporary,
+                'def run(arguments, output):\n    import time\n    time.sleep(10)\n')
+            spec = register(root, registration, module='control', action='run',
+                            arguments={}, timeout_seconds=1)
+            actual_killpg = os.killpg
+            calls = []
+
+            def killed_group_can_become_inaccessible(pgid, signal):
+                calls.append(pgid)
+                if len(calls) > 1:
+                    raise PermissionError('simulated macOS post-reap orphan-zombie group')
+                return actual_killpg(pgid, signal)
+
+            with patch('sat_runtime_execution_v3.os.killpg',
+                       side_effect=killed_group_can_become_inaccessible):
+                process = execute(registration, output, expected_spec=spec, timeout_seconds=1)
+            self.assertTrue(process['timed_out'])
+            self.assertEqual(len(calls), 1)
+            self.assertLess(process['exit_code'], 0)
+            self.assertTrue((output/'process.json').exists())
+            self.assertFalse((output/'after.json').exists())
 
 
 if __name__ == '__main__':
