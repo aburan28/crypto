@@ -715,6 +715,47 @@ note applies its own collapse: the measured rate, carried out 97 bits, lands
 within 2^3.5 of this note's own code, inside the measured band.  Neither
 number was fitted to the other.
 
+### 6.3 A third accounting correction: a Frobenius-stable set with a membership ideal
+
+**Experiment:** [`research/hamming_ideal_pdp_20260930/`](../../hamming_ideal_pdp_20260930/)
+· **Note:** [`RESEARCH_HAMMING_IDEAL_PDP.md`](../index-calculus/RESEARCH_HAMMING_IDEAL_PDP.md)
+· everything below that is a number is a **measurement at `n ≤ 19`**.
+
+§6 says an orbit-union base "has no low-degree membership polynomial", so
+the last summand must be looked up in a materialised base of `2^l` stored
+points. That is true of a union of orbits chosen freely; it is not true of
+every Frobenius-stable set. In a **normal basis** `{α^{2^i}}` Frobenius is a
+cyclic shift of coordinates, so
+
+```text
+    F_w = { P : wt_NB(x(P)) ≤ w },      |{x : wt(x) ≤ w}| = Σ_{j ≤ w} C(n, j),
+```
+
+is `π`-stable at every `n`, prime or not, needs no storage (membership is
+a popcount), and by La Scala–Marchesin–Tiwari (*Hamming ideals and Gröbner
+bases for ISD-like syndrome decoding*, 2026) has a membership ideal of
+`O(n)` auxiliary variables and degree at most `⌊log₂ n⌋ + 1` (their
+FC-Hamming ideal; quadratic with `O(n log n)` variables in the C and QFC
+forms). So the `2^l` storage in the table of §6 is not a cost of the
+collapse; it is a cost of the enumeration oracle, and a weight base
+removes it with no change to the operation count. The three rows of §5.2
+that carry "materialised" keep their `log₂ ops` and lose their storage
+column; the family's bottom, `2^124.99` at `m = 2`, is unchanged. Class:
+accounting, as §6.1 and §6.2.
+
+Whether the membership ideal makes an *algebraic* oracle for a
+Frobenius-stable base — the thing §6 said prime `n` forbids — was then
+measured rather than derived. It does not, at any size run: with `S₃`
+Weil-descended in normal-basis coordinates and the weight constraint in
+each of the paper's three presentations, the paper's own `MultiSolve`
+answers every target correctly but resolves only after nearly every
+coordinate of one summand is fixed (mean tame depth 14.7–16.2 of 17 at
+`n = 17`), and its call count grows as `|F_w|^{1.9–3.6}` against the
+exhaustive oracle's `|F_w|`. That is the paper's Classic McEliece
+conclusion — the Prange point wins — transferred intact. §5.3's demand on
+the oracle stands; this oracle is the enumeration with a Gröbner
+computation bolted onto each candidate.
+
 ## 7. What this does not settle
 
 - **The oracle family, not every oracle.**  §5 prices methods that fix some
