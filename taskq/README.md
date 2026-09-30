@@ -148,7 +148,8 @@ on secp256k1 and sect163k1, and to brute-force enumeration of toy curves.
 `"verify": {"argv": [...]}` instead runs a verifier from the checkout, which
 exits 0 verified, 1 refuted or 2 no claim.
 
-Each timed run gets `verification.status`: `verified`, `refuted`,
+Each timed run that exited 0 gets `verification.status` (a run that failed
+or timed out made no checkable claim and gets none): `verified`, `refuted`,
 `no_claim` or `error`. The result gets a rollup, which is `refuted` if any
 run was refuted, else `error`, else `verified`, else `no_claim`.
 **Verification never rewrites `status`.** A run that exited 0 with a wrong
