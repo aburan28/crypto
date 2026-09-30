@@ -5585,6 +5585,28 @@ The fit separates neither `1/6` nor 0.141 from zero.
 This is a plan, recorded on 2026-09-30 after §22 merged. Nothing in it
 has run. Each round needs its own protocol, committed before it runs.
 
+**Correction, 2026-09-30, found while reading §20's harness for §23.**
+Item 1's rungs above `2^47.2` cannot run.
+- `KoblitzCurve::new` refuses `n > MAX_N = 63`, and the single-word
+  arithmetic and pair table stop there as well. `n = 71` panics in
+  `examples/koblitz_curve_records`.
+- With `n ≤ 63`, the only curves with `r ≥ 2^36` are the ladder's four
+  and two more, both inside its span:
+  - `K_1/GF(2^47)`, `2^36.6`;
+  - `K_0/GF(2^57)`, `2^38.0`, new. Its proper intermediate subfields over
+    `GF(2)` are `GF(2^3)` and `GF(2^19)`.
+  - `K_0/GF(2^41)`, `2^39.0`;
+  - `K_0/GF(2^53)`, `2^44.3`;
+  - `K_1/GF(2^59)`, `2^44.5`, new, prime `n`.
+  - `K_0/GF(2^61)`, `2^47.2`.
+- So item 1 splits in two:
+  - **1a**, which needs no code change: the two new sizes and more sets.
+    It can narrow the fit, but it cannot lengthen its lever arm.
+  - **1b**, which lifts `MAX_N`: two-word field arithmetic and pair
+    table. That is engineering, and it comes before any rung above
+    `2^47.2`, `K_1/GF(2^83)` included.
+- Item 1's text below is kept as it was written.
+
 1. **Recommended next (§23): resolve the top-end exponent.** Pending.
    - **Why first.** Whether any work on constants can ever reach a
      crossing depends on this exponent.
@@ -5659,6 +5681,8 @@ has run. Each round needs its own protocol, committed before it runs.
     about 2× to about 19,000×. Item 1 exists to narrow that.
 - **Memory:** the thread's pair table at that size would not fit this
   host.
+- **Construction** (added with the correction above): `n = 83` is also
+  past `MAX_N`. The thread cannot build the curve without item 1b.
 - So the thread keeps high-fidelity ECC2K-130 improvement unestablished,
   as §22.9 says.
 
