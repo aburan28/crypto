@@ -608,10 +608,14 @@ fn xor_entries(
     simd: SimdKind,
 ) -> usize {
     // Offsets pointing at entry 0 of a table are zero rows: skip them.
-    static ZERO_GROUP_INDEX: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    let use_known_zero = *ZERO_GROUP_INDEX
-        .get_or_init(|| std::env::var("KIC_GF2_ZERO_GROUP_INDEX").as_deref() == Ok("1"));
-    let (live, n) = live_table_offsets(offsets, suffix, table_size, use_known_zero);
+    let mut live = [0usize; 4];
+    let mut n = 0;
+    for &o in offsets {
+        if !(o / suffix).is_multiple_of(table_size) {
+            live[n] = o;
+            n += 1;
+        }
+    }
     let live = &live[..n];
     #[cfg(target_arch = "x86_64")]
     match simd {
@@ -630,38 +634,6 @@ fn xor_entries(
     let _ = simd;
     xor_entries_generic(dst, table, live, suffix);
     n
-}
-
-#[inline(always)]
-fn live_table_offsets(
-    offsets: &[usize],
-    suffix: usize,
-    table_size: usize,
-    use_known_zero: bool,
-) -> ([usize; 4], usize) {
-    let mut live = [0usize; 4];
-    let mut n = 0;
-    if use_known_zero {
-        // Offset t was formed as (t * table_size + selector) * suffix.
-        // Entry zero is therefore at t * table_size * suffix exactly.
-        let stride = table_size * suffix;
-        let mut zero = 0;
-        for &offset in offsets {
-            if offset != zero {
-                live[n] = offset;
-                n += 1;
-            }
-            zero += stride;
-        }
-    } else {
-        for &offset in offsets {
-            if !(offset / suffix).is_multiple_of(table_size) {
-                live[n] = offset;
-                n += 1;
-            }
-        }
-    }
-    (live, n)
 }
 
 #[inline(always)]
@@ -806,29 +778,6 @@ pub fn simd_available() -> bool {
 mod tests {
     use super::*;
     use rand::{rngs::StdRng, Rng, SeedableRng};
-
-    #[test]
-    fn known_zero_table_offsets_match_division_for_all_selectors() {
-        for suffix in [1usize, 3, 31, 257] {
-            for table_size in [2usize, 16, 256] {
-                for groups in 1..=4 {
-                    for selector_seed in [0usize, 1, 7, 0x1234, usize::MAX] {
-                        let offsets: Vec<usize> = (0..groups)
-                            .map(|t| {
-                                let selector = (selector_seed >> (4 * t)) % table_size;
-                                (t * table_size + selector) * suffix
-                            })
-                            .collect();
-                        assert_eq!(
-                            live_table_offsets(&offsets, suffix, table_size, true),
-                            live_table_offsets(&offsets, suffix, table_size, false),
-                            "suffix={suffix} table_size={table_size} groups={groups}",
-                        );
-                    }
-                }
-            }
-        }
-    }
 
     #[test]
     fn branchless_strip_matches_conditional_clear() {
