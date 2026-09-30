@@ -9,7 +9,7 @@ import statistics as st
 import sys
 from pathlib import Path
 
-LOWER = 9  # d_max + 1
+LOWER = {'rr': 8, 'ctrl': 8, 'x4': 10}  # d_max + 1 per arm
 ARMS = ('rr', 'x4', 'ctrl')
 
 
@@ -19,27 +19,29 @@ def fit(points):
     return sum((x - mx) * (y - my) for x, y in points) / sum((x - mx) ** 2 for x in xs)
 
 
-def degree(o):
+def degree(o, arm):
+    """A resolved degree, the arm's lower bound (d_max + 1) for at_least, None for caps."""
     if o is None:
         return None
     if o['kind'] == 'resolved':
         return o['degree']
     if o['kind'] == 'at_least':
-        return LOWER
+        assert o['degree'] == LOWER[arm], (arm, o)
+        return LOWER[arm]
     return None  # caps or satisfiable
 
 
-def show(d):
-    return 'caps' if d is None else (f'>={d}' if d == LOWER else str(d))
+def show(d, arm):
+    return 'caps' if d is None else (f'>={d}' if d == LOWER[arm] else str(d))
 
 
-def cell_median(degs):
+def cell_median(degs, arm):
     """Median resolved degree over >= 3 measured draws; '>=LOWER' if lower bounds are the
     majority; None if fewer than 3 draws or any caps."""
     if len(degs) < 3 or None in degs:
         return None
-    lowers = sum(d == LOWER for d in degs)
-    return f'>={LOWER}' if lowers * 2 > len(degs) else st.median_low(degs)
+    lowers = sum(d == LOWER[arm] for d in degs)
+    return f'>={LOWER[arm]}' if lowers * 2 > len(degs) else st.median_low(degs)
 
 
 def main(runs):
@@ -56,28 +58,33 @@ def main(runs):
     paired = []
     for name, c in sorted(cells.items(), key=lambda kv: (kv[1]['n'] or 0, kv[1]['ell'] or 0)):
         rows = c['rows']
-        degs = {arm: [] for arm in ARMS}
+        # one line per (draw, arm); a killed cell keeps the arms it measured
+        per = {}
         for r in rows:
-            for arm in ('rr', 'x4'):
-                o = r[arm]['outcome']
-                if o['kind'] != 'satisfiable':
-                    degs[arm].append(degree(o))
-            if 'ctrl' in r['rr']:
-                degs['ctrl'].append(degree(r['rr']['ctrl']['outcome']))
-            if r['rr']['outcome']['kind'] != 'satisfiable' and r['x4']['outcome']['kind'] != 'satisfiable':
-                d_rr, d_x4 = degree(r['rr']['outcome']), degree(r['x4']['outcome'])
-                if d_rr is not None and d_x4 is not None:
+            per.setdefault(r['draw'], {})[r['arm']] = r
+        degs = {arm: [] for arm in ARMS}
+        for d, arms in sorted(per.items()):
+            for arm in ARMS:
+                r = arms.get(arm)
+                if r is not None and r['outcome']['kind'] != 'satisfiable':
+                    degs[arm].append(degree(r['outcome'], arm))
+            if 'rr' in arms and 'x4' in arms:
+                d_rr, d_x4 = degree(arms['rr']['outcome'], 'rr'), degree(arms['x4']['outcome'], 'x4')
+                if arms['rr']['outcome']['kind'] != 'satisfiable' and arms['x4']['outcome']['kind'] != 'satisfiable' \
+                        and d_rr is not None and d_x4 is not None \
+                        and d_rr != LOWER['rr'] and d_x4 != LOWER['x4']:
                     paired.append((name, d_rr, d_x4))
-        sat = {arm: sum(r[arm]['outcome']['kind'] == 'satisfiable' for r in rows) for arm in ('rr', 'x4')}
-        med = {arm: cell_median(degs[arm]) for arm in ARMS}
-        print(f"{name:10} {len(rows):5} {sat['rr']:6} {sat['x4']:6}  "
-              + ' '.join(f"{' '.join(show(d) for d in degs[arm]):16}" for arm in ARMS)
+        sat = {arm: sum(1 for arms in per.values() if arm in arms and arms[arm]['outcome']['kind'] == 'satisfiable')
+               for arm in ('rr', 'x4')}
+        med = {arm: cell_median(degs[arm], arm) for arm in ARMS}
+        print(f"{name:10} {len(per):5} {sat['rr']:6} {sat['x4']:6}  "
+              + ' '.join(f"{' '.join(show(d, arm) for d in degs[arm]):16}" for arm in ARMS)
               + f"  {str(med['rr']):6}  {str(med['x4']):6}  {med['ctrl']}")
         if c['n'] is None:
             continue
         key = (c['a'], c['n'])
         for arm in ARMS:
-            if med[arm] == f'>={LOWER}':
+            if med[arm] == f'>={LOWER[arm]}':
                 lower_below[arm].setdefault(key, []).append(c['ell'])
             elif isinstance(med[arm], int):
                 by_curve[arm].setdefault(key, []).append((c['ell'], med[arm]))
@@ -93,7 +100,7 @@ def main(runs):
     print()
     if paired:
         diffs = [a - b for _, a, b in paired]
-        print(f'paired rr - x4 over {len(paired)} draws measured on both: '
+        print(f'paired rr - x4 over {len(paired)} draws resolved on both: '
               f'mean {st.mean(diffs):+.2f}, min {min(diffs):+d}, max {max(diffs):+d}; '
               f'rr below x4 on {sum(d < 0 for d in diffs)}, equal {sum(d == 0 for d in diffs)}, above {sum(d > 0 for d in diffs)}')
     curves = {(c['a'], c['n']) for c in cells.values() if c['n'] is not None}

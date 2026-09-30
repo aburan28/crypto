@@ -18,7 +18,7 @@ if [ "${2:-}" = "--cells" ]; then
       name="K${a}n${n}l${ell}"
       set +e
       ( ulimit -t 3600; ulimit -v 10000000; exec taskset -c 3 env -i PATH="$PATH" F4_F2_MAX_ROWS=50000000 F4_F2_MAX_COLS=50000000 "$bin" \
-          --a "$a" --n "$n" --ell "$ell" --unsat 4 --max-draws 256 --d-max 8 --seed 20260930 \
+          --a "$a" --n "$n" --ell "$ell" --unsat 4 --max-draws 256 --d-max 7 --d-max-x4 9 --seed 20260930 \
           --out "$runs/$name.jsonl" ) > /dev/null 2> "$runs/$name.stderr"
       echo $? > "$runs/$name.exit"
       set -e

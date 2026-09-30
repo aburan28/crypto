@@ -16,7 +16,8 @@
 //! Roots are counted by group arithmetic, independently of every Macaulay code path:
 //! `rr`'s roots are the ordered triples of factor-base points summing to `R`; `x4`'s are
 //! the `x`-triples at which `S₄` vanishes in the field.  Only a system with no root is
-//! measured, by `solving_degree` up to `--d-max`.  Output: one JSON line per draw.
+//! measured, by `solving_degree` up to `--d-max` (`--d-max-x4` for the cheaper `x4`).  Output: one JSON line per draw and
+//! arm, in the order `rr`, `x4`, `ctrl`, written as soon as it exists.
 //!
 //!     rr_degree_ladder --a 1 --n 17 --ell 4 --unsat 4 --max-draws 256 --d-max 8 \
 //!         --seed 20260930 --out cell.jsonl
@@ -340,7 +341,8 @@ fn main() {
     let ell = num("--ell", 3) as usize;
     let want_unsat = num("--unsat", 4) as u32;
     let max_draws = num("--max-draws", 256) as u32;
-    let d_max = num("--d-max", 8) as u32;
+    let d_max = num("--d-max", 7) as u32;
+    let d_max_x4 = num("--d-max-x4", 9) as u32;
     let seed = num("--seed", 20260930);
     let check = args.iter().any(|s| s == "--check");
     assert!((2..=8).contains(&ell), "need 2 ≤ ℓ ≤ 8");
@@ -398,20 +400,41 @@ fn main() {
             assert_eq!(rr_roots, rr_brute, "rr root count");
             assert_eq!(x4_roots, x4_brute, "x4 root count");
         }
-        let mut line = format!(
-            r#"{{"cell":"{cell}","a":{a},"n":{n},"ell":{ell},"m":3,"seed":{seed},"draw":{draw},"v_basis":{:?},"k":{k},"x_r":{},"base_points":{},"rr":{{"n_vars":{rr_vars},"n_eqs":{},"degree":{},"terms_per_eq":{},"roots":{rr_roots}"#,
+        let head = format!(
+            r#""cell":"{cell}","a":{a},"n":{n},"ell":{ell},"m":3,"seed":{seed},"draw":{draw},"v_basis":{:?},"k":{k},"x_r":{},"base_points":{}"#,
             basis.iter().map(word).collect::<Vec<_>>(),
             word(x_r),
             base.len(),
-            rr.len(),
-            system_degree(&rr),
-            terms_per_eq(&rr),
         );
-        let mut any_unsat = false;
+        // One line per arm, written as soon as it exists, in the order rr, x4, ctrl:
+        // a cell killed by its limit keeps every arm it finished.
+        let mut emit =
+            |arm: &str, polys: &[F2BoolPoly], n_vars: usize, roots: Option<u64>, d_max: u32| {
+                let shape = format!(
+                    r#""arm":"{arm}","n_vars":{n_vars},"n_eqs":{},"degree":{},"terms_per_eq":{}"#,
+                    polys.len(),
+                    system_degree(polys),
+                    terms_per_eq(polys)
+                );
+                let roots_field = roots.map_or(String::new(), |r| format!(r#","roots":{r}"#));
+                let body = if roots == Some(0) || roots.is_none() {
+                    let m = measure(polys, n_vars, d_max);
+                    format!(r#","outcome":{},"secs":{:.3}"#, m.outcome, m.secs)
+                } else {
+                    r#","outcome":{"kind":"satisfiable"}"#.to_string()
+                };
+                let line = format!("{{{head},{shape}{roots_field}{body}}}");
+                match out.as_mut() {
+                    Some(f) => {
+                        writeln!(f, "{line}").expect("write");
+                        f.flush().expect("flush");
+                    }
+                    None => println!("{line}"),
+                }
+            };
+        emit("rr", &rr, rr_vars, Some(rr_roots), d_max);
+        emit("x4", &x4, x4_vars, Some(x4_roots), d_max_x4);
         if rr_roots == 0 {
-            any_unsat = true;
-            let m = measure(&rr, rr_vars, d_max);
-            line.push_str(&format!(r#","outcome":{},"secs":{:.3}"#, m.outcome, m.secs));
             let ctrl = random_control_system(
                 rr_vars,
                 rr.len(),
@@ -419,44 +442,12 @@ fn main() {
                 terms_per_eq(&rr),
                 cell_seed ^ 0x0C01_7201_u64.wrapping_mul(u64::from(draw) + 1),
             );
-            let mc = measure(&ctrl, rr_vars, d_max);
-            line.push_str(&format!(
-                r#"}},"ctrl":{{"n_vars":{rr_vars},"n_eqs":{},"degree":{},"outcome":{},"secs":{:.3}"#,
-                ctrl.len(),
-                system_degree(&ctrl),
-                mc.outcome,
-                mc.secs
-            ));
-        } else {
-            line.push_str(r#","outcome":{"kind":"satisfiable"}"#);
-        }
-        line.push_str(&format!(
-            r#"}},"x4":{{"n_vars":{x4_vars},"n_eqs":{},"degree":{},"terms_per_eq":{},"roots":{x4_roots}"#,
-            x4.len(),
-            system_degree(&x4),
-            terms_per_eq(&x4),
-        ));
-        if x4_roots == 0 {
-            any_unsat = true;
-            let m = measure(&x4, x4_vars, d_max);
-            line.push_str(&format!(r#","outcome":{},"secs":{:.3}"#, m.outcome, m.secs));
-        } else {
-            line.push_str(r#","outcome":{"kind":"satisfiable"}"#);
-        }
-        line.push_str(&format!(
-            r#"}},"total_secs":{:.3}}}"#,
-            started.elapsed().as_secs_f64()
-        ));
-        if rr_roots == 0 {
+            emit("ctrl", &ctrl, rr_vars, None, d_max);
             unsat += 1;
         } else {
             sat += 1;
         }
-        let _ = any_unsat;
-        match out.as_mut() {
-            Some(f) => writeln!(f, "{line}").expect("write"),
-            None => println!("{line}"),
-        }
+        let _ = started;
     }
     eprintln!("{cell}: {unsat} unsat, {sat} sat, {skipped} skipped (x_R ∈ V)");
 }

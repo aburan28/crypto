@@ -76,7 +76,7 @@ registration and what was seen.
   registered run uses a different seed and a fresh output directory, and no smoke draw is
   pooled with it.
 
-### 2a. Smoke (seed 7, `d_max = 8`, two unsatisfiable draws per cell, not data)
+### 2a. Smoke (seed 7, not data)
 
 SMOKE_PENDING
 
@@ -102,9 +102,13 @@ One process per cell `(K_a, n, ℓ)`. Each draw:
   arithmetic, `x4` by evaluating `S₄` in the field over `V³`. `x4` may have roots that `rr`
   does not (summands whose `x` lies in `V` but is an abscissa only over `F_{2^{2n}}`); each
   arm is measured on its own rootless draws.
-- **Measurement.** `solving_degree` up to `d_max = 8`, with the ladder caps
-  `F4_F2_MAX_ROWS = F4_F2_MAX_COLS = 50,000,000`. The outcome is `resolved D`,
-  `at_least 9`, or `caps`.
+- **Measurement.** `solving_degree` with the ladder caps
+  `F4_F2_MAX_ROWS = F4_F2_MAX_COLS = 50,000,000`, up to `d_max = 7` for `rr` and `ctrl`
+  and `d_max = 9` for `x4`, whose system degree is already 6 and whose matrices are far
+  smaller (`3ℓ` unknowns, `n` equations). The outcome is `resolved D`, `at_least 8`
+  (`at_least 10` for `x4`), or `caps`. Arms are measured in the order `rr`, `x4`, `ctrl`, and each
+  arm's result is written as its own line as soon as it exists, so a cell killed by its
+  limit keeps every arm it finished.
 - **Stop.** A cell stops at 4 draws with `rr` rootless, or 256 draws.
 
 ## 4. Cells
@@ -121,17 +125,18 @@ One process per cell `(K_a, n, ℓ)`. Each draw:
 ## 5. Metric and decision rule ([`analyze.py`](analyze.py))
 
 - **Per cell and arm:** the median resolved `D` over that arm's rootless draws. If lower
-  bounds (`≥ 9`) are the majority the cell reads `≥ 9` and leaves the fit, but is listed;
+  bounds (`≥ 8`; `≥ 10` for `x4`) are the majority the cell reads so and leaves the fit, but
+  is listed;
   fewer than 3 measured draws, or any `caps`, also leaves the fit.
 - **Per curve and arm:** `s_n`, the least-squares slope of the cell medians on `ℓ`, fitted
   only with at least 3 retained `ℓ`. **Overall:** `s̄`, the mean of the fitted `s_n`.
-- **Paired:** on every draw measured on both `rr` and `x4`, `D_rr − D_x4`; reported as
+- **Paired:** on every draw resolved on both `rr` and `x4`, `D_rr − D_x4`; reported as
   mean, range and the counts below / equal / above.
 
 The decision, on `rr`, with the sym-lever thresholds:
 
-- **Constant lever** if `s̄_rr ≥ 0.35`, or if every curve has a `≥ 9` cell at `ℓ ≤ 6`.
-- **Slope lever** if `s̄_rr ≤ 0.15` and no cell below `ℓ = 6` reads `≥ 9`.
+- **Constant lever** if `s̄_rr ≥ 0.35`, or if every curve has a `≥ 8` cell at `ℓ ≤ 6`.
+- **Slope lever** if `s̄_rr ≤ 0.15` and no cell below `ℓ = 6` reads `≥ 8`.
 - **Inconclusive** otherwise, and whenever fewer than two curves are fitted.
 
 Reported, not decisive: `s̄_x4`, the paired differences, and the control's medians.
@@ -160,6 +165,6 @@ Reported, not decisive: `s̄_x4`, the paired differences, and the control's medi
 ## 7. Scope
 
 Two Koblitz curves, `n` 13–19, `ℓ` 2–6, `m = 3`, one engine's `solving_degree` at
-`d_max = 8`, four rootless draws per cell. Nothing here is an end-to-end cost, nothing
+`d_max = 7` (`9` for `x4`), four rootless draws per cell. Nothing here is an end-to-end cost, nothing
 transfers to `n ≈ 83` or 131, and a refutation degree is a stage diagnostic (AGENTS.md
 §2, §5).
