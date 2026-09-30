@@ -216,6 +216,31 @@ independently reviewed, label-gated m10 capacity PR #937; only if it passes
 should a frozen natural-target solver/yield and equal-useful-size original,
 native, transported and pullback comparison follow.
 
+### Compact whole-process instruction ledger, 2026-09-30 — common work unit, no CPU crossover
+
+The [frozen six-cell Callgrind ledger](../../research/notes/ecc2k130/compact_ir_ledger_20260930/RESULT.md)
+ran the exact blocked-prefilter source and matched 32-walk normal-basis rho v3
+on the same public Q at n=37/41/53, L=1/1024. All 16 child processes, nine
+compact full-rank traces and 8,200 target logarithms passed hosted and
+separate macOS group-law replay; the n37/L1 instruction-repeat control passed.
+Complete guest-instruction IC/rho ratios for unfiltered compact are 2.5231,
+0.5165, 9.2716, 0.6221, 13.2293 and 0.7773 in that cell order. The n41/n53
+batch blocked arms are 0.6351/0.7889 of rho in Ir but remain 1.3282/1.4727
+of rho in the separately eligible same-source/Q native CPU repeat. The filter
+raises Ir by 2.10%/1.49% over off while lowering native CPU by 14.7%/10.8%.
+This is an all-phase instruction/accounting result and a quantitative no-go
+for **the tested W64 n41/n53 batch cold CPU cells** against strong rho; Ir alone
+is not a group-addition or cycle unit and does not establish a method speedup.
+
+The older point-panel native CPU references for n37/L1, n37/L1024, n41/L1
+and n53/L1 used a different rho/source snapshot. Their current-source cold
+CPU ratios remain pending a separate four-cell protocol committed before
+inspection of the Ir results. The K+L rank/recovery attempt floor is exactly
+met in all compact arms, but no instruction lower bound, calibrated generic
+S, disjoint target confirmation, n83 confidence, GF(2^131) transfer, or native
+leaf m≥3 PDP result follows. The degree-263 map/ring certificate and the
+review/label-gated m10 capacity PR #937 remain separate prerequisites.
+
 ### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
 
 Separate measurement, separate base family, not a competing record. The
