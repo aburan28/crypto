@@ -830,6 +830,42 @@
   },
   {
    "n": 19,
+   "encoding": "QFC",
+   "base": "WT2",
+   "F_points": 229,
+   "F_x": 115,
+   "vars": 174,
+   "aux_vars": 136,
+   "gens": 163,
+   "max_gen_degree": 2,
+   "targets": 8,
+   "decomposable": 4,
+   "agree": 8,
+   "timeouts": 0,
+   "mismatches": 0,
+   "encoding_violations": 0,
+   "calls_mean": 135.375,
+   "calls_yes": 59.25,
+   "calls_no": 211.5,
+   "tame_mean": 62.25,
+   "wild_mean": 73.125,
+   "budget_mean": 66.625,
+   "cap_mean": 20.25,
+   "tame_depth_mean": 18.210843373,
+   "coords_per_summand": null,
+   "xor_mean": 14614646712.0,
+   "xor_per_call": 107650338.08710794,
+   "rows_max": 59790,
+   "cols_max": 53555,
+   "max_f4_degree": 4,
+   "solve_ms_mean": 1151531.884625,
+   "exhaustive_scanned": 229,
+   "exhaustive_first_hit_mean": 59.75,
+   "exhaustive_us_mean": 245.625,
+   "calls_over_F": 0.591157205
+  },
+  {
+   "n": 19,
    "encoding": "SUB",
    "base": "SUB8",
    "F_points": 243,
@@ -927,9 +963,10 @@
    "sizes": [
     11,
     13,
-    17
+    17,
+    19
    ],
-   "exponent": 3.218181911,
+   "exponent": 2.481521942,
    "points": [
     [
      6.06608919,
@@ -942,6 +979,10 @@
     [
      7.098032083,
      6.103287808
+    ],
+    [
+     7.839203788,
+     7.080817528
     ]
    ]
   },
@@ -1064,9 +1105,10 @@
    "sizes": [
     11,
     13,
-    17
+    17,
+    19
    ],
-   "exponent": 2.853288179,
+   "exponent": 2.085864236,
    "points": [
     [
      6.06608919,
@@ -1079,6 +1121,10 @@
     [
      7.098032083,
      33.154151694
+    ],
+    [
+     7.839203788,
+     33.766695903
     ]
    ]
   },
