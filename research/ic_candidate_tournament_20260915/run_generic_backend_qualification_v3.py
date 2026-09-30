@@ -2,9 +2,9 @@
 """Lock the v3 smoke registration and refuse to measure it.
 
 Seed 2026093001 stays reserved. This checker does not generate targets,
-restore archives, or start the tournament. A later commit may enable one
-dispatch only after lost-v2-campaign-exposures.json is on main at the
-sealed hash. Seeds 2026092901 and 2026092902 are not retried.
+restore archives, or start the tournament. lost-v2-campaign-exposures.json
+is on main at the sealed hash; a later commit may add one dispatch path.
+Seeds 2026092901 and 2026092902 are not retried.
 """
 import json
 from pathlib import Path
@@ -23,8 +23,8 @@ LOST_V1 = V2 / 'lost-campaign-exposures.json'
 LOST_V1_SHA256 = 'a728677b199eac02800d8338204d5306f391ec5da757c910bec1e51955fe7b41'
 LOST_V2 = V2 / 'lost-v2-campaign-exposures.json'
 LOST_V2_SHA256 = '0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54'
-# This file has no path that starts a campaign. Dispatch stays false until a
-# later change adds one, after the v2 exposure corpus is merged.
+# This file has no path that starts a campaign. The v2 exposure corpus is
+# merged; dispatch stays false until a later change adds the one campaign job.
 DISPATCH_AUTHORIZED = False
 
 
@@ -87,14 +87,19 @@ def exposure_block():
 
 
 def status_report(panel):
-    block = exposure_block()
+    census_block = exposure_block()
+    # A matching census clears the exposure gate only. This checker still has
+    # no campaign path, so a null block must not be read as permission to sample.
+    dispatch_block = census_block
+    if census_block is None and not DISPATCH_AUTHORIZED:
+        dispatch_block = 'dispatch path is not in this checker'
     return {
         'seed': panel['seed'],
         'panel_sha256': PANEL_SHA256,
         'static_layout': 'PASS_STATIC_LAYOUT_ONLY',
         'v2_exposure_sha256': LOST_V2_SHA256,
-        'v2_exposure_present': block is None,
-        'dispatch_block': block,
+        'v2_exposure_present': census_block is None,
+        'dispatch_block': dispatch_block,
         'dispatch_authorized': DISPATCH_AUTHORIZED,
         'measurement': 'not_run',
     }
@@ -104,7 +109,11 @@ def main():
     panel = read(PANEL)
     registration_check(panel)
     report = status_report(panel)
+    require(LOST_V2.is_file() and report['v2_exposure_present'] is True,
+            report['dispatch_block'] or 'v2 exposure census is not on this checkout')
     require(report['dispatch_authorized'] is False, 'v3 dispatch flag was enabled in this checker')
+    require(report['dispatch_block'] == 'dispatch path is not in this checker',
+            'v3 checker lost its refusal to sample points')
     print(json.dumps(report, sort_keys=True), flush=True)
     return 0
 

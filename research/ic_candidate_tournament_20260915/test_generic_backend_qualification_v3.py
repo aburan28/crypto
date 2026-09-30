@@ -31,6 +31,8 @@ class V3RegistrationTest(unittest.TestCase):
             self.assertIn('v2 exposure census', report['dispatch_block'])
         else:
             self.assertIsNone(exposure_block())
+            self.assertTrue(report['v2_exposure_present'])
+            self.assertEqual(report['dispatch_block'], 'dispatch path is not in this checker')
 
     def test_a_changed_seed_is_rejected(self):
         panel = read(PANEL)
