@@ -2,7 +2,7 @@
 """Run the target-only decomposition grid.  One fresh single-thread
 CryptoMiniSat solver per attempt; wall time includes model construction,
 loading, solving and verification.  Writes one JSON line per attempt."""
-import argparse, json, multiprocessing as mp, random, time
+import argparse, json, multiprocessing as mp, os, random, time
 
 import pycryptosat
 
@@ -117,6 +117,8 @@ def main():
     ap.add_argument("--budget", type=float, default=2.0)
     ap.add_argument("--procs", type=int, default=4)
     ap.add_argument("--phases", action="store_true")
+    ap.add_argument("--resume", action="store_true",
+                    help="append, skipping attempts already in --out")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     rng = random.Random(a.seed * 1000 + a.n)
@@ -131,8 +133,19 @@ def main():
         for R, w in ts:
             for form in a.forms.split(","):
                 jobs.append((a.n, basis, R, form, a.budget, w, a.phases))
-    with open(a.out, "w") as fh:
-        fh.write(json.dumps({"meta": meta}) + "\n")
+    done = set()
+    if a.resume and os.path.exists(a.out):
+        for line in open(a.out):
+            r = json.loads(line)
+            if "meta" in r:
+                assert r["meta"] == meta, "resume with a different setup"
+            else:
+                done.add((tuple(r["target"]), r["formulation"]))
+        jobs = [j for j in jobs
+                if ((hex(j[2][0]), hex(j[2][1])), j[3]) not in done]
+    with open(a.out, "a" if done else "w") as fh:
+        if not done:
+            fh.write(json.dumps({"meta": meta}) + "\n")
         with mp.Pool(a.procs) as pool:
             for r in pool.imap(attempt, jobs):
                 fh.write(json.dumps(r) + "\n")
