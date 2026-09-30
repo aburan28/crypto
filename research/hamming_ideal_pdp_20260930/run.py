@@ -38,12 +38,30 @@ def run_cell(args):
         return (n, enc, "exists")
     cmd = [BIN, "--n", str(n), "--w", str(w), "--targets", str(targets), "--encodings", enc,
            "--budget-log2", str(budget), "--matrix-cap-log2", str(cap), "--out", out + ".part"]
+    # Resume: a cell interrupted by a lost container keeps its finished
+    # targets and runs only the missing seeds, appending to the same file.
+    done = set()
+    if os.path.exists(out + ".part"):
+        with open(out + ".part") as fh:
+            for line in fh:
+                try:
+                    r = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if r.get("kind") == "cell":
+                    done.add(r["seed"])
+    missing = [s for s in range(targets) if s not in done]
+    if done and missing:
+        cmd += ["--seeds", ",".join(map(str, missing)), "--append"]
     t0 = time.time()
-    with open(log, "w") as lf:
-        lf.write(" ".join(cmd) + "\n")
-        lf.flush()
-        rc = subprocess.call(cmd, stdout=lf, stderr=subprocess.STDOUT)
-    os.rename(out + ".part", out)
+    rc = 0
+    if missing:
+        with open(log, "a") as lf:
+            lf.write(" ".join(cmd) + "\n")
+            lf.flush()
+            rc = subprocess.call(cmd, stdout=lf, stderr=subprocess.STDOUT)
+    if rc == 0:
+        os.rename(out + ".part", out)
     return (n, enc, f"rc={rc} {time.time()-t0:.0f}s")
 
 def main():

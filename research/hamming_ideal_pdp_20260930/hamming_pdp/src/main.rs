@@ -159,6 +159,8 @@ fn main() {
     let mut max_calls: u64 = 1 << 13;
     let mut matrix_cap_log2: u32 = 27;
     let mut out = String::from("/dev/stdout");
+    let mut seeds: Option<Vec<u64>> = None;
+    let mut append = false;
     let mut i = 1;
     while i < args.len() {
         match args[i].as_str() {
@@ -173,6 +175,8 @@ fn main() {
             "--max-calls" => { max_calls = args[i + 1].parse().unwrap(); i += 2; }
             "--encodings" => { encodings = args[i + 1].split(',').map(|s| Encoding::parse(s).expect("encoding")).collect(); i += 2; }
             "--out" => { out = args[i + 1].clone(); i += 2; }
+            "--seeds" => { seeds = Some(args[i + 1].split(',').map(|t| t.parse().unwrap()).collect()); i += 2; }
+            "--append" => { append = true; i += 1; }
             _ => panic!("unknown arg {}", args[i]),
         }
     }
@@ -194,7 +198,8 @@ fn main() {
 
     // Targets: even seeds planted from the weight base, odd seeds uniform.
     let mut tg: Vec<(u64, Point, &str)> = Vec::new();
-    for s in 0..targets {
+    let seed_list: Vec<u64> = seeds.clone().unwrap_or_else(|| (0..targets).collect());
+    for s in seed_list {
         let mut rng = Rng::new((n as u64) << 32 | s);
         if s % 2 == 0 {
             loop {
@@ -211,11 +216,16 @@ fn main() {
         }
     }
 
-    let mut file = std::fs::File::create(&out).expect("open output");
+    let mut file = if append {
+        std::fs::OpenOptions::new().append(true).create(true).open(&out).expect("open output")
+    } else {
+        std::fs::File::create(&out).expect("open output")
+    };
     let cfg = Config { d_max, budget_xor: budget, max_calls, max_free: 12, matrix_cap_words: 1u64 << matrix_cap_log2 };
     let nn = n as usize;
 
-    // Manifest line.
+    // Manifest line (once per file: a resumed run appends targets only).
+    if !append {
     writeln!(
         file,
         "{{\"kind\":\"manifest\",\"n\":{n},\"irr\":\"{:#x}\",\"normal_alpha\":\"{:#x}\",\"order\":{},\"odd_order\":{},\"w\":{w},\"l\":{l},\"wt_points\":{},\"wt_x\":{},\"wt_x_digest\":\"{:016x}\",\"sub_points\":{},\"sub_x\":{},\"sub_x_digest\":\"{:016x}\",\"sub_basis\":{},\"d_max\":{d_max},\"budget_xor\":{budget},\"max_calls\":{max_calls},\"matrix_cap_words\":{},\"targets\":{targets},\"setup_ms\":{setup_ms}}}",
@@ -223,6 +233,7 @@ fn main() {
         json_list(&sub.sub.iter().map(|b| format!("\"{b:#x}\"")).collect::<Vec<_>>()),
         1u64 << matrix_cap_log2
     ).unwrap();
+    }
 
     for enc in &encodings {
         let base = if *enc == Encoding::Sub { &sub } else { &wt };
