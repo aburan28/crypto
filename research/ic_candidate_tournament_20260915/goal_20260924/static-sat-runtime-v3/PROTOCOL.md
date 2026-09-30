@@ -1,7 +1,7 @@
 # Complete Python source binding for the next SAT registration
 
-Status: complete development-controller integration. Native smoke execution
-and a complete source-bound SAT solve remain pending. No candidate ID, workload
+Status: complete development-controller integration and independently replayed
+one-query native smoke. A complete source-bound SAT solve remains pending. No candidate ID, workload
 ID, fresh target allocation, measured cost or promotion is established here.
 
 The v1/v2 SAT manifest's import walk omitted `producer/evidence.py` and
@@ -114,9 +114,9 @@ native argv independently of the producer builder. The audit works after
 transport because input/output roles are relative within the retained bundle.
 Development controls have no promotion or paired speedup claim.
 
-Local validation: the complete tournament suite passes 303 tests (300 passing,
+Local validation: the complete tournament suite passes 307 tests (304 passing,
 three justified platform skips), including the earlier seven execution controls
-and twelve new asset/native/mathematical/registration controls. The mathematical
+and sixteen new asset/native/mathematical/registration/transport controls. The mathematical
 full-pipeline tests use an explicitly disclosed exact-oracle PDP callback;
 they establish controller/LA/descent correctness, not SAT yield or admission.
 Portable C process controls establish actual child cleanup and source gates;
@@ -131,13 +131,15 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=research/ic_candidate_tournament_20260915 \
 
 No historical complete-pipeline registration executes in these controls.
 Hosted checks remain the merge gate. The separately preregistered
-[one-query native smoke](native-smoke-20260929/PROTOCOL.md) is pending and
-cannot establish a complete IC solve or an estimate of natural relation yield.
+[one-query native smoke](native-smoke-20260929/PROTOCOL.md) completed once:
+[source/input replay](native-smoke-20260929/results-20260929/README.md) passes
+with one independently confirmed UNSAT query and rank 0/29. It cannot establish
+a complete IC solve or an estimate of natural relation yield.
 
 Remaining execution gates:
 
-- Execute and independently replay the one-query native smoke, then preregister
-  and run a distinct bounded full development solve. Preserve failed and
+- The one-query native smoke is terminal and closed. Preregister and run a
+  distinct bounded full development solve. Preserve failed and
   budget-inconclusive attempts and check the natural-query status mix, rank,
   complete descent, scalar replay and complete pre/post source evidence.
 - Complete the F4/F5 encoding/coverage review and a bounded policy registration
