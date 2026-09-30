@@ -460,10 +460,6 @@ pub struct F5Timings {
     pub direct_pack_used: bool,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
-    /// Whether direct unpack used the byte-subset monomial table.
-    pub byte_table_unpack_used: bool,
-    /// Allocated byte-subset table storage, including offsets.
-    pub byte_table_bytes: usize,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -516,91 +512,6 @@ fn unpack_row_scalar_direct(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolP
     debug_assert_eq!(written, terms);
     // SAFETY: all `terms` slots have been written above.
     unsafe { monos.set_len(terms) };
-    F2BoolPoly {
-        terms: monos,
-        n_vars,
-    }
-}
-
-/// Consecutive monomial masks for every subset of each eight-column group.
-/// The upper bound includes the offset array and is kept below 16 MiB.
-struct ByteSubsetTable {
-    offsets: Vec<u32>,
-    terms: Vec<u64>,
-    chunks: usize,
-}
-
-impl ByteSubsetTable {
-    fn allocated_bytes(&self) -> usize {
-        self.offsets.capacity() * std::mem::size_of::<u32>()
-            + self.terms.capacity() * std::mem::size_of::<u64>()
-    }
-}
-
-fn byte_subset_table(cols: &[u64]) -> Option<ByteSubsetTable> {
-    const MAX_BYTES: usize = 16 * 1024 * 1024;
-    const OFFSETS_PER_CHUNK: usize = 257;
-    const TERMS_PER_CHUNK: usize = 256 * 8 / 2;
-    let chunks = cols.len().div_ceil(8);
-    let offsets_cap = chunks.checked_mul(OFFSETS_PER_CHUNK)?;
-    let terms_cap = chunks.checked_mul(TERMS_PER_CHUNK)?;
-    let bytes = offsets_cap
-        .checked_mul(std::mem::size_of::<u32>())?
-        .checked_add(terms_cap.checked_mul(std::mem::size_of::<u64>())?)?;
-    if bytes > MAX_BYTES {
-        return None;
-    }
-    let mut offsets = Vec::new();
-    let mut terms = Vec::new();
-    offsets.try_reserve_exact(offsets_cap).ok()?;
-    terms.try_reserve_exact(terms_cap).ok()?;
-    for chunk in 0..chunks {
-        for pattern in 0..256u16 {
-            offsets.push(u32::try_from(terms.len()).ok()?);
-            let mut bits = pattern as u8;
-            while bits != 0 {
-                let col = chunk * 8 + bits.trailing_zeros() as usize;
-                if let Some(&mask) = cols.get(col) {
-                    terms.push(mask);
-                }
-                bits &= bits - 1;
-            }
-        }
-        offsets.push(u32::try_from(terms.len()).ok()?);
-    }
-    let table = ByteSubsetTable {
-        offsets,
-        terms,
-        chunks,
-    };
-    (table.allocated_bytes() <= MAX_BYTES).then_some(table)
-}
-
-fn unpack_row_byte_table(row: &[u64], table: &ByteSubsetTable, n_vars: usize) -> F2BoolPoly {
-    let count = row.iter().map(|word| word.count_ones() as usize).sum();
-    let mut monos = Vec::<F2BoolMono>::with_capacity(count);
-    let out = monos.as_mut_ptr().cast::<u64>();
-    let mut written = 0;
-    for chunk in 0..table.chunks {
-        let pattern = (row[chunk / 8] >> (8 * (chunk % 8))) as u8;
-        if pattern == 0 {
-            continue;
-        }
-        let entry = chunk * 257 + pattern as usize;
-        let start = table.offsets[entry] as usize;
-        let end = table.offsets[entry + 1] as usize;
-        let len = end - start;
-        debug_assert_eq!(len, pattern.count_ones() as usize);
-        // SAFETY: table entries preserve ascending columns for valid row
-        // bits. `count` is the row popcount, so the copy fits in `monos`.
-        unsafe {
-            std::ptr::copy_nonoverlapping(table.terms.as_ptr().add(start), out.add(written), len)
-        };
-        written += len;
-    }
-    debug_assert_eq!(written, count);
-    // SAFETY: every one of the `count` slots was initialized by a copy.
-    unsafe { monos.set_len(count) };
     F2BoolPoly {
         terms: monos,
         n_vars,
@@ -782,27 +693,10 @@ pub fn matrix_f5_f2_with_form_timed(
     let direct_unpack =
         *DIRECT_UNPACK.get_or_init(|| std::env::var("KIC_F5_UNPACK_DIRECT").as_deref() == Ok("1"));
     timings.direct_unpack_used = direct_unpack && !avx512_unpack;
-    static BYTE_TABLE_UNPACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    let byte_table_requested = *BYTE_TABLE_UNPACK
-        .get_or_init(|| std::env::var("KIC_F5_UNPACK_BYTE_TABLE").as_deref() == Ok("1"));
-    let byte_table =
-        if byte_table_requested && direct_unpack && !avx512_unpack && cols.len() >= 4096 {
-            byte_subset_table(&cols)
-        } else {
-            None
-        };
-    timings.byte_table_unpack_used = byte_table.is_some();
-    timings.byte_table_bytes = byte_table
-        .as_ref()
-        .map_or(0, ByteSubsetTable::allocated_bytes);
     let out = matrix[..rank]
         .par_iter()
         .map(|row| {
-            let p = if let Some(table) = byte_table.as_ref() {
-                unpack_row_byte_table(row, table, n_vars_out)
-            } else {
-                unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack)
-            };
+            let p = unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack);
             debug_assert!(p.is_canonical());
             p
         })
@@ -847,32 +741,6 @@ mod tests {
     use crate::cryptanalysis::koblitz_groebner::{
         f5_rows_monos_with_f4_count, f5_rows_packed_full_columns, matrix_f4_f2, pack_rows,
     };
-
-    #[test]
-    fn byte_subset_unpack_matches_scalar_direct_for_partial_chunks() {
-        for cols_len in [1usize, 7, 8, 9, 63, 64, 65, 129, 4097, 12_951] {
-            let cols: Vec<u64> = (0..cols_len)
-                .map(|i| (i as u64).wrapping_mul(0x9e37_79b9) & 0x00ff_ffff)
-                .collect();
-            let table = byte_subset_table(&cols).unwrap();
-            assert!(table.allocated_bytes() <= 16 * 1024 * 1024);
-            for salt in [0u64, 1, 3, 7, u64::MAX] {
-                let row: Vec<u64> = (0..cols_len.div_ceil(64))
-                    .map(|w| {
-                        let bits = (w as u64).wrapping_mul(0xd6e8_feb8_6659_fd93) ^ salt;
-                        let valid = (cols_len - w * 64).min(64);
-                        bits & (u64::MAX >> (64 - valid))
-                    })
-                    .collect();
-                assert_eq!(
-                    unpack_row_byte_table(&row, &table, 24),
-                    unpack_row_scalar_direct(&row, &cols, 24),
-                    "cols_len={cols_len}, salt={salt}",
-                );
-            }
-        }
-        assert!(byte_subset_table(&vec![0; 20_000]).is_none());
-    }
 
     #[test]
     fn direct_scalar_unpack_matches_push_path() {

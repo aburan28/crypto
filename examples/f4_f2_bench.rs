@@ -221,8 +221,6 @@ fn main() {
                 "output_terms": output_terms,
                 "direct_pack_used": phases.direct_pack_used,
                 "direct_unpack_used": phases.direct_unpack_used,
-                "byte_table_unpack_used": phases.byte_table_unpack_used,
-                "byte_table_bytes": phases.byte_table_bytes,
                 "row_space_fp": format!("{row_space_fp:016x}"),
                 "criterion_ms": phases.criterion_ns as f64 / 1e6, "f5_build_ms": phases.build_ns as f64 / 1e6,
                 "reduce_ms": phases.reduce_ns as f64 / 1e6, "unpack_ms": phases.unpack_ns as f64 / 1e6,
