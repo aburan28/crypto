@@ -25,6 +25,16 @@ or binary-field S3 on their x-coordinates. Check that the wrong target
 forces full-width scalar handling. Every target coordinate and all exact
 parameters are frozen in the receipt; native CLI tests compare them to Sage.
 
+Each binary curve also has fifteen bounded checks for quadratic point lifting,
+both signed generator lifts, the linear and pure-square solver branches,
+nonzero constant rejection, Artin-Schreier round trips, and trace-one rejection
+(all five NIST degrees are odd). The group-law checks cover both infinity
+identities, inverse addition, doubling, scalar zero and `[r-1]G=-G`.
+The `x=0` point obtained from the pure-square branch must lie on the curve
+and double to infinity. Independent Sage polynomial roots and group operations
+provide the reference; native outputs must match both generator y-roots and
+all fifteen booleans. These checks cover all ten exact binary parameter sets.
+
 Success requires every check on all eleven curves to pass; any failure is
 preserved in the JSON receipt and makes the reference command exit nonzero.
 These fixtures are bounded public arithmetic checks. They do not measure
@@ -63,10 +73,15 @@ Koblitz analogue selection preserves `a`: K-163 uses `a=1`; the other four
 NIST K curves use `a=0`. The earlier `a=1`-first fallback selected a different
 member of the family and has been removed. Random binary analogues remain
 labelled analogues; their random coefficients do not equal the named B curve.
+K-163 defaults to degree 11: its `a=1` degree-13 analogue is not admitted by
+the existing subgroup/cofactor rule (`r=79`, `h=106`). Explicit degree-13
+requests fail with the preserved coefficient in the error. The `a=0` defaults
+remain degree 13. The smoke tests use an admitted analogue of each coefficient.
 
 - [x] Check all eleven exact parameter sets independently with Sage.
 - [x] Add native full-width parameter and public point/S3 validation.
 - [x] Compare native outputs with frozen independent coordinates in CI.
+- [x] Add binary point-lifting, trace and exceptional group-law reference checks.
 - [x] Preserve Koblitz `a` and prevent misleading analogue run regimes.
 - [x] Add an exact-parameter solve guard and reject incompatible size flags.
 - [ ] Execute and pass applicable native CI on the final PR head.

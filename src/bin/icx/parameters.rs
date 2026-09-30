@@ -2,17 +2,74 @@
 //! this diagnostic does not collect a factor base or recover a logarithm.
 
 use num_bigint::BigUint;
-use num_traits::One;
+use num_traits::{One, Zero};
 use serde_json::{json, Value};
 
-use crypto_lib::binary_ecc::curve::{point_add, scalar_mul, BinaryPoint};
-use crypto_lib::cryptanalysis::binary_semaev::binary_semaev_s3;
+use crypto_lib::binary_ecc::curve::{
+    point_add, point_double, point_neg, scalar_mul, BinaryCurve, BinaryPoint,
+};
+use crypto_lib::binary_ecc::f2m::F2mElement;
+use crypto_lib::cryptanalysis::binary_semaev::{
+    binary_semaev_s3, solve_artin_schreier, solve_quadratic_f2m,
+};
 use crypto_lib::cryptanalysis::curve_catalog::{CatalogCurve, CurveObject};
 use crypto_lib::cryptanalysis::ec_index_calculus::semaev_s3;
 use crypto_lib::ecc::point::Point;
 
 fn hex(n: &BigUint) -> String {
     n.to_str_radix(16)
+}
+
+/// Exercise point lifting and exceptional group operations on public inputs.
+fn binary_diagnostics(c: &BinaryCurve) -> Result<Value, String> {
+    let BinaryPoint::Affine { x, y } = &c.generator else {
+        return Err("binary diagnostics require an affine generator".into());
+    };
+    let irr = &c.irreducible;
+    let zero = F2mElement::zero(c.m);
+    let one = F2mElement::one(c.m);
+    let rhs = x
+        .square(irr)
+        .mul(x, irr)
+        .add(&c.a.mul(&x.square(irr), irr))
+        .add(&c.b);
+    let roots = solve_quadratic_f2m(&one, x, &rhs, c.m, irr);
+    let mut encoded_roots: Vec<String> = roots.iter().map(|r| hex(&r.to_biguint())).collect();
+    encoded_roots.sort_unstable();
+    let square_roots = solve_quadratic_f2m(&one, &zero, &c.b, c.m, irr);
+    let torsion_verified = square_roots.len() == 1 && {
+        let torsion = BinaryPoint::Affine {
+            x: zero.clone(),
+            y: square_roots[0].clone(),
+        };
+        c.is_on_curve(&torsion)
+            && point_double(c, &torsion) == BinaryPoint::Infinity
+            && point_add(c, &torsion, &torsion) == BinaryPoint::Infinity
+    };
+    let artin_input = y.square(irr).add(y);
+    let artin_verified = solve_artin_schreier(&artin_input, c.m, irr)
+        .is_some_and(|r| r.square(irr).add(&r) == artin_input);
+    let g = &c.generator;
+    Ok(json!({
+        "generator_y_roots": encoded_roots,
+        "checks": {
+            "generator_lift_two_roots": roots.len() == 2 && roots[0] != roots[1],
+            "generator_lift_matches_signed_points": roots.contains(y) && roots.contains(&y.add(x)),
+            "generator_lift_roots_on_curve": roots.iter().all(|r| c.is_on_curve(&BinaryPoint::Affine { x: x.clone(), y: r.clone() })),
+            "linear_root_verified": solve_quadratic_f2m(&zero, &one, y, c.m, irr) == vec![y.clone()],
+            "nonzero_constant_has_no_roots": solve_quadratic_f2m(&zero, &zero, &one, c.m, irr).is_empty(),
+            "pure_square_and_two_torsion_verified": torsion_verified,
+            "artin_schreier_round_trip": artin_verified,
+            "artin_schreier_zero": solve_artin_schreier(&zero, c.m, irr) == Some(zero),
+            "trace_one_equation_classified": solve_artin_schreier(&one, c.m, irr).is_none() == (c.m % 2 == 1),
+            "left_identity": point_add(c, &BinaryPoint::Infinity, g) == *g,
+            "right_identity": point_add(c, g, &BinaryPoint::Infinity) == *g,
+            "inverse_sum": point_add(c, g, &point_neg(g)) == BinaryPoint::Infinity,
+            "double_matches_sum": point_double(c, g) == point_add(c, g, g),
+            "zero_scalar": scalar_mul(c, g, &BigUint::zero()) == BinaryPoint::Infinity,
+            "order_minus_one_matches_inverse": scalar_mul(c, g, &(&c.order - BigUint::one())) == point_neg(g),
+        },
+    }))
 }
 
 /// Export every parameter used by the diagnostic, without narrowing to u64.
@@ -126,7 +183,20 @@ pub fn validate(curve: &CatalogCurve) -> Result<Value, String> {
             fixtures.push(fixture);
         }
     }
+    let binary_diagnostics = if parameters_verified {
+        match &curve.object {
+            CurveObject::Binary(c) => binary_diagnostics(c)?,
+            _ => Value::Null,
+        }
+    } else {
+        Value::Null
+    };
+    let binary_verified = binary_diagnostics.is_null()
+        || binary_diagnostics["checks"]
+            .as_object()
+            .is_some_and(|checks| checks.values().all(|v| v == true));
     let verified = parameters_verified
+        && binary_verified
         && fixtures.len() == 2
         && fixtures.iter().all(|f| {
             [
@@ -146,6 +216,7 @@ pub fn validate(curve: &CatalogCurve) -> Result<Value, String> {
         "is_named_curve": true, "diagnostic_only": true,
         "exact_parameters": exact_parameters(curve), "checks": checks_json,
         "fixtures": fixtures,
+        "binary_diagnostics": binary_diagnostics,
         "full_parameter_pipeline_available": false,
         "scope": "Named-curve parameter, public point-sum and S3 checks only; no relation collection, independent-rank test, linear algebra or DLP recovery.",
     }))

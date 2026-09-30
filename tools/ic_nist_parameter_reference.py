@@ -122,11 +122,47 @@ def main():
                 "wrong_s3_rejected": bool(s3(wrong[0]) != 0),
             }
             fixtures.append(fixture)
+        binary_diagnostics = None
+        if name != "p256":
+            x, y = generator[0], generator[1]
+            # Sage 10.9's NTL polynomial backend aborts on this large binary
+            # field panel; the generic backend provides independent roots.
+            polynomials = PolynomialRing(field, "Y", implementation="generic")
+            Y = polynomials.gen()
+            rhs = x**3 + lift(a)*x**2 + lift(b)
+            roots = (Y**2 + x*Y + rhs).roots(multiplicities=False)
+            square_roots = (Y**2 + lift(b)).roots(multiplicities=False)
+            torsion = curve(field(0), square_roots[0])
+            artin_input = y**2 + y
+            artin_roots = (Y**2 + Y + artin_input).roots(multiplicities=False)
+            binary_diagnostics = {
+                "generator_y_roots": sorted(encode(root) for root in roots),
+                "checks": {
+                    "generator_lift_two_roots": len(roots) == 2 and roots[0] != roots[1],
+                    "generator_lift_matches_signed_points": y in roots and y+x in roots,
+                    "generator_lift_roots_on_curve": all(curve(x, root) in curve for root in roots),
+                    "linear_root_verified": (Y+y).roots(multiplicities=False) == [y],
+                    "nonzero_constant_has_no_roots": polynomials(1).roots(multiplicities=False) == [],
+                    "pure_square_and_two_torsion_verified": len(square_roots) == 1 and 2*torsion == curve(0),
+                    "artin_schreier_round_trip": bool(artin_roots) and all(root**2+root == artin_input for root in artin_roots),
+                    "artin_schreier_zero": set((Y**2+Y).roots(multiplicities=False)) == {field(0), field(1)},
+                    "trace_one_equation_classified": ((Y**2+Y+1).roots(multiplicities=False) == []) == (field.degree() % 2 == 1),
+                    "left_identity": curve(0)+generator == generator,
+                    "right_identity": generator+curve(0) == generator,
+                    "inverse_sum": generator+(-generator) == curve(0),
+                    "double_matches_sum": 2*generator == generator+generator,
+                    "zero_scalar": 0*generator == curve(0),
+                    "order_minus_one_matches_inverse": (n-1)*generator == -generator,
+                },
+            }
+            binary_diagnostics["checks"] = {key: bool(value) for key, value in binary_diagnostics["checks"].items()}
         verified = all(checks.values()) and all(all(f[k] for k in (
             "point_sum_verified", "s3_zero", "wrong_target_rejected", "wrong_s3_rejected"
         )) for f in fixtures)
+        verified = verified and (binary_diagnostics is None or all(binary_diagnostics["checks"].values()))
         rows.append({"curve": name, "exact_parameters": record, "checks": checks,
-                     "fixtures": fixtures, "verified": verified})
+                     "fixtures": fixtures, "binary_diagnostics": binary_diagnostics,
+                     "verified": verified})
         print(f"{name}: {'PASS' if verified else 'FAIL'}", flush=True)
     report = {
         "schema_version": 1, "scope": "independent public-parameter/S3 diagnostic; no DLP recovery",

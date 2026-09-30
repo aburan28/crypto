@@ -85,7 +85,7 @@ jobs:
         run: |
           set -e
           echo "== Koblitz analogue (sect163k1) =="
-          ./target/release/icx run sect163k1 --degree 13 --rho-runs 4
+          ./target/release/icx run sect163k1 --degree 11 --rho-runs 4
           echo "== Random binary analogue (sect163r2) =="
           ./target/release/icx run sect163r2 --degree 13 --rho-runs 0
           echo "== Prime analogue (p256) =="

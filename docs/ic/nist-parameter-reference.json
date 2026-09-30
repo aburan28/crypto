@@ -1,6 +1,7 @@
 {
   "curves": [
     {
+      "binary_diagnostics": null,
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,
@@ -56,6 +57,29 @@
       "verified": true
     },
     {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "289070fb05d38ff58321f2e800536d538ccdaa3d9",
+          "7714cfe32684eef49818f913db78b866904e4d31"
+        ]
+      },
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,
@@ -119,6 +143,29 @@
       "verified": true
     },
     {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "325f41d0ef702dc310254c42d65851a3b91471ac7",
+          "d51fbc6c71a0094fa2cdd545b11c5c0c797324f1"
+        ]
+      },
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,
@@ -182,6 +229,29 @@
       "verified": true
     },
     {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "1db537dece819b7f70f555a67c427a8cd9bf18aeb9b56e0c11056fae6a3",
+          "a961c769d267c4edfe7ca84830333dae3fe848806e5cac5c7eb9578785"
+        ]
+      },
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,
@@ -243,6 +313,29 @@
       "verified": true
     },
     {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "1006a08a41903350678e58528bebf8a0beff867a7ca36716f7e01f81052",
+          "1faa3d76fb58026bd59dc7493cbe0656e53c1782cfcce89840d700545d9"
+        ]
+      },
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,
@@ -304,6 +397,29 @@
       "verified": true
     },
     {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "1ccda380f1c9e318d90f95d07e5426fe87e45c0e8184698e45962364e34116177dd2259",
+          "4cffb0777d6dab9b28ac2dc6514ca8abbb3639fcbd910e2f2de0b25fef6bd452f940a6f"
+        ]
+      },
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,
@@ -367,6 +483,29 @@
       "verified": true
     },
     {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "3676854fe24141cb98fe6d4b20d02b4516ff702350eddb0826779c813f0df45be8112f4",
+          "69e51717393c98c581ca958c2bddd587f82d2ba6070712c02859850eb3d6188383032a7"
+        ]
+      },
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,
@@ -430,6 +569,29 @@
       "verified": true
     },
     {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "183995a6ef307830180ac25b075adbd3a9d71a872896c6bc19e9edd101c6c211e3f74dc5c6ff87744be8ccbeb36ac8731e21f2d",
+          "1e369050b7c4e42acba1dacbf04299c3460782f918ea427e6325165e9ea10e3da5f6c42e9c55215aa9ca27a5863ec48d8e0286b"
+        ]
+      },
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,
@@ -491,6 +653,29 @@
       "verified": true
     },
     {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "13cf9af7be3384062d4abe34098720a322a678f56ca04c0b1475414606d478ce4741599555acf11841bb59de1ba2aeeb90a51a1",
+          "61b1cfab6be5f32bbfa78324ed106a7636b9c5a7bd198d0158aa4f5488d08f38514f1fdf4b4f40d2181b3681c364ba0273c706"
+        ]
+      },
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,
@@ -552,6 +737,29 @@
       "verified": true
     },
     {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "1276b2826dd808bcd527cefc3daaad5e1492e7b9f22af809fe29eb401e99688de39ec443ff6ab4108648bf443bc1e500df10a2332e0d9e0aa8f77df14d30c31e3591e979eed4ed1",
+          "349dc807f4fbf374f4aeade3bca95314dd58cec9f307a54ffc61efc006d8a2c9d4979c0ac44aea74fbebbb9f772aedcb620b01a7ba7af1b320430c8591984f601cd4c143ef1c7a3"
+        ]
+      },
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,
@@ -615,6 +823,29 @@
       "verified": true
     },
     {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "37bf27342da639b6dccfffeb73d69d78c6c27a6009cbbca1980f8533921e8a684423e43bab08a576291af8f461bb2a8b3531d2f0485c19b16e2f1516e23dd3c1a4827af1b8ac15b",
+          "78f26e766235b201da3f2aba01bea286fff67495c313c0bc74f79be25ac21b39a707134e7058c4af46be2c1d7c49bc2afd7d2c829130a25c5d52e5a673041bfbaf51339566ec42"
+        ]
+      },
       "checks": {
         "generator_on_curve": true,
         "generator_subgroup": true,

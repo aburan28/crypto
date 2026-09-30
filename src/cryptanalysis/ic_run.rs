@@ -545,7 +545,16 @@ pub fn run_curve(
             ))
         }
         Family::BinaryRandom | Family::Koblitz => {
-            let degree = cfg.degree.unwrap_or(13);
+            // K_1 at degree 13 fails the constructor's subgroup/cofactor
+            // admission rule. Use an admitted K_1 default without changing a.
+            let default_degree = if family == Family::Koblitz
+                && matches!(&curve.object, CurveObject::Binary(c) if !c.a.is_zero())
+            {
+                11
+            } else {
+                13
+            };
+            let degree = cfg.degree.unwrap_or(default_degree);
             let inst = if family == Family::Koblitz {
                 let a = match &curve.object {
                     CurveObject::Binary(c) => {
@@ -561,8 +570,9 @@ pub fn run_curve(
                     }
                     _ => return Err("Koblitz family requires a binary curve object".into()),
                 };
-                koblitz_instance(a, degree)
-                    .ok_or_else(|| format!("could not build a degree-{degree} Koblitz analogue"))?
+                koblitz_instance(a, degree).ok_or_else(|| {
+                    format!("could not build an admitted degree-{degree} Koblitz analogue with a={a}")
+                })?
             } else {
                 random_binary_instance(degree, cfg.seed, 8)
                     .ok_or_else(|| format!("could not build a degree-{degree} binary analogue"))?
@@ -696,15 +706,29 @@ mod tests {
     fn koblitz_analogue_runs_and_is_labelled() {
         let c = by_name("sect163k1").unwrap();
         let cfg = RunConfig {
-            degree: Some(13),
             rho_runs: 0,
             ..Default::default()
         };
         let mut p = ProgressReporter::silent();
         let res = run_curve(&c, &cfg, &mut p).expect("run");
         assert_eq!(res.analogue.family, "koblitz");
+        assert_eq!(res.analogue.instance, koblitz_instance(1, 11).unwrap().name);
         assert!(!res.analogue.is_named_curve);
         assert!(res.reports.iter().any(|r| r.verified));
+    }
+
+    #[test]
+    fn inadmissible_koblitz_degree_never_changes_coefficient() {
+        let c = by_name("sect163k1").unwrap();
+        let cfg = RunConfig {
+            degree: Some(13),
+            rho_runs: 0,
+            ..Default::default()
+        };
+        let mut p = ProgressReporter::silent();
+        let error = run_curve(&c, &cfg, &mut p).unwrap_err();
+        assert!(error.contains("degree-13"));
+        assert!(error.contains("a=1"));
     }
 
     #[test]

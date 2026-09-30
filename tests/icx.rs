@@ -118,6 +118,18 @@ fn validate_actual_nist_parameters_against_independent_sage_reference() {
             actual["fixtures"], row["fixtures"],
             "point/S3 fixtures {name}"
         );
+        assert_eq!(
+            actual["binary_diagnostics"], row["binary_diagnostics"],
+            "point lifting and group-law checks {name}"
+        );
+        if name != "p256" {
+            let checks = actual["binary_diagnostics"]["checks"].as_object().unwrap();
+            assert_eq!(checks.len(), 15, "binary coverage changed for {name}");
+            assert!(
+                checks.values().all(|v| v == true),
+                "binary check failed for {name}"
+            );
+        }
         assert!(
             actual["fixtures"][1]["u"].as_str().unwrap().len() > 16,
             "wide public scalar was narrowed for {name}"
@@ -166,6 +178,7 @@ fn incompatible_or_unrepresentable_analogue_parameters_are_rejected() {
         vec!["run", "k-163", "--bits", "16"],
         vec!["run", "b-571", "--degree", "571"],
         vec!["run", "k-163", "--repeats", "0"],
+        vec!["run", "k-163", "--degree", "13"],
     ] {
         let out = icx().args(&args).arg("--json").output().unwrap();
         assert!(!out.status.success(), "ignored invalid arguments: {args:?}");
@@ -246,7 +259,7 @@ fn fes_worker_path_when_available() {
 fn run_koblitz_analogue_recovers_a_logarithm() {
     // `icx run` on a Koblitz curve executes a small same-family analogue and
     // must recover a verified logarithm, labelled as scaled.
-    let v = run_json(&["run", "sect163k1", "--degree", "13", "--rho-runs", "0"]);
+    let v = run_json(&["run", "sect163k1", "--degree", "11", "--rho-runs", "0"]);
     assert_eq!(v["operation"], "run");
     assert_eq!(v["verified"], true, "koblitz analogue did not verify");
     assert_eq!(v["result"]["analogue"]["family"], "koblitz");
