@@ -418,3 +418,86 @@ run; dropping blocks; reporting the point estimate without the interval.
 ---
 
 <!-- R2 results are appended below. Nothing above this line is edited after seeing them. -->
+
+## R2 results (2026-09-30; `r2.json`, `analysis_r2.txt`)
+
+**Host.** R2 ran after the session was resumed on a **different VM instance** (kernel
+`fc-v50`, uptime 2 minutes; the calibration, registered stages, A1 and A2 ran on
+`fc-v37`); same CPU model string, effective clock 3.24 GHz. `host_manifest_r2.txt`. R2's
+estimate uses only its own 4 KiB / THP contrasts and the deterministic `Ir`, so the change
+does not enter it, but R2's user times are not comparable in absolute terms to A2's (IC
+4 KiB user time 3.27 s against 4.01 s).
+
+**Gates.** R-G1 pass (every run recovers every target); R-N pass ((Q3 − Q1)/median of
+4 KiB user time 0.061 IC, 0.073 rho); R-D pass (block-half drift −5.5 %…−0.8 %);
+**R-V fails**: the median of the six chase-control speedups is **1.24**, below the
+registered 1.3 (pairs: 1.26, 0.88, 1.22, 1.18, 1.36, 1.32), although the other half of
+R-V holds (IC's sampled `AnonHugePages` median 281 MB against a 338 MB peak RSS).
+**Registered R2 verdict: UNRESOLVED (gate).**
+
+**Numbers the gate withholds a label from** (medians over 15 blocks, user time):
+
+| | 4 KiB s | THP s | ratio |
+|:--|--:|--:|--:|
+| IC | 3.266 | 2.828 | 1.155 |
+| rho R3 | 0.983 | 0.951 | 1.035 |
+
+Translation share **0.219, 95 % bootstrap interval [0.153, 0.322]** (`d_IC = 0.0352`,
+`d_rho = 0.0040`, `Δ_user = 0.1424` ns per instruction). System time rises in THP
+mode (IC 0.24 → 0.73 s) but wall time is flat (IC 3.79 vs 3.77 s).
+
+## Conclusion of the check (what is and is not established)
+
+1. **Registered outcome of attempt 1: UNDETERMINED (G5).** Registered outcome of R2:
+   UNRESOLVED (R-V). Neither is relabelled here. The literal labels come from gates that
+   fail narrowly (a noise gate the VM cannot meet; a control speedup of 1.24 against
+   1.3), and the point of the substantive reading below is to say what the numbers do
+   and do not support, not to rescue a label.
+2. **H_mem is neither established nor refuted at n = 41.** The simulator interval for
+   the fraction of IC's per-instruction time gap that cache-miss stalls can explain is
+   `[0.077, 1.91]`, wide because cachegrind carries no overlap information, and the one
+   native contention test has no power on this VM (E1). The native huge-page contrast
+   is the only mechanism-isolating measurement: two runs on two VM instances give a
+   translation share of 0.257 (A2, no interval) and 0.219 (R2, interval [0.153, 0.322],
+   validity gate failed), i.e. address translation on 4 KiB pages plausibly accounts
+   for about a fifth to a quarter of the user-time gap. That is a description of these
+   two runs, not a finding: neither cleared its own bar. **Roughly three quarters of the
+   per-instruction gap is unexplained by anything measured here.**
+3. **Hardware-neutral facts (deterministic, cachegrind, Ir within 0.013 % of the
+   sweep's callgrind).** IC has 12.15 D1 misses per 1,000 instructions against rho's
+   6.63, and 1.21 against 0.147 last-level data misses per 1,000 at a 2 MiB LL
+   (8.2×); at 32 MiB, 1.10 against 0.081 (13.5×). IC's last-level misses barely fall as
+   the simulated cache grows (15.0 M at 2 MiB, 14.7 M at 8 MiB, 13.7 M at 32 MiB), which
+   is what a random access into a several-hundred-MB table looks like. By function (2 MiB
+   LL), `main` (the index build and probe loop, inlined) holds 55 % of IC's instructions,
+   66 % of its far read misses and 99 % of its far write misses; `extract` holds 34 % of
+   instructions and 34 % of far read misses. Instruction-cache misses (0.025 and 0.088
+   per 1,000) and simulated branch mispredicts (2.91 and 2.39 per 1,000; 2 % of the gap
+   at the calibrated cost) are minor.
+4. **Why the verdict does not depend on the answer.** Wall time is `Ir × ns/instruction`.
+   At this cell IC retires 1.52× rho's instructions; were IC's stalls removed entirely so
+   that it ran at rho's ns per instruction, IC would still take 1.52× rho's time. No
+   cache-level engineering of IC flips the verdict here; a candidate has to cut probes
+   and index work, as PR #966 concluded. What the memory question decides is only how
+   large the extra wall-clock factor (about 3.0-3.6× here against 1.52×) is and where
+   it comes from.
+
+## Limits
+
+One cell (n = 41, L = 1,024, K = 255), one VM class observed on two instances, one
+implementation of each arm, IC as merged. Nothing here reaches n = 53 (IC's 1.36 GiB
+index), larger n, other L, aarch64 or m = 83 / ECC2K-130 transfer. Cachegrind has no
+prefetcher or TLB; the prices are pointer-chase measurements on this VM; there is no
+hardware-counter access. Registered gates failed on noise/controls; no gate or
+threshold was edited, and the follow-ups (E1-E3, A2, R2) are explicitly outside the
+attempt-1 verdict. Raw per-target streams from the follow-up stages were first committed
+uncompressed (commit `ed9df0d13`, about 25 MB of history) and are gzip'd with a sha256
+manifest from the next commit on.
+
+## Superseded statements
+
+The sentences "IC's 1.36 GiB index runs at a lower IPC, which is consistent with the
+memory-bound reading in PR #955 but was **not** tested here" (ladder note and PR #966)
+now have a test at n = 41: its outcome is the paragraph above, and the memory-bound
+reading remains a partly supported hypothesis, not a result. It has not been tested at
+n = 53.
