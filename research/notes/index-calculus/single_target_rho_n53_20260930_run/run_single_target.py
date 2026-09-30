@@ -70,7 +70,9 @@ def pinned(arm, cmd):
 def run_one(arm, cmd, tag, wrap=None):
     os.makedirs(WORK, exist_ok=True)
     out, err = f"{WORK}/{tag}.stdout", f"{WORK}/{tag}.stderr"
-    full = (wrap or []) + pinned(arm, cmd)
+    # the wrapper (valgrind) must sit INSIDE taskset: valgrind does not follow exec by default,
+    # so `valgrind taskset cmd` would run cmd uninstrumented
+    full = pinned(arm, (wrap or []) + cmd)
     t0 = time.perf_counter()
     with open(out, "w") as fo, open(err, "w") as fe:
         p = subprocess.Popen(full, stdout=fo, stderr=fe, env=env_for(arm))
@@ -155,6 +157,8 @@ def stage_callgrind():
         for line in open(rec["stderr"]):
             if "Collected :" in line:
                 ir = int(line.split("Collected :")[1].split()[0])
+            elif "I   refs:" in line and ir is None:
+                ir = int(line.split("refs:")[1].strip().replace(",", ""))
         rec["Ir"] = ir
         out["runs"].append(rec)
         print(arm, rec["rc"], rec["gate"], ir, round(rec["wall_s"], 1), flush=True)

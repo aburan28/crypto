@@ -1,0 +1,11 @@
+== timing start 2026-09-30T21:06:20Z load: 1.13 1.17 0.60 2/105 2373
+== timing rc=0 end 2026-09-30T21:08:03Z
+== seeds start 2026-09-30T21:08:03Z load: 1.80 1.38 0.74 1/107 2561
+== seeds rc=0 end 2026-09-30T21:10:26Z
+== callgrind start 2026-09-30T21:10:26Z load: 1.07 1.23 0.78 1/103 2699
+== callgrind rc=0 end 2026-09-30T21:10:38Z
+ALL_DONE
+== callgrind attempt 1 ran the programs UNINSTRUMENTED (valgrind wrapped taskset, not the program); Ir=None; runner fixed (wrapper inside taskset), stage re-run, no other change
+== callgrind(rerun) start 2026-09-30T21:11:01Z
+== callgrind(rerun) rc=0 end 2026-09-30T21:16:22Z
+CG_DONE
