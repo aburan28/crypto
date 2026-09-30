@@ -55,9 +55,10 @@ pub fn validate(curve: &CatalogCurve) -> Result<Value, String> {
     }
     let checks = curve.verify();
     let parameters_verified = checks.iter().all(|c| c.passed);
-    let checks_json: Vec<Value> = checks.iter().map(|c| {
-        json!({"name": c.name, "passed": c.passed, "detail": c.detail})
-    }).collect();
+    let checks_json: Vec<Value> = checks
+        .iter()
+        .map(|c| json!({"name": c.name, "passed": c.passed, "detail": c.detail}))
+        .collect();
     let order = curve.subgroup_order();
     if order <= BigUint::from(7u32) {
         return Err("full-parameter fixtures require a subgroup order greater than seven".into());
@@ -80,8 +81,12 @@ pub fn validate(curve: &CatalogCurve) -> Result<Value, String> {
                     let r = c.generator().scalar_mul(&w, &a);
                     let wrong = c.generator().scalar_mul(&wrong_w, &a);
                     match (&p, &q, &r, &wrong) {
-                        (Point::Affine { x: x1, .. }, Point::Affine { x: x2, .. },
-                         Point::Affine { x: x3, y: y3 }, Point::Affine { x: bad, .. }) => json!({
+                        (
+                            Point::Affine { x: x1, .. },
+                            Point::Affine { x: x2, .. },
+                            Point::Affine { x: x3, y: y3 },
+                            Point::Affine { x: bad, .. },
+                        ) => json!({
                             "target": {"x": hex(&x3.value), "y": hex(&y3.value)},
                             "point_sum_verified": p.add(&q, &a) == r,
                             "s3_zero": semaev_s3(x1, x2, x3, &a, &c.b_fe()).is_zero(),
@@ -97,8 +102,12 @@ pub fn validate(curve: &CatalogCurve) -> Result<Value, String> {
                     let r = scalar_mul(c, &c.generator, &w);
                     let wrong = scalar_mul(c, &c.generator, &wrong_w);
                     match (&p, &q, &r, &wrong) {
-                        (BinaryPoint::Affine { x: x1, .. }, BinaryPoint::Affine { x: x2, .. },
-                         BinaryPoint::Affine { x: x3, y: y3 }, BinaryPoint::Affine { x: bad, .. }) => json!({
+                        (
+                            BinaryPoint::Affine { x: x1, .. },
+                            BinaryPoint::Affine { x: x2, .. },
+                            BinaryPoint::Affine { x: x3, y: y3 },
+                            BinaryPoint::Affine { x: bad, .. },
+                        ) => json!({
                             "target": {"x": hex(&x3.to_biguint()), "y": hex(&y3.to_biguint())},
                             "point_sum_verified": point_add(c, &p, &q) == r,
                             "s3_zero": binary_semaev_s3(x1, x2, x3, &c.b, &c.irreducible).is_zero(),
@@ -116,10 +125,18 @@ pub fn validate(curve: &CatalogCurve) -> Result<Value, String> {
             fixtures.push(fixture);
         }
     }
-    let verified = parameters_verified && fixtures.len() == 2 && fixtures.iter().all(|f| {
-        ["point_sum_verified", "s3_zero", "wrong_target_rejected", "wrong_s3_rejected"]
-            .iter().all(|k| f[*k] == true)
-    });
+    let verified = parameters_verified
+        && fixtures.len() == 2
+        && fixtures.iter().all(|f| {
+            [
+                "point_sum_verified",
+                "s3_zero",
+                "wrong_target_rejected",
+                "wrong_s3_rejected",
+            ]
+            .iter()
+            .all(|k| f[*k] == true)
+        });
     Ok(json!({
         "schema_version": 1, "operation": "validate",
         "status": if verified { "checks_passed" } else { "checks_failed" },

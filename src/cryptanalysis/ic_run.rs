@@ -478,7 +478,11 @@ pub fn run_curve(
         return Err("--bits applies to prime analogues; use --degree for a binary analogue".into());
     }
     if cfg.degree.is_some_and(|degree| degree > 62) {
-        return Err("the current analogue pipeline supports field degree at most 62; use `icx validate` for actual NIST parameters".into());
+        return Err(
+            "the current analogue pipeline supports field degree at most 62; \
+             use `icx validate` for actual NIST parameters"
+                .into(),
+        );
     }
 
     // Extension and characteristic-three families do not yet have a
@@ -492,10 +496,18 @@ pub fn run_curve(
         ));
     }
 
-    let failed: Vec<_> = curve.verify().into_iter().filter(|check| !check.passed)
-        .map(|check| check.name).collect();
+    let failed: Vec<_> = curve
+        .verify()
+        .into_iter()
+        .filter(|check| !check.passed)
+        .map(|check| check.name)
+        .collect();
     if !failed.is_empty() {
-        return Err(format!("named curve {} failed parameter checks: {}", curve.name, failed.join(", ")));
+        return Err(format!(
+            "named curve {} failed parameter checks: {}",
+            curve.name,
+            failed.join(", ")
+        ));
     }
 
     match family {
@@ -541,7 +553,11 @@ pub fn run_curve(
                         if c.b != one || (!c.a.is_zero() && c.a != one) {
                             return Err("Koblitz analogue requires a in {0,1} and b=1".into());
                         }
-                        if c.a.is_zero() { 0 } else { 1 }
+                        if c.a.is_zero() {
+                            0
+                        } else {
+                            1
+                        }
                     }
                     _ => return Err("Koblitz family requires a binary curve object".into()),
                 };
@@ -608,7 +624,11 @@ fn finish(
     };
     RunResult {
         curve: curve.name.to_string(),
-        regime: if analogue.is_named_curve { regime.tag() } else { Regime::Scaled.tag() },
+        regime: if analogue.is_named_curve {
+            regime.tag()
+        } else {
+            Regime::Scaled.tag()
+        },
         ic_relevant,
         analogue,
         config_label,
@@ -648,7 +668,9 @@ mod tests {
             p.b += num_bigint::BigUint::from(1u32);
         }
         let mut progress = ProgressReporter::silent();
-        let error = run_curve(&c, &RunConfig::default(), &mut progress).err().unwrap();
+        let error = run_curve(&c, &RunConfig::default(), &mut progress)
+            .err()
+            .unwrap();
         assert!(error.contains("failed parameter checks"));
     }
 
