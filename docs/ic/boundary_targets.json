@@ -128,7 +128,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Compact-orbit point-only full-rank n37/n41/n53 L=1/1024 replayed; corrected rho CPU ratios at n41/n53 are 2.727/0.309 and 2.283/0.252 (single/batch). S is unset; no selected-panel promotion. Next: precomputed-start signed-Frobenius rho and calibrated full-operation unit on identical n41/n53 Q, then n83 and n61 L=65536 transfer probes. No 32-target panels."
+      "beat": "Compact-orbit W64 n41/n53 L=1024 blocked-root-prefilter repeat passed full-rank and independent replay, A/A and isolation gates. Same-K complete CPU filter/off ratios 0.8528/0.8924 are engineering gains, but filter/rho remains 1.3282/1.4727; common S, n83/n131 transfer and selected-panel or native-PDP promotion are unset. Next high-arity gate: independently reviewed, label-gated m10 capacity PR #937; if it passes, freeze natural-target solver/yield and equal-useful-size original/native/transported/pullback PDP with rank and full cost, retaining matched automorphism-aware rho."
     },
     {
       "beat": "Reduce the selected algebraic n=53 exact support from 738,197,504 bytes below 512 MiB without regressing the 95-relation solve, online wall crossover, or charged resources",
@@ -11369,6 +11369,14 @@
               "rho": "examples/koblitz_rho_batch_ks_v2_n61.rs",
               "evidence": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/RESULT.md",
               "status": "PENDING_INDEPENDENT_VALIDATION"
+            },
+            "compact_s3_prefilter_followup": {
+              "summary": "n41/K255 and n53/K440 W64 same-binary blocked-root-prefilter: first panel correctness PASS but timing gates failed; one frozen both-size repeat passed full-rank/log replay, A/A and isolation gates. Complete CPU filter/off 0.8528/0.8924, filter/rho 1.3282/1.4727. Engineering gain only; no ECC2K-130 crossover, common S, n83/n131 transfer, or descendant-native PDP conclusion.",
+              "producer": "examples/koblitz_orbit_dlp_s3_batch.rs",
+              "rho": "examples/koblitz_rho_batch_ks_v3.rs",
+              "evidence": "research/notes/ecc2k130/compact_s3_prefilter_20260930/RESULT.md",
+              "status": "ENGINEERING_GAIN_NO_RHO_CROSSOVER",
+              "next_gate": "Independently reviewed, label-gated m10 capacity PR #937, then frozen natural-target solver/yield and equal-useful-size original/native/transported/pullback PDP if capacity passes; measure common operation unit against matched signed-Frobenius rho."
             },
             "matched_arithmetic_check": {
               "summary": "Gave the growing-n vs_rho comparator's rho (koblitz_rho_batch_ks.rs, squaring-walk canonicalization + Fermat inversion) the IC arm's own normal-basis rotation and Itoh-Tsujii inversion (new koblitz_rho_batch_ks_matched_arith.rs, 4 passing correctness gates), and reran the frozen n=53 L=1024 K=440 batch_seed=531310 dp_bits=4 cell.",
