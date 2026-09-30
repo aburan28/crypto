@@ -81,9 +81,24 @@ def paired(xs, ys):
     return ratios, m, m - h, m + h
 
 
-def one(label, binary, flags):
+def recorded():
+    """Labels that already have a record: an interrupted `run` resumes after
+    them, in the same order."""
+    path = os.path.join(OUT, "records.jsonl")
+    if not os.path.exists(path):
+        return set()
+    with open(path) as f:
+        return {json.loads(line)["label"] for line in f if line.strip()}
+
+
+def one(label, binary, flags, done=frozenset()):
     rows = os.path.join(OUT, "rows", label + ".jsonl")
     log = os.path.join(OUT, "logs", label + ".log")
+    if label in done:
+        return
+    if os.path.exists(rows):
+        # A run cut off before its record was written: start it again.
+        os.remove(rows)
     env = dict(os.environ, RAYON_NUM_THREADS="1")
     cmd = [sys.executable, TOOL, "run", "--cpus", CPU, "--wait", "--label", label,
            "--out", os.path.join(OUT, "records.jsonl"), "--", binary, *COMMON, *flags, "--out", rows]
@@ -109,15 +124,16 @@ def run(base, cand):
     copy = os.path.join(tmp, "baseline-copy")
     shutil.copy2(base, copy)
     builds = {"A": base, "A2": copy, "B": cand}
+    done = recorded()
     with open(os.path.join(OUT, "builds.json"), "w") as f:
         json.dump({k: {"path": v, "sha256": sha256(v)} for k, v in builds.items()}, f, indent=1)
     for system, flags in SYSTEMS:
         for r in range(ROUNDS):
             for b in ("A", "A2"):
-                one(f"{system}-aa{r}-{b}", builds[b], flags)
+                one(f"{system}-aa{r}-{b}", builds[b], flags, done)
         for r in range(ROUNDS):
             for b in ("A", "B"):
-                one(f"{system}-ab{r}-{b}", builds[b], flags)
+                one(f"{system}-ab{r}-{b}", builds[b], flags, done)
     shutil.rmtree(tmp)
 
 

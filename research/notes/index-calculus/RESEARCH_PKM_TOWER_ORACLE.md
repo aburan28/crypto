@@ -2610,6 +2610,47 @@ read literally, it failed the clause at `m = 3`.
   - Every A/A interval contains 1.
 
 
+### 15.9 The second measurement
+
+`bench.py` ran §15.8's protocol from 04:28 to 05:40 UTC on 2026-09-30, with
+the same builds.
+- **Contention.** All 180 runs were uncontended. The tool refused 18 starts,
+  and each was retried: 15 for the CPU pressure a previous run left (PSI avg10
+  5.2–6.1), 3 for other processes' CPU use.
+- **An interruption.** The session's background-task limit stopped the driver
+  after 56 records, inside the run `m4-N12-ab13-A`, which left no record.
+  - The killed tool had moved other processes off CPU 3 and never restored
+    them, so the first relaunch inherited a mask without CPU 3 and was refused
+    (`bench2/logs/m4-N12-ab13-A.log` then held that refusal).
+  - `bench.py` gained a resume (it skips labels that have a record, and removes
+    the half-written row of a run cut off), and the driver was relaunched with
+    the full mask. It re-ran `m4-N12-ab13-A` and went on in the same order.
+  - Rounds 12 and 13 of that A/B phase are 21 minutes apart (04:57 and
+    05:18). No other pair spans a gap.
+
+| system | multiply-adds B/A | A/B median, A / B (s) | A/B: mean B/A, 95% interval | A/A: mean A2/A, 95% interval | verdict |
+|:--|--:|:--|:--|:--|:--|
+| `m = 4`, `N = 12` | 0.602 | 31.29 / 21.04 | 0.669 [0.663, 0.675] | 1.001 [0.990, 1.012] | **faster** |
+| `m = 3`, `N = 12` | 1.000 | 4.791 / 4.857 | 1.019 [0.995, 1.043] | 0.999 [0.979, 1.018] | no difference resolved |
+| `m = 2`, `N = 16` | 0.915 | 3.003 / 2.773 | 0.916 [0.900, 0.931] | 1.006 [0.988, 1.025] | **faster** |
+
+**§15.8's predictions all hold.**
+- The candidate is faster at `m = 4` and at `m = 2`.
+- At `m = 3` no difference is resolved: the interval allows anything from 0.5%
+  faster to 4.3% slower.
+- Every A/A interval contains 1.
+
+No timed system is slower by §15.8's test, so the timing clause of §15.6, as
+§15.8 restated it, holds.
+
+The multiply-adds are the primary metric, and they did not vary between runs:
+- one thread saves 39.8% at `m = 4`, `N = 12`, and 8.5% at `m = 2`, `N = 16`;
+- at `m = 3`, `N = 12` the saving is 1,140 of 1.06e10.
+
+At one thread, time falls a little less than work: by 33% against 40% at
+`m = 4`, and by 8.4% against 8.5% at `m = 2`.
+
+
 ---
 
 ## References
