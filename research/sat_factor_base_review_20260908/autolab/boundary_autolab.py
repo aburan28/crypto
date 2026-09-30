@@ -261,7 +261,7 @@ def validate_claim(
             import re
             if not re.fullmatch(re.escape(candidate_id) + r"W" + re.escape(workload_id) + r"R[1-9][0-9]*", run_id):
                 validation_errors.append("run_id must be <candidate_id>W<workload_id>R<run-number>")
-        if report.get("target_count") != 1:
+        if type(report.get("target_count")) is not int or report["target_count"] != 1:
             validation_errors.append("target_count must equal 1")
         target_hashes = (report.get("ic_target_hash"), report.get("rho_target_hash"))
         if not all(isinstance(value, str) and value.strip() for value in target_hashes):
