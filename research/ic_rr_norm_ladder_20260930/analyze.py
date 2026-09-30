@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+"""Registered readout for the RR norm-form ladder (PREREGISTRATION.md section 5).
+
+    python3 analyze.py RUNS_DIR
+"""
+
+import json
+import statistics as st
+import sys
+from pathlib import Path
+
+LOWER = 9  # d_max + 1
+ARMS = ('rr', 'x4', 'ctrl')
+
+
+def fit(points):
+    xs, ys = zip(*points)
+    mx, my = st.mean(xs), st.mean(ys)
+    return sum((x - mx) * (y - my) for x, y in points) / sum((x - mx) ** 2 for x in xs)
+
+
+def degree(o):
+    if o is None:
+        return None
+    if o['kind'] == 'resolved':
+        return o['degree']
+    if o['kind'] == 'at_least':
+        return LOWER
+    return None  # caps or satisfiable
+
+
+def show(d):
+    return 'caps' if d is None else (f'>={d}' if d == LOWER else str(d))
+
+
+def cell_median(degs):
+    """Median resolved degree over >= 3 measured draws; '>=LOWER' if lower bounds are the
+    majority; None if fewer than 3 draws or any caps."""
+    if len(degs) < 3 or None in degs:
+        return None
+    lowers = sum(d == LOWER for d in degs)
+    return f'>={LOWER}' if lowers * 2 > len(degs) else st.median_low(degs)
+
+
+def main(runs):
+    cells = {}
+    for path in sorted(Path(runs).glob('*.jsonl')):
+        rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+        if rows:
+            cells[path.stem] = {'rows': rows, 'n': rows[0]['n'], 'ell': rows[0]['ell'], 'a': rows[0]['a']}
+        else:
+            cells[path.stem] = {'rows': [], 'n': None, 'ell': None, 'a': None}
+    print(f"{'cell':10} {'draws':>5} {'rr-sat':>6} {'x4-sat':>6}  {'rr degrees':16} {'x4 degrees':16} {'ctrl degrees':16}  med rr  med x4  med ctrl")
+    by_curve = {arm: {} for arm in ARMS}
+    lower_below = {arm: {} for arm in ARMS}
+    paired = []
+    for name, c in sorted(cells.items(), key=lambda kv: (kv[1]['n'] or 0, kv[1]['ell'] or 0)):
+        rows = c['rows']
+        degs = {arm: [] for arm in ARMS}
+        for r in rows:
+            for arm in ('rr', 'x4'):
+                o = r[arm]['outcome']
+                if o['kind'] != 'satisfiable':
+                    degs[arm].append(degree(o))
+            if 'ctrl' in r['rr']:
+                degs['ctrl'].append(degree(r['rr']['ctrl']['outcome']))
+            if r['rr']['outcome']['kind'] != 'satisfiable' and r['x4']['outcome']['kind'] != 'satisfiable':
+                d_rr, d_x4 = degree(r['rr']['outcome']), degree(r['x4']['outcome'])
+                if d_rr is not None and d_x4 is not None:
+                    paired.append((name, d_rr, d_x4))
+        sat = {arm: sum(r[arm]['outcome']['kind'] == 'satisfiable' for r in rows) for arm in ('rr', 'x4')}
+        med = {arm: cell_median(degs[arm]) for arm in ARMS}
+        print(f"{name:10} {len(rows):5} {sat['rr']:6} {sat['x4']:6}  "
+              + ' '.join(f"{' '.join(show(d) for d in degs[arm]):16}" for arm in ARMS)
+              + f"  {str(med['rr']):6}  {str(med['x4']):6}  {med['ctrl']}")
+        if c['n'] is None:
+            continue
+        key = (c['a'], c['n'])
+        for arm in ARMS:
+            if med[arm] == f'>={LOWER}':
+                lower_below[arm].setdefault(key, []).append(c['ell'])
+            elif isinstance(med[arm], int):
+                by_curve[arm].setdefault(key, []).append((c['ell'], med[arm]))
+    print()
+    slopes = {arm: {} for arm in ARMS}
+    for arm in ARMS:
+        for key, pts in sorted(by_curve[arm].items()):
+            if len({x for x, _ in pts}) >= 3:
+                slopes[arm][key] = fit(pts)
+                print(f'{arm:4} K_{key[0]}/2^{key[1]}: s_n = {slopes[arm][key]:.3f} over l = {sorted(x for x, _ in pts)}')
+            else:
+                print(f'{arm:4} K_{key[0]}/2^{key[1]}: not fitted (fewer than 3 retained l)')
+    print()
+    if paired:
+        diffs = [a - b for _, a, b in paired]
+        print(f'paired rr - x4 over {len(paired)} draws measured on both: '
+              f'mean {st.mean(diffs):+.2f}, min {min(diffs):+d}, max {max(diffs):+d}; '
+              f'rr below x4 on {sum(d < 0 for d in diffs)}, equal {sum(d == 0 for d in diffs)}, above {sum(d > 0 for d in diffs)}')
+    curves = {(c['a'], c['n']) for c in cells.values() if c['n'] is not None}
+    print()
+    for arm in ('rr', 'x4'):
+        s = slopes[arm]
+        if len(s) < 2:
+            print(f'{arm}: fewer than two curves fitted')
+            continue
+        mean = st.mean(s.values())
+        early_lower_everywhere = all(any(e <= 6 for e in lower_below[arm].get(k, [])) for k in curves)
+        early_lower_any = any(e < 6 for v in lower_below[arm].values() for e in v)
+        print(f'{arm}: s_bar = {mean:.3f}; lower-bound cells: {dict(lower_below[arm])}')
+        if arm == 'rr':
+            if mean >= 0.35 or early_lower_everywhere:
+                verdict = 'CONSTANT LEVER (the norm form does not flatten the degree in l)'
+            elif mean <= 0.15 and not early_lower_any:
+                verdict = 'SLOPE LEVER (rr degree flat in l)'
+            else:
+                verdict = 'INCONCLUSIVE'
+            print(f'REGISTERED VERDICT: {verdict}')
+
+
+if __name__ == '__main__':
+    main(sys.argv[1])
