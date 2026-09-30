@@ -7,6 +7,7 @@ on:
       - 'research/pkm_tower_round3_20260925/**'
       - 'research/pkm_tower_round4_20260926/**'
       - 'research/pkm_tower_round5_20260926/**'
+      - 'research/pkm_tower_round6_20260930/**'
       - 'src/cryptanalysis/f4_fp_tower.rs'
       - 'src/cryptanalysis/sig_fp_tower.rs'
       - 'examples/pkm_tower_pilot.rs'
@@ -61,6 +62,17 @@ jobs:
         run: python3 research/pkm_tower_round4_20260926/compare_engines.py
       - name: The gate of note section 14.2 (signature criteria with F4's steps)
         run: python3 research/pkm_tower_round5_20260926/compare_gate.py
+      - name: The full-rank exit reproduces rounds 2 and 3 (round 6, note section 15.2)
+        run: python3 research/pkm_tower_round6_20260930/compare_exit.py
+      - name: Every committed round-6 row against exhaustive search
+        run: |
+          shopt -s nullglob
+          rows=(research/pkm_tower_round6_20260930/replay/*.jsonl research/pkm_tower_round6_20260930/off/*.jsonl)
+          if [ ${#rows[@]} -gt 0 ]; then
+            python3 research/pkm_tower_pilot_20260924/verify.py "${rows[@]}"
+          else
+            echo "no round-6 rows committed yet"
+          fi
   engine-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 45
