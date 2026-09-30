@@ -32,6 +32,18 @@ not required by this repository-local runner.
 
 ## Quality and accounting first
 
+Historical static SAT registrations replay through
+[`frozen_sat_runtime.py`](../../../research/ic_candidate_tournament_20260915/frozen_sat_runtime.py)
+and the
+[recovered runtime bundle](../../../research/ic_candidate_tournament_20260915/goal_20260924/static-sat-runtime/README.md).
+The v1/v2 source walker omitted imported `producer` package files. Recovery
+from their recorded commits preserves identity replay, but cannot retroactively
+establish complete preexecution source coverage. Keep those runs ineligible for
+promotion. A future registration must bind package imports as well as top-level
+modules, retain every executed source, and pass complete-source replay before
+measurement. Never update an old manifest or disable its live source gate to
+accommodate new tournament code.
+
 Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use a versioned runner for the intended unexecuted round; the round-one wrapper is historical, and generic pilot defaults do not implement the goal protocol. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass and an accepted, versioned reference binding is committed.
 
 
