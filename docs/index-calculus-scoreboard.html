@@ -1001,6 +1001,33 @@
       </div>
     </div>
 
+<!-- hamming-ideal-pdp:begin -->
+    <div class="panel" id="hamming-ideal-pdp">
+      <div class="panel-head">
+        <h2>Hamming ideals as a membership ideal for a Frobenius-stable weight base <span class="chip">accounting</span></h2>
+        <p>Frozen source: <code>research/hamming_ideal_pdp_20260930/results/main/summary.json</code> (derived from the per-target
+          records beside it; protocol and result in the same directory). A normal-basis weight-bounded base
+          <code>F_w = {P : wt_NB(x(P)) &le; w}</code> is Frobenius-stable at every prime <code>n</code>, needs no storage, and by
+          La Scala&ndash;Marchesin&ndash;Tiwari has a bounded-degree membership ideal (C, FC, QFC). Their <code>MultiSolve</code>
+          oracle, with a degree-truncated Boolean F4 inside, was run on <code>K_0/F_2^n</code> against the exhaustive oracle
+          (<code>|F_w|</code> candidates per target) and a matched subspace base (SUB) through the same solver; MONO is the
+          monomial-ideal control. Every target of every cell agrees with the exhaustive oracle. Unit: <code>GroebnerSafe</code>
+          calls per target; the tame depth is the number of summand coordinates fixed before the basis became linear.
+          No <code>S</code>, rho ratio or end-to-end figure: a stage diagnostic of one oracle, <code>m = 2</code>, <code>w = 2</code>.</p>
+      </div>
+      <div class="table-scroll"><table><caption>calls per target and mean tame depth (of n coordinates per summand); exponent = least-squares slope of log&#8322; calls against log&#8322; |F| over the prime sizes.</caption>
+        <thead><tr><th>encoding</th><th>n = 11: calls / target</th><th>n = 11: tame depth</th><th>n = 13: calls / target</th><th>n = 13: tame depth</th><th>n = 17: calls / target</th><th>n = 17: tame depth</th><th>n = 19: calls / target</th><th>n = 19: tame depth</th><th>exponent in |F|</th><th>class</th></tr></thead><tbody><tr><td>SUB</td><td>3.2</td><td>2.2</td><td>1.2</td><td>0.2</td><td>1.0</td><td>0.0</td><td>1.0</td><td>0.0</td><td>-0.87 over n = 11, 13, 17, 19</td><td>accounting</td></tr><tr><td>MONO</td><td>4.6</td><td>3.6</td><td>10.1</td><td>4.4</td><td>22.2</td><td>8.8</td><td>33.8</td><td>11.8</td><td>1.51 over n = 11, 13, 17, 19</td><td>accounting</td></tr><tr><td>C</td><td>6.8</td><td>4.6</td><td>16.4</td><td>7.4</td><td>93.5</td><td>16.2</td><td>135.4</td><td>18.2</td><td>2.43 over n = 11, 13, 17, 19</td><td>accounting</td></tr><tr><td>FC</td><td>8.2</td><td>5.3</td><td>28.0</td><td>10.4</td><td>56.9</td><td>14.7</td><td>112.9</td><td>17.8</td><td>1.87 over n = 11, 13, 17, 19</td><td>accounting</td></tr><tr><td>QFC</td><td>6.8</td><td>4.6</td><td>12.2</td><td>5.6</td><td>68.8</td><td>15.4</td><td>135.4</td><td>18.2</td><td>2.48 over n = 11, 13, 17, 19</td><td>accounting</td></tr></tbody></table></div>
+      <div class="table-scroll"><table><caption>the exhaustive oracle's candidate count |F_w| (points of the weight base) at each size.</caption>
+        <thead><tr><th>n = 11</th><th>n = 13</th><th>n = 17</th><th>n = 19</th></tr></thead><tbody><tr><td>67</td><td>79</td><td>137</td><td>229</td></tr></tbody></table></div>
+      <div class="panel-head"><p>Verdict: the paper&rsquo;s negative result on Classic McEliece transfers. The algebra resolves only after
+        nearly a whole summand is fixed and the call count grows faster than the candidate count, so the oracle is the
+        enumeration with a Gr&ouml;bner computation attached to each candidate. What the construction changes is the
+        decomposition note&rsquo;s &sect;6 storage term for a Frobenius-stable set (removed); no operation count moves,
+        and the verdict at the top of this page is unchanged. Budget sensitivity: 16&times; the per-call budget lowers the tame
+        depth by one to two levels at <code>n = 11</code> (<code>results/tau/TABLE.md</code>).</p></div>
+    </div>
+    <!-- hamming-ideal-pdp:end -->
+
     <div class="panel">
       <div class="panel-head">
         <h2>The solver inside S: one base, four oracles, whole runs <span class="chip">accounting</span></h2>
