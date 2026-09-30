@@ -2546,6 +2546,70 @@ for the committed rows), and `compare_exit.py` checks them.
   - pooling contended runs with uncontended ones.
 
 
+### 15.7 The first timing measurement, and why there is a second
+
+`bench.py` ran §15.3's protocol from 04:08 to 04:26 UTC on 2026-09-30, with the
+candidate built from the pre-registration commit `00983dfc` (binary sha256
+`644ac866…`).
+- **Contention.** All 60 runs were uncontended. The tool refused 5 starts, all
+  at `m = 3`: the CPU pressure left by the previous run (PSI avg10 5.3–5.5, limit
+  5.0). Each was retried after 30 s. The refusals are in `bench/refusals.txt`.
+- **Multiply-adds.** They did not vary between repeats or between the two
+  copies of the baseline.
+
+| system | multiply-adds, baseline | candidate | B/A | A/A median, A / A2 (s) | A/B median, A / B (s) | A/B minimum, A / B (s) |
+|:--|--:|--:|--:|:--|:--|:--|
+| `m = 4`, `N = 12` | 85,477,602,933 | 51,426,567,808 | **0.602** | 32.18 / 32.37 | 32.46 / 21.63 | 31.72 / 20.94 |
+| `m = 3`, `N = 12` | 10,595,733,281 | 10,595,732,141 | 1.000 | 4.764 / 4.755 | 4.614 / 4.746 | 4.517 / 4.445 |
+| `m = 2`, `N = 16` | 6,178,203,100 | 5,655,592,357 | **0.915** | 2.932 / 2.952 | 2.953 / 2.728 | 2.838 / 2.636 |
+
+**§15.6's timing clause, as `bench.py` computed it, fails at `m = 3`,
+`N = 12`.**
+- The script's "A/A spread" is the difference between the two copies' medians.
+  It is 0.19% there, and the candidate's A/B median is 2.9% above the
+  baseline's. At `m = 4` and `m = 2` the clause holds: the candidate is faster
+  by far more than the spread (0.59% and 0.67%).
+- That spread, one difference between two five-run medians, cannot resolve 3%
+  on this system:
+  - the same baseline binary's median moved 3.2% between the A/A and the A/B
+    phases (4.764 s and 4.614 s);
+  - its ten runs span 7.4%;
+  - the A/A pairs' ratios run from 0.945 to 1.052.
+- The paired view of the same runs (`bench.py summary`): the mean of the five
+  A/B pair ratios is 1.023, with a 95% interval of [0.979, 1.067]. That
+  resolves no difference, and the candidate's minimum is below the baseline's.
+  At `m = 4` the A/B interval is [0.649, 0.679], and at `m = 2` [0.850, 0.966]:
+  both faster.
+- The candidate saves 1,140 multiply-adds there (a few skipped rows in the last
+  step). No change it makes could slow the rest.
+
+So the clause fired on a noise estimate that the same data show too narrow.
+Rather than choose a more favourable definition after the fact, §15.8 fixes a
+second, larger measurement and its test before it runs, and the default
+follows it. The first measurement stays as recorded. The record states that,
+read literally, it failed the clause at `m = 3`.
+
+### 15.8 The second timing measurement, fixed before it ran
+
+- **Runs.** The same builds, systems, thread count, CPU and tool as §15.3,
+  with fresh runs: 15 interleaved A/A pairs, then 15 interleaved A/B pairs,
+  per system (`bench.py run … --rounds 15 --dir bench2`).
+- **Test.** For each system, the mean of the A/B pairs' ratios (B/A) and its
+  95% confidence interval (Student's t, 14 degrees of freedom), from
+  uncontended pairs only. This is the paired interval `AGENTS.md` §8 asks of a
+  runtime claim.
+  - The candidate is **slower** on a system if the interval lies above 1.
+  - It is **faster** if the interval lies below 1.
+  - Otherwise no difference is resolved.
+  - The A/A pairs get the same test, as a check on the method.
+- **The timing clause of §15.6 becomes:** no timed system is slower by this
+  test. With predictions 1 and 2 of §15.5, it decides the default.
+- **Predictions.**
+  - Faster at `m = 4`, `N = 12` and at `m = 2`, `N = 16`.
+  - No difference resolved at `m = 3`, `N = 12`.
+  - Every A/A interval contains 1.
+
+
 ---
 
 ## References

@@ -3,6 +3,9 @@
 
     python3 research/pkm_tower_round6_20260930/bench.py run BASELINE_BIN CANDIDATE_BIN
     python3 research/pkm_tower_round6_20260930/bench.py summary
+    # the second measurement of note section 15.8: fresh runs, 15 pairs each
+    python3 research/pkm_tower_round6_20260930/bench.py run BASELINE_BIN CANDIDATE_BIN --rounds 15 --dir bench2
+    python3 research/pkm_tower_round6_20260930/bench.py summary --rounds 15 --dir bench2
 
 `run` times three systems, target 0 each, at one thread
 (`RAYON_NUM_THREADS=1`), every run through `tools/isolated_bench.py` on CPU 3:
@@ -19,7 +22,9 @@ machine) is retried after a pause, and the refusal is kept in
 `summary` prints, per system: the median and minimum wall time of each build,
 the A/A spread, the A/B ratio, the contended runs, and the multiply-adds of
 each build, which must not vary between repeats or between the two copies of
-the baseline.
+the baseline. It also prints, per system and phase, the paired ratios of the
+interleaved rounds (A2/A, B/A), their mean and its 95% confidence interval
+(Student's t): the test of note section 15.8.
 """
 
 import hashlib
@@ -47,6 +52,8 @@ SYSTEMS = [
 ]
 ROUNDS = 5
 CPU = "3"
+# Two-sided 95% Student's t quantiles, by degrees of freedom.
+T95 = {4: 2.776, 9: 2.262, 14: 2.145, 19: 2.093, 29: 2.045}
 
 
 def sha256(path):
@@ -55,6 +62,23 @@ def sha256(path):
         for block in iter(lambda: f.read(1 << 20), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def options(argv):
+    """`--rounds N` and `--dir NAME` (under this directory)."""
+    global OUT, ROUNDS
+    if "--rounds" in argv:
+        ROUNDS = int(argv[argv.index("--rounds") + 1])
+    if "--dir" in argv:
+        OUT = os.path.join(HERE, argv[argv.index("--dir") + 1])
+
+
+def paired(xs, ys):
+    """Mean of ys[i] / xs[i] and its 95% confidence interval."""
+    ratios = [y / x for x, y in zip(xs, ys)]
+    m = statistics.mean(ratios)
+    h = T95[len(ratios) - 1] * statistics.stdev(ratios) / len(ratios) ** 0.5
+    return ratios, m, m - h, m + h
 
 
 def one(label, binary, flags):
@@ -142,12 +166,26 @@ def summary():
                           f"{b[1] / b0[1]:.4f}; multiply-adds B/A {min(b[2]) / min(b0[2]):.4f}")
     print()
     print("\n".join(ratios))
+    print()
+    for system, _ in SYSTEMS:
+        for phase, (x, y) in (("aa", ("A", "A2")), ("ab", ("A", "B"))):
+            pairs = [(f"{system}-{phase}{r}-{x}", f"{system}-{phase}{r}-{y}") for r in range(ROUNDS)]
+            pairs = [(a, b) for a, b in pairs if a in recs and b in recs
+                     and not recs[a]["run"]["contended"] and not recs[b]["run"]["contended"]]
+            if len(pairs) < 2:
+                continue
+            _, m, lo, hi = paired([recs[a]["run"]["wall_seconds"] for a, _ in pairs],
+                                  [recs[b]["run"]["wall_seconds"] for _, b in pairs])
+            verdict = "slower" if lo > 1 else "faster" if hi < 1 else "no difference resolved"
+            print(f"- {system} {phase.upper()} ({y}/{x}, {len(pairs)} uncontended pairs): mean {m:.4f}, "
+                  f"95% interval [{lo:.4f}, {hi:.4f}]: {verdict}")
     if bad:
         print(f"{bad} build(s) whose multiply-adds varied between runs or copies")
     return 1 if bad else 0
 
 
 if __name__ == "__main__":
+    options(sys.argv)
     if sys.argv[1:2] == ["run"]:
         run(sys.argv[2], sys.argv[3])
     elif sys.argv[1:2] == ["summary"]:
