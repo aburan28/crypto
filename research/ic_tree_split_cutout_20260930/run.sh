@@ -9,7 +9,7 @@
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 runs="${1:?RUNS_DIR}"
-mkdir "$runs"
+mkdir -p "$(dirname "$runs")" && mkdir "$runs"
 git -C "$here" rev-parse HEAD > "$runs/commit"
 sha256sum "$here/cutout.py" "$here/../../target/release/examples/gf2_span" > "$runs/sha256"
 
