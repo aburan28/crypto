@@ -57,3 +57,12 @@ native rebuild/platform proof, one-target resource limits and arm order before
 the first fresh fixture. Never reopen the three sealed confirmation sets or the
 two censored generic campaigns. Linux requires newly built Linux executables;
 retained macOS binaries cannot establish Linux execution.
+
+Freshness exclusions must also cover every ordinary preparation query point
+`[a]G`, including failed queries, and every sign/Frobenius orbit point whose log
+is implied by a retained column log. Excluding only old supplied targets misses
+these already exposed or algebraically known inputs. Freeze the union across
+all compared arms, along with the other exposure corpora, and explicitly declare
+the resulting conditional target input law before sampling. The existing
+certificate has the ordinary scalars and column points needed to reconstruct
+that union; this analysis does not implement or execute fresh target sampling.
