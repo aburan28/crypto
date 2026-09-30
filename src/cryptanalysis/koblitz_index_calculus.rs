@@ -542,7 +542,7 @@ fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
     let mut d = 2u64;
     while v > 1 && !is_prime_u64(v) && d.saturating_mul(d) <= v {
         let mut e = 0;
-        while v % d == 0 {
+        while v.is_multiple_of(d) {
             v /= d;
             e += 1;
         }
@@ -565,7 +565,7 @@ fn is_prime_u64(n: u64) -> bool {
         return false;
     }
     for &p in &BASES {
-        if n % p == 0 {
+        if n.is_multiple_of(p) {
             return n == p;
         }
     }
