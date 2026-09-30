@@ -19,8 +19,9 @@ exponents it rests on.
    - At fixed surplus it grows in every pair of the registered ladder.
 2. **It tracks a generic reference.** In every cell with exact values, the
    refutation degree is within one of the semi-regular degree of
-   regularity of the system's shape, and equal to it in 9 of 13. The
-   `ℓ = 5` bounds are consistent with it. That reference grows about
+   regularity of the system's shape, and equal to it in 10 of 14. The
+   reference predicted the 7 at `(10, 5)` before it was measured, and the
+   `ℓ = 5` lower bounds are consistent with it. That reference grows about
    linearly in the number of unknowns.
 3. **ECC2K-130's verdict does not depend on it.**
    - At `m = 3` the route loses to rho even with a free oracle:
@@ -47,8 +48,8 @@ Refutation degree of the `m = 3` chained `S₃` system (`b = 1`), per cell
 and `n` quadratic equations, surplus `S = n − 3ℓ` (equations minus
 unknowns). A value is exact where the degree-`D` Macaulay row space first
 contains `1`; `≥D` is a lower bound (the full degree-`(D−1)` matrix does
-not). Sources: `RESEARCH_DREG_MEASUREMENT.md` Results 4–8 and the degree-7
-study.
+not). Sources: `RESEARCH_DREG_MEASUREMENT.md` Results 4–9, the last being
+the degree-7 study.
 
 | `ℓ` | cell `(n, ℓ)` | `N` | `S` | measured, four draws | semi-regular `D_reg` |
 |--:|---|--:|--:|---|--:|
@@ -70,8 +71,10 @@ The last column is `D_reg`, the semi-regular reference: the first
 non-positive coefficient of `(1+z)^N / ((1+z²)^n (1+z³)^n)`. It comes from
 `research/dreg_degree7_ell5_20260930/semireg.py`, a formula, not a run.
 
-- **The degree grows with `ℓ` down every surplus column where more than
-  one rung is measured.**
+- **The degree never falls as `ℓ` rises at a fixed surplus, and it rises
+  from `ℓ = 3` to `ℓ = 5` in every column where both are measured.**
+  - `S = −5`: 5 to 7. `S = −4`, `−2` and 0: 6 to ≥7.
+  - At `S = −5` it is flat from `ℓ = 4` to `ℓ = 5`: 7 7 6 7, then 7.
 - **At fixed surplus it grows in every registered pair**, two of them with
   `ℓ ≥ 3` at both ends (Results 7 and 8).
 - **The first fall degree is 3 throughout.** So the gap between the fall
@@ -82,13 +85,13 @@ non-positive coefficient of `(1+z)^N / ((1+z²)^n (1+z³)^n)`. It comes from
     ASIACRYPT 2012) treats that gap as bounded.
   - On this system, at these sizes, it is not.
 - **Against the reference, the measured degree is within one degree in
-  every cell.**
-  - It is equal in 9 of the 13 cells with exact values.
+  every cell with exact values.**
+  - It is equal in 10 of those 14 cells. One of them is `(10, 5)`, where the
+    reference predicted 7 before the degree-7 run.
   - It is one above in `(5, 3)` and `(7, 4)`, and one below in `(11, 4)` and
     `(13, 4)`.
-  - That is 14 cells with exact values, `(10, 5)` included. The reference
-    predicted 7 there before the degree-7 run, and it resolved at 7.
-  - The three unmeasured `ℓ = 5` cells are consistent with it.
+  - The lower bounds of the three unrun `ℓ = 5` cells are consistent with
+    it.
 
 ## 2. The price at `n = 131`, by degree
 
@@ -140,8 +143,9 @@ Each row is minimised over integer `ℓ`. The rho reference is `2^60.81`
     Every other row with an oracle clears rho by 8 to 209 bits, and a
     reader should subtract `log₂ K` from those gaps.
 - **The `m = 4` rows are `m = 3`'s degrees applied to an unmeasured
-  system.** The `m = 4` chain has `2n` cubic equations and 132 more
-  unknowns. Nothing here measures its degree, so those rows are the
+  system.** The `m = 4` chain has `2n` cubic equations. At equal `ℓ` it
+  has `n + ℓ` more unknowns, one more 131-bit intermediate point and one
+  more summand. Nothing here measures its degree, so those rows are the
   optimistic case.
 
 ### What the table says
