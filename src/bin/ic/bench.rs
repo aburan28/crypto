@@ -266,7 +266,7 @@ fn listing() -> Value {
                                     {"name": "divisor", "means": "the base's divisor; copied from koblitz-symmetrised when omitted"},
                                     {"name": "engine", "means": "inherited-f4 (default), matrix-f4 or matrix-f5"},
                                     {"name": "max_degree", "means": "Macaulay cap before splitting (default 3)"},
-                                    {"name": "node_budget", "means": "splits before a call gives up (default 4096)"}],
+                                    {"name": "node_budget", "means": "algebraic reduction calls before a solve gives up (default 4096)"}],
                      "needs": "the koblitz-symmetrised factor base; solves in w = u² + u, s = Σu with koblitz_groebner"},
                 ],
             },
