@@ -35,7 +35,8 @@ def compact_identity(subdir: Path) -> tuple:
     return base, ranks, tuple(identity(target) for target in targets)
 
 
-def verify(cell_id: str, run_dir: Path, mode: str) -> dict:
+def verify(cell_id: str, run_dir: Path, mode: str,
+           relocated: bool = False) -> dict:
     config, cell = load_cell(cell_id)
     report = json.loads((run_dir / "cold_run.json").read_text())
     assert report["schema"] == "ecc2k130-compact-ir-cold-gap-run-v1"
@@ -83,7 +84,7 @@ def verify(cell_id: str, run_dir: Path, mode: str) -> dict:
             assert item["child_max_rss_kib_linux"] * 1024 < config[
                 "per_arm_address_space_limit_bytes"]
             assert item["command"][:3] == ["taskset", "-c", str(reserved_cpu)]
-        replay = verify_ir(cell_id, subdir, smoke=True)
+        replay = verify_ir(cell_id, subdir, smoke=True, relocated=relocated)
         assert replay["status"] == "SMOKE_PASS"
         assert replay["details"][policy]["targets_verified"] == cell["L"]
         checked.append({"block": block, "arm": arm,
@@ -141,10 +142,13 @@ def main() -> None:
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--mode", choices=("smoke", "measure"), required=True)
+    parser.add_argument("--relocated", action="store_true",
+                        help="replay an archived run extracted outside its original runner path")
     args = parser.parse_args()
     assert not args.out.exists(), "never overwrite a cold replay receipt"
     try:
-        receipt = verify(args.cell, args.run_dir.resolve(), args.mode)
+        receipt = verify(args.cell, args.run_dir.resolve(), args.mode,
+                         relocated=args.relocated)
     except BaseException as error:
         receipt = {"status": "FAIL", "error_type": type(error).__name__,
                    "error": str(error), "traceback": traceback.format_exc()}

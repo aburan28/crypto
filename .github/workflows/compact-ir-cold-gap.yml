@@ -41,6 +41,11 @@ jobs:
           python3 -m unittest discover -s research/notes/ecc2k130/compact_ir_ledger_20260930 -p 'test_panel.py' -v
           python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
           python3 -c 'import sys; sys.path.insert(0,"research/notes/ecc2k130/compact_ir_cold_gap_20260930"); from run_cold import load_cell; [load_cell(x) for x in ("n37_L1","n37_L1024","n41_L1","n53_L1")]'
+          python3 research/notes/ecc2k130/compact_ir_cold_gap_20260930/analyze_cold.py \
+            --archive research/notes/ecc2k130/compact_ir_cold_gap_20260930/evidence/run_36694337420 \
+            --out "$RUNNER_TEMP/cold-analysis.json"
+          python3 -c 'import json,sys; sys.path.insert(0,"research/notes/ecc2k130/compact_ir_ledger_20260930"); from archive import equivalent; assert equivalent(json.load(open(sys.argv[1])), json.load(open(sys.argv[2])))' \
+            "$RUNNER_TEMP/cold-analysis.json" research/notes/ecc2k130/compact_ir_cold_gap_20260930/ANALYSIS.json
       - name: Materialize and build the exact frozen source
         run: |
           mkdir -p "${{ runner.temp }}/compact-ir-cold"

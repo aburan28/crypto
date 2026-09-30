@@ -233,13 +233,21 @@ for **the tested W64 n41/n53 batch cold CPU cells** against strong rho; Ir alone
 is not a group-addition or cycle unit and does not establish a method speedup.
 
 The older point-panel native CPU references for n37/L1, n37/L1024, n41/L1
-and n53/L1 used a different rho/source snapshot. Their current-source cold
-CPU ratios remain pending a separate four-cell protocol committed before
-inspection of the Ir results. The K+L rank/recovery attempt floor is exactly
-met in all compact arms, but no instruction lower bound, calibrated generic
-S, disjoint target confirmation, n83 confidence, GF(2^131) transfer, or native
-leaf m≥3 PDP result follows. The degree-263 map/ring certificate and the
-review/label-gated m10 capacity PR #937 remain separate prerequisites.
+and n53/L1 used a different rho/source snapshot. The preregistered
+[four-cell current-source cold panel](../../research/notes/ecc2k130/compact_ir_cold_gap_20260930/RESULT.md)
+now closes those cells: all 105 processes, 70 compact full-rank traces and
+15,450 target logarithms passed hosted and separate macOS replay. Eligible
+off/rho CPU medians [paired 95% intervals] are 3.7362 [3.6901, 3.7803],
+1.7064 [1.6933, 1.7146], 17.0499 [16.0731, 18.1962] and 27.4483
+[27.1951, 27.6616] in that order. Every A/A and isolation gate passed.
+The n37 batch Ir advantage (0.5165 of rho) therefore does not survive native
+CPU either; all six tested current-source W64 n/L cells lack a matched-rho
+cold CPU crossover. Short-arm wall time is coarsened by 0.2-second runner
+polling and is ineligible as a speed claim. The K+L rank/recovery attempt floor
+is exactly met in all compact arms, but no instruction lower bound, calibrated
+generic S, disjoint target confirmation, n83 confidence, GF(2^131) transfer,
+or native leaf m≥3 PDP result follows. The degree-263 map/ring certificate
+and review/label-gated m10 capacity PR #937 remain separate prerequisites.
 
 ### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
 
