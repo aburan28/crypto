@@ -1,0 +1,15 @@
+error: rustup could not choose a version of rustc to run, because one wasn't specified explicitly, and no default is configured.
+help: run 'rustup default stable' to download the latest stable release of Rust and set it as your default toolchain.
+Traceback (most recent call last):
+  File "/home/runner/work/crypto/crypto/research/gf2_branchless_strip_20260929/confirm_default.py", line 302, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/runner/work/crypto/crypto/research/gf2_branchless_strip_20260929/confirm_default.py", line 242, in main
+    "rustc": subprocess.check_output(["rustc", "--version"], text=True).strip(),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['rustc', '--version']' returned non-zero exit status 1.

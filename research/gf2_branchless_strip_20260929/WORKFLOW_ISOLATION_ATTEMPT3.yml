@@ -51,10 +51,7 @@ jobs:
         run: |
           # Redirect in the runner shell so the failure artifact stays runner-owned.
           # shellcheck disable=SC2024
-          sudo -n env PATH="$PATH" HOME="$HOME" \
-            RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}" CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}" \
-            GITHUB_SHA="$GITHUB_SHA" GITHUB_HEAD_REF="${GITHUB_HEAD_REF:-}" \
-            python3 tools/isolated_bench.py reserve \
+          sudo -n env PATH="$PATH" GITHUB_SHA="$GITHUB_SHA" GITHUB_HEAD_REF="${GITHUB_HEAD_REF:-}" python3 tools/isolated_bench.py reserve \
             --lock "$RUNNER_TEMP/f5-branchless-bench.lock" \
             --cpus '${{ steps.cpus.outputs.reserve }}' \
             --out research/gf2_branchless_strip_20260929/isolation-t${{ matrix.threads }}.jsonl \
