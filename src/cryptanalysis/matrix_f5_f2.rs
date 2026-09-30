@@ -460,8 +460,6 @@ pub struct F5Timings {
     pub direct_pack_used: bool,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
-    /// Whether the direct unpack path used a compact 32-bit column lookup.
-    pub compact_unpack_used: bool,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -513,47 +511,6 @@ fn unpack_row_scalar_direct(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolP
     }
     debug_assert_eq!(written, terms);
     // SAFETY: all `terms` slots have been written above.
-    unsafe { monos.set_len(terms) };
-    F2BoolPoly {
-        terms: monos,
-        n_vars,
-    }
-}
-
-/// Use narrower column values when every monomial mask fits in 32 bits.
-fn compact_unpack_columns(cols: &[u64]) -> Option<Vec<u32>> {
-    cols.iter()
-        .copied()
-        .map(|mask| u32::try_from(mask).ok())
-        .collect()
-}
-
-/// Expand one internally built packed row through a compact column map.
-///
-/// Every set bit is a valid column: builders leave padding bits clear, and
-/// elimination only XORs rows with the same valid-column width. This is the
-/// same invariant used by the scalar direct path above.
-fn unpack_row_compact_direct(row: &[u64], cols: &[u32], n_vars: usize) -> F2BoolPoly {
-    let terms = row.iter().map(|w| w.count_ones() as usize).sum();
-    let mut monos = Vec::<F2BoolMono>::with_capacity(terms);
-    let out = monos.as_mut_ptr();
-    let mut written = 0;
-    for (w, &word) in row.iter().enumerate() {
-        let mut bits = word;
-        while bits != 0 {
-            let c = w * 64 + bits.trailing_zeros() as usize;
-            bits &= bits - 1;
-            debug_assert!(c < cols.len());
-            // SAFETY: the packed matrix has no set bits past its column
-            // count, and `compact_unpack_columns` preserves that count.
-            let mask = unsafe { *cols.get_unchecked(c) } as u64;
-            // SAFETY: `written` is bounded by the precomputed popcount.
-            unsafe { out.add(written).write(F2BoolMono::from_mask(mask)) };
-            written += 1;
-        }
-    }
-    debug_assert_eq!(written, terms);
-    // SAFETY: each of the `terms` slots was initialized exactly once.
     unsafe { monos.set_len(terms) };
     F2BoolPoly {
         terms: monos,
@@ -736,23 +693,10 @@ pub fn matrix_f5_f2_with_form_timed(
     let direct_unpack =
         *DIRECT_UNPACK.get_or_init(|| std::env::var("KIC_F5_UNPACK_DIRECT").as_deref() == Ok("1"));
     timings.direct_unpack_used = direct_unpack && !avx512_unpack;
-    static COMPACT_UNPACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    let compact_requested = *COMPACT_UNPACK
-        .get_or_init(|| std::env::var("KIC_F5_UNPACK_COMPACT_COLS").as_deref() == Ok("1"));
-    let compact_cols = if compact_requested && direct_unpack && !avx512_unpack && n_vars_out <= 32 {
-        compact_unpack_columns(&cols)
-    } else {
-        None
-    };
-    timings.compact_unpack_used = compact_cols.is_some();
     let out = matrix[..rank]
         .par_iter()
         .map(|row| {
-            let p = if let Some(compact) = compact_cols.as_deref() {
-                unpack_row_compact_direct(row, compact, n_vars_out)
-            } else {
-                unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack)
-            };
+            let p = unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack);
             debug_assert!(p.is_canonical());
             p
         })
@@ -815,31 +759,6 @@ mod tests {
                 assert_eq!(
                     unpack_row_scalar_direct(&row, &cols, 24),
                     unpack_row_scalar(&row, &cols, 24),
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn compact_column_unpack_matches_direct_scalar_for_partial_words() {
-        assert!(compact_unpack_columns(&[u32::MAX as u64 + 1]).is_none());
-        for cols_len in [1usize, 7, 63, 64, 65, 127, 129, 4097] {
-            let cols: Vec<u64> = (0..cols_len)
-                .map(|i| (i as u32).wrapping_mul(0x9e37_79b9) as u64 & 0x00ff_ffff)
-                .collect();
-            let compact = compact_unpack_columns(&cols).unwrap();
-            for salt in [0u64, 1, 3, 7, u64::MAX] {
-                let row: Vec<u64> = (0..cols_len.div_ceil(64))
-                    .map(|w| {
-                        let bits = (w as u64).wrapping_mul(0xd6e8_feb8_6659_fd93) ^ salt;
-                        let valid = (cols_len - w * 64).min(64);
-                        bits & (u64::MAX >> (64 - valid))
-                    })
-                    .collect();
-                assert_eq!(
-                    unpack_row_compact_direct(&row, &compact, 24),
-                    unpack_row_scalar_direct(&row, &cols, 24),
-                    "cols_len={cols_len}, salt={salt}",
                 );
             }
         }
