@@ -60,7 +60,8 @@ def identity(record: dict) -> tuple[str, ...]:
     return tuple(json.dumps(record[key], sort_keys=True) for key in TARGET_IDENTITY_KEYS)
 
 
-def verify(cell_id: str, run_dir: Path, smoke: bool = False) -> dict:
+def verify(cell_id: str, run_dir: Path, smoke: bool = False,
+           relocated: bool = False) -> dict:
     config, cell, spec, points, fixture = load_cell(cell_id)
     report = json.loads((run_dir / "run.json").read_text())
     assert report["schema"] == "ecc2k130-compact-ir-run-v1"
@@ -115,14 +116,29 @@ def verify(cell_id: str, run_dir: Path, smoke: bool = False) -> dict:
         if policy in ("off", "blocked"):
             assert item["environment"]["KIC_S3_BATCH_WINDOW"] == "64"
             assert item["environment"]["KIC_S3_PREFILTER"] == policy
-            assert item["command"][-4:-1] == [f"construct:{cell['n']}:0:{cell['k']}",
-                                               str(points), "7"]
+            assert item["command"][-4] == f"construct:{cell['n']}:0:{cell['k']}"
+            assert item["command"][-2] == "7"
+            original_points = Path(item["command"][-3])
+            if relocated:
+                assert original_points.is_absolute() and original_points.name == points.name
+            else:
+                assert original_points == points
             base_path = run_dir / f"{arm}.base.jsonl"
             rank_path = run_dir / f"{arm}.rank.jsonl"
             target_path = run_dir / f"{arm}.target.jsonl"
-            assert Path(item["environment"]["KIC_DUMP_BASE"]) == base_path
-            assert Path(item["environment"]["KIC_DUMP_RANK"]) == rank_path
-            assert Path(item["command"][-1]) == target_path
+            recorded_base = Path(item["environment"]["KIC_DUMP_BASE"])
+            recorded_rank = Path(item["environment"]["KIC_DUMP_RANK"])
+            recorded_target = Path(item["command"][-1])
+            if relocated:
+                assert all(path.is_absolute() for path in
+                           (recorded_base, recorded_rank, recorded_target))
+                assert (recorded_base.parent == recorded_rank.parent ==
+                        recorded_target.parent)
+                assert (recorded_base.name, recorded_rank.name, recorded_target.name) == (
+                    base_path.name, rank_path.name, target_path.name)
+            else:
+                assert (recorded_base, recorded_rank, recorded_target) == (
+                    base_path, rank_path, target_path)
             rank = verify_rank(rank_path, base_path, stdout)
             assert rank["status"] == "PASS" and rank["rank"] == cell["k"]
             base, = rows(base_path)
@@ -156,7 +172,11 @@ def verify(cell_id: str, run_dir: Path, smoke: bool = False) -> dict:
             assert item["environment"]["KIC_RHO_CANON_BACKEND"] == "normal_basis"
             assert item["environment"]["KIC_RHO_DP_BITS"] == "4"
             assert item["environment"]["KIC_RHO_BATCH_CORPUS"] == spec["corpus"]
-            assert item["environment"]["KIC_RHO_POINT_INPUT"] == str(points)
+            original_points = Path(item["environment"]["KIC_RHO_POINT_INPUT"])
+            if relocated:
+                assert original_points.is_absolute() and original_points.name == points.name
+            else:
+                assert original_points == points
             assert item["command"][-5:] == [str(cell["n"]), "0", "signed_frobenius",
                                                str(cell["L"]), str(spec["seed"])]
             data = rows(stdout)
@@ -218,10 +238,12 @@ def main() -> None:
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--relocated", action="store_true",
+                        help="replay archived output after moving it to another host")
     args = parser.parse_args()
     assert not args.out.exists(), "never overwrite a verification receipt"
     try:
-        receipt = verify(args.cell, args.run_dir.resolve(), args.smoke)
+        receipt = verify(args.cell, args.run_dir.resolve(), args.smoke, args.relocated)
     except BaseException as error:
         receipt = {"status": "FAIL", "error_type": type(error).__name__,
                    "error": str(error), "traceback": traceback.format_exc()}

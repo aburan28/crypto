@@ -128,7 +128,7 @@ def archive_runs(runs: Path, out: Path, source_head: str, run_url: str,
         "extraction": "tar -xzf raw/CELL.tar.gz -C DEST",
         "independent_replay": (
             "python3 verify_panel.py --cell CELL --run-dir DEST/CELL "
-            "--out DEST/CELL.replay.json"),
+            "--out DEST/CELL.replay.json --relocated"),
         "cost_limitation": "Ir is a same-host whole-process instruction unit, not group additions",
     }
     (out / "MANIFEST.json").write_text(json.dumps(
