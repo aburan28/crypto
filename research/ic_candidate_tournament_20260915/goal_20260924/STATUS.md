@@ -1,5 +1,13 @@
 # September 24 bounded IC goal
 
+Current family-admission status (September 30): the complete source-bound
+[SAT v3 development solve](static-sat-runtime-v3/full-development-20260929/README.md)
+is accepted. The single [F5 v1 invocation](f5-source-bound-runtime-v1/README.md)
+failed native JSON parsing before any IC query and is closed. Complete F4/F5
+admission and a fresh paired incumbent/rho comparison remain outstanding;
+no new speedup or promotion is established. The historical confirmation sets
+and censored generic registrations below remain closed.
+
 Status: the archived reference panel has completed under the frozen protocol:
 1,290/1,290 native/profile pairs, three IC sources and eighteen rho configurations.
 [PR 761](https://github.com/aburan28/crypto/pull/761) merged the implementation at
@@ -21,9 +29,10 @@ verification. Selected challengers `stop6`, `stop5_word` and `stop7_word` all
 failed the 0.8 cold gates and/or familywise online rules. Altogether
 10,203/10,203 native/profile pairs were verified. Do not redispatch any of the
 three registered attempts or retune on their confirmation/replay points. The
-next registered comparison is
+next historical registered comparison was
 [generic-backend-qualification](generic-backend-qualification/README.md)
-(seed `2026092901`); its measurement is pending.
+(seed `2026092901`); its [censored result](generic-backend-qualification/RESULT.md)
+is terminal, as is the second registration described below.
 Canonical admission is merged in both drivers; the earlier
 [driver controls](driver-admission/README.md) preserve their fixed-vector scope.
 Public-point input and single-target native intervals are implemented in the
@@ -336,7 +345,14 @@ add full Python/interpreter/native binding, canonical registered JSON stdin,
 independent natural-query/matrix/log/target auditing and durable transport.
 The registered development intent uses the same exposed n17 point, fresh seed
 2026093031, node budget 8192, 512 ordinary/target attempt caps and a two-hour
-controller watchdog. Implementation controls do not establish an executed
-complete F5 solve. Freeze the accepted snapshot and commit its external
-preexecution receipt before the one permitted dispatch. Historical F5 and all
-three confirmation registrations remain closed.
+controller watchdog. [PR #1056](https://github.com/aburan28/crypto/pull/1056)
+accepted the controller; [PR #1058](https://github.com/aburan28/crypto/pull/1058)
+committed the external receipt before its single dispatch and retains the
+[terminal schema failure](f5-source-bound-runtime-v1/README.md). Native `Job`
+expects integer seeds or an empty list, but v1 submitted `[null]`. Parsing failed
+before IC execution. Independent failure/archive/source/invocation replay passed;
+mathematical costs, rank, targets and speedup remain unknown. This registration
+may not be retried, resumed or extended. A corrected version must pass the
+actual native deserialization contract and float-free deterministic audit
+publication controls before a new registration. Historical F5 and all three
+confirmation registrations remain closed.
