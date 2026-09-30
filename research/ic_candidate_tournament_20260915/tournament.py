@@ -33,6 +33,7 @@ ROOT = HERE.parents[1]
 UNIT = 'valgrind-3.22-amd64-Ir'
 STAGES = ['aa', 'smoke', 'development', 'selection', 'confirmation', 'replay']
 QUALIFICATION_STAGES = STAGES[:3]
+SMOKE_QUALIFICATION_STAGES = STAGES[:2]
 BASE_CONFIG = {'solver':'pair_table','linear_algebra':'sparse','batch_trials':64,
                'max_trials':4096,'summands':3}
 PHASES = {'startup_and_input','curve_and_targets','factor_base_and_tables',
@@ -273,8 +274,10 @@ def frozen_inputs(round_dir):
         require(digest(HERE/name)==expected,'changed evaluator or checker: '+name)
     fixtures, arms = read(round_dir/'fixtures.json'), read(round_dir/'candidates.json')
     rules = bounded_protocol(c)
+    qualification_stages = (SMOKE_QUALIFICATION_STAGES
+                            if c.get('qualification_schedule') == 'smoke' else QUALIFICATION_STAGES)
     if any(a.get('adapter') == 'generic-v1' for a in arms + c.get('reference_arms', [])):
-        require(((c['purpose'] == 'reference-qualification' and c['stages'] == QUALIFICATION_STAGES)
+        require(((c['purpose'] == 'reference-qualification' and c['stages'] == qualification_stages)
                  or (rules is bounded_v2 and c['stages'] == STAGES))
                 and c.get('execution_number_stride') == 2, 'generic pipeline lacks an accepted protocol')
     if rules:
@@ -293,7 +296,8 @@ def frozen_inputs(round_dir):
                     'unknown supplemental target exposure schema')
             history.verify_exposures(round_dir/'target-exposures', read(round_dir/'target-history.json'))
     if c.get('qualification_reference_schema') == 1:
-        require(c['purpose'] == 'reference-qualification' and c['stages'] == QUALIFICATION_STAGES
+        require(c['purpose'] == 'reference-qualification' and c['stages'] == qualification_stages
+                and c.get('qualification_schedule', 'full') in ('full', 'smoke')
                 and c['execution_number_stride'] == 2,
                 'invalid frozen qualification schedule')
         require(c['reference_qualification'] == bounded_v2.qualified_binding(
@@ -547,7 +551,13 @@ def prepare(args):
         online_reference['configuration_sha256'] = objhash(online_reference['config'])
         references.append(online_reference)
         reference_binding = rules.qualified_binding(read(out/'qualified-references.json'), arms[0], references)
-    stages = QUALIFICATION_STAGES if qualification else STAGES
+    qualification_schedule = getattr(args, 'qualification_schedule', 'full') if qualification else None
+    if qualification:
+        require(qualification_schedule in ('full', 'smoke'), 'unknown qualification schedule')
+        stages = (SMOKE_QUALIFICATION_STAGES if qualification_schedule == 'smoke'
+                  else QUALIFICATION_STAGES)
+    else:
+        stages = STAGES
     cpus = sorted(os.sched_getaffinity(0))
     cpu = args.cpu if args.cpu is not None else cpus[-1]
     require(cpu in cpus,'CPU outside permitted affinity')
@@ -712,6 +722,7 @@ def prepare(args):
         c['pinned_files']['qualification-protocol.md']=digest(out/'qualification-protocol.md')
     if frozen_qualification:
         c.update(qualification_reference_schema=1, target_exposure_schema=1,
+                 qualification_schedule=qualification_schedule,
                  fresh_target_count=history.validate_fresh(fixtures, excluded),
                  prior_rounds=prior_rounds,
                  target_uniqueness='Exact canonical curve ID plus public point; all sealed prior rounds and supplemental exposures excluded.')
@@ -724,6 +735,10 @@ def prepare(args):
         c['qualification_scope'] = ('fully charged instrumented pipelines with accepted observer binding'
             if versioned or frozen_qualification else
             'mixed prepared/generic instrumented pipelines; no observer or promotion qualification')
+        if qualification_schedule == 'smoke':
+            c['qualification_scope'] = (
+                'smoke-only fully charged instrumented pipelines with accepted observer binding; '
+                'no development stage, held-out confirmation, or familywise promotion')
     if bounded_run:
         protocol = HERE/('goal_20260924/improvement-v2/PROTOCOL.md' if versioned
                          else 'goal_20260924/improvement/PROTOCOL.md')
@@ -1410,6 +1425,8 @@ def main():
     p.add_argument('--profile',choices=['pilot','standard'],default='pilot')
     p.add_argument('--qualification',action='store_true',
         help='Run only A/A, smoke and development with matched rho references; never promote.')
+    p.add_argument('--qualification-schedule',choices=['full','smoke'],default='full',
+        help='full keeps A/A+smoke+development; smoke omits development for registered smoke panels.')
     p.add_argument('--qualification-protocol',type=Path,
         help='Registered protocol to freeze for a new development qualification panel.')
     p.add_argument('--attempt-number', type=int, default=0, help='Bounded goal round 1..3; zero keeps promotion disabled.')

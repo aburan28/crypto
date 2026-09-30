@@ -1,6 +1,7 @@
 {
   "freezes": [
     "research/notes/ecc2k130/compact_s3_batch_20260929/FROZEN.json",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json",
     "research/notes/ecc2k130/compact_swap_quotient_20260929/FROZEN.json"
   ],
   "schema": "compact-frozen-source-snapshots-v1",
@@ -10,6 +11,12 @@
       "gzip_sha256": "ae906875cad520e34f8f7aba0e0076ee84d52f7be1f251cb5035516ca22dd932",
       "path": ".github/workflows/compact-s3-batch.yml",
       "sha256": "8a1d24841733cc5913b570004543a8d7f1e5fdd3ce2f98267ba7924849184888"
+    },
+    {
+      "bytes": 5196,
+      "gzip_sha256": "fc5ddc62071f7fc7410a71e4bc8a1b42d1a14c067da48907837b6a14981c11b2",
+      "path": ".github/workflows/compact-s3-prefilter.yml",
+      "sha256": "29b154568920e1e5aeec0f1d86f63629a43dfd4624a0dfa2bea1d4f1c075893c"
     },
     {
       "bytes": 3933,
@@ -96,6 +103,12 @@
       "sha256": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa"
     },
     {
+      "bytes": 670128,
+      "gzip_sha256": "a3c46105f33606171cfea62a2f8de24c753051b2fac7c6d1d882d1e86dc21ed9",
+      "path": "src/cryptanalysis/koblitz_index_calculus.rs",
+      "sha256": "22b3601a082e706abf709a9798823a21d6748f84b47647cdfe6a7fcc1c73382c"
+    },
+    {
       "bytes": 669217,
       "gzip_sha256": "e5bfdb9eeaeff3e2145a920f8f6e2dbb5f2aff77c06f7965c6be106dd01230ee",
       "path": "src/cryptanalysis/koblitz_index_calculus.rs",
@@ -112,6 +125,12 @@
       "gzip_sha256": "4da43a8e504e117980f95b2bd19c924520615f1c6b76b74a633ef03ab45f1d46",
       "path": "src/lib.rs",
       "sha256": "f1e13bc7fa51ff57dd4cd056036669577d1f07a0cb06502b4b839b9af50ffba6"
+    },
+    {
+      "bytes": 15277,
+      "gzip_sha256": "09e90796796898948f24926ca79b35775deaa57417884ee11eea328befd54e86",
+      "path": "tools/isolated_bench.py",
+      "sha256": "4575860a5da9a6a6e997b91fc173ac515a2497290c0e830301c83fa3b712c05c"
     }
   ],
   "source_commit": "f84e6193a5b33b939b5dfa8934852a4115a6f1fd"

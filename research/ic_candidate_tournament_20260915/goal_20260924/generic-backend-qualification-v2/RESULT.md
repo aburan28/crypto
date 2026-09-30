@@ -56,11 +56,11 @@ static finding is separate from this censoring event and does not substitute
 for measured family qualification.
 
 Do not dispatch seed `2026092902` again. Treat all 25 points in
-[lost-campaign-exposures.json](lost-campaign-exposures.json) as exposed together
-with every public point this registration could have reached once reconstructed
-(prepare replay at the pinned checkout), even though no bundle was uploaded.
+[lost-campaign-exposures.json](lost-campaign-exposures.json) and all 25 points
+in [lost-v2-campaign-exposures.json](lost-v2-campaign-exposures.json)
+(SHA-256 `0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54`;
+see [V2-EXPOSURE-RECONSTRUCTION.md](V2-EXPOSURE-RECONSTRUCTION.md)) as exposed.
 A new campaign needs a new frozen panel and seed, exclusion of all three sealed
-improvement archives, the 25 lost first-run points, and every point from this
-second dispatch, plus packaging that quiesces or excludes live callgrind trees
-before `tar` runs. Neither the sealed improvement confirmation sets nor this
-interrupted run can be used as a favourable retry.
+improvement archives, both lost corpora, and packaging that quiesces or excludes
+live callgrind trees before `tar` runs. Neither the sealed improvement
+confirmation sets nor this interrupted run can be used as a favourable retry.

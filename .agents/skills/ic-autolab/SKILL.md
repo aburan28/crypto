@@ -44,6 +44,48 @@ modules, retain every executed source, and pass complete-source replay before
 measurement. Never update an old manifest or disable its live source gate to
 accommodate new tournament code.
 
+The next static SAT controller is
+[`static_sat_pipeline_v3.py`](../../../research/ic_candidate_tournament_20260915/static_sat_pipeline_v3.py),
+with its [source/input protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/static-sat-runtime-v3/PROTOCOL.md).
+Use `static_sat_registration_v3.py` to freeze the full Python/interpreter and
+native inputs before deriving candidate/workload identities. Execute only the
+externally sealed invocation from its read-only snapshot; use
+`audit_static_sat_full_v3.py` for independent rows, rank, source models and scalar
+replay. All native children inherit the controller watchdog group and carry
+isolated pre/post source gates. The adapter currently admits development
+controls on the accepted macOS ARM64 build; it rejects fresh-paired qualification
+until the exposure/reference/calibration adapter is reviewed. The one-query
+native smoke and a full source-bound development solve are separate gates.
+Exact-oracle mathematical tests and portable C watchdog controls do not establish
+SAT yield or family qualification. Keep all three confirmation rounds closed.
+
+The [F4/F5 v1 protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v1/PROTOCOL.md)
+is closed: its single invocation in PR #1058 failed native JSON parsing before
+any IC query. It conflated the empty `Vec<u64>` input seed list with the output
+fixture's `[null]` provenance. Preserve its failure/source/transport receipts;
+never retry, resume or extend that registration. Its scalar, rank, scientific
+costs and speedup remain unknown.
+
+The corrected controller is
+[`f5_runtime_pipeline_v2.py`](../../../research/ic_candidate_tournament_20260915/f5_runtime_pipeline_v2.py),
+with its [new one-shot development protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/PROTOCOL.md).
+The actual pinned native `Job`/`Config` deserialization control and float-free
+audit-publication controls must pass and be retained before a new registration.
+Use `f5_runtime_inputs_v1.py` for unchanged reusable native assets and
+`f5_runtime_registration_v2.py` for the complete new Python/interpreter/native
+binding. Input seeds are empty for the supplied point; fixture provenance stays
+`[null]`. `audit_f5_runtime_v2.py` verifies natural attempts, observed dispatch,
+matrix/log/target certificates and timing closure. Resource seconds serialize as
+decimal strings, with the unchanged raw metrics file hashed and retained;
+integer scientific clocks are preserved. Use `publish_f5_runtime_v2.py` for
+complete-controller records including native timeouts with unknown math, and
+the v3 failure publisher for partial/failed controllers. Merge the accepted
+adapter and controls, freeze its source, commit the external receipt, then
+execute its distinct prospective registration once. These bounded Macaulay/F5
+row-criterion engines are not full incremental Gröbner-basis implementations.
+Controls and source binding do not establish complete-family admission or fresh
+paired qualification. All three confirmation sets stay closed.
+
 Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use a versioned runner for the intended unexecuted round; the round-one wrapper is historical, and generic pilot defaults do not implement the goal protocol. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass and an accepted, versioned reference binding is committed.
 
 
@@ -131,9 +173,12 @@ and 250 paired trial slots. The runner is
 measure step timeout at 300 minutes, `pack_partial_campaign.py` failed while
 callgrind files were still mutating, and GitHub uploaded zero campaign bundle.
 Never dispatch seed `2026092902` again. PR preflight and artifact-upload smoke
-passed; that does not substitute for retained receipts. Register a new panel
-and exclude all potentially generated points from this run (prepare replay at
-the pinned checkout) before any later measurement. Without a bundle, do not run
+passed; that does not substitute for retained receipts. The reconstructed
+second-run exposure census is
+[lost-v2-campaign-exposures.json](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/lost-v2-campaign-exposures.json)
+(SHA-256 `0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54`;
+[V2-EXPOSURE-RECONSTRUCTION.md](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/V2-EXPOSURE-RECONSTRUCTION.md)).
+Register a new panel and exclude both lost corpora before any later measurement. Without a bundle, do not run
 `generic_backend_gate_v2.py` or
 [independent_pairs.py](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/independent_pairs.py)
 as if qualification were established. The post-registration
@@ -149,7 +194,15 @@ points at `max_trials=1` and `node_budget=4096`, with zero accepted relations.
 [`run-20260929`](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-f4-subspace-pilot/run-20260929/RESULT.md)
 is a same-budget replay of that series, not a new registration, and
 `run_pilot.py` refuses another dispatch. Do not rerun this budget or treat it
-as family qualification. Before any new algebraic panel generates fresh targets, run
+as family qualification. The next planned registration is
+[generic-backend-qualification-v3](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v3/PROTOCOL.md)
+(seed `2026093001`, panel SHA-256
+`df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`,
+`standard_subspace` dimension 6, F4/F5 only, SAT deferred). Its runner
+`run_generic_backend_qualification_v3.py` and workflow authorize one
+`workflow_dispatch` campaign with the frozen 180/35/240 minute caps on the
+smoke schedule. Measurement stays `not_run` until that single job runs.
+Never sample points outside that path, and never retry after dispatch. Before any new algebraic panel generates fresh targets, run
 `generic_solver_feasibility.py --require-pass` against its exact worker source
 checkout and registered panel. A static pass is only an encoder preflight:
 also pilot actual dispatch and natural failed-attempt accounting on disclosed
