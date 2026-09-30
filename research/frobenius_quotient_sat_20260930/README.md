@@ -94,6 +94,18 @@ degree 13.
 | 13, 300 s | planted | 4/4; 176 s | 4/4; 674 s | 4/4; 164 s | 4/4; 299 s | 4/4; 160 s | 4/4; 226 s |
 | 13, 300 s | random | 4/4; 285 s | 3/4; 611 s | 4/4; 131 s | 4/4; 175 s | 4/4; 138 s | 4/4; 529 s |
 
+At n = 19 the factor space holds 22 valid representatives, giving 418
+admissible x-coordinates. The two fastest n = 13 models were then given a
+longer budget on 4 planted targets. All 4 targets are decomposable (checked
+exhaustively).
+
+| n, budget | targets | subgroup_xor | line_subgroup |
+|---|---|---|---|
+| 19, 1200 s | planted | 0/4; 4921 s | 0/4; 4910 s |
+
+Each n = 19 model has about 7.5k variables and 5.4k AND gates, against 3.6k
+and 2.5k at n = 13.
+
 Tuples proposed and rejected by the curve check (300 s, n = 13, phases, summed
 over all 8 targets):
 
@@ -122,8 +134,24 @@ over all 8 targets):
   certificate the two are within noise; without it `line_xor` was faster on
   random targets and slower on planted ones.
 
+- **Degree 19 is out of reach at these budgets.** With phases unknown, n = 13
+  planted targets finish in a median of about 50 s. At n = 19, none of 8
+  planted attempts finishes in 1200 s. That is at least a 24× increase for
+  6 more field bits, from one lower-bounded sample per cell. Without phases,
+  n = 19 planted attempts also time out at 300 s.
+
+## Degree 29: not attempted
+
+The note identifies n = 29 as the first informative sparse control, where
+about 8% of target/label cases are compatible. No SAT solve was attempted
+there, because the n = 19 planted instances already exceed 1200 s. A run at
+n = 29 at comparable budgets would only record timeouts, which are not
+evidence about the formulation. Revisit when an n = 19 planted instance
+solves, either at a longer budget (resume with `--resume --budget ...`) or
+with a better encoding.
+
 ## Not measured
 
 Relation-matrix rank, Groebner solving degree, repeated timing trials, and
-end-to-end discrete-log cost were not measured. Degree 29 has not been
-attempted yet.
+end-to-end discrete-log cost were not measured. The representative-only
+n = 19, 300 s grid is partial (12 of 48 attempts) and can be resumed.
