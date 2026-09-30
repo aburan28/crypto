@@ -18,7 +18,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: ic-bounded-improvement-round3
+  # Correctness controls are independent per PR. The push-triggered measured
+  # round retains its original serialized group and its one-shot guard.
+  group: ${{ github.event_name == 'pull_request' && format('ic-bounded-improvement-round3-pr-{0}', github.event.pull_request.number) || 'ic-bounded-improvement-round3' }}
   cancel-in-progress: false
 
 jobs:
