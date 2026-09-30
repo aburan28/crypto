@@ -10321,6 +10321,104 @@ pub struct IndividualLogSolver<'a> {
     fast: Option<(FastCurve, FastPoint)>,
     h: BigUint,
     r_u64: u64,
+    /// The walks' stride and its multiples `[j·stride]G`, `j = 1..WALKS`,
+    /// built once so every target's starts are one batched addition.
+    /// Empty without the single-word curve.
+    stride: u64,
+    stride_multiples: Vec<FastPoint>,
+    /// The relation's arithmetic modulo `r` in machine words, when `r`
+    /// fits one.
+    word: Option<WordRelation>,
+}
+
+/// Walks a walked descent steps together (see
+/// [`IndividualLogSolver::solve_by_walking`]).
+const DESCENT_WALKS: usize = 64;
+
+/// What turning a descent relation into `d` needs, as machine words:
+/// `r`, `h mod r`, `λᵏ mod r` for every Frobenius power a column can carry,
+/// and each column's logarithm.  Every quantity is below `r < 2⁶³`, so a
+/// product fits a `u128`.
+struct WordRelation {
+    r: u64,
+    h: u64,
+    lambda_pow: Vec<u64>,
+    column_log: Vec<u64>,
+}
+
+impl WordRelation {
+    fn new(kc: &KoblitzCurve, column_log: &[BigUint]) -> Option<Self> {
+        let r_big = &kc.subgroup_order;
+        if r_big.bits() > 63 {
+            return None;
+        }
+        let word = |v: &BigUint| v.to_u64_digits().first().copied().unwrap_or(0);
+        let r = word(r_big);
+        let lambda = word(&(&kc.lambda % r_big));
+        let mut lambda_pow = Vec::with_capacity(kc.n as usize);
+        let mut power = 1 % r;
+        for _ in 0..kc.n {
+            lambda_pow.push(power);
+            power = mul_mod_u64(power, lambda, r);
+        }
+        Some(Self {
+            r,
+            h: word(&(&kc.cofactor % r_big)),
+            lambda_pow,
+            column_log: column_log.iter().map(word).collect(),
+        })
+    }
+
+    /// `d` with `Σ ±λᵏ·x_o − h·a ≡ h·b·d (mod r)`, or `None` when `h·b`
+    /// is not invertible — the relation
+    /// [`relation_from_decomposition_with_mode`] builds and the solver
+    /// used to reduce in big integers, summed column by column.
+    fn logarithm(
+        &self,
+        projected: &ProjectedSignedOrbitMap,
+        idxs: &[usize],
+        a: u64,
+        b: u64,
+    ) -> Option<u64> {
+        let r = self.r;
+        let mut sum = 0u64;
+        for &i in idxs {
+            let Some((o, k, negated)) = projected.orbit_of[i] else {
+                // [h]P = O: the summand contributes nothing.
+                continue;
+            };
+            let mut coeff = self.lambda_pow[k as usize];
+            if negated && coeff != 0 {
+                coeff = r - coeff;
+            }
+            sum = add_mod_u64(sum, mul_mod_u64(coeff, self.column_log[o], r), r);
+        }
+        let ha = mul_mod_u64(self.h, a % r, r);
+        let numerator = add_mod_u64(sum, r - ha, r);
+        let hb = mul_mod_u64(self.h, b % r, r);
+        Some(mul_mod_u64(numerator, inverse_mod_u64(hb, r)?, r))
+    }
+}
+
+fn mul_mod_u64(a: u64, b: u64, m: u64) -> u64 {
+    ((a as u128 * b as u128) % m as u128) as u64
+}
+
+fn add_mod_u64(a: u64, b: u64, m: u64) -> u64 {
+    ((a as u128 + b as u128) % m as u128) as u64
+}
+
+/// `a⁻¹ mod m` by the extended Euclidean algorithm, or `None` when
+/// `gcd(a, m) ≠ 1`.
+fn inverse_mod_u64(a: u64, m: u64) -> Option<u64> {
+    let (mut old_r, mut r) = (a as i128 % m as i128, m as i128);
+    let (mut old_s, mut s) = (1i128, 0i128);
+    while r != 0 {
+        let q = old_r / r;
+        (old_r, r) = (r, old_r - q * r);
+        (old_s, s) = (s, old_s - q * s);
+    }
+    (old_r == 1).then(|| old_s.rem_euclid(m as i128) as u64)
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -10391,6 +10489,24 @@ impl<'a> IndividualLogSolver<'a> {
             let g = fc.lift(kc.generator());
             (fc, g)
         });
+        let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+        // Walks must not tread on each other, so they start one stride
+        // apart on the same line (see `solve_by_walking`).
+        let stride = (r_u64 / DESCENT_WALKS as u64).max(1 << 20);
+        let stride_multiples = match &fast {
+            Some((fc, g)) => {
+                let step = fc.mul_u64(*g, stride);
+                let mut multiples = Vec::with_capacity(DESCENT_WALKS - 1);
+                let mut current = step;
+                for _ in 1..DESCENT_WALKS {
+                    multiples.push(current);
+                    current = fc.add(current, step);
+                }
+                multiples
+            }
+            None => Vec::new(),
+        };
+        let word = WordRelation::new(kc, &column_log);
         Some(Self {
             kc,
             fb,
@@ -10402,8 +10518,68 @@ impl<'a> IndividualLogSolver<'a> {
             field: FieldStructure::new(kc.n, &kc.curve.irreducible),
             fast,
             h: &kc.cofactor % r,
-            r_u64: r.to_u64_digits().first().copied().unwrap_or(1).max(2),
+            r_u64,
+            stride,
+            stride_multiples,
+            word,
         })
+    }
+
+    /// The 64 walks' starting points: `start + [j·stride]G` for
+    /// `j = 0..64`, the first given, the rest by one batched addition to
+    /// the precomputed multiples — one inversion where adding the stride
+    /// 63 times, one point after another, paid 63.  The points are the
+    /// ones the sequential sums reach, so every walk starts where it did.
+    fn walk_starts(
+        &self,
+        fc: &FastCurve,
+        start: FastPoint,
+        scratch: &mut BatchScratch,
+    ) -> Vec<FastPoint> {
+        let mut states = Vec::with_capacity(DESCENT_WALKS);
+        states.push(start);
+        fc.add_many(start, &self.stride_multiples, &mut states, scratch);
+        states
+    }
+
+    /// `d` from a decomposition of `[a]G + [b]Q`, in machine words when
+    /// `r` fits one, else in big integers.
+    fn relation_logarithm(&self, idxs: &[usize], a: u64, b: u64) -> Option<BigUint> {
+        if let Some(word) = &self.word {
+            return word
+                .logarithm(self.projected.as_ref(), idxs, a, b)
+                .map(BigUint::from);
+        }
+        self.relation_logarithm_big(idxs, a, b)
+    }
+
+    /// The same `d` in big-integer arithmetic: the relation row over the
+    /// projected columns, its dot product with the column logarithms and
+    /// a modular inverse.
+    fn relation_logarithm_big(&self, idxs: &[usize], a: u64, b: u64) -> Option<BigUint> {
+        let kc = self.kc;
+        let r = &kc.subgroup_order;
+        let (a, b) = (BigUint::from(a), BigUint::from(b));
+        let relation = relation_from_decomposition_with_mode(
+            kc,
+            self.fb,
+            idxs,
+            &a,
+            &b,
+            self.opts.collapse_negation,
+            Some(self.projected.as_ref()),
+        );
+        // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
+        let mut sum = BigUint::zero();
+        for (coeff, log) in relation.row.iter().zip(&self.column_log) {
+            if !coeff.is_zero() {
+                sum = (sum + coeff * log) % r;
+            }
+        }
+        let ha = (&self.h * &a) % r;
+        let numerator = (sum + r - ha) % r;
+        let hb = (&self.h * &b) % r;
+        Some((numerator * mod_inverse(&hb, r)?) % r)
     }
 
     /// Draw one query and preserve the frontend's verdict, including identity queries.
@@ -10461,33 +10637,23 @@ impl<'a> IndividualLogSolver<'a> {
 
     /// Turn a decomposition of `[a]G + [b]Q` into the logarithm, or
     /// `None` when this relation cannot give one.
-    fn logarithm_from(&self, q: &BinaryPoint, idxs: &[usize], a: u64, b: u64) -> Option<BigUint> {
+    ///
+    /// The recovery check `[d]G = Q` is made in the single-word
+    /// arithmetic the walk already uses; the caller's own final
+    /// verification is independent of it.
+    fn logarithm_from(
+        &self,
+        fc: &FastCurve,
+        g: FastPoint,
+        q_fast: FastPoint,
+        idxs: &[usize],
+        a: u64,
+        b: u64,
+    ) -> Option<BigUint> {
         let _descent = measurement::scope(Phase::TargetDescent);
-        let kc = self.kc;
-        let r = &kc.subgroup_order;
-        let (a, b) = (BigUint::from(a), BigUint::from(b));
-        let relation = relation_from_decomposition_with_mode(
-            kc,
-            self.fb,
-            idxs,
-            &a,
-            &b,
-            self.opts.collapse_negation,
-            Some(self.projected.as_ref()),
-        );
-        // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
-        let mut sum = BigUint::zero();
-        for (coeff, log) in relation.row.iter().zip(&self.column_log) {
-            if !coeff.is_zero() {
-                sum = (sum + coeff * log) % r;
-            }
-        }
-        let ha = (&self.h * &a) % r;
-        let numerator = (sum + r - ha) % r;
-        let hb = (&self.h * &b) % r;
-        let d = (numerator * mod_inverse(&hb, r)?) % r;
+        let d = self.relation_logarithm(idxs, a, b)?;
         let _replay = measurement::scope(Phase::RecoveryCheck);
-        (kc.mul(kc.generator(), &d) == *q).then_some(d)
+        (fc.mul(g, &d) == q_fast).then_some(d)
     }
 
     /// **Walk the probes instead of drawing them.**
@@ -10511,32 +10677,28 @@ impl<'a> IndividualLogSolver<'a> {
         let pair = self.pair?;
         let m = self.descent_m();
         let q_fast = fc.lift(q);
-        const WALKS: usize = 64;
         // Walks must not tread on each other, so they start one stride
         // apart on the same line and each is stepped by G.  Building
-        // them that way costs three scalar multiplications and 63
-        // additions, where drawing each start costs two scalar
-        // multiplications apiece — which on a walk of a few hundred
-        // rounds is most of the descent.
-        let stride = (self.r_u64 / WALKS as u64).max(1 << 20);
+        // them that way costs two scalar multiplications and one batched
+        // addition of the precomputed stride multiples, where drawing
+        // each start costs two scalar multiplications apiece — which on
+        // a walk of a few hundred rounds is most of the descent.
+        let stride = self.stride;
         let mut rng = StdRng::seed_from_u64(self.opts.seed ^ 0x57_41_4c_4b_44_45_53_00);
         let a0 = rng.gen_range(1..self.r_u64);
         let b = rng.gen_range(1..self.r_u64);
-        let stride_point = fc.mul_u64(*g, stride);
-        let mut coefficients: Vec<(u64, u64)> = Vec::with_capacity(WALKS);
-        let mut states: Vec<FastPoint> = Vec::with_capacity(WALKS);
-        let mut state = fc.add(fc.mul_u64(*g, a0), fc.mul_u64(q_fast, b));
+        let mut scratch = BatchScratch::default();
+        let start = fc.add(fc.mul_u64(*g, a0), fc.mul_u64(q_fast, b));
+        let mut states = self.walk_starts(fc, start, &mut scratch);
+        let mut coefficients: Vec<(u64, u64)> = Vec::with_capacity(DESCENT_WALKS);
         let mut a = a0;
-        for _ in 0..WALKS {
+        for _ in 0..DESCENT_WALKS {
             coefficients.push((a, b));
-            states.push(state);
-            state = fc.add(state, stride_point);
             a = (a + stride) % self.r_u64;
         }
-        let mut advanced = Vec::with_capacity(WALKS);
-        let mut lambdas: Vec<u64> = Vec::with_capacity(WALKS);
-        let mut scratch = BatchScratch::default();
-        let mut keys: Vec<u64> = Vec::with_capacity(WALKS);
+        let mut advanced = Vec::with_capacity(DESCENT_WALKS);
+        let mut lambdas: Vec<u64> = Vec::with_capacity(DESCENT_WALKS);
+        let mut keys: Vec<u64> = Vec::with_capacity(DESCENT_WALKS);
         while report.trials < self.opts.max_trials {
             // Key every state of the round first and prefetch its filter
             // word, so the 64 probes' cache misses overlap instead of
@@ -10594,7 +10756,7 @@ impl<'a> IndividualLogSolver<'a> {
                 let Some(idxs) = pdp.points else {
                     continue;
                 };
-                if let Some(d) = self.logarithm_from(q, &idxs, *a, *b) {
+                if let Some(d) = self.logarithm_from(fc, *g, q_fast, &idxs, *a, *b) {
                     report.relation = Some(DescentRelation {
                         a: *a,
                         b: *b,
@@ -10702,39 +10864,13 @@ impl<'a> IndividualLogSolver<'a> {
                 None => continue,
             };
             measurement::mark(Phase::TargetDescent);
-            let a = BigUint::from(a);
-            let b = BigUint::from(b);
-            let relation = relation_from_decomposition_with_mode(
-                kc,
-                self.fb,
-                &idxs,
-                &a,
-                &b,
-                self.opts.collapse_negation,
-                Some(self.projected.as_ref()),
-            );
-            // Σ_o c_o x_o − h·a ≡ h·b·d (mod r).
-            let mut sum = BigUint::zero();
-            for (coeff, log) in relation.row.iter().zip(&self.column_log) {
-                if !coeff.is_zero() {
-                    sum = (sum + coeff * log) % r;
-                }
-            }
-            let ha = (&self.h * &a) % r;
-            let numerator = (sum + r - ha) % r;
-            let hb = (&self.h * &b) % r;
-            let Some(hb_inv) = mod_inverse(&hb, r) else {
+            let Some(d) = self.relation_logarithm_big(&idxs, a, b) else {
                 continue;
             };
-            let d = (numerator * hb_inv) % r;
             measurement::mark(Phase::RecoveryCheck);
             if kc.mul(g, &d) == *q {
                 report.log = Some(d.clone());
-                report.relation = Some(DescentRelation {
-                    a: a.to_u64_digits()[0],
-                    b: b.to_u64_digits()[0],
-                    points: idxs,
-                });
+                report.relation = Some(DescentRelation { a, b, points: idxs });
                 return report;
             }
             // A non-matching d means this factor base cannot place Q in the
@@ -11552,6 +11688,142 @@ mod tests {
             solver.solve(&BinaryPoint::Infinity).unwrap().0,
             BigUint::zero()
         );
+    }
+
+    /// A descent solver over `fb` whose column logarithms are arbitrary
+    /// residues: enough to compare two ways of doing the same arithmetic,
+    /// at any size, without solving the base.
+    fn solver_with_arbitrary_logs<'a>(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+        pair: &'a PairSumTable,
+        seed: u64,
+    ) -> IndividualLogSolver<'a> {
+        let mut rng = StdRng::seed_from_u64(seed);
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let table = FactorBaseLogTable {
+            columns: projected_signed_orbit_map(kc, fb)
+                .representatives
+                .iter()
+                .map(|p| (p.clone(), BigUint::from(rng.gen_range(0..r))))
+                .collect(),
+        };
+        IndividualLogSolver::new(kc, fb, &table, opts, Some(pair)).expect("a solver")
+    }
+
+    /// Ledger §22: the batched walk starts are the sequential sums, the
+    /// relation's machine-word arithmetic gives the big-integer `d`, and
+    /// the single-word recovery check agrees with the general one — so a
+    /// descent walks, tries and recovers exactly as it did.
+    #[test]
+    fn descent_starts_and_word_relations_match_the_general_arithmetic() {
+        let mut checked = 0;
+        for (a, n, points) in [
+            (1u8, 19u32, 304usize),
+            (1, 23, 368),
+            (0, 37, 592),
+            (0, 41, 1200),
+            (0, 53, 1200),
+            (0, 61, 1200),
+        ] {
+            let kc = KoblitzCurve::new(a, n).expect("curve");
+            let fc = FastCurve::new(&kc.curve).expect("single word");
+            let g = fc.lift(kc.generator());
+            let fb = build_subgroup_orbit_factor_base(&kc, 7, points).expect("base");
+            let pair =
+                PairSumTable::build_folded_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)
+                    .expect("pair table");
+            let opts = KoblitzIcOptions {
+                m: 3,
+                descent_m: Some(2),
+                strategy: DecompositionStrategy::PairTable,
+                collapse_negation: true,
+                collapse_projected_orbits: true,
+                ..KoblitzIcOptions::default()
+            };
+            let solver = solver_with_arbitrary_logs(&kc, &fb, &opts, &pair, u64::from(n));
+            assert!(solver.word.is_some(), "{}: r fits a word", kc.label());
+            let r = kc.subgroup_order.to_u64_digits()[0];
+            let mut rng = StdRng::seed_from_u64(0x5eed ^ u64::from(n));
+            let mut scratch = BatchScratch::default();
+            for _ in 0..40 {
+                // The starts, batched and one after another.
+                let start = fc.mul_u64(g, rng.gen_range(1..r));
+                let batched = solver.walk_starts(&fc, start, &mut scratch);
+                let step = fc.mul_u64(g, solver.stride);
+                let mut sequential = Vec::with_capacity(DESCENT_WALKS);
+                let mut state = start;
+                for _ in 0..DESCENT_WALKS {
+                    sequential.push(state);
+                    state = fc.add(state, step);
+                }
+                assert_eq!(batched, sequential, "{}: walk starts", kc.label());
+
+                // A relation over two or three base points, both ways.
+                let idxs: Vec<usize> = (0..rng.gen_range(2..=3))
+                    .map(|_| rng.gen_range(0..fb.points.len()))
+                    .collect();
+                let (a, b) = (rng.gen_range(0..r), rng.gen_range(0..r));
+                assert_eq!(
+                    solver.relation_logarithm(&idxs, a, b),
+                    solver.relation_logarithm_big(&idxs, a, b),
+                    "{}: d from {idxs:?}",
+                    kc.label()
+                );
+
+                // The recovery check, single-word against general.
+                let d = BigUint::from(rng.gen_range(0..r));
+                let q = kc.mul(kc.generator(), &BigUint::from(rng.gen_range(0..r)));
+                for candidate in [d, BigUint::from(0u8)] {
+                    assert_eq!(
+                        fc.mul(g, &candidate) == fc.lift(&q),
+                        kc.mul(kc.generator(), &candidate) == q
+                    );
+                }
+                checked += 1;
+            }
+            // b = 0 makes h·b non-invertible in both.
+            assert_eq!(solver.relation_logarithm(&[0, 1], 5, 0), None);
+            assert_eq!(solver.relation_logarithm_big(&[0, 1], 5, 0), None);
+        }
+        assert_eq!(checked, 240);
+        assert_eq!(inverse_mod_u64(0, 7), None);
+        assert_eq!(inverse_mod_u64(3, 7), Some(5));
+        assert_eq!(inverse_mod_u64(6, 9), None);
+    }
+
+    /// Ledger §22: a real descent over solved logarithms still recovers
+    /// every target, and recovers it after the same trials whichever
+    /// arithmetic turns its relation into `d`.
+    #[test]
+    fn descent_recovers_the_same_logarithm_after_the_same_trials() {
+        for (a, n) in [(0u8, 9u32), (1, 11)] {
+            let Some(kc) = KoblitzCurve::new(a, n) else {
+                continue;
+            };
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let opts = KoblitzIcOptions {
+                m: 2,
+                strategy: DecompositionStrategy::PairTable,
+                ..KoblitzIcOptions::default()
+            };
+            let (table, _) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
+            let pair = PairSumTable::build(&kc, &fb).unwrap();
+            let words = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+            let mut big = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+            big.word = None;
+            let r = kc.subgroup_order.to_u64_digits()[0];
+            for d in (1..r).step_by(((r / 40) as usize).max(1)) {
+                let d = BigUint::from(d);
+                let q = kc.mul(kc.generator(), &d);
+                let (found, report) = words.solve(&q).expect("descends");
+                let (found_big, report_big) = big.solve(&q).expect("descends");
+                assert_eq!(found, d);
+                assert_eq!(found_big, d);
+                assert_eq!(report.trials, report_big.trials);
+            }
+        }
     }
 
     #[test]
