@@ -146,9 +146,12 @@ and 250 paired trial slots. The runner is
 measure step timeout at 300 minutes, `pack_partial_campaign.py` failed while
 callgrind files were still mutating, and GitHub uploaded zero campaign bundle.
 Never dispatch seed `2026092902` again. PR preflight and artifact-upload smoke
-passed; that does not substitute for retained receipts. Register a new panel
-and exclude all potentially generated points from this run (prepare replay at
-the pinned checkout) before any later measurement. Without a bundle, do not run
+passed; that does not substitute for retained receipts. The reconstructed
+second-run exposure census is
+[lost-v2-campaign-exposures.json](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/lost-v2-campaign-exposures.json)
+(SHA-256 `0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54`;
+[V2-EXPOSURE-RECONSTRUCTION.md](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/V2-EXPOSURE-RECONSTRUCTION.md)).
+Register a new panel and exclude both lost corpora before any later measurement. Without a bundle, do not run
 `generic_backend_gate_v2.py` or
 [independent_pairs.py](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/independent_pairs.py)
 as if qualification were established. The post-registration
