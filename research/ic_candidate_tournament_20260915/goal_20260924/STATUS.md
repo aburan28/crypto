@@ -283,3 +283,45 @@ same budget (build SHA-256
 summary SHA-256
 `04230b42ce3a6392b9a2681ac7ab385e43db41aba5e2617466597246a65a2e4c`).
 It does not replace `RESULT.md`. `run_pilot.py` is closed.
+
+## September 30 family-admission gates
+
+The active goal is to admit at least one complete source-bound one-target
+F4/F5 pipeline and one SAT pipeline, audit natural query yield and failed
+attempts, then compare them with the incumbent and matched rho on fresh
+paired points. The three confirmation rounds above stay closed. These family
+gates do not redefine their objective, references, accounting or results.
+
+The [retrospective F5 audit](f5-closed-diagnostics-20260930/README.md), accepted
+in [PR #1046](https://github.com/aburan28/crypto/pull/1046), preserves the closed
+256-query run: 61 witnesses, 195 budget-exhausted attempts and rank 28/29,
+without a target recovery or verified online cost. Its two lost feasible
+queries led to separate correctness controls. The
+[Boolean/root-matrix control](f5-boolean-system-control-20260930/README.md),
+accepted in [PR #1048](https://github.com/aburan28/crypto/pull/1048), verifies
+exact ANF encoding and full-readback root row spaces. The follow-on
+[production-path control](f5-production-path-control-20260930/README.md)
+was preregistered in [PR #1050](https://github.com/aburan28/crypto/pull/1050);
+[PR #1052](https://github.com/aburan28/crypto/pull/1052) retains its single
+passing native execution, 840 independently checked substitutions and exact
+F4/F5 decisive sets on 66 unique disclosed systems. These guided controls do
+not estimate natural yield, verify actual recursive search traversal or admit
+a complete F4/F5 IC family.
+
+The full SAT development protocol was accepted in
+[PR #1036](https://github.com/aburan28/crypto/pull/1036), with the controller
+and failure-retention path accepted in PRs
+[#1031](https://github.com/aburan28/crypto/pull/1031) and
+[#1042](https://github.com/aburan28/crypto/pull/1042).
+[PR #1051](https://github.com/aburan28/crypto/pull/1051) records its accepted
+snapshot and complete invocation before dispatch, and tracks execution and
+terminal evidence. It fixes one exposed n17 point, 256 ordinary queries,
+64 target attempts and a two-hour controller watchdog, with no retry or
+extension. That bounded macOS ARM64 control establishes no calibrated speedup
+or fresh-target qualification, even if it recovers the point's scalar.
+
+The next competitive gate requires complete family admission, the reviewed
+exposure/reference/calibration adapter, fresh points excluding every exposure,
+matched resource envelopes and arm order, and strong one-target rho and
+incumbent references. Development progress or a cheap PDP stage cannot replace
+that independent paired comparison.
