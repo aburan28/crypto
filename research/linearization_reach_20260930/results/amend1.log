@@ -1,0 +1,33 @@
+{"n": 13, "l": 3, "b": 3, "trials": 30000, "consistent_solves": 1558, "family_points_hist": {"0": 1431, "2": 105, "1": 21, "3": 1}, "enum_success": 91, "struct_success": 89, "disagreements": 0, "algebra_mismatch": 0, "max_combos": 8, "noncanonical_solves": 46}
+{"n": 13, "l": 4, "b": 2, "trials": 30000, "consistent_solves": 5953, "family_points_hist": {"0": 5758, "1": 177, "2": 18}, "enum_success": 164, "struct_success": 122, "disagreements": 0, "algebra_mismatch": 0, "max_combos": 4, "noncanonical_solves": 797}
+{"n": 17, "l": 4, "b": 3, "trials": 40000, "consistent_solves": 2279, "family_points_hist": {"0": 2254, "1": 16, "2": 9}, "enum_success": 22, "struct_success": 22, "disagreements": 0, "algebra_mismatch": 0, "max_combos": 8, "noncanonical_solves": 84}
+{"n": 17, "l": 5, "b": 2, "trials": 40000, "consistent_solves": 4594, "family_points_hist": {"0": 4553, "1": 36, "2": 5}, "enum_success": 35, "struct_success": 31, "disagreements": 0, "algebra_mismatch": 0, "max_combos": 2, "noncanonical_solves": 275}
+{"n": 19, "l": 5, "b": 2, "trials": 40000, "consistent_solves": 1192, "family_points_hist": {"0": 1185, "1": 7}, "enum_success": 7, "struct_success": 7, "disagreements": 0, "algebra_mismatch": 0, "max_combos": 1, "noncanonical_solves": 17}
+{"n": 23, "l": 6, "b": 2, "trials": 40000, "consistent_solves": 614, "family_points_hist": {"0": 613, "1": 1}, "enum_success": 1, "struct_success": 1, "disagreements": 0, "algebra_mismatch": 0, "max_combos": 1, "noncanonical_solves": 8}
+{
+ "A1_low": {
+  "cells": 17,
+  "min_frac": 0.935
+ },
+ "A1_high": {
+  "cells": 10,
+  "min_frac": 1.0
+ },
+ "A1": true,
+ "A2": {
+  "solves": 16190,
+  "frac_le2": 0.9999382334774553,
+  "pass_": true
+ },
+ "A3": {
+  "disagreements": 0,
+  "noncanonical_solves": 1227,
+  "consistent_solves": 16190,
+  "algebra_mismatch": 0,
+  "pass_": true
+ }
+}
+
+real	2m44.251s
+user	2m42.305s
+sys	0m0.023s
