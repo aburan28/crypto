@@ -15,7 +15,7 @@ is cheapest over.
 every `P_i` in the Frobenius-invariant factor base?* and answers it by
 Weil-restricting the Semaev condition to a Boolean system and reducing it with
 matrix-F4 plus splitting.  On the Koblitz note's own table that oracle is the
-slowest of the three (`206 s` against enumeration's `4.3 s` at `K_1/2^23` before
+slowest of the three (`206 s` against enumeration's `4.3 s` at `icv1-f2m23-tm5197-1f85e9e1` before
 the projection work, `20.6 s` after).  **How much of that is the algebra, and
 how much is the implementation?**
 
@@ -82,12 +82,12 @@ deterministic and identical across all three on both sides.
 
 | instance | `m` | `ℓ` | targets | decomposed | word XORs baseline → candidate | ratio | ratio to floor | wall | correct |
 |:--|--:|--:|--:|--:|--:|--:|:--|--:|:--|
-| `K_0/2^9`  | 2 | 6 | 40 | 39 | 1,958,318 → 1,625,348 | **1.20×** | flat | 1.82× | ✓ identical |
-| `K_0/2^9`  | 3 | 6 | 16 | 15 | 36,193,798 → 32,991,833 | **1.10×** | flat | 2.22× | ✓ identical |
-| `K_0/2^13` | 2 | 12 | 40 | 40 | 108,572,993 → 79,728,473 | **1.36×** | flat | 2.56× | ✓ identical |
-| `K_1/2^15` | 2 | 4 | 32 | 0 | 135,838 → 88,520 | **1.53×** | flat | 1.24× | ✓ identical |
-| `K_1/2^17` | 2 | 8 | 32 | 7 | 139,256,561 → 91,932,686 | **1.51×** | flat | 2.56× | ✓ identical |
-| `K_1/2^23` | 2 | 11 | 16 | 9 | 2,189,186,746 → 1,343,398,546 | **1.63×** | flat | 2.95× | ✓ identical |
+| `icv1-f2m9-t5-81e744be`  | 2 | 6 | 40 | 39 | 1,958,318 → 1,625,348 | **1.20×** | flat | 1.82× | ✓ identical |
+| `icv1-f2m9-t5-81e744be`  | 3 | 6 | 16 | 15 | 36,193,798 → 32,991,833 | **1.10×** | flat | 2.22× | ✓ identical |
+| `icv1-f2m13-t181-515ee569` | 2 | 12 | 40 | 40 | 108,572,993 → 79,728,473 | **1.36×** | flat | 2.56× | ✓ identical |
+| `icv1-f2m15-t275-b7f03703` | 2 | 4 | 32 | 0 | 135,838 → 88,520 | **1.53×** | flat | 1.24× | ✓ identical |
+| `icv1-f2m17-tm101-00378d4e` | 2 | 8 | 32 | 7 | 139,256,561 → 91,932,686 | **1.51×** | flat | 2.56× | ✓ identical |
+| `icv1-f2m23-tm5197-1f85e9e1` | 2 | 11 | 16 | 9 | 2,189,186,746 → 1,343,398,546 | **1.63×** | flat | 2.95× | ✓ identical |
 | **total** | | | 176 | 110 | 2,475,304,254 → 1,549,765,406 | **1.60×** | flat | **2.84×** | ✓ |
 
 **Class: engineering.**  `S` fell; the ratio to the floor did not move, and
@@ -95,22 +95,22 @@ could not have.
 
 *Correctness* is not a summary judgement: `compare.py` refuses the comparison
 unless the verdict digest over every target and every solver counter agree rung
-for rung, and it did not refuse.  `K_1/2^15` decomposes nothing — its subspace
+for rung, and it did not refuse.  `icv1-f2m15-t275-b7f03703` decomposes nothing — its subspace
 admits no `m = 2` relation — so it prices refutation alone, which is most of an
 attack's work and the case the algebra is supposed to be for.
 
 ### Holdout
 
 Two instances the tuning never saw, including a different factor-base divisor at
-`n = 17` and the widest matrices the oracle reaches here (`K_0/2^19`, a few
+`n = 17` and the widest matrices the oracle reaches here (`icv1-f2m19-t797-b6cf2467`, a few
 hundred rows against a couple of thousand columns).  Only the elimination kernel
 is switchable at run time (`F4_F2_RREF=ref`), so this A/B isolates that one
 change rather than the whole round:
 
 | instance | word XORs | wall | correct |
 |:--|--:|--:|:--|
-| `K_0/2^19`, `m = 2` | **1.58×** | 1.70× | ✓ identical |
-| `K_1/2^17`, `m = 2`, divisor 1 | **1.51×** | 1.43× | ✓ identical |
+| `icv1-f2m19-t797-b6cf2467`, `m = 2` | **1.58×** | 1.70× | ✓ identical |
+| `icv1-f2m17-tm101-00378d4e`, `m = 2`, divisor 1 | **1.51×** | 1.43× | ✓ identical |
 
 ## 3. The engineering ledger
 
@@ -149,7 +149,7 @@ is broken out because it is the rung that dominates.
 
 The reference reducer eliminates one column at a time, so it *touches every row
 once per pivot column*.  These Macaulay matrices are a few hundred rows of a
-handful of 64-bit words each — at `K_1/2^23`, `276 × 439` on average, seven
+handful of 64-bit words each — at `icv1-f2m23-tm5197-1f85e9e1`, `276 × 439` on average, seven
 words per row — so the per-row touch, not the XOR it guards, is the cost.  Four
 Russians eliminates `k` columns per pass: tabulate all `2^k` combinations of the
 `k` pivot rows once, then fix every other row with one indexed XOR.

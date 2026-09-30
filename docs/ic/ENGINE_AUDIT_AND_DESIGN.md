@@ -27,7 +27,7 @@ Index calculus is only sub-exponential on some ECDLP instances:
   the relevant sub-exponential attack (Semaev, Gaudry, Diem, FGHR, GGMP).
   This is where the interesting crossovers live, and where this repository
   already has measured end-to-end results (largest solved: a 48-bit subgroup
-  of `K_0/F_{2^61}`).
+  of `icv1-f2m61-t158598901-ab42b6c5`).
 - **Characteristic-three** curves (pairing-era supersingular curves over
   `F_{3^m}`): included for completeness of coverage; IC via descent applies
   in principle at descent-feasible sizes only.

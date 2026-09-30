@@ -1879,8 +1879,8 @@ instance.
 
 ### Setup
 
-- **Instances.**  `K₁/F_{2^17}` (`r = 65587`), `K₀/F_{2^23}`
-  (`r = 2095853`), `K₁/F_{2^23}` (`r = 4196903`), `K₀/F_{2^31}`
+- **Instances.**  `icv1-f2m17-tm101-00378d4e` (`r = 65587`), `icv1-f2m23-t5197-69e76b73`
+  (`r = 2095853`), `icv1-f2m23-tm5197-1f85e9e1` (`r = 4196903`), `icv1-f2m31-tm90707-c95f16f5`
   (`r = 1439393`), with `V ∋ 1` of dimension 9, 12, 12 and 11
   (divisor `0;1`, `0;1`, `0;1`, `0;1;2` of `xⁿ − 1`).  `K₀/2¹⁷` and
   `K₁/2³¹` have no prime-order subgroup in the roster; `n = 13, 19, 29,

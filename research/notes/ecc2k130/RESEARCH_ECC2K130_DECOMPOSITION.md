@@ -39,7 +39,7 @@ how this route gets over-sold.  Concretely:
   `n = 131` it says a typical target has a
   decomposition as soon as `m·l ≥ 131 + log₂ m!` — `l = 45` at `m = 3` (§2).
 - **Admissibility** is not the obstacle either.  The cofactor class that makes
-  odd `m` decompose *nothing* on `K_1/F_2^7` does not bite here: measured on the
+  odd `m` decompose *nothing* on `icv1-f2m7-tm13-ac10a42c` does not bite here: measured on the
   challenge curve, a subspace meeting both trace values gives all four classes
   and one inside `ker Tr` gives the two even ones, and **every `m ≥ 2` is
   admissible either way** (§3).  §4 exhibits certified `m = 2, 3, 4`
@@ -205,7 +205,7 @@ Existence in the *whole* group is not enough.  `E(F_2^131)` is cyclic of order
 `4r` — the only rational 2-torsion point is `(0, √b)` — so every point has a
 class in `E/⟨G⟩ ≅ Z/4`, computed as `[r]P`, and a decomposition of a target in
 `⟨G⟩` needs the summands' classes to sum to zero mod 4.  This is not a
-formality: on `K_1/F_2^7` the whole base sits off `⟨G⟩` and **odd `m`
+formality: on `icv1-f2m7-tm13-ac10a42c` the whole base sits off `⟨G⟩` and **odd `m`
 decomposes nothing at any `|F|`** (`research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md`, "the
 cofactor class decides which `m` can work").
 

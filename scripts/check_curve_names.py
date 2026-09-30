@@ -49,13 +49,19 @@ FROZEN_DIRS = ("results", "runs", "raw", "evidence", "archives")
 SELF = {"docs/curves/ICV1.md", "docs/curves/README.md", "scripts/check_curve_names.py",
         "scripts/build_curve_registry.py", "scripts/curve_id.py",
         "src/cryptanalysis/curve_id.rs", "tests/curve_id.rs",
-        "examples/curve_id_generated.rs"}
+        "examples/curve_id_generated.rs",
+        # Generated alias tables: their "also called" column lists the
+        # legacy spellings on purpose.
+        "docs/ic-leaderboard.html", "docs/ic/LEADERBOARD.md"}
 
 SUB = r"(?:_\{?([01])\}?|<sub>([01])</sub>|&#832([01]);|([₀₁]))"
 DEG = (r"(?:GF\(\s*2(?:\^\{?(\d+)\}?|<sup>(\d+)</sup>)\s*\)"
        r"|F_\{?2\^\{?(\d+)\}?\}?|F<sub>2</sub><sup>(\d+)</sup>"
        r"|2(?:\^\{?(\d+)\}?|<sup>(\d+)</sup>))")
 KOBLITZ = re.compile(r"K" + SUB + r"\s*/\s*" + DEG)
+# Set notation, `K_0/2^{9,13,15,19}`: one name for several curves.
+KOBLITZ_SET = re.compile(r"(`?)K" + SUB + r"\s*/\s*(?:GF\(\s*2\^|F_\{?2\^|2\^)"
+                         r"\{(\d+(?:\s*,\s*\d+)+)\}\)?\}?(`?)")
 EDGE_L, EDGE_R = r"(?<![A-Za-z0-9_./-])", r"(?![A-Za-z0-9_.-]*[A-Za-z0-9_])(?![./-][A-Za-z0-9])"
 STEM = re.compile(EDGE_L + r"(k[01]n\d{1,3}|bench-\d+bit|generated-\d+bit-\d+"
                   r"|random-binary-n\d+-b[0-9a-f]+)" + EDGE_R)
@@ -145,9 +151,24 @@ class Resolver:
 def find_retired(text: str, rel: str, res: Resolver):
     """(start, end, found, replacement or None) for each retired name."""
     fences = fence_mask(text, rel)
-    hits = []
-    for m in KOBLITZ.finditer(text):
+    hits, sets = [], []
+    for m in KOBLITZ_SET.finditer(text):
         if in_spans(m.start(), fences):
+            continue
+        g = next(x for x in m.group(2, 3, 4, 5) if x)
+        a = int("₀₁".index(g)) if g in "₀₁" else int(g)
+        curves = [res.koblitz(a, int(n)) for n in re.split(r"\s*,\s*", m.group(6))]
+        repl = None
+        if all(curves):
+            names = [res.name(c) for c in curves]
+            quoted = bool(m.group(1)) and bool(m.group(7))
+            repl = ", ".join(f"`{x}`" if quoted else x for x in names)
+            if bool(m.group(1)) != bool(m.group(7)):  # an unmatched backtick stays put
+                repl = m.group(1) + ", ".join(names) + m.group(7)
+        hits.append((m.start(), m.end(), m.group(0), repl))
+        sets.append((m.start(), m.end()))
+    for m in KOBLITZ.finditer(text):
+        if in_spans(m.start(), fences) or in_spans(m.start(), sets):
             continue
         a = next(g for g in m.group(1, 2, 3, 4) if g)
         a = int("₀₁".index(a)) if a in "₀₁" else int(a)
