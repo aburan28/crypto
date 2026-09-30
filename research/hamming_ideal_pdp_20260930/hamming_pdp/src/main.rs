@@ -53,23 +53,76 @@ fn fnv(acc: u64, v: u64) -> u64 {
     (acc ^ v).wrapping_mul(0x100000001b3)
 }
 
+/// Masks of Hamming weight at most `w` in `n` bits, in increasing order.
+/// That is the normal-coordinate analogue of scanning field elements, and it
+/// does not walk `2^n`.
+fn weight_masks(n: u32, w: u32) -> Vec<u64> {
+    fn rec(n: u32, start: u32, left: u32, acc: u64, out: &mut Vec<u64>) {
+        if left == 0 {
+            out.push(acc);
+            return;
+        }
+        let last = n - left;
+        for i in start..=last {
+            rec(n, i + 1, left - 1, acc | (1u64 << i), out);
+        }
+    }
+    let mut masks = vec![0u64];
+    for k in 1..=w.min(n) {
+        rec(n, 0, k, 0, &mut masks);
+    }
+    masks.sort_unstable();
+    masks
+}
+
+fn push_lift(
+    f_xs: &mut HashSet<u64>,
+    points: &mut Vec<Point>,
+    digest: &mut u64,
+    c: &Curve,
+    x: u64,
+) {
+    if let Some(ps) = c.lift(x) {
+        f_xs.insert(x);
+        *digest = fnv(*digest, x);
+        points.push(ps[0]);
+        if ps[1] != ps[0] {
+            points.push(ps[1]);
+        }
+    }
+}
+
 fn weight_base(f: &Field, c: &Curve, w: u32) -> Base {
     let mut xs = HashSet::new();
     let mut points = Vec::new();
     let mut digest = 0xcbf29ce484222325u64;
-    for x in 0..(1u64 << f.n) {
-        if f.to_normal(x).count_ones() <= w {
-            if let Some(ps) = c.lift(x) {
-                xs.insert(x);
-                digest = fnv(digest, x);
-                points.push(ps[0]);
-                if ps[1] != ps[0] {
-                    points.push(ps[1]);
-                }
+    // n ≤ 20 is every frozen cell (n ≤ 19) and keeps the polynomial-basis
+    // scan order those digests were computed in. A larger n enumerates the
+    // normal-basis masks of weight ≤ w instead of walking the field.
+    if f.n <= 20 {
+        for x in 0..(1u64 << f.n) {
+            if f.to_normal(x).count_ones() <= w {
+                push_lift(&mut xs, &mut points, &mut digest, c, x);
             }
         }
+    } else {
+        let count: u64 = (0..=w).map(|j| binom(f.n as u64, j as u64)).sum();
+        assert!(
+            count <= 2_000_000,
+            "weight base has {count} masks; refusing to enumerate"
+        );
+        for mask in weight_masks(f.n, w) {
+            push_lift(&mut xs, &mut points, &mut digest, c, f.from_normal(mask));
+        }
     }
-    Base { name: format!("WT{w}"), xs, points, w: Some(w), sub: vec![], x_digest: digest }
+    Base {
+        name: format!("WT{w}"),
+        xs,
+        points,
+        w: Some(w),
+        sub: vec![],
+        x_digest: digest,
+    }
 }
 
 fn subspace_base(f: &Field, c: &Curve, l: usize, rng: &mut Rng) -> Base {
@@ -101,7 +154,14 @@ fn subspace_base(f: &Field, c: &Curve, l: usize, rng: &mut Rng) -> Base {
             }
         }
     }
-    Base { name: format!("SUB{l}"), xs, points, w: None, sub: basis, x_digest: digest }
+    Base {
+        name: format!("SUB{l}"),
+        xs,
+        points,
+        w: None,
+        sub: basis,
+        x_digest: digest,
+    }
 }
 
 struct Exhaustive {
@@ -126,7 +186,11 @@ fn exhaustive(c: &Curve, base: &Base, r: Point) -> Exhaustive {
             }
         }
     }
-    Exhaustive { ordered_pairs: count, first_hit: first, scanned }
+    Exhaustive {
+        ordered_pairs: count,
+        first_hit: first,
+        scanned,
+    }
 }
 
 fn random_point(c: &Curve, rng: &mut Rng) -> Point {
@@ -153,7 +217,13 @@ fn main() {
     let mut w: u32 = 2;
     let mut l: usize = 0;
     let mut targets: u64 = 24;
-    let mut encodings: Vec<Encoding> = vec![Encoding::Sub, Encoding::Mono, Encoding::C, Encoding::Fc, Encoding::Qfc];
+    let mut encodings: Vec<Encoding> = vec![
+        Encoding::Sub,
+        Encoding::Mono,
+        Encoding::C,
+        Encoding::Fc,
+        Encoding::Qfc,
+    ];
     let mut d_max = 6;
     let mut budget: u64 = 1 << 30;
     let mut max_calls: u64 = 1 << 13;
@@ -164,21 +234,69 @@ fn main() {
     let mut i = 1;
     while i < args.len() {
         match args[i].as_str() {
-            "--selftest" => { selftest::run(args[i + 1].parse().unwrap(), 300); return; }
-            "--n" => { n = args[i + 1].parse().unwrap(); i += 2; }
-            "--w" => { w = args[i + 1].parse().unwrap(); i += 2; }
-            "--l" => { l = args[i + 1].parse().unwrap(); i += 2; }
-            "--targets" => { targets = args[i + 1].parse().unwrap(); i += 2; }
-            "--d" => { d_max = args[i + 1].parse().unwrap(); i += 2; }
-            "--budget-log2" => { budget = 1u64 << args[i + 1].parse::<u32>().unwrap(); i += 2; }
-            "--matrix-cap-log2" => { matrix_cap_log2 = args[i + 1].parse().unwrap(); i += 2; }
-            "--max-calls" => { max_calls = args[i + 1].parse().unwrap(); i += 2; }
-            "--encodings" => { encodings = args[i + 1].split(',').map(|s| Encoding::parse(s).expect("encoding")).collect(); i += 2; }
-            "--out" => { out = args[i + 1].clone(); i += 2; }
-            "--seeds" => { seeds = Some(args[i + 1].split(',').map(|t| t.parse().unwrap()).collect()); i += 2; }
-            "--append" => { append = true; i += 1; }
+            "--selftest" => {
+                selftest::run(args[i + 1].parse().unwrap(), 300);
+                return;
+            }
+            "--n" => {
+                n = args[i + 1].parse().unwrap();
+                i += 2;
+            }
+            "--w" => {
+                w = args[i + 1].parse().unwrap();
+                i += 2;
+            }
+            "--l" => {
+                l = args[i + 1].parse().unwrap();
+                i += 2;
+            }
+            "--targets" => {
+                targets = args[i + 1].parse().unwrap();
+                i += 2;
+            }
+            "--d" => {
+                d_max = args[i + 1].parse().unwrap();
+                i += 2;
+            }
+            "--budget-log2" => {
+                budget = 1u64 << args[i + 1].parse::<u32>().unwrap();
+                i += 2;
+            }
+            "--matrix-cap-log2" => {
+                matrix_cap_log2 = args[i + 1].parse().unwrap();
+                i += 2;
+            }
+            "--max-calls" => {
+                max_calls = args[i + 1].parse().unwrap();
+                i += 2;
+            }
+            "--encodings" => {
+                encodings = args[i + 1]
+                    .split(',')
+                    .map(|s| Encoding::parse(s).expect("encoding"))
+                    .collect();
+                i += 2;
+            }
+            "--out" => {
+                out = args[i + 1].clone();
+                i += 2;
+            }
+            "--seeds" => {
+                seeds = Some(args[i + 1].split(',').map(|t| t.parse().unwrap()).collect());
+                i += 2;
+            }
+            "--append" => {
+                append = true;
+                i += 1;
+            }
             _ => panic!("unknown arg {}", args[i]),
         }
+    }
+    if n == 0 || n > 63 {
+        eprintln!(
+            "n={n} does not fit the u64 field (need 1..=63). n=83 needs a multi-limb polynomial basis and a normal-basis inverse wider than u128."
+        );
+        std::process::exit(2);
     }
     let t_setup = Instant::now();
     let f = Field::new(n);
@@ -217,16 +335,26 @@ fn main() {
     }
 
     let mut file = if append {
-        std::fs::OpenOptions::new().append(true).create(true).open(&out).expect("open output")
+        std::fs::OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(&out)
+            .expect("open output")
     } else {
         std::fs::File::create(&out).expect("open output")
     };
-    let cfg = Config { d_max, budget_xor: budget, max_calls, max_free: 12, matrix_cap_words: 1u64 << matrix_cap_log2 };
+    let cfg = Config {
+        d_max,
+        budget_xor: budget,
+        max_calls,
+        max_free: 12,
+        matrix_cap_words: 1u64 << matrix_cap_log2,
+    };
     let nn = n as usize;
 
     // Manifest line (once per file: a resumed run appends targets only).
     if !append {
-    writeln!(
+        writeln!(
         file,
         "{{\"kind\":\"manifest\",\"n\":{n},\"irr\":\"{:#x}\",\"normal_alpha\":\"{:#x}\",\"order\":{},\"odd_order\":{},\"w\":{w},\"l\":{l},\"wt_points\":{},\"wt_x\":{},\"wt_x_digest\":\"{:016x}\",\"sub_points\":{},\"sub_x\":{},\"sub_x_digest\":\"{:016x}\",\"sub_basis\":{},\"d_max\":{d_max},\"budget_xor\":{budget},\"max_calls\":{max_calls},\"matrix_cap_words\":{},\"targets\":{targets},\"setup_ms\":{setup_ms}}}",
         f.irr, f.nb[0], c.order, c.odd_order, wt.points.len(), wt.xs.len(), wt.x_digest, sub.points.len(), sub.xs.len(), sub.x_digest,
@@ -246,12 +374,22 @@ fn main() {
 
             // Build the system.
             let t1 = Instant::now();
-            let mut alloc = Alloc { next: 2 * coords_per };
-            let sv: Vec<Vec<usize>> = (0..2).map(|i| (0..coords_per).map(|j| i * coords_per + j).collect()).collect();
+            let mut alloc = Alloc {
+                next: 2 * coords_per,
+            };
+            let sv: Vec<Vec<usize>> = (0..2)
+                .map(|i| (0..coords_per).map(|j| i * coords_per + j).collect())
+                .collect();
             let (x1, x2) = if *enc == Encoding::Sub {
-                (SymElem::from_vars(&f, &sub.sub, &sv[0]), SymElem::from_vars(&f, &sub.sub, &sv[1]))
+                (
+                    SymElem::from_vars(&f, &sub.sub, &sv[0]),
+                    SymElem::from_vars(&f, &sub.sub, &sv[1]),
+                )
             } else {
-                (SymElem::from_vars(&f, &f.nb, &sv[0]), SymElem::from_vars(&f, &f.nb, &sv[1]))
+                (
+                    SymElem::from_vars(&f, &f.nb, &sv[0]),
+                    SymElem::from_vars(&f, &f.nb, &sv[1]),
+                )
             };
             let mut eqs = s3_descent(&f, &x1, &x2, xr);
             let s3_eqs = eqs.len();
@@ -284,7 +422,7 @@ fn main() {
                 let mut bits = 0u64;
                 for (j, &v) in sv[i].iter().enumerate() {
                     if (pt[v / 64] >> (v % 64)) & 1 == 1 {
-                        bits |= 1 << j;
+                        bits |= 1u64 << j;
                     }
                 }
                 if *enc == Encoding::Sub {
@@ -332,8 +470,18 @@ fn main() {
             let solve_ms = t2.elapsed().as_micros();
             let found = !st.solutions.is_empty();
             let label = ex.ordered_pairs > 0;
-            let agree = if st.exhausted { "timeout" } else if found == label { "ok" } else { "MISMATCH" };
-            let mean_tame_depth = if st.tame_depths.is_empty() { -1.0 } else { st.tame_depths.iter().sum::<usize>() as f64 / st.tame_depths.len() as f64 };
+            let agree = if st.exhausted {
+                "timeout"
+            } else if found == label {
+                "ok"
+            } else {
+                "MISMATCH"
+            };
+            let mean_tame_depth = if st.tame_depths.is_empty() {
+                -1.0
+            } else {
+                st.tame_depths.iter().sum::<usize>() as f64 / st.tame_depths.len() as f64
+            };
             eprintln!(
                 "n={n} {} {} seed={seed} {kind} label={} pairs={} found={found} {agree} calls={} tame={} wild={} budget={} cap={} depth_mean={:.2} max_depth={} xor={} rows={} cols={} deg={} prep={}ms elim={}ms add={}ms rref={}ms subst={}ms post={}ms branch={}ms {}ms",
                 enc.name(), base.name, label, ex.ordered_pairs, st.calls, st.tame, st.wild, st.budget, st.matrix_cap_hits, mean_tame_depth, st.max_depth, st.xor_total, st.rows_max, st.cols_max, st.max_degree, st.prep_ns / 1_000_000, st.elim_ns / 1_000_000, st.add_ns / 1_000_000, st.rref_ns / 1_000_000, st.subst_ns / 1_000_000, st.post_ns / 1_000_000, st.branch_ns / 1_000_000, solve_ms / 1000
@@ -350,6 +498,43 @@ fn main() {
             ).unwrap();
             let _ = Poly::zero();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::weight_masks;
+    use crate::gf2n::Field;
+    use std::collections::HashSet;
+
+    #[test]
+    fn weight_masks_match_the_field_scan() {
+        let f = Field::new(11);
+        let w = 2u32;
+        let from_masks: HashSet<u64> = weight_masks(f.n, w)
+            .into_iter()
+            .map(|m| f.from_normal(m))
+            .collect();
+        let mut from_scan = HashSet::new();
+        for x in 0..(1u64 << f.n) {
+            if f.to_normal(x).count_ones() <= w {
+                from_scan.insert(x);
+            }
+        }
+        assert_eq!(from_masks, from_scan);
+        assert_eq!(weight_masks(11, 2).len(), 1 + 11 + 55);
+        let f7 = Field::new(7);
+        let m7: HashSet<u64> = weight_masks(7, 2)
+            .into_iter()
+            .map(|m| f7.from_normal(m))
+            .collect();
+        let mut s7 = HashSet::new();
+        for x in 0..(1u64 << 7) {
+            if f7.to_normal(x).count_ones() <= 2 {
+                s7.insert(x);
+            }
+        }
+        assert_eq!(m7, s7);
     }
 }
 

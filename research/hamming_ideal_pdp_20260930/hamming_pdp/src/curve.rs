@@ -17,14 +17,6 @@ pub struct Curve<'a> {
 impl<'a> Curve<'a> {
     pub fn new(f: &'a Field) -> Curve<'a> {
         let n = f.n;
-        // Count points: O, (0,1), and two per x ≠ 0 with Tr(x + x^{-2}) = 0.
-        let mut count = 2u64;
-        for x in 1..(1u64 << n) {
-            let c = x ^ f.sqr(f.inv(x));
-            if f.trace(c) == 0 {
-                count += 2;
-            }
-        }
         // Koblitz recurrence for a = 0: V_0 = 2, V_1 = -1, V_k = -V_{k-1} - 2 V_{k-2};
         // #E = 2^n + 1 - V_n.
         let (mut v0, mut v1) = (2i128, -1i128);
@@ -34,7 +26,28 @@ impl<'a> Curve<'a> {
             v1 = v2;
         }
         let expected = (1i128 << n) + 1 - v1;
-        assert_eq!(count as i128, expected, "point count must match the Koblitz recurrence");
+        // O, (0,1), and two points per x ≠ 0 with Tr(x + x^{-2}) = 0.
+        // The scan is the check that the recurrence matches an enumeration.
+        // Frozen cells stop at n = 19, so n ≤ 20 keeps that check. Past it
+        // the scan is 2^n field inversions and is not a check that can be run;
+        // the order is the recurrence alone.
+        let count = if n <= 20 {
+            let mut count = 2u64;
+            for x in 1..(1u64 << n) {
+                let c = x ^ f.sqr(f.inv(x));
+                if f.trace(c) == 0 {
+                    count += 2;
+                }
+            }
+            assert_eq!(
+                count as i128, expected,
+                "point count must match the Koblitz recurrence"
+            );
+            count
+        } else {
+            assert!(expected > 0 && expected <= u64::MAX as i128);
+            expected as u64
+        };
         assert_eq!(count % 4, 0);
         Curve {
             f,
