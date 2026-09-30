@@ -19,7 +19,9 @@ fn main() {
         .collect();
     let (s, k, w) = (words[0] as usize, words[1] as usize, words[2] as usize);
     assert_eq!(words.len(), 3 + (s + k) * w, "length does not match header");
-    let mut rows: Vec<Vec<u64>> = (0..s).map(|i| words[3 + i * w..3 + (i + 1) * w].to_vec()).collect();
+    let mut rows: Vec<Vec<u64>> = (0..s)
+        .map(|i| words[3 + i * w..3 + (i + 1) * w].to_vec())
+        .collect();
     let samples = &words[3 + s * w..];
 
     // Row echelon form: row r has its first set bit at pivots[r], and every
@@ -40,8 +42,8 @@ fn main() {
         let pivot = &head[r];
         for row in tail.iter_mut() {
             if row[cw] & bit != 0 {
-                for j in cw..w {
-                    row[j] ^= pivot[j];
+                for (x, &y) in row[cw..].iter_mut().zip(&pivot[cw..]) {
+                    *x ^= y;
                 }
             }
         }
@@ -50,18 +52,24 @@ fn main() {
     }
 
     let mut in_span = 0usize;
-    for i in 0..k {
-        let mut v = samples[i * w..(i + 1) * w].to_vec();
-        for (idx, &col) in pivots.iter().enumerate() {
+    for sample in samples.chunks_exact(w).take(k) {
+        let mut v = sample.to_vec();
+        for (row, &col) in rows.iter().zip(&pivots) {
             let (cw, bit) = (col / 64, 1u64 << (col % 64));
             if v[cw] & bit != 0 {
-                for j in cw..w {
-                    v[j] ^= rows[idx][j];
+                for (x, &y) in v[cw..].iter_mut().zip(&row[cw..]) {
+                    *x ^= y;
                 }
             }
         }
         in_span += v.iter().all(|&x| x == 0) as usize;
     }
     let mut out = std::io::stdout();
-    writeln!(out, "{{\"rank\": {}, \"in_span\": {}}}", pivots.len(), in_span).unwrap();
+    writeln!(
+        out,
+        "{{\"rank\": {}, \"in_span\": {}}}",
+        pivots.len(),
+        in_span
+    )
+    .unwrap();
 }
