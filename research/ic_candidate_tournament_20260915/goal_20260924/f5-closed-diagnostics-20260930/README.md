@@ -34,6 +34,15 @@ per-query matrix word counts, cache hit/miss counts and observed resolved
 variable/value policy remain instrumentation gaps. Reuse the existing core
 counters; add the missing observations without changing an old manifest.
 
+`MATRIX-REPLAY.json` independently rebuilds every stored relation row from the
+query witnesses and orbit coefficients, checks all query laws and batch
+accounting, and reconstructs the final matrix: 61 accepted rows, no duplicates,
+29 columns, rank 28 and 16 attempted final-LA solves without certified logs.
+Fault-injected matrix entries, modulus two and changed point witnesses are all
+rejected. The script checks the recorded auditor source hashes before replay.
+This verifies the stored-row construction; it does not validate the PDP
+encoder, criterion or traversal that failed to produce more witnesses.
+
 ## Mathematical chain controls
 
 The auditor independently re-adds every retained full-point witness: 61 F5
@@ -93,6 +102,12 @@ separate reduction and split counts, repeated/sign/identity cases, a two-torsion
 case with no finite intermediate, false full-point witness rejection and an
 external archive mismatch rejected before member reads. No timing or kernel
 benchmark is inferred from these tests.
+
+The complete local tournament suite on this branch passes 296 tests: 293
+passing and three platform skips. The stored-matrix replay and its three
+artifact-fault controls also pass. The per-PR CI concurrency fix from PR #1031
+is included so this PR cannot replace another PR's pending correctness checks;
+measured dispatch groups, jobs and one-shot conditions remain unchanged.
 
 To replay the derivation into a new output without invoking a solver:
 
