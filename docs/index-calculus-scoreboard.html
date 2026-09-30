@@ -493,6 +493,37 @@
     <nav aria-label="Performance evidence"><a href="algorithm-lab.html">Factor bases, linear algebra &amp; SAT demos →</a><a href="performance-gains.html">Explore performance charts →</a><a href="#summation-polynomials-20260914">Summation-polynomial evidence</a><a href="#gaudry-allocation-20260914">Earlier Gaudry gains</a><a href="#macaulay-cpu-gpu-pipeline">CPU/GPU pipeline</a></nav>
   </aside>
 
+  <div class="panel" id="ic-sat-v3-full-development-20260930">
+    <div class="panel-head">
+      <h2>Source-bound SAT IC completes one n17 development target <span class="chip">accounting</span></h2>
+      <p>The separately registered SAT v3 control on exposed point
+        <code>[52411,72106]</code>, curve <code>EC1N17Ckb1hbbe2b5b6b1e6</code>,
+        passed independent source, native-child, ordinary-row, all-column-log,
+        target-scalar and archive transport replay. Its complete invocation was
+        frozen before dispatch; no solver ran during replay. These are
+        uncalibrated physical macOS ARM64 development observations.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>One supplied target. Values cite the retained audit; competitive costs and boundaries stay unknown.</caption>
+      <thead><tr><th>Candidate</th><th>Actual base / columns</th><th>Ordinary queries / witnesses / rank</th><th>Verified scalar</th><th>Observed online ns</th><th>Competitive online ns</th><th>Rho / IC</th><th>S / floor</th></tr></thead>
+      <tbody><tr><td><code>IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h0ef1e080d97e</code></td><td>62 / 29</td><td>149 / 37 / 29</td><td>24886</td><td>708,643,292</td><td>unknown</td><td>unknown</td><td>unknown</td></tr></tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>All 106 source-UNSAT and six conflict-inconclusive ordinary attempts are
+        retained. Exact postexecution enumeration finds 37 feasible inputs;
+        every one has a verified native witness. The target succeeded on its
+        first attempt, with five exclusive phases closing through independent
+        scalar replay after reusable preparation. No rho or incumbent was
+        measured here; fresh qualification, speedup and promotion remain
+        unestablished. Missing exclusive cold costs remain unknown. This new
+        source-bound invocation does not upgrade historical SAT v1/v2 coverage
+        or reopen the three sealed confirmation sets.
+        <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/static-sat-runtime-v3/full-development-20260929/README.md">Result, full archive and limits</a>;
+        <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/static-sat-runtime-v3/full-development-20260929/results-20260930/AUDIT.json">audited observations</a>;
+        <a href="https://github.com/aburan28/crypto/pull/1051">PR #1051</a>.</p>
+    </div>
+  </div>
+
   <div class="panel" id="ic-paired-n17-diagnostic-20260929">
     <div class="panel-head">
       <h2>Paired n17a1 correctness panel: SAT completes; bounded F5 misses one column <span class="chip">accounting</span></h2>
