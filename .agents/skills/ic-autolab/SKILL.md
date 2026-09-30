@@ -132,8 +132,13 @@ measure step timeout at 300 minutes, `pack_partial_campaign.py` failed while
 callgrind files were still mutating, and GitHub uploaded zero campaign bundle.
 Never dispatch seed `2026092902` again. PR preflight and artifact-upload smoke
 passed; that does not substitute for retained receipts. Register a new panel
-and exclude all potentially generated points from this run (prepare replay at
-the pinned checkout) before any later measurement. Without a bundle, do not run
+and exclude both
+[lost-campaign-exposures.json](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/lost-campaign-exposures.json)
+and the reconstructed this-run census
+[this-run-exposures.json](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/this-run-exposures.json)
+(SHA-256 `64f30e19f0ef1a4c4b95d4168c977b13de9559cb8a934cfcc9c3bf8a63fa0a25`;
+see [THIS-RUN-RECONSTRUCTION.md](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/THIS-RUN-RECONSTRUCTION.md))
+before any later measurement. Without a bundle, do not run
 `generic_backend_gate_v2.py` or
 [independent_pairs.py](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/independent_pairs.py)
 as if qualification were established. The post-registration

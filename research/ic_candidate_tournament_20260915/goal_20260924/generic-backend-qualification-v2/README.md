@@ -18,12 +18,12 @@ uses seed `2026092902`, one process for each of 25 distinct public targets,
 algorithm arms. It does not use the sealed improvement confirmation sets.
 
 The first run's entire possible 25-point fixture schedule is in
-[lost-campaign-exposures.json](lost-campaign-exposures.json). An independent full-prepare replay matches that corpus byte-for-byte on all 25 points; see [INDEPENDENT-RECONSTRUCTION.md](INDEPENDENT-RECONSTRUCTION.md). It was reproduced
-from the pinned worker and sealed historical exclusions using
-[reconstruct_exposures.py](reconstruct_exposures.py); five retained prior
-fixtures matched exactly and a second local reconstruction matched the checked
-file's SHA-256 byte for byte. The fresh runner passes that corpus to the
-tournament's exact curve/point exclusion checker before making new targets.
+[lost-campaign-exposures.json](lost-campaign-exposures.json). An independent full-prepare replay matches that corpus byte-for-byte on all 25 points; see [INDEPENDENT-RECONSTRUCTION.md](INDEPENDENT-RECONSTRUCTION.md).
+This run's prepare schedule is reconstructed in
+[this-run-exposures.json](this-run-exposures.json)
+(SHA-256 `64f30e19f0ef1a4c4b95d4168c977b13de9559cb8a934cfcc9c3bf8a63fa0a25`);
+see [THIS-RUN-RECONSTRUCTION.md](THIS-RUN-RECONSTRUCTION.md). Later
+registrations must exclude both corpora before sampling fresh targets.
 
 The workflow is
 [`ic-generic-backend-qualification-v2.yml`](../../../../.github/workflows/ic-generic-backend-qualification-v2.yml).

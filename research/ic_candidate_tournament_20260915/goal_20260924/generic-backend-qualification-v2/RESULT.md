@@ -57,10 +57,11 @@ for measured family qualification.
 
 Do not dispatch seed `2026092902` again. Treat all 25 points in
 [lost-campaign-exposures.json](lost-campaign-exposures.json) as exposed together
-with every public point this registration could have reached once reconstructed
-(prepare replay at the pinned checkout), even though no bundle was uploaded.
-A new campaign needs a new frozen panel and seed, exclusion of all three sealed
-improvement archives, the 25 lost first-run points, and every point from this
-second dispatch, plus packaging that quiesces or excludes live callgrind trees
-before `tar` runs. Neither the sealed improvement confirmation sets nor this
-interrupted run can be used as a favourable retry.
+with the 25 reconstructed points in
+[this-run-exposures.json](this-run-exposures.json)
+(SHA-256 `64f30e19f0ef1a4c4b95d4168c977b13de9559cb8a934cfcc9c3bf8a63fa0a25`;
+see [THIS-RUN-RECONSTRUCTION.md](THIS-RUN-RECONSTRUCTION.md)). A new campaign
+needs a new frozen panel and seed, exclusion of all three sealed improvement
+archives, both censored-run exposure corpora, plus packaging that quiesces or
+excludes live callgrind trees before `tar` runs. Neither the sealed improvement
+confirmation sets nor this interrupted run can be used as a favourable retry.

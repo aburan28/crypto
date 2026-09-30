@@ -14,7 +14,7 @@ disclosed inventory points. Zero relations/solutions at `max_trials=1`.
 | Live v2 measurement | Do not retry seed `2026092902` |
 | This pilot (dispatch series) | Complete — [RESULT.md](RESULT.md) (PR #961) |
 | Same-budget replay | Retained in [`run-20260929`](run-20260929/RESULT.md); do not rerun |
-| Fresh competitive F4/F5 registration | Blocked until recovery mechanism + v2 exposure census |
+| Fresh competitive F4/F5 registration | Needs new seed + both censored-run exposure corpora + recovery-capable budget |
 
 No scoreboard competitive row is updated from this directory. The retained
 run is a disclosed-point diagnostic with unknown complete cost.
