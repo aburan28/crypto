@@ -350,7 +350,12 @@
       workflow&rsquo;s constructions once per base, with every count unchanged. That makes the whole
       pipeline 1.04&ndash;2.25&times; faster and takes the same row to 4.3&times;. On current main, which
       later rounds made 12&ndash;33% cheaper at the top, ledger &sect;22 (2026-09-30) cut the descent&rsquo;s
-      fixed cost per target: 1.35&ndash;1.39&times; at the small end in isolated runs, and the row reads 3.6&times;. The first two were
+      fixed cost per target: 1.35&ndash;1.39&times; at the small end in isolated runs, and the row reads 3.6&times;.
+      Under AGENTS.md&rsquo;s IC measurement rules (#1076, 2026-09-30) that figure, like every
+      <code>k</code> = 32 ratio on this page, is a historical multi-target diagnostic. The primary
+      comparison is now one unseen target against rho on the same point, with the reusable
+      set-up reported apart. Ledger &sect;23 declares it for the thread&rsquo;s six largest sizes,
+      and it is not yet measured. The first two were
       3.55&times; and 16.0&times; until the reference was matched (ledger &sect;18, 2026-09-23): the
       prime and binary rows had been priced against a walk that used no automorphism and paid
       most of its <code>S</code> in set-up, and against the negation-map walk the contract asks for

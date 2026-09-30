@@ -1,5 +1,13 @@
 # Ledger §23: the top-end exponent, in range
 
+> **Withdrawn before anything ran.** AGENTS.md's IC measurement rules
+> (#1076) made one previously unseen target the primary comparison, and
+> bar a ratio to batch rho at `k = 32` as a headline. This declaration's
+> primary figure was that ratio. Nothing below ran. §23 was declared
+> again as a single-target round in
+> [`../ic_single_target_20260930/`](../ic_single_target_20260930/PROTOCOL.md).
+> This file is kept unchanged below as the record.
+
 A measurement round (AGENTS.md §3, accounting) on the Koblitz collection
 thread of [ledger §20](../ic_exponent_20260926/)–[§22](../ic_descent_20260930/).
 It was declared in [`PROTOCOL.md`](PROTOCOL.md) before anything ran, and is

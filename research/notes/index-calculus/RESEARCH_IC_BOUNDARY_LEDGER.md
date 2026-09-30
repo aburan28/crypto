@@ -5606,6 +5606,10 @@ Item 1's rungs above `2^47.2` cannot run.
     table. That is engineering, and it comes before any rung above
     `2^47.2`, `K_1/GF(2^83)` included.
 - Item 1's text below is kept as it was written.
+- **1a's status.** It was declared as §23 at `k = 32` and withdrawn
+  before it ran, when #1076 made one target the primary comparison
+  (§23.1). §23 is now the single-target round at the same sizes. The
+  exponent question stays open, as a multi-target diagnostic.
 
 1. **Recommended next (§23): resolve the top-end exponent.** Pending.
    - **Why first.** Whether any work on constants can ever reach a
@@ -5686,70 +5690,118 @@ Item 1's rungs above `2^47.2` cannot run.
 - So the thread keeps high-fidelity ECC2K-130 improvement unestablished,
   as §22.9 says.
 
-## 23. The top-end exponent, in range
+## 23. One unseen point, online and cold
 
-This is §22.12's item 1a. After the correction there, only item 1a runs
-without code changes. It is a measurement round: no algorithm changes.
+AGENTS.md's IC measurement rules (#1076) changed the question every
+earlier section answered.
+- **The new primary comparison** is one previously unseen target. The
+  index calculus and Pollard rho run on that same point, in one resource
+  envelope. Each is timed from its first target-dependent operation to a
+  verified scalar, with reusable setup reported apart.
+- **What the old figures become.** Every `k = 32` ratio in §19–§22, and
+  on the page, is now a historical diagnostic.
+- **What this section does.** It is the thread's first single-target
+  round, at the six sizes the library can build above `2^36`.
 
-§22 left the declared fit over the four largest sizes at `r^0.137`
-[−0.059, 0.332]. That interval includes zero, and it separates neither
-the law's `1/6` nor §20's model from it. Sizes above `2^47.2` need
-`n > MAX_N = 63`. So this round cannot lengthen the fit's lever arm. It
-can add the only two other buildable sizes, measure each size on eight
-sets, and re-sweep every size's recipe on one binary.
+It needed two things the pricer did not have:
 
-### 23.1 Declared before anything below ran
+- **An online interval.** `ic price --single-target` times the
+  reusable setup on the exclusive clock as before. The descent's online
+  interval, from its first query to the logarithm it has checked, goes on
+  the measurement session's five exclusive phases, which sum to it to the
+  nanosecond.
+- **A one-target rho worth timing.** §19 showed that both one-target
+  walks the repository had are weak in wall time:
+  - the repository's signed-Frobenius walk canonicalises by a chain of
+    squarings, about 21 units a step;
+  - the tuned walk adds one point at a time, each with its own
+    inversion.
 
-The protocol is `research/ic_exponent_top_20260930/PROTOCOL.md` (v1). It
-was committed with its harness and analysis script before any run.
+  `ParallelRho` is the tuned walk with its walks stepped in lockstep, so
+  a round's additions share one inversion. With one lane it is §19's
+  batch walk at `k = 1`, operation for operation. It still costs about
+  4.1–4.8 units a step at `n = 41` and `47`, against the canonical step's
+  2.3, so the canonical-step price is reported beside every measured
+  one.
 
-- **Sizes:** every Koblitz curve with `n ≤ 63` and `r ≥ 2^36`.
-  - `K_1/GF(2^47)` (`2^36.6`), `K_0/GF(2^41)` (`2^39.0`), `K_0/GF(2^53)`
-    (`2^44.3`) and `K_0/GF(2^61)` (`2^47.2`), from §20.
-  - `K_0/GF(2^57)` (`2^38.0`), new. Its proper intermediate subfields
-    over `GF(2)` are `GF(2^3)` and `GF(2^19)`; the method uses neither.
-  - `K_1/GF(2^59)` (`2^44.5`), new, prime `n`.
-- **Recipe:** §20's rules, re-swept at every size on this round's binary
-  by §20's procedure, on sweep set `W`.
-  - The fit must compare every size's best recipe on one binary.
-  - §20's choices at the four old sizes are reported beside the new ones.
-- **Sets:** `M1`–`M8` (seeds 201–208), with batch rho in the same
-  process on each set's targets.
-- **Accounting:** §20's, unchanged. A size's ratio is the mean `S` over
-  the mean priced rho `S`. Its interval uses `t` with 7 degrees of
-  freedom.
-- **Isolation.** Every `ic price` runs through `tools/isolated_bench.py`,
-  after the harness waits for PSI `some avg10` to fall below 4.0.
-  Contended runs are kept, excluded and run again. Control 1 runs on `M1`
-  at each size, untimed.
-- **Predictions** (§20's model, carried unchanged): a local exponent of
-  0.139 over the six sizes, and 0.149 over the four largest. The law's is
-  `1/6`.
+### 23.1 First declared at `k = 32`, and withdrawn before anything ran
+
+§23 was first declared in #1080's first commit (`b24b5313`,
+`research/ic_exponent_top_20260930/`). It was §22.12's item 1a: the
+top-end exponent of the ratio to batch rho at `k = 32`.
+- **What it would have run:** eight sets at each of six sizes, every
+  recipe re-swept, and the fit's aim to exclude 0 or `1/6`.
+- **Nothing of it ran.** Its primary figure is a multi-target ratio,
+  which the rule bars as a headline.
+- **The record.** Its files are kept, marked withdrawn. The exponent
+  question stays open, as a multi-target diagnostic.
+
+### 23.2 Declared before anything below ran
+
+The protocol is `research/ic_single_target_20260930/PROTOCOL.md`. It
+was committed with its harness, claim assembler and analysis before
+any run.
+
+- **Sizes:** the six of the withdrawn declaration, `2^36.6`–`2^47.2`:
+  - `E_0` (the ECC2K-130 family) at `n = 41`, `53`, `57` and `61`;
+  - `E_1` at `n = 47` and `59`;
+  - `GF(2^57)`'s subfields `GF(2^3)` and `GF(2^19)` disclosed and
+    unused.
+- **Recipe:**
+  - §20's frozen choice at the four sizes §20 swept;
+  - §20's model optimum at the two it never ran, labelled as such;
+  - nothing chosen on a measurement.
+- **Rows:**
+  - 64 public hash-to-curve points per size, one process each, and
+    `T01`–`T04` again as the A/A;
+  - three repetitions per process, both arms rebuilt each time, the
+    median repetition as the figure;
+  - every row keyed by the canonical IC1, workload and run identities;
+  - both answers replayed outside the process;
+  - every claim checked by `validate_claim` at `vs_rho`.
+- **Boundaries:**
+  - **floor:** the generic one-target floor `√(π/4n)`;
+  - **reference (the rule's):** one-target rho on the same point,
+    measured;
+  - **model:** rho at the canonical step, the conservative reading;
+  - **precomputation boundary:** Bernstein and Lange's trade-off,
+    `O·P ≈ 1.93·1.21·r/A`. It gives the online cost a generic walk
+    reaches with the index calculus's own setup as its budget. This is a
+    model: the rule bars such a walk as the reference, and the round
+    measures none.
+- **Accounting:** each arm's online interval in units, and the setup
+  apart. Per size:
+  - the online speedup, mean rho online over mean index-calculus online,
+    with a bootstrap interval over targets;
+  - the cold ratio, setup included;
+  - the break-even count of targets;
+  - the growth of each across sizes.
+- **Isolation:** every process through `tools/isolated_bench.py`, after
+  PSI falls below 4.0. Contended runs are kept and run again, never
+  pooled.
+- **Predictions** (§22's frozen records):
+  - online speedups of 8–27× with the probe's step, or 4.3–15× at the
+    canonical step;
+  - cold ratios of 8–28× against the index calculus;
+  - break-even at 10–31 targets;
+  - the index calculus 1.2–5.3× slower online than the precomputation
+    model.
 
 **Targets:**
+1. **Correct:** every row verified and replayed, both arms agreeing.
+2. **Rule-conformant:** every row passes the checker.
+3. **Primary:** the online speedup per size, read as faster, slower or
+   not separated by its interval.
+4. **Cold:** the cold ratio, reported first beside it.
+5. **Secondary:** the canonical-step speedup, the precomputation
+   boundary, the break-even count and the slopes.
 
-1. **Correct:** every target verified, no rejected relation, counts
-   identical across repetitions, every run complete.
-2. **Control 1** holds on `M1` at all six sizes.
-3. **The primary fit.** Fit `ln(ratio·√n)` on `ln r` over the six sizes,
-   with the slope's 95% interval (`t`, 4 degrees of freedom).
-   - The rise is *resolved from zero* if the interval excludes 0.
-   - `1/6` and 0.139 are each read as consistent or falsified.
-   - **The aim is met if the interval excludes 0 or excludes `1/6`.**
-     Otherwise the round reports that the buildable sizes cannot
-     separate them.
-4. **The secondary fit:** §20's four-largest fit, for continuity.
-5. **Crossing:** a size whose ratio interval lies wholly below one. None
-   is expected.
+The aim is met if 1 and 2 hold. The rest is a measurement, tuned for
+nothing.
 
-**Stop:**
-- a verification failure;
-- Control 1 failing;
-- a repetition spread above 1.25, which means the set is rerun with
-  double the repetitions.
-
-**Class: accounting.** No algorithm changes. There is no `m = 83` run
-(AGENTS.md §8a): `n = 83` is past `MAX_N`.
+**Class: accounting.** The index calculus's code is unchanged: the pin
+checks §22's counts. The reference changed because the rule changed it.
+There is no `m = 83` run (AGENTS.md §8a).
 
 ## Appendix A. The conversion factors, as measured
 

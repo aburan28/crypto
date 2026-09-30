@@ -1,5 +1,13 @@
 # Ledger §23 protocol, v1: the top-end exponent, in range
 
+> **Withdrawn before anything ran.** AGENTS.md's IC measurement rules
+> (#1076) made one previously unseen target the primary comparison, and
+> bar a ratio to batch rho at `k = 32` as a headline. This declaration's
+> primary figure was that ratio. Nothing below ran. §23 was declared
+> again as a single-target round in
+> [`../ic_single_target_20260930/`](../ic_single_target_20260930/PROTOCOL.md).
+> This file is kept unchanged below as the record.
+
 Declared 2026-09-30, before anything below ran. The only computations
 made first are `predict.py`, which carries §20's frozen model to the six
 sizes below (`prediction.json`), and a pin check. The pin check ran the
