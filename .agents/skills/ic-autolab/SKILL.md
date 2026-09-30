@@ -108,6 +108,22 @@ all new target attempts and scalar replay. These certificates do not authorize
 a fresh paired dispatch or reopen any consumed registration. Reviewed exposure,
 reference, hardware rebuild, calibration and resource/order gates remain pending.
 
+The [prepared target-only adapters](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-target-runtime-v1/README.md)
+add an optional native F5 preparation import and a SAT adapter core plus
+`prepared_sat_runtime_v1.py` registrar/entrypoint/auditor. They independently
+replay preparation before online start and retain all failed target attempts.
+Only disclosed development controls are admitted; no new production registration
+or fresh comparison has executed. Native F5 source/build/registration transport
+and fresh campaign gates remain pending. Run the four strict native unit controls
+in an isolated `RAYON_NUM_THREADS=1` process with `--ignored --test-threads=1`;
+the ordinary parallel runner intentionally skips them and CI explicitly runs
+them. Callback/oracle tests are not native SAT yield evidence. The committed
+preparation-only exclusion union contains 1,340 points, including failed queries
+and all known-log sign/Frobenius orbits; merge it with the complete historical
+and current exposure census before any fresh sampling. Candidate identity binds
+math preparation and executed code; certificate/build/transport evidence remains
+in the frozen run. Do not bypass a consumed registrar or weaken a source gate.
+
 Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use a versioned runner for the intended unexecuted round; the round-one wrapper is historical, and generic pilot defaults do not implement the goal protocol. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass and an accepted, versioned reference binding is committed.
 
 
