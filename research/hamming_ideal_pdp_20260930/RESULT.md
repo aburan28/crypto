@@ -15,11 +15,12 @@ target correctly (zero disagreements with the exhaustive oracle over all
 cells, every "yes" carrying a verified decomposition), but the algebra
 resolves only after nearly all coordinates of one summand have been
 assigned: mean tame depth 7.4–10.4 of 13 coordinates at `n = 13`,
-14.7–16.2 of 17 at `n = 17`, 17.8 of 19 at `n = 19` (FC). The number of
+14.7–16.2 of 17 at `n = 17`, 17.8–18.2 of 19 at `n = 19`. The number of
 `GroebnerSafe` calls per target grows faster than the candidate count
-`|F_w|` of the exhaustive oracle: fitted exponents 1.9 (FC), 3.2 (QFC),
-3.6 (C) against the success threshold 0.8, and the ratio `calls / |F_w|`
-rises from 0.10–0.12 at `n = 11` to 0.42–0.68 at `n = 17`. This is the
+`|F_w|` of the exhaustive oracle: fitted exponents 1.9 (FC), 2.4 (C), 2.5 (QFC)
+over `n = 11, 13, 17, 19` against the success threshold 0.8, and the ratio `calls / |F_w|`
+rises from 0.10–0.12 at `n = 11` to 0.42–0.68 at `n = 17`
+and 0.49–0.59 at `n = 19`. This is the
 paper's own conclusion on Classic McEliece transferred to the PDP: the
 Prange point wins, and every coordinate left to the algebra costs a
 Gröbner call that the combinatorial saving does not repay. The subspace

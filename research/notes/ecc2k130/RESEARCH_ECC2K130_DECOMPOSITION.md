@@ -750,8 +750,8 @@ Weil-descended in normal-basis coordinates and the weight constraint in
 each of the paper's three presentations, the paper's own `MultiSolve`
 answers every target correctly but resolves only after nearly every
 coordinate of one summand is fixed (mean tame depth 14.7–16.2 of 17 at
-`n = 17`), and its call count grows as `|F_w|^{1.9–3.6}` against the
-exhaustive oracle's `|F_w|`. That is the paper's Classic McEliece
+`n = 17`, 17.8–18.2 of 19 at `n = 19`), and its call count grows as
+`|F_w|^{1.9–2.5}` against the exhaustive oracle's `|F_w|`. That is the paper's Classic McEliece
 conclusion — the Prange point wins — transferred intact. §5.3's demand on
 the oracle stands; this oracle is the enumeration with a Gröbner
 computation bolted onto each candidate.

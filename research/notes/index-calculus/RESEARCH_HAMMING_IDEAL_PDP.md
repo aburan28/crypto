@@ -252,9 +252,9 @@ resolves only after nearly all of one summand's coordinates are fixed:
 the mean tame depth of the paper's encodings is within 1–3 of the full
 summand at `n ≥ 17`. The oracle is therefore the exhaustive oracle with a
 truncated Gröbner computation attached to each candidate, and its call
-count grows faster than the candidate count (exponents 1.9–3.6 in `|F_w|`
-against the threshold 0.8; `calls / |F_w|` rises from about 0.1 at
-`n = 11` to 0.4–0.7 at `n = 17`). The subspace baseline through the same
+count grows faster than the candidate count (exponents 1.9–2.5 in `|F_w|` over
+`n = 11, 13, 17, 19` against the threshold 0.8; `calls / |F_w|` rises from about 0.1 at
+`n = 11` to 0.4–0.7 at `n = 17` and 0.5–0.6 at `n = 19`). The subspace baseline through the same
 solver is tame at the root or one level down at every size, which is the
 contrast the solver module's documentation predicts: restricting summands
 to a subspace keeps everything linear in the unknowns the way a weight
@@ -264,8 +264,8 @@ Three things the table separates:
 
 - **Presentation matters, but not in the useful direction.** Among the
   paper's three ideals FC (fewest variables, highest degree) needs the
-  fewest calls at `n = 13` and `n = 17` is where C and QFC (quadratic,
-  more variables) fall behind it; the control MONO, `C(n, w+1)` monomial
+  fewest calls at `n = 17` and `n = 19`, where C and QFC (quadratic, more
+  variables) fall behind it by 20–65%; the control MONO, `C(n, w+1)` monomial
   generators and no auxiliary variables, resolves 6–8 levels higher than
   any of them. The lifted ideals trade the degree the paper wants to avoid
   for auxiliary variables whose values the truncated basis does not reach
