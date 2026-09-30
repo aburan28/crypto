@@ -21,8 +21,15 @@ import run as pilot  # noqa: E402
 from dual_transport import DualTransport  # noqa: E402
 
 CONFIG = HERE / "CONFIG.json"
+FROZEN = HERE / "FROZEN.json"
+REPAIR = HERE / "FROZEN_REPLAY.json"
 VARIANTS = ("original", "transported", "descendant_native", "pullback")
 R = 421
+SUPERSEDED = {
+    ".github/workflows/ecc2k130-m3-four-policy.yml",
+    "research/notes/ecc2k130/m3_four_policy_20260930/verify.py",
+    "research/notes/ecc2k130/m3_four_policy_20260930/test_arithmetic.py",
+}
 
 
 def sha(path: Path) -> str:
@@ -53,11 +60,27 @@ def checked_config() -> dict:
     assert config["field_degree"] == 21 and config["base_size"] == 8
     for relative, expected in config["inputs_sha256"].items():
         assert sha(ROOT / relative) == expected, relative
-    lock = json.loads((HERE / "FROZEN.json").read_text())
+    lock = json.loads(FROZEN.read_text())
     assert lock["schema"] == "ecc2k130-degree7-m3-four-policy-source-lock-v1"
     for relative, expected in lock["sha256"].items():
+        if relative not in SUPERSEDED:
+            assert sha(ROOT / relative) == expected, relative
+    repair = json.loads(REPAIR.read_text())
+    assert repair["schema"] == "ecc2k130-degree7-m3-replay-repair-v1"
+    assert repair["original_frozen_sha256"] == sha(FROZEN)
+    assert repair["repair_protocol_sha256"] == sha(
+        HERE / "REPLAY_REPAIR_PROTOCOL.md")
+    assert repair["replaced_sha256"] == {
+        path: lock["sha256"][path] for path in sorted(SUPERSEDED)}
+    assert set(repair["sha256"]) == SUPERSEDED
+    for relative, expected in repair["sha256"].items():
         assert sha(ROOT / relative) == expected, relative
     return config
+
+
+def restore_bare_curve() -> None:
+    """Undo the pilot's process-global metering hook for reference geometry."""
+    pilot.oriented_velu.Koblitz = pilot.Koblitz
 
 
 class ReferenceField:
@@ -284,11 +307,15 @@ def sum_costs(parts):
 
 def replay(folder: Path) -> dict:
     config = checked_config()
+    repair = json.loads(REPAIR.read_text())
+    assert sha(folder / "result.json") == repair["result_sha256"]
+    assert sha(folder / "replay.json") == repair["failed_replay_sha256"]
     result = json.loads((folder / "result.json").read_text())
     assert result["schema"] == "ecc2k130-degree7-m3-four-policy-result-v1"
     assert result["status"] in ("PASS_PANEL", "NEGATIVE_PANEL")
     assert result["config_sha256"] == sha(CONFIG)
-    assert result["frozen_sha256"] == sha(HERE / "FROZEN.json")
+    assert result["frozen_sha256"] == sha(FROZEN)
+    restore_bare_curve()
     F = pilot.FastGF2m(21, pilot.IRR)
     E0 = pilot.Koblitz(F, 0, 1)
     twist = pilot.Koblitz(F, 1, 1)
@@ -497,7 +524,9 @@ def replay(folder: Path) -> dict:
             "status": "PASS", "panel_status": expected_status,
             "result_sha256": sha(folder / "result.json"),
             "config_sha256": sha(CONFIG),
-            "frozen_sha256": sha(HERE / "FROZEN.json"),
+            "frozen_sha256": sha(FROZEN),
+            "repair_lock_sha256": sha(REPAIR),
+            "failed_replay_sha256": repair["failed_replay_sha256"],
             "cells_replayed": 16, "cases_replayed": total_cases,
             "bit_polynomial_point_checks": reference_checks,
             "cells": cells}
