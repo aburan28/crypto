@@ -375,6 +375,30 @@ archives:
 [`RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md`](../../research/notes/index-calculus/RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md),
 [`strong_rho_sweep_20260929_run/`](../../research/notes/index-calculus/strong_rho_sweep_20260929_run/).
 
+**2026-09-30 cachegrind check of the memory-bound hypothesis at n = 41 (class:
+measurement of an explanation; moves no boundary target and does not touch the
+instruction verdict).** PR #955 and the ladder note left "IC's index runs at a lower IPC
+because it is memory-bound" untested. At n = 41, L = 1,024, K = 255, IC runs at IPC 0.89
+against rho R3's 2.06. Pre-registered protocol, simulator (cachegrind, LL 2 / 8 / 32 MiB),
+pointer-chase host calibration, native huge-page contrast. **Registered verdict:
+UNDETERMINED** (the noise gate, max/min ≤ 0.10 over five repetitions, is unreachable on
+this VM: 0.28 over fifteen); a second registered attempt (R2) is **UNRESOLVED (gate)**
+(chase-control speedup 1.24 against the required 1.3). Deterministic facts: IC has 12.15
+D1 misses per 1,000 instructions against rho's 6.63 and 1.21 against 0.147 last-level
+misses per 1,000 at 2 MiB (8.2×; 13.5× at 32 MiB), nearly independent of simulated
+cache size, concentrated in the inlined index build and probe loop. The simulator can
+explain between 0.08 and 1.9 of the per-instruction time gap (no overlap information);
+the antagonist contention test has no power on this VM (positive control did not
+slow); huge pages cut IC's user time by 13-15 % and rho's by 0-3 %, a translation share
+of 0.257 (A2, no interval) and 0.219 (R2, 95 % interval 0.153-0.322, validity gate
+failed): **about a fifth to a quarter of the gap is address translation, and roughly
+three quarters is unexplained.** Not tested at n = 53 (1.36 GiB index). Whatever the
+answer, IC retires 1.52× rho's instructions at this cell, so no cache-level fix makes
+it faster than the reference here; wins must cut probes and index work. Protocol,
+amendments (A1, A2), R2, results and raw outputs:
+[`RESEARCH_CACHEGRIND_N41_20260929.md`](../../research/notes/index-calculus/RESEARCH_CACHEGRIND_N41_20260929.md),
+[`cachegrind_n41_20260929_run/`](../../research/notes/index-calculus/cachegrind_n41_20260929_run/).
+
 **[SUPERSEDED by the erratum above] Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
 `vs_rho` comparator (`examples/koblitz_rho_batch_ks.rs`) walks its
 signed-Frobenius canonicalization by real field squaring and inverts by
