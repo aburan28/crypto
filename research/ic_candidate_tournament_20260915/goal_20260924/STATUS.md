@@ -314,11 +314,16 @@ and failure-retention path accepted in PRs
 [#1031](https://github.com/aburan28/crypto/pull/1031) and
 [#1042](https://github.com/aburan28/crypto/pull/1042).
 [PR #1051](https://github.com/aburan28/crypto/pull/1051) records its accepted
-snapshot and complete invocation before dispatch, and tracks execution and
-terminal evidence. It fixes one exposed n17 point, 256 ordinary queries,
-64 target attempts and a two-hour controller watchdog, with no retry or
-extension. That bounded macOS ARM64 control establishes no calibrated speedup
-or fresh-target qualification, even if it recovers the point's scalar.
+snapshot and complete invocation before dispatch, and retains the
+[terminal full development solve](static-sat-runtime-v3/full-development-20260929/README.md).
+Its single invocation completed at rank 29/29 with 37 verified relations from
+149 ordinary queries, retaining 106 source-UNSAT and six conflict-inconclusive
+attempts. It recovered scalar 24886 on its first target attempt; independent
+row/log/scalar/source and fresh archive transport replay passed. The observed
+708,643,292 ns online interval closes through recovery replay. This bounded
+macOS ARM64 control establishes a complete source-bound SAT IC path, with no
+calibrated speedup or fresh-target qualification. Its exposed point, 256-query
+and 64-target caps, two-hour controller watchdog and no-retry rule stay fixed.
 
 The next competitive gate requires complete family admission, the reviewed
 exposure/reference/calibration adapter, fresh points excluding every exposure,
