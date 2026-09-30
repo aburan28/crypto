@@ -483,6 +483,43 @@
     <nav aria-label="Performance evidence"><a href="algorithm-lab.html">Factor bases, linear algebra &amp; SAT demos →</a><a href="performance-gains.html">Explore performance charts →</a><a href="#summation-polynomials-20260914">Summation-polynomial evidence</a><a href="#gaudry-allocation-20260914">Earlier Gaudry gains</a><a href="#macaulay-cpu-gpu-pipeline">CPU/GPU pipeline</a></nav>
   </aside>
 
+  <div class="panel" id="ic-paired-n17-diagnostic-20260929">
+    <div class="panel-head">
+      <h2>Paired n17a1 correctness panel: SAT completes; bounded F5 misses one column <span class="chip">accounting</span></h2>
+      <p>All registered local arms are terminal on public point <code>[52411,72106]</code>,
+        curve <code>EC1N17Ckb1hbbe2b5b6b1e6</code>, subgroup order 65587.
+        The table cites the retained
+        <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/paired-fresh-n17a1/results-20260929/DIAGNOSTIC-PANEL.json">raw observations</a>
+        and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/paired-fresh-n17a1/results-20260929/README.md">archive, identities and independent replay</a>.
+        Nanoseconds are uncalibrated instrument readings on a busy macOS host;
+        admissible online costs, speedups, normalized S and floor ratios remain unknown.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>One supplied target per arm; raw online intervals exclude reusable preparation and include scalar replay. No row qualifies for promotion.</caption>
+      <thead><tr><th>Arm</th><th>Actual base / columns</th><th>Ordinary queries / witnesses / rank</th><th>Verified scalar</th><th>Observed online ns</th><th>Admissible online ns</th><th>Rho / IC</th><th>S / floor</th></tr></thead>
+      <tbody>
+        <tr><td>Static SAT v2</td><td>62 / 29</td><td>189 / 57 / 29</td><td>24886</td><td>72,019,683,375</td><td>unknown</td><td>unknown</td><td>unknown</td></tr>
+        <tr><td>Bounded MatrixF5</td><td>62 / 29</td><td>256 / 61 / 28</td><td>none</td><td>unknown</td><td>unknown</td><td>unknown</td><td>unknown</td></tr>
+        <tr><td>Accepted-source pair-table IC</td><td>272 / 8</td><td>9 / 9 / 8</td><td>24886</td><td>25,791</td><td>unknown</td><td>unknown</td><td>unknown</td></tr>
+        <tr><td>Selected-source signed-Frobenius rho</td><td>not applicable</td><td>not applicable</td><td>24886</td><td>158,125</td><td>unknown</td><td>not applicable</td><td>unknown</td></tr>
+        <tr><td>Generic rho diagnostic</td><td>not applicable</td><td>not applicable</td><td>24886</td><td>142,750</td><td>unknown</td><td>not applicable</td><td>unknown</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>Independent field elimination finds every F5 relation has zero coefficient
+        at column 27. SAT queries 164 and 173 cover that direction; both were
+        budget-incomplete in F5. The first 189 shared inputs yield 45 witnesses
+        in both, 12 SAT-only witnesses, 125 oracle-infeasible SAT inputs and seven
+        SAT budget-inconclusive inputs. This prefix was selected by SAT&rsquo;s rank
+        stop and is a post-hoc coverage diagnostic. The original SAT manifests
+        missed two imported package files; recovered bytes preserve replay but
+        cannot establish preexecution coverage. SAT ran before F5 contrary to
+        the declared order, cache declarations differ, and isolation/A-A gates
+        were unavailable. All failures and earlier figures remain retained;
+        no algorithmic or ECC2K-130 improvement follows.</p>
+    </div>
+  </div>
+
   <!-- ============ THREE REGIMES ON ONE AXIS ============ -->
   <div class="panel" id="boundary-ledger">
     <div class="panel-head">
