@@ -13,6 +13,22 @@ PILOT_RESULT = (verify.ROOT /
 
 
 class ReferenceArithmeticTests(unittest.TestCase):
+    def test_unmetered_degree_seven_geometry(self):
+        verify.restore_bare_curve()
+        field = verify.pilot.FastGF2m(21, verify.pilot.IRR)
+        source = verify.pilot.Koblitz(field, 0, 1)
+        twist = verify.pilot.Koblitz(field, 1, 1)
+        lines, selected, _ = verify.pilot.order_seven_lines(field, twist)
+        complement = next(lines[key]["generator"] for key in sorted(lines)
+                          if key != selected)
+        generator, _ = verify.pilot.choose_generator(source)
+        transport = verify.pilot.BinaryVeluMap.from_generator(
+            source, twist, lines[selected]["generator"], 7)
+        dual = verify.DualTransport(source, twist, lines[selected]["generator"],
+                                    complement, 7, generator)
+        self.assertEqual(transport(generator), dual.forward(generator))
+        self.assertEqual(dual.compose(generator), source.mul(generator, 7))
+
     def test_bit_polynomial_field_matches_existing_field(self):
         reference = verify.ReferenceField()
         fast = verify.pilot.FastGF2m(21, verify.pilot.IRR)
