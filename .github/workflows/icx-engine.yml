@@ -69,15 +69,21 @@ jobs:
         run: |
           set -e
           mkdir -p results/icx-nist
+          failed=0
           for c in P-256 K-163 K-233 K-283 K-409 K-571 B-163 B-233 B-283 B-409 B-571; do
-            ./target/release/icx validate "$c" --json > "results/icx-nist/$c.json"
+            if ! ./target/release/icx validate "$c" --json > "results/icx-nist/$c.json"; then
+              failed=1
+            fi
             cat "results/icx-nist/$c.json"
           done
+          exit "$failed"
       - name: Archive native NIST parameter diagnostics
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: icx-nist-${{ matrix.arch }}
           path: results/icx-nist
+          if-no-files-found: ignore
       - name: Estimate one curve per family
         run: |
           set -e
