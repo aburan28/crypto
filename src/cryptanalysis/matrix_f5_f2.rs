@@ -897,7 +897,7 @@ mod tests {
         if std::arch::is_x86_feature_detected!("avx2") {
             for cols_len in [1usize, 3, 4, 5, 63, 64, 65, 127, 129, 4097, 12951] {
                 let cols: Vec<u64> = (0..cols_len)
-                    .map(|i| (i as u32).wrapping_mul(0x9e37_79b9) as u64 & 0x00ff_ffff)
+                    .map(|i| (i as u32).wrapping_mul(0x9e37_79b9) as u64)
                     .collect();
                 let compact = compact_gather_columns(&cols).unwrap();
                 for salt in [0u64, 1, 3, 7, u64::MAX] {
@@ -910,8 +910,8 @@ mod tests {
                         .collect();
                     assert_eq!(
                         // SAFETY: AVX2 support was checked above.
-                        unsafe { unpack_row_avx2_gather(&row, &compact, 24) },
-                        unpack_row_scalar_direct(&row, &cols, 24),
+                        unsafe { unpack_row_avx2_gather(&row, &compact, 32) },
+                        unpack_row_scalar_direct(&row, &cols, 32),
                         "cols_len={cols_len}, salt={salt}",
                     );
                 }
