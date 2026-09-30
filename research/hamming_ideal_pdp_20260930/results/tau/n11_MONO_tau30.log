@@ -1,0 +1,4 @@
+/home/user/crypto/research/hamming_ideal_pdp_20260930/hamming_pdp/target/release/hamming_pdp --n 11 --w 2 --targets 4 --encodings MONO --budget-log2 30 --matrix-cap-log2 27 --out /home/user/crypto/research/hamming_ideal_pdp_20260930/results/tau/n11_MONO_tau30.jsonl.part
+n=11 irr=0x805 alpha=0x3 #E=2116 odd=529 |F_wt|=67 (x:34) |F_sub|=137 (x:69) l=7 setup=1ms
+n=11 MONO WT2 seed=0 planted label=true pairs=2 found=true ok calls=1 tame=1 wild=0 budget=0 cap=0 depth_mean=0.00 max_depth=0 xor=165616337 rows=10917 cols=7547 deg=4 prep=365ms elim=610ms add=358ms rref=0ms subst=148ms post=218ms branch=0ms 1721ms
+n=11 MONO WT2 seed=1 uniform label=true pairs=2 found=true ok calls=1 tame=1 wild=0 budget=0 cap=0 depth_mean=0.00 max_depth=0 xor=169280345 rows=10999 cols=7547 deg=4 prep=341ms elim=531ms add=362ms rref=0ms subst=163ms post=176ms branch=0ms 1594ms
