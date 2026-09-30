@@ -2409,6 +2409,143 @@ trace of `m = 4`, `N = 16` shows where those rows are.
 4. **`m = 2` at `N = 28`**, and the **independent replication** of §12.10's
    items 3–4.
 
+## 15. Round 6, 2026-09-30: stop a step's elimination at a full echelon
+
+§§15.1–15.6 were written and committed before the round's runs. The results
+follow as §15.7 onward. The data are in `research/pkm_tower_round6_20260930/`.
+
+### 15.1 The change
+
+§14.8 ranked this first. Its target is F4's zero rows, the goal the signature
+line (§§13–14) served.
+- **Where they are.** A step reduces its S-rows by the reduced reducer block
+  (`D − C·B'`), then echelonizes the residues in chunks.
+  - Once that echelon has a pivot on every residual column, every later S-row
+    reduces to zero.
+  - A pivot is never rewritten once found.
+  - So the rest of the step's S-rows can be skipped without changing a pivot,
+    the basis, the trace or `D`.
+- **The code.** `f4_fp_tower` gains `full_rank_exit`, on by default
+  (`--no-full-rank-exit` in the example turns it off).
+  - Each step records after how many S-rows its echelon filled and how many
+    rows were skipped. The trace prints both, with the step's multiply-adds.
+  - Rows add `full_rank_exit` and `rows_skipped_full_rank`.
+- **What may change.** Only these may change, and all may only fall:
+  - the multiply-adds;
+  - each step's residue count and `max_residual_rows`, since skipped rows are
+    not counted;
+  - the time.
+- **Class** (`AGENTS.md` §3): engineering at most. A solver-stage cost falls,
+  and `D` and every other output stay. There is no `S` and no scoreboard row.
+- **Tests.** Two new unit tests join the nine existing ones.
+  - The step's elimination with the exit on and off gives the same echelon,
+    row for row, and never more multiply-adds. That is checked on random
+    matrices, most of which fill the echelon, some in the middle of a chunk.
+  - The whole engine with the exit on and off gives the same basis, report and
+    trace, but for the multiply-adds, the residual rows and the skipped rows.
+    That is checked on 40 systems: Kummer towers like the pilot's, and towers
+    with every rule coefficient non-zero.
+
+### 15.2 The identity check
+
+`replay.sh` runs two passes at the host's default thread count (four here, as
+for the committed rows), and `compare_exit.py` checks them.
+- **The exit on.** Every committed system that round 3 replayed, with the flags
+  it was run with, and round 3's own cells:
+  - round 2's cross-check (XV1–XV5), its cells to the sizes they finished, its
+    confirmations and D1, which are round 3's 355 rows;
+  - round 3's `m = 4`, `N = 16` cell and its confirmation (M4b, C-M4b).
+
+  Every row must equal the committed row on every field but the wall clock,
+  the multiply-adds and `max_residual_rows`, and those two may only fall.
+  Every trace step must equal the committed step on every field the old build
+  printed up to the pairs left, except the residue count, which may only fall.
+- **The exit off.** The cross-check, D1, and M4 at `N ≤ 12`. Every row must
+  equal the committed row on every field but the wall clock, multiply-adds
+  included.
+
+### 15.3 The timing protocol (`AGENTS.md` §10)
+
+- **Host.** Intel Xeon at 2.10 GHz, 4 cores without SMT, AVX-512 (F, BW, CD,
+  DQ, VL, IFMA, VBMI, VNNI, BF16, FP16) and AVX2, 15 GB. Linux 6.18.44, x86-64,
+  rustc 1.94.1. It is not the host of rounds 2–5 (2.80 GHz), so no earlier
+  wall time is compared with a new one.
+- **Builds.**
+  - Baseline: the example built from `main` at `9f4df528`, whose
+    `f4_fp_tower.rs` is the one rounds 3–5 measured (sha256 `6fc24089…`).
+    Binary sha256
+    `830cfad997e249499674f9e1b1ae923f0b83b7d41375ea2a998df944f3f40764`.
+  - Candidate: the example built from the commit of this section.
+- **Runs.** `bench.py` times three systems, target 0 each: Kummer, `p₁`, at
+  `m = 4`, `N = 12`; `m = 3`, `N = 12`; and `m = 2`, `N = 16`.
+  - Every run is at one thread (`RAYON_NUM_THREADS=1`), through
+    `tools/isolated_bench.py` on CPU 3.
+  - First the baseline against a byte-identical copy of itself (A/A),
+    interleaved over five rounds. Then the baseline against the candidate
+    (A/B), interleaved over five rounds.
+  - The table gives the median and the minimum. Contended runs are reported
+    and not pooled.
+- **Metrics.** The multiply-adds are the primary metric. Wall time is a
+  practicality note and counts only from uncontended runs.
+- **No timing claim for `m = 4`, `N = 16`.** A one-thread run would take hours
+  per build. Its evidence is the replay's multiply-adds.
+
+### 15.4 What was measured before this section (a disclosure)
+
+- **The committed traces**, read without running anything:
+
+  | system | full-rank steps | residue phase in them, share of the run | rows after full rank, weighted |
+  |:--|--:|--:|--:|
+  | `m = 4`, `N = 16` (round 3) | 1 | 23% | 21% |
+  | `m = 4`, `N = 12` (round 4's T4, D1) | 1 | 48–54% | 28–31% |
+  | `m = 3`, `N = 9`–15 (T3) | 1 | 0–1% | ≤ 1% |
+  | `m = 2`, `N = 12`–20 (T2) | 1 | 0.2–11% | ≤ 11% |
+
+  - Every full-rank step there is a refutation's last step.
+  - The last column is an upper bound on the saving: it assumes the echelon
+    fills after as many rows as it has columns, where the time goes to rows
+    evenly.
+- **A plumbing check** with the candidate, on round 4's T4 at `N = 8` and T2
+  at `N = 12`, both targets.
+  - The exit off reproduces the committed rows exactly, multiply-adds
+    included.
+  - With the exit on, `N = 8` does not change.
+  - With the exit on, at `N = 12` the last step's echelon filled after 63 of
+    its 168 S-rows. The other 105 were skipped, and the multiply-adds fell from
+    65,014,148 to 64,802,468 (0.33%).
+- **The unit tests** of §15.1.
+
+### 15.5 Predictions, before the runs
+
+1. **Identity.** Every replayed row and trace step is as §15.2 requires, with
+   no exception.
+2. **The exit off** reproduces every row it runs exactly, multiply-adds
+   included.
+3. **Multiply-adds** fall on every system whose run has a step with S-rows
+   left after its echelon filled, and nowhere else. The rough ranges from
+   §15.4:
+   - 10–35% at `m = 4`, `N = 12`;
+   - 5–25% at `m = 4`, `N = 16`;
+   - under 1% at `m = 3`;
+   - under 11% at `m = 2`.
+4. **Timing** (one thread, isolated). At `m = 4`, `N = 12` the candidate's
+   median is below the baseline's by more than the A/A spread. On the other
+   two systems it is not above the baseline's by more than the A/A spread.
+
+### 15.6 Decision rule, fixed now
+
+- **Adoption.** The exit stays on by default if predictions 1 and 2 hold and no
+  timed system is slower by more than its A/A spread. Otherwise the default
+  goes back to off, the code stays, and this section records why.
+- **Instrument first.** A difference in any field other than §15.2's voids the
+  change until it is explained.
+- **Inadmissible:**
+  - changing the scripts' systems, flags or thread counts after the first
+    round-6 run;
+  - dropping a system;
+  - pooling contended runs with uncontended ones.
+
+
 ---
 
 ## References
