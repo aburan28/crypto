@@ -1,3 +1,5 @@
 /home/user/crypto/research/hamming_ideal_pdp_20260930/hamming_pdp/target/release/hamming_pdp --n 11 --w 2 --targets 4 --encodings FC --budget-log2 30 --matrix-cap-log2 27 --out /home/user/crypto/research/hamming_ideal_pdp_20260930/results/tau/n11_FC_tau30.jsonl.part
 n=11 irr=0x805 alpha=0x3 #E=2116 odd=529 |F_wt|=67 (x:34) |F_sub|=137 (x:69) l=7 setup=1ms
 n=11 FC WT2 seed=0 planted label=true pairs=2 found=true ok calls=6 tame=1 wild=5 budget=5 cap=3 depth_mean=5.00 max_depth=5 xor=2342929860 rows=46657 cols=37199 deg=4 prep=4985ms elim=1184ms add=3136ms rref=1ms subst=1087ms post=4252ms branch=0ms 20280ms
+n=11 FC WT2 seed=1 uniform label=true pairs=2 found=true ok calls=11 tame=5 wild=6 budget=6 cap=4 depth_mean=4.00 max_depth=5 xor=2566967871 rows=43031 cols=33543 deg=4 prep=7319ms elim=2186ms add=4981ms rref=1ms subst=6054ms post=6018ms branch=1ms 33692ms
+n=11 FC WT2 seed=2 planted label=true pairs=4 found=true ok calls=6 tame=1 wild=5 budget=5 cap=3 depth_mean=5.00 max_depth=5 xor=2510986420 rows=43176 cols=33361 deg=6 prep=4654ms elim=1842ms add=2830ms rref=0ms subst=1647ms post=4296ms branch=0ms 21219ms

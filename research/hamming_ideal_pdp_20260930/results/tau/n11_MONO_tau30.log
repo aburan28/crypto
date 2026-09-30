@@ -2,3 +2,5 @@
 n=11 irr=0x805 alpha=0x3 #E=2116 odd=529 |F_wt|=67 (x:34) |F_sub|=137 (x:69) l=7 setup=1ms
 n=11 MONO WT2 seed=0 planted label=true pairs=2 found=true ok calls=1 tame=1 wild=0 budget=0 cap=0 depth_mean=0.00 max_depth=0 xor=165616337 rows=10917 cols=7547 deg=4 prep=365ms elim=610ms add=358ms rref=0ms subst=148ms post=218ms branch=0ms 1721ms
 n=11 MONO WT2 seed=1 uniform label=true pairs=2 found=true ok calls=1 tame=1 wild=0 budget=0 cap=0 depth_mean=0.00 max_depth=0 xor=169280345 rows=10999 cols=7547 deg=4 prep=341ms elim=531ms add=362ms rref=0ms subst=163ms post=176ms branch=0ms 1594ms
+n=11 MONO WT2 seed=2 planted label=true pairs=4 found=true ok calls=4 tame=1 wild=3 budget=0 cap=0 depth_mean=3.00 max_depth=3 xor=444871709 rows=10907 cols=7547 deg=4 prep=861ms elim=1559ms add=915ms rref=0ms subst=589ms post=534ms branch=0ms 4519ms
+n=11 MONO WT2 seed=3 uniform label=true pairs=8 found=true ok calls=6 tame=1 wild=5 budget=0 cap=0 depth_mean=5.00 max_depth=5 xor=540271418 rows=11004 cols=7547 deg=4 prep=1137ms elim=1905ms add=1045ms rref=0ms subst=1100ms post=627ms branch=0ms 5889ms
