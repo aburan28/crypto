@@ -80,9 +80,13 @@ class StaticSatNativeV3Tests(unittest.TestCase):
 
     def test_outer_watchdog_kills_inherited_native_group(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root,spec=self.registered(temporary,'/bin/sleep',['sleep','30'],20,outer_seconds=3)
+            # Source/interpreter preflight varies with the installed stdlib and
+            # hosted-runner I/O. This is a cleanup control, not a startup-speed
+            # assertion. Leave ample time for launch; the native sleep remains
+            # strictly longer than both registered watchdogs.
+            root,spec=self.registered(temporary,'/bin/sleep',['sleep','120'],60,outer_seconds=30)
             process=execute(root/'registration',root/'execution',expected_spec=spec,
-                            timeout_seconds=3)
+                            timeout_seconds=30)
             self.assertTrue(process['timed_out'])
             spawned=json.loads((root/'execution/entry-output/control.spawned.json').read_text())
             pid=spawned['native_pid']
