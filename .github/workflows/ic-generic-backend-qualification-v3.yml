@@ -1,0 +1,36 @@
+name: IC generic backend qualification v3
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ic-generic-backend-qualification-v3.yml'
+      - 'research/ic_candidate_tournament_20260915/run_generic_backend_qualification_v3.py'
+      - 'research/ic_candidate_tournament_20260915/test_generic_backend_qualification_v3.py'
+      - 'research/ic_candidate_tournament_20260915/generic_solver_feasibility.py'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v3/**'
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: 765c3c5f19032bd852163805f257c56babef2040
+          path: frozen-generic
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Lock the planning panel and refuse dispatch
+        working-directory: research/ic_candidate_tournament_20260915
+        run: |
+          python -m unittest test_generic_backend_qualification_v3.py -q
+          python -c 'import json,subprocess,sys; p=subprocess.run([sys.executable,"run_generic_backend_qualification_v3.py"],check=True,capture_output=True,text=True); r=json.loads(p.stdout); assert r["dispatch_authorized"] is False and r["measurement"]=="not_run" and r["v2_exposure_present"] is True and r["dispatch_block"]=="dispatch path is not in this checker"; print(p.stdout)'
+          python generic_solver_feasibility.py \
+            --panel goal_20260924/generic-backend-qualification-v3/panel.json \
+            --source-repo "$GITHUB_WORKSPACE/frozen-generic" \
+            --out "$RUNNER_TEMP/v3-layout.json" \
+            --require-pass

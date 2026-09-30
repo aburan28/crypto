@@ -68,8 +68,8 @@ Exclude, by exact curve ID and point:
 4. Second-run censored exposures
    [lost-v2-campaign-exposures.json](../generic-backend-qualification-v2/lost-v2-campaign-exposures.json)
    (SHA-256 `0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54`),
-   once that file is merged from the exposure-census PR; until then this
-   planning document cites the sealed hash only.
+   merged to `main` in #1039. The checker requires those bytes. That match
+   does not authorize sampling.
 
 Never redispatch seeds `2026092901` or `2026092902`. Do not reuse disclosed
 recovery-pilot or d6-pilot points as fresh competitive targets.

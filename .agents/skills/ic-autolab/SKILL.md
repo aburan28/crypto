@@ -194,7 +194,15 @@ points at `max_trials=1` and `node_budget=4096`, with zero accepted relations.
 [`run-20260929`](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-f4-subspace-pilot/run-20260929/RESULT.md)
 is a same-budget replay of that series, not a new registration, and
 `run_pilot.py` refuses another dispatch. Do not rerun this budget or treat it
-as family qualification. Before any new algebraic panel generates fresh targets, run
+as family qualification. The next planned registration is
+[generic-backend-qualification-v3](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v3/PROTOCOL.md)
+(seed `2026093001`, panel SHA-256
+`df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`,
+`standard_subspace` dimension 6, F4/F5 only, SAT deferred). Its lock checker
+`run_generic_backend_qualification_v3.py` and preflight-only workflow refuse
+sampling: `dispatch_authorized` stays false until a later commit adds the
+single campaign job with the frozen 180/35/240 minute caps. Never sample
+points from the lock checker alone. Before any new algebraic panel generates fresh targets, run
 `generic_solver_feasibility.py --require-pass` against its exact worker source
 checkout and registered panel. A static pass is only an encoder preflight:
 also pilot actual dispatch and natural failed-attempt accounting on disclosed
