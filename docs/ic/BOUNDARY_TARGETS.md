@@ -249,6 +249,19 @@ generic S, disjoint target confirmation, n83 confidence, GF(2^131) transfer,
 or native leaf m≥3 PDP result follows. The degree-263 map/ring certificate
 and review/label-gated m10 capacity PR #937 remain separate prerequisites.
 
+### Degree-263 leaf m10 physical support, 2026-09-30 — count transfer fails, no PDP
+
+The [frozen leaf census](../../research/notes/ecc2k130/leaf_m10_support_20260930/RESULT.md)
+ran once as Actions run 36707051160. Source low slots are 7,977 physical
+points ten times and the high slot is 16,125. Leaf `[1,0]` low slots are
+8,063–8,339 and its high slot is 16,259. Leaf `[1,4]` low slots are
+8,087–8,323 and its high slot is 16,323. Balanced projected-sign unions are
+39,880 / 40,875 / 40,994 and unequal unions are 43,954 / 44,932 / 45,075.
+Each arm's union equals the sum of its slot class counts. `N/q` remains a
+counting ceiling. `PDP_yield`, full ECDLP cost, `S`, matched rho, and
+method crossover stay unset. The census does not discharge review-gated
+m10 capacity PR #937, and it is not an equal-useful-size PDP comparison.
+
 ### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
 
 Separate measurement, separate base family, not a competing record. The
