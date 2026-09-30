@@ -14,11 +14,11 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 sys.path.insert(0, str(ROOT / "research/notes/ecc2k130/compact_ir_ledger_20260930"))
 from run_panel import sha  # noqa: E402
+from run_cold import ARM_ORDER, LIMIT_BYTES, LIMIT_SECONDS, checked_spec, schedule  # noqa: E402
 sys.path.insert(0, str(ROOT / "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929"))
 from verify_rank import Curve, Field, verify as verify_rank  # noqa: E402
 sys.path.insert(0, str(ROOT / "research/notes/ecc2k130/compact_orbit_point_panel_20260929"))
 from verify_panel import check_target  # noqa: E402
-from run_cold import ARM_ORDER, LIMIT_BYTES, LIMIT_SECONDS, checked_spec, schedule  # noqa: E402
 from verify_frozen import verify as verify_frozen  # noqa: E402
 
 T_CRIT_95 = {5: 2.7764451051977987, 20: 2.093024054408263}
