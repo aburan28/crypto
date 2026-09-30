@@ -460,6 +460,12 @@ pub struct F5Timings {
     pub direct_pack_used: bool,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
+    /// Whether the one-pass direct-write unpack path was used.
+    pub one_pass_unpack_used: bool,
+    /// Number of output-row capacity growths in one-pass unpack.
+    pub one_pass_growths: u64,
+    /// Largest allocated output-row capacity in one-pass unpack.
+    pub one_pass_max_capacity: usize,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -516,6 +522,46 @@ fn unpack_row_scalar_direct(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolP
         terms: monos,
         n_vars,
     }
+}
+
+/// Decode once, reserving an estimate and growing only between packed words.
+fn unpack_row_one_pass(
+    row: &[u64],
+    cols: &[u64],
+    n_vars: usize,
+    row_index: usize,
+) -> (F2BoolPoly, u64) {
+    let estimate = cols.len().saturating_sub(row_index) / 3 + 64;
+    let mut monos = Vec::<F2BoolMono>::with_capacity(estimate.max(64));
+    let mut written = 0usize;
+    let mut growths = 0u64;
+    for (w, &word) in row.iter().enumerate() {
+        if monos.capacity() - written < 64 {
+            // SAFETY: all earlier slots were initialized before this word.
+            unsafe { monos.set_len(written) };
+            monos.reserve(64);
+            growths += 1;
+        }
+        let out = monos.as_mut_ptr();
+        let mut bits = word;
+        while bits != 0 {
+            let c = w * 64 + bits.trailing_zeros() as usize;
+            bits &= bits - 1;
+            // SAFETY: at least 64 slots were reserved before this word,
+            // which can contain at most 64 set bits.
+            unsafe { out.add(written).write(F2BoolMono::from_mask(cols[c])) };
+            written += 1;
+        }
+    }
+    // SAFETY: exactly `written` slots were initialized above.
+    unsafe { monos.set_len(written) };
+    (
+        F2BoolPoly {
+            terms: monos,
+            n_vars,
+        },
+        growths,
+    )
 }
 
 #[cfg(target_arch = "x86_64")]
@@ -693,15 +739,37 @@ pub fn matrix_f5_f2_with_form_timed(
     let direct_unpack =
         *DIRECT_UNPACK.get_or_init(|| std::env::var("KIC_F5_UNPACK_DIRECT").as_deref() == Ok("1"));
     timings.direct_unpack_used = direct_unpack && !avx512_unpack;
+    static ONE_PASS_UNPACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let one_pass_requested = *ONE_PASS_UNPACK
+        .get_or_init(|| std::env::var("KIC_F5_ONE_PASS_UNPACK").as_deref() == Ok("1"));
+    let one_pass_unpack = one_pass_requested
+        && direct_unpack
+        && !avx512_unpack
+        && n_vars >= 24
+        && degree == 4
+        && cols.len() >= 4096;
+    timings.one_pass_unpack_used = one_pass_unpack;
+    let growths = std::sync::atomic::AtomicU64::new(0);
+    let max_capacity = std::sync::atomic::AtomicUsize::new(0);
     let out = matrix[..rank]
         .par_iter()
-        .map(|row| {
-            let p = unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack);
+        .enumerate()
+        .map(|(row_index, row)| {
+            let p = if one_pass_unpack {
+                let (p, row_growths) = unpack_row_one_pass(row, &cols, n_vars_out, row_index);
+                growths.fetch_add(row_growths, std::sync::atomic::Ordering::Relaxed);
+                max_capacity.fetch_max(p.terms.capacity(), std::sync::atomic::Ordering::Relaxed);
+                p
+            } else {
+                unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack)
+            };
             debug_assert!(p.is_canonical());
             p
         })
         .filter(|p| !p.is_zero())
         .collect();
+    timings.one_pass_growths = growths.load(std::sync::atomic::Ordering::Relaxed);
+    timings.one_pass_max_capacity = max_capacity.load(std::sync::atomic::Ordering::Relaxed);
     timings.unpack_ns = t.elapsed().as_nanos() as u64;
     Some((out, report, timings))
 }
@@ -760,6 +828,31 @@ mod tests {
                     unpack_row_scalar_direct(&row, &cols, 24),
                     unpack_row_scalar(&row, &cols, 24),
                 );
+            }
+        }
+    }
+
+    #[test]
+    fn one_pass_unpack_matches_direct_for_sparse_dense_and_partial_words() {
+        for cols_len in [1usize, 7, 63, 64, 65, 127, 129, 4097, 12951] {
+            let cols: Vec<u64> = (0..cols_len)
+                .map(|i| (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15))
+                .collect();
+            for salt in [0u64, 1, 3, 7, u64::MAX] {
+                let row: Vec<u64> = (0..cols_len.div_ceil(64))
+                    .map(|w| {
+                        let bits = (w as u64).wrapping_mul(0xd6e8_feb8_6659_fd93) ^ salt;
+                        let valid = (cols_len - w * 64).min(64);
+                        bits & (u64::MAX >> (64 - valid))
+                    })
+                    .collect();
+                for row_index in [0, cols_len / 2, cols_len] {
+                    assert_eq!(
+                        unpack_row_one_pass(&row, &cols, 24, row_index).0,
+                        unpack_row_scalar_direct(&row, &cols, 24),
+                        "cols_len={cols_len}, salt={salt}, row_index={row_index}",
+                    );
+                }
             }
         }
     }
