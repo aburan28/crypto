@@ -95,7 +95,7 @@ jobs:
           echo "== Prime analogue (p256) =="
           ./target/release/icx run p256 --bits 16 --rho-runs 4
           echo "== Gray-code FES solver plugged in =="
-          ./target/release/icx run sect233k1 --degree 11 --oracle descent-algebraic --solver fes-f2 --rho-runs 0
+          ./target/release/icx run sect163k1 --degree 11 --oracle descent-algebraic --solver fes-f2 --rho-runs 0
       - name: GPU FES kernel — host verification (no GPU needed)
         run: make -C gpu/fes test
       - name: GPU FES — drive the worker from icx (subprocess offload path)
