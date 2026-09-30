@@ -1,11 +1,25 @@
 # Native descendant factor bases: an m≥3 pullback control
 
-Status: **conditional protocol and counting preflight only**. No new relation,
+Status at the 2026-09-26 freeze: **conditional protocol and counting preflight
+only**. No new relation,
 solver, ECDLP, or ECC2K-130 timing measurement is reported here. Freeze a
 separate input manifest, target stream, source hashes, and resource caps before
 any measured successor run. Do not use this note to dispatch a leaf run while
 the implicit full-point PDP exporter and its negative-result semantics remain
 unadmitted.
+
+2026-09-29 addendum: [PR #973](https://github.com/aburan28/crypto/pull/973)
+admitted a generic full-point edge, and
+[PR #976](https://github.com/aburan28/crypto/pull/976) admitted a complete
+three-summand implicit leaf representation on both saved degree-263 lines.
+Those are semantic and representation-size gates, not a solved natural-target
+PDP or useful physical factor base. The subsequent exact
+[counting admission](../notes/ecc2k130/native_m3_counting_admission_20260929/DECISION.md)
+rejects the m3 route at a 79,770-choice physical budget under its frozen
+uniform-target cap. Checked general UNSAT, physical-support/rank admission for
+a viable larger base, paired native/pullback yield and charged full logs
+remain open. The original frozen conditions below still govern any measured
+paired experiment.
 
 ## Question and existing boundary
 
@@ -41,9 +55,11 @@ targets have at most `32×816/R ≈ 3.84×10⁻³⁵` expected hits. Even a 1%
 *necessary* target-support ceiling would need at least
 `s=3,443,553,994,135` physical points in one unordered common base; this
 number says nothing about whether such a base can be represented or solved.
-No larger native leaf base or n=131 m≥3 implicit representation is admitted,
-so transfer from a positive toy cell remains unset. A separate higher-arity,
-actual-count and memory gate is mandatory.
+At this protocol's freeze, no larger native leaf base or n=131 m≥3 implicit
+representation was admitted. PR #976 subsequently admitted the representation
+only; its physical point count and target yield remain unset. Transfer from a
+positive toy cell remains unset. A separate higher-arity, actual-count and
+memory gate is mandatory.
 
 ## Exact paired invariant
 
