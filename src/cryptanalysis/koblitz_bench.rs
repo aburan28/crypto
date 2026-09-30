@@ -1433,6 +1433,29 @@ pub struct RefutationProfile {
     pub max_weight: usize,
 }
 
+/// For one degree of one ladder draw (arguments as in
+/// [`ladder_refutation_profile`]): the Macaulay rows, the rows the F5
+/// criterion keeps, and the milliseconds evaluating the criterion and
+/// counting took.  Nothing is eliminated.
+pub fn ladder_f5_row_counts(
+    n: u32,
+    basis: &[u64],
+    x_r: u64,
+    degree: u32,
+) -> Option<(usize, usize, f64)> {
+    use crate::cryptanalysis::koblitz_groebner::f5_row_counts;
+    use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+
+    let irr = find_irreducible_sparse(n)?;
+    let st = FieldStructure::new(n, &irr);
+    let elem = |w: u64| F2mElement::from_biguint(&BigUint::from(w), n);
+    let basis: Vec<F2mElement> = basis.iter().map(|&w| elem(w)).collect();
+    let sys = build_decomposition_system(&basis, &elem(x_r), &F2mElement::one(n), 3, &st)?;
+    let t0 = Instant::now();
+    let (full, kept) = f5_row_counts(&sys.equations, sys.n_vars, degree)?;
+    Some((full, kept, t0.elapsed().as_secs_f64() * 1e3))
+}
+
 /// Profile one degree of one ladder draw.  `basis` and `x_r` are the
 /// recorded low words of the draw's `V` basis and `x_R`, as the ladder's
 /// JSON lines print them.
@@ -1876,6 +1899,78 @@ mod tests {
             }
         }
         assert!(compared >= 60, "only {compared} comparisons ran");
+    }
+
+    /// The F5-pruned sparse Macaulay matrix has the full one's columns,
+    /// high rank and linear span, with fewer rows: dropping rows the
+    /// criterion proves redundant never changes a refutation.
+    #[test]
+    fn f5_rows_keep_the_sparse_refutation() {
+        use crate::cryptanalysis::koblitz_groebner::{
+            build_macaulay_sparse, build_macaulay_sparse_f5, rref_f2, system_degree,
+        };
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+
+        let span = |rows: &[Vec<u32>], low: usize, n_cols: usize| -> Vec<Vec<u64>> {
+            let width = n_cols - low;
+            let mut m: Vec<Vec<u64>> = rows
+                .iter()
+                .map(|r| {
+                    let mut bits = vec![0u64; width.div_ceil(64).max(1)];
+                    for &c in r {
+                        let k = c as usize - low;
+                        bits[k / 64] |= 1 << (k % 64);
+                    }
+                    bits
+                })
+                .collect();
+            let rank = if m.is_empty() {
+                0
+            } else {
+                rref_f2(&mut m, width)
+            };
+            m.truncate(rank);
+            m
+        };
+
+        let mut rng = StdRng::seed_from_u64(0xF5_0B0E);
+        let (mut compared, mut pruned) = (0, 0usize);
+        for (n, ell, d_top) in [(5u32, 2usize, 6u32), (7, 3, 6), (4, 3, 6), (8, 4, 5)] {
+            for _ in 0..3 {
+                let (basis, x_r) = ladder_sample(n, ell, &mut rng);
+                let irr = find_irreducible_sparse(n).unwrap();
+                let st = FieldStructure::new(n, &irr);
+                let sys =
+                    build_decomposition_system(&basis, &x_r, &F2mElement::one(n), 3, &st).unwrap();
+                for degree in system_degree(&sys.equations)..=d_top {
+                    let (Some((cols, rows)), Some((f5_cols, f5_rows))) = (
+                        build_macaulay_sparse(&sys.equations, sys.n_vars, degree),
+                        build_macaulay_sparse_f5(&sys.equations, sys.n_vars, degree),
+                    ) else {
+                        continue;
+                    };
+                    assert_eq!(f5_cols, cols, "({n}, {ell}) degree {degree}");
+                    assert!(f5_rows.len() <= rows.len());
+                    pruned += rows.len() - f5_rows.len();
+                    let low = low_column_start(&cols);
+                    let want = eliminate_high_columns(rows, cols.len(), low);
+                    let got = eliminate_high_columns(f5_rows, cols.len(), low);
+                    assert_eq!(
+                        got.high_rank, want.high_rank,
+                        "({n}, {ell}) degree {degree}"
+                    );
+                    assert_eq!(
+                        span(&got.linear_rows, low, cols.len()),
+                        span(&want.linear_rows, low, cols.len()),
+                        "({n}, {ell}) degree {degree}"
+                    );
+                    compared += 1;
+                }
+            }
+        }
+        assert!(compared >= 30, "only {compared} comparisons ran");
+        assert!(pruned > 0, "the criterion pruned nothing");
     }
 
     /// `ladder_measure_from` gives the same outcome as `ladder_measure` when
