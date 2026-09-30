@@ -1,0 +1,241 @@
+{
+  "conclusion": "success",
+  "createdAt": "2026-09-30T06:36:12Z",
+  "headSha": "1d8f231759e2decd323c79fd3a6c62dccedaa398",
+  "jobs": [
+    {
+      "completedAt": "2026-09-30T07:35:22Z",
+      "conclusion": "success",
+      "databaseId": 109770374687,
+      "name": "paired-f5 (1)",
+      "startedAt": "2026-09-30T07:26:11Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-09-30T07:26:13Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-09-30T07:26:12Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:26:55Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-09-30T07:26:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:27:03Z",
+          "conclusion": "success",
+          "name": "Run dtolnay/rust-toolchain@master",
+          "number": 3,
+          "startedAt": "2026-09-30T07:26:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:27:05Z",
+          "conclusion": "success",
+          "name": "Run Swatinem/rust-cache@v2",
+          "number": 4,
+          "startedAt": "2026-09-30T07:27:03Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:27:05Z",
+          "conclusion": "success",
+          "name": "Check fail-closed block qualification",
+          "number": 5,
+          "startedAt": "2026-09-30T07:27:05Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:30:43Z",
+          "conclusion": "success",
+          "name": "Check exact shared-kernel and F5 output",
+          "number": 6,
+          "startedAt": "2026-09-30T07:27:05Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:32:55Z",
+          "conclusion": "success",
+          "name": "Build F5 stage benchmark",
+          "number": 7,
+          "startedAt": "2026-09-30T07:30:43Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:32:55Z",
+          "conclusion": "success",
+          "name": "Choose reservable CPUs",
+          "number": 8,
+          "startedAt": "2026-09-30T07:32:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:35:17Z",
+          "conclusion": "success",
+          "name": "Replay four seed blocks with first-clean selection",
+          "number": 9,
+          "startedAt": "2026-09-30T07:32:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:35:18Z",
+          "conclusion": "success",
+          "name": "Preserve every qualified and failed attempt",
+          "number": 10,
+          "startedAt": "2026-09-30T07:35:17Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:35:20Z",
+          "conclusion": "success",
+          "name": "Post Run Swatinem/rust-cache@v2",
+          "number": 19,
+          "startedAt": "2026-09-30T07:35:18Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:35:21Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 20,
+          "startedAt": "2026-09-30T07:35:20Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:35:21Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 21,
+          "startedAt": "2026-09-30T07:35:21Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/aburan28/crypto/actions/runs/36679082741/job/109770374687"
+    },
+    {
+      "completedAt": "2026-09-30T07:36:51Z",
+      "conclusion": "success",
+      "databaseId": 109770374981,
+      "name": "paired-f5 (2)",
+      "startedAt": "2026-09-30T07:28:18Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-09-30T07:28:19Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-09-30T07:28:18Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:29:05Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-09-30T07:28:19Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:29:13Z",
+          "conclusion": "success",
+          "name": "Run dtolnay/rust-toolchain@master",
+          "number": 3,
+          "startedAt": "2026-09-30T07:29:05Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:29:15Z",
+          "conclusion": "success",
+          "name": "Run Swatinem/rust-cache@v2",
+          "number": 4,
+          "startedAt": "2026-09-30T07:29:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:29:15Z",
+          "conclusion": "success",
+          "name": "Check fail-closed block qualification",
+          "number": 5,
+          "startedAt": "2026-09-30T07:29:15Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:32:49Z",
+          "conclusion": "success",
+          "name": "Check exact shared-kernel and F5 output",
+          "number": 6,
+          "startedAt": "2026-09-30T07:29:15Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:34:58Z",
+          "conclusion": "success",
+          "name": "Build F5 stage benchmark",
+          "number": 7,
+          "startedAt": "2026-09-30T07:32:49Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:34:58Z",
+          "conclusion": "success",
+          "name": "Choose reservable CPUs",
+          "number": 8,
+          "startedAt": "2026-09-30T07:34:58Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:36:47Z",
+          "conclusion": "success",
+          "name": "Replay four seed blocks with first-clean selection",
+          "number": 9,
+          "startedAt": "2026-09-30T07:34:58Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:36:48Z",
+          "conclusion": "success",
+          "name": "Preserve every qualified and failed attempt",
+          "number": 10,
+          "startedAt": "2026-09-30T07:36:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:36:50Z",
+          "conclusion": "success",
+          "name": "Post Run Swatinem/rust-cache@v2",
+          "number": 19,
+          "startedAt": "2026-09-30T07:36:48Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:36:50Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 20,
+          "startedAt": "2026-09-30T07:36:50Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-09-30T07:36:50Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 21,
+          "startedAt": "2026-09-30T07:36:50Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/aburan28/crypto/actions/runs/36679082741/job/109770374981"
+    }
+  ],
+  "startedAt": "2026-09-30T06:36:12Z",
+  "status": "completed",
+  "updatedAt": "2026-09-30T07:36:52Z",
+  "url": "https://github.com/aburan28/crypto/actions/runs/36679082741"
+}
