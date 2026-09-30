@@ -979,3 +979,158 @@ at genus 4, 0.38 at genus 3). Round six should have updated it and did
 not. This round updates it from its own frozen file, and the earlier
 fit (`experiments/hyperelliptic_exponent_fit.json`) stays as it is,
 superseded but not rewritten.
+
+## Round seven: measured
+
+Frozen source: `experiments/hyperelliptic_sparse_solve_r7/` (raw sweeps,
+per-run isolation records, manifest with binary hashes, the analysis
+script and its outputs). Eleven sweeps: an A/A pair, then five
+interleaved baseline/candidate rounds, each on one reserved core. None
+was contended.
+
+**Pinned output held.** Across all eleven sweeps, every row's `N`, `m`,
+relation-stage operations, oracle mul-mods, rho operations and verified
+`k` are identical. Only the solve's cost moved. The dense-solve rows,
+which this change does not touch, moved by at most 0.07% in `S` — the
+control behaved as a control.
+
+**The hypothesis holds: the cost was bookkeeping.** Counted solve
+mul-mods changed by −4% to +8% (a deterministic pivot order replacing a
+`HashMap`-ordered one). The solve's charge fell:
+
+| | fb-walk rows | ab-walk rows |
+|--|--:|--:|
+| median cut in solve charge | **5.1×** | 2.5× |
+| range | 2.0 – 18.2× | 1.0 – 5.3× |
+| A/A spread (max over rows) | 1.40× | — |
+| rows where every candidate sweep beats every baseline sweep | 18 of 18 | — |
+
+The success condition (median ≥ 2×, outside the A/A spread) is met.
+
+**Two defects surfaced on the way, both caught before measuring.** The
+first candidate visited a row twice when it cancelled out of a column
+and filled back in, aborting the solve; four DLP tests failed. And the
+cross-check I wrote used dense elimination as its oracle, which was
+wrong: `gaussian_eliminate_mod_n` returns a particular solution on an
+under-determined system instead of `None`, despite its documentation.
+The test now uses an independent rank criterion, and a mutation check
+confirmed it fails without the fix. The dense solver's behaviour is
+outside this round and is filed separately; the DLP driver is protected
+from it by its `[k]D₁ = D₂` check.
+
+### The solve's growth changed, not only its constant
+
+Log-log slope of solve charge against `m`, fb-walk rows:
+
+| genus | charge before | charge after | counted mul-mods (both) |
+|--:|--:|--:|--:|
+| 2 | 2.25 | 1.37 | 1.67 – 1.69 |
+| 3 | 2.68 | 1.70 | 2.14 |
+| 4 | 2.39 | 1.64 | 2.02 – 2.04 |
+
+The old bookkeeping grew faster than the arithmetic it surrounded — the
+per-pivot rescan is `O(m · holders · row length)` and the holder lists
+grew with every update. The candidate's charge now grows no faster than
+its arithmetic. The algorithm's own exponent, the mul-mod column, did
+not move.
+
+### Table
+
+Factor-base walk, DP rho in the same run, in-situ unit. Medians over
+six baseline and five candidate sweeps. `corr` renormalises rho's walk
+to the ideal `√(π/2)` as round five did; `clock` is `wall_ic/wall_rho`.
+
+| g | `p` | `N` | `m` | `S_ic` before | `S_ic` after | `S_ic/S_rho` before → after | `corr` before → after | `clock` after |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 2 | 41 | 1321 | 15 | 2.74 | 2.58 | 0.30 → 0.28 | 0.31 → 0.29 | 0.33 |
+| 2 | 61 | 1399 | 22 | 2.79 | 2.56 | 0.32 → 0.29 | 0.32 → 0.29 | 0.33 |
+| 2 | 101 | 4663 | 46 | 3.25 | 2.29 | 0.59 → 0.42 | 0.60 → 0.42 | 0.45 |
+| 2 | 151 | 7949 | 78 | 5.62 | 2.54 | 1.22 → 0.55 | 1.26 → 0.57 | 0.57 |
+| 2 | 211 | 11813 | 112 | 7.88 | 2.67 | 1.99 → 0.67 | 2.03 → 0.69 | 0.64 |
+| 2 | 251 | 61667 | 123 | 4.07 | 1.33 | 1.69 → **0.55** | 1.69 → **0.55** | 0.60 |
+| 3 | 23 | 6299 | 12 | 2.66 | 2.64 | 0.56 → 0.56 | 0.55 → 0.55 | 0.43 |
+| 3 | 31 | 7333 | 16 | 3.48 | 3.40 | 0.80 → 0.78 | 0.76 → 0.75 | 0.62 |
+| 3 | 41 | 6679 | 27 | 4.12 | 3.82 | 0.86 → 0.80 | 0.87 → 0.81 | 0.70 |
+| 3 | 61 | 124459 | 33 | 1.79 | 1.65 | 0.78 → 0.72 | 0.86 → 0.80 | 0.57 |
+| 3 | 101 | 364747 | 53 | 1.66 | 1.28 | 0.88 → 0.68 | 0.95 → 0.73 | 0.57 |
+| 3 | 151 | 1180351 | 77 | 1.71 | 1.09 | 0.86 → 0.55 | 1.12 → 0.72 | 0.45 |
+| 3 | 211 | 4620611 | 104 | 1.38 | 0.81 | 0.70 → **0.41** | 0.99 → **0.58** | 0.31 |
+| 4 | 17 | 5639 | 7 | 12.74 | 12.76 | 2.45 → 2.45 | 2.53 → 2.54 | 1.72 |
+| 4 | 23 | 30223 | 11 | 5.20 | 5.18 | 1.80 → 1.79 | 1.78 → 1.78 | 1.29 |
+| 4 | 31 | 239753 | 16 | 2.31 | 2.29 | 1.21 → 1.20 | 1.25 → 1.24 | 0.85 |
+| 4 | 41 | 333041 | 24 | 2.18 | 2.14 | 1.18 → 1.15 | 1.23 → 1.21 | 0.90 |
+| 4 | 61 | 16790591 | 36 | 0.35 | 0.32 | 0.16 → **0.15** | 0.26 → **0.24** | 0.11 |
+
+Every row returned its verified `k` on every sweep.
+
+**Class: engineering.** `S` fell; the solve's arithmetic exponent did
+not. The genus-2 column moved most because genus 2 has the largest `m`
+per unit of `N`, so it carried the most bookkeeping.
+
+## What the priced solve does to the exponent claim
+
+Round five's law, `S_ic/S_rho ∝ g!·N^{1/g − 1/2}`, prices the relation
+stage only. With the solve priced, the ratio is a sum of two terms, and
+the second one grows. Writing the solve's measured growth as `m^s`, with
+`s ≈ 1.4 – 1.7` from the table above, and `m ∝ N^{1/g}`:
+
+```
+relation stage / rho  ∝  N^{1/g − 1/2}
+solve / rho           ∝  N^{s/g − 1/2}
+```
+
+| g | relation term | solve term (`s` measured) | predicted net | measured slope of `corr` after, 95% CI |
+|--:|--:|--:|--|--:|
+| 2 | 0 | +0.19 | rises | **+0.21** [0.00, 0.41] |
+| 3 | −0.167 | +0.07 | flat, relation term falling, solve term rising | **−0.01** [−0.07, +0.05] |
+| 4 | −0.25 | −0.09 | falls | **−0.29** [−0.42, −0.16] |
+
+(Slopes are against `log₂ N`, as round five's were. Before this round,
+under round six's accounting, the same fits read +0.51, +0.06 [0.00,
+0.13] and −0.28.)
+
+**This withdraws round five's genus-3 exponent claim.** It reported
+−0.154 against a predicted −0.167 and the scoreboard carries it as an
+exponent advance. That fit was made while the solve was charged almost
+nothing. With the solve priced, genus 3 is flat: −1/6 lies outside the
+interval. Genus 4 still falls at a slope consistent with its law, and
+genus 2 was never predicted to cross.
+
+The reason is structural, not a matter of this implementation. A full
+degree-1 factor base has `m ≈ p/2`, and any elimination of an `m × m`
+system costs at least order `m`, realistically `m²`. Against rho's
+`√N ≈ p^{g/2}`, that is `p²` against `p^{1.5}` at genus 3: with a full
+factor base the linear algebra outgrows rho. This is the known reason
+that small-genus index calculus shrinks the factor base and accepts
+large primes to balance the two phases — Thériault (ASIACRYPT 2003) and
+Gaudry, Thomé, Thériault and Diem (Math. Comp. 2007) reach
+`q^{2 − 4/(2g+1)}` and `q^{2 − 2/g}` that way; both are below rho's
+`q^{g/2}` at genus 3. At toy sizes the solve's measured `s` is under 2
+because it is sparse and has fixed overheads; that is a reprieve at
+these sizes, not an exponent.
+
+## Where this leaves the thread
+
+1. **Genus 2 now measures below rho at all six instances**, 0.28 – 0.67
+   on the unit and 0.33 – 0.64 on the clock. Round six's "genus 2 gets
+   worse with `p`" was the bookkeeping. The ratio still rises with `N`
+   (+0.21), as the solve term predicts, so this is a constant-factor
+   lead that shrinks with size, not a crossover.
+2. **Genus 3 is flat at 0.4 – 0.8.** Ahead of rho at every size
+   measured, with no exponent behind it.
+3. **Genus 4 carries the only exponent claim left**: −0.29, consistent
+   with −1/4, best row 0.15 raw and 0.24 renormalised at `N = 1.7·10⁷`.
+   It still rests on five sizes, and the four small ones lose.
+4. **The next lever is the factor-base size**, not the solver. The
+   solve is now charged honestly and grows with `m`; the literature's
+   answer is a reduced factor base with large-prime relations, which
+   trades relation-stage work for linear algebra. That is a change to
+   the algorithm and needs its own pre-registered protocol and floor.
+
+## Scope
+
+`p ≤ 251`, `N ≤ 1.7·10⁷`, one x86-64 cloud container (Arm64 and GPU not
+measured), full degree-1 factor base, `BigUint` arithmetic on both
+sides. Wall time enters `S` through the in-situ unit, so these are
+single-host numbers; the A/A spread bounds their noise at 1.4× per row
+and the medians over five or six sweeps are what is reported.
