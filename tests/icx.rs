@@ -89,6 +89,57 @@ fn aliases_resolve() {
 }
 
 #[test]
+fn validate_actual_nist_parameters_against_independent_sage_reference() {
+    let reference: serde_json::Value = serde_json::from_str(include_str!(
+        "../docs/ic/nist-parameter-reference.json"
+    )).unwrap();
+    let rows = reference["curves"].as_array().unwrap();
+    assert_eq!(rows.len(), 11, "the frozen NIST coverage panel changed");
+    for row in rows {
+        let name = row["curve"].as_str().unwrap();
+        assert_eq!(row["verified"], true, "Sage reference failed for {name}");
+        let actual = run_json(&["validate", name]);
+        assert_eq!(actual["verified"], true, "parameter validation failed for {name}");
+        assert_eq!(actual["is_named_curve"], true);
+        assert_eq!(actual["diagnostic_only"], true);
+        assert_eq!(actual["full_parameter_pipeline_available"], false);
+        assert_eq!(actual["exact_parameters"], row["exact_parameters"], "parameters {name}");
+        assert_eq!(actual["fixtures"], row["fixtures"], "point/S3 fixtures {name}");
+        assert!(actual["fixtures"][1]["u"].as_str().unwrap().len() > 16,
+            "wide public scalar was narrowed for {name}");
+    }
+}
+
+#[test]
+fn exact_parameter_solve_requests_never_substitute_an_analogue() {
+    for name in ["P-256", "K-163", "K-233", "K-283", "K-409", "K-571",
+                 "B-163", "B-233", "B-283", "B-409", "B-571"] {
+        let out = icx().args(["run", name, "--require-named-curve", "--envelope", "1024", "--json"])
+            .output().expect("run icx");
+        assert!(!out.status.success(), "{name} must not report a full-size solve");
+        let report: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert_eq!(report["status"], "error");
+        assert!(report["message"].as_str().unwrap().contains("full-parameter IC solving is unavailable"));
+        assert!(report.get("result").is_none(), "analogue result leaked for {name}");
+    }
+}
+
+#[test]
+fn incompatible_or_unrepresentable_analogue_parameters_are_rejected() {
+    for args in [
+        vec!["run", "p256", "--degree", "13"],
+        vec!["run", "k-163", "--bits", "16"],
+        vec!["run", "b-571", "--degree", "571"],
+        vec!["run", "k-163", "--repeats", "0"],
+    ] {
+        let out = icx().args(&args).arg("--json").output().unwrap();
+        assert!(!out.status.success(), "ignored invalid arguments: {args:?}");
+        let report: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert_eq!(report["status"], "error");
+    }
+}
+
+#[test]
 fn unknown_curve_errors_cleanly() {
     let out = icx().args(["inspect", "no-such-curve"]).output().unwrap();
     assert!(!out.status.success());

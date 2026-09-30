@@ -22,6 +22,9 @@ use std::process::ExitCode;
 use clap::{Args, Parser, Subcommand};
 use serde_json::{json, Value};
 
+#[path = "icx/parameters.rs"]
+mod parameters;
+
 use crypto_lib::cryptanalysis::curve_catalog::{self, CatalogCurve, Family};
 use crypto_lib::cryptanalysis::ic_engine;
 
@@ -53,6 +56,8 @@ enum Action {
     List(ListArgs),
     /// Verify a curve's parameters (generator on curve, [n]G = O, Hasse).
     Inspect(CurveArg),
+    /// Check public point sums and S3 on the named curve's exact parameters.
+    Validate(CurveArg),
     /// Report the generic-attack cost and the IC picture for this curve.
     Estimate(EstimateArgs),
     /// Run the index-calculus pipeline on the curve (or a same-family analogue).
@@ -85,6 +90,9 @@ struct FesArgs {
 struct RunArgs {
     /// Curve name or alias.
     curve: String,
+    /// Require the actual named curve; fail if only an analogue is available.
+    #[arg(long)]
+    require_named_curve: bool,
     /// Factor base plugin: `name` or `name:k=v,...` (default per family).
     #[arg(long)]
     factor_base: Option<String>,
@@ -206,6 +214,7 @@ fn list(args: &ListArgs) -> Result<Value, String> {
             "field_bits": field.bits,
             "order_bits": c.order_bits(),
             "rho_security_bits": round1(c.rho_security_bits()),
+            "exact_parameters": parameters::exact_parameters(&c),
             "ic_relevant": est.ic_relevant,
             "regime": est.regime.tag(),
         }));
@@ -444,6 +453,13 @@ fn run_cmd(args: &RunArgs, json: bool) -> Result<Value, String> {
 
     let curve = curve_catalog::by_name(&args.curve)
         .ok_or_else(|| format!("unknown curve '{}'; try `icx list`", args.curve))?;
+    if args.require_named_curve {
+        return Err(format!(
+            "full-parameter IC solving is unavailable for {}; the current run path uses \
+             an analogue. Use `icx validate {}` for bounded checks on the actual parameters",
+            curve.name, curve.name
+        ));
+    }
     let cfg = RunConfig {
         factor_base: args.factor_base.clone(),
         oracle: args.oracle.clone(),
@@ -520,6 +536,11 @@ fn execute(cli: &Cli) -> Result<Value, String> {
     match &cli.command {
         Some(Action::List(a)) => list(a),
         Some(Action::Inspect(a)) => inspect(&a.curve),
+        Some(Action::Validate(a)) => {
+            let curve = curve_catalog::by_name(&a.curve)
+                .ok_or_else(|| format!("unknown curve '{}'; try `icx list`", a.curve))?;
+            parameters::validate(&curve)
+        }
         Some(Action::Estimate(a)) => estimate(a),
         Some(Action::Run(a)) => run_cmd(a, cli.json),
         Some(Action::Fes(a)) => fes_cmd(a),

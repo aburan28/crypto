@@ -362,7 +362,7 @@ fn prime_curves(v: &mut Vec<CatalogCurve>) {
         ),
         (
             "p256",
-            &["secp256r1", "prime256v1", "nistp256"],
+            &["p-256", "secp256r1", "prime256v1", "nistp256"],
             "NIST FIPS 186-4 / SEC 2",
             CurveParams::p256,
         ),

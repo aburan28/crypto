@@ -19,6 +19,9 @@ on:
       - "src/cryptanalysis/fes_gpu.rs"
       - "src/cryptanalysis/gf3m.rs"
       - "tests/icx.rs"
+      - "docs/ic/nist-parameter-reference.json"
+      - "docs/ic/NIST_PARAMETER_COVERAGE.md"
+      - "tools/ic_nist_parameter_reference.py"
       - "Cargo.toml"
       - "docs/ic/ENGINE_AUDIT_AND_DESIGN.md"
       - "gpu/fes/**"
@@ -58,6 +61,19 @@ jobs:
         run: cargo test --release --test icx
       - name: List the catalog (log which curves ran on ${{ matrix.arch }})
         run: ./target/release/icx list
+      - name: Check actual NIST parameters and public S3 fixtures
+        run: |
+          set -e
+          mkdir -p results/icx-nist
+          for c in P-256 K-163 K-233 K-283 K-409 K-571 B-163 B-233 B-283 B-409 B-571; do
+            ./target/release/icx validate "$c" --json > "results/icx-nist/$c.json"
+            cat "results/icx-nist/$c.json"
+          done
+      - name: Archive native NIST parameter diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: icx-nist-${{ matrix.arch }}
+          path: results/icx-nist
       - name: Estimate one curve per family
         run: |
           set -e

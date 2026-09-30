@@ -25,7 +25,7 @@
 
 use serde::Serialize;
 
-use crate::cryptanalysis::curve_catalog::{CatalogCurve, Family};
+use crate::cryptanalysis::curve_catalog::{CatalogCurve, CurveObject, Family};
 use crate::cryptanalysis::ic_boundary::{
     calibrate_binary_instance, calibrate_group, calibrate_row_ops, calibrate_word_xor,
     generic_floor_ops, koblitz_instance, random_binary_instance, rho_reference,
@@ -468,6 +468,18 @@ pub fn run_curve(
 ) -> Result<RunResult, String> {
     let cls = classify(curve, cfg.envelope_bits);
     let family = curve.family;
+    if cfg.repeats == 0 {
+        return Err("repeats must be greater than zero".into());
+    }
+    if family == Family::Prime && cfg.degree.is_some() {
+        return Err("--degree applies to binary analogues; use --bits for a prime analogue".into());
+    }
+    if family != Family::Prime && cfg.bits.is_some() {
+        return Err("--bits applies to prime analogues; use --degree for a binary analogue".into());
+    }
+    if cfg.degree.is_some_and(|degree| degree > 62) {
+        return Err("the current analogue pipeline supports field degree at most 62; use `icx validate` for actual NIST parameters".into());
+    }
 
     // Extension and characteristic-three families do not yet have a
     // pipeline-runnable instance in this crate (the framework is single-word
@@ -478,6 +490,12 @@ pub fn run_curve(
             family.tag(),
             curve.name
         ));
+    }
+
+    let failed: Vec<_> = curve.verify().into_iter().filter(|check| !check.passed)
+        .map(|check| check.name).collect();
+    if !failed.is_empty() {
+        return Err(format!("named curve {} failed parameter checks: {}", curve.name, failed.join(", ")));
     }
 
     match family {
@@ -517,8 +535,17 @@ pub fn run_curve(
         Family::BinaryRandom | Family::Koblitz => {
             let degree = cfg.degree.unwrap_or(13);
             let inst = if family == Family::Koblitz {
-                koblitz_instance(1, degree)
-                    .or_else(|| koblitz_instance(0, degree))
+                let a = match &curve.object {
+                    CurveObject::Binary(c) => {
+                        let one = crate::binary_ecc::F2mElement::one(c.m);
+                        if c.b != one || (!c.a.is_zero() && c.a != one) {
+                            return Err("Koblitz analogue requires a in {0,1} and b=1".into());
+                        }
+                        if c.a.is_zero() { 0 } else { 1 }
+                    }
+                    _ => return Err("Koblitz family requires a binary curve object".into()),
+                };
+                koblitz_instance(a, degree)
                     .ok_or_else(|| format!("could not build a degree-{degree} Koblitz analogue"))?
             } else {
                 random_binary_instance(degree, cfg.seed, 8)
@@ -566,7 +593,7 @@ fn finish(
 ) -> RunResult {
     let note = if !analogue.is_named_curve {
         Some(format!(
-            "This run solved a {}-bit {} analogue, not {} ({} bits). It demonstrates the \
+            "This run used a {}-bit {} analogue, not {} ({} bits). It demonstrates the \
              pipeline and its cost on the same family; the named curve's cost is an \
              extrapolation — see `icx estimate {}`. No claim is made about breaking {}.",
             analogue.run_order_bits,
@@ -581,7 +608,7 @@ fn finish(
     };
     RunResult {
         curve: curve.name.to_string(),
-        regime: regime.tag(),
+        regime: if analogue.is_named_curve { regime.tag() } else { Regime::Scaled.tag() },
         ic_relevant,
         analogue,
         config_label,
@@ -595,6 +622,35 @@ fn finish(
 mod tests {
     use super::*;
     use crate::cryptanalysis::curve_catalog::by_name;
+
+    #[test]
+    fn analogue_preserves_koblitz_coefficient_and_scaled_regime() {
+        let c = by_name("k-233").unwrap();
+        let cfg = RunConfig {
+            degree: Some(13),
+            rho_runs: 0,
+            envelope_bits: 1024,
+            ..Default::default()
+        };
+        let expected = koblitz_instance(0, 13).unwrap();
+        let mut p = ProgressReporter::silent();
+        let res = run_curve(&c, &cfg, &mut p).expect("run");
+        assert_eq!(res.analogue.instance, expected.name);
+        assert_eq!(res.regime, "scaled");
+        assert!(!res.analogue.is_named_curve);
+        assert!(res.reports.iter().any(|r| r.verified));
+    }
+
+    #[test]
+    fn invalid_named_parameters_fail_before_analogue_selection() {
+        let mut c = by_name("p256").unwrap();
+        if let CurveObject::Prime(p) = &mut c.object {
+            p.b += num_bigint::BigUint::from(1u32);
+        }
+        let mut progress = ProgressReporter::silent();
+        let error = run_curve(&c, &RunConfig::default(), &mut progress).err().unwrap();
+        assert!(error.contains("failed parameter checks"));
+    }
 
     #[test]
     fn prime_analogue_recovers_a_logarithm() {
