@@ -18,9 +18,10 @@
 //! Reports written before ICV1 name curves by the spellings they used then
 //! (`K_0 / GF(2^41)`, `bench-24bit`, `random-binary-n27-b845462`, …).
 //! Those files are frozen.  The registry (`docs/curves/registry.json`) maps
-//! every such spelling to its identity, and [`resolve`] and [`same_curve`]
-//! read it, so code that replays a frozen report, or looks a curve up in a
-//! table keyed the old way, accepts either name.
+//! every such spelling to its identity; [`resolve`] and [`same_curve`] read
+//! the alias map generated from it (`curve_aliases.json`, beside this file),
+//! so code that replays a frozen report, or looks a curve up in a table keyed
+//! the old way, accepts either name.
 
 use std::collections::HashMap;
 use std::sync::OnceLock;
@@ -34,8 +35,10 @@ use crate::hash::sha256::sha256;
 /// Version of the canonical model JSON.
 pub const VERSION: &str = "1";
 
-/// The registry, compiled in so that lookups need no file at run time.
-const REGISTRY: &str = include_str!("../../docs/curves/registry.json");
+/// Every name the registry knows, normalised, to its slug: generated from
+/// `docs/curves/registry.json` by `scripts/build_curve_registry.py` and kept
+/// under `src/` so that a checkout of `src/` alone still builds.
+const ALIASES: &str = include_str!("curve_aliases.json");
 
 /// A curve's ICV1 identity.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -260,22 +263,13 @@ fn aliases() -> &'static HashMap<String, String> {
     static MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
     MAP.get_or_init(|| {
         let doc: serde_json::Value =
-            serde_json::from_str(REGISTRY).expect("docs/curves/registry.json parses");
-        let mut map = HashMap::new();
-        for c in doc["curves"].as_array().into_iter().flatten() {
-            let Some(slug) = c["slug"].as_str() else {
-                continue;
-            };
-            let names = ["aliases", "standard_names"]
-                .iter()
-                .flat_map(|k| c[*k].as_array().into_iter().flatten())
-                .filter_map(serde_json::Value::as_str)
-                .chain([slug, c["icv1"].as_str().unwrap_or(slug)]);
-            for name in names {
-                map.insert(normalise(name), slug.to_string());
-            }
-        }
-        map
+            serde_json::from_str(ALIASES).expect("curve_aliases.json parses");
+        doc["aliases"]
+            .as_object()
+            .into_iter()
+            .flatten()
+            .filter_map(|(k, v)| Some((k.clone(), v.as_str()?.to_string())))
+            .collect()
     })
 }
 

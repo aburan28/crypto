@@ -48,7 +48,7 @@ FROZEN_DIRS = ("results", "runs", "raw", "evidence", "archives")
 # of retired forms, and the tools that recognise them.
 SELF = {"docs/curves/ICV1.md", "docs/curves/README.md", "scripts/check_curve_names.py",
         "scripts/build_curve_registry.py", "scripts/curve_id.py",
-        "src/cryptanalysis/curve_id.rs", "tests/curve_id.rs",
+        "src/cryptanalysis/curve_id.rs", "src/cryptanalysis/curve_aliases.json", "tests/curve_id.rs",
         "examples/curve_id_generated.rs",
         # Generated alias tables: their "also called" column lists the
         # legacy spellings on purpose.
@@ -262,6 +262,9 @@ def main() -> int:
     args = ap.parse_args()
     res = Resolver()
     problems = lint(res, pinned_hashes(), args.fix)
+    if not cid.ALIAS_MAP.exists() or cid.ALIAS_MAP.read_text() != cid.alias_map_text(res.reg):
+        problems.append("src/cryptanalysis/curve_aliases.json does not match docs/curves/registry.json; "
+                        "run scripts/build_curve_registry.py")
     if args.diff:
         problems += lint_diff(args.diff, res)
     for p in problems:

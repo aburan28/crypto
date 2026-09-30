@@ -701,12 +701,12 @@ def page(doc: dict, standalone: bool) -> str:
     P.append('<footer><p><strong>What this is not.</strong> A view of frozen measurements, class accounting: no row '
              'here was measured for this page, and nothing is a speedup. Records kept in other units, wall-clock '
              'panels and batched producers awaiting independent replay, are in '
-             '<a href="ic/BOUNDARY_TARGETS.md">docs/ic/BOUNDARY_TARGETS.md</a>; the canonical page is the '
-             '<a href="index-calculus-scoreboard.html">index-calculus scoreboard</a>. No IC pipeline has been priced '
+             '<a href="https://github.com/aburan28/crypto/blob/main/docs/ic/BOUNDARY_TARGETS.md">docs/ic/BOUNDARY_TARGETS.md</a>; the canonical page is the '
+             '<a href="https://aburan28.github.io/crypto/scoreboard/">index-calculus scoreboard</a>. No IC pipeline has been priced '
              'end to end on ECC2K-130 or on the m = 83 confidence gate (AGENTS.md §8a).</p>'
              '<p>Built by <code>scripts/build_ic_leaderboard.py</code> from: '
              + ", ".join(f'<code>{esc(v["path"])}</code> ({v["sha256"][:12]})' for v in doc["sources"].values())
-             + '. Curves are named by ICV1 slug (<a href="curves/ICV1.md">docs/curves/ICV1.md</a>).</p></footer></div>')
+             + '. Curves are named by ICV1 slug (<a href="https://github.com/aburan28/crypto/blob/main/docs/curves/ICV1.md">docs/curves/ICV1.md</a>).</p></footer></div>')
     body = "\n".join(P)
     if standalone:
         return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'

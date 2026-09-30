@@ -518,16 +518,21 @@ def main() -> int:
         print("note:", p, file=sys.stderr)
     for m in missing:
         print("unresolved:", m, file=sys.stderr)
+    amap = cid.alias_map_text(doc)
     if args.check:
-        current = OUT.read_text() if OUT.exists() else ""
-        if current != text:
-            print("docs/curves/registry.json is stale; run scripts/build_curve_registry.py",
+        stale = [p for p, t in ((OUT, text), (cid.ALIAS_MAP, amap))
+                 if not p.exists() or p.read_text() != t]
+        for p in stale:
+            print(f"{p.relative_to(REPO)} is stale; run scripts/build_curve_registry.py",
                   file=sys.stderr)
+        if stale:
             return 1
     else:
         OUT.parent.mkdir(parents=True, exist_ok=True)
         OUT.write_text(text)
-        print(f"wrote {OUT.relative_to(REPO)}: {len(doc['curves'])} curves")
+        cid.ALIAS_MAP.write_text(amap)
+        print(f"wrote {OUT.relative_to(REPO)}: {len(doc['curves'])} curves, "
+              f"and {cid.ALIAS_MAP.relative_to(REPO)}")
     return 1 if missing else 0
 
 

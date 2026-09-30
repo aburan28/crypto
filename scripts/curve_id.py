@@ -299,6 +299,23 @@ def normalise_alias(name: str) -> str:
     return s
 
 
+ALIAS_MAP = REPO / "src" / "cryptanalysis" / "curve_aliases.json"
+
+
+def alias_map_text(registry: dict) -> str:
+    """The alias map `crypto::cryptanalysis::curve_id` compiles in: every
+    name the registry knows, normalised, to its curve's slug.  It lives under
+    src/ because workflows that sparse-check-out src/ must still build."""
+    aliases = {}
+    for c in registry["curves"]:
+        for name in c["aliases"] + c["standard_names"] + [c["slug"], c["icv1"]]:
+            aliases[normalise_alias(name)] = c["slug"]
+    doc = {"schema_version": 1, "generated_from": "docs/curves/registry.json",
+           "generated_by": "scripts/build_curve_registry.py",
+           "aliases": dict(sorted(aliases.items()))}
+    return json.dumps(doc, indent=0, ensure_ascii=False) + "\n"
+
+
 def load_registry(path: Path = REGISTRY) -> dict:
     return json.loads(path.read_text())
 
