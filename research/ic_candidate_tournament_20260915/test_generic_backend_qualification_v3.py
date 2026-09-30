@@ -1,4 +1,4 @@
-"""The v3 smoke registration stays locked and undispatched."""
+"""The v3 smoke registration is locked and may measure once with --out."""
 import unittest
 
 from oracle import InvalidEvidence
@@ -19,20 +19,21 @@ class V3RegistrationTest(unittest.TestCase):
         self.assertTrue(algebraic)
         self.assertTrue(all(row['boolean_variables'] <= 64 for row in algebraic))
 
-    def test_seed_is_not_dispatched_without_the_v2_census(self):
-        self.assertFalse(DISPATCH_AUTHORIZED)
+    def test_dispatch_path_is_authorized_after_the_census(self):
+        self.assertTrue(DISPATCH_AUTHORIZED)
         panel = read(PANEL)
         report = status_report(panel)
-        self.assertFalse(report['dispatch_authorized'])
+        self.assertTrue(report['dispatch_authorized'])
         self.assertEqual(report['measurement'], 'not_run')
         self.assertEqual(report['seed'], 2026093001)
+        self.assertEqual(report['qualification_schedule'], 'smoke')
         if not LOST_V2.is_file():
             self.assertEqual(exposure_block(), 'v2 exposure census is not on this checkout')
             self.assertIn('v2 exposure census', report['dispatch_block'])
         else:
             self.assertIsNone(exposure_block())
             self.assertTrue(report['v2_exposure_present'])
-            self.assertEqual(report['dispatch_block'], 'dispatch path is not in this checker')
+            self.assertIsNone(report['dispatch_block'])
 
     def test_a_changed_seed_is_rejected(self):
         panel = read(PANEL)
