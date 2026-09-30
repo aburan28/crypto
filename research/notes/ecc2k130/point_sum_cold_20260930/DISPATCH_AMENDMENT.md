@@ -9,8 +9,11 @@ cell result exists from that run.
 
 The workflow now runs `measure` only for an explicit `workflow_dispatch`.
 Pull requests still run `validate`, including independent replay of the
-frozen inputs and local smokes. Dispatch the six-cell matrix exactly once
-after validation passes; archive all cell artifacts, including failures.
+frozen inputs and local smokes. [GitHub requires a manually dispatched
+workflow to exist on the default branch](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow), so first merge the passing
+harness PR, then dispatch the six-cell matrix exactly once from that
+merged commit. Archive all cell artifacts, including failures, in a
+linked outcome PR.
 An outcome-only PR commit may run validation again but cannot repeat the
 cold panel. This amendment changes scheduling only: frozen Q, source,
 K/prefilter, arms, child limits, estimator and decision gates in
