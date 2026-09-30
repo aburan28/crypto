@@ -36,6 +36,21 @@ def test_other_use_excludes_and_ignores_idle():
     assert used == {'b[2]': 2.0, 'd[4]': 1.0}
 
 
+def test_monitor_excludes_descendants_from_its_cpu_snapshot():
+    # The benchmark is present in the CPU scan, then exits before a separate
+    # process-tree scan could find it. Parent IDs from the same scan retain it.
+    snapshot = {
+        10: ('taskset', 1, 1),
+        11: ('python3', 5, 10),
+        12: ('f4_f2_bench', 3 * ib.TICK, 11),
+        13: ('background', ib.TICK, 1),
+    }
+    assert ib.descendants(10, snapshot) == {11, 12}
+    now = {pid: (name, ticks) for pid, (name, ticks, _) in snapshot.items()}
+    used = ib.other_use({}, now, exclude={10} | ib.descendants(10, snapshot))
+    assert used == {'background[13]': 1.0}
+
+
 def test_reserving_every_cpu_is_refused():
     with pytest.raises(SystemExit):
         ib.check_cpus(set(os.sched_getaffinity(0)))

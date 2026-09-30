@@ -120,17 +120,15 @@ def conditions() -> dict:
             'psi_cpu': psi('cpu'), 'psi_memory': psi('memory')}
 
 
-def descendants(root: int) -> set[int]:
+def descendants(root: int, snapshot: dict[int, tuple[str, int, int]]) -> set[int]:
+    """Find children in the same /proc scan used for CPU accounting.
+
+    A short-lived benchmark can exit between a CPU scan and a second process
+    tree scan. In that case its charged ticks look like unrelated load.
+    """
     children: dict[int, list[int]] = {}
-    for entry in Path('/proc').iterdir():
-        if not entry.name.isdigit():
-            continue
-        try:
-            stat = (entry / 'stat').read_text()
-            ppid = int(stat[stat.rindex(')') + 2:].split()[1])
-        except (OSError, ValueError, IndexError):
-            continue
-        children.setdefault(ppid, []).append(int(entry.name))
+    for pid, (_, _, ppid) in snapshot.items():
+        children.setdefault(ppid, []).append(pid)
     out, stack = set(), [root]
     while stack:
         pid = stack.pop()
@@ -141,8 +139,8 @@ def descendants(root: int) -> set[int]:
     return out
 
 
-def cpu_ticks() -> dict[int, tuple[str, int]]:
-    """utime+stime of every process, in clock ticks, with its command name."""
+def cpu_snapshot() -> dict[int, tuple[str, int, int]]:
+    """Read each process's command, CPU ticks and parent from one stat entry."""
     out = {}
     for entry in Path('/proc').iterdir():
         if not entry.name.isdigit():
@@ -153,8 +151,13 @@ def cpu_ticks() -> dict[int, tuple[str, int]]:
             continue
         name = stat[stat.index('(') + 1:stat.rindex(')')]
         fields = stat[stat.rindex(')') + 2:].split()
-        out[int(entry.name)] = (name, int(fields[11]) + int(fields[12]))
+        out[int(entry.name)] = (name, int(fields[11]) + int(fields[12]), int(fields[1]))
     return out
+
+
+def cpu_ticks() -> dict[int, tuple[str, int]]:
+    """utime+stime of every process, in clock ticks, with its command name."""
+    return {pid: (name, ticks) for pid, (name, ticks, _) in cpu_snapshot().items()}
 
 
 def other_use(before: dict, after: dict, exclude: set[int]) -> dict:
@@ -305,8 +308,9 @@ class Monitor(threading.Thread):
         mine = {os.getpid()}
         previous = cpu_ticks()
         while not self.stop.wait(self.period):
-            now = cpu_ticks()
-            used = other_use(previous, now, mine | descendants(self.root) | {self.root})
+            snapshot = cpu_snapshot()
+            now = {pid: (name, ticks) for pid, (name, ticks, _) in snapshot.items()}
+            used = other_use(previous, now, mine | descendants(self.root, snapshot) | {self.root})
             total = sum(used.values())
             self.samples.append({'unix_time': time.time(), 'other_cpu_seconds': total,
                                  'contended': total > self.threshold * self.period,

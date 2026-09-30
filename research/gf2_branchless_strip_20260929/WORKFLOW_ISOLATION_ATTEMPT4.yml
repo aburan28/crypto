@@ -34,17 +34,6 @@ jobs:
         with:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
-      - name: Check isolation monitor attribution
-        run: |
-          PYTHONPATH=tools python3 - <<'PY'
-          import isolated_bench as ib
-          snapshot = {10: ('taskset', 0, 1), 11: ('python3', 0, 10),
-                      12: ('f4_f2_bench', ib.TICK, 11), 13: ('outside', ib.TICK, 1)}
-          children = ib.descendants(10, snapshot)
-          assert children == {11, 12}
-          now = {pid: (name, ticks) for pid, (name, ticks, _) in snapshot.items()}
-          assert ib.other_use({}, now, {10} | children) == {'outside[13]': 1.0}
-          PY
       - name: Check exact shared-kernel and F5 output
         run: |
           python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-branchless-bench.lock" -- cargo test --release --lib cryptanalysis::gf2_elim::tests -- --test-threads=1
