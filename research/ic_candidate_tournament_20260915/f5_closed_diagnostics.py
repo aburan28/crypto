@@ -96,7 +96,9 @@ def counters(attempts, config, expected_fields):
     for outcome, rows in sorted(by_outcome.items()):
         summaries[outcome] = dict(
             attempts=len(rows), at_reduction_budget=sum(row['at_reduction_budget'] for row in rows),
-            totals={key: sum(row['stats'][key] for row in rows) for key in sorted(INTEGER_COUNTERS)},
+            # Built degree is a parameter, not an additive work counter.
+            totals={key: sum(row['stats'][key] for row in rows)
+                    for key in sorted(INTEGER_COUNTERS - {'max_degree_built'})},
             ranges={key: [min(row['stats'][key] for row in rows), max(row['stats'][key] for row in rows)]
                     for key in sorted(INTEGER_COUNTERS)},
             built_degree_histogram=dict(sorted(Counter(str(row['stats']['max_degree_built'])
@@ -224,7 +226,8 @@ def analyze(bundle, protocol_file=PROTOCOL):
             path = Path(path).resolve()
             if path.suffix == '.py' and path.is_relative_to(HERE) and path.is_file():
                 loaded_sources[path.relative_to(HERE).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
-    return dict(schema_version=1, status='AUDITED_CLOSED_DIAGNOSTICS', protocol_sha256=sha256(protocol),
+    return dict(schema_version=1, presentation_schema_version=2,
+                status='AUDITED_CLOSED_DIAGNOSTICS', protocol_sha256=sha256(protocol),
                 protocol_document_sha256=hashlib.sha256(
                     Path(protocol_file).with_name('PROTOCOL.md').read_bytes()).hexdigest(),
                 analysis_invocation=list(sys.argv),

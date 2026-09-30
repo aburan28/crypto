@@ -58,6 +58,8 @@ class F5ClosedDiagnosticsTests(unittest.TestCase):
         self.assertEqual(row['stats']['reductions'], 4096)
         self.assertEqual(row['stats']['splits'], 1573)
         self.assertEqual(result['by_outcome']['incomplete']['attempts'], 1)
+        self.assertNotIn('max_degree_built', result['by_outcome']['incomplete']['totals'])
+        self.assertEqual(result['by_outcome']['incomplete']['built_degree_histogram'], {'3': 1})
         self.assertIn('cache_hits_and_misses', result['unresolved_instrumentation'])
         with self.assertRaisesRegex(InvalidEvidence, 'completion flags'):
             counters([self.attempt('proved_unsat')], dict(node_budget=4096, groebner_degree=3),
