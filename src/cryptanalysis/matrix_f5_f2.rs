@@ -460,10 +460,6 @@ pub struct F5Timings {
     pub direct_pack_used: bool,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
-    /// Whether output terms came from the four-column subset table.
-    pub nibble_table_unpack_used: bool,
-    /// Actual allocated bytes for that table, including offsets.
-    pub nibble_table_bytes: usize,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -516,90 +512,6 @@ fn unpack_row_scalar_direct(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolP
     debug_assert_eq!(written, terms);
     // SAFETY: all `terms` slots have been written above.
     unsafe { monos.set_len(terms) };
-    F2BoolPoly {
-        terms: monos,
-        n_vars,
-    }
-}
-
-/// Ordered monomial masks for all subsets of each four-column group.
-struct NibbleSubsetTable {
-    offsets: Vec<u32>,
-    terms: Vec<u64>,
-    chunks: usize,
-}
-
-impl NibbleSubsetTable {
-    fn allocated_bytes(&self) -> usize {
-        self.offsets.capacity() * std::mem::size_of::<u32>()
-            + self.terms.capacity() * std::mem::size_of::<u64>()
-    }
-}
-
-fn nibble_subset_table(cols: &[u64]) -> Option<NibbleSubsetTable> {
-    const MAX_BYTES: usize = 2 * 1024 * 1024;
-    const OFFSETS_PER_CHUNK: usize = 17;
-    const TERMS_PER_CHUNK: usize = 16 * 4 / 2;
-    let chunks = cols.len().div_ceil(4);
-    let offsets_cap = chunks.checked_mul(OFFSETS_PER_CHUNK)?;
-    let terms_cap = chunks.checked_mul(TERMS_PER_CHUNK)?;
-    let bytes = offsets_cap
-        .checked_mul(std::mem::size_of::<u32>())?
-        .checked_add(terms_cap.checked_mul(std::mem::size_of::<u64>())?)?;
-    if bytes > MAX_BYTES {
-        return None;
-    }
-    let mut offsets = Vec::new();
-    let mut terms = Vec::new();
-    offsets.try_reserve_exact(offsets_cap).ok()?;
-    terms.try_reserve_exact(terms_cap).ok()?;
-    for chunk in 0..chunks {
-        for pattern in 0..16u8 {
-            offsets.push(u32::try_from(terms.len()).ok()?);
-            let mut bits = pattern;
-            while bits != 0 {
-                let col = chunk * 4 + bits.trailing_zeros() as usize;
-                if let Some(&mask) = cols.get(col) {
-                    terms.push(mask);
-                }
-                bits &= bits - 1;
-            }
-        }
-        offsets.push(u32::try_from(terms.len()).ok()?);
-    }
-    let table = NibbleSubsetTable {
-        offsets,
-        terms,
-        chunks,
-    };
-    (table.allocated_bytes() <= MAX_BYTES).then_some(table)
-}
-
-fn unpack_row_nibble_table(row: &[u64], table: &NibbleSubsetTable, n_vars: usize) -> F2BoolPoly {
-    let count = row.iter().map(|word| word.count_ones() as usize).sum();
-    let mut monos = Vec::<F2BoolMono>::with_capacity(count);
-    let out = monos.as_mut_ptr().cast::<u64>();
-    let mut written = 0;
-    for chunk in 0..table.chunks {
-        let pattern = ((row[chunk / 16] >> (4 * (chunk % 16))) & 0xf) as usize;
-        if pattern == 0 {
-            continue;
-        }
-        let entry = chunk * 17 + pattern;
-        let start = table.offsets[entry] as usize;
-        let end = table.offsets[entry + 1] as usize;
-        let len = end - start;
-        debug_assert_eq!(len, pattern.count_ones() as usize);
-        // SAFETY: table entries preserve ascending columns. Every set bit
-        // accounts for one slot in `count`, so each copy fits in `monos`.
-        unsafe {
-            std::ptr::copy_nonoverlapping(table.terms.as_ptr().add(start), out.add(written), len)
-        };
-        written += len;
-    }
-    debug_assert_eq!(written, count);
-    // SAFETY: all `count` slots were initialized by the copies above.
-    unsafe { monos.set_len(count) };
     F2BoolPoly {
         terms: monos,
         n_vars,
@@ -781,27 +693,10 @@ pub fn matrix_f5_f2_with_form_timed(
     let direct_unpack =
         *DIRECT_UNPACK.get_or_init(|| std::env::var("KIC_F5_UNPACK_DIRECT").as_deref() == Ok("1"));
     timings.direct_unpack_used = direct_unpack && !avx512_unpack;
-    static NIBBLE_TABLE_UNPACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    let nibble_table_requested = *NIBBLE_TABLE_UNPACK
-        .get_or_init(|| std::env::var("KIC_F5_UNPACK_NIBBLE_TABLE").as_deref() == Ok("1"));
-    let nibble_table =
-        if nibble_table_requested && direct_unpack && !avx512_unpack && cols.len() >= 4096 {
-            nibble_subset_table(&cols)
-        } else {
-            None
-        };
-    timings.nibble_table_unpack_used = nibble_table.is_some();
-    timings.nibble_table_bytes = nibble_table
-        .as_ref()
-        .map_or(0, NibbleSubsetTable::allocated_bytes);
     let out = matrix[..rank]
         .par_iter()
         .map(|row| {
-            let p = if let Some(table) = nibble_table.as_ref() {
-                unpack_row_nibble_table(row, table, n_vars_out)
-            } else {
-                unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack)
-            };
+            let p = unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack);
             debug_assert!(p.is_canonical());
             p
         })
@@ -867,31 +762,6 @@ mod tests {
                 );
             }
         }
-    }
-
-    #[test]
-    fn nibble_subset_unpack_matches_scalar_direct_for_partial_chunks() {
-        for cols_len in [1usize, 3, 4, 5, 63, 64, 65, 127, 129, 4097, 12951] {
-            let cols: Vec<u64> = (0..cols_len)
-                .map(|i| (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15))
-                .collect();
-            let table = nibble_subset_table(&cols).unwrap();
-            assert!(table.allocated_bytes() <= 2 * 1024 * 1024);
-            for salt in [0u64, 1, 3, 7, u64::MAX] {
-                let row: Vec<u64> = (0..cols_len.div_ceil(64))
-                    .map(|w| {
-                        let bits = (w as u64).wrapping_mul(0xd6e8_feb8_6659_fd93) ^ salt;
-                        let valid = (cols_len - w * 64).min(64);
-                        bits & (u64::MAX >> (64 - valid))
-                    })
-                    .collect();
-                assert_eq!(
-                    unpack_row_nibble_table(&row, &table, 24),
-                    unpack_row_scalar_direct(&row, &cols, 24),
-                );
-            }
-        }
-        assert!(nibble_subset_table(&vec![0; 30_000]).is_none());
     }
 
     #[test]
