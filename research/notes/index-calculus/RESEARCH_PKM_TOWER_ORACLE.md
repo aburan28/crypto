@@ -52,6 +52,17 @@ pilot (§10, 2026-09-24).
   run and F4 stays. That mode's zero reductions come back as singular rows. The
   next lever for F4's zero rows is an exact early exit once a step's residue
   block reaches full rank (§14.8).
+- **Round 6 (§15, 2026-09-30) makes that exit.** F4 now stops a step's
+  elimination once the residue echelon is full. Every later row there reduces
+  to zero, and no pivot changes.
+  - It reproduces all 359 committed rows and 1,111 trace steps, but for the
+    multiply-adds and the residual counts. With it off it reproduces 313 rows
+    exactly.
+  - The multiply-adds fall 39% at `m = 4`, `N = 12` and 25% at `N = 16`, all in
+    the refutation step. They fall 0–15% at `m = 2` and ≤ 0.1% at `m = 3`.
+  - At one thread, isolated, `m = 4`, `N = 12` runs in 0.67 of the baseline's
+    time.
+  - `D` and memory are unchanged. This is engineering, not a finding.
 
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
@@ -2650,6 +2661,115 @@ The multiply-adds are the primary metric, and they did not vary between runs:
 At one thread, time falls a little less than work: by 33% against 40% at
 `m = 4`, and by 8.4% against 8.5% at `m = 2`.
 
+
+### 15.10 The identity check
+
+`replay.sh` ran from 05:40 to 08:18 UTC on 2026-09-30, with the candidate built
+from `00983dfc`, at four threads. `compare_exit.py` gives:
+
+| pass | rows | as required | trace steps | as required | steps that skipped rows |
+|:--|--:|--:|--:|--:|--:|
+| the exit off | 313 | **313, exactly: multiply-adds too** | 129 | 129 | 0 |
+| the exit on | 359 | **359** | 1,111 | 1,111 | 37 |
+
+- **Two changes to the comparison script after the pre-registration.**
+  - **More trace references.** Round 2 traced few of its cells, so the script
+    also compares against round 3's replay traces, which are committed and come
+    from the same engine as the committed rows. That widens the check.
+  - **One wrong reference, fixed.** Round 2's D2 diagnostic, a run stopped
+    early, is the same system as round 3's M4b target 0. The script had
+    compared the new M4b target-0 row with D2's row. It now compares a replay
+    row with its own file's row, or else with a finished one.
+- **`verify.py`** agrees with all 200 distinct rows it checks.
+- **Where the exit fires.** Every step that fills its echelon is its run's
+  last step, the refutation. Each fills at the earliest possible row: after
+  exactly as many S-rows as residual columns, so every row until then gave a
+  pivot.
+- **Multiply-adds.** They fall on exactly the 179 rows whose runs skipped
+  S-rows, and on no other:
+
+| system | multiply-adds, committed → exit on | saved | the last step: S-rows, filled after, after the fill point |
+|:--|:--|--:|:--|
+| `m = 4`, `N = 12` (M4, D1) | 8.548e10 → 5.194e10 | **39.2%** | 7,440, 3,130, 4,310 |
+| `m = 4`, `N = 16` (M4b) | 2.705e13 → 2.039e13 | **24.6%** | 82,738, 9,661, 73,077 |
+| `m = 3`, `N = 9`, 12, 15 (M3) | 1.59e8, 1.06e10, 3.19e12 | 0.1%, 0.0%, 0.0% | 340, 81, 45 S-rows |
+| `m = 2`, `N = 12`–22 (K1) | 6.50e7 → … → 4.88e12 | 0.3%, 14.5%, 8.1%, 0.1%, 0.5%, 0.0% | 168 to 5,648 S-rows |
+| isogeny, `m = 2`, `p₀`, `N = 20` (I0) | 4.45e11 → 4.38e11 | 1.6% | 16,060, 410, 15,650 |
+
+- **A counting error, fixed after the runs.** When the echelon fills inside a
+  chunk, the round's build set the skipped count to the later chunks' rows
+  instead of adding them, so it lost the rest of that chunk.
+  - Only the counter was affected: the rows were skipped, and every output and
+    multiply-add is as the table shows.
+  - As a result, `rows_skipped_full_rank` and the trace's "skipped" in this
+    round's files run up to one chunk short (at `m = 2`, `N = 14`, 1,910 for
+    2,251).
+  - The last column of the table is exact: the S-rows minus the fill point,
+    both of which the trace prints.
+  - The counter is fixed in this PR, and both unit tests now pin the exact
+    count.
+- **Memory is unchanged.** M4b peaks at 8,075 MB, against round 3's 8,062 MB.
+  `B'` and the kept basis set the peak, and the exit touches neither.
+
+### 15.11 The rule of §15.6, applied
+
+**The predictions of §15.5.**
+1. **Identity: confirmed.**
+2. **The exit off: confirmed**, exactly, multiply-adds included.
+3. **Multiply-adds: the pattern is confirmed, and two of the four ranges were
+   missed on the high side.**
+   - The multiply-adds fell exactly where S-rows were left after the echelon
+     filled.
+   - At `m = 4`, `N = 16` the saving was 24.6%, inside 5–25%.
+   - At `m = 3` it was at most 0.1%, under 1%.
+   - At `m = 4`, `N = 12` it was 39.2%, above 10–35%.
+   - At `m = 2` it reached 14.5% at `N = 14`, above "under 11%".
+   - The ranges came from time shares (§15.4), and the refutation step carries
+     more of the multiply-adds than of the time.
+4. **Timing.** Read literally, the first measurement failed the clause at
+   `m = 3` (§15.7). The second measurement, fixed before it ran, meets §15.8's
+   test on every system (§15.9).
+
+**Adoption: yes.** Predictions 1 and 2 hold, and no timed system is slower by
+§15.8's test. The exit stays on by default.
+
+**Class** (`AGENTS.md` §3): engineering. F4's multiply-adds fall by up to 39%,
+and `D` and every other output are unchanged. This is a stage diagnostic: no
+`S`, no scoreboard row.
+
+### 15.12 What round 6 shows, and what it does not
+
+It shows three things.
+1. **The rows after a full echelon were a large part of `m = 4`'s work.** They
+   were 39% of the multiply-adds at `N = 12` and 25% at `N = 16`, all in the
+   refutation step, and they are now skipped exactly.
+2. **The echelon fills at the earliest possible row** in every refutation step
+   of these systems. The exit's saving is therefore the whole of the rows after
+   the column count, and the saving at a new size can be read off one trace.
+3. **At `m = 3`, and at `m = 2` beyond `N = 16`, the refutation step is cheap.**
+   The saving there is under 2%. Those runs' work is in their earlier steps'
+   zero rows, which no exact exit reaches.
+
+It does not show three things.
+1. **Any change in a degree.** `D` and every measured quantity of §§10–14 are
+   unchanged. This is engineering.
+2. **Any change in memory.** M4b still peaks at 8.1 GB, so this machine's
+   obstacle to `m = 4`, `N = 20` stands.
+3. **A speed beyond the three timed systems.** Wall time was measured at one
+   thread, isolated, on `m = 4`, `N = 12`, `m = 3`, `N = 12` and `m = 2`,
+   `N = 16` only. `m = 4`, `N = 16`'s evidence is its multiply-adds. Nothing is
+   priced end to end (`AGENTS.md` §2).
+
+**Next steps, ranked.**
+1. **`m = 3` at `N = 18` with F4** (§13.10 item 1).
+2. **`m = 4` at `N = 20`.** Memory limits it, not arithmetic: `B'` and the kept
+   basis reach 8 GB at `N = 16`. It needs a machine with several times this
+   one's memory, or a lever on those two.
+3. **The zero rows of the non-final steps**, 48% of step 49's S-rows at `m = 4`,
+   `N = 16`. No exact exit reaches them. The signature criteria were the
+   attempt (§§13–14), and none is ranked now.
+4. **`m = 2` at `N = 28`**, and the independent replication of §12.10's items
+   3–4.
 
 ---
 

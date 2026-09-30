@@ -733,8 +733,10 @@ worse than none:
   `m = 3`, `N = 15`. So `f4_fp_tower` stays the engine that measures `D`.
   A variant taking F4's steps by polynomial degree (§14) matches F4's
   degree at `m = 3`, `N = 9` but not at `N = 12`, so the signature line
-  stops there; the next lever for F4's zero rows is an exact early exit
-  once a step's residue block reaches full rank.
+  stops there. The exact lever it left for F4's zero rows, stopping a
+  step's elimination once the residue echelon is full, is round 6 (§15):
+  every output unchanged, 39% fewer multiply-adds at `m = 4`, `N = 12` and
+  25% at `N = 16`, all in the refutation step.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.

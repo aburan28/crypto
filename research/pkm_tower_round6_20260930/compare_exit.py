@@ -29,6 +29,9 @@ REFS = [
     os.path.join(HERE, "..", "pkm_tower_round2_20260925", "runs"),
     os.path.join(HERE, "..", "pkm_tower_round3_20260925", "runs"),
 ]
+# Traces: round 2 traced few of its cells, but round 3's replay of them, with
+# the same engine as round 2's rows, traced every one.
+TRACE_REFS = REFS + [os.path.join(HERE, "..", "pkm_tower_round3_20260925", "replay")]
 TIMING = {"ms", "wall_s"}
 NEW = {"full_rank_exit", "rows_skipped_full_rank"}
 MAY_FALL = {"muladds", "max_residual_rows"}
@@ -96,12 +99,25 @@ def ended():
 
 def main():
     diffs = 0
-    ref = {}
+    # A system can have several committed rows: round 2's D2 diagnostic,
+    # stopped early, is the same system as round 3's M4b target 0. A replay
+    # row is compared with the row of its own file, else with a finished one.
+    refs = {}
     for d in REFS:
         for path in sorted(glob.glob(os.path.join(d, "*.jsonl"))):
             stem = os.path.basename(path)[: -len(".jsonl")]
             for r in rows(path):
-                ref.setdefault(key(r), (stem, r))
+                refs.setdefault(key(r), []).append((stem, r))
+
+    def pick(k, stem):
+        cands = refs[k]
+        for c in cands:
+            if c[0] == stem:
+                return c
+        done = [c for c in cands if not c[1]["timed_out"]]
+        return (done or cands)[0]
+
+    ref = {k: v[0] for k, v in refs.items()}
     done = ended()
     savings = []
     total = 0
@@ -116,13 +132,13 @@ def main():
             stems.add(stem)
             for r in rows(path):
                 k = key(r)
-                if k not in ref:
+                if k not in refs:
                     diffs += 1
                     print(f"{where}/{stem}: no reference row for {r['kind']} m={r['m']} "
                           f"{r['control']} N={r['N']} target {r['target_index']}")
                     continue
                 seen.add(k)
-                ostem, o = ref[k]
+                ostem, o = pick(k, stem)
                 compared += 1
                 fields = (set(r) | set(o)) - TIMING - NEW
                 bad = [f for f in sorted(fields) if f not in may_fall and r.get(f) != o.get(f)]
@@ -142,7 +158,8 @@ def main():
         print(f"{where}: {compared} rows compared, {identical} as required")
         missing = [
             (stem, o["kind"], o["m"], o["control"], o["N"], o["target_index"])
-            for k, (stem, o) in ref.items()
+            for k, cands in refs.items()
+            for stem, o in cands
             if stem in stems and k not in seen and (stem, o["N"]) not in NOT_REPLAYED
         ]
         if missing:
@@ -157,12 +174,11 @@ def main():
             name = os.path.basename(path)
             if f"{where}/{name[: -len('.log')]}" not in done:
                 continue
-            opath = next((os.path.join(d, name) for d in REFS if os.path.exists(os.path.join(d, name))), None)
-            if opath is None:
+            old = next((t for t in (trace(os.path.join(d, name)) for d in TRACE_REFS
+                                    if os.path.exists(os.path.join(d, name))) if t), None)
+            if old is None:
                 continue
-            new, old = trace(path), trace(opath)
-            if not old:
-                continue
+            new = trace(path)
             if len(new) != len(old):
                 diffs += 1
                 print(f"TRACE {where}/{name}: {len(new)} systems traced, committed {len(old)}")
@@ -184,7 +200,10 @@ def main():
                     exits += int("skipped)" in line and "(0 skipped)" not in line)
         print(f"{where} trace steps: {steps} compared, {same} as required, {exits} with rows skipped")
 
-    print("\nMultiply-adds saved by the exit (replay against the committed rows):\n")
+    print("\nMultiply-adds saved by the exit (replay against the committed rows). The last")
+    print("column is `rows_skipped_full_rank` as the round-6 build counted it: up to one")
+    print("chunk short, a counting error fixed after the runs (note section 15.10). The")
+    print("exact count is the step's S-rows minus the fill point its trace prints.\n")
     print("| file | kind | m | control | N | target | committed | replay | saved | S-rows skipped |")
     print("|:--|:--|--:|:--|--:|--:|--:|--:|--:|--:|")
     for stem, kind, m, control, n, t, old, new, skipped in savings:

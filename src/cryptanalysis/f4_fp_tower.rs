@@ -1295,7 +1295,9 @@ fn eliminate(
     }
     for rows in all.chunks(chunk) {
         if full_rank_exit && leads.len() == nq {
-            st.skipped_rows = n_s - done;
+            // Added to the rows the previous chunk skipped after its echelon
+            // filled.
+            st.skipped_rows += n_s - done;
             break;
         }
         let reduced: Vec<Reduced> = rows
@@ -2494,8 +2496,9 @@ mod tests {
                         assert_eq!(full.leads.len(), nq, "p = {p}, trial {trial}");
                         assert!(k <= n_s);
                         // Every row after the one that filled the echelon
-                        // is skipped, up to the chunk the exit sees it in.
-                        assert!(b.skipped_rows <= n_s - k, "p = {p}, trial {trial}");
+                        // is skipped: the rest of its chunk, and every chunk
+                        // after it.
+                        assert_eq!(b.skipped_rows, n_s - k, "p = {p}, trial {trial}");
                         if b.skipped_rows > 0 {
                             exits += 1;
                             skipped_total += b.skipped_rows;
@@ -2618,6 +2621,12 @@ mod tests {
                     (y.basis_active, y.basis_kept, y.basis_entries, y.pairs_left)
                 );
                 assert_eq!(x.full_rank_after, y.full_rank_after);
+                assert_eq!(x.skipped_rows, 0);
+                // Every S-row after the one that filled the echelon.
+                assert_eq!(
+                    y.skipped_rows,
+                    y.full_rank_after.map_or(0, |k| y.s_rows - k)
+                );
                 if y.skipped_rows == 0 {
                     assert_eq!(x.muladds, y.muladds);
                     assert_eq!(x.residual_rows, y.residual_rows);
