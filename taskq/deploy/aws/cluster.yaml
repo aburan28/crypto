@@ -1,0 +1,57 @@
+# eksctl ClusterConfig for taskq. Region and instance families follow
+# ecc2k130/aws (us-west-2, c7i, g7e = RTX PRO 6000 Blackwell, sm_120).
+#
+#   eksctl create cluster -f cluster.yaml      (provision.sh does this)
+#
+# Worker node groups are self-managed so their kubelet can run the static CPU
+# manager: a Guaranteed pod with integer CPUs then owns its cores exclusively,
+# which is what makes two measurements comparable. Nodes are sized for ONE
+# worker pod each. There is no node autoscaler: scale a group with
+#   eksctl scale nodegroup --cluster taskq --name cpu-c7i --nodes N
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: taskq
+  region: us-west-2
+  version: "1.31"
+iam:
+  withOIDC: true
+addons:
+  - name: aws-efs-csi-driver      # ReadWriteMany results volume
+    wellKnownPolicies: {efsCSIController: true}
+managedNodeGroups:
+  - name: system                  # Redis is external; this runs KEDA, CSI, the MCP endpoint
+    instanceType: t3.large
+    minSize: 1
+    desiredCapacity: 2
+    maxSize: 3
+    privateNetworking: true
+nodeGroups:
+  - name: cpu-c7i
+    instanceType: c7i.2xlarge     # 8 vCPU / 16 GiB; the pool requests 6 CPU / 12 GiB
+    amiFamily: AmazonLinux2023
+    minSize: 0
+    desiredCapacity: 2
+    maxSize: 20
+    privateNetworking: true
+    labels: {taskq/pool: cpu}
+    taints:
+      - {key: taskq/pool, value: cpu, effect: NoSchedule}
+    kubeletExtraConfig:
+      cpuManagerPolicy: static
+      kubeReserved: {cpu: 500m, memory: 1Gi}
+      systemReserved: {cpu: 300m, memory: 512Mi}
+  - name: gpu-g7e
+    instanceType: g7e.2xlarge     # 1x RTX PRO 6000 Blackwell (sm_120)
+    amiFamily: AmazonLinux2023    # eksctl installs the NVIDIA device plugin for GPU types
+    minSize: 0
+    desiredCapacity: 0            # GPUs cost money while idle: scale up when there is work
+    maxSize: 4
+    privateNetworking: true
+    labels: {taskq/pool: gpu-sm120}
+    taints:
+      - {key: nvidia.com/gpu, value: present, effect: NoSchedule}
+    kubeletExtraConfig:
+      cpuManagerPolicy: static
+      kubeReserved: {cpu: 500m, memory: 1Gi}
+      systemReserved: {cpu: 300m, memory: 512Mi}

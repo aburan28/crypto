@@ -65,6 +65,33 @@ def repo(tmp_path):
         "print('hello'); sum(range(200000))\n")
     (root / "fail.py").write_text("import sys; print('boom', file=sys.stderr); sys.exit(3)\n")
     (root / "sleep.py").write_text("import time, sys; time.sleep(float(sys.argv[1]))\n")
+    # toy "solver": brute-forces k = 17 for P = (0, 10) of order 50 on
+    # y^2 = x^3 + 2x + 3 over F_97, or lies
+    (root / "solve.py").write_text(
+        "import json, os, sys\n"
+        "p, a, b = 97, 2, 3\n"
+        "def add(P, Q):\n"
+        "    if P is None: return Q\n"
+        "    if Q is None: return P\n"
+        "    if P[0] == Q[0] and (P[1] + Q[1]) % p == 0: return None\n"
+        "    l = ((3*P[0]*P[0]+a) * pow(2*P[1], -1, p) if P == Q else (Q[1]-P[1]) * pow(Q[0]-P[0], -1, p)) % p\n"
+        "    x = (l*l - P[0] - Q[0]) % p\n"
+        "    return (x, (l*(P[0]-x) - P[1]) % p)\n"
+        "P, Q = (0, 10), None\n"
+        "for _ in range(17): Q = add(Q, P)\n"
+        "mode = sys.argv[1]\n"
+        "R, k = None, 0\n"
+        "while R != Q: R, k = add(R, P), k + 1\n"
+        "if mode == 'lie': k += 1\n"
+        "cert = {'kind': 'discrete_log', 'curve': {'field': 'prime', 'p': p, 'a': a, 'b': b},\n"
+        "        'statement': {'P': list(P), 'Q': list(Q), 'k': k}}\n"
+        "if mode != 'silent':\n"
+        "    json.dump(cert, open(os.path.join(os.environ['TASKQ_OUTPUT_DIR'], 'certificate.json'), 'w'))\n")
+    (root / "check.py").write_text(
+        "import json, os, sys\n"
+        "c = json.load(open(os.environ['TASKQ_CERTIFICATE']))\n"
+        "print(json.dumps({'k': c['statement']['k']}))\n"
+        "sys.exit(0 if c['statement']['k'] == 17 else 1)\n")
     (root / "sub").mkdir()
     (root / "sub" / "where.py").write_text("import os; print(os.getcwd())\n")
     env = {**os.environ, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",

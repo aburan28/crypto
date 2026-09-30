@@ -274,6 +274,69 @@ def collect_artifacts(src: Path, dest: Path | None) -> list[dict[str, Any]]:
     return out
 
 
+# -- certificate verification ------------------------------------------------
+
+_VERIFY_EXIT = {0: "verified", 1: "refuted", 2: "no_claim"}
+
+
+def verify_run(vspec: dict[str, Any], run_out: Path, cwd: Path,
+               env: dict[str, str]) -> dict[str, Any]:
+    """Check one run's certificate in a separate process, after timing stopped.
+
+    Exit 0/1/2 of the verifier mean verified/refuted/no_claim; anything else,
+    a timeout or unparseable output is `error`, which is not a refutation.
+    """
+    cert = run_out / vspec["certificate_file"]
+    if "builtin" in vspec:
+        if not cert.exists():
+            return {"status": "no_claim", "verifier": "taskq.verify",
+                    "detail": f"no {vspec['certificate_file']} written"}
+        argv = [sys.executable, "-m", "taskq.verify", str(cert)]
+        name = "taskq.verify"
+    else:
+        argv, name = vspec["argv"], " ".join(vspec["argv"])
+    venv = {**env, "TASKQ_CERTIFICATE": str(cert)}
+    if "builtin" in vspec:  # the built-in must resolve to this worker's taskq
+        venv["PYTHONPATH"] = os.pathsep.join(
+            [str(Path(__file__).resolve().parent.parent)]
+            + ([env["PYTHONPATH"]] if env.get("PYTHONPATH") else []))
+    t0 = time.perf_counter()
+    try:
+        p = subprocess.run(argv, cwd=cwd, env=venv, capture_output=True, text=True,
+                           timeout=vspec["timeout_seconds"], stdin=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired:
+        return {"status": "error", "verifier": name,
+                "detail": f"verifier exceeded {vspec['timeout_seconds']}s"}
+    except OSError as err:
+        return {"status": "error", "verifier": name, "detail": f"cannot exec verifier: {err}"}
+    out = {"status": _VERIFY_EXIT.get(p.returncode, "error"), "verifier": name,
+           "exit_code": p.returncode, "wall_seconds": time.perf_counter() - t0,
+           "certificate_sha256": _sha256(cert) if cert.exists() else None}
+    last = (p.stdout.strip().splitlines() or [""])[-1]
+    try:
+        out["detail"] = json.loads(last)
+    except ValueError:
+        out["detail"] = (p.stdout[-2000:] + p.stderr[-2000:]) or None
+    return out
+
+
+def rollup_verification(runs: list[dict[str, Any]]) -> dict[str, Any]:
+    counts = {"verified": 0, "refuted": 0, "no_claim": 0, "error": 0}
+    for r in runs:
+        v = r.get("verification")
+        if v:
+            counts[v["status"]] += 1
+    if counts["refuted"]:
+        status = "refuted"
+    elif counts["error"]:
+        status = "error"
+    elif counts["verified"]:
+        status = "verified"
+    else:
+        status = "no_claim"
+    return {"status": status, "counts": counts}
+
+
 # -- the whole task ----------------------------------------------------------
 
 def _summary(runs: list[dict[str, Any]]) -> dict[str, Any] | None:
@@ -385,7 +448,11 @@ def execute(spec: dict[str, Any], task_id: str, attempt: int,
                     status, error = "failed", f"run {i} exited {m.exit_code} (signal {m.signal})"
                 if status != "succeeded":
                     break
+                if spec.get("verify") and not warm:
+                    rec["verification"] = verify_run(spec["verify"], run_out, cwd, env)
         body["summary"] = _summary(body["runs"])
+        if spec.get("verify"):
+            body["verification"] = rollup_verification(body["runs"])
 
         for p in logs.iterdir():
             if _cap_log(p, limits["max_log_bytes"]):
