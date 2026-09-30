@@ -4,7 +4,11 @@
 use std::cell::Cell;
 use std::cmp::Ordering;
 
-pub const W: usize = 8;
+/// 1024 Boolean variables. Frozen cells use fewer than 512. C-Hamming at
+/// `n = 53` needs two 53-bit coordinate blocks plus the convolution
+/// auxiliaries, which does not fit in 512, so the width is 16 limbs.
+/// High limbs of a smaller system stay zero.
+pub const W: usize = 16;
 pub const MAX_VARS: usize = 64 * W;
 
 thread_local! {

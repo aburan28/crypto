@@ -155,7 +155,10 @@ RESULTS_TEXT
   recorded in
   [`ENGINE_SPEED.md`](../../hamming_ideal_pdp_20260930/ENGINE_SPEED.md).
   That change is engineering of the stage diagnostic's wall time. It does
-  not resolve a higher basis, and it is not a scoreboard row.
+  not resolve a higher basis, and it is not a scoreboard row. An `n = 53`
+  root call outside the frozen set is in that note: the matrix cap stops it,
+  and on that call the widened engine is slower than the one it replaced.
+  `n = 83` does not fit the `u64` field.
 - **The `r`-sweep of `GBDecode`.** The paper fixes `r` coordinates and
   enumerates `u` of weight `t̄` outside the algebra. Here `MultiSolve` does
   the fixing itself and the tame depth reports the `r` it needed; the

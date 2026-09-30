@@ -17,7 +17,7 @@ use std::collections::hash_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::hash::{BuildHasherDefault, Hasher};
 
-/// Multiply-add mixer. SipHash of an 8-limb monomial dominates the reducer
+/// Multiply-add mixer. SipHash of a wide monomial dominates the reducer
 /// index; the inputs are our own monomials, not attacker-chosen keys.
 #[derive(Clone, Default)]
 struct FxHasher(u64);
