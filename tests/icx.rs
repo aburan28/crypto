@@ -105,6 +105,8 @@ fn validate_actual_nist_parameters_against_independent_sage_reference() {
         assert_eq!(actual["is_named_curve"], true);
         assert_eq!(actual["diagnostic_only"], true);
         assert_eq!(actual["full_parameter_pipeline_available"], false);
+        let inspected = run_json(&["inspect", name]);
+        assert_eq!(inspected["curve"]["exact_parameters"], row["exact_parameters"]);
         assert_eq!(
             actual["exact_parameters"], row["exact_parameters"],
             "parameters {name}"

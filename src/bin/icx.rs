@@ -253,6 +253,7 @@ fn inspect(name: &str) -> Result<Value, String> {
             "cofactor": c.cofactor().to_string(),
             "group_order": c.group_order().to_string(),
             "rho_security_bits": round1(c.rho_security_bits()),
+            "exact_parameters": parameters::exact_parameters(&c),
         },
         "checks": checks_json,
         "verified": all_passed,
