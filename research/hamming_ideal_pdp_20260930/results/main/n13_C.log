@@ -1,3 +1,0 @@
-/home/user/crypto/research/hamming_ideal_pdp_20260930/hamming_pdp/target/release/hamming_pdp --n 13 --w 2 --targets 24 --encodings C --budget-log2 28 --matrix-cap-log2 26 --out /home/user/crypto/research/hamming_ideal_pdp_20260930/results/main/n13_C.jsonl.part
-n=13 irr=0x201b alpha=0x3 #E=8012 odd=2003 |F_wt|=79 (x:40) |F_sub|=125 (x:63) l=7 setup=6ms
-n=13 C WT2 seed=0 planted label=true pairs=2 found=true ok calls=8 tame=1 wild=7 budget=7 cap=3 depth_mean=7.00 max_depth=7 xor=1475333231 rows=22242 cols=22647 deg=4 prep=3490ms elim=4702ms add=64010ms rref=3ms subst=34177ms post=16089ms branch=1ms 133453ms

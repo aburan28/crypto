@@ -219,8 +219,9 @@ fn main() {
     writeln!(
         file,
         "{{\"kind\":\"manifest\",\"n\":{n},\"irr\":\"{:#x}\",\"normal_alpha\":\"{:#x}\",\"order\":{},\"odd_order\":{},\"w\":{w},\"l\":{l},\"wt_points\":{},\"wt_x\":{},\"wt_x_digest\":\"{:016x}\",\"sub_points\":{},\"sub_x\":{},\"sub_x_digest\":\"{:016x}\",\"sub_basis\":{},\"d_max\":{d_max},\"budget_xor\":{budget},\"max_calls\":{max_calls},\"matrix_cap_words\":{},\"targets\":{targets},\"setup_ms\":{setup_ms}}}",
-        f.irr, f.nb[0], c.order, c.odd_order, wt.points.len(), wt.xs.len(), wt.x_digest, sub.points.len(), sub.xs.len(), sub.x_digest, 1u64 << matrix_cap_log2,
-        json_list(&sub.sub.iter().map(|b| format!("\"{b:#x}\"")).collect::<Vec<_>>())
+        f.irr, f.nb[0], c.order, c.odd_order, wt.points.len(), wt.xs.len(), wt.x_digest, sub.points.len(), sub.xs.len(), sub.x_digest,
+        json_list(&sub.sub.iter().map(|b| format!("\"{b:#x}\"")).collect::<Vec<_>>()),
+        1u64 << matrix_cap_log2
     ).unwrap();
 
     for enc in &encodings {
