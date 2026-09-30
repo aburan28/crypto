@@ -493,6 +493,33 @@
     <nav aria-label="Performance evidence"><a href="algorithm-lab.html">Factor bases, linear algebra &amp; SAT demos →</a><a href="performance-gains.html">Explore performance charts →</a><a href="#summation-polynomials-20260914">Summation-polynomial evidence</a><a href="#gaudry-allocation-20260914">Earlier Gaudry gains</a><a href="#macaulay-cpu-gpu-pipeline">CPU/GPU pipeline</a></nav>
   </aside>
 
+  <div class="panel" id="ic-f5-v1-schema-failure-20260930">
+    <div class="panel-head">
+      <h2>Source-bound F5 v1 stops before IC at the native input interface <span class="chip">accounting</span></h2>
+      <p>The one registered invocation on the exposed n17 public point
+        <code>[52411,72106]</code> submitted <code>target_seeds: [null]</code>.
+        The pinned native worker expects unsigned integers or an empty list;
+        JSON parsing failed before <code>execute_job</code>. No IC query ran.
+        Independent failure transport, source gates and native invocation replay
+        passed. This is an adapter failure, with no mathematical admission.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Closed failed registration. Scientific costs and comparison boundaries remain unknown.</caption>
+      <thead><tr><th>Candidate</th><th>Registered base / columns</th><th>Outcome</th><th>Verified target</th><th>Online ns</th><th>Rho / IC</th><th>S / floor</th></tr></thead>
+      <tbody><tr><td><code>IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0he2ed5ed7bb97</code></td><td>62 / 29</td><td>Native input rejected</td><td>unknown</td><td>unknown</td><td>unknown</td><td>unknown</td></tr></tbody>
+    </table></div>
+    <div class="panel-head">
+      <p>Native exit code 2 and controller exit code 1 are retained with no
+        timeout. Process intervals are operational diagnostics, not PDP or
+        target online costs. No retry, resume, budget extension, complete F4/F5
+        admission or promotion is allowed from this consumed registration.
+        The next adapter must pass native deserialization and deterministic
+        audit-publication controls under a new versioned protocol.
+        <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v1/README.md">Failure, full archive and replay</a>;
+        <a href="https://github.com/aburan28/crypto/pull/1058">PR #1058</a>.</p>
+    </div>
+  </div>
+
   <div class="panel" id="ic-sat-v3-full-development-20260930">
     <div class="panel-head">
       <h2>Source-bound SAT IC completes one n17 development target <span class="chip">accounting</span></h2>
