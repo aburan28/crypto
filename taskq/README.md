@@ -119,6 +119,49 @@ non-warmup runs that succeeded. `environment` records the CPU model,
 affinity, governor, cgroup `cpu.max` and `memory.max`, load average, kernel,
 node and pod.
 
+### Certificates: a solve counts only when independent code agrees
+
+A solver that claims an answer writes `certificate.json` into
+`TASKQ_OUTPUT_DIR`. The format is crypto-autoresearcher's
+(`docs/claims-and-verification.md` there), so one certificate serves both
+repos:
+
+```json
+{"kind": "discrete_log",
+ "curve": {"field": "prime", "p": "0x…", "a": "0", "b": "7"},
+ "statement": {"P": ["0x…", "0x…"], "Q": ["…", "…"], "k": "…", "n": "0x…"}}
+```
+
+For a binary field, `curve` is
+`{"field": "binary", "m": 131, "modulus": [131, 13, 2, 1, 0], "a": …, "b": …}`.
+That is `y² + xy = x³ + ax² + b` in a polynomial basis, with `modulus` listing
+the exponents of the reduction polynomial. A run that claims nothing writes
+`{"kind": "none"}` or no file.
+
+Add `"verify": {"builtin": "certificate"}` to the spec (`--verify` on the
+CLI, `verify_certificate=true` over MCP). After each timed run's clock has
+stopped, the worker runs `python -m taskq.verify`
+([`taskq/verify.py`](taskq/verify.py)) in a separate process. That code
+shares nothing with any solver. It checks that P and Q are on the curve, that
+k·P = Q, and that n·P = O when an order n is given. Its tests pin it to n·G = O
+on secp256k1 and sect163k1, and to brute-force enumeration of toy curves.
+`"verify": {"argv": [...]}` instead runs a verifier from the checkout, which
+exits 0 verified, 1 refuted or 2 no claim.
+
+Each timed run gets `verification.status`: `verified`, `refuted`,
+`no_claim` or `error`. The result gets a rollup, which is `refuted` if any
+run was refuted, else `error`, else `verified`, else `no_claim`.
+**Verification never rewrites `status`.** A run that exited 0 with a wrong
+answer is `succeeded` and `refuted`. The consumer reads it as an invalid
+measurement, never as a negative result, and a solve counts only when it is
+`verified`. The autoresearcher still re-verifies with its own verifier;
+taskq's check is a second, independent opinion, not the authority.
+
+**Version skew.** A worker re-validates every spec it claims against its own
+schema. A spec with a field it does not know, such as `verify` on a worker
+older than this change, is handed back without counting as an attempt, so an
+old worker never silently skips a check.
+
 ## Redis layout and state machine
 
 ```
@@ -163,7 +206,7 @@ one `ecc2k130/aws/controlplane` uses in Postgres.
   with external side effects must tolerate a re-run. Use `TASKQ_ATTEMPT`, or
   write only into `TASKQ_OUTPUT_DIR`.
 * **Durability is Redis AOF with `everysec` fsync.** A Redis crash can lose
-  up to one second of transitions. `deploy/k8s/redis.yaml` runs with AOF on a
+  up to one second of transitions. The Helm chart runs Redis with AOF on a
   PVC and `noeviction`. Workers also mirror each result to `--result-dir`
   *before* committing it, as `attempt-N-fence-F.json`. If Redis is lost, the
   queue is lost, but the results are not. A mirrored file with no committed
@@ -194,10 +237,35 @@ taskq wait T-… ; taskq result T-…
 taskq list --label experiment=EXP-… ; taskq stats ; taskq workers ; taskq cancel T-…
 ```
 
-Kubernetes manifests are in `deploy/k8s/`: a Redis StatefulSet with AOF on a
-PVC, and a worker Deployment per queue with Guaranteed QoS. The container
-image is `deploy/Dockerfile`. Toolchains (Rust, Sage, CUDA) go in a derived
-image per hardware class.
+### Kubernetes: `deploy/helm/taskq`
+
+```sh
+helm install rq taskq/deploy/helm/taskq -f my-values.yaml
+```
+
+One chart contains:
+
+* **Redis.** A StatefulSet with AOF on a PVC, a generated password kept
+  across upgrades, and `noeviction`. Set `redis.enabled=false` with
+  `redis.externalUrlSecret` to use a managed Redis instead, such as
+  ElastiCache or Memorystore.
+* **One worker Deployment per entry in `pools`.** Each pool has its own
+  queues, labels, resources, node selector, tolerations and, optionally, its
+  own image. A GPU pool is the same Deployment with `nvidia.com/gpu` in its
+  resources; see the commented example in `values.yaml`.
+* **The repo allowlist ConfigMap and a ReadWriteMany results PVC.** The
+  results PVC is kept on uninstall.
+* **Optional KEDA `redis-streams` scalers**, one per pool with a `keda` block
+  (`keda.enabled`). These scale pools on unread entries. KEDA picks which pod
+  to remove at scale-in, and a busy pod hands its task back on SIGTERM, so
+  keep `cooldownPeriod` long.
+* **An optional MCP endpoint over streamable HTTP** (`mcp.enabled`). It has
+  no authentication, so it stays ClusterIP.
+
+The image is `deploy/Dockerfile`. The `taskq image` workflow publishes it to
+`ghcr.io/aburan28/taskq-worker` on every merge that touches it. Toolchains
+(Rust, Sage, CUDA) go in a derived image per hardware class, set per pool.
+CI lints and renders the chart in three configurations and builds the image.
 
 **Checkouts.** Each repo gets one blobless mirror (`--filter=blob:none`) per
 worker. Each commit gets a git worktree, reused across tasks so `target/` and
@@ -223,8 +291,7 @@ MCP endpoint from the cluster instead of stdio.
 
 ## Integrating the consumers
 
-**crypto-autoresearcher.** This part is a follow-up PR there; nothing in that
-repo changes here. An Executor submits with
+**crypto-autoresearcher.** The bridge lives in that repo. An Executor submits with
 `labels.experiment=EXP-…` and `idempotency_key=EXP-…/RUN-…`, so a
 re-dispatched task cannot double-run. When the task finishes, a small adapter
 writes the existing run package from the result:
@@ -254,5 +321,4 @@ and queues such as `gpu-sm120`. A `setup` step builds it
   predecessor finishes.
 * Authentication on the HTTP MCP transport. Use Redis ACLs and keep the MCP
   server stdio, or cluster-internal, until this exists.
-* A KEDA `redis-streams` scaler on `lag_unread`, so pods scale to zero.
-* An autoresearcher run-package adapter, as above.
+* Graceful scale-in that drains a pod before KEDA removes it.

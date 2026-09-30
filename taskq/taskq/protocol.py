@@ -48,6 +48,7 @@ _DEFAULTS: dict[str, Any] = {
     "retry": {"max_attempts": 3},
     "labels": {},
 }
+_VERIFY_DEFAULTS = {"timeout_seconds": 600, "certificate_file": "certificate.json"}
 
 
 def normalize_spec(spec: dict[str, Any]) -> dict[str, Any]:
@@ -65,6 +66,8 @@ def normalize_spec(spec: dict[str, Any]) -> dict[str, Any]:
         merged = copy.deepcopy(default)
         merged.update(out.get(key) or {})
         out[key] = merged
+    if out.get("verify"):
+        out["verify"] = {**_VERIFY_DEFAULTS, **out["verify"]}
     cmd = out["command"]
     cmd.setdefault("cwd", ".")
     cmd.setdefault("env", {})

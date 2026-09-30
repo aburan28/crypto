@@ -74,6 +74,17 @@ class Worker:
         fence, attempt = claimed
         task = self.store.get_task(task_id)
         spec = task["spec"]
+        try:
+            # A spec written by a newer taskq may carry fields this worker would
+            # silently ignore (e.g. `verify`). Hand it to a worker that knows them.
+            protocol.normalize_spec(spec)
+        except protocol.SpecError as err:
+            log.warning("%s: declining, spec unsupported here: %s", task_id, err)
+            self.store.requeue(queue, msg_id, task_id, fence,
+                               f"declined by {self.id}: spec unsupported by this worker ({err})",
+                               count_attempt=False, worker_id=self.id)
+            time.sleep(min(1.0, self.block_ms / 1000))
+            return False
         missing = {k: v for k, v in spec["placement"]["require_labels"].items()
                    if self.labels.get(k) != v}
         if missing:
@@ -177,6 +188,7 @@ class Worker:
                        "setup_wall_seconds": body.get("setup_wall_seconds", 0.0)},
             "setup": body["setup"], "runs": body["runs"],
             "summary": body["summary"], "artifacts": body["artifacts"],
+            "verification": body.get("verification"),
             "labels": task["labels"],
         }
         if self.result_dir:
