@@ -7,7 +7,7 @@ Every value comes from a committed run record in `runs/`.
 
 | cell | `N` | `S` | `ℓ = 3` | `ℓ = 4` | **`ℓ = 5` at degree 7** | reading | semi-regular `D_reg` | verdict |
 |---|--:|--:|---|---|---|---|--:|---|
-| `(10, 5)` | 25 | −5 | 5 5 5 5 | 7 7 6 7 | **U3_CELL** | **7** | 7 | **Q6: one degree above 6** |
+| `(10, 5)` | 25 | −5 | 5 5 5 5 | 7 7 6 7 | **7 7 7 7** | **7** | 7 | **Q6: one degree above 6** |
 | `(13, 5)` | 28 | −2 | 6 6 6 6 | — | not run (about 47–50 GB) | not measured | 7 | Q5: not testable |
 | `(11, 5)` | 26 | −4 | 6 6 6 6 | 6 7 6 7 | not run (about 18–19 GB) | not measured | 7 | secondary, not decided on |
 
@@ -17,10 +17,10 @@ from Results 5 and 6 of `RESEARCH_DREG_MEASUREMENT.md`.
 - **ℓ = 5 refutes at exactly 7: one degree above 6.**
   - This is the first exact ℓ = 5 value. Every earlier ℓ = 5 draw was a ≥7
     bound.
-  - The degree-7 row space contains `1` on U3_COUNT four draws. The FFD is 3 on
+  - The degree-7 row space contains `1` on all four draws. The FFD is 3 on
     every draw.
-  - Three draws already fix the registered median at 7, whatever the last
-    one reads.
+  - Three draws already fixed the registered median at 7, whatever the
+    last one read. The fourth also reads 7.
 - **The predictions held.**
   - Q6 was predicted at 7, with low confidence: ≥8 was named as the likelier
     miss, and it did not happen.
@@ -50,7 +50,7 @@ from Results 5 and 6 of `RESEARCH_DREG_MEASUREMENT.md`.
 | `(10, 5)` u0, draw 22 | **7**, refuted | 3 | 9,376 s | 10.99 GB | `7eb043b0`, 11,000 MB, F5 rows |
 | `(10, 5)` u1, draw 34 | **7**, refuted | 3 | 9,055 s | 10.96 GB | `7eb043b0`, 11,000 MB, F5 rows |
 | `(10, 5)` u2, draw 35 | **7**, refuted | 3 | 9,085 s | 11.00 GB | `7eb043b0`, 11,000 MB, F5 rows |
-| `(10, 5)` u3, draw 57 | U3_ROW |
+| `(10, 5)` u3, draw 57 | **7**, refuted | 3 | 9,017 s | 11.01 GB | `7eb043b0`, 11,000 MB, F5 rows |
 
 - **Draws.** Each row replays its committed degree-6 draw from `--d-min 7`.
   `score.py` checks the draw index, subspace, target and the `≥7`

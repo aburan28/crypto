@@ -667,7 +667,7 @@ It builds degree 7 on the committed `≥7` draws, replayed with `--d-min 7`.
 
 | `S` | `ℓ = 3` | `ℓ = 4` | `ℓ = 5` | semi-regular `D_reg` at `ℓ = 5` |
 |--:|---|---|---|--:|
-| −5 | 5 5 5 5 | 7 7 6 7 | **`(10, 5)`: U3_CELL** | 7 |
+| −5 | 5 5 5 5 | 7 7 6 7 | **`(10, 5)`: 7 7 7 7** | 7 |
 | −4 | 6 6 6 6 | 6 7 6 7 | `(11, 5)`: ≥7 ×4 (degree 7 not run: 18–19 GB) | 7 |
 | −2 | 6 6 6 6 | — | `(13, 5)`: ≥7 ×4 (degree 7 not run: 47–50 GB) | 7 |
 | 0 | 6 6 6 6 | — | `(15, 5)`: ≥7 ×4 (not attempted) | 8 |
