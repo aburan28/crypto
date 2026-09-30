@@ -68,7 +68,8 @@ costs and speedup remain unknown.
 
 The [F5 v2 development registration](../../../research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/README.md)
 is consumed and closed in PR #1064: source-bound native execution completed,
-and exact independent admission/transport passes, pending exact-head acceptance.
+and exact independent admission/transport passes; PR #1064 is accepted at
+`07d7c63636965a47035c66e37f665d5611b6a7a0` after all applicable exact-head checks.
 Preserve its preexecution candidate/workload/run identity, raw execution,
 original v2 negative-proof rejection and first v3 geometric-domain rejection.
 Never retry, resume or extend that invocation. The exact geometric PDP base is
@@ -91,6 +92,21 @@ control has no matched rho/incumbent arm, fresh-target qualification or speedup.
 The engine is bounded Macaulay elimination with an F5 row criterion. A new
 fresh paired protocol still needs the reviewed exposure/reference/calibration
 adapter and resource/arm-order freeze. Keep all three confirmation sets closed.
+
+The [reusable preparation certificates](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/README.md)
+use `prepared_ic_state_v1.py` to reconstruct the ordinary rows, full rank and
+column logs separately from the two accepted closed source controls. Both
+produce mathematical state `ICP1hedbff76da644`; their whole-certificate seals
+and source/query evidence remain distinct. `ICP1` is preparation, never a
+complete `IC1` candidate or run. The exporter launches no native child and
+creates no new target; it discards all previous target answers, descent records,
+workloads and clocks. Retain the 63-point geometry, including killed torsion,
+and use only the 62-point cofactor image for the actual usable IC count.
+Later one-target adapters must bind their complete source and the exact external
+certificate seal, validate/load preparation before online timing, and charge
+all new target attempts and scalar replay. These certificates do not authorize
+a fresh paired dispatch or reopen any consumed registration. Reviewed exposure,
+reference, hardware rebuild, calibration and resource/order gates remain pending.
 
 Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use a versioned runner for the intended unexecuted round; the round-one wrapper is historical, and generic pilot defaults do not implement the goal protocol. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass and an accepted, versioned reference binding is committed.
 
