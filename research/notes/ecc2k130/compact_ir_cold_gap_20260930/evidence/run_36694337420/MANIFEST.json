@@ -1,0 +1,44 @@
+{
+  "actions_run": 36694337420,
+  "archives": {
+    "n37_L1.tar.gz": {
+      "bytes": 494109,
+      "sha256": "53f9b0e3413a375a5897025cf6b4f4c20f4318489e5b1b6ddf7f414fdcf2eeb2"
+    },
+    "n37_L1024.tar.gz": {
+      "bytes": 2252020,
+      "sha256": "ad821bfeab0411b4964897ab38c56e6dd47e4a2a33a1465aef94e240fca54678"
+    },
+    "n37_L1_smoke.tar.gz": {
+      "bytes": 12660,
+      "sha256": "46ef980794ca2d630d886f56f0a6c7d3a81f4dc858ce6d06d0d4a19c2393241c"
+    },
+    "n41_L1.tar.gz": {
+      "bytes": 1192872,
+      "sha256": "b1edb6af527b5a2977db5de41b98ccb862bd66b88fabf0bece0de35531cd9f50"
+    },
+    "n53_L1.tar.gz": {
+      "bytes": 4454267,
+      "sha256": "a7a80e80347699005fb776a42a52437466cc5da0736566283176c851bb52b8f6"
+    }
+  },
+  "git_head_measured": "fe75eea69dc66660c3920342d83f17e3f4eb1151",
+  "schema": "ecc2k130-compact-ir-cold-gap-archive-v1",
+  "second_host": {
+    "actions_run": 36694337420,
+    "machine": "x86_64",
+    "platform": "Linux-6.12.94+-x86_64-with-glibc2.39",
+    "producers_rerun": false,
+    "python": "3.12.8 (main, Sep 29 2026, 17:00:15) [GCC 13.3.0]",
+    "role": "second_host_replay",
+    "verifier": "research/notes/ecc2k130/compact_ir_cold_gap_20260930/verify_cold.py --relocated",
+    "verifier_sha256": "02ddbe38534c1edd1d2d1e6f3887aa94f74c01a2f58fe691f6701fd72249a8d5"
+  },
+  "second_host_replay_sha256": {
+    "n37_L1.json": "516e8c50be011f9ed5c1eaa7452517ff94544b5a0ba40812dee514ec4001893f",
+    "n37_L1024.json": "df653dc7fb61ed9b5afcac697c34b8f7b52965ca16c301e8beea56a2325eaff4",
+    "n37_L1_smoke.json": "8dbacbd21d0cb33b22a91ad9166a0112f3b42c4b81a8d99689cfd493fc5325a5",
+    "n41_L1.json": "c335786760598d012c40e059d4973a41a55c01cad94d50704f7b4742fc83476c",
+    "n53_L1.json": "09fa193c09fda321cf79ebf6088066c94b7dadbf4eff270481f9dd9545e1f721"
+  }
+}

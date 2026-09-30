@@ -1,6 +1,6 @@
 # Matched cold native CPU gap panel for the compact instruction ledger
 
-Status: preregistered before any run of this panel or inspection of the dispatched Callgrind result. The merged instruction-ledger source and all four Q lists are fixed; this is not a new target-distribution holdout, a descendant-native PDP experiment, or an ECC2K-130 challenge attack.
+Status: executed once. [Actions run 36694337420](https://github.com/aburan28/crypto/actions/runs/36694337420) is the only measurement. Do not dispatch this panel again. The result is [RESULT.md](RESULT.md). This registration was committed before any run of this panel or inspection of the dispatched Callgrind result. The merged instruction-ledger source and all four Q lists are fixed; this is not a new target-distribution holdout, a descendant-native PDP experiment, or an ECC2K-130 challenge attack.
 
 ## Question and boundary
 
