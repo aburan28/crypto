@@ -204,14 +204,13 @@ def koblitz_rows(names: Names) -> list[dict]:
         before = s20[x["curve"]]
         shares, counts = koblitz_phase_shares(a, n)
         s = x["s_after"]
-        floor_s = before["sets"][0]["floor"]["per_target_k"]
+        floor_s = before["sets"][0]["floor"]  # L(32)·√(π/4n), per target
         logs = counts.get("logs", {})
         la = logs.get("linear_algebra", {})
         desc = counts.get("descent", {})
         recipe = {
             "variant": "koblitz_collection_m3_aimed",
-            "label": "pair table, m = 3 collection aimed at the least-mentioned columns; "
-                     f"m = {before['chosen']['descent_summands']} descent",
+            "label": f"aimed m = 3 collection, m = {before['chosen']['descent_summands']} descent",
             "m": 3, "descent_summands": before["chosen"]["descent_summands"],
             "base_points": before["sets"][0]["points"], "columns": before["chosen"]["columns"],
             "table": before["sets"][0]["tier"], "stored_pairs": before["sets"][0]["stored_pairs"],
@@ -449,6 +448,7 @@ table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-nu
 th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
 th { font-family: var(--mono); font-size: 10.5px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 td.n, th.n { text-align: right; white-space: nowrap; }
+td.recipe { min-width: 210px; }
 tr.lead td { background: var(--data-soft); }
 code, .slug { font-family: var(--mono); font-size: 12px; }
 .slug { white-space: nowrap; }
@@ -560,7 +560,7 @@ def page(doc: dict, standalone: bool) -> str:
                   if "ratio_rho_ci" in b else "")
             P.append(f'<tr class="{"lead" if i == 1 else ""}"><td class="n">{i}</td>'
                      f'<td><span class="slug">{esc(r["slug"])}</span></td><td class="n">{r["log2_r"]:.1f}</td>'
-                     f'<td>{esc(b["label"])}</td><td class="n">{b["m"]}</td><td class="n">{b["base_points"]:,}</td>'
+                     f'<td class="recipe">{esc(b["label"])}</td><td class="n">{b["m"]}</td><td class="n">{b["base_points"]:,}</td>'
                      f'<td class="n">{b["columns"]:,}</td><td class="n">{g3(b["s"])}</td>'
                      f'<td class="n">{g3(r["reference_s"])}</td><td class="n"><span class="ratio">{times(b["ratio_rho"])}</span>{ci}</td>'
                      f'<td class="n">{times(b["ratio_floor"])}</td><td>{phase_bar(b["phases_s"], b["s"])}</td>'

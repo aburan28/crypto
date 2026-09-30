@@ -24,6 +24,7 @@ does not resolve.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import re
@@ -303,6 +304,35 @@ def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
                 problems.append(f"{rel}: skipped a curve record ({err})")
 
 
+def unbuilt_specs() -> dict[str, str]:
+    """Constructor calls examples/curve_id_generated.rs could not build."""
+    path = REPO / "docs/curves/sources/generated.json"
+    if not path.exists() or not path.stat().st_size:
+        return {}
+    return {u["spec"]: u["why"] for u in json.loads(path.read_text()).get("unbuilt", [])}
+
+
+def unresolved_reason(e: dict) -> str:
+    """Why a model has no EC1 identity here, as precisely as the tree says."""
+    for s in e["standard_names"]:
+        if s in EC1_UNRESOLVED:
+            return EC1_UNRESOLVED[s]
+    p, unbuilt = e["params"], unbuilt_specs()
+    if e["family"] == "koblitz":
+        spec = f"koblitz:{p['a']}:{p['n']}"
+        if spec in unbuilt:
+            return (f"KoblitzCurve::new({p['a']}, {p['n']}) finds no usable prime-order "
+                    "subgroup, so the repository has built no generator on it")
+        if p["n"] > 63:
+            return ("no generator recorded; KoblitzCurve covers n <= 63 and no tracked "
+                    "record carries this model's subgroup and generator")
+    for alias in e["aliases"]:
+        m = re.fullmatch(r"bench-(\d+)bit", alias)
+        if m and f"roster:{m.group(1)}" in unbuilt:
+            return f"roster_prime_instance({m.group(1)}) builds no instance on this roster curve"
+    return "no tracked record carries this model's subgroup and generator"
+
+
 def tag_of(e: dict) -> str:
     """The EC1 alias tag: the standard name, else the family's (not hashed)."""
     if e["standard_names"]:
@@ -397,12 +427,36 @@ def unresolved_text(reg: Registry) -> list[str]:
     return sorted(missing)
 
 
+def carry_forward(reg: Registry) -> None:
+    """The registry is append-only.  A curve registered once stays, with its
+    names and representations, even when no source re-derives it: after
+    prose is rewritten to slugs, the legacy spelling that first registered a
+    curve is gone, and the slug that replaced it must still resolve."""
+    if not OUT.exists():
+        return
+    for e in json.loads(OUT.read_text())["curves"]:
+        key = hashlib.sha256(e["model_json"].encode("ascii")).hexdigest()
+        if key in reg.curves:
+            for a in e["aliases"]:
+                reg.alias(a, key)
+            continue
+        kept = {k: v for k, v in e.items() if k not in ("representations", "ec1_unresolved")}
+        reg.curves[key] = kept
+        for a in e["aliases"] + e["standard_names"]:
+            reg.alias_models[cid.normalise_alias(a)].add(key)
+            reg.alias_text.setdefault(cid.normalise_alias(a), a)
+        for rep in e.get("representations", []):
+            reg.reps[key][rep["curve_uid"]] = {"field": rep["field"], "curve": rep["curve"],
+                                               "sources": rep["sources"]}
+
+
 def build() -> tuple[dict, list[str], list[str]]:
     reg, problems, fatal = Registry(), [], []
     harvest_standards(reg)
     harvest_bench(reg)
     harvest_json(reg, problems, fatal)
     harvest_text_koblitz(reg)
+    carry_forward(reg)
     ambiguous = sorted(f"{reg.alias_text[k]!r} -> {len(v)} models"
                        for k, v in reg.alias_models.items() if len(v) > 1)
     for k, v in reg.alias_models.items():
@@ -420,9 +474,7 @@ def build() -> tuple[dict, list[str], list[str]]:
                 "field_sha256": ident["field_sha256"], "field": rep["field"],
                 "curve": rep["curve"], "sources": rep["sources"]})
         if not e["representations"]:
-            e["ec1_unresolved"] = next(
-                (EC1_UNRESOLVED[s] for s in e["standard_names"] if s in EC1_UNRESOLVED),
-                "no tracked record carries this model's subgroup and generator")
+            e["ec1_unresolved"] = unresolved_reason(e)
     check_calibration(Registry._rebuilt(list(reg.curves.values())), fatal)
     fam_rank = {"koblitz": 0, "subfield": 1, "binary": 2, "prime": 3}
     curves = sorted(reg.curves.values(), key=lambda e: (

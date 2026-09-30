@@ -4,7 +4,7 @@ Every elliptic curve the repository names, in text, tables, reports, code
 and new file names, is named by its **ICV1 identity**.  Before this, one
 curve went by five names (`K_0 / GF(2^41)`, `K_0/2^41`, `K_0/F_2^41`,
 `K₀/GF(2^41)`, `k0n41`), a prime curve by the generator that happened to
-find it (`bench-24bit`, `generated-24bit-10935329`), and nothing said
+find it (`bench-20bit`, `generated-24bit-10935329`), and nothing said
 which modulus, basis or model a name meant.  A number quoted against the
 wrong curve is a wrong number, so the name is now computed from the curve
 rather than chosen.
@@ -99,7 +99,7 @@ the registry resolves every occurrence:
 |:--|:--|:--|
 | `K_a / GF(2^n)`, `K_a/2^n`, `K_a/F_2^n`, `K₀/GF(2^n)` with a number for `n` | `K_0 / GF(2^41)` | the modulus; five spellings of one curve |
 | `k<a>n<n>` as a curve name | `k0n41` | the same; still valid as the stem of a frozen parameter file |
-| `bench-<bits>bit` | `bench-24bit` | anything but the roster slot |
+| `bench-<bits>bit` | `bench-20bit` | anything but the roster slot |
 | `generated-<bits>bit-<p>` | `generated-24bit-10935329` | `a` and `b` |
 | `random-binary-n<n>-b<b>` | `random-binary-n27-b845462` | `a` and the modulus |
 | `E_{a,b}/GF(2^k) over GF(2^n)` | `E_{0,2}/GF(4) over GF(2^14)` | the subfield basis the indices refer to |
