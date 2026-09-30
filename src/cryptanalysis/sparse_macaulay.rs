@@ -282,7 +282,12 @@ fn sparse_then_dense(
                 .expect("bucket is non-empty");
             is_pivot[piv] = true;
             out.high_rank += 1;
-            let pivot_row = rows[piv].clone();
+            // Every row with this lead is in this bucket and no later
+            // reduction produces it again, so the pivot row is never read
+            // after this loop: take it rather than keep it.  At degree 7
+            // the kept pivots were over a million sparse rows alive
+            // beside the dense block.
+            let pivot_row = take(&mut rows[piv]);
             for i in bucket {
                 if i == piv {
                     continue;
