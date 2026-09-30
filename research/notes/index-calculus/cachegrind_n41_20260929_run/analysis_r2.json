@@ -1,0 +1,65 @@
+{
+  "gates": {
+    "R-G1": true,
+    "R-V": false,
+    "R-V_detail": {
+      "median_anon_huge_bytes_ic_thp": 281018368,
+      "ic_peak_rss": 338305024,
+      "chase_speedups": [
+        1.2633456576340463,
+        0.8833169165788627,
+        1.2190239598558574,
+        1.1759355386312065,
+        1.3552880315709332,
+        1.319227781923712
+      ],
+      "median_chase_speedup": 1.241184808744952
+    },
+    "R-N": true,
+    "R-N_detail": {
+      "ic": 0.06051881050870789,
+      "rho": 0.07284208235582458
+    },
+    "R-D": true,
+    "R-D_detail": {
+      "rho/k4": -0.008216727146565739,
+      "rho/thp": -0.018326696530551745,
+      "ic/k4": -0.05482810329258381,
+      "ic/thp": -0.012143628385673844
+    }
+  },
+  "estimate": {
+    "translation_share": 0.2193647436041731,
+    "ci95": [
+      0.1525604373969984,
+      0.32175616953120684
+    ],
+    "median_user_s": {
+      "rho/k4": 0.983367,
+      "rho/thp": 0.950507,
+      "ic/k4": 3.266472,
+      "ic/thp": 2.82789
+    },
+    "d_ns_per_Ir": {
+      "ic": 0.035248024420972406,
+      "rho": 0.004014533798875125
+    },
+    "delta_user_ns_per_Ir": 0.1423815427626589,
+    "median_sys_s": {
+      "rho/k4": 0.027995,
+      "rho/thp": 0.023974,
+      "ic/k4": 0.24251599999999998,
+      "ic/thp": 0.7274729999999999
+    },
+    "median_wall_s": {
+      "rho/k4": 1.2536710029999938,
+      "rho/thp": 1.2533837569999946,
+      "ic/k4": 3.7871662390000154,
+      "ic/thp": 3.765732430000014
+    },
+    "ic_user_speedup_thp": 1.1550916054019074,
+    "rho_user_speedup_thp": 1.0345710236747336
+  },
+  "verdict": "UNRESOLVED (gate)",
+  "H_mem": "partly supported by the measured translation share; remainder unresolved within [F_low, F_high] = [0.077, 1.912]"
+}

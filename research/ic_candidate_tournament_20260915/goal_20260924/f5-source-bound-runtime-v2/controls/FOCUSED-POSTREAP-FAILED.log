@@ -1,0 +1,32 @@
+test_rss_watch_preserves_raw_output_and_timeout (test_generic_disclosed_pilot.DisclosedPilotTests.test_rss_watch_preserves_raw_output_and_timeout) ... ok
+test_outer_watchdog_kills_inherited_native_group (test_static_sat_native_v3.StaticSatNativeV3Tests.test_outer_watchdog_kills_inherited_native_group) ... ERROR
+test_algorithm_and_controller_source_change_candidate (test_f5_runtime_v2.F5RuntimeV2Tests.test_algorithm_and_controller_source_change_candidate) ... ok
+test_changed_native_worker_source_or_target_leak_fails_admission (test_f5_runtime_v2.F5RuntimeV2Tests.test_changed_native_worker_source_or_target_leak_fails_admission) ... ok
+test_known_scalar_freshness_wrong_subgroup_and_boolean_resources_fail_closed (test_f5_runtime_v2.F5RuntimeV2Tests.test_known_scalar_freshness_wrong_subgroup_and_boolean_resources_fail_closed) ... ok
+test_live_registrar_requires_retained_parser_proof_before_freezing (test_f5_runtime_v2.F5RuntimeV2Tests.test_live_registrar_requires_retained_parser_proof_before_freezing) ... ok
+test_new_registration_seals_controller_packages_and_assets_without_worker (test_f5_runtime_v2.F5RuntimeV2Tests.test_new_registration_seals_controller_packages_and_assets_without_worker) ... ok
+test_retained_natural_queries_keep_failed_feasible_cases_and_reject_bad_witness (test_f5_runtime_v2.F5RuntimeV2Tests.test_retained_natural_queries_keep_failed_feasible_cases_and_reject_bad_witness) ... ok
+test_target_and_seed_change_workload_without_changing_candidate (test_f5_runtime_v2.F5RuntimeV2Tests.test_target_and_seed_change_workload_without_changing_candidate) ... ok
+test_actual_raw_float_metrics_publish_and_preserve_exact_clock (test_f5_runtime_receipts_v2.F5RuntimeReceiptsV2Tests.test_actual_raw_float_metrics_publish_and_preserve_exact_clock) ... ok
+test_nonfinite_negative_boolean_and_unknown_diagnostics_fail_closed (test_f5_runtime_receipts_v2.F5RuntimeReceiptsV2Tests.test_nonfinite_negative_boolean_and_unknown_diagnostics_fail_closed) ... ok
+test_archive_hash_paths_duplicates_permissions_and_inventory_fail_closed (test_publish_f5_runtime_v2.PublishF5RuntimeV2Tests.test_archive_hash_paths_duplicates_permissions_and_inventory_fail_closed) ... ok
+test_external_invocation_mismatch_cannot_publish_or_extract (test_publish_f5_runtime_v2.PublishF5RuntimeV2Tests.test_external_invocation_mismatch_cannot_publish_or_extract) ... ok
+test_raw_diagnostics_publish_transport_without_float_writer_failure (test_publish_f5_runtime_v2.PublishF5RuntimeV2Tests.test_raw_diagnostics_publish_transport_without_float_writer_failure) ... ok
+test_closed_transport_defaults_and_six_actual_native_rejections (test_f5_job_schema_control.F5JobSchemaControlTests.test_closed_transport_defaults_and_six_actual_native_rejections) ... ok
+test_source_input_binary_output_and_external_seal_tampering_fail_closed (test_f5_job_schema_control.F5JobSchemaControlTests.test_source_input_binary_output_and_external_seal_tampering_fail_closed) ... ok
+
+======================================================================
+ERROR: test_outer_watchdog_kills_inherited_native_group (test_static_sat_native_v3.StaticSatNativeV3Tests.test_outer_watchdog_kills_inherited_native_group)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/ic-f5-native-interface-v2-20260930/research/ic_candidate_tournament_20260915/test_static_sat_native_v3.py", line 122, in test_outer_watchdog_kills_inherited_native_group
+    process=execute(root/'registration',root/'execution',expected_spec=spec,
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/ic-f5-native-interface-v2-20260930/research/ic_candidate_tournament_20260915/sat_runtime_execution_v3.py", line 237, in execute
+    os.killpg(process.pid, signal.SIGKILL)
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 16 tests in 34.740s
+
+FAILED (errors=1)

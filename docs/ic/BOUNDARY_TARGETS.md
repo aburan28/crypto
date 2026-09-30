@@ -190,6 +190,65 @@ cold against W64 and rho. These host-specific timing diagnostics do not set
 common calibrated S, an n=83 result, GF(2^131) transfer or a descendant-native
 PDP verdict, and they do not alter the selected-panel `vs_rho` row above.
 
+### Compact S3 blocked root prefilter, 2026-09-30 — engineering gain, no rho crossover
+
+The [preregistered prefilter panel](../../research/notes/ecc2k130/compact_s3_prefilter_20260930/RESULT.md)
+tests the W64 binary with a 512-bit blocked Bloom filter over every canonical
+root key, alongside two same-binary off controls and the matched normal-basis
+rho on 1,024 new point-only public Q at n=41/K255 and n=53/K440. The first
+hosted panel and separate macOS raw replay independently verified all 30
+full-rank compact traces and 40,960 target logs. The filter preserved every
+first witness and scalar and skipped 3.154/3.187 million root-table keys at
+n=41 and 27.985/28.244 million at n=53, using 4/16 MiB additional storage.
+The first-run CPU ratios to rho, 1.4567 and 1.5218, are diagnostic because
+n41's off-B/off-A interval excluded one and n53 had two contention samples.
+A single same-source/Q, both-size repeat was committed before inspection.
+Both repeat cells satisfy the A/A and isolation gates and independently
+replay all 30 full-rank traces and 40,960 logs. Filter/off complete CPU ratios
+are **0.8528** (95% interval 0.8390–0.8636) at n41 and **0.8924**
+(0.8805–0.9134) at n53: a fixed-K engineering gain. Filter/rho ratios remain
+**1.3282** (1.2980–1.3556) and **1.4727** (1.4231–1.5292), so no matched-rho
+crossover. Common operation-counted S, n83 and GF(2^131) transfer, and
+descendant-native PDP benefit remain unset.
+The separate degree-263 all-line certificate records the changed descending
+endomorphism order but no native PDP yield. The next high-arity gate is the
+independently reviewed, label-gated m10 capacity PR #937; only if it passes
+should a frozen natural-target solver/yield and equal-useful-size original,
+native, transported and pullback comparison follow.
+
+### Compact whole-process instruction ledger, 2026-09-30 — common work unit, no CPU crossover
+
+The [frozen six-cell Callgrind ledger](../../research/notes/ecc2k130/compact_ir_ledger_20260930/RESULT.md)
+ran the exact blocked-prefilter source and matched 32-walk normal-basis rho v3
+on the same public Q at n=37/41/53, L=1/1024. All 16 child processes, nine
+compact full-rank traces and 8,200 target logarithms passed hosted and
+separate macOS group-law replay; the n37/L1 instruction-repeat control passed.
+Complete guest-instruction IC/rho ratios for unfiltered compact are 2.5231,
+0.5165, 9.2716, 0.6221, 13.2293 and 0.7773 in that cell order. The n41/n53
+batch blocked arms are 0.6351/0.7889 of rho in Ir but remain 1.3282/1.4727
+of rho in the separately eligible same-source/Q native CPU repeat. The filter
+raises Ir by 2.10%/1.49% over off while lowering native CPU by 14.7%/10.8%.
+This is an all-phase instruction/accounting result and a quantitative no-go
+for **the tested W64 n41/n53 batch cold CPU cells** against strong rho; Ir alone
+is not a group-addition or cycle unit and does not establish a method speedup.
+
+The older point-panel native CPU references for n37/L1, n37/L1024, n41/L1
+and n53/L1 used a different rho/source snapshot. The preregistered
+[four-cell current-source cold panel](../../research/notes/ecc2k130/compact_ir_cold_gap_20260930/RESULT.md)
+now closes those cells: all 105 processes, 70 compact full-rank traces and
+15,450 target logarithms passed hosted and separate macOS replay. Eligible
+off/rho CPU medians [paired 95% intervals] are 3.7362 [3.6901, 3.7803],
+1.7064 [1.6933, 1.7146], 17.0499 [16.0731, 18.1962] and 27.4483
+[27.1951, 27.6616] in that order. Every A/A and isolation gate passed.
+The n37 batch Ir advantage (0.5165 of rho) therefore does not survive native
+CPU either; all six tested current-source W64 n/L cells lack a matched-rho
+cold CPU crossover. Short-arm wall time is coarsened by 0.2-second runner
+polling and is ineligible as a speed claim. The K+L rank/recovery attempt floor
+is exactly met in all compact arms, but no instruction lower bound, calibrated
+generic S, disjoint target confirmation, n83 confidence, GF(2^131) transfer,
+or native leaf m≥3 PDP result follows. The degree-263 map/ring certificate
+and review/label-gated m10 capacity PR #937 remain separate prerequisites.
+
 ### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
 
 Separate measurement, separate base family, not a competing record. The
@@ -374,6 +433,30 @@ change this (n = 61 is at 2.30 at L = 1,024). Note, evidence and per-cell
 archives:
 [`RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md`](../../research/notes/index-calculus/RESEARCH_STRONG_RHO_SWEEP_PROTOCOL_20260929.md),
 [`strong_rho_sweep_20260929_run/`](../../research/notes/index-calculus/strong_rho_sweep_20260929_run/).
+
+**2026-09-30 cachegrind check of the memory-bound hypothesis at n = 41 (class:
+measurement of an explanation; moves no boundary target and does not touch the
+instruction verdict).** PR #955 and the ladder note left "IC's index runs at a lower IPC
+because it is memory-bound" untested. At n = 41, L = 1,024, K = 255, IC runs at IPC 0.89
+against rho R3's 2.06. Pre-registered protocol, simulator (cachegrind, LL 2 / 8 / 32 MiB),
+pointer-chase host calibration, native huge-page contrast. **Registered verdict:
+UNDETERMINED** (the noise gate, max/min ≤ 0.10 over five repetitions, is unreachable on
+this VM: 0.28 over fifteen); a second registered attempt (R2) is **UNRESOLVED (gate)**
+(chase-control speedup 1.24 against the required 1.3). Deterministic facts: IC has 12.15
+D1 misses per 1,000 instructions against rho's 6.63 and 1.21 against 0.147 last-level
+misses per 1,000 at 2 MiB (8.2×; 13.5× at 32 MiB), nearly independent of simulated
+cache size, concentrated in the inlined index build and probe loop. The simulator can
+explain between 0.08 and 1.9 of the per-instruction time gap (no overlap information);
+the antagonist contention test has no power on this VM (positive control did not
+slow); huge pages cut IC's user time by 13-15 % and rho's by 0-3 %, a translation share
+of 0.257 (A2, no interval) and 0.219 (R2, 95 % interval 0.153-0.322, validity gate
+failed): **about a fifth to a quarter of the gap is address translation, and roughly
+three quarters is unexplained.** Not tested at n = 53 (1.36 GiB index). Whatever the
+answer, IC retires 1.52× rho's instructions at this cell, so no cache-level fix makes
+it faster than the reference here; wins must cut probes and index work. Protocol,
+amendments (A1, A2), R2, results and raw outputs:
+[`RESEARCH_CACHEGRIND_N41_20260929.md`](../../research/notes/index-calculus/RESEARCH_CACHEGRIND_N41_20260929.md),
+[`cachegrind_n41_20260929_run/`](../../research/notes/index-calculus/cachegrind_n41_20260929_run/).
 
 **[SUPERSEDED by the erratum above] Matched-arithmetic recheck (2026-09-28, class `accounting`):** the growing-n
 `vs_rho` comparator (`examples/koblitz_rho_batch_ks.rs`) walks its

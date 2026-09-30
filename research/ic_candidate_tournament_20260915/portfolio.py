@@ -25,6 +25,14 @@ def family(arm):
             cfg.get('batch_trials', 1), cfg.get('collection_window'))
 
 
+def mechanism_family(arm):
+    """Coarse family for exploration; batch and kernel variants share a slot."""
+    cfg = arm['config']
+    base = cfg.get('factor_base', {})
+    return (arm.get('adapter'), base.get('kind'), cfg.get('solver', 'pair_table'),
+            cfg.get('linear_algebra', 'sparse'))
+
+
 def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
     """Keep total-cost leaders, cell specialists, and a reproducible outsider.
 
@@ -34,6 +42,7 @@ def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
     import random
     require(width >= 2 and 0 <= exploration < width, 'invalid portfolio budget')
     by_id = {a['id']: a for a in arms}
+    require(len(by_id) == len(arms), 'duplicate candidate registrations')
     eligible = []
     for row in comparisons:
         if not row.get('eligible') or row['candidate'] not in by_id:
@@ -42,6 +51,8 @@ def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
         vector += list(row['per_cell'].values()) + list(row['native_wall_per_cell'].values())
         require(vector and all(math.isfinite(v) and v > 0 for v in vector), 'invalid portfolio cost')
         eligible.append(row)
+    require(len({row['candidate'] for row in eligible}) == len(eligible),
+            'duplicate candidate comparison rows')
     eligible.sort(key=lambda r: (r['candidate_over_baseline'], r['candidate']))
     if not eligible:
         return []
@@ -105,9 +116,34 @@ def retain(comparisons, arms, *, width=6, exploration=1, seed=0):
     for row in frontier + eligible:
         add(row, 'Pareto frontier' if row in frontier else 'development reserve')
     remaining = [r for r in eligible if r['candidate'] not in {s['candidate'] for s in selected}]
-    random.Random(seed).shuffle(remaining)
-    selected.extend({'candidate': r['candidate'], 'reason': 'predeclared exploration slot'}
-                    for r in remaining[:min(exploration, width-len(selected))])
+    groups = {}
+    for row in remaining:
+        groups.setdefault(mechanism_family(by_id[row['candidate']]), []).append(row)
+    represented = {mechanism_family(by_id[item['candidate']]) for item in selected}
+    outsider_families = [key for key in groups if key not in represented]
+    other_families = [key for key in groups if key in represented]
+    rng = random.Random(seed)
+    rng.shuffle(outsider_families)
+    rng.shuffle(other_families)
+    slots = min(exploration, width-len(selected))
+    chosen = 0
+    # Sample families, not rows: registering many near-identical variants must
+    # not multiply that family's chance of taking the exploration budget.
+    for key in outsider_families + other_families:
+        if chosen == slots:
+            break
+        best = min(groups[key], key=lambda row: (
+            row['online']['candidate_over_baseline'] if online else
+            row['candidate_over_baseline'], row['candidate']))
+        selected.append({'candidate': best['candidate'],
+                         'reason': 'predeclared exploration slot'})
+        remaining.remove(best)
+        chosen += 1
+    if chosen < slots:
+        rng.shuffle(remaining)
+        selected.extend({'candidate': row['candidate'],
+                         'reason': 'predeclared exploration slot'}
+                        for row in remaining[:slots-chosen])
     return selected
 
 

@@ -2620,18 +2620,22 @@ pub struct BinaryInstance {
 }
 
 impl BinaryInstance {
-    /// The curve's ICV1 identity (`docs/curves/ICV1.md`).
+    /// The curve's ICV1 identity (`docs/curves/ICV1.md`), from this
+    /// instance's own fields.  A Koblitz instance ([`koblitz_instance`], the
+    /// only one that sets `koblitz`) certifies `End(E) = Z[τ]`, `−7`.
+    ///
+    /// This deliberately does not call into `koblitz_index_calculus`: the
+    /// compact-orbit workflows build this crate with a frozen snapshot of
+    /// that file (`compact_frozen_source_replay_20260929/materialize.py`),
+    /// so live code here may use only what the snapshot already has.
     pub fn curve_id(&self) -> CurveId {
-        if let Some(kc) = &self.koblitz {
-            return kc.curve_id();
-        }
         curve_id::binary(
             self.n,
             &curve_id::modulus_integer(&self.irreducible),
             &BigUint::from(self.a),
             &BigUint::from(self.b),
             &BigUint::from(self.group_order),
-            None,
+            self.koblitz.is_some().then_some(-7),
         )
         .expect("a constructed curve is non-singular and inside the Hasse interval")
     }

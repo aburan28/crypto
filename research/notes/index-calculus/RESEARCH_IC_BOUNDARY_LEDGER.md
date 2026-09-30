@@ -5186,6 +5186,506 @@ same 36 files.
   builder's eight-orbit minimum, the build's price as the table leaves
   cache, and Bailey's walk.
 
+## 22. The descent's fixed cost per target
+
+This takes up one of §21.10's open items, the per-target big-integer
+work, carried from §20.10. It is an engineering round: every count,
+relation and recovered logarithm must come out as it was, and `S` must
+fall.
+
+After §21 the descent is the largest phase at six of nine sizes: 37–45% of
+`S` below `2^37`. It is paid per target, so no number of targets amortises
+it. At those sizes a target needs few probes, so what it pays is the
+descent's fixed cost.
+
+**Current `main` first.** `main` has taken the Koblitz "n59" stack since
+§21, which rewrote much of the pair-table code and touched the collector
+and the log solver. At `n = 19` and `n = 41` it reproduces §21's counts
+and recovered logarithms exactly. This round's baseline is `main`, so
+its baseline arm re-prices the thread on current `main` as well.
+
+### 22.1 Declared before any candidate code or timed comparison
+
+The protocol is `research/ic_descent_20260930/PROTOCOL.md` (v1).
+
+**The probe** was made first, and it is the only measurement that was.
+`examples/koblitz_descent_prices.rs`, on the unmodified library, priced
+each target's descent part by part. It used the log table from an
+`ic workflow` run of the same file, and its trials equal the pricer's at
+every size. In units per target:
+
+| `M1` | trials | descent | walk start | of which 63 additions | relation assembly | recovery check |
+|:--|--:|--:|--:|--:|--:|--:|
+| `icv1-f2m19-tm797-9c54981b` | 8.2 | 1,481 | 635 | 549 | 391 | 118 |
+| `icv1-f2m23-tm5197-1f85e9e1` | 105.5 | 1,984 | 752 | 658 | 429 | 146 |
+| `icv1-f2m45-tm6236725-40939294` | 160.8 | 2,449 | 1,162 | 1,045 | 345 | 155 |
+| `icv1-f2m37-tm534059-32aad96b` | 1,619 | 4,408 | 1,060 | 918 | 387 | 177 |
+| `icv1-f2m43-tm998717-e2e742b0` | 5,115 | 9,530 | 1,120 | 970 | 371 | 190 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 24,134 | 38,789 | 1,156 | 986 | 488 | 210 |
+
+**What the probe shows:**
+
+- **The walk start.** The 64 walks start from three scalar
+  multiplications (21–29 units each) and 63 additions made one at a time,
+  each paying its own inversion. The same 63 points, as one batched
+  addition to precomputed multiples of the stride, cost 78–90 units.
+- **The relation assembly.** The one decomposition found becomes `d` in
+  big-integer arithmetic, at 345–490 units.
+- **The recovery check.** `[d]G = Q` in the general arithmetic costs
+  118–210 units, against 61–117 in single words.
+- **Stepping and lookups** cost about 1.5 units a probe, near their
+  floor. This round leaves them alone.
+
+**The change:**
+
+1. The 63 multiples of the stride are precomputed once per solver. Each
+   target's starts come from one batched addition.
+2. The relation's arithmetic modulo `r` is done in machine words.
+3. The solver's own recovery check is done in single-word arithmetic.
+   The pipeline's final check stays in the general arithmetic, as an
+   independent verification.
+
+Every walk, trial and logarithm is unchanged.
+
+**The comparison.**
+
+- **Binaries:** the baseline is `ic` at `57e7ce3a`, sha256 `07e527a4…`,
+  kept outside the tree.
+- **Inputs:** §20's 36 frozen files.
+- **Runs:** five rounds per file, baseline and candidate interleaved on
+  one thread: 180 pairs, with counts and recovered logarithms pinned.
+- **Controls:** Control 1 on the candidate at every size, and batch rho
+  re-priced on the baseline at `n = 41`.
+- **The probe, after,** at the six sizes above.
+- **Many threads:** a four-thread check at `n = 41`.
+
+**The measure.** §21.4 found the unit itself moving between binaries, so
+the primary speedup converts both arms at one unit: the paired ratio of
+total time. The ratio in each process's own unit is reported beside it.
+
+**Targets:**
+
+1. Identical outputs.
+2. The relation and its check fall at least 3× at every probed size.
+3. The descent per target falls at least 1.8× at `n = 19`, `23` and
+   `45`.
+4. A whole-pipeline speedup whose 95% interval excludes 1, at the four
+   sizes where the fixed part is at least 25% of the descent: `2^18`,
+   `2^22`, `2^24.8` and `2^27.8`.
+5. No regression anywhere, at one thread or at four.
+
+**Stop:** on any mismatch in counts or recovered logarithms.
+
+**Class: engineering.** Counts do not move; `S` falls where the fixed
+part weighs.
+
+**Amended before an isolated re-run (PROTOCOL.md v2).**
+- **Why.** v1's runs used `taskset` alone. When they ran, AGENTS.md §10
+  had already made `tools/isolated_bench.py` mandatory for every timed
+  number: `aa677e4c` is in `57e7ce3a`. Every figure this round quotes is
+  timed.
+- **What v2 does.** It runs the timed steps again, isolated, into
+  `runs-isolated/`:
+  - the same binaries, inputs, pins, measures, targets and class;
+  - contended pairs kept, excluded from the figures and run again;
+  - an A/A against a byte-identical copy of the baseline, as the noise
+    floor;
+  - the thread check at three threads, since the tool will not reserve
+    all four CPUs.
+- **v2's figures are the evidence** in §22.2–§22.11. v1's are kept in
+  §22.7 for comparison, and are not evidence under §10.
+
+### 22.2 What ran
+
+Everything is in `research/ic_descent_20260930/`, run twice on one host of
+§20's class.
+
+- **Binaries.** The same in both runs:
+  - the baseline `ic` is `57e7ce3a`'s, sha256 `07e527a4…`;
+  - the candidate is `20ff4765`'s, built from a clean tree, sha256
+    `d390908a…`;
+  - both probe binaries are kept beside them.
+- **v1, `runs/`,** was pinned with `taskset -c 2` alone. That is not
+  evidence under AGENTS.md §10. Its figures are kept in §22.7 and
+  `analysis.json`.
+- **v2, `runs-isolated/`,** ran every timed process through
+  `tools/isolated_bench.py` (sha256 `ff59e53f…`), in the declared order:
+  - **A/A:** the baseline against a byte-identical copy of itself, `M1` at
+    all nine sizes, five rounds: 90 processes.
+  - **The main comparison:** §20's 36 files, hash-checked first, five
+    rounds of baseline then candidate: 372 processes.
+  - **Rho:** batch rho re-priced on the baseline at `n = 41`, `M1`.
+  - **Threads:** three threads on CPUs 1–3 at `n = 41`, `M1`, three ABAB
+    rounds.
+  - **The probe** on both libraries at six sizes, with the log tables
+    committed at the declaration.
+  - Control 1 compares counts only, so v1's stands.
+
+**The isolation's own record** (`runs-isolated/`):
+
+- **Contention.** 481 processes ran isolated, and the tool marked one
+  contended: the baseline of `icv1-f2m19-tm797-9c54981b`, `M1`, round 5. The agent's
+  own process used 0.31 CPU-seconds during its 1.87 s. That pair is kept,
+  excluded from the figures, and its slot was run again clean.
+- **Failures.** None failed, and every slot has a clean pair.
+- **The spread rule** fired once, on `icv1-f2m41-tm2308219-7f48b14a`, `M3`, at 1.256. Its
+  five rounds were rerun with double the repetitions, and that set's
+  figure uses them, as declared.
+- **Refused starts.** The tool refused 319 starts, each retried after
+  15 s:
+  - 302 on CPU pressure that the benchmark before had left (PSI
+    `some avg10` above 5, with nothing else running);
+  - 17 on the agent's own activity.
+- **One restart.** The harness was stopped once between two processes,
+  to leave a two-hour task limit, and then resumed. No process was cut.
+
+### 22.3 Current `main`, re-priced
+
+This round's baseline arm is `main` at `57e7ce3a`. Its counts and
+recovered logarithms equal §21's candidate's in all 36 files. The n59
+stack that landed on `main` since §21 changed only speed, and its speed
+moved the top end (v2's baseline arm):
+
+| curve | `S`, §21 after | `S`, `main` | change | ratio to batch rho, §21 → `main` |
+|:--|--:|--:|--:|--:|
+| `icv1-f2m19-tm797-9c54981b` | 6.819 | 6.783 | 0.99× | 20.85× → 20.74× |
+| `icv1-f2m23-tm5197-1f85e9e1` | 1.983 | 1.977 | 1.00× | 9.68× → 9.64× |
+| `icv1-f2m45-tm6236725-40939294` | 1.182 | 1.152 | 0.97× | 9.93× → 9.67× |
+| `icv1-f2m37-tm534059-32aad96b` | 0.582 | 0.569 | 0.98× | 6.31× → 6.16× |
+| `icv1-f2m43-tm998717-e2e742b0` | 0.368 | 0.344 | 0.93× | 5.53× → 5.16× |
+| `icv1-f2m47-t22705043-f4e44623` | 0.267 | 0.234 | 0.87× | 4.44× → 3.88× |
+| `icv1-f2m41-tm2308219-7f48b14a` | 0.285 | 0.250 | 0.88× | 4.28× → 3.75× |
+| `icv1-f2m53-tm56619371-dac20a85` | 0.396 | 0.263 | 0.66× | 7.77× → 5.15× |
+| `icv1-f2m61-t158598901-ab42b6c5` | 0.644 | 0.481 | 0.75× | 12.12× → 9.07× |
+
+- **Below `2^32`** nothing moved beyond the run-to-run spread.
+- **From `2^32`**, where build and collection are most of `S`, `main`
+  is 7% cheaper, and from `2^36.6` up 12–34% cheaper.
+- These are other rounds' gains, measured here, not this round's.
+- **Batch rho** on the same binary counts exactly as in §20. Isolated,
+  it prices at 0.0600 a target against §20's 0.0610 at `n = 41`.
+
+### 22.4 The table
+
+**How to read it.**
+
+- `S` is per target at `k = 32`.
+- **The primary speedup** is the paired ratio of total time, with both
+  arms at one unit, as declared. It uses clean pairs only.
+- **"After"** is `S` before over that speedup, so both columns are in the
+  baseline binary's unit.
+- **The ratio** is against §20's batch rho on the same 32 targets, with an
+  interval over the four sets.
+- **"Own unit"** is the same pairs, each process in its own unit.
+- **The descent column** is a stage diagnostic, and so is its share, the
+  descent's share of the baseline's `S`.
+- **"A/A"** is the baseline against a byte-identical copy of itself,
+  `M1`, five pairs. It is the noise floor for the speedup beside it.
+
+| curve | log₂ r | `S`, before → after | ratio to batch rho | speedup [95%] | own unit | descent [95%] | descent share | A/A [95%] |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| `icv1-f2m19-tm797-9c54981b` | 18.0 | 6.783 → 4.873 | 20.74× → **14.90×** [13.78, 16.05] | **1.392×** [1.376, 1.409] | 1.555× | 3.22× [3.17, 3.28] | 42% | 1.026× [0.997, 1.056] |
+| `icv1-f2m23-tm5197-1f85e9e1` | 22.0 | 1.977 → 1.432 | 9.64× → **6.99×** [4.44, 10.27] | **1.380×** [1.366, 1.394] | 1.527× | 2.87× [2.82, 2.92] | 44% | 1.013× [0.990, 1.036] |
+| `icv1-f2m45-tm6236725-40939294` | 24.8 | 1.152 → 0.856 | 9.67× → **7.19×** [6.41, 8.02] | **1.345×** [1.321, 1.369] | 1.411× | 2.92× [2.85, 2.98] | 38% | 1.008× [0.983, 1.034] |
+| `icv1-f2m37-tm534059-32aad96b` | 27.8 | 0.569 → 0.485 | 6.16× → **5.26×** [4.40, 6.15] | **1.173×** [1.132, 1.215] | 1.206× | 1.59× [1.51, 1.68] | 44% | 1.001× [0.960, 1.044] |
+| `icv1-f2m43-tm998717-e2e742b0` | 32.1 | 0.344 → 0.325 | 5.16× → **4.88×** [4.16, 5.62] | **1.060×** [1.043, 1.078] | 1.103× | 1.18× [1.15, 1.21] | 42% | 0.998× [0.961, 1.037] |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 0.234 → 0.234 | 3.88× → **3.89×** [3.46, 4.35] | **0.999×** [0.956, 1.043] | 1.073× | 1.06× [1.02, 1.10] | 34% | 0.988× [0.907, 1.077] |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 0.250 → 0.241 | 3.75× → **3.62×** [3.28, 3.97] | **1.037×** [1.005, 1.070] | 1.021× | 1.09× [1.03, 1.16] | 21% | 0.979× [0.838, 1.144] |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 0.263 → 0.261 | 5.15× → **5.11×** [3.82, 6.60] | **1.008×** [0.986, 1.030] | 1.060× | 1.05× [1.00, 1.10] | 8% | 0.973× [0.892, 1.062] |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 0.481 → 0.488 | 9.07× → **9.20×** [8.24, 10.24] | **0.986×** [0.973, 0.999] | 1.040× | 0.98× [0.95, 1.01] | 9% | 1.009× [0.985, 1.033] |
+
+**Where the change pays.**
+- **At the three smallest sizes** the descent falls 2.9–3.2×, and the
+  whole pipeline gets 1.35–1.39× faster.
+- **At `2^27.8`** it gets 1.17× faster.
+- **From `2^32` up** a target needs thousands of probes, and the fixed
+  part is a few percent of the descent. The speedup reads 1.06× at
+  `2^32.1`. Above that it reads 0.99–1.04×, each inside its size's A/A
+  interval.
+
+**The probe, before and after** (isolated, with the same log tables).
+Units per target, each process in its own unit:
+
+| `M1` | descent | relation + check | of which relation | walk and lookups |
+|:--|--:|--:|--:|--:|
+| `icv1-f2m19-tm797-9c54981b` | 1,406 → 451 (3.11×) | 503 → 68 (7.38×) | 392 → 11 | 803 → 320 |
+| `icv1-f2m23-tm5197-1f85e9e1` | 1,818 → 698 (2.60×) | 566 → 81 (6.96×) | 437 → 12 | 1,111 → 484 |
+| `icv1-f2m45-tm6236725-40939294` | 2,405 → 1,008 (2.38×) | 521 → 101 (5.18×) | 369 → 12 | 1,708 → 733 |
+| `icv1-f2m37-tm534059-32aad96b` | 4,093 → 2,945 (1.39×) | 535 → 106 (5.03×) | 379 → 15 | 3,505 → 2,634 |
+| `icv1-f2m43-tm998717-e2e742b0` | 9,920 → 8,019 (1.24×) | 604 → 128 (4.73×) | 407 → 16 | 9,379 → 7,821 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 38,594 → 38,354 (1.01×) | 737 → 151 (4.89×) | 492 → 21 | 37,504 → 38,129 |
+
+- **The relation assembly** falls from 369–492 units to 11–21.
+- **The walk start's 63 additions** leave the walk column: 803 → 320 at
+  `n = 19`.
+- **Every target's trials** are equal before and after.
+- **At `2^39` the lookups read 8% slower** in the candidate's own unit
+  (17,387 → 18,808), though their code is untouched. See §22.5.
+
+### 22.5 The unit moved again
+
+The code of the unit is untouched in every run below.
+
+| run | candidate's unit, as fast as the baseline's |
+|:--|:--|
+| §21 | up to 11% faster |
+| §22 v1 | 0.88–1.01× |
+| §22 v2 | 0.89–0.97× at eight of nine sizes, and 1.02× at `2^39` |
+
+- **In each process's own unit** the candidate therefore looks up to 12%
+  better than its paired time says. It reads 1.555× against 1.392× at
+  `2^18`, and 1.040× against 0.986× at `2^47.2`.
+- **The declared primary** is time at one unit, which is the measure
+  §8's "same calibrated unit" asks for.
+
+### 22.6 The targets, graded on v2
+
+1. **Identical outputs: met.**
+   - All 186 pairs agree in counts and recovered logarithms, including the
+     retried pair and the doubled rounds. Every target was verified.
+   - Control 1 holds at all nine sizes.
+   - The probe's trials agree target by target.
+2. **The relation and its check down at least 3×: met.** It fell
+   4.73–7.38× at every probed size.
+3. **The descent per target down at least 1.8× at `n = 19`, `23` and
+   `45`: met.** It fell 3.11×, 2.60× and 2.38×.
+4. **A primary interval above 1 at the four smallest sizes: met.** The
+   lower bounds are 1.376, 1.366, 1.321 and 1.132.
+5. **No regression: not met.**
+   - **At one thread,** `2^47.2` reads 0.986 [0.973, 0.999]: wholly below
+     1, by 0.001.
+   - **Attribution by phase:** every phase there runs 1.4–2% slower in
+     the candidate. Collection, 78% of the time, reads 0.986×, the build
+     0.98× and the descent 0.981×.
+   - Collection and the build are code this round does not touch. The
+     candidate's unit runs at 0.942× there.
+   - **The A/A** at that size reads 1.009 [0.985, 1.033]. The 1.4%
+     shortfall is inside the spread of the baseline against a copy of
+     itself.
+   - **At three threads,** `n = 41` reads 0.984 [0.915, 1.059] over three
+     pairs. That is not a regression by the declared rule.
+
+### 22.7 v1 against v2
+
+v1's figures are not evidence (§22.2). They are kept here because the
+comparison says what isolation changed:
+
+| curve | log₂ r | v1 speedup [95%], not isolated | v2 speedup [95%], isolated | v2 A/A [95%] |
+|:--|--:|--:|--:|--:|
+| `icv1-f2m19-tm797-9c54981b` | 18.0 | 1.386× [1.346, 1.427] | **1.392×** [1.376, 1.409] | 1.026× [0.997, 1.056] |
+| `icv1-f2m23-tm5197-1f85e9e1` | 22.0 | 1.372× [1.344, 1.401] | **1.380×** [1.366, 1.394] | 1.013× [0.990, 1.036] |
+| `icv1-f2m45-tm6236725-40939294` | 24.8 | 1.303× [1.266, 1.340] | **1.345×** [1.321, 1.369] | 1.008× [0.983, 1.034] |
+| `icv1-f2m37-tm534059-32aad96b` | 27.8 | 1.127× [0.942, 1.348] | **1.173×** [1.132, 1.215] | 1.001× [0.960, 1.044] |
+| `icv1-f2m43-tm998717-e2e742b0` | 32.1 | 1.071× [1.061, 1.081] | **1.060×** [1.043, 1.078] | 0.998× [0.961, 1.037] |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 1.046× [1.031, 1.061] | **0.999×** [0.956, 1.043] | 0.988× [0.907, 1.077] |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 1.038× [1.010, 1.067] | **1.037×** [1.005, 1.070] | 0.979× [0.838, 1.144] |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 0.974× [0.952, 0.996] | **1.008×** [0.986, 1.030] | 0.973× [0.892, 1.062] |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 1.001× [0.992, 1.010] | **0.986×** [0.973, 0.999] | 1.009× [0.985, 1.033] |
+
+- **Below `2^28`** the two runs agree within their intervals, and v2's
+  intervals are narrower.
+  - v1 missed target 4 at `2^27.8` because of one stalled process. It
+    had three repetitions of 7.5, 36 and 122 ms against the usual 7.4.
+  - Isolated, that size passes.
+- **From `2^32` up** both runs read within about 3% of 1 either way.
+  - The size that reads below 1 moved, from `2^44.3` in v1 (0.974) to
+    `2^47.2` in v2 (0.986).
+  - Both misses are the same thing: code the change does not touch,
+    running slower in the candidate binary.
+
+### 22.8 Classification
+
+**Engineering** (AGENTS.md §3).
+
+**What did not move:** the counts, the relations, the recovered
+logarithms, the counting floor and the ratio to it.
+
+**What fell:**
+
+- At the small end `S` fell 1.35–1.39×. Below `2^25` the thread now reads
+  7.0–14.9× batch rho: `main` read 9.6–20.7×, and §21 9.7–20.9×.
+- At `2^39` the least ratio is 3.62× [3.28, 3.97]: `main` read 3.75×,
+  §21 4.28× and §20 4.86×. Most of that move is `main`'s n59 stack
+  (§22.3). This round adds 1.04×.
+
+There is still no crossing.
+
+**The top end's exponent**, refitted by §20's declared method over the
+four largest sizes:
+
+- **after:** `r^0.137` [−0.059, 0.332];
+- **`main`:** `r^0.133` [−0.047, 0.314];
+- **§21:** `r^0.165` [0.010, 0.320].
+
+`main`'s cheaper top end flattens the fit. The interval includes zero
+again, so §21's "resolved from zero" does not survive on current `main`.
+The fit separates neither `1/6` nor 0.141 from zero.
+
+### 22.9 What does not count
+
+- **v1's figures:** they were pinned with `taskset` alone (AGENTS.md §10).
+- **Stage diagnostics:** the descent column and the probe's parts, each
+  in its own process's unit.
+- **The own-unit column,** which mixes two binaries' units (§22.5).
+- **The three-thread check.** It shows no regression on three pairs, and
+  no gain either. It ran at three threads because the isolation tool
+  will not reserve all four CPUs.
+- **Scope, per AGENTS.md §8a and §8b:**
+  - The `K_0` rows are `E_0: y² + xy = x³ + 1`, the ECC2K-130 family.
+    The `K_1` rows are `E_1`, a different Koblitz model.
+  - The largest field is `GF(2^61)`, and there is no `m = 83` run. So
+    this round establishes nothing about ECC2K-130 at high fidelity.
+  - `GF(2^45)` has proper intermediate subfields over `GF(2)`:
+    `GF(2^3)`, `GF(2^5)`, `GF(2^9)` and `GF(2^15)`. The change uses none
+    of them.
+  - The nine curves' EC1 aliases and full curve UIDs are in
+    `curve_ids.json` (docs/curve-identities.md). They are metadata
+    hashes, not certification.
+- **The host class:** one x86-64 container. Nothing is claimed for Arm64,
+  GPUs or other hosts.
+
+### 22.10 Reproducing
+
+    # binaries and v1: research/ic_descent_20260930/README.md
+    cd research/ic_descent_20260930
+    IC_ISOLATE=1 IC_RUNS=runs-isolated IC_BASELINE=… IC_BASELINE_COPY=… IC_CANDIDATE=… \
+      PROBE_BASELINE=… PROBE_CANDIDATE=… python3 run.py all
+    IC_RUNS=runs-isolated python3 analyse.py > analysis-isolated.json
+    python3 render_rows.py md analysis-isolated.json      # the table in §22.4
+
+### 22.11 What stays open
+
+- **Layout between binaries.** Three runs now show a rebuilt binary
+  running code it did not change 1–11% faster or slower: §21, §22 v1 and
+  §22 v2.
+  - It decided target 5 in both of this round's runs, at a different size
+    each time.
+  - A comparison of binaries on this host cannot resolve a change smaller
+    than that without a way to hold the layout fixed. Candidates are a
+    placebo rebuild measured as an A/A', one codegen unit, or instruction
+    counts beside the time.
+- **The isolation gate and a benchmark's own pressure.** The tool's PSI
+  gate refused most starts once, on pressure the benchmark before had
+  left. Each such start waited 15 s. A gate that waits for PSI to decay,
+  or a longer settle, would cost less.
+- **A symmetric spread rule.** The declared rule checks only baseline
+  totals. Isolation now catches contention from other processes, but a
+  stall on the virtual machine's host would still pass both.
+- **The walk and the lookups:** about 1.5 units a probe. They are now
+  almost all of the descent above `2^32`, near the floor of one batched
+  addition and one lookup.
+- **Carried from §21.10:** `FieldStructure::new`, the two big-integer
+  constructions, a cheaper identity check and the curve's setup.
+- **Carried from §20.10:** the builder's eight-orbit minimum, the build's
+  price as the table leaves cache (now smaller on `main`), and Bailey's
+  walk.
+
+### 22.12 The next rounds, ranked
+
+This is a plan, recorded on 2026-09-30 after §22 merged. Nothing in it
+has run. Each round needs its own protocol, committed before it runs.
+
+**Correction, 2026-09-30, found while reading §20's harness for §23.**
+Item 1's rungs above `2^47.2` cannot run.
+- `KoblitzCurve::new` refuses `n > MAX_N = 63`, and the single-word
+  arithmetic and pair table stop there as well. `n = 71` panics in
+  `examples/koblitz_curve_records`.
+- With `n ≤ 63`, the only curves with `r ≥ 2^36` are the ladder's four
+  and two more, both inside its span:
+  - `icv1-f2m47-t22705043-f4e44623`, `2^36.6`;
+  - `icv1-f2m57-tm747311035-c1f545af`, `2^38.0`, new. Its proper intermediate subfields over
+    `GF(2)` are `GF(2^3)` and `GF(2^19)`.
+  - `icv1-f2m41-tm2308219-7f48b14a`, `2^39.0`;
+  - `icv1-f2m53-tm56619371-dac20a85`, `2^44.3`;
+  - `icv1-f2m59-tm943548413-98844ecc`, `2^44.5`, new, prime `n`.
+  - `icv1-f2m61-t158598901-ab42b6c5`, `2^47.2`.
+- So item 1 splits in two:
+  - **1a**, which needs no code change: the two new sizes and more sets.
+    It can narrow the fit, but it cannot lengthen its lever arm.
+  - **1b**, which lifts `MAX_N`: two-word field arithmetic and pair
+    table. That is engineering, and it comes before any rung above
+    `2^47.2`, `icv1-f2m83-t6151469093347-cdcc5432` included.
+- Item 1's text below is kept as it was written.
+
+1. **Recommended next (§23): resolve the top-end exponent.** Pending.
+   - **Why first.** Whether any work on constants can ever reach a
+     crossing depends on this exponent.
+     - The ratio to batch rho falls to 3.62× at `2^39` and rises to 9.20×
+       at `2^47.2`.
+     - The declared four-point fit reads `r^0.137` [−0.059, 0.332]. That
+       interval includes zero, and it separates neither the law's `1/6`
+       nor the model's 0.141 from it.
+     - §20.10 already named the cure: more sizes above `2^40`, or more
+       sets per size.
+   - **What.** A measurement round, with no code change, on current
+     `main`, every timed process isolated.
+     - Three new rungs, with prime `n`:
+       - `icv1-f2m71-tm48653080717-f25c4638`, `r = 2^49.1`;
+       - `icv1-f2m71-t48653080717-2cafaea3`, `r = 2^52.3`;
+       - `icv1-f2m83-t6151469093347-cdcc5432`, `r = 2^52.9`.
+     - `icv1-f2m73-tm184271214331-9d25cc67`, `r = 2^56.3`, if its pair table fits the host.
+       §20's rule applies: a refused grid point is recorded, not forced.
+     - Sets `M5`–`M8` at the four present largest sizes.
+     - §20's sweep and measurement procedure throughout, with batch rho in
+       the same process.
+   - **Cost, as an estimate.**
+     - §20's procedure prices each size about 18 times: 14 sweep points
+       and 4 sets.
+     - `2^47.2` takes 24 s and 218 MiB a pricing today. Scaled by `√r`
+       and by the table, a pricing near `2^52` is 2–4 minutes and a few
+       GiB.
+     - In all, about 3–4 hours of isolated runs. The table at `2^56.3`
+       is estimated near this host's 16 GB.
+   - **The target to declare.** Fit every size from `2^36.6` up. The
+     interval must either read 0 and `1/6` against each other, or the
+     round must say it cannot.
+   - **Scope.** `icv1-f2m83-t6151469093347-cdcc5432` is of degree 83 but is `E_1`, not the
+     challenge family, so it does not discharge AGENTS.md §8a.
+2. **Hold the binary layout fixed.** Pending.
+   - A placebo rebuild of the baseline, measured as an A/A'.
+   - One codegen unit.
+   - Instruction counts beside the time.
+   - §22's one failed target, and the unit's shifts in §21 and §22, are
+     between-binary effects of 1–11%. Until they are held fixed, no
+     engineering round on this host can resolve a smaller change.
+   - About 1–2 hours.
+3. **The build's price as the table leaves cache.** Pending.
+   - §20.10 measured a stored pair at 4.98 units at `2^39` and 9.20 at
+     `2^47.2`, before `main`'s n59 stack made the top end cheaper.
+   - A cost that grows with the table bears on the top-end exponent as
+     well as the constant.
+   - Engineering, and best run after items 1 and 2.
+4. **The isolation gate's own pressure.** Pending.
+   - `tools/isolated_bench.py` refused most of §22's starts once, on the
+     CPU pressure left by the benchmark before. Each refusal waited 15 s.
+   - An opt-in wait for that pressure to decay would roughly halve an
+     isolated run.
+   - The tool is shared, so the change must be opt-in.
+5. **The small end's constants.** Pending, deprioritised.
+   - From §21.10 and §22.11: `FieldStructure::new`, the two big-integer
+     constructions, the identity check, the curve's setup, and the walk
+     and lookups.
+   - They move `S` below `2^32`, where the ratio is already 5–15× and
+     falls with size. They do not bear on the exponent.
+
+**Not planned on this host: the §8a gate.**
+- `E_0` over `GF(2^83)` has `r = 2^81.0`, with cofactor 4.
+- **Batch rho** at `S ≈ 0.06` a target would cost about
+  `0.06·2^40.5 ≈ 9·10^10` units a target. That is roughly 40 minutes a
+  target on this host.
+- **The thread** would cost more, by an amount the present fit cannot
+  pin down. *Extrapolated, not measured:* `ratio·√n ∝ r^β`, carried from
+  9.20× at `2^47.2`.
+  - At `β = 0.137` it puts the thread near 200× batch rho.
+  - Across the fit's interval, [−0.059, 0.332], it is anywhere from
+    about 2× to about 19,000×. Item 1 exists to narrow that.
+- **Memory:** the thread's pair table at that size would not fit this
+  host.
+- **Construction** (added with the correction above): `n = 83` is also
+  past `MAX_N`. The thread cannot build the curve without item 1b.
+- So the thread keeps high-fidelity ECC2K-130 improvement unestablished,
+  as §22.9 says.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

@@ -30,13 +30,17 @@
    "path": "research/ic_constructions_20260926/analysis.json",
    "sha256": "e0758400806dc97f1b34b6acff214f1fffbe33ba7565ce2de942c180d3b314c7"
   },
+  "koblitz_s22": {
+   "path": "research/ic_descent_20260930/analysis-isolated.json",
+   "sha256": "060359c266e779dbe3911a325dcb0a2296e4f95dc100e7e6763fe19076bfe1ff"
+  },
   "oracles": {
    "path": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
    "sha256": "2271c4aa5236e2bdc8ff3d8b7782beddcbe1bc733a9343db3e833eba49fe75c5"
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "f3884179fde9e43a16570043f148baf28360ffd4c19c18b03c7c112e6c3b3d80"
+   "sha256": "ecd982f4b570043c5dd7d352cbf1825136363d59114ec8fa3151dde1b8df4125"
   }
  },
  "leaders": {
@@ -46,6 +50,7 @@
    "ratio_rho": 5.4703789655979405,
    "s": 15.617808489239641,
    "recipe": "folded table, walked targets, m = 2",
+   "one_target": null,
    "largest": {
     "slug": "icv1-fp24-t1577-77336155",
     "log2_r": 23.38228535388855,
@@ -58,6 +63,7 @@
    "ratio_rho": 10.621069650895725,
    "s": 21.30470007604251,
    "recipe": "folded, walked, base at the family optimum, m = 2",
+   "one_target": null,
    "largest": {
     "slug": "icv1-f2m27-t12543-569dca8b",
     "log2_r": 24.414902680079198,
@@ -67,13 +73,14 @@
   "koblitz": {
    "slug": "icv1-f2m41-tm2308219-7f48b14a",
    "log2_r": 39.0,
-   "ratio_rho": 4.278238141623078,
-   "s": 0.2849220439144774,
+   "ratio_rho": 3.6156712977275385,
+   "s": 0.24079642651229552,
    "recipe": "aimed m = 3 collection, m = 2 descent",
+   "one_target": 22.62440892847403,
    "largest": {
     "slug": "icv1-f2m61-t158598901-ab42b6c5",
     "log2_r": 47.21,
-    "ratio_rho": 12.124322000457676
+    "ratio_rho": 9.202036756044834
    }
   }
  },
@@ -3066,7 +3073,7 @@
    "legacy": "K_1/GF(2^19)",
    "log2_r": 18.0,
    "cofactor": null,
-   "reference": "batch rho, signed Frobenius and negation, the same 32 targets",
+   "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
    "reference_s": 0.3271131115122378,
    "floor_s": 0.04039725135552522,
    "targets": 32,
@@ -3087,32 +3094,33 @@
      "la_rows_in": 15,
      "la_core_dimension": 0,
      "trials": 16,
-     "s": 6.819055263124212,
-     "s_before": 7.223411863973261,
-     "s_section20": 8.117868359434528,
+     "s": 4.872889458440391,
+     "s_before": 6.783250946324698,
      "phases_s": {
-      "setup": 0.591045296919234,
-      "constructions": 0.8485997828333932,
-      "factor_base": 0.5445062519043842,
-      "table": 0.617176313247569,
-      "relations": 0.2585407499475523,
-      "linear_algebra": 0.12578843594691197,
-      "descent": 2.904832083700463,
-      "verify": 0.9285663486247041
+      "setup": 0.6237339814760797,
+      "constructions": 0.9143040099593411,
+      "factor_base": 0.5715249018442982,
+      "table": 0.5043462314056679,
+      "relations": 0.2581727942743142,
+      "linear_algebra": 0.1300231945875359,
+      "descent": 0.9139956272233088,
+      "verify": 0.9567887176698457
      },
-     "ratio_rho": 20.84616917860567,
+     "ratio_rho": 14.896649773263793,
      "ratio_rho_ci": [
-      19.2349550066329,
-      22.50848625675146
+      13.77919573904663,
+      16.04839160892127
      ],
-     "ratio_rho_before": 22.082306119065553,
+     "ratio_rho_before": 20.736713716444612,
+     "ratio_rho_section21": 20.84616917860567,
      "ratio_rho_section20": 24.81670123800839,
-     "speedup": 1.057675058719813,
+     "one_target_cold_ratio_section20": 113.07142404067712,
+     "speedup": 1.3922266153961902,
      "speedup_ci": [
-      1.0498196345765056,
-      1.065589262187148
+      1.3758523655574657,
+      1.408795737929466
      ],
-     "ratio_floor": 168.79998104602615,
+     "ratio_floor": 120.62428246801784,
      "verified": true
     }
    ],
@@ -3132,36 +3140,37 @@
     "la_rows_in": 15,
     "la_core_dimension": 0,
     "trials": 16,
-    "s": 6.819055263124212,
-    "s_before": 7.223411863973261,
-    "s_section20": 8.117868359434528,
+    "s": 4.872889458440391,
+    "s_before": 6.783250946324698,
     "phases_s": {
-     "setup": 0.591045296919234,
-     "constructions": 0.8485997828333932,
-     "factor_base": 0.5445062519043842,
-     "table": 0.617176313247569,
-     "relations": 0.2585407499475523,
-     "linear_algebra": 0.12578843594691197,
-     "descent": 2.904832083700463,
-     "verify": 0.9285663486247041
+     "setup": 0.6237339814760797,
+     "constructions": 0.9143040099593411,
+     "factor_base": 0.5715249018442982,
+     "table": 0.5043462314056679,
+     "relations": 0.2581727942743142,
+     "linear_algebra": 0.1300231945875359,
+     "descent": 0.9139956272233088,
+     "verify": 0.9567887176698457
     },
-    "ratio_rho": 20.84616917860567,
+    "ratio_rho": 14.896649773263793,
     "ratio_rho_ci": [
-     19.2349550066329,
-     22.50848625675146
+     13.77919573904663,
+     16.04839160892127
     ],
-    "ratio_rho_before": 22.082306119065553,
+    "ratio_rho_before": 20.736713716444612,
+    "ratio_rho_section21": 20.84616917860567,
     "ratio_rho_section20": 24.81670123800839,
-    "speedup": 1.057675058719813,
+    "one_target_cold_ratio_section20": 113.07142404067712,
+    "speedup": 1.3922266153961902,
     "speedup_ci": [
-     1.0498196345765056,
-     1.065589262187148
+     1.3758523655574657,
+     1.408795737929466
     ],
-    "ratio_floor": 168.79998104602615,
+    "ratio_floor": 120.62428246801784,
     "verified": true
    },
-   "source": "research/ic_constructions_20260926/analysis.json",
-   "round": "§20 sweep (2026-09-26), §21 constructions built once (2026-09-26)",
+   "source": "research/ic_descent_20260930/analysis-isolated.json",
+   "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering"
   },
   {
@@ -3171,7 +3180,7 @@
    "legacy": "K_1/GF(2^23)",
    "log2_r": 22.0,
    "cofactor": null,
-   "reference": "batch rho, signed Frobenius and negation, the same 32 targets",
+   "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
    "reference_s": 0.20497224759663915,
    "floor_s": 0.036716789445079064,
    "targets": 32,
@@ -3192,32 +3201,33 @@
      "la_rows_in": 11,
      "la_core_dimension": 0,
      "trials": 48,
-     "s": 1.9833722584960238,
-     "s_before": 2.3216412187421906,
-     "s_section20": 2.594961661095908,
+     "s": 1.432406399234411,
+     "s_before": 1.9765001942778928,
      "phases_s": {
-      "setup": 0.1536807027878143,
-      "constructions": 0.26958168808070504,
-      "factor_base": 0.16063454002505753,
-      "table": 0.17474952553345202,
-      "relations": 0.1086463524450128,
-      "linear_algebra": 0.03584397567660965,
-      "descent": 0.8715952485204679,
-      "verify": 0.20864022542690475
+      "setup": 0.16446116776150432,
+      "constructions": 0.28861160085349774,
+      "factor_base": 0.1684686994182842,
+      "table": 0.13652435255426154,
+      "relations": 0.11946648505974385,
+      "linear_algebra": 0.03654222426518232,
+      "descent": 0.3055268922172965,
+      "verify": 0.2128049771046404
      },
-     "ratio_rho": 9.67629658039884,
+     "ratio_rho": 6.988294347307033,
      "ratio_rho_ci": [
-      5.995400479904158,
-      14.40560782504436
+      4.436909446037522,
+      10.267183126777482
      ],
-     "ratio_rho_before": 11.326612485173616,
+     "ratio_rho_before": 9.642769777142751,
+     "ratio_rho_section21": 9.67629658039884,
      "ratio_rho_section20": 12.660063455041396,
-     "speedup": 1.1687116674318354,
+     "one_target_cold_ratio_section20": 62.25946981985991,
+     "speedup": 1.3799241490507275,
      "speedup_ci": [
-      1.1525265206112785,
-      1.1851241053150432
+      1.3656401299183054,
+      1.3943575729920048
      ],
-     "ratio_floor": 54.01812872181404,
+     "ratio_floor": 39.01229984655938,
      "verified": true
     }
    ],
@@ -3237,36 +3247,37 @@
     "la_rows_in": 11,
     "la_core_dimension": 0,
     "trials": 48,
-    "s": 1.9833722584960238,
-    "s_before": 2.3216412187421906,
-    "s_section20": 2.594961661095908,
+    "s": 1.432406399234411,
+    "s_before": 1.9765001942778928,
     "phases_s": {
-     "setup": 0.1536807027878143,
-     "constructions": 0.26958168808070504,
-     "factor_base": 0.16063454002505753,
-     "table": 0.17474952553345202,
-     "relations": 0.1086463524450128,
-     "linear_algebra": 0.03584397567660965,
-     "descent": 0.8715952485204679,
-     "verify": 0.20864022542690475
+     "setup": 0.16446116776150432,
+     "constructions": 0.28861160085349774,
+     "factor_base": 0.1684686994182842,
+     "table": 0.13652435255426154,
+     "relations": 0.11946648505974385,
+     "linear_algebra": 0.03654222426518232,
+     "descent": 0.3055268922172965,
+     "verify": 0.2128049771046404
     },
-    "ratio_rho": 9.67629658039884,
+    "ratio_rho": 6.988294347307033,
     "ratio_rho_ci": [
-     5.995400479904158,
-     14.40560782504436
+     4.436909446037522,
+     10.267183126777482
     ],
-    "ratio_rho_before": 11.326612485173616,
+    "ratio_rho_before": 9.642769777142751,
+    "ratio_rho_section21": 9.67629658039884,
     "ratio_rho_section20": 12.660063455041396,
-    "speedup": 1.1687116674318354,
+    "one_target_cold_ratio_section20": 62.25946981985991,
+    "speedup": 1.3799241490507275,
     "speedup_ci": [
-     1.1525265206112785,
-     1.1851241053150432
+     1.3656401299183054,
+     1.3943575729920048
     ],
-    "ratio_floor": 54.01812872181404,
+    "ratio_floor": 39.01229984655938,
     "verified": true
    },
-   "source": "research/ic_constructions_20260926/analysis.json",
-   "round": "§20 sweep (2026-09-26), §21 constructions built once (2026-09-26)",
+   "source": "research/ic_descent_20260930/analysis-isolated.json",
+   "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering"
   },
   {
@@ -3276,7 +3287,7 @@
    "legacy": "K_1/GF(2^45)",
    "log2_r": 24.8,
    "cofactor": null,
-   "reference": "batch rho, signed Frobenius and negation, the same 32 targets",
+   "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
    "reference_s": 0.11910097160042797,
    "floor_s": 0.026249580070523963,
    "targets": 32,
@@ -3297,32 +3308,33 @@
      "la_rows_in": 8,
      "la_core_dimension": 0,
      "trials": 32,
-     "s": 1.182108273315064,
-     "s_before": 2.6696799261214643,
-     "s_section20": 2.8190565065008277,
+     "s": 0.8563454652154826,
+     "s_before": 1.1515275315298121,
      "phases_s": {
-      "setup": 0.18092770309010278,
-      "constructions": 0.1870795601514295,
-      "factor_base": 0.13043346431778807,
-      "table": 0.10954999340203235,
-      "relations": 0.04177948469239407,
-      "linear_algebra": 0.012538571118803448,
-      "descent": 0.44121670599897633,
-      "verify": 0.07858279054353745
+      "setup": 0.18135162380042724,
+      "constructions": 0.19199834315659717,
+      "factor_base": 0.1300108689672182,
+      "table": 0.06965563710625806,
+      "relations": 0.04060455824877867,
+      "linear_algebra": 0.012480668153261886,
+      "descent": 0.15063656688310412,
+      "verify": 0.07960719889983717
      },
-     "ratio_rho": 9.925261376380043,
+     "ratio_rho": 7.190079591360827,
      "ratio_rho_ci": [
-      9.074439068919613,
-      10.832957876439686
+      6.410148541316479,
+      8.021509071646102
      ],
-     "ratio_rho_before": 22.415265721575953,
+     "ratio_rho_before": 9.668498216732216,
+     "ratio_rho_section21": 9.925261376380043,
      "ratio_rho_section20": 23.669466912146483,
-     "speedup": 2.2447186901583613,
+     "one_target_cold_ratio_section20": 122.84084563986289,
+     "speedup": 1.3447053980796186,
      "speedup_ci": [
-      2.221862885655546,
-      2.2678096071889766
+      1.3206296304784522,
+      1.3692200794929608
      ],
-     "ratio_floor": 45.0334165399648,
+     "ratio_floor": 32.62320627281522,
      "verified": true
     }
    ],
@@ -3342,36 +3354,37 @@
     "la_rows_in": 8,
     "la_core_dimension": 0,
     "trials": 32,
-    "s": 1.182108273315064,
-    "s_before": 2.6696799261214643,
-    "s_section20": 2.8190565065008277,
+    "s": 0.8563454652154826,
+    "s_before": 1.1515275315298121,
     "phases_s": {
-     "setup": 0.18092770309010278,
-     "constructions": 0.1870795601514295,
-     "factor_base": 0.13043346431778807,
-     "table": 0.10954999340203235,
-     "relations": 0.04177948469239407,
-     "linear_algebra": 0.012538571118803448,
-     "descent": 0.44121670599897633,
-     "verify": 0.07858279054353745
+     "setup": 0.18135162380042724,
+     "constructions": 0.19199834315659717,
+     "factor_base": 0.1300108689672182,
+     "table": 0.06965563710625806,
+     "relations": 0.04060455824877867,
+     "linear_algebra": 0.012480668153261886,
+     "descent": 0.15063656688310412,
+     "verify": 0.07960719889983717
     },
-    "ratio_rho": 9.925261376380043,
+    "ratio_rho": 7.190079591360827,
     "ratio_rho_ci": [
-     9.074439068919613,
-     10.832957876439686
+     6.410148541316479,
+     8.021509071646102
     ],
-    "ratio_rho_before": 22.415265721575953,
+    "ratio_rho_before": 9.668498216732216,
+    "ratio_rho_section21": 9.925261376380043,
     "ratio_rho_section20": 23.669466912146483,
-    "speedup": 2.2447186901583613,
+    "one_target_cold_ratio_section20": 122.84084563986289,
+    "speedup": 1.3447053980796186,
     "speedup_ci": [
-     2.221862885655546,
-     2.2678096071889766
+     1.3206296304784522,
+     1.3692200794929608
     ],
-    "ratio_floor": 45.0334165399648,
+    "ratio_floor": 32.62320627281522,
     "verified": true
    },
-   "source": "research/ic_constructions_20260926/analysis.json",
-   "round": "§20 sweep (2026-09-26), §21 constructions built once (2026-09-26)",
+   "source": "research/ic_descent_20260930/analysis-isolated.json",
+   "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering"
   },
   {
@@ -3381,7 +3394,7 @@
    "legacy": "K_0/GF(2^37)",
    "log2_r": 27.78,
    "cofactor": null,
-   "reference": "batch rho, signed Frobenius and negation, the same 32 targets",
+   "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
    "reference_s": 0.09224464641391365,
    "floor_s": 0.028948612637507132,
    "targets": 32,
@@ -3402,32 +3415,33 @@
      "la_rows_in": 8,
      "la_core_dimension": 0,
      "trials": 684,
-     "s": 0.5822033197424488,
-     "s_before": 0.8606459950542746,
-     "s_section20": 0.8608206394395959,
+     "s": 0.48528077638942624,
+     "s_before": 0.5686472372254764,
      "phases_s": {
-      "setup": 0.0725693228681542,
-      "constructions": 0.05775741928776645,
-      "factor_base": 0.04035464706294763,
-      "table": 0.035494177143568686,
-      "relations": 0.07972492475058521,
-      "linear_algebra": 0.004661767985524221,
-      "descent": 0.26144764019649785,
-      "verify": 0.030193420447404484
+      "setup": 0.07562128195935067,
+      "constructions": 0.06214807047463206,
+      "factor_base": 0.04114115835264887,
+      "table": 0.02432361136640727,
+      "relations": 0.08316503750296374,
+      "linear_algebra": 0.004893805839784593,
+      "descent": 0.16189097130470326,
+      "verify": 0.03209683958893579
      },
-     "ratio_rho": 6.3115133763972295,
+     "ratio_rho": 5.260801523504233,
      "ratio_rho_ci": [
-      5.422347797364535,
-      7.235675963820724
+      4.39987399454134,
+      6.152290215940666
      ],
-     "ratio_rho_before": 9.33003733563512,
+     "ratio_rho_before": 6.164555443942868,
+     "ratio_rho_section21": 6.3115133763972295,
      "ratio_rho_section20": 9.331930609576867,
-     "speedup": 1.4896844833430898,
+     "one_target_cold_ratio_section20": 41.6092621993215,
+     "speedup": 1.1725391928620652,
      "speedup_ci": [
-      1.4670533446562652,
-      1.5126647357415102
+      1.1317452745511727,
+      1.2148035337217207
      ],
-     "ratio_floor": 20.111613880525653,
+     "ratio_floor": 16.763524472349825,
      "verified": true
     }
    ],
@@ -3447,36 +3461,37 @@
     "la_rows_in": 8,
     "la_core_dimension": 0,
     "trials": 684,
-    "s": 0.5822033197424488,
-    "s_before": 0.8606459950542746,
-    "s_section20": 0.8608206394395959,
+    "s": 0.48528077638942624,
+    "s_before": 0.5686472372254764,
     "phases_s": {
-     "setup": 0.0725693228681542,
-     "constructions": 0.05775741928776645,
-     "factor_base": 0.04035464706294763,
-     "table": 0.035494177143568686,
-     "relations": 0.07972492475058521,
-     "linear_algebra": 0.004661767985524221,
-     "descent": 0.26144764019649785,
-     "verify": 0.030193420447404484
+     "setup": 0.07562128195935067,
+     "constructions": 0.06214807047463206,
+     "factor_base": 0.04114115835264887,
+     "table": 0.02432361136640727,
+     "relations": 0.08316503750296374,
+     "linear_algebra": 0.004893805839784593,
+     "descent": 0.16189097130470326,
+     "verify": 0.03209683958893579
     },
-    "ratio_rho": 6.3115133763972295,
+    "ratio_rho": 5.260801523504233,
     "ratio_rho_ci": [
-     5.422347797364535,
-     7.235675963820724
+     4.39987399454134,
+     6.152290215940666
     ],
-    "ratio_rho_before": 9.33003733563512,
+    "ratio_rho_before": 6.164555443942868,
+    "ratio_rho_section21": 6.3115133763972295,
     "ratio_rho_section20": 9.331930609576867,
-    "speedup": 1.4896844833430898,
+    "one_target_cold_ratio_section20": 41.6092621993215,
+    "speedup": 1.1725391928620652,
     "speedup_ci": [
-     1.4670533446562652,
-     1.5126647357415102
+     1.1317452745511727,
+     1.2148035337217207
     ],
-    "ratio_floor": 20.111613880525653,
+    "ratio_floor": 16.763524472349825,
     "verified": true
    },
-   "source": "research/ic_constructions_20260926/analysis.json",
-   "round": "§20 sweep (2026-09-26), §21 constructions built once (2026-09-26)",
+   "source": "research/ic_descent_20260930/analysis-isolated.json",
+   "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering"
   },
   {
@@ -3486,7 +3501,7 @@
    "legacy": "K_1/GF(2^43)",
    "log2_r": 32.11,
    "cofactor": null,
-   "reference": "batch rho, signed Frobenius and negation, the same 32 targets",
+   "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
    "reference_s": 0.06663205638098299,
    "floor_s": 0.026853097532361443,
    "targets": 32,
@@ -3507,32 +3522,33 @@
      "la_rows_in": 16,
      "la_core_dimension": 0,
      "trials": 2280,
-     "s": 0.36844126700100344,
-     "s_before": 0.5182852299421006,
-     "s_section20": 0.5440260614079698,
+     "s": 0.3248333744103279,
+     "s_before": 0.3441430466861978,
      "phases_s": {
-      "setup": 0.03367589211728556,
-      "constructions": 0.022738734573939805,
-      "factor_base": 0.019031477524557326,
-      "table": 0.02709228613864814,
-      "relations": 0.09504345246637472,
-      "linear_algebra": 0.001990652870413133,
-      "descent": 0.15801715268984165,
-      "verify": 0.010851618619943108
+      "setup": 0.03395506914921843,
+      "constructions": 0.023034166887328986,
+      "factor_base": 0.019384788042774333,
+      "table": 0.01416451850857146,
+      "relations": 0.0971688146840351,
+      "linear_algebra": 0.0019617182033429244,
+      "descent": 0.12391483206638415,
+      "verify": 0.011249466868672486
      },
-     "ratio_rho": 5.529489663269012,
+     "ratio_rho": 4.875031509653909,
      "ratio_rho_ci": [
-      4.7230274657594755,
-      6.385700151584668
+      4.163545782633675,
+      5.622433030033322
      ],
-     "ratio_rho_before": 7.778316595524147,
+     "ratio_rho_before": 5.164827042384622,
+     "ratio_rho_section21": 5.529489663269012,
      "ratio_rho_section20": 8.164629623576149,
-     "speedup": 1.4035990778133363,
+     "one_target_cold_ratio_section20": 39.94660672249136,
+     "speedup": 1.0601697747610863,
      "speedup_ci": [
-      1.3830046992007612,
-      1.4245001281463208
+      1.0425671221098771,
+      1.0780696297446806
      ],
-     "ratio_floor": 13.72062446639477,
+     "ratio_floor": 12.09668173360119,
      "verified": true
     }
    ],
@@ -3552,36 +3568,37 @@
     "la_rows_in": 16,
     "la_core_dimension": 0,
     "trials": 2280,
-    "s": 0.36844126700100344,
-    "s_before": 0.5182852299421006,
-    "s_section20": 0.5440260614079698,
+    "s": 0.3248333744103279,
+    "s_before": 0.3441430466861978,
     "phases_s": {
-     "setup": 0.03367589211728556,
-     "constructions": 0.022738734573939805,
-     "factor_base": 0.019031477524557326,
-     "table": 0.02709228613864814,
-     "relations": 0.09504345246637472,
-     "linear_algebra": 0.001990652870413133,
-     "descent": 0.15801715268984165,
-     "verify": 0.010851618619943108
+     "setup": 0.03395506914921843,
+     "constructions": 0.023034166887328986,
+     "factor_base": 0.019384788042774333,
+     "table": 0.01416451850857146,
+     "relations": 0.0971688146840351,
+     "linear_algebra": 0.0019617182033429244,
+     "descent": 0.12391483206638415,
+     "verify": 0.011249466868672486
     },
-    "ratio_rho": 5.529489663269012,
+    "ratio_rho": 4.875031509653909,
     "ratio_rho_ci": [
-     4.7230274657594755,
-     6.385700151584668
+     4.163545782633675,
+     5.622433030033322
     ],
-    "ratio_rho_before": 7.778316595524147,
+    "ratio_rho_before": 5.164827042384622,
+    "ratio_rho_section21": 5.529489663269012,
     "ratio_rho_section20": 8.164629623576149,
-    "speedup": 1.4035990778133363,
+    "one_target_cold_ratio_section20": 39.94660672249136,
+    "speedup": 1.0601697747610863,
     "speedup_ci": [
-     1.3830046992007612,
-     1.4245001281463208
+     1.0425671221098771,
+     1.0780696297446806
     ],
-    "ratio_floor": 13.72062446639477,
+    "ratio_floor": 12.09668173360119,
     "verified": true
    },
-   "source": "research/ic_constructions_20260926/analysis.json",
-   "round": "§20 sweep (2026-09-26), §21 constructions built once (2026-09-26)",
+   "source": "research/ic_descent_20260930/analysis-isolated.json",
+   "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering"
   },
   {
@@ -3591,7 +3608,7 @@
    "legacy": "K_1/GF(2^47)",
    "log2_r": 36.64,
    "cofactor": null,
-   "reference": "batch rho, signed Frobenius and negation, the same 32 targets",
+   "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
    "reference_s": 0.06021563077488146,
    "floor_s": 0.025685006978800405,
    "targets": 32,
@@ -3612,32 +3629,33 @@
      "la_rows_in": 56,
      "la_core_dimension": 0,
      "trials": 2460,
-     "s": 0.2673702542106171,
-     "s_before": 0.3810651566185538,
-     "s_section20": 0.39746791219846045,
+     "s": 0.23441213095035382,
+     "s_before": 0.23389823108073377,
      "phases_s": {
-      "setup": 0.021366439281906107,
-      "constructions": 0.015360761605541465,
-      "factor_base": 0.016686602694589957,
-      "table": 0.06920506959682124,
-      "relations": 0.05778596770645286,
-      "linear_algebra": 0.00153280597146405,
-      "descent": 0.07908378722895153,
-      "verify": 0.0063488201248899055
+      "setup": 0.022026209336272286,
+      "constructions": 0.01568087091378731,
+      "factor_base": 0.01703870257189441,
+      "table": 0.03705563654823103,
+      "relations": 0.05791232891756848,
+      "linear_algebra": 0.0015295490447882385,
+      "descent": 0.07648273932107356,
+      "verify": 0.006686094296738499
      },
-     "ratio_rho": 4.440213459030123,
+     "ratio_rho": 3.8928784425876555,
      "ratio_rho_ci": [
-      4.040125903993013,
-      4.870780435272004
+      3.458046626220236,
+      4.350846122546918
      ],
-     "ratio_rho_before": 6.32834285242616,
+     "ratio_rho_before": 3.884344115818892,
+     "ratio_rho_section21": 4.440213459030123,
      "ratio_rho_section20": 6.60074314731353,
-     "speedup": 1.4204169834333267,
+     "one_target_cold_ratio_section20": 38.72414372317772,
+     "speedup": 0.9985705348872875,
      "speedup_ci": [
-      1.3877826114742455,
-      1.453818768259782
+      0.9563234455069335,
+      1.0426839557577847
      ],
-     "ratio_floor": 10.40958464334061,
+     "ratio_floor": 9.12641881482961,
      "verified": true
     }
    ],
@@ -3657,36 +3675,37 @@
     "la_rows_in": 56,
     "la_core_dimension": 0,
     "trials": 2460,
-    "s": 0.2673702542106171,
-    "s_before": 0.3810651566185538,
-    "s_section20": 0.39746791219846045,
+    "s": 0.23441213095035382,
+    "s_before": 0.23389823108073377,
     "phases_s": {
-     "setup": 0.021366439281906107,
-     "constructions": 0.015360761605541465,
-     "factor_base": 0.016686602694589957,
-     "table": 0.06920506959682124,
-     "relations": 0.05778596770645286,
-     "linear_algebra": 0.00153280597146405,
-     "descent": 0.07908378722895153,
-     "verify": 0.0063488201248899055
+     "setup": 0.022026209336272286,
+     "constructions": 0.01568087091378731,
+     "factor_base": 0.01703870257189441,
+     "table": 0.03705563654823103,
+     "relations": 0.05791232891756848,
+     "linear_algebra": 0.0015295490447882385,
+     "descent": 0.07648273932107356,
+     "verify": 0.006686094296738499
     },
-    "ratio_rho": 4.440213459030123,
+    "ratio_rho": 3.8928784425876555,
     "ratio_rho_ci": [
-     4.040125903993013,
-     4.870780435272004
+     3.458046626220236,
+     4.350846122546918
     ],
-    "ratio_rho_before": 6.32834285242616,
+    "ratio_rho_before": 3.884344115818892,
+    "ratio_rho_section21": 4.440213459030123,
     "ratio_rho_section20": 6.60074314731353,
-    "speedup": 1.4204169834333267,
+    "one_target_cold_ratio_section20": 38.72414372317772,
+    "speedup": 0.9985705348872875,
     "speedup_ci": [
-     1.3877826114742455,
-     1.453818768259782
+     0.9563234455069335,
+     1.0426839557577847
     ],
-    "ratio_floor": 10.40958464334061,
+    "ratio_floor": 9.12641881482961,
     "verified": true
    },
-   "source": "research/ic_constructions_20260926/analysis.json",
-   "round": "§20 sweep (2026-09-26), §21 constructions built once (2026-09-26)",
+   "source": "research/ic_descent_20260930/analysis-isolated.json",
+   "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering"
   },
   {
@@ -3696,7 +3715,7 @@
    "legacy": "K_0/GF(2^41)",
    "log2_r": 39.0,
    "cofactor": null,
-   "reference": "batch rho, signed Frobenius and negation, the same 32 targets",
+   "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
    "reference_s": 0.06659798601262147,
    "floor_s": 0.027500252958724918,
    "targets": 32,
@@ -3717,32 +3736,33 @@
      "la_rows_in": 86,
      "la_core_dimension": 12,
      "trials": 9968,
-     "s": 0.2849220439144774,
-     "s_before": 0.32217812168780235,
-     "s_section20": 0.3238984549728641,
+     "s": 0.24079642651229552,
+     "s_before": 0.24982039203317233,
      "phases_s": {
-      "setup": 0.021371544305893123,
-      "constructions": 0.008972151469574486,
-      "factor_base": 0.008897293008350224,
-      "table": 0.05776633509562108,
-      "relations": 0.12654490704917665,
-      "linear_algebra": 0.0012218299876871144,
-      "descent": 0.055841320347238835,
-      "verify": 0.004306662650935846
+      "setup": 0.020918427650165213,
+      "constructions": 0.00845148974160727,
+      "factor_base": 0.009389432875206362,
+      "table": 0.029064516010166193,
+      "relations": 0.11961859469647401,
+      "linear_algebra": 0.001103131805338061,
+      "descent": 0.04790804218541379,
+      "verify": 0.004342791547924642
      },
-     "ratio_rho": 4.278238141623078,
+     "ratio_rho": 3.6156712977275385,
      "ratio_rho_ci": [
-      3.943422794339384,
-      4.6304180542885875
+      3.27910503470705,
+      3.969531552076008
      ],
-     "ratio_rho_before": 4.837655625603213,
+     "ratio_rho_before": 3.7511703730173918,
+     "ratio_rho_section21": 4.278238141623078,
      "ratio_rho_section20": 4.8634872368584805,
-     "speedup": 1.130998817523317,
+     "one_target_cold_ratio_section20": 22.62440892847403,
+     "speedup": 1.0373392546142055,
      "speedup_ci": [
-      1.1146959837251171,
-      1.1475400861896172
+      1.0054637146067265,
+      1.070225323431435
      ],
-     "ratio_floor": 10.360706293942693,
+     "ratio_floor": 8.756153147889457,
      "verified": true
     }
    ],
@@ -3762,36 +3782,37 @@
     "la_rows_in": 86,
     "la_core_dimension": 12,
     "trials": 9968,
-    "s": 0.2849220439144774,
-    "s_before": 0.32217812168780235,
-    "s_section20": 0.3238984549728641,
+    "s": 0.24079642651229552,
+    "s_before": 0.24982039203317233,
     "phases_s": {
-     "setup": 0.021371544305893123,
-     "constructions": 0.008972151469574486,
-     "factor_base": 0.008897293008350224,
-     "table": 0.05776633509562108,
-     "relations": 0.12654490704917665,
-     "linear_algebra": 0.0012218299876871144,
-     "descent": 0.055841320347238835,
-     "verify": 0.004306662650935846
+     "setup": 0.020918427650165213,
+     "constructions": 0.00845148974160727,
+     "factor_base": 0.009389432875206362,
+     "table": 0.029064516010166193,
+     "relations": 0.11961859469647401,
+     "linear_algebra": 0.001103131805338061,
+     "descent": 0.04790804218541379,
+     "verify": 0.004342791547924642
     },
-    "ratio_rho": 4.278238141623078,
+    "ratio_rho": 3.6156712977275385,
     "ratio_rho_ci": [
-     3.943422794339384,
-     4.6304180542885875
+     3.27910503470705,
+     3.969531552076008
     ],
-    "ratio_rho_before": 4.837655625603213,
+    "ratio_rho_before": 3.7511703730173918,
+    "ratio_rho_section21": 4.278238141623078,
     "ratio_rho_section20": 4.8634872368584805,
-    "speedup": 1.130998817523317,
+    "one_target_cold_ratio_section20": 22.62440892847403,
+    "speedup": 1.0373392546142055,
     "speedup_ci": [
-     1.1146959837251171,
-     1.1475400861896172
+     1.0054637146067265,
+     1.070225323431435
     ],
-    "ratio_floor": 10.360706293942693,
+    "ratio_floor": 8.756153147889457,
     "verified": true
    },
-   "source": "research/ic_constructions_20260926/analysis.json",
-   "round": "§20 sweep (2026-09-26), §21 constructions built once (2026-09-26)",
+   "source": "research/ic_descent_20260930/analysis-isolated.json",
+   "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering"
   },
   {
@@ -3801,7 +3822,7 @@
    "legacy": "K_0/GF(2^53)",
    "log2_r": 44.26,
    "cofactor": null,
-   "reference": "batch rho, signed Frobenius and negation, the same 32 targets",
+   "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
    "reference_s": 0.05094548856731939,
    "floor_s": 0.024187483284397012,
    "targets": 32,
@@ -3822,32 +3843,33 @@
      "la_rows_in": 267,
      "la_core_dimension": 51,
      "trials": 16224,
-     "s": 0.39569988568968095,
-     "s_before": 0.42664828644155717,
-     "s_section20": 0.4690566790853182,
+     "s": 0.2605273559740867,
+     "s_before": 0.26253101699679465,
      "phases_s": {
-      "setup": 0.017265093117220447,
-      "constructions": 0.005407225389154019,
-      "factor_base": 0.006677072277350541,
-      "table": 0.17847242222360016,
-      "relations": 0.16315743334514646,
-      "linear_algebra": 0.0006826822617651906,
-      "descent": 0.021883652894366817,
-      "verify": 0.0021543041810773464
+      "setup": 0.017266943494031076,
+      "constructions": 0.0058062544903476725,
+      "factor_base": 0.006559107758187589,
+      "table": 0.06108266240102846,
+      "relations": 0.1467521035694754,
+      "linear_algebra": 0.0005688476699458335,
+      "descent": 0.020272929527882285,
+      "verify": 0.002218507063188404
      },
-     "ratio_rho": 7.767123190246825,
+     "ratio_rho": 5.113845470925767,
      "ratio_rho_ci": [
-      5.5860759900353605,
-      10.285409115112202
+      3.8183953443844496,
+      6.602938388941934
      ],
-     "ratio_rho_before": 8.374603884263156,
+     "ratio_rho_before": 5.153174979368115,
+     "ratio_rho_section21": 7.767123190246825,
      "ratio_rho_section20": 9.20703073571483,
-     "speedup": 1.0717293904787781,
+     "one_target_cold_ratio_section20": 42.98308249030352,
+     "speedup": 1.007678980277373,
      "speedup_ci": [
-      1.050074017819885,
-      1.0938313556226174
+      0.9860335891939092,
+      1.0297995305849146
      ],
-     "ratio_floor": 16.359696502403004,
+     "ratio_floor": 10.77116427992114,
      "verified": true
     }
    ],
@@ -3867,36 +3889,37 @@
     "la_rows_in": 267,
     "la_core_dimension": 51,
     "trials": 16224,
-    "s": 0.39569988568968095,
-    "s_before": 0.42664828644155717,
-    "s_section20": 0.4690566790853182,
+    "s": 0.2605273559740867,
+    "s_before": 0.26253101699679465,
     "phases_s": {
-     "setup": 0.017265093117220447,
-     "constructions": 0.005407225389154019,
-     "factor_base": 0.006677072277350541,
-     "table": 0.17847242222360016,
-     "relations": 0.16315743334514646,
-     "linear_algebra": 0.0006826822617651906,
-     "descent": 0.021883652894366817,
-     "verify": 0.0021543041810773464
+     "setup": 0.017266943494031076,
+     "constructions": 0.0058062544903476725,
+     "factor_base": 0.006559107758187589,
+     "table": 0.06108266240102846,
+     "relations": 0.1467521035694754,
+     "linear_algebra": 0.0005688476699458335,
+     "descent": 0.020272929527882285,
+     "verify": 0.002218507063188404
     },
-    "ratio_rho": 7.767123190246825,
+    "ratio_rho": 5.113845470925767,
     "ratio_rho_ci": [
-     5.5860759900353605,
-     10.285409115112202
+     3.8183953443844496,
+     6.602938388941934
     ],
-    "ratio_rho_before": 8.374603884263156,
+    "ratio_rho_before": 5.153174979368115,
+    "ratio_rho_section21": 7.767123190246825,
     "ratio_rho_section20": 9.20703073571483,
-    "speedup": 1.0717293904787781,
+    "one_target_cold_ratio_section20": 42.98308249030352,
+    "speedup": 1.007678980277373,
     "speedup_ci": [
-     1.050074017819885,
-     1.0938313556226174
+     0.9860335891939092,
+     1.0297995305849146
     ],
-    "ratio_floor": 16.359696502403004,
+    "ratio_floor": 10.77116427992114,
     "verified": true
    },
-   "source": "research/ic_constructions_20260926/analysis.json",
-   "round": "§20 sweep (2026-09-26), §21 constructions built once (2026-09-26)",
+   "source": "research/ic_descent_20260930/analysis-isolated.json",
+   "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering"
   },
   {
@@ -3906,7 +3929,7 @@
    "legacy": "K_0/GF(2^61)",
    "log2_r": 47.21,
    "cofactor": null,
-   "reference": "batch rho, signed Frobenius and negation, the same 32 targets",
+   "reference": "batch rho, signed Frobenius and negation, the same 32 targets (a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
    "reference_s": 0.053081464625631784,
    "floor_s": 0.0225456987372308,
    "targets": 32,
@@ -3927,32 +3950,33 @@
      "la_rows_in": 336,
      "la_core_dimension": 63,
      "trials": 66576,
-     "s": 0.6435767693770633,
-     "s_before": 0.6652027704494277,
-     "s_section20": 0.7214696576270222,
+     "s": 0.4884575885497573,
+     "s_before": 0.48140217766517623,
      "phases_s": {
-      "setup": 0.016254569227686307,
-      "constructions": 0.0028567390627402315,
-      "factor_base": 0.0036197702168808987,
-      "table": 0.13003294060258144,
-      "relations": 0.444487095022956,
-      "linear_algebra": 0.0003121154323715587,
-      "descent": 0.045029809397947,
-      "verify": 0.0009837304138999021
+      "setup": 0.016734336446242993,
+      "constructions": 0.0029578587093882307,
+      "factor_base": 0.0035389964287900373,
+      "table": 0.036428805990492114,
+      "relations": 0.3849898071771096,
+      "linear_algebra": 0.00025765445893974597,
+      "descent": 0.042519478831920324,
+      "verify": 0.001030650506874197
      },
-     "ratio_rho": 12.124322000457676,
+     "ratio_rho": 9.202036756044834,
      "ratio_rho_ci": [
-      10.747338745289069,
-      13.576554884096838
+      8.236328022313302,
+      10.235863046251744
      ],
-     "ratio_rho_before": 12.531733537137876,
+     "ratio_rho_before": 9.069120097954466,
+     "ratio_rho_section21": 12.124322000457676,
      "ratio_rho_section20": 13.59174360985212,
-     "speedup": 1.0386175948091247,
+     "one_target_cold_ratio_section20": 84.9668569083461,
+     "speedup": 0.9855943064716586,
      "speedup_ci": [
-      1.0052532959734735,
-      1.0730892527961993
+      0.9726749875316956,
+      0.9986852231230998
      ],
-     "ratio_floor": 28.54543462493331,
+     "ratio_floor": 21.66522289873162,
      "verified": true
     }
    ],
@@ -3972,36 +3996,37 @@
     "la_rows_in": 336,
     "la_core_dimension": 63,
     "trials": 66576,
-    "s": 0.6435767693770633,
-    "s_before": 0.6652027704494277,
-    "s_section20": 0.7214696576270222,
+    "s": 0.4884575885497573,
+    "s_before": 0.48140217766517623,
     "phases_s": {
-     "setup": 0.016254569227686307,
-     "constructions": 0.0028567390627402315,
-     "factor_base": 0.0036197702168808987,
-     "table": 0.13003294060258144,
-     "relations": 0.444487095022956,
-     "linear_algebra": 0.0003121154323715587,
-     "descent": 0.045029809397947,
-     "verify": 0.0009837304138999021
+     "setup": 0.016734336446242993,
+     "constructions": 0.0029578587093882307,
+     "factor_base": 0.0035389964287900373,
+     "table": 0.036428805990492114,
+     "relations": 0.3849898071771096,
+     "linear_algebra": 0.00025765445893974597,
+     "descent": 0.042519478831920324,
+     "verify": 0.001030650506874197
     },
-    "ratio_rho": 12.124322000457676,
+    "ratio_rho": 9.202036756044834,
     "ratio_rho_ci": [
-     10.747338745289069,
-     13.576554884096838
+     8.236328022313302,
+     10.235863046251744
     ],
-    "ratio_rho_before": 12.531733537137876,
+    "ratio_rho_before": 9.069120097954466,
+    "ratio_rho_section21": 12.124322000457676,
     "ratio_rho_section20": 13.59174360985212,
-    "speedup": 1.0386175948091247,
+    "one_target_cold_ratio_section20": 84.9668569083461,
+    "speedup": 0.9855943064716586,
     "speedup_ci": [
-     1.0052532959734735,
-     1.0730892527961993
+     0.9726749875316956,
+     0.9986852231230998
     ],
-    "ratio_floor": 28.54543462493331,
+    "ratio_floor": 21.66522289873162,
     "verified": true
    },
-   "source": "research/ic_constructions_20260926/analysis.json",
-   "round": "§20 sweep (2026-09-26), §21 constructions built once (2026-09-26)",
+   "source": "research/ic_descent_20260930/analysis-isolated.json",
+   "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
    "class": "engineering"
   }
  ],
@@ -4521,10 +4546,10 @@
   },
   "koblitz": {
    "quantity": "ratio to batch rho times sqrt(n), against r, four largest sizes",
-   "beta": 0.16529691771987765,
+   "beta": 0.13650703077561852,
    "ci": [
-    0.010366653846455604,
-    0.32022718159329966
+    -0.059209823791438104,
+    0.3322238853426751
    ],
    "points": 4,
    "law": 0.16666666666666666,
@@ -5036,6 +5061,23 @@
    "on_board": true
   },
   {
+   "slug": "icv1-f2m57-tm747311035-c1f545af",
+   "family": "koblitz",
+   "field": "GF(2^57)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 58,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n57",
+    "K_0 / GF(2^57)",
+    "K_0/2^57",
+    "K_0/F_2^57"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m59-tm943548413-98844ecc",
    "family": "koblitz",
    "field": "GF(2^59)",
@@ -5074,6 +5116,57 @@
    "on_board": true
   },
   {
+   "slug": "icv1-f2m71-t48653080717-2cafaea3",
+   "family": "koblitz",
+   "field": "GF(2^71)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 71,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n71",
+    "K_0 / GF(2^71)",
+    "K_0/2^71",
+    "K_0/F_2^71"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m71-tm48653080717-f25c4638",
+   "family": "koblitz",
+   "field": "GF(2^71)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 72,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k1n71",
+    "K_1 / GF(2^71)",
+    "K_1/2^71",
+    "K_1/F_2^71"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m73-tm184271214331-9d25cc67",
+   "family": "koblitz",
+   "field": "GF(2^73)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 74,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n73",
+    "K_0 / GF(2^73)",
+    "K_0/2^73",
+    "K_0/F_2^73"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m83-tm6151469093347-debefd74",
    "family": "koblitz",
    "field": "GF(2^83)",
@@ -5087,6 +5180,23 @@
     "K_0 / GF(2^83)",
     "K_0/2^83",
     "K_0/F_2^83"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m83-t6151469093347-cdcc5432",
+   "family": "koblitz",
+   "field": "GF(2^83)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 83,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k1n83",
+    "K_1 / GF(2^83)",
+    "K_1/2^83",
+    "K_1/F_2^83"
    ],
    "on_board": false
   },

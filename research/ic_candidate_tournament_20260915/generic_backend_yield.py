@@ -188,8 +188,14 @@ def audit_campaign(root):
     contract, fixtures, arms = frozen_inputs(root)
     require(contract['qualification_reference_schema'] == 1,
             'not the frozen generic backend qualification')
+    schedule = contract.get('qualification_schedule', 'full')
+    require(schedule in ('full', 'smoke'), 'unknown qualification schedule')
+    stages = ('smoke',) if schedule == 'smoke' else ('smoke', 'development')
+    for stage in stages:
+        require(stage in fixtures and stage in contract['stages'],
+                'missing stage for natural-query audit: '+stage)
     observations = []
-    for stage in ('smoke', 'development'):
+    for stage in stages:
         active = [arm for arm in stage_arms(root, stage, arms)
                   if arm.get('adapter') == 'generic-v1' and arm['id'].startswith('generic_')]
         for case in fixtures[stage]:
@@ -198,6 +204,7 @@ def audit_campaign(root):
                     observations.append(observed_run(root, case, arm, stage, repetition))
     return dict(schema_version=1, status='AUDITED', observations=observations,
                 rows=summarize(observations, contract['repetitions']), bootstrap_seed=SEED, bootstrap_draws=DRAWS,
+                qualification_schedule=schedule,
                 rate_scope='natural sampled ordinary queries; one independent point per case; '
                            'censored runs and audited zero-query points excluded from rate '
                            'denominator and counted separately',

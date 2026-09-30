@@ -1,0 +1,51 @@
+{
+  "schema": "taskq.task-spec/v1",
+  "queue": "cpu",
+  "kind": "benchmark",
+  "source": {
+    "repo": "crypto",
+    "commit": "0000000000000000000000000000000000000000",
+    "sparse_paths": [
+      "src",
+      "examples",
+      "benches"
+    ]
+  },
+  "command": {
+    "argv": [
+      "target/release/examples/bsgs_fast_bench"
+    ],
+    "setup": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--example",
+        "bsgs_fast_bench"
+      ]
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1"
+    }
+  },
+  "benchmark": {
+    "warmups": 1,
+    "repetitions": 9
+  },
+  "limits": {
+    "timeout_seconds": 900,
+    "setup_timeout_seconds": 1800
+  },
+  "placement": {
+    "cpus": 1,
+    "require_labels": {
+      "pool": "cpu-c7i"
+    }
+  },
+  "idempotency_key": "EXP-ECDLP-3f9a1c/RUN-01",
+  "labels": {
+    "goal": "GOAL-ECDLP-7a2b10",
+    "experiment": "EXP-ECDLP-3f9a1c",
+    "submitted_by": "executor"
+  }
+}

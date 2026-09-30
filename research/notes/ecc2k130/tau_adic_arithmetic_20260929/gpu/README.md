@@ -195,6 +195,15 @@ are diagnostics and must not override it. Smoke mode is correctness-only.
 CPU isolation does not establish exclusive GPU use or isolate other VM tenants.
 Dedicated GPU allocation and the recorded hardware/noise checks remain necessary.
 
+Timeout rejection is unconditional: a worker that exits cleanly during the
+termination grace period may retain a complete inner receipt, but the outer
+receipt always sets `timing_eligible: false` when its deadline was exceeded.
+The regression test first reproduced the contradictory timeout/eligible
+receipt, then passed after the gate correction. All 16 local tests passed;
+see [timeout-gate-validation-01.json](results/timeout-gate-validation-01.json).
+This is an accounting correction with CPU-stub validation, not a new device
+measurement or arithmetic optimization. Existing archived receipts are unchanged.
+
 RunPod/local-container users can invoke the same study by appending
 `--study square-unroll --mode smoke --output /results/unroll-smoke.json` to
 the Docker command below, then use benchmark mode with a new output path.

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "goal_status": "active; complete source-bound families and calibrated paired comparison remain pending",
+  "evidence_archive": "evidence.tar.gz",
+  "evidence_archive_sha256": "039e535fa73e5c794aeff666bc02989076f04abbf751b5f609884a2785760678",
+  "joint_replay": "REPLAY-v2.json",
+  "arms": {
+    "sat-v1": "terminal; correctness-only separate point; source coverage incomplete",
+    "sat-v2": "terminal; verified same-point solve; source coverage incomplete; uncalibrated",
+    "f5": "terminal; budget exhausted; rank 28/29; no descent or verified scalar",
+    "incumbent": "terminal; verified same-point solve; uncalibrated local build",
+    "rho-selected": "terminal; verified same-point solve; uncalibrated local build",
+    "rho-generic": "terminal; verified same-point solve; uncalibrated local build"
+  },
+  "sealed_confirmation_rounds": "closed; never redispatch",
+  "local_registrations": "closed; never retry or overwrite measured evidence",
+  "next_actions": [
+    "Deliver and merge this evidence with exact-head passing applicable checks",
+    "Wire package-complete source binding into a versioned SAT registrar, runner and independent auditor",
+    "Develop a separately frozen F5 coverage/budget policy on disclosed controls; preserve all failures",
+    "Freeze new excluded public targets and a strong same-point rho with exact arm limits and order",
+    "Run the new protocol on calibrated Linux with isolation and A/A controls; retain every registered arm once"
+  ],
+  "pr_dependencies": [
+    "https://github.com/aburan28/crypto/pull/1000",
+    "https://github.com/aburan28/crypto/pull/1003",
+    "https://github.com/aburan28/crypto/pull/1012"
+  ],
+  "promotion_eligible": false,
+  "online_speedup": null
+}

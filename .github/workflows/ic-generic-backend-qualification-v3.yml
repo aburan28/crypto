@@ -1,0 +1,138 @@
+name: IC generic backend qualification v3
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ic-generic-backend-qualification-v3.yml'
+      - 'research/ic_candidate_tournament_20260915/run_generic_backend_qualification_v3.py'
+      - 'research/ic_candidate_tournament_20260915/test_generic_backend_qualification_v3.py'
+      - 'research/ic_candidate_tournament_20260915/generic_backend_gate_v3.py'
+      - 'research/ic_candidate_tournament_20260915/test_generic_backend_gate_v3.py'
+      - 'research/ic_candidate_tournament_20260915/generic_backend_yield.py'
+      - 'research/ic_candidate_tournament_20260915/pack_partial_campaign.py'
+      - 'research/ic_candidate_tournament_20260915/tournament.py'
+      - 'research/ic_candidate_tournament_20260915/generic_solver_feasibility.py'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v3/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('ic-generic-backend-v3-pr-{0}', github.event.pull_request.number) || 'ic-generic-backend-v3-2026093001' }}
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: 765c3c5f19032bd852163805f257c56babef2040
+          path: frozen-generic
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install artifact decoder
+        run: sudo apt-get update && sudo apt-get install -y zstd
+      - name: Lock the smoke panel and authorize one dispatch path
+        working-directory: research/ic_candidate_tournament_20260915
+        env:
+          IC_GENERIC_SOURCE_ROOT: ${{ github.workspace }}/frozen-generic
+        run: |
+          python -m unittest test_generic_backend_qualification_v3.py test_generic_backend_gate_v3.py -q
+          python -c 'import json,subprocess,sys; p=subprocess.run([sys.executable,"run_generic_backend_qualification_v3.py"],check=True,capture_output=True,text=True); r=json.loads(p.stdout); assert r["dispatch_authorized"] is True and r["measurement"]=="not_run" and r["v2_exposure_present"] is True and r["dispatch_block"] is None and r["qualification_schedule"]=="smoke"; print(p.stdout)'
+          python generic_solver_feasibility.py \
+            --panel goal_20260924/generic-backend-qualification-v3/panel.json \
+            --source-repo "$GITHUB_WORKSPACE/frozen-generic" \
+            --out "$RUNNER_TEMP/v3-layout.json" \
+            --require-pass
+  artifact-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install artifact decoder
+        run: sudo apt-get update && sudo apt-get install -y zstd
+      - name: Preserve a synthetic interrupted trial
+        run: |
+          mkdir -p "$RUNNER_TEMP/ic-pack-smoke/tournament/runs/smoke/case/arm/rep-0"
+          printf '%s\n' '{"status":"TIMEOUT"}' > "$RUNNER_TEMP/ic-pack-smoke/tournament/runs/smoke/case/arm/rep-0/receipt.json"
+          python research/ic_candidate_tournament_20260915/pack_partial_campaign.py \
+            --source "$RUNNER_TEMP/ic-pack-smoke" \
+            --archive "$RUNNER_TEMP/ic-pack-smoke.tar.zst"
+          zstd -dc "$RUNNER_TEMP/ic-pack-smoke.tar.zst" | tar -tf - | grep -F 'receipt.json'
+      - name: Prove one-file artifact upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-generic-v3-pack-smoke-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/ic-pack-smoke.tar.zst
+            ${{ runner.temp }}/ic-pack-smoke.tar.zst.manifest.json
+            ${{ runner.temp }}/ic-pack-smoke.tar.zst.tar.stderr
+          retention-days: 3
+          if-no-files-found: error
+  campaign:
+    # Seed 2026093001 may run exactly once from main via workflow_dispatch.
+    # Never redispatch 2026092901 or 2026092902.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    needs: [preflight, artifact-smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: 765c3c5f19032bd852163805f257c56babef2040
+          path: frozen-generic
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: x86_64-unknown-linux-musl
+      - name: Install calibrated profiler and archive decoder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind musl-tools zstd
+          test "$(valgrind --version)" = valgrind-3.22.0
+          [[ "$(rustc --version)" == 'rustc 1.94.1 '* ]]
+      - name: Freeze dependency resolution
+        run: |
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          cp research/ic_candidate_tournament_20260915/ci/Cargo.lock frozen-generic/Cargo.lock
+          cargo fetch --locked --manifest-path frozen-generic/Cargo.toml
+      - name: Run the registered F4/F5 subspace smoke comparison
+        timeout-minutes: 180
+        env:
+          KIC_F5_AVX512_UNPACK: '0'
+          IC_GENERIC_SOURCE_ROOT: ${{ github.workspace }}/frozen-generic
+        run: |
+          python -u research/ic_candidate_tournament_20260915/run_generic_backend_qualification_v3.py \
+            --out "$RUNNER_TEMP/ic-generic-backend-qualification-v3"
+      - name: Pack complete or partial work while the job is still alive
+        if: always()
+        timeout-minutes: 35
+        run: |
+          python -u research/ic_candidate_tournament_20260915/pack_partial_campaign.py \
+            --source "$RUNNER_TEMP/ic-generic-backend-qualification-v3" \
+            --archive "$RUNNER_TEMP/ic-generic-backend-qualification-v3-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT.tar.zst" \
+            --cargo-lock frozen-generic/Cargo.lock
+      - name: Preserve the single packed artifact and checksum
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-generic-backend-qualification-v3-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-generic-backend-qualification-v3-${{ github.run_id }}-${{ github.run_attempt }}.tar.zst
+            ${{ runner.temp }}/ic-generic-backend-qualification-v3-${{ github.run_id }}-${{ github.run_attempt }}.tar.zst.manifest.json
+            ${{ runner.temp }}/ic-generic-backend-qualification-v3-${{ github.run_id }}-${{ github.run_attempt }}.tar.zst.tar.stderr
+          retention-days: 30
+          if-no-files-found: error

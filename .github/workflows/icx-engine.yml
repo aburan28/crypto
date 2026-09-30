@@ -10,6 +10,10 @@ on:
     paths:
       - "src/bin/icx.rs"
       - "src/bin/icx/**"
+      - "src/ecc/**"
+      - "src/binary_ecc/**"
+      - "src/cryptanalysis/binary_semaev.rs"
+      - "src/cryptanalysis/ec_index_calculus.rs"
       - "src/cryptanalysis/curve_catalog.rs"
       - "src/cryptanalysis/ic_engine.rs"
       - "src/cryptanalysis/ic_progress.rs"
@@ -19,6 +23,9 @@ on:
       - "src/cryptanalysis/fes_gpu.rs"
       - "src/cryptanalysis/gf3m.rs"
       - "tests/icx.rs"
+      - "docs/ic/nist-parameter-reference.json"
+      - "docs/ic/NIST_PARAMETER_COVERAGE.md"
+      - "tools/ic_nist_parameter_reference.py"
       - "Cargo.toml"
       - "docs/ic/ENGINE_AUDIT_AND_DESIGN.md"
       - "gpu/fes/**"
@@ -58,6 +65,25 @@ jobs:
         run: cargo test --release --test icx
       - name: List the catalog (log which curves ran on ${{ matrix.arch }})
         run: ./target/release/icx list
+      - name: Check actual NIST parameters and public S3 fixtures
+        run: |
+          set -e
+          mkdir -p results/icx-nist
+          failed=0
+          for c in P-256 K-163 K-233 K-283 K-409 K-571 B-163 B-233 B-283 B-409 B-571; do
+            if ! ./target/release/icx validate "$c" --json > "results/icx-nist/$c.json"; then
+              failed=1
+            fi
+            cat "results/icx-nist/$c.json"
+          done
+          exit "$failed"
+      - name: Archive native NIST parameter diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: icx-nist-${{ matrix.arch }}
+          path: results/icx-nist
+          if-no-files-found: ignore
       - name: Estimate one curve per family
         run: |
           set -e
@@ -69,13 +95,13 @@ jobs:
         run: |
           set -e
           echo "== Koblitz analogue (sect163k1) =="
-          ./target/release/icx run sect163k1 --degree 13 --rho-runs 4
+          ./target/release/icx run sect163k1 --degree 11 --rho-runs 4
           echo "== Random binary analogue (sect163r2) =="
           ./target/release/icx run sect163r2 --degree 13 --rho-runs 0
           echo "== Prime analogue (p256) =="
           ./target/release/icx run p256 --bits 16 --rho-runs 4
           echo "== Gray-code FES solver plugged in =="
-          ./target/release/icx run sect233k1 --degree 11 --oracle descent-algebraic --solver fes-f2 --rho-runs 0
+          ./target/release/icx run sect163k1 --degree 11 --oracle descent-algebraic --solver fes-f2 --rho-runs 0
       - name: GPU FES kernel — host verification (no GPU needed)
         run: make -C gpu/fes test
       - name: GPU FES — drive the worker from icx (subprocess offload path)

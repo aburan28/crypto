@@ -2,7 +2,7 @@
 //!
 //! ```sh
 //! cargo run --release --example refute_profile -- \
-//!     --n 8 --basis 232,164,245,177 --xr 200 --degree 6
+//!     --n 8 --basis 232,164,245,177 --xr 200 --degree 6 [--f5-count]
 //! ```
 //!
 //! `--basis` and `--xr` are the `v_basis` and `x_r` fields of a ladder
@@ -13,7 +13,7 @@
 //! A profiling tool: it reports no degree, and its timings are
 //! practicality notes on whatever machine it runs.
 
-use crypto_lib::cryptanalysis::koblitz_bench::ladder_refutation_profile;
+use crypto_lib::cryptanalysis::koblitz_bench::{ladder_f5_row_counts, ladder_refutation_profile};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -31,6 +31,18 @@ fn main() {
         .collect();
     let x_r: u64 = flag("--xr").expect("--xr").parse().expect("x_r");
     let degree: u32 = flag("--degree").expect("--degree").parse().expect("degree");
+
+    // `--f5-count`: only count the rows, and the rows the F5 criterion keeps.
+    if args.iter().any(|a| a == "--f5-count") {
+        let (full, kept, ms) = ladder_f5_row_counts(n, &basis, x_r, degree).expect("draw builds");
+        println!(
+            "n={n} ell={} degree={degree} rows {full} f5_kept {kept} pruned {} ({:.1}%) in {ms:.0} ms",
+            basis.len(),
+            full - kept,
+            100.0 * (full - kept) as f64 / full.max(1) as f64
+        );
+        return;
+    }
 
     let p = ladder_refutation_profile(n, &basis, x_r, degree).expect("draw builds");
     println!(

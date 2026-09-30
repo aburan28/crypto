@@ -1,0 +1,129 @@
+name: Compact S3 root prefilter against matched rho
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/compact-s3-prefilter.yml'
+      - 'research/notes/ecc2k130/compact_s3_prefilter_20260930/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/compact-s3-prefilter.yml'
+      - 'research/notes/ecc2k130/compact_s3_prefilter_20260930/**'
+  workflow_dispatch:
+
+jobs:
+  paired-prefilter:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        n: [41, 53]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            docs/ic/calibration.json
+            src
+            examples/koblitz_orbit_dlp_s3_batch.rs
+            examples/koblitz_rho_batch_ks_v2_n61.rs
+            examples/koblitz_rho_batch_ks_v3.rs
+            research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+            research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures
+            research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures
+            research/notes/ecc2k130/compact_k_boundary_20260929/fixtures
+            research/notes/ecc2k130/compact_swap_quotient_20260929/fixtures
+            research/notes/ecc2k130/compact_s3_batch_20260929/fixtures
+            research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/fixtures
+            research/notes/ecc2k130/compact_s3_prefilter_20260930
+            research/notes/ecc2k130/compact_frozen_source_replay_20260929
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            tools/isolated_bench.py
+            .github/workflows/compact-s3-prefilter.yml
+      - name: Check fail-closed frozen-source materialization
+        run: python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+      - name: Materialize the measured source tree from committed snapshots
+        run: |
+          mkdir -p "${{ runner.temp }}/compact-s3-prefilter"
+          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+            --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
+            --dest "${{ runner.temp }}/s3-prefilter-frozen-src" \
+            --receipt "${{ runner.temp }}/compact-s3-prefilter/materialization.json"
+      - name: Python syntax and frozen-source check
+        working-directory: ${{ runner.temp }}/s3-prefilter-frozen-src
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/compact_s3_prefilter_20260930/*.py
+          python3 -c 'import sys; sys.path.insert(0, "research/notes/ecc2k130/compact_s3_prefilter_20260930"); from verify_panel import freeze; freeze()'
+      - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+        working-directory: ${{ runner.temp }}/s3-prefilter-frozen-src
+      - name: Build and test the exact evaluation source
+        working-directory: ${{ runner.temp }}/s3-prefilter-frozen-src
+        run: |
+          cargo build --release --locked --example koblitz_orbit_dlp_s3_batch --example koblitz_rho_batch_ks_v3
+          cargo test --release --locked --example koblitz_orbit_dlp_s3_batch
+      - name: Run pinned cold arms on new point-only Q
+        id: run
+        working-directory: ${{ runner.temp }}/s3-prefilter-frozen-src
+        env:
+          RAYON_NUM_THREADS: '1'
+          GIT_DIR: ${{ github.workspace }}/.git
+        run: |
+          set -euo pipefail
+          CPU=$(python3 -c 'import os; print(sorted(os.sched_getaffinity(0))[-1])')
+          CPUS=$(cat "/sys/devices/system/cpu/cpu${CPU}/topology/thread_siblings_list")
+          PARENT="${{ runner.temp }}/compact-s3-prefilter"
+          RUN_DIR="$PARENT/n${{ matrix.n }}_L1024"
+          mkdir -p "$PARENT"
+          STATUS=1
+          for ATTEMPT in 1 2 3 4 5 6; do
+            sleep 20
+            LOG="$PARENT/n${{ matrix.n }}_preflight_${ATTEMPT}.log"
+            set +e
+            python3 tools/isolated_bench.py reserve --cpus "$CPUS" --max-psi 5 \
+              --out "$PARENT/n${{ matrix.n }}_L1024.isolation.jsonl" \
+              --label "s3-prefilter-n${{ matrix.n }}" -- \
+              python3 research/notes/ecc2k130/compact_s3_prefilter_20260930/run_panel.py \
+                --n ${{ matrix.n }} \
+                --rho target/release/examples/koblitz_rho_batch_ks_v3 \
+                --batch target/release/examples/koblitz_orbit_dlp_s3_batch \
+                --out "$RUN_DIR" --cpu "$CPU" \
+              > "$LOG" 2>&1
+            STATUS=$?
+            set -e
+            cat "$LOG"
+            if [ "$STATUS" -eq 0 ] || [ -d "$RUN_DIR" ]; then
+              break
+            fi
+            if ! grep -q '^machine is busy:' "$LOG"; then
+              break
+            fi
+          done
+          if [ -d "$RUN_DIR" ] && [ -f "$PARENT/n${{ matrix.n }}_L1024.isolation.jsonl" ]; then
+            cp "$PARENT/n${{ matrix.n }}_L1024.isolation.jsonl" "$RUN_DIR/isolation.jsonl"
+          fi
+          if [ -d "$RUN_DIR" ]; then
+            cp "$PARENT"/n${{ matrix.n }}_preflight_*.log "$RUN_DIR/"
+            cp "$PARENT/materialization.json" "$RUN_DIR/"
+          fi
+          exit "$STATUS"
+      - name: Independently replay every rank and logarithm
+        if: always() && steps.run.outcome != 'skipped'
+        working-directory: ${{ runner.temp }}/s3-prefilter-frozen-src
+        run: |
+          python3 research/notes/ecc2k130/compact_s3_prefilter_20260930/verify_panel.py \
+            --n ${{ matrix.n }} \
+            --run-dir "${{ runner.temp }}/compact-s3-prefilter/n${{ matrix.n }}_L1024" \
+            --out "${{ runner.temp }}/compact-s3-prefilter/n${{ matrix.n }}_L1024/receipt.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compact-s3-prefilter-n${{ matrix.n }}-L1024
+          path: ${{ runner.temp }}/compact-s3-prefilter
+          if-no-files-found: warn
+          retention-days: 90

@@ -32,6 +32,82 @@ not required by this repository-local runner.
 
 ## Quality and accounting first
 
+Historical static SAT registrations replay through
+[`frozen_sat_runtime.py`](../../../research/ic_candidate_tournament_20260915/frozen_sat_runtime.py)
+and the
+[recovered runtime bundle](../../../research/ic_candidate_tournament_20260915/goal_20260924/static-sat-runtime/README.md).
+The v1/v2 source walker omitted imported `producer` package files. Recovery
+from their recorded commits preserves identity replay, but cannot retroactively
+establish complete preexecution source coverage. Keep those runs ineligible for
+promotion. A future registration must bind package imports as well as top-level
+modules, retain every executed source, and pass complete-source replay before
+measurement. Never update an old manifest or disable its live source gate to
+accommodate new tournament code.
+
+The next static SAT controller is
+[`static_sat_pipeline_v3.py`](../../../research/ic_candidate_tournament_20260915/static_sat_pipeline_v3.py),
+with its [source/input protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/static-sat-runtime-v3/PROTOCOL.md).
+Use `static_sat_registration_v3.py` to freeze the full Python/interpreter and
+native inputs before deriving candidate/workload identities. Execute only the
+externally sealed invocation from its read-only snapshot; use
+`audit_static_sat_full_v3.py` for independent rows, rank, source models and scalar
+replay. All native children inherit the controller watchdog group and carry
+isolated pre/post source gates. The adapter currently admits development
+controls on the accepted macOS ARM64 build; it rejects fresh-paired qualification
+until the exposure/reference/calibration adapter is reviewed. The one-query
+native smoke and a full source-bound development solve are separate gates.
+Exact-oracle mathematical tests and portable C watchdog controls do not establish
+SAT yield or family qualification. Keep all three confirmation rounds closed.
+
+The [F4/F5 v1 protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v1/PROTOCOL.md)
+is closed: its single invocation in PR #1058 failed native JSON parsing before
+any IC query. It conflated the empty `Vec<u64>` input seed list with the output
+fixture's `[null]` provenance. Preserve its failure/source/transport receipts;
+never retry, resume or extend that registration. Its scalar, rank, scientific
+costs and speedup remain unknown.
+
+The [F5 v2 development registration](../../../research/ic_candidate_tournament_20260915/goal_20260924/f5-source-bound-runtime-v2/README.md)
+is consumed and closed in PR #1064: source-bound native execution completed,
+and exact independent admission/transport passes; PR #1064 is accepted at
+`07d7c63636965a47035c66e37f665d5611b6a7a0` after all applicable exact-head checks.
+Preserve its preexecution candidate/workload/run identity, raw execution,
+original v2 negative-proof rejection and first v3 geometric-domain rejection.
+Never retry, resume or extend that invocation. The exact geometric PDP base is
+63 points; cofactor projection yields 62 usable IC points and 29 folded columns.
+Use `audit_f5_runtime_v3.py` and `publish_f5_runtime_v3.py` for this retained
+result. Versioned query/law/stage/admission wrappers independently prove all
+157 recorded three-summand negatives by complete finite-group pair-complement
+checking; the legacy evaluators are unchanged. Geometric torsion/coset points,
+repeated indices and identity pair sums must remain in the negative proof.
+The proof adapter is limited to n<=17, m=3 and at most 128 geometric points.
+Its complete auditor context is explicitly postexecution independent analysis,
+separate from the unchanged preregistered controller/native/interpreter binding.
+Transport replay loads those retained sources under isolated Python with full
+before/after loaded-module gates and executes no native worker.
+The single native run has rank 29/29, 61 verified relations in 216 ordinary
+queries, all column logs verified and scalar 24886 replayed after three target
+attempts. Exclusive online time is 10512454542 ns on the uncalibrated macOS
+ARM64 development host; failed target attempts are charged. This exposed-point
+control has no matched rho/incumbent arm, fresh-target qualification or speedup.
+The engine is bounded Macaulay elimination with an F5 row criterion. A new
+fresh paired protocol still needs the reviewed exposure/reference/calibration
+adapter and resource/arm-order freeze. Keep all three confirmation sets closed.
+
+The [reusable preparation certificates](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/README.md)
+use `prepared_ic_state_v1.py` to reconstruct the ordinary rows, full rank and
+column logs separately from the two accepted closed source controls. Both
+produce mathematical state `ICP1hedbff76da644`; their whole-certificate seals
+and source/query evidence remain distinct. `ICP1` is preparation, never a
+complete `IC1` candidate or run. The exporter launches no native child and
+creates no new target; it discards all previous target answers, descent records,
+workloads and clocks. Retain the 63-point geometry, including killed torsion,
+and use only the 62-point cofactor image for the actual usable IC count.
+Later one-target adapters must bind their complete source and the exact external
+certificate seal, validate/load preparation before online timing, and charge
+all new target attempts and scalar replay. These certificates do not authorize
+a fresh paired dispatch or reopen any consumed registration. Reviewed exposure,
+reference, hardware rebuild, calibration and resource/order gates remain pending.
+
 Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use a versioned runner for the intended unexecuted round; the round-one wrapper is historical, and generic pilot defaults do not implement the goal protocol. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass and an accepted, versioned reference binding is committed.
 
 
@@ -119,9 +195,12 @@ and 250 paired trial slots. The runner is
 measure step timeout at 300 minutes, `pack_partial_campaign.py` failed while
 callgrind files were still mutating, and GitHub uploaded zero campaign bundle.
 Never dispatch seed `2026092902` again. PR preflight and artifact-upload smoke
-passed; that does not substitute for retained receipts. Register a new panel
-and exclude all potentially generated points from this run (prepare replay at
-the pinned checkout) before any later measurement. Without a bundle, do not run
+passed; that does not substitute for retained receipts. The reconstructed
+second-run exposure census is
+[lost-v2-campaign-exposures.json](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/lost-v2-campaign-exposures.json)
+(SHA-256 `0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54`;
+[V2-EXPOSURE-RECONSTRUCTION.md](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/V2-EXPOSURE-RECONSTRUCTION.md)).
+Register a new panel and exclude both lost corpora before any later measurement. Without a bundle, do not run
 `generic_backend_gate_v2.py` or
 [independent_pairs.py](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/independent_pairs.py)
 as if qualification were established. The post-registration
@@ -137,7 +216,15 @@ points at `max_trials=1` and `node_budget=4096`, with zero accepted relations.
 [`run-20260929`](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-f4-subspace-pilot/run-20260929/RESULT.md)
 is a same-budget replay of that series, not a new registration, and
 `run_pilot.py` refuses another dispatch. Do not rerun this budget or treat it
-as family qualification. Before any new algebraic panel generates fresh targets, run
+as family qualification. The next planned registration is
+[generic-backend-qualification-v3](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v3/PROTOCOL.md)
+(seed `2026093001`, panel SHA-256
+`df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`,
+`standard_subspace` dimension 6, F4/F5 only, SAT deferred). Its runner
+`run_generic_backend_qualification_v3.py` and workflow authorize one
+`workflow_dispatch` campaign with the frozen 180/35/240 minute caps on the
+smoke schedule. Measurement stays `not_run` until that single job runs.
+Never sample points outside that path, and never retry after dispatch. Before any new algebraic panel generates fresh targets, run
 `generic_solver_feasibility.py --require-pass` against its exact worker source
 checkout and registered panel. A static pass is only an encoder preflight:
 also pilot actual dispatch and natural failed-attempt accounting on disclosed
@@ -197,7 +284,9 @@ The native screen is diagnostic and always sets `promotion_eligible=false`.
 
 Keep a portfolio: total-cost leaders, alternatives on the Pareto frontier,
 different solver/base families, cell specialists, and predeclared exploration
-slots. Use development evidence only. `autolab.py recombine` builds explicit
+slots. Sample those slots across previously unrepresented complete-solve
+families before revisiting a family with many similar variants. Use development
+evidence only. `autolab.py recombine` builds explicit
 combinations of disjoint configuration changes; source combinations need their
 own builds. Measure each combination as a complete algorithm. Never sum cheap
 phases from different runs. Include some initially slower mechanisms: interaction

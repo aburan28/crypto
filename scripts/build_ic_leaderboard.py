@@ -42,10 +42,11 @@ SOURCES = {
     "matched_rho_analysis": "research/ic_rho_reference_20260923/analysis.json",
     "koblitz_s20": "research/ic_exponent_20260926/analysis.json",
     "koblitz_s21": "research/ic_constructions_20260926/analysis.json",
+    "koblitz_s22": "research/ic_descent_20260930/analysis-isolated.json",
     "oracles": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
     "registry": "docs/curves/registry.json",
 }
-S21_RUNS = "research/ic_constructions_20260926/runs/main"
+S22_RUNS = "research/ic_descent_20260930/runs-isolated/main"
 
 # Phases, in pipeline order, as the page groups them.
 PHASES = [
@@ -174,12 +175,13 @@ KOBLITZ_GROUPS = {
 
 
 def koblitz_phase_shares(a: int, n: int) -> tuple[dict, dict]:
-    """Shares of each phase in §21's candidate reports: the median over
-    five rounds within each set, then the mean over the four sets."""
+    """Shares of each phase in §22's candidate reports (the isolated
+    re-run): the median over five rounds within each set, then the mean
+    over the four sets."""
     per_set = []
     counts = None
     for s in ("M1", "M2", "M3", "M4"):
-        d = REPO / S21_RUNS / f"k{a}n{n}" / s
+        d = REPO / S22_RUNS / f"k{a}n{n}" / s
         reports = sorted(d.glob("r*-candidate.price.json"))
         if not reports:
             continue
@@ -196,9 +198,18 @@ def koblitz_phase_shares(a: int, n: int) -> tuple[dict, dict]:
 
 
 def koblitz_rows(names: Names) -> list[dict]:
+    """The Koblitz thread on current evidence (§22, isolated), with §21 and
+    §22's own baseline as the before marks and §20's one-target cold ratio.
+
+    These rows solve 32 targets together and are priced per target against
+    batch rho on the same 32.  AGENTS.md ("Primary comparison uses one
+    target") makes that a historical diagnostic, not a primary comparison,
+    so each row carries its target count and the one-target figure §20
+    measured beside it."""
     s20 = {x["curve"]: x for x in load(SOURCES["koblitz_s20"])["sizes"]}
+    s21 = {x["curve"]: x for x in load(SOURCES["koblitz_s21"])["sizes"]}
     rows = []
-    for x in load(SOURCES["koblitz_s21"])["sizes"]:
+    for x in load(SOURCES["koblitz_s22"])["sizes"]:
         c = names(x["curve"])
         a, n = x["a"], x["n"]
         before = s20[x["curve"]]
@@ -207,7 +218,6 @@ def koblitz_rows(names: Names) -> list[dict]:
         floor_s = before["sets"][0]["floor"]  # L(32)·√(π/4n), per target
         logs = counts.get("logs", {})
         la = logs.get("linear_algebra", {})
-        desc = counts.get("descent", {})
         recipe = {
             "variant": "koblitz_collection_m3_aimed",
             "label": f"aimed m = 3 collection, m = {before['chosen']['descent_summands']} descent",
@@ -220,20 +230,25 @@ def koblitz_rows(names: Names) -> list[dict]:
             "la_rows_in": la.get("filter", {}).get("rows_in"),
             "la_core_dimension": la.get("core_dimension"),
             "trials": counts.get("collect", {}).get("trials"),
-            "s": s, "s_before": x["s_before"], "s_section20": x["s20_s_ic"],
+            "s": s, "s_before": x["s_before"],
             "phases_s": {g: shares[g] * s for g in shares},
-            "ratio_rho": x["ratio_after"], "ratio_rho_ci": [x["ratio_after_ci"]["lo"], x["ratio_after_ci"]["hi"]],
-            "ratio_rho_before": x["ratio_before"], "ratio_rho_section20": x["s20_ratio"],
+            "ratio_rho": x["ratio_after"],
+            "ratio_rho_ci": [x["ratio_after_ci"]["lo"], x["ratio_after_ci"]["hi"]],
+            "ratio_rho_before": x["ratio_before"],
+            "ratio_rho_section21": s21[x["curve"]]["ratio_after"],
+            "ratio_rho_section20": before["ratio"],
+            "one_target_cold_ratio_section20": before["cold_ratio_M1"],
             "speedup": x["speedup"]["geomean"], "speedup_ci": [x["speedup"]["lo"], x["speedup"]["hi"]],
             "ratio_floor": s / floor_s, "verified": bool(x["pins"] and x["control1"]),
         }
         rows.append({
             "regime": "koblitz", "slug": c["slug"], "ec1": ec1_of(c), "legacy": x["curve"],
             "log2_r": x["log2_r"], "cofactor": None,
-            "reference": "batch rho, signed Frobenius and negation, the same 32 targets",
+            "reference": "batch rho, signed Frobenius and negation, the same 32 targets "
+                         "(a 32-target batch: a historical diagnostic under AGENTS.md's one-target rule)",
             "reference_s": x["s_rho_s20"], "floor_s": floor_s, "targets": 32,
-            "recipes": [recipe], "best": recipe, "source": SOURCES["koblitz_s21"],
-            "round": "§20 sweep (2026-09-26), §21 constructions built once (2026-09-26)",
+            "recipes": [recipe], "best": recipe, "source": SOURCES["koblitz_s22"],
+            "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
             "class": "engineering",
         })
     return rows
@@ -288,10 +303,10 @@ def exponents() -> dict:
     for regime in ("prime", "char2"):
         out[regime]["rho_matched"] = {"alpha": rho[f"{regime}/rho_matched"]["alpha"],
                                       "r2": rho[f"{regime}/rho_matched"]["r_squared"]}
-    s21 = load(SOURCES["koblitz_s21"])["exponent_refit"]
+    s22 = load(SOURCES["koblitz_s22"])["exponent_refit"]
     out["koblitz"] = {"quantity": "ratio to batch rho times sqrt(n), against r, four largest sizes",
-                      "beta": s21["after"]["beta"], "ci": [s21["after"]["lo"], s21["after"]["hi"]],
-                      "points": s21["after"]["points"], "law": 1 / 6, "model": 0.141}
+                      "beta": s22["after"]["beta"], "ci": [s22["after"]["lo"], s22["after"]["hi"]],
+                      "points": s22["after"]["points"], "law": 1 / 6, "model": 0.141}
     return out
 
 
@@ -331,6 +346,7 @@ def build() -> dict:
         leaders[regime] = {"slug": best["slug"], "log2_r": best["log2_r"],
                            "ratio_rho": best["best"]["ratio_rho"], "s": best["best"]["s"],
                            "recipe": best["best"]["label"],
+                           "one_target": best["best"].get("one_target_cold_ratio_section20"),
                            "largest": {"slug": top["slug"], "log2_r": top["log2_r"],
                                        "ratio_rho": top["best"]["ratio_rho"]}}
     return {
@@ -385,7 +401,8 @@ def markdown(doc: dict) -> str:
                  f"| {g3(b['s'])} | {g3(r['reference_s'])} | **{times(b['ratio_rho'])}** "
                  f"| {times(b['ratio_floor'])} | {'✓' if b['verified'] else '✗'} |")
     L += ["", "Reference: prime and random binary rows, the matched negation-map rho on one target "
-          "(ledger §18); Koblitz rows, batch rho on the same 32 targets (§19–§21).", "",
+          "(ledger §18); Koblitz rows, batch rho on the same 32 targets (§19–§22), a historical "
+          "diagnostic under the one-target rule in AGENTS.md.", "",
           "## Phases, as a share of S", "",
           "| curve | " + " | ".join(n for _, n, _ in PHASES) + " |",
           "|:--|" + "--:|" * len(PHASES)]
@@ -523,13 +540,18 @@ def page(doc: dict, standalone: bool) -> str:
              '<h1>Index Calculus Leaderboard</h1>'
              '<p class="verdict">Every curve this repository has priced end to end, with the best index-calculus '
              'recipe measured on it, in one unit, S = operations / √r, against the matched Pollard rho on the same '
-             'curve. <strong>No row is below its reference.</strong> The closest is '
-             f'{times(L["koblitz"]["ratio_rho"])} on a Koblitz subgroup of 2<sup>{L["koblitz"]["log2_r"]:.0f}</sup>.</p>'
+             'curve. <strong>No row is below its reference.</strong> Solving one target, the closest is '
+             f'{times(L["prime"]["ratio_rho"])} on a prime-order curve of 2<sup>{L["prime"]["log2_r"]:.1f}</sup>, where '
+             'rho\'s set-up still dominates. The Koblitz rows solve 32 targets together, a historical diagnostic '
+             'under the one-target rule (AGENTS.md); at their best they read '
+             f'{times(L["koblitz"]["ratio_rho"])} batch rho at 2<sup>{L["koblitz"]["log2_r"]:.0f}</sup>, and one '
+             f'target alone {times(L["koblitz"]["one_target"])} (§20).</p>'
              '<dl class="facts">')
     for g in ("koblitz", "prime", "char2"):
         ld = L[g]
         big = ld["largest"]
-        P.append(f'<div class="fact"><dt>Closest · {esc(REGIME_NAME[g])}</dt><dd>{times(ld["ratio_rho"])}</dd>'
+        label = f'{REGIME_NAME[g]} · 32-target batch' if g == "koblitz" else REGIME_NAME[g]
+        P.append(f'<div class="fact"><dt>Closest · {esc(label)}</dt><dd>{times(ld["ratio_rho"])}</dd>'
                  f'<p>at log₂ r = {ld["log2_r"]:.1f}, <span class="slug">{esc(ld["slug"])}</span>; '
                  f'at the largest size, log₂ r = {big["log2_r"]:.1f}: {times(big["ratio_rho"])}</p></div>')
     P.append(f'<div class="fact"><dt>Curves</dt><dd>{len(board)} priced</dd>'
@@ -540,7 +562,8 @@ def page(doc: dict, standalone: bool) -> str:
              '<p>One row per curve: its best recipe, ranked within its family by the ratio to the reference. '
              'The prime and random-binary rows solve one target each against the matched negation-map rho '
              '(ledger §18). The Koblitz rows solve 32 targets together, priced per target against batch rho '
-             'on the same 32 (§19–§21). Floor: the generic bound √(π/2A) in the same unit. The bar splits S '
+             'on the same 32 (§19–§22); under the one-target rule in AGENTS.md that is a historical diagnostic, '
+             'so each also shows the one-target cold ratio §20 measured and its §21 figure as the before mark. Floor: the generic bound √(π/2A) in the same unit. The bar splits S '
              'into the pipeline\'s phases. A walked-target row at three repetitions is resolved to about '
              'a factor 1.8 either way (ledger §13.7), so neighbouring ranks within that are not an ordering.</p>'
              f'<div class="scroll">{ratio_chart(board)}</div>'
@@ -558,6 +581,9 @@ def page(doc: dict, standalone: bool) -> str:
             b = r["best"]
             ci = (f'<br><span class="muted">[{g3(b["ratio_rho_ci"][0])}, {g3(b["ratio_rho_ci"][1])}]</span>'
                   if "ratio_rho_ci" in b else "")
+            if "ratio_rho_section21" in b:
+                ci += (f'<br><span class="muted">was {times(b["ratio_rho_section21"])} (§21)</span>'
+                       f'<br><span class="muted">one target: {times(b["one_target_cold_ratio_section20"])} (§20)</span>')
             P.append(f'<tr class="{"lead" if i == 1 else ""}"><td class="n">{i}</td>'
                      f'<td><span class="slug">{esc(r["slug"])}</span></td><td class="n">{r["log2_r"]:.1f}</td>'
                      f'<td class="recipe">{esc(b["label"])}</td><td class="n">{b["m"]}</td><td class="n">{b["base_points"]:,}</td>'
@@ -614,7 +640,7 @@ def page(doc: dict, standalone: bool) -> str:
              'r<sup>1/2</sup>, so a phase with α above ½ loses ground at every size. The share columns are the '
              'phase\'s part of S on each family\'s leading row.</p><div class="scroll"><table><thead><tr>'
              '<th>phase</th><th>what it does</th><th>cost model</th><th class="n">α prime</th><th class="n">α binary</th>'
-             f'<th class="n">share · Koblitz 2^{L["koblitz"]["log2_r"]:.0f}</th><th class="n">share · prime 2^{L["prime"]["log2_r"]:.1f}</th></tr></thead><tbody>')
+             f'<th class="n">share · Koblitz 2^{L["koblitz"]["log2_r"]:.0f} (§22)</th><th class="n">share · prime 2^{L["prime"]["log2_r"]:.1f}</th></tr></thead><tbody>')
     for pid, what, model, _, fitkey in rows_steps:
         name = next(n for i, n, _ in PHASES if i == pid)
         ap = ex["prime"]["phases"].get(fitkey, {}).get("alpha") if fitkey != "—" else None

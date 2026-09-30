@@ -1,0 +1,66 @@
+{
+  "accepted_controller_commit": "f9e7883f2c6ae85b7b300383381388f6b69ce676",
+  "accepted_controller_pr": "https://github.com/aburan28/crypto/pull/1056",
+  "binding": {
+    "asset_archive_sha256": "9a062a02b41a20ea55b2392058b5942062fade117a3c2e0f316a2a4de0adf822",
+    "asset_manifest_sha256": "a32f5bd249615724971fc022ec2950515daf9afb3ee860d7f46b088531978dfe",
+    "callable": "run",
+    "interpreter_sha256": "ec11021561db6edca6d1a8a796ddb94ffa0d0074b68e25f093b4bc117f06a70e",
+    "module": "f5_runtime_pipeline_v1",
+    "python_archive_sha256": "ab6ac29a7fc9fcaf9db68f61913e4cbefbbacede5c32df455eea01ee8b184186",
+    "python_manifest_sha256": "6db3c73420ec56f9592dca240f8afd2effd8c5e79e9310b83a2c690eec104a33"
+  },
+  "budget_extension_permitted": false,
+  "execution_directory": "/Volumes/SSD990/llm/tmp/ic-f5-source-bound-v1-20260930-execution0",
+  "execution_sha256": "5969837ddc69d25a3e44954f203077c0e6d682bbce2d1ac8eb0f9c3a10bb826b",
+  "executions_permitted": 1,
+  "mathematical_seal": {
+    "candidate_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0he2ed5ed7bb97",
+    "candidate_sha256": "6a6be8a516d70a89af343d0e045592ebcbf958342cbe660f8f7b7d6af87e48fc",
+    "method_sha256": "f073780f5a22dcabc637e20232a4354229ff8f29dec140a2a96ff77fe18b2955",
+    "panel_sha256": "25a020d827f39b33cd69a1846f28880a5fb70b9f38363c1f6bfc4dffbf6ad049",
+    "registration_stage": "before-execution",
+    "run_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0he2ed5ed7bb97W1d07932114f4R0",
+    "schema_version": 1,
+    "source_sha256": "777936d1ee5a06b2fd054c4b29289218857df11b47e2b8da0bb731263a91909a",
+    "workload_id": "1d07932114f4",
+    "workload_sha256": "4dd143b31ed2e88392a172a285319b56da89add80dc090f4e12537816bafcd7a"
+  },
+  "native_source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "online_speedup": null,
+  "promotion_eligible": false,
+  "registration_directory": "/Volumes/SSD990/llm/tmp/ic-f5-source-bound-v1-20260930-registration0",
+  "restart_permitted": false,
+  "resume_permitted": false,
+  "schema_version": 1,
+  "static_layout": {
+    "impossible_algebraic_cells": 0,
+    "interpretation": "Static encoder check only; dispatch, natural yield, complete recovery and cost remain unmeasured.",
+    "layout": "m*ell+(m-2)*n",
+    "max_boolean_variables": 64,
+    "rows": [
+      {
+        "basis_length": 6,
+        "boolean_variables": 35,
+        "candidate": "declared-development-arm",
+        "cell": "n17a1",
+        "max_boolean_variables": 64,
+        "solver": "f5",
+        "status": "WITHIN_LAYOUT_CAP_ONLY",
+        "summands": 3
+      }
+    ],
+    "schema_version": 1,
+    "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+    "source_objects": {
+      "examples/ic_tournament_worker.rs": "745247f3d89d46cdffb6d1f28778971caae7aa21",
+      "src/cryptanalysis/koblitz_factor_base_search.rs": "8aacd0b9c0c4b4e8702c97d631319afdaa4e22e6",
+      "src/cryptanalysis/koblitz_groebner.rs": "91ee5d6cfd99166697895aac62dbabb1f4d9778c",
+      "src/cryptanalysis/koblitz_index_calculus.rs": "16a102a9be61630da2d1c49bcabcc55eaf5ab2f0",
+      "src/cryptanalysis/polynomial_reuse.rs": "f79411c0f2309090b4ba7ddfd9b80bb202859796"
+    },
+    "status": "PASS_STATIC_LAYOUT_ONLY"
+  },
+  "status": "REGISTERED_NOT_DISPATCHED",
+  "timing_scope": "uncalibrated physical macOS ARM64 development correctness and source control"
+}

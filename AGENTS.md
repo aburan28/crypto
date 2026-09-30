@@ -539,3 +539,52 @@ immutable historical names and never infer exact identity from field degree alon
 Within this repository the text name is the ICV1 slug (§11); the curve
 registry, [docs/curves/registry.json](docs/curves/registry.json), maps each
 slug to the EC1 identities of its recorded representations.
+
+# Agent rules for IC measurements
+
+## Primary comparison uses one target
+
+The default elliptic-curve index-calculus (IC) question is the cost to solve
+one previously unseen public target. Every primary comparison run must use
+exactly one target and pair IC with Pollard rho on that same point under the
+same resource envelope. A panel of independent points is a set of separate
+one-target workloads, with one result row per point; do not combine them into
+a multi-target DLP run or replace the per-target results with a batch average.
+
+Start the IC online clock when target-dependent computation begins, after
+reusable target-independent base, index, relation-log, or solver setup is
+ready. Include all target-dependent attempts and point-query generation, and
+stop after scalar recovery and independent verification. Report reusable
+setup separately. Exclude process launch, input loading, and construction of a
+known-answer target from both IC and rho online intervals. Start rho timing at
+its first target-dependent walk and stop after recovery and independent
+verification. If scalar replay is outside either interval, report its cost
+separately and keep the correctness check.
+
+Do not use multi-target rho batches, cross-target distinguished-point tables,
+batch throughput divided by target count, or shared-collision work as the
+one-target rho reference. Multi-target work needs a separate, explicit
+research question after the one-target measurement; it cannot be the default,
+headline, or acceptance gate for a speedup claim. Preserve old batch results
+as historical diagnostics and label their target count and shared setup.
+
+An IC-vs-rho speedup is eligible only when both methods solve and verify the
+same point and both online intervals are complete. Report
+`rho_online_ms / ic_online_ms`, target identity, candidate and workload
+identity, included phases, resource conditions, and correctness evidence.
+Timeouts, failures, OOMs, and unverified scalars stay in the record and never
+count as wins. Missing phase costs make the total and speedup unknown. Key result rows by
+`(candidate_id, workload_id, run_id)`, preserve their manifest hashes, and
+use the canonical run-id convention from the repository's IC measurement
+rules. Keep the five exclusive IC online phase costs; their sum must equal the
+charged IC online wall time. Each claim must retain independent replay
+certificate SHA-256 digests and the exact nonempty resource-envelope object for
+both arms; the claim checker requires those envelopes to match and rejects a
+bare boolean verification or resource-match assertion. The IC interval must
+name all five target-dependent phases, and rho must name walk, collision, and
+recovery check.
+
+The current `boundary_autolab.py` producer timing is whole-process or
+operation-counted. Treat those outputs as legacy diagnostics until producers
+emit the online intervals above; they cannot establish the primary speedup.
+Its launch interface now permits one target per run only.

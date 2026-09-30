@@ -7,6 +7,11 @@ promoted, no tracked file was changed.** The new files are this note and three s
 model scripts, each with its output next to it (§8 lists exactly what ran).
 Classification: **scoping / stage diagnostic**. It computes no `S` and no new rho ratio.
 
+> **Erratum 1 (2026-09-30), appended at the end of this file.** §0 item 2, §2 and §3.3
+> say `m = 3` cannot beat rho even with a free oracle. That holds for the no-large-prime
+> model only. With two large primes, the free-oracle exponent at `m = 3` is `4/9`. No
+> `m ≥ 4` bar is loosened. Apart from this note, the sections below are unchanged.
+
 The question: is there a way of decomposing `R = [a]G + [b]Q` into factor-base points
 that could change the **cost exponent** against rho, rather than the constant in front
 of it? Or is none known, and if so, why not?
@@ -543,3 +548,57 @@ cargo; no tracked file modified.
 | `python3 decomp_exponent_model.py` | `decomp-exponent-model.txt`: Parts A–D (generic family, `c*(m)`, four solve laws against matched rho, oracle budgets) | 0.2 s |
 | `python3 decomp_m4_readout.py` | `decomp-m4-readout.txt`: `m = 4` per-target growth read from `research/chain_split_order_20260924/tables.md` | < 1 s |
 | `python3 research/ic_triple_table_20260923/model.py` (existing, unmodified; output to terminal only) | the triple optimum's local slope, 0.51 → 0.57 over `r = 2^26…2^42` | < 5 s |
+
+## Erratum 1 (2026-09-30): double large primes lower the `m = 3` ceiling
+
+§0 item 2, the `m = 3` row of §2's table, §3.3 ("no `m = 3` method can have an exponent
+below `1/2` even with a free oracle") and `decomp_exponent_model.py` line 93 all state the
+same `m = 3` ceiling. Nothing above is rewritten.
+
+**What was wrong.** The claim holds for §2's model, which has no large primes:
+`E(c, m) = 2(1+c)/(m+1)` gives `E(0, 3) = 1/2`. It is not a ceiling for every method. The
+double-large-prime variant works on a small base `F′ ⊂ F` and recombines relations carrying
+up to two large primes through the collision graph. It costs `q^{2−2/m}` in place of
+`q^{2−2/(m+1)}`.
+
+**The repository already has this result, in its own setting.**
+[`RESEARCH_EXTENSION_FIELD_BOUNDARIES.md`](../../notes/index-calculus/RESEARCH_EXTENSION_FIELD_BOUNDARIES.md)
+Theorem 3 derives total work `Θ(N^{4/9})` at `k = 3`. It rests on H1 and on H2, the
+large-prime percolation heuristic.
+[`RESEARCH_RHO_PARITY_PROGRAMME.md`](../../notes/index-calculus/RESEARCH_RHO_PARITY_PROGRAMME.md)
+measures it end to end, for the relation phase, at `n^{0.44 ± 0.01}` on `E(F_{p³})` with a
+subfield base. So this survey contradicted the repository's own theorem and measurement.
+
+**The corrected exponents.** In the unit `r = q^m`, the double-large-prime free-oracle
+exponent is `2(m−1)/m²`. With per-attempt oracle cost `2^{cn}`, not re-optimised,
+`E_dlp(c, m) = 2(m−1)/m² + c` ([`decomp_dlp_erratum.py`](decomp_dlp_erratum.py), output in
+[`decomp-dlp-erratum.txt`](decomp-dlp-erratum.txt)):
+
+| `m` | `E(0, m)`, §2 | `E_dlp(0, m)` | `c*`, §2 | `c*`, double large primes | best bar |
+|--:|--:|--:|--:|--:|--:|
+| 3 | 0.500 | **0.444** | 0 | **0.056** (`1/18`) | 0.056 |
+| 4 | 0.400 | 0.375 | 0.250 | 0.125 | 0.250 (unchanged) |
+| 5 | 0.333 | 0.320 | 0.300 | 0.180 | 0.300 (unchanged) |
+| 6 | 0.286 | 0.278 | 0.333 | 0.222 | 0.333 (unchanged) |
+
+**What changes.**
+- **`m = 3` has an exponent bar, but a tight one:** `c < 1/18`, so the oracle must be
+  nearly free. Every measured `m = 3` algebraic oracle is far above it. Examples: the
+  refutation-degree slope of about 1 per unit `ℓ` in `ic_symmetry_lever_slope_20260929`, and
+  the F4 prices in §2's budget paragraph. No `m = 3` exponent audit against `c < 1/18` has
+  been run.
+- **No `m ≥ 4` bar is loosened.** At `m ≥ 4` the double-large-prime bar is *stricter* than
+  §2's `c*(m)`, because §2's model already rebalances the base against `c`. So every `m = 4`
+  verdict (`ic_m4_exponent_audit_20260928`, `ic_m4_head_engine_20260929`), read against
+  `c* = 0.25`, stands.
+- **§3.3's inference is weakened.** It argued that "an exponent claim needs this encoding
+  extended to `m ≥ 4`". An `m = 3` encoding with a nearly free oracle plus double large
+  primes would also qualify.
+
+**What this rests on.**
+- **Heuristics.** Carrying Theorem 3 to a subspace base on binary Koblitz curves assumes H1
+  (the decomposition rate) and H2 (percolation of the large-prime graph) hold there. That
+  has not been validated on binary curves.
+- **Memory.** The graph holds `Θ(N^{2/9})` large-prime vertices. It is not charged here,
+  and neither is it in §2.
+
