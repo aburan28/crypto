@@ -117,7 +117,7 @@ jobs:
           cargo fetch --locked
           python research/ic_candidate_tournament_20260915/generic_build.py \
             --out "$RUNNER_TEMP/ic-generic-driver-build"
-          RAYON_NUM_THREADS=1 cargo test --locked --release --no-default-features \
+          env -u IC_SOURCE_MANIFEST_SHA256 RAYON_NUM_THREADS=1 cargo test --locked --release --no-default-features \
             --example ic_tournament_worker prepared_target_tests -- --ignored --test-threads=1
           python research/ic_candidate_tournament_20260915/generic_driver_smoke.py \
             --prepared "$RUNNER_TEMP/ic-producer" --generic-build "$RUNNER_TEMP/ic-generic-driver-build" \

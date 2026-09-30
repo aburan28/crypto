@@ -72,6 +72,11 @@ require the reserved slot to remain null and retain all five IC costs; they
 do not turn an unentered or unmeasured stage into measured work. The prepared
 mode guard now precedes fixture generation. Existing sealed validators and
 historical evidence were not changed.
+The first PR CI run separately exposed an inherited legacy producer provenance
+variable in the new native test command. The worker rejected it before target
+work, as required. The [CI environment repair](CI-ENVIRONMENT-REPAIR.md) preserves
+that failure and removes only that variable from this command, keeping all
+native/source guards and the preceding archived provenance intact.
 
 The preparation-only freshness corpus is
 [preparation-exclusions.json](preparation-exclusions.json), record digest
