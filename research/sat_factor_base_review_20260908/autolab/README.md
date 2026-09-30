@@ -22,21 +22,17 @@ Install or copy into a Cursor skills path if agents should auto-discover it.
 python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py plan
 python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py preflight
 
-# Setup smoke (n=13, 1 fixture) — verifies deps + producers + schema wiring
+# Optional one-target legacy diagnostic (n=13); the online-speedup gate stays blocked
 python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
   launch --beat smoke.koblitz.vs_rho.n13
 
-# Priority beat: Koblitz whole-process wall-clock at n=37 (start with 1 fixture)
+# One-target legacy diagnostic at n=37; this cannot claim an online speedup
 python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
-  launch --beat koblitz.vs_rho.n37_wall
+  launch --beat koblitz.vs_rho.n37_wall --fixtures 1
 
-# Same beat, amortized 1024-fixture panel (long)
+# Alternate one-target diagnostic at n=41
 python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
-  launch --beat koblitz.vs_rho.n37_wall --fixtures 1024
-
-# Alternate priority: charged crossover attempt at n=41
-python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
-  launch --beat koblitz.vs_rho.n41_charged
+  launch --beat koblitz.vs_rho.n41_charged --fixtures 1
 
 # Scaffold only (writes commands without executing)
 python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
@@ -47,7 +43,7 @@ python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
 
 | Command | Purpose |
 |---------|---------|
-| `plan` | Ledger agent priorities + beat ids + copy-paste launch lines |
+| `plan` | Ledger priorities, target-count gate, and primary-speedup eligibility |
 | `preflight` | Ledger schema v2, cargo/rustc, producer sources, host pin |
 | `launch --beat …` | Lock → run dir → build producers → measure → claim draft + schema check |
 | `status [--run-id]` | Print `runs/<id>/state.json` (default: `runs/current.json`) |
@@ -70,7 +66,7 @@ autolab/
       inputs/            # pinned protocol + ledger snapshot
       artifacts/         # preflight, claim_draft, claim_check, candidate
       logs/              # producer stdout/stderr
-      receipts/          # whole-process wall timings
+      receipts/          # whole-process/cold-start timing diagnostics
   evidence/
     <date>-<topic>/      # bundles promoted out of runs/ for a ledger change
 ```
@@ -85,44 +81,54 @@ Every beat claim must include **all** required fields for its stage from
 `claim-check` and `launch` both enforce this. Incomplete reports get
 `SCHEMA_INCOMPLETE` and must not promote a ledger row.
 
-For `vs_rho` the required set includes `timing_class`, `ic_cost`, `rho_cost`,
-`automorphism_discount`, `all_stages_charged_same_series`, `verdict`,
-`claim_boundary`, and `independent_replay_pointer`.
+The primary `vs_rho` claim is one previously unseen target, paired on the exact
+same point and resource envelope. Time IC after reusable setup at its first
+target-dependent operation, and rho at its first target-dependent walk. Stop
+after independently verified scalar recovery. Exclude launch, input loading,
+and known-answer fixture construction. Report candidate, workload, and run IDs
+with manifest hashes; use the canonical run-id convention. Report
+`rho_online_wall_ms / ic_online_wall_ms`, the exact online stages, and rho's
+worker, walk/collision, and distinguished-point memory policy. The five
+exclusive IC online phase costs must sum to its online total. Every panel point
+is a separate one-target workload row.
 
-### Reading charged cost off the direct producer
+The current producers do not expose these online intervals. Their whole-process
+wall and operation-counted readings are diagnostic only, and `plan` reports the
+primary speedup as blocked until online instrumentation and verification fields
+are available. The launcher accepts exactly one fixture and rejects batches;
+old multi-target results stay historical.
 
-Use `full_algorithm_charged_total_ms` from the `retained_support_batch_summary`
-row. It charges curve setup and the support-table build **once** for the batch.
+### Legacy producer timing
 
-Do not sum the per-target `relation_rank_summary` rows' `charged_total_ms`. That
-field is `setup_ms + fixture_setup_ms + collection_ms`, and `setup_ms` is the
-shared support build — summing it re-charges the whole base once per target. At
-`n = 37` over 1024 targets it reports 34.08 ms/target where the batch summary
-gives 20.27, and it makes setup amortization look like the bottleneck when
-setup is actually under 0.02 ms/target.
+The current producers report whole-process wall time or operation-counted
+totals. They do not identify the point where target-dependent work begins after
+reusable setup, nor do they emit the exclusive online phase record. Keep their
+`full_algorithm_charged_total_ms`, setup, and per-target values as labeled
+diagnostics only. Do not divide a shared total by the target count, sum rows
+that repeat shared setup, or use either value to claim single-target speedup.
 
-### Target mode is a free parameter, and the beats pin it to the slow one
+### Historical target mode
 
-All three `koblitz.vs_rho.*` beats run `target_mode=independent`. At `n = 37`
-that is the most expensive of the three modes, 37% above `partition_walk`. A
-stage read off one beat alone understates the method. Sweep
-`independent | coefficient_walk | partition_walk` before quoting a vs_rho
-number; see
+The old beats pin `target_mode=independent`. Preserve that configuration when
+reproducing those diagnostics; the target-mode sweep is not a replacement for a
+paired single-target online result. See
 [`evidence/20260912-koblitz-vs-rho-no-crossover/sweep_target_modes.py`](evidence/20260912-koblitz-vs-rho-no-crossover/sweep_target_modes.py).
 
 ## Claiming a ledger beat
 
-1. Freeze the public fixture (curve `n`/`a`, seeds, fixture counts, caps).
+1. Freeze exactly one public target (curve `n`/`a`, point, seeds, and resource envelope).
 2. `launch` the beat; keep `artifacts/claim_draft.json` + receipts.
-3. Ensure `claim_check.status == PASS` (fill any missing fields first).
-4. Independent recomputation on a second process / author.
+3. Keep current-producer outputs labeled diagnostic-only; do not fill absent
+   online fields with estimates. Claim-check can pass only after the producers
+   emit the required intervals, matched target, resource policy, and verification.
+4. Independently recompute a complete result on a second process / author.
 5. Promote the bundle: copy `artifacts/`, `inputs/`, `receipts/` and
    `state.json` into `evidence/<date>-<topic>/`. Leave `logs/` behind — it is
    tens of megabytes and its per-relation records carry factor-base point
    coordinates, target point keys and walk coefficients. Reduce any cost
    component you need out of it into a committed aggregate first.
-6. PR that updates `current` → `history`, sets a new `next_target`, and points
-   `evidence` at the promoted directory.
+6. Promote only a complete one-target online comparison. Historical diagnostic
+   evidence must stay labeled and cannot set the primary `next_target`.
 
 `runs/*` is gitignored, so a ledger row citing a path under `runs/` is dangling
 the moment the directory is cleaned. This is not hypothetical: the `vs_rho`

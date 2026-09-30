@@ -31,6 +31,11 @@ class LedgerContractTests(unittest.TestCase):
         self.assertIn("smoke.koblitz.vs_rho.n13", beat_ids)
         self.assertIn("koblitz.vs_rho.n37_wall", beat_ids)
         self.assertTrue(report["agent_priorities"])
+        self.assertFalse(report["commands"].get("n37_full"))
+        self.assertTrue(report["primary_speedup_contract"])
+        for row in report["beats"]:
+            self.assertFalse(row["primary_speedup_eligible"])
+            self.assertTrue(row["primary_speedup_blocker"])
 
 
 class MeasurementSchemaTests(unittest.TestCase):
@@ -44,26 +49,134 @@ class MeasurementSchemaTests(unittest.TestCase):
         self.assertIn("timing_class", result["missing_stage_fields"])
         self.assertTrue(result["missing_global_provenance"])
 
-    def test_vs_rho_complete_passes(self) -> None:
+    def test_vs_rho_single_target_online_claim_passes(self) -> None:
         report = {
             "n": 37,
-            "timing_class": "whole_process_wall",
-            "ic_cost": 1.0,
-            "rho_cost": 2.0,
-            "automorphism_discount": {"A": 74, "formula": "sqrt(2*n)"},
-            "all_stages_charged_same_series": True,
+            "candidate_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abc",
+            "candidate_manifest_sha256": "123456789abc0000000000000000000000000000000000000000000000000000",
+            "workload_id": "abcdef123456",
+            "workload_manifest_sha256": "abcdef1234560000000000000000000000000000000000000000000000000000",
+            "run_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abcWabcdef123456R1",
+            "target_count": 1,
+            "ic_target_hash": "target-abc",
+            "rho_target_hash": "target-abc",
+            "timing_class": "single_target_online_wall",
+            "ic_online_wall_ms": 10.0,
+            "rho_online_wall_ms": 20.0,
+            "online_speedup": 2.0,
+            "ic_online_phase_ms": {
+                "T_target_query_ms": 1.0,
+                "T_target_PDP_ms": 3.0,
+                "T_target_relation_check_ms": 1.0,
+                "T_target_descent_ms": 4.0,
+                "T_target_recovery_check_ms": 1.0,
+            },
+            "online_interval": {
+                "ic_start_event": "first target-dependent IC query after reusable setup",
+                "ic_stop_event": "scalar recovered and independently verified",
+                "ic_included_stages": ["target_query", "target_PDP", "target_descent", "recovery_check"],
+                "rho_start_event": "first target-dependent rho walk",
+                "rho_stop_event": "scalar recovered and independently verified",
+                "rho_included_stages": ["walk", "collision", "recovery_check"],
+            },
+            "same_resource_envelope": True,
+            "ic_scalar_verified": True,
+            "rho_scalar_verified": True,
+            "rho_policy": {
+                "worker_count": 1,
+                "walk_policy": "signed_frobenius",
+                "collision_policy": "distinguished_point",
+                "distinguished_point_memory_bytes": 0,
+            },
             "verdict": "DRAFT",
-            "claim_boundary": "synthetic only",
+            "claim_boundary": "single public target only",
             "independent_replay_pointer": "research/example",
-            "fixture_hash": "abc",
-            "executable_or_source_hash": "def",
+            "fixture_hash": "target-abc",
+            "executable_or_source_hash": {"direct": "def", "rho": "ghi"},
             "host_id": {"node": "test"},
             "resource_caps": {"common_cap_bytes": 1},
-            "seeds": {"direct": 1},
+            "seeds": {"direct": 1, "rho": 2},
             "claim_boundary_non_claims": ["not key recovery"],
         }
         result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
         self.assertEqual(result["status"], "PASS", result)
+
+    def test_vs_rho_batch_mismatch_and_legacy_timing_are_rejected(self) -> None:
+        import copy
+
+        base = {
+            "candidate_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abc",
+            "candidate_manifest_sha256": "123456789abc0000000000000000000000000000000000000000000000000000",
+            "workload_id": "abcdef123456",
+            "workload_manifest_sha256": "abcdef1234560000000000000000000000000000000000000000000000000000",
+            "run_id": "IC1N37Ckb1fb64PDP5f4RCwalkLAbwTDdirectISO0h123456789abcWabcdef123456R1",
+            "target_count": 1,
+            "ic_target_hash": "target-abc",
+            "rho_target_hash": "target-abc",
+            "timing_class": "single_target_online_wall",
+            "ic_online_wall_ms": 10.0,
+            "rho_online_wall_ms": 20.0,
+            "online_speedup": 2.0,
+            "ic_online_phase_ms": {
+                "T_target_query_ms": 1.0,
+                "T_target_PDP_ms": 3.0,
+                "T_target_relation_check_ms": 1.0,
+                "T_target_descent_ms": 4.0,
+                "T_target_recovery_check_ms": 1.0,
+            },
+            "online_interval": {
+                "ic_start_event": "target computation after reusable setup",
+                "ic_stop_event": "verified scalar recovered",
+                "ic_included_stages": ["target_query", "target_descent"],
+                "rho_start_event": "target walk begins",
+                "rho_stop_event": "verified scalar recovered",
+                "rho_included_stages": ["walk", "collision"],
+            },
+            "same_resource_envelope": True,
+            "ic_scalar_verified": True,
+            "rho_scalar_verified": True,
+            "rho_policy": {
+                "worker_count": 1,
+                "walk_policy": "walk",
+                "collision_policy": "collision",
+                "distinguished_point_memory_bytes": 0,
+            },
+            "verdict": "DRAFT",
+            "claim_boundary": "single public target only",
+            "independent_replay_pointer": "research/example",
+            "fixture_hash": "target-abc",
+            "executable_or_source_hash": {"direct": "def", "rho": "ghi"},
+            "host_id": "test",
+            "resource_caps": {},
+            "seeds": 1,
+            "claim_boundary_non_claims": ["not key recovery"],
+        }
+        variants = []
+        batched = copy.deepcopy(base)
+        batched["target_count"] = 2
+        variants.append(batched)
+        mismatched = copy.deepcopy(base)
+        mismatched["rho_target_hash"] = "another-target"
+        variants.append(mismatched)
+        legacy = copy.deepcopy(base)
+        legacy["timing_class"] = "whole_process_wall"
+        variants.append(legacy)
+        wrong_ratio = copy.deepcopy(base)
+        wrong_ratio["online_speedup"] = 3.0
+        variants.append(wrong_ratio)
+        unverified = copy.deepcopy(base)
+        unverified["rho_scalar_verified"] = False
+        variants.append(unverified)
+        wrong_phase_total = copy.deepcopy(base)
+        wrong_phase_total["ic_online_phase_ms"]["T_target_PDP_ms"] = 4.0
+        variants.append(wrong_phase_total)
+        wrong_run_id = copy.deepcopy(base)
+        wrong_run_id["run_id"] = "legacy-timestamp-run"
+        variants.append(wrong_run_id)
+        for report in variants:
+            result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
+            self.assertEqual(result["status"], "FAIL", result)
+            self.assertTrue(result["validation_errors"])
 
     def test_decomposition_requires_ffd(self) -> None:
         report = {
@@ -111,14 +224,22 @@ class HelperTests(unittest.TestCase):
         for a,b,count in [(direct,rho,2),(direct+direct,rho,1),([],rho,1)]:
             self.assertEqual(lab.comparison_integrity(a,b,count)['status'],'INVALID_COMPARISON')
 
-    def test_only_complete_ic_cost_and_total_rho_batch_are_comparable(self):
+    def test_only_single_target_rho_cost_is_comparable(self):
         self.assertIsNone(lab.extract_ic_cost([{'online_charged_ms':1}], 'algorithmic_charged'))
         self.assertIsNone(lab.extract_ic_cost([{'charged_total_ms':1}], 'algorithmic_charged'))
         self.assertEqual(lab.extract_ic_cost([{'full_algorithm_charged_total_ms':9}], 'algorithmic_charged'),9)
-        self.assertEqual(lab.extract_rho_cost([{'total_ms':2},{'total_ms':3}]),5)
-        self.assertIsNone(lab.extract_rho_cost([{'total_ms':2},{}]))
-        self.assertIsNone(lab.extract_rho_cost([{'total_ms':float('nan')}]))
+        one = {'kind': 'rho_public_fixture', 'total_ms': 2}
+        self.assertEqual(lab.extract_rho_cost([one]), 2)
+        self.assertIsNone(lab.extract_rho_cost([one, dict(one, fixture_index=1)]))
+        self.assertIsNone(lab.extract_rho_cost([{'kind': 'rho_public_fixture', 'total_ms':float('nan')}]))
         self.assertIsNone(lab.extract_ic_cost([{'full_algorithm_charged_total_ms':-1}], 'algorithmic_charged'))
+
+    def test_launch_rejects_more_than_one_target_before_preflight(self):
+        args = lab.parser().parse_args([
+            'launch', '--beat', 'koblitz.vs_rho.n37_wall', '--fixtures', '2'
+        ])
+        with self.assertRaisesRegex(lab.AutolabError, 'exactly one target'):
+            lab.launch(args)
 
     def test_seed_is_deterministic(self) -> None:
         self.assertEqual(
@@ -157,8 +278,9 @@ class HelperTests(unittest.TestCase):
                 ["claim-check", "--report", str(path), "--stage", "vs_rho", "--out", str(out)]
             )
             result = lab.claim_check(args)
-            self.assertEqual(result["status"], "PASS")
-            self.assertEqual(json.loads(out.read_text())["status"], "PASS")
+            self.assertEqual(result["status"], "FAIL")
+            self.assertIn("target_count", result["missing_stage_fields"])
+            self.assertEqual(json.loads(out.read_text())["status"], "FAIL")
 
 
 class TimingTests(unittest.TestCase):
