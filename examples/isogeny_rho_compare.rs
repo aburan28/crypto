@@ -10,8 +10,8 @@
 
 use crypto_lib::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
 use crypto_lib::cryptanalysis::ic_boundary::{
-    binary_point_count, rho_reference_negation, ArtinSchreier, BinaryGroup, CountedGroup,
-    GroupOps, RhoResult,
+    binary_point_count, rho_reference_negation, ArtinSchreier, BinaryGroup, CountedGroup, GroupOps,
+    RhoResult,
 };
 use crypto_lib::cryptanalysis::koblitz_fast::{FastCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
@@ -30,8 +30,8 @@ use std::path::PathBuf;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 fn load_members(n: u32) -> (u8, Vec<u64>, u64) {
-    let raw = fs::read_to_string("experiments/koblitz_isogeny_cost_sweep.json")
-        .expect("frozen census");
+    let raw =
+        fs::read_to_string("experiments/koblitz_isogeny_cost_sweep.json").expect("frozen census");
     let v: Value = serde_json::from_str(&raw).expect("json");
     for sweep in v["sweeps"].as_array().expect("sweeps") {
         if sweep["n"].as_u64() == Some(n as u64) {
@@ -119,11 +119,7 @@ fn rebuild(n: u32, irr: &IrreduciblePoly, a2: u8, a6: u64, seed: u64) -> Built {
     let group = BinaryGroup(&fast);
     let mut ops = GroupOps::default();
     let mut rng = StdRng::seed_from_u64(seed ^ 0xA6A6 ^ a6);
-    let mask = if n >= 64 {
-        u64::MAX
-    } else {
-        (1u64 << n) - 1
-    };
+    let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
     let generator = loop {
         let x = rng.gen::<u64>() & mask;
         if x == 0 {
@@ -166,14 +162,7 @@ fn plant_target(
     (d, q)
 }
 
-fn negation_row(
-    n: u32,
-    irr: &IrreduciblePoly,
-    a2: u8,
-    a6: u64,
-    seed: u64,
-    reps: usize,
-) -> Value {
+fn negation_row(n: u32, irr: &IrreduciblePoly, a2: u8, a6: u64, seed: u64, reps: usize) -> Value {
     let me = rebuild(n, irr, a2, a6, seed);
     let group = BinaryGroup(&me.fast);
     let max_steps = ((std::f64::consts::PI * me.r as f64 / 2.0).sqrt() * 200.0) as u64;
@@ -229,10 +218,7 @@ fn signed_frobenius_row(n: u32, a2: u8, seed: u64, reps: usize) -> Value {
         let t0 = Instant::now();
         let report = koblitz_signed_frobenius_rho_reference(&kc, &q, &opts, &mut |_| {});
         let wall_ns = t0.elapsed().as_nanos() as u64;
-        let recovered = report
-            .recovered_log
-            .as_ref()
-            .and_then(|v| v.to_u64());
+        let recovered = report.recovered_log.as_ref().and_then(|v| v.to_u64());
         let verified = report.verified
             && recovered
                 .map(|s| kc.mul(&g, &BigUint::from(s)) == q)
@@ -245,8 +231,7 @@ fn signed_frobenius_row(n: u32, a2: u8, seed: u64, reps: usize) -> Value {
             + report.charges.candidate_verification_scalar_multiplications;
         let gae = (setup + steps) as f64 + 1.5 * bits * smuls as f64;
         let s = gae / (r as f64).sqrt();
-        let expected =
-            (std::f64::consts::PI * r as f64 / 2.0).sqrt() / (2.0 * n as f64).sqrt();
+        let expected = (std::f64::consts::PI * r as f64 / 2.0).sqrt() / (2.0 * n as f64).sqrt();
         runs.push(json!({
             "rep": rep,
             "planted": planted,
@@ -282,7 +267,10 @@ fn main() {
     let n = 17u32;
     let (a2_pref, _r_pref, _h_pref) = preferred_family(n).expect("family");
     let (a2, members, order) = load_members(n);
-    assert_eq!(a2, a2_pref, "frozen census family must match preferred_family");
+    assert_eq!(
+        a2, a2_pref,
+        "frozen census family must match preferred_family"
+    );
     let sample = sample_members(&members, 8);
     let irr = find_irreducible_sparse(n).expect("irr");
     let base_seed = 2026093001u64 + (n as u64) * 1000;
