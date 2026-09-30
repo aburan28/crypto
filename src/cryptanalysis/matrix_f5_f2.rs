@@ -460,8 +460,6 @@ pub struct F5Timings {
     pub direct_pack_used: bool,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
-    /// Whether the validated-row bounds-free unpack path was used.
-    pub unchecked_unpack_used: bool,
 }
 
 /// Row form requested from a matrix-F5 step. Both forms span the same
@@ -513,42 +511,6 @@ fn unpack_row_scalar_direct(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolP
     }
     debug_assert_eq!(written, terms);
     // SAFETY: all `terms` slots have been written above.
-    unsafe { monos.set_len(terms) };
-    F2BoolPoly {
-        terms: monos,
-        n_vars,
-    }
-}
-
-/// Decode a valid packed row after checking the column span once.
-fn unpack_row_unchecked_guarded(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolPoly {
-    let words = cols.len().div_ceil(64);
-    let tail_bits = cols.len() % 64;
-    let invalid_tail = tail_bits != 0
-        && row.len() == words
-        && row.last().is_some_and(|&last| last >> tail_bits != 0);
-    if row.len() > words || invalid_tail {
-        return unpack_row_scalar_direct(row, cols, n_vars);
-    }
-    let terms = row.iter().map(|w| w.count_ones() as usize).sum();
-    let mut monos = Vec::<F2BoolMono>::with_capacity(terms);
-    let out = monos.as_mut_ptr();
-    let mut written = 0;
-    for (w, &word) in row.iter().enumerate() {
-        let mut bits = word;
-        while bits != 0 {
-            let c = w * 64 + bits.trailing_zeros() as usize;
-            bits &= bits - 1;
-            // SAFETY: `row.len() <= ceil(cols.len()/64)` and set bits in
-            // the final partial word were rejected above, so c < cols.len().
-            let mono = F2BoolMono::from_mask(unsafe { *cols.get_unchecked(c) });
-            // SAFETY: `terms` is the exact number of set bits in the row.
-            unsafe { out.add(written).write(mono) };
-            written += 1;
-        }
-    }
-    debug_assert_eq!(written, terms);
-    // SAFETY: all `terms` slots were initialized above.
     unsafe { monos.set_len(terms) };
     F2BoolPoly {
         terms: monos,
@@ -731,24 +693,10 @@ pub fn matrix_f5_f2_with_form_timed(
     let direct_unpack =
         *DIRECT_UNPACK.get_or_init(|| std::env::var("KIC_F5_UNPACK_DIRECT").as_deref() == Ok("1"));
     timings.direct_unpack_used = direct_unpack && !avx512_unpack;
-    static UNCHECKED_UNPACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    let unchecked_requested = *UNCHECKED_UNPACK
-        .get_or_init(|| std::env::var("KIC_F5_UNPACK_UNCHECKED").as_deref() == Ok("1"));
-    let unchecked_unpack = unchecked_requested
-        && direct_unpack
-        && !avx512_unpack
-        && n_vars >= 24
-        && degree == 4
-        && cols.len() >= 4096;
-    timings.unchecked_unpack_used = unchecked_unpack;
     let out = matrix[..rank]
         .par_iter()
         .map(|row| {
-            let p = if unchecked_unpack {
-                unpack_row_unchecked_guarded(row, &cols, n_vars_out)
-            } else {
-                unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack)
-            };
+            let p = unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack);
             debug_assert!(p.is_canonical());
             p
         })
@@ -811,35 +759,6 @@ mod tests {
                 assert_eq!(
                     unpack_row_scalar_direct(&row, &cols, 24),
                     unpack_row_scalar(&row, &cols, 24),
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn guarded_unchecked_unpack_matches_direct_and_falls_back_for_long_rows() {
-        for cols_len in [1usize, 7, 63, 64, 65, 127, 129, 4097, 12951] {
-            let cols: Vec<u64> = (0..cols_len)
-                .map(|i| (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15))
-                .collect();
-            for salt in [0u64, 1, 3, 7, u64::MAX] {
-                let mut row: Vec<u64> = (0..cols_len.div_ceil(64))
-                    .map(|w| {
-                        let bits = (w as u64).wrapping_mul(0xd6e8_feb8_6659_fd93) ^ salt;
-                        let valid = (cols_len - w * 64).min(64);
-                        bits & (u64::MAX >> (64 - valid))
-                    })
-                    .collect();
-                assert_eq!(
-                    unpack_row_unchecked_guarded(&row, &cols, 24),
-                    unpack_row_scalar_direct(&row, &cols, 24),
-                    "cols_len={cols_len}, salt={salt}",
-                );
-                row.push(0);
-                assert_eq!(
-                    unpack_row_unchecked_guarded(&row, &cols, 24),
-                    unpack_row_scalar_direct(&row, &cols, 24),
-                    "fallback cols_len={cols_len}, salt={salt}",
                 );
             }
         }
