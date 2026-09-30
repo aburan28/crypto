@@ -1,0 +1,6 @@
+{
+  "error": "",
+  "error_type": "AssertionError",
+  "status": "FAIL",
+  "traceback": "Traceback (most recent call last):\n  File \"/private/tmp/ecc2k130-s3-prefilter-20260930/research/notes/ecc2k130/compact_ir_ledger_20260930/verify_panel.py\", line 215, in main\n    receipt = verify(args.cell, args.run_dir.resolve(), args.smoke)\n  File \"/private/tmp/ecc2k130-s3-prefilter-20260930/research/notes/ecc2k130/compact_ir_ledger_20260930/verify_panel.py\", line 74, in verify\n    assert len(report[\"sequence\"]) == 1 and report[\"sequence\"][0] in expected\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+}
