@@ -36,7 +36,7 @@ def features(campaign, target, rank=0, direct=False):
     p = campaign.params
     x = 0 if target is None else p.onb.toCoords(target[0])
     squared = 0 if target is None else p.onb.toCoords(p.onb.frob(target[0], 1))
-    return {'x_weight': x.bit_count(), 'x_frobenius_distance': (x ^ squared).bit_count(),
+    return {'x_weight': bin(x).count('1'), 'x_frobenius_distance': bin(x ^ squared).count('1'),
             'rank_fraction': rank / (len(campaign.reps) + int(direct)),
             'direct_target': int(direct)}
 

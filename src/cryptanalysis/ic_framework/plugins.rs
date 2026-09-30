@@ -903,7 +903,8 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzSymmetrisedBase<'_> {
 /// (`inherited-f4` default, `matrix-f4`, `matrix-f5`), `max_degree`
 /// (Macaulay cap, default 3: the cap is absolute, so the degree-4
 /// `m = 3` system still builds its own degree at the root) and
-/// `node_budget` (splits before a call gives up, default 4096).
+/// `node_budget` (algebraic reduction calls before a solve gives up,
+/// default 4096; splitting decisions are counted separately).
 pub struct SymmetrisedOracle<'i> {
     summands: u32,
     instance: &'i BinaryInstance,
@@ -950,7 +951,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
 
     fn describe(&self, params: &Params) -> String {
         format!(
-            "solve the symmetrised S_{} in w = u² + u, s = Σu over F_u with {} (Macaulay cap {}, {} splits)",
+            "solve the symmetrised S_{} in w = u² + u, s = Σu over F_u with {} (Macaulay cap {}, {} reduction calls)",
             self.summands + 1,
             params.get("engine").unwrap_or("inherited-f4"),
             params.get("max_degree").unwrap_or("3"),
@@ -972,7 +973,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for SymmetrisedOracle<'_> {
             ),
             (
                 "node_budget",
-                "splits before a call gives up (default 4096)",
+                "algebraic reduction calls before a solve gives up (default 4096)",
             ),
         ]
     }

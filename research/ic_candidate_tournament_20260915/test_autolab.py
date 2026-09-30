@@ -67,6 +67,28 @@ class PortfolioTests(unittest.TestCase):
         self.assertNotIn('timeout', [r['candidate'] for r in chosen])
         self.assertEqual(chosen, retain(rows, arms, width=3, exploration=1, seed=12))
 
+    def test_exploration_is_balanced_across_unrepresented_families(self):
+        from portfolio import mechanism_family
+        arms = [{'id': name, 'config': dict(BASE_CONFIG, solver=solver,
+                                           batch_trials=batch)}
+                for name, solver, batch in (
+                    ('leader', 'pair_table', 1), ('clone1', 'pair_table', 2),
+                    ('clone2', 'pair_table', 4), ('clone3', 'pair_table', 8),
+                    ('f4', 'f4', 1), ('f5', 'f5', 1))]
+        rows = [self.row(name, cost, {'c': cost}) for name, cost in (
+            ('leader', .5), ('clone1', .6), ('clone2', .7),
+            ('clone3', .8), ('f4', 2), ('f5', 3))]
+        chosen = retain(rows, arms, width=3, exploration=2, seed=12)
+        self.assertEqual(chosen[0]['candidate'], 'leader')
+        self.assertEqual(len(chosen), 3)
+        self.assertEqual({mechanism_family(next(a for a in arms
+                                  if a['id'] == item['candidate']))
+                          for item in chosen},
+                         {mechanism_family(arms[0]), mechanism_family(arms[4]),
+                          mechanism_family(arms[5])})
+        self.assertEqual(chosen, retain(rows, arms, width=3,
+                                        exploration=2, seed=12))
+
     def test_cell_specialist_and_pair_table_family_both_survive(self):
         from portfolio import family
         arms = [
@@ -131,6 +153,8 @@ class PortfolioTests(unittest.TestCase):
             retain([self.row('a',float('nan'),{'c':1})],arms)
         with self.assertRaises(InvalidEvidence):
             retain([self.row('a',1,{'c':1}),self.row('b',1,{'other':1})],arms)
+        with self.assertRaisesRegex(InvalidEvidence, 'duplicate candidate comparison'):
+            retain([self.row('a',1,{'c':1}),self.row('a',1,{'c':1})],arms)
 
 
 class NativeEvidenceTests(unittest.TestCase):

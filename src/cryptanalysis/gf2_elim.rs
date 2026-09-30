@@ -179,6 +179,25 @@ fn eliminate_with(
     reverse_tile_words: Option<usize>,
     reuse_table: bool,
 ) -> usize {
+    static BRANCHLESS_STRIP: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let branchless_strip = *BRANCHLESS_STRIP.get_or_init(|| {
+        match std::env::var("KIC_GF2_BRANCHLESS_STRIP").as_deref() {
+            Ok("0") => false,
+            Ok("1") => true,
+            _ => {
+                #[cfg(target_arch = "x86_64")]
+                {
+                    std::arch::is_x86_feature_detected!("avx2")
+                }
+                #[cfg(not(target_arch = "x86_64"))]
+                {
+                    false
+                }
+            }
+        }
+    });
+    #[cfg(target_arch = "x86_64")]
+    let avx2_strip = branchless_strip && std::arch::is_x86_feature_detected!("avx2");
     let rows = matrix.len();
     let words = n_cols.div_ceil(64);
     if rows == 0 || words == 0 {
@@ -267,9 +286,22 @@ fn eliminate_with(
             }
             // Clear the column from the strip of every unpivoted row.
             let ps = strip[pivot_row];
-            for s in &mut strip[pivot_row + 1..] {
-                if *s >> best & 1 != 0 {
-                    *s ^= ps;
+            let remaining = &mut strip[pivot_row + 1..];
+            if branchless_strip {
+                #[cfg(target_arch = "x86_64")]
+                if avx2_strip {
+                    // SAFETY: AVX2 was checked for this process.
+                    unsafe { clear_strip_avx2(remaining, best, ps) };
+                } else {
+                    clear_strip_branchless(remaining, best, ps);
+                }
+                #[cfg(not(target_arch = "x86_64"))]
+                clear_strip_branchless(remaining, best, ps);
+            } else {
+                for s in remaining {
+                    if *s >> best & 1 != 0 {
+                        *s ^= ps;
+                    }
                 }
             }
             pivot_cols.push(col);
@@ -348,6 +380,34 @@ fn eliminate_with(
         }
     }
     pivot_row
+}
+
+#[inline]
+fn clear_strip_branchless(strip: &mut [u64], bit: u32, pivot: u64) {
+    for s in strip {
+        *s ^= pivot & 0u64.wrapping_sub((*s >> bit) & 1);
+    }
+}
+
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn clear_strip_avx2(strip: &mut [u64], bit: u32, pivot: u64) {
+    use std::arch::x86_64::*;
+
+    let shift = _mm_cvtsi64_si128(bit as i64);
+    let one = _mm256_set1_epi64x(1);
+    let zero = _mm256_setzero_si256();
+    let pivot_vec = _mm256_set1_epi64x(pivot as i64);
+    let mut chunks = strip.chunks_exact_mut(4);
+    for chunk in &mut chunks {
+        let ptr = chunk.as_mut_ptr().cast::<__m256i>();
+        let value = _mm256_loadu_si256(ptr);
+        let selected = _mm256_and_si256(_mm256_srl_epi64(value, shift), one);
+        let mask = _mm256_sub_epi64(zero, selected);
+        let updated = _mm256_xor_si256(value, _mm256_and_si256(pivot_vec, mask));
+        _mm256_storeu_si256(ptr, updated);
+    }
+    clear_strip_branchless(chunks.into_remainder(), bit, pivot);
 }
 
 struct DeferredTable {
@@ -718,6 +778,33 @@ pub fn simd_available() -> bool {
 mod tests {
     use super::*;
     use rand::{rngs::StdRng, Rng, SeedableRng};
+
+    #[test]
+    fn branchless_strip_matches_conditional_clear() {
+        let mut rng = StdRng::seed_from_u64(0x51_7a_1c);
+        for len in [0, 1, 2, 3, 4, 5, 7, 16, 101] {
+            for bit in 0..64 {
+                let pivot = rng.gen::<u64>() | (1u64 << bit);
+                let input: Vec<u64> = (0..len).map(|_| rng.gen()).collect();
+                let mut expected = input.clone();
+                for s in &mut expected {
+                    if (*s >> bit) & 1 != 0 {
+                        *s ^= pivot;
+                    }
+                }
+                let mut scalar = input.clone();
+                clear_strip_branchless(&mut scalar, bit, pivot);
+                assert_eq!(scalar, expected, "scalar len={len} bit={bit}");
+                #[cfg(target_arch = "x86_64")]
+                if std::arch::is_x86_feature_detected!("avx2") {
+                    let mut vector = input;
+                    // SAFETY: AVX2 was checked for this process.
+                    unsafe { clear_strip_avx2(&mut vector, bit, pivot) };
+                    assert_eq!(vector, expected, "AVX2 len={len} bit={bit}");
+                }
+            }
+        }
+    }
 
     /// Textbook column-at-a-time RREF: the reference.
     fn naive_rref(m: &mut [Vec<u64>], n_cols: usize) -> usize {

@@ -72,3 +72,19 @@ Any one of these reopens the named item, and a proposal citing it should link th
   collection thread, and the F4/F5 backends.
 - **The protocol for any reopened round** is in
   [next-proposal-single-target.json](next-proposal-single-target.json).
+
+## Addendum, 2026-09-30: the sized-cache rho
+
+This addendum supersedes one sentence above and changes no decision. The scope-and-uncertainty
+bullet that says a rho with the cache sized to the walk "has not been built or measured" is
+out of date. [sized_cache_rho_20260930](sized_cache_rho_20260930/RESULTS.md) built and measured it,
+under the isolated runner and a registration made before the run:
+
+- The sized rho takes 0.875–0.913 of the lean rho's wall time at the four small cells.
+- IC is then 0.98–1.03 of the sized rho, so its small-cell time lead is gone. IC's one residual,
+  2% at `n19a0`, is inside the A/A residue.
+- At `n23a0` the sized rho is 4% faster than IC (`incumbent/sized` 1.043 [1.015, 1.074]).
+- The walk is unchanged on all 60 timed cases, and every one of 1,536 recorded rho runs verifies.
+
+The reopening item "a rho stronger than the lean rho at small `n`" is met for the time lead. The
+sized rho is now the reference rho at `n ≤ 23` for any reopened round.

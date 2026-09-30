@@ -85,7 +85,7 @@ class AuditField(field.Onb):
 
     def trace(self, value):
         self.ledger.counts['field.trace'] += 1
-        return self.toCoords(value).bit_count() & 1
+        return bin(self.toCoords(value)).count('1') & 1
 
 
 def counted(name, original):
@@ -136,7 +136,7 @@ def subgroupBase(onb, curve, ell, eigen, weight):
     for coordinate in sorted(candidates):
         # Every odd-order point is a double; x(2P)=lambda^2+lambda
         # has trace zero. This is necessary, not a subgroup certificate.
-        if coordinate.bit_count() & 1:
+        if bin(coordinate).count('1') & 1:
             continue
         p = curve.pointFromX(onb.fromCoords(coordinate))
         if p is None or curve.mul(p, ell) is not None:
@@ -265,7 +265,7 @@ def decomposeLocal(context, target, points, weight, variant, ledger, budget=.25)
                 model = {abs(lit): lit > 0 for lit in solver.get_model()}
                 details['models'] += 1
                 coordinates = [sum((1 << j) for j, lit in enumerate(v) if model.get(lit, False)) for v in pvars]
-                assert all(value.bit_count() <= weight for value in coordinates)
+                assert all(bin(value).count('1') <= weight for value in coordinates)
                 lifted = strictLift(onb, curve, coordinates, target, lookup)
                 if lifted:
                     actual, signs = lifted

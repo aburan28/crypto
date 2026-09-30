@@ -15,6 +15,35 @@ from test_readiness import cupy_stub,panel
 
 
 class PairedTests(unittest.TestCase):
+    def test_timeout_never_accepts_clean_shutdown_receipts(self):
+        isolation={'schema':'isolated-bench/1','mode':'run',
+                   'run':{'exit_status':0,'contended':False},
+                   'left_on_reserved':{'user_threads':[]}}
+        worker={'status':'passed','gpu_executed':True}
+        for mode,timed_out,expected_status,eligible in (
+                ('benchmark',True,'process_timeout',False),
+                ('smoke',True,'process_timeout',False),
+                ('benchmark',False,'passed',True),
+                ('smoke',False,'passed',False)):
+            with self.subTest(mode=mode,timed_out=timed_out), \
+                 tempfile.TemporaryDirectory() as folder, \
+                 patch.object(launch_gpu,'select_cpus',return_value='0,1'), \
+                 patch.object(launch_gpu,'bounded',return_value={
+                     'returncode':0,'stdout':'clean shutdown','stderr':'',
+                     'timed_out':timed_out}), \
+                 patch.object(launch_gpu,'read_partial',side_effect=lambda path:
+                     worker if path.name=='benchmark.json' else isolation), \
+                 contextlib.redirect_stdout(io.StringIO()):
+                output=Path(folder)/'launch.json'
+                code=launch_gpu.launch(output,mode,'square-unroll')
+                receipt=json.loads(output.read_text())
+                self.assertEqual(code,0 if expected_status=='passed' else 1)
+                self.assertEqual(receipt['status'],expected_status)
+                self.assertIs(receipt['timing_eligible'],eligible)
+                self.assertEqual(receipt['benchmark'],worker)
+                self.assertTrue(receipt['gpu_executed'])
+                self.assertEqual(receipt['stdout'],'clean shutdown')
+
     def test_interruption_also_terminates_process_group(self):
         process=Mock(pid=12345)
         process.communicate.side_effect=[KeyboardInterrupt(),('','')]
