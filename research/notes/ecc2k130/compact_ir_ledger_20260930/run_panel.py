@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import resource
 import signal
 import subprocess
 import sys
@@ -125,14 +126,23 @@ def rss_bytes(pid: int) -> int:
 
 
 def run_child(command: list[str], env: dict[str, str], stdout: Path,
-              stderr: Path, timeout: int, rss_limit: int) -> dict:
+              stderr: Path, timeout: int, rss_limit: int,
+              address_space_limit: int | None = None) -> dict:
     started = time.monotonic()
     peak_rss = 0
     stopped_for: str | None = None
+    def limits() -> None:
+        if address_space_limit is not None:
+            resource.setrlimit(resource.RLIMIT_AS,
+                               (address_space_limit, address_space_limit))
     with stdout.open("wb") as out, stderr.open("wb") as err:
         process = subprocess.Popen(command, stdout=out, stderr=err, env=env,
-                                   start_new_session=True)
-        while process.poll() is None:
+                                   start_new_session=True,
+                                   preexec_fn=limits if address_space_limit is not None else None)
+        while True:
+            waited_pid, status, usage = os.wait4(process.pid, os.WNOHANG)
+            if waited_pid:
+                break
             peak_rss = max(peak_rss, rss_bytes(process.pid))
             elapsed = time.monotonic() - started
             if elapsed > timeout:
@@ -144,12 +154,18 @@ def run_child(command: list[str], env: dict[str, str], stdout: Path,
                     os.killpg(process.pid, signal.SIGKILL)
                 except ProcessLookupError:
                     pass
+                waited_pid, status, usage = os.wait4(process.pid, 0)
                 break
             time.sleep(0.2)
-        exit_code = process.wait()
+        assert waited_pid == process.pid
+        exit_code = os.waitstatus_to_exitcode(status)
+        process.returncode = exit_code
     return {"exit_code": exit_code, "stopped_for": stopped_for,
             "elapsed_under_backend_seconds_not_a_cost": time.monotonic() - started,
-            "observed_peak_rss_bytes": peak_rss}
+            "observed_peak_rss_bytes": peak_rss,
+            "child_user_cpu_seconds": usage.ru_utime,
+            "child_system_cpu_seconds": usage.ru_stime,
+            "child_max_rss_kib_linux": usage.ru_maxrss if sys.platform == "linux" else None}
 
 
 def write_json(path: Path, value: dict) -> None:
@@ -159,11 +175,21 @@ def write_json(path: Path, value: dict) -> None:
 
 
 def run(cell_id: str, frozen_root: Path, batch: Path, rho: Path, materialization: Path,
-        output: Path, backend: str, smoke_arm: str | None) -> dict:
+        output: Path, backend: str, smoke_arm: str | None,
+        cpu: int | None = None, timeout_seconds: int | None = None,
+        rss_limit_bytes: int | None = None,
+        address_space_limit_bytes: int | None = None) -> dict:
     assert sys.platform == "linux" or backend == "native", "Callgrind requires Linux"
     assert backend in ("callgrind", "native")
     assert smoke_arm is None or backend == "native"
+    if cpu is not None:
+        assert sys.platform == "linux" and cpu in os.sched_getaffinity(0)
     config, cell, spec, points, _fixture = load_cell(cell_id)
+    assert timeout_seconds is None or 0 < timeout_seconds <= config["timeout_seconds_per_arm"]
+    assert rss_limit_bytes is None or 0 < rss_limit_bytes <= config["rss_limit_bytes_per_arm"]
+    assert address_space_limit_bytes is None or address_space_limit_bytes > 0
+    timeout = timeout_seconds or config["timeout_seconds_per_arm"]
+    rss_limit = rss_limit_bytes or config["rss_limit_bytes_per_arm"]
     source = json.loads((ROOT / config["source_freeze"]).read_text())
     receipt = json.loads(materialization.read_text())
     assert receipt["schema"] == "compact-frozen-source-materialization-v1"
@@ -190,10 +216,14 @@ def run(cell_id: str, frozen_root: Path, batch: Path, rho: Path, materialization
               "materialization": receipt,
               "host": {"platform": platform.platform(), "machine": platform.machine(),
                        "python": sys.version, "valgrind": version,
+                       "reserved_cpu": cpu,
                        "git_head": subprocess.check_output(["git", "rev-parse", "HEAD"],
                                                            cwd=ROOT, text=True).strip()},
               "binaries": {"compact_sha256": sha(batch), "rho_sha256": sha(rho)},
               "points_sha256": sha(points), "sequence": sequence, "runs": []}
+    report["limits"] = {"timeout_seconds_per_arm": timeout,
+                        "rss_limit_bytes_per_arm": rss_limit,
+                        "address_space_limit_bytes_per_arm": address_space_limit_bytes}
     write_json(output / "run.json", report)
     for name in sequence:
         policy = name.removesuffix("_repeat")
@@ -228,12 +258,13 @@ def run(cell_id: str, frozen_root: Path, batch: Path, rho: Path, materialization
             "--cache-sim=no", "--branch-sim=no", "--error-exitcode=97",
             f"--callgrind-out-file={callgrind}", *program,
         ] if backend == "callgrind" else program)
+        if cpu is not None:
+            command = ["taskset", "-c", str(cpu), *command]
         assert not any(".fixture.jsonl" in value for value in
                        command + list(environment.values()))
         stdout, stderr = prefix.with_suffix(".stdout.jsonl"), prefix.with_suffix(".stderr.txt")
         result = run_child(command, environment, stdout, stderr,
-                           config["timeout_seconds_per_arm"],
-                           config["rss_limit_bytes_per_arm"])
+                           timeout, rss_limit, address_space_limit_bytes)
         ir = None
         if backend == "callgrind" and result["exit_code"] == 0 and result["stopped_for"] is None:
             try:
@@ -279,10 +310,11 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--backend", choices=("callgrind", "native"), default="callgrind")
     parser.add_argument("--smoke-arm")
+    parser.add_argument("--cpu", type=int)
     args = parser.parse_args()
     result = run(args.cell, args.frozen_root.resolve(), args.batch.resolve(),
                  args.rho.resolve(), args.materialization.resolve(),
-                 args.out.resolve(), args.backend, args.smoke_arm)
+                 args.out.resolve(), args.backend, args.smoke_arm, args.cpu)
     if result["status"] not in ("PASS", "SMOKE_PASS"):
         raise SystemExit(1)
 
