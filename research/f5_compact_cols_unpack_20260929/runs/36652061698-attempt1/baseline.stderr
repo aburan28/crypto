@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/runner/work/crypto/crypto/tools/isolated_bench.py", line 384, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/runner/work/crypto/crypto/tools/isolated_bench.py", line 348, in main
+    with locked(args.lock, wait=args.wait):
+  File "/usr/lib/python3.12/contextlib.py", line 137, in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+  File "/home/runner/work/crypto/crypto/tools/isolated_bench.py", line 235, in locked
+    handle = open(path, 'a+')
+             ^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/tmp/crypto-bench.lock'

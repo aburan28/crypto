@@ -129,7 +129,7 @@ use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::sync::{Arc, OnceLock};
 
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
+use num_traits::{One, ToPrimitive, Zero};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use rayon::prelude::*;
@@ -521,9 +521,86 @@ fn subfield_point_count(curve: &BinaryCurve, basis: &[F2mElement], k: u32) -> u6
     count
 }
 
-/// Trial-division factorisation into `(prime, exponent)` pairs.  Only
-/// ever called on `#E` for toy `n`.
-fn factorise(mut v: BigUint) -> Vec<(BigUint, u32)> {
+/// Trial-division factorisation into `(prime, exponent)` pairs,
+/// ascending.  Only ever called on `#E`, which for `n ≤ MAX_N` fits a
+/// `u64`: there it stops as soon as what is left is prime (a
+/// deterministic Miller–Rabin test), instead of dividing up to the
+/// square root of the large prime `r` — about 2²² big-integer divisions
+/// at `n = 53`, which was most of building a curve.
+fn factorise(v: BigUint) -> Vec<(BigUint, u32)> {
+    if let Some(small) = v.to_u64() {
+        return factorise_u64(small)
+            .into_iter()
+            .map(|(p, e)| (BigUint::from(p), e))
+            .collect();
+    }
+    factorise_big(v)
+}
+
+fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
+    let mut out = Vec::new();
+    let mut d = 2u64;
+    while v > 1 && !is_prime_u64(v) && d.saturating_mul(d) <= v {
+        let mut e = 0;
+        while v % d == 0 {
+            v /= d;
+            e += 1;
+        }
+        if e > 0 {
+            out.push((d, e));
+        }
+        d += 1;
+    }
+    if v > 1 {
+        out.push((v, 1));
+    }
+    out
+}
+
+/// Deterministic Miller–Rabin for every `u64`: the first twelve primes
+/// as bases are a complete witness set below `3.3 · 10²⁴`.
+fn is_prime_u64(n: u64) -> bool {
+    const BASES: [u64; 12] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
+    if n < 2 {
+        return false;
+    }
+    for &p in &BASES {
+        if n % p == 0 {
+            return n == p;
+        }
+    }
+    let mul = |a: u64, b: u64| ((a as u128 * b as u128) % n as u128) as u64;
+    let pow = |mut b: u64, mut e: u64| {
+        let mut r = 1u64;
+        b %= n;
+        while e > 0 {
+            if e & 1 == 1 {
+                r = mul(r, b);
+            }
+            b = mul(b, b);
+            e >>= 1;
+        }
+        r
+    };
+    let s = (n - 1).trailing_zeros();
+    let d = (n - 1) >> s;
+    'witness: for &a in &BASES {
+        let mut x = pow(a, d);
+        if x == 1 || x == n - 1 {
+            continue;
+        }
+        for _ in 1..s {
+            x = mul(x, x);
+            if x == n - 1 {
+                continue 'witness;
+            }
+        }
+        return false;
+    }
+    true
+}
+
+fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
     let mut out: Vec<(BigUint, u32)> = Vec::new();
     let mut d = BigUint::from(2u32);
     while &d * &d <= v {
@@ -13530,6 +13607,36 @@ mod tests {
         );
         for t in (1u64..60).map(|t| fc.mul_u64(g, 7919 * t)) {
             assert_eq!(a.decompose_fast(t, 3), b.decompose_fast(t, 3));
+        }
+    }
+
+    #[test]
+    fn the_u64_factorisation_matches_trial_division() {
+        let mut rng = StdRng::seed_from_u64(29);
+        let mut values: Vec<u64> = (0..300).map(|_| rng.gen_range(2u64..1 << 32)).collect();
+        values.extend([2, 3, 4, 97, 1 << 40, 999_983 * 999_979, (1 << 31) - 1]);
+        for a in 0u8..=1 {
+            for n in 3u32..=63 {
+                values.push(koblitz_point_count(a, n).to_u64().unwrap());
+            }
+        }
+        for v in values {
+            let fast: Vec<(BigUint, u32)> = factorise_u64(v)
+                .into_iter()
+                .map(|(p, e)| (BigUint::from(p), e))
+                .collect();
+            if v < 1 << 32 {
+                assert_eq!(fast, factorise_big(BigUint::from(v)), "{v}");
+            }
+            let product = fast
+                .iter()
+                .fold(BigUint::one(), |acc, (p, e)| acc * p.pow(*e));
+            assert_eq!(product, BigUint::from(v), "{v}");
+            assert!(
+                fast.iter().all(|(p, _)| is_prime_u64(p.to_u64().unwrap())),
+                "{v}"
+            );
+            assert!(fast.windows(2).all(|w| w[0].0 < w[1].0), "{v}");
         }
     }
 
