@@ -76,6 +76,7 @@ pub fn validate(curve: &CatalogCurve) -> Result<Value, String> {
             let mut fixture = match &curve.object {
                 CurveObject::Prime(c) => {
                     let a = c.a_fe();
+                    let b = c.fe(c.b.clone());
                     let p = c.generator().scalar_mul(&u, &a);
                     let q = c.generator().scalar_mul(&v, &a);
                     let r = c.generator().scalar_mul(&w, &a);
@@ -89,9 +90,9 @@ pub fn validate(curve: &CatalogCurve) -> Result<Value, String> {
                         ) => json!({
                             "target": {"x": hex(&x3.value), "y": hex(&y3.value)},
                             "point_sum_verified": p.add(&q, &a) == r,
-                            "s3_zero": semaev_s3(x1, x2, x3, &a, &c.b_fe()).is_zero(),
+                            "s3_zero": semaev_s3(x1, x2, x3, &a, &b).is_zero(),
                             "wrong_target_rejected": p.add(&q, &a) != wrong,
-                            "wrong_s3_rejected": !semaev_s3(x1, x2, bad, &a, &c.b_fe()).is_zero(),
+                            "wrong_s3_rejected": !semaev_s3(x1, x2, bad, &a, &b).is_zero(),
                         }),
                         _ => return Err("unexpected infinity in prime IC fixture".into()),
                     }
