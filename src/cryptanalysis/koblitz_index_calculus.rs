@@ -142,7 +142,9 @@ use crate::cryptanalysis::crossbred::{
     extract_crossbred, solve_crossbred, CrossbredParams, SearchOptions as CrossbredSearchOptions,
     SearchStats as CrossbredSearchStats,
 };
-use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
+use crate::cryptanalysis::ec_index_calculus::{
+    gaussian_eliminate_mod_n, gaussian_eliminate_mod_n_particular, sqrt_mod_p,
+};
 use crate::cryptanalysis::fx_hash::{FxMap, FxSet};
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
@@ -6905,13 +6907,21 @@ fn solve_relation_system(
         matrix.push(row);
         rhs.push((&h * &relation.coef_a) % modulus);
     }
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, modulus);
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, modulus);
     let rank = matrix
         .iter()
         .filter(|row| row.iter().any(|value| !value.is_zero()))
         .count();
     RelationSolveResult {
-        candidate: solution.and_then(|values| values.get(relation_unknowns).cloned()),
+        // Only a pinned target column is a candidate; a free one would
+        // be the arbitrary zero of the particular solution.
+        candidate: solution.and_then(|s| {
+            s.determined
+                .get(relation_unknowns)
+                .copied()
+                .unwrap_or(false)
+                .then(|| s.values[relation_unknowns].clone())
+        }),
         rows: relations.len(),
         columns: relation_unknowns + 1,
         rank,
@@ -14389,13 +14399,10 @@ mod tests {
             }
             let phases = session.finish().unwrap();
             assert!(phases.phases_ns["relation_la"].is_some());
-            // Dense elimination returns a provisional zero vector, rejected
-            // by the group certificate. Sparse LA rejects uncovered columns
-            // before producing a vector. Both failed paths keep their work.
-            assert_eq!(
-                phases.phases_ns["relation_check"].is_some(),
-                solver.system.sparse_opts.is_none()
-            );
+            // Both dense (rank-checked) and sparse LA reject the singular
+            // system before producing a vector, so no group check runs.
+            // Both failed paths keep their LA work.
+            assert!(phases.phases_ns["relation_check"].is_none());
             assert_eq!(phases.online_wall_ns, None);
         }
     }

@@ -32,7 +32,7 @@
 //!    Collect `m + extra` such rows and solve mod the prime order `N`
 //!    of `D_1`.  Each row has at most `g + 1` non-zeros whatever `m`
 //!    is, so the default solve is sparse (`LinearAlgebra::Sparse`);
-//!    dense elimination ([`gaussian_eliminate_mod_n`]) is kept as the
+//!    dense elimination ([`gaussian_eliminate_mod_n_particular`]) is kept as the
 //!    reference it has to beat.
 //! 3. **Read off** `log_{D_1} D_2` and verify `D_2 = k·D_1` before
 //!    returning it.  An unverified `k` is never returned.
@@ -83,7 +83,7 @@ use num_traits::{One, Zero};
 use rand::rngs::StdRng;
 use rand::{RngCore, SeedableRng};
 
-use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
+use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n_particular, sqrt_mod_p};
 use crate::prime_hyperelliptic::{FpPoly, HyperellipticCurveP, MumfordDivisorP};
 use crate::utils::mod_inverse;
 
@@ -1519,8 +1519,11 @@ fn solve_for_logarithm(
                 matrix.push(dense);
             }
             report.solve_row_ops = rows.len() * (m + 1) * (m + 1);
-            let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, n)?;
-            solution[m].clone()
+            let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, n)?;
+            if !solution.determined[m] {
+                return None;
+            }
+            solution.values[m].clone()
         }
     };
 

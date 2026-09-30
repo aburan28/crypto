@@ -1750,8 +1750,7 @@ mod tests {
         let mut b: Vec<BigUint> = rows.iter().map(|r| BigUint::from(r.rhs)).collect();
         let sol = gaussian_eliminate_mod_n(&mut m, &mut b, &BigUint::from(modulus))?;
         let sol: Vec<u64> = sol.iter().map(|v| to_u64_mod(v, modulus)).collect();
-        // The reference returns a partial solution when the system is
-        // underdetermined; only accept it when it satisfies every row.
+        // The reference is rank-checked; re-check every row anyway.
         rows.iter()
             .all(|r| r.evaluate(&sol, modulus) == r.rhs)
             .then_some(sol)
