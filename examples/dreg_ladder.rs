@@ -81,6 +81,10 @@ fn main() {
     let max_draws = num("--max-draws", 4096) as usize;
     let ffd_max = num("--ffd-max", 5) as u32;
     let controls = num("--controls", 0) as usize;
+    // `--d-min D` (with `--unsat-index`): start the degree scan at D.  Only
+    // for a draw whose degrees below D are already measured not to resolve,
+    // in a committed run of the same draw; the JSON line records `d_min`.
+    let d_min = num("--d-min", 1) as u32;
     let seed = num("--seed", 0x5EED);
 
     // `--unsat-index K`: measure only the cell's K-th unsatisfiable draw
@@ -96,7 +100,7 @@ fn main() {
         let (n, ell, d_max) = cells[0];
         let cell_seed = seed ^ (u64::from(n) << 40) ^ ((ell as u64) << 32);
         if let Some(k) = only_unsat {
-            measure_one(n, ell, d_max, ffd_max, cell_seed, k, max_draws);
+            measure_one(n, ell, d_min, d_max, ffd_max, cell_seed, k, max_draws);
         }
         if control_only {
             let n_vars = 3 * ell + n as usize;
@@ -221,9 +225,11 @@ fn main() {
 
 /// The cell's `k`-th unsatisfiable draw, measured; the draws before it only
 /// counted.  Prints the draw's JSON line exactly as the sequential run does.
+#[allow(clippy::too_many_arguments)]
 fn measure_one(
     n: u32,
     ell: usize,
+    d_min: u32,
     d_max: u32,
     ffd_max: u32,
     cell_seed: u64,
@@ -232,7 +238,7 @@ fn measure_one(
 ) {
     use crypto_lib::binary_ecc::F2mElement;
     use crypto_lib::cryptanalysis::koblitz_bench::{
-        chained_s3_solution_count, ladder_measure, ladder_sample,
+        chained_s3_solution_count, ladder_measure_from, ladder_sample,
     };
     use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
     let irr = find_irreducible_sparse(n).expect("field");
@@ -248,9 +254,9 @@ fn measure_one(
             unsat_seen += 1;
             continue;
         }
-        let d = ladder_measure(n, &basis, &x_r, d_max, ffd_max).expect("cell builds");
+        let d = ladder_measure_from(n, &basis, &x_r, d_min, d_max, ffd_max).expect("cell builds");
         println!(
-            r#"{{"cell":"n{n}l{ell}","n":{n},"ell":{ell},"surplus":{},"d_max":{d_max},"draw":{drawn},"n_vars":{},"n_eqs":{},"v_basis":{:?},"x_r":{},"solutions":{},"outcome":{},"ffd":{},"secs":{:.3},"unsat_index":{k}}}"#,
+            r#"{{"cell":"n{n}l{ell}","n":{n},"ell":{ell},"surplus":{},"d_max":{d_max},"draw":{drawn},"n_vars":{},"n_eqs":{},"v_basis":{:?},"x_r":{},"solutions":{},"outcome":{},"ffd":{},"secs":{:.3},"unsat_index":{k}{}}}"#,
             n as i64 - 3 * ell as i64,
             d.n_vars,
             d.n_eqs,
@@ -259,7 +265,12 @@ fn measure_one(
             d.solutions,
             outcome_json(&d.outcome),
             d.ffd.map_or("null".to_string(), |f| f.to_string()),
-            d.secs
+            d.secs,
+            if d_min > 1 {
+                format!(r#","d_min":{d_min}"#)
+            } else {
+                String::new()
+            }
         );
         eprintln!(
             "n={n} ℓ={ell}: unsat draw {k} (draw {drawn}) -> {} ({:.1}s)",

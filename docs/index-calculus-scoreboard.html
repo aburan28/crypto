@@ -2602,6 +2602,70 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="ecc2k130-descent-degree-20260930">
+    <div class="panel-head">
+      <h2>ECC2K-130 descent route: the solving degree grows with &ell; and tracks the semi-regular reference, so the route has no crossover to wait for</h2>
+      <p>Class <span class="chip">accounting</span>. There is no new <code>S</code> and no cost moves: the ECC2K-130
+        verdict was already set by the product law and the oracle budget above. This panel adds what the
+        refutation degree of the <code>m</code>&thinsp;=&thinsp;3 chained S<sub>3</sub> system does as &ell; grows,
+        measured in <code>RESEARCH_DREG_MEASUREMENT.md</code> Results&nbsp;4&ndash;9, and the price that implies at
+        n&thinsp;=&thinsp;131 under each degree model. Every n&thinsp;=&thinsp;131 figure is <b>derived, not
+        measured</b>. Sources: <code>research/dreg_degree7_ell5_20260930/</code> and
+        <code>research/notes/ecc2k130/RESEARCH_ECC2K130_DESCENT_DEGREE.md</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>The refutation degree, four unsatisfiable draws per cell: the degree at which the constant 1
+        enters the Macaulay row space. &ldquo;&ge;D&rdquo; is a lower bound. The first fall degree is 3 in every
+        cell. D<sub>reg</sub> is the semi-regular degree of regularity of the cell's shape, a formula
+        (<code>semireg.py</code>).</caption>
+      <thead>
+        <tr><th scope="col">&ell;</th><th scope="col">cells (n, &ell;)</th><th scope="col">unknowns</th>
+          <th scope="col">measured</th><th scope="col">semi-regular D<sub>reg</sub></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2</td><td>(5,2) (7,2) (8,2) (10,2) (12,2)</td><td class="n">11&ndash;18</td><td>5 in every draw</td><td>5</td></tr>
+        <tr><td>3</td><td>(4,3) (5,3) (7,3) (9,3)</td><td class="n">13&ndash;18</td><td>5; 6; 6; 6</td><td>5; 5; 6; 6</td></tr>
+        <tr><td>4</td><td>(7,4) (8,4) (11,4) (13,4)</td><td class="n">19&ndash;25</td><td>7767; 6767; 6666; 6666</td><td>6; 6; 7; 7</td></tr>
+        <tr><td>5</td><td>(10,5)</td><td class="n">25</td><td><b>7 7 7 7</b>: exactly 7, the degree-7 study</td><td>7</td></tr>
+        <tr><td>5</td><td>(11,5) (13,5) (15,5)</td><td class="n">26&ndash;30</td><td>&ge;7 in every draw; degree 7 needs hosts of about 24, 64 and 128 GB</td><td>7; 7; 8</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>Derived price at n&thinsp;=&thinsp;131, minimised over integer &ell;. It uses the cost model of
+        <code>RESEARCH_ECC2K130_DECOMPOSITION.md</code> &sect;5.1, with the oracle priced per target as the column count
+        C(N,&thinsp;&le;D)<sup>w</sup> of the degree-D Macaulay matrix. w&thinsp;=&thinsp;1 is one touch per column, which
+        no elimination beats; w&thinsp;=&thinsp;2 is the usual &omega;&thinsp;=&thinsp;2 estimate. Oracle units are column
+        touches, rho units are group operations, and the two are not converted.
+        <code>descent_degree_cost_20260930.py</code>.</caption>
+      <thead>
+        <tr><th scope="col">m</th><th scope="col">degree model</th><th scope="col" class="n">w</th><th scope="col" class="n">log<sub>2</sub> total</th><th scope="col" class="n">vs rho</th><th scope="col">Class</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>3</td><td>free oracle (the floor, &sect;5.3)</td><td class="n">&mdash;</td><td class="n">68.58</td><td class="n">+7.77</td><td><span class="chip">boundary</span></td></tr>
+        <tr><td>3</td><td>D&thinsp;=&thinsp;7, constant</td><td class="n">1</td><td class="n">90.53</td><td class="n">+29.72</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>3</td><td>D&thinsp;=&thinsp;7, constant</td><td class="n">2</td><td class="n">133.02</td><td class="n">+72.21</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>3</td><td>semi-regular D<sub>reg</sub>(N) (28 at &ell;&thinsp;=&thinsp;26)</td><td class="n">1</td><td class="n">196.95</td><td class="n">+136.14</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>free oracle (the floor, integer &ell;)</td><td class="n">&mdash;</td><td class="n">56.46</td><td class="n">&minus;4.35</td><td><span class="chip">boundary</span></td></tr>
+        <tr><td>4</td><td>D&thinsp;=&thinsp;2, any Macaulay matrix</td><td class="n">1</td><td class="n">62.88</td><td class="n">+2.07</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>4</td><td>D&thinsp;=&thinsp;7, constant (m&thinsp;=&thinsp;4 unmeasured)</td><td class="n">1</td><td class="n">82.11</td><td class="n">+21.30</td><td><span class="chip">extrapolation</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p><b>The verdict does not depend on the degree.</b> At m&thinsp;=&thinsp;3 the route is above rho even with a
+        free oracle. At m&thinsp;=&thinsp;4 the lowest Macaulay degree there is, 2, already spends the whole margin
+        the free oracle had; that is the 2<sup>5.71</sup>-per-target budget of &sect;5.3, seen from the oracle's side.
+        <b>What the degree decides is whether the route has an asymptote.</b> At a constant degree the oracle is
+        polynomial in the unknowns, which is the regime of the published sub-exponential estimates. The
+        measured degree is not constant: it rises 5, 6, 6&ndash;7, 7 over &ell;&thinsp;=&thinsp;2&ndash;5, and it
+        rises at fixed surplus in all four registered ladder pairs, while the first fall degree stays at 3. In
+        all 14 exactly measured cells it lies within one degree of the semi-regular reference, equal in 10 (it predicted the 7 at (10,5) before the run), which grows about
+        linearly in the unknowns. Under that reference the m&thinsp;=&thinsp;3 price at n&thinsp;=&thinsp;131 is
+        2<sup>196.95</sup>, which is worse than an exhaustive search of the 2<sup>129</sup> subgroup. That rests on
+        the agreement seen at n&thinsp;&le;&thinsp;15 persisting to about 209 unknowns, and it is not measured. The discriminating next cell is (15,5), where the reference says 8; its degree-7 matrix needs a
+        larger machine.</p>
+    </div>
+  </div>
+
   <div class="panel" id="koblitz-phase-prices-20260921">
     <div class="panel-head">
       <h2>Every phase priced: the linear algebra is 0.002% of the cost</h2>
