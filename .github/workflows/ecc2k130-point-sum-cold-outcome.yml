@@ -1,0 +1,68 @@
+name: ECC2K130 point-sum cold outcome replay
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ecc2k130-point-sum-cold-outcome.yml
+      - research/notes/ecc2k130/point_sum_cold_outcome_20260930/**
+      - docs/index-calculus-scoreboard.html
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/workflows/ecc2k130-point-sum-cold-outcome.yml
+            docs/index-calculus-scoreboard.html
+            research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            research/notes/ecc2k130/point_sum_cold_20260930
+            research/notes/ecc2k130/point_sum_cold_outcome_20260930
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+      - name: Independently rehash the raw run and second-host receipts
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/point_sum_cold_outcome_20260930/*.py
+          OUTCOME_ROOT=research/notes/ecc2k130/point_sum_cold_outcome_20260930
+          python3 "$OUTCOME_ROOT/verify_archive.py" \
+            --evidence "$OUTCOME_ROOT/evidence/run_36764654520" \
+            --out "$RUNNER_TEMP/ARCHIVE_REPLAY.json"
+          cmp "$RUNNER_TEMP/ARCHIVE_REPLAY.json" "$OUTCOME_ROOT/ARCHIVE_REPLAY.json"
+      - name: Replay all rank and target logs in the censored n37 batch
+        run: |
+          OUTCOME_ROOT=research/notes/ecc2k130/point_sum_cold_outcome_20260930
+          python3 "$OUTCOME_ROOT/diagnose_n37_batch.py" \
+            --evidence "$OUTCOME_ROOT/evidence/run_36764654520" \
+            --out "$RUNNER_TEMP/N37_BATCH_DIAGNOSTIC.json"
+          cmp "$RUNNER_TEMP/N37_BATCH_DIAGNOSTIC.json" "$OUTCOME_ROOT/N37_BATCH_DIAGNOSTIC.json"
+      - name: Recompute paired complete-process CPU diagnostics and page
+        run: |
+          OUTCOME_ROOT=research/notes/ecc2k130/point_sum_cold_outcome_20260930
+          python3 "$OUTCOME_ROOT/analyze.py" \
+            --evidence "$OUTCOME_ROOT/evidence/run_36764654520" \
+            --out "$RUNNER_TEMP/ANALYSIS.json"
+          python3 - "$RUNNER_TEMP/ANALYSIS.json" "$OUTCOME_ROOT/ANALYSIS.json" <<'PY'
+          import json, sys
+          sys.path.insert(0, 'research/notes/ecc2k130/point_sum_cold_outcome_20260930')
+          from verify_archive import equivalent
+          with open(sys.argv[1]) as stream: actual = json.load(stream)
+          with open(sys.argv[2]) as stream: expected = json.load(stream)
+          print('float rounding differences:', equivalent(actual, expected))
+          assert actual['status'] == 'NO_ELIGIBLE_TIMING'
+          assert actual['fully_eligible_cells'] == 0
+          PY
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          page = Path('docs/index-calculus-scoreboard.html').read_text()
+          assert page.count('id="point-sum-cold-outcome-20260930"') == 1
+          assert '<strong>0/6 cells are timing-eligible</strong>' in page
+          HTMLParser().feed(page)
+          PY
