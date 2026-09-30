@@ -255,6 +255,15 @@ audit and the disclosed-point
 [dimension-6 pilot](generic-f4-subspace-pilot/RESULT.md) remain separate
 diagnostics.
 
+The next planned competitive registration is
+[generic-backend-qualification-v3](generic-backend-qualification-v3/PROTOCOL.md):
+seed `2026093001`, smoke-only schedule, `standard_subspace` dimension 6 for
+algebraic arms (`factor-base-policy`), F4/F5 family only (SAT deferred), 180/35/240
+minute measure/pack/job caps. Panel intent SHA-256
+`df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`.
+Planning only; no dispatch until the runner/workflow and both exposure corpora
+are on `main`.
+
 Post-registration source audit (PR
 [#952](https://github.com/aburan28/crypto/pull/952)): the pinned `m=3` Semaev
 template needs `4n` Boolean variables on the registered ambient
