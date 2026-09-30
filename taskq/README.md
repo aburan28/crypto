@@ -267,6 +267,11 @@ The image is `deploy/Dockerfile`. The `taskq image` workflow publishes it to
 (Rust, Sage, CUDA) go in a derived image per hardware class, set per pool.
 CI lints and renders the chart in three configurations and builds the image.
 
+**On AWS**, `deploy/aws/provision.sh` stands up EKS, ElastiCache and an EFS
+results volume, then installs the chart. It also covers ElastiCache's
+durability caveat and the MemoryDB alternative; see
+[`deploy/aws/README.md`](deploy/aws/README.md).
+
 **Checkouts.** Each repo gets one blobless mirror (`--filter=blob:none`) per
 worker. Each commit gets a git worktree, reused across tasks so `target/` and
 other build caches survive. Only the least recently used trees are evicted

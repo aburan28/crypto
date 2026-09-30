@@ -75,6 +75,11 @@ keda:
   enabled: false
   pollingInterval: 30
   cooldownPeriod: 600
+  # Only when redis.enabled=false: how KEDA reaches the external Redis.
+  external:
+    address: ""            # host:port, e.g. master.taskq.xxxx.usw2.cache.amazonaws.com:6379
+    enableTLS: false       # true for ElastiCache/MemoryDB in-transit encryption
+    passwordSecret: {name: "", key: password}
 
 # A shared MCP endpoint over streamable HTTP. It has NO authentication:
 # keep it cluster-internal (ClusterIP, NetworkPolicy) or leave it off and run

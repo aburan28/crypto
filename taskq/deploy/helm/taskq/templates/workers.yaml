@@ -1,5 +1,5 @@
-{{- if and .Values.keda.enabled (not .Values.redis.enabled) }}
-{{- fail "keda.enabled needs the in-chart Redis (redis.enabled=true): the scaler addresses it by service name" }}
+{{- if and .Values.keda.enabled (not .Values.redis.enabled) (not .Values.keda.external.address) }}
+{{- fail "keda.enabled with an external Redis needs keda.external.address (and passwordSecret)" }}
 {{- end }}
 {{- range $pool := .Values.pools }}
 {{- $img := merge (default dict $pool.image) $.Values.image }}
@@ -98,7 +98,12 @@ spec:
     {{- range $pool.queues }}
     - type: redis-streams
       metadata:
+        {{- if $.Values.redis.enabled }}
         address: {{ include "taskq.name" $ }}-redis:6379
+        {{- else }}
+        address: {{ $.Values.keda.external.address }}
+        enableTLS: {{ $.Values.keda.external.enableTLS | quote }}
+        {{- end }}
         stream: "{{ $.Values.namespace | default "taskq" }}:q:{{ . }}"
         consumerGroup: workers
         lagCount: {{ $pool.keda.lagCount | default 1 | quote }}
@@ -116,5 +121,9 @@ metadata:
   labels: {{- include "taskq.labels" . | nindent 4 }}
 spec:
   secretTargetRef:
+    {{- if .Values.redis.enabled }}
     - {parameter: password, name: {{ include "taskq.redisSecret" . }}, key: redis-password}
+    {{- else }}
+    - {parameter: password, name: {{ .Values.keda.external.passwordSecret.name }}, key: {{ .Values.keda.external.passwordSecret.key }}}
+    {{- end }}
 {{- end }}
