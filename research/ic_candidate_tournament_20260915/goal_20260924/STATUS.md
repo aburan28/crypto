@@ -330,3 +330,13 @@ exposure/reference/calibration adapter, fresh points excluding every exposure,
 matched resource envelopes and arm order, and strong one-target rho and
 incumbent references. Development progress or a cheap PDP stage cannot replace
 that independent paired comparison.
+
+The [source-bound F4/F5 controller and one-shot F5 protocol](f5-source-bound-runtime-v1/PROTOCOL.md)
+add full Python/interpreter/native binding, canonical registered JSON stdin,
+independent natural-query/matrix/log/target auditing and durable transport.
+The registered development intent uses the same exposed n17 point, fresh seed
+2026093031, node budget 8192, 512 ordinary/target attempt caps and a two-hour
+controller watchdog. Implementation controls do not establish an executed
+complete F5 solve. Freeze the accepted snapshot and commit its external
+preexecution receipt before the one permitted dispatch. Historical F5 and all
+three confirmation registrations remain closed.
