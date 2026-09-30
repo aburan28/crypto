@@ -157,6 +157,7 @@ pub fn eliminate(
         && *DEFER_ABOVE.get_or_init(|| std::env::var("KIC_GF2_DEFER_ABOVE").as_deref() == Ok("1"));
     let reuse_table =
         *REUSE_TABLE.get_or_init(|| std::env::var("KIC_GF2_REUSE_TABLE").as_deref() == Ok("1"));
+    let pivot_choices = bounded_pivot_choices(matrix.len(), n_cols, reduce_above);
     eliminate_with(
         matrix,
         n_cols,
@@ -166,7 +167,55 @@ pub fn eliminate(
         word_ops,
         None,
         reuse_table,
+        pivot_choices,
     )
+}
+
+/// Opt-in bounded current-weight pivot choice for large echelon matrices.
+pub(crate) fn bounded_pivot_choices(rows: usize, n_cols: usize, reduce_above: bool) -> usize {
+    static REQUESTED: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    let requested =
+        *REQUESTED.get_or_init(|| match std::env::var("KIC_GF2_PIVOT_CHOICES").as_deref() {
+            Ok("8") => 8,
+            Ok("16") => 16,
+            _ => 0,
+        });
+    if !reduce_above && rows >= 4096 && n_cols >= 4096 {
+        requested
+    } else {
+        0
+    }
+}
+
+/// Select by the current suffix weight among the first few eligible rows.
+fn bounded_weight_pivot(
+    matrix: &[Vec<u64>],
+    strip: &[u64],
+    start: usize,
+    word: usize,
+    bit: u32,
+    choices: usize,
+) -> usize {
+    let mut selected = usize::MAX;
+    let mut least_weight = u32::MAX;
+    let mut seen = 0;
+    for (offset, &selector) in strip[start..].iter().enumerate() {
+        if selector >> bit & 1 == 0 {
+            continue;
+        }
+        let row = start + offset;
+        let weight: u32 = matrix[row][word..].iter().map(|w| w.count_ones()).sum();
+        if weight < least_weight {
+            selected = row;
+            least_weight = weight;
+        }
+        seen += 1;
+        if seen == choices {
+            break;
+        }
+    }
+    debug_assert_ne!(selected, usize::MAX);
+    selected
 }
 
 fn eliminate_with(
@@ -178,6 +227,7 @@ fn eliminate_with(
     word_ops: &mut u64,
     reverse_tile_words: Option<usize>,
     reuse_table: bool,
+    pivot_choices: usize,
 ) -> usize {
     static BRANCHLESS_STRIP: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let branchless_strip = *BRANCHLESS_STRIP.get_or_init(|| {
@@ -255,6 +305,10 @@ fn eliminate_with(
                 break;
             }
             let col = word * 64 + best as usize;
+            if pivot_choices > 0 {
+                best_row =
+                    bounded_weight_pivot(matrix, &strip, pivot_row, word, best, pivot_choices);
+            }
             matrix.swap(pivot_row, best_row);
             strip.swap(pivot_row, best_row);
             // Reduce the new pivot row in full by the block's earlier
@@ -886,6 +940,7 @@ mod tests {
                             &mut old_ops,
                             None,
                             false,
+                            0,
                         );
                         let new_rank = eliminate_with(
                             &mut new,
@@ -896,6 +951,7 @@ mod tests {
                             &mut new_ops,
                             None,
                             true,
+                            0,
                         );
                         assert_eq!(new_rank, old_rank);
                         assert_eq!(new, old);
@@ -937,6 +993,7 @@ mod tests {
                             &mut ops,
                             Some(2),
                             false,
+                            0,
                         );
                         assert_eq!(
                             r, rank,
@@ -993,6 +1050,7 @@ mod tests {
                             &mut ops,
                             Some(3),
                             false,
+                            0,
                         ),
                         rank
                     );
@@ -1033,6 +1091,53 @@ mod tests {
     }
 
     #[test]
+    fn bounded_current_weight_pivots_preserve_echelon_row_space() {
+        let mut rng = StdRng::seed_from_u64(119);
+        for &(rows, cols, density) in &[
+            (70, 130, 0.04),
+            (130, 70, 0.3),
+            (180, 257, 0.1),
+            (160, 385, 0.5),
+        ] {
+            let input = random_matrix(&mut rng, rows, cols, density);
+            let mut expected = input.clone();
+            let rank = naive_rref(&mut expected, cols);
+            for choices in [8, 16] {
+                let mut actual = input.clone();
+                let mut ops = 0;
+                let actual_rank = eliminate_with(
+                    &mut actual,
+                    cols,
+                    false,
+                    false,
+                    Config::default(),
+                    &mut ops,
+                    None,
+                    true,
+                    choices,
+                );
+                assert_eq!(actual_rank, rank, "{rows}x{cols} K={choices}");
+                let leading = |row: &[u64]| {
+                    row.iter()
+                        .enumerate()
+                        .find(|(_, &word)| word != 0)
+                        .map(|(word, &bits)| word * 64 + bits.trailing_zeros() as usize)
+                };
+                let leads: Vec<_> = actual[..rank]
+                    .iter()
+                    .map(|row| leading(row).expect("nonzero pivot row"))
+                    .collect();
+                assert!(leads.windows(2).all(|pair| pair[0] < pair[1]));
+                assert!(actual[rank..]
+                    .iter()
+                    .all(|row| row.iter().all(|&word| word == 0)));
+                naive_rref(&mut actual, cols);
+                assert_eq!(actual, expected, "{rows}x{cols} K={choices}");
+            }
+        }
+    }
+
+    #[test]
     fn reverse_tile_width_preserves_the_counted_work() {
         let mut rng = StdRng::seed_from_u64(41);
         let input = random_matrix(&mut rng, 160, 385, 0.15);
@@ -1052,6 +1157,7 @@ mod tests {
                     &mut ops,
                     width,
                     false,
+                    0,
                 ),
                 rank
             );
