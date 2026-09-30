@@ -6,6 +6,7 @@
     3,
     0
   ],
+  "ci_materialization_amendment": "research/notes/ecc2k130/compact_s3_prefilter_20260930/CI_MATERIALIZATION_AMENDMENT.md",
   "evaluation_repetitions": 5,
   "evaluation_source_commit": "2c207b41",
   "hypothesis": "A no-false-negative 512-bit blocked Bloom root prefilter lowers complete W64 compact CPU on fresh n41/n53 L1024 public Q against same-binary off controls; normal-basis batched rho is the matched boundary",
@@ -31,9 +32,10 @@
   "schema": "compact-s3-prefilter-evaluation-freeze-v1",
   "seed": 623051,
   "source_base_main": "16dd178b38698b9ce2084247118f7b9a6c1dd010",
-  "source_lock_sha256": "2b8681e3181d586933a58f84fd1a504e61e24e58122c0dd4d1e61ed62799f0eb",
+  "source_freeze_revision": 2,
+  "source_lock_sha256": "b04516536e6d509e5a0c8a003e26d72860948ceb1d4d89072dd505656ad4eb8e",
   "source_sha256": {
-    ".github/workflows/compact-s3-prefilter.yml": "9bf8bd8fdb399e40a40aa9dd55080f6cd2fa26c83fd54e07020723622dab4ada",
+    ".github/workflows/compact-s3-prefilter.yml": "e66ba4a3b2c27cc1b19aaa8d32f86af998c36e5dcf64a6cf7c3c53a38d6e2272",
     "Cargo.toml": "f1b3abc246c4971b48b377d5696bc96594deb729320348c4277307e42ed61721",
     "docs/ic/calibration.json": "425078627bbc38b3f9cb97351b405f52509431c080ed996bfeab72d12d78acfd",
     "examples/koblitz_orbit_dlp_s3_batch.rs": "702a0a05709bc14bc10bafbb08edb2a2f5f86794e970d84c317da3bc65cdcf38",
@@ -47,6 +49,7 @@
     "research/notes/ecc2k130/compact_s3_prefilter_20260930/run_panel.py": "98cc9a6d20b50742a973ed7e35a1235be753b7fcf2f05390c821f0a66c073ab9",
     "research/notes/ecc2k130/compact_s3_prefilter_20260930/verify_panel.py": "c7956ebbd9844418b49269a300adff9aff5fb28af9300c692a83b79e5d5e63c7",
     "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py": "1df6fc9295cf525be198a19842dfdca7391ac985bfa79ffa1acf8e546cc05ce1",
     "src/cryptanalysis/koblitz_fast.rs": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa",
     "src/cryptanalysis/koblitz_index_calculus.rs": "22b3601a082e706abf709a9798823a21d6748f84b47647cdfe6a7fcc1c73382c",
     "src/cryptanalysis/semaev_decomp.rs": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2",

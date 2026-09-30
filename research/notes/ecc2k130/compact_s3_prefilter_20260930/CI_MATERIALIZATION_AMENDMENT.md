@@ -1,0 +1,5 @@
+# Source-freeze checkout amendment, before any evaluation measurement
+
+The first [hosted attempt](https://github.com/aburan28/crypto/actions/runs/36662383388) at frozen PR head `43aa4ba6` failed in both n41 and n53 jobs at `Python syntax and frozen-source check`: the sparse checkout omitted `research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py`, which the existing rank verifier imports. Neither job compiled the candidate nor launched a measured arm; the failed logs are retained in Actions. The prior [source lock](SOURCE_FROZEN.json) and [point freeze](FROZEN.json) preceded that attempt.
+
+The checkout manifest now includes that existing independent arithmetic module, and the updated source lock pins its SHA-256 plus the changed workflow SHA-256. The n41/n53 public Q and scalar labels, seed, K, filter code, Rust dependencies, runner, verifier, ratios, thresholds and caps are unchanged. This is a CI materialization correction only. The amended source lock and FROZEN source-lock hash are committed before retrying the first evaluation run; the initial missing-file failure is not an evaluation result.
