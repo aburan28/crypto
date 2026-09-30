@@ -256,3 +256,68 @@ reads 5 at `ℓ = 3` and 7 7 6 7 at `ℓ = 4`, and both are reported next to it.
 - **Class: stage diagnostic.** It computes no `S` and no rho ratio, so it
   owes the scoreboard no row. It says nothing about `n = 131` by itself.
   Any use in an ECC2K-130 estimate is marked there as extrapolation.
+
+## Amendment 1, 2026-09-30: F5-criterion rows, before any outcome
+
+This is additive. The text above is unchanged, and no `ℓ = 5` degree-7
+outcome existed when it was written.
+
+**What happened.** The first `(10, 5)` u0 run did not reach an outcome
+(`runs/stopped/NOTE.md`).
+
+- It used `0227cd61` with an 11,000 MB budget and was stopped by hand
+  after 4 h 26 min, at a 10.06 GB peak.
+- Band 7 is rank-deficient, so more than about 376k rows survived it, and
+  the block after band 7 did not fit the budget.
+- The engine therefore eliminated band 6 sparsely, at under one column a
+  second: about two days a draw.
+- The stop is a resource limit, not evidence.
+
+**Change.** `7eb043b0` adds F5-criterion rows (`KIC_SPARSE_F5=1`).
+
+- They come from the repository's matrix-F5 criterion
+  (`matrix_f5_f2.rs`: the Koszul part plus the Frobenius span).
+- The Macaulay matrix loses the rows the criterion proves redundant.
+- The row space is the same, so the columns, the high rank, the linear
+  span and the outcome are the same. `f5_rows_keep_the_sparse_refutation`
+  tests this.
+- Every dropped row is one fewer survivor of band 7, the quantity that did
+  not fit.
+
+| draw, degree 7 | rows | kept by F5 | dropped |
+|---|--:|--:|--:|
+| `(8, 4)` u1 (identity-check draw) | 223,151 | 164,132 | 26.4% |
+| `(10, 5)` u0 | 836,820 | 665,817 | 20.4% |
+| `(13, 5)` u0 | 1,905,748 | 1,515,487 | 20.5% |
+
+(`refute_profile --f5-count`; evaluating the criterion took 0.6 s, 5.9 s
+and 31 s.)
+
+**What it does to the cells.**
+
+- **`(10, 5)`**: the block after band 7 drops by the 171k dropped rows to
+  roughly 7 GB. The budget stays at 11,000 MB.
+- **`(11, 5)`**: about 9–10 GB after band 7. That is borderline, so it runs
+  second, at 11,000 MB.
+- **`(13, 5)`**: even with every dropped row gone, at least 331k rows survive
+  band 7 over 499,178 columns, which is **at least 20.7 GB**.
+  - It would have to go through band 6 sparsely. At the rate `(10, 5)`
+    showed, that is days a draw.
+  - **`(13, 5)` is therefore not run on this 16 GB machine**, and Q5 is
+    reported as not measured (memory), as the stop conditions provide.
+  - It needs a host with about 24 GB or more.
+- **Order:** `(10, 5)` u0–u3, then `(11, 5)` u0–u3.
+
+**Binary.** `dreg_ladder` built at `7eb043b0`, sha256
+`6e3806747e150b202ad57f36bf8825300666ebabc4a9f70939721b72feabcce6`, run with
+`KIC_SPARSE_F5=1` (`run.py` sets it and `queue.log` records it).
+
+**Identity check with `KIC_SPARSE_F5=1`**, the same set as before:
+**332 committed rows, 41 of them measured draws, 0 mismatches**
+(`runs/identity-check-f5/`, `compare-output.txt`). The `(8, 4)` degree-7
+resolution from `--d-min 7` took 231 s against 284 s without the criterion,
+with a peak of 0.85 GB against 1.31 GB. The check ran before any `ℓ = 5`
+degree-7 run on this binary.
+
+**Verdict rules unchanged.** Q6, `(10, 5)`, is now the primary cell that can
+be measured here. `(11, 5)` is still reported and not decided on.

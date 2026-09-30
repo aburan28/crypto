@@ -29,10 +29,12 @@ CELLS = {
     "13-5-7": ("13:5:7", "20260928"),  # the fixed-surplus ladder
     "11-5-7": ("11:5:7", "20260926"),  # the surplus control (secondary)
 }
-# Switch right after band 7 where it fits (about 10.2 GiB at (10, 5));
-# elsewhere that block is 17-42 GiB, so band 6 is eliminated sparsely.
-BUDGET_MB = {"10-5-7": "11000", "13-5-7": "6000", "11-5-7": "6000"}
-ORDER = [f"{c}.u{k}" for c in ("10-5-7", "13-5-7", "11-5-7") for k in range(4)]
+# Switch right after band 7 where it fits.  With the F5-criterion rows
+# (amendment 1) that block is about 7 GB at (10, 5) and 9-10 GB at (11, 5);
+# at (13, 5) it is at least 20.7 GB, so that cell is not in the default
+# order on this machine and would eliminate band 6 sparsely.
+BUDGET_MB = {"10-5-7": "11000", "11-5-7": "11000", "13-5-7": "6000"}
+ORDER = [f"{c}.u{k}" for c in ("10-5-7", "11-5-7") for k in range(4)]
 LIMIT_SECS = 96 * 3600
 
 
@@ -67,11 +69,12 @@ def run(binary, job):
         F4_F2_MAX_COLS="50000000",
         KIC_SPARSE_DENSE_FINISH="1",
         KIC_SPARSE_DENSE_BUDGET_MB=budget,
+        KIC_SPARSE_F5="1",  # amendment 1: same row space, fewer rows
         RAYON_NUM_THREADS=os.environ.get("RAYON_NUM_THREADS", "4"),
     )
     cmd = [binary, "--cells", cells, "--ffd-max", "5", "--seed", seed,
            "--unsat-index", k, "--d-min", "7"]
-    log(f"{job}: start budget_mb={budget} threads={env['RAYON_NUM_THREADS']} cmd={' '.join(cmd)}")
+    log(f"{job}: start budget_mb={budget} f5=1 threads={env['RAYON_NUM_THREADS']} cmd={' '.join(cmd)}")
     started = time.time()
     peak = 0
     with open(out, "w") as fo, open(RUNS / f"cell-{job}.log", "w") as fe:
