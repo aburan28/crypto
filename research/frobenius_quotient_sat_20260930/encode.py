@@ -180,29 +180,69 @@ def f3(M, x1, x2, x3_is_var):
     M.zero(M.add(M.add(M.sq(M.add(m, w)), v), M.const(1)))
 
 
-def build(n, basis, target, final="line", subgroup=False, native_xor=True):
-    """Return (model, c_vars) for target R = (a, b)."""
+def build(n, basis, target, final="line", subgroup=False, native_xor=True,
+          phases=False):
+    """Return (model, c_vars, e_vars) for target R = (a, b).
+
+    phases=False: each x_i is the factor-space representative v_i itself.
+    phases=True:  x_i = v_i^(2^k_i) with the Frobenius phase k_i unknown,
+    selected by a one-hot vector e_i (n AND gates per bit of x_i)."""
     M = Model(n, native_xor)
     a, b = target
     s = len(basis)
     cvars = [[M.var() for _ in range(s)] for _ in range(4)]
-    xs = []
+    vs = []
     for ci in cvars:
-        # x = sum_j c_j * basis_j  (linear)
-        xs.append([lsum(Lin({ci[j]}) for j in range(s) if (basis[j] >> k) & 1)
+        # v = sum_j c_j * basis_j  (linear)
+        vs.append([lsum(Lin({ci[j]}) for j in range(s) if (basis[j] >> k) & 1)
                    for k in range(n)])
-    for x in xs:
-        M.xor_eq(M.trace(x), 0)
-        if subgroup:  # q^2 + sqrt(x) q + 1 = 0, Tr(q) = 0
+    for v in vs:
+        M.xor_eq(M.trace(v), 0)
+        if subgroup:  # q^2 + sqrt(v) q + 1 = 0, Tr(q) = 0 (Frobenius-invariant)
             q = M.elem()
-            g = M.mul(M.sqrt(x), q)
+            g = M.mul(M.sqrt(v), q)
             M.zero(M.add(M.add(M.sq(q), g), M.const(1)))
             M.xor_eq(M.trace(q), 0)
-    for i, j in itertools.combinations(range(4), 2):
-        M.differ(cvars[i], cvars[j])
-    if not subgroup:  # certificate already excludes x = 0
+    if not subgroup:  # certificate already excludes v = 0
         for ci in cvars:
             M.clauses.append(list(ci))
+    evars = None
+    if phases:
+        evars, xs = [], []
+        for v in vs:
+            e = [M.var() for _ in range(n)]
+            M.clauses.append(list(e))
+            for i, j in itertools.combinations(e, 2):
+                M.clauses.append([-i, -j])
+            evars.append(e)
+            frob = [[Lin({M.as_var(f)}) for f in v]]
+            for _ in range(n - 1):  # Frob^k(v), linear in v
+                frob.append(M.sq(frob[-1]))
+            x = []
+            for bit in range(n):
+                terms = set()
+                for k in range(n):
+                    form = frob[k][bit]
+                    g = M.var()  # g = e_k AND form
+                    fv = M.as_var(form) if form.v else None
+                    if fv is None:
+                        if form.c:
+                            M.xor_eq(Lin({g, e[k]}))
+                        else:
+                            M.clauses.append([-g])
+                    else:
+                        M.clauses += [[-g, e[k]], [-g, fv], [g, -e[k], -fv]]
+                        M.stats["and_gates"] += 1
+                    terms ^= {g}
+                x.append(Lin(terms))
+            xs.append(x)
+        xvars = [[M.as_var(f) for f in x] for x in xs]
+        for i, j in itertools.combinations(range(4), 2):
+            M.differ(xvars[i], xvars[j])
+    else:
+        xs = vs
+        for i, j in itertools.combinations(range(4), 2):
+            M.differ(cvars[i], cvars[j])
     t = M.elem()
     if final == "line":
         ell = M.elem()
@@ -221,16 +261,20 @@ def build(n, basis, target, final="line", subgroup=False, native_xor=True):
         raise ValueError(final)
     f3(M, xs[0], xs[1], t)
     f3(M, xs[2], xs[3], u)
-    return M, cvars
+    return M, cvars, evars
 
 
-def decode(sol, cvars, basis):
+def decode(sol, cvars, basis, evars=None, f=None):
     xs = []
-    for ci in cvars:
+    for i, ci in enumerate(cvars):
         x = 0
         for j, v in enumerate(ci):
             if sol[v]:
                 x ^= basis[j]
+        if evars is not None:
+            k = next(k for k, e in enumerate(evars[i]) if sol[e])
+            for _ in range(k):
+                x = f.sq(x)
         xs.append(x)
     return xs
 

@@ -58,7 +58,7 @@ class T(unittest.TestCase):
             basis, valid = factor_space(E, s, rng)
             for R, w in targets(E, valid, "planted", 2, rng):
                 for form, (final, sub, nx) in FORMULATIONS.items():
-                    M, cvars = build(n, basis, R, final, sub, nx)
+                    M, cvars, _ = build(n, basis, R, final, sub, nx)
                     # coordinates of each witness x in the basis
                     assum = []
                     for x, ci in zip(w, cvars):
@@ -70,6 +70,40 @@ class T(unittest.TestCase):
                     sat, sol = solver.solve(assum)
                     self.assertTrue(sat, (n, form))
                     self.assertIsNotNone(verify(E, decode(sol, cvars, basis), R))
+
+
+    def test_phase_model_planted(self):
+        from run import FORMULATIONS
+        for n, s in ((13, 4),):
+            rng = random.Random(7)
+            E = Curve(n)
+            basis, valid = factor_space(E, s, rng)
+            for R, w in targets(E, valid, "planted", 2, rng, phases=True):
+                for form in ("line_subgroup", "specialized_cnf"):
+                    final, sub, nx = FORMULATIONS[form]
+                    M, cvars, evars = build(n, basis, R, final, sub, nx, True)
+                    assum = []
+                    for x, ci, ev in zip(w, cvars, evars):
+                        # find representative v in the span and phase k
+                        for coords in itertools.product((0, 1), repeat=s):
+                            v, k = _span(basis, coords), None
+                            y = v
+                            for kk in range(n):
+                                if y == x:
+                                    k = kk
+                                    break
+                                y = E.f.sq(y)
+                            if v and k is not None:
+                                break
+                        assum += [c if b else -c for c, b in zip(ci, coords)]
+                        assum += [e if i == k else -e for i, e in enumerate(ev)]
+                    solver = pycryptosat.Solver()
+                    M.load(solver)
+                    sat, sol = solver.solve(assum)
+                    self.assertTrue(sat, form)
+                    xs = decode(sol, cvars, basis, evars, E.f)
+                    self.assertEqual(sorted(xs), sorted(w))
+                    self.assertIsNotNone(verify(E, xs, R))
 
 
 def _span(basis, coords):
