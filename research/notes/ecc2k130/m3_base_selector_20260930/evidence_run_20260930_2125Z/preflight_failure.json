@@ -1,0 +1,12 @@
+{
+  "status": "PREFLIGHT_NO_FIXTURES",
+  "command": "python3 research/notes/ecc2k130/m3_base_selector_20260930/produce.py --out research/notes/ecc2k130/m3_base_selector_20260930/evidence_run_20260930_2125Z",
+  "source_head": "991b904720d0b08b6cbc171f195a433930cd4f5e",
+  "error_type": "FileNotFoundError",
+  "missing_pinned_path": ".github/workflows/ecc2k130-m3-base-selector-source.yml",
+  "cause": "The local sparse checkout omitted a tracked file required by checked_config().",
+  "stage": "checked_config before run(), candidate construction, challenge Q, or target stream",
+  "candidate_fixtures_generated": false,
+  "challenge_generated": false,
+  "target_stream_generated": false
+}
