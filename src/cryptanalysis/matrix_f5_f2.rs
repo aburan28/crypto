@@ -458,8 +458,6 @@ pub struct F5Timings {
     pub unpack_ns: u64,
     /// Whether the full-column direct packed-row builder was used.
     pub direct_pack_used: bool,
-    /// Whether stratified current-weight pivot choice was used.
-    pub stratified_weight_pivot_used: bool,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
 }
@@ -662,9 +660,6 @@ pub fn matrix_f5_f2_with_form_timed(
     let mut word_ops = 0u64;
     let echelon = matches!(form, F5OutputForm::Echelon)
         || (matches!(form, F5OutputForm::SelectiveEchelon) && degree == 4 && n_vars >= 20);
-    timings.stratified_weight_pivot_used = echelon
-        && crate::cryptanalysis::gf2_elim::stratified_pivot_bands(matrix.len(), cols.len(), false)
-            > 0;
     let rank = if !echelon {
         rref_f2_counted(&mut matrix, cols.len(), &mut word_ops)
     } else if matrix.len() >= 128 && cols.len() >= 256 {

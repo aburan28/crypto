@@ -157,7 +157,6 @@ pub fn eliminate(
         && *DEFER_ABOVE.get_or_init(|| std::env::var("KIC_GF2_DEFER_ABOVE").as_deref() == Ok("1"));
     let reuse_table =
         *REUSE_TABLE.get_or_init(|| std::env::var("KIC_GF2_REUSE_TABLE").as_deref() == Ok("1"));
-    let pivot_bands = stratified_pivot_bands(matrix.len(), n_cols, reduce_above);
     eliminate_with(
         matrix,
         n_cols,
@@ -167,56 +166,7 @@ pub fn eliminate(
         word_ops,
         None,
         reuse_table,
-        pivot_bands,
     )
-}
-
-/// Opt-in stratified current-weight pivot choice for large echelon matrices.
-pub(crate) fn stratified_pivot_bands(rows: usize, n_cols: usize, reduce_above: bool) -> usize {
-    static REQUESTED: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
-    let requested =
-        *REQUESTED.get_or_init(|| match std::env::var("KIC_GF2_PIVOT_STRATA").as_deref() {
-            Ok("16") => 16,
-            Ok("32") => 32,
-            _ => 0,
-        });
-    if !reduce_above && rows >= 4096 && n_cols >= 4096 {
-        requested
-    } else {
-        0
-    }
-}
-
-/// Select the lightest current suffix among eligible rows spread across the strip.
-fn stratified_weight_pivot(
-    matrix: &[Vec<u64>],
-    strip: &[u64],
-    start: usize,
-    word: usize,
-    bit: u32,
-    bands: usize,
-) -> usize {
-    let remaining = strip.len() - start;
-    let bands = bands.min(remaining);
-    let mut selected = usize::MAX;
-    let mut least_weight = u32::MAX;
-    for band in 0..bands {
-        let first = start + band * remaining / bands;
-        let end = start + (band + 1) * remaining / bands;
-        if let Some(offset) = strip[first..end]
-            .iter()
-            .position(|&selector| selector >> bit & 1 != 0)
-        {
-            let row = first + offset;
-            let weight: u32 = matrix[row][word..].iter().map(|w| w.count_ones()).sum();
-            if weight < least_weight {
-                selected = row;
-                least_weight = weight;
-            }
-        }
-    }
-    debug_assert_ne!(selected, usize::MAX);
-    selected
 }
 
 fn eliminate_with(
@@ -228,7 +178,6 @@ fn eliminate_with(
     word_ops: &mut u64,
     reverse_tile_words: Option<usize>,
     reuse_table: bool,
-    pivot_bands: usize,
 ) -> usize {
     static BRANCHLESS_STRIP: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let branchless_strip = *BRANCHLESS_STRIP.get_or_init(|| {
@@ -306,10 +255,6 @@ fn eliminate_with(
                 break;
             }
             let col = word * 64 + best as usize;
-            if pivot_bands > 0 {
-                best_row =
-                    stratified_weight_pivot(matrix, &strip, pivot_row, word, best, pivot_bands);
-            }
             matrix.swap(pivot_row, best_row);
             strip.swap(pivot_row, best_row);
             // Reduce the new pivot row in full by the block's earlier
@@ -941,7 +886,6 @@ mod tests {
                             &mut old_ops,
                             None,
                             false,
-                            0,
                         );
                         let new_rank = eliminate_with(
                             &mut new,
@@ -952,7 +896,6 @@ mod tests {
                             &mut new_ops,
                             None,
                             true,
-                            0,
                         );
                         assert_eq!(new_rank, old_rank);
                         assert_eq!(new, old);
@@ -994,7 +937,6 @@ mod tests {
                             &mut ops,
                             Some(2),
                             false,
-                            0,
                         );
                         assert_eq!(
                             r, rank,
@@ -1051,7 +993,6 @@ mod tests {
                             &mut ops,
                             Some(3),
                             false,
-                            0,
                         ),
                         rank
                     );
@@ -1092,53 +1033,6 @@ mod tests {
     }
 
     #[test]
-    fn stratified_current_weight_pivots_preserve_echelon_row_space() {
-        let mut rng = StdRng::seed_from_u64(119);
-        for &(rows, cols, density) in &[
-            (70, 130, 0.04),
-            (130, 70, 0.3),
-            (180, 257, 0.1),
-            (160, 385, 0.5),
-        ] {
-            let input = random_matrix(&mut rng, rows, cols, density);
-            let mut expected = input.clone();
-            let rank = naive_rref(&mut expected, cols);
-            for bands in [16, 32] {
-                let mut actual = input.clone();
-                let mut ops = 0;
-                let actual_rank = eliminate_with(
-                    &mut actual,
-                    cols,
-                    false,
-                    false,
-                    Config::default(),
-                    &mut ops,
-                    None,
-                    true,
-                    bands,
-                );
-                assert_eq!(actual_rank, rank, "{rows}x{cols} bands={bands}");
-                let leading = |row: &[u64]| {
-                    row.iter()
-                        .enumerate()
-                        .find(|(_, &word)| word != 0)
-                        .map(|(word, &bits)| word * 64 + bits.trailing_zeros() as usize)
-                };
-                let leads: Vec<_> = actual[..rank]
-                    .iter()
-                    .map(|row| leading(row).expect("nonzero pivot row"))
-                    .collect();
-                assert!(leads.windows(2).all(|pair| pair[0] < pair[1]));
-                assert!(actual[rank..]
-                    .iter()
-                    .all(|row| row.iter().all(|&word| word == 0)));
-                naive_rref(&mut actual, cols);
-                assert_eq!(actual, expected, "{rows}x{cols} bands={bands}");
-            }
-        }
-    }
-
-    #[test]
     fn reverse_tile_width_preserves_the_counted_work() {
         let mut rng = StdRng::seed_from_u64(41);
         let input = random_matrix(&mut rng, 160, 385, 0.15);
@@ -1158,7 +1052,6 @@ mod tests {
                     &mut ops,
                     width,
                     false,
-                    0,
                 ),
                 rank
             );
