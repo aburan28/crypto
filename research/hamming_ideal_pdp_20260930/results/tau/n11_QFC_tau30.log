@@ -1,2 +1,4 @@
 /home/user/crypto/research/hamming_ideal_pdp_20260930/hamming_pdp/target/release/hamming_pdp --n 11 --w 2 --targets 4 --encodings QFC --budget-log2 30 --matrix-cap-log2 27 --out /home/user/crypto/research/hamming_ideal_pdp_20260930/results/tau/n11_QFC_tau30.jsonl.part
 n=11 irr=0x805 alpha=0x3 #E=2116 odd=529 |F_wt|=67 (x:34) |F_sub|=137 (x:69) l=7 setup=1ms
+n=11 QFC WT2 seed=0 planted label=true pairs=2 found=true ok calls=2 tame=1 wild=1 budget=1 cap=0 depth_mean=1.00 max_depth=1 xor=1827691950 rows=38269 cols=27100 deg=4 prep=1374ms elim=4089ms add=4174ms rref=0ms subst=3811ms post=1845ms branch=0ms 17797ms
+n=11 QFC WT2 seed=1 uniform label=true pairs=2 found=true ok calls=2 tame=1 wild=1 budget=1 cap=0 depth_mean=1.00 max_depth=1 xor=1844163121 rows=48328 cols=36176 deg=4 prep=1664ms elim=4063ms add=3605ms rref=0ms subst=3637ms post=1902ms branch=0ms 17647ms
