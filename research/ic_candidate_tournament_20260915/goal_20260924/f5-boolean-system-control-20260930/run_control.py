@@ -57,6 +57,7 @@ def run(original, out, protocol_file):
     require(not out.exists(), 'control output exists; do not retry or overwrite')
     protocol = json.loads(protocol_file.read_text())
     require(protocol['schema_version'] == 2, 'first registration closed after retained preflight failure')
+    require(not (HERE/'TERMINAL.json').exists(), 'native control registration closed; use retained replay')
     out.mkdir(parents=True)
     analysis_files = [Path(__file__), HERE/'export.rs', HERE/'inputs.json', PACKAGE/'f5_boolean_control.py',
                       PACKAGE/'generic_build.py', PACKAGE/'identity.py', PACKAGE/'oracle.py',

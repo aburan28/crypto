@@ -2,8 +2,11 @@ import copy
 import itertools
 import json
 import importlib.util
+import io
 from pathlib import Path
 import subprocess
+import tempfile
+import tarfile
 import unittest
 from unittest.mock import patch
 
@@ -130,6 +133,43 @@ class BooleanControlTests(unittest.TestCase):
         self.assertFalse(receipt['version_probe_succeeded'])
         with self.assertRaisesRegex(InvalidEvidence, 'first registration closed'):
             module.run(directory, directory/'unused-first-registration-output', directory/'protocol.json')
+        with self.assertRaisesRegex(InvalidEvidence, 'native control registration closed'):
+            module.run(directory, directory/'unused-second-registration-output', directory/'protocol-v2.json')
+
+    def test_closed_native_transport_replays_and_rejects_receipt_and_archive_faults(self):
+        from replay_f5_boolean_control import replay, replay_files
+        from replay_paired_n17_evidence import retained_files
+        bundle = Path(__file__).parent/'goal_20260924/f5-boolean-system-control-20260930/native-v2'
+        files = retained_files(bundle)
+        self.assertEqual(replay_files(files)['status'], 'AUDITED_DISCLOSED_BOOLEAN_SYSTEM_CONTROL')
+        for role in ('diagnostic', 'native.stdout'):
+            changed = dict(files)
+            changed[role] += b'changed'
+            with self.assertRaises(InvalidEvidence):
+                replay_files(changed)
+        changed = dict(files)
+        data = io.BytesIO()
+        with tarfile.open(fileobj=data, mode='w:gz') as tar:
+            info = tarfile.TarInfo('Cargo.toml')
+            info.size = 7
+            tar.addfile(info, io.BytesIO(b'changed'))
+        changed['root-source.tar.gz'] = data.getvalue()
+        with self.assertRaisesRegex(InvalidEvidence, 'compiled manifest'):
+            replay_files(changed)
+        changed = dict(files)
+        process = json.loads(changed['native-process.json'])
+        process['argv'][-1] += '-changed'
+        changed['native-process.json'] = json.dumps(process).encode()
+        with self.assertRaisesRegex(InvalidEvidence, 'argv'):
+            replay_files(changed)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            receipt = json.loads((bundle/'receipt.json').read_text())
+            receipt['archive_sha256'] = '0'*64
+            (root/'receipt.json').write_text(json.dumps(receipt))
+            (root/'evidence.tar.gz').write_bytes((bundle/'evidence.tar.gz').read_bytes())
+            with self.assertRaisesRegex(InvalidEvidence, 'archive changed'):
+                replay(root)
 
 
 if __name__ == '__main__':
