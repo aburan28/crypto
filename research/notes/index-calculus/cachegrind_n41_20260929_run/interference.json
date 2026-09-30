@@ -1,0 +1,109 @@
+{
+  "stage": "interference",
+  "reps": [
+    {
+      "alone": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.0896462830000928,
+          "cpu_s": 1.087673,
+          "gates_G1": true,
+          "total_walk_steps": 3827005
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.754815528000108,
+          "cpu_s": 4.672312,
+          "gates_G1": true,
+          "peak_rss_bytes": 338411520
+        }
+      },
+      "loaded": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.4965899230001014,
+          "cpu_s": 1.4681419999999998,
+          "gates_G1": true,
+          "total_walk_steps": 3827005
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.721949239999958,
+          "cpu_s": 4.633386000000001,
+          "gates_G1": true,
+          "peak_rss_bytes": 338436096
+        }
+      }
+    },
+    {
+      "alone": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.0994026220000706,
+          "cpu_s": 1.0957629999999932,
+          "gates_G1": true,
+          "total_walk_steps": 3827005
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.524899040000037,
+          "cpu_s": 4.437058,
+          "gates_G1": true,
+          "peak_rss_bytes": 338415616
+        }
+      },
+      "loaded": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.1692007990000093,
+          "cpu_s": 1.1333420000000043,
+          "gates_G1": true,
+          "total_walk_steps": 3827005
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.26920994000011,
+          "cpu_s": 4.206174999999997,
+          "gates_G1": true,
+          "peak_rss_bytes": 338436096
+        }
+      }
+    },
+    {
+      "alone": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.2269319909999012,
+          "cpu_s": 1.2037309999999968,
+          "gates_G1": true,
+          "total_walk_steps": 3827005
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.267867045000003,
+          "cpu_s": 4.200408999999999,
+          "gates_G1": true,
+          "peak_rss_bytes": 338427904
+        }
+      },
+      "loaded": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.1569172069998785,
+          "cpu_s": 1.146250000000006,
+          "gates_G1": true,
+          "total_walk_steps": 3827005
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.469362844999978,
+          "cpu_s": 4.369635999999992,
+          "gates_G1": true,
+          "peak_rss_bytes": 338370560
+        }
+      }
+    }
+  ],
+  "load_before": "20:02:29 up 27 min,  0 user,  load average: 0.82, 0.81, 0.76",
+  "load_after": "20:03:27 up 28 min,  0 user,  load average: 2.11, 1.17, 0.88"
+}

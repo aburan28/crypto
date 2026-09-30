@@ -277,7 +277,7 @@ class Campaign:
                 require(p.curve.onCurve(rep) and p.curve.mul(rep, p.prime) is None,
                         'invalid factor-base subgroup point')
                 if p.weight is not None:
-                    require(0 < p.onb.toCoords(rep[0]).bit_count() <= p.weight,
+                    require(0 < bin(p.onb.toCoords(rep[0])).count('1') <= p.weight,
                             'factor-base point violates its Hamming-weight recipe')
                 point, coefficient = rep, 1
                 for _ in range(p.onb.m):
