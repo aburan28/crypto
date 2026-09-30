@@ -458,8 +458,6 @@ pub struct F5Timings {
     pub unpack_ns: u64,
     /// Whether the full-column direct packed-row builder was used.
     pub direct_pack_used: bool,
-    /// Whether byte-table colex indexing was used by the packed-row builder.
-    pub byte_colex_used: bool,
     /// Whether the scalar preallocated direct-write unpack path was used.
     pub direct_unpack_used: bool,
 }
@@ -620,15 +618,11 @@ pub fn matrix_f5_f2_with_form_timed(
     static DIRECT_PACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let direct_pack =
         *DIRECT_PACK.get_or_init(|| std::env::var("KIC_F5_DIRECT_PACK").as_deref() == Ok("1"));
-    static BYTE_COLEX: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    let byte_colex =
-        *BYTE_COLEX.get_or_init(|| std::env::var("KIC_F5_COLEX_BYTES").as_deref() == Ok("1"));
     let (cols, mut matrix) = if direct_pack {
         if let Some((rows_f4, cols, matrix)) =
-            f5_rows_packed_full_columns(polys, n_vars, degree, &criterion, byte_colex)
+            f5_rows_packed_full_columns(polys, n_vars, degree, &criterion)
         {
             timings.direct_pack_used = true;
-            timings.byte_colex_used = byte_colex;
             report.rows_f4 = rows_f4 as u64;
             (cols, matrix)
         } else {
@@ -783,26 +777,9 @@ mod tests {
             n_vars,
         );
         let criterion = F5Criterion::new(std::slice::from_ref(&dense), n_vars, degree, mask);
-        let (direct_count, direct_cols, direct_rows) = f5_rows_packed_full_columns(
-            std::slice::from_ref(&dense),
-            n_vars,
-            degree,
-            &criterion,
-            false,
-        )
-        .expect("dense polynomial spans the complete column universe");
-        let byte_rows = f5_rows_packed_full_columns(
-            std::slice::from_ref(&dense),
-            n_vars,
-            degree,
-            &criterion,
-            true,
-        )
-        .expect("byte colex must span the same columns");
-        assert_eq!(
-            byte_rows,
-            (direct_count, direct_cols.clone(), direct_rows.clone())
-        );
+        let (direct_count, direct_cols, direct_rows) =
+            f5_rows_packed_full_columns(std::slice::from_ref(&dense), n_vars, degree, &criterion)
+                .expect("dense polynomial spans the complete column universe");
         let (normal_count, rows_monos) = f5_rows_monos_with_f4_count(
             std::slice::from_ref(&dense),
             n_vars,
@@ -817,35 +794,6 @@ mod tests {
         assert_eq!(direct_cols, normal_cols);
         assert_eq!(direct_rows, normal_rows);
 
-        for n_vars in [4, 7, 10] {
-            let mask = all_variable_mask(n_vars);
-            let monomials = monomials_up_to_mask(mask, 2);
-            let dense = F2BoolPoly::from_monos(
-                monomials
-                    .iter()
-                    .copied()
-                    .map(F2BoolMono::from_mask)
-                    .collect(),
-                n_vars,
-            );
-            let perturbed = F2BoolPoly::from_monos(
-                monomials
-                    .iter()
-                    .copied()
-                    .filter(|&m| m.wrapping_mul(0x9e37_79b9) % 7 < 3)
-                    .map(F2BoolMono::from_mask)
-                    .collect(),
-                n_vars,
-            );
-            let polys = [dense, perturbed];
-            for degree in [3, 4] {
-                let criterion = F5Criterion::new(&polys, n_vars, degree, mask);
-                let scalar = f5_rows_packed_full_columns(&polys, n_vars, degree, &criterion, false);
-                let bytes = f5_rows_packed_full_columns(&polys, n_vars, degree, &criterion, true);
-                assert_eq!(bytes, scalar, "n_vars={n_vars} degree={degree}");
-            }
-        }
-
         let sparse = poly(n_vars, &[&[0], &[1]]);
         let sparse_criterion =
             F5Criterion::new(std::slice::from_ref(&sparse), n_vars, degree, mask);
@@ -853,8 +801,7 @@ mod tests {
             std::slice::from_ref(&sparse),
             n_vars,
             degree,
-            &sparse_criterion,
-            true
+            &sparse_criterion
         )
         .is_none());
     }

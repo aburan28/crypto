@@ -220,7 +220,6 @@ fn main() {
                 "rows_pruned": rep.rows_pruned, "rank": rep.rank, "rows_fp": format!("{:016x}", h.finish()),
                 "output_terms": output_terms,
                 "direct_pack_used": phases.direct_pack_used,
-                "byte_colex_used": phases.byte_colex_used,
                 "direct_unpack_used": phases.direct_unpack_used,
                 "row_space_fp": format!("{row_space_fp:016x}"),
                 "criterion_ms": phases.criterion_ns as f64 / 1e6, "f5_build_ms": phases.build_ns as f64 / 1e6,

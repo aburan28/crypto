@@ -1585,70 +1585,6 @@ pub(crate) fn f5_rows_packed_full_columns(
     n_vars: usize,
     degree: u32,
     criterion: &F5Criterion,
-    byte_colex: bool,
-) -> Option<(usize, Vec<u64>, Vec<Vec<u64>>)> {
-    if byte_colex {
-        f5_rows_packed_full_columns_impl::<true>(polys, n_vars, degree, criterion)
-    } else {
-        f5_rows_packed_full_columns_impl::<false>(polys, n_vars, degree, criterion)
-    }
-}
-
-struct ByteColex {
-    sums: [[[u16; 256]; 5]; 3],
-    counts: [u8; 256],
-}
-
-impl ByteColex {
-    fn new(choose: &[[usize; 5]; 25]) -> Self {
-        let mut sums = [[[0u16; 256]; 5]; 3];
-        let mut counts = [0u8; 256];
-        for byte in 0..256 {
-            counts[byte] = (byte as u8).count_ones() as u8;
-        }
-        for block in 0..3 {
-            for prior in 0..=4 {
-                for byte in 0..256 {
-                    let mut bits = byte as u8;
-                    let mut j = prior;
-                    let mut sum = 0usize;
-                    while bits != 0 {
-                        j += 1;
-                        if j > 4 {
-                            break;
-                        }
-                        let bit = block * 8 + bits.trailing_zeros() as usize;
-                        sum += choose[bit][j];
-                        bits &= bits - 1;
-                    }
-                    sums[block][prior][byte] = sum as u16;
-                }
-            }
-        }
-        Self { sums, counts }
-    }
-
-    #[inline(always)]
-    fn index(&self, mask: u64, offsets: &[usize; 5]) -> usize {
-        let low = mask as u8 as usize;
-        let middle = (mask >> 8) as u8 as usize;
-        let high = (mask >> 16) as u8 as usize;
-        let low_count = self.counts[low] as usize;
-        let middle_count = self.counts[middle] as usize;
-        let degree = low_count + middle_count + self.counts[high] as usize;
-        debug_assert!(degree <= 4);
-        offsets[degree]
-            + self.sums[0][0][low] as usize
-            + self.sums[1][low_count][middle] as usize
-            + self.sums[2][low_count + middle_count][high] as usize
-    }
-}
-
-fn f5_rows_packed_full_columns_impl<const BYTE_COLEX: bool>(
-    polys: &[F2BoolPoly],
-    n_vars: usize,
-    degree: u32,
-    criterion: &F5Criterion,
 ) -> Option<(usize, Vec<u64>, Vec<Vec<u64>>)> {
     const MAX_DIRECT_VARS: usize = 24;
     const MAX_DIRECT_DEGREE: usize = 4;
@@ -1682,7 +1618,6 @@ fn f5_rows_packed_full_columns_impl<const BYTE_COLEX: bool>(
     if full_cols == 0 || full_cols > max_f4_cols() {
         return None;
     }
-    let byte_table = BYTE_COLEX.then(|| ByteColex::new(&choose));
     let words = full_cols.div_ceil(64);
     let row_cap = max_f4_rows();
     let mut matrix = Vec::new();
@@ -1700,20 +1635,15 @@ fn f5_rows_packed_full_columns_impl<const BYTE_COLEX: bool>(
             let mut row = vec![0u64; words];
             for term in &p.terms {
                 let mask = term.mask | mult;
-                let index = if BYTE_COLEX {
-                    byte_table.as_ref().unwrap().index(mask, &offsets)
-                } else {
-                    let mut bits = mask;
-                    let mut index = offsets[mask.count_ones() as usize];
-                    let mut j = 1;
-                    while bits != 0 {
-                        let bit = bits.trailing_zeros() as usize;
-                        index += choose[bit][j];
-                        bits &= bits - 1;
-                        j += 1;
-                    }
-                    index
-                };
+                let mut bits = mask;
+                let mut index = offsets[mask.count_ones() as usize];
+                let mut j = 1;
+                while bits != 0 {
+                    let bit = bits.trailing_zeros() as usize;
+                    index += choose[bit][j];
+                    bits &= bits - 1;
+                    j += 1;
+                }
                 row[index / 64] ^= 1u64 << (index % 64);
             }
             if row.iter().all(|&word| word == 0) {
@@ -4676,50 +4606,6 @@ mod tests {
     use crate::binary_ecc::BinaryCurve;
     use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
     use crate::cryptanalysis::koblitz_index_calculus::{find_irreducible, KoblitzCurve};
-
-    #[test]
-    fn byte_colex_matches_scalar_for_every_degree_four_column() {
-        let mut choose = [[0usize; 5]; 25];
-        for n in 0..=24 {
-            choose[n][0] = 1;
-            for k in 1..=4.min(n) {
-                choose[n][k] = choose[n - 1][k - 1] + choose[n - 1][k];
-            }
-        }
-        let table = ByteColex::new(&choose);
-        for block in 0..3 {
-            for prior in 0..=4 {
-                for byte in 0..256usize {
-                    if byte.count_ones() as usize + prior > 4 {
-                        continue;
-                    }
-                    let expected: usize = (0..8)
-                        .filter(|&bit| byte >> bit & 1 != 0)
-                        .enumerate()
-                        .map(|(position, bit)| choose[block * 8 + bit][prior + position + 1])
-                        .sum();
-                    assert_eq!(table.sums[block][prior][byte] as usize, expected);
-                }
-            }
-        }
-        let mut offsets = [0usize; 5];
-        let mut total = 0;
-        for degree in (0..=4).rev() {
-            offsets[degree] = total;
-            total += choose[24][degree];
-        }
-        for mask in monomials_up_to_mask(all_variable_mask(24), 4) {
-            let mut bits = mask;
-            let mut expected = offsets[mask.count_ones() as usize];
-            let mut j = 1;
-            while bits != 0 {
-                expected += choose[bits.trailing_zeros() as usize][j];
-                bits &= bits - 1;
-                j += 1;
-            }
-            assert_eq!(table.index(mask, &offsets), expected, "mask={mask:x}");
-        }
-    }
 
     #[test]
     fn fused_f5_count_applies_the_full_f4_row_cap() {
