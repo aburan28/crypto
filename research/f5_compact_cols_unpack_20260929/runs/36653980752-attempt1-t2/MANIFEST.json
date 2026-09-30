@@ -1,0 +1,26 @@
+{
+  "attempt": 1,
+  "binary_sha256": "834b495f776f641d18bc322ba6ab1dbf128d4e355dd9447e40ae1b74cd5b9c3c",
+  "call_status": "complete",
+  "calls": 88,
+  "compressed_json_bytes": 56489,
+  "compressed_json_sha256": "608006a58a200469f2175b128beba8265460ed3824fe2b34de23a1835a2aee8a",
+  "exact_statuses": true,
+  "git_sha": "7915fcf4011b455083f527f5322b5be760c600f2",
+  "isolation": {
+    "contended_samples": 4,
+    "exit_status": 0,
+    "left_user_threads": [],
+    "preflight_other_cpu_seconds": 0.32999999999999996
+  },
+  "raw_json_bytes": 849494,
+  "raw_json_sha256": "326e20ef7ca25574b61a255fafb4d350aa97a3e23e4762cf4c7dabc058ee1e8a",
+  "run_id": 36653980752,
+  "source_hashes": {
+    "benchmark_source_sha256": "5f423955fbc3c9ca1a4df3a1fa25cf20c311733f44151d3e38893182f7ab1328",
+    "f5_source_sha256": "b72b678ed364e8b200e52e5d4fc1ef5278f8d101f13bd8b73b3b2fd93feeb451",
+    "gf2_source_sha256": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+    "mono_source_sha256": "934dba95f3ec85bcb4108708d1d0f1c16e334cae65962ae6deb5fcf9d565071e"
+  },
+  "threads": 2
+}
