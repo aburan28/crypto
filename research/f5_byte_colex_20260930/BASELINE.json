@@ -7,7 +7,10 @@
   },
   "host": {
     "architecture": "arm64",
+    "chip": "Apple M4 Pro",
+    "cores": "10 performance, 4 efficiency",
     "logical_cpus": 14,
+    "memory_gb": 48,
     "os": "macOS 26.6",
     "processor": "arm",
     "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
