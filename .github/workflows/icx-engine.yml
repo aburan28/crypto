@@ -10,6 +10,10 @@ on:
     paths:
       - "src/bin/icx.rs"
       - "src/bin/icx/**"
+      - "src/ecc/**"
+      - "src/binary_ecc/**"
+      - "src/cryptanalysis/binary_semaev.rs"
+      - "src/cryptanalysis/ec_index_calculus.rs"
       - "src/cryptanalysis/curve_catalog.rs"
       - "src/cryptanalysis/ic_engine.rs"
       - "src/cryptanalysis/ic_progress.rs"

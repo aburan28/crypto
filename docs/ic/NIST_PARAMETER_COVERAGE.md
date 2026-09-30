@@ -17,6 +17,8 @@ revision is `d1114083390ddcfde9a063fa7187767c7e7b92e9`. An independent Sage
 implementation checks the field modulus, subgroup-order primality, generator
 membership, `[r]G=O`, positive cofactor and the Hasse necessary condition.
 This does not independently count each full curve's points.
+The native Hasse check uses the same exact squared inequality; it no longer
+rounds the square-root bound up and admits impossible boundary cardinalities.
 
 For every curve, the public fixtures are `(u,v)=(1,2)` and `(r-2,r-3)`.
 Set `w=(u+v) mod r`, check `[u]G+[v]G=[w]G`, and evaluate the correct prime-
@@ -82,6 +84,7 @@ remain degree 13. The smoke tests use an admitted analogue of each coefficient.
 - [x] Add native full-width parameter and public point/S3 validation.
 - [x] Compare native outputs with frozen independent coordinates in CI.
 - [x] Add binary point-lifting, trace and exceptional group-law reference checks.
+- [x] Check the Hasse necessary condition without rounding; test both boundaries.
 - [x] Preserve Koblitz `a` and prevent misleading analogue run regimes.
 - [x] Add an exact-parameter solve guard and reject incompatible size flags.
 - [ ] Execute and pass applicable native CI on the final PR head.

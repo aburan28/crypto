@@ -306,19 +306,19 @@ fn verify_binary(c: &BinaryCurve) -> Vec<Check> {
     checks
 }
 
-/// `|#E - (q + 1)| <= 2√q`, computed with integer square roots so it is exact.
+/// `|#E - (q + 1)|² <= 4q`, checked exactly with integer arithmetic.
 fn hasse_check(q: &BigUint, card: &BigUint) -> Check {
     let q1 = q + BigUint::one();
-    // 2√q, rounded up so the bound is not too tight.
-    let two_sqrt_q = (q.sqrt() + BigUint::one()) * BigUint::from(2u32);
     let diff = if card >= &q1 { card - &q1 } else { &q1 - card };
-    let passed = diff <= two_sqrt_q;
+    let diff_squared = &diff * &diff;
+    let four_q = q * BigUint::from(4u32);
+    let passed = diff_squared <= four_q;
     Check {
         name: "hasse_bound",
         passed,
         detail: format!(
-            "|#E-(q+1)| = {} <= 2sqrt(q) = {} (necessary cardinality bound)",
-            diff, two_sqrt_q
+            "|#E-(q+1)|² = {} <= 4q = {} (necessary cardinality bound)",
+            diff_squared, four_q
         ),
     }
 }
@@ -964,6 +964,22 @@ mod tests {
                 c.m
             );
         }
+    }
+
+    #[test]
+    fn hasse_bound_rejects_cardinalities_outside_exact_integer_limit() {
+        let q = BigUint::from(8u32);
+        // 2*sqrt(8) lies strictly between five and six. The old rounded
+        // bound admitted both differences, including impossible cardinalities.
+        for card in [4u32, 14] {
+            assert!(hasse_check(&q, &BigUint::from(card)).passed);
+        }
+        for card in [3u32, 15] {
+            assert!(!hasse_check(&q, &BigUint::from(card)).passed);
+        }
+        let q = BigUint::from(16u32);
+        assert!(hasse_check(&q, &BigUint::from(25u32)).passed);
+        assert!(!hasse_check(&q, &BigUint::from(26u32)).passed);
     }
 
     #[test]

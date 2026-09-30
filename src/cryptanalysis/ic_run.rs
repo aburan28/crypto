@@ -571,7 +571,9 @@ pub fn run_curve(
                     _ => return Err("Koblitz family requires a binary curve object".into()),
                 };
                 koblitz_instance(a, degree).ok_or_else(|| {
-                    format!("could not build an admitted degree-{degree} Koblitz analogue with a={a}")
+                    format!(
+                        "could not build an admitted degree-{degree} Koblitz analogue with a={a}"
+                    )
                 })?
             } else {
                 random_binary_instance(degree, cfg.seed, 8)
