@@ -328,3 +328,93 @@ verdict.
 ---
 
 <!-- A2 results are appended below. Nothing above this line is edited after seeing them. -->
+
+## A2 results, as run (`explore_thp_a2.json`, `analysis_explore.txt`)
+
+Valid: `AnonHugePages` reached 281 MB for IC (peak RSS 338 MB) and the 256 MiB chase
+control ran 1.33-1.53× faster with the tunable (A1 run). Medians of seven repetitions:
+
+| | user s, 4 KiB | user s, THP | sys s, 4 KiB | sys s, THP |
+|:--|--:|--:|--:|--:|
+| IC | 4.011 | 3.424 | 0.317 | 1.976 |
+| rho R3 | 1.117 | 1.122 | 0.036 | 0.215 |
+
+Huge pages cut IC's **user** time by 14.6 % (ratio 1.172) and left rho's unchanged
+(0.995); both arms pay more **system** time in THP mode (page-fault path), which is
+what made A1's user + system sums look like a slowdown. `d_IC = 0.0472` and
+`d_rho = −0.0006` ns per instruction against `Δ_user = 0.1860`, so the **user-time
+translation share is 0.257**, and the A2 rule fires its "≥ 0.25" branch.
+
+Assessment of that label: it is a point estimate 0.007 above a threshold, from seven
+repetitions whose user-time spread within a condition is 9-18 %, and no interval was
+registered in A2. It is consistent with a translation share of about a quarter of the
+user-time gap; it does not resolve it against 0.20 or 0.30. The other results of the
+follow-ups: pooled over fifteen native repetitions the medians are IC 4.371 s and rho
+1.237 s (IPC 0.89 and 2.06 at the effective clock), spread max/min 0.28 and 0.28 but
+(Q3 − Q1)/median only 0.070 and 0.062, and the post hoc `F_high` / `F_low` recomputed
+with the pooled medians are 1.911 / 0.077 (registered: 1.912 / 0.077). The registered
+verdict stays **UNDETERMINED (G5)**.
+
+---
+
+## Registration R2 (a second registered attempt; written after A2, before its run)
+
+**Why a second attempt.** Attempt 1 ended UNDETERMINED because (i) its noise gate
+(max/min ≤ 0.10 over five repetitions) is unreachable on this VM (measured spread 0.28
+over fifteen), (ii) its contention test has no power here (positive control did not
+slow), and (iii) the one native mechanism test that worked, A2's huge-page user-time
+share, landed at 0.257 with no interval. R2 repeats *only* the part that can be measured
+natively and gives it a registered interval and gates. Carried over unchanged: the
+frozen cell, the binaries (`SHA256SUMS_inputs`), the cachegrind counts and prices
+(deterministic instruction and miss counts are not re-measured), and the simulator
+interval `[F_low, F_high] = [0.077, 1.91]`. Dropped, and why: the antagonist
+contention test (E1 shows it cannot detect memory contention on this VM).
+
+**Design.** Fifteen blocks. Each block runs the four conditions {rho, IC} × {4 KiB,
+`glibc.malloc.hugetlb=1`} once each, pinned to core 0, in an order drawn per block from a
+fixed seed (20260930) to break any position effect. Recorded per run: user time, system
+time, wall time, sampled `AnonHugePages`, correctness (G1 as before). Before the first
+block and after the last, three alternating (4 KiB, THP) pairs of the 256 MiB
+pointer-chase control.
+
+**Estimator.** For each arm and page mode take the median user time over blocks; `d_a`,
+`Δ_user` and the **translation share** `(d_IC − d_rho) / Δ_user` as in A2
+(`Ir_a` from the registered cachegrind runs). Interval: percentile bootstrap over blocks
+(10,000 resamples of the fifteen blocks with replacement, `random.Random(20260930)`),
+2.5 % to 97.5 %.
+
+**Gates (all must pass, else UNRESOLVED (gate)).**
+- **R-G1** every run recovers every target for both arms.
+- **R-V** validity: the median over THP-mode IC runs of the maximum sampled
+  `AnonHugePages` is at least half of IC's peak RSS, and the median of the six chase
+  control speedups is at least 1.3×.
+- **R-N** noise: (Q3 − Q1)/median of the 4 KiB user times is ≤ 0.10 for each arm. This
+  replaces G5's max/min form, which E3 showed is unreachable; the replacement is
+  justified by E3 and applies to R2's new data only. Attempt 1's registered verdict is
+  not reinterpreted under it.
+- **R-D** drift: for each (arm, page mode), the median user time of blocks 1-7 and of
+  blocks 9-15 differ by at most 10 %.
+
+**Decision (registered).** With gates passed:
+- **STRONG**: interval lower bound ≥ 0.25. Address-translation stalls that huge pages
+  remove are, natively measured, at least a quarter of IC's per-instruction user-time
+  deficit.
+- **SUBSTANTIAL**: lower bound ≥ 0.10 (and not STRONG).
+- **BELOW A QUARTER**: upper bound < 0.25 (may co-occur with SUBSTANTIAL: "between a tenth
+  and a quarter").
+- otherwise **UNRESOLVED**.
+
+**What R2 can and cannot say about H_mem.** H_mem is SUPPORTED at this cell iff R2 is
+STRONG (a natively measured lower bound on the memory share of at least a quarter) or
+`F_low ≥ 0.5`. R2 **cannot refute** H_mem: the cache-latency term stays inside
+`[0.077, 1.91]` and no native test in this note isolates it. Any outcome other than
+STRONG leaves H_mem "partly supported by the measured translation share X, remainder
+unresolved". A huge-page speed-up is also not a claim that IC would run faster with
+THP: system time rises by more than the user time falls in this VM.
+
+**Inadmissible:** changing seeds, block count, thresholds, estimator or gates after the
+run; dropping blocks; reporting the point estimate without the interval.
+
+---
+
+<!-- R2 results are appended below. Nothing above this line is edited after seeing them. -->
