@@ -1,8 +1,8 @@
 # Complete Python source binding for the next SAT registration
 
-Status: source snapshot and isolated execution implementation; the next measured
-registration remains pending. No candidate ID, workload ID, target allocation, measured cost or
-promotion is established by this protocol.
+Status: complete development-controller integration. Native smoke execution
+and a complete source-bound SAT solve remain pending. No candidate ID, workload
+ID, fresh target allocation, measured cost or promotion is established here.
 
 The v1/v2 SAT manifest's import walk omitted `producer/evidence.py` and
 `producer/timing.py`. Historical recovery preserves those registrations and
@@ -65,18 +65,63 @@ Seven controls exercise the real SAT controller's imports without executing
 its historical job, frozen-package use after live-source edits, late external
 imports, changed invocation/interpreter, failed entrypoints and timeouts.
 
-The controller API is `callable(arguments, entry_output_directory)`. It does not
-yet stage the mathematical registration and archived non-Python input assets,
-provide native Rust/SAT build admission, govern every Python child process, or
-implement a complete solver run. The versioned integration must retain and
-verify those inputs independently, use the frozen child-script paths with
-isolated interpreters, and keep runtime preflight/terminal auditing outside
-the one-target online interval. An import-only control is never a new solve.
+The controller API is `callable(arguments, entry_output_directory)`.
+`static_sat_pipeline_v3.py` now integrates ordinary public-aG query collection,
+source-model verification and group lifting, actual usable-base/orbit counts,
+duplicate and dependent rows, full modular rank, final prime-subgroup Gaussian
+elimination, all-column scalar replay, target aG+bQ descent and recovered-scalar
+replay. It retains progress and bounded failures. The online endpoint follows
+independent scalar replay immediately, before final progress writes; the five
+exclusive phase costs close to its exact interval. Failed target attempts keep
+their charged interval separately and have null verified online cost.
 
-Local validation: the complete tournament suite passes 291 tests (288 passing,
-three justified platform skips), including all seven execution controls and
-historical artifact replay. Exact command, with process access for the existing
-RSS accounting control:
+`static_sat_registration_v3.py` builds the canonical method after freezing
+Python/interpreter and native inputs. All executed source bindings enter the
+candidate; collection/descent/exporter seeds enter the workload. An immutable
+registration seal hashes the entire invocation, including its watchdog.
+The development adapter rejects fresh-paired-qualification requests: a boolean
+freshness flag alone cannot establish exposure exclusions, paired arms or
+calibration. Those campaign gates need their reviewed adapter.
+
+`static_sat_assets_v3.py` retains exact non-Python inputs in a deterministic
+archive. `static_sat_inputs_v3.py` validates the existing exact n17a1 geometry
+and accepted static macOS ARM64 exporter/CMS source/build receipts; it has no
+live-path fallback. `native-inputs-macos-arm64/` contains both binaries, the
+Rust root-source archive and full dependency-source manifest, exporter source
+and build records, and the CMS/source/CaDiCaL/CadiBack archives. Its archive is
+7,292,102 bytes, SHA-256
+`a1fd5bd49c80076f3b64fd5cb51d891b278afde765b4d3e39853692ac318bd96`.
+These are retained accepted local receipts, not hermetic builds or remote
+attestation. A Linux native build requires a separately reviewed adapter;
+transporting these macOS binaries does not establish Linux compatibility.
+
+Every native invocation runs through `static_sat_native_v3.py` in a fresh
+`-I -S -B` Python child from the frozen source tree. Pre/post import, interpreter,
+source and asset gates retain exact argv, binary hashes, output and watchdog
+receipts. Both native tools and their meter inherit the controller's process
+group; the outer supervisor kills that owned group at timeout and after any
+leader exit. This policy is for the admitted non-forking tools, not arbitrary
+plugins that create their own sessions. Native thread-pool settings are fixed
+to one. All target-query wrapper/check overhead belongs to target PDP cost;
+native-only child CPU/RSS remains a separate diagnostic. Runtime preflight and
+terminal audit stay outside the one-target interval.
+
+`audit_static_sat_full_v3.py` verifies the retained execution against an external
+registration, independently rebuilds orbit coefficients, relation rows and
+modular rank, checks exact three-sum existence and every formula/model/lift,
+then checks solved logs, descent and scalar replay. It reconstructs exact
+native argv independently of the producer builder. The audit works after
+transport because input/output roles are relative within the retained bundle.
+Development controls have no promotion or paired speedup claim.
+
+Local validation: the complete tournament suite passes 303 tests (300 passing,
+three justified platform skips), including the earlier seven execution controls
+and twelve new asset/native/mathematical/registration controls. The mathematical
+full-pipeline tests use an explicitly disclosed exact-oracle PDP callback;
+they establish controller/LA/descent correctness, not SAT yield or admission.
+Portable C process controls establish actual child cleanup and source gates;
+they do not execute a SAT solver. Exact command, with process access for the
+existing RSS accounting control:
 
 ```sh
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=research/ic_candidate_tournament_20260915 \
@@ -84,16 +129,20 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=research/ic_candidate_tournament_20260915 \
   -p 'test_*.py'
 ```
 
-No SAT solver or historical complete-pipeline registration executes in these
-controls. `git diff --check` passes. Hosted checks remain the merge gate.
+No historical complete-pipeline registration executes in these controls.
+Hosted checks remain the merge gate. The separately preregistered
+[one-query native smoke](native-smoke-20260929/PROTOCOL.md) is pending and
+cannot establish a complete IC solve or an estimate of natural relation yield.
 
 Remaining execution gates:
 
-- Integrate the execution envelope with a versioned SAT runner, registrar and
-  independent auditor using
-  the snapshot and loaded-module gates; retain the corrected online endpoint,
-  all budget-inconclusive attempts, natural relation yield, rank trajectory,
-  complete descent and independent scalar replay.
+- Execute and independently replay the one-query native smoke, then preregister
+  and run a distinct bounded full development solve. Preserve failed and
+  budget-inconclusive attempts and check the natural-query status mix, rank,
+  complete descent, scalar replay and complete pre/post source evidence.
+- Complete the F4/F5 encoding/coverage review and a bounded policy registration
+  before fresh qualification. The disclosed F5 rank gap remains unresolved;
+  the corrected reduction-budget description is not a coverage improvement.
 - Freeze new public targets excluding every prior exposure, exact candidate
   and workload records, arm limits, resource envelope and same-point reference.
   The current paired point `[52411,72106]` is already exposed.
