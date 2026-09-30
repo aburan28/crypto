@@ -65,19 +65,35 @@ jobs:
           PARENT="${{ runner.temp }}/compact-s3-prefilter"
           RUN_DIR="$PARENT/n${{ matrix.n }}_L1024"
           mkdir -p "$PARENT"
-          set +e
-          python3 tools/isolated_bench.py reserve --cpus "$CPUS" \
-            --out "$PARENT/n${{ matrix.n }}_L1024.isolation.jsonl" \
-            --label "s3-prefilter-n${{ matrix.n }}" -- \
-            python3 research/notes/ecc2k130/compact_s3_prefilter_20260930/run_panel.py \
-              --n ${{ matrix.n }} \
-              --rho target/release/examples/koblitz_rho_batch_ks_v3 \
-              --batch target/release/examples/koblitz_orbit_dlp_s3_batch \
-              --out "$RUN_DIR" --cpu "$CPU"
-          STATUS=$?
-          set -e
+          STATUS=1
+          for ATTEMPT in 1 2 3 4 5 6; do
+            sleep 20
+            LOG="$PARENT/n${{ matrix.n }}_preflight_${ATTEMPT}.log"
+            set +e
+            python3 tools/isolated_bench.py reserve --cpus "$CPUS" --max-psi 5 \
+              --out "$PARENT/n${{ matrix.n }}_L1024.isolation.jsonl" \
+              --label "s3-prefilter-n${{ matrix.n }}" -- \
+              python3 research/notes/ecc2k130/compact_s3_prefilter_20260930/run_panel.py \
+                --n ${{ matrix.n }} \
+                --rho target/release/examples/koblitz_rho_batch_ks_v3 \
+                --batch target/release/examples/koblitz_orbit_dlp_s3_batch \
+                --out "$RUN_DIR" --cpu "$CPU" \
+              > "$LOG" 2>&1
+            STATUS=$?
+            set -e
+            cat "$LOG"
+            if [ "$STATUS" -eq 0 ] || [ -d "$RUN_DIR" ]; then
+              break
+            fi
+            if ! grep -q '^machine is busy:' "$LOG"; then
+              break
+            fi
+          done
           if [ -d "$RUN_DIR" ] && [ -f "$PARENT/n${{ matrix.n }}_L1024.isolation.jsonl" ]; then
             cp "$PARENT/n${{ matrix.n }}_L1024.isolation.jsonl" "$RUN_DIR/isolation.jsonl"
+          fi
+          if [ -d "$RUN_DIR" ]; then
+            cp "$PARENT"/n${{ matrix.n }}_preflight_*.log "$RUN_DIR/"
           fi
           exit "$STATUS"
       - name: Independently replay every rank and logarithm
