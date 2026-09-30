@@ -1134,3 +1134,110 @@ measured), full degree-1 factor base, `BigUint` arithmetic on both
 sides. Wall time enters `S` through the in-situ unit, so these are
 single-host numbers; the A/A spread bounds their noise at 1.4× per row
 and the medians over five or six sweeps are what is reported.
+
+## Round eight: reduced factor base with single large primes — protocol, written before measuring
+
+Round seven priced the solve honestly and found that with a full
+factor base it grows faster than rho at genus ≤ 3. The literature's
+remedy (Thériault, ASIACRYPT 2003) is a reduced factor base plus
+**large primes**: a smooth candidate with exactly one place outside the
+base is kept as a partial relation, and two partials sharing that place
+combine into a full one. This round builds that and tests it. Protocol
+fixed here before any of the code exists; baseline is `main` at
+`01a64427`.
+
+**The mechanism.** The factor base is the first `F = θ·L` places by
+`x` (`L` = all degree-1 places after ± folding; the existing `fb_size`
+truncation). A candidate that splits with one off-base place `P`,
+coefficient `e`, is stored under `P`. A later partial with the same `P`,
+coefficient `e'`, gives `e'·row₁ − e·row₂`, which eliminates `log P`.
+Each subsequent partial combines with the first one stored under its
+place, so combined rows do not repeat. Rows with two or more off-base
+places are still discarded (the double-large-prime variant is out of
+scope).
+
+**Heuristic balance, for orientation only.** With `F = L^a`, single
+large primes need about `L^{(a+1)/2 − (a−1)(g−1)}` trials, and the solve
+costs about `L^{2a}`. Balancing gives `a = (2g−1)/(2g+1)` and total
+`L^{2 − 4/(2g+1)}`, Thériault's exponent. That is an asymptotic
+statement with the solve at `m²`; it says nothing about where the
+balance sits at these sizes.
+
+**The prediction at these sizes, from round seven's frozen rows.**
+After round seven the solve is only 0 – 13% of index calculus's total
+(`experiments/hyperelliptic_sparse_solve_r7/`). Model: a smooth
+candidate's `g` places land in the base independently with probability
+`θ`; partials fill `(1−θ)·L` buckets and combine at the birthday rate
+`P − B(1 − e^{−P/B})`; relation and oracle cost scale with trials; the
+solve scales as `θ^s` with round seven's `s` (1.37 / 1.70 / 1.64).
+Predicted `S(θ)/S(1)`, large primes on, and the no-large-prime control:
+
+| genus | rows | θ = 0.75 | θ = 0.5 | θ = 0.5, no large primes |
+|--:|--|--:|--:|--:|
+| 2 | `p` = 41 … 251 | 1.04 → 0.97 | 1.25 → 1.05 | 2.7 → 1.9 |
+| 3 | `p` = 23 … 211 | 1.17 → 1.13 | 1.94 → 1.72 | 5.6 → 4.2 |
+| 4 | `p` = 17 … 61 | 1.35 → 1.33 | 3.18 → 2.97 | 12.5 → 9.5 |
+
+(Ranges run from the smallest row to the largest.) So **at genus 3 and
+4 the model predicts the reduced base loses at every size this harness
+can reach.** Extrapolating the same model, with the solve growing as
+`m^s` and the relation stage as `m`, a ≥ 10% saving first appears near
+`m ≈ 2000` (`p ≈ 4000`) at genus 2, `m ≈ 13 000` at genus 3 and
+`m ≈ 150 000` at genus 4. Only the first is reachable, so this round
+extends genus 2 to `p ≈ 4000` to put rows on both sides of a predicted
+crossover. If the solve's `s` rises toward 2 at larger `m`, as an `m²`
+bound suggests it eventually must, the crossovers come earlier; that is
+a stated uncertainty of the model, not a free parameter.
+
+**Known omission.** A combined row carries up to `2g` factor-base
+entries instead of `g`, so the solve should cost more per row than `θ^s`
+says. The model leaves it out; if it matters, it shows up as a
+systematic under-prediction at small θ.
+
+**Instances and configurations.** A new example,
+`examples/hyperelliptic_ic_large_prime.rs`, so round seven's frozen
+command stays unchanged. Curves and instance selection as in the round-
+seven harness. Genus 2 at `p` ∈ {101, 251, 503, 1009, 2003, 4001},
+genus 3 at `p` ∈ {61, 211, 401}, genus 4 at `p` ∈ {31, 61}. Configs:
+θ ∈ {1, 0.85, 0.7, 0.5} with large primes, and θ = 0.5 without (the
+control). Factor-base walk, sparse solve, gcd oracle, seeds `20260916` /
+`0xC0FFEE`, 5 index-calculus and 40 rho runs per row, DP rho reference.
+
+**Accounting.** Unchanged unit. Storing and matching partials is new
+bookkeeping, and round seven showed what uncharged bookkeeping does, so
+it is timed and converted in situ like the oracle and the solve. The
+floor `(m+1)(1+g/c) + m²/c` is evaluated at each configuration's own
+`m`; since that moves the boundary with θ, **the comparison across θ is
+made against rho and against θ = 1, not against the floor.**
+
+**Pinned output.** At θ = 1 there are no off-base places, so the new
+code must reproduce the old one exactly: identical relation-stage
+operations, oracle mul-mods and `k` against `main`'s binary on the
+round-seven harness. Every run on every row returns a verified `k`, and
+a test checks every combined relation as a Jacobian identity.
+
+**Pre-registered hypotheses.** Measured `S(θ)/S(1)` is the median over
+three isolated sweeps.
+
+- **H1 (no win where none is predicted).** At genus 3 and 4, no θ < 1
+  configuration beats θ = 1 by more than 10% on any row. Falsified by
+  one such row.
+- **H2 (genus-2 crossover).** At genus 2, `p ≤ 251`: no θ < 1 config
+  beats θ = 1 by more than 5%. At `p ≥ 2003`: the best θ < 1 beats
+  θ = 1 by at least 5%. Falsified if either half fails.
+- **H3 (model fidelity).** Re-evaluating the model with each row's
+  own θ = 1 measurements (smoothness rate, relation, oracle and solve
+  costs — none of them θ < 1 data), it predicts measured `S(θ)/S(1)`
+  within ±25% on at least 80% of (row, θ < 1) cells.
+- **H4 (the control).** With θ = 0.5, large primes are cheaper than no
+  large primes on every row.
+
+**Stop.** H1 or H2 falsified means the cost model is wrong about where
+the solve and relation stage balance, and the next step is to measure
+why before building further variants.
+
+**Expected class.** At the reachable sizes, mostly "no change"
+(θ = 1 wins). A genus-2 crossover at `p ≈ 4000` would be engineering
+within a genus whose rho-relative exponent is not the target. It would
+still be the first measurement of this lever and a check on the model
+that predicts where it pays at genus 3, which is what matters.
