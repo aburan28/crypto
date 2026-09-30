@@ -46,6 +46,10 @@ different content at an existing path. Full certificate seals use the existing
 sorted-key compact canonical JSON identity rules; raw formatted file hashes are
 separate. The reader itself must be source-bound by a later execution protocol;
 these offline receipts do not claim a new preexecution source attestation.
+In that protocol, candidate identity binds exact executed source/policy and the
+mathematical state digest; the run/preparation manifest binds the full evidence
+certificate. Preparation-run seeds and measurements stay outside candidate
+identity, including hashes of such run evidence.
 
 The tests reject target-bearing inputs and native `b!=0` collection rows,
 torsion removal, duplicate/reordered geometry, false group relations, rank loss,

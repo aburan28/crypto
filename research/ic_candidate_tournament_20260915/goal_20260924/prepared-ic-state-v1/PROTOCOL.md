@@ -40,9 +40,12 @@ repair it, generate fresh targets, change old source manifests or infer a win.
 `ICP1h<12hex>` labels mathematical preparation, **not** an `IC1` pipeline,
 `EC1` curve, workload or measured run. Its full record digest distinguishes
 content; the two separate whole-certificate seals distinguish their evidence.
-A later adapter must bind both its exact source and the externally frozen
-certificate hash in its own canonical method/preparation manifest. Loading and
-checking that state happen before the primary one-target online clock starts.
+A later adapter's canonical method binds its exact executed source/policy and
+the mathematical state digest. Its frozen run/preparation manifest separately
+binds the externally frozen whole-certificate hash and preparation evidence.
+Source-run seeds, query counts and measurements must not enter a candidate ID,
+including indirectly through a hash of that evidence. Loading and checking
+that state happen before the primary one-target online clock starts.
 All target-dependent solving, failed attempts and final replay remain charged.
 
 This certificate establishes no executable target-only adapter, fresh-target
