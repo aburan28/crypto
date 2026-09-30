@@ -1,0 +1,98 @@
+{
+  "basis": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "controls": [
+    {
+      "indices": [
+        62,
+        9,
+        43
+      ],
+      "points": [
+        [
+          63,
+          4366
+        ],
+        [
+          13,
+          39239
+        ],
+        [
+          47,
+          4676
+        ]
+      ],
+      "scalar": 8015,
+      "target": [
+        75203,
+        52604
+      ],
+      "trial": 164
+    },
+    {
+      "indices": [
+        2,
+        44,
+        51
+      ],
+      "points": [
+        [
+          3,
+          95627
+        ],
+        [
+          47,
+          4715
+        ],
+        [
+          57,
+          96968
+        ]
+      ],
+      "scalar": 26268,
+      "target": [
+        29365,
+        106256
+      ],
+      "trial": 173
+    }
+  ],
+  "fixture": {
+    "cofactor": "2",
+    "curve_a": 1,
+    "degree": 17,
+    "generator": [
+      "43693",
+      "23339"
+    ],
+    "group_order": "131174",
+    "irreducible": {
+      "degree": 17,
+      "low_terms": [
+        0,
+        3
+      ]
+    },
+    "lambda": "17184",
+    "subgroup_order": "65587",
+    "target_scalar_constructed": false,
+    "target_seeds": [
+      2026092948
+    ],
+    "targets": [
+      [
+        "52411",
+        "72106"
+      ]
+    ]
+  },
+  "matrix_degree": 3,
+  "schema_version": 1,
+  "summands": 3
+}
