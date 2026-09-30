@@ -1,0 +1,22 @@
+{
+  "baseline_commit": "d40843d50e13e541943a89786e009165a702fc5d",
+  "binary": {
+    "build_command": "CARGO_TARGET_DIR=/private/tmp/f5-further-2x-20260929/target python3 tools/isolated_bench.py busy -- cargo build --offline --release --example f4_f2_bench",
+    "retained_local_path": "/private/tmp/f5-byte-colex-baseline/f4_f2_bench",
+    "sha256": "b04bfcc0257a091fce804d10b9994cba49277a9d0dc3daba841ee1ca4af6f68c"
+  },
+  "host": {
+    "architecture": "arm64",
+    "logical_cpus": 14,
+    "os": "macOS 26.6",
+    "processor": "arm",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+  },
+  "source_sha256": {
+    "examples/f4_f2_bench.rs": "d40f9f0c76e5c56c9f4a52596b9edef41f321aa3d70cfb023c4ba21fdde70336",
+    "src/cryptanalysis/koblitz_groebner.rs": "cc50fa7dee14d6c606883713fe842139a1d25f636c57be99817ca63607c2b816",
+    "src/cryptanalysis/matrix_f5_f2.rs": "bf35680f431ab7ac13a7615d334ec9b060217b84bdde36f03ce00319491d42da",
+    "tools/isolated_bench.py": "ff59e53fd5566078ad493c8be0d06168699c4fd194bc881d99df19fa20e007ef"
+  },
+  "timing": null
+}
