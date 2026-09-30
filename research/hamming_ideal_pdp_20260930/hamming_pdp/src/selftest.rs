@@ -37,18 +37,27 @@ pub fn run(seed: u64, trials: u32) {
         // brute force
         let mut sols: Vec<u64> = Vec::new();
         for a in 0..(1u64 << nv) {
-            let pt = [a, 0, 0, 0, 0, 0, 0, 0];
+            let mut pt = [0u64; W];
+            pt[0] = a;
             if eqs.iter().all(|e| !e.eval(&pt)) {
                 sols.push(a);
             }
         }
-        if let Some(o) = only { if o != t { continue; } }
+        if let Some(o) = only {
+            if o != t {
+                continue;
+            }
+        }
         let affine = is_affine(&sols);
         let (out, st) = truncated_groebner(&eqs, nv as u32, u64::MAX, u64::MAX);
         let verdict = match out {
             Outcome::Inconsistent => {
                 counts[0] += 1;
-                assert!(sols.is_empty(), "trial {t}: F4 says inconsistent but {} solutions", sols.len());
+                assert!(
+                    sols.is_empty(),
+                    "trial {t}: F4 says inconsistent but {} solutions",
+                    sols.len()
+                );
                 "inconsistent"
             }
             Outcome::Linear(rref) => {
@@ -57,15 +66,23 @@ pub fn run(seed: u64, trials: u32) {
                 let mut got: Vec<u64> = ls.iter().map(|p| p[0]).collect();
                 got.sort();
                 if got != sols {
-                    for e in &eqs { eprintln!("eq: {e}"); }
-                    for r in &rref { eprintln!("rref: {r}"); }
+                    for e in &eqs {
+                        eprintln!("eq: {e}");
+                    }
+                    for r in &rref {
+                        eprintln!("rref: {r}");
+                    }
                     panic!("trial {t}: linear solution set differs: got {got:?} want {sols:?} (nv={nv})");
                 }
                 "linear"
             }
             Outcome::Wild => {
                 counts[2] += 1;
-                assert!(!affine, "trial {t}: complete GB wild but solutions {:?} affine (nv={nv}, ne={ne})", sols);
+                assert!(
+                    !affine,
+                    "trial {t}: complete GB wild but solutions {:?} affine (nv={nv}, ne={ne})",
+                    sols
+                );
                 "wild"
             }
             Outcome::Budget => {
@@ -76,7 +93,10 @@ pub fn run(seed: u64, trials: u32) {
         let _ = (verdict, st);
         let _ = W;
     }
-    eprintln!("selftest ok: inconsistent={} linear={} wild={} budget={}", counts[0], counts[1], counts[2], counts[3]);
+    eprintln!(
+        "selftest ok: inconsistent={} linear={} wild={} budget={}",
+        counts[0], counts[1], counts[2], counts[3]
+    );
 }
 
 fn is_affine(sols: &[u64]) -> bool {
