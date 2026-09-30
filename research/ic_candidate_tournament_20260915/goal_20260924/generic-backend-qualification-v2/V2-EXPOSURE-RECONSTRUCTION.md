@@ -25,6 +25,7 @@ Machine-readable digests are in
 | Accepted distinct points | 25 (aa 5, smoke 5, development 15) |
 | Overlap with first-run accepted points | 0 |
 | Second local reconstruction | byte-identical to the sealed export |
+| Full `tournament.py prepare` replay | all 25 accepted fixtures match; export in [independent-v2-prepare-replay-fixtures.json](independent-v2-prepare-replay-fixtures.json) |
 | Seed / run id | `2026092902` / `36580669479` |
 
 A later competitive registration must pass this file to the tournament’s
