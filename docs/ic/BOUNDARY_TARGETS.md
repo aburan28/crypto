@@ -233,9 +233,13 @@ for **the tested W64 n41/n53 batch cold CPU cells** against strong rho; Ir alone
 is not a group-addition or cycle unit and does not establish a method speedup.
 
 The older point-panel native CPU references for n37/L1, n37/L1024, n41/L1
-and n53/L1 used a different rho/source snapshot. Their current-source cold
-CPU ratios remain pending a separate four-cell protocol committed before
-inspection of the Ir results. The K+L rank/recovery attempt floor is exactly
+and n53/L1 used a different rho/source snapshot. The separate four-cell
+protocol committed before inspection of the Ir results has now run once
+([cold-gap result](../../research/notes/ecc2k130/compact_ir_cold_gap_20260930/RESULT.md)).
+Its current-source complete CPU ratios to the same-Q rho are **3.7362**
+(3.6901–3.7803), **1.7064** (1.6933–1.7146), **17.0499** (16.0731–18.1962)
+and **27.4483** (27.1951–27.6616). All four A/A and isolation gates passed.
+None is below one, so those cells also have no matched-rho cold CPU crossover. The K+L rank/recovery attempt floor is exactly
 met in all compact arms, but no instruction lower bound, calibrated generic
 S, disjoint target confirmation, n83 confidence, GF(2^131) transfer, or native
 leaf m≥3 PDP result follows. The degree-263 map/ring certificate and the
