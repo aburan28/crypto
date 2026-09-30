@@ -25,6 +25,12 @@ fixtures matched exactly and a second local reconstruction matched the checked
 file's SHA-256 byte for byte. The fresh runner passes that corpus to the
 tournament's exact curve/point exclusion checker before making new targets.
 
+This run’s own 25-point schedule is sealed in
+[lost-v2-campaign-exposures.json](lost-v2-campaign-exposures.json)
+(SHA-256 `0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54`);
+see [V2-EXPOSURE-RECONSTRUCTION.md](V2-EXPOSURE-RECONSTRUCTION.md). Later
+panels must exclude both lost corpora before sampling new targets.
+
 The workflow is
 [`ic-generic-backend-qualification-v2.yml`](../../../../.github/workflows/ic-generic-backend-qualification-v2.yml).
 Its PR jobs run the scientific controls and prove that a synthetic interrupted

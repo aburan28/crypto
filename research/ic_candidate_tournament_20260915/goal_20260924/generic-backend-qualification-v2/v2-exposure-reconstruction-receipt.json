@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "status": "DETERMINISTIC_RECONSTRUCTION_OF_CENSORED_V2_EXPOSURES",
+  "censored_campaign_seed": 2026092902,
+  "frozen_execution_checkout": "765c3c5f19032bd852163805f257c56babef2040",
+  "workflow_run": "36580669479",
+  "method": "reconstruct_v2_exposures.py: sealed history + EXPOSED + lost-campaign-exposures.json, Random(2026092902) fixture walk matching tournament prepare, stopped before measurement",
+  "registration_panel_sha256": "d283a869b0412228d1c66260fdfd8f387d7243bd15456c7febf3c46ee5da27a8",
+  "prior_censored_exposures_sha256": "a728677b199eac02800d8338204d5306f391ec5da757c910bec1e51955fe7b41",
+  "export_path": "lost-v2-campaign-exposures.json",
+  "export_sha256": "0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54",
+  "accepted_points": 25,
+  "overlap_with_first_run_accepted_points": 0,
+  "second_local_reconstruction_byte_identical": true
+}

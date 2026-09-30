@@ -244,10 +244,13 @@ incumbent and matched-rho arms. Its one permitted dispatch,
 timed out, packing failed on a live ~35 GiB tournament tree, and zero campaign
 artifacts were uploaded; see the
 [censored result](generic-backend-qualification-v2/RESULT.md). Never redispatch
-seed `2026092902`. Family qualification and competitive costs are unknown. Any
-later registration must exclude all three sealed rounds, the 25 reconstructed
-first-run points, and every public point this second dispatch could have
-generated once reconstructed at the pinned checkout. The static F4/F5 encoder
+seed `2026092902`. Family qualification and competitive costs are unknown. The
+second-run exposure census is sealed in
+[lost-v2-campaign-exposures.json](generic-backend-qualification-v2/lost-v2-campaign-exposures.json)
+(SHA-256 `0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54`;
+[V2-EXPOSURE-RECONSTRUCTION.md](generic-backend-qualification-v2/V2-EXPOSURE-RECONSTRUCTION.md)).
+Any later registration must exclude all three sealed rounds, the 25
+first-run points, and these 25 second-run points. The static F4/F5 encoder
 audit and the disclosed-point
 [dimension-6 pilot](generic-f4-subspace-pilot/RESULT.md) remain separate
 diagnostics.
@@ -263,7 +266,8 @@ shows both `f4` and `f5` dispatch into MatrixF4/MatrixF5 with
 `unsupported: false` on all five inventory points at `max_trials=1`, with zero
 relations/solutions under that budget. It is a factor-base-policy diagnostic,
 not a family qualification. A fresh competitive registration still needs a new
-seed, the v2 exposure census, and a recovery-capable budget.
+seed, both lost exposure corpora (including the sealed v2 census), and a
+recovery-capable budget.
 [`run-20260929`](generic-f4-subspace-pilot/run-20260929/RESULT.md) repeats that
 same budget (build SHA-256
 `de3cb8b896f31f03668f1d0eb14302fef2b1e0bc0be303e7f4021a70dd085335`,
