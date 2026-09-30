@@ -1,9 +1,8 @@
 //! # Running the index-calculus pipeline on a catalog curve.
 //!
 //! `icx run <curve>` lands here.  Given a standardized curve, this module
-//! selects a **feasible instance of the same family** (the real curve when it
-//! is inside the u64 pipeline's envelope, otherwise a scaled same-family
-//! analogue), builds it, calibrates it, runs one or more pluggable pipeline
+//! selects a **smaller instance of the same family**, builds it, calibrates
+//! it, runs one or more pluggable pipeline
 //! configurations through the *identical* public entry points that `ic bench`
 //! uses ([`run_pipeline`], [`rho_reference`], the calibration functions), and
 //! reports the result with its regime and, for a scaled run, an explicit
@@ -16,9 +15,10 @@
 //!
 //! ## Honest labelling
 //!
-//! Standardized curves are all far above the demonstrated end-to-end envelope
-//! (the largest solved here is a 48-bit subgroup), and their fields exceed the
-//! single-word ceiling (`n ≤ 62`, `p < 2^62`).  So a `run` against, say,
+//! The named NIST fields exceed the single-word ceiling (`n ≤ 62`,
+//! `p < 2^62`). This entry point always selects an analogue, including for
+//! smaller catalog curves; raising the configured envelope does not change
+//! that dispatch. So a `run` against, say,
 //! `sect163k1` executes a small **Koblitz analogue** and says so; the
 //! real-curve cost is what `icx estimate` reports.  Nothing here claims to
 //! solve the named curve.
