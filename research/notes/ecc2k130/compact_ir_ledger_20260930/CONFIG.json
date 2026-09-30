@@ -1,0 +1,22 @@
+{
+  "schema": "ecc2k130-compact-ir-ledger-v1",
+  "source_freeze": "research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json",
+  "source_freeze_sha256": "3e9f67cc2cd6de5a8458badb3525983d561d9c3449c05118819fb424c5093b2b",
+  "point_panel_freeze": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/FROZEN.json",
+  "point_panel_freeze_sha256": "eb1a76cc72b02bcef551a83e20ad8372f9a5b7fcde917cd7c89470812bf24dde",
+  "rank_seed": 7,
+  "s3_batch_window": 64,
+  "rho_dp_bits": 4,
+  "rho_canonicalization_backend": "normal_basis",
+  "rho_quotient_mode": "signed_frobenius",
+  "timeout_seconds_per_arm": 2700,
+  "rss_limit_bytes_per_arm": 8589934592,
+  "cells": [
+    {"id": "n37_L1", "n": 37, "L": 1, "k": 7, "arms": ["off", "rho"], "freeze_key": "n37_L1_eval", "freeze_kind": "point_panel", "points_sha256": "ff47666b9ff626be49fcaf430502694c4081f8d37187715750083025d1731f58", "fixture_sha256": "00db023e7d66edc2393e813389c500c1f6629ddf57d8c428f5b5df007026c532"},
+    {"id": "n37_L1024", "n": 37, "L": 1024, "k": 42, "arms": ["off", "rho"], "freeze_key": "n37_L1024_eval", "freeze_kind": "point_panel", "points_sha256": "3e249b1ddb41f7c3f6e73cbe893d12db87ce58bebcf92013c8b39d2ee0ec05d6", "fixture_sha256": "411e85382680a4b85d7b0b2bb7abeb68935e3b66e96e082f807a7beda1c1bdf5"},
+    {"id": "n41_L1", "n": 41, "L": 1, "k": 85, "arms": ["off", "rho"], "freeze_key": "n41_L1_eval", "freeze_kind": "point_panel", "points_sha256": "fff82518e01fa70ef0facfc8273ed112eb2ebfc18ba5c9a71d472d3af1aeb739", "fixture_sha256": "e7b8a3d3a0a40096d3c4b645c0be0a6baac0d8842b7969cd3e498b9beafe7386"},
+    {"id": "n41_L1024", "n": 41, "L": 1024, "k": 255, "arms": ["off", "blocked", "rho"], "freeze_key": "n41_L1024_eval", "freeze_kind": "prefilter", "points_sha256": "fc570981e2dd4b6d09a61773fec0330fd0d9967602610df910f0a1e6fb9efb20", "fixture_sha256": "c859ff318495c289cede5fa88f32b8e8150d909ca6c7ac9ddf2653605a96f449"},
+    {"id": "n53_L1", "n": 53, "L": 1, "k": 220, "arms": ["off", "rho"], "freeze_key": "n53_L1_eval", "freeze_kind": "point_panel", "points_sha256": "d71cd294f88cc87f85f0da9f6f3bd6585072f9128b2542047127307fb0c043c5", "fixture_sha256": "78c7b284b136613d26df5c9cb58a3b736c23351babc3c11f9aec4fbdf8689f37"},
+    {"id": "n53_L1024", "n": 53, "L": 1024, "k": 440, "arms": ["off", "blocked", "rho"], "freeze_key": "n53_L1024_eval", "freeze_kind": "prefilter", "points_sha256": "0e10e0155566a01993929d838b8830259dc2fd6b8e21fea44ac0c4e13d0d76bb", "fixture_sha256": "db0dc42f76cbabd7c4dca4144c4ed17e1071a2336d4cdc1689ceb3588a1656e9"}
+  ]
+}
