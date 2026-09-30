@@ -53,23 +53,23 @@ jobs:
           mkdir -p "${{ runner.temp }}/compact-s3-prefilter"
           python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
             --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
-            --dest "${{ runner.temp }}/compact-s3-prefilter/frozen-src" \
+            --dest "${{ runner.temp }}/s3-prefilter-frozen-src" \
             --receipt "${{ runner.temp }}/compact-s3-prefilter/materialization.json"
       - name: Python syntax and frozen-source check
-        working-directory: ${{ runner.temp }}/compact-s3-prefilter/frozen-src
+        working-directory: ${{ runner.temp }}/s3-prefilter-frozen-src
         run: |
           python3 -m py_compile research/notes/ecc2k130/compact_s3_prefilter_20260930/*.py
           python3 -c 'import sys; sys.path.insert(0, "research/notes/ecc2k130/compact_s3_prefilter_20260930"); from verify_panel import freeze; freeze()'
       - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
-        working-directory: ${{ runner.temp }}/compact-s3-prefilter/frozen-src
+        working-directory: ${{ runner.temp }}/s3-prefilter-frozen-src
       - name: Build and test the exact evaluation source
-        working-directory: ${{ runner.temp }}/compact-s3-prefilter/frozen-src
+        working-directory: ${{ runner.temp }}/s3-prefilter-frozen-src
         run: |
           cargo build --release --locked --example koblitz_orbit_dlp_s3_batch --example koblitz_rho_batch_ks_v3
           cargo test --release --locked --example koblitz_orbit_dlp_s3_batch
       - name: Run pinned cold arms on new point-only Q
         id: run
-        working-directory: ${{ runner.temp }}/compact-s3-prefilter/frozen-src
+        working-directory: ${{ runner.temp }}/s3-prefilter-frozen-src
         env:
           RAYON_NUM_THREADS: '1'
           GIT_DIR: ${{ github.workspace }}/.git
@@ -114,7 +114,7 @@ jobs:
           exit "$STATUS"
       - name: Independently replay every rank and logarithm
         if: always() && steps.run.outcome != 'skipped'
-        working-directory: ${{ runner.temp }}/compact-s3-prefilter/frozen-src
+        working-directory: ${{ runner.temp }}/s3-prefilter-frozen-src
         run: |
           python3 research/notes/ecc2k130/compact_s3_prefilter_20260930/verify_panel.py \
             --n ${{ matrix.n }} \
