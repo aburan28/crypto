@@ -5686,6 +5686,71 @@ Item 1's rungs above `2^47.2` cannot run.
 - So the thread keeps high-fidelity ECC2K-130 improvement unestablished,
   as §22.9 says.
 
+## 23. The top-end exponent, in range
+
+This is §22.12's item 1a. After the correction there, only item 1a runs
+without code changes. It is a measurement round: no algorithm changes.
+
+§22 left the declared fit over the four largest sizes at `r^0.137`
+[−0.059, 0.332]. That interval includes zero, and it separates neither
+the law's `1/6` nor §20's model from it. Sizes above `2^47.2` need
+`n > MAX_N = 63`. So this round cannot lengthen the fit's lever arm. It
+can add the only two other buildable sizes, measure each size on eight
+sets, and re-sweep every size's recipe on one binary.
+
+### 23.1 Declared before anything below ran
+
+The protocol is `research/ic_exponent_top_20260930/PROTOCOL.md` (v1). It
+was committed with its harness and analysis script before any run.
+
+- **Sizes:** every Koblitz curve with `n ≤ 63` and `r ≥ 2^36`.
+  - `K_1/GF(2^47)` (`2^36.6`), `K_0/GF(2^41)` (`2^39.0`), `K_0/GF(2^53)`
+    (`2^44.3`) and `K_0/GF(2^61)` (`2^47.2`), from §20.
+  - `K_0/GF(2^57)` (`2^38.0`), new. Its proper intermediate subfields
+    over `GF(2)` are `GF(2^3)` and `GF(2^19)`; the method uses neither.
+  - `K_1/GF(2^59)` (`2^44.5`), new, prime `n`.
+- **Recipe:** §20's rules, re-swept at every size on this round's binary
+  by §20's procedure, on sweep set `W`.
+  - The fit must compare every size's best recipe on one binary.
+  - §20's choices at the four old sizes are reported beside the new ones.
+- **Sets:** `M1`–`M8` (seeds 201–208), with batch rho in the same
+  process on each set's targets.
+- **Accounting:** §20's, unchanged. A size's ratio is the mean `S` over
+  the mean priced rho `S`. Its interval uses `t` with 7 degrees of
+  freedom.
+- **Isolation.** Every `ic price` runs through `tools/isolated_bench.py`,
+  after the harness waits for PSI `some avg10` to fall below 4.0.
+  Contended runs are kept, excluded and run again. Control 1 runs on `M1`
+  at each size, untimed.
+- **Predictions** (§20's model, carried unchanged): a local exponent of
+  0.139 over the six sizes, and 0.149 over the four largest. The law's is
+  `1/6`.
+
+**Targets:**
+
+1. **Correct:** every target verified, no rejected relation, counts
+   identical across repetitions, every run complete.
+2. **Control 1** holds on `M1` at all six sizes.
+3. **The primary fit.** Fit `ln(ratio·√n)` on `ln r` over the six sizes,
+   with the slope's 95% interval (`t`, 4 degrees of freedom).
+   - The rise is *resolved from zero* if the interval excludes 0.
+   - `1/6` and 0.139 are each read as consistent or falsified.
+   - **The aim is met if the interval excludes 0 or excludes `1/6`.**
+     Otherwise the round reports that the buildable sizes cannot
+     separate them.
+4. **The secondary fit:** §20's four-largest fit, for continuity.
+5. **Crossing:** a size whose ratio interval lies wholly below one. None
+   is expected.
+
+**Stop:**
+- a verification failure;
+- Control 1 failing;
+- a repetition spread above 1.25, which means the set is rerun with
+  double the repetitions.
+
+**Class: accounting.** No algorithm changes. There is no `m = 83` run
+(AGENTS.md §8a): `n = 83` is past `MAX_N`.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
