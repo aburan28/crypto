@@ -1,10 +1,60 @@
 //! Boolean polynomials over `F_2` in the quotient by the field equations:
 //! square-free monomials as bit masks, degrevlex with variable `0` largest.
 
+use std::cell::Cell;
 use std::cmp::Ordering;
 
 pub const W: usize = 8;
 pub const MAX_VARS: usize = 64 * W;
+
+thread_local! {
+    /// How many `u64` limbs of a monomial can be nonzero on this thread.
+    /// High limbs of every monomial built inside a `LimbsGuard` are zero, so
+    /// degree, order and divisibility may ignore them. The guard is restored
+    /// on drop: a later system with a wider variable set must not inherit it.
+    static ACTIVE_LIMBS: Cell<usize> = const { Cell::new(W) };
+}
+
+#[inline]
+pub fn active_limbs() -> usize {
+    ACTIVE_LIMBS.with(|c| c.get())
+}
+
+/// Sets the limb width for the current thread and restores the previous
+/// width when dropped.
+pub struct LimbsGuard {
+    prev: usize,
+}
+
+impl LimbsGuard {
+    pub fn set(n: usize) -> Self {
+        let n = n.clamp(1, W);
+        let prev = ACTIVE_LIMBS.with(|c| c.replace(n));
+        Self { prev }
+    }
+}
+
+impl Drop for LimbsGuard {
+    fn drop(&mut self) {
+        ACTIVE_LIMBS.with(|c| c.set(self.prev));
+    }
+}
+
+/// Smallest limb count that covers every nonzero word of `polys`.
+pub fn limbs_covering(polys: &[Poly]) -> usize {
+    let mut n = 1usize;
+    for p in polys {
+        for m in &p.terms {
+            for k in (0..W).rev() {
+                if m.0[k] != 0 {
+                    n = n.max(k + 1);
+                    break;
+                }
+            }
+        }
+    }
+    n
+}
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Mono(pub [u64; W]);
@@ -19,24 +69,37 @@ impl Mono {
     }
     #[inline]
     pub fn degree(&self) -> u32 {
-        self.0.iter().map(|w| w.count_ones()).sum()
+        let n = active_limbs();
+        let mut s = 0u32;
+        for k in 0..n {
+            s += self.0[k].count_ones();
+        }
+        s
     }
     #[inline]
     pub fn mul(&self, o: &Mono) -> Mono {
+        let n = active_limbs();
         let mut m = [0u64; W];
-        for k in 0..W {
+        for k in 0..n {
             m[k] = self.0[k] | o.0[k];
         }
         Mono(m)
     }
     #[inline]
     pub fn divides(&self, o: &Mono) -> bool {
-        (0..W).all(|k| self.0[k] & !o.0[k] == 0)
+        let n = active_limbs();
+        for k in 0..n {
+            if self.0[k] & !o.0[k] != 0 {
+                return false;
+            }
+        }
+        true
     }
     #[inline]
     pub fn div(&self, o: &Mono) -> Mono {
+        let n = active_limbs();
         let mut m = [0u64; W];
-        for k in 0..W {
+        for k in 0..n {
             m[k] = self.0[k] & !o.0[k];
         }
         Mono(m)
@@ -53,7 +116,8 @@ impl Mono {
     }
     pub fn vars(&self) -> Vec<usize> {
         let mut v = Vec::new();
-        for k in 0..W {
+        let n = active_limbs();
+        for k in 0..n {
             let mut w = self.0[k];
             while w != 0 {
                 let b = w.trailing_zeros() as usize;
@@ -65,16 +129,36 @@ impl Mono {
     }
 }
 
+/// Ascending key whose order is descending degrevlex (`cmp_mono(b, a)`).
+/// Degree is reversed; at equal degree the high limb compares first, and a
+/// set high bit makes the monomial smaller, so it sorts later.
+#[inline]
+fn mono_desc_key(m: &Mono) -> (u32, [u64; W]) {
+    let n = active_limbs();
+    let mut deg = 0u32;
+    let mut limbs = [0u64; W];
+    for k in 0..n {
+        deg += m.0[k].count_ones();
+        limbs[W - 1 - k] = m.0[k];
+    }
+    (!deg, limbs)
+}
+
 /// Degrevlex, variable `0` largest: higher degree wins; at equal degree the
 /// monomial *without* the smallest (highest-index) differing variable wins.
 #[inline]
 pub fn cmp_mono(a: &Mono, b: &Mono) -> Ordering {
-    let da = a.degree();
-    let db = b.degree();
+    let n = active_limbs();
+    let mut da = 0u32;
+    let mut db = 0u32;
+    for k in 0..n {
+        da += a.0[k].count_ones();
+        db += b.0[k].count_ones();
+    }
     if da != db {
         return da.cmp(&db);
     }
-    for k in (0..W).rev() {
+    for k in (0..n).rev() {
         let d = a.0[k] ^ b.0[k];
         if d != 0 {
             let h = 63 - d.leading_zeros();
@@ -99,10 +183,14 @@ impl Poly {
         Poly { terms: vec![] }
     }
     pub fn one() -> Poly {
-        Poly { terms: vec![Mono::ONE] }
+        Poly {
+            terms: vec![Mono::ONE],
+        }
     }
     pub fn var(i: usize) -> Poly {
-        Poly { terms: vec![Mono::var(i)] }
+        Poly {
+            terms: vec![Mono::var(i)],
+        }
     }
     pub fn constant(b: bool) -> Poly {
         if b {
@@ -113,18 +201,26 @@ impl Poly {
     }
     /// Sort and cancel duplicate monomials.
     pub fn from_terms(mut t: Vec<Mono>) -> Poly {
-        t.sort_by(|a, b| cmp_mono(b, a));
-        let mut out: Vec<Mono> = Vec::with_capacity(t.len());
-        for m in t {
-            if let Some(last) = out.last() {
-                if *last == m {
-                    out.pop();
-                    continue;
-                }
-            }
-            out.push(m);
+        match t.len() {
+            0 | 1 => return Poly { terms: t },
+            n if n <= 24 => t.sort_unstable_by(|a, b| cmp_mono(b, a)),
+            _ => t.sort_by_cached_key(mono_desc_key),
         }
-        Poly { terms: out }
+        // In-place GF(2) stack cancel. Writes stay at indices `< r`, so
+        // `t[r]` is still the sorted value.
+        let mut w = 0usize;
+        for r in 0..t.len() {
+            if w > 0 && t[w - 1] == t[r] {
+                w -= 1;
+            } else {
+                if w != r {
+                    t[w] = t[r];
+                }
+                w += 1;
+            }
+        }
+        t.truncate(w);
+        Poly { terms: t }
     }
     #[inline]
     pub fn is_zero(&self) -> bool {
@@ -197,8 +293,16 @@ impl Poly {
     /// Evaluate at a point given as a bitset over variables.
     pub fn eval(&self, point: &[u64; W]) -> bool {
         let mut acc = false;
+        let n = active_limbs();
         for m in &self.terms {
-            if (0..W).all(|k| m.0[k] & !point[k] == 0) {
+            let mut hits = true;
+            for k in 0..n {
+                if m.0[k] & !point[k] != 0 {
+                    hits = false;
+                    break;
+                }
+            }
+            if hits {
                 acc ^= true;
             }
         }
@@ -222,10 +326,52 @@ impl std::fmt::Display for Poly {
                 if v.is_empty() {
                     "1".to_string()
                 } else {
-                    v.iter().map(|i| format!("x{i}")).collect::<Vec<_>>().join("*")
+                    v.iter()
+                        .map(|i| format!("x{i}"))
+                        .collect::<Vec<_>>()
+                        .join("*")
                 }
             })
             .collect();
         write!(fm, "{}", parts.join(" + "))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn reference_from_terms(mut t: Vec<Mono>) -> Poly {
+        t.sort_by(|a, b| cmp_mono(b, a));
+        let mut out: Vec<Mono> = Vec::new();
+        for m in t {
+            if out.last() == Some(&m) {
+                out.pop();
+            } else {
+                out.push(m);
+            }
+        }
+        Poly { terms: out }
+    }
+
+    #[test]
+    fn from_terms_matches_degrevlex_cancel() {
+        let _g = LimbsGuard::set(2);
+        let mut monos = vec![Mono::ONE];
+        for i in 0..80 {
+            monos.push(Mono::var(i));
+            if i % 3 == 0 {
+                monos.push(Mono::var(i));
+                monos.push(Mono::var(i));
+            }
+            for j in (i + 1..80).step_by(7) {
+                monos.push(Mono::var(i).mul(&Mono::var(j)));
+            }
+        }
+        let got = Poly::from_terms(monos.clone());
+        let want = reference_from_terms(monos);
+        assert_eq!(got, want);
+        let triple = Poly::from_terms(vec![Mono::var(3), Mono::var(3), Mono::var(3)]);
+        assert_eq!(triple.terms, vec![Mono::var(3)]);
     }
 }

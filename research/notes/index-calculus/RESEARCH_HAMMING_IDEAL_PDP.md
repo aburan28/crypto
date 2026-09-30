@@ -150,7 +150,12 @@ RESULTS_TEXT
 - **The engine.** The tame depth depends on how much of the truncated basis
   the engine reaches within its budget: a better F4 (or Magma's) resolves
   higher in the tree. The budget-sensitivity cell in `RESULT.md` bounds
-  that dependence at `n = 11`; it does not remove it.
+  that dependence at `n = 11`; it does not remove it. A faster run of this
+  same engine, with the same `xor_words` and the same tame/wild verdict, is
+  recorded in
+  [`ENGINE_SPEED.md`](../../hamming_ideal_pdp_20260930/ENGINE_SPEED.md).
+  That change is engineering of the stage diagnostic's wall time. It does
+  not resolve a higher basis, and it is not a scoreboard row.
 - **The `r`-sweep of `GBDecode`.** The paper fixes `r` coordinates and
   enumerates `u` of weight `t̄` outside the algebra. Here `MultiSolve` does
   the fixing itself and the tame depth reports the `r` it needed; the
