@@ -5580,6 +5580,88 @@ The fit separates neither `1/6` nor 0.141 from zero.
   price as the table leaves cache (now smaller on `main`), and Bailey's
   walk.
 
+### 22.12 The next rounds, ranked
+
+This is a plan, recorded on 2026-09-30 after §22 merged. Nothing in it
+has run. Each round needs its own protocol, committed before it runs.
+
+1. **Recommended next (§23): resolve the top-end exponent.** Pending.
+   - **Why first.** Whether any work on constants can ever reach a
+     crossing depends on this exponent.
+     - The ratio to batch rho falls to 3.62× at `2^39` and rises to 9.20×
+       at `2^47.2`.
+     - The declared four-point fit reads `r^0.137` [−0.059, 0.332]. That
+       interval includes zero, and it separates neither the law's `1/6`
+       nor the model's 0.141 from it.
+     - §20.10 already named the cure: more sizes above `2^40`, or more
+       sets per size.
+   - **What.** A measurement round, with no code change, on current
+     `main`, every timed process isolated.
+     - Three new rungs, with prime `n`:
+       - `K_1/GF(2^71)`, `r = 2^49.1`;
+       - `K_0/GF(2^71)`, `r = 2^52.3`;
+       - `K_1/GF(2^83)`, `r = 2^52.9`.
+     - `K_0/GF(2^73)`, `r = 2^56.3`, if its pair table fits the host.
+       §20's rule applies: a refused grid point is recorded, not forced.
+     - Sets `M5`–`M8` at the four present largest sizes.
+     - §20's sweep and measurement procedure throughout, with batch rho in
+       the same process.
+   - **Cost, as an estimate.**
+     - §20's procedure prices each size about 18 times: 14 sweep points
+       and 4 sets.
+     - `2^47.2` takes 24 s and 218 MiB a pricing today. Scaled by `√r`
+       and by the table, a pricing near `2^52` is 2–4 minutes and a few
+       GiB.
+     - In all, about 3–4 hours of isolated runs. The table at `2^56.3`
+       is estimated near this host's 16 GB.
+   - **The target to declare.** Fit every size from `2^36.6` up. The
+     interval must either read 0 and `1/6` against each other, or the
+     round must say it cannot.
+   - **Scope.** `K_1/GF(2^83)` is of degree 83 but is `E_1`, not the
+     challenge family, so it does not discharge AGENTS.md §8a.
+2. **Hold the binary layout fixed.** Pending.
+   - A placebo rebuild of the baseline, measured as an A/A'.
+   - One codegen unit.
+   - Instruction counts beside the time.
+   - §22's one failed target, and the unit's shifts in §21 and §22, are
+     between-binary effects of 1–11%. Until they are held fixed, no
+     engineering round on this host can resolve a smaller change.
+   - About 1–2 hours.
+3. **The build's price as the table leaves cache.** Pending.
+   - §20.10 measured a stored pair at 4.98 units at `2^39` and 9.20 at
+     `2^47.2`, before `main`'s n59 stack made the top end cheaper.
+   - A cost that grows with the table bears on the top-end exponent as
+     well as the constant.
+   - Engineering, and best run after items 1 and 2.
+4. **The isolation gate's own pressure.** Pending.
+   - `tools/isolated_bench.py` refused most of §22's starts once, on the
+     CPU pressure left by the benchmark before. Each refusal waited 15 s.
+   - An opt-in wait for that pressure to decay would roughly halve an
+     isolated run.
+   - The tool is shared, so the change must be opt-in.
+5. **The small end's constants.** Pending, deprioritised.
+   - From §21.10 and §22.11: `FieldStructure::new`, the two big-integer
+     constructions, the identity check, the curve's setup, and the walk
+     and lookups.
+   - They move `S` below `2^32`, where the ratio is already 5–15× and
+     falls with size. They do not bear on the exponent.
+
+**Not planned on this host: the §8a gate.**
+- `E_0` over `GF(2^83)` has `r = 2^81.0`, with cofactor 4.
+- **Batch rho** at `S ≈ 0.06` a target would cost about
+  `0.06·2^40.5 ≈ 9·10^10` units a target. That is roughly 40 minutes a
+  target on this host.
+- **The thread** would cost more, by an amount the present fit cannot
+  pin down. *Extrapolated, not measured:* `ratio·√n ∝ r^β`, carried from
+  9.20× at `2^47.2`.
+  - At `β = 0.137` it puts the thread near 200× batch rho.
+  - Across the fit's interval, [−0.059, 0.332], it is anywhere from
+    about 2× to about 19,000×. Item 1 exists to narrow that.
+- **Memory:** the thread's pair table at that size would not fit this
+  host.
+- So the thread keeps high-fidelity ECC2K-130 improvement unestablished,
+  as §22.9 says.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
