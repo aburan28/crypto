@@ -292,6 +292,11 @@ struct S3Counts {
     table_lookup_probes: u64,
     table_insert_probes: u64,
     lift_attempts: u64,
+    root_keys_considered: u64,
+    prefilter_checks: u64,
+    prefilter_definite_misses: u64,
+    prefilter_false_positives: u64,
+    prefilter_true_positives: u64,
 }
 
 impl S3Counts {
@@ -303,6 +308,17 @@ impl S3Counts {
             self.consumed_candidates + self.discarded_candidates
         );
         assert!(self.table_lookup_probes >= self.table_lookups);
+        assert_eq!(
+            self.root_keys_considered,
+            self.table_lookups + self.prefilter_definite_misses
+        );
+        assert_eq!(
+            self.prefilter_checks,
+            self.prefilter_definite_misses
+                + self.prefilter_false_positives
+                + self.prefilter_true_positives
+        );
+        assert!(self.prefilter_checks == 0 || self.prefilter_checks == self.root_keys_considered);
         if window == 1 {
             assert_eq!(self.scalar_inversions, self.regular_calls);
             assert_eq!(self.batch_inversions, 0);
@@ -328,6 +344,11 @@ impl S3Counts {
         self.table_lookup_probes += other.table_lookup_probes;
         self.table_insert_probes += other.table_insert_probes;
         self.lift_attempts += other.lift_attempts;
+        self.root_keys_considered += other.root_keys_considered;
+        self.prefilter_checks += other.prefilter_checks;
+        self.prefilter_definite_misses += other.prefilter_definite_misses;
+        self.prefilter_false_positives += other.prefilter_false_positives;
+        self.prefilter_true_positives += other.prefilter_true_positives;
     }
 
     fn as_json(&self) -> Value {
@@ -345,6 +366,11 @@ impl S3Counts {
             "table_lookup_probes":self.table_lookup_probes,
             "table_insert_probes":self.table_insert_probes,
             "lift_attempts":self.lift_attempts,
+            "root_keys_considered":self.root_keys_considered,
+            "prefilter_checks":self.prefilter_checks,
+            "prefilter_definite_misses":self.prefilter_definite_misses,
+            "prefilter_false_positives":self.prefilter_false_positives,
+            "prefilter_true_positives":self.prefilter_true_positives,
         })
     }
 }
@@ -499,6 +525,61 @@ impl RootTable {
     }
 }
 
+/// Three hashes within one 64-byte block. Every inserted key sets all three
+/// bits; a definite miss is therefore safe to skip, regardless of collisions.
+struct BlockedBloom {
+    blocks: Vec<[u64; 8]>,
+}
+
+impl BlockedBloom {
+    fn with_capacity(expected_keys: usize) -> Self {
+        let blocks = expected_keys
+            .saturating_mul(12)
+            .div_ceil(512)
+            .next_power_of_two()
+            .max(1);
+        Self {
+            blocks: vec![[0; 8]; blocks],
+        }
+    }
+
+    #[inline(always)]
+    fn positions(&self, key: u64) -> (usize, [usize; 3]) {
+        let mut h = key.wrapping_add(0x9E37_79B9_7F4A_7C15);
+        h = (h ^ (h >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        h = (h ^ (h >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+        h ^= h >> 31;
+        (
+            (h as usize) & (self.blocks.len() - 1),
+            [
+                ((h >> 19) & 511) as usize,
+                ((h >> 28) & 511) as usize,
+                ((h >> 37) & 511) as usize,
+            ],
+        )
+    }
+
+    #[inline(always)]
+    fn insert(&mut self, key: u64) {
+        let (block, positions) = self.positions(key);
+        for position in positions {
+            self.blocks[block][position >> 6] |= 1u64 << (position & 63);
+        }
+    }
+
+    #[inline(always)]
+    fn may_contain(&self, key: u64) -> bool {
+        let (block, positions) = self.positions(key);
+        positions
+            .iter()
+            .all(|&position| self.blocks[block][position >> 6] & (1u64 << (position & 63)) != 0)
+    }
+
+    fn bytes(&self) -> usize {
+        self.blocks.len() * 64
+    }
+}
+
 struct State {
     left: u16,
     right: u16,
@@ -509,6 +590,7 @@ struct State {
 struct Index {
     states: Vec<State>,
     table: RootTable,
+    prefilter: Option<BlockedBloom>,
     shifted: Vec<Vec<u64>>,
     representative_candidates: usize,
 }
@@ -566,6 +648,7 @@ fn build_index(
     solver: &S3Solver,
     reps: &[u64],
     window: usize,
+    use_prefilter: bool,
     counts: &mut S3Counts,
 ) -> Index {
     let n = gf.n as usize;
@@ -640,9 +723,13 @@ fn build_index(
         );
     }
     let mut table = RootTable::with_capacity(states.len() * 2);
+    let mut prefilter = use_prefilter.then(|| BlockedBloom::with_capacity(states.len() * 2));
     for state in &states {
         for &root in &state.normal_roots {
             let (canonical, shift) = basis.canonical(root);
+            if let Some(filter) = prefilter.as_mut() {
+                filter.insert(canonical);
+            }
             counts.table_insert_probes += table.insert_if_absent(
                 canonical,
                 pack(state.left, state.right, state.relative, shift),
@@ -652,6 +739,7 @@ fn build_index(
     Index {
         states,
         table,
+        prefilter,
         shifted,
         representative_candidates,
     }
@@ -748,9 +836,24 @@ fn consume_query_batch(
         for partner in partners {
             *probes += 1;
             let (canonical, partner_shift) = basis.canonical(basis.to_normal.apply(partner));
+            counts.root_keys_considered += 1;
+            if let Some(filter) = &index.prefilter {
+                counts.prefilter_checks += 1;
+                if !filter.may_contain(canonical) {
+                    counts.prefilter_definite_misses += 1;
+                    continue;
+                }
+            }
             let (value, slot_probes) = index.table.get_counted(canonical);
             counts.table_lookups += 1;
             counts.table_lookup_probes += slot_probes;
+            if index.prefilter.is_some() {
+                if value.is_some() {
+                    counts.prefilter_true_positives += 1;
+                } else {
+                    counts.prefilter_false_positives += 1;
+                }
+            }
             let Some(value) = value else {
                 continue;
             };
@@ -1030,6 +1133,11 @@ fn main() {
         matches!(window, 1 | 16 | 64),
         "batch window must be 1, 16, or 64"
     );
+    let use_prefilter = match std::env::var("KIC_S3_PREFILTER").as_deref() {
+        Ok("blocked") => true,
+        Ok("off") | Err(_) => false,
+        _ => panic!("KIC_S3_PREFILTER must be off or blocked"),
+    };
     let constructed: Option<(u32, u8, usize)> =
         arguments[1].strip_prefix("construct:").map(|spec| {
             let parts: Vec<&str> = spec.split(':').collect();
@@ -1167,7 +1275,15 @@ fn main() {
 
     let index_started = Instant::now();
     let mut index_counts = S3Counts::default();
-    let index = build_index(&gf, &basis, &solver, &reps, window, &mut index_counts);
+    let index = build_index(
+        &gf,
+        &basis,
+        &solver,
+        &reps,
+        window,
+        use_prefilter,
+        &mut index_counts,
+    );
     index_counts.validate(window);
     let index_ms = index_started.elapsed().as_secs_f64() * 1000.0;
     let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
@@ -1404,6 +1520,9 @@ fn main() {
         "factor_base_points":base.points.len(),
         "index_policy":"swap_frobenius_quotient",
         "s3_batch_window":window,
+        "root_prefilter_policy":if use_prefilter { "blocked_bloom_512_3hash" } else { "off" },
+        "root_prefilter_bytes":index.prefilter.as_ref().map_or(0, BlockedBloom::bytes),
+        "root_prefilter_blocks":index.prefilter.as_ref().map_or(0, |filter| filter.blocks.len()),
         "index_s3_counts":index_counts.as_json(),
         "rank_s3_counts":rank_counts.as_json(),
         "target_s3_counts":target_counts.as_json(),
@@ -1519,7 +1638,19 @@ mod swap_quotient_tests {
             columns: 1,
         };
         let mut index_counts = S3Counts::default();
-        let index = build_index(&gf, &basis, &solver, &reps, 1, &mut index_counts);
+        let index = build_index(&gf, &basis, &solver, &reps, 1, false, &mut index_counts);
+        let mut filter_index_counts = S3Counts::default();
+        let filtered = build_index(
+            &gf,
+            &basis,
+            &solver,
+            &reps,
+            1,
+            true,
+            &mut filter_index_counts,
+        );
+        assert_eq!(filtered.table.slots, index.table.slots);
+        assert_eq!(filter_index_counts.as_json(), index_counts.as_json());
         let mut found = None;
         for i in 0..8 {
             for j in 0..8 {
@@ -1573,6 +1704,30 @@ mod swap_quotient_tests {
                 scalar_counts.consumed_candidates
             );
             assert!(counts.discarded_candidates < window as u64);
+            let mut filter_counts = S3Counts::default();
+            let filtered_relation = extract(
+                &gf,
+                &fast,
+                &basis,
+                &solver,
+                &filtered,
+                &base,
+                q,
+                0,
+                window,
+                &mut filter_counts,
+            )
+            .unwrap();
+            filter_counts.validate(window);
+            assert_eq!(filtered_relation.point_indices, actual.point_indices);
+            assert_eq!(filtered_relation.x_codes, actual.x_codes);
+            assert_eq!(filtered_relation.intermediates, actual.intermediates);
+            assert_eq!(filtered_relation.probes, actual.probes);
+            assert_eq!(
+                filter_counts.root_keys_considered,
+                counts.root_keys_considered
+            );
+            assert_eq!(filter_counts.calls, counts.calls);
         }
         // This deliberately invalid point cannot be a sum of curve points.
         // Its complete scan ends in a non-full batch, whose actual work is counted.
@@ -1609,6 +1764,60 @@ mod swap_quotient_tests {
         assert_eq!(batch_counts.calls, scalar_counts.calls);
         assert_ne!(batch_counts.calls % 64, 0);
         assert_eq!(batch_counts.discarded_candidates, 0);
+        let mut filtered_counts = S3Counts::default();
+        assert!(extract(
+            &gf,
+            &fast,
+            &basis,
+            &solver,
+            &filtered,
+            &base,
+            impossible,
+            0,
+            64,
+            &mut filtered_counts
+        )
+        .is_none());
+        filtered_counts.validate(64);
+        assert_eq!(filtered_counts.calls, batch_counts.calls);
+        assert_eq!(
+            filtered_counts.root_keys_considered,
+            batch_counts.root_keys_considered
+        );
+        assert!(filtered_counts.prefilter_definite_misses > 0);
+    }
+
+    #[test]
+    fn exhaustive_gf32_root_filter_only_skips_absent_keys() {
+        let gf = Gf2::new(&IrreduciblePoly {
+            degree: 5,
+            low_terms: vec![0, 2],
+        });
+        let basis = NormalBasis::new(&gf);
+        let solver = S3Solver::new(&gf, 1);
+        let mut table = RootTable::with_capacity(2048);
+        let mut filter = BlockedBloom::with_capacity(2048);
+        for left in 0..32 {
+            for right in 0..32 {
+                if let Some(roots) = solver.roots(&gf, &basis, left, right) {
+                    for root in roots {
+                        let (key, _) = basis.canonical(basis.to_normal.apply(root));
+                        filter.insert(key);
+                        table.insert_if_absent(key, left * 32 + right);
+                    }
+                }
+            }
+        }
+        let mut skipped_absent = 0;
+        for key in 0..4096u64 {
+            let actual = table.get(key);
+            if !filter.may_contain(key) {
+                assert!(actual.is_none(), "false negative for canonical root {key}");
+                skipped_absent += 1;
+            }
+        }
+        assert!(table.len > 0);
+        assert!(skipped_absent > 3000);
     }
 
     #[test]
@@ -1624,7 +1833,7 @@ mod swap_quotient_tests {
         let solver = S3Solver::new(&gf, 1);
         let reps: Vec<u64> = (0..(1u64 << 5)).collect();
         let mut counts = S3Counts::default();
-        let index = build_index(&gf, &basis, &solver, &reps, 1, &mut counts);
+        let index = build_index(&gf, &basis, &solver, &reps, 1, false, &mut counts);
         counts.validate(1);
         let n = gf.n as usize;
         let ordered = reps.len() * reps.len() * n;

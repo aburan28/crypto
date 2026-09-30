@@ -246,11 +246,22 @@ artifacts were uploaded; see the
 [censored result](generic-backend-qualification-v2/RESULT.md). Never redispatch
 seed `2026092902`. Family qualification and competitive costs are unknown. Any
 later registration must exclude all three sealed rounds, the 25 reconstructed
-first-run points, and every public point this second dispatch could have
-generated once reconstructed at the pinned checkout. The static F4/F5 encoder
+first-run points, and the 25 second-run points sealed as
+`lost-v2-campaign-exposures.json` (SHA-256
+`0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54`;
+exposure-census PR). The static F4/F5 encoder
 audit and the disclosed-point
 [dimension-6 pilot](generic-f4-subspace-pilot/RESULT.md) remain separate
 diagnostics.
+
+The next planned competitive registration is
+[generic-backend-qualification-v3](generic-backend-qualification-v3/PROTOCOL.md):
+seed `2026093001`, smoke-only schedule, `standard_subspace` dimension 6 for
+algebraic arms (`factor-base-policy`), F4/F5 family only (SAT deferred), 180/35/240
+minute measure/pack/job caps. Panel intent SHA-256
+`df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`.
+Planning only; no dispatch until the runner/workflow and both exposure corpora
+are on `main`.
 
 Post-registration source audit (PR
 [#952](https://github.com/aburan28/crypto/pull/952)): the pinned `m=3` Semaev

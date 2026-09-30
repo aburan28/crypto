@@ -1,0 +1,9 @@
+{
+  "machine": "arm64",
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "schema": "compact-s3-prefilter-second-host-v1",
+  "source_head": "96cf142a4bea65120ccb3985b20c4e2de6876685",
+  "utc_recorded": "2026-09-30T04:03:41.909634+00:00",
+  "verification_command": "python3 research/notes/ecc2k130/compact_s3_prefilter_20260930/verify_archive_portable.py --n {41,53} --run-dir /private/tmp/s3filter-repeat-96cf142a/n{n}_L1024 --out /private/tmp/s3filter-portable-repeat-96cf142a/n{n}_L1024.json"
+}
