@@ -1,4 +1,8 @@
-//! `F_{2^n}` on `u64`, `n ≤ 40`, polynomial basis, plus a normal basis.
+//! `F_{2^n}` on `u64`, `1 ≤ n ≤ 63`, polynomial basis, plus a normal basis.
+//!
+//! `n = 83` does not fit. The irreducible needs bit `n` set in a `u64`, and
+//! the normal-basis inverse is a `u128` row of width `2n` (`n + (n − 1) < 128`).
+//! Callers that scan `1 << n` are gated on their own; this type stops at 63.
 
 #[derive(Clone, Debug)]
 pub struct Field {
@@ -111,6 +115,10 @@ pub fn rank_f2(rows: &[u64]) -> usize {
 
 impl Field {
     pub fn new(n: u32) -> Field {
+        assert!(
+            (1..64).contains(&n),
+            "F_2^n is a u64 polynomial basis; n = 83 needs a multi-limb field"
+        );
         let irr = find_irreducible(n);
         let mut f = Field {
             n,
@@ -148,7 +156,9 @@ impl Field {
             })
             .collect();
         for col in 0..nn {
-            let p = (col..nn).find(|&i| (aug[i] >> col) & 1 == 1).expect("singular");
+            let p = (col..nn)
+                .find(|&i| (aug[i] >> col) & 1 == 1)
+                .expect("singular");
             aug.swap(col, p);
             let piv = aug[col];
             for i in 0..nn {
@@ -165,7 +175,10 @@ impl Field {
             let u = f.to_normal(x);
             let u2 = f.to_normal(f.sqr(x));
             let shifted = ((u << 1) | (u >> (n - 1))) & f.mask;
-            assert_eq!(u2, shifted, "normal basis: Frobenius must be a cyclic shift");
+            assert_eq!(
+                u2, shifted,
+                "normal basis: Frobenius must be a cyclic shift"
+            );
             assert_eq!(f.from_normal(u), x);
         }
         f
