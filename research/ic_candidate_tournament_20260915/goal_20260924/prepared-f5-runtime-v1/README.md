@@ -1,5 +1,12 @@
 # Prepared F5 native source and runtime
 
+The retained-input format is version one; the executable adapter is
+`prepared_f5_runtime_v2.py`. The accepted registrar from PR #1096 remains
+available as `prepared_f5_runtime_v1.py`, with its original panel and asset
+schema. Version two adds pinned mathematical-only build inputs, strict native
+recipe/platform admission, retained concrete assets and preexecution-frozen
+audit transport without replacing that API or freezing an invocation.
+
 This follow-up implements the missing source/build/registration and frozen-audit
 transport for the target-only F5 adapter accepted in
 [PR #1093](https://github.com/aburan28/crypto/pull/1093), merge
@@ -18,7 +25,7 @@ validators, archives and consumed registrations remain unchanged.
 
 `prepared_f5_inputs_v1.py` verifies a new controlled worker build and retains all
 root and registry dependency source bytes before sealing assets.
-`prepared_f5_runtime_v1.py` freezes canonical math/code identity and a separate
+`prepared_f5_runtime_v2.py` freezes canonical math/code identity and a separate
 one-use invocation containing the certificate, supplied point, seeds and limits.
 Its entrypoint uses the existing isolated Python/native wrappers, registered
 stdin and controller watchdog. Only disclosed n17 controls are admitted.

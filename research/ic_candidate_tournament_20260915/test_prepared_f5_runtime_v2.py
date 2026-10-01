@@ -15,7 +15,7 @@ from identity import sha256
 from oracle import InvalidEvidence
 from prepared_f5_inputs_v1 import (MATHEMATICS, MATHEMATICS_SHA256, WORKER,
     WORKER_SOURCE_SHA256, archive_members, digest, native_admission, source_archive)
-from prepared_f5_runtime_v1 import (audit, mathematical_registration, register,
+from prepared_f5_runtime_v2 import (audit, mathematical_registration, register,
     run, transport)
 from prepared_target_v1 import CERTIFICATE_SEALS
 from sat_runtime_execution_v3 import audit_execution, binding, execute, register as register_runtime
@@ -26,7 +26,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 
 
-class PreparedF5RuntimeTests(unittest.TestCase):
+class PreparedF5RuntimeV2Tests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.docs = {family:json.loads((HERE/'goal_20260924/prepared-ic-state-v1'/
@@ -35,7 +35,7 @@ class PreparedF5RuntimeTests(unittest.TestCase):
         manifest,seal = [json.loads((cls.assets/name).read_text()) for name in ('manifest.json','seal.json')]
         cls.files = verified_assets(cls.assets,manifest,seal)
         cls.build,cls.source,cls.native = native_admission(cls.files)
-        cls.spec = dict(entrypoint=dict(module='prepared_f5_runtime_v1',callable='run'),
+        cls.spec = dict(entrypoint=dict(module='prepared_f5_runtime_v2',callable='run'),
             runtime_watchdog_seconds=600,runtime_seal=dict(manifest_sha256='a'*64,archive_sha256='b'*64),
             asset_manifest=manifest,asset_seal=seal,interpreter={'scope':'registration control only'})
         cls.spec['binding'] = binding(cls.spec)
@@ -150,19 +150,19 @@ class PreparedF5RuntimeTests(unittest.TestCase):
             (directory/'pipeline.metrics.json').write_text(json.dumps(process))
             return process
 
-        with patch('prepared_f5_runtime_v1.check_extracted_assets',return_value=self.files),\
+        with patch('prepared_f5_runtime_v2.check_extracted_assets',return_value=self.files),\
              patch('prepared_f5_inputs_v1.platform.system',return_value='Darwin'),\
              patch('prepared_f5_inputs_v1.platform.machine',return_value='arm64'),\
-             patch('prepared_f5_runtime_v1.meter',side_effect=native_meter) as calls:
+             patch('prepared_f5_runtime_v2.meter',side_effect=native_meter) as calls:
             result = run(arguments,out)
             self.assertEqual(calls.call_count,2)  # One preflight, exactly one native attempt; no retry.
         return arguments,spec,report,process,result
 
     def audit_control(self,root,spec,process):
-        with patch('prepared_f5_runtime_v1.audit_execution',return_value={'entrypoint_succeeded':True,
+        with patch('prepared_f5_runtime_v2.audit_execution',return_value={'entrypoint_succeeded':True,
                         'scope':'mock source gates; no new execution admitted by this test'}),\
-             patch('prepared_f5_runtime_v1.check_extracted_assets',return_value=self.files),\
-             patch('prepared_f5_runtime_v1.audit_meter',side_effect=lambda *a,**k:
+             patch('prepared_f5_runtime_v2.check_extracted_assets',return_value=self.files),\
+             patch('prepared_f5_runtime_v2.audit_meter',side_effect=lambda *a,**k:
                    dict(returncode=0,timed_out=False) if a[2]=='build_identity' else process):
             return audit(root,spec)
 
@@ -204,7 +204,7 @@ class PreparedF5RuntimeTests(unittest.TestCase):
             self.assertEqual(spec['arguments']['seal']['registration_stage'],'before-execution')
             with self.assertRaises(InvalidEvidence):
                 register(ROOT,self.assets,self.panel,self.docs['f5'],CERTIFICATE_SEALS['f5'],root/'registered')
-            with patch('prepared_f5_runtime_v1.subprocess.run',side_effect=AssertionError('no audit child may run')):
+            with patch('prepared_f5_runtime_v2.subprocess.run',side_effect=AssertionError('no audit child may run')):
                 with self.assertRaises((InvalidEvidence,FileNotFoundError)):
                     transport(root/'registered',sha256(spec),root/'transport')
             self.assertFalse((root/'transport').exists())
@@ -212,7 +212,7 @@ class PreparedF5RuntimeTests(unittest.TestCase):
     def test_new_adapters_import_from_the_real_fresh_isolated_source_snapshot(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            modules = ['prepared_f5_runtime_v1','prepared_sat_runtime_v1']
+            modules = ['prepared_f5_runtime_v2','prepared_sat_runtime_v1']
             spec = register_runtime(ROOT,root/'registration',module='sat_runtime_execution_v3',
                 action='import_probe',arguments=modules,timeout_seconds=60)
             process = execute(root/'registration',root/'execution',expected_spec=spec,timeout_seconds=60)

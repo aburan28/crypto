@@ -59,7 +59,7 @@ def mathematical_registration(panel, spec, files, document, certificate_sha256):
             and type(resources['total_wall_limit_seconds']) is int
             and 31 <= resources['total_wall_limit_seconds'] <= 900,
             'prepared F5 requires a bounded one-worker control envelope')
-    require(spec['entrypoint'] == dict(module='prepared_f5_runtime_v1',callable='run')
+    require(spec['entrypoint'] == dict(module='prepared_f5_runtime_v2',callable='run')
             and spec['runtime_watchdog_seconds'] == resources['total_wall_limit_seconds'],
             'prepared F5 entrypoint or controller watchdog differs')
     job = native_job(document, certificate_sha256, point=panel['target_input']['point'],
@@ -118,7 +118,7 @@ def register(repository, assets, panel, document, certificate_sha256, output):
     assets = Path(assets)
     files = verified_assets(assets,read(assets/'manifest.json'),read(assets/'seal.json'))
     native_admission(files,check_host=True)
-    return register_runtime(repository,output,module='prepared_f5_runtime_v1',action='run',arguments=None,
+    return register_runtime(repository,output,module='prepared_f5_runtime_v2',action='run',arguments=None,
         timeout_seconds=panel['resources']['total_wall_limit_seconds'],asset_snapshot=assets,
         arguments_factory=lambda spec:mathematical_registration(panel,spec,files,document,certificate_sha256))
 
@@ -248,7 +248,7 @@ def transport(execution, expected_sha256, out):
             'prepared F5 transport seal, interpreter or one-use output differs')
     audit_execution(execution,spec)
     out.mkdir(parents=True)
-    script = execution/'extracted'/ 'research/ic_candidate_tournament_20260915/prepared_f5_runtime_v1.py'
+    script = execution/'extracted'/ 'research/ic_candidate_tournament_20260915/prepared_f5_runtime_v2.py'
     command = [sys.executable,'-I','-S','-B',str(script),'_frozen-audit',
                '--execution',str(execution),'--expected-execution-sha256',expected_sha256,'--out',str(out)]
     timed_out = False

@@ -1,5 +1,11 @@
 # Prepared F5 source and invocation binding, version one
 
+This retained-input/transport protocol uses `prepared_f5_runtime_v2.py`.
+The registrar merged in PR #1096 remains unchanged as
+`prepared_f5_runtime_v1.py`; its panel/asset schema and unexecuted state are
+preserved. Version two uses the stricter retained input below and adds frozen
+audit transport. Neither registrar's existence authorizes a solver execution.
+
 This is the next implementation gate toward the active complete F4/F5 and SAT
 one-target goal. All three old confirmations, both censored generic studies and
 the accepted historical F5/SAT invocations remain consumed and closed. This

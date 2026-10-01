@@ -125,7 +125,7 @@ math preparation and executed code; certificate/build/transport evidence remains
 in the frozen run. Do not bypass a consumed registrar or weaken a source gate.
 
 The [prepared F5 source/runtime follow-up](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-runtime-v1/README.md)
-adds `prepared_f5_inputs_v1.py` and `prepared_f5_runtime_v1.py`. Its rebuilt worker
+adds `prepared_f5_inputs_v1.py` and `prepared_f5_runtime_v2.py`. Its rebuilt worker
 retains all Rust dependency sources and a mathematical-only unit fixture;
 historical certificates remain invocation data. Its audit CLI runs the
 preexecution-frozen auditor in a fresh isolated interpreter and executes no
