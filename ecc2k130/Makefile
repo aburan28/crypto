@@ -928,4 +928,8 @@ test-cycle-escape:
 	./build/test-cycle-escape
 	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-hybrid
 	./build/test-cycle-escape-hybrid
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_CYCLE_FAST2=1 src/testcycleescape.cpp -o build/test-cycle-escape-fast2
+	./build/test-cycle-escape-fast2
+	$(CXX) -O2 -std=c++17 -Wno-unknown-pragmas -DECC_CYCLE_FAST2=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-fast2-hybrid
+	./build/test-cycle-escape-fast2-hybrid
 .PHONY: test-cycle-escape
