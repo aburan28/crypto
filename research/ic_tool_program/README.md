@@ -16,5 +16,5 @@ It adds each part with the round that creates it:
 
 | round | what | state | PR |
 |:--|:--|:--|:--|
-| plan | goals, suite, measurement, loop, backlogs | this PR | — |
-| R01 | baseline v0: freeze suite v1, pin against §23, profile every phase, A/A | pending | — |
+| plan | goals, suite, measurement, loop, backlogs | merged | #1103 |
+| R01 | baseline v0: freeze suite v1, pin against §23, profile every phase, A/A | declared ([`rounds/R01-baseline-v0/`](rounds/R01-baseline-v0/PROTOCOL.md)) | this branch |
