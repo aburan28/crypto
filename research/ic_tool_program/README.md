@@ -14,7 +14,7 @@ It adds each part with the round that creates it:
 | `rounds/R<k>-<slug>/` | one round: `PROTOCOL.md` committed before its candidate code, then its runs (as `runs.tar.xz` with its SHA-256), analysis, decision and README | each round |
 | `baselines.json` | the ledger's rows as data: baseline, commit, binary hash, host and per-size figures | R01, then every accepted round |
 | `conformance/v1/` | the conformance (C) suite: one case per defect or refusal, and its runner | B0 |
-| `design/` | Track B's designs: the schema, the checks, the routing, and the cases each B step is judged against | B1 |
+| `design/` | Track B's designs: the schema, the checks, the routing, and the cases each B step is judged against ([`schema-v2.md`](design/schema-v2.md)); the F1 sampled level ([`f1-sampled.md`](design/f1-sampled.md)) | B1, B7 |
 | `conformance/v2/` | B1's cases and their parameter files, the script that writes and checks them, and the runner (v1's cases, then v2's) | B1 |
 | `conformance/v2-b2/` | B2's cases (C032–C051) beside B1's frozen ones | B2 |
 | `conformance/v2-b2b/` | B2b's cases (C059–C070) beside the earlier steps' frozen ones | B2b |
