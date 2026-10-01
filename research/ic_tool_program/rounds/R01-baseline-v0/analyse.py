@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """R01's figures (PROTOCOL.md, "Figures"), from runs/ only.
 
-    python3 analyse.py > analysis.json
+    tar -xJf runs.tar.xz && python3 analyse.py > analysis.json
 """
 from __future__ import annotations
 

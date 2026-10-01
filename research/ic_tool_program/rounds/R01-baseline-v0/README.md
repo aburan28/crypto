@@ -255,7 +255,7 @@ differ only in two hyperelliptic files the pipeline does not call.
 
 ## Correction to the host manifest
 
-`runs/host.json` records the build commit as `4afd2990b6fd`. That was a
+`runs/host.json` (in `runs.tar.xz`) records the build commit as `4afd2990b6fd`. That was a
 typing error at launch. The binary was built from
 `4afd29903e4fcf65c1d7096083bbe9b9f5ec0a66`, whose `src/` tree is
 `003badc259bcef6e56ad19ac8ae93df4221ffe6e`, as the same manifest
@@ -268,7 +268,29 @@ correction.
 |:--|:--|
 | `PROTOCOL.md` | the declaration (#1104) |
 | `run.py`, `analyse.py` | the steps and the figures |
-| `analysis.json` | every figure above (`IC_RUNS=runs python3 analyse.py`) |
+| `analysis.json` | every figure above, derived from the run tree |
+| `runs.tar.xz`, `runs.tar.xz.sha256` | the run tree, 1,282 files, as one archive: 2,083,252 bytes, SHA-256 `ae20e0bd…` |
+
+The run tree is committed as one archive because its directories are
+named by the suite's row ids. AGENTS.md §11, which landed after the run,
+refuses those stems in new file names. It also says evidence keeps the
+names it was written with. The archive does both: every name and byte
+inside it is as the run wrote it. To audit the figures:
+
+```
+cd research/ic_tool_program/rounds/R01-baseline-v0
+sha256sum -c runs.tar.xz.sha256
+tar -xJf runs.tar.xz            # runs/, which .gitignore keeps out of git
+python3 analyse.py | cmp - analysis.json
+```
+
+The archive is deterministic (`tar --sort=name --mtime='2026-10-01 00:00:00Z'
+--owner=0 --group=0 --numeric-owner --mode='u+rwX,go+rX,go-w' --format=gnu`,
+then `xz -6 -T1`), so packing the extracted tree again gives the same
+bytes. Inside it:
+
+| path in the archive | what it is |
+|:--|:--|
 | `runs/host.json` | the host manifest (see the correction) |
 | `runs/pin/`, `runs/smoke/` | the pin against §23, and the smoke rows |
 | `runs/profile/`, `runs/aa/`, `runs/thp/` | each process's report, isolation record and stderr; `-retry1` files are reruns of contended attempts, which are kept |

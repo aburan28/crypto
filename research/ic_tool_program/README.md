@@ -9,7 +9,7 @@ It adds each part with the round that creates it:
 |:--|:--|:--|
 | `suite/v1/` | the frozen suite: parameter files, `SUITE.json` with every file's SHA-256, and the script that wrote them | R01 |
 | `harness/` | the shared runner (ABAB order, isolation, resumable, never overwrites) and the analysis | R01 |
-| `rounds/R<k>-<slug>/` | one round: `PROTOCOL.md` committed before its candidate code, then its runs, analysis, decision and README | each round |
+| `rounds/R<k>-<slug>/` | one round: `PROTOCOL.md` committed before its candidate code, then its runs (as `runs.tar.xz` with its SHA-256), analysis, decision and README | each round |
 | `baselines.json` | the ledger's rows as data: baseline, commit, binary hash, host and per-size figures | R01, then every accepted round |
 
 ## Status
