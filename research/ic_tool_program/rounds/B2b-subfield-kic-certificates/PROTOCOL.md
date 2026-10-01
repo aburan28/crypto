@@ -249,3 +249,55 @@ declared again, by amendment.
 - The pin and the translation: 270 untimed processes.
 - The timing check: 220 processes, about 90 minutes.
 - The sweep: 40 processes, a few minutes.
+
+## Amendment 1 (2026-10-01, before any B2b measurement)
+
+Written once B2b's code passed every selected case (C001–C070 under
+`--steps B0,B1,B2,B2b,B3`, 69 of 69), and before the first measurement.
+It records where the code makes the text above exact. No case, and no
+pinned file, changes.
+
+1. **Targets on a curve over a subfield.** When `kic` takes a curve
+   with `k > 1`, `random_seed` and `public_hash_seed` follow the v2 rules
+   (B2's amendment 1, item 9), as every other pipeline does on such a
+   curve.
+   - So `solve: paired`, `index_calculus` and `rho` on one document find
+     the same point.
+   - On a Koblitz curve, `kic` keeps v1's rules.
+   - The target record names the rule: `random_seed_v2` or
+     `public_hash_seed_v2`.
+2. **v1's generator rule with `k > 1`.** A translated v1 workflow of a
+   subfield curve names its generator by v1's rule.
+   - The workflow parameters then name the curve as v1 does: `subfield`,
+     and `a` and `b` by their coordinates in the basis
+     `KoblitzCurve::subfield` builds.
+   - `kic` builds the curve with v1's constructor, under the
+     repository's modulus.
+   - Under another modulus the rule is `not-yet-supported`, as it is for
+     `k = 1`.
+3. **The v1 translation** of a subfield workflow names `rho-negation` as
+   its rho, since `rho-koblitz` takes `k = 1` only.
+4. **`kic` beside another plain rho.**
+   - Where a document names `rho-bignum` beside `kic`, the pair runs as
+     the `rho-negation` pair does, with the big-integer walk.
+   - Where a document names `rho-negation` beside `kic` on a Koblitz
+     curve, the pair runs the same way and gets the same disclosure, with
+     `subfield_degree` 1.
+   - `rho-koblitz` beside `kic` keeps B1's path, unchanged.
+5. **The certificate binding.** For `k > 1`, a certificate's curve
+   binding and the identity fixture also bind `subfield`, `a` and `b`. A
+   Koblitz curve's are unchanged, so the pin is unaffected.
+6. **The resolved document** carries the certificates the document gave,
+   so running it proves what the document proved.
+7. **The report keys.**
+   - The `kic` reports add an `ic` object: `pipeline`,
+     `subfield_degree` and `recipe_source`.
+   - The plain-rho pair adds `rho.pipeline`, `rho_counts`, `rho_policy`
+     and `ic_and_rho_agree`.
+   - The rho arm's interval maps its whole call to `rho_solve`. Its
+     stages are the jump table, the walk, the collision and the recovery
+     check.
+8. **A development check.** The sweep ran once against the development
+   build on 2026-10-01. All 40 runs completed and replayed, and it found
+   nothing. That was a development check, not B2b's measurement:
+   measurement 6 runs on B2b's build.
