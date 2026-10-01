@@ -149,10 +149,12 @@ with `c = −c₀ mod p`, so elements need no map.
 
 **Set-up and online.**
 - **Set-up:** the subspace factor base (`SubspaceBase::build`, about
-  `p/2` points), and the symmetrised `S₄`'s precomputation when the
-  oracle is `groebner`.
+  `p/2` points).
 - **Online:** relation collection on random `R = [a]G + [b]Q`, the
-  linear algebra and the logarithm.
+  linear algebra and the logarithm. With the `groebner` oracle, the
+  symmetrised `S₄`'s once-per-curve precomputation is inside this
+  interval too: the module runs it inside its run, and the import does
+  not change the module.
 - As for B2's imported pipelines, the online work is not split into
   AGENTS.md's five exclusive phases, so the report marks the pair
   ineligible for a speedup claim.
@@ -209,7 +211,21 @@ in [`../rounds/B5a-extension-fields/estimates.json`](../rounds/B5a-extension-fie
 | `rho-bignum` | the same, at its step cost by the width of `q` | provisional, then set by measurement 6 |
 | `ic-gaudry-cubic` | its measured cost at its largest rung, carried along its fitted exponent, as `imported_ic` does for `ic-prime-s3` | the anchor is §11.2's: `p = 2083`, `n = 2^33.1`, `361.7·10⁶` operations, `ops ∝ n^{0.69}`. Measurement 6 re-anchors it on the reference host |
 
-### 2.7 Disclosures for every extension instance
+### 2.7 Targets and F1
+
+**Targets.** `known_log` and `random_seed` are B2's rules, as on every
+kind. `public_hash_seed` is the prime field's rule read on the packing:
+- `x` is the element whose packing `Σ x_i p^i` is `H mod q`, where `H` is
+  the first `bits(q) + 64` bits of B2's counter-mode output under its
+  label;
+- `y` is the root with the smaller packing;
+- the target is that point times `h`, the first that is not the identity.
+
+**F1.** F1 has no model on extension fields: B7a samples `kic` and the
+rho walks on binary and prime fields. `fidelity: F1` on an extension
+instance is refused as `no-f1-model`; F0 runs there.
+
+### 2.8 Disclosures for every extension instance
 
 `intermediate-subfields` (B2) states the proper divisors `d` of `k`.
 B5a adds `curve-subfield` for extension fields:
@@ -300,5 +316,5 @@ is `instances.json`.
   not beat rho.
 - **Characteristic 3.** It is still refused at validation.
 - **The `p^d`-power Frobenius** of a curve over a subfield, which rho
-  could fold. It is disclosed (§2.7), not used.
+  could fold. It is disclosed (§2.8), not used.
 - **No speed claim.** These are new rows, measured as new rows.
