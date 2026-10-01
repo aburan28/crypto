@@ -23,6 +23,7 @@
 //!     rr_degree_ladder --a 1 --n 17 --ell 4 --unsat 4 --max-draws 256 --d-max 8 \
 //!         --seed 20260930 --out cell.jsonl
 //!
+//! `--resume` appends to an existing `--out`, replaying its completed draws unmeasured.
 //! `--check` brute-forces the `rr` root count over its cube and the `x4` system at every
 //! point of `V³`, and compares both with the group-arithmetic counts (tiny cells only).
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement, IrreduciblePoly};
@@ -375,13 +376,44 @@ fn main() {
     let d_max_x4 = num("--d-max-x4", 9) as u32;
     let seed = num("--seed", 20260930);
     let check = args.iter().any(|s| s == "--check");
+    let resume = args.iter().any(|s| s == "--resume");
     assert!((2..=8).contains(&ell), "need 2 ≤ ℓ ≤ 8");
+    // `--resume`: an existing `--out` is read for the draws it already completed (an
+    // `rr` final line that is satisfiable, or a `ctrl` final line), which are replayed
+    // through the generator without measuring, and the file is appended to.  Earlier
+    // provisional lines of an interrupted draw stay; the last line per draw and arm
+    // is the result.
+    let mut completed: std::collections::HashMap<u32, bool> = std::collections::HashMap::new();
     let mut out = get("--out").map(|p| {
-        assert!(
-            !std::path::Path::new(&p).exists(),
-            "--out exists; never overwritten"
-        );
-        std::fs::File::create(p).expect("create --out")
+        let path = std::path::Path::new(&p);
+        if resume && path.exists() {
+            for line in std::fs::read_to_string(path).expect("read --out").lines() {
+                let v: serde_json::Value = serde_json::from_str(line).expect("json line");
+                let (d, arm) = (
+                    v["draw"].as_u64().unwrap() as u32,
+                    v["arm"].as_str().unwrap(),
+                );
+                let o = &v["outcome"];
+                if o["partial"].as_bool().unwrap_or(false) {
+                    continue;
+                }
+                if arm == "rr" && o["kind"] == "satisfiable" {
+                    completed.insert(d, true);
+                } else if arm == "ctrl" {
+                    completed.insert(d, false);
+                }
+            }
+            std::fs::OpenOptions::new()
+                .append(true)
+                .open(path)
+                .expect("append --out")
+        } else {
+            assert!(
+                !path.exists(),
+                "--out exists; never overwritten (use --resume)"
+            );
+            std::fs::File::create(path).expect("create --out")
+        }
     });
 
     let kc = KoblitzCurve::new(a, n).unwrap_or_else(|| panic!("no curve K_{a}/2^{n}"));
@@ -413,6 +445,14 @@ fn main() {
         let in_v: HashSet<u64> = v.iter().map(word).collect();
         if in_v.contains(&word(x_r)) {
             skipped += 1;
+            continue;
+        }
+        if let Some(&was_sat) = completed.get(&draw) {
+            if was_sat {
+                sat += 1;
+            } else {
+                unsat += 1;
+            }
             continue;
         }
         let base: Vec<BinaryPoint> = v.iter().flat_map(|x| points_over(&kc, x)).collect();
@@ -485,5 +525,8 @@ fn main() {
         }
         let _ = started;
     }
-    eprintln!("{cell}: {unsat} unsat, {sat} sat, {skipped} skipped (x_R ∈ V)");
+    eprintln!(
+        "{cell}: {unsat} unsat, {sat} sat, {skipped} skipped (x_R ∈ V), {} replayed from --out",
+        completed.len()
+    );
 }

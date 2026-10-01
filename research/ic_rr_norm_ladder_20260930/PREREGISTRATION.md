@@ -196,3 +196,26 @@ Two Koblitz curves, `n` 13–19, `ℓ` 2–6, `m = 3`, one engine's `solving_deg
 `d_max = 7` (`9` for `x4`), four rootless draws per cell. Nothing here is an end-to-end cost, nothing
 transfers to `n ≈ 83` or 131, and a refutation degree is a stage diagnostic (AGENTS.md
 §2, §5).
+
+## Amendment 1 (2026-10-01T01:50Z, additive): resumable cells
+
+The registered run started at 00:47:15Z on commit `9f0dc489` and was cut within a minute
+when the session's container was reclaimed; every lane had written only provisional `x4`
+lines. A detached process does not survive the container, and a tracked one is cut at two
+hours, so the run must survive cuts. Nothing above about the cells, seeds, arms, degrees,
+metric or decision rule changes. What changes:
+
+- **Cells resume at draw granularity.** `rr_degree_ladder --resume` reads the cell's
+  existing output, replays through the generator the draws it already completed (an `rr`
+  final line that is satisfiable, or a `ctrl` final line) without measuring them, and
+  appends. Draws are seeded, so a replayed draw is the same draw. Provisional lines of an
+  interrupted draw stay in the file; the last line per draw and arm is still the result.
+- **Up to three attempts of 6,000 CPU-s per cell** (`run.sh`, `*.attempts`), in place of
+  one of 9,000: a cell killed by its limit or by the container is retried where it stopped,
+  and its last attempt's exit status is recorded. The cumulative cap, 18,000 CPU-s, is
+  above the registered 9,000; a cell that exhausts it is censored where it stands.
+- **The same output directory** continues, with `resumes.txt` recording each resume, its
+  commit and binary hash. The first attempt's provisional lines are kept.
+- The instrument commit for the resumed run is the one carrying this amendment; the
+  `rr`, `x4` and `ctrl` builders are untouched (their source is diffable against
+  `9f0dc489`).
