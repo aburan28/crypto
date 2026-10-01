@@ -226,3 +226,34 @@ declared, by dated amendment, before it runs.
    the report. The F0 path is unchanged, and the pin holds.
 3. B7a's measurement (§7).
 4. B3b (two-word `kic` kernels), then B7b.
+
+## Amendment 1 (2026-10-01, before B7a's protocol and before any F1 run)
+
+v0's own runs (R01's A/A) show that §7's target ignored F0's sampling
+noise. B7a's protocol uses the corrected target below.
+
+- **F0 is one draw.**
+  - A collection that needs `R` relations scans a Gamma-distributed
+    number of summands, with relative spread `1/√R`.
+  - At the five smallest suite sizes, `R` is 8 to 16, so F0's collection
+    cost scatters by ±25–35% on its own. Both `M1` rows of a size share
+    one set-up, so each size has a single draw.
+  - The `m = 2` descent's probes are exponential: one target is one
+    draw, with a spread equal to its mean.
+- **The count's correction `κ` in those runs** (summands per relation
+  measured, over counted) is 0.88–1.33 across the eleven sizes.
+  - Most of that is the same Poisson noise.
+  - The three sizes with 256–336 relations give 0.96–1.04.
+- **So F1 reports two intervals.**
+  - The interval of its expectation, from its constants' uncertainty.
+  - A predictive interval for one run. It adds the Gamma spread of the
+    collection's relations and the exponential spread of one target's
+    descent.
+- **The target is restated, before any F1 run:**
+  1. F0's measured cold cost lies inside F1's 95% predictive interval at
+     9 or more of the 11 sizes.
+  2. At the three sizes where F0's collection holds 200 relations or
+     more (`n = 53`, `59`, `61`), F1's expected cold cost lies within
+     `[0.85, 1.18]` of F0's.
+
+  The rule for abandoning B7a is unchanged.

@@ -221,7 +221,9 @@ AGENTS.md's single-target rule.
   - `auto`, the default: F0 when the estimate fits the budget, a
     refusal otherwise;
   - `F0`;
-  - `F1`, from B7;
+  - `F1`, from B7a ([`f1-sampled.md`](f1-sampled.md)): `kic` and every
+    rho pipeline, extrapolated from samples on the instance. It runs only
+    when asked for by name;
   - `F2`: the estimate alone.
 - `pipeline` is `auto` or a pipeline id from §5.1.
 - `recipe` is `auto` (§5.3), or an object with v1's knobs, checked as v1
@@ -413,8 +415,10 @@ For a valid instance:
    Otherwise the input is refused with that pipeline's gate code.
 5. **The level.**
    - The run is F0 when every arm's estimate fits the budget.
-   - Otherwise it is refused with `over-budget` and the estimates. The
-     report names F1 as unavailable until B7.
+   - Otherwise it is refused with `over-budget` and the estimates. From
+     B7a, the refusal also gives F1's own estimated cost. `auto` never
+     falls back to F1: a run asked for as a measurement never becomes an
+     extrapolation unasked.
    - The arms of a paired run share one wall budget, so the router
      compares their estimates' sum with it (B2's amendment 1).
    - `fidelity: F2` runs nothing, so it skips the size gates: the five
@@ -447,6 +451,7 @@ The gate codes:
 | `subgroup-smaller-than-cofactor` | `kic` and `rho-koblitz` need `r > h`, as `KoblitzCurve`'s own construction does |
 | `not-the-identity` | `trivial` takes the identity only |
 | `over-budget` | an estimate exceeds the budget |
+| `no-f1-model` | `fidelity: F1` on a pipeline with no F1 model: `ic-binary-s4` and `ic-prime-s3` (B7a) |
 | `not-yet-supported` | a feature of the schema that a later step implements. The message names the feature and the step. B1 uses it for prime and extension fields, the other curve forms, named curves, one arm alone, `recipe: auto`, F1, F2 and more than one thread. From B3, `solve: rho` runs. Under it, v1's hashed and random targets past one word wait for B4, and so does v1's generator rule. B2 lifts all of B1's list except F1 (B7) and more than one thread (plan §8, A6). B2's amendment 1 leaves `kic` alone, and `kic` beside any rho but `rho-koblitz`, to B2b. |
 
 ### 5.3 Recipes

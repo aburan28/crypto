@@ -1,0 +1,46 @@
+{
+ "what": "The constants B7a's F1 carries rather than measures on the instance (PROTOCOL.md §3). Frozen with the declaration; changing one after any B7a run is inadmissible.",
+ "rho": {
+  "meaning": "relations per column when collection ends: the log system's relations_accepted over its columns",
+  "value": 1.0134943181818183,
+  "interval": [1.0, 1.075],
+  "rule": "the median of v0's rho at the six largest suite sizes, one constant for every size, its interval their range",
+  "source": {
+   "archive": "research/ic_tool_program/rounds/R01-baseline-v0/runs.tar.xz",
+   "archive_sha256": "ae20e0bd6ed5c76f0f93717d995dcabd385746d26899f22e7d573dad66aecc5d",
+   "files": {
+    "icv1-f2m47-t22705043-f4e44623": {"path": "runs/aa/A/k1n47-M1-T02/r1.price.json", "relations_accepted": 56, "columns": 56},
+    "icv1-f2m57-tm747311035-c1f545af": {"path": "runs/aa/A/k0n57-M1-T02/r1.price.json", "relations_accepted": 65, "columns": 64},
+    "icv1-f2m41-tm2308219-7f48b14a": {"path": "runs/aa/A/k0n41-M1-T02/r1.price.json", "relations_accepted": 86, "columns": 80},
+    "icv1-f2m53-tm56619371-dac20a85": {"path": "runs/aa/A/k0n53-M1-T02/r1.price.json", "relations_accepted": 267, "columns": 264},
+    "icv1-f2m59-tm943548413-98844ecc": {"path": "runs/aa/A/k1n59-M1-T02/r1.price.json", "relations_accepted": 256, "columns": 256},
+    "icv1-f2m61-t158598901-ab42b6c5": {"path": "runs/aa/A/k0n61-M1-T02/r1.price.json", "relations_accepted": 336, "columns": 320}
+   }
+  }
+ },
+ "kappa": {
+  "meaning": "the count's correction: summands scanned per relation, measured, over the count r/(2e·K)",
+  "value": 1.0,
+  "interval": [0.93, 1.07],
+  "rule": "1, with the spread of v0's kappa at the three sizes whose collection holds more than 200 relations (0.960, 0.964, 1.039), rounded outward",
+  "source": {
+   "archive": "research/ic_tool_program/rounds/R01-baseline-v0/runs.tar.xz",
+   "archive_sha256": "ae20e0bd6ed5c76f0f93717d995dcabd385746d26899f22e7d573dad66aecc5d",
+   "files": {
+    "icv1-f2m53-tm56619371-dac20a85": {"path": "runs/aa/A/k0n53-M1-T01/r1.price.json", "summands_scanned": 13723476, "relations_collected": 267, "stored_pairs": 3707880},
+    "icv1-f2m59-tm943548413-98844ecc": {"path": "runs/aa/A/k1n59-M1-T01/r1.price.json", "summands_scanned": 13570590, "relations_collected": 256, "stored_pairs": 3881728},
+    "icv1-f2m61-t158598901-ab42b6c5": {"path": "runs/aa/A/k0n61-M1-T01/r1.price.json", "summands_scanned": 74382912, "relations_collected": 336, "stored_pairs": 6265920}
+   }
+  }
+ },
+ "samples": {
+  "collect_warmup_summands": 4096,
+  "collect_timed_summands": 65536,
+  "descent_warmup_probes": 8,
+  "descent_timed_probes": 64,
+  "la_timed_iterations": 8,
+  "rho_warmup_steps": 4096,
+  "rho_timed_steps": 65536,
+  "monte_carlo_draws": 10000
+ }
+}

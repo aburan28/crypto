@@ -36,7 +36,7 @@ _spec = importlib.util.spec_from_file_location("conformance_v2_run", HERE / "v2"
 v2 = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(v2)
 
-STEPS = ("B0", "B1", "B2", "B2b", "B3", "B3b", "B4", "B5", "B6", "B7")
+STEPS = ("B0", "B1", "B2", "B2b", "B3", "B3b", "B4", "B5", "B6", "B7", "B7a", "B7b")
 
 
 def case_sets() -> list[tuple[Path, list[dict]]]:
