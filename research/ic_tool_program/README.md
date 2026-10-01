@@ -14,7 +14,8 @@ It adds each part with the round that creates it:
 | `conformance/v1/` | the conformance (C) suite: one case per defect or refusal, and its runner | B0 |
 | `design/` | Track B's designs: the schema, the checks, the routing, and the cases each B step is judged against | B1 |
 | `conformance/v2/` | B1's cases and their parameter files, the script that writes and checks them, and the runner (v1's cases, then v2's) | B1 |
-| `conformance/v2-b3/` | B3's cases (C052–C058) beside B1's frozen ones, and the runner from B3 on, which applies the `until` rule | B3 |
+| `conformance/v2-b3/` | B3's cases (C052–C058) beside B1's frozen ones | B3 |
+| `conformance/run.py` | the runner from B3 on: every step's cases in order, with the `until` rule applied | B3 |
 
 ## Status
 

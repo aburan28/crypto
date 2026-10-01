@@ -14,8 +14,8 @@ here, beside them:
   built here with B1's generator code (`../v2/make_cases.py`), whose
   arithmetic shares nothing with the Rust tool.
 
-`run.py` here runs v1's and v2's cases with the `until` rule applied, then
-these.
+`../run.py` runs every step's cases, these among them, with the `until`
+rule applied.
 """
 from __future__ import annotations
 
@@ -146,7 +146,7 @@ def build() -> tuple[dict[str, dict], list[dict]]:
     files["C058-n61-rho-alone.json"] = doc
     cases.append(case(
         "C058-n61-rho-alone-is-the-paired-rho", "C057 at n = 61, against the v1 row's single-target price",
-        {"params.json": {"copy": "{b3}/C058-n61-rho-alone.json"}, "v1.json": {"copy": "{suite}/" + ROW61}},
+        {"params.json": {"copy": "{here}/C058-n61-rho-alone.json"}, "v1.json": {"copy": "{suite}/" + ROW61}},
         price(),
         {"exit": 0, "json_file": "{tmp}/report.json",
          "json_paths": {"status": "complete", "result.verified": True},
@@ -167,8 +167,8 @@ def texts() -> dict[str, str]:
                   "research/ic_tool_program/rounds/B3-two-word-rho/PROTOCOL.md",
         "includes": "../v1/cases.json (step B0) and ../v2/cases.json (B1), run first, with the until rule",
         "rules": [
-            "The rules of ../v2/cases.json hold. {b3} is this directory's params/; {cases} is still "
-            "../v2/params/.",
+            "The rules of ../v2/cases.json hold. {here} is this directory's params/; {cases} is still "
+            "../v2/params/. ../run.py runs these after v1's and v2's.",
             "The until rule: a case whose `until` step is at or before the step run through is not run; "
             "its successor carries the new expectation. B1's files are frozen, so the dated note for "
             "C027 is here: from B3 (declared 2026-10-01) C027 is retired and C054 succeeds it.",

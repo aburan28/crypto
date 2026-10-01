@@ -1,12 +1,23 @@
 #!/usr/bin/env python3
-"""The conformance runner from B3 on: v1's and v2's cases with the design's
-`until` rule applied, then B3's (`cases.json` here).
+"""The programme's conformance runner, from B3 on: every step's cases, in
+order, with the design's `until` rule applied
+(`research/ic_tool_program/design/schema-v2.md` §9).
 
     python3 run.py --ic target/release/ic --through B3 [--build-commit SHA] [--out report.json]
 
+The case sets, each frozen by its own step's `SHA256SUMS`:
+- `v1/cases.json`, conformance suite v1: step B0's cases;
+- `v2/cases.json`: B1's cases;
+- every `v2-*/cases.json` (`v2-b3/`, …): the later steps' cases, each in
+  its own directory so that no earlier step's pinned files change.
+
+In a case, `{here}` is its own set's `params/`; `{cases}` is still
+`v2/params/`, B1's frozen documents, which later cases copy and edit.
+
 A case whose `until` step is at or before `--through` is not run; its
 successor carries the new expectation.  Everything else — materialising
-files, running, the expectations — is `../v2/run.py`'s, unchanged.
+files, running, the expectations — is `v2/run.py`'s, unchanged.  This
+runner's rules change only by a step's declaration.
 """
 from __future__ import annotations
 
@@ -17,28 +28,33 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-V2 = HERE.parent / "v2"
-_spec = importlib.util.spec_from_file_location("conformance_v2_run", V2 / "run.py")
+_spec = importlib.util.spec_from_file_location("conformance_v2_run", HERE / "v2" / "run.py")
 v2 = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(v2)
 
 STEPS = ("B0", "B1", "B2", "B3", "B3b", "B4", "B5", "B6", "B7")
 
 
-def with_b3_paths(case: dict) -> dict:
-    return json.loads(json.dumps(case).replace("{b3}", str(HERE / "params")))
+def case_sets() -> list[tuple[Path, list[dict]]]:
+    sets = [(HERE / "v1", [{**c, "step": "B0"} for c in json.loads((HERE / "v1" / "cases.json").read_text())["cases"]]),
+            (HERE / "v2", json.loads((HERE / "v2" / "cases.json").read_text())["cases"])]
+    for d in sorted(p for p in HERE.glob("v2-*") if (p / "cases.json").is_file()):
+        sets.append((d, json.loads((d / "cases.json").read_text())["cases"]))
+    return sets
 
 
 def cases_through(step: str) -> list[dict]:
     last = STEPS.index(step)
-    v1 = [{**c, "step": "B0"} for c in json.loads((v2.V1 / "cases.json").read_text())["cases"]]
-    b1 = json.loads((V2 / "cases.json").read_text())["cases"]
-    b3 = json.loads((HERE / "cases.json").read_text())["cases"]
 
     def live(c: dict) -> bool:
         return STEPS.index(c["step"]) <= last and ("until" not in c or STEPS.index(c["until"]) > last)
 
-    return [with_b3_paths(c) for c in v1 + b1 + b3 if live(c)]
+    out = []
+    for d, cases in case_sets():
+        for c in cases:
+            if live(c):
+                out.append(json.loads(json.dumps(c).replace("{here}", str(d / "params"))))
+    return out
 
 
 def main() -> None:

@@ -102,7 +102,7 @@ speedup. The gate's rho at F0 is a measurement of the reference at
 
 1. **Tests.** `cargo test --release --lib -- gf2_wide koblitz_wide` and
    `cargo test --release --bin ic`.
-2. **Conformance.** `conformance/v2-b3/run.py --through B3` on B3, which
+2. **Conformance.** `conformance/run.py --through B3` on B3, which
    runs:
    - v1's cases;
    - v2's cases with the `until` rule applied, which retires C027;
@@ -138,7 +138,7 @@ speedup. The gate's rho at F0 is a measurement of the reference at
 
 B3 is **accepted** when all of the following hold:
 - every test passes;
-- every case `run.py --through B3` selects passes;
+- every case `conformance/run.py --through B3` selects passes;
 - the pin holds on every row;
 - no size regresses beyond its A/A band, judged as in B1;
 - the gate's rho recovers the logarithm, checked in the walk and
@@ -164,6 +164,8 @@ index calculus at `n = 83`.
   applied by a later step.
 - Changing a file under `conformance/v2-b3/` after this declaration.
   `SHA256SUMS` pins B3's files.
+- Changing `conformance/run.py`'s rules other than by a later step's
+  declaration. A later step may add its own case set beside B3's.
 - Running the gate under another seed and reporting the better run.
 - Counting a contended run.
 

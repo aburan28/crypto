@@ -656,7 +656,8 @@ B3–B7 are unchanged from the plan, with these refinements:
   - The plan's gate run is B3's measurement 5: the gate file with
     `solve: rho`, at F0.
   - B1's files are frozen, so the dated note C027 needs is in B3's
-    `cases.json`, and B3's runner applies the rule.
+    `cases.json`, and the programme's runner, `../conformance/run.py`,
+    applies the rule.
 - **B3b** lifts `kic` to `n ≤ 126` and runs the index calculus at F1.
   C054 then changes by the `until` rule: at `n = 83` the index
   calculus's estimate exceeds any day-long budget, so `paired` becomes
