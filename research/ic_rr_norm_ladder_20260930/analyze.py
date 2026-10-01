@@ -9,7 +9,11 @@ import statistics as st
 import sys
 from pathlib import Path
 
-LOWER = {'rr': 8, 'ctrl': 8, 'x4': 10}  # d_max + 1 per arm: a '>= LOWER' cell is a full-scan lower bound
+LOWER = {'rr': 8, 'ctrl': 8, 'x4': 10}  # d_max + 1 per arm at l <= 5; l = 6 scans rr/ctrl to 6
+
+
+def full_scan_bound(arm, ell):
+    return 7 if arm in ('rr', 'ctrl') and ell >= 6 else LOWER[arm]
 ARMS = ('rr', 'x4', 'ctrl')
 
 
@@ -85,7 +89,7 @@ def main(runs):
             continue
         key = (c['a'], c['n'])
         for arm in ARMS:
-            if isinstance(med[arm], str) and int(med[arm][2:]) >= LOWER[arm]:
+            if isinstance(med[arm], str) and int(med[arm][2:]) >= full_scan_bound(arm, c['ell']):
                 lower_below[arm].setdefault(key, []).append(c['ell'])
             elif isinstance(med[arm], int):
                 by_curve[arm].setdefault(key, []).append((c['ell'], med[arm]))

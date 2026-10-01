@@ -102,27 +102,31 @@ One process per cell `(K_a, n, ℓ)`. Each draw:
   arithmetic, `x4` by evaluating `S₄` in the field over `V³`. `x4` may have roots that `rr`
   does not (summands whose `x` lies in `V` but is an abscissa only over `F_{2^{2n}}`); each
   arm is measured on its own rootless draws.
-- **Measurement.** `solving_degree` with the ladder caps
-  `F4_F2_MAX_ROWS = F4_F2_MAX_COLS = 50,000,000`, up to `d_max = 7` for `rr` and `ctrl`
-  and `d_max = 9` for `x4`, whose system degree is already 6 and whose matrices are far
-  smaller (`3ℓ` unknowns, `n` equations). The outcome is `resolved D`, `at_least 8`
-  (`at_least 10` for `x4`), or `caps`. Arms are measured in the order `x4`, `rr`, `ctrl`; each arm's
-  result is written as its own line as soon as it exists, and after every unresolved
-  degree a provisional `at_least` line is written, so a cell killed by its limit keeps every
-  arm it finished and a lower bound for the one it was on. The last line per draw and arm
-  is the result.
+- **Measurement.** `solving_profile_sparse` degree by degree, with the ladder caps
+  `F4_F2_MAX_ROWS = F4_F2_MAX_COLS = 50,000,000`, up to `d_max = 7` for `rr` and `ctrl` at
+  `ℓ ≤ 5` and `d_max = 6` at `ℓ = 6` (the smoke, §2a: one `rr` draw at `ℓ = 5` takes 1,370 s
+  to resolve at 7, and at `ℓ = 6` degree 7 does not finish in 2,400 s), and `d_max = 9`
+  for `x4`, whose system degree is already 6 and whose matrices are far smaller (`3ℓ`
+  unknowns, `n` equations). The outcome is `resolved D`, `at_least d_max + 1`, or `caps`.
+  Arms are measured in the order `x4`, `rr`, `ctrl`; each arm's result is written as its
+  own line as soon as it exists, and after every unresolved degree a provisional
+  `at_least` line is written, so a cell killed by its limit keeps every arm it finished
+  and a lower bound for the one it was on. The last line per draw and arm is the result.
 - **Stop.** A cell stops at 4 draws with `rr` rootless, or 256 draws.
 
 ## 4. Cells
 
 - `K₀/2¹³`: `ℓ = 2, 3, 4, 5`; `K₁/2¹⁷`: `ℓ = 2 … 6`; `K₁/2¹⁹`: `ℓ = 2 … 6`. The same 14
   cells as the sym-lever ladder, chosen there so that unsatisfiable targets stay common.
-- **Seed** `20260930`. **Limits** per cell: `ulimit -t 3600`, `ulimit -v 10000000`,
-  machine protection; a killed cell keeps its lines and its missing draws are censored,
-  never negative evidence.
-- **Pinning.** Cells run one at a time on CPU 3 under the benchmark lock (AGENTS.md §10).
-  The metric is a degree and does not depend on it; the per-draw `secs` are logged and are
-  not measurements.
+- **Seed** `20260930`. **Limits** per cell: `ulimit -t 9000`, `ulimit -v 4500000` (three
+  lanes on a 15 GB host), machine protection; a killed cell keeps its lines and its missing draws are censored,
+  never negative evidence. The `ℓ = 6` cells are expected to censor `rr` at degree 7 and
+  are kept for `x4` and for `rr`'s lower bound; `ℓ = 5` cells are expected to reach 3 or 4
+  `rr` draws within the limit.
+- **Lanes.** Three cells at a time, one per CPU (1, 2, 3), under the benchmark lock with
+  nothing else running (AGENTS.md §10; the `m = 4` head audit ran its cells the same
+  way). A refutation degree does not depend on contention; the per-draw `secs` are logged
+  and are not measurements. Lane assignment is in [run.sh](run.sh).
 
 ## 5. Metric and decision rule ([`analyze.py`](analyze.py))
 
@@ -130,7 +134,8 @@ One process per cell `(K_a, n, ℓ)`. Each draw:
   bounds are the majority the cell reads `≥ b`, `b` the smallest of them, and leaves the
   fit, but is listed; a minority of bounds is counted at its bound in the low median, the
   sym-lever convention. Only a full-scan bound (`≥ 8`; `≥ 10` for `x4`) counts as such in
-  the decision rule below; a bound left by a kill (`≥ 7` or lower) only leaves the fit;
+  the decision rule below (`≥ 7` at `ℓ = 6`, where the scan stops at 6); a bound left by a
+  kill below the scan's end only leaves the fit;
   fewer than 3 measured draws, or any `caps`, also leaves the fit.
 - **Per curve and arm:** `s_n`, the least-squares slope of the cell medians on `ℓ`, fitted
   only with at least 3 retained `ℓ`. **Overall:** `s̄`, the mean of the fitted `s_n`.
@@ -139,7 +144,8 @@ One process per cell `(K_a, n, ℓ)`. Each draw:
 
 The decision, on `rr`, with the sym-lever thresholds:
 
-- **Constant lever** if `s̄_rr ≥ 0.35`, or if every curve has a `≥ 8` cell at `ℓ ≤ 6`.
+- **Constant lever** if `s̄_rr ≥ 0.35`, or if every curve has a full-scan lower-bound cell
+  (`≥ 8`, or `≥ 7` at `ℓ = 6` where `d_max = 6`) at `ℓ ≤ 6`.
 - **Slope lever** if `s̄_rr ≤ 0.15` and no cell below `ℓ = 6` reads `≥ 8`.
 - **Inconclusive** otherwise, and whenever fewer than two curves are fitted.
 
