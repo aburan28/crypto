@@ -151,15 +151,15 @@ fn vartime_ops_match_on_every_input_of_tiny_prime_fields() {
     );
 }
 
-/// The linear search over `F_2`, on every input.  Ignored while it
-/// fails: `2 = 0` there, so a Jacobian doubling's `Z₃ = 2·Y·Z` and a
-/// mixed addition's `Z₃ = 2·Z·H` are zero, where the affine search's
-/// `2y` has no inverse and it panics.  E.g. base `(0, 1)`, `a = 0`,
-/// target `(1, 0)`, bound 3: the stepped search panics computing `2G`;
-/// `linear_dlog_vartime` returns `Some(2)`, and through it
-/// `recover_in_prime_power_subgroup` returns a digit where it panicked.
+/// The linear search over `F_2`, on every input.  `2 = 0` there, so a
+/// Jacobian doubling's `Z₃ = 2·Y·Z` and a mixed addition's
+/// `Z₃ = 2·Z·H` are zero, where the affine search's `2y` has no inverse
+/// and it panics.  E.g. base `(0, 1)`, `a = 0`, target `(1, 0)`,
+/// bound 3: the stepped search panics computing `2G`, and so must
+/// `linear_dlog_vartime` (before even moduli were stepped affinely it
+/// returned `Some(2)`, and through it `recover_in_prime_power_subgroup`
+/// returned a digit where it panicked).
 #[test]
-#[ignore = "linear_dlog_vartime departs from the stepped search over F_2"]
 fn linear_dlog_vartime_matches_stepped_search_over_f2() {
     let bad = quietly(|| {
         let mut bad = Vec::new();

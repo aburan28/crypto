@@ -202,7 +202,9 @@ pub struct JobContext {
     pub dp_mask: BigUint,
     pub step_cap: u64,
     /// `⌊p/2⌋`: under the negation map a walk keeps the `±`
-    /// representative with `y ≤ ⌊p/2⌋`.
+    /// representative with `y ≤ ⌊p/2⌋`.  Derived from `p` in
+    /// [`new`](Self::new), like `branches` and `dp_mask`: a caller that
+    /// changes `p` must build a new context rather than edit this one.
     pub half_p: BigUint,
 }
 

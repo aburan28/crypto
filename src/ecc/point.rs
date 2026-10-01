@@ -154,8 +154,10 @@ impl Point {
 
     /// [`scalar_mul`](Self::scalar_mul) in **variable time**, for public
     /// points and scalars only: over a prime `p`, exactly
-    /// `self.scalar_mul(k, a)` (on other moduli, as for
-    /// [`add_vartime`](Self::add_vartime)).
+    /// `self.scalar_mul(k, a)` (on composite moduli, as for
+    /// [`add_vartime`](Self::add_vartime); `p = 1` is no field and is not
+    /// covered: there `scalar_mul` panics in `inv`'s exponent `p − 2`
+    /// where this returns).
     ///
     /// When `p` fits a word the same Jacobian ladder runs on word
     /// arithmetic and inverts once at the end with the word Euclid of
@@ -196,12 +198,15 @@ impl Point {
     /// The running multiple `k·self` is kept in Jacobian coordinates and
     /// compared with the affine `target = (x, y)` by cross-multiplying,
     /// `X = x·Z²` and `Y = y·Z³`, so a step costs a mixed addition and
-    /// four multiplications and never an inversion.  Over a prime `p`,
-    /// where a finite point's `Z` is a unit, the multiples, the identity
-    /// among them, and so the `k` returned are exactly those of stepping
-    /// `current = current.add(self, a)` and testing `current == *target`.
-    /// (On another modulus a `Z` can be a zero divisor and `add`'s
-    /// `a^(p−2)` need not be an inverse, so the `k` can differ.)  On word
+    /// four multiplications and never an inversion.  Over an odd prime
+    /// `p`, where a finite point's `Z` is a unit, the multiples, the
+    /// identity among them, and so the `k` returned are exactly those of
+    /// stepping `current = current.add(self, a)` and testing
+    /// `current == *target`.  (On another modulus a `Z` can be a zero
+    /// divisor and `add`'s `a^(p−2)` need not be an inverse, so the `k`
+    /// can differ.)  An even modulus is stepped affinely, as that search
+    /// does: over `F_2` a doubling's `Z₃ = 2·Y·Z` is always zero, where
+    /// the affine doubling panics on `2y` having no inverse.  On word
     /// arithmetic when `p` fits a word, on the [`BigUint`] Jacobian
     /// points of [`scalar_mul`](Self::scalar_mul) otherwise.
     pub fn linear_dlog_vartime(&self, target: &Point, bound: u64, a: &FieldElement) -> Option<u64> {
@@ -213,8 +218,9 @@ impl Point {
         let m = &gx.modulus;
         // A base with an unreduced coordinate (no constructor makes one) is
         // itself the multiple `1·self` compared, unreduced, so it is
-        // stepped affinely as the search this stands for does.
-        if gx.value >= *m || gy.value >= *m {
+        // stepped affinely as the search this stands for does.  So is an
+        // even modulus, where the Jacobian `Z` of a doubling vanishes.
+        if gx.value >= *m || gy.value >= *m || !m.bit(0) {
             let mut current = Point::Infinity;
             for k in 0..bound {
                 if current == *target {
