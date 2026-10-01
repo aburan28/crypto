@@ -338,3 +338,17 @@ revision and the abandonment.
     `params/`. A directory with nothing in it cannot be committed, so
     the path did not resolve. No case and no expectation changes.
 13. **The sample sizes** are `carried.json`'s amended `samples` block.
+14. **The runner and the analysis** are committed with this amendment,
+    before any run: [`run.py`](run.py) and [`analyse.py`](analyse.py).
+    - Measurements 2–4 are `harness/bround.py`'s steps. `run.py` adds
+      `f1` and `partial`: each M1 row's v2 translation at `fidelity: F1`,
+      run through the programme's isolation and retries.
+    - `analyse.py` fixes the statistics.
+      - F0's cold cost per size is the median over measurement 4's B7a
+        processes, each in its own units.
+      - F1's per size is the median over its six processes of each
+        figure.
+      - "Inside" means F0's median lies in F1's predictive interval.
+      - The ratio is F1's median over F0's.
+    - A size missing either figure makes the decision incomplete, not a
+      rejection.
