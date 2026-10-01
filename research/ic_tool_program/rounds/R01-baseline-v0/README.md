@@ -173,6 +173,31 @@ The declared step ran `ic price --repeats 1` on `M1-T01` at
 `icv1-f2m41-tm2308219-7f48b14a` and `icv1-f2m61-t158598901-ab42b6c5`.
 The simulated I1 and D1 are 32 KiB each and the LL is 2 MiB.
 
+**Correction (2026-10-01, before this round merged): valgrind hides
+AVX-512.** Under valgrind 3.22, CPUID reports `avx512f`, `avx512bw`,
+`vpclmulqdq` and `gfni` as absent. Natively all four are present. A
+five-line CPUID probe run both ways shows this. The binary picks its
+kernels by run-time feature detection, so every callgrind run took the
+portable paths, not the AVX-512 ones:
+- the batched addition ran its scalar path;
+- the canonical key ran its scalar rotation chain.
+
+The timed runs took the AVX-512 paths wherever the kernel accepts the
+field. So the instruction shares below describe the portable code:
+- **The scalar addition's share applies to the timed runs at the two
+  sizes R02 targets.** There the kernel refuses the field natively too.
+- **The canonical key's share applies at no size.** The AVX-512 key
+  computes the same values in bulk. By its code that is about 70
+  instructions a key, against the 565 counted here. That is a
+  byte-table basis change, then 60 rotate-and-minimum steps shared by
+  sixteen keys. Its native cost is unmeasured.
+- **Native instruction counts are not available on this host.** The
+  container exposes no hardware performance counters: `perf_event_open`
+  finds no CPU PMU. Native attribution therefore needs timed probes.
+
+The figures are kept as measured. The readings that follow are
+corrected.
+
 **Each run is split into parts, one per phase boundary.**
 - `ic_measurement` asks valgrind to dump its statistics at every phase
   boundary, and labels each part with the phase that just ended
@@ -202,7 +227,9 @@ not the index calculus.**
 - So the declared profile measures the pricer more than the pipeline.
 
 **What R02 does about it.** R02's amendment 2 profiles `ic workflow`,
-which has no calibration, for its cross-check.
+which has no calibration. Valgrind cannot run R02's kernel, which is
+AVX-512 only. So that profile can show only that the two arms' portable
+paths are the same; R02's amendment 3 takes this up.
 
 **At `icv1-f2m61-t158598901-ab42b6c5` the set-up dominates the profile.**
 - The run has 6,696 parts and 9.34 × 10¹⁰ instructions.
@@ -222,26 +249,28 @@ which has no calibration, for its cross-check.
 | `PairSumTable::compact_contains` | 1.63 × 10⁹ | 1.8% | 32.99 M |
 | `FrobeniusCanon::canon_in_place` | 1.39 × 10⁹ | 1.5% | 0.03 M |
 
-**Reading it.**
-- **The scan's canonical keys are the largest single cost.** `keys_of`
-  is 46% of the set-up's instructions: about 565 a scanned summand, for
-  74.4 M summands. At `icv1-f2m41-tm2308219-7f48b14a` it is about 390.
-  It misses no cache.
-  - This is the next lever after R02, and nothing in the plan's backlog
-    named it. It is added as A11.
+**Reading it, as corrected above.**
+- **On the portable path, the scan's canonical keys are the largest
+  single cost.**
+  - `keys_of` is 46% of the set-up's instructions: about 565 a scanned
+    summand, for 74.4 M summands. At `icv1-f2m41-tm2308219-7f48b14a` it
+    is about 390. It misses no cache.
+  - That is the scalar rotation chain. The timed runs used the AVX-512
+    key, which this profile cannot see.
+  - The plan keeps the lever as A11, unpriced. Its first step is a
+    native price of the key inside the scan.
 - **The scalar addition path is 38%.**
   - `Gf2::batch_inv`, `sqr`, `clmul_u64`, `inv` and `add_many_lazy`'s
     own body are the scalar path's.
-  - At this size the AVX-512 kernel refuses the field, which is R02's
-    hypothesis seen from the instruction side.
-  - The matching split where the kernel runs needs a profile without the
-    pricer's calibration. At `icv1-f2m41-tm2308219-7f48b14a` the first
-    part is mostly calibration. R02's workflow profiles, under its
-    amendment 2, give that split.
-- **The cache misses sit in the filter and the compact table.**
-  `witnesses_fast_scan` and `compact_contains` take 99 M last-level read
-  misses against the simulated 2 MiB LL. The prefetches hide part of
-  them. How much is a timing question callgrind cannot answer.
+  - At this size the AVX-512 kernel refuses the field natively too. So
+    this share is R02's hypothesis seen from the instruction side.
+  - Where the kernel accepts the field, callgrind cannot see it; that
+    split needs a timed probe.
+- **On the portable path, the cache misses sit in the filter and the
+  compact table.** `witnesses_fast_scan` and `compact_contains` take
+  99 M last-level read misses against the simulated 2 MiB LL. The
+  prefetches hide part of them. How much is a timing question callgrind
+  cannot answer.
 
 ## v0's ledger row
 
