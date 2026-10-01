@@ -111,3 +111,17 @@ the benchmark lock's queue.
 ## Cost
 
 132 timed processes, about 40 minutes.
+
+## Amendment 1 (2026-10-01, before any R04 run)
+
+**R04 runs after R02's decision, before R03, B0 and B1.** The text above
+said it runs after all four.
+- R04 is a 40-minute diagnostic. The next scan round is chosen from its
+  answer, so it should run early: that round can then be built while
+  R03 and the Track B measurements hold the timed machine.
+- Nothing else changes. Its base is the newest accepted baseline when it
+  runs: R02's candidate if R02 is accepted, else v0. Its arms, rows,
+  measurements and inadmissible readings are as above.
+- R03, B0 and B1 lose nothing by waiting. None of them reads R04, and
+  each measures against the newest accepted baseline, which a stage
+  diagnostic does not change.
