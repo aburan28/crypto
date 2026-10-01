@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Where the index-calculus programme stands: the question it asks, the answer so far, what is closed, what is open, in one page that links into the cost ledger.">
+<title>Index Calculus: Where Things Stand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column; the board and the step table are the page, everything else hangs off them. */
+:root {
+  --ground: #e7ebef; --surface: #fbfcfd; --sunk: #f0f3f6; --ink: #0e1922; --ink-2: #354855;
+  --muted: #576976; --rule: #ccd5dc; --data: #1f6fd0; --data-soft: #d7e4f6; --bound: #b3372a;
+  --bound-soft: #f3dcd8;
+  --ph-precomputation: #b9c3cb; --ph-setup: #9aa7b1; --ph-constructions: #c4a35a; --ph-factor_base: #2f8f83; --ph-table: #6fb7a8;
+  --ph-relations: #1f6fd0; --ph-linear_algebra: #8b5bc4; --ph-descent: #d0782f; --ph-verify: #4d5b66;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground: #0d1318; --surface: #151d24; --sunk: #101820; --ink: #e3eaef; --ink-2: #b6c5cf;
+  --muted: #8799a6; --rule: #25323a; --data: #4e92de; --data-soft: #1c2e42; --bound: #d9604e;
+  --bound-soft: #38221f;
+  --ph-precomputation: #3d4a54; --ph-setup: #6c7a85; --ph-constructions: #b8954a; --ph-factor_base: #3aa698; --ph-table: #7cc4b5;
+  --ph-relations: #4e92de; --ph-linear_algebra: #a57ad8; --ph-descent: #e08c45; --ph-verify: #93a3ae;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --ground: #0d1318; --surface: #151d24; --sunk: #101820; --ink: #e3eaef; --ink-2: #b6c5cf;
+  --muted: #8799a6; --rule: #25323a; --data: #4e92de; --data-soft: #1c2e42; --bound: #d9604e;
+  --bound-soft: #38221f;
+  --ph-precomputation: #3d4a54; --ph-setup: #6c7a85; --ph-constructions: #b8954a; --ph-factor_base: #3aa698; --ph-table: #7cc4b5;
+  --ph-relations: #4e92de; --ph-linear_algebra: #a57ad8; --ph-descent: #e08c45; --ph-verify: #93a3ae;
+  color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; padding-inline: 16px; padding-block: 36px 64px; background: var(--ground); color: var(--ink);
+  font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .13em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(30px, 5.2vw, 44px); line-height: 1.08; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 0; text-wrap: balance; }
+.verdict { font-family: var(--serif); font-size: clamp(17px, 2.2vw, 20px); line-height: 1.45; color: var(--ink-2); max-width: 64ch; margin: 0; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--rule);
+  border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+.fact { background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.fact dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.fact dd { margin: 0; font-family: var(--mono); font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.fact p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; overflow-wrap: anywhere; }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; display: flex; flex-direction: column; gap: 12px; padding-block: 18px; }
+.panel > * { padding-inline: 20px; }
+.panel p { margin: 0; max-width: 72ch; color: var(--ink-2); font-size: 14px; }
+.scroll { overflow-x: auto; padding-inline: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-family: var(--mono); font-size: 10.5px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+td.n, th.n { text-align: right; white-space: nowrap; }
+td.recipe { min-width: 210px; }
+tr.lead td { background: var(--data-soft); }
+code, .slug { font-family: var(--mono); font-size: 12px; }
+.slug { white-space: nowrap; }
+.chip { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 1px 6px; border: 1px solid var(--rule); border-radius: 2px; color: var(--ink-2); white-space: nowrap; }
+.ratio { font-family: var(--mono); font-weight: 600; color: var(--bound); }
+.bar { display: flex; height: 12px; min-width: 160px; border-radius: 2px; overflow: hidden; background: var(--sunk); }
+.bar span { display: block; height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.muted { color: var(--muted); }
+svg text { fill: var(--ink-2); font-family: var(--mono); font-size: 10px; }
+svg .axis { stroke: var(--rule); }
+svg .rho { stroke: var(--bound); stroke-width: 1.5; }
+details summary { cursor: pointer; font-family: var(--mono); font-size: 12px; color: var(--data); }
+details summary:focus-visible, a:focus-visible { outline: 2px solid var(--data); outline-offset: 2px; }
+a { color: var(--data); }
+footer { font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+footer p { margin: 0; max-width: 90ch; }
+</style>
+<style>
+/* Additions for the current-state page only. */
+.lede { font-size: 15px; color: var(--ink-2); max-width: 72ch; margin: 0; line-height: 1.6; }
+.stamp { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+ul.plain { margin: 0; padding-left: 20px; max-width: 76ch; }
+ul.plain li { margin: 0 0 9px; color: var(--ink-2); font-size: 14px; line-height: 1.55; }
+ul.plain li strong { color: var(--ink); }
+td.c { max-width: 28ch; }
+td.why { min-width: 44ch; max-width: 64ch; }
+td.inst { white-space: nowrap; }
+.links { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="eyebrow">ECDLP · index calculus · current state · cites the ledger, measures nothing</span>
+  <h1>Index calculus: where things stand</h1>
+  <p class="verdict">Can index calculus solve the elliptic-curve discrete logarithm faster than Pollard rho? Priced end to end on every curve this repository has measured, <strong>no.</strong> The one family below rho is hyperelliptic, at toy sizes. Nothing here threatens a deployed curve.</p>
+  <p class="stamp">As of ledger &sect;23 and the tool programme&rsquo;s round R01 (2026-10-01). Every figure on this page is quoted from the <a href="./">scoreboard</a>, the ledger this page summarises, and from the frozen files it names. When the ledger moves, this page moves in the same pull request.</p>
+</header>
+
+<section class="panel" id="question">
+  <h2>The question, and how it is scored</h2>
+  <p class="lede">Pollard rho is the generic method every curve is sized against; its cost is about the square root of the group order. Index calculus is a family of algebraic attacks that trade that walk for a factor base, a decomposition oracle and linear algebra. The repository asks one question of every variant it builds: with every phase counted, cold, from set-up to a checked logarithm, is it cheaper than a rho matched to the same curve?</p>
+  <p class="lede">The score is <code>S</code>, total operations divided by the square root of the group order, so that rho reads about 1 at every size and anything above 1 loses. Progress is a fall in the ratio to a boundary, never a fall in a constant; the <a href="https://github.com/aburan28/crypto/blob/main/AGENTS.md">reporting rule</a> and its four classes (advance, engineering, relabelling, accounting) are what keep the ledger honest.</p>
+</section>
+
+<section class="panel" id="standing">
+  <h2>The standing, family by family</h2>
+  <p class="lede">The best measured row of each family, in the ledger&rsquo;s unit, against the rho matched to that curve. Curves are named by their ICV1 slug. The &ldquo;see&rdquo; column is the ledger panel the row is quoted from.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>family</th><th>instance</th><th>best measured row</th><th class="n">S</th><th class="n">&times; matched rho</th><th>reads as</th><th>see</th></tr></thead>
+    <tbody>
+      <tr><td>Prime-field curve, one target</td><td class="inst"><span class="slug">icv1-fp24-t1577-77336155</span> &middot; r = 2<sup>23.4</sup></td><td class="c">Meet in the middle, m = 2, negation-folded table, walked targets, base at the family optimum</td><td class="n">14.0</td><td class="n"><span class="ratio">13.5&times;</span></td><td class="why">Engineering only: no fitted exponent below rho&rsquo;s one half, and the pair-table family rises as r<sup>1/6</sup> where rho is flat, so it has no crossover at any size. Operation-counted, before the one-target timing rule.</td><td><a href="./#boundary-ledger">three regimes</a>, <a href="./#matched-rho-20260923">matched rho</a></td></tr>
+      <tr><td>Random binary curve, one target</td><td class="inst"><span class="slug">icv1-f2m27-t12543-569dca8b</span> &middot; r = 2<sup>24.4</sup></td><td class="c">Same recipe, m = 2</td><td class="n">36.9</td><td class="n"><span class="ratio">38.2&times;</span></td><td class="why">As above.</td><td><a href="./#boundary-ledger">three regimes</a></td></tr>
+      <tr><td>Koblitz curve, 32 targets solved together</td><td class="inst"><span class="slug">icv1-f2m41-tm2308219-7f48b14a</span> &middot; r = 2<sup>39.0</sup></td><td class="c">Aimed m = 3 collection, m = 2 descent, constructions built once, descent fixed cost cut (&sect;20&ndash;&sect;22)</td><td class="n">&mdash;</td><td class="n"><span class="ratio">3.6&times;</span> batch rho</td><td class="why">The closest any elliptic-curve row gets, and a historical multi-target diagnostic under the current rule: it divides 32 targets&rsquo; cost by a rho that also solves 32. One target alone it read 22.6&times; at this size (&sect;20).</td><td><a href="./#koblitz-descent-20260930">&sect;22</a>, <a href="./#koblitz-references-20260923">&sect;19</a></td></tr>
+      <tr><td>Koblitz curve, one unseen public point</td><td class="inst"><span class="slug">icv1-f2m47-t22705043-f4e44623</span> &middot; r = 2<sup>36.6</sup></td><td class="c">The same thread under the one-target rule: 384 public points at six sizes, 408 of 408 claims checked</td><td class="n">&mdash;</td><td class="n"><span class="ratio">4.9&times;</span> cold</td><td class="why">Online, after a reusable set-up, the descent is 8.8&ndash;17.5&times; <em>faster</em> than rho on the same point. Cold, with that set-up charged, it is 4.9&ndash;31.6&times; slower. The set-up would serve a generic walk as precomputation too; by Bernstein and Lange&rsquo;s trade-off, a model, that walk would then be 2.0&ndash;8.0&times; faster online still. Class accounting: no algorithm changed.</td><td><a href="./#koblitz-single-target-20261001">&sect;23</a></td></tr>
+      <tr><td>Hyperelliptic Jacobian, genus 4</td><td class="inst">toy sizes, p &le; 251, N = 2<sup>24</sup></td><td class="c">Degree-1 factor base, sparse solve priced (round seven)</td><td class="n">&mdash;</td><td class="n"><span class="ratio">0.24</span></td><td class="why">The one family measured below a real rho, with a fitted exponent of &minus;0.29 [&minus;0.42, &minus;0.16] against a derived &minus;0.25: an advance in exponent, at toy size. Genus 3&rsquo;s exponent claim was withdrawn once the solve was priced; genus 2 leads by a constant and the lead is rising. A statement about the shape of the cost, not about any deployed curve.</td><td><a href="./#genus-crossover">hyperelliptic</a></td></tr>
+      <tr><td>ECC2K-130, the challenge curve</td><td class="inst">GF(2<sup>131</sup>), r &asymp; 2<sup>129</sup></td><td class="c">Every route tried: decomposition tables, descent, symmetrised oracles, rotated bases, compact orbit bases on smaller members of the family</td><td class="n">&mdash;</td><td class="n">&gt; 1 everywhere</td><td class="why">No route is measured below a matched rho at any size, and the challenge-size verdict is set by a product law and an oracle budget that no measured oracle meets. On the family&rsquo;s n = 53 member the best fixed-stream compact pipeline is 2.057&times; matched rho; the six-cell orbit-disjoint cold panel is above rho in every cell. Challenge-size figures are derived, never measured.</td><td><a href="./#ecc2k130-descent-degree-20260930">descent degree</a>, <a href="./#disjoint-cold-v2-outcome-20261001">cold panel</a>, <a href="./#ecc2k130-n53-native-cyclic-l384-first-20260929">n = 53</a></td></tr>
+      <tr><td>Residual walks on E(F<sub>p</sub><sup>3</sup>)</td><td class="inst">subspace base, 33 bits</td><td class="c">O(1) S&#8324; solve, tuned; j = 0 orbit quotient</td><td class="n">&mdash;</td><td class="n">224&times; plain rho, 388&times; folded</td><td class="why">Hundreds of times behind rho and closed: its linear algebra grows as n<sup>0.68</sup> against rho&rsquo;s one half. The k = 4 variant would reach parity near 2<sup>151</sup>, an extrapolation on measured exponents.</td><td><a href="./#rho-parity-ledger">rho-parity ledger</a>, <a href="./#residual-walk-chart">residual walks</a></td></tr>
+    </tbody>
+  </table></div>
+  <p class="muted">Curve by curve, with the best recipe on each and its phase split: the <a href="ic-leaderboard.html">leaderboard</a>.</p>
+</section>
+
+<section class="panel" id="closed">
+  <h2>What is closed</h2>
+  <ul class="plain">
+    <li><strong>Collision search over partial decompositions.</strong> The relation yield is bounded by a counting argument, and every lever tried left the ratio to that floor between 1.00 and 1.07. <a href="./#residual-walk-variants">Every variant, classified</a>.</li>
+    <li><strong>The pair-table family at any size.</strong> Its optimum is 0.75&thinsp;r<sup>1/6</sup> in a unit where rho is constant, so a constant and a rising function cross once, near r = 2<sup>2</sup>, and never again. At sect163k1&rsquo;s size it sits about 107&times; the automorphism-aware walk. <a href="./#boundary-ledger">three regimes</a>.</li>
+    <li><strong>The &ldquo;crossing&rdquo; below rho.</strong> A tournament collector read 0.83&times; rho on an eight-cell Koblitz panel, but against a rho whose step spent most of its instructions naming Frobenius classes. Given the collector&rsquo;s own orbit naming, that rho wins at every cell, by 1.19&ndash;2.88&times;. <a href="./#ic-triple-counted-20260923">the control</a>.</li>
+    <li><strong>A bigger field, a bigger genus, or an auxiliary curve.</strong> Base-changing ECC2K-130 leaves its 262 automorphisms untouched and every usable subfield is either the whole field or too small; the only covers available have genus 1 or 2<sup>129</sup>; torsion and auxiliary-input routes move nothing unless the problem hands over extra powers of the secret. <a href="./#auxiliary-inputs-20260918">auxiliary inputs</a>.</li>
+    <li><strong>Cheaper oracles on their own.</strong> F4, F5, crossbred, SAT and WDSat all decide the same systems; the fastest, on every cell, is the pair table at 0&ndash;25 group additions per target where the algebraic engines need 10<sup>2</sup>&ndash;10<sup>6</sup>. Relation collection stays &Theta;(2<sup>n</sup>) with any oracle polynomial in the base. <a href="./#f4-f5-engines">the engines</a>.</li>
+    <li><strong>Batch wins read as single-target wins.</strong> The Koblitz thread&rsquo;s 1.17&times; of 2026-09-22 was 32 targets divided by a rho solving one; matched to batch rho it read 6.5&times;, and each later round moved it by engineering only. <a href="./#koblitz-references-20260923">&sect;19</a>.</li>
+  </ul>
+</section>
+
+<section class="panel" id="open">
+  <h2>What is open</h2>
+  <ul class="plain">
+    <li><strong>The tool programme.</strong> The <code>ic</code> tool is being made faster round by round against frozen baselines, cold and end to end with identical outputs. Baseline v0 is pinned; it reads 4.9&ndash;31.6&times; rho cold across six sizes, and round B3b, the index calculus on two-word binary fields, is declared. A faster tool moves <code>S</code> and never the ratio to the floor. <a href="./#ic-tool-programme-20261001">the programme</a>.</li>
+    <li><strong>The extension-degree lever.</strong> At k = 4 the linear algebra grows as rho does, and the measured constant puts a plain k = 4 method at 1.9&times; below rho eventually, with the handover near 2<sup>151</sup>: an extrapolation on measured exponents, and far outside anything deployed. <a href="./#rho-parity-ledger">rho-parity ledger</a>.</li>
+    <li><strong>Hyperelliptic genus 4.</strong> The exponent advance holds at p &le; 251 with the full degree-1 base; the factor-base build that dominates at cryptographic size is not modelled. <a href="./#genus-crossover">hyperelliptic</a>.</li>
+    <li><strong>ECC2K-130 at scale.</strong> Any improvement meant to transfer to the challenge must first survive the m = 83 member of the same family; a result there is evidence at m = 83, and the step to m = 131 stays an extrapolation until checked. Nothing measured so far has reached that gate with a ratio below one.</li>
+    <li><strong>Generic backend qualification.</strong> Two dispatches produced no auditable bundle (one cancelled at the job cap, one timed out), so no F4/F5 or SAT family qualification is established.</li>
+  </ul>
+</section>
+
+<section class="panel" id="rho">
+  <h2>The rho side</h2>
+  <p class="lede">The repository also runs the generic attack itself on ECC2K-130. The <a href="../status/">campaign status</a> page shows the live distinguished-point table. The GPU client ships at 15.1 billion scalar updates a second on one RTX PRO 6000; the best tuning snapshot measured 17.95, and the 18, 20, 25 and 29 B/s targets were each priced, tried and not reached. These are practicality measurements of rho; they move no boundary. <a href="./#ecc2k-inline-25b">inlining</a>, <a href="./#twenty-nine-b-result">29 B/s</a>, <a href="./#per-sm-waves-result">occupancy</a>.</p>
+</section>
+
+<section class="panel" id="read">
+  <h2>Reading the ledger</h2>
+  <p class="lede">The <a href="./">scoreboard</a> is a ledger, not a summary: every experiment stays on it, negative results included, with superseded figures kept as &ldquo;was&rdquo; beside the current ones so an engineering step is never mistaken for an advance. Its panels are in the order the work was done. Within a panel, read three things: <code>S</code> (smaller is better), the ratio to the matched rho (above 1, rho wins) and the class chip, where only <em>advance</em> means the method did something a generic algorithm cannot.</p>
+  <div class="links">
+    <a href="./">The scoreboard</a>
+    <a href="ic-leaderboard.html">The leaderboard, curve by curve</a>
+    <a href="performance-gains.html">Performance charts</a>
+    <a href="algorithm-lab.html">Algorithm lab</a>
+    <a href="../status/">ECC2K-130 campaign status</a>
+    <a href="https://github.com/aburan28/crypto/blob/main/AGENTS.md">The reporting rule</a>
+  </div>
+</section>
+
+<footer>
+  <p>Source: <code>docs/ic-current-state.html</code> in <a href="https://github.com/aburan28/crypto">aburan28/crypto</a>. This page cites the scoreboard and computes nothing; a figure that is not on the scoreboard does not belong here. Challenge-size and crossover sizes beyond the measured ladders are extrapolations on the exponents the ledger names.</p>
+</footer>
+</div>
+</body>
+</html>
