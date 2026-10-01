@@ -46,6 +46,12 @@ The fast2 median is **3.592794 B/s** and the median paired ratio is
 **1.466604**. [`result.json`](result.json) retains the full summary. The raw
 archive is 61,389,365 bytes with SHA-256
 `6662cd707f4a0add15ba47fa240c1dde83c3f8ace7db40637cf7fef51eaf2755`.
+[`independent-audit.json`](independent-audit.json) recomputes the corpus,
+replay, exact work, raw-log hashes, source manifests, resources and timing.
+The post-run checker was strengthened to reopen every timed log and validate
+those same hashes, work counters, feature markers, final rates and zero drops.
+The executables were not retained, so their recorded hashes remain provenance
+rather than independently recomputed identities.
 
 Reproduce or audit with:
 
