@@ -33,14 +33,43 @@
    }
   }
  },
+ "context": {
+  "meaning": "F1 times each part once, as F0's first repetition does, where F0 reports the median of its repetitions: the ratio of F0's first repetition's set-up to its median, one factor for every size, applied to F1's totals",
+  "value": 1.0,
+  "interval": [0.88, 1.12],
+  "rule": "the range of that ratio over the eleven suite sizes in v0's A/A runs (0.8831 to 1.1145), rounded outward, 1 at its centre",
+  "added": "2026-10-01, by amendment 1, before any B7a run",
+  "source": {
+   "archive": "research/ic_tool_program/rounds/R01-baseline-v0/runs.tar.xz",
+   "archive_sha256": "ae20e0bd6ed5c76f0f93717d995dcabd385746d26899f22e7d573dad66aecc5d",
+   "files": {
+    "icv1-f2m19-tm797-9c54981b": {"path": "runs/aa/A/k1n19-M1-T01/r1.price.json", "repetitions": 15, "first_setup_units": 62783.4, "median_setup_units": 61212.9, "ratio": 1.0257},
+    "icv1-f2m23-tm5197-1f85e9e1": {"path": "runs/aa/A/k1n23-M1-T01/r1.price.json", "repetitions": 15, "first_setup_units": 69894.0, "median_setup_units": 66348.1, "ratio": 1.0534},
+    "icv1-f2m45-tm6236725-40939294": {"path": "runs/aa/A/k1n45-M1-T01/r1.price.json", "repetitions": 15, "first_setup_units": 117055.2, "median_setup_units": 112125.5, "ratio": 1.044},
+    "icv1-f2m37-tm534059-32aad96b": {"path": "runs/aa/A/k0n37-M1-T01/r1.price.json", "repetitions": 15, "first_setup_units": 163104.6, "median_setup_units": 153270.4, "ratio": 1.0642},
+    "icv1-f2m43-tm998717-e2e742b0": {"path": "runs/aa/A/k1n43-M1-T01/r1.price.json", "repetitions": 15, "first_setup_units": 431975.5, "median_setup_units": 441912.1, "ratio": 0.9775},
+    "icv1-f2m47-t22705043-f4e44623": {"path": "runs/aa/A/k1n47-M1-T01/r1.price.json", "repetitions": 15, "first_setup_units": 1567854.5, "median_setup_units": 1406750.3, "ratio": 1.1145},
+    "icv1-f2m57-tm747311035-c1f545af": {"path": "runs/aa/A/k0n57-M1-T01/r1.price.json", "repetitions": 3, "first_setup_units": 4478082.4, "median_setup_units": 4478082.4, "ratio": 1.0},
+    "icv1-f2m41-tm2308219-7f48b14a": {"path": "runs/aa/A/k0n41-M1-T01/r1.price.json", "repetitions": 3, "first_setup_units": 3711648.6, "median_setup_units": 3991796.0, "ratio": 0.9298},
+    "icv1-f2m53-tm56619371-dac20a85": {"path": "runs/aa/A/k0n53-M1-T01/r1.price.json", "repetitions": 3, "first_setup_units": 39890264.4, "median_setup_units": 41552548.7, "ratio": 0.96},
+    "icv1-f2m59-tm943548413-98844ecc": {"path": "runs/aa/A/k1n59-M1-T01/r1.price.json", "repetitions": 3, "first_setup_units": 37849285.8, "median_setup_units": 41618194.1, "ratio": 0.9094},
+    "icv1-f2m61-t158598901-ab42b6c5": {"path": "runs/aa/A/k0n61-M1-T01/r1.price.json", "repetitions": 3, "first_setup_units": 172154016.7, "median_setup_units": 194947094.7, "ratio": 0.8831}
+   }
+  }
+ },
  "samples": {
   "collect_warmup_summands": 4096,
   "collect_timed_summands": 65536,
-  "descent_warmup_probes": 8,
-  "descent_timed_probes": 64,
-  "la_timed_iterations": 8,
+  "descent_m2_warmup_probes": 1024,
+  "descent_m2_timed_probes": 16384,
+  "descent_m2_repeats": 5,
+  "descent_m3_warmup_trials": 8,
+  "descent_m3_timed_trials": 64,
+  "one_off_warmup": 8,
+  "one_off_timed": 64,
   "rho_warmup_steps": 4096,
   "rho_timed_steps": 65536,
-  "monte_carlo_draws": 10000
+  "monte_carlo_draws": 10000,
+  "amended": "2026-10-01, by amendment 1, before any B7a run: the m = 2 descent was 8 probes of warm-up and 64 timed, and the linear algebra 8 timed iterations; the linear algebra is now solved in full on a synthetic system"
  }
 }

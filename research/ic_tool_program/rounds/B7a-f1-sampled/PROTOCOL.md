@@ -215,3 +215,126 @@ by how much. Any other failure **rejects** B7a, as for every step.
 - F1 against F0: 66 processes. F1 runs the full table, so each costs
   20–40% of its F0 row.
 - Partial tables: 24 processes.
+
+## Amendment 1 (2026-10-01, before any B7a run)
+
+Written while implementing F1, before any measurement this protocol
+declares. F1 was run only on documents no measurement uses: the
+conformance documents (curve A, the suite's smoke size
+`icv1-f2m31-tm90707-c95f16f5`; C059's curve over `GF(4)`; the m = 83
+gate's field, rho alone; secp256k1, rho alone). No F1 run touched any of
+measurement 5's eleven sizes. Two findings at the smoke size shaped
+items 1 and 9, and each rests on an argument that does not depend on
+them.
+
+Everything not named here stands: the carried `ρ` and `κ`, the
+measurements, the acceptance rule, the falsification target, the one
+revision and the abandonment.
+
+1. **The count uses the table's distinct keys.** `K` is
+   `PairSumTable::distinct_keys`, not the stored entries.
+   - A folded table enumerates each sum of two points of one signed
+     orbit from both offsets `g` and `g⁻¹` of its row, so it stores
+     those sums twice, and it stores the identity `P + (−P)` once per
+     orbit. That is about `1/(c + 1)` of its entries: 11% at `c = 8`,
+     0.3% at `c = 320`. Two pairs whose sums share an orbit also share a
+     key.
+   - So `μ = r/(2e·K)` on a folded table, and `r/K` on an unfolded one,
+     whose keys are points.
+   - `κ` was computed from stored entries at the three largest sizes,
+     where the two counts differ by 0.3–0.4%, inside its interval. It is
+     unchanged.
+   - A test enumerates every pair sum of two small bases and checks the
+     count against them.
+2. **Summands per relation are `probes(κμ, w)`**, not `κμ`. `w` is the
+   window one collection trial scans, and a trial yields one relation
+   at most. When `w ≪ κμ` this is `κμ + w/2`; at the smallest sizes it
+   is up to twice `κμ`. So the total summands are
+   `S = max(ρ·c·probes(κμ, w), units_planned · unit_trials · w)`.
+3. **The collection sample uses F0's unit layout.**
+   - The trials run from 0, each unit's part in one call. Each unit is
+     aimed as F0 aims it, and the coverage is updated at its end.
+   - The first call follows the collector's construction, as F0's first
+     unit does. It is timed apart, and what it costs beyond the timed
+     rate is charged once.
+   - The collector and the coverage are charged twice when F0 would
+     extend past its planned units, since F0 builds them again then.
+4. **The verification is priced per relation.**
+   - Relations are pushed one at a time: the collection sample's own
+     relations when it found 16 or more, else synthetic ones. A
+     synthetic relation fails after the same group arithmetic, so only
+     its row's entry into the system goes unpriced, and the report says
+     which kind was used.
+   - The relations priced are `ρ·c` when the count decides how long
+     collection runs. Otherwise they are what F0's planned units find.
+   - The first push is timed apart and its premium charged once.
+   - Pinned to one CPU, as measurement 5 runs, a batch and single pushes
+     cost the same per relation.
+5. **The linear algebra is solved in full on a synthetic system.** This
+   replaces "the first 8 iterations timed".
+   - The system has `c` columns and `⌈ρ·c⌉` rows of weight 3. Each of
+     its first `c` rows holds a column of a random permutation, so every
+     column is covered and the generic rank is full. Its coefficients
+     are uniform and nonzero modulo `r`, and its right-hand sides come
+     from a planted solution.
+   - F0's own solver solves it in full, with F0's options: the filter,
+     the fold, block Wiedemann, reconstruction and the row check.
+   - The table's certification, one scalar multiplication a column, also
+     runs in full, on random logarithms.
+   - Why: at the suite's sizes v0's filter leaves 0–63 core columns, so
+     the solve takes microseconds and the certification is most of F0's
+     `la` clock. Eight iterations would have priced neither the filter,
+     the approximant basis nor the certification.
+6. **The log solver and the descent's solver are built in full.** The
+   descent's is built on a placeholder table, every column's logarithm 0,
+   which indexes as the real table does.
+7. **The descent.** Its online cost is
+   `start + probes(κμ, g)·d + one witness`, plus the first start-up's
+   premium.
+   - `m = 2`: `d` comes from differencing walks of 1,024 and 17,408
+     probes on the real target, through the placeholder table, five
+     times. A probe that decomposes then fails its recovery check. The
+     timed probes' witnesses are counted on one observed walk, and their
+     cost (a decomposition and a recovery check, timed) is subtracted.
+     This replaces "8 probes of warm-up, then 64 timed", which is one
+     round of the walk and too short to time.
+   - `m = 3`: `d` is per summand, from 64 full scans of the base (after
+     8), on states `[a]G + [b]Q`.
+   - The start-up and the witness: 64 timed after 8.
+8. **Rho.**
+   - Its reusable set-up runs in full for each walk.
+   - Its step cost and per-target start-up are fitted by least squares
+     to seven capped walks on the target, under the seeds `seed` to
+     `seed + 6`. The caps are 4,096 and 16,384 steps in turn, 65,536 in
+     all, after a warm-up walk of 4,096.
+   - The expected steps are `√(πr/2A)`, `A` the walk's own; one run's
+     steps are Rayleigh-distributed.
+   - The unit is the one-word batched addition. Rho alone on
+     `rho-koblitz` uses the two-word one its walk runs on. A prime field
+     has no unit in the tool, so its figures are in seconds only.
+9. **A carried context `χ`.**
+   - F1 times each part once, as F0's first repetition does. F0 reports
+     the median of its repetitions.
+   - In v0's A/A runs, the first repetition's set-up is 0.883 to 1.115
+     times the median over the eleven sizes. That makes `χ`
+     `[0.88, 1.12]`, with 1 at its centre.
+   - `χ` multiplies `kic`'s cold and online totals in both intervals.
+   - It is added to `carried.json` with its source, one figure for each
+     size. `ρ` and `κ` are unchanged.
+10. **The predictive interval** also draws the relations of F0's planned
+    units, binomially, when those units decide the collection.
+11. **Partial tables (measurement 7)** are forced by
+    `ic price --f1-partial g`.
+    - The table is built over a random fraction `g` of the base's signed
+      orbits, rounded and at least two, from a fixed seed. The samples
+      run on that base.
+    - The full table's entries come from the build's row structure:
+      `(c·|F| + |F|)/2` folded, `|F|(|F| + 1)/2` unfolded. Its keys are
+      the partial table's divided by the fraction squared.
+    - The build is priced per stored pair, times the full table's
+      entries.
+12. **`conformance/v2-b7a/params/README.md`** is added. Some cases name
+    their documents as `{here}/../../v2-b2/params/…`, a path through
+    `params/`. A directory with nothing in it cannot be committed, so
+    the path did not resolve. No case and no expectation changes.
+13. **The sample sizes** are `carried.json`'s amended `samples` block.
