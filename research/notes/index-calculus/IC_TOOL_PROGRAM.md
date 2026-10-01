@@ -432,8 +432,8 @@ The row above still states the done-when for both halves together.
   kernels two and three words.
 
 **Track B's code is on record before its measurements** (2026-10-01).
-- B0 to B3b are implemented, each on the one before, and none is
-  measured yet. Each step's code reaches `src/` only through its
+- B0 to B3b are implemented, each on the one before, and B4 on B3b;
+  none is measured yet. Each step's code reaches `src/` only through its
   results pull request, in the queue's order.
 - Until then the stack is kept as a verified git bundle in
   [`research/ic_tool_program/track-b/`](../../ic_tool_program/track-b/README.md),
@@ -454,7 +454,7 @@ protocol, 2026-10-01, before any B measurement).
 - The seven checks take 880 processes, not 1,540.
 
 **B4 is declared, generic to nine words** (2026-10-01, before any B4
-code; [protocol](../../ic_tool_program/rounds/B4-multi-word/PROTOCOL.md),
+measurement; [protocol](../../ic_tool_program/rounds/B4-multi-word/PROTOCOL.md),
 [design](../../ic_tool_program/design/multi-word.md)).
 - **One more pipeline, generic in the word count:** `rho-koblitz` and
   `kic` on fields of 3 to 9 words, odd `n ≤ 574`. The row above says
@@ -472,6 +472,12 @@ code; [protocol](../../ic_tool_program/rounds/B4-multi-word/PROTOCOL.md),
   the polynomial basis of `x^131 + x^13 + x^2 + x + 1`, in which they lie
   on the curve. Schema v2 §10–11 had deferred a normal-basis import to
   B4; none is needed.
+- **Its code is on record** in a second bundle,
+  [`track-b/stack-20261001-b4.bundle`](../../ic_tool_program/track-b/README.md),
+  on B3b's branch. As development checks, not B4's measurement, all
+  fifteen of its frozen cases pass on it. One case's expectation was
+  corrected before any measurement: C098's document, at `n = 577`, is
+  refused by schema v2's degree range (2..=571) before any gate.
 
 ## 10. What does not count
 
