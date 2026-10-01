@@ -38,6 +38,12 @@
 #if ECC_TABLE_BRANCHES != 8 && ECC_TABLE_BRANCHES != 16
 #error "ECC_TABLE_BRANCHES must be 8 or 16"
 #endif
+#ifndef ECC_CYCLE_FAST2
+#define ECC_CYCLE_FAST2 0
+#endif
+#if ECC_CYCLE_FAST2 != 0 && ECC_CYCLE_FAST2 != 1
+#error "ECC_CYCLE_FAST2 must be 0 or 1"
+#endif
 #include "bitslice.h"
 
 // Step tag: h in bits 0-3, k in bits 4-11, eps in bit 12.  A lane that has not

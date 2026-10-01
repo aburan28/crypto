@@ -9,11 +9,47 @@
     for (int i = 0; i < 8; ++i) {
         if (ops.distinguished(cur)) return raw; // never escape past a report
         points[i] = cur;
+#if ECC_CYCLE_FAST2
+        // The fast-two probe fills tags[1] while examining the first edge, so
+        // a non-two-cycle continues without recomputing that raw selection.
+        if (i == 0) tags[i] = raw;
+        else if (i > 1) tags[i] = ops.tag(cur);
+#else
         tags[i] = i == 0 ? raw : ops.tag(cur);
+#endif
         Point next;
         if (!ops.next(cur, tags[i], &next)) return raw;
         cur = next;
         if (ops.equal(cur, start)) { length = i + 1; break; }
+#if ECC_CYCLE_FAST2
+        if (i == 0) {
+            // If the next raw tag is the exact inverse table addend, the
+            // group law proves a two-cycle. oppositeCloses also verifies the
+            // second affine step's denominator is nonzero, matching next()'s
+            // exceptional-path contract without paying its inversion.
+            if (ops.distinguished(cur)) return raw;
+            const unsigned opposite = tags[1] = ops.tag(cur);
+            if (eccTagNegates(raw, opposite) &&
+                ops.oppositeCloses(start, cur, opposite)) {
+                unsigned long long h0 = ECC_HIST_EMPTY;
+                h0 = eccHistPush(h0, raw);
+                h0 = eccHistPush(h0, opposite);
+                h0 = eccHistPush(h0, raw);
+                h0 = eccHistPush(h0, opposite);
+                unsigned long long h1 = ECC_HIST_EMPTY;
+                h1 = eccHistPush(h1, opposite);
+                h1 = eccHistPush(h1, raw);
+                h1 = eccHistPush(h1, opposite);
+                h1 = eccHistPush(h1, raw);
+                const bool startEligible = eccTagFruitless(raw, h0, m);
+                const bool otherEligible = eccTagFruitless(opposite, h1, m);
+                if (!startEligible || (otherEligible && ops.less(cur, start)))
+                    return raw;
+                return eccTag((eccTagH(raw) + 1) & (branches - 1),
+                              eccTagK(raw), eccTagEps(raw));
+            }
+        }
+#endif
     }
     if (!length) return raw;
     int anchor = -1;

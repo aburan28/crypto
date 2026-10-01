@@ -373,6 +373,16 @@ struct TwCycleOps {
         out->y = add131(add131(mul131(lambda, add131(p.x, out->x)), out->x), p.y);
         return true;
     }
+    TW_METHOD bool oppositeCloses(const TwCyclePoint &, const TwCyclePoint &after,
+                                  unsigned t) const {
+        P131 zero = {{0,0,0,0,0}}, tx, ty;
+        twAddend(t, zero, zero, tab, &tx, &ty);
+        tx = fromPolynomial131(tx);
+        // The caller proved t is the inverse of the first addend. By group
+        // associativity the result is the start whenever next() is defined;
+        // next() is defined exactly when this denominator is nonzero.
+        return !twFieldEqual(after.x, tx);
+    }
     TW_METHOD bool equal(const TwCyclePoint &a, const TwCyclePoint &b) const {
         return twFieldEqual(a.x,b.x) && twFieldEqual(a.y,b.y);
     }
