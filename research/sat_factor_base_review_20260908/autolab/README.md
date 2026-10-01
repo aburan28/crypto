@@ -46,6 +46,7 @@ python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py \
 | `plan` | Ledger priorities, target-count gate, and primary-speedup eligibility |
 | `preflight` | Ledger schema v2, cargo/rustc, producer sources, host pin |
 | `launch --beat …` | Lock → run dir → build producers → measure → claim draft + schema check |
+| `launch-panel --beat … [--targets L] [--blocks B] [--k K \| --k-candidates …] [--cpu N]` | Multi-target batch panel beats only (see below); `launch` rejects them |
 | `status [--run-id]` | Print `runs/<id>/state.json` (default: `runs/current.json`) |
 | `verify [--run-id]` | Rehash review manifest |
 | `claim-check --report PATH --stage STAGE` | Fail-closed measurement-schema validation |
@@ -106,6 +107,34 @@ reusable setup, nor do they emit the exclusive online phase record. Keep their
 `full_algorithm_charged_total_ms`, setup, and per-target values as labeled
 diagnostics only. Do not divide a shared total by the target count, sum rows
 that repeat shared setup, or use either value to claim single-target speedup.
+
+### Batch panel beats
+
+Beats with `"launch_mode": "batch_panel"` (currently
+`koblitz.compact_orbit.n61_panel`: compact-orbit shared-log DLP against the
+frozen KS v2 batched rho at a=0 n=61) run through `launch-panel`. One run:
+
+1. generates the tune and eval corpora (`KIC_RHO_GENERATE_ONLY=1`, same
+   derivation as the walking rho) and checks they are disjoint;
+2. tunes K on the tune corpus of the same L and picks the lowest whole-process
+   wall, skipping (and recording) candidates whose estimated IC RSS exceeds
+   available memory; `--k` fixes K instead;
+3. runs `B` paired blocks in alternating order on the eval corpus, recording
+   wall, CPU, RSS, load, available memory and swap per run, and the retired
+   instruction count on macOS;
+4. checks every target in both arms, then replays every IC and rho record with
+   the pure-Python checkers;
+5. writes an `end_to_end_dlp` claim draft (`claim_draft.json` /
+   `claim_check.json`) and a supplementary `vs_rho` draft
+   (`claim_draft_vs_rho.json` / `claim_check_vs_rho.json`).
+
+`L < targets_minimum` (1,024) is refused. The `vs_rho` draft fails closed by
+design: the batch producers emit no single-target online fields, and none are
+filled in. A panel can reach `PENDING_INDEPENDENT_VALIDATION` under
+`end_to_end_dlp`, never a `vs_rho` promotion. With `--cpu N` every producer is
+pinned with `taskset`; wrap the whole command in
+`tools/isolated_bench.py reserve` (Linux) for AGENTS.md section-10 timings, as
+`.github/workflows/compact-orbit-n61-isolated.yml` does.
 
 ### Historical target mode
 
