@@ -316,6 +316,11 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #endif
 
 #if ECC_WALK_TABLE
+#if ECC_CYCLE_PROFILE
+#define ECC_CYCLE_PROFILE_ARG(params) , (params).cycleProfile
+#else
+#define ECC_CYCLE_PROFILE_ARG(params)
+#endif
 // The forward-pass selection of one slot, without the chain product: load the
 // point, weight and distinguished-point test, table-walk selection with its
 // history update, and the addend (d, e) in the polynomial basis.
@@ -354,7 +359,8 @@ __device__ __forceinline__ void tableSelectSlot(const WalkParams<unsigned> &p, i
             atomicAdd(p.dpCount + 1, 1u);
         }
     }
-    const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight);
+    const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight
+                                  ECC_CYCLE_PROFILE_ARG(p));
     twAddend(tag, xp, yp, twTab, dp, ep);
 }
 #if ECC_TABLE_SPLIT_FORWARD
@@ -393,7 +399,8 @@ __device__ __forceinline__ void tableSelectTagSlot(const WalkParams<unsigned> &p
             atomicAdd(p.dpCount + 1, 1u);
         }
     }
-    (void)twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight);
+    (void)twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight
+                   ECC_CYCLE_PROFILE_ARG(p));
 }
 #else
 // Record the raw tag immediately, but defer a hinted v3 point probe.  A later
@@ -447,7 +454,12 @@ __device__ __forceinline__ void tableResolveHintSlot(const WalkParams<unsigned> 
     const unsigned raw = unsigned(hist & 0xffffull);
     const P131 x = fromPolynomial131(load(p.x, slot, tid, p.threads));
     const P131 yp = load(p.y, slot, tid, p.threads);
+#if ECC_CYCLE_PROFILE
+    const unsigned tag = twCycleTagProfile(x, yp, raw, twSel, twTab, p.dpWeight,
+                                           p.cycleProfile);
+#else
     const unsigned tag = twCycleTag(x, yp, raw, twSel, twTab, p.dpWeight);
+#endif
     p.hist[id] = (hist & ~0xffffull) | tag;
 }
 #endif
@@ -494,7 +506,8 @@ __device__ __forceinline__ void fusedSelect(const WalkParams<unsigned> &p, const
             atomicAdd(p.dpCount + 1, 1u);
         }
     }
-    const unsigned tag = twSelectHist(x, yp, hw, &hist, twSel, twTab, p.dpWeight);
+    const unsigned tag = twSelectHist(x, yp, hw, &hist, twSel, twTab, p.dpWeight
+                                      ECC_CYCLE_PROFILE_ARG(p));
     p.hist[id] = hist;
     P131 dp, ep;
     twAddend(tag, xp, yp, twTab, &dp, &ep);
@@ -904,7 +917,8 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #if !ECC_PACKED_SLOT_PIPELINE
             const P131 yp = load(p.y, slot, tid, p.threads);
 #endif
-            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight);
+            const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight
+                                          ECC_CYCLE_PROFILE_ARG(p));
             P131 dp, ep;
             twAddend(tag, xp, yp, twTab, &dp, &ep);
             if (slot) {

@@ -35,6 +35,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #endif
     PackedCudaEngine() { P = {}; }
     ~PackedCudaEngine() override {
+#if ECC_CYCLE_PROFILE
+        if (P.cycleProfile) reportCycleProfile();
+#endif
 #if ECC_PHASE_PROFILE
         cudaDeviceSynchronize();
         if (profWarpSteps > 0) eccPacked131::phaseProfileReport(profWarpSteps);
@@ -49,6 +52,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         cudaFree(P.seed); cudaFree(P.startIter); cudaFree(P.dp); cudaFree(P.dpCount);
         cudaFree(P.hist); cudaFree(twConsts);
         cudaFree(P.counts);
+#if ECC_CYCLE_PROFILE
+        cudaFree(P.cycleProfile);
+#endif
     }
 #if ECC_WALK_TABLE && !ECC_TABLE_GLOBAL
     static size_t dynamicSharedBytes() { return eccPacked131::TW_SHARED_BYTES; }
@@ -154,6 +160,30 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     const char *name() const { return "cuda-packed131"; }
     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
     bool needsReseed() const { return restartPending; }
+
+#if ECC_CYCLE_PROFILE
+    void reportCycleProfile() const {
+        EccCycleProfile profile = {};
+        CUDA_CHECK(cudaDeviceSynchronize());
+        CUDA_CHECK(cudaMemcpy(&profile, P.cycleProfile, sizeof(profile),
+                              cudaMemcpyDeviceToHost));
+        const unsigned long long terminal = eccCycleProfileTerminalTotal(profile);
+        printf("cycle profile: {\"hints\":%llu,\"fast2_hits\":%llu,"
+               "\"general_cycles_by_length_1_8\":[%llu,%llu,%llu,%llu,%llu,%llu,%llu,%llu],"
+               "\"open_eight_step_probes\":%llu,\"dp_aborts\":%llu,"
+               "\"exceptional_denominator_aborts\":%llu,\"affine_next_calls\":%llu,"
+               "\"anchor_exits\":%llu,\"terminal_total\":%llu,\"reconciled\":%s}\n",
+               profile.hints, profile.fast2Hits,
+               profile.generalCycles[0], profile.generalCycles[1],
+               profile.generalCycles[2], profile.generalCycles[3],
+               profile.generalCycles[4], profile.generalCycles[5],
+               profile.generalCycles[6], profile.generalCycles[7],
+               profile.openEightStepProbes, profile.dpAborts,
+               profile.exceptionalDenominatorAborts, profile.affineNextCalls,
+               profile.anchorExits, terminal,
+               terminal == profile.hints ? "true" : "false");
+    }
+#endif
 
     static int autoThreads(int device) {
         cudaDeviceProp prop;
@@ -280,6 +310,10 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         // Second counter signals overdue restarts without emitting false DPs.
         CUDA_CHECK(cudaMalloc(&P.dpCount, 3 * sizeof(unsigned)));
         CUDA_CHECK(cudaMemset(P.dpCount, 0, 3 * sizeof(unsigned)));
+#if ECC_CYCLE_PROFILE
+        CUDA_CHECK(cudaMalloc(&P.cycleProfile, sizeof(EccCycleProfile)));
+        CUDA_CHECK(cudaMemset(P.cycleProfile, 0, sizeof(EccCycleProfile)));
+#endif
         using R = Ref<CfgF131>;
         auto basis = R::make(R::fromLimbs(px), R::fromLimbs(py));
         eccPacked131::P131 ox[128], oy[128];
@@ -345,6 +379,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed table split forward: %d\n", ECC_TABLE_SPLIT_FORWARD);
         printf("packed table batch hints: %d\n", ECC_TABLE_BATCH_HINTS);
         printf("packed cycle fast2: %d\n", ECC_CYCLE_FAST2);
+        printf("packed cycle profile: %d\n", ECC_CYCLE_PROFILE);
         printf("packed table global: %d\n", ECC_TABLE_GLOBAL);
         printf("packed table addend global: %d\n", ECC_TABLE_ADDEND_GLOBAL);
 #endif

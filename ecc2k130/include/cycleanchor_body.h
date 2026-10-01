@@ -2,12 +2,16 @@
 // templates. No include guard: this is not a standalone translation unit.
 // Keeping execution spaces explicit avoids compiling host-only Ref operations
 // into an unused device specialization (or device intrinsics for the host).
+    ECC_CYCLE_PROFILE_BEGIN();
     Point points[8];
     unsigned tags[8];
     Point cur = start;
     int length = 0;
     for (int i = 0; i < 8; ++i) {
-        if (ops.distinguished(cur)) return raw; // never escape past a report
+        if (ops.distinguished(cur)) {
+            ECC_CYCLE_PROFILE_OUTCOME(ECC_CYCLE_OUTCOME_DP_ABORT);
+            return raw; // never escape past a report
+        }
         points[i] = cur;
 #if ECC_CYCLE_FAST2
         // The fast-two probe fills tags[1] while examining the first edge, so
@@ -18,7 +22,11 @@
         tags[i] = i == 0 ? raw : ops.tag(cur);
 #endif
         Point next;
-        if (!ops.next(cur, tags[i], &next)) return raw;
+        ECC_CYCLE_PROFILE_NEXT();
+        if (!ops.next(cur, tags[i], &next)) {
+            ECC_CYCLE_PROFILE_OUTCOME(ECC_CYCLE_OUTCOME_EXCEPTIONAL_ABORT);
+            return raw;
+        }
         cur = next;
         if (ops.equal(cur, start)) { length = i + 1; break; }
 #if ECC_CYCLE_FAST2
@@ -27,10 +35,14 @@
             // group law proves a two-cycle. oppositeCloses also verifies the
             // second affine step's denominator is nonzero, matching next()'s
             // exceptional-path contract without paying its inversion.
-            if (ops.distinguished(cur)) return raw;
+            if (ops.distinguished(cur)) {
+                ECC_CYCLE_PROFILE_OUTCOME(ECC_CYCLE_OUTCOME_DP_ABORT);
+                return raw;
+            }
             const unsigned opposite = tags[1] = ops.tag(cur);
             if (eccTagNegates(raw, opposite) &&
                 ops.oppositeCloses(start, cur, opposite)) {
+                ECC_CYCLE_PROFILE_OUTCOME(ECC_CYCLE_OUTCOME_FAST2);
                 unsigned long long h0 = ECC_HIST_EMPTY;
                 h0 = eccHistPush(h0, raw);
                 h0 = eccHistPush(h0, opposite);
@@ -45,13 +57,18 @@
                 const bool otherEligible = eccTagFruitless(opposite, h1, m);
                 if (!startEligible || (otherEligible && ops.less(cur, start)))
                     return raw;
+                ECC_CYCLE_PROFILE_EXIT();
                 return eccTag((eccTagH(raw) + 1) & (branches - 1),
                               eccTagK(raw), eccTagEps(raw));
             }
         }
 #endif
     }
-    if (!length) return raw;
+    if (!length) {
+        ECC_CYCLE_PROFILE_OUTCOME(ECC_CYCLE_OUTCOME_OPEN_8);
+        return raw;
+    }
+    ECC_CYCLE_PROFILE_OUTCOME(ECC_CYCLE_OUTCOME_GENERAL_1 + length - 1);
     int anchor = -1;
     bool startEligible = false;
     for (int i = 0; i < length; ++i) {
@@ -64,4 +81,5 @@
     }
     // Equivalent orbit keys may tie: covariance gives equivalent exit edges.
     if (!startEligible || anchor < 0 || ops.less(points[anchor], start)) return raw;
+    ECC_CYCLE_PROFILE_EXIT();
     return eccTag((eccTagH(raw) + 1) & (branches - 1), eccTagK(raw), eccTagEps(raw));
