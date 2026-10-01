@@ -15,6 +15,9 @@ HEADER = struct.Struct("<8sII")
 MAGIC = b"ECC2KDT3"
 VERSION = 3
 RECORD_BYTES = 32
+LIVE_SLOTS = 96_256 * 16
+STEPS = 1024
+LAUNCHES = {"warmup": 16, "screen": 32, "confirm": 64}
 
 
 def read_corpus(path):
@@ -107,8 +110,47 @@ def read_samples(path):
             row["rateMps"] = float(row["rateMps"])
             if not math.isfinite(row["rateMps"]) or row["rateMps"] <= 0:
                 raise ValueError(f"non-positive/non-finite rate in {row}")
+            if row["phase"] not in LAUNCHES or row["variant"] not in ("control", "candidate"):
+                raise ValueError(f"unknown timing phase/variant in {row}")
+            if not re.fullmatch(r"[0-9a-f]{64}", row["logSha256"]):
+                raise ValueError(f"invalid log digest in {row}")
             rows.append(row)
     return rows
+
+
+def validate_sample_logs(results, rows):
+    """Bind every TSV row to one complete raw log and its exact work budget."""
+    errors = []
+    for row in rows:
+        name = f"{row['phase']}-{row['pair']}-{row['order']}-{row['variant']}.log"
+        path = pathlib.Path(results) / name
+        try:
+            data = path.read_bytes()
+        except OSError as exc:
+            errors.append(str(exc))
+            continue
+        digest = hashlib.sha256(data).hexdigest()
+        if digest != row["logSha256"]:
+            errors.append(f"{name}: sha256 {digest}, TSV has {row['logSha256']}")
+        text = data.decode(errors="replace")
+        finished = re.findall(
+            r"finished: ([0-9.]+) M it/s, (\d+) distinguished points "
+            r"\((\d+) verified against the reference, (\d+) dropped\)",
+            text,
+        )
+        if len(finished) != 1:
+            errors.append(f"{name}: finished marker count {len(finished)}")
+        else:
+            rate, _, _, dropped = finished[0]
+            if float(rate) != row["rateMps"]:
+                errors.append(f"{name}: final rate {rate}, TSV has {row['rateMps']}")
+            if dropped != "0":
+                errors.append(f"{name}: timed row dropped {dropped} reports")
+        updates = [int(value) for value in re.findall(r"\s(\d+) iterations\s", text)]
+        expected = LIVE_SLOTS * STEPS * LAUNCHES[row["phase"]]
+        if not updates or updates[-1] != expected:
+            errors.append(f"{name}: final work {updates[-1] if updates else None}, expected {expected}")
+    return errors
 
 
 def decide_samples(rows):
@@ -118,8 +160,12 @@ def decide_samples(rows):
     confirm = [r for r in rows if r["phase"] == "confirm"]
     if [r["variant"] for r in warmup] != ["control", "candidate"]:
         errors.append("warmups must be exactly control,candidate")
+    if [(r["pair"], r["order"]) for r in warmup] != [(0, 1), (0, 2)]:
+        errors.append("warmup pair/order keys differ")
     if [r["variant"] for r in screen] != ["control", "candidate", "control"]:
         errors.append("screen must be exactly control,candidate,control")
+    if [(r["pair"], r["order"]) for r in screen] != [(0, 1), (0, 2), (0, 3)]:
+        errors.append("screen pair/order keys differ")
     qualified = False
     threshold = None
     screen_ratio = None
@@ -204,15 +250,21 @@ def summarize(results, include_timing=True):
         errors.append(str(exc))
     if include_timing:
         try:
-            output["timing"] = decide_samples(read_samples(results / "samples.tsv"))
+            samples = read_samples(results / "samples.tsv")
+            output["timing"] = decide_samples(samples)
+            output["timing"]["logErrors"] = validate_sample_logs(results, samples)
+            if output["timing"]["logErrors"]:
+                errors.extend(output["timing"]["logErrors"])
             if not output["timing"]["valid"]:
                 errors.extend(output["timing"]["errors"])
         except (OSError, ValueError) as exc:
             errors.append(str(exc))
-    for optional in ("host.txt", "source-files.sha256", "binary-sha256.txt"):
-        path = results / optional
+    for required in ("host.txt", "source-files.sha256", "binary-sha256.txt"):
+        path = results / required
         if path.exists():
-            output[optional] = path.read_text(errors="replace").strip()
+            output[required] = path.read_text(errors="replace").strip()
+        else:
+            errors.append(f"missing evidence manifest: {path}")
     output["valid"] = not errors
     output["errors"] = errors
     if not output["valid"]:

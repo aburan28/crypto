@@ -1,4 +1,5 @@
 import pathlib
+import hashlib
 import struct
 import tempfile
 import unittest
@@ -94,6 +95,34 @@ class QualificationTests(unittest.TestCase):
         result = summarize.decide_samples(rows)
         self.assertFalse(result["valid"])
         self.assertEqual(result["decision"], "invalid")
+
+    def test_screen_pair_order_is_exact(self):
+        rows = self.base_rows(101)
+        rows[2]["pair"] = 7
+        result = summarize.decide_samples(rows)
+        self.assertFalse(result["valid"])
+        self.assertIn("screen pair/order keys differ", result["errors"])
+
+
+class TimedLogTests(unittest.TestCase):
+    def test_hash_rate_drop_and_exact_work_are_bound(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            work = summarize.LIVE_SLOTS * summarize.STEPS * summarize.LAUNCHES["warmup"]
+            data = (
+                f"  1.0 s  1000.0 M it/s  {work} iterations  0 dp  0 stored  0 dropped\n"
+                "  finished: 1000.0 M it/s, 0 distinguished points "
+                "(0 verified against the reference, 0 dropped)\n"
+            ).encode()
+            path = root / "warmup-0-1-control.log"
+            path.write_bytes(data)
+            row = {
+                "phase": "warmup", "pair": 0, "order": 1, "variant": "control",
+                "rateMps": 1000.0, "logSha256": hashlib.sha256(data).hexdigest(),
+            }
+            self.assertEqual(summarize.validate_sample_logs(root, [row]), [])
+            row["logSha256"] = "0" * 64
+            self.assertTrue(summarize.validate_sample_logs(root, [row]))
 
 
 class EvidenceParserTests(unittest.TestCase):
