@@ -8,7 +8,6 @@ from __future__ import annotations
 import json
 import math
 import os
-import re
 import statistics
 import sys
 from pathlib import Path
@@ -184,25 +183,16 @@ def calib_rows() -> dict:
     return out
 
 
-LINE = re.compile(r"^\s*([\d,]+)\s+\(\s*([\d.]+)%\)\s+(.*)$")
-
-
 def callgrind_rows() -> dict:
+    """The per-phase split of each callgrind run (`../../harness/callgrind_phases.py`).
+
+    The declared step's own `*.annotate.txt` read only the base output file,
+    which holds none of the phase parts; the split re-reads every part.
+    """
     out = {}
     d = RUNS / "callgrind"
-    for f in sorted(d.glob("*.annotate.txt")) if d.exists() else []:
-        rid = f.name.split(".")[0]
-        text = f.read_text()
-        events = next((ln.split(":", 1)[1].split() for ln in text.splitlines() if ln.startswith("Events shown:")),
-                      [])
-        top = []
-        for ln in text.splitlines():
-            parts = ln.split()
-            if len(parts) > len(events) and all(p.replace(",", "").isdigit() for p in parts[:len(events)]) \
-                    and events:
-                values = [int(p.replace(",", "")) for p in parts[:len(events)]]
-                top.append({"function": " ".join(parts[len(events):])[:160], **dict(zip(events, values))})
-        out[rid] = {"events": events, "top": top[:25]}
+    for f in sorted(d.glob("*.phases.json")) if d.exists() else []:
+        out[f.name.split(".")[0]] = json.loads(f.read_text())
     return out
 
 

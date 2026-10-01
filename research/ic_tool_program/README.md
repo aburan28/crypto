@@ -17,4 +17,6 @@ It adds each part with the round that creates it:
 | round | what | state | PR |
 |:--|:--|:--|:--|
 | plan | goals, suite, measurement, loop, backlogs | merged | #1103 |
-| R01 | baseline v0: freeze suite v1, pin against §23, profile every phase, A/A | declared ([`rounds/R01-baseline-v0/`](rounds/R01-baseline-v0/PROTOCOL.md)) | this branch |
+| R01 | baseline v0: freeze suite v1, pin against §23, profile every phase, A/A | complete ([`rounds/R01-baseline-v0/`](rounds/R01-baseline-v0/README.md)) | #1104 (declaration), results PR |
+| R02 | the AVX-512 batched addition for fields with `n + deg t = 66` | declared, next | — |
+| B0 | refusals and fixes for the survey's defects, with conformance suite v1 | written, after R02 | — |

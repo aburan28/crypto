@@ -1,0 +1,191 @@
+{
+ "rows": [
+  {
+   "row": "k0n31-M1-T01",
+   "status": "complete",
+   "counts": {
+    "pass": {
+     "build": {
+      "stored_pairs": 2232,
+      "tier": "folded"
+     },
+     "collect": {
+      "per_unit_index_relations_trials_summands": [
+       [
+        0,
+        14,
+        16,
+        256
+       ]
+      ],
+      "relations_collected": 14,
+      "summands_scanned": 256,
+      "trials": 16,
+      "units": 1,
+      "units_extended": 0,
+      "units_planned": 1
+     },
+     "descent": {
+      "summands": 2,
+      "trials_per_target": [
+       47
+      ],
+      "trials_total": 47
+     },
+     "logs": {
+      "columns": 8,
+      "duplicates": 0,
+      "linear_algebra": {
+       "attempts": 0,
+       "core_dimension": 0,
+       "core_nonzeros": 0,
+       "filter": {
+        "columns_in": 8,
+        "columns_out": 0,
+        "dependent_rows_dropped": 6,
+        "duplicates_removed": 0,
+        "excess_rows_removed": 0,
+        "merged_columns": 7,
+        "nonzeros_in": 37,
+        "nonzeros_out": 0,
+        "rows_in": 14,
+        "rows_out": 0,
+        "singletons_removed": 1,
+        "uncovered_columns": 0
+       },
+       "reconstructed_columns": 8,
+       "wiedemann": null
+      },
+      "rejected": 0,
+      "relations_accepted": 14,
+      "solve_attempts": 1
+     },
+     "select": {
+      "columns": 8,
+      "points": 496,
+      "selection_cost": {
+       "abscissae_drawn": 21,
+       "cofactor_multiplications": 8,
+       "frobenius_squarings": 248,
+       "lifts_found": 8,
+       "rebuilds": 1
+      },
+      "signed_orbits": 8
+     }
+    },
+    "recovered": [
+     "923097"
+    ]
+   },
+   "recovered_ic": "923097",
+   "recovered_rho": "923097",
+   "rho_counts": {
+    "distinguished_points": 4,
+    "recovered": 923097,
+    "steps": 74,
+    "target_ops": {
+     "adds": 103,
+     "doubles": 37,
+     "scalar_mults": 2
+    },
+    "walks": 4
+   },
+   "all_verified": true,
+   "ic_and_rho_agree": true
+  },
+  {
+   "row": "k0n31-M1-T02",
+   "status": "complete",
+   "counts": {
+    "pass": {
+     "build": {
+      "stored_pairs": 2232,
+      "tier": "folded"
+     },
+     "collect": {
+      "per_unit_index_relations_trials_summands": [
+       [
+        0,
+        14,
+        16,
+        256
+       ]
+      ],
+      "relations_collected": 14,
+      "summands_scanned": 256,
+      "trials": 16,
+      "units": 1,
+      "units_extended": 0,
+      "units_planned": 1
+     },
+     "descent": {
+      "summands": 2,
+      "trials_per_target": [
+       21
+      ],
+      "trials_total": 21
+     },
+     "logs": {
+      "columns": 8,
+      "duplicates": 0,
+      "linear_algebra": {
+       "attempts": 0,
+       "core_dimension": 0,
+       "core_nonzeros": 0,
+       "filter": {
+        "columns_in": 8,
+        "columns_out": 0,
+        "dependent_rows_dropped": 6,
+        "duplicates_removed": 0,
+        "excess_rows_removed": 0,
+        "merged_columns": 7,
+        "nonzeros_in": 37,
+        "nonzeros_out": 0,
+        "rows_in": 14,
+        "rows_out": 0,
+        "singletons_removed": 1,
+        "uncovered_columns": 0
+       },
+       "reconstructed_columns": 8,
+       "wiedemann": null
+      },
+      "rejected": 0,
+      "relations_accepted": 14,
+      "solve_attempts": 1
+     },
+     "select": {
+      "columns": 8,
+      "points": 496,
+      "selection_cost": {
+       "abscissae_drawn": 21,
+       "cofactor_multiplications": 8,
+       "frobenius_squarings": 248,
+       "lifts_found": 8,
+       "rebuilds": 1
+      },
+      "signed_orbits": 8
+     }
+    },
+    "recovered": [
+     "171503"
+    ]
+   },
+   "recovered_ic": "171503",
+   "recovered_rho": "171503",
+   "rho_counts": {
+    "distinguished_points": 11,
+    "recovered": 171503,
+    "steps": 167,
+    "target_ops": {
+     "adds": 205,
+     "doubles": 37,
+     "scalar_mults": 2
+    },
+    "walks": 11
+   },
+   "all_verified": true,
+   "ic_and_rho_agree": true
+  }
+ ],
+ "ok": true
+}

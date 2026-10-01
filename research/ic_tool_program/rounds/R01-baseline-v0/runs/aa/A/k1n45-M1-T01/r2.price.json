@@ -1,0 +1,1420 @@
+{
+  "a": 1,
+  "all_verified": true,
+  "binary_blake3": "258baffee11a93d1ce12707d2c8de3f92486ffc2154a98a34caf208281953180",
+  "certificates": {
+    "ic": {
+      "arm": "ic",
+      "curve": {
+        "curve_a": 1,
+        "degree": 45,
+        "generator": [
+          "32731336711205",
+          "6242274623135"
+        ],
+        "irreducible_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ],
+        "subgroup_order": "29264761"
+      },
+      "method": "Koblitz index calculus: `ic price` single-target descent on the parameter file's recipe",
+      "scalar": "10308773",
+      "schema": "ic-price-single-target-replay-v1",
+      "statement": "[scalar]generator = target, in the prime-order subgroup",
+      "target": [
+        "6540513803421",
+        "11208085253968"
+      ]
+    },
+    "ic_sha256": "d20f11a1547b2361008fc53a5439a291ac435f5a9f586429e6085ed8c07ed04e",
+    "rho": {
+      "arm": "rho",
+      "curve": {
+        "curve_a": 1,
+        "degree": 45,
+        "generator": [
+          "32731336711205",
+          "6242274623135"
+        ],
+        "irreducible_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ],
+        "subgroup_order": "29264761"
+      },
+      "method": "1 lanes in lockstep, one inversion a round; jumps in G only; batched restarts (1): signed-Frobenius r-adding walk: normal-basis canonicalisation, look-ahead, short-cycle escape by doubling, distinguished points, stride starts",
+      "scalar": "10308773",
+      "schema": "ic-price-single-target-replay-v1",
+      "statement": "[scalar]generator = target, in the prime-order subgroup",
+      "target": [
+        "6540513803421",
+        "11208085253968"
+      ]
+    },
+    "rho_sha256": "cacb64439365264def469c66d6f533148dda0d030042470686158b2c79002c0e"
+  },
+  "commit": "18d649cbdf6add7e5feea28460d81393101770df",
+  "counts": {
+    "pass": {
+      "build": {
+        "stored_pairs": 3240,
+        "tier": "folded"
+      },
+      "collect": {
+        "per_unit_index_relations_trials_summands": [
+          [
+            0,
+            3,
+            16,
+            352
+          ],
+          [
+            1,
+            5,
+            16,
+            352
+          ]
+        ],
+        "relations_collected": 8,
+        "summands_scanned": 704,
+        "trials": 32,
+        "units": 2,
+        "units_extended": 1,
+        "units_planned": 1
+      },
+      "descent": {
+        "summands": 2,
+        "trials_per_target": [
+          43
+        ],
+        "trials_total": 43
+      },
+      "logs": {
+        "columns": 8,
+        "duplicates": 0,
+        "linear_algebra": {
+          "attempts": 0,
+          "core_dimension": 0,
+          "core_nonzeros": 0,
+          "filter": {
+            "columns_in": 8,
+            "columns_out": 0,
+            "dependent_rows_dropped": 0,
+            "duplicates_removed": 0,
+            "excess_rows_removed": 0,
+            "merged_columns": 2,
+            "nonzeros_in": 21,
+            "nonzeros_out": 0,
+            "rows_in": 8,
+            "rows_out": 0,
+            "singletons_removed": 6,
+            "uncovered_columns": 0
+          },
+          "reconstructed_columns": 8,
+          "wiedemann": null
+        },
+        "rejected": 0,
+        "relations_accepted": 8,
+        "solve_attempts": 1
+      },
+      "select": {
+        "columns": 8,
+        "points": 720,
+        "selection_cost": {
+          "abscissae_drawn": 16,
+          "cofactor_multiplications": 8,
+          "frobenius_squarings": 360,
+          "lifts_found": 8,
+          "rebuilds": 1
+        },
+        "signed_orbits": 8
+      }
+    },
+    "recovered": [
+      "10308773"
+    ]
+  },
+  "counts_identical_across_repetitions": true,
+  "curve": "K_1 / GF(2^45)",
+  "ic_and_rho_agree": true,
+  "identity_inputs": {
+    "column_convention": "representative",
+    "columns": 8,
+    "factor_base_orbits": [
+      [
+        "301448021461",
+        "24759294119776"
+      ],
+      [
+        "321181765829",
+        "5243634148005"
+      ],
+      [
+        "406341338653",
+        "22070644031010"
+      ],
+      [
+        "578949423549",
+        "18269313245317"
+      ],
+      [
+        "725521405129",
+        "28346451926769"
+      ],
+      [
+        "956948974569",
+        "13207650256191"
+      ],
+      [
+        "1456094426585",
+        "21924846426838"
+      ],
+      [
+        "1595867823919",
+        "35032076012541"
+      ]
+    ],
+    "fixture": {
+      "cofactor": "1202278",
+      "curve_a": 1,
+      "degree": 45,
+      "generator": [
+        "32731336711205",
+        "6242274623135"
+      ],
+      "group_order": "35184378325558",
+      "irreducible": {
+        "degree": 45,
+        "low_terms": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      "lambda": "18336344",
+      "subgroup_order": "29264761",
+      "target_scalar_constructed": false,
+      "target_seeds": [
+        23001
+      ],
+      "targets": [
+        [
+          "6540513803421",
+          "11208085253968"
+        ]
+      ]
+    }
+  },
+  "log2_r": 24.802661160698776,
+  "median": {
+    "cold_ratio_ic_over_rho": 1.5157099485285537,
+    "ic_online_phase_ms": {
+      "T_target_PDP_ms": 0.007802,
+      "T_target_descent_ms": 0.000819,
+      "T_target_query_ms": 0.008986,
+      "T_target_recovery_check_ms": 0.00227,
+      "T_target_relation_check_ms": 0.000649
+    },
+    "ic_online_phases_not_entered": [],
+    "ic_online_phases_ns": {
+      "recovery_check": 2270,
+      "target_descent": 819,
+      "target_pdp": 7802,
+      "target_query": 8986,
+      "target_relation_check": 649
+    },
+    "ic_online_repetition": 4,
+    "ic_online_units": 768.1816348364083,
+    "ic_online_wall_ms": 0.020526,
+    "ic_online_wall_ns": 20526,
+    "ic_replay_ns": 4701.0,
+    "online_speedup": 26.68980804832895,
+    "online_speedup_rho_model": 2.3144051068526967,
+    "rho_model_units": 1777.883498655837,
+    "rho_online_phases_ns": {
+      "recovery_check": 3048,
+      "rho_solve": 544787
+    },
+    "rho_online_repetition": 2,
+    "rho_online_units": 19983.041820370367,
+    "rho_online_wall_ms": 0.547835,
+    "rho_online_wall_ns": 547835,
+    "rho_replay_ns": 6308.0,
+    "rho_setup_units": 56381.379222869895,
+    "rho_step_over_model": 11.25391295852197,
+    "rho_units_per_step": 25.104323894937647,
+    "s_ic_cold": 21.3961027008603,
+    "s_ic_online": 0.14200100867192544,
+    "s_rho_cold": 14.11622502156931,
+    "s_rho_model": 0.3286478596485383,
+    "s_rho_online": 3.6939337861548305,
+    "s_rho_setup": 10.42229123541448,
+    "s_setup": 21.254101692188375,
+    "setup_units": 114978.13105402609
+  },
+  "n": 45,
+  "name": "k1n45-c8-m2-s201-T01",
+  "online_interval": {
+    "ic_included_stages": [
+      "target_query",
+      "target_PDP",
+      "target_relation_check",
+      "target_descent",
+      "target_recovery_check"
+    ],
+    "ic_phase_map": {
+      "target_PDP": "target_pdp",
+      "target_descent": "target_descent",
+      "target_query": "target_query",
+      "target_recovery_check": "recovery_check",
+      "target_relation_check": "target_relation_check"
+    },
+    "ic_start_event": "first target-dependent operation after reusable setup: the descent's first query",
+    "ic_stop_event": "the descent returns a logarithm it has checked as [d]G = Q on the single-word ladder",
+    "replay": "[d]G = Q in the general arithmetic, for both arms after their intervals; timed as ic_replay_ns and rho_replay_ns",
+    "rho_included_stages": [
+      "walk",
+      "collision",
+      "recovery_check"
+    ],
+    "rho_phase_map": {
+      "recovery_check": [
+        "recovery_check"
+      ],
+      "rho_solve": [
+        "walk",
+        "collision"
+      ]
+    },
+    "rho_start_event": "first target-dependent operation after reusable setup: lifting the target for the walk",
+    "rho_stop_event": "the walk returns a logarithm it has checked as [d]G = Q on the single-word ladder"
+  },
+  "operation": "price_single_target",
+  "params": "/home/user/crypto/research/ic_tool_program/suite/v1/params/S/k1n45/M1-T01.json",
+  "r": 29264761,
+  "recipe": {
+    "collection_aim": true,
+    "collection_window": 22,
+    "descent_summands": 2,
+    "max_trials": 100000,
+    "max_units": 100000,
+    "points_requested": {
+      "kind": "subgroup_orbits",
+      "points": 720,
+      "seed": 201
+    },
+    "seed": 201,
+    "summands": 3,
+    "unit_trials": 16,
+    "units": 1
+  },
+  "repetitions": [
+    {
+      "ic_online": {
+        "clock_lap_ns": 30912,
+        "not_entered": [],
+        "outer_ns": 25565,
+        "phases_ns": {
+          "recovery_check": 2457,
+          "target_descent": 636,
+          "target_pdp": 11770,
+          "target_query": 8807,
+          "target_relation_check": 518
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 1038.1620311823306,
+        "verified": true,
+        "wall_ns": 24188
+      },
+      "ic_replay_ns": 5175,
+      "online_speedup": 17.985695386141888,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 435251,
+        "phases_ns": {
+          "recovery_check": 2528,
+          "rho_solve": 432510
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 18672.066054303734,
+        "units_per_step": 23.45736941495444,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 435038
+      },
+      "rho_replay_ns": 6249,
+      "rho_setup_ns": 1402661,
+      "rho_setup_units": 60202.9681172581,
+      "setup_ns": 2734588,
+      "setup_phases_ns": {
+        "build": 285325,
+        "collect": 156323,
+        "collect_setup": 495470,
+        "descent_setup": 166164,
+        "la": 69113,
+        "logs_setup": 7207,
+        "other": 2183,
+        "select": 560159,
+        "select_projection": 177827,
+        "setup": 644652,
+        "verify": 170165
+      },
+      "setup_units": 117369.99472990024,
+      "unit_ns": 23.29886787754416,
+      "unit_ns_after": 21.22226822516641,
+      "unit_ns_before": 25.375467529921917
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 26709,
+        "not_entered": [],
+        "outer_ns": 20937,
+        "phases_ns": {
+          "recovery_check": 2348,
+          "target_descent": 734,
+          "target_pdp": 7490,
+          "target_query": 9146,
+          "target_relation_check": 613
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 768.1816348364083,
+        "verified": true,
+        "wall_ns": 20331
+      },
+      "ic_replay_ns": 4827,
+      "online_speedup": 26.70562195661797,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 543141,
+        "phases_ns": {
+          "recovery_check": 2791,
+          "rho_solve": 540161
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 20514.768333957876,
+        "units_per_step": 25.772322027585272,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 542952
+      },
+      "rho_replay_ns": 6040,
+      "rho_setup_ns": 1649709,
+      "rho_setup_units": 62332.209759693884,
+      "setup_ns": 3144538,
+      "setup_phases_ns": {
+        "build": 346947,
+        "collect": 164855,
+        "collect_setup": 585765,
+        "descent_setup": 143212,
+        "la": 58919,
+        "logs_setup": 6829,
+        "other": 1996,
+        "select": 627714,
+        "select_projection": 189177,
+        "setup": 818906,
+        "verify": 200218
+      },
+      "setup_units": 118812.47069230287,
+      "unit_ns": 26.46639684939836,
+      "unit_ns_after": 26.851067968349973,
+      "unit_ns_before": 26.08172573044675
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 30091,
+        "not_entered": [],
+        "outer_ns": 23806,
+        "phases_ns": {
+          "recovery_check": 3067,
+          "target_descent": 770,
+          "target_pdp": 8124,
+          "target_query": 10507,
+          "target_relation_check": 599
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 861.6665611602053,
+        "verified": true,
+        "wall_ns": 23067
+      },
+      "ic_replay_ns": 5181,
+      "online_speedup": 23.749729050158233,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 548075,
+        "phases_ns": {
+          "recovery_check": 3048,
+          "rho_solve": 544787
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 20464.347359136475,
+        "units_per_step": 25.708979094392557,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 547835
+      },
+      "rho_replay_ns": 6059,
+      "rho_setup_ns": 1529214,
+      "rho_setup_units": 57123.70783621807,
+      "setup_ns": 3110781,
+      "setup_phases_ns": {
+        "build": 328182,
+        "collect": 148856,
+        "collect_setup": 589532,
+        "descent_setup": 153342,
+        "la": 54058,
+        "logs_setup": 6530,
+        "other": 1937,
+        "select": 617750,
+        "select_projection": 201282,
+        "setup": 803711,
+        "verify": 205601
+      },
+      "setup_units": 116203.05920980209,
+      "unit_ns": 26.770216043826807,
+      "unit_ns_after": 26.800946260560675,
+      "unit_ns_before": 26.739485827092935
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 26096,
+        "not_entered": [],
+        "outer_ns": 20586,
+        "phases_ns": {
+          "recovery_check": 2326,
+          "target_descent": 681,
+          "target_pdp": 7425,
+          "target_query": 8901,
+          "target_relation_check": 615
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 720.9535950934428,
+        "verified": true,
+        "wall_ns": 19948
+      },
+      "ic_replay_ns": 4508,
+      "online_speedup": 31.65395027070383,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 631942,
+        "phases_ns": {
+          "recovery_check": 3371,
+          "rho_solve": 628062
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 22821.029246572984,
+        "units_per_step": 28.669634731875608,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 631433
+      },
+      "rho_replay_ns": 9211,
+      "rho_setup_ns": 1536878,
+      "rho_setup_units": 55545.303755766,
+      "setup_ns": 3149307,
+      "setup_phases_ns": {
+        "build": 329360,
+        "collect": 163122,
+        "collect_setup": 594049,
+        "descent_setup": 138041,
+        "la": 51087,
+        "logs_setup": 7241,
+        "other": 1830,
+        "select": 586413,
+        "select_projection": 219480,
+        "setup": 853742,
+        "verify": 204942
+      },
+      "setup_units": 113821.14516256993,
+      "unit_ns": 27.668909810227856,
+      "unit_ns_after": 28.031741531458014,
+      "unit_ns_before": 27.306078088997698
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 26686,
+        "not_entered": [],
+        "outer_ns": 21142,
+        "phases_ns": {
+          "recovery_check": 2270,
+          "target_descent": 819,
+          "target_pdp": 7802,
+          "target_query": 8986,
+          "target_relation_check": 649
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 758.7863099031205,
+        "verified": true,
+        "wall_ns": 20526
+      },
+      "ic_replay_ns": 4370,
+      "online_speedup": 29.40826269122089,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 603990,
+        "phases_ns": {
+          "recovery_check": 2657,
+          "rho_solve": 600977
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 22314.58712813311,
+        "units_per_step": 28.03340091474009,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 603634
+      },
+      "rho_replay_ns": 8342,
+      "rho_setup_ns": 1512270,
+      "rho_setup_units": 55904.207974139725,
+      "setup_ns": 3092017,
+      "setup_phases_ns": {
+        "build": 314184,
+        "collect": 161209,
+        "collect_setup": 583703,
+        "descent_setup": 135277,
+        "la": 52862,
+        "logs_setup": 7935,
+        "other": 2122,
+        "select": 600839,
+        "select_projection": 210916,
+        "setup": 774457,
+        "verify": 248513
+      },
+      "setup_units": 114302.84369033016,
+      "unit_ns": 27.051094270033282,
+      "unit_ns_after": 28.366019425243216,
+      "unit_ns_before": 25.736169114823348
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 25369,
+        "not_entered": [],
+        "outer_ns": 20931,
+        "phases_ns": {
+          "recovery_check": 2889,
+          "target_descent": 667,
+          "target_pdp": 7139,
+          "target_query": 9086,
+          "target_relation_check": 570
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 770.2550168122011,
+        "verified": true,
+        "wall_ns": 20351
+      },
+      "ic_replay_ns": 4746,
+      "online_speedup": 25.784334922116848,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 524949,
+        "phases_ns": {
+          "recovery_check": 15453,
+          "rho_solve": 509284
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 19860.51332892654,
+        "units_per_step": 24.9503936293047,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 524737
+      },
+      "rho_replay_ns": 6230,
+      "rho_setup_ns": 1456100,
+      "rho_setup_units": 55111.21468135453,
+      "setup_ns": 2965787,
+      "setup_phases_ns": {
+        "build": 312858,
+        "collect": 145780,
+        "collect_setup": 554865,
+        "descent_setup": 158599,
+        "la": 48526,
+        "logs_setup": 6475,
+        "other": 1822,
+        "select": 577647,
+        "select_projection": 200762,
+        "setup": 770054,
+        "verify": 188399
+      },
+      "setup_units": 112250.61744122684,
+      "unit_ns": 26.421119701660906,
+      "unit_ns_after": 26.68862757216462,
+      "unit_ns_before": 26.153611831157193
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 25799,
+        "not_entered": [],
+        "outer_ns": 20551,
+        "phases_ns": {
+          "recovery_check": 2357,
+          "target_descent": 771,
+          "target_pdp": 7256,
+          "target_query": 8991,
+          "target_relation_check": 582
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 671.3063536878769,
+        "verified": true,
+        "wall_ns": 19957
+      },
+      "ic_replay_ns": 4701,
+      "online_speedup": 29.315327955103474,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 585762,
+        "phases_ns": {
+          "recovery_check": 3139,
+          "rho_solve": 581907
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 19679.565916704796,
+        "units_per_step": 24.723072759679393,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 585046
+      },
+      "rho_replay_ns": 10268,
+      "rho_setup_ns": 1970812,
+      "rho_setup_units": 66293.46181912672,
+      "setup_ns": 3464729,
+      "setup_phases_ns": {
+        "build": 409948,
+        "collect": 153947,
+        "collect_setup": 610363,
+        "descent_setup": 139143,
+        "la": 59440,
+        "logs_setup": 7024,
+        "other": 2305,
+        "select": 613012,
+        "select_projection": 480040,
+        "setup": 764517,
+        "verify": 224990
+      },
+      "setup_units": 116545.30197457755,
+      "unit_ns": 29.728602880584358,
+      "unit_ns_after": 27.65756608422939,
+      "unit_ns_before": 31.799639676939325
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 26652,
+        "not_entered": [],
+        "outer_ns": 21467,
+        "phases_ns": {
+          "recovery_check": 2282,
+          "target_descent": 654,
+          "target_pdp": 7561,
+          "target_query": 9431,
+          "target_relation_check": 575
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 786.5339368071242,
+        "verified": true,
+        "wall_ns": 20503
+      },
+      "ic_replay_ns": 4292,
+      "online_speedup": 25.00039018680193,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 512776,
+        "phases_ns": {
+          "recovery_check": 2963,
+          "rho_solve": 509620
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 19663.655315339518,
+        "units_per_step": 24.703084567009444,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 512583
+      },
+      "rho_replay_ns": 5906,
+      "rho_setup_ns": 1419359,
+      "rho_setup_units": 54449.30117605341,
+      "setup_ns": 3014693,
+      "setup_phases_ns": {
+        "build": 329184,
+        "collect": 146373,
+        "collect_setup": 565121,
+        "descent_setup": 137243,
+        "la": 53032,
+        "logs_setup": 6782,
+        "other": 1932,
+        "select": 589763,
+        "select_projection": 193964,
+        "setup": 779746,
+        "verify": 211553
+      },
+      "setup_units": 115649.3368558201,
+      "unit_ns": 26.06753382216462,
+      "unit_ns_after": 25.797841561859958,
+      "unit_ns_before": 26.33722608246928
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 23861,
+        "not_entered": [],
+        "outer_ns": 19285,
+        "phases_ns": {
+          "recovery_check": 2227,
+          "target_descent": 600,
+          "target_pdp": 7116,
+          "target_query": 8192,
+          "target_relation_check": 586
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 696.0554601443795,
+        "verified": true,
+        "wall_ns": 18721
+      },
+      "ic_replay_ns": 4275,
+      "online_speedup": 28.0080123925004,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 524651,
+        "phases_ns": {
+          "recovery_check": 3258,
+          "rho_solve": 521080
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 19495.12995359135,
+        "units_per_step": 24.491369288431343,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 524338
+      },
+      "rho_replay_ns": 7124,
+      "rho_setup_ns": 1763582,
+      "rho_setup_units": 65570.79645918195,
+      "setup_ns": 2912593,
+      "setup_phases_ns": {
+        "build": 332179,
+        "collect": 143168,
+        "collect_setup": 531920,
+        "descent_setup": 132258,
+        "la": 54596,
+        "logs_setup": 6194,
+        "other": 1877,
+        "select": 562915,
+        "select_projection": 208017,
+        "setup": 728767,
+        "verify": 210702
+      },
+      "setup_units": 108291.55818750594,
+      "unit_ns": 26.89584533410138,
+      "unit_ns_after": 28.45087235583077,
+      "unit_ns_before": 25.34081831237199
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 25428,
+        "not_entered": [],
+        "outer_ns": 20265,
+        "phases_ns": {
+          "recovery_check": 2311,
+          "target_descent": 889,
+          "target_pdp": 7217,
+          "target_query": 8708,
+          "target_relation_check": 591
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 735.8249269537565,
+        "verified": true,
+        "wall_ns": 19716
+      },
+      "ic_replay_ns": 4294,
+      "online_speedup": 25.89079935078109,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 510629,
+        "phases_ns": {
+          "recovery_check": 2478,
+          "rho_solve": 507985
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 19051.095541062863,
+        "units_per_step": 23.93353711188802,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 510463
+      },
+      "rho_replay_ns": 5638,
+      "rho_setup_ns": 1425739,
+      "rho_setup_units": 53210.301051436494,
+      "setup_ns": 3080772,
+      "setup_phases_ns": {
+        "build": 300357,
+        "collect": 152471,
+        "collect_setup": 638555,
+        "descent_setup": 135116,
+        "la": 51454,
+        "logs_setup": 6697,
+        "other": 2024,
+        "select": 592383,
+        "select_projection": 191791,
+        "setup": 810816,
+        "verify": 199108
+      },
+      "setup_units": 114978.13105402609,
+      "unit_ns": 26.794417092693934,
+      "unit_ns_after": 26.132522981470814,
+      "unit_ns_before": 27.45631120391705
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 27648,
+        "not_entered": [],
+        "outer_ns": 21768,
+        "phases_ns": {
+          "recovery_check": 2694,
+          "target_descent": 712,
+          "target_pdp": 7521,
+          "target_query": 9704,
+          "target_relation_check": 604
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 763.6191350820552,
+        "verified": true,
+        "wall_ns": 21235
+      },
+      "ic_replay_ns": 5190,
+      "online_speedup": 28.113868613138685,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 597189,
+        "phases_ns": {
+          "recovery_check": 3157,
+          "rho_solve": 593841
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 21468.2880341755,
+        "units_per_step": 26.970211098210427,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 596998
+      },
+      "rho_replay_ns": 6308,
+      "rho_setup_ns": 1567874,
+      "rho_setup_units": 56381.379222869895,
+      "setup_ns": 5565759,
+      "setup_phases_ns": {
+        "build": 320616,
+        "collect": 148171,
+        "collect_setup": 575164,
+        "descent_setup": 157794,
+        "la": 55923,
+        "logs_setup": 6720,
+        "other": 1860,
+        "select": 917045,
+        "select_projection": 214612,
+        "setup": 2970334,
+        "verify": 197520
+      },
+      "setup_units": 200146.93071133338,
+      "unit_ns": 27.808365485391064,
+      "unit_ns_after": 26.983973474302356,
+      "unit_ns_before": 28.632757496479776
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 27232,
+        "not_entered": [],
+        "outer_ns": 21677,
+        "phases_ns": {
+          "recovery_check": 2543,
+          "target_descent": 656,
+          "target_pdp": 8070,
+          "target_query": 9189,
+          "target_relation_check": 600
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 743.2805842203501,
+        "verified": true,
+        "wall_ns": 21058
+      },
+      "ic_replay_ns": 4852,
+      "online_speedup": 29.540317219109127,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 622243,
+        "phases_ns": {
+          "recovery_check": 4212,
+          "rho_solve": 617848
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 21956.7442406739,
+        "units_per_step": 27.5838495485853,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 622060
+      },
+      "rho_replay_ns": 9848,
+      "rho_setup_ns": 1480734,
+      "rho_setup_units": 52265.211919220055,
+      "setup_ns": 3097151,
+      "setup_phases_ns": {
+        "build": 339620,
+        "collect": 146973,
+        "collect_setup": 543537,
+        "descent_setup": 140665,
+        "la": 67818,
+        "logs_setup": 6683,
+        "other": 2067,
+        "select": 631699,
+        "select_projection": 203133,
+        "setup": 812643,
+        "verify": 202313
+      },
+      "setup_units": 109319.60322436327,
+      "unit_ns": 28.331158444140424,
+      "unit_ns_after": 28.34698970734127,
+      "unit_ns_before": 28.31532718093958
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 28777,
+        "not_entered": [],
+        "outer_ns": 22897,
+        "phases_ns": {
+          "recovery_check": 2317,
+          "target_descent": 694,
+          "target_pdp": 9345,
+          "target_query": 9210,
+          "target_relation_check": 669
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 801.7267186904078,
+        "verified": true,
+        "wall_ns": 22235
+      },
+      "ic_replay_ns": 4675,
+      "online_speedup": 25.220688104340006,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 561211,
+        "phases_ns": {
+          "recovery_check": 3036,
+          "rho_solve": 557746
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 20220.099517006714,
+        "units_per_step": 25.402135071616474,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 560782
+      },
+      "rho_replay_ns": 7100,
+      "rho_setup_ns": 1581964,
+      "rho_setup_units": 57040.82783028344,
+      "setup_ns": 3284536,
+      "setup_phases_ns": {
+        "build": 324997,
+        "collect": 176104,
+        "collect_setup": 667034,
+        "descent_setup": 143344,
+        "la": 64116,
+        "logs_setup": 6756,
+        "other": 2818,
+        "select": 596809,
+        "select_projection": 220980,
+        "setup": 803179,
+        "verify": 278399
+      },
+      "setup_units": 118430.41464810062,
+      "unit_ns": 27.73388921891001,
+      "unit_ns_after": 27.803274909594215,
+      "unit_ns_before": 27.664503528225808
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 28240,
+        "not_entered": [],
+        "outer_ns": 22410,
+        "phases_ns": {
+          "recovery_check": 2322,
+          "target_descent": 760,
+          "target_pdp": 8435,
+          "target_query": 9778,
+          "target_relation_check": 588
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 786.1543155181141,
+        "verified": true,
+        "wall_ns": 21883
+      },
+      "ic_replay_ns": 4453,
+      "online_speedup": 25.418726865603436,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 556705,
+        "phases_ns": {
+          "recovery_check": 2649,
+          "rho_solve": 553589
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 19983.041820370367,
+        "units_per_step": 25.104323894937647,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 556238
+      },
+      "rho_replay_ns": 8187,
+      "rho_setup_ns": 1619193,
+      "rho_setup_units": 58170.06647199752,
+      "setup_ns": 3172040,
+      "setup_phases_ns": {
+        "build": 313454,
+        "collect": 149615,
+        "collect_setup": 576265,
+        "descent_setup": 149703,
+        "la": 74876,
+        "logs_setup": 19738,
+        "other": 3033,
+        "select": 599416,
+        "select_projection": 214568,
+        "setup": 854111,
+        "verify": 217261
+      },
+      "setup_units": 113956.63003226608,
+      "unit_ns": 27.835501972126217,
+      "unit_ns_after": 27.792879744303637,
+      "unit_ns_before": 27.878124199948797
+    },
+    {
+      "ic_online": {
+        "clock_lap_ns": 29329,
+        "not_entered": [],
+        "outer_ns": 22801,
+        "phases_ns": {
+          "recovery_check": 2688,
+          "target_descent": 736,
+          "target_pdp": 8933,
+          "target_query": 9261,
+          "target_relation_check": 562
+        },
+        "recovered": "10308773",
+        "trials": 43,
+        "units": 792.8857040823902,
+        "verified": true,
+        "wall_ns": 22180
+      },
+      "ic_replay_ns": 4981,
+      "online_speedup": 24.50063119927863,
+      "rho_online": {
+        "distinguished_points": 25,
+        "outer_ns": 543663,
+        "phases_ns": {
+          "recovery_check": 2793,
+          "rho_solve": 540631
+        },
+        "recovered": 10308773,
+        "restart_batches": 24,
+        "rounds": 797,
+        "steps": 796,
+        "target_ops": {
+          "adds": 851,
+          "doubles": 47,
+          "scalar_mults": 2
+        },
+        "units": 19426.200218903014,
+        "units_per_step": 24.40477414435052,
+        "verified": true,
+        "walks": 25,
+        "wall_ns": 543424
+      },
+      "rho_replay_ns": 5932,
+      "rho_setup_ns": 1443163,
+      "rho_setup_units": 51589.86976378064,
+      "setup_ns": 3201046,
+      "setup_phases_ns": {
+        "build": 359088,
+        "collect": 164076,
+        "collect_setup": 612321,
+        "descent_setup": 138936,
+        "la": 76363,
+        "logs_setup": 7800,
+        "other": 2734,
+        "select": 628101,
+        "select_projection": 211980,
+        "setup": 791772,
+        "verify": 207875
+      },
+      "setup_units": 114430.28005005045,
+      "unit_ns": 27.97376707109255,
+      "unit_ns_after": 28.25358672955069,
+      "unit_ns_before": 27.693947412634408
+    }
+  ],
+  "resource_envelope": {
+    "arch": "x86_64",
+    "arms": "one process, both arms rebuilt from nothing each repetition, the index calculus first",
+    "cpus_allowed_list": "2",
+    "os": "linux",
+    "rayon_threads": 1
+  },
+  "rho_counts": {
+    "distinguished_points": 25,
+    "recovered": 10308773,
+    "steps": 796,
+    "target_ops": {
+      "adds": 851,
+      "doubles": 47,
+      "scalar_mults": 2
+    },
+    "walks": 25
+  },
+  "rho_model": "rho's counted walk operations at the canonical step, one batched addition plus the table canonicalisation, priced in this process (ledger §19–§22); a model beside the measured interval, not a measurement of it",
+  "rho_policy": {
+    "collision_policy": "distinguished points in one table for the target's walks; a stored point reached with a different coefficient of Q gives d, checked as [d]G = Q; fruitless short cycles are left by doubling their least point",
+    "counters": {
+      "canonicalisations_uncharged": 822,
+      "cycle_escape_doublings": 0,
+      "cycles_length_2": 0,
+      "cycles_length_4": 0,
+      "cycles_other_length": 0,
+      "distinguished_point_bits": 5,
+      "distinguished_point_table_bytes": 43008,
+      "distinguished_points_stored": 24,
+      "jump_coefficient_bits": 12,
+      "jumps": 16,
+      "lanes": 1,
+      "look_ahead_additions": 1,
+      "restart_batch": 1,
+      "restart_batches": 24,
+      "rounds": 797,
+      "setup_additions": 162,
+      "setup_doublings": 354,
+      "start_additions": 24,
+      "target_setup_additions": 19,
+      "target_setup_doublings": 24,
+      "useless_collisions": 0,
+      "verification_operations": 34,
+      "walk_operations": 797,
+      "walks_abandoned_in_a_cycle": 0,
+      "walks_capped": 0
+    },
+    "distinguished_point_bits": 5,
+    "distinguished_point_memory_bytes": 43008,
+    "lanes": 1,
+    "seed": 2293761,
+    "walk_policy": "1 lanes in lockstep, one inversion a round; jumps in G only; batched restarts (1): signed-Frobenius r-adding walk: normal-basis canonicalisation, look-ahead, short-cycle escape by doubling, distinguished points, stride starts",
+    "worker_count": 1
+  },
+  "rho_setup": {
+    "setup_ops": {
+      "adds": 162,
+      "doubles": 354,
+      "scalar_mults": 16
+    },
+    "what": "the curve's single-word arithmetic, the signed-Frobenius classes and the jump table [c_j]G: nothing depends on the target"
+  },
+  "schema_version": 1,
+  "single_thread": true,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "258baffee11a93d1ce12707d2c8de3f92486ffc2154a98a34caf208281953180",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "spread_max_over_min": {
+    "ic_online": 1.2920249986646013,
+    "rho_online": 1.451443322192544
+  },
+  "status": "complete",
+  "step_prices": {
+    "bailey_overhead_units": [
+      0.6171880595622902,
+      0.6193563180874908,
+      0.40718491669743423,
+      0.5335528673440167,
+      0.5936803026067228
+    ],
+    "bailey_step_units": 1.5936803026067228,
+    "canonical_step_units": 2.2307195717137227,
+    "canonicalisation_units": [
+      1.5429965948212014,
+      1.2307195717137227,
+      0.9695326409508436,
+      1.1916567744783064,
+      1.2486891956830533
+    ],
+    "rounds": 5,
+    "unit_ns": [
+      26.355676763312854,
+      27.42102244543651,
+      39.786080809171786,
+      28.084024877592167,
+      25.450633840565796
+    ]
+  },
+  "strict_phase_session": true,
+  "target": {
+    "hashed": {
+      "curve": {
+        "curve_a": 1,
+        "degree": 45,
+        "generator": [
+          "32731336711205",
+          "6242274623135"
+        ],
+        "irreducible_low_terms": [
+          0,
+          1,
+          3,
+          4
+        ],
+        "subgroup_order": "29264761"
+      },
+      "point": [
+        "6540513803421",
+        "11208085253968"
+      ]
+    },
+    "point": [
+      "6540513803421",
+      "11208085253968"
+    ],
+    "record": {
+      "kind": "public_hash_to_curve_cofactor",
+      "public_hash_counter": 1,
+      "public_hash_seed": 23001,
+      "target_scalar_constructed": false,
+      "x": "6540513803421",
+      "y": "11208085253968"
+    },
+    "sha256": "8db7074d964a5f4b87b82ed6fe0d7f3a1fd7ee4e7808f6854d191ee4fa0ed571"
+  },
+  "target_count": 1,
+  "threads": 1
+}

@@ -1085,6 +1085,46 @@
     </div>
   </div>
 
+  <div class="panel" id="ic-tool-programme-20261001">
+    <div class="panel-head">
+      <h2>The <code>ic</code> tool programme, baseline by baseline <span class="chip">accounting</span></h2>
+      <p>The programme makes the <code>ic</code> tool faster, round after round, against frozen baselines
+        (<a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/IC_TOOL_PROGRAM.md">plan</a>,
+        #1103). &ldquo;Faster&rdquo; means faster than its previous baseline, end to end and cold, with identical
+        outputs. Each round is declared before its runs.</p>
+      <ul>
+        <li><b>The suite (v1)</b> is eleven Koblitz curves from 2<sup>18</sup> to 2<sup>47.2</sup>, each with
+          four recipe seeds and two public targets.</li>
+        <li><b>Round 1 (v0)</b> pinned main against &sect;23, profiled every phase on the suite and measured
+          the noise floor, all in isolated runs. The pin held on all 12 shared rows, so &sect;23&rsquo;s
+          single-target figures are v0&rsquo;s.</li>
+      </ul>
+      <p>Frozen source: <code>research/ic_tool_program/</code> (<code>rounds/R01-baseline-v0/analysis.json</code>
+        for every figure here).</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>One row per baseline. S is cold, set-up plus online, in v0&rsquo;s unit, as a median over each
+        size&rsquo;s eight suite rows. The ratio to rho is &sect;23&rsquo;s cold ratio, index calculus over
+        rho on the same point.</caption>
+      <thead><tr><th scope="col">Baseline</th><th scope="col" class="n">2<sup>36.6</sup></th>
+        <th scope="col" class="n">2<sup>38.0</sup></th><th scope="col" class="n">2<sup>39.0</sup></th>
+        <th scope="col" class="n">2<sup>44.3</sup></th><th scope="col" class="n">2<sup>44.5</sup></th>
+        <th scope="col" class="n">2<sup>47.2</sup></th><th scope="col" class="n">cold over the previous</th>
+        <th scope="col" class="n">cold over rho</th></tr></thead>
+      <tbody>
+        <tr><td>v0 &middot; <code>46ae2014</code></td><td class="n">4.43</td><td class="n">7.65</td><td class="n">5.42</td>
+          <td class="n">7.53</td><td class="n">8.77</td><td class="n">14.49</td><td class="n">&mdash;</td>
+          <td class="n">4.9&ndash;31.6&times;</td></tr>
+      </tbody>
+    </table></div>
+    <div class="legend" style="padding-top:0">
+      <span><b>Where the set-up goes.</b> The cold cost is the set-up, and the online interval is 0.1&ndash;2% of it. From 2<sup>32</sup> up, collection is the largest phase, at 41&ndash;89% of the set-up. The exception is 2<sup>38.0</sup>, where the curve&rsquo;s construction takes 45%. A scanned summand costs 1.36&ndash;1.49 units from 2<sup>36.6</sup> up, but 2.17&ndash;2.18 at the two sizes whose field polynomial has <code>n + deg t = 66</code>. The AVX-512 batched addition refuses those two fields, and round 2 tests whether that is the cause.</span>
+      <span><b>The noise floor.</b> v0 against a byte-identical copy reads within &plusmn;4&ndash;11% in cold time at ten pairs per size. One interval excludes 1: 1.075 [1.005, 1.149] at 2<sup>39.0</sup>. A ratio inside the band is not a gain.</span>
+      <span><b>Huge pages are not a lever</b> through glibc&rsquo;s tunable. Cold time reads 0.96&ndash;1.00&times; at the three largest sizes. Collection gains 5&ndash;12%, but the build loses up to 1.5&times; and system time rises 3&ndash;5&times;. This host&rsquo;s memory costs 44&ndash;70&nbsp;ns per random access from 2 to 32&nbsp;MiB and 221&nbsp;ns at 256&nbsp;MiB.</span>
+      <span><span class="chip">accounting</span> A baseline, not a change, so no candidate and no speedup. Round 2, the AVX-512 kernel for those two fields, is declared, with predictions of 1.37&times; at 2<sup>47.2</sup> and 1.31&times; at 2<sup>44.5</sup>.</span>
+    </div>
+  </div>
+
   <!-- ============ LEDGER EXPONENTS + ORACLES ============ -->
   <div class="duo">
     <div class="panel">

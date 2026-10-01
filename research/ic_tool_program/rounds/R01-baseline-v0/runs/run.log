@@ -1,0 +1,450 @@
+{
+ "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+ "logical_cores": 4,
+ "transparent_hugepage": {
+  "enabled": "always [madvise] never",
+  "defrag": "always defer defer+madvise [madvise] never"
+ },
+ "binaries": {
+  "v0": {
+   "path_basename": "ic-v0",
+   "sha256": "c776cc04a4e7f2657505f2ab192030ca7e3fb03fff5853709a4778106b726797",
+   "built_from": "4afd2990b6fd",
+   "src_tree": "003badc259bcef6e56ad19ac8ae93df4221ffe6e"
+  }
+ }
+}
+{
+ "rows": [
+  {
+   "row": "k1n47-M1-T01",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k1n47-M1-T02",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k0n57-M1-T01",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k0n57-M1-T02",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k0n41-M1-T01",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k0n41-M1-T02",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k0n53-M1-T01",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k0n53-M1-T02",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k1n59-M1-T01",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k1n59-M1-T02",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k0n61-M1-T01",
+   "equal": true,
+   "differs_in": []
+  },
+  {
+   "row": "k0n61-M1-T02",
+   "equal": true,
+   "differs_in": []
+  }
+ ],
+ "held": true,
+ "reference": "research/ic_single_target_20260930/runs/<size>/T0{1,2}-R1.price.json"
+}
+r1 k1n19-M1-T01 v0: complete setup 127.883 online 1.2560
+r1 k1n19-M1-T02 v0: complete setup 122.507 online 1.1936
+r1 k1n19-M2-T03 v0: complete setup 118.897 online 1.2098
+r1 k1n19-M2-T04 v0: complete setup 121.814 online 1.2784
+r1 k1n19-M3-T05 v0: complete setup 119.662 online 1.1482
+r1 k1n19-M3-T06 v0: complete setup 115.084 online 1.1617
+r1 k1n19-M4-T07 v0: complete setup 115.682 online 1.3112
+r1 k1n19-M4-T08 v0: complete setup 116.299 online 1.2193
+r1 k1n23-M1-T01 v0: complete setup 33.419 online 0.3561
+r1 k1n23-M1-T02 v0: complete setup 33.219 online 0.3930
+r1 k1n23-M2-T03 v0: complete setup 34.034 online 0.4366
+r1 k1n23-M2-T04 v0: complete setup 32.113 online 0.3365
+r1 k1n23-M3-T05 v0: complete setup 32.653 online 0.3358
+r1 k1n23-M3-T06 v0: complete setup 32.602 online 0.4220
+r1 k1n23-M4-T07 v0: complete setup 33.203 online 0.3578
+r1 k1n23-M4-T08 v0: complete setup 34.915 online 0.3565
+r1 k1n45-M1-T01 v0: complete setup 21.947 online 0.1526
+r1 k1n45-M1-T02 v0: complete setup 21.580 online 0.1469
+r1 k1n45-M2-T03 v0: complete setup 22.595 online 0.1456
+r1 k1n45-M2-T04 v0: complete setup 21.846 online 0.1524
+r1 k1n45-M3-T05 v0: complete setup 21.259 online 0.2227
+r1 k1n45-M3-T06 v0: complete setup 21.619 online 0.1757
+r1 k1n45-M4-T07 v0: complete setup 21.053 online 0.2364
+r1 k1n45-M4-T08 v0: complete setup 21.185 online 0.1436
+r1 k0n37-M1-T01 v0: complete setup 10.036 online 0.2151
+r1 k0n37-M1-T02 v0: complete setup 10.100 online 0.1392
+r1 k0n37-M2-T03 v0: complete setup 7.837 online 0.2198
+r1 k0n37-M2-T04 v0: complete setup 7.634 online 0.1231
+r1 k0n37-M3-T05 v0: complete setup 9.084 online 0.1837
+r1 k0n37-M3-T06 v0: complete setup 9.075 online 0.3780
+r1 k0n37-M4-T07 v0: complete setup 9.187 online 0.1079
+r1 k0n37-M4-T08 v0: complete setup 9.160 online 0.0642
+r1 k1n43-M1-T01 v0: complete setup 6.415 online 0.1538
+r1 k1n43-M1-T02 v0: complete setup 6.489 online 0.0919
+r1 k1n43-M2-T03 v0: complete setup 5.448 online 0.0743
+r1 k1n43-M2-T04 v0: complete setup 5.332 online 0.1519
+r1 k1n43-M3-T05 v0: complete setup 4.915 online 0.3190
+r1 k1n43-M3-T06 v0: complete setup 5.021 online 0.0216
+r1 k1n43-M4-T07 v0: complete setup 6.405 online 0.1489
+r1 k1n43-M4-T08 v0: complete setup 6.304 online 0.0184
+r1 k1n47-M1-T01 v0: complete setup 4.009 online 0.0287
+r1 k1n47-M1-T02 v0: complete setup 3.755 online 0.0552
+r1 k1n47-M2-T03 v0: complete setup 4.656 online 0.0921
+r1 k1n47-M2-T04 v0: complete setup 4.250 online 0.1132
+r1 k1n47-M3-T05 v0: complete setup 4.086 online 0.0184
+r1 k1n47-M3-T06 v0: complete setup 4.307 online 0.1560
+r1 k1n47-M4-T07 v0: complete setup 4.514 online 0.1826
+r1 k1n47-M4-T08 v0: complete setup 4.377 online 0.0673
+r1 k0n57-M1-T01 v0: complete setup 8.575 online 0.1238
+r1 k0n57-M1-T02 v0: complete setup 8.771 online 0.0564
+r1 k0n57-M2-T03 v0: complete setup 7.115 online 0.0299
+r1 k0n57-M2-T04 v0: complete setup 7.694 online 0.0385
+r1 k0n57-M3-T05 v0: complete setup 6.763 online 0.0084
+r1 k0n57-M3-T06 v0: complete setup 7.729 online 0.0306
+r1 k0n57-M4-T07 v0: complete setup 7.761 online 0.0030
+r1 k0n57-M4-T08 v0: complete setup 7.896 online 0.0394
+r1 k0n41-M1-T01 v0: complete setup 5.201 online 0.1108
+r1 k0n41-M1-T02 v0: complete setup 5.486 online 0.0237
+r1 k0n41-M2-T03 v0: complete setup 5.579 online 0.0098
+r1 k0n41-M2-T04 v0: complete setup 6.404 online 0.0734
+r1 k0n41-M3-T05 v0: complete setup 5.194 online 0.0698
+r1 k0n41-M3-T06 v0: complete setup 5.514 online 0.0077
+r1 k0n41-M4-T07 v0: complete setup 5.101 online 0.1182
+r1 k0n41-M4-T08 v0: complete setup 5.343 online 0.1218
+r1 k0n53-M1-T01 v0: complete setup 7.280 online 0.0021
+r1 k0n53-M1-T02 v0: complete setup 6.206 online 0.0397
+r1 k0n53-M2-T03 v0: complete setup 8.383 online 0.0236
+r1 k0n53-M2-T04 v0: complete setup 7.470 online 0.0355
+r1 k0n53-M3-T05 v0: complete setup 8.027 online 0.0487
+r1 k0n53-M3-T06 v0: complete setup 6.798 online 0.0392
+r1 k0n53-M4-T07 v0: complete setup 6.496 online 0.0378
+r1 k0n53-M4-T08 v0: complete setup 7.923 online 0.0150
+r1 k1n59-M1-T01 v0: complete setup 8.802 online 0.0394
+r1 k1n59-M1-T02 v0: complete setup 8.862 online 0.0219
+r1 k1n59-M2-T03 v0: complete setup 10.469 online 0.0138
+r1 k1n59-M2-T04 v0: complete setup 7.707 online 0.0166
+r1 k1n59-M3-T05 v0: complete setup 8.383 online 0.0425
+r1 k1n59-M3-T06 v0: complete setup 8.289 online 0.0117
+r1 k1n59-M4-T07 v0: complete setup 8.293 online 0.0041
+r1 k1n59-M4-T08 v0: complete setup 9.360 online 0.0687
+r1 k0n61-M1-T01 v0: complete setup 14.240 online 0.0489
+r1 k0n61-M1-T02 v0: complete setup 15.324 online 0.0166
+r1 k0n61-M2-T03 v0: complete setup 13.158 online 0.0149
+r1 k0n61-M2-T04 v0: complete setup 13.087 online 0.0238
+r1 k0n61-M3-T05 v0: complete setup 14.602 online 0.1086
+r1 k0n61-M3-T06 v0: complete setup 12.008 online 0.0093
+r1 k0n61-M4-T07 v0: complete setup 14.732 online 0.0021
+r1 k0n61-M4-T08 v0: complete setup 14.254 online 0.0158
+r1 k1n19-M1-T01 A: complete setup 119.465 online 1.1669
+r1 k1n19-M1-T01 A2: complete setup 122.018 online 1.1830
+r1 k1n19-M1-T02 A: complete setup 124.248 online 1.3033
+r1 k1n19-M1-T02 A2: complete setup 125.515 online 1.2166
+r1 k1n23-M1-T01 A: complete setup 32.386 online 0.3508
+r1 k1n23-M1-T01 A2: complete setup 32.636 online 0.3364
+r1 k1n23-M1-T02 A: complete setup 33.982 online 0.4072
+r1 k1n23-M1-T02 A2: complete setup 31.407 online 0.3677
+r1 k1n45-M1-T01 A: complete setup 20.727 online 0.1401
+r1 k1n45-M1-T01 A2: complete setup 21.322 online 0.1418
+r1 k1n45-M1-T02 A: complete setup 21.244 online 0.1509
+r1 k1n45-M1-T02 A2: complete setup 21.553 online 0.1525
+r1 k0n37-M1-T01 A: complete setup 10.093 online 0.2150
+r1 k0n37-M1-T01 A2: complete setup 10.120 online 0.2169
+r1 k0n37-M1-T02 A: complete setup 10.086 online 0.1373
+r1 k0n37-M1-T02 A2: complete setup 10.285 online 0.1350
+r1 k1n43-M1-T01 A: complete setup 6.485 online 0.1594
+r1 k1n43-M1-T01 A2: complete setup 6.446 online 0.1538
+r1 k1n43-M1-T02 A: complete setup 6.499 online 0.0937
+r1 k1n43-M1-T02 A2: complete setup 6.569 online 0.0938
+r1 k1n47-M1-T01 A: complete setup 4.305 online 0.0322
+r1 k1n47-M1-T01 A2: complete setup 4.201 online 0.0301
+r1 k1n47-M1-T02 A: complete setup 4.342 online 0.0573
+r1 k1n47-M1-T02 A2: complete setup 4.286 online 0.0564
+r1 k0n57-M1-T01 A: complete setup 8.535 online 0.1219
+r1 k0n57-M1-T01 A2: complete setup 7.615 online 0.1207
+r1 k0n57-M1-T02 A: complete setup 9.212 online 0.0596
+r1 k0n57-M1-T02 A2: complete setup 8.072 online 0.0528
+r1 k0n41-M1-T01 A: complete setup 5.384 online 0.1093
+r1 k0n41-M1-T01 A2: complete setup 5.693 online 0.1103
+r1 k0n41-M1-T02 A: complete setup 6.092 online 0.0202
+r1 k0n41-M1-T02 A2: complete setup 5.546 online 0.0323
+r1 k0n53-M1-T01 A: complete setup 9.058 online 0.0019
+r1 k0n53-M1-T01 A2: complete setup 5.847 online 0.0016
+r1 k0n53-M1-T02 A: complete setup 7.165 online 0.0453
+r1 k0n53-M1-T02 A2: complete setup 7.108 online 0.0356
+r1 k1n59-M1-T01 A: complete setup 8.294 online 0.0341
+r1 k1n59-M1-T01 A2: complete setup 8.694 online 0.0361
+r1 k1n59-M1-T02 A: complete setup 8.429 online 0.0205
+r1 k1n59-M1-T02 A2: complete setup 8.640 online 0.0268
+r1 k0n61-M1-T01 A: complete setup 15.275 online 0.0628
+r1 k0n61-M1-T01 A2: complete setup 14.446 online 0.0504
+r1 k0n61-M1-T02 A: complete setup 15.754 online 0.0160
+r1 k0n61-M1-T02 A2: complete setup 15.825 online 0.0166
+r2 k1n19-M1-T01 A2: complete setup 123.832 online 1.2158
+r2 k1n19-M1-T01 A: complete setup 121.130 online 1.1907
+r2 k1n19-M1-T02 A2: complete setup 120.698 online 1.1643
+r2 k1n19-M1-T02 A: complete setup 133.950 online 1.2740
+r2 k1n23-M1-T01 A2: complete setup 33.636 online 0.3402
+r2 k1n23-M1-T01 A: complete setup 33.551 online 0.3411
+r2 k1n23-M1-T02 A2: complete setup 33.499 online 0.3960
+r2 k1n23-M1-T02 A: complete setup 34.000 online 0.4103
+r2 k1n45-M1-T01 A2: complete setup 21.072 online 0.1435
+r2 k1n45-M1-T01 A: complete setup 21.254 online 0.1420
+r2 k1n45-M1-T02 A2: complete setup 20.634 online 0.1439
+r2 k1n45-M1-T02 A: complete setup 21.108 online 0.1437
+r2 k0n37-M1-T01 A2: complete setup 8.755 online 0.1889
+r2 k0n37-M1-T01 A: complete setup 10.185 online 0.2097
+r2 k0n37-M1-T02 A2: complete setup 10.113 online 0.1367
+r2 k0n37-M1-T02 A: complete setup 10.254 online 0.1383
+r2 k1n43-M1-T01 A2: complete setup 6.449 online 0.1579
+r2 k1n43-M1-T01 A: complete setup 6.496 online 0.1631
+r2 k1n43-M1-T02 A2: complete setup 6.456 online 0.0898
+r2 k1n43-M1-T02 A: complete setup 6.518 online 0.0858
+r2 k1n47-M1-T01 A2: complete setup 4.204 online 0.0303
+r2 k1n47-M1-T01 A: complete setup 4.348 online 0.0298
+r2 k1n47-M1-T02 A2: complete setup 4.268 online 0.0666
+r2 k1n47-M1-T02 A: complete setup 4.069 online 0.0559
+r2 k0n57-M1-T01 A2: complete setup 8.148 online 0.1172
+r2 k0n57-M1-T01 A: complete setup 7.371 online 0.1056
+r2 k0n57-M1-T02 A2: complete setup 8.100 online 0.0530
+r2 k0n57-M1-T02 A: complete setup 8.158 online 0.0560
+r2 k0n41-M1-T01 A2: complete setup 5.574 online 0.1089
+r2 k0n41-M1-T01 A: complete setup 6.236 online 0.1427
+r2 k0n41-M1-T02 A2: complete setup 5.751 online 0.0234
+r2 k0n41-M1-T02 A: complete setup 6.134 online 0.0230
+r2 k0n53-M1-T01 A2: complete setup 7.847 online 0.0020
+r2 k0n53-M1-T01 A: complete setup 6.145 online 0.0015
+r2 k0n53-M1-T02 A2: complete setup 6.338 online 0.0301
+r2 k0n53-M1-T02 A: complete setup 7.158 online 0.0351
+r2 k1n59-M1-T01 A2: complete setup 8.515 online 0.0337
+r2 k1n59-M1-T01 A: complete setup 9.389 online 0.0328
+r2 k1n59-M1-T02 A2: complete setup 8.659 online 0.0197
+r2 k1n59-M1-T02 A: complete setup 9.280 online 0.0211
+r2 k0n61-M1-T01 A2: complete setup 15.510 online 0.0469
+r2 k0n61-M1-T01 A: complete setup 12.815 online 0.0457
+r2 k0n61-M1-T02 A2: complete setup 14.778 online 0.0163
+r2 k0n61-M1-T02 A: complete setup 14.545 online 0.0150
+r3 k1n19-M1-T01 A: complete setup 123.601 online 1.2408
+r3 k1n19-M1-T01 A2: complete setup 119.890 online 1.1733
+r3 k1n19-M1-T02 A: complete setup 125.770 online 1.2758
+r3 k1n19-M1-T02 A2: complete setup 119.450 online 1.1798
+r3 k1n23-M1-T01 A: complete setup 35.630 online 0.3621
+r3 k1n23-M1-T01 A2: complete setup 34.825 online 0.3731
+r3 k1n23-M1-T02 A: complete setup 33.771 online 0.4063
+r3 k1n23-M1-T02 A2: complete setup 33.632 online 0.4057
+r3 k1n45-M1-T01 A: complete setup 20.529 online 0.1392
+r3 k1n45-M1-T01 A2: complete setup 20.791 online 0.1471
+r3 k1n45-M1-T02 A: complete setup 20.652 online 0.1512
+r3 k1n45-M1-T02 A2: complete setup 21.181 online 0.1433
+r3 k0n37-M1-T01 A: complete setup 9.967 online 0.2120
+r3 k0n37-M1-T01 A2: complete setup 10.268 online 0.2152
+r3 k0n37-M1-T02 A: complete setup 9.947 online 0.1349
+r3 k0n37-M1-T02 A2: complete setup 10.064 online 0.1355
+r3 k1n43-M1-T01 A: complete setup 6.525 online 0.1585
+r3 k1n43-M1-T01 A2: complete setup 6.528 online 0.1651
+r3 k1n43-M1-T02 A: complete setup 6.403 online 0.0901
+r3 k1n43-M1-T02 A2: complete setup 6.397 online 0.0940
+r3 k1n47-M1-T01 A: complete setup 4.420 online 0.0297
+r3 k1n47-M1-T01 A2: complete setup 4.410 online 0.0305
+r3 k1n47-M1-T02 A: complete setup 4.425 online 0.0628
+r3 k1n47-M1-T02 A2: complete setup 4.123 online 0.0596
+r3 k0n57-M1-T01 A: complete setup 8.382 online 0.1217
+r3 k0n57-M1-T01 A2: complete setup 8.849 online 0.1301
+r3 k0n57-M1-T02 A: complete setup 8.810 online 0.0561
+r3 k0n57-M1-T02 A2: complete setup 8.408 online 0.0676
+r3 k0n41-M1-T01 A: complete setup 6.006 online 0.1048
+r3 k0n41-M1-T01 A2: complete setup 5.819 online 0.1290
+r3 k0n41-M1-T02 A: complete setup 5.329 online 0.0228
+r3 k0n41-M1-T02 A2: complete setup 5.469 online 0.0226
+r3 k0n53-M1-T01 A: complete setup 6.575 online 0.0019
+r3 k0n53-M1-T01 A2: complete setup 7.327 online 0.0015
+r3 k0n53-M1-T02 A: complete setup 7.264 online 0.0319
+r3 k0n53-M1-T02 A2: complete setup 6.727 online 0.0287
+r3 k1n59-M1-T01 A: complete setup 8.666 online 0.0351
+r3 k1n59-M1-T01 A2: complete setup 9.894 online 0.0353
+r3 k1n59-M1-T02 A: complete setup 8.584 online 0.0203
+r3 k1n59-M1-T02 A2: complete setup 8.762 online 0.0209
+r3 k0n61-M1-T01 A: complete setup 15.283 online 0.0520
+r3 k0n61-M1-T01 A2: complete setup 15.143 online 0.0534
+r3 k0n61-M1-T02 A: complete setup 14.087 online 0.0135
+r3 k0n61-M1-T02 A2: complete setup 15.029 online 0.0233
+r4 k1n19-M1-T01 A2: complete setup 121.062 online 1.2197
+r4 k1n19-M1-T01 A: complete setup 125.682 online 1.3624
+r4 k1n19-M1-T02 A2: complete setup 122.746 online 1.2116
+r4 k1n19-M1-T02 A: complete setup 122.603 online 1.1937
+r4 k1n23-M1-T01 A2: complete setup 33.561 online 0.3623
+r4 k1n23-M1-T01 A: complete setup 34.276 online 0.3562
+r4 k1n23-M1-T02 A2: complete setup 33.284 online 0.4199
+r4 k1n23-M1-T02 A: complete setup 34.180 online 0.4145
+r4 k1n45-M1-T01 A2: complete setup 21.072 online 0.1436
+r4 k1n45-M1-T01 A: complete setup 21.025 online 0.1372
+r4 k1n45-M1-T02 A2: complete setup 21.721 online 0.1466
+r4 k1n45-M1-T02 A: complete setup 21.873 online 0.1434
+r4 k0n37-M1-T01 A2: complete setup 9.907 online 0.2115
+r4 k0n37-M1-T01 A: complete setup 9.841 online 0.2154
+r4 k0n37-M1-T02 A2: complete setup 10.297 online 0.1354
+r4 k0n37-M1-T02 A: complete setup 9.916 online 0.1343
+r4 k1n43-M1-T01 A2: complete setup 6.465 online 0.1608
+r4 k1n43-M1-T01 A: complete setup 6.439 online 0.1617
+r4 k1n43-M1-T02 A2: complete setup 6.395 online 0.0904
+r4 k1n43-M1-T02 A: complete setup 6.411 online 0.0863
+r4 k1n47-M1-T01 A2: complete setup 4.167 online 0.0282
+r4 k1n47-M1-T01 A: complete setup 4.296 online 0.0295
+r4 k1n47-M1-T02 A2: complete setup 4.510 online 0.0621
+r4 k1n47-M1-T02 A: complete setup 4.293 online 0.0667
+r4 k0n57-M1-T01 A2: complete setup 8.203 online 0.1174
+r4 k0n57-M1-T01 A: complete setup 8.530 online 0.1171
+r4 k0n57-M1-T02 A2: complete setup 8.283 online 0.0561
+r4 k0n57-M1-T02 A: complete setup 8.052 online 0.0552
+r4 k0n41-M1-T01 A2: complete setup 5.510 online 0.1267
+r4 k0n41-M1-T01 A: complete setup 5.370 online 0.1124
+r4 k0n41-M1-T02 A2: complete setup 5.586 online 0.0223
+r4 k0n41-M1-T02 A: complete setup 5.612 online 0.0254
+r4 k0n53-M1-T01 A2: complete setup 7.076 online 0.0019
+r4 k0n53-M1-T01 A: complete setup 6.960 online 0.0020
+r4 k0n53-M1-T02 A2: complete setup 7.805 online 0.0330
+r4 k0n53-M1-T02 A: complete setup 7.940 online 0.0362
+r4 k1n59-M1-T01 A2: complete setup 8.760 online 0.0360
+r4 k1n59-M1-T01 A: complete setup 8.901 online 0.0359
+r4 k1n59-M1-T02 A2: complete setup 7.161 online 0.0170
+r4 k1n59-M1-T02 A: complete setup 9.572 online 0.0203
+r4 k0n61-M1-T01 A2: complete setup 15.439 online 0.0527
+r4 k0n61-M1-T01 A: complete setup 12.585 online 0.0422
+r4 k0n61-M1-T02 A2: complete setup 15.007 online 0.0178
+r4 k0n61-M1-T02 A: complete setup 14.588 online 0.0150
+r5 k1n19-M1-T01 A: complete setup 124.474 online 1.2317
+r5 k1n19-M1-T01 A2: complete setup 124.754 online 1.2135
+r5 k1n19-M1-T02 A: complete setup 127.016 online 1.2340
+r5 k1n19-M1-T02 A2: complete setup 128.451 online 1.2765
+r5 k1n23-M1-T01 A: complete setup 33.747 online 0.3519
+r5 k1n23-M1-T01 A2: complete setup 33.266 online 0.3549
+r5 k1n23-M1-T02 A: complete setup 31.924 online 0.3812
+r5 k1n23-M1-T02 A2: complete setup 32.452 online 0.3931
+r5 k1n45-M1-T01 A: complete setup 21.027 online 0.1493
+r5 k1n45-M1-T01 A2: complete setup 21.071 online 0.1549
+r5 k1n45-M1-T02 A: complete setup 21.130 online 0.1473
+r5 k1n45-M1-T02 A2: complete setup 21.221 online 0.1454
+r5 k0n37-M1-T01 A: complete setup 10.197 online 0.2162
+r5 k0n37-M1-T01 A2: complete setup 10.253 online 0.2214
+r5 k0n37-M1-T02 A: complete setup 8.974 online 0.1194
+r5 k0n37-M1-T02 A2: complete setup 10.222 online 0.1437
+r5 k1n43-M1-T01 A: complete setup 6.456 online 0.1580
+r5 k1n43-M1-T01 A2: complete setup 6.475 online 0.1597
+r5 k1n43-M1-T02 A: complete setup 6.623 online 0.0920
+r5 k1n43-M1-T02 A2: complete setup 6.433 online 0.0872
+r5 k1n47-M1-T01 A: complete setup 4.292 online 0.0317
+r5 k1n47-M1-T01 A2: complete setup 4.354 online 0.0302
+r5 k1n47-M1-T02 A: complete setup 4.588 online 0.0652
+r5 k1n47-M1-T02 A2: complete setup 4.362 online 0.0625
+r5 k0n57-M1-T01 A: complete setup 8.079 online 0.1212
+r5 k0n57-M1-T01 A2: complete setup 8.661 online 0.1316
+r5 k0n57-M1-T02 A: complete setup 8.276 online 0.0538
+r5 k0n57-M1-T02 A2: complete setup 8.384 online 0.0552
+r5 k0n41-M1-T01 A: complete setup 5.699 online 0.1133
+r5 k0n41-M1-T01 A2: complete setup 5.596 online 0.1119
+r5 k0n41-M1-T02 A: complete setup 5.558 online 0.0233
+r5 k0n41-M1-T02 A2: complete setup 5.357 online 0.0257
+r5 k0n53-M1-T01 A: complete setup 8.018 online 0.0022
+r5 k0n53-M1-T01 A2: complete setup 7.616 online 0.0023
+r5 k0n53-M1-T02 A: complete setup 8.163 online 0.0365
+r5 k0n53-M1-T02 A2: complete setup 7.304 online 0.0353
+r5 k1n59-M1-T01 A: complete setup 9.084 online 0.0377
+r5 k1n59-M1-T01 A2: complete setup 9.025 online 0.0407
+r5 k1n59-M1-T02 A: complete setup 9.526 online 0.0218
+r5 k1n59-M1-T02 A2: complete setup 9.688 online 0.0240
+r5 k0n61-M1-T01 A: complete setup 15.682 online 0.0511
+r5 k0n61-M1-T01 A2: complete setup 15.176 online 0.0479
+r5 k0n61-M1-T02 A: complete setup 14.807 online 0.0148
+r5 k0n61-M1-T02 A2: complete setup 15.845 online 0.0169
+r1 k0n53-M1-T01 4k: complete setup 5.633 online 0.0015
+r1 k0n53-M1-T01 thp: complete setup 6.963 online 0.0017
+r1 k0n53-M1-T02 4k: complete setup 7.486 online 0.0339
+r1 k0n53-M1-T02 thp: complete setup 7.761 online 0.0345
+r1 k1n59-M1-T01 4k: complete setup 8.641 online 0.0363
+r1 k1n59-M1-T01 thp: complete setup 7.444 online 0.0305
+r1 k1n59-M1-T02 4k: complete setup 8.164 online 0.0224
+r1 k1n59-M1-T02 thp: complete setup 9.018 online 0.0203
+r1 k0n61-M1-T01 4k: complete setup 14.642 online 0.0496
+r1 k0n61-M1-T01 thp: complete setup 14.583 online 0.0495
+r1 k0n61-M1-T02 4k: complete setup 15.753 online 0.0168
+r1 k0n61-M1-T02 thp: complete setup 15.190 online 0.0155
+r2 k0n53-M1-T01 thp: complete setup 6.759 online 0.0016
+r2 k0n53-M1-T01 4k: complete setup 8.256 online 0.0019
+r2 k0n53-M1-T02 thp: complete setup 8.678 online 0.0323
+r2 k0n53-M1-T02 4k: complete setup 8.013 online 0.0353
+r2 k1n59-M1-T01 thp: complete setup 8.250 online 0.0327
+r2 k1n59-M1-T01 4k: complete setup 8.738 online 0.0357
+r2 k1n59-M1-T02 thp: complete setup 9.235 online 0.0199
+r2 k1n59-M1-T02 4k: complete setup 7.826 online 0.0203
+r2 k0n61-M1-T01 thp: complete setup 14.754 online 0.0492
+r2 k0n61-M1-T01 4k: complete setup 14.879 online 0.0483
+r2 k0n61-M1-T02 thp: complete setup 14.022 online 0.0138
+r2 k0n61-M1-T02 4k: complete setup 13.895 online 0.0155
+r3 k0n53-M1-T01 4k: complete setup 6.843 online 0.0019
+r3 k0n53-M1-T01 thp: complete setup 8.034 online 0.0017
+r3 k0n53-M1-T02 4k: complete setup 7.981 online 0.0378
+r3 k0n53-M1-T02 thp: complete setup 9.295 online 0.0336
+r3 k1n59-M1-T01 4k: complete setup 8.594 online 0.0352
+r3 k1n59-M1-T01 thp: complete setup 9.049 online 0.0326
+r3 k1n59-M1-T02 4k: complete setup 8.560 online 0.0213
+r3 k1n59-M1-T02 thp: complete setup 9.814 online 0.0227
+r3 k0n61-M1-T01 4k: complete setup 14.393 online 0.0532
+r3 k0n61-M1-T01 thp: complete setup 15.227 online 0.0486
+r3 k0n61-M1-T02 4k: complete setup 14.191 online 0.0171
+r3 k0n61-M1-T02 thp: complete setup 13.691 online 0.0144
+r4 k0n53-M1-T01 thp: complete setup 7.488 online 0.0019
+r4 k0n53-M1-T01 4k: complete setup 8.074 online 0.0021
+r4 k0n53-M1-T02 thp: complete setup 8.439 online 0.0356
+r4 k0n53-M1-T02 4k: complete setup 7.360 online 0.0346
+r4 k1n59-M1-T01 thp: complete setup 8.570 online 0.0323
+r4 k1n59-M1-T01 4k: complete setup 8.862 online 0.0321
+r4 k1n59-M1-T02 thp: complete setup 8.337 online 0.0208
+r4 k1n59-M1-T02 4k: complete setup 9.415 online 0.0223
+r4 k0n61-M1-T01 thp: complete setup 14.509 online 0.0463
+r4 k0n61-M1-T01 4k: complete setup 16.722 online 0.0552
+r4 k0n61-M1-T02 thp: complete setup 13.188 online 0.0150
+r4 k0n61-M1-T02 4k: complete setup 14.690 online 0.0159
+r5 k0n53-M1-T01 4k: complete setup 7.689 online 0.0019
+r5 k0n53-M1-T01 thp: complete setup 8.276 online 0.0016
+r5 k0n53-M1-T02 4k: complete setup 7.219 online 0.0383
+r5 k0n53-M1-T02 thp: complete setup 8.862 online 0.0408
+r5 k1n59-M1-T01 4k: complete setup 8.693 online 0.0369
+r5 k1n59-M1-T01 thp: complete setup 9.343 online 0.0347
+r5 k1n59-M1-T02 4k: complete setup 11.204 online 0.0257
+r5 k1n59-M1-T02 thp: complete setup 8.057 online 0.0244
+r5 k0n61-M1-T01 4k: complete setup 14.827 online 0.0505
+r5 k0n61-M1-T01 thp: complete setup 15.864 online 0.0496
+r5 k0n61-M1-T02 4k: complete setup 14.489 online 0.0149
+r5 k0n61-M1-T02 thp: complete setup 14.708 online 0.0147
