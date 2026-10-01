@@ -148,7 +148,7 @@ impl SystemSolver for F4F2 {
     }
 
     fn describe(&self) -> String {
-        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis"
+        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, adaptive exact-submask reducer lookup, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis"
             .into()
     }
 
@@ -178,6 +178,8 @@ impl SystemSolver for F4F2 {
             ("matrix_rows_sum", st.matrix_rows_sum),
             ("word_xors_performed", st.word_xors_performed),
             ("divisor_tests", st.divisor_tests),
+            ("divisor_submask_lookups", st.divisor_submask_lookups),
+            ("divisor_linear_tests", st.divisor_linear_tests),
             ("new_elements", st.new_elements),
             ("max_poly_degree", u64::from(st.max_poly_degree)),
             ("basis_len", st.basis_len),
