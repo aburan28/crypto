@@ -19,6 +19,7 @@ of its own.
 """
 from __future__ import annotations
 
+import functools
 import hashlib
 import json
 import os
@@ -53,6 +54,26 @@ def sha256(path: Path) -> str:
 def suite_rows(tier: str = "S") -> list[dict]:
     rows = json.loads((SUITE / "SUITE.json").read_text())["rows"]
     return [r for r in rows if r["tier"] == tier]
+
+
+@functools.cache
+def curve_slug(a: int, n: int) -> str:
+    """The ICV1 slug (AGENTS.md §11) of the suite's Koblitz curve with
+    coefficient `a` over `GF(2^n)`, from `docs/curves/registry.json`."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import curve_id  # noqa: E402
+
+    curve = curve_id.resolve(f"K_{a} / GF(2^{n})")
+    if curve is None:
+        raise SystemExit(f"docs/curves/registry.json has no Koblitz curve a={a} over GF(2^{n})")
+    return curve["slug"]
+
+
+def slug_rows(rows: list[dict]) -> list[dict]:
+    """Rows for a new run tree, keyed `<slug>/<recipe>-<target>`, as AGENTS.md
+    §11 names run files.  The suite's frozen id stays as `suite_id`."""
+    return [{**r, "suite_id": r["id"], "id": f"{curve_slug(r['a'], r['n'])}/{r['id'].split('-', 1)[1]}"}
+            for r in rows]
 
 
 def psi_some_avg10() -> float:

@@ -31,9 +31,15 @@ implements the missing retained native input, canonical registrar, isolated
 entrypoint and preexecution-frozen audit transport. The rebuilt macOS worker
 and complete Rust dependencies are retained; its Rust unit fixture now hashes
 only the common mathematics instead of historical certificate evidence.
-Implementation acceptance and separately frozen new F5/SAT executions remain
-pending. Mocked native tests and real frozen import controls execute no IC query
+Implementation is accepted in [PR #1098](https://github.com/aburan28/crypto/pull/1098)
+at `3918ee200ad1e363db63314539ef8cf43076b41c`. Separately frozen new F5/SAT
+executions remain pending. Mocked native tests and real frozen import controls execute no IC query
 and cannot supply family qualification or a fresh result.
+The [prepared audit/claim follow-up](prepared-runtime-transport-v1/PROTOCOL.md)
+adds a shared frozen SAT/F5 audit path and consumes each new runtime registration
+with an atomic claim before launch. This follow-up is not yet accepted or used
+for a production invocation. Portable synthetic transports establish the source
+transport contract only; they do not establish native execution or mathematics.
 
 Status: the archived reference panel has completed under the frozen protocol:
 1,290/1,290 native/profile pairs, three IC sources and eighteen rho configurations.
@@ -415,3 +421,42 @@ not complete execution attestation, and its additional DEFAULTS source is
 explicitly retained as postexecution auditor context. The complete IC result
 above independently passes its full Python/package/interpreter/native pre/post
 gates. Neither development result supplies the pending fresh paired comparison.
+
+## October 1 prepared target controls
+
+[PR #1110](https://github.com/aburan28/crypto/pull/1110) preregistered two new
+one-shot prepared target controls on the disclosed n17 public point. Both
+executed once, stopped incomplete at eight attempts and are now consumed and
+closed. [Their result](prepared-one-target-controls-v1/RESULT.md) retains the
+complete raw archive, original audits, claims, postexecution diagnosis and local
+relocation receipts. Never retry, resume, extend or regenerate either invocation.
+
+F5 reported eight `proved_unsat` target queries, all independently absent in
+the complete 63-point geometric three-sum domain. Its original frozen audit
+rejects a missing native `query_schema_version` header. A labelled in-memory
+postexecution view replays mathematical checks but cannot replace that rejection.
+SAT retained eight conflict-budget inconclusive queries and passed frozen audit
+only as an incomplete source-bound control. One recorded SAT query has a
+group-readded decomposition; that alone is not a CNF assignment proof.
+
+Neither control recovers a scalar or supplies verified online time, comparative
+cost, speedup or fresh qualification. Their new query/target sign/Frobenius
+exclusions are a partial current census to merge with historical/preparation
+exclusions. Next work must repair and regression-check the actual native F5
+report contract using a new bound build and diagnose SAT encoding/solver budget
+on its retained feasible query. Existing complete cold development solves and
+preparation certificates remain separate evidence. The full fresh paired
+incumbent/rho goal and all reference/calibration/resource gates remain open;
+the three historical confirmation sets stay closed.
+
+The [prepared report-contract follow-up](prepared-report-contract-v1/EVIDENCE.md)
+repairs the missing native F5 header and tests actual release CLI reports through
+the independent mathematical auditor for both incomplete and complete disclosed
+fixtures. The corrected native source requires a new versioned retained-input
+adapter; the old source pin, runtime and consumed registrations are unchanged.
+The retained SAT feasible query now has a complete assignment satisfying all
+original ANF/CNF/XOR constraints and lifting to the exact point. This identifies
+a real solver-budget miss on that particular source-valid case, without changing
+its native outcome, admitting an IC target recovery or estimating natural yield.
+These correctness gates move the full goal forward; fresh paired qualification
+and complete corrected runtime admission remain outstanding.

@@ -1,16 +1,20 @@
 """Real isolated imports and incomplete executions retain their source boundary."""
 import copy
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 from pathlib import Path
 import shutil
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
 
 from oracle import InvalidEvidence
 from sat_runtime_bundle import CHILD_SCRIPTS, DIRECTORY
-from sat_runtime_execution_v3 import audit_execution, execute, register
+from sat_runtime_execution_v3 import (
+    EXECUTION_POLICY, audit_execution, claim_execution, execute, register,
+)
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -71,6 +75,9 @@ class SatRuntimeExecutionV3Tests(unittest.TestCase):
             self.assertTrue(audit_execution(output, spec)['entrypoint_succeeded'])
             with self.assertRaisesRegex(InvalidEvidence, 'no retries'):
                 execute(registration, output, expected_spec=spec, timeout_seconds=30)
+            with self.assertRaisesRegex(InvalidEvidence, 'registration consumed'):
+                execute(registration, Path(temporary)/'second-execution',
+                        expected_spec=spec, timeout_seconds=30)
             with self.assertRaisesRegex(InvalidEvidence, 'already exists'):
                 register(root, registration, module='control', action='run', arguments={},
                          timeout_seconds=30)
@@ -88,6 +95,9 @@ class SatRuntimeExecutionV3Tests(unittest.TestCase):
             self.assertFalse(audited['entrypoint_succeeded'])
             self.assertIsNone(audited['online_speedup'])
             self.assertIn('registered failure', (output/'stderr.txt').read_text())
+            with self.assertRaisesRegex(InvalidEvidence, 'registration consumed'):
+                execute(registration, Path(temporary)/'retry-failure',
+                        expected_spec=spec, timeout_seconds=30)
 
     def test_late_live_checkout_import_rejects_terminal_source_admission(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -124,6 +134,7 @@ class SatRuntimeExecutionV3Tests(unittest.TestCase):
                 with self.assertRaisesRegex(InvalidEvidence, 'interpreter changed'):
                     execute(registration, output, expected_spec=spec, timeout_seconds=30)
             self.assertFalse(output.exists())
+            self.assertFalse((registration/EXECUTION_POLICY['claim_file']).exists())
 
     def test_retained_receipt_cannot_change_invocation_or_promote_cost(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -165,6 +176,84 @@ class SatRuntimeExecutionV3Tests(unittest.TestCase):
             self.assertFalse((output/'after.json').exists())
             with self.assertRaises((FileNotFoundError, InvalidEvidence)):
                 audit_execution(output, spec)
+            with self.assertRaisesRegex(InvalidEvidence, 'registration consumed'):
+                execute(registration, Path(temporary)/'retry-timeout',
+                        expected_spec=spec, timeout_seconds=1)
+
+    def test_claim_arbitrates_concurrent_distinct_outputs_and_cannot_replay(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root, registration, output = self.fixture(temporary,
+                'def run(arguments, output):\n    return {}\n')
+            spec = register(root, registration, module='control', action='run', arguments={},
+                            timeout_seconds=30)
+            barrier = threading.Barrier(2)
+
+            def attempt(index):
+                barrier.wait()
+                try:
+                    return claim_execution(registration, output.with_name(str(index)), spec)
+                except InvalidEvidence:
+                    return None
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                claims = list(pool.map(attempt, (1, 2)))
+            winner, = [claim for claim in claims if claim is not None]
+            retained = json.loads((registration/EXECUTION_POLICY['claim_file']).read_text())
+            self.assertEqual(retained, winner)
+            # Identical bytes still cannot acquire an already consumed claim.
+            with self.assertRaisesRegex(InvalidEvidence, 'registration consumed'):
+                claim_execution(registration, Path(winner['output_directory']), spec)
+            self.assertFalse(output.exists())
+
+    def test_setup_failure_after_claim_is_consumed_and_claim_tamper_rejects(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root, registration, output = self.fixture(temporary,
+                'def run(arguments, output):\n    return {}\n')
+            spec = register(root, registration, module='control', action='run', arguments={},
+                            timeout_seconds=30)
+            with patch('sat_runtime_execution_v3.extract', side_effect=OSError('control setup failed')):
+                with self.assertRaisesRegex(OSError, 'control setup failed'):
+                    execute(registration, output, expected_spec=spec, timeout_seconds=30)
+            self.assertTrue((registration/EXECUTION_POLICY['claim_file']).exists())
+            with self.assertRaisesRegex(InvalidEvidence, 'registration consumed'):
+                execute(registration, Path(temporary)/'new-output', expected_spec=spec, timeout_seconds=30)
+        with tempfile.TemporaryDirectory() as temporary:
+            root, registration, output = self.fixture(temporary,
+                'def run(arguments, output):\n    return {}\n')
+            spec = register(root, registration, module='control', action='run', arguments={},
+                            timeout_seconds=30)
+            execute(registration, output, expected_spec=spec, timeout_seconds=30)
+            claim = json.loads((output/EXECUTION_POLICY['claim_file']).read_text())
+            claim['output_directory'] = '/changed-retained-path'
+            (output/EXECUTION_POLICY['claim_file']).write_text(json.dumps(claim))
+            with self.assertRaisesRegex(InvalidEvidence, 'claim differs from process/source gates'):
+                audit_execution(output, spec)
+
+    def test_legacy_registration_cannot_launch_through_new_code(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root, registration, output = self.fixture(temporary,
+                'def run(arguments, output):\n    return {}\n')
+            spec = register(root, registration, module='control', action='run', arguments={},
+                            timeout_seconds=30)
+            spec.pop('execution_policy')
+            (registration/'execution.json').write_text(json.dumps(spec))
+            with self.assertRaisesRegex(InvalidEvidence, 'legacy registration is audit-only'):
+                execute(registration, output, expected_spec=spec, timeout_seconds=30)
+            self.assertFalse(output.exists())
+
+    def test_moved_archive_audits_original_claim_without_reopening_registration(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root, registration, output = self.fixture(temporary,
+                'def run(arguments, output):\n    return {}\n')
+            spec = register(root, registration, module='control', action='run', arguments={},
+                            timeout_seconds=30)
+            execute(registration, output, expected_spec=spec, timeout_seconds=30)
+            moved = Path(temporary)/'transported-archive'
+            output.rename(moved)
+            shutil.rmtree(registration)
+            self.assertTrue(audit_execution(moved, spec)['entrypoint_succeeded'])
+            claim = json.loads((moved/EXECUTION_POLICY['claim_file']).read_text())
+            self.assertEqual(claim['output_directory'], str(output))
 
     def test_watchdog_does_not_resignal_a_group_after_successful_kill_and_reap(self):
         with tempfile.TemporaryDirectory() as temporary:

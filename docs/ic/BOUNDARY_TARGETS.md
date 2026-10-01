@@ -53,6 +53,22 @@ negation-map fruitless-cycle failure recorded in
 ("The ρ baseline was failing, not losing"), which produced a spurious
 charged crossover at `n = 41` until the walk was fixed.
 
+**A ρ baseline that is slow per step is not a reference either (2026-10-01).**
+Every Koblitz `vs_rho` comparison must measure against a strong ρ: for one target,
+`koblitz_rho_fixture <n> <a> signed_frobenius 1 strong …` (the library
+`koblitz_strong_rho` walk: distinguished points, normal-basis signed-Frobenius
+canonical form, library `Gf2`, lockstep lanes with batched inversion); for batches,
+`koblitz_rho_batch_ks_strong` rung 3 or the normal-basis backend of
+`koblitz_rho_batch_ks_v3`. A different ρ is admissible only with a measured per-step
+cost (instructions or ns per step on the same target) no worse than the strong one.
+`koblitz_rho_fixture`'s `packed` and `reference` backends, `koblitz_rho_batch_ks` and
+`koblitz_rho_batch_ks_matched_arith` are **not** admissible references: the measured
+ones cost 8-60× the strong walk (2026-09-29 and 2026-09-30 errata below), and
+`reference` shares `packed`'s every-step table and O(n) scan (not measured). The weak fixture
+backends now print a note to stderr saying so; they are kept only so archived stage
+runs reproduce. Fix and validation:
+[`RESEARCH_FIXED_REFERENCE_RHO_20261001.md`](../../research/notes/index-calculus/RESEARCH_FIXED_REFERENCE_RHO_20261001.md).
+
 Global provenance on every beat report: fixture hash, executable / source
 hash, host id, resource caps, seeds, and an explicit non-claim list.
 

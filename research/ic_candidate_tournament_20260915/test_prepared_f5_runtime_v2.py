@@ -4,9 +4,11 @@ These tests are registration/rejection controls, never new F5 execution,
 hardware validation, natural-yield observations or competitive measurements.
 """
 import copy
+import io
 import json
 from pathlib import Path
 import tempfile
+import tarfile
 import unittest
 from unittest.mock import patch
 
@@ -18,6 +20,7 @@ from prepared_f5_inputs_v1 import (MATHEMATICS, MATHEMATICS_SHA256, WORKER,
 from prepared_f5_runtime_v2 import (audit, mathematical_registration, register,
     run, transport)
 from prepared_target_v1 import CERTIFICATE_SEALS
+from prepared_runtime_transport_v1 import HELPER_ROLE, validate_admission
 from sat_runtime_execution_v3 import audit_execution, binding, execute, register as register_runtime
 from static_sat_assets_v3 import verified_assets
 import test_prepared_target_v1 as controls
@@ -60,7 +63,30 @@ class PreparedF5RuntimeV2Tests(unittest.TestCase):
                 factor_base=[[str(v) for v in point] for point in document['record']['factor_base']['points']],
                 columns=[dict(point=[str(v) for v in item['point']],log=str(item['log']))
                          for item in document['record']['column_logs']]))
-        self.assertEqual(digest((ROOT/WORKER).read_bytes()),WORKER_SOURCE_SHA256)
+        # This pin identifies the retained v1 worker, not today's mutable tree.
+        with tarfile.open(fileobj=io.BytesIO(self.files['rust/root-source.tar.gz']), mode='r:gz') as archive:
+            retained_worker = archive.extractfile(WORKER).read()
+        self.assertEqual(digest(retained_worker),WORKER_SOURCE_SHA256)
+
+    def test_self_consistent_changed_source_still_cannot_enter_the_old_admission_gate(self):
+        files = copy.deepcopy(self.files)
+        source = copy.deepcopy(self.source)
+        with tarfile.open(fileobj=io.BytesIO(files['rust/root-source.tar.gz']), mode='r:gz') as archive:
+            root_files = {item.name:archive.extractfile(item).read() for item in archive}
+        root_files[WORKER] += b'\n// prospective source change; not a built worker\n'
+        source['root_files'][WORKER] = digest(root_files[WORKER])
+        policy = copy.deepcopy(self.build['build'])
+        policy['source_manifest_sha256'] = sha256(source)
+        record = copy.deepcopy(self.build)
+        record.update(source_manifest_sha256=sha256(source),build=policy,build_sha256=sha256(policy))
+        record['identity'].update(source_manifest_sha256=sha256(source),build_sha256=sha256(policy))
+        files['rust/root-source.tar.gz'] = source_archive(root_files)
+        for role, value in [('rust/source-manifest.json',source),
+                            ('build/build-policy.json',policy),('build/build-record.json',record)]:
+            files[role] = json.dumps(value).encode()
+        generic_build.verify_build_record(record,source)
+        with self.assertRaisesRegex(InvalidEvidence, '^prepared worker source lacks the admitted mode'):
+            native_admission(files)
 
     def test_conservative_rust_manifest_retains_only_mathematics_not_certificate(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -172,6 +198,8 @@ class PreparedF5RuntimeV2Tests(unittest.TestCase):
             arguments,spec,report,process,result = self.control_execution(root)
             self.assertEqual(result['status'],'COMPLETE')
             audited = self.audit_control(root,spec,process)
+            validate_admission(audited, dict(spec, runtime_manifest={
+                'components': [{'role': HELPER_ROLE}]}))
             self.assertEqual(audited['recovered_scalar'],24886)
             self.assertEqual(audited['target_attempt_count'],3)
             self.assertEqual(audited['ordinary_queries_executed'],0)
@@ -191,6 +219,8 @@ class PreparedF5RuntimeV2Tests(unittest.TestCase):
             _,spec,_,process,result = self.control_execution(root,timeout=True)
             self.assertEqual(result['status'],'NATIVE_TIMEOUT')
             audited = self.audit_control(root,spec,process)
+            validate_admission(audited, dict(spec, runtime_manifest={
+                'components': [{'role': HELPER_ROLE}]}))
             self.assertFalse(audited['scalar_verified'])
             self.assertIsNone(audited['online_wall_ns'])
             self.assertIsNone(audited['target_attempt_count'])

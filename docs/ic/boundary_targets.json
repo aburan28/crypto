@@ -156,7 +156,23 @@
         "walk_policy",
         "collision_policy"
       ],
-      "notes": "Schema completeness only; scientific replay, source/manifest binding and matched resources must be independently audited. Historical batch and whole-process rows remain supplementary and cannot satisfy this primary single-target online claim."
+      "notes": "Schema completeness only; scientific replay, source/manifest binding and matched resources must be independently audited. Historical batch and whole-process rows remain supplementary and cannot satisfy this primary single-target online claim.",
+      "rho_reference_minimum": {
+        "since": "2026-10-01",
+        "single_target": "koblitz_rho_fixture <n> <a> signed_frobenius 1 strong [batch_seed] [scalar] (library crypto_lib::cryptanalysis::koblitz_strong_rho)",
+        "batch": [
+          "koblitz_rho_batch_ks_strong rung 3",
+          "koblitz_rho_batch_ks_v3 normal_basis backend"
+        ],
+        "other_rho_admissible_if": "measured per-step cost (instructions or ns per step, same target) no worse than the strong reference",
+        "inadmissible": [
+          "koblitz_rho_fixture packed",
+          "koblitz_rho_fixture reference",
+          "koblitz_rho_batch_ks (unmodified)",
+          "koblitz_rho_batch_ks_matched_arith"
+        ],
+        "evidence": "research/notes/index-calculus/RESEARCH_FIXED_REFERENCE_RHO_20261001.md"
+      }
     }
   },
   "how_to_beat": [
