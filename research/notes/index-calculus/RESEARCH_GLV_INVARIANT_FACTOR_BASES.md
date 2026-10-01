@@ -4,7 +4,7 @@
 **CLI:** `ic bench --bits 20 --family j0 --factor-base glv-orbit:size=64 --oracle mitm:negation_folded=1` (control: `glv-orbit:size=64,no_fold=1`)
 **Bench (pilot):** `cargo run --release --example glv_invariant_bench -- --families j0,j1728,generic,d7,d8 --bits 16,20,24 --seeds 2 --oracles subtract,mitm --json experiments/23_glv_invariant_pilot.json`; `--families gls --bits 8,10,12 --oracles subtract --json experiments/23_glv_invariant_gls_pilot.json`
 **Runner (E1–E7):** `cargo run --release --example glv_invariant_experiments -- --exp e1 --bits 16,20,24,28 --seeds 6 --json experiments/23_glv_invariant_e1.json` (the exact command of every file is its `command` field)
-**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29), `experiments/23_glv_invariant_e{8,9}.{json,log}` (2026-10-01); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
+**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29), `experiments/23_glv_invariant_e{8,9,11,11_12,11_13,11_14}.{json,log}` (2026-10-01); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
 **Tables:** `python3 scripts/glv_invariant_tables.py experiments/23_glv_invariant_pilot.json experiments/23_glv_invariant_gls_pilot.json` (§5) and `python3 scripts/glv_invariant_experiment_tables.py experiments/23_glv_invariant_e*.json` (§6, §8); every number in §5, §6 and §8 is printed by them from the frozen files
 
 > **Status.**  Implementation, pilot, and the seven experiments of §4
@@ -31,7 +31,10 @@
 > line (E8: the fold's relation count falls with the columns once the
 > two-summand degeneracy of §6.5 is gone, and every phase is priced in
 > one unit beside the matched rho), the folded rho on the `F_{p²}` and
-> `F_{p³}` groups (E9), and the fitted exponents (E10).
+> `F_{p³}` groups (E9), the fitted exponents (E10), and the algebraic
+> `S₄` oracle on the line (E11: flat in `p`, the first arm of this note
+> whose fitted exponent sits below rho's `1/2`, and still not faster than
+> rho at any size run).
 
 ## 1. What is new, against what exists
 
@@ -628,12 +631,10 @@ products.
   the fold is measured; a `j = 0` subfield curve with `r` larger than
   `p` would need `E(F_{p^n})` for `n` prime to `3` or a different
   eigenline, neither of which the driver builds.
-- **No algebraic three-summand oracle on the subfield line.**  E8
-  (§8.2) runs three summands over the pair table, which settles the
-  fold's relation count but prices the oracle at `|F|` additions a
-  target; the Weil-descended, `S₃`-symmetrised `S₄` solver on the line
-  — the oracle that makes the relation phase `p^{1+o(1)}` — is E11 and
-  is not written.
+- **The algebraic `S₄` oracle (E11, §8.5) is run to `p = 2^13` only**,
+  and its Frobenius symmetry breaking is measured as the orbit-duplicate
+  count rather than reproduced from the paper, which this session could
+  not retrieve.
 - **`S` at full rank is measured for E8 only.**  §8.2 prices every
   phase of the three-summand pair-table pipeline and the matched rho in
   one unit on the subfield curves; E1–E7 count relations, rank, trials,
@@ -655,7 +656,7 @@ products.
   and the exponent panel is untouched.
 - Nothing here bears on any deployed curve: `r ≤ 2^32`, certified toy
   instances, and a fold that rho already takes as `√(w/2)`.
-- E11–E15 of §8.1 are proposed, not run.
+- E12–E15 of §8.1 are proposed, not run.
 
 ## 8. Toward the state of the art: what the literature does, what is next, and E8–E9
 
@@ -710,7 +711,7 @@ That is the ordering below.
 | **E8** | Three summands on the `π`-line of a subfield curve: does the fold's relation count fall with the columns once the §6.5 block degeneracy is gone? | relations to full rank `÷ 3` (times the coupon factor), `0` single-column rows, both arms at one rank fraction after `columns` relations | full-rank ratio `< 2.0` on a majority of instances, or single-column rows `> 1 %`, falsifies | engineering | **done** (§8.2) |
 | **E9** | The matched folded rho on the `F_{p²}` and `F_{p³}` groups, so every "vs rho" on those groups has its reference | steps ratio `√(A/2)`: `√2` (GLS), `√6` (`j = 0` twist), `√3` (subfield) | a mean steps ratio below `0.8·√(A/2)` or any unverified walk falsifies | accounting (reference) | **done** (§8.3) |
 | **E10** | One `S` column in one unit (`F_p` multiplications; inversions by a measured factor; linear-algebra row operations as one each) for both arms and both walks on one instance, five sizes, exponent fitted | the fold moves `S` by its column ratio where the relation phase dominates and by its square where the linear algebra does; the exponent of neither arm falls below rho's `1/2` with the pair-table oracle | an arm whose fitted exponent is below the control's by more than the fit's scatter would be an advance; expected: none | engineering | **done**, inside E8 (§8.2) |
-| **E11** | The algebraic three-summand oracle on the line: `S₄(s t₁, s t₂, s t₃, x_R)` Weil-descended, `S₃`-symmetrised in the elementary symmetric functions of `t_i`, solved as `gaudry_cubic::solve_s4_subspace` solves the `x_i ∈ F_p` base; then GGMP's Frobenius symmetry breaking — only canonical `⟨−1, π⟩`-orbit representatives admitted as solutions | oracle cost `O(1)` in `p` (the Macaulay solve at degree `10`–`13`); the fold ratio unchanged at `3`; symmetry breaking removes the `3`-fold redundancy among a system's solutions, not systems | the fold's `S` ratio below `2.7` at any size with this oracle, or an oracle cost growing with `p`, falsifies | engineering | pending: port of `SymmetrisedS4` to a line `s·F_p` (the `x_i ∈ F_p` base is `E(F_p)` on a subfield curve and useless, §6.5) |
+| **E11** | The algebraic three-summand oracle on the line: `S₄(s t₁, s t₂, s t₃, x_R)` Weil-descended, `S₃`-symmetrised in the elementary symmetric functions of `t_i`, solved as `gaudry_cubic::solve_s4_subspace` solves the `x_i ∈ F_p` base; then GGMP's Frobenius symmetry breaking — only canonical `⟨−1, π⟩`-orbit representatives admitted as solutions | oracle cost `O(1)` in `p` (the Macaulay solve at degree `10`–`13`); the fold ratio unchanged at `3`; symmetry breaking removes the `3`-fold redundancy among a system's solutions, not systems | the fold's `S` ratio below `2.7` at any size with this oracle, or an oracle cost growing with `p`, falsifies | engineering | **done** (§8.5): `9.42e+05` multiplications a call, flat in `p`; agrees with the pair table on `3600` of `3600` targets; fitted exponent `0.53` on the fold; symmetry breaking reduces to the orbit duplicates |
 | **E12** | The pair table over orbit representatives: `P + φ^c P'` for representatives `P, P'` and `c < w/2` | table `w/2` smaller and `w/2` cheaper to build, one probe per target unchanged; `S` moves only by the table's share | a probe cost above `1.2×` the full table's falsifies "unchanged" | engineering (memory) | pending |
 | **E13** | FGHR's `2`-torsion symmetry **and** the fold together: close the line base under translation by `T ∈ E(F_p)[2]` and under `π`, fold by `⟨−1, π⟩`, symmetrise the system by `(Z/2)^{m−1} ⋊ S_m` | the two levers multiply — columns `÷ 3`, system degree `÷ 2^{m−1}` — because one acts on the base and the other on the system | a combined `S` ratio below the product of the separate ratios by more than `20 %` falsifies "multiply" | engineering | pending; needs E11's oracle and a `+T`-closed base |
 | **E14** | Q-curves of degree 2 and 3 over `F_{p²}` (the second half of E4b) | type C: `0` base points kept, no fold | any image in the base beyond chance falsifies | accounting | pending; Smith's construction not in the repository |
@@ -846,14 +847,193 @@ against the matched walk instead of the `A = 2` one, with E8's caveat that the
 matched walk's cost in field multiplications depends on what a canonicalisation
 costs.  **Class: accounting** (reference).
 
-### 8.4 Verdict after E8–E9
+### 8.5 E11 — the algebraic `S₄` oracle on the Frobenius line
+
+**Relations, every instance**
+
+| p | log2 r | h / #E(F_p) | cols π | cols negation | full-rank rel π | full-rank rel negation | ratio | rank fraction at k = cols, π / negation | single-column rows π / negation | orbit duplicates | targets | hit rate | correct |
+|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|--:|--:|--:|:--|
+| 2^7 | 10.7 | 4 | 11 | 33 | — | — | — | 0.75 / 0.74 | 0 / 0 | 1410 | 10180 | 0.0094 | yes |
+| 2^8 | 11.8 | 7 | 26 | 78 | 50 | 181 | 3.62 | 0.85 / 0.90 | 0 / 0 | 598 | 1325 | 0.1366 | yes |
+| 2^7 | 11.9 | 4 | 19 | 57 | — | — | — | 0.75 / 0.72 | 0 / 0 | 3110 | 31286 | 0.0084 | yes |
+| 2^7 | 12.1 | 1 | 14 | 42 | 19 | 94 | 4.95 | 0.80 / 0.91 | 0 / 0 | 59 | 353 | 0.2663 | yes |
+| 2^8 | 12.4 | 7 | 33 | 99 | 42 | 226 | 5.38 | 0.88 / 0.90 | 0 / 0 | 647 | 1637 | 0.1381 | yes |
+| 2^7 | 13.4 | 1 | 18 | 54 | 46 | 116 | 2.52 | 0.95 / 0.89 | 0 / 0 | 110 | 755 | 0.1536 | yes |
+| 2^9 | 14.8 | 7 | 87 | 261 | 100 | 672 | 6.72 | 0.98 / 0.91 | 0 / 0 | 658 | 3218 | 0.2088 | yes |
+| 2^9 | 15.1 | 4 | 62 | 186 | 99 | 505 | 5.10 | 0.95 / 0.91 | 0 / 0 | 604 | 3204 | 0.1576 | yes |
+| 2^8 | 15.5 | 1 | 44 | 132 | 75 | 317 | 4.23 | 0.91 / 0.91 | 0 / 0 | 117 | 1522 | 0.2083 | yes |
+| 2^8 | 15.5 | 1 | 48 | 144 | 109 | 380 | 3.49 | 0.92 / 0.95 | 0 / 0 | 116 | 1579 | 0.2407 | yes |
+| 2^9 | 15.7 | 4 | 81 | 243 | 225 | 527 | 2.34 | 0.88 / 0.91 | 0 / 0 | 332 | 2760 | 0.1909 | yes |
+| 2^10 | 16.2 | 4 | 84 | 252 | 152 | 508 | 3.34 | 0.93 / 0.92 | 0 / 0 | 630 | 4691 | 0.1083 | yes |
+| 2^10 | 16.5 | 4 | 104 | 312 | 133 | 626 | 4.71 | 0.96 / 0.93 | 0 / 0 | 369 | 3965 | 0.1579 | yes |
+| 2^9 | 17.1 | 1 | 58 | 174 | 67 | 451 | 6.73 | 0.97 / 0.95 | 0 / 0 | 193 | 3319 | 0.1359 | yes |
+| 2^10 | 17.2 | 4 | 133 | 399 | 274 | 671 | 2.45 | 0.93 / 0.92 | 0 / 0 | 242 | 3889 | 0.1725 | yes |
+| 2^11 | 17.9 | 7 | 222 | 666 | 462 | 1429 | 3.09 | 0.91 / 0.94 | 0 / 0 | 782 | 8956 | 0.1596 | yes |
+| 2^11 | 19.0 | 4 | 264 | 792 | 612 | 2193 | 3.58 | 0.92 / 0.94 | 0 / 0 | 642 | 11860 | 0.1849 | yes |
+| 2^10 | 19.2 | 1 | 141 | 423 | 195 | 1086 | 5.57 | 0.95 / 0.96 | 0 / 0 | 146 | 5818 | 0.1867 | yes |
+| 2^12 | 19.2 | 7 | 350 | 1050 | 768 | 2848 | 3.71 | 0.94 / 0.94 | 0 / 0 | 1503 | 20176 | 0.1412 | yes |
+| 2^12 | 20.2 | 4 | 361 | 1083 | 1003 | 2892 | 2.88 | 0.94 / 0.94 | 0 / 0 | 877 | 20684 | 0.1398 | yes |
+| 2^11 | 21.3 | 1 | 264 | 792 | 544 | 2564 | 4.71 | 0.95 / 0.93 | 0 / 0 | 314 | 17765 | 0.1443 | yes |
+| 2^11 | 21.7 | 1 | 307 | 921 | 776 | 2368 | 3.05 | 0.94 / 0.93 | 0 / 0 | 122 | 14351 | 0.1650 | yes |
+| 2^12 | 23.7 | 1 | 614 | 1842 | 1199 | 3979 | 3.32 | 0.93 / 0.93 | 0 / 0 | 113 | 26283 | 0.1514 | yes |
+| 2^12 | 23.8 | 1 | 659 | 1977 | 1589 | 5156 | 3.24 | 0.95 / 0.93 | 0 / 0 | 184 | 33288 | 0.1549 | yes |
+| 2^14 | 24.2 | 4 | 1409 | 4227 | 4086 | 12670 | 3.10 | 0.93 / 0.94 | 0 / 0 | 968 | 87047 | 0.1456 | yes |
+| 2^13 | 25.0 | 1 | 977 | 2931 | 2349 | 9548 | 4.06 | 0.93 / 0.94 | 0 / 0 | 260 | 56958 | 0.1676 | yes |
+| 2^13 | 25.0 | 1 | 956 | 2868 | 1875 | 7993 | 4.26 | 0.93 / 0.94 | 0 / 0 | 212 | 53004 | 0.1508 | yes |
+| 2^14 | 27.0 | 1 | 1935 | 5805 | 5690 | 18731 | 3.29 | 0.94 / 0.94 | 0 / 0 | 258 | 123811 | 0.1513 | yes |
+
+**Every phase priced (rows at full rank on both arms)**
+
+| p | log2 r | inv / mul (measured) | muls per addition | base build π / neg | pair table | stream (incl. oracle) π / neg | LA π / neg | total π | total negation | S π | S negation | S neg / S π | rho S negation | rho S folded | rho muls per group op, negation / folded | rho steps ratio (expected) | S π / rho S folded | all verified |
+|--:|--:|--:|--:|:--|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|:--|:--|--:|:--|
+| 2^7 | 10.7 | — | — | not full rank on both arms: the stream exhausted the group's targets | | | | | | | | | | | | | | |
+| 2^8 | 11.8 | 2.5 | 92.7 | 3.38e+05 / 3.37e+05 | 0 | 2.4e+08 / 9.74e+08 | 1.63e+03 / 3.42e+03 | 2.4e+08 | 9.74e+08 | 4046821.5 | 16430454.0 | 4.06 | 221.4 | 202.6 | 89 / 105 | 1.58 (1.73) | 19972 | yes |
+| 2^7 | 11.9 | — | — | not full rank on both arms: the stream exhausted the group's targets | | | | | | | | | | | | | | |
+| 2^7 | 12.1 | 2.2 | 91.4 | 1.21e+05 / 1.2e+05 | 0 | 4.48e+07 / 2.93e+08 | 786 / 1.52e+03 | 4.49e+07 | 2.93e+08 | 675457.9 | 4405395.8 | 6.52 | 189.0 | 202.0 | 89 / 106 | 1.20 (1.73) | 3344 | yes |
+| 2^8 | 12.4 | 2.7 | 92.9 | 4.53e+05 / 4.51e+05 | 0 | 1.69e+08 / 1.23e+09 | 2.07e+03 / 6.54e+03 | 1.7e+08 | 1.23e+09 | 2307959.1 | 16678827.1 | 7.23 | 200.7 | 168.7 | 89 / 107 | 1.87 (1.73) | 13683 | yes |
+| 2^7 | 13.4 | 2.4 | 93.0 | 1.86e+05 / 1.85e+05 | 0 | 2.84e+08 / 6.35e+08 | 1.31e+03 / 1.87e+03 | 2.84e+08 | 6.35e+08 | 2686978.2 | 6017586.0 | 2.24 | 201.6 | 160.8 | 87 / 110 | 1.77 (1.73) | 16714 | yes |
+| 2^9 | 14.8 | 3.2 | 92.2 | 1.29e+06 / 1.29e+06 | 0 | 3.83e+08 / 2.78e+09 | 7.79e+03 / 4.03e+04 | 3.85e+08 | 2.79e+09 | 2244087.6 | 16254073.7 | 7.24 | 146.0 | 104.1 | 88 / 109 | 2.26 (1.73) | 21550 | yes |
+| 2^9 | 15.1 | 2.8 | 92.9 | 9.27e+05 / 9.25e+05 | 0 | 5.15e+08 / 2.73e+09 | 5.13e+03 / 1.45e+04 | 5.16e+08 | 2.73e+09 | 2783147.6 | 14717631.2 | 5.29 | 171.7 | 143.9 | 89 / 105 | 1.93 (1.73) | 19338 | yes |
+| 2^8 | 15.5 | 3.0 | 92.5 | 5.52e+05 / 5.5e+05 | 0 | 3.4e+08 / 1.33e+09 | 3.07e+03 / 8.97e+03 | 3.41e+08 | 1.33e+09 | 1579001.2 | 6186425.2 | 3.92 | 204.1 | 151.8 | 88 / 107 | 2.24 (1.73) | 10400 | yes |
+| 2^8 | 15.5 | 2.6 | 92.1 | 6.26e+05 / 6.24e+05 | 0 | 3.74e+08 / 1.41e+09 | 3.73e+03 / 1.64e+04 | 3.74e+08 | 1.41e+09 | 1722359.5 | 6482738.5 | 3.76 | 167.7 | 153.1 | 88 / 107 | 1.63 (1.73) | 11247 | yes |
+| 2^9 | 15.7 | 3.4 | 92.7 | 1.2e+06 / 1.2e+06 | 0 | 1.02e+09 / 2.46e+09 | 7.15e+03 / 2.79e+04 | 1.02e+09 | 2.46e+09 | 4495401.1 | 10819235.9 | 2.41 | 175.4 | 136.4 | 88 / 108 | 2.15 (1.73) | 32962 | yes |
+| 2^10 | 16.2 | 3.3 | 93.7 | 1.28e+06 / 1.28e+06 | 0 | 1.25e+09 / 4.08e+09 | 6.06e+03 / 4.51e+04 | 1.25e+09 | 4.08e+09 | 4505118.5 | 14665701.5 | 3.26 | 152.1 | 143.5 | 88 / 110 | 1.50 (1.73) | 31393 | yes |
+| 2^10 | 16.5 | 3.6 | 93.1 | 1.65e+06 / 1.65e+06 | 0 | 7.46e+08 / 3.53e+09 | 8.98e+03 / 5.19e+04 | 7.47e+08 | 3.53e+09 | 2437562.0 | 11513227.3 | 4.72 | 157.9 | 137.8 | 88 / 111 | 1.67 (1.73) | 17689 | yes |
+| 2^9 | 17.1 | 3.5 | 93.4 | 7.79e+05 / 7.77e+05 | 0 | 4.77e+08 / 2.95e+09 | 5.15e+03 / 1.75e+04 | 4.77e+08 | 2.95e+09 | 1262964.5 | 7795194.7 | 6.17 | 151.2 | 96.3 | 87 / 109 | 2.67 (1.73) | 13111 | yes |
+| 2^10 | 17.2 | 3.9 | 93.1 | 2.2e+06 / 2.19e+06 | 0 | 1.39e+09 / 3.48e+09 | 9.86e+03 / 1.16e+05 | 1.39e+09 | 3.49e+09 | 3598552.7 | 8997342.6 | 2.50 | 113.2 | 117.0 | 89 / 111 | 1.29 (1.73) | 30746 | yes |
+| 2^11 | 17.9 | 4.3 | 93.1 | 3.58e+06 / 3.57e+06 | 0 | 2.58e+09 / 8.05e+09 | 3.6e+04 / 7.72e+05 | 2.58e+09 | 8.06e+09 | 5313399.7 | 16572286.9 | 3.12 | 138.9 | 122.0 | 88 / 114 | 1.59 (1.73) | 43562 | yes |
+| 2^11 | 19.0 | 4.5 | 92.9 | 5.09e+06 / 5.08e+06 | 0 | 2.99e+09 / 1.1e+10 | 5.91e+04 / 8.88e+05 | 3e+09 | 1.1e+10 | 4151761.7 | 15217225.4 | 3.67 | 108.1 | 91.5 | 88 / 115 | 1.69 (1.73) | 45364 | yes |
+| 2^10 | 19.2 | 4.0 | 93.0 | 2.11e+06 / 2.11e+06 | 0 | 9.06e+08 / 5.27e+09 | 1.86e+04 / 1.62e+05 | 9.08e+08 | 5.28e+09 | 1171590.0 | 6810054.5 | 5.81 | 124.8 | 59.6 | 87 / 112 | 3.57 (1.73) | 19641 | yes |
+| 2^12 | 19.2 | 5.2 | 93.5 | 6.92e+06 / 6.91e+06 | 0 | 4.73e+09 / 1.83e+10 | 1e+05 / 1.86e+06 | 4.74e+09 | 1.83e+10 | 6034763.6 | 23337516.2 | 3.87 | 122.8 | 98.5 | 88 / 116 | 1.77 (1.73) | 61252 | yes |
+| 2^12 | 20.2 | 5.6 | 93.5 | 6.99e+06 / 6.98e+06 | 0 | 6.53e+09 / 1.91e+10 | 1.36e+05 / 1.96e+06 | 6.54e+09 | 1.91e+10 | 5893919.5 | 17239831.3 | 2.93 | 105.5 | 102.3 | 88 / 118 | 1.40 (1.73) | 57626 | yes |
+| 2^11 | 21.3 | 5.0 | 93.5 | 4.42e+06 / 4.41e+06 | 0 | 3.26e+09 / 1.64e+10 | 5.92e+04 / 8.84e+05 | 3.26e+09 | 1.64e+10 | 2052760.4 | 10299420.6 | 5.02 | 106.9 | 85.5 | 87 / 118 | 1.73 (1.73) | 24022 | yes |
+| 2^11 | 21.7 | 5.0 | 93.4 | 5.09e+06 / 5.08e+06 | 0 | 4.35e+09 / 1.33e+10 | 7.37e+04 / 9.61e+05 | 4.36e+09 | 1.33e+10 | 2372929.0 | 7238675.9 | 3.05 | 109.8 | 97.3 | 87 / 119 | 1.53 (1.73) | 24398 | yes |
+| 2^12 | 23.7 | 6.3 | 93.5 | 1.19e+07 / 1.19e+07 | 0 | 7.64e+09 / 2.5e+10 | 4.44e+05 / 1.08e+07 | 7.65e+09 | 2.5e+10 | 2056739.3 | 6721324.6 | 3.27 | 93.3 | 108.0 | 88 / 121 | 1.17 (1.73) | 19049 | yes |
+| 2^12 | 23.8 | 6.7 | 93.5 | 1.29e+07 / 1.28e+07 | 0 | 9.59e+09 / 3.16e+10 | 5.73e+05 / 1.19e+07 | 9.6e+09 | 3.17e+10 | 2472468.6 | 8153526.3 | 3.30 | 79.9 | 93.8 | 89 / 121 | 1.15 (1.73) | 26350 | yes |
+| 2^14 | 24.2 | 7.3 | 93.6 | 3.18e+07 / 3.18e+07 | 0 | 2.66e+10 / 8.32e+10 | 4.44e+06 / 1.2e+08 | 2.67e+10 | 8.34e+10 | 6125678.4 | 19151026.7 | 3.13 | 98.9 | 60.4 | 89 / 120 | 2.41 (1.73) | 101441 | yes |
+| 2^13 | 25.0 | 7.2 | 93.4 | 2.05e+07 / 2.04e+07 | 0 | 1.26e+10 / 5.43e+10 | 1.3e+06 / 4.24e+07 | 1.26e+10 | 5.43e+10 | 2200628.7 | 9465212.7 | 4.30 | 111.6 | 72.5 | 89 / 122 | 2.19 (1.73) | 30373 | yes |
+| 2^13 | 25.0 | 7.2 | 93.5 | 1.95e+07 / 1.95e+07 | 0 | 1.14e+10 / 5.05e+10 | 1.92e+06 / 3.65e+07 | 1.15e+10 | 5.05e+10 | 1984973.6 | 8743451.2 | 4.40 | 106.5 | 74.5 | 89 / 122 | 2.03 (1.73) | 26639 | yes |
+| 2^14 | 27.0 | 7.8 | 93.6 | 4.22e+07 / 4.21e+07 | 0 | 3.68e+10 / 1.2e+11 | 1.38e+07 / 2.6e+08 | 3.69e+10 | 1.21e+11 | 3145232.1 | 10284379.7 | 3.27 | 126.3 | 80.3 | 89 / 124 | 2.19 (1.73) | 39150 | yes |
+
+**Summary**
+
+| arms | instances (of run) | log2 r | column ratio | full-rank ratio mean (min–max) | rank fraction at k = cols, π / negation | S neg / S π mean (min–max) | S π / rho S folded, min–max | rho steps ratio mean (expected) | rho muls per group op, negation / folded | rho S negation / rho S folded, mean | fitted exponent of total: π, negation, rho folded, rho negation (rho: 0.50) | all verified |
+|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
+| π-line fold vs negation, m = 3, the algebraic S₄ oracle | 26 (28) | 11.8–27.0 | 3.0 | 3.98 (2.34–6.73) | 0.93 / 0.93 | 4.17 (2.24–7.24) | 3344–101441 | 1.85 (1.73) | 88 / 113 | 1.25 | 0.53, 0.50, 0.41, 0.42 | yes |
+
+**The solver, per instance**
+
+| p | log2 r | solver calls | F_p muls per call | Macaulay muls per call | unsolved (border unreachable) | retried at 11 / 12 / 13 | root triples | unliftable systems | agreement with the pair table (S₄ only / pair table only) | wall s per call |
+|--:|--:|--:|--:|--:|:--|:--|--:|--:|:--|--:|
+| 2^7 | 10.7 | 1692 | 830626 | 488503 | 30 (30) | 0 / 0 / 0 | 126 | 24 | 300/300 (0 / 0) | 0.0037 |
+| 2^8 | 11.8 | 1118 | 867628 | 499124 | 7 (7) | 0 / 0 / 0 | 181 | 0 | 300/300 (0 / 0) | 0.0038 |
+| 2^7 | 11.9 | 3732 | 856630 | 496050 | 42 (42) | 0 / 0 / 0 | 312 | 30 | 300/300 (0 / 0) | 0.0038 |
+| 2^7 | 12.1 | 344 | 848029 | 483948 | 9 (9) | 0 / 0 / 0 | 94 | 0 | 300/300 (0 / 0) | 0.0031 |
+| 2^8 | 12.4 | 1393 | 876293 | 501507 | 5 (5) | 0 / 0 / 0 | 237 | 8 | 300/300 (0 / 0) | 0.0037 |
+| 2^7 | 13.4 | 733 | 862917 | 495715 | 6 (6) | 0 / 0 / 0 | 116 | 0 | 300/300 (0 / 0) | 0.0043 |
+| 2^9 | 14.8 | 3041 | 911512 | 504912 | 9 (9) | 0 / 0 / 0 | 672 | 0 | 300/300 (0 / 0) | 0.0041 |
+| 2^9 | 15.1 | 3043 | 892869 | 502908 | 22 (22) | 0 / 0 / 0 | 509 | 4 | 300/300 (0 / 0) | 0.0040 |
+| 2^8 | 15.5 | 1488 | 892496 | 500635 | 13 (13) | 0 / 0 / 0 | 324 | 7 | 300/300 (0 / 0) | 0.0043 |
+| 2^8 | 15.5 | 1563 | 897067 | 499185 | 21 (21) | 0 / 0 / 0 | 393 | 6 | 300/300 (0 / 0) | 0.0035 |
+| 2^9 | 15.7 | 2711 | 902830 | 504796 | 8 (8) | 0 / 0 / 0 | 530 | 3 | 300/300 (0 / 0) | 0.0040 |
+| 2^10 | 16.2 | 4566 | 888582 | 505412 | 12 (12) | 0 / 0 / 0 | 515 | 6 | — | 0.0038 |
+| 2^10 | 16.5 | 3878 | 905095 | 505666 | 9 (9) | 0 / 0 / 0 | 632 | 5 | — | 0.0039 |
+| 2^9 | 17.1 | 3290 | 890752 | 503764 | 16 (16) | 0 / 0 / 0 | 451 | 0 | 300/300 (0 / 0) | 0.0041 |
+| 2^10 | 17.2 | 3846 | 901266 | 505857 | 11 (11) | 0 / 0 / 0 | 671 | 0 | — | 0.0038 |
+| 2^11 | 17.9 | 8777 | 912673 | 506741 | 17 (17) | 0 / 0 / 0 | 1429 | 0 | — | 0.0040 |
+| 2^11 | 19.0 | 11733 | 930989 | 506745 | 26 (26) | 0 / 0 / 0 | 2193 | 0 | — | 0.0040 |
+| 2^10 | 19.2 | 5784 | 906446 | 505544 | 23 (23) | 0 / 0 / 0 | 1086 | 0 | — | 0.0040 |
+| 2^12 | 19.2 | 19841 | 917668 | 507505 | 13 (13) | 0 / 0 / 0 | 2856 | 6 | — | 0.0039 |
+| 2^12 | 20.2 | 20527 | 925360 | 507369 | 23 (23) | 0 / 0 / 0 | 2899 | 6 | — | 0.0040 |
+| 2^11 | 21.3 | 17710 | 918622 | 507069 | 27 (27) | 0 / 0 / 0 | 2573 | 8 | — | 0.0038 |
+| 2^11 | 21.7 | 14325 | 921489 | 507295 | 15 (15) | 0 / 0 / 0 | 2373 | 4 | — | 0.0040 |
+| 2^12 | 23.7 | 26271 | 944232 | 507707 | 19 (19) | 0 / 0 / 0 | 3984 | 3 | — | 0.0041 |
+| 2^12 | 23.8 | 33251 | 944961 | 507795 | 16 (16) | 0 / 0 / 0 | 5162 | 6 | — | 0.0041 |
+| 2^14 | 24.2 | 86822 | 951714 | 508025 | 21 (21) | 0 / 0 / 0 | 12674 | 2 | — | 0.0041 |
+| 2^13 | 25.0 | 56915 | 946086 | 507908 | 22 (22) | 0 / 0 / 0 | 9556 | 7 | — | 0.0041 |
+| 2^13 | 25.0 | 52962 | 945661 | 507915 | 21 (21) | 0 / 0 / 0 | 7993 | 0 | — | 0.0040 |
+| 2^14 | 27.0 | 123747 | 964494 | 508088 | 19 (19) | 0 / 0 / 0 | 18742 | 10 | — | 0.0041 |
+
+**Solver summary**
+
+| calls | F_p muls per call (mean) | unsolved | unsolved fraction | agreement with the pair table | S₄ only | pair table only |
+|--:|--:|--:|--:|:--|--:|--:|
+| 515103 | 942213 | 482 | 0.0009 | 3600/3600 | 0 | 0 |
+
+**Against the pair table (E8), the same instances, `S` in the same unit**
+
+| p | log2 r | S π, S₄ oracle | S π, pair table | pair / S₄ | S negation, S₄ | S negation, pair table | pair / S₄ |
+|--:|--:|--:|--:|--:|--:|--:|--:|
+| 2^7 | 12.1 | 6.75e+05 | 1.09e+04 | 0.02 | 4.41e+06 | 4.91e+04 | 0.01 |
+| 2^7 | 13.4 | 2.69e+06 | 3.98e+04 | 0.01 | 6.02e+06 | 8.4e+04 | 0.01 |
+| 2^8 | 11.8 | 4.05e+06 | 8.32e+04 | 0.02 | 1.64e+07 | 2.95e+05 | 0.02 |
+| 2^8 | 12.4 | 2.31e+06 | 6.5e+04 | 0.03 | 1.67e+07 | 3.63e+05 | 0.02 |
+| 2^8 | 15.5 | 1.58e+06 | 4.91e+04 | 0.03 | 6.19e+06 | 1.65e+05 | 0.03 |
+| 2^8 | 15.5 | 1.72e+06 | 5.61e+04 | 0.03 | 6.48e+06 | 1.81e+05 | 0.03 |
+| 2^9 | 14.8 | 2.24e+06 | 1.4e+05 | 0.06 | 1.63e+07 | 7.63e+05 | 0.05 |
+| 2^9 | 15.1 | 2.78e+06 | 1.19e+05 | 0.04 | 1.47e+07 | 5.39e+05 | 0.04 |
+| 2^9 | 15.7 | 4.5e+06 | 2.21e+05 | 0.05 | 1.08e+07 | 4.94e+05 | 0.05 |
+| 2^9 | 17.1 | 1.26e+06 | 5.21e+04 | 0.04 | 7.8e+06 | 2.77e+05 | 0.04 |
+| 2^10 | 16.2 | 4.51e+06 | 2.43e+05 | 0.05 | 1.47e+07 | 7.38e+05 | 0.05 |
+| 2^10 | 16.5 | 2.44e+06 | 1.68e+05 | 0.07 | 1.15e+07 | 6.74e+05 | 0.06 |
+| 2^10 | 17.2 | 3.6e+06 | 2.91e+05 | 0.08 | 9e+06 | 6.67e+05 | 0.07 |
+| 2^10 | 19.2 | 1.17e+06 | 1.08e+05 | 0.09 | 6.81e+06 | 5.2e+05 | 0.08 |
+| 2^11 | 17.9 | 5.31e+06 | 6.89e+05 | 0.13 | 1.66e+07 | 1.97e+06 | 0.12 |
+| 2^11 | 19.0 | 4.15e+06 | 6.16e+05 | 0.15 | 1.52e+07 | 2.04e+06 | 0.13 |
+| 2^11 | 21.3 | 2.05e+06 | 3.18e+05 | 0.16 | 1.03e+07 | 1.45e+06 | 0.14 |
+| 2^11 | 21.7 | 2.37e+06 | 4.12e+05 | 0.17 | 7.24e+06 | 1.17e+06 | 0.16 |
+
+Reading.  The oracle is the one E11 asked for: `S₄(s t₁, s t₂, s t₃, x_R)` symmetrised
+in the `t_i` (the fourth summation polynomial of `gaudry_cubic`, its coefficients
+scaled by `s^{a + 2b + 3c}` so that the unknowns are the elementary symmetric
+functions of the line parameters), Weil-descended to three `F_p` equations in three
+unknowns and solved by the Macaulay matrix at degree `10`–`13`, the eigenvalues of
+`e₁`, and the cubic split over `F_p`; the signs are settled by group arithmetic, so
+nothing is returned that does not sum to the target.  It agrees with the pair table
+on `3600` of `3600` targets at `p ≤ 2^9` (`0` decomposed by `S₄` alone,
+`0` by the table alone), every decomposition it returns is checked, and the
+relation stream it produces is E8's on the same instances — the same columns,
+and the same trials and full-rank counts up to the few targets it leaves
+unsolved — because an oracle changes what a target costs and not whether it
+decomposes.  Its cost is independent of `p`:
+`9.42e+05` `F_p` multiplications a call (`4.0` ms), `482` of
+`515103` calls unsolved (no Macaulay degree closed the quotient; those targets are
+skipped and reported, never guessed).  Against the pair table at `93`
+multiplications an addition that is `10123` additions: the algebraic
+oracle is the dearer one while `|F| < 10123` (`p ≲ 2^12`) and
+the cheaper one above.  The comparison table holds the sizes both oracles were run
+on, `p ≤ 2^11`, all below that crossover, and the pair table wins on every one of
+them by the margin the per-target costs predict; above it E8 was not run — its
+table at `p = 2^13` would hold `2^24` pairs — and E11 runs on at `2^12`, `2^13` and
+`2^14` alone, where the per-target cost is the same `10⁶` multiplications as at
+`2^7`.  The
+fold's reading is unchanged — columns `÷ 3`, relations `÷ 3.98`, both arms at
+`0.93` / `0.93` of full rank after `columns` relations, `S ÷ 4.17` — and
+the fitted exponents of the total over `26` instances are fold `0.53`,
+control `0.50`, rho `0.41` / `0.42`: with the oracle
+flat in `p` the stream is `p · ln` solves at a constant each, so the arms grow as `r^{1/3}`
+times the coupon factor, below rho's `1/2` for the first time in this note, and the
+folded arm is still `3344`–`101441×` the matched rho at these sizes
+(a constant of `10⁶` multiplications a solve against `10²` a step).  **Frobenius
+symmetry breaking** (Galbraith–Granger–Merz–Petit's third lever) in the form the
+driver can measure — one solve per `⟨−1, π⟩`-orbit of targets, the conjugate
+systems' solutions being the conjugate decompositions — would save exactly the
+orbit duplicates, `11056` of `512218` targets here (the birthday count of E7);
+on a folded base a conjugate decomposition is the same row, so there is nothing
+further to break at the system level, and the paper's own mechanism was not
+available to this session to reproduce.  **Class: engineering** — the oracle moves
+`S` and the exponent of the relation phase, not a ratio to a floor; the method is
+not faster than rho at any size run.
+
+### 8.4 Verdict after E8–E9, with E11
 
 | lever | measured | class |
 |:--|:--|:--|
 | three summands on the `π`-line (E8) | columns `÷ 3`, relations `÷ 4.2`, `0` single-column rows; `S ÷ 3.8` end to end in one unit | engineering |
 | the matched folded rho on `F_{p²}`, `F_{p³}` (E9) | steps `÷ 1.40, 1.74, 2.16` at `A = 4, 6, 12` (expected `1.41, 1.73, 2.45`), verified; in `F_p` multiplications the folded walk on `E(F_{p³})` pays `110` a step against `88` (E8) | accounting (reference) |
+| the algebraic `S₄` line oracle (E11) | `9.42e+05` multiplications a target, flat in `p`; same relation stream as E8; exponent of the total `0.53` (fold) against the pair table's `0.88`; cheaper than the pair table from `p ≈ 2^12` | engineering |
 | exponents (E10) | fold `0.88`, control `0.86`, rho `0.37` / `0.39` over `18` instances; no arm's exponent below rho's `1/2` | accounting |
 
-The next lever that could change a number of substance is E11 — the algebraic
-oracle on the line, which is also the prerequisite of the FGHR combination
-(E13); nothing on the base side remains.
+With E11 run, the relation phase is `p^{1+o(1)}` solves on the folded line and the
+next lever is E13 — the FGHR `2`-torsion symmetry of the system combined with the
+fold — and E12 for the pair-table regime; nothing on the base side remains.

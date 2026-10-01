@@ -1736,8 +1736,8 @@
   <!-- ============ ENDOMORPHISM-INVARIANT FACTOR BASES: EXPERIMENTS E1-E7 ============ -->
   <div class="panel" id="glv-invariant-experiments">
     <div class="panel-head">
-      <h2>Endomorphism-invariant factor bases: experiments E1&ndash;E9 <span class="chip">engineering</span> <span class="chip">accounting</span></h2>
-      <p>Frozen source: <code>experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.json</code> (2026-09-29) and <code>&hellip;_e{8,9}.json</code> (2026-10-01),
+      <h2>Endomorphism-invariant factor bases: experiments E1&ndash;E9 and E11 <span class="chip">engineering</span> <span class="chip">accounting</span></h2>
+      <p>Frozen source: <code>experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.json</code> (2026-09-29) and <code>&hellip;_e{8,9,11,11_12,11_13,11_14}.json</code> (2026-10-01),
         tables by <code>scripts/glv_invariant_experiment_tables.py</code>; note
         <code>research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md</code> &sect;6 and &sect;8.
         The plan&rsquo;s seven experiments and the first two of its successors run: one relation stream per instance feeds the folded
@@ -1769,6 +1769,7 @@
           <tr><td>E7, <code>j = 0</code>, three summands, 2<sup>17</sup>&ndash;2<sup>26</sup></td><td><code>&lang;&minus;1, &zeta;&rang;</code> at <code>m = 3</code></td><td class="n">6.0</td><td class="n">3.00</td><td class="n">&mdash;</td><td class="n">1.4&ndash;5.7</td><td>0 rows fold to <code>0 = 0</code>; orbit duplicates at the birthday count <code>3T&sup2;/r</code></td><td><span class="chip">accounting</span></td></tr>
           <tr><td>E8, generic <code>E/F<sub>p</sub></code> on E(F<sub>p&sup3;</sub>), the Frobenius line, <b>three summands</b>, <code>p</code> = 2<sup>7</sup>&ndash;2<sup>11</sup>, <code>r</code> = 2<sup>12</sup>&ndash;2<sup>22</sup></td><td><code>&lang;&minus;1, &pi;&rang;</code>, order 6, pair-table oracle</td><td class="n">6.0</td><td class="n">3.00</td><td class="n">0.80&ndash;0.98 / 0.89&ndash;0.96</td><td class="n">4.20 (2.34&ndash;6.73); 0 single-column rows</td><td>three summands restore the fold on the subfield line; every phase priced in F<sub>p</sub> multiplications: <code>S</code> control / fold 3.75 (2.11&ndash;5.58), fold at 54&ndash;6759&times; the matched folded rho; fitted exponents of the total 0.88 (fold), 0.86 (control), 0.37 / 0.39 (rho), against rho&rsquo;s 1/2</td><td><span class="chip">engineering</span></td></tr>
           <tr><td>E9, matched rho on F<sub>p&sup2;</sub> and F<sub>p&sup3;</sub>, 960 walks</td><td>rho folded by <code>&lang;&minus;1, &psi;&rang;</code> (A = 4), <code>&lang;&minus;1, &psi;, &zeta;&rang;</code> (A = 12), <code>&lang;&minus;1, &pi;&rang;</code> (A = 6) vs the <code>A = 2</code> walk</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">steps ratio GLS 1.40 (expected 1.41), <code>j = 0</code> twist 2.16 (2.45), subfield 1.74 (1.73); at <code>r &asymp; p</code>: <code>j = 1728</code> twist 1.15, <code>j = 0</code> subfield 1.72</td><td class="n">&mdash;</td><td>the reference for every F<sub>p&sup2;</sub>/F<sub>p&sup3;</sub> &ldquo;vs rho&rdquo; above; in F<sub>p</sub> multiplications the folded walk pays its canonicalisation, 88 / 110 multiplications a group operation (negation / folded) on E(F<sub>p&sup3;</sub>), so rho <code>S</code> negation / folded is 1.24 there (E8)</td><td><span class="chip">accounting</span></td></tr>
+          <tr><td>E11, the algebraic <code>S&#8324;</code> oracle on the Frobenius line, three summands, <code>p</code> = 2<sup>7</sup>&ndash;2<sup>13</sup>, <code>r</code> = 2<sup>12</sup>&ndash;2<sup>27</sup></td><td><code>&lang;&minus;1, &pi;&rang;</code>, order 6; <code>S&#8324;(s t&#8321;, s t&#8322;, s t&#8323;, x_R)</code> symmetrised, Weil-descended, Macaulay-solved</td><td class="n">6.0</td><td class="n">3.00</td><td class="n">0.80&ndash;0.98 / 0.89&ndash;0.96</td><td class="n">3.98 (2.34&ndash;6.73); the same stream as E8</td><td>9.42e+05 F<sub>p</sub> multiplications a target, flat in <code>p</code>; agrees with the pair table on 3600 of 3600 targets; <code>S</code> control / fold 4.17; fitted exponents of the total 0.53 (fold), 0.50 (control) &mdash; below rho&rsquo;s 1/2, at 3344&ndash;101441&times; the matched rho; cheaper than the pair table from <code>p &asymp; 2<sup>12</sup></code></td><td><span class="chip">engineering</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -1783,9 +1784,11 @@
         multiplications, pays for each step&rsquo;s canonicalisation. Against the literature
         (note &sect;8.0): the invariant base is Galbraith&ndash;Granger&ndash;Merz&ndash;Petit&rsquo;s
         lever measured at framework level; the Faug&egrave;re&ndash;Gaudry&ndash;Huot&ndash;Renault
-        symmetries act on the decomposition system, not the base, and the two multiply. Next
-        (&sect;8.1, pending): the algebraic <code>S&#8324;</code> oracle on the line with Frobenius
-        symmetry breaking (E11), the orbit-representative pair table (E12), the combined
+        symmetries act on the decomposition system, not the base, and the two multiply. The
+        algebraic <code>S&#8324;</code> oracle (E11) makes the relation phase flat in <code>p</code> and
+        the fold&rsquo;s arm the first on this page with a fitted exponent below rho&rsquo;s 1/2,
+        at a constant of about 0.9 million multiplications a solve. Next
+        (&sect;8.1, pending): the orbit-representative pair table (E12), the combined
         base-and-system symmetries (E13), Q-curves (E14), the ECC2K-130 transfer check (E15).</p>
     </div>
   </div>
