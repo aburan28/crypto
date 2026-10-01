@@ -32,10 +32,11 @@ cell() {  # cpu a n ell  -- up to three attempts of 6000 CPU-s, resumed at draw 
 }
 
 if [ "${2:-}" = "--cells" ]; then
-  # lanes balanced by the smoke's costs: l = 5 and 6 cells are the heavy ones
-  ( cell 1 1 19 6; cell 1 0 13 2; cell 1 0 13 3; cell 1 0 13 4; cell 1 0 13 5 ) &
-  ( cell 2 1 17 6; cell 2 1 17 2; cell 2 1 17 3; cell 2 1 17 4; cell 2 1 17 5 ) &
-  ( cell 3 1 19 5; cell 3 1 19 2; cell 3 1 19 3; cell 3 1 19 4 ) &
+  # cheap cells first in every lane, so a two-hour window delivers the fit's cells
+  # before the heavy l = 5 and 6 cells (amendment 2)
+  ( cell 1 0 13 2; cell 1 0 13 3; cell 1 0 13 4; cell 1 0 13 5; cell 1 1 19 6 ) &
+  ( cell 2 1 17 2; cell 2 1 17 3; cell 2 1 17 4; cell 2 1 17 5; cell 2 1 17 6 ) &
+  ( cell 3 1 19 2; cell 3 1 19 3; cell 3 1 19 4; cell 3 1 19 5 ) &
   wait
   exit 0
 fi

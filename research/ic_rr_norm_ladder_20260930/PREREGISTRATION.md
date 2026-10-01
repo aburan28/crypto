@@ -219,3 +219,21 @@ metric or decision rule changes. What changes:
 - The instrument commit for the resumed run is the one carrying this amendment; the
   `rr`, `x4` and `ctrl` builders are untouched (their source is diffable against
   `9f0dc489`).
+
+## Amendment 2 (2026-10-01T15:10Z, additive): order of measurement only
+
+After amendment 1 the three lanes ran 01:52Z–03:52Z and each spent its whole window on
+its first, heaviest cell (`K₁/2¹⁹ ℓ = 5`, `K₁/2¹⁷ ℓ = 6`, `K₁/2¹⁹ ℓ = 6`): the first
+attempts hit their 6,000 CPU-s limit at 03:33Z and the second were cut with the tracked
+task. None of the `ℓ ≤ 4` cells, which the slope fit rests on, had started. Nothing about
+what is measured changes; two orders do:
+
+- **Lanes run their cheap cells first** (`ℓ = 2, 3, 4`, then 5, then 6; [run.sh](run.sh)).
+- **Within a cell, every draw's `x4` and `rr` are measured before any control.** The
+  control of each rootless draw is measured afterwards, in draw order, with the same seed
+  and shape as before. A cell cut during its controls therefore has its `rr` and `x4`
+  results complete; `--resume` picks up the controls still missing. The per-draw order
+  `x4`, `rr` is unchanged.
+
+Everything measured before this amendment stays in the files and is replayed, not
+re-measured.

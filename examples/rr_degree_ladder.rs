@@ -354,6 +354,61 @@ fn put(out: &mut Option<std::fs::File>, line: &str) {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+fn draw_head(
+    cell: &str,
+    a: u8,
+    n: u32,
+    ell: usize,
+    seed: u64,
+    draw: u32,
+    basis: &[F2mElement],
+    x_r: &F2mElement,
+    k: u64,
+    base_points: usize,
+) -> String {
+    format!(
+        r#""cell":"{cell}","a":{a},"n":{n},"ell":{ell},"m":3,"seed":{seed},"draw":{draw},"v_basis":{:?},"k":{k},"x_r":{},"base_points":{base_points}"#,
+        basis.iter().map(word).collect::<Vec<_>>(),
+        word(x_r),
+    )
+}
+
+/// One line per arm, plus a provisional `at_least` line after every unresolved degree;
+/// the last line per (draw, arm) is the result.
+fn emit_line(
+    out: &mut Option<std::fs::File>,
+    head: &str,
+    arm: &str,
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    roots: Option<u64>,
+    d_max: u32,
+) {
+    let shape = format!(
+        r#""arm":"{arm}","n_vars":{n_vars},"n_eqs":{},"degree":{},"terms_per_eq":{}"#,
+        polys.len(),
+        system_degree(polys),
+        terms_per_eq(polys)
+    );
+    let roots_field = roots.map_or(String::new(), |r| format!(r#","roots":{r}"#));
+    let body = if roots == Some(0) || roots.is_none() {
+        let m = measure(polys, n_vars, d_max, |d, secs| {
+            put(
+                out,
+                &format!(
+                    r#"{{{head},{shape}{roots_field},"outcome":{{"kind":"at_least","degree":{},"partial":true}},"secs":{secs:.3}}}"#,
+                    d + 1
+                ),
+            );
+        });
+        format!(r#","outcome":{},"secs":{:.3}"#, m.outcome, m.secs)
+    } else {
+        r#","outcome":{"kind":"satisfiable"}"#.to_string()
+    };
+    put(out, &format!("{{{head},{shape}{roots_field}{body}}}"));
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let get = |name: &str| {
@@ -378,12 +433,13 @@ fn main() {
     let check = args.iter().any(|s| s == "--check");
     let resume = args.iter().any(|s| s == "--resume");
     assert!((2..=8).contains(&ell), "need 2 ≤ ℓ ≤ 8");
-    // `--resume`: an existing `--out` is read for the draws it already completed (an
-    // `rr` final line that is satisfiable, or a `ctrl` final line), which are replayed
-    // through the generator without measuring, and the file is appended to.  Earlier
+    // `--resume`: an existing `--out` is read for the draws whose `rr` (and `ctrl`) have a
+    // final line; those are replayed through the generator without measuring, and the
+    // file is appended to.  Earlier
     // provisional lines of an interrupted draw stay; the last line per draw and arm
     // is the result.
     let mut completed: std::collections::HashMap<u32, bool> = std::collections::HashMap::new();
+    let mut completed_ctrl: HashSet<u32> = HashSet::new();
     let mut out = get("--out").map(|p| {
         let path = std::path::Path::new(&p);
         if resume && path.exists() {
@@ -397,10 +453,10 @@ fn main() {
                 if o["partial"].as_bool().unwrap_or(false) {
                     continue;
                 }
-                if arm == "rr" && o["kind"] == "satisfiable" {
-                    completed.insert(d, true);
+                if arm == "rr" {
+                    completed.insert(d, o["kind"] == "satisfiable");
                 } else if arm == "ctrl" {
-                    completed.insert(d, false);
+                    completed_ctrl.insert(d);
                 }
             }
             std::fs::OpenOptions::new()
@@ -430,6 +486,7 @@ fn main() {
     let cell = format!("K{a}n{n}l{ell}");
     let g = kc.generator().clone();
     let (mut unsat, mut sat, mut skipped) = (0u32, 0u32, 0u32);
+    let mut pending_ctrl: Vec<(u32, String, usize, usize, u32, usize)> = Vec::new();
 
     for draw in 0..max_draws {
         if unsat >= want_unsat {
@@ -452,6 +509,17 @@ fn main() {
                 sat += 1;
             } else {
                 unsat += 1;
+                if !completed_ctrl.contains(&draw) {
+                    let (rr, rr_vars) = build_rr(&kc, &basis, &target, &st).expect("rr builds");
+                    pending_ctrl.push((
+                        draw,
+                        draw_head(&cell, a, n, ell, seed, draw, &basis, x_r, k, 0),
+                        rr_vars,
+                        rr.len(),
+                        system_degree(&rr),
+                        terms_per_eq(&rr),
+                    ));
+                }
             }
             continue;
         }
@@ -470,60 +538,43 @@ fn main() {
             assert_eq!(rr_roots, rr_brute, "rr root count");
             assert_eq!(x4_roots, x4_brute, "x4 root count");
         }
-        let head = format!(
-            r#""cell":"{cell}","a":{a},"n":{n},"ell":{ell},"m":3,"seed":{seed},"draw":{draw},"v_basis":{:?},"k":{k},"x_r":{},"base_points":{}"#,
-            basis.iter().map(word).collect::<Vec<_>>(),
-            word(x_r),
-            base.len(),
+        let head = draw_head(&cell, a, n, ell, seed, draw, &basis, x_r, k, base.len());
+        // x4 then rr for this draw; every control comes after the cell's last draw
+        // (amendment 2), so a cut cell has its rr and x4 complete.
+        emit_line(
+            &mut out,
+            &head,
+            "x4",
+            &x4,
+            x4_vars,
+            Some(x4_roots),
+            d_max_x4,
         );
-        // One line per arm, written as soon as it exists, in the order x4, rr, ctrl, and
-        // after every unresolved degree a provisional `at_least` line (`"partial":true`):
-        // the last line per (draw, arm) is the result, so a cell killed by its limit keeps
-        // every arm it finished and a lower bound for the one it was on.
-        let mut emit = |arm: &str,
-                        polys: &[F2BoolPoly],
-                        n_vars: usize,
-                        roots: Option<u64>,
-                        d_max: u32| {
-            let shape = format!(
-                r#""arm":"{arm}","n_vars":{n_vars},"n_eqs":{},"degree":{},"terms_per_eq":{}"#,
-                polys.len(),
-                system_degree(polys),
-                terms_per_eq(polys)
-            );
-            let roots_field = roots.map_or(String::new(), |r| format!(r#","roots":{r}"#));
-            let body = if roots == Some(0) || roots.is_none() {
-                let m = measure(polys, n_vars, d_max, |d, secs| {
-                    put(
-                        &mut out,
-                        &format!(
-                            r#"{{{head},{shape}{roots_field},"outcome":{{"kind":"at_least","degree":{},"partial":true}},"secs":{secs:.3}}}"#,
-                            d + 1
-                        ),
-                    );
-                });
-                format!(r#","outcome":{},"secs":{:.3}"#, m.outcome, m.secs)
-            } else {
-                r#","outcome":{"kind":"satisfiable"}"#.to_string()
-            };
-            put(&mut out, &format!("{{{head},{shape}{roots_field}{body}}}"));
-        };
-        emit("x4", &x4, x4_vars, Some(x4_roots), d_max_x4);
-        emit("rr", &rr, rr_vars, Some(rr_roots), d_max);
+        emit_line(&mut out, &head, "rr", &rr, rr_vars, Some(rr_roots), d_max);
         if rr_roots == 0 {
-            let ctrl = random_control_system(
+            pending_ctrl.push((
+                draw,
+                head,
                 rr_vars,
                 rr.len(),
                 system_degree(&rr),
                 terms_per_eq(&rr),
-                cell_seed ^ 0x0C01_7201_u64.wrapping_mul(u64::from(draw) + 1),
-            );
-            emit("ctrl", &ctrl, rr_vars, None, d_max);
+            ));
             unsat += 1;
         } else {
             sat += 1;
         }
         let _ = started;
+    }
+    for (draw, head, n_vars, n_eqs, degree, terms) in pending_ctrl {
+        let ctrl = random_control_system(
+            n_vars,
+            n_eqs,
+            degree,
+            terms,
+            cell_seed ^ 0x0C01_7201_u64.wrapping_mul(u64::from(draw) + 1),
+        );
+        emit_line(&mut out, &head, "ctrl", &ctrl, n_vars, None, d_max);
     }
     eprintln!(
         "{cell}: {unsat} unsat, {sat} sat, {skipped} skipped (x_R ∈ V), {} replayed from --out",
