@@ -1327,8 +1327,8 @@
      "ops_median": 4882,
      "points_per_column": 2.0,
      "priced_by": null,
-     "process_wall_ms_median": 165.106714,
-     "process_wall_ms_min": 140.492045,
+     "process_wall_ms_median": 168.671196,
+     "process_wall_ms_min": 152.197697,
      "runs": 5,
      "solver": null,
      "solver_conflicts": null,
@@ -1338,8 +1338,8 @@
      "unit": "count.s3_solves",
      "usable_points": 232,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 26.55993000007584,
-     "window_wall_ms_min": 20.644181000534445,
+     "window_wall_ms_median": 26.83384899955854,
+     "window_wall_ms_min": 25.14397499999177,
      "workload_id": "W74fbf17035cb",
      "xor_rows": null,
      "xor_rows_total": null
@@ -1366,8 +1366,8 @@
      "ops_median": 4882,
      "points_per_column": 2.0,
      "priced_by": null,
-     "process_wall_ms_median": 167.195535,
-     "process_wall_ms_min": 140.535021,
+     "process_wall_ms_median": 170.385923,
+     "process_wall_ms_min": 159.369788,
      "runs": 5,
      "solver": null,
      "solver_conflicts": null,
@@ -1377,8 +1377,8 @@
      "unit": "count.s3_solves",
      "usable_points": 232,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 26.399241999570222,
-     "window_wall_ms_min": 20.95381399976759,
+     "window_wall_ms_median": 26.762880999740442,
+     "window_wall_ms_min": 26.559535000160395,
      "workload_id": "W74fbf17035cb",
      "xor_rows": null,
      "xor_rows_total": null
@@ -1405,8 +1405,8 @@
      "ops_median": 4882,
      "points_per_column": 2.0,
      "priced_by": null,
-     "process_wall_ms_median": 159.330321,
-     "process_wall_ms_min": 140.836784,
+     "process_wall_ms_median": 166.421213,
+     "process_wall_ms_min": 162.304433,
      "runs": 5,
      "solver": null,
      "solver_conflicts": null,
@@ -1416,8 +1416,8 @@
      "unit": "count.s3_solves",
      "usable_points": 232,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 26.391347999378922,
-     "window_wall_ms_min": 20.421275999979116,
+     "window_wall_ms_median": 26.705766999839398,
+     "window_wall_ms_min": 26.415992999318405,
      "workload_id": "W74fbf17035cb",
      "xor_rows": null,
      "xor_rows_total": null
@@ -1473,7 +1473,7 @@
      "Ubuntu 24.04.4 LTS \u00b7 glibc-2.39"
     ]
    ],
-   "commit": "fe7c8b33842bde76414f88e4243396652cdd4642",
+   "commit": "c40ce8f02a417e1ffb9c6d5d510316eee52fc413",
    "comparisons": [
     {
      "a": {
@@ -1490,14 +1490,14 @@
        ],
        "estimate": {
         "ci95": [
-         0.7489977188173442,
-         1.2783916203164316
+         0.7353359374728944,
+         1.1110841861893113
         ],
         "excludes_1": false,
-        "max_ratio": 1.2783916203164316,
-        "median_ratio": 1.0143942952508285,
+        "max_ratio": 1.1110841861893113,
+        "median_ratio": 0.9862528107812899,
         "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
-        "min_ratio": 0.7489977188173442,
+        "min_ratio": 0.7353359374728944,
         "n_pairs": 5
        },
        "spec_id": "ICS1h2af445a54511"
@@ -1545,14 +1545,14 @@
       "contended_runs": 3,
       "estimate": {
        "ci95": [
-        0.7003187624984129,
-        1.2797629995093192
+        0.6830735041900398,
+        1.5691904281256475
        ],
        "excludes_1": false,
-       "max_ratio": 1.2797629995093192,
-       "median_ratio": 1.0983068102833062,
+       "max_ratio": 1.5691904281256475,
+       "median_ratio": 1.0117509251060974,
        "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
-       "min_ratio": 0.7003187624984129,
+       "min_ratio": 0.6830735041900398,
        "n_pairs": 5
       },
       "pairs": 5,
@@ -1561,8 +1561,8 @@
         "blocking": [
          "bare_metal",
          "fixed_frequency",
-         "foreign_runnable",
          "kernel_isolation",
+         "run_delay",
          "steal"
         ],
         "count": 3,
@@ -1606,10 +1606,10 @@
       "unknown": 15
      },
      "foreign_runnable": {
-      "fail": 2,
+      "fail": 0,
       "level": "L2",
       "note": "sampler ticks with another runnable task on a pinned CPU (4 ticks)",
-      "pass": 13,
+      "pass": 15,
       "unknown": 0
      },
      "involuntary_switches": {
@@ -1655,10 +1655,10 @@
       "unknown": 0
      },
      "run_delay": {
-      "fail": 0,
+      "fail": 1,
       "level": "L2",
       "note": "share of the child's runnable time spent waiting for a CPU",
-      "pass": 15,
+      "pass": 14,
       "unknown": 0
      },
      "smt": {
@@ -1669,10 +1669,10 @@
       "unknown": 0
      },
      "steal": {
-      "fail": 2,
+      "fail": 3,
       "level": "L2",
       "note": "hypervisor steal on the pinned CPUs; a hypervisor that hides steal reads 0",
-      "pass": 13,
+      "pass": 12,
       "unknown": 0
      }
     },
@@ -1695,9 +1695,9 @@
      "kernel_threads": 26,
      "user_threads": []
     },
-    "threads_moved": 55
+    "threads_moved": 52
    },
-   "session_id": "ICSESS1h877de3c21e18"
+   "session_id": "ICSESS1h49b92b7a0470"
   },
   {
    "arms": [
@@ -1723,8 +1723,8 @@
      "ops_median": 36430578687,
      "points_per_column": 2.0,
      "priced_by": "pinned",
-     "process_wall_ms_median": 499.575142,
-     "process_wall_ms_min": 410.57582,
+     "process_wall_ms_median": 504.584265,
+     "process_wall_ms_min": 452.247774,
      "runs": 5,
      "solver": "macaulay-xl",
      "solver_conflicts": null,
@@ -1734,8 +1734,8 @@
      "unit": "cryptanalysis.rps",
      "usable_points": 8,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 275.079612,
-     "window_wall_ms_min": 214.829156,
+     "window_wall_ms_median": 266.463324,
+     "window_wall_ms_min": 219.417438,
      "workload_id": "Wea67e76bfd9f",
      "xor_rows": null,
      "xor_rows_total": null
@@ -1762,8 +1762,8 @@
      "ops_median": 33739039805,
      "points_per_column": 2.0,
      "priced_by": "pinned",
-     "process_wall_ms_median": 478.922263,
-     "process_wall_ms_min": 401.279878,
+     "process_wall_ms_median": 478.810152,
+     "process_wall_ms_min": 459.636861,
      "runs": 5,
      "solver": "macaulay-xl",
      "solver_conflicts": null,
@@ -1773,8 +1773,8 @@
      "unit": "cryptanalysis.rps",
      "usable_points": 8,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 217.936331,
-     "window_wall_ms_min": 188.590565,
+     "window_wall_ms_median": 243.049341,
+     "window_wall_ms_min": 234.86809,
      "workload_id": "Wea67e76bfd9f",
      "xor_rows": null,
      "xor_rows_total": null
@@ -1801,8 +1801,8 @@
      "ops_median": 36430578687,
      "points_per_column": 2.0,
      "priced_by": "pinned",
-     "process_wall_ms_median": 503.224378,
-     "process_wall_ms_min": 399.748937,
+     "process_wall_ms_median": 502.65074,
+     "process_wall_ms_min": 476.843846,
      "runs": 5,
      "solver": "macaulay-xl",
      "solver_conflicts": null,
@@ -1812,8 +1812,8 @@
      "unit": "cryptanalysis.rps",
      "usable_points": 8,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 276.459345,
-     "window_wall_ms_min": 210.676571,
+     "window_wall_ms_median": 277.326363,
+     "window_wall_ms_min": 257.483643,
      "workload_id": "Wea67e76bfd9f",
      "xor_rows": null,
      "xor_rows_total": null
@@ -1869,7 +1869,7 @@
      "Ubuntu 24.04.4 LTS \u00b7 glibc-2.39"
     ]
    ],
-   "commit": "fe7c8b33842bde76414f88e4243396652cdd4642",
+   "commit": "c40ce8f02a417e1ffb9c6d5d510316eee52fc413",
    "comparisons": [
     {
      "a": {
@@ -1886,14 +1886,14 @@
        ],
        "estimate": {
         "ci95": [
-         0.7963003430561406,
-         1.2941558454011708
+         0.9602385097571726,
+         1.3079399003829404
         ],
         "excludes_1": false,
-        "max_ratio": 1.2941558454011708,
-        "median_ratio": 1.0050157588560216,
+        "max_ratio": 1.3079399003829404,
+        "median_ratio": 1.0740593564517382,
         "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
-        "min_ratio": 0.7963003430561406,
+        "min_ratio": 0.9602385097571726,
         "n_pairs": 5
        },
        "spec_id": "ICS1h35585e581598"
@@ -1938,17 +1938,17 @@
      "refusals": [],
      "wall": {
       "admitted": false,
-      "contended_runs": 6,
+      "contended_runs": 3,
       "estimate": {
        "ci95": [
-        0.6855853970013598,
-        1.2214763949452
+        0.9096223917105527,
+        1.0900403731812782
        ],
        "excludes_1": false,
-       "max_ratio": 1.2214763949452,
-       "median_ratio": 0.7765308314742487,
+       "max_ratio": 1.0900403731812782,
+       "median_ratio": 0.9244674574224081,
        "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
-       "min_ratio": 0.6855853970013598,
+       "min_ratio": 0.9096223917105527,
        "n_pairs": 5
       },
       "pairs": 5,
@@ -1957,11 +1957,10 @@
         "blocking": [
          "bare_metal",
          "fixed_frequency",
-         "involuntary_switches",
          "kernel_isolation",
          "steal"
         ],
-        "count": 6,
+        "count": 3,
         "reason": "runs below their declared isolation level (earned ['L1', 'L2'])"
        }
       ],
@@ -2009,10 +2008,10 @@
       "unknown": 0
      },
      "involuntary_switches": {
-      "fail": 1,
+      "fail": 0,
       "level": "L2",
       "note": "preemptions of the child per second",
-      "pass": 14,
+      "pass": 15,
       "unknown": 0
      },
      "kernel_isolation": {
@@ -2065,16 +2064,16 @@
       "unknown": 0
      },
      "steal": {
-      "fail": 8,
+      "fail": 7,
       "level": "L2",
       "note": "hypervisor steal on the pinned CPUs; a hypervisor that hides steal reads 0",
-      "pass": 7,
+      "pass": 8,
       "unknown": 0
      }
     },
     "levels": {
-     "L1": 8,
-     "L2": 7
+     "L1": 7,
+     "L2": 8
     }
    },
    "label": "icv1-f2m13-t181-515ee569 (cryptanalysis): prefix vs geomtrace basis, A/A on prefix",
@@ -2093,12 +2092,12 @@
     },
     "threads_moved": 55
    },
-   "session_id": "ICSESS1h15335a0ef66b"
+   "session_id": "ICSESS1h31417fae01a9"
   },
   {
    "arms": [
     {
-     "S_median": 1031.5517165605984,
+     "S_median": 931.7600407305139,
      "abscissae": 31,
      "arm": 0,
      "cnf_clauses": 108,
@@ -2116,11 +2115,11 @@
      "n_equations": 17,
      "n_vars": 12,
      "ops_distinct": 5,
-     "ops_median": 264179.9716786549,
+     "ops_median": 238623.3644128004,
      "points_per_column": 2.0,
      "priced_by": "measured",
-     "process_wall_ms_median": 189.762617,
-     "process_wall_ms_min": 176.299487,
+     "process_wall_ms_median": 173.050922,
+     "process_wall_ms_min": 159.932003,
      "runs": 5,
      "solver": "sat-cdcl",
      "solver_conflicts": 2299,
@@ -2130,14 +2129,14 @@
      "unit": "crypto.S.gae_pinned",
      "usable_points": null,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 76.278558,
-     "window_wall_ms_min": 71.008593,
+     "window_wall_ms_median": 67.119912,
+     "window_wall_ms_min": 52.226082,
      "workload_id": "W6ae0480b51c6",
      "xor_rows": null,
      "xor_rows_total": 20243
     },
     {
-     "S_median": 555852.0042600067,
+     "S_median": 357151.5281784098,
      "abscissae": 31,
      "arm": 1,
      "cnf_clauses": null,
@@ -2154,11 +2153,11 @@
      "n_equations": 17,
      "n_vars": 12,
      "ops_distinct": 5,
-     "ops_median": 142353470.39365402,
+     "ops_median": 91466359.93564157,
      "points_per_column": 2.0,
      "priced_by": "measured",
-     "process_wall_ms_median": 27019.363573,
-     "process_wall_ms_min": 25927.838612,
+     "process_wall_ms_median": 16942.015685,
+     "process_wall_ms_min": 16441.740009,
      "runs": 5,
      "solver": "sat-cdcl",
      "solver_conflicts": 1328807,
@@ -2168,14 +2167,14 @@
      "unit": "crypto.S.gae_pinned",
      "usable_points": null,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 26918.331804,
-     "window_wall_ms_min": 25822.817718,
+     "window_wall_ms_median": 16838.980243,
+     "window_wall_ms_min": 16345.094239,
      "workload_id": "W6ae0480b51c6",
      "xor_rows": 0,
      "xor_rows_total": 0
     },
     {
-     "S_median": 1032.2712824269618,
+     "S_median": 947.887621362325,
      "abscissae": 31,
      "arm": 2,
      "cnf_clauses": 108,
@@ -2193,11 +2192,11 @@
      "n_equations": 17,
      "n_vars": 12,
      "ops_distinct": 5,
-     "ops_median": 264364.2522020111,
+     "ops_median": 242753.63120035687,
      "points_per_column": 2.0,
      "priced_by": "measured",
-     "process_wall_ms_median": 178.891024,
-     "process_wall_ms_min": 176.969185,
+     "process_wall_ms_median": 177.127543,
+     "process_wall_ms_min": 174.989705,
      "runs": 5,
      "solver": "sat-cdcl",
      "solver_conflicts": 2299,
@@ -2207,8 +2206,8 @@
      "unit": "crypto.S.gae_pinned",
      "usable_points": null,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 75.851069,
-     "window_wall_ms_min": 72.772718,
+     "window_wall_ms_median": 68.457624,
+     "window_wall_ms_min": 66.461045,
      "workload_id": "W6ae0480b51c6",
      "xor_rows": null,
      "xor_rows_total": 20243
@@ -2264,7 +2263,7 @@
      "Ubuntu 24.04.4 LTS \u00b7 glibc-2.39"
     ]
    ],
-   "commit": "fe7c8b33842bde76414f88e4243396652cdd4642",
+   "commit": "c40ce8f02a417e1ffb9c6d5d510316eee52fc413",
    "comparisons": [
     {
      "a": {
@@ -2281,14 +2280,14 @@
        ],
        "estimate": {
         "ci95": [
-         0.9511950925923289,
-         1.0862759850281603
+         0.7209368730003428,
+         1.6675218332479929
         ],
         "excludes_1": false,
-        "max_ratio": 1.0862759850281603,
-        "median_ratio": 0.9943956858754461,
+        "max_ratio": 1.6675218332479929,
+        "median_ratio": 1.0223483606474335,
         "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
-        "min_ratio": 0.9511950925923289,
+        "min_ratio": 0.7209368730003428,
         "n_pairs": 5
        },
        "spec_id": "ICS1h24cd9a6da726"
@@ -2308,16 +2307,16 @@
      ],
      "name": "cnf-vs-native",
      "ops": {
-      "a_median": 264179.9716786549,
+      "a_median": 238623.3644128004,
       "a_spread": [
-       258066.31167753154,
-       360655.6925827622
+       188664.79490144295,
+       346027.0082608225
       ],
       "admitted": true,
-      "b_median": 142353470.39365402,
+      "b_median": 91466359.93564157,
       "b_spread": [
-       130178801.61295423,
-       153269658.57792887
+       84604324.54147778,
+       94391200.67210546
       ],
       "completed": {
        "a": "5/5",
@@ -2326,8 +2325,8 @@
       "deterministic": false,
       "label": "host-dependent: some cost in this unit was priced from wall time on this host (see units.<unit>.host_dependent_because); valid on this env_class only",
       "lower_bound": false,
-      "ratio_b_over_a": 538.8503507253416,
-      "speedup_a_over_b": 0.0018558028191944366,
+      "ratio_b_over_a": 383.3084834786407,
+      "speedup_a_over_b": 0.0026088647736796657,
       "unit": "crypto.S.gae_pinned",
       "window": "cold_end_to_end"
      },
@@ -2337,14 +2336,14 @@
       "contended_runs": 7,
       "estimate": {
        "ci95": [
-        259.2423092279874,
-        363.6576451810558
+        187.14208683015485,
+        321.06510743042145
        ],
        "excludes_1": true,
-       "max_ratio": 363.6576451810558,
-       "median_ratio": 351.58922285011926,
+       "max_ratio": 321.06510743042145,
+       "median_ratio": 247.06073469075332,
        "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
-       "min_ratio": 259.2423092279874,
+       "min_ratio": 187.14208683015485,
        "n_pairs": 5
       },
       "pairs": 5,
@@ -2353,7 +2352,6 @@
         "blocking": [
          "bare_metal",
          "fixed_frequency",
-         "foreign_runnable",
          "kernel_isolation",
          "steal"
         ],
@@ -2398,10 +2396,10 @@
       "unknown": 15
      },
      "foreign_runnable": {
-      "fail": 3,
+      "fail": 1,
       "level": "L2",
       "note": "sampler ticks with another runnable task on a pinned CPU (4 ticks)",
-      "pass": 12,
+      "pass": 14,
       "unknown": 0
      },
      "involuntary_switches": {
@@ -2469,8 +2467,8 @@
      }
     },
     "levels": {
-     "L1": 9,
-     "L2": 6
+     "L1": 10,
+     "L2": 5
     }
    },
    "label": "icv1-f2m17-tm101-00378d4e SAT: native XOR rows vs CNF parity, A/A on native",
@@ -2487,9 +2485,9 @@
      "kernel_threads": 26,
      "user_threads": []
     },
-    "threads_moved": 51
+    "threads_moved": 52
    },
-   "session_id": "ICSESS1h841388daf858"
+   "session_id": "ICSESS1h7f8b05c0b164"
   },
   {
    "arms": [
@@ -2505,7 +2503,6 @@
      "empty": false,
      "label": "icv1-f2m23-tm5197-1f85e9e1 (K_1, n = 23): binary subspace dim 7, mitm m=2",
      "levels": [
-      "L1",
       "L2"
      ],
      "lower_bound": false,
@@ -2515,8 +2512,8 @@
      "ops_median": 33674.705889000004,
      "points_per_column": 2.0,
      "priced_by": null,
-     "process_wall_ms_median": 178.124312,
-     "process_wall_ms_min": 168.645506,
+     "process_wall_ms_median": 174.70557,
+     "process_wall_ms_min": 173.941088,
      "runs": 5,
      "solver": null,
      "solver_conflicts": null,
@@ -2526,8 +2523,8 @@
      "unit": "crypto.S.gae_pinned",
      "usable_points": null,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 8.969465,
-     "window_wall_ms_min": 8.778373,
+     "window_wall_ms_median": 8.773554,
+     "window_wall_ms_min": 8.743654,
      "workload_id": "We613e07c6011",
      "xor_rows": null,
      "xor_rows_total": null
@@ -2554,8 +2551,8 @@
      "ops_median": 43578.025613000005,
      "points_per_column": 2.0,
      "priced_by": null,
-     "process_wall_ms_median": 183.120916,
-     "process_wall_ms_min": 143.973267,
+     "process_wall_ms_median": 175.223471,
+     "process_wall_ms_min": 140.975458,
      "runs": 5,
      "solver": null,
      "solver_conflicts": null,
@@ -2565,8 +2562,8 @@
      "unit": "crypto.S.gae_pinned",
      "usable_points": null,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 10.916458,
-     "window_wall_ms_min": 8.558485,
+     "window_wall_ms_median": 10.575507,
+     "window_wall_ms_min": 8.500364,
      "workload_id": "We613e07c6011",
      "xor_rows": null,
      "xor_rows_total": null
@@ -2593,8 +2590,8 @@
      "ops_median": 33674.705889000004,
      "points_per_column": 2.0,
      "priced_by": null,
-     "process_wall_ms_median": 176.724592,
-     "process_wall_ms_min": 160.969715,
+     "process_wall_ms_median": 175.914955,
+     "process_wall_ms_min": 173.563176,
      "runs": 5,
      "solver": null,
      "solver_conflicts": null,
@@ -2604,8 +2601,8 @@
      "unit": "crypto.S.gae_pinned",
      "usable_points": null,
      "window": "cold_end_to_end",
-     "window_wall_ms_median": 8.905228,
-     "window_wall_ms_min": 8.788755,
+     "window_wall_ms_median": 8.975742,
+     "window_wall_ms_min": 8.8439,
      "workload_id": "We613e07c6011",
      "xor_rows": null,
      "xor_rows_total": null
@@ -2661,7 +2658,7 @@
      "Ubuntu 24.04.4 LTS \u00b7 glibc-2.39"
     ]
    ],
-   "commit": "fe7c8b33842bde76414f88e4243396652cdd4642",
+   "commit": "c40ce8f02a417e1ffb9c6d5d510316eee52fc413",
    "comparisons": [
     {
      "a": {
@@ -2678,14 +2675,14 @@
        ],
        "estimate": {
         "ci95": [
-         0.938070339682114,
-         1.3595573769488865
+         0.9747402952670524,
+         1.0362977639490432
         ],
         "excludes_1": false,
-        "max_ratio": 1.3595573769488865,
-        "median_ratio": 1.001182679296038,
+        "max_ratio": 1.0362977639490432,
+        "median_ratio": 1.0158794258290311,
         "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
-        "min_ratio": 0.938070339682114,
+        "min_ratio": 0.9747402952670524,
         "n_pairs": 5
        },
        "spec_id": "ICS1hed02326d5f07"
@@ -2730,17 +2727,17 @@
      "refusals": [],
      "wall": {
       "admitted": false,
-      "contended_runs": 4,
+      "contended_runs": 1,
       "estimate": {
        "ci95": [
-        0.9608777195772512,
-        1.245911514582486
+        0.9721752484716344,
+        1.2202417754934167
        ],
        "excludes_1": false,
-       "max_ratio": 1.245911514582486,
-       "median_ratio": 1.191608195137614,
+       "max_ratio": 1.2202417754934167,
+       "median_ratio": 1.2053846138064461,
        "method": "percentile bootstrap of the median per-round ratio, 20000 resamples, seed 20261001",
-       "min_ratio": 0.9608777195772512,
+       "min_ratio": 0.9721752484716344,
        "n_pairs": 5
       },
       "pairs": 5,
@@ -2750,10 +2747,9 @@
          "bare_metal",
          "fixed_frequency",
          "foreign_runnable",
-         "kernel_isolation",
-         "steal"
+         "kernel_isolation"
         ],
-        "count": 4,
+        "count": 1,
         "reason": "runs below their declared isolation level (earned ['L1', 'L2'])"
        }
       ],
@@ -2857,16 +2853,16 @@
       "unknown": 0
      },
      "steal": {
-      "fail": 5,
+      "fail": 2,
       "level": "L2",
       "note": "hypervisor steal on the pinned CPUs; a hypervisor that hides steal reads 0",
-      "pass": 10,
+      "pass": 13,
       "unknown": 0
      }
     },
     "levels": {
-     "L1": 6,
-     "L2": 9
+     "L1": 3,
+     "L2": 12
     }
    },
    "label": "icv1-f2m23-tm5197-1f85e9e1: subspace dimension 7 vs 8, A/A on 7",
@@ -2883,75 +2879,75 @@
      "kernel_threads": 26,
      "user_threads": []
     },
-    "threads_moved": 55
+    "threads_moved": 52
    },
-   "session_id": "ICSESS1ha5372416ce40"
+   "session_id": "ICSESS1h64285700b1c4"
   }
  ],
  "sources": {
   "2026-10-01-ar-p16-engine/capsule.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-ar-p16-engine/capsule.json",
-   "sha256": "a60b0b1addcb3bf37c136932f406bddec51b0099c6f04deee103d866bc623d9a"
+   "sha256": "f7bce5c4821fdf6f0a5b9cfc3bc36e67be27fb01eeee18ea1f7de4a7d686a0ff"
   },
   "2026-10-01-ar-p16-engine/comparisons/mitm-vs-enumerate.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-ar-p16-engine/comparisons/mitm-vs-enumerate.json",
-   "sha256": "fc41c4044191ebdb6565c0d12b80b49b3fea0804285d60aad0cfb658d3b183e5"
+   "sha256": "02e443372bad528e3b37d80e694c22306fd0f997dd1ef24c6479071699705d01"
   },
   "2026-10-01-ar-p16-engine/records.jsonl": {
    "path": "docs/ic/measurement/sessions/2026-10-01-ar-p16-engine/records.jsonl",
-   "sha256": "8154257d29f77aa3507dd273451a2dc05984a60d5a0f3df83bc4f03311e30fe9"
+   "sha256": "844aa77c0ae3b64b69a9c01ac336384e3c9cc141651393268a4b2653dfe20b52"
   },
   "2026-10-01-ar-p16-engine/session.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-ar-p16-engine/session.json",
-   "sha256": "9af4d77a69cf063f9e6e8d92be424bf58a2f3b09817db6094a5df931827ccdc7"
+   "sha256": "c2ffd1d61c7af329a3302e40e9de235268ec438773e896c895d6b5f6049d53af"
   },
   "2026-10-01-ca-k0n13-basis-law/capsule.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-ca-k0n13-basis-law/capsule.json",
-   "sha256": "a5c33d63e0972fdc486d3d576354a6071b53e548b57cbf26ad2769b3ab5698af"
+   "sha256": "ed53409a7c34993d63b873e7173d8c138476fa0ecbb55e40e03451deb58093c2"
   },
   "2026-10-01-ca-k0n13-basis-law/comparisons/geomtrace-vs-prefix.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-ca-k0n13-basis-law/comparisons/geomtrace-vs-prefix.json",
-   "sha256": "3d5f16c8be7f423ce7c76bba9f655b77ba819213eabc9b3729a30b6f6d616272"
+   "sha256": "ff815d5734edfe24e284eb1520ce3f850907dde2e7ba6cf9b3b14961cd5be9f2"
   },
   "2026-10-01-ca-k0n13-basis-law/records.jsonl": {
    "path": "docs/ic/measurement/sessions/2026-10-01-ca-k0n13-basis-law/records.jsonl",
-   "sha256": "cf762f0a9a05f54c896cac821ab0ff8e81f4e44265a687084ac9ae04ffe06681"
+   "sha256": "a123b115e5e999f9b0aa31c0c455800fa4747136a817d5acac1e48e1eb28cbe0"
   },
   "2026-10-01-ca-k0n13-basis-law/session.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-ca-k0n13-basis-law/session.json",
-   "sha256": "2e75f814a5951f6ac757adc1625922cbee2b061bfd4c975064f5cf715cde4aaa"
+   "sha256": "9a3390ba3216cd0244114010b121ca6df7b9f71f53736625cc8f6b1f6db4cc49"
   },
   "2026-10-01-k17-sat-xor-encoding/capsule.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-k17-sat-xor-encoding/capsule.json",
-   "sha256": "2cfcf82c0b8cbfc8733c13e0ad32d1a4dbcb361c0c9bbca882a76df4bb5b80f5"
+   "sha256": "eca7dffd9c19293e19427ad4f6699689292e3c9b2aba15dc265d31c8e18b89ac"
   },
   "2026-10-01-k17-sat-xor-encoding/comparisons/cnf-vs-native.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-k17-sat-xor-encoding/comparisons/cnf-vs-native.json",
-   "sha256": "f260a66dafea8c09d53c41abb59a362968fec2c3092cfa7a7973ae11eba659ab"
+   "sha256": "3ffa03664a077ac8d9cb2146812d943b5ea1b64c80016af297a6ec7d4d7f2343"
   },
   "2026-10-01-k17-sat-xor-encoding/records.jsonl": {
    "path": "docs/ic/measurement/sessions/2026-10-01-k17-sat-xor-encoding/records.jsonl",
-   "sha256": "45bb5b995817c91313021f94a131731042029dd23bcbeb315f860cdc877ee40c"
+   "sha256": "783c12c4c586a031affcfbd7c38aa3426fd79cc55388ee6948b32cbaa8fd703e"
   },
   "2026-10-01-k17-sat-xor-encoding/session.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-k17-sat-xor-encoding/session.json",
-   "sha256": "8c1360aebfb8efd1bb88f8ba307b4853d257f7f829d6e65bfa254becc6b19132"
+   "sha256": "9ff02a8534c4c1610523eb9bc1b069e4514706224f16c3b7b168bcb697833f69"
   },
   "2026-10-01-k23-subspace-dimension/capsule.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/capsule.json",
-   "sha256": "ef25734e36782bc300ba6f61d4fddc9674cff86b7431b46e0aaf2151206d81b4"
+   "sha256": "f19456dfc46be49cfe473b0bfab8b9897c034e6457a37c5f84fef6ad97e768a8"
   },
   "2026-10-01-k23-subspace-dimension/comparisons/d8-vs-d7.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/comparisons/d8-vs-d7.json",
-   "sha256": "116054b932114d22342b32f016183cae018e0f8d91f32f66720f5bc7bff572c1"
+   "sha256": "cee2a161b0db1cd6cbe303def53b95e09ec8751a336ad9ce273d132bea3b6a35"
   },
   "2026-10-01-k23-subspace-dimension/records.jsonl": {
    "path": "docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/records.jsonl",
-   "sha256": "12039036d430d1ed883394cdb344c66d45128239357bccab8ffd0567cd9293c7"
+   "sha256": "ff86791c065c02f4aab1fca118e3ef88545b3baf0498d73c70b305544a23d63c"
   },
   "2026-10-01-k23-subspace-dimension/session.json": {
    "path": "docs/ic/measurement/sessions/2026-10-01-k23-subspace-dimension/session.json",
-   "sha256": "9218a59f10ca58f679f272fa0128dc50d1be380cc6080d0263da27e453ef18a0"
+   "sha256": "87b5f9ca5ccc593e5fefbf07db005a1ecbe7136bf8eb92228a725e707ca7251e"
   },
   "audit": {
    "path": "docs/ic/measurement/audit.json",
