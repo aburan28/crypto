@@ -421,3 +421,30 @@ not complete execution attestation, and its additional DEFAULTS source is
 explicitly retained as postexecution auditor context. The complete IC result
 above independently passes its full Python/package/interpreter/native pre/post
 gates. Neither development result supplies the pending fresh paired comparison.
+
+## October 1 prepared target controls
+
+[PR #1110](https://github.com/aburan28/crypto/pull/1110) preregistered two new
+one-shot prepared target controls on the disclosed n17 public point. Both
+executed once, stopped incomplete at eight attempts and are now consumed and
+closed. [Their result](prepared-one-target-controls-v1/RESULT.md) retains the
+complete raw archive, original audits, claims, postexecution diagnosis and local
+relocation receipts. Never retry, resume, extend or regenerate either invocation.
+
+F5 reported eight `proved_unsat` target queries, all independently absent in
+the complete 63-point geometric three-sum domain. Its original frozen audit
+rejects a missing native `query_schema_version` header. A labelled in-memory
+postexecution view replays mathematical checks but cannot replace that rejection.
+SAT retained eight conflict-budget inconclusive queries and passed frozen audit
+only as an incomplete source-bound control. One recorded SAT query has a
+group-readded decomposition; that alone is not a CNF assignment proof.
+
+Neither control recovers a scalar or supplies verified online time, comparative
+cost, speedup or fresh qualification. Their new query/target sign/Frobenius
+exclusions are a partial current census to merge with historical/preparation
+exclusions. Next work must repair and regression-check the actual native F5
+report contract using a new bound build and diagnose SAT encoding/solver budget
+on its retained feasible query. Existing complete cold development solves and
+preparation certificates remain separate evidence. The full fresh paired
+incumbent/rho goal and all reference/calibration/resource gates remain open;
+the three historical confirmation sets stay closed.
