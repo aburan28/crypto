@@ -68,7 +68,9 @@ def run_controls(build, out):
                         os.killpg(process.pid, signal.SIGKILL)
                     except ProcessLookupError:
                         pass
-                process.communicate()
+                process.wait()
+                if process.stdin is not None and not process.stdin.closed:
+                    process.stdin.close()
         receipt = dict(exit_code=process.returncode, timed_out=timed_out, watchdog_seconds=90,
                        stdout_sha256=generic_build.digest(directory/'stdout.json'),
                        stderr_sha256=generic_build.digest(directory/'stderr.txt'),

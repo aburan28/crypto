@@ -448,3 +448,15 @@ on its retained feasible query. Existing complete cold development solves and
 preparation certificates remain separate evidence. The full fresh paired
 incumbent/rho goal and all reference/calibration/resource gates remain open;
 the three historical confirmation sets stay closed.
+
+The [prepared report-contract follow-up](prepared-report-contract-v1/EVIDENCE.md)
+repairs the missing native F5 header and tests actual release CLI reports through
+the independent mathematical auditor for both incomplete and complete disclosed
+fixtures. The corrected native source requires a new versioned retained-input
+adapter; the old source pin, runtime and consumed registrations are unchanged.
+The retained SAT feasible query now has a complete assignment satisfying all
+original ANF/CNF/XOR constraints and lifting to the exact point. This identifies
+a real solver-budget miss on that particular source-valid case, without changing
+its native outcome, admitting an IC target recovery or estimating natural yield.
+These correctness gates move the full goal forward; fresh paired qualification
+and complete corrected runtime admission remain outstanding.

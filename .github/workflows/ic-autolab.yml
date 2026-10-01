@@ -76,6 +76,10 @@ jobs:
         run: |
           python research/ic_candidate_tournament_20260915/run_prepared_report_controls.py \
             --build "$RUNNER_TEMP/ic-generic-build" --out "$RUNNER_TEMP/ic-prepared-report-controls"
+          python research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/check_retained_sat_source.py \
+            --out "$RUNNER_TEMP/ic-retained-sat-source-check"
+          python -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["status"] == "PASS_RETAINED_LIFTING_SOURCE_MODEL" and r["source_anf_valid"] and r["cnf_xor_valid"] and r["native_solvers_executed"] == 0' \
+            "$RUNNER_TEMP/ic-retained-sat-source-check/result.json"
       - name: Complete-solve and profiler integration
         run: |
           run_start=$(python research/ic_candidate_tournament_20260915/execution_ids.py \
@@ -95,6 +99,7 @@ jobs:
             ${{ runner.temp }}/ic-generic-build
             ${{ runner.temp }}/ic-generic-admission
             ${{ runner.temp }}/ic-prepared-report-controls
+            ${{ runner.temp }}/ic-retained-sat-source-check
             Cargo.lock
           retention-days: 30
           if-no-files-found: warn
