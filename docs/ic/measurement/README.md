@@ -68,7 +68,7 @@ measurement it runs under:
 
 ```yaml
 icms: icms.spec/v1
-label: "K_1/GF(2^23): binary subspace dim 8, mitm m=2"
+label: "icv1-f2m23-tm5197-1f85e9e1 (K_1, n = 23): binary subspace dim 8, mitm m=2"
 role: candidate                     # candidate | baseline | reference
 instance:
   curve: {regime: koblitz, degree: 23, koblitz_a: 1}   # K_a must be named: producers default differently

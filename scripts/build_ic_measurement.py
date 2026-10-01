@@ -33,6 +33,10 @@ BASE = REPO / "docs" / "ic" / "measurement"
 OUT_HTML = REPO / "docs" / "ic-measurement.html"
 OUT_JSON = BASE / "page.json"
 GITHUB = "https://github.com/aburan28/crypto/blob/main/"
+REPO_URLS = {"crypto": GITHUB, "cryptanalysis": "https://github.com/aburan28/cryptanalysis/blob/main/",
+             "crypto-autoresearcher": "https://github.com/aburan28/crypto-autoresearcher/blob/main/"}
+# The spec shown on the page as the worked example of the YAML schema.
+EXAMPLE_SPEC = BASE / "specs" / "k17-subspace-d6-sat-native.yaml"
 
 
 def esc(s) -> str:
@@ -105,6 +109,7 @@ def arm_rows(s: dict) -> list[dict]:
             "cnf_clauses": sysm.get("cnf_clauses"), "xor_rows": sysm.get("xor_rows"),
             "solver": sol.get("name"), "solver_ops": sol.get("ops"), "solver_op_unit": sol.get("op_unit"),
             "priced_by": sol.get("priced_by"),
+            "lower_bound": any(((r.get("units") or {}).get(unit) or {}).get("unpriced_counters") for r in rs),
         })
     return rows
 
@@ -135,7 +140,8 @@ def capsule_facts(cap: dict) -> list[tuple[str, str]]:
         ("isolation flags", f"isolcpus={t['isolated']!r} nohz_full={t['nohz_full']!r} · cmdline {json.dumps(k['cmdline_flags'], sort_keys=True)}"),
         ("frequency", f"governors {govs} · no_turbo {t['intel_pstate_no_turbo']} · boost {t['cpufreq_boost']}"),
         ("SMT", f"control {t['smt_control']} · active {t['smt_active']}"),
-        ("virtualisation", str(st["virtualization"]["detect_virt"])),
+        ("virtualisation", f'{st["virtualization"].get("detect_virt")} · vm {st["virtualization"].get("detect_vm")} · '
+                           f'container {st["virtualization"].get("detect_container")} · hypervisor flag {feats.get("hypervisor")}'),
         ("memory / THP", f"{st['memory'].get('MemTotal')} · THP {k['thp_enabled']}"),
         ("sysctls", ", ".join(f"{n.split('/')[-1]}={v}" for n, v in k["sysctl"].items() if v is not None)),
         ("toolchain", f"Python {st['toolchain']['python']} · {st['toolchain'].get('rustc')} · {st['toolchain'].get('gcc')}"),
@@ -147,7 +153,7 @@ def build() -> dict:
     registry = json.loads((BASE / "registry.json").read_text())
     audit = json.loads((BASE / "audit.json").read_text())
     sessions = load_sessions()
-    sources = {"registry": BASE / "registry.json", "audit": BASE / "audit.json"}
+    sources = {"registry": BASE / "registry.json", "audit": BASE / "audit.json", "example spec": EXAMPLE_SPEC}
     doc_sessions = []
     for s in sessions:
         name = s["dir"].name
@@ -174,7 +180,11 @@ def build() -> dict:
         "what_this_is": "the ICMS v1 standard and its frozen demonstration sessions",
         "what_this_is_not": ["a speedup claim", "a measurement of any curve beyond the toy instances named"],
         "registry": {"windows": registry["windows"]["list"], "units": registry["units"]["list"],
-                     "rho": registry["references"]["rho"], "size_fields": registry["factor_base_size_fields"]["fields"]},
+                     "rho": registry["references"]["rho"], "size_fields": registry["factor_base_size_fields"]["fields"],
+                     "families": registry["factor_base_families"]["list"], "variants": registry["variants"],
+                     "solver_options": registry["solver_options_that_change_search"]["list"],
+                     "pdp_metrics": registry["pdp_metrics"]["fields"]},
+        "example_spec": {"path": rel(EXAMPLE_SPEC), "text": EXAMPLE_SPEC.read_text()},
         "audit": audit,
         "sessions": doc_sessions,
         "sources": {k: {"path": rel(p), "sha256": sha(p)} for k, p in sorted(sources.items())},
@@ -235,6 +245,8 @@ code, .mono { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere
 .chip.medium { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
 .ratio { font-family: var(--mono); font-weight: 600; }
 .muted { color: var(--muted); }
+td.cfg { min-width: 240px; }
+.panel > pre { margin-inline: 20px; padding-inline: 14px; }
 pre { margin: 0; background: var(--sunk); border: 1px solid var(--rule); border-radius: 3px; padding: 12px 14px;
   overflow-x: auto; font-family: var(--mono); font-size: 12px; line-height: 1.5; }
 a { color: var(--data); }
@@ -254,8 +266,8 @@ def level_chip(level: str) -> str:
     return f'<span class="chip {cls}">{esc(level)}</span>'
 
 
-def link(path: str, text: str | None = None) -> str:
-    return f'<a href="{esc(GITHUB + path)}">{esc(text or path)}</a>'
+def link(path: str, text: str | None = None, repo: str = "crypto") -> str:
+    return f'<a href="{esc(REPO_URLS[repo] + path)}">{esc(text or path)}</a>'
 
 
 def page(doc: dict) -> str:
@@ -271,15 +283,47 @@ def page(doc: dict) -> str:
          'unit, over the same window, against the same reference, on the same class of host, under conditions that could '
          'not have moved the result. ICMS writes each of those down for every run and refuses a comparison when one '
          f'differs. The audit behind it found <strong>{len(audit)} ways the existing figures were not '
-         f'apples to apples</strong>, {n_high} of them severe. The demonstration below runs on this repository\'s '
-         'cloud container, which can be pinned but not isolated: wall time there is shown and refused, while operation '
-         'counts are exact.</p>',
+         f'apples to apples</strong>, {n_high} of them severe. The demonstrations below run on this repository\'s '
+         'cloud container, a virtual machine that can be pinned and is sometimes quiet (L2) but is never isolated (L3). '
+         'Operation counts there are exact; wall time is admitted only when every run of both arms earned its declared '
+         'level, and is otherwise shown as descriptive only.</p>',
          '<dl class="facts">',
          f'<div class="fact"><dt>Audit findings</dt><dd>{len(audit)}</dd><p>{n_high} high severity; each with its evidence path</p></div>',
          f'<div class="fact"><dt>Runs recorded</dt><dd>{measured}</dd><p>in {len(sessions)} frozen session(s), warm-ups kept separately</p></div>',
          f'<div class="fact"><dt>Isolation earned here</dt><dd>{esc(", ".join(best) or "—")}</dd><p>L1 pinned, L2 quiet, L3 isolated; see the gate below</p></div>',
          f'<div class="fact"><dt>Units kept apart</dt><dd>{len(doc["registry"]["units"])}</dd><p>never compared with each other</p></div>',
          '</dl></header>']
+
+    # The spec.
+    reg = doc["registry"]
+    producers = ("crypto.ic_bench", "cryptanalysis.ic_bench", "autoresearcher.index_calculus", "crypto.workflow")
+    P.append('<section class="panel" id="spec"><h2>One YAML file per configuration</h2>'
+             '<p>A spec names everything that decides what was measured: the instance and workload, the factor-base family '
+             'and its parameters, the symmetries folded out, large-prime and partition variants, the decomposition method, '
+             'its encoding and splitting, the solver and every option that changes its search, the relation stop rule, '
+             'the linear algebra, the descent, the reference, the unit, the window and the isolation required. Labels are '
+             'not identity; everything else is hashed into the spec id. A new factor-base family or variant is a registry '
+             f'entry, not a schema change. This one is {link(doc["example_spec"]["path"])}:</p>'
+             f'<pre>{esc(doc["example_spec"]["text"])}</pre>'
+             '<h3>Factor-base families and which producer can run them</h3><div class="scroll"><table><thead><tr>'
+             '<th>family</th><th>parameters</th><th>means</th>' + "".join(f'<th>{esc(x)}</th>' for x in producers) +
+             '</tr></thead><tbody>')
+    for f in reg["families"]:
+        params = ", ".join(f["params"]) + ("" if not f.get("optional_params") else
+                                           " (optional: " + ", ".join(f["optional_params"]) + ")")
+        P.append(f'<tr><td><code>{esc(f["family"])}</code></td><td><code>{esc(params or "—")}</code></td>'
+                 f'<td>{esc(f["means"])}</td>' + "".join(f'<td><code>{esc(f.get(x, "—"))}</code></td>' for x in producers) + '</tr>')
+    P.append('</tbody></table></div><h3>Variants a spec can declare</h3><div class="scroll"><table><tbody>')
+    for k, v in reg["variants"].items():
+        P.append(f'<tr><th>{esc(k.replace("_", " "))}</th><td class="mono">{esc(", ".join(v))}</td></tr>')
+    P.append('</tbody></table></div><h3>Solver options a spec must pin</h3><p>Options that move a solver\'s counters by '
+             'large factors. A spec that names the solver and leaves one out is refused.</p><div class="scroll"><table><tbody>')
+    for k, v in reg["solver_options"].items():
+        P.append(f'<tr><th><code>{esc(k)}</code></th><td class="mono">{esc(", ".join(v))}</td></tr>')
+    P.append('</tbody></table></div><h3>Point-decomposition system metrics every record carries</h3><div class="scroll"><table><tbody>')
+    for k, v in reg["pdp_metrics"].items():
+        P.append(f'<tr><th><code>{esc(k)}</code></th><td>{esc(v)}</td></tr>')
+    P.append('</tbody></table></div></section>')
 
     # What every figure states.
     P.append('<section class="panel" id="contract"><h2>What every figure must state</h2>'
@@ -311,11 +355,14 @@ def page(doc: dict) -> str:
     P.append('<section class="panel" id="audit"><h2>Why the existing figures were not apples to apples</h2>'
              '<p>Found by reading the code and frozen evidence of this repository, cryptanalysis and crypto-autoresearcher. '
              'Each finding names where it was verified and how ICMS handles it.</p><div class="scroll"><table>'
-             '<thead><tr><th>dimension</th><th>finding</th><th>severity</th><th>ICMS</th></tr></thead><tbody>')
+             '<thead><tr><th>id</th><th>finding</th><th>severity</th><th>ICMS</th></tr></thead><tbody>')
     for f in audit:
-        ev = "; ".join(link(e["path"], e["path"] + (f" ({e['where']})" if e.get("where") else "")) if e["repo"] == "crypto"
-                       else esc(f"{e['repo']}: {e['path']}" + (f" ({e['where']})" if e.get('where') else "")) for e in f["evidence"])
-        P.append(f'<tr><td><code>{esc(f["dimension"])}</code></td><td>{esc(f["finding"])}<br><span class="muted">{ev}</span></td>'
+        ev = "; ".join((link(e["path"], ("" if e["repo"] == "crypto" else e["repo"] + ": ") + e["path"]
+                             + (f" ({e['where']})" if e.get("where") else ""), e["repo"])
+                        if e["repo"] in REPO_URLS else esc(f"{e['repo']}: {e['path']}")) for e in f["evidence"])
+        effect = f'<br><span class="muted">effect: {esc(f["effect"])}</span>' if f.get("effect") else ""
+        P.append(f'<tr><td><code>{esc(f["id"])}</code><br><code class="muted">{esc(f["dimension"])}</code></td>'
+                 f'<td>{esc(f["finding"])}{effect}<br><span class="muted">{ev}</span></td>'
                  f'<td>{chip(f["severity"])}</td><td>{esc(f["icms"])}</td></tr>')
     P.append('</tbody></table></div></section>')
 
@@ -342,16 +389,20 @@ def page(doc: dict) -> str:
                  f'{s["measured"]} measured runs plus warm-ups, every one kept.</p>')
         P.append('<h3>Arms</h3><div class="scroll"><table><thead><tr><th class="n">arm</th><th>configuration</th>'
                  '<th class="n">runs ok</th><th>levels</th><th class="n">usable pts</th><th class="n">columns</th>'
-                 '<th class="n">vars / eqs</th><th class="n">clauses / XOR</th><th class="n">ops (unit)</th><th class="n">S</th>'
+                 '<th class="n">vars / eqs</th><th class="n">clauses / XOR</th><th class="n">solver effort</th>'
+                 '<th class="n">ops (unit)</th><th class="n">S</th>'
                  '<th class="n">window ms med / min</th></tr></thead><tbody>')
         for a in s["arms"]:
             ops = f'{g3(a["ops_median"])}{"" if a["ops_distinct"] <= 1 else " (varies)"}'
-            det = "" if a["deterministic"] else '<br><span class="muted">host-dependent</span>'
-            P.append(f'<tr><td class="n">{a["arm"]}</td><td>{esc(a["label"])}<br><code class="muted">{esc(a["spec_id"])} · '
+            det = ("" if a["deterministic"] else '<br><span class="muted">host-dependent</span>') + \
+                  ('<br><span class="muted">lower bound: unpriced counters</span>' if a["lower_bound"] else "")
+            effort = (f'{g3(a["solver_ops"])}<br><span class="muted">{esc(a["solver_op_unit"])}</span>'
+                      if a["solver_ops"] is not None else "—")
+            P.append(f'<tr><td class="n">{a["arm"]}</td><td class="cfg">{esc(a["label"])}<br><code class="muted">{esc(a["spec_id"])} · '
                      f'{esc(a["workload_id"])}</code>{("<br><span class=muted>solver " + esc(a["solver"]) + ", " + esc(a["priced_by"]) + "</span>") if a["solver"] else ""}</td>'
                      f'<td class="n">{a["complete"]}/{a["runs"]}</td><td>{" ".join(level_chip(lv) for lv in a["levels"])}</td>'
                      f'<td class="n">{g3(a["usable_points"])}</td><td class="n">{g3(a["columns"])}</td>'
-                     f'<td class="n">{g3(a["n_vars"])} / {g3(a["n_equations"])}</td><td class="n">{g3(a["cnf_clauses"])} / {g3(a["xor_rows"])}</td>'
+                     f'<td class="n">{g3(a["n_vars"])} / {g3(a["n_equations"])}</td><td class="n">{g3(a["cnf_clauses"])} / {g3(a["xor_rows"])}</td><td class="n">{effort}</td>'
                      f'<td class="n">{ops}<br><span class="muted">{esc(a["unit"])}</span>{det}</td><td class="n">{g3(a["S_median"])}</td>'
                      f'<td class="n">{g3(a["window_wall_ms_median"])} / {g3(a["window_wall_ms_min"])}</td></tr>')
         P.append('</tbody></table></div>')
@@ -363,7 +414,9 @@ def page(doc: dict) -> str:
                 if c.get("refusals"):
                     ops_txt = "refused: " + "; ".join(r["reason"] for r in c["refusals"])
                 elif ops.get("admitted"):
-                    ops_txt = f'<span class="ratio">{ops["ratio_b_over_a"]:.4g}</span>' + ("" if ops["deterministic"] else ' <span class="muted">host-dependent</span>')
+                    ops_txt = (f'<span class="ratio">{ops["ratio_b_over_a"]:.4g}</span><br><span class="muted">{esc(ops["unit"])}</span>'
+                               + ("" if ops["deterministic"] else '<br><span class="muted">host-dependent</span>')
+                               + ('<br><span class="muted">lower bound</span>' if ops.get("lower_bound") else ""))
                 else:
                     ops_txt = esc(ops.get("reason", "not admitted"))
                 est = wall.get("estimate") or {}
@@ -410,9 +463,12 @@ def page(doc: dict) -> str:
              'it cannot overlap a timed run.</p><pre>python3 tools/isolated_bench.py busy -- cargo build --release --bin ic\n'
              'python3 tools/icms capsule\n'
              'python3 tools/icms validate docs/ic/measurement/specs/*.yaml\n'
-             'python3 tools/icms run A.yaml B.yaml A.yaml --cpus 3 --out docs/ic/measurement/sessions/&lt;new&gt;\n'
+             'python3 tools/icms run A.yaml B.yaml A.yaml --cpus auto --out docs/ic/measurement/sessions/&lt;new&gt;\n'
              'python3 tools/icms compare docs/ic/measurement/sessions/&lt;new&gt; --a 0 --b 1 --declare &lt;field&gt; --out …/comparisons/&lt;name&gt;.json\n'
+             'python3 tools/icms audit-sessions docs/ic/measurement/sessions\n'
              'python3 scripts/build_ic_measurement.py</pre>'
+             '<p>The audit re-derives every committed session from its raw files: hashes, ids, the isolation level of every '
+             'run from its own observations, and every frozen comparison. CI runs it on every change.</p>'
              f'<p>The standard: {link("docs/ic/measurement/README.md")}. Implementation and tests: {link("tools/icms/__main__.py", "tools/icms/")}. '
              'Related pages: <a href="./">the cost ledger</a> and <a href="ic-leaderboard.html">the leaderboard</a>.</p></section>')
 
