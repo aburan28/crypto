@@ -1731,8 +1731,17 @@ pub fn rho_walk_with<G: CountedGroup, C: RhoClasses<G>>(
             )
         })
         .collect();
-    let (ta, tb) = (rng.gen_range(1..r.max(2)), rng.gen_range(1..r.max(2)));
-    let stride = joint_mul(g, &mut ops, generator, target, gq, ta, tb);
+    let (mut ta, mut tb) = (rng.gen_range(1..r.max(2)), rng.gen_range(1..r.max(2)));
+    let mut stride = joint_mul(g, &mut ops, generator, target, gq, ta, tb);
+    // A stride that is the identity (`ta + tb·d ≡ 0 (mod r)`, one seed in
+    // `r`) would make every start the identity and the loop below spin
+    // to `max_steps` without a step: redraw it.  Seeds whose stride is
+    // not the identity draw exactly as before.
+    while g.is_identity(&stride) {
+        ta = rng.gen_range(1..r.max(2));
+        tb = rng.gen_range(1..r.max(2));
+        stride = joint_mul(g, &mut ops, generator, target, gq, ta, tb);
+    }
     let setup = ops;
 
     let mut walker = TunedWalker::new(g, classes, r, jumps, &shape, walk);
@@ -1915,8 +1924,15 @@ pub fn rho_batch_with<G: CountedGroup, C: RhoClasses<G>>(
         let mut ops = GroupOps::default();
         let mut tally = WalkTally::default();
         let gq = g.add(&mut ops, generator, q);
-        let (ta, tb) = (rng.gen_range(1..r.max(2)), rng.gen_range(1..r.max(2)));
-        let stride = joint_mul(g, &mut ops, generator, q, gq, ta, tb);
+        let (mut ta, mut tb) = (rng.gen_range(1..r.max(2)), rng.gen_range(1..r.max(2)));
+        let mut stride = joint_mul(g, &mut ops, generator, q, gq, ta, tb);
+        // As in `rho_walk_with`: an identity stride would spin every
+        // start on the identity; redraw it.
+        while g.is_identity(&stride) {
+            ta = rng.gen_range(1..r.max(2));
+            tb = rng.gen_range(1..r.max(2));
+            stride = joint_mul(g, &mut ops, generator, q, gq, ta, tb);
+        }
         target_setup.merge(ops);
         let (mut sx, mut sa, mut sb) = (stride, ta % r, tb % r);
         let (mut walks, mut dps, mut start_adds) = (0u64, 0u64, 0u64);
@@ -2650,9 +2666,17 @@ impl<'a> ParallelRho<'a> {
 
         // T = [ta]G + [tb]Q, and its multiples [i]T for the first lanes'
         // starts, by batched doubling of the list.
-        let (ta, tb) = (rng.gen_range(1..r.max(2)), rng.gen_range(1..r.max(2)));
+        let (mut ta, mut tb) = (rng.gen_range(1..r.max(2)), rng.gen_range(1..r.max(2)));
         charge_joint_mul(&mut ops, ta, tb);
-        let stride = fc.add(fc.mul_u64(inst.generator, ta), fc.mul_u64(target, tb));
+        let mut stride = fc.add(fc.mul_u64(inst.generator, ta), fc.mul_u64(target, tb));
+        // As in `rho_walk_with`: an identity stride would make every
+        // lane's start the identity; redraw it.
+        while stride.infinity {
+            ta = rng.gen_range(1..r.max(2));
+            tb = rng.gen_range(1..r.max(2));
+            charge_joint_mul(&mut ops, ta, tb);
+            stride = fc.add(fc.mul_u64(inst.generator, ta), fc.mul_u64(target, tb));
+        }
         let mut scratch = BatchScratch::default();
         let mut multiples: Vec<(FastPoint, u64, u64)> = vec![(stride, ta % r, tb % r)];
         let mut sums: Vec<FastPoint> = Vec::with_capacity(self.lanes);
@@ -8380,5 +8404,27 @@ mod tests {
             .unwrap();
         assert!((total.alpha - 0.75).abs() < 1e-9, "{total:?}");
         assert!(total.r_squared > 0.999);
+    }
+
+    /// One seed in `r` draws a start stride `[ta]G + [tb]Q` that is the
+    /// identity; before the redraw the walk loop then spun to
+    /// `max_steps` without a step (seen as a hang of the E8/E9 drivers
+    /// on `r ≈ 2^12`).  On a group of about `2^8` elements a thousand
+    /// seeds meet that case a few times; every one must now walk.
+    #[test]
+    fn the_walk_redraws_an_identity_stride_instead_of_spinning() {
+        let inst = find_prime_order_curve(8, 7);
+        let g = inst.generator_point();
+        let mut ops = GroupOps::default();
+        let target = inst.curve.mul(&mut ops, g, 29 % inst.r);
+        let max_steps = 1u64 << 14;
+        let mut verified = 0u64;
+        for seed in 1..=1000u64 {
+            let res = rho_reference_negation(&inst.curve, g, target, inst.r, seed, max_steps);
+            assert!(res.walks < max_steps, "seed {seed} spun: {res:?}");
+            assert!(res.steps > 0, "seed {seed} never stepped: {res:?}");
+            verified += res.verified as u64;
+        }
+        assert!(verified >= 990, "{verified} of 1000 walks verified");
     }
 }

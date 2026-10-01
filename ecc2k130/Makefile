@@ -318,6 +318,7 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testirschedule.py'
 	python3 -m unittest discover -s codegen -p 'testwdsat.py'
 	python3 -m unittest discover -s codegen -p 'testlambdaprojective.py'
+	python3 -m unittest benchmarks/test_dp_identity.py
 
 # Exhaustively rule out sigma-walk orbit returns through CYCLE_LENGTH.
 # Equivariance alone does not rule out cycles. This check does not cover the

@@ -8,10 +8,10 @@
 //! instance.
 
 use num_bigint::BigUint;
-use num_traits::Zero;
 use serde::{Deserialize, Serialize};
 
 use super::job::{hex_of, parse_hex, JobContext};
+use crate::cryptanalysis::ecdlp_variants::{add_mod, neg_mod};
 use crate::ecc::point::Point;
 
 /// A distinguished point reached by one walker, as shipped in a
@@ -86,18 +86,12 @@ fn branch_index(pt: &Point, r: usize) -> usize {
     }
 }
 
-fn needs_flip(pt: &Point, p: &BigUint) -> bool {
+/// Is `pt` the upper `±` representative, `2y > p`?  Compared as
+/// `y > ⌊p/2⌋` against the job's precomputed [`JobContext::half_p`].
+fn needs_flip(pt: &Point, half_p: &BigUint) -> bool {
     match pt {
-        Point::Affine { y, .. } => &(&y.value << 1) > p,
+        Point::Affine { y, .. } => y.value > *half_p,
         Point::Infinity => false,
-    }
-}
-
-fn neg_mod(v: &BigUint, n: &BigUint) -> BigUint {
-    if v.is_zero() {
-        BigUint::zero()
-    } else {
-        n - v
     }
 }
 
@@ -114,18 +108,18 @@ pub fn step(
     let n = &ctx.n;
     let idx = branch_index(r, ctx.branches.len());
     let br = &ctx.branches[idx];
-    let mut np = r.add(&br.point, &ctx.a);
-    let mut na = (a + &br.u) % n;
-    let mut nb = (b + &br.v) % n;
+    let mut np = r.add_vartime(&br.point, &ctx.a);
+    let mut na = add_mod(a, &br.u, n);
+    let mut nb = add_mod(b, &br.v, n);
     if ctx.spec.negation_map {
         if last == Some(&np) {
             // Fruitless 2-cycle A→B→A: break symmetry by doubling.
-            np = r.double(&ctx.a);
+            np = r.double_vartime(&ctx.a);
             na = (a << 1) % n;
             nb = (b << 1) % n;
         }
-        if needs_flip(&np, &ctx.p) {
-            np = np.neg();
+        if needs_flip(&np, &ctx.half_p) {
+            np = np.neg_vartime();
             na = neg_mod(&na, n);
             nb = neg_mod(&nb, n);
         }
@@ -136,8 +130,8 @@ pub fn step(
 /// Run walker `i` from its derived start until a DP or the step cap.
 pub fn run_walker(ctx: &JobContext, i: u64) -> WalkerOutcome {
     let (mut a, mut b, mut r) = ctx.walker_start(i);
-    if ctx.spec.negation_map && needs_flip(&r, &ctx.p) {
-        r = r.neg();
+    if ctx.spec.negation_map && needs_flip(&r, &ctx.half_p) {
+        r = r.neg_vartime();
         a = neg_mod(&a, &ctx.n);
         b = neg_mod(&b, &ctx.n);
     }
@@ -173,6 +167,7 @@ pub fn run_walker(ctx: &JobContext, i: u64) -> WalkerOutcome {
 mod tests {
     use super::super::job::{demo_curve, JobSpec};
     use super::*;
+    use num_traits::Zero;
 
     fn ctx(negation: bool) -> JobContext {
         let curve = demo_curve("demo-mid").unwrap();
@@ -239,7 +234,7 @@ mod tests {
         for negation in [false, true] {
             let c = ctx(negation);
             let (mut a, mut b, mut r) = c.walker_start(9);
-            if negation && needs_flip(&r, &c.p) {
+            if negation && needs_flip(&r, &c.half_p) {
                 r = r.neg();
                 a = neg_mod(&a, &c.n);
                 b = neg_mod(&b, &c.n);
@@ -251,6 +246,61 @@ mod tests {
                 last = Some(std::mem::replace(&mut r, np));
                 a = na;
                 b = nb;
+            }
+        }
+    }
+
+    /// `add_mod`, `neg_mod`, `needs_flip` and [`JobContext::is_dp`] return
+    /// exactly what the expressions they replaced did, on one-word values
+    /// and on multi-word ones (their `BigUint` fallbacks).
+    #[test]
+    fn step_helpers_match_the_expressions_they_replace() {
+        use num_bigint::RandBigInt;
+        use rand::SeedableRng;
+        let mut rng = rand::rngs::StdRng::seed_from_u64(0xc011ab);
+        let zero = BigUint::zero();
+        for n in [
+            BigUint::from(2u32),
+            BigUint::from(7u32),
+            BigUint::from(u64::MAX - 58),
+            BigUint::from(1u32) << 64,
+            BigUint::from(5u32).pow(60),
+        ] {
+            let mut vals = vec![zero.clone(), BigUint::from(1u32) % &n, &n - 1u32];
+            vals.extend((0..40).map(|_| rng.gen_biguint_below(&n)));
+            let half = &n >> 1;
+            for v in &vals {
+                let old_neg = if v.is_zero() { zero.clone() } else { &n - v };
+                assert_eq!(neg_mod(v, &n), old_neg, "n={n} v={v}");
+                let y = Point::Affine {
+                    x: crate::ecc::field::FieldElement::zero(n.clone()),
+                    y: crate::ecc::field::FieldElement {
+                        value: v.clone(),
+                        modulus: n.clone(),
+                    },
+                };
+                assert_eq!(needs_flip(&y, &half), (v << 1) > n, "n={n} y={v}");
+                for w in vals.iter().step_by(7) {
+                    assert_eq!(add_mod(v, w, &n), (v + w) % &n, "n={n} {v}+{w}");
+                }
+            }
+            let wide = BigUint::from(u64::MAX);
+            assert_eq!(add_mod(&wide, &wide, &n), (&wide + &wide) % &n);
+        }
+        let mut c = ctx(true);
+        let big = BigUint::from(5u32).pow(60);
+        for bits in [0u32, 1, 10, 63, 64, 65, 130] {
+            c.dp_mask = (BigUint::from(1u32) << bits) - 1u32;
+            for i in 0..60u32 {
+                let x = (rng.gen_biguint_below(&big) >> (i % 70)) << (i % 70);
+                let p = Point::Affine {
+                    x: crate::ecc::field::FieldElement {
+                        value: x.clone(),
+                        modulus: big.clone(),
+                    },
+                    y: crate::ecc::field::FieldElement::zero(big.clone()),
+                };
+                assert_eq!(c.is_dp(&p), (&x & &c.dp_mask).is_zero(), "{bits} {x}");
             }
         }
     }

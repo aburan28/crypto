@@ -432,8 +432,8 @@ The row above still states the done-when for both halves together.
   kernels two and three words.
 
 **Track B's code is on record before its measurements** (2026-10-01).
-- B0 to B3b are implemented, each on the one before, and none is
-  measured yet. Each step's code reaches `src/` only through its
+- B0 to B3b are implemented, each on the one before, and B4 on B3b;
+  none is measured yet. Each step's code reaches `src/` only through its
   results pull request, in the queue's order.
 - Until then the stack is kept as a verified git bundle in
   [`research/ic_tool_program/track-b/`](../../ic_tool_program/track-b/README.md),
@@ -452,6 +452,32 @@ protocol, 2026-10-01, before any B measurement).
 - Each step is read against the arm before it, which is its base, with
   ten pairs a size as before.
 - The seven checks take 880 processes, not 1,540.
+
+**B4 is declared, generic to nine words** (2026-10-01, before any B4
+measurement; [protocol](../../ic_tool_program/rounds/B4-multi-word/PROTOCOL.md),
+[design](../../ic_tool_program/design/multi-word.md)).
+- **One more pipeline, generic in the word count:** `rho-koblitz` and
+  `kic` on fields of 3 to 9 words, odd `n ≤ 574`. The row above says
+  three words; the generic pipeline takes nine at no extra code, so the
+  standard curves up to `sect571k1` pass the field gate. Subgroups stay
+  below `2^127`, as at two words: ECC2K-130's and the standard curves'
+  meet `scalar-wider-than-127-bits`, which B7b lifts for F1 at
+  `n = 131`.
+- **v1's rules past one word,** which B3 and B3b refused: the hashed and
+  random targets and the generator rule, each v1's own at one word.
+- **Six F0 instances at three words,** Koblitz curves of prime degree
+  127–179 with a 28- to 47-bit subgroup, each solved and verified on a
+  known answer and a public point.
+- **A correction to the record:** ECC2K-130's published points are in
+  the polynomial basis of `x^131 + x^13 + x^2 + x + 1`, in which they lie
+  on the curve. Schema v2 §10–11 had deferred a normal-basis import to
+  B4; none is needed.
+- **Its code is on record** in a second bundle,
+  [`track-b/stack-20261001-b4.bundle`](../../ic_tool_program/track-b/README.md),
+  on B3b's branch. As development checks, not B4's measurement, all
+  fifteen of its frozen cases pass on it. One case's expectation was
+  corrected before any measurement: C098's document, at `n = 577`, is
+  refused by schema v2's degree range (2..=571) before any gate.
 
 ## 10. What does not count
 
