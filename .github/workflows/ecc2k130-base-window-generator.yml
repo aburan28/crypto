@@ -28,6 +28,7 @@ jobs:
           sparse-checkout: |
             /Cargo.toml
             /Cargo.lock
+            /docs/ic/calibration.json
             /src/*
             /examples/koblitz_base_window.rs
             /research/notes/ecc2k130/base_window_screen_20261001/*
