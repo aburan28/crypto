@@ -479,6 +479,26 @@ measurement; [protocol](../../ic_tool_program/rounds/B4-multi-word/PROTOCOL.md),
   corrected before any measurement: C098's document, at `n = 577`, is
   refused by schema v2's degree range (2..=571) before any gate.
 
+**B5 is split in two, and B5a is declared** (2026-10-01, before any B5a
+code; [protocol](../../ic_tool_program/rounds/B5a-extension-fields/PROTOCOL.md),
+[design](../../ic_tool_program/design/extension-fields.md)).
+- **B5a is extension fields `GF(p^k)`,** which the tool validates and
+  routes nowhere. Every valid instance gets a route:
+  - `rho-negation` for `q ≤ 2^62`;
+  - `rho-bignum` for any `q`;
+  - Gaudry's index calculus on `E(GF(p³))`, imported from the
+    residual-walk thread as `ic-gaudry-cubic`, for the modulus `t³ − c`
+    and a prime group order.
+- **Its instances:** eight, from `q ≈ 2^24` to `2^70`, found in Python
+  arithmetic that shares nothing with the tool, and B2's C050 document,
+  which B5a's C103 supersedes.
+- **ICV1 gains an extension kind first:** `docs/curves/ICV1.md`, its
+  reference implementation and the names check. No existing identity
+  changes. The registry names B5a's instances and C050's curve.
+- **B5b**, prime fields past one word (a multi-limb `rho-negation`), is
+  declared on its own later. The row above is done when both are
+  accepted.
+
 ## 10. What does not count
 
 - A speedup with any output changed, unless the round declared an

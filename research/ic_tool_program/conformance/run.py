@@ -21,7 +21,9 @@ In a case, `{here}` is its own set's `params/`; `{cases}` is still
 A case whose `until` step is among `--steps` is not run; its successor
 carries the new expectation.  A case that a run case `supersedes` is not
 run either: the converse rule, for an expectation a step moves without
-being the case's `until` step (B3b's amendment 2).  Everything else — materialising
+being the case's `until` step (B3b's amendment 2).  B5 is two steps,
+B5a and B5b (B5a's declaration), and C103 supersedes C050, whose
+`until` is B5.  Everything else — materialising
 files, running, the expectations — is `v2/run.py`'s, unchanged.  This
 runner's rules change only by a step's declaration.
 """
@@ -38,7 +40,7 @@ _spec = importlib.util.spec_from_file_location("conformance_v2_run", HERE / "v2"
 v2 = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(v2)
 
-STEPS = ("B0", "B1", "B2", "B2b", "B3", "B3b", "B4", "B5", "B6", "B7", "B7a", "B7b")
+STEPS = ("B0", "B1", "B2", "B2b", "B3", "B3b", "B4", "B5", "B5a", "B5b", "B6", "B7", "B7a", "B7b")
 
 
 def case_sets() -> list[tuple[Path, list[dict]]]:

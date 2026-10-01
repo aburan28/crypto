@@ -6304,6 +6304,1003 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-fp6k11-tm527622722-07ccd925",
+   "icv1": "ICV1:fpk-37-11-02fde89a:-527622722:177917622307083136:16,4,11,23,19,29,29,1,8,23,29:unk:unk:r:07ccd925d696",
+   "family": "extension",
+   "params": {
+    "p": "37",
+    "k": 11,
+    "modulus": [
+     "26",
+     "21",
+     "7",
+     "6",
+     "4",
+     "31",
+     "21",
+     "29",
+     "14",
+     "16",
+     "7"
+    ],
+    "a": [
+     "18",
+     "2",
+     "14",
+     "25",
+     "8",
+     "30",
+     "31",
+     "18",
+     "12",
+     "21",
+     "25"
+    ],
+    "b": [
+     "27",
+     "36",
+     "7",
+     "5",
+     "6",
+     "18",
+     "26",
+     "26",
+     "16",
+     "14",
+     "34"
+    ]
+   },
+   "model_json": "{\"a\":[\"18\",\"2\",\"14\",\"25\",\"8\",\"30\",\"31\",\"18\",\"12\",\"21\",\"25\"],\"b\":[\"27\",\"36\",\"7\",\"5\",\"6\",\"18\",\"26\",\"26\",\"16\",\"14\",\"34\"],\"field\":\"fpk-37-11-02fde89a\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"11\",\"modulus\":[\"26\",\"21\",\"7\",\"6\",\"4\",\"31\",\"21\",\"29\",\"14\",\"16\",\"7\"],\"p\":\"37\",\"v\":\"1\"}",
+   "trace": -527622722,
+   "order": "177917622307083136",
+   "j": "16,4,11,23,19,29,29,1,8,23,29",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/E11-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q37D11Cfpkh06d0f78d2fde",
+     "curve_uid": "urn:ec-record:1:sha256:06d0f78d2fdea20265e940969142fcd4daed58279fc2121acc85eb91fff9fce2",
+     "field_sha256": "5b6b560e8be65fa252ffa27ba8ad72d12279a40046188c8fd6650fe206e76892",
+     "field": {
+      "characteristic": 37,
+      "degree": 11,
+      "representation": "polynomial",
+      "modulus": [
+       26,
+       21,
+       7,
+       6,
+       4,
+       31,
+       21,
+       29,
+       14,
+       16,
+       7,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        18,
+        2,
+        14,
+        25,
+        8,
+        30,
+        31,
+        18,
+        12,
+        21,
+        25
+       ],
+       [
+        27,
+        36,
+        7,
+        5,
+        6,
+        18,
+        26,
+        26,
+        16,
+        14,
+        34
+       ]
+      ],
+      "subgroup_order": "49850497589",
+      "cofactor": 3569024,
+      "generator": [
+       [
+        27,
+        35,
+        36,
+        18,
+        20,
+        16,
+        8,
+        16,
+        8,
+        6,
+        30
+       ],
+       [
+        12,
+        5,
+        11,
+        10,
+        33,
+        24,
+        26,
+        24,
+        28,
+        19,
+        32
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/E11-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp9k3-t1227-55c8d640",
+   "icv1": "ICV1:fpk-271-3-725abf60:1227:19901285:202,155,118:unk:unk:r:55c8d6404e98",
+   "family": "extension",
+   "params": {
+    "p": "271",
+    "k": 3,
+    "modulus": [
+     "269",
+     "0",
+     "0"
+    ],
+    "a": [
+     "88",
+     "60",
+     "158"
+    ],
+    "b": [
+     "233",
+     "70",
+     "211"
+    ]
+   },
+   "model_json": "{\"a\":[\"88\",\"60\",\"158\"],\"b\":[\"233\",\"70\",\"211\"],\"field\":\"fpk-271-3-725abf60\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"269\",\"0\",\"0\"],\"p\":\"271\",\"v\":\"1\"}",
+   "trace": 1227,
+   "order": "19901285",
+   "j": "202,155,118",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/H1-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q271D3Cfpkhd6a8a65a8a4c",
+     "curve_uid": "urn:ec-record:1:sha256:d6a8a65a8a4cdc11ee858a30bea829d77dd41024b02530bc0c7c7a8b234885e6",
+     "field_sha256": "e42118a0aa09555de1fde40c9d479bd89757cf6aa3ffb132ab22b7367998066b",
+     "field": {
+      "characteristic": 271,
+      "degree": 3,
+      "representation": "polynomial",
+      "modulus": [
+       269,
+       0,
+       0,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        88,
+        60,
+        158
+       ],
+       [
+        233,
+        70,
+        211
+       ]
+      ],
+      "subgroup_order": "50383",
+      "cofactor": 395,
+      "generator": [
+       [
+        88,
+        252,
+        245
+       ],
+       [
+        255,
+        69,
+        184
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/H1-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp9k3-tm4575-aba104ba",
+   "icv1": "ICV1:fpk-271-3-725abf60:-4575:19907087:109,150,85:unk:unk:r:aba104bae738",
+   "family": "extension",
+   "params": {
+    "p": "271",
+    "k": 3,
+    "modulus": [
+     "269",
+     "0",
+     "0"
+    ],
+    "a": [
+     "168",
+     "59",
+     "35"
+    ],
+    "b": [
+     "212",
+     "72",
+     "29"
+    ]
+   },
+   "model_json": "{\"a\":[\"168\",\"59\",\"35\"],\"b\":[\"212\",\"72\",\"29\"],\"field\":\"fpk-271-3-725abf60\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"269\",\"0\",\"0\"],\"p\":\"271\",\"v\":\"1\"}",
+   "trace": -4575,
+   "order": "19907087",
+   "j": "109,150,85",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/G1-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q271D3Cfpkh800837f403ee",
+     "curve_uid": "urn:ec-record:1:sha256:800837f403eeba121cd787ec4015aed256fb2046a64e10eca701ac56f11b9b37",
+     "field_sha256": "e42118a0aa09555de1fde40c9d479bd89757cf6aa3ffb132ab22b7367998066b",
+     "field": {
+      "characteristic": 271,
+      "degree": 3,
+      "representation": "polynomial",
+      "modulus": [
+       269,
+       0,
+       0,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        168,
+        59,
+        35
+       ],
+       [
+        212,
+        72,
+        29
+       ]
+      ],
+      "subgroup_order": "19907087",
+      "cofactor": 1,
+      "generator": [
+       [
+        14,
+        102,
+        40
+       ],
+       [
+        152,
+        203,
+        44
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/G1-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp10k3-t3589-bbd5cc8b",
+   "icv1": "ICV1:fpk-523-3-c6b97896:3589:143052079:432,170,295:unk:unk:r:bbd5cc8b7e15",
+   "family": "extension",
+   "params": {
+    "p": "523",
+    "k": 3,
+    "modulus": [
+     "521",
+     "0",
+     "0"
+    ],
+    "a": [
+     "345",
+     "215",
+     "106"
+    ],
+    "b": [
+     "424",
+     "373",
+     "36"
+    ]
+   },
+   "model_json": "{\"a\":[\"345\",\"215\",\"106\"],\"b\":[\"424\",\"373\",\"36\"],\"field\":\"fpk-523-3-c6b97896\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"521\",\"0\",\"0\"],\"p\":\"523\",\"v\":\"1\"}",
+   "trace": 3589,
+   "order": "143052079",
+   "j": "432,170,295",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/G2-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q523D3Cfpkhfb90ff16ed62",
+     "curve_uid": "urn:ec-record:1:sha256:fb90ff16ed6280a00b19e7f65249080e8fff2a71a2878977102278d641bd7977",
+     "field_sha256": "77b892654796c5e23ecf10181dc19349fb4edb11ded53a8e174f77e087c457a5",
+     "field": {
+      "characteristic": 523,
+      "degree": 3,
+      "representation": "polynomial",
+      "modulus": [
+       521,
+       0,
+       0,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        345,
+        215,
+        106
+       ],
+       [
+        424,
+        373,
+        36
+       ]
+      ],
+      "subgroup_order": "143052079",
+      "cofactor": 1,
+      "generator": [
+       [
+        249,
+        32,
+        448
+       ],
+       [
+        386,
+        88,
+        501
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/G2-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp10k3-t41822-dfa3991d",
+   "icv1": "ICV1:fpk-1009-3-e3fbfd05:41822:1027201908:974,955,327:unk:unk:r:dfa3991d2668",
+   "family": "extension",
+   "params": {
+    "p": "1009",
+    "k": 3,
+    "modulus": [
+     "776",
+     "595",
+     "960"
+    ],
+    "a": [
+     "670",
+     "300",
+     "374"
+    ],
+    "b": [
+     "47",
+     "257",
+     "560"
+    ]
+   },
+   "model_json": "{\"a\":[\"670\",\"300\",\"374\"],\"b\":[\"47\",\"257\",\"560\"],\"field\":\"fpk-1009-3-e3fbfd05\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"776\",\"595\",\"960\"],\"p\":\"1009\",\"v\":\"1\"}",
+   "trace": 41822,
+   "order": "1027201908",
+   "j": "974,955,327",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b2/params/C050-cubic-extension.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q1009D3Cfpkh957c64a1ac0d",
+     "curve_uid": "urn:ec-record:1:sha256:957c64a1ac0d70205d16d43a313f3c7c6dc5336178982bd04b3cecbba057594b",
+     "field_sha256": "01e51c4c8605d33ec4884a9afe9f3806a811e5be257950308e974d00cb0c6ece",
+     "field": {
+      "characteristic": 1009,
+      "degree": 3,
+      "representation": "polynomial",
+      "modulus": [
+       776,
+       595,
+       960,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        670,
+        300,
+        374
+       ],
+       [
+        47,
+        257,
+        560
+       ]
+      ],
+      "subgroup_order": "674017",
+      "cofactor": 1524,
+      "generator": [
+       [
+        179,
+        892,
+        250
+       ],
+       [
+        146,
+        197,
+        22
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b2/params/C050-cubic-extension.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp11k3-tm30789-3c2726bc",
+   "icv1": "ICV1:fpk-1039-3-c47db6db:-30789:1121653109:752,81,656:unk:unk:r:3c2726bc5e60",
+   "family": "extension",
+   "params": {
+    "p": "1039",
+    "k": 3,
+    "modulus": [
+     "1037",
+     "0",
+     "0"
+    ],
+    "a": [
+     "335",
+     "1030",
+     "289"
+    ],
+    "b": [
+     "701",
+     "99",
+     "145"
+    ]
+   },
+   "model_json": "{\"a\":[\"335\",\"1030\",\"289\"],\"b\":[\"701\",\"99\",\"145\"],\"field\":\"fpk-1039-3-c47db6db\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"3\",\"modulus\":[\"1037\",\"0\",\"0\"],\"p\":\"1039\",\"v\":\"1\"}",
+   "trace": -30789,
+   "order": "1121653109",
+   "j": "752,81,656",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/G3-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q1039D3Cfpkh1d1f8afd3a95",
+     "curve_uid": "urn:ec-record:1:sha256:1d1f8afd3a95b5b8d341e196ec918b9984e52584f2987f908879c7285cb92f19",
+     "field_sha256": "bb3e453929417626d341b3ebc5f3a2087f2f5ab5537b01edc30a432f45869a2f",
+     "field": {
+      "characteristic": 1039,
+      "degree": 3,
+      "representation": "polynomial",
+      "modulus": [
+       1037,
+       0,
+       0,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0
+       ],
+       [
+        335,
+        1030,
+        289
+       ],
+       [
+        701,
+        99,
+        145
+       ]
+      ],
+      "subgroup_order": "1121653109",
+      "cofactor": 1,
+      "generator": [
+       [
+        792,
+        757,
+        118
+       ],
+       [
+        754,
+        980,
+        697
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/G3-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp12k5-tm296780010-475f4271",
+   "icv1": "ICV1:fpk-2053-5-b778c5c5:-296780010:36470754699785504:584,1698,1294,850,1945:unk:unk:r:475f42718ca5",
+   "family": "extension",
+   "params": {
+    "p": "2053",
+    "k": 5,
+    "modulus": [
+     "1536",
+     "882",
+     "535",
+     "1934",
+     "211"
+    ],
+    "a": [
+     "420",
+     "738",
+     "2017",
+     "1352",
+     "1667"
+    ],
+    "b": [
+     "1807",
+     "597",
+     "1599",
+     "912",
+     "658"
+    ]
+   },
+   "model_json": "{\"a\":[\"420\",\"738\",\"2017\",\"1352\",\"1667\"],\"b\":[\"1807\",\"597\",\"1599\",\"912\",\"658\"],\"field\":\"fpk-2053-5-b778c5c5\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"5\",\"modulus\":[\"1536\",\"882\",\"535\",\"1934\",\"211\"],\"p\":\"2053\",\"v\":\"1\"}",
+   "trace": -296780010,
+   "order": "36470754699785504",
+   "j": "584,1698,1294,850,1945",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/E5-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q2053D5Cfpkhe85f97f97912",
+     "curve_uid": "urn:ec-record:1:sha256:e85f97f97912f08c6a5fd63b4cede93430651f82d1b5e687a7e9daa4b7456462",
+     "field_sha256": "0ea22979d523c9c72155127cce14bb14bae709e77e95ee5c8b6a40c2b3abca1a",
+     "field": {
+      "characteristic": 2053,
+      "degree": 5,
+      "representation": "polynomial",
+      "modulus": [
+       1536,
+       882,
+       535,
+       1934,
+       211,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        420,
+        738,
+        2017,
+        1352,
+        1667
+       ],
+       [
+        1807,
+        597,
+        1599,
+        912,
+        658
+       ]
+      ],
+      "subgroup_order": "698780554487",
+      "cofactor": 52192,
+      "generator": [
+       [
+        78,
+        1089,
+        61,
+        911,
+        482
+       ],
+       [
+        126,
+        911,
+        496,
+        1983,
+        1270
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/E5-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp31k2-t1044939202-6687f4aa",
+   "icv1": "ICV1:fpk-2147483647-2-2dd74626:1044939202:4611686013087481408:1684628177,1856063102:unk:unk:r:6687f4aa0d02",
+   "family": "extension",
+   "params": {
+    "p": "2147483647",
+    "k": 2,
+    "modulus": [
+     "996971330",
+     "270963791"
+    ],
+    "a": [
+     "459164876",
+     "1077033002"
+    ],
+    "b": [
+     "87384810",
+     "1624838696"
+    ]
+   },
+   "model_json": "{\"a\":[\"459164876\",\"1077033002\"],\"b\":[\"87384810\",\"1624838696\"],\"field\":\"fpk-2147483647-2-2dd74626\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"2\",\"modulus\":[\"996971330\",\"270963791\"],\"p\":\"2147483647\",\"v\":\"1\"}",
+   "trace": 1044939202,
+   "order": "4611686013087481408",
+   "j": "1684628177,1856063102",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/E2-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q2147483647D2Cfpkhf7a0a063fa34",
+     "curve_uid": "urn:ec-record:1:sha256:f7a0a063fa34935ec81cc9a9904e5926efbea39d8e1e0a2c45e0dfa2c43460be",
+     "field_sha256": "2f5529645c14abdfd039a8a4f8706a4ec6d8ad334f333febc07707f27c679137",
+     "field": {
+      "characteristic": 2147483647,
+      "degree": 2,
+      "representation": "polynomial",
+      "modulus": [
+       996971330,
+       270963791,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        459164876,
+        1077033002
+       ],
+       [
+        87384810,
+        1624838696
+       ]
+      ],
+      "subgroup_order": "50612514727",
+      "cofactor": 91117504,
+      "generator": [
+       [
+        605757450,
+        1161662889
+       ],
+       [
+        1780798159,
+        718871902
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/E2-known.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp36k2-tm52676205250-0d78f787",
+   "icv1": "ICV1:fpk-34359738421-2-8286ea01:-52676205250:1180591624412219778492:34103994903,19452403749:unk:unk:r:0d78f7872138",
+   "family": "extension",
+   "params": {
+    "p": "34359738421",
+    "k": 2,
+    "modulus": [
+     "26331252790",
+     "2511667419"
+    ],
+    "a": [
+     "14233520128",
+     "7914896054"
+    ],
+    "b": [
+     "26838110637",
+     "17581638592"
+    ]
+   },
+   "model_json": "{\"a\":[\"14233520128\",\"7914896054\"],\"b\":[\"26838110637\",\"17581638592\"],\"field\":\"fpk-34359738421-2-8286ea01\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"2\",\"modulus\":[\"26331252790\",\"2511667419\"],\"p\":\"34359738421\",\"v\":\"1\"}",
+   "trace": -52676205250,
+   "order": "1180591624412219778492",
+   "j": "34103994903,19452403749",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/ic_tool_program/conformance/v2-b5a/params/B2-known.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1Q34359738421D2Cfpkh988322aa091b",
+     "curve_uid": "urn:ec-record:1:sha256:988322aa091b3f9eb837e9ae88e8a4fbfe8f9ae554a856d6d59da7792508ddf2",
+     "field_sha256": "e275210105d86a7dfccf1400a61848b6e5b7910acef2899b984972358fe1ef2d",
+     "field": {
+      "characteristic": 34359738421,
+      "degree": 2,
+      "representation": "polynomial",
+      "modulus": [
+       26331252790,
+       2511667419,
+       1
+      ],
+      "element_encoding": "decimal coefficient list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ... + e_{k-1} t^{k-1} modulo the monic modulus"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        0,
+        0
+       ],
+       [
+        14233520128,
+        7914896054
+       ],
+       [
+        26838110637,
+        17581638592
+       ]
+      ],
+      "subgroup_order": "5986912233091",
+      "cofactor": 197195412,
+      "generator": [
+       [
+        15167988613,
+        19608674438
+       ],
+       [
+        28472194760,
+        22214387862
+       ]
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/ic_tool_program/conformance/v2-b5a/params/B2-known.json"
+     ]
+    }
+   ]
   }
  ]
 }

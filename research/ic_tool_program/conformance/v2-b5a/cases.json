@@ -1,0 +1,763 @@
+{
+ "suite": "ic tool programme conformance suite v2, B5a's cases",
+ "design": "research/ic_tool_program/design/extension-fields.md; research/ic_tool_program/rounds/B5a-extension-fields/PROTOCOL.md",
+ "includes": "../v1/cases.json (step B0), ../v2/cases.json (B1) and the later steps' sets, run first, with the until and supersedes rules",
+ "rules": [
+  "The rules of ../v2/cases.json hold. {here} is this directory's params/; {cases} is still ../v2/params/. ../run.py runs these after the earlier steps' cases.",
+  "The supersedes rule: C050 names B5 as its `until`, and B5 is now two steps, B5a and B5b, so C103 supersedes C050 from B5a on.",
+  "params/C050-cubic-extension.json is B2's file, copied byte for byte for C103 and C107.",
+  "params/*-T001.json are no case's: they are B5a's measurement 5's public points, frozen here with the instances' known-answer documents. Every instance comes from ../../rounds/B5a-extension-fields/instances.json, re-checked by this generator."
+ ],
+ "generator": {
+  "path": "research/ic_tool_program/conformance/v2-b5a/make_cases.py",
+  "sha256": "0a13d6458e9803e434fb4a5be969c999fa706b1d998b7535ed20c0d61555a815"
+ },
+ "instances": {
+  "path": "research/ic_tool_program/rounds/B5a-extension-fields/instances.json",
+  "sha256": "3adb3d9aea262bec8e80e2f81303b1e58f4d256155988fb6c0901f90f2a3095d"
+ },
+ "cases": [
+  {
+   "id": "C103-cubic-extension-rho",
+   "step": "B5a",
+   "checks": "C050's successor from B5a: its GF(1009^3) document, with a general modulus and h = 1524, recovers its known logarithm with rho-negation",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C050-cubic-extension.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.rho.pipeline": "rho-negation",
+     "result.scalar": "554837",
+     "result.known_answer": true
+    }
+   },
+   "timeout_s": 300,
+   "supersedes": "C050-cubic-extension"
+  },
+  {
+   "id": "C104-gaudry-cubic-g1",
+   "step": "B5a",
+   "checks": "ic-gaudry-cubic paired with rho-negation at F0 on G1, GF(271^3) with t^3 - c and a prime group order of 2^24.25",
+   "files": {
+    "params.json": {
+     "copy": "{here}/G1-known.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "fidelity": "F0",
+     "result.scalar": "13736502",
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "route.ic.pipeline": "ic-gaudry-cubic",
+     "route.rho.pipeline": "rho-negation",
+     "speedup_eligible": false,
+     "curve_id.slug": "icv1-fp9k3-tm4575-aba104ba"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "ic-gaudry-cubic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-negation",
+       "admitted": true
+      }
+     ],
+     "disclosures": [
+      {
+       "code": "study-pipeline"
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C105-gaudry-cubic-g2",
+   "step": "B5a",
+   "checks": "ic-gaudry-cubic paired with rho-negation at F0 on G2, GF(523^3) with t^3 - c and a prime group order of 2^27.09",
+   "files": {
+    "params.json": {
+     "copy": "{here}/G2-known.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "fidelity": "F0",
+     "result.scalar": "57198436",
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "route.ic.pipeline": "ic-gaudry-cubic",
+     "route.rho.pipeline": "rho-negation",
+     "speedup_eligible": false,
+     "curve_id.slug": "icv1-fp10k3-t3589-bbd5cc8b"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "ic-gaudry-cubic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-negation",
+       "admitted": true
+      }
+     ],
+     "disclosures": [
+      {
+       "code": "study-pipeline"
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C106-gaudry-cubic-g3",
+   "step": "B5a",
+   "checks": "ic-gaudry-cubic paired with rho-negation at F0 on G3, GF(1039^3) with t^3 - c and a prime group order of 2^30.06",
+   "files": {
+    "params.json": {
+     "copy": "{here}/G3-known.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "fidelity": "F0",
+     "result.scalar": "480850355",
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "route.ic.pipeline": "ic-gaudry-cubic",
+     "route.rho.pipeline": "rho-negation",
+     "speedup_eligible": false,
+     "curve_id.slug": "icv1-fp11k3-tm30789-3c2726bc"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "ic-gaudry-cubic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-negation",
+       "admitted": true
+      }
+     ],
+     "disclosures": [
+      {
+       "code": "study-pipeline"
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C107-cubic-modulus-not-binomial",
+   "step": "B5a",
+   "checks": "C050's document paired: its general cubic modulus is refused by ic-gaudry-cubic as modulus-not-binomial, and rho-negation admits it",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C050-cubic-extension.json",
+     "set": {
+      "method": {
+       "solve": "paired",
+       "index_calculus": {
+        "pipeline": "auto",
+        "recipe": "auto"
+       },
+       "rho": {
+        "pipeline": "auto",
+        "seed": 7
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 3,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "no-ic-route",
+     "refusal.class": "unsupported"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "ic-gaudry-cubic",
+       "admitted": false,
+       "gate": "modulus-not-binomial"
+      },
+      {
+       "pipeline": "rho-negation",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C108-gaudry-cofactor-not-one",
+   "step": "B5a",
+   "checks": "H1 paired: a cofactor of 395 is refused by ic-gaudry-cubic as cofactor-not-one, and rho-negation admits it",
+   "files": {
+    "params.json": {
+     "copy": "{here}/H1-known.json",
+     "set": {
+      "method": {
+       "solve": "paired",
+       "index_calculus": {
+        "pipeline": "auto",
+        "recipe": "auto"
+       },
+       "rho": {
+        "pipeline": "auto",
+        "seed": 2293761
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 3,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "no-ic-route",
+     "refusal.class": "unsupported"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "ic-gaudry-cubic",
+       "admitted": false,
+       "gate": "cofactor-not-one"
+      },
+      {
+       "pipeline": "rho-negation",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C109-quadratic-extension-paired",
+   "step": "B5a",
+   "checks": "E2 paired: GF(p^2) is refused by ic-gaudry-cubic as extension-degree-not-three, and rho-negation admits it",
+   "files": {
+    "params.json": {
+     "copy": "{here}/E2-known.json",
+     "set": {
+      "method": {
+       "solve": "paired",
+       "index_calculus": {
+        "pipeline": "auto",
+        "recipe": "auto"
+       },
+       "rho": {
+        "pipeline": "auto",
+        "seed": 2293761
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 3,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "no-ic-route",
+     "refusal.class": "unsupported"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "ic-gaudry-cubic",
+       "admitted": false,
+       "gate": "extension-degree-not-three"
+      },
+      {
+       "pipeline": "rho-negation",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C110-rho-e2",
+   "step": "B5a",
+   "checks": "E2 under solve: rho: the one-word arithmetic at its widest, q = (2^31 - 1)^2, the logarithm recovered and verified",
+   "files": {
+    "params.json": {
+     "copy": "{here}/E2-known.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.rho.pipeline": "rho-negation",
+     "result.scalar": "17700316210",
+     "result.known_answer": true,
+     "curve_id.slug": "icv1-fp31k2-t1044939202-6687f4aa"
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C111-rho-e5",
+   "step": "B5a",
+   "checks": "E5 under solve: rho: a degree-5 field, q ≈ 2^55, the logarithm recovered and verified",
+   "files": {
+    "params.json": {
+     "copy": "{here}/E5-known.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.rho.pipeline": "rho-negation",
+     "result.scalar": "411883226907",
+     "result.known_answer": true,
+     "curve_id.slug": "icv1-fp12k5-tm296780010-475f4271"
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C112-rho-e11",
+   "step": "B5a",
+   "checks": "E11 under solve: rho: a degree-11 field, past eight coefficients, the logarithm recovered and verified",
+   "files": {
+    "params.json": {
+     "copy": "{here}/E11-known.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.rho.pipeline": "rho-negation",
+     "result.scalar": "28437843532",
+     "result.known_answer": true,
+     "curve_id.slug": "icv1-fp6k11-tm527622722-07ccd925"
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C113-rho-b2",
+   "step": "B5a",
+   "checks": "B2 under solve: rho: q ≈ 2^70, past one word: rho-negation is refused and rho-bignum runs, the logarithm recovered and verified",
+   "files": {
+    "params.json": {
+     "copy": "{here}/B2-known.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.rho.pipeline": "rho-bignum",
+     "result.scalar": "889502972667",
+     "result.known_answer": true,
+     "curve_id.slug": "icv1-fp36k2-tm52676205250-0d78f787"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "rho-negation",
+       "admitted": false,
+       "gate": "field-wider-than-one-word"
+      },
+      {
+       "pipeline": "rho-bignum",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C114-general-weierstrass-extension",
+   "step": "B5a",
+   "checks": "a general Weierstrass curve over GF(271^3), isomorphic to G1's: converted, the conversion recorded, and the logarithm of the mapped target recovered by rho",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C114-general-weierstrass-g1.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "result.scalar": "13736502",
+     "route.rho.pipeline": "rho-negation",
+     "conversion.from": "general_weierstrass",
+     "conversion.to": "short_weierstrass"
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C115-gaudry-check",
+   "step": "B5a",
+   "checks": "G1 under check: valid, with ic-gaudry-cubic and rho-negation admitted",
+   "files": {
+    "params.json": {
+     "copy": "{here}/G1-known.json"
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "checks_passed"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "ic-gaudry-cubic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-negation",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C116-gaudry-estimates",
+   "step": "B5a",
+   "checks": "G1 at fidelity F2: estimated, with an estimate for each arm",
+   "files": {
+    "params.json": {
+     "copy": "{here}/G1-known.json",
+     "set": {
+      "method.fidelity": "F2"
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "estimated",
+     "estimate.ic.pipeline": "ic-gaudry-cubic",
+     "estimate.rho.pipeline": "rho-negation"
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C117-gaudry-on-a-binary-field",
+   "step": "B5a",
+   "checks": "ic-gaudry-cubic named on the smoke row's binary document: refused with its gate, no-pipeline-for-field",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C009-translation-of-smoke-row.json",
+     "set": {
+      "method.index_calculus": {
+       "pipeline": "ic-gaudry-cubic",
+       "recipe": "auto"
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 3,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "no-pipeline-for-field",
+     "refusal.class": "unsupported"
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C118-gaudry-groebner-oracle",
+   "step": "B5a",
+   "checks": "G1 with recipe {oracle: groebner}: Gaudry's symmetrised S4 solve recovers the logarithm, verified with the matched rho's",
+   "files": {
+    "params.json": {
+     "copy": "{here}/G1-known.json",
+     "set": {
+      "method.index_calculus": {
+       "pipeline": "ic-gaudry-cubic",
+       "recipe": {
+        "oracle": "groebner"
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "result.scalar": "13736502",
+     "all_verified": true,
+     "route.ic.pipeline": "ic-gaudry-cubic",
+     "ic.recipe.oracle": "groebner"
+    }
+   },
+   "timeout_s": 1800
+  }
+ ]
+}
