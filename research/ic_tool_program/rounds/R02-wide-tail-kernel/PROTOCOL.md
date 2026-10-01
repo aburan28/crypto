@@ -10,7 +10,7 @@ appended at the end.
 ## Hypothesis
 
 **The scan is slower at the two largest sizes because the 8-lane kernel
-is off there.** At `K_1/GF(2^59)` and `K_0/GF(2^61)` the collection
+is off there.** At `icv1-f2m59-tm943548413-98844ecc` and `icv1-f2m61-t158598901-ab42b6c5` the collection
 scan's batched addition falls back to the scalar path. The SIMD kernel
 `Simd512` in `src/cryptanalysis/koblitz_fast.rs` refuses those fields:
 - It reduces a product `L + z^n·H` through the tail `t` of the field's
@@ -26,12 +26,12 @@ at `0bf67f16`, one thread, isolated, a scanned summand costs:
 
 | curve | `n + deg t` | kernel | ns per summand | units per summand | collection's share of the set-up |
 |:--|--:|:--|--:|--:|--:|
-| `K_1/GF(2^47)` | 52 | on | 38.7 | 1.44 | 42% |
-| `K_0/GF(2^57)` | 61 | on | 44.8 | 1.48 | 31% |
-| `K_0/GF(2^41)` | 44 | on | 33.4 | 1.37 | 67% |
-| `K_0/GF(2^53)` | 59 | on | 48.7 | 1.59 | 65% |
-| `K_1/GF(2^59)` | 66 | **off** | 71.7 | 2.38 | 71% |
-| `K_0/GF(2^61)` | 66 | **off** | 68.9 | 2.30 | 89% |
+| `icv1-f2m47-t22705043-f4e44623` | 52 | on | 38.7 | 1.44 | 42% |
+| `icv1-f2m57-tm747311035-c1f545af` | 61 | on | 44.8 | 1.48 | 31% |
+| `icv1-f2m41-tm2308219-7f48b14a` | 44 | on | 33.4 | 1.37 | 67% |
+| `icv1-f2m53-tm56619371-dac20a85` | 59 | on | 48.7 | 1.59 | 65% |
+| `icv1-f2m59-tm943548413-98844ecc` | 66 | **off** | 71.7 | 2.38 | 71% |
+| `icv1-f2m61-t158598901-ab42b6c5` | 66 | **off** | 68.9 | 2.30 | 89% |
 
 **The candidate.** The kernel carries the bits of `H·t` that pass `z^63`
 into its second fold. Those bits are `h >> (64 − t_i)` for each tail
@@ -56,7 +56,7 @@ the ratio to the floor is flat.
 
 ## A control first, on v0, before any candidate is timed
 
-v0 at `K_0/GF(2^53)`, `M1`'s two rows, five rounds ABAB. One arm sets
+v0 at `icv1-f2m53-tm56619371-dac20a85`, `M1`'s two rows, five rounds ABAB. One arm sets
 `KIC_SCAN_SIMD=0`, the existing same-binary switch to the scalar path;
 the other is the default. That is 20 isolated processes.
 
@@ -75,7 +75,7 @@ the other is the default. That is 20 isolated processes.
   - the kernel against the scalar field on every degree 2–62 the
     relaxed condition accepts;
   - the batched addition against the scalar batched addition on the
-    `K_1/GF(2^59)` and `K_0/GF(2^61)` curves themselves;
+    `icv1-f2m59-tm943548413-98844ecc` and `icv1-f2m61-t158598901-ab42b6c5` curves themselves;
   - the two suite fields marked wide.
 
 ## Timed comparison
@@ -89,20 +89,20 @@ the other is the default. That is 20 isolated processes.
 - **The A/A.** R02 runs in R01's container session. It uses R01's A/A
   if the host manifest's CPU, kernel, memory and THP settings are
   unchanged, and runs its own on `M1`'s rows otherwise.
-- **Callgrind, untimed.** Both arms run at `K_0/GF(2^61)` and
-  `K_0/GF(2^41)` `M1-T01`, `--repeats 1`, as in R01. The figures are
+- **Callgrind, untimed.** Both arms run at `icv1-f2m61-t158598901-ab42b6c5` and
+  `icv1-f2m41-tm2308219-7f48b14a` `M1-T01`, `--repeats 1`, as in R01. The figures are
   the instruction counts and the collection's share.
 - **If R02 is accepted,** the new baseline gets the rule's comparison:
   §23's protocol at its six sizes with 64 targets, on the candidate.
 
 ## Prediction
 
-- **`K_0/GF(2^61)`: 1.37×** [1.18, 1.53], the paired cold-time ratio,
+- **`icv1-f2m61-t158598901-ab42b6c5`: 1.37×** [1.18, 1.53], the paired cold-time ratio,
   v0 over the candidate. Collection, 89% of the set-up, falls from 2.30
-  units a summand to `K_0/GF(2^53)`'s 1.59. The range runs from 1.9 to
+  units a summand to `icv1-f2m53-tm56619371-dac20a85`'s 1.59. The range runs from 1.9 to
   1.4 units. The build's and the descent's gains are left out, so the
   prediction is conservative.
-- **`K_1/GF(2^59)`: 1.31×** [1.15, 1.45], by the same arithmetic at
+- **`icv1-f2m59-tm943548413-98844ecc`: 1.31×** [1.15, 1.45], by the same arithmetic at
   71%.
 - **The other nine sizes: 1.00×.** Their kernels are unchanged.
 
@@ -111,7 +111,7 @@ the other is the default. That is 20 isolated processes.
 **Accepted** if all of the following hold:
 1. The control confirms the mechanism.
 2. Every pinned output is identical.
-3. At `K_1/GF(2^59)` and `K_0/GF(2^61)`, the paired cold-time ratio's
+3. At `icv1-f2m59-tm943548413-98844ecc` and `icv1-f2m61-t158598901-ab42b6c5`, the paired cold-time ratio's
    95% interval lies above 1.10, on the suite rows and on the holdouts
    separately.
 4. No size regresses beyond its A/A band. A regression is a candidate
@@ -163,7 +163,7 @@ figure pools all ten.
 Nothing else changes: the rows, the order, the control, the pin, the
 success condition and the stop rules. The figure is fixed now, before any
 R02 process runs. One untimed sanity check ran before this amendment:
-the candidate on `K_0/GF(2^61)` and `K_1/GF(2^59)` `M1-T01`, outputs only,
+the candidate on `icv1-f2m61-t158598901-ab42b6c5` and `icv1-f2m59-tm943548413-98844ecc` `M1-T01`, outputs only,
 under `taskset` on a machine that was compiling. Both outputs equal v0's.
 Its collection phase read about 1.32× faster than v0's R01 profile row
 at both sizes. That figure was seen before this amendment was written.
@@ -174,7 +174,7 @@ not depend on it.
 
 **What R01 found.** R01's callgrind of `ic price --repeats 1` showed that
 most of the process is the pricer's own calibration, not the index
-calculus. At `K_0/GF(2^41)`:
+calculus. At `icv1-f2m41-tm2308219-7f48b14a`:
 - `UnitBench`'s timing loop is 1.56 × 10⁹ instructions;
 - the pass up to its first online boundary is 0.12 × 10⁹.
 
@@ -185,8 +185,8 @@ code. Some of it runs through the very kernel R02 changes.
 pipeline alone.
 - **The command:** `ic workflow --params <row> --dir <fresh dir>`, with
   `RAYON_NUM_THREADS=1` and no rho baseline in the file.
-- **The arms and rows:** both arms, at `K_0/GF(2^61)`, `K_1/GF(2^59)`
-  and `K_0/GF(2^41)` `M1-T01`.
+- **The arms and rows:** both arms, at `icv1-f2m61-t158598901-ab42b6c5`, `icv1-f2m59-tm943548413-98844ecc`
+  and `icv1-f2m41-tm2308219-7f48b14a` `M1-T01`.
 - **The options:** the same callgrind options as R01.
 - **The figures:**
   - the total instruction ratio, v0 over the candidate, per row;
