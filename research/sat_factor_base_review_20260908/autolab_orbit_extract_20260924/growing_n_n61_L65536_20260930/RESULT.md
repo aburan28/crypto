@@ -103,10 +103,16 @@ L=16,384 gap would need a larger K, which this 48 GiB shared host cannot hold.
 `../independent_replay.py` (pure-Python GF(2^61) and Koblitz arithmetic, no
 code shared with the producer) checks every IC record of every block against
 `base_n61_K1400.jsonl`: `replay_b{0,1,2}/independent_replay.json`. **Result:
-196,608 / 196,608 pass, 0 fail** (65,536 per block). Rho's logs are not
-separately replayed.
-Rho's scalars equal the corpus scalars, which the IC replay verifies as
-[d]G = Q on the identical points.
+196,608 / 196,608 pass, 0 fail** (65,536 per block).
+
+Rho, block 0 only (the only rho block whose raw records are committed):
+`../growing_n_n61_L65536_20260930_rho_replay.py` uses the same pure-Python
+arithmetic. For every rho record it checks that the recovered scalar equals
+the published scalar and the corpus line, that [d]G = Q, and that Q equals
+the IC target of the same index. Its receipt is
+`replay_b0/rho_independent_replay.json`. **Result: 65,536 / 65,536 pass,
+0 fail.** Blocks 1–2 rho records were not kept, so they are not replayed. Their
+untimed records hash equal to block 0 (`growing_n_summary.json`).
 
 ## Claim-check
 
@@ -140,3 +146,8 @@ block 0 apart from timing fields. Regenerate them with
 - K above 1,400 at L=65,536, which needs about 19–30 GB free for the IC arm.
 - This L against strong rho R3, which decides the operative verdict.
 - Single-target online instrumentation for the `vs_rho` schema.
+- The panel ran through the standalone resumable script, not
+  `boundary_autolab.py launch`, so there is no `autolab/runs/<run-id>/`
+  directory. The claim drafts and receipts here take its place.
+- K was tuned on a disjoint 65,536-target corpus. No 1,024-target tune was
+  recorded for this panel.

@@ -355,7 +355,8 @@ estimated 27.8 GB did not fit beside another agent's 21 GB job. Three paired
 blocks gave compact/rho wall ratios of **1.968 / 0.343 / 0.352** (median 0.352).
 Block 0 is a compact loss: its 11.6 GB IC index swapped, with 521 s of system
 time. User-CPU ratios were 0.379 / 0.328 / 0.331 and retired-instruction ratios
-0.201 / 0.135 / 0.135. 196,608/196,608 logs were independently replayed.
+0.201 / 0.135 / 0.135. 196,608/196,608 IC logs and the 65,536 block-0 rho logs
+were independently replayed.
 `end_to_end_dlp` claim-check PASS; `vs_rho` claim-check FAIL by design (the
 schema requires one target). At fixed K the lead over v2 narrows from
 L=16,384 (instructions 0.109 → 0.135). The walls are not AGENTS.md §10 evidence,
