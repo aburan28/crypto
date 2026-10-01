@@ -35,6 +35,8 @@
 #   TABLE_FUSED  one fused pass per step, alternating slot order (default 0)
 #   TABLE_PIPE_SELECT  forward pass issues slot k's products before slot k+1's
 #                      selection (default 0)
+#   TABLE_SPLIT_FORWARD  report/select all slots before prefix products
+#                        (default 0; requires TABLE_PIPE_SELECT)
 #   TABLE_PHASE_POPC  phase via eight L-bit popc planes (default 0;
 #                     CHEAPER-SELECTION.md)
 #   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
@@ -120,6 +122,8 @@ PHASE_PROFILE ?= 0
 # Forward pass software-pipelined: slot k's products issue before slot k+1's
 # selection (needs TAG_DENOM; two-pass kernel only).
 TABLE_PIPE_SELECT ?= 0
+# Keep the established kernel as the default until a matched GPU A/B qualifies.
+TABLE_SPLIT_FORWARD ?= 0
 # Reverse pass issues the chain product before lambda's.
 PACKED_CHAIN_FIRST ?= 0
 # Two independent Montgomery chains of BATCH/2 slots per thread, interleaved
@@ -239,7 +243,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_PHASE_POPC=$(TABLE_PHASE_POPC) \
-       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
+       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_TABLE_SPLIT_FORWARD=$(TABLE_SPLIT_FORWARD) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_PACKED_CHAINS=$(PACKED_CHAINS) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \

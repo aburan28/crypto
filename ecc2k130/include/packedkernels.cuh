@@ -267,6 +267,18 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
 #if ECC_TABLE_PIPE_SELECT && (!ECC_WALK_TABLE || !ECC_TABLE_TAG_DENOM || !ECC_PACKED_POLY_STATE || ECC_PACKED_WEIGHTED_PREFIX != 2 || ECC_TABLE_FUSED || ECC_PACKED_SLOT_PIPELINE || ECC_PACKED_SLOT_PREFETCH)
 #error "ECC_TABLE_PIPE_SELECT requires the two-pass table walk with ECC_TABLE_TAG_DENOM, polynomial state and weighted prefix 2"
 #endif
+// The v3 cycle-anchor probe is cold but needs a large point array. Keep it out
+// of the prefix product's live range by selecting every slot first, then reload
+// the unchanged polynomial coordinates and build the prefix from hist's tag.
+#ifndef ECC_TABLE_SPLIT_FORWARD
+#define ECC_TABLE_SPLIT_FORWARD 0
+#endif
+#if ECC_TABLE_SPLIT_FORWARD != 0 && ECC_TABLE_SPLIT_FORWARD != 1
+#error "ECC_TABLE_SPLIT_FORWARD must be 0 or 1"
+#endif
+#if ECC_TABLE_SPLIT_FORWARD && !ECC_TABLE_PIPE_SELECT
+#error "ECC_TABLE_SPLIT_FORWARD requires ECC_TABLE_PIPE_SELECT"
+#endif
 // ECC_PACKED_CHAINS=2: every thread runs two independent Montgomery chains
 // of ECC_BATCH/2 slots each (slots [0, B/2) and [B/2, B)) instead of one
 // chain of ECC_BATCH.  The chains are interleaved slot by slot in both
@@ -317,6 +329,13 @@ __device__ __forceinline__ void tableSelectSlot(const WalkParams<unsigned> &p, i
                 rec.iters = now - p.startIter[id];
                 toLimbs(x, rec.x);
                 toLimbs(fromPolynomial131(yp), rec.y);
+                for (int k = 0; k < ECC_JCOUNT; ++k) {
+#if ECC_WITNESS
+                    rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
+#else
+                    rec.counts[k] = 0;
+#endif
+                }
                 p.dp[dest] = rec;
             }
             p.dead[id] = 1;
@@ -329,6 +348,53 @@ __device__ __forceinline__ void tableSelectSlot(const WalkParams<unsigned> &p, i
     const unsigned tag = twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight);
     twAddend(tag, xp, yp, twTab, dp, ep);
 }
+#if ECC_TABLE_SPLIT_FORWARD
+__device__ __forceinline__ void tableSelectTagSlot(const WalkParams<unsigned> &p, int slot, int tid,
+                                                   unsigned long long now, bool guard,
+                                                   const uint32_t *twSel, const uint32_t *twTab) {
+    const P131 xp = load(p.x, slot, tid, p.threads);
+    const P131 yp = load(p.y, slot, tid, p.threads);
+    const size_t id = size_t(slot) * p.threads + tid;
+    const P131 x = fromPolynomial131(xp);
+    const int hw = weight(x);
+    if (!p.dead[id]) {
+        if (hw <= p.dpWeight) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            const unsigned dest = atomicAdd(p.dpCount, 1u);
+            if (dest < p.dpCap) {
+                DpRecord rec;
+                rec.seed = p.seed[id];
+                rec.iters = now - p.startIter[id];
+                toLimbs(x, rec.x);
+                toLimbs(fromPolynomial131(yp), rec.y);
+                for (int k = 0; k < ECC_JCOUNT; ++k) {
+#if ECC_WITNESS
+                    rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
+#else
+                    rec.counts[k] = 0;
+#endif
+                }
+                p.dp[dest] = rec;
+            }
+            p.dead[id] = 1;
+        } else if (guard && now - p.startIter[id] >= p.maxIters) {
+            if ((p.seed[id] & 0xffffull) == 0xffffull) atomicAdd(p.dpCount + 2, 1u);
+            p.dead[id] = 1;
+            atomicAdd(p.dpCount + 1, 1u);
+        }
+    }
+    (void)twSelect(x, yp, hw, p.hist + id, twSel, twTab, p.dpWeight);
+}
+
+__device__ __forceinline__ void tableAddendFromHist(const WalkParams<unsigned> &p, int slot, int tid,
+                                                    const uint32_t *twTab, P131 *dp, P131 *ep) {
+    const size_t id = size_t(slot) * p.threads + tid;
+    const P131 xp = load(p.x, slot, tid, p.threads);
+    const P131 yp = load(p.y, slot, tid, p.threads);
+    const unsigned tag = unsigned(p.hist[id] & 0xffffull);
+    twAddend(tag, xp, yp, twTab, dp, ep);
+}
+#endif
 #endif
 
 #if ECC_TABLE_FUSED
@@ -626,12 +692,25 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
         ECC_PHASE_MARK(ph0);
 #if ECC_TABLE_PIPE_SELECT
+#if ECC_TABLE_SPLIT_FORWARD
+#pragma unroll 1
+        for (int slot = 0; slot < ECC_BATCH; ++slot)
+            tableSelectTagSlot(p, slot, tid, now, guard, twSel, twTab);
+#endif
         {
             P131 dpN, epN;
+#if ECC_TABLE_SPLIT_FORWARD
+            tableAddendFromHist(p, 0, tid, twTab, &dpN, &epN);
+#else
             tableSelectSlot(p, 0, tid, now, guard, twSel, twTab, &dpN, &epN);
+#endif
             prod = dpN;
             store(p.pchain, 0, tid, p.threads, epN);
+#if ECC_TABLE_SPLIT_FORWARD
+            tableAddendFromHist(p, 1, tid, twTab, &dpN, &epN);
+#else
             tableSelectSlot(p, 1, tid, now, guard, twSel, twTab, &dpN, &epN);
+#endif
             // Twelve CLMADs per slot: the chain product prod*d first, because
             // its reduction gates the next slot's products, then W = prod*e.
             // W's reduction and store are deferred by one slot, into the time
@@ -647,8 +726,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                 product131(prod, dp, hc);
                 product131(prod, ep, hb);
                 if (slot > 1) store(p.pchain, slot - 1, tid, p.threads, reducePolynomial131(hbPrev));
-                if (slot + 1 < ECC_BATCH)
+                if (slot + 1 < ECC_BATCH) {
+#if ECC_TABLE_SPLIT_FORWARD
+                    tableAddendFromHist(p, slot + 1, tid, twTab, &dpN, &epN);
+#else
                     tableSelectSlot(p, slot + 1, tid, now, guard, twSel, twTab, &dpN, &epN);
+#endif
+                }
                 prod = reducePolynomial131(hc);
 #pragma unroll
                 for (int i = 0; i < 9; ++i) hbPrev[i] = hb[i];
