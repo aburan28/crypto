@@ -529,7 +529,7 @@ from R03's `runs.tar.xz`, byte for byte.
 |:--|:--|:--|:--|
 | statistics, run-tree access, round analysis | `harness/stats.py`, the rounds' `analyse.py` | R05's results | N1: R03 reproduced byte for byte |
 | isolation | `tools/isolated_bench.py` | every timed run from N1 on | N1: modes, refusals, the widened mask and the record's keys checked against the Python tool |
-| the round runner: manifest, pin, ABAB order with retries, holdouts, extension | `harness/bench.py`, the rounds' `run.py` | R05's rule comparison, R02b | N2 |
+| the round runner: the PSI wait, refusals, retries, ABAB order, holdouts, extension; manifest and pin | `harness/bench.py`, the rounds' `run.py` | R05's holdouts, after the container rebuild (below); R02b | N1: `icprog run r05` (`plan`, `manifest-resumed`, `compare`, `holdout`, `extend`), which resumed R05's run tree where the declared runner stopped; the pin and the manifest for a fresh round come with R02b's steps (N2) |
 | the callgrind phase split | `harness/callgrind_phases.py` | R02b's control | N2 |
 | the single-target rule comparison and its claims | `research/ic_single_target_20260930/*.py` | the rule comparison at each new baseline | N3 |
 | the conformance runners and case checks | `conformance/run.py`, `v1/run.py`, `v2/run.py`, `make_cases.py --check` | Track B's measurements; B5a's declaration, re-made on native tools (#1178 closed unmerged) | N4 |
@@ -546,11 +546,27 @@ holdout set gets a native generator in the round that draws it.
 - **Its runner.** R05's declared runs began at 18:51 UTC under its
   declared runner: `run.py`, `harness/bench.py` and
   `tools/isolated_bench.py`. That was three hours before the rule merged.
-- **Its holdouts.** The suite rows finished before 22:00. The holdouts
-  ran after, under the same runner, because changing the runner partway
-  through a declared set changes the set.
-- **Its timed values** are the `ic` binaries' own in-process timers in
-  both cases.
+- **The suite rows** all finished on that runner, before 22:00.
+- **The holdouts, until the rebuild.** They ran on the same runner until
+  the container was rebuilt at about 22:47 UTC, which killed it.
+  - By then rounds 1 and 2 were complete, and round 3 had 22 of its 24
+    pairs. One pair had only its base arm.
+  - The rebuilt host matches the old one in CPU model, flags, cores,
+    memory and THP. Its kernel build differs: `6.18.44-fc-v51` against
+    `-v50`.
+- **The holdouts, after the rebuild.** From 23:00 UTC the declared
+  holdout steps ran on the native runner and isolation tool, from the
+  same run tree.
+  - The rest of round 3 and rounds 4–5 ran: 99 processes, in the
+    declared order.
+  - The rebuilt host's manifest is `host-resumed.json`, beside the
+    round's `host.json`.
+  - Each process's record names its tool.
+  - The split pair is paired as the declared runner pairs it: a base
+    arm from before the rebuild, a candidate arm from after. The results
+    say so.
+- **Its timed values** are the `ic` binaries' own in-process timers
+  throughout.
 - **Its analysis** is native (`icprog analyse r05`).
 - **Its rule comparison**, owed at a new baseline, runs on N3.
 

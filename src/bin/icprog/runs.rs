@@ -160,6 +160,30 @@ pub fn accounting(d: &Path) -> Result<J, String> {
     ]))
 }
 
+/// Processes under `d` by the isolation tool that ran them: the native
+/// tool's records carry `tool.implementation`, the Python tool's do not.
+pub fn by_tool(d: &Path) -> Result<J, String> {
+    let mut paths = Vec::new();
+    records(d, &mut paths);
+    let (mut python, mut native) = (0i128, 0i128);
+    for rec in paths {
+        let text = std::fs::read_to_string(&rec).map_err(|e| format!("{}: {e}", rec.display()))?;
+        for line in text.lines() {
+            let v = json::parse(line).map_err(|e| format!("{}: {e}", rec.display()))?;
+            let tool = v.get("tool").and_then(|t| t.get("implementation"));
+            if tool.and_then(J::as_str) == Some("native") {
+                native += 1;
+            } else {
+                python += 1;
+            }
+        }
+    }
+    Ok(json::obj([
+        ("python", J::Int(python)),
+        ("native", J::Int(native)),
+    ]))
+}
+
 // ── the measures a round compares (IC_TOOL_PROGRAM.md §5) ───────────
 
 fn reps(rep: &J) -> Result<&[J], String> {

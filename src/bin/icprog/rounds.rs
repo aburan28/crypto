@@ -10,6 +10,7 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
+use super::bench::{self, Arm, Bench};
 use super::json::{self, obj, opt_f64, J};
 use super::runs;
 use super::stats;
@@ -307,6 +308,8 @@ pub mod r03 {
                     n,
                     r: r0.r,
                     recipe_seed: None,
+                    params: None,
+                    rho_seed: None,
                 });
             }
         }
@@ -363,6 +366,11 @@ pub mod r05 {
         (213, 118),
     ];
     const ACCEPT_LO: f64 = 1.10;
+    /// Suite v1's rho seeds: `0x230000 +` the target's number.
+    const RHO_SEED_BASE: i128 = 0x230000;
+    const ROUNDS: u32 = 5;
+    const EXTENDED_ROUNDS: u32 = 10;
+    const HALF_WIDTH_LIMIT: f64 = 0.03;
 
     fn collect(rep: &J) -> Result<f64, String> {
         runs::setup_phase_ns(rep, "collect")
@@ -412,6 +420,8 @@ pub mod r05 {
                     n,
                     r,
                     recipe_seed: Some(seed),
+                    params: Some(path),
+                    rho_seed: Some(RHO_SEED_BASE + i as i128),
                 });
             }
         }
@@ -506,13 +516,214 @@ pub mod r05 {
                 J::Str("R05, the sharper presence filter: every figure the README, the ledger and the scoreboard quote".into()),
             ),
             ("host", opt(json::read_opt(&c.runs.join("host.json"))?)),
+            (
+                "host_resumed",
+                opt(json::read_opt(&c.runs.join("host-resumed.json"))?),
+            ),
             ("aa_source", opt(json::read_opt(&c.runs.join("aa-source.json"))?)),
             ("accounting", accounting(c, &["compare", "holdout"])?),
+            (
+                "isolation_by_tool",
+                J::Obj(vec![
+                    ("compare".into(), runs::by_tool(&c.runs.join("compare"))?),
+                    ("holdout".into(), runs::by_tool(&c.runs.join("holdout"))?),
+                ]),
+            ),
             ("pin", pin_summary(&pin)?),
             ("extended", opt(json::read_opt(&c.runs.join("extended.json"))?)),
             ("suite", suite_j),
             ("holdouts", holdouts),
             ("decision", decision),
         ]))
+    }
+
+    // ── the declared runs, natively (PROTOCOL.md "What runs") ────────
+
+    fn status(rep: &J) -> Option<&str> {
+        rep.get("status").and_then(J::as_str)
+    }
+
+    /// The cold ratios the extension rule reads: each round's figure, or
+    /// its first attempt when none is clean, as the declared runner read them.
+    fn cold_ratios(d: &Path, rs: &[Row], rounds: u32) -> Result<Vec<f64>, String> {
+        let mut out = Vec::new();
+        for r in rs {
+            for k in 1..=rounds {
+                let path = |arm: &str| d.join(arm).join(&r.id).join(format!("r{k}.price.json"));
+                let a = runs::load(&runs::figure_path(&path("base"))?);
+                let b = runs::load(&runs::figure_path(&path("cand"))?);
+                if status(&a) == Some("complete") && status(&b) == Some("complete") {
+                    out.push(runs::ic_cold_ns(&a)? / runs::ic_cold_ns(&b)?);
+                }
+            }
+        }
+        Ok(out)
+    }
+
+    fn sets(c: &Ctx) -> Result<[(&'static str, PathBuf, Vec<Row>); 2], String> {
+        Ok([
+            ("suite", c.runs.join("compare"), suite_rows(c)?),
+            ("holdouts", c.runs.join("holdout"), holdout_rows(c)?),
+        ])
+    }
+
+    /// Rounds 6–10 for a set whose half-width at a target size exceeds 3%
+    /// after five rounds.  The test reads the interval's width only.
+    pub fn extend(c: &Ctx, b: &Bench, arms: &[Arm]) -> Result<J, String> {
+        let record = c.runs.join("extended.json");
+        let sets = sets(c)?;
+        let done = if record.exists() {
+            json::read(&record)?
+        } else {
+            let mut kv: Vec<(String, J)> = Vec::new();
+            for (name, d, rows) in &sets {
+                for (a, n) in TARGETS {
+                    let rs: Vec<Row> = rows
+                        .iter()
+                        .filter(|r| (r.a, r.n) == (a, n))
+                        .cloned()
+                        .collect();
+                    let ci = stats::geo_ci(&cold_ratios(d, &rs, ROUNDS)?, LEVEL);
+                    if let (Some(hi), Some(g)) = (ci.hi, ci.geomean) {
+                        if hi / g - 1.0 > HALF_WIDTH_LIMIT {
+                            let slug = J::Str(suite::curve_slug(a, n)?);
+                            match kv.iter_mut().find(|(k, _)| k == name) {
+                                Some((_, J::Arr(v))) => v.push(slug),
+                                _ => kv.push((name.to_string(), J::Arr(vec![slug]))),
+                            }
+                        }
+                    }
+                }
+            }
+            let doc = J::Obj(kv);
+            std::fs::write(&record, json::dumps(&doc, 1) + "\n")
+                .map_err(|e| format!("{}: {e}", record.display()))?;
+            doc
+        };
+        for (name, d, rows) in &sets {
+            let slugs: Vec<&str> = done
+                .get(name)
+                .and_then(J::as_arr)
+                .unwrap_or(&[])
+                .iter()
+                .filter_map(J::as_str)
+                .collect();
+            let mut rs = Vec::new();
+            for r in rows {
+                if slugs.contains(&suite::curve_slug(r.a, r.n)?.as_str()) {
+                    rs.push(r.clone());
+                }
+            }
+            if !rs.is_empty() {
+                b.interleave(arms, &rs, EXTENDED_ROUNDS, d, &[])?;
+            }
+        }
+        Ok(done)
+    }
+
+    /// What `compare` and `holdout` would still run, in their order: the
+    /// rounds with no first attempt yet, and the attempts owed a retry.
+    pub fn plan(c: &Ctx, arms: &[Arm]) -> Result<J, String> {
+        let mut out = Vec::new();
+        for (name, d, rows) in sets(c)? {
+            let mut missing = Vec::new();
+            for k in 1..=ROUNDS {
+                let order: Vec<&Arm> = if k % 2 == 1 {
+                    arms.iter().collect()
+                } else {
+                    arms.iter().rev().collect()
+                };
+                for r in &rows {
+                    for arm in &order {
+                        let first = d
+                            .join(&arm.name)
+                            .join(&r.id)
+                            .join(format!("r{k}.price.json"));
+                        let figure = runs::figure_path(&first)?;
+                        let done = figure.exists()
+                            && runs::clean(&figure)?
+                            && status(&runs::load(&figure)) == Some("complete");
+                        let tried = (0..=runs::RETRIES)
+                            .filter(|&a| runs::attempt(&first, a).exists())
+                            .count();
+                        if !done && tried <= runs::RETRIES {
+                            missing.push(J::Str(format!(
+                                "r{k} {} {}{}",
+                                r.id,
+                                arm.name,
+                                if tried > 0 { " (retry)" } else { "" }
+                            )));
+                        }
+                    }
+                }
+            }
+            out.push((
+                name.to_string(),
+                json::obj([
+                    ("to_run", J::Int(missing.len() as i128)),
+                    ("processes", J::Arr(missing)),
+                ]),
+            ));
+        }
+        Ok(J::Obj(out))
+    }
+
+    /// One declared step on the native runner.  `manifest` and `pin`
+    /// ran under the declared runner at the round's start; their records
+    /// are in the run tree and are not re-run.  `manifest-resumed` records
+    /// the host the round resumed on, once.
+    pub fn run(c: &Ctx, step: &str, b: &Bench, arms: &[Arm], root: &Path) -> Result<J, String> {
+        match step {
+            "plan" => plan(c, arms),
+            "manifest-resumed" => {
+                let binaries = J::Obj(
+                    arms.iter()
+                        .map(|a| {
+                            Ok((
+                                if a.name == "cand" {
+                                    "candidate".to_string()
+                                } else {
+                                    a.name.clone()
+                                },
+                                json::obj([
+                                    (
+                                        "path_basename",
+                                        J::Str(
+                                            a.binary
+                                                .file_name()
+                                                .map(|f| f.to_string_lossy().into_owned())
+                                                .unwrap_or_default(),
+                                        ),
+                                    ),
+                                    ("sha256", J::Str(bench::sha256_file(&a.binary)?)),
+                                ]),
+                            ))
+                        })
+                        .collect::<Result<Vec<_>, String>>()?,
+                );
+                bench::host_manifest(
+                    &c.runs.join("host-resumed.json"),
+                    root,
+                    binaries,
+                    &b.isolate,
+                    "the host R05 resumed on after its container was rebuilt mid-holdouts",
+                )
+            }
+            "compare" => {
+                b.interleave(arms, &suite_rows(c)?, ROUNDS, &c.runs.join("compare"), &[])?;
+                Ok(J::Null)
+            }
+            "holdout" => {
+                b.interleave(arms, &holdout_rows(c)?, ROUNDS, &c.runs.join("holdout"), &[])?;
+                Ok(J::Null)
+            }
+            "extend" => extend(c, b, arms),
+            "manifest" | "pin" => Err(format!(
+                "`{step}` ran under the declared runner at the round's start; its record is in the run tree"
+            )),
+            other => Err(format!(
+                "unknown step `{other}`; try plan, manifest-resumed, compare, holdout or extend"
+            )),
+        }
     }
 }

@@ -17,6 +17,10 @@ pub struct Row {
     /// The subgroup order.
     pub r: f64,
     pub recipe_seed: Option<i128>,
+    /// The parameter file a timed process prices, absolute.
+    pub params: Option<PathBuf>,
+    /// The rho walk's seed for the row's single target.
+    pub rho_seed: Option<i128>,
 }
 
 /// The programme's directory, `research/ic_tool_program`, under `root`.
@@ -60,12 +64,18 @@ pub fn rows(programme: &Path, tier: &str) -> Result<Vec<Row>, String> {
         let (_, rest) = frozen
             .split_once('-')
             .ok_or_else(|| format!("suite id `{frozen}` has no recipe part"))?;
+        let params = row
+            .at("params")?
+            .as_str()
+            .ok_or("`params` is not a string")?;
         out.push(Row {
             id: format!("{}/{rest}", curve_slug(a, n)?),
             a,
             n,
             r: int(row, "r")? as f64,
             recipe_seed: Some(int(row, "recipe_seed")?),
+            params: Some(programme.join("suite").join("v1").join(params)),
+            rho_seed: Some(int(row, "rho_seed")?),
         });
     }
     Ok(out)
