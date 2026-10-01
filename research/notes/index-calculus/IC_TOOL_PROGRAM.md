@@ -334,6 +334,16 @@ It sets out:
 - the conformance cases, of which B1's are frozen in
   `research/ic_tool_program/conformance/v2/`.
 
+**B3 is split in two** (2026-10-01).
+- **B3** lifts the rho reference to two-word fields (`n ≤ 126`) and
+  adds `solve: rho`. Its measurement is the gate's rho at F0 at
+  `n = 83`.
+- **B3b** lifts the index calculus and runs it at F1.
+
+B3's declaration is
+[`research/ic_tool_program/rounds/B3-two-word-rho/PROTOCOL.md`](../../ic_tool_program/rounds/B3-two-word-rho/PROTOCOL.md).
+The row above still states the done-when for both halves together.
+
 ## 10. What does not count
 
 - A speedup with any output changed, unless the round declared an

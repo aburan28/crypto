@@ -14,6 +14,8 @@ It adds each part with the round that creates it:
 | `conformance/v1/` | the conformance (C) suite: one case per defect or refusal, and its runner | B0 |
 | `design/` | Track B's designs: the schema, the checks, the routing, and the cases each B step is judged against | B1 |
 | `conformance/v2/` | B1's cases and their parameter files, the script that writes and checks them, and the runner (v1's cases, then v2's) | B1 |
+| `conformance/v2-b3/` | B3's cases (C052–C058) beside B1's frozen ones | B3 |
+| `conformance/run.py` | the runner from B3 on: every step's cases in order, with the `until` rule applied | B3 |
 
 ## Status
 
@@ -26,4 +28,6 @@ It adds each part with the round that creates it:
 | B0 | refusals and fixes for the survey's defects, with conformance suite v1 | declared ([`rounds/B0-refusals/PROTOCOL.md`](rounds/B0-refusals/PROTOCOL.md), [`conformance/v1/`](conformance/v1/cases.json)); runs after R03 | #1119 (declaration) |
 | B1 | schema v2, the checks for binary instances, and the Koblitz pipelines on imported instances | declared ([`rounds/B1-schema-v2/PROTOCOL.md`](rounds/B1-schema-v2/PROTOCOL.md); design [`design/schema-v2.md`](design/schema-v2.md); cases [`conformance/v2/`](conformance/v2/cases.json)); runs after B0 | #1125 (declaration) |
 | B2 | prime and extension fields, the other curve forms and importers, estimates and budgets | designed ([`design/schema-v2.md`](design/schema-v2.md) §9–§10); declared after B1 | — |
-| R04 | where a scanned summand's time goes: per-stage counters inside the scan, in a probe build (a stage diagnostic) | declared ([`rounds/R04-scan-probes/PROTOCOL.md`](rounds/R04-scan-probes/PROTOCOL.md)); runs after B1 | this PR (declaration) |
+| R04 | where a scanned summand's time goes: per-stage counters inside the scan, in a probe build (a stage diagnostic) | declared ([`rounds/R04-scan-probes/PROTOCOL.md`](rounds/R04-scan-probes/PROTOCOL.md)); runs after B1 | #1128 (declaration) |
+| B3 | two-word binary fields (`n ≤ 126`), `rho-koblitz` on them, `solve: rho`, and the gate's rho at F0 at `n = 83` | declared ([`rounds/B3-two-word-rho/PROTOCOL.md`](rounds/B3-two-word-rho/PROTOCOL.md); cases [`conformance/v2-b3/`](conformance/v2-b3/cases.json)); runs after B1 | this PR (declaration) |
+| B3b | the index calculus on two-word fields, at F1 | to be declared | — |

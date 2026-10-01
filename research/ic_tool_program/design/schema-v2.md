@@ -372,8 +372,8 @@ These never refuse. AGENTS.md §8b requires them.
 
 | id | arm | admits | gate today | lifted by | imported by |
 |:--|:--|:--|:--|:--|:--|
-| `kic` | index calculus: the pair-table pipeline `ic price` runs | binary; `a, b ∈ GF(2^k)` with `k ≤ 8`; `n = k·e`, `e` odd and at least 3 | `n ≤ 62`, `r < 2^63`; `k = 1` until B2 | B3 (`n ≤ 127`), B4 (`n ≤ 191`) | B1 (`k = 1`), B2 (`k > 1`) |
-| `rho-koblitz` | rho on signed-Frobenius classes, the matched reference | Koblitz curves (`k = 1`), `n` odd and at least 3 | `n ≤ 62` | B3, B4 | B1 |
+| `kic` | index calculus: the pair-table pipeline `ic price` runs | binary; `a, b ∈ GF(2^k)` with `k ≤ 8`; `n = k·e`, `e` odd and at least 3 | `n ≤ 62`, `r < 2^63`; `k = 1` until B2 | B3b (`n ≤ 126`), B4 (`n ≤ 191`) | B1 (`k = 1`), B2 (`k > 1`) |
+| `rho-koblitz` | rho on signed-Frobenius classes, the matched reference | Koblitz curves (`k = 1`), `n` odd and at least 3 | `n ≤ 62` | B3 (`n ≤ 126`, `r < 2^127`), B4 | B1 |
 | `rho-negation` | rho with the negation map | any ordinary binary curve; prime fields | binary `n ≤ 62`; prime `p < 2^63` | B3, B5 | B2 |
 | `ic-binary-s4` | index calculus: `ic boundary`'s generic binary pipeline | any ordinary binary curve | `n` in 5..=32 | — | B2 |
 | `ic-prime-s3` | index calculus: `ic boundary`'s prime pipeline (see below) | prime fields | `p < 2^63` | B5 | B2 |
@@ -422,9 +422,11 @@ The gate codes:
 
 | code | gate |
 |:--|:--|
-| `field-wider-than-one-word` | binary `n > 62` (lifted by B3, B4) |
+| `field-wider-than-one-word` | binary `n > 62`: on `rho-koblitz` until B3, on `kic` until B3b |
+| `field-wider-than-two-words` | binary `n > 126` on `rho-koblitz`, from B3. A class key packs to `2(x + 1) + s`, which needs 129 bits at `n = 127`. Lifted by B4. |
 | `prime-wider-than-one-word` | `p ≥ 2^63` (B5) |
-| `scalar-wider-than-63-bits` | `r ≥ 2^63` (B3) |
+| `scalar-wider-than-63-bits` | `r ≥ 2^63`: on `rho-koblitz` until B3, on `kic` until B3b |
+| `scalar-wider-than-127-bits` | `r ≥ 2^127` on `rho-koblitz`, from B3. No curve that passes the field gate reaches it, since `r ≤ #E < 2^127` there; it is stated so that the gate is total. |
 | `even-extension-degree` | `kic` and `rho-koblitz` need `e` odd. Their one-word point lifting solves `z² + z = c` by the half-trace, and the orbit maps assume the distinct factors of `x^n − 1` that an odd `n` gives (`koblitz_index_calculus.rs`). |
 | `subfield-curve-unsupported` | `k > 1` on `kic` before B2, and on `rho-koblitz` always |
 | `subfield-too-large` | `k > 8` |
@@ -435,7 +437,7 @@ The gate codes:
 | `subgroup-smaller-than-cofactor` | `kic` and `rho-koblitz` need `r > h`, as `KoblitzCurve`'s own construction does |
 | `not-the-identity` | `trivial` takes the identity only |
 | `over-budget` | an estimate exceeds the budget |
-| `not-yet-supported` | a feature of the schema that a later step implements. The message names the feature and the step. B1 uses it for prime and extension fields, the other curve forms, named curves, one arm alone, `recipe: auto`, F1, F2 and more than one thread. |
+| `not-yet-supported` | a feature of the schema that a later step implements. The message names the feature and the step. B1 uses it for prime and extension fields, the other curve forms, named curves, one arm alone, `recipe: auto`, F1, F2 and more than one thread. From B3, `solve: rho` runs. Under it, v1's hashed and random targets past one word wait for B4, and so does v1's generator rule. |
 
 ### 5.3 Recipes
 
@@ -642,12 +644,26 @@ The curves the cases use:
 | **B2** | <ul><li>prime and extension fields</li><li>the other curve forms and their conversions</li><li>§4.5 methods 3–4</li><li>the importers for `rho-negation`, `ic-binary-s4`, `ic-prime-s3` and `rho-bignum`</li><li>estimates and budgets</li></ul> | <ul><li>C001–C051 pass</li><li>the same pin, translation and timing checks as B1</li><li>the estimate's error reported at the suite's sizes</li></ul> |
 
 B3–B7 are unchanged from the plan, with these refinements:
-- **B3** lifts `kic`, `rho-koblitz` and `rho-negation` to `n ≤ 127`.
-  - C027's refusal then changes, by the `until` rule: at `n = 83` the
-    index calculus's estimate exceeds any day-long budget, so `paired`
-    becomes `over-budget`.
-  - B3 adds the run the plan asks for as its own case: the gate file
-    with `solve: rho`, at F0.
+- **B3** (declared 2026-10-01 in
+  [`../rounds/B3-two-word-rho/PROTOCOL.md`](../rounds/B3-two-word-rho/PROTOCOL.md))
+  lifts `rho-koblitz` to `n ≤ 126` and `r < 2^127`, and adds
+  `solve: rho`.
+  - Its cases are [`../conformance/v2-b3/`](../conformance/v2-b3/cases.json),
+    C052–C058.
+  - C027 is retired by the `until` rule, and C054 succeeds it: `paired`
+    on the gate file is refused with `no-ic-route`, and `rho-koblitz` is
+    admitted.
+  - The plan's gate run is B3's measurement 5: the gate file with
+    `solve: rho`, at F0.
+  - B1's files are frozen, so the dated note C027 needs is in B3's
+    `cases.json`, and the programme's runner, `../conformance/run.py`,
+    applies the rule.
+- **B3b** lifts `kic` to `n ≤ 126` and runs the index calculus at F1.
+  C054 then changes by the `until` rule: at `n = 83` the index
+  calculus's estimate exceeds any day-long budget, so `paired` becomes
+  `over-budget`. (This was B3's own refinement before B3 was split.)
+- **`rho-negation` on two-word fields** follows its importer, which is
+  B2's.
 - **B4** adds the normal-basis import with the challenge.
 - **B5** adds `F_{p^k}`, after extending ICV1.
 
