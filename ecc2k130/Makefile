@@ -39,6 +39,8 @@
 #                        (default 0; requires TABLE_PIPE_SELECT)
 #   TABLE_BATCH_HINTS  reconverge split-forward v3 cycle probes across slots
 #                      before building the prefix (default 0)
+#   TABLE_BLOCK_HINTS  compact hinted slots across a CUDA block (default 0;
+#                      requires TABLE_BATCH_HINTS)
 #   CYCLE_FAST2  prove raw two-cycles after one affine step (default 0)
 #   CYCLE_PROFILE  diagnostic exact-v3 cold-probe counters (default 0)
 #   TABLE_PHASE_POPC  phase via eight L-bit popc planes (default 0;
@@ -130,6 +132,9 @@ TABLE_PIPE_SELECT ?= 0
 TABLE_SPLIT_FORWARD ?= 0
 # Resolve the split-forward pass's cold v3 hints after all raw tags are known.
 TABLE_BATCH_HINTS ?= 0
+# Compact up to TABLE_HINT_QUEUE pending (thread,slot) pairs in shared memory.
+TABLE_BLOCK_HINTS ?= 0
+TABLE_HINT_QUEUE ?= 512
 # Prove raw two-cycles after one affine step and one denominator check.
 CYCLE_FAST2 ?= 0
 # Count exact-v3 cold-probe outcomes. Diagnostic only; instrumented timing is
@@ -254,7 +259,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_PHASE_POPC=$(TABLE_PHASE_POPC) \
-       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_TABLE_SPLIT_FORWARD=$(TABLE_SPLIT_FORWARD) -DECC_TABLE_BATCH_HINTS=$(TABLE_BATCH_HINTS) -DECC_CYCLE_FAST2=$(CYCLE_FAST2) -DECC_CYCLE_PROFILE=$(CYCLE_PROFILE) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
+       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_TABLE_SPLIT_FORWARD=$(TABLE_SPLIT_FORWARD) -DECC_TABLE_BATCH_HINTS=$(TABLE_BATCH_HINTS) -DECC_TABLE_BLOCK_HINTS=$(TABLE_BLOCK_HINTS) -DECC_TABLE_HINT_QUEUE=$(TABLE_HINT_QUEUE) -DECC_CYCLE_FAST2=$(CYCLE_FAST2) -DECC_CYCLE_PROFILE=$(CYCLE_PROFILE) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_PACKED_CHAINS=$(PACKED_CHAINS) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
