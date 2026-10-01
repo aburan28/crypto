@@ -86,6 +86,11 @@ speedup, and its multi-word figures are new rows, not gains.
    and counts; the host manifest and the isolation record. A run has one
    hour.
 
+   [`run.py`](run.py) runs them (`manifest`, then `f0`) through the
+   programme's runner, and [`analyse.py`](analyse.py) reads them,
+   replaying both arms' certificates in B1's generator arithmetic.
+   Both were added to this declaration before any B4 measurement.
+
 ## B4's cases
 
 `conformance/v2-b4/`, written by its `make_cases.py` with B1's
