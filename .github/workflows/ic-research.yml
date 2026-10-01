@@ -7,12 +7,60 @@ on:
       - "tests/ic_*.rs"
       - "Cargo.toml"
       - "docs/ic/**"
+      # Inputs and outputs of scripts/build_ic_leaderboard.py (job `leaderboard`).
+      - "scripts/build_ic_leaderboard.py"
+      - "scripts/curve_id.py"
+      - "docs/curves/registry.json"
+      - "docs/ic-leaderboard.html"
+      - "research/ic_rho_reference_20260923/analysis.json"
+      - "research/ic_rho_reference_20260923/reprice/ic-boundary-ledger-round5-2026-09-22.json"
+      - "research/ic_exponent_20260926/analysis.json"
+      - "research/ic_constructions_20260926/analysis.json"
+      - "research/ic_descent_20260930/analysis-isolated.json"
+      - "research/ic_descent_20260930/runs-isolated/main/**/r*-candidate.price.json"
+      - "research/ic_single_target_20260930/analysis.json"
+      - "research/ic_single_target_20260930/runs/*/T01.params.json"
+      - ".github/workflows/ic-research.yml"
+  # Two pull requests that each leave the leaderboard fresh can merge into a
+  # stale one, so the leaderboard check also runs on main.  Only that job runs
+  # on a push; the CLI build is for pull requests.
+  push:
+    branches: [main]
+    paths:
+      - "docs/ic/**"
+      - "scripts/build_ic_leaderboard.py"
+      - "scripts/curve_id.py"
+      - "docs/curves/registry.json"
+      - "docs/ic-leaderboard.html"
+      - "research/ic_rho_reference_20260923/analysis.json"
+      - "research/ic_rho_reference_20260923/reprice/ic-boundary-ledger-round5-2026-09-22.json"
+      - "research/ic_exponent_20260926/analysis.json"
+      - "research/ic_constructions_20260926/analysis.json"
+      - "research/ic_descent_20260930/analysis-isolated.json"
+      - "research/ic_descent_20260930/runs-isolated/main/**/r*-candidate.price.json"
+      - "research/ic_single_target_20260930/analysis.json"
+      - "research/ic_single_target_20260930/runs/*/T01.params.json"
       - ".github/workflows/ic-research.yml"
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  leaderboard:
+    # docs/ic/leaderboard.json, docs/ic/LEADERBOARD.md and docs/ic-leaderboard.html
+    # are derived from frozen evidence and the curve registry.  This fails when
+    # any of the three is stale (for example after a curve is registered), or
+    # was edited by hand.  Fix: python3 scripts/build_ic_leaderboard.py
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Leaderboard outputs match the builder
+        run: python3 scripts/build_ic_leaderboard.py --check
   validate-cli:
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

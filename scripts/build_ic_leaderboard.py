@@ -11,6 +11,10 @@ Outputs, all derived and never measured here:
 - docs/ic/LEADERBOARD.md      the same tables in Markdown
 - docs/ic-leaderboard.html    the page
 
+The board has no single unit.  It is three tables (A, B, C), each priced in
+its own unit against its own reference and floor, and the outputs state
+those at the head of each table; see FAMILIES.
+
 Every curve is named by its ICV1 slug (docs/curves/ICV1.md) through the
 curve registry.  Every number is read from a frozen file named in
 `SOURCES`; the only arithmetic here is averaging the repetitions a report
@@ -78,6 +82,81 @@ VARIANTS = {
 }
 REGIME_NAME = {"prime": "Prime field", "char2": "Random binary", "koblitz": "Koblitz",
                "koblitz_batch": "Koblitz, 32-target batch"}
+
+# The board mixes three unit families.  Their S, × reference and × floor are
+# different quantities: a different unit (a count of group-addition
+# equivalents, or a clock reading in batched additions), a different
+# reference (one-target rho on the matched instance, one-target rho measured
+# as built, or 32-target batch rho) and a different floor (a one-target
+# bound in additions, a one-target bound in steps, or its 32-target batch
+# share).  Every table, chart and summary below reads inside one family.
+# The texts are the unit and reference definitions of the sources named in
+# SOURCES: ledger §12 and §18 (table B), §20 and §22 (table C), §23 (table A);
+# research/ic_exponent_20260926/PROTOCOL.md and
+# research/ic_single_target_20260930/PROTOCOL.md.
+FAMILY_OF = {"koblitz": "A", "prime": "B", "char2": "B", "koblitz_batch": "C"}
+FAMILIES = {
+    "A": {
+        "title": "Koblitz, one target", "regimes": ["koblitz"], "section": "§23",
+        "status": "primary comparison: one target, as AGENTS.md's one-target rule requires",
+        "targets": "one unseen public point per process, 64 per size",
+        "unit": "one batched affine addition (`add_many` over 1,024 subgroup points), per √r",
+        "unit_how": "A clock reading, not a count: `ic price` times each phase exclusively, on one thread, "
+                    "and divides by this unit, measured around each repetition (§20, §23).",
+        "reference": "One-target rho on the same point, measured as built (its set-up plus its walk), "
+                     "in the same unit and the same process; its answer replayed and verified (§23).",
+        "floor": "√(π/4n) rho steps per √r: generic, one target, no precomputation, A = 2n by signed "
+                 "Frobenius and negation, n the extension degree. Stated in steps and not rescaled to "
+                 "units, so × floor here divides units by steps.",
+        "unit_short": "batched-addition units", "ref_short": "one-target rho",
+    },
+    "B": {
+        "title": "Prime and random-binary ladder", "regimes": ["prime", "char2"], "section": "§18",
+        "status": "primary comparison: one target per instance",
+        "targets": "one planted target per instance",
+        "unit": "one group-addition equivalent (GAE), per √r",
+        "unit_how": "A count, not a clock: exact native operation counts converted to additions at the "
+                    "dimensionless ratios pinned per instance in `docs/ic/calibration.json` (ns per native "
+                    "operation over ns per group addition; all 13 instances used the pinned ratios; "
+                    "`ic boundary`, ledger §12). No conversion to table A's or C's unit is applied or "
+                    "claimed.",
+        "reference": "Matched Pollard rho on the same instance, one target: the negation-map r-adding "
+                     "walk (A = 2), counted in GAE, verified [d]G = Q (§18).",
+        "floor": "√(π/4) ≈ 0.886 GAE per √r: generic, one target, no precomputation, A = 2 usable "
+                 "automorphisms (negation).",
+        "unit_short": "GAE", "ref_short": "matched negation-map rho",
+    },
+    "C": {
+        "title": "Koblitz, 32-target batch", "regimes": ["koblitz_batch"], "section": "§19–§22",
+        "status": "historical diagnostic under AGENTS.md's one-target rule: 32 targets solved together",
+        "targets": "32 targets solved together, priced per target",
+        "unit": "one batched affine addition (`add_many` over 1,024 subgroup points), per √r, per target",
+        "unit_how": "A clock reading, not a count: `ic price` times each phase exclusively, on one thread, "
+                    "and divides by this unit (§20, §22 isolated re-run).",
+        "reference": "Batch rho on the same 32 targets (signed Frobenius and negation), its counted "
+                     "operations priced at the canonical step, one batched addition plus the table "
+                     "canonicalisation, in the same process (§20). Collisions shared across the 32 "
+                     "targets are in its cost per target.",
+        "floor": "L(32)·√(π/4n) steps per √r per target, with L(32) = 0.19869: the one-target floor of "
+                 "table A times Kuhn–Struik's batch share. Stated in steps and not rescaled to units, "
+                 "and a smaller object than table A's floor, so × floor in C and in A do not compare.",
+        "unit_short": "batched-addition units, per target", "ref_short": "32-target batch rho",
+    },
+}
+
+
+def rng(lo: float, hi: float) -> str:
+    return g3(lo) if lo == hi else f"{g3(lo)}–{g3(hi)}"
+
+
+def step_line(f: dict) -> str | None:
+    """What one rho step costs in the family's unit, where the unit prices a step."""
+    parts = []
+    if f.get("rho_step_units_as_built"):
+        parts.append(f"rho's walk as built costs {rng(*f['rho_step_units_as_built'])} units a step")
+    if f.get("canonical_step_units"):
+        parts.append(f"the canonical step costs {rng(*f['canonical_step_units'])}")
+    return "; ".join(parts) or None
 
 
 def sha256(rel: str) -> str:
@@ -244,6 +323,7 @@ def koblitz_rows(names: Names) -> list[dict]:
             "ratio_rho_section20": before["ratio"],
             "one_target_cold_ratio_section20": before["cold_ratio_M1"],
             "speedup": x["speedup"]["geomean"], "speedup_ci": [x["speedup"]["lo"], x["speedup"]["hi"]],
+            "canonical_step_units": before["canonical_step_units"],
             "ratio_floor": s / floor_s, "verified": bool(x["pins"] and x["control1"]),
         }
         rows.append({
@@ -296,6 +376,8 @@ def koblitz_one_target_rows(names: Names) -> list[dict]:
             "ic_online_over_precomputation_model": x["precomputation_boundary_model"]["ic_online_over_bl"],
             "break_even_targets": x["break_even_targets"]["value"],
             "construction_artefact": artefact,
+            "canonical_step_units": x["canonical_step_units"],
+            "rho_step_units_as_built": x["rho_units_per_step_median"],
             "cold_ratio_without_curve_construction": d["cold_ratio_without_curve_construction"],
             "ratio_floor": s / floor_s,
             "verified": bool(x["all_rows_pass_the_check"]),
@@ -390,10 +472,24 @@ def roster(names: Names, measured: set[str]) -> list[dict]:
     return out
 
 
+def families(board: list[dict]) -> dict:
+    out = {}
+    for code, f in FAMILIES.items():
+        rows = [r for r in board if r["family"] == code]
+        canon = [r["best"]["canonical_step_units"] for r in rows if "canonical_step_units" in r["best"]]
+        built = [r["best"]["rho_step_units_as_built"] for r in rows if "rho_step_units_as_built" in r["best"]]
+        out[code] = {**f, "rows": len(rows),
+                     "canonical_step_units": [min(canon), max(canon)] if canon else None,
+                     "rho_step_units_as_built": [min(built), max(built)] if built else None}
+    return out
+
+
 def build() -> dict:
     names = Names()
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
+    for r in board:
+        r["family"] = FAMILY_OF[r["regime"]]
     measured = {r["slug"] for r in board}
     leaders = {}
     for regime in ("prime", "char2", "koblitz", "koblitz_batch"):
@@ -411,12 +507,16 @@ def build() -> dict:
     return {
         "schema_version": 1,
         "generated_by": "scripts/build_ic_leaderboard.py",
-        "unit": "S = total group-addition equivalents / sqrt(r), whole pipeline, cold, every phase",
+        "unit": "none: the board has three families, each with its own unit, reference and floor "
+                "(families[*].unit, .reference, .floor); S, ratio to reference and ratio to floor "
+                "are comparable within a family and nowhere else",
         "what_this_is": "A view of frozen whole-pipeline ECDLP measurements, curve by curve, "
-                        "each against its matched reference and the generic floor. No new measurement.",
+                        "each against its own family's matched reference and generic floor. "
+                        "No new measurement.",
         "what_this_is_not": ["a measurement", "a speedup", "a claim about any curve not on it"],
         "class": "accounting",
         "sources": {k: {"path": v, "sha256": sha256(v)} for k, v in SOURCES.items()},
+        "families": families(board),
         "leaders": leaders, "board": board, "oracles": oracle_rows(names),
         "exponents": exponents(), "roster": roster(names, measured),
         "phases": [{"id": i, "name": n, "what": w} for i, n, w in PHASES],
@@ -446,29 +546,57 @@ def esc(s) -> str:
     return html.escape(str(s))
 
 
+def rich(s) -> str:
+    """Escaped text with `code` spans, for the family definitions shared with the Markdown."""
+    return re.sub(r"`([^`]+)`", r"<code>\1</code>", esc(s))
+
+
 def markdown(doc: dict) -> str:
+    fams = doc["families"]
     L = ["# Index-calculus leaderboard", "",
          "Generated by `scripts/build_ic_leaderboard.py` from frozen evidence; the page is "
-         "[`docs/ic-leaderboard.html`](../ic-leaderboard.html).  Unit: `S = total operations / sqrt(r)`, "
-         "the whole pipeline, cold.  Curves are named by ICV1 slug ([`docs/curves/ICV1.md`](../curves/ICV1.md)).  "
-         "No row is below its reference.", "",
-         "| regime | curve | log₂ r | recipe | S, IC | S, reference | × reference | × floor | ok |",
-         "|:--|:--|--:|:--|--:|--:|--:|--:|:--|"]
-    for r in doc["board"]:
-        b = r["best"]
-        L.append(f"| {REGIME_NAME[r['regime']]} | `{r['slug']}` | {r['log2_r']:.1f} | {b['label']} "
-                 f"| {g3(b['s'])} | {g3(r['reference_s'])} | **{times(b['ratio_rho'])}** "
-                 f"| {times(b['ratio_floor'])} | {'✓' if b['verified'] else '✗'} |")
-    L += ["", "Reference: prime and random binary rows, the matched negation-map rho on one target "
-          "(ledger §18); Koblitz rows, batch rho on the same 32 targets (§19–§22), a historical "
-          "diagnostic under the one-target rule in AGENTS.md.", "",
-          "## Phases, as a share of S", "",
-          "| curve | " + " | ".join(n for _, n, _ in PHASES) + " |",
-          "|:--|" + "--:|" * len(PHASES)]
-    for r in doc["board"]:
-        ph, s = r["best"]["phases_s"], r["best"]["s"]
-        L.append(f"| `{r['slug']}` | " + " | ".join(
-            (f"{100 * ph[i] / s:.1f}%" if i in ph else "—") for i, _, _ in PHASES) + " |")
+         "[`docs/ic-leaderboard.html`](../ic-leaderboard.html).  Curves are named by ICV1 slug "
+         "([`docs/curves/ICV1.md`](../curves/ICV1.md)).  No row is below its reference.", "",
+         "**There is no single unit on this page.**  The board is three tables, A, B and C.  Each is "
+         "priced in its own unit, against its own reference and floor, stated at its head.  `S`, "
+         "`× reference` and `× floor` are comparable within a table and nowhere else.  The same slug "
+         "can appear in two tables with different `S`, because the unit, the reference and the number "
+         "of targets differ.", ""]
+    for code in ("A", "B", "C"):
+        f = fams[code]
+        rows = [r for r in doc["board"] if r["family"] == code]
+        multi = len(f["regimes"]) > 1
+        L += [f"## Table {code}: {f['title']} ({f['section']})", "",
+              f"- **Unit:** {f['unit']}.  {f['unit_how']}",
+              f"- **Reference:** {f['reference']}",
+              f"- **Floor:** {f['floor']}",
+              f"- **Targets:** {f['targets']}",
+              f"- **Status:** {f['status']}"]
+        steps = step_line(f)
+        if steps:
+            L.append(f"- **Rho step:** {steps}")
+        head = (["regime"] if multi else []) + ["curve", "log₂ r", "recipe", "S, IC", "S, reference",
+                                                "× reference", "S, floor", "× floor", "ok"]
+        align = (([":--"] if multi else []) + [":--", "--:", ":--", "--:", "--:", "--:", "--:", "--:", ":--"])
+        L += ["", "| " + " | ".join(head) + " |", "|" + "|".join(align) + "|"]
+        for r in rows:
+            b = r["best"]
+            cells = ([REGIME_NAME[r["regime"]]] if multi else []) + [
+                f"`{r['slug']}`", f"{r['log2_r']:.1f}", b["label"], g3(b["s"]), g3(r["reference_s"]),
+                f"**{times(b['ratio_rho'])}**", g3(r["floor_s"]), times(b["ratio_floor"]),
+                "✓" if b["verified"] else "✗"]
+            L.append("| " + " | ".join(cells) + " |")
+        L.append("")
+    L += ["## Phases, as a share of S", "",
+          "Shares are fractions of each row's own `S`, so they carry no unit; read each row in the "
+          "table named in its first column.", "",
+          "| table | curve | " + " | ".join(n for _, n, _ in PHASES) + " |",
+          "|:--|:--|" + "--:|" * len(PHASES)]
+    for code in ("A", "B", "C"):
+        for r in (r for r in doc["board"] if r["family"] == code):
+            ph, s = r["best"]["phases_s"], r["best"]["s"]
+            L.append(f"| {code} | `{r['slug']}` | " + " | ".join(
+                (f"{100 * ph[i] / s:.1f}%" if i in ph else "—") for i, _, _ in PHASES) + " |")
     L += ["", "## Sources", ""]
     for k, v in doc["sources"].items():
         L.append(f"- `{v['path']}` — sha256 `{v['sha256'][:16]}…`")
@@ -536,6 +664,11 @@ code, .slug { font-family: var(--mono); font-size: 12px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--ink-2); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
 .muted { color: var(--muted); }
+.defs { margin-block: 0; display: flex; flex-direction: column; gap: 6px; }
+.defs div { display: grid; grid-template-columns: 84px 1fr; gap: 12px; }
+.defs dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.defs dd { margin: 0; font-size: 13px; color: var(--ink-2); max-width: 90ch; }
+@media (max-width: 560px) { .defs div { grid-template-columns: 1fr; gap: 1px; } }
 svg text { fill: var(--ink-2); font-family: var(--mono); font-size: 10px; }
 svg .axis { stroke: var(--rule); }
 svg .rho { stroke: var(--bound); stroke-width: 1.5; }
@@ -573,7 +706,7 @@ def ratio_chart(board: list[dict]) -> str:
                f'<text x="{x(1) + 4:.1f}" y="12">reference = 1×</text>')
     for i, regime in enumerate(("koblitz", "prime", "char2")):
         y = 36 + i * 26
-        out.append(f'<text x="0" y="{y + 4}">{esc(REGIME_NAME[regime])}</text>')
+        out.append(f'<text x="0" y="{y + 4}">{esc(REGIME_NAME[regime])} ({FAMILY_OF[regime]})</text>')
         for r in (r for r in board if r["regime"] == regime):
             v = r["best"]["ratio_rho"]
             out.append(f'<circle cx="{x(v):.1f}" cy="{y}" r="5" fill="var(--data)" fill-opacity=".55" '
@@ -604,30 +737,40 @@ def page(doc: dict, standalone: bool) -> str:
              '<span class="eyebrow">ECDLP · index calculus · whole pipeline · accounting view, no new measurement</span>'
              '<h1>Index Calculus Leaderboard</h1>'
              '<p class="verdict">Every curve this repository has priced end to end, with the best index-calculus '
-             'recipe measured on it, in one unit, S = operations / √r, against Pollard rho on the same curve and '
-             'the same point. <strong>Cold, set-up included, no row is below rho.</strong> On one unseen Koblitz '
-             f'point the index calculus\'s online interval is {g3(online_lo)}–{g3(online_hi)}× faster than rho once '
+             'recipe measured on it, against Pollard rho on the same curve and the same point. <strong>The units '
+             'differ between the three tables below, and so do the references and the floors: S and the ratios '
+             'are comparable inside a table and nowhere else.</strong> <strong>Cold, set-up included, no row is '
+             'below its reference.</strong> On one unseen point of a Koblitz curve (table A) '
+             f'the index calculus\'s online interval is {g3(online_lo)}–{g3(online_hi)}× faster than rho once '
              'its reusable set-up exists, but the set-up is paid first: cold it is '
              f'{g3(min(cold))}–{g3(max(cold))}× slower, and a generic walk given the same precomputation would be '
-             f'{g3(min(model))}–{g3(max(model))}× faster online again (a model). Prime and random-binary curves, '
+             f'{g3(min(model))}–{g3(max(model))}× faster online again (a model). Prime and random-binary curves (table B), '
              f'one target each: {times(L["prime"]["ratio_rho"])} to {times(L["prime"]["largest"]["ratio_rho"])} and '
              f'{times(L["char2"]["ratio_rho"])} to {times(L["char2"]["largest"]["ratio_rho"])}.</p>'
              '<dl class="facts">')
+    def unit_ref(code: str) -> str:
+        f = doc["families"][code]
+        return f'<br>× {esc(f["ref_short"])}, in {esc(f["unit_short"])} (table {code})'
+
     P.append(f'<div class="fact"><dt>Koblitz · one point, cold</dt><dd>{times(K1["ratio_rho"])}</dd>'
              f'<p>at log₂ r = {K1["log2_r"]:.1f}, <span class="slug">{esc(K1["slug"])}</span>; online alone '
-             f'{times(K1["online_speedup"])} faster than rho; largest size {times(K1["largest"]["ratio_rho"])} cold</p></div>')
+             f'{times(K1["online_speedup"])} faster than rho; largest size {times(K1["largest"]["ratio_rho"])} cold'
+             f'{unit_ref("A")}</p></div>')
     for g in ("prime", "char2"):
         ld = L[g]
         big = ld["largest"]
         P.append(f'<div class="fact"><dt>Closest · {esc(REGIME_NAME[g])}</dt><dd>{times(ld["ratio_rho"])}</dd>'
                  f'<p>at log₂ r = {ld["log2_r"]:.1f}, <span class="slug">{esc(ld["slug"])}</span>; '
-                 f'at the largest size, log₂ r = {big["log2_r"]:.1f}: {times(big["ratio_rho"])}</p></div>')
+                 f'at the largest size, log₂ r = {big["log2_r"]:.1f}: {times(big["ratio_rho"])}'
+                 f'{unit_ref("B")}</p></div>')
     P.append(f'<div class="fact"><dt>Curves</dt><dd>{len({r["slug"] for r in board})} priced</dd>'
              f'<p>of {len(doc["roster"])} named in the repository; every one by its ICV1 slug</p></div></dl></header>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'
-                  '<th class="n">S, ref</th><th class="n">× ref</th><th class="n">× floor</th><th>phases</th><th>ok</th>')
+                  '<th class="n">S, ref</th><th class="n">× ref</th><th class="n">S, floor</th>'
+                  '<th class="n">× floor</th><th>phases</th><th>ok</th>')
+    ncols = 14
 
     def board_rows(g: str) -> None:
         for i, r in enumerate(by_regime[g], 1):
@@ -645,45 +788,79 @@ def page(doc: dict, standalone: bool) -> str:
                            f'without it {times(b["cold_ratio_without_curve_construction"])}</span>')
             if "ratio_rho_section21" in b:
                 ci += (f'<br><span class="muted">was {times(b["ratio_rho_section21"])} (§21)</span>'
-                       f'<br><span class="muted">one target, cold: {times(b["one_target_cold_ratio_section20"])} (§20)</span>')
+                       f'<br><span class="muted">derived one-target cold estimate: {times(b["one_target_cold_ratio_section20"])} '
+                     f'(§20; not table A\'s measurement)</span>')
             rank = "—" if b.get("construction_artefact") else i
             P.append(f'<tr class="{"lead" if r["slug"] == L[g]["slug"] else ""}"><td class="n">{rank}</td>'
                      f'<td><span class="slug">{esc(r["slug"])}</span></td><td class="n">{r["log2_r"]:.1f}</td>'
                      f'<td class="recipe">{esc(b["label"])}</td><td class="n">{b["m"]}</td><td class="n">{b["base_points"]:,}</td>'
                      f'<td class="n">{b["columns"]:,}</td><td class="n">{g3(b["s"])}</td>'
                      f'<td class="n">{g3(r["reference_s"])}</td><td class="n"><span class="ratio">{times(b["ratio_rho"])}</span>{ci}</td>'
-                     f'<td class="n">{times(b["ratio_floor"])}</td><td>{phase_bar(b["phases_s"], b["s"])}</td>'
+                     f'<td class="n">{g3(r["floor_s"])}</td><td class="n">{times(b["ratio_floor"])}</td><td>{phase_bar(b["phases_s"], b["s"])}</td>'
                      f'<td>{"✓" if b["verified"] else "✗"}</td></tr>')
 
-    # The board.
+
+    def family_defs(code: str) -> str:
+        f = doc["families"][code]
+        defs = [("Unit", f"{f['unit']}. {f['unit_how']}"), ("Reference", f["reference"]),
+                ("Floor", f["floor"]), ("Targets", f["targets"]), ("Status", f["status"])]
+        steps = step_line(f)
+        if steps:
+            defs.append(("Rho step", steps))
+        return ('<dl class="defs">' + "".join(
+            f'<div><dt>{esc(k)}</dt><dd>{rich(v)}</dd></div>' for k, v in defs) + '</dl>'
+            f'<p class="muted">Read S, × ref and × floor in table {code} only.</p>')
+
+    def family_table(code: str) -> None:
+        f = doc["families"][code]
+        multi = len(f["regimes"]) > 1
+        P.append(f'<div class="scroll"><table><thead><tr>{head_cells}</tr></thead><tbody>')
+        for g in f["regimes"]:
+            if multi:
+                P.append(f'<tr><td colspan="{ncols}"><span class="chip">{esc(REGIME_NAME[g])}</span></td></tr>')
+            board_rows(g)
+        P.append('</tbody></table></div>')
+
+    # The board: the index, the chart, and what the three tables are.
     P.append('<section class="panel" id="board"><h2>The board</h2>'
-             '<p>One row per curve: its best recipe, ranked within its family by the cold ratio to rho, the whole '
-             'method from set-up to a verified logarithm. Every row solves one target, as AGENTS.md\'s one-target '
-             'rule requires: the prime and random-binary rows against the matched negation-map rho (ledger §18), '
-             'the Koblitz rows on one unseen public point per process against one-target rho on the same point '
-             '(§23, 64 points per size). For the Koblitz rows the online interval, the reading with rho at the '
-             'canonical step and the generic-precomputation model sit beside the cold ratio, as §23 requires. '
-             'Floor: the generic bound √(π/2A) in the same unit. The bar splits S into phases. A walked-target '
-             'row on the ladder is resolved to about a factor 1.8 either way at three repetitions (ledger §13.7).</p>'
+             '<p>One row per curve: its best recipe, ranked within its table by the cold ratio to that table\'s '
+             'reference, the whole method from set-up to a verified logarithm. <strong>There is no single unit '
+             'here.</strong> Tables A, B and C below are priced in different units against different references '
+             'and floors, stated at the head of each; S, × ref and × floor are comparable inside a table and '
+             'nowhere else. Tables A and B solve one target per row, as AGENTS.md\'s one-target rule requires: '
+             'A on one unseen public point per process against one-target rho on the same point (§23, 64 points '
+             'per size), B against the matched negation-map rho (ledger §18). Table C is a historical 32-target '
+             'diagnostic. For the Koblitz rows of A the online interval, the reading with rho at the canonical '
+             'step and the generic-precomputation model sit beside the cold ratio, as §23 requires. The bar '
+             'splits S into phases. A walked-target row on the ladder is resolved to about a factor 1.8 either '
+             'way at three repetitions (ledger §13.7).</p>'
              f'<div class="scroll">{ratio_chart(board)}</div>'
+             '<p class="muted">Each dot is a ratio to its own table\'s reference, in that table\'s unit; the '
+             'three rows of dots are not comparable with one another.</p>'
              '<div class="legend">' + "".join(
                  f'<span><i style="background:var(--ph-{pid})"></i>{esc(n)}</span>' for pid, n, _ in PHASES)
-             + f'</div><div class="scroll"><table><thead><tr>{head_cells}</tr></thead><tbody>')
-    for g in ("koblitz", "prime", "char2"):
-        P.append(f'<tr><td colspan="13"><span class="chip">{esc(REGIME_NAME[g])}</span> '
-                 f'<span class="muted">reference: {esc(by_regime[g][0]["reference"])}</span></td></tr>')
-        board_rows(g)
-    P.append('</tbody></table></div></section>')
+             + '</div></section>')
+    for code, anchor, title in (("A", "board-A", "Table A · Koblitz, one target"),
+                                ("B", "board-B", "Table B · prime and random-binary ladder")):
+        f = doc["families"][code]
+        P.append(f'<section class="panel" id="{anchor}"><h2>{esc(title)} <span class="chip">{esc(f["section"])}</span></h2>'
+                 + family_defs(code))
+        family_table(code)
+        P.append('</section>')
 
-    # The Koblitz batch: a historical diagnostic.
-    P.append('<section class="panel" id="batch"><h2>Koblitz, 32 targets in a batch</h2>'
+    # Table C: the Koblitz batch, a historical diagnostic.
+    fc = doc["families"]["C"]
+    P.append(f'<section class="panel" id="batch"><h2>Table C · Koblitz, 32 targets in a batch '
+             f'<span class="chip">{esc(fc["section"])}</span></h2>'
              '<p>The collection thread\'s rounds before §23 solved 32 targets together and priced them per target '
              'against batch rho on the same 32 (§19–§22). Under the one-target rule that is a historical '
              'diagnostic, not a primary comparison; it is kept here with its §21 figure as the before mark and '
-             'the one-target cold ratio §20 measured. The phase split is the most detailed the thread has.</p>'
-             f'<div class="scroll"><table><thead><tr>{head_cells}</tr></thead><tbody>')
-    board_rows("koblitz_batch")
-    P.append('</tbody></table></div></section>')
+             'the one-target cold ratio §20 derived from this run (shared phases plus one mean descent, against '
+             'single-target rho), which table A\'s measured figure replaces. The phase split is the most detailed '
+             'the thread has.</p>'
+             + family_defs("C"))
+    family_table("C")
+    P.append('</section>')
 
     # Every recipe, every curve (the ladder).
     ladder = [r for r in board if r["regime"] in ("prime", "char2")]
@@ -693,7 +870,7 @@ def page(doc: dict, standalone: bool) -> str:
             if v["variant"] not in variants:
                 variants.append(v["variant"])
     P.append('<section class="panel" id="recipes"><h2>Every recipe on every ladder curve</h2>'
-             '<p>Ratio to the matched rho for each variant the ladder ran, three repetitions averaged. '
+             '<p>Table B only: ratio to the matched rho for each variant the ladder ran, three repetitions averaged. '
              'The minimum per curve is the row on the board. The balanced recipe sizes the base at the '
              'family optimum F = (c·#E·t/k)<sup>1/3</sup>, which is 0.75·r<sup>1/6</sup> in S on a '
              'prime-order curve (ledger §11.2): a rising cost against a flat reference, so this family '
@@ -729,7 +906,7 @@ def page(doc: dict, standalone: bool) -> str:
     ]
     P.append('<section class="panel" id="steps"><h2>The ECDLP, step by step</h2>'
              '<p>What each phase computes, what it costs, and how fast it grows. The exponent α is the fit of that '
-             'phase\'s operations to r<sup>α</sup> on the Round-5 ladder for the balanced recipe; rho grows as '
+             'phase\'s operations to r<sup>α</sup> on the Round-5 ladder (table B, in GAE) for the balanced recipe; rho grows as '
              'r<sup>1/2</sup>, so a phase with α above ½ loses ground at every size. The share columns are the '
              'phase\'s part of S on each family\'s leading row.</p><div class="scroll"><table><thead><tr>'
              '<th>phase</th><th>what it does</th><th>cost model</th><th class="n">α prime</th><th class="n">α binary</th>'

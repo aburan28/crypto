@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
  "generated_by": "scripts/build_ic_leaderboard.py",
- "unit": "S = total group-addition equivalents / sqrt(r), whole pipeline, cold, every phase",
- "what_this_is": "A view of frozen whole-pipeline ECDLP measurements, curve by curve, each against its matched reference and the generic floor. No new measurement.",
+ "unit": "none: the board has three families, each with its own unit, reference and floor (families[*].unit, .reference, .floor); S, ratio to reference and ratio to floor are comparable within a family and nowhere else",
+ "what_this_is": "A view of frozen whole-pipeline ECDLP measurements, curve by curve, each against its own family's matched reference and generic floor. No new measurement.",
  "what_this_is_not": [
   "a measurement",
   "a speedup",
@@ -44,7 +44,73 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "90a9f8f02352fd00efde42d4355f78ad88c1f3132e1af080f890abd8be5b4df0"
+   "sha256": "1c702c1a2c621d23d783dd7ba5844a968ed9d0952aac9c5dcd85028a0e889c41"
+  }
+ },
+ "families": {
+  "A": {
+   "title": "Koblitz, one target",
+   "regimes": [
+    "koblitz"
+   ],
+   "section": "§23",
+   "status": "primary comparison: one target, as AGENTS.md's one-target rule requires",
+   "targets": "one unseen public point per process, 64 per size",
+   "unit": "one batched affine addition (`add_many` over 1,024 subgroup points), per √r",
+   "unit_how": "A clock reading, not a count: `ic price` times each phase exclusively, on one thread, and divides by this unit, measured around each repetition (§20, §23).",
+   "reference": "One-target rho on the same point, measured as built (its set-up plus its walk), in the same unit and the same process; its answer replayed and verified (§23).",
+   "floor": "√(π/4n) rho steps per √r: generic, one target, no precomputation, A = 2n by signed Frobenius and negation, n the extension degree. Stated in steps and not rescaled to units, so × floor here divides units by steps.",
+   "unit_short": "batched-addition units",
+   "ref_short": "one-target rho",
+   "rows": 6,
+   "canonical_step_units": [
+    2.142270081067134,
+    2.2734072757106256
+   ],
+   "rho_step_units_as_built": [
+    3.9850650183431062,
+    4.972046545147329
+   ]
+  },
+  "B": {
+   "title": "Prime and random-binary ladder",
+   "regimes": [
+    "prime",
+    "char2"
+   ],
+   "section": "§18",
+   "status": "primary comparison: one target per instance",
+   "targets": "one planted target per instance",
+   "unit": "one group-addition equivalent (GAE), per √r",
+   "unit_how": "A count, not a clock: exact native operation counts converted to additions at the dimensionless ratios pinned per instance in `docs/ic/calibration.json` (ns per native operation over ns per group addition; all 13 instances used the pinned ratios; `ic boundary`, ledger §12). No conversion to table A's or C's unit is applied or claimed.",
+   "reference": "Matched Pollard rho on the same instance, one target: the negation-map r-adding walk (A = 2), counted in GAE, verified [d]G = Q (§18).",
+   "floor": "√(π/4) ≈ 0.886 GAE per √r: generic, one target, no precomputation, A = 2 usable automorphisms (negation).",
+   "unit_short": "GAE",
+   "ref_short": "matched negation-map rho",
+   "rows": 13,
+   "canonical_step_units": null,
+   "rho_step_units_as_built": null
+  },
+  "C": {
+   "title": "Koblitz, 32-target batch",
+   "regimes": [
+    "koblitz_batch"
+   ],
+   "section": "§19–§22",
+   "status": "historical diagnostic under AGENTS.md's one-target rule: 32 targets solved together",
+   "targets": "32 targets solved together, priced per target",
+   "unit": "one batched affine addition (`add_many` over 1,024 subgroup points), per √r, per target",
+   "unit_how": "A clock reading, not a count: `ic price` times each phase exclusively, on one thread, and divides by this unit (§20, §22 isolated re-run).",
+   "reference": "Batch rho on the same 32 targets (signed Frobenius and negation), its counted operations priced at the canonical step, one batched addition plus the table canonicalisation, in the same process (§20). Collisions shared across the 32 targets are in its cost per target.",
+   "floor": "L(32)·√(π/4n) steps per √r per target, with L(32) = 0.19869: the one-target floor of table A times Kuhn–Struik's batch share. Stated in steps and not rescaled to units, and a smaller object than table A's floor, so × floor in C and in A do not compare.",
+   "unit_short": "batched-addition units, per target",
+   "ref_short": "32-target batch rho",
+   "rows": 9,
+   "canonical_step_units": [
+    1.7979598351260446,
+    2.299890357672487
+   ],
+   "rho_step_units_as_built": null
   }
  },
  "leaders": {
@@ -351,7 +417,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -598,7 +665,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -845,7 +913,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -1092,7 +1161,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -1339,7 +1409,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -1586,7 +1657,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -1833,7 +1905,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "prime",
@@ -2080,7 +2153,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "char2",
@@ -2281,7 +2355,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "char2",
@@ -2482,7 +2557,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "char2",
@@ -2683,7 +2759,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "char2",
@@ -2884,7 +2961,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "char2",
@@ -3085,7 +3163,8 @@
    },
    "source": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
    "round": "Round 5 (2026-09-22), reference §18 (2026-09-23)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "B"
   },
   {
    "regime": "koblitz",
@@ -3129,6 +3208,8 @@
      "ic_online_over_precomputation_model": 2.420286907320609,
      "break_even_targets": 7.1187482335527985,
      "construction_artefact": false,
+     "canonical_step_units": 2.1685398620292853,
+     "rho_step_units_as_built": 4.86695968803288,
      "cold_ratio_without_curve_construction": 6.313789246637844,
      "ratio_floor": 33.01435804053309,
      "verified": true
@@ -3164,13 +3245,16 @@
     "ic_online_over_precomputation_model": 2.420286907320609,
     "break_even_targets": 7.1187482335527985,
     "construction_artefact": false,
+    "canonical_step_units": 2.1685398620292853,
+    "rho_step_units_as_built": 4.86695968803288,
     "cold_ratio_without_curve_construction": 6.313789246637844,
     "ratio_floor": 33.01435804053309,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz",
@@ -3214,6 +3298,8 @@
      "ic_online_over_precomputation_model": 3.2853141362363862,
      "break_even_targets": 15.202756221157943,
      "construction_artefact": true,
+     "canonical_step_units": 2.255632469705837,
+     "rho_step_units_as_built": 4.972046545147329,
      "cold_ratio_without_curve_construction": 8.213014968979117,
      "ratio_floor": 69.18489342115318,
      "verified": true
@@ -3249,13 +3335,16 @@
     "ic_online_over_precomputation_model": 3.2853141362363862,
     "break_even_targets": 15.202756221157943,
     "construction_artefact": true,
+    "canonical_step_units": 2.255632469705837,
+    "rho_step_units_as_built": 4.972046545147329,
     "cold_ratio_without_curve_construction": 8.213014968979117,
     "ratio_floor": 69.18489342115318,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz",
@@ -3299,6 +3388,8 @@
      "ic_online_over_precomputation_model": 2.500894272351845,
      "break_even_targets": 9.884128309762037,
      "construction_artefact": false,
+     "canonical_step_units": 2.269717997999659,
+     "rho_step_units_as_built": 4.652925803784777,
      "cold_ratio_without_curve_construction": 8.891126124173486,
      "ratio_floor": 40.3210032810846,
      "verified": true
@@ -3334,13 +3425,16 @@
     "ic_online_over_precomputation_model": 2.500894272351845,
     "break_even_targets": 9.884128309762037,
     "construction_artefact": false,
+    "canonical_step_units": 2.269717997999659,
+    "rho_step_units_as_built": 4.652925803784777,
     "cold_ratio_without_curve_construction": 8.891126124173486,
     "ratio_floor": 40.3210032810846,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz",
@@ -3384,6 +3478,8 @@
      "ic_online_over_precomputation_model": 2.0210143621729992,
      "break_even_targets": 16.125485011850408,
      "construction_artefact": false,
+     "canonical_step_units": 2.142270081067134,
+     "rho_step_units_as_built": 3.9850650183431062,
      "cold_ratio_without_curve_construction": 15.240965981501452,
      "ratio_floor": 60.779189777284564,
      "verified": true
@@ -3419,13 +3515,16 @@
     "ic_online_over_precomputation_model": 2.0210143621729992,
     "break_even_targets": 16.125485011850408,
     "construction_artefact": false,
+    "canonical_step_units": 2.142270081067134,
+    "rho_step_units_as_built": 3.9850650183431062,
     "cold_ratio_without_curve_construction": 15.240965981501452,
     "ratio_floor": 60.779189777284564,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz",
@@ -3469,6 +3568,8 @@
      "ic_online_over_precomputation_model": 2.772527754858401,
      "break_even_targets": 18.439342463174974,
      "construction_artefact": false,
+     "canonical_step_units": 2.246492578065093,
+     "rho_step_units_as_built": 4.25386084636961,
      "cold_ratio_without_curve_construction": 17.317058867897916,
      "ratio_floor": 78.2895782821557,
      "verified": true
@@ -3504,13 +3605,16 @@
     "ic_online_over_precomputation_model": 2.772527754858401,
     "break_even_targets": 18.439342463174974,
     "construction_artefact": false,
+    "canonical_step_units": 2.246492578065093,
+    "rho_step_units_as_built": 4.25386084636961,
     "cold_ratio_without_curve_construction": 17.317058867897916,
     "ratio_floor": 78.2895782821557,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz",
@@ -3554,6 +3658,8 @@
      "ic_online_over_precomputation_model": 8.042349147151148,
      "break_even_targets": 36.540505449023996,
      "construction_artefact": false,
+     "canonical_step_units": 2.2734072757106256,
+     "rho_step_units_as_built": 4.294251594371072,
      "cold_ratio_without_curve_construction": 32.50035798612046,
      "ratio_floor": 133.50702947303913,
      "verified": true
@@ -3589,13 +3695,16 @@
     "ic_online_over_precomputation_model": 8.042349147151148,
     "break_even_targets": 36.540505449023996,
     "construction_artefact": false,
+    "canonical_step_units": 2.2734072757106256,
+    "rho_step_units_as_built": 4.294251594371072,
     "cold_ratio_without_curve_construction": 32.50035798612046,
     "ratio_floor": 133.50702947303913,
     "verified": true
    },
    "source": "research/ic_single_target_20260930/analysis.json",
    "round": "§23 one unseen point, online and cold (2026-09-30)",
-   "class": "accounting"
+   "class": "accounting",
+   "family": "A"
   },
   {
    "regime": "koblitz_batch",
@@ -3651,6 +3760,7 @@
       1.3758523655574657,
       1.408795737929466
      ],
+     "canonical_step_units": 1.7979598351260446,
      "ratio_floor": 120.62428246801784,
      "verified": true
     }
@@ -3697,12 +3807,14 @@
      1.3758523655574657,
      1.408795737929466
     ],
+    "canonical_step_units": 1.7979598351260446,
     "ratio_floor": 120.62428246801784,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -3758,6 +3870,7 @@
       1.3656401299183054,
       1.3943575729920048
      ],
+     "canonical_step_units": 1.840924915755323,
      "ratio_floor": 39.01229984655938,
      "verified": true
     }
@@ -3804,12 +3917,14 @@
      1.3656401299183054,
      1.3943575729920048
     ],
+    "canonical_step_units": 1.840924915755323,
     "ratio_floor": 39.01229984655938,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -3865,6 +3980,7 @@
       1.3206296304784522,
       1.3692200794929608
      ],
+     "canonical_step_units": 2.1576441535539783,
      "ratio_floor": 32.62320627281522,
      "verified": true
     }
@@ -3911,12 +4027,14 @@
      1.3206296304784522,
      1.3692200794929608
     ],
+    "canonical_step_units": 2.1576441535539783,
     "ratio_floor": 32.62320627281522,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -3972,6 +4090,7 @@
       1.1317452745511727,
       1.2148035337217207
      ],
+     "canonical_step_units": 2.0915675162883303,
      "ratio_floor": 16.763524472349825,
      "verified": true
     }
@@ -4018,12 +4137,14 @@
      1.1317452745511727,
      1.2148035337217207
     ],
+    "canonical_step_units": 2.0915675162883303,
     "ratio_floor": 16.763524472349825,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -4079,6 +4200,7 @@
       1.0425671221098771,
       1.0780696297446806
      ],
+     "canonical_step_units": 2.148556507850753,
      "ratio_floor": 12.09668173360119,
      "verified": true
     }
@@ -4125,12 +4247,14 @@
      1.0425671221098771,
      1.0780696297446806
     ],
+    "canonical_step_units": 2.148556507850753,
     "ratio_floor": 12.09668173360119,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -4186,6 +4310,7 @@
       0.9563234455069335,
       1.0426839557577847
      ],
+     "canonical_step_units": 2.1439478844237705,
      "ratio_floor": 9.12641881482961,
      "verified": true
     }
@@ -4232,12 +4357,14 @@
      0.9563234455069335,
      1.0426839557577847
     ],
+    "canonical_step_units": 2.1439478844237705,
     "ratio_floor": 9.12641881482961,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -4293,6 +4420,7 @@
       1.0054637146067265,
       1.070225323431435
      ],
+     "canonical_step_units": 2.24897336116124,
      "ratio_floor": 8.756153147889457,
      "verified": true
     }
@@ -4339,12 +4467,14 @@
      1.0054637146067265,
      1.070225323431435
     ],
+    "canonical_step_units": 2.24897336116124,
     "ratio_floor": 8.756153147889457,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -4400,6 +4530,7 @@
       0.9860335891939092,
       1.0297995305849146
      ],
+     "canonical_step_units": 2.149475213396229,
      "ratio_floor": 10.77116427992114,
      "verified": true
     }
@@ -4446,12 +4577,14 @@
      0.9860335891939092,
      1.0297995305849146
     ],
+    "canonical_step_units": 2.149475213396229,
     "ratio_floor": 10.77116427992114,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   },
   {
    "regime": "koblitz_batch",
@@ -4507,6 +4640,7 @@
       0.9726749875316956,
       0.9986852231230998
      ],
+     "canonical_step_units": 2.299890357672487,
      "ratio_floor": 21.66522289873162,
      "verified": true
     }
@@ -4553,12 +4687,14 @@
      0.9726749875316956,
      0.9986852231230998
     ],
+    "canonical_step_units": 2.299890357672487,
     "ratio_floor": 21.66522289873162,
     "verified": true
    },
    "source": "research/ic_descent_20260930/analysis-isolated.json",
    "round": "§22 isolated re-run (2026-09-30); before marks §21 and §22's baseline on main",
-   "class": "engineering"
+   "class": "engineering",
+   "family": "C"
   }
  ],
  "oracles": [
@@ -5649,6 +5785,40 @@
    "on_board": true
   },
   {
+   "slug": "icv1-f2m67-tm19346764963-82c84cca",
+   "family": "koblitz",
+   "field": "GF(2^67)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 68,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n67",
+    "K_0 / GF(2^67)",
+    "K_0/2^67",
+    "K_0/F_2^67"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m67-t19346764963-e760df38",
+   "family": "koblitz",
+   "field": "GF(2^67)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 67,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k1n67",
+    "K_1 / GF(2^67)",
+    "K_1/2^67",
+    "K_1/F_2^67"
+   ],
+   "on_board": false
+  },
+  {
    "slug": "icv1-f2m71-t48653080717-2cafaea3",
    "family": "koblitz",
    "field": "GF(2^71)",
@@ -5696,6 +5866,23 @@
     "K_0 / GF(2^73)",
     "K_0/2^73",
     "K_0/F_2^73"
+   ],
+   "on_board": false
+  },
+  {
+   "slug": "icv1-f2m79-tm420247971347-2a24b892",
+   "family": "koblitz",
+   "field": "GF(2^79)",
+   "coefficients": "a = 0, b = 1",
+   "order_bits": 80,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator",
+   "legacy": [
+    "k0n79",
+    "K_0 / GF(2^79)",
+    "K_0/2^79",
+    "K_0/F_2^79"
    ],
    "on_board": false
   },
