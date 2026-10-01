@@ -1364,7 +1364,15 @@ mod tests {
                 return;
             }
             ran += 1;
-            for (rung, lanes) in [(0u8, 1usize), (1, 1), (2, 1), (3, 8), (3, 32), (4, 8), (4, 32)] {
+            for (rung, lanes) in [
+                (0u8, 1usize),
+                (1, 1),
+                (2, 1),
+                (3, 8),
+                (3, 32),
+                (4, 8),
+                (4, 32),
+            ] {
                 let r = run(&cfg(a, n, 60, rung, lanes), &mut |_| {});
                 assert_eq!(
                     r.recovered, r.planted,
