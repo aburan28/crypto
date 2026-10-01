@@ -212,5 +212,6 @@ All values below are n24 discovery milliseconds per cold solve plus validation. 
 ## Retained resource failures
 
 - GitHub run 36922805760, attempt 1: Other-process CPU exceeded the unchanged isolation threshold in n12/seed17/unplanted A/B; no performance result admitted. The complete artifact is retained in `failed_isolation_01` and contributes no accepted timing samples.
+- GitHub run 36930298574, attempt 1: Kernel RCU CPU tick exceeded the unchanged isolation threshold during n12/seed17/cross-planted A/A; no performance result admitted. The complete artifact is retained in `failed_isolation_02` and contributes no accepted timing samples.
 
 `ISOLATION_ATTEMPTS.md` records the exact failure and any subsequent complete same-source retry.

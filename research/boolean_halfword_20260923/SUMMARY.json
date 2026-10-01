@@ -152,6 +152,18 @@
         "source_head": "fa01d9b8d63ef2f489a6497ffaea33342a3dd27c",
         "worker_wall_seconds": 0.08303723499989246,
         "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36922805760"
+      },
+      {
+        "github_attempt": 1,
+        "github_run_id": 36930298574,
+        "manifest_sha256": "949dc54ad1ae6cc2fd8e106568aec63dddc8eba5c14d037c4e1b80fc0f0937f8",
+        "maximum_other_cpu_fraction": 0.1,
+        "other_cpu_seconds": 0.01,
+        "path": "failed_isolation_02",
+        "reason": "Kernel RCU CPU tick exceeded the unchanged isolation threshold during n12/seed17/cross-planted A/A; no performance result admitted.",
+        "source_head": "8180ef3d8c5ca9eed2ccd45b5e0284269e3d9b50",
+        "worker_wall_seconds": 0.0018080019999615615,
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36930298574"
       }
     ],
     "full": null,
@@ -179,6 +191,19 @@
         "exception_type": "AssertionError",
         "message": "Isolation refused, contended, or failed: n12-discovery-17-unplanted/ab",
         "recorded_utc": "2026-10-01T20:39:55.875813+00:00",
+        "status": "FAILED_OR_UNQUALIFIED"
+      }
+    },
+    {
+      "github_attempt": 1,
+      "github_run_id": 36930298574,
+      "path": "failed_isolation_02",
+      "reason": "Kernel RCU CPU tick exceeded the unchanged isolation threshold during n12/seed17/cross-planted A/A; no performance result admitted.",
+      "status": {
+        "completed_cells": 1,
+        "exception_type": "AssertionError",
+        "message": "Isolation refused, contended, or failed: n12-discovery-17-cross_planted/aa",
+        "recorded_utc": "2026-10-01T21:43:44.254876+00:00",
         "status": "FAILED_OR_UNQUALIFIED"
       }
     }

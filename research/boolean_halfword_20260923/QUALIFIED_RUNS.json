@@ -14,6 +14,18 @@
       "other_cpu_seconds": 0.01,
       "worker_wall_seconds": 0.08303723499989246,
       "maximum_other_cpu_fraction": 0.1
+    },
+    {
+      "path": "failed_isolation_02",
+      "manifest_sha256": "949dc54ad1ae6cc2fd8e106568aec63dddc8eba5c14d037c4e1b80fc0f0937f8",
+      "github_run_id": 36930298574,
+      "github_attempt": 1,
+      "source_head": "8180ef3d8c5ca9eed2ccd45b5e0284269e3d9b50",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36930298574",
+      "reason": "Kernel RCU CPU tick exceeded the unchanged isolation threshold during n12/seed17/cross-planted A/A; no performance result admitted.",
+      "other_cpu_seconds": 0.01,
+      "worker_wall_seconds": 0.0018080019999615615,
+      "maximum_other_cpu_fraction": 0.1
     }
   ],
   "historical_qualified_runs": [
