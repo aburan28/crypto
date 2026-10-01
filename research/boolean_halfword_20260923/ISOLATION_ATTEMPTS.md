@@ -85,3 +85,27 @@ Run 36935022647 was cancelled during checkout because its dispatch had selected
 the previous head `2238fa2a4289dae21900f58a3c65574ecab57f1a` while a push was
 still completing. It supplies no benchmark evidence. Subsequent dispatches must
 verify the remote head before launch and the run's recorded head afterward.
+
+## Complete paired execution — verifier filename failure
+
+Run 36936730092, attempt 1, source
+`62fdadd6e6c296d17f3b08a8176ff1f7ccc129d0`, completed all 24 fixture pairs and
+passed every resource receipt. All 25 startup/fixture readiness checks accepted
+their first observation. The final analyzer then raised `FileNotFoundError`:
+it stripped `-aa-conditions.jsonl` from a receipt named
+`n12-discovery-17-planted-paired-conditions.jsonl`, producing the nonexistent
+`n12-discovery-17-planted-paired-conditions.jsonl-aa.jsonl`.
+
+The verifier now validates the resource mode and strips its matching suffix
+before reading the A/A phase slice. A focused regression checks paired receipts,
+and a full archive replay exercises all sixteen-repetition n12 and eight-repetition
+larger fixtures. The original 257-member bundle, including its failure status,
+is immutable in `failed_analysis_01`.
+
+`analysis_replay_01` separately retains the corrected analyzer, exact replay and
+hash-bound correction receipt. All 14,640 A/B and 480 A/A observations replay and
+all 24 fixtures complete correctly. This is diagnostic repair of a failed workflow,
+not an admitted discovery binding; its `performance_admitted` and
+`full_discovery_binding_eligible` fields remain false. No raw values, kernels or
+gates changed, and no repaired timings were used to tune the solver. A fresh
+unchanged-kernel campaign must pass the complete workflow before the full phase.

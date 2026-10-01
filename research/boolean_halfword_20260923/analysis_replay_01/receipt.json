@@ -1,0 +1,23 @@
+{
+  "aa_observations": 480,
+  "ab_observations": 14640,
+  "all_complete": true,
+  "classification": "accounting",
+  "completed_cells": 24,
+  "correction": "Resolve the A/A phase slice using resource_mode before removing the conditions filename suffix. No timed source, raw observation, acceptance gate or sealed source artifact was changed. The retained results qualified flag means resource verification; this separate repair is not registered as accepted discovery.",
+  "full_discovery_binding_eligible": false,
+  "github_attempt": 1,
+  "github_run_id": 36936730092,
+  "original_analyzer_sha256": "8601a9d546a04ea6784190daee311848442c8060ddb34947287b3c73c252e49e",
+  "performance_admitted": false,
+  "replay_source_hashes": {
+    "analyze.py": "f71c9c0e3fa50ef683422fcaeaad8a27209d24fdee8a555c503b6a75b6c517f8",
+    "reference.py": "5db7890f61f878057ed1222d86c1cb6df6643fec28e2c30b53e619c0a7e6dab7"
+  },
+  "resource_checks_passed": true,
+  "results_sha256": "ac5ab710d7bac5a276781fb0ed4f7b187086215d15dd85a31a5cfaad8a02b5b7",
+  "schema_version": 1,
+  "source_bundle": "failed_analysis_01",
+  "source_head": "62fdadd6e6c296d17f3b08a8176ff1f7ccc129d0",
+  "source_manifest_sha256": "478d676e97ae87057914dff84e2cf5e8aab3ef0bf8ad02afa877f0fd12312792"
+}

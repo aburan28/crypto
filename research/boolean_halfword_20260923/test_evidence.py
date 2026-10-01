@@ -205,6 +205,15 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(result['paired_ratios'],[1.0]*8)
         self.assertEqual(result['symmetric_ratios'],[1.0]*8)
 
+    def test_paired_aa_uses_phase_slice_with_shared_resource_receipt(self):
+        root,stage,source,pairs,seed,_,path=self.aa_fixture()
+        stage['conditions_file']=path.name.removesuffix('-aa.jsonl')+'-paired-conditions.jsonl'
+        stage['resource_mode']='paired';stage['worker_command'][-1]='paired'
+        result=a.verify_aa(root,stage,source,pairs,seed)
+        self.assertEqual(result['paired_ratios'],[1.0]*8)
+        stage['conditions_file']=stage['conditions_file'].replace('-paired-','-ab-')
+        with self.assertRaises(AssertionError):a.verify_aa(root,stage,source,pairs,seed)
+
     def test_aa_rejects_work_drift_after_hash_rebind(self):
         root,stage,source,pairs,seed,samples,path=self.aa_fixture()
         samples[0]['logical']['enumeration_points']+=16
@@ -216,7 +225,7 @@ class EvidenceTests(unittest.TestCase):
         path.write_text(''.join(json.dumps(r)+'\n' for r in [{**source,'mode':'aa'},*samples[:-1]]));stage['stdout_sha256']=a.sha(path)
         with self.assertRaises(AssertionError):a.verify_aa(root,stage,source,pairs,seed)
 
-    def test_failed_isolation_attempts_are_preserved_and_not_admitted(self):
+    def test_failed_attempts_are_preserved_and_not_admitted(self):
         registry=a.read(HERE/'QUALIFIED_RUNS.json')
         for entry in registry['failed_attempts']:
             root=HERE/entry['path']
@@ -225,6 +234,17 @@ class EvidenceTests(unittest.TestCase):
             self.assertTrue((root/'EXECUTION_STATUS.json').exists())
             self.assertNotEqual(registry['discovery'],entry)
             self.assertNotEqual(registry['full'],entry)
+
+    def test_complete_paired_archive_replays_after_filename_fix_without_admission(self):
+        replay=HERE/'analysis_replay_01'
+        for name,digest in a.read(replay/'manifest.json')['files'].items():self.assertEqual(a.sha(replay/name),digest)
+        receipt=a.read(replay/'receipt.json');root=HERE/receipt['source_bundle']
+        self.assertEqual(a.sha(root/'manifest.json'),receipt['source_manifest_sha256'])
+        self.assertTrue((root/'EXECUTION_STATUS.json').exists())
+        self.assertFalse(receipt['performance_admitted'] or receipt['full_discovery_binding_eligible'])
+        result=a.validate(root);self.assertEqual(result,a.read(replay/'results.json'))
+        self.assertEqual((result['cells'],result['observations']),(24,14640))
+        self.assertTrue(result['all_complete'] and result['qualified'])
 
     def test_accepted_qualified_runs_bind_current_source_and_exact_replay(self):
         registry=a.read(HERE/'QUALIFIED_RUNS.json')

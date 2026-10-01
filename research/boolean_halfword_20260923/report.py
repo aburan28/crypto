@@ -28,15 +28,19 @@ def main():
         for name,digest in manifest['files'].items():assert sha(path/name)==digest,name
         status=read(path/'EXECUTION_STATUS.json')
         failures.append({'path':entry['path'],'github_run_id':entry['github_run_id'],'github_attempt':entry['github_attempt'],
-                         'status':status,'reason':entry['reason']})
+                         'status':status,'reason':entry['reason'],'failure_kind':entry.get('failure_kind','resource')})
     for phase in ['discovery','full']:
         entry=registry[phase]
         if entry is None:continue
         path=HERE/entry['path'];assert sha(path/'manifest.json')==entry['manifest_sha256']
-        result=bundle(path);assert result['qualified'] and result['phase']==phase
+        result=bundle(path);assert result['qualified'] and result['all_complete'] and result['phase']==phase
         qualified[phase]=result
     latest=qualified.get('full',qualified.get('discovery'))
-    title=('16-bit predecessor reaches about 1.55x on n24; specialization pending' if qualified_history else '16-bit syndrome implementation verified; qualified comparison pending') if latest is None else '16-bit syndrome qualified comparison recorded; full objective remains open'
+    title=('16-bit predecessor reaches about 1.55x on n24; specialization pending' if qualified_history else '16-bit syndrome implementation verified; qualified comparison pending')
+    if latest is not None:
+        title=('16-bit specialization discovery complete; full comparison pending' if latest['phase']=='discovery'
+               else ('16-bit primary gate passed; confirmation pending' if any(d['dramatic_pass'] for d in latest['decisions'].values())
+                     else '16-bit full comparison complete; dramatic gate not met'))
     old1={r['variant']:r for r in first['n24_ms']};old2={r['variant']:r for r in second['n24_ms']}
     protocol=read(HERE/'protocol_full.json')
     historical=[]
@@ -148,14 +152,50 @@ dramatic-gain objective is not achieved by this implementation or its tests.
         history_summary.append(host)
         history_html.append('<p>Qualified predecessor '+html.escape(entry['source_head'][:12])+': Linux ARM64, 24 discovery fixtures, 11,712 comparison observations plus A/A. No dramatic group passed. These numbers precede the current specialization.</p><div class="table-wrap"><table><thead><tr><th>Method</th><th>Planted ms</th><th>Cross-planted ms</th><th>Unplanted ms</th><th>Dispatcher / arm, planted</th><th>Correctness</th></tr></thead><tbody>'+''.join('<tr>'+''.join('<td>'+html.escape(v)+'</td>' for v in row)+'</tr>' for row in rows)+'</tbody></table></div>')
     summary['historical_qualified_runs']=history_summary
-    if latest is not None:
-        report+='\n## Qualified run readback\n\n'+json.dumps({'phase':latest['phase'],'cells':latest['cells'],'observations':latest['observations'],'decisions':latest['decisions']},indent=2)+'\n'
+    current_html=[];readbacks=[]
+    for phase,result in qualified.items():
+        entry=registry[phase];meta=read(HERE/entry['path']/'metadata.json')
+        aa_count=sum(2*len(cell['paired_ratios']) for cell in result['aa_summaries'])
+        floors=[g['noise_floor'] for g in result['gates']]
+        verdict=('Discovery only; no promotion.' if phase=='discovery'
+                 else ('Primary dramatic gate passed; independent holdout confirmation still required.'
+                       if any(d['dramatic_pass'] for d in result['decisions'].values()) else 'No candidate passed the all-group dramatic gate.'))
+        gates=[[arm,f"{d['dramatic_groups']}/{d['groups']}",f"{d['incremental_groups']}/{d['groups']}",
+                'discovery only' if phase=='discovery' else ('PASS' if d['dramatic_pass'] else 'FAIL')]
+               for arm,d in result['decisions'].items()]
+        reference=next(row for row in result['n24_ms'] if row['variant']=='word_dispatch')
+        rows=[[row['variant']]+[f"{row[f]:.6f}" for f in ['planted','cross_planted','unplanted']]+
+              [f"{reference['planted']/row['planted']:.4f}",'PASS' if result['all_complete'] else 'INCOMPLETE'] for row in result['n24_ms']]
+        split='discovery' if phase=='discovery' else 'holdout'
+        text=(f"Source `{entry['source_head']}` completed {result['cells']} fixtures, {result['observations']:,} A/B observations "
+              f"and {aa_count:,} A/A observations. All resource receipts passed and every arm completed verification. "
+              f"{verdict} The group A/A symmetric noise floors range from {min(floors):.4f} to {max(floors):.4f}. "
+              f"Campaign duration, including readiness waits, was {result['campaign_seconds']:.3f} seconds; "
+              f"peak worker RSS was {result['peak_worker_rss_bytes']:,} bytes. "
+              f"Host: {meta['host']['system']} {meta['host']['machine']}, {meta['host']['logical_cpus']} logical CPUs; "
+              f"reserved CPUs {meta['cpus']}; EOR3 available: {meta['capabilities']['eor3_available']}. "
+              "Host/compiler details and exact per-group confidence intervals remain in the sealed artifact.")
+        report+=f'\n## Current qualified {phase}\n\n'+text+'\n\n'
+        report+='The gate uses the pointwise fastest of all 52 frozen reference methods and requires the lower 95% bound to exceed the A/A floor as well as the numeric threshold.\n\n'
+        report+='| Candidate | Groups above 2x | Groups above 1x | Primary dramatic verdict |\n|---|---:|---:|---|\n'+md(gates)+'\n\n'
+        caption=(f"All methods below use n24 {split} milliseconds per complete solve plus validation. "
+                 "The displayed ratio divides pooled planted dispatcher medians; it is descriptive, not the primary fastest-reference gate.")
+        report+=caption+'\n\n| Method | Planted ms | Cross-planted ms | Unplanted ms | Dispatcher / arm, planted | Correctness |\n|---|---:|---:|---:|---:|---|\n'+md(rows)+'\n'
+        table=lambda headers,body:'<div class="table-wrap"><table><thead><tr>'+''.join('<th>'+html.escape(x)+'</th>' for x in headers)+'</tr></thead><tbody>'+''.join('<tr>'+''.join('<td>'+html.escape(x)+'</td>' for x in row)+'</tr>' for row in body)+'</tbody></table></div>'
+        current_html.append('<h3>Current qualified '+phase+'</h3><p>'+html.escape(text)+'</p>'+table(['Candidate','Groups above 2x','Groups above 1x','Primary dramatic verdict'],gates)+'<p>'+html.escape(caption)+'</p>'+table(['Method','Planted ms','Cross-planted ms','Unplanted ms','Dispatcher / arm, planted','Correctness'],rows))
+        readbacks.append({'phase':phase,'source_head':entry['source_head'],'manifest_sha256':entry['manifest_sha256'],
+                         'cells':result['cells'],'ab_observations':result['observations'],'aa_observations':aa_count,
+                         'verdict':verdict,'aa_noise_floor_range':[min(floors),max(floors)],'decisions':result['decisions'],
+                         'campaign_seconds':result['campaign_seconds'],'peak_worker_rss_bytes':result['peak_worker_rss_bytes'],
+                         'host':meta['host'],'capabilities':meta['capabilities'],'cpus':meta['cpus']})
+    summary['current_qualified_readbacks']=readbacks
     if failures:
-        report+='\n## Retained resource failures\n\n'
+        report+='\n## Retained execution and validation failures\n\n'
         for failure in failures:
             report+=f"- GitHub run {failure['github_run_id']}, attempt {failure['github_attempt']}: {failure['reason']} The complete artifact is retained in `{failure['path']}` and contributes no accepted timing samples.\n"
         report+='\n`ISOLATION_ATTEMPTS.md` records the exact failure and any subsequent complete same-source retry.\n'
-    summary['retained_resource_failures']=failures
+    summary['retained_resource_failures']=[f for f in failures if f['failure_kind']=='resource']
+    summary['retained_analysis_failures']=[f for f in failures if f['failure_kind']=='analysis']
     (HERE/'CONCLUSION.md').write_text(report);dump(HERE/'SUMMARY.json',summary)
     base='https://github.com/aburan28/crypto/blob/main/research/boolean_halfword_20260923/'
     html_rows=lambda rows:'\n'.join('<tr>'+''.join('<td>'+html.escape(v)+'</td>' for v in row)+'</tr>' for row in rows)
@@ -163,11 +203,13 @@ dramatic-gain objective is not achieved by this implementation or its tests.
   <div class="panel-head"><h2>{html.escape(title)} <span class="chip">engineering</span></h2>
     <p>Exact half-word projection, original-equation checks and feature-gated EOR3 kernels are implemented.
       The two preserved probes contain 21,888 observations, but lack current CPU-isolation and A/A evidence.
-      No new timing gain or full-IC result is established. Contention in the old runs is unknown.</p>
+      Qualified current results, when present below, remain finite Boolean solver diagnostics.
+      No full-IC result is established. Contention in the old runs is unknown.</p>
     <p>Sources: <a href="{base}CONCLUSION.md">scope and results</a>, <a href="{base}QUALIFIED_RUNS.json">qualified-run registry</a>,
       <a href="{base}RESOURCE_PLAN.md">resource and calibration plan</a>, <a href="{base}RUN_LEDGER.json">evidence hashes</a>.</p></div>
   {''.join(history_html)}
-  <p>{len(failures)} failed resource attempts are retained in the evidence registry and contribute no accepted samples.
+{''.join(current_html)}
+  <p>{len(failures)} failed attempts are retained in the evidence registry and contribute no accepted samples.
     Before each new fixture, bounded readiness checks wait for the unchanged CPU and pressure limits;
     the locked launch checks again. No timed samples are retried.</p>
   <p>Historical n24 milliseconds, explicitly unqualified under current policy. Prior values remain visible.

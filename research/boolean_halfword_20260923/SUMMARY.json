@@ -1,6 +1,7 @@
 {
   "calibrated_operation_ratio": null,
   "classification": "engineering",
+  "current_qualified_readbacks": [],
   "full_ic_cost": null,
   "historical_cells": 48,
   "historical_observations": 21888,
@@ -190,6 +191,18 @@
         "source_head": "6a36f1e206e7d2e10eb15973b2e369d6905e2345",
         "worker_launched": false,
         "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36935271707"
+      },
+      {
+        "completed_cells": 24,
+        "failure_kind": "analysis",
+        "github_attempt": 1,
+        "github_run_id": 36936730092,
+        "manifest_sha256": "478d676e97ae87057914dff84e2cf5e8aab3ef0bf8ad02afa877f0fd12312792",
+        "path": "failed_analysis_01",
+        "reason": "All 24 fixture pairs passed resource admission; the final verifier used the separate-worker suffix for a paired A/A receipt and raised FileNotFoundError. Raw evidence is preserved; repaired analysis remains diagnostic and is not an admitted discovery binding.",
+        "repaired_analysis_path": "analysis_replay_01",
+        "source_head": "62fdadd6e6c296d17f3b08a8176ff1f7ccc129d0",
+        "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36936730092"
       }
     ],
     "full": null,
@@ -206,8 +219,25 @@
     ],
     "schema_version": 1
   },
+  "retained_analysis_failures": [
+    {
+      "failure_kind": "analysis",
+      "github_attempt": 1,
+      "github_run_id": 36936730092,
+      "path": "failed_analysis_01",
+      "reason": "All 24 fixture pairs passed resource admission; the final verifier used the separate-worker suffix for a paired A/A receipt and raised FileNotFoundError. Raw evidence is preserved; repaired analysis remains diagnostic and is not an admitted discovery binding.",
+      "status": {
+        "completed_cells": 24,
+        "exception_type": "CalledProcessError",
+        "message": "Command '['/usr/bin/python3', '/home/runner/work/crypto/crypto/research/boolean_halfword_20260923/ci_discovery_36936730092_1/analyze.py', '/home/runner/work/crypto/crypto/research/boolean_halfword_20260923/ci_discovery_36936730092_1']' returned non-zero exit status 1.",
+        "recorded_utc": "2026-10-01T22:51:36.080470+00:00",
+        "status": "FAILED_OR_UNQUALIFIED"
+      }
+    }
+  ],
   "retained_resource_failures": [
     {
+      "failure_kind": "resource",
       "github_attempt": 1,
       "github_run_id": 36922805760,
       "path": "failed_isolation_01",
@@ -221,6 +251,7 @@
       }
     },
     {
+      "failure_kind": "resource",
       "github_attempt": 1,
       "github_run_id": 36930298574,
       "path": "failed_isolation_02",
@@ -234,6 +265,7 @@
       }
     },
     {
+      "failure_kind": "resource",
       "github_attempt": 2,
       "github_run_id": 36930298574,
       "path": "failed_isolation_03",
@@ -247,6 +279,7 @@
       }
     },
     {
+      "failure_kind": "resource",
       "github_attempt": 1,
       "github_run_id": 36935271707,
       "path": "failed_isolation_04",

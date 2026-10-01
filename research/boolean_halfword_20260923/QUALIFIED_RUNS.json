@@ -52,6 +52,18 @@
       "preflight_psi_some_avg10": 18.36,
       "maximum_psi_some_avg10": 5.0,
       "worker_launched": false
+    },
+    {
+      "path": "failed_analysis_01",
+      "manifest_sha256": "478d676e97ae87057914dff84e2cf5e8aab3ef0bf8ad02afa877f0fd12312792",
+      "github_run_id": 36936730092,
+      "github_attempt": 1,
+      "source_head": "62fdadd6e6c296d17f3b08a8176ff1f7ccc129d0",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36936730092",
+      "failure_kind": "analysis",
+      "reason": "All 24 fixture pairs passed resource admission; the final verifier used the separate-worker suffix for a paired A/A receipt and raised FileNotFoundError. Raw evidence is preserved; repaired analysis remains diagnostic and is not an admitted discovery binding.",
+      "completed_cells": 24,
+      "repaired_analysis_path": "analysis_replay_01"
     }
   ],
   "historical_qualified_runs": [

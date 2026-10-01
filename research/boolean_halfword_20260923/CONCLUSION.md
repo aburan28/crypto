@@ -219,11 +219,12 @@ All values below are n24 discovery milliseconds per cold solve plus validation. 
 | eor3_word16 | 3.146378 | 3.144396 | 3.832539 | 0.6698 | PASS |
 | eor3_word64 | 1.755348 | 1.750443 | 2.137465 | 1.2006 | PASS |
 
-## Retained resource failures
+## Retained execution and validation failures
 
 - GitHub run 36922805760, attempt 1: Other-process CPU exceeded the unchanged isolation threshold in n12/seed17/unplanted A/B; no performance result admitted. The complete artifact is retained in `failed_isolation_01` and contributes no accepted timing samples.
 - GitHub run 36930298574, attempt 1: Kernel RCU CPU tick exceeded the unchanged isolation threshold during n12/seed17/cross-planted A/A; no performance result admitted. The complete artifact is retained in `failed_isolation_02` and contributes no accepted timing samples.
 - GitHub run 36930298574, attempt 2: Same-source retry stopped at n20/seed17/unplanted A/A because the unchanged resource threshold was exceeded; no samples admitted. The complete artifact is retained in `failed_isolation_03` and contributes no accepted timing samples.
 - GitHub run 36935271707, attempt 1: After 19 completed fixture pairs, n24/seed17/cross-planted was refused before worker launch because CPU PSI avg10 was 18.36, above the unchanged limit of 5.0. No performance samples admitted. The complete artifact is retained in `failed_isolation_04` and contributes no accepted timing samples.
+- GitHub run 36936730092, attempt 1: All 24 fixture pairs passed resource admission; the final verifier used the separate-worker suffix for a paired A/A receipt and raised FileNotFoundError. Raw evidence is preserved; repaired analysis remains diagnostic and is not an admitted discovery binding. The complete artifact is retained in `failed_analysis_01` and contributes no accepted timing samples.
 
 `ISOLATION_ATTEMPTS.md` records the exact failure and any subsequent complete same-source retry.
