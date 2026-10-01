@@ -2306,7 +2306,6 @@ pub fn run_cover_dlp(
         setup_muls,
         ..Default::default()
     };
-    let opts = jv_options(24, 600.0);
     let mut full_rels: Vec<SparseRel> = Vec::new();
     let mut next_attempt = unknowns;
     let mut la_ops = 0u64;
@@ -2328,6 +2327,8 @@ pub fn run_cover_dlp(
             .map_init(
                 || Ctx::new(&spec),
                 |c, (a, b, r, idx)| {
+                    // the deadline is absolute: one budget per test, not per run
+                    let opts = jv_options(24, 600.0);
                     let mut lrng =
                         StdRng::seed_from_u64(seed ^ idx.wrapping_mul(0x9E37_79B9_7F4A_7C15));
                     let (decs, cost) = nagao_decompose(c, &base, &by_x, r, &opts, &mut lrng);
