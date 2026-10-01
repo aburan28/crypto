@@ -1,9 +1,10 @@
 """Retain a newly built prepared n17 worker and its complete Rust sources.
 
-No target, query, old worker or historical preparation receipt enters these
-assets. Staging checks the controlled build and dependency trees; it neither
-compiles nor executes a solver. A separately sealed invocation imports its
-preparation certificate and admits only the disclosed development point.
+Assets retain code and mathematical state; the Rust sources include disclosed
+unit controls excluded from the release worker. The historical preparation
+certificates remain invocation data. Staging checks the controlled build and
+dependency trees; it neither compiles nor executes a solver. A separately
+sealed invocation imports its certificate and disclosed public point.
 """
 import argparse
 import gzip

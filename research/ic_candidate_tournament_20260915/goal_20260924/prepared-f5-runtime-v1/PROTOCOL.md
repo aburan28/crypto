@@ -26,6 +26,10 @@ Both accepted certificates independently reconstruct these same inputs:
 63 geometric points including killed torsion, 62 usable cofactor images and
 29 sign/Frobenius columns. The whole F5 certificate remains externally pinned
 as run input, separately from candidate mathematical and code identity.
+Retained Rust source includes the disclosed point and expected scalar in
+`#[cfg(test)]` controls. That test code is excluded from the release build;
+the runtime receives its public point through the separately sealed stdin job
+with no scalar input. These sources never establish target freshness.
 
 `prepared_f5_inputs_v1.py` accepts a new controlled `generic_build.py` receipt,
 retains exact root and registry-dependency source archives, verifies all bytes

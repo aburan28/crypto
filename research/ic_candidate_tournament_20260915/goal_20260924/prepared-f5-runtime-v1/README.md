@@ -56,8 +56,12 @@ and staged without running an IC query. Native input identity is:
 
 Candidate identity binds the mathematical state and executed code/binary;
 certificate history and native build/transport receipt hashes are in the sealed
-run. Native assets contain no target, scalar answer, query stream or certificate.
-Compiler policy and source archives stay reproducible beside the binary. Each
+run. The retained Rust sources include the disclosed control point and expected
+scalar in `#[cfg(test)]` assertions; that test code is excluded from the release
+worker. Runtime target input comes from sealed stdin without a scalar field.
+Both historical preparation certificates are absent from the Rust manifest
+and remain invocation data. Compiler policy and source archives stay
+reproducible beside the binary. Each
 execution must use its own build platform. Linux staging is a separate local
 build; these macOS bytes cannot establish Linux correctness or performance.
 
