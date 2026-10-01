@@ -254,6 +254,8 @@ class PreparedF5RuntimeTests(unittest.TestCase):
             spec = dict(copy.deepcopy(self.spec), arguments=args)
             (root/'execution.json').write_text(json.dumps(spec))
             with patch('prepared_f5_runtime_v1.check_extracted_assets', return_value=macos), \
+                 patch('prepared_f5_runtime_v1.platform.system', return_value='Linux'), \
+                 patch('prepared_f5_runtime_v1.platform.machine', return_value='x86_64'), \
                  patch('prepared_f5_runtime_v1.meter', side_effect=AssertionError('worker ran')):
                 with self.assertRaises(InvalidEvidence):
                     run(args, out)

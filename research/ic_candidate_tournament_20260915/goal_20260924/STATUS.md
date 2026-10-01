@@ -26,6 +26,14 @@ development control and the fresh paired incumbent/rho protocol remain
 outstanding;
 no new speedup or promotion is established. The historical confirmation sets
 and censored generic registrations below remain closed.
+The [prepared F5 source/runtime follow-up](prepared-f5-runtime-v1/README.md)
+implements the missing retained native input, canonical registrar, isolated
+entrypoint and preexecution-frozen audit transport. The rebuilt macOS worker
+and complete Rust dependencies are retained; its Rust unit fixture now hashes
+only the common mathematics instead of historical certificate evidence.
+Implementation acceptance and separately frozen new F5/SAT executions remain
+pending. Mocked native tests and real frozen import controls execute no IC query
+and cannot supply family qualification or a fresh result.
 
 Status: the archived reference panel has completed under the frozen protocol:
 1,290/1,290 native/profile pairs, three IC sources and eighteen rho configurations.
