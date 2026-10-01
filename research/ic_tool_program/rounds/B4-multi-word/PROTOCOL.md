@@ -98,7 +98,7 @@ generator code, which shares no arithmetic with the tool:
 | C095 | `--kic-multi` on C080's document (`n = 79`): the two-word pipeline's |
 | C096 | C055's and C086's successor: on the challenge's document, `n = 131` passes the field gate, and `kic` and `rho-koblitz` refuse `r = 2^129` as `scalar-wider-than-127-bits` |
 | C097 | C056's successor: v1's hashed target at `n = 83`, derived by design §2's rule; the derived point is the one the generator computes with its own BLAKE3, and rho alone stops at its step cap |
-| C098 | the width gate: at `n = 577`, `kic` and `rho-koblitz` refuse the field as `field-wider-than-nine-words` |
+| C098 | past nine words: schema v2's binary degrees stop at 571 (its §3), inside nine words' 574, so `n = 577` is refused as `degree-range` before any gate. The router's `field-wider-than-nine-words` gate is its own unit test |
 | C099 | `sect163k1`: `n = 163` passes the field gate at three words, and both pipelines refuse `r = 2^162` by the same scalar gate |
 | C100 | v1's random target past one word, at `n = 67`: drawn by design §2's rule, recovered and verified by both arms |
 | C101 | v1's generator rule past one word, at `n = 67`: the generator found by design §2's rule, and the known logarithm recovered and verified by both arms |

@@ -11,7 +11,7 @@
  ],
  "generator": {
   "path": "research/ic_tool_program/conformance/v2-b4/make_cases.py",
-  "sha256": "f064b177a1d43a27cd46bfb6f1191322972ce5682e1d1bf16500089485dd576d"
+  "sha256": "16a20ec4762da8211e7c8bab2526841a5e6c98f875d9ec255dcbea969f94e434"
  },
  "cases": [
   {
@@ -559,7 +559,7 @@
   {
    "id": "C098-past-nine-words",
    "step": "B4",
-   "checks": "the width gate: at n = 577 kic and rho-koblitz refuse the field as wider than nine words",
+   "checks": "past nine words: schema v2's binary degrees stop at 571, inside nine words' 574, so n = 577 is refused as degree-range before any gate",
    "files": {
     "params.json": {
      "copy": "{here}/C098-past-nine-words-n577.json"
@@ -577,24 +577,12 @@
     "RAYON_NUM_THREADS": "1"
    },
    "expect": {
-    "exit": 0,
+    "exit": 2,
     "json_file": "{tmp}/report.json",
     "json_paths": {
-     "status": "checks_passed"
-    },
-    "json_contains": {
-     "route.considered": [
-      {
-       "pipeline": "kic",
-       "admitted": false,
-       "gate": "field-wider-than-nine-words"
-      },
-      {
-       "pipeline": "rho-koblitz",
-       "admitted": false,
-       "gate": "field-wider-than-nine-words"
-      }
-     ]
+     "status": "refused",
+     "refusal.code": "degree-range",
+     "refusal.class": "invalid"
     }
    },
    "timeout_s": 120

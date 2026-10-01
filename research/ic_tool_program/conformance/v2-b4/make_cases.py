@@ -60,8 +60,10 @@ INSTANCES = [
 ]
 
 # C098: past nine words. #K_0(GF(2^577)) = 4 * 2347237 * (a composite
-# cofactor), so r = 2347237 names a valid subgroup the width gate must
-# refuse before anything runs.
+# cofactor), so r = 2347237 names a subgroup.  Schema v2's binary degrees
+# stop at 571 (its §3), inside nine words' 574, so the document is
+# refused as `degree-range` before any gate is read; the width gate past
+# nine words is the router's own test.
 WIDE_N, WIDE_A, WIDE_R = 577, 0, 2347237
 
 # C102: the 95-bit prime factor of #K_0(GF(2^127)), and the bases of its
@@ -355,7 +357,7 @@ def build() -> tuple[dict[str, dict | str], list[dict]]:
                         "target.record.x": str(target[0]), "target.record.y": str(target[1])}},
         timeout=120))
 
-    # C098: the width gate past nine words.
+    # C098: past nine words, the schema's degree range refuses first.
     f = v2.curve_id.find_irreducible_sparse(WIDE_N)
     assert v2.irreducible(f)
     curve = Curve(WIDE_N, f, WIDE_A, 1)
@@ -372,14 +374,12 @@ def build() -> tuple[dict[str, dict | str], list[dict]]:
     files["C098-past-nine-words-n577.json"] = v2.document(
         name, curve, {"form": "koblitz", "a": WIDE_A}, WIDE_R, h, gen,
         {"known_log": str(k)}, "auto", RHO_SEED, routed=True)
-    gate_577 = [{"pipeline": p, "admitted": False, "gate": "field-wider-than-nine-words"}
-                for p in ("kic", "rho-koblitz")]
     cases.append(case(
-        "C098-past-nine-words", "the width gate: at n = 577 kic and rho-koblitz refuse the field as wider "
-        "than nine words",
+        "C098-past-nine-words", "past nine words: schema v2's binary degrees stop at 571, inside nine "
+        "words' 574, so n = 577 is refused as degree-range before any gate",
         {"params.json": {"copy": "{here}/C098-past-nine-words-n577.json"}}, check(),
-        {"exit": 0, "json_file": "{tmp}/report.json", "json_paths": {"status": "checks_passed"},
-         "json_contains": {"route.considered": gate_577}},
+        {"exit": 2, "json_file": "{tmp}/report.json",
+         "json_paths": {"status": "refused", "refusal.code": "degree-range", "refusal.class": "invalid"}},
         timeout=120))
 
     # C099: sect163k1, paired at F0: admitted by width, refused by budget.
