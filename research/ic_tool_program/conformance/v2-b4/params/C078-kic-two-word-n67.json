@@ -1,0 +1,35 @@
+{
+ "schema_version": 2,
+ "name": "C078: icv1-f2m67-tm19346764963-82c84cca, the smallest two-word instance",
+ "field": {
+  "kind": "binary",
+  "degree": 67,
+  "modulus": "0x80000000000000027"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 0
+ },
+ "subgroup": {
+  "order": "76589041",
+  "cofactor": "1926828573412",
+  "generator": {
+   "x": "0x2fda605a2ee816d55",
+   "y": "0x2d50fbb484b44203b"
+  }
+ },
+ "target": {
+  "known_log": "5869641"
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

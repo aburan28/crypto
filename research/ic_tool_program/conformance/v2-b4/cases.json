@@ -1,0 +1,804 @@
+{
+ "suite": "ic tool programme conformance suite v2, B4's cases",
+ "design": "research/ic_tool_program/design/multi-word.md; research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md",
+ "includes": "../v1/cases.json (step B0), ../v2/cases.json (B1) and the later steps' sets, run first, with the until rule",
+ "rules": [
+  "The rules of ../v2/cases.json hold. {here} is this directory's params/; {cases} is still ../v2/params/. ../run.py runs these after the earlier steps' cases.",
+  "The until rule: C031, C055, C056 and C086 name B4 as their `until`, so from B4 they are not run. C096 succeeds C055 and C086, and C097 succeeds C056.",
+  "`--kic-multi` is B4's test switch: it runs the multi-word pipeline, at three words, where the one- or two-word pipeline would run. C094 and C095 compare them through `same_outputs_as`.",
+  "params/C078-kic-two-word-n67.json and params/C080-kic-two-word-n79.json are B3b's files, copied byte for byte for C100, C101 and C095.",
+  "params/C088-T001-n127.json to params/C093-T001-n179.json are no case's: they are B4's measurement 5's public targets, frozen here with the cases' documents."
+ ],
+ "generator": {
+  "path": "research/ic_tool_program/conformance/v2-b4/make_cases.py",
+  "sha256": "f064b177a1d43a27cd46bfb6f1191322972ce5682e1d1bf16500089485dd576d"
+ },
+ "cases": [
+  {
+   "id": "C088-kic-three-word-n127",
+   "step": "B4",
+   "checks": "B4's kic at F0 on a three-word field: the smallest three-word degree",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C088-kic-three-word-n127.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "693055417",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-127-364a9ce5:24589614856193402413:170141183460469231707097688859690703316:0x1:-7:unk:r:a00e5890d422",
+     "ic.words": 3
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C089-kic-three-word-n137",
+   "step": "B4",
+   "checks": "B4's kic at F0 on a three-word field: a 37-bit subgroup at n = 137",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C089-kic-three-word-n137.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "58995114512",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-137-47245086:574016314927011818501:174224571863520493292673782690138312446972:0x1:-7:unk:r:11ceb4d66d95",
+     "ic.words": 3
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C090-kic-three-word-n151",
+   "step": "B4",
+   "checks": "B4's kic at F0 on a three-word field: n = 151, a trinomial field",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C090-kic-three-word-n151.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "9408463826",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-151-3756229f:-97937651335354183120307:2854495385411919762116669876550325626948613556:0x1:-7:unk:r:ee31df7e19f3",
+     "ic.words": 3
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C091-kic-three-word-n157",
+   "step": "B4",
+   "checks": "B4's kic at F0 on a three-word field: the largest subgroup, 47 bits",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C091-kic-three-word-n157.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "77149251007378",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-157-f01548f6:158060339213695215877259:182687704666362864775460446029196163761775690614:0x1:-7:unk:r:816eafb26d94",
+     "ic.words": 3
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C092-kic-three-word-n173",
+   "step": "B4",
+   "checks": "B4's kic at F0 on a three-word field: the smallest subgroup, under a 146-bit cofactor",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C092-kic-three-word-n173.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "24197884",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-173-d1492ee1:-67870783603944754053042229:11972621413014756705924586217482574100966153445101622:0x1:-7:unk:r:ddf2de63c865",
+     "ic.words": 3
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C093-kic-three-word-n179",
+   "step": "B4",
+   "checks": "B4's kic at F0 on a three-word field: the widest three-word degree here, n = 179",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C093-kic-three-word-n179.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.scalar": "422026531794",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "curve_id.icv1": "ICV1:f2m-179-aaf7a24d:1681527843948629186391379613:766247770432944429179173511893626747860740374700421476:0x1:-7:unk:r:d1b73c24cc55",
+     "ic.words": 3
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C094-smoke-multi-word-is-one-word",
+   "step": "B4",
+   "checks": "the multi-word pipeline on the smoke row's translation gives the one-word pipeline's counts, logarithm and certificates",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/C009-translation-of-smoke-row.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1",
+    "--kic-multi"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "ic.words": 3,
+     "all_verified": true
+    },
+    "same_outputs_as": {
+     "argv": [
+      "price",
+      "--params",
+      "{tmp}/params.json",
+      "--json",
+      "--out",
+      "{tmp}/narrow.json",
+      "--repeats",
+      "1",
+      "--repeats-fast",
+      "1"
+     ],
+     "json_file": "{tmp}/narrow.json",
+     "paths": [
+      "counts",
+      "certificates.ic.scalar",
+      "certificates.rho.scalar",
+      "rho_counts",
+      "all_verified",
+      "ic_and_rho_agree"
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C095-n79-multi-word-is-two-word",
+   "step": "B4",
+   "checks": "C094 on B3b's C080 document (n = 79): the multi-word pipeline gives the two-word pipeline's counts, logarithm and certificates",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C080-kic-two-word-n79.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1",
+    "--kic-multi"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "ic.words": 3,
+     "all_verified": true
+    },
+    "same_outputs_as": {
+     "argv": [
+      "price",
+      "--params",
+      "{tmp}/params.json",
+      "--json",
+      "--out",
+      "{tmp}/narrow.json",
+      "--repeats",
+      "1",
+      "--repeats-fast",
+      "1"
+     ],
+     "json_file": "{tmp}/narrow.json",
+     "paths": [
+      "counts",
+      "certificates.ic.scalar",
+      "certificates.rho.scalar",
+      "rho_counts",
+      "all_verified",
+      "ic_and_rho_agree"
+     ]
+    }
+   },
+   "timeout_s": 900
+  },
+  {
+   "id": "C096-challenge-past-the-field-gate",
+   "step": "B4",
+   "checks": "C055's and C086's successor from B4: the challenge file is valid; n = 131 passes the field gate, and kic and rho-koblitz refuse r = 2^129 as wider than 127 bits",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/ecc2k130-challenge.json"
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "checks_passed"
+    },
+    "json_contains": {
+     "checks": [
+      {
+       "code": "order-composite",
+       "status": "pass",
+       "exact": false
+      }
+     ],
+     "disclosures": [
+      {
+       "code": "primality-screen"
+      }
+     ],
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": false,
+       "gate": "scalar-wider-than-127-bits"
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": false,
+       "gate": "scalar-wider-than-127-bits"
+      }
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C097-gate-rho-hashed-target",
+   "step": "B4",
+   "checks": "C056's successor from B4: v1's hashed target past one word is derived by design §2's rule, equal to this generator's own derivation, and rho alone stops at its step cap",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/gate-m83-T001.json",
+     "set": {
+      "target": {
+       "public_hash_seed": 1
+      },
+      "method": {
+       "solve": "rho",
+       "fidelity": "F0",
+       "rho": {
+        "pipeline": "auto",
+        "seed": 2293761,
+        "max_iterations": 1000
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 1,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "not_recovered",
+     "result.verified": false,
+     "rho.step_cap": 1000,
+     "rho.pipeline": "rho-koblitz",
+     "target.record.kind": "public_hash_to_curve_cofactor",
+     "target.record.public_hash_seed": 1,
+     "target.record.public_hash_counter": 0,
+     "target.record.x": "1866615447523137264584666",
+     "target.record.y": "6666425591582117184067929"
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C098-past-nine-words",
+   "step": "B4",
+   "checks": "the width gate: at n = 577 kic and rho-koblitz refuse the field as wider than nine words",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C098-past-nine-words-n577.json"
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "checks_passed"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": false,
+       "gate": "field-wider-than-nine-words"
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": false,
+       "gate": "field-wider-than-nine-words"
+      }
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C099-sect163k1-past-the-field-gate",
+   "step": "B4",
+   "checks": "sect163k1: valid, n = 163 passes the field gate at three words, and kic and rho-koblitz refuse r = 2^162 as wider than 127 bits",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C099-sect163k1-paired.json"
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "checks_passed"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": false,
+       "gate": "scalar-wider-than-127-bits"
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": false,
+       "gate": "scalar-wider-than-127-bits"
+      }
+     ]
+    }
+   },
+   "timeout_s": 120
+  },
+  {
+   "id": "C100-random-target-past-one-word",
+   "step": "B4",
+   "checks": "v1's random target past one word: drawn by design §2's rule at n = 67, recovered and verified by both arms",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C078-kic-two-word-n67.json",
+     "set": {
+      "target": {
+       "random_seed": 7
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "ic.words": 2
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C101-generator-rule-past-one-word",
+   "step": "B4",
+   "checks": "v1's generator rule past one word: found by design §2's rule at n = 67, and the known logarithm recovered and verified by both arms",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C078-kic-two-word-n67.json",
+     "set": {
+      "subgroup.generator": {
+       "rule": "koblitz_search_v1"
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "complete",
+     "fidelity": "F0",
+     "result.verified": true,
+     "result.known_answer": true,
+     "all_verified": true,
+     "ic_and_rho_agree": true,
+     "ic.words": 2
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 1800
+  },
+  {
+   "id": "C102-n127-over-budget",
+   "step": "B4",
+   "checks": "a 95-bit subgroup at n = 127: kic and rho-koblitz admit it by field and scalar width, and F0's estimate exceeds the budget, so the paired price is refused as over budget",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C102-n127-95-bit-subgroup.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 4,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "refusal.code": "over-budget",
+     "refusal.class": "over_budget"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 300
+  }
+ ]
+}
