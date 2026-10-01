@@ -184,7 +184,7 @@ def evaluate(points: list[tuple[int, int, int]], name: str, sign: int, degree: i
         draw = sign * rank_correlation(counts, shuffled)
         wins += draw >= signed
         rendered.append(float.hex(draw))
-    order = sorted(range(len(points)), key=lambda i: ((-sign * counts[i]), points[i][0], points[i][1]))
+    order = sorted(range(len(points)), key=lambda i: ((sign * counts[i]), points[i][0], points[i][1]))
     width = len(points) // 4
     chosen_probes = [probes[i] for i in order[:width]]
     all_median = statistics.median(probes)

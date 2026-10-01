@@ -235,7 +235,7 @@ def cohort_metrics(rows: list[dict], name: str, sign: int, degree: int, low_term
         if value >= signed:
             extremes += 1
         score_hex.append(float.hex(value))
-    ordered = sorted(range(len(rows)), key=lambda i: ((-sign * counts[i]), rows[i]["x"], rows[i]["y"]))
+    ordered = sorted(range(len(rows)), key=lambda i: ((sign * counts[i]), rows[i]["x"], rows[i]["y"]))
     take = len(rows) // 4
     selected = [probes[i] for i in ordered[:take]]
     median_all = statistics.median(probes)

@@ -5,27 +5,27 @@
     "n41_holdout": {
       "feature_evaluations": 2048,
       "median_probes_all": 1639.5,
-      "median_probes_selected": 1603.0,
+      "median_probes_selected": 1661.0,
       "n": 2048,
       "observed_spearman": -0.01623388189548811,
       "passes_gate": false,
       "permutation_p": 0.769615192403798,
       "permutation_scores_sha256": "40733f78c5368a769a9cf79261cb70ea1ee5debbe33fda647f7672bc41ba124c",
       "selected_n": 512,
-      "selected_quartile_median_probes_ratio": 0.9777371149740774,
+      "selected_quartile_median_probes_ratio": 1.0131137541933517,
       "signed_spearman": -0.01623388189548811
     },
     "n53_holdout": {
       "feature_evaluations": 5120,
       "median_probes_all": 13390.0,
-      "median_probes_selected": 13208.5,
+      "median_probes_selected": 13735.5,
       "n": 5120,
       "observed_spearman": -0.005156678549466277,
       "passes_gate": false,
       "permutation_p": 0.6471764117941029,
       "permutation_scores_sha256": "efc5dba20545d9978277ff35d5f50343e72eb6dc5adc5d515c087a3655688fea",
       "selected_n": 1280,
-      "selected_quartile_median_probes_ratio": 0.9864451082897685,
+      "selected_quartile_median_probes_ratio": 1.0258028379387603,
       "signed_spearman": -0.005156678549466277
     }
   },
@@ -33,8 +33,8 @@
   "decision": "NEGATIVE",
   "feature_evaluations": 16384,
   "host": {
-    "cpu_seconds": 12.641360872,
-    "elapsed_seconds": 12.644959130004281,
+    "cpu_seconds": 12.885518794,
+    "elapsed_seconds": 12.886850003007567,
     "machine": "x86_64",
     "python": "3.12.8",
     "system": "Linux"

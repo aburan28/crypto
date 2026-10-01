@@ -20,15 +20,17 @@ The same feature and sign, with no refit. Median is the average of the two centr
 
 | Cohort | Q | Signed Spearman | Permutation p | Selected-quarter median probe ratio | Gate |
 | --- | ---: | ---: | ---: | ---: | --- |
-| n41 blocks 3–4 | 2,048 | −0.01623388189548811 | 0.769615192403798 | 0.9777371149740774 | fail |
-| n53 blocks 0–4 | 5,120 | −0.005156678549466277 | 0.6471764117941029 | 0.9864451082897685 | fail |
+| n41 blocks 3–4 | 2,048 | −0.01623388189548811 | 0.769615192403798 | 1.0131137541933517 | fail |
+| n53 blocks 0–4 | 5,120 | −0.005156678549466277 | 0.6471764117941029 | 1.0258028379387603 | fail |
 
-Both cohorts miss every numeric bar. The quartile ratios near 1 are probe-count descriptions inside an already sealed panel. They are not an index-calculus speedup.
+Both cohorts miss every numeric bar. The predicted-easy quarter is slightly more expensive than the cohort median, not cheaper. These ratios are probe counts inside an already sealed panel. They are not an index-calculus speedup.
+
+The first draft of this replay sorted the opposite quarter: high signed-y weight first. Those withdrawn ratios were 0.9777 and 0.9864. The corrected order matches the merged producer in #1118, and the quartile ratios match the result recorded in #1120. The permutation p-values differ from that record by one draw. Both are far above 0.01, so the decision does not change. #1120 is the archive of that merged producer.
 
 ## Scope
 
 A/B traces matched on public Q, base hash, probes, and recovered scalar, with `group_verified` true and 1,024 solved rows in every consumed block. Feature evaluations: 16,384. Permutations use Python 3.12 `random.Random(seed).shuffle` for 2,000 successive Fisher–Yates shuffles of the archive-order probe list. Seeds are the frozen per-cohort values 2026100141 and 2026100153.
 
-Producer wall time 12.64 s and CPU 12.64 s on Linux x86_64, Python 3.12.8. The checker finished in 13.17 s with peak resident set 137,868 KiB, inside the 120 s and 512 MiB limits. No input mismatch and no censoring.
+The corrected producer run took 12.886850003007567 s wall and 12.885518794 s CPU on Linux x86_64, Python 3.12.8. An independent checker of that outcome passed in 13.017912187002366 s with peak resident set 137,944 KiB, inside the 120 s and 512 MiB limits. The withdrawn high-weight sort had quoted 12.64 s and 137,868 KiB; those figures are not this run. No input mismatch and no censoring.
 
 This rejects these three public-coordinate predictors under this split. It does not reject every PDP difficulty discriminator. A charged relation-selection pilot on new Q is not authorized.
