@@ -289,7 +289,9 @@ def recipe_of(v1: dict) -> dict:
 
 
 def document(name: str, curve: Curve, form: dict, r: int, h: int, generator, target: dict,
-             recipe: dict | str, rho_seed: int) -> dict:
+             recipe: dict | str, rho_seed: int, routed: bool = False) -> dict:
+    """A v2 document. `routed` leaves both pipelines to the router (design §5.2): a document that
+    names a pipeline is refused with that pipeline's own gate, not with `no-ic-route`."""
     field = {"kind": "binary", "degree": curve.n, "modulus": hx(curve.f)}
     return {
         "schema_version": 2,
@@ -300,8 +302,8 @@ def document(name: str, curve: Curve, form: dict, r: int, h: int, generator, tar
                      "generator": generator if isinstance(generator, dict) else point_doc(generator)},
         "target": target,
         "method": {"solve": "paired",
-                   "index_calculus": {"pipeline": "kic", "recipe": recipe},
-                   "rho": {"pipeline": "rho-koblitz", "seed": rho_seed}},
+                   "index_calculus": {"pipeline": "auto" if routed else "kic", "recipe": recipe},
+                   "rho": {"pipeline": "auto" if routed else "rho-koblitz", "seed": rho_seed}},
     }
 
 
@@ -456,7 +458,7 @@ def build() -> tuple[dict[str, dict], list[dict]]:
     tgt83 = G83.subgroup_point("ic-tool-programme/gate/m83/T001", h_g, r_g)
     files["gate-m83-T001.json"] = document(
         "the m = 83 confidence gate (AGENTS.md §8a): frozen generator, public target T001", G83,
-        {"form": "koblitz", "a": 0}, r_g, h_g, gen83, {"point": point_doc(tgt83)}, "auto", rho_seed)
+        {"form": "koblitz", "a": 0}, r_g, h_g, gen83, {"point": point_doc(tgt83)}, "auto", rho_seed, routed=True)
     c27 = run_case("C027-gate-curve-has-no-route-yet", "design §5: the gate curve is valid and no pipeline "
                    "admits it before B3", "gate-m83-T001.json",
                    {"refusal.code": "no-ic-route", "refusal.class": "unsupported"},
@@ -507,7 +509,7 @@ def build() -> tuple[dict[str, dict], list[dict]]:
     k30 = int.from_bytes(hashlib.sha256(b"ic-conformance-v2/C030/known_log").digest(), "big") % (r_32 - 1) + 1
     files["C030-even-degree-32.json"] = document(
         "C030: y^2 + xy = x^3 + 1 over GF(2^32)", K32, {"form": "koblitz", "a": 0}, r_32, h_32, g_32,
-        {"known_log": str(k30)}, smoke_recipe, rho_seed)
+        {"known_log": str(k30)}, smoke_recipe, rho_seed, routed=True)
     cases.append(run_case("C030-even-degree-has-no-ic-route", "design §5.2: kic needs an odd extension degree",
                           "C030-even-degree-32.json", {"refusal.code": "no-ic-route", "refusal.class": "unsupported"},
                           {"route.considered": [{"pipeline": "kic", "admitted": False,
@@ -528,7 +530,7 @@ def build() -> tuple[dict[str, dict], list[dict]]:
     files["ecc2k130-challenge.json"] = document(
         "ECC2K-130: the challenge's generator and target, in the polynomial basis "
         "(docs/ic/params/ecc2k130-fixed.json)", C130, {"form": "koblitz", "a": 0}, r_c, h_c, g_c,
-        {"point": point_doc(q_c)}, "auto", rho_seed)
+        {"point": point_doc(q_c)}, "auto", rho_seed, routed=True)
     c31 = run_case("C031-challenge-checks", "design §4: the challenge file is valid; r's primality is a screen",
                    "ecc2k130-challenge.json", {"status": "checks_passed"},
                    {"checks": [{"code": "order-composite", "status": "pass", "exact": False}],

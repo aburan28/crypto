@@ -24,7 +24,7 @@
  "method": {
   "solve": "paired",
   "index_calculus": {
-   "pipeline": "kic",
+   "pipeline": "auto",
    "recipe": {
     "summands": 3,
     "descent_summands": 2,
@@ -49,7 +49,7 @@
    }
   },
   "rho": {
-   "pipeline": "rho-koblitz",
+   "pipeline": "auto",
    "seed": 2293761
   }
  }

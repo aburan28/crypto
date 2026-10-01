@@ -180,7 +180,7 @@ are field elements, and the router finds the subfield itself (§5).
 
 - `order` is the prime `r`, and `cofactor` is `h = #E / r`.
   - Both may be omitted when the tool can find `#E` exactly (§4.5).
-    The tool then divides out `h` by trial division up to `2^32`, and
+    The tool then divides out `h` by trial division up to `2^20`, and
     needs what remains to be a prime greater than `h`. Otherwise the
     input is refused with `subgroup-underivable`.
 - `generator` is either a point or `{"rule": "koblitz_search_v1"}`.
@@ -241,8 +241,9 @@ AGENTS.md's single-target rule.
 
 - **Before the run**, the router refuses a run whose estimate exceeds
   the budget (§5.4).
-- **During the run**, a run that exceeds its budget stops. Its partial
-  counts are kept as a failure (plan §10).
+- **During the run**, a run that exceeds its wall budget stops, with
+  exit status 1 and the budget named on stderr. It is kept as a failure
+  (plan §10).
 - **The defaults** are:
   - a wall budget of 86,400 seconds, written into the report, so that a
     run of `2^128` steps is refused rather than started;
@@ -276,6 +277,7 @@ does. Every check is exact unless it is marked as a screen.
 | `schema-version` | `schema_version` is not 2. v1 files go through §8. |
 | `unknown-key` | a key outside the schema appears, at any level |
 | `missing-key` | a required key is absent |
+| `value-invalid` | a value has the wrong JSON type, or is not one of the values its key allows (a `kind`, `form`, `solve` or pipeline name, say) |
 | `integer-syntax` | an integer is empty, signed, spaced, neither decimal nor `0x` hexadecimal, or over 1,024 bits |
 | `name-syntax` | `name` is empty, over 120 characters, or has a control character |
 | `target-count` | there is not exactly one target form |
@@ -430,7 +432,10 @@ The gate codes:
 | `enumeration-bound` | `ic-binary-s4` at `n > 32` |
 | `no-pipeline-for-field` | an extension field before B5, or characteristic 3 |
 | `no-recipe` | `recipe: auto` where §5.3 has no rule |
+| `subgroup-smaller-than-cofactor` | `kic` and `rho-koblitz` need `r > h`, as `KoblitzCurve`'s own construction does |
+| `not-the-identity` | `trivial` takes the identity only |
 | `over-budget` | an estimate exceeds the budget |
+| `not-yet-supported` | a feature of the schema that a later step implements. The message names the feature and the step. B1 uses it for prime and extension fields, the other curve forms, named curves, one arm alone, `recipe: auto`, F1, F2 and more than one thread. |
 
 ### 5.3 Recipes
 
@@ -478,7 +483,7 @@ Every operation that reads a v2 document adds these keys to its report:
 |:--|:--|
 | `input` | the file's SHA-256 |
 | `resolved` | the instance as the tool understood it, as a complete v2 document (below) |
-| `curve_id` | the resolved model's ICV1 identity and slug, and the EC1 alias of the representation measured (AGENTS.md §11) |
+| `curve_id` | the resolved model's ICV1 identity: `{icv1, slug, model_json}` (AGENTS.md §11). The EC1 alias of the representation is computed from `resolved` by `tools/curve_identity.py`, which has no Rust port yet. |
 | `checks` | every check in §4, as `{code, status, exact, details}`. `status` is `pass`, `fail` or `not_checked`; `exact` is true or false. |
 | `disclosures` | §4.6 |
 | `route` | the chosen pipeline for each arm, the level, and every pipeline considered, with its gate code |
@@ -492,7 +497,7 @@ The cases (§9) read these keys by path:
   - `considered` lists `{pipeline, arm, admitted, gate}`, one entry for
     every pipeline.
 - Each disclosure is `{code, value}`.
-- `curve_id` is `{icv1, slug, model_json, ec1}`.
+- `curve_id` is `{icv1, slug, model_json}`.
 - A run keeps v1's keys as well: `status`, `counts`, `certificates`,
   `rho_counts`, `all_verified` and `ic_and_rho_agree`. A pin therefore
   compares a v2 run with a v1 run directly.

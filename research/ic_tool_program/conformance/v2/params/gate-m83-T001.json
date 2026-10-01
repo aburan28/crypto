@@ -27,11 +27,11 @@
  "method": {
   "solve": "paired",
   "index_calculus": {
-   "pipeline": "kic",
+   "pipeline": "auto",
    "recipe": "auto"
   },
   "rho": {
-   "pipeline": "rho-koblitz",
+   "pipeline": "auto",
    "seed": 2293761
   }
  }
