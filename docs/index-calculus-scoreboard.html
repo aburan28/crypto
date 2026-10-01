@@ -164,6 +164,7 @@
   }
   .panel-head p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; line-height: 1.5; }
   #joint-dimension-length .panel-body { padding: 16px 20px 20px; }
+  #ic-tournament-reference-history .panel-body { padding: 16px 20px 20px; }
   #joint-dimension-length .panel-body > p { font-size: 13.5px; line-height: 1.55; }
 
   .chart-scroll { overflow-x: auto; padding: 10px 8px 4px; }
@@ -248,6 +249,7 @@
   }
   tbody tr:last-child td { border-bottom: 0; }
 
+  .ref-note { margin: 28px 0 10px; padding: 10px 14px; border-radius: 4px; border-left: 3px solid var(--bound); background: var(--surface-sunk); color: var(--ink); font-size: 13px; line-height: 1.5; }
   .chip {
     display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 500;
     letter-spacing: .07em; text-transform: uppercase; padding: 2.5px 7px;
@@ -408,7 +410,7 @@
       (<a href="#ic-triple-counted-20260923">below</a>). So no crossing with a matched rho has been
       measured, and the <code>r<sup>[0.13, 0.19]</sup></code> is a growth against the unmatched
       walk. <strong>That tournament line was stopped on 2026-09-29</strong>
-      (<a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/DECISION-20260929-stop.md">decision</a>).
+      (<a href="#ic-tournament-reference-history">reference history</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/DECISION-20260929-stop.md">decision</a>).
       Against a rho in the IC arm&rsquo;s own arithmetic, no collector is below rho in instructions
       at any of twelve cells. Its one lead is 16&ndash;26% in isolated in-process time at
       <code>n</code>&thinsp;&le;&thinsp;19, gone by 23. That is engineering: it comes from more
@@ -4071,6 +4073,53 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     window.addEventListener('scroll', hide, { passive: true });
   })();
 </script>
+<!-- BEGIN ic-tournament-reference-history -->
+<section class="panel" id="ic-tournament-reference-history">
+<div class="panel-head"><h2>The tournament&rsquo;s rho, as the reference was matched <span class="chip">accounting</span></h2>
+<p>Every complete-IC tournament panel below reports <em>Cost / rho</em>. Through round 0023 that rho was the
+  tournament worker&rsquo;s, which named each Frobenius class by running the abscissa through every image with
+  field squarings &mdash; about 9,100 of its 9,930 instructions a step at <code>n43a1</code>, a cost the IC arm had
+  replaced with a normal-basis rotation in round 0007. The reference was then matched in steps. This table is
+  that sequence, one row per reference, so each round&rsquo;s own <em>Cost / rho</em> column can be read
+  against it. No algorithm got worse at any step: what the ratios were counted against changed.
+  <strong>The line was stopped on 2026-09-29</strong> (<a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/DECISION-20260929-stop.md">decision</a>): rounds
+  0023, 0024 and 0025 produced no win against a matched rho, and nothing in it is an advance.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md">campaign results</a> &middot;
+  <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/RESULTS.md">the control</a> &middot;
+  <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND24-pair-inverse.md">round 0024</a> &middot;
+  <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND25-lean-rho-switch.md">round 0025</a> &middot;
+  <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/sized_cache_rho_20260930/RESULTS.md">sized-cache re-timing</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>IC over rho, complete cold single-target DLP, every answer certified. Instructions are Valgrind Ir;
+  time is native wall. Ranges are per-cell point estimates across the cells named. Panel = the eight cells
+  <code>n13a0</code>&ndash;<code>n31a0</code> (r &le; 4.2&middot;10<sup>6</sup>); crossover = <code>n37a0</code>,
+  <code>n43a1</code>, <code>n59a0</code>, <code>n61a1</code> (r = 2.3&middot;10<sup>8</sup> to 1.2&middot;10<sup>10</sup>).</caption>
+<thead><tr><th>Reference rho</th><th>Where</th><th>IC arm</th><th>IC / rho, instructions</th><th>IC / rho, time</th><th>Class</th></tr></thead><tbody>
+<tr><td>Worker rho: orbit named by squaring</td><td>rounds 0007&ndash;0023</td><td>pair collector (tournament winner)</td>
+  <td>panel 0.6751 [0.6298, 0.7265] (round 0019), 0.6629 (round 0020); crossover 1.396&ndash;2.207 at best base (round 0022)</td>
+  <td>panel 0.8848 (round 0019)</td><td><span class="chip">engineering</span> against an unmatched reference</td></tr>
+<tr><td>Control: worker rho plus the IC arm&rsquo;s normal-basis orbit naming, nothing else</td><td>2026-09-23, 5 cells</td><td>triple collector, counted sizing</td>
+  <td><strong>1.19&ndash;2.88, above rho at every cell</strong> (<code>n23a1</code> 1.501 through <code>n43a1</code> 2.882)</td>
+  <td>not measured</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>Matched rho: the control patch in every arm</td><td>round 0024, 12 cells</td><td>pair collector</td>
+  <td>six panel cells <strong>0.61&ndash;0.82</strong>; <code>n23a0</code> 0.971; <code>n23a1</code> <strong>1.126</strong>; crossover 1.88&ndash;9.26; all twelve cells 1.380 [0.847, 2.387]</td>
+  <td>six panel cells 0.87&ndash;0.95; <code>n23a1</code> 1.041</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>Lean rho: the matched walk in the IC arm&rsquo;s own single-word arithmetic</td><td>round 0025, 12 cells</td><td>pair collector; pair/triple switch</td>
+  <td><strong>above rho at every cell</strong>: panel 1.36&ndash;2.56; crossover 2.1&ndash;13.7 (pair), 1.35&ndash;5.0 (switch)</td>
+  <td>four smallest cells 0.87&ndash;0.98, unpredicted; rho wins from <code>n23a0</code> on</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>Lean rho with its recent-point cache sized to the walk</td><td>re-timing 2026-09-30, 5 cells, wall time only</td><td>pair collector (round-0025 incumbent)</td>
+  <td>unchanged</td><td><strong>0.98&ndash;1.03</strong> at the four small cells; 1.043 [1.015, 1.074] at <code>n23a0</code></td><td><span class="chip">engineering</span> in rho&rsquo;s favour</td></tr>
+</tbody></table></div>
+<div class="panel-body"><p>Read the rows in order. The round-0019 strict win on eight cells does not survive a matched rho: it fails at
+  <code>n23a1</code>. The six small cells that do survive it are lost to a rho running the same walk in the IC
+  arm&rsquo;s own arithmetic. The one lead left, in wall time at <code>n &le; 19</code>, came from the IC arm
+  executing 1.65&ndash;2.03&times; more instructions per second, mostly because rho zero-filled a fixed 160 KB
+  cache per solve, and sizing that cache removes it. The control&rsquo;s two formally unscored cells and its own
+  per-step cost (about 3,000 instructions against an IC probe&rsquo;s 1,100) are in its panel below. Each
+  round&rsquo;s panel keeps its figures as measured, with a note above it pointing here.</p></div>
+</section>
+<!-- END ic-tournament-reference-history -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0002 -->
 <section class="panel" id="ic-tournament-round-0002">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4098,6 +4147,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0002 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0003b -->
 <section class="panel" id="ic-tournament-round-0003b">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4132,6 +4182,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0003b -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0004 -->
 <section class="panel" id="ic-tournament-round-0004">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4165,6 +4216,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0004 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0005-batch16 -->
 <section class="panel" id="ic-tournament-round-0005-batch16">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4196,6 +4248,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0005-batch16 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0006-batch16 -->
 <section class="panel" id="ic-tournament-round-0006-batch16">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4231,6 +4284,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0006-batch16 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0006 -->
 <section class="panel" id="ic-tournament-round-0006">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4264,6 +4318,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0006 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0007 -->
 <section class="panel" id="ic-tournament-round-0007">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4295,6 +4350,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0007 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0008 -->
 <section class="panel" id="ic-tournament-round-0008">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4324,6 +4380,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0008 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0009 -->
 <section class="panel" id="ic-tournament-round-0009">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4353,6 +4410,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0009 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0010 -->
 <section class="panel" id="ic-tournament-round-0010">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4383,6 +4441,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0010 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0011 -->
 <section class="panel" id="ic-tournament-round-0011">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4494,6 +4553,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       (<a href="https://modal.com/apps/a-buran28/main/ap-aNsvFhZH5TKB6fETEVUfLP">ap-aNsvFhZH5TKB6fETEVUfLP</a>);
       <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/per-sm/WAVES.md">boundaries and table</a>.</p>
   </section>
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-autolab-20260915 -->
 <section class="panel" id="ic-tournament-round-autolab-20260915">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4566,6 +4626,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>All costs include setup and required verification. Kernel/device work, profiler execution and external audits are separate research overhead. The K-instruction floor is implementation-specific. Unverified workloads have no aggregate cost or promotion score; no arithmetic-complexity or family-wide claim.</p>
 </section>
 <!-- END ic-autolab-source-development-20260915 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-20260915t205319z -->
 <section class="panel" id="ic-tournament-round-20260915t205319z">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4602,6 +4663,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p><a href="https://github.com/aburan28/crypto/blob/main/research/ic_autolab_next30_20260915/README.md">Research report</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_autolab_next30_20260915/development-measurements.json">Frozen measurements</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_autolab_next30_20260915/development-audit.json">Independent audit</a>.</p>
 </section>
 <!-- END ic-autolab-next30-source-development-20260915 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-20260915t224645z -->
 <section class="panel" id="ic-tournament-round-20260915t224645z">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4624,6 +4686,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings remain diagnostics. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-20260915t224645z -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0006b-single -->
 <section class="panel" id="ic-tournament-round-0006b-single">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4657,6 +4720,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0006b-single -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0007-single-policy -->
 <section class="panel" id="ic-tournament-round-0007-single-policy">
 <p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
@@ -4702,6 +4766,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0007-single-policy -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0008-single-implementation -->
 <section class="panel" id="ic-tournament-round-0008-single-implementation">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4836,6 +4901,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       interval. Cold setup dominates. Kernel arithmetic is unchanged; no operation-count,
       whole-DLP, RDMA-network or crossover improvement is established.</p></div>
   </div>
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0012 -->
 <section class="panel" id="ic-tournament-round-0012">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4876,6 +4942,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0012 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0013 -->
 <section class="panel" id="ic-tournament-round-0013">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4914,6 +4981,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0013 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0014 -->
 <section class="panel" id="ic-tournament-round-0014">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -4952,6 +5020,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0014 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0015 -->
 <section class="panel" id="ic-tournament-round-0015">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5057,6 +5126,7 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <p>Classification against the contract's boundaries: engineering where S<sub>sym</sub> / S<sub>x</sub> &lt; 1 (a constant on the solve, paid for in part by the base's halved yield), refuted at n = 31 where the u-base needed 2.6&times; the trials to a solvable matrix; the ratio to rho grows with n (990&times; &rarr; 63500&times;) and no arm approaches the floor, as the counting floor &kappa; &ge; &radic;(2(B+1)/&gamma;) says a symmetry cannot. The oracle-only refutation wins of &sect;8 (&times;300&ndash;6000 at n = 15) do not survive the pipeline: a base that refutes faster also decomposes fewer targets.</p>
 </section>
 <!-- END koblitz-symmetrised-e2e-20260927 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0016 -->
 <section class="panel" id="ic-tournament-round-0016">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5093,6 +5163,7 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0016 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0017 -->
 <section class="panel" id="ic-tournament-round-0017">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5214,6 +5285,7 @@ No row is an advance: relation collection stays &Theta;(2<sup>n</sup>) with any 
 factor base, and this prices a decomposition oracle.</p>
 </section>
 <!-- END wdsat-rr-20260920 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0018b -->
 <section class="panel" id="ic-tournament-round-0018b">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5254,6 +5326,7 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0018b -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0019 -->
 <section class="panel" id="ic-tournament-round-0019">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5290,6 +5363,7 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0019 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0020 -->
 <section class="panel" id="ic-tournament-round-0020">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -5363,6 +5437,7 @@ SAT. It does not speak to an encoding whose value set stays proper at d = 45, or
 F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 2<sup>131</sup>.</p>
 </section>
 <!-- END solver16-weil-descent-sat-20260920 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-crossover-20260922 -->
 <section class="panel" id="ic-crossover-20260922">
 <div class="panel-head"><h2>Where the tournament collector crosses rho <span class="chip">engineering</span></h2>
@@ -5419,6 +5494,7 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
   calibrated rows, fitted exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
 <!-- END ic-crossover-20260922 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-triple-table-20260923 -->
 <section class="panel" id="ic-triple-table-20260923">
 <div class="panel-head"><h2>A triple-sum table moves the crossover <span class="chip">engineering</span></h2>
@@ -5473,8 +5549,8 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
 <div class="table-scroll"><table>
 <caption>Instruction unit Ir, complete DLP, 32 paired fixtures a cell (128 at <code>n43a1</code>),
   every report of every arm verified by <code>oracle.py</code> with the same logarithm. Geometric
-  mean of paired ratios, 95% bootstrap interval. &ldquo;Worker rho&rdquo; is the tournament&rsquo;s
-  matched rho; &ldquo;control&rdquo; is that rho with the IC arm&rsquo;s orbit naming.</caption>
+  mean of paired ratios, 95% bootstrap interval. &ldquo;Worker rho&rdquo; is the rho the tournament had used as its
+  matched reference; &ldquo;control&rdquo; is that rho with the IC arm&rsquo;s orbit naming, which shows it was not matched.</caption>
 <thead><tr><th>Cell</th><th>r</th><th>counted / triple</th><th>counted / worker rho</th><th>counted / control</th></tr></thead><tbody>
 <tr><td>n23a1</td><td>4,196,903</td><td>0.968 (identity)</td><td>1.210 [1.121, 1.303]</td><td>1.501 [1.433, 1.574]&dagger;</td></tr>
 <tr><td>n37a0</td><td>230,603,167</td><td>0.991 (identity)</td><td>0.795 [0.679, 0.935]</td><td><strong>1.723</strong> [1.569, 1.892]</td></tr>
@@ -6894,6 +6970,7 @@ F<sub>2</sub>-subspace. No row is an advance; nothing here is a statement about 
     per-rung regression. Every figure here is for the code before #697 (<code>31bedbdf</code>).</p>
 </section>
 <!-- END groebner-instructions-20260925 -->
+<p class="ref-note" data-ref-note="worker-rho"><span class="chip">accounting</span> <em>Cost / rho</em> and <em>Time / rho</em> in the next panel are against the tournament worker&rsquo;s rho, which named Frobenius classes by squaring and is not a matched reference. Against a matched rho (round 0024) and a lean one (round 0025) these ratios move against the IC arm: see <a href="#ic-tournament-reference-history">the reference history</a>.</p>
 <!-- BEGIN ic-tournament-round-0023 -->
 <section class="panel" id="ic-tournament-round-0023">
 <p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
