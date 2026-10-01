@@ -156,3 +156,113 @@ rejected B2 is fixed and declared again, by amendment.
 - The timing check: 220 processes, about 90 minutes.
 - The estimate's error: no processes, since it reads R01's figures.
 - `rho-bignum`'s step costs: three short runs.
+
+## Amendment 1 (2026-10-01, before any B2 measurement)
+
+Written once B2's code passed every selected case (C001–C058 under
+`--steps B0,B1,B3,B2`, 57 of 57), and before the first measurement. It
+records where the code differs from the text above or makes it exact.
+None of it loosens a case: no case file changes.
+
+1. **A step of its own: B2b.** Three items move out of B2:
+   - `kic` on a curve over a subfield with `k > 1`;
+   - `solve: index_calculus` on `kic`;
+   - order certificates.
+
+   `ic price` prices Koblitz curves only. Pairing `kic` with
+   `rho-negation`, or running `kic` alone, needs a second rho arm and a
+   new report shape in the single-target pricer, whose outputs the pin
+   holds fixed. Until B2b:
+   - `kic`'s gate for `k > 1` stays `subfield-curve-unsupported`;
+   - `kic` alone is `not-yet-supported`, naming B2b;
+   - a certificate is recorded as `not_checked`.
+
+   The imported index calculus pipelines, `ic-binary-s4` and
+   `ic-prime-s3`, run alone from B2.
+2. **How method 4 counts.**
+   - Up to `q = 2^16` it enumerates.
+   - Above that it uses Mestre's method: the orders of points on the
+     curve and on its quadratic twist, intersected in the Hasse
+     interval. That is exact as well.
+   - If 64 points leave more than one value, the result is
+     `cardinality-unknown`.
+
+   Enumeration alone would take minutes near `2^32`. The tests check the
+   counts against enumeration over `F_p`, `GF(17^3)` and `GF(2^13)`.
+3. **A recipe object belongs to `kic`.** A recipe object holds v1's
+   knobs, and only `kic` reads them. When a document gives one, every
+   other index calculus pipeline is gated `recipe-not-taken`, a new gate
+   code. So `auto` never routes the arm to a pipeline that would ignore
+   the user's recipe.
+
+   B1's frozen case C030 is the instance this protects. It is a Koblitz
+   curve over `GF(2^32)` with an explicit `kic` recipe; without this
+   rule, `ic-binary-s4` (`n ≤ 32`) would take it.
+4. **The other field's pipelines.** A pipeline with no implementation
+   for the instance's field kind is gated `no-pipeline-for-field`:
+   - `kic`, `rho-koblitz` and `ic-binary-s4` on a prime field;
+   - `ic-prime-s3` on a binary one;
+   - every pipeline on `GF(p^k)`. There the refusal is
+     `no-pipeline-for-field` itself, before any arm is chosen, as C050
+     reads.
+5. **The gates F2 skips** are the five word-width codes:
+   - `field-wider-than-one-word` and `field-wider-than-two-words`;
+   - `prime-wider-than-one-word`;
+   - `scalar-wider-than-63-bits` and `scalar-wider-than-127-bits`.
+
+   `enumeration-bound` is not one of them. `ic-binary-s4`'s enumeration
+   of `GF(2^n)` is the pipeline's method, not a word.
+6. **The budget compares the arms' sum.** A paired run's arms share one
+   process and one wall budget, so the router refuses a run whose arms'
+   estimates together exceed it. That implies the per-arm test above.
+   Under `max_iterations`, rho's estimate counts that many steps.
+7. **The estimates' models.** Every constant beyond `baselines.json` is
+   in [`estimates.json`](estimates.json), with its source.
+   - **`kic`.** §20's `ic_phases`, evaluated for one target (`K = 1`,
+     the single-target rule's count, where `predict.py` used 32).
+     - `K = 1` was chosen before any comparison with v0.
+     - A development check against v0's cold times at the eleven sizes
+       was then computed: geometric mean 0.91, range 0.34–1.98.
+     - Nothing in the model changed after it. Measurement 6 reports the
+       binary's own figures.
+   - **`recipe: auto`.**
+     - At the suite's sizes it is the suite's row. There are twelve with
+       the smoke size, keyed by `(a, n, r)`.
+     - Elsewhere it is `make_params.py` at §20's optimum for one target.
+     - It rounds as Python's `round` does. A test reproduces every suite
+       file's recipe.
+   - **`rho-koblitz`.** The newest baseline's row nearest in `log₂ r`:
+     `s_rho_online × unit_ns × √(4n/π)` nanoseconds a step.
+   - **`rho-negation`.** No baseline row times it, so it uses the
+     boundary ledger's matched rho at the largest rung of its regime.
+   - **`ic-prime-s3` and `ic-binary-s4`.** Each pipeline's measured cost
+     at the ledger's largest rung, carried along its fitted exponent.
+   - **`rho-bignum`.** Provisional development-host step costs, until
+     measurement 7 replaces them in `estimates.json`.
+8. **What the imported pipelines run.**
+   - **`ic-prime-s3`** is the ledger's `mitm_m2_negfold_walk_balanced`
+     row: two summands (`S₃`) by meet in the middle, on the base the
+     family's shape law asks for.
+   - **`ic-binary-s4`** is `mitm_m3_negfold_walk`: three summands
+     (`S₄`) on the `⌈n/3⌉` subspace base. Where a census finds three
+     cannot reach the subgroup, it uses two, and says so.
+   - Each times its set-up apart from its target-dependent work. Neither
+     splits that work into AGENTS.md's five exclusive phases, so their
+     reports mark the pair `speedup_eligible: false`.
+9. **Targets v1's rules do not cover.** On an instance outside v1's
+   rules (not a Koblitz curve on `kic` or `rho-koblitz`),
+   `random_seed` and `public_hash_seed` follow v2 rules. Each is SHA-256
+   in counter mode under a fixed label, and the report states it.
+10. **Characteristic 3.**
+    - A `prime_extension` with `p = 3` is refused with
+      `no-pipeline-for-field` once its field is validated (design §11).
+      B2 validates no curve over it.
+    - `p < 3` is `p-range`.
+11. **Named curves.**
+    - `named` takes the names `params::NAMES` lists.
+    - A name with no recorded generator or polynomial basis is
+      `named-incomplete`, class `unsupported`, exit 3. Today that is
+      `ecc2k-130`.
+12. **Measurement 7** runs `examples/rho_bignum_rate.rs`:
+    - stand-in curves of the declared widths;
+    - a fixed step count, isolated, on one thread.
