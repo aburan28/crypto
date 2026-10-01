@@ -219,6 +219,16 @@ Rows are baselines and columns are one unit. R01 filled v0 (2026-10-01).
 |:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
 | v0 | `46ae2014` (`src/` tree `003badc2`) | accounting | 4.43, 7.65, 5.42, 7.53, 8.77, 14.49 | — | IC 8.8–17.5× faster (§23) | IC 4.9–31.6× slower (§23) | none yet | 61 | #1104, R01 results |
 
+**Rounds that did not become baselines.** A rejected round keeps its
+numbers here and its code on record (§6, step 4). Its ratio is paired
+within its own runs: its arms' `S` come from those runs, and a
+different run of the same binary can read several per cent apart on
+this host.
+
+| round | candidate | would-be class | decision | cold-time ratio over its base [95%], at the sizes it targets | elsewhere | record |
+|:--|:--|:--|:--|:--|:--|:--|
+| R02, the AVX-512 batched addition for `n + deg t = 66` | `a1645ac6` on v0′ `c1a2e5f8` | engineering | **rejected**: the holdouts at `2^44.5` read 1.161 [1.089, 1.239], and the lower end is not above 1.10; the callgrind control also failed, by 0.1% of instructions in the compiler's code for two scan functions | suite 1.182 [1.151, 1.213] at `2^44.5`, 1.267 [1.242, 1.292] at `2^47.2`; holdouts 1.161 and 1.262 [1.216, 1.310] | 0.973–1.027, inside every A/A band | [`rounds/R02-wide-tail-kernel/`](../../ic_tool_program/rounds/R02-wide-tail-kernel/README.md), `candidate.patch` |
+
 ## 8. Track A: speed
 
 **What §23 already measured.** Under the single-target rule the cold
