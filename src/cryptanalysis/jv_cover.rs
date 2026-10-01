@@ -1776,20 +1776,26 @@ pub fn nagao_decompose(
                 f.sub(&a, &f.mul(&lam[2], &vc(k)))
             })
             .collect();
-        let mut terms: Vec<(usize, i8)> = Vec::with_capacity(6);
+        // Per root, the admissible signs: one when `y = −A/µ` is determined, both
+        // when `µ(x) = 0` (then `A(x) = 0` too, and `u(x) = 0`: the reduced
+        // divisor contains a point over this abscissa, `y` is not determined by
+        // the formula and the group decides).
+        let jc = ctx.jac();
+        let mut options: Vec<(usize, Vec<i8>)> = Vec::with_capacity(6);
         for &x in &roots {
             let xe = f.from_fp(x);
-            let mu = f.add(&lam[2], &xe);
-            if mu == E2::ZERO || peval(f, &r.u, &xe) == E2::ZERO {
+            let Some(&i) = by_x.get(&x) else {
                 continue 'sol;
+            };
+            let mu = f.add(&lam[2], &xe);
+            if mu == E2::ZERO {
+                options.push((i, vec![1, -1]));
+                continue;
             }
             let y = f.neg(&f.mul(&peval(f, &ak, &xe), &f.inv(&mu)));
             if y == E2::ZERO || f.sq(&y) != peval(f, &ctx.cov.hx, &xe) {
                 continue 'sol;
             }
-            let Some(&i) = by_x.get(&x) else {
-                continue 'sol;
-            };
             // R = −Σ (Q_i − ∞): the sign of the base element is the opposite
             let eps: i8 = if y == base[i].y {
                 -1
@@ -1798,12 +1804,28 @@ pub fn nagao_decompose(
             } else {
                 continue 'sol;
             };
-            terms.push((i, eps));
+            options.push((i, vec![eps]));
+        }
+        if options.len() != 6 {
+            continue;
+        }
+        let free: Vec<usize> = (0..6).filter(|&k| options[k].1.len() > 1).collect();
+        if free.len() > 4 {
+            continue;
         }
         cost.split += 1;
-        terms.sort_unstable();
-        let t: [(usize, i8); 6] = core::array::from_fn(|k| terms[k]);
-        out.insert(Dec6 { terms: t });
+        for combo in 0..(1u32 << free.len()) {
+            let mut terms: Vec<(usize, i8)> = options.iter().map(|(i, e)| (*i, e[0])).collect();
+            for (bit, &k) in free.iter().enumerate() {
+                terms[k].1 = if combo & (1 << bit) == 0 { 1 } else { -1 };
+            }
+            terms.sort_unstable();
+            let t: [(usize, i8); 6] = core::array::from_fn(|k| terms[k]);
+            let d = Dec6 { terms: t };
+            if free.is_empty() || verify_dec(&jc, base, r, &d) {
+                out.insert(d);
+            }
+        }
     }
     cost.post_muls = f.muls() - m1 + ring.muls.get();
     cost.decompositions = out.len();
@@ -2771,5 +2793,34 @@ mod tests {
                 "trial {trial}: missed {want:?}, {cost:?}"
             );
         }
+    }
+
+    /// Slow (40 s): 1,500 planted six-sums at `p = 61`.  The only admissible
+    /// misses are residuals the solver flags `incomplete` (a positive-dimensional
+    /// ideal, about 1 in 700), and there must be no other.  Two defects were
+    /// found by this test: a Krylov vector missing a root's eigenspace, and
+    /// the reduced divisor containing a point over a planted abscissa, where
+    /// `µ(x) = u(x) = A(x) = 0` leaves `y` undetermined (both signs are now
+    /// tried and the group decides).
+    #[test]
+    #[ignore]
+    fn solver_is_exact_on_1500_planted_sums_at_p61() {
+        let (_, ctx, base, by_x, mut rng) = small_ctx(61, 1);
+        let jac = ctx.jac();
+        let opts = jv_options(24, 120.0);
+        let (mut flagged, mut missed) = (0, 0);
+        for _ in 0..1500 {
+            let (r, want) = planted(&jac, &base, &mut rng);
+            let (found, cost) = nagao_decompose(&ctx, &base, &by_x, &r, &opts, &mut rng);
+            if found.contains(&want) {
+                continue;
+            }
+            if cost.incomplete {
+                flagged += 1;
+            } else {
+                missed += 1;
+            }
+        }
+        assert_eq!(missed, 0, "unflagged misses (flagged: {flagged})");
     }
 }
