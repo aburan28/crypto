@@ -961,6 +961,12 @@ configurations from a JSON file and prints one table.
         --oracle descent-algebraic:m=2 --solver buchberger-f2
     ./target/release/ic bench --sweep docs/ic/sweeps/solver-engines.json
 
+A plug-in is written `name:key=value,key=value`. The `,` ends a
+parameter, so a parameter that takes several values separates them with
+`;`: `--factor-base 'koblitz-orbit:divisor=1;2'` selects factors 1 and 2
+(quote it, since a bare `;` ends a shell command). `divisor=1,2` is
+refused with an error that names the `;`.
+
 [`FRAMEWORK.md`](FRAMEWORK.md) is the manual: the unit, the report
 columns, the stage contracts, a worked example of adding a solver (the
 plug point for F4, F5, XL, SAT), the sweep schema and the reporting
