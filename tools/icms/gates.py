@@ -34,6 +34,11 @@ from .environment import parse_cpu_list
 
 LEVELS = ("L0", "L1", "L2", "L3")
 
+# The isolated_bench preflight's own defaults.  A session may run its preflight
+# stricter (longer settle, lower limits) and still count as quiet; one that
+# loosened any of them did not show a quiet machine by this standard's test.
+PREFLIGHT_LIMITS = {"settle_s": 2.0, "max_other_cpu": 0.10, "max_psi": 5.0}
+
 DEFAULT_THRESHOLDS: dict[str, float] = {
     "max_run_delay_fraction": 0.005,       # child runnable-but-waiting / (on CPU + waiting)
     "max_steal_fraction": 0.0,             # steal jiffies on pinned CPUs / all their jiffies
@@ -155,9 +160,15 @@ def evaluate(execution: dict[str, Any], session: dict[str, Any], capsule_stable:
     else:
         checks.append(_c("involuntary_switches", "L2", "unknown", None, th["max_involuntary_switches_per_s"], "no rusage"))
     pre = session.get("preflight") or {}
-    checks.append(_c("preflight_quiet", "L2", _bool_status(pre.get("quiet") if pre else None),
-                     {k: pre.get(k) for k in ("other_cpu_seconds", "psi_some_avg10_max")} if pre else None,
-                     "isolated_bench preflight", "the machine was quiet before the session started"))
+    lim = pre.get("limits") or {}
+    loosened = sorted(k for k, v in PREFLIGHT_LIMITS.items()
+                      if lim.get(k) is None or (lim[k] < v if k == "settle_s" else lim[k] > v))
+    quiet_ok = None if not pre else (bool(pre.get("quiet")) and not loosened)
+    checks.append(_c("preflight_quiet", "L2", _bool_status(quiet_ok),
+                     {**({k: pre.get(k) for k in ("other_cpu_seconds", "psi_some_avg10_max")} if pre else {}),
+                      "limits": lim or None, "loosened": loosened},
+                     {"isolated_bench preflight at least as strict as": PREFLIGHT_LIMITS},
+                     "the machine was quiet before the session started, by a preflight no looser than the default"))
 
     # ---- L3 ------------------------------------------------------------------
     topo = capsule_stable.get("topology", {})

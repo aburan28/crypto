@@ -180,7 +180,8 @@ class GateTests(unittest.TestCase):
                            "intel_pstate_no_turbo": None, "cpufreq_boost": None, "cpus": {"3": {"governor": None}}},
               "virtualization": {"detect_virt": "kvm"}}
     SESSION = {"reservation": {"evicted": True, "threads_moved": 3, "left_on_reserved": {}},
-               "preflight": {"quiet": True, "other_cpu_seconds": 0.0, "psi_some_avg10_max": 0.0}}
+               "preflight": {"quiet": True, "other_cpu_seconds": 0.0, "psi_some_avg10_max": 0.0,
+                             "limits": {"settle_s": 2.0, "max_other_cpu": 0.1, "max_psi": 5.0}}}
 
     def execution(self, **over):
         ex = {"pinned_cpus": [3], "child_affinity_observed": [3], "wall_ns": 1_000_000_000,
@@ -489,6 +490,13 @@ class RunnerRegressionTests(unittest.TestCase):
         checks = {c["id"]: c for c in evaluate(ex, {}, {"topology": {}}, 1)["checks"]}
         self.assertEqual(checks["parallelism"]["status"], "fail")
         self.assertEqual(checks["run_delay"]["status"], "unknown")
+
+    def test_a_loosened_preflight_is_not_quiet(self):
+        ok = {"quiet": True, "limits": {"settle_s": 2.0, "max_other_cpu": 0.10, "max_psi": 5.0}}
+        loose = {"quiet": True, "limits": {"settle_s": 2.0, "max_other_cpu": 0.5, "max_psi": 5.0}}
+        strict = {"quiet": True, "limits": {"settle_s": 5.0, "max_other_cpu": 0.05, "max_psi": 1.0}}
+        status = lambda pre: {c["id"]: c["status"] for c in evaluate({}, {"preflight": pre}, {"topology": {}}, 1)["checks"]}["preflight_quiet"]  # noqa: E731
+        self.assertEqual((status(ok), status(loose), status(strict)), ("pass", "fail", "pass"))
 
     def test_a_user_thread_left_on_the_reservation_fails_l1(self):
         session = {"reservation": {"evicted": True, "threads_moved": 3,
