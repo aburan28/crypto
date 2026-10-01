@@ -169,24 +169,24 @@ and verified its own; the class column is by the test of `AGENTS.md`
 
 | regime, instance | variant | m | \|F\| | K | trials | yield/ceiling | S | vs rho | vs floor | correct | class |
 |:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
-| **prime**, `generated-24bit-10935329`, `r = 2^23.4`, `#E = r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | 0.23× | 1× | — | boundary |
+| **prime**, `icv1-fp24-t1577-77336155`, `r = 2^23.4`, `#E = r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | 0.23× | 1× | — | boundary |
 | | Pollard rho, r-adding, counted (walk alone 3.54) | | | | | | 3.93 | 1× | 4.4× | ✓ | reference |
 | | Semaev `S₃` roots | 2 | 512 | 256 | 9,784 | 1.05 | 4,349 | 1,107× | 4,907× | ✓ | baseline |
 | | direct subtraction | 2 | 512 | 256 | 9,784 | 1.05 | 1,715 | 436× | 1,935× | ✓ | accounting |
 | | meet in the middle | 2 | 512 | 256 | 9,784 | 1.05 | 232 | 59.1× | 262× | ✓ | engineering |
 | | meet in the middle | 3 | 512 | 256 | 265 | 0.87 | **56.8** | **14.5×** | **64.1×** | ✓ | engineering |
-| **binary**, `random-binary-n27-b845462`, `r = 2^24.4`, `#E = 6r`, `A = 2` | generic floor | | | | | | 0.886 | 0.38× | 1× | — | boundary |
+| **binary**, `icv1-f2m27-t12543-569dca8b`, `r = 2^24.4`, `#E = 6r`, `A = 2` | generic floor | | | | | | 0.886 | 0.38× | 1× | — | boundary |
 | | Pollard rho, r-adding, counted (walk alone 1.98) | | | | | | 2.31 | 1× | 2.6× | ✓ | reference |
 | | meet in the middle | 3 | 526 | 263 | 1,498 | 0.90 | **206** | **89.0×** | **232×** | ✓ | baseline |
 | | `S₄` pairs-and-solve | 3 | 526 | 263 | 1,499 | 0.90 | 105,198 | 45,471× | 118,703× | ✓ | relabelling |
-| **Koblitz**, `K_1 / GF(2^23)`, `r = 2^22.0`, `#E = 2r`, `A = 46` | generic floor | | | | | | 0.185 | 0.21× | 1× | — | boundary |
+| **Koblitz**, `icv1-f2m23-tm5197-1f85e9e1`, `r = 2^22.0`, `#E = 2r`, `A = 46` | generic floor | | | | | | 0.185 | 0.21× | 1× | — | boundary |
 | | signed-Frobenius rho, counted (walk alone 0.19) | | | | | | 0.89 | 1× | 4.8× | ✓ | reference |
 | | meet in the middle, one column per abscissa | 3 | 875 | 438 | 348 | 1.00 | 203 | 227× | 1,096× | ✓ | baseline (control) |
 | | meet in the middle, signed-orbit columns | 3 | 875 | 20 | 18 | 1.00 | 188 | 210× | 1,017× | ✓ | advance, count |
-| **Koblitz**, `K_0 / GF(2^41)`, `r = 2^39.0`, `#E = 4r`, `A = 82` | generic floor | | | | | | 0.138 | 0.69× | 1× | — | boundary |
+| **Koblitz**, `icv1-f2m41-tm2308219-7f48b14a`, `r = 2^39.0`, `#E = 4r`, `A = 82` | generic floor | | | | | | 0.138 | 0.69× | 1× | — | boundary |
 | | signed-Frobenius rho, counted (walk alone 0.19) | | | | | | 0.20 | 1× | 1.45× | ✓ | reference |
 | | meet in the middle, signed-orbit columns | 3 | 5,003 | 62 | 6,086 | 1.05 | **58.8** | **300×** | **425×** | ✓ | advance, count |
-| **Koblitz**, `K_0 / GF(2^31)`, `r = 2^20.5`, `#E = 1492r`, `A = 62` | signed-Frobenius rho, counted | | | | | | 1.13 | 1× | 7.1× | ✓ | reference |
+| **Koblitz**, `icv1-f2m31-tm90707-c95f16f5`, `r = 2^20.5`, `#E = 1492r`, `A = 62` | signed-Frobenius rho, counted | | | | | | 1.13 | 1× | 7.1× | ✓ | reference |
 | | meet in the middle, one column per abscissa | 3 | 2,421 | 1,211 | 951 | 0.67 | 3,412 | 3,010× | 21,436× | ✓ | baseline (control) |
 | | meet in the middle, signed-orbit columns | 3 | 2,421 | 41 | 49 | 0.74 | 2,489 | 2,195× | 15,635× | ✓ | advance, count |
 | | `S₄` pairs-and-solve on the invariant subspace | 3 | 2,421 | 41 | 49 | 0.74 | 128,758 | 113,579× | 808,926× | ✓ | relabelling |
@@ -205,69 +205,69 @@ practicality note only.
 
 | regime | instance | log₂ r | variant | m | \|F\| | K | trials | yield/ceiling | S | S_wall | vs rho | vs floor | FB | rel | LA | verify | ok |
 |:--|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
-| prime | bench-10bit | 9.7 | semaev_s3_roots_m2 | 2 | 32 | 16 | 31 | 0.75 | 43.3 | 58.0 | 1.91 | 48.9 | 0.64 | 42.2 | 0.14 | 0.349 | ✓ |
-| prime | bench-10bit | 9.7 | direct_subtraction_m2 | 2 | 32 | 16 | 31 | 0.75 | 51.3 | 54.4 | 2.27 | 57.9 | 0.64 | 50.2 | 0.14 | 0.349 | ✓ |
-| prime | bench-10bit | 9.7 | mitm_m2 | 2 | 32 | 16 | 31 | 0.75 | 45.9 | 45.4 | 2.03 | 51.8 | 19.0 | 26.4 | 0.14 | 0.349 | ✓ |
-| prime | bench-10bit | 9.7 | mitm_m3 | 3 | 32 | 16 | 14 | 1.00 | 33.1 | 33.9 | 1.46 | 37.4 | 19.0 | 13.5 | 0.25 | 0.349 | ✓ |
-| prime | bench-12bit | 11.9 | semaev_s3_roots_m2 | 2 | 32 | 16 | 95 | 1.03 | 75.0 | 88.1 | 4.04 | 84.7 | 0.34 | 74.4 | 0.05 | 0.214 | ✓ |
-| prime | bench-12bit | 11.9 | direct_subtraction_m2 | 2 | 32 | 16 | 95 | 1.03 | 92.3 | 84.4 | 4.97 | 104 | 0.34 | 91.7 | 0.05 | 0.214 | ✓ |
-| prime | bench-12bit | 11.9 | mitm_m2 | 2 | 32 | 16 | 95 | 1.03 | 55.7 | 55.1 | 3.00 | 62.8 | 8.81 | 46.6 | 0.05 | 0.214 | ✓ |
-| prime | bench-12bit | 11.9 | mitm_m3 | 3 | 32 | 16 | 18 | 0.83 | 21.7 | 22.0 | 1.17 | 24.5 | 8.81 | 12.5 | 0.11 | 0.214 | ✓ |
-| prime | bench-14bit | 14.0 | semaev_s3_roots_m2 | 2 | 64 | 32 | 161 | 1.25 | 102 | 116 | 11.5 | 116 | 0.50 | 102 | 0.05 | 0.141 | ✓ |
-| prime | bench-14bit | 14.0 | direct_subtraction_m2 | 2 | 64 | 32 | 161 | 1.25 | 122 | 109 | 13.6 | 137 | 0.50 | 121 | 0.05 | 0.141 | ✓ |
-| prime | bench-14bit | 14.0 | mitm_m2 | 2 | 64 | 32 | 161 | 1.25 | 64.2 | 58.4 | 7.20 | 72.4 | 16.8 | 47.1 | 0.05 | 0.141 | ✓ |
-| prime | bench-14bit | 14.0 | mitm_m3 | 3 | 64 | 32 | 28 | 0.96 | 27.9 | 22.5 | 3.13 | 31.5 | 16.8 | 10.8 | 0.13 | 0.141 | ✓ |
-| prime | bench-16bit | 16.0 | semaev_s3_roots_m2 | 2 | 128 | 64 | 360 | 0.92 | 594 | 654 | 93.3 | 670 | 1.66 | 592 | 0.04 | 0.081 | ✓ |
-| prime | bench-16bit | 16.0 | direct_subtraction_m2 | 2 | 128 | 64 | 360 | 0.92 | 231 | 213 | 36.4 | 261 | 1.66 | 230 | 0.04 | 0.081 | ✓ |
-| prime | bench-16bit | 16.0 | mitm_m2 | 2 | 128 | 64 | 360 | 0.92 | 94.9 | 86.8 | 14.9 | 107 | 34.0 | 60.7 | 0.04 | 0.081 | ✓ |
-| prime | bench-16bit | 16.0 | mitm_m3 | 3 | 128 | 64 | 53 | 0.99 | 45.7 | 34.3 | 7.18 | 51.5 | 34.0 | 11.3 | 0.23 | 0.081 | ✓ |
-| prime | bench-18bit | 18.0 | semaev_s3_roots_m2 | 2 | 128 | 64 | 674 | 1.13 | 192 | 220 | 45.6 | 216 | 0.24 | 191 | 0.01 | 0.041 | ✓ |
-| prime | bench-18bit | 18.0 | direct_subtraction_m2 | 2 | 128 | 64 | 674 | 1.13 | 232 | 204 | 55.2 | 262 | 0.24 | 232 | 0.01 | 0.041 | ✓ |
-| prime | bench-18bit | 18.0 | mitm_m2 | 2 | 128 | 64 | 674 | 1.13 | 81.1 | 72.7 | 19.3 | 91.6 | 16.4 | 64.7 | 0.01 | 0.041 | ✓ |
-| prime | bench-18bit | 18.0 | mitm_m3 | 3 | 128 | 64 | 78 | 0.75 | 32.2 | 23.7 | 7.65 | 36.3 | 16.4 | 15.6 | 0.17 | 0.041 | ✓ |
-| prime | bench-20bit | 20.0 | semaev_s3_roots_m2 | 2 | 256 | 128 | 1746 | 1.20 | 439 | 518 | 164 | 496 | 0.24 | 439 | 0.01 | 0.023 | ✓ |
-| prime | bench-20bit | 20.0 | direct_subtraction_m2 | 2 | 256 | 128 | 1746 | 1.20 | 525 | 474 | 196 | 593 | 0.24 | 525 | 0.01 | 0.023 | ✓ |
-| prime | bench-20bit | 20.0 | mitm_m2 | 2 | 256 | 128 | 1746 | 1.20 | 126 | 113 | 47.1 | 143 | 32.4 | 94.0 | 0.01 | 0.023 | ✓ |
-| prime | bench-20bit | 20.0 | mitm_m3 | 3 | 256 | 128 | 118 | 0.93 | 45.0 | 30.3 | 16.8 | 50.8 | 32.4 | 12.3 | 0.25 | 0.023 | ✓ |
-| prime | generated-22bit-3290411 | 21.7 | semaev_s3_roots_m2 | 2 | 512 | 256 | 2793 | 1.03 | 692 | 838 | 232 | 781 | 0.29 | 692 | 0.01 | 0.016 | ✓ |
-| prime | generated-22bit-3290411 | 21.7 | direct_subtraction_m2 | 2 | 512 | 256 | 2793 | 1.03 | 870 | 780 | 292 | 981 | 0.29 | 869 | 0.01 | 0.016 | ✓ |
-| prime | generated-22bit-3290411 | 21.7 | mitm_m2 | 2 | 512 | 256 | 2793 | 1.03 | 165 | 136 | 55.3 | 186 | 72.7 | 92.1 | 0.01 | 0.016 | ✓ |
-| prime | generated-22bit-3290411 | 21.7 | mitm_m3 | 3 | 512 | 256 | 218 | 1.00 | 84.3 | 53.1 | 28.3 | 95.1 | 72.7 | 11.1 | 0.51 | 0.016 | ✓ |
-| prime | generated-24bit-10935329 | 23.4 | semaev_s3_roots_m2 | 2 | 512 | 256 | 9784 | 1.05 | 4,349 | 4,654 | 1,107 | 4,907 | 0.46 | 4,348 | 0.01 | 0.009 | ✓ |
-| prime | generated-24bit-10935329 | 23.4 | direct_subtraction_m2 | 2 | 512 | 256 | 9784 | 1.05 | 1,715 | 1,561 | 436 | 1,935 | 0.46 | 1,715 | 0.01 | 0.009 | ✓ |
-| prime | generated-24bit-10935329 | 23.4 | mitm_m2 | 2 | 512 | 256 | 9784 | 1.05 | 232 | 219 | 59.1 | 262 | 40.2 | 192 | 0.01 | 0.009 | ✓ |
-| prime | generated-24bit-10935329 | 23.4 | mitm_m3 | 3 | 512 | 256 | 265 | 0.87 | 56.8 | 38.1 | 14.5 | 64.1 | 40.2 | 16.1 | 0.51 | 0.009 | ✓ |
-| char2 | random-binary-n15-b524b | 14.0 | mitm_m3 | 3 | 30 | 15 | 106 | 0.95 | 69.1 | 56.3 | 8.27 | 78.0 | 15.5 | 53.4 | 0.04 | 0.144 | ✓ |
-| char2 | random-binary-n15-b524b | 14.0 | semaev_s4_pairs_and_solve_m3 | 3 | 30 | 15 | 117 | 0.89 | 1,294 | 1,283 | 155 | 1,460 | 11.9 | 1,282 | 0.05 | 0.144 | ✓ |
-| char2 | random-binary-n18-b6507 | 15.0 | mitm_m3 | 3 | 64 | 32 | 97 | 1.61 † | 80.0 | 60.6 | 10.6 | 90.2 | 30.2 | 49.6 | 0.05 | 0.101 | ✓ |
-| char2 | random-binary-n18-b6507 | 15.0 | semaev_s4_pairs_and_solve_m3 | 3 | 64 | 32 | 97 | 1.48 † | 2,652 | 2,643 | 351 | 2,992 | 18.7 | 2,633 | 0.04 | 0.101 | ✓ |
-| char2 | random-binary-n21-b1b6f3b | 20.0 | mitm_m3 | 3 | 122 | 61 | 407 | 0.96 | 81.0 | 70.8 | 25.4 | 91.4 | 15.2 | 65.7 | 0.04 | 0.026 | ✓ |
-| char2 | random-binary-n21-b1b6f3b | 20.0 | semaev_s4_pairs_and_solve_m3 | 3 | 122 | 61 | 408 | 0.96 | 8,439 | 8,338 | 2,652 | 9,522 | 7.89 | 8,431 | 0.04 | 0.026 | ✓ |
-| char2 | random-binary-n24-b5fc9da | 21.0 | mitm_m3 | 3 | 274 | 137 | 365 | 1.74 † | 102 | 89.6 | 40.5 | 115 | 36.7 | 65.0 | 0.15 | 0.020 | ✓ |
-| char2 | random-binary-n24-b5fc9da | 21.0 | semaev_s4_pairs_and_solve_m3 | 3 | 274 | 137 | 365 | 1.74 † | 17,425 | 17,346 | 6,926 | 19,661 | 10.6 | 17,414 | 0.15 | 0.020 | ✓ |
-| char2 | random-binary-n27-b845462 | 24.4 | mitm_m3 | 3 | 526 | 263 | 1498 | 0.90 | 206 | 194 | 89.0 | 232 | 37.3 | 168 | 0.20 | 0.007 | ✓ |
-| char2 | random-binary-n27-b845462 | 24.4 | semaev_s4_pairs_and_solve_m3 | 3 | 526 | 263 | 1499 | 0.90 | 105,198 | 104,992 | 45,471 | 118,703 | 8.04 | 105,190 | 0.20 | 0.007 | ✓ |
-| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m3_signed_orbit_columns | 3 | 45 | 3 | 5 | 0.82 | 39.0 | 38.6 | 2.24 | 146 | 33.0 | 5.58 | 0.02 | 0.328 | ✓ |
-| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m3_abscissa_columns_control | 3 | 45 | 23 | 20 | 0.90 | 54.4 | 57.1 | 3.13 | 203 | 33.0 | 20.7 | 0.27 | 0.328 | ✓ |
-| koblitz | K_0 / GF(2^13) | 11.0 | mitm_m3_signed_orbit_columns | 3 | 79 | 4 | 4 | 1.00 | 74.0 | 70.4 | 5.51 | 301 | 70.8 | 2.83 | 0.01 | 0.290 | ✓ |
-| koblitz | K_0 / GF(2^13) | 11.0 | mitm_m3_abscissa_columns_control | 3 | 79 | 40 | 29 | 1.00 | 92.1 | 89.8 | 6.85 | 375 | 70.8 | 20.7 | 0.28 | 0.290 | ✓ |
-| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m3_signed_orbit_columns | 3 | 33 | 3 | 8 | 2.70 † | 36.5 | 37.0 | 1.91 | 160 | 20.6 | 15.6 | 0.01 | 0.316 | ✓ |
-| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m3_abscissa_columns_control | 3 | 33 | 17 | 46 | 1.42 † | 106 | 103 | 5.56 | 465 | 20.6 | 85.4 | 0.16 | 0.316 | ✓ |
-| koblitz | K_0 / GF(2^15) | 9.6 | semaev_s4_pairs_and_solve_m3_signed_orbit_columns | 3 | 33 | 3 | 8 | 2.70 † | 369 | 380 | 19.2 | 1,610 | 0.14 | 368 | 0.01 | 0.316 | ✓ |
-| koblitz | K_1 / GF(2^17) | 16.0 | mitm_m2_signed_orbit_columns | 2 | 239 | 8 | 20 | 1.55 † | 116 | 111 | 32.2 | 538 | 112 | 3.44 | 0.00 | 0.082 | ✓ |
-| koblitz | K_1 / GF(2^17) | 16.0 | mitm_m2_abscissa_columns_control | 2 | 239 | 120 | 231 | 1.56 † | 151 | 148 | 42.1 | 704 | 112 | 39.1 | 0.05 | 0.082 | ✓ |
-| koblitz | K_1 / GF(2^19) | 18.0 | mitm_m3_signed_orbit_columns | 3 | 305 | 9 | 9 | 1.00 | 92.2 | 94.6 | 44.2 | 454 | 91.1 | 1.06 | 0.00 | 0.048 | ✓ |
-| koblitz | K_1 / GF(2^19) | 18.0 | mitm_m3_abscissa_columns_control | 3 | 305 | 153 | 126 | 1.00 | 108 | 111 | 51.5 | 529 | 91.1 | 16.0 | 0.37 | 0.048 | ✓ |
-| koblitz | K_1 / GF(2^23) | 22.0 | mitm_m3_signed_orbit_columns | 3 | 875 | 20 | 18 | 1.00 | 188 | 187 | 210 | 1,017 | 187 | 0.79 | 0.00 | 0.015 | ✓ |
-| koblitz | K_1 / GF(2^23) | 22.0 | mitm_m3_abscissa_columns_control | 3 | 875 | 438 | 348 | 1.00 | 203 | 204 | 227 | 1,096 | 187 | 14.6 | 0.79 | 0.015 | ✓ |
-| koblitz | K_1 / GF(2^29) | 15.4 | mitm_m3_signed_orbit_columns | 3 | 3771 | 66 | 55 | 1.00 | 34,554 | 38,510 | 8,226 | 209,968 | 34,518 | 35.4 | 0.18 | 0.107 | ✓ |
-| koblitz | K_1 / GF(2^29) | 15.4 | mitm_m3_abscissa_columns_control | 3 | 3771 | 1886 | 216 | 1.00 | 34,650 | 38,640 | 8,249 | 210,548 | 34,518 | 131 | 0.15 | 0.107 | ✓ |
-| koblitz | K_0 / GF(2^31) | 20.5 | mitm_m3_signed_orbit_columns | 3 | 2421 | 41 | 49 | 0.74 | 2,489 | 2,696 | 2,195 | 15,635 | 2,444 | 44.7 | 0.01 | 0.023 | ✓ |
-| koblitz | K_0 / GF(2^31) | 20.5 | mitm_m3_abscissa_columns_control | 3 | 2421 | 1211 | 951 | 0.67 | 3,412 | 3,649 | 3,010 | 21,436 | 2,444 | 949 | 18.7 | 0.023 | ✓ |
-| koblitz | K_0 / GF(2^31) | 20.5 | semaev_s4_pairs_and_solve_m3_signed_orbit_columns | 3 | 2421 | 41 | 49 | 0.74 | 128,758 | 128,755 | 113,579 | 808,926 | 0.20 | 128,757 | 0.01 | 0.023 | ✓ |
-| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m3_signed_orbit_columns | 3 | 4663 | 64 | 493 | 0.98 | 857 | 1,006 | 2,052 | 5,882 | 716 | 141 | 0.00 | 0.003 | ✓ |
-| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m3_signed_orbit_columns | 3 | 4681 | 61 | 921 | 2.05 † | 1,830 | 2,125 | 4,021 | 12,898 | 1,323 | 507 | 0.00 | 0.004 | ✓ |
-| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m3_signed_orbit_columns | 3 | 5003 | 62 | 6086 | 1.05 | 58.8 | 65.9 | 300 | 425 | 16.9 | 41.9 | 0.00 | 0.000 | ✓ |
+| prime | icv1-fp10-t5-192cb216 | 9.7 | semaev_s3_roots_m2 | 2 | 32 | 16 | 31 | 0.75 | 43.3 | 58.0 | 1.91 | 48.9 | 0.64 | 42.2 | 0.14 | 0.349 | ✓ |
+| prime | icv1-fp10-t5-192cb216 | 9.7 | direct_subtraction_m2 | 2 | 32 | 16 | 31 | 0.75 | 51.3 | 54.4 | 2.27 | 57.9 | 0.64 | 50.2 | 0.14 | 0.349 | ✓ |
+| prime | icv1-fp10-t5-192cb216 | 9.7 | mitm_m2 | 2 | 32 | 16 | 31 | 0.75 | 45.9 | 45.4 | 2.03 | 51.8 | 19.0 | 26.4 | 0.14 | 0.349 | ✓ |
+| prime | icv1-fp10-t5-192cb216 | 9.7 | mitm_m3 | 3 | 32 | 16 | 14 | 1.00 | 33.1 | 33.9 | 1.46 | 37.4 | 19.0 | 13.5 | 0.25 | 0.349 | ✓ |
+| prime | icv1-fp12-t19-d4a315df | 11.9 | semaev_s3_roots_m2 | 2 | 32 | 16 | 95 | 1.03 | 75.0 | 88.1 | 4.04 | 84.7 | 0.34 | 74.4 | 0.05 | 0.214 | ✓ |
+| prime | icv1-fp12-t19-d4a315df | 11.9 | direct_subtraction_m2 | 2 | 32 | 16 | 95 | 1.03 | 92.3 | 84.4 | 4.97 | 104 | 0.34 | 91.7 | 0.05 | 0.214 | ✓ |
+| prime | icv1-fp12-t19-d4a315df | 11.9 | mitm_m2 | 2 | 32 | 16 | 95 | 1.03 | 55.7 | 55.1 | 3.00 | 62.8 | 8.81 | 46.6 | 0.05 | 0.214 | ✓ |
+| prime | icv1-fp12-t19-d4a315df | 11.9 | mitm_m3 | 3 | 32 | 16 | 18 | 0.83 | 21.7 | 22.0 | 1.17 | 24.5 | 8.81 | 12.5 | 0.11 | 0.214 | ✓ |
+| prime | icv1-fp14-tm43-158b6914 | 14.0 | semaev_s3_roots_m2 | 2 | 64 | 32 | 161 | 1.25 | 102 | 116 | 11.5 | 116 | 0.50 | 102 | 0.05 | 0.141 | ✓ |
+| prime | icv1-fp14-tm43-158b6914 | 14.0 | direct_subtraction_m2 | 2 | 64 | 32 | 161 | 1.25 | 122 | 109 | 13.6 | 137 | 0.50 | 121 | 0.05 | 0.141 | ✓ |
+| prime | icv1-fp14-tm43-158b6914 | 14.0 | mitm_m2 | 2 | 64 | 32 | 161 | 1.25 | 64.2 | 58.4 | 7.20 | 72.4 | 16.8 | 47.1 | 0.05 | 0.141 | ✓ |
+| prime | icv1-fp14-tm43-158b6914 | 14.0 | mitm_m3 | 3 | 64 | 32 | 28 | 0.96 | 27.9 | 22.5 | 3.13 | 31.5 | 16.8 | 10.8 | 0.13 | 0.141 | ✓ |
+| prime | icv1-fp16-t351-d433f24e | 16.0 | semaev_s3_roots_m2 | 2 | 128 | 64 | 360 | 0.92 | 594 | 654 | 93.3 | 670 | 1.66 | 592 | 0.04 | 0.081 | ✓ |
+| prime | icv1-fp16-t351-d433f24e | 16.0 | direct_subtraction_m2 | 2 | 128 | 64 | 360 | 0.92 | 231 | 213 | 36.4 | 261 | 1.66 | 230 | 0.04 | 0.081 | ✓ |
+| prime | icv1-fp16-t351-d433f24e | 16.0 | mitm_m2 | 2 | 128 | 64 | 360 | 0.92 | 94.9 | 86.8 | 14.9 | 107 | 34.0 | 60.7 | 0.04 | 0.081 | ✓ |
+| prime | icv1-fp16-t351-d433f24e | 16.0 | mitm_m3 | 3 | 128 | 64 | 53 | 0.99 | 45.7 | 34.3 | 7.18 | 51.5 | 34.0 | 11.3 | 0.23 | 0.081 | ✓ |
+| prime | icv1-fp18-t175-45770ebc | 18.0 | semaev_s3_roots_m2 | 2 | 128 | 64 | 674 | 1.13 | 192 | 220 | 45.6 | 216 | 0.24 | 191 | 0.01 | 0.041 | ✓ |
+| prime | icv1-fp18-t175-45770ebc | 18.0 | direct_subtraction_m2 | 2 | 128 | 64 | 674 | 1.13 | 232 | 204 | 55.2 | 262 | 0.24 | 232 | 0.01 | 0.041 | ✓ |
+| prime | icv1-fp18-t175-45770ebc | 18.0 | mitm_m2 | 2 | 128 | 64 | 674 | 1.13 | 81.1 | 72.7 | 19.3 | 91.6 | 16.4 | 64.7 | 0.01 | 0.041 | ✓ |
+| prime | icv1-fp18-t175-45770ebc | 18.0 | mitm_m3 | 3 | 128 | 64 | 78 | 0.75 | 32.2 | 23.7 | 7.65 | 36.3 | 16.4 | 15.6 | 0.17 | 0.041 | ✓ |
+| prime | icv1-fp20-t1293-3c2999ba | 20.0 | semaev_s3_roots_m2 | 2 | 256 | 128 | 1746 | 1.20 | 439 | 518 | 164 | 496 | 0.24 | 439 | 0.01 | 0.023 | ✓ |
+| prime | icv1-fp20-t1293-3c2999ba | 20.0 | direct_subtraction_m2 | 2 | 256 | 128 | 1746 | 1.20 | 525 | 474 | 196 | 593 | 0.24 | 525 | 0.01 | 0.023 | ✓ |
+| prime | icv1-fp20-t1293-3c2999ba | 20.0 | mitm_m2 | 2 | 256 | 128 | 1746 | 1.20 | 126 | 113 | 47.1 | 143 | 32.4 | 94.0 | 0.01 | 0.023 | ✓ |
+| prime | icv1-fp20-t1293-3c2999ba | 20.0 | mitm_m3 | 3 | 256 | 128 | 118 | 0.93 | 45.0 | 30.3 | 16.8 | 50.8 | 32.4 | 12.3 | 0.25 | 0.023 | ✓ |
+| prime | icv1-fp22-tm1267-a5acaf6d | 21.7 | semaev_s3_roots_m2 | 2 | 512 | 256 | 2793 | 1.03 | 692 | 838 | 232 | 781 | 0.29 | 692 | 0.01 | 0.016 | ✓ |
+| prime | icv1-fp22-tm1267-a5acaf6d | 21.7 | direct_subtraction_m2 | 2 | 512 | 256 | 2793 | 1.03 | 870 | 780 | 292 | 981 | 0.29 | 869 | 0.01 | 0.016 | ✓ |
+| prime | icv1-fp22-tm1267-a5acaf6d | 21.7 | mitm_m2 | 2 | 512 | 256 | 2793 | 1.03 | 165 | 136 | 55.3 | 186 | 72.7 | 92.1 | 0.01 | 0.016 | ✓ |
+| prime | icv1-fp22-tm1267-a5acaf6d | 21.7 | mitm_m3 | 3 | 512 | 256 | 218 | 1.00 | 84.3 | 53.1 | 28.3 | 95.1 | 72.7 | 11.1 | 0.51 | 0.016 | ✓ |
+| prime | icv1-fp24-t1577-77336155 | 23.4 | semaev_s3_roots_m2 | 2 | 512 | 256 | 9784 | 1.05 | 4,349 | 4,654 | 1,107 | 4,907 | 0.46 | 4,348 | 0.01 | 0.009 | ✓ |
+| prime | icv1-fp24-t1577-77336155 | 23.4 | direct_subtraction_m2 | 2 | 512 | 256 | 9784 | 1.05 | 1,715 | 1,561 | 436 | 1,935 | 0.46 | 1,715 | 0.01 | 0.009 | ✓ |
+| prime | icv1-fp24-t1577-77336155 | 23.4 | mitm_m2 | 2 | 512 | 256 | 9784 | 1.05 | 232 | 219 | 59.1 | 262 | 40.2 | 192 | 0.01 | 0.009 | ✓ |
+| prime | icv1-fp24-t1577-77336155 | 23.4 | mitm_m3 | 3 | 512 | 256 | 265 | 0.87 | 56.8 | 38.1 | 14.5 | 64.1 | 40.2 | 16.1 | 0.51 | 0.009 | ✓ |
+| char2 | icv1-f2m15-t131-ed7256f0 | 14.0 | mitm_m3 | 3 | 30 | 15 | 106 | 0.95 | 69.1 | 56.3 | 8.27 | 78.0 | 15.5 | 53.4 | 0.04 | 0.144 | ✓ |
+| char2 | icv1-f2m15-t131-ed7256f0 | 14.0 | semaev_s4_pairs_and_solve_m3 | 3 | 30 | 15 | 117 | 0.89 | 1,294 | 1,283 | 155 | 1,460 | 11.9 | 1,282 | 0.05 | 0.144 | ✓ |
+| char2 | icv1-f2m18-t393-d2c04152 | 15.0 | mitm_m3 | 3 | 64 | 32 | 97 | 1.61 † | 80.0 | 60.6 | 10.6 | 90.2 | 30.2 | 49.6 | 0.05 | 0.101 | ✓ |
+| char2 | icv1-f2m18-t393-d2c04152 | 15.0 | semaev_s4_pairs_and_solve_m3 | 3 | 64 | 32 | 97 | 1.48 † | 2,652 | 2,643 | 351 | 2,992 | 18.7 | 2,633 | 0.04 | 0.101 | ✓ |
+| char2 | icv1-f2m21-t2591-de54d72e | 20.0 | mitm_m3 | 3 | 122 | 61 | 407 | 0.96 | 81.0 | 70.8 | 25.4 | 91.4 | 15.2 | 65.7 | 0.04 | 0.026 | ✓ |
+| char2 | icv1-f2m21-t2591-de54d72e | 20.0 | semaev_s4_pairs_and_solve_m3 | 3 | 122 | 61 | 408 | 0.96 | 8,439 | 8,338 | 2,652 | 9,522 | 7.89 | 8,431 | 0.04 | 0.026 | ✓ |
+| char2 | icv1-f2m24-tm3047-2d0c0e8c | 21.0 | mitm_m3 | 3 | 274 | 137 | 365 | 1.74 † | 102 | 89.6 | 40.5 | 115 | 36.7 | 65.0 | 0.15 | 0.020 | ✓ |
+| char2 | icv1-f2m24-tm3047-2d0c0e8c | 21.0 | semaev_s4_pairs_and_solve_m3 | 3 | 274 | 137 | 365 | 1.74 † | 17,425 | 17,346 | 6,926 | 19,661 | 10.6 | 17,414 | 0.15 | 0.020 | ✓ |
+| char2 | icv1-f2m27-t12543-569dca8b | 24.4 | mitm_m3 | 3 | 526 | 263 | 1498 | 0.90 | 206 | 194 | 89.0 | 232 | 37.3 | 168 | 0.20 | 0.007 | ✓ |
+| char2 | icv1-f2m27-t12543-569dca8b | 24.4 | semaev_s4_pairs_and_solve_m3 | 3 | 526 | 263 | 1499 | 0.90 | 105,198 | 104,992 | 45,471 | 118,703 | 8.04 | 105,190 | 0.20 | 0.007 | ✓ |
+| koblitz | icv1-f2m11-t67-05f5aa36 | 10.0 | mitm_m3_signed_orbit_columns | 3 | 45 | 3 | 5 | 0.82 | 39.0 | 38.6 | 2.24 | 146 | 33.0 | 5.58 | 0.02 | 0.328 | ✓ |
+| koblitz | icv1-f2m11-t67-05f5aa36 | 10.0 | mitm_m3_abscissa_columns_control | 3 | 45 | 23 | 20 | 0.90 | 54.4 | 57.1 | 3.13 | 203 | 33.0 | 20.7 | 0.27 | 0.328 | ✓ |
+| koblitz | icv1-f2m13-t181-515ee569 | 11.0 | mitm_m3_signed_orbit_columns | 3 | 79 | 4 | 4 | 1.00 | 74.0 | 70.4 | 5.51 | 301 | 70.8 | 2.83 | 0.01 | 0.290 | ✓ |
+| koblitz | icv1-f2m13-t181-515ee569 | 11.0 | mitm_m3_abscissa_columns_control | 3 | 79 | 40 | 29 | 1.00 | 92.1 | 89.8 | 6.85 | 375 | 70.8 | 20.7 | 0.28 | 0.290 | ✓ |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 9.6 | mitm_m3_signed_orbit_columns | 3 | 33 | 3 | 8 | 2.70 † | 36.5 | 37.0 | 1.91 | 160 | 20.6 | 15.6 | 0.01 | 0.316 | ✓ |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 9.6 | mitm_m3_abscissa_columns_control | 3 | 33 | 17 | 46 | 1.42 † | 106 | 103 | 5.56 | 465 | 20.6 | 85.4 | 0.16 | 0.316 | ✓ |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 9.6 | semaev_s4_pairs_and_solve_m3_signed_orbit_columns | 3 | 33 | 3 | 8 | 2.70 † | 369 | 380 | 19.2 | 1,610 | 0.14 | 368 | 0.01 | 0.316 | ✓ |
+| koblitz | icv1-f2m17-tm101-00378d4e | 16.0 | mitm_m2_signed_orbit_columns | 2 | 239 | 8 | 20 | 1.55 † | 116 | 111 | 32.2 | 538 | 112 | 3.44 | 0.00 | 0.082 | ✓ |
+| koblitz | icv1-f2m17-tm101-00378d4e | 16.0 | mitm_m2_abscissa_columns_control | 2 | 239 | 120 | 231 | 1.56 † | 151 | 148 | 42.1 | 704 | 112 | 39.1 | 0.05 | 0.082 | ✓ |
+| koblitz | icv1-f2m19-tm797-9c54981b | 18.0 | mitm_m3_signed_orbit_columns | 3 | 305 | 9 | 9 | 1.00 | 92.2 | 94.6 | 44.2 | 454 | 91.1 | 1.06 | 0.00 | 0.048 | ✓ |
+| koblitz | icv1-f2m19-tm797-9c54981b | 18.0 | mitm_m3_abscissa_columns_control | 3 | 305 | 153 | 126 | 1.00 | 108 | 111 | 51.5 | 529 | 91.1 | 16.0 | 0.37 | 0.048 | ✓ |
+| koblitz | icv1-f2m23-tm5197-1f85e9e1 | 22.0 | mitm_m3_signed_orbit_columns | 3 | 875 | 20 | 18 | 1.00 | 188 | 187 | 210 | 1,017 | 187 | 0.79 | 0.00 | 0.015 | ✓ |
+| koblitz | icv1-f2m23-tm5197-1f85e9e1 | 22.0 | mitm_m3_abscissa_columns_control | 3 | 875 | 438 | 348 | 1.00 | 203 | 204 | 227 | 1,096 | 187 | 14.6 | 0.79 | 0.015 | ✓ |
+| koblitz | icv1-f2m29-tm40309-30c52b96 | 15.4 | mitm_m3_signed_orbit_columns | 3 | 3771 | 66 | 55 | 1.00 | 34,554 | 38,510 | 8,226 | 209,968 | 34,518 | 35.4 | 0.18 | 0.107 | ✓ |
+| koblitz | icv1-f2m29-tm40309-30c52b96 | 15.4 | mitm_m3_abscissa_columns_control | 3 | 3771 | 1886 | 216 | 1.00 | 34,650 | 38,640 | 8,249 | 210,548 | 34,518 | 131 | 0.15 | 0.107 | ✓ |
+| koblitz | icv1-f2m31-tm90707-c95f16f5 | 20.5 | mitm_m3_signed_orbit_columns | 3 | 2421 | 41 | 49 | 0.74 | 2,489 | 2,696 | 2,195 | 15,635 | 2,444 | 44.7 | 0.01 | 0.023 | ✓ |
+| koblitz | icv1-f2m31-tm90707-c95f16f5 | 20.5 | mitm_m3_abscissa_columns_control | 3 | 2421 | 1211 | 951 | 0.67 | 3,412 | 3,649 | 3,010 | 21,436 | 2,444 | 949 | 18.7 | 0.023 | ✓ |
+| koblitz | icv1-f2m31-tm90707-c95f16f5 | 20.5 | semaev_s4_pairs_and_solve_m3_signed_orbit_columns | 3 | 2421 | 41 | 49 | 0.74 | 128,758 | 128,755 | 113,579 | 808,926 | 0.20 | 128,757 | 0.01 | 0.023 | ✓ |
+| koblitz | icv1-f2m37-tm534059-32aad96b | 27.8 | mitm_m3_signed_orbit_columns | 3 | 4663 | 64 | 493 | 0.98 | 857 | 1,006 | 2,052 | 5,882 | 716 | 141 | 0.00 | 0.003 | ✓ |
+| koblitz | icv1-f2m39-t1481485-829ef1d1 | 26.0 | mitm_m3_signed_orbit_columns | 3 | 4681 | 61 | 921 | 2.05 † | 1,830 | 2,125 | 4,021 | 12,898 | 1,323 | 507 | 0.00 | 0.004 | ✓ |
+| koblitz | icv1-f2m41-tm2308219-7f48b14a | 39.0 | mitm_m3_signed_orbit_columns | 3 | 5003 | 62 | 6086 | 1.05 | 58.8 | 65.9 | 300 | 425 | 16.9 | 41.9 | 0.00 | 0.000 | ✓ |
 
 † the base lies inside a proper subgroup of `E`, where the ceiling of
 §1.3 is loose by the subgroup's index; see §3.5, which is a correction
@@ -283,30 +283,30 @@ the walk alone, `steps/expected` the measured walk length over
 
 | regime | instance | log₂ r | #E/r | A | S_floor | rho S | rho walk S | steps/expected | rho ok |
 |:--|:--|--:|--:|--:|--:|--:|--:|--:|:--|
-| prime | bench-10bit | 9.7 | 1 | 2 | 0.886 | 22.7 | 1.81 | 1.44 | ✓ |
-| prime | bench-12bit | 11.9 | 1 | 2 | 0.886 | 18.6 | 4.23 | 3.38 | ✓ |
-| prime | bench-14bit | 14.0 | 1 | 2 | 0.886 | 8.91 | 1.47 | 1.17 | ✓ |
-| prime | bench-16bit | 16.0 | 1 | 2 | 0.886 | 6.36 | 2.35 | 1.87 | ✓ |
-| prime | bench-18bit | 18.0 | 1 | 2 | 0.886 | 4.20 | 1.95 | 1.55 | ✓ |
-| prime | bench-20bit | 20.0 | 1 | 2 | 0.886 | 2.68 | 1.59 | 1.27 | ✓ |
-| prime | generated-22bit-3290411 | 21.7 | 1 | 2 | 0.886 | 2.98 | 2.28 | 1.82 | ✓ |
-| prime | generated-24bit-10935329 | 23.4 | 1 | 2 | 0.886 | 3.93 | 3.54 | 2.83 | ✓ |
-| char2 | random-binary-n15-b524b | 14.0 | 2 | 2 | 0.886 | 8.36 | 1.39 | 1.11 | ✓ |
-| char2 | random-binary-n18-b6507 | 15.0 | 8 | 2 | 0.886 | 7.56 | 1.38 | 1.10 | ✓ |
-| char2 | random-binary-n21-b1b6f3b | 20.0 | 2 | 2 | 0.886 | 3.18 | 2.03 | 1.62 | ✓ |
-| char2 | random-binary-n24-b5fc9da | 21.0 | 8 | 2 | 0.886 | 2.52 | 1.80 | 1.44 | ✓ |
-| char2 | random-binary-n27-b845462 | 24.4 | 6 | 2 | 0.886 | 2.31 | 1.98 | 1.58 | ✓ |
-| koblitz | K_1 / GF(2^11) | 10.0 | 2 | 22 | 0.267 | 17.4 | 0.28 | 1.05 | ✓ |
-| koblitz | K_0 / GF(2^13) | 11.0 | 4 | 26 | 0.246 | 13.4 | 0.21 | 0.86 | ✓ |
-| koblitz | K_0 / GF(2^15) | 9.6 | 44 | 30 | 0.229 | 19.2 | 0.27 | 1.19 | ✓ |
-| koblitz | K_1 / GF(2^17) | 16.0 | 2 | 34 | 0.215 | 3.59 | 0.25 | 1.16 | ✓ |
-| koblitz | K_1 / GF(2^19) | 18.0 | 2 | 38 | 0.203 | 2.09 | 0.21 | 1.04 | ✓ |
-| koblitz | K_1 / GF(2^23) | 22.0 | 2 | 46 | 0.185 | 0.89 | 0.19 | 1.03 | ✓ |
-| koblitz | K_1 / GF(2^29) | 15.4 | 12646 | 58 | 0.165 | 4.20 | 0.21 | 1.25 | ✓ |
-| koblitz | K_0 / GF(2^31) | 20.5 | 1492 | 62 | 0.159 | 1.13 | 0.17 | 1.09 | ✓ |
-| koblitz | K_0 / GF(2^37) | 27.8 | 596 | 74 | 0.146 | 0.42 | 0.15 | 1.02 | ✓ |
-| koblitz | K_0 / GF(2^39) | 26.0 | 8012 | 78 | 0.142 | 0.46 | 0.13 | 0.89 | ✓ |
-| koblitz | K_0 / GF(2^41) | 39.0 | 4 | 82 | 0.138 | 0.20 | 0.19 | 1.36 | ✓ |
+| prime | icv1-fp10-t5-192cb216 | 9.7 | 1 | 2 | 0.886 | 22.7 | 1.81 | 1.44 | ✓ |
+| prime | icv1-fp12-t19-d4a315df | 11.9 | 1 | 2 | 0.886 | 18.6 | 4.23 | 3.38 | ✓ |
+| prime | icv1-fp14-tm43-158b6914 | 14.0 | 1 | 2 | 0.886 | 8.91 | 1.47 | 1.17 | ✓ |
+| prime | icv1-fp16-t351-d433f24e | 16.0 | 1 | 2 | 0.886 | 6.36 | 2.35 | 1.87 | ✓ |
+| prime | icv1-fp18-t175-45770ebc | 18.0 | 1 | 2 | 0.886 | 4.20 | 1.95 | 1.55 | ✓ |
+| prime | icv1-fp20-t1293-3c2999ba | 20.0 | 1 | 2 | 0.886 | 2.68 | 1.59 | 1.27 | ✓ |
+| prime | icv1-fp22-tm1267-a5acaf6d | 21.7 | 1 | 2 | 0.886 | 2.98 | 2.28 | 1.82 | ✓ |
+| prime | icv1-fp24-t1577-77336155 | 23.4 | 1 | 2 | 0.886 | 3.93 | 3.54 | 2.83 | ✓ |
+| char2 | icv1-f2m15-t131-ed7256f0 | 14.0 | 2 | 2 | 0.886 | 8.36 | 1.39 | 1.11 | ✓ |
+| char2 | icv1-f2m18-t393-d2c04152 | 15.0 | 8 | 2 | 0.886 | 7.56 | 1.38 | 1.10 | ✓ |
+| char2 | icv1-f2m21-t2591-de54d72e | 20.0 | 2 | 2 | 0.886 | 3.18 | 2.03 | 1.62 | ✓ |
+| char2 | icv1-f2m24-tm3047-2d0c0e8c | 21.0 | 8 | 2 | 0.886 | 2.52 | 1.80 | 1.44 | ✓ |
+| char2 | icv1-f2m27-t12543-569dca8b | 24.4 | 6 | 2 | 0.886 | 2.31 | 1.98 | 1.58 | ✓ |
+| koblitz | icv1-f2m11-t67-05f5aa36 | 10.0 | 2 | 22 | 0.267 | 17.4 | 0.28 | 1.05 | ✓ |
+| koblitz | icv1-f2m13-t181-515ee569 | 11.0 | 4 | 26 | 0.246 | 13.4 | 0.21 | 0.86 | ✓ |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 9.6 | 44 | 30 | 0.229 | 19.2 | 0.27 | 1.19 | ✓ |
+| koblitz | icv1-f2m17-tm101-00378d4e | 16.0 | 2 | 34 | 0.215 | 3.59 | 0.25 | 1.16 | ✓ |
+| koblitz | icv1-f2m19-tm797-9c54981b | 18.0 | 2 | 38 | 0.203 | 2.09 | 0.21 | 1.04 | ✓ |
+| koblitz | icv1-f2m23-tm5197-1f85e9e1 | 22.0 | 2 | 46 | 0.185 | 0.89 | 0.19 | 1.03 | ✓ |
+| koblitz | icv1-f2m29-tm40309-30c52b96 | 15.4 | 12646 | 58 | 0.165 | 4.20 | 0.21 | 1.25 | ✓ |
+| koblitz | icv1-f2m31-tm90707-c95f16f5 | 20.5 | 1492 | 62 | 0.159 | 1.13 | 0.17 | 1.09 | ✓ |
+| koblitz | icv1-f2m37-tm534059-32aad96b | 27.8 | 596 | 74 | 0.146 | 0.42 | 0.15 | 1.02 | ✓ |
+| koblitz | icv1-f2m39-t1481485-829ef1d1 | 26.0 | 8012 | 78 | 0.142 | 0.46 | 0.13 | 0.89 | ✓ |
+| koblitz | icv1-f2m41-tm2308219-7f48b14a | 39.0 | 4 | 82 | 0.138 | 0.20 | 0.19 | 1.36 | ✓ |
 
 The reference is not flat at these sizes and the table says why: the
 walk alone sits at `1.4–4.2` in the prime and binary regimes against the
@@ -444,13 +444,13 @@ larger by the index `[E : H]`.  That is the case on every marked row:
   point satisfies `Tr(x) = Tr(a)` and lies in `2E`, an index-2
   subgroup; all `32` and all `137` base abscissae, checked.  Corrected,
   the rows read `0.80` and `0.87`.
-- `K_1 / GF(2^17)` (`a = 1`, `Tr(a) = 1`): a Frobenius-invariant subspace
+- `icv1-f2m17-tm101-00378d4e` (`a = 1`, `Tr(a) = 1`): a Frobenius-invariant subspace
   that does not contain `F₂` lies in the trace-zero hyperplane, so the
   base points lie *outside* `2E`, no sum of three of them can reach the
   odd-order subgroup (the census found `m = 3` yields nothing, which is
   why this rung runs at `m = 2`), and every sum of two lies in `2E`.
   Corrected by the same index 2: `0.78`.
-- `K_0 / GF(2^15)` and `K_0 / GF(2^39)` (`a = 0`, cofactors `44` and
+- `icv1-f2m15-tm275-2d22ff5d` and `icv1-f2m39-t1481485-829ef1d1` (`a = 0`, cofactors `44` and
   `8,012`): the base is again in `2E`, which accounts for a factor 2;
   the rest is the finer class structure of a large cofactor and, at
   `n = 15`, the variance of two or three relations per run.
@@ -706,7 +706,7 @@ spurious model in any cell (every model was checked in the group).
   floor** (`0.023` against `0.127` at `n = 23`), and that is the caveat
   of §1.6 made numeric: the probe is cheap because the `|F|²/2` pair
   table already did the work, and on the pipeline row for the same
-  degree (§2.1, `K_1 / GF(2^23)`) the table is `99.6%` of `S = 188`.  A
+  degree (§2.1, `icv1-f2m23-tm5197-1f85e9e1`) the table is `99.6%` of `S = 188`.  A
   per-target price is not a pipeline cost.
 - **Driving the pipeline with matrix-F4 instead of the table** would put
   the relation phase alone at a projected `S ≈ 9.2 × 10³` at `n = 23`
@@ -955,7 +955,7 @@ what the artifact had been hiding.
 **It is a correction to the first round too.**  Round 1 drew targets
 without the guard, so 22 of its 63 rows moved when the guarded ladder
 reran them, by `0.88×` to `1.59×` in `S` — the largest being
-`bench-18bit`, where all three `m = 2` variants ran 674 trials and now
+`icv1-fp18-t175-45770ebc`, where all three `m = 2` variants ran 674 trials and now
 run 1,068 (`S` `81.1 → 119` for meet in the middle).  §2.2's `m = 2`
 rows are to be read with that correction, and the comparison file
 carries it row by row.
@@ -972,7 +972,7 @@ relation).
 
 | regime, instance | variant | m | \|F\| | K | trials | yield/ceiling (exact) | S | was | vs rho | vs floor | ok | class |
 |:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
-| **prime**, `generated-24bit-10935329`, `r = 2^23.4`, `#E = 1r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | | 0.23× | 1× | — | boundary |
+| **prime**, `icv1-fp24-t1577-77336155`, `r = 2^23.4`, `#E = 1r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | | 0.23× | 1× | — | boundary |
 | | Pollard rho, r-adding, counted (walk alone 3.54) | | | | | | 3.93 | | 1× | 4.43× | ✓ | reference |
 | | Semaev `S₃` roots | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 5,129 |  | 1,305× | 5,787× | ✓ | baseline |
 | | direct subtraction | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 2,037 |  | 518× | 2,298× | ✓ | accounting |
@@ -982,7 +982,7 @@ relation).
 | | + walk targets | 2 | 512 | 256 | 7,974 | 0.93 (0.93) | **24.2** | 248 | **6.16×** | 27.3× | ✓ | engineering |
 | | + negation-folded table | 3 | 512 | 256 | 265 | 0.87 (0.87) | 37.0 | 56.8 | 9.41× | 41.7× | ✓ | engineering |
 | | + walk targets | 3 | 512 | 256 | 259 | 0.89 (0.89) | 31.7 | 37.0 | 8.06× | 35.7× | ✓ | engineering |
-| **binary**, `random-binary-n27-b845462`, `r = 2^24.4`, `#E = 6r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | | 0.38× | 1× | — | boundary |
+| **binary**, `icv1-f2m27-t12543-569dca8b`, `r = 2^24.4`, `#E = 6r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | | 0.38× | 1× | — | boundary |
 | | Pollard rho, r-adding, counted (walk alone 1.98) | | | | | | 2.31 | | 1× | 2.61× | ✓ | reference |
 | | meet in the middle | 3 | 526 | 263 | 1,498 | 0.90 (0.90) | **206** |  | **89.1×** | 232× | ✓ | engineering |
 | | `S₄` pairs-and-solve | 3 | 526 | 263 | 1,499 | 0.90 (0.90) | 108,654 |  | 46,965× | 122,603× | ✓ | relabelling |
@@ -990,7 +990,7 @@ relation).
 | | + walk targets | 3 | 526 | 263 | 1,482 | 0.90 (0.90) | 169 | 191 | 73.2× | 191× | ✓ | engineering |
 | | + negation-folded table | 2 | 526 | 263 | 112,779 | 1.06 (1.05) | 1,645 | 206 | 711× | 1,856× | ✓ | engineering |
 | | + walk targets | 2 | 526 | 263 | 75,384 | 1.14 (1.13) | **71.2** | 1,645 | **30.8×** | 80.4× | ✓ | engineering |
-| **Koblitz**, `K_0 / GF(2^41)`, `r = 2^39.0`, `#E = 4r`, `A = 82` | generic floor `√(π/2A)` | | | | | | 0.138 | | 0.71× | 1× | — | boundary |
+| **Koblitz**, `icv1-f2m41-tm2308219-7f48b14a`, `r = 2^39.0`, `#E = 4r`, `A = 82` | generic floor `√(π/2A)` | | | | | | 0.138 | | 0.71× | 1× | — | boundary |
 | | signed-Frobenius rho, counted (walk alone 0.19) | | | | | | 0.20 | | 1× | 1.41× | ✓ | reference |
 | | meet in the middle, signed-orbit columns | 3 | 5,003 | 62 | 6,086 | 1.05 (1.04) | **58.8** |  | **300×** | 425× | ✓ | advance, count |
 | | + negation-folded table | 3 | 5,003 | 62 | 6,086 | 1.05 (1.04) | 50.4 | 58.8 | 257× | 364× | ✓ | engineering |
@@ -1006,109 +1006,109 @@ The full Round-2 ladder, every instance and rung, with the phase split:
 
 | regime | instance | log₂ r | variant | m | \|F\| | K | table | targets | trials | y/c | exact | S | was | vs rho | vs floor | FB | rel | LA | ok |
 |:--|:--|--:|:--|--:|--:|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
-| prime | bench-10bit | 9.7 | mitm_m2_negfold | 2 | 32 | 16 | negation | random | 31 | 0.76 | 0.76 | 36.7 | 45.7 | 1.62 | 41.5 | 9.93 | 26.4 | 0.09 | ✓ |
-| prime | bench-10bit | 9.7 | mitm_m2_negfold_walk | 2 | 32 | 16 | negation | walk | 28 | 0.66 | 0.66 | 25.9 | 36.7 | 1.14 | 29.3 | 9.93 | 15.6 | 0.07 | ✓ |
-| prime | bench-10bit | 9.7 | mitm_m3_negfold | 3 | 32 | 16 | negation | random | 14 | 1.00 | 1.00 | 23.9 | 32.8 | 1.06 | 27.0 | 9.93 | 13.5 | 0.16 | ✓ |
-| prime | bench-10bit | 9.7 | mitm_m3_negfold_walk | 3 | 32 | 16 | negation | walk | 13 | 1.00 | 1.00 | 26.3 | 23.9 | 1.16 | 29.7 | 9.93 | 15.9 | 0.14 | ✓ |
-| prime | bench-12bit | 11.9 | mitm_m2_negfold | 2 | 32 | 16 | negation | random | 95 | 1.03 | 1.03 | 51.6 | 55.7 | 2.78 | 58.2 | 4.70 | 46.6 | 0.05 | ✓ |
-| prime | bench-12bit | 11.9 | mitm_m2_negfold_walk | 2 | 32 | 16 | negation | walk | 93 | 1.11 | 1.11 | 20.8 | 51.6 | 1.12 | 23.4 | 4.70 | 15.8 | 0.06 | ✓ |
-| prime | bench-12bit | 11.9 | mitm_m3_negfold | 3 | 32 | 16 | negation | random | 18 | 0.83 | 0.83 | 17.6 | 21.7 | 0.95 | 19.8 | 4.70 | 12.6 | 0.10 | ✓ |
-| prime | bench-12bit | 11.9 | mitm_m3_negfold_walk | 3 | 32 | 16 | negation | walk | 17 | 0.84 | 0.84 | 17.2 | 17.6 | 0.92 | 19.4 | 4.70 | 12.1 | 0.10 | ✓ |
-| prime | bench-14bit | 14.0 | mitm_m2_negfold | 2 | 64 | 32 | negation | random | 161 | 1.25 | 1.25 | 56.1 | 64.1 | 6.29 | 63.3 | 8.74 | 47.2 | 0.05 | ✓ |
-| prime | bench-14bit | 14.0 | mitm_m2_negfold_walk | 2 | 64 | 32 | negation | walk | 154 | 1.20 | 1.20 | 18.7 | 56.1 | 2.09 | 21.1 | 8.74 | 9.73 | 0.05 | ✓ |
-| prime | bench-14bit | 14.0 | mitm_m3_negfold | 3 | 64 | 32 | negation | random | 28 | 0.96 | 0.96 | 19.8 | 27.8 | 2.22 | 22.3 | 8.74 | 10.8 | 0.13 | ✓ |
-| prime | bench-14bit | 14.0 | mitm_m3_negfold_walk | 3 | 64 | 32 | negation | walk | 29 | 0.94 | 0.94 | 17.2 | 19.8 | 1.93 | 19.4 | 8.74 | 8.15 | 0.16 | ✓ |
-| prime | bench-16bit | 16.0 | mitm_m2_negfold | 2 | 128 | 64 | negation | random | 360 | 0.92 | 0.92 | 78.9 | 95.0 | 12.4 | 89.0 | 18.0 | 60.7 | 0.04 | ✓ |
-| prime | bench-16bit | 16.0 | mitm_m2_negfold_walk | 2 | 128 | 64 | negation | walk | 314 | 1.13 | 1.13 | 22.5 | 78.9 | 3.53 | 25.4 | 18.0 | 4.32 | 0.04 | ✓ |
-| prime | bench-16bit | 16.0 | mitm_m3_negfold | 3 | 128 | 64 | negation | random | 53 | 0.99 | 0.99 | 29.7 | 45.8 | 4.67 | 33.5 | 18.0 | 11.3 | 0.25 | ✓ |
-| prime | bench-16bit | 16.0 | mitm_m3_negfold_walk | 3 | 128 | 64 | negation | walk | 53 | 0.99 | 0.99 | 23.9 | 29.7 | 3.75 | 26.9 | 18.0 | 5.54 | 0.22 | ✓ |
-| prime | bench-18bit | 18.0 | mitm_m2_negfold | 2 | 128 | 64 | negation | random | 1,068 | 1.08 | 1.08 | 111 | 119 | 26.4 | 125 | 8.37 | 102 | 0.01 | ✓ |
-| prime | bench-18bit | 18.0 | mitm_m2_negfold_walk | 2 | 128 | 64 | negation | walk | 1,581 | 0.89 | 0.89 | 16.7 | 111 | 3.97 | 18.8 | 8.37 | 8.24 | 0.02 | ✓ |
-| prime | bench-18bit | 18.0 | mitm_m3_negfold | 3 | 128 | 64 | negation | random | 78 | 0.75 | 0.75 | 24.2 | 32.2 | 5.76 | 27.3 | 8.37 | 15.6 | 0.17 | ✓ |
-| prime | bench-18bit | 18.0 | mitm_m3_negfold_walk | 3 | 128 | 64 | negation | walk | 80 | 0.72 | 0.72 | 18.8 | 24.2 | 4.48 | 21.3 | 8.37 | 10.3 | 0.12 | ✓ |
-| prime | bench-20bit | 20.0 | mitm_m2_negfold | 2 | 256 | 128 | negation | random | 1,746 | 1.20 | 1.20 | 110 | 126 | 41.1 | 125 | 16.4 | 94.0 | 0.01 | ✓ |
-| prime | bench-20bit | 20.0 | mitm_m2_negfold_walk | 2 | 256 | 128 | negation | walk | 2,258 | 0.95 | 0.95 | 22.4 | 110 | 8.34 | 25.3 | 16.4 | 5.99 | 0.01 | ✓ |
-| prime | bench-20bit | 20.0 | mitm_m3_negfold | 3 | 256 | 128 | negation | random | 118 | 0.93 | 0.93 | 29.0 | 45.0 | 10.8 | 32.7 | 16.4 | 12.3 | 0.24 | ✓ |
-| prime | bench-20bit | 20.0 | mitm_m3_negfold_walk | 3 | 256 | 128 | negation | walk | 120 | 0.94 | 0.94 | 23.4 | 29.0 | 8.72 | 26.4 | 16.4 | 6.71 | 0.32 | ✓ |
-| prime | generated-22bit-3290411 | 21.7 | mitm_m2_negfold | 2 | 512 | 256 | negation | random | 3,118 | 1.00 | 1.00 | 139 | 176 | 46.8 | 157 | 36.5 | 103 | 0.02 | ✓ |
-| prime | generated-22bit-3290411 | 21.7 | mitm_m2_negfold_walk | 2 | 512 | 256 | negation | walk | 3,242 | 1.06 | 1.06 | 39.8 | 139 | 13.4 | 44.9 | 36.5 | 3.23 | 0.02 | ✓ |
-| prime | generated-22bit-3290411 | 21.7 | mitm_m3_negfold | 3 | 512 | 256 | negation | random | 218 | 1.00 | 1.00 | 48.1 | 84.3 | 16.2 | 54.3 | 36.5 | 11.1 | 0.51 | ✓ |
-| prime | generated-22bit-3290411 | 21.7 | mitm_m3_negfold_walk | 3 | 512 | 256 | negation | walk | 210 | 1.00 | 1.00 | 41.2 | 48.1 | 13.8 | 46.5 | 36.5 | 4.16 | 0.49 | ✓ |
-| prime | generated-24bit-10935329 | 23.4 | mitm_m2_negfold | 2 | 512 | 256 | negation | random | 11,612 | 0.99 | 0.99 | 248 | 268 | 63.2 | 280 | 20.4 | 228 | 0.01 | ✓ |
-| prime | generated-24bit-10935329 | 23.4 | mitm_m2_negfold_walk | 2 | 512 | 256 | negation | walk | 7,974 | 0.93 | 0.93 | 24.2 | 248 | 6.16 | 27.3 | 20.4 | 3.84 | 0.00 | ✓ |
-| prime | generated-24bit-10935329 | 23.4 | mitm_m3_negfold | 3 | 512 | 256 | negation | random | 265 | 0.87 | 0.87 | 37.0 | 56.8 | 9.41 | 41.7 | 20.4 | 16.1 | 0.51 | ✓ |
-| prime | generated-24bit-10935329 | 23.4 | mitm_m3_negfold_walk | 3 | 512 | 256 | negation | walk | 259 | 0.89 | 0.89 | 31.7 | 37.0 | 8.06 | 35.7 | 20.4 | 10.8 | 0.53 | ✓ |
-| char2 | random-binary-n15-b524b | 14.0 | mitm_m3_negfold | 3 | 30 | 15 | negation | random | 106 | 0.95 | 0.96 | 67.2 | 69.0 | 8.04 | 75.9 | 13.8 | 53.3 | 0.06 | ✓ |
-| char2 | random-binary-n15-b524b | 14.0 | mitm_m3_negfold_walk | 3 | 30 | 15 | negation | walk | 140 | 0.71 | 0.71 | 52.4 | 67.2 | 6.27 | 59.1 | 13.8 | 38.5 | 0.04 | ✓ |
-| char2 | random-binary-n15-b524b | 14.0 | mitm_m2_negfold | 2 | 30 | 15 | negation | random | 631 | 1.05 | 1.02 | 196 | 69.0 | 23.5 | 221 | 13.8 | 182 | 0.01 | ✓ |
-| char2 | random-binary-n15-b524b | 14.0 | mitm_m2_negfold_walk | 2 | 30 | 15 | negation | walk | 528 | 1.25 | 1.20 | 63.9 | 196 | 7.65 | 72.1 | 13.8 | 50.0 | 0.01 | ✓ |
-| char2 | random-binary-n18-b6507 | 15.0 | mitm_m3_negfold | 3 | 64 | 32 | negation | random | 97 | 1.61 | 0.84 | 74.3 | 80.0 | 9.83 | 83.9 | 24.6 | 49.6 | 0.05 | ✓ |
-| char2 | random-binary-n18-b6507 | 15.0 | mitm_m3_negfold_walk | 3 | 64 | 32 | negation | walk | 107 | 1.72 | 0.90 | 59.0 | 74.3 | 7.80 | 66.5 | 24.6 | 34.2 | 0.07 | ✓ |
-| char2 | random-binary-n18-b6507 | 15.0 | mitm_m2_negfold | 2 | 64 | 32 | negation | random | 908 | 2.28 | 1.03 | 226 | 80.0 | 29.9 | 255 | 24.6 | 201 | 0.01 | ✓ |
-| char2 | random-binary-n18-b6507 | 15.0 | mitm_m2_negfold_walk | 2 | 64 | 32 | negation | walk | 1,206 | 1.75 | 0.79 | 108 | 226 | 14.3 | 122 | 24.6 | 83.5 | 0.01 | ✓ |
-| char2 | random-binary-n21-b1b6f3b | 20.0 | mitm_m3_negfold | 3 | 122 | 61 | negation | random | 407 | 0.96 | 0.96 | 77.3 | 81.0 | 24.3 | 87.3 | 11.6 | 65.7 | 0.04 | ✓ |
-| char2 | random-binary-n21-b1b6f3b | 20.0 | mitm_m3_negfold_walk | 3 | 122 | 61 | negation | walk | 468 | 0.84 | 0.84 | 64.6 | 77.3 | 20.3 | 72.8 | 11.6 | 52.9 | 0.04 | ✓ |
-| char2 | random-binary-n21-b1b6f3b | 20.0 | mitm_m2_negfold | 2 | 122 | 61 | negation | random | 10,149 | 0.99 | 0.98 | 557 | 81.0 | 175 | 629 | 11.6 | 546 | 0.00 | ✓ |
-| char2 | random-binary-n21-b1b6f3b | 20.0 | mitm_m2_negfold_walk | 2 | 122 | 61 | negation | walk | 10,919 | 0.89 | 0.88 | 78.5 | 557 | 24.7 | 88.5 | 11.6 | 66.9 | 0.00 | ✓ |
-| char2 | random-binary-n24-b5fc9da | 21.0 | mitm_m3_negfold | 3 | 274 | 137 | negation | random | 365 | 1.74 | 0.87 | 88.9 | 102 | 35.3 | 100 | 23.7 | 65.0 | 0.15 | ✓ |
-| char2 | random-binary-n24-b5fc9da | 21.0 | mitm_m3_negfold_walk | 3 | 274 | 137 | negation | walk | 386 | 1.63 | 0.81 | 79.4 | 88.9 | 31.5 | 89.6 | 23.7 | 55.5 | 0.13 | ✓ |
-| char2 | random-binary-n24-b5fc9da | 21.0 | mitm_m2_negfold | 2 | 274 | 137 | negation | random | 16,514 | 2.05 | 1.02 | 686 | 102 | 273 | 774 | 23.7 | 662 | 0.00 | ✓ |
-| char2 | random-binary-n24-b5fc9da | 21.0 | mitm_m2_negfold_walk | 2 | 274 | 137 | negation | walk | 14,315 | 1.87 | 0.92 | 62.1 | 686 | 24.7 | 70.1 | 23.7 | 38.4 | 0.00 | ✓ |
-| char2 | random-binary-n27-b845462 | 24.4 | mitm_m3_negfold | 3 | 526 | 263 | negation | random | 1,498 | 0.90 | 0.90 | 191 | 206 | 82.7 | 216 | 22.7 | 168 | 0.20 | ✓ |
-| char2 | random-binary-n27-b845462 | 24.4 | mitm_m3_negfold_walk | 3 | 526 | 263 | negation | walk | 1,482 | 0.90 | 0.90 | 169 | 191 | 73.2 | 191 | 22.7 | 146 | 0.19 | ✓ |
-| char2 | random-binary-n27-b845462 | 24.4 | mitm_m2_negfold | 2 | 526 | 263 | negation | random | 112,779 | 1.06 | 1.05 | 1,645 | 206 | 711 | 1,856 | 22.7 | 1,622 | 0.00 | ✓ |
-| char2 | random-binary-n27-b845462 | 24.4 | mitm_m2_negfold_walk | 2 | 526 | 263 | negation | walk | 75,384 | 1.14 | 1.13 | 71.2 | 1,645 | 30.8 | 80.4 | 22.7 | 48.5 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 45 | 3 | negation | random | 5 | 0.82 | 0.82 | 23.6 | 39.0 | 1.36 | 88.4 | 17.7 | 5.59 | 0.02 | ✓ |
-| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 45 | 3 | frobenius | random | 5 | 0.82 | 0.82 | 11.3 | 39.0 | 0.65 | 42.2 | 5.24 | 5.69 | 0.02 | ✓ |
-| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 45 | 3 | frobenius | walk | 4 | 1.00 | 1.00 | 19.8 | 11.3 | 1.14 | 74.1 | 5.24 | 14.2 | 0.03 | ✓ |
-| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 45 | 3 | frobenius | walk | 4 | 1.00 | 0.98 | 19.2 | 39.0 | 1.11 | 71.9 | 5.24 | 13.7 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^13) | 11.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 79 | 4 | negation | random | 4 | 1.00 | 1.00 | 40.0 | 74.0 | 2.98 | 163 | 36.8 | 2.83 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^13) | 11.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 79 | 4 | frobenius | random | 4 | 1.00 | 1.00 | 10.6 | 74.0 | 0.79 | 43.3 | 7.49 | 2.84 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^13) | 11.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 79 | 4 | frobenius | walk | 4 | 1.00 | 1.00 | 18.8 | 10.6 | 1.40 | 76.5 | 7.49 | 11.0 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^13) | 11.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 79 | 4 | frobenius | walk | 6 | 1.65 | 0.84 | 18.5 | 74.0 | 1.38 | 75.4 | 7.49 | 10.8 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m3_signed_orbit_columns_negfold | 3 | 33 | 3 | negation | random | 8 | 2.70 | 0.89 | 27.2 | 36.5 | 1.42 | 119 | 11.3 | 15.6 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m3_signed_orbit_columns_frobfold | 3 | 33 | 3 | frobenius | random | 8 | 2.70 | 0.89 | 21.5 | 36.5 | 1.12 | 94.2 | 5.10 | 16.1 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 33 | 3 | frobenius | walk | 10 | 2.12 | 0.70 | 31.5 | 21.5 | 1.64 | 138 | 5.10 | 26.1 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 33 | 3 | frobenius | walk | 45 | 11.23 | 3.05 | 65.2 | 36.5 | 3.41 | 285 | 5.10 | 59.8 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 91 | 4 | frobenius | walk | 4 | 1.00 | 1.00 | 31.2 | 31.5 | 1.63 | 136 | 14.3 | 16.5 | 0.03 | ✓ |
-| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 91 | 4 | frobenius | walk | 6 | 3.76 | 0.61 | 29.8 | 65.2 | 1.55 | 130 | 14.3 | 15.1 | 0.01 | ✓ |
-| koblitz | K_1 / GF(2^17) | 16.0 | mitm_m2_signed_orbit_columns_negfold | 2 | 239 | 8 | negation | random | 20 | 1.55 | 0.77 | 60.3 | 116 | 16.8 | 281 | 56.8 | 3.44 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^17) | 16.0 | mitm_m2_signed_orbit_columns_frobfold | 2 | 239 | 8 | frobenius | random | 22 | 1.47 | 0.73 | 9.96 | 116 | 2.77 | 46.4 | 6.16 | 3.72 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^17) | 16.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 239 | 8 | frobenius | walk | 15 | 2.24 | 1.12 | 9.18 | 9.96 | 2.56 | 42.7 | 6.16 | 2.94 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^19) | 18.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 305 | 9 | negation | random | 9 | 1.00 | 1.00 | 47.2 | 92.2 | 22.6 | 232 | 46.0 | 1.06 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^19) | 18.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 305 | 9 | frobenius | random | 9 | 1.00 | 1.00 | 5.28 | 92.2 | 2.53 | 26.0 | 4.16 | 1.07 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^19) | 18.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 305 | 9 | frobenius | walk | 8 | 1.00 | 1.00 | 6.20 | 5.28 | 2.97 | 30.5 | 4.16 | 1.98 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^19) | 18.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 305 | 9 | frobenius | walk | 67 | 1.46 | 1.37 | 5.99 | 92.2 | 2.87 | 29.4 | 4.16 | 1.78 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^23) | 22.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 875 | 20 | negation | random | 18 | 1.00 | 1.00 | 94.7 | 188 | 106 | 512 | 93.9 | 0.79 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^23) | 22.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 875 | 20 | frobenius | random | 18 | 1.00 | 1.00 | 6.35 | 188 | 7.11 | 34.4 | 5.53 | 0.80 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^23) | 22.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 875 | 20 | frobenius | walk | 19 | 1.00 | 1.00 | 6.33 | 6.35 | 7.09 | 34.3 | 5.53 | 0.78 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^23) | 22.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 875 | 20 | frobenius | walk | 281 | 1.00 | 0.98 | 6.21 | 188 | 6.96 | 33.6 | 5.53 | 0.67 | 0.00 | ✓ |
-| koblitz | K_1 / GF(2^29) | 15.4 | mitm_m3_signed_orbit_columns_negfold | 3 | 3771 | 66 | negation | random | 59 | 0.99 | 0.99 | 17,311 | 34,555 | 4,121 | 105,189 | 17,274 | 36.8 | 0.22 | ✓ |
-| koblitz | K_1 / GF(2^29) | 15.4 | mitm_m3_signed_orbit_columns_frobfold | 3 | 3771 | 66 | frobenius | random | 59 | 0.99 | 0.99 | 728 | 34,555 | 173 | 4,426 | 690 | 38.5 | 0.22 | ✓ |
-| koblitz | K_1 / GF(2^29) | 15.4 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 3771 | 66 | frobenius | walk | 53 | 1.00 | 1.00 | 713 | 728 | 170 | 4,335 | 690 | 23.6 | 0.15 | ✓ |
-| koblitz | K_1 / GF(2^29) | 15.4 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 3771 | 66 | frobenius | walk | 350 | 1.38 | 0.30 | 703 | 34,555 | 167 | 4,271 | 690 | 13.2 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^31) | 20.5 | mitm_m3_signed_orbit_columns_negfold | 3 | 2421 | 41 | negation | random | 49 | 0.74 | 0.74 | 1,268 | 2,489 | 1,119 | 7,968 | 1,224 | 44.7 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^31) | 20.5 | mitm_m3_signed_orbit_columns_frobfold | 3 | 2421 | 41 | frobenius | random | 49 | 0.74 | 0.74 | 98.2 | 2,489 | 86.6 | 617 | 50.3 | 47.9 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^31) | 20.5 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 2421 | 41 | frobenius | walk | 51 | 0.70 | 0.70 | 100 | 98.2 | 88.4 | 630 | 50.3 | 49.9 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^31) | 20.5 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 2421 | 41 | frobenius | walk | 4,151 | 0.93 | 0.62 | 59.2 | 2,489 | 52.2 | 372 | 50.3 | 8.86 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m3_signed_orbit_columns_negfold | 3 | 4663 | 64 | negation | random | 493 | 0.98 | 0.98 | 499 | 857 | 1,195 | 3,426 | 358 | 141 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m3_signed_orbit_columns_frobfold | 3 | 4663 | 64 | frobenius | random | 493 | 0.98 | 0.98 | 161 | 857 | 387 | 1,108 | 11.3 | 150 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 4663 | 64 | frobenius | walk | 496 | 0.96 | 0.96 | 161 | 161 | 385 | 1,103 | 11.3 | 150 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 4663 | 64 | frobenius | walk | 91,721 | 1.07 | 0.92 | 19.4 | 857 | 46.4 | 133 | 11.3 | 8.13 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 9177 | 125 | frobenius | walk | 175 | 0.70 | 0.70 | 94.1 | 161 | 225 | 646 | 41.8 | 52.3 | 0.01 | ✓ |
-| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 9177 | 125 | frobenius | walk | 72,038 | 1.40 | 1.32 | 48.2 | 19.4 | 115 | 331 | 41.8 | 6.38 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 4681 | 61 | negation | random | 921 | 2.05 | 1.02 | 1,170 | 1,831 | 2,569 | 8,242 | 662 | 508 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 4681 | 61 | frobenius | random | 921 | 2.05 | 1.02 | 561 | 1,831 | 1,233 | 3,955 | 19.8 | 541 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 4681 | 61 | frobenius | walk | 950 | 1.98 | 0.99 | 569 | 561 | 1,251 | 4,013 | 19.8 | 550 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 4681 | 61 | frobenius | walk | 224,721 | 4.84 | 0.71 | 110 | 1,831 | 241 | 774 | 19.8 | 90.1 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 21529 | 277 | frobenius | walk | 275 | 0.94 | 0.94 | 522 | 569 | 1,146 | 3,678 | 391 | 131 | 0.11 | ✓ |
-| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 21529 | 277 | frobenius | walk | 38,806 | 1.93 | 0.90 | 397 | 110 | 873 | 2,800 | 391 | 6.62 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 5003 | 62 | negation | random | 6,086 | 1.05 | 1.04 | 50.4 | 58.8 | 257 | 364 | 8.45 | 41.9 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 5003 | 62 | frobenius | random | 6,086 | 1.05 | 1.04 | 45.2 | 58.8 | 231 | 327 | 0.24 | 45.0 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 5003 | 62 | frobenius | walk | 5,645 | 1.07 | 1.07 | 41.1 | 45.2 | 210 | 297 | 0.24 | 40.9 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 5003 | 62 | frobenius | walk | 5,346,681 | 0.99 | 0.96 | 8.15 | 58.8 | 41.6 | 58.9 | 0.24 | 7.91 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 20501 | 251 | frobenius | walk | 468 | 0.77 | 0.77 | 12.3 | 41.1 | 62.7 | 88.7 | 3.80 | 8.48 | 0.00 | ✓ |
-| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 20501 | 251 | frobenius | walk | 901,943 | 1.12 | 1.12 | 5.12 | 8.15 | 26.2 | 37.0 | 3.80 | 1.32 | 0.00 | ✓ |
+| prime | icv1-fp10-t5-192cb216 | 9.7 | mitm_m2_negfold | 2 | 32 | 16 | negation | random | 31 | 0.76 | 0.76 | 36.7 | 45.7 | 1.62 | 41.5 | 9.93 | 26.4 | 0.09 | ✓ |
+| prime | icv1-fp10-t5-192cb216 | 9.7 | mitm_m2_negfold_walk | 2 | 32 | 16 | negation | walk | 28 | 0.66 | 0.66 | 25.9 | 36.7 | 1.14 | 29.3 | 9.93 | 15.6 | 0.07 | ✓ |
+| prime | icv1-fp10-t5-192cb216 | 9.7 | mitm_m3_negfold | 3 | 32 | 16 | negation | random | 14 | 1.00 | 1.00 | 23.9 | 32.8 | 1.06 | 27.0 | 9.93 | 13.5 | 0.16 | ✓ |
+| prime | icv1-fp10-t5-192cb216 | 9.7 | mitm_m3_negfold_walk | 3 | 32 | 16 | negation | walk | 13 | 1.00 | 1.00 | 26.3 | 23.9 | 1.16 | 29.7 | 9.93 | 15.9 | 0.14 | ✓ |
+| prime | icv1-fp12-t19-d4a315df | 11.9 | mitm_m2_negfold | 2 | 32 | 16 | negation | random | 95 | 1.03 | 1.03 | 51.6 | 55.7 | 2.78 | 58.2 | 4.70 | 46.6 | 0.05 | ✓ |
+| prime | icv1-fp12-t19-d4a315df | 11.9 | mitm_m2_negfold_walk | 2 | 32 | 16 | negation | walk | 93 | 1.11 | 1.11 | 20.8 | 51.6 | 1.12 | 23.4 | 4.70 | 15.8 | 0.06 | ✓ |
+| prime | icv1-fp12-t19-d4a315df | 11.9 | mitm_m3_negfold | 3 | 32 | 16 | negation | random | 18 | 0.83 | 0.83 | 17.6 | 21.7 | 0.95 | 19.8 | 4.70 | 12.6 | 0.10 | ✓ |
+| prime | icv1-fp12-t19-d4a315df | 11.9 | mitm_m3_negfold_walk | 3 | 32 | 16 | negation | walk | 17 | 0.84 | 0.84 | 17.2 | 17.6 | 0.92 | 19.4 | 4.70 | 12.1 | 0.10 | ✓ |
+| prime | icv1-fp14-tm43-158b6914 | 14.0 | mitm_m2_negfold | 2 | 64 | 32 | negation | random | 161 | 1.25 | 1.25 | 56.1 | 64.1 | 6.29 | 63.3 | 8.74 | 47.2 | 0.05 | ✓ |
+| prime | icv1-fp14-tm43-158b6914 | 14.0 | mitm_m2_negfold_walk | 2 | 64 | 32 | negation | walk | 154 | 1.20 | 1.20 | 18.7 | 56.1 | 2.09 | 21.1 | 8.74 | 9.73 | 0.05 | ✓ |
+| prime | icv1-fp14-tm43-158b6914 | 14.0 | mitm_m3_negfold | 3 | 64 | 32 | negation | random | 28 | 0.96 | 0.96 | 19.8 | 27.8 | 2.22 | 22.3 | 8.74 | 10.8 | 0.13 | ✓ |
+| prime | icv1-fp14-tm43-158b6914 | 14.0 | mitm_m3_negfold_walk | 3 | 64 | 32 | negation | walk | 29 | 0.94 | 0.94 | 17.2 | 19.8 | 1.93 | 19.4 | 8.74 | 8.15 | 0.16 | ✓ |
+| prime | icv1-fp16-t351-d433f24e | 16.0 | mitm_m2_negfold | 2 | 128 | 64 | negation | random | 360 | 0.92 | 0.92 | 78.9 | 95.0 | 12.4 | 89.0 | 18.0 | 60.7 | 0.04 | ✓ |
+| prime | icv1-fp16-t351-d433f24e | 16.0 | mitm_m2_negfold_walk | 2 | 128 | 64 | negation | walk | 314 | 1.13 | 1.13 | 22.5 | 78.9 | 3.53 | 25.4 | 18.0 | 4.32 | 0.04 | ✓ |
+| prime | icv1-fp16-t351-d433f24e | 16.0 | mitm_m3_negfold | 3 | 128 | 64 | negation | random | 53 | 0.99 | 0.99 | 29.7 | 45.8 | 4.67 | 33.5 | 18.0 | 11.3 | 0.25 | ✓ |
+| prime | icv1-fp16-t351-d433f24e | 16.0 | mitm_m3_negfold_walk | 3 | 128 | 64 | negation | walk | 53 | 0.99 | 0.99 | 23.9 | 29.7 | 3.75 | 26.9 | 18.0 | 5.54 | 0.22 | ✓ |
+| prime | icv1-fp18-t175-45770ebc | 18.0 | mitm_m2_negfold | 2 | 128 | 64 | negation | random | 1,068 | 1.08 | 1.08 | 111 | 119 | 26.4 | 125 | 8.37 | 102 | 0.01 | ✓ |
+| prime | icv1-fp18-t175-45770ebc | 18.0 | mitm_m2_negfold_walk | 2 | 128 | 64 | negation | walk | 1,581 | 0.89 | 0.89 | 16.7 | 111 | 3.97 | 18.8 | 8.37 | 8.24 | 0.02 | ✓ |
+| prime | icv1-fp18-t175-45770ebc | 18.0 | mitm_m3_negfold | 3 | 128 | 64 | negation | random | 78 | 0.75 | 0.75 | 24.2 | 32.2 | 5.76 | 27.3 | 8.37 | 15.6 | 0.17 | ✓ |
+| prime | icv1-fp18-t175-45770ebc | 18.0 | mitm_m3_negfold_walk | 3 | 128 | 64 | negation | walk | 80 | 0.72 | 0.72 | 18.8 | 24.2 | 4.48 | 21.3 | 8.37 | 10.3 | 0.12 | ✓ |
+| prime | icv1-fp20-t1293-3c2999ba | 20.0 | mitm_m2_negfold | 2 | 256 | 128 | negation | random | 1,746 | 1.20 | 1.20 | 110 | 126 | 41.1 | 125 | 16.4 | 94.0 | 0.01 | ✓ |
+| prime | icv1-fp20-t1293-3c2999ba | 20.0 | mitm_m2_negfold_walk | 2 | 256 | 128 | negation | walk | 2,258 | 0.95 | 0.95 | 22.4 | 110 | 8.34 | 25.3 | 16.4 | 5.99 | 0.01 | ✓ |
+| prime | icv1-fp20-t1293-3c2999ba | 20.0 | mitm_m3_negfold | 3 | 256 | 128 | negation | random | 118 | 0.93 | 0.93 | 29.0 | 45.0 | 10.8 | 32.7 | 16.4 | 12.3 | 0.24 | ✓ |
+| prime | icv1-fp20-t1293-3c2999ba | 20.0 | mitm_m3_negfold_walk | 3 | 256 | 128 | negation | walk | 120 | 0.94 | 0.94 | 23.4 | 29.0 | 8.72 | 26.4 | 16.4 | 6.71 | 0.32 | ✓ |
+| prime | icv1-fp22-tm1267-a5acaf6d | 21.7 | mitm_m2_negfold | 2 | 512 | 256 | negation | random | 3,118 | 1.00 | 1.00 | 139 | 176 | 46.8 | 157 | 36.5 | 103 | 0.02 | ✓ |
+| prime | icv1-fp22-tm1267-a5acaf6d | 21.7 | mitm_m2_negfold_walk | 2 | 512 | 256 | negation | walk | 3,242 | 1.06 | 1.06 | 39.8 | 139 | 13.4 | 44.9 | 36.5 | 3.23 | 0.02 | ✓ |
+| prime | icv1-fp22-tm1267-a5acaf6d | 21.7 | mitm_m3_negfold | 3 | 512 | 256 | negation | random | 218 | 1.00 | 1.00 | 48.1 | 84.3 | 16.2 | 54.3 | 36.5 | 11.1 | 0.51 | ✓ |
+| prime | icv1-fp22-tm1267-a5acaf6d | 21.7 | mitm_m3_negfold_walk | 3 | 512 | 256 | negation | walk | 210 | 1.00 | 1.00 | 41.2 | 48.1 | 13.8 | 46.5 | 36.5 | 4.16 | 0.49 | ✓ |
+| prime | icv1-fp24-t1577-77336155 | 23.4 | mitm_m2_negfold | 2 | 512 | 256 | negation | random | 11,612 | 0.99 | 0.99 | 248 | 268 | 63.2 | 280 | 20.4 | 228 | 0.01 | ✓ |
+| prime | icv1-fp24-t1577-77336155 | 23.4 | mitm_m2_negfold_walk | 2 | 512 | 256 | negation | walk | 7,974 | 0.93 | 0.93 | 24.2 | 248 | 6.16 | 27.3 | 20.4 | 3.84 | 0.00 | ✓ |
+| prime | icv1-fp24-t1577-77336155 | 23.4 | mitm_m3_negfold | 3 | 512 | 256 | negation | random | 265 | 0.87 | 0.87 | 37.0 | 56.8 | 9.41 | 41.7 | 20.4 | 16.1 | 0.51 | ✓ |
+| prime | icv1-fp24-t1577-77336155 | 23.4 | mitm_m3_negfold_walk | 3 | 512 | 256 | negation | walk | 259 | 0.89 | 0.89 | 31.7 | 37.0 | 8.06 | 35.7 | 20.4 | 10.8 | 0.53 | ✓ |
+| char2 | icv1-f2m15-t131-ed7256f0 | 14.0 | mitm_m3_negfold | 3 | 30 | 15 | negation | random | 106 | 0.95 | 0.96 | 67.2 | 69.0 | 8.04 | 75.9 | 13.8 | 53.3 | 0.06 | ✓ |
+| char2 | icv1-f2m15-t131-ed7256f0 | 14.0 | mitm_m3_negfold_walk | 3 | 30 | 15 | negation | walk | 140 | 0.71 | 0.71 | 52.4 | 67.2 | 6.27 | 59.1 | 13.8 | 38.5 | 0.04 | ✓ |
+| char2 | icv1-f2m15-t131-ed7256f0 | 14.0 | mitm_m2_negfold | 2 | 30 | 15 | negation | random | 631 | 1.05 | 1.02 | 196 | 69.0 | 23.5 | 221 | 13.8 | 182 | 0.01 | ✓ |
+| char2 | icv1-f2m15-t131-ed7256f0 | 14.0 | mitm_m2_negfold_walk | 2 | 30 | 15 | negation | walk | 528 | 1.25 | 1.20 | 63.9 | 196 | 7.65 | 72.1 | 13.8 | 50.0 | 0.01 | ✓ |
+| char2 | icv1-f2m18-t393-d2c04152 | 15.0 | mitm_m3_negfold | 3 | 64 | 32 | negation | random | 97 | 1.61 | 0.84 | 74.3 | 80.0 | 9.83 | 83.9 | 24.6 | 49.6 | 0.05 | ✓ |
+| char2 | icv1-f2m18-t393-d2c04152 | 15.0 | mitm_m3_negfold_walk | 3 | 64 | 32 | negation | walk | 107 | 1.72 | 0.90 | 59.0 | 74.3 | 7.80 | 66.5 | 24.6 | 34.2 | 0.07 | ✓ |
+| char2 | icv1-f2m18-t393-d2c04152 | 15.0 | mitm_m2_negfold | 2 | 64 | 32 | negation | random | 908 | 2.28 | 1.03 | 226 | 80.0 | 29.9 | 255 | 24.6 | 201 | 0.01 | ✓ |
+| char2 | icv1-f2m18-t393-d2c04152 | 15.0 | mitm_m2_negfold_walk | 2 | 64 | 32 | negation | walk | 1,206 | 1.75 | 0.79 | 108 | 226 | 14.3 | 122 | 24.6 | 83.5 | 0.01 | ✓ |
+| char2 | icv1-f2m21-t2591-de54d72e | 20.0 | mitm_m3_negfold | 3 | 122 | 61 | negation | random | 407 | 0.96 | 0.96 | 77.3 | 81.0 | 24.3 | 87.3 | 11.6 | 65.7 | 0.04 | ✓ |
+| char2 | icv1-f2m21-t2591-de54d72e | 20.0 | mitm_m3_negfold_walk | 3 | 122 | 61 | negation | walk | 468 | 0.84 | 0.84 | 64.6 | 77.3 | 20.3 | 72.8 | 11.6 | 52.9 | 0.04 | ✓ |
+| char2 | icv1-f2m21-t2591-de54d72e | 20.0 | mitm_m2_negfold | 2 | 122 | 61 | negation | random | 10,149 | 0.99 | 0.98 | 557 | 81.0 | 175 | 629 | 11.6 | 546 | 0.00 | ✓ |
+| char2 | icv1-f2m21-t2591-de54d72e | 20.0 | mitm_m2_negfold_walk | 2 | 122 | 61 | negation | walk | 10,919 | 0.89 | 0.88 | 78.5 | 557 | 24.7 | 88.5 | 11.6 | 66.9 | 0.00 | ✓ |
+| char2 | icv1-f2m24-tm3047-2d0c0e8c | 21.0 | mitm_m3_negfold | 3 | 274 | 137 | negation | random | 365 | 1.74 | 0.87 | 88.9 | 102 | 35.3 | 100 | 23.7 | 65.0 | 0.15 | ✓ |
+| char2 | icv1-f2m24-tm3047-2d0c0e8c | 21.0 | mitm_m3_negfold_walk | 3 | 274 | 137 | negation | walk | 386 | 1.63 | 0.81 | 79.4 | 88.9 | 31.5 | 89.6 | 23.7 | 55.5 | 0.13 | ✓ |
+| char2 | icv1-f2m24-tm3047-2d0c0e8c | 21.0 | mitm_m2_negfold | 2 | 274 | 137 | negation | random | 16,514 | 2.05 | 1.02 | 686 | 102 | 273 | 774 | 23.7 | 662 | 0.00 | ✓ |
+| char2 | icv1-f2m24-tm3047-2d0c0e8c | 21.0 | mitm_m2_negfold_walk | 2 | 274 | 137 | negation | walk | 14,315 | 1.87 | 0.92 | 62.1 | 686 | 24.7 | 70.1 | 23.7 | 38.4 | 0.00 | ✓ |
+| char2 | icv1-f2m27-t12543-569dca8b | 24.4 | mitm_m3_negfold | 3 | 526 | 263 | negation | random | 1,498 | 0.90 | 0.90 | 191 | 206 | 82.7 | 216 | 22.7 | 168 | 0.20 | ✓ |
+| char2 | icv1-f2m27-t12543-569dca8b | 24.4 | mitm_m3_negfold_walk | 3 | 526 | 263 | negation | walk | 1,482 | 0.90 | 0.90 | 169 | 191 | 73.2 | 191 | 22.7 | 146 | 0.19 | ✓ |
+| char2 | icv1-f2m27-t12543-569dca8b | 24.4 | mitm_m2_negfold | 2 | 526 | 263 | negation | random | 112,779 | 1.06 | 1.05 | 1,645 | 206 | 711 | 1,856 | 22.7 | 1,622 | 0.00 | ✓ |
+| char2 | icv1-f2m27-t12543-569dca8b | 24.4 | mitm_m2_negfold_walk | 2 | 526 | 263 | negation | walk | 75,384 | 1.14 | 1.13 | 71.2 | 1,645 | 30.8 | 80.4 | 22.7 | 48.5 | 0.00 | ✓ |
+| koblitz | icv1-f2m11-t67-05f5aa36 | 10.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 45 | 3 | negation | random | 5 | 0.82 | 0.82 | 23.6 | 39.0 | 1.36 | 88.4 | 17.7 | 5.59 | 0.02 | ✓ |
+| koblitz | icv1-f2m11-t67-05f5aa36 | 10.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 45 | 3 | frobenius | random | 5 | 0.82 | 0.82 | 11.3 | 39.0 | 0.65 | 42.2 | 5.24 | 5.69 | 0.02 | ✓ |
+| koblitz | icv1-f2m11-t67-05f5aa36 | 10.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 45 | 3 | frobenius | walk | 4 | 1.00 | 1.00 | 19.8 | 11.3 | 1.14 | 74.1 | 5.24 | 14.2 | 0.03 | ✓ |
+| koblitz | icv1-f2m11-t67-05f5aa36 | 10.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 45 | 3 | frobenius | walk | 4 | 1.00 | 0.98 | 19.2 | 39.0 | 1.11 | 71.9 | 5.24 | 13.7 | 0.01 | ✓ |
+| koblitz | icv1-f2m13-t181-515ee569 | 11.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 79 | 4 | negation | random | 4 | 1.00 | 1.00 | 40.0 | 74.0 | 2.98 | 163 | 36.8 | 2.83 | 0.01 | ✓ |
+| koblitz | icv1-f2m13-t181-515ee569 | 11.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 79 | 4 | frobenius | random | 4 | 1.00 | 1.00 | 10.6 | 74.0 | 0.79 | 43.3 | 7.49 | 2.84 | 0.01 | ✓ |
+| koblitz | icv1-f2m13-t181-515ee569 | 11.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 79 | 4 | frobenius | walk | 4 | 1.00 | 1.00 | 18.8 | 10.6 | 1.40 | 76.5 | 7.49 | 11.0 | 0.01 | ✓ |
+| koblitz | icv1-f2m13-t181-515ee569 | 11.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 79 | 4 | frobenius | walk | 6 | 1.65 | 0.84 | 18.5 | 74.0 | 1.38 | 75.4 | 7.49 | 10.8 | 0.01 | ✓ |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 9.6 | mitm_m3_signed_orbit_columns_negfold | 3 | 33 | 3 | negation | random | 8 | 2.70 | 0.89 | 27.2 | 36.5 | 1.42 | 119 | 11.3 | 15.6 | 0.01 | ✓ |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 9.6 | mitm_m3_signed_orbit_columns_frobfold | 3 | 33 | 3 | frobenius | random | 8 | 2.70 | 0.89 | 21.5 | 36.5 | 1.12 | 94.2 | 5.10 | 16.1 | 0.01 | ✓ |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 9.6 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 33 | 3 | frobenius | walk | 10 | 2.12 | 0.70 | 31.5 | 21.5 | 1.64 | 138 | 5.10 | 26.1 | 0.01 | ✓ |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 9.6 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 33 | 3 | frobenius | walk | 45 | 11.23 | 3.05 | 65.2 | 36.5 | 3.41 | 285 | 5.10 | 59.8 | 0.01 | ✓ |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 9.6 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 91 | 4 | frobenius | walk | 4 | 1.00 | 1.00 | 31.2 | 31.5 | 1.63 | 136 | 14.3 | 16.5 | 0.03 | ✓ |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 9.6 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 91 | 4 | frobenius | walk | 6 | 3.76 | 0.61 | 29.8 | 65.2 | 1.55 | 130 | 14.3 | 15.1 | 0.01 | ✓ |
+| koblitz | icv1-f2m17-tm101-00378d4e | 16.0 | mitm_m2_signed_orbit_columns_negfold | 2 | 239 | 8 | negation | random | 20 | 1.55 | 0.77 | 60.3 | 116 | 16.8 | 281 | 56.8 | 3.44 | 0.00 | ✓ |
+| koblitz | icv1-f2m17-tm101-00378d4e | 16.0 | mitm_m2_signed_orbit_columns_frobfold | 2 | 239 | 8 | frobenius | random | 22 | 1.47 | 0.73 | 9.96 | 116 | 2.77 | 46.4 | 6.16 | 3.72 | 0.00 | ✓ |
+| koblitz | icv1-f2m17-tm101-00378d4e | 16.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 239 | 8 | frobenius | walk | 15 | 2.24 | 1.12 | 9.18 | 9.96 | 2.56 | 42.7 | 6.16 | 2.94 | 0.00 | ✓ |
+| koblitz | icv1-f2m19-tm797-9c54981b | 18.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 305 | 9 | negation | random | 9 | 1.00 | 1.00 | 47.2 | 92.2 | 22.6 | 232 | 46.0 | 1.06 | 0.00 | ✓ |
+| koblitz | icv1-f2m19-tm797-9c54981b | 18.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 305 | 9 | frobenius | random | 9 | 1.00 | 1.00 | 5.28 | 92.2 | 2.53 | 26.0 | 4.16 | 1.07 | 0.00 | ✓ |
+| koblitz | icv1-f2m19-tm797-9c54981b | 18.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 305 | 9 | frobenius | walk | 8 | 1.00 | 1.00 | 6.20 | 5.28 | 2.97 | 30.5 | 4.16 | 1.98 | 0.00 | ✓ |
+| koblitz | icv1-f2m19-tm797-9c54981b | 18.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 305 | 9 | frobenius | walk | 67 | 1.46 | 1.37 | 5.99 | 92.2 | 2.87 | 29.4 | 4.16 | 1.78 | 0.00 | ✓ |
+| koblitz | icv1-f2m23-tm5197-1f85e9e1 | 22.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 875 | 20 | negation | random | 18 | 1.00 | 1.00 | 94.7 | 188 | 106 | 512 | 93.9 | 0.79 | 0.00 | ✓ |
+| koblitz | icv1-f2m23-tm5197-1f85e9e1 | 22.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 875 | 20 | frobenius | random | 18 | 1.00 | 1.00 | 6.35 | 188 | 7.11 | 34.4 | 5.53 | 0.80 | 0.00 | ✓ |
+| koblitz | icv1-f2m23-tm5197-1f85e9e1 | 22.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 875 | 20 | frobenius | walk | 19 | 1.00 | 1.00 | 6.33 | 6.35 | 7.09 | 34.3 | 5.53 | 0.78 | 0.00 | ✓ |
+| koblitz | icv1-f2m23-tm5197-1f85e9e1 | 22.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 875 | 20 | frobenius | walk | 281 | 1.00 | 0.98 | 6.21 | 188 | 6.96 | 33.6 | 5.53 | 0.67 | 0.00 | ✓ |
+| koblitz | icv1-f2m29-tm40309-30c52b96 | 15.4 | mitm_m3_signed_orbit_columns_negfold | 3 | 3771 | 66 | negation | random | 59 | 0.99 | 0.99 | 17,311 | 34,555 | 4,121 | 105,189 | 17,274 | 36.8 | 0.22 | ✓ |
+| koblitz | icv1-f2m29-tm40309-30c52b96 | 15.4 | mitm_m3_signed_orbit_columns_frobfold | 3 | 3771 | 66 | frobenius | random | 59 | 0.99 | 0.99 | 728 | 34,555 | 173 | 4,426 | 690 | 38.5 | 0.22 | ✓ |
+| koblitz | icv1-f2m29-tm40309-30c52b96 | 15.4 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 3771 | 66 | frobenius | walk | 53 | 1.00 | 1.00 | 713 | 728 | 170 | 4,335 | 690 | 23.6 | 0.15 | ✓ |
+| koblitz | icv1-f2m29-tm40309-30c52b96 | 15.4 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 3771 | 66 | frobenius | walk | 350 | 1.38 | 0.30 | 703 | 34,555 | 167 | 4,271 | 690 | 13.2 | 0.00 | ✓ |
+| koblitz | icv1-f2m31-tm90707-c95f16f5 | 20.5 | mitm_m3_signed_orbit_columns_negfold | 3 | 2421 | 41 | negation | random | 49 | 0.74 | 0.74 | 1,268 | 2,489 | 1,119 | 7,968 | 1,224 | 44.7 | 0.01 | ✓ |
+| koblitz | icv1-f2m31-tm90707-c95f16f5 | 20.5 | mitm_m3_signed_orbit_columns_frobfold | 3 | 2421 | 41 | frobenius | random | 49 | 0.74 | 0.74 | 98.2 | 2,489 | 86.6 | 617 | 50.3 | 47.9 | 0.01 | ✓ |
+| koblitz | icv1-f2m31-tm90707-c95f16f5 | 20.5 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 2421 | 41 | frobenius | walk | 51 | 0.70 | 0.70 | 100 | 98.2 | 88.4 | 630 | 50.3 | 49.9 | 0.01 | ✓ |
+| koblitz | icv1-f2m31-tm90707-c95f16f5 | 20.5 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 2421 | 41 | frobenius | walk | 4,151 | 0.93 | 0.62 | 59.2 | 2,489 | 52.2 | 372 | 50.3 | 8.86 | 0.00 | ✓ |
+| koblitz | icv1-f2m37-tm534059-32aad96b | 27.8 | mitm_m3_signed_orbit_columns_negfold | 3 | 4663 | 64 | negation | random | 493 | 0.98 | 0.98 | 499 | 857 | 1,195 | 3,426 | 358 | 141 | 0.00 | ✓ |
+| koblitz | icv1-f2m37-tm534059-32aad96b | 27.8 | mitm_m3_signed_orbit_columns_frobfold | 3 | 4663 | 64 | frobenius | random | 493 | 0.98 | 0.98 | 161 | 857 | 387 | 1,108 | 11.3 | 150 | 0.00 | ✓ |
+| koblitz | icv1-f2m37-tm534059-32aad96b | 27.8 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 4663 | 64 | frobenius | walk | 496 | 0.96 | 0.96 | 161 | 161 | 385 | 1,103 | 11.3 | 150 | 0.00 | ✓ |
+| koblitz | icv1-f2m37-tm534059-32aad96b | 27.8 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 4663 | 64 | frobenius | walk | 91,721 | 1.07 | 0.92 | 19.4 | 857 | 46.4 | 133 | 11.3 | 8.13 | 0.00 | ✓ |
+| koblitz | icv1-f2m37-tm534059-32aad96b | 27.8 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 9177 | 125 | frobenius | walk | 175 | 0.70 | 0.70 | 94.1 | 161 | 225 | 646 | 41.8 | 52.3 | 0.01 | ✓ |
+| koblitz | icv1-f2m37-tm534059-32aad96b | 27.8 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 9177 | 125 | frobenius | walk | 72,038 | 1.40 | 1.32 | 48.2 | 19.4 | 115 | 331 | 41.8 | 6.38 | 0.00 | ✓ |
+| koblitz | icv1-f2m39-t1481485-829ef1d1 | 26.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 4681 | 61 | negation | random | 921 | 2.05 | 1.02 | 1,170 | 1,831 | 2,569 | 8,242 | 662 | 508 | 0.00 | ✓ |
+| koblitz | icv1-f2m39-t1481485-829ef1d1 | 26.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 4681 | 61 | frobenius | random | 921 | 2.05 | 1.02 | 561 | 1,831 | 1,233 | 3,955 | 19.8 | 541 | 0.00 | ✓ |
+| koblitz | icv1-f2m39-t1481485-829ef1d1 | 26.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 4681 | 61 | frobenius | walk | 950 | 1.98 | 0.99 | 569 | 561 | 1,251 | 4,013 | 19.8 | 550 | 0.00 | ✓ |
+| koblitz | icv1-f2m39-t1481485-829ef1d1 | 26.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 4681 | 61 | frobenius | walk | 224,721 | 4.84 | 0.71 | 110 | 1,831 | 241 | 774 | 19.8 | 90.1 | 0.00 | ✓ |
+| koblitz | icv1-f2m39-t1481485-829ef1d1 | 26.0 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 21529 | 277 | frobenius | walk | 275 | 0.94 | 0.94 | 522 | 569 | 1,146 | 3,678 | 391 | 131 | 0.11 | ✓ |
+| koblitz | icv1-f2m39-t1481485-829ef1d1 | 26.0 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 21529 | 277 | frobenius | walk | 38,806 | 1.93 | 0.90 | 397 | 110 | 873 | 2,800 | 391 | 6.62 | 0.00 | ✓ |
+| koblitz | icv1-f2m41-tm2308219-7f48b14a | 39.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 5003 | 62 | negation | random | 6,086 | 1.05 | 1.04 | 50.4 | 58.8 | 257 | 364 | 8.45 | 41.9 | 0.00 | ✓ |
+| koblitz | icv1-f2m41-tm2308219-7f48b14a | 39.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 5003 | 62 | frobenius | random | 6,086 | 1.05 | 1.04 | 45.2 | 58.8 | 231 | 327 | 0.24 | 45.0 | 0.00 | ✓ |
+| koblitz | icv1-f2m41-tm2308219-7f48b14a | 39.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 5003 | 62 | frobenius | walk | 5,645 | 1.07 | 1.07 | 41.1 | 45.2 | 210 | 297 | 0.24 | 40.9 | 0.00 | ✓ |
+| koblitz | icv1-f2m41-tm2308219-7f48b14a | 39.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 5003 | 62 | frobenius | walk | 5,346,681 | 0.99 | 0.96 | 8.15 | 58.8 | 41.6 | 58.9 | 0.24 | 7.91 | 0.00 | ✓ |
+| koblitz | icv1-f2m41-tm2308219-7f48b14a | 39.0 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 20501 | 251 | frobenius | walk | 468 | 0.77 | 0.77 | 12.3 | 41.1 | 62.7 | 88.7 | 3.80 | 8.48 | 0.00 | ✓ |
+| koblitz | icv1-f2m41-tm2308219-7f48b14a | 39.0 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 20501 | 251 | frobenius | walk | 901,943 | 1.12 | 1.12 | 5.12 | 8.15 | 26.2 | 37.0 | 3.80 | 1.32 | 0.00 | ✓ |
 
 </details>
 
@@ -1179,11 +1179,11 @@ both.
 
 | instance | rows | cofactor | classes | `yield/ceiling` | exact | index |
 |:--|:--|--:|--:|--:|--:|--:|
-| `random-binary-n18-b6507` | `m = 3` and `m = 2`, all rungs | 8 | 4 | 1.48–2.28 | 0.77–1.03 | 1.92–2.21 |
-| `random-binary-n24-b5fc9da` | all rungs | 8 | 4 | 1.63–2.05 | 0.81–1.02 | 2.00–2.02 |
-| `K_0 / GF(2^15)` | all rungs | 44 | 13 | 1.37–2.70 | 0.45–0.89 | 3.04 |
-| `K_1 / GF(2^17)` | all `m = 2` rungs | 2 | 1 | 1.47–2.24 | 0.73–1.12 | 2.00 |
-| `K_1 / GF(2^29)` | `m = 2` walk | 12,646 | 3,133 | 1.38 | 0.30 | 4.59 |
+| `icv1-f2m18-t393-d2c04152` | `m = 3` and `m = 2`, all rungs | 8 | 4 | 1.48–2.28 | 0.77–1.03 | 1.92–2.21 |
+| `icv1-f2m24-tm3047-2d0c0e8c` | all rungs | 8 | 4 | 1.63–2.05 | 0.81–1.02 | 2.00–2.02 |
+| `icv1-f2m15-tm275-2d22ff5d` | all rungs | 44 | 13 | 1.37–2.70 | 0.45–0.89 | 3.04 |
+| `icv1-f2m17-tm101-00378d4e` | all `m = 2` rungs | 2 | 1 | 1.47–2.24 | 0.73–1.12 | 2.00 |
+| `icv1-f2m29-tm40309-30c52b96` | `m = 2` walk | 12,646 | 3,133 | 1.38 | 0.30 | 4.59 |
 
 The hand-argued factor 2 of §3.5 is confirmed where the base is in `2E`
 (`1.92–2.21` measured, against the exact 2 the trace argument gives, the
@@ -1194,7 +1194,7 @@ leaves 3,133.  No count moved and no `S` moved; this is the accounting
 correction §3.5 asked for, and the `†` rows of §2.2 are to be read at
 the exact column from here on.
 
-One row still exceeds its exact ceiling: `K_0 / GF(2^15)`'s two-summand
+One row still exceeds its exact ceiling: `icv1-f2m15-tm275-2d22ff5d`'s two-summand
 folded walk, at `3.05`.  That instance has `r = 2^9.6` with a cofactor of
 44 and a base of 33 signed points, so the run finds two or three
 relations in a handful of trials and the ratio is the variance of a
@@ -1395,9 +1395,9 @@ those.  Per thousand trials, on the holdout's two-summand walk rows:
 | `generated-24bit` | 0.76 | 0.45 | 0.46 |
 | `random-binary-n24` | 2.92 | 4.28 | 3.61 |
 | `random-binary-n27` | 1.21 | 0.76 | 0.66 |
-| `K_0 / GF(2^37)` | 0.19 | 0.21 | 0.55 |
-| `K_0 / GF(2^39)` | 0.38 | 0.99 | 1.31 |
-| `K_0 / GF(2^41)` | 0.00 | 0.01 | 0.01 |
+| `icv1-f2m37-tm534059-32aad96b` | 0.19 | 0.21 | 0.55 |
+| `icv1-f2m39-t1481485-829ef1d1` | 0.38 | 0.99 | 1.31 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 0.00 | 0.01 | 0.01 |
 
 There is no systematic difference between sixteen step functions per
 run, `16!` of them, and a fresh sixteen at every restart.  The rows that
@@ -1589,12 +1589,12 @@ law prescribes at every rung:
 
 | instance | `log₂ r` | `\|F\|` | `F*` | `S` | `S_family` | `S / S_family` |
 |:--|--:|--:|--:|--:|--:|--:|
-| bench-10bit | 9.7 | 10 | 9 | 32.90 | 2.30 | 14.33 |
-| bench-12bit | 11.9 | 16 | 16 | 21.51 | 2.97 | 7.23 |
-| bench-14bit | 14.0 | 26 | 25 | 14.28 | 3.77 | 3.78 |
-| bench-16bit | 16.0 | 40 | 40 | 12.36 | 4.76 | 2.60 |
-| bench-18bit | 18.0 | 64 | 64 | 10.72 | 6.00 | 1.79 |
-| bench-20bit | 20.0 | 102 | 102 | 11.97 | 7.56 | 1.58 |
+| icv1-fp10-t5-192cb216 | 9.7 | 10 | 9 | 32.90 | 2.30 | 14.33 |
+| icv1-fp12-t19-d4a315df | 11.9 | 16 | 16 | 21.51 | 2.97 | 7.23 |
+| icv1-fp14-tm43-158b6914 | 14.0 | 26 | 25 | 14.28 | 3.77 | 3.78 |
+| icv1-fp16-t351-d433f24e | 16.0 | 40 | 40 | 12.36 | 4.76 | 2.60 |
+| icv1-fp18-t175-45770ebc | 18.0 | 64 | 64 | 10.72 | 6.00 | 1.79 |
+| icv1-fp20-t1293-3c2999ba | 20.0 | 102 | 102 | 11.97 | 7.56 | 1.58 |
 | generated-22bit | 21.7 | 148 | 149 | 10.47 | 9.15 | 1.15 |
 | generated-24bit | 23.4 | 222 | 222 | 14.03 | 11.17 | 1.26 |
 
@@ -1658,7 +1658,7 @@ model at the row's own folds, and is a model, not a bound.
 
 | regime, instance | variant | m | \|F\| | K | trials | y/c (exact) | S | was | vs rho | vs floor | vs family | ok | class |
 |:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
-| **prime**, `generated-24bit-10935329`, `r = 2^23.4`, `#E = 1r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | | 0.23× | 1× | | — | boundary |
+| **prime**, `icv1-fp24-t1577-77336155`, `r = 2^23.4`, `#E = 1r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | | 0.23× | 1× | | — | boundary |
 | | family optimum, `k = 1` | | 222 | | | | 11.2 | | 2.84× | 12.6× | 1× | — | model |
 | | Pollard rho, r-adding, counted | | | | | | 3.93 | | 1× | 4.43× | | ✓ | reference |
 | | Semaev `S₃` roots | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 5,123 | | 1,304× | 5,781× | 459× | ✓ | baseline |
@@ -1670,7 +1670,7 @@ model at the row's own folds, and is a model, not a bound.
 | | + negation-folded table | 3 | 512 | 256 | 265 | 0.87 (0.87) | 37.0 | 56.8 | 9.42× | 41.8× | 3.31× | ✓ | engineering |
 | | + walk targets | 3 | 512 | 256 | 262 | 0.89 (0.89) | 31.4 | 37.0 | 7.99× | 35.4× | 2.81× | ✓ | engineering |
 | | **+ base at the family optimum** | 2 | 222 | 111 | 31,023 | 1.02 (1.02) | **14.3** | 24.1 | **3.63×** | 16.1× | 1.28× | ✓ | engineering |
-| **binary**, `random-binary-n27-b845462`, `r = 2^24.4`, `#E = 6r`, `A = 2` | generic floor | | | | | | 0.886 | | 0.38× | 1× | | — | boundary |
+| **binary**, `icv1-f2m27-t12543-569dca8b`, `r = 2^24.4`, `#E = 6r`, `A = 2` | generic floor | | | | | | 0.886 | | 0.38× | 1× | | — | boundary |
 | | family optimum, `k = 1` | | 512 | | | | 41.6 | | 18.0× | 46.9× | 1× | — | model |
 | | Pollard rho, r-adding, counted | | | | | | 2.31 | | 1× | 2.61× | | ✓ | reference |
 | | meet in the middle | 3 | 526 | 263 | 1,498 | 0.90 (0.90) | 206 | | 89.1× | 233× | 4.96× | ✓ | engineering |
@@ -1680,7 +1680,7 @@ model at the row's own folds, and is a model, not a bound.
 | | + negation-folded table | 2 | 526 | 263 | 112,779 | 1.06 (1.05) | 1,645 | 206 | 711× | 1,856× | 39.6× | ✓ | engineering |
 | | + walk targets | 2 | 526 | 263 | 130,973 | 0.99 (0.98) | 51.3 | 1,645 | 22.2× | 57.9× | 1.23× | ✓ | engineering |
 | | **+ base at the family optimum** | 2 | 254 | 127 | 217,845 | 0.99 (0.96) | **50.7** | 51.3 | **21.9×** | 57.2× | 1.22× | ✓ | engineering |
-| **Koblitz**, `K_0 / GF(2^41)`, `r = 2^39.0`, `#E = 4r`, `A = 82` | generic floor | | | | | | 0.138 | | 0.71× | 1× | | — | boundary |
+| **Koblitz**, `icv1-f2m41-tm2308219-7f48b14a`, `r = 2^39.0`, `#E = 4r`, `A = 82` | generic floor | | | | | | 0.138 | | 0.71× | 1× | | — | boundary |
 | | family optimum, `k = 41` | | 13,021 | | | | 4.18 | | 21.4× | 30.2× | 1× | — | model |
 | | signed-Frobenius rho, counted | | | | | | 0.20 | | 1× | 1.41× | | ✓ | reference |
 | | meet in the middle, signed-orbit columns | 3 | 5,003 | 62 | 6,086 | 1.05 (1.04) | 58.8 | | 301× | 425× | 4.05× | ✓ | advance, count |
@@ -1723,7 +1723,7 @@ which are the rungs that restart most.
 offsets are drawn with the jumps at setup: sixteen extra `[c]G + [d]Q`,
 thirty-two scalar multiplications, once per run whether or not the walk
 ever restarts.  On rungs that barely restart that is a straight loss —
-`K_1 / GF(2^11)` at `0.597`, `K_0 / GF(2^13)` at `0.650`, `bench-10bit`'s
+`icv1-f2m11-t67-05f5aa36` at `0.597`, `icv1-f2m13-t181-515ee569` at `0.650`, `icv1-fp10-t5-192cb216`'s
 three-summand walk at `0.656`.  Every one of those is below `2^20` and so
 outside §1.6's window, but it is a real trade and not noise, and the fix
 is obvious: draw the pool on the *first* restart rather than at setup, so
@@ -1881,8 +1881,8 @@ across three ladders on one machine:
 |:--|--:|--:|--:|
 | spread of a pinned ratio across three runs | 1.08 | 1.23 | 3.70 |
 
-The worst are `ns_per_sqrt` on `bench-12bit` at `3.70` and
-`ns_per_frobenius` on `K_0 / GF(2^41)` at `2.50`.  The consequence was
+The worst are `ns_per_sqrt` on `icv1-fp12-t19-d4a315df` at `3.70` and
+`ns_per_frobenius` on `icv1-f2m41-tm2308219-7f48b14a` at `2.50`.  The consequence was
 §11.7's: 111 of 166 cross-round rows had identical trials, relations and
 group operations and still moved, by `0.912` to `1.076`.
 
@@ -2043,8 +2043,8 @@ last clause was measured and is corrected in §13.5: it is right about
 `ΔS`, which is a function of `r` alone, and wrong about the *ratio*,
 which also depends on the row's `S` — one row inside the window moves by
 `7.2%`.)  The
-three losses §11.6 recorded — `K_1 / GF(2^11)` at `0.597`,
-`K_0 / GF(2^13)` at `0.650`, `bench-10bit`'s three-summand walk at
+three losses §11.6 recorded — `icv1-f2m11-t67-05f5aa36` at `0.597`,
+`icv1-f2m13-t181-515ee569` at `0.650`, `icv1-fp10-t5-192cb216`'s three-summand walk at
 `0.656` — are all below `2^20`, and so is all of the gain.
 
 There is one consequence that is not cosmetic.  §11.3 reads the ladder's
@@ -2159,15 +2159,15 @@ saving any walk row realised against `(48·log₂r − 48)/√r`:
 
 | instance | `log₂r` | predicted `ΔS` | measured `ΔS` | measured / predicted |
 |:--|--:|--:|--:|--:|
-| `K_0 / GF(2^15)` | 9.55 | 14.980 | 13.854 | 0.925 |
-| `bench-10bit` | 9.68 | 14.531 | 13.490 | 0.928 |
-| `K_1 / GF(2^11)` | 9.95 | 13.651 | 12.442 | 0.911 |
-| `bench-14bit` | 13.99 | 4.893 | 4.717 | 0.964 |
-| `bench-20bit` | 20.00 | 0.891 | 0.850 | 0.954 |
-| `K_1 / GF(2^23)` | 22.00 | 0.492 | 0.478 | 0.972 |
+| `icv1-f2m15-tm275-2d22ff5d` | 9.55 | 14.980 | 13.854 | 0.925 |
+| `icv1-fp10-t5-192cb216` | 9.68 | 14.531 | 13.490 | 0.928 |
+| `icv1-f2m11-t67-05f5aa36` | 9.95 | 13.651 | 12.442 | 0.911 |
+| `icv1-fp14-tm43-158b6914` | 13.99 | 4.893 | 4.717 | 0.964 |
+| `icv1-fp20-t1293-3c2999ba` | 20.00 | 0.891 | 0.850 | 0.954 |
+| `icv1-f2m23-tm5197-1f85e9e1` | 22.00 | 0.492 | 0.478 | 0.972 |
 | `generated-24bit` | 23.38 | 0.325 | 0.318 | 0.980 |
-| `K_0 / GF(2^37)` | 27.78 | 0.085 | 0.082 | 0.969 |
-| `K_0 / GF(2^41)` | 39.00 | 0.002 | 0.002 | 0.990 |
+| `icv1-f2m37-tm534059-32aad96b` | 27.78 | 0.085 | 0.082 | 0.969 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.00 | 0.002 | 0.002 | 0.990 |
 
 The formula is high by 1 to 9 per cent across the whole ladder, as it
 should be: it prices sixteen offsets and the best row on each instance
@@ -2185,7 +2185,7 @@ the `2n` fold.  Splitting the walk rows at the window's edge:
 | below `2^20` | 120 | 0.5825 | 14.633 |
 | at or above `2^20` | 84 | **0.9283** | 0.850 |
 
-That best is `K_1 / GF(2^23)`'s two-summand folded walk at `2^22`: a
+That best is `icv1-f2m23-tm5197-1f85e9e1`'s two-summand folded walk at `2^22`: a
 **7.2 per cent** cut, inside the window, on a row whose `S` is about
 `6.7`.  Small, but not nothing, and the prediction should have said so.
 The prime and binary rows at the same sizes move by 1 per cent or less,
@@ -2199,9 +2199,9 @@ and the lazy arm removes them:
 
 | row | Round 2 `S` | eager `S` | lazy `S` | lazy vs Round 2 | §11.6 quoted |
 |:--|--:|--:|--:|--:|--:|
-| `K_1 / GF(2^11)` `m = 2` folded walk | 19.22 | 31.66 | 19.21 | **1.001×** | 0.597 |
-| `K_0 / GF(2^13)` `m = 2` folded walk | 18.54 | 28.54 | 18.53 | **1.000×** | 0.650 |
-| `bench-10bit` `m = 3` walk | 26.31 | 39.80 | 26.31 | **1.000×** | 0.656 |
+| `icv1-f2m11-t67-05f5aa36` `m = 2` folded walk | 19.22 | 31.66 | 19.21 | **1.001×** | 0.597 |
+| `icv1-f2m13-t181-515ee569` `m = 2` folded walk | 18.54 | 28.54 | 18.53 | **1.000×** | 0.650 |
+| `icv1-fp10-t5-192cb216` `m = 3` walk | 26.31 | 39.80 | 26.31 | **1.000×** | 0.656 |
 
 The eager arm's own ratios to Round 2 are `0.607`, `0.649` and `0.661`
 against §11.6's `0.597`, `0.650` and `0.656` — an independent
@@ -2592,7 +2592,7 @@ an accounting error, not of an attack.
 
 Frozen at `docs/ic/runs/ic-bench-solver-engines-2026-09-22.json`; two
 planted targets per configuration, the same two for every row.
-`random-binary-n13-b1503`, `binary-subspace[dimension=6]`: 60 signed
+`icv1-f2m13-t11-f036dc01`, `binary-subspace[dimension=6]`: 60 signed
 points, 30 columns, walk targets, `incremental-gauss`.  `S` and the
 ratio to the reference are per target; the solver columns are totals
 over the run.
@@ -2644,7 +2644,7 @@ Reading it:
 ### 15.3 The relation matrix, on its own
 
 Frozen at `docs/ic/runs/ic-bench-relation-matrix-2026-09-22.json`:
-`bench-20bit`, `r = 1,046,999`, `mitm[negation_folded=1]`, walk
+`icv1-fp20-t1293-3c2999ba`, `r = 1,046,999`, `mitm[negation_folded=1]`, walk
 targets, two planted targets, both eliminations on the same relations,
 pinned calibration.
 
@@ -2794,7 +2794,7 @@ the engines do when the descent no longer stops them.
 ### 16.3 One base at `n = 17`, `n' = 9`: eighteen unknowns
 
 Frozen at `docs/ic/runs/ic-bench-solver-engines-n17-2026-09-22.json`;
-`random-binary-n17-b1ad26`, `binary-subspace[dimension=9]`: 476 signed
+`icv1-f2m17-t455-60048e6d`, `binary-subspace[dimension=9]`: 476 signed
 points, 238 columns, walk targets, `incremental-gauss`, two planted
 targets, every row a verified logarithm.  `S` and the ratio are per
 target; the solver columns are totals over the run.  The 120-second
@@ -3617,7 +3617,7 @@ not printed.  One smoke test of `ic bench` touched an evaluation
 instance before this was committed: eight runs on the `W13` curve of
 seed `20260922` with the provisional rule below, negation walk
 `S = 2.70` against the frozen walk's `18.4` on the same eight seeds;
-and one on `K_1 / GF(2^17)`, which no evaluation uses, where the
+and one on `icv1-f2m17-tm101-00378d4e`, which no evaluation uses, where the
 negation walk (`2.15`) came in under the signed-Frobenius walk
 (`3.51`).  Neither is used below.
 
@@ -3764,22 +3764,22 @@ declared rule chose:
 
 | bits(r) | curve | log₂ r | frozen walk `S` | negation `S`, J = 4 | J = 8 | J = 16 | chosen | its walk / own floor | tuned plain at that J, walk / own floor | J = 4 walks capped |
 |--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
-| 12 | char2 `random-binary-n13-ba3f` | 12.0 | 14.77 | 2.56 | 3.52 | 6.31 | **4** | 1.56 | 1.28 | 1 |
-| 12 | prime `bench-12bit` | 11.9 | 15.35 | 2.59 | 3.62 | 6.71 | **4** | 1.54 | 1.37 | 0 |
-| 13 | char2 `random-binary-n15-b2493` | 13.0 | 12.20 | 2.17 | 2.83 | 4.93 | **4** | 1.44 | 1.20 | 1 |
-| 14 | prime `bench-14bit` | 14.0 | 8.90 | 1.99 | 2.32 | 3.83 | **4** | 1.46 | 1.29 | 4 |
-| 16 | prime `bench-16bit` | 16.0 | 5.66 | 1.90 | 1.85 | 2.41 | **8** | 1.33 | 1.18 | 15 |
-| 17 | char2 `random-binary-n17-bbe86` | 16.0 | 5.68 | 1.87 | 1.85 | 2.41 | **8** | 1.33 | 1.15 | 14 |
-| 18 | prime `bench-18bit` | 18.0 | 4.34 | 1.68 | 1.41 | 1.71 | **8** | 1.17 | 1.12 | 13 |
-| 19 | char2 `random-binary-n19-b5f57e` | 18.0 | 4.05 | 1.62 | 1.47 | 1.72 | **8** | 1.23 | 1.11 | 21 |
-| 19 | char2 `random-binary-n21-b10cc7b` | 19.0 | 3.58 | 1.61 | 1.29 | 1.44 | **8** | 1.14 | 1.04 | 34 |
-| 20 | prime `bench-20bit` | 20.0 | 3.05 | 2.09 | 1.22 | 1.37 | **8** | 1.16 | 1.10 | 100 |
-| 22 | prime `generated-22bit-3914087` | 21.9 | 2.56 | 2.01 | 1.09 | 1.14 | **8** | 1.10 | 1.14 | 173 |
-| 23 | char2 `random-binary-n23-b3a296b` | 22.0 | 2.38 | 1.92 | 1.14 | 1.13 | **16** | 1.04 | 1.06 | 177 |
-| 24 | char2 `random-binary-n25-b1448ace` | 24.0 | 2.36 | 3.26 | 1.13 | 1.04 | **16** | 1.05 | 1.04 | 626 |
-| 24 | prime `generated-24bit-11921101` | 23.5 | 2.28 | 3.02 | 1.10 | 1.05 | **16** | 1.05 | 1.03 | 471 |
-| 25 | char2 `random-binary-n27-b3bfa9c2` | 24.4 | 1.99 | 2.96 | 1.15 | 1.06 | **16** | 1.09 | 1.13 | 623 |
-| 26 | prime `generated-26bit-38313677` | 25.2 | 2.71 | 3.14 | 1.06 | 0.99 | **16** | 1.03 | 1.00 | 888 |
+| 12 | char2 `icv1-f2m13-t79-00b3392a` | 12.0 | 14.77 | 2.56 | 3.52 | 6.31 | **4** | 1.56 | 1.28 | 1 |
+| 12 | prime `icv1-fp12-t19-d4a315df` | 11.9 | 15.35 | 2.59 | 3.62 | 6.71 | **4** | 1.54 | 1.37 | 0 |
+| 13 | char2 `icv1-f2m15-t5-d9fb183e` | 13.0 | 12.20 | 2.17 | 2.83 | 4.93 | **4** | 1.44 | 1.20 | 1 |
+| 14 | prime `icv1-fp14-tm43-158b6914` | 14.0 | 8.90 | 1.99 | 2.32 | 3.83 | **4** | 1.46 | 1.29 | 4 |
+| 16 | prime `icv1-fp16-t351-d433f24e` | 16.0 | 5.66 | 1.90 | 1.85 | 2.41 | **8** | 1.33 | 1.18 | 15 |
+| 17 | char2 `icv1-f2m17-tm185-c9e2dceb` | 16.0 | 5.68 | 1.87 | 1.85 | 2.41 | **8** | 1.33 | 1.15 | 14 |
+| 18 | prime `icv1-fp18-t175-45770ebc` | 18.0 | 4.34 | 1.68 | 1.41 | 1.71 | **8** | 1.17 | 1.12 | 13 |
+| 19 | char2 `icv1-f2m19-tm353-a68ceb24` | 18.0 | 4.05 | 1.62 | 1.47 | 1.72 | **8** | 1.23 | 1.11 | 21 |
+| 19 | char2 `icv1-f2m21-t2845-e2683765` | 19.0 | 3.58 | 1.61 | 1.29 | 1.44 | **8** | 1.14 | 1.04 | 34 |
+| 20 | prime `icv1-fp20-t1293-3c2999ba` | 20.0 | 3.05 | 2.09 | 1.22 | 1.37 | **8** | 1.16 | 1.10 | 100 |
+| 22 | prime `icv1-fp22-t3019-0c6101de` | 21.9 | 2.56 | 2.01 | 1.09 | 1.14 | **8** | 1.10 | 1.14 | 173 |
+| 23 | char2 `icv1-f2m23-tm1957-8891f5a2` | 22.0 | 2.38 | 1.92 | 1.14 | 1.13 | **16** | 1.04 | 1.06 | 177 |
+| 24 | char2 `icv1-f2m25-t4775-4830dca7` | 24.0 | 2.36 | 3.26 | 1.13 | 1.04 | **16** | 1.05 | 1.04 | 626 |
+| 24 | prime `icv1-fp24-t1465-0b7163ca` | 23.5 | 2.28 | 3.02 | 1.10 | 1.05 | **16** | 1.05 | 1.03 | 471 |
+| 25 | char2 `icv1-f2m27-t20811-3d0fd5a1` | 24.4 | 1.99 | 2.96 | 1.15 | 1.06 | **16** | 1.09 | 1.13 | 623 |
+| 26 | prime `icv1-fp26-tm9263-8a144943` | 25.2 | 2.71 | 3.14 | 1.06 | 0.99 | **16** | 1.03 | 1.00 | 888 |
 
 The rule, now in `rho_jumps_for`: **four jumps to 15 bits, eight from
 16 to 22, sixteen from 23.**  It replaces the provisional one at 16–18
@@ -3840,22 +3840,22 @@ three walks on the same planted logarithms and seeds:
 
 | regime | curve | log₂ r | J | frozen walk `S` | tuned, points `S` | **negation `S`** (median) | negation walk / own floor | points / negation, walk ops | frozen / negation, `S` |
 |:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|
-| prime | `generated-12bit-3529` | 11.8 | 4 | 15.05 | 3.00 | **2.80** (2.57) | 1.727 | 1.104 | 5.37× |
-| prime | `generated-14bit-14389` | 13.8 | 4 | 9.46 | 2.37 | **2.09** (1.95) | 1.540 | 1.160 | 4.52× |
-| prime | `generated-16bit-53411` | 15.7 | 8 | 6.21 | 2.28 | **1.82** (1.75) | 1.235 | 1.388 | 3.41× |
-| prime | `generated-18bit-212099` | 17.7 | 8 | 4.42 | 1.77 | **1.49** (1.42) | 1.216 | 1.246 | 2.97× |
-| prime | `generated-20bit-563153` | 19.1 | 8 | 4.14 | 1.62 | **1.38** (1.29) | 1.272 | 1.205 | 3.00× |
-| prime | `generated-22bit-2434423` | 21.2 | 8 | 3.01 | 1.41 | **1.20** (1.19) | 1.197 | 1.193 | 2.50× |
-| prime | `generated-24bit-16483309` | 24.0 | 16 | 2.56 | 1.49 | **1.06** (1.04) | 1.075 | 1.445 | 2.42× |
-| prime | `generated-26bit-42652151` | 25.3 | 16 | 2.45 | 1.34 | **0.98** (0.91) | 1.024 | 1.391 | 2.50× |
-| char2 | `random-binary-n13-b168f` | 10.4 | 4 | 21.10 | 3.53 | **3.17** (3.11) | 1.408 | 1.219 | 6.66× |
-| char2 | `random-binary-n15-b157a` | 14.0 | 4 | 9.06 | 2.40 | **2.08** (1.93) | 1.550 | 1.180 | 4.35× |
-| char2 | `random-binary-n17-b10103` | 14.4 | 4 | 9.03 | 2.25 | **2.06** (1.97) | 1.590 | 1.096 | 4.38× |
-| char2 | `random-binary-n19-b770f7` | 18.0 | 8 | 4.39 | 1.73 | **1.38** (1.32) | 1.141 | 1.322 | 3.18× |
-| char2 | `random-binary-n21-b968e` | 18.0 | 8 | 4.28 | 1.78 | **1.47** (1.40) | 1.235 | 1.263 | 2.91× |
-| char2 | `random-binary-n23-b480f9a` | 22.0 | 16 | 2.87 | 1.51 | **1.13** (1.11) | 1.047 | 1.395 | 2.53× |
-| char2 | `random-binary-n25-b1a9b772` | 22.4 | 16 | 2.27 | 1.51 | **1.14** (1.10) | 1.082 | 1.374 | 1.99× |
-| char2 | `random-binary-n27-b227199e` | 26.0 | 16 | 2.28 | 1.46 | **1.06** (1.06) | 1.127 | 1.392 | 2.15× |
+| prime | `icv1-fp12-tm53-6c9ff4bb` | 11.8 | 4 | 15.05 | 3.00 | **2.80** (2.57) | 1.727 | 1.104 | 5.37× |
+| prime | `icv1-fp14-tm143-dec4cf6b` | 13.8 | 4 | 9.46 | 2.37 | **2.09** (1.95) | 1.540 | 1.160 | 4.52× |
+| prime | `icv1-fp16-t295-8d3c3165` | 15.7 | 8 | 6.21 | 2.28 | **1.82** (1.75) | 1.235 | 1.388 | 3.41× |
+| prime | `icv1-fp18-tm337-d28d5e09` | 17.7 | 8 | 4.42 | 1.77 | **1.49** (1.42) | 1.216 | 1.246 | 2.97× |
+| prime | `icv1-fp20-t727-cd198a38` | 19.1 | 8 | 4.14 | 1.62 | **1.38** (1.29) | 1.272 | 1.205 | 3.00× |
+| prime | `icv1-fp22-tm1385-475dcb5f` | 21.2 | 8 | 3.01 | 1.41 | **1.20** (1.19) | 1.197 | 1.193 | 2.50× |
+| prime | `icv1-fp24-t1059-6df599df` | 24.0 | 16 | 2.56 | 1.49 | **1.06** (1.04) | 1.075 | 1.445 | 2.42× |
+| prime | `icv1-fp26-tm1775-7e8fb6df` | 25.3 | 16 | 2.45 | 1.34 | **0.98** (0.91) | 1.024 | 1.391 | 2.50× |
+| char2 | `icv1-f2m13-tm9-6863a838` | 10.4 | 4 | 21.10 | 3.53 | **3.17** (3.11) | 1.408 | 1.219 | 6.66× |
+| char2 | `icv1-f2m15-tm65-37237277` | 14.0 | 4 | 9.06 | 2.40 | **2.08** (1.93) | 1.550 | 1.180 | 4.35× |
+| char2 | `icv1-f2m17-t531-2048fb7c` | 14.4 | 4 | 9.03 | 2.25 | **2.06** (1.97) | 1.590 | 1.096 | 4.38× |
+| char2 | `icv1-f2m19-tm649-a9133fe6` | 18.0 | 8 | 4.39 | 1.73 | **1.38** (1.32) | 1.141 | 1.322 | 3.18× |
+| char2 | `icv1-f2m21-tm1495-8bd9aa74` | 18.0 | 8 | 4.28 | 1.78 | **1.47** (1.40) | 1.235 | 1.263 | 2.91× |
+| char2 | `icv1-f2m23-tm4129-45500fce` | 22.0 | 16 | 2.87 | 1.51 | **1.13** (1.11) | 1.047 | 1.395 | 2.53× |
+| char2 | `icv1-f2m25-tm489-c50a8fb9` | 22.4 | 16 | 2.27 | 1.51 | **1.14** (1.10) | 1.082 | 1.374 | 1.99× |
+| char2 | `icv1-f2m27-tm20293-ca4ad8af` | 26.0 | 16 | 2.28 | 1.46 | **1.06** (1.06) | 1.127 | 1.392 | 2.15× |
 
 Reading it:
 
@@ -3886,10 +3886,10 @@ matched walk's mean `S`, on the same curves, seeds and targets:
 
 | report | curve | log₂ r | frozen rho `S` | matched rho `S` | frozen / matched |
 |:--|:--|--:|--:|--:|--:|
-| Round-5 ladder | `bench-10bit` … `bench-20bit` | 9.7–20.0 | 22.66 · 18.58 · 8.91 · 6.36 · 4.20 · 2.68 | 3.60 · 2.85 · 2.03 · 1.74 · 1.45 · 1.29 | 2.1–6.5× |
-| | `generated-22bit-3290411` · `-24bit-10935329` | 21.7 · 23.4 | 2.98 · 3.93 | 1.22 · 1.04 | 2.45× · 3.79× |
+| Round-5 ladder | `icv1-fp10-t5-192cb216` … `icv1-fp20-t1293-3c2999ba` | 9.7–20.0 | 22.66 · 18.58 · 8.91 · 6.36 · 4.20 · 2.68 | 3.60 · 2.85 · 2.03 · 1.74 · 1.45 · 1.29 | 2.1–6.5× |
+| | `icv1-fp22-tm1267-a5acaf6d` · `-24bit-10935329` | 21.7 · 23.4 | 2.98 · 3.93 | 1.22 · 1.04 | 2.45× · 3.79× |
 | | `random-binary-n15` · `n18` · `n21` · `n24` · `n27` | 14.0–24.4 | 8.36 · 7.56 · 3.18 · 2.52 · 2.31 | 2.01 · 2.01 · 1.36 · 1.18 · 0.97 | 2.1–4.2× |
-| Round-5 headline | `generated-24bit-10935329` · `random-binary-n27-b845462` | 23.4 · 24.4 | 3.28 · 2.18 | 1.05 · 1.03 | 3.12× · 2.12× |
+| Round-5 headline | `icv1-fp24-t1577-77336155` · `icv1-f2m27-t12543-569dca8b` | 23.4 · 24.4 | 3.28 · 2.18 | 1.05 · 1.03 | 3.12× · 2.12× |
 | Round-5 holdout | two prime, two binary | 21.0–26.0 | 2.96 · 2.66 · 2.43 · 1.99 | 1.12 · 0.88 · 0.96 · 0.90 | 2.2–3.0× |
 | §17.11 `W13` | three curves | 11.0–12.0 | 16.2 · 18.7 · 14.6 | 2.65 · 3.10 · 2.44 | 6.0–6.1× |
 | §17.11 `W15` | three curves | 12.4–14.0 | 13.1 · 9.2 · 8.9 | 2.21 · 2.06 · 1.76 | 4.5–5.9× |
@@ -3965,13 +3965,13 @@ Koblitz regime has used as its reference since Round 1.
 
   | curve | log₂ r | signed-Frobenius `S` | negation `S` |
   |:--|--:|--:|--:|
-  | `K_0 / GF(2^13)` | 11.0 | 13.5 | **2.78** |
-  | `K_1 / GF(2^17)` | 16.0 | 3.56 | **1.80** |
-  | `K_1 / GF(2^19)` | 18.0 | 2.10 | **1.38** |
-  | `K_0 / GF(2^31)` | 20.5 | **1.10** | 1.19 |
-  | `K_1 / GF(2^23)` | 22.0 | **0.88** | 1.17 |
-  | `K_0 / GF(2^37)` | 27.8 | **0.42** | 0.93 |
-  | `K_0 / GF(2^41)` | 39.0 | **0.16** | 1.03 |
+  | `icv1-f2m13-t181-515ee569` | 11.0 | 13.5 | **2.78** |
+  | `icv1-f2m17-tm101-00378d4e` | 16.0 | 3.56 | **1.80** |
+  | `icv1-f2m19-tm797-9c54981b` | 18.0 | 2.10 | **1.38** |
+  | `icv1-f2m31-tm90707-c95f16f5` | 20.5 | **1.10** | 1.19 |
+  | `icv1-f2m23-tm5197-1f85e9e1` | 22.0 | **0.88** | 1.17 |
+  | `icv1-f2m37-tm534059-32aad96b` | 27.8 | **0.42** | 0.93 |
+  | `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | **0.16** | 1.03 |
 
   So the Koblitz ladder's `vs rho` below about `2^{20}` flatters index
   calculus by up to `4.8×`, as the prime and binary ladders' did.
@@ -3992,7 +3992,7 @@ Koblitz regime has used as its reference since Round 1.
 So every Koblitz `vs rho` on the ledger and the page is off in both
 directions: generous below `2^{20}`, harsh above.  At the boundary
 panel's `n = 41` row the second effect is about `1.07×` on the affine
-unit.  The collection thread's `1.17×` (`K_0 / GF(2^41)`, a
+unit.  The collection thread's `1.17×` (`icv1-f2m41-tm2308219-7f48b14a`, a
 batched-addition unit, reference `S` = rho iterations over `√r`)
 carries the same asymmetry.  A batched addition shares its inversion,
 so a canonicalisation is a larger fraction of it than of an affine
@@ -4113,8 +4113,8 @@ same `k`, measured.
   - targets solved in sequence, so a later walk can finish on an
     earlier target's trail.
 
-  It runs on the thread's two rung curves, `K_0 / GF(2^41)` and
-  `K_0 / GF(2^53)`, at `k = 1, 4, 16, 32`, with 16 batches each on
+  It runs on the thread's two rung curves, `icv1-f2m41-tm2308219-7f48b14a` and
+  `icv1-f2m53-tm56619371-dac20a85`, at `k = 1, 4, 16, 32`, with 16 batches each on
   fresh targets.  On the `n = 61` panel's curve it runs at `k = 1` and
   `32`, with 8 batches.
 - **(b) Step price,** in the thread's unit, measured in the same
@@ -4193,16 +4193,16 @@ things ran that §19.1 did not declare, and each is labelled in its file:
 
 | curve | k | batches | S per target (95 % CI) | over k = 1 (95 % CI) | batch law | over floor | own / earlier trail | ok |
 |:--|--:|--:|--:|--:|--:|--:|--:|:--|
-| K_0 / GF(2^41) | 1 | 16 | 0.1429 [0.1030, 0.1828] | 1.000 [1.000, 1.000] | 1.000 | 1.032 | 16 / 0 | 16/16 |
-| K_0 / GF(2^41) | 4 | 16 | 0.0742 [0.0664, 0.0819] | 0.519 [0.409, 0.705] | 0.547 | 0.536 | 28 / 36 | 64/64 |
-| K_0 / GF(2^41) | 16 | 16 | 0.0396 [0.0367, 0.0425] | 0.277 [0.220, 0.372] | 0.280 | 0.286 | 40 / 216 | 256/256 |
-| K_0 / GF(2^41) | 32 | 16 | 0.0300 [0.0287, 0.0312] | 0.210 [0.168, 0.280] | 0.199 | 0.216 | 43 / 469 | 512/512 |
-| K_0 / GF(2^53) | 1 | 16 | 0.1052 [0.0682, 0.1422] | 1.000 [1.000, 1.000] | 1.000 | 0.864 | 16 / 0 | 16/16 |
-| K_0 / GF(2^53) | 4 | 16 | 0.0626 [0.0552, 0.0700] | 0.595 [0.435, 0.830] | 0.547 | 0.515 | 27 / 37 | 64/64 |
-| K_0 / GF(2^53) | 16 | 16 | 0.0340 [0.0313, 0.0367] | 0.323 [0.239, 0.447] | 0.280 | 0.279 | 42 / 214 | 256/256 |
-| K_0 / GF(2^53) | 32 | 16 | 0.0252 [0.0240, 0.0263] | 0.239 [0.177, 0.329] | 0.199 | 0.207 | 41 / 471 | 512/512 |
-| K_0 / GF(2^61) | 1 | 8 | 0.1151 [0.0503, 0.1798] | 1.000 [1.000, 1.000] | 1.000 | 1.014 | 8 / 0 | 8/8 |
-| K_0 / GF(2^61) | 32 | 8 | 0.0219 [0.0205, 0.0233] | 0.190 [0.131, 0.320] | 0.199 | 0.193 | 21 / 235 | 256/256 |
+| icv1-f2m41-tm2308219-7f48b14a | 1 | 16 | 0.1429 [0.1030, 0.1828] | 1.000 [1.000, 1.000] | 1.000 | 1.032 | 16 / 0 | 16/16 |
+| icv1-f2m41-tm2308219-7f48b14a | 4 | 16 | 0.0742 [0.0664, 0.0819] | 0.519 [0.409, 0.705] | 0.547 | 0.536 | 28 / 36 | 64/64 |
+| icv1-f2m41-tm2308219-7f48b14a | 16 | 16 | 0.0396 [0.0367, 0.0425] | 0.277 [0.220, 0.372] | 0.280 | 0.286 | 40 / 216 | 256/256 |
+| icv1-f2m41-tm2308219-7f48b14a | 32 | 16 | 0.0300 [0.0287, 0.0312] | 0.210 [0.168, 0.280] | 0.199 | 0.216 | 43 / 469 | 512/512 |
+| icv1-f2m53-tm56619371-dac20a85 | 1 | 16 | 0.1052 [0.0682, 0.1422] | 1.000 [1.000, 1.000] | 1.000 | 0.864 | 16 / 0 | 16/16 |
+| icv1-f2m53-tm56619371-dac20a85 | 4 | 16 | 0.0626 [0.0552, 0.0700] | 0.595 [0.435, 0.830] | 0.547 | 0.515 | 27 / 37 | 64/64 |
+| icv1-f2m53-tm56619371-dac20a85 | 16 | 16 | 0.0340 [0.0313, 0.0367] | 0.323 [0.239, 0.447] | 0.280 | 0.279 | 42 / 214 | 256/256 |
+| icv1-f2m53-tm56619371-dac20a85 | 32 | 16 | 0.0252 [0.0240, 0.0263] | 0.239 [0.177, 0.329] | 0.199 | 0.207 | 41 / 471 | 512/512 |
+| icv1-f2m61-t158598901-ab42b6c5 | 1 | 8 | 0.1151 [0.0503, 0.1798] | 1.000 [1.000, 1.000] | 1.000 | 1.014 | 8 / 0 | 8/8 |
+| icv1-f2m61-t158598901-ab42b6c5 | 32 | 8 | 0.0219 [0.0205, 0.0233] | 0.190 [0.131, 0.320] | 0.199 | 0.193 | 21 / 235 | 256/256 |
 
 - **Target 1 met.**  All 1,960 targets were recovered and verified, and
   no batch was dropped.
@@ -4458,9 +4458,9 @@ and writes `prediction.json`.  In brief:
     canonicalisation, measured against the same unit in the same process.
   - Bailey's step is a model column.
   - A cold figure is derived secondarily, against single-target rho.
-- **Sizes:** `K_1/GF(2^19)`, `K_1/GF(2^23)`, `K_1/GF(2^45)`,
-  `K_0/GF(2^37)`, `K_1/GF(2^43)`, `K_1/GF(2^47)`, `K_0/GF(2^41)`,
-  `K_0/GF(2^53)` and `K_0/GF(2^61)`, at `log₂ r` = 18.0, 22.0, 24.8,
+- **Sizes:** `icv1-f2m19-tm797-9c54981b`, `icv1-f2m23-tm5197-1f85e9e1`, `icv1-f2m45-tm6236725-40939294`,
+  `icv1-f2m37-tm534059-32aad96b`, `icv1-f2m43-tm998717-e2e742b0`, `icv1-f2m47-t22705043-f4e44623`, `icv1-f2m41-tm2308219-7f48b14a`,
+  `icv1-f2m53-tm56619371-dac20a85` and `icv1-f2m61-t158598901-ab42b6c5`, at `log₂ r` = 18.0, 22.0, 24.8,
   27.8, 32.1, 36.6, 39.0, 44.3 and 47.2.
 - **Recipe.**  Fixed at every size:
   - the thread's `m = 3` pair-table collection, aimed at the
@@ -4490,15 +4490,15 @@ and writes `prediction.json`.  In brief:
 
 | curve | `log₂ r` | law | model |
 |:--|--:|--:|--:|
-| `K_1/GF(2^19)` | 18.0 | 0.83 | 4.89 |
-| `K_1/GF(2^23)` | 22.0 | 1.20 | 3.42 |
-| `K_1/GF(2^45)` | 24.8 | 1.18 | 3.35 |
-| `K_0/GF(2^37)` | 27.8 | 1.84 | **2.85** |
-| `K_1/GF(2^43)` | 32.1 | 2.81 | 2.89 |
-| `K_1/GF(2^47)` | 36.6 | 4.53 | 3.56 |
-| `K_0/GF(2^41)` | 39.0 | 6.38 | 4.51 |
-| `K_0/GF(2^53)` | 44.3 | 10.3 | 6.76 |
-| `K_0/GF(2^61)` | 47.2 | 13.5 | 8.68 |
+| `icv1-f2m19-tm797-9c54981b` | 18.0 | 0.83 | 4.89 |
+| `icv1-f2m23-tm5197-1f85e9e1` | 22.0 | 1.20 | 3.42 |
+| `icv1-f2m45-tm6236725-40939294` | 24.8 | 1.18 | 3.35 |
+| `icv1-f2m37-tm534059-32aad96b` | 27.8 | 1.84 | **2.85** |
+| `icv1-f2m43-tm998717-e2e742b0` | 32.1 | 2.81 | 2.89 |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 4.53 | 3.56 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 6.38 | 4.51 |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 10.3 | 6.76 |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 13.5 | 8.68 |
 
 - **The law.**  The page's `r^{1/6}`, carried as
   `r^{1/6} n^{−1/2}` from §19.5's `6.38×` at `2^39`.  It predicts a
@@ -4521,7 +4521,7 @@ and writes `prediction.json`.  In brief:
    - The law is falsified there if the ratio's interval at each of the
      three smallest sizes lies above twice its prediction.
    - The model's minimum is confirmed if the least measured ratio falls
-     at `K_0/GF(2^37)` or a neighbour, within a factor of two of `2.85`.
+     at `icv1-f2m37-tm534059-32aad96b` or a neighbour, within a factor of two of `2.85`.
 5. **Crossing.**  A size whose interval lies wholly below one is claimed
    as a crossing only after two fresh seed sets repeat it.
 
@@ -4616,15 +4616,15 @@ No target, size, seed or prediction changed.
 
 | curve | `log₂ r` | recipe | `S`, IC | `S`, batch rho | ratio [95%] | law | model | work | W / C / V | cold |
 |:--|--:|:--|--:|--:|--:|--:|--:|--:|:--|--:|
-| `K_1/GF(2^19)` | 18.0 | 8, 2, 304 | 8.118 | 0.3271 | **24.82×** [23.47, 26.21] | 0.83× | 4.89× | 13.76× | 55% / 32% / 11% | 113× |
-| `K_1/GF(2^23)` | 22.0 | 8, 2, 368 | 2.595 | 0.2050 | **12.66×** [7.85, 18.84] | 1.20× | 3.42× | 6.68× | 53% / 38% / 8% | 62.3× |
-| `K_1/GF(2^45)` | 24.8 | 8, 2, 720 | 2.819 | 0.1191 | **23.67×** [21.02, 26.50] | 1.18× | 3.35× | 6.20× | 26% / 70% / 3% | 123× |
-| `K_0/GF(2^37)` | 27.8 | 8, 2, 592 | 0.861 | 0.0922 | **9.33×** [8.30, 10.42] | 1.84× | 2.85× | 4.58× | 49% / 47% / 3% | 41.6× |
-| `K_1/GF(2^43)` | 32.1 | 16, 2, 1,376 | 0.544 | 0.0666 | **8.16×** [7.10, 9.32] | 2.81× | 2.89× | 4.53× | 55% / 42% / 2% | 39.9× |
-| `K_1/GF(2^47)` | 36.6 | 56, 3, 5,264 | 0.397 | 0.0602 | **6.60×** [6.00, 7.25] | 4.53× | 3.56× | 3.73× | 56% / 42% / 2% | 38.7× |
-| `K_0/GF(2^41)` | 39.0 | 80, 2, 6,560 | 0.324 | 0.0666 | **4.86×** [4.21, 5.55] | 6.38× | 4.51× | 3.73× | 77% / 21% / 1% | 22.6× |
-| `K_0/GF(2^53)` | 44.3 | 264, 2, 27,984 | 0.469 | 0.0509 | **9.21×** [6.92, 11.85] | 10.30× | 6.76× | 7.81× | 85% / 15% / 0% | 43.0× |
-| `K_0/GF(2^61)` | 47.2 | 320, 2, 39,040 | 0.721 | 0.0531 | **13.59×** [11.95, 15.34] | 13.51× | 8.68× | 12.64× | 93% / 7% / 0% | 85.0× |
+| `icv1-f2m19-tm797-9c54981b` | 18.0 | 8, 2, 304 | 8.118 | 0.3271 | **24.82×** [23.47, 26.21] | 0.83× | 4.89× | 13.76× | 55% / 32% / 11% | 113× |
+| `icv1-f2m23-tm5197-1f85e9e1` | 22.0 | 8, 2, 368 | 2.595 | 0.2050 | **12.66×** [7.85, 18.84] | 1.20× | 3.42× | 6.68× | 53% / 38% / 8% | 62.3× |
+| `icv1-f2m45-tm6236725-40939294` | 24.8 | 8, 2, 720 | 2.819 | 0.1191 | **23.67×** [21.02, 26.50] | 1.18× | 3.35× | 6.20× | 26% / 70% / 3% | 123× |
+| `icv1-f2m37-tm534059-32aad96b` | 27.8 | 8, 2, 592 | 0.861 | 0.0922 | **9.33×** [8.30, 10.42] | 1.84× | 2.85× | 4.58× | 49% / 47% / 3% | 41.6× |
+| `icv1-f2m43-tm998717-e2e742b0` | 32.1 | 16, 2, 1,376 | 0.544 | 0.0666 | **8.16×** [7.10, 9.32] | 2.81× | 2.89× | 4.53× | 55% / 42% / 2% | 39.9× |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 56, 3, 5,264 | 0.397 | 0.0602 | **6.60×** [6.00, 7.25] | 4.53× | 3.56× | 3.73× | 56% / 42% / 2% | 38.7× |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 80, 2, 6,560 | 0.324 | 0.0666 | **4.86×** [4.21, 5.55] | 6.38× | 4.51× | 3.73× | 77% / 21% / 1% | 22.6× |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 264, 2, 27,984 | 0.469 | 0.0509 | **9.21×** [6.92, 11.85] | 10.30× | 6.76× | 7.81× | 85% / 15% / 0% | 43.0× |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 320, 2, 39,040 | 0.721 | 0.0531 | **13.59×** [11.95, 15.34] | 13.51× | 8.68× | 12.64× | 93% / 7% / 0% | 85.0× |
 
 **Against the floor**, `L(32)·√(π/4n)`:
 
@@ -4673,7 +4673,7 @@ No target, size, seed or prediction changed.
      there: at `2^22` and `2^24.8` the thread measures 12.7× and 23.7×
      batch rho.
    - **The model's minimum is not confirmed.** The least measured ratio
-     is 4.86× at `2^39` (`K_0/GF(2^41)`), eleven bits above the model's
+     is 4.86× at `2^39` (`icv1-f2m41-tm2308219-7f48b14a`), eleven bits above the model's
      `2^27.8`. At `2^27.8` itself the thread measures 9.33×, 3.3× the
      model's 2.85×.
 5. **Crossing: none.** The lowest interval anywhere is `[4.21, 5.55]`,
@@ -4686,15 +4686,15 @@ rho's cost for one target of 32:
 
 | curve | descent per target | batch rho per target | descent ÷ rho |
 |:--|--:|--:|--:|
-| `K_1/GF(2^19)` | 1,491 | 168 | 8.89× |
-| `K_1/GF(2^23)` | 1,780 | 420 | 4.24× |
-| `K_1/GF(2^45)` | 2,389 | 644 | 3.71× |
-| `K_0/GF(2^37)` | 3,981 | 1,401 | 2.84× |
-| `K_1/GF(2^43)` | 10,730 | 4,541 | 2.36× |
-| `K_1/GF(2^47)` | 25,653 | 19,677 | 1.30× |
-| `K_0/GF(2^41)` | 42,087 | 49,379 | 0.85× |
-| `K_0/GF(2^53)` | 104,548 | 233,711 | 0.45× |
-| `K_0/GF(2^61)` | 621,397 | 677,466 | 0.92× |
+| `icv1-f2m19-tm797-9c54981b` | 1,491 | 168 | 8.89× |
+| `icv1-f2m23-tm5197-1f85e9e1` | 1,780 | 420 | 4.24× |
+| `icv1-f2m45-tm6236725-40939294` | 2,389 | 644 | 3.71× |
+| `icv1-f2m37-tm534059-32aad96b` | 3,981 | 1,401 | 2.84× |
+| `icv1-f2m43-tm998717-e2e742b0` | 10,730 | 4,541 | 2.36× |
+| `icv1-f2m47-t22705043-f4e44623` | 25,653 | 19,677 | 1.30× |
+| `icv1-f2m41-tm2308219-7f48b14a` | 42,087 | 49,379 | 0.85× |
+| `icv1-f2m53-tm56619371-dac20a85` | 104,548 | 233,711 | 0.45× |
+| `icv1-f2m61-t158598901-ab42b6c5` | 621,397 | 677,466 | 0.92× |
 
 Below about `2^37` the descent alone costs more per target than batch rho
 does. No amortisation of the shared phases, over any number of targets,
@@ -4724,7 +4724,7 @@ charged 54 to 62.
   point. [§21 corrects the attribution: the map itself already had a
   single-word path. The big-integer constructions beside it are the
   point index and the decomposition check.]
-- They are 70% of `S` at `K_1/GF(2^45)`, whose field is wide for its
+- They are 70% of `S` at `icv1-f2m45-tm6236725-40939294`, whose field is wide for its
   `r`, and 7% at `2^47.2`.
 - No frozen figure priced them.
 
@@ -4973,20 +4973,20 @@ never fired, and no set was rerun.
 
 | curve | log₂ r | `S`, before → after | ratio to batch rho | speedup [95%] | constructions fall [95%] | constructions share |
 |:--|--:|--:|--:|--:|--:|--:|
-| `K_1/GF(2^19)` | 18.0 | 7.223 → 6.819 | 22.08× → **20.85×** [19.23, 22.51] | **1.058×** [1.050, 1.066] | 2.1× [2.1, 2.2] | 24.6% → 12.3% |
-| `K_1/GF(2^23)` | 22.0 | 2.322 → 1.983 | 11.33× → **9.68×** [6.00, 14.41] | **1.169×** [1.153, 1.185] | 2.8× [2.8, 2.8] | 32.5% → 13.5% |
-| `K_1/GF(2^45)` | 24.8 | 2.670 → 1.182 | 22.42× → **9.93×** [9.07, 10.83] | **2.245×** [2.222, 2.268] | 9.1× [9.0, 9.2] | 63.8% → 15.7% |
-| `K_0/GF(2^37)` | 27.8 | 0.861 → 0.582 | 9.33× → **6.31×** [5.42, 7.24] | **1.490×** [1.467, 1.513] | 5.8× [5.8, 5.9] | 38.5% → 9.9% |
-| `K_1/GF(2^43)` | 32.1 | 0.518 → 0.368 | 7.78× → **5.53×** [4.72, 6.39] | **1.404×** [1.383, 1.425] | 8.2× [8.1, 8.3] | 35.6% → 6.2% |
-| `K_1/GF(2^47)` | 36.6 | 0.381 → 0.267 | 6.33× → **4.44×** [4.04, 4.87] | **1.420×** [1.388, 1.454] | 9.0× [8.8, 9.3] | 36.3% → 5.7% |
-| `K_0/GF(2^41)` | 39.0 | 0.322 → 0.285 | 4.84× → **4.28×** [3.94, 4.63] | **1.131×** [1.115, 1.148] | 5.2× [5.0, 5.3] | 14.4% → 3.1% |
-| `K_0/GF(2^53)` | 44.3 | 0.427 → 0.396 | 8.37× → **7.77×** [5.59, 10.29] | **1.072×** [1.050, 1.094] | 9.0× [8.9, 9.1] | 11.3% → 1.4% |
-| `K_0/GF(2^61)` | 47.2 | 0.665 → 0.644 | 12.53× → **12.12×** [10.75, 13.58] | **1.039×** [1.005, 1.073] | 11.7× [11.3, 12.1] | 5.1% → 0.4% |
+| `icv1-f2m19-tm797-9c54981b` | 18.0 | 7.223 → 6.819 | 22.08× → **20.85×** [19.23, 22.51] | **1.058×** [1.050, 1.066] | 2.1× [2.1, 2.2] | 24.6% → 12.3% |
+| `icv1-f2m23-tm5197-1f85e9e1` | 22.0 | 2.322 → 1.983 | 11.33× → **9.68×** [6.00, 14.41] | **1.169×** [1.153, 1.185] | 2.8× [2.8, 2.8] | 32.5% → 13.5% |
+| `icv1-f2m45-tm6236725-40939294` | 24.8 | 2.670 → 1.182 | 22.42× → **9.93×** [9.07, 10.83] | **2.245×** [2.222, 2.268] | 9.1× [9.0, 9.2] | 63.8% → 15.7% |
+| `icv1-f2m37-tm534059-32aad96b` | 27.8 | 0.861 → 0.582 | 9.33× → **6.31×** [5.42, 7.24] | **1.490×** [1.467, 1.513] | 5.8× [5.8, 5.9] | 38.5% → 9.9% |
+| `icv1-f2m43-tm998717-e2e742b0` | 32.1 | 0.518 → 0.368 | 7.78× → **5.53×** [4.72, 6.39] | **1.404×** [1.383, 1.425] | 8.2× [8.1, 8.3] | 35.6% → 6.2% |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 0.381 → 0.267 | 6.33× → **4.44×** [4.04, 4.87] | **1.420×** [1.388, 1.454] | 9.0× [8.8, 9.3] | 36.3% → 5.7% |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 0.322 → 0.285 | 4.84× → **4.28×** [3.94, 4.63] | **1.131×** [1.115, 1.148] | 5.2× [5.0, 5.3] | 14.4% → 3.1% |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 0.427 → 0.396 | 8.37× → **7.77×** [5.59, 10.29] | **1.072×** [1.050, 1.094] | 9.0× [8.9, 9.1] | 11.3% → 1.4% |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 0.665 → 0.644 | 12.53× → **12.12×** [10.75, 13.58] | **1.039×** [1.005, 1.073] | 11.7× [11.3, 12.1] | 5.1% → 0.4% |
 
 **The whole pipeline is faster at every size.**
 
 - The speedup is largest where the constructions weighed most: 2.25× at
-  `K_1/GF(2^45)`, whose field is wide for its `r`.
+  `icv1-f2m45-tm6236725-40939294`, whose field is wide for its `r`.
 - It is 1.40–1.49× in the middle of the range.
 - It is 1.04–1.13× at the top, where the work dominates.
 - It is 1.06–1.17× at the two smallest sizes, where a fixed cost the
@@ -5035,15 +5035,15 @@ the same 180 pairs in nanoseconds:
 
 | curve | wall-clock speedup [95%] | unit, baseline ns ÷ candidate ns | untouched phases, baseline ÷ candidate |
 |:--|--:|--:|--:|
-| `K_1/GF(2^19)` | 1.172 [1.164, 1.179] | 1.103 | 1.002 |
-| `K_1/GF(2^23)` | 1.295 [1.285, 1.305] | 1.109 | 1.011 |
-| `K_1/GF(2^45)` | 2.344 [2.322, 2.366] | 1.042 | 0.997 |
-| `K_0/GF(2^37)` | 1.464 [1.440, 1.488] | 0.990 | 0.994 |
-| `K_1/GF(2^43)` | 1.477 [1.456, 1.498] | 1.052 | 1.003 |
-| `K_1/GF(2^47)` | 1.512 [1.484, 1.541] | 1.064 | 1.013 |
-| `K_0/GF(2^41)` | 1.141 [1.123, 1.159] | 1.006 | 1.006 |
-| `K_0/GF(2^53)` | 1.129 [1.110, 1.148] | 1.059 | 1.019 |
-| `K_0/GF(2^61)` | 1.052 [1.031, 1.073] | 1.011 | 1.000 |
+| `icv1-f2m19-tm797-9c54981b` | 1.172 [1.164, 1.179] | 1.103 | 1.002 |
+| `icv1-f2m23-tm5197-1f85e9e1` | 1.295 [1.285, 1.305] | 1.109 | 1.011 |
+| `icv1-f2m45-tm6236725-40939294` | 2.344 [2.322, 2.366] | 1.042 | 0.997 |
+| `icv1-f2m37-tm534059-32aad96b` | 1.464 [1.440, 1.488] | 0.990 | 0.994 |
+| `icv1-f2m43-tm998717-e2e742b0` | 1.477 [1.456, 1.498] | 1.052 | 1.003 |
+| `icv1-f2m47-t22705043-f4e44623` | 1.512 [1.484, 1.541] | 1.064 | 1.013 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 1.141 [1.123, 1.159] | 1.006 | 1.006 |
+| `icv1-f2m53-tm56619371-dac20a85` | 1.129 [1.110, 1.148] | 1.059 | 1.019 |
+| `icv1-f2m61-t158598901-ab42b6c5` | 1.052 [1.031, 1.073] | 1.011 | 1.000 |
 
 **Rho re-priced on the candidate** at `n = 41`, `M1`. Every count, step
 and recovered logarithm equals §20's, and so do the pipeline's. It
@@ -5216,12 +5216,12 @@ every size. In units per target:
 
 | `M1` | trials | descent | walk start | of which 63 additions | relation assembly | recovery check |
 |:--|--:|--:|--:|--:|--:|--:|
-| `K_1/GF(2^19)` | 8.2 | 1,481 | 635 | 549 | 391 | 118 |
-| `K_1/GF(2^23)` | 105.5 | 1,984 | 752 | 658 | 429 | 146 |
-| `K_1/GF(2^45)` | 160.8 | 2,449 | 1,162 | 1,045 | 345 | 155 |
-| `K_0/GF(2^37)` | 1,619 | 4,408 | 1,060 | 918 | 387 | 177 |
-| `K_1/GF(2^43)` | 5,115 | 9,530 | 1,120 | 970 | 371 | 190 |
-| `K_0/GF(2^41)` | 24,134 | 38,789 | 1,156 | 986 | 488 | 210 |
+| `icv1-f2m19-tm797-9c54981b` | 8.2 | 1,481 | 635 | 549 | 391 | 118 |
+| `icv1-f2m23-tm5197-1f85e9e1` | 105.5 | 1,984 | 752 | 658 | 429 | 146 |
+| `icv1-f2m45-tm6236725-40939294` | 160.8 | 2,449 | 1,162 | 1,045 | 345 | 155 |
+| `icv1-f2m37-tm534059-32aad96b` | 1,619 | 4,408 | 1,060 | 918 | 387 | 177 |
+| `icv1-f2m43-tm998717-e2e742b0` | 5,115 | 9,530 | 1,120 | 970 | 371 | 190 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 24,134 | 38,789 | 1,156 | 986 | 488 | 210 |
 
 **What the probe shows:**
 
@@ -5324,11 +5324,11 @@ Everything is in `research/ic_descent_20260930/`, run twice on one host of
 **The isolation's own record** (`runs-isolated/`):
 
 - **Contention.** 481 processes ran isolated, and the tool marked one
-  contended: the baseline of `K_1/GF(2^19)`, `M1`, round 5. The agent's
+  contended: the baseline of `icv1-f2m19-tm797-9c54981b`, `M1`, round 5. The agent's
   own process used 0.31 CPU-seconds during its 1.87 s. That pair is kept,
   excluded from the figures, and its slot was run again clean.
 - **Failures.** None failed, and every slot has a clean pair.
-- **The spread rule** fired once, on `K_0/GF(2^41)`, `M3`, at 1.256. Its
+- **The spread rule** fired once, on `icv1-f2m41-tm2308219-7f48b14a`, `M3`, at 1.256. Its
   five rounds were rerun with double the repetitions, and that set's
   figure uses them, as declared.
 - **Refused starts.** The tool refused 319 starts, each retried after
@@ -5348,15 +5348,15 @@ moved the top end (v2's baseline arm):
 
 | curve | `S`, §21 after | `S`, `main` | change | ratio to batch rho, §21 → `main` |
 |:--|--:|--:|--:|--:|
-| `K_1/GF(2^19)` | 6.819 | 6.783 | 0.99× | 20.85× → 20.74× |
-| `K_1/GF(2^23)` | 1.983 | 1.977 | 1.00× | 9.68× → 9.64× |
-| `K_1/GF(2^45)` | 1.182 | 1.152 | 0.97× | 9.93× → 9.67× |
-| `K_0/GF(2^37)` | 0.582 | 0.569 | 0.98× | 6.31× → 6.16× |
-| `K_1/GF(2^43)` | 0.368 | 0.344 | 0.93× | 5.53× → 5.16× |
-| `K_1/GF(2^47)` | 0.267 | 0.234 | 0.87× | 4.44× → 3.88× |
-| `K_0/GF(2^41)` | 0.285 | 0.250 | 0.88× | 4.28× → 3.75× |
-| `K_0/GF(2^53)` | 0.396 | 0.263 | 0.66× | 7.77× → 5.15× |
-| `K_0/GF(2^61)` | 0.644 | 0.481 | 0.75× | 12.12× → 9.07× |
+| `icv1-f2m19-tm797-9c54981b` | 6.819 | 6.783 | 0.99× | 20.85× → 20.74× |
+| `icv1-f2m23-tm5197-1f85e9e1` | 1.983 | 1.977 | 1.00× | 9.68× → 9.64× |
+| `icv1-f2m45-tm6236725-40939294` | 1.182 | 1.152 | 0.97× | 9.93× → 9.67× |
+| `icv1-f2m37-tm534059-32aad96b` | 0.582 | 0.569 | 0.98× | 6.31× → 6.16× |
+| `icv1-f2m43-tm998717-e2e742b0` | 0.368 | 0.344 | 0.93× | 5.53× → 5.16× |
+| `icv1-f2m47-t22705043-f4e44623` | 0.267 | 0.234 | 0.87× | 4.44× → 3.88× |
+| `icv1-f2m41-tm2308219-7f48b14a` | 0.285 | 0.250 | 0.88× | 4.28× → 3.75× |
+| `icv1-f2m53-tm56619371-dac20a85` | 0.396 | 0.263 | 0.66× | 7.77× → 5.15× |
+| `icv1-f2m61-t158598901-ab42b6c5` | 0.644 | 0.481 | 0.75× | 12.12× → 9.07× |
 
 - **Below `2^32`** nothing moved beyond the run-to-run spread.
 - **From `2^32`**, where build and collection are most of `S`, `main`
@@ -5384,15 +5384,15 @@ moved the top end (v2's baseline arm):
 
 | curve | log₂ r | `S`, before → after | ratio to batch rho | speedup [95%] | own unit | descent [95%] | descent share | A/A [95%] |
 |:--|--:|--:|--:|--:|--:|--:|--:|--:|
-| `K_1/GF(2^19)` | 18.0 | 6.783 → 4.873 | 20.74× → **14.90×** [13.78, 16.05] | **1.392×** [1.376, 1.409] | 1.555× | 3.22× [3.17, 3.28] | 42% | 1.026× [0.997, 1.056] |
-| `K_1/GF(2^23)` | 22.0 | 1.977 → 1.432 | 9.64× → **6.99×** [4.44, 10.27] | **1.380×** [1.366, 1.394] | 1.527× | 2.87× [2.82, 2.92] | 44% | 1.013× [0.990, 1.036] |
-| `K_1/GF(2^45)` | 24.8 | 1.152 → 0.856 | 9.67× → **7.19×** [6.41, 8.02] | **1.345×** [1.321, 1.369] | 1.411× | 2.92× [2.85, 2.98] | 38% | 1.008× [0.983, 1.034] |
-| `K_0/GF(2^37)` | 27.8 | 0.569 → 0.485 | 6.16× → **5.26×** [4.40, 6.15] | **1.173×** [1.132, 1.215] | 1.206× | 1.59× [1.51, 1.68] | 44% | 1.001× [0.960, 1.044] |
-| `K_1/GF(2^43)` | 32.1 | 0.344 → 0.325 | 5.16× → **4.88×** [4.16, 5.62] | **1.060×** [1.043, 1.078] | 1.103× | 1.18× [1.15, 1.21] | 42% | 0.998× [0.961, 1.037] |
-| `K_1/GF(2^47)` | 36.6 | 0.234 → 0.234 | 3.88× → **3.89×** [3.46, 4.35] | **0.999×** [0.956, 1.043] | 1.073× | 1.06× [1.02, 1.10] | 34% | 0.988× [0.907, 1.077] |
-| `K_0/GF(2^41)` | 39.0 | 0.250 → 0.241 | 3.75× → **3.62×** [3.28, 3.97] | **1.037×** [1.005, 1.070] | 1.021× | 1.09× [1.03, 1.16] | 21% | 0.979× [0.838, 1.144] |
-| `K_0/GF(2^53)` | 44.3 | 0.263 → 0.261 | 5.15× → **5.11×** [3.82, 6.60] | **1.008×** [0.986, 1.030] | 1.060× | 1.05× [1.00, 1.10] | 8% | 0.973× [0.892, 1.062] |
-| `K_0/GF(2^61)` | 47.2 | 0.481 → 0.488 | 9.07× → **9.20×** [8.24, 10.24] | **0.986×** [0.973, 0.999] | 1.040× | 0.98× [0.95, 1.01] | 9% | 1.009× [0.985, 1.033] |
+| `icv1-f2m19-tm797-9c54981b` | 18.0 | 6.783 → 4.873 | 20.74× → **14.90×** [13.78, 16.05] | **1.392×** [1.376, 1.409] | 1.555× | 3.22× [3.17, 3.28] | 42% | 1.026× [0.997, 1.056] |
+| `icv1-f2m23-tm5197-1f85e9e1` | 22.0 | 1.977 → 1.432 | 9.64× → **6.99×** [4.44, 10.27] | **1.380×** [1.366, 1.394] | 1.527× | 2.87× [2.82, 2.92] | 44% | 1.013× [0.990, 1.036] |
+| `icv1-f2m45-tm6236725-40939294` | 24.8 | 1.152 → 0.856 | 9.67× → **7.19×** [6.41, 8.02] | **1.345×** [1.321, 1.369] | 1.411× | 2.92× [2.85, 2.98] | 38% | 1.008× [0.983, 1.034] |
+| `icv1-f2m37-tm534059-32aad96b` | 27.8 | 0.569 → 0.485 | 6.16× → **5.26×** [4.40, 6.15] | **1.173×** [1.132, 1.215] | 1.206× | 1.59× [1.51, 1.68] | 44% | 1.001× [0.960, 1.044] |
+| `icv1-f2m43-tm998717-e2e742b0` | 32.1 | 0.344 → 0.325 | 5.16× → **4.88×** [4.16, 5.62] | **1.060×** [1.043, 1.078] | 1.103× | 1.18× [1.15, 1.21] | 42% | 0.998× [0.961, 1.037] |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 0.234 → 0.234 | 3.88× → **3.89×** [3.46, 4.35] | **0.999×** [0.956, 1.043] | 1.073× | 1.06× [1.02, 1.10] | 34% | 0.988× [0.907, 1.077] |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 0.250 → 0.241 | 3.75× → **3.62×** [3.28, 3.97] | **1.037×** [1.005, 1.070] | 1.021× | 1.09× [1.03, 1.16] | 21% | 0.979× [0.838, 1.144] |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 0.263 → 0.261 | 5.15× → **5.11×** [3.82, 6.60] | **1.008×** [0.986, 1.030] | 1.060× | 1.05× [1.00, 1.10] | 8% | 0.973× [0.892, 1.062] |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 0.481 → 0.488 | 9.07× → **9.20×** [8.24, 10.24] | **0.986×** [0.973, 0.999] | 1.040× | 0.98× [0.95, 1.01] | 9% | 1.009× [0.985, 1.033] |
 
 **Where the change pays.**
 - **At the three smallest sizes** the descent falls 2.9–3.2×, and the
@@ -5408,12 +5408,12 @@ Units per target, each process in its own unit:
 
 | `M1` | descent | relation + check | of which relation | walk and lookups |
 |:--|--:|--:|--:|--:|
-| `K_1/GF(2^19)` | 1,406 → 451 (3.11×) | 503 → 68 (7.38×) | 392 → 11 | 803 → 320 |
-| `K_1/GF(2^23)` | 1,818 → 698 (2.60×) | 566 → 81 (6.96×) | 437 → 12 | 1,111 → 484 |
-| `K_1/GF(2^45)` | 2,405 → 1,008 (2.38×) | 521 → 101 (5.18×) | 369 → 12 | 1,708 → 733 |
-| `K_0/GF(2^37)` | 4,093 → 2,945 (1.39×) | 535 → 106 (5.03×) | 379 → 15 | 3,505 → 2,634 |
-| `K_1/GF(2^43)` | 9,920 → 8,019 (1.24×) | 604 → 128 (4.73×) | 407 → 16 | 9,379 → 7,821 |
-| `K_0/GF(2^41)` | 38,594 → 38,354 (1.01×) | 737 → 151 (4.89×) | 492 → 21 | 37,504 → 38,129 |
+| `icv1-f2m19-tm797-9c54981b` | 1,406 → 451 (3.11×) | 503 → 68 (7.38×) | 392 → 11 | 803 → 320 |
+| `icv1-f2m23-tm5197-1f85e9e1` | 1,818 → 698 (2.60×) | 566 → 81 (6.96×) | 437 → 12 | 1,111 → 484 |
+| `icv1-f2m45-tm6236725-40939294` | 2,405 → 1,008 (2.38×) | 521 → 101 (5.18×) | 369 → 12 | 1,708 → 733 |
+| `icv1-f2m37-tm534059-32aad96b` | 4,093 → 2,945 (1.39×) | 535 → 106 (5.03×) | 379 → 15 | 3,505 → 2,634 |
+| `icv1-f2m43-tm998717-e2e742b0` | 9,920 → 8,019 (1.24×) | 604 → 128 (4.73×) | 407 → 16 | 9,379 → 7,821 |
+| `icv1-f2m41-tm2308219-7f48b14a` | 38,594 → 38,354 (1.01×) | 737 → 151 (4.89×) | 492 → 21 | 37,504 → 38,129 |
 
 - **The relation assembly** falls from 369–492 units to 11–21.
 - **The walk start's 63 additions** leave the walk column: 803 → 320 at
@@ -5472,15 +5472,15 @@ comparison says what isolation changed:
 
 | curve | log₂ r | v1 speedup [95%], not isolated | v2 speedup [95%], isolated | v2 A/A [95%] |
 |:--|--:|--:|--:|--:|
-| `K_1/GF(2^19)` | 18.0 | 1.386× [1.346, 1.427] | **1.392×** [1.376, 1.409] | 1.026× [0.997, 1.056] |
-| `K_1/GF(2^23)` | 22.0 | 1.372× [1.344, 1.401] | **1.380×** [1.366, 1.394] | 1.013× [0.990, 1.036] |
-| `K_1/GF(2^45)` | 24.8 | 1.303× [1.266, 1.340] | **1.345×** [1.321, 1.369] | 1.008× [0.983, 1.034] |
-| `K_0/GF(2^37)` | 27.8 | 1.127× [0.942, 1.348] | **1.173×** [1.132, 1.215] | 1.001× [0.960, 1.044] |
-| `K_1/GF(2^43)` | 32.1 | 1.071× [1.061, 1.081] | **1.060×** [1.043, 1.078] | 0.998× [0.961, 1.037] |
-| `K_1/GF(2^47)` | 36.6 | 1.046× [1.031, 1.061] | **0.999×** [0.956, 1.043] | 0.988× [0.907, 1.077] |
-| `K_0/GF(2^41)` | 39.0 | 1.038× [1.010, 1.067] | **1.037×** [1.005, 1.070] | 0.979× [0.838, 1.144] |
-| `K_0/GF(2^53)` | 44.3 | 0.974× [0.952, 0.996] | **1.008×** [0.986, 1.030] | 0.973× [0.892, 1.062] |
-| `K_0/GF(2^61)` | 47.2 | 1.001× [0.992, 1.010] | **0.986×** [0.973, 0.999] | 1.009× [0.985, 1.033] |
+| `icv1-f2m19-tm797-9c54981b` | 18.0 | 1.386× [1.346, 1.427] | **1.392×** [1.376, 1.409] | 1.026× [0.997, 1.056] |
+| `icv1-f2m23-tm5197-1f85e9e1` | 22.0 | 1.372× [1.344, 1.401] | **1.380×** [1.366, 1.394] | 1.013× [0.990, 1.036] |
+| `icv1-f2m45-tm6236725-40939294` | 24.8 | 1.303× [1.266, 1.340] | **1.345×** [1.321, 1.369] | 1.008× [0.983, 1.034] |
+| `icv1-f2m37-tm534059-32aad96b` | 27.8 | 1.127× [0.942, 1.348] | **1.173×** [1.132, 1.215] | 1.001× [0.960, 1.044] |
+| `icv1-f2m43-tm998717-e2e742b0` | 32.1 | 1.071× [1.061, 1.081] | **1.060×** [1.043, 1.078] | 0.998× [0.961, 1.037] |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 1.046× [1.031, 1.061] | **0.999×** [0.956, 1.043] | 0.988× [0.907, 1.077] |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 1.038× [1.010, 1.067] | **1.037×** [1.005, 1.070] | 0.979× [0.838, 1.144] |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 0.974× [0.952, 0.996] | **1.008×** [0.986, 1.030] | 0.973× [0.892, 1.062] |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 1.001× [0.992, 1.010] | **0.986×** [0.973, 0.999] | 1.009× [0.985, 1.033] |
 
 - **Below `2^28`** the two runs agree within their intervals, and v2's
   intervals are narrower.
@@ -5592,19 +5592,19 @@ Item 1's rungs above `2^47.2` cannot run.
   `examples/koblitz_curve_records`.
 - With `n ≤ 63`, the only curves with `r ≥ 2^36` are the ladder's four
   and two more, both inside its span:
-  - `K_1/GF(2^47)`, `2^36.6`;
-  - `K_0/GF(2^57)`, `2^38.0`, new. Its proper intermediate subfields over
+  - `icv1-f2m47-t22705043-f4e44623`, `2^36.6`;
+  - `icv1-f2m57-tm747311035-c1f545af`, `2^38.0`, new. Its proper intermediate subfields over
     `GF(2)` are `GF(2^3)` and `GF(2^19)`.
-  - `K_0/GF(2^41)`, `2^39.0`;
-  - `K_0/GF(2^53)`, `2^44.3`;
-  - `K_1/GF(2^59)`, `2^44.5`, new, prime `n`.
-  - `K_0/GF(2^61)`, `2^47.2`.
+  - `icv1-f2m41-tm2308219-7f48b14a`, `2^39.0`;
+  - `icv1-f2m53-tm56619371-dac20a85`, `2^44.3`;
+  - `icv1-f2m59-tm943548413-98844ecc`, `2^44.5`, new, prime `n`.
+  - `icv1-f2m61-t158598901-ab42b6c5`, `2^47.2`.
 - So item 1 splits in two:
   - **1a**, which needs no code change: the two new sizes and more sets.
     It can narrow the fit, but it cannot lengthen its lever arm.
   - **1b**, which lifts `MAX_N`: two-word field arithmetic and pair
     table. That is engineering, and it comes before any rung above
-    `2^47.2`, `K_1/GF(2^83)` included.
+    `2^47.2`, `icv1-f2m83-t6151469093347-cdcc5432` included.
 - Item 1's text below is kept as it was written.
 - **1a's status.** It was declared as §23 at `k = 32` and withdrawn
   before it ran, when #1076 made one target the primary comparison
@@ -5624,10 +5624,10 @@ Item 1's rungs above `2^47.2` cannot run.
    - **What.** A measurement round, with no code change, on current
      `main`, every timed process isolated.
      - Three new rungs, with prime `n`:
-       - `K_1/GF(2^71)`, `r = 2^49.1`;
-       - `K_0/GF(2^71)`, `r = 2^52.3`;
-       - `K_1/GF(2^83)`, `r = 2^52.9`.
-     - `K_0/GF(2^73)`, `r = 2^56.3`, if its pair table fits the host.
+       - `icv1-f2m71-tm48653080717-f25c4638`, `r = 2^49.1`;
+       - `icv1-f2m71-t48653080717-2cafaea3`, `r = 2^52.3`;
+       - `icv1-f2m83-t6151469093347-cdcc5432`, `r = 2^52.9`.
+     - `icv1-f2m73-tm184271214331-9d25cc67`, `r = 2^56.3`, if its pair table fits the host.
        §20's rule applies: a refused grid point is recorded, not forced.
      - Sets `M5`–`M8` at the four present largest sizes.
      - §20's sweep and measurement procedure throughout, with batch rho in
@@ -5643,7 +5643,7 @@ Item 1's rungs above `2^47.2` cannot run.
    - **The target to declare.** Fit every size from `2^36.6` up. The
      interval must either read 0 and `1/6` against each other, or the
      round must say it cannot.
-   - **Scope.** `K_1/GF(2^83)` is of degree 83 but is `E_1`, not the
+   - **Scope.** `icv1-f2m83-t6151469093347-cdcc5432` is of degree 83 but is `E_1`, not the
      challenge family, so it does not discharge AGENTS.md §8a.
 2. **Hold the binary layout fixed.** Pending.
    - A placebo rebuild of the baseline, measured as an A/A'.
@@ -5814,7 +5814,7 @@ Everything is in `research/ic_single_target_20260930/`.
   counts and recovered logarithms.
 - **The rows.** 408 processes ran as declared, one target each, every one
   through `tools/isolated_bench.py`.
-  - Two were marked contended, both at `K_1/GF(2^47)`. Each was kept and
+  - Two were marked contended, both at `icv1-f2m47-t22705043-f4e44623`. Each was kept and
     run again clean.
   - None failed, and no size stopped.
   - The tool refused 38 starts, and each was retried.
@@ -5831,12 +5831,12 @@ Everything is in `research/ic_single_target_20260930/`.
 
 | curve | log₂ r | S, index calculus online | S, rho online | online speedup [95%] | at the canonical step [95%] | cold ratio [95%] | S, setup | break-even | IC online over the BL model |
 |:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
-| `K_1/GF(2^47)` | 36.6 | 0.0673 | 0.657 | **9.77×** [7.83, 12.5] | 4.34× [3.47, 5.53] | 4.95× [4.55, 5.41] | 4.20 | 7 | 2.4× |
-| `K_0/GF(2^57)` | 38.0 | 0.0424 | 0.574 | **13.5×** [10.7, 17.3] | 5.97× [4.76, 7.61] | 1.98× [1.95, 2.02] | 8.08 | 15 | 3.3× |
-| `K_0/GF(2^41)` | 39.0 | 0.0665 | 0.624 | **9.38×** [7.43, 12.1] | 4.57× [3.64, 5.85] | 8.04× [7.26, 9.01] | 5.51 | 10 | 2.5× |
-| `K_0/GF(2^53)` | 44.3 | 0.0277 | 0.485 | **17.5×** [13.6, 22.6] | 9.37× [7.33, 12.2] | 14.7× [13.1, 16.7] | 7.37 | 16 | 2.0× |
-| `K_1/GF(2^59)` | 44.5 | 0.0308 | 0.519 | **16.9×** [13.0, 22.1] | 8.90× [6.85, 11.6] | 15.7× [13.9, 17.9] | 9.00 | 18 | 2.8× |
-| `K_0/GF(2^61)` | 47.2 | 0.0527 | 0.466 | **8.84×** [6.76, 11.9] | 4.68× [3.63, 6.28] | 31.6× [28.2, 35.7] | 15.10 | 37 | 8.0× |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 0.0673 | 0.657 | **9.77×** [7.83, 12.5] | 4.34× [3.47, 5.53] | 4.95× [4.55, 5.41] | 4.20 | 7 | 2.4× |
+| `icv1-f2m57-tm747311035-c1f545af` | 38.0 | 0.0424 | 0.574 | **13.5×** [10.7, 17.3] | 5.97× [4.76, 7.61] | 1.98× [1.95, 2.02] | 8.08 | 15 | 3.3× |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 0.0665 | 0.624 | **9.38×** [7.43, 12.1] | 4.57× [3.64, 5.85] | 8.04× [7.26, 9.01] | 5.51 | 10 | 2.5× |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 0.0277 | 0.485 | **17.5×** [13.6, 22.6] | 9.37× [7.33, 12.2] | 14.7× [13.1, 16.7] | 7.37 | 16 | 2.0× |
+| `icv1-f2m59-tm943548413-98844ecc` | 44.5 | 0.0308 | 0.519 | **16.9×** [13.0, 22.1] | 8.90× [6.85, 11.6] | 15.7× [13.9, 17.9] | 9.00 | 18 | 2.8× |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 0.0527 | 0.466 | **8.84×** [6.76, 11.9] | 4.68× [3.63, 6.28] | 31.6× [28.2, 35.7] | 15.10 | 37 | 8.0× |
 
 **How to read it.**
 - **`S`** is units over `√r`, each row in its own process's unit. Per
@@ -6010,30 +6010,30 @@ converted at; the square-root column is the one that moves the prime
 
 | regime | instance | add | double | sqrt | AS solve | S₄ pair | lookup | row op | word xor | legendre | inversion | frobenius |
 |:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
-| prime | bench-10bit | 140 | 165 | 63.5 | — | — | 2.63 | 3.57 | 0.50 | 49.5 | 95.5 | — |
-| prime | bench-12bit | 153 | 177 | 77.0 | — | — | 2.64 | 3.57 | 0.50 | 66.5 | 109 | — |
-| prime | bench-14bit | 166 | 190 | 123 | — | — | 2.62 | 3.59 | 0.50 | 84.0 | 123 | — |
-| prime | bench-16bit | 177 | 203 | 993 | — | — | 2.71 | 3.43 | 0.49 | 87.9 | 132 | — |
-| prime | bench-18bit | 195 | 218 | 155 | — | — | 2.94 | 3.51 | 0.49 | 107 | 144 | — |
-| prime | bench-20bit | 203 | 227 | 171 | — | — | 2.64 | 3.51 | 0.49 | 118 | 159 | — |
-| prime | generated-22bit-3290411 | 215 | 240 | 168 | — | — | 3.10 | 3.64 | 0.50 | 129 | 169 | — |
-| prime | generated-24bit-10935329 | 224 | 248 | 1,060 | — | — | 3.00 | 3.51 | 0.49 | 131 | 180 | — |
-| char2 | random-binary-n15-b524b | 238 | 238 | — | 13.1 | 676 | 2.70 | 3.55 | 0.49 | — | — | 14.2 |
-| char2 | random-binary-n18-b6507 | 301 | 299 | — | 9.92 | 848 | 2.65 | 3.55 | 0.50 | — | — | 15.3 |
-| char2 | random-binary-n21-b1b6f3b | 344 | 345 | — | 22.5 | 960 | 2.82 | 3.57 | 0.50 | — | — | 15.0 |
-| char2 | random-binary-n24-b5fc9da | 387 | 387 | — | 13.0 | 1,050 | 2.59 | 3.51 | 0.49 | — | — | 15.0 |
-| char2 | random-binary-n27-b845462 | 459 | 460 | — | 32.8 | 1,292 | 3.19 | 3.59 | 0.50 | — | — | 16.5 |
-| koblitz | K_1 / GF(2^11) | 183 | 182 | — | 9.11 | — | 2.74 | 3.54 | 0.50 | — | — | 14.3 |
-| koblitz | K_0 / GF(2^13) | 210 | 211 | — | 10.7 | — | 2.56 | 3.54 | 0.49 | — | — | 14.2 |
-| koblitz | K_0 / GF(2^15) | 239 | 239 | — | 13.7 | 642 | 2.61 | 3.57 | 0.49 | — | — | 14.4 |
-| koblitz | K_1 / GF(2^17) | 266 | 266 | — | 15.4 | — | 2.69 | 3.55 | 0.49 | — | — | 14.2 |
-| koblitz | K_1 / GF(2^19) | 313 | 313 | — | 17.9 | — | 2.61 | 3.53 | 0.49 | — | — | 15.0 |
-| koblitz | K_1 / GF(2^23) | 373 | 372 | — | 25.4 | — | 3.32 | 3.52 | 0.49 | — | — | 15.1 |
-| koblitz | K_1 / GF(2^29) | 487 | 486 | — | 38.1 | — | 5.02 | 3.52 | 0.50 | — | — | 17.0 |
-| koblitz | K_0 / GF(2^31) | 519 | 521 | — | 42.4 | 1,495 | 3.85 | 3.56 | 0.49 | — | — | 16.6 |
-| koblitz | K_0 / GF(2^37) | 641 | 642 | — | 67.8 | — | 3.91 | 3.52 | 0.49 | — | — | 17.3 |
-| koblitz | K_0 / GF(2^39) | 685 | 682 | — | 69.5 | — | 3.86 | 3.59 | 0.50 | — | — | 17.5 |
-| koblitz | K_0 / GF(2^41) | 721 | 717 | — | 72.8 | — | 4.19 | 3.61 | 0.50 | — | — | 17.5 |
+| prime | icv1-fp10-t5-192cb216 | 140 | 165 | 63.5 | — | — | 2.63 | 3.57 | 0.50 | 49.5 | 95.5 | — |
+| prime | icv1-fp12-t19-d4a315df | 153 | 177 | 77.0 | — | — | 2.64 | 3.57 | 0.50 | 66.5 | 109 | — |
+| prime | icv1-fp14-tm43-158b6914 | 166 | 190 | 123 | — | — | 2.62 | 3.59 | 0.50 | 84.0 | 123 | — |
+| prime | icv1-fp16-t351-d433f24e | 177 | 203 | 993 | — | — | 2.71 | 3.43 | 0.49 | 87.9 | 132 | — |
+| prime | icv1-fp18-t175-45770ebc | 195 | 218 | 155 | — | — | 2.94 | 3.51 | 0.49 | 107 | 144 | — |
+| prime | icv1-fp20-t1293-3c2999ba | 203 | 227 | 171 | — | — | 2.64 | 3.51 | 0.49 | 118 | 159 | — |
+| prime | icv1-fp22-tm1267-a5acaf6d | 215 | 240 | 168 | — | — | 3.10 | 3.64 | 0.50 | 129 | 169 | — |
+| prime | icv1-fp24-t1577-77336155 | 224 | 248 | 1,060 | — | — | 3.00 | 3.51 | 0.49 | 131 | 180 | — |
+| char2 | icv1-f2m15-t131-ed7256f0 | 238 | 238 | — | 13.1 | 676 | 2.70 | 3.55 | 0.49 | — | — | 14.2 |
+| char2 | icv1-f2m18-t393-d2c04152 | 301 | 299 | — | 9.92 | 848 | 2.65 | 3.55 | 0.50 | — | — | 15.3 |
+| char2 | icv1-f2m21-t2591-de54d72e | 344 | 345 | — | 22.5 | 960 | 2.82 | 3.57 | 0.50 | — | — | 15.0 |
+| char2 | icv1-f2m24-tm3047-2d0c0e8c | 387 | 387 | — | 13.0 | 1,050 | 2.59 | 3.51 | 0.49 | — | — | 15.0 |
+| char2 | icv1-f2m27-t12543-569dca8b | 459 | 460 | — | 32.8 | 1,292 | 3.19 | 3.59 | 0.50 | — | — | 16.5 |
+| koblitz | icv1-f2m11-t67-05f5aa36 | 183 | 182 | — | 9.11 | — | 2.74 | 3.54 | 0.50 | — | — | 14.3 |
+| koblitz | icv1-f2m13-t181-515ee569 | 210 | 211 | — | 10.7 | — | 2.56 | 3.54 | 0.49 | — | — | 14.2 |
+| koblitz | icv1-f2m15-tm275-2d22ff5d | 239 | 239 | — | 13.7 | 642 | 2.61 | 3.57 | 0.49 | — | — | 14.4 |
+| koblitz | icv1-f2m17-tm101-00378d4e | 266 | 266 | — | 15.4 | — | 2.69 | 3.55 | 0.49 | — | — | 14.2 |
+| koblitz | icv1-f2m19-tm797-9c54981b | 313 | 313 | — | 17.9 | — | 2.61 | 3.53 | 0.49 | — | — | 15.0 |
+| koblitz | icv1-f2m23-tm5197-1f85e9e1 | 373 | 372 | — | 25.4 | — | 3.32 | 3.52 | 0.49 | — | — | 15.1 |
+| koblitz | icv1-f2m29-tm40309-30c52b96 | 487 | 486 | — | 38.1 | — | 5.02 | 3.52 | 0.50 | — | — | 17.0 |
+| koblitz | icv1-f2m31-tm90707-c95f16f5 | 519 | 521 | — | 42.4 | 1,495 | 3.85 | 3.56 | 0.49 | — | — | 16.6 |
+| koblitz | icv1-f2m37-tm534059-32aad96b | 641 | 642 | — | 67.8 | — | 3.91 | 3.52 | 0.49 | — | — | 17.3 |
+| koblitz | icv1-f2m39-t1481485-829ef1d1 | 685 | 682 | — | 69.5 | — | 3.86 | 3.59 | 0.50 | — | — | 17.5 |
+| koblitz | icv1-f2m41-tm2308219-7f48b14a | 721 | 717 | — | 72.8 | — | 4.19 | 3.61 | 0.50 | — | — | 17.5 |
 
 The word-XOR factor (`0.49–0.50 ns`) against an addition (`183–721 ns`)
 is what turns matrix-F4's `2.3 × 10⁸` XORs into `3.1 × 10⁵` additions

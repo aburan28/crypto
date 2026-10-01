@@ -22,8 +22,8 @@ abandon conditions, and was committed before anything here ran.
 
 | path | what | ledger |
 |:--|:--|:--|
-| `batch/k0n41.json`, `k0n53.json` | `K_0/GF(2^41)` and `K_0/GF(2^53)`, `k = 1, 4, 16, 32`, 16 batches each | §19.3 |
-| `batch/k0n61.json` | `K_0/GF(2^61)` (the `n = 61` panel's curve), `k = 1, 32`, 8 batches | §19.3 |
+| `batch/k0n41.json`, `k0n53.json` | `icv1-f2m41-tm2308219-7f48b14a` and `icv1-f2m53-tm56619371-dac20a85`, `k = 1, 4, 16, 32`, 16 batches each | §19.3 |
+| `batch/k0n61.json` | `icv1-f2m61-t158598901-ab42b6c5` (the `n = 61` panel's curve), `k = 1, 32`, 8 batches | §19.3 |
 | `batch/*.stderr.log` | each batch's progress line and the summary table | |
 | `prices/n41-F15744.json` | (b) and (c) on the thread's `n = 41` base, `\|F\| = 15,744`: the declared price | §19.4 |
 | `prices/n53.json`, `n61.json` | (b) on the other two curves | §19.4 |

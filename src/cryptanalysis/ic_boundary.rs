@@ -110,6 +110,7 @@ use rand::{Rng, SeedableRng};
 use serde::Serialize;
 
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, IrreduciblePoly};
+use crate::cryptanalysis::curve_id::{self, CurveId};
 use crate::cryptanalysis::ic_measurement as measurement;
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_index_calculus::{
@@ -218,13 +219,22 @@ pub struct PinOutcome {
 }
 
 /// The pinned ratios for `regime/instance`, or `None` when the table has
-/// no entry for it — a new size or a freshly generated curve.
+/// no entry for it — a new size or a freshly generated curve.  The table
+/// predates ICV1 and is keyed by the names curves had then; an instance
+/// named by its slug finds its row through the curve registry.
 fn pinned_ratios(
     regime: &str,
     instance: &str,
 ) -> Option<serde_json::Map<String, serde_json::Value>> {
     let doc: serde_json::Value = serde_json::from_str(PINNED_CALIBRATION).ok()?;
-    let row = doc.get("instances")?.get(format!("{regime}/{instance}"))?;
+    let table = doc.get("instances")?.as_object()?;
+    let prefix = format!("{regime}/");
+    let row = table.get(&format!("{prefix}{instance}")).or_else(|| {
+        table.iter().find_map(|(key, row)| {
+            let name = key.strip_prefix(&prefix)?;
+            curve_id::same_curve(name, instance).then_some(row)
+        })
+    })?;
     Some(row.as_object()?.clone())
 }
 
@@ -3089,6 +3099,22 @@ impl PrimeInstance {
     pub fn generator_point(&self) -> PrimePoint {
         PrimePoint::affine(self.generator.0, self.generator.1)
     }
+
+    /// The curve's ICV1 identity (`docs/curves/ICV1.md`).
+    pub fn curve_id(&self) -> CurveId {
+        prime_curve_id(&self.curve, self.group_order)
+    }
+}
+
+fn prime_curve_id(curve: &PrimeCurve, group_order: u64) -> CurveId {
+    let big = |v: u64| BigUint::from(v);
+    curve_id::prime(
+        &big(curve.p),
+        &big(curve.a),
+        &big(curve.b),
+        &big(group_order),
+    )
+    .expect("a constructed curve is non-singular and inside the Hasse interval")
 }
 
 /// The repository's bench roster (`research_bench::bench_curves`),
@@ -3103,7 +3129,7 @@ pub fn roster_prime_instance(bits: u32) -> Option<PrimeInstance> {
     };
     let n = c.n.to_u64()?;
     Some(PrimeInstance {
-        name: c.name.to_string(),
+        name: prime_curve_id(&curve, n * c.h as u64).slug,
         curve,
         group_order: n * c.h as u64,
         r: n,
@@ -3155,7 +3181,7 @@ pub fn find_prime_order_curve(bits: u32, seed: u64) -> PrimeInstance {
             let mut ops = GroupOps::default();
             debug_assert!(curve.mul(&mut ops, g, order).infinity);
             return PrimeInstance {
-                name: format!("generated-{bits}bit-{p}"),
+                name: prime_curve_id(&curve, order).slug,
                 curve,
                 group_order: order,
                 r: order,
@@ -3285,6 +3311,26 @@ pub struct BinaryInstance {
 }
 
 impl BinaryInstance {
+    /// The curve's ICV1 identity (`docs/curves/ICV1.md`), from this
+    /// instance's own fields.  A Koblitz instance ([`koblitz_instance`], the
+    /// only one that sets `koblitz`) certifies `End(E) = Z[τ]`, `−7`.
+    ///
+    /// This deliberately does not call into `koblitz_index_calculus`: the
+    /// compact-orbit workflows build this crate with a frozen snapshot of
+    /// that file (`compact_frozen_source_replay_20260929/materialize.py`),
+    /// so live code here may use only what the snapshot already has.
+    pub fn curve_id(&self) -> CurveId {
+        curve_id::binary(
+            self.n,
+            &curve_id::modulus_integer(&self.irreducible),
+            &BigUint::from(self.a),
+            &BigUint::from(self.b),
+            &BigUint::from(self.group_order),
+            self.koblitz.is_some().then_some(-7),
+        )
+        .expect("a constructed curve is non-singular and inside the Hasse interval")
+    }
+
     /// Both points with abscissa `x`, or none.
     pub fn points_with_x(&self, x: u64) -> Vec<FastPoint> {
         let f = &self.fast.field;
@@ -3431,8 +3477,19 @@ pub fn random_binary_instance(n: u32, seed: u64, max_cofactor: u64) -> Option<Bi
             cofactor: BigUint::from(h),
         };
         let fast = FastCurve::new(&curve)?;
+        let Some(id) = curve_id::binary(
+            n,
+            &curve_id::modulus_integer(&irreducible),
+            &BigUint::from(a),
+            &BigUint::from(b),
+            &BigUint::from(order),
+            None,
+        ) else {
+            continue;
+        };
+        let name = id.slug;
         let inst = BinaryInstance {
-            name: format!("random-binary-n{n}-b{b:x}"),
+            name,
             n,
             irreducible: irreducible.clone(),
             fast,

@@ -229,12 +229,12 @@ repetitions:
 
 | curve | log₂ r | set-up | collection | build | other | ns per summand scanned | stored pairs |
 |:--|--:|--:|--:|--:|:--|--:|--:|
-| `K_1/GF(2^47)` | 36.6 | 37 ms | 42% | 25% | selection 12% | 39 | 0.15 M |
-| `K_0/GF(2^57)` | 38.0 | 129 ms | 31% | 14% | curve construction 41% | 44 | 0.24 M |
-| `K_0/GF(2^41)` | 39.0 | 100 ms | 67% | 18% | selection 6% | 33 | 0.27 M |
-| `K_0/GF(2^53)` | 44.3 | 1.03 s | 65% | 28% | selection 3% | 49 | 3.7 M |
-| `K_1/GF(2^59)` | 44.5 | 1.37 s | 71% | 22% | selection 3% | 71 | 3.9 M |
-| `K_0/GF(2^61)` | 47.2 | 5.74 s | 89% | 9% | selection 1% | 69 | 6.3 M |
+| `icv1-f2m47-t22705043-f4e44623` | 36.6 | 37 ms | 42% | 25% | selection 12% | 39 | 0.15 M |
+| `icv1-f2m57-tm747311035-c1f545af` | 38.0 | 129 ms | 31% | 14% | curve construction 41% | 44 | 0.24 M |
+| `icv1-f2m41-tm2308219-7f48b14a` | 39.0 | 100 ms | 67% | 18% | selection 6% | 33 | 0.27 M |
+| `icv1-f2m53-tm56619371-dac20a85` | 44.3 | 1.03 s | 65% | 28% | selection 3% | 49 | 3.7 M |
+| `icv1-f2m59-tm943548413-98844ecc` | 44.5 | 1.37 s | 71% | 22% | selection 3% | 71 | 3.9 M |
+| `icv1-f2m61-t158598901-ab42b6c5` | 47.2 | 5.74 s | 89% | 9% | selection 1% | 69 | 6.3 M |
 
 **The collection scan dominates at the top.**
 - **Its cost per summand is not set by the table's size alone.** A

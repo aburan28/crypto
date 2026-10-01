@@ -75,9 +75,9 @@ There is one process per cell `(K_a, n, ℓ)`. Each draw does the following:
 ## 4. Cells
 
 - **Curves and dimensions.**
-  - `K_0/2^13`: `ℓ = 2, 3, 4, 5`;
-  - `K_1/2^17`: `ℓ = 2, 3, 4, 5, 6`;
-  - `K_1/2^19`: `ℓ = 2, 3, 4, 5, 6`.
+  - `icv1-f2m13-t181-515ee569`: `ℓ = 2, 3, 4, 5`;
+  - `icv1-f2m17-tm101-00378d4e`: `ℓ = 2, 3, 4, 5, 6`;
+  - `icv1-f2m19-tm797-9c54981b`: `ℓ = 2, 3, 4, 5, 6`.
 
   That is 14 cells. Each curve stops where unsatisfiable targets stay common: the
   expected root count is about `2^{3ℓ − 2 − n}`.

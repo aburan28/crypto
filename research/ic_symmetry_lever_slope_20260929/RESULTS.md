@@ -18,7 +18,7 @@ since its registration commit `ea9f9592`. The readout is
 per unit `ℓ` on every curve: `s̄ = 1.033`, far above the 0.35 threshold. Both `ℓ = 6`
 cells read `≥ 8` on every draw.
 
-| `ℓ` | unknowns | `K_0/2^13` | `K_1/2^17` | `K_1/2^19` |
+| `ℓ` | unknowns | `icv1-f2m13-t181-515ee569` | `icv1-f2m17-tm101-00378d4e` | `icv1-f2m19-tm797-9c54981b` |
 |--:|--:|:--|:--|:--|
 | 2 | 4 | 4 4 4 4 | 4 4 4 4 | 4 4 4 4 |
 | 3 | 7 | 5 5 5 5 | 4 5 4 5 | 5 4 4 4 |

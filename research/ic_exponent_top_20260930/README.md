@@ -16,7 +16,7 @@ written up in `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`
 
 **Sizes.** Every Koblitz curve the library can build (`n ≤ MAX_N = 63`)
 with `r ≥ 2^36`. That is the ladder's four largest, plus
-`K_0/GF(2^57)` (`2^38.0`) and `K_1/GF(2^59)` (`2^44.5`).
+`icv1-f2m57-tm747311035-c1f545af` (`2^38.0`) and `icv1-f2m59-tm943548413-98844ecc` (`2^44.5`).
 
 **What is measured.** Each size's recipe is re-swept on this round's
 binary, then priced on eight sets, with every timed process isolated.

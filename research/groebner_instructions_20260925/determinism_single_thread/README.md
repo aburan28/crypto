@@ -1,6 +1,6 @@
 # G2 diagnostic, after the registered runs (not a registered measurement)
 
-G2 failed as registered on the frozen `K_0/2^13 m=2` rung in all three arms
+G2 failed as registered on the frozen `icv1-f2m13-t181-515ee569 m=2` rung in all three arms
 (relative differences 2.5e-5, 7.0e-6 and 8.6e-6 against a gate of 1e-6).
 To find the cause, the A2 arm of that rung was run twice more, single-threaded:
 

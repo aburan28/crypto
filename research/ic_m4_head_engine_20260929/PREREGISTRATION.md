@@ -43,10 +43,10 @@ Every row matches the recorded head totals exactly
 
 | cell | policy | recorded at 1722bad1 | rerun at 4ff512f2 |
 |:--|:--|--:|--:|
-| `K_0/2^9` m=4 | reference | 595,511 | **595,511** |
-| `K_0/2^9` m=4 | candidate | 294,112 | **294,112** |
-| `K_1/2^15` m=4 | reference | 83,790,974 | **83,790,974** |
-| `K_1/2^15` m=4 | candidate | 27,620,511 | **27,620,511** |
+| `icv1-f2m9-t5-81e744be` m=4 | reference | 595,511 | **595,511** |
+| `icv1-f2m9-t5-81e744be` m=4 | candidate | 294,112 | **294,112** |
+| `icv1-f2m15-t275-b7f03703` m=4 | reference | 83,790,974 | **83,790,974** |
+| `icv1-f2m15-t275-b7f03703` m=4 | candidate | 27,620,511 | **27,620,511** |
 
 The match covers word XORs, F4 calls, the verdict digest, the decomposed count, matrix
 rows and columns, reductions, splits, infeasible branches and exhaustion.

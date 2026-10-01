@@ -1,0 +1,592 @@
+#!/usr/bin/env python3
+"""Build docs/curves/registry.json: every curve the repository names, by ICV1.
+
+Sources, in order:
+
+1. every tracked JSON file that records a curve model: a prime curve as
+   `p`, `a`, `b` and its group order, a binary curve as `field`
+   (`degree`, `polynomial_low_terms`), `a`, `b` and its group order;
+2. the bench ladder in `src/cryptanalysis/research_bench.rs`, whose orders
+   are counted here;
+3. every Koblitz curve `K_a` over `GF(2^n)` that any tracked text names,
+   under the modulus the code builds it with (`find_irreducible_sparse`
+   below degree 64, the standard's polynomial above);
+4. the standards curves whose parameters the source tree carries.
+
+Each legacy spelling becomes an alias of the curve it denotes.  A spelling
+that would denote two different models is reported and left out, never
+guessed.  The build fails if any legacy name in tracked Markdown or HTML
+does not resolve.
+
+    python3 scripts/build_curve_registry.py            # write the registry
+    python3 scripts/build_curve_registry.py --check    # verify it is current
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib.util
+import json
+import re
+import subprocess
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import curve_id as cid  # noqa: E402
+
+_spec = importlib.util.spec_from_file_location(
+    "curve_identity", Path(__file__).resolve().parent.parent / "tools" / "curve_identity.py")
+ec1 = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(ec1)
+
+REPO = cid.REPO
+OUT = cid.REGISTRY
+MAX_JSON_BYTES = 8 << 20
+
+# Moduli for Koblitz degrees the sparse search does not cover (n >= 64):
+# the polynomial of the standard or challenge defined over that degree.
+STANDARD_MODULI = {
+    83: ([83, 45, 2, 1, 0], "the m = 83 confidence gate (AGENTS.md §8a)"),
+    97: ([97, 6, 0], "ECC2K-95 (src/bin/ic/params.rs)"),
+    131: ([131, 13, 2, 1, 0], "ECC2K-130 (src/cryptanalysis/ecc2k130_guard.rs)"),
+    163: ([163, 7, 6, 3, 0], "sect163k1, SEC 2 (src/binary_ecc/curve.rs)"),
+    233: ([233, 74, 0], "sect233k1, SEC 2"),
+    239: ([239, 158, 0], "sect239k1, SEC 2"),
+    283: ([283, 12, 7, 5, 0], "sect283k1, SEC 2"),
+    409: ([409, 87, 0], "sect409k1, SEC 2"),
+    571: ([571, 10, 5, 2, 0], "sect571k1, SEC 2"),
+}
+# Standard names that are Koblitz curves: (a, n).
+KOBLITZ_STANDARDS = {
+    "ECC2K-95": (0, 97), "ECC2K-130": (0, 131), "sect163k1": (1, 163),
+    "sect233k1": (0, 233), "sect239k1": (0, 239), "sect283k1": (0, 283),
+    "sect409k1": (0, 409), "sect571k1": (0, 571),
+}
+PRIME_STANDARDS = {
+    # name: (p, a, b, n, h, (gx, gy)), as src/ecc/curve.rs constructs them.
+    "secp256k1": (
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F, 0, 7,
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141, 1,
+        (0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798,
+         0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8)),
+    "P-256": (
+        0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF,
+        0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC,
+        0x5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B,
+        0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551, 1,
+        (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
+         0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5)),
+}
+# Binary standards whose generator the source tree carries, in the basis of
+# the modulus above: (subgroup order, cofactor, gx, gy).
+BINARY_GENERATORS = {
+    "sect163k1": (0x4000000000000000000020108A2E0CC0D99F8A5EF, 2,
+                  0x02FE13C0537BBC11ACAA07D793DE4E6D5E5C94EEE8,
+                  0x0289070FB05D38FF58321F2E800536D538CCDAA3D9),
+    "ECC2K-95": (39614081257132074233778707191, 4,
+                 0x08A84FB02034F7771DC940097, 0x1D2F10A471D48A720F18F6339),
+}
+# Why a standard has no EC1 identity here: the representation is not
+# recorded in this repository.
+EC1_UNRESOLVED = {
+    "ECC2K-130": "the challenge's normal-basis points are not imported (src/bin/ic/params.rs)",
+}
+# EC1 records use the encoding crypto's existing producer writes
+# (examples/koblitz_curve_records.rs, which follows the repository's earlier
+# E_0 records), so a UID here equals the one a thread's curve_ids.json carries
+# for the same representation.  Prime-field and non-Koblitz binary records
+# extend that encoding: coefficients [a1, a2, a3, a4, a6] as integers,
+# field elements as 0x-prefixed integers.
+BINARY_FIELD_ENCODING = "hex polynomial coefficient bitset, least significant bit is constant"
+TARGET_GROUP = "prime-order subgroup"
+
+# Legacy spellings, as they occur in text.  Each regex yields enough to
+# rebuild the curve or look it up.
+KOBLITZ_TEXT = re.compile(
+    r"K(?:_\{?([01])\}?|([₀₁]))\s*/\s*(?:GF\(\s*2\^\{?(\d+)\}?\s*\)|F_\{?2\^\{?(\d+)\}?\}?|2\^\{?(\d+)\}?)")
+KOBLITZ_SLUG = re.compile(r"(?<![A-Za-z0-9_])k([01])n(\d{1,3})(?![0-9])")
+NAMED_TEXT = re.compile(
+    r"(?<![A-Za-z0-9_-])(bench-\d+bit|generated-\d+bit-\d+|random-binary-n\d+-b[0-9a-f]+)(?![0-9a-z])")
+
+
+def tracked(*patterns: str) -> list[Path]:
+    out = subprocess.run(["git", "ls-files", "-z", "--", *patterns], cwd=REPO,
+                         capture_output=True, check=True).stdout
+    return [REPO / p for p in out.decode().split("\0") if p]
+
+
+def _int(v) -> int | None:
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, int):
+        return v
+    if isinstance(v, float) and v.is_integer() and abs(v) < 2**53:
+        return int(v)
+    if isinstance(v, str):
+        try:
+            return int(v, 0)
+        except ValueError:
+            return None
+    return None
+
+
+class Registry:
+    def __init__(self) -> None:
+        self.curves: dict[str, dict] = {}          # model_sha256 -> entry
+        self.alias_models: dict[str, set] = defaultdict(set)
+        self.alias_text: dict[str, str] = {}       # normalised -> first spelling
+        self.reps: dict[str, dict[str, dict]] = defaultdict(dict)  # model -> uid -> rep
+
+    def add(self, ident: dict, family: str, params: dict, source: str,
+            aliases: list[str] = (), standard: str | None = None) -> dict:
+        key = ident["model_sha256"]
+        e = self.curves.get(key)
+        if e is None:
+            e = self.curves[key] = {
+                "slug": ident["slug"], "icv1": ident["icv1"], "family": family,
+                "params": params, "model_json": ident["model_json"],
+                "trace": ident["trace"], "order": str(ident["order"]),
+                "j": ident["j"], "end": ident["end"],
+                "aliases": [], "standard_names": [], "sources": [],
+            }
+        for a in aliases:
+            self.alias(a, key)
+        if standard and standard not in e["standard_names"]:
+            e["standard_names"].append(standard)
+            self.alias(standard, key)
+        if source not in e["sources"] and len(e["sources"]) < 6:
+            e["sources"].append(source)
+        return e
+
+    def represent(self, ident: dict, field: dict, curve: dict, source: str) -> None:
+        """One exact representation of the model `ident` names (EC1)."""
+        uid = ec1.curve_identity(field, curve, "x")["curve_uid"]
+        rep = self.reps[ident["model_sha256"]].setdefault(
+            uid, {"field": field, "curve": curve, "sources": []})
+        if source not in rep["sources"] and len(rep["sources"]) < 6:
+            rep["sources"].append(source)
+
+    def alias(self, spelling: str, key: str) -> None:
+        norm = cid.normalise_alias(spelling)
+        self.alias_models[norm].add(key)
+        self.alias_text.setdefault(norm, spelling)
+        e = self.curves[key]
+        if not any(cid.normalise_alias(x) == norm for x in e["aliases"]):
+            e["aliases"].append(spelling)
+
+
+def exps(modulus: int) -> list[int]:
+    return [i for i in range(modulus.bit_length() - 1, -1, -1) if modulus >> i & 1]
+
+
+def binary_record(m: int, modulus: int, a: int, b: int, order: int, r: int, h: int,
+                  g: tuple[int, int]) -> tuple[dict, dict]:
+    """The EC1 field and curve records, as examples/koblitz_curve_records.rs writes them."""
+    field = {"characteristic": 2, "degree": m, "representation": "polynomial",
+             "modulus_exponents": exps(modulus), "element_encoding": BINARY_FIELD_ENCODING}
+    curve = {"model": "binary Weierstrass", "coefficients": [1, a, 0, 0, b],
+             "subgroup_order": str(r), "cofactor": h,
+             "generator": [hex(g[0]), hex(g[1])], "target_group": TARGET_GROUP}
+    return field, curve
+
+
+def prime_record(p: int, a: int, b: int, order: int, r: int, h: int,
+                 g: tuple[int, int]) -> tuple[dict, dict]:
+    """A prime-field EC1 record in the same encoding (no earlier producer)."""
+    field = {"characteristic": p, "degree": 1, "representation": "prime",
+             "element_encoding": "hex integer modulo the characteristic"}
+    curve = {"model": "short Weierstrass", "coefficients": [0, 0, 0, a % p, b % p],
+             "subgroup_order": str(r), "cofactor": h,
+             "generator": [hex(g[0]), hex(g[1])], "target_group": TARGET_GROUP}
+    return field, curve
+
+
+def generator_of(o: dict) -> tuple[int, int] | None:
+    g = o.get("generator")
+    if isinstance(g, dict):
+        x, y = _int(g.get("x")), _int(g.get("y"))
+    elif isinstance(g, list) and len(g) == 2:
+        x, y = _int(g[0]), _int(g[1])
+    else:
+        return None
+    return None if x is None or y is None else (x, y)
+
+
+def subgroup_of(o: dict, order: int) -> tuple[int, int] | None:
+    r = _int(o.get("subgroup_order"))
+    h = _int(o.get("cofactor"))
+    if r is None:
+        return None
+    if h is None:
+        h = order // r
+    return (r, h) if r * h == order else None
+
+
+def koblitz_modulus(n: int) -> tuple[int, str]:
+    if n < 64:
+        return cid.find_irreducible_sparse(n), "find_irreducible_sparse(n)"
+    if n in STANDARD_MODULI:
+        terms, why = STANDARD_MODULI[n]
+        return sum(1 << t for t in terms), why
+    return cid.find_irreducible_sparse(n), "least sparse irreducible, uncapped (docs/curves/ICV1.md)"
+
+
+def koblitz_aliases(a: int, n: int) -> list[str]:
+    return [f"K_{a} / GF(2^{n})", f"K_{a}/2^{n}", f"K_{a}/F_2^{n}", f"k{a}n{n}"]
+
+
+def add_koblitz(reg: Registry, a: int, n: int, source: str, standard: str | None = None) -> None:
+    f, why = koblitz_modulus(n)
+    ident = cid.koblitz_id(a, n, f)
+    reg.add(ident, "koblitz",
+            {"a": a, "n": n, "modulus": cid._hex(f), "modulus_rule": why},
+            source, koblitz_aliases(a, n), standard)
+
+
+def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
+    for path in tracked("*.json"):
+        try:
+            if path.stat().st_size > MAX_JSON_BYTES:
+                continue
+            doc = json.loads(path.read_text())
+        except (OSError, ValueError, UnicodeDecodeError):
+            continue
+        rel = str(path.relative_to(REPO))
+        stack = [doc]
+        while stack:
+            o = stack.pop()
+            if isinstance(o, list):
+                stack.extend(x for x in o if isinstance(x, (dict, list)))
+                continue
+            if not isinstance(o, dict):
+                continue
+            stack.extend(v for v in o.values() if isinstance(v, (dict, list)))
+            order = _int(o.get("group_order", o.get("order")))
+            name = o.get("name") if isinstance(o.get("name"), str) else None
+            field = o.get("field")
+            try:
+                if (isinstance(field, dict) and field.get("kind") == "binary"
+                        and order and "a" in o and "b" in o):
+                    m = _int(field.get("degree"))
+                    low = field.get("polynomial_low_terms")
+                    a, b = _int(o["a"]), _int(o["b"])
+                    if m is None or not isinstance(low, list) or a is None or not b:
+                        continue
+                    f = (1 << m) | sum(1 << int(t) for t in low)
+                    ident = cid.binary_id(m, f, a, b, order,
+                                          end="-7" if o.get("koblitz") and b == 1 and a in (0, 1) else "unk")
+                    fam = "koblitz" if o.get("koblitz") and b == 1 and a in (0, 1) else "binary"
+                    params = {"m": m, "modulus": cid._hex(f), "a": cid._hex(a), "b": cid._hex(b)}
+                    if fam == "koblitz":
+                        params = {"a": a, "n": m, "modulus": cid._hex(f),
+                                  "modulus_rule": "recorded in the run"}
+                    if isinstance(name, str) and name.startswith("E_{"):
+                        fam = "subfield"
+                    if o.get("generator_call"):
+                        params["generator_call"] = o["generator_call"]
+                    names = [name] if name else []
+                    if fam == "koblitz":
+                        names += koblitz_aliases(a, m)
+                    check_rust(o, ident, rel, fatal)
+                    reg.add(ident, fam, params, rel, names)
+                    g, rh = generator_of(o), subgroup_of(o, order)
+                    if g and rh:
+                        reg.represent(ident, *binary_record(m, f, a, b, order, *rh, g), rel)
+                elif "p" in o and "a" in o and "b" in o and order:
+                    p, a, b = _int(o["p"]), _int(o["a"]), _int(o["b"])
+                    if p is None or a is None or b is None or p < 5:
+                        continue
+                    ident = cid.prime_id(p, a, b, order)
+                    params = {"p": str(p), "a": str(a % p), "b": str(b % p)}
+                    if o.get("generator_call"):
+                        params["generator_call"] = o["generator_call"]
+                    check_rust(o, ident, rel, fatal)
+                    reg.add(ident, "prime", params, rel, [name] if name else [])
+                    g, rh = generator_of(o), subgroup_of(o, order)
+                    if g and rh:
+                        reg.represent(ident, *prime_record(p, a, b, order, *rh, g), rel)
+            except (ValueError, ZeroDivisionError) as err:
+                problems.append(f"{rel}: skipped a curve record ({err})")
+
+
+def unbuilt_specs() -> dict[str, str]:
+    """Constructor calls examples/curve_id_generated.rs could not build."""
+    path = REPO / "docs/curves/sources/generated.json"
+    if not path.exists() or not path.stat().st_size:
+        return {}
+    return {u["spec"]: u["why"] for u in json.loads(path.read_text()).get("unbuilt", [])}
+
+
+def unresolved_reason(e: dict) -> str:
+    """Why a model has no EC1 identity here, as precisely as the tree says."""
+    for s in e["standard_names"]:
+        if s in EC1_UNRESOLVED:
+            return EC1_UNRESOLVED[s]
+    p, unbuilt = e["params"], unbuilt_specs()
+    if e["family"] == "koblitz":
+        spec = f"koblitz:{p['a']}:{p['n']}"
+        if spec in unbuilt:
+            return (f"KoblitzCurve::new({p['a']}, {p['n']}) finds no usable prime-order "
+                    "subgroup, so the repository has built no generator on it")
+        if p["n"] > 63:
+            return ("no generator recorded; KoblitzCurve covers n <= 63 and no tracked "
+                    "record carries this model's subgroup and generator")
+    for alias in e["aliases"]:
+        m = re.fullmatch(r"bench-(\d+)bit", alias)
+        if m and f"roster:{m.group(1)}" in unbuilt:
+            return f"roster_prime_instance({m.group(1)}) builds no instance on this roster curve"
+    return "no tracked record carries this model's subgroup and generator"
+
+
+def tag_of(e: dict) -> str:
+    """The EC1 alias tag: the standard name, else the family's (not hashed)."""
+    if e["standard_names"]:
+        return re.sub(r"[^a-z0-9]", "", e["standard_names"][0].lower())
+    if e["family"] == "koblitz":
+        return f"e{e['params']['a']}"  # E_0 / E_1, as AGENTS.md §8b names the families
+    return {"subfield": "sf", "binary": "rb", "prime": "fp"}[e["family"]]
+
+
+def check_rust(o: dict, ident: dict, rel: str, fatal: list[str]) -> None:
+    """A record that carries an ICV1 computed in Rust must match this one."""
+    if "icv1" in o and o["icv1"] != ident["icv1"]:
+        fatal.append(f"{rel}: Rust ICV1 {o['icv1']} differs from the reference {ident['icv1']}")
+
+
+def check_thread_ids(curves: list[dict], fatal: list[str]) -> None:
+    """Every EC1 UID a tracked curve_ids.json records must be one the registry
+    holds: the registry and the threads hash the same records the same way."""
+    held = {r["curve_uid"] for c in curves for r in c.get("representations", [])}
+    for path in tracked("*curve_ids.json"):
+        try:
+            doc = json.loads(path.read_text())
+        except (OSError, ValueError):
+            continue
+        for c in doc.get("curves", []) if isinstance(doc, dict) else []:
+            uid = c.get("curve_uid") if isinstance(c, dict) else None
+            if uid and uid not in held:
+                fatal.append(f"{path.relative_to(REPO)}: {c.get('curve_id')} ({uid[-12:]}) "
+                             "is not a representation in the registry")
+
+
+def check_calibration(reg: "Registry", fatal: list[str]) -> None:
+    """Every instance docs/ic/calibration.json pins must resolve: `ic`
+    finds a pin for an instance named by its slug through this registry."""
+    doc = json.loads((REPO / "docs/ic/calibration.json").read_text())
+    for key in doc.get("instances", {}):
+        name = key.split("/", 1)[1]
+        if len(reg.alias_models.get(cid.normalise_alias(name), ())) != 1:
+            fatal.append(f"docs/ic/calibration.json: pin {key!r} resolves to no single curve")
+
+
+def harvest_curve_records(reg: Registry) -> None:
+    """EC1 records the threads keep (curve_records.json, written by
+    examples/koblitz_curve_records.rs): each is one exact representation,
+    taken verbatim so its UID is the thread's."""
+    for path in tracked("*curve_records.json"):
+        rel = str(path.relative_to(REPO))
+        try:
+            doc = json.loads(path.read_text())
+        except (OSError, ValueError):
+            continue
+        for rec in doc.get("curves", []) if isinstance(doc, dict) else []:
+            f, c = rec.get("field", {}), rec.get("curve", {})
+            coeff, order = c.get("coefficients"), _int(rec.get("group_order"))
+            if (f.get("characteristic") != 2 or not isinstance(coeff, list) or len(coeff) != 5
+                    or coeff[0] != 1 or coeff[2] or coeff[3] or not order):
+                continue
+            m = f["degree"]
+            modulus = sum(1 << e for e in f["modulus_exponents"])
+            a, b = coeff[1], coeff[4]
+            koblitz = b == 1 and a in (0, 1)
+            ident = cid.binary_id(m, modulus, a, b, order, end="-7" if koblitz else "unk")
+            params = ({"a": a, "n": m, "modulus": cid._hex(modulus), "modulus_rule": "recorded in the run"}
+                      if koblitz else {"m": m, "modulus": cid._hex(modulus), "a": cid._hex(a), "b": cid._hex(b)})
+            reg.add(ident, "koblitz" if koblitz else "binary", params, rel,
+                    koblitz_aliases(a, m) if koblitz else [])
+            reg.represent(ident, f, {k: v for k, v in c.items() if k != "curve_id"}, rel)
+
+
+def harvest_bench(reg: Registry) -> None:
+    src = (REPO / "src/cryptanalysis/research_bench.rs").read_text()
+    pat = re.compile(r'name: "(bench-\d+bit)",\s*p: BigUint::from\((\d+)u32\),\s*'
+                     r'a: BigUint::from\((\d+)u32\),\s*b: BigUint::from\((\d+)u32\)')
+    for name, p, a, b in pat.findall(src):
+        p, a, b = int(p), int(a), int(b)
+        order = cid._count_prime(p, a, b)
+        reg.add(cid.prime_id(p, a, b, order), "prime", {"p": str(p), "a": str(a), "b": str(b)},
+                "src/cryptanalysis/research_bench.rs", [name])
+
+
+def harvest_text_koblitz(reg: Registry) -> None:
+    seen = set()
+    for path in tracked("*.md", "*.html", "*.rs", "*.py", "*.json", "*.yml", "*.toml", "*.txt"):
+        try:
+            if path.stat().st_size > MAX_JSON_BYTES:
+                continue
+            text = path.read_text(errors="ignore")
+        except OSError:
+            continue
+        for m in KOBLITZ_TEXT.finditer(text):
+            a = int(m.group(1)) if m.group(1) else "₀₁".index(m.group(2))
+            n = int(next(g for g in m.group(3, 4, 5) if g))
+            seen.add((a, n, str(path.relative_to(REPO))))
+        for m in KOBLITZ_SLUG.finditer(text):
+            seen.add((int(m.group(1)), int(m.group(2)), str(path.relative_to(REPO))))
+    done = set()
+    for a, n, src in sorted(seen):
+        if (a, n) in done or n < 3:
+            continue
+        done.add((a, n))
+        add_koblitz(reg, a, n, f"prose, by the constructor rule: {src}")
+
+
+# Curves the repository designates without a standard name: (a, n).
+DESIGNATED_KOBLITZ = [(0, 83)]
+
+
+def harvest_standards(reg: Registry) -> None:
+    for a, n in DESIGNATED_KOBLITZ:
+        add_koblitz(reg, a, n, STANDARD_MODULI[n][1])
+    for name, (a, n) in KOBLITZ_STANDARDS.items():
+        add_koblitz(reg, a, n, STANDARD_MODULI[n][1], standard=name)
+        if name in BINARY_GENERATORS:
+            r, h, gx, gy = BINARY_GENERATORS[name]
+            f, _ = koblitz_modulus(n)
+            order = cid.koblitz_order(a, n)
+            assert r * h == order, name
+            reg.represent(cid.koblitz_id(a, n, f), *binary_record(n, f, a, 1, order, r, h, (gx, gy)),
+                          STANDARD_MODULI[n][1])
+    for name, (p, a, b, n, h, g) in PRIME_STANDARDS.items():
+        ident = cid.prime_id(p, a, b, n * h)
+        reg.add(ident, "prime", {"p": str(p), "a": str(a), "b": str(b)},
+                "src/ecc/curve.rs", [], standard=name)
+        reg.represent(ident, *prime_record(p, a, b, n * h, n, h, g), "src/ecc/curve.rs")
+
+
+def unresolved_text(reg: Registry) -> list[str]:
+    missing = set()
+    for path in tracked("*.md", "*.html"):
+        text = path.read_text(errors="ignore")
+        for rx in (KOBLITZ_TEXT, NAMED_TEXT):
+            for m in rx.finditer(text):
+                norm = cid.normalise_alias(m.group(0))
+                if len(reg.alias_models.get(norm, ())) != 1:
+                    missing.add(f"{m.group(0)!r} in {path.relative_to(REPO)}")
+    return sorted(missing)
+
+
+def carry_forward(reg: Registry) -> None:
+    """The registry is append-only.  A curve registered once stays, with its
+    names and representations, even when no source re-derives it: after
+    prose is rewritten to slugs, the legacy spelling that first registered a
+    curve is gone, and the slug that replaced it must still resolve."""
+    if not OUT.exists():
+        return
+    for e in json.loads(OUT.read_text())["curves"]:
+        key = hashlib.sha256(e["model_json"].encode("ascii")).hexdigest()
+        if key in reg.curves:
+            for a in e["aliases"]:
+                reg.alias(a, key)
+            continue
+        # Identity and names carry forward; representations are always
+        # recomputed from their sources, never copied from an older build.
+        kept = {k: v for k, v in e.items() if k not in ("representations", "ec1_unresolved")}
+        reg.curves[key] = kept
+        for a in e["aliases"] + e["standard_names"]:
+            reg.alias_models[cid.normalise_alias(a)].add(key)
+            reg.alias_text.setdefault(cid.normalise_alias(a), a)
+
+
+def build() -> tuple[dict, list[str], list[str]]:
+    reg, problems, fatal = Registry(), [], []
+    harvest_standards(reg)
+    harvest_bench(reg)
+    harvest_json(reg, problems, fatal)
+    harvest_curve_records(reg)
+    harvest_text_koblitz(reg)
+    carry_forward(reg)
+    ambiguous = sorted(f"{reg.alias_text[k]!r} -> {len(v)} models"
+                       for k, v in reg.alias_models.items() if len(v) > 1)
+    for k, v in reg.alias_models.items():
+        if len(v) > 1:  # never guess: an ambiguous spelling resolves nowhere
+            for key in v:
+                reg.curves[key]["aliases"] = [
+                    x for x in reg.curves[key]["aliases"] if cid.normalise_alias(x) != k]
+    for key, e in reg.curves.items():
+        tag = tag_of(e)
+        e["representations"] = []
+        for uid, rep in sorted(reg.reps.get(key, {}).items()):
+            ident = ec1.curve_identity(rep["field"], rep["curve"], tag)
+            e["representations"].append({
+                "ec1": ident["curve_id"], "curve_uid": ident["curve_uid"],
+                "field_sha256": ident["field_sha256"], "field": rep["field"],
+                "curve": rep["curve"], "sources": rep["sources"]})
+        if not e["representations"]:
+            e["ec1_unresolved"] = unresolved_reason(e)
+    check_calibration(Registry._rebuilt(list(reg.curves.values())), fatal)
+    fam_rank = {"koblitz": 0, "subfield": 1, "binary": 2, "prime": 3}
+    curves = sorted(reg.curves.values(), key=lambda e: (
+        fam_rank[e["family"]], int(e["params"].get("n", e["params"].get("m", 0)) or 0),
+        int(e["params"].get("p", 0)), e["params"].get("a", 0) if e["family"] == "koblitz" else 0,
+        e["slug"]))
+    for e in curves:
+        e["aliases"].sort(key=str.lower)
+    doc = {
+        "schema_version": 1,
+        "spec": "docs/curves/ICV1.md",
+        "generated_by": "scripts/build_curve_registry.py",
+        "what_this_is": "Every elliptic curve this repository names, by its ICV1 identity, "
+                        "with every legacy spelling that denotes it.",
+        "curves": curves,
+    }
+    check_thread_ids(curves, fatal)
+    missing = unresolved_text(Registry._rebuilt(curves)) + fatal
+    return doc, problems + [f"ambiguous alias dropped: {x}" for x in ambiguous], missing
+
+
+def _rebuilt(curves: list[dict]) -> Registry:
+    r = Registry()
+    for e in curves:
+        key = e["icv1"]
+        r.curves[key] = e
+        for a in e["aliases"] + e["standard_names"] + [e["slug"]]:
+            r.alias_models[cid.normalise_alias(a)].add(key)
+    return r
+
+
+Registry._rebuilt = staticmethod(_rebuilt)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--check", action="store_true", help="fail if the registry is stale")
+    args = ap.parse_args()
+    doc, problems, missing = build()
+    text = json.dumps(doc, indent=1, ensure_ascii=False) + "\n"
+    for p in problems:
+        print("note:", p, file=sys.stderr)
+    for m in missing:
+        print("unresolved:", m, file=sys.stderr)
+    amap = cid.alias_map_text(doc)
+    if args.check:
+        stale = [p for p, t in ((OUT, text), (cid.ALIAS_MAP, amap))
+                 if not p.exists() or p.read_text() != t]
+        for p in stale:
+            print(f"{p.relative_to(REPO)} is stale; run scripts/build_curve_registry.py",
+                  file=sys.stderr)
+        if stale:
+            return 1
+    else:
+        OUT.parent.mkdir(parents=True, exist_ok=True)
+        OUT.write_text(text)
+        cid.ALIAS_MAP.write_text(amap)
+        print(f"wrote {OUT.relative_to(REPO)}: {len(doc['curves'])} curves, "
+              f"and {cid.ALIAS_MAP.relative_to(REPO)}")
+    return 1 if missing else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

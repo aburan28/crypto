@@ -65,8 +65,8 @@ parameter files.
      setting, glibc's malloc asks for transparent huge pages on its
      large mappings. Nothing in `src/` sets an allocator or calls
      `madvise`.
-   - Rows: `M1`'s rows at the three largest sizes (`k0n53`, `k1n59`,
-     `k0n61`), for five rounds, with the order alternating. That is 60
+   - Rows: `M1`'s rows at the three largest sizes (`icv1-f2m53-tm56619371-dac20a85`, `icv1-f2m59-tm943548413-98844ecc`,
+     `icv1-f2m61-t158598901-ab42b6c5`), for five rounds, with the order alternating. That is 60
      isolated processes.
 7. **Memory calibration.**
    - The tool is the earlier study's `mem_calib.c`
@@ -76,8 +76,8 @@ parameter files.
      plus memory-level parallelism at 256 MiB. It does so with and
      without the tunable, through `tools/isolated_bench.py`.
 8. **Callgrind, untimed, after every timed step.**
-   - v0 runs with `--repeats 1 --repeats-fast 1` on `M1-T01` at `k0n41`
-     and `k0n61`.
+   - v0 runs with `--repeats 1 --repeats-fast 1` on `M1-T01` at `icv1-f2m41-tm2308219-7f48b14a`
+     and `icv1-f2m61-t158598901-ab42b6c5`.
    - The tool is `valgrind --tool=callgrind --cache-sim=yes
      --I1=32768,8,64 --D1=32768,8,64 --LL=2097152,16,64`, the earlier
      study's lower last-level size.
