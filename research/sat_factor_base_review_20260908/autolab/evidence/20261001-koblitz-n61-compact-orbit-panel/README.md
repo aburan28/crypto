@@ -148,3 +148,55 @@ requests it validates only. The measurement job is `workflow_dispatch`, so it
 can only run once the workflow is on the default branch. Hosted runners are
 VMs, so expect the ±5–10% residual wall noise §10 describes. The A/A spread
 is the per-arm spread across the alternating blocks (default 5).
+
+### Hosted run `gha-36912327205-1` (Actions run 36912327205, L=1,024)
+
+[Actions run 36912327205](https://github.com/aburan28/crypto/actions/runs/36912327205)
+dispatched the workflow at `64e9ee32a` with `--targets 1024 --blocks 5`. Host:
+Intel Xeon Platinum 8370C @ 2.80 GHz, 4 logical CPUs, Linux 6.17 (Azure),
+`isolated_bench.py reserve` on CPUs {2, 3}, producers pinned to CPU 3.
+`isolation.jsonl` reports **0 contended samples** and exit status 0. The
+`verify` re-hash of all 76 manifest files passes. The run is archived under
+`autolab_runs/gha-36912327205-1/`, with the artifact's `isolation.jsonl`,
+`verify.json`, `preflight_1.log` and `lscpu.txt` in `hosted/`. `logs/` and
+`inputs/boundary_targets.json` are left out as above.
+
+The tune ran on the disjoint 1,024-target corpus and picked K=700, as on macOS:
+
+| K | Process wall s | Setup s | Rank s | Targets s | Peak RSS GiB |
+|---:|---:|---:|---:|---:|---:|
+| 400 | 71.1 | 5.9 | 19.6 | 45.5 | 1.23 |
+| 500 | 52.8 | 9.3 | 14.4 | 29.2 | 1.35 |
+| 600 | 45.3 | 13.4 | 12.0 | 19.9 | 2.50 |
+| **700** | **43.1** | 18.2 | 10.4 | 14.4 | 2.68 |
+| 800 | 45.0 | 24.1 | 9.2 | 11.6 | 4.89 |
+| 1,000 | 52.5 | 37.5 | 7.4 | 7.5 | 5.39 |
+
+The producer's `setup_total` excludes `rank_stage`, so process wall ≈ setup +
+rank + targets.
+
+The five alternating blocks, with the same eval targets in both arms, give
+wall in seconds:
+
+| Block | Order | IC | Rho (KS v2) | Wall ratio | User ratio |
+|---:|---|---:|---:|---:|---:|
+| 0 | IC→rho | 42.66 | 183.91 | 0.2320 | 0.2295 |
+| 1 | rho→IC | 42.16 | 183.94 | 0.2292 | 0.2268 |
+| 2 | IC→rho | 42.12 | 183.79 | 0.2292 | 0.2268 |
+| 3 | rho→IC | 42.24 | 186.20 | 0.2269 | 0.2244 |
+| 4 | IC→rho | 42.36 | 183.90 | 0.2303 | 0.2280 |
+
+- The wall ratio median is **0.229** (range 0.227–0.232), and the user-CPU
+  ratio median is 0.227.
+- The A/A spread per arm is 1.3% for IC (42.12–42.66 s) and 1.3% for rho
+  (183.79–186.20 s), inside the §10 hosted-VM noise band.
+- Instruction counts are not collected on Linux.
+- Verification is the same as on macOS: every block solves all 1,024 targets
+  in both arms, and both pure-Python replays pass 5,120 / 5,120.
+- `end_to_end_dlp` passes. `vs_rho` fails closed for the same reason as
+  above.
+
+The isolated hosted ratio (0.229) sits below the contended macOS ratio
+(0.282). It is still a multi-target batch against KS v2, so it is a diagnostic
+and not the one-target primary comparison. For that comparison, see
+`../20261001-koblitz-n61-single-target/`.
