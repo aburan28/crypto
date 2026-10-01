@@ -37,6 +37,31 @@ def paired(values: list[float]) -> dict:
             "interval_95pct": [math.exp(center - half), math.exp(center + half)]}
 
 
+def observed_isolation_ok(isolation: dict | None, label: str, cpu: int) -> bool:
+    """Use measured load and A/A later; archive idle thread affinity separately."""
+    if not isolation or isolation.get("schema") != "isolated-bench/1":
+        return False
+    preflight = isolation.get("preflight", {})
+    quiet = preflight.get("settle", {})
+    conditions = preflight.get("conditions", {})
+    psi_some = [conditions[kind]["some"]["avg10"]
+                for kind in ("psi_cpu", "psi_memory") if conditions.get(kind)]
+    samples = isolation.get("samples", [])
+    return bool(isolation.get("mode") == "reserve" and
+                isolation.get("label") == label and
+                cpu in isolation.get("reserved_cpus", []) and
+                isolation.get("exit_status") == 0 and
+                "user_threads" in isolation.get("left_on_reserved", {}) and
+                quiet.get("seconds") == 2.0 and
+                quiet.get("other_cpu_seconds", float("inf")) <= 0.2 and
+                len(psi_some) == 2 and
+                all(0.0 <= value <= 5.0 for value in psi_some) and
+                samples and isolation.get("contended_samples") == 0 and
+                all(not sample.get("contended", True) and
+                    sample.get("other_cpu_seconds", float("inf")) <= 0.5
+                    for sample in samples))
+
+
 def checked_files(run_dir: Path, item: dict) -> dict[str, Path]:
     assert all(".fixture.jsonl" not in value for value in
                item["command"] + list(item["environment"].values()))
@@ -219,14 +244,8 @@ def verify(cell: str, run_dir: Path, relocated: bool = False) -> dict:
     isolation_rows = rows(isolation_path) if isolation_path.is_file() else []
     assert len(isolation_rows) <= 1
     isolation = isolation_rows[0] if isolation_rows else None
-    uncontended = bool(isolation and
-                       isolation["schema"] == "isolated-bench/1" and
-                       isolation["mode"] == "reserve" and
-                       isolation["label"] == f"disjoint-cold-{cell}" and
-                       report["host"]["reserved_cpu"] in isolation["reserved_cpus"] and
-                       isolation["exit_status"] == 0 and
-                       isolation["contended_samples"] == 0 and
-                       not isolation["left_on_reserved"]["user_threads"])
+    uncontended = observed_isolation_ok(
+        isolation, f"disjoint-cold-v2-{cell}", report["host"]["reserved_cpu"])
     aa, over_rho = [], []
     for block in range(spec["blocks"]):
         arms = by_block[block]
