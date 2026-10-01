@@ -65,7 +65,14 @@ def replay() -> dict:
         ["git", "ls-files", "research/notes/ecc2k130/**/*.points.jsonl"],
         cwd=ROOT, text=True).splitlines()
         if not path.startswith(str(HERE.relative_to(ROOT)) + "/")]
-    assert [item["path"] for item in canonical] == tracked
+    canonical_paths = [item["path"] for item in canonical]
+    # The equality used to cover every ecc2k130 points file. Later freezes
+    # add their own corpora beside this one. A new file inside a directory
+    # this inventory already listed is still a hole; a file in a new
+    # directory is a later experiment and does not change these hashes.
+    historical_dirs = {str(Path(path).parent) for path in canonical_paths}
+    historical_tracked = [path for path in tracked if str(Path(path).parent) in historical_dirs]
+    assert canonical_paths == historical_tracked
 
     old = json.loads(OLD_INPUT_FREEZE.read_text())
     curves = {}
