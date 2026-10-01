@@ -18,6 +18,7 @@ It adds each part with the round that creates it:
 | `conformance/v2/` | B1's cases and their parameter files, the script that writes and checks them, and the runner (v1's cases, then v2's) | B1 |
 | `conformance/v2-b2/` | B2's cases (C032–C051) beside B1's frozen ones | B2 |
 | `conformance/v2-b2b/` | B2b's cases (C059–C070) beside the earlier steps' frozen ones | B2b |
+| `conformance/v2-b7a/` | B7a's cases (C071–C077), each an earlier step's frozen document at `fidelity: F1` | B7a |
 | `conformance/v2-b3/` | B3's cases (C052–C058) beside B1's frozen ones | B3 |
 | `conformance/run.py` | the runner from B3 on: every step's cases in order, with the `until` rule applied | B3 |
 
@@ -37,3 +38,4 @@ It adds each part with the round that creates it:
 | B3 | two-word binary fields (`n ≤ 126`), `rho-koblitz` on them, `solve: rho`, and the gate's rho at F0 at `n = 83` | declared ([`rounds/B3-two-word-rho/PROTOCOL.md`](rounds/B3-two-word-rho/PROTOCOL.md); cases [`conformance/v2-b3/`](conformance/v2-b3/cases.json)); runs after B1 | #1139 (declaration) |
 | B3b | the index calculus on two-word fields, at F1 | to be declared | — |
 | B6 | fuzzing and differential checks: a seeded generator of valid and corrupted documents, every answer replayed in independent Python arithmetic, in CI and as a 20,000-document campaign | declared ([`rounds/B6-fuzzing/PROTOCOL.md`](rounds/B6-fuzzing/PROTOCOL.md); generator [`fuzz/fuzz_v2.py`](fuzz/fuzz_v2.py)); runs after B2 | #1143 (declaration) |
+| B7a | the F1 sampled level at one-word sizes: `kic` and every rho extrapolated from samples on the instance, the yield counted, with predictive intervals; validated against F0 | declared ([`rounds/B7a-f1-sampled/PROTOCOL.md`](rounds/B7a-f1-sampled/PROTOCOL.md); design [`design/f1-sampled.md`](design/f1-sampled.md); cases [`conformance/v2-b7a/`](conformance/v2-b7a/cases.json); carried constants [`carried.json`](rounds/B7a-f1-sampled/carried.json)); runs after B2b | this PR (declaration) |
