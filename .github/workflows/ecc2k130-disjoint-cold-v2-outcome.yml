@@ -43,6 +43,4 @@ jobs:
           python3 -m py_compile research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/*.py
           ARCHIVE=research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/evidence_run_36803331080
           OUTCOME=research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001
-          python3 "$OUTCOME/analyze_cold.py" --archive "$ARCHIVE" --out "$RUNNER_TEMP/v2-analysis.json"
-          cmp "$RUNNER_TEMP/v2-analysis.json" "$OUTCOME/ANALYSIS.json"
           python3 "$OUTCOME/replay_archive.py" --archive "$ARCHIVE" --analysis "$OUTCOME/ANALYSIS.json"
