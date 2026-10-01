@@ -742,39 +742,18 @@ mod prepared_target_tests {
     use super::*;
 
     fn prepared_job(cap: u64) -> Job {
-        // Accepted preparation fixture, never a new measured registration.
-        let certificate: Value = serde_json::from_str(include_str!(
-            "../research/ic_candidate_tournament_20260915/goal_20260924/prepared-ic-state-v1/f5-preparation.json"
+        // Shared mathematical fixture only. Historical preparation receipts,
+        // ordinary query streams and measurements remain invocation evidence.
+        let prepared: Value = serde_json::from_str(include_str!(
+            "../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-runtime-v1/mathematics.json"
         )).unwrap();
-        let encode = |p: &Value| {
-            [
-                p[0].as_u64().unwrap().to_string(),
-                p[1].as_u64().unwrap().to_string(),
-            ]
-        };
-        let base = certificate["record"]["factor_base"]["points"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(encode)
-            .collect::<Vec<_>>();
-        let columns = certificate["record"]["column_logs"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|entry| {
-                json!({"point":encode(&entry["point"]),
-                "log":entry["log"].as_u64().unwrap().to_string()})
-            })
-            .collect::<Vec<_>>();
         serde_json::from_value(json!({"mode":"ic","degree":17,"curve_a":1,
             "public_targets":[["52411","72106"]],"target_seeds":[],
             "algorithm_seed":2026093032_u64,"exclusive_phases":true,
             "factor_base":{"kind":"standard_subspace","dimension":6},
             "config":{"solver":"f5","linear_algebra":"dense","summands":3,
                 "groebner_degree":3,"node_budget":8192,"batch_trials":1,"max_trials":cap},
-            "prepared":{"mathematical_state_sha256":PREPARED_N17_STATE,
-                "factor_base":base,"columns":columns}}))
+            "prepared":prepared}))
         .unwrap()
     }
 
