@@ -32,7 +32,10 @@
  *              u32 rep_orbit[n_reps]
  *              u64 rep_x[n_reps], u64 rep_y[n_reps]
  *
- *   table  0   "PTFOLD1\0"
+ *   table  0   "PTFOLD2\0": each key sets three bits of one presence
+ *              word (`pt_filter_bits_of`).  "PTFOLD1\0" is the same layout
+ *              with one bit a key, as this file was written before; the
+ *              loader still reads it as that.
  *          8   u32 degree, u32 base_request, u64 seed
  *          24  u32 bucket_shift, u32 buckets, u32 words, u32 present_words
  *          40  u64 present_mask
@@ -168,7 +171,7 @@ inline bool pt_write_table(const char *path, const PtFoldPlan &plan, const PtFol
                                (uint32_t)t.words.size(), (uint32_t)t.present.size()};
     const uint32_t canon[2] = {(uint32_t)plan.canon_bytes, 0};
     const size_t tables = (size_t)plan.canon_bytes * 256;
-    bool ok = fwrite("PTFOLD1", 1, 8, f) == 8 && fwrite(head, 4, 2, f) == 2 &&
+    bool ok = fwrite("PTFOLD2", 1, 8, f) == 8 && fwrite(head, 4, 2, f) == 2 &&
               fwrite(&plan.seed, 8, 1, f) == 1 && fwrite(sizes, 4, 4, f) == 4 &&
               fwrite(&t.present_mask, 8, 1, f) == 1 && fwrite(canon, 4, 2, f) == 2 &&
               fwrite(plan.canon_tables.data(), 8, tables, f) == tables &&
