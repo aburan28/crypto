@@ -84,7 +84,8 @@ def launch(output,mode='smoke',study='original'):
             result['gpu_executed']=result['benchmark'].get('gpu_executed')
             result['isolation']=read_partial(conditions) if mode=='benchmark' else None
             verified=result['returncode']==0 and result['benchmark'].get('status')=='passed'
-            result['timing_eligible']=mode=='benchmark' and verified and timing_eligible(result['isolation'])
+            result['timing_eligible']=(mode=='benchmark' and not result['timed_out']
+                                       and verified and timing_eligible(result['isolation']))
             if result['timed_out']:result['status']='process_timeout'
             elif not verified:result['status']='failed'
             elif mode=='benchmark' and not result['timing_eligible']:result['status']='isolation_rejected'

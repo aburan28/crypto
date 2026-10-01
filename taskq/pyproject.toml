@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taskq"
+version = "0.1.0"
+description = "Persistent Redis task queue for measured CPU/GPU research runs"
+requires-python = ">=3.10"
+dependencies = ["redis>=5", "jsonschema>=4", "pyyaml>=6"]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.2"]
+test = ["pytest>=7"]
+
+[project.scripts]
+taskq = "taskq.cli:main"
+
+[tool.setuptools]
+packages = ["taskq", "taskq.schemas"]
+
+[tool.setuptools.package-data]
+"taskq.schemas" = ["*.json"]

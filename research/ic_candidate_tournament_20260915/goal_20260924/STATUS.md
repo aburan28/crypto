@@ -1,5 +1,32 @@
 # September 24 bounded IC goal
 
+Current family-admission status (September 30): the complete source-bound
+[SAT v3 development solve](static-sat-runtime-v3/full-development-20260929/README.md)
+is accepted. The single [F5 v1 invocation](f5-source-bound-runtime-v1/README.md)
+failed native JSON parsing before any IC query and is closed. The single
+[F5 v2 development solve](f5-source-bound-runtime-v2/README.md) now passes
+complete source/matrix/log/scalar/negative-query admission and isolated archive
+replay, accepted in PR #1064 at
+`07d7c63636965a47035c66e37f665d5611b6a7a0` after all applicable exact-head checks
+passed. The [reusable preparation certificates](prepared-ic-state-v1/README.md)
+independently derive identical ordered base/projection/log mathematics from both
+accepted ordinary-query preparations; this follow-up has no new target or
+native execution. Preparation and the one-target boundary schema repair are
+accepted in [PR #1081](https://github.com/aburan28/crypto/pull/1081) at
+`9285f2cadbc8f016a68a13e946de6a5654ddfa62`.
+The [target-only adapter follow-up](prepared-target-runtime-v1/README.md)
+implements native F5 log import, independent warm mathematical/clock replay,
+SAT source-bound registration/entrypoint/audit, and the 1,340-point preparation
+exclusion union. Disclosed native/Python correctness controls are separate from
+production source-bound invocations; no new measured registration or fresh
+target has executed. `prepared_f5_runtime_v1.py` now registers a
+prepared-capable build and refuses the consumed v2 worker; no invocation of
+that registrar has been frozen or executed. A separately frozen one-shot
+development control and the fresh paired incumbent/rho protocol remain
+outstanding;
+no new speedup or promotion is established. The historical confirmation sets
+and censored generic registrations below remain closed.
+
 Status: the archived reference panel has completed under the frozen protocol:
 1,290/1,290 native/profile pairs, three IC sources and eighteen rho configurations.
 [PR 761](https://github.com/aburan28/crypto/pull/761) merged the implementation at
@@ -21,9 +48,10 @@ verification. Selected challengers `stop6`, `stop5_word` and `stop7_word` all
 failed the 0.8 cold gates and/or familywise online rules. Altogether
 10,203/10,203 native/profile pairs were verified. Do not redispatch any of the
 three registered attempts or retune on their confirmation/replay points. The
-next registered comparison is
+next historical registered comparison was
 [generic-backend-qualification](generic-backend-qualification/README.md)
-(seed `2026092901`); its measurement is pending.
+(seed `2026092901`); its [censored result](generic-backend-qualification/RESULT.md)
+is terminal, as is the second registration described below.
 Canonical admission is merged in both drivers; the earlier
 [driver controls](driver-admission/README.md) preserve their fixed-vector scope.
 Public-point input and single-target native intervals are implemented in the
@@ -244,13 +272,29 @@ incumbent and matched-rho arms. Its one permitted dispatch,
 timed out, packing failed on a live ~35 GiB tournament tree, and zero campaign
 artifacts were uploaded; see the
 [censored result](generic-backend-qualification-v2/RESULT.md). Never redispatch
-seed `2026092902`. Family qualification and competitive costs are unknown. Any
-later registration must exclude all three sealed rounds, the 25 reconstructed
-first-run points, and every public point this second dispatch could have
-generated once reconstructed at the pinned checkout. The static F4/F5 encoder
+seed `2026092902`. Family qualification and competitive costs are unknown. The
+second-run exposure census is sealed in
+[lost-v2-campaign-exposures.json](generic-backend-qualification-v2/lost-v2-campaign-exposures.json)
+(SHA-256 `0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54`;
+[V2-EXPOSURE-RECONSTRUCTION.md](generic-backend-qualification-v2/V2-EXPOSURE-RECONSTRUCTION.md)).
+Any later registration must exclude all three sealed rounds, the 25
+first-run points, and these 25 second-run points. The static F4/F5 encoder
 audit and the disclosed-point
 [dimension-6 pilot](generic-f4-subspace-pilot/RESULT.md) remain separate
 diagnostics.
+
+The next planned competitive registration is
+[generic-backend-qualification-v3](generic-backend-qualification-v3/PROTOCOL.md):
+seed `2026093001`, smoke-only schedule, `standard_subspace` dimension 6 for
+algebraic arms (`factor-base-policy`), F4/F5 family only (SAT deferred), 180/35/240
+minute measure/pack/job caps. Panel intent SHA-256
+`df92d5507785446a2a5b333bd7a04776781de4f54c63c5ea3ffa921bc99ad2e4`.
+Both exposure corpora are on `main`. The runner
+`run_generic_backend_qualification_v3.py` and workflow
+`ic-generic-backend-qualification-v3.yml` authorize one `workflow_dispatch`
+campaign on the smoke schedule (`dispatch_authorized` true;
+`measurement` still `not_run` until that job runs with `--out`). Seed
+`2026093001` has not been dispatched.
 
 Post-registration source audit (PR
 [#952](https://github.com/aburan28/crypto/pull/952)): the pinned `m=3` Semaev
@@ -263,10 +307,103 @@ shows both `f4` and `f5` dispatch into MatrixF4/MatrixF5 with
 `unsupported: false` on all five inventory points at `max_trials=1`, with zero
 relations/solutions under that budget. It is a factor-base-policy diagnostic,
 not a family qualification. A fresh competitive registration still needs a new
-seed, the v2 exposure census, and a recovery-capable budget.
+seed, both lost exposure corpora (including the sealed v2 census), and a
+recovery-capable budget.
 [`run-20260929`](generic-f4-subspace-pilot/run-20260929/RESULT.md) repeats that
 same budget (build SHA-256
 `de3cb8b896f31f03668f1d0eb14302fef2b1e0bc0be303e7f4021a70dd085335`,
 summary SHA-256
 `04230b42ce3a6392b9a2681ac7ab385e43db41aba5e2617466597246a65a2e4c`).
 It does not replace `RESULT.md`. `run_pilot.py` is closed.
+
+## September 30 family-admission gates
+
+The active goal is to admit at least one complete source-bound one-target
+F4/F5 pipeline and one SAT pipeline, audit natural query yield and failed
+attempts, then compare them with the incumbent and matched rho on fresh
+paired points. The three confirmation rounds above stay closed. These family
+gates do not redefine their objective, references, accounting or results.
+
+The [retrospective F5 audit](f5-closed-diagnostics-20260930/README.md), accepted
+in [PR #1046](https://github.com/aburan28/crypto/pull/1046), preserves the closed
+256-query run: 61 witnesses, 195 budget-exhausted attempts and rank 28/29,
+without a target recovery or verified online cost. Its two lost feasible
+queries led to separate correctness controls. The
+[Boolean/root-matrix control](f5-boolean-system-control-20260930/README.md),
+accepted in [PR #1048](https://github.com/aburan28/crypto/pull/1048), verifies
+exact ANF encoding and full-readback root row spaces. The follow-on
+[production-path control](f5-production-path-control-20260930/README.md)
+was preregistered in [PR #1050](https://github.com/aburan28/crypto/pull/1050);
+[PR #1052](https://github.com/aburan28/crypto/pull/1052) retains its single
+passing native execution, 840 independently checked substitutions and exact
+F4/F5 decisive sets on 66 unique disclosed systems. These guided controls do
+not estimate natural yield, verify actual recursive search traversal or admit
+a complete F4/F5 IC family.
+
+The full SAT development protocol was accepted in
+[PR #1036](https://github.com/aburan28/crypto/pull/1036), with the controller
+and failure-retention path accepted in PRs
+[#1031](https://github.com/aburan28/crypto/pull/1031) and
+[#1042](https://github.com/aburan28/crypto/pull/1042).
+[PR #1051](https://github.com/aburan28/crypto/pull/1051) records its accepted
+snapshot and complete invocation before dispatch, and retains the
+[terminal full development solve](static-sat-runtime-v3/full-development-20260929/README.md).
+Its single invocation completed at rank 29/29 with 37 verified relations from
+149 ordinary queries, retaining 106 source-UNSAT and six conflict-inconclusive
+attempts. It recovered scalar 24886 on its first target attempt; independent
+row/log/scalar/source and fresh archive transport replay passed. The observed
+708,643,292 ns online interval closes through recovery replay. This bounded
+macOS ARM64 control establishes a complete source-bound SAT IC path, with no
+calibrated speedup or fresh-target qualification. Its exposed point, 256-query
+and 64-target caps, two-hour controller watchdog and no-retry rule stay fixed.
+
+The next competitive gate requires complete family admission, the reviewed
+exposure/reference/calibration adapter, fresh points excluding every exposure,
+matched resource envelopes and arm order, and strong one-target rho and
+incumbent references. Development progress or a cheap PDP stage cannot replace
+that independent paired comparison.
+
+The [source-bound F4/F5 controller and one-shot F5 protocol](f5-source-bound-runtime-v1/PROTOCOL.md)
+add full Python/interpreter/native binding, canonical registered JSON stdin,
+independent natural-query/matrix/log/target auditing and durable transport.
+The registered development intent uses the same exposed n17 point, fresh seed
+2026093031, node budget 8192, 512 ordinary/target attempt caps and a two-hour
+controller watchdog. [PR #1056](https://github.com/aburan28/crypto/pull/1056)
+accepted the controller; [PR #1058](https://github.com/aburan28/crypto/pull/1058)
+committed the external receipt before its single dispatch and retains the
+[terminal schema failure](f5-source-bound-runtime-v1/README.md). Native `Job`
+expects integer seeds or an empty list, but v1 submitted `[null]`. Parsing failed
+before IC execution. Independent failure/archive/source/invocation replay passed;
+mathematical costs, rank, targets and speedup remain unknown. This registration
+may not be retried, resumed or extended. A corrected version must pass the
+actual native deserialization contract and float-free deterministic audit
+publication controls before a new registration. Historical F5 and all three
+confirmation registrations remain closed.
+
+The [version-two adapter and fresh development protocol](f5-source-bound-runtime-v2/PROTOCOL.md)
+correct the empty input seed list while preserving null fixture provenance and
+publish finite resource seconds as decimal strings beside the unchanged raw
+receipt. They require the separately frozen actual native Job/Config parser
+control and float-free publication/transport controls before any new IC
+registration. The single [native parser control](f5-source-bound-runtime-v2/interface-control/README.md)
+passed: two inputs reproduced every field/default and six adversarial schemas
+rejected, with independent archive/source/input/output replay. The registrar
+requires the exact accepted proof hash before freezing an invocation. Its
+prospective seed is 2026093032. [PR #1064](https://github.com/aburan28/crypto/pull/1064)
+committed the complete external invocation receipt before the single dispatch;
+[DISPATCH-OBSERVATION.json](f5-source-bound-runtime-v2/DISPATCH-OBSERVATION.json)
+records its owned native process. [TERMINAL.json](f5-source-bound-runtime-v2/TERMINAL.json)
+closes that single invocation: 216 ordinary queries, 61 verified relations,
+full rank 29/29, all logs checked and scalar 24886 recovered on the third target
+attempt. The versioned exact-negative proof verifies all 157 negative queries
+over the exact 63-point geometric PDP input, separate from 62 usable IC points.
+The original v2 gate and first geometric-domain audit rejections are retained.
+Independent source/math/isolated archive replay passes; the exclusive native
+online ledger closes at 10,512,454,542 ns. No speedup, fresh-target qualification
+or promotion is admitted. Exact-head CI/review acceptance completed in PR #1064;
+the fresh paired reference/calibration gate remains outstanding.
+The parser control remains separate: its direct Python analysis inventory is
+not complete execution attestation, and its additional DEFAULTS source is
+explicitly retained as postexecution auditor context. The complete IC result
+above independently passes its full Python/package/interpreter/native pre/post
+gates. Neither development result supplies the pending fresh paired comparison.

@@ -86,6 +86,22 @@ FIELD_ALIASES: dict[str, tuple[str, ...]] = {
     "stage_timers": ("stage_timers",),
     "claim_boundary": ("claim_boundary",),
     "timing_class": ("timing_class",),
+    "target_count": ("target_count",),
+    "ic_target_hash": ("ic_target_hash",),
+    "rho_target_hash": ("rho_target_hash",),
+    "ic_online_wall_ms": ("ic_online_wall_ms",),
+    "rho_online_wall_ms": ("rho_online_wall_ms",),
+    "online_speedup": ("online_speedup",),
+    "online_interval": ("online_interval",),
+    "same_resource_envelope": ("same_resource_envelope",),
+    "ic_scalar_verified": ("ic_scalar_verified",),
+    "rho_scalar_verified": ("rho_scalar_verified",),
+    "independent_validation": ("independent_validation",),
+    "ic_replay_certificate_sha256": ("ic_replay_certificate_sha256",),
+    "rho_replay_certificate_sha256": ("rho_replay_certificate_sha256",),
+    "ic_resource_envelope": ("ic_resource_envelope",),
+    "rho_resource_envelope": ("rho_resource_envelope",),
+    "rho_policy": ("rho_policy",),
     "ic_cost": ("ic_cost",),
     "rho_cost": ("rho_cost",),
     "automorphism_discount": ("automorphism_discount",),
@@ -106,6 +122,17 @@ FIELD_ALIASES: dict[str, tuple[str, ...]] = {
         "non_claims",
         "claim_boundary",
     ),
+}
+
+ONLINE_REQUIRED_STAGES: dict[str, tuple[str, ...]] = {
+    "ic_included_stages": (
+        "target_query",
+        "target_PDP",
+        "target_relation_check",
+        "target_descent",
+        "target_recovery_check",
+    ),
+    "rho_included_stages": ("walk", "collision", "recovery_check"),
 }
 
 
@@ -198,7 +225,140 @@ def validate_claim(
     global_required = list(schema.get("global_provenance_required", []))
     missing_stage = missing_fields(report, required)
     missing_global = missing_fields(report, global_required)
-    ok = not missing_stage and not missing_global
+    validation_errors: list[str] = []
+
+    if stage == "vs_rho":
+        for key in ("candidate_id", "workload_id", "run_id"):
+            value = report.get(key)
+            if not isinstance(value, str) or not value.strip():
+                validation_errors.append(f"{key} must be a nonempty string")
+        candidate_id = report.get("candidate_id")
+        workload_id = report.get("workload_id")
+        run_id = report.get("run_id")
+        candidate_manifest_hash = report.get("candidate_manifest_sha256")
+        workload_manifest_hash = report.get("workload_manifest_sha256")
+        if not isinstance(candidate_manifest_hash, str) or len(candidate_manifest_hash) != 64:
+            validation_errors.append("candidate_manifest_sha256 must be a full SHA-256 hex digest")
+        elif any(ch not in "0123456789abcdef" for ch in candidate_manifest_hash):
+            validation_errors.append("candidate_manifest_sha256 must be lowercase hex")
+        if not isinstance(workload_manifest_hash, str) or len(workload_manifest_hash) != 64:
+            validation_errors.append("workload_manifest_sha256 must be a full SHA-256 hex digest")
+        elif any(ch not in "0123456789abcdef" for ch in workload_manifest_hash):
+            validation_errors.append("workload_manifest_sha256 must be lowercase hex")
+        if isinstance(candidate_id, str) and isinstance(candidate_manifest_hash, str):
+            import re
+            match = re.search(r"h([0-9a-f]{12,64})$", candidate_id)
+            if not candidate_id.startswith("IC1") or not match:
+                validation_errors.append("candidate_id must use the IC1 identity format with a digest suffix")
+            elif not candidate_manifest_hash.startswith(match.group(1)):
+                validation_errors.append("candidate_id digest must match candidate_manifest_sha256")
+        if isinstance(workload_id, str) and isinstance(workload_manifest_hash, str):
+            if len(workload_id) != 12 or any(ch not in "0123456789abcdef" for ch in workload_id):
+                validation_errors.append("workload_id must be 12 lowercase hex digits")
+            elif not workload_manifest_hash.startswith(workload_id):
+                validation_errors.append("workload_id must match workload_manifest_sha256")
+        if all(isinstance(value, str) and value for value in (candidate_id, workload_id, run_id)):
+            import re
+            if not re.fullmatch(re.escape(candidate_id) + r"W" + re.escape(workload_id) + r"R[1-9][0-9]*", run_id):
+                validation_errors.append("run_id must be <candidate_id>W<workload_id>R<run-number>")
+        if type(report.get("target_count")) is not int or report["target_count"] != 1:
+            validation_errors.append("target_count must equal 1")
+        target_hashes = (report.get("ic_target_hash"), report.get("rho_target_hash"))
+        if not all(isinstance(value, str) and value.strip() for value in target_hashes):
+            validation_errors.append("IC and rho target hashes must be nonempty strings")
+        elif target_hashes[0] != target_hashes[1]:
+            validation_errors.append("IC and rho target hashes must match")
+        if report.get("timing_class") not in stage_schema.get("timing_class_enum", []):
+            validation_errors.append("timing_class must be single_target_online_wall")
+        if report.get("same_resource_envelope") is not True:
+            validation_errors.append("same_resource_envelope must be true")
+        for key in ("ic_scalar_verified", "rho_scalar_verified"):
+            if report.get(key) is not True:
+                validation_errors.append(f"{key} must be true")
+        if report.get("independent_validation") is not True:
+            validation_errors.append("independent_validation must be true")
+        for key in ("ic_replay_certificate_sha256", "rho_replay_certificate_sha256"):
+            digest = report.get(key)
+            if not isinstance(digest, str) or len(digest) != 64 or any(
+                ch not in "0123456789abcdef" for ch in digest
+            ):
+                validation_errors.append(f"{key} must be a full lowercase SHA-256 digest")
+        ic_resources = report.get("ic_resource_envelope")
+        rho_resources = report.get("rho_resource_envelope")
+        if not isinstance(ic_resources, dict) or not ic_resources:
+            validation_errors.append("ic_resource_envelope must be a nonempty object")
+        if not isinstance(rho_resources, dict) or not rho_resources:
+            validation_errors.append("rho_resource_envelope must be a nonempty object")
+        if isinstance(ic_resources, dict) and isinstance(rho_resources, dict):
+            if ic_resources != rho_resources:
+                validation_errors.append("IC and rho resource envelopes must match exactly")
+
+        ic_ms = positive_cost(report.get("ic_online_wall_ms"))
+        rho_ms = positive_cost(report.get("rho_online_wall_ms"))
+        speedup = positive_cost(report.get("online_speedup"))
+        if ic_ms is None or rho_ms is None or speedup is None:
+            validation_errors.append("online times and speedup must be positive finite numbers")
+        elif not math.isclose(speedup, rho_ms / ic_ms, rel_tol=1e-9, abs_tol=1e-12):
+            validation_errors.append("online_speedup must equal rho_online_wall_ms / ic_online_wall_ms")
+
+        phase_costs = report.get("ic_online_phase_ms")
+        phase_fields = stage_schema.get("ic_online_phase_fields", [])
+        if not isinstance(phase_costs, dict):
+            validation_errors.append("ic_online_phase_ms must be an object")
+        else:
+            phase_values = []
+            for key in phase_fields:
+                value = phase_costs.get(key)
+                if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+                    validation_errors.append(f"ic_online_phase_ms.{key} must be a finite nonnegative number")
+                else:
+                    phase_values.append(float(value))
+            if len(phase_values) == len(phase_fields) and ic_ms is not None:
+                if not math.isclose(math.fsum(phase_values), ic_ms, rel_tol=1e-6, abs_tol=1e-3):
+                    validation_errors.append("IC exclusive phase costs must sum to ic_online_wall_ms")
+
+        interval = report.get("online_interval")
+        interval_fields = (
+            stage_schema.get("online_interval_event_fields", [])
+            + stage_schema.get("online_interval_stage_fields", [])
+        )
+        if not isinstance(interval, dict):
+            validation_errors.append("online_interval must be an object")
+        else:
+            for key in interval_fields:
+                value = interval.get(key)
+                valid = (
+                    isinstance(value, str) and bool(value.strip())
+                    if key.endswith("_event")
+                    else isinstance(value, list) and bool(value)
+                    and all(isinstance(item, str) and item.strip() for item in value)
+                )
+                if not valid:
+                    validation_errors.append(f"online_interval.{key} is missing or invalid")
+            for included_key, required_stages in ONLINE_REQUIRED_STAGES.items():
+                included = interval.get(included_key)
+                if isinstance(included, list):
+                    missing = sorted(set(required_stages) - set(included))
+                    if missing:
+                        validation_errors.append(
+                            f"online_interval.{included_key} is missing required stages: {', '.join(missing)}"
+                        )
+
+        policy = report.get("rho_policy")
+        if not isinstance(policy, dict):
+            validation_errors.append("rho_policy must be an object")
+        else:
+            for key in stage_schema.get("rho_policy_integer_fields", []):
+                value = policy.get(key)
+                minimum = stage_schema.get("rho_policy_minimums", {}).get(key)
+                if type(value) is not int or (minimum is not None and value < minimum):
+                    validation_errors.append(f"rho_policy.{key} must be an integer >= {minimum}")
+            for key in stage_schema.get("rho_policy_string_fields", []):
+                value = policy.get(key)
+                if not isinstance(value, str) or not value.strip():
+                    validation_errors.append(f"rho_policy.{key} must be a nonempty string")
+
+    ok = not missing_stage and not missing_global and not validation_errors
     return {
         "schema_version": ledger.get("schema_version"),
         "stage": stage,
@@ -206,6 +366,7 @@ def validate_claim(
         "status": "PASS" if ok else "FAIL",
         "missing_stage_fields": missing_stage,
         "missing_global_provenance": missing_global,
+        "validation_errors": validation_errors,
         "required_stage_fields": required,
         "required_global_provenance": global_required,
     }
@@ -351,11 +512,16 @@ def preflight(protocol: dict[str, Any], ledger: dict[str, Any]) -> dict[str, Any
 
 
 def plan(protocol: dict[str, Any], ledger: dict[str, Any]) -> dict[str, Any]:
+    contract = protocol.get("primary_speedup_contract", {})
+    contract_ready = contract.get("status") == "ready" and contract.get("target_count") == 1
     beats = []
     for beat_id, beat in sorted(
         protocol["beats"].items(),
         key=lambda item: (item[1].get("priority", 99), item[0]),
     ):
+        eligible = contract_ready and bool(beat.get("primary_speedup_eligible")) and (
+            beat.get("timing_class_goal") == "single_target_online_wall"
+        )
         beats.append(
             {
                 "beat_id": beat_id,
@@ -365,6 +531,12 @@ def plan(protocol: dict[str, Any], ledger: dict[str, Any]) -> dict[str, Any]:
                 "stage": beat.get("stage"),
                 "n": beat.get("n"),
                 "timing_class_goal": beat.get("timing_class_goal"),
+                "primary_speedup_eligible": eligible,
+                "primary_speedup_blocker": None if eligible else (
+                    beat.get("primary_speedup_blocker")
+                    or protocol.get("primary_speedup_contract", {}).get("blocker")
+                    or "beat is diagnostic-only"
+                ),
             }
         )
     return {
@@ -372,15 +544,12 @@ def plan(protocol: dict[str, Any], ledger: dict[str, Any]) -> dict[str, Any]:
         "task_id": TASK_ID,
         "ledger": str(protocol["ledger"]["path"]),
         "ledger_schema_version": ledger.get("schema_version"),
+        "primary_speedup_contract": contract,
         "agent_priorities": ledger.get("agent_priorities", []),
         "beats": beats,
         "how_to_beat": ledger.get("how_to_beat", []),
         "commands": {
             "preflight": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py preflight",
-            "smoke": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat smoke.koblitz.vs_rho.n13",
-            "n37_wall": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n37_wall",
-            "n41_charged": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n41_charged",
-            "n37_full": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py launch --beat koblitz.vs_rho.n37_wall --fixtures 1024",
             "claim_check": "python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py claim-check --report PATH --stage vs_rho",
         },
     }
@@ -569,24 +738,17 @@ def extract_ic_cost(rows: list[dict[str, Any]], timing_class: str) -> float | No
 
 
 def extract_rho_cost(rows: list[dict[str, Any]]) -> float | None:
-    if not rows:
+    """Return a cost only for exactly one explicit target result row."""
+    targets = [row for row in rows if row.get("kind") == "rho_public_fixture"]
+    if len(targets) != 1:
         return None
-    totals = []
-    for row in rows:
-        value = None
-        if "total_ms" in row:
-            value = positive_cost(row['total_ms'])
-        elif isinstance(row.get("timing_breakdown_ms"), dict):
-            timing = row["timing_breakdown_ms"]
-            if "total_ms" in timing:
-                value = positive_cost(timing['total_ms'])
-        if value is None:
-            return None
-        totals.append(value)
-    if not totals:
-        return None
-    # IC's full_algorithm field is a batch total. Compare equal workloads.
-    return math.fsum(totals)
+    row = targets[0]
+    if "total_ms" in row:
+        return positive_cost(row["total_ms"])
+    timing = row.get("timing_breakdown_ms")
+    if isinstance(timing, dict) and "total_ms" in timing:
+        return positive_cost(timing["total_ms"])
+    return None
 
 
 def comparison_integrity(direct_rows, rho_rows, expected_count=None):
@@ -595,6 +757,12 @@ def comparison_integrity(direct_rows, rho_rows, expected_count=None):
     This checks producer consistency only. Independent group/rank replay is
     still required for a scientific result.
     """
+    try:
+        require(expected_count == 1, "primary comparison requires exactly one target")
+    except AutolabError as exc:
+        return {"status": "INVALID_COMPARISON", "reason": str(exc), "fixture_hash": None,
+                "independent_validation": False}
+
     def corpus(rows, kind, verified_key):
         selected = [r for r in rows if r.get('kind') == kind]
         require(bool(selected), 'no complete fixture records')
@@ -670,6 +838,29 @@ def draft_vs_rho_claim(
         "n": beat["n"],
         "n_or_bits": beat["n"],
         "timing_class": timing_class,
+        "candidate_id": None,
+        "candidate_manifest_sha256": None,
+        "workload_id": None,
+        "workload_manifest_sha256": None,
+        "run_id": None,
+        "autolab_run_id": run.name,
+        "target_count": integrity.get("fixtures"),
+        "ic_target_hash": integrity.get("fixture_hash") if integrity["status"] == "MATCHED" else None,
+        "rho_target_hash": integrity.get("fixture_hash") if integrity["status"] == "MATCHED" else None,
+        "ic_online_wall_ms": None,
+        "rho_online_wall_ms": None,
+        "ic_online_phase_ms": None,
+        "online_speedup": None,
+        "online_interval": None,
+        "same_resource_envelope": None,
+        "ic_scalar_verified": integrity["status"] == "MATCHED" and producers_ok,
+        "rho_scalar_verified": integrity["status"] == "MATCHED" and producers_ok,
+        "independent_validation": False,
+        "ic_replay_certificate_sha256": None,
+        "rho_replay_certificate_sha256": None,
+        "ic_resource_envelope": None,
+        "rho_resource_envelope": None,
+        "rho_policy": None,
         "ic_cost": ic_cost,
         "rho_cost": rho_cost,
         "automorphism_discount": automorphism_discount(int(beat["n"])),
@@ -683,9 +874,9 @@ def draft_vs_rho_claim(
             else "PRODUCER_FAILURE"
         ),
         "claim_boundary": (
-            "Public synthetic Koblitz fixture comparison only. Not key recovery, "
-            "not asymptotic sub-rho, not an imported-point attack, and not a "
-            "ledger promotion until independent validation and schema PASS."
+            "Legacy single-fixture producer diagnostic only. Current producers "
+            "report whole-process or operation-counted costs, not target-online "
+            "wall intervals; this row is not a primary single-target speedup."
         ),
         "claim_boundary_non_claims": [
             "not key recovery",
@@ -754,7 +945,7 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
     fixtures = arguments.fixtures
     if fixtures is None:
         fixtures = int(beat.get("fixtures", beat.get("fixtures_default", 1)))
-    require(fixtures > 0, "fixtures must be positive")
+    require(fixtures == 1, "run exactly one target per workload; batch fixtures are disabled")
     repeats = getattr(arguments, "repeats", None) or DEFAULT_TIMED_REPEATS
     require(repeats > 0, "repeats must be positive")
 
@@ -1024,7 +1215,7 @@ def parser() -> argparse.ArgumentParser:
     launch_parser.add_argument(
         "--fixtures",
         type=int,
-        help="Override fixture count (default from beat; use 1024 for full n37/n41)",
+        help="Compatibility option; the only accepted value is 1 target per workload",
     )
     launch_parser.add_argument(
         "--repeats",

@@ -1168,6 +1168,13 @@ Two isolated re-timings came after round 0025:
 - **[walltime_strong_rho_20260929](walltime_strong_rho_20260929/RESULTS.md).** The lead
   survives main's strongest rho, at 0.74–0.84 in-process, and is gone by `n = 23`.
 
+A third re-timing followed, on 2026-09-30:
+
+- **[sized_cache_rho_20260930](sized_cache_rho_20260930/RESULTS.md).** Sizing rho's
+  recent-point cache to its walk removes the IC arm's small-cell time lead: IC is 0.98–1.03 of
+  the sized rho on wall time at the four small cells, and 1.043 [1.015, 1.074] slower at
+  `n23a0`. It is engineering, in rho's favour. Instruction counts are unchanged.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.

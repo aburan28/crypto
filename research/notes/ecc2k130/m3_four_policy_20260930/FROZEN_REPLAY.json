@@ -1,0 +1,19 @@
+{
+  "schema": "ecc2k130-degree7-m3-replay-repair-v1",
+  "run_id": 36722040881,
+  "repair_source_commit": "b6e8f0bbc9e9c55c397ada2af0ccca6fefa1c2b6",
+  "original_frozen_sha256": "1010be473d848fe1c6ba7e76c93b471dca66a7875fef4c78de5847ac229c926c",
+  "result_sha256": "f0cb3c18dac3b01da91892a3fb4ecb9c77f9fbab86ccc6b38f6343d5738989aa",
+  "failed_replay_sha256": "8c7c5a10c5c8def3e5869b0d0d9ba051ee0a31e3fcb093e0ac2d46342958daa7",
+  "repair_protocol_sha256": "4acd0da25e5cf512d4ad8c0706cc6a22fba02dbd4485bc036abb05e0d28613a1",
+  "replaced_sha256": {
+    ".github/workflows/ecc2k130-m3-four-policy.yml": "ce1a16e03fa8ae8eed332f81aafa4495ced505df169b8c687d252a56675c4a48",
+    "research/notes/ecc2k130/m3_four_policy_20260930/verify.py": "cb562b6364d6943b947821177b56aa331163e96177349eef6d02802f6822c559",
+    "research/notes/ecc2k130/m3_four_policy_20260930/test_arithmetic.py": "d6d68811bca37395978fe7441501524d1f38eb43080a94ede72bdd854ab72bda"
+  },
+  "sha256": {
+    ".github/workflows/ecc2k130-m3-four-policy.yml": "5c2a2f06008a913e5c351b4c6070cc13c6d7b1880b82e936dc52ed00c8cba147",
+    "research/notes/ecc2k130/m3_four_policy_20260930/verify.py": "0a9ee3cabb3f7080506415d0bcda3099a2f54850c08a5ad810d0239af54e9bb3",
+    "research/notes/ecc2k130/m3_four_policy_20260930/test_arithmetic.py": "0f8fcd9554e1107d78ec6b9e9da265b181271f1db3bbc213d030038ae5b8c1fb"
+  }
+}

@@ -944,7 +944,7 @@ fn print_tower_step(k: usize, st: &f4_fp_tower::StepTrace) {
         format!(", memory {rss} MB (peak {peak} MB)")
     });
     eprintln!(
-        "tower step {}: degree {}, {} critical + {} tower pairs, {} S-rows + {} reducers + {} promoted x {} cols, nnz {}, residue {} x {}, fresh {} (lowest degree {}), basis {}, pairs left {}, {:.1} ms (rows {:.0}, A {:.0}, B {:.0}, update {:.0}), B' {} entries, kept {} elements with {} entries{}",
+        "tower step {}: degree {}, {} critical + {} tower pairs, {} S-rows + {} reducers + {} promoted x {} cols, nnz {}, residue {} x {}, fresh {} (lowest degree {}), basis {}, pairs left {}, {:.1} ms (rows {:.0}, A {:.0}, B {:.0}, update {:.0}), B' {} entries, kept {} elements with {} entries, muladds {}{}{}",
         k,
         st.degree,
         st.critical_pairs,
@@ -968,6 +968,11 @@ fn print_tower_step(k: usize, st: &f4_fp_tower::StepTrace) {
         st.dense_entries,
         st.basis_kept,
         st.basis_entries,
+        st.muladds,
+        st.full_rank_after.map_or(String::new(), |k| format!(
+            ", full rank after {k} of {} S-rows ({} skipped)",
+            st.s_rows, st.skipped_rows
+        )),
         memory
     );
 }
@@ -1027,6 +1032,7 @@ fn measure_tower(
     stop_below: Option<usize>,
     max_nnz: Option<u64>,
     trace: bool,
+    full_rank_exit: bool,
     sig: Option<sig_fp_tower::SigOptions>,
 ) -> (Outcome, Vec<RPoly>) {
     let p = ring.p;
@@ -1060,6 +1066,7 @@ fn measure_tower(
     if let Some(c) = max_nnz {
         opts = opts.with_max_nnz(c);
     }
+    opts.full_rank_exit = full_rank_exit;
     if trace {
         // Each step as it ends, so that a run that dies leaves its trace.
         opts = opts.on_step(print_tower_step);
@@ -1115,6 +1122,8 @@ fn measure_tower(
             "muladds": r.muladds,
             "max_nnz": r.max_nnz,
             "max_residual_rows": r.max_residual_rows,
+            "full_rank_exit": sig.is_none().then_some(full_rank_exit),
+            "rows_skipped_full_rank": sig.is_none().then_some(r.rows_skipped),
             "oversize": r.oversize,
             "critical_pairs_reduced": r.critical_pairs_reduced,
             "tower_pairs_reduced": r.tower_pairs_reduced,
@@ -1165,6 +1174,9 @@ struct Args {
     max_nnz: Option<u64>,
     /// `f4_fp_tower` only: print one line per F4 step.
     trace: bool,
+    /// `f4_fp_tower` only: skip a step's remaining S-rows once their
+    /// echelon is full (on unless `--no-full-rank-exit`).
+    full_rank_exit: bool,
     /// `sig_fp_tower` only: the module and rewrite orders.
     sig: sig_fp_tower::SigOptions,
 }
@@ -1218,6 +1230,7 @@ fn parse_args() -> Args {
         engine: Engine::F4,
         max_nnz: None,
         trace: false,
+        full_rank_exit: true,
         sig: sig_fp_tower::SigOptions::default(),
     };
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -1231,6 +1244,11 @@ fn parse_args() -> Args {
     while i < args.len() {
         if args[i] == "--trace" {
             a.trace = true;
+            i += 1;
+            continue;
+        }
+        if args[i] == "--no-full-rank-exit" {
+            a.full_rank_exit = false;
             i += 1;
             continue;
         }
@@ -1418,6 +1436,7 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
                     a.stop_below,
                     a.max_nnz,
                     a.trace,
+                    a.full_rank_exit,
                     (a.engine == Engine::Sig).then_some(a.sig),
                 );
                 (out, Dumpable::Ring(basis))

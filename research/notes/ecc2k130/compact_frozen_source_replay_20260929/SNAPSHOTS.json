@@ -1,6 +1,7 @@
 {
   "freezes": [
     "research/notes/ecc2k130/compact_s3_batch_20260929/FROZEN.json",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json",
     "research/notes/ecc2k130/compact_swap_quotient_20260929/FROZEN.json"
   ],
   "schema": "compact-frozen-source-snapshots-v1",
@@ -10,6 +11,12 @@
       "gzip_sha256": "ae906875cad520e34f8f7aba0e0076ee84d52f7be1f251cb5035516ca22dd932",
       "path": ".github/workflows/compact-s3-batch.yml",
       "sha256": "8a1d24841733cc5913b570004543a8d7f1e5fdd3ce2f98267ba7924849184888"
+    },
+    {
+      "bytes": 5196,
+      "gzip_sha256": "fc5ddc62071f7fc7410a71e4bc8a1b42d1a14c067da48907837b6a14981c11b2",
+      "path": ".github/workflows/compact-s3-prefilter.yml",
+      "sha256": "29b154568920e1e5aeec0f1d86f63629a43dfd4624a0dfa2bea1d4f1c075893c"
     },
     {
       "bytes": 3933,
@@ -34,6 +41,12 @@
       "gzip_sha256": "8cade9cb2fffaee7e053324c715508a4734ea8b23289bfd43c009080dad6b4ed",
       "path": "examples/koblitz_orbit_dlp_fast.rs",
       "sha256": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75"
+    },
+    {
+      "bytes": 67739,
+      "gzip_sha256": "8a411517c6e21c82695b920717eea32f2edd745339b65c1d230099e8b3e64622",
+      "path": "examples/koblitz_orbit_dlp_s3_batch.rs",
+      "sha256": "702a0a05709bc14bc10bafbb08edb2a2f5f86794e970d84c317da3bc65cdcf38"
     },
     {
       "bytes": 60280,
@@ -78,6 +91,30 @@
       "sha256": "254869e52bdbd417e14d74c87940293490160faaa7fbb45f4edcb6b773a4b0f6"
     },
     {
+      "bytes": 5268,
+      "gzip_sha256": "ddde91db84a90c0cd01f18d78eedb577404b98c6367ad59cff13b35a169db796",
+      "path": "research/notes/ecc2k130/compact_s3_prefilter_20260930/PROTOCOL.md",
+      "sha256": "74bd16b4bb8fd21b2457e2e7690ce88f548bc2b5ea40edbeced492ff81e87bdf"
+    },
+    {
+      "bytes": 3975,
+      "gzip_sha256": "783d6c27c840a8d9e5e458e660aec63388673629abe52d9cbba5887c960ff279",
+      "path": "research/notes/ecc2k130/compact_s3_prefilter_20260930/prepare.py",
+      "sha256": "eda8080fa4f508c08130129479e0ad26f3235e1b628e27b5bbfc9db52ce85362"
+    },
+    {
+      "bytes": 5743,
+      "gzip_sha256": "cf0097c8a428f676b4c3f0066828e92002a92de2e0b9183ff3109c8d2f5c6d96",
+      "path": "research/notes/ecc2k130/compact_s3_prefilter_20260930/run_panel.py",
+      "sha256": "98cc9a6d20b50742a973ed7e35a1235be753b7fcf2f05390c821f0a66c073ab9"
+    },
+    {
+      "bytes": 19703,
+      "gzip_sha256": "49367daec39501f4263ef0510428ceeec9ef7c1fa113a097e10e7822fda0867c",
+      "path": "research/notes/ecc2k130/compact_s3_prefilter_20260930/verify_panel.py",
+      "sha256": "9c6acec9cc5f0129f71392d8943aedcf37e96f7bd95d6e439fa4842f0dc355c6"
+    },
+    {
       "bytes": 29121,
       "gzip_sha256": "1e52ee8d8da43a9ebaca9766ea21c44e52c4f2f88800c0311875938ac4785e91",
       "path": "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock",
@@ -96,6 +133,12 @@
       "sha256": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa"
     },
     {
+      "bytes": 670128,
+      "gzip_sha256": "a3c46105f33606171cfea62a2f8de24c753051b2fac7c6d1d882d1e86dc21ed9",
+      "path": "src/cryptanalysis/koblitz_index_calculus.rs",
+      "sha256": "22b3601a082e706abf709a9798823a21d6748f84b47647cdfe6a7fcc1c73382c"
+    },
+    {
       "bytes": 669217,
       "gzip_sha256": "e5bfdb9eeaeff3e2145a920f8f6e2dbb5f2aff77c06f7965c6be106dd01230ee",
       "path": "src/cryptanalysis/koblitz_index_calculus.rs",
@@ -112,6 +155,12 @@
       "gzip_sha256": "4da43a8e504e117980f95b2bd19c924520615f1c6b76b74a633ef03ab45f1d46",
       "path": "src/lib.rs",
       "sha256": "f1e13bc7fa51ff57dd4cd056036669577d1f07a0cb06502b4b839b9af50ffba6"
+    },
+    {
+      "bytes": 15277,
+      "gzip_sha256": "09e90796796898948f24926ca79b35775deaa57417884ee11eea328befd54e86",
+      "path": "tools/isolated_bench.py",
+      "sha256": "4575860a5da9a6a6e997b91fc173ac515a2497290c0e830301c83fa3b712c05c"
     }
   ],
   "source_commit": "f84e6193a5b33b939b5dfa8934852a4115a6f1fd"

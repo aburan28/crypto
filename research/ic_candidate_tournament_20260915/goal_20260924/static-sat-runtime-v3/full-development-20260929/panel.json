@@ -1,0 +1,26 @@
+{
+  "cms_conflict_budget": 1000000,
+  "cms_timeout_seconds": 120,
+  "descent_query_seed": 2026093012,
+  "export_nonce": 2026093013,
+  "export_timeout_seconds": 60,
+  "max_descent_queries": 64,
+  "max_relation_queries": 256,
+  "question": "development-source-control",
+  "relation_query_seed": 2026093011,
+  "resources": {
+    "cpu_workers": 1,
+    "host_class": "physical-macos-arm64",
+    "memory_limit_bytes": null,
+    "target_count": 1,
+    "total_wall_limit_seconds": 7200
+  },
+  "run_number": 0,
+  "target_input": {
+    "input_law": "one-supplied-public-point-development-control",
+    "known_scalar_supplied": false,
+    "point": [52411, 72106],
+    "point_was_previously_supplied": true,
+    "seed": null
+  }
+}

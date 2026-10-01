@@ -276,8 +276,8 @@ pub use canonical_lift::{
 };
 pub use ec_index_calculus::{
     build_factor_base, ec_index_calculus_dlp, find_one_relation, find_roots_fp,
-    gaussian_eliminate_mod_n, pollard_rho_ecdlp, semaev_s3, semaev_s3_in_x3, semaev_s4_in_x4,
-    sqrt_mod_p, FactorBaseEntry, Relation,
+    gaussian_eliminate_mod_n, gaussian_eliminate_mod_n_particular, pollard_rho_ecdlp, semaev_s3,
+    semaev_s3_in_x3, semaev_s4_in_x4, sqrt_mod_p, FactorBaseEntry, ModNSolution, Relation,
 };
 pub use ec_index_calculus_j0::{
     build_eisenstein_factor_base, eisenstein_smooth_ic_dlp, j0_index_calculus_dlp,

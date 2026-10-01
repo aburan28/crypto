@@ -1,0 +1,42 @@
+{
+  "binary_bytes": 2180736,
+  "binary_sha256": "604a81550ed7fc1caa232fffa2aee5850658a2092e6f3bd5dad8d26c43abd293",
+  "cases": 7,
+  "cpu_count": 4,
+  "cpu_features": [
+    "avx2",
+    "avx512f",
+    "bmi2",
+    "popcnt"
+  ],
+  "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+  "git_sha": "ef3e193e697ea900ed25242e2fe1a49207088f14",
+  "memory": "MemTotal:       16372440 kB",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "primary": {
+    "case": "f5_n24_m24_d4",
+    "cols": 12951,
+    "criterion_ms": 0.223208,
+    "criterion_word_ops": 1350,
+    "direct_pack_used": true,
+    "direct_unpack_used": true,
+    "f5_build_ms": 6.002421,
+    "output_terms": 13734979,
+    "rank": 6924,
+    "reduce_ms": 32.744465,
+    "reduce_word_ops": 100213183,
+    "row_space_fp": "ed5234ba018bc079",
+    "rows_built": 6924,
+    "rows_f4": 7224,
+    "rows_fp": "3f659516eff553b8",
+    "rows_pruned": 300,
+    "unpack_ms": 39.748421,
+    "wall_ms": 78.988534
+  },
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "source": {
+    "examples/f4_f2_bench.rs": "d40f9f0c76e5c56c9f4a52596b9edef41f321aa3d70cfb023c4ba21fdde70336",
+    "src/cryptanalysis/gf2_elim.rs": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+    "src/cryptanalysis/matrix_f5_f2.rs": "bf35680f431ab7ac13a7615d334ec9b060217b84bdde36f03ce00319491d42da"
+  }
+}
