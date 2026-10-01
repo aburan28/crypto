@@ -406,5 +406,110 @@ class TimingTests(unittest.TestCase):
         self.assertEqual(observed["timed_repeats"], 1)
 
 
+class BatchPanelTests(unittest.TestCase):
+    BEAT = "koblitz.compact_orbit.n61_panel"
+
+    def setUp(self) -> None:
+        self.protocol = lab.load_protocol()
+        self.ledger = lab.load_ledger(self.protocol)
+        self.beat = self.protocol["beats"][self.BEAT]
+
+    def test_panel_beat_is_registered_as_diagnostic_only(self) -> None:
+        self.assertEqual(self.beat["launch_mode"], "batch_panel")
+        self.assertEqual(self.beat["stage"], "end_to_end_dlp")
+        self.assertFalse(self.beat["primary_speedup_eligible"])
+        self.assertGreaterEqual(self.beat["targets_minimum"], 1024)
+        for targets in self.beat["k_candidates"]:
+            self.assertGreaterEqual(int(targets), self.beat["targets_minimum"])
+        rows = {row["beat_id"]: row for row in lab.plan(self.protocol, self.ledger)["beats"]}
+        self.assertFalse(rows[self.BEAT]["primary_speedup_eligible"])
+
+    def test_single_target_launch_rejects_the_panel_beat(self) -> None:
+        args = lab.parser().parse_args(["launch", "--beat", self.BEAT])
+        with self.assertRaisesRegex(lab.AutolabError, "launch-panel"):
+            lab.launch(args)
+
+    def test_panel_rejects_small_batches_and_single_target_beats(self) -> None:
+        args = lab.parser().parse_args(["launch-panel", "--beat", self.BEAT, "--targets", "32"])
+        with self.assertRaisesRegex(lab.AutolabError, ">= 1024"):
+            lab.launch_panel(args)
+        args = lab.parser().parse_args(["launch-panel", "--beat", "koblitz.vs_rho.n37_wall"])
+        with self.assertRaisesRegex(lab.AutolabError, "not a batch panel"):
+            lab.launch_panel(args)
+
+    def test_parse_time_l_ignores_producer_lines(self) -> None:
+        text = textwrap.dedent(
+            """\
+            note: producer line 12
+                  295.04 real       273.93 user        16.72 sys
+               11502862336  maximum resident set size
+                  2274502049018  instructions retired
+                       12  swaps
+            """
+        )
+        parsed = lab.parse_time_l(text)
+        self.assertEqual(parsed["max_rss_bytes"], 11502862336)
+        self.assertEqual(parsed["instructions_retired"], 2274502049018)
+        self.assertEqual(parsed["swaps"], 12)
+        self.assertNotIn("page_faults", parsed)
+
+    def block_records(self, scalars):
+        ic = [
+            {"kind": "compact_orbit_dlp_target", "fixture_index": i, "published_fixture_scalar": s,
+             "target": [s, s + 1], "recovered_matches_published": True, "group_verified": True,
+             "probes": 3, "target_ms": 0.5}
+            for i, s in enumerate(scalars)
+        ]
+        rho = [
+            {"kind": "rho_ks_batch_fixture", "fixture_index": i, "published_fixture_scalar": s,
+             "recovered_fixture_scalar": s, "published_q": [s, s + 1], "verified": True}
+            for i, s in enumerate(scalars)
+        ] + [{"kind": "rho_ks_batch_summary"}]
+        return ic, rho
+
+    def test_block_check_requires_same_verified_targets(self) -> None:
+        ic, rho = self.block_records([5, 9])
+        checks = lab.check_panel_block(ic, rho, [5, 9])
+        for key in ("ic_all_verified", "rho_all_verified", "ic_matches_corpus",
+                    "rho_matches_corpus", "same_target_points"):
+            self.assertTrue(checks[key], key)
+        rho[1]["published_q"] = [9, 11]
+        self.assertFalse(lab.check_panel_block(ic, rho, [5, 9])["same_target_points"])
+        ic[0]["group_verified"] = False
+        self.assertFalse(lab.check_panel_block(ic, rho, [5, 9])["ic_all_verified"])
+        self.assertFalse(lab.check_panel_block([], rho, [5, 9])["ic_all_verified"])
+
+    def test_untimed_digest_ignores_timers(self) -> None:
+        ic, _ = self.block_records([5])
+        slower = [dict(ic[0], target_ms=99.0)]
+        self.assertEqual(lab.untimed_digest(ic), lab.untimed_digest(slower))
+
+    def test_panel_claims_pass_end_to_end_and_fail_vs_rho_closed(self) -> None:
+        with tempfile.TemporaryDirectory(dir=lab.RUNS_DIR.parent) as tmp:
+            run = Path(tmp)
+            (run / "artifacts").mkdir()
+            (run / "artifacts/replay_ic.json").write_text("{}\n")
+            summary = {
+                "targets": 1024, "K": 600, "subgroup_order_bits": 47.21,
+                "corpora": {"eval": {"name": "e"}, "tune": {"name": "t"}, "disjoint": True},
+                "executables": {"git_head": "0" * 40},
+                "host": {"node": "test"},
+                "isolation": "none",
+                "wall_ratio": {"median": 0.3}, "user_ratio": None, "instructions_ratio": None,
+                "verification": {"ic_all_verified": True, "rho_all_verified": True},
+                "blocks": [{"block": 0, "ic_timing_ms": {"process_total": 1.0}}],
+            }
+            end_to_end, vs_rho = lab.draft_panel_claims(
+                beat_id=self.BEAT, beat=self.beat, run=run, summary=summary
+            )
+        e2e = lab.validate_claim(end_to_end, stage="end_to_end_dlp", ledger=self.ledger)
+        self.assertEqual(e2e["status"], "PASS", e2e)
+        check = lab.validate_claim(vs_rho, stage="vs_rho", ledger=self.ledger)
+        self.assertEqual(check["status"], "FAIL")
+        self.assertIn("target_count must equal 1", check["validation_errors"])
+        for absent in ("ic_online_wall_ms", "rho_online_wall_ms", "ic_online_phase_ms", "online_interval"):
+            self.assertNotIn(absent, vs_rho)
+
+
 if __name__ == "__main__":
     unittest.main()
