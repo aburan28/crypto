@@ -2248,6 +2248,35 @@
    ]
   },
   {
+   "slug": "icv1-f2m127-t24589614856193402413-a00e5890",
+   "icv1": "ICV1:f2m-127-364a9ce5:24589614856193402413:170141183460469231707097688859690703316:0x1:-7:unk:r:a00e5890d422",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 127,
+    "modulus": "0x80000000000000000000000000000003",
+    "modulus_rule": "least sparse irreducible, uncapped (docs/curves/ICV1.md)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-127-364a9ce5\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80000000000000000000000000000003\",\"v\":\"1\"}",
+   "trace": 24589614856193402413,
+   "order": "170141183460469231707097688859690703316",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n127",
+    "K_0 / GF(2^127)",
+    "K_0/2^127",
+    "K_0/F_2^127"
+   ],
+   "standard_names": [],
+   "sources": [
+    "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
+    "prose, by the constructor rule: docs/curves/registry.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-f2m131-tm22283658519494248867-115e0dc5",
    "icv1": "ICV1:f2m-131-5cc3e086:-22283658519494248867:2722258935367507707729280517973639940516:0x1:-7:unk:r:115e0dc5d9eb",
    "family": "koblitz",
@@ -2278,6 +2307,93 @@
    ],
    "representations": [],
    "ec1_unresolved": "the challenge's normal-basis points are not imported (src/bin/ic/params.rs)"
+  },
+  {
+   "slug": "icv1-f2m137-t574016314927011818501-11ceb4d6",
+   "icv1": "ICV1:f2m-137-47245086:574016314927011818501:174224571863520493292673782690138312446972:0x1:-7:unk:r:11ceb4d66d95",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 137,
+    "modulus": "0x20000000000000000000000000000000813",
+    "modulus_rule": "least sparse irreducible, uncapped (docs/curves/ICV1.md)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-137-47245086\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000000000813\",\"v\":\"1\"}",
+   "trace": 574016314927011818501,
+   "order": "174224571863520493292673782690138312446972",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n137",
+    "K_0 / GF(2^137)",
+    "K_0/2^137",
+    "K_0/F_2^137"
+   ],
+   "standard_names": [],
+   "sources": [
+    "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
+    "prose, by the constructor rule: docs/curves/registry.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-f2m151-tm97937651335354183120307-ee31df7e",
+   "icv1": "ICV1:f2m-151-3756229f:-97937651335354183120307:2854495385411919762116669876550325626948613556:0x1:-7:unk:r:ee31df7e19f3",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 151,
+    "modulus": "0x80000000000000000000000000000000000009",
+    "modulus_rule": "least sparse irreducible, uncapped (docs/curves/ICV1.md)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-151-3756229f\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x80000000000000000000000000000000000009\",\"v\":\"1\"}",
+   "trace": -97937651335354183120307,
+   "order": "2854495385411919762116669876550325626948613556",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n151",
+    "K_0 / GF(2^151)",
+    "K_0/2^151",
+    "K_0/F_2^151"
+   ],
+   "standard_names": [],
+   "sources": [
+    "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
+    "prose, by the constructor rule: docs/curves/registry.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-f2m157-t158060339213695215877259-816eafb2",
+   "icv1": "ICV1:f2m-157-f01548f6:158060339213695215877259:182687704666362864775460446029196163761775690614:0x1:-7:unk:r:816eafb26d94",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 157,
+    "modulus": "0x2000000000000000000000000000000000000065",
+    "modulus_rule": "least sparse irreducible, uncapped (docs/curves/ICV1.md)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-157-f01548f6\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x2000000000000000000000000000000000000065\",\"v\":\"1\"}",
+   "trace": 158060339213695215877259,
+   "order": "182687704666362864775460446029196163761775690614",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n157",
+    "K_1 / GF(2^157)",
+    "K_1/2^157",
+    "K_1/F_2^157"
+   ],
+   "standard_names": [],
+   "sources": [
+    "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
+    "prose, by the constructor rule: docs/curves/registry.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-f2m163-tm4845466632539410776804317-e15e581e",
@@ -2348,6 +2464,64 @@
      ]
     }
    ]
+  },
+  {
+   "slug": "icv1-f2m173-tm67870783603944754053042229-ddf2de63",
+   "icv1": "ICV1:f2m-173-d1492ee1:-67870783603944754053042229:11972621413014756705924586217482574100966153445101622:0x1:-7:unk:r:ddf2de63c865",
+   "family": "koblitz",
+   "params": {
+    "a": 1,
+    "n": 173,
+    "modulus": "0x20000000000000000000000000000000000000000125",
+    "modulus_rule": "least sparse irreducible, uncapped (docs/curves/ICV1.md)"
+   },
+   "model_json": "{\"a\":\"0x1\",\"b\":\"0x1\",\"field\":\"f2m-173-d1492ee1\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x20000000000000000000000000000000000000000125\",\"v\":\"1\"}",
+   "trace": -67870783603944754053042229,
+   "order": "11972621413014756705924586217482574100966153445101622",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k1n173",
+    "K_1 / GF(2^173)",
+    "K_1/2^173",
+    "K_1/F_2^173"
+   ],
+   "standard_names": [],
+   "sources": [
+    "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
+    "prose, by the constructor rule: docs/curves/registry.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-f2m179-t1681527843948629186391379613-d1b73c24",
+   "icv1": "ICV1:f2m-179-aaf7a24d:1681527843948629186391379613:766247770432944429179173511893626747860740374700421476:0x1:-7:unk:r:d1b73c24cc55",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 179,
+    "modulus": "0x800000000000000000000000000000000000000000017",
+    "modulus_rule": "least sparse irreducible, uncapped (docs/curves/ICV1.md)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-179-aaf7a24d\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x800000000000000000000000000000000000000000017\",\"v\":\"1\"}",
+   "trace": 1681527843948629186391379613,
+   "order": "766247770432944429179173511893626747860740374700421476",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n179",
+    "K_0 / GF(2^179)",
+    "K_0/2^179",
+    "K_0/F_2^179"
+   ],
+   "standard_names": [],
+   "sources": [
+    "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
+    "prose, by the constructor rule: docs/curves/registry.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
   },
   {
    "slug": "icv1-f2m233-tm137381546011108235394987299651366779-08b072d7",
@@ -2504,6 +2678,35 @@
    ],
    "sources": [
     "sect571k1, SEC 2",
+    "prose, by the constructor rule: docs/curves/registry.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no generator recorded; KoblitzCurve covers n <= 63 and no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-f2m577-tm1291692360366072294584975927365743158796464824452643158538754096040254908300224422995291-5e910562",
+   "icv1": "ICV1:f2m-577-08b4d067:-1291692360366072294584975927365743158796464824452643158538754096040254908300224422995291:494660802946209068121005042039294380070262698202423679828126112185794450213063734340634093814846456051489927827959644421861526533437955063093631064299826590741513768720393564:0x1:-7:unk:r:5e91056274a1",
+   "family": "koblitz",
+   "params": {
+    "a": 0,
+    "n": 577,
+    "modulus": "0x200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010d",
+    "modulus_rule": "least sparse irreducible, uncapped (docs/curves/ICV1.md)"
+   },
+   "model_json": "{\"a\":\"0x0\",\"b\":\"0x1\",\"field\":\"f2m-577-08b4d067\",\"form\":\"y^2+xy=x^3+a*x^2+b\",\"modulus\":\"0x200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010d\",\"v\":\"1\"}",
+   "trace": -1291692360366072294584975927365743158796464824452643158538754096040254908300224422995291,
+   "order": "494660802946209068121005042039294380070262698202423679828126112185794450213063734340634093814846456051489927827959644421861526533437955063093631064299826590741513768720393564",
+   "j": "0x1",
+   "end": "-7",
+   "aliases": [
+    "k0n577",
+    "K_0 / GF(2^577)",
+    "K_0/2^577",
+    "K_0/F_2^577"
+   ],
+   "standard_names": [],
+   "sources": [
+    "the ic tool programme's B4 instances (research/ic_tool_program/rounds/B4-multi-word/PROTOCOL.md)",
     "prose, by the constructor rule: docs/curves/registry.json"
    ],
    "representations": [],
