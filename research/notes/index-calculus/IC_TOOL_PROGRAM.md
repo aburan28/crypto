@@ -213,11 +213,11 @@ A Track B round may change no speed at all. It must then show:
 
 ## 7. The baseline ledger
 
-Rows are baselines and columns are one unit. v0 is round R01's to fill.
+Rows are baselines and columns are one unit. R01 filled v0 (2026-10-01).
 
 | baseline | commit | class | `S` cold at the six top sizes (v0 unit) | cold-time ratio over the previous [95%] | online / rho | cold / rho | C suite | largest `n` at F0 | PR |
 |:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
-| v0 | pending (R01) | — | pending | — | pending | pending | pending | 63 (`MAX_N`) | — |
+| v0 | `46ae2014` (`src/` tree `003badc2`) | accounting | 4.43, 7.65, 5.42, 7.53, 8.77, 14.49 | — | IC 8.8–17.5× faster (§23) | IC 4.9–31.6× slower (§23) | none yet | 61 | #1104, R01 results |
 
 ## 8. Track A: speed
 
@@ -262,6 +262,7 @@ Paths below are to `src/cryptanalysis/koblitz_index_calculus.rs`
 | **A1** | **the pair-table build** | 9–28% of the set-up | §19.4's two passes per stored pair survive only in the compact tier (KIC:3822-3828). The folded tier, which every suite size uses, builds in one pass up to 2 GiB of scratch (KIC:4027-4030). So the lever is the one pass's own cost, which needs v0's profile to locate. |
 | **A9** | **the curve's construction** | 41% of the set-up at `2^38.0`. `factorise_u64` (KIC:540) tests primality at every trial divisor. | it is shared by both arms, so it moves cold time, not the ratio |
 | **A10** | **relation verification and the log system** | each check builds a fresh `FastCurve` inside `kc.mul` (KIC:9791, 828-838). `LogSystem::push` makes a dense big-integer row per relation (KIC:6301-6322). Each extra solve attempt refilters from scratch. | 1–7% of the set-up on the suite, so the gain is mostly at small sizes |
+| **A11** | **the scan's canonical key** (`PairSumTable::keys_of`) | 46% of the set-up's instructions at `icv1-f2m61-t158598901-ab42b6c5`, about 565 a scanned summand, and no cache misses (R01's callgrind, added 2026-10-01). Valgrind hides AVX-512, so that is the portable key's cost. The timed runs use the AVX-512 key, about 70 instructions a key by its code, and its native cost is unmeasured (R01's correction). | first a native price: time the scan with and without the key, since this host has no hardware counters. `KIC_SCAN_SIMD=0` cannot do it alone, because it turns off the batched addition too. Then fewer instructions per key, with the keys pinned identical |
 | **A3** | online lookups | `target_PDP` is 53–96% of the online interval (§23) | the online interval is under 2% of cold, so this moves the rule's online ratio, not the cold one |
 | **A4** | linear algebra: block Wiedemann over `u64` residues (`koblitz_sparse_la.rs`) | under 1% of the set-up at these sizes | it grows faster than the other phases (AGENTS.md §5); price it at every baseline |
 | **A5** | rho parity | the batched walk's step costs 1.86–2.25× the canonical step (§23) | it moves the ratio against the index calculus, which is the point: a reference must be as strong as it can be made |
