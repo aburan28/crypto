@@ -68,16 +68,16 @@ measurement it runs under:
 
 ```yaml
 icms: icms.spec/v1
-label: "K_1/GF(2^23): binary subspace dim 8, pair-table m=2"
+label: "K_1/GF(2^23): binary subspace dim 8, mitm m=2"
 role: candidate                     # candidate | baseline | reference
 instance:
-  curve: {regime: koblitz, degree: 23}
+  curve: {regime: koblitz, degree: 23, koblitz_a: 1}   # K_a must be named: producers default differently
   workload: {targets: 1, law: known_answer, seeds: [123212651130]}
 factor_base:
   family: binary_subspace           # a name from registry.json
-  params: {dimension: 8}            # the family's own parameters
+  params: {dimension: 8, basis_law: prefix}   # the family's own parameters, values checked by the registry
   quotient: [negation]              # folded symmetries; [] is one column per point
-  large_primes: {mode: none}        # none | single | double, with bound and cycle finding
+  large_primes: {mode: none}        # none | single | double | multi (max_large_primes, small_base, merge level)
   # partition: {parts: 2, scheme: per_summand, assignment: [0, 1]}
 decomposition:
   arity: 2
@@ -114,6 +114,11 @@ must agree.**
 - **One target, one workload.** The primary window takes exactly one target.
   Each seed in `seeds` is a separate workload; more seeds give independent
   targets, and repetitions re-run the same seed.
+- **Nothing that changes the instance is left to a producer default.** A
+  Koblitz curve names `koblitz_a` (crypto `ic bench` tries K_1 first,
+  cryptanalysis `ic-bench` runs K_0 only), and an F_2-subspace base names its
+  `basis_law` (`prefix`, `geometric`, `geomtrace`, `random`, `kertrace`, ...;
+  crypto's base is `prefix`), so two specs that look alike are alike.
 
 Validation runs in three layers, and any failure refuses the spec: the JSON
 Schema, the registry vocabulary, and policy rules across sections. The
@@ -155,17 +160,27 @@ refused rather than made silently.
 | `count.group_additions`, `count.s3_solves`, `count.solver_conflicts` | plain counts | yes (conflicts: per solver, version and options) |
 | `time.wall_ns`, `time.cpu_ns` | time | no |
 
-Each record states whether its total was deterministic. It also states why
-not when it was not, for example a solver priced from host wall time or a
-native counter with no pinned price that was charged zero.
+Each record states whether its total was deterministic, and why not when it
+was not (a solver priced from host wall time, a calibration ratio measured on
+this host). Work a producer counted but charged nothing for is listed in
+`unpriced_counters`, which makes the total a lower bound; a comparison carries
+`lower_bound: true` when either arm has any. Every operation figure of a
+window or phase names its unit (`ops_unit`), and a comparison uses a window's
+figure only when that unit is the spec's.
 
 ## 4. References and floors
 
 The rho reference moved three times between 2026-09-21 and 2026-10-01. A
-record therefore names its reference by id: `rho.negation`,
-`rho.signed_frobenius`, `rho.automorphism`, `rho.measured_matched`, or
-`rho.batch_kuhn_struik`, which is a diagnostic for k targets only and never
-the one-target reference. A comparison refuses two different references.
+record therefore names its reference by id: `rho.plain` (A = 1, the "before"
+mark), `rho.negation`, `rho.signed_frobenius`, `rho.automorphism`,
+`rho.measured_matched`, or `rho.batch_kuhn_struik`, which is a diagnostic for
+k targets only and never the one-target reference. A comparison refuses two
+different references. The adapters refuse a reference their producer does not
+compute: cryptanalysis `ic-bench` prices rho analytically (plain, with the
+signed-Frobenius figure beside it), and the autoresearcher solver runs a
+Teske walk without the negation map, so neither may claim
+`rho.measured_matched`. On K_n the plain and signed-Frobenius references
+differ by sqrt(2n), 6.8x at n = 23 (audit X01).
 
 ## 5. Structural metrics
 
@@ -209,9 +224,13 @@ comparison of the record.
   - twenty sysctls (`kernel.randomize_va_space`, `kernel.nmi_watchdog`,
     `kernel.numa_balancing`, `kernel.sched_autogroup_enabled`,
     `vm.swappiness`, ...);
-  - the virtualisation type, cgroup limits, memory, OS and libc;
-  - the toolchain (`rustc -Vv`, cargo, gcc, clang, Python and its
-    executable hash).
+  - the virtualisation type, read both ways (a container inside a KVM guest
+    reports `docker` first, so `systemd-detect-virt --vm` and the CPU's
+    `hypervisor` flag decide "bare metal"), cgroup limits, memory, OS and libc;
+  - the toolchain: `rustc -Vv`, cargo, gcc, clang, `cc`, valgrind, msolve,
+    Python and its executable hash, PyYAML and numpy, and the build flags in
+    the environment (`RUSTFLAGS`, `CC`, `CFLAGS`, ...), because a
+    `-march=native` kernel changes the code that runs.
 - **Volatile** facts are sampled before and after every run and never
   hashed: load, PSI for cpu, memory and io, per-CPU jiffies including
   hypervisor steal, current frequencies and temperatures.
@@ -249,7 +268,9 @@ is unobservable. Two failures this gate catches that `isolated_bench`'s
 
 ## 8. How a session runs
 
-`python3 tools/icms run A.yaml B.yaml A.yaml --cpus 3 --out <new dir>`:
+`python3 tools/icms run A.yaml B.yaml A.yaml --cpus auto --out <new dir>`
+(`auto` reserves the highest-numbered whole core, SMT siblings included, never
+CPU 0's core and never every CPU):
 
 1. **Validate before anything runs.** Every spec is validated and checked by
    its adapter, and any refusal stops the session.
@@ -309,7 +330,45 @@ cold method with every phase priced. ICMS reports the ratio. Classifying the
 change as advance, engineering, relabelling or accounting stays with the
 author (§3).
 
-## 10. Version pinning
+## 10. Records, schemas and the audit
+
+Every object a session writes has a schema in [`schema/`](schema):
+[`record.v1.json`](schema/record.v1.json),
+[`session.v1.json`](schema/session.v1.json),
+[`comparison.v1.json`](schema/comparison.v1.json) and
+[`capsule.v1.json`](schema/capsule.v1.json). The record schema fixes the
+metric sections: every factor-base size field and every PDP system field of
+the registry is present in every record (`null` when the producer does not
+report it), and anything else a producer reports is kept under `native`, so a
+standard field never silently changes meaning. A test holds the schema and the
+registry to the same field lists.
+
+`python3 tools/icms audit-sessions docs/ic/measurement/sessions` re-derives a
+committed session from its files and refuses any mismatch:
+
+- every object validates against its schema;
+- the capsule, `records.jsonl` and every spec copy hash to what
+  `session.json` says, and every raw `stdout`/`stderr` under `exec/` hashes to
+  its record;
+- the capsule's environment class is recomputed from its stable facts;
+- every spec copy loads under the current standard and hashes to the spec id
+  and workload ids its arms carry;
+- every record follows the plan, carries the session id and hashes to its
+  own `record_id`;
+- **the isolation level of every record is recomputed** from the record's own
+  raw observations (schedstat, steal jiffies, sampler ticks, PSI, rusage), the
+  session's preflight and reservation, and the capsule;
+- **every frozen comparison is recomputed** from the records and its
+  request, and must match exactly.
+
+A record cannot be made to claim a quieter run than it observed without also
+editing the observations, and those are bound to the record hash, the
+session's `records_sha256` and the raw output files. CI runs the audit over
+every committed session (`.github/workflows/ic-measurement.yml`), and its
+smoke job builds `ic`, runs a three-arm session on the hosted runner and
+audits that too.
+
+## 11. Version pinning
 
 Every session records:
 
@@ -330,14 +389,20 @@ Gaps this standard records but does not close:
   directory's HEAD at start-up, not the commit the binary was built from. Use
   the binary hash.
 
-## 11. Adapters
+## 12. Adapters
 
-| adapter | producer | status |
+| adapter | producer | what it must be honest about |
 |---|---|---|
-| `crypto.ic_bench` | `ic bench` (IC framework) | implemented; tested on frozen reports |
-| `command` | any program that writes `$ICMS_METRICS_PATH` | implemented; how a new producer joins without an adapter of its own |
-| `cryptanalysis.ic_bench` | cryptanalysis `experiments/ic-bench/bench.py` | see the adapter's docstring for the current state |
-| `autoresearcher.index_calculus` | crypto-autoresearcher `index_calculus sweep` | see the adapter's docstring for the current state |
+| `crypto.ic_bench` | `ic bench` (IC framework) | first-log stop; derived online window; solvers priced from wall time unless their unit is word XORs |
+| `cryptanalysis.ic_bench` | one cryptanalysis `experiments/ic-bench` cell, run by `run_cell` in the pinned process (never `--record`) | K_0 only; full-rank stop then PDP descent; analytic plain rho; rps unit; no system shape in the receipt |
+| `autoresearcher.index_calculus` | crypto-autoresearcher `index_calculus solve` | one seed draws curve, target and randomness; Teske rho without negation; S3 solves and group additions never summed; `\|F\|` is half the signed point count |
+| `command` | any program that writes `$ICMS_METRICS_PATH` | how a new producer joins without an adapter of its own |
+
+Each adapter refuses a spec its producer cannot run faithfully, and the
+refusal names the reason (for example, cryptanalysis `ic-bench` refuses
+`relations.stop: first_log` and `rho.measured_matched`; `ic bench` refuses a
+basis law other than `prefix`). The cross-repository differences these
+adapters make explicit are findings X01 to X19 of [`audit.json`](audit.json).
 
 taskq can carry a session unchanged: submit `python3 tools/icms run ...` as
 the task's argv on the `cpu-exclusive` queue. The session directory then
@@ -348,7 +413,8 @@ lands in `TASKQ_OUTPUT_DIR` with its own capsule.
 - [`registry.json`](registry.json): phases, windows, units, references,
   factor-base families and size fields, PDP metrics, and the solver options
   that must be pinned.
-- [`schema/spec.v1.json`](schema/spec.v1.json): the specification schema.
+- [`schema/`](schema): the spec, record, session, comparison and capsule
+  schemas.
 - [`specs/`](specs): specifications.
 - [`sessions/`](sessions): frozen sessions the page cites.
 - [`audit.json`](audit.json): the comparability findings that motivated
