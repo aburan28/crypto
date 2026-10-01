@@ -13,16 +13,18 @@ including a browser copy of the toy:
 
 # ECC2K-130 and ECC2K-95
 
-The exact v3 table walk now measures **2.449169 B complete scalar updates/s**
+The exact v3 table walk now measures **3.592794 B complete scalar updates/s**
 on one RTX PRO 6000 with `make gpu-rtx-pro6000-20b`. Reconverging cold cycle
-hints across the batch measured 2.448134–2.449438 B/s against
-1.050904–1.052700 B/s for the split-forward control, a median paired ratio of
-2.327850. Both arms replayed 300/300 reports with zero drops and produced the
-same sorted multiset of 1,480,278 `ECC2KDT3` records. The selected B16/T512
-geometry beat B32 in every long confirmation and B64 in the screen. See
-[the frozen result](benchmarks/batch-hints/result.json), its
-[independent audit](benchmarks/batch-hints/independent-audit.json), and the
-[geometry follow-up](benchmarks/hint-geometry/result.json).
+hints across the batch first raised the path to 2.449169 B/s. Proving raw
+two-cycles after their first affine step then measured 3.592601–3.593206 B/s
+against 2.449482–2.450247 B/s, with a median paired ratio of 1.466604. Every
+arm replayed 300/300 reports with zero drops and produced the same sorted
+multiset of 1,480,278 `ECC2KDT3` records. The selected B16/T512 geometry beat
+B32 in every long confirmation and B64 in the screen. See the frozen
+[reconvergence result](benchmarks/batch-hints/result.json), its
+[independent audit](benchmarks/batch-hints/independent-audit.json), the
+[geometry follow-up](benchmarks/hint-geometry/result.json), and the
+[two-cycle result](benchmarks/batch-hints-fast2/result.json).
 
 The earlier **20.078 B/s** table result in
 [ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md) used the superseded v2 cycle

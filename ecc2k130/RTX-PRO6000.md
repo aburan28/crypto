@@ -113,16 +113,25 @@ same-walk scheduling options:
 
 The first option alone measured about +1.0% in three long pairs. Adding
 reconvergence measured **2.449169 B/s** versus **1.052232 B/s** control, a
-median paired ratio of **2.327850**. Both modes replayed 300/300 reports, dropped
-none and produced the same sorted v3 corpus. A fixed-population geometry sweep
-retained B16: B32 was 0.7% slower in every 64-launch pair, while B64 was much
-slower in the screen. The global knobs remain default-off; the RTX table preset
-selects both. This repairs a correctness-current path but remains below the
-sigma preset and far below 26 B/s.
+median paired ratio of **2.327850**. A fixed-population geometry sweep retained
+B16: B32 was 0.7% slower in every 64-launch pair, while B64 was much slower in
+the screen.
+
+The exact `CYCLE_FAST2=1` shortcut then recognizes a raw two-cycle after one
+ordinary step when the next tag selects the inverse addend and the closing
+denominator is nonzero. It preserves the DP stop, cyclic eligibility and anchor
+order, and otherwise resumes the unchanged v3 probe. Three long pairs measured
+**3.592794 B/s** versus **2.450018 B/s**, a median paired ratio of **1.466604**.
+Every measured mode replayed 300/300 reports, dropped none and produced the same
+sorted v3 corpus. The global knobs remain default-off; the RTX table preset
+selects split-forward, reconvergence and fast2. This repairs a
+correctness-current path but remains below the sigma preset and far below 26 B/s.
 
 Evidence: [`benchmarks/batch-hints/result.json`](benchmarks/batch-hints/result.json),
 [`benchmarks/batch-hints/independent-audit.json`](benchmarks/batch-hints/independent-audit.json),
 and [`benchmarks/hint-geometry/result.json`](benchmarks/hint-geometry/result.json).
+The fast2 result is
+[`benchmarks/batch-hints-fast2/result.json`](benchmarks/batch-hints-fast2/result.json).
 
 ## Historical table-walk comparison (superseded cycle rule)
 

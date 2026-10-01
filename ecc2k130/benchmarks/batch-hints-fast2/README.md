@@ -25,8 +25,29 @@ The frozen admission protocol is:
    `1.005` times the faster screening control.
 
 The timing counter covers complete table-walk updates. Passing is bounded
-kernel-engineering evidence; it does not establish the 26 B/s objective. The
-harness is prepared only and must not be launched without separate admission:
+kernel-engineering evidence; it does not establish the 26 B/s objective.
+
+## Measured result
+
+Both arms replayed 300/300 reports with zero drops and produced identical
+sorted multisets of 1,480,278 v3 records, SHA-256
+`2fc6f84d4b1969240418cf6f8e779df9538b1d8f01eb6ff4c6a00be7324fae01`.
+Both kernels used 128 registers, a 400-byte frame and zero reported spills.
+The screen measured 2.931950 / 4.190032 / 2.931331 B/s. Three alternating
+64-launch confirmation pairs were:
+
+| Pair | Control B/s | Fast2 B/s | Ratio |
+|---|---:|---:|---:|
+| 1 | 2.450018 | 3.593206 | 1.466604 |
+| 2 | 2.450247 | 3.592601 | 1.466220 |
+| 3 | 2.449482 | 3.592794 | 1.466757 |
+
+The fast2 median is **3.592794 B/s** and the median paired ratio is
+**1.466604**. [`result.json`](result.json) retains the full summary. The raw
+archive is 61,389,365 bytes with SHA-256
+`6662cd707f4a0add15ba47fa240c1dde83c3f8ace7db40637cf7fef51eaf2755`.
+
+Reproduce or audit with:
 
 ```sh
 modal run --detach modal_job.py \

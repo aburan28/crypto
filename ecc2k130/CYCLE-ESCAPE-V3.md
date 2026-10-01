@@ -60,7 +60,19 @@ control, with paired ratios 2.325576–2.330535. Both arms replayed 300/300
 reports, dropped none and produced identical 1,480,278-record v3 corpora. A
 B16/B32/B64 constant-population follow-up retained B16 after B32 lost all three
 long pairs and B64 lost the screen. These are same-walk scheduling results,
-not a 26 B/s result or a full-solve speedup. The default sigma walk is unchanged.
+not a 26 B/s result or a full-solve speedup.
+
+`CYCLE_FAST2=1` additionally proves a raw two-cycle after its first ordinary
+step when the successor tag selects the exact opposite addend and the closing
+denominator is nonzero. Associativity makes the second inversion and point
+comparison redundant. The shortcut applies the same DP stop, cyclic
+eligibility tests and strict anchor ordering; every other hint resumes the
+unchanged bounded probe. On top of reconvergence it measured 3.592794 B/s
+versus 2.450018 B/s control, with paired ratios 1.466220–1.466757 and the same
+300/300, zero-drop, identical-corpus gate. The RTX table preset selects it;
+the general option defaults off.
+
+The default sigma walk is unchanged.
 The hashed controls in `walkconstant.cpp` explicitly retain v2; native rows use
 v3 and identify it in their output. Their old merge-loss model is not a v3 model.
 
