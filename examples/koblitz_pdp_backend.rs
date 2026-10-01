@@ -1064,7 +1064,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver_internal_mask_maps":"repository FxMap/FxSet with exact u64 key equality",
             "solver_pair_selector":"all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
             "solver_pair_installer":"order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
-            "solver_symbolic_reducer_selector":if std::env::var("F4_F2_INDEXED_REDUCERS").as_deref() == Ok("0") { "shortest active exact divisor by deterministic linear scan" } else { "adaptive exact-submask leading-monomial lookup or deterministic linear scan, preserving shortest-row and lowest-index ties" },
+            "solver_symbolic_reducer_selector":if std::env::var("F4_F2_INDEXED_REDUCERS").as_deref() == Ok("0") { "shortest active exact divisor by deterministic linear scan" } else { "reused dense exact-leading-monomial array through 20 variables with adaptive submask lookup; deterministic linear scan above 20, preserving shortest-row and lowest-index ties" },
             "solver_symbolic_reducer_control":"F4_F2_INDEXED_REDUCERS=0",
             "solver_symbolic_monomial_sets":if std::env::var("F4_F2_BITMAP_SEEN").as_deref() == Ok("0") { "hash sets" } else { "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables" },
             "solver_symbolic_monomial_set_control":"F4_F2_BITMAP_SEEN=0",

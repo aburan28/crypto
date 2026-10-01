@@ -148,7 +148,7 @@ impl SystemSolver for F4F2 {
     }
 
     fn describe(&self) -> String {
-        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, adaptive exact-submask reducer lookup, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis"
+        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, reusable dense exact-submask reducer lookup on bounded domains, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis"
             .into()
     }
 
@@ -180,6 +180,7 @@ impl SystemSolver for F4F2 {
             ("divisor_tests", st.divisor_tests),
             ("divisor_submask_lookups", st.divisor_submask_lookups),
             ("divisor_linear_tests", st.divisor_linear_tests),
+            ("reducer_index_bytes_max", st.reducer_index_bytes_max),
             ("new_elements", st.new_elements),
             ("max_poly_degree", u64::from(st.max_poly_degree)),
             ("basis_len", st.basis_len),
@@ -201,7 +202,10 @@ impl SystemSolver for F4F2 {
             // their individually observed maxima is a conservative
             // per-call upper bound and avoids silently omitting the table
             // storage from charged memory.
-            peak_bytes: st.peak_matrix_bytes.saturating_add(st.peak_table_bytes),
+            peak_bytes: st
+                .peak_matrix_bytes
+                .saturating_add(st.peak_table_bytes)
+                .saturating_add(st.reducer_index_bytes_max),
             degree_reached: Some(st.degree_reached),
             solving_degree: Some(st.solving_degree),
             timed_out: st.timed_out,

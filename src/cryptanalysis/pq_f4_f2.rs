@@ -153,6 +153,8 @@ pub struct F4Stats {
     /// their sum is [`Self::divisor_tests`].
     pub divisor_submask_lookups: u64,
     pub divisor_linear_tests: u64,
+    /// Largest reusable dense reducer-index allocation.
+    pub reducer_index_bytes_max: u64,
     /// Elements added to the basis after the initial echelon.
     pub new_elements: u64,
     /// Highest step degree processed.
@@ -1032,7 +1034,7 @@ impl State {
         &self,
         m: u64,
         active: &[usize],
-        active_by_lm: Option<&FxMap<u64, usize>>,
+        active_by_lm: Option<&DenseReducerIndex>,
         deadline: Option<Instant>,
     ) -> Result<ReducerLookup, ()> {
         let mut best: Option<usize> = None;
@@ -1052,7 +1054,7 @@ impl State {
                     return Err(());
                 }
                 submask_lookups += 1;
-                if let Some(&g) = index.get(&divisor) {
+                if let Some(g) = index.get(divisor) {
                     let candidate = (self.polys[g].terms.len(), g);
                     if best.is_none_or(|b| candidate < (self.polys[b].terms.len(), b)) {
                         best = Some(g);
@@ -1087,20 +1089,58 @@ impl State {
     }
 }
 
-/// The best active basis element for each exact leading monomial.
-fn active_leading_monomial_index(state: &State, active: &[usize]) -> FxMap<u64, usize> {
-    let mut index = FxMap::default();
-    for &g in active {
-        index
-            .entry(state.lm[g])
-            .and_modify(|best: &mut usize| {
-                if (state.polys[g].terms.len(), g) < (state.polys[*best].terms.len(), *best) {
-                    *best = g;
-                }
-            })
-            .or_insert(g);
+/// Largest Boolean domain for which a direct leading-monomial array is kept.
+const DENSE_REDUCER_INDEX_VARS: usize = 20;
+
+/// The best active basis element at each exact leading-monomial mask.
+///
+/// The array is allocated once per F4 call. Rebuilding it clears only masks
+/// touched by the preceding step, avoiding a full-domain fill and a fresh hash
+/// allocation at every symbolic-preprocessing matrix.
+struct DenseReducerIndex {
+    best: Vec<u32>,
+    touched: Vec<u32>,
+}
+
+impl DenseReducerIndex {
+    fn new(n_vars: usize) -> Self {
+        assert!(n_vars <= DENSE_REDUCER_INDEX_VARS);
+        Self {
+            best: vec![NONE; 1usize << n_vars],
+            touched: Vec::new(),
+        }
     }
-    index
+
+    fn rebuild(&mut self, state: &State, active: &[usize]) {
+        for mask in self.touched.drain(..) {
+            self.best[mask as usize] = NONE;
+        }
+        self.touched.reserve(active.len());
+        for &g in active {
+            debug_assert!(g < u32::MAX as usize);
+            let mask = state.lm[g] as usize;
+            let current = self.best[mask];
+            if current == NONE {
+                self.best[mask] = g as u32;
+                self.touched.push(mask as u32);
+            } else {
+                let current = current as usize;
+                if (state.polys[g].terms.len(), g) < (state.polys[current].terms.len(), current) {
+                    self.best[mask] = g as u32;
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn get(&self, mask: u64) -> Option<usize> {
+        let value = self.best[mask as usize];
+        (value != NONE).then_some(value as usize)
+    }
+
+    fn bytes(&self) -> u64 {
+        ((self.best.capacity() + self.touched.capacity()) * std::mem::size_of::<u32>()) as u64
+    }
 }
 
 struct ReducerLookup {
@@ -1128,6 +1168,11 @@ pub fn groebner_basis_f4(
     let started = Instant::now();
     let deadline = budget.map(|b| started + b);
     let mut st = F4Stats::default();
+    let mut reducer_index = (indexed_reducers && n_vars <= DENSE_REDUCER_INDEX_VARS)
+        .then(|| DenseReducerIndex::new(n_vars));
+    if let Some(index) = &reducer_index {
+        st.reducer_index_bytes_max = index.bytes();
+    }
     let one = || vec![F2BoolPoly::one(n_vars)];
     let finish = |basis: Vec<F2BoolPoly>, mut st: F4Stats| {
         debug_assert_eq!(
@@ -1240,7 +1285,10 @@ pub fn groebner_basis_f4(
         // Symbolic preprocessing.  Every monomial other than an S-pair's
         // lcm is examined once; a divisible one gets a reducer led by it.
         let active: Vec<usize> = (0..s.polys.len()).filter(|&g| s.active[g]).collect();
-        let active_by_lm = indexed_reducers.then(|| active_leading_monomial_index(&s, &active));
+        if let Some(index) = &mut reducer_index {
+            index.rebuild(&s, &active);
+            st.reducer_index_bytes_max = st.reducer_index_bytes_max.max(index.bytes());
+        }
         let mut no_divisor = MonomialSeen::new(n_vars);
         // The first level: every monomial of the S-rows but the lcms.
         let s_terms: usize = half_rows
@@ -1305,7 +1353,7 @@ pub fn groebner_basis_f4(
             let parallel = frontier.len() >= PAR_REDUCERS
                 && frontier.len() * mean_terms >= PAR_PRODUCT_TERMS
                 && rayon::current_num_threads() > 1;
-            let lookup = |&m: &u64| s.reducer_for(m, &active, active_by_lm.as_ref(), deadline);
+            let lookup = |&m: &u64| s.reducer_for(m, &active, reducer_index.as_ref(), deadline);
             let lookups: Vec<Result<ReducerLookup, ()>> = if parallel {
                 frontier.par_iter().map(lookup).collect()
             } else {
@@ -1780,7 +1828,8 @@ mod tests {
                 pairs: Vec::new(),
             };
             let active: Vec<usize> = (0..count).filter(|&g| state.active[g]).collect();
-            let index = active_leading_monomial_index(&state, &active);
+            let mut index = DenseReducerIndex::new(n);
+            index.rebuild(&state, &active);
             for m in 0..(1u64 << n) {
                 let linear = state.reducer_for(m, &active, None, None).unwrap();
                 let indexed = state.reducer_for(m, &active, Some(&index), None).unwrap();
