@@ -26,7 +26,7 @@ RUNS = (HERE / os.environ.get("IC_RUNS", "runs")).resolve()
 R01 = HERE.parent / "R01-baseline-v0" / "runs"
 ROUNDS = 5
 CONTROL_SIZE = "k0n53"
-CALLGRIND_ROWS = ["k0n61-M1-T01", "k0n41-M1-T01"]
+CALLGRIND_ROWS = ["k0n61-M1-T01", "k1n59-M1-T01", "k0n41-M1-T01"]
 HOLDOUT_SEED = 205
 HOLDOUT_TARGETS = (101, 102)
 SCALAR_ENV = {**bench.ENV, "KIC_SCAN_SIMD": "0"}
@@ -133,24 +133,27 @@ def holdout() -> None:
 
 
 def callgrind() -> None:
+    """Amendment 2: the pipeline alone, `ic workflow`, under callgrind, both arms."""
     d = RUNS / "callgrind"
     d.mkdir(parents=True, exist_ok=True)
     by_id = {r["id"]: r for r in rows()}
     for name, binary in (("v0", arm("IC_BASE")), ("cand", arm("IC_CAND"))):
         for rid in CALLGRIND_ROWS:
-            cg = d / f"{name}-{rid}.callgrind.out"
-            if cg.exists():
+            stem = f"{name}-{rid}.callgrind.out"
+            if any(d.glob(stem + "*")):
                 continue
-            rep = d / f"{name}-{rid}.price.json"
+            work = d / f"{name}-{rid}.workflow"
             cmd = ["valgrind", "--tool=callgrind", "--cache-sim=yes", "--I1=32768,8,64", "--D1=32768,8,64",
-                   "--LL=2097152,16,64", f"--callgrind-out-file={cg}",
-                   *bench.price_cmd(binary, by_id[rid], rep, ("--repeats", "1", "--repeats-fast", "1"))]
-            with open(d / f"{name}-{rid}.valgrind.log", "w") as log:
-                subprocess.run(["taskset", "-c", bench.CPUS, *cmd], env=bench.ENV, stdout=subprocess.DEVNULL,
-                               stderr=log, check=False)
-            with open(d / f"{name}-{rid}.annotate.txt", "w") as f:
-                subprocess.run(["callgrind_annotate", "--inclusive=no", "--threshold=99", str(cg)], stdout=f,
-                               stderr=subprocess.DEVNULL, check=False)
+                   "--LL=2097152,16,64", f"--callgrind-out-file={d / stem}",
+                   str(binary), "--json", "workflow", "--params", str(bench.SUITE / by_id[rid]["params"]),
+                   "--dir", str(work)]
+            with open(d / f"{name}-{rid}.workflow.json", "w") as out, \
+                    open(d / f"{name}-{rid}.valgrind.log", "w") as log:
+                subprocess.run(["taskset", "-c", bench.CPUS, *cmd], env=bench.ENV, stdout=out, stderr=log,
+                               check=False)
+            with open(d / f"{name}-{rid}.phases.json", "w") as f:
+                subprocess.run([sys.executable, str(HERE.parents[1] / "harness" / "callgrind_phases.py"), str(d),
+                                stem, "--top", "40"], stdout=f, check=False)
 
 
 def rule() -> None:
