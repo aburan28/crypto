@@ -50,12 +50,13 @@ reference preparation, diagnostic serialization and returned-record destruction
 are outside the arm clocks and inside worker receipts. No phase is subtracted.
 "Cold" means fresh solver state, not an empty processor or operating-system cache.
 
-The current discovery grid has 24 fixtures and 61 A/B arms, with eight random/reverse
-repetitions and a preceding A/A calibration. The full grid retains all 216 predecessor
-fixtures and adds 24 fresh holdouts: 240 systems and 117,120 A/B observations, plus
-3,840 A/A observations. The 57-arm historical probes remain unchanged and unqualified
-under the current isolation policy. Its source must match a sealed
-discovery run before it can start. The previous inputs are hash-bound in
+The current discovery grid has 24 fixtures and 61 A/B arms, with sixteen random/reverse
+repetitions at n12 and eight at larger sizes, plus a preceding A/A calibration.
+It produces 14,640 A/B and 480 A/A observations. The full grid retains all 216
+predecessor fixtures and adds 24 fresh holdouts: 240 systems, 146,400 A/B observations
+and 4,800 A/A observations. The 57-arm historical probes remain unchanged and
+unqualified under the current isolation policy. Full-run timed Rust sources must
+match a sealed qualified discovery before it can start. The previous inputs are hash-bound in
 `REFERENCE_FIXTURES.json` and independently regenerated during verification.
 
 The dramatic criterion remains a paired 95% median-ratio lower bound above 2.0
@@ -79,8 +80,8 @@ checks only. Use new output directories from the repository root with Python 3.1
 and stable Rust:
 
 ```sh
-python3 research/boolean_halfword_20260923/isolated_run.py --phase discovery --out research/boolean_halfword_20260923/qualified_probe_01
-python3 research/boolean_halfword_20260923/isolated_run.py --phase full --discovery research/boolean_halfword_20260923/qualified_probe_01 --out research/boolean_halfword_20260923/qualified_full_01
+python3 research/boolean_halfword_20260923/isolated_run.py --phase discovery --out research/boolean_halfword_20260923/discovery_YYYYMMDD_run1
+python3 research/boolean_halfword_20260923/isolated_run.py --phase full --discovery research/boolean_halfword_20260923/discovery_YYYYMMDD_run1 --out research/boolean_halfword_20260923/full_YYYYMMDD_run1
 python3 tools/isolated_bench.py busy -- python3 -m unittest discover -s research/boolean_halfword_20260923 -p 'test_*.py' -v
 ```
 
@@ -90,6 +91,12 @@ manifest. The verifier reads sealed evidence; do not rerun the writing analyzer
 inside an archived directory. A full run binds its discovery manifest and unchanged
 timed Rust sources.
 
+Replace the example date/run suffix with a fresh directory name. Existing evidence
+directories are never reused. Startup and between-fixture readiness waits retain
+every observation and stop after thirty unsuccessful samples; the locked launch
+still enforces the original resource limits. This waiting is outside solver timers
+and inside the campaign duration.
+
 The correctness suite covers all initial blocks and Gray transitions on bounded
 systems, the highest retained bit, the 16/17-equation boundary, false and multiple
 hits, every small cap, all late models on a complete eight-variable fixture family,
@@ -97,3 +104,5 @@ all pairs of three-variable quadratics, unsupported omitted rows, and the retain
 solver suite. Original-equation verification is never inferred from a projected hit.
 
 See `RESOURCE_PLAN.md` for resource refusal, A/A noise, retained binaries and the Linux ARM64 CI route. The legacy `run.py` refuses current protocols. `QUALIFIED_RUNS.json` records accepted qualified evidence; null entries remain unmeasured.
+
+Schema 3 executes A/A and A/B for one fixture in a single reserved worker and retains the combined stdout plus exact phase slices. n12 uses sixteen repetitions; other sizes use eight. The resource record covers the paired fixture. This adds real calibration/comparison work without padding or changing the 10% resource threshold; see `ISOLATION_ATTEMPTS.md`. The current discovery therefore has 14,640 comparison and 480 A/A observations; the full grid has 146,400 comparison and 4,800 A/A observations. Earlier counts describe their frozen predecessor protocols.

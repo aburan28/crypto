@@ -1,4 +1,4 @@
-# 16-bit syndrome implementation verified; qualified comparison pending
+# 16-bit predecessor reaches about 1.55x on n24; specialization pending
 
 The complete 16-bit syndrome implementation preserves the original model and
 assignment order and checks every projected zero on the original equations. The
@@ -114,6 +114,9 @@ CPU reservations. It records host identity/features, memory, compiler, exact com
 pressure, context switches, faults and other-process CPU use. Any failed, contended
 or missing-isolation stage is retained and stops that campaign; it is not pooled
 or silently retried. The A/A symmetric noise spread is an additional gate.
+Before startup and every fixture, a bounded readiness wait retains every rejected
+and accepted observation at unchanged CPU/PSI thresholds. The locked worker launch
+checks again. Waiting contributes to campaign duration; no timed solve is retried.
 
 The comparison retains the 52 September 23 solver implementations as a frozen
 reference roster. It does not claim to include every later repository optimization
@@ -121,12 +124,19 @@ or every known solver. Nine new treatments include matched 32-bit EOR3 controls 
 the hardware operation is not attributed solely to narrowing. Runtime capability
 records distinguish an actual feature path from a portable fallback.
 
-The intended discovery grid has 61 A/B arms and 24 fixtures: 11,712 comparison
-observations plus 384 A/A calibration observations. The full grid has 240 fixtures,
-117,120 comparison observations and 3,840 calibration observations. It retains all
+The current paired-worker discovery grid has 61 A/B arms and 24 fixtures: 14,640
+comparison observations plus 480 A/A calibration observations. It uses sixteen
+repetitions at n12 and eight at larger sizes. The full grid has 240 fixtures,
+146,400 comparison observations and 4,800 calibration observations. It retains all
 216 earlier inputs and adds 24 unused holdouts. The full run must bind unchanged
 timed source from qualified discovery. A positive primary comparison still requires
 confirmation on further unused holdouts. No source tuning follows holdout timing.
+
+Schema 3 runs A/A followed by A/B for one fixture inside one reserved worker.
+The resource receipt covers that real paired computation, while each cold solve
+retains its own timer. The combined stdout and exact phase slices are preserved.
+No padding or resource-threshold relaxation is used. This packaging change follows
+the retained short-worker resource failures and needs a fresh qualified run.
 
 Native timing currently requires Linux affinity and pressure interfaces, so the
 local macOS correctness checks do not supply new qualified timings. The Linux ARM64
@@ -138,3 +148,83 @@ any result.
 is recorded. `RUN_LEDGER.json` binds this report and the preserved probes. All
 full-IC, production, calibrated-operation and rho costs remain **null**. The active
 dramatic-gain objective is not achieved by this implementation or its tests.
+
+## Qualified predecessor: fa01d9b8d63ef2f489a6497ffaea33342a3dd27c
+
+The preserved Linux ARM64 discovery completed 24 fixtures, 11,712 comparison observations and 384 A/A observations. Every resource record passed. The 64-point native policy is about 1.55x the retained dispatcher on pooled n24 medians, but no dramatic group passed. These results belong to the predecessor source, before the complete-budget specialization; they do not measure the current source or discharge the full/holdout gate.
+
+All values below are n24 discovery milliseconds per cold solve plus validation. The ratio is the pooled planted dispatcher median divided by the arm median; the paired gates and A/A noise floors are retained in the result.
+
+| Method | Planted ms | Cross-planted ms | Unplanted ms | Dispatcher / arm, planted | Correctness |
+|---|---:|---:|---:|---:|---|
+| search | 105.719880 | 107.963231 | 137.869802 | 0.0199 | PASS |
+| flat | 476.711574 | 163.982665 | 626.913101 | 0.0044 | PASS |
+| bucket | 1340.397402 | 470.012779 | 1788.952407 | 0.0016 | PASS |
+| hybrid | 703.921217 | 236.472423 | 999.120916 | 0.0030 | PASS |
+| small_flat | 129.712210 | 131.661622 | 168.501168 | 0.0162 | PASS |
+| word_tail | 112.532685 | 114.386076 | 145.444884 | 0.0187 | PASS |
+| merge_search | 84.860065 | 86.962409 | 109.129018 | 0.0248 | PASS |
+| quadratic_state | 46.918948 | 47.823172 | 60.066727 | 0.0449 | PASS |
+| packed_state | 26.498610 | 26.852876 | 34.119647 | 0.0795 | PASS |
+| basis_list | 330.944323 | 155.390369 | 519.508548 | 0.0064 | PASS |
+| basis_wide | 91.233736 | 43.040775 | 141.659374 | 0.0231 | PASS |
+| tail_list | 234.058086 | 72.263843 | 297.199323 | 0.0090 | PASS |
+| tail_wide | 80.957523 | 26.014319 | 100.748394 | 0.0260 | PASS |
+| packed_untraced | 19.078602 | 19.308741 | 24.453173 | 0.1105 | PASS |
+| affine_sl_basis_list | 223.632966 | 163.458516 | 557.585184 | 0.0094 | PASS |
+| affine_sl_basis_fast | 31.086813 | 19.759242 | 77.204048 | 0.0678 | PASS |
+| gray_scalar | 32.100125 | 32.093979 | 39.265472 | 0.0657 | PASS |
+| gray_simd | 6.748621 | 6.719289 | 8.213806 | 0.3123 | PASS |
+| packed_gray12_scalar | 32.352067 | 34.004120 | 43.774976 | 0.0651 | PASS |
+| packed_gray12_simd | 13.714227 | 14.593191 | 19.072804 | 0.1537 | PASS |
+| packed_gray16_scalar | 27.407441 | 30.200672 | 40.184866 | 0.0769 | PASS |
+| packed_gray16_simd | 6.273331 | 6.906911 | 9.209210 | 0.3359 | PASS |
+| gray_delta_scalar | 24.521331 | 24.515345 | 30.102401 | 0.0859 | PASS |
+| gray_delta_simd | 3.913597 | 3.908260 | 4.775121 | 0.5385 | PASS |
+| initial_list | 24.561029 | 12.303752 | 29.927939 | 0.0858 | PASS |
+| initial_simd | 3.937794 | 1.977740 | 4.798617 | 0.5352 | PASS |
+| packed_gray16_delta_scalar | 21.149373 | 23.319103 | 31.187461 | 0.0996 | PASS |
+| packed_gray16_delta_simd | 4.100207 | 4.520645 | 6.026293 | 0.5140 | PASS |
+| fiber_rows | 6.743840 | 6.112463 | 13.364536 | 0.3125 | PASS |
+| fiber_columns | 5.994147 | 5.611097 | 12.768343 | 0.3516 | PASS |
+| fiber_simd | 1.769000 | 1.599959 | 3.772489 | 1.1913 | PASS |
+| fiber_zero_simd | 2.413365 | 2.393546 | 5.887454 | 0.8732 | PASS |
+| gray_quiet | 6.022172 | 6.041904 | 7.335682 | 0.3499 | PASS |
+| wide64_quiet | 2.936964 | 2.966862 | 3.619991 | 0.7175 | PASS |
+| byte_scalar | 7.181916 | 7.130006 | 8.784897 | 0.2934 | PASS |
+| byte_simd | 2.092758 | 2.005104 | 2.614246 | 1.0070 | PASS |
+| leaf16_quiet | 5.745887 | 6.225156 | 8.307172 | 0.3668 | PASS |
+| leaf16_byte_scalar | 6.456023 | 6.950722 | 9.460914 | 0.3264 | PASS |
+| leaf16_byte_simd | 2.476602 | 2.449918 | 3.698079 | 0.8509 | PASS |
+| byte_single_quiet | 2.536446 | 2.424253 | 3.176274 | 0.8308 | PASS |
+| leaf16_single_quiet | 2.855276 | 2.815314 | 4.287693 | 0.7381 | PASS |
+| byte_planes | 1.997032 | 1.930870 | 2.472877 | 1.0553 | PASS |
+| leaf16_byte_planes | 2.459707 | 2.507347 | 3.669624 | 0.8568 | PASS |
+| byte_unrolled | 1.841151 | 1.720751 | 2.328106 | 1.1446 | PASS |
+| wide64_unrolled | 2.109215 | 2.106968 | 2.576904 | 0.9991 | PASS |
+| leaf16_byte_unrolled | 2.275157 | 2.214836 | 3.366536 | 0.9263 | PASS |
+| word16_unrolled | 3.269214 | 3.263733 | 3.995912 | 0.6446 | PASS |
+| word_dispatch | 2.107387 | 2.108615 | 2.573934 | 1.0000 | PASS |
+| leaf16_word_unrolled | 3.455238 | 3.810814 | 5.065165 | 0.6099 | PASS |
+| projected4 | 3.041375 | 2.803546 | 4.244109 | 0.6929 | PASS |
+| projected5 | 4.061677 | 3.271200 | 5.014383 | 0.5188 | PASS |
+| projected6 | 5.470330 | 4.220270 | 6.572756 | 0.3852 | PASS |
+| half16_scalar | 11.201064 | 11.197945 | 13.700282 | 0.1881 | PASS |
+| half64_scalar | 2.796897 | 2.181459 | 2.658514 | 0.7535 | PASS |
+| half16_native | 3.520116 | 3.519623 | 4.313834 | 0.5987 | PASS |
+| half64_native | 1.359292 | 1.363018 | 1.665304 | 1.5504 | PASS |
+| half_dispatch | 1.359587 | 1.361387 | 1.659069 | 1.5500 | PASS |
+| half16_eor3 | 3.715054 | 3.726886 | 4.549054 | 0.5673 | PASS |
+| half64_eor3 | 1.385261 | 1.397932 | 1.694177 | 1.5213 | PASS |
+| eor3_word16 | 3.146378 | 3.144396 | 3.832539 | 0.6698 | PASS |
+| eor3_word64 | 1.755348 | 1.750443 | 2.137465 | 1.2006 | PASS |
+
+## Retained execution and validation failures
+
+- GitHub run 36922805760, attempt 1: Other-process CPU exceeded the unchanged isolation threshold in n12/seed17/unplanted A/B; no performance result admitted. The complete artifact is retained in `failed_isolation_01` and contributes no accepted timing samples.
+- GitHub run 36930298574, attempt 1: Kernel RCU CPU tick exceeded the unchanged isolation threshold during n12/seed17/cross-planted A/A; no performance result admitted. The complete artifact is retained in `failed_isolation_02` and contributes no accepted timing samples.
+- GitHub run 36930298574, attempt 2: Same-source retry stopped at n20/seed17/unplanted A/A because the unchanged resource threshold was exceeded; no samples admitted. The complete artifact is retained in `failed_isolation_03` and contributes no accepted timing samples.
+- GitHub run 36935271707, attempt 1: After 19 completed fixture pairs, n24/seed17/cross-planted was refused before worker launch because CPU PSI avg10 was 18.36, above the unchanged limit of 5.0. No performance samples admitted. The complete artifact is retained in `failed_isolation_04` and contributes no accepted timing samples.
+- GitHub run 36936730092, attempt 1: All 24 fixture pairs passed resource admission; the final verifier used the separate-worker suffix for a paired A/A receipt and raised FileNotFoundError. Raw evidence is preserved; repaired analysis remains diagnostic and is not an admitted discovery binding. The complete artifact is retained in `failed_analysis_01` and contributes no accepted timing samples.
+
+`ISOLATION_ATTEMPTS.md` records the exact failure and any subsequent complete same-source retry.

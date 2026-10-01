@@ -37,3 +37,5 @@ research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/evidence/final/dense/prod
 # Keep pinned SAT solver stdout/stderr bytes verbatim, including padded comment lines.
 research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/**/*.stdout -whitespace
 research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/**/*.stderr -whitespace
+# Preserve sealed Rust test stdout in the Boolean half-word comparison.
+research/boolean_halfword_20260923/*/test.stdout whitespace=-blank-at-eof
