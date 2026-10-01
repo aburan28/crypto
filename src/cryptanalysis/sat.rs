@@ -370,14 +370,19 @@ pub struct Solver {
     /// Centre of the literal-indexed tables `values` and `watches`:
     /// literal `l` lives at slot `l + lit_base`.  Always at least
     /// `n_vars`; the slots of variables beyond `n_vars` are unassigned
-    /// and watched by nothing.
+    /// and watched by nothing.  They would read as unassigned variables,
+    /// so no literal or variable from outside the solver may reach them:
+    /// [`Solver::add_clause`] and the lazy-clause path refuse a clause
+    /// naming a variable past `n_vars`, and trigger variables are read
+    /// through the `n_vars`-long [`Solver::assignment`] slice.
     ///
     /// It is not simply `n_vars` because widening the tables moves every
     /// slot.  Centred on `n_vars`, each [`Solver::add_vars`] call cost
     /// `O(n_vars)`, and a caller that adds its auxiliaries one at a time
     /// paid quadratically for its encoding.  [`Solver::add_vars`] grows
     /// the base geometrically instead, so only `O(log n_vars)` calls
-    /// re-centre.
+    /// re-centre.  The price is up to twice the table size the variable
+    /// count needs, kept for the solver's lifetime.
     lit_base: u32,
     /// **Clause arena**: every clause, original and learnt, stored back
     /// to back as a length word followed by its literals, and named
@@ -811,22 +816,13 @@ impl Solver {
     pub fn add_clause(&mut self, mut lits: Vec<Lit>) -> bool {
         // Deduplicate and remove tautologies.
         lits.sort_by_key(|&l| (var_of(l), l));
-        // 0 ends a clause in DIMACS and is no literal.  The value table
-        // gives it the unused centre slot, where it would read as a
-        // literal that is never false and quietly weaken the clause, so
-        // it is refused in release builds too.  `var_of(0)` underflows:
-        // with overflow checks that is already a panic, and without them
-        // it is `u32::MAX`, above every real variable, so a 0 that gets
-        // here has sorted last.  One comparison rather than a scan of the
-        // clause, which cost an encoding-heavy kernel 0.3% of its
-        // instructions.
-        assert!(lits.last() != Some(&0), "0 is not a literal");
         lits.dedup();
         for w in lits.windows(2) {
             if w[0] == -w[1] {
                 return true; // tautology — drop
             }
         }
+        self.assert_names_variables(&lits);
         // Incremental clauses may arrive after root propagation has
         // already consumed the trail. Remove root-false literals before
         // choosing watches: otherwise both watches can be false with no
@@ -932,6 +928,31 @@ impl Solver {
         }
     }
 
+    /// Panic unless every literal of `sorted` (sorted by variable, as
+    /// [`Solver::add_clause`] sorts) names one of the `n_vars` variables.
+    ///
+    /// The literal tables are centred on `lit_base`, which can exceed
+    /// `n_vars`: a literal past `n_vars` would read the spare slots as an
+    /// unassigned variable that nothing watches and quietly weaken the
+    /// clause, where the per-variable tables before them panicked on the
+    /// index.  0 ends a clause in DIMACS and is no literal; it has the
+    /// unused centre slot.  `var_of(0)` underflows: with overflow checks
+    /// that is already a panic, and without them it is `u32::MAX`, above
+    /// every variable, so 0 and any literal out of range sort last and
+    /// one comparison checks the clause.  A scan of the clause cost an
+    /// encoding-heavy kernel 0.3% of its instructions.
+    #[inline]
+    fn assert_names_variables(&self, sorted: &[Lit]) {
+        if let Some(&last) = sorted.last() {
+            assert!(last != 0, "0 is not a literal");
+            assert!(
+                var_of(last) < self.n_vars,
+                "literal {last} names no variable of this solver ({} variables)",
+                self.n_vars
+            );
+        }
+    }
+
     /// Look up the truth value of a literal under the current trail.
     ///
     /// Literal 0 has a slot of its own, the centre, which is never
@@ -941,12 +962,14 @@ impl Solver {
     #[inline]
     fn lit_value(&self, lit: Lit) -> Option<bool> {
         debug_assert!(lit != 0, "0 is not a literal");
+        debug_assert!(var_of(lit) < self.n_vars, "literal {lit} out of range");
         self.values[(lit + self.lit_base as i32) as usize]
     }
 
     /// Value of 0-indexed variable `v`, if assigned.
     #[inline]
     fn var_value(&self, v: usize) -> Option<bool> {
+        debug_assert!(v < self.n_vars as usize, "variable {v} out of range");
         self.values[self.lit_base as usize + 1 + v]
     }
 
@@ -977,6 +1000,7 @@ impl Solver {
     #[inline]
     fn watch_slot(&self, lit: Lit) -> usize {
         debug_assert!(lit != 0, "0 is not a literal");
+        debug_assert!(var_of(lit) < self.n_vars, "literal {lit} out of range");
         (lit + self.lit_base as i32) as usize
     }
 
@@ -1821,11 +1845,15 @@ impl Solver {
                     restart_limit = 100u64 * luby(luby_index);
                 }
             } else {
-                if !trigger_vars.is_empty()
-                    && trigger_vars
+                // Through the `n_vars`-long assignment, so a trigger past the
+                // variables panics on the index as it did before the tables
+                // had spare slots, instead of reading as never assigned.
+                if !trigger_vars.is_empty() && {
+                    let assignment = self.assignment();
+                    trigger_vars
                         .iter()
-                        .all(|&variable| self.var_value((variable - 1) as usize).is_some())
-                {
+                        .all(|&variable| assignment[(variable - 1) as usize].is_some())
+                } {
                     if let Some(clauses) = theory(self.assignment()) {
                         assert!(!clauses.is_empty(), "lazy theory returned an empty update");
                         let mut normalized = Vec::with_capacity(clauses.len());
@@ -1835,6 +1863,7 @@ impl Solver {
                             if clause.windows(2).any(|pair| pair[0] == -pair[1]) {
                                 continue;
                             }
+                            self.assert_names_variables(&clause);
                             normalized.push(clause);
                         }
                         let has_current_conflict = normalized.iter().any(|clause| {
@@ -2577,6 +2606,62 @@ mod tests {
         assert!(!model[2]);
         assert_eq!(model[2], model[0] ^ model[1]);
         assert!(!seen.is_empty());
+    }
+
+    /// A literal past the variables is refused even once
+    /// [`Solver::add_vars`] has grown the literal tables past `n_vars`,
+    /// where its spare slot would read as a variable nothing watches.
+    /// The per-variable tables before them panicked on the index.
+    #[test]
+    #[should_panic(expected = "names no variable of this solver")]
+    fn add_clause_refuses_a_literal_past_the_variables_after_add_vars() {
+        let mut solver = Solver::new(1000);
+        solver.add_vars(1);
+        solver.add_clause(vec![1, 1500]);
+    }
+
+    /// 0 is refused wherever it sorts, but a tautology is still dropped
+    /// before any literal is looked at, as it always was.
+    #[test]
+    fn add_clause_drops_tautologies_before_checking_literals() {
+        let mut solver = Solver::new(3);
+        assert!(solver.add_clause(vec![1, -1, 7]));
+        assert_eq!(solver.n_clauses(), 0);
+    }
+
+    /// With overflow checks `var_of(0)` already panics while the clause
+    /// is sorted; without them the clause check refuses it.  Either way
+    /// it never reaches a table.
+    #[test]
+    #[should_panic]
+    fn add_clause_refuses_literal_zero() {
+        let mut solver = Solver::new(3);
+        solver.add_clause(vec![1, 0]);
+    }
+
+    /// A trigger variable past the variables panics on the index, as it
+    /// did before the tables had spare slots, rather than reading as
+    /// never assigned and silently never consulting the theory.
+    #[test]
+    #[should_panic(expected = "index out of bounds")]
+    fn lazy_trigger_past_the_variables_panics_after_add_vars() {
+        let mut solver = Solver::new(10);
+        solver.add_vars(1);
+        assert!(solver.add_clause(vec![1, 2]));
+        let mut theory = |_: &[Option<bool>]| -> Option<Vec<Vec<Lit>>> { Some(vec![vec![-1]]) };
+        solver.solve_with_lazy_clauses(&[15], &mut theory);
+    }
+
+    /// A theory clause naming a variable past the solver's is refused
+    /// like one given to [`Solver::add_clause`].
+    #[test]
+    #[should_panic(expected = "names no variable of this solver")]
+    fn lazy_theory_clause_past_the_variables_panics() {
+        let mut solver = Solver::new(10);
+        solver.add_vars(1);
+        assert!(solver.add_clause(vec![1, 2]));
+        let mut theory = |_: &[Option<bool>]| -> Option<Vec<Vec<Lit>>> { Some(vec![vec![-1, 50]]) };
+        solver.solve_with_lazy_clauses(&[1], &mut theory);
     }
 
     /// **Clause forgetting must not change any answer.**  Under a
