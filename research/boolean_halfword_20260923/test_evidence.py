@@ -171,5 +171,37 @@ class EvidenceTests(unittest.TestCase):
         path.write_text(''.join(json.dumps(r)+'\n' for r in [{**source,'mode':'aa'},*samples[:-1]]));stage['stdout_sha256']=a.sha(path)
         with self.assertRaises(AssertionError):a.verify_aa(root,stage,source,pairs,seed)
 
+    def test_failed_isolation_attempts_are_preserved_and_not_admitted(self):
+        registry=a.read(HERE/'QUALIFIED_RUNS.json')
+        for entry in registry['failed_attempts']:
+            root=HERE/entry['path']
+            self.assertEqual(a.sha(root/'manifest.json'),entry['manifest_sha256'])
+            for name,digest in a.read(root/'manifest.json')['files'].items():self.assertEqual(a.sha(root/name),digest)
+            self.assertTrue((root/'EXECUTION_STATUS.json').exists())
+            self.assertNotEqual(registry['discovery'],entry)
+            self.assertNotEqual(registry['full'],entry)
+
+    def test_accepted_qualified_runs_bind_current_source_and_exact_replay(self):
+        registry=a.read(HERE/'QUALIFIED_RUNS.json')
+        for phase in ['discovery','full']:
+            entry=registry[phase]
+            if entry is None:continue
+            root=HERE/entry['path'];self.assertEqual(a.sha(root/'manifest.json'),entry['manifest_sha256'])
+            for name,digest in a.read(root/'manifest.json')['files'].items():self.assertEqual(a.sha(root/name),digest)
+            self.assertFalse((root/'EXECUTION_STATUS.json').exists())
+            for name,digest in a.read(root/'metadata.json')['source_hashes'].items():
+                if name.endswith('.rs'):self.assertEqual(a.sha(HERE/name),digest,name)
+            self.assertEqual(a.sha(root/'protocol.json'),a.sha(HERE/('protocol_'+phase+'.json')))
+            result=a.validate(root);self.assertEqual(result,a.read(root/'results.json'))
+            self.assertTrue(result['qualified'] and result['all_complete'])
+            self.assertEqual(result['phase'],phase)
+
+    def test_qualified_predecessors_remain_exact_for_their_own_source(self):
+        for entry in a.read(HERE/'QUALIFIED_RUNS.json').get('historical_qualified_runs',[]):
+            root=HERE/entry['path'];self.assertEqual(a.sha(root/'manifest.json'),entry['manifest_sha256'])
+            for name,digest in a.read(root/'manifest.json')['files'].items():self.assertEqual(a.sha(root/name),digest)
+            result=a.validate(root);self.assertEqual(result,a.read(root/'results.json'))
+            self.assertTrue(result['qualified'] and result['all_complete'])
+
 
 if __name__=='__main__':unittest.main()

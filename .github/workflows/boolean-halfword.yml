@@ -54,7 +54,7 @@ jobs:
           path: research/boolean_halfword_20260923/ci_discovery_${{ github.run_id }}_${{ github.run_attempt }}/
           if-no-files-found: error
   qualified-full:
-    if: github.event_name == 'workflow_dispatch' && inputs.phase == 'full'
+    if: (github.event.action == 'labeled' && github.event.label.name == 'halfword-full') || (github.event_name == 'workflow_dispatch' && inputs.phase == 'full')
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 180
     env:
@@ -65,9 +65,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Require the selected qualified discovery binding
-        run: test -f research/boolean_halfword_20260923/qualified_probe_01/manifest.json
+        run: test -f research/boolean_halfword_20260923/qualified_probe_02/manifest.json
       - name: Frozen corpus and unused holdouts
-        run: python3 research/boolean_halfword_20260923/isolated_run.py --phase full --discovery research/boolean_halfword_20260923/qualified_probe_01 --out research/boolean_halfword_20260923/ci_full_${{ github.run_id }}_${{ github.run_attempt }}
+        run: python3 research/boolean_halfword_20260923/isolated_run.py --phase full --discovery research/boolean_halfword_20260923/qualified_probe_02 --out research/boolean_halfword_20260923/ci_full_${{ github.run_id }}_${{ github.run_attempt }}
       - name: Preserve successful or failed execution
         if: always()
         uses: actions/upload-artifact@v4

@@ -19,13 +19,19 @@ fn half_eor3<const G: usize, const LOW: usize>(
     #[cfg(target_arch = "aarch64")]
     if eor3_available() {
         // The runtime flag is required before entering this target-feature body.
-        return unsafe { half_eor3_kernel::<G, LOW>(form, system, cap) };
+        return unsafe {
+            if cap >= 1u64 << form.n {
+                half_eor3_kernel::<G, LOW, false>(form, system, cap)
+            } else {
+                half_eor3_kernel::<G, LOW, true>(form, system, cap)
+            }
+        };
     }
     enumerate_half::<NativeHalf<G>, LOW>(form, system, cap)
 }
 #[cfg(target_arch = "aarch64")]
 #[target_feature(enable = "sha3")]
-unsafe fn half_eor3_kernel<const G: usize, const LOW: usize>(
+unsafe fn half_eor3_kernel<const G: usize, const LOW: usize, const CHECKED: bool>(
     form: &HalfForm,
     system: &System,
     cap: u64,
@@ -45,7 +51,7 @@ unsafe fn half_eor3_kernel<const G: usize, const LOW: usize>(
         },
     };
     for base in (0..1u64 << (form.n - LOW)).step_by(16) {
-        if cap - out.work.points < 1u64 << LOW {
+        if CHECKED && cap - out.work.points < 1u64 << LOW {
             return out;
         }
         if base != 0 {
@@ -59,12 +65,12 @@ unsafe fn half_eor3_kernel<const G: usize, const LOW: usize>(
                 schedule.differences[i] ^= form.quadratic[i + LOW][j + LOW];
             }
         }
-        if half_process::<NativeHalf<G>, LOW>(&schedule.block, system, &mut out, base) {
+        if half_process::<NativeHalf<G>, LOW, CHECKED>(&schedule.block, system, &mut out, base) {
             return out;
         }
         macro_rules! step {
             ($j:literal,$r:literal) => {{
-                if cap - out.work.points < 1u64 << LOW {
+                if CHECKED && cap - out.work.points < 1u64 << LOW {
                     return out;
                 }
                 let delta = vdupq_n_u16(schedule.differences[$j]);
@@ -74,8 +80,12 @@ unsafe fn half_eor3_kernel<const G: usize, const LOW: usize>(
                 for i in 0..$j {
                     schedule.differences[i] ^= form.quadratic[i + LOW][$j + LOW];
                 }
-                if half_process::<NativeHalf<G>, LOW>(&schedule.block, system, &mut out, base + $r)
-                {
+                if half_process::<NativeHalf<G>, LOW, CHECKED>(
+                    &schedule.block,
+                    system,
+                    &mut out,
+                    base + $r,
+                ) {
                     return out;
                 }
             }};
@@ -96,17 +106,69 @@ unsafe fn half_eor3_kernel<const G: usize, const LOW: usize>(
         step!(1, 14);
         step!(0, 15);
     }
+    if !CHECKED {
+        out.work.points = 1u64 << form.n;
+        out.work.batches = 1u64 << (form.n - LOW);
+    }
     out.complete = true;
     out
+}
+#[inline(always)]
+fn process_word16_eor3<const CHECKED: bool>(
+    block: &NativeDeltaBlock,
+    out: &mut Enumeration,
+    step: u64,
+) -> bool {
+    if CHECKED {
+        return process_word16(block, out, step);
+    }
+    if let Some(low) = native_first_zero16(block) {
+        out.points = (step + 1) * 16;
+        out.batches = step + 1;
+        out.model = Some(((step ^ (step >> 1)) << 4) | u64::from(low));
+        out.complete = true;
+        true
+    } else {
+        false
+    }
+}
+#[inline(always)]
+fn process_word64_eor3<const CHECKED: bool>(
+    block: &Word64,
+    out: &mut Enumeration,
+    step: u64,
+) -> bool {
+    if CHECKED {
+        return process_word64(block, out, step);
+    }
+    for r in 0..4 {
+        let group = legacy_group64(step, r);
+        if let Some(low) = native_first_zero16(&block.0[group]) {
+            out.points = (step + 1) * 64;
+            out.batches = step + 1;
+            out.model = Some(((step ^ (step >> 1)) << 6) | (group as u64 * 16 + u64::from(low)));
+            out.complete = true;
+            return true;
+        }
+    }
+    false
 }
 fn word_eor3(form: &SyndromeForm, cap: u64, wide: bool) -> Enumeration {
     #[cfg(target_arch = "aarch64")]
     if eor3_available() {
         return unsafe {
             if wide {
-                word64_eor3_kernel(form, cap)
+                if cap >= 1u64 << form.n {
+                    word64_eor3_kernel::<false>(form, cap)
+                } else {
+                    word64_eor3_kernel::<true>(form, cap)
+                }
             } else {
-                word16_eor3_kernel(form, cap)
+                if cap >= 1u64 << form.n {
+                    word16_eor3_kernel::<false>(form, cap)
+                } else {
+                    word16_eor3_kernel::<true>(form, cap)
+                }
             }
         };
     }
@@ -118,7 +180,7 @@ fn word_eor3(form: &SyndromeForm, cap: u64, wide: bool) -> Enumeration {
 }
 #[cfg(target_arch = "aarch64")]
 #[target_feature(enable = "sha3")]
-unsafe fn word16_eor3_kernel(form: &SyndromeForm, cap: u64) -> Enumeration {
+unsafe fn word16_eor3_kernel<const CHECKED: bool>(form: &SyndromeForm, cap: u64) -> Enumeration {
     use std::arch::aarch64::*;
     if form.n < 8 {
         return enumerate_word16_unrolled(form, cap);
@@ -133,7 +195,7 @@ unsafe fn word16_eor3_kernel(form: &SyndromeForm, cap: u64) -> Enumeration {
         checksum: 0,
     };
     for base in (0..1u64 << (form.n - 4)).step_by(16) {
-        if cap - out.points < 16 {
+        if CHECKED && cap - out.points < 16 {
             return out;
         }
         if base != 0 {
@@ -146,12 +208,12 @@ unsafe fn word16_eor3_kernel(form: &SyndromeForm, cap: u64) -> Enumeration {
                 cursor.differences[i] ^= form.quadratic[i + 4][j + 4];
             }
         }
-        if process_word16(&cursor.block, &mut out, base) {
+        if process_word16_eor3::<CHECKED>(&cursor.block, &mut out, base) {
             return out;
         }
         macro_rules! step {
             ($j:literal,$r:literal) => {{
-                if cap - out.points < 16 {
+                if CHECKED && cap - out.points < 16 {
                     return out;
                 }
                 let delta = vdupq_n_u32(cursor.differences[$j]);
@@ -161,7 +223,7 @@ unsafe fn word16_eor3_kernel(form: &SyndromeForm, cap: u64) -> Enumeration {
                 for i in 0..$j {
                     cursor.differences[i] ^= form.quadratic[i + 4][$j + 4];
                 }
-                if process_word16(&cursor.block, &mut out, base + $r) {
+                if process_word16_eor3::<CHECKED>(&cursor.block, &mut out, base + $r) {
                     return out;
                 }
             }};
@@ -182,12 +244,16 @@ unsafe fn word16_eor3_kernel(form: &SyndromeForm, cap: u64) -> Enumeration {
         step!(1, 14);
         step!(0, 15);
     }
+    if !CHECKED {
+        out.points = 1u64 << form.n;
+        out.batches = out.points / 16;
+    }
     out.complete = true;
     out
 }
 #[cfg(target_arch = "aarch64")]
 #[target_feature(enable = "sha3")]
-unsafe fn word64_eor3_kernel(form: &SyndromeForm, cap: u64) -> Enumeration {
+unsafe fn word64_eor3_kernel<const CHECKED: bool>(form: &SyndromeForm, cap: u64) -> Enumeration {
     use std::arch::aarch64::*;
     if form.n < 10 {
         return enumerate_word64_unrolled(form, cap);
@@ -206,7 +272,7 @@ unsafe fn word64_eor3_kernel(form: &SyndromeForm, cap: u64) -> Enumeration {
         checksum: 0,
     };
     for base in (0..1u64 << (form.n - 6)).step_by(16) {
-        if cap - out.points < 64 {
+        if CHECKED && cap - out.points < 64 {
             return out;
         }
         if let Some((j, d)) = cursor.advance::<false>(form, base) {
@@ -217,12 +283,12 @@ unsafe fn word64_eor3_kernel(form: &SyndromeForm, cap: u64) -> Enumeration {
                 }
             }
         }
-        if process_word64(&block, &mut out, base) {
+        if process_word64_eor3::<CHECKED>(&block, &mut out, base) {
             return out;
         }
         macro_rules! step {
             ($j:literal,$r:literal) => {{
-                if cap - out.points < 64 {
+                if CHECKED && cap - out.points < 64 {
                     return out;
                 }
                 let delta = vdupq_n_u32(cursor.advance_fixed::<$j>(form));
@@ -231,7 +297,7 @@ unsafe fn word64_eor3_kernel(form: &SyndromeForm, cap: u64) -> Enumeration {
                         block.0[g].0[v] = veor3q_u32(block.0[g].0[v], low[$j].0[g].0[v], delta);
                     }
                 }
-                if process_word64(&block, &mut out, base + $r) {
+                if process_word64_eor3::<CHECKED>(&block, &mut out, base + $r) {
                     return out;
                 }
             }};
@@ -251,6 +317,10 @@ unsafe fn word64_eor3_kernel(form: &SyndromeForm, cap: u64) -> Enumeration {
         step!(0, 13);
         step!(1, 14);
         step!(0, 15);
+    }
+    if !CHECKED {
+        out.points = 1u64 << form.n;
+        out.batches = out.points / 64;
     }
     out.complete = true;
     out

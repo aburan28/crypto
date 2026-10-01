@@ -2,5 +2,29 @@
   "schema_version": 1,
   "discovery": null,
   "full": null,
-  "failed_attempts": []
+  "failed_attempts": [
+    {
+      "path": "failed_isolation_01",
+      "manifest_sha256": "8abd6431d91dd4ada9bc460fd8488ab344dd078c0225a987af9a01174b0868ae",
+      "github_run_id": 36922805760,
+      "github_attempt": 1,
+      "source_head": "fa01d9b8d63ef2f489a6497ffaea33342a3dd27c",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36922805760",
+      "reason": "Other-process CPU exceeded the unchanged isolation threshold in n12/seed17/unplanted A/B; no performance result admitted.",
+      "other_cpu_seconds": 0.01,
+      "worker_wall_seconds": 0.08303723499989246,
+      "maximum_other_cpu_fraction": 0.1
+    }
+  ],
+  "historical_qualified_runs": [
+    {
+      "path": "qualified_probe_01",
+      "manifest_sha256": "247a477a90e055ad758dff3b5813cb96d525f0067bd74b9c78fc07933331a0ac",
+      "github_run_id": 36922805760,
+      "github_attempt": 2,
+      "source_head": "fa01d9b8d63ef2f489a6497ffaea33342a3dd27c",
+      "workflow_url": "https://github.com/aburan28/crypto/actions/runs/36922805760",
+      "status": "qualified discovery for the pre-specialization source; no dramatic group passed"
+    }
+  ]
 }
