@@ -16,7 +16,19 @@ def bundle(path):
     return read(path/'results.json')
 def main():
     first=bundle(HERE/'probe_01');second=bundle(HERE/'probe_02')
-    registry=read(HERE/'QUALIFIED_RUNS.json');qualified={}
+    registry=read(HERE/'QUALIFIED_RUNS.json');qualified={};qualified_history=[]
+    for entry in registry.get('historical_qualified_runs',[]):
+        path=HERE/entry['path'];assert sha(path/'manifest.json')==entry['manifest_sha256']
+        result=bundle(path);assert result['qualified'] and result['all_complete']
+        qualified_history.append((entry,result,read(path/'metadata.json')))
+    failures=[]
+    for entry in registry['failed_attempts']:
+        path=HERE/entry['path'];assert sha(path/'manifest.json')==entry['manifest_sha256']
+        manifest=read(path/'manifest.json')
+        for name,digest in manifest['files'].items():assert sha(path/name)==digest,name
+        status=read(path/'EXECUTION_STATUS.json')
+        failures.append({'path':entry['path'],'github_run_id':entry['github_run_id'],'github_attempt':entry['github_attempt'],
+                         'status':status,'reason':entry['reason']})
     for phase in ['discovery','full']:
         entry=registry[phase]
         if entry is None:continue
@@ -24,7 +36,7 @@ def main():
         result=bundle(path);assert result['qualified'] and result['phase']==phase
         qualified[phase]=result
     latest=qualified.get('full',qualified.get('discovery'))
-    title='16-bit syndrome implementation verified; qualified comparison pending' if latest is None else '16-bit syndrome qualified comparison recorded; full objective remains open'
+    title=('16-bit predecessor reaches about 1.55x on n24; specialization pending' if qualified_history else '16-bit syndrome implementation verified; qualified comparison pending') if latest is None else '16-bit syndrome qualified comparison recorded; full objective remains open'
     old1={r['variant']:r for r in first['n24_ms']};old2={r['variant']:r for r in second['n24_ms']}
     protocol=read(HERE/'protocol_full.json')
     historical=[]
@@ -114,8 +126,26 @@ dramatic-gain objective is not achieved by this implementation or its tests.
         'historical_qualification':'unisolated; not eligible under current policy','historical_probe_02_decisions':second['decisions'],
         'qualified_runs':registry,'qualified_decisions':None if latest is None else latest['decisions'],
         'full_ic_cost':None,'production_solver_cost':None,'calibrated_operation_ratio':None,'rho_ratio':None}
+    history_html=[];history_summary=[]
+    for entry,result,meta in qualified_history:
+        reference=next(row for row in result['n24_ms'] if row['variant']=='word_dispatch')
+        rows=[[row['variant']]+[f"{row[f]:.6f}" for f in ['planted','cross_planted','unplanted']]+[f"{reference['planted']/row['planted']:.4f}",'PASS'] for row in result['n24_ms']]
+        report+='\n## Qualified predecessor: '+entry['source_head']+'\n\n'
+        report+='The preserved Linux ARM64 discovery completed 24 fixtures, 11,712 comparison observations and 384 A/A observations. Every resource record passed. The 64-point native policy is about 1.55x the retained dispatcher on pooled n24 medians, but no dramatic group passed. These results belong to the predecessor source, before the complete-budget specialization; they do not measure the current source or discharge the full/holdout gate.\n\n'
+        report+='All values below are n24 discovery milliseconds per cold solve plus validation. The ratio is the pooled planted dispatcher median divided by the arm median; the paired gates and A/A noise floors are retained in the result.\n\n| Method | Planted ms | Cross-planted ms | Unplanted ms | Dispatcher / arm, planted | Correctness |\n|---|---:|---:|---:|---:|---|\n'+md(rows)+'\n'
+        host={'source_head':entry['source_head'],'phase':result['phase'],'capabilities':meta['capabilities'],'host':meta['host'],'cpus':meta['cpus'],
+              'decisions':result['decisions'],'manifest_sha256':entry['manifest_sha256']}
+        history_summary.append(host)
+        history_html.append('<p>Qualified predecessor '+html.escape(entry['source_head'][:12])+': Linux ARM64, 24 discovery fixtures, 11,712 comparison observations plus A/A. No dramatic group passed. These numbers precede the current specialization.</p><div class="table-wrap"><table><thead><tr><th>Method</th><th>Planted ms</th><th>Cross-planted ms</th><th>Unplanted ms</th><th>Dispatcher / arm, planted</th><th>Correctness</th></tr></thead><tbody>'+''.join('<tr>'+''.join('<td>'+html.escape(v)+'</td>' for v in row)+'</tr>' for row in rows)+'</tbody></table></div>')
+    summary['historical_qualified_runs']=history_summary
     if latest is not None:
         report+='\n## Qualified run readback\n\n'+json.dumps({'phase':latest['phase'],'cells':latest['cells'],'observations':latest['observations'],'decisions':latest['decisions']},indent=2)+'\n'
+    if failures:
+        report+='\n## Retained resource failures\n\n'
+        for failure in failures:
+            report+=f"- GitHub run {failure['github_run_id']}, attempt {failure['github_attempt']}: {failure['reason']} The complete artifact is retained in `{failure['path']}` and contributes no accepted timing samples.\n"
+        report+='\n`ISOLATION_ATTEMPTS.md` records the exact failure and any subsequent complete same-source retry.\n'
+    summary['retained_resource_failures']=failures
     (HERE/'CONCLUSION.md').write_text(report);dump(HERE/'SUMMARY.json',summary)
     base='https://github.com/aburan28/crypto/blob/main/research/boolean_halfword_20260923/'
     html_rows=lambda rows:'\n'.join('<tr>'+''.join('<td>'+html.escape(v)+'</td>' for v in row)+'</tr>' for row in rows)
@@ -126,6 +156,7 @@ dramatic-gain objective is not achieved by this implementation or its tests.
       No new timing gain or full-IC result is established. Contention in the old runs is unknown.</p>
     <p>Sources: <a href="{base}CONCLUSION.md">scope and results</a>, <a href="{base}QUALIFIED_RUNS.json">qualified-run registry</a>,
       <a href="{base}RESOURCE_PLAN.md">resource and calibration plan</a>, <a href="{base}RUN_LEDGER.json">evidence hashes</a>.</p></div>
+  {''.join(history_html)}
   <p>Historical n24 milliseconds, explicitly unqualified under current policy. Prior values remain visible.
     New variants are pending; null or pending is never a zero-cost result.</p>
   <div class="table-wrap"><table><thead><tr><th>Method</th><th>Probe 1 planted ms</th><th>Probe 2 planted ms</th><th>Probe 2 cross-planted ms</th><th>Probe 2 unplanted ms</th><th>Qualification</th></tr></thead><tbody>

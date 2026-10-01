@@ -374,14 +374,16 @@ fn half_check(system: &System, point: u64, out: &mut HalfEnumeration) -> bool {
     }
 }
 #[inline(always)]
-fn half_process<B: HalfBlock, const LOW: usize>(
+fn half_process<B: HalfBlock, const LOW: usize, const COUNT: bool>(
     block: &B,
     system: &System,
     out: &mut HalfEnumeration,
     step: u64,
 ) -> bool {
-    out.work.points += B::POINTS as u64;
-    out.work.batches += 1;
+    if COUNT {
+        out.work.points += B::POINTS as u64;
+        out.work.batches += 1;
+    }
     if !block.any_zero() {
         return false;
     }
@@ -393,6 +395,10 @@ fn half_process<B: HalfBlock, const LOW: usize>(
             for lane in 0..16 {
                 let low = group * 16 + lane;
                 if values[low] == 0 && half_check(system, high | low as u64, out) {
+                    if !COUNT {
+                        out.work.batches = step + 1;
+                        out.work.points = (step + 1) << LOW;
+                    }
                     return true;
                 }
             }
@@ -400,6 +406,10 @@ fn half_process<B: HalfBlock, const LOW: usize>(
     } else {
         for (low, &value) in values[..16].iter().enumerate() {
             if value == 0 && half_check(system, high | low as u64, out) {
+                if !COUNT {
+                    out.work.batches = step + 1;
+                    out.work.points = (step + 1) << LOW;
+                }
                 return true;
             }
         }
@@ -443,6 +453,17 @@ fn enumerate_half<B: HalfBlock, const LOW: usize>(
     system: &System,
     cap: u64,
 ) -> HalfEnumeration {
+    if cap >= 1u64 << form.n {
+        enumerate_half_inner::<B, LOW, false>(form, system, cap)
+    } else {
+        enumerate_half_inner::<B, LOW, true>(form, system, cap)
+    }
+}
+fn enumerate_half_inner<B: HalfBlock, const LOW: usize, const CHECKED: bool>(
+    form: &HalfForm,
+    system: &System,
+    cap: u64,
+) -> HalfEnumeration {
     if form.n < LOW {
         return half_tiny(form, system, cap);
     }
@@ -457,31 +478,32 @@ fn enumerate_half<B: HalfBlock, const LOW: usize>(
     };
     if form.n - LOW < 4 {
         for step in 0..1u64 << (form.n - LOW) {
-            if cap - out.work.points < B::POINTS as u64 {
+            if CHECKED && cap - out.work.points < B::POINTS as u64 {
                 return out;
             }
             schedule.advance(form, step);
-            if half_process::<B, LOW>(&schedule.block, system, &mut out, step) {
+            if half_process::<B, LOW, CHECKED>(&schedule.block, system, &mut out, step) {
                 return out;
             }
         }
     } else {
         let low: [B; 4] = std::array::from_fn(|j| schedule.cross[j]);
         for base in (0..1u64 << (form.n - LOW)).step_by(16) {
-            if cap - out.work.points < B::POINTS as u64 {
+            if CHECKED && cap - out.work.points < B::POINTS as u64 {
                 return out;
             }
             schedule.advance(form, base);
-            if half_process::<B, LOW>(&schedule.block, system, &mut out, base) {
+            if half_process::<B, LOW, CHECKED>(&schedule.block, system, &mut out, base) {
                 return out;
             }
             macro_rules! step {
                 ($j:literal,$r:literal) => {{
-                    if cap - out.work.points < B::POINTS as u64 {
+                    if CHECKED && cap - out.work.points < B::POINTS as u64 {
                         return out;
                     }
                     schedule.fixed::<$j>(form, &low[$j]);
-                    if half_process::<B, LOW>(&schedule.block, system, &mut out, base + $r) {
+                    if half_process::<B, LOW, CHECKED>(&schedule.block, system, &mut out, base + $r)
+                    {
                         return out;
                     }
                 }};
@@ -502,6 +524,10 @@ fn enumerate_half<B: HalfBlock, const LOW: usize>(
             step!(1, 14);
             step!(0, 15);
         }
+    }
+    if !CHECKED {
+        out.work.points = 1u64 << form.n;
+        out.work.batches = 1u64 << (form.n - LOW);
     }
     out.complete = true;
     out
