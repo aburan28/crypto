@@ -320,6 +320,38 @@
   <header>
     <div class="eyebrow">Cryptanalysis cost ledger · aburan28/crypto</div>
     <h1>Index Calculus Scoreboard</h1>
+    <div class="note" id="plain-reading" style="margin-top:14px">
+      <h3>In plain terms</h3>
+      <p><strong>The question.</strong> Can index calculus, a family of algebraic attacks, solve the
+        elliptic-curve discrete logarithm faster than Pollard rho, the generic method every curve is
+        sized against? Every panel on this page is one measurement of that question, with every
+        phase of the attack counted, on a planted or public logarithm that was then checked.</p>
+      <p><strong>The answer so far: no.</strong> Priced end to end, no elliptic-curve row on this page
+        is below rho. The closest are 3.6&times; slower on a 39-bit Koblitz subgroup when 32 targets
+        are solved together, 13.5&times; on a 23-bit prime-field curve and 38.2&times; on a 24-bit
+        random binary curve. Under the current one-target rule the Koblitz method finishes its online
+        phase 8.8&ndash;17.5&times; faster than rho, but only after a reusable set-up that makes it
+        4.9&ndash;31.6&times; slower cold, and that same set-up would speed up a generic walk too. The
+        gap widens as curves grow: no fitted exponent sits below rho&rsquo;s. Every route tried against
+        ECC2K-130 is bounded above rho or closed. Nothing here threatens a deployed curve.</p>
+      <p><strong>The one exception</strong> is not an elliptic curve: on hyperelliptic Jacobians of
+        genus 4, at toy sizes (<code>p &le; 251</code>), index calculus measures below rho, 0.24 at
+        N = 2<sup>24</sup>. That is a statement about the shape of the cost curve, not about any
+        deployed system.</p>
+      <p><strong>How to read a row.</strong> <code>S</code> is the whole attack&rsquo;s cost in one
+        unit, scaled so that rho reads about 1 at every size; smaller is better. <em>vs rho</em> is the
+        ratio to the matched rho on the same instance; above 1, rho wins. <em>vs floor</em> is the
+        ratio to the provable lower bound for a generic method. The class chip says what a change
+        meant: <span class="chip advance">advance</span> moved the ratio to the floor, which is the only
+        kind of progress; <span class="chip">engineering</span> made the code cheaper without changing
+        the mathematics; <span class="chip">accounting</span> changed only the bookkeeping; and
+        <span class="chip relabel">relabelling</span> lowered a headline number while the real cost
+        rose.</p>
+      <p><strong>Why the page is so long.</strong> It is a ledger, not a summary. Negative results,
+        corrections and superseded figures stay on it by rule, with the old value kept as
+        &ldquo;was&rdquo; beside the new one, so that an improvement in the code is never mistaken for
+        an improvement in the attack. The sections below are in the order the work was done.</p>
+    </div>
     <p><span class="chip">accounting</span> Volcano metadata correction:
       Frobenius-order conductors are now distinct from certified endomorphism
       conductors; unknown strata remain unknown. Historical volcano labels are

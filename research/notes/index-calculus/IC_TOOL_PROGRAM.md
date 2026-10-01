@@ -334,6 +334,28 @@ It sets out:
 - the conformance cases, of which B1's are frozen in
   `research/ic_tool_program/conformance/v2/`.
 
+**B3 is split in two** (2026-10-01).
+- **B3** lifts the rho reference to two-word fields (`n ≤ 126`) and
+  adds `solve: rho`. Its measurement is the gate's rho at F0 at
+  `n = 83`.
+- **B3b** lifts the index calculus to two-word fields, at F0 where the
+  subgroup is small enough to afford, declared 2026-10-01
+  ([`research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md`](../../ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md)).
+  F1 at `n = 83` moves to B7b, which needs its kernels.
+
+B3's declaration is
+[`research/ic_tool_program/rounds/B3-two-word-rho/PROTOCOL.md`](../../ic_tool_program/rounds/B3-two-word-rho/PROTOCOL.md).
+The row above still states the done-when for both halves together.
+
+**B7 is split in two** (2026-10-01), by its design,
+[`research/ic_tool_program/design/f1-sampled.md`](../../ic_tool_program/design/f1-sampled.md).
+- **B7a** builds the F1 sampled level where F0 also runs, at one-word
+  sizes. It measures F1's error there against F0, size by size, with a
+  falsification target declared in the design. It also measures the
+  yield constant B7b has to carry.
+- **B7b** runs F1 at `n = 83` and `131`, after B3b and B4 give `kic`'s
+  kernels two and three words.
+
 ## 10. What does not count
 
 - A speedup with any output changed, unless the round declared an

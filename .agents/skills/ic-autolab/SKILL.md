@@ -163,6 +163,28 @@ actual native-to-auditor control under a newly bound build; diagnose SAT source
 constraints/budgets on the retained feasible query. No verified online time,
 speedup, family promotion or fresh paired comparison follows from these controls.
 
+The [prepared report-contract follow-up](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-report-contract-v1/EVIDENCE.md)
+adds the missing native header and tests actual complete/incomplete CLI reports
+with the independent Python auditor. Autolab CI explicitly runs the ignored
+prepared Rust controls and this release-worker interface check. These are
+repeatable disclosed fixtures, not registered scientific runtime executions.
+The old input v1 source pin and runtime v2 remain unchanged; the corrected worker
+requires its own versioned retained-input/admission adapter and new registration.
+The retained SAT trial 1 witness also satisfies every original ANF equation,
+CNF clause and XOR row and lifts to the exact query. This proves that specific
+source instance is satisfiable; its original native result remains budget-
+inconclusive. Investigate the solver/encoding budget on that retained case rather
+than replacing failed queries. Fresh comparison and full goal gates remain open.
+
+The [corrected prepared F5 runtime gate](../../../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-runtime-v3/README.md)
+adds native input v2, runtime v3 and frozen transport v2. Its retained corrected
+worker includes all root and registry source bytes; it cannot enter the immutable
+old input gate. The new helper must have been frozen before execution. Import,
+relocation and mocked native controls are implementation evidence only. This
+implementation has no scientific native invocation; publish a separate new frozen
+protocol and external execution seal before any actual solve. Never substitute
+these assets or helper into old registrations. Fresh paired gates remain pending.
+
 Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use a versioned runner for the intended unexecuted round; the round-one wrapper is historical, and generic pilot defaults do not implement the goal protocol. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay. The [generic scientific admission guide](../../../research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/README.md) adds source-bound builds, independent reconstruction of all six factor-base families, observed dispatch and matrix/batch audits. Use `generic_build.py` and `generic_admission.py` for this worker; unbound reports stay diagnostic-only. Admission is not generic reference or observer qualification. Keep generic backends out of competitive rankings until those qualification gates pass and an accepted, versioned reference binding is committed.
 
 
