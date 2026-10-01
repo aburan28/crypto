@@ -1,0 +1,12 @@
+{
+  "schema": "isolab.job/v1",
+  "name": "git-checkout-build-then-measure",
+  "runtime": {"image": "localhost/isolab-base:latest"},
+  "inputs": [{"path": "src", "git": {"url": "https://github.com/aburan28/crypto.git", "commit": "0000000000000000000000000000000000000000", "sparse_paths": ["Cargo.toml", "Cargo.lock", "src", "examples"]}}],
+  "build": [{"argv": ["cargo", "build", "--release", "--example", "bench"], "cwd": "src", "timeout_s": 3600}],
+  "command": {"argv": ["./target/release/examples/bench", "--seed", "7"], "cwd": "src", "env": {"RAYON_NUM_THREADS": "1"}},
+  "measure": {"warmups": 1, "repeats": 9},
+  "resources": {"cpus": 1, "memory_mb": 8192},
+  "fidelity": {"policy": "strict"},
+  "verify": {"builtin": "taskq-certificate"}
+}
