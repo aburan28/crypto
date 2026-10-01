@@ -39,6 +39,8 @@ the longer confirmation rejected it in all three pairs:
 B16/T512 remains selected. [`result.json`](result.json) retains the complete
 screen and confirmation. The raw archive is 92,074,189 bytes with SHA-256
 `06ccc4323b8d8ca4dc70ab5d3d78a2481235651af780da9f6589702c3d7d4354`.
+[`independent-audit.json`](independent-audit.json) reopens every timed log,
+checks its digest and exact work, and independently reaches the B16 decision.
 
 Prepared launch; do not run without admission:
 
