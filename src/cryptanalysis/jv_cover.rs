@@ -28,7 +28,7 @@ use rand::{Rng, SeedableRng};
 use rayon::prelude::*;
 use serde::Serialize;
 
-use super::f4_fp::{self, F4Options, Ordering as F4Ordering, Verdict};
+use super::f4_fp::{self, F4Options, Ordering as F4Ordering};
 use super::gaudry_cubic::{am, mm, sm, square_core, wiedemann_u64, PolyRing, SparseRel, UPoly};
 use super::residual_walk::{inv_mod, is_prime_u64, mix64, pow_mod};
 
@@ -239,7 +239,7 @@ pub struct Fq3 {
 
 impl Fq3 {
     pub fn new(p: u64) -> Fq3 {
-        assert!(p % 3 != 0);
+        assert!(!p.is_multiple_of(3));
         let f = Fq::new(p);
         let q1 = f.order();
         let s = (1..p * p)
@@ -390,9 +390,6 @@ fn ptrim<F: Fld>(f: &F, p: &mut Poly<F::E>) {
         p.pop();
     }
 }
-fn pdeg<E>(p: &[E]) -> isize {
-    p.len() as isize - 1
-}
 fn padd<F: Fld>(f: &F, a: &[F::E], b: &[F::E]) -> Poly<F::E> {
     let n = a.len().max(b.len());
     let mut out: Poly<F::E> = (0..n)
@@ -507,9 +504,6 @@ fn peval<F: Fld>(f: &F, a: &[F::E], x: &F::E) -> F::E {
 /// `a mod m` (`m ≠ 0`).
 fn pmod<F: Fld>(f: &F, a: &[F::E], m: &[F::E]) -> Poly<F::E> {
     pdivrem(f, a, m).1
-}
-fn pmap<F: Fld, G: Fld>(a: &[F::E], h: impl Fn(&F::E) -> G::E) -> Poly<G::E> {
-    a.iter().map(h).collect()
 }
 
 // ── Jacobians of y² = f(x), f monic of odd degree, by Cantor ──────────────
@@ -661,11 +655,10 @@ impl<'a> EllE<'a> {
     pub fn rhs(&self, x: &E6) -> E6 {
         let f = self.f;
         let x2 = f.sq(x);
-        let t = f.add(
+        f.add(
             &f.add(&f.mul(&x2, x), &f.mul(&self.a2, &x2)),
             &f.mul(&self.a4, x),
-        );
-        t
+        )
     }
     pub fn on_curve(&self, p: &PtE6) -> bool {
         p.inf || self.f.sq(&p.y) == self.rhs(&p.x)
@@ -896,13 +889,9 @@ impl Cover {
         let a1 = psub(
             f,
             &pmul(f, &lin(&self.alpha), &lin(&self.alpha)),
-            &vec![self.d[1]],
+            &[self.d[1]],
         );
-        let a2 = psub(
-            f,
-            &pmul(f, &lin(&self.sal), &lin(&self.sal)),
-            &vec![self.d[2]],
-        );
+        let a2 = psub(f, &pmul(f, &lin(&self.sal), &lin(&self.sal)), &[self.d[2]]);
         let a12 = pmod(f, &pmul(f, &a1, &a2), &g);
         let (gc, s, _) = pxgcd(f, &a12, &g);
         if gc.len() != 1 {
@@ -1222,7 +1211,7 @@ pub fn solve_zero_dim(
             cap[k] = cap[k].min(lm[k]);
         }
     }
-    if cap.iter().any(|&c| c == u32::MAX) {
+    if cap.contains(&u32::MAX) {
         st.incomplete = true;
         return (Vec::new(), st);
     }
@@ -2560,7 +2549,7 @@ mod tests {
             ),
             g
         );
-        assert!(pdeg(&g) >= pdeg(&c));
+        assert!(g.len() >= c.len());
     }
 
     #[test]
