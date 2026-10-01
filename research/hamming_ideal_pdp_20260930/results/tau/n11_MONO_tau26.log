@@ -1,0 +1,6 @@
+/home/user/crypto/research/hamming_ideal_pdp_20260930/hamming_pdp/target/release/hamming_pdp --n 11 --w 2 --targets 4 --encodings MONO --budget-log2 26 --matrix-cap-log2 27 --out /home/user/crypto/research/hamming_ideal_pdp_20260930/results/tau/n11_MONO_tau26.jsonl.part
+n=11 irr=0x805 alpha=0x3 #E=2116 odd=529 |F_wt|=67 (x:34) |F_sub|=137 (x:69) l=7 setup=1ms
+n=11 MONO WT2 seed=0 planted label=true pairs=2 found=true ok calls=5 tame=1 wild=4 budget=4 cap=0 depth_mean=4.00 max_depth=4 xor=322268035 rows=10917 cols=7547 deg=4 prep=1182ms elim=183ms add=1032ms rref=0ms subst=42ms post=472ms branch=0ms 3764ms
+n=11 MONO WT2 seed=1 uniform label=true pairs=2 found=true ok calls=8 tame=4 wild=4 budget=4 cap=0 depth_mean=3.25 max_depth=4 xor=322633201 rows=10999 cols=7547 deg=4 prep=1204ms elim=223ms add=1328ms rref=0ms subst=73ms post=485ms branch=0ms 4237ms
+n=11 MONO WT2 seed=2 planted label=true pairs=4 found=true ok calls=5 tame=1 wild=4 budget=4 cap=0 depth_mean=4.00 max_depth=4 xor=322360989 rows=10907 cols=7547 deg=4 prep=965ms elim=185ms add=944ms rref=0ms subst=34ms post=458ms branch=0ms 3433ms
+n=11 MONO WT2 seed=3 uniform label=true pairs=8 found=true ok calls=6 tame=1 wild=5 budget=4 cap=0 depth_mean=5.00 max_depth=5 xor=357085678 rows=11004 cols=7547 deg=4 prep=1226ms elim=328ms add=1072ms rref=0ms subst=56ms post=580ms branch=0ms 4078ms

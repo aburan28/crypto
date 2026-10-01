@@ -26,7 +26,15 @@ jobs:
           import hashlib
           from pathlib import Path
           path = Path('research/notes/ecc2k130/m10_export_capacity_20260925/FROZEN.json')
-          assert hashlib.sha256(path.read_bytes()).hexdigest() == '0f60b9ae8d4c003ac37d3093ebfa673ecb731f819870a0331d4d64c70d003a33'
+          assert hashlib.sha256(path.read_bytes()).hexdigest() == '06b18465d807693550a66be04a1634812e5089c3dee06b7bb94b89fc034271d3'
           PY
       - name: Replay hashes, normal-basis maps, and n3 full-point toy
         run: python3 research/notes/ecc2k130/m10_export_capacity_20260925/ci_replay.py
+      - name: Parse release gate and independent verifier without running n131
+        run: |
+          python3 -m py_compile \
+            research/notes/ecc2k130/m10_export_capacity_20260925/ci_replay.py \
+            research/notes/ecc2k130/m10_export_capacity_20260925/run.py \
+            research/notes/ecc2k130/m10_export_capacity_20260925/dispatch_gate.py \
+            research/notes/ecc2k130/m10_export_capacity_20260925/verify.py
+          python3 -m unittest discover -s research/notes/ecc2k130/m10_export_capacity_20260925 -p 'test_dispatch_gate.py' -v

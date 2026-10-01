@@ -148,20 +148,8 @@ impl SystemSolver for F4F2 {
     }
 
     fn describe(&self) -> String {
-        let products = if std::env::var("PQ_F4_DISABLE_DENSE_MUL").as_deref() == Ok("1") {
-            "sorted-input monomial products"
-        } else {
-            "dense duplicate-cancelling monomial products"
-        };
-        let symbolic_sets =
-            if std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() == Ok("1") {
-                "hash-backed symbolic monomial sets"
-            } else {
-                "bit-packed symbolic monomial sets on bounded Boolean domains"
-            };
-        format!(
-            "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, {products}, {symbolic_sets}, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis"
-        )
+        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis"
+            .into()
     }
 
     fn accepts(&self, shape: &SystemShape) -> bool {
@@ -184,76 +172,34 @@ impl SystemSolver for F4F2 {
             ("field_pairs_reduced", st.field_pairs_reduced),
             ("pairs_product_skipped", st.pairs_product_skipped),
             ("pairs_chain_skipped", st.pairs_chain_skipped),
-            ("pair_prune_tests", st.pair_prune_tests),
-            ("pair_prune_submask_lookups", st.pair_prune_submask_lookups),
-            ("pair_prune_linear_tests", st.pair_prune_linear_tests),
-            ("pair_prune_passes", st.pair_prune_passes),
-            ("batch_insert_groups", st.batch_insert_groups),
-            ("batch_insert_elements", st.batch_insert_elements),
-            ("active_candidate_visits", st.active_candidate_visits),
-            ("active_deactivation_tests", st.active_deactivation_tests),
-            ("pair_dense_select_calls", st.pair_dense_select_calls),
-            ("pair_sorted_select_calls", st.pair_sorted_select_calls),
-            ("pair_lcm_groups", st.pair_lcm_groups),
-            ("pair_cover_lookups", st.pair_cover_lookups),
-            (
-                "pair_dense_scratch_bytes_max",
-                st.pair_dense_scratch_bytes_max,
-            ),
-            ("dense_column_matrices", st.dense_column_matrices),
-            ("dense_column_bytes_max", st.dense_column_bytes_max),
             ("reducer_rows", st.reducer_rows),
             ("matrix_rows_max", st.matrix_rows_max),
             ("matrix_cols_max", st.matrix_cols_max),
             ("matrix_rows_sum", st.matrix_rows_sum),
-            ("m4ri_matrices", st.m4ri_matrices),
-            ("m4ri_block_width_max", st.m4ri_block_width_max),
-            ("m4ri_table_word_xors", st.m4ri_table_word_xors),
-            ("m4ri_blocks", st.m4ri_blocks),
-            ("m4ri_consecutive_blocks", st.m4ri_consecutive_blocks),
-            (
-                "m4ri_trimmed_word_xors_avoided",
-                st.m4ri_trimmed_word_xors_avoided,
-            ),
-            ("m4ri_scratch_bytes_max", st.m4ri_scratch_bytes_max),
-            ("flat_m4ri_matrices", st.flat_m4ri_matrices),
-            ("flat_m4ri_order_bytes_max", st.flat_m4ri_order_bytes_max),
+            ("word_xors_performed", st.word_xors_performed),
             ("divisor_tests", st.divisor_tests),
-            ("divisor_submask_lookups", st.divisor_submask_lookups),
-            ("divisor_linear_tests", st.divisor_linear_tests),
-            ("dense_mul_calls", st.dense_mul_calls),
-            ("dense_mul_input_terms", st.dense_mul_input_terms),
-            ("dense_mul_output_terms", st.dense_mul_output_terms),
-            ("dense_mul_cancelled_terms", st.dense_mul_cancelled_terms),
-            (
-                "dense_mul_scratch_bytes_max",
-                st.dense_mul_scratch_bytes_max,
-            ),
-            ("dense_symbolic_set_steps", st.dense_symbolic_set_steps),
-            (
-                "dense_symbolic_set_bytes_max",
-                st.dense_symbolic_set_bytes_max,
-            ),
             ("new_elements", st.new_elements),
+            ("max_poly_degree", u64::from(st.max_poly_degree)),
             ("basis_len", st.basis_len),
+            ("peak_matrix_bytes", st.peak_matrix_bytes),
+            ("peak_table_bytes", st.peak_table_bytes),
             ("build_ns", st.build_ns),
             ("eliminate_ns", st.eliminate_ns),
-            ("pair_update_ns", st.pair_update_ns),
+            ("f4_wall_ns", st.wall_ns),
             ("pairs_left", st.pairs_left),
             ("oversize", st.oversize as u64),
-            (
-                "symbolic_bytes_estimate_max",
-                st.symbolic_bytes_estimate_max,
-            ),
-            ("symbolic_cap_hit", st.symbolic_cap_hit as u64),
         ] {
             extra.insert(k.to_string(), v);
         }
         let mut cost = SolverCost {
             ops: st.word_xors,
-            op_unit: "word XORs (elimination, including M4RI tables)".into(),
+            op_unit: "word XORs (elimination only)".into(),
             wall_ns: 0,
-            peak_bytes: st.peak_matrix_bytes,
+            // Tables and their matrix are simultaneously live.  Summing
+            // their individually observed maxima is a conservative
+            // per-call upper bound and avoids silently omitting the table
+            // storage from charged memory.
+            peak_bytes: st.peak_matrix_bytes.saturating_add(st.peak_table_bytes),
             degree_reached: Some(st.degree_reached),
             solving_degree: Some(st.solving_degree),
             timed_out: st.timed_out,

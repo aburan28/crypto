@@ -1,0 +1,55 @@
+{
+  "cases": {
+    "n41_L1024": {
+      "host_path": "hosts/n41_L1024.json",
+      "host_sha256": "715fe6820f95bb2662e958ed14080af41703e6d7d5ed7aff94e0acbd51d2edb0",
+      "k_grid": [
+        128,
+        192,
+        255,
+        320
+      ],
+      "paired_to_normal_rho": null,
+      "raw_bytes": 30817834,
+      "raw_path": "raw/n41_L1024.tar.gz",
+      "raw_sha256": "a8b53367603eff82728e8819c0287ea1f9dd1ca4fd2f93b3530b029c593a3be3",
+      "receipt_path": "receipts/n41_L1024.json",
+      "receipt_sha256": "56d7a57eb62b2a1b5071530a2e97b29388a397975bb7a10b6f54a4ccec21b690",
+      "second_host_replay_path": "second_host_replay/n41_L1024.json",
+      "second_host_replay_sha256": "56d7a57eb62b2a1b5071530a2e97b29388a397975bb7a10b6f54a4ccec21b690",
+      "status": "PASS",
+      "targets_verified_per_arm": 9216
+    },
+    "n53_L1024": {
+      "host_path": "hosts/n53_L1024.json",
+      "host_sha256": "1d3d0a34586cda6e03022f41d2af90691b7cc74e47835169e84dc038dc567b91",
+      "k_grid": [
+        220,
+        330,
+        440,
+        550
+      ],
+      "paired_to_normal_rho": null,
+      "raw_bytes": 66152517,
+      "raw_path": "raw/n53_L1024.tar.gz",
+      "raw_sha256": "7f4f496dbf94e030e479e7807ef2c6e177aaf064c43defa4d4f94a8fab23cced",
+      "receipt_path": "receipts/n53_L1024.json",
+      "receipt_sha256": "42a191dfd292ecbd14d64f78fe5d74f385339687c1a14341d69ab8c2faec2034",
+      "second_host_replay_path": "second_host_replay/n53_L1024.json",
+      "second_host_replay_sha256": "42a191dfd292ecbd14d64f78fe5d74f385339687c1a14341d69ab8c2faec2034",
+      "status": "PASS",
+      "targets_verified_per_arm": 9216
+    }
+  },
+  "checkout_main_parent": "d100eeec89f3cd8f2970f26f0e91de852efd266e",
+  "checkout_merge_commit": "c0f1ebacd9a3d8111d0b15a4d24cb3123b43cfcc",
+  "extraction": "tar -xzf raw/n41_L1024.tar.gz -C DEST; repeat for n53",
+  "frozen_sha256": "b746618d3bfb03ecd55c7050066b38155591a66fa797e31716cc11d0f752dd8c",
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36581100810",
+  "independent_replay": "python3 verify_panel.py --n 41 --run-dir DEST/n41_L1024 --out NEW_RECEIPT.json",
+  "schema": "compact-swap-quotient-hosted-archive-v1",
+  "second_host_replay_host_path": "second_host_replay/HOST.json",
+  "second_host_replay_host_sha256": "c94ba016cb34fc203eacc249dde683f2463613616ffc036295b19deea303471a",
+  "source_head": "716f46e64037fd99e25e9a73fc395e9a45230d28",
+  "source_head_kind": "PR head; Actions compiled the recorded PR merge checkout"
+}

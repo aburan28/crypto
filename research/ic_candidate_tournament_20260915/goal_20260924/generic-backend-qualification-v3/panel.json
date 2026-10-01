@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "campaign": "generic-backend-qualification-v3-20260930",
+  "status": "REGISTERED_PLANNING",
+  "seed": 2026093001,
+  "comparison_kind": "factor-base-policy",
+  "stages": ["aa", "smoke"],
+  "cells": ["n17a1", "n19a0", "n23a0", "n23a1", "n31a0"],
+  "holdout_cells_excluded": ["n29a1"],
+  "repetitions": 1,
+  "timeout_seconds": 300,
+  "memory_bytes": 8589934592,
+  "measure_timeout_minutes": 180,
+  "pack_timeout_minutes": 35,
+  "job_timeout_minutes": 240,
+  "scheduled_pair_bound": 45,
+  "pair_cap": 60,
+  "hypothesis": "At least one source-bound F4/F5 arm on standard_subspace dimension 6 completes independently verified one-target solves on every A/A and smoke point, with natural-query evidence and exclusive costs.",
+  "success": "One F4/F5 subspace arm passes full scientific admission and exclusive phase closure on all scheduled A/A and smoke jobs; retain alternatives; no familywise promotion; SAT out of scope.",
+  "stop": "Any failed or censored A/A or smoke job disqualifies its arm for family admission; preserve all raw rows. Never retry seed 2026093001 or widen resources after measurement.",
+  "prior_exposure_corpora": [
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/lost-campaign-exposures.json",
+      "sha256": "a728677b199eac02800d8338204d5306f391ec5da757c910bec1e51955fe7b41",
+      "seed": 2026092901
+    },
+    {
+      "path": "research/ic_candidate_tournament_20260915/goal_20260924/generic-backend-qualification-v2/lost-v2-campaign-exposures.json",
+      "sha256": "0cc792cceb8c7190a533e6f4e665e8486911153ad57609ac8d1243af282b8e54",
+      "seed": 2026092902
+    }
+  ],
+  "factor_base_policy": {
+    "algebraic_and_continuity": {"kind": "standard_subspace", "dimension": 6},
+    "incumbent_reference": {
+      "recipe": "subgroup_orbits",
+      "seed": 43,
+      "requested_points": "6n",
+      "note": "Prepared pairinv/both keep their qualified orbit construction; algebraic arms do not."
+    }
+  },
+  "candidates": [
+    {
+      "id": "incumbent",
+      "adapter": null,
+      "source": "qualified-pairinv",
+      "role": "cold_ic_reference",
+      "config": {
+        "solver": "pair_table",
+        "linear_algebra": "tiny_gauss",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536
+      }
+    },
+    {
+      "id": "prepared_both",
+      "adapter": null,
+      "source": "qualified-both",
+      "role": "online_ic_reference",
+      "config": {
+        "solver": "pair_table",
+        "linear_algebra": "tiny_gauss",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536
+      }
+    },
+    {
+      "id": "generic_pair_subspace_dense",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "Continuity control: generic pair_table on the same dimension-6 subspace base.",
+      "config": {
+        "solver": "pair_table",
+        "linear_algebra": "dense",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536,
+        "factor_base": {"kind": "standard_subspace", "dimension": 6}
+      }
+    },
+    {
+      "id": "generic_f4_subspace_dense",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "Bounded MatrixF4 d≤3 on standard_subspace dimension 6 with dense relation LA.",
+      "config": {
+        "solver": "f4",
+        "linear_algebra": "dense",
+        "summands": 3,
+        "batch_trials": 8,
+        "max_trials": 256,
+        "groebner_degree": 3,
+        "node_budget": 4096,
+        "factor_base": {"kind": "standard_subspace", "dimension": 6}
+      }
+    },
+    {
+      "id": "generic_f5_subspace_dense",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "Bounded MatrixF5 d≤3 on standard_subspace dimension 6 with dense relation LA.",
+      "config": {
+        "solver": "f5",
+        "linear_algebra": "dense",
+        "summands": 3,
+        "batch_trials": 8,
+        "max_trials": 256,
+        "groebner_degree": 3,
+        "node_budget": 4096,
+        "factor_base": {"kind": "standard_subspace", "dimension": 6}
+      }
+    }
+  ],
+  "rho_arms": [
+    {
+      "id": "rho",
+      "role": "cold_rho_reference",
+      "config": {"rho_parallel_walks": 8}
+    },
+    {
+      "id": "rho_online",
+      "role": "online_rho_reference",
+      "config": {"rho_parallel_walks": 16, "linear_algebra": "dense"}
+    }
+  ],
+  "worker_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "sat_in_scope": false,
+  "promotion_eligible": false
+}

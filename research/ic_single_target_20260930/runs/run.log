@@ -1,0 +1,466 @@
+{
+ "commit": "0bf67f169f0762c8bd225760196803379cabdcb9",
+ "tree_status": "",
+ "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+ "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+ "cpu_flags_relevant": [
+  "pclmulqdq",
+  "popcnt",
+  "avx2",
+  "bmi2",
+  "avx512f",
+  "avx512dq",
+  "avx512ifma",
+  "avx512cd",
+  "avx512bw",
+  "avx512vl",
+  "avx512_bf16",
+  "avx512vbmi",
+  "avx512_vbmi2",
+  "gfni",
+  "vpclmulqdq",
+  "avx512_vnni",
+  "avx512_bitalg",
+  "avx512_vpopcntdq",
+  "avx512_fp16"
+ ],
+ "logical_cores": 4,
+ "memory": "MemTotal:       16480972 kB",
+ "os": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+ "arch": "x86_64",
+ "ic_binary_sha256": "6f58b075b7d16f01d5ffbd1ff87cdc3fdaf9fc5ec11aa53dbf87ac85c89c64d5",
+ "ic_built_from": "0bf67f169f0762c8bd225760196803379cabdcb9",
+ "isolation_tool": {
+  "path": "tools/isolated_bench.py",
+  "sha256": "ff59e53fd5566078ad493c8be0d06168699c4fd194bc881d99df19fa20e007ef"
+ },
+ "pinning": "tools/isolated_bench.py run --wait --cpus 2 with RAYON_NUM_THREADS=1, after PSI some avg10 falls below 4.0; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI at most 5); the pin untimed under taskset -c 2",
+ "smt_siblings": {
+  "0": "0",
+  "1": "1",
+  "2": "2",
+  "3": "3"
+ },
+ "uptime": "23:22:12 up  1:14,  0 user,  load average: 0.30, 0.31, 0.72",
+ "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts"
+}
+k1n47: start
+k1n47: T01-R1 online speedup 11.15
+k1n47: T02-R1 online speedup 18.65
+k1n47: T03-R1 online speedup 7.33
+k1n47: T04-R1 online speedup 121.60
+k1n47: T05-R1 online speedup 20.12
+k1n47: T06-R1 online speedup 24.15
+k1n47: T07-R1 online speedup 28.02
+k1n47: T08-R1 online speedup 11.11
+k1n47: T09-R1 online speedup 2.20
+k1n47: T10-R1 online speedup 104.27
+k1n47: T11-R1 online speedup 19.90
+k1n47: T12-R1 online speedup 132.24
+k1n47: T13-R1 online speedup 2.72
+k1n47: T14-R1 online speedup 7.01
+k1n47: T15-R1 online speedup 12.43
+k1n47: T16-R1 online speedup 7.16
+k1n47: T17-R1 online speedup 2.59
+k1n47: T18-R1 online speedup 4.91
+k1n47: T19-R1 online speedup 7.42
+k1n47: T20-R1 online speedup 2.76
+k1n47: T21-R1 online speedup 12.59
+k1n47: T22-R1 online speedup 2.33
+k1n47: T23-R1 online speedup 12.39
+k1n47: T24-R1 online speedup 143.54
+k1n47: T25-R1 online speedup 24.88
+k1n47: T26-R1 online speedup 12.75
+k1n47: T27-R1 online speedup 3.09
+k1n47: T28-R1 online speedup 30.58
+k1n47: T29-R1 online speedup 4.92
+k1n47: T30-R1 online speedup 4.97
+k1n47: T31-R1 online speedup 98.85
+k1n47: T32-R1 online speedup 7.32
+k1n47: T33-R1 online speedup 122.01
+k1n47: T34-R1 online speedup 11.94
+k1n47: T35-R1 online speedup 3.20
+k1n47: T36-R1 online speedup 20.98
+k1n47: T37-R1 online speedup 3.29
+k1n47: T38-R1 online speedup 62.85
+k1n47: T39-R1 online speedup 14.57
+k1n47: T40-R1 online speedup 6.80
+k1n47: T41-R1 online speedup 20.91
+k1n47: T42-R1 online speedup 2.01
+k1n47: T43-R1 online speedup 68.91
+k1n47: T44-R1 online speedup 3.89
+k1n47: T45-R1 online speedup 41.20
+k1n47: T46-R1 online speedup 45.53
+k1n47: T47-R1 online speedup 2.45
+k1n47: T48-R1 online speedup 14.38
+k1n47: T49-R1 online speedup 2.38
+k1n47: T50-R1 online speedup 8.95
+k1n47: T51-R1 online speedup 9.53
+k1n47: T52-R1 online speedup 12.99
+k1n47: T53-R1 online speedup 7.23
+k1n47: T54-R1 online speedup 10.75
+k1n47: T55-R1 online speedup 3.30
+k1n47: T56-R1 online speedup 4.53
+k1n47: T57-R1 online speedup 9.19
+k1n47: T58-R1 online speedup 31.30
+k1n47: T59-R1 online speedup 5.27
+k1n47: T60-R1 online speedup 31.42
+k1n47: T61-R1 online speedup 51.17
+k1n47: T62-R1 online speedup 11.20
+k1n47: T63-R1 online speedup 7.16
+k1n47: T64-R1 online speedup 78.99
+k1n47: T01-R2 online speedup 14.49
+k1n47: T02-R2 online speedup 20.47
+k1n47: T03-R2 online speedup 6.99
+k1n47: T04-R2 online speedup 106.72
+k1n47: done
+k0n57: start
+k0n57: T01-R1 online speedup 2.52
+k0n57: T02-R1 online speedup 6.02
+k0n57: T03-R1 online speedup 18.87
+k0n57: T04-R1 online speedup 17.89
+k0n57: T05-R1 online speedup 39.16
+k0n57: T06-R1 online speedup 50.29
+k0n57: T07-R1 online speedup 9.06
+k0n57: T08-R1 online speedup 4.75
+k0n57: T09-R1 online speedup 16.59
+k0n57: T10-R1 online speedup 10.81
+k0n57: T11-R1 online speedup 28.25
+k0n57: T12-R1 online speedup 37.45
+k0n57: T13-R1 online speedup 11.01
+k0n57: T14-R1 online speedup 19.77
+k0n57: T15-R1 online speedup 149.12
+k0n57: T16-R1 online speedup 7.83
+k0n57: T17-R1 online speedup 13.93
+k0n57: T18-R1 online speedup 4.51
+k0n57: T19-R1 online speedup 88.95
+k0n57: T20-R1 online speedup 51.14
+k0n57: T21-R1 online speedup 12.81
+k0n57: T22-R1 online speedup 11.35
+k0n57: T23-R1 online speedup 11.57
+k0n57: T24-R1 online speedup 15.95
+k0n57: T25-R1 online speedup 6.51
+k0n57: T26-R1 online speedup 59.67
+k0n57: T27-R1 online speedup 14.60
+k0n57: T28-R1 online speedup 29.89
+k0n57: T29-R1 online speedup 52.62
+k0n57: T30-R1 online speedup 5.37
+k0n57: T31-R1 online speedup 70.42
+k0n57: T32-R1 online speedup 11.77
+k0n57: T33-R1 online speedup 49.88
+k0n57: T34-R1 online speedup 34.84
+k0n57: T35-R1 online speedup 16.98
+k0n57: T36-R1 online speedup 2.59
+k0n57: T37-R1 online speedup 5.71
+k0n57: T38-R1 online speedup 81.58
+k0n57: T39-R1 online speedup 43.11
+k0n57: T40-R1 online speedup 9.07
+k0n57: T41-R1 online speedup 35.33
+k0n57: T42-R1 online speedup 26.57
+k0n57: T43-R1 online speedup 31.08
+k0n57: T44-R1 online speedup 2.64
+k0n57: T45-R1 online speedup 11.05
+k0n57: T46-R1 online speedup 82.60
+k0n57: T47-R1 online speedup 14.39
+k0n57: T48-R1 online speedup 5.84
+k0n57: T49-R1 online speedup 35.29
+k0n57: T50-R1 online speedup 45.41
+k0n57: T51-R1 online speedup 35.16
+k0n57: T52-R1 online speedup 24.20
+k0n57: T53-R1 online speedup 7.63
+k0n57: T54-R1 online speedup 19.77
+k0n57: T55-R1 online speedup 19.92
+k0n57: T56-R1 online speedup 107.94
+k0n57: T57-R1 online speedup 6.37
+k0n57: T58-R1 online speedup 39.17
+k0n57: T59-R1 online speedup 12.97
+k0n57: T60-R1 online speedup 0.89
+k0n57: T61-R1 online speedup 16.40
+k0n57: T62-R1 online speedup 8.13
+k0n57: T63-R1 online speedup 3.33
+k0n57: T64-R1 online speedup 86.27
+k0n57: T01-R2 online speedup 3.25
+k0n57: T02-R2 online speedup 5.54
+k0n57: T03-R2 online speedup 22.35
+k0n57: T04-R2 online speedup 21.25
+k0n57: done
+k0n41: start
+k0n41: T01-R1 online speedup 9.13
+k0n41: T02-R1 online speedup 30.12
+k0n41: T03-R1 online speedup 9.00
+k0n41: T04-R1 online speedup 19.81
+k0n41: T05-R1 online speedup 21.64
+k0n41: T06-R1 online speedup 9.52
+k0n41: T07-R1 online speedup 11.04
+k0n41: T08-R1 online speedup 18.96
+k0n41: T09-R1 online speedup 7.65
+k0n41: T10-R1 online speedup 30.85
+k0n41: T11-R1 online speedup 12.28
+k0n41: T12-R1 online speedup 19.34
+k0n41: T13-R1 online speedup 5.58
+k0n41: T14-R1 online speedup 66.39
+k0n41: T15-R1 online speedup 0.85
+k0n41: T16-R1 online speedup 12.57
+k0n41: T17-R1 online speedup 17.35
+k0n41: T18-R1 online speedup 11.44
+k0n41: T19-R1 online speedup 21.10
+k0n41: T20-R1 online speedup 6.99
+k0n41: T21-R1 online speedup 1.43
+k0n41: T22-R1 online speedup 9.52
+k0n41: T23-R1 online speedup 14.10
+k0n41: T24-R1 online speedup 11.43
+k0n41: T25-R1 online speedup 6.50
+k0n41: T26-R1 online speedup 3.92
+k0n41: T27-R1 online speedup 22.52
+k0n41: T28-R1 online speedup 9.70
+k0n41: T29-R1 online speedup 28.64
+k0n41: T30-R1 online speedup 8.57
+k0n41: T31-R1 online speedup 26.19
+k0n41: T32-R1 online speedup 3.03
+k0n41: T33-R1 online speedup 7.35
+k0n41: T34-R1 online speedup 199.93
+k0n41: T35-R1 online speedup 4.20
+k0n41: T36-R1 online speedup 6.87
+k0n41: T37-R1 online speedup 3.23
+k0n41: T38-R1 online speedup 70.80
+k0n41: T39-R1 online speedup 36.96
+k0n41: T40-R1 online speedup 14.62
+k0n41: T41-R1 online speedup 3.11
+k0n41: T42-R1 online speedup 139.28
+k0n41: T43-R1 online speedup 12.04
+k0n41: T44-R1 online speedup 16.73
+k0n41: T45-R1 online speedup 23.08
+k0n41: T46-R1 online speedup 1.19
+k0n41: T47-R1 online speedup 7.06
+k0n41: T48-R1 online speedup 23.75
+k0n41: T49-R1 online speedup 4.08
+k0n41: T50-R1 online speedup 3.34
+k0n41: T51-R1 online speedup 14.18
+k0n41: T52-R1 online speedup 106.84
+k0n41: T53-R1 online speedup 84.90
+k0n41: T54-R1 online speedup 7.10
+k0n41: T55-R1 online speedup 2.26
+k0n41: T56-R1 online speedup 5.71
+k0n41: T57-R1 online speedup 6.39
+k0n41: T58-R1 online speedup 7.22
+k0n41: T59-R1 online speedup 3.31
+k0n41: T60-R1 online speedup 10.99
+k0n41: T61-R1 online speedup 18.74
+k0n41: T62-R1 online speedup 38.99
+k0n41: T63-R1 online speedup 52.17
+k0n41: T64-R1 online speedup 9.32
+k0n41: T01-R2 online speedup 9.29
+k0n41: T02-R2 online speedup 42.00
+k0n41: T03-R2 online speedup 7.30
+k0n41: T04-R2 online speedup 21.48
+k0n41: done
+k0n53: start
+k0n53: T01-R1 online speedup 593.71
+k0n53: T02-R1 online speedup 19.17
+k0n53: T03-R1 online speedup 44.97
+k0n53: T04-R1 online speedup 5.07
+k0n53: T05-R1 online speedup 21.37
+k0n53: T06-R1 online speedup 69.56
+k0n53: T07-R1 online speedup 11.59
+k0n53: T08-R1 online speedup 9.65
+k0n53: T09-R1 online speedup 50.16
+k0n53: T10-R1 online speedup 26.32
+k0n53: T11-R1 online speedup 16.40
+k0n53: T12-R1 online speedup 39.18
+k0n53: T13-R1 online speedup 16.22
+k0n53: T14-R1 online speedup 22.99
+k0n53: T15-R1 online speedup 17.74
+k0n53: T16-R1 online speedup 63.12
+k0n53: T17-R1 online speedup 4.46
+k0n53: T18-R1 online speedup 41.05
+k0n53: T19-R1 online speedup 45.39
+k0n53: T20-R1 online speedup 18.21
+k0n53: T21-R1 online speedup 16.88
+k0n53: T22-R1 online speedup 31.70
+k0n53: T23-R1 online speedup 23.61
+k0n53: T24-R1 online speedup 17.91
+k0n53: T25-R1 online speedup 177.14
+k0n53: T26-R1 online speedup 461.04
+k0n53: T27-R1 online speedup 79.53
+k0n53: T28-R1 online speedup 25.56
+k0n53: T29-R1 online speedup 77.11
+k0n53: T30-R1 online speedup 44.95
+k0n53: T31-R1 online speedup 7.71
+k0n53: T32-R1 online speedup 18.74
+k0n53: T33-R1 online speedup 7.74
+k0n53: T34-R1 online speedup 18.89
+k0n53: T35-R1 online speedup 10.96
+k0n53: T36-R1 online speedup 14.74
+k0n53: T37-R1 online speedup 6.82
+k0n53: T38-R1 online speedup 33.02
+k0n53: T39-R1 online speedup 7.93
+k0n53: T40-R1 online speedup 7.63
+k0n53: T41-R1 online speedup 27.74
+k0n53: T42-R1 online speedup 6.84
+k0n53: T43-R1 online speedup 42.64
+k0n53: T44-R1 online speedup 1.72
+k0n53: T45-R1 online speedup 24.42
+k0n53: T46-R1 online speedup 91.47
+k0n53: T47-R1 online speedup 56.16
+k0n53: T48-R1 online speedup 15.94
+k0n53: T49-R1 online speedup 9.02
+k0n53: T50-R1 online speedup 7.75
+k0n53: T51-R1 online speedup 106.11
+k0n53: T52-R1 online speedup 22.41
+k0n53: T53-R1 online speedup 25.80
+k0n53: T54-R1 online speedup 21.35
+k0n53: T55-R1 online speedup 42.61
+k0n53: T56-R1 online speedup 14.08
+k0n53: T57-R1 online speedup 18.03
+k0n53: T58-R1 online speedup 96.74
+k0n53: T59-R1 online speedup 6.86
+k0n53: T60-R1 online speedup 3.60
+k0n53: T61-R1 online speedup 63.30
+k0n53: T62-R1 online speedup 10.78
+k0n53: T63-R1 online speedup 12.47
+k0n53: T64-R1 online speedup 42.27
+k0n53: T01-R2 online speedup 673.73
+k0n53: T02-R2 online speedup 17.69
+k0n53: T03-R2 online speedup 43.22
+k0n53: T04-R2 online speedup 5.06
+k0n53: done
+k1n59: start
+k1n59: T01-R1 online speedup 23.59
+k1n59: T02-R1 online speedup 13.01
+k1n59: T03-R1 online speedup 6.28
+k1n59: T04-R1 online speedup 54.61
+k1n59: T05-R1 online speedup 8.79
+k1n59: T06-R1 online speedup 14.63
+k1n59: T07-R1 online speedup 2.09
+k1n59: T08-R1 online speedup 55.82
+k1n59: T09-R1 online speedup 108.23
+k1n59: T10-R1 online speedup 126.69
+k1n59: T11-R1 online speedup 7.59
+k1n59: T12-R1 online speedup 13.19
+k1n59: T13-R1 online speedup 12.32
+k1n59: T14-R1 online speedup 10.30
+k1n59: T15-R1 online speedup 6.90
+k1n59: T16-R1 online speedup 2.39
+k1n59: T17-R1 online speedup 4.46
+k1n59: T18-R1 online speedup 16.28
+k1n59: T19-R1 online speedup 82.35
+k1n59: T20-R1 online speedup 2.37
+k1n59: T21-R1 online speedup 20.32
+k1n59: T22-R1 online speedup 2.01
+k1n59: T23-R1 online speedup 1.44
+k1n59: T24-R1 online speedup 149.78
+k1n59: T25-R1 online speedup 17.72
+k1n59: T26-R1 online speedup 20.72
+k1n59: T27-R1 online speedup 6.40
+k1n59: T28-R1 online speedup 26.41
+k1n59: T29-R1 online speedup 115.35
+k1n59: T30-R1 online speedup 43.83
+k1n59: T31-R1 online speedup 4.33
+k1n59: T32-R1 online speedup 17.61
+k1n59: T33-R1 online speedup 25.18
+k1n59: T34-R1 online speedup 14.09
+k1n59: T35-R1 online speedup 32.20
+k1n59: T36-R1 online speedup 875.67
+k1n59: T37-R1 online speedup 50.36
+k1n59: T38-R1 online speedup 51.13
+k1n59: T39-R1 online speedup 10.72
+k1n59: T40-R1 online speedup 19.69
+k1n59: T41-R1 online speedup 20.92
+k1n59: T42-R1 online speedup 85.65
+k1n59: T43-R1 online speedup 50.91
+k1n59: T44-R1 online speedup 6.20
+k1n59: T45-R1 online speedup 80.59
+k1n59: T46-R1 online speedup 11.51
+k1n59: T47-R1 online speedup 44.87
+k1n59: T48-R1 online speedup 6.93
+k1n59: T49-R1 online speedup 850.78
+k1n59: T50-R1 online speedup 244.08
+k1n59: T51-R1 online speedup 11.31
+k1n59: T52-R1 online speedup 34.92
+k1n59: T53-R1 online speedup 59.66
+k1n59: T54-R1 online speedup 14.90
+k1n59: T55-R1 online speedup 73.62
+k1n59: T56-R1 online speedup 5.11
+k1n59: T57-R1 online speedup 8.14
+k1n59: T58-R1 online speedup 22.90
+k1n59: T59-R1 online speedup 5.88
+k1n59: T60-R1 online speedup 39.49
+k1n59: T61-R1 online speedup 72.71
+k1n59: T62-R1 online speedup 5.89
+k1n59: T63-R1 online speedup 9.10
+k1n59: T64-R1 online speedup 105.00
+k1n59: T01-R2 online speedup 23.78
+k1n59: T02-R2 online speedup 14.06
+k1n59: T03-R2 online speedup 6.97
+k1n59: T04-R2 online speedup 52.73
+k1n59: done
+k0n61: start
+k0n61: T01-R1 online speedup 12.22
+k0n61: T02-R1 online speedup 39.92
+k0n61: T03-R1 online speedup 52.03
+k0n61: T04-R1 online speedup 2.76
+k0n61: T05-R1 online speedup 9.44
+k0n61: T06-R1 online speedup 4.72
+k0n61: T07-R1 online speedup 99.43
+k0n61: T08-R1 online speedup 5.19
+k0n61: T09-R1 online speedup 4.81
+k0n61: T10-R1 online speedup 4.27
+k0n61: T11-R1 online speedup 4.42
+k0n61: T12-R1 online speedup 44.34
+k0n61: T13-R1 online speedup 21.82
+k0n61: T14-R1 online speedup 11.68
+k0n61: T15-R1 online speedup 19.40
+k0n61: T16-R1 online speedup 3.80
+k0n61: T17-R1 online speedup 14.43
+k0n61: T18-R1 online speedup 112.36
+k0n61: T19-R1 online speedup 45.40
+k0n61: T20-R1 online speedup 18.37
+k0n61: T21-R1 online speedup 24.19
+k0n61: T22-R1 online speedup 6.31
+k0n61: T23-R1 online speedup 36.11
+k0n61: T24-R1 online speedup 10.21
+k0n61: T25-R1 online speedup 41.60
+k0n61: T26-R1 online speedup 26.11
+k0n61: T27-R1 online speedup 7.99
+k0n61: T28-R1 online speedup 81.72
+k0n61: T29-R1 online speedup 41.59
+k0n61: T30-R1 online speedup 3.67
+k0n61: T31-R1 online speedup 30.49
+k0n61: T32-R1 online speedup 2.09
+k0n61: T33-R1 online speedup 1.79
+k0n61: T34-R1 online speedup 3.13
+k0n61: T35-R1 online speedup 60.86
+k0n61: T36-R1 online speedup 91.86
+k0n61: T37-R1 online speedup 1.79
+k0n61: T38-R1 online speedup 76.02
+k0n61: T39-R1 online speedup 6.29
+k0n61: T40-R1 online speedup 3.85
+k0n61: T41-R1 online speedup 2.16
+k0n61: T42-R1 online speedup 22.78
+k0n61: T43-R1 online speedup 5.06
+k0n61: T44-R1 online speedup 25.93
+k0n61: T45-R1 online speedup 1.97
+k0n61: T46-R1 online speedup 2.79
+k0n61: T47-R1 online speedup 4.71
+k0n61: T48-R1 online speedup 109.38
+k0n61: T49-R1 online speedup 6.32
+k0n61: T50-R1 online speedup 11.62
+k0n61: T51-R1 online speedup 5.18
+k0n61: T52-R1 online speedup 8.35
+k0n61: T53-R1 online speedup 12.59
+k0n61: T54-R1 online speedup 3.94
+k0n61: T55-R1 online speedup 36.09
+k0n61: T56-R1 online speedup 3.55
+k0n61: T57-R1 online speedup 12.07
+k0n61: T58-R1 online speedup 11.29
+k0n61: T59-R1 online speedup 71.52
+k0n61: T60-R1 online speedup 899.63
+k0n61: T61-R1 online speedup 1.45
+k0n61: T62-R1 online speedup 29.69
+k0n61: T63-R1 online speedup 59.36
+k0n61: T64-R1 online speedup 55.77
+k0n61: T01-R2 online speedup 11.73
+k0n61: T02-R2 online speedup 44.00
+k0n61: T03-R2 online speedup 59.10
+k0n61: T04-R2 online speedup 3.47
+k0n61: done

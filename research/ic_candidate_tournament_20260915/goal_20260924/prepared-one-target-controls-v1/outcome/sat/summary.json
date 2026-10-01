@@ -1,0 +1,1163 @@
+{
+  "candidate_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h5f7f1076e104",
+  "cms_preflight": {
+    "after_sha256": "ee85bb8748228066fca0018cc9803277e930426c742b6d4dd444edbdb56efb3f",
+    "before_sha256": "ee85bb8748228066fca0018cc9803277e930426c742b6d4dd444edbdb56efb3f",
+    "command": [
+      "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/cms",
+      "--version"
+    ],
+    "controller_group": 14138,
+    "environment_threads": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "RAYON_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1"
+    },
+    "executable_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+    "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+    "invocation_sha256": "b461bb03c5c9eed24827a707a1206946fbc6caa6b183af5dffdd608d6c89ffc4",
+    "metrics": {
+      "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+      "peak_rss_bytes": 1998848,
+      "single_core_seconds": 0.005135,
+      "system_seconds": 0.0036699999999999997,
+      "total_core_seconds": 0.005135,
+      "user_seconds": 0.001465,
+      "wall_seconds": 0.503581583
+    },
+    "native_group_observed": 14138,
+    "native_pid": 14145,
+    "native_wall_ns": 503581583,
+    "process_group_policy": "inherit-controller-group; no native fork or setsid",
+    "returncode": 0,
+    "schema_version": 3,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "aad58f059a5bb57e3ca02400781eabe4958abb4ac52b5a07d3c441a3a882b589",
+    "timed_out": false,
+    "watchdog_seconds": 10
+  },
+  "fresh_paired_qualification": false,
+  "online_attempt_wall_ns": 38824339375,
+  "online_bookkeeping_assigned_to_target_query_ns": 40238958,
+  "online_phases_ns": {
+    "target_descent": 0,
+    "target_pdp": 38757915958,
+    "target_query": 59879834,
+    "target_recovery_check": 0,
+    "target_relation_check": 6543583
+  },
+  "online_speedup": null,
+  "online_start_monotonic_ns": 193869902831208,
+  "online_stop_event": "frozen-target-attempt-cap",
+  "online_stop_monotonic_ns": 193908727170583,
+  "online_wall_ns": null,
+  "ordinary_queries_executed": 0,
+  "preparation": {
+    "actual_usable_base_size": 62,
+    "certificate_sha256": "91856ab78550436d3f668367f9aebd9e2c0604bd64b1472d9d19ec318e2b144e",
+    "effective_columns": 29,
+    "geometric_base_size": 63,
+    "native_execution": false,
+    "online_speedup": null,
+    "ordinary_queries": 149,
+    "promotion_eligible": false,
+    "rank": 29,
+    "state_id": "ICP1hedbff76da644",
+    "status": "VERIFIED_REUSABLE_PREPARATION",
+    "target_input_present": false,
+    "verified_relation_rows": 37
+  },
+  "preparation_wall_ns": 48753625,
+  "promotion_eligible": false,
+  "recovered_scalar": null,
+  "run_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h5f7f1076e104Wb79558c422c7R2026100102",
+  "scalar_verified": false,
+  "scope": "target adapter core; source-bound callback and transport require separate admission",
+  "source_bound_execution_admitted": false,
+  "status": "INCOMPLETE_TARGET",
+  "target_attempts": [
+    {
+      "a": 57811,
+      "b": 42049,
+      "cms": {
+        "after_sha256": "cd890787ddaa695c64cea11aa33f317a806ed4e422bc3580c357366dd307c254",
+        "before_sha256": "cd890787ddaa695c64cea11aa33f317a806ed4e422bc3580c357366dd307c254",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/cms",
+          "--verb",
+          "1",
+          "--threads",
+          "1",
+          "--random",
+          "1",
+          "--maxsol",
+          "1",
+          "--maxconfl",
+          "100000",
+          "instance/instance.xor.cnf"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "fe19fa445c0a4e2d6e62748c111b9397fef439be9ed33cdcce4906cf154a70a3",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 13877248,
+          "single_core_seconds": 1.6840629999999999,
+          "system_seconds": 0.038479,
+          "total_core_seconds": 1.6840629999999999,
+          "user_seconds": 1.645584,
+          "wall_seconds": 3.246585416
+        },
+        "native_group_observed": 14138,
+        "native_pid": 14358,
+        "native_wall_ns": 3246585416,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 15,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "96261888f31ac8719c60f7fff68a1605a3bb0c5a1b5a311d7678e7751dd2d0e7",
+        "timed_out": false,
+        "watchdog_seconds": 60
+      },
+      "exporter": {
+        "after_sha256": "a7d1968f0f30851d77aa9a953c3982c69c0798ddbac6e0be043e3e1ce17292f5",
+        "before_sha256": "a7d1968f0f30851d77aa9a953c3982c69c0798ddbac6e0be043e3e1ce17292f5",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/exporter",
+          "17",
+          "6",
+          "standard",
+          "2026100103",
+          "100000",
+          "instance",
+          "1",
+          "0",
+          "--target-x",
+          "52471",
+          "--target-y",
+          "123167",
+          "--blind-instance-id",
+          "control-00",
+          "--export-only"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "5ae8c355642ec3db9be25e907b06dc37444eac268a076dd6a0a167aafb9ab608",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 4538368,
+          "single_core_seconds": 0.011616999999999999,
+          "system_seconds": 0.003743,
+          "total_core_seconds": 0.011616999999999999,
+          "user_seconds": 0.007873999999999999,
+          "wall_seconds": 0.243360041
+        },
+        "native_group_observed": 14138,
+        "native_pid": 14278,
+        "native_wall_ns": 243360041,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 0,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "0b114f4502e5c8c50c8b401037bcfb3c4d9868c64048124951c01eb3fa3609ec",
+        "timed_out": false,
+        "watchdog_seconds": 30
+      },
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "bytes": 42962,
+          "sha256": "be982291e5094f35f49c9184488e1120000babdf98c55438e45464edc06094c9"
+        },
+        "magma_boolean_f4": {
+          "bytes": 58489,
+          "sha256": "c1323e1aaa535f3920648e496c929fe53cdef8bad16667b413c1c6856e219308"
+        },
+        "wdsat_anf": {
+          "bytes": 36337,
+          "sha256": "a7c5f28ae95ed32866150437571bd3e6ee72ccc1c797806d5ed52eb7134b8eb1"
+        }
+      },
+      "manifest_sha256": "fcc3d40d00c8b084d06541580111cd23aef58f31e57774d464fc184623a3b66d",
+      "pdp_wall_ns": 5850976291,
+      "point_witness": null,
+      "probe_scalar": 57811,
+      "public_point": [
+        52471,
+        123167
+      ],
+      "query_wall_ns": 5851857583,
+      "source_model_valid": null,
+      "status": "CONFLICT_BUDGET_INCONCLUSIVE",
+      "target_query_index": 0,
+      "trial": 0,
+      "verification_wall_ns": 881292
+    },
+    {
+      "a": 32326,
+      "b": 42888,
+      "cms": {
+        "after_sha256": "bd7524c3e7699fba23b44ff2dfcf2119e7e4f384547b1a3fe54e53835e7b3e55",
+        "before_sha256": "bd7524c3e7699fba23b44ff2dfcf2119e7e4f384547b1a3fe54e53835e7b3e55",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/cms",
+          "--verb",
+          "1",
+          "--threads",
+          "1",
+          "--random",
+          "1",
+          "--maxsol",
+          "1",
+          "--maxconfl",
+          "100000",
+          "instance/instance.xor.cnf"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "9f862418f8b8c7d6167eeb8d12fe459be315b641d636069b21a7cb24792be4b6",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 21102592,
+          "single_core_seconds": 2.837383,
+          "system_seconds": 0.081455,
+          "total_core_seconds": 2.837383,
+          "user_seconds": 2.755928,
+          "wall_seconds": 3.506947375
+        },
+        "native_group_observed": 14138,
+        "native_pid": 14875,
+        "native_wall_ns": 3506947375,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 15,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "525580b97bd4fa2c29a8ee67cd3a7c40ff4b97af3a612da3ae9740fd02b73176",
+        "timed_out": false,
+        "watchdog_seconds": 60
+      },
+      "exporter": {
+        "after_sha256": "2a98b96bc86cc636cac02d589789a723777d2c3a3fd4bc6b2e0e3f5e477ab7ff",
+        "before_sha256": "2a98b96bc86cc636cac02d589789a723777d2c3a3fd4bc6b2e0e3f5e477ab7ff",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/exporter",
+          "17",
+          "6",
+          "standard",
+          "2026100103",
+          "100000",
+          "instance",
+          "1",
+          "0",
+          "--target-x",
+          "62577",
+          "--target-y",
+          "27783",
+          "--blind-instance-id",
+          "control-01",
+          "--export-only"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "e13d6d62f234e1569bc03934b8ec550c6bdf129068764813070b0fcc7ed32d54",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 4325376,
+          "single_core_seconds": 0.011054999999999999,
+          "system_seconds": 0.003172,
+          "total_core_seconds": 0.011054999999999999,
+          "user_seconds": 0.007883,
+          "wall_seconds": 0.043294708
+        },
+        "native_group_observed": 14138,
+        "native_pid": 14838,
+        "native_wall_ns": 43294708,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 0,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "ae0089cfb7d705b11a4e3275df0628522d915d9bae4d8477cfa98f687f789986",
+        "timed_out": false,
+        "watchdog_seconds": 30
+      },
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "bytes": 39608,
+          "sha256": "d46c9d1edea83cb1ea2d09ce6cab4f42ff15bce99263b676430e61f4930ab3a0"
+        },
+        "magma_boolean_f4": {
+          "bytes": 46815,
+          "sha256": "30c623c4366c36bea854ab4ac08ff0deed0da4c37347395a3c442f525f1e4803"
+        },
+        "wdsat_anf": {
+          "bytes": 28877,
+          "sha256": "e5d49feddef960a0ea8a74836f517563a4f63f987abfc45defbe36a337c83057"
+        }
+      },
+      "manifest_sha256": "9f516b3b6e1600a63ae42bd6e06342c3a8539c8f84d5bccc86b62d11c500822b",
+      "pdp_wall_ns": 5711615709,
+      "point_witness": null,
+      "probe_scalar": 32326,
+      "public_point": [
+        62577,
+        27783
+      ],
+      "query_wall_ns": 5712501875,
+      "source_model_valid": null,
+      "status": "CONFLICT_BUDGET_INCONCLUSIVE",
+      "target_query_index": 1,
+      "trial": 1,
+      "verification_wall_ns": 886166
+    },
+    {
+      "a": 1092,
+      "b": 49226,
+      "cms": {
+        "after_sha256": "857d41955c061d217861e85fa08846574f9603fe9e6446435610c6258f30cbe1",
+        "before_sha256": "857d41955c061d217861e85fa08846574f9603fe9e6446435610c6258f30cbe1",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/cms",
+          "--verb",
+          "1",
+          "--threads",
+          "1",
+          "--random",
+          "1",
+          "--maxsol",
+          "1",
+          "--maxconfl",
+          "100000",
+          "instance/instance.xor.cnf"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "1ad8257a07ecf713e6fd9e986a9bb88c609f76def5bb16a6c8f1c9e3164c9f94",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 27033600,
+          "single_core_seconds": 2.778457,
+          "system_seconds": 0.063498,
+          "total_core_seconds": 2.778457,
+          "user_seconds": 2.714959,
+          "wall_seconds": 3.558198
+        },
+        "native_group_observed": 14138,
+        "native_pid": 15315,
+        "native_wall_ns": 3558198000,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 15,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "8f69f78e31399a63d25a66cac36e2f4f1e64745c3e86a01c214f76244ad3ad09",
+        "timed_out": false,
+        "watchdog_seconds": 60
+      },
+      "exporter": {
+        "after_sha256": "1ae63bf5fbc20c06e73212901b1eff1a5141577714995e3f5b8180b615f6e6e9",
+        "before_sha256": "1ae63bf5fbc20c06e73212901b1eff1a5141577714995e3f5b8180b615f6e6e9",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/exporter",
+          "17",
+          "6",
+          "standard",
+          "2026100103",
+          "100000",
+          "instance",
+          "1",
+          "0",
+          "--target-x",
+          "99579",
+          "--target-y",
+          "75031",
+          "--blind-instance-id",
+          "control-02",
+          "--export-only"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "db40fcc4e8a804e3a2622b5f183f4c8f3c1b4165bf7dc87058c3dcd5f9d0af2c",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 4440064,
+          "single_core_seconds": 0.011259,
+          "system_seconds": 0.003776,
+          "total_core_seconds": 0.011259,
+          "user_seconds": 0.007483,
+          "wall_seconds": 0.024691125
+        },
+        "native_group_observed": 14138,
+        "native_pid": 15306,
+        "native_wall_ns": 24691125,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 0,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "5af0a2c05980f09f6721f01b60f1d7b79ece3ff45dda40e15028f6cbd9e41dc2",
+        "timed_out": false,
+        "watchdog_seconds": 30
+      },
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "bytes": 42074,
+          "sha256": "d323eccac25305a98d913d773c533a16993190669f05e524ef7abea174404ebf"
+        },
+        "magma_boolean_f4": {
+          "bytes": 55481,
+          "sha256": "c6f34811e417caeb990e3136ecde1c3bcb0890354e28ccd973228c51d511b3cb"
+        },
+        "wdsat_anf": {
+          "bytes": 34423,
+          "sha256": "d2e1ae3fc91317d82a9ac2c3146714fbfc05050d29b4448d4bf4cd32b5080749"
+        }
+      },
+      "manifest_sha256": "a3865169bbfb6ae7cfa70055c1f30d248d53cf28c7758b8d6c3061a4e70adce2",
+      "pdp_wall_ns": 5226779835,
+      "point_witness": null,
+      "probe_scalar": 1092,
+      "public_point": [
+        99579,
+        75031
+      ],
+      "query_wall_ns": 5227626834,
+      "source_model_valid": null,
+      "status": "CONFLICT_BUDGET_INCONCLUSIVE",
+      "target_query_index": 2,
+      "trial": 2,
+      "verification_wall_ns": 846999
+    },
+    {
+      "a": 54541,
+      "b": 49307,
+      "cms": {
+        "after_sha256": "8b87ea0464a1a68a433c5786490ae340df70f0c550ced4a790a284ce3ec53c14",
+        "before_sha256": "8b87ea0464a1a68a433c5786490ae340df70f0c550ced4a790a284ce3ec53c14",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/cms",
+          "--verb",
+          "1",
+          "--threads",
+          "1",
+          "--random",
+          "1",
+          "--maxsol",
+          "1",
+          "--maxconfl",
+          "100000",
+          "instance/instance.xor.cnf"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "744b1959ae178dd9ef23039aa096293b815a1f7e4df5e356227e83df1a344703",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 15269888,
+          "single_core_seconds": 2.4662979999999997,
+          "system_seconds": 0.048879,
+          "total_core_seconds": 2.4662979999999997,
+          "user_seconds": 2.4174189999999998,
+          "wall_seconds": 2.8842105
+        },
+        "native_group_observed": 14138,
+        "native_pid": 15645,
+        "native_wall_ns": 2884210500,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 15,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "49c1b2b5e5626cbe2ecf3a1a9f61ad7f086ebbe4019fd421f1dc5a80ea5785e6",
+        "timed_out": false,
+        "watchdog_seconds": 60
+      },
+      "exporter": {
+        "after_sha256": "2b911bcacb8fe72e126e56b68ce565c12bced10ef3a33dc88abde3f853fc7286",
+        "before_sha256": "2b911bcacb8fe72e126e56b68ce565c12bced10ef3a33dc88abde3f853fc7286",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/exporter",
+          "17",
+          "6",
+          "standard",
+          "2026100103",
+          "100000",
+          "instance",
+          "1",
+          "0",
+          "--target-x",
+          "53485",
+          "--target-y",
+          "35406",
+          "--blind-instance-id",
+          "control-03",
+          "--export-only"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "d36e26f2fabe4f66f2bedd6ef33f6348b61538d3243d8600acf46d00d65eaa63",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 4587520,
+          "single_core_seconds": 0.012424,
+          "system_seconds": 0.0037579999999999996,
+          "total_core_seconds": 0.012424,
+          "user_seconds": 0.008666,
+          "wall_seconds": 0.024139916
+        },
+        "native_group_observed": 14138,
+        "native_pid": 15622,
+        "native_wall_ns": 24139916,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 0,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "cc2f39723ef3cb8bf7770c8c3e0e654c4f7f91fa8dd6fc53b6779f7193e6e0d6",
+        "timed_out": false,
+        "watchdog_seconds": 30
+      },
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "bytes": 42750,
+          "sha256": "66604820fa96e1503a5f3e88f722416bf1f0289ea7f725f6e35dedc04463ab2a"
+        },
+        "magma_boolean_f4": {
+          "bytes": 57837,
+          "sha256": "fc2ae77e3791b8bec9ed6b99b21224f05652a6d22c197ebac2789ba3ed4a1603"
+        },
+        "wdsat_anf": {
+          "bytes": 35973,
+          "sha256": "04c95dfd48fde2a6e54b832fcb809c9809377e0a1ab55339362a4b8fd583ab0e"
+        }
+      },
+      "manifest_sha256": "1682874cb0f4bfc7a45e893a3ab9d93645ecc13be89628a410be193196ef365e",
+      "pdp_wall_ns": 5029264666,
+      "point_witness": null,
+      "probe_scalar": 54541,
+      "public_point": [
+        53485,
+        35406
+      ],
+      "query_wall_ns": 5029946166,
+      "source_model_valid": null,
+      "status": "CONFLICT_BUDGET_INCONCLUSIVE",
+      "target_query_index": 3,
+      "trial": 3,
+      "verification_wall_ns": 681500
+    },
+    {
+      "a": 63139,
+      "b": 62566,
+      "cms": {
+        "after_sha256": "7601dfa92eee9d5f19f6d017a08b7c8b5716950f48e990c27c39cff63d8ad99a",
+        "before_sha256": "7601dfa92eee9d5f19f6d017a08b7c8b5716950f48e990c27c39cff63d8ad99a",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/cms",
+          "--verb",
+          "1",
+          "--threads",
+          "1",
+          "--random",
+          "1",
+          "--maxsol",
+          "1",
+          "--maxconfl",
+          "100000",
+          "instance/instance.xor.cnf"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "2da2b1358e0790b0d87862573dd7ff374dd25ef1614e49282941dfa060748435",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 25149440,
+          "single_core_seconds": 2.786738,
+          "system_seconds": 0.070501,
+          "total_core_seconds": 2.786738,
+          "user_seconds": 2.716237,
+          "wall_seconds": 3.493008083
+        },
+        "native_group_observed": 14138,
+        "native_pid": 16271,
+        "native_wall_ns": 3493008083,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 15,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "32d43e490263a143febc28d3cc3cf3cfc02e74af323eee1c18fc5f9b201a7917",
+        "timed_out": false,
+        "watchdog_seconds": 60
+      },
+      "exporter": {
+        "after_sha256": "7d1fd8a3fe3b980643fd59f3f44fcb97797b5288d262c0dc87acb5522d27f98c",
+        "before_sha256": "7d1fd8a3fe3b980643fd59f3f44fcb97797b5288d262c0dc87acb5522d27f98c",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/exporter",
+          "17",
+          "6",
+          "standard",
+          "2026100103",
+          "100000",
+          "instance",
+          "1",
+          "0",
+          "--target-x",
+          "70491",
+          "--target-y",
+          "125691",
+          "--blind-instance-id",
+          "control-04",
+          "--export-only"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "8085c2a08ac3caaff5f59b21c0d8c76958174a2ebe13a9ad6e5da8bcac2c1580",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 4440064,
+          "single_core_seconds": 0.011028,
+          "system_seconds": 0.00381,
+          "total_core_seconds": 0.011028,
+          "user_seconds": 0.007218,
+          "wall_seconds": 0.027369167
+        },
+        "native_group_observed": 14138,
+        "native_pid": 16201,
+        "native_wall_ns": 27369167,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 0,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "3bdaf76fe4b7ff0f174f389404c0efc2992dd35db1eff563529d4212f0dda70e",
+        "timed_out": false,
+        "watchdog_seconds": 30
+      },
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "bytes": 41963,
+          "sha256": "df8e46687ac63dae88b4e84d1bcc5c506ecd6e509296698bc86623de8886ac9e"
+        },
+        "magma_boolean_f4": {
+          "bytes": 55065,
+          "sha256": "02ac11d0c0a2d0d14fe89986c85e371366ff13e5536a8f332a0a97b1601e15f9"
+        },
+        "wdsat_anf": {
+          "bytes": 34165,
+          "sha256": "a18ae78dfee5c6e6ff3220a4b51c22aa7c58199f95b2ad8970e510b87e7d76fd"
+        }
+      },
+      "manifest_sha256": "eed3381f3ab07b1aa5ed0493a04fe8dc9a36f157604a7f25ba90dde0a72e71e1",
+      "pdp_wall_ns": 6177773375,
+      "point_witness": null,
+      "probe_scalar": 63139,
+      "public_point": [
+        70491,
+        125691
+      ],
+      "query_wall_ns": 6178351250,
+      "source_model_valid": null,
+      "status": "CONFLICT_BUDGET_INCONCLUSIVE",
+      "target_query_index": 4,
+      "trial": 4,
+      "verification_wall_ns": 577875
+    },
+    {
+      "a": 35480,
+      "b": 17371,
+      "cms": {
+        "after_sha256": "35e65fa500708027249677945d78060b58420a4b2104f582f0317d5b2122bff1",
+        "before_sha256": "35e65fa500708027249677945d78060b58420a4b2104f582f0317d5b2122bff1",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/cms",
+          "--verb",
+          "1",
+          "--threads",
+          "1",
+          "--random",
+          "1",
+          "--maxsol",
+          "1",
+          "--maxconfl",
+          "100000",
+          "instance/instance.xor.cnf"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "5a9a46dc3e300d11f32f349ea327dc714e14412ec872de07c1e8b12e483281d9",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 12926976,
+          "single_core_seconds": 2.202439,
+          "system_seconds": 0.034027999999999996,
+          "total_core_seconds": 2.202439,
+          "user_seconds": 2.168411,
+          "wall_seconds": 2.332729625
+        },
+        "native_group_observed": 14138,
+        "native_pid": 16857,
+        "native_wall_ns": 2332729625,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 15,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "acffc5cc33cd47c69d0e6143ec6e260eb60f7128e021c44166cbe7bd8538b4a9",
+        "timed_out": false,
+        "watchdog_seconds": 60
+      },
+      "exporter": {
+        "after_sha256": "ac4e316fb9b30c91d4b66cacfd88a1f25f7f625ab18a3603eb69099907f4bbc7",
+        "before_sha256": "ac4e316fb9b30c91d4b66cacfd88a1f25f7f625ab18a3603eb69099907f4bbc7",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/exporter",
+          "17",
+          "6",
+          "standard",
+          "2026100103",
+          "100000",
+          "instance",
+          "1",
+          "0",
+          "--target-x",
+          "21551",
+          "--target-y",
+          "7798",
+          "--blind-instance-id",
+          "control-05",
+          "--export-only"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "4979f45a62d3a0d088f2fee2a5eab6789eb72b8ba56eb48eb0f037af3ee269b7",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 4390912,
+          "single_core_seconds": 0.013578999999999997,
+          "system_seconds": 0.005000999999999999,
+          "total_core_seconds": 0.013578999999999997,
+          "user_seconds": 0.008577999999999999,
+          "wall_seconds": 0.043346875
+        },
+        "native_group_observed": 14138,
+        "native_pid": 16755,
+        "native_wall_ns": 43346875,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 0,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "acd59ff9a41db7bcbd86dc4718b9ea82641627e6652792ec0ff3f1583400d286",
+        "timed_out": false,
+        "watchdog_seconds": 30
+      },
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "bytes": 41730,
+          "sha256": "b634ee8f6cce39e8e35ba87645a170b345dd1d49e435da79f89628d09a4ae34a"
+        },
+        "magma_boolean_f4": {
+          "bytes": 54217,
+          "sha256": "9346451fd87febd765523d198f6984f433f4a0fa1f46c3c4283fec1ee6f4e458"
+        },
+        "wdsat_anf": {
+          "bytes": 33647,
+          "sha256": "83f2ba8b7ab24df0c6e99a80a87e0107f7d2712366330dacfee979e417da4686"
+        }
+      },
+      "manifest_sha256": "a2f2a9ce4bd5ec9828498737b244433d5dd0fda3726f26b8859a861ef7c82da7",
+      "pdp_wall_ns": 3369600040,
+      "point_witness": null,
+      "probe_scalar": 35480,
+      "public_point": [
+        21551,
+        7798
+      ],
+      "query_wall_ns": 3370764458,
+      "source_model_valid": null,
+      "status": "CONFLICT_BUDGET_INCONCLUSIVE",
+      "target_query_index": 5,
+      "trial": 5,
+      "verification_wall_ns": 1164418
+    },
+    {
+      "a": 34505,
+      "b": 12588,
+      "cms": {
+        "after_sha256": "212580aabd167d762200f7537514dc4b39c4186a368d1a87ce82834d4fce11dd",
+        "before_sha256": "212580aabd167d762200f7537514dc4b39c4186a368d1a87ce82834d4fce11dd",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/cms",
+          "--verb",
+          "1",
+          "--threads",
+          "1",
+          "--random",
+          "1",
+          "--maxsol",
+          "1",
+          "--maxconfl",
+          "100000",
+          "instance/instance.xor.cnf"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "036b9657a01b55734bc9854108c5e3763df7f8a5efc4c9628a79a91b35d333ef",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 12222464,
+          "single_core_seconds": 2.535939,
+          "system_seconds": 0.039935,
+          "total_core_seconds": 2.535939,
+          "user_seconds": 2.496004,
+          "wall_seconds": 2.739829459
+        },
+        "native_group_observed": 14138,
+        "native_pid": 17359,
+        "native_wall_ns": 2739829459,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 15,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "629b99801b67044237f168bcff43350eaf165ef088af1f900b71185bef6b676f",
+        "timed_out": false,
+        "watchdog_seconds": 60
+      },
+      "exporter": {
+        "after_sha256": "0d19a0b44d099c05cc985cf4f85c8a705c53a63324565e45066624dd65b47bfb",
+        "before_sha256": "0d19a0b44d099c05cc985cf4f85c8a705c53a63324565e45066624dd65b47bfb",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/exporter",
+          "17",
+          "6",
+          "standard",
+          "2026100103",
+          "100000",
+          "instance",
+          "1",
+          "0",
+          "--target-x",
+          "58383",
+          "--target-y",
+          "53891",
+          "--blind-instance-id",
+          "control-06",
+          "--export-only"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "87f4dc73a6855b216c74dd61ec795a8267db0a3cb49a27a2bc2967533b847010",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 4538368,
+          "single_core_seconds": 0.009996,
+          "system_seconds": 0.002227,
+          "total_core_seconds": 0.009996,
+          "user_seconds": 0.007769,
+          "wall_seconds": 0.022562542
+        },
+        "native_group_observed": 14138,
+        "native_pid": 17278,
+        "native_wall_ns": 22562542,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 0,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "0bb0107c8d721eb33cabbf43ccaad9ba4338376ff498739c1575684bff22dcf3",
+        "timed_out": false,
+        "watchdog_seconds": 30
+      },
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "bytes": 43083,
+          "sha256": "7c6b4053c4e86ae6414e63e98e51a93fa87f6e11f1b44a26b11a057c6061e525"
+        },
+        "magma_boolean_f4": {
+          "bytes": 59015,
+          "sha256": "6837b14bbb5f99ef4fb1317e4b019476148ee6fa9fffe7d07c6e4ebe06f29c86"
+        },
+        "wdsat_anf": {
+          "bytes": 36719,
+          "sha256": "81b44917c1fce11e8fda27aa11a963f083aed05412aae143503b82aa3e2009c0"
+        }
+      },
+      "manifest_sha256": "ad0a3ebfceb59da629a91818204767c0a9c93028a9bbb92c52b95b2418118bfc",
+      "pdp_wall_ns": 3746732792,
+      "point_witness": null,
+      "probe_scalar": 34505,
+      "public_point": [
+        58383,
+        53891
+      ],
+      "query_wall_ns": 3747574250,
+      "source_model_valid": null,
+      "status": "CONFLICT_BUDGET_INCONCLUSIVE",
+      "target_query_index": 6,
+      "trial": 6,
+      "verification_wall_ns": 841458
+    },
+    {
+      "a": 6051,
+      "b": 59761,
+      "cms": {
+        "after_sha256": "61954c32e69f237d0e5875c7a74a14f83a1b347e5af1628ea5dd1c19cf025907",
+        "before_sha256": "61954c32e69f237d0e5875c7a74a14f83a1b347e5af1628ea5dd1c19cf025907",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/cms",
+          "--verb",
+          "1",
+          "--threads",
+          "1",
+          "--random",
+          "1",
+          "--maxsol",
+          "1",
+          "--maxconfl",
+          "100000",
+          "instance/instance.xor.cnf"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "f8a508b93c8fa76391a1faff7874b55198d901a020b61c976cacd6c59362629f",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 21479424,
+          "single_core_seconds": 2.359962,
+          "system_seconds": 0.0339,
+          "total_core_seconds": 2.359962,
+          "user_seconds": 2.326062,
+          "wall_seconds": 2.502749916
+        },
+        "native_group_observed": 14138,
+        "native_pid": 17810,
+        "native_wall_ns": 2502749916,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 15,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "ef93c58db230c13e89b75ddc9d8b4a82d3da8cea590ef2fefd875a99751b92b2",
+        "timed_out": false,
+        "watchdog_seconds": 60
+      },
+      "exporter": {
+        "after_sha256": "3c0a55dcbff1398f7f9972e5a0a8b8fec0f44458f4a048791f4c29a7e8ca9c3e",
+        "before_sha256": "3c0a55dcbff1398f7f9972e5a0a8b8fec0f44458f4a048791f4c29a7e8ca9c3e",
+        "command": [
+          "/Volumes/SSD990/llm/tmp/ic-prepared-one-target-controls-v1-20261001/sat-execution/asset-files/bin/exporter",
+          "17",
+          "6",
+          "standard",
+          "2026100103",
+          "100000",
+          "instance",
+          "1",
+          "0",
+          "--target-x",
+          "40029",
+          "--target-y",
+          "71273",
+          "--blind-instance-id",
+          "control-07",
+          "--export-only"
+        ],
+        "controller_group": 14138,
+        "environment_threads": {
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "RAYON_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1"
+        },
+        "executable_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+        "execution_sha256": "43539f7d440289dae1ad4867ba1ca951bd4664bf01147b9070eaa68f3bad07cb",
+        "invocation_sha256": "4ee2a7c011d0e3d0c97102851e995365ea7ed7a6ce7bd75467c56511a3631e1d",
+        "metrics": {
+          "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+          "peak_rss_bytes": 4341760,
+          "single_core_seconds": 0.011855,
+          "system_seconds": 0.003547,
+          "total_core_seconds": 0.011855,
+          "user_seconds": 0.008308,
+          "wall_seconds": 0.021581
+        },
+        "native_group_observed": 14138,
+        "native_pid": 17770,
+        "native_wall_ns": 21581000,
+        "process_group_policy": "inherit-controller-group; no native fork or setsid",
+        "returncode": 0,
+        "schema_version": 3,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "2b47571b5a738310e18fa629d58b4201e534f2db8a60b983079555fee0cafef0",
+        "timed_out": false,
+        "watchdog_seconds": 30
+      },
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "bytes": 41242,
+          "sha256": "724fa5b17c8437e5b85879c6584177b6c12964264be735058a965120ca13a617"
+        },
+        "magma_boolean_f4": {
+          "bytes": 52529,
+          "sha256": "69e5ca0c122f438680d912cea75d70e29dd203cafca046d899f5266df262a950"
+        },
+        "wdsat_anf": {
+          "bytes": 32524,
+          "sha256": "3567cafee47da7a54f074ea2ecc87dfb9cc1960aba2cbb48d7004cd93e6abc67"
+        }
+      },
+      "manifest_sha256": "9fae9afe4a03b093cf5041792d26fe228ebe0a316a80fc24a0435f6fb3cee957",
+      "pdp_wall_ns": 3645173250,
+      "point_witness": null,
+      "probe_scalar": 6051,
+      "public_point": [
+        40029,
+        71273
+      ],
+      "query_wall_ns": 3645837125,
+      "source_model_valid": null,
+      "status": "CONFLICT_BUDGET_INCONCLUSIVE",
+      "target_query_index": 7,
+      "trial": 7,
+      "verification_wall_ns": 663875
+    }
+  ],
+  "target_input": [
+    52411,
+    72106
+  ],
+  "target_status_mix": {
+    "CONFLICT_BUDGET_INCONCLUSIVE": 8
+  },
+  "workload_id": "b79558c422c7"
+}

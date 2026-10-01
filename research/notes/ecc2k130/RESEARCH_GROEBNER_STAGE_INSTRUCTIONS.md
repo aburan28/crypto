@@ -72,7 +72,7 @@ on the same instance and priced in the same unit as the pipeline.
 **Why instructions.**
 - They are **complete**: every cost the method incurs is in them, including
   the ones no counter was written for.
-- They are **deterministic**: a repeated run of `K_0/2^23 m=3` differed by 28
+- They are **deterministic**: a repeated run of `icv1-f2m23-t5197-69e76b73 m=3` differed by 28
   of 2,136,316,624, with the arms on one binary.
 - They are **independent of the host**.
 
@@ -94,29 +94,29 @@ disclosed so that the cells it touched are read as tuning data:
     51–586 instructions per counted operation, an 11× spread across rungs.
   - **In instructions, round 2 is `1.12×`** on its registered holdout against
     `1.50×` in word operations.  It is `1.01×` on the four largest cells
-    (`K_0/2^31`, `K_1/2^29`) against `1.43–1.63×`, `1.17×` on the
+    (`icv1-f2m31-tm90707-c95f16f5`, `icv1-f2m29-tm40309-30c52b96`) against `1.43–1.63×`, `1.17×` on the
     predecessor's T1′ against `1.65×`, and `1.00×` on the frozen ladder
     against `1.02×`.
-  - One frozen rung, `K_1/2^15 m=2`, is `0.79×` in instructions
+  - One frozen rung, `icv1-f2m15-t275-b7f03703 m=2`, is `0.79×` in instructions
     (29.5 M → 37.6 M) and `1.04×` in word operations.
   - Where the instructions go, summed over every rung of the current default:
     specialisation `51%` (`ReducedBasis::insert` `29%`), sorting `22%`,
     root builds `18.5%`, linear elimination `11.6%`, system construction
     `8.7%`.  The counted elimination kernels are `8%`.
-  - On `K_0/2^31 m=3`, the rewrite scatter inside specialisation is `36%` of
+  - On `icv1-f2m31-tm90707-c95f16f5 m=3`, the rewrite scatter inside specialisation is `36%` of
     the rung's instructions.  It is charged per live word but costs per set
     bit, about 186 instructions per counted operation.  The m4ri elimination
     is `9.6%`, at about 7.5 instructions per counted XOR.
 - **Round 2's whole-log wall ratio** after its hash fix was `1.41×`
-  (`K_0/2^13`, 15 seeds).  Instructions on one of those runs (seed 210,
+  (`icv1-f2m13-t181-515ee569`, 15 seeds).  Instructions on one of those runs (seed 210,
   round 2's `profile/`) gave `1.46×` in the stage (332.9 M → 228.3 M) and
   `1.33×` for the whole process (417.3 M → 312.8 M).  On the R2 holdout, wall
   gave `1.08×` and instructions `1.12×`: instructions track wall, and word
   operations do not.
 - **Calibration probes:**
-  - `ir_calibration add`: 924 instructions per addition on `K_0/2^13` and
-    680 on `K_0/2^9`, over 200,000 additions.
-  - `ir_calibration rho` on `K_0/2^13`, seeds 201–203: 940 k, 706 k and
+  - `ir_calibration add`: 924 instructions per addition on `icv1-f2m13-t181-515ee569` and
+    680 on `icv1-f2m9-t5-81e744be`, over 200,000 additions.
+  - `ir_calibration rho` on `icv1-f2m13-t181-515ee569`, seeds 201–203: 940 k, 706 k and
     555 k instructions for counted `S` of 22.4, 16.8 and 13.2.  Rho's
     instructions per counted GAE are 938, 937 and 940, so its overhead
     beyond the additions is about 1%.
@@ -134,14 +134,14 @@ disclosed so that the cells it touched are read as tuning data:
 - All five ladders: frozen, chain, chain-holdout, chain-holdout-2, R2 holdout.
 - Every admissible rung, one callgrind run per rung per arm (`run.sh`).
 - Three rungs per arm are run a second time for the determinism gate: the
-  frozen `K_0/2^13 m=2`, chain-holdout-2 `K_0/2^23 m=3`, and R2
-  `K_0/2^9 m=4`.
+  frozen `icv1-f2m13-t181-515ee569 m=2`, chain-holdout-2 `icv1-f2m23-t5197-69e76b73 m=3`, and R2
+  `icv1-f2m9-t5-81e744be m=4`.
 
 **Whole logarithms,** in process instructions: `ic run --degree n --curve-a 0
 --summands 3 --solver groebner --random-target --batch 1`, one run per seed
 per arm.
-- `K_0/2^13`: seeds 201–210, plus holdout 301–305.
-- `K_0/2^9`: seeds 201–205.
+- `icv1-f2m13-t181-515ee569`: seeds 201–210, plus holdout 301–305.
+- `icv1-f2m9-t5-81e744be`: seeds 201–205.
 
 These are round 2's seeds.
 
@@ -226,12 +226,12 @@ gzipped callgrind profile.  Every job ran on one binary built from
   holdout, which it never ran, it is `10.6×` against `17.3×` in word
   operations.
 - **Round 2 shrinks to `1.12×`** on its registered holdout, against `1.50×`.
-  It is `1.01×` on the three `K_0/2^31` cells and `1.00×` on the frozen
+  It is `1.01×` on the three `icv1-f2m31-tm90707-c95f16f5` cells and `1.00×` on the frozen
   ladder.  One frozen rung regresses to `0.79×`.
 - **The whole logarithm has a measured `S`.**
-  - `K_0/2^13`: `S ≈ 19,100` against rho's `19.8` on the same seeds and in the
+  - `icv1-f2m13-t181-515ee569`: `S ≈ 19,100` against rho's `19.8` on the same seeds and in the
     same unit, **`964×` rho**.
-  - `K_0/2^9`: `S ≈ 8,700` against `45.2`, `192×`.
+  - `icv1-f2m9-t5-81e744be`: `S ≈ 8,700` against `45.2`, `192×`.
 
 The class is **accounting**: no algorithm moved.
 
@@ -247,9 +247,9 @@ The class is **accounting**: no algorithm moved.
   operations equal round 2's on all twenty seeds.
 - **G2, determinism: not met as registered.**
   - Two of the three rungs reproduce within the gate: chain-holdout-2
-    `K_0/2^23 m=3` differs by at most `3.2 × 10⁻⁷`, and R2 `K_0/2^9 m=4` is
+    `icv1-f2m23-t5197-69e76b73 m=3` differs by at most `3.2 × 10⁻⁷`, and R2 `icv1-f2m9-t5-81e744be m=4` is
     exact in A1 and A2 and `7.4 × 10⁻⁷` in A0.
-  - The frozen `K_0/2^13 m=2` does not: `2.5 × 10⁻⁵`, `7.0 × 10⁻⁶` and
+  - The frozen `icv1-f2m13-t181-515ee569 m=2` does not: `2.5 × 10⁻⁵`, `7.0 × 10⁻⁶` and
     `8.6 × 10⁻⁶` in A0, A1 and A2, against a gate of `10⁻⁶`.
   - The cause, found after the registered runs (`determinism_single_thread/`):
     rayon's scheduling in the parallel Macaulay elimination, which that
@@ -280,11 +280,11 @@ Reading it:
 
 - **Round 1's gains were mostly real.**
   - On its registered holdout T1′ the instruction ratio (`5.23×`) exceeds
-    the word-operation ratio.  Its largest cell, `K_1/2^11 m=4`, is `38×` in
+    the word-operation ratio.  Its largest cell, `icv1-f2m11-t67-05f5aa36 m=4`, is `38×` in
     instructions against `33×` in word operations.
-  - On the three `K_0/2^31` cells it never ran it is `14–24×`.
+  - On the three `icv1-f2m31-tm90707-c95f16f5` cells it never ran it is `14–24×`.
   - Where it did little, it did little in both units: the frozen ladder is
-    `1.02×`, and `K_0/2^13 m=3` is `1.03×` in instructions against `1.62×`.
+    `1.02×`, and `icv1-f2m13-t181-515ee569 m=3` is `1.03×` in instructions against `1.62×`.
 - **Round 2's gains were mostly in the phase the unit over-weights.**
   - On the four cells it had never seen, T1 is `1.01×`, `1.01×`, `1.01×` and
     `1.90×` in instructions, against `1.43–1.63×` in word operations.
@@ -292,9 +292,9 @@ Reading it:
   - Round 2's status is unchanged, because it was registered in word
     operations (§4).  The page shows both figures.
   - Its genuine instruction gains are on small and middling chains:
-    `1.3–2.0×` on the `n ≤ 11` cells and `1.46×` on `K_0/2^13 m=3`.
+    `1.3–2.0×` on the `n ≤ 11` cells and `1.46×` on `icv1-f2m13-t181-515ee569 m=3`.
 - **One frozen rung regresses in instructions under round 2:**
-  `K_1/2^15 m=2`, 29.5 M → 37.5 M (`0.79×`), with word operations `1.04×`.
+  `icv1-f2m15-t275-b7f03703 m=2`, 29.5 M → 37.5 M (`0.79×`), with word operations `1.04×`.
   - The rung has 32 targets and no tree: every node is a root.
   - Its generators do not all span every variable, so round 2's builder
     takes the support-local path, which has no layout cache.  The rung's
@@ -307,7 +307,7 @@ Reading it:
   - The fix, a layout cache for support-local roots, is listed for the next
     round rather than made here.
 - **The unit over-weights elimination.**  Instructions per counted operation
-  run from 51 (`K_0/2^31`, where the m4ri kernels dominate) to 586 (the
+  run from 51 (`icv1-f2m31-tm90707-c95f16f5`, where the m4ri kernels dominate) to 586 (the
   `n = 9` cells, where system construction and root builds dominate).
 
 ### 5.3 Where the default's stage instructions go
@@ -336,13 +336,13 @@ contains `insert`.  The shares name where to look.
 
 `ic run --solver groebner --summands 3`, process instructions, one run per
 seed per arm.  The conversion is 923.9 instructions per addition on
-`K_0/2^13` and 679.9 on `K_0/2^9` (`add/`).  Rho is `ic_boundary::rho_reference`
+`icv1-f2m13-t181-515ee569` and 679.9 on `icv1-f2m9-t5-81e744be` (`add/`).  Rho is `ic_boundary::rho_reference`
 on the same instance and seeds (`rho/`).
 
 | cell | runs | rho `S` (instructions; counted) | A0 `S` | A1 `S` | **A2 `S`** (the default) | A2 / rho |
 |:--|--:|:--|--:|--:|--:|--:|
-| `K_0/2^13`, seeds 201–210, 301–305 | 15 per arm | 19.8; 19.5 | 27,185 | 26,999 | **19,128** (7,508–40,130) | **964×** |
-| `K_0/2^9`, seeds 201–205 | 5 per arm | 45.2; 43.9 | 12,395 | 10,464 | **8,674** (7,892–9,721) | **192×** |
+| `icv1-f2m13-t181-515ee569`, seeds 201–210, 301–305 | 15 per arm | 19.8; 19.5 | 27,185 | 26,999 | **19,128** (7,508–40,130) | **964×** |
+| `icv1-f2m9-t5-81e744be`, seeds 201–205 | 5 per arm | 45.2; 43.9 | 12,395 | 10,464 | **8,674** (7,892–9,721) | **192×** |
 
 - **The conversion checks itself.**  Rho's instruction-derived `S` and its
   counted `S` agree within 3%: its overhead beyond the additions is small, as
@@ -403,7 +403,7 @@ reference is main after #697, re-priced under this round's convention.*
 2. **System construction on small and quadratic cells** (31–33%): taken up
    by #697's in-process template memo, whose instruction effect is still to
    be measured.
-3. **The `K_1/2^15 m=2` regression:** give support-local roots a layout
+3. **The `icv1-f2m15-t275-b7f03703 m=2` regression:** give support-local roots a layout
    cache.
 
 ### 5.7 Reproducing

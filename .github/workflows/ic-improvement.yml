@@ -29,7 +29,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ic-bounded-improvement
+  # PR controls need their own pending slot. Keep measured dispatches in the
+  # original serialized group; unrelated PRs must not cancel queued controls.
+  group: ${{ github.event_name == 'pull_request' && format('ic-bounded-improvement-pr-{0}', github.event.pull_request.number) || 'ic-bounded-improvement' }}
   cancel-in-progress: false
 jobs:
   candidate-controls:

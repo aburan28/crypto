@@ -1,0 +1,94 @@
+{
+ "what_this_is": "the exploration before R05's declaration, not a round's measurement: the prototype filter (0318f016) over its base (eaa842aa), cold time and collection, base over candidate",
+ "accounting": {
+  "processes": 37,
+  "contended": 1,
+  "failed": 0
+ },
+ "sizes": {
+  "icv1-f2m41-tm2308219-7f48b14a": {
+   "cold_base_over_cand": {
+    "n": 6,
+    "geomean": 1.1247648891253965,
+    "min": 0.9469992227067088,
+    "max": 1.4115445538331743,
+    "lo": 0.9759749097161154,
+    "hi": 1.2962382979468678
+   },
+   "cold_pairs": [
+    1.0347,
+    1.0926,
+    1.4115,
+    0.947,
+    1.135,
+    1.1805
+   ],
+   "cold_log_sd": 0.1352,
+   "collect_base_over_cand": {
+    "n": 6,
+    "geomean": 1.203861494852414,
+    "min": 0.9977657877889794,
+    "max": 1.4844718458511355,
+    "lo": 1.033699797834889,
+    "hi": 1.402034228722738
+   },
+   "outputs_identical": true
+  },
+  "icv1-f2m53-tm56619371-dac20a85": {
+   "cold_base_over_cand": {
+    "n": 6,
+    "geomean": 1.2739517013616641,
+    "min": 1.1853232328412406,
+    "max": 1.3777766520072638,
+    "lo": 1.2112782596096703,
+    "hi": 1.3398679655368941
+   },
+   "cold_pairs": [
+    1.2773,
+    1.2841,
+    1.3778,
+    1.2653,
+    1.1853,
+    1.2613
+   ],
+   "cold_log_sd": 0.0481,
+   "collect_base_over_cand": {
+    "n": 6,
+    "geomean": 1.4979918440320295,
+    "min": 1.4363054972811748,
+    "max": 1.5922548962020906,
+    "lo": 1.4398637590083159,
+    "hi": 1.5584665915419573
+   },
+   "outputs_identical": true
+  },
+  "icv1-f2m61-t158598901-ab42b6c5": {
+   "cold_base_over_cand": {
+    "n": 6,
+    "geomean": 1.3739026470685207,
+    "min": 1.32158285577653,
+    "max": 1.4785014169162125,
+    "lo": 1.315396009328429,
+    "hi": 1.4350115632368388
+   },
+   "cold_pairs": [
+    1.3588,
+    1.3216,
+    1.3792,
+    1.4785,
+    1.3225,
+    1.3888
+   ],
+   "cold_log_sd": 0.0415,
+   "collect_base_over_cand": {
+    "n": 6,
+    "geomean": 1.4454791977634938,
+    "min": 1.3704136148322306,
+    "max": 1.5650051307780002,
+    "lo": 1.3765082548905367,
+    "hi": 1.5179059796725654
+   },
+   "outputs_identical": true
+  }
+ }
+}

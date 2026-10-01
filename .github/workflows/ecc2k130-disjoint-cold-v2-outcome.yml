@@ -1,0 +1,46 @@
+name: ECC2K130 orbit-disjoint v2 cold outcome replay
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ecc2k130-disjoint-cold-v2-outcome.yml
+      - research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/**
+      - research/notes/ecc2k130/disjoint_cold_v2_20261001/**
+      - research/notes/ecc2k130/compact_ir_ledger_20260930/archive.py
+      - research/notes/ecc2k130/compact_ir_ledger_20260930/run_panel.py
+      - docs/index-calculus-scoreboard.html
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            research/notes/ecc2k130/compact_ir_ledger_20260930/archive.py
+            research/notes/ecc2k130/compact_ir_ledger_20260930/run_panel.py
+            research/notes/ecc2k130/compact_k_boundary_20260929
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929
+            research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            research/notes/ecc2k130/compact_orbit_strong_rho_20260929
+            research/notes/ecc2k130/compact_s3_batch_20260929
+            research/notes/ecc2k130/compact_s3_prefilter_20260930
+            research/notes/ecc2k130/compact_swap_quotient_20260929
+            research/notes/ecc2k130/disjoint_cold_q_20260930
+            research/notes/ecc2k130/disjoint_cold_v2_20261001
+            research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001
+            research/notes/ecc2k130/point_sum_cold_20260930
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+      - name: Check syntax and independently replay sealed outcome
+        run: |
+          set -euo pipefail
+          python3 -m py_compile research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/*.py
+          ARCHIVE=research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/evidence_run_36803331080
+          OUTCOME=research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001
+          python3 "$OUTCOME/replay_archive.py" --archive "$ARCHIVE" --analysis "$OUTCOME/ANALYSIS.json"

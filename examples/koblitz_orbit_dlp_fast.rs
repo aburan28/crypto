@@ -777,7 +777,25 @@ fn main() {
     let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
 
     // Rank stage: rows sum(coefficient * L_column) = a for random [a]G.
+    // The optional trace lets a separate implementation replay every attempted
+    // group relation, rank transition, and final base-log solution.
     let rank_started = Instant::now();
+    let mut rank_trace = std::env::var("KIC_DUMP_RANK")
+        .ok()
+        .map(|path| std::fs::File::create(path).expect("create rank trace"));
+    if let Some(trace) = rank_trace.as_mut() {
+        writeln!(
+            trace,
+            "{}",
+            json!({
+                "kind":"compact_orbit_rank_header", "schema_version":1,
+                "n":n, "a":a, "subgroup_order":r, "base_hash":base_hash,
+                "generator":generator.map(|(x, y)| [x, y]),
+                "orbit_columns":base.columns, "factor_base_points":base.points.len(),
+            })
+        )
+        .unwrap();
+    }
     let mut echelon = Echelon {
         r,
         columns: base.columns,
@@ -805,6 +823,7 @@ fn main() {
             FastBinaryCurve::neg(rep),
         );
         rank_attempts += 1;
+        let rank_before = echelon.rank;
         match extract(
             &gf,
             &fast,
@@ -820,16 +839,62 @@ fn main() {
                 rank_probes += relation.probes;
                 let mut row = relation_row(&base, &relation, scalar, r);
                 row[column] = (row[column] + 1) % r;
-                if !echelon.insert(row) {
+                let gained = echelon.insert(row.clone());
+                if !gained {
                     rank_rows_without_gain += 1;
                 }
+                if let Some(trace) = rank_trace.as_mut() {
+                    writeln!(
+                        trace,
+                        "{}",
+                        json!({
+                            "kind":"compact_orbit_rank_attempt", "attempt_index":rank_attempts - 1,
+                            "found":true, "scalar":scalar, "pivotless_column":column,
+                            "target":point.map(|(x, y)| [x, y]),
+                            "point_indices":relation.point_indices, "x_codes":relation.x_codes,
+                            "pinned_intermediates":relation.intermediates,
+                            "probes":relation.probes, "row":row,
+                            "rank_before":rank_before, "rank_after":echelon.rank, "gained":gained,
+                        })
+                    )
+                    .unwrap();
+                }
             }
-            None => rank_failures += 1,
+            None => {
+                rank_failures += 1;
+                if let Some(trace) = rank_trace.as_mut() {
+                    writeln!(
+                        trace,
+                        "{}",
+                        json!({
+                            "kind":"compact_orbit_rank_attempt", "attempt_index":rank_attempts - 1,
+                            "found":false, "scalar":scalar, "pivotless_column":column,
+                            "target":point.map(|(x, y)| [x, y]),
+                            "rank_before":rank_before, "rank_after":echelon.rank,
+                        })
+                    )
+                    .unwrap();
+                }
+            }
         }
     }
     let rank_ms = rank_started.elapsed().as_secs_f64() * 1000.0;
     let la_started = Instant::now();
     let logs = echelon.solve();
+    if let Some(trace) = rank_trace.as_mut() {
+        writeln!(
+            trace,
+            "{}",
+            json!({
+                "kind":"compact_orbit_rank_solution", "rank":echelon.rank,
+                "attempts":rank_attempts, "relations":rank_relations,
+                "failures":rank_failures, "rows_without_gain":rank_rows_without_gain,
+                "logs":logs,
+            })
+        )
+        .unwrap();
+        trace.flush().unwrap();
+    }
     let la_ms = la_started.elapsed().as_secs_f64() * 1000.0;
 
     let targets_started = Instant::now();

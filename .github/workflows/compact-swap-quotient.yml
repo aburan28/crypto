@@ -1,0 +1,97 @@
+name: Compact-orbit S3 swap quotient against strong rho
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/compact-swap-quotient.yml'
+      - 'research/notes/ecc2k130/compact_swap_quotient_20260929/**'
+      - 'research/notes/ecc2k130/compact_frozen_source_replay_20260929/**'
+      - 'examples/koblitz_orbit_dlp_fast.rs'
+      - 'examples/koblitz_orbit_dlp_swap.rs'
+      - 'examples/koblitz_rho_batch_ks_v3.rs'
+      - 'src/cryptanalysis/koblitz_fast.rs'
+      - 'src/cryptanalysis/koblitz_index_calculus.rs'
+      - 'src/cryptanalysis/semaev_decomp.rs'
+      - 'src/lib.rs'
+      - 'research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py'
+      - 'research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py'
+      - 'research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/compact-swap-quotient.yml'
+      - 'research/notes/ecc2k130/compact_swap_quotient_20260929/**'
+      - 'research/notes/ecc2k130/compact_frozen_source_replay_20260929/**'
+  workflow_dispatch:
+
+jobs:
+  paired-swap-grid:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        n: [41, 53]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            Cargo.toml
+            docs/ic/calibration.json
+            src
+            examples/koblitz_orbit_dlp_fast.rs
+            examples/koblitz_orbit_dlp_swap.rs
+            examples/koblitz_rho_batch_ks_v2_n61.rs
+            examples/koblitz_rho_batch_ks_v3.rs
+            research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+            research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py
+            research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures
+            research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures
+            research/notes/ecc2k130/compact_k_boundary_20260929/fixtures
+            research/notes/ecc2k130/compact_swap_quotient_20260929
+            research/notes/ecc2k130/compact_frozen_source_replay_20260929
+            .github/workflows/compact-swap-quotient.yml
+      - name: Check fail-closed frozen-source materialization
+        run: python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+      - name: Materialize frozen source tree from committed snapshots
+        run: |
+          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+            --freeze research/notes/ecc2k130/compact_swap_quotient_20260929/FROZEN.json \
+            --dest "${{ runner.temp }}/frozen-src"
+      - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+        working-directory: ${{ runner.temp }}/frozen-src
+      - run: cargo build --release --locked --example koblitz_rho_batch_ks_v3 --example koblitz_orbit_dlp_fast --example koblitz_orbit_dlp_swap
+        working-directory: ${{ runner.temp }}/frozen-src
+      - name: Exhaustive swap identity and exceptional-state test
+        working-directory: ${{ runner.temp }}/frozen-src
+        run: cargo test --release --locked --example koblitz_orbit_dlp_swap exhaustive_odd_degree_swap_preserves_roots_and_table_witnesses
+      - name: Run nine Latin-balanced cold arms on the same public points
+        id: run
+        working-directory: ${{ runner.temp }}/frozen-src
+        env:
+          GIT_DIR: ${{ github.workspace }}/.git
+        run: |
+          python3 research/notes/ecc2k130/compact_swap_quotient_20260929/run_panel.py \
+            --n ${{ matrix.n }} \
+            --rho target/release/examples/koblitz_rho_batch_ks_v3 \
+            --baseline target/release/examples/koblitz_orbit_dlp_fast \
+            --swap target/release/examples/koblitz_orbit_dlp_swap \
+            --out "${{ runner.temp }}/compact-swap/n${{ matrix.n }}_L1024"
+      - name: Independently replay every rank and logarithm
+        if: always() && steps.run.outcome != 'skipped'
+        working-directory: ${{ runner.temp }}/frozen-src
+        run: |
+          python3 research/notes/ecc2k130/compact_swap_quotient_20260929/verify_panel.py \
+            --n ${{ matrix.n }} \
+            --run-dir "${{ runner.temp }}/compact-swap/n${{ matrix.n }}_L1024" \
+            --out "${{ runner.temp }}/compact-swap/n${{ matrix.n }}_L1024/receipt.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compact-swap-quotient-n${{ matrix.n }}-L1024
+          path: ${{ runner.temp }}/compact-swap/n${{ matrix.n }}_L1024
+          if-no-files-found: warn
+          retention-days: 90

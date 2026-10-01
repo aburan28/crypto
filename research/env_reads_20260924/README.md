@@ -33,7 +33,7 @@ whole-logarithm seeds of
   - The ladders run `1.03–1.07×` faster.  The `0.98×` on the chain ladder is
     a `0.11 s` suite.
   - The whole logarithms are **flat**: `0.975× [0.954, 0.996]` on
-    `K_0/2^13` and `1.000×` on `K_0/2^9`.  Those runs take 0.03–0.3 s, where
+    `icv1-f2m13-t181-515ee569` and `1.000×` on `icv1-f2m9-t5-81e744be`.  Those runs take 0.03–0.3 s, where
     process start-up and the host dominate.  Twelve more interleaved pairs on
     the heaviest seed (209) read `1.016×` in the change's favour.
   - Nothing is claimed beyond the ladders' few per cent.

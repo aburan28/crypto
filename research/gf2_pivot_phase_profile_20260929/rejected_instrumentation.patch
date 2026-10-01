@@ -1,0 +1,104 @@
+diff --git a/src/cryptanalysis/gf2_elim.rs b/src/cryptanalysis/gf2_elim.rs
+index 33e58bd4d..a7feac5cc 100644
+--- a/src/cryptanalysis/gf2_elim.rs
++++ b/src/cryptanalysis/gf2_elim.rs
+@@ -52,0 +53,15 @@ use rayon::prelude::*;
++use std::time::Instant;
++
++#[derive(Default)]
++struct ElimPhaseProfile {
++    strip_ns: u64,
++    pivot_ns: u64,
++    pivot_scan_ns: u64,
++    selected_row_xor_ns: u64,
++    earlier_pivots_xor_ns: u64,
++    strip_clear_ns: u64,
++    table_ns: u64,
++    row_clear_ns: u64,
++    reverse_ns: u64,
++    blocks: u64,
++}
+@@ -181,0 +197,8 @@ fn eliminate_with(
++    static PROFILE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
++    static PIVOT_PROFILE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
++    let profiled = *PROFILE.get_or_init(|| std::env::var("KIC_GF2_PROFILE").as_deref() == Ok("1"));
++    let fine_pivot = profiled
++        && *PIVOT_PROFILE
++            .get_or_init(|| std::env::var("KIC_GF2_PIVOT_PROFILE").as_deref() == Ok("1"));
++    let total_start = Instant::now();
++    let mut phases = ElimPhaseProfile::default();
+@@ -204,0 +228 @@ fn eliminate_with(
++        let strip_start = profiled.then(Instant::now);
+@@ -209,0 +234,3 @@ fn eliminate_with(
++        if let Some(start) = strip_start {
++            phases.strip_ns += start.elapsed().as_nanos() as u64;
++        }
+@@ -214,0 +242 @@ fn eliminate_with(
++        let pivot_start = profiled.then(Instant::now);
+@@ -216,0 +245 @@ fn eliminate_with(
++            let scan_start = fine_pivot.then(Instant::now);
+@@ -233,0 +263,3 @@ fn eliminate_with(
++            if let Some(start) = scan_start {
++                phases.pivot_scan_ns += start.elapsed().as_nanos() as u64;
++            }
+@@ -240,0 +273 @@ fn eliminate_with(
++            let selected_xor_start = fine_pivot.then(Instant::now);
+@@ -255,0 +289,4 @@ fn eliminate_with(
++            if let Some(start) = selected_xor_start {
++                phases.selected_row_xor_ns += start.elapsed().as_nanos() as u64;
++            }
++            let earlier_xor_start = fine_pivot.then(Instant::now);
+@@ -267,0 +305,4 @@ fn eliminate_with(
++            if let Some(start) = earlier_xor_start {
++                phases.earlier_pivots_xor_ns += start.elapsed().as_nanos() as u64;
++            }
++            let strip_clear_start = fine_pivot.then(Instant::now);
+@@ -274,0 +316,3 @@ fn eliminate_with(
++            if let Some(start) = strip_clear_start {
++                phases.strip_clear_ns += start.elapsed().as_nanos() as u64;
++            }
+@@ -282,0 +327,3 @@ fn eliminate_with(
++        if let Some(start) = pivot_start {
++            phases.pivot_ns += start.elapsed().as_nanos() as u64;
++        }
+@@ -297,0 +345 @@ fn eliminate_with(
++                if profiled { Some(&mut phases) } else { None },
+@@ -298,0 +347 @@ fn eliminate_with(
++            phases.blocks += 1;
+@@ -314,0 +364 @@ fn eliminate_with(
++    let reverse_start = profiled.then(Instant::now);
+@@ -349,0 +400,21 @@ fn eliminate_with(
++    if let Some(start) = reverse_start {
++        phases.reverse_ns = start.elapsed().as_nanos() as u64;
++    }
++    if profiled {
++        eprintln!(
++            "GF2_PHASES {}",
++            serde_json::json!({
++                "rows": rows, "cols": n_cols, "rank": pivot_row,
++                "reduce_above": reduce_above, "blocks": phases.blocks,
++                "total_ns": total_start.elapsed().as_nanos() as u64,
++                "strip_ns": phases.strip_ns, "pivot_ns": phases.pivot_ns,
++                "fine_pivot": fine_pivot,
++                "pivot_scan_ns": phases.pivot_scan_ns,
++                "selected_row_xor_ns": phases.selected_row_xor_ns,
++                "earlier_pivots_xor_ns": phases.earlier_pivots_xor_ns,
++                "strip_clear_ns": phases.strip_clear_ns,
++                "table_ns": phases.table_ns, "row_clear_ns": phases.row_clear_ns,
++                "reverse_ns": phases.reverse_ns,
++            })
++        );
++    }
+@@ -453,0 +525 @@ fn clear_block(
++    mut profile: Option<&mut ElimPhaseProfile>,
+@@ -454,0 +527 @@ fn clear_block(
++    let table_start = profile.as_ref().map(|_| Instant::now());
+@@ -501,0 +575,4 @@ fn clear_block(
++    if let (Some(start), Some(phases)) = (table_start, profile.as_mut()) {
++        phases.table_ns += start.elapsed().as_nanos() as u64;
++    }
++    let row_clear_start = profile.as_ref().map(|_| Instant::now());
+@@ -536,0 +614,3 @@ fn clear_block(
++    if let (Some(start), Some(phases)) = (row_clear_start, profile.as_mut()) {
++        phases.row_clear_ns += start.elapsed().as_nanos() as u64;
++    }

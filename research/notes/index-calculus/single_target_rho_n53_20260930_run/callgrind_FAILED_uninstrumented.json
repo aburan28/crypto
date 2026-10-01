@@ -1,0 +1,59 @@
+{
+  "stage": "callgrind",
+  "runs": [
+    {
+      "tag": "cg_D",
+      "arm": "D",
+      "rc": 0,
+      "wall_s": 6.22624964900001,
+      "user_s": 14.286898,
+      "sys_s": 1.546816,
+      "cpu_s": 15.833714,
+      "maxrss_kb": 1033816,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_D.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_D.stderr",
+      "gate": true,
+      "extra": {
+        "admitted_relations": 95
+      },
+      "Ir": null
+    },
+    {
+      "tag": "cg_P",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 6.108151230999965,
+      "user_s": 5.974767,
+      "sys_s": 0.055113999999999996,
+      "cpu_s": 6.029881,
+      "maxrss_kb": 37464,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_P.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_P.stderr",
+      "gate": true,
+      "extra": {
+        "walk_steps": 369507,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 369507
+      },
+      "Ir": null
+    },
+    {
+      "tag": "cg_S",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.40094847600005323,
+      "user_s": 0.37438,
+      "sys_s": 0.01991,
+      "cpu_s": 0.39429,
+      "maxrss_kb": 37464,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_S.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/cg_S.stderr",
+      "gate": true,
+      "extra": {
+        "walk_steps": 470279,
+        "ideal_steps": 558444.48690292
+      },
+      "Ir": null
+    }
+  ]
+}

@@ -37,6 +37,7 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde_json::{json, Value};
 
+use crypto_lib::cryptanalysis::curve_id::{binary_degree, same_curve};
 use crypto_lib::cryptanalysis::ic_boundary::{
     find_prime_order_curve, generic_floor_ops, generic_floor_s, koblitz_instance,
     koblitz_instance_best, prime_instance_for, random_binary_instance, rho_cap, rho_reference,
@@ -577,13 +578,13 @@ fn same_run(recorded: &Value, rerun: &RhoResult) -> Result<(), String> {
 fn rebuild_prime(name: &str, bits_list: &[u32], seed: u64) -> Option<PrimeInstance> {
     for &b in bits_list {
         let inst = prime_instance_for(b, seed);
-        if inst.name == name {
+        if same_curve(&inst.name, name) {
             return Some(inst);
         }
     }
     (8..=20)
         .filter_map(roster_prime_instance)
-        .find(|i| i.name == name)
+        .find(|i| same_curve(&i.name, name))
 }
 
 /// One ledger instance of a frozen `ic boundary` report, re-priced.
@@ -686,7 +687,7 @@ fn reprice_boundary_instance(
                 .ok_or("binary instance without a degree")? as u32;
             let b = random_binary_instance(n, seed, 8)
                 .ok_or_else(|| format!("cannot rebuild {name}"))?;
-            if b.name != name || b.r != r {
+            if !same_curve(&b.name, &name) || b.r != r {
                 return Err(format!("{name}: rebuilt {} with r = {}", b.name, b.r));
             }
             let bg = BinaryGroup(&b.fast);
@@ -795,10 +796,6 @@ fn reprice_bench(
     let seed = first_seed ^ 0x5248_4F00;
     let r = doc["rows"][0]["r"].as_u64().ok_or("no row carries r")?;
     let max_steps = (generic_floor_ops(r as f64, 1.0) * 64.0) as u64 + 4096;
-    let degree = |name: &str| -> Option<u32> {
-        let at = name.find("-n")? + 2;
-        name[at..].split('-').next()?.parse().ok()
-    };
     // (planted, run seed) of every recorded run.
     let draws: Vec<(u64, u64, Value)> = per_run
         .iter()
@@ -820,21 +817,17 @@ fn reprice_bench(
     let exclusions = match regime.as_str() {
         "char2" | "koblitz" => {
             let inst = if regime == "char2" {
-                let n = degree(&name).ok_or_else(|| format!("no degree in {name}"))?;
+                let n = binary_degree(&name).ok_or_else(|| format!("no degree in {name}"))?;
                 random_binary_instance(n, seed, max_cofactor)
                     .ok_or_else(|| format!("cannot rebuild {name}"))?
             } else {
-                let n: u32 = name
-                    .split("2^")
-                    .nth(1)
-                    .and_then(|t| t.trim_end_matches(')').parse().ok())
-                    .ok_or_else(|| format!("no degree in {name}"))?;
+                let n = binary_degree(&name).ok_or_else(|| format!("no degree in {name}"))?;
                 koblitz_instance(1, n)
-                    .filter(|i| i.name == name)
+                    .filter(|i| same_curve(&i.name, &name))
                     .or_else(|| koblitz_instance(0, n))
                     .ok_or("no Koblitz curve")?
             };
-            if inst.name != name || inst.r != r {
+            if !same_curve(&inst.name, &name) || inst.r != r {
                 return Err(format!("{name}: rebuilt {} with r = {}", inst.name, inst.r));
             }
             let bg = BinaryGroup(&inst.fast);
@@ -865,7 +858,7 @@ fn reprice_bench(
         "prime" => {
             let inst = (8..=20)
                 .filter_map(roster_prime_instance)
-                .find(|i| i.name == name)
+                .find(|i| same_curve(&i.name, &name))
                 .ok_or_else(|| format!("cannot rebuild {name}"))?;
             let g = inst.generator_point();
             for (k, (planted, s, recorded)) in draws.iter().enumerate() {

@@ -1,0 +1,48 @@
+{
+  "child_rss_cap_bytes": 1073741824,
+  "child_wall_cap_seconds": 600,
+  "exact_modulus_hex": "0x800000000000000000000000000002007",
+  "external_child_cap_seconds": 630,
+  "fields": [
+    [
+      2,
+      7
+    ],
+    [
+      3,
+      11
+    ]
+  ],
+  "leaf_lines": [
+    [
+      1,
+      0
+    ],
+    [
+      1,
+      4
+    ]
+  ],
+  "schema": "ecc2k130-native-fullpoint-edge-freeze-v1",
+  "sha256": {
+    ".github/workflows/ecc2k130-native-fullpoint-edge.yml": "c3e34c3889ccde8943a023e3c46597212244994c455a813d3f48a01709f00f1c",
+    "research/ecc2k130_factor_base_replication_20260925/exact_replay.json": "982750f272271a566e48724f470b6bca51d9d3ba159114c7628693b3a2fe9865",
+    "research/ecc2k130_factor_base_replication_20260925/exact_smoke.json": "d83873d46f810c75045131ab57b3110e313f1185ba75831c1fa3739862f48e0c",
+    "research/ecc2k130_relations/fastfield.py": "b5990fda51700bbfba363251c41f02febfd0fc92edfea4f5ddd647bab472789e",
+    "research/ecc2k130_relations/relations.py": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f",
+    "research/notes/ecc2k130/native_fullpoint_edge_20260929/PROTOCOL.md": "78e769bb156afc553a4f8e06fec5a39f4fb43d961dbcf212bda1fa09a9c56555",
+    "research/notes/ecc2k130/native_fullpoint_edge_20260929/ci_replay.py": "db3961933357c70e847cb72f411a60abc2a8254741067cf136671b7f3dfab22c",
+    "research/notes/ecc2k130/native_fullpoint_edge_20260929/native_relation.py": "2f6793509ac7ae6fbe4050af3441889c266f86c33397df1482bcb4457ebb29fc",
+    "research/notes/ecc2k130/native_fullpoint_edge_20260929/produce.py": "1b9710dc9a3db081e6475a333af05e84d8214d61f2bcfb69607b0cdca842a99c",
+    "research/notes/ecc2k130/native_fullpoint_edge_20260929/run.py": "52efac8154af8b7ea69074dc5a7cad7f028fa760e0d7ca4ff1eb843520d7036b",
+    "research/notes/ecc2k130/native_fullpoint_edge_20260929/verify.py": "7d50fe688fb494ad6a35085007d1ce16a5ddf156b85d3f2dcee57f32f492859d",
+    "research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/dag.py": "a277fb1b2f9b58ca8cc7cb33713950015f8c0446651b1d4e8657650819bcd419"
+  },
+  "source_commit": "31997e6b9598b5bdad08d3ca36b6dbfef805bd3a",
+  "source_main_parent": "c237ef9bbfcabb286fd37f1448ebe76bd79a4f99",
+  "toy_a": [
+    0,
+    1
+  ],
+  "toy_b": "all_nonzero"
+}

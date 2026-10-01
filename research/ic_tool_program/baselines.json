@@ -1,0 +1,173 @@
+{
+ "what_this_is": "The ic tool programme's baseline ledger as data (IC_TOOL_PROGRAM.md §7). Each accepted round appends a baseline; none is ever edited.",
+ "unit": "S = time / (unit_ns × √r); unit_ns is v0's median batched addition at each size, pinned from R01 (IC_TOOL_PROGRAM.md §5)",
+ "baselines": [
+  {
+   "baseline": "v0",
+   "round": "R01",
+   "class": "accounting",
+   "commit": "46ae2014",
+   "built_from": "4afd29903e4fcf65c1d7096083bbe9b9f5ec0a66",
+   "src_tree": "003badc259bcef6e56ad19ac8ae93df4221ffe6e",
+   "binary_sha256": "c776cc04a4e7f2657505f2ab192030ca7e3fb03fff5853709a4778106b726797",
+   "host": {
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "logical_cores": 4,
+    "memory": "MemTotal:       16480972 kB",
+    "os": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+    "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "transparent_hugepage": {
+     "enabled": "always [madvise] never",
+     "defrag": "always defer defer+madvise [madvise] never"
+    }
+   },
+   "source": "research/ic_tool_program/rounds/R01-baseline-v0/analysis.json",
+   "rule_comparison": "ledger §23 (pin held): online IC 8.8–17.5× faster than rho on the same point; cold 4.9–31.6× slower",
+   "sizes": [
+    {
+     "size": "k1n19",
+     "curve_alias": "icv1-f2m19-tm797-9c54981b",
+     "ec1": "EC1N19Ce1h7e63aa468dcc",
+     "curve_uid": "urn:ec-record:1:sha256:7e63aa468dcc9ee8813f014acabe3395ac3e3d9f533d00361a821770038f4d23",
+     "log2_r": 18.002,
+     "unit_ns": 21.993,
+     "s_cold": 120.561,
+     "s_setup": 119.2329,
+     "s_online": 1.22822,
+     "s_rho_online": 4.0282,
+     "cold_ms_median": 1.3586
+    },
+    {
+     "size": "k1n23",
+     "curve_alias": "icv1-f2m23-tm5197-1f85e9e1",
+     "ec1": "EC1N23Ce1heec6a3619e3f",
+     "curve_uid": "urn:ec-record:1:sha256:eec6a3619e3fdf05035e0ef5d3ec8cf3af507268cf760c77d47518d62141b00f",
+     "log2_r": 22.001,
+     "unit_ns": 22.281,
+     "s_cold": 33.4804,
+     "s_setup": 33.1042,
+     "s_online": 0.35225,
+     "s_rho_online": 4.7786,
+     "cold_ms_median": 1.5283
+    },
+    {
+     "size": "k1n45",
+     "curve_alias": "icv1-f2m45-tm6236725-40939294",
+     "ec1": "EC1N45Ce1h97bc367649de",
+     "curve_uid": "urn:ec-record:1:sha256:97bc367649ded9e1309ece1e66c630f558ee953b017378c53b2c3cf2896747df",
+     "log2_r": 24.803,
+     "unit_ns": 26.903,
+     "s_cold": 21.7841,
+     "s_setup": 21.5654,
+     "s_online": 0.15131,
+     "s_rho_online": 3.8158,
+     "cold_ms_median": 3.1704
+    },
+    {
+     "size": "k0n37",
+     "curve_alias": "icv1-f2m37-tm534059-32aad96b",
+     "ec1": "EC1N37Ce0h0c51aa4aa7c3",
+     "curve_uid": "urn:ec-record:1:sha256:0c51aa4aa7c3c76c45885e230d717aedcbefad98e2604d1664ac38b57299f180",
+     "log2_r": 27.781,
+     "unit_ns": 24.29,
+     "s_cold": 8.5309,
+     "s_setup": 8.4449,
+     "s_online": 0.15002,
+     "s_rho_online": 1.5372,
+     "cold_ms_median": 3.1467
+    },
+    {
+     "size": "k1n43",
+     "curve_alias": "icv1-f2m43-tm998717-e2e742b0",
+     "ec1": "EC1N43Ce1h7d34f0f22c70",
+     "curve_uid": "urn:ec-record:1:sha256:7d34f0f22c707e3756957364281079ea2835960013fd13a1e648b7ff5e5fea8c",
+     "log2_r": 32.113,
+     "unit_ns": 26.96,
+     "s_cold": 5.8711,
+     "s_setup": 5.7592,
+     "s_online": 0.11905,
+     "s_rho_online": 0.9747,
+     "cold_ms_median": 10.7868
+    },
+    {
+     "size": "k1n47",
+     "curve_alias": "icv1-f2m47-t22705043-f4e44623",
+     "ec1": "EC1N47Ce1h9669b6d5105b",
+     "curve_uid": "urn:ec-record:1:sha256:9669b6d5105b035b2ff286a4e32c52725841e8546ab03de8a8077c5114e98b0c",
+     "log2_r": 36.636,
+     "unit_ns": 27.702,
+     "s_cold": 4.431,
+     "s_setup": 4.3455,
+     "s_online": 0.07648,
+     "s_rho_online": 0.7719,
+     "cold_ms_median": 40.1115
+    },
+    {
+     "size": "k0n57",
+     "curve_alias": "icv1-f2m57-tm747311035-c1f545af",
+     "ec1": "EC1N57Ce0hb5884395c7f2",
+     "curve_uid": "urn:ec-record:1:sha256:b5884395c7f28d0d22eb1acc451c34ff979b0a40f93629e44b30107592b76695",
+     "log2_r": 38.002,
+     "unit_ns": 29.418,
+     "s_cold": 7.6499,
+     "s_setup": 7.6236,
+     "s_online": 0.03131,
+     "s_rho_online": 0.5014,
+     "cold_ms_median": 118.0784
+    },
+    {
+     "size": "k0n41",
+     "curve_alias": "icv1-f2m41-tm2308219-7f48b14a",
+     "ec1": "EC1N41Ce0he09550ab560a",
+     "curve_uid": "urn:ec-record:1:sha256:e09550ab560a9bb6de7981f4b47c48235d8553626dc43dbe92bf73262a95a8e1",
+     "log2_r": 39.0,
+     "unit_ns": 24.447,
+     "s_cold": 5.4211,
+     "s_setup": 5.3232,
+     "s_online": 0.07131,
+     "s_rho_online": 0.9188,
+     "cold_ms_median": 98.267
+    },
+    {
+     "size": "k0n53",
+     "curve_alias": "icv1-f2m53-tm56619371-dac20a85",
+     "ec1": "EC1N53Ce0hb097de99be9a",
+     "curve_uid": "urn:ec-record:1:sha256:b097de99be9a3af970966707e65d24bf63302ba5324f05b714f916a680651ae6",
+     "log2_r": 44.259,
+     "unit_ns": 29.911,
+     "s_cold": 7.5302,
+     "s_setup": 7.4946,
+     "s_online": 0.03678,
+     "s_rho_online": 0.5481,
+     "cold_ms_median": 1033.2479
+    },
+    {
+     "size": "k1n59",
+     "curve_alias": "icv1-f2m59-tm943548413-98844ecc",
+     "ec1": "EC1N59Ce1h20858f64459b",
+     "curve_uid": "urn:ec-record:1:sha256:20858f64459bbef8a18a8b75dbe579ce4cb0901d5c1b70d236ac154427d86980",
+     "log2_r": 44.517,
+     "unit_ns": 30.682,
+     "s_cold": 8.7708,
+     "s_setup": 8.7442,
+     "s_online": 0.01953,
+     "s_rho_online": 0.3749,
+     "cold_ms_median": 1350.357
+    },
+    {
+     "size": "k0n61",
+     "curve_alias": "icv1-f2m61-t158598901-ab42b6c5",
+     "ec1": "EC1N61Ce0hd8c15448081e",
+     "curve_uid": "urn:ec-record:1:sha256:d8c15448081eb349784c3d5d9d3144eaa4a5252d115f9049e10bbadf373db689",
+     "log2_r": 47.211,
+     "unit_ns": 30.922,
+     "s_cold": 14.488,
+     "s_setup": 14.4351,
+     "s_online": 0.01601,
+     "s_rho_online": 0.4762,
+     "cold_ms_median": 5717.6017
+    }
+   ]
+  }
+ ]
+}

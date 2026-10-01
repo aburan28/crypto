@@ -411,12 +411,38 @@ conditions both sides ran under.  Before changing code for speed:
   results and counted units (fingerprints, digests, counters) between
   baseline and candidate.  A faster run that decides anything differently
   is a different algorithm, not a speedup.
-- **Account for contention.** Check the load average and running processes
-  before and after (`uptime`, `top`).  Do not benchmark while builds, test
-  suites, other agents' jobs or other workers share the machine; if the
-  host is shared or virtualised (cloud containers, CI runners), expect
-  ±5–10% wall noise and say so.  Fix the thread count explicitly
-  (`RAYON_NUM_THREADS`, `taskset`) when comparing, and report it.
+- **Isolate every timed run: pin it, reserve its core, and record the
+  conditions.  This is mandatory for any wall-clock or native-time number.**
+  Run the benchmark through `tools/isolated_bench.py`: `run` for a single
+  command it pins itself, `reserve` for a harness that pins its own children
+  (such as the tournament evaluator's `--cpu`). The tool does the following:
+  - It takes an exclusive lock, so only one benchmark runs at a time.
+  - It refuses to start while other processes use CPU or while the CPU or
+    memory pressure (PSI) is high.
+  - It moves every other movable thread off the benchmark core and pins
+    the benchmark there.
+  - It records, per run, the context switches, faults, load average, PSI
+    and the CPU time everything else used, and it marks a run `contended`
+    when others used more than the threshold.
+
+  `taskset` alone is not enough. It keeps the benchmark on one core, but
+  it does not keep anything else off that core. It also does nothing about
+  builds on the neighbouring cores, which share the cache and the memory
+  bus.
+
+  While a timed stage runs, start no builds, test suites, lints, audit
+  cells or other agents' jobs on the same machine. Run heavy work through
+  `tools/isolated_bench.py busy -- CMD` so that it waits for the lock.
+
+  Instruction counts and the repository's counted units do not depend on
+  contention, so they stay the primary metric. Wall time is evidence only
+  from uncontended runs. Report how many runs were contended, and do not
+  pool contended and uncontended runs.
+
+  A virtual machine's host neighbours and CPU frequency are outside the
+  tool's reach. Expect ±5–10% residual wall noise on cloud containers and
+  CI runners, and measure it with an A/A run. Fix the thread count
+  explicitly (`RAYON_NUM_THREADS=1`), and report the pinned CPUs.
 - **Measure the noise floor, then interleave.** Run the baseline against a
   copy of itself (A/A) to see the spread, then alternate baseline and
   candidate (ABAB…, at least five rounds) and report median and minimum.
@@ -441,6 +467,47 @@ conditions both sides ran under.  Before changing code for speed:
 - **Keep the evidence.** The PR states the host manifest, the A/A spread,
   the A/B table with identical-output checks, and the changes that were
   tried and rejected with their numbers.
+
+### 11. Name every curve by its ICV1 slug
+
+A number quoted against the wrong curve is a wrong number, and until this
+rule one Koblitz curve went by five spellings, a prime curve by whichever
+generator found it, and no name said which modulus or model it meant.
+Every elliptic curve is now named by an identity computed from the curve,
+specified in [`docs/curves/ICV1.md`](docs/curves/ICV1.md).
+
+- **Write the slug.** In prose, tables, scoreboard rows, report `name`
+  fields, parameter and run file names, a curve is its ICV1 slug
+  (`icv1-f2m41-tm2308219-7f48b14a`).  A curve a standards body or public
+  challenge published may go by that name (`ECC2K-130`, `sect163k1`,
+  `secp256k1`, `P-256`).  Family notation with a free parameter is fine
+  when a sentence is about the family.
+- **Never write a retired form.** The spellings in `ICV1.md`'s table of
+  retired names carry no model and may not appear in new text or be
+  emitted by new code.  Frozen reports keep them; the registry resolves
+  them, and code that replays a report or reads a table keyed the old way
+  matches through `curve_id::same_curve`, never by string equality.
+- **Register before you cite.** Every slug written must be in
+  [`docs/curves/registry.json`](docs/curves/registry.json).  A new curve is
+  registered in the pull request that first names it
+  (`python3 scripts/build_curve_registry.py`; a curve built from a seed
+  also goes in `docs/curves/sources/specs.txt`).
+- **Join on EC1, write ICV1.** The slug names a curve *model*.  A
+  comparison, UI export or candidate manifest that joins across
+  repositories carries the EC1 alias and curve UID of the exact
+  representation measured, subgroup and generator included, as the
+  cross-repository section below and
+  [`docs/curve-identities.md`](docs/curve-identities.md) require.  The
+  registry lists each model's EC1 representations.
+- **Do not rename evidence.** Frozen run JSON, hash-pinned files and
+  anything under a `results/`, `runs/`, `raw/`, `evidence/` or `archives/`
+  directory keep the names they were written with.  Prose about them uses
+  the slug.
+
+`scripts/check_curve_names.py` enforces this in CI (`curve-names`): no
+retired form in Markdown or HTML outside a code fence, every slug
+registered, and no retired form on a line a pull request adds to prose or
+code.  `--fix` rewrites retired names in place.
 
 ## Worked example
 
@@ -469,3 +536,55 @@ For new curve comparisons and UI exports, follow [docs/curve-identities.md](docs
 and `tools/curve_identity.py`. Reuse EC1 aliases and full curve UIDs across IC and
 Pollard rho; keep factor-base/isogeny candidate identities separate. Preserve
 immutable historical names and never infer exact identity from field degree alone.
+Within this repository the text name is the ICV1 slug (§11); the curve
+registry, [docs/curves/registry.json](docs/curves/registry.json), maps each
+slug to the EC1 identities of its recorded representations.
+
+# Agent rules for IC measurements
+
+## Primary comparison uses one target
+
+The default elliptic-curve index-calculus (IC) question is the cost to solve
+one previously unseen public target. Every primary comparison run must use
+exactly one target and pair IC with Pollard rho on that same point under the
+same resource envelope. A panel of independent points is a set of separate
+one-target workloads, with one result row per point; do not combine them into
+a multi-target DLP run or replace the per-target results with a batch average.
+
+Start the IC online clock when target-dependent computation begins, after
+reusable target-independent base, index, relation-log, or solver setup is
+ready. Include all target-dependent attempts and point-query generation, and
+stop after scalar recovery and independent verification. Report reusable
+setup separately. Exclude process launch, input loading, and construction of a
+known-answer target from both IC and rho online intervals. Start rho timing at
+its first target-dependent walk and stop after recovery and independent
+verification. If scalar replay is outside either interval, report its cost
+separately and keep the correctness check.
+
+Do not use multi-target rho batches, cross-target distinguished-point tables,
+batch throughput divided by target count, or shared-collision work as the
+one-target rho reference. Multi-target work needs a separate, explicit
+research question after the one-target measurement; it cannot be the default,
+headline, or acceptance gate for a speedup claim. Preserve old batch results
+as historical diagnostics and label their target count and shared setup.
+
+An IC-vs-rho speedup is eligible only when both methods solve and verify the
+same point and both online intervals are complete. Report
+`rho_online_ms / ic_online_ms`, target identity, candidate and workload
+identity, included phases, resource conditions, and correctness evidence.
+Timeouts, failures, OOMs, and unverified scalars stay in the record and never
+count as wins. Missing phase costs make the total and speedup unknown. Key result rows by
+`(candidate_id, workload_id, run_id)`, preserve their manifest hashes, and
+use the canonical run-id convention from the repository's IC measurement
+rules. Keep the five exclusive IC online phase costs; their sum must equal the
+charged IC online wall time. Each claim must retain independent replay
+certificate SHA-256 digests and the exact nonempty resource-envelope object for
+both arms; the claim checker requires those envelopes to match and rejects a
+bare boolean verification or resource-match assertion. The IC interval must
+name all five target-dependent phases, and rho must name walk, collision, and
+recovery check.
+
+The current `boundary_autolab.py` producer timing is whole-process or
+operation-counted. Treat those outputs as legacy diagnostics until producers
+emit the online intervals above; they cannot establish the primary speedup.
+Its launch interface now permits one target per run only.

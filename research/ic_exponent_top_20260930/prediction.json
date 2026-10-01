@@ -1,0 +1,202 @@
+{
+ "what_this_is": "Ledger \u00a723's declared prediction: \u00a720's frozen model and law at \u00a723's six sizes, computed before any \u00a723 measurement.",
+ "source_model": "research/ic_exponent_20260926/predict.py (constants unchanged)",
+ "k": 32,
+ "law_exponent": 0.16666666666666666,
+ "model_local_exponent_six_sizes_n_corrected": 0.139,
+ "model_local_exponent_top_four_n_corrected": 0.149,
+ "rows": [
+  {
+   "curve": "K_1/GF(2^47)",
+   "a": 1,
+   "n": 47,
+   "r": 106781081677,
+   "log2_r": 36.64,
+   "new_in_23": false,
+   "model_optimum": {
+    "columns": 55,
+    "points": 5170,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.2587,
+   "model_S_batch_rho": 0.0727,
+   "model_ratio": 3.56,
+   "model_phase_shares": {
+    "collect": 0.48,
+    "build": 0.334,
+    "select": 0.071,
+    "descent": 0.114
+   },
+   "law_ratio": 4.53,
+   "sweep_grid_columns": [
+    28,
+    39,
+    55,
+    78,
+    110,
+    156,
+    220
+   ]
+  },
+  {
+   "curve": "K_0/GF(2^57)",
+   "a": 0,
+   "n": 57,
+   "r": 275295876199,
+   "log2_r": 38.0,
+   "new_in_23": true,
+   "model_optimum": {
+    "columns": 61,
+    "points": 6954,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.244,
+   "model_S_batch_rho": 0.066,
+   "model_ratio": 3.7,
+   "model_phase_shares": {
+    "collect": 0.501,
+    "build": 0.328,
+    "select": 0.063,
+    "descent": 0.107
+   },
+   "law_ratio": 4.82,
+   "sweep_grid_columns": [
+    30,
+    43,
+    61,
+    86,
+    122,
+    173,
+    244
+   ]
+  },
+  {
+   "curve": "K_0/GF(2^41)",
+   "a": 0,
+   "n": 41,
+   "r": 549756390943,
+   "log2_r": 39.0,
+   "new_in_23": false,
+   "model_optimum": {
+    "columns": 104,
+    "points": 8528,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.3508,
+   "model_S_batch_rho": 0.0778,
+   "model_ratio": 4.51,
+   "model_phase_shares": {
+    "collect": 0.558,
+    "build": 0.333,
+    "select": 0.038,
+    "descent": 0.07
+   },
+   "law_ratio": 6.38,
+   "sweep_grid_columns": [
+    52,
+    74,
+    104,
+    147,
+    208,
+    294,
+    416
+   ]
+  },
+  {
+   "curve": "K_0/GF(2^53)",
+   "a": 0,
+   "n": 53,
+   "r": 21044858204113,
+   "log2_r": 44.26,
+   "new_in_23": false,
+   "model_optimum": {
+    "columns": 263,
+    "points": 27878,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.4625,
+   "model_S_batch_rho": 0.0685,
+   "model_ratio": 6.76,
+   "model_phase_shares": {
+    "collect": 0.62,
+    "build": 0.334,
+    "select": 0.015,
+    "descent": 0.031
+   },
+   "law_ratio": 10.3,
+   "sweep_grid_columns": [
+    132,
+    186,
+    263,
+    372,
+    526,
+    744,
+    1052
+   ]
+  },
+  {
+   "curve": "K_1/GF(2^59)",
+   "a": 1,
+   "n": 59,
+   "r": 25179555920633,
+   "log2_r": 44.52,
+   "new_in_23": true,
+   "model_optimum": {
+    "columns": 251,
+    "points": 29618,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.4291,
+   "model_S_batch_rho": 0.0649,
+   "model_ratio": 6.61,
+   "model_phase_shares": {
+    "collect": 0.618,
+    "build": 0.334,
+    "select": 0.016,
+    "descent": 0.032
+   },
+   "law_ratio": 10.06,
+   "sweep_grid_columns": [
+    126,
+    177,
+    251,
+    355,
+    502,
+    710,
+    1004
+   ]
+  },
+  {
+   "curve": "K_0/GF(2^61)",
+   "a": 0,
+   "n": 61,
+   "r": 162888033982417,
+   "log2_r": 47.21,
+   "new_in_23": false,
+   "model_optimum": {
+    "columns": 448,
+    "points": 54656,
+    "descent_summands": 2
+   },
+   "model_S_ic": 0.5537,
+   "model_S_batch_rho": 0.0638,
+   "model_ratio": 8.68,
+   "model_phase_shares": {
+    "collect": 0.639,
+    "build": 0.334,
+    "select": 0.009,
+    "descent": 0.019
+   },
+   "law_ratio": 13.51,
+   "sweep_grid_columns": [
+    224,
+    317,
+    448,
+    634,
+    896,
+    1267,
+    1792
+   ]
+  }
+ ]
+}

@@ -701,7 +701,13 @@ impl F4CostAggregate {
             let aggregate_by_max = key.ends_with("_max")
                 || matches!(
                     key.as_str(),
-                    "basis_len" | "oversize" | "symbolic_bytes_estimate_max" | "symbolic_cap_hit"
+                    "basis_len"
+                        | "max_poly_degree"
+                        | "oversize"
+                        | "peak_matrix_bytes"
+                        | "peak_table_bytes"
+                        | "symbolic_bytes_estimate_max"
+                        | "symbolic_cap_hit"
                 );
             let entry = self.extra.entry(key).or_default();
             if aggregate_by_max {
@@ -717,7 +723,7 @@ impl F4CostAggregate {
         extra.insert("f4_calls".to_string(), self.calls);
         json!({
             "ops":self.ops,
-            "op_unit":"word XORs (elimination, including M4RI tables)",
+            "op_unit":"row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
             "wall_ns":self.wall_ns,
             "peak_bytes":self.peak_bytes,
             "degree_reached":self.degree_reached,
@@ -1054,18 +1060,18 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver_rayon_threads_requested":rayon_threads_requested,
             "solver":"f4-f2",
             "solver_description":solver.describe(),
-            "solver_internal_mask_hasher":"splitmix64_for_trusted_u64_masks_with_exact_key_equality",
-            "solver_pair_selector":"epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
-            "solver_pair_installer":"order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
-            "solver_symbolic_reducer_selector":"exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
-            "solver_symbolic_monomial_sets":if std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() == Ok("1") { "splitmix64_hash_sets" } else { "reused_bit_packed_complete_boolean_domain_to_20_variables_else_splitmix64_hash_sets" },
-            "solver_symbolic_monomial_set_control":"PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
-            "solver_column_index":"dense_monomial_domain_to_20_variables_else_splitmix64_hash",
-            "solver_monomial_multiply":if std::env::var("PQ_F4_DISABLE_DENSE_MUL").as_deref() == Ok("1") { "sort_all_mapped_terms_then_cancel" } else { "epoch_dense_parity_cancel_then_encoded_u32_order_sort" },
-            "solver_monomial_multiply_control":"PQ_F4_DISABLE_DENSE_MUL=1",
-            "solver_echelon_policy":if std::env::var("PQ_F4_FLAT_M4RI").as_deref() == Ok("1") { "shape_selected_contiguous_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming" } else { "shape_selected_segmented_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming" },
-            "solver_flat_m4ri_control":"PQ_F4_FLAT_M4RI=1 and optional PQ_F4_FLAT_M4RI_MIN_WORDS",
-            "solver_flat_m4ri_min_words":std::env::var("PQ_F4_FLAT_M4RI_MIN_WORDS").ok().and_then(|value| value.parse::<usize>().ok()),
+            "solver_engine":"repository_current_block_tables_f4",
+            "solver_internal_mask_maps":"repository FxMap/FxSet with exact u64 key equality",
+            "solver_pair_selector":"all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
+            "solver_pair_installer":"order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
+            "solver_symbolic_reducer_selector":"shortest active exact divisor by deterministic linear scan, processed in parallel levels when large",
+            "solver_symbolic_monomial_sets":if std::env::var("F4_F2_BITMAP_SEEN").as_deref() == Ok("0") { "hash sets" } else { "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables" },
+            "solver_symbolic_monomial_set_control":"F4_F2_BITMAP_SEEN=0",
+            "solver_column_index":"dense exact mask index through 22 spanned variables; exact hash map above 22",
+            "solver_monomial_multiply":"canonical square-free monomial multiplication with duplicate cancellation in F2BoolPoly",
+            "solver_echelon_policy":"segmented bit-packed rows; tiled and batched parallel reduction; adaptive leading-block BlockTables",
+            "solver_block_table_columns":if cfg!(feature = "f4-wide-tables") { 6 } else if cfg!(feature = "f4-four-tables") { 4 } else { 5 },
+            "solver_block_table_build":"automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
             "single_thread_requested":x1_batch_size == 1 && rayon_threads_requested.unwrap_or(1) == 1,
             "budget_seconds":budget_seconds,
             "source_variables":instance.n_vars,

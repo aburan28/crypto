@@ -1667,6 +1667,20 @@ pub(crate) fn macaulay_row_count(
     )
 }
 
+/// The rows of the degree-`degree` Macaulay matrix and how many of them
+/// the F5 criterion keeps ([`build_macaulay_sparse_f5`]), counted without
+/// materialising either.
+pub(crate) fn f5_row_counts(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(usize, usize)> {
+    let mask = all_variable_mask(n_vars);
+    let criterion = F5Criterion::new(polys, n_vars, degree, mask);
+    let kept = visit_macaulay_rows(polys, n_vars, degree, mask, Some(&criterion), |_| {})?;
+    Some((macaulay_row_count(polys, n_vars, degree)?, kept))
+}
+
 /// Build the F5-surviving rows while counting all nonempty F4 rows in the
 /// same product traversal. F5's report needs the latter count even for rows
 /// pruned by its criterion.
@@ -1688,6 +1702,113 @@ pub(crate) fn f5_rows_monos_with_f4_count(
         |row| rows_monos.push(row.to_vec()),
     )?;
     Some((full_count, rows_monos))
+}
+
+/// Pack F5 rows in one product traversal when the full degree-bounded
+/// column universe occurs. Products are XORed directly into bit rows, so
+/// collisions cancel without sorting. Sparse systems fall back to the
+/// ordinary builder to preserve its exact column list and matrix shape.
+pub(crate) fn f5_rows_packed_full_columns(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    criterion: &F5Criterion,
+) -> Option<(usize, Vec<u64>, Vec<Vec<u64>>)> {
+    const MAX_DIRECT_VARS: usize = 24;
+    const MAX_DIRECT_DEGREE: usize = 4;
+    if n_vars > MAX_DIRECT_VARS
+        || degree as usize > MAX_DIRECT_DEGREE
+        || occurring_vars(polys) & !all_variable_mask(n_vars) != 0
+    {
+        return None;
+    }
+
+    // Pascal's triangle gives the colex rank of a mask within its degree:
+    // sum C(bit_position_j, j), with j numbered from one. DegRevLex uses
+    // ascending masks within each descending degree block.
+    let mut choose = [[0usize; MAX_DIRECT_DEGREE + 1]; MAX_DIRECT_VARS + 1];
+    for n in 0..=n_vars {
+        choose[n][0] = 1;
+        for k in 1..=MAX_DIRECT_DEGREE.min(n) {
+            choose[n][k] = if n == 0 {
+                0
+            } else {
+                choose[n - 1][k - 1] + choose[n - 1][k]
+            };
+        }
+    }
+    let mut offsets = [0usize; MAX_DIRECT_DEGREE + 1];
+    let mut full_cols = 0usize;
+    for d in (0..=degree as usize).rev() {
+        offsets[d] = full_cols;
+        full_cols += choose[n_vars][d];
+    }
+    if full_cols == 0 || full_cols > max_f4_cols() {
+        return None;
+    }
+    let words = full_cols.div_ceil(64);
+    let row_cap = max_f4_rows();
+    let mut matrix = Vec::new();
+    let mut full_count = 0usize;
+    let mut schedules: Vec<Option<Vec<u64>>> = vec![None; degree as usize + 1];
+    for (i, p) in polys.iter().enumerate() {
+        let pdeg = p.terms.iter().map(|t| t.degree()).max().unwrap_or(0);
+        if pdeg > degree {
+            continue;
+        }
+        let gap = (degree - pdeg) as usize;
+        let multipliers = schedules[gap]
+            .get_or_insert_with(|| monomials_up_to_mask(all_variable_mask(n_vars), gap as u32));
+        for &mult in multipliers.iter() {
+            let mut row = vec![0u64; words];
+            for term in &p.terms {
+                let mask = term.mask | mult;
+                let mut bits = mask;
+                let mut index = offsets[mask.count_ones() as usize];
+                let mut j = 1;
+                while bits != 0 {
+                    let bit = bits.trailing_zeros() as usize;
+                    index += choose[bit][j];
+                    bits &= bits - 1;
+                    j += 1;
+                }
+                row[index / 64] ^= 1u64 << (index % 64);
+            }
+            if row.iter().all(|&word| word == 0) {
+                continue;
+            }
+            full_count += 1;
+            if full_count > row_cap {
+                return None;
+            }
+            if !criterion.prunes(i, mult) {
+                matrix.push(row);
+            }
+        }
+    }
+    if matrix.is_empty() {
+        return None;
+    }
+
+    let mut used = vec![0u64; words];
+    for row in &matrix {
+        for (seen, &word) in used.iter_mut().zip(row) {
+            *seen |= word;
+        }
+    }
+    let last_bits = full_cols % 64;
+    let last_mask = if last_bits == 0 {
+        u64::MAX
+    } else {
+        (1u64 << last_bits) - 1
+    };
+    if used[..words - 1].iter().any(|&word| word != u64::MAX) || used[words - 1] != last_mask {
+        return None;
+    }
+    let mut cols = monomials_up_to_mask(all_variable_mask(n_vars), degree);
+    cols.sort_unstable_by_key(|&m| std::cmp::Reverse(mono_key(F2BoolMono::from_mask(m))));
+    debug_assert_eq!(cols.len(), full_cols);
+    Some((full_count, cols, matrix))
 }
 
 /// Hand every non-empty Macaulay row (ascending monomial masks, odd
@@ -1818,7 +1939,30 @@ pub(crate) fn build_macaulay_sparse(
     n_vars: usize,
     degree: u32,
 ) -> Option<(Vec<u64>, Vec<Vec<u32>>)> {
-    let rows_monos = macaulay_rows_monos(polys, n_vars, degree)?;
+    sparse_from_rows_monos(macaulay_rows_monos(polys, n_vars, degree)?)
+}
+
+/// [`build_macaulay_sparse`] without the rows the F5 criterion prunes
+/// ([`crate::cryptanalysis::matrix_f5_f2`]): the same row space, so the
+/// same columns (a pruned row is a sum of kept rows, so every monomial of
+/// it occurs in one), the same high rank and the same linear span.  Only
+/// the row count falls.  That matters to the dense finish: every pruned
+/// row is one fewer survivor of the leading bands, and at degree 7 the
+/// survivors, not the columns, are what does not fit.
+pub(crate) fn build_macaulay_sparse_f5(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(Vec<u64>, Vec<Vec<u32>>)> {
+    let mask = all_variable_mask(n_vars);
+    let criterion = F5Criterion::new(polys, n_vars, degree, mask);
+    sparse_from_rows_monos(f5_rows_monos_with_mask(
+        polys, n_vars, degree, mask, &criterion,
+    )?)
+}
+
+/// Column masks and per-row ascending column indices for monomial rows.
+fn sparse_from_rows_monos(rows_monos: Vec<Vec<u64>>) -> Option<(Vec<u64>, Vec<Vec<u32>>)> {
     if rows_monos.is_empty() {
         return Some((Vec::new(), Vec::new()));
     }
@@ -3308,6 +3452,30 @@ fn sparse_dense_finish() -> bool {
     *ON.get_or_init(|| std::env::var("KIC_SPARSE_DENSE_FINISH").as_deref() == Ok("1"))
 }
 
+/// Whether [`solving_profile_sparse`] builds its rows with the F5
+/// criterion (`KIC_SPARSE_F5=1`): the same row space with fewer rows, so
+/// the same outcome; see [`build_macaulay_sparse_f5`].
+fn sparse_f5() -> bool {
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ON.get_or_init(|| std::env::var("KIC_SPARSE_F5").as_deref() == Ok("1"))
+}
+
+/// Memory budget for the dense finish's block (`KIC_SPARSE_DENSE_BUDGET_MB`),
+/// which moves the switch past the leading band when the block would not
+/// fit; see
+/// [`crate::cryptanalysis::sparse_macaulay::eliminate_high_columns_dense_finish_budgeted`].
+/// Unset keeps the switch after the leading band.  It never changes an
+/// outcome, only where the sparse pass stops.
+fn sparse_dense_budget_bytes() -> Option<u64> {
+    static BUDGET: std::sync::OnceLock<Option<u64>> = std::sync::OnceLock::new();
+    *BUDGET.get_or_init(|| {
+        std::env::var("KIC_SPARSE_DENSE_BUDGET_MB")
+            .ok()
+            .and_then(|v| v.parse::<u64>().ok())
+            .map(|mb| mb * 1024 * 1024)
+    })
+}
+
 /// [`solving_profile`] via structured sparse elimination.
 ///
 /// Identical semantics, different representation: the high-degree
@@ -3325,14 +3493,18 @@ pub fn solving_profile_sparse(
     degree: u32,
 ) -> Option<SolvingProfile> {
     use crate::cryptanalysis::sparse_macaulay::{
-        eliminate_high_columns, eliminate_high_columns_dense_finish, leading_band_end,
-        low_column_start,
+        band_ends, eliminate_high_columns, eliminate_high_columns_dense_finish,
+        eliminate_high_columns_dense_finish_budgeted, leading_band_end, low_column_start,
     };
 
     if degree < system_degree(polys) {
         return None;
     }
-    let (cols, rows) = build_macaulay_sparse(polys, n_vars, degree)?;
+    let (cols, rows) = if sparse_f5() {
+        build_macaulay_sparse_f5(polys, n_vars, degree)?
+    } else {
+        build_macaulay_sparse(polys, n_vars, degree)?
+    };
     let n_cols = cols.len();
     let n_rows = rows.len();
     if n_cols == 0 {
@@ -3349,7 +3521,21 @@ pub fn solving_profile_sparse(
 
     let low_start = low_column_start(&cols);
     let elim = if sparse_dense_finish() {
-        eliminate_high_columns_dense_finish(rows, n_cols, low_start, leading_band_end(&cols))
+        match sparse_dense_budget_bytes() {
+            Some(budget) => eliminate_high_columns_dense_finish_budgeted(
+                rows,
+                n_cols,
+                low_start,
+                &band_ends(&cols),
+                budget,
+            ),
+            None => eliminate_high_columns_dense_finish(
+                rows,
+                n_cols,
+                low_start,
+                leading_band_end(&cols),
+            ),
+        }
     } else {
         eliminate_high_columns(rows, n_cols, low_start)
     };
@@ -3429,11 +3615,24 @@ pub fn solving_degree(
     n_vars: usize,
     d_max: u32,
 ) -> (Option<u32>, Vec<SolvingProfile>) {
+    solving_degree_from(polys, n_vars, 1, d_max)
+}
+
+/// [`solving_degree`], scanning from `d_min` (or the input degree, if
+/// higher) instead of from the input degree.  For a system already known
+/// not to resolve below `d_min`, the answer is the same and the lower
+/// degrees are not rebuilt; the caller vouches for that knowledge.
+pub fn solving_degree_from(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    d_min: u32,
+    d_max: u32,
+) -> (Option<u32>, Vec<SolvingProfile>) {
     let mut solved = None;
     let mut profiles = Vec::new();
     // Below the system's own degree the Macaulay matrix drops equations
     // rather than relaxing them; see [`solving_profile`].
-    for d in system_degree(polys).max(1)..=d_max {
+    for d in system_degree(polys).max(1).max(d_min)..=d_max {
         let prof = match solving_profile_sparse(polys, n_vars, d) {
             Some(p) => p,
             None => break,
