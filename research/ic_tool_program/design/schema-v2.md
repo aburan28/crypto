@@ -221,7 +221,9 @@ AGENTS.md's single-target rule.
   - `auto`, the default: F0 when the estimate fits the budget, a
     refusal otherwise;
   - `F0`;
-  - `F1`, from B7;
+  - `F1`, from B7a ([`f1-sampled.md`](f1-sampled.md)): `kic` and every
+    rho pipeline, extrapolated from samples on the instance. It runs only
+    when asked for by name;
   - `F2`: the estimate alone.
 - `pipeline` is `auto` or a pipeline id from §5.1.
 - `recipe` is `auto` (§5.3), or an object with v1's knobs, checked as v1
@@ -342,7 +344,10 @@ below that applies, and the report names the method.
    - `#E` is then the only multiple of `r` in the Hasse interval, and
      `h = ⌊(√q + 1)²/r⌋`. This is SEC 1's check.
    - It needs `r` prime, `G ≠ O` and `[r]G = O`.
-4. **A small field**, `q ≤ 2^32`: enumeration, within B0's bound.
+4. **A small field**, `q ≤ 2^32`, within B0's bound. It enumerates up to
+   `q = 2^16`, and above that uses Mestre's method: the orders of points
+   on the curve and its quadratic twist, intersected in the Hasse
+   interval. Both are exact (B2's amendment 1).
 
 When none of these applies, the instance is unsupported, under the code
 `cardinality-unknown`.
@@ -365,6 +370,7 @@ These never refuse. AGENTS.md §8b requires them.
 | `koblitz-endomorphism` | `End(E) ⊇ Z[τ]`, ICV1's `end = −7`, and the signed-Frobenius classes of size `2n` that rho and the index calculus use |
 | `method-uses-subfield` | set by the router when the chosen pipeline uses a proper intermediate subfield |
 | `primality-screen` | a prime whose test was a screen, not a proof |
+| `study-pipeline` | set when the route uses a study pipeline, with the reason: `ic-prime-s3`, since no subexponential index calculus is known for prime fields (added at B2's declaration) |
 
 ## 5. Routing
 
@@ -372,8 +378,8 @@ These never refuse. AGENTS.md §8b requires them.
 
 | id | arm | admits | gate today | lifted by | imported by |
 |:--|:--|:--|:--|:--|:--|
-| `kic` | index calculus: the pair-table pipeline `ic price` runs | binary; `a, b ∈ GF(2^k)` with `k ≤ 8`; `n = k·e`, `e` odd and at least 3 | `n ≤ 62`, `r < 2^63`; `k = 1` until B2 | B3 (`n ≤ 127`), B4 (`n ≤ 191`) | B1 (`k = 1`), B2 (`k > 1`) |
-| `rho-koblitz` | rho on signed-Frobenius classes, the matched reference | Koblitz curves (`k = 1`), `n` odd and at least 3 | `n ≤ 62` | B3, B4 | B1 |
+| `kic` | index calculus: the pair-table pipeline `ic price` runs | binary; `a, b ∈ GF(2^k)` with `k ≤ 8`; `n = k·e`, `e` odd and at least 3 | `n ≤ 62`, `r < 2^63`; `k = 1` until B2b | B3b (`n ≤ 126`), B4 (`n ≤ 191`) | B1 (`k = 1`), B2b (`k > 1`) |
+| `rho-koblitz` | rho on signed-Frobenius classes, the matched reference | Koblitz curves (`k = 1`), `n` odd and at least 3 | `n ≤ 62` | B3 (`n ≤ 126`, `r < 2^127`), B4 | B1 |
 | `rho-negation` | rho with the negation map | any ordinary binary curve; prime fields | binary `n ≤ 62`; prime `p < 2^63` | B3, B5 | B2 |
 | `ic-binary-s4` | index calculus: `ic boundary`'s generic binary pipeline | any ordinary binary curve | `n` in 5..=32 | — | B2 |
 | `ic-prime-s3` | index calculus: `ic boundary`'s prime pipeline (see below) | prime fields | `p < 2^63` | B5 | B2 |
@@ -409,9 +415,16 @@ For a valid instance:
    Otherwise the input is refused with that pipeline's gate code.
 5. **The level.**
    - The run is F0 when every arm's estimate fits the budget.
-   - Otherwise it is refused with `over-budget` and the estimates. The
-     report names F1 as unavailable until B7.
-   - `fidelity: F2` runs nothing, so it skips the size gates. It
+   - Otherwise it is refused with `over-budget` and the estimates. From
+     B7a, the refusal also gives F1's own estimated cost. `auto` never
+     falls back to F1: a run asked for as a measurement never becomes an
+     extrapolation unasked.
+   - The arms of a paired run share one wall budget, so the router
+     compares their estimates' sum with it (B2's amendment 1).
+   - `fidelity: F2` runs nothing, so it skips the size gates: the five
+     word-width codes `field-wider-than-one-word`,
+     `field-wider-than-two-words`, `prime-wider-than-one-word`,
+     `scalar-wider-than-63-bits` and `scalar-wider-than-127-bits`. It
      returns the estimate of every pipeline whose family admits the
      instance, with `status: estimated`.
 
@@ -422,20 +435,24 @@ The gate codes:
 
 | code | gate |
 |:--|:--|
-| `field-wider-than-one-word` | binary `n > 62` (lifted by B3, B4) |
+| `field-wider-than-one-word` | binary `n > 62`: on `rho-koblitz` until B3, on `kic` until B3b |
+| `field-wider-than-two-words` | binary `n > 126` on `rho-koblitz`, from B3. A class key packs to `2(x + 1) + s`, which needs 129 bits at `n = 127`. Lifted by B4. |
 | `prime-wider-than-one-word` | `p ≥ 2^63` (B5) |
-| `scalar-wider-than-63-bits` | `r ≥ 2^63` (B3) |
+| `scalar-wider-than-63-bits` | `r ≥ 2^63`: on `rho-koblitz` until B3, on `kic` until B3b |
+| `scalar-wider-than-127-bits` | `r ≥ 2^127` on `rho-koblitz`, from B3. No curve that passes the field gate reaches it, since `r ≤ #E < 2^127` there; it is stated so that the gate is total. |
 | `even-extension-degree` | `kic` and `rho-koblitz` need `e` odd. Their one-word point lifting solves `z² + z = c` by the half-trace, and the orbit maps assume the distinct factors of `x^n − 1` that an odd `n` gives (`koblitz_index_calculus.rs`). |
-| `subfield-curve-unsupported` | `k > 1` on `kic` before B2, and on `rho-koblitz` always |
+| `subfield-curve-unsupported` | `k > 1` on `kic` before B2b, and on `rho-koblitz` always |
 | `subfield-too-large` | `k > 8` |
 | `not-a-subfield-curve` | no `k ≤ 8` with `a, b ∈ GF(2^k)` |
 | `enumeration-bound` | `ic-binary-s4` at `n > 32` |
-| `no-pipeline-for-field` | an extension field before B5, or characteristic 3 |
+| `no-pipeline-for-field` | an extension field before B5, or characteristic 3; and, per pipeline, a field kind the pipeline has no implementation for (B2's amendment 1) |
+| `recipe-not-taken` | a recipe object, which holds `kic`'s knobs, on any other index calculus pipeline (B2's amendment 1) |
 | `no-recipe` | `recipe: auto` where §5.3 has no rule |
 | `subgroup-smaller-than-cofactor` | `kic` and `rho-koblitz` need `r > h`, as `KoblitzCurve`'s own construction does |
 | `not-the-identity` | `trivial` takes the identity only |
 | `over-budget` | an estimate exceeds the budget |
-| `not-yet-supported` | a feature of the schema that a later step implements. The message names the feature and the step. B1 uses it for prime and extension fields, the other curve forms, named curves, one arm alone, `recipe: auto`, F1, F2 and more than one thread. |
+| `no-f1-model` | `fidelity: F1` on a pipeline with no F1 model: `ic-binary-s4` and `ic-prime-s3` (B7a) |
+| `not-yet-supported` | a feature of the schema that a later step implements. The message names the feature and the step. B1 uses it for prime and extension fields, the other curve forms, named curves, one arm alone, `recipe: auto`, F1, F2 and more than one thread. From B3, `solve: rho` runs. Under it, v1's hashed and random targets past one word wait for B4, and so does v1's generator rule. B2 lifts all of B1's list except F1 (B7) and more than one thread (plan §8, A6). B2's amendment 1 leaves `kic` alone, and `kic` beside any rho but `rho-koblitz`, to B2b. |
 
 ### 5.3 Recipes
 
@@ -475,6 +492,13 @@ The router compares these estimates with the budget. They are not
 measurements, and the report keeps them apart from the run's own
 figures.
 
+**The keys** (fixed at B2's declaration, for the cases to read):
+- `estimate.<arm>` is `{pipeline, seconds, model}`.
+- For rho it also carries `steps`, `√(πr/2A)`, and `steps_bits`, its
+  `⌈log₂⌉`.
+- `model` names the step cost or the phase model the seconds come
+  from.
+
 ## 6. The report
 
 Every operation that reads a v2 document adds these keys to its report:
@@ -490,6 +514,7 @@ Every operation that reads a v2 document adds these keys to its report:
 | `estimate` | §5.4, for each arm |
 | `refusal` | when the run is refused: `{code, class, message}`, where `class` is `invalid`, `unsupported` or `over_budget` |
 | `result` | after a run: `{scalar, verified, known_answer}`, the scalar both arms recovered, in decimal |
+| `conversion` | for a converted curve: `{from, to, map}`. `from` is the input's form; `to` is `short_weierstrass` or `binary_weierstrass`; `map` states the substitution, points included (added at B2's declaration) |
 
 The cases (§9) read these keys by path:
 - `route` is `{ic, rho, level, considered}`.
@@ -569,9 +594,12 @@ below have their expected outcomes fixed here.
     `SHA256SUMS`.
   - It checks each file's intended property with its own arithmetic,
     which shares nothing with the Rust.
-- **B2's cases (C032–C051)** have their inputs described below. The
-  same script writes their files when B2 is declared, before any B2
-  code. Their expected outcomes do not change.
+- **B2's cases (C032–C051)** have their inputs described below. Their
+  files were written at B2's declaration (2026-10-01), before any B2
+  code, by `../conformance/v2-b2/make_cases.py`. B1's own generator and
+  files are frozen, so B2's sit beside them. Their expected outcomes do
+  not change, and the declaration made them exact as report keys
+  (`conversion`, `estimate.<arm>`, `study-pipeline`).
 - **Steps.** Each case names the step that must make it pass. A step is
   accepted only when its own cases and every earlier step's cases pass.
 - **`until`.** A case that expects a refusal a later step will lift
@@ -639,15 +667,46 @@ The curves the cases use:
 | step | delivers | accepted when |
 |:--|:--|:--|
 | **B1** | <ul><li>schema v2's parser (§3)</li><li>the checks a binary instance needs (§4.1–§4.2 for binary, §4.3, §4.4, §4.5 methods 1–2)</li><li>the disclosures for binary fields</li><li>`kic`, `rho-koblitz` and `trivial` reading imported instances</li><li>the v1 translation</li><li>`ic check`</li></ul> Estimates, `recipe: auto` and pre-run budget refusals come with B2. Under B1, `fidelity: auto` means F0, and the budget is enforced while the run goes. | <ul><li>C001–C031 pass</li><li>the pin holds on all 90 rows</li><li>every row's v2 translation gives identical outputs</li><li>no size regresses beyond its A/A band</li></ul> |
-| **B2** | <ul><li>prime and extension fields</li><li>the other curve forms and their conversions</li><li>§4.5 methods 3–4</li><li>the importers for `rho-negation`, `ic-binary-s4`, `ic-prime-s3` and `rho-bignum`</li><li>estimates and budgets</li></ul> | <ul><li>C001–C051 pass</li><li>the same pin, translation and timing checks as B1</li><li>the estimate's error reported at the suite's sizes</li></ul> |
+| **B2** | <ul><li>prime and extension fields</li><li>the other curve forms and their conversions</li><li>§4.5 methods 3–4</li><li>the importers for `rho-negation`, `ic-binary-s4`, `ic-prime-s3` and `rho-bignum`</li><li>estimates and budgets</li></ul> Declared 2026-10-01 in [`../rounds/B2-fields-forms-estimates/PROTOCOL.md`](../rounds/B2-fields-forms-estimates/PROTOCOL.md); its cases are in [`../conformance/v2-b2/`](../conformance/v2-b2/cases.json), since B1's files are frozen. | <ul><li>C001–C051 pass</li><li>the same pin, translation and timing checks as B1</li><li>the estimate's error reported at the suite's sizes</li></ul> |
 
 B3–B7 are unchanged from the plan, with these refinements:
-- **B3** lifts `kic`, `rho-koblitz` and `rho-negation` to `n ≤ 127`.
-  - C027's refusal then changes, by the `until` rule: at `n = 83` the
-    index calculus's estimate exceeds any day-long budget, so `paired`
-    becomes `over-budget`.
-  - B3 adds the run the plan asks for as its own case: the gate file
-    with `solve: rho`, at F0.
+- **B3** (declared 2026-10-01 in
+  [`../rounds/B3-two-word-rho/PROTOCOL.md`](../rounds/B3-two-word-rho/PROTOCOL.md))
+  lifts `rho-koblitz` to `n ≤ 126` and `r < 2^127`, and adds
+  `solve: rho`.
+  - Its cases are [`../conformance/v2-b3/`](../conformance/v2-b3/cases.json),
+    C052–C058.
+  - C027 is retired by the `until` rule, and C054 succeeds it: `paired`
+    on the gate file is refused with `no-ic-route`, and `rho-koblitz` is
+    admitted.
+  - The plan's gate run is B3's measurement 5: the gate file with
+    `solve: rho`, at F0.
+  - B1's files are frozen, so the dated note C027 needs is in B3's
+    `cases.json`, and the programme's runner, `../conformance/run.py`,
+    applies the rule.
+- **B2b** (B2's amendment 1) takes three items from B2:
+  - `kic` on curves over a subfield with `k > 1`, paired with
+    `rho-negation`;
+  - `kic` alone;
+  - the verification of order certificates.
+
+  It was declared 2026-10-01 in
+  [`../rounds/B2b-subfield-kic-certificates/PROTOCOL.md`](../rounds/B2b-subfield-kic-certificates/PROTOCOL.md).
+  Its cases are C059–C070, in
+  [`../conformance/v2-b2b/`](../conformance/v2-b2b/cases.json). The
+  declaration makes two points of this design exact:
+  - §3.3's certificate for `p` is the key `field.p_certificate`, and
+    `subgroup.order_certificate` certifies `r`. Both have the form and
+    rules the protocol states.
+  - `kic`'s estimate on a curve over a subfield is §20's model with `e`
+    in the place of `n`, labelled as outside the range the model was
+    fitted on.
+- **B3b** lifts `kic` to `n ≤ 126` and runs the index calculus at F1.
+  C054 then changes by the `until` rule: at `n = 83` the index
+  calculus's estimate exceeds any day-long budget, so `paired` becomes
+  `over-budget`. (This was B3's own refinement before B3 was split.)
+- **`rho-negation` on two-word fields** follows its importer, which is
+  B2's.
 - **B4** adds the normal-basis import with the challenge.
 - **B5** adds `F_{p^k}`, after extending ICV1.
 
