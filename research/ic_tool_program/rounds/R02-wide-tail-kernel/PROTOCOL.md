@@ -141,3 +141,31 @@ verification fails.
 - The comparison: 1,100 processes, about 2.5 hours.
 - Callgrind: four runs, about 40 minutes.
 - If accepted, the rule's comparison: 384 processes, about 40 minutes.
+
+## Amendment 1 (2026-10-01, after R01's timed steps, before any R02 run)
+
+**What R01 said.** R01's protocol, under "What follows", said: "a size
+whose A/A interval is wider than ±5% gets ten rounds instead of five."
+R01's A/A intervals are ±4–11% at ten of eleven sizes.
+
+**Why the rule is miscalibrated.** R01's A/A interval rests on ten
+pairs: two rows × five rounds. R02's comparison has 40 pairs per size:
+eight rows × five rounds. Its interval is therefore expected to be about
+half the A/A's width (`√(40/10) = 2`), so ±2–5%. The intent of R01's
+rule is precision near ±5%, and five rounds of R02's design meet it.
+Ten rounds would double the cost, about four more hours, and add
+nothing to that intent.
+
+**The amendment.** R02 keeps five rounds. Any size whose comparison
+interval has a half-width above 5% then gets five more rounds, and its
+figure pools all ten.
+
+Nothing else changes: the rows, the order, the control, the pin, the
+success condition and the stop rules. The figure is fixed now, before any
+R02 process runs. One untimed sanity check ran before this amendment:
+the candidate on `K_0/GF(2^61)` and `K_1/GF(2^59)` `M1-T01`, outputs only,
+under `taskset` on a machine that was compiling. Both outputs equal v0's.
+Its collection phase read about 1.32× faster than v0's R01 profile row
+at both sizes. That figure was seen before this amendment was written.
+It is not evidence, it is not used, and the amendment's argument does
+not depend on it.
