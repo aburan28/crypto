@@ -1,0 +1,40 @@
+{
+ "note": "raw producer outputs; block 0 and the base are committed as .xz; blocks 1-2 equal block 0 apart from timing fields (growing_n_summary.json untimed_record_sha256)",
+ "files": {
+  "ic_n61_b0.jsonl": {
+   "sha256": "372b32a6bbd5320f3c6b91fbfb343418204c8447213666b1f04d0902d04b0458",
+   "bytes": 54427842,
+   "committed_as": "ic_n61_b0.jsonl.xz"
+  },
+  "ic_n61_b1.jsonl": {
+   "sha256": "1e9eaa1e99bac2dbc7479b385dafea9d8cad5f440cef068ab78d4b06d5278546",
+   "bytes": 54412708,
+   "committed_as": null
+  },
+  "ic_n61_b2.jsonl": {
+   "sha256": "0b9bdee13f20b8a6900a87d2374137922c179df6d9a618d60ccb23f890e02aa9",
+   "bytes": 54409158,
+   "committed_as": null
+  },
+  "ks_n61_b0.jsonl": {
+   "sha256": "db0fdee32e75cda2c5668f822ad7954d0dfc621a37b9d342e930b29b930cf802",
+   "bytes": 45086156,
+   "committed_as": "ks_n61_b0.jsonl.xz"
+  },
+  "ks_n61_b1.jsonl": {
+   "sha256": "33af07991a40a45c9e5de356b9df3fdfa49b6aa936f12d431c14cef83ba8806e",
+   "bytes": 45084697,
+   "committed_as": null
+  },
+  "ks_n61_b2.jsonl": {
+   "sha256": "a11a34fd15618e803d45e0cdb0c32461dcb6fc2c23d275a1987a53f8f57f60d3",
+   "bytes": 45085119,
+   "committed_as": null
+  },
+  "base_n61_K1400.jsonl": {
+   "sha256": "c6640be084968c69cfabe0ae3786822670b18a25ff2f2317335168a9b335a296",
+   "bytes": 10733381,
+   "committed_as": "base_n61_K1400.jsonl.xz"
+  }
+ }
+}

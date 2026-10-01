@@ -9416,6 +9416,20 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <p>On these same new batches compact/v2 CPU ratios are 0.782/0.391/0.344 at n37/41/53, while compact/normal ratios are 2.081/2.989/3.086. The earlier lead against v2 was real for that weaker comparator and does not survive this stronger one. At n41 and n53, compact S3 index construction alone takes more wall time than the entire normal-rho process in all five blocks. Rank attempts already equal K, so index/base construction and target probes are the next measured bottlenecks. The normal rho performs more walk steps than v2 at n41/n53 batch, and all recovered logs independently verify; the reversal is not a missing-completion artifact. Every S, ratio to the generic-group floor, n=83 confidence gate and GF(2<sup>131</sup>) transfer remains unset. The selected-panel <code>vs_rho</code> verdict is unchanged. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_orbit_strong_rho_20260929/RESULT.md">Result, six raw archives and decisions</a>; <a href="https://github.com/aburan28/crypto/pull/943">PR #943</a>.</p>
 </section>
 <!-- END compact-orbit-strong-rho-20260929 -->
+<!-- BEGIN compact-orbit-n61-L65536-20260930 -->
+<section class="panel" id="compact-orbit-n61-L65536-20260930">
+<div class="panel-head"><h2>Compact orbit at n=61, L=65,536 against the historical v2 rho <span class="chip">diagnostic</span></h2>
+<p>This reruns the n=61 L=65,536 batch probe that PR #830 left aborted. It uses the superseded KS v2 batched rho, three paired blocks of 65,536 shared targets, and a memory-capped K=1,400. K=1,800 was censored while swapping, and K=2,200 did not fit beside another job. The run was on a shared macOS host where <code>tools/isolated_bench.py</code> cannot run, so the walls are unisolated.</p></div>
+<div class="table-scroll"><table>
+<caption>Compact / rho per paired block, whole process. Wall and user CPU come from /usr/bin/time; instructions are retired-instruction counts, which on macOS include kernel paging work. This is a multi-target diagnostic, not a common-unit S or single-target speedup.</caption>
+<thead><tr><th>Block</th><th>IC wall s</th><th>Rho wall s</th><th>Wall ratio</th><th>User-CPU ratio</th><th>Instructions ratio</th><th>Verified per arm</th><th>S, whole pipeline</th></tr></thead><tbody>
+<tr><td>0</td><td>1,798.2</td><td>913.7</td><td>1.968</td><td>0.379</td><td>0.201</td><td>65,536/65,536</td><td>unset</td></tr>
+<tr><td>1</td><td>295.3</td><td>859.8</td><td>0.343</td><td>0.328</td><td>0.135</td><td>65,536/65,536</td><td>unset</td></tr>
+<tr><td>2</td><td>295.0</td><td>839.1</td><td>0.352</td><td>0.331</td><td>0.135</td><td>65,536/65,536</td><td>unset</td></tr>
+</tbody></table></div>
+<p>Block 0 is a compact loss: the 11.6 GB IC index swapped and spent 521 s in system time. 196,608/196,608 logs replayed independently. Claim-check: <code>end_to_end_dlp</code> PASS; <code>vs_rho</code> FAIL by design, because the schema requires one target. At fixed K the lead over v2 narrows from L=16,384 (instruction ratio 0.109 to 0.135). The strong-rho verdict (IC/rho 2.297 at n=61 L=1,024) is unchanged, and no ledger row is promoted. <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930/RESULT.md">Result, deviations and raw manifest</a>.</p>
+</section>
+<!-- END compact-orbit-n61-L65536-20260930 -->
 <!-- BEGIN compact-k-boundary-20260929 -->
 <section class="panel" id="compact-k-boundary-20260929">
 <div class="panel-head"><h2>Held-out K sweep: eager compact index still loses to normal-basis rho <span class="chip">K/base-size gate</span></h2>
