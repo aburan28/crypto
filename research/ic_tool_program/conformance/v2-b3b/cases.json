@@ -4,13 +4,14 @@
  "includes": "../v1/cases.json (step B0), ../v2/cases.json (B1) and the later steps' sets, run first, with the until rule",
  "rules": [
   "The rules of ../v2/cases.json hold. {here} is this directory's params/; {cases} is still ../v2/params/. ../run.py runs these after the earlier steps' cases.",
-  "The until rule: B3 marked C054 `until: B3b`. From B3b (declared DATE) C054 is retired and C083 succeeds it.",
+  "The until rule: B3 marked C054 `until: B3b`. From B3b (declared 2026-10-01) C054 is retired and C083 succeeds it. (Amendment 2 filled in this date, which the declaration left as a placeholder.)",
+  "The supersedes rule (amendment 2, 2026-10-01): a case may name an earlier step's case that it supersedes; while the superseding case is run, the superseded one is not. B3b moves kic's width gate past one word, which C031 (until B4) and C053 (no until) read, so C086 supersedes C031 and C087 supersedes C053. B1's and B3's files stay frozen, so the note is here.",
   "`--kic-wide` is B3b's test switch: it runs the two-word pipeline where the one-word pipeline would run. C084 and C085 compare the two through `same_outputs_as`.",
   "params/C078-T001-n67.json to params/C082-T001-n83.json are no case's: they are B3b's measurement 5's public targets, frozen here with the cases' documents."
  ],
  "generator": {
   "path": "research/ic_tool_program/conformance/v2-b3b/make_cases.py",
-  "sha256": "26dcb18e1d28bf97a2dcc311dc7ac725683d54b24af0bec121fd438c6c8e86aa"
+  "sha256": "973434f3d628a0f61bae576b351ae9e684a9230a8e01b353f3329bf0c660b0c2"
  },
  "cases": [
   {
@@ -228,7 +229,7 @@
   {
    "id": "C082-kic-two-word-n83",
    "step": "B3b",
-   "checks": "B3b's kic at F0 on a two-word field: the gate's field under the gate's modulus, with K_1's 53-bit subgroup: not the gate's curve",
+   "checks": "B3b's kic at F0 on a two-word field: the gate's field and modulus; K_1's 53-bit subgroup, not the gate's curve",
    "files": {
     "params.json": {
      "copy": "{here}/C082-kic-two-word-n83.json"
@@ -441,6 +442,115 @@
     }
    },
    "timeout_s": 900
+  },
+  {
+   "id": "C086-challenge-kic-past-two-words",
+   "step": "B3b",
+   "checks": "C031's successor from B3b: the challenge file is valid, and kic, with two-word kernels, refuses n = 131 as wider than two words, as rho-koblitz has since B3",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/ecc2k130-challenge.json"
+    }
+   },
+   "argv": [
+    "check",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 0,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "checks_passed"
+    },
+    "json_contains": {
+     "checks": [
+      {
+       "code": "order-composite",
+       "status": "pass",
+       "exact": false
+      }
+     ],
+     "disclosures": [
+      {
+       "code": "primality-screen"
+      }
+     ],
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": false,
+       "gate": "field-wider-than-two-words"
+      }
+     ]
+    }
+   },
+   "timeout_s": 120,
+   "until": "B4",
+   "supersedes": "C031-challenge-checks"
+  },
+  {
+   "id": "C087-gate-rho-capped-kic-admitted",
+   "step": "B3b",
+   "checks": "C053's successor from B3b: rho alone on the gate curve, stopped by its step cap, reports no logarithm and exits 1; kic now admits the gate's field by width",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/gate-m83-T001.json",
+     "set": {
+      "method": {
+       "solve": "rho",
+       "fidelity": "F0",
+       "rho": {
+        "pipeline": "auto",
+        "seed": 2293761,
+        "max_iterations": 200000
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "exit": 1,
+    "json_file": "{tmp}/report.json",
+    "json_paths": {
+     "status": "not_recovered",
+     "result.verified": false,
+     "rho.step_cap": 200000,
+     "rho.counters.walk_operations": 200000,
+     "rho.pipeline": "rho-koblitz"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "kic",
+       "admitted": true
+      },
+      {
+       "pipeline": "rho-koblitz",
+       "admitted": true
+      }
+     ]
+    }
+   },
+   "timeout_s": 120,
+   "supersedes": "C053-gate-rho-capped"
   }
  ]
 }

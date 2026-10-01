@@ -436,7 +436,7 @@ The gate codes:
 | code | gate |
 |:--|:--|
 | `field-wider-than-one-word` | binary `n > 62`: on `rho-koblitz` until B3, on `kic` until B3b |
-| `field-wider-than-two-words` | binary `n > 126` on `rho-koblitz`, from B3. A class key packs to `2(x + 1) + s`, which needs 129 bits at `n = 127`. Lifted by B4. |
+| `field-wider-than-two-words` | binary `n > 126` on `rho-koblitz`, from B3, and on `kic`, from B3b. A class key packs to `2(x + 1) + s`, which needs 129 bits at `n = 127`. Lifted by B4. |
 | `prime-wider-than-one-word` | `p ≥ 2^63` (B5) |
 | `scalar-wider-than-63-bits` | `r ≥ 2^63`: on `rho-koblitz` until B3, on `kic` until B3b |
 | `scalar-wider-than-127-bits` | `r ≥ 2^127` on `rho-koblitz`, from B3. No curve that passes the field gate reaches it, since `r ≤ #E < 2^127` there; it is stated so that the gate is total. |
@@ -448,7 +448,7 @@ The gate codes:
 | `no-pipeline-for-field` | an extension field before B5, or characteristic 3; and, per pipeline, a field kind the pipeline has no implementation for (B2's amendment 1) |
 | `recipe-not-taken` | a recipe object, which holds `kic`'s knobs, on any other index calculus pipeline (B2's amendment 1) |
 | `no-recipe` | `recipe: auto` where §5.3 has no rule |
-| `subgroup-smaller-than-cofactor` | `kic` and `rho-koblitz` need `r > h`, as `KoblitzCurve`'s own construction does |
+| `subgroup-smaller-than-cofactor` | `kic` and `rho-koblitz` need `r > h` at one word, as `KoblitzCurve`'s own construction does; past one word the refusal is lifted (B3b, amendment 1) |
 | `not-the-identity` | `trivial` takes the identity only |
 | `over-budget` | an estimate exceeds the budget |
 | `no-f1-model` | `fidelity: F1` on a pipeline with no F1 model: `ic-binary-s4` and `ic-prime-s3` (B7a) |
@@ -605,7 +605,13 @@ below have their expected outcomes fixed here.
 - **`until`.** A case that expects a refusal a later step will lift
   names that step in `until`. That step changes the case's expectation
   with a dated note in `cases.json`, and adds the newly possible run as
-  a case of its own. This is the only way an expectation changes.
+  a case of its own.
+- **`supersedes`** (B3b's amendment 2). A step can move an expectation
+  without being the case's `until` step. Its own case then names the
+  earlier case it `supersedes`, and while that case is run the earlier
+  one is not. B3b supersedes C031 and C053 this way, since it moves
+  `kic`'s width gate. These two rules are the only ways an expectation
+  changes.
 
 The curves the cases use:
 - **Curve A** is `icv1-f2m31-tm90707-c95f16f5`:
@@ -705,6 +711,9 @@ B3–B7 are unchanged from the plan, with these refinements:
   C054 then changes by the `until` rule: at `n = 83` the index
   calculus's estimate exceeds any day-long budget, so `paired` becomes
   `over-budget`. (This was B3's own refinement before B3 was split.)
+  Its amendment 2 adds C086 and C087, which supersede C031 and C053:
+  from B3b `kic` refuses `n = 131` as wider than two words and admits
+  `n = 83`.
 - **`rho-negation` on two-word fields** follows its importer, which is
   B2's.
 - **B4** adds the normal-basis import with the challenge.
