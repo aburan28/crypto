@@ -51,6 +51,35 @@ BASE = (HERE / os.environ.get("IC_OUT", ".")).resolve()
 OUT = BASE / "claims"
 MANIFESTS = BASE / "manifests"
 
+# The checker's curve is a function of the curve's fields alone, and its
+# construction proves r prime by trial division (seconds at n = 61): build
+# each once.  Every row's targets still go through the curve's own checks.
+_CURVE_FIELDS = ("degree", "curve_a", "subgroup_order", "irreducible", "group_order", "cofactor",
+                 "generator", "lambda")
+_curves: dict[str, oracle.Curve] = {}
+_Curve = oracle.Curve
+
+
+def cached_curve(fixture: dict) -> oracle.Curve:
+    key = json.dumps({k: fixture[k] for k in _CURVE_FIELDS}, sort_keys=True)
+    if key not in _curves:
+        _curves[key] = _Curve(fixture)
+    return _curves[key]
+
+
+identity.Curve = cached_curve
+oracle_curve = cached_curve
+_candidates: dict[str, dict] = {}
+
+
+def candidate(fixture: dict, inventory: dict, method: dict) -> dict:
+    """identity.candidate_manifest, once per distinct curve, base and method:
+    a size's rows share all three, and the inventory expands every orbit."""
+    key = json.dumps([{k: fixture[k] for k in _CURVE_FIELDS}, inventory, method], sort_keys=True)
+    if key not in _candidates:
+        _candidates[key] = identity.candidate_manifest(fixture, inventory, method)
+    return _candidates[key]
+
 # The sources the two arms execute, hashed at the binary's commit.
 IC_SOURCES = [
     "src/cryptanalysis/koblitz_index_calculus.rs",
@@ -193,7 +222,7 @@ def replay(fixture: dict, rep: dict, arm: str) -> dict:
     cert = rep["certificates"][arm]
     text = json.dumps(cert, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     digest = hashlib.sha256(text.encode()).hexdigest()
-    curve = oracle.Curve(fixture)
+    curve = oracle_curve(fixture)
     target = curve.decode(cert["target"])
     scalar = int(cert["scalar"])
     holds = 0 <= scalar < curve.r and curve.mul(curve.g, scalar) == target \
@@ -219,7 +248,7 @@ def main() -> None:
             params = json.loads((RUNS / f"k{a}n{n}" / f"T{i:02d}.params.json").read_text())
             ii = rep["identity_inputs"]
             fixture = ii["fixture"]
-            cand = identity.candidate_manifest(
+            cand = candidate(
                 fixture,
                 {"factor_base_orbits": ii["factor_base_orbits"], "columns": ii["columns"],
                  "column_convention": ii["column_convention"]},
