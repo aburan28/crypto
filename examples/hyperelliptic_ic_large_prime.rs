@@ -134,7 +134,21 @@ fn main() {
         (0.5, true),
         (0.5, false),
     ];
-    let trials = HeadToHeadTrials::default();
+    // Post-hoc diagnostics only (round eight's registered sweep uses the
+    // defaults): `LP_ONLY=g:p` restricts the sweep to one instance and
+    // `LP_IC_TRIALS=n` raises the index-calculus seed count, so seed
+    // variance can be separated from a real effect on one row.
+    let only: Option<(u32, u64)> = std::env::var("LP_ONLY").ok().and_then(|v| {
+        let (g, p) = v.split_once(':')?;
+        Some((g.parse().ok()?, p.parse().ok()?))
+    });
+    let mut trials = HeadToHeadTrials::default();
+    if let Some(n) = std::env::var("LP_IC_TRIALS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+    {
+        trials.ic = n;
+    }
     println!(
         "Round eight. Unit S = group operations / sqrt(N), in-situ conversion; \
          {} IC and {} DP-rho runs per row.",
@@ -147,6 +161,9 @@ fn main() {
 
     for (genus, primes) in sweep {
         for &p in primes {
+            if only.is_some_and(|o| o != (genus, p)) {
+                continue;
+            }
             io::stdout().flush().ok();
             let (curve, d1, n, c) = match pick_instance(p, genus) {
                 Some(v) => v,

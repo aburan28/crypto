@@ -1241,3 +1241,113 @@ why before building further variants.
 within a genus whose rho-relative exponent is not the target. It would
 still be the first measurement of this lever and a check on the model
 that predicts where it pays at genus 3, which is what matters.
+
+## Round eight: measured
+
+Frozen source: `experiments/hyperelliptic_large_prime_r8/` (raw sweeps
+from both hosts, the interrupted ones kept, isolation records, a
+manifest with binary hashes, the analysis script and its outputs).
+
+**Two hosts, kept apart.** The container was restarted twice during the
+round and came back on different CPUs. Medians are never pooled across
+hosts. The registered result is three uncontended sweeps on one host
+(2.10 GHz Xeon, `L4`–`L6`); two sweeps on the other (2.80 GHz, `L1`,
+`L2`) replicate it. Two sweeps were interrupted (a tool time limit, then
+a container stop); they are kept, marked, and not used.
+
+**Pinned output held.** At θ = 1 the new code reproduces round seven
+exactly: all 54 rows of round seven's command, every configuration,
+match its frozen output on `N`, `m`, relation-stage operations, oracle
+and solve mul-mods, rho operations and `k`. Across sweeps, every
+deterministic count is identical. Every run on every row returned its
+verified `k`. The combined relations are checked as Jacobian identities
+by a test that a sign mutation fails.
+
+### Verdicts on the registered hypotheses
+
+| | registered test | primary host | replication host |
+|--|--|--|--|
+| **H1** no win at genus 3–4 | no θ < 1 beats θ = 1 by > 10% | **falsified** at one row: g3 `p = 61`, θ = 0.85, **0.864** | falsified, same row, 0.874 |
+| **H2** genus-2 crossover | `p ≥ 2003` gains ≥ 5% | **falsified**: best 0.991, 0.987 | falsified: 0.984, 0.978 |
+| **H3** model fidelity | ≥ 80% of cells within ±25% | holds: 44 of 44 | holds: 44 of 44 |
+| **H4** large primes beat no large primes | every row | holds: 1.6 – 3.8× cheaper | holds |
+
+**The H1 violation is seed variance, and the protocol is to blame for
+it.** Sweeps repeat the same five index-calculus seeds, so they
+replicate timing noise but never sample a new seed. A post-hoc rerun of
+that one row with 60 seeds (labelled as such in the manifest) gives
+θ = 0.85 at **1.003×** θ = 1, against the model's 1.05. Five seeds per
+row was too few for a 10% threshold on an instance this small; that was
+my design error. H1 stays recorded as falsified, because that is what
+the registered test returned; the reading of it is that no genus-3 or
+genus-4 row shows a real gain.
+
+### Why the genus-2 crossover did not appear
+
+At `p = 2003` and `4001` the solve is 20% of the total at θ = 1, so
+there is something to save. Two things eat it:
+
+| `p` | θ | solve, measured / model | relation + oracle | partial bookkeeping, share of total |
+|--:|--:|--:|--:|--:|
+| 2003 | 0.85 | 0.90 / 0.80 | 0.99 | 2.0% |
+| 2003 | 0.5 | 0.57 / 0.39 | 1.12 | 4.1% |
+| 4001 | 0.85 | 0.87 / 0.80 | 0.99 | 1.8% |
+| 4001 | 0.5 | 0.51 / 0.39 | 1.11 | 3.5% |
+
+1. **The solve falls less than `θ^s`.** This is the omission registered
+   in advance: a combined row carries up to `2g` entries, so the system
+   shrinks in rows but not in proportion in work. At genus 3 the gap is
+   larger still (0.76 measured against 0.31 at θ = 0.5, `p = 401`); at
+   genus 4 the model is right (0.32 against 0.32), because there the
+   solve is 1% of the total and dominated by fixed costs.
+2. **Partial bookkeeping costs 2 – 4%.** It is charged, as registered.
+   Left uncharged it would have shown roughly half of the predicted
+   gain — the same trap round six fell into, avoided this time by
+   pricing it before measuring.
+
+Net: the predicted 4 – 6% saving at `p ≈ 4000` measures as about 1%.
+The model's θ-dependence of the relation stage is accurate (H3, and
+the relation-plus-oracle column above); its solve term is optimistic.
+
+### The table
+
+Primary host, medians of three sweeps. `S/S₁` is the ratio to θ = 1 in
+the same sweep; `ratio` is `S_ic/S_rho`.
+
+| g | `p` | `N` | `m` | θ = 1: `S_ic`, ratio | best θ < 1: θ, `S/S₁` | θ = 0.5 with / without large primes |
+|--:|--:|--:|--:|--|--|--|
+| 2 | 101 | 4663 | 46 | 2.29, 0.42 | 0.70, 0.976 | 1.36 / 2.48 |
+| 2 | 251 | 61667 | 123 | 1.35, 0.56 | 0.85, 0.993 | 1.14 / 2.06 |
+| 2 | 503 | 65179 | 259 | 2.88, 1.25 | 0.85, 0.956 | 1.04 / 1.70 |
+| 2 | 1009 | 241259 | 478 | 3.71, 1.78 | 0.85, 1.006 | 1.08 / 1.83 |
+| 2 | 2003 | 2001787 | 1000 | 2.00, 1.03 | 0.85, 0.991 | 1.04 / 1.73 |
+| 2 | 4001 | 16050337 | 2005 | 1.65, 0.73 | 0.85, 0.987 | 1.03 / 1.70 |
+| 3 | 61 | 124459 | 33 | 1.65, 0.72 | 0.85, 0.864 (1.003 at 60 seeds) | 1.48 / 3.59 |
+| 3 | 211 | 4620611 | 104 | 0.81, 0.41 | 0.85, 1.081 | 1.68 / 4.02 |
+| 3 | 401 | 31525763 | 196 | 0.60, **0.23** | 0.85, 1.028 | 1.59 / 3.79 |
+| 4 | 31 | 239753 | 16 | 2.32, 1.22 | 0.85, 1.231 | 2.82 / 9.88 |
+| 4 | 61 | 16790591 | 36 | 0.33, **0.15** | 0.85, 1.262 | 2.69 / 10.30 |
+
+**Class: no change at these sizes.** θ = 1 is the right choice on every
+row once seed variance is accounted for; large primes are a large
+improvement over a reduced base *without* them, and no improvement
+over the full base.
+
+**One new reference point, not from the lever.** Genus 3 at `p = 401`
+(`N = 3.2·10⁷`, a size this thread had not measured) reads **0.23**
+against DP rho, 0.46 with the walk renormalised. That extends the
+genus-3 sizes from round seven by one row; it does not change round
+seven's finding that the genus-3 ratio has no exponent behind it, and it
+is a single new size, not a refit.
+
+### What this says about the next lever
+
+The solve is still not the bottleneck at genus 3 and 4 (1 – 4% of the
+total), so no amount of factor-base reduction can pay there at these
+sizes; the relation stage and the oracle are what cost. The calibrated
+model, corrected for the measured solve behaviour, would put the genus-3
+crossover further out than the `m ≈ 13 000` registered. The double
+large prime variation (Gaudry–Thomé–Thériault–Diem) has the same
+problem in sharper form: it trades even more relation-stage work and
+denser rows for a smaller solve. **At reachable sizes the lever is the
+oracle and the per-trial cost of the walk, not the factor base.**
