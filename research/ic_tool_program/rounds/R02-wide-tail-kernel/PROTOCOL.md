@@ -196,3 +196,117 @@ pipeline alone.
 A workflow run must also recover the same logarithm in both arms. This
 replaces the `ic price` callgrind runs in "Timed comparison". The timed
 comparison itself is unchanged.
+
+## Amendment 3 (2026-10-01, before any R02 run): the baseline arm, two controls, the names and the run tree
+
+**What moved.** After this protocol was written, `main` merged AGENTS.md
+§11, which names every curve by its ICV1 slug, together with the
+`src/` change that carries it out. From v0 (`46ae2014`) to this round's
+base (`c1a2e5f8dda5613bf797c4c38afc8b0b433ea348`), `src/` changed in eight files:
+- a new naming module, `curve_id.rs`, with its alias table and
+  `mod.rs`;
+- the labels: a report's `curve` field is now the slug;
+- name matching in `ic rho`'s replays and in `ic experiment`, now through
+  the registry;
+- the unit calibration's pinned-ratio lookup, likewise;
+- the text of one error message;
+- a new strong-rho module, which the pricer does not call.
+
+No pipeline step changed. The calibration runs before the timed
+intervals start, and the labels are written after they end.
+
+**The baseline arm is v0′.** v0′ is `main` at `c1a2e5f8`, the commit
+the candidate is built on. The candidate is v0′ plus the kernel change
+in `src/cryptanalysis/koblitz_fast.rs` and its tests, so the two arms
+differ in that one file. Wherever this protocol names v0 as an arm (the
+control, the comparison, the holdouts, callgrind), read v0′.
+
+**v0′ is pinned like the candidate.** Before any timed step, v0′ runs
+the pin on all 90 rows, untimed. Its outputs must equal v0's from R01's
+profile pass. If any differs, R02 stops, because the baseline itself has
+changed. The pin also checks the names: every report's `curve` must
+equal the registry's slug for its row, and v0's old label must resolve
+to that slug.
+
+**v0 against v0′, timed: accounting.** v0 (R01's binary, `c776cc04…`)
+and v0′ run on `M1`'s 22 rows, five rounds ABAB: 220 processes. The
+figure is the paired cold-time ratio per size. It says whether `main`'s
+renaming moved the cost. It gates nothing, because R02's speedup is v0′
+over the candidate. A ratio outside the A/A band is recorded as
+`main`'s own change, not R02's.
+
+**The control switches off two kernels, not one.** `KIC_SCAN_SIMD=0`
+turns off the AVX-512 batched addition (`Simd512::new`) and also the
+AVX-512 canonical key (`canon_simd_enabled`). At
+`icv1-f2m53-tm56619371-dac20a85` both are on by default, so the control
+measures the two together. Its declared rule changes as follows:
+- **A ratio below 1.3 still stops R02.** If the two kernels together are
+  worth less than 1.3× in collection per summand, the addition alone is
+  too.
+- **A ratio at or above 1.3 no longer confirms the mechanism.** It shows
+  only that the two kernels together pass the bar.
+- **The mechanism is tested by the comparison itself.** At the two
+  target sizes the candidate changes only the addition, and the AVX-512
+  key runs in both arms.
+
+**Callgrind becomes a control.** Valgrind 3.22 hides AVX-512: under it,
+CPUID reports `avx512f`, `vpclmulqdq` and `gfni` as absent (R01's
+correction). Every callgrind run therefore takes the portable paths, in
+both arms, and cannot see the kernel. Amendment 2's step runs as
+declared, with a new reading:
+- **The two arms' portable paths must be instruction-identical:** a
+  total ratio of 1.000 per row and the same logarithm.
+- **A difference fails the step.** It would mean the candidate changed
+  more than its kernel.
+- **It yields no speed figure.** The speed evidence is the timed
+  comparison and the holdouts.
+
+**Names.** This protocol now writes every curve by its ICV1 slug, as
+§11 requires. The rewrite is the commit before this amendment, made by
+`scripts/check_curve_names.py --fix`. It changes no figure, row,
+target, seed or rule.
+
+**The run tree.** A run directory is named `<slug>/<recipe>-<target>`,
+for example `icv1-f2m61-t158598901-ab42b6c5/M1-T01`, not by the suite's
+row id. The holdouts' parameter files are named the same way, while the
+`name` field inside them stays as suite v1's construction writes it. The
+suite's own frozen files keep their names. The tree is committed as
+`runs.tar.xz` with its SHA-256, as R01's is.
+
+**R01's outputs** for the pin come from R01's archive (`runs.tar.xz`,
+SHA-256 `ae20e0bd…`). It is checked against its hash and extracted in
+place, where `.gitignore` keeps it out of git.
+
+**Amendment 1's extension, made exact.** A size's interval half-width
+is `hi / geomean − 1` of its paired cold-time ratio. A size above 5%
+gets rounds 6–10, and its figure pools all ten. The extension applies to
+the suite rows, not to the holdouts.
+
+**Order and cost.**
+1. manifest;
+2. the control;
+3. the pin, both arms;
+4. R02's own A/A, only if the host differs from R01's;
+5. the comparison, then its extension;
+6. the holdouts;
+7. v0 against v0′;
+8. callgrind.
+
+This adds 90 untimed processes and 220 timed ones, about 40 minutes.
+
+**The kernel change is held back from the declaration's pull request.**
+The repository's approval bot merges pull requests once CI passes,
+drafts included, so a declaration carrying candidate code would land
+that code unmeasured. The candidate was written after this protocol's
+first commit, as local commits `76efcd1e` and `7c356fac` (formatting).
+It lands with R02's results.
+
+**What ran before this amendment.** Both arms were built:
+- v0′, SHA-256 `a89e1be0…`;
+- the candidate, SHA-256 `19240609…`.
+
+The candidate's `koblitz_fast` tests pass, 28 of 28, including the
+wide-tail and scalar-equivalence tests. The runner's pin logic was then
+exercised untimed on two small rows: the smallest suite row's `M1-T01`
+and the first smoke row. On both, both arms' outputs equal v0's, and
+the names agree. Nothing was timed.
