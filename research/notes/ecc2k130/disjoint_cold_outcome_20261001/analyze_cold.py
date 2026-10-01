@@ -65,6 +65,24 @@ def analyze(archive: Path) -> dict:
     assert sha(host_path) == manifest["second_host_sha256"]
     host = json.loads(host_path.read_text())
     assert host["run_url"] == RUN_URL and host["source_head"] == SOURCE_HEAD
+    diagnostics = {}
+    for name, metadata in manifest["diagnostics"].items():
+        path = archive / metadata["path"]
+        assert path.stat().st_size == metadata["bytes"]
+        assert sha(path) == metadata["sha256"]
+        diagnostics[name] = path
+    addendum = json.loads(diagnostics["n37_L1024_pairing_addendum.json"].read_text())
+    assert host["pairing_addendum_sha256"] == sha(
+        diagnostics["n37_L1024_pairing_addendum.json"])
+    assert host["sparse_checkout_preflight_failure_sha256"] == sha(
+        diagnostics["preflight_sparse_checkout_n37_L1.json"])
+    assert addendum["status"] == "CORRECTED_REPLAY_PASS_NOT_TIMING_ELIGIBLE"
+    assert addendum["cell"] == "n37_L1024"
+    assert addendum["frozen_cold_verifier_sha256"] == sha(VERIFIER)
+    assert addendum["verified_children"] == 15
+    assert addendum["verified_target_logs"] == 15360
+    assert addendum["pairing_mismatch_count"] == len(addendum["pairing_mismatches"])
+    assert addendum["timing_eligible"] is False
     result = {"schema": "ecc2k130-disjoint-cold-analysis-v1",
               "source_head": SOURCE_HEAD,
               "github_run_url": RUN_URL,
@@ -119,12 +137,28 @@ def analyze(archive: Path) -> dict:
         else:
             second = None
         if entry["status"] != "PASS":
+            correction = None
+            if cell == "n37_L1024":
+                assert entry["status"] == "FAIL"
+                assert sha(raw_path) == entry["raw_sha256"]
+                assert entry["run_json_sha256"] == addendum["cold_run_sha256"]
+                assert entry["receipt_sha256"] == addendum[
+                    "original_hosted_failure_sha256"]
+                correction = {"verified_children": addendum["verified_children"],
+                              "verified_target_logs": addendum["verified_target_logs"],
+                              "pairing_mismatches": addendum["pairing_mismatch_count"],
+                              "status": addendum["status"]}
             result["cells"][cell] = {"status": entry["status"],
                                      "n": n, "L": length, "K": k,
                                      "blocks": blocks, "timing_eligible": False,
                                      "decision": "CENSORED",
                                      "completed_children": len(report["runs"]) if report else 0,
-                                     "failure": (hosted.get("failure") if hosted else None),
+                                     "post_run_diagnostic": correction,
+                                     "failure": ((hosted.get("failure") or {
+                                         "error_type": hosted.get("error_type"),
+                                         "error": hosted.get("error"),
+                                         "traceback": hosted.get("traceback")})
+                                         if hosted else None),
                                      "raw_sha256": entry["raw_sha256"]}
             continue
         assert report is not None and report["status"] == "PASS"

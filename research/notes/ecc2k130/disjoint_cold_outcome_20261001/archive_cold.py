@@ -35,7 +35,7 @@ def archive_runs(downloads: Path, second_host: Path, out: Path) -> dict:
     assert host["run_url"] == RUN_URL and host["source_head"] == SOURCE_HEAD
     assert host["verifier_sha256"] == sha(VERIFIER)
     out.mkdir(parents=True)
-    for directory in ("raw", "receipts", "second_host_replay"):
+    for directory in ("raw", "receipts", "second_host_replay", "diagnostics"):
         (out / directory).mkdir()
     cases = {}
     for n, length, k, _prefilter, blocks in CELLS:
@@ -94,6 +94,21 @@ def archive_runs(downloads: Path, second_host: Path, out: Path) -> dict:
         cases[cell] = entry
     host_copy = out / "second_host_replay" / "HOST.json"
     shutil.copyfile(host_file, host_copy)
+    diagnostics = {}
+    for name in ("n37_L1024_pairing_addendum.json",
+                 "n37_L1024.stderr.txt",
+                 "preflight_sparse_checkout_n37_L1.json"):
+        source = second_host / name
+        assert source.is_file(), name
+        destination = out / "diagnostics" / name
+        shutil.copyfile(source, destination)
+        diagnostics[name] = {"path": str(destination.relative_to(out)),
+                             "sha256": sha(destination),
+                             "bytes": destination.stat().st_size}
+    assert host["pairing_addendum_sha256"] == diagnostics[
+        "n37_L1024_pairing_addendum.json"]["sha256"]
+    assert host["sparse_checkout_preflight_failure_sha256"] == diagnostics[
+        "preflight_sparse_checkout_n37_L1.json"]["sha256"]
     manifest = {"schema": "ecc2k130-disjoint-cold-hosted-archive-v1",
                 "source_head": SOURCE_HEAD,
                 "source_head_kind": "PR #1095 merged main commit checked out by workflow_dispatch",
@@ -104,6 +119,7 @@ def archive_runs(downloads: Path, second_host: Path, out: Path) -> dict:
                 "cases": cases,
                 "second_host_path": str(host_copy.relative_to(out)),
                 "second_host_sha256": sha(host_copy),
+                "diagnostics": diagnostics,
                 "extraction": "tar -xzf raw/CELL.tar.gz -C DEST",
                 "independent_replay": (
                     "python3 verify_cold.py --cell CELL --run-dir "
