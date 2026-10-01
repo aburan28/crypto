@@ -445,11 +445,17 @@ def harvest_text_koblitz(reg: Registry) -> None:
 
 # Curves the repository designates without a standard name: (a, n).
 DESIGNATED_KOBLITZ = [(0, 83)]
+# Koblitz curves the ic tool programme names as instances on two-word
+# fields, under the repository's modulus rule: (a, n) -> where.
+B3B = "the ic tool programme's B3b instances (research/ic_tool_program/rounds/B3b-two-word-kic/PROTOCOL.md)"
+PROGRAMME_KOBLITZ = {(0, 67): B3B, (1, 67): B3B, (0, 79): B3B}
 
 
 def harvest_standards(reg: Registry) -> None:
     for a, n in DESIGNATED_KOBLITZ:
         add_koblitz(reg, a, n, STANDARD_MODULI[n][1])
+    for (a, n), why in PROGRAMME_KOBLITZ.items():
+        add_koblitz(reg, a, n, why)
     for name, (a, n) in KOBLITZ_STANDARDS.items():
         add_koblitz(reg, a, n, STANDARD_MODULI[n][1], standard=name)
         if name in BINARY_GENERATORS:
