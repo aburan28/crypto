@@ -27,10 +27,10 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
-            /Cargo.lock
             /docs/ic/calibration.json
             /src/*
             /examples/koblitz_base_window.rs
+            /research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
             /research/notes/ecc2k130/base_window_screen_20261001/*
             /research/notes/ecc2k130/base_window_screen_20261001/development/*
             /research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/evidence_run_36803331080/raw/n41_L1024.tar.gz
@@ -45,7 +45,12 @@ jobs:
             research/notes/ecc2k130/base_window_screen_20261001/verify_generator.py \
             research/notes/ecc2k130/base_window_screen_20261001/test_generator.py
       - name: Build generator
-        run: cargo build --locked --example koblitz_base_window
+        run: |
+          printf '%s  %s\n' \
+            7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627 \
+            research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock | sha256sum -c -
+          cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
+          cargo build --locked --example koblitz_base_window
       - name: Replay frozen-source toy and archived n41 controls
         run: |
           python3 research/notes/ecc2k130/base_window_screen_20261001/test_generator.py \

@@ -5,6 +5,7 @@ rank/target measurements, or rho processes are involved. The committed
 `SOURCE_CONTROL.json` is reproduced by:
 
 ```sh
+cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
 cargo build --locked --example koblitz_base_window
 python3 research/notes/ecc2k130/base_window_screen_20261001/test_generator.py \
   --generator target/debug/examples/koblitz_base_window \
