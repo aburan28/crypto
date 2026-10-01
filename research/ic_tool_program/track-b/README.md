@@ -33,7 +33,7 @@ The branches:
 | `b2b-int` | `5c93e142` | B2b, on B2: `kic` on curves over a subfield, `kic` alone, order certificates |
 | `b7a-int` | `58cada36` | B7a, on B2b: the F1 sampled level for `kic` and every rho |
 | `b3b-int` | `eaa842aa` | B3b, on B7a: the index calculus on two-word fields at F0, with its amendments 1–2 |
-| `b4-int` | `fca148b6` | B4, on B3b: binary fields of three to nine words, `rho-koblitz` and `kic` on them, and v1's three rules past one word (in `stack-20261001-b4.bundle`) |
+| `b4-int` | `8a2519e6` | B4, on B3b: binary fields of three to nine words, `rho-koblitz` and `kic` on them, and v1's three rules past one word (in `stack-20261001-b4.bundle`) |
 | `b0-local` | `a1187008` | an earlier version of B0, which `b0-port` supersedes |
 | `b3-local` | `65465f68` | an earlier version of B3, which `b3-int` supersedes |
 
