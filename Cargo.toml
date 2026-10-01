@@ -24,6 +24,19 @@ path = "src/bin/icx.rs"
 name = "ecc2k-guard"
 path = "src/bin/ecc2k_guard.rs"
 
+# `icprog` — the ic tool programme's harness: round analyses, natively
+# (AGENTS.md: no Python for research tooling).  Apart from `ic`, so the
+# harness never changes the code it measures.
+[[bin]]
+name = "icprog"
+path = "src/bin/icprog.rs"
+
+# `isolated-bench` — tools/isolated_bench.py, native: the same lock, modes
+# and record (AGENTS.md §10).  Linux only.
+[[bin]]
+name = "isolated-bench"
+path = "src/bin/isolated_bench.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"
