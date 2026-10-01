@@ -40,6 +40,7 @@ class PreparedF5RuntimeV3Tests(unittest.TestCase):
         cls.build,cls.source,cls.native = native_admission(cls.files)
         cls.spec = dict(entrypoint=dict(module='prepared_f5_runtime_v3',callable='run'),
             runtime_watchdog_seconds=600,runtime_seal=dict(manifest_sha256='a'*64,archive_sha256='b'*64),
+            runtime_manifest={'components': [{'role': HELPER_ROLE}]},
             asset_manifest=manifest,asset_seal=seal,interpreter={'scope':'registration control only'})
         cls.spec['binding'] = binding(cls.spec)
         cls.panel = dict(question='prepared-development-source-control',algorithm_seed=2026093032,
@@ -63,12 +64,12 @@ class PreparedF5RuntimeV3Tests(unittest.TestCase):
                 factor_base=[[str(v) for v in point] for point in document['record']['factor_base']['points']],
                 columns=[dict(point=[str(v) for v in item['point']],log=str(item['log']))
                          for item in document['record']['column_logs']]))
-        # This pin identifies the retained v1 worker, not today's mutable tree.
+        # Read the retained corrected worker; today's tree can later evolve.
         with tarfile.open(fileobj=io.BytesIO(self.files['rust/root-source.tar.gz']), mode='r:gz') as archive:
             retained_worker = archive.extractfile(WORKER).read()
         self.assertEqual(digest(retained_worker),WORKER_SOURCE_SHA256)
 
-    def test_self_consistent_changed_source_still_cannot_enter_the_old_admission_gate(self):
+    def test_self_consistent_changed_source_still_cannot_enter_the_v3_admission_gate(self):
         files = copy.deepcopy(self.files)
         source = copy.deepcopy(self.source)
         with tarfile.open(fileobj=io.BytesIO(files['rust/root-source.tar.gz']), mode='r:gz') as archive:
@@ -112,6 +113,16 @@ class PreparedF5RuntimeV3Tests(unittest.TestCase):
         with self.assertRaisesRegex(InvalidEvidence, '^prepared worker source lacks the admitted mode'):
             native_admission(old_files)
 
+    def test_missing_helper_rejects_before_native_job_or_candidate_is_built(self):
+        spec = copy.deepcopy(self.spec)
+        spec['runtime_manifest']['components'] = []
+        with patch('prepared_f5_runtime_v3.native_job') as job, \
+             patch('prepared_f5_runtime_v3.candidate_manifest') as candidate:
+            with self.assertRaisesRegex(InvalidEvidence, 'helper was not frozen before execution'):
+                self.registration(spec=spec)
+        job.assert_not_called()
+        candidate.assert_not_called()
+
     def test_binary_recipe_and_complete_dependency_retention_are_required(self):
         for change in ('binary','recipe','dependency','old_source'):
             files = copy.deepcopy(self.files)
@@ -146,7 +157,7 @@ class PreparedF5RuntimeV3Tests(unittest.TestCase):
         self.assertTrue(first['candidate']['candidate_id'].startswith('IC1N17Ckb1fb62PDP3f5'))
 
     def test_control_caps_fresh_point_bool_and_changed_certificate_fail_closed(self):
-        for change in ('fresh','point','bool','scalar','extra','cap','wall','watchdog','certificate'):
+        for change in ('fresh','point','bool','scalar','extra','cap','wall','watchdog','helper','certificate'):
             panel,spec,doc = copy.deepcopy(self.panel),copy.deepcopy(self.spec),copy.deepcopy(self.docs['f5'])
             if change == 'fresh': panel['question'] = 'fresh-paired-qualification'
             elif change == 'point': panel['target_input']['point'] = [471,57570]
@@ -156,6 +167,7 @@ class PreparedF5RuntimeV3Tests(unittest.TestCase):
             elif change == 'cap': panel['max_attempts'] = 9
             elif change == 'wall': panel['resources']['total_wall_limit_seconds'] = 30
             elif change == 'watchdog': spec['runtime_watchdog_seconds'] += 1
+            elif change == 'helper': spec['runtime_manifest']['components'] = []
             else: doc['provenance']['archive_sha256'] = '0'*64
             with self.assertRaises(InvalidEvidence): self.registration(panel,spec,doc)
 
